@@ -179,32 +179,40 @@ void ASpaceshipPawn::BuildProceduralInputAssets()
 		TEXT("IA_* actions in /Game/Input (or assign them on a Blueprint child) to make the bindings editable."),
 		*GetName());
 
-	auto MakeAction = [this](const TCHAR* Name, EInputActionValueType ValueType) -> UInputAction*
+	auto MakeAction = [this](const TCHAR* Name, EInputActionValueType ValueType,
+		EInputActionAccumulationBehavior Accumulation) -> UInputAction*
 	{
 		UInputAction* Action = NewObject<UInputAction>(this, FName(Name));
 		Action->ValueType = ValueType;
+		Action->AccumulationBehavior = Accumulation;
 		return Action;
 	};
 
+	// Opposing keys on one axis (W and S) have to cancel, which is what Cumulative does.
+	// The default, TakeHighestAbsoluteValue, would pick one of +1 and -1 arbitrarily.
+	const EInputActionAccumulationBehavior Opposed = EInputActionAccumulationBehavior::Cumulative;
+
 	if (!ThrustAction)
 	{
-		ThrustAction = MakeAction(TEXT("IA_Thrust_Runtime"), EInputActionValueType::Axis1D);
+		ThrustAction = MakeAction(TEXT("IA_Thrust_Runtime"), EInputActionValueType::Axis1D, Opposed);
 	}
 	if (!StrafeAction)
 	{
-		StrafeAction = MakeAction(TEXT("IA_Strafe_Runtime"), EInputActionValueType::Axis1D);
+		StrafeAction = MakeAction(TEXT("IA_Strafe_Runtime"), EInputActionValueType::Axis1D, Opposed);
 	}
 	if (!LiftAction)
 	{
-		LiftAction = MakeAction(TEXT("IA_Lift_Runtime"), EInputActionValueType::Axis1D);
+		LiftAction = MakeAction(TEXT("IA_Lift_Runtime"), EInputActionValueType::Axis1D, Opposed);
 	}
 	if (!RollAction)
 	{
-		RollAction = MakeAction(TEXT("IA_Roll_Runtime"), EInputActionValueType::Axis1D);
+		RollAction = MakeAction(TEXT("IA_Roll_Runtime"), EInputActionValueType::Axis1D, Opposed);
 	}
 	if (!LookAction)
 	{
-		LookAction = MakeAction(TEXT("IA_Look_Runtime"), EInputActionValueType::Axis2D);
+		// Mouse and stick feed the same action, so here the larger of the two should win.
+		LookAction = MakeAction(TEXT("IA_Look_Runtime"), EInputActionValueType::Axis2D,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
 	}
 
 	// A context the designer supplied is left alone even if it is missing mappings: silently
