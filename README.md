@@ -107,15 +107,51 @@ Then open `IMC_Spaceship` and add the mappings from the controls table. Every ne
 The names above are exactly what `SpaceshipPawn.cpp` looks for, so once they exist the pawn picks
 them up with no further wiring and the warning disappears.
 
+## SpaceGameMode
+
+`Source/gamespace/SpaceGameMode.h` / `.cpp` - `AGameModeBase` with `DefaultPawnClass` set to
+`ASpaceshipPawn`. It is the project-wide default, wired up in `Config/DefaultEngine.ini`:
+
+```ini
+[/Script/EngineSettings.GameMapsSettings]
+EditorStartupMap=/Game/Maps/TestSpace.TestSpace
+GameDefaultMap=/Game/Maps/TestSpace.TestSpace
+GlobalDefaultGameMode=/Script/gamespace.SpaceGameMode
+```
+
+Any level without a World Settings override therefore spawns a flyable ship at its
+`PlayerStart`. A Blueprint child of `SpaceGameMode` can still override the pawn per level.
+
+## TestSpace
+
+`Content/Maps/TestSpace` - the test level, and the editor/game startup map. Non-partitioned,
+20 actors:
+
+| Actor            | Notes                                                                |
+| ---------------- | -------------------------------------------------------------------- |
+| `Sun`            | Directional light, movable, intensity 8, 0.2 deg source angle for hard vacuum shadows |
+| `SkyAtmosphere`  | Default settings                                                      |
+| `SkyLight`       | Movable, real-time capture, intensity 0.35 - ambient fill only        |
+| `PlayerStart`    | At (0, 0, 300)                                                        |
+| `Asteroid_00-15` | Scaled cubes scattered 30-260 m out                                   |
+
+The asteroids are placeholder reference geometry, not a design decision. Without something to
+fly past, an empty sky gives no sense of motion whatsoever. Delete them once real props exist.
+
+There is no starfield yet: `SkyAtmosphere` renders an atmosphere, not stars. That wants an HDRI
+cubemap on the sky light or a dedicated skybox material.
+
 ## Testing in the editor
 
 1. Close the editor if it is open, then build the **gamespaceEditor** target (Live Coding cannot
-   pick up newly added source files).
-2. Open the project, create or open a level, and place a `SpaceshipPawn` in it.
-3. In the Details panel set **Pawn → Auto Possess Player** to `Player 0`.
-4. Add a directional light and a sky if the level is empty, otherwise you will fly a black cube
-   through black space.
-5. Press Play.
+   pick up newly added source files):
 
-To make it the default pawn instead, create a Game Mode with `SpaceshipPawn` as the Default Pawn
-Class and set it under Project Settings → Maps & Modes.
+   ```
+   "C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" gamespaceEditor Win64 Development -Project="C:\gamespace\gamespace\gamespace.uproject" -WaitMutex
+   ```
+
+2. Open the project. It starts on `TestSpace`.
+3. Press Play. `W` to accelerate, mouse to steer, `Q` / `E` to roll.
+
+Nothing needs placing by hand: the game mode supplies the pawn and the level has a
+`PlayerStart`.
