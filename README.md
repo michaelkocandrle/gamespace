@@ -107,7 +107,46 @@ Then open `IMC_Spaceship` and add the mappings from the controls table. Every ne
 The names above are exactly what `SpaceshipPawn.cpp` looks for, so once they exist the pawn picks
 them up with no further wiring and the warning disappears.
 
-## SpaceGameMode
+## Script-authored assets
+
+New Input Actions, Mapping Contexts, Data Assets, Curve Tables and Data Tables can be created
+from Python instead of by hand: [`Content/Python/gamespace_assets.py`](Content/Python/gamespace_assets.py).
+Its module docstring holds the full reference.
+
+```python
+import gamespace_assets as ga
+
+boost = ga.input_action("/Game/Input/IA_Boost", "bool")
+look = ga.existing("/Game/Input/IA_Look")        # reference only, never modified
+ga.mapping_context("/Game/Input/IMC_Debug", [
+    ga.Map(boost, "LeftShift", triggers=["Pressed"]),
+    ga.Map(look, "Down", swizzle="YXZ", negate=True),
+])
+```
+
+Run it headless with the editor **closed**:
+
+```
+.\Tools\run_editor_python.ps1 path\to\script.py
+```
+
+The runner refuses to start while an editor has this project open, because that editor would
+overwrite the script's changes with its own in-memory copies on the next save. With the editor
+open, enable the *Python Editor Script Plugin* and use **Tools → Execute Python Script** instead.
+
+**Existing assets are never touched by default.** Every function takes `on_exists`:
+`"error"` (default, raises), `"skip"` (returns the asset unmodified) or `"update"`
+(explicit opt-in; for mapping contexts and data tables it *replaces* the contents).
+
+### What still needs the editor
+
+| Asset / feature | Why |
+| --- | --- |
+| `CurveFloat`, `CurveVector`, `CurveLinearColor` keys | The key data is a bare `UPROPERTY()` that Python cannot see, and the CSV/JSON import on `UCurveBase` is not a `UFUNCTION`. Use a `CurveTable` instead, or add a small editor-only C++ function that wraps `ImportFromJSONString`. |
+| Cubic / weighted curve tangents | `CurveTable` keys from script are simple curves, linear interpolation only. |
+| Any property declared as plain `UPROPERTY()` | Python only reaches `EditAnywhere` / `Blueprint*` properties. Applies to our own C++ classes too. |
+| Player Mappable Key Settings on mappings | Not tested. |
+
 
 `Source/gamespace/SpaceGameMode.h` / `.cpp` - `AGameModeBase` with `DefaultPawnClass` set to
 `ASpaceshipPawn`. It is the project-wide default, wired up in `Config/DefaultEngine.ini`:
