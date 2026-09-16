@@ -185,6 +185,18 @@ command-line script that validates a ship and exports one FBX per mesh plus a JS
 with sizes, socket positions in Unreal centimetres and suggested pawn settings. Its validation
 core runs without Blender: `python Tools/Blender/tests/test_ship_export_core.py`.
 
+The manifest can be checked on its own before any import
+(`python Tools/Blender/gamespace_ship_export.py --check-manifest <manifest.json>`).
+`Tools/Assets/import_ship.py` (editor closed, `GAMESPACE_SHIP_MANIFEST` set) imports the FBX
+files, checks them against the manifest and writes the manifest's suggested settings into
+`BP_Ship_<Ship>`; run with plain Python it is a dry run that prints the plan
+(`python Tools/Assets/tests/test_import_ship_plan.py` tests that part). It has not run inside
+Unreal yet.
+
+The player character pipeline (Higgsfield rig vs. UE5 Mannequin skeleton, camera and animation
+decisions, folder layout and naming) is in
+[Docs/Characters/CharacterPipeline.md](Docs/Characters/CharacterPipeline.md).
+
 ## Script-authored assets
 
 New Input Actions, Mapping Contexts, Data Assets, Curve Tables and Data Tables can be created

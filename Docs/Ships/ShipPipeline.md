@@ -82,6 +82,7 @@ Blender při duplikaci přidává `.001` – skript to hlásí jako chybu, přej
 | `SOCKET_Engine_L`, `SOCKET_Engine_R` (nebo `SOCKET_EngineMain`) | trysky: plamen, zvuk; osa X socketu míří **dozadu ven z trysky** |
 | `SOCKET_CameraTarget` (volitelné) | kam se dívá chase kamera, když střed lodi není vizuální těžiště |
 | `SOCKET_Gear_*` (volitelné, později) | body dotyku podvozku pro přesnější přistání |
+| `SOCKET_Exit` (později, s postavou) | kde se po výstupu z lodi objeví hráčova postava; osa X = směr, kterým se dívá |
 
 ---
 
@@ -237,9 +238,42 @@ Exportní nastavení (napevno ve skriptu): Selected Objects, Mesh + Empty, Apply
 Smoothing **Face**, Tangent Space, Apply Unit, Apply Scalings **All Local**, Forward **−Z**,
 Up **Y**, bez leaf bones a animací.
 
+Export si manifest po zápisu přečte zpátky a zkontroluje ho (viz L1); chybný manifest =
+export hlásí chybu.
+
 ### L. Import do Unrealu (až bude editor volný)
 
-Import FBX do `Content/Ships/Vanguard/Meshes/`:
+**L1. Kontrola manifestu – kdykoli, bez Blenderu i bez Unrealu:**
+```
+python Tools/Blender/gamespace_ship_export.py --check-manifest ArtSource/Ships/Vanguard/Export/Vanguard_manifest.json
+python Tools/Assets/import_ship.py ArtSource/Ships/Vanguard/Export/Vanguard_manifest.json
+```
+První příkaz ověří strukturu, typy, rozsahy a vnitřní konzistenci (verze, všechna pole
+`suggested_pawn_settings`, převod cm/osy, existence FBX souborů vedle manifestu, rozumná
+velikost lodi). Druhý navíc vypíše přesný plán importu (co se kam naimportuje a jaké hodnoty
+se nastaví do `BP_Ship_Vanguard`) a nic nezmění.
+
+**L2. Automatický import – editor zavřený:**
+```
+$env:GAMESPACE_SHIP_MANIFEST = "C:\gamespace\gamespace\ArtSource\Ships\Vanguard\Export\Vanguard_manifest.json"
+.\Tools\run_editor_python.ps1 Tools\Assets\import_ship.py
+```
+`Tools/Assets/import_ship.py`:
+1. zkontroluje manifest (chyba = konec, nic se neimportuje),
+2. naimportuje LOD0 FBX s nastavením z tabulky níže (Nanite zapne jen pro neprůhledné díly),
+3. ověří velikost (při stokrát menší lodi zkusí jednou Convert Scene Unit), otočení, počet
+   kolizních hullů, sloty materiálů a sockety (polohu a měřítko srovná podle manifestu),
+4. vytvoří/aktualizuje `BP_Ship_Vanguard` (potomek `ASpaceshipPawn`) s hodnotami ze
+   `suggested_pawn_settings` (tabulka v kapitole 5), sklo přidá jako komponentu pod `Hull`,
+5. nastaví `Planet_Veyra` (warm-up dosah, minimální kolizní poloměr) a vytvoří
+   `/Game/Blueprints/BP_SpaceGameMode`, který v TestSpace spawnuje novou loď
+   (vypnout: `$env:GAMESPACE_SHIP_APPLY_PLANET = "0"`, `$env:GAMESPACE_SHIP_SET_GAME_MODE = "0"`),
+6. zapíše `Vanguard_import_report.json` vedle manifestu (co se opravilo, co je ruční krok).
+
+Skript zatím nikdy neběžel (napsaný dřív, než existuje model): první běh berte jako test a
+výsledek zkontrolujte podle „Ověření po prvním importu“ níže.
+
+Ruční import (kdyby skript selhal) – FBX do `Content/Ships/Vanguard/Meshes/`:
 
 | Volba | Hodnota |
 | --- | --- |
@@ -355,6 +389,10 @@ Stav dnes (`Source/gamespace/SpaceshipPawn.cpp`):
   `QueryOnly` na vlastním kanálu pro zásahy – pohyb se tím nemění.
 
 ### Čísla, která se změní s velikostí lodi (placeholder 2 × 1 × 0,35 m → ~14 × 10 × 3 m)
+
+Přesné vzorce jsou na jediném místě: `suggest_pawn_settings()` v
+`Tools/Blender/gamespace_ship_export.py`. Export je zapíše do manifestu a `import_ship.py` je
+nastaví do `BP_Ship_<Loď>` – nic se nepřepočítává ručně. Tabulka ukazuje orientační hodnoty.
 
 | Kde | Dnes | Pro ~14 m loď | Poznámka |
 | --- | --- | --- | --- |

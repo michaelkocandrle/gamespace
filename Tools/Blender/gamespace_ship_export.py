@@ -7,6 +7,8 @@ Use it three ways:
 * Script: open it in Blender's Text Editor and Run Script; the same sidebar panel appears.
 * Command line (no UI):
       blender -b Ship.blend --python Tools/Blender/gamespace_ship_export.py -- --out "//Export" [--validate-only] [--force]
+* Manifest check without Blender (before importing into Unreal):
+      python Tools/Blender/gamespace_ship_export.py --check-manifest ArtSource/Ships/Vanguard/Export/Vanguard_manifest.json
 
 Conventions (details in Docs/Ships/ShipPipeline.md):
 
@@ -324,6 +326,48 @@ def plan_exports(classified):
     return plan
 
 
+MANIFEST_VERSION = 1
+
+
+def _clamp(x, lo, hi):
+    return max(lo, min(hi, x))
+
+
+def suggest_pawn_settings(render_box, collision_box, cockpit_location_m):
+    """Starting values for ASpaceshipPawn (and the planet) from the ship's size.
+
+    The single source of the formulas in Docs/Ships/ShipPipeline.md, section 5; import_ship.py
+    applies these values as they are. All sizes in Unreal centimetres unless the key says M.
+    """
+    size = bounds_size(render_box)
+    box = collision_box or render_box
+    box_size = bounds_size(box)
+    longest_cm = max(size) * 100.0
+    box_height_cm = box_size[2] * 100.0
+    center_offset = blender_to_unreal_cm(bounds_center(box))
+    cockpit = None
+    if cockpit_location_m is not None:
+        # Relative to the root box, which sits on the actor origin: the mesh is shifted by
+        # -center_offset so the box is centred on the collision hulls.
+        cockpit = [round(a - b, 2) + 0.0 for a, b in zip(blender_to_unreal_cm(cockpit_location_m), center_offset)]
+    return {
+        "HullCollision_BoxExtent_cm": [round(x * 50.0, 1) for x in box_size],
+        "HullCollision_center_offset_ue_cm": center_offset,
+        "Hull_RelativeLocation_cm": [round(-x, 2) + 0.0 for x in center_offset],
+        "CameraBoom_TargetArmLength_cm": round(max(900.0, longest_cm * 2.5), 0),
+        "CameraBoom_SocketOffset_Z_cm": round(max(200.0, size[2] * 100.0), 0),
+        "CameraBoom_ProbeSize_cm": round(_clamp(box_height_cm * 0.15, 25.0, 50.0), 1),
+        "CameraBoom_CameraLagMaxDistance_cm": round(max(1500.0, longest_cm * 2.0), 0),
+        "CockpitCamera_location_ue_cm": cockpit,
+        "LandingFootprintRadiusCm": round(_clamp(min(box_size[0], box_size[1]) * 50.0, 50.0, 2000.0), 0),
+        "LandingMaxGapCm": round(_clamp(box_height_cm * 0.33, 60.0, 200.0), 0),
+        "GroundContactToleranceCm": round(_clamp(box_height_cm * 0.05, 10.0, 25.0), 1),
+        "HeatShakeCm": round(_clamp(longest_cm * 0.02, 14.0, 60.0), 1),
+        "Planet_CollisionWarmupReachM": round(max(15.0, max(size) * 0.75), 1),
+        "Planet_CollisionMinRadiusM": round(max(60.0, max(size) * 5.0), 0),
+    }
+
+
 def build_manifest(classified, plan, blend_file=""):
     render = classified["render"]
     ship = sorted({r["ship"] for r in render.values()})[0] if render else None
@@ -331,6 +375,7 @@ def build_manifest(classified, plan, blend_file=""):
     render_box = bounds_union([r.get("bounds") for r in lod0])
     collision_box = bounds_union([h.get("bounds") for h in classified["collision"].values()])
     manifest = {
+        "manifest_version": MANIFEST_VERSION,
         "ship": ship,
         "blend_file": blend_file,
         "units": "Blender metres, right-handed Z-up; *_ue_cm = Unreal centimetres (Y flipped)",
@@ -341,35 +386,264 @@ def build_manifest(classified, plan, blend_file=""):
     }
     for name, r in sorted(render.items()):
         manifest["meshes"][name] = {
-            "lod": r["lod"], "tris": r.get("tris"), "verts": r.get("verts"), "materials": r.get("materials"),
-            "uv_layers": r.get("uv_layers"), "bounds_m": r.get("bounds"),
+            "lod": r["lod"], "part": r.get("part"), "tris": r.get("tris"), "verts": r.get("verts"),
+            "materials": r.get("materials"), "uv_layers": r.get("uv_layers"), "bounds_m": r.get("bounds"),
         }
     for name, h in sorted(classified["collision"].items()):
         manifest["collision"][name] = {"kind": h["kind"], "mesh": h["mesh"], "verts": h.get("verts"), "bounds_m": h.get("bounds")}
-    for name, s in sorted(classified["sockets"].items()):
-        manifest["sockets"][name] = {"parent": s.get("parent"), "location_m": s.get("world_location"),
-                                     "location_ue_cm": blender_to_unreal_cm(s.get("world_location") or [0, 0, 0])}
+    for name, sock in sorted(classified["sockets"].items()):
+        manifest["sockets"][name] = {"parent": sock.get("parent"), "location_m": sock.get("world_location"),
+                                     "location_ue_cm": blender_to_unreal_cm(sock.get("world_location") or [0, 0, 0])}
     if render_box:
         size = bounds_size(render_box)
-        box = collision_box or render_box
-        box_size = bounds_size(box)
         manifest["render_bounds_m"] = render_box
         manifest["render_size_m"] = [round(x, 4) for x in size]
         manifest["expected_ue_size_cm"] = [round(x * 100.0, 1) for x in size]
         manifest["collision_bounds_m"] = collision_box
-        # Starting values for ASpaceshipPawn; see Docs/Ships/ShipPipeline.md, section 5.
         cockpit = classified["sockets"].get("SOCKET_Cockpit")
-        manifest["suggested_pawn_settings"] = {
-            "HullCollision_BoxExtent_cm": [round(x * 50.0, 1) for x in box_size],
-            "HullCollision_center_offset_ue_cm": blender_to_unreal_cm(bounds_center(box)),
-            "LandingFootprintRadiusCm": round(min(box_size[0], box_size[1]) * 50.0, 0),
-            "CameraBoom_TargetArmLength_cm": round(max(size) * 250.0, 0),
-            "CameraBoom_SocketOffset_Z_cm": round(size[2] * 100.0, 0),
-            "CameraBoom_ProbeSize_cm": 25.0,
-            "CockpitCamera_location_ue_cm": blender_to_unreal_cm(cockpit["world_location"]) if cockpit else None,
-            "Planet_CollisionWarmupReachM": round(max(15.0, max(size) * 0.75), 1),
-        }
+        manifest["suggested_pawn_settings"] = suggest_pawn_settings(
+            render_box, collision_box, cockpit["world_location"] if cockpit else None)
     return manifest
+
+
+# Every key import_ship.py relies on, with the range a sane ship produces. (min, max) in the
+# key's units; None = any number.
+PAWN_SETTING_RANGES = {
+    "HullCollision_BoxExtent_cm": (1.0, 5000.0),
+    "HullCollision_center_offset_ue_cm": None,
+    "Hull_RelativeLocation_cm": None,
+    "CameraBoom_TargetArmLength_cm": (300.0, 20000.0),
+    "CameraBoom_SocketOffset_Z_cm": (0.0, 5000.0),
+    "CameraBoom_ProbeSize_cm": (5.0, 200.0),
+    "CameraBoom_CameraLagMaxDistance_cm": (500.0, 50000.0),
+    "CockpitCamera_location_ue_cm": None,
+    "LandingFootprintRadiusCm": (10.0, 5000.0),
+    "LandingMaxGapCm": (10.0, 500.0),
+    "GroundContactToleranceCm": (1.0, 100.0),
+    "HeatShakeCm": (0.0, 200.0),
+    "Planet_CollisionWarmupReachM": (5.0, 200.0),
+    "Planet_CollisionMinRadiusM": (20.0, 2000.0),
+}
+VECTOR_SETTINGS = {"HullCollision_BoxExtent_cm", "HullCollision_center_offset_ue_cm", "Hull_RelativeLocation_cm",
+                   "CockpitCamera_location_ue_cm"}
+
+
+def _is_number(x):
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
+
+
+def _is_vec3(v):
+    return isinstance(v, (list, tuple)) and len(v) == 3 and all(_is_number(x) for x in v)
+
+
+def _is_box(b):
+    return (isinstance(b, (list, tuple)) and len(b) == 2 and _is_vec3(b[0]) and _is_vec3(b[1])
+            and all(b[0][i] <= b[1][i] for i in range(3)))
+
+
+def _inside(point, box, margin):
+    return all(box[0][i] - margin <= point[i] <= box[1][i] + margin for i in range(3))
+
+
+def validate_manifest(manifest, base_dir=None, limits=LIMITS):
+    """Checks a manifest (as loaded from JSON) before anything is imported into Unreal:
+    structure, types, internal consistency and sane ranges. base_dir, when given, is the folder
+    the FBX files must exist in. Returns a list of issues like validate()."""
+    issues = []
+    if not isinstance(manifest, dict):
+        return [issue(ERROR, "Manifest is not a JSON object")]
+
+    def need(key, check, what):
+        if key not in manifest:
+            issues.append(issue(ERROR, "Missing key %r" % key))
+            return False
+        if not check(manifest[key]):
+            issues.append(issue(ERROR, "Key %r must be %s, is %r" % (key, what, manifest[key])))
+            return False
+        return True
+
+    version = manifest.get("manifest_version")
+    if version != MANIFEST_VERSION:
+        issues.append(issue(ERROR, "manifest_version is %r, this tool reads %d: re-export from Blender" % (version, MANIFEST_VERSION)))
+
+    ship_ok = need("ship", lambda v: isinstance(v, str) and re.match("^%s$" % NAME_PART, v), "a ship name like 'Vanguard'")
+    ship = manifest.get("ship") if ship_ok else None
+    main = "SM_Ship_%s" % ship if ship else None
+
+    # --- meshes ----------------------------------------------------------------------------
+    meshes = manifest.get("meshes")
+    if need("meshes", lambda v: isinstance(v, dict) and v, "a non-empty object"):
+        for name, m in meshes.items():
+            match = RENDER_RE.match(name)
+            if not match or (ship and match.group("ship") != ship):
+                issues.append(issue(ERROR, "Mesh name does not belong to ship %r" % ship, name))
+                continue
+            if not isinstance(m, dict):
+                issues.append(issue(ERROR, "Mesh entry must be an object", name))
+                continue
+            if m.get("lod") != int(match.group("lod") or 0):
+                issues.append(issue(ERROR, "lod is %r but the name says LOD%s" % (m.get("lod"), match.group("lod") or 0), name))
+            for key in ("tris", "verts"):
+                if not isinstance(m.get(key), int) or m.get(key) <= 0:
+                    issues.append(issue(ERROR, "%s must be a positive integer, is %r" % (key, m.get(key)), name))
+            if isinstance(m.get("tris"), int) and m.get("lod") == 0 and m["tris"] > limits["lod0_tris_error"]:
+                issues.append(issue(ERROR, "%d triangles is over the %d limit" % (m["tris"], limits["lod0_tris_error"]), name))
+            mats = m.get("materials")
+            if not isinstance(mats, list) or not mats or not all(isinstance(x, str) and x for x in mats):
+                issues.append(issue(ERROR, "materials must be a non-empty list of names, is %r" % (mats,), name))
+            if not _is_box(m.get("bounds_m")):
+                issues.append(issue(ERROR, "bounds_m must be [[min x,y,z],[max x,y,z]], is %r" % (m.get("bounds_m"),), name))
+        if main and main not in meshes:
+            issues.append(issue(ERROR, "Main hull %s is not in meshes" % main))
+
+    # --- files -----------------------------------------------------------------------------
+    files = manifest.get("files")
+    if need("files", lambda v: isinstance(v, list) and v, "a non-empty list"):
+        exported_meshes = set()
+        for entry in files:
+            if not isinstance(entry, dict) or not isinstance(entry.get("fbx"), str) or not isinstance(entry.get("objects"), list) \
+                    or not entry.get("objects"):
+                issues.append(issue(ERROR, "files entry must be {fbx: name, objects: [...]}, is %r" % (entry,)))
+                continue
+            fbx, objects = entry["fbx"], entry["objects"]
+            if not fbx.lower().endswith(".fbx") or os.path.basename(fbx) != fbx:
+                issues.append(issue(ERROR, "fbx must be a plain file name ending in .fbx", fbx))
+            if isinstance(meshes, dict) and objects[0] not in meshes:
+                issues.append(issue(ERROR, "First object %r is not a listed mesh" % objects[0], fbx))
+            if fbx != "%s.fbx" % objects[0]:
+                issues.append(issue(ERROR, "File name must be the mesh name + .fbx", fbx))
+            exported_meshes.add(objects[0])
+            if base_dir is not None and not os.path.isfile(os.path.join(base_dir, fbx)):
+                issues.append(issue(ERROR, "File not found next to the manifest", fbx))
+        if isinstance(meshes, dict):
+            for name in meshes:
+                if name not in exported_meshes:
+                    issues.append(issue(ERROR, "Mesh has no FBX file in files", name))
+
+    # --- collision -------------------------------------------------------------------------
+    collision = manifest.get("collision", {})
+    if not isinstance(collision, dict):
+        issues.append(issue(ERROR, "collision must be an object"))
+        collision = {}
+    for name, h in collision.items():
+        if not COLLISION_RE.match(name) or not isinstance(h, dict):
+            issues.append(issue(ERROR, "Bad collision entry", name))
+            continue
+        if isinstance(meshes, dict) and (h.get("mesh") not in meshes or meshes[h.get("mesh")].get("lod") != 0):
+            issues.append(issue(ERROR, "Collision mesh %r is not a LOD0 mesh" % h.get("mesh"), name))
+        if h.get("kind") not in ("UCX", "UBX", "USP", "UCP") or not name.startswith(str(h.get("kind")) + "_"):
+            issues.append(issue(ERROR, "kind %r does not match the name" % h.get("kind"), name))
+        if not isinstance(h.get("verts"), int) or not 4 <= h["verts"] <= limits["hull_verts_error"]:
+            issues.append(issue(ERROR, "verts must be 4..%d, is %r" % (limits["hull_verts_error"], h.get("verts")), name))
+        if not _is_box(h.get("bounds_m")):
+            issues.append(issue(ERROR, "bounds_m is not a valid box", name))
+    if main and not any(isinstance(h, dict) and h.get("mesh") == main for h in collision.values()):
+        issues.append(issue(WARN, "No collision hulls for %s: the root box is then sized from the visible mesh" % main))
+
+    # --- size ------------------------------------------------------------------------------
+    render_box = manifest.get("render_bounds_m")
+    size = manifest.get("render_size_m")
+    if need("render_bounds_m", _is_box, "a valid box") and need("render_size_m", lambda v: _is_vec3(v) and min(v) > 0, "three positive numbers"):
+        if any(abs(size[i] - (render_box[1][i] - render_box[0][i])) > 0.01 for i in range(3)):
+            issues.append(issue(ERROR, "render_size_m does not match render_bounds_m"))
+        longest = max(size)
+        if not limits["length_min_m"] <= longest <= limits["length_max_m"]:
+            issues.append(issue(ERROR, "Ship is %.2f m across, outside %.0f-%.0f m: scale mistake in Blender" % (
+                longest, limits["length_min_m"], limits["length_max_m"])))
+        if size[1] > size[0] * 1.15:
+            issues.append(issue(WARN, "Wider along Y than long along X: nose not along +X?"))
+        if need("expected_ue_size_cm", _is_vec3, "three numbers"):
+            if any(abs(manifest["expected_ue_size_cm"][i] - size[i] * 100.0) > 0.5 for i in range(3)):
+                issues.append(issue(ERROR, "expected_ue_size_cm is not render_size_m x 100"))
+    else:
+        render_box = None
+
+    collision_box = manifest.get("collision_bounds_m")
+    if collision_box is not None and not _is_box(collision_box):
+        issues.append(issue(ERROR, "collision_bounds_m must be null or a valid box"))
+        collision_box = None
+    if render_box and collision_box:
+        margin = limits["collision_overhang_warn"] * max(size)
+        if not (_inside(collision_box[0], render_box, margin) and _inside(collision_box[1], render_box, margin)):
+            issues.append(issue(WARN, "Collision bounds stick out of the render bounds"))
+
+    # --- sockets ---------------------------------------------------------------------------
+    sockets = manifest.get("sockets", {})
+    if not isinstance(sockets, dict):
+        issues.append(issue(ERROR, "sockets must be an object"))
+        sockets = {}
+    for name, sock in sockets.items():
+        if not SOCKET_RE.match(name) or not isinstance(sock, dict):
+            issues.append(issue(ERROR, "Bad socket entry", name))
+            continue
+        loc, ue = sock.get("location_m"), sock.get("location_ue_cm")
+        if not _is_vec3(loc) or not _is_vec3(ue):
+            issues.append(issue(ERROR, "location_m and location_ue_cm must be three numbers each", name))
+            continue
+        if any(abs(a - b) > 0.05 for a, b in zip(blender_to_unreal_cm(loc), ue)):
+            issues.append(issue(ERROR, "location_ue_cm %s is not location_m %s converted (x100, Y flipped)" % (ue, loc), name))
+        if isinstance(meshes, dict) and (sock.get("parent") not in meshes or meshes[sock.get("parent")].get("lod") != 0):
+            issues.append(issue(ERROR, "Parent %r is not a LOD0 mesh" % sock.get("parent"), name))
+        if render_box and not _inside(loc, render_box, 0.1 * max(size)):
+            issues.append(issue(WARN, "Socket lies well outside the ship", name))
+    if "SOCKET_Cockpit" not in sockets:
+        issues.append(issue(WARN, "No SOCKET_Cockpit: the cockpit camera keeps its current position"))
+
+    # --- suggested pawn settings -----------------------------------------------------------
+    settings = manifest.get("suggested_pawn_settings")
+    if need("suggested_pawn_settings", lambda v: isinstance(v, dict), "an object"):
+        for key, allowed in PAWN_SETTING_RANGES.items():
+            if key not in settings:
+                issues.append(issue(ERROR, "suggested_pawn_settings is missing %r" % key))
+                continue
+            value = settings[key]
+            if key == "CockpitCamera_location_ue_cm" and value is None:
+                continue
+            if key in VECTOR_SETTINGS:
+                if not _is_vec3(value):
+                    issues.append(issue(ERROR, "%s must be three numbers, is %r" % (key, value)))
+                    continue
+                values = value
+            else:
+                if not _is_number(value):
+                    issues.append(issue(ERROR, "%s must be a number, is %r" % (key, value)))
+                    continue
+                values = [value]
+            if allowed and not all(allowed[0] <= x <= allowed[1] for x in values):
+                issues.append(issue(ERROR, "%s = %r is outside %s..%s" % (key, value, allowed[0], allowed[1])))
+        for key in settings:
+            if key not in PAWN_SETTING_RANGES:
+                issues.append(issue(WARN, "Unknown suggested_pawn_settings key %r (ignored by the import)" % key))
+        if render_box and all(k in settings for k in PAWN_SETTING_RANGES):
+            longest_cm = max(size) * 100.0
+            extent = settings["HullCollision_BoxExtent_cm"]
+            offset = settings["HullCollision_center_offset_ue_cm"]
+            if _is_vec3(extent) and any(extent[i] > size[i] * 55.0 + 1.0 for i in range(3)):
+                issues.append(issue(WARN, "Root box extent %s is larger than the ship itself" % (extent,)))
+            if _is_vec3(offset) and math.sqrt(sum(x * x for x in offset)) > limits["pivot_offset_warn"] * longest_cm:
+                issues.append(issue(WARN, "Collision centre is %.0f cm off the pivot: run 'Center on collision' in Blender"
+                                    % math.sqrt(sum(x * x for x in offset))))
+            hull_loc = settings["Hull_RelativeLocation_cm"]
+            if _is_vec3(offset) and _is_vec3(hull_loc) and any(abs(a + b) > 0.05 for a, b in zip(offset, hull_loc)):
+                issues.append(issue(ERROR, "Hull_RelativeLocation_cm must be -HullCollision_center_offset_ue_cm"))
+            cockpit = settings["CockpitCamera_location_ue_cm"]
+            if _is_vec3(extent) and _is_vec3(cockpit) and any(abs(cockpit[i]) > extent[i] * 1.2 + 50.0 for i in range(3)):
+                issues.append(issue(WARN, "Cockpit camera %s lies outside the root box" % (cockpit,)))
+            if _is_number(settings["Planet_CollisionMinRadiusM"]) and settings["Planet_CollisionMinRadiusM"] < max(size) * 2.0:
+                issues.append(issue(ERROR, "Planet_CollisionMinRadiusM must be at least twice the ship length"))
+            if _is_number(settings["Planet_CollisionWarmupReachM"]) and settings["Planet_CollisionWarmupReachM"] < max(size) * 0.5:
+                issues.append(issue(ERROR, "Planet_CollisionWarmupReachM must cover at least half the ship length"))
+    return issues
+
+
+def load_and_validate_manifest(path, check_files=True):
+    """(manifest or None, issues) for a manifest file on disk."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            manifest = json.load(f)
+    except (OSError, ValueError) as error:
+        return None, [issue(ERROR, "Cannot read manifest %s: %s" % (path, error))]
+    return manifest, validate_manifest(manifest, os.path.dirname(os.path.abspath(path)) if check_files else None)
 
 
 def format_issues(issues):
@@ -542,7 +816,11 @@ def export_ship(context, out_dir, force=False):
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
     written.append(manifest_path)
-    return True, report + "\nWrote:\n  " + "\n  ".join(written)
+    # Read it back the way the Unreal import will: a manifest that does not pass here would
+    # fail there, after the editor had to be closed for it.
+    _, manifest_issues = load_and_validate_manifest(manifest_path)
+    report += "\nWrote:\n  " + "\n  ".join(written) + "\n\nManifest check:\n" + format_issues(manifest_issues)
+    return not any(i["level"] == ERROR for i in manifest_issues), report
 
 
 def center_on_collision(context):
@@ -657,6 +935,20 @@ def _main_cli(argv):
     print(text)
     return 0 if ok else 1
 
+
+def _main_plain(argv):
+    import argparse
+    parser = argparse.ArgumentParser(prog="gamespace_ship_export", description="Manifest check without Blender")
+    parser.add_argument("--check-manifest", required=True, metavar="MANIFEST_JSON")
+    parser.add_argument("--no-files", action="store_true", help="do not require the FBX files next to the manifest")
+    args = parser.parse_args(argv)
+    _, issues = load_and_validate_manifest(args.check_manifest, check_files=not args.no_files)
+    print(format_issues(issues))
+    return 1 if any(i["level"] == ERROR for i in issues) else 0
+
+
+if __name__ == "__main__" and bpy is None:
+    sys.exit(_main_plain(sys.argv[1:]))
 
 if __name__ == "__main__" and bpy is not None:
     if bpy.app.background and "--" in sys.argv:
