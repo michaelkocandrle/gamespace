@@ -11,6 +11,9 @@
 #include "Engine/CollisionProfile.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/StaticMesh.h"
+#include "Algo/Find.h"
+#include "Engine/World.h"
+#include "PlayerCharacter.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputAction.h"
@@ -34,6 +37,7 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const LookActionPath = TEXT("/Game/Input/IA_Look.IA_Look");
 	const TCHAR* const ToggleCameraActionPath = TEXT("/Game/Input/IA_ToggleCamera.IA_ToggleCamera");
 	const TCHAR* const BoostActionPath = TEXT("/Game/Input/IA_Boost.IA_Boost");
+	const TCHAR* const InteractActionPath = TEXT("/Game/Input/IA_Interact.IA_Interact");
 	const TCHAR* const MouseLookActionPath = TEXT("/Game/Input/IA_LookMouse.IA_LookMouse");
 	const TCHAR* const MouseMappingContextPath = TEXT("/Game/Input/IMC_SpaceshipMouse.IMC_SpaceshipMouse");
 	const TCHAR* const EngineLoopSoundPath = TEXT("/Game/Ships/Audio/SW_EngineLoop.SW_EngineLoop");
@@ -108,6 +112,8 @@ ASpaceshipPawn::ASpaceshipPawn()
 	CockpitCamera->bUsePawnControlRotation = false;
 	// The view comes from the first active camera component, so only one may be active.
 	CockpitCamera->SetAutoActivate(false);
+
+	PilotCharacterClass = APlayerCharacter::StaticClass();
 
 	EngineAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("EngineAudio"));
 	EngineAudio->SetupAttachment(HullCollision);
@@ -219,6 +225,11 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(BoostAction, ETriggerEvent::Canceled, this, &ASpaceshipPawn::HandleBoostCompleted);
 	}
 
+	if (InteractAction)
+	{
+		Input->BindAction(InteractAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleInteract);
+	}
+
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (!PlayerController)
 	{
@@ -237,7 +248,40 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			// One above the flight context: its mouse mapping consumes the mouse there.
 			Subsystem->AddMappingContext(MouseMappingContext, MappingContextPriority + 1);
 		}
+		if (InteractAction && FlightMappingContext && !FlightMappingContext->GetMappings().ContainsByPredicate(
+			[this](const FEnhancedActionKeyMapping& Mapping) { return Mapping.Action == InteractAction; }))
+		{
+			// The hand-authored IMC_Spaceship without F (add_character_input.py not run yet).
+			if (!InteractMappingContext)
+			{
+				InteractMappingContext = NewObject<UInputMappingContext>(this, FName(TEXT("IMC_SpaceshipInteract_Runtime")));
+				InteractMappingContext->MapKey(InteractAction, EKeys::F);
+			}
+			Subsystem->AddMappingContext(InteractMappingContext, MappingContextPriority);
+		}
 	}
+}
+
+void ASpaceshipPawn::UnPossessed()
+{
+	// Remove this ship's contexts while the controller is still known: the mouse context would
+	// otherwise keep consuming the mouse after the pilot got out.
+	if (const APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			for (UInputMappingContext* Context : { FlightMappingContext.Get(), MouseMappingContext.Get(), InteractMappingContext.Get() })
+			{
+				if (Context)
+				{
+					Subsystem->RemoveMappingContext(Context);
+				}
+			}
+		}
+	}
+	ClearPilotInput();
+	Super::UnPossessed();
 }
 
 void ASpaceshipPawn::ResolveInputAssets()
@@ -277,6 +321,10 @@ void ASpaceshipPawn::ResolveInputAssets()
 	{
 		BoostAction = LoadOptional<UInputAction>(BoostActionPath);
 	}
+	if (!InteractAction)
+	{
+		InteractAction = LoadOptional<UInputAction>(InteractActionPath);
+	}
 	if (!MouseLookAction)
 	{
 		MouseLookAction = LoadOptional<UInputAction>(MouseLookActionPath);
@@ -293,7 +341,7 @@ void ASpaceshipPawn::BuildProceduralInputAssets()
 {
 	const bool bNeedsAnything = !FlightMappingContext || !ThrustAction || !StrafeAction || !LiftAction
 		|| !RollAction || !LookAction || !ToggleCameraAction || !BoostAction || !MouseLookAction
-		|| !MouseMappingContext;
+		|| !MouseMappingContext || !InteractAction;
 	if (!bNeedsAnything)
 	{
 		return;
@@ -350,6 +398,12 @@ void ASpaceshipPawn::BuildProceduralInputAssets()
 		BoostAction = MakeAction(TEXT("IA_Boost_Runtime"), EInputActionValueType::Boolean,
 			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
 	}
+	if (!InteractAction)
+	{
+		InteractAction = MakeAction(TEXT("IA_Interact_Runtime"), EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+		InteractAction->Triggers.Add(NewObject<UInputTriggerPressed>(InteractAction));
+	}
 	if (!MouseLookAction)
 	{
 		MouseLookAction = MakeAction(TEXT("IA_LookMouse_Runtime"), EInputActionValueType::Axis2D,
@@ -394,6 +448,7 @@ void ASpaceshipPawn::BuildProceduralInputAssets()
 		{ LookAction,   EKeys::Gamepad_Right2D,       false },
 		{ ToggleCameraAction, EKeys::C,               false },
 		{ BoostAction,  EKeys::LeftShift,             false },
+		{ InteractAction, EKeys::F,                   false },
 	};
 
 	for (const FDefaultMapping& Mapping : DefaultMappings)
@@ -451,6 +506,124 @@ void ASpaceshipPawn::HandleToggleCamera(const FInputActionValue& /*Value*/)
 void ASpaceshipPawn::HandleBoost(const FInputActionValue& /*Value*/)
 {
 	bBoostHeld = true;
+}
+
+void ASpaceshipPawn::HandleInteract(const FInputActionValue& /*Value*/)
+{
+	ExitShip();
+}
+
+void ASpaceshipPawn::ClearPilotInput()
+{
+	ThrustInput = 0.f;
+	StrafeInput = 0.f;
+	LiftInput = 0.f;
+	RollInput = 0.f;
+	LookInput = FVector2D::ZeroVector;
+	MouseLookDelta = FVector2D::ZeroVector;
+	MouseStick = FVector2D::ZeroVector;
+	bBoostHeld = false;
+}
+
+// -------------------------------------------------------------------------------------------
+// Exit and boarding
+// -------------------------------------------------------------------------------------------
+
+bool ASpaceshipPawn::CanExit() const
+{
+	return IsLanded() && IsPlayerControlled() && PilotCharacterClass != nullptr;
+}
+
+double ASpaceshipPawn::GetDistanceToHull(const FVector& Location) const
+{
+	const FVector Local = HullCollision->GetComponentTransform().InverseTransformPositionNoScale(Location);
+	const FVector Extent = HullCollision->GetScaledBoxExtent();
+	const FVector Outside(
+		FMath::Max(FMath::Abs(Local.X) - Extent.X, 0.0),
+		FMath::Max(FMath::Abs(Local.Y) - Extent.Y, 0.0),
+		FMath::Max(FMath::Abs(Local.Z) - Extent.Z, 0.0));
+	return Outside.Size();
+}
+
+FVector ASpaceshipPawn::ComputeSideExitLocation(const FVector& ShipLocation, const FRotator& ShipRotation, const FVector& HullExtent, float CapsuleRadius, float ClearanceCm)
+{
+	const FQuat Rotation = ShipRotation.Quaternion();
+	return ShipLocation + Rotation.GetRightVector() * (HullExtent.Y + CapsuleRadius + ClearanceCm);
+}
+
+FTransform ASpaceshipPawn::ComputeExitTransform() const
+{
+	const FVector Up = bHasEnvironment ? Environment.Up : GetActorUpVector();
+	const ACharacter* PilotDefaults = Cast<ACharacter>(PilotCharacterClass ? PilotCharacterClass->GetDefaultObject() : nullptr);
+	const float CapsuleRadius = PilotDefaults ? PilotDefaults->GetSimpleCollisionRadius() : 42.f;
+	const float CapsuleHalfHeight = PilotDefaults ? PilotDefaults->GetSimpleCollisionHalfHeight() : 96.f;
+
+	FVector Location;
+	FVector Forward = GetActorForwardVector();
+	static const FName ExitSockets[] = { FName(TEXT("Exit")), FName(TEXT("SOCKET_Exit")) };
+	const FName* Socket = Algo::FindByPredicate(ExitSockets, [this](const FName& Name) { return Hull->DoesSocketExist(Name); });
+	if (Socket)
+	{
+		const FTransform SocketTransform = Hull->GetSocketTransform(*Socket);
+		Location = SocketTransform.GetLocation();
+		Forward = SocketTransform.GetRotation().GetForwardVector();
+	}
+	else
+	{
+		Location = ComputeSideExitLocation(GetActorLocation(), GetActorRotation(), HullCollision->GetScaledBoxExtent(), CapsuleRadius, ExitClearanceCm);
+	}
+
+	// Stand on the terrain there, not at the height of the ship's centre.
+	FVector SurfacePoint;
+	FVector SurfaceNormal;
+	if (const ACelestialBody* Body = NearestBody.Get())
+	{
+		if (Body->GetSurfaceFrame(Location, CapsuleRadius, SurfacePoint, SurfaceNormal))
+		{
+			const double AboveGround = (Location - SurfacePoint) | Up;
+			// A socket in the air (a hatch above the ground) still puts the pilot on the ground.
+			Location += Up * (CapsuleHalfHeight + 20.0 - AboveGround);
+		}
+	}
+
+	FVector Flat = FVector::VectorPlaneProject(Forward, Up).GetSafeNormal();
+	if (Flat.IsNearlyZero())
+	{
+		Flat = FVector::VectorPlaneProject(GetActorUpVector(), Up).GetSafeNormal();
+	}
+	return FTransform(FRotationMatrix::MakeFromXZ(Flat, Up).ToQuat(), Location);
+}
+
+APawn* ASpaceshipPawn::ExitShip()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (!CanExit() || !PlayerController)
+	{
+		return nullptr;
+	}
+
+	FActorSpawnParameters Params;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	const FTransform ExitTransform = ComputeExitTransform();
+	APawn* Pilot = GetWorld()->SpawnActor<APawn>(PilotCharacterClass, ExitTransform, Params);
+	if (!Pilot)
+	{
+		UE_LOG(LogSpaceship, Warning, TEXT("%s: could not spawn %s at the exit"), *GetName(), *GetNameSafe(PilotCharacterClass));
+		return nullptr;
+	}
+	PlayerController->Possess(Pilot);
+	if (APlayerCharacter* Character = Cast<APlayerCharacter>(Pilot))
+	{
+		Character->FaceDirection(ExitTransform.GetRotation().GetForwardVector());
+	}
+	UE_LOG(LogSpaceship, Log, TEXT("%s: pilot out at %s"), *GetName(), *ExitTransform.GetLocation().ToString());
+	return Pilot;
+}
+
+void ASpaceshipPawn::OnBoarded()
+{
+	ClearPilotInput();
+	SnapCameraToShip();
 }
 
 void ASpaceshipPawn::HandleBoostCompleted(const FInputActionValue& /*Value*/)

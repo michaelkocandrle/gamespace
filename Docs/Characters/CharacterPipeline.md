@@ -84,7 +84,10 @@ ale je to jiný styl a těžší na výkon – spíš pro NPC ve stanicích než
 
 ---
 
-## 2. Rozhodnutí k probrání (zatím neuzavřené)
+## 2. Rozhodnutí
+
+**Rozhodnuto (L6):** third-person kamera jako výchozí (FP přepínač později) a UE5 Manny jako
+placeholder. Implementace: `APlayerCharacter` (README, sekce PlayerCharacter).
 
 ### 2.1 Kamera po výstupu z lodi: first-person, nebo third-person?
 
@@ -122,6 +125,12 @@ připravit už teď, animace ne.
 lezení, motion matching (až bude locomotion odladěná na kulaté planetě).
 
 ### 2.3 Co musí vyřešit kód, ne art (kvůli tomu gameplay s Manny nejdřív)
+
+Stav po L6: gravitace po kouli, kamera v gravitačním rámci, výstup/nástup a foot IK proti
+viditelnému terénu jsou hotové. Šablonový ABP a Control Rig foot IK se **nepoužívají**
+(počítají s gravitací po světové −Z); pózu skládá nativní `UPlayerCharacterAnimInstance`.
+Vlastní postava na kostře `SK_Mannequin` (varianta B) proto dostane animace i IK bez úprav.
+Jemnější kolize kolem chodce zatím není potřeba: foot IK pokryje rozdíl (max ~25 cm).
 
 - **Gravitace po kouli:** `UCharacterMovementComponent` od UE 5.4 umí vlastní směr gravitace
   (`SetGravityDirection`). Každý tick ho nastavit na −Up z `ACelestialBody::FindNearest`.

@@ -7,6 +7,8 @@
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
 #include "EngineUtils.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "PlayerCharacter.h"
 #include "QuadSpherePlanet.h"
 #include "SpaceOriginRebasingSubsystem.h"
 #include "SpaceshipPawn.h"
@@ -27,8 +29,8 @@ namespace
 			S.CollisionRadiusCm / 100.0, S.CollisionDepth, S.CollisionWarmups, S.SelectionMs);
 	}
 
-	/** "ORIGIN" readout: where the world origin is and how far the ship is from it. */
-	FString DescribeOrigin(const UWorld* World, const ASpaceshipPawn& Ship)
+	/** "ORIGIN" readout: where the world origin is and how far the player is from it. */
+	FString DescribeOrigin(const UWorld* World, const APawn& Pawn)
 	{
 		const USpaceOriginRebasingSubsystem* Rebasing = World->GetSubsystem<USpaceOriginRebasingSubsystem>();
 		if (!Rebasing)
@@ -36,11 +38,11 @@ namespace
 			return TEXT("n/a");
 		}
 		const FVector Origin(Rebasing->GetOriginLocation());
-		const double FromOriginKm = Ship.GetActorLocation().Size() / 100000.0;
+		const double FromOriginKm = Pawn.GetActorLocation().Size() / 100000.0;
 		const FString Trigger = Rebasing->IsEnabled()
 			? FString::Printf(TEXT("rebase at %.0f km"), Rebasing->GetRebaseDistanceCm() / 100000.0)
 			: FString(TEXT("rebasing off"));
-		return FString::Printf(TEXT("ship %.2f km from origin (%s)   origin %.1f, %.1f, %.1f km"),
+		return FString::Printf(TEXT("player %.2f km from origin (%s)   origin %.1f, %.1f, %.1f km"),
 			FromOriginKm, *Trigger, Origin.X / 100000.0, Origin.Y / 100000.0, Origin.Z / 100000.0);
 	}
 
@@ -138,10 +140,8 @@ namespace
 	}
 
 	/** "TARGET" readout for the nearest celestial body: name, surface distance, time to reach it. */
-	FString DescribeNearestBody(const UWorld* World, const ASpaceshipPawn& Ship)
+	FString DescribeNearestBody(const UWorld* World, const FVector& ShipLocation, const FVector& Velocity)
 	{
-		const FVector ShipLocation = Ship.GetActorLocation();
-
 		const ACelestialBody* Nearest = nullptr;
 		double NearestDistance = TNumericLimits<double>::Max();
 		// A handful of bodies at most, so a per-frame walk is cheaper than keeping a registry.
@@ -162,7 +162,7 @@ namespace
 
 		// Only the part of the velocity pointing at the body closes the gap.
 		const FVector ToBody = (Nearest->GetActorLocation() - ShipLocation).GetSafeNormal();
-		const double ClosingSpeed = FVector::DotProduct(Ship.GetLinearVelocity(), ToBody);
+		const double ClosingSpeed = FVector::DotProduct(Velocity, ToBody);
 
 		FString Eta = TEXT("--:--");
 		if (ClosingSpeed > 50.0 && NearestDistance > 0.0)
@@ -176,21 +176,8 @@ namespace
 	}
 }
 
-void ASpaceDebugHUD::DrawHUD()
+namespace
 {
-	Super::DrawHUD();
-
-	const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(GetOwningPawn());
-	if (!Ship || !Canvas || !GEngine)
-	{
-		return;
-	}
-
-	UFont* Font = GEngine->GetMediumFont();
-
-	// Unreal units are centimetres.
-	const float SpeedMetres = Ship->GetSpeed() / 100.f;
-
 	struct FLine
 	{
 		const TCHAR* Label;
@@ -198,24 +185,117 @@ void ASpaceDebugHUD::DrawHUD()
 		FLinearColor Color;
 	};
 
-	FLinearColor FlightColor;
-	const FString Flight = DescribeFlight(*Ship, FlightColor);
-	FLinearColor LandingColor;
-	const FString Landing = DescribeLanding(*Ship, LandingColor);
+	const FLinearColor ModeColor(1.f, 1.f, 0.55f);
 
-	const FLine Lines[] = {
-		{ TEXT("SPEED"), FString::Printf(TEXT("%6.1f m/s   %5.0f km/h"), SpeedMetres, SpeedMetres * 3.6f), FLinearColor::White },
-		{ TEXT("THROTTLE"), FString::Printf(TEXT("%+4.0f %%"), Ship->GetThrottle() * 100.f), FLinearColor::White },
-		{ TEXT("BOOST"), Ship->IsBoosting() ? TEXT("ON") : TEXT("off"),
-			Ship->IsBoosting() ? FLinearColor(1.f, 0.55f, 0.1f) : FLinearColor(0.6f, 0.6f, 0.6f) },
-		{ TEXT("CAMERA"), Ship->IsCockpitView() ? TEXT("Cockpit") : TEXT("Chase"), FLinearColor::White },
-		{ TEXT("FLIGHT"), Flight, FlightColor },
-		{ TEXT("LANDING"), Landing, LandingColor },
-		{ TEXT("TARGET"), DescribeNearestBody(GetWorld(), *Ship), FLinearColor(0.6f, 1.f, 0.7f) },
-		{ TEXT("ORIGIN"), DescribeOrigin(GetWorld(), *Ship), FLinearColor(0.85f, 0.85f, 0.6f) },
-		{ TEXT("REBASE"), DescribeRebases(GetWorld()), FLinearColor(0.85f, 0.85f, 0.6f) },
-		{ TEXT("TERRAIN"), DescribeTerrain(GetWorld()), FLinearColor(0.85f, 0.7f, 0.5f) },
-	};
+	void AddShipLines(const UWorld* World, const ASpaceshipPawn& Ship, TArray<FLine>& Lines)
+	{
+		// Unreal units are centimetres.
+		const float SpeedMetres = Ship.GetSpeed() / 100.f;
+		FLinearColor FlightColor;
+		const FString Flight = DescribeFlight(Ship, FlightColor);
+		FLinearColor LandingColor;
+		const FString Landing = DescribeLanding(Ship, LandingColor);
+
+		Lines.Add({ TEXT("MODE"), Ship.CanExit() ? TEXT("IN SHIP   [F] get out") : TEXT("IN SHIP"), ModeColor });
+		Lines.Add({ TEXT("SPEED"), FString::Printf(TEXT("%6.1f m/s   %5.0f km/h"), SpeedMetres, SpeedMetres * 3.6f), FLinearColor::White });
+		Lines.Add({ TEXT("THROTTLE"), FString::Printf(TEXT("%+4.0f %%"), Ship.GetThrottle() * 100.f), FLinearColor::White });
+		Lines.Add({ TEXT("BOOST"), Ship.IsBoosting() ? TEXT("ON") : TEXT("off"),
+			Ship.IsBoosting() ? FLinearColor(1.f, 0.55f, 0.1f) : FLinearColor(0.6f, 0.6f, 0.6f) });
+		Lines.Add({ TEXT("CAMERA"), Ship.IsCockpitView() ? TEXT("Cockpit") : TEXT("Chase"), FLinearColor::White });
+		Lines.Add({ TEXT("FLIGHT"), Flight, FlightColor });
+		Lines.Add({ TEXT("LANDING"), Landing, LandingColor });
+		Lines.Add({ TEXT("TARGET"), DescribeNearestBody(World, Ship.GetActorLocation(), Ship.GetLinearVelocity()), FLinearColor(0.6f, 1.f, 0.7f) });
+	}
+
+	void AddCharacterLines(const UWorld* World, const APlayerCharacter& Character, TArray<FLine>& Lines)
+	{
+		const UCharacterMovementComponent* Movement = Character.GetCharacterMovement();
+		const FVector Up = Character.GetGravityUp();
+		const FVector Velocity = Movement->Velocity;
+		const double Ground = FVector::VectorPlaneProject(Velocity, Up).Size() / 100.0;
+		const double Vertical = (Velocity | Up) / 100.0;
+
+		double ShipDistance = 0.0;
+		const ASpaceshipPawn* Ship = Character.FindBoardableShip(ShipDistance);
+		FString Mode = TEXT("ON FOOT");
+		if (Ship)
+		{
+			Mode += FString::Printf(TEXT("   [F] board ship (%.1f m)"), ShipDistance / 100.0);
+		}
+		else
+		{
+			// Where the nearest ship is, landed or not, so it can be found again.
+			double Nearest = TNumericLimits<double>::Max();
+			bool bLanded = false;
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				const double Distance = It->GetDistanceToHull(Character.GetActorLocation());
+				if (Distance < Nearest)
+				{
+					Nearest = Distance;
+					bLanded = It->IsLanded();
+				}
+			}
+			if (Nearest < TNumericLimits<double>::Max())
+			{
+				Mode += FString::Printf(TEXT("   ship %.0f m away%s"), Nearest / 100.0, bLanded ? TEXT("") : TEXT(" (not landed)"));
+			}
+		}
+		Lines.Add({ TEXT("MODE"), Mode, ModeColor });
+
+		const TCHAR* State = Movement->IsFalling() ? TEXT("falling") : Movement->IsMovingOnGround() ? TEXT("on ground") : TEXT("other");
+		Lines.Add({ TEXT("MOVE"), FString::Printf(TEXT("%s   %4.1f m/s ground, %+5.1f m/s vertical   %s"),
+			State, Ground, Vertical, Character.IsSprinting() ? TEXT("SPRINT") : TEXT("walk")), FLinearColor::White });
+
+		if (Character.HasEnvironment())
+		{
+			const FCelestialEnvironment& E = Character.GetEnvironment();
+			Lines.Add({ TEXT("GRAVITY"), FString::Printf(TEXT("%.2f m/s2 (scale %.2f)   up %.2f, %.2f, %.2f   alt %s AGL"),
+				E.GravityCmS2 / 100.0, Movement->GravityScale, Up.X, Up.Y, Up.Z, *FormatDistance(E.AltitudeAboveTerrainCm)), FLinearColor(0.5f, 1.f, 1.f) });
+		}
+		else
+		{
+			Lines.Add({ TEXT("GRAVITY"), TEXT("no body nearby: world default"), FLinearColor(0.6f, 0.6f, 0.6f) });
+		}
+
+		const FFootIKState IK = Character.GetFootIKState();
+		Lines.Add({ TEXT("FOOT IK"), IK.bActive
+			? FString::Printf(TEXT("pelvis %+5.1f cm   left %+5.1f   right %+5.1f%s"), IK.PelvisOffsetCm, IK.LeftFootOffsetCm, IK.RightFootOffsetCm,
+				IK.bClamped ? TEXT("   CLAMPED") : TEXT(""))
+			: FString(TEXT("off (not standing on planet terrain)")),
+			IK.bClamped ? FLinearColor(1.f, 0.6f, 0.2f) : FLinearColor(0.8f, 0.8f, 0.8f) });
+		Lines.Add({ TEXT("TARGET"), DescribeNearestBody(World, Character.GetActorLocation(), Velocity), FLinearColor(0.6f, 1.f, 0.7f) });
+	}
+}
+
+void ASpaceDebugHUD::DrawHUD()
+{
+	Super::DrawHUD();
+
+	const APawn* Pawn = GetOwningPawn();
+	if (!Pawn || !Canvas || !GEngine)
+	{
+		return;
+	}
+
+	TArray<FLine> Lines;
+	if (const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Pawn))
+	{
+		AddShipLines(GetWorld(), *Ship, Lines);
+	}
+	else if (const APlayerCharacter* Character = Cast<APlayerCharacter>(Pawn))
+	{
+		AddCharacterLines(GetWorld(), *Character, Lines);
+	}
+	else
+	{
+		Lines.Add({ TEXT("MODE"), Pawn->GetClass()->GetName(), ModeColor });
+	}
+	Lines.Add({ TEXT("ORIGIN"), DescribeOrigin(GetWorld(), *Pawn), FLinearColor(0.85f, 0.85f, 0.6f) });
+	Lines.Add({ TEXT("REBASE"), DescribeRebases(GetWorld()), FLinearColor(0.85f, 0.85f, 0.6f) });
+	Lines.Add({ TEXT("TERRAIN"), DescribeTerrain(GetWorld()), FLinearColor(0.85f, 0.7f, 0.5f) });
+
+	UFont* Font = GEngine->GetMediumFont();
 
 	const float LineHeight = Font->GetMaxCharHeight() * TextScale * 1.25f;
 	const float ValueColumn = 130.f * TextScale;
@@ -233,7 +313,7 @@ void ASpaceDebugHUD::DrawHUD()
 
 	// Dark backing so the numbers stay readable against a bright sky or a lit asteroid.
 	DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.55f), Origin.X - Padding, Origin.Y - Padding,
-		ValueColumn + WidestValue + Padding * 2.f, LineHeight * UE_ARRAY_COUNT(Lines) + Padding * 2.f);
+		ValueColumn + WidestValue + Padding * 2.f, LineHeight * Lines.Num() + Padding * 2.f);
 
 	float Y = Origin.Y;
 	for (const FLine& Line : Lines)

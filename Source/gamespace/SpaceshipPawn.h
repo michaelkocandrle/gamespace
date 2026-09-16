@@ -102,6 +102,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	virtual void UnPossessed() override;
 
 	/** Current world-space velocity in cm/s. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
@@ -200,6 +201,38 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
 	void SnapCameraToShip();
 
+	// --- Getting out and back in ---------------------------------------------------------------
+
+	/** Landed and flown by a player: F spawns the pilot and hands control to it. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Exit")
+	bool CanExit() const;
+
+	/** Spawns PilotCharacterClass at the exit and possesses it. Returns the pilot, or null. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Exit")
+	APawn* ExitShip();
+
+	/** Called by the pilot right after it possessed this ship again. */
+	void OnBoarded();
+
+	/**
+	 * Where the pilot appears: the hull mesh's "Exit" socket (SOCKET_Exit in Blender) if it has
+	 * one, otherwise beside the ship on its right. Placed on the ground, upright to gravity, facing
+	 * the ship's heading.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Exit")
+	FTransform ComputeExitTransform() const;
+
+	/** Distance from Location to the hull collision box, cm; 0 inside. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Exit")
+	double GetDistanceToHull(const FVector& Location) const;
+
+	/**
+	 * The fallback exit beside the hull: right of a ship with this location and rotation, far
+	 * enough that a capsule of CapsuleRadius clears a box of HullExtent. For tests.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Exit")
+	static FVector ComputeSideExitLocation(const FVector& ShipLocation, const FRotator& ShipRotation, const FVector& HullExtent, float CapsuleRadius, float ClearanceCm);
+
 protected:
 	// ---------------------------------------------------------------------------------------
 	// Components
@@ -283,6 +316,22 @@ protected:
 	/** Digital, held. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> BoostAction;
+
+	/** Digital, pressed: exit the ship when landed. Shared with the character (F). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> InteractAction;
+
+	/** Maps F to InteractAction when the authored flight context lacks it. */
+	UPROPERTY(Transient)
+	TObjectPtr<UInputMappingContext> InteractMappingContext;
+
+	/** Who gets out. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Exit")
+	TSubclassOf<APawn> PilotCharacterClass;
+
+	/** Gap between hull and pilot capsule for the side exit, cm. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Exit", meta = (ClampMin = "0.0"))
+	float ExitClearanceCm = 80.f;
 
 	// ---------------------------------------------------------------------------------------
 	// Flight model tuning
@@ -530,6 +579,8 @@ private:
 	void HandleToggleCamera(const FInputActionValue& Value);
 	void HandleBoost(const FInputActionValue& Value);
 	void HandleBoostCompleted(const FInputActionValue& Value);
+	void HandleInteract(const FInputActionValue& Value);
+	void ClearPilotInput();
 
 	/** Fills in any unassigned input asset: first from /Game/Input, then procedurally. */
 	void ResolveInputAssets();

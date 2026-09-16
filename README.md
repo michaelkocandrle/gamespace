@@ -131,6 +131,7 @@ of 15 degrees; 87 % of the surface is landable, 4.5 % is steeper than 30 degrees
 | Pitch / yaw  | Mouse                      | Right stick          |
 | Boost (hold) | `Left Shift`               | -                    |
 | Camera       | `C` (chase / cockpit)      | -                    |
+| Get out      | `F` (only when LANDED)     | -                    |
 
 ### Enhanced Input
 
@@ -171,6 +172,53 @@ Then open `IMC_Spaceship` and add the mappings from the controls table. Every ne
 
 The names above are exactly what `SpaceshipPawn.cpp` looks for, so once they exist the pawn picks
 them up with no further wiring and the warning disappears.
+
+## PlayerCharacter (on foot)
+
+`Source/gamespace/PlayerCharacter.h`, `PlayerCharacterAnimInstance.h` - `APlayerCharacter`, the
+player outside the ship. Placeholder art: the UE5 Mannequin pack (`SKM_Manny_Simple` and the
+Unarmed animations), installed unchanged at `/Game/Characters/Mannequins` by
+`python Tools/Assets/install_mannequin_pack.py` (a copy of the engine's Characters template pack).
+
+| Action          | Keyboard / mouse |
+| --------------- | ---------------- |
+| Move            | `W` `A` `S` `D`  |
+| Look            | Mouse            |
+| Jump            | `Space`          |
+| Sprint (hold)   | `Left Shift`     |
+| Board ship      | `F` within 4 m of a landed ship |
+
+Input: `IMC_Character` with `IA_CharMove`, `IA_CharLook`, `IA_CharJump`, `IA_CharSprint` and the
+shared `IA_Interact` (F, Pressed), created by `Tools/Assets/add_character_input.py`, which also
+appended F to `IMC_Spaceship`. Each pawn removes its mapping contexts when it is unpossessed, so
+the ship's mouse context never swallows the character's mouse look.
+
+- **Gravity** comes from the nearest celestial body every tick: `SetGravityDirection(-Up)` and
+  `GravityScale` = body gravity / world gravity (0.61 on Veyra). Character Movement (UE 5.4+)
+  walks, jumps, finds floors and stays upright in that frame by itself. Walk 2.5 m/s, sprint
+  5.5 m/s, jump 4.5 m/s (~1.7 m high at 6 m/s^2).
+- **View**: control rotation is world-space and the camera manager clamps its world pitch and
+  roll, which breaks when up is not world Z. So the look yaw/pitch live in a gravity frame carried
+  along the planet by parallel transport (no twist after a full lap, tested), and the camera boom
+  (absolute rotation) is rotated to it directly. Movement input is relative to that view.
+- **Animation**: `UPlayerCharacterAnimInstance` evaluates the pose natively (no Animation
+  Blueprint): idle / walk / jog blended by ground speed in the gravity plane, one shared phase so
+  the feet stay in step, play rate matched to speed (reference speeds 3 / 6 m/s read from
+  `BS_Idle_Walk_Run`), plus jump start, fall loop and a landing blend. The template ABP and foot
+  IK rig assume world -Z gravity, hence native.
+- **Foot IK**: the capsule stands on the coarse collision tiles (2.4 m cells); the visible terrain
+  has 33 cm cells. Measured difference: median 3.9 cm, 99 % under 18 cm, max 25 cm. Each foot's
+  ground is read from the planet's height field (what the visible mesh is built from), the pelvis
+  drops up to 40 cm for the lower foot, both legs get two-bone IK in their animated bend plane,
+  feet tilt with the slope up to 30 degrees. Off when not standing on planet terrain.
+- **Ship exit / boarding**: on a LANDED ship, F spawns the character at the hull mesh socket
+  `Exit` (`SOCKET_Exit` from Blender) or, without one, 80 cm right of the hull, placed on the
+  terrain, and possesses it. F within `BoardingRangeCm` (4 m from the hull box) of a landed ship
+  possesses the ship again and removes the character (0.75 s cooldown after getting out).
+- **HUD**: `MODE` shows IN SHIP / ON FOOT with the F prompt; on foot also MOVE, GRAVITY, FOOT IK.
+
+Headless: `Tools/Tests/test_character_l6.py` (assets and input, gravity frame transport, exit
+placement, native pose evaluation, foot IK with forced ground, terrain vs collision error).
 
 ## Ship art pipeline
 

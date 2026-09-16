@@ -108,6 +108,9 @@ public:
 
 	const FQuadSpherePlanetStats& GetTerrainStats() const { return Stats; }
 
+	/** The height field's settings, by value-safe reference: PlanetTerrain functions are thread-safe with a copy. */
+	const FPlanetTerrainSettings& GetTerrainSettings() const { return Settings; }
+
 	// Stats for Blueprint / Python (tests and debugging).
 	UFUNCTION(BlueprintPure, Category = "Planet|Debug")
 	int32 GetVisibleTileCount() const { return Stats.VisibleTiles; }
