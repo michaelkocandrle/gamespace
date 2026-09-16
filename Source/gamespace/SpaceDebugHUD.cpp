@@ -7,11 +7,25 @@
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
 #include "EngineUtils.h"
+#include "QuadSpherePlanet.h"
 #include "SpaceOriginRebasingSubsystem.h"
 #include "SpaceshipPawn.h"
 
 namespace
 {
+	/** "TERRAIN" readout: quad-sphere LOD state of the first planet in the level. */
+	FString DescribeTerrain(const UWorld* World)
+	{
+		TActorIterator<AQuadSpherePlanet> It(World);
+		if (!It)
+		{
+			return TEXT("n/a");
+		}
+		const FQuadSpherePlanetStats& S = It->GetTerrainStats();
+		return FString::Printf(TEXT("%d visible / %d built, %d building, depth %d/%d, collision %d, LOD %.2f ms"),
+			S.VisibleTiles, S.CachedTiles, S.PendingBuilds, S.MaxVisibleDepth, S.MaxDepth, S.CollisionTiles, S.SelectionMs);
+	}
+
 	/** "ORIGIN" readout: where the world origin is and how far the ship is from it. */
 	FString DescribeOrigin(const UWorld* World, const ASpaceshipPawn& Ship)
 	{
@@ -127,6 +141,7 @@ void ASpaceDebugHUD::DrawHUD()
 		{ TEXT("TARGET"), DescribeNearestBody(GetWorld(), *Ship), FLinearColor(0.6f, 1.f, 0.7f) },
 		{ TEXT("ORIGIN"), DescribeOrigin(GetWorld(), *Ship), FLinearColor(0.85f, 0.85f, 0.6f) },
 		{ TEXT("REBASE"), DescribeRebases(GetWorld()), FLinearColor(0.85f, 0.85f, 0.6f) },
+		{ TEXT("TERRAIN"), DescribeTerrain(GetWorld()), FLinearColor(0.85f, 0.7f, 0.5f) },
 	};
 
 	const float LineHeight = Font->GetMaxCharHeight() * TextScale * 1.25f;

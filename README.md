@@ -258,6 +258,41 @@ also capped at 15 m, since at orbital speeds it would otherwise trail kilometres
 station): a `Body` static mesh component and a `DisplayName`. `GetSurfaceDistance()` measures
 to the mesh's bounding sphere - exact for spheres, an underestimate for elongated shapes.
 
+## QuadSpherePlanet (L2 terrain)
+
+`Source/gamespace/QuadSpherePlanet.h`, `PlanetTerrain.h` - `AQuadSpherePlanet`, an
+`ACelestialBody` whose surface is a quad-sphere: six cube faces projected onto the sphere
+(equi-angular mapping), each a quadtree of `UProceduralMeshComponent` tiles.
+
+- **Height**: fBm of `FMath::PerlinNoise3D` sampled on the unit sphere (amplitude 12 m, largest
+  features 200 m, 8 octaves). Normals come from the height field, not the mesh, so they match
+  across LOD levels.
+- **LOD**: a tile splits when the camera is within `LodDistanceFactor` (3) tile sizes of its
+  bounds, merges with 15 % hysteresis. Finest tiles ~2.5 m (depth 8 on Veyra), 32x32 cells.
+- **No holes / pops / cracks**: parents stay visible until all four children are built (and
+  children until the parent is); vertices carry their parent-grid position in UV1/UV2 and the
+  material geomorphs towards it with camera distance; skirts hang under tile edges.
+- **Precision**: each tile component sits at the tile centre (double transform); vertices are
+  relative to it, so float mesh data only holds tile-sized values.
+- **Threads**: tiles build on the thread pool; component creation is capped per frame by count
+  and time budget (`UploadBudgetMs`), cache eviction by `MaxEvictionsPerFrame`, and LOD
+  selection only reruns when the camera moved or tiles changed.
+- **Collision**: separate invisible collision tiles (~49 m, 32 cells) only within
+  `CollisionRadiusM` (60 m) of the ship, so the body count - and origin rebase cost - stays
+  small. The inherited `Body` is a hidden sphere just under the lowest possible terrain as a
+  safety net. `GetSurfaceDistance` uses the exact height field, so TARGET/ETA stay correct.
+- **Debug**: HUD `TERRAIN` line; `space.TerrainDebugLOD 1` tints tiles by depth;
+  `space.TerrainFreezeLOD 1` freezes LOD updates.
+
+Measured in PIE (editor, before the last round of optimisations): ~89 fps from orbit, ~66 fps
+at 30 m with ~1000 visible tiles, ~54 fps flying at 83 m/s 20 m above the surface; single
+hitches up to 67-117 ms while streaming. The upload budget, gradual eviction, LOD gating and
+the 60 m collision radius came after and are not measured yet.
+
+When measuring in an editor that is not in the foreground, pass
+`-ini:EditorSettings:[/Script/UnrealEd.EditorPerformanceSettings]:bThrottleCPUWhenNotForeground=False`,
+otherwise the editor throttles itself to ~3 fps.
+
 ## TestSpace
 
 `Content/Maps/TestSpace` - the test level, and the editor/game startup map. Non-partitioned.
@@ -268,7 +303,7 @@ Its space look is built by `Tools/Assets/build_space_scene.py` (see below).
 | `Sun`              | Directional light, movable, intensity 8, pitch -39 / yaw 45: from behind the player's left shoulder |
 | `SkyLight`         | Movable, real-time capture, intensity 0.35. Captures the star dome, so ambient light is near zero |
 | `StarfieldSky`     | `ASkyDome`: 1000 km sphere that follows the camera, with `M_Starfield_Sky`: unlit, *Is Sky*, procedural stars plus a Milky Way glow cubemap |
-| `Planet_Veyra`     | `ACelestialBody`, radius 500 m, surface 2.5 km ahead of the start |
+| `Planet_Veyra`     | `AQuadSpherePlanet`, radius 500 m, surface 2.5 km ahead of the start |
 | `PP_SpaceExposure` | Unbound post-process volume fixing exposure at EV100 3 |
 | `PlayerStart`      | At (0, 0, 300), facing +X towards the planet |
 | `Asteroid_00-15`   | Scaled cubes scattered 30-260 m out |
@@ -324,8 +359,9 @@ Assets it creates:
 | ----- | ---- |
 | `Environments/Space/T_MilkyWay_Glow_Cube` | Diffuse Milky Way band, imported from a long-lat HDR as a cubemap |
 | `Environments/Space/M_Starfield_Sky`  | Sky material: procedural stars + glow |
-| `Planets/SM_PlanetSphere`             | 65k-triangle Nanite sphere, radius 100 cm, one sphere collision |
-| `Planets/M_Planet_Test`               | Noise-based two-tone terrain with polar caps, colour parameters |
+| `Planets/SM_PlanetSphere`             | 65k-triangle Nanite sphere, radius 100 cm, one sphere collision; now only the planet's hidden safety sphere |
+| `Planets/M_Planet_Terrain`            | Terrain tile material: noise colours and polar caps from the planet-local position, geomorphing via World Position Offset, LOD debug tint |
+| `Planets/M_Planet_Test`               | Material of the old single-sphere planet; no longer used by the script |
 
 ### Smart App Control
 

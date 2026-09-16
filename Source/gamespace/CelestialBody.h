@@ -26,11 +26,12 @@ public:
 	const FText& GetDisplayName() const { return DisplayName; }
 
 	/**
-	 * Distance in cm from Location to the body's surface, taken as its bounding sphere. Exact for
-	 * spheres, an underestimate for anything elongated. Negative inside the sphere.
+	 * Distance in cm from Location to the body's surface. The default takes the surface as the
+	 * Body mesh's bounding sphere: exact for spheres, an underestimate for anything elongated.
+	 * Negative inside. Subclasses with real terrain override it.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Celestial Body")
-	double GetSurfaceDistance(const FVector& Location) const;
+	virtual double GetSurfaceDistance(const FVector& Location) const;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Celestial Body")

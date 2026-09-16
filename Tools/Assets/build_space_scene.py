@@ -57,7 +57,7 @@ LEVEL = "/Game/Maps/TestSpace"
 GLOW_TEXTURE = "/Game/Environments/Space/T_MilkyWay_Glow_Cube"
 STARFIELD_MATERIAL = "/Game/Environments/Space/M_Starfield_Sky"
 PLANET_MESH = "/Game/Planets/SM_PlanetSphere"
-PLANET_MATERIAL = "/Game/Planets/M_Planet_Test"
+PLANET_MATERIAL = "/Game/Planets/M_Planet_Terrain"
 
 MEL = unreal.MaterialEditingLibrary
 GENERATED = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_intermediate_dir()), "GeneratedAssets")
@@ -313,23 +313,51 @@ def build_starfield_material(glow_cube):
     return m
 
 
-def build_planet_material():
-    m = fresh_material(PLANET_MATERIAL)
-    # The imported planet mesh is Nanite. Without this flag a packaged or -game build falls back
-    # to the default material, and PIE would set it silently and dirty the asset.
-    m.set_editor_property("used_with_nanite", True)
+def pin(expr, wanted):
+    """Input pin name, checked against the node - pin names are not always the obvious ones."""
+    names = [str(n) for n in MEL.get_material_expression_input_names(expr)]
+    if wanted not in names:
+        raise RuntimeError("%s has no input %r; inputs are %s" % (expr.get_class().get_name(), wanted, names))
+    return wanted
 
-    # Unit direction from the planet's centre. Built from world position so it does not depend
-    # on how the mesh is scaled; ObjectRadius is exact for a sphere.
-    world = node(m, unreal.MaterialExpressionWorldPosition, -1600, 0)
-    centre = node(m, unreal.MaterialExpressionObjectPositionWS, -1600, 150)
-    offset = node(m, unreal.MaterialExpressionSubtract, -1400, 0)
-    link(world, offset, "A")
-    link(centre, offset, "B")
-    radius = node(m, unreal.MaterialExpressionObjectRadius, -1400, 150)
+
+def primitive_data(material, name, index, x, y):
+    """Scalar read per component from custom primitive data (set by AQuadSpherePlanet)."""
+    return node(material, unreal.MaterialExpressionScalarParameter, x, y, parameter_name=name,
+                use_custom_primitive_data=True, primitive_data_index=index)
+
+
+def build_planet_material():
+    """Terrain material for AQuadSpherePlanet tiles.
+
+    Each tile is its own component, so object position and radius describe the tile, not the
+    planet. The planet-local position is rebuilt instead from the tile centre that the planet
+    passes in custom primitive data (slots 0-2). Also reads the geomorph range (3-4), the planet
+    radius (5), the tile depth (6) and a debug flag (7).
+    """
+    m = fresh_material(PLANET_MATERIAL)
+
+    world = node(m, unreal.MaterialExpressionWorldPosition, -2000, 0)
+    tile_origin = node(m, unreal.MaterialExpressionObjectPositionWS, -2000, 150)
+    in_tile = node(m, unreal.MaterialExpressionSubtract, -1800, 0)       # small, single precision is fine
+    link(world, in_tile, pin(in_tile, "A"))
+    link(tile_origin, in_tile, pin(in_tile, "B"))
+    cx = primitive_data(m, "TileCenterX", 0, -2000, 300)
+    cy = primitive_data(m, "TileCenterY", 1, -2000, 400)
+    cz = primitive_data(m, "TileCenterZ", 2, -2000, 500)
+    cxy = node(m, unreal.MaterialExpressionAppendVector, -1850, 350)
+    link(cx, cxy, pin(cxy, "A"))
+    link(cy, cxy, pin(cxy, "B"))
+    centre = node(m, unreal.MaterialExpressionAppendVector, -1700, 400)
+    link(cxy, centre, pin(centre, "A"))
+    link(cz, centre, pin(centre, "B"))
+    planet_local = node(m, unreal.MaterialExpressionAdd, -1550, 0)
+    link(in_tile, planet_local, pin(planet_local, "A"))
+    link(centre, planet_local, pin(planet_local, "B"))
+    radius = primitive_data(m, "PlanetRadius", 5, -1550, 200)
     unit = node(m, unreal.MaterialExpressionDivide, -1200, 0)
-    link(offset, unit, "A")
-    link(radius, unit, "B")
+    link(planet_local, unit, pin(unit, "A"))
+    link(radius, unit, pin(unit, "B"))
 
     # Continents: one multi-octave noise over the surface blends two terrain colours.
     noise = node(m, unreal.MaterialExpressionNoise, -1000, 0,
@@ -365,10 +393,62 @@ def build_planet_material():
     link(terrain, base, "A")
     link(ice, base, "B")
     link(cap, base, "Alpha")
-    output(base, unreal.MaterialProperty.MP_BASE_COLOR)
+
+    # Debug: space.TerrainDebugLOD 1 tints each tile by its quadtree depth.
+    depth = primitive_data(m, "TileDepth", 6, -700, 850)
+    hue_steps = node(m, unreal.MaterialExpressionConstant3Vector, -700, 950,
+                     constant=unreal.LinearColor(0.37, 0.61, 0.83, 1.0))
+    hue = node(m, unreal.MaterialExpressionMultiply, -550, 850)
+    link(depth, hue, pin(hue, "A"))
+    link(hue_steps, hue, pin(hue, "B"))
+    tint = node(m, unreal.MaterialExpressionFrac, -400, 850)
+    link(hue, tint, "")
+    debug_flag = primitive_data(m, "DebugTint", 7, -400, 1000)
+    shown = node(m, unreal.MaterialExpressionLinearInterpolate, -150, 400)
+    link(base, shown, "A")
+    link(tint, shown, "B")
+    link(debug_flag, shown, "Alpha")
+    output(shown, unreal.MaterialProperty.MP_BASE_COLOR)
 
     rough = node(m, unreal.MaterialExpressionConstant, -300, 500, r=0.85)
     output(rough, unreal.MaterialProperty.MP_ROUGHNESS)
+
+    # Geomorph: move each vertex towards where the parent tile would put it (UV1.xy, UV2.x, in
+    # the tile's local frame) as the camera distance goes from MorphStart to MorphEnd.
+    uv1 = node(m, unreal.MaterialExpressionTextureCoordinate, -1200, 1300, coordinate_index=1)
+    uv2 = node(m, unreal.MaterialExpressionTextureCoordinate, -1200, 1450, coordinate_index=2)
+    uv2_x = node(m, unreal.MaterialExpressionComponentMask, -1050, 1450, r=True, g=False, b=False, a=False)
+    link(uv2, uv2_x, "")
+    delta_local = node(m, unreal.MaterialExpressionAppendVector, -900, 1350)
+    link(uv1, delta_local, pin(delta_local, "A"))
+    link(uv2_x, delta_local, pin(delta_local, "B"))
+    delta_world = node(m, unreal.MaterialExpressionTransform, -750, 1350,
+                       transform_source_type=unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_LOCAL,
+                       transform_type=unreal.MaterialVectorCoordTransform.TRANSFORM_WORLD)
+    link(delta_local, delta_world, "")
+
+    camera = node(m, unreal.MaterialExpressionCameraPositionWS, -1200, 1650)
+    distance = node(m, unreal.MaterialExpressionDistance, -1050, 1600)
+    link(world, distance, pin(distance, "A"))
+    link(camera, distance, pin(distance, "B"))
+    morph_start = primitive_data(m, "MorphStart", 3, -1200, 1800)
+    morph_end = primitive_data(m, "MorphEnd", 4, -1200, 1900)
+    past_start = node(m, unreal.MaterialExpressionSubtract, -900, 1650)
+    link(distance, past_start, pin(past_start, "A"))
+    link(morph_start, past_start, pin(past_start, "B"))
+    span = node(m, unreal.MaterialExpressionSubtract, -900, 1850)
+    link(morph_end, span, pin(span, "A"))
+    link(morph_start, span, pin(span, "B"))
+    ratio = node(m, unreal.MaterialExpressionDivide, -750, 1700)
+    link(past_start, ratio, pin(ratio, "A"))
+    link(span, ratio, pin(ratio, "B"))
+    morph = node(m, unreal.MaterialExpressionSaturate, -600, 1700)
+    link(ratio, morph, "")
+    offset = node(m, unreal.MaterialExpressionMultiply, -450, 1450)
+    link(delta_world, offset, pin(offset, "A"))
+    link(morph, offset, pin(offset, "B"))
+    output(offset, unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
+
     finish(m)
     return m
 
@@ -429,14 +509,16 @@ def build_level(sky_material, planet_mesh, planet_material):
     sky.get_component_by_class(unreal.StaticMeshComponent).set_material(0, sky_material)
     log("sky dome radius %.0f km, actor scale %.0f" % (SKY_DOME_RADIUS_KM, sky.get_actor_scale3d().x))
 
-    # Planet
-    body_class = unreal.load_class(None, "/Script/gamespace.CelestialBody")
-    planet = upsert_actor(eas, actors, "Planet_" + PLANET_NAME, body_class, PLANET_LOCATION_CM)
+    # Planet: quad-sphere terrain. Shape and LOD tuning are C++ defaults on AQuadSpherePlanet;
+    # only identity, size and material are set here. Body is its hidden safety sphere.
+    planet_class = unreal.load_class(None, "/Script/gamespace.QuadSpherePlanet")
+    planet = upsert_actor(eas, actors, "Planet_" + PLANET_NAME, planet_class, PLANET_LOCATION_CM,
+                          replace_other_class=True)
+    planet.set_actor_scale3d(unreal.Vector(1, 1, 1))  # tiles are in cm; scale must stay 1
     planet.set_editor_property("display_name", unreal.Text(PLANET_NAME))
-    planet.set_actor_scale3d(unreal.Vector(1, 1, 1) * (PLANET_RADIUS_CM / 100.0))  # mesh radius 100 cm
-    body = planet.get_component_by_class(unreal.StaticMeshComponent)
-    body.set_static_mesh(planet_mesh)
-    body.set_material(0, planet_material)
+    planet.set_editor_property("radius_km", PLANET_RADIUS_CM / 100000.0)
+    planet.set_editor_property("terrain_material", planet_material)
+    planet.get_component_by_class(unreal.StaticMeshComponent).set_static_mesh(planet_mesh)
 
     # Exposure: clamp auto exposure to one value, i.e. fixed.
     ppv = upsert_actor(eas, actors, "PP_SpaceExposure", unreal.PostProcessVolume)
