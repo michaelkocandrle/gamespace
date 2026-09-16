@@ -69,6 +69,8 @@ __all__ = [
     "data_asset",
     "data_table",
     "existing",
+    "existing_or_none",
+    "import_file",
     "input_action",
     "mapping_context",
 ]
@@ -157,6 +159,13 @@ def _resolve_class(cls):
             raise ValueError("class not found: %r" % cls)
         return loaded
     return cls
+
+
+def existing_or_none(path):
+    """Like existing(), but returns None instead of raising when there is no asset."""
+    folder, name = _split(path)
+    package = "%s/%s" % (folder, name)
+    return _EAL.load_asset(package) if _EAL.does_asset_exist(package) else None
 
 
 def existing(path):
@@ -384,6 +393,40 @@ def add_mappings(path, mappings):
 # ---------------------------------------------------------------------------------------
 # Other asset types
 # ---------------------------------------------------------------------------------------
+
+
+def import_file(path, source_file, properties=None, on_exists="error"):
+    """Imports a file (texture, mesh, ...) through the editor's normal importer.
+
+    The asset type follows from the file: .png -> Texture2D, a 2:1 long-lat .hdr ->
+    TextureCube, .obj / .fbx -> StaticMesh. properties are set on the imported asset.
+    With on_exists="update" the existing asset is reimported from source_file in place.
+    """
+    import os
+
+    if not os.path.isfile(source_file):
+        raise ValueError("source file not found: %r" % source_file)
+    folder, name = _split(path)
+    asset = _prepare(path, on_exists)
+    if asset is not None and on_exists == "skip":
+        return asset
+
+    task = unreal.AssetImportTask()
+    task.set_editor_property("filename", source_file)
+    task.set_editor_property("destination_path", folder)
+    task.set_editor_property("destination_name", name)
+    task.set_editor_property("automated", True)
+    task.set_editor_property("save", False)
+    # Only reached for "update"; _prepare() has already refused an existing asset otherwise.
+    task.set_editor_property("replace_existing", asset is not None)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+
+    package = "%s/%s" % (folder, name)
+    if not _EAL.does_asset_exist(package):
+        raise RuntimeError("import of %s produced no asset at %s (see LogInterchange / LogAssetTools)" % (source_file, package))
+    asset = _EAL.load_asset(package)
+    _set_properties(asset, properties)
+    return _save(asset)
 
 
 def data_asset(path, asset_class, properties=None, on_exists="error"):

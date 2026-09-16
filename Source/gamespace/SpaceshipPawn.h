@@ -198,9 +198,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.1"))
 	float AngularResponsiveness = 6.f;
 
-	/** Scales the raw look axis. Mouse deltas are pixels per frame, hence the small default. */
+	/**
+	 * Scales the raw look axis. Mouse deltas are pixels per frame, hence the small value.
+	 * Higher reaches full turn rate with less mouse movement; the turn rate itself is still
+	 * capped by PitchRate / YawRate.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.0"))
-	float LookSensitivity = 0.08f;
+	float LookSensitivity = 0.15f;
 
 	/** Flip the pitch axis for players who fly stick-style. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling")

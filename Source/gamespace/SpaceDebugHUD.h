@@ -7,7 +7,8 @@
 #include "SpaceDebugHUD.generated.h"
 
 /**
- * Plain-text flight readout drawn straight onto the canvas: speed, throttle, boost and camera.
+ * Plain-text flight readout drawn straight onto the canvas: speed, throttle, boost, camera, and
+ * distance and ETA to the nearest ACelestialBody.
  *
  * A stopgap for tuning the flight model, deliberately not UMG. It needs no widget asset and no
  * extra module, and gets replaced once a real HUD exists.

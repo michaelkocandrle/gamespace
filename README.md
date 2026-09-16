@@ -181,24 +181,72 @@ Any level without a World Settings override therefore spawns a flyable ship at i
 (signed %, the raw `IA_Thrust` value), boost state and active camera as plain canvas text in
 the top-left corner. A tuning aid, not UMG - replace it when a real HUD exists.
 
+The `TARGET` line shows the nearest `ACelestialBody`: its name, the distance to its surface, and
+the time to reach it at the current closing speed (`--:--` when not approaching).
+
+## CelestialBody
+
+`Source/gamespace/CelestialBody.h` - `ACelestialBody`, a named body in space (planet, moon,
+station): a `Body` static mesh component and a `DisplayName`. `GetSurfaceDistance()` measures
+to the mesh's bounding sphere - exact for spheres, an underestimate for elongated shapes.
+
 ## TestSpace
 
-`Content/Maps/TestSpace` - the test level, and the editor/game startup map. Non-partitioned,
-20 actors:
+`Content/Maps/TestSpace` - the test level, and the editor/game startup map. Non-partitioned.
+Its space look is built by `Tools/Assets/build_space_scene.py` (see below).
 
-| Actor            | Notes                                                                |
-| ---------------- | -------------------------------------------------------------------- |
-| `Sun`            | Directional light, movable, intensity 8, 0.2 deg source angle for hard vacuum shadows |
-| `SkyAtmosphere`  | Default settings                                                      |
-| `SkyLight`       | Movable, real-time capture, intensity 0.35 - ambient fill only        |
-| `PlayerStart`    | At (0, 0, 300)                                                        |
-| `Asteroid_00-15` | Scaled cubes scattered 30-260 m out                                   |
+| Actor              | Notes |
+| ------------------ | ----- |
+| `Sun`              | Directional light, movable, intensity 8, pitch -39 / yaw 45: from behind the player's left shoulder |
+| `SkyLight`         | Movable, real-time capture, intensity 0.35. Captures the star dome, so ambient light is near zero |
+| `StarfieldSky`     | 8 km engine sphere with `M_Starfield_Sky` (unlit, *Is Sky*, star cubemap looked up by view direction) |
+| `Planet_Veyra`     | `ACelestialBody`, radius 500 m, surface 2.5 km ahead of the start |
+| `PP_SpaceExposure` | Unbound post-process volume fixing exposure at EV100 3 |
+| `PlayerStart`      | At (0, 0, 300), facing +X towards the planet |
+| `Asteroid_00-15`   | Scaled cubes scattered 30-260 m out |
 
 The asteroids are placeholder reference geometry, not a design decision. Without something to
 fly past, an empty sky gives no sense of motion whatsoever. Delete them once real props exist.
 
-There is no starfield yet: `SkyAtmosphere` renders an atmosphere, not stars. That wants an HDRI
-cubemap on the sky light or a dedicated skybox material.
+**Distances.** Cruise speed is ~33 m/s, so the planet surface is ~76 s away, ~30 s with boost.
+It starts at ~19 degrees across in the 90 degree view.
+
+**Why no SkyAtmosphere.** It simulates an Earth-like atmosphere with the player at sea level:
+a sunset sky over a black ground plane, which is the opposite of space.
+
+**Why fixed exposure.** Auto exposure would brighten the mostly black sky until the stars bloom
+out, then darken again whenever a lit asteroid fills the view.
+
+**Why an 8 km dome.** The stars are looked up by view direction, so the dome's size does not
+change how they look; it only has to enclose everything you fly to. 8 km is verified in PIE.
+Flying more than 8 km from the origin takes you outside it.
+
+**Checking visuals headlessly.** A standalone `-game` run of uncooked content renders newly
+created materials with the default material, even with their shaders compiled. Judge the look
+in PIE, not in `-game`.
+
+### Rebuilding the scene
+
+Editor closed:
+
+```
+python Tools/Assets/generate_starfield.py Intermediate/GeneratedAssets/starfield.hdr
+.\Tools\run_editor_python.ps1 Tools\Assets\build_space_scene.py
+```
+
+The generator runs in the system Python with numpy and is deterministic. The build script is
+safe to re-run: it rebuilds its own two materials, finds its actors by label, and imports the
+star cubemap and planet mesh only if they are missing. Brightness, exposure, planet size and
+position are constants at the top of `build_space_scene.py`.
+
+Assets it creates:
+
+| Asset | What |
+| ----- | ---- |
+| `Environments/Space/T_Starfield_Cube` | Procedural star field, imported from a long-lat HDR as a cubemap |
+| `Environments/Space/M_Starfield_Sky`  | Sky material, `StarBrightness` parameter |
+| `Planets/SM_PlanetSphere`             | 65k-triangle Nanite sphere, radius 100 cm, one sphere collision |
+| `Planets/M_Planet_Test`               | Noise-based two-tone terrain with polar caps, colour parameters |
 
 ### Smart App Control
 
