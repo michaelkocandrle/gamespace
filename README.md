@@ -172,6 +172,19 @@ Then open `IMC_Spaceship` and add the mappings from the controls table. Every ne
 The names above are exactly what `SpaceshipPawn.cpp` looks for, so once they exist the pawn picks
 them up with no further wiring and the warning disappears.
 
+## Ship art pipeline
+
+The real ship replaces the placeholder cube through Higgsfield (AI 3D, GLB) -> Blender -> FBX ->
+Unreal. The step-by-step guide, folder layout (`ArtSource/Ships/<Ship>/` for source files,
+`Content/Ships/<Ship>/` for assets), naming (`SM_Ship_<Ship>`, `UCX_`, `SOCKET_`, `_LOD<n>`),
+model checklist and the pawn changes the switch needs are in
+[Docs/Ships/ShipPipeline.md](Docs/Ships/ShipPipeline.md).
+
+`Tools/Blender/gamespace_ship_export.py` is a Blender add-on (sidebar tab "Gamespace") and
+command-line script that validates a ship and exports one FBX per mesh plus a JSON manifest
+with sizes, socket positions in Unreal centimetres and suggested pawn settings. Its validation
+core runs without Blender: `python Tools/Blender/tests/test_ship_export_core.py`.
+
 ## Script-authored assets
 
 New Input Actions, Mapping Contexts, Data Assets, Curve Tables and Data Tables can be created

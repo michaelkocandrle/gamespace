@@ -85,3 +85,7 @@ Config/*Local*.ini
 # Python bytecode from editor scripting (Content/Python)
 __pycache__/
 *.pyc
+
+# Blender backups
+*.blend1
+*.blend2
