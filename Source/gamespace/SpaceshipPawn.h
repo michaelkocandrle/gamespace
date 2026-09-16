@@ -251,21 +251,33 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
 	TObjectPtr<USoundBase> EngineLoopSound;
 
-	/** Volume at full engine load. */
+	/** Volume at full engine load. Kept moderate: the engine plays for the whole flight. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
-	float EngineVolume = 0.8f;
+	float EngineVolume = 0.55f;
 
-	/** Pitch just above idle, as the engine starts to push. */
+	/**
+	 * Pitch just above idle, as the engine starts to push. The pitch range is deliberately
+	 * narrow: playing the loop faster moves all of it up, and at 1.55x the old range pushed the
+	 * rumble into the band where it sounded like a vacuum cleaner.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.1"))
-	float EngineMinPitch = 0.7f;
+	float EngineMinPitch = 0.8f;
 
 	/** Pitch at full thrust without boost. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.1"))
-	float EngineMaxPitch = 1.2f;
+	float EngineMaxPitch = 1.05f;
 
 	/** Pitch added on top while boosting forward. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
-	float EngineBoostPitch = 0.35f;
+	float EngineBoostPitch = 0.15f;
+
+	/** Low-pass cutoff at the lightest engine load, Hz: a muffled, distant rumble. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "20.0"))
+	float EngineLowPassIdleHz = 400.f;
+
+	/** Low-pass cutoff at full load or boost, Hz. The loop has almost nothing above 1 kHz anyway. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "20.0"))
+	float EngineLowPassFullHz = 2000.f;
 
 	/** How fast engine volume and pitch follow the controls, per second. Lower spools slower. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.1"))

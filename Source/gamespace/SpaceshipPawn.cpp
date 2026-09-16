@@ -112,6 +112,9 @@ ASpaceshipPawn::ASpaceshipPawn()
 	EngineAudio->SetAutoActivate(false);
 	// The player's own engine: heard the same from chase and cockpit camera, not positioned.
 	EngineAudio->bAllowSpatialization = false;
+	// Opened up with engine load in UpdateEngineAudio, so light thrust sounds muffled and distant.
+	EngineAudio->bEnableLowPassFilter = true;
+	EngineAudio->LowPassFilterFrequency = EngineLowPassIdleHz;
 }
 
 void ASpaceshipPawn::BeginPlay()
@@ -582,8 +585,11 @@ void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
 		EngineAudio->Play();
 	}
 
-	const float Load = EngineLoad + 0.35f * EngineBoostBlend;
-	EngineAudio->SetVolumeMultiplier(EngineVolume * FMath::Min(Load, 1.f));
+	const float Load = FMath::Min(EngineLoad + 0.35f * EngineBoostBlend, 1.f);
+	EngineAudio->SetVolumeMultiplier(EngineVolume * Load);
 	EngineAudio->SetPitchMultiplier(
 		FMath::Lerp(EngineMinPitch, EngineMaxPitch, EngineLoad) + EngineBoostPitch * EngineBoostBlend);
+	// Interpolated in log space, which is how cutoff frequencies are heard.
+	EngineAudio->SetLowPassFilterFrequency(FMath::Exp(FMath::Lerp(
+		FMath::Loge(EngineLowPassIdleHz), FMath::Loge(EngineLowPassFullHz), Load)));
 }

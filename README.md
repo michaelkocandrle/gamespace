@@ -70,9 +70,12 @@ predictable and cheap to tune.
   turn half as fast at 120 FPS as at 60. The turn rate itself is capped by `PitchRate` (100),
   `YawRate` (75) and `RollRate` (150) deg/s.
 - **Engine sound** follows the controls, not the speed: main thrust counts fully, strafe and lift
-  60 %, roll 30 %. Volume and pitch spool at `EngineSpoolRate`, boost adds pitch, and the sound
-  is stopped outright below 1 % load, so a ship at rest is silent. The sound is a procedural
-  placeholder (rumble, turbine whine, exhaust hiss; seamless 4 s loop), rebuilt with
+  60 %, roll 30 %. Volume, pitch (narrow range, 0.8-1.05, +0.15 boost) and a low-pass filter
+  (400 Hz at light load up to 2 kHz at full) spool at `EngineSpoolRate`, and the sound is stopped
+  outright below 1 % load, so a ship at rest is silent. The sound is a procedural placeholder:
+  low-pass filtered noise with a soft narrow-band hum, no pure tones and nothing above ~1 kHz,
+  in a seamless 8 s loop. An earlier version with sine partials and hiss sounded like a vacuum
+  cleaner - its perceived loudness centred at 1.3 kHz, where the ear is most sensitive. Rebuilt with
   `python Tools/Assets/generate_engine_sound.py Intermediate/GeneratedAssets/engine_loop.wav`
   and then `.\Tools\run_editor_python.ps1 Tools\Assets\build_ship_audio.py`. A real recording
   can be reimported onto `/Game/Ships/Audio/SW_EngineLoop`.
