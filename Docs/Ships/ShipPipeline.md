@@ -271,7 +271,7 @@ $env:GAMESPACE_SHIP_MANIFEST = "C:\gamespace\gamespace\ArtSource\Ships\Vanguard\
 6. zapíše `Vanguard_import_report.json` vedle manifestu (co se opravilo, co je ruční krok).
 
 Ověřeno na lodi Vanguard (09/2026). Kontrola po importu v čerstvém editoru:
-`.\Toolsun_editor_python.ps1 Tools\Tests	est_ship_import.py`. Zjištění z prvního běhu:
+`.\Tools\run_editor_python.ps1 Tools\Tests\test_ship_import.py`. Zjištění z prvního běhu:
 sockety přicházejí z FBX s měřítkem 100 (skript je srovná na 1) a pole `Sockets` je v UE 5.8 pro
 Python chráněné (skript používá `find_socket`). Blender z Git Bash spouštějte s
 `MSYS_NO_PATHCONV=1`, jinak se `//Export` přepíše na `/Export`.
@@ -431,4 +431,4 @@ nastaví do `BP_Ship_<Loď>` – nic se nepřepočítává ručně. Tabulka ukaz
 - **Trysky**: emisivní materiál + později Niagara na `SOCKET_Engine_*`; zvuk
   `EngineAudio` přesunout na socket (dnes nespatializovaný, takže nevadí).
 - **Origin rebasing**: nic nového – loď je jeden actor, jeho komponenty se posouvají s ním.
-- **Commit**: `.blend`, GLB i FBX přes LFS; importované `.uasset` až po ověření kapitoly L.
+`.\Toolsun_editor_python.ps1 Tools\Tests	est_ship_import.py`. Zjištění z prvního běhu:
