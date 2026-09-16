@@ -235,7 +235,7 @@ konvexnost a počet vrcholů kolizí, návaznost LODů, rodiče socketů, orient
 (4–80 m), pivot, kolize vyčnívající z meshe.
 
 Exportní nastavení (napevno ve skriptu): Selected Objects, Mesh + Empty, Apply Modifiers,
-Smoothing **Face**, Tangent Space, Apply Unit, Apply Scalings **All Local**, Forward **−Z**,
+Smoothing **Face**, Tangent Space, Triangulate, Apply Unit, Apply Scalings **All Local**, Forward **−Z**,
 Up **Y**, bez leaf bones a animací.
 
 Export si manifest po zápisu přečte zpátky a zkontroluje ho (viz L1); chybný manifest =
@@ -270,8 +270,11 @@ $env:GAMESPACE_SHIP_MANIFEST = "C:\gamespace\gamespace\ArtSource\Ships\Vanguard\
    (vypnout: `$env:GAMESPACE_SHIP_APPLY_PLANET = "0"`, `$env:GAMESPACE_SHIP_SET_GAME_MODE = "0"`),
 6. zapíše `Vanguard_import_report.json` vedle manifestu (co se opravilo, co je ruční krok).
 
-Skript zatím nikdy neběžel (napsaný dřív, než existuje model): první běh berte jako test a
-výsledek zkontrolujte podle „Ověření po prvním importu“ níže.
+Ověřeno na lodi Vanguard (09/2026). Kontrola po importu v čerstvém editoru:
+`.\Toolsun_editor_python.ps1 Tools\Tests	est_ship_import.py`. Zjištění z prvního běhu:
+sockety přicházejí z FBX s měřítkem 100 (skript je srovná na 1) a pole `Sockets` je v UE 5.8 pro
+Python chráněné (skript používá `find_socket`). Blender z Git Bash spouštějte s
+`MSYS_NO_PATHCONV=1`, jinak se `//Export` přepíše na `/Export`.
 
 Ruční import (kdyby skript selhal) – FBX do `Content/Ships/Vanguard/Meshes/`:
 
@@ -397,7 +400,7 @@ nastaví do `BP_Ship_<Loď>` – nic se nepřepočítává ručně. Tabulka ukaz
 | Kde | Dnes | Pro ~14 m loď | Poznámka |
 | --- | --- | --- | --- |
 | `HullCollision` BoxExtent | 100, 50, 17,5 | z manifestu (~700, 500, 150) | |
-| `CameraBoom->TargetArmLength` | 900 | ~3500 | manifest: `CameraBoom_TargetArmLength_cm` |
+| `CameraBoom->TargetArmLength` | 900 | ~2500 (1.8 × délka) | manifest: `CameraBoom_TargetArmLength_cm` |
 | `CameraBoom->SocketOffset.Z` | 200 | ~300–400 | kamera kousek nad lodí |
 | `CameraBoom->ProbeSize` | 25 | 25–50 | |
 | `CameraBoom->CameraLagMaxDistance` | 1500 | ~3000 | |

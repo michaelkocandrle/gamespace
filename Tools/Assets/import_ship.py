@@ -66,8 +66,12 @@ SOCKET_TOLERANCE_CM = 1.0
 # =========================================================================================
 
 def is_glass_part(mesh_name, mesh_entry):
-    text = (mesh_name + " " + " ".join(mesh_entry.get("materials") or [])).lower()
-    return any(h in text for h in GLASS_HINTS)
+    """A see-through part: named like one, or made of nothing but glass materials. A hull with a few
+    small glass bits (sensor windows) stays Nanite; those bits need an opaque glass look."""
+    if any(h in mesh_name.lower() for h in GLASS_HINTS):
+        return True
+    materials = mesh_entry.get("materials") or []
+    return bool(materials) and all(any(h in m.lower() for h in GLASS_HINTS) for m in materials)
 
 
 def find_manifest(explicit=None):
@@ -228,7 +232,7 @@ def import_fbx(mesh, convert_scene_unit=False):
         ("convert_scene_unit", convert_scene_unit, True),
         ("import_uniform_scale", 1.0, True),
         ("one_convex_hull_per_ucx", True, False),
-        ("import_mesh_lo_ds", False, False),
+        ("import_mesh_lods", False, False),
         ("generate_lightmap_u_vs", False, False),
         ("build_nanite", mesh["nanite"], False),
         ("bake_pivot_in_vertex", False, False),
@@ -287,25 +291,25 @@ def check_and_fix_mesh(static_mesh, mesh, report):
     if sorted(slots) != sorted(mesh["materials"]):
         notes.append("material slots %s differ from Blender %s" % (slots, mesh["materials"]))
 
-    # Sockets: the importer may carry the FBX node scale over; the manifest has the truth.
+    # Sockets: the importer may carry the FBX node scale over; the manifest has the truth. The
+    # Sockets array itself is protected from Python in UE 5.8, so look each one up by name.
     wanted = {socket_key(k): v for k, v in mesh["sockets"].items()}
-    found = {}
-    for sock in static_mesh.get_editor_property("sockets"):
-        key = socket_key(str(sock.get_editor_property("socket_name")))
-        found[key] = sock
-        if key not in wanted:
+    missing = []
+    for key, target in sorted(wanted.items()):
+        sock = static_mesh.find_socket(key) or static_mesh.find_socket("SOCKET_" + key)
+        if sock is None:
+            missing.append(key)
             continue
         loc = sock.get_editor_property("relative_location")
         scale = sock.get_editor_property("relative_scale")
-        target = wanted[key]
         if max(abs(loc.x - target[0]), abs(loc.y - target[1]), abs(loc.z - target[2])) > SOCKET_TOLERANCE_CM:
             notes.append("socket %s moved from (%.1f, %.1f, %.1f) to manifest %s" % (key, loc.x, loc.y, loc.z, target))
             sock.set_editor_property("relative_location", vec(target))
         if max(abs(scale.x - 1.0), abs(scale.y - 1.0), abs(scale.z - 1.0)) > 1e-3:
             notes.append("socket %s scale (%.3g, %.3g, %.3g) reset to 1" % (key, scale.x, scale.y, scale.z))
             sock.set_editor_property("relative_scale", unreal.Vector(1.0, 1.0, 1.0))
-        sock.set_editor_property("socket_name", key)
-    missing = sorted(set(wanted) - set(found))
+        if str(sock.get_editor_property("socket_name")) != key:
+            sock.set_editor_property("socket_name", key)
     if missing:
         raise ImportFailed("%s is missing sockets %s" % (mesh["name"], missing))
 

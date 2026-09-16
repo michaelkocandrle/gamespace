@@ -40,6 +40,8 @@ class ImportPlanTest(unittest.TestCase):
         self.assertEqual(self.plan["extra_components"][0]["component"], "Canopy")
         self.assertTrue(import_ship.is_glass_part("SM_Ship_X_Top", {"materials": ["M_Ship_X_Glass"]}))
         self.assertFalse(import_ship.is_glass_part("SM_Ship_X_Wing", {"materials": ["M_Ship_X_Hull"]}))
+        # A hull with small glass bits keeps Nanite.
+        self.assertFalse(import_ship.is_glass_part("SM_Ship_X", {"materials": ["M_Ship_X_Hull", "M_Ship_X_Glass"]}))
 
     def test_pawn_settings_come_from_the_manifest(self):
         settings = {(c, p): v for c, p, v in self.plan["pawn_settings"]}

@@ -1,0 +1,463 @@
+{
+  "manifest_version": 1,
+  "ship": "Vanguard",
+  "blend_file": "C:\\gamespace\\gamespace\\ArtSource\\Ships\\Vanguard\\Vanguard.blend",
+  "units": "Blender metres, right-handed Z-up; *_ue_cm = Unreal centimetres (Y flipped)",
+  "files": [
+    {
+      "fbx": "SM_Ship_Vanguard.fbx",
+      "objects": [
+        "SM_Ship_Vanguard",
+        "UCX_SM_Ship_Vanguard_00",
+        "UCX_SM_Ship_Vanguard_01",
+        "UCX_SM_Ship_Vanguard_02",
+        "UCX_SM_Ship_Vanguard_03",
+        "UCX_SM_Ship_Vanguard_04",
+        "UCX_SM_Ship_Vanguard_05",
+        "UCX_SM_Ship_Vanguard_06",
+        "UCX_SM_Ship_Vanguard_07",
+        "UCX_SM_Ship_Vanguard_08",
+        "SOCKET_CameraTarget",
+        "SOCKET_Cockpit",
+        "SOCKET_Engine_L",
+        "SOCKET_Engine_R",
+        "SOCKET_Exit",
+        "SOCKET_Gear_L",
+        "SOCKET_Gear_Nose",
+        "SOCKET_Gear_R",
+        "SOCKET_Weapon_Chin",
+        "SOCKET_Weapon_L",
+        "SOCKET_Weapon_R"
+      ]
+    },
+    {
+      "fbx": "SM_Ship_Vanguard_Canopy.fbx",
+      "objects": [
+        "SM_Ship_Vanguard_Canopy"
+      ]
+    }
+  ],
+  "meshes": {
+    "SM_Ship_Vanguard": {
+      "lod": 0,
+      "part": null,
+      "tris": 74843,
+      "verts": 41435,
+      "materials": [
+        "M_Ship_Vanguard_Underlayer",
+        "M_Ship_Vanguard_HullPaint",
+        "M_Ship_Vanguard_HullDark",
+        "M_Ship_Vanguard_Accent",
+        "M_Ship_Vanguard_HullPaintB",
+        "M_Ship_Vanguard_BareMetal",
+        "M_Ship_Vanguard_Emissive",
+        "M_Ship_Vanguard_Rubber",
+        "M_Ship_Vanguard_NavRed",
+        "M_Ship_Vanguard_NavGreen",
+        "M_Ship_Vanguard_Glass",
+        "M_Ship_Vanguard_NavWhite"
+      ],
+      "uv_layers": 1,
+      "bounds_m": [
+        [
+          -8.781450271606445,
+          -6.480000019073486,
+          -2.152841567993164
+        ],
+        [
+          8.79710578918457,
+          6.480000019073486,
+          2.207744598388672
+        ]
+      ]
+    },
+    "SM_Ship_Vanguard_Canopy": {
+      "lod": 0,
+      "part": "Canopy",
+      "tris": 212,
+      "verts": 108,
+      "materials": [
+        "M_Ship_Vanguard_Glass"
+      ],
+      "uv_layers": 1,
+      "bounds_m": [
+        [
+          2.2749996185302734,
+          -0.7200000286102295,
+          0.3325871229171753
+        ],
+        [
+          6.324999809265137,
+          0.7200000286102295,
+          1.1971585750579834
+        ]
+      ]
+    }
+  },
+  "collision": {
+    "UCX_SM_Ship_Vanguard_00": {
+      "kind": "UCX",
+      "mesh": "SM_Ship_Vanguard",
+      "verts": 32,
+      "bounds_m": [
+        [
+          -7.725000381469727,
+          -1.4800000190734863,
+          -1.1428413391113281
+        ],
+        [
+          8.774999618530273,
+          1.4800000190734863,
+          0.7071585655212402
+        ]
+      ]
+    },
+    "UCX_SM_Ship_Vanguard_01": {
+      "kind": "UCX",
+      "mesh": "SM_Ship_Vanguard",
+      "verts": 18,
+      "bounds_m": [
+        [
+          -5.525000095367432,
+          -0.6200000047683716,
+          0.6424919366836548
+        ],
+        [
+          1.5749996900558472,
+          0.6200000047683716,
+          1.0864919424057007
+        ]
+      ]
+    },
+    "UCX_SM_Ship_Vanguard_02": {
+      "kind": "UCX",
+      "mesh": "SM_Ship_Vanguard",
+      "verts": 18,
+      "bounds_m": [
+        [
+          -8.774999618530273,
+          1.32657790184021,
+          -0.8207844495773315
+        ],
+        [
+          -1.9250001907348633,
+          2.8334221839904785,
+          0.47510164976119995
+        ]
+      ]
+    },
+    "UCX_SM_Ship_Vanguard_03": {
+      "kind": "UCX",
+      "mesh": "SM_Ship_Vanguard",
+      "verts": 18,
+      "bounds_m": [
+        [
+          -8.774999618530273,
+          -2.8334221839904785,
+          -0.8207844495773315
+        ],
+        [
+          -1.9250001907348633,
+          -1.32657790184021,
+          0.47510164976119995
+        ]
+      ]
+    },
+    "UCX_SM_Ship_Vanguard_04": {
+      "kind": "UCX",
+      "mesh": "SM_Ship_Vanguard",
+      "verts": 15,
+      "bounds_m": [
+        [
+          -3.575000286102295,
+          1.2999999523162842,
+          -0.5828413963317871
+        ],
+        [
+          2.2749996185302734,
+          6.449999809265137,
+          -0.012841403484344482
+        ]
+      ]
+    },
+    "UCX_SM_Ship_Vanguard_05": {
+      "kind": "UCX",
+      "mesh": "SM_Ship_Vanguard",
+      "verts": 15,
+      "bounds_m": [
+        [
+          -3.575000286102295,
+          -6.449999809265137,
+          -0.5828413963317871
+        ],
+        [
+          2.2749996185302734,
+          -1.2999999523162842,
+          -0.012841403484344482
+        ]
+      ]
+    },
+    "UCX_SM_Ship_Vanguard_06": {
+      "kind": "UCX",
+      "mesh": "SM_Ship_Vanguard",
+      "verts": 15,
+      "bounds_m": [
+        [
+          -8.375,
+          2.0058252811431885,
+          0.4771900773048401
+        ],
+        [
+          -5.225000381469727,
+          2.768012762069702,
+          2.142841339111328
+        ]
+      ]
+    },
+    "UCX_SM_Ship_Vanguard_07": {
+      "kind": "UCX",
+      "mesh": "SM_Ship_Vanguard",
+      "verts": 15,
+      "bounds_m": [
+        [
+          -8.375,
+          -2.768012762069702,
+          0.4771900773048401
+        ],
+        [
+          -5.225000381469727,
+          -2.0058252811431885,
+          2.142841339111328
+        ]
+      ]
+    },
+    "UCX_SM_Ship_Vanguard_08": {
+      "kind": "UCX",
+      "mesh": "SM_Ship_Vanguard",
+      "verts": 12,
+      "bounds_m": [
+        [
+          -3.9000000953674316,
+          -2.440000057220459,
+          -2.142841339111328
+        ],
+        [
+          4.734999656677246,
+          2.440000057220459,
+          -0.7728413939476013
+        ]
+      ]
+    }
+  },
+  "sockets": {
+    "SOCKET_CameraTarget": {
+      "parent": "SM_Ship_Vanguard",
+      "location_m": [
+        0.175,
+        0.0,
+        0.30716
+      ],
+      "location_ue_cm": [
+        17.5,
+        -0.0,
+        30.72
+      ]
+    },
+    "SOCKET_Cockpit": {
+      "parent": "SM_Ship_Vanguard",
+      "location_m": [
+        3.525,
+        0.0,
+        1.10716
+      ],
+      "location_ue_cm": [
+        352.5,
+        -0.0,
+        110.72
+      ]
+    },
+    "SOCKET_Engine_L": {
+      "parent": "SM_Ship_Vanguard",
+      "location_m": [
+        -8.775,
+        2.08,
+        -0.17284
+      ],
+      "location_ue_cm": [
+        -877.5,
+        -208.0,
+        -17.28
+      ]
+    },
+    "SOCKET_Engine_R": {
+      "parent": "SM_Ship_Vanguard",
+      "location_m": [
+        -8.775,
+        -2.08,
+        -0.17284
+      ],
+      "location_ue_cm": [
+        -877.5,
+        208.0,
+        -17.28
+      ]
+    },
+    "SOCKET_Exit": {
+      "parent": "SM_Ship_Vanguard",
+      "location_m": [
+        5.175,
+        -2.3,
+        -2.14284
+      ],
+      "location_ue_cm": [
+        517.5,
+        230.0,
+        -214.28
+      ]
+    },
+    "SOCKET_Gear_L": {
+      "parent": "SM_Ship_Vanguard",
+      "location_m": [
+        -3.425,
+        2.08,
+        -2.14284
+      ],
+      "location_ue_cm": [
+        -342.5,
+        -208.0,
+        -214.28
+      ]
+    },
+    "SOCKET_Gear_Nose": {
+      "parent": "SM_Ship_Vanguard",
+      "location_m": [
+        4.425,
+        0.0,
+        -2.14284
+      ],
+      "location_ue_cm": [
+        442.5,
+        -0.0,
+        -214.28
+      ]
+    },
+    "SOCKET_Gear_R": {
+      "parent": "SM_Ship_Vanguard",
+      "location_m": [
+        -3.425,
+        -2.08,
+        -2.14284
+      ],
+      "location_ue_cm": [
+        -342.5,
+        208.0,
+        -214.28
+      ]
+    },
+    "SOCKET_Weapon_Chin": {
+      "parent": "SM_Ship_Vanguard",
+      "location_m": [
+        7.995,
+        0.0,
+        -0.99284
+      ],
+      "location_ue_cm": [
+        799.5,
+        -0.0,
+        -99.28
+      ]
+    },
+    "SOCKET_Weapon_L": {
+      "parent": "SM_Ship_Vanguard",
+      "location_m": [
+        1.225,
+        6.28,
+        -0.38284
+      ],
+      "location_ue_cm": [
+        122.5,
+        -628.0,
+        -38.28
+      ]
+    },
+    "SOCKET_Weapon_R": {
+      "parent": "SM_Ship_Vanguard",
+      "location_m": [
+        1.225,
+        -6.28,
+        -0.38284
+      ],
+      "location_ue_cm": [
+        122.5,
+        628.0,
+        -38.28
+      ]
+    }
+  },
+  "render_bounds_m": [
+    [
+      -8.781450271606445,
+      -6.480000019073486,
+      -2.152841567993164
+    ],
+    [
+      8.79710578918457,
+      6.480000019073486,
+      2.207744598388672
+    ]
+  ],
+  "render_size_m": [
+    17.5786,
+    12.96,
+    4.3606
+  ],
+  "expected_ue_size_cm": [
+    1757.9,
+    1296.0,
+    436.1
+  ],
+  "collision_bounds_m": [
+    [
+      -8.774999618530273,
+      -6.449999809265137,
+      -2.142841339111328
+    ],
+    [
+      8.774999618530273,
+      6.449999809265137,
+      2.142841339111328
+    ]
+  ],
+  "suggested_pawn_settings": {
+    "HullCollision_BoxExtent_cm": [
+      877.5,
+      645.0,
+      214.3
+    ],
+    "HullCollision_center_offset_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+    ],
+    "Hull_RelativeLocation_cm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "CameraBoom_TargetArmLength_cm": 3164.0,
+    "CameraBoom_SocketOffset_Z_cm": 436.0,
+    "CameraBoom_ProbeSize_cm": 50.0,
+    "CameraBoom_CameraLagMaxDistance_cm": 3516.0,
+    "CockpitCamera_location_ue_cm": [
+      352.5,
+      0.0,
+      110.72
+    ],
+    "LandingFootprintRadiusCm": 645.0,
+    "LandingMaxGapCm": 141.0,
+    "GroundContactToleranceCm": 21.4,
+    "HeatShakeCm": 35.2,
+    "Planet_CollisionWarmupReachM": 15.0,
+    "Planet_CollisionMinRadiusM": 88.0
+  }
+}

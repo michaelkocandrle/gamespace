@@ -249,8 +249,10 @@ The manifest can be checked on its own before any import
 `Tools/Assets/import_ship.py` (editor closed, `GAMESPACE_SHIP_MANIFEST` set) imports the FBX
 files, checks them against the manifest and writes the manifest's suggested settings into
 `BP_Ship_<Ship>`; run with plain Python it is a dry run that prints the plan
-(`python Tools/Assets/tests/test_import_ship_plan.py` tests that part). It has not run inside
-Unreal yet.
+(`python Tools/Assets/tests/test_import_ship_plan.py` tests that part). First real run: the
+Vanguard (`ArtSource/Ships/Vanguard`), checked afterwards in a fresh editor by
+`Tools/Tests/test_ship_import.py`. From Git Bash, run Blender with `MSYS_NO_PATHCONV=1`, or
+`--out "//Export"` is rewritten to `/Export` (C:\Export).
 
 The player character pipeline (Higgsfield rig vs. UE5 Mannequin skeleton, camera and animation
 decisions, folder layout and naming) is in

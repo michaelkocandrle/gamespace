@@ -247,7 +247,7 @@ class ManifestValidationTest(unittest.TestCase):
 
     def test_suggestions_scale_with_ship_size(self):
         s = gx.suggest_pawn_settings([[-7, -5, -1.5], [7, 5, 1.5]], [[-6.5, -5, -1.4], [6.5, 5, 1.6]], [5.0, 0.5, 0.8])
-        self.assertEqual(s["CameraBoom_TargetArmLength_cm"], 3500)
+        self.assertEqual(s["CameraBoom_TargetArmLength_cm"], 2520)
         self.assertEqual(s["LandingFootprintRadiusCm"], 500)
         self.assertEqual(s["LandingMaxGapCm"], 99)
         self.assertEqual(s["HullCollision_center_offset_ue_cm"], [0.0, 0.0, 10.0])

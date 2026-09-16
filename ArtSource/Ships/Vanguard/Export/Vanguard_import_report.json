@@ -1,0 +1,48 @@
+{
+  "manifest": "C:\\gamespace\\gamespace\\ArtSource\\Ships\\Vanguard\\Export\\Vanguard_manifest.json",
+  "ship": "Vanguard",
+  "meshes": {
+    "SM_Ship_Vanguard": [
+      "socket CameraTarget scale (100, 100, 100) reset to 1",
+      "socket Cockpit scale (100, 100, 100) reset to 1",
+      "socket Engine_L scale (100, 100, 100) reset to 1",
+      "socket Engine_R scale (100, 100, 100) reset to 1",
+      "socket Exit scale (100, 100, 100) reset to 1",
+      "socket Gear_L scale (100, 100, 100) reset to 1",
+      "socket Gear_Nose scale (100, 100, 100) reset to 1",
+      "socket Gear_R scale (100, 100, 100) reset to 1",
+      "socket Weapon_Chin scale (100, 100, 100) reset to 1",
+      "socket Weapon_L scale (100, 100, 100) reset to 1",
+      "socket Weapon_R scale (100, 100, 100) reset to 1"
+    ],
+    "SM_Ship_Vanguard_Canopy": []
+  },
+  "blueprint": {
+    "path": "/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard",
+    "applied": [
+      "hull_collision.box_extent = [877.5, 645.0, 214.3]",
+      "hull.static_mesh = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard",
+      "hull.relative_scale3d = [1.0, 1.0, 1.0]",
+      "hull.relative_location = [0.0, 0.0, 0.0]",
+      "camera_boom.target_arm_length = 3164.0",
+      "camera_boom.socket_offset_z = 436.0",
+      "camera_boom.probe_size = 50.0",
+      "camera_boom.camera_lag_max_distance = 3516.0",
+      "pawn.landing_footprint_radius_cm = 645.0",
+      "pawn.landing_max_gap_cm = 141.0",
+      "pawn.ground_contact_tolerance_cm = 21.4",
+      "pawn.heat_shake_cm = 35.2",
+      "cockpit_camera.relative_location = [352.5, 0.0, 110.72]",
+      "component Canopy = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Canopy"
+    ]
+  },
+  "planet": {
+    "collision_warmup_reach_m": 15.0,
+    "collision_min_radius_m": 88.0
+  },
+  "game_mode": {
+    "path": "/Game/Blueprints/BP_SpaceGameMode",
+    "default_pawn_class": "/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard",
+    "level": "/Game/Maps/TestSpace"
+  }
+}

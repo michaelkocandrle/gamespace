@@ -354,7 +354,7 @@ def suggest_pawn_settings(render_box, collision_box, cockpit_location_m):
         "HullCollision_BoxExtent_cm": [round(x * 50.0, 1) for x in box_size],
         "HullCollision_center_offset_ue_cm": center_offset,
         "Hull_RelativeLocation_cm": [round(-x, 2) + 0.0 for x in center_offset],
-        "CameraBoom_TargetArmLength_cm": round(max(900.0, longest_cm * 2.5), 0),
+        "CameraBoom_TargetArmLength_cm": round(max(900.0, longest_cm * 1.8), 0),
         "CameraBoom_SocketOffset_Z_cm": round(max(200.0, size[2] * 100.0), 0),
         "CameraBoom_ProbeSize_cm": round(_clamp(box_height_cm * 0.15, 25.0, 50.0), 1),
         "CameraBoom_CameraLagMaxDistance_cm": round(max(1500.0, longest_cm * 2.0), 0),
@@ -666,7 +666,7 @@ FBX_EXPORT_SETTINGS = dict(
     use_mesh_modifiers=True,
     mesh_smooth_type="FACE",          # writes smoothing groups; Unreal warns without them
     use_tspace=True,                  # tangents for normal maps baked in Blender
-    use_triangles=False,              # Unreal triangulates; keep quads for inspection
+    use_triangles=True,               # tangents need tris or quads; n-gons (bevels, text) get none otherwise
     use_custom_props=False,
     apply_unit_scale=True,
     # "All Local": the metre-to-centimetre factor goes into the exported transforms, so the file
