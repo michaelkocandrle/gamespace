@@ -39,11 +39,12 @@ git lfs install
 
 | Component     | Purpose                                                         |
 | ------------- | --------------------------------------------------------------- |
-| `ShipRoot`    | Unscaled pivot so the camera does not inherit the hull's scale   |
-| `Hull`        | `/Engine/BasicShapes/Cube` stretched to 2.0 x 1.0 x 0.35         |
+| `HullCollision` | Root. Box 200 x 100 x 35 cm, `Pawn` profile - the ship's only collision. Unscaled, so the cameras do not inherit the hull's scale |
+| `Hull`        | `/Engine/BasicShapes/Cube` stretched to 2.0 x 1.0 x 0.35, visual only |
 | `CameraBoom`  | 900 cm spring arm, no collision test, mild lag                   |
 | `ChaseCamera` | Third-person camera                                              |
 | `CockpitCamera` | Nose view at (90, 0, 15), FOV 90, inactive until toggled; hides the hull from the player's own view |
+| `EngineAudio` | Engine loop, not spatialised, started and stopped from `Tick` |
 
 ### Flight model
 
@@ -59,7 +60,22 @@ predictable and cheap to tune.
   `AngularResponsiveness`, then apply as a *local* rotation. Local rotation is what makes this
   6DOF rather than an aircraft glued to a horizon, and it avoids gimbal lock at the poles.
 - Movement is swept (`bSweepMovement`), and a blocking hit projects velocity onto the surface
-  plane so the ship slides instead of stalling.
+  plane so the ship slides instead of stalling. **A sweep only tests the root component**, which
+  is why `HullCollision` has to be the root: with a plain scene component there the ship used to
+  fly straight through the planet.
+- **Mouse steering is a virtual joystick.** Mouse movement pushes the stick
+  (`MouseSensitivity`, deflection per pixel), which springs back to centre at
+  `MouseRecenterRate`. Full turn rate at ~130 px/s of mouse movement. This keeps steering
+  independent of frame rate; turning pixels-per-frame straight into a turn rate made the ship
+  turn half as fast at 120 FPS as at 60. The turn rate itself is capped by `PitchRate` (100),
+  `YawRate` (75) and `RollRate` (150) deg/s.
+- **Engine sound** follows the controls, not the speed: main thrust counts fully, strafe and lift
+  60 %, roll 30 %. Volume and pitch spool at `EngineSpoolRate`, boost adds pitch, and the sound
+  is stopped outright below 1 % load, so a ship at rest is silent. The sound is a procedural
+  placeholder (rumble, turbine whine, exhaust hiss; seamless 4 s loop), rebuilt with
+  `python Tools/Assets/generate_engine_sound.py Intermediate/GeneratedAssets/engine_loop.wav`
+  and then `.\Tools\run_editor_python.ps1 Tools\Assets\build_ship_audio.py`. A real recording
+  can be reimported onto `/Game/Ships/Audio/SW_EngineLoop`.
 
 - **Cruise speed is set by damping, not by `MaxSpeed`.** With flight assist on, speed settles at
   `ThrustAcceleration / LinearDamping` - 4000 / 1.2 = ~33 m/s with the defaults - long before the
@@ -89,7 +105,13 @@ The pawn resolves its mapping context and actions in this order, first hit wins:
 
 1. Whatever is assigned on the Blueprint child (`Spaceship|Input` category).
 2. Assets loaded from `/Game/Input`: `IMC_Spaceship`, `IA_Thrust`, `IA_Strafe`, `IA_Lift`,
-   `IA_Roll`, `IA_Look`, `IA_ToggleCamera`, `IA_Boost`.
+   `IA_Roll`, `IA_Look`, `IA_ToggleCamera`, `IA_Boost`, plus `IMC_SpaceshipMouse` and
+   `IA_LookMouse`.
+
+The mouse has its own action and context because a mouse delta (pixels this frame) and a stick
+(a position) need different handling, and an action value does not say which key produced it.
+`IMC_SpaceshipMouse` is added one priority above `IMC_Spaceship`; Enhanced Input then skips the
+mouse mapping in `IMC_Spaceship`, so `IA_Look` only carries the gamepad stick.
 3. An equivalent set built procedurally at possession time, so the pawn flies out of the box.
 
 Step 3 logs a warning under `LogSpaceship`. It exists so the pawn is testable immediately -
@@ -199,7 +221,7 @@ Its space look is built by `Tools/Assets/build_space_scene.py` (see below).
 | ------------------ | ----- |
 | `Sun`              | Directional light, movable, intensity 8, pitch -39 / yaw 45: from behind the player's left shoulder |
 | `SkyLight`         | Movable, real-time capture, intensity 0.35. Captures the star dome, so ambient light is near zero |
-| `StarfieldSky`     | 8 km engine sphere with `M_Starfield_Sky` (unlit, *Is Sky*, star cubemap looked up by view direction) |
+| `StarfieldSky`     | 8 km engine sphere with `M_Starfield_Sky`: unlit, *Is Sky*, procedural stars plus a Milky Way glow cubemap |
 | `Planet_Veyra`     | `ACelestialBody`, radius 500 m, surface 2.5 km ahead of the start |
 | `PP_SpaceExposure` | Unbound post-process volume fixing exposure at EV100 3 |
 | `PlayerStart`      | At (0, 0, 300), facing +X towards the planet |
@@ -217,6 +239,15 @@ a sunset sky over a black ground plane, which is the opposite of space.
 **Why fixed exposure.** Auto exposure would brighten the mostly black sky until the stars bloom
 out, then darken again whenever a lit asteroid fills the view.
 
+**Why procedural stars.** A star texture cannot stay sharp: a cubemap texel is larger than a
+screen pixel, and filtering turns points into smudges. `M_Starfield_Sky` computes the stars per
+pixel in a Custom HLSL node (hashed cells on the cube faces, three layers, Gaussian points sized
+in screen pixels), so they are ~1 px points at any resolution. Only the soft Milky Way glow
+comes from a texture. What is left of the softness is TSR, the temporal anti-aliasing, which
+softens anything smaller than a pixel. Material parameters: `StarBrightness`, `StarDensity`,
+`GlowBrightness`. The sky light still captures the dome, but only for ambient light, which is
+near zero.
+
 **Why an 8 km dome.** The stars are looked up by view direction, so the dome's size does not
 change how they look; it only has to enclose everything you fly to. 8 km is verified in PIE.
 Flying more than 8 km from the origin takes you outside it.
@@ -230,21 +261,21 @@ in PIE, not in `-game`.
 Editor closed:
 
 ```
-python Tools/Assets/generate_starfield.py Intermediate/GeneratedAssets/starfield.hdr
+python Tools/Assets/generate_milky_way_glow.py Intermediate/GeneratedAssets/milky_way_glow.hdr
 .\Tools\run_editor_python.ps1 Tools\Assets\build_space_scene.py
 ```
 
 The generator runs in the system Python with numpy and is deterministic. The build script is
 safe to re-run: it rebuilds its own two materials, finds its actors by label, and imports the
-star cubemap and planet mesh only if they are missing. Brightness, exposure, planet size and
+glow cubemap and planet mesh only if they are missing. Brightness, exposure, planet size and
 position are constants at the top of `build_space_scene.py`.
 
 Assets it creates:
 
 | Asset | What |
 | ----- | ---- |
-| `Environments/Space/T_Starfield_Cube` | Procedural star field, imported from a long-lat HDR as a cubemap |
-| `Environments/Space/M_Starfield_Sky`  | Sky material, `StarBrightness` parameter |
+| `Environments/Space/T_MilkyWay_Glow_Cube` | Diffuse Milky Way band, imported from a long-lat HDR as a cubemap |
+| `Environments/Space/M_Starfield_Sky`  | Sky material: procedural stars + glow |
 | `Planets/SM_PlanetSphere`             | 65k-triangle Nanite sphere, radius 100 cm, one sphere collision |
 | `Planets/M_Planet_Test`               | Noise-based two-tone terrain with polar caps, colour parameters |
 

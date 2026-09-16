@@ -3,9 +3,12 @@
 #include "SpaceshipPawn.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/AudioComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Engine/CollisionProfile.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/StaticMesh.h"
 #include "GameFramework/PlayerController.h"
@@ -15,6 +18,7 @@
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
 #include "InputTriggers.h"
+#include "Sound/SoundBase.h"
 #include "UObject/ConstructorHelpers.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSpaceship, Log, All);
@@ -30,6 +34,9 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const LookActionPath = TEXT("/Game/Input/IA_Look.IA_Look");
 	const TCHAR* const ToggleCameraActionPath = TEXT("/Game/Input/IA_ToggleCamera.IA_ToggleCamera");
 	const TCHAR* const BoostActionPath = TEXT("/Game/Input/IA_Boost.IA_Boost");
+	const TCHAR* const MouseLookActionPath = TEXT("/Game/Input/IA_LookMouse.IA_LookMouse");
+	const TCHAR* const MouseMappingContextPath = TEXT("/Game/Input/IMC_SpaceshipMouse.IMC_SpaceshipMouse");
+	const TCHAR* const EngineLoopSoundPath = TEXT("/Game/Ships/Audio/SW_EngineLoop.SW_EngineLoop");
 
 	/** Quiet load: a missing asset is the normal case until the designer authors one. */
 	template <typename T>
@@ -49,13 +56,16 @@ ASpaceshipPawn::ASpaceshipPawn()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	ShipRoot = CreateDefaultSubobject<USceneComponent>(TEXT("ShipRoot"));
-	SetRootComponent(ShipRoot);
+	// Sized to the placeholder hull below: the 100 cm cube scaled by (2, 1, 0.35).
+	HullCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("HullCollision"));
+	HullCollision->SetBoxExtent(FVector(100.f, 50.f, 17.5f));
+	HullCollision->SetCollisionProfileName(TEXT("Pawn"));
+	HullCollision->SetSimulatePhysics(false);
+	SetRootComponent(HullCollision);
 
 	Hull = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Hull"));
-	Hull->SetupAttachment(ShipRoot);
-	Hull->SetCollisionProfileName(TEXT("Pawn"));
-	Hull->SetSimulatePhysics(false);
+	Hull->SetupAttachment(HullCollision);
+	Hull->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaceholderCube(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	if (PlaceholderCube.Succeeded())
@@ -66,7 +76,7 @@ ASpaceshipPawn::ASpaceshipPawn()
 	}
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(ShipRoot);
+	CameraBoom->SetupAttachment(HullCollision);
 	CameraBoom->TargetArmLength = 900.f;
 	CameraBoom->SocketOffset = FVector(0.f, 0.f, 200.f);
 	// The boom follows the hull, not the controller, and there is nothing in space to collide with.
@@ -79,16 +89,42 @@ ASpaceshipPawn::ASpaceshipPawn()
 	ChaseCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	ChaseCamera->bUsePawnControlRotation = false;
 
-	// On ShipRoot rather than the hull so it does not inherit the placeholder's scale. The
-	// placeholder hull ends at X = 100 cm; the hull is hidden in cockpit view (see
+	// On the unscaled root rather than the hull so it does not inherit the placeholder's scale.
+	// The placeholder hull ends at X = 100 cm; the hull is hidden in cockpit view (see
 	// SetCockpitView), so sitting just inside the nose never shows its inner faces.
 	CockpitCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CockpitCamera"));
-	CockpitCamera->SetupAttachment(ShipRoot);
+	CockpitCamera->SetupAttachment(HullCollision);
 	CockpitCamera->SetRelativeLocation(FVector(90.f, 0.f, 15.f));
 	CockpitCamera->SetFieldOfView(90.f);
 	CockpitCamera->bUsePawnControlRotation = false;
 	// The view comes from the first active camera component, so only one may be active.
 	CockpitCamera->SetAutoActivate(false);
+
+	EngineAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("EngineAudio"));
+	EngineAudio->SetupAttachment(HullCollision);
+	// Silent until the engine actually pushes; UpdateEngineAudio starts and stops it.
+	EngineAudio->SetAutoActivate(false);
+	// The player's own engine: heard the same from chase and cockpit camera, not positioned.
+	EngineAudio->bAllowSpatialization = false;
+}
+
+void ASpaceshipPawn::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (!EngineLoopSound)
+	{
+		EngineLoopSound = SpaceshipPawnDefaults::LoadOptional<USoundBase>(SpaceshipPawnDefaults::EngineLoopSoundPath);
+	}
+	if (EngineLoopSound)
+	{
+		EngineAudio->SetSound(EngineLoopSound);
+	}
+	else
+	{
+		UE_LOG(LogSpaceship, Warning, TEXT("%s has no engine sound: %s not found."),
+			*GetName(), SpaceshipPawnDefaults::EngineLoopSoundPath);
+	}
 }
 
 void ASpaceshipPawn::SetCockpitView(bool bCockpit)
@@ -142,6 +178,11 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASpaceshipPawn::HandleLook);
 	}
 
+	if (MouseLookAction)
+	{
+		Input->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &ASpaceshipPawn::HandleMouseLook);
+	}
+
 	if (ToggleCameraAction)
 	{
 		// The action carries a Pressed trigger, so Triggered fires once per key press.
@@ -156,7 +197,7 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	}
 
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (!PlayerController || !FlightMappingContext)
+	if (!PlayerController)
 	{
 		return;
 	}
@@ -164,7 +205,15 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
 		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
-		Subsystem->AddMappingContext(FlightMappingContext, MappingContextPriority);
+		if (FlightMappingContext)
+		{
+			Subsystem->AddMappingContext(FlightMappingContext, MappingContextPriority);
+		}
+		if (MouseMappingContext)
+		{
+			// One above the flight context: its mouse mapping consumes the mouse there.
+			Subsystem->AddMappingContext(MouseMappingContext, MappingContextPriority + 1);
+		}
 	}
 }
 
@@ -205,6 +254,14 @@ void ASpaceshipPawn::ResolveInputAssets()
 	{
 		BoostAction = LoadOptional<UInputAction>(BoostActionPath);
 	}
+	if (!MouseLookAction)
+	{
+		MouseLookAction = LoadOptional<UInputAction>(MouseLookActionPath);
+	}
+	if (!MouseMappingContext)
+	{
+		MouseMappingContext = LoadOptional<UInputMappingContext>(MouseMappingContextPath);
+	}
 
 	BuildProceduralInputAssets();
 }
@@ -212,7 +269,8 @@ void ASpaceshipPawn::ResolveInputAssets()
 void ASpaceshipPawn::BuildProceduralInputAssets()
 {
 	const bool bNeedsAnything = !FlightMappingContext || !ThrustAction || !StrafeAction || !LiftAction
-		|| !RollAction || !LookAction || !ToggleCameraAction || !BoostAction;
+		|| !RollAction || !LookAction || !ToggleCameraAction || !BoostAction || !MouseLookAction
+		|| !MouseMappingContext;
 	if (!bNeedsAnything)
 	{
 		return;
@@ -269,6 +327,16 @@ void ASpaceshipPawn::BuildProceduralInputAssets()
 		BoostAction = MakeAction(TEXT("IA_Boost_Runtime"), EInputActionValueType::Boolean,
 			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
 	}
+	if (!MouseLookAction)
+	{
+		MouseLookAction = MakeAction(TEXT("IA_LookMouse_Runtime"), EInputActionValueType::Axis2D,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+	}
+	if (!MouseMappingContext)
+	{
+		MouseMappingContext = NewObject<UInputMappingContext>(this, FName(TEXT("IMC_SpaceshipMouse_Runtime")));
+		MouseMappingContext->MapKey(MouseLookAction, EKeys::Mouse2D);
+	}
 
 	// A context the designer supplied is left alone even if it is missing mappings: silently
 	// bolting extra keys onto an authored asset would be worse than a context that does nothing.
@@ -299,7 +367,7 @@ void ASpaceshipPawn::BuildProceduralInputAssets()
 		{ RollAction,   EKeys::Q,                     true  },
 		{ RollAction,   EKeys::Gamepad_RightShoulder, false },
 		{ RollAction,   EKeys::Gamepad_LeftShoulder,  true  },
-		{ LookAction,   EKeys::Mouse2D,               false },
+		// The mouse is mapped in MouseMappingContext, not here.
 		{ LookAction,   EKeys::Gamepad_Right2D,       false },
 		{ ToggleCameraAction, EKeys::C,               false },
 		{ BoostAction,  EKeys::LeftShift,             false },
@@ -346,6 +414,12 @@ void ASpaceshipPawn::HandleLook(const FInputActionValue& Value)
 	LookInput = Value.Get<FVector2D>();
 }
 
+void ASpaceshipPawn::HandleMouseLook(const FInputActionValue& Value)
+{
+	// Accumulated: every pixel moved between two ticks counts, however events are batched.
+	MouseLookDelta += Value.Get<FVector2D>();
+}
+
 void ASpaceshipPawn::HandleToggleCamera(const FInputActionValue& /*Value*/)
 {
 	SetCockpitView(!bCockpitView);
@@ -372,14 +446,27 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 	// Rotate first so this frame's thrust is applied along the heading the player just commanded.
 	UpdateAngularMotion(DeltaSeconds);
 	UpdateLinearMotion(DeltaSeconds);
+	UpdateEngineAudio(DeltaSeconds);
 }
 
 void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 {
-	// A mouse delta is unbounded, so clamp the scaled value into the same [-1, 1] range a stick
-	// produces. Both then mean the same thing: a fraction of the maximum rotation rate.
-	const float PitchCommand = FMath::Clamp(LookInput.Y * LookSensitivity, -1.f, 1.f) * (bInvertPitch ? -1.f : 1.f);
-	const float YawCommand = FMath::Clamp(LookInput.X * LookSensitivity, -1.f, 1.f);
+	// Mouse as a virtual joystick. Turning the per-frame delta straight into a turn rate (as
+	// before) made steering frame-rate dependent: at 120 FPS each frame sees half the pixels, so
+	// the same hand movement turned half as fast. Pushing a spring-centred stick instead makes
+	// the steady-state deflection depend on mouse speed per second, not per frame.
+	MouseStick *= FMath::Exp(-MouseRecenterRate * DeltaSeconds);
+	MouseStick += MouseLookDelta * MouseSensitivity;
+	MouseStick.X = FMath::Clamp(MouseStick.X, -1., 1.);
+	MouseStick.Y = FMath::Clamp(MouseStick.Y, -1., 1.);
+	MouseLookDelta = FVector2D::ZeroVector;
+
+	// Stick and mouse are both a fraction of the maximum rotation rate now, so they simply add.
+	const FVector2D Command(
+		FMath::Clamp(MouseStick.X + LookInput.X, -1., 1.),
+		FMath::Clamp(MouseStick.Y + LookInput.Y, -1., 1.));
+	const float PitchCommand = Command.Y * (bInvertPitch ? -1.f : 1.f);
+	const float YawCommand = Command.X;
 
 	const FVector TargetRates(
 		RollInput * RollRate,
@@ -395,8 +482,7 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 		AngularVelocity.Z * DeltaSeconds,
 		AngularVelocity.X * DeltaSeconds));
 
-	// Mouse input arrives as a per-frame delta: consume it so the ship stops turning when the
-	// mouse does. Held keys and gamepad sticks re-fire Triggered every frame, so they are unaffected.
+	// A deflected stick re-fires Triggered every frame; clearing means a released stick stops.
 	LookInput = FVector2D::ZeroVector;
 }
 
@@ -436,13 +522,62 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		return;
 	}
 
+	const FVector Delta = LinearVelocity * DeltaSeconds;
 	FHitResult Hit;
-	AddActorWorldOffset(LinearVelocity * DeltaSeconds, bSweepMovement, &Hit);
+	AddActorWorldOffset(Delta, bSweepMovement, &Hit);
 
 	if (Hit.bBlockingHit)
 	{
 		// Drop the component of velocity pointing into the surface so the ship slides along it
 		// instead of pressing into it and stalling.
 		LinearVelocity = FVector::VectorPlaneProject(LinearVelocity, Hit.Normal);
+
+		// Spend the rest of this frame's movement sliding, so touching a surface does not cost
+		// a frame of motion and stutter.
+		const FVector Slide = FVector::VectorPlaneProject(Delta * (1.f - Hit.Time), Hit.Normal);
+		if (!Slide.IsNearlyZero())
+		{
+			AddActorWorldOffset(Slide, true);
+		}
 	}
+}
+
+void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
+{
+	if (!EngineAudio->GetSound())
+	{
+		return;
+	}
+
+	// How hard the engines work: main thrust counts fully, manoeuvring thrusters partly.
+	const float TargetLoad = FMath::Clamp(FMath::Max3(
+		FMath::Abs(ThrustInput),
+		0.6f * FMath::Max(FMath::Abs(StrafeInput), FMath::Abs(LiftInput)),
+		0.3f * FMath::Abs(RollInput)), 0.f, 1.f);
+	const float TargetBoost = (bBoostHeld && ThrustInput > 0.f) ? 1.f : 0.f;
+
+	// Eased rather than snapped, so the engine spools up and down instead of clicking.
+	EngineLoad = FMath::FInterpTo(EngineLoad, TargetLoad, DeltaSeconds, EngineSpoolRate);
+	EngineBoostBlend = FMath::FInterpTo(EngineBoostBlend, TargetBoost, DeltaSeconds, EngineSpoolRate);
+
+	// Below this the sound is inaudible anyway; stopping it makes idle truly silent.
+	const float SilenceThreshold = 0.01f;
+	if (EngineLoad < SilenceThreshold)
+	{
+		if (EngineAudio->IsPlaying())
+		{
+			EngineAudio->Stop();
+		}
+		return;
+	}
+
+	if (!EngineAudio->IsPlaying())
+	{
+		EngineAudio->Play();
+	}
+
+	const float Load = EngineLoad + 0.35f * EngineBoostBlend;
+	EngineAudio->SetVolumeMultiplier(EngineVolume * FMath::Min(Load, 1.f));
+	EngineAudio->SetPitchMultiplier(
+		FMath::Lerp(EngineMinPitch, EngineMaxPitch, EngineLoad) + EngineBoostPitch * EngineBoostBlend);
 }

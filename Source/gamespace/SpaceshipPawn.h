@@ -6,10 +6,13 @@
 #include "GameFramework/Pawn.h"
 #include "SpaceshipPawn.generated.h"
 
+class UAudioComponent;
+class UBoxComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputComponent;
 class UInputMappingContext;
+class USoundBase;
 class USpringArmComponent;
 class UStaticMeshComponent;
 struct FInputActionValue;
@@ -53,6 +56,7 @@ public:
 	ASpaceshipPawn();
 
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	/** Current world-space velocity in cm/s. */
@@ -82,11 +86,15 @@ protected:
 	// Components
 	// ---------------------------------------------------------------------------------------
 
-	/** Unscaled pivot. The hull carries a non-uniform scale, so the camera must not hang off it. */
+	/**
+	 * Root and the only collision of the ship. Swept movement tests the root component alone, so
+	 * the collision shape must be the root: with a plain scene component there, the ship flew
+	 * straight through everything. Unscaled, so children do not inherit the hull scale.
+	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
-	TObjectPtr<USceneComponent> ShipRoot;
+	TObjectPtr<UBoxComponent> HullCollision;
 
-	/** Placeholder cube standing in for the real ship mesh. */
+	/** Placeholder cube standing in for the real ship mesh. Visual only, no collision. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UStaticMeshComponent> Hull;
 
@@ -99,6 +107,10 @@ protected:
 	/** First-person view from the nose. Inactive until the player toggles to it. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UCameraComponent> CockpitCamera;
+
+	/** Engine loop. Started and stopped by UpdateEngineAudio, never auto-activated. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UAudioComponent> EngineAudio;
 
 	// ---------------------------------------------------------------------------------------
 	// Enhanced Input
@@ -127,9 +139,23 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> RollAction;
 
-	/** Axis2D: X steers yaw, Y steers pitch. */
+	/** Axis2D, stick values in [-1, 1]: X steers yaw, Y steers pitch. Gamepad right stick. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> LookAction;
+
+	/**
+	 * Axis2D, raw mouse movement in pixels. Separate from LookAction because a mouse delta and a
+	 * stick deflection mean different things: movement during one frame versus a position.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> MouseLookAction;
+
+	/**
+	 * Maps the mouse to MouseLookAction. Added one priority above FlightMappingContext, so it
+	 * consumes the mouse there, where IA_Look still maps it.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputMappingContext> MouseMappingContext;
 
 	/** Digital, with a Pressed trigger so a held key toggles once. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
@@ -182,33 +208,68 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "0.0"))
 	float OverspeedDecay = 1.5f;
 
-	/** Maximum pitch rate, deg/s. */
+	/** Maximum pitch rate, deg/s. The hard ceiling on turning, however fast the mouse moves. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.0"))
-	float PitchRate = 60.f;
+	float PitchRate = 100.f;
 
 	/** Maximum yaw rate, deg/s. Lower than pitch, as on a real aircraft. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.0"))
-	float YawRate = 45.f;
+	float YawRate = 75.f;
 
 	/** Maximum roll rate, deg/s. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.0"))
-	float RollRate = 110.f;
+	float RollRate = 150.f;
 
 	/** How fast the ship converges on the commanded rotation rate. Lower feels heavier. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.1"))
-	float AngularResponsiveness = 6.f;
+	float AngularResponsiveness = 8.f;
 
 	/**
-	 * Scales the raw look axis. Mouse deltas are pixels per frame, hence the small value.
-	 * Higher reaches full turn rate with less mouse movement; the turn rate itself is still
-	 * capped by PitchRate / YawRate.
+	 * Mouse steering is a virtual joystick: moving the mouse pushes the stick, and the stick
+	 * springs back to centre at MouseRecenterRate. This value is stick deflection per pixel.
+	 *
+	 * Moving the mouse steadily at MouseRecenterRate / MouseSensitivity pixels per second holds
+	 * the stick fully over, i.e. turns at PitchRate / YawRate. The defaults reach full rate at
+	 * roughly 130 px/s, independent of frame rate.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.0"))
-	float LookSensitivity = 0.15f;
+	float MouseSensitivity = 0.09f;
+
+	/** How quickly the virtual stick returns to centre once the mouse stops, per second. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.1"))
+	float MouseRecenterRate = 12.f;
 
 	/** Flip the pitch axis for players who fly stick-style. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling")
 	bool bInvertPitch = false;
+
+	// ---------------------------------------------------------------------------------------
+	// Engine audio
+	// ---------------------------------------------------------------------------------------
+
+	/** Looping engine sound. Loaded from /Game/Ships/Audio/SW_EngineLoop when left empty. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
+	TObjectPtr<USoundBase> EngineLoopSound;
+
+	/** Volume at full engine load. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
+	float EngineVolume = 0.8f;
+
+	/** Pitch just above idle, as the engine starts to push. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.1"))
+	float EngineMinPitch = 0.7f;
+
+	/** Pitch at full thrust without boost. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.1"))
+	float EngineMaxPitch = 1.2f;
+
+	/** Pitch added on top while boosting forward. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
+	float EngineBoostPitch = 0.35f;
+
+	/** How fast engine volume and pitch follow the controls, per second. Lower spools slower. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.1"))
+	float EngineSpoolRate = 5.f;
 
 	// ---------------------------------------------------------------------------------------
 	// Runtime state
@@ -226,6 +287,7 @@ private:
 	void HandleAxisTriggered(const FInputActionValue& Value, ESpaceshipAxis Axis);
 	void HandleAxisCompleted(const FInputActionValue& Value, ESpaceshipAxis Axis);
 	void HandleLook(const FInputActionValue& Value);
+	void HandleMouseLook(const FInputActionValue& Value);
 	void HandleToggleCamera(const FInputActionValue& Value);
 	void HandleBoost(const FInputActionValue& Value);
 	void HandleBoostCompleted(const FInputActionValue& Value);
@@ -236,6 +298,7 @@ private:
 
 	void UpdateAngularMotion(float DeltaSeconds);
 	void UpdateLinearMotion(float DeltaSeconds);
+	void UpdateEngineAudio(float DeltaSeconds);
 
 	float& AxisInput(ESpaceshipAxis Axis);
 
@@ -244,8 +307,18 @@ private:
 	float LiftInput = 0.f;
 	float RollInput = 0.f;
 
-	/** X yaw, Y pitch. Consumed and cleared every tick because mouse input is a per-frame delta. */
+	/** Stick look, X yaw, Y pitch. Cleared every tick; a deflected stick re-fires Triggered. */
 	FVector2D LookInput = FVector2D::ZeroVector;
+
+	/** Mouse movement in pixels since the last tick. */
+	FVector2D MouseLookDelta = FVector2D::ZeroVector;
+
+	/** The mouse virtual joystick, each axis in [-1, 1]. */
+	FVector2D MouseStick = FVector2D::ZeroVector;
+
+	/** Smoothed engine load and boost blend, each in [0, 1], driving the engine sound. */
+	float EngineLoad = 0.f;
+	float EngineBoostBlend = 0.f;
 
 	bool bBoostHeld = false;
 	bool bCockpitView = false;
