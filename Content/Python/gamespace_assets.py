@@ -64,6 +64,7 @@ import unreal
 __all__ = [
     "AssetExistsError",
     "Map",
+    "add_mappings",
     "curve_table",
     "data_asset",
     "data_table",
@@ -174,27 +175,33 @@ def existing(path):
 _VALUE_TYPE_ALIASES = {"BOOL": "BOOLEAN", "DIGITAL": "BOOLEAN", "FLOAT": "AXIS1D", "VECTOR2D": "AXIS2D"}
 
 
-def input_action(path, value_type, accumulation=None, properties=None, on_exists="error"):
+def input_action(path, value_type, accumulation=None, triggers=None, properties=None, on_exists="error"):
     """Creates a UInputAction.
 
     value_type:   "bool" | "axis1d" | "axis2d" | "axis3d" (or unreal.InputActionValueType)
     accumulation: None (engine default, TakeHighestAbsoluteValue) | "cumulative" |
                   "take_highest_absolute_value". Use cumulative on 1D axes with opposed keys.
+    triggers:     action-level triggers, applying to every key mapped to it, same form as on
+                  Map: ["Pressed"] or [("Hold", {"hold_time_threshold": 0.5})].
     properties:   any other editable UInputAction property, e.g. {"consume_input": False}
     """
+    value_type = _enum(unreal.InputActionValueType, value_type, _VALUE_TYPE_ALIASES)
+    if accumulation is not None:
+        accumulation = _enum(unreal.InputActionAccumulationBehavior, accumulation)
+    triggers = list(triggers or [])
+    _validate_instanced("InputTrigger", triggers)
+
     asset = _prepare(path, on_exists)
     if asset is not None and on_exists == "skip":
         return asset
     if asset is None:
         asset = _create(path, unreal.InputAction, unreal.InputAction_Factory())
 
-    asset.set_editor_property(
-        "value_type", _enum(unreal.InputActionValueType, value_type, _VALUE_TYPE_ALIASES)
-    )
+    asset.set_editor_property("value_type", value_type)
     if accumulation is not None:
-        asset.set_editor_property(
-            "accumulation_behavior", _enum(unreal.InputActionAccumulationBehavior, accumulation)
-        )
+        asset.set_editor_property("accumulation_behavior", accumulation)
+    if triggers or on_exists == "update":
+        asset.set_editor_property("triggers", [_instanced("InputTrigger", t, asset) for t in triggers])
     _set_properties(asset, properties)
     return _save(asset)
 
@@ -227,12 +234,19 @@ class Map(object):
         self.triggers = list(triggers or [])
 
 
+def _validate_instanced(prefix, specs):
+    for item in specs:
+        name = item if isinstance(item, str) else item[0]
+        if getattr(unreal, prefix + name, None) is None:
+            raise ValueError("unknown %s type %r (no unreal.%s%s)" % (prefix, name, prefix, name))
+
+
 def _instanced(prefix, spec, outer):
     name, properties = (spec, None) if isinstance(spec, str) else spec
     cls = getattr(unreal, prefix + name, None)
     if cls is None:
         raise ValueError("unknown %s type %r (no unreal.%s%s)" % (prefix, name, prefix, name))
-    # The IMC must be the outer: these are Instanced subobjects and serialise inside it.
+    # The owning asset must be the outer: these are Instanced subobjects and serialise inside it.
     obj = unreal.new_object(cls, outer=outer)
     _set_properties(obj, properties)
     return obj
@@ -251,11 +265,8 @@ def _validate_mapping(spec):
     _key(spec.key)
     if spec.swizzle:
         _enum(unreal.InputAxisSwizzle, spec.swizzle)
-    for prefix, specs in (("InputModifier", spec.modifiers), ("InputTrigger", spec.triggers)):
-        for item in specs:
-            name = item if isinstance(item, str) else item[0]
-            if getattr(unreal, prefix + name, None) is None:
-                raise ValueError("unknown %s type %r (no unreal.%s%s)" % (prefix, name, prefix, name))
+    _validate_instanced("InputModifier", spec.modifiers)
+    _validate_instanced("InputTrigger", spec.triggers)
 
 
 def _build_mapping(spec, imc):
@@ -304,6 +315,70 @@ def mapping_context(path, mappings, description=None, on_exists="error"):
     if description is not None:
         asset.set_editor_property("context_description", description)
     return _save(asset)
+
+
+def _snapshot(mapping):
+    """Identity of one mapping, down to the exact modifier/trigger objects it references."""
+    action = mapping.get_editor_property("action")
+    return (
+        action.get_path_name() if action else None,
+        str(mapping.get_editor_property("key").get_editor_property("key_name")),
+        tuple(m.get_path_name() for m in mapping.get_editor_property("modifiers")),
+        tuple(t.get_path_name() for t in mapping.get_editor_property("triggers")),
+    )
+
+
+def add_mappings(path, mappings):
+    """Appends mappings to an EXISTING mapping context, leaving every current mapping as is.
+
+    This is the safe way to extend a hand-authored context. A Map whose action and key are
+    already mapped is skipped rather than duplicated, so re-running a script is harmless.
+    Before saving, the original mappings are compared against a snapshot - including the
+    identity of their modifier and trigger objects - and the save is refused on any drift.
+
+    Returns the number of mappings actually added.
+    """
+    for spec in mappings:
+        if not isinstance(spec, Map):
+            raise TypeError("mappings must be Map instances, got %r" % (spec,))
+        _validate_mapping(spec)
+
+    asset = existing(path)
+    if not isinstance(asset, unreal.InputMappingContext):
+        raise TypeError("%s is a %s, not an InputMappingContext" % (path, asset.get_class().get_name()))
+
+    data = asset.get_editor_property("default_key_mappings")
+    current = list(data.get_editor_property("mappings"))
+    before = [_snapshot(m) for m in current]
+    mapped = set((a, k) for a, k, _, _ in before)
+
+    added = []
+    for spec in mappings:
+        pair = (spec.action.get_path_name(), spec.key)
+        if pair in mapped:
+            unreal.log("gamespace_assets: %s already maps %s to %s, skipped" % (path, spec.key, spec.action.get_name()))
+            continue
+        mapped.add(pair)
+        added.append(_build_mapping(spec, asset))
+
+    if not added:
+        return 0
+
+    data.set_editor_property("mappings", current + added)
+    asset.set_editor_property("default_key_mappings", data)
+
+    after = [_snapshot(m) for m in asset.get_editor_property("default_key_mappings").get_editor_property("mappings")]
+    if after[: len(before)] != before or len(after) != len(before) + len(added):
+        # Nothing has been written to disk yet. Reload from disk so an open editor cannot save
+        # the half-applied edit later; raise whether or not that succeeds.
+        try:
+            unreal.EditorLoadingAndSavingUtils.reload_packages([asset.get_package()])
+        except Exception as exc:
+            unreal.log_error("gamespace_assets: could not reload %s, do not save it: %s" % (path, exc))
+        raise RuntimeError("existing mappings in %s changed while appending; nothing was saved" % path)
+
+    _save(asset)
+    return len(added)
 
 
 # ---------------------------------------------------------------------------------------
