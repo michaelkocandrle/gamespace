@@ -14,6 +14,7 @@
 #include "InputActionValue.h"
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
+#include "InputTriggers.h"
 #include "UObject/ConstructorHelpers.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSpaceship, Log, All);
@@ -27,6 +28,8 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const LiftActionPath = TEXT("/Game/Input/IA_Lift.IA_Lift");
 	const TCHAR* const RollActionPath = TEXT("/Game/Input/IA_Roll.IA_Roll");
 	const TCHAR* const LookActionPath = TEXT("/Game/Input/IA_Look.IA_Look");
+	const TCHAR* const ToggleCameraActionPath = TEXT("/Game/Input/IA_ToggleCamera.IA_ToggleCamera");
+	const TCHAR* const BoostActionPath = TEXT("/Game/Input/IA_Boost.IA_Boost");
 
 	/** Quiet load: a missing asset is the normal case until the designer authors one. */
 	template <typename T>
@@ -75,6 +78,26 @@ ASpaceshipPawn::ASpaceshipPawn()
 	ChaseCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ChaseCamera"));
 	ChaseCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	ChaseCamera->bUsePawnControlRotation = false;
+
+	// On ShipRoot rather than the hull so it does not inherit the placeholder's scale. The
+	// placeholder hull ends at X = 100 cm; the hull is hidden in cockpit view (see
+	// SetCockpitView), so sitting just inside the nose never shows its inner faces.
+	CockpitCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CockpitCamera"));
+	CockpitCamera->SetupAttachment(ShipRoot);
+	CockpitCamera->SetRelativeLocation(FVector(90.f, 0.f, 15.f));
+	CockpitCamera->SetFieldOfView(90.f);
+	CockpitCamera->bUsePawnControlRotation = false;
+	// The view comes from the first active camera component, so only one may be active.
+	CockpitCamera->SetAutoActivate(false);
+}
+
+void ASpaceshipPawn::SetCockpitView(bool bCockpit)
+{
+	bCockpitView = bCockpit;
+	ChaseCamera->SetActive(!bCockpit);
+	CockpitCamera->SetActive(bCockpit);
+	// Only hidden from this pawn's own view: other players and shadows still see the hull.
+	Hull->SetOwnerNoSee(bCockpit);
 }
 
 // -------------------------------------------------------------------------------------------
@@ -119,6 +142,19 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASpaceshipPawn::HandleLook);
 	}
 
+	if (ToggleCameraAction)
+	{
+		// The action carries a Pressed trigger, so Triggered fires once per key press.
+		Input->BindAction(ToggleCameraAction, ETriggerEvent::Triggered, this, &ASpaceshipPawn::HandleToggleCamera);
+	}
+
+	if (BoostAction)
+	{
+		Input->BindAction(BoostAction, ETriggerEvent::Triggered, this, &ASpaceshipPawn::HandleBoost);
+		Input->BindAction(BoostAction, ETriggerEvent::Completed, this, &ASpaceshipPawn::HandleBoostCompleted);
+		Input->BindAction(BoostAction, ETriggerEvent::Canceled, this, &ASpaceshipPawn::HandleBoostCompleted);
+	}
+
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (!PlayerController || !FlightMappingContext)
 	{
@@ -161,14 +197,22 @@ void ASpaceshipPawn::ResolveInputAssets()
 	{
 		LookAction = LoadOptional<UInputAction>(LookActionPath);
 	}
+	if (!ToggleCameraAction)
+	{
+		ToggleCameraAction = LoadOptional<UInputAction>(ToggleCameraActionPath);
+	}
+	if (!BoostAction)
+	{
+		BoostAction = LoadOptional<UInputAction>(BoostActionPath);
+	}
 
 	BuildProceduralInputAssets();
 }
 
 void ASpaceshipPawn::BuildProceduralInputAssets()
 {
-	const bool bNeedsAnything =
-		!FlightMappingContext || !ThrustAction || !StrafeAction || !LiftAction || !RollAction || !LookAction;
+	const bool bNeedsAnything = !FlightMappingContext || !ThrustAction || !StrafeAction || !LiftAction
+		|| !RollAction || !LookAction || !ToggleCameraAction || !BoostAction;
 	if (!bNeedsAnything)
 	{
 		return;
@@ -214,6 +258,17 @@ void ASpaceshipPawn::BuildProceduralInputAssets()
 		LookAction = MakeAction(TEXT("IA_Look_Runtime"), EInputActionValueType::Axis2D,
 			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
 	}
+	if (!ToggleCameraAction)
+	{
+		ToggleCameraAction = MakeAction(TEXT("IA_ToggleCamera_Runtime"), EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+		ToggleCameraAction->Triggers.Add(NewObject<UInputTriggerPressed>(ToggleCameraAction));
+	}
+	if (!BoostAction)
+	{
+		BoostAction = MakeAction(TEXT("IA_Boost_Runtime"), EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+	}
 
 	// A context the designer supplied is left alone even if it is missing mappings: silently
 	// bolting extra keys onto an authored asset would be worse than a context that does nothing.
@@ -246,6 +301,8 @@ void ASpaceshipPawn::BuildProceduralInputAssets()
 		{ RollAction,   EKeys::Gamepad_LeftShoulder,  true  },
 		{ LookAction,   EKeys::Mouse2D,               false },
 		{ LookAction,   EKeys::Gamepad_Right2D,       false },
+		{ ToggleCameraAction, EKeys::C,               false },
+		{ BoostAction,  EKeys::LeftShift,             false },
 	};
 
 	for (const FDefaultMapping& Mapping : DefaultMappings)
@@ -289,6 +346,21 @@ void ASpaceshipPawn::HandleLook(const FInputActionValue& Value)
 	LookInput = Value.Get<FVector2D>();
 }
 
+void ASpaceshipPawn::HandleToggleCamera(const FInputActionValue& /*Value*/)
+{
+	SetCockpitView(!bCockpitView);
+}
+
+void ASpaceshipPawn::HandleBoost(const FInputActionValue& /*Value*/)
+{
+	bBoostHeld = true;
+}
+
+void ASpaceshipPawn::HandleBoostCompleted(const FInputActionValue& /*Value*/)
+{
+	bBoostHeld = false;
+}
+
 // -------------------------------------------------------------------------------------------
 // Flight model
 // -------------------------------------------------------------------------------------------
@@ -330,8 +402,12 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 
 void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 {
+	// Boost only drives the main engine forwards; reverse, strafe and lift stay at normal power.
+	const float BoostFactor = bBoostHeld ? BoostMultiplier : 1.f;
+	const float ThrustFactor = ThrustInput > 0.f ? BoostFactor : 1.f;
+
 	const FVector LocalAcceleration(
-		ThrustInput * ThrustAcceleration,
+		ThrustInput * ThrustAcceleration * ThrustFactor,
 		StrafeInput * StrafeAcceleration,
 		LiftInput * LiftAcceleration);
 
@@ -343,7 +419,16 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		LinearVelocity -= LinearVelocity * FMath::Min(LinearDamping * DeltaSeconds, 1.f);
 	}
 
-	LinearVelocity = LinearVelocity.GetClampedToMaxSize(MaxSpeed);
+	const float SpeedCap = MaxSpeed * BoostFactor;
+	const float Speed = LinearVelocity.Size();
+	if (Speed > SpeedCap)
+	{
+		// Above the cap: while accelerating this is an ordinary clamp, but right after boost
+		// is released the excess bleeds off instead of snapping to the unboosted cap.
+		const float Excess = (Speed - SpeedCap) * FMath::Min(OverspeedDecay * DeltaSeconds, 1.f);
+		const float Target = bBoostHeld ? SpeedCap : Speed - Excess;
+		LinearVelocity *= FMath::Max(Target, SpeedCap) / Speed;
+	}
 
 	if (LinearVelocity.IsNearlyZero())
 	{

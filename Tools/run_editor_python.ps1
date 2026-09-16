@@ -52,6 +52,15 @@ Select-String -Path $log -Pattern "^Traceback|^\s+File |^\w+Error:" | ForEach-Ob
 
 $failed = Select-String -Path $log -Pattern "LogPython: Error|^Traceback" -Quiet
 Write-Host "Full log: $log"
+
+# No Python errors can also mean the script never started, e.g. when the editor aborts on a
+# game module that fails to load. Only a log showing the script actually ran counts as OK.
+if (-not (Select-String -Path $log -Pattern "LogPythonScriptCommandlet: Display: Running Python script" -Quiet)) {
+    Select-String -Path $log -Pattern "could not be loaded|Failed to load '.*gamespace|Fatal error" |
+        Select-Object -First 5 | ForEach-Object { $_.Line }
+    Write-Host "RESULT: FAILED - the script never ran (editor did not finish starting)" -ForegroundColor Red
+    exit 1
+}
 if ($failed) {
     Write-Host "RESULT: FAILED" -ForegroundColor Red
     exit 1

@@ -43,6 +43,7 @@ git lfs install
 | `Hull`        | `/Engine/BasicShapes/Cube` stretched to 2.0 x 1.0 x 0.35         |
 | `CameraBoom`  | 900 cm spring arm, no collision test, mild lag                   |
 | `ChaseCamera` | Third-person camera                                              |
+| `CockpitCamera` | Nose view at (90, 0, 15), FOV 90, inactive until toggled; hides the hull from the player's own view |
 
 ### Flight model
 
@@ -60,6 +61,13 @@ predictable and cheap to tune.
 - Movement is swept (`bSweepMovement`), and a blocking hit projects velocity onto the surface
   plane so the ship slides instead of stalling.
 
+- **Cruise speed is set by damping, not by `MaxSpeed`.** With flight assist on, speed settles at
+  `ThrustAcceleration / LinearDamping` - 4000 / 1.2 = ~33 m/s with the defaults - long before the
+  120 m/s cap. Tune those two to change how fast the ship feels; `MaxSpeed` is only a safety cap.
+- **Boost** (`BoostMultiplier`, default 2.5) multiplies forward thrust and the speed cap while
+  held, so cruise speed goes to ~83 m/s. Reverse, strafe and lift are unaffected. On release,
+  speed above the normal cap bleeds off at `OverspeedDecay` instead of snapping down.
+
 All tuning values are `EditAnywhere` under the `Spaceship|Flight` and `Spaceship|Handling`
 categories.
 
@@ -72,6 +80,8 @@ categories.
 | Lift         | `Space` / `Left Ctrl`      | -                    |
 | Roll         | `E` / `Q`                  | Shoulder buttons     |
 | Pitch / yaw  | Mouse                      | Right stick          |
+| Boost (hold) | `Left Shift`               | -                    |
+| Camera       | `C` (chase / cockpit)      | -                    |
 
 ### Enhanced Input
 
@@ -79,7 +89,7 @@ The pawn resolves its mapping context and actions in this order, first hit wins:
 
 1. Whatever is assigned on the Blueprint child (`Spaceship|Input` category).
 2. Assets loaded from `/Game/Input`: `IMC_Spaceship`, `IA_Thrust`, `IA_Strafe`, `IA_Lift`,
-   `IA_Roll`, `IA_Look`.
+   `IA_Roll`, `IA_Look`, `IA_ToggleCamera`, `IA_Boost`.
 3. An equivalent set built procedurally at possession time, so the pawn flies out of the box.
 
 Step 3 logs a warning under `LogSpaceship`. It exists so the pawn is testable immediately -
@@ -138,6 +148,10 @@ open, enable the *Python Editor Script Plugin* and use **Tools → Execute Pytho
 `"error"` (default, raises), `"skip"` (returns the asset unmodified) or `"update"`
 (explicit opt-in; for mapping contexts and data tables it *replaces* the contents).
 
+To extend an existing mapping context without replacing it, use `ga.add_mappings()`: it
+appends, skips mappings that already exist, and refuses to save if any original mapping changed.
+`Tools/Assets/add_camera_and_boost_input.py` is the worked example.
+
 ### What still needs the editor
 
 | Asset / feature | Why |
@@ -161,6 +175,12 @@ GlobalDefaultGameMode=/Script/gamespace.SpaceGameMode
 Any level without a World Settings override therefore spawns a flyable ship at its
 `PlayerStart`. A Blueprint child of `SpaceGameMode` can still override the pawn per level.
 
+## SpaceDebugHUD
+
+`AHUD` subclass set as `HUDClass` on `SpaceGameMode`. Draws speed (m/s and km/h), throttle
+(signed %, the raw `IA_Thrust` value), boost state and active camera as plain canvas text in
+the top-left corner. A tuning aid, not UMG - replace it when a real HUD exists.
+
 ## TestSpace
 
 `Content/Maps/TestSpace` - the test level, and the editor/game startup map. Non-partitioned,
@@ -179,6 +199,14 @@ fly past, an empty sky gives no sense of motion whatsoever. Delete them once rea
 
 There is no starfield yet: `SkyAtmosphere` renders an atmosphere, not stars. That wants an HDRI
 cubemap on the sky light or a dedicated skybox material.
+
+### Smart App Control
+
+This machine runs Windows Smart App Control, which judges every freshly built unsigned DLL by
+reputation. Occasionally it blocks `UnrealEditor-gamespace.dll` (Code Integrity event 3077),
+and the editor reports that *the game module 'gamespace' could not be loaded*. So far a retry
+has loaded the same file fine. `run_editor_python.ps1` reports this as a failure rather than
+silently succeeding.
 
 ## Testing in the editor
 

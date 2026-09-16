@@ -63,6 +63,20 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
 	float GetSpeed() const { return LinearVelocity.Size(); }
 
+	/** Raw thrust input, -1 full reverse to +1 full forward. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
+	float GetThrottle() const { return ThrustInput; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
+	bool IsBoosting() const { return bBoostHeld; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
+	bool IsCockpitView() const { return bCockpitView; }
+
+	/** Switches between the chase camera and the cockpit camera. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
+	void SetCockpitView(bool bCockpit);
+
 protected:
 	// ---------------------------------------------------------------------------------------
 	// Components
@@ -81,6 +95,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UCameraComponent> ChaseCamera;
+
+	/** First-person view from the nose. Inactive until the player toggles to it. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UCameraComponent> CockpitCamera;
 
 	// ---------------------------------------------------------------------------------------
 	// Enhanced Input
@@ -113,6 +131,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> LookAction;
 
+	/** Digital, with a Pressed trigger so a held key toggles once. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> ToggleCameraAction;
+
+	/** Digital, held. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> BoostAction;
+
 	// ---------------------------------------------------------------------------------------
 	// Flight model tuning
 	// ---------------------------------------------------------------------------------------
@@ -140,6 +166,21 @@ protected:
 	/** Sweep the hull along the movement path instead of tunnelling through geometry. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight")
 	bool bSweepMovement = true;
+
+	/**
+	 * While boost is held, forward thrust acceleration and MaxSpeed are multiplied by this.
+	 * With flight assist on, cruise speed settles at ThrustAcceleration / LinearDamping, so the
+	 * multiplier scales cruise speed directly: 2.5 takes the defaults from ~33 to ~83 m/s.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "1.0"))
+	float BoostMultiplier = 2.5f;
+
+	/**
+	 * How quickly speed above the current cap bleeds off once boost is released, as a fraction
+	 * of the excess per second. Avoids a hard velocity snap at the moment Shift comes up.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "0.0"))
+	float OverspeedDecay = 1.5f;
 
 	/** Maximum pitch rate, deg/s. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.0"))
@@ -181,6 +222,9 @@ private:
 	void HandleAxisTriggered(const FInputActionValue& Value, ESpaceshipAxis Axis);
 	void HandleAxisCompleted(const FInputActionValue& Value, ESpaceshipAxis Axis);
 	void HandleLook(const FInputActionValue& Value);
+	void HandleToggleCamera(const FInputActionValue& Value);
+	void HandleBoost(const FInputActionValue& Value);
+	void HandleBoostCompleted(const FInputActionValue& Value);
 
 	/** Fills in any unassigned input asset: first from /Game/Input, then procedurally. */
 	void ResolveInputAssets();
@@ -198,4 +242,7 @@ private:
 
 	/** X yaw, Y pitch. Consumed and cleared every tick because mouse input is a per-frame delta. */
 	FVector2D LookInput = FVector2D::ZeroVector;
+
+	bool bBoostHeld = false;
+	bool bCockpitView = false;
 };
