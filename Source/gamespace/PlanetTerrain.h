@@ -26,8 +26,8 @@ struct FPlanetTerrainSettings
 	int32 Octaves = 8;
 	double Lacunarity = 2.0;
 	double Gain = 0.5;
-	/** Moves the noise sampling point so different seeds give different planets. */
-	FVector SeedOffset = FVector::ZeroVector;
+	/** Different seeds give different planets (mixed into the noise lattice hash). */
+	uint32 Seed = 1;
 	/**
 	 * Finite-difference step for normals. Fixed, not per-LOD, so a point gets exactly the same
 	 * normal whichever LOD level renders it - otherwise lighting shows seams between levels.
@@ -102,8 +102,25 @@ namespace PlanetTerrain
 	/** Inverse of FaceDirection. */
 	GAMESPACE_API void DirectionToFace(const FVector& Dir, int32& OutFace, double& OutU, double& OutV);
 
+	/**
+	 * 3D gradient noise (improved Perlin) entirely in double precision, roughly in [-1, 1].
+	 *
+	 * Replaces FMath::PerlinNoise3D, which works in float: at the high octaves a large planet needs,
+	 * the sample coordinates get big enough for float rounding to show up as terracing. The lattice
+	 * is hashed instead of using a 256-entry permutation table, so it never repeats.
+	 */
+	GAMESPACE_API double GradientNoise3D(const FVector& Point, uint32 Seed);
+
 	/** Terrain height above the base radius, in cm, for a unit direction. */
 	GAMESPACE_API double Height(const FPlanetTerrainSettings& Settings, const FVector& Dir);
+
+	/**
+	 * Realistic bound (octaves combined as root of sum of squares) on how far the terrain inside a tile at Depth can rise or fall relative to the
+	 * height at its centre. Large octaves barely change across a small tile, so this shrinks with
+	 * depth - unlike the planet-wide MaxHeight, which is kilometres on a mountainous planet and would
+	 * make every small tile look near and split.
+	 */
+	GAMESPACE_API double HeightVariationWithinTileCm(const FPlanetTerrainSettings& Settings, int32 Depth);
 
 	/** Planet-local surface point for a unit direction. */
 	GAMESPACE_API FVector SurfacePoint(const FPlanetTerrainSettings& Settings, const FVector& Dir);
@@ -114,7 +131,10 @@ namespace PlanetTerrain
 	/** Nominal edge length of a tile at Depth, along the surface, in cm. */
 	GAMESPACE_API double TileSizeCm(const FPlanetTerrainSettings& Settings, int32 Depth);
 
-	/** Cheap conservative bounds without sampling noise: used every frame for LOD decisions. */
+	/**
+	 * Bounds for LOD decisions: centre on the real surface (one height sample) and a radius from
+	 * the tile's extent plus HeightVariationWithinTileCm. Callers cache the result per tile.
+	 */
 	GAMESPACE_API void EstimateTileBounds(const FPlanetTerrainSettings& Settings, const FQuadTileId& Id, FVector& OutCenter, double& OutRadius);
 
 	/**

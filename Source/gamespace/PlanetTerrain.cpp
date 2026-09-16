@@ -60,22 +60,116 @@ namespace PlanetTerrain
 		OutV = FMath::Atan(B) / (UE_DOUBLE_HALF_PI * 0.5);
 	}
 
+	namespace
+	{
+		uint64 HashLattice(int64 X, int64 Y, int64 Z, uint32 Seed)
+		{
+			uint64 H = uint64(X) * 0x9E3779B185EBCA87ull;
+			H ^= uint64(Y) * 0xC2B2AE3D27D4EB4Full + (H << 6) + (H >> 2);
+			H ^= uint64(Z) * 0x165667B19E3779F9ull + (H << 6) + (H >> 2);
+			H ^= uint64(Seed) * 0x27D4EB2F165667C5ull;
+			// splitmix64 finaliser: every input bit affects every output bit.
+			H ^= H >> 30;
+			H *= 0xBF58476D1CE4E5B9ull;
+			H ^= H >> 27;
+			H *= 0x94D049BB133111EBull;
+			H ^= H >> 31;
+			return H;
+		}
+
+		/** Dot product with one of Perlin's 12 cube-edge gradients. */
+		double Gradient(uint64 Hash, double X, double Y, double Z)
+		{
+			switch (Hash % 12)
+			{
+			case 0: return X + Y;
+			case 1: return -X + Y;
+			case 2: return X - Y;
+			case 3: return -X - Y;
+			case 4: return X + Z;
+			case 5: return -X + Z;
+			case 6: return X - Z;
+			case 7: return -X - Z;
+			case 8: return Y + Z;
+			case 9: return -Y + Z;
+			case 10: return Y - Z;
+			default: return -Y - Z;
+			}
+		}
+
+		double Fade(double T)
+		{
+			return T * T * T * (T * (T * 6.0 - 15.0) + 10.0);
+		}
+	}
+
+	double GradientNoise3D(const FVector& Point, uint32 Seed)
+	{
+		const double FloorX = FMath::Floor(Point.X);
+		const double FloorY = FMath::Floor(Point.Y);
+		const double FloorZ = FMath::Floor(Point.Z);
+		const int64 IX = int64(FloorX);
+		const int64 IY = int64(FloorY);
+		const int64 IZ = int64(FloorZ);
+		const double X = Point.X - FloorX;
+		const double Y = Point.Y - FloorY;
+		const double Z = Point.Z - FloorZ;
+		const double U = Fade(X);
+		const double V = Fade(Y);
+		const double W = Fade(Z);
+
+		auto Corner = [&](int32 DX, int32 DY, int32 DZ)
+		{
+			return Gradient(HashLattice(IX + DX, IY + DY, IZ + DZ, Seed), X - DX, Y - DY, Z - DZ);
+		};
+
+		const double X00 = FMath::Lerp(Corner(0, 0, 0), Corner(1, 0, 0), U);
+		const double X10 = FMath::Lerp(Corner(0, 1, 0), Corner(1, 1, 0), U);
+		const double X01 = FMath::Lerp(Corner(0, 0, 1), Corner(1, 0, 1), U);
+		const double X11 = FMath::Lerp(Corner(0, 1, 1), Corner(1, 1, 1), U);
+		return FMath::Lerp(FMath::Lerp(X00, X10, V), FMath::Lerp(X01, X11, V), W);
+	}
+
 	double Height(const FPlanetTerrainSettings& Settings, const FVector& Dir)
 	{
 		// Sample 3D noise on the sphere itself: no seams, no pole distortion. The input is scaled
 		// so one unit of noise space is one base wavelength along the surface.
-		const FVector Point = Dir * (Settings.RadiusCm / Settings.BaseWavelengthCm) + Settings.SeedOffset;
+		const FVector Point = Dir * (Settings.RadiusCm / Settings.BaseWavelengthCm);
 
 		double Sum = 0.0;
 		double Amplitude = 1.0;
 		double Frequency = 1.0;
 		for (int32 Octave = 0; Octave < Settings.Octaves; ++Octave)
 		{
-			Sum += Amplitude * FMath::PerlinNoise3D(Point * Frequency);
+			// A different offset and seed per octave, so octaves don't line up on the same lattice.
+			const FVector Offset(Octave * 31.4159, Octave * -17.1234, Octave * 11.7310);
+			Sum += Amplitude * GradientNoise3D(Point * Frequency + Offset, Settings.Seed + uint32(Octave) * 1013u);
 			Frequency *= Settings.Lacunarity;
 			Amplitude *= Settings.Gain;
 		}
 		return Settings.AmplitudeCm * Sum;
+	}
+
+	double HeightVariationWithinTileCm(const FPlanetTerrainSettings& Settings, int32 Depth)
+	{
+		// Centre-to-corner distance of the tile along the surface.
+		const double Reach = TileSizeCm(Settings, Depth) * 0.75;
+		double SumSquares = 0.0;
+		double Amplitude = Settings.AmplitudeCm;
+		double Wavelength = Settings.BaseWavelengthCm;
+		for (int32 Octave = 0; Octave < Settings.Octaves; ++Octave)
+		{
+			// Gradient noise changes by at most ~3 amplitudes per wavelength, and never by more
+			// than its full range of 2 amplitudes.
+			SumSquares += FMath::Square(FMath::Min(2.0 * Amplitude, 3.0 * Amplitude * Reach / Wavelength));
+			Amplitude *= Settings.Gain;
+			Wavelength /= Settings.Lacunarity;
+		}
+		// Octaves are independent, so their worst cases practically never line up; adding them
+		// linearly made small tiles look several times taller than they are and doubled the tile
+		// count. The root of the sum of squares is a realistic bound. An underestimate here only
+		// makes a tile split a little later - it never opens holes.
+		return FMath::Sqrt(SumSquares);
 	}
 
 	FVector SurfacePoint(const FPlanetTerrainSettings& Settings, const FVector& Dir)
@@ -109,17 +203,19 @@ namespace PlanetTerrain
 		double VMin;
 		double Size;
 		Id.FaceBounds(UMin, VMin, Size);
-		OutCenter = FaceDirection(Id.Face, UMin + Size * 0.5, VMin + Size * 0.5) * Settings.RadiusCm;
+		const FVector CenterDir = FaceDirection(Id.Face, UMin + Size * 0.5, VMin + Size * 0.5);
+		const double SurfaceRadius = Settings.RadiusCm + Height(Settings, CenterDir);
+		OutCenter = CenterDir * SurfaceRadius;
 
-		// Corners on the base sphere bound the curved patch around a centre that is also on it;
-		// the terrain can then add or remove at most MaxHeight in any direction.
+		// Corners on the sphere through the centre bound the curved patch; the terrain can then
+		// only deviate from the centre height by the tile's own height variation.
 		double MaxCornerSq = 0.0;
 		for (int32 Corner = 0; Corner < 4; ++Corner)
 		{
-			const FVector P = FaceDirection(Id.Face, UMin + Size * (Corner & 1), VMin + Size * ((Corner >> 1) & 1)) * Settings.RadiusCm;
+			const FVector P = FaceDirection(Id.Face, UMin + Size * (Corner & 1), VMin + Size * ((Corner >> 1) & 1)) * SurfaceRadius;
 			MaxCornerSq = FMath::Max(MaxCornerSq, FVector::DistSquared(P, OutCenter));
 		}
-		OutRadius = FMath::Sqrt(MaxCornerSq) + Settings.MaxHeightCm();
+		OutRadius = FMath::Sqrt(MaxCornerSq) + HeightVariationWithinTileCm(Settings, Id.Depth);
 	}
 
 	namespace

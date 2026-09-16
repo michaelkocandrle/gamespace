@@ -40,13 +40,13 @@ GLOW_BRIGHTNESS = 0.06
 # farthest body that should be visible: anything beyond it is hidden behind the dome.
 SKY_DOME_RADIUS_KM = 1000.0
 
-# Planet: radius 500 m, surface ~2.5 km from PlayerStart. At the ~33 m/s cruise speed that is
-# roughly 75 s of flight, ~30 s with boost, and the planet starts at ~19 degrees across - clearly
-# visible, with plenty of room to grow.
+# Planet: radius 25 km, centre 45 km straight ahead of PlayerStart (which faces +X), so the ship
+# starts 20 km above sea level - above the 12 km atmosphere, in "orbit". The planet fills ~67
+# degrees of view. Descent at the 300 m/s boost cap takes a bit over a minute to the atmosphere
+# edge. The sky dome (1000 km) stays far outside everything here.
 PLANET_NAME = "Veyra"
-PLANET_RADIUS_CM = 500_00
-# Ahead of PlayerStart (which faces +X), a little right and up so the ship does not hide it.
-PLANET_LOCATION_CM = (3000_00, 400_00, 250_00)
+PLANET_RADIUS_CM = 25_000_00
+PLANET_LOCATION_CM = (45_000_00, 0, 0)
 
 # Sun from behind the player's left shoulder, so the planet is seen about three-quarters lit.
 SUN_PITCH, SUN_YAW = -39.0, 45.0
@@ -305,12 +305,56 @@ def build_starfield_material(glow_cube):
     link(glow, glow_scaled, "A", "RGB")
     link(glow_brightness, glow_scaled, "B")
 
-    emissive = node(m, unreal.MaterialExpressionAdd, -150, 0)
-    link(stars, emissive, "A")
-    link(glow_scaled, emissive, "B")
-    output(emissive, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    space = node(m, unreal.MaterialExpressionAdd, -150, 0)
+    link(stars, space, "A")
+    link(glow_scaled, space, "B")
+
+    # Atmosphere: ASkyDome sets these every frame from the planet nearest the camera.
+    blend = node(m, unreal.MaterialExpressionCustom, 100, 0,
+                 code=ATMOSPHERE_HLSL, description="Atmosphere blend",
+                 output_type=unreal.CustomMaterialOutputType.CMOT_FLOAT3)
+    names = ("Space", "Dir", "Up", "Zenith", "Horizon", "Brightness", "Amount")
+    custom_inputs = []
+    for name in names:
+        custom_pin = unreal.CustomInput()
+        custom_pin.set_editor_property("input_name", name)
+        custom_inputs.append(custom_pin)
+    blend.set_editor_property("inputs", custom_inputs)
+    up = node(m, unreal.MaterialExpressionVectorParameter, -150, 250, parameter_name="PlanetUp",
+              default_value=unreal.LinearColor(0.0, 0.0, 1.0, 0.0))
+    zenith = node(m, unreal.MaterialExpressionVectorParameter, -150, 400, parameter_name="SkyZenithColor",
+                  default_value=unreal.LinearColor(0.16, 0.32, 0.62, 1.0))
+    horizon = node(m, unreal.MaterialExpressionVectorParameter, -150, 550, parameter_name="SkyHorizonColor",
+                   default_value=unreal.LinearColor(0.62, 0.70, 0.80, 1.0))
+    sky_brightness = node(m, unreal.MaterialExpressionScalarParameter, -150, 700,
+                          parameter_name="SkyBrightness", default_value=6.0)
+    amount = node(m, unreal.MaterialExpressionScalarParameter, -150, 800,
+                  parameter_name="AtmosphereAmount", default_value=0.0)
+    link(space, blend, "Space")
+    link(direction, blend, "Dir")
+    link(up, blend, "Up")
+    link(zenith, blend, "Zenith")
+    link(horizon, blend, "Horizon")
+    link(sky_brightness, blend, "Brightness")
+    link(amount, blend, "Amount")
+    output(blend, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     finish(m)
     return m
+
+
+# Sky colour by elevation above the local horizon, blended over the stars. Stars fade faster than
+# the sky brightens (squared), as they do in a real dusk: the thinnest haze already hides them.
+# Below the horizon (seen only in gaps, e.g. over a cliff) the colour darkens.
+ATMOSPHERE_HLSL = r"""
+float3 d = normalize(Dir);
+float3 up = normalize(Up.xyz);
+float mu = dot(d, up);
+float3 sky = lerp(Horizon.rgb, Zenith.rgb, sqrt(saturate(mu)));
+sky *= lerp(1.0, 0.35, saturate(-mu * 3.0));
+float a = saturate(Amount);
+float keep = (1.0 - a) * (1.0 - a);
+return Space * keep + sky * Brightness * a;
+"""
 
 
 def pin(expr, wanted):
@@ -339,9 +383,15 @@ def build_planet_material():
 
     world = node(m, unreal.MaterialExpressionWorldPosition, -2000, 0)
     tile_origin = node(m, unreal.MaterialExpressionObjectPositionWS, -2000, 150)
-    in_tile = node(m, unreal.MaterialExpressionSubtract, -1800, 0)       # small, single precision is fine
-    link(world, in_tile, pin(in_tile, "A"))
-    link(tile_origin, in_tile, pin(in_tile, "B"))
+    in_tile_world = node(m, unreal.MaterialExpressionSubtract, -1900, 0)  # small, single precision is fine
+    link(world, in_tile_world, pin(in_tile_world, "A"))
+    link(tile_origin, in_tile_world, pin(in_tile_world, "B"))
+    # Into the tile's (= the planet's) local frame, so colours stay on the ground when the planet
+    # actor is rotated. Tile components carry no rotation of their own.
+    in_tile = node(m, unreal.MaterialExpressionTransform, -1800, 0,
+                   transform_source_type=unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_WORLD,
+                   transform_type=unreal.MaterialVectorCoordTransform.TRANSFORM_LOCAL)
+    link(in_tile_world, in_tile, "")
     cx = primitive_data(m, "TileCenterX", 0, -2000, 300)
     cy = primitive_data(m, "TileCenterY", 1, -2000, 400)
     cz = primitive_data(m, "TileCenterZ", 2, -2000, 500)
@@ -544,8 +594,8 @@ def main():
     start = unreal.Vector(0.0, 0.0, 300.0)
     centre = unreal.Vector(*PLANET_LOCATION_CM)
     surface_m = ((centre - start).length() - PLANET_RADIUS_CM) / 100.0
-    log("planet surface %.0f m from PlayerStart: %.0f s at 33 m/s, %.0f s at 83 m/s boost" % (
-        surface_m, surface_m / 33.3, surface_m / 83.3))
+    log("sea level %.0f m below PlayerStart: %.0f s at 120 m/s, %.0f s at 300 m/s boost" % (
+        surface_m, surface_m / 120.0, surface_m / 300.0))
 
 
 main()

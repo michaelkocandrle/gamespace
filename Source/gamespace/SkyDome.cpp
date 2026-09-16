@@ -3,10 +3,12 @@
 #include "SkyDome.h"
 
 #include "Camera/PlayerCameraManager.h"
+#include "CelestialBody.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
 #include "Kismet/GameplayStatics.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -44,12 +46,37 @@ void ASkyDome::OnConstruction(const FTransform& Transform)
 	SetActorScale3D(FVector(DomeRadiusKm * 100000.0 / SphereMeshRadiusCm));
 }
 
+void ASkyDome::BeginPlay()
+{
+	Super::BeginPlay();
+	SkyMaterial = Dome->CreateDynamicMaterialInstance(0);
+}
+
 void ASkyDome::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (const APlayerCameraManager* Camera = UGameplayStatics::GetPlayerCameraManager(this, 0))
+	const APlayerCameraManager* Camera = UGameplayStatics::GetPlayerCameraManager(this, 0);
+	if (!Camera)
 	{
-		SetActorLocation(Camera->GetCameraLocation());
+		return;
+	}
+	const FVector CameraLocation = Camera->GetCameraLocation();
+	SetActorLocation(CameraLocation);
+
+	if (SkyMaterial)
+	{
+		FCelestialEnvironment Environment;
+		bool bHasEnvironment = false;
+		ACelestialBody::FindNearest(GetWorld(), CameraLocation, &Environment, &bHasEnvironment);
+		const float Amount = bHasEnvironment ? Environment.SkyAmount : 0.f;
+		SkyMaterial->SetScalarParameterValue(TEXT("AtmosphereAmount"), Amount);
+		if (Amount > 0.f)
+		{
+			SkyMaterial->SetVectorParameterValue(TEXT("PlanetUp"), FLinearColor(FVector3f(Environment.Up)));
+			SkyMaterial->SetVectorParameterValue(TEXT("SkyZenithColor"), Environment.SkyZenithColor);
+			SkyMaterial->SetVectorParameterValue(TEXT("SkyHorizonColor"), Environment.SkyHorizonColor);
+			SkyMaterial->SetScalarParameterValue(TEXT("SkyBrightness"), Environment.SkyBrightness);
+		}
 	}
 }

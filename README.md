@@ -53,8 +53,17 @@ predictable and cheap to tune.
 
 - Thrust, strafe and lift are accelerations applied along the hull's local axes and accumulated
   into `LinearVelocity` (world space, cm/s).
-- `LinearDamping` bleeds velocity off each second. This is the "flight assist" of Elite-style
-  flight models - **set it to 0 for true Newtonian drift**.
+- **Environment (L3).** Every tick the ship samples the nearest `ACelestialBody`
+  (`SampleEnvironment`). Everything blends smoothly with altitude:
+  - **Space** (above the atmosphere): no drag, no gravity - true Newtonian drift
+    (`SpaceLinearDamping` 0). The ship keeps flying until you brake with S.
+  - **Atmosphere**: drag `LinearDamping` (0.4/s) plus `QuadraticDrag` (4e-5 per cm, grows with
+    speed squared), both multiplied by air density (0 at the top, 1 at sea level), and gravity
+    along the local down (`GravityScale`).
+  - At sea level that gives ~62 m/s cruise at full thrust, ~116 m/s with boost, ~13 m/s falling
+    with the engines off. `ComputeEnvironmentAcceleration` is the exact formula.
+  - **Entry heat** (`Spaceship|Entry`): density x (speed / 100 m/s)^3, from `HeatOnset` to
+    `HeatFull`, smoothed; shakes the camera (`HeatShakeCm`) and shows on the HUD.
 - `MaxSpeed` is a hard cap.
 - Pitch, yaw and roll drive a target rate that `AngularVelocity` eases towards over
   `AngularResponsiveness`, then apply as a *local* rotation. Local rotation is what makes this
@@ -80,11 +89,10 @@ predictable and cheap to tune.
   and then `.\Tools\run_editor_python.ps1 Tools\Assets\build_ship_audio.py`. A real recording
   can be reimported onto `/Game/Ships/Audio/SW_EngineLoop`.
 
-- **Cruise speed is set by damping, not by `MaxSpeed`.** With flight assist on, speed settles at
-  `ThrustAcceleration / LinearDamping` - 4000 / 1.2 = ~33 m/s with the defaults - long before the
-  120 m/s cap. Tune those two to change how fast the ship feels; `MaxSpeed` is only a safety cap.
+- **Speed**: in space `MaxSpeed` (120 m/s, 300 m/s with boost) is the only limit; in the
+  atmosphere drag sets cruise speed (see above).
 - **Boost** (`BoostMultiplier`, default 2.5) multiplies forward thrust and the speed cap while
-  held, so cruise speed goes to ~83 m/s. Reverse, strafe and lift are unaffected. On release,
+  held. Reverse, strafe and lift are unaffected. On release,
   speed above the normal cap bleeds off at `OverspeedDecay` instead of snapping down.
 
 All tuning values are `EditAnywhere` under the `Spaceship|Flight` and `Spaceship|Handling`
@@ -206,6 +214,10 @@ Any level without a World Settings override therefore spawns a flyable ship at i
 (signed %, the raw `IA_Thrust` value), boost state and active camera as plain canvas text in
 the top-left corner. A tuning aid, not UMG - replace it when a real HUD exists.
 
+The `FLIGHT` line shows the regime (`ORBIT` / `ATMOSPHERE` / `SURFACE`, or `DEEP SPACE` with no
+body around), altitude above the terrain (AGL) and above sea level (ASL), air density in %,
+gravity, and `HEAT` in % during a hot entry (the line turns orange-red).
+
 The `TARGET` line shows the nearest `ACelestialBody`: its name, the distance to its surface, and
 the time to reach it at the current closing speed (`--:--` when not approaching).
 
@@ -258,36 +270,58 @@ also capped at 15 m, since at orbital speeds it would otherwise trail kilometres
 station): a `Body` static mesh component and a `DisplayName`. `GetSurfaceDistance()` measures
 to the mesh's bounding sphere - exact for spheres, an underestimate for elongated shapes.
 
-## QuadSpherePlanet (L2 terrain)
+`SampleEnvironment(Location)` returns an `FCelestialEnvironment`: altitude above terrain and sea
+level, local up, air density, gravity, sky colours and amount, and the flight regime
+(`ORBIT` / `ATMOSPHERE` / `SURFACE`). The base class has none; `AQuadSpherePlanet` does.
+`ACelestialBody::FindNearest` is what the ship, the sky dome and the HUD use.
+
+## QuadSpherePlanet (terrain L2, atmosphere L3)
 
 `Source/gamespace/QuadSpherePlanet.h`, `PlanetTerrain.h` - `AQuadSpherePlanet`, an
 `ACelestialBody` whose surface is a quad-sphere: six cube faces projected onto the sphere
 (equi-angular mapping), each a quadtree of `UProceduralMeshComponent` tiles.
 
-- **Height**: fBm of `FMath::PerlinNoise3D` sampled on the unit sphere (amplitude 12 m, largest
-  features 200 m, 8 octaves). Normals come from the height field, not the mesh, so they match
-  across LOD levels.
-- **LOD**: a tile splits when the camera is within `LodDistanceFactor` (3) tile sizes of its
-  bounds, merges with 15 % hysteresis. Finest tiles ~2.5 m (depth 8 on Veyra), 32x32 cells.
+- **Height**: fBm of `PlanetTerrain::GradientNoise3D` - improved Perlin noise entirely in double
+  precision, with a hashed (never repeating) lattice - sampled on the unit sphere. Veyra: radius
+  25 km, amplitude 800 m, largest features 8 km, 12 octaves (smallest ~4 m); relief up to about
+  +/-1.6 km, typically +/-260 m. Normals come from the height field, so they match across LODs.
+- **LOD**: a tile splits when the camera is within `LodDistanceFactor` (1.5) tile sizes of its
+  bounds, merges with 15 % hysteresis; 48x48 cells, finest tiles ~10 m (`LeafTileSizeM` 16),
+  depth 12. Tile bounds use the height at the tile centre plus how much the terrain can vary
+  inside a tile of that size (octaves combined as root of sum of squares), cached per node - not
+  the planet-wide maximum height, which on a mountainous planet made every tile look near.
+  Tiles below the horizon (behind a sphere under the lowest terrain) are not split.
+- **Tile counts** (headless, `CountLodTilesFrom`, descending over the start point): 72 at 20 km,
+  183 at 5 km, 309 at 1 km, 510 at 200 m, 714 at 30 m, 750 at 5 m (~3.5 M triangles). The L2
+  tuning (32 cells, factor 3, 4 m leaves) would need 1983 tiles at 5 m on this planet.
 - **No holes / pops / cracks**: parents stay visible until all four children are built (and
   children until the parent is); vertices carry their parent-grid position in UV1/UV2 and the
-  material geomorphs towards it with camera distance; skirts hang under tile edges.
+  material geomorphs towards it with camera distance; skirts (8 % of the tile size) hang under
+  tile edges.
 - **Precision**: each tile component sits at the tile centre (double transform); vertices are
   relative to it, so float mesh data only holds tile-sized values.
 - **Threads**: tiles build on the thread pool; component creation is capped per frame by count
   and time budget (`UploadBudgetMs`), cache eviction by `MaxEvictionsPerFrame`, and LOD
   selection only reruns when the camera moved or tiles changed.
-- **Collision**: separate invisible collision tiles (~49 m, 32 cells) only within
-  `CollisionRadiusM` (60 m) of the ship, so the body count - and origin rebase cost - stays
-  small. The inherited `Body` is a hidden sphere just under the lowest possible terrain as a
-  safety net. `GetSurfaceDistance` uses the exact height field, so TARGET/ETA stay correct.
-- **Debug**: HUD `TERRAIN` line; `space.TerrainDebugLOD 1` tints tiles by depth;
+- **Collision**: separate invisible collision tiles (32 cells) around the ship. Radius
+  `CollisionMinRadiusM` (60 m) + speed x `CollisionLookaheadSeconds` (2.5 s), up to 2 km; tile
+  size radius / 2, at least 64 m, so there are always ~25-50 bodies. When the size changes, the
+  old tiles stay until the new set is built. The inherited `Body` is a hidden sphere just under
+  the lowest possible terrain as a safety net. `GetSurfaceDistance` uses the exact height field.
+- **Atmosphere and gravity** (`Planet|Atmosphere`): `AtmosphereHeightKm` 12, exponential density
+  with `AtmosphereScaleHeightKm` 3 (reaching exactly 0 at the top); gravity `SurfaceGravity`
+  6 m/s^2, inverse square, faded in from 0 at the top to full at 40 % of the height; sky colour
+  amount rises faster than density (18 % at 8 km, 53 % at 5 km, 99 % at 1 km). Regime `SURFACE`
+  below `SurfaceRegimeAltitudeM` (500 m) above the terrain.
+- **Debug**: HUD `FLIGHT` and `TERRAIN` lines; `space.TerrainDebugLOD 1` tints tiles by depth;
   `space.TerrainFreezeLOD 1` freezes LOD updates.
 
-Measured in PIE (editor, before the last round of optimisations): ~89 fps from orbit, ~66 fps
-at 30 m with ~1000 visible tiles, ~54 fps flying at 83 m/s 20 m above the surface; single
-hitches up to 67-117 ms while streaming. The upload budget, gradual eviction, LOD gating and
-the 60 m collision radius came after and are not measured yet.
+L2 measurements (500 m planet, PIE): ~89 fps from orbit, ~66 fps at 30 m with ~1000 visible
+tiles, ~54 fps flying 20 m above the surface. The 25 km planet is not measured in PIE yet.
+
+Headless checks: `.\Tools\run_editor_python.ps1 Tools\Tests\test_planet_l3.py` - noise
+determinism, range and smoothness, tile counts per altitude, atmosphere curves, and simulated
+descents with the ship's real drag/gravity/heat code.
 
 When measuring in an editor that is not in the foreground, pass
 `-ini:EditorSettings:[/Script/UnrealEd.EditorPerformanceSettings]:bThrottleCPUWhenNotForeground=False`,
@@ -303,7 +337,7 @@ Its space look is built by `Tools/Assets/build_space_scene.py` (see below).
 | `Sun`              | Directional light, movable, intensity 8, pitch -39 / yaw 45: from behind the player's left shoulder |
 | `SkyLight`         | Movable, real-time capture, intensity 0.35. Captures the star dome, so ambient light is near zero |
 | `StarfieldSky`     | `ASkyDome`: 1000 km sphere that follows the camera, with `M_Starfield_Sky`: unlit, *Is Sky*, procedural stars plus a Milky Way glow cubemap |
-| `Planet_Veyra`     | `AQuadSpherePlanet`, radius 500 m, surface 2.5 km ahead of the start |
+| `Planet_Veyra`     | `AQuadSpherePlanet`, radius 25 km, centre 45 km ahead of the start (start is 20 km above sea level, 8 km above the atmosphere) |
 | `PP_SpaceExposure` | Unbound post-process volume fixing exposure at EV100 3 |
 | `PlayerStart`      | At (0, 0, 300), facing +X towards the planet |
 | `Asteroid_00-15`   | Scaled cubes scattered 30-260 m out |
@@ -311,8 +345,9 @@ Its space look is built by `Tools/Assets/build_space_scene.py` (see below).
 The asteroids are placeholder reference geometry, not a design decision. Without something to
 fly past, an empty sky gives no sense of motion whatsoever. Delete them once real props exist.
 
-**Distances.** Cruise speed is ~33 m/s, so the planet surface is ~76 s away, ~30 s with boost.
-It starts at ~19 degrees across in the 90 degree view.
+**Distances.** In space the ship accelerates to 120 m/s (300 m/s with boost). Simulated boost
+dive straight down: atmosphere after ~28 s, entry heat between ~8 and ~3 km, ground after ~3.5
+min if the throttle is released at 3 km. The planet fills ~67 degrees of the 90 degree view.
 
 **Why no SkyAtmosphere.** It simulates an Earth-like atmosphere with the player at sea level:
 a sunset sky over a black ground plane, which is the opposite of space.
@@ -333,7 +368,14 @@ near zero.
 position and size do not change how they look. A fixed dome could be flown out of; `ASkyDome`
 re-centres on the camera every frame, so the sky works at any distance and across rebases
 (verified 20 km out after a rebase). Its radius (`DomeRadiusKm`, 1000) must exceed the distance
-to the farthest body that should be visible, because anything beyond it is hidden.
+to the farthest body that should be visible, because anything beyond it is hidden. 1000 km
+is plenty: Veyra is 45 km away and its horizon, even from the start, is under 40 km.
+
+**Atmosphere in the sky.** `ASkyDome` samples the environment at the camera each frame and sets
+`AtmosphereAmount`, `PlanetUp`, `SkyZenithColor`, `SkyHorizonColor` and `SkyBrightness` on a
+dynamic instance of `M_Starfield_Sky`. The material blends a horizon-to-zenith gradient over the
+stars; stars fade with the square of the remaining space. The sky does not know where the sun is
+yet: the night side is blue too.
 
 **Checking visuals headlessly.** A standalone `-game` run of uncooked content renders newly
 created materials with the default material, even with their shaders compiled. Judge the look
@@ -365,16 +407,10 @@ Assets it creates:
 
 ### Smart App Control
 
-This machine runs Windows Smart App Control, which judges every freshly built unsigned DLL by
-reputation. Occasionally it blocks `UnrealEditor-gamespace.dll` (Code Integrity event 3077),
-and the editor reports that *the game module 'gamespace' could not be loaded*. So far a retry
-has loaded the same file fine. `run_editor_python.ps1` reports this as a failure rather than
-silently succeeding.
-
-**It also blocks any change to `gamespace.Build.cs`.** UBT compiles the build rules into
-`Intermediate/Build/BuildRules/gamespaceModuleRules.dll`, and a newly compiled version is refused
-(0x800711C7, "An Application Control policy has blocked this file") on every retry. The
-unchanged original still loads. Until that is resolved, no module dependency can be added.
+Smart App Control used to block freshly built DLLs and any change to `gamespace.Build.cs`. The
+user has since turned it off, so module dependencies can be added again (ProceduralMeshComponent
+was the first). If a build or editor start ever fails with Code Integrity event 3077 or
+0x800711C7, that is the cause.
 
 ## Testing in the editor
 

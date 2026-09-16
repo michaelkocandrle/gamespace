@@ -22,8 +22,9 @@ namespace
 			return TEXT("n/a");
 		}
 		const FQuadSpherePlanetStats& S = It->GetTerrainStats();
-		return FString::Printf(TEXT("%d visible / %d built, %d building, depth %d/%d, collision %d, LOD %.2f ms"),
-			S.VisibleTiles, S.CachedTiles, S.PendingBuilds, S.MaxVisibleDepth, S.MaxDepth, S.CollisionTiles, S.SelectionMs);
+		return FString::Printf(TEXT("%d visible / %d built, %d building, depth %d/%d, collision %d (r %.0f m, depth %d), LOD %.2f ms"),
+			S.VisibleTiles, S.CachedTiles, S.PendingBuilds, S.MaxVisibleDepth, S.MaxDepth, S.CollisionTiles,
+			S.CollisionRadiusCm / 100.0, S.CollisionDepth, S.SelectionMs);
 	}
 
 	/** "ORIGIN" readout: where the world origin is and how far the ship is from it. */
@@ -69,6 +70,30 @@ namespace
 		return Metres < 1000.0
 			? FString::Printf(TEXT("%.0f m"), Metres)
 			: FString::Printf(TEXT("%.2f km"), Metres / 1000.0);
+	}
+
+	/** "FLIGHT" readout: regime, altitude, air density, gravity and entry heat at the ship. */
+	FString DescribeFlight(const ASpaceshipPawn& Ship, FLinearColor& OutColor)
+	{
+		if (!Ship.HasEnvironment())
+		{
+			OutColor = FLinearColor(0.6f, 0.6f, 0.6f);
+			return TEXT("DEEP SPACE");
+		}
+		const FCelestialEnvironment& E = Ship.GetEnvironment();
+		const TCHAR* Regime = E.Regime == EFlightRegime::Orbit ? TEXT("ORBIT")
+			: E.Regime == EFlightRegime::Atmosphere ? TEXT("ATMOSPHERE") : TEXT("SURFACE");
+		OutColor = E.Regime == EFlightRegime::Orbit ? FLinearColor(0.6f, 0.8f, 1.f)
+			: E.Regime == EFlightRegime::Atmosphere ? FLinearColor(0.5f, 1.f, 1.f) : FLinearColor(1.f, 0.85f, 0.4f);
+		FString Text = FString::Printf(TEXT("%s   alt %s AGL / %s ASL   air %3.0f %%   g %.2f m/s2"),
+			Regime, *FormatDistance(E.AltitudeAboveTerrainCm), *FormatDistance(E.AltitudeAboveSeaLevelCm),
+			E.AtmosphereDensity * 100.f, E.GravityCmS2 / 100.0);
+		if (Ship.GetHeat() > 0.02f)
+		{
+			Text += FString::Printf(TEXT("   HEAT %3.0f %%"), Ship.GetHeat() * 100.f);
+			OutColor = FMath::Lerp(OutColor, FLinearColor(1.f, 0.3f, 0.1f), FMath::Min(1.f, Ship.GetHeat() * 2.f));
+		}
+		return Text;
 	}
 
 	/** "TARGET" readout for the nearest celestial body: name, surface distance, time to reach it. */
@@ -132,12 +157,16 @@ void ASpaceDebugHUD::DrawHUD()
 		FLinearColor Color;
 	};
 
+	FLinearColor FlightColor;
+	const FString Flight = DescribeFlight(*Ship, FlightColor);
+
 	const FLine Lines[] = {
 		{ TEXT("SPEED"), FString::Printf(TEXT("%6.1f m/s   %5.0f km/h"), SpeedMetres, SpeedMetres * 3.6f), FLinearColor::White },
 		{ TEXT("THROTTLE"), FString::Printf(TEXT("%+4.0f %%"), Ship->GetThrottle() * 100.f), FLinearColor::White },
 		{ TEXT("BOOST"), Ship->IsBoosting() ? TEXT("ON") : TEXT("off"),
 			Ship->IsBoosting() ? FLinearColor(1.f, 0.55f, 0.1f) : FLinearColor(0.6f, 0.6f, 0.6f) },
 		{ TEXT("CAMERA"), Ship->IsCockpitView() ? TEXT("Cockpit") : TEXT("Chase"), FLinearColor::White },
+		{ TEXT("FLIGHT"), Flight, FlightColor },
 		{ TEXT("TARGET"), DescribeNearestBody(GetWorld(), *Ship), FLinearColor(0.6f, 1.f, 0.7f) },
 		{ TEXT("ORIGIN"), DescribeOrigin(GetWorld(), *Ship), FLinearColor(0.85f, 0.85f, 0.6f) },
 		{ TEXT("REBASE"), DescribeRebases(GetWorld()), FLinearColor(0.85f, 0.85f, 0.6f) },

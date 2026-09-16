@@ -11,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
 #include "ProceduralMeshComponent.h"
+#include "SpaceshipPawn.h"
 
 namespace
 {
@@ -25,6 +26,9 @@ namespace
 	/** SM_PlanetSphere, used for the Body safety sphere, has a radius of 100 cm. */
 	constexpr double SafetySphereMeshRadiusCm = 100.0;
 
+	/** The bounds cache is dropped past this many nodes; a long flight would otherwise grow it forever. */
+	constexpr int32 MaxCachedBounds = 400000;
+
 	/** Custom primitive data slots read by M_Planet_Terrain. */
 	enum ETerrainPrimitiveData : int32
 	{
@@ -35,6 +39,12 @@ namespace
 		CPD_Depth = 6,
 		CPD_DebugTint = 7,
 	};
+
+	double SmoothStep01(double X)
+	{
+		const double T = FMath::Clamp(X, 0.0, 1.0);
+		return T * T * (3.0 - 2.0 * T);
+	}
 }
 
 AQuadSpherePlanet::AQuadSpherePlanet()
@@ -50,6 +60,8 @@ AQuadSpherePlanet::AQuadSpherePlanet()
 	Body->SetupAttachment(TerrainRoot);
 	Body->SetHiddenInGame(true);
 	Body->SetCastShadow(false);
+
+	RefreshDerivedSettings();
 }
 
 FPlanetTerrainSettings AQuadSpherePlanet::MakeSettings() const
@@ -59,18 +71,28 @@ FPlanetTerrainSettings AQuadSpherePlanet::MakeSettings() const
 	Result.AmplitudeCm = TerrainAmplitudeM * 100.0;
 	Result.BaseWavelengthCm = BaseWavelengthM * 100.0;
 	Result.Octaves = NoiseOctaves;
-	Result.SeedOffset = FVector(NoiseSeed * 17.31, NoiseSeed * -31.77, NoiseSeed * 7.13);
+	Result.Lacunarity = NoiseLacunarity;
+	Result.Gain = NoiseGain;
+	Result.Seed = uint32(NoiseSeed);
 	return Result;
 }
 
 void AQuadSpherePlanet::RefreshDerivedSettings()
 {
-	Settings = MakeSettings();
+	const FPlanetTerrainSettings NewSettings = MakeSettings();
+	const bool bShapeChanged = NewSettings.RadiusCm != Settings.RadiusCm || NewSettings.AmplitudeCm != Settings.AmplitudeCm
+		|| NewSettings.BaseWavelengthCm != Settings.BaseWavelengthCm || NewSettings.Octaves != Settings.Octaves
+		|| NewSettings.Lacunarity != Settings.Lacunarity || NewSettings.Gain != Settings.Gain || NewSettings.Seed != Settings.Seed;
+	Settings = NewSettings;
+	if (bShapeChanged)
+	{
+		BoundsCache.Reset();
+	}
+
 	TileQuads = FMath::Max(4, TileQuads & ~1);
 	CollisionTileQuads = FMath::Max(2, CollisionTileQuads);
 	const double RootSize = PlanetTerrain::TileSizeCm(Settings, 0);
 	MaxDepth = FMath::Clamp(FMath::CeilToInt32(FMath::Log2(RootSize / (LeafTileSizeM * 100.0))), 0, 24);
-	CollisionDepth = FMath::Clamp(FMath::RoundToInt32(FMath::Log2(RootSize / (CollisionTileSizeM * 100.0))), 0, MaxDepth);
 	Stats.MaxDepth = MaxDepth;
 }
 
@@ -83,6 +105,22 @@ void AQuadSpherePlanet::OnConstruction(const FTransform& Transform)
 	Body->SetRelativeScale3D(FVector(FMath::Max(SafetyRadiusCm, 100.0) / SafetySphereMeshRadiusCm));
 }
 
+void AQuadSpherePlanet::PostLoad()
+{
+	Super::PostLoad();
+	// Settings are not saved; rebuild them from the loaded properties so queries work in the
+	// editor and in commandlets, not only after BeginPlay.
+	RefreshDerivedSettings();
+}
+
+#if WITH_EDITOR
+void AQuadSpherePlanet::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	RefreshDerivedSettings();
+}
+#endif
+
 void AQuadSpherePlanet::BeginPlay()
 {
 	Super::BeginPlay();
@@ -92,8 +130,7 @@ void AQuadSpherePlanet::BeginPlay()
 	for (uint8 Face = 0; Face < 6; ++Face)
 	{
 		const FQuadTileId Root{ Face, 0, 0, 0 };
-		const TSharedPtr<FTerrainTileMesh> Mesh = PlanetTerrain::BuildTile(
-			Settings, Root, TileQuads, true, PlanetTerrain::TileSizeCm(Settings, 0) * 0.05 + 100.0);
+		const TSharedPtr<FTerrainTileMesh> Mesh = PlanetTerrain::BuildTile(Settings, Root, TileQuads, true, SkirtDepthCm(0));
 		FTile& Tile = Tiles.Add(Root.Key());
 		Tile.Id = Root;
 		Tile.Mesh = CreateTileComponent(*Mesh, false);
@@ -107,6 +144,13 @@ void AQuadSpherePlanet::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	// discard their results without touching this actor.
 	Builds.Reset();
 	Super::EndPlay(EndPlayReason);
+}
+
+double AQuadSpherePlanet::SkirtDepthCm(int32 Depth) const
+{
+	// Deep enough to cover the worst crack between neighbours one or two levels apart; with
+	// kilometre-high relief the parent's chord can sit far from the child's surface.
+	return PlanetTerrain::TileSizeCm(Settings, Depth) * 0.08 + 100.0;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -130,7 +174,7 @@ void AQuadSpherePlanet::Tick(float DeltaSeconds)
 			// Re-select only when the camera moved noticeably for its altitude, or tiles came or
 			// went; a hovering or slow ship then costs nothing here.
 			const FVector CameraLocal = ToWorld.InverseTransformPositionNoScale(Camera->GetCameraLocation());
-			const double Altitude = FMath::Max(0.0, CameraLocal.Size() - Settings.RadiusCm);
+			const double Altitude = FMath::Max(0.0, CameraLocal.Size() - Settings.RadiusCm - PlanetTerrain::Height(Settings, CameraLocal.GetSafeNormal()));
 			const double MoveThreshold = FMath::Max(50.0, LodUpdateMoveFraction * Altitude);
 			if (bTilesChangedSinceLod || FVector::DistSquared(CameraLocal, LastLodCameraLocal) > FMath::Square(MoveThreshold))
 			{
@@ -141,9 +185,11 @@ void AQuadSpherePlanet::Tick(float DeltaSeconds)
 		}
 	}
 
-	if (const APawn* Ship = UGameplayStatics::GetPlayerPawn(this, 0))
+	if (const APawn* Pawn = UGameplayStatics::GetPlayerPawn(this, 0))
 	{
-		UpdateCollisionTiles(ToWorld.InverseTransformPositionNoScale(Ship->GetActorLocation()));
+		const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Pawn);
+		const double Speed = Ship ? Ship->GetLinearVelocity().Size() : Pawn->GetVelocity().Size();
+		UpdateCollisionTiles(ToWorld.InverseTransformPositionNoScale(Pawn->GetActorLocation()), Speed);
 	}
 
 	const int32 DebugTint = CVarTerrainDebugLOD.GetValueOnGameThread();
@@ -152,23 +198,57 @@ void AQuadSpherePlanet::Tick(float DeltaSeconds)
 		AppliedDebugTint = DebugTint;
 		for (TPair<uint64, FTile>& Pair : Tiles)
 		{
-			ApplyDebugTint(Pair.Value.Mesh, Pair.Value.Id.Depth);
+			ApplyDebugTint(Pair.Value.Mesh);
 		}
+	}
+
+	if (BoundsCache.Num() > MaxCachedBounds)
+	{
+		BoundsCache.Reset();
 	}
 
 	Stats.CachedTiles = Tiles.Num();
 	Stats.PendingBuilds = Builds.Num();
 	Stats.CollisionTiles = CollisionTiles.Num();
+	Stats.CollisionDepth = CollisionDepth;
 	Stats.TickMs = (FPlatformTime::Seconds() - TickStart) * 1000.0;
 }
 
-void AQuadSpherePlanet::UpdateRenderLod(const FVector& CameraLocal, double NowSeconds)
+const AQuadSpherePlanet::FTileBounds& AQuadSpherePlanet::GetTileBounds(const FQuadTileId& Id) const
 {
-	const double StartSeconds = FPlatformTime::Seconds();
+	const uint64 Key = Id.Key();
+	if (const FTileBounds* Cached = BoundsCache.Find(Key))
+	{
+		return *Cached;
+	}
+	FTileBounds Bounds;
+	PlanetTerrain::EstimateTileBounds(Settings, Id, Bounds.Center, Bounds.Radius);
+	return BoundsCache.Add(Key, Bounds);
+}
 
-	// 1) Which nodes should be split, and which leaves we want, from the camera distance alone.
-	TSet<uint64> Split;
-	TArray<TPair<double, FQuadTileId>> WantedLeaves;
+bool AQuadSpherePlanet::IsBelowHorizon(const FVector& CameraLocal, const FTileBounds& Bounds) const
+{
+	// The occluder is the sphere under the lowest possible terrain: whatever lies behind it is
+	// hidden for sure. A point P is out of sight when it is farther from the camera than the two
+	// horizon distances together - the camera's and P's own - since the line of sight then has to
+	// dip into the occluder. For the bounds, take their nearest point and their highest possible
+	// radius, which keeps the test conservative.
+	const double OccluderRadius = Settings.RadiusCm - Settings.MaxHeightCm();
+	const double CameraDistance = CameraLocal.Size();
+	if (OccluderRadius <= 0.0 || CameraDistance <= OccluderRadius)
+	{
+		return false;
+	}
+	const double CameraHorizon = FMath::Sqrt(CameraDistance * CameraDistance - OccluderRadius * OccluderRadius);
+	const double TopRadius = FMath::Min(Bounds.Center.Size() + Bounds.Radius, Settings.RadiusCm + Settings.MaxHeightCm());
+	const double TopHorizon = FMath::Sqrt(FMath::Max(0.0, TopRadius * TopRadius - OccluderRadius * OccluderRadius));
+	return FVector::Dist(CameraLocal, Bounds.Center) - Bounds.Radius > CameraHorizon + TopHorizon;
+}
+
+void AQuadSpherePlanet::SelectLodTree(const FVector& CameraLocal, const TSet<uint64>& PreviousSplit, TSet<uint64>& OutSplit,
+	TArray<TPair<double, FQuadTileId>>& OutLeaves, int32& OutHorizonCulled) const
+{
+	OutHorizonCulled = 0;
 	TArray<FQuadTileId> Stack;
 	for (uint8 Face = 0; Face < 6; ++Face)
 	{
@@ -177,16 +257,21 @@ void AQuadSpherePlanet::UpdateRenderLod(const FVector& CameraLocal, double NowSe
 	while (Stack.Num() > 0)
 	{
 		const FQuadTileId Id = Stack.Pop(EAllowShrinking::No);
-		FVector Center;
-		double Radius;
-		PlanetTerrain::EstimateTileBounds(Settings, Id, Center, Radius);
-		const double Distance = FMath::Max(0.0, FVector::Dist(CameraLocal, Center) - Radius);
-		const double Hysteresis = SplitLastFrame.Contains(Id.Key()) ? MergeHysteresis : 1.0;
+		const FTileBounds& Bounds = GetTileBounds(Id);
+		const double Distance = FMath::Max(0.0, FVector::Dist(CameraLocal, Bounds.Center) - Bounds.Radius);
+		const double Hysteresis = PreviousSplit.Contains(Id.Key()) ? MergeHysteresis : 1.0;
 		const double SplitDistance = LodDistanceFactor * PlanetTerrain::TileSizeCm(Settings, Id.Depth) * Hysteresis;
 
-		if (Id.Depth < MaxDepth && Distance < SplitDistance)
+		bool bSplit = Id.Depth < MaxDepth && Distance < SplitDistance;
+		if (bSplit && bHorizonCulling && IsBelowHorizon(CameraLocal, Bounds))
 		{
-			Split.Add(Id.Key());
+			bSplit = false;
+			++OutHorizonCulled;
+		}
+
+		if (bSplit)
+		{
+			OutSplit.Add(Id.Key());
 			for (int32 Child = 0; Child < 4; ++Child)
 			{
 				Stack.Add(Id.Child(Child));
@@ -194,9 +279,30 @@ void AQuadSpherePlanet::UpdateRenderLod(const FVector& CameraLocal, double NowSe
 		}
 		else
 		{
-			WantedLeaves.Add({ Distance, Id });
+			OutLeaves.Add({ Distance, Id });
 		}
 	}
+}
+
+int32 AQuadSpherePlanet::CountLodTilesFrom(const FVector& CameraWorldLocation)
+{
+	RefreshDerivedSettings();
+	const FVector CameraLocal = GetActorTransform().InverseTransformPositionNoScale(CameraWorldLocation);
+	TSet<uint64> Split;
+	TArray<TPair<double, FQuadTileId>> Leaves;
+	int32 Culled = 0;
+	SelectLodTree(CameraLocal, TSet<uint64>(), Split, Leaves, Culled);
+	return Leaves.Num();
+}
+
+void AQuadSpherePlanet::UpdateRenderLod(const FVector& CameraLocal, double NowSeconds)
+{
+	const double StartSeconds = FPlatformTime::Seconds();
+
+	// 1) Which nodes should be split, and which leaves we want, from the camera alone.
+	TSet<uint64> Split;
+	TArray<TPair<double, FQuadTileId>> WantedLeaves;
+	SelectLodTree(CameraLocal, SplitLastFrame, Split, WantedLeaves, Stats.HorizonCulled);
 
 	// 2) What can actually be shown right now without holes.
 	TMap<uint64, bool> Memo;
@@ -321,20 +427,39 @@ void AQuadSpherePlanet::ChooseVisible(const FQuadTileId& Id, const TSet<uint64>&
 	}
 }
 
-void AQuadSpherePlanet::UpdateCollisionTiles(const FVector& ShipLocal)
+void AQuadSpherePlanet::UpdateCollisionTiles(const FVector& ShipLocal, double ShipSpeedCmS)
 {
-	const double RadiusCm = CollisionRadiusM * 100.0;
+	// Radius: what the ship covers in the look-ahead time. It grows at once when the ship speeds
+	// up, and shrinks gradually, so easing off the throttle does not drop tiles right in front.
+	const double TargetRadius = FMath::Clamp(CollisionMinRadiusM * 100.0 + ShipSpeedCmS * CollisionLookaheadSeconds,
+		CollisionMinRadiusM * 100.0, FMath::Max(CollisionMinRadiusM, CollisionMaxRadiusM) * 100.0);
+	const double DeltaSeconds = GetWorld()->GetDeltaSeconds();
+	Stats.CollisionRadiusCm = TargetRadius >= Stats.CollisionRadiusCm
+		? TargetRadius
+		: FMath::Lerp(TargetRadius, Stats.CollisionRadiusCm, FMath::Exp(-0.5 * DeltaSeconds));
+	const double RadiusCm = Stats.CollisionRadiusCm;
+
+	// Tile size follows the radius, with hysteresis: the depth only changes once the ideal size
+	// is ~1.7x off, so a ship cruising at one speed never flips between two tile sizes.
+	const double RootSize = PlanetTerrain::TileSizeCm(Settings, 0);
+	const double IdealSize = FMath::Max(CollisionMinTileSizeM * 100.0, RadiusCm / CollisionTilesPerRadius);
+	const double IdealDepth = FMath::Clamp(FMath::Log2(RootSize / IdealSize), 0.0, double(MaxDepth));
+	if (CollisionDepth < 0 || FMath::Abs(IdealDepth - CollisionDepth) > 0.75)
+	{
+		CollisionDepth = FMath::Clamp(FMath::RoundToInt32(IdealDepth), 0, MaxDepth);
+	}
+
 	const double TileSize = PlanetTerrain::TileSizeCm(Settings, CollisionDepth);
 	const int32 TilesPerSide = 1 << CollisionDepth;
 
 	TSet<uint64> Wanted;
 	TMap<uint64, FQuadTileId> WantedIds;
-	const double Altitude = ShipLocal.Size() - Settings.RadiusCm - Settings.MaxHeightCm();
-	if (Altitude < RadiusCm)
+	const FVector Dir = ShipLocal.GetSafeNormal();
+	const double AltitudeAboveTerrain = ShipLocal.Size() - Settings.RadiusCm - PlanetTerrain::Height(Settings, Dir);
+	if (AltitudeAboveTerrain < RadiusCm + TileSize)
 	{
 		// Sample the surface around the point under the ship; this crosses cube-face edges
 		// naturally, which walking tile indices on one face would not.
-		const FVector Dir = ShipLocal.GetSafeNormal();
 		const FVector T1 = FVector::CrossProduct(Dir, FMath::Abs(Dir.Z) < 0.9 ? FVector::UpVector : FVector::ForwardVector).GetSafeNormal();
 		const FVector T2 = FVector::CrossProduct(Dir, T1);
 		const double Step = TileSize * 0.5;
@@ -361,10 +486,8 @@ void AQuadSpherePlanet::UpdateCollisionTiles(const FVector& ShipLocal)
 				{
 					continue;
 				}
-				FVector Center;
-				double BoundsRadius;
-				PlanetTerrain::EstimateTileBounds(Settings, Id, Center, BoundsRadius);
-				if (FVector::Dist(ShipLocal, Center) - BoundsRadius <= RadiusCm)
+				const FTileBounds& Bounds = GetTileBounds(Id);
+				if (FVector::Dist(ShipLocal, Bounds.Center) - Bounds.Radius <= RadiusCm)
 				{
 					Wanted.Add(Id.Key());
 					WantedIds.Add(Id.Key(), Id);
@@ -373,7 +496,19 @@ void AQuadSpherePlanet::UpdateCollisionTiles(const FVector& ShipLocal)
 		}
 	}
 
-	// Drop tiles well outside the radius (with margin, so they don't churn at the boundary).
+	bool bAllWantedReady = true;
+	for (const TPair<uint64, FQuadTileId>& Pair : WantedIds)
+	{
+		if (!CollisionTiles.Contains(Pair.Key))
+		{
+			bAllWantedReady = false;
+			break;
+		}
+	}
+
+	// Tiles of the current size are dropped well outside the radius (with margin, so they don't
+	// churn at the boundary). Tiles of a previous size stay until the new set is complete, so a
+	// size change never leaves the ship without collision for the frames the builds take.
 	TArray<uint64> ToRemove;
 	for (const TPair<uint64, FTile>& Pair : CollisionTiles)
 	{
@@ -381,10 +516,17 @@ void AQuadSpherePlanet::UpdateCollisionTiles(const FVector& ShipLocal)
 		{
 			continue;
 		}
-		FVector Center;
-		double BoundsRadius;
-		PlanetTerrain::EstimateTileBounds(Settings, Pair.Value.Id, Center, BoundsRadius);
-		if (FVector::Dist(ShipLocal, Center) - BoundsRadius > RadiusCm * 1.5)
+		bool bRemove;
+		if (Pair.Value.Id.Depth != CollisionDepth)
+		{
+			bRemove = bAllWantedReady;
+		}
+		else
+		{
+			const FTileBounds& Bounds = GetTileBounds(Pair.Value.Id);
+			bRemove = FVector::Dist(ShipLocal, Bounds.Center) - Bounds.Radius > RadiusCm * 1.5;
+		}
+		if (bRemove)
 		{
 			ToRemove.Add(Pair.Key);
 		}
@@ -417,8 +559,7 @@ void AQuadSpherePlanet::LaunchBuild(const FQuadTileId& Id, bool bCollision)
 {
 	const FPlanetTerrainSettings BuildSettings = Settings;
 	const int32 Quads = bCollision ? CollisionTileQuads : TileQuads;
-	// Deep enough to cover the worst crack between neighbours one or two levels apart.
-	const double SkirtDepth = PlanetTerrain::TileSizeCm(Settings, Id.Depth) * 0.05 + 100.0;
+	const double SkirtDepth = SkirtDepthCm(Id.Depth);
 
 	FBuild& Build = Builds.AddDefaulted_GetRef();
 	Build.Id = Id;
@@ -520,12 +661,12 @@ UProceduralMeshComponent* AQuadSpherePlanet::CreateTileComponent(const FTerrainT
 		Component->SetCustomPrimitiveDataFloat(CPD_MorphEnd, float(MorphEnd));
 		Component->SetCustomPrimitiveDataFloat(CPD_PlanetRadius, float(Settings.RadiusCm));
 		Component->SetCustomPrimitiveDataFloat(CPD_Depth, float(Depth));
-		ApplyDebugTint(Component, Depth);
+		ApplyDebugTint(Component);
 	}
 	return Component;
 }
 
-void AQuadSpherePlanet::ApplyDebugTint(UProceduralMeshComponent* Mesh, int32 /*Depth*/) const
+void AQuadSpherePlanet::ApplyDebugTint(UProceduralMeshComponent* Mesh) const
 {
 	Mesh->SetCustomPrimitiveDataFloat(CPD_DebugTint, CVarTerrainDebugLOD.GetValueOnGameThread() != 0 ? 1.f : 0.f);
 }
@@ -563,4 +704,52 @@ double AQuadSpherePlanet::GetSurfaceDistance(const FVector& Location) const
 {
 	const FVector Local = GetActorTransform().InverseTransformPositionNoScale(Location);
 	return Local.Size() - (Settings.RadiusCm + PlanetTerrain::Height(Settings, Local.GetSafeNormal()));
+}
+
+bool AQuadSpherePlanet::SampleEnvironment(const FVector& Location, FCelestialEnvironment& Out) const
+{
+	const FVector Local = GetActorTransform().InverseTransformPositionNoScale(Location);
+	const double DistanceFromCentre = FMath::Max(Local.Size(), 1.0);
+	const FVector LocalUp = Local / DistanceFromCentre;
+
+	Out.Up = GetActorTransform().TransformVectorNoScale(LocalUp);
+	Out.AltitudeAboveSeaLevelCm = DistanceFromCentre - Settings.RadiusCm;
+	Out.AltitudeAboveTerrainCm = Out.AltitudeAboveSeaLevelCm - PlanetTerrain::Height(Settings, LocalUp);
+
+	const double Top = AtmosphereHeightKm * 100000.0;
+	const double Altitude = Out.AltitudeAboveSeaLevelCm;
+
+	// Exponential atmosphere, shifted so it reaches exactly zero at the top instead of trailing
+	// off forever, and clamped to 1 below sea level (deep valleys).
+	const double ScaleHeight = AtmosphereScaleHeightKm * 100000.0;
+	const double TopFalloff = FMath::Exp(-Top / ScaleHeight);
+	const double RawDensity = (FMath::Exp(-FMath::Max(Altitude, 0.0) / ScaleHeight) - TopFalloff) / (1.0 - TopFalloff);
+	Out.AtmosphereDensity = float(Altitude >= Top ? 0.0 : FMath::Clamp(RawDensity, 0.0, 1.0));
+
+	// Gravity: inverse square, faded in over the upper part of the atmosphere.
+	const double FullBelow = Top * GravityFullBelowFraction;
+	const double GravityFade = SmoothStep01((Top - Altitude) / FMath::Max(Top - FullBelow, 1.0));
+	const double Ratio = Settings.RadiusCm / FMath::Max(DistanceFromCentre, Settings.RadiusCm * 0.5);
+	Out.GravityCmS2 = SurfaceGravity * 100.0 * Ratio * Ratio * GravityFade;
+
+	// The sky turns blue much faster than density grows: thin air already scatters visibly.
+	const double Thin = 1.0 - double(Out.AtmosphereDensity);
+	Out.SkyAmount = float(1.0 - Thin * Thin * Thin * Thin);
+	Out.SkyZenithColor = SkyZenithColor;
+	Out.SkyHorizonColor = SkyHorizonColor;
+	Out.SkyBrightness = SkyBrightness;
+
+	if (Altitude >= Top)
+	{
+		Out.Regime = EFlightRegime::Orbit;
+	}
+	else if (Out.AltitudeAboveTerrainCm < SurfaceRegimeAltitudeM * 100.0)
+	{
+		Out.Regime = EFlightRegime::Surface;
+	}
+	else
+	{
+		Out.Regime = EFlightRegime::Atmosphere;
+	}
+	return true;
 }

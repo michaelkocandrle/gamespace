@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "CelestialBody.h"
 #include "SpaceshipPawn.generated.h"
 
 class UAudioComponent;
@@ -38,9 +39,13 @@ enum class ESpaceshipAxis : uint8
  * Player-flown spaceship with 6 degrees of freedom: thrust / strafe / lift plus pitch / yaw / roll.
  *
  * Motion is integrated by hand rather than handed to Chaos. For a space game that keeps the feel
- * predictable and cheap to tune. Velocity lives in LinearVelocity and is bled off by
- * LinearDamping, which acts as the flight assist of Elite-style flight models: set it to 0 for
- * true Newtonian drift.
+ * predictable and cheap to tune. Velocity lives in LinearVelocity.
+ *
+ * The flight model follows the nearest celestial body's environment (ACelestialBody::
+ * SampleEnvironment), blended smoothly with altitude: in space nothing slows the ship (Newtonian
+ * drift, SpaceLinearDamping 0); inside an atmosphere, drag (LinearDamping and QuadraticDrag, both
+ * scaled by air density) and gravity grow as the ship descends. Fast flight through dense air
+ * builds up entry heat, which shakes the camera.
  *
  * Input uses Enhanced Input. Assign the mapping context and actions on a Blueprint child, or drop
  * assets named IMC_Spaceship / IA_Thrust / ... into /Game/Input and they get picked up
@@ -76,6 +81,27 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
 	bool IsCockpitView() const { return bCockpitView; }
+
+	/** Conditions at the ship this frame. Valid only when HasEnvironment() is true. */
+	const FCelestialEnvironment& GetEnvironment() const { return Environment; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
+	bool HasEnvironment() const { return bHasEnvironment; }
+
+	/** Entry heat, 0..1, smoothed. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
+	float GetHeat() const { return Heat; }
+
+	/**
+	 * Acceleration in cm/s^2 the environment puts on a ship with this velocity: drag and gravity,
+	 * without the pilot's thrust. The flight model uses exactly this; exposed for tests.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Flight")
+	FVector ComputeEnvironmentAcceleration(const FCelestialEnvironment& InEnvironment, const FVector& Velocity) const;
+
+	/** Entry heat target, 0..1, for a speed in cm/s at an atmosphere density. For tests. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Flight")
+	float ComputeHeatTarget(float AtmosphereDensity, float SpeedCmS) const;
 
 	/** Switches between the chase camera and the cockpit camera. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
@@ -192,9 +218,31 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
 	float MaxSpeed = 12000.f;
 
-	/** Flight assist: fraction of velocity shed per second. 0 gives true Newtonian drift. */
+	/**
+	 * Drag at sea-level air density: fraction of velocity shed per second, scaled by density.
+	 * Together with QuadraticDrag the defaults give, at sea level: ~62 m/s cruise at full thrust,
+	 * ~116 m/s with boost, and ~13 m/s terminal speed falling with the engines off.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
-	float LinearDamping = 1.2f;
+	float LinearDamping = 0.4f;
+
+	/**
+	 * Fraction of velocity shed per second outside any atmosphere. 0 is true Newtonian drift: the
+	 * ship keeps flying until the pilot brakes. Raise it for an arcade-style flight assist.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
+	float SpaceLinearDamping = 0.f;
+
+	/**
+	 * Drag growing with speed squared, per cm, at sea-level density. It is what brakes a fast
+	 * entry: at 300 m/s in sea-level air it adds ~36 m/s^2; at 30 m/s only 0.4 m/s^2.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
+	float QuadraticDrag = 4.0e-5f;
+
+	/** Scales the gravity of the environment. 0 switches gravity off for this ship. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
+	float GravityScale = 1.f;
 
 	/** Sweep the hull along the movement path instead of tunnelling through geometry. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight")
@@ -249,6 +297,30 @@ protected:
 	/** Flip the pitch axis for players who fly stick-style. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling")
 	bool bInvertPitch = false;
+
+	// ---------------------------------------------------------------------------------------
+	// Atmospheric entry
+	// ---------------------------------------------------------------------------------------
+
+	/** Speed that heat is measured against, cm/s. Heating is density x (speed / this)^3. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Entry", meta = (ClampMin = "1.0"))
+	float HeatReferenceSpeed = 10000.f;
+
+	/** Heating where heat starts to show... */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Entry", meta = (ClampMin = "0.0"))
+	float HeatOnset = 0.5f;
+
+	/** ...and where it is full. Defaults: none cruising low, strong in a 300 m/s dive below ~8 km. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Entry", meta = (ClampMin = "0.0"))
+	float HeatFull = 3.0f;
+
+	/** How fast heat follows its target, per second. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Entry", meta = (ClampMin = "0.1"))
+	float HeatResponse = 2.f;
+
+	/** Camera shake at full heat, cm. The cockpit camera gets a quarter of it. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Entry", meta = (ClampMin = "0.0"))
+	float HeatShakeCm = 14.f;
 
 	// ---------------------------------------------------------------------------------------
 	// Engine audio
@@ -318,6 +390,8 @@ private:
 	void UpdateAngularMotion(float DeltaSeconds);
 	void UpdateLinearMotion(float DeltaSeconds);
 	void UpdateEngineAudio(float DeltaSeconds);
+	void UpdateEnvironment(float DeltaSeconds);
+	void UpdateHeatShake();
 
 	float& AxisInput(ESpaceshipAxis Axis);
 
@@ -341,6 +415,12 @@ private:
 
 	bool bBoostHeld = false;
 	bool bCockpitView = false;
+
+	FCelestialEnvironment Environment;
+	bool bHasEnvironment = false;
+	float Heat = 0.f;
+	FVector ChaseCameraBaseLocation = FVector::ZeroVector;
+	FVector CockpitCameraBaseLocation = FVector::ZeroVector;
 
 	/** Ticks left with camera lag switched off after SnapCameraToShip. */
 	int32 CameraSnapTicks = 0;

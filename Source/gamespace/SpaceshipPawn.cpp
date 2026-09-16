@@ -124,6 +124,9 @@ void ASpaceshipPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ChaseCameraBaseLocation = ChaseCamera->GetRelativeLocation();
+	CockpitCameraBaseLocation = CockpitCamera->GetRelativeLocation();
+
 	if (!EngineLoopSound)
 	{
 		EngineLoopSound = SpaceshipPawnDefaults::LoadOptional<USoundBase>(SpaceshipPawnDefaults::EngineLoopSoundPath);
@@ -464,9 +467,11 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	// Rotate first so this frame's thrust is applied along the heading the player just commanded.
+	UpdateEnvironment(DeltaSeconds);
 	UpdateAngularMotion(DeltaSeconds);
 	UpdateLinearMotion(DeltaSeconds);
 	UpdateEngineAudio(DeltaSeconds);
+	UpdateHeatShake();
 
 	if (CameraSnapTicks > 0 && --CameraSnapTicks == 0)
 	{
@@ -524,10 +529,15 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 
 	LinearVelocity += GetActorQuat().RotateVector(LocalAcceleration) * DeltaSeconds;
 
-	if (LinearDamping > 0.f)
+	// Drag and gravity, the same terms as ComputeEnvironmentAcceleration. Drag is applied as a
+	// damping fraction clamped to 1, so a long frame in dense air can stop the ship but never
+	// reverse it.
+	const double Density = bHasEnvironment ? Environment.AtmosphereDensity : 0.0;
+	const double DragRate = SpaceLinearDamping + (LinearDamping + QuadraticDrag * LinearVelocity.Size()) * Density;
+	LinearVelocity -= LinearVelocity * FMath::Min(DragRate * DeltaSeconds, 1.0);
+	if (bHasEnvironment)
 	{
-		// Min() keeps a long frame from overshooting into a reversed velocity.
-		LinearVelocity -= LinearVelocity * FMath::Min(LinearDamping * DeltaSeconds, 1.f);
+		LinearVelocity -= Environment.Up * (Environment.GravityCmS2 * GravityScale * DeltaSeconds);
 	}
 
 	const float SpeedCap = MaxSpeed * BoostFactor;
@@ -565,6 +575,40 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 			AddActorWorldOffset(Slide, true);
 		}
 	}
+}
+
+FVector ASpaceshipPawn::ComputeEnvironmentAcceleration(const FCelestialEnvironment& InEnvironment, const FVector& Velocity) const
+{
+	const double DragRate = SpaceLinearDamping + (LinearDamping + QuadraticDrag * Velocity.Size()) * InEnvironment.AtmosphereDensity;
+	return -Velocity * DragRate - InEnvironment.Up * (InEnvironment.GravityCmS2 * GravityScale);
+}
+
+float ASpaceshipPawn::ComputeHeatTarget(float AtmosphereDensity, float SpeedCmS) const
+{
+	const double Relative = SpeedCmS / HeatReferenceSpeed;
+	const double Heating = AtmosphereDensity * Relative * Relative * Relative;
+	return float(FMath::Clamp((Heating - HeatOnset) / FMath::Max(double(HeatFull - HeatOnset), 0.01), 0.0, 1.0));
+}
+
+void ASpaceshipPawn::UpdateEnvironment(float DeltaSeconds)
+{
+	ACelestialBody::FindNearest(GetWorld(), GetActorLocation(), &Environment, &bHasEnvironment);
+	const float Target = bHasEnvironment ? ComputeHeatTarget(Environment.AtmosphereDensity, LinearVelocity.Size()) : 0.f;
+	Heat = FMath::FInterpTo(Heat, Target, DeltaSeconds, HeatResponse);
+}
+
+void ASpaceshipPawn::UpdateHeatShake()
+{
+	// Smooth noise rather than random jumps: a rumble, not a flicker. Nothing moves when cold.
+	const double Time = GetWorld()->GetTimeSeconds() * 11.0;
+	const FVector Shake = Heat < 0.001f
+		? FVector::ZeroVector
+		: FVector(
+			FMath::PerlinNoise1D(float(Time + 3.7)),
+			FMath::PerlinNoise1D(float(Time * 1.13 + 17.1)),
+			FMath::PerlinNoise1D(float(Time * 0.91 + 41.9))) * (HeatShakeCm * Heat * Heat);
+	ChaseCamera->SetRelativeLocation(ChaseCameraBaseLocation + Shake);
+	CockpitCamera->SetRelativeLocation(CockpitCameraBaseLocation + Shake * 0.25);
 }
 
 void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
