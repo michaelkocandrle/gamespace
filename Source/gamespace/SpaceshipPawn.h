@@ -122,6 +122,22 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
 	bool IsCockpitView() const { return bCockpitView; }
 
+	/** Free look button held: the mouse turns the camera, not the ship. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
+	bool IsFreeLooking() const { return bFreeLookHeld; }
+
+	/** Current camera offset from straight ahead, degrees: X yaw, Y pitch. Eases back to 0 on release. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
+	FVector2D GetFreeLookAngles() const { return FreeLookAngles; }
+
+	/**
+	 * Tests: runs the free look and steering code for one 1/60 s frame per entry of Frames, each
+	 * (mouse X, mouse Y, button held 0/1). Returns two vectors per frame: (camera yaw, camera pitch,
+	 * held) and the ship's rotation (pitch, yaw, roll).
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	TArray<FVector> DebugSimulateFreeLook(const TArray<FVector>& Frames);
+
 	/** Conditions at the ship this frame. Valid only when HasEnvironment() is true. */
 	const FCelestialEnvironment& GetEnvironment() const { return Environment; }
 
@@ -321,7 +337,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> InteractAction;
 
-	/** Maps F to InteractAction when the authored flight context lacks it. */
+	/** Digital, held: free look (right mouse button). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> FreeLookAction;
+
+	/** Maps F / right mouse button when the authored flight context lacks them. */
 	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> InteractMappingContext;
 
@@ -432,6 +452,34 @@ protected:
 	/** Flip the pitch axis for players who fly stick-style. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling")
 	bool bInvertPitch = false;
+
+	// ---------------------------------------------------------------------------------------
+	// Free look (hold right mouse button)
+	// ---------------------------------------------------------------------------------------
+
+	/**
+	 * Camera degrees per mouse count while free looking. Steering maps a count to 0.09 of full
+	 * stick; this is 4x that number, but in degrees, so a flick turns the head well past what the
+	 * same flick would turn the ship.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Free Look", meta = (ClampMin = "0.0"))
+	float FreeLookSensitivity = 0.36f;
+
+	/** How far the camera can turn left / right from straight ahead. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Free Look", meta = (ClampMin = "0.0", ClampMax = "179.0"))
+	float FreeLookMaxYawDeg = 110.f;
+
+	/** How far the camera can turn up / down from straight ahead. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Free Look", meta = (ClampMin = "0.0", ClampMax = "89.0"))
+	float FreeLookMaxPitchDeg = 70.f;
+
+	/** How fast the camera follows the mouse while held, per second; smooths raw mouse steps. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Free Look", meta = (ClampMin = "0.1"))
+	float FreeLookFollowRate = 20.f;
+
+	/** How fast the camera swings back after release, per second (6: ~95 % in half a second). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Free Look", meta = (ClampMin = "0.1"))
+	float FreeLookReturnRate = 6.f;
 
 	// ---------------------------------------------------------------------------------------
 	// Atmospheric entry
@@ -580,6 +628,10 @@ private:
 	void HandleBoost(const FInputActionValue& Value);
 	void HandleBoostCompleted(const FInputActionValue& Value);
 	void HandleInteract(const FInputActionValue& Value);
+	void HandleFreeLookStarted(const FInputActionValue& Value);
+	void HandleFreeLookCompleted(const FInputActionValue& Value);
+	void SetFreeLookHeld(bool bHeld);
+	void UpdateFreeLook(float DeltaSeconds);
 	void ClearPilotInput();
 
 	/** Fills in any unassigned input asset: first from /Game/Input, then procedurally. */
@@ -613,6 +665,12 @@ private:
 
 	/** The mouse virtual joystick, each axis in [-1, 1]. */
 	FVector2D MouseStick = FVector2D::ZeroVector;
+
+	bool bFreeLookHeld = false;
+	/** Where the mouse has pushed the view (X yaw, Y pitch), clamped; 0 when released. */
+	FVector2D FreeLookTarget = FVector2D::ZeroVector;
+	/** What the cameras show, easing towards FreeLookTarget. */
+	FVector2D FreeLookAngles = FVector2D::ZeroVector;
 
 	/** Smoothed engine load and boost blend, each in [0, 1], driving the engine sound. */
 	float EngineLoad = 0.f;

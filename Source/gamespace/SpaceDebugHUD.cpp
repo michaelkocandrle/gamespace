@@ -201,7 +201,16 @@ namespace
 		Lines.Add({ TEXT("THROTTLE"), FString::Printf(TEXT("%+4.0f %%"), Ship.GetThrottle() * 100.f), FLinearColor::White });
 		Lines.Add({ TEXT("BOOST"), Ship.IsBoosting() ? TEXT("ON") : TEXT("off"),
 			Ship.IsBoosting() ? FLinearColor(1.f, 0.55f, 0.1f) : FLinearColor(0.6f, 0.6f, 0.6f) });
-		Lines.Add({ TEXT("CAMERA"), Ship.IsCockpitView() ? TEXT("Cockpit") : TEXT("Chase"), FLinearColor::White });
+		if (Ship.IsFreeLooking())
+		{
+			const FVector2D Angles = Ship.GetFreeLookAngles();
+			Lines.Add({ TEXT("CAMERA"), FString::Printf(TEXT("%s   FREE LOOK  yaw %+4.0f  pitch %+4.0f   (mouse turns the camera, not the ship)"),
+				Ship.IsCockpitView() ? TEXT("Cockpit") : TEXT("Chase"), Angles.X, Angles.Y), FLinearColor(1.f, 0.65f, 0.15f) });
+		}
+		else
+		{
+			Lines.Add({ TEXT("CAMERA"), Ship.IsCockpitView() ? TEXT("Cockpit") : TEXT("Chase"), FLinearColor::White });
+		}
 		Lines.Add({ TEXT("FLIGHT"), Flight, FlightColor });
 		Lines.Add({ TEXT("LANDING"), Landing, LandingColor });
 		Lines.Add({ TEXT("TARGET"), DescribeNearestBody(World, Ship.GetActorLocation(), Ship.GetLinearVelocity()), FLinearColor(0.6f, 1.f, 0.7f) });
@@ -321,5 +330,20 @@ void ASpaceDebugHUD::DrawHUD()
 		DrawText(Line.Label, FLinearColor(0.55f, 0.8f, 1.f), Origin.X, Y, Font, TextScale);
 		DrawText(Line.Value, Line.Color, Origin.X + ValueColumn, Y, Font, TextScale);
 		Y += LineHeight;
+	}
+
+	// Big and central while free looking: the mouse is not doing what it usually does.
+	const ASpaceshipPawn* FreeLookShip = Cast<ASpaceshipPawn>(Pawn);
+	if (FreeLookShip && FreeLookShip->IsFreeLooking())
+	{
+		const FString Label = TEXT("FREE LOOK");
+		const float LabelScale = TextScale * 1.6f;
+		float Width = 0.f;
+		float Height = 0.f;
+		GetTextSize(Label, Width, Height, Font, LabelScale);
+		const float X = (Canvas->ClipX - Width) * 0.5f;
+		const float LabelY = Canvas->ClipY * 0.12f;
+		DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.45f), X - 14.f, LabelY - 6.f, Width + 28.f, Height + 12.f);
+		DrawText(Label, FLinearColor(1.f, 0.65f, 0.15f), X, LabelY, Font, LabelScale);
 	}
 }

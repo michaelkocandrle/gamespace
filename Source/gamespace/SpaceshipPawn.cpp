@@ -38,6 +38,7 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const ToggleCameraActionPath = TEXT("/Game/Input/IA_ToggleCamera.IA_ToggleCamera");
 	const TCHAR* const BoostActionPath = TEXT("/Game/Input/IA_Boost.IA_Boost");
 	const TCHAR* const InteractActionPath = TEXT("/Game/Input/IA_Interact.IA_Interact");
+	const TCHAR* const FreeLookActionPath = TEXT("/Game/Input/IA_FreeLook.IA_FreeLook");
 	const TCHAR* const MouseLookActionPath = TEXT("/Game/Input/IA_LookMouse.IA_LookMouse");
 	const TCHAR* const MouseMappingContextPath = TEXT("/Game/Input/IMC_SpaceshipMouse.IMC_SpaceshipMouse");
 	const TCHAR* const EngineLoopSoundPath = TEXT("/Game/Ships/Audio/SW_EngineLoop.SW_EngineLoop");
@@ -230,6 +231,13 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(InteractAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleInteract);
 	}
 
+	if (FreeLookAction)
+	{
+		Input->BindAction(FreeLookAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleFreeLookStarted);
+		Input->BindAction(FreeLookAction, ETriggerEvent::Completed, this, &ASpaceshipPawn::HandleFreeLookCompleted);
+		Input->BindAction(FreeLookAction, ETriggerEvent::Canceled, this, &ASpaceshipPawn::HandleFreeLookCompleted);
+	}
+
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (!PlayerController)
 	{
@@ -248,15 +256,27 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			// One above the flight context: its mouse mapping consumes the mouse there.
 			Subsystem->AddMappingContext(MouseMappingContext, MappingContextPriority + 1);
 		}
-		if (InteractAction && FlightMappingContext && !FlightMappingContext->GetMappings().ContainsByPredicate(
-			[this](const FEnhancedActionKeyMapping& Mapping) { return Mapping.Action == InteractAction; }))
+		// The hand-authored IMC_Spaceship may predate F / right mouse button (their add_*.py
+		// scripts not run yet): map whatever is missing in a small runtime context.
+		auto IsMapped = [this](const UInputAction* Action)
 		{
-			// The hand-authored IMC_Spaceship without F (add_character_input.py not run yet).
-			if (!InteractMappingContext)
+			return FlightMappingContext->GetMappings().ContainsByPredicate(
+				[Action](const FEnhancedActionKeyMapping& Mapping) { return Mapping.Action == Action; });
+		};
+		if (FlightMappingContext && !InteractMappingContext)
+		{
+			InteractMappingContext = NewObject<UInputMappingContext>(this, FName(TEXT("IMC_SpaceshipExtras_Runtime")));
+			if (InteractAction && !IsMapped(InteractAction))
 			{
-				InteractMappingContext = NewObject<UInputMappingContext>(this, FName(TEXT("IMC_SpaceshipInteract_Runtime")));
 				InteractMappingContext->MapKey(InteractAction, EKeys::F);
 			}
+			if (FreeLookAction && !IsMapped(FreeLookAction))
+			{
+				InteractMappingContext->MapKey(FreeLookAction, EKeys::RightMouseButton);
+			}
+		}
+		if (InteractMappingContext && InteractMappingContext->GetMappings().Num() > 0)
+		{
 			Subsystem->AddMappingContext(InteractMappingContext, MappingContextPriority);
 		}
 	}
@@ -325,6 +345,10 @@ void ASpaceshipPawn::ResolveInputAssets()
 	{
 		InteractAction = LoadOptional<UInputAction>(InteractActionPath);
 	}
+	if (!FreeLookAction)
+	{
+		FreeLookAction = LoadOptional<UInputAction>(FreeLookActionPath);
+	}
 	if (!MouseLookAction)
 	{
 		MouseLookAction = LoadOptional<UInputAction>(MouseLookActionPath);
@@ -341,7 +365,7 @@ void ASpaceshipPawn::BuildProceduralInputAssets()
 {
 	const bool bNeedsAnything = !FlightMappingContext || !ThrustAction || !StrafeAction || !LiftAction
 		|| !RollAction || !LookAction || !ToggleCameraAction || !BoostAction || !MouseLookAction
-		|| !MouseMappingContext || !InteractAction;
+		|| !MouseMappingContext || !InteractAction || !FreeLookAction;
 	if (!bNeedsAnything)
 	{
 		return;
@@ -404,6 +428,11 @@ void ASpaceshipPawn::BuildProceduralInputAssets()
 			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
 		InteractAction->Triggers.Add(NewObject<UInputTriggerPressed>(InteractAction));
 	}
+	if (!FreeLookAction)
+	{
+		FreeLookAction = MakeAction(TEXT("IA_FreeLook_Runtime"), EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+	}
 	if (!MouseLookAction)
 	{
 		MouseLookAction = MakeAction(TEXT("IA_LookMouse_Runtime"), EInputActionValueType::Axis2D,
@@ -449,6 +478,7 @@ void ASpaceshipPawn::BuildProceduralInputAssets()
 		{ ToggleCameraAction, EKeys::C,               false },
 		{ BoostAction,  EKeys::LeftShift,             false },
 		{ InteractAction, EKeys::F,                   false },
+		{ FreeLookAction, EKeys::RightMouseButton,    false },
 	};
 
 	for (const FDefaultMapping& Mapping : DefaultMappings)
@@ -513,8 +543,93 @@ void ASpaceshipPawn::HandleInteract(const FInputActionValue& /*Value*/)
 	ExitShip();
 }
 
+// -------------------------------------------------------------------------------------------
+// Free look
+// -------------------------------------------------------------------------------------------
+
+void ASpaceshipPawn::HandleFreeLookStarted(const FInputActionValue& /*Value*/)
+{
+	SetFreeLookHeld(true);
+}
+
+void ASpaceshipPawn::HandleFreeLookCompleted(const FInputActionValue& /*Value*/)
+{
+	SetFreeLookHeld(false);
+}
+
+void ASpaceshipPawn::SetFreeLookHeld(bool bHeld)
+{
+	if (bHeld == bFreeLookHeld)
+	{
+		return;
+	}
+	bFreeLookHeld = bHeld;
+	// Either way the virtual stick starts centred: on press the ship stops turning at once, on
+	// release steering resumes from neutral instead of from wherever the stick was left.
+	MouseStick = FVector2D::ZeroVector;
+	MouseLookDelta = FVector2D::ZeroVector;
+	if (bHeld)
+	{
+		AngularVelocity.Y = 0.0;
+		AngularVelocity.Z = 0.0;
+		// Start from where the camera still is (a quick re-press during the swing back).
+		FreeLookTarget = FreeLookAngles;
+	}
+	else
+	{
+		FreeLookTarget = FVector2D::ZeroVector;
+	}
+}
+
+void ASpaceshipPawn::UpdateFreeLook(float DeltaSeconds)
+{
+	if (bFreeLookHeld)
+	{
+		// Mouse up looks up; pitch is not affected by bInvertPitch, which is about steering.
+		FreeLookTarget.X = FMath::Clamp(FreeLookTarget.X + MouseLookDelta.X * FreeLookSensitivity, -FreeLookMaxYawDeg, FreeLookMaxYawDeg);
+		FreeLookTarget.Y = FMath::Clamp(FreeLookTarget.Y + MouseLookDelta.Y * FreeLookSensitivity, -FreeLookMaxPitchDeg, FreeLookMaxPitchDeg);
+		MouseLookDelta = FVector2D::ZeroVector;
+		LookInput = FVector2D::ZeroVector;
+	}
+
+	const FVector2D Previous = FreeLookAngles;
+	const float Rate = bFreeLookHeld ? FreeLookFollowRate : FreeLookReturnRate;
+	FreeLookAngles += (FreeLookTarget - FreeLookAngles) * (1.0 - FMath::Exp(-Rate * DeltaSeconds));
+	if (!bFreeLookHeld && FreeLookAngles.GetAbsMax() < 0.05)
+	{
+		FreeLookAngles = FVector2D::ZeroVector;
+	}
+	if (FreeLookAngles == Previous)
+	{
+		return;  // nothing moved (the usual case: not free looking)
+	}
+
+	// Chase: the boom swings around the ship. Cockpit: the head turns.
+	const FRotator Offset(float(FreeLookAngles.Y), float(FreeLookAngles.X), 0.f);
+	CameraBoom->SetRelativeRotation(Offset);
+	CockpitCamera->SetRelativeRotation(Offset);
+}
+
+TArray<FVector> ASpaceshipPawn::DebugSimulateFreeLook(const TArray<FVector>& Frames)
+{
+	const float Step = 1.f / 60.f;
+	TArray<FVector> Result;
+	for (const FVector& Frame : Frames)
+	{
+		SetFreeLookHeld(Frame.Z > 0.5);
+		MouseLookDelta += FVector2D(Frame.X, Frame.Y);
+		UpdateFreeLook(Step);
+		UpdateAngularMotion(Step);
+		Result.Add(FVector(FreeLookAngles.X, FreeLookAngles.Y, bFreeLookHeld ? 1.0 : 0.0));
+		const FRotator Rotation = GetActorRotation();
+		Result.Add(FVector(Rotation.Pitch, Rotation.Yaw, Rotation.Roll));
+	}
+	return Result;
+}
+
 void ASpaceshipPawn::ClearPilotInput()
 {
+	SetFreeLookHeld(false);
 	ThrustInput = 0.f;
 	StrafeInput = 0.f;
 	LiftInput = 0.f;
@@ -641,6 +756,8 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 
 	UpdateEnvironment(DeltaSeconds);
 	UpdateLanding(DeltaSeconds);
+	// Before steering: while held it takes the mouse movement for itself.
+	UpdateFreeLook(DeltaSeconds);
 	if (LandingState == ELandingState::Landed)
 	{
 		UpdateLandedMotion(DeltaSeconds);
@@ -676,8 +793,8 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 	const FVector2D Command(
 		FMath::Clamp(MouseStick.X + LookInput.X, -1., 1.),
 		FMath::Clamp(MouseStick.Y + LookInput.Y, -1., 1.));
-	const float PitchCommand = Command.Y * (bInvertPitch ? -1.f : 1.f);
-	const float YawCommand = Command.X;
+	const float PitchCommand = bFreeLookHeld ? 0.f : Command.Y * (bInvertPitch ? -1.f : 1.f);
+	const float YawCommand = bFreeLookHeld ? 0.f : Command.X;
 
 	const FVector TargetRates(
 		RollInput * RollRate,
@@ -685,6 +802,12 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 		YawCommand * YawRate);
 
 	AngularVelocity = FMath::VInterpTo(AngularVelocity, TargetRates, DeltaSeconds, AngularResponsiveness);
+	if (bFreeLookHeld)
+	{
+		// Heading frozen where it was; roll (keys) still works, and the flight path is untouched.
+		AngularVelocity.Y = 0.0;
+		AngularVelocity.Z = 0.0;
+	}
 
 	// Local rotation, so pitch/yaw/roll stay relative to the hull. That is what makes this 6DOF
 	// rather than an aircraft glued to a horizon, and it sidesteps gimbal lock at the poles.

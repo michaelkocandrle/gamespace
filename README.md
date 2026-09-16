@@ -132,6 +132,17 @@ of 15 degrees; 87 % of the surface is landable, 4.5 % is steeper than 30 degrees
 | Boost (hold) | `Left Shift`               | -                    |
 | Camera       | `C` (chase / cockpit)      | -                    |
 | Get out      | `F` (only when LANDED)     | -                    |
+| Free look    | hold right mouse button    | -                    |
+
+**Free look** (Elite-style head look): while the right mouse button is held, the ship keeps its
+heading (pitch/yaw rotation stops at once; roll keys and the flight path carry on) and the mouse
+turns only the camera - the chase boom swings around the ship, the cockpit camera turns like a
+head. `FreeLookSensitivity` 0.36 deg per mouse count, limits `FreeLookMaxYawDeg` 110 and
+`FreeLookMaxPitchDeg` 70, smoothed at `FreeLookFollowRate`. On release the camera eases back
+(`FreeLookReturnRate` 6: ~95 % in 0.5 s) while steering works again immediately, from a centred
+stick. The HUD shows FREE LOOK in the middle of the screen and the camera angles on the CAMERA
+line. Input: `IA_FreeLook` (bool, held), added to `IMC_Spaceship` by
+`Tools/Assets/add_free_look_input.py`; headless test `Tools/Tests/test_free_look.py`.
 
 ### Enhanced Input
 
