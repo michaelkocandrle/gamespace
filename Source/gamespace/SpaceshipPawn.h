@@ -81,6 +81,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
 	void SetCockpitView(bool bCockpit);
 
+	/**
+	 * Puts the chase camera straight back behind the ship instead of letting camera lag glide it
+	 * there. Call after teleporting the ship, or the camera trails across the whole jump.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
+	void SnapCameraToShip();
+
 protected:
 	// ---------------------------------------------------------------------------------------
 	// Components
@@ -334,4 +341,7 @@ private:
 
 	bool bBoostHeld = false;
 	bool bCockpitView = false;
+
+	/** Ticks left with camera lag switched off after SnapCameraToShip. */
+	int32 CameraSnapTicks = 0;
 };

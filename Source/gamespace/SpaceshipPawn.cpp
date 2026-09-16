@@ -90,6 +90,9 @@ ASpaceshipPawn::ASpaceshipPawn()
 	CameraBoom->ProbeSize = 25.f;
 	CameraBoom->bEnableCameraLag = true;
 	CameraBoom->CameraLagSpeed = 8.f;
+	// Lag trails by roughly speed / CameraLagSpeed: ~10 m at boost, but a kilometre at orbital
+	// speeds, and the whole distance after a teleport. Cap it so the ship stays in frame.
+	CameraBoom->CameraLagMaxDistance = 1500.f;
 
 	ChaseCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ChaseCamera"));
 	ChaseCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -134,6 +137,14 @@ void ASpaceshipPawn::BeginPlay()
 		UE_LOG(LogSpaceship, Warning, TEXT("%s has no engine sound: %s not found."),
 			*GetName(), SpaceshipPawnDefaults::EngineLoopSoundPath);
 	}
+}
+
+void ASpaceshipPawn::SnapCameraToShip()
+{
+	// The spring arm stores its lagged location every update; one update without lag stores the
+	// real one. Two ticks, because the arm may update before or after this pawn in a frame.
+	CameraBoom->bEnableCameraLag = false;
+	CameraSnapTicks = 2;
 }
 
 void ASpaceshipPawn::SetCockpitView(bool bCockpit)
@@ -456,6 +467,11 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 	UpdateAngularMotion(DeltaSeconds);
 	UpdateLinearMotion(DeltaSeconds);
 	UpdateEngineAudio(DeltaSeconds);
+
+	if (CameraSnapTicks > 0 && --CameraSnapTicks == 0)
+	{
+		CameraBoom->bEnableCameraLag = true;
+	}
 }
 
 void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)

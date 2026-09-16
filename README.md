@@ -209,6 +209,49 @@ the top-left corner. A tuning aid, not UMG - replace it when a real HUD exists.
 The `TARGET` line shows the nearest `ACelestialBody`: its name, the distance to its surface, and
 the time to reach it at the current closing speed (`--:--` when not approaching).
 
+The `ORIGIN` line shows how far the ship is from the current world origin and where that origin
+is in absolute km; `REBASE` shows how many origin shifts have happened, how long ago and how
+long the last one took.
+
+## Large world coordinates and origin rebasing
+
+**Large World Coordinates are always on in UE 5.1+.** There is no project setting for it:
+`FVector`/`FTransform` are `double`, the old per-world `bEnableLargeWorlds` flag is deprecated
+("As of UE 5.1 all worlds are large"), `UE_USE_UE4_WORLD_MAX` is 0 and the world is valid up to
+~44 million km from the origin. Chaos physics also uses `double` (`Chaos::FReal`).
+`ASpaceshipPawn` keeps `LinearVelocity`/`AngularVelocity` as `FVector`, and all actor locations
+(including `ACelestialBody`) are standard double-precision transforms.
+
+**Origin rebasing** (`USpaceOriginRebasingSubsystem`) still moves the world origin to the ship
+once it is `RebaseDistanceKm` (default 10) away, through the engine's own
+`UWorld::RequestNewWorldOrigin`. It keeps coordinates small for what remains single precision:
+mesh vertices in component space, GPU particles, material world-position maths. Settings are
+on `ASpaceGameMode` (`Space|Origin Rebasing`); during PIE select *SpaceGameMode* in the
+Outliner to change them live.
+
+Measured in PIE: a rebase takes 0.2-1.5 ms; positions, velocities, relative distances and
+collision are unchanged afterwards (drift 0.000000 cm).
+
+Limits to know:
+- `UWorld::OriginLocation` is `FIntVector` (int32 cm), so the origin can only follow to
+  ±21,474 km from absolute zero. Beyond that rebasing stops with one warning; the world keeps
+  working in plain double coordinates (verified at 30,000 km).
+- Chaos cannot shift its physics scene (`FPhysScene_Chaos::SupportsOriginShifting()` is false),
+  so the engine teleports every physics body one by one. Cheap now; it scales with body count.
+- Local only, not network-aware; editor worlds never rebase.
+
+Console commands (open the console in PIE with the key under Esc):
+
+| Command | Effect |
+| ------- | ------ |
+| `space.TeleportForwardKm <km>` | Moves the ship along its nose |
+| `space.TeleportAbsoluteKm <x> <y> <z>` | Moves the ship to an absolute position, independent of rebasing |
+| `space.RebaseNow` | Moves the origin to the ship on the next tick |
+| `space.PrintOrigin` | Logs origin and ship position (`LogSpaceOrigin`) |
+
+Teleports snap the chase camera to the ship (`ASpaceshipPawn::SnapCameraToShip`); camera lag is
+also capped at 15 m, since at orbital speeds it would otherwise trail kilometres behind.
+
 ## CelestialBody
 
 `Source/gamespace/CelestialBody.h` - `ACelestialBody`, a named body in space (planet, moon,
@@ -224,7 +267,7 @@ Its space look is built by `Tools/Assets/build_space_scene.py` (see below).
 | ------------------ | ----- |
 | `Sun`              | Directional light, movable, intensity 8, pitch -39 / yaw 45: from behind the player's left shoulder |
 | `SkyLight`         | Movable, real-time capture, intensity 0.35. Captures the star dome, so ambient light is near zero |
-| `StarfieldSky`     | 8 km engine sphere with `M_Starfield_Sky`: unlit, *Is Sky*, procedural stars plus a Milky Way glow cubemap |
+| `StarfieldSky`     | `ASkyDome`: 1000 km sphere that follows the camera, with `M_Starfield_Sky`: unlit, *Is Sky*, procedural stars plus a Milky Way glow cubemap |
 | `Planet_Veyra`     | `ACelestialBody`, radius 500 m, surface 2.5 km ahead of the start |
 | `PP_SpaceExposure` | Unbound post-process volume fixing exposure at EV100 3 |
 | `PlayerStart`      | At (0, 0, 300), facing +X towards the planet |
@@ -251,9 +294,11 @@ softens anything smaller than a pixel. Material parameters: `StarBrightness`, `S
 `GlowBrightness`. The sky light still captures the dome, but only for ambient light, which is
 near zero.
 
-**Why an 8 km dome.** The stars are looked up by view direction, so the dome's size does not
-change how they look; it only has to enclose everything you fly to. 8 km is verified in PIE.
-Flying more than 8 km from the origin takes you outside it.
+**Why the dome follows the camera.** The stars are looked up by view direction, so the dome's
+position and size do not change how they look. A fixed dome could be flown out of; `ASkyDome`
+re-centres on the camera every frame, so the sky works at any distance and across rebases
+(verified 20 km out after a rebase). Its radius (`DomeRadiusKm`, 1000) must exceed the distance
+to the farthest body that should be visible, because anything beyond it is hidden.
 
 **Checking visuals headlessly.** A standalone `-game` run of uncooked content renders newly
 created materials with the default material, even with their shaders compiled. Judge the look
@@ -289,6 +334,11 @@ reputation. Occasionally it blocks `UnrealEditor-gamespace.dll` (Code Integrity 
 and the editor reports that *the game module 'gamespace' could not be loaded*. So far a retry
 has loaded the same file fine. `run_editor_python.ps1` reports this as a failure rather than
 silently succeeding.
+
+**It also blocks any change to `gamespace.Build.cs`.** UBT compiles the build rules into
+`Intermediate/Build/BuildRules/gamespaceModuleRules.dll`, and a newly compiled version is refused
+(0x800711C7, "An Application Control policy has blocked this file") on every retry. The
+unchanged original still loads. Until that is resolved, no module dependency can be added.
 
 ## Testing in the editor
 

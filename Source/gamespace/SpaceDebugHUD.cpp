@@ -7,10 +7,48 @@
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
 #include "EngineUtils.h"
+#include "SpaceOriginRebasingSubsystem.h"
 #include "SpaceshipPawn.h"
 
 namespace
 {
+	/** "ORIGIN" readout: where the world origin is and how far the ship is from it. */
+	FString DescribeOrigin(const UWorld* World, const ASpaceshipPawn& Ship)
+	{
+		const USpaceOriginRebasingSubsystem* Rebasing = World->GetSubsystem<USpaceOriginRebasingSubsystem>();
+		if (!Rebasing)
+		{
+			return TEXT("n/a");
+		}
+		const FVector Origin(Rebasing->GetOriginLocation());
+		const double FromOriginKm = Ship.GetActorLocation().Size() / 100000.0;
+		const FString Trigger = Rebasing->IsEnabled()
+			? FString::Printf(TEXT("rebase at %.0f km"), Rebasing->GetRebaseDistanceCm() / 100000.0)
+			: FString(TEXT("rebasing off"));
+		return FString::Printf(TEXT("ship %.2f km from origin (%s)   origin %.1f, %.1f, %.1f km"),
+			FromOriginKm, *Trigger, Origin.X / 100000.0, Origin.Y / 100000.0, Origin.Z / 100000.0);
+	}
+
+	/** "REBASE" readout: how many rebases, how long ago and how long the last one took. */
+	FString DescribeRebases(const UWorld* World)
+	{
+		const USpaceOriginRebasingSubsystem* Rebasing = World->GetSubsystem<USpaceOriginRebasingSubsystem>();
+		if (!Rebasing)
+		{
+			return TEXT("n/a");
+		}
+		FString Text = Rebasing->GetRebaseCount() == 0
+			? FString(TEXT("none yet"))
+			: FString::Printf(TEXT("%d x, last %.1f s ago, took %.1f ms, shift %.2f km"),
+				Rebasing->GetRebaseCount(), Rebasing->GetSecondsSinceLastRebase(),
+				Rebasing->GetLastRebaseMilliseconds(), Rebasing->GetLastShiftCm().Size() / 100000.0);
+		if (Rebasing->IsOutOfRebaseRange())
+		{
+			Text += TEXT("   OUT OF RANGE (> 21474 km)");
+		}
+		return Text;
+	}
+
 	FString FormatDistance(double Centimetres)
 	{
 		const double Metres = FMath::Max(Centimetres, 0.0) / 100.0;
@@ -87,6 +125,8 @@ void ASpaceDebugHUD::DrawHUD()
 			Ship->IsBoosting() ? FLinearColor(1.f, 0.55f, 0.1f) : FLinearColor(0.6f, 0.6f, 0.6f) },
 		{ TEXT("CAMERA"), Ship->IsCockpitView() ? TEXT("Cockpit") : TEXT("Chase"), FLinearColor::White },
 		{ TEXT("TARGET"), DescribeNearestBody(GetWorld(), *Ship), FLinearColor(0.6f, 1.f, 0.7f) },
+		{ TEXT("ORIGIN"), DescribeOrigin(GetWorld(), *Ship), FLinearColor(0.85f, 0.85f, 0.6f) },
+		{ TEXT("REBASE"), DescribeRebases(GetWorld()), FLinearColor(0.85f, 0.85f, 0.6f) },
 	};
 
 	const float LineHeight = Font->GetMaxCharHeight() * TextScale * 1.25f;

@@ -35,9 +35,10 @@ STAR_DENSITY = 1.0
 # The diffuse Milky Way band. Kept faint: it is a hint of structure, not a light source.
 GLOW_BRIGHTNESS = 0.06
 
-# Sky dome radius. Only has to enclose everything you can fly to; the stars are looked up by
-# view direction, so they appear infinitely far away whatever the size.
-SKY_RADIUS_CM = 8_000_00  # 8 km
+# Sky dome radius. The dome (ASkyDome) follows the camera and the stars are looked up by view
+# direction, so the size does not change how the sky looks. It must exceed the distance to the
+# farthest body that should be visible: anything beyond it is hidden behind the dome.
+SKY_DOME_RADIUS_KM = 1000.0
 
 # Planet: radius 500 m, surface ~2.5 km from PlayerStart. At the ~33 m/s cruise speed that is
 # roughly 75 s of flight, ~30 s with boost, and the planet starts at ~19 degrees across - clearly
@@ -377,13 +378,18 @@ def build_planet_material():
 # ---------------------------------------------------------------------------------------
 
 
-def upsert_actor(eas, actors, label, cls, location=(0.0, 0.0, 0.0)):
+def upsert_actor(eas, actors, label, cls, location=(0.0, 0.0, 0.0), replace_other_class=False):
     for actor in actors:
         if actor.get_actor_label() == label:
             # cls may be a Python wrapper type or a UClass from load_class(); compare as UClass.
             wanted = cls if isinstance(cls, unreal.Class) else cls.static_class()
             if not unreal.MathLibrary.class_is_child_of(actor.get_class(), wanted):
-                raise RuntimeError("actor %r is a %s, expected %s" % (label, actor.get_class().get_name(), cls))
+                if not replace_other_class:
+                    raise RuntimeError("actor %r is a %s, expected %s" % (label, actor.get_class().get_name(), cls))
+                # Only for actors this script created itself, when their class has changed.
+                log("replacing %s (%s) with %s" % (label, actor.get_class().get_name(), wanted.get_name()))
+                eas.destroy_actor(actor)
+                break
             actor.set_actor_location(unreal.Vector(*location), False, False)
             return actor
     actor = eas.spawn_actor_from_class(cls, unreal.Vector(*location), unreal.Rotator())
@@ -414,19 +420,14 @@ def build_level(sky_material, planet_mesh, planet_material):
             # Stars exist below the horizon too; don't clamp the captured lower half to black.
             sky_light.set_editor_property("lower_hemisphere_is_black", False)
 
-    # Star dome
-    sphere = unreal.load_object(None, "/Engine/BasicShapes/Sphere.Sphere")  # radius 50 cm
-    sky = upsert_actor(eas, actors, "StarfieldSky", unreal.StaticMeshActor)
-    sky.set_actor_scale3d(unreal.Vector(1, 1, 1) * (SKY_RADIUS_CM / 50.0))
-    smc = sky.get_component_by_class(unreal.StaticMeshComponent)
-    smc.set_static_mesh(sphere)
-    smc.set_material(0, sky_material)
-    smc.set_collision_profile_name("NoCollision")
-    # A shell around the whole level: casting shadows would put everything in the dark.
-    smc.set_editor_property("cast_shadow", False)
-    smc.set_editor_property("affect_distance_field_lighting", False)
-    smc.set_editor_property("affect_dynamic_indirect_lighting", False)
-    smc.set_editor_property("visible_in_ray_tracing", False)
+    # Star dome: ASkyDome sets its own mesh, collision, shadow and scale (from the radius) and
+    # follows the camera at runtime; only the material and radius are set here.
+    sky = upsert_actor(eas, actors, "StarfieldSky", unreal.load_class(None, "/Script/gamespace.SkyDome"),
+                       replace_other_class=True)
+    # set_editor_property goes through PostEditChangeProperty, which reruns OnConstruction.
+    sky.set_editor_property("dome_radius_km", SKY_DOME_RADIUS_KM)
+    sky.get_component_by_class(unreal.StaticMeshComponent).set_material(0, sky_material)
+    log("sky dome radius %.0f km, actor scale %.0f" % (SKY_DOME_RADIUS_KM, sky.get_actor_scale3d().x))
 
     # Planet
     body_class = unreal.load_class(None, "/Script/gamespace.CelestialBody")
