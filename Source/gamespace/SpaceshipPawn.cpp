@@ -79,9 +79,15 @@ ASpaceshipPawn::ASpaceshipPawn()
 	CameraBoom->SetupAttachment(HullCollision);
 	CameraBoom->TargetArmLength = 900.f;
 	CameraBoom->SocketOffset = FVector(0.f, 0.f, 200.f);
-	// The boom follows the hull, not the controller, and there is nothing in space to collide with.
+	// The boom follows the hull, not the controller.
 	CameraBoom->bUsePawnControlRotation = false;
-	CameraBoom->bDoCollisionTest = false;
+	// Pull the camera in when something is between it and the ship. Without this the camera,
+	// 9 m back, sank into asteroids smaller than the boom: seen from inside, a mesh's faces are
+	// culled, so the rock vanished and the ship appeared to fly through it. The trace ignores
+	// the ship itself.
+	CameraBoom->bDoCollisionTest = true;
+	CameraBoom->ProbeChannel = ECC_Camera;
+	CameraBoom->ProbeSize = 25.f;
 	CameraBoom->bEnableCameraLag = true;
 	CameraBoom->CameraLagSpeed = 8.f;
 

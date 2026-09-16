@@ -41,7 +41,7 @@ git lfs install
 | ------------- | --------------------------------------------------------------- |
 | `HullCollision` | Root. Box 200 x 100 x 35 cm, `Pawn` profile - the ship's only collision. Unscaled, so the cameras do not inherit the hull's scale |
 | `Hull`        | `/Engine/BasicShapes/Cube` stretched to 2.0 x 1.0 x 0.35, visual only |
-| `CameraBoom`  | 900 cm spring arm, no collision test, mild lag                   |
+| `CameraBoom`  | 900 cm spring arm, mild lag, collision test on: pulls the camera in rather than letting it sink into an asteroid |
 | `ChaseCamera` | Third-person camera                                              |
 | `CockpitCamera` | Nose view at (90, 0, 15), FOV 90, inactive until toggled; hides the hull from the player's own view |
 | `EngineAudio` | Engine loop, not spatialised, started and stopped from `Tick` |
