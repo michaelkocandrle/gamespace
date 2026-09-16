@@ -79,6 +79,40 @@ class ImportPlanTest(unittest.TestCase):
         self.assertEqual(import_ship.socket_key("SOCKET_Cockpit"), "Cockpit")
         self.assertEqual(import_ship.socket_key("Cockpit"), "Cockpit")
 
+    def test_setup_file_overrides_manifest_in_order(self):
+        setup = {"pawn": {"_comment": "x", "pitch_rate": 70.0, "hide_hull_in_cockpit": False},
+                 "components": {"camera_boom": {"target_arm_length": 1450.0},
+                                "cockpit_camera": {"relative_location": [300.0, 0.0, 78.0]}},
+                 "materials": {"MI_A": {"master": "hull", "slots": ["M_Ship_Vanguard_Hull"]}}}
+        plan = import_ship.build_plan(self.manifest, "C:/art/Vanguard/Export", setup)
+        settings = {}
+        for c, p, v in plan["pawn_settings"]:
+            settings[(c, p)] = v  # later entries win, as in apply_pawn_settings
+        self.assertEqual(settings[("camera_boom", "target_arm_length")], 1450.0)
+        self.assertEqual(settings[("cockpit_camera", "relative_location")], [300.0, 0.0, 78.0])
+        self.assertIs(settings[(None, "hide_hull_in_cockpit")], False)
+        self.assertNotIn((None, "_comment"), settings)
+        self.assertIn("MI_A", plan["materials"])
+        self.assertIn("material MI_A (hull)", import_ship.format_plan(plan))
+        self.assertEqual(import_ship.setup_path("C:/art/Vanguard/Export", "Vanguard").replace("\\", "/"),
+                         "C:/art/Vanguard/Vanguard_setup.json")
+
+    def test_vanguard_setup_covers_every_material_slot(self):
+        ship_dir = os.path.join(import_ship.REPO, "ArtSource", "Ships", "Vanguard")
+        manifest = json.load(open(os.path.join(ship_dir, "Export", "Vanguard_manifest.json"), encoding="utf-8"))
+        setup = import_ship.load_setup(os.path.join(ship_dir, "Vanguard_setup.json"))
+        self.assertTrue(setup)
+        for mesh_name, info in manifest["meshes"].items():
+            if info["lod"] != 0:
+                continue
+            for slot in info["materials"]:
+                matches = [n for n, spec in setup["materials"].items()
+                           if slot in spec["slots"] and (not spec.get("meshes") or mesh_name in spec["meshes"])]
+                self.assertTrue(matches, "%s slot %s has no material" % (mesh_name, slot))
+                self.assertIn(setup["materials"][matches[0]]["master"], ("hull", "glass"))
+        canopy = [n for n, spec in setup["materials"].items() if "SM_Ship_Vanguard_Canopy" in spec.get("meshes", [])]
+        self.assertEqual([setup["materials"][n]["master"] for n in canopy], ["glass"])
+
     def test_dry_run_from_the_command_line(self):
         script = os.path.join(HERE, "..", "import_ship.py")
         with tempfile.TemporaryDirectory() as folder:

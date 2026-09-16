@@ -18,6 +18,7 @@
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
 #include "InputTriggers.h"
+#include "SpaceDebugHUD.h"
 #include "SpaceshipPawn.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -32,6 +33,7 @@ namespace PlayerCharacterDefaults
 	const TCHAR* const JumpActionPath = TEXT("/Game/Input/IA_CharJump.IA_CharJump");
 	const TCHAR* const SprintActionPath = TEXT("/Game/Input/IA_CharSprint.IA_CharSprint");
 	const TCHAR* const InteractActionPath = TEXT("/Game/Input/IA_Interact.IA_Interact");
+	const TCHAR* const ToggleHudActionPath = TEXT("/Game/Input/IA_ToggleHud.IA_ToggleHud");
 
 	constexpr float CapsuleRadius = 42.f;
 	constexpr float CapsuleHalfHeight = 96.f;
@@ -205,6 +207,7 @@ void APlayerCharacter::ResolveInputAssets()
 	if (!JumpAction) { JumpAction = LoadOptional<UInputAction>(JumpActionPath); }
 	if (!SprintAction) { SprintAction = LoadOptional<UInputAction>(SprintActionPath); }
 	if (!InteractAction) { InteractAction = LoadOptional<UInputAction>(InteractActionPath); }
+	if (!ToggleHudAction) { ToggleHudAction = LoadOptional<UInputAction>(ToggleHudActionPath); }
 
 	if (CharacterMappingContext && MoveAction && LookAction && JumpAction && SprintAction && InteractAction)
 	{
@@ -266,6 +269,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		Input->BindAction(SprintAction, ETriggerEvent::Triggered, this, &APlayerCharacter::HandleSprint);
 		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::HandleSprintReleased);
 		Input->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::HandleInteract);
+		if (ToggleHudAction)
+		{
+			Input->BindAction(ToggleHudAction, ETriggerEvent::Started, this, &APlayerCharacter::HandleToggleHud);
+		}
 	}
 
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -327,6 +334,11 @@ void APlayerCharacter::HandleSprint(const FInputActionValue& /*Value*/)
 void APlayerCharacter::HandleSprintReleased(const FInputActionValue& /*Value*/)
 {
 	bSprintHeld = false;
+}
+
+void APlayerCharacter::HandleToggleHud(const FInputActionValue& /*Value*/)
+{
+	ASpaceDebugHUD::CycleDisplayMode();
 }
 
 void APlayerCharacter::HandleInteract(const FInputActionValue& /*Value*/)

@@ -27,9 +27,13 @@ Steps:
   4. Create or update /Game/Ships/<Ship>/Blueprints/BP_Ship_<Ship> (child of ASpaceshipPawn)
      with the manifest's suggested_pawn_settings: root box, hull mesh and offset, camera boom,
      cockpit camera, landing and heat values; glass parts become extra mesh components.
-  5. Optionally: planet collision settings in TestSpace, and a BP_SpaceGameMode that spawns
+  5. Hand tuning from ArtSource/Ships/<Ship>/<Ship>_setup.json, when it exists: master materials
+     and material instances assigned by slot name (Tools/Assets/ship_materials.py), then pawn and
+     component values that override the size-based ones above (camera distance, FOV, handling,
+     engine sound).
+  6. Optionally: planet collision settings in TestSpace, and a BP_SpaceGameMode that spawns
      the new ship as TestSpace's game mode override.
-  6. Write <Ship>_import_report.json next to the manifest.
+  7. Write <Ship>_import_report.json next to the manifest.
 
 Nothing is saved when a step fails before the Blueprint stage; meshes that did import stay.
 Reduced LODs (_LOD1...) are not imported: Nanite meshes do not use them. Import them in the
@@ -84,8 +88,29 @@ def find_manifest(explicit=None):
     return found[0]
 
 
-def build_plan(manifest, manifest_dir):
-    """Everything the import will do, as data. Assumes validate_manifest passed."""
+def setup_path(manifest_dir, ship):
+    """ArtSource/Ships/<Ship>/<Ship>_setup.json: the manifest lives in <Ship>/Export."""
+    return os.path.join(os.path.dirname(os.path.abspath(manifest_dir)), "%s_setup.json" % ship)
+
+
+def load_setup(path):
+    if not os.path.isfile(path):
+        return {}
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def setup_settings(setup):
+    """(component or None, property, value) from a setup file, in file order; keys starting with _ are notes."""
+    out = [(None, prop, value) for prop, value in (setup.get("pawn") or {}).items() if not prop.startswith("_")]
+    for component, props in (setup.get("components") or {}).items():
+        out += [(component, prop, value) for prop, value in props.items() if not prop.startswith("_")]
+    return out
+
+
+def build_plan(manifest, manifest_dir, setup=None):
+    """Everything the import will do, as data. Assumes validate_manifest passed. setup: the parsed
+    <Ship>_setup.json (or None); its values come after the manifest's, so they win."""
     ship = manifest["ship"]
     root = "/Game/Ships/%s" % ship
     s = manifest["suggested_pawn_settings"]
@@ -132,6 +157,9 @@ def build_plan(manifest, manifest_dir):
     if s["CockpitCamera_location_ue_cm"] is not None:
         pawn.append(("cockpit_camera", "relative_location", s["CockpitCamera_location_ue_cm"]))
 
+    setup = setup or {}
+    pawn += setup_settings(setup)
+
     extra_components = [{"component": m["part"] or m["name"], "mesh": m["asset_path"],
                          "relative_location": s["Hull_RelativeLocation_cm"]}
                         for m in meshes if m["name"] != main]
@@ -141,6 +169,7 @@ def build_plan(manifest, manifest_dir):
         "meshes": meshes,
         "blueprint": "%s/Blueprints/BP_Ship_%s" % (root, ship),
         "pawn_settings": pawn,
+        "materials": setup.get("materials") or {},
         "extra_components": extra_components,
         "planet_settings": [("collision_warmup_reach_m", s["Planet_CollisionWarmupReachM"]),
                             ("collision_min_radius_m", s["Planet_CollisionMinRadiusM"])],
@@ -159,6 +188,9 @@ def format_plan(plan):
     lines.append("  blueprint %s" % plan["blueprint"])
     for component, prop, value in plan["pawn_settings"]:
         lines.append("    %s.%s = %s" % (component or "(pawn)", prop, value))
+    for mi, spec in sorted(plan["materials"].items()):
+        lines.append("  material %s (%s) -> slots %s%s" % (mi, spec["master"], ", ".join(spec["slots"]),
+                                                       " on " + ", ".join(spec["meshes"]) if spec.get("meshes") else ""))
     for extra in plan["extra_components"]:
         lines.append("    + component %s with %s" % (extra["component"], extra["mesh"]))
     for prop, value in plan["planet_settings"]:
@@ -370,7 +402,9 @@ def apply_pawn_settings(plan, report):
         elif prop == "socket_offset_z":
             offset = target.get_editor_property("socket_offset")
             target.set_editor_property("socket_offset", unreal.Vector(offset.x, offset.y, float(value)))
-        elif prop in ("relative_location", "relative_scale3d"):
+        elif isinstance(value, bool):
+            target.set_editor_property(prop, value)
+        elif isinstance(value, (list, tuple)):
             target.set_editor_property(prop, vec(value))
         else:
             target.set_editor_property(prop, float(value))
@@ -463,7 +497,10 @@ def main(argv):
     if any(i["level"] == gx.ERROR for i in issues):
         raise ImportFailed("manifest has errors; fix them in Blender and export again")
 
-    plan = build_plan(manifest, os.path.dirname(manifest_path))
+    setup_file = setup_path(os.path.dirname(manifest_path), manifest["ship"])
+    setup = load_setup(setup_file)
+    log("setup %s" % (setup_file if setup else "(none: %s not found)" % setup_file))
+    plan = build_plan(manifest, os.path.dirname(manifest_path), setup)
     log(format_plan(plan))
     if unreal is None or env_flag("GAMESPACE_SHIP_DRY_RUN", False):
         log("dry run: nothing imported")
@@ -471,7 +508,11 @@ def main(argv):
 
     report = {"manifest": manifest_path, "ship": plan["ship"], "meshes": {}}
     use_legacy_fbx_importer()
-    import_all_meshes(plan, report["meshes"])
+    imported = import_all_meshes(plan, report["meshes"])
+    if plan["materials"]:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import ship_materials
+        report["materials"] = ship_materials.apply(plan["ship"], {"materials": plan["materials"]}, imported)
     blueprint = apply_pawn_settings(plan, report)
     apply_level_settings(plan, blueprint, env_flag("GAMESPACE_SHIP_APPLY_PLANET", True),
                          env_flag("GAMESPACE_SHIP_SET_GAME_MODE", True), report)

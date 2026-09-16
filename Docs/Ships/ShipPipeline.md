@@ -207,8 +207,12 @@ Rozlišení: trup 4096², malé díly 1024–2048². Rozměry vždy mocnina dvou
 
 ### J. Materiály
 
-Sloty na meshi pojmenuj `M_Ship_Vanguard_Hull`, `_Glass`, `_Emissive` (2–4 sloty). Jméno slotu
-se přenese do Unrealu; skutečné materiály se udělají v Unrealu jako `MI_` z `M_Ship_Master`.
+Sloty na meshi pojmenuj `M_Ship_<Loď>_<Povrch>` (`_HullPaint`, `_Glass`, `_Emissive`, ...). Jméno
+slotu se přenese do Unrealu. Materiály v Unrealu vytvoří import podle
+`ArtSource/Ships/<Loď>/<Loď>_setup.json` (viz L3): instance `MI_Ship_<Loď>_*` ze dvou sdílených
+masterů `/Game/Ships/Shared/Materials/M_Ship_Hull` (neprůhledný, Nanite; BaseColor, Metallic,
+Roughness, EmissiveColor × EmissiveStrength) a `M_Ship_Glass` (průhledný, oboustranný; BaseColor,
+Opacity, Roughness).
 
 ### K. Kontrola a export
 
@@ -290,6 +294,21 @@ Ruční import (kdyby skript selhal) – FBX do `Content/Ships/Vanguard/Meshes/`
 | Convert Scene Unit | off |
 | Normal Import Method | Import Normals and Tangents |
 | Import Materials / Textures | off (textury importovat zvlášť s nastavením z E.) |
+
+**L3. Ruční doladění: `ArtSource/Ships/<Loď>/<Loď>_setup.json`** (nepovinné, v gitu).
+Import ho načte po manifestu, takže jeho hodnoty vyhrávají:
+- `materials`: jméno instance → `master` (`hull`/`glass`), `slots` (jména slotů z Blenderu),
+  volitelně `meshes` (jen na těchto meshích; např. sklo trupu neprůhledné, kokpit průhledný),
+  `base_color`, `metallic`, `roughness`, `emissive_color`, `emissive_strength`, `opacity`.
+  Každý slot musí mít materiál (hlídá `test_import_ship_plan.py`).
+- `pawn`: vlastnosti `ASpaceshipPawn` v snake_case (`pitch_rate`, `thrust_acceleration`,
+  `engine_min_pitch`, `hide_hull_in_cockpit`, ...).
+- `components`: komponenta → vlastnosti (`camera_boom.target_arm_length`,
+  `chase_camera.field_of_view`, `cockpit_camera.relative_location`, ...). Vektory jako `[x, y, z]`.
+- Klíče začínající `_` jsou poznámky.
+
+Po úpravě stačí znovu spustit import (L2); FBX se naimportují znovu, ale nic ručního se neztratí,
+protože všechno je v souborech.
 
 **Ověření po prvním importu** (jednou; pak víme, že nastavení sedí):
 1. Static Mesh Editor > Details > **Approx Size** = `expected_ue_size_cm` z manifestu.
@@ -400,11 +419,11 @@ nastaví do `BP_Ship_<Loď>` – nic se nepřepočítává ručně. Tabulka ukaz
 | Kde | Dnes | Pro ~14 m loď | Poznámka |
 | --- | --- | --- | --- |
 | `HullCollision` BoxExtent | 100, 50, 17,5 | z manifestu (~700, 500, 150) | |
-| `CameraBoom->TargetArmLength` | 900 | ~2500 (1.8 × délka) | manifest: `CameraBoom_TargetArmLength_cm` |
-| `CameraBoom->SocketOffset.Z` | 200 | ~300–400 | kamera kousek nad lodí |
+| `CameraBoom->TargetArmLength` | 900 | ~2500 (1.8 × délka) | manifest: `CameraBoom_TargetArmLength_cm`; při hraní bylo moc daleko, Vanguard (17,6 m) má v `_setup.json` 1450 (~0,8 × délka) |
+| `CameraBoom->SocketOffset.Z` | 200 | ~300–400 | kamera kousek nad lodí (Vanguard 330) |
 | `CameraBoom->ProbeSize` | 25 | 25–50 | |
 | `CameraBoom->CameraLagMaxDistance` | 1500 | ~3000 | |
-| `CockpitCamera` poloha | 90, 0, 15 | ze `SOCKET_Cockpit` | lépe připojit ke socketu meshe |
+| `CockpitCamera` poloha | 90, 0, 15 | ze `SOCKET_Cockpit` | oko musí být pod sklem kokpitu a nad trupem; Vanguard `SOCKET_Cockpit` (Z 111) bylo ve skle, `_setup.json` ho posouvá na 300, 0, 78 |
 | `LandingFootprintRadiusCm` | 150 | ~500 | půlka menšího rozměru |
 | `LandingMaxGapCm` | 60 | ~100 | |
 | `GroundContactToleranceCm` | 10 | 10–20 | |
@@ -431,4 +450,5 @@ nastaví do `BP_Ship_<Loď>` – nic se nepřepočítává ručně. Tabulka ukaz
 - **Trysky**: emisivní materiál + později Niagara na `SOCKET_Engine_*`; zvuk
   `EngineAudio` přesunout na socket (dnes nespatializovaný, takže nevadí).
 - **Origin rebasing**: nic nového – loď je jeden actor, jeho komponenty se posouvají s ním.
-`.\Toolsun_editor_python.ps1 Tools\Tests	est_ship_import.py`. Zjištění z prvního běhu:
+`.\Tools
+un_editor_python.ps1 Tools\Tests	est_ship_import.py`. Zjištění z prvního běhu:

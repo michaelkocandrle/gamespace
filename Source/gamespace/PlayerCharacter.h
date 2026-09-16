@@ -116,6 +116,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player|Input")
 	TObjectPtr<UInputAction> SprintAction;
 
+	/** Shared with the ship: H cycles the debug HUD. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player|Input")
+	TObjectPtr<UInputAction> ToggleHudAction;
+
 	/** Shared with the ship: F boards here, exits there. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player|Input")
 	TObjectPtr<UInputAction> InteractAction;
@@ -166,6 +170,7 @@ private:
 	void HandleSprint(const FInputActionValue& Value);
 	void HandleSprintReleased(const FInputActionValue& Value);
 	void HandleInteract(const FInputActionValue& Value);
+	void HandleToggleHud(const FInputActionValue& Value);
 
 	void UpdateGravity();
 	void UpdateView();

@@ -32,7 +32,8 @@ def check(name, ok, detail=""):
 
 manifest_path = import_ship.find_manifest(os.environ.get("GAMESPACE_SHIP_MANIFEST"))
 manifest, _ = import_ship.gx.load_and_validate_manifest(manifest_path)
-plan = import_ship.build_plan(manifest, os.path.dirname(manifest_path))
+setup = import_ship.load_setup(import_ship.setup_path(os.path.dirname(manifest_path), manifest["ship"]))
+plan = import_ship.build_plan(manifest, os.path.dirname(manifest_path), setup)
 s = manifest["suggested_pawn_settings"]
 
 # --- meshes ------------------------------------------------------------------------------
@@ -63,6 +64,31 @@ for m in plan["meshes"]:
         if max(abs(scale.x - 1), abs(scale.y - 1), abs(scale.z - 1)) > 1e-3:
             bad.append("%s scale %.3g" % (key, scale.x))
     check("%s sockets saved at manifest positions, scale 1" % m["name"], not bad, "; ".join(bad) or "%d sockets" % len(m["sockets"]))
+    if plan["materials"]:
+        unassigned = []
+        for slot in mesh.get_editor_property("static_materials"):
+            mat = slot.get_editor_property("material_interface")
+            if not isinstance(mat, unreal.MaterialInstanceConstant) or not mat.get_path_name().startswith("/Game/Ships/"):
+                unassigned.append("%s=%s" % (slot.get_editor_property("material_slot_name"), mat.get_name() if mat else None))
+        check("%s every slot has a ship material instance" % m["name"], not unassigned, "; ".join(unassigned))
+
+# --- materials -----------------------------------------------------------------------------
+if plan["materials"]:
+    MEL = unreal.MaterialEditingLibrary
+    folder = "/Game/Ships/%s/Materials" % plan["ship"]
+    for name, spec in sorted(plan["materials"].items()):
+        mi = unreal.EditorAssetLibrary.load_asset("%s/%s" % (folder, name))
+        parent = mi.get_editor_property("parent") if mi else None
+        want_parent = {"hull": "M_Ship_Hull", "glass": "M_Ship_Glass"}[spec["master"]]
+        check("%s parent %s" % (name, want_parent), parent is not None and parent.get_name() == want_parent,
+              parent.get_name() if parent else "missing")
+        if mi and "emissive_strength" in spec:
+            got = MEL.get_material_instance_scalar_parameter_value(mi, "EmissiveStrength")
+            check("%s glows" % name, abs(got - spec["emissive_strength"]) < 1e-3 and got > 1.0, "%.1f" % got)
+    glass = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Glass")
+    check("M_Ship_Glass is translucent", glass is not None and glass.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_TRANSLUCENT)
+    hull_master = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Hull")
+    check("M_Ship_Hull used with Nanite", hull_master is not None and hull_master.get_editor_property("used_with_nanite"))
 
 # --- blueprint: spawn it, so inherited component overrides are what the game would see ------
 bp_class = unreal.EditorAssetLibrary.load_blueprint_class(plan["blueprint"])
@@ -81,16 +107,22 @@ if ship:
         check("hull mesh", mesh is not None and mesh.get_name() == "SM_Ship_%s" % plan["ship"], str(mesh.get_name() if mesh else None))
         sc = hull.get_editor_property("relative_scale3d")
         check("hull scale 1", abs(sc.x - 1) + abs(sc.y - 1) + abs(sc.z - 1) < 1e-4, "(%.2f, %.2f, %.2f)" % (sc.x, sc.y, sc.z))
-        boom = ship.get_editor_property("camera_boom")
-        check("camera arm", abs(boom.get_editor_property("target_arm_length") - s["CameraBoom_TargetArmLength_cm"]) < 0.5,
-              "%.0f cm" % boom.get_editor_property("target_arm_length"))
-        cockpit = ship.get_editor_property("cockpit_camera").get_editor_property("relative_location")
-        want = s["CockpitCamera_location_ue_cm"]
-        check("cockpit camera at SOCKET_Cockpit", max(abs(cockpit.x - want[0]), abs(cockpit.y - want[1]), abs(cockpit.z - want[2])) < 0.5,
-              "(%.0f, %.0f, %.0f)" % (cockpit.x, cockpit.y, cockpit.z))
-        for prop, key in (("landing_footprint_radius_cm", "LandingFootprintRadiusCm"), ("landing_max_gap_cm", "LandingMaxGapCm"),
-                          ("ground_contact_tolerance_cm", "GroundContactToleranceCm"), ("heat_shake_cm", "HeatShakeCm")):
-            check(prop, abs(ship.get_editor_property(prop) - s[key]) < 0.05, "%.1f" % ship.get_editor_property(prop))
+        # Effective values: manifest first, setup file after it (later entries win).
+        effective = {}
+        for component, prop, value in plan["pawn_settings"]:
+            if prop not in ("box_extent", "static_mesh", "socket_offset_z", "relative_scale3d") and component != "hull":
+                effective[(component, prop)] = value
+        for (component, prop), want in sorted(effective.items(), key=lambda kv: (kv[0][0] or "", kv[0][1])):
+            target = ship if component is None else ship.get_editor_property(component)
+            got = target.get_editor_property(prop)
+            if isinstance(want, bool):
+                ok, shown = got == want, str(got)
+            elif isinstance(want, (list, tuple)):
+                ok = max(abs(got.x - want[0]), abs(got.y - want[1]), abs(got.z - want[2])) < 0.5
+                shown = "(%.0f, %.0f, %.0f)" % (got.x, got.y, got.z)
+            else:
+                ok, shown = abs(got - want) < max(0.05, abs(want) * 1e-4), "%.4g" % got
+            check("%s.%s = %s" % (component or "pawn", prop, want), ok, shown)
         meshes = [c for c in ship.get_components_by_class(unreal.StaticMeshComponent)]
         names = {c.get_name(): c for c in meshes}
         extras = [e["component"] for e in plan["extra_components"]]

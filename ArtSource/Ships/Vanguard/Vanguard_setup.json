@@ -1,0 +1,56 @@
+{
+  "_comment": "Hand-tuned look and feel for BP_Ship_Vanguard. Applied by Tools/Assets/import_ship.py after the size-based values from the manifest, so everything here wins. Edit, then run the import again (editor closed).",
+
+  "pawn": {
+    "thrust_acceleration": 3200.0,
+    "strafe_acceleration": 1400.0,
+    "lift_acceleration": 1600.0,
+    "boost_multiplier": 2.2,
+    "pitch_rate": 70.0,
+    "yaw_rate": 50.0,
+    "roll_rate": 110.0,
+    "angular_responsiveness": 4.5,
+    "engine_volume": 0.6,
+    "engine_min_pitch": 0.68,
+    "engine_max_pitch": 0.9,
+    "engine_boost_pitch": 0.12,
+    "engine_low_pass_full_hz": 1600.0,
+    "engine_spool_rate": 3.0,
+    "free_look_max_yaw_deg": 120.0,
+    "hide_hull_in_cockpit": false
+  },
+
+  "components": {
+    "camera_boom": {
+      "target_arm_length": 1450.0,
+      "socket_offset": [0.0, 0.0, 330.0],
+      "camera_lag_speed": 6.0,
+      "camera_lag_max_distance": 1800.0,
+      "probe_size": 40.0
+    },
+    "chase_camera": {
+      "field_of_view": 80.0
+    },
+    "cockpit_camera": {
+      "_comment": "Eye inside the canopy bubble (canopy spans X 227..632, Z 33..120 cm), above the hull top at Z 33, so the nose is seen from outside. SOCKET_Cockpit at Z 111 sat in the glass.",
+      "relative_location": [300.0, 0.0, 78.0],
+      "field_of_view": 88.0
+    }
+  },
+
+  "materials": {
+    "MI_Ship_Vanguard_HullPaint":  { "master": "hull", "slots": ["M_Ship_Vanguard_HullPaint"],  "base_color": [0.34, 0.355, 0.37], "metallic": 0.3, "roughness": 0.45 },
+    "MI_Ship_Vanguard_HullPaintB": { "master": "hull", "slots": ["M_Ship_Vanguard_HullPaintB"], "base_color": [0.29, 0.30, 0.315], "metallic": 0.3, "roughness": 0.52 },
+    "MI_Ship_Vanguard_HullDark":   { "master": "hull", "slots": ["M_Ship_Vanguard_HullDark"],   "base_color": [0.045, 0.05, 0.055], "metallic": 0.6, "roughness": 0.45 },
+    "MI_Ship_Vanguard_Accent":     { "master": "hull", "slots": ["M_Ship_Vanguard_Accent"],     "base_color": [0.72, 0.24, 0.03], "metallic": 0.1, "roughness": 0.45 },
+    "MI_Ship_Vanguard_Underlayer": { "master": "hull", "slots": ["M_Ship_Vanguard_Underlayer"], "base_color": [0.018, 0.019, 0.021], "metallic": 0.8, "roughness": 0.55 },
+    "MI_Ship_Vanguard_BareMetal":  { "master": "hull", "slots": ["M_Ship_Vanguard_BareMetal"],  "base_color": [0.52, 0.53, 0.55], "metallic": 1.0, "roughness": 0.3 },
+    "MI_Ship_Vanguard_Rubber":     { "master": "hull", "slots": ["M_Ship_Vanguard_Rubber"],     "base_color": [0.015, 0.015, 0.016], "metallic": 0.0, "roughness": 0.85 },
+    "MI_Ship_Vanguard_Thruster":   { "master": "hull", "slots": ["M_Ship_Vanguard_Emissive"],   "base_color": [0.1, 0.2, 0.35], "metallic": 0.0, "roughness": 0.4, "emissive_color": [0.35, 0.65, 1.0], "emissive_strength": 40.0 },
+    "MI_Ship_Vanguard_NavRed":     { "master": "hull", "slots": ["M_Ship_Vanguard_NavRed"],     "base_color": [0.3, 0.02, 0.02], "metallic": 0.0, "roughness": 0.4, "emissive_color": [1.0, 0.05, 0.03], "emissive_strength": 60.0 },
+    "MI_Ship_Vanguard_NavGreen":   { "master": "hull", "slots": ["M_Ship_Vanguard_NavGreen"],   "base_color": [0.02, 0.3, 0.05], "metallic": 0.0, "roughness": 0.4, "emissive_color": [0.05, 1.0, 0.2], "emissive_strength": 60.0 },
+    "MI_Ship_Vanguard_NavWhite":   { "master": "hull", "slots": ["M_Ship_Vanguard_NavWhite"],   "base_color": [0.5, 0.5, 0.5], "metallic": 0.0, "roughness": 0.4, "emissive_color": [1.0, 0.95, 0.85], "emissive_strength": 40.0 },
+    "MI_Ship_Vanguard_SensorGlass": { "master": "hull", "slots": ["M_Ship_Vanguard_Glass"], "meshes": ["SM_Ship_Vanguard"], "base_color": [0.02, 0.03, 0.035], "metallic": 0.0, "roughness": 0.05 },
+    "MI_Ship_Vanguard_CanopyGlass": { "master": "glass", "slots": ["M_Ship_Vanguard_Glass"], "meshes": ["SM_Ship_Vanguard_Canopy"], "base_color": [0.25, 0.35, 0.4], "opacity": 0.18, "roughness": 0.03 }
+  }
+}

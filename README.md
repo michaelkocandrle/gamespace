@@ -322,6 +322,12 @@ Any level without a World Settings override therefore spawns a flyable ship at i
 (signed %, the raw `IA_Thrust` value), boost state and active camera as plain canvas text in
 the top-left corner. A tuning aid, not UMG - replace it when a real HUD exists.
 
+`H` (`IA_ToggleHud`, appended to `IMC_Spaceship` and `IMC_Character` by
+`Tools/Assets/add_hud_toggle_input.py`) cycles the CVar `space.Hud`: `1` compact (default: mode,
+speed, flight, landing, move), `2` full (every line below), `0` hidden. Position and text size
+scale with the viewport height (1.0 at 1080 p), so the panel stays in the corner at any
+resolution.
+
 The `LANDING` line shows `LANDED` (green), `TOUCHDOWN nn %` while settling (yellow), or below
 30 m the gap, slope and tilt with the reason touchdown is not possible (`too high`, `TOO STEEP`,
 `too fast`, `level the ship`, `engines on`, `taking off`). The `TERRAIN` line counts collision
@@ -542,3 +548,20 @@ was the first). If a build or editor start ever fails with Code Integrity event 
 
 Nothing needs placing by hand: the game mode supplies the pawn and the level has a
 `PlayerStart`.
+
+## Playing fullscreen outside the editor
+
+The editor viewport costs frame rate and screen space. Two ways out:
+
+| Command | What runs | When |
+| --- | --- | --- |
+| `.\Tools\Package.ps1` then `.\Tools\Play.ps1` | Cooked Development build in `Saved\Packaged\Windows`, borderless fullscreen at the desktop resolution | Normal play testing. Re-package after content or C++ changes (editor closed; the first package is slow, later ones are incremental). |
+| `.\Tools\Play.ps1 -Editor` | `UnrealEditor.exe -game`, uncooked | Quick look without packaging. Loads slower; materials the editor has not compiled yet can render grey. |
+
+`Play.ps1 -Windowed -Width 1600 -Height 900` for a window, `-Exclusive` for exclusive
+fullscreen. In game: `~` console (`stat fps`, `stat unit`), `Alt+Enter` window/fullscreen,
+`Alt+F4` quit.
+
+Inside the editor: Play dropdown > **New Editor Window (PIE)** opens a separate window
+(`Alt+Enter` makes it fullscreen), or press `F11` in the viewport for immersive mode. `Shift+F1`
+frees the mouse.

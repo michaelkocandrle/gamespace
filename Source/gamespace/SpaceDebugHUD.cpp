@@ -7,6 +7,7 @@
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
 #include "EngineUtils.h"
+#include "HAL/IConsoleManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PlayerCharacter.h"
 #include "QuadSpherePlanet.h"
@@ -15,6 +16,10 @@
 
 namespace
 {
+	TAutoConsoleVariable<int32> CVarSpaceHud(
+		TEXT("space.Hud"), 1,
+		TEXT("Debug HUD: 0 off, 1 compact (default), 2 full. H cycles it in game."));
+
 	/** "TERRAIN" readout: quad-sphere LOD state of the first planet in the level. */
 	FString DescribeTerrain(const UWorld* World)
 	{
@@ -277,6 +282,11 @@ namespace
 	}
 }
 
+void ASpaceDebugHUD::CycleDisplayMode()
+{
+	CVarSpaceHud->Set((CVarSpaceHud.GetValueOnGameThread() + 1) % 3, ECVF_SetByConsole);
+}
+
 void ASpaceDebugHUD::DrawHUD()
 {
 	Super::DrawHUD();
@@ -286,6 +296,9 @@ void ASpaceDebugHUD::DrawHUD()
 	{
 		return;
 	}
+	const int32 Mode = FMath::Clamp(CVarSpaceHud.GetValueOnGameThread(), 0, 2);
+	const float Scale = TextScale * FMath::Clamp(Canvas->ClipY / 1080.f, 0.5f, 2.5f);
+	UFont* Font = GEngine->GetMediumFont();
 
 	TArray<FLine> Lines;
 	if (const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Pawn))
@@ -304,11 +317,22 @@ void ASpaceDebugHUD::DrawHUD()
 	Lines.Add({ TEXT("REBASE"), DescribeRebases(GetWorld()), FLinearColor(0.85f, 0.85f, 0.6f) });
 	Lines.Add({ TEXT("TERRAIN"), DescribeTerrain(GetWorld()), FLinearColor(0.85f, 0.7f, 0.5f) });
 
-	UFont* Font = GEngine->GetMediumFont();
+	if (Mode == 1)
+	{
+		// Compact: what matters while playing; the rest is one H press away.
+		static const TSet<FString> Compact = { TEXT("MODE"), TEXT("SPEED"), TEXT("FLIGHT"), TEXT("LANDING"), TEXT("MOVE") };
+		const bool bFreeLook = Cast<ASpaceshipPawn>(Pawn) && Cast<ASpaceshipPawn>(Pawn)->IsFreeLooking();
+		Lines.RemoveAll([bFreeLook](const FLine& Line)
+		{
+			return !Compact.Contains(Line.Label) && !(bFreeLook && FString(Line.Label) == TEXT("CAMERA"));
+		});
+		Lines.Add({ TEXT("H"), TEXT("more / hide"), FLinearColor(0.5f, 0.5f, 0.5f) });
+	}
 
-	const float LineHeight = Font->GetMaxCharHeight() * TextScale * 1.25f;
-	const float ValueColumn = 130.f * TextScale;
-	const float Padding = 10.f;
+	const FVector2D TopLeft(Origin.X * Canvas->ClipX, Origin.Y * Canvas->ClipY);
+	const float LineHeight = Font->GetMaxCharHeight() * Scale * 1.25f;
+	const float ValueColumn = 100.f * Scale;
+	const float Padding = 8.f * Scale;
 
 	// Size the backing to the longest value so the target line never spills out of it.
 	float WidestValue = 0.f;
@@ -316,20 +340,23 @@ void ASpaceDebugHUD::DrawHUD()
 	{
 		float Width = 0.f;
 		float Height = 0.f;
-		GetTextSize(Line.Value, Width, Height, Font, TextScale);
+		GetTextSize(Line.Value, Width, Height, Font, Scale);
 		WidestValue = FMath::Max(WidestValue, Width);
 	}
 
-	// Dark backing so the numbers stay readable against a bright sky or a lit asteroid.
-	DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.55f), Origin.X - Padding, Origin.Y - Padding,
-		ValueColumn + WidestValue + Padding * 2.f, LineHeight * Lines.Num() + Padding * 2.f);
-
-	float Y = Origin.Y;
-	for (const FLine& Line : Lines)
+	if (Mode > 0)
 	{
-		DrawText(Line.Label, FLinearColor(0.55f, 0.8f, 1.f), Origin.X, Y, Font, TextScale);
-		DrawText(Line.Value, Line.Color, Origin.X + ValueColumn, Y, Font, TextScale);
-		Y += LineHeight;
+		// Dark backing so the numbers stay readable against a bright sky or a lit asteroid.
+		DrawRect(FLinearColor(0.f, 0.f, 0.f, Mode == 1 ? 0.35f : 0.55f), TopLeft.X - Padding, TopLeft.Y - Padding,
+			ValueColumn + WidestValue + Padding * 2.f, LineHeight * Lines.Num() + Padding * 2.f);
+
+		float Y = TopLeft.Y;
+		for (const FLine& Line : Lines)
+		{
+			DrawText(Line.Label, FLinearColor(0.55f, 0.8f, 1.f), TopLeft.X, Y, Font, Scale);
+			DrawText(Line.Value, Line.Color, TopLeft.X + ValueColumn, Y, Font, Scale);
+			Y += LineHeight;
+		}
 	}
 
 	// Big and central while free looking: the mouse is not doing what it usually does.
@@ -337,7 +364,7 @@ void ASpaceDebugHUD::DrawHUD()
 	if (FreeLookShip && FreeLookShip->IsFreeLooking())
 	{
 		const FString Label = TEXT("FREE LOOK");
-		const float LabelScale = TextScale * 1.6f;
+		const float LabelScale = Scale * 1.6f;
 		float Width = 0.f;
 		float Height = 0.f;
 		GetTextSize(Label, Width, Height, Font, LabelScale);

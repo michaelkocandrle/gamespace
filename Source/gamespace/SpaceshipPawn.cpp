@@ -14,6 +14,7 @@
 #include "Algo/Find.h"
 #include "Engine/World.h"
 #include "PlayerCharacter.h"
+#include "SpaceDebugHUD.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputAction.h"
@@ -39,6 +40,7 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const BoostActionPath = TEXT("/Game/Input/IA_Boost.IA_Boost");
 	const TCHAR* const InteractActionPath = TEXT("/Game/Input/IA_Interact.IA_Interact");
 	const TCHAR* const FreeLookActionPath = TEXT("/Game/Input/IA_FreeLook.IA_FreeLook");
+	const TCHAR* const ToggleHudActionPath = TEXT("/Game/Input/IA_ToggleHud.IA_ToggleHud");
 	const TCHAR* const MouseLookActionPath = TEXT("/Game/Input/IA_LookMouse.IA_LookMouse");
 	const TCHAR* const MouseMappingContextPath = TEXT("/Game/Input/IMC_SpaceshipMouse.IMC_SpaceshipMouse");
 	const TCHAR* const EngineLoopSoundPath = TEXT("/Game/Ships/Audio/SW_EngineLoop.SW_EngineLoop");
@@ -163,7 +165,7 @@ void ASpaceshipPawn::SetCockpitView(bool bCockpit)
 	ChaseCamera->SetActive(!bCockpit);
 	CockpitCamera->SetActive(bCockpit);
 	// Only hidden from this pawn's own view: other players and shadows still see the hull.
-	Hull->SetOwnerNoSee(bCockpit);
+	Hull->SetOwnerNoSee(bCockpit && bHideHullInCockpit);
 }
 
 // -------------------------------------------------------------------------------------------
@@ -231,6 +233,15 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(InteractAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleInteract);
 	}
 
+	if (!ToggleHudAction)
+	{
+		ToggleHudAction = SpaceshipPawnDefaults::LoadOptional<UInputAction>(SpaceshipPawnDefaults::ToggleHudActionPath);
+	}
+	if (ToggleHudAction)
+	{
+		Input->BindAction(ToggleHudAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleToggleHud);
+	}
+
 	if (FreeLookAction)
 	{
 		Input->BindAction(FreeLookAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleFreeLookStarted);
@@ -273,6 +284,10 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			if (FreeLookAction && !IsMapped(FreeLookAction))
 			{
 				InteractMappingContext->MapKey(FreeLookAction, EKeys::RightMouseButton);
+			}
+			if (ToggleHudAction && !IsMapped(ToggleHudAction))
+			{
+				InteractMappingContext->MapKey(ToggleHudAction, EKeys::H);
 			}
 		}
 		if (InteractMappingContext && InteractMappingContext->GetMappings().Num() > 0)
@@ -536,6 +551,11 @@ void ASpaceshipPawn::HandleToggleCamera(const FInputActionValue& /*Value*/)
 void ASpaceshipPawn::HandleBoost(const FInputActionValue& /*Value*/)
 {
 	bBoostHeld = true;
+}
+
+void ASpaceshipPawn::HandleToggleHud(const FInputActionValue& /*Value*/)
+{
+	ASpaceDebugHUD::CycleDisplayMode();
 }
 
 void ASpaceshipPawn::HandleInteract(const FInputActionValue& /*Value*/)

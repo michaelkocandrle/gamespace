@@ -337,6 +337,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> InteractAction;
 
+	/** Digital, pressed: cycle the debug HUD (H). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> ToggleHudAction;
+
+	/**
+	 * Hide the hull mesh from the pilot in cockpit view. Right for the placeholder cube (the camera
+	 * sits inside it); a real ship with a cockpit wants its canopy frame and nose in view.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera")
+	bool bHideHullInCockpit = false;
+
 	/** Digital, held: free look (right mouse button). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> FreeLookAction;
@@ -628,6 +639,7 @@ private:
 	void HandleBoost(const FInputActionValue& Value);
 	void HandleBoostCompleted(const FInputActionValue& Value);
 	void HandleInteract(const FInputActionValue& Value);
+	void HandleToggleHud(const FInputActionValue& Value);
 	void HandleFreeLookStarted(const FInputActionValue& Value);
 	void HandleFreeLookCompleted(const FInputActionValue& Value);
 	void SetFreeLookHeld(bool bHeld);
