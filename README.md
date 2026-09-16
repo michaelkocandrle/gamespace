@@ -98,6 +98,28 @@ predictable and cheap to tune.
 All tuning values are `EditAnywhere` under the `Spaceship|Flight` and `Spaceship|Handling`
 categories.
 
+### Landing (L5)
+
+Low over a planet (below `LandingProbeAltitudeM`, 30 m) the ship probes the ground every frame:
+a sweep of the hull straight down gives the gap, and `ACelestialBody::GetSurfaceFrame` the
+terrain normal averaged over `LandingFootprintRadiusCm` (1.5 m).
+
+- **Touchdown** (`Settling`): gap <= 60 cm, slope <= `MaxLandingSlopeDeg` (25), speed <= 3 m/s,
+  hull tilted <= 30 degrees against the terrain, no thrust and no upward lift. All of it must
+  hold for `LandingConfirmSeconds` (0.75 s) without a break; a bounce restarts the window.
+- **Landed**: flight physics and steering are off. The ship eases its up vector onto the terrain
+  normal, keeping its heading (`LandingAlignRate` 6: ~95 % in 0.5 s), sweeps the hull down onto
+  the collision and eases onto it, and leftover sliding dies out (`LandedBrakeRate`).
+- **Takeoff**: W, S or Space at half input or more. Space lifts straight off; W on a slope can
+  push the nose into the hill. For `TakeoffCooldownSeconds` (0.75 s) no new touchdown.
+- **Friction while touching the ground** (not landed yet, or on ground too steep to land):
+  Coulomb friction `GroundFriction` 0.5 against the gravity pressing the ship down, so it stands
+  still on slopes up to ~26.5 degrees and slides on steeper ones.
+- Steeper than 25 degrees: touchdown is refused (HUD `TOO STEEP`); the ship slides.
+
+Headless: `Tools/Tests/test_landing_l5.py`. Under a 1.5 m footprint Veyra's slope has a median
+of 15 degrees; 87 % of the surface is landable, 4.5 % is steeper than 30 degrees.
+
 ### Controls
 
 | Action       | Keyboard / mouse           | Gamepad              |
@@ -214,6 +236,11 @@ Any level without a World Settings override therefore spawns a flyable ship at i
 (signed %, the raw `IA_Thrust` value), boost state and active camera as plain canvas text in
 the top-left corner. A tuning aid, not UMG - replace it when a real HUD exists.
 
+The `LANDING` line shows `LANDED` (green), `TOUCHDOWN nn %` while settling (yellow), or below
+30 m the gap, slope and tilt with the reason touchdown is not possible (`too high`, `TOO STEEP`,
+`too fast`, `level the ship`, `engines on`, `taking off`). The `TERRAIN` line counts collision
+warm-ups.
+
 The `FLIGHT` line shows the regime (`ORBIT` / `ATMOSPHERE` / `SURFACE`, or `DEEP SPACE` with no
 body around), altitude above the terrain (AGL) and above sea level (ASL), air density in %,
 gravity, and `HEAT` in % during a hot entry (the line turns orange-red).
@@ -306,7 +333,10 @@ level, local up, air density, gravity, sky colours and amount, and the flight re
 - **Collision**: separate invisible collision tiles (32 cells) around the ship. Radius
   `CollisionMinRadiusM` (60 m) + speed x `CollisionLookaheadSeconds` (2.5 s), up to 2 km; tile
   size radius / 2, at least 64 m, so there are always ~25-50 bodies. When the size changes, the
-  old tiles stay until the new set is built. The inherited `Body` is a hidden sphere just under
+  old tiles stay until the new set is built. Below `CollisionWarmupAltitudeM` (150 m), missing
+  collision tiles right under the ship (within 15 m) are built on the game thread with synchronous
+  physics cooking (~1.6 ms to build, at most 2 per frame), so a touchdown never meets a tile
+  whose collision is still cooking. The inherited `Body` is a hidden sphere just under
   the lowest possible terrain as a safety net. `GetSurfaceDistance` uses the exact height field.
 - **Atmosphere and gravity** (`Planet|Atmosphere`): `AtmosphereHeightKm` 12, exponential density
   with `AtmosphereScaleHeightKm` 3 (reaching exactly 0 at the top); gravity `SurfaceGravity`

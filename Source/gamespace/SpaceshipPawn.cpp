@@ -466,10 +466,18 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Rotate first so this frame's thrust is applied along the heading the player just commanded.
 	UpdateEnvironment(DeltaSeconds);
-	UpdateAngularMotion(DeltaSeconds);
-	UpdateLinearMotion(DeltaSeconds);
+	UpdateLanding(DeltaSeconds);
+	if (LandingState == ELandingState::Landed)
+	{
+		UpdateLandedMotion(DeltaSeconds);
+	}
+	else
+	{
+		// Rotate first so this frame's thrust is applied along the heading the player just commanded.
+		UpdateAngularMotion(DeltaSeconds);
+		UpdateLinearMotion(DeltaSeconds);
+	}
 	UpdateEngineAudio(DeltaSeconds);
 	UpdateHeatShake();
 
@@ -539,6 +547,13 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 	{
 		LinearVelocity -= Environment.Up * (Environment.GravityCmS2 * GravityScale * DeltaSeconds);
 	}
+	if (bGroundContact)
+	{
+		// After gravity, so on a gentle slope friction cancels this frame's pull down the slope
+		// completely and the ship stands still instead of creeping.
+		LinearVelocity = ApplyGroundFriction(LinearVelocity, GroundNormal, Environment.Up,
+			Environment.GravityCmS2 * GravityScale, DeltaSeconds);
+	}
 
 	const float SpeedCap = MaxSpeed * BoostFactor;
 	const float Speed = LinearVelocity.Size();
@@ -592,9 +607,204 @@ float ASpaceshipPawn::ComputeHeatTarget(float AtmosphereDensity, float SpeedCmS)
 
 void ASpaceshipPawn::UpdateEnvironment(float DeltaSeconds)
 {
-	ACelestialBody::FindNearest(GetWorld(), GetActorLocation(), &Environment, &bHasEnvironment);
+	NearestBody = ACelestialBody::FindNearest(GetWorld(), GetActorLocation(), &Environment, &bHasEnvironment);
 	const float Target = bHasEnvironment ? ComputeHeatTarget(Environment.AtmosphereDensity, LinearVelocity.Size()) : 0.f;
 	Heat = FMath::FInterpTo(Heat, Target, DeltaSeconds, HeatResponse);
+}
+
+// -------------------------------------------------------------------------------------------
+// Landing
+// -------------------------------------------------------------------------------------------
+
+namespace
+{
+	float AngleBetweenDeg(const FVector& A, const FVector& B)
+	{
+		return float(FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(A.GetSafeNormal() | B.GetSafeNormal(), -1.0, 1.0))));
+	}
+
+	/** Keeps the heading, puts the ship's up on Normal. */
+	FQuat LevelOnSurface(const FQuat& Current, const FVector& Normal)
+	{
+		FVector Forward = FVector::VectorPlaneProject(Current.GetForwardVector(), Normal);
+		if (Forward.SizeSquared() < 1e-4)
+		{
+			// Nose pointing straight at the ground or the sky: keep the up vector's heading instead.
+			Forward = FVector::VectorPlaneProject(Current.GetUpVector(), Normal);
+		}
+		return FRotationMatrix::MakeFromXZ(Forward.GetSafeNormal(), Normal).ToQuat();
+	}
+}
+
+ELandingBlocker ASpaceshipPawn::EvaluateLanding(float GroundGap, float Speed, float TiltDeg, float SlopeDeg, bool bEngineInput) const
+{
+	if (GroundGap < 0.f || GroundGap > LandingMaxGapCm)
+	{
+		return ELandingBlocker::TooHigh;
+	}
+	if (SlopeDeg > MaxLandingSlopeDeg)
+	{
+		return ELandingBlocker::TooSteep;
+	}
+	if (Speed > LandingMaxSpeed)
+	{
+		return ELandingBlocker::TooFast;
+	}
+	if (TiltDeg > LandingMaxTiltDeg)
+	{
+		return ELandingBlocker::Tilted;
+	}
+	if (bEngineInput)
+	{
+		return ELandingBlocker::EngineInput;
+	}
+	return ELandingBlocker::None;
+}
+
+FVector ASpaceshipPawn::ApplyGroundFriction(const FVector& Velocity, const FVector& SurfaceNormal, const FVector& Up, float GravityCmS2, float DeltaSeconds) const
+{
+	// Coulomb friction: the tangential velocity loses at most mu x normal load per second. On a
+	// slope where mu >= tan(slope) that is more than gravity adds along it, so a resting ship
+	// stays at rest; on steeper ground the remainder makes it slide.
+	const double NormalLoad = GravityCmS2 * FMath::Max(0.0, SurfaceNormal | Up);
+	const FVector Tangential = FVector::VectorPlaneProject(Velocity, SurfaceNormal);
+	const double TangentialSpeed = Tangential.Size();
+	if (TangentialSpeed < UE_KINDA_SMALL_NUMBER)
+	{
+		return Velocity;
+	}
+	const double Remaining = FMath::Max(0.0, TangentialSpeed - GroundFriction * NormalLoad * DeltaSeconds);
+	return Velocity - Tangential * (1.0 - Remaining / TangentialSpeed);
+}
+
+FRotator ASpaceshipPawn::ComputeLandedRotationStep(const FRotator& Current, const FVector& SurfaceNormal, float DeltaSeconds) const
+{
+	const FQuat From = Current.Quaternion();
+	const double Alpha = 1.0 - FMath::Exp(-LandingAlignRate * DeltaSeconds);
+	return FQuat::Slerp(From, LevelOnSurface(From, SurfaceNormal.GetSafeNormal()), Alpha).GetNormalized().Rotator();
+}
+
+bool ASpaceshipPawn::SweepHull(const FVector& Start, const FVector& End, const FQuat& Rotation, FHitResult& OutHit) const
+{
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(SpaceshipGroundProbe), false, this);
+	FCollisionResponseParams Responses;
+	HullCollision->InitSweepCollisionParams(Params, Responses);
+	return GetWorld()->SweepSingleByChannel(OutHit, Start, End, Rotation, HullCollision->GetCollisionObjectType(),
+		HullCollision->GetCollisionShape(), Params, Responses);
+}
+
+void ASpaceshipPawn::UpdateLanding(float DeltaSeconds)
+{
+	TakeoffCooldown = FMath::Max(0.f, TakeoffCooldown - DeltaSeconds);
+	bSurfaceValid = false;
+	bGroundContact = false;
+	GroundGapCm = -1.f;
+
+	// Probe the ground only when it matters: low over a body with a walkable surface.
+	const ACelestialBody* Body = NearestBody.Get();
+	FVector SurfacePoint;
+	if (bHasEnvironment && Body && Environment.AltitudeAboveTerrainCm < LandingProbeAltitudeM * 100.0
+		&& Body->GetSurfaceFrame(GetActorLocation(), LandingFootprintRadiusCm, SurfacePoint, GroundNormal))
+	{
+		bSurfaceValid = true;
+		GroundSlopeDeg = AngleBetweenDeg(GroundNormal, Environment.Up);
+		GroundTiltDeg = AngleBetweenDeg(GetActorUpVector(), GroundNormal);
+
+		// Straight down with the real hull shape: the gap is what the collision actually sees,
+		// wherever on the hull the first contact would be.
+		const FVector Start = GetActorLocation();
+		const double ProbeLength = FMath::Max(LandingMaxGapCm, GroundContactToleranceCm) + 200.0;
+		FHitResult Hit;
+		if (SweepHull(Start, Start - Environment.Up * ProbeLength, GetActorQuat(), Hit))
+		{
+			GroundGapCm = Hit.bStartPenetrating ? 0.f : float(Hit.Distance);
+		}
+		bGroundContact = GroundGapCm >= 0.f && GroundGapCm <= GroundContactToleranceCm;
+	}
+
+	const bool bEngineInput = FMath::Abs(ThrustInput) >= TakeoffInputThreshold || LiftInput >= TakeoffInputThreshold;
+
+	if (LandingState == ELandingState::Landed)
+	{
+		LandingBlocker = ELandingBlocker::None;
+		if (bEngineInput || !bSurfaceValid)
+		{
+			ExitLanded();
+		}
+		return;
+	}
+
+	LandingBlocker = !bSurfaceValid ? ELandingBlocker::NoSurface
+		: TakeoffCooldown > 0.f ? ELandingBlocker::TakeoffCooldown
+		: EvaluateLanding(GroundGapCm, LinearVelocity.Size(), GroundTiltDeg, GroundSlopeDeg, bEngineInput);
+
+	if (LandingBlocker == ELandingBlocker::None)
+	{
+		// Every condition has to hold without a break: a bounce restarts the window.
+		SettleSeconds += DeltaSeconds;
+		LandingState = ELandingState::Settling;
+		if (SettleSeconds >= LandingConfirmSeconds)
+		{
+			EnterLanded();
+		}
+	}
+	else
+	{
+		SettleSeconds = 0.f;
+		LandingState = ELandingState::Flying;
+	}
+}
+
+void ASpaceshipPawn::EnterLanded()
+{
+	LandingState = ELandingState::Landed;
+	SettleSeconds = LandingConfirmSeconds;
+	AngularVelocity = FVector::ZeroVector;
+	MouseStick = FVector2D::ZeroVector;
+	UE_LOG(LogSpaceship, Log, TEXT("%s landed: slope %.1f deg, tilt %.1f deg, gap %.0f cm"),
+		*GetName(), GroundSlopeDeg, GroundTiltDeg, GroundGapCm);
+}
+
+void ASpaceshipPawn::ExitLanded()
+{
+	LandingState = ELandingState::Flying;
+	SettleSeconds = 0.f;
+	TakeoffCooldown = TakeoffCooldownSeconds;
+	LinearVelocity = FVector::ZeroVector;
+	UE_LOG(LogSpaceship, Log, TEXT("%s took off"), *GetName());
+}
+
+void ASpaceshipPawn::UpdateLandedMotion(float DeltaSeconds)
+{
+	// Steering does nothing on the ground; drop what the mouse and stick sent, so nothing
+	// piles up and jerks the ship at takeoff.
+	MouseLookDelta = FVector2D::ZeroVector;
+	LookInput = FVector2D::ZeroVector;
+	MouseStick = FVector2D::ZeroVector;
+	AngularVelocity = FVector::ZeroVector;
+
+	const double Alpha = 1.0 - FMath::Exp(-LandingAlignRate * DeltaSeconds);
+	const FQuat Current = GetActorQuat();
+	const FQuat Rotation = FQuat::Slerp(Current, LevelOnSurface(Current, GroundNormal), Alpha).GetNormalized();
+
+	// Leftover sliding along the ground dies out instead of stopping dead.
+	LinearVelocity = FVector::VectorPlaneProject(LinearVelocity, GroundNormal) * FMath::Exp(-LandedBrakeRate * DeltaSeconds);
+	if (LinearVelocity.SizeSquared() < 1.0)
+	{
+		LinearVelocity = FVector::ZeroVector;
+	}
+	FVector Location = GetActorLocation() + LinearVelocity * DeltaSeconds;
+
+	// Where the hull, in its new rotation, rests on the collision: sweep it down onto the ground
+	// from a metre above, and ease towards that. Keeps the ship sitting on the terrain as it
+	// levels out, without sinking in or hovering.
+	FHitResult Hit;
+	if (SweepHull(Location + GroundNormal * 100.0, Location - GroundNormal * 300.0, Rotation, Hit) && !Hit.bStartPenetrating)
+	{
+		Location = FMath::Lerp(Location, Hit.Location + GroundNormal * 1.0, Alpha);
+	}
+
+	SetActorLocationAndRotation(Location, Rotation);
 }
 
 void ASpaceshipPawn::UpdateHeatShake()

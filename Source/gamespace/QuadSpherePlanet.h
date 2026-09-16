@@ -30,6 +30,8 @@ struct FQuadSpherePlanetStats
 	/** Current speed-scaled collision radius and collision tile depth. */
 	double CollisionRadiusCm = 0.0;
 	int32 CollisionDepth = 0;
+	/** Collision tiles built synchronously because the ship was about to touch down on them. */
+	int32 CollisionWarmups = 0;
 };
 
 /**
@@ -82,6 +84,11 @@ public:
 
 	virtual double GetSurfaceDistance(const FVector& Location) const override;
 	virtual bool SampleEnvironment(const FVector& Location, FCelestialEnvironment& OutEnvironment) const override;
+	virtual bool GetSurfaceFrame(const FVector& Location, double FootprintRadiusCm, FVector& OutSurfacePoint, FVector& OutNormal) const override;
+
+	/** Milliseconds to build the smallest collision tile under a location on this thread. For tests. */
+	UFUNCTION(BlueprintCallable, Category = "Planet|Debug")
+	float MeasureCollisionTileBuildMs(const FVector& WorldLocation);
 
 	/** Terrain height above the base radius, in cm, straight below a world location. */
 	UFUNCTION(BlueprintPure, Category = "Planet")
@@ -122,6 +129,8 @@ public:
 	float GetUploadMs() const { return float(Stats.UploadMs); }
 	UFUNCTION(BlueprintPure, Category = "Planet|Debug")
 	float GetCollisionRadiusM() const { return float(Stats.CollisionRadiusCm / 100.0); }
+	UFUNCTION(BlueprintPure, Category = "Planet|Debug")
+	int32 GetCollisionWarmupCount() const { return Stats.CollisionWarmups; }
 
 protected:
 	/** Planet centre. Tiles and the Body safety sphere hang off this, unscaled. */
@@ -247,6 +256,23 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Planet|Collision", meta = (ClampMin = "2", ClampMax = "64"))
 	int32 CollisionTileQuads = 32;
 
+	/**
+	 * Below this height above the terrain, the collision tiles right under the ship (within
+	 * CollisionWarmupReachM) are built on the game thread with synchronous physics cooking if they
+	 * are still missing. Asynchronous builds and cooking can leave a tile without collision for a
+	 * few frames, which is exactly when a slowly landing ship would sink into it.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Planet|Collision", meta = (ClampMin = "0.0", Units = "m"))
+	float CollisionWarmupAltitudeM = 150.f;
+
+	/** How far around the point under the ship the warm-up looks, so tile edges are covered. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Planet|Collision", meta = (ClampMin = "0.0", Units = "m"))
+	float CollisionWarmupReachM = 15.f;
+
+	/** Synchronous warm-up builds per frame at most; each costs a few milliseconds. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Planet|Collision", meta = (ClampMin = "1"))
+	int32 MaxCollisionWarmupsPerFrame = 2;
+
 	// --- Atmosphere and gravity ----------------------------------------------------------------
 
 	/** Top of the atmosphere above sea level. Above it: no drag, no gravity, black sky. */
@@ -316,7 +342,9 @@ private:
 	void UpdateCollisionTiles(const FVector& ShipLocal, double ShipSpeedCmS);
 	void LaunchBuild(const FQuadTileId& Id, bool bCollision);
 	void CollectFinishedBuilds();
-	UProceduralMeshComponent* CreateTileComponent(const FTerrainTileMesh& Mesh, bool bCollision);
+	UProceduralMeshComponent* CreateTileComponent(const FTerrainTileMesh& Mesh, bool bCollision, bool bSynchronousCooking = false);
+	FQuadTileId CollisionTileAt(const FVector& LocalDirection) const;
+	void WarmUpCollisionBelow(const FVector& ShipLocal, TSet<uint64>& Wanted);
 	void DestroyTile(uint64 Key);
 	void ApplyDebugTint(UProceduralMeshComponent* Mesh) const;
 	double SkirtDepthCm(int32 Depth) const;

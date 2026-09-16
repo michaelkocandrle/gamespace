@@ -25,6 +25,11 @@ bool ACelestialBody::SampleEnvironment(const FVector& /*Location*/, FCelestialEn
 	return false;
 }
 
+bool ACelestialBody::GetSurfaceFrame(const FVector& /*Location*/, double /*FootprintRadiusCm*/, FVector& /*OutSurfacePoint*/, FVector& /*OutNormal*/) const
+{
+	return false;
+}
+
 ACelestialBody* ACelestialBody::FindNearest(const UWorld* World, const FVector& Location, FCelestialEnvironment* OutEnvironment, bool* bOutHasEnvironment)
 {
 	ACelestialBody* Nearest = nullptr;

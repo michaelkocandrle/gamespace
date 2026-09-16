@@ -450,7 +450,6 @@ void AQuadSpherePlanet::UpdateCollisionTiles(const FVector& ShipLocal, double Sh
 	}
 
 	const double TileSize = PlanetTerrain::TileSizeCm(Settings, CollisionDepth);
-	const int32 TilesPerSide = 1 << CollisionDepth;
 
 	TSet<uint64> Wanted;
 	TMap<uint64, FQuadTileId> WantedIds;
@@ -474,14 +473,7 @@ void AQuadSpherePlanet::UpdateCollisionTiles(const FVector& ShipLocal, double Sh
 				{
 					continue;
 				}
-				const FVector SampleDir = (Dir * Settings.RadiusCm + Offset).GetSafeNormal();
-				int32 Face;
-				double U;
-				double V;
-				PlanetTerrain::DirectionToFace(SampleDir, Face, U, V);
-				const FQuadTileId Id{ uint8(Face), uint8(CollisionDepth),
-					FMath::Clamp(FMath::FloorToInt32((U + 1.0) * 0.5 * TilesPerSide), 0, TilesPerSide - 1),
-					FMath::Clamp(FMath::FloorToInt32((V + 1.0) * 0.5 * TilesPerSide), 0, TilesPerSide - 1) };
+				const FQuadTileId Id = CollisionTileAt((Dir * Settings.RadiusCm + Offset).GetSafeNormal());
 				if (Wanted.Contains(Id.Key()))
 				{
 					continue;
@@ -494,6 +486,11 @@ void AQuadSpherePlanet::UpdateCollisionTiles(const FVector& ShipLocal, double Sh
 				}
 			}
 		}
+	}
+
+	if (AltitudeAboveTerrain < CollisionWarmupAltitudeM * 100.0)
+	{
+		WarmUpCollisionBelow(ShipLocal, Wanted);
 	}
 
 	bool bAllWantedReady = true;
@@ -549,6 +546,64 @@ void AQuadSpherePlanet::UpdateCollisionTiles(const FVector& ShipLocal, double Sh
 		}
 	}
 	CollisionWanted = MoveTemp(Wanted);
+}
+
+FQuadTileId AQuadSpherePlanet::CollisionTileAt(const FVector& LocalDirection) const
+{
+	const int32 TilesPerSide = 1 << CollisionDepth;
+	int32 Face;
+	double U;
+	double V;
+	PlanetTerrain::DirectionToFace(LocalDirection, Face, U, V);
+	return { uint8(Face), uint8(CollisionDepth),
+		FMath::Clamp(FMath::FloorToInt32((U + 1.0) * 0.5 * TilesPerSide), 0, TilesPerSide - 1),
+		FMath::Clamp(FMath::FloorToInt32((V + 1.0) * 0.5 * TilesPerSide), 0, TilesPerSide - 1) };
+}
+
+void AQuadSpherePlanet::WarmUpCollisionBelow(const FVector& ShipLocal, TSet<uint64>& Wanted)
+{
+	// The point under the ship and four points around it: enough to cover the hull when it sits
+	// near a tile edge or corner.
+	const FVector Dir = ShipLocal.GetSafeNormal();
+	const FVector T1 = FVector::CrossProduct(Dir, FMath::Abs(Dir.Z) < 0.9 ? FVector::UpVector : FVector::ForwardVector).GetSafeNormal();
+	const FVector T2 = FVector::CrossProduct(Dir, T1);
+	const double Reach = CollisionWarmupReachM * 100.0;
+	const FVector Offsets[] = { FVector::ZeroVector, T1 * Reach, T1 * -Reach, T2 * Reach, T2 * -Reach };
+
+	int32 Built = 0;
+	for (const FVector& Offset : Offsets)
+	{
+		const FQuadTileId Id = CollisionTileAt((Dir * Settings.RadiusCm + Offset).GetSafeNormal());
+		const uint64 Key = Id.Key();
+		Wanted.Add(Key);
+		if (CollisionTiles.Contains(Key) || Built >= MaxCollisionWarmupsPerFrame)
+		{
+			continue;
+		}
+		// An asynchronous build of the same tile may still be running; its result is dropped
+		// when it arrives, because the tile already exists by then.
+		const TSharedPtr<FTerrainTileMesh> Mesh = PlanetTerrain::BuildTile(Settings, Id, CollisionTileQuads, false, 0.0);
+		FTile& Tile = CollisionTiles.Add(Key);
+		Tile.Id = Id;
+		Tile.Mesh = CreateTileComponent(*Mesh, true, true);
+		++Built;
+		++Stats.CollisionWarmups;
+	}
+}
+
+float AQuadSpherePlanet::MeasureCollisionTileBuildMs(const FVector& WorldLocation)
+{
+	RefreshDerivedSettings();
+	const int32 SavedDepth = CollisionDepth;
+	const double RootSize = PlanetTerrain::TileSizeCm(Settings, 0);
+	CollisionDepth = FMath::Clamp(FMath::RoundToInt32(FMath::Log2(RootSize / (CollisionMinTileSizeM * 100.0))), 0, MaxDepth);
+	const FVector Local = GetActorTransform().InverseTransformPositionNoScale(WorldLocation);
+	const FQuadTileId Id = CollisionTileAt(Local.GetSafeNormal());
+	CollisionDepth = SavedDepth;
+
+	const double Start = FPlatformTime::Seconds();
+	const TSharedPtr<FTerrainTileMesh> Mesh = PlanetTerrain::BuildTile(Settings, Id, CollisionTileQuads, false, 0.0);
+	return float((FPlatformTime::Seconds() - Start) * 1000.0);
 }
 
 // -------------------------------------------------------------------------------------------
@@ -621,14 +676,15 @@ void AQuadSpherePlanet::CollectFinishedBuilds()
 	}
 }
 
-UProceduralMeshComponent* AQuadSpherePlanet::CreateTileComponent(const FTerrainTileMesh& Mesh, bool bCollision)
+UProceduralMeshComponent* AQuadSpherePlanet::CreateTileComponent(const FTerrainTileMesh& Mesh, bool bCollision, bool bSynchronousCooking)
 {
 	UProceduralMeshComponent* Component = NewObject<UProceduralMeshComponent>(this, NAME_None, RF_Transient);
 	Component->SetupAttachment(TerrainRoot);
 	// The tile's place on the planet lives here, in the double-precision transform...
 	Component->SetRelativeLocation(Mesh.CenterLocal);
 	Component->SetCanEverAffectNavigation(false);
-	Component->bUseAsyncCooking = true;
+	// Async cooking keeps streaming smooth, but the tile has no collision until it finishes.
+	Component->bUseAsyncCooking = !bSynchronousCooking;
 	Component->SetVisibility(false);
 
 	if (bCollision)
@@ -704,6 +760,35 @@ double AQuadSpherePlanet::GetSurfaceDistance(const FVector& Location) const
 {
 	const FVector Local = GetActorTransform().InverseTransformPositionNoScale(Location);
 	return Local.Size() - (Settings.RadiusCm + PlanetTerrain::Height(Settings, Local.GetSafeNormal()));
+}
+
+bool AQuadSpherePlanet::GetSurfaceFrame(const FVector& Location, double FootprintRadiusCm, FVector& OutSurfacePoint, FVector& OutNormal) const
+{
+	const FTransform& ToWorld = GetActorTransform();
+	const FVector Dir = ToWorld.InverseTransformPositionNoScale(Location).GetSafeNormal();
+	if (Dir.IsNearlyZero())
+	{
+		return false;
+	}
+	const FVector T1 = FVector::CrossProduct(Dir, FMath::Abs(Dir.Z) < 0.9 ? FVector::UpVector : FVector::ForwardVector).GetSafeNormal();
+	const FVector T2 = FVector::CrossProduct(Dir, T1);
+	const double Radius = FMath::Max(FootprintRadiusCm, 10.0);
+	auto SurfaceAt = [this, &Dir](const FVector& Offset)
+	{
+		return PlanetTerrain::SurfacePoint(Settings, (Dir * Settings.RadiusCm + Offset).GetSafeNormal());
+	};
+
+	// A plane through the footprint's four edge points: the average slope under the hull.
+	const FVector AcrossT1 = SurfaceAt(T1 * Radius) - SurfaceAt(T1 * -Radius);
+	const FVector AcrossT2 = SurfaceAt(T2 * Radius) - SurfaceAt(T2 * -Radius);
+	FVector Normal = FVector::CrossProduct(AcrossT1, AcrossT2).GetSafeNormal();
+	if ((Normal | Dir) < 0.0)
+	{
+		Normal = -Normal;
+	}
+	OutSurfacePoint = ToWorld.TransformPositionNoScale(PlanetTerrain::SurfacePoint(Settings, Dir));
+	OutNormal = ToWorld.TransformVectorNoScale(Normal);
+	return !OutNormal.IsNearlyZero();
 }
 
 bool AQuadSpherePlanet::SampleEnvironment(const FVector& Location, FCelestialEnvironment& Out) const

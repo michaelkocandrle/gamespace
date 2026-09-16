@@ -35,6 +35,39 @@ enum class ESpaceshipAxis : uint8
 	Roll
 };
 
+/** Touchdown state machine. */
+UENUM(BlueprintType)
+enum class ELandingState : uint8
+{
+	/** Normal flight physics. */
+	Flying,
+	/** All touchdown conditions hold; waiting out LandingConfirmSeconds. */
+	Settling,
+	/** Resting on the ground: aligned to the terrain, held in place, flight physics off. */
+	Landed
+};
+
+/** The first reason the ship cannot touch down right now. */
+UENUM(BlueprintType)
+enum class ELandingBlocker : uint8
+{
+	None,
+	/** No walkable body below within LandingProbeAltitudeM. */
+	NoSurface,
+	/** Hull more than LandingMaxGapCm above the ground. */
+	TooHigh,
+	/** Ground steeper than MaxLandingSlopeDeg. */
+	TooSteep,
+	/** Faster than LandingMaxSpeed. */
+	TooFast,
+	/** Hull tilted more than LandingMaxTiltDeg against the ground. */
+	Tilted,
+	/** Thrust or upward lift held at TakeoffInputThreshold or more. */
+	EngineInput,
+	/** Just took off; TakeoffCooldownSeconds not over. */
+	TakeoffCooldown
+};
+
 /**
  * Player-flown spaceship with 6 degrees of freedom: thrust / strafe / lift plus pitch / yaw / roll.
  *
@@ -46,6 +79,12 @@ enum class ESpaceshipAxis : uint8
  * drift, SpaceLinearDamping 0); inside an atmosphere, drag (LinearDamping and QuadraticDrag, both
  * scaled by air density) and gravity grow as the ship descends. Fast flight through dense air
  * builds up entry heat, which shakes the camera.
+ *
+ * Landing: close above walkable ground (ACelestialBody::GetSurfaceFrame), slow, roughly level
+ * with the terrain and with the engines idle, the ship settles for LandingConfirmSeconds and then
+ * becomes Landed - it eases into alignment with the terrain, sits on it and stops. Thrust or
+ * upward lift takes off again. While touching the ground without being landed, Coulomb friction
+ * (GroundFriction) holds the ship on slopes up to about atan(GroundFriction).
  *
  * Input uses Enhanced Input. Assign the mapping context and actions on a Blueprint child, or drop
  * assets named IMC_Spaceship / IA_Thrust / ... into /Game/Input and they get picked up
@@ -91,6 +130,53 @@ public:
 	/** Entry heat, 0..1, smoothed. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
 	float GetHeat() const { return Heat; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
+	ELandingState GetLandingState() const { return LandingState; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
+	bool IsLanded() const { return LandingState == ELandingState::Landed; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
+	ELandingBlocker GetLandingBlocker() const { return LandingBlocker; }
+
+	/** Settling progress towards Landed, 0..1. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
+	float GetLandingProgress() const { return FMath::Clamp(SettleSeconds / FMath::Max(LandingConfirmSeconds, 0.01f), 0.f, 1.f); }
+
+	/** Whether the ground below was probed this frame (low enough over a walkable body). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
+	bool HasGroundInfo() const { return bSurfaceValid; }
+
+	/** Gap between hull and ground straight down, cm; negative when nothing is within the probe. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
+	float GetGroundGapCm() const { return GroundGapCm; }
+
+	/** Terrain slope under the ship, degrees from level. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
+	float GetGroundSlopeDeg() const { return GroundSlopeDeg; }
+
+	/** Angle between the ship's up and the terrain normal, degrees. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
+	float GetGroundTiltDeg() const { return GroundTiltDeg; }
+
+	/**
+	 * The touchdown rule on its own: the first blocker for these measurements, or None. The state
+	 * machine uses exactly this; exposed for tests.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Landing")
+	ELandingBlocker EvaluateLanding(float GroundGap, float Speed, float TiltDeg, float SlopeDeg, bool bEngineInput) const;
+
+	/**
+	 * Velocity after one step of ground friction: the part along the surface loses up to
+	 * GroundFriction x the gravity pressing the ship onto it. For tests.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Landing")
+	FVector ApplyGroundFriction(const FVector& Velocity, const FVector& SurfaceNormal, const FVector& Up, float GravityCmS2, float DeltaSeconds) const;
+
+	/** One step of the landed alignment from Current towards the terrain normal. For tests. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Landing")
+	FRotator ComputeLandedRotationStep(const FRotator& Current, const FVector& SurfaceNormal, float DeltaSeconds) const;
 
 	/**
 	 * Acceleration in cm/s^2 the environment puts on a ship with this velocity: drag and gravity,
@@ -323,6 +409,68 @@ protected:
 	float HeatShakeCm = 14.f;
 
 	// ---------------------------------------------------------------------------------------
+	// Landing
+	// ---------------------------------------------------------------------------------------
+
+	/** Below this height above the terrain the ground is probed every frame. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "1.0", Units = "m"))
+	float LandingProbeAltitudeM = 30.f;
+
+	/** Touchdown only when the hull is at most this far above the ground. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.0"))
+	float LandingMaxGapCm = 60.f;
+
+	/** Touchdown only below this speed, cm/s. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.0"))
+	float LandingMaxSpeed = 300.f;
+
+	/** Touchdown only with the hull tilted at most this much against the terrain. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+	float LandingMaxTiltDeg = 30.f;
+
+	/**
+	 * Steeper ground refuses touchdown: the ship keeps sliding and has to find a flatter spot.
+	 * Keep it at or below atan(GroundFriction), where friction can still hold the ship.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.0", ClampMax = "60.0"))
+	float MaxLandingSlopeDeg = 25.f;
+
+	/** Conditions must hold this long without a break before the ship counts as landed. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.0", Units = "s"))
+	float LandingConfirmSeconds = 0.75f;
+
+	/** How fast a landed ship eases into alignment and onto the ground, per second (6: ~95 % in 0.5 s). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.1"))
+	float LandingAlignRate = 6.f;
+
+	/** How fast leftover sliding stops once landed, per second. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.1"))
+	float LandedBrakeRate = 6.f;
+
+	/**
+	 * Friction coefficient while touching the ground (not yet landed). 0.5 holds the ship still
+	 * on slopes up to ~26.5 degrees; steeper, it slides.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.0"))
+	float GroundFriction = 0.5f;
+
+	/** Hull within this distance of the ground counts as touching it, for friction. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.0"))
+	float GroundContactToleranceCm = 10.f;
+
+	/** Radius over which the terrain slope under the ship is averaged. About half the hull length. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "10.0"))
+	float LandingFootprintRadiusCm = 150.f;
+
+	/** Thrust (either way) or upward lift at this input or more takes off, and blocks touchdown. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.05", ClampMax = "1.0"))
+	float TakeoffInputThreshold = 0.5f;
+
+	/** No new touchdown for this long after taking off, so a tap on Space really lifts off. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.0", Units = "s"))
+	float TakeoffCooldownSeconds = 0.75f;
+
+	// ---------------------------------------------------------------------------------------
 	// Engine audio
 	// ---------------------------------------------------------------------------------------
 
@@ -392,6 +540,12 @@ private:
 	void UpdateEngineAudio(float DeltaSeconds);
 	void UpdateEnvironment(float DeltaSeconds);
 	void UpdateHeatShake();
+	void UpdateLanding(float DeltaSeconds);
+	void UpdateLandedMotion(float DeltaSeconds);
+	void EnterLanded();
+	void ExitLanded();
+	/** Sweeps the hull from Start to End with Rotation, ignoring this ship. */
+	bool SweepHull(const FVector& Start, const FVector& End, const FQuat& Rotation, FHitResult& OutHit) const;
 
 	float& AxisInput(ESpaceshipAxis Axis);
 
@@ -418,6 +572,18 @@ private:
 
 	FCelestialEnvironment Environment;
 	bool bHasEnvironment = false;
+	TWeakObjectPtr<ACelestialBody> NearestBody;
+
+	ELandingState LandingState = ELandingState::Flying;
+	ELandingBlocker LandingBlocker = ELandingBlocker::NoSurface;
+	float SettleSeconds = 0.f;
+	float TakeoffCooldown = 0.f;
+	bool bSurfaceValid = false;
+	bool bGroundContact = false;
+	float GroundGapCm = -1.f;
+	float GroundSlopeDeg = 0.f;
+	float GroundTiltDeg = 0.f;
+	FVector GroundNormal = FVector::UpVector;
 	float Heat = 0.f;
 	FVector ChaseCameraBaseLocation = FVector::ZeroVector;
 	FVector CockpitCameraBaseLocation = FVector::ZeroVector;

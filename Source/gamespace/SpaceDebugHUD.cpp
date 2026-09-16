@@ -22,9 +22,9 @@ namespace
 			return TEXT("n/a");
 		}
 		const FQuadSpherePlanetStats& S = It->GetTerrainStats();
-		return FString::Printf(TEXT("%d visible / %d built, %d building, depth %d/%d, collision %d (r %.0f m, depth %d), LOD %.2f ms"),
+		return FString::Printf(TEXT("%d visible / %d built, %d building, depth %d/%d, collision %d (r %.0f m, depth %d, warm-ups %d), LOD %.2f ms"),
 			S.VisibleTiles, S.CachedTiles, S.PendingBuilds, S.MaxVisibleDepth, S.MaxDepth, S.CollisionTiles,
-			S.CollisionRadiusCm / 100.0, S.CollisionDepth, S.SelectionMs);
+			S.CollisionRadiusCm / 100.0, S.CollisionDepth, S.CollisionWarmups, S.SelectionMs);
 	}
 
 	/** "ORIGIN" readout: where the world origin is and how far the ship is from it. */
@@ -96,6 +96,47 @@ namespace
 		return Text;
 	}
 
+	/** "LANDING" readout: the touchdown state, or why touchdown is not possible right now. */
+	FString DescribeLanding(const ASpaceshipPawn& Ship, FLinearColor& OutColor)
+	{
+		const ELandingState State = Ship.GetLandingState();
+		if (State == ELandingState::Landed)
+		{
+			OutColor = FLinearColor(0.3f, 1.f, 0.35f);
+			return FString::Printf(TEXT("LANDED   slope %.0f deg   (W / Space to take off)"), Ship.GetGroundSlopeDeg());
+		}
+		if (!Ship.HasGroundInfo())
+		{
+			OutColor = FLinearColor(0.6f, 0.6f, 0.6f);
+			return TEXT("-");
+		}
+
+		const FString Gap = Ship.GetGroundGapCm() < 0.f ? FString(TEXT("> 2 m"))
+			: FString::Printf(TEXT("%.1f m"), Ship.GetGroundGapCm() / 100.f);
+		const FString Measurements = FString::Printf(TEXT("gap %s   slope %.0f deg   tilt %.0f deg"),
+			*Gap, Ship.GetGroundSlopeDeg(), Ship.GetGroundTiltDeg());
+
+		if (State == ELandingState::Settling)
+		{
+			OutColor = FLinearColor(1.f, 0.9f, 0.3f);
+			return FString::Printf(TEXT("TOUCHDOWN %3.0f %%   %s"), Ship.GetLandingProgress() * 100.f, *Measurements);
+		}
+
+		const TCHAR* Reason = TEXT("");
+		switch (Ship.GetLandingBlocker())
+		{
+		case ELandingBlocker::TooHigh: Reason = TEXT("too high"); break;
+		case ELandingBlocker::TooSteep: Reason = TEXT("TOO STEEP"); break;
+		case ELandingBlocker::TooFast: Reason = TEXT("too fast"); break;
+		case ELandingBlocker::Tilted: Reason = TEXT("level the ship"); break;
+		case ELandingBlocker::EngineInput: Reason = TEXT("engines on"); break;
+		case ELandingBlocker::TakeoffCooldown: Reason = TEXT("taking off"); break;
+		default: break;
+		}
+		OutColor = Ship.GetLandingBlocker() == ELandingBlocker::TooSteep ? FLinearColor(1.f, 0.45f, 0.2f) : FLinearColor(0.8f, 0.8f, 0.8f);
+		return FString::Printf(TEXT("%s   %s"), *Measurements, Reason);
+	}
+
 	/** "TARGET" readout for the nearest celestial body: name, surface distance, time to reach it. */
 	FString DescribeNearestBody(const UWorld* World, const ASpaceshipPawn& Ship)
 	{
@@ -159,6 +200,8 @@ void ASpaceDebugHUD::DrawHUD()
 
 	FLinearColor FlightColor;
 	const FString Flight = DescribeFlight(*Ship, FlightColor);
+	FLinearColor LandingColor;
+	const FString Landing = DescribeLanding(*Ship, LandingColor);
 
 	const FLine Lines[] = {
 		{ TEXT("SPEED"), FString::Printf(TEXT("%6.1f m/s   %5.0f km/h"), SpeedMetres, SpeedMetres * 3.6f), FLinearColor::White },
@@ -167,6 +210,7 @@ void ASpaceDebugHUD::DrawHUD()
 			Ship->IsBoosting() ? FLinearColor(1.f, 0.55f, 0.1f) : FLinearColor(0.6f, 0.6f, 0.6f) },
 		{ TEXT("CAMERA"), Ship->IsCockpitView() ? TEXT("Cockpit") : TEXT("Chase"), FLinearColor::White },
 		{ TEXT("FLIGHT"), Flight, FlightColor },
+		{ TEXT("LANDING"), Landing, LandingColor },
 		{ TEXT("TARGET"), DescribeNearestBody(GetWorld(), *Ship), FLinearColor(0.6f, 1.f, 0.7f) },
 		{ TEXT("ORIGIN"), DescribeOrigin(GetWorld(), *Ship), FLinearColor(0.85f, 0.85f, 0.6f) },
 		{ TEXT("REBASE"), DescribeRebases(GetWorld()), FLinearColor(0.85f, 0.85f, 0.6f) },

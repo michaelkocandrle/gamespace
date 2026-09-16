@@ -97,6 +97,15 @@ public:
 	virtual bool SampleEnvironment(const FVector& Location, FCelestialEnvironment& OutEnvironment) const;
 
 	/**
+	 * The ground under Location as a plane: the surface point straight below and the normal of
+	 * the terrain averaged over a footprint of FootprintRadiusCm (so a ship-sized object gets the
+	 * slope it would actually stand on, not the tilt of one bump). False for bodies without a
+	 * walkable surface, which the default is.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Celestial Body")
+	virtual bool GetSurfaceFrame(const FVector& Location, double FootprintRadiusCm, FVector& OutSurfacePoint, FVector& OutNormal) const;
+
+	/**
 	 * The body whose surface is nearest to Location, and whether it has an environment. Used by
 	 * everything that needs "the planet I'm near" without caring which one.
 	 */
