@@ -327,10 +327,15 @@ Další otevřené směry mimo let:
 
 - **Neověřeno autorem:** celý SC-1a (pocit letu, hodnoty G a rychlostí, VJoy kruh, Alt +
   kolečko, přistávání s novým coupled režimem). Headless testy prochází.
-- **Zjištěno autorem v buildu (17. 9. 2026), zatím neopraveno:**
-  - po výstupu z lodi stojí postava spíš uvnitř lodi a kamera je moc přiblížená (lehké glitchování),
-    po pár krocích od lodi je vše v pořádku;
-  - změna grafického nastavení není znát;
+- **Zjištěno autorem v buildu (17. 9. 2026):**
+  - *Opraveno, čeká na autorův test:* po výstupu z lodi stála postava skoro v trupu a kamera byla
+    přiblížená. Příčiny: `SOCKET_Exit` Vanguardu je jen 2 cm od kolizního hullu břicha (`UCX_08`)
+    a kořenový box lodi blokoval kanál kamery, takže se boom postavy stáhl k hlavě. Místo výstupu se
+    teď posune do strany na `ExitClearanceCm` od kolizních tvarů (`GetHullClearance`, čistá
+    geometrie) a box kameru ignoruje.
+  - *Opraveno, čeká na autorův test:* grafika „se neměnila“. Engine hlásí úroveň kvality −1
+    („vlastní“), jakmile škálování rozlišení není výchozí pro danou úroveň. Menu pak vždy ukázalo
+    „Vysoká“ a další POUŽÍT uložilo zpět Vysokou. Menu teď čte `GetGraphicsQualityLevel()`.
   - obloha pořád působí jako tapeta (řeší se v dalších krocích).
 - **Zvuky jsou procedurální placeholdery** z numpy a nikdo je zatím neslyšel. Ladění podle
   autorovy zpětné vazby. Hlasitosti jsou v nastavení a v `ASpaceshipPawn` (`EngineHumVolume`,

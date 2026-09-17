@@ -303,9 +303,13 @@ the ship's mouse context never swallows the character's mouse look.
   feet tilt with the slope up to 30 degrees. Off when not standing on planet terrain.
 - **Ship exit / boarding**: on a LANDED ship, F spawns the character at the first free spot of:
   the hull mesh socket `Exit` (`SOCKET_Exit` from Blender), then right, left, behind and in front
-  of the hull mesh bounds at 0.8, 3.8 and 8.8 m past them. Each spot is put on the terrain and
-  tested with a capsule overlap against everything that blocks pawns, the ship's collision hulls
-  included. The Vanguard's socket is 80 cm clear of its UCX hulls. F within `BoardingRangeCm` (4 m from the hull box) of a landed ship
+  of the hull mesh bounds at 0.8, 3.8 and 8.8 m past them. Every spot is first pushed outward
+  (sideways for the socket) until the pilot capsule, standing at the gear's height, is
+  `ExitClearanceCm` (80 cm) clear of the hull's collision shapes (`GetHullClearance`: geometry of the
+  UCX hulls, no physics query). The Vanguard's socket is only 2 cm clear of its belly hull, so the
+  pilot now appears 1.4 m further out. Then each spot is put on the terrain and tested with a
+  capsule overlap against everything that blocks pawns. The ship's root box ignores cameras, or the
+  character's camera, starting inside it, would be pulled in to the head. F within `BoardingRangeCm` (4 m from the hull box) of a landed ship
   possesses the ship again and removes the character (0.75 s cooldown after getting out).
 - **Safety net** (`RecoverFromTerrain`, every tick): a capsule more than `FallThroughToleranceCm`
   (60) under the terrain height field, or falling without moving for `StuckFallingSeconds`
@@ -673,7 +677,10 @@ the build.
   resolution scale, VSync, frame limit; master / effects / music volume (heard live while
   dragging); mouse sensitivity (multiplies ship steering, free look and on-foot look); inverted
   ship pitch; HUD mode; FPS counter. POUŽÍT applies and saves, Escape / ZPĚT discards. First
-  start: borderless fullscreen at the desktop resolution, quality High.
+  start: borderless fullscreen at the desktop resolution, quality High. The quality row reads
+  `GetGraphicsQualityLevel()` (the lowest scalability group), not the engine's
+  `GetOverallScalabilityLevel()`, which is -1 whenever the resolution scale is not the preset's
+  default: the row then showed High and the next POUŽÍT saved High over the player's choice.
 - **Global keys** live in `ASpacePlayerController`'s own mapping context (priority 100): Escape /
   F10 menu, H HUD (saved to the settings). Pawns no longer bind H.
 - The menus are plain Slate (`SSpaceMenu`), no UMG assets. UI sounds `/Game/UI/Audio`.
