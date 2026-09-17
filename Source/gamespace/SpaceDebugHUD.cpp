@@ -139,8 +139,7 @@ namespace
 		case ELandingBlocker::TooFast: Reason = TEXT("too fast"); break;
 		case ELandingBlocker::Tilted: Reason = TEXT("level the ship"); break;
 		case ELandingBlocker::EngineInput:
-			Reason = Ship.GetCruiseState() != ECruiseState::Off ? TEXT("cruise on")
-				: (Ship.IsFlightAssistOn() && FMath::Abs(Ship.GetThrottleSetting()) > 0.05f) ? TEXT("throttle to 0 (X)") : TEXT("engines on");
+			Reason = Ship.GetCruiseState() != ECruiseState::Off ? TEXT("cruise on") : TEXT("engines on");
 			break;
 		case ELandingBlocker::TakeoffCooldown: Reason = TEXT("taking off"); break;
 		default: break;
@@ -203,7 +202,7 @@ namespace
 			return FString::Printf(TEXT("CRUISE CHARGING %3.0f %%   (J cancels)"), Ship.GetCruiseSpoolProgress() * 100.f);
 		case ECruiseState::Active:
 			OutColor = FLinearColor(0.4f, 0.85f, 1.f);
-			return FString::Printf(TEXT("CRUISE   limit %s here   throttle sets speed   (J drops out)"), *FormatSpeed(Ship.GetCruiseSpeedLimit()));
+			return FString::Printf(TEXT("CRUISE   limit %s here   wheel sets speed   (J drops out)"), *FormatSpeed(Ship.GetCruiseSpeedLimit()));
 		case ECruiseState::Dropping:
 			OutColor = FLinearColor(1.f, 0.8f, 0.3f);
 			return FString::Printf(TEXT("CRUISE DROP (%s)"), Reason);
@@ -215,8 +214,13 @@ namespace
 			OutColor = FLinearColor(1.f, 0.55f, 0.25f);
 			return TEXT("cruise needs more altitude above the ground");
 		}
+		if (Ship.GetCruiseMessageSeconds() > 0.f && Ship.GetCruiseBlocker() == ECruiseBlocker::NeedsNav)
+		{
+			OutColor = FLinearColor(1.f, 0.55f, 0.25f);
+			return TEXT("cruise needs NAV mode (B)");
+		}
 		OutColor = FLinearColor(0.7f, 0.7f, 0.7f);
-		return TEXT("J cruise drive   V flight assist   X all stop   wheel zoom");
+		return TEXT("B SCM/NAV   wheel limiter   Alt+wheel zoom   V cpld   X brake   K g-safe   L comstab   J cruise (NAV)");
 	}
 
 	FString EnergyBar(float Fraction, int32 Cells = 10)
@@ -247,17 +251,28 @@ namespace
 		const FString Landing = DescribeLanding(Ship, LandingColor);
 
 		Lines.Add({ TEXT("MODE"), Ship.CanExit() ? TEXT("IN SHIP   [F] get out") : TEXT("IN SHIP"), ModeColor });
-		Lines.Add({ TEXT("SPEED"), SpeedMetres < 1000.f
-			? FString::Printf(TEXT("%6.1f m/s   %5.0f km/h"), SpeedMetres, SpeedMetres * 3.6f)
-			: FString::Printf(TEXT("%6.2f km/s   %5.0f km/h"), SpeedMetres / 1000.f, SpeedMetres * 3.6f), FLinearColor::White });
+		const FString SpeedText = SpeedMetres < 1000.f
+			? FString::Printf(TEXT("%6.1f m/s"), SpeedMetres)
+			: FString::Printf(TEXT("%6.2f km/s"), SpeedMetres / 1000.f);
+		Lines.Add({ TEXT("SPEED"), FString::Printf(TEXT("%s   limit %s (%3.0f %% of %s)"), *SpeedText, *FormatSpeed(Ship.GetSpeedLimit()),
+			Ship.GetSpeedLimiter() * 100.f, *FormatSpeed(Ship.GetModeMaxSpeed())), FLinearColor::White });
 
-		FString Throttle = Ship.IsFlightAssistOn()
-			? FString::Printf(TEXT("%+4.0f %%   FA ON"), Ship.GetThrottleSetting() * 100.f)
-			: FString::Printf(TEXT("%+4.0f %%   FA OFF (drift)"), Ship.GetThrottle() * 100.f);
+		// IFCS state, Star Citizen style: master mode, coupled, the assists, load on the pilot.
+		const TCHAR* ModeName = Ship.GetMasterMode() == EMasterMode::NAV ? TEXT("NAV") : TEXT("SCM");
+		FString Ifcs = Ship.IsMasterModeSwitching()
+			? FString::Printf(TEXT("%s > %s %3.0f %%"), ModeName, Ship.GetPendingMasterMode() == EMasterMode::NAV ? TEXT("NAV") : TEXT("SCM"),
+				Ship.GetMasterModeSwitchProgress() * 100.f)
+			: FString(ModeName);
+		Ifcs += Ship.IsSpaceBraking() ? TEXT("   SPACEBRAKE") : Ship.IsFlightAssistOn() ? TEXT("   CPLD") : TEXT("   DECOUPLED");
+		Ifcs += Ship.IsGSafeOn() ? TEXT("   G-SAFE") : TEXT("   g-safe off");
+		Ifcs += Ship.IsComStabOn() ? TEXT("   COMSTAB") : TEXT("   comstab off");
+		Ifcs += FString::Printf(TEXT("   %4.1f G"), Ship.GetGForce());
 		const TCHAR* BoostState = Ship.IsBoosting() ? TEXT("BOOST") : Ship.IsBoostLocked() ? TEXT("recharging") : TEXT("boost");
-		Throttle += FString::Printf(TEXT("   %s [%s]"), BoostState, *EnergyBar(Ship.GetBoostEnergy()));
-		Lines.Add({ TEXT("THROTTLE"), Throttle, Ship.IsBoosting() ? FLinearColor(1.f, 0.55f, 0.1f)
-			: Ship.IsFlightAssistOn() ? FLinearColor::White : FLinearColor(1.f, 0.8f, 0.45f) });
+		Ifcs += FString::Printf(TEXT("   %s [%s]"), BoostState, *EnergyBar(Ship.GetBoostEnergy()));
+		Lines.Add({ TEXT("IFCS"), Ifcs, Ship.IsBoosting() ? FLinearColor(1.f, 0.55f, 0.1f)
+			: Ship.IsSpaceBraking() ? FLinearColor(1.f, 0.4f, 0.3f)
+			: !Ship.IsFlightAssistOn() ? FLinearColor(1.f, 0.8f, 0.45f)
+			: Ship.GetMasterMode() == EMasterMode::NAV ? FLinearColor(0.55f, 0.85f, 1.f) : FLinearColor::White });
 		FLinearColor CruiseColor;
 		const FString Cruise = DescribeCruise(Ship, CruiseColor);
 		Lines.Add({ TEXT("DRIVE"), Cruise, CruiseColor });
@@ -341,6 +356,45 @@ namespace
 	}
 }
 
+void ASpaceDebugHUD::DrawVirtualJoystick(const ASpaceshipPawn& Ship, float Scale)
+{
+	if (!Ship.UsesVirtualJoystick() || Ship.IsLanded() || Ship.IsFreeLooking() || !Canvas)
+	{
+		return;
+	}
+	// A circle in the middle of the screen: its rim is full turn rate, the inner ring the dead zone,
+	// the cross is where the mouse left the virtual stick (Y up on the stick is up on screen).
+	const FVector2D Centre(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
+	const float Radius = Canvas->ClipY * 0.11f;
+	const float Thickness = FMath::Max(1.f, Scale);
+	const FLinearColor RimColor(0.55f, 0.85f, 1.f, 0.35f);
+	auto Circle = [&](float R, const FLinearColor& Color)
+	{
+		const int32 Segments = 48;
+		for (int32 Index = 0; Index < Segments; ++Index)
+		{
+			const float A = UE_TWO_PI * Index / Segments;
+			const float B = UE_TWO_PI * (Index + 1) / Segments;
+			DrawLine(Centre.X + R * FMath::Cos(A), Centre.Y + R * FMath::Sin(A),
+				Centre.X + R * FMath::Cos(B), Centre.Y + R * FMath::Sin(B), Color, Thickness);
+		}
+	};
+	Circle(Radius, RimColor);
+	Circle(Radius * Ship.GetVirtualJoystickDeadzone(), FLinearColor(0.55f, 0.85f, 1.f, 0.25f));
+
+	const FVector2D Stick = Ship.GetMouseStick();
+	const FVector2D Cursor(Centre.X + Stick.X * Radius, Centre.Y - Stick.Y * Radius);
+	const bool bActive = Stick.Size() > Ship.GetVirtualJoystickDeadzone();
+	const FLinearColor CursorColor = bActive ? FLinearColor(1.f, 0.85f, 0.3f, 0.9f) : FLinearColor(0.8f, 0.9f, 1.f, 0.6f);
+	if (bActive)
+	{
+		DrawLine(Centre.X, Centre.Y, Cursor.X, Cursor.Y, FLinearColor(1.f, 0.85f, 0.3f, 0.35f), Thickness);
+	}
+	const float Arm = 7.f * Scale;
+	DrawLine(Cursor.X - Arm, Cursor.Y, Cursor.X + Arm, Cursor.Y, CursorColor, Thickness * 1.5f);
+	DrawLine(Cursor.X, Cursor.Y - Arm, Cursor.X, Cursor.Y + Arm, CursorColor, Thickness * 1.5f);
+}
+
 void ASpaceDebugHUD::CycleDisplayMode()
 {
 	CVarSpaceHud->Set((CVarSpaceHud.GetValueOnGameThread() + 1) % 3, ECVF_SetByConsole);
@@ -391,7 +445,7 @@ void ASpaceDebugHUD::DrawHUD()
 	if (Mode == 1)
 	{
 		// Compact: what matters while playing; the rest is one H press away.
-		static const TSet<FString> Compact = { TEXT("MODE"), TEXT("SPEED"), TEXT("THROTTLE"), TEXT("DRIVE"), TEXT("FLIGHT"), TEXT("LANDING"), TEXT("MOVE") };
+		static const TSet<FString> Compact = { TEXT("MODE"), TEXT("SPEED"), TEXT("IFCS"), TEXT("DRIVE"), TEXT("FLIGHT"), TEXT("LANDING"), TEXT("MOVE") };
 		const bool bFreeLook = Cast<ASpaceshipPawn>(Pawn) && Cast<ASpaceshipPawn>(Pawn)->IsFreeLooking();
 		Lines.RemoveAll([bFreeLook](const FLine& Line)
 		{
@@ -430,11 +484,27 @@ void ASpaceDebugHUD::DrawHUD()
 		}
 	}
 
-	// Big and central: the mouse is not doing what it usually does, or the drive is doing something.
 	const ASpaceshipPawn* FreeLookShip = Cast<ASpaceshipPawn>(Pawn);
+	if (Mode > 0 && FreeLookShip)
+	{
+		DrawVirtualJoystick(*FreeLookShip, Scale);
+	}
+
+	// Big and central: the mouse is not doing what it usually does, or the drive is doing something.
 	FString Label;
 	FLinearColor LabelColor(1.f, 0.65f, 0.15f);
-	if (FreeLookShip && FreeLookShip->GetCruiseState() == ECruiseState::Spooling)
+	if (FreeLookShip && FreeLookShip->IsMasterModeSwitching())
+	{
+		Label = FString::Printf(TEXT("%s MODE %3.0f %%"), FreeLookShip->GetPendingMasterMode() == EMasterMode::NAV ? TEXT("NAV") : TEXT("SCM"),
+			FreeLookShip->GetMasterModeSwitchProgress() * 100.f);
+		LabelColor = FLinearColor(0.55f, 0.85f, 1.f);
+	}
+	else if (FreeLookShip && FreeLookShip->GetCruiseState() == ECruiseState::Off && FreeLookShip->GetCruiseMessageSeconds() > 0.f
+		&& FreeLookShip->GetCruiseBlocker() == ECruiseBlocker::NeedsNav)
+	{
+		Label = TEXT("CRUISE NEEDS NAV MODE (B)");
+	}
+	else if (FreeLookShip && FreeLookShip->GetCruiseState() == ECruiseState::Spooling)
 	{
 		Label = FString::Printf(TEXT("CRUISE CHARGING %3.0f %%"), FreeLookShip->GetCruiseSpoolProgress() * 100.f);
 		LabelColor = FLinearColor(0.55f, 0.8f, 1.f);

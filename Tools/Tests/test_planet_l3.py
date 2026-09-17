@@ -197,7 +197,7 @@ for alt in (12000, 10000, 8000, 5000, 3000, 1000, 0):
 ship = unreal.SpaceshipPawn.get_default_object()
 thrust = ship.get_editor_property("thrust_acceleration")
 boost = ship.get_editor_property("boost_multiplier")
-max_speed = ship.get_editor_property("max_speed")
+max_speed = ship.get_editor_property("scm_max_speed")
 damping = ship.get_editor_property("linear_damping")
 space_damping = ship.get_editor_property("space_linear_damping")
 quad = ship.get_editor_property("quadratic_drag")
@@ -277,7 +277,9 @@ g3, h3, j3 = simulate("free fall from 11 km", 11000, 0.0, False)
 check("boost dive reaches the ground", g1 is not None)
 check("boost dive builds entry heat", h1 > 0.3, "max heat %.2f" % h1)
 check("free fall reaches the ground below 20 m/s", g3 is not None and g3[1] < 20.0, "impact %.1f m/s" % (g3[1] if g3 else -1))
-check("no acceleration spikes (jerk < 3 m/s2 per frame)", max(j1, j2, j3) < 3.0,
+# Since SC-1a the boost dive hits the air at ~500 m/s (was ~260): drag then changes by ~4 m/s2 per
+# frame, smoothly. A real discontinuity (e.g. at the top of the atmosphere) would be far larger.
+check("no acceleration spikes (jerk < 5 m/s2 per frame)", max(j1, j2, j3) < 5.0,
       "max %.2f" % max(j1, j2, j3))
 check("cruise dive stays cool", h2 < 0.2, "max heat %.2f" % h2)
 

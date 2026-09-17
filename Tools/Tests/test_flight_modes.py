@@ -1,4 +1,4 @@
-"""Headless checks for flight assist, throttle, boost energy, cruise drive, exits and the scene extras.
+"""Headless checks for boost energy, cruise drive (NAV only), free look, exits and the scene extras.
 
     .\\Tools\\run_editor_python.ps1 Tools\\Tests\\test_flight_modes.py
 
@@ -47,9 +47,12 @@ def run(ship, seconds, thrust=0.0, strafe=0.0, lift=0.0, boost=False, each=None)
 
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 cdo = unreal.get_default_object(unreal.SpaceshipPawn)
-MAX = cdo.get_editor_property("max_speed")
+MAX = cdo.get_editor_property("scm_max_speed")
+NAV = cdo.get_editor_property("nav_max_speed")
 BOOST = cdo.get_editor_property("boost_multiplier")
-RATE = cdo.get_editor_property("throttle_rate")
+SWITCH = cdo.get_editor_property("master_mode_switch_seconds")
+
+# Coupled / decoupled, limiter, spacebrake and master modes: Tools/Tests/test_ifcs_sc1.py.
 
 # =========================================================================================
 # Deep space
@@ -61,55 +64,10 @@ def spawn():
     return eas.spawn_actor_from_class(unreal.SpaceshipPawn, unreal.Vector(0.0, 0.0, 0.0), unreal.Rotator())
 
 
-# --- Flight assist: throttle lever ------------------------------------------------------
-ship = spawn()
-try:
-    check("flight assist on by default", ship.is_flight_assist_on())
-    run(ship, 0.5, thrust=1.0)
-    lever = ship.get_throttle_setting()
-    check("W moves the lever at ThrottleRate", abs(lever - 0.5 * RATE) < 0.02, "%.3f after 0.5 s" % lever)
-    velocity = run(ship, 12.0)
-    check("lever stays where it was left", abs(ship.get_throttle_setting() - lever) < 1e-6)
-    check("ship settles at lever x MaxSpeed along the nose", abs(velocity[0] - lever * MAX) < 0.02 * MAX and abs(velocity[1]) < 1.0,
-          "%.0f cm/s, target %.0f" % (velocity[0], lever * MAX))
+def to_nav(ship):
+    ship.request_master_mode(unreal.MasterMode.NAV)
+    run(ship, SWITCH + 0.05)
 
-    # Strafe while held, drift cancelled after release.
-    velocity = run(ship, 2.0, strafe=1.0)
-    check("strafe moves sideways", velocity[1] > 1000.0, "%.0f cm/s" % velocity[1])
-    velocity = run(ship, 6.0)
-    check("flight assist cancels sideways drift", abs(velocity[1]) < 30.0, "%.1f cm/s left" % velocity[1])
-
-    # Detent at zero on the way down.
-    lowest = [1.0]
-    run(ship, 3.0, thrust=-1.0, each=lambda i, v: lowest.__setitem__(0, min(lowest[0], ship.get_throttle_setting())))
-    check("S stops the lever at 0 while held", abs(ship.get_throttle_setting()) < 1e-6 and lowest[0] >= -1e-6, "lowest %.3f" % lowest[0])
-    run(ship, 0.1)
-    run(ship, 1.0, thrust=-1.0)
-    reverse = cdo.get_editor_property("max_reverse_throttle")
-    check("pressing S again goes into reverse, limited", -reverse - 1e-3 <= ship.get_throttle_setting() < -0.3,
-          "%.3f (limit -%.2f)" % (ship.get_throttle_setting(), reverse))
-
-    ship.all_stop()
-    velocity = run(ship, 25.0)
-    check("X (all stop) brakes to a standstill", length(velocity) < 20.0, "%.1f cm/s" % length(velocity))
-finally:
-    eas.destroy_actor(ship)
-
-# --- Flight assist off: Newtonian ---------------------------------------------------------
-ship = spawn()
-try:
-    ship.set_flight_assist(False)
-    run(ship, 2.0, thrust=1.0)
-    before = run(ship, STEP)
-    after = run(ship, 5.0)
-    check("FA off: no braking after release", abs(after[0] - before[0]) < 1.0 and after[0] > 1000.0,
-          "%.0f -> %.0f cm/s" % (before[0], after[0]))
-    ship.set_flight_assist(True)
-    expected = after[0] / MAX
-    check("FA back on picks the lever up at the current speed", abs(ship.get_throttle_setting() - expected) < 0.02,
-          "lever %.3f, speed/MaxSpeed %.3f" % (ship.get_throttle_setting(), expected))
-finally:
-    eas.destroy_actor(ship)
 
 # --- Boost energy ---------------------------------------------------------------------------
 ship = spawn()
@@ -123,8 +81,10 @@ try:
         if ship.is_boosting():
             active_frames[0] += 1
 
-    run(ship, duration + 1.0, boost=True, each=watch)
-    check("boost reaches MaxSpeed x BoostMultiplier", abs(peak[0] - MAX * BOOST) < 0.03 * MAX * BOOST, "%.0f of %.0f cm/s" % (peak[0], MAX * BOOST))
+    limits = []
+    run(ship, duration + 1.0, thrust=1.0, boost=True, each=lambda i, v: (watch(i, v), limits.append(ship.get_speed_limit())))
+    check("boost raises the speed limit to limit x BoostMultiplier", abs(max(limits) - MAX * BOOST) < 1.0, "%.0f of %.0f cm/s" % (max(limits), MAX * BOOST))
+    check("boost flies past the SCM top speed", peak[0] > 1.2 * MAX, "%.0f m/s" % (peak[0] / 100.0))
     check("boost lasts BoostDurationSeconds", abs(active_frames[0] * STEP - duration) < 0.1, "%.2f s" % (active_frames[0] * STEP))
     check("empty boost locks", ship.is_boost_locked() and not ship.is_boosting() and ship.get_boost_energy() < 0.01)
 finally:
@@ -137,7 +97,7 @@ try:
     unlock = cdo.get_editor_property("boost_unlock_fraction")
     frames = 0
     while not ship.is_boost_locked() and frames < 3000:
-        ship.debug_step_flight(STEP, 0.0, 0.0, 0.0, True)
+        ship.debug_step_flight(STEP, 1.0, 0.0, 0.0, True)
         frames += 1
     run(ship, delay - 0.05)
     check("no recharge during BoostRechargeDelaySeconds", ship.get_boost_energy() < 0.005, "%.4f" % ship.get_boost_energy())
@@ -146,10 +106,10 @@ try:
     run(ship, 1.0)
     gained = ship.get_boost_energy() - start_energy
     check("recharges at 1 / BoostRechargeSeconds per second", abs(gained - 1.0 / recharge) < 0.005, "%.3f per s" % gained)
-    ship.debug_step_flight(STEP, 0.0, 0.0, 0.0, True)
+    ship.debug_step_flight(STEP, 1.0, 0.0, 0.0, True)
     check("still locked below BoostUnlockFraction", ship.is_boost_locked() and not ship.is_boosting(), "energy %.2f" % ship.get_boost_energy())
     run(ship, (unlock - ship.get_boost_energy()) * recharge + 0.1)
-    ship.debug_step_flight(STEP, 0.0, 0.0, 0.0, True)
+    ship.debug_step_flight(STEP, 1.0, 0.0, 0.0, True)
     check("boost works again once BoostUnlockFraction is back", ship.is_boosting() and not ship.is_boost_locked(),
           "energy %.2f" % ship.get_boost_energy())
 finally:
@@ -161,26 +121,39 @@ try:
     spool = cdo.get_editor_property("cruise_spool_seconds")
     cruise_max = cdo.get_editor_property("cruise_max_speed")
     ship.toggle_cruise()
-    check("J starts charging", ship.get_cruise_state() == unreal.CruiseState.SPOOLING)
+    check("J refused in SCM", ship.get_cruise_state() == unreal.CruiseState.OFF and ship.get_cruise_blocker() == unreal.CruiseBlocker.NEEDS_NAV)
+    to_nav(ship)
+    ship.set_speed_limiter(0.75)
+    ship.toggle_cruise()
+    check("J starts charging in NAV", ship.get_cruise_state() == unreal.CruiseState.SPOOLING)
     run(ship, spool - 0.1)
     check("still charging just before CruiseSpoolSeconds", ship.get_cruise_state() == unreal.CruiseState.SPOOLING,
           "%.0f %%" % (100 * ship.get_cruise_spool_progress()))
     run(ship, 0.2)
     check("engaged after CruiseSpoolSeconds", ship.get_cruise_state() == unreal.CruiseState.ACTIVE)
-    check("lever raised to 75 % on engage", abs(ship.get_throttle_setting() - 0.75) < 1e-3)
     check("limit in deep space is CruiseMaxSpeed", abs(ship.get_cruise_speed_limit() - cruise_max) < 1.0)
     velocity = run(ship, 6.0)
-    check("cruise flies at lever x limit", abs(velocity[0] - 0.75 * cruise_max) < 0.02 * cruise_max,
+    check("cruise flies at limiter x limit", abs(velocity[0] - 0.75 * cruise_max) < 0.02 * cruise_max,
           "%.0f m/s" % (velocity[0] / 100.0))
     ship.toggle_cruise()
     check("J again drops out", ship.get_cruise_state() == unreal.CruiseState.DROPPING
           and ship.get_cruise_blocker() == unreal.CruiseBlocker.PILOT)
     velocity = run(ship, 3.0)
-    check("drop bleeds speed down to boosted flight", length(velocity) <= MAX * BOOST + 1.0 and ship.get_cruise_state() == unreal.CruiseState.OFF,
+    check("drop bleeds speed down to boosted NAV flight", length(velocity) <= NAV * BOOST + 1.0 and ship.get_cruise_state() == unreal.CruiseState.OFF,
           "%.0f m/s, state %s" % (length(velocity) / 100.0, ship.get_cruise_state()))
     check("cruise limit function", abs(ship.compute_cruise_speed_limit(1000000.0, 0.0, True) - 400000.0) < 1.0
           and abs(ship.compute_cruise_speed_limit(1000.0, 0.0, True) - cdo.get_editor_property("cruise_min_speed")) < 1.0
           and ship.compute_cruise_speed_limit(1000000.0, 1.0, True) < ship.compute_cruise_speed_limit(1000000.0, 0.0, True))
+finally:
+    eas.destroy_actor(ship)
+
+ship = spawn()
+try:
+    to_nav(ship)
+    ship.toggle_cruise()
+    run(ship, cdo.get_editor_property("cruise_spool_seconds") + 0.1)
+    ship.toggle_master_mode()
+    check("B back to SCM drops out of cruise", ship.get_cruise_state() == unreal.CruiseState.DROPPING and ship.is_master_mode_switching())
 finally:
     eas.destroy_actor(ship)
 
@@ -220,7 +193,7 @@ def above_surface(direction, altitude_cm):
 up = (-1.0, 0.0, 0.0)  # the side of Veyra facing PlayerStart
 ship = eas.spawn_actor_from_class(unreal.SpaceshipPawn, above_surface(up, 150000.0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
 try:
-    run(ship, STEP)
+    to_nav(ship)
     ship.toggle_cruise()
     check("cruise refused 1.5 km above ground", ship.get_cruise_state() == unreal.CruiseState.OFF
           and ship.get_cruise_blocker() == unreal.CruiseBlocker.TOO_LOW)
@@ -230,7 +203,7 @@ finally:
 # Nose straight down at the planet from 6 km: the limit shrinks with altitude and cruise drops out low.
 ship = eas.spawn_actor_from_class(unreal.SpaceshipPawn, above_surface(up, 600000.0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
 try:
-    run(ship, STEP)
+    to_nav(ship)
     ship.toggle_cruise()
     run(ship, cdo.get_editor_property("cruise_spool_seconds") + 0.1)
     check("cruise engages 6 km up", ship.get_cruise_state() == unreal.CruiseState.ACTIVE)
@@ -322,6 +295,7 @@ pairs = set()
 for m in imc.get_editor_property("default_key_mappings").get_editor_property("mappings"):
     a = m.get_editor_property("action")
     pairs.add((str(m.get_editor_property("key").get_editor_property("key_name")), a.get_name() if a else None))
-check("V / J / X / wheel mapped", {("V", "IA_FlightAssist"), ("J", "IA_CruiseDrive"), ("X", "IA_AllStop"), ("MouseWheelAxis", "IA_CameraZoom")} <= pairs)
+check("V / J / X / wheel / B mapped", {("V", "IA_FlightAssist"), ("J", "IA_CruiseDrive"), ("X", "IA_AllStop"), ("MouseWheelAxis", "IA_CameraZoom"),
+                                      ("B", "IA_MasterMode")} <= pairs)
 
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

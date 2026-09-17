@@ -72,7 +72,8 @@ Obsah k 17. 9. 2026:
 
 Pozor:
 - Úseky „Náš stav“ v referencích byly psané před posledními kroky a místy jsou zastaralé. Náš
-  let už má coupled/decoupled (V), throttle páku, boost s energií a cruise (J). Aktuální stav je
+  let už má SC-1a: coupled/decoupled podle SC, SCM/NAV, omezovač, G-Safe, ComStab, VJoy, boost s
+  energií a cruise (J, jen NAV). Aktuální stav je
   v kapitole 5.
 - Složka **není v gitu** (untracked). Jestli ji commitovat, rozhoduje autor.
 
@@ -160,6 +161,18 @@ Od nejstaršího (celkem 25 commitů, posledních ~7 nepushnutých):
     - H funguje globálně přes `ASpacePlayerController`;
     - oprava cookování: assety načítané podle cesty chyběly v buildu, proto nebyl zvuk a
       nefungovalo H.
+    - Autor build ověřil 17. 9. 2026: menu, nastavení, zvuk, H, Escape i výkon jsou v pořádku
+      (výjimky jsou v kapitole 10).
+14. **SC-1a – jádro IFCS podle Star Citizen** (17. 9. 2026):
+    - trysky mají zrychlení zvlášť pro každý směr (main, retro, strafe, nahoru, dolů) a rotace má
+      setrvačnost (úhlové zrychlení);
+    - coupled: držená klávesa chce rychlost až do limitu, puštěná osa se zabrzdí. Páka plynu
+      zmizela. Decoupled drží vektor rychlosti;
+    - spacebrake (držet X), omezovač rychlosti na kolečku (zoom je teď Alt + kolečko);
+    - master modes SCM a NAV (B, přepnutí trvá 2 s), cruise (J) funguje jen v NAV;
+    - G-Safe (K) a ComStab (L);
+    - myš jako virtuální joystick SC s kruhem a kurzorem v HUD;
+    - entry heat se nově měří proti 200 m/s (rychlost SCM).
 
 ---
 
@@ -222,17 +235,20 @@ Od nejstaršího (celkem 25 commitů, posledních ~7 nepushnutých):
 
 | Akce | Klávesa |
 | --- | --- |
-| Páka plynu (FA on) nebo přímý tah (FA off) | W / S |
+| Dopředu / dozadu (coupled: držet = letět, pustit = brzdit) | W / S |
 | Strafe | A / D |
 | Nahoru / dolů | Space / Ctrl |
 | Roll | Q / E |
-| Směr | myš |
-| Boost | Shift |
-| Flight assist | V |
-| All stop | X |
-| Cruise | J |
+| Směr (virtuální joystick, kurzor zůstává) | myš |
+| Boost | Shift (s W) |
+| Coupled / decoupled | V |
+| Spacebrake (držet) | X |
+| Omezovač rychlosti | kolečko |
+| SCM / NAV | B |
+| G-Safe / ComStab | K / L |
+| Cruise (jen v NAV) | J |
 | Kamera chase / kokpit | C |
-| Zoom | kolečko |
+| Zoom | Alt + kolečko |
 | Free look | pravé tlačítko |
 | Vystoupit (jen když LANDED) | F |
 
@@ -254,7 +270,8 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_character_l6.py` | Input assety postavy, gravity frame, výstup, animace, foot IK. |
 | `test_free_look.py` | Free look (neomezený yaw, návrat). |
 | `test_ship_import.py` | Importovaná loď: meshe, kolize, sockety, materiály, všechny hodnoty ze setup JSON (s `GAMESPACE_SHIP_MANIFEST`). |
-| `test_flight_modes.py` | Páka, detent, all stop, FA off, boost energie, cruise (vesmír i nad Veyrou), výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
+| `test_ifcs_sc1.py` | SC-1a: limity trysek podle směru, coupled brzdění, decoupled, omezovač, spacebrake, SCM/NAV, setrvačnost rotace, G-Safe, ComStab, virtuální joystick, input assety, hodnoty Vanguardu. |
+| `test_flight_modes.py` | Boost energie, cruise jen v NAV (vesmír i nad Veyrou), výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
 
@@ -276,14 +293,14 @@ Dnešní systém (FA on/off, páka, boost, cruise J) je mezikrok. Části se př
 trysek, environment, přistání), jiné se nahradí (J cruise → quantum travel, páka → SC throttle
 a speed limiter).
 
-- **SC-1 – IFCS jádro a master modes**
-  - Režimy SCM a NAV: rychlostní limity a manévrovatelnost. NAV vypíná „bojové“ věci.
-  - SC semantika coupled a decoupled.
-  - Speed limiter na kolečku myši; W/S jako cílová rychlost do limitu.
-  - Kapacity trysek podle směru (main, retro, manévrovací), hmotnost a setrvačnost lodi.
-  - Zrychlení a rotace omezené přetížením (G-Safe) a ComStab.
-  - Myš jako VJoy s viditelným kruhem a kurzorem.
-  - Oddělit boost (manévrovací) a afterburner (hlavní tah, palivo).
+- **SC-1 – IFCS jádro a master modes**, rozdělené na dva kroky:
+  - **SC-1a (hotovo, 17. 9. 2026, čeká na autorův test):** SCM/NAV, coupled/decoupled podle SC,
+    omezovač na kolečku, W/S jako cílová rychlost, trysky podle směru a setrvačnost rotace,
+    G-Safe, ComStab, spacebrake, myš jako VJoy s kruhem. Hmotnost lodi zatím není samostatný
+    parametr: tah je rovnou zadaný jako zrychlení (stejně ho uvádí SC).
+  - **SC-1b:** oddělit boost (manévrovací trysky a rotace, vypíná G-Safe) a afterburner (hlavní
+    tah, vlastní palivo, rychlost relativní k plynu).
+  - Ladění hodnot (G, rychlosti, citlivost VJoy) podle autorova hraní.
 - **SC-2 – Přistání SC stylem**
   - Landing gear (N) s vizuálem na socketech `Gear_*`.
   - Precision / landing mode s nízkými limity.
@@ -308,11 +325,13 @@ Další otevřené směry mimo let:
 
 ## 10. Známé problémy a neověřené věci
 
-- **Neověřeno autorem** (postaveno v posledním kroku, headless testy prochází):
-  - úvodní obrazovka a její rámování kamery, menu a nastavení;
-  - H v zabaleném buildu;
-  - zvuk v buildu (dřív v něm úplně chyběl);
-  - oprava krátkého škubnutí kamery po výstupu z lodi (postava je teď otočená k lodi).
+- **Neověřeno autorem:** celý SC-1a (pocit letu, hodnoty G a rychlostí, VJoy kruh, Alt +
+  kolečko, přistávání s novým coupled režimem). Headless testy prochází.
+- **Zjištěno autorem v buildu (17. 9. 2026), zatím neopraveno:**
+  - po výstupu z lodi stojí postava spíš uvnitř lodi a kamera je moc přiblížená (lehké glitchování),
+    po pár krocích od lodi je vše v pořádku;
+  - změna grafického nastavení není znát;
+  - obloha pořád působí jako tapeta (řeší se v dalších krocích).
 - **Zvuky jsou procedurální placeholdery** z numpy a nikdo je zatím neslyšel. Ladění podle
   autorovy zpětné vazby. Hlasitosti jsou v nastavení a v `ASpaceshipPawn` (`EngineHumVolume`,
   `EngineVolume`, `BoostVolume`, `CruiseVolume`, `OneShotVolume`).
@@ -361,5 +380,5 @@ Další otevřené směry mimo let:
 
 Viz `git log --oneline`. Poslední kroky:
 - `73b1410`: letové režimy, cruise, vrstvený zvuk, živá obloha, opravy výstupu a kokpitu;
-- následující commit: hratelný build (úvodní obrazovka, pauza, nastavení, H, cookování, zvuky UI)
-  a tento handoff.
+- `77b26d6`: hratelný build (úvodní obrazovka, pauza, nastavení, H, cookování, zvuky UI) a handoff;
+- následující commit: SC-1a, jádro IFCS podle Star Citizen.

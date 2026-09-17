@@ -99,19 +99,42 @@ enum class ECruiseBlocker : uint8
 	/** Too close to the ground: below CruiseMinAltitudeM to engage, CruiseDropAltitudeM while cruising. */
 	TooLow,
 	/** The pilot switched it off. */
-	Pilot
+	Pilot,
+	/** Cruise only works in NAV master mode (B). */
+	NeedsNav
+};
+
+/** Star Citizen master modes: what the ship is set up for. B switches, taking MasterModeSwitchSeconds. */
+UENUM(BlueprintType)
+enum class EMasterMode : uint8
+{
+	/** Space Combat Maneuvering: combat speed, full manoeuvrability. */
+	SCM,
+	/** Navigation: much higher speed, reduced turning and manoeuvring thrust, cruise drive available. */
+	NAV
 };
 
 /**
- * Player-flown spaceship with 6 degrees of freedom: thrust / strafe / lift plus pitch / yaw / roll.
+ * Player-flown spaceship with 6 degrees of freedom: thrust / strafe / lift plus pitch / yaw / roll,
+ * flown through an IFCS modelled on Star Citizen's.
  *
- * Flight assist (V) chooses how the controls act:
- * - On (default, "coupled"): W / S set a throttle lever that stays where it is left. The flight
- *   computer fires the thrusters to fly at throttle x MaxSpeed along the nose, cancels sideways
- *   drift, holds altitude against gravity and brakes when the lever is at 0 (X pulls it there).
- *   Each thruster axis has a limited force, so hard turns still slide.
- * - Off ("decoupled"): W / S / A / D / Space / Ctrl fire the thrusters directly while held.
- *   Nothing brakes and nothing holds altitude: Newtonian drift.
+ * Coupled / decoupled (V):
+ * - Coupled (default): W / S / A / D / Space / Ctrl ask for a velocity while held - up to the speed
+ *   limit in that direction. Let go and the flight computer brakes that axis to zero. It also holds
+ *   altitude against gravity. Each thruster direction has its own acceleration (main, retro,
+ *   strafe, up, down), so hard turns still slide.
+ * - Decoupled: the keys fire the thrusters directly and nothing brakes: the ship keeps its velocity
+ *   while it turns. Rotation stays computer-controlled in both.
+ * - Spacebrake (hold X): brakes to a stop with every thruster, coupled or not.
+ *
+ * Speed limiter (mouse wheel): a fraction of the master mode's top speed that no key goes past.
+ * Master modes (B): SCM for combat speed and full manoeuvring, NAV for travel. Cruise drive (J)
+ * works only in NAV, until quantum travel replaces it.
+ * G-Safe (K) keeps the pilot under GSafeMaxG and turns the nose slower at high speed; ComStab (L)
+ * gives cancelling a slide priority over forward thrust and slows turning while the ship slides.
+ *
+ * Mouse steering is a Star Citizen virtual joystick: the mouse moves a cursor inside a circle that
+ * stays where it is left; its offset from the centre (outside a small dead zone) is the turn rate.
  *
  * Boost (Shift) multiplies forward thrust and speed while its energy lasts; it recharges after a
  * pause. Cruise drive (J) charges for a few seconds and then flies at kilometres per second, as
@@ -163,20 +186,101 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
 	float GetThrottle() const { return ThrustInput; }
 
-	/** The throttle lever with flight assist on, -MaxReverseThrottle..1. */
-	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
-	float GetThrottleSetting() const { return ThrottleSetting; }
-
+	/** Coupled flight (the flight computer brakes what the keys do not ask for). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
 	bool IsFlightAssistOn() const { return bFlightAssist; }
 
-	/** Switches flight assist. Turning it on sets the throttle lever to the current forward speed. */
+	/** Coupled (true) or decoupled (false). V toggles it. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Flight")
 	void SetFlightAssist(bool bOn);
 
-	/** Pulls the throttle lever to 0: with flight assist on the ship brakes to a stop. */
+	/** Spacebrake, held (X): brake to a stop with every thruster, coupled or decoupled. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Flight")
-	void AllStop();
+	void SetSpaceBrake(bool bHeld);
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
+	bool IsSpaceBraking() const { return bSpaceBrakeHeld; }
+
+	/** The master mode in force. While switching it is still the old one. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	EMasterMode GetMasterMode() const { return MasterMode; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	bool IsMasterModeSwitching() const { return bMasterModeSwitching; }
+
+	/** The mode being switched to while IsMasterModeSwitching, else the current one. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	EMasterMode GetPendingMasterMode() const { return bMasterModeSwitching ? PendingMasterMode : MasterMode; }
+
+	/** Switching progress, 0..1; 0 when not switching. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	float GetMasterModeSwitchProgress() const;
+
+	/** Starts switching to Mode (takes MasterModeSwitchSeconds). Asking for the current mode cancels a switch. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|IFCS")
+	void RequestMasterMode(EMasterMode Mode);
+
+	/** B: switch to the other master mode, or cancel a switch in progress. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|IFCS")
+	void ToggleMasterMode();
+
+	/** Speed limiter as a fraction of the master mode's top speed, SpeedLimiterMin..1. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	float GetSpeedLimiter() const { return SpeedLimiterFraction; }
+
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|IFCS")
+	void SetSpeedLimiter(float Fraction);
+
+	/** Mouse wheel: +1 per notch up raises the limiter by SpeedLimiterStep. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|IFCS")
+	void AdjustSpeedLimiter(float Notches);
+
+	/** Top speed of the current master mode, cm/s (ScmMaxSpeed or NavMaxSpeed). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	float GetModeMaxSpeed() const;
+
+	/** The speed no key goes past right now: mode top speed x limiter (x BoostMultiplier while boosting), cm/s. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	float GetSpeedLimit() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|IFCS")
+	void SetGSafe(bool bOn);
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	bool IsGSafeOn() const { return bGSafe; }
+
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|IFCS")
+	void SetComStab(bool bOn);
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	bool IsComStabOn() const { return bComStab; }
+
+	/** Acceleration the thrusters put on the pilot, in G, smoothed. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	float GetGForce() const { return GForce; }
+
+	/** Angle between the nose and the flight path, degrees; 0 when nearly stopped. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	float GetSlipAngleDeg() const { return SlipAngleDeg; }
+
+	/**
+	 * G-Safe on a thruster command (local cm/s^2, X forward, Z up): vertical to GSafeMaxVerticalG,
+	 * the whole vector to GSafeMaxG. With bLateralFirst (ComStab) sideways and vertical keep what
+	 * they need and forward gets the rest; otherwise everything scales down together. For tests.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|IFCS")
+	FVector LimitThrustForPilot(const FVector& LocalAcceleration, bool bLateralFirst) const;
+
+	/** The virtual joystick cursor, each axis in [-1, 1] inside the unit circle (X right, Y up). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Handling")
+	FVector2D GetMouseStick() const { return MouseStick; }
+
+	/** True when the mouse drives the Star Citizen style virtual joystick (no recentering). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Handling")
+	bool UsesVirtualJoystick() const { return !bMouseRecenter; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Handling")
+	float GetVirtualJoystickDeadzone() const { return VJoyDeadzone; }
 
 	/** How hard the thrusters work this frame, 0..1 of their force. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
@@ -230,6 +334,13 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	FVector DebugStepFlight(float DeltaSeconds, float Thrust, float Strafe, float Lift, bool bBoost);
+
+	/**
+	 * Tests: like DebugStepFlight, with LinearInput (thrust, strafe, lift) and RotationInput (roll,
+	 * pitch, yaw) as held stick values in [-1, 1]. The mouse joystick is left as it is.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	FVector DebugStepFlightInput(float DeltaSeconds, const FVector& LinearInput, const FVector& RotationInput, bool bBoost);
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
 	bool IsCockpitView() const { return bCockpitView; }
@@ -489,15 +600,31 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> CruiseAction;
 
-	/** Digital, pressed: throttle to zero (X). */
+	/** Digital, held: spacebrake (X). The asset keeps its old name, IA_AllStop. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> AllStopAction;
 
-	/** Axis1D: mouse wheel. Chase camera distance, or cockpit zoom. */
+	/** Axis1D: mouse wheel with Alt held. Chase camera distance, or cockpit zoom. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> CameraZoomAction;
 
-	/** Maps keys the authored flight context lacks (F, H, V, J, X, right mouse button, wheel). */
+	/** Digital, pressed: SCM / NAV (B). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> MasterModeAction;
+
+	/** Axis1D: mouse wheel without Alt. Speed limiter. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> SpeedLimiterAction;
+
+	/** Digital, pressed: G-Safe on / off (K). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> GSafeAction;
+
+	/** Digital, pressed: ComStab on / off (L). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> ComStabAction;
+
+	/** Maps keys the authored flight context lacks (F, V, J, X, B, K, L, right mouse button, wheel). */
 	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> InteractMappingContext;
 
@@ -513,21 +640,33 @@ protected:
 	// Flight model tuning
 	// ---------------------------------------------------------------------------------------
 
-	/** Forward and reverse acceleration, cm/s^2. */
+	/** Main thrusters: forward acceleration, cm/s^2 (981 is 1 G). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
-	float ThrustAcceleration = 4000.f;
+	float ThrustAcceleration = 7845.f;
 
-	/** Lateral acceleration, cm/s^2. Deliberately weaker than main thrust. */
+	/** Retro thrusters: backward acceleration (braking from forward flight), cm/s^2. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
-	float StrafeAcceleration = 1800.f;
+	float RetroAcceleration = 4900.f;
 
-	/** Vertical acceleration, cm/s^2. */
+	/** Manoeuvring thrusters: sideways acceleration either way, cm/s^2. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
-	float LiftAcceleration = 1800.f;
+	float StrafeAcceleration = 4900.f;
 
-	/** Hard speed cap in cm/s. 12000 cm/s is 120 m/s. */
+	/** Manoeuvring thrusters: upward acceleration, cm/s^2. Also what holds the ship against gravity. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
-	float MaxSpeed = 12000.f;
+	float LiftAcceleration = 5880.f;
+
+	/** Manoeuvring thrusters: downward acceleration, cm/s^2. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
+	float DownAcceleration = 3920.f;
+
+	/** SCM master mode top speed, cm/s (20000 is 200 m/s). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
+	float ScmMaxSpeed = 20000.f;
+
+	/** NAV master mode top speed, cm/s (100000 is 1 km/s). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight", meta = (ClampMin = "0.0"))
+	float NavMaxSpeed = 100000.f;
 
 	/**
 	 * Drag at sea-level air density: fraction of velocity shed per second, scaled by density.
@@ -559,11 +698,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight")
 	bool bSweepMovement = true;
 
-	/**
-	 * While boost is held, forward thrust acceleration and MaxSpeed are multiplied by this.
-	 * With flight assist on, cruise speed settles at ThrustAcceleration / LinearDamping, so the
-	 * multiplier scales cruise speed directly: 2.5 takes the defaults from ~33 to ~83 m/s.
-	 */
+	/** While boost is held with W, forward thrust and the speed limit are multiplied by this. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "1.0"))
 	float BoostMultiplier = 2.5f;
 
@@ -591,49 +726,91 @@ protected:
 	float BoostUnlockFraction = 0.3f;
 
 	// ---------------------------------------------------------------------------------------
-	// Flight assist
+	// IFCS: coupled flight, master modes, speed limiter, G-Safe, ComStab
 	// ---------------------------------------------------------------------------------------
 
 	/** Coupled flight (see the class comment). V toggles it in game. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS")
 	bool bFlightAssist = true;
 
-	/** How hard the flight computer chases the target velocity, per second of error. Higher is snappier. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.1"))
-	float FlightAssistResponse = 2.f;
+	/** How hard the coupled flight computer chases the target velocity, per second of error. Higher is snappier. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.1"))
+	float FlightAssistResponse = 3.f;
 
-	/** Throttle lever travel per second while W / S is held. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.05"))
-	float ThrottleRate = 0.8f;
+	/** Seconds a master mode switch (B) takes. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.0", Units = "s"))
+	float MasterModeSwitchSeconds = 2.f;
 
-	/** How far the lever goes into reverse, as a fraction of MaxSpeed. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float MaxReverseThrottle = 0.35f;
+	/** NAV: turn rates as a fraction of the SCM ones. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.05", ClampMax = "1.0"))
+	float NavTurnScale = 0.5f;
 
-	/** Braking and reverse thrust as a fraction of ThrustAcceleration. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float ReverseThrustFraction = 0.65f;
+	/** NAV: strafe, up and down thrust as a fraction of the SCM ones (main and retro stay). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.05", ClampMax = "1.0"))
+	float NavManeuverScale = 0.5f;
 
-	/** Sideways speed at full strafe input, cm/s. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.0"))
-	float StrafeSpeedLimit = 3000.f;
+	/** Speed limiter change per mouse wheel notch, fraction of the mode's top speed. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.01", ClampMax = "0.5"))
+	float SpeedLimiterStep = 0.05f;
 
-	/** Vertical speed at full lift input, cm/s. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.0"))
-	float LiftSpeedLimit = 3000.f;
+	/** Lowest speed limiter setting. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.01", ClampMax = "1.0"))
+	float SpeedLimiterMin = 0.05f;
+
+	/** G-Safe (K): keep the pilot's G load down. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS")
+	bool bGSafe = true;
+
+	/** G-Safe: most total thruster acceleration on the pilot, G. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.5"))
+	float GSafeMaxG = 7.f;
+
+	/** G-Safe: most acceleration along the pilot's spine (up / down), G. The body takes least that way. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.5"))
+	float GSafeMaxVerticalG = 5.f;
 
 	/**
-	 * Highest descent speed commanded near the ground, cm/s. The limit rises to LiftSpeedLimit by
+	 * G-Safe, coupled: pitch and yaw rates are limited so that bending the flight path at the
+	 * current speed would take at most this many G. Fast ships turn wider.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.5"))
+	float GSafeTurnG = 14.f;
+
+	/** G-Safe never slows turning below this fraction of the full rates. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.05", ClampMax = "1.0"))
+	float GSafeMinTurnFraction = 0.3f;
+
+	/** ComStab (L): fight the slide in turns. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS")
+	bool bComStab = true;
+
+	/** ComStab, coupled: turning starts to slow once nose and flight path are this far apart. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+	float ComStabSlipStartDeg = 8.f;
+
+	/** ComStab: at this slip angle turning is down to ComStabMinTurnFraction. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "1.0", ClampMax = "180.0"))
+	float ComStabSlipFullDeg = 30.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.05", ClampMax = "1.0"))
+	float ComStabMinTurnFraction = 0.35f;
+
+	/** Below this speed there is no meaningful flight path, so no slip, cm/s. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.0"))
+	float ComStabMinSpeed = 1500.f;
+
+	/**
+	 * Highest descent speed commanded near the ground, cm/s. The limit rises to the speed limit by
 	 * 20 m above the terrain, so holding Ctrl lowers the ship onto the ground instead of into it.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "10.0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "10.0"))
 	float LandingDescentSpeed = 250.f;
 
 	/**
-	 * With the throttle at 0 and a hull gap under ~4 m, the flight computer holds only this much
+	 * With no thrust or lift held and a hull gap under ~4 m, the flight computer holds only this much
 	 * less than gravity, so a hovering ship settles gently onto the ground by itself.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|IFCS", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float LandingSettleGravityFraction = 0.25f;
 
 	// ---------------------------------------------------------------------------------------
@@ -699,18 +876,42 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.1"))
 	float AngularResponsiveness = 8.f;
 
+	/** Rotational inertia: the most the pitch rate changes per second, deg/s^2. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "1.0"))
+	float PitchAcceleration = 300.f;
+
+	/** The most the yaw rate changes per second, deg/s^2. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "1.0"))
+	float YawAcceleration = 220.f;
+
+	/** The most the roll rate changes per second, deg/s^2. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "1.0"))
+	float RollAcceleration = 500.f;
+
 	/**
-	 * Mouse steering is a virtual joystick: moving the mouse pushes the stick, and the stick
-	 * springs back to centre at MouseRecenterRate. This value is stick deflection per pixel.
-	 *
-	 * Moving the mouse steadily at MouseRecenterRate / MouseSensitivity pixels per second holds
-	 * the stick fully over, i.e. turns at PitchRate / YawRate. The defaults reach full rate at
-	 * roughly 130 px/s, independent of frame rate.
+	 * Mouse steering. Off (default): Star Citizen virtual joystick - the mouse moves a cursor in a
+	 * circle that stays where it is left. On: the older spring-centred stick that returns to the
+	 * middle at MouseRecenterRate once the mouse stops.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling")
+	bool bMouseRecenter = false;
+
+	/** Virtual joystick: mouse counts from the centre to the edge of the circle (full turn rate). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "10.0"))
+	float VJoyCountsToFull = 300.f;
+
+	/** Virtual joystick: inner part of the circle that turns nothing, fraction of the radius. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.0", ClampMax = "0.5"))
+	float VJoyDeadzone = 0.06f;
+
+	/**
+	 * Spring-centred stick only (bMouseRecenter): stick deflection per pixel. Moving the mouse
+	 * steadily at MouseRecenterRate / MouseSensitivity pixels per second holds the stick fully over.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.0"))
 	float MouseSensitivity = 0.09f;
 
-	/** How quickly the virtual stick returns to centre once the mouse stops, per second. */
+	/** Spring-centred stick only: how quickly it returns to centre once the mouse stops, per second. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.1"))
 	float MouseRecenterRate = 12.f;
 
@@ -813,9 +1014,12 @@ protected:
 	// Atmospheric entry
 	// ---------------------------------------------------------------------------------------
 
-	/** Speed that heat is measured against, cm/s. Heating is density x (speed / this)^3. */
+	/**
+	 * Speed that heat is measured against, cm/s. Heating is density x (speed / this)^3. The SCM top
+	 * speed (200 m/s): flying at SCM speed stays cool, boost and NAV speeds in thick air heat up.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Entry", meta = (ClampMin = "1.0"))
-	float HeatReferenceSpeed = 10000.f;
+	float HeatReferenceSpeed = 20000.f;
 
 	/** Heating where heat starts to show... */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Entry", meta = (ClampMin = "0.0"))
@@ -1003,12 +1207,19 @@ private:
 	void HandleFlightAssist(const FInputActionValue& Value);
 	void HandleCruise(const FInputActionValue& Value);
 	void HandleAllStop(const FInputActionValue& Value);
+	void HandleAllStopCompleted(const FInputActionValue& Value);
 	void HandleCameraZoom(const FInputActionValue& Value);
+	void HandleMasterMode(const FInputActionValue& Value);
+	void HandleSpeedLimiter(const FInputActionValue& Value);
+	void HandleGSafe(const FInputActionValue& Value);
+	void HandleComStab(const FInputActionValue& Value);
+	/** Alt held on the controlling player's keyboard: the wheel zooms instead of setting the limiter. */
+	bool IsAltHeld() const;
 	void SetFreeLookHeld(bool bHeld);
 	void UpdateFreeLook(float DeltaSeconds);
 	void ClearPilotInput();
 
-	void UpdateThrottle(float DeltaSeconds);
+	void UpdateMasterMode(float DeltaSeconds);
 	void UpdateBoost(float DeltaSeconds);
 	void UpdateCruise(float DeltaSeconds);
 	ECruiseBlocker EvaluateCruiseEngage() const;
@@ -1051,7 +1262,7 @@ private:
 	/** Mouse movement in pixels since the last tick. */
 	FVector2D MouseLookDelta = FVector2D::ZeroVector;
 
-	/** The mouse virtual joystick, each axis in [-1, 1]. */
+	/** The mouse virtual joystick, inside the unit circle. */
 	FVector2D MouseStick = FVector2D::ZeroVector;
 
 	bool bFreeLookHeld = false;
@@ -1071,10 +1282,16 @@ private:
 	float BoostEnergy = 1.f;
 	float BoostRechargeWait = 0.f;
 
-	float ThrottleSetting = 0.f;
-	/** The lever stopped at 0 on its way through; it stays there until W / S is released. */
-	bool bThrottleDetentHold = false;
 	float EngineDemand = 0.f;
+
+	bool bSpaceBrakeHeld = false;
+	EMasterMode MasterMode = EMasterMode::SCM;
+	EMasterMode PendingMasterMode = EMasterMode::SCM;
+	bool bMasterModeSwitching = false;
+	float MasterModeTimer = 0.f;
+	float SpeedLimiterFraction = 1.f;
+	float GForce = 0.f;
+	float SlipAngleDeg = 0.f;
 
 	ECruiseState CruiseState = ECruiseState::Off;
 	ECruiseBlocker CruiseBlocker = ECruiseBlocker::None;

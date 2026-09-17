@@ -52,63 +52,91 @@ git lfs install
 Motion is integrated by hand in `Tick` rather than simulated by Chaos, which keeps the feel
 predictable and cheap to tune.
 
-- Thrust, strafe and lift are accelerations applied along the hull's local axes and accumulated
-  into `LinearVelocity` (world space, cm/s).
+- Every thruster direction has its own acceleration limit (cm/s^2, 981 = 1 G): main
+  `ThrustAcceleration`, `RetroAcceleration`, `StrafeAcceleration`, up `LiftAcceleration`, `DownAcceleration`.
+  The commanded acceleration is applied along the hull's local axes and accumulated into
+  `LinearVelocity` (world space, cm/s).
 - **Environment (L3).** Every tick the ship samples the nearest `ACelestialBody`
   (`SampleEnvironment`). Everything blends smoothly with altitude:
   - **Space** (above the atmosphere): no drag, no gravity - true Newtonian drift
-    (`SpaceLinearDamping` 0). The ship keeps flying until you brake with S.
+    (`SpaceLinearDamping` 0). Coupled, the flight computer brakes; decoupled, the ship keeps flying.
   - **Atmosphere**: drag `LinearDamping` (0.4/s) plus `QuadraticDrag` (4e-5 per cm, grows with
     speed squared), both multiplied by air density (0 at the top, 1 at sea level), and gravity
     along the local down (`GravityScale`).
-  - At sea level that gives ~62 m/s cruise at full thrust, ~116 m/s with boost, ~13 m/s falling
-    with the engines off. `ComputeEnvironmentAcceleration` is the exact formula.
-  - **Entry heat** (`Spaceship|Entry`): density x (speed / 100 m/s)^3, from `HeatOnset` to
+  - At sea level, with G-Safe's 7 G against the drag, that gives ~90 m/s top speed and ~13 m/s
+    falling with the engines off. `ComputeEnvironmentAcceleration` is the exact formula.
+  - **Entry heat** (`Spaceship|Entry`): density x (speed / 200 m/s)^3, from `HeatOnset` to
     `HeatFull`, smoothed; shakes the camera (`HeatShakeCm`) and shows on the HUD.
-- `MaxSpeed` is a hard cap (times `BoostMultiplier` while boosting); cruise has its own limit.
-- Pitch, yaw and roll drive a target rate that `AngularVelocity` eases towards over
-  `AngularResponsiveness`, then apply as a *local* rotation. Local rotation is what makes this
-  6DOF rather than an aircraft glued to a horizon, and it avoids gimbal lock at the poles.
+- The master mode's top speed (`ScmMaxSpeed` / `NavMaxSpeed`, times `BoostMultiplier` while boosting)
+  is a hard cap; above it (boost released, NAV back to SCM) the excess bleeds off at `OverspeedDecay`.
+  Cruise has its own limit.
+- Pitch, yaw and roll drive a target rate (`PitchRate`, `YawRate`, `RollRate`, scaled down in NAV,
+  in cruise and by G-Safe / ComStab, see below). `AngularVelocity` eases towards it at
+  `AngularResponsiveness` but never changes faster than `PitchAcceleration` / `YawAcceleration` /
+  `RollAcceleration` (rotational inertia), then applies as a *local* rotation. Local rotation is what
+  makes this 6DOF rather than an aircraft glued to a horizon, and it avoids gimbal lock at the poles.
 - Movement is swept (`bSweepMovement`), and a blocking hit projects velocity onto the surface
   plane so the ship slides instead of stalling. **A sweep only tests the root component**, which
   is why `HullCollision` has to be the root: with a plain scene component there the ship used to
   fly straight through the planet.
-- **Mouse steering is a virtual joystick.** Mouse movement pushes the stick
-  (`MouseSensitivity`, deflection per pixel), which springs back to centre at
-  `MouseRecenterRate`. Full turn rate at ~130 px/s of mouse movement. This keeps steering
-  independent of frame rate; turning pixels-per-frame straight into a turn rate made the ship
-  turn half as fast at 120 FPS as at 60. The turn rate itself is capped by `PitchRate` (100),
-  `YawRate` (75) and `RollRate` (150) deg/s.
-- **Speed**: in space `MaxSpeed` (Vanguard 120 m/s, ~264 m/s with boost) is the only limit; in the
-  atmosphere drag sets top speed (see above). Engine sound, boost and cruise: see the next section.
+- **Mouse steering is a Star Citizen virtual joystick** (default, `bMouseRecenter` false): mouse
+  movement moves a cursor inside a circle, and it stays where it is left. `VJoyCountsToFull` (300)
+  mouse counts from the centre reach the rim = full turn rate; inside `VJoyDeadzone` (6 % of the
+  radius) nothing turns, outside it the rate grows linearly. The debug HUD draws the circle, the dead
+  zone and the cursor in the middle of the screen. With `bMouseRecenter` the older spring-centred
+  stick is back (`MouseSensitivity` per pixel, `MouseRecenterRate`). Either way steering works on a
+  stick position, not on per-frame deltas, so it is independent of frame rate.
 
-All tuning values are `EditAnywhere` under the `Spaceship|Flight` and `Spaceship|Handling`
-categories.
+All tuning values are `EditAnywhere` under the `Spaceship|Flight`, `Spaceship|IFCS` and
+`Spaceship|Handling` categories.
 
-### Flight assist, throttle, boost and cruise drive
+### IFCS (SC-1a): coupled flight, speed limiter, master modes, G-Safe, ComStab
 
-- **Flight assist on** (default, `V` toggles, HUD `FA ON`): `W` / `S` move a **throttle lever**
-  (`ThrottleRate` 0.8 per s) that stays where it is left, from -35 % (`MaxReverseThrottle`) to
-  100 %. The flight computer then chases a target velocity: lever x `MaxSpeed` along the nose,
-  `StrafeSpeedLimit` / `LiftSpeedLimit` (30 m/s) sideways and up while `A` `D` `Space` `Ctrl` are
-  held, zero otherwise. It feeds forward drag and gravity (so the ship hovers in the atmosphere)
-  and closes the rest at `FlightAssistResponse` (2 per s). Every thruster axis keeps its force
-  limit (`ThrustAcceleration`, reverse `ReverseThrustFraction` 65 %, `StrafeAcceleration`,
-  `LiftAcceleration`), so hard turns still slide. Pulling the lever back stops at a **detent at
-  0** until `S` is pressed again. `X` pulls it to 0 at once (all stop).
+Modelled on Star Citizen's Intelligent Flight Control System (`starcitizenreference/`). Headless:
+`Tools/Tests/test_ifcs_sc1.py`.
+
+- **Coupled** (default, `V` toggles, HUD `CPLD`): `W` `S` `A` `D` `Space` `Ctrl` ask for a velocity
+  in that direction while held - up to the speed limit. A released key means zero on that axis: the
+  flight computer brakes it with the thrusters it has. It chases the target at `FlightAssistResponse`
+  (3 per s), feeds forward drag and gravity (the ship hovers in the atmosphere) and every direction
+  keeps its thruster limit, so hard turns still slide. There is no throttle lever any more.
+- **Decoupled** (HUD `DECOUPLED`): the keys fire the thrusters directly, nothing brakes, nothing
+  holds altitude: the ship keeps its velocity while it turns. The thrusters cannot push the speed
+  past the limiter, but a faster ship is not slowed down by it. Rotation stays computer-controlled.
+- **Spacebrake** (hold `X`, `IA_AllStop`): coupled flight towards zero on every axis with every
+  thruster, also when decoupled. Keys are ignored while held.
 - **Near the ground**: the commanded descent speed shrinks to `LandingDescentSpeed` (2.5 m/s) by
-  20 m above the terrain, and with the lever at 0 and the hull under ~4 m up, the computer holds
-  only 75 % of gravity, so the ship settles onto its gear. An open lever counts as engines on for
-  landing (HUD `throttle to 0 (X)`); landing closes it.
-- **Flight assist off** (HUD `FA OFF (drift)`): the keys fire the thrusters directly while held,
-  nothing brakes or holds altitude. Newtonian drift, flip-and-burn. Switching back on picks the
-  lever up at the current forward speed.
-- **Boost** (hold `Shift`): forward thrust and top speed x `BoostMultiplier`, with flight assist
-  straight to boosted top speed. Lasts `BoostDurationSeconds` (4.5 s) of energy, recharges in
-  `BoostRechargeSeconds` (7 s) after `BoostRechargeDelaySeconds` (1 s); run dry, it stays off
-  until `BoostUnlockFraction` (30 %) is back. HUD bar on the THROTTLE line.
-- **Cruise drive** (`J`): charges for `CruiseSpoolSeconds` (2.5 s, camera shake builds, charging
-  sound), then flies along the nose at lever x speed limit (a lever under 25 % is raised to 75 %).
+  20 m above the terrain, and with nothing held and the hull under ~4 m up, the computer holds only
+  75 % of gravity, so the ship settles onto its gear.
+- **Speed limiter** (mouse wheel, `IA_SpeedLimiter`): a fraction of the master mode's top speed,
+  `SpeedLimiterStep` (5 %) per notch, `SpeedLimiterMin` (5 %) to 100 %. No key goes past it; lowering
+  it in coupled flight brakes down to it. In cruise it sets how much of the cruise limit to use.
+  `Alt` + wheel is the camera zoom (both actions are on the wheel; the ship checks Alt).
+- **Master modes** (`B`, `IA_MasterMode`): switching takes `MasterModeSwitchSeconds` (2 s, the HUD
+  shows the progress; `B` again cancels).
+  - **SCM**: `ScmMaxSpeed` (Vanguard 210 m/s), full manoeuvrability. Cruise refused (`NeedsNav`).
+  - **NAV**: `NavMaxSpeed` (1 km/s), turn rates x `NavTurnScale` (0.5), strafe / up / down thrust x
+    `NavManeuverScale` (0.5), cruise drive available. Back to SCM drops out of cruise and bleeds the
+    speed down.
+- **G-Safe** (`K`, on by default): thruster acceleration on the pilot is limited to `GSafeMaxG`
+  (7 G) in total and `GSafeMaxVerticalG` (5 G) along the spine. In coupled flight pitch and yaw rates
+  are limited so that bending the flight path at the current speed takes at most `GSafeTurnG` (14 G):
+  ~39 deg/s at 200 m/s, never below `GSafeMinTurnFraction` (30 %) of the full rate.
+- **ComStab** (`L`, on by default): when G-Safe has to cut the thrust, sideways and vertical keep
+  what they need and forward gets the rest (`LimitThrustForPilot`). And once nose and flight path are
+  more than `ComStabSlipStartDeg` (8) apart, turning slows, down to `ComStabMinTurnFraction` (35 %) at
+  `ComStabSlipFullDeg` (30). At SCM top speed with full yaw, slip stays around 40 degrees instead of
+  sliding sideways and backwards.
+- **Entry heat** is measured against `HeatReferenceSpeed` 200 m/s (the SCM top speed): SCM flight
+  stays cool, boost and NAV speeds in thick air heat up.
+- **Boost** (hold `Shift` with `W`): forward thrust and the speed limit x `BoostMultiplier` (G-Safe
+  still caps the acceleration). SC-1b splits this into boost and afterburner. Lasts
+  `BoostDurationSeconds` (4.5 s) of energy, recharges in `BoostRechargeSeconds` (7 s) after
+  `BoostRechargeDelaySeconds` (1 s); run dry, it stays off until `BoostUnlockFraction` (30 %) is
+  back. HUD bar on the IFCS line.
+- **Cruise drive** (`J`, **NAV only**, a stand-in for quantum travel until SC-4): charges for
+  `CruiseSpoolSeconds` (2.5 s, camera shake builds, charging sound), then flies along the nose at the
+  speed limiter x cruise limit (at least 10 %).
   The limit is the altitude above the terrain x `CruiseAltitudeRate` (0.4 per s), lowered in thick
   air (`CruiseAtmosphereSlowdown`), between 250 m/s and `CruiseMaxSpeed` 6 km/s (6 km/s far from
   bodies). Flying at the ground therefore slows by itself (the altitude shrinks ~33 % per second)
@@ -131,8 +159,8 @@ categories.
   the first engine loop sounded like a vacuum cleaner because of its 1-4 kHz energy, so nothing
   here has more than a few percent above 2 kHz.
 
-Headless: `Tools/Tests/test_flight_modes.py` (lever, detent, all stop, drift cancelling, FA off,
-boost energy, cruise engage / limit / drop in deep space and over Veyra, free look all round,
+Headless: `Tools/Tests/test_flight_modes.py` (boost energy, cruise NAV-only / engage / limit / drop
+in deep space and over Veyra, free look all round,
 exit candidates and collision setup, character recovery, scene extras).
 
 ### Landing (L5)
@@ -166,19 +194,23 @@ of 15 degrees; 87 % of the surface is landable, 4.5 % is steeper than 30 degrees
 | Lift         | `Space` / `Left Ctrl`      | -                    |
 | Roll         | `E` / `Q`                  | Shoulder buttons     |
 | Pitch / yaw  | Mouse                      | Right stick          |
-| Boost (hold) | `Left Shift`               | -                    |
-| Flight assist | `V` (on / off)            | -                    |
-| All stop     | `X` (throttle lever to 0)  | -                    |
-| Cruise drive | `J` (charge / cancel / drop out) | -              |
+| Boost (hold) | `Left Shift` (with `W`)    | -                    |
+| Coupled / decoupled | `V`                 | -                    |
+| Spacebrake (hold) | `X`                   | -                    |
+| Speed limiter | Mouse wheel               | -                    |
+| SCM / NAV    | `B`                        | -                    |
+| G-Safe / ComStab | `K` / `L`              | -                    |
+| Cruise drive | `J` (NAV only: charge / cancel / drop out) | -    |
 | Camera       | `C` (chase / cockpit)      | -                    |
-| Zoom         | Mouse wheel (chase distance, cockpit zoom) | -    |
+| Zoom         | `Alt` + mouse wheel (chase distance, cockpit zoom) | - |
 | Get out      | `F` (only when LANDED)     | -                    |
 | Free look    | hold right mouse button    | -                    |
 | HUD          | `H` (compact / full / off) | -                    |
 
 `V`, `J`, `X` and the wheel are `IA_FlightAssist`, `IA_CruiseDrive`, `IA_AllStop` and
-`IA_CameraZoom`, appended to `IMC_Spaceship` by `Tools/Assets/add_flight_modes_input.py`
-(without it the ship maps the same keys at runtime).
+`IA_CameraZoom`, appended to `IMC_Spaceship` by `Tools/Assets/add_flight_modes_input.py`; `B`, the
+wheel again, `K` and `L` are `IA_MasterMode`, `IA_SpeedLimiter`, `IA_GSafe` and `IA_ComStab` from
+`Tools/Assets/add_ifcs_input.py` (without them the ship maps the same keys at runtime).
 
 **Free look** (Elite-style head look): while the right mouse button is held, the ship keeps its
 heading (pitch/yaw rotation stops at once; roll keys and the flight path carry on) and the mouse
@@ -372,15 +404,17 @@ Any level without a World Settings override therefore spawns a flyable ship at i
 
 ## SpaceDebugHUD
 
-`AHUD` subclass set as `HUDClass` on `SpaceGameMode`. Draws speed (m/s or km/s and km/h), the
-throttle lever with FA ON / OFF and the boost energy bar, the cruise drive state (`DRIVE`) and
-active camera as plain canvas text in the top-left corner. Cruise charging, a drop close to the
-ground and free look also show big in the middle of the screen. A tuning aid, not UMG - replace
-it when a real HUD exists.
+`AHUD` subclass set as `HUDClass` on `SpaceGameMode`. Draws speed with the speed limiter (`SPEED`),
+the IFCS state (`IFCS`: SCM / NAV and switch progress, CPLD / DECOUPLED / SPACEBRAKE, G-SAFE,
+COMSTAB, G load, boost energy bar), the cruise drive state or the key help (`DRIVE`) and the active
+camera as plain canvas text in the top-left corner. A master mode switch, cruise charging, a drop
+close to the ground and free look also show big in the middle of the screen, and in flight the mouse
+virtual joystick (rim, dead zone, cursor) is drawn in the centre. A tuning aid, not UMG - SC-3
+replaces it.
 
 `H` (`IA_ToggleHud`, appended to `IMC_Spaceship` and `IMC_Character` by
 `Tools/Assets/add_hud_toggle_input.py`) cycles the CVar `space.Hud`: `1` compact (default: mode,
-speed, throttle, drive, flight, landing, move), `2` full (every line below), `0` hidden. Position and text size
+speed, IFCS, drive, flight, landing, move), `2` full (every line below), `0` hidden. Position and text size
 scale with the viewport height (1.0 at 1080 p), so the panel stays in the corner at any
 resolution.
 

@@ -7,8 +7,8 @@
 #include "SpaceDebugHUD.generated.h"
 
 /**
- * Plain-text flight readout drawn straight onto the canvas: speed, throttle, boost, camera, and
- * distance and ETA to the nearest ACelestialBody.
+ * Plain-text flight readout drawn straight onto the canvas: speed and limiter, IFCS state, boost,
+ * camera, distance and ETA to the nearest ACelestialBody, plus the mouse virtual joystick.
  *
  * A stopgap for tuning the flight model, deliberately not UMG. It needs no widget asset and no
  * extra module, and gets replaced once a real HUD exists.
@@ -39,6 +39,9 @@ protected:
 	float TextScale = 1.0f;
 
 private:
+	/** The mouse virtual joystick: rim, dead zone and cursor in the middle of the screen. */
+	void DrawVirtualJoystick(const class ASpaceshipPawn& Ship, float Scale);
+
 	/** For the FPS counter (settings: show FPS). */
 	float SmoothedFrameSeconds = 0.f;
 };

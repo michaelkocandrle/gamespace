@@ -51,6 +51,13 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const CruiseActionPath = TEXT("/Game/Input/IA_CruiseDrive.IA_CruiseDrive");
 	const TCHAR* const AllStopActionPath = TEXT("/Game/Input/IA_AllStop.IA_AllStop");
 	const TCHAR* const CameraZoomActionPath = TEXT("/Game/Input/IA_CameraZoom.IA_CameraZoom");
+	const TCHAR* const MasterModeActionPath = TEXT("/Game/Input/IA_MasterMode.IA_MasterMode");
+	const TCHAR* const SpeedLimiterActionPath = TEXT("/Game/Input/IA_SpeedLimiter.IA_SpeedLimiter");
+	const TCHAR* const GSafeActionPath = TEXT("/Game/Input/IA_GSafe.IA_GSafe");
+	const TCHAR* const ComStabActionPath = TEXT("/Game/Input/IA_ComStab.IA_ComStab");
+
+	/** 1 G in cm/s^2. */
+	constexpr double StandardGravityCmS2 = 980.665;
 	const TCHAR* const EngineLoopSoundPath = TEXT("/Game/Ships/Audio/SW_EngineLoop.SW_EngineLoop");
 	const TCHAR* const EngineHumSoundPath = TEXT("/Game/Ships/Audio/SW_EngineHum.SW_EngineHum");
 	const TCHAR* const BoostLoopSoundPath = TEXT("/Game/Ships/Audio/SW_BoostLoop.SW_BoostLoop");
@@ -284,10 +291,28 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	if (AllStopAction)
 	{
 		Input->BindAction(AllStopAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleAllStop);
+		Input->BindAction(AllStopAction, ETriggerEvent::Completed, this, &ASpaceshipPawn::HandleAllStopCompleted);
+		Input->BindAction(AllStopAction, ETriggerEvent::Canceled, this, &ASpaceshipPawn::HandleAllStopCompleted);
 	}
 	if (CameraZoomAction)
 	{
 		Input->BindAction(CameraZoomAction, ETriggerEvent::Triggered, this, &ASpaceshipPawn::HandleCameraZoom);
+	}
+	if (MasterModeAction)
+	{
+		Input->BindAction(MasterModeAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleMasterMode);
+	}
+	if (SpeedLimiterAction)
+	{
+		Input->BindAction(SpeedLimiterAction, ETriggerEvent::Triggered, this, &ASpaceshipPawn::HandleSpeedLimiter);
+	}
+	if (GSafeAction)
+	{
+		Input->BindAction(GSafeAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleGSafe);
+	}
+	if (ComStabAction)
+	{
+		Input->BindAction(ComStabAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleComStab);
 	}
 
 	if (FreeLookAction)
@@ -348,6 +373,22 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			if (CameraZoomAction && !IsMapped(CameraZoomAction))
 			{
 				InteractMappingContext->MapKey(CameraZoomAction, EKeys::MouseWheelAxis);
+			}
+			if (MasterModeAction && !IsMapped(MasterModeAction))
+			{
+				InteractMappingContext->MapKey(MasterModeAction, EKeys::B);
+			}
+			if (SpeedLimiterAction && !IsMapped(SpeedLimiterAction))
+			{
+				InteractMappingContext->MapKey(SpeedLimiterAction, EKeys::MouseWheelAxis);
+			}
+			if (GSafeAction && !IsMapped(GSafeAction))
+			{
+				InteractMappingContext->MapKey(GSafeAction, EKeys::K);
+			}
+			if (ComStabAction && !IsMapped(ComStabAction))
+			{
+				InteractMappingContext->MapKey(ComStabAction, EKeys::L);
 			}
 		}
 		if (InteractMappingContext && InteractMappingContext->GetMappings().Num() > 0)
@@ -451,6 +492,10 @@ void ASpaceshipPawn::ResolveInputAssets()
 	LoadOrMake(CruiseAction, CruiseActionPath, TEXT("IA_CruiseDrive_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(AllStopAction, AllStopActionPath, TEXT("IA_AllStop_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(CameraZoomAction, CameraZoomActionPath, TEXT("IA_CameraZoom_Runtime"), EInputActionValueType::Axis1D);
+	LoadOrMake(MasterModeAction, MasterModeActionPath, TEXT("IA_MasterMode_Runtime"), EInputActionValueType::Boolean);
+	LoadOrMake(SpeedLimiterAction, SpeedLimiterActionPath, TEXT("IA_SpeedLimiter_Runtime"), EInputActionValueType::Axis1D);
+	LoadOrMake(GSafeAction, GSafeActionPath, TEXT("IA_GSafe_Runtime"), EInputActionValueType::Boolean);
+	LoadOrMake(ComStabAction, ComStabActionPath, TEXT("IA_ComStab_Runtime"), EInputActionValueType::Boolean);
 
 	BuildProceduralInputAssets();
 }
@@ -654,11 +699,50 @@ void ASpaceshipPawn::HandleCruise(const FInputActionValue& /*Value*/)
 
 void ASpaceshipPawn::HandleAllStop(const FInputActionValue& /*Value*/)
 {
-	AllStop();
+	SetSpaceBrake(true);
+}
+
+void ASpaceshipPawn::HandleAllStopCompleted(const FInputActionValue& /*Value*/)
+{
+	SetSpaceBrake(false);
+}
+
+void ASpaceshipPawn::HandleMasterMode(const FInputActionValue& /*Value*/)
+{
+	ToggleMasterMode();
+}
+
+void ASpaceshipPawn::HandleSpeedLimiter(const FInputActionValue& Value)
+{
+	// The wheel is mapped to both the limiter and the zoom; Alt picks the zoom.
+	if (!IsAltHeld())
+	{
+		AdjustSpeedLimiter(Value.Get<float>());
+	}
+}
+
+void ASpaceshipPawn::HandleGSafe(const FInputActionValue& /*Value*/)
+{
+	SetGSafe(!bGSafe);
+}
+
+void ASpaceshipPawn::HandleComStab(const FInputActionValue& /*Value*/)
+{
+	SetComStab(!bComStab);
+}
+
+bool ASpaceshipPawn::IsAltHeld() const
+{
+	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	return PlayerController && (PlayerController->IsInputKeyDown(EKeys::LeftAlt) || PlayerController->IsInputKeyDown(EKeys::RightAlt));
 }
 
 void ASpaceshipPawn::HandleCameraZoom(const FInputActionValue& Value)
 {
+	if (!IsAltHeld())
+	{
+		return;  // the plain wheel is the speed limiter
+	}
 	// One wheel notch is +-1. Up (positive) brings the camera closer / zooms the cockpit in.
 	const float Notches = Value.Get<float>();
 	if (bCockpitView)
@@ -678,20 +762,130 @@ void ASpaceshipPawn::SetFlightAssist(bool bOn)
 		return;
 	}
 	bFlightAssist = bOn;
-	if (bOn)
-	{
-		// Pick the lever up where the ship already flies, so switching back does not brake or lurch.
-		const double Forward = LinearVelocity | GetActorForwardVector();
-		ThrottleSetting = float(FMath::Clamp(Forward / FMath::Max(double(MaxSpeed), 1.0), -double(MaxReverseThrottle), 1.0));
-		bThrottleDetentHold = false;
-	}
-	UE_LOG(LogSpaceship, Log, TEXT("%s: flight assist %s"), *GetName(), bOn ? TEXT("on") : TEXT("off"));
+	UE_LOG(LogSpaceship, Log, TEXT("%s: %s"), *GetName(), bOn ? TEXT("coupled") : TEXT("decoupled"));
 }
 
-void ASpaceshipPawn::AllStop()
+void ASpaceshipPawn::SetSpaceBrake(bool bHeld)
 {
-	ThrottleSetting = 0.f;
-	bThrottleDetentHold = ThrustInput != 0.f;
+	bSpaceBrakeHeld = bHeld;
+}
+
+float ASpaceshipPawn::GetMasterModeSwitchProgress() const
+{
+	return bMasterModeSwitching ? FMath::Clamp(MasterModeTimer / FMath::Max(MasterModeSwitchSeconds, 0.01f), 0.f, 1.f) : 0.f;
+}
+
+void ASpaceshipPawn::RequestMasterMode(EMasterMode Mode)
+{
+	if (Mode == MasterMode)
+	{
+		// Already there: cancels a switch the other way.
+		bMasterModeSwitching = false;
+		MasterModeTimer = 0.f;
+		return;
+	}
+	if (bMasterModeSwitching && Mode == PendingMasterMode)
+	{
+		return;
+	}
+	PendingMasterMode = Mode;
+	bMasterModeSwitching = true;
+	MasterModeTimer = 0.f;
+	if (Mode == EMasterMode::SCM)
+	{
+		// Cruise belongs to NAV: leaving NAV ends it now.
+		if (CruiseState == ECruiseState::Active)
+		{
+			BeginCruiseDrop(ECruiseBlocker::Pilot);
+		}
+		else if (CruiseState == ECruiseState::Spooling)
+		{
+			ToggleCruise();
+		}
+	}
+	UE_LOG(LogSpaceship, Log, TEXT("%s: switching to %s"), *GetName(), Mode == EMasterMode::NAV ? TEXT("NAV") : TEXT("SCM"));
+}
+
+void ASpaceshipPawn::ToggleMasterMode()
+{
+	const EMasterMode Target = GetPendingMasterMode();
+	RequestMasterMode(Target == EMasterMode::SCM ? EMasterMode::NAV : EMasterMode::SCM);
+}
+
+void ASpaceshipPawn::UpdateMasterMode(float DeltaSeconds)
+{
+	if (!bMasterModeSwitching)
+	{
+		return;
+	}
+	MasterModeTimer += DeltaSeconds;
+	if (MasterModeTimer >= MasterModeSwitchSeconds)
+	{
+		MasterMode = PendingMasterMode;
+		bMasterModeSwitching = false;
+		MasterModeTimer = 0.f;
+		CameraKick = FMath::Max(CameraKick, 0.35f);
+		UE_LOG(LogSpaceship, Log, TEXT("%s: master mode %s"), *GetName(), MasterMode == EMasterMode::NAV ? TEXT("NAV") : TEXT("SCM"));
+	}
+}
+
+void ASpaceshipPawn::SetSpeedLimiter(float Fraction)
+{
+	SpeedLimiterFraction = FMath::Clamp(Fraction, FMath::Min(SpeedLimiterMin, 1.f), 1.f);
+}
+
+void ASpaceshipPawn::AdjustSpeedLimiter(float Notches)
+{
+	// Snapped to whole steps, so a few notches up and down land on round numbers again.
+	const float Steps = FMath::RoundToFloat(SpeedLimiterFraction / SpeedLimiterStep) + Notches;
+	SetSpeedLimiter(Steps * SpeedLimiterStep);
+}
+
+float ASpaceshipPawn::GetModeMaxSpeed() const
+{
+	return MasterMode == EMasterMode::NAV ? NavMaxSpeed : ScmMaxSpeed;
+}
+
+float ASpaceshipPawn::GetSpeedLimit() const
+{
+	return GetModeMaxSpeed() * SpeedLimiterFraction * (bBoostActive ? BoostMultiplier : 1.f);
+}
+
+void ASpaceshipPawn::SetGSafe(bool bOn)
+{
+	bGSafe = bOn;
+}
+
+void ASpaceshipPawn::SetComStab(bool bOn)
+{
+	bComStab = bOn;
+}
+
+FVector ASpaceshipPawn::LimitThrustForPilot(const FVector& LocalAcceleration, bool bLateralFirst) const
+{
+	using SpaceshipPawnDefaults::StandardGravityCmS2;
+	const double MaxTotal = FMath::Max(double(GSafeMaxG), 0.0) * StandardGravityCmS2;
+	const double MaxVertical = FMath::Min(double(GSafeMaxVerticalG) * StandardGravityCmS2, MaxTotal);
+	FVector Result = LocalAcceleration;
+	Result.Z = FMath::Clamp(Result.Z, -MaxVertical, MaxVertical);
+	if (Result.Size() <= MaxTotal)
+	{
+		return Result;
+	}
+	if (!bLateralFirst)
+	{
+		return Result.GetSafeNormal() * MaxTotal;
+	}
+	// Sideways and vertical first: they are what keeps the flight path on the nose.
+	const FVector Lateral(0.0, Result.Y, Result.Z);
+	const double LateralSize = Lateral.Size();
+	if (LateralSize >= MaxTotal)
+	{
+		return Lateral * (MaxTotal / LateralSize);
+	}
+	const double Remaining = FMath::Sqrt(MaxTotal * MaxTotal - LateralSize * LateralSize);
+	Result.X = FMath::Clamp(Result.X, -Remaining, Remaining);
+	return Result;
 }
 
 float ASpaceshipPawn::GetCruiseSpoolProgress() const
@@ -803,6 +997,7 @@ void ASpaceshipPawn::ClearPilotInput()
 	MouseLookDelta = FVector2D::ZeroVector;
 	MouseStick = FVector2D::ZeroVector;
 	bBoostHeld = false;
+	bSpaceBrakeHeld = false;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -1001,8 +1196,7 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 void ASpaceshipPawn::StepFlight(float DeltaSeconds)
 {
 	UpdateEnvironment(DeltaSeconds);
-	// The lever before landing: a lever left open counts as engines on.
-	UpdateThrottle(DeltaSeconds);
+	UpdateMasterMode(DeltaSeconds);
 	UpdateLanding(DeltaSeconds);
 	UpdateBoost(DeltaSeconds);
 	UpdateCruise(DeltaSeconds);
@@ -1030,36 +1224,21 @@ FVector ASpaceshipPawn::DebugStepFlight(float DeltaSeconds, float Thrust, float 
 	return LinearVelocity;
 }
 
-// -------------------------------------------------------------------------------------------
-// Throttle, boost and cruise
-// -------------------------------------------------------------------------------------------
-
-void ASpaceshipPawn::UpdateThrottle(float DeltaSeconds)
+FVector ASpaceshipPawn::DebugStepFlightInput(float DeltaSeconds, const FVector& LinearInput, const FVector& RotationInput, bool bBoost)
 {
-	if (!bFlightAssist)
-	{
-		return;  // decoupled: W / S fire the main engine directly
-	}
-	if (ThrustInput == 0.f)
-	{
-		bThrottleDetentHold = false;
-		return;
-	}
-	if (bThrottleDetentHold)
-	{
-		return;
-	}
-	const float Previous = ThrottleSetting;
-	float Next = FMath::Clamp(Previous + ThrustInput * ThrottleRate * DeltaSeconds, -MaxReverseThrottle, 1.f);
-	// A detent at zero: pulling back from forward (or pushing up from reverse) stops the lever at 0
-	// until the key is pressed again, so braking to a stop never rolls on into reverse.
-	if ((Previous > 0.f && Next < 0.f) || (Previous < 0.f && Next > 0.f))
-	{
-		Next = 0.f;
-		bThrottleDetentHold = true;
-	}
-	ThrottleSetting = Next;
+	ThrustInput = float(LinearInput.X);
+	StrafeInput = float(LinearInput.Y);
+	LiftInput = float(LinearInput.Z);
+	RollInput = float(RotationInput.X);
+	LookInput = FVector2D(RotationInput.Z, RotationInput.Y);
+	bBoostHeld = bBoost;
+	StepFlight(DeltaSeconds);
+	return LinearVelocity;
 }
+
+// -------------------------------------------------------------------------------------------
+// Boost and cruise
+// -------------------------------------------------------------------------------------------
 
 void ASpaceshipPawn::UpdateBoost(float DeltaSeconds)
 {
@@ -1068,7 +1247,8 @@ void ASpaceshipPawn::UpdateBoost(float DeltaSeconds)
 	{
 		bBoostLocked = false;
 	}
-	const bool bForward = bFlightAssist ? ThrottleSetting >= 0.f : ThrustInput > 0.f;
+	// Boost pushes the main thrusters, so it only burns energy while W is held.
+	const bool bForward = ThrustInput > 0.f && !bSpaceBrakeHeld;
 	bBoostActive = bBoostHeld && bForward && !bBoostLocked && BoostEnergy > 0.f
 		&& CruiseState == ECruiseState::Off && LandingState != ELandingState::Landed;
 
@@ -1113,6 +1293,10 @@ ECruiseBlocker ASpaceshipPawn::EvaluateCruiseEngage() const
 	if (LandingState == ELandingState::Landed)
 	{
 		return ECruiseBlocker::Landed;
+	}
+	if (MasterMode != EMasterMode::NAV || bMasterModeSwitching)
+	{
+		return ECruiseBlocker::NeedsNav;
 	}
 	if (bHasEnvironment && Environment.AltitudeAboveTerrainCm < CruiseMinAltitudeM * 100.0)
 	{
@@ -1201,8 +1385,6 @@ void ASpaceshipPawn::UpdateCruise(float DeltaSeconds)
 			CruiseState = ECruiseState::Active;
 			CruiseTimer = 0.f;
 			CruiseBlocker = ECruiseBlocker::None;
-			// An idle lever would engage the drive at a crawl; start at three quarters.
-			ThrottleSetting = FMath::Max(ThrottleSetting, 0.75f);
 			bBoostActive = false;
 			CameraKick = 1.f;
 			CruiseChargeAudio = nullptr;
@@ -1238,32 +1420,89 @@ void ASpaceshipPawn::UpdateCruise(float DeltaSeconds)
 
 void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 {
-	// Mouse as a virtual joystick. Turning the per-frame delta straight into a turn rate (as
-	// before) made steering frame-rate dependent: at 120 FPS each frame sees half the pixels, so
-	// the same hand movement turned half as fast. Pushing a spring-centred stick instead makes
-	// the steady-state deflection depend on mouse speed per second, not per frame.
-	MouseStick *= FMath::Exp(-MouseRecenterRate * DeltaSeconds);
-	MouseStick += MouseLookDelta * (MouseSensitivity * USpaceUserSettings::GetMouseSensitivityScale());
-	MouseStick.X = FMath::Clamp(MouseStick.X, -1., 1.);
-	MouseStick.Y = FMath::Clamp(MouseStick.Y, -1., 1.);
+	// Mouse steering works on a stick position, never on a per-frame delta turned straight into a
+	// turn rate: that made steering frame-rate dependent (at 120 FPS each frame sees half the pixels).
+	FVector2D MouseCommand;
+	if (bMouseRecenter)
+	{
+		// Spring-centred stick: the steady deflection depends on mouse speed per second.
+		MouseStick *= FMath::Exp(-MouseRecenterRate * DeltaSeconds);
+		MouseStick += MouseLookDelta * (MouseSensitivity * USpaceUserSettings::GetMouseSensitivityScale());
+		MouseStick.X = FMath::Clamp(MouseStick.X, -1., 1.);
+		MouseStick.Y = FMath::Clamp(MouseStick.Y, -1., 1.);
+		MouseCommand = MouseStick;
+	}
+	else
+	{
+		// Star Citizen virtual joystick: the cursor moves inside the unit circle and stays put.
+		MouseStick += MouseLookDelta * (USpaceUserSettings::GetMouseSensitivityScale() / FMath::Max(VJoyCountsToFull, 1.f));
+		if (MouseStick.SizeSquared() > 1.0)
+		{
+			MouseStick.Normalize();
+		}
+		// Nothing inside the dead zone, then linear from its edge to the rim.
+		const double Deflection = MouseStick.Size();
+		MouseCommand = Deflection <= VJoyDeadzone ? FVector2D::ZeroVector
+			: MouseStick * ((Deflection - VJoyDeadzone) / (FMath::Max(1.0 - VJoyDeadzone, 0.01) * Deflection));
+	}
 	MouseLookDelta = FVector2D::ZeroVector;
 
-	// Stick and mouse are both a fraction of the maximum rotation rate now, so they simply add.
+	// Stick and mouse are both a fraction of the maximum rotation rate, so they simply add.
 	const FVector2D Command(
-		FMath::Clamp(MouseStick.X + LookInput.X, -1., 1.),
-		FMath::Clamp(MouseStick.Y + LookInput.Y, -1., 1.));
+		FMath::Clamp(MouseCommand.X + LookInput.X, -1., 1.),
+		FMath::Clamp(MouseCommand.Y + LookInput.Y, -1., 1.));
 	const bool bInvert = bInvertPitch != USpaceUserSettings::IsShipPitchInverted();
 	const float PitchCommand = bFreeLookHeld ? 0.f : Command.Y * (bInvert ? -1.f : 1.f);
 	const float YawCommand = bFreeLookHeld ? 0.f : Command.X;
-	// A ship at kilometres per second turns wide.
-	const float RateScale = CruiseState == ECruiseState::Active ? CruiseTurnScale : 1.f;
+	// A ship at kilometres per second turns wide; NAV turns slower than SCM.
+	float RateScale = CruiseState == ECruiseState::Active ? CruiseTurnScale : 1.f;
+	if (MasterMode == EMasterMode::NAV)
+	{
+		RateScale *= NavTurnScale;
+	}
 
-	const FVector TargetRates(
+	FVector TargetRates(
 		RollInput * RollRate * RateScale,
 		PitchCommand * PitchRate * RateScale,
 		YawCommand * YawRate * RateScale);
 
-	AngularVelocity = FMath::VInterpTo(AngularVelocity, TargetRates, DeltaSeconds, AngularResponsiveness);
+	const double Speed = LinearVelocity.Size();
+	SlipAngleDeg = Speed < ComStabMinSpeed ? 0.f
+		: float(FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp((LinearVelocity / Speed) | GetActorForwardVector(), -1.0, 1.0))));
+	const bool bCoupledTurns = (bFlightAssist || bSpaceBrakeHeld) && CruiseState != ECruiseState::Active;
+	if (bCoupledTurns && bGSafe && Speed > 1.0)
+	{
+		// Bending the flight path at rate w takes Speed x w of sideways thrust: keep that under GSafeTurnG.
+		const double MaxRateDeg = FMath::RadiansToDegrees(GSafeTurnG * SpaceshipPawnDefaults::StandardGravityCmS2 / Speed);
+		auto Limit = [this, MaxRateDeg](double Target, double FullRate)
+		{
+			const double Allowed = FMath::Max(MaxRateDeg, FullRate * GSafeMinTurnFraction);
+			return FMath::Clamp(Target, -Allowed, Allowed);
+		};
+		TargetRates.Y = Limit(TargetRates.Y, PitchRate * RateScale);
+		TargetRates.Z = Limit(TargetRates.Z, YawRate * RateScale);
+	}
+	if (bCoupledTurns && bComStab && SlipAngleDeg > ComStabSlipStartDeg)
+	{
+		// Sliding: turn slower so the thrusters can swing the flight path back onto the nose.
+		const double Alpha = FMath::Clamp((SlipAngleDeg - ComStabSlipStartDeg) / FMath::Max(ComStabSlipFullDeg - ComStabSlipStartDeg, 0.1f), 0.0, 1.0);
+		const double Scale = FMath::Lerp(1.0, double(ComStabMinTurnFraction), Alpha);
+		TargetRates.Y *= Scale;
+		TargetRates.Z *= Scale;
+	}
+
+	// Rotational inertia: ease towards the target rate, but never change it faster than the
+	// thrusters can (the per-axis angular acceleration).
+	const double Ease = FMath::Min(double(AngularResponsiveness) * DeltaSeconds, 1.0);
+	auto StepRate = [DeltaSeconds, Ease](double Current, double Target, double Acceleration)
+	{
+		const double MaxStep = Acceleration * DeltaSeconds;
+		return Current + FMath::Clamp((Target - Current) * Ease, -MaxStep, MaxStep);
+	};
+	AngularVelocity = FVector(
+		StepRate(AngularVelocity.X, TargetRates.X, RollAcceleration),
+		StepRate(AngularVelocity.Y, TargetRates.Y, PitchAcceleration),
+		StepRate(AngularVelocity.Z, TargetRates.Z, YawAcceleration));
 	if (bFreeLookHeld)
 	{
 		// Heading frozen where it was; roll (keys) still works, and the flight path is untouched.
@@ -1294,8 +1533,9 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 	if (CruiseState == ECruiseState::Active)
 	{
 		// The drive carries the ship along its nose; thrusters, drag and gravity do not matter at
-		// these speeds. Velocity swings onto the nose and the target speed at CruiseResponse.
-		const double Target = CruiseSpeedLimit * FMath::Clamp(ThrottleSetting, 0.1f, 1.f);
+		// these speeds. Velocity swings onto the nose and the target speed at CruiseResponse; the
+		// speed limiter (wheel) sets how much of the cruise limit to use.
+		const double Target = CruiseSpeedLimit * FMath::Clamp(SpeedLimiterFraction, 0.1f, 1.f);
 		const FVector Desired = Rotation.GetForwardVector() * Target;
 		LinearVelocity = Desired + (LinearVelocity - Desired) * FMath::Exp(-CruiseResponse * DeltaSeconds);
 		// The limit falls as the ground comes closer; never lag behind it on the way down.
@@ -1305,31 +1545,49 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 			LinearVelocity *= CruiseSpeedLimit / Speed;
 		}
 		EngineDemand = 0.6f;
+		GForce = FMath::FInterpTo(GForce, 0.f, DeltaSeconds, 8.f);
 	}
 	else
 	{
+		// What each thruster direction can do. NAV keeps main and retro but halves manoeuvring.
+		const double Maneuver = MasterMode == EMasterMode::NAV ? NavManeuverScale : 1.0;
 		const double ForwardCap = ThrustAcceleration * BoostFactor;
-		const double ReverseCap = ThrustAcceleration * ReverseThrustFraction;
+		const double RetroCap = RetroAcceleration;
+		const double StrafeCap = StrafeAcceleration * Maneuver;
+		const double UpCap = LiftAcceleration * Maneuver;
+		const double DownCap = DownAcceleration * Maneuver;
+		const double SpeedLimit = GetSpeedLimit();
+		const double SpeedBefore = LinearVelocity.Size();
+		// The spacebrake is coupled flight towards zero, whatever the coupled switch says.
+		const bool bCoupled = bFlightAssist || bSpaceBrakeHeld;
 		FVector LocalAcceleration;
 
-		if (bFlightAssist)
+		if (bCoupled)
 		{
-			// Coupled: the flight computer chases a velocity target with the thrusters it has.
-			const double Forward = bBoostActive ? MaxSpeed * BoostMultiplier : ThrottleSetting * MaxSpeed;
-			double Lift = LiftInput * LiftSpeedLimit;
-			if (LiftInput < 0.f && bHasEnvironment)
+			// Coupled: the keys ask for a velocity, up to the speed limit; what they do not ask for
+			// (a released key, every axis under the spacebrake) is braked to zero.
+			FVector DesiredLocal = FVector::ZeroVector;
+			if (!bSpaceBrakeHeld)
 			{
-				// Descending gets gentler towards the ground, down to LandingDescentSpeed.
-				const double Near = FMath::Clamp(Environment.AltitudeAboveTerrainCm / 2000.0, 0.0, 1.0);
-				Lift = LiftInput * FMath::Lerp(double(LandingDescentSpeed), double(LiftSpeedLimit), Near);
+				DesiredLocal = FVector(ThrustInput, StrafeInput, LiftInput) * SpeedLimit;
+				if (DesiredLocal.Size() > SpeedLimit)
+				{
+					DesiredLocal *= SpeedLimit / DesiredLocal.Size();
+				}
+				if (LiftInput < 0.f && bHasEnvironment)
+				{
+					// Descending gets gentler towards the ground, down to LandingDescentSpeed.
+					const double Near = FMath::Clamp(Environment.AltitudeAboveTerrainCm / 2000.0, 0.0, 1.0);
+					const double DescentLimit = FMath::Lerp(double(LandingDescentSpeed), SpeedLimit, Near);
+					DesiredLocal.Z = FMath::Max(DesiredLocal.Z, -DescentLimit);
+				}
 			}
-			const FVector DesiredLocal(Forward, StrafeInput * StrafeSpeedLimit, Lift);
 			const FVector VelocityLocal = Rotation.UnrotateVector(LinearVelocity);
 
-			// Hovering over the ground with the engines idle, hold a little less than gravity so the
-			// ship sinks onto its gear on its own.
+			// Hovering over the ground with nothing held, hold a little less than gravity so the ship
+			// sinks onto its gear on its own.
 			double GravityHold = 1.0;
-			if (bSurfaceValid && GroundGapCm >= 0.f && GroundGapCm < 400.f && FMath::Abs(ThrottleSetting) < 0.05f && LiftInput <= 0.f)
+			if (bSurfaceValid && GroundGapCm >= 0.f && GroundGapCm < 400.f && ThrustInput == 0.f && LiftInput <= 0.f && !bSpaceBrakeHeld)
 			{
 				GravityHold = 1.0 - LandingSettleGravityFraction;
 			}
@@ -1340,20 +1598,26 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		}
 		else
 		{
+			// Decoupled: the keys fire the thrusters, nothing else does.
 			LocalAcceleration = FVector(
-				ThrustInput * (ThrustInput > 0.f ? ForwardCap : ReverseCap),
-				StrafeInput * StrafeAcceleration,
-				LiftInput * LiftAcceleration);
+				ThrustInput * (ThrustInput > 0.f ? ForwardCap : RetroCap),
+				StrafeInput * StrafeCap,
+				LiftInput * (LiftInput > 0.f ? UpCap : DownCap));
 		}
 
-		// Every thruster axis has its limit, flight computer or not.
-		LocalAcceleration.X = FMath::Clamp(LocalAcceleration.X, -ReverseCap, ForwardCap);
-		LocalAcceleration.Y = FMath::Clamp(LocalAcceleration.Y, -double(StrafeAcceleration), double(StrafeAcceleration));
-		LocalAcceleration.Z = FMath::Clamp(LocalAcceleration.Z, -double(LiftAcceleration), double(LiftAcceleration));
+		// Every thruster direction has its limit, flight computer or not; then G-Safe on top.
+		LocalAcceleration.X = FMath::Clamp(LocalAcceleration.X, -RetroCap, ForwardCap);
+		LocalAcceleration.Y = FMath::Clamp(LocalAcceleration.Y, -StrafeCap, StrafeCap);
+		LocalAcceleration.Z = FMath::Clamp(LocalAcceleration.Z, -DownCap, UpCap);
+		if (bGSafe)
+		{
+			LocalAcceleration = LimitThrustForPilot(LocalAcceleration, bComStab && bCoupled);
+		}
 		EngineDemand = float(FMath::Clamp(FMath::Max3(
-			FMath::Abs(LocalAcceleration.X) / (LocalAcceleration.X >= 0.0 ? FMath::Max(ForwardCap, 1.0) : FMath::Max(ReverseCap, 1.0)),
-			0.7 * FMath::Abs(LocalAcceleration.Y) / FMath::Max(double(StrafeAcceleration), 1.0),
-			0.7 * FMath::Abs(LocalAcceleration.Z) / FMath::Max(double(LiftAcceleration), 1.0)), 0.0, 1.0));
+			FMath::Abs(LocalAcceleration.X) / FMath::Max(LocalAcceleration.X >= 0.0 ? ForwardCap : RetroCap, 1.0),
+			0.7 * FMath::Abs(LocalAcceleration.Y) / FMath::Max(StrafeCap, 1.0),
+			0.7 * FMath::Abs(LocalAcceleration.Z) / FMath::Max(LocalAcceleration.Z >= 0.0 ? UpCap : DownCap, 1.0)), 0.0, 1.0));
+		GForce = FMath::FInterpTo(GForce, float(LocalAcceleration.Size() / SpaceshipPawnDefaults::StandardGravityCmS2), DeltaSeconds, 8.f);
 
 		LinearVelocity += Rotation.RotateVector(LocalAcceleration) * DeltaSeconds;
 
@@ -1372,26 +1636,31 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 			LinearVelocity = ApplyGroundFriction(LinearVelocity, GroundNormal, Up, float(Gravity), DeltaSeconds);
 		}
 
-		const float Speed = LinearVelocity.Size();
+		const double Speed = LinearVelocity.Size();
 		if (CruiseState == ECruiseState::Dropping)
 		{
 			// Out of cruise: kilometres per second bleed off quickly down to boosted flight speed.
-			const float Cap = MaxSpeed * BoostMultiplier;
+			const double Cap = GetModeMaxSpeed() * BoostMultiplier;
 			if (Speed > Cap)
 			{
-				LinearVelocity *= FMath::Max(Cap, Speed * FMath::Exp(-2.5f * DeltaSeconds)) / Speed;
+				LinearVelocity *= FMath::Max(Cap, Speed * FMath::Exp(-2.5 * DeltaSeconds)) / Speed;
 			}
 		}
 		else
 		{
-			const float SpeedCap = MaxSpeed * BoostFactor;
+			const double SpeedCap = GetModeMaxSpeed() * BoostFactor;
 			if (Speed > SpeedCap)
 			{
-				// Above the cap: while accelerating this is an ordinary clamp, but right after boost
-				// ends the excess bleeds off instead of snapping to the unboosted cap.
-				const float Excess = (Speed - SpeedCap) * FMath::Min(OverspeedDecay * DeltaSeconds, 1.f);
-				const float Target = bBoostActive ? SpeedCap : Speed - Excess;
+				// Above the mode's top speed (after boost, or leaving NAV for SCM): while accelerating
+				// this is an ordinary clamp, otherwise the excess bleeds off instead of snapping.
+				const double Excess = (Speed - SpeedCap) * FMath::Min(double(OverspeedDecay) * DeltaSeconds, 1.0);
+				const double Target = bBoostActive ? SpeedCap : Speed - Excess;
 				LinearVelocity *= FMath::Max(Target, SpeedCap) / Speed;
+			}
+			else if (!bCoupled && Speed > SpeedLimit && Speed > SpeedBefore)
+			{
+				// Decoupled keeps whatever speed it has, but the thrusters cannot push past the limiter.
+				LinearVelocity *= FMath::Max(SpeedBefore, SpeedLimit) / Speed;
 			}
 		}
 	}
@@ -1557,7 +1826,7 @@ void ASpaceshipPawn::UpdateLanding(float DeltaSeconds)
 	}
 
 	const bool bEngineInput = FMath::Abs(ThrustInput) >= TakeoffInputThreshold || LiftInput >= TakeoffInputThreshold
-		|| (bFlightAssist && FMath::Abs(ThrottleSetting) > 0.05f) || CruiseState != ECruiseState::Off;
+		|| CruiseState != ECruiseState::Off;
 
 	if (LandingState == ELandingState::Landed)
 	{
@@ -1596,7 +1865,6 @@ void ASpaceshipPawn::EnterLanded()
 	SettleSeconds = LandingConfirmSeconds;
 	AngularVelocity = FVector::ZeroVector;
 	MouseStick = FVector2D::ZeroVector;
-	ThrottleSetting = 0.f;
 	bBoostActive = false;
 	PlayOneShot(TouchdownSound, FMath::Clamp(LinearVelocity.Size() / FMath::Max(LandingMaxSpeed, 1.f), 0.4f, 1.f));
 	UE_LOG(LogSpaceship, Log, TEXT("%s landed: slope %.1f deg, tilt %.1f deg, gap %.0f cm"),
@@ -1745,9 +2013,10 @@ void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
 	// Eased rather than snapped, so the engines spool up and down instead of clicking. The load is
 	// what the thrusters really do: braking and holding altitude are heard too, a steady cruise
 	// through empty space is quiet.
-	// With flight assist the engines also run at the lever: an idling drone that grows with the set
-	// speed, so steady flight is never silent.
-	const float LeverLoad = (bFlightAssist || CruiseState == ECruiseState::Active) ? 0.35f * FMath::Abs(ThrottleSetting) : 0.f;
+	// Coupled, the engines also drone with speed (cruise: with the limiter), so steady flight is
+	// never silent.
+	const float LeverLoad = CruiseState == ECruiseState::Active ? 0.35f * SpeedLimiterFraction
+		: bFlightAssist ? 0.35f * FMath::Clamp(float(LinearVelocity.Size()) / FMath::Max(GetModeMaxSpeed(), 1.f), 0.f, 1.f) : 0.f;
 	EngineLoad = FMath::FInterpTo(EngineLoad, bPiloted ? FMath::Max(EngineDemand, LeverLoad) : 0.f, DeltaSeconds, EngineSpoolRate);
 	EngineBoostBlend = FMath::FInterpTo(EngineBoostBlend, bPiloted && bBoostActive ? 1.f : 0.f, DeltaSeconds, EngineSpoolRate);
 	HumBlend = FMath::FInterpTo(HumBlend, bPiloted ? 1.f : 0.f, DeltaSeconds, 1.5f);
