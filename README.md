@@ -137,8 +137,8 @@ Modelled on Star Citizen's Intelligent Flight Control System (`starcitizenrefere
   (4.5 s), recharges in `BoostRechargeSeconds` (7 s) after `BoostRechargeDelaySeconds` (1 s); run
   dry, it stays off until `BoostUnlockFraction` (30 %) is back. HUD bar on the IFCS line.
 - **Afterburner** (hold `Tab` with `W`, `IA_Afterburner`, **SCM only**): main thrust x
-  `AfterburnerThrustMultiplier` (1.8); the speed limit becomes SCM top speed x
-  `AfterburnerSpeedMultiplier` (2: 420 m/s on the Vanguard) **x the speed limiter** - at a 50 %
+  `AfterburnerThrustMultiplier` (2.1); the speed limit becomes SCM top speed x
+  `AfterburnerSpeedMultiplier` (2.5: 525 m/s on the Vanguard) **x the speed limiter** - at a 50 %
   limiter the afterburner tops out at 50 % of that. Own fuel: `AfterburnerDurationSeconds` (8 s) of
   burn, refills slowly in `AfterburnerRefillSeconds` (40 s) after `AfterburnerRefillDelaySeconds`
   (2 s); empty, it switches itself off and waits for `AfterburnerUnlockFraction` (15 %). The raised
@@ -149,7 +149,12 @@ Modelled on Star Citizen's Intelligent Flight Control System (`starcitizenrefere
     for more; the afterburner is the short combat or escape burst above SCM speed.
   - *G-Safe stays on*: the afterburner is straight-line forward thrust, exactly the load G-Safe
     exists for, so with G-Safe on it raises top speed but acceleration stays at 7 G. Turning G-Safe
-    off (K), or holding boost at the same time (Shift + Tab), lets its full 13+ G through.
+    off (K), or holding boost at the same time (Shift + Tab), lets its full 16 G through. That is the
+    tuning: from SCM speed to the top takes **4.4 s inside G-Safe and 1.8 s outside it**, out of an
+    8 s tank, so the full speed is really only worth it with the safety off - the pilot chooses.
+  - *Feel*: the limit opens in `AfterburnerSpoolSeconds` (0.25 s) and the view punches out at once
+    (+9 degrees of FOV, eased in at 9 per second, back at 2.5) with a jolt and
+    `AfterburnerShakeCm` 4.5 of shake, then fades over `AfterburnerFadeSeconds`.
   HUD line `AFTERBRN`: fuel bar and %, BURNING / fading / EMPTY - refilling / SCM only.
 - **Cruise drive** (`J`, **NAV only**, a stand-in for quantum travel until SC-4): charges for
   `CruiseSpoolSeconds` (2.5 s, camera shake builds, charging sound), then flies along the nose at the

@@ -817,14 +817,14 @@ protected:
 
 	/** Afterburner: main (forward) thrust is multiplied by this. G-Safe still applies. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "1.0"))
-	float AfterburnerThrustMultiplier = 1.8f;
+	float AfterburnerThrustMultiplier = 2.1f;
 
 	/**
 	 * Afterburner: the speed limit becomes SCM top speed x this x the speed limiter. Relative to the
 	 * limiter, as in Star Citizen: at a 50 % limiter the afterburner reaches 50 % of its full top speed.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "1.0"))
-	float AfterburnerSpeedMultiplier = 2.f;
+	float AfterburnerSpeedMultiplier = 2.5f;
 
 	/** Seconds of burn a full afterburner tank lasts. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "0.1", Units = "s"))
@@ -844,7 +844,7 @@ protected:
 
 	/** Seconds for the raised speed limit to come in fully. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "0.01", Units = "s"))
-	float AfterburnerSpoolSeconds = 0.4f;
+	float AfterburnerSpoolSeconds = 0.25f;
 
 	/**
 	 * Seconds for the raised speed limit to fade back to normal when the afterburner stops (released
@@ -1100,7 +1100,7 @@ protected:
 
 	/** Degrees added to the field of view at full afterburner... */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
-	float AfterburnerFovKick = 7.f;
+	float AfterburnerFovKick = 9.f;
 
 	/** ...and in cruise. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
@@ -1112,7 +1112,7 @@ protected:
 
 	/** Camera shake at full afterburner, cm (cockpit a quarter). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
-	float AfterburnerShakeCm = 3.f;
+	float AfterburnerShakeCm = 4.5f;
 
 	/** Camera shake at the end of cruise charging, cm; a little stays while cruising. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))

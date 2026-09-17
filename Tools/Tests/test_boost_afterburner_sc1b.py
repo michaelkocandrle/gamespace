@@ -206,8 +206,10 @@ finally:
 ship = spawn()
 try:
     ship.set_flight_assist(False)
-    v = run(ship, 7.0, lin=(1, 0, 0), afterburner=True)
+    ship.set_g_safe(False)
+    v = run(ship, 5.0, lin=(1, 0, 0), afterburner=True)
     check("decoupled: afterburner reaches its top speed", abs(length(v) - AB_SPEED) < 0.01 * AB_SPEED, "%.1f m/s" % (length(v) / 100))
+    ship.set_g_safe(True)
     state, each = decel_watch()
     v = run(ship, P["afterburner_fade_seconds"] + 4.0, each=each)
     check("decoupled: released, speed falls back to SCM top speed", abs(length(v) - SCM) < 0.01 * SCM, "%.1f m/s" % (length(v) / 100))
@@ -293,6 +295,16 @@ check("IA_Afterburner is a held bool", action is not None and len(action.get_edi
 vanguard = unreal.get_default_object(unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard"))
 check("Vanguard boost / afterburner values from its setup JSON",
       abs(vanguard.get_editor_property("boost_maneuver_multiplier") - 1.6) < 1e-4 and abs(vanguard.get_editor_property("boost_rotation_multiplier") - 1.4) < 1e-4
-      and abs(vanguard.get_editor_property("afterburner_speed_multiplier") - 2.0) < 1e-4 and abs(vanguard.get_editor_property("afterburner_duration_seconds") - 8.0) < 1e-4)
+      and abs(vanguard.get_editor_property("afterburner_thrust_multiplier") - 2.1) < 1e-4
+      and abs(vanguard.get_editor_property("afterburner_speed_multiplier") - 2.5) < 1e-4
+      and abs(vanguard.get_editor_property("afterburner_duration_seconds") - 8.0) < 1e-4,
+      "thrust x%.2f, speed x%.2f" % (vanguard.get_editor_property("afterburner_thrust_multiplier"),
+                                     vanguard.get_editor_property("afterburner_speed_multiplier")))
+
+# What the tuning actually buys, printed so the numbers are in the log next to the feel.
+g = cdo.get_editor_property("g_safe_max_g") * G
+log("INFO from SCM to the afterburner top speed: %.1f s with G-Safe (%.0f m/s2), %.1f s without (%.0f m/s2); tank lasts %.0f s" % (
+    (AB_SPEED - SCM) / g, g, (AB_SPEED - SCM) / (P["thrust_acceleration"] * P["afterburner_thrust_multiplier"]),
+    P["thrust_acceleration"] * P["afterburner_thrust_multiplier"], P["afterburner_duration_seconds"]))
 
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

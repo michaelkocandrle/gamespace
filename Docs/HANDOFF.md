@@ -198,7 +198,10 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - afterburner (Tab + W, jen SCM) zesiluje hlavní tah a zvedá rychlostní limit na SCM × 2 ×
       omezovač. Má vlastní palivo na 8 s hoření a doplňuje se 40 s. Po vyhoření nebo puštění se
       limit 4 s plynule vrací. G-Safe nevypíná;
-    - hodnoty jsou ve `Vanguard_setup.json`, HUD má řádek AFTERBRN a stav boostu na řádku IFCS.
+    - hodnoty jsou ve `Vanguard_setup.json`, HUD má řádek AFTERBRN a stav boostu na řádku IFCS;
+    - **ladění 17. 9. 2026:** tah ×2,1, rychlost ×2,5 (Vanguard 525 m/s), náběh limitu 0,25 s,
+      silnější FOV a třes. Palivo a G-Safe zůstaly: se zapnutým G-Safe je zrychlení pořád stropované
+      na 7 G, takže z SCM na maximálku je to 4,4 s, bez G-Safe (Shift+Tab nebo K) 1,8 s z 8s nádrže.
 17. **SC-1c – letový HUD v UMG** (17. 9. 2026), podle `Docs/UI/`, včetně vizuálního polishe podle
     referenčních screenshotů (kapsle se zaoblenými konci a přechodem, pilulkové indikátory, rohové
     konzoly, tenká technická typografie, vrstvená záře):

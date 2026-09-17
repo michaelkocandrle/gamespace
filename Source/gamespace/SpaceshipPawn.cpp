@@ -1456,7 +1456,7 @@ void ASpaceshipPawn::UpdateAfterburner(float DeltaSeconds)
 
 	if (bAfterburnerActive && !bWasActive)
 	{
-		CameraKick = FMath::Max(CameraKick, 0.6f);
+		CameraKick = FMath::Max(CameraKick, 1.f);
 		PlayOneShot(BoostStartSound);
 	}
 }
@@ -2105,7 +2105,10 @@ void ASpaceshipPawn::UpdateLandedMotion(float DeltaSeconds)
 void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 {
 	BoostBlend = FMath::FInterpTo(BoostBlend, bBoostActive ? 1.f : 0.f, DeltaSeconds, 4.f);
-	AfterburnerFeel = FMath::FInterpTo(AfterburnerFeel, bAfterburnerActive ? 1.f : 0.f, DeltaSeconds, 4.f);
+	// Asymmetric on purpose: the punch arrives at once, the view settles back slowly. Symmetric easing
+	// made lighting the afterburner feel soft, which is most of what "no kick" was about.
+	AfterburnerFeel = FMath::FInterpTo(AfterburnerFeel, bAfterburnerActive ? 1.f : 0.f, DeltaSeconds,
+		bAfterburnerActive ? 9.f : 2.5f);
 	const float CruiseTarget = CruiseState == ECruiseState::Active ? 1.f
 		: CruiseState == ECruiseState::Spooling ? 0.2f * GetCruiseSpoolProgress() : 0.f;
 	CruiseBlend = FMath::FInterpTo(CruiseBlend, CruiseTarget, DeltaSeconds, CruiseState == ECruiseState::Dropping ? 3.f : 1.5f);
