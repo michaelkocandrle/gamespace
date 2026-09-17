@@ -474,10 +474,18 @@ keeps ticking). Module dependency: `UMG`.
 - **Centre**: the virtual joystick - rim, dead zone, cursor (amber with a line from the centre when
   outside the dead zone); hidden while landed or free looking.
 
+**Palette** (from `Docs/UI/SC_throttle_hud_reference.png`): the instruments are yellow-green on
+near-black with near-white labels and a thin cool-white rail; **cyan is only for the frame brackets
+and the virtual joystick**, and warm colours are warnings, never a state - amber marks G-Safe
+suspended by boost and a high G load, red the reserve, flying backwards and the part of the speed bar
+above the limiter mark. An earlier pass painted boost and the afterburner amber, which read as an
+orange HUD; the reference never floods a bar with a warning colour.
+
 **Look** (matched against the screenshots in `Docs/UI/`, iterated with `Tools/Shots.ps1 -Preset hud`):
-bars are thin capsules - a dark tube with a 1 px cyan outline, a gradient fill that is brightest at
-the leading edge, a halo, and the limiter hanging off the side as a short handle with a nub. Status
-switches are pills around their label (dark fill, cyan outline, brighter when lit), groups are framed
+bars are thin capsules - a dark tube with a 1 px cool-white outline and ticks up its side, a gradient
+fill broken into thin rungs (the reference fills its tubes like a ladder, not with a solid block), a
+halo, and the limiter hanging off the side as a short handle with a nub. Status switches are dark
+boxes holding their label with a small square lamp inside on the right, groups are framed
 by corner brackets over the bare view rather than by filled panels, and type is the engine's thin
 Roboto Light for numbers with small wide-spaced Bold caps for labels, both outlined so they read over
 a bright sky. Slate has no additive brush and a scene bloom would light the whole game, so the glow is

@@ -24,16 +24,26 @@
 
 namespace SpaceHudStyle
 {
-	// Thin translucent cyan, like the reference's glass frame lines; colours carry the state.
-	const FLinearColor Cyan(0.30f, 0.88f, 1.f, 0.98f);
-	const FLinearColor CyanFaint(0.30f, 0.88f, 1.f, 0.45f);
-	const FLinearColor LampOff(0.30f, 0.88f, 1.f, 0.12f);
+	/**
+	 * The reference's instruments are yellow-green on near-black, labels near-white, the reserve red;
+	 * cyan belongs to the canopy frame lines, not to the readouts. Ours was cyan with amber states,
+	 * which is what read as orange.
+	 */
+	const FLinearColor Green(0.62f, 0.95f, 0.28f, 0.95f);
+	const FLinearColor GreenBright(0.80f, 1.f, 0.45f, 1.f);
+	const FLinearColor Label(0.86f, 0.93f, 0.90f, 0.95f);
+	/** Tube outlines and ticks: thin cool white, as on the reference's gauges. */
+	const FLinearColor Rail(0.78f, 0.88f, 0.90f, 0.50f);
+	/** Frames and the virtual joystick only. */
+	const FLinearColor Cyan(0.30f, 0.88f, 1.f, 0.85f);
+	const FLinearColor CyanFaint(0.30f, 0.88f, 1.f, 0.40f);
+	const FLinearColor LampOff(0.55f, 0.65f, 0.65f, 0.18f);
 	/** Behind pills and inside bar tubes: this is why the reference still reads over bright ground. */
-	const FLinearColor Backing(0.01f, 0.05f, 0.08f, 0.55f);
-	const FLinearColor Green(0.35f, 1.f, 0.55f, 0.85f);
-	const FLinearColor Amber(1.f, 0.72f, 0.2f, 0.95f);
-	const FLinearColor Red(1.f, 0.3f, 0.22f, 0.95f);
-	const FLinearColor NavBlue(0.45f, 0.65f, 1.f, 0.95f);
+	const FLinearColor Backing(0.02f, 0.04f, 0.04f, 0.62f);
+	/** Caution only (G-Safe suspended by boost), never a whole bar. */
+	const FLinearColor Amber(1.f, 0.78f, 0.25f, 0.95f);
+	const FLinearColor Red(0.95f, 0.26f, 0.18f, 0.95f);
+	const FLinearColor NavBlue(0.55f, 0.85f, 1.f, 0.95f);
 
 	/**
 	 * The HUD's own faces, after the reference's instrument type: Rajdhani SemiBold for labels
@@ -254,15 +264,20 @@ int32 USpaceHudLamp::NativePaint(const FPaintArgs& Args, const FGeometry& Allott
 	}
 	// In the reference a switch is a pill around its label (ESP, CPLD, LOCK), lit by its outline and
 	// a faint inner fill, not a square block beside the text.
+	// The reference's switch: a dark box with a thin cool-white edge, its label in near-white and a
+	// small square lamp inside on the right. The box keeps its colour; the square carries the state.
 	const float Lit = FMath::Clamp(Intensity + 0.6f * Flash * Intensity, 0.f, 1.5f);
 	const float Breath = FMath::Lerp(1.f, Pulse, FMath::Min(Lit, 1.f));
-	const float Radius = FMath::Min(Size.Y * 0.45f, 7.f);
-	const FLinearColor Outline = FMath::Lerp(Faded(Color, 0.35f), Color, FMath::Min(Lit, 1.f));
-	FLinearColor Fill = FMath::Lerp(Backing, FMath::Lerp(Backing, Color, 0.22f), FMath::Min(Lit, 1.f));
-	Fill.A = FMath::Lerp(0.45f, 0.6f, FMath::Min(Lit, 1.f));
-	GlowRounded(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, Radius, Color, Lit * 0.8f * Breath);
-	RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, FVector2f::ZeroVector, Size, Radius, Fill, Outline, 1.2f);
-	return LayerId + 2;
+	const float Radius = FMath::Min(Size.Y * 0.35f, 4.f);
+	RoundedBox(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, Radius,
+		Backing, FMath::Lerp(Faded(Rail, 0.5f), Rail, FMath::Min(Lit, 1.f)), 1.f);
+
+	const float Square = FMath::Clamp(Size.Y - 8.f, 3.f, 6.f);
+	const FVector2f At(Size.X - Square - 4.f, (Size.Y - Square) * 0.5f);
+	GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, At, FVector2f(Square, Square), 1.f, Color, Lit * 0.9f * Breath);
+	RoundedBox(OutDrawElements, LayerId + 2, AllottedGeometry, At, FVector2f(Square, Square), 1.f,
+		FMath::Lerp(LampOff, Color, FMath::Min(Lit, 1.f)));
+	return LayerId + 3;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -295,9 +310,34 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	const float Zero = Length * FMath::Clamp(ReverseZone, 0.f, 0.9f);
 	const float Span = Length - Zero;
 
+	/** The fill is not solid in the reference: it is a stack of thin rungs inside the tube. */
+	auto Rungs = [&](float Along0, float Along1)
+	{
+		for (float At = Along0 + 4.f; At < Along1 - 1.f; At += 4.f)
+		{
+			const TArray<FVector2f> Line = bHorizontal
+				? TArray<FVector2f>({ FVector2f(At, 1.f), FVector2f(At, Width - 1.f) })
+				: TArray<FVector2f>({ FVector2f(1.f, Length - At), FVector2f(Width - 1.f, Length - At) });
+			FSlateDrawElement::MakeLines(OutDrawElements, LayerId + 3, AllottedGeometry.ToPaintGeometry(), Line,
+				ESlateDrawEffect::None, Faded(Backing, 0.6f * Dim), false, 1.f);
+		}
+	};
+
 	// The tube: a thin capsule outline with an almost black inside, like the reference's bars.
 	RoundedBox(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, Radius,
-		Faded(Backing, Dim), Faded(Cyan, 0.55f * Dim), 1.f);
+		Faded(Backing, Dim), Faded(Rail, Dim), 1.f);
+
+	// Ticks up the outside, as on the reference's gauges.
+	if (!bHorizontal && Ticks > 1)
+	{
+		for (int32 Index = 1; Index < Ticks; ++Index)
+		{
+			const float Along = Zero + Span * Index / Ticks;
+			const TArray<FVector2f> Tick = { FVector2f(-4.f, Length - Along), FVector2f(-1.f, Length - Along) };
+			FSlateDrawElement::MakeLines(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), Tick,
+				ESlateDrawEffect::None, Faded(Rail, (Index * 2 == Ticks ? 0.9f : 0.5f) * Dim), true, 1.f);
+		}
+	}
 
 	// Reverse zone (flying backwards): a red root, as the reference marks its reserve.
 	if (Zero > 1.f)
@@ -310,10 +350,22 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	const float Top = Zero + Span * FMath::Clamp(Display, 0.f, 1.f);
 	if (Top > Zero + 1.f)
 	{
-		const TPair<FVector2f, FVector2f> Fill = Place(Zero, Top);
+		// Past the marker (over the speed limiter) the rest of the fill goes red, the way the
+		// reference marks the part of a gauge that is outside its allowed range.
+		const float Allowed = Marker >= 0.f ? FMath::Min(Top, Zero + Span * FMath::Clamp(Marker, 0.f, 1.f)) : Top;
+		const TPair<FVector2f, FVector2f> Fill = Place(Zero, Allowed);
 		GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, Fill.Key, Fill.Value, Radius, FillColor, Dim * Pulse);
 		GradientCapsule(OutDrawElements, LayerId + 2, AllottedGeometry, Fill.Key, Fill.Value, Radius,
 			Faded(FillColor, 0.85f * Dim), Faded(FMath::Lerp(FillColor, FLinearColor::White, 0.22f), Dim), !bHorizontal);
+		Rungs(Zero, Allowed);
+		if (Top > Allowed + 1.f)
+		{
+			const TPair<FVector2f, FVector2f> Over = Place(Allowed, Top);
+			GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, Over.Key, Over.Value, Radius, Red, Dim * Pulse);
+			GradientCapsule(OutDrawElements, LayerId + 2, AllottedGeometry, Over.Key, Over.Value, Radius,
+				Faded(Red, 0.85f * Dim), Faded(FMath::Lerp(Red, FLinearColor::White, 0.2f), Dim), !bHorizontal);
+			Rungs(Allowed, Top);
+		}
 	}
 	const float Bottom = Zero * (1.f - FMath::Clamp(DisplayReverse, 0.f, 1.f));
 	if (Bottom < Zero - 1.f)
@@ -322,6 +374,7 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 		GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, Fill.Key, Fill.Value, Radius, Red, Dim);
 		GradientCapsule(OutDrawElements, LayerId + 2, AllottedGeometry, Fill.Key, Fill.Value, Radius,
 			Faded(Red, 0.9f * Dim), Faded(FMath::Lerp(Red, FLinearColor::White, 0.2f), Dim), !bHorizontal);
+		Rungs(Bottom, Zero);
 	}
 
 	// The handle: the reference hangs the limiter off the tube as a short bar with a nub.
@@ -332,14 +385,14 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 		const TArray<FVector2f> Bar = bHorizontal
 			? TArray<FVector2f>({ FVector2f(Along, -Reach * 0.6f), FVector2f(Along, Width + Reach * 0.6f) })
 			: TArray<FVector2f>({ FVector2f(-Reach * 0.2f, Length - Along), FVector2f(Width + Reach, Length - Along) });
-		GlowLines(OutDrawElements, LayerId + 3, AllottedGeometry.ToPaintGeometry(), Bar, MarkerColor, 1.4f, 0.9f * Dim);
+		GlowLines(OutDrawElements, LayerId + 4, AllottedGeometry.ToPaintGeometry(), Bar, MarkerColor, 1.4f, 0.7f * Dim);
 		const FVector2f Nub(3.f, 3.f);
 		const FVector2f NubAt = bHorizontal
 			? FVector2f(Along - Nub.X * 0.5f, Width + Reach * 0.6f - Nub.Y)
 			: FVector2f(Width + Reach - Nub.X, Length - Along - Nub.Y * 0.5f);
-		RoundedBox(OutDrawElements, LayerId + 3, AllottedGeometry, NubAt, Nub, 1.f, Faded(MarkerColor, Dim));
+		RoundedBox(OutDrawElements, LayerId + 4, AllottedGeometry, NubAt, Nub, 1.f, Faded(MarkerColor, Dim));
 	}
-	return LayerId + 4;
+	return LayerId + 5;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -421,7 +474,7 @@ UTextBlock* USpaceFlightHud::MakeText(const FName Name, float Size, int32 Letter
 	Font.OutlineSettings.OutlineSize = 1;
 	Font.OutlineSettings.OutlineColor = FLinearColor(0.f, 0.02f, 0.04f, 0.95f);
 	Text->SetFont(Font);
-	Text->SetColorAndOpacity(FSlateColor(SpaceHudStyle::Cyan));
+	Text->SetColorAndOpacity(FSlateColor(Weight == FName(TEXT("Number")) ? SpaceHudStyle::Green : SpaceHudStyle::Label));
 	Texts.Add(Name, Text);
 	return Text;
 }
@@ -517,19 +570,19 @@ void USpaceFlightHud::BuildTree()
 	{
 		const FName Key(LampName);
 		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("LampRow_%s"), LampName)));
-		UTextBlock* Label = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 9.f, 120, TEXT("Label"));
-		Label->SetText(FText::FromString(LampName));
-		Label->SetJustification(ETextJustify::Center);
-		LampLabels.Add(Key, Label);
+		UTextBlock* LampText = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 9.f, 120, TEXT("Label"));
+		LampText->SetText(FText::FromString(LampName));
+		LampText->SetJustification(ETextJustify::Center);
+		LampLabels.Add(Key, LampText);
 		UOverlay* Pill = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("Pill_%s"), LampName)));
 		if (UOverlaySlot* LampSlot = Pill->AddChildToOverlay(Lamp(FName(*FString::Printf(TEXT("Lamp_%s"), LampName)))))
 		{
 			LampSlot->SetHorizontalAlignment(HAlign_Fill);
 			LampSlot->SetVerticalAlignment(VAlign_Fill);
 		}
-		if (UOverlaySlot* LabelSlot = Pill->AddChildToOverlay(Label))
+		if (UOverlaySlot* LabelSlot = Pill->AddChildToOverlay(LampText))
 		{
-			LabelSlot->SetPadding(FMargin(9.f, 2.f, 8.f, 3.f));
+			LabelSlot->SetPadding(FMargin(7.f, 2.f, 15.f, 3.f));
 			LabelSlot->SetHorizontalAlignment(HAlign_Center);
 			LabelSlot->SetVerticalAlignment(VAlign_Center);
 		}
@@ -555,11 +608,11 @@ void USpaceFlightHud::BuildTree()
 	UHorizontalBox* Right = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RightCluster"));
 	AddToHorizontal(Right, Sized(TEXT("FrameRightBox"), Frame(TEXT("FrameRight")), 10.f, FrameHeight), VAlign_Center, FMargin(0.f, 0.f, 14.f, 0.f));
 	UHorizontalBox* Columns = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RightColumns"));
-	auto Column = [&](const TCHAR* Label, const FName GaugeName, const FName TextName, const FMargin& SlotPadding)
+	auto Column = [&](const TCHAR* Caption, const FName GaugeName, const FName TextName, const FMargin& SlotPadding)
 	{
 		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), *GaugeName.ToString())));
 		UTextBlock* Title = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 8.f, 160, TEXT("Label"));
-		Title->SetText(FText::FromString(Label));
+		Title->SetText(FText::FromString(Caption));
 		AddToVertical(Box, Title, HAlign_Center, FMargin(0.f, 0.f, 0.f, 6.f));
 		AddToVertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 9.f, 180.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
 		AddToVertical(Box, MakeText(TextName, 9.f, 20, TEXT("Number")), HAlign_Center, FMargin(0.f));
@@ -653,9 +706,9 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 			// The lamp eases to its new level and flashes once, so a switch is noticed, not blinked.
 			Lamp->SetTarget(bLit, Color);
 		}
-		if (UTextBlock* Label = LampLabels.FindRef(Name))
+		if (UTextBlock* LabelText = LampLabels.FindRef(Name))
 		{
-			Label->SetColorAndOpacity(FSlateColor(bLit ? Color : Faded(Cyan, 0.45f)));
+			LabelText->SetColorAndOpacity(FSlateColor(bLit ? Label : Faded(Label, 0.45f)));
 		}
 		LampLit.Add(Name, bLit);
 	};
@@ -674,16 +727,16 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 		ModeLabel->SetText(FText::FromString(State.ModeLabel));
 	}
 	// Switching blinks the mode being switched to.
-	SetLamp(TEXT("MODE"), !State.bModeSwitching || bBlink, State.ModeLabel == TEXT("NAV") ? NavBlue : Cyan);
+	SetLamp(TEXT("MODE"), !State.bModeSwitching || bBlink, State.ModeLabel == TEXT("NAV") ? NavBlue : Green);
 	if (UTextBlock* CoupledLabel = LampLabels.FindRef(TEXT("CPLD")))
 	{
 		CoupledLabel->SetText(FText::FromString(State.bSpaceBrake ? TEXT("BRAKE") : TEXT("CPLD")));
 	}
-	SetLamp(TEXT("CPLD"), State.bCoupled || State.bSpaceBrake, State.bSpaceBrake ? Red : Cyan);
+	SetLamp(TEXT("CPLD"), State.bCoupled || State.bSpaceBrake, State.bSpaceBrake ? Red : Green);
 	// G-Safe switched on but suspended by boost: amber.
-	SetLamp(TEXT("GSAF"), State.bGSafeOn, State.bGSafeActive ? Cyan : Amber);
-	SetLamp(TEXT("CSTB"), State.bComStab, Cyan);
-	SetLamp(TEXT("BOOST"), State.bBoostActive, Amber);
+	SetLamp(TEXT("GSAF"), State.bGSafeOn, State.bGSafeActive ? Green : Amber);
+	SetLamp(TEXT("CSTB"), State.bComStab, Green);
+	SetLamp(TEXT("BOOST"), State.bBoostActive, GreenBright);
 
 	// --- Speed gauge, speed, limit -------------------------------------------------------------
 	if (USpaceHudGauge* Speed = Gauges.FindRef(TEXT("SpeedGauge")))
@@ -692,22 +745,22 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 		Speed->Value = State.SpeedFraction;
 		Speed->ReverseValue = State.ReverseFraction;
 		Speed->Marker = State.LimiterFraction;
-		Speed->MarkerColor = Cyan;
-		Speed->FillColor = State.bAfterburnerActive ? Amber : State.bOverLimit ? Amber : Green;
+		Speed->MarkerColor = Label;
+		Speed->FillColor = State.bAfterburnerActive ? GreenBright : Green;
 	}
-	SetText(TEXT("SpeedText"), SpaceHudStyle::Speed(State.SpeedCmS), State.ForwardSpeedCmS < -50.f ? Red : Cyan);
+	SetText(TEXT("SpeedText"), SpaceHudStyle::Speed(State.SpeedCmS), State.ForwardSpeedCmS < -50.f ? Red : Green);
 	SetText(TEXT("LimitText"), FString::Printf(TEXT("LIM %s  %3.0f%%"), *SpaceHudStyle::Speed(State.SpeedLimitCmS), State.LimiterFraction * 100.f),
-		Faded(Cyan, 0.85f));
+		Faded(Label, 0.75f));
 
 	// --- G meter ------------------------------------------------------------------------------
-	const FLinearColor GColor = State.GForce > State.GSafeMaxG + 0.05f ? Red : State.GForce > State.GSafeMaxG * 0.7f ? Amber : Cyan;
+	const FLinearColor GColor = State.GForce > State.GSafeMaxG + 0.05f ? Red : State.GForce > State.GSafeMaxG * 0.7f ? Amber : Green;
 	if (USpaceHudGauge* GGauge = Gauges.FindRef(TEXT("GGauge")))
 	{
 		GGauge->Value = State.GForce / GMeterRangeG;
 		GGauge->FillColor = GColor;
 		// The G-Safe limit as a mark, while G-Safe is actually limiting.
 		GGauge->Marker = State.bGSafeActive ? State.GSafeMaxG / GMeterRangeG : -1.f;
-		GGauge->MarkerColor = Faded(Cyan, 0.8f);
+		GGauge->MarkerColor = Faded(Label, 0.8f);
 	}
 	SetText(TEXT("GText"), FString::Printf(TEXT("%.1f G"), State.GForce), GColor);
 
@@ -715,33 +768,35 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 	if (USpaceHudGauge* Boost = Gauges.FindRef(TEXT("BoostGauge")))
 	{
 		Boost->Value = State.BoostEnergy;
-		Boost->FillColor = State.bBoostLocked ? Red : State.bBoostActive ? Amber : Cyan;
+		Boost->ReverseZone = 0.f;
+		Boost->FillColor = State.bBoostLocked || State.BoostEnergy < 0.25f ? Red : State.bBoostActive ? GreenBright : Green;
 	}
-	SetText(TEXT("BoostText"), State.bBoostLocked ? FString::Printf(TEXT("%.0f%% LOW"), State.BoostEnergy * 100.f)
-		: FString::Printf(TEXT("%.0f%%"), State.BoostEnergy * 100.f), State.bBoostLocked ? Red : State.bBoostActive ? Amber : Cyan);
+	SetText(TEXT("BoostText"), FString::Printf(TEXT("%.0f%%"), State.BoostEnergy * 100.f),
+		State.bBoostLocked ? Red : State.bBoostActive ? GreenBright : Green);
 
 	if (USpaceHudGauge* Afterburner = Gauges.FindRef(TEXT("AfterburnerGauge")))
 	{
 		Afterburner->Value = State.AfterburnerFuel;
 		Afterburner->bDim = !State.bAfterburnerAvailable;
-		Afterburner->FillColor = State.bAfterburnerLocked ? Red : State.bAfterburnerActive ? Amber : Green;
+		Afterburner->FillColor = State.bAfterburnerLocked || State.AfterburnerFuel < 0.25f ? Red
+			: State.bAfterburnerActive ? GreenBright : Green;
 	}
 	FString AfterburnerText = FString::Printf(TEXT("%.0f%%"), State.AfterburnerFuel * 100.f);
-	FLinearColor AfterburnerColor = Cyan;
+	FLinearColor AfterburnerColor = Green;
 	if (!State.bAfterburnerAvailable)
 	{
-		AfterburnerText += TEXT(" SCM ONLY");
-		AfterburnerColor = Faded(Cyan, 0.45f);
+		AfterburnerText += TEXT(" SCM");
+		AfterburnerColor = Faded(Label, 0.45f);
 	}
 	else if (State.bAfterburnerLocked)
 	{
-		AfterburnerText += TEXT(" EMPTY");
+		AfterburnerText += TEXT(" DRY");
 		AfterburnerColor = Red;
 	}
 	else if (State.bAfterburnerActive)
 	{
 		AfterburnerText += TEXT(" BURN");
-		AfterburnerColor = Amber;
+		AfterburnerColor = GreenBright;
 	}
 	SetText(TEXT("AfterburnerText"), AfterburnerText, AfterburnerColor);
 

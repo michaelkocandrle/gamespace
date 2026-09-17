@@ -40,12 +40,13 @@ def lamp(hud, name):
     return color is not None, color
 
 
+# The palette after the reference: instruments green, cautions amber, the rest near-white.
 def amber(color):
-    return color.r > 0.9 and 0.5 < color.g < 0.85 and color.b < 0.4
+    return color.r > 0.9 and 0.6 < color.g < 0.9 and color.b < 0.4
 
 
-def cyan(color):
-    return color.r < 0.6 and color.g > 0.8 and color.b > 0.9
+def green(color):
+    return color.r < 0.85 and color.g > 0.9 and color.b < 0.5
 
 
 def show(hud, ship, mode=1):
@@ -121,7 +122,7 @@ try:
     check("ship flown: HUD visible", state.visible)
     for name, want in (("MODE", True), ("CPLD", True), ("GSAF", True), ("CSTB", True), ("BOOST", False)):
         lit, color = lamp(hud, name)
-        check("default lamp %s %s" % (name, "lit" if want else "dark"), lit == want and (not want or cyan(color)), str(color))
+        check("default lamp %s %s" % (name, "lit" if want else "dark"), lit == want and (not want or green(color)), str(color))
     check("mode label SCM", hud.debug_get_text("LampLabel_MODE") == "SCM")
 
     # --- Speed gauge against the limiter -----------------------------------------------------------
@@ -144,7 +145,8 @@ try:
     ship.set_speed_limiter(0.25)
     run(ship, 0.2, lin=(1, 0, 0))
     state = show(hud, ship)
-    check("faster than a lowered limiter: over limit, amber fill", state.over_limit and amber(gauge.get_editor_property("fill_color")))
+    # The fill stays green; the gauge paints the part above the limiter mark red by itself.
+    check("faster than a lowered limiter: flagged, fill still green", state.over_limit and green(gauge.get_editor_property("fill_color")))
     ship.set_speed_limiter(1.0)
     run(ship, 12.0)
     run(ship, 3.0, lin=(-1, 0, 0))
@@ -191,13 +193,14 @@ try:
     state = show(hud, ship)
     lit_gsaf, color_gsaf = lamp(hud, "GSAF")
     lit_boost, color_boost = lamp(hud, "BOOST")
-    check("boost: BOOST lit amber, GSAF amber (suspended)", lit_boost and amber(color_boost) and lit_gsaf and amber(color_gsaf),
+    # Boost is a normal state (bright green); G-Safe suspended by it is the caution (amber).
+    check("boost: BOOST lit green, GSAF amber (suspended)", lit_boost and green(color_boost) and lit_gsaf and amber(color_gsaf),
           "boost %s gsaf %s" % (color_boost, color_gsaf))
     check("G meter follows the ship", abs(state.g_force - ship.get_g_force()) < 1e-4 and hud.debug_get_text("GText") == "%.1f G" % ship.get_g_force(),
           hud.debug_get_text("GText"))
     boost_gauge = hud.debug_get_gauge("BoostGauge")
     check("boost gauge shows the energy", abs(boost_gauge.get_editor_property("value") - ship.get_boost_energy()) < 1e-4
-          and ship.get_boost_energy() < 1.0 and amber(boost_gauge.get_editor_property("fill_color")))
+          and ship.get_boost_energy() < 1.0 and green(boost_gauge.get_editor_property("fill_color")))
     run(ship, 8.0)
 finally:
     eas.destroy_actor(ship)
@@ -213,7 +216,7 @@ try:
           and abs(ab.get_editor_property("value") - ship.get_afterburner_fuel()) < 1e-4 and ship.get_afterburner_fuel() < 1.0,
           hud.debug_get_text("AfterburnerText"))
     check("afterburner: speed gauge rescales to the raised top speed, limiter mark stays at 100 %",
-          abs(state.gauge_scale_cm_s - SCM * AB) < 1.0 and abs(gauge.get_editor_property("marker") - 1.0) < 1e-4 and amber(gauge.get_editor_property("fill_color")),
+          abs(state.gauge_scale_cm_s - SCM * AB) < 1.0 and abs(gauge.get_editor_property("marker") - 1.0) < 1e-4 and green(gauge.get_editor_property("fill_color")),
           "scale %.0f m/s" % (state.gauge_scale_cm_s / 100))
     ship.set_afterburner_held(True)
     for _ in range(2000):
@@ -222,14 +225,14 @@ try:
         ship.debug_step_flight_input(STEP, unreal.Vector(1, 0, 0), unreal.Vector(0, 0, 0), False)
     ship.set_afterburner_held(False)
     show(hud, ship)
-    check("empty tank: EMPTY", hud.debug_get_text("AfterburnerText").endswith("EMPTY"), hud.debug_get_text("AfterburnerText"))
+    check("empty tank: DRY", hud.debug_get_text("AfterburnerText").endswith("DRY"), hud.debug_get_text("AfterburnerText"))
     ship.toggle_master_mode()
     run(ship, 0.5)
     show(hud, ship)
     check("switching to NAV: mode label already NAV", hud.debug_get_text("LampLabel_MODE") == "NAV")
     run(ship, 2.0)
     show(hud, ship)
-    check("NAV: afterburner gauge dimmed, SCM ONLY", ab.get_editor_property("dim") and hud.debug_get_text("AfterburnerText").endswith("SCM ONLY"),
+    check("NAV: afterburner gauge dimmed, SCM only", ab.get_editor_property("dim") and hud.debug_get_text("AfterburnerText").endswith("SCM"),
           hud.debug_get_text("AfterburnerText"))
 finally:
     eas.destroy_actor(ship)
