@@ -327,6 +327,30 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Afterburner")
 	void SetAfterburnerHeld(bool bHeld) { bAfterburnerHeld = bHeld; }
 
+	/** Boost held (Shift). For tests and the screenshot runner; the key does the same. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Boost")
+	void SetBoostHeld(bool bHeld) { bBoostHeld = bHeld; }
+
+	/** Tests and screenshots: put the ship at this velocity (world cm/s) without flying there. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugSetLinearVelocity(const FVector& Velocity) { LinearVelocity = Velocity; }
+
+	/** Tests and screenshots: place the mouse virtual joystick cursor. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugSetMouseStick(const FVector2D& InStick) { MouseStick = InStick; }
+
+	/**
+	 * Tests and screenshots: try a cockpit setup without rebuilding the ship - the eye position
+	 * (relative to the hull, cm) and what is hidden from the pilot. An eye of (0,0,0) keeps the one
+	 * the Blueprint has.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugConfigureCockpit(const FVector& EyeLocation, bool bHideHull, bool bHideCanopy);
+
+	/** Tests and screenshots: finish a master mode switch at once instead of waiting it out. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugFinishMasterModeSwitch() { if (bMasterModeSwitching) { MasterMode = PendingMasterMode; bMasterModeSwitching = false; MasterModeTimer = 0.f; } }
+
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
 	ECruiseState GetCruiseState() const { return CruiseState; }
 
@@ -629,6 +653,15 @@ protected:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera")
 	bool bHideHullInCockpit = false;
+
+	/**
+	 * Hide mesh components whose name contains "Canopy" from the pilot in cockpit view. The Vanguard
+	 * has no modelled interior: its canopy is a shallow tinted shell that sits ~13 cm from the eye and
+	 * fills the whole view (see Tools/Blender/cockpit_view_survey.py). Hidden, the pilot looks out
+	 * through the open frame; everyone else, and the chase camera, still see the glass.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera")
+	bool bHideCanopyInCockpit = true;
 
 	/** Digital, held: free look (right mouse button). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")

@@ -12,6 +12,9 @@ public class gamespace : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "ProceduralMeshComponent", "AnimationCore" });
 
+		// Screenshot shot lists (Tools/Shots/*.json), read by USpaceShotRunner.
+		PrivateDependencyModuleNames.Add("Json");
+
 		// Menus (SSpaceMenu) are plain Slate; the flight HUD (USpaceFlightHud) is UMG.
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "UMG" });
 		

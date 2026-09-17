@@ -73,6 +73,17 @@ check("gauges and virtual joystick are the custom widgets",
 check("G meter is horizontal, the others vertical", hud.debug_get_gauge("GGauge").get_editor_property("horizontal")
       and not hud.debug_get_gauge("SpeedGauge").get_editor_property("horizontal"))
 
+# --- Look: panels with cut corners, monospace type, animated lamps ---------------------------------
+panels = {"LampPanel", "SpeedPanel", "PowerPanel", "FrameLeft", "FrameRight"}
+check("clusters sit on cut-corner panels", panels <= names, "missing %s" % sorted(panels - names))
+lamp_widget = hud.debug_get_lamp("CPLD")
+check("lamps are the painted widget with an animated intensity", isinstance(lamp_widget, unreal.SpaceHudLamp))
+font = hud.debug_get_text_widget("SpeedText").get_editor_property("font")
+check("speed reads in the engine's monospace face, letter-spaced and outlined",
+      "Mono" in str(font.get_editor_property("typeface_font_name")) and font.get_editor_property("letter_spacing") > 0
+      and font.get_editor_property("outline_settings").get_editor_property("outline_size") >= 1,
+      "%s, spacing %d" % (font.get_editor_property("typeface_font_name"), font.get_editor_property("letter_spacing")))
+
 state = unreal.SpaceFlightHud.make_state(None, 1)
 check("no ship: HUD hidden", not state.visible)
 
@@ -128,11 +139,27 @@ try:
     show(hud, ship)
     check("ComStab off: CSTB dark", not lamp(hud, "CSTB")[0])
     ship.set_com_stab(True)
+    # The lamp fades and flashes instead of snapping (SC-1c polish). It has to be lit first: the
+    # widgets only animate while the HUD ticks (debug_advance stands in for that headless).
+    show(hud, ship)
+    hud.debug_advance(1.0)
+    gsaf = hud.debug_get_lamp("GSAF")
+    check("a lit lamp reaches full brightness", gsaf.get_editor_property("intensity") > 0.99)
     ship.set_g_safe(False)
     show(hud, ship)
+    before = gsaf.get_editor_property("intensity")
+    hud.debug_advance(0.03)
+    mid = gsaf.get_editor_property("intensity")
+    check("switching a lamp fades it, not blinks", gsaf.get_editor_property("flash") > 0.5 and before > mid > 0.05,
+          "%.2f -> %.2f" % (before, mid))
+    hud.debug_advance(1.0)
+    check("the fade settles where the state says", gsaf.get_editor_property("intensity") < 0.01 and gsaf.get_editor_property("flash") < 0.01)
     check("G-Safe off: GSAF dark, no G-Safe mark on the G meter", not lamp(hud, "GSAF")[0]
           and hud.debug_get_gauge("GGauge").get_editor_property("marker") < 0)
     ship.set_g_safe(True)
+    show(hud, ship)
+    hud.debug_advance(1.0)
+    check("a lamp switched back on is fully lit again", hud.debug_get_lamp("GSAF").get_editor_property("intensity") > 0.99)
     run(ship, 0.5, lin=(0, 1, 0), boost=True)
     state = show(hud, ship)
     lit_gsaf, color_gsaf = lamp(hud, "GSAF")

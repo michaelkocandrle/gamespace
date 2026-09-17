@@ -1,0 +1,14 @@
+{
+  "_comment": "The flight HUD (SC-1c) in the states worth looking at: idle, at the limiter, afterburner, boost, NAV, reverse, and the full text readout. Run: .\\Tools\\Shots.ps1 -Preset hud",
+  "shots": [
+    { "name": "hud_idle", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": 0, "settle": 1.2 },
+    { "name": "hud_scm_full", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": 210, "limiter": 1.0 },
+    { "name": "hud_limiter_half", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": 105, "limiter": 0.5 },
+    { "name": "hud_afterburner", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": 400, "afterburner": true, "settle": 1.0 },
+    { "name": "hud_boost_stick", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": 180, "boost": true, "stick": [0.55, 0.3], "settle": 1.0 },
+    { "name": "hud_nav", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "mode": "NAV", "speed_ms": 800, "settle": 1.0 },
+    { "name": "hud_decoupled_gsafe_off", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": 150, "coupled": false, "gsafe": false, "comstab": false },
+    { "name": "hud_reverse", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": -40 },
+    { "name": "hud_full_text", "camera": "chase", "altitude_m": 6000, "facing": "horizon", "hud": 2, "speed_ms": 210, "settle": 1.0 }
+  ]
+}

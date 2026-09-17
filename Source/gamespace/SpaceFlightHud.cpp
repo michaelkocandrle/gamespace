@@ -9,6 +9,8 @@
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/SizeBox.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
 #include "Components/Spacer.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
@@ -40,11 +42,125 @@ namespace SpaceHudStyle
 		return Color;
 	}
 
+	/**
+	 * Slate has no additive brush and a scene bloom would light up the whole game, so a "glow" here is
+	 * the same stroke drawn two more times, thicker and much fainter: a halo that reads the same way
+	 * at HUD line widths and costs two draw calls.
+	 */
+	void GlowLines(FSlateWindowElementList& Out, int32 Layer, const FPaintGeometry& Geometry, const TArray<FVector2f>& Points,
+		const FLinearColor& Color, float Thickness, float Glow)
+	{
+		if (Glow > 0.01f)
+		{
+			FSlateDrawElement::MakeLines(Out, Layer, Geometry, Points, ESlateDrawEffect::None, Faded(Color, 0.07f * Glow), true, Thickness + 7.f);
+			FSlateDrawElement::MakeLines(Out, Layer, Geometry, Points, ESlateDrawEffect::None, Faded(Color, 0.16f * Glow), true, Thickness + 3.f);
+		}
+		FSlateDrawElement::MakeLines(Out, Layer, Geometry, Points, ESlateDrawEffect::None, Color, true, Thickness);
+	}
+
+	void GlowBox(FSlateWindowElementList& Out, int32 Layer, const FGeometry& Geometry, const FVector2f& Centre, float HalfSize,
+		const FLinearColor& Color, float Glow)
+	{
+		auto Box = [&](float Half, const FLinearColor& BoxColor)
+		{
+			FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(FVector2f(Half * 2.f, Half * 2.f),
+				FSlateLayoutTransform(Centre - FVector2f(Half, Half))), White(), ESlateDrawEffect::None, BoxColor);
+		};
+		if (Glow > 0.01f)
+		{
+			Box(HalfSize + 5.f, Faded(Color, 0.10f * Glow));
+			Box(HalfSize + 2.5f, Faded(Color, 0.18f * Glow));
+		}
+		Box(HalfSize, Color);
+	}
+
 	FString Speed(double CmPerSecond)
 	{
 		const double Metres = CmPerSecond / 100.0;
 		return FMath::Abs(Metres) < 1000.0 ? FString::Printf(TEXT("%.0f M/S"), Metres) : FString::Printf(TEXT("%.2f KM/S"), Metres / 1000.0);
 	}
+}
+
+// -------------------------------------------------------------------------------------------
+// Panel with cut corners
+// -------------------------------------------------------------------------------------------
+
+int32 USpaceHudPanel::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	using namespace SpaceHudStyle;
+	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+
+	const FVector2f Size = AllottedGeometry.GetLocalSize();
+	const float Cut = FMath::Clamp(Chamfer, 0.f, FMath::Min(Size.X, Size.Y) * 0.5f);
+	if (Size.X < 4.f || Size.Y < 4.f)
+	{
+		return LayerId;
+	}
+	// A barely-there fill so the lines read as a panel without hiding the view: three boxes make the
+	// chamfered shape, which Slate cannot fill directly.
+	const FLinearColor Fill(0.05f, 0.12f, 0.16f, FillAlpha);
+	auto Box = [&](float X0, float Y0, float X1, float Y1)
+	{
+		FSlateDrawElement::MakeBox(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(FVector2f(X1 - X0, Y1 - Y0),
+			FSlateLayoutTransform(FVector2f(X0, Y0))), White(), ESlateDrawEffect::None, Fill);
+	};
+	Box(0.f, Cut, Size.X, Size.Y - Cut);
+	Box(Cut, 0.f, Size.X - Cut, Cut);
+	Box(Cut, Size.Y - Cut, Size.X - Cut, Size.Y);
+
+	const TArray<FVector2f> Outline = {
+		FVector2f(Cut, 0.f), FVector2f(Size.X - Cut, 0.f), FVector2f(Size.X, Cut),
+		FVector2f(Size.X, Size.Y - Cut), FVector2f(Size.X - Cut, Size.Y), FVector2f(Cut, Size.Y),
+		FVector2f(0.f, Size.Y - Cut), FVector2f(0.f, Cut), FVector2f(Cut, 0.f) };
+	GlowLines(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), Outline, LineColor, 1.2f, Glow);
+	return LayerId + 1;
+}
+
+// -------------------------------------------------------------------------------------------
+// Status lamp
+// -------------------------------------------------------------------------------------------
+
+void USpaceHudLamp::SetTarget(bool bLit, const FLinearColor& InColor)
+{
+	const float NewTarget = bLit ? 1.f : 0.f;
+	if (NewTarget != Target)
+	{
+		// A change is worth noticing: a short flash, then the lamp eases to its new level.
+		Flash = 1.f;
+	}
+	Target = NewTarget;
+	Color = InColor;
+}
+
+void USpaceHudLamp::Advance(float DeltaSeconds)
+{
+	Intensity += (Target - Intensity) * (1.f - FMath::Exp(-12.f * DeltaSeconds));
+	Flash *= FMath::Exp(-6.f * DeltaSeconds);
+	if (FMath::Abs(Target - Intensity) < 0.002f)
+	{
+		Intensity = Target;
+	}
+}
+
+int32 USpaceHudLamp::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	using namespace SpaceHudStyle;
+	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+
+	const FVector2f Size = AllottedGeometry.GetLocalSize();
+	const float Half = FMath::Min(Size.X, Size.Y) * 0.5f;
+	if (Half < 1.f)
+	{
+		return LayerId;
+	}
+	const float Lit = FMath::Clamp(Intensity + 0.5f * Flash * Intensity, 0.f, 1.5f);
+	// Dark but never invisible, so the row still reads as a row of switches.
+	FLinearColor Core = FMath::Lerp(LampOff, Color, FMath::Min(Lit, 1.f));
+	Core.A = FMath::Lerp(LampOff.A, Color.A, FMath::Min(Lit, 1.f));
+	GlowBox(OutDrawElements, LayerId, AllottedGeometry, Size * 0.5f, Half, Core, Lit);
+	return LayerId + 1;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -70,11 +186,10 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	{
 		return bHorizontal ? FVector2f(Along, Width - Across) : FVector2f(Across, Length - Along);
 	};
-	auto Line = [&](float A0, float C0, float A1, float C1, const FLinearColor& Color, float Thickness)
+	auto Line = [&](float A0, float C0, float A1, float C1, const FLinearColor& Color, float Thickness, float Glow = 0.f)
 	{
-		TArray<FVector2f> Points = { Point(A0, C0), Point(A1, C1) };
-		FSlateDrawElement::MakeLines(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), MoveTemp(Points),
-			ESlateDrawEffect::None, Faded(Color, Dim), true, Thickness);
+		const TArray<FVector2f> Points = { Point(A0, C0), Point(A1, C1) };
+		GlowLines(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), Points, Faded(Color, Dim), Thickness, Glow * Dim);
 	};
 	auto Box = [&](float A0, float A1, float C0, float C1, const FLinearColor& Color)
 	{
@@ -91,10 +206,12 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	const float Zero = Length * FMath::Clamp(ReverseZone, 0.f, 0.9f);
 	const float Span = Length - Zero;
 
-	// Frame: faint rails along both sides, brighter end caps.
-	Line(0.f, 0.f, Length, 0.f, CyanFaint, 1.f);
-	Line(0.f, Width, Length, Width, CyanFaint, 1.f);
-	Line(Length, 0.f, Length, Width, Cyan, 1.5f);
+	// Frame: faint rails along both sides, a brighter cut-corner cap at the top.
+	Line(0.f, 0.f, Length - 4.f, 0.f, CyanFaint, 1.f);
+	Line(0.f, Width, Length - 4.f, Width, CyanFaint, 1.f);
+	Line(Length - 4.f, 0.f, Length, 4.f, Cyan, 1.5f, 0.4f);
+	Line(Length - 4.f, Width, Length, Width - 4.f, Cyan, 1.5f, 0.4f);
+	Line(Length, 4.f, Length, Width - 4.f, Cyan, 1.5f, 0.4f);
 	Line(0.f, 0.f, 0.f, Width, CyanFaint, 1.f);
 	for (int32 Index = 1; Index < Ticks; ++Index)
 	{
@@ -115,7 +232,7 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	if (Top > Zero + 0.5f)
 	{
 		Box(Zero, Top, Inset, Width - Inset, Faded(FillColor, 0.45f));
-		Line(Top, Inset * 0.5f, Top, Width - Inset * 0.5f, FillColor, 2.f);
+		Line(Top, Inset * 0.5f, Top, Width - Inset * 0.5f, FillColor, 2.f, 1.f);
 	}
 	const float Bottom = Zero * (1.f - FMath::Clamp(ReverseValue, 0.f, 1.f));
 	if (Bottom < Zero - 0.5f)
@@ -128,7 +245,7 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	if (Marker >= 0.f)
 	{
 		const float Along = Zero + Span * FMath::Clamp(Marker, 0.f, 1.f);
-		Line(Along, -5.f, Along, Width + 5.f, MarkerColor, 2.5f);
+		Line(Along, -5.f, Along, Width + 5.f, MarkerColor, 2.5f, 0.8f);
 	}
 	return LayerId + 1;
 }
@@ -150,10 +267,9 @@ int32 USpaceHudVirtualJoystick::NativePaint(const FPaintArgs& Args, const FGeome
 	{
 		return LayerId;
 	}
-	auto Draw = [&](TArray<FVector2f> Points, const FLinearColor& Color, float Thickness)
+	auto Draw = [&](const TArray<FVector2f>& Points, const FLinearColor& Color, float Thickness, float Glow = 0.f)
 	{
-		FSlateDrawElement::MakeLines(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), MoveTemp(Points),
-			ESlateDrawEffect::None, Color, true, Thickness);
+		GlowLines(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), Points, Color, Thickness, Glow);
 	};
 	auto Circle = [&](float R, const FLinearColor& Color)
 	{
@@ -179,8 +295,8 @@ int32 USpaceHudVirtualJoystick::NativePaint(const FPaintArgs& Args, const FGeome
 		Draw({ Centre, CursorAt }, Faded(Amber, 0.35f), 1.f);
 	}
 	const float Arm = 7.f;
-	Draw({ CursorAt - FVector2f(Arm, 0.f), CursorAt + FVector2f(Arm, 0.f) }, CursorColor, 2.f);
-	Draw({ CursorAt - FVector2f(0.f, Arm), CursorAt + FVector2f(0.f, Arm) }, CursorColor, 2.f);
+	Draw({ CursorAt - FVector2f(Arm, 0.f), CursorAt + FVector2f(Arm, 0.f) }, CursorColor, 2.f, bTurning ? 1.f : 0.4f);
+	Draw({ CursorAt - FVector2f(0.f, Arm), CursorAt + FVector2f(0.f, Arm) }, CursorColor, 2.f, bTurning ? 1.f : 0.4f);
 	return LayerId;
 }
 
@@ -198,14 +314,19 @@ bool USpaceFlightHud::Initialize()
 	return bResult;
 }
 
-UTextBlock* USpaceFlightHud::MakeText(const FName Name, float Size, const FName Weight)
+UTextBlock* USpaceFlightHud::MakeText(const FName Name, float Size, int32 LetterSpacing, const FName Weight)
 {
 	UTextBlock* Text = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), Name);
-	Text->SetFont(FCoreStyle::GetDefaultFontStyle(Weight, Size));
+	// "Mono" is the engine's DroidSansMono (Slate's built-in typefaces, no asset to import): digits
+	// keep their place as speed changes, and it reads as instrument type rather than UI text.
+	FSlateFontInfo Font = FCoreStyle::GetDefaultFontStyle(Weight, Size);
+	Font.LetterSpacing = LetterSpacing;
+	// A thin dark outline instead of a drop shadow: readable against the sun and a bright planet
+	// from every side.
+	Font.OutlineSettings.OutlineSize = 1;
+	Font.OutlineSettings.OutlineColor = FLinearColor(0.f, 0.02f, 0.04f, 0.85f);
+	Text->SetFont(Font);
 	Text->SetColorAndOpacity(FSlateColor(SpaceHudStyle::Cyan));
-	// A soft shadow keeps thin text readable against the sun, a planet or the ship's own glow.
-	Text->SetShadowOffset(FVector2D(1.0, 1.0));
-	Text->SetShadowColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.6f));
 	Texts.Add(Name, Text);
 	return Text;
 }
@@ -234,12 +355,36 @@ void USpaceFlightHud::BuildTree()
 		Box->AddChild(Content);
 		return Box;
 	};
-	auto Solid = [this](const FName Name, const FLinearColor& Color)
+	auto Lamp = [this](const FName Name)
 	{
-		UBorder* Border = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), Name);
-		Border->SetBrush(*White());
-		Border->SetBrushColor(Color);
-		return Border;
+		USpaceHudLamp* NewLamp = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), Name);
+		NewLamp->Color = SpaceHudStyle::Cyan;
+		Lamps.Add(FName(*Name.ToString().RightChop(5)), NewLamp);  // Lamp_CPLD -> CPLD
+		return NewLamp;
+	};
+	// Content over a cut-corner panel, like the reference's instrument frames.
+	auto Panelled = [this](const FName PanelName, UWidget* Content, const FMargin& Inset)
+	{
+		UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("%sOverlay"), *PanelName.ToString())));
+		USpaceHudPanel* Panel = WidgetTree->ConstructWidget<USpaceHudPanel>(USpaceHudPanel::StaticClass(), PanelName);
+		Panel->LineColor = SpaceHudStyle::CyanFaint;
+		Overlay->AddChildToOverlay(Panel);
+		if (UOverlaySlot* ContentSlot = Overlay->AddChildToOverlay(Content))
+		{
+			ContentSlot->SetPadding(Inset);
+			ContentSlot->SetHorizontalAlignment(HAlign_Fill);
+			ContentSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		return Overlay;
+	};
+	auto Frame = [this](const FName Name)
+	{
+		USpaceHudPanel* Panel = WidgetTree->ConstructWidget<USpaceHudPanel>(USpaceHudPanel::StaticClass(), Name);
+		Panel->LineColor = SpaceHudStyle::CyanFaint;
+		Panel->FillAlpha = 0.f;
+		Panel->Chamfer = 5.f;
+		Panel->Glow = 0.3f;
+		return Panel;
 	};
 	auto Gauge = [this](const FName Name, bool bHorizontal, int32 Ticks)
 	{
@@ -266,45 +411,51 @@ void USpaceFlightHud::BuildTree()
 	// --- Left of centre: lamps, speed gauge, speed, limit, G meter, then a frame line ---------
 	UHorizontalBox* Left = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("LeftCluster"));
 	UVerticalBox* LeftContent = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("LeftContent"));
+	UVerticalBox* LampBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("LampBox"));
 	for (const TCHAR* LampName : { TEXT("MODE"), TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST") })
 	{
 		const FName Key(LampName);
 		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("LampRow_%s"), LampName)));
-		UTextBlock* Label = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 11.f);
+		UTextBlock* Label = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 10.f, 180);
 		Label->SetText(FText::FromString(LampName));
 		LampLabels.Add(Key, Label);
-		UBorder* Lamp = Solid(FName(*FString::Printf(TEXT("Lamp_%s"), LampName)), LampOff);
-		Lamps.Add(Key, Lamp);
 		AddToHorizontal(Row, Label, VAlign_Center, FMargin(0.f, 0.f, 7.f, 0.f));
-		AddToHorizontal(Row, Sized(FName(*FString::Printf(TEXT("LampBox_%s"), LampName)), Lamp, 9.f, 9.f), VAlign_Center, FMargin(0.f));
-		AddToVertical(LeftContent, Row, HAlign_Right, FMargin(0.f, 0.f, 0.f, 4.f));
+		AddToHorizontal(Row, Sized(FName(*FString::Printf(TEXT("LampBox_%s"), LampName)),
+			Lamp(FName(*FString::Printf(TEXT("Lamp_%s"), LampName))), 8.f, 8.f), VAlign_Center, FMargin(0.f));
+		AddToVertical(LampBox, Row, HAlign_Right, FMargin(0.f, 0.f, 0.f, 5.f));
 	}
-	AddToVertical(LeftContent, Sized(TEXT("SpeedGaugeBox"), Gauge(TEXT("SpeedGauge"), false, 10), 26.f, 280.f), HAlign_Right, FMargin(0.f, 10.f, 0.f, 6.f));
-	AddToVertical(LeftContent, MakeText(TEXT("SpeedText"), 16.f), HAlign_Right, FMargin(0.f));
-	AddToVertical(LeftContent, MakeText(TEXT("LimitText"), 10.f, TEXT("Regular")), HAlign_Right, FMargin(0.f, 0.f, 0.f, 6.f));
+	AddToVertical(LeftContent, Panelled(TEXT("LampPanel"), LampBox, FMargin(10.f, 8.f, 10.f, 3.f)), HAlign_Right, FMargin(0.f, 0.f, 0.f, 10.f));
+	UVerticalBox* SpeedBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SpeedBox"));
+	AddToVertical(SpeedBox, Sized(TEXT("SpeedGaugeBox"), Gauge(TEXT("SpeedGauge"), false, 10), 26.f, 280.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
+	AddToVertical(SpeedBox, MakeText(TEXT("SpeedText"), 15.f, 30), HAlign_Right, FMargin(0.f));
+	AddToVertical(SpeedBox, MakeText(TEXT("LimitText"), 9.f, 40), HAlign_Right, FMargin(0.f, 0.f, 0.f, 7.f));
 	UHorizontalBox* GRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("GRow"));
 	AddToHorizontal(GRow, Sized(TEXT("GGaugeBox"), Gauge(TEXT("GGauge"), true, 4), 64.f, 8.f), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
-	AddToHorizontal(GRow, MakeText(TEXT("GText"), 13.f), VAlign_Center, FMargin(0.f));
-	AddToVertical(LeftContent, GRow, HAlign_Right, FMargin(0.f));
-	AddToHorizontal(Left, LeftContent, VAlign_Center, FMargin(0.f, 0.f, 16.f, 0.f));
-	AddToHorizontal(Left, Sized(TEXT("FrameLeftBox"), Solid(TEXT("FrameLeft"), CyanFaint), 2.f, FrameHeight), VAlign_Center, FMargin(0.f));
+	AddToHorizontal(GRow, MakeText(TEXT("GText"), 12.f, 30), VAlign_Center, FMargin(0.f));
+	AddToVertical(SpeedBox, GRow, HAlign_Right, FMargin(0.f));
+	AddToVertical(LeftContent, Panelled(TEXT("SpeedPanel"), SpeedBox, FMargin(12.f, 10.f)), HAlign_Right, FMargin(0.f));
+	AddToHorizontal(Left, LeftContent, VAlign_Center, FMargin(0.f, 0.f, 14.f, 0.f));
+	// The glass frame line beside the cluster, cut at both ends like the reference's canopy frame.
+	AddToHorizontal(Left, Sized(TEXT("FrameLeftBox"), Frame(TEXT("FrameLeft")), 10.f, FrameHeight), VAlign_Center, FMargin(0.f));
 	Place(Left, FVector2D(-300.0, 30.0), FVector2D(1.0, 0.5));
 
 	// --- Right of centre: a frame line, then boost energy and afterburner fuel gauges ----------
 	UHorizontalBox* Right = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RightCluster"));
-	AddToHorizontal(Right, Sized(TEXT("FrameRightBox"), Solid(TEXT("FrameRight"), CyanFaint), 2.f, FrameHeight), VAlign_Center, FMargin(0.f, 0.f, 16.f, 0.f));
-	auto Column = [&](const TCHAR* Label, const FName GaugeName, const FName TextName)
+	AddToHorizontal(Right, Sized(TEXT("FrameRightBox"), Frame(TEXT("FrameRight")), 10.f, FrameHeight), VAlign_Center, FMargin(0.f, 0.f, 14.f, 0.f));
+	UHorizontalBox* Columns = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RightColumns"));
+	auto Column = [&](const TCHAR* Label, const FName GaugeName, const FName TextName, const FMargin& SlotPadding)
 	{
 		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), *GaugeName.ToString())));
-		UTextBlock* Title = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 10.f);
+		UTextBlock* Title = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 9.f, 180);
 		Title->SetText(FText::FromString(Label));
-		AddToVertical(Box, Title, HAlign_Left, FMargin(0.f, 0.f, 0.f, 4.f));
-		AddToVertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 14.f, 220.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 6.f));
-		AddToVertical(Box, MakeText(TextName, 11.f), HAlign_Left, FMargin(0.f));
-		AddToHorizontal(Right, Box, VAlign_Center, FMargin(0.f, 0.f, 18.f, 0.f));
+		AddToVertical(Box, Title, HAlign_Center, FMargin(0.f, 0.f, 0.f, 6.f));
+		AddToVertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 14.f, 220.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 7.f));
+		AddToVertical(Box, MakeText(TextName, 10.f, 40), HAlign_Center, FMargin(0.f));
+		AddToHorizontal(Columns, Box, VAlign_Center, SlotPadding);
 	};
-	Column(TEXT("BOOST"), TEXT("BoostGauge"), TEXT("BoostText"));
-	Column(TEXT("AFTERBURNER"), TEXT("AfterburnerGauge"), TEXT("AfterburnerText"));
+	Column(TEXT("BST"), TEXT("BoostGauge"), TEXT("BoostText"), FMargin(0.f, 0.f, 22.f, 0.f));
+	Column(TEXT("AB"), TEXT("AfterburnerGauge"), TEXT("AfterburnerText"), FMargin(0.f));
+	AddToHorizontal(Right, Panelled(TEXT("PowerPanel"), Columns, FMargin(14.f, 10.f)), VAlign_Center, FMargin(0.f));
 	Place(Right, FVector2D(300.0, 30.0), FVector2D(0.0, 0.5));
 
 	// --- Centre: the virtual joystick ----------------------------------------------------------
@@ -385,9 +536,10 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 	const bool bBlink = FMath::Fmod(Time, 0.5f) < 0.25f;
 	auto SetLamp = [this](const FName Name, bool bLit, const FLinearColor& Color)
 	{
-		if (UBorder* Lamp = Lamps.FindRef(Name))
+		if (USpaceHudLamp* Lamp = Lamps.FindRef(Name))
 		{
-			Lamp->SetBrushColor(bLit ? Color : LampOff);
+			// The lamp eases to its new level and flashes once, so a switch is noticed, not blinked.
+			Lamp->SetTarget(bLit, Color);
 		}
 		if (UTextBlock* Label = LampLabels.FindRef(Name))
 		{
@@ -500,6 +652,7 @@ void USpaceFlightHud::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	// The root panel collapses rather than this widget, so the widget keeps ticking and can come back.
 	static const IConsoleVariable* HudMode = IConsoleManager::Get().FindConsoleVariable(TEXT("space.Hud"));
 	ApplyState(MakeState(Cast<ASpaceshipPawn>(GetOwningPlayerPawn()), HudMode ? HudMode->GetInt() : 1));
+	DebugAdvance(InDeltaTime);
 }
 
 TArray<FString> USpaceFlightHud::DebugGetWidgetNames() const
@@ -514,9 +667,30 @@ TArray<FString> USpaceFlightHud::DebugGetWidgetNames() const
 
 bool USpaceFlightHud::DebugIsLampLit(FName Lamp, FLinearColor& OutColor) const
 {
-	const UBorder* Border = Lamps.FindRef(Lamp);
-	OutColor = Border ? Border->GetBrushColor() : FLinearColor::Transparent;
+	const USpaceHudLamp* Found = Lamps.FindRef(Lamp);
+	OutColor = Found ? Found->Color : FLinearColor::Transparent;
 	return LampLit.FindRef(Lamp);
+}
+
+UTextBlock* USpaceFlightHud::DebugGetTextWidget(FName TextName) const
+{
+	return Texts.FindRef(TextName);
+}
+
+USpaceHudLamp* USpaceFlightHud::DebugGetLamp(FName Lamp) const
+{
+	return Lamps.FindRef(Lamp);
+}
+
+void USpaceFlightHud::DebugAdvance(float Seconds)
+{
+	for (const TPair<FName, TObjectPtr<USpaceHudLamp>>& Pair : Lamps)
+	{
+		if (Pair.Value)
+		{
+			Pair.Value->Advance(Seconds);
+		}
+	}
 }
 
 FString USpaceFlightHud::DebugGetText(FName TextName) const

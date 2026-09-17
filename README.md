@@ -765,6 +765,27 @@ the first packaged builds: no sound, no H. `Config/DefaultGame.ini` now lists `M
 
 Headless: `Tools/Tests/test_menu_settings.py`.
 
+## Screenshots for visual checks
+
+`Tools/Shots.ps1` runs the **packaged** game through a shot list and quits: cooked materials, no
+editor, and nobody has to play to see what a change looks like.
+
+```powershell
+.\Tools\Shots.ps1 -Preset cockpit           # Tools/Shots/cockpit.json
+.\Tools\Shots.ps1 -Preset hud -Package      # package first (after any C++ or content change)
+.\Tools\Shots.ps1 -Last                     # paths of the newest set
+```
+
+Pictures land in `Saved/Shots/<stamp>_<preset>/NN_<name>.png` (not in git; `-Keep` also copies them
+to `Docs/Shots/` for the repository's visual history). Presets are `cockpit`, `hud`, `ship` and
+`cockpit_tune` (variants side by side). A shot list is JSON read from disk at runtime, so editing one
+needs no repackaging; a shot can set the camera, HUD mode, altitude, facing, speed, master mode,
+limiter, coupled / G-Safe / ComStab, boost, afterburner, the virtual joystick cursor, and - for
+tuning a cockpit without reimporting the ship - `cockpit_eye`, `hide_hull` and `hide_canopy`.
+
+`USpaceShotRunner` (`SpaceShotRunner.*`) does the work: `-ShotList=<path> -ShotOut=<dir>` on the
+command line, or `space.Shot [name]` / `space.Shots <path>` in the console during a normal session.
+
 ## Playing fullscreen outside the editor
 
 | Command | What runs | When |

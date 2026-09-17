@@ -48,8 +48,8 @@
       "field_of_view": 80.0
     },
     "cockpit_camera": {
-      "_comment": "Pilot's eye at the windscreen, not in the canopy bubble. The Vanguard has no modelled interior: from the seat position (345, 0, 103) the tinted canopy glass sits 13 cm above the eye and fills 70 % of the view, the fuselage and the canopy frame (part of the hull mesh) the other 30 % - 0 % open sky, which is the blue tunnel the author saw. Ray-cast survey of the real model (88 deg FOV, Vanguard.blend): at (520, 0, 110), just in front of the glass and 47 cm above the nose deck, 98 % of the view is open, the canopy is out of the forward view entirely and only the nose tip shows at the bottom, like the Star Citizen reference. Nearest surface ~19 cm, well clear of the 10 cm near clip. Free look back still shows the canopy.",
-      "relative_location": [520.0, 0.0, 110.0],
+      "_comment": "Pilot's eye, picked by looking at screenshots (Tools/Shots.ps1 -Preset cockpit_tune) rather than by guessing. The Vanguard has no modelled interior, so hide_canopy_in_cockpit hides the tinted glass from the pilot (with it drawn, it sits 13 cm from the eye and fills the view). From the seat itself (340, 0, 100) the fuselage and the canopy frame, both part of the hull mesh, still block most of the picture; at (500, 0, 110) the sky is open and the nose deck reads like a dashboard along the bottom, closest to the Star Citizen reference in Docs/UI. Free look still swings round to the hull.",
+      "relative_location": [500.0, 0.0, 110.0],
       "field_of_view": 88.0
     }
   },

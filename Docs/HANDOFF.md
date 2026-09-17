@@ -27,7 +27,7 @@ rozbité nebo neověřené a co následuje.
   - loď **Vanguard** (lehká stíhačka 17,6 × 13 × 4,4 m, vlastní model z Blenderu);
   - postava na nohou (placeholder UE Manny).
 - **Další velký cíl autora:** letový systém lodi má být **kompletní kopie systému ze Star
-  Citizen**. Nemá vzniknout najednou, ale po krocích (kapitola 9).
+  Citizen**. Nemá vzniknout najednou, ale po krocích (kapitola 10).
 
 ---
 
@@ -40,6 +40,9 @@ rozbité nebo neověřené a co následuje.
   - přesný **testovací scénář** (co spustit, co zkusit, co má vidět);
   - informaci, jestli stačí **Live Coding**, nebo je nutný **restart editoru**;
   - **rizika** a co je neověřené.
+- **Vizuální změny si ověř sám snímky** (kapitola 9, `Tools\Shots.ps1`), než řekneš, že je hotovo.
+  Autorovi pak napiš, co jsi na snímcích viděl, a odděl, co musí posoudit on sám (pocit z ovládání,
+  plynulost, zvuk).
 - **Neměřit ani netestovat v PIE či okně editoru bez vyžádání** („ne laskavě už proteď nic
   neměř“). Testuj **headless** (`Tools/run_editor_python.ps1`) a autorovi napiš scénář.
   Okno editoru mu kradlo myš a klávesnici.
@@ -77,7 +80,7 @@ Obsah k 17. 9. 2026:
 | `PlanetaryBiomes_Reference.md` | Planetární biomy: více biomů na planetu (Starfield styl), sklon a výška do materiálu terénu, Material Parameter Collection, počasí, den a noc, povrchové POI. |
 | `Gamespace_ReferenceLibrary_Plan.md` | Plán dalších referenčních témat (ekonomika a těžba, zbraně a štíty, EVA, mise a AI, UI a navigace). |
 
-**UI reference: `Docs/UI/`** (pro budoucí krok **SC-1c**, viz kapitola 9):
+**UI reference: `Docs/UI/`** (pro krok **SC-1c**, viz kapitola 10):
 
 | Soubor | O čem je |
 | --- | --- |
@@ -188,7 +191,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - myš jako virtuální joystick SC s kruhem a kurzorem v HUD;
     - entry heat se nově měří proti 200 m/s (rychlost SCM).
 15. **Opravy po SC-1a** (17. 9. 2026): výstup z lodi (postava vedle lodi, kamera normálně daleko)
-    a zobrazení kvality grafiky v menu (kapitola 10).
+    a zobrazení kvality grafiky v menu (kapitola 11).
 16. **SC-1b – boost a afterburner** (17. 9. 2026):
     - boost (Shift) zesiluje jen manévrovací trysky (retro, strafe, nahoru, dolů) a rotaci a po
       dobu hoření vypíná G-Safe. Hlavní tah ani rychlost nemění;
@@ -203,7 +206,9 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - vpravo ukazatele energie boostu a paliva afterburneru, uprostřed virtuální joystick;
     - celé v C++ (`USpaceFlightHud`, bez widget Blueprintu), tenké průhledné cyan linky;
     - kompaktní textový debug HUD už neukazuje SPEED, IFCS ani AFTERBRN, plný (H) ano.
-18. **Oprava kamery v kokpitu** (17. 9. 2026): oko pilota přesunuto k čelnímu sklu, viz kapitola 10.
+18. **Oprava kamery v kokpitu a workflow vizuální kontroly** (17. 9. 2026): sklo canopy se pilotovi
+    skrývá, oko je na (500, 0, 110) a vybralo se podle snímků; snímky ze zabalené hry umí
+    `Tools/Shots.ps1` (kapitola 9).
 
 ---
 
@@ -226,6 +231,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `SSpaceMenu` | `SpaceMenuWidget.*` | Menu ve Slate (bez UMG assetů): titul, pauza, nastavení. |
 | `USpaceUserSettings` | `SpaceUserSettings.*` | Nastavení hráče (grafika a hlasitosti, citlivost, invert, HUD, FPS). |
 | `USpaceFlightHud`, `USpaceHudGauge`, `USpaceHudVirtualJoystick` | `SpaceFlightHud.*` | SC-1c letový HUD v UMG: kontrolky, ukazatel rychlosti a omezovače, G-metr, boost a afterburner, virtuální joystick. Strom widgetů stavěný v C++. |
+| `USpaceShotRunner` | `SpaceShotRunner.*` | Snímky podle scénáře pro vizuální kontrolu (kapitola 9): `-ShotList=` z příkazové řádky, `space.Shot` a `space.Shots` v konzoli. |
 | `ASpaceDebugHUD` | `SpaceDebugHUD.*` | Textový debug HUD (CVar `space.Hud`), FPS; vytváří `USpaceFlightHud`. Anglicky, placeholder, zbytek nahradí SC-3. |
 | `USpaceOriginRebasingSubsystem` | `SpaceOriginRebasingSubsystem.*` | Posun počátku světa. |
 
@@ -252,6 +258,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `Assets/install_mannequin_pack.py`, `generate_milky_way_glow.py` | Jednorázová instalace a textura. |
 | `Blender/gamespace_ship_export.py` | Export lodí z Blenderu (FBX, manifest, validace). |
 | `Blender/cockpit_view_survey.py` | Změří, co pilot vidí: paprsky přes zorné pole proti skutečnému modelu, kolik % výhledu je volných a co ho blokuje. Po změně modelu nebo pozice kamery. |
+| `Shots.ps1` + `Shots/*.json` | Snímky ze zabalené hry podle scénáře (kapitola 9). |
 | `Content/Python/gamespace_assets.py` | Knihovna pro skriptové vytváření IA, IMC a dalších assetů. |
 
 ### Dokumentace
@@ -319,7 +326,77 @@ Co headless **nejde** ověřit a musí vyzkoušet autor ve hře:
 
 ---
 
-## 9. Roadmapa – letový systém podle Star Citizen (rozdělit do kroků)
+## 9. Vizuální kontrola snímky (workflow, 17. 9. 2026)
+
+**Claude Code se umí dívat na obrázky ze souboru, ale neumí si sám udělat screenshot běžící hry.**
+Tahle kapitola popisuje, jak si ho udělá skriptem a sám si ho pak prohlédne. Cíl: po každé vizuální
+změně (kamera, HUD, model, terén) ověří výsledek dřív, než autorovi řekne, že je hotovo.
+
+### Jak to spustit
+
+```
+.\Tools\Shots.ps1 -Preset cockpit            # sada snímků podle scénáře
+.\Tools\Shots.ps1 -Preset hud -Package       # nejdřív zabalí hru, pak fotí
+.\Tools\Shots.ps1 -Last                      # vypíše nejnovější sadu
+```
+
+Skript spustí **zabalenou hru** (ne editor) v okně 1600 × 900, ta si sama načte TestSpace, projde
+scénář, u každého snímku nastaví loď a kameru, počká, vyfotí a nakonec se ukončí. Trvá to pár
+desítek sekund a hra má po tu dobu okno v popředí, takže se mezitím nemá psát.
+
+- Proč zabalená hra: cooked materiály se vykreslují správně (uncooked `-game` je šedý) a editor
+  autorovi nekrade myš a klávesnici.
+- Snímky obsahují i HUD (Slate a UMG).
+
+### Kam se ukládají
+
+`Saved\Shots\<RRRRMMDD_HHMMSS>_<scénář>\NN_<název>.png` – číslo je pořadí ve scénáři, takže je
+poznat, co je co, a nejnovější složka je ta s nejvyšším časem. `Saved/` **není v gitu**: snímky jsou
+pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u vzhledu), přidá se
+`-Keep` a kopie jde do `Docs\Shots\<scénář>\<čas>\`, což v gitu je.
+
+### Scénáře (`Tools\Shots\*.json`)
+
+| Scénář | K čemu |
+| --- | --- |
+| `cockpit` | Pohled z kokpitu a chase kamery nad planetou i ve vesmíru, s HUD i bez něj. |
+| `hud` | Letový HUD ve všech stavech: klid, na limitu, afterburner, boost s vychýleným joystickem, NAV, decoupled s vypnutým G-Safe, let pozpátku, plný textový výpis. |
+| `ship` | Loď zvenku: nad planetou, při sestupu, ve vesmíru, se zářícími tryskami. |
+| `cockpit_tune` | Porovnání variant kokpitu vedle sebe (pozice oka, co se pilotovi skrývá). Vzor pro dočasné scénáře při ladění. |
+
+Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
+Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
+(`horizon`/`planet`/`away`), `speed_ms`, `mode` (`SCM`/`NAV`), `limiter`, `coupled`, `gsafe`,
+`comstab`, `boost`, `afterburner`, `stick` (kurzor VJoy), `settle` (sekundy na ustálení),
+`cockpit_eye`, `hide_hull`, `hide_canopy` (pro ladění kokpitu bez reimportu lodi).
+
+### Jednotlivý snímek při hraní
+
+V konzoli hry (`~`):
+
+```
+space.Shot nazev            # jeden snímek aktuálního pohledu do Saved\Shots\manual
+space.Shots <cesta.json>    # projede celý scénář odsud
+```
+
+### Jak to používá Claude Code
+
+1. Udělá vizuální změnu, zabalí hru (`Tools\Shots.ps1 -Preset <scénář> -Package`).
+2. Prohlédne si snímky (čte je jako obrázky ze souboru) a podle nich rozhodne, jestli výsledek sedí.
+3. Když ne, upraví hodnoty a fotí znovu. U kokpitu a podobných voleb si napřed udělá **porovnávací
+   scénář** (jako `cockpit_tune`) a vybere variantu podle obrázků, ne odhadem.
+4. Autorovi pak napíše, co na snímcích viděl, a **výslovně oddělí, co musí posoudit sám**: pocit
+   z ovládání, plynulost, zvuk, čitelnost za pohybu, cokoli, co statický snímek neukáže.
+
+Omezení, se kterými je potřeba počítat:
+- Snímek je statický: nepozná se z něj plynulost, pocit z myši ani zvuk.
+- Scénář umí jen to, co má v polích. Přistání, výstup z lodi nebo menu se zatím fotit nedají.
+- Hra fotí to, co je zabalené. Po změně C++ nebo obsahu je potřeba `-Package`, jinak snímky ukazují
+  starý build; skript na to upozorní.
+
+---
+
+## 10. Roadmapa – letový systém podle Star Citizen (rozdělit do kroků)
 
 Autor chce **kompletní kopii SC pilotování**, ale ne v jednom kroku. Níže je navržené rozdělení.
 **Před začátkem každé fáze** ho potvrď s autorem a zkontroluj master referenci. Každá fáze má
@@ -364,7 +441,7 @@ Další otevřené směry mimo let:
 
 ---
 
-## 10. Známé problémy a neověřené věci
+## 11. Známé problémy a neověřené věci
 
 - **Neověřeno autorem:** celý SC-1c, hlavně vzhled (rozmístění, čitelnost na světlém pozadí,
   velikost na jiném rozlišení než 1080p), a nová pozice kamery v kokpitu (C). SC-1a a SC-1b autor otestoval a fungují; hodnoty se
@@ -387,9 +464,11 @@ Další otevřené směry mimo let:
 - **Jas oblohy** (slunce, mlhoviny) je nastavený odhadem. Ladí se v levelu na `StarfieldSky`
   (`NebulaScale`, `SunScale`) nebo v konstantách `build_space_scene.py`.
 - **Kokpit:** Vanguard nemá modelovaný vnitřek kabiny (canopy je nízká skořepina nad plným trupem a
-  rám kabiny je součástí trupu). Oko pilota je proto u čelního skla (520, 0, 110), ne v kabině:
-  97,5 % výhledu je volných, dole je vidět špička přídě. Z pozice sedadla (345, 0, 103) bylo volných
-  0 % a hráč viděl modrý tunel ze skla. Měří se `Tools/Blender/cockpit_view_survey.py`.
+  rám kabiny je součástí trupu). Sklo canopy se proto pilotovi skrývá (`hide_canopy_in_cockpit`) a
+  oko je na (500, 0, 110): obloha je volná a dole je vidět příď jako palubní deska. Z pozice sedadla
+  (340, 0, 100) trup a rám kabiny zakrývaly většinu obrazu, i se skrytým sklem – viz porovnávací
+  snímky (`Tools\Shots.ps1 -Preset cockpit_tune`). Skutečný interiér je úkol pro budoucí iteraci
+  pipeline lodí.
 - **V PIE Escape ukončí hru** (je to zkratka editoru). V PIE otevírá menu **F10**, v buildu Escape.
 - Debug HUD je anglicky, menu česky.
 - Build je **Development** (má konzoli `~`). Shipping zatím nebyl zkoušený.
@@ -400,7 +479,7 @@ Další otevřené směry mimo let:
 
 ---
 
-## 11. Technické pasti (ušetří hodiny)
+## 12. Technické pasti (ušetří hodiny)
 
 - **Cookování:** C++ načítá assety podle cesty (`StaticLoadObject`). Cooker je nevidí, a proto
   jsou složky v `Config/DefaultGame.ini` pod `DirectoriesToAlwaysCook`. Nový assetový adresář
@@ -428,7 +507,7 @@ Další otevřené směry mimo let:
 
 ---
 
-## 12. Poslední commity
+## 13. Poslední commity
 
 Viz `git log --oneline`. Poslední kroky:
 - `73b1410`: letové režimy, cruise, vrstvený zvuk, živá obloha, opravy výstupu a kokpitu;

@@ -210,6 +210,20 @@ void ASpaceshipPawn::SnapCameraToShip()
 	CameraSnapTicks = 2;
 }
 
+void ASpaceshipPawn::DebugConfigureCockpit(const FVector& EyeLocation, bool bHideHull, bool bHideCanopy)
+{
+	if (!EyeLocation.IsNearlyZero())
+	{
+		CockpitCamera->SetRelativeLocation(EyeLocation);
+		// UpdateCameraEffects puts the camera back on its base location (plus shake) every frame, so
+		// the base has to move too or the new eye lasts exactly one frame.
+		CockpitCameraBaseLocation = EyeLocation;
+	}
+	bHideHullInCockpit = bHideHull;
+	bHideCanopyInCockpit = bHideCanopy;
+	SetCockpitView(bCockpitView);
+}
+
 void ASpaceshipPawn::SetCockpitView(bool bCockpit)
 {
 	bCockpitView = bCockpit;
@@ -217,6 +231,17 @@ void ASpaceshipPawn::SetCockpitView(bool bCockpit)
 	CockpitCamera->SetActive(bCockpit);
 	// Only hidden from this pawn's own view: other players and shadows still see the hull.
 	Hull->SetOwnerNoSee(bCockpit && bHideHullInCockpit);
+	// The canopy glass is right in front of the pilot's eye and would fill the view; the chase camera
+	// and everyone else keep it.
+	TArray<UStaticMeshComponent*> Meshes;
+	GetComponents<UStaticMeshComponent>(Meshes);
+	for (UStaticMeshComponent* Mesh : Meshes)
+	{
+		if (Mesh != Hull && Mesh->GetName().Contains(TEXT("Canopy")))
+		{
+			Mesh->SetOwnerNoSee(bCockpit && bHideCanopyInCockpit);
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------

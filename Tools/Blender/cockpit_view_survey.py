@@ -3,6 +3,8 @@
     & "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe" -b ArtSource\\Ships\\Vanguard\\Vanguard.blend ^
         --python Tools\\Blender\\cockpit_view_survey.py -- 520 0 110 88
 
+Add hide:Canopy (or any mesh name fragment) to ignore a mesh, for a cockpit view that hides it.
+
 Arguments (all optional): eye X Y Z in UE centimetres (the value of cockpit_camera.relative_location in
 <Ship>_setup.json), then the camera's horizontal field of view in degrees. Without arguments it sweeps
 a grid of eye positions instead and prints the most open ones.
@@ -25,7 +27,9 @@ from mathutils import Vector
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 ROWS, COLS = 13, 25
 
-MESHES = [o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith("UCX_") and "STAGE" not in o.name]
+HIDE = [a[5:] for a in ARGS if a.startswith("hide:")]  # e.g. hide:Canopy for a cockpit view that hides the glass
+MESHES = [o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith("UCX_") and "STAGE" not in o.name
+          and not any(h.lower() in o.name.lower() for h in HIDE)]
 
 
 def cast(ob, origin, direction):
@@ -66,9 +70,10 @@ def clearance(eye):
                for d in ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)))
 
 
-if len(ARGS) >= 3:
-    eye = Vector((float(ARGS[0]) / 100.0, -float(ARGS[1]) / 100.0, float(ARGS[2]) / 100.0))
-    fov = float(ARGS[3]) if len(ARGS) >= 4 else 88.0
+POSITIONAL = [a for a in ARGS if not a.startswith("hide:")]
+if len(POSITIONAL) >= 3:
+    eye = Vector((float(POSITIONAL[0]) / 100.0, -float(POSITIONAL[1]) / 100.0, float(POSITIONAL[2]) / 100.0))
+    fov = float(POSITIONAL[3]) if len(POSITIONAL) >= 4 else 88.0
     open_percent, blocked, rows = survey(eye, fov)
     print("COCKPIT eye (%.0f, %.0f, %.0f) cm, FOV %.0f deg" % (eye.x * 100, -eye.y * 100, eye.z * 100, fov))
     for line in rows:
@@ -80,7 +85,7 @@ else:
     print("COCKPIT sweeping eye positions (x, z in cm): open %, nearest surface")
     best = []
     for x in range(300, 660, 20):
-        for z in range(90, 130, 10):
+        for z in range(90, 130, 4):
             eye = Vector((x / 100.0, 0.0, z / 100.0))
             open_percent, blocked, _ = survey(eye, 88.0)
             near = clearance(eye)

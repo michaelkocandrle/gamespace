@@ -1,0 +1,9 @@
+{
+  "_comment": "The ship and the world around it: hull in daylight over the planet, against space, high up. For checking materials, lights and the sky. Run: .\\Tools\\Shots.ps1 -Preset ship",
+  "shots": [
+    { "name": "ship_over_planet", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "speed_ms": 100, "settle": 1.5 },
+    { "name": "ship_diving", "camera": "chase", "altitude_m": 8000, "facing": "planet", "hud": 0, "speed_ms": 200, "settle": 1.0 },
+    { "name": "ship_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "speed_ms": 0, "settle": 1.0 },
+    { "name": "ship_boost_glow", "camera": "chase", "altitude_m": 20000, "facing": "horizon", "hud": 0, "speed_ms": 400, "afterburner": true, "settle": 1.2 }
+  ]
+}

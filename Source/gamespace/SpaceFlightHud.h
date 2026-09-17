@@ -173,6 +173,69 @@ protected:
 		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 };
 
+/**
+ * A panel outline in the Star Citizen style: thin lines with cut corners around a barely tinted
+ * fill, drawn by the widget itself (UMG borders can only do square or rounded corners).
+ */
+UCLASS()
+class GAMESPACE_API USpaceHudPanel : public UUserWidget
+{
+	GENERATED_BODY()
+
+public:
+	/** Corner cut, pixels. */
+	UPROPERTY(BlueprintReadOnly, Category = "Panel")
+	float Chamfer = 10.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Panel")
+	FLinearColor LineColor = FLinearColor::White;
+
+	/** How much of the panel is filled behind the content (kept very low: the HUD must not block the view). */
+	UPROPERTY(BlueprintReadOnly, Category = "Panel")
+	float FillAlpha = 0.09f;
+
+	/** Halo strength around the lines, 0..1. */
+	UPROPERTY(BlueprintReadOnly, Category = "Panel")
+	float Glow = 0.5f;
+
+protected:
+	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+};
+
+/** A status lamp: a small glowing square that fades in and out and flashes when it changes. */
+UCLASS()
+class GAMESPACE_API USpaceHudLamp : public UUserWidget
+{
+	GENERATED_BODY()
+
+public:
+	/** Where the lamp is heading: 1 lit, 0 dark. */
+	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
+	float Target = 0.f;
+
+	/** What is drawn, easing towards Target. */
+	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
+	float Intensity = 0.f;
+
+	/** Extra brightness right after a change, decaying. */
+	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
+	float Flash = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
+	FLinearColor Color = FLinearColor::White;
+
+	/** Sets where the lamp should go; a change starts a short flash. */
+	void SetTarget(bool bLit, const FLinearColor& InColor);
+
+	/** One animation step. Driven by the HUD so tests can step it without Slate. */
+	void Advance(float DeltaSeconds);
+
+protected:
+	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+};
+
 /** The mouse virtual joystick: rim (full turn rate), dead zone and the cursor. */
 UCLASS()
 class GAMESPACE_API USpaceHudVirtualJoystick : public UUserWidget
@@ -235,6 +298,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Flight HUD|Tests")
 	bool DebugIsLampLit(FName Lamp, FLinearColor& OutColor) const;
 
+	/** Tests: a text widget, for its font. */
+	UFUNCTION(BlueprintCallable, Category = "Flight HUD|Tests")
+	UTextBlock* DebugGetTextWidget(FName TextName) const;
+
+	/** Tests: a status lamp, for its animation state. */
+	UFUNCTION(BlueprintCallable, Category = "Flight HUD|Tests")
+	USpaceHudLamp* DebugGetLamp(FName Lamp) const;
+
+	/** Tests: runs the HUD's animations for this long, without Slate. */
+	UFUNCTION(BlueprintCallable, Category = "Flight HUD|Tests")
+	void DebugAdvance(float Seconds);
+
 	/** Tests: the text of a text widget (ModeText, SpeedText, LimitText, GText, BoostText, AfterburnerText). */
 	UFUNCTION(BlueprintCallable, Category = "Flight HUD|Tests")
 	FString DebugGetText(FName TextName) const;
@@ -257,10 +332,11 @@ protected:
 
 private:
 	void BuildTree();
-	UTextBlock* MakeText(const FName Name, float Size, const FName Weight = TEXT("Bold"));
+	/** Monospace (the engine's DroidSansMono), letter-spaced and outlined: a technical, readable look. */
+	UTextBlock* MakeText(const FName Name, float Size, int32 LetterSpacing = 60, const FName Weight = TEXT("Mono"));
 
 	UPROPERTY(Transient)
-	TMap<FName, TObjectPtr<UBorder>> Lamps;
+	TMap<FName, TObjectPtr<USpaceHudLamp>> Lamps;
 
 	UPROPERTY(Transient)
 	TMap<FName, TObjectPtr<UTextBlock>> LampLabels;
