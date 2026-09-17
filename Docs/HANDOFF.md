@@ -48,8 +48,13 @@ rozbité nebo neověřené a co následuje.
 - **Nikdy neměň bezpečnostní nastavení Windows.** Smart App Control autor 16. 9. 2026 vypnul,
   moduly v `gamespace.Build.cs` se proto přidávat smí. Když build selže na Code Integrity
   (3077 / 0x800711C7), řekni to autorovi a nic neměň.
-- **Git:** commit po každém dokončeném kroku, **nepushovat** (pushuje autor). Commit message
-  končí řádkem `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
+- **Git (pokyn autora 17. 9. 2026): všechno, co uděláš, vždy commitni a pushni do repozitáře**
+  https://github.com/michaelkocandrle/gamespace/tree/main (remote `origin`, větev `main`).
+  - Commit a push po každém dokončeném kroku, i po drobných opravách a úpravách dokumentace.
+  - Nic nenechávej jen lokálně. Před commitem zkontroluj `git status`, jestli se tam nedostalo
+    něco, co tam nepatří.
+  - Commit message končí řádkem `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
+  - Nahrazuje dřívější pravidlo „nepushovat, pushuje autor“.
 - Autor hraje hlavně **zabalenou hru** (`C:\gamespace\Builds\Gamespace`), ne PIE. Po změnách
   obsahu nebo C++ je proto potřeba znovu spustit `Tools\Package.ps1`.
 - Velké úkoly autor chce **dělit do kroků**. Nedělej obří změny najednou, domluv rozdělení.
@@ -69,13 +74,22 @@ Obsah k 17. 9. 2026:
 | --- | --- |
 | `StarCitizen_FlightSystem_Reference.md` | Rozbor pilotování ve Star Citizen: IFCS, coupled/decoupled, flight modes (Precision/SCM/Cruise → master modes SCM/NAV), G-Safe a ComStab, ESP, boost vs. afterburner, power triangle, quantum travel (výběr cíle, spool, kalibrace, engage, cooldown, interdikce), VTOL a landing gear. Obsahuje doporučené pořadí zavádění. |
 | `SpaceEnvironment_Reference.md` | Vesmírné prostředí: měřítko vesmíru (1:1 + quantum travel vs. zmenšené vzdálenosti), obsah mezi planetami (asteroidová pole, vraky, mlhoviny, stanice, signály), procedurální vs. ručně dělaný obsah, hazardy, skybox. Doporučení: realistické vzdálenosti + quantum travel, malý ručně navržený systém. |
+| `PlanetaryBiomes_Reference.md` | Planetární biomy: více biomů na planetu (Starfield styl), sklon a výška do materiálu terénu, Material Parameter Collection, počasí, den a noc, povrchové POI. |
+| `Gamespace_ReferenceLibrary_Plan.md` | Plán dalších referenčních témat (ekonomika a těžba, zbraně a štíty, EVA, mise a AI, UI a navigace). |
+
+**UI reference: `Docs/UI/`** (pro budoucí krok **SC-1c**, viz kapitola 9):
+
+| Soubor | O čem je |
+| --- | --- |
+| `SC_ThrottleHUD_VisualReference.md` | Rozbor letového HUD ze Star Citizen: svislý pruh rychlosti vůči limitu s barevným kódováním, G-metr pod ním, malé stavové indikátory (CPLD, ESP, LOCK / VTOL, GEAR, GSAF), symetrické rozložení kolem středu, tenké cyan linky místo plných panelů, pruh paliva. Doporučuje UMG místo Canvas. |
+| `Screenshot 2026-09-17 180903.png` | Screenshot kokpitu SC, ke kterému se dokument vztahuje (v dokumentu je uvedený pod jménem `SC_throttle_hud_reference.png`). |
 
 Pozor:
 - Úseky „Náš stav“ v referencích byly psané před posledními kroky a místy jsou zastaralé. Náš
   let už má SC-1a: coupled/decoupled podle SC, SCM/NAV, omezovač, G-Safe, ComStab, VJoy, boost s
   energií a cruise (J, jen NAV). Aktuální stav je
   v kapitole 5.
-- Složka **není v gitu** (untracked). Jestli ji commitovat, rozhoduje autor.
+- Složka je v gitu (autor ji commitnul 17. 9. 2026).
 
 ---
 
@@ -300,6 +314,10 @@ a speed limiter).
     parametr: tah je rovnou zadaný jako zrychlení (stejně ho uvádí SC).
   - **SC-1b:** oddělit boost (manévrovací trysky a rotace, vypíná G-Safe) a afterburner (hlavní
     tah, vlastní palivo, rychlost relativní k plynu).
+  - **SC-1c:** letový HUD podle referencí v `Docs/UI/` (kapitola 3): svislý pruh rychlosti vůči
+    omezovači, G-metr, indikátory CPLD / GSAF / COMSTAB a pruh paliva a boostu místo textových
+    řádků. Přesný rozsah a vztah k SC-3 domluvit s autorem před začátkem (reference sama mluví o
+    SC-3 a doporučuje UMG).
   - Ladění hodnot (G, rychlosti, citlivost VJoy) podle autorova hraní.
 - **SC-2 – Přistání SC stylem**
   - Landing gear (N) s vizuálem na socketech `Gear_*`.
