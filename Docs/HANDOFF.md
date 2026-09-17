@@ -203,6 +203,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - vpravo ukazatele energie boostu a paliva afterburneru, uprostřed virtuální joystick;
     - celé v C++ (`USpaceFlightHud`, bez widget Blueprintu), tenké průhledné cyan linky;
     - kompaktní textový debug HUD už neukazuje SPEED, IFCS ani AFTERBRN, plný (H) ano.
+18. **Oprava kamery v kokpitu** (17. 9. 2026): oko pilota přesunuto k čelnímu sklu, viz kapitola 10.
 
 ---
 
@@ -250,6 +251,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `Assets/add_*_input.py` | Přidávání mapování kláves (pouze append). |
 | `Assets/install_mannequin_pack.py`, `generate_milky_way_glow.py` | Jednorázová instalace a textura. |
 | `Blender/gamespace_ship_export.py` | Export lodí z Blenderu (FBX, manifest, validace). |
+| `Blender/cockpit_view_survey.py` | Změří, co pilot vidí: paprsky přes zorné pole proti skutečnému modelu, kolik % výhledu je volných a co ho blokuje. Po změně modelu nebo pozice kamery. |
 | `Content/Python/gamespace_assets.py` | Knihovna pro skriptové vytváření IA, IMC a dalších assetů. |
 
 ### Dokumentace
@@ -365,7 +367,7 @@ Další otevřené směry mimo let:
 ## 10. Známé problémy a neověřené věci
 
 - **Neověřeno autorem:** celý SC-1c, hlavně vzhled (rozmístění, čitelnost na světlém pozadí,
-  velikost na jiném rozlišení než 1080p). SC-1a a SC-1b autor otestoval a fungují; hodnoty se
+  velikost na jiném rozlišení než 1080p), a nová pozice kamery v kokpitu (C). SC-1a a SC-1b autor otestoval a fungují; hodnoty se
   budou dál ladit. Dříve:
   celý SC-1a (pocit letu, hodnoty G a rychlostí, VJoy kruh, Alt +
   kolečko, přistávání s novým coupled režimem). Headless testy prochází.
@@ -384,7 +386,10 @@ Další otevřené směry mimo let:
   `EngineVolume`, `BoostVolume`, `CruiseVolume`, `OneShotVolume`).
 - **Jas oblohy** (slunce, mlhoviny) je nastavený odhadem. Ladí se v levelu na `StarfieldSky`
   (`NebulaScale`, `SunScale`) nebo v konstantách `build_space_scene.py`.
-- **Uprostřed výhledu z kokpitu** je středový rám kabiny, tak je loď vymodelovaná.
+- **Kokpit:** Vanguard nemá modelovaný vnitřek kabiny (canopy je nízká skořepina nad plným trupem a
+  rám kabiny je součástí trupu). Oko pilota je proto u čelního skla (520, 0, 110), ne v kabině:
+  97,5 % výhledu je volných, dole je vidět špička přídě. Z pozice sedadla (345, 0, 103) bylo volných
+  0 % a hráč viděl modrý tunel ze skla. Měří se `Tools/Blender/cockpit_view_survey.py`.
 - **V PIE Escape ukončí hru** (je to zkratka editoru). V PIE otevírá menu **F10**, v buildu Escape.
 - Debug HUD je anglicky, menu česky.
 - Build je **Development** (má konzoli `~`). Shipping zatím nebyl zkoušený.

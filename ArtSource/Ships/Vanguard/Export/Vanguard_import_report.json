@@ -72,7 +72,7 @@
       "camera_boom.camera_lag_max_distance = 1800.0",
       "camera_boom.probe_size = 40.0",
       "chase_camera.field_of_view = 80.0",
-      "cockpit_camera.relative_location = [345.0, 0.0, 103.0]",
+      "cockpit_camera.relative_location = [520.0, 0.0, 110.0]",
       "cockpit_camera.field_of_view = 88.0",
       "component Canopy = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Canopy"
     ]

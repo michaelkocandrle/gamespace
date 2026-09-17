@@ -257,8 +257,20 @@ try:
     check("every exit candidate clear of the hull", worst >= clearance_needed - 0.5, "worst %.0f cm" % worst)
     rings = [length([c[k] - loc[k] for k in range(3)]) for c in candidates[1:]]
     check("fallback spots move outwards", rings[0] < rings[4] < rings[8], "%.0f / %.0f / %.0f m" % (rings[0] / 100, rings[4] / 100, rings[8] / 100))
-    cockpit = v3(ship.get_editor_property("cockpit_camera").get_editor_property("relative_location"))
-    check("cockpit eye in front of the seat, under the canopy", abs(cockpit[0] - 345.0) < 1 and abs(cockpit[2] - 103.0) < 1, str(cockpit))
+    # The pilot's eye at the windscreen, checked against the canopy mesh: inside its footprint along
+    # the ship, in its top half, well forward of its middle (the seat position had the tinted glass
+    # 13 cm from the eye and 0 % open view). The view itself is measured with
+    # Tools/Blender/cockpit_view_survey.py: 97.5 % open, only the nose tip at the bottom.
+    camera = ship.get_editor_property("cockpit_camera")
+    cockpit = v3(camera.get_editor_property("relative_location"))
+    rotation = camera.get_editor_property("relative_rotation")
+    canopy = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Canopy").get_bounding_box()
+    low, high = v3(canopy.min), v3(canopy.max)
+    check("cockpit eye at the windscreen, not buried in the canopy bubble",
+          low[0] < cockpit[0] < high[0] and cockpit[0] > (low[0] + high[0]) / 2 + 50.0
+          and (low[2] + high[2]) / 2 < cockpit[2] < high[2] and abs(cockpit[1]) < 1.0,
+          "eye %s, canopy x %.0f..%.0f z %.0f..%.0f" % (cockpit, low[0], high[0], low[2], high[2]))
+    check("cockpit camera looks straight ahead", abs(rotation.pitch) < 1e-3 and abs(rotation.yaw) < 1e-3 and abs(rotation.roll) < 1e-3, str(rotation))
     check("free look unlimited on the Vanguard", ship.get_editor_property("free_look_max_yaw_deg") >= 180.0)
 finally:
     eas.destroy_actor(ship)

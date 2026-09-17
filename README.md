@@ -43,7 +43,7 @@ git lfs install
 | `Hull`        | The ship mesh (placeholder: `/Engine/BasicShapes/Cube` stretched to 2.0 x 1.0 x 0.35). Query-only collision from its simple collision (the UCX hulls from Blender) blocking pawns, cameras and visibility: characters walk around the real shape. The ship's own movement never sees it |
 | `CameraBoom`  | 900 cm spring arm (Vanguard: 14.5 m), mild lag, collision test on: pulls the camera in rather than letting it sink into an asteroid. The mouse wheel scales it 0.45x-3x |
 | `ChaseCamera` | Third-person camera                                              |
-| `CockpitCamera` | Pilot's eye (Vanguard: 345, 0, 103 in front of the seat, under the canopy), FOV 90, inactive until toggled; the wheel zooms it to `CockpitZoomFov` 40. `bHideHullInCockpit` hides the hull from the pilot, only for the placeholder cube |
+| `CockpitCamera` | Pilot's eye (Vanguard: 520, 0, 110 - at the windscreen, see below), FOV 90, inactive until toggled; `Alt` + wheel zooms it to `CockpitZoomFov` 40. `bHideHullInCockpit` hides the hull from the pilot, only for the placeholder cube |
 | `EngineAudio` | Thruster loop, not spatialised. Hum, boost and cruise layers are created at runtime next to it |
 | `SpaceDust`   | `USpaceDustComponent`: 400 specks in a 70 m box around the camera that stretch into streaks with speed |
 
@@ -180,6 +180,25 @@ Modelled on Star Citizen's Intelligent Flight Control System (`starcitizenrefere
 Headless: `Tools/Tests/test_flight_modes.py` (boost energy, cruise NAV-only / engage / limit / drop
 in deep space and over Veyra, free look all round,
 exit candidates and collision setup, character recovery, scene extras).
+
+### Cockpit view
+
+The eye position lives in `<Ship>_setup.json` (`components.cockpit_camera.relative_location`) and is
+measured against the real model, not guessed: `Tools/Blender/cockpit_view_survey.py` casts a grid of
+rays over the camera's field of view in Blender and prints what each one hits and how much of the view
+is open.
+
+    blender.exe -b ArtSource\Ships\Vanguard\Vanguard.blend --python Tools\Blender\cockpit_view_survey.py -- 520 0 110 88
+
+The Vanguard has no modelled cockpit interior: the canopy is a shallow shell over a solid fuselage,
+and its frame is part of the hull mesh. From a seat position (345, 0, 103) the survey found the tinted
+glass 13 cm above the eye, filling 70 % of the view, the fuselage and frame the rest - **0 % open sky**,
+which is what a player sees as a blue tunnel with a dark mass below. At (520, 0, 110), just in front of
+the glass and 47 cm above the nose deck, **97.5 % of the view is open**, no glass is in the forward view
+and only the nose tip shows at the bottom, like the Star Citizen reference in `Docs/UI/`. Free look
+still swings round to the canopy and the hull. Run the survey again after changing a ship's model, and
+put the result in its setup file; `Tools/Tests/test_flight_modes.py` then checks the eye against the
+canopy mesh bounds (inside its footprint, upper half, well forward of its middle, looking straight ahead).
 
 ### Landing (L5)
 
