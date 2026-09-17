@@ -168,6 +168,20 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
 	int32 Ticks = 10;
 
+	/** What is drawn: eases towards Value, so a jump in speed springs rather than snaps. */
+	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
+	float Display = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
+	float DisplayReverse = 0.f;
+
+	/** Breathing of the halo, 0..1, driven by the HUD's clock. */
+	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
+	float Pulse = 1.f;
+
+	/** One step of the easing. Driven by the HUD so tests can step it without Slate. */
+	void Advance(float DeltaSeconds);
+
 protected:
 	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
 		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -221,6 +235,10 @@ public:
 	/** Extra brightness right after a change, decaying. */
 	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
 	float Flash = 0.f;
+
+	/** Breathing of the halo while lit, 0..1, driven by the HUD's clock. */
+	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
+	float Pulse = 1.f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
 	FLinearColor Color = FLinearColor::White;

@@ -19,6 +19,7 @@
 #include "Rendering/DrawElements.h"
 #include "SpaceshipPawn.h"
 #include "Brushes/SlateRoundedBoxBrush.h"
+#include "Misc/Paths.h"
 #include "Styling/CoreStyle.h"
 
 namespace SpaceHudStyle
@@ -33,6 +34,19 @@ namespace SpaceHudStyle
 	const FLinearColor Amber(1.f, 0.72f, 0.2f, 0.95f);
 	const FLinearColor Red(1.f, 0.3f, 0.22f, 0.95f);
 	const FLinearColor NavBlue(0.45f, 0.65f, 1.f, 0.95f);
+
+	/**
+	 * The engine's Roboto typefaces (Regular / Bold / Light / Mono) are ordinary UI faces. The one
+	 * condensed cut it ships, Roboto-BoldCondensed, is not among them, so the HUD asks for the file
+	 * directly; it is packed with the game like the rest of Engine/Content/Slate. Falls back to Bold
+	 * if the file ever moves.
+	 */
+	FSlateFontInfo CondensedFont(float Size)
+	{
+		static const FString Path = FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-BoldCondensed.ttf");
+		static const bool bExists = FPaths::FileExists(Path);
+		return bExists ? FSlateFontInfo(Path, Size) : FCoreStyle::GetDefaultFontStyle("Bold", Size);
+	}
 
 	const FSlateBrush* White()
 	{
@@ -185,6 +199,23 @@ void USpaceHudLamp::SetTarget(bool bLit, const FLinearColor& InColor)
 	Color = InColor;
 }
 
+void USpaceHudGauge::Advance(float DeltaSeconds)
+{
+	// The bar springs after the number instead of tracking it exactly: a fast change reads as motion,
+	// a steady value still settles precisely.
+	const float Rate = 1.f - FMath::Exp(-11.f * DeltaSeconds);
+	Display += (Value - Display) * Rate;
+	DisplayReverse += (ReverseValue - DisplayReverse) * Rate;
+	if (FMath::Abs(Value - Display) < 0.0015f)
+	{
+		Display = Value;
+	}
+	if (FMath::Abs(ReverseValue - DisplayReverse) < 0.0015f)
+	{
+		DisplayReverse = ReverseValue;
+	}
+}
+
 void USpaceHudLamp::Advance(float DeltaSeconds)
 {
 	Intensity += (Target - Intensity) * (1.f - FMath::Exp(-12.f * DeltaSeconds));
@@ -209,11 +240,12 @@ int32 USpaceHudLamp::NativePaint(const FPaintArgs& Args, const FGeometry& Allott
 	// In the reference a switch is a pill around its label (ESP, CPLD, LOCK), lit by its outline and
 	// a faint inner fill, not a square block beside the text.
 	const float Lit = FMath::Clamp(Intensity + 0.6f * Flash * Intensity, 0.f, 1.5f);
+	const float Breath = FMath::Lerp(1.f, Pulse, FMath::Min(Lit, 1.f));
 	const float Radius = FMath::Min(Size.Y * 0.45f, 7.f);
 	const FLinearColor Outline = FMath::Lerp(Faded(Color, 0.35f), Color, FMath::Min(Lit, 1.f));
 	FLinearColor Fill = FMath::Lerp(Backing, FMath::Lerp(Backing, Color, 0.22f), FMath::Min(Lit, 1.f));
 	Fill.A = FMath::Lerp(0.45f, 0.6f, FMath::Min(Lit, 1.f));
-	GlowRounded(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, Radius, Color, Lit * 0.8f);
+	GlowRounded(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, Radius, Color, Lit * 0.8f * Breath);
 	RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, FVector2f::ZeroVector, Size, Radius, Fill, Outline, 1.2f);
 	return LayerId + 2;
 }
@@ -260,15 +292,15 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	}
 
 	// The fill: bright at the leading edge, deeper at the root, with a halo.
-	const float Top = Zero + Span * FMath::Clamp(Value, 0.f, 1.f);
+	const float Top = Zero + Span * FMath::Clamp(Display, 0.f, 1.f);
 	if (Top > Zero + 1.f)
 	{
 		const TPair<FVector2f, FVector2f> Fill = Place(Zero, Top);
-		GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, Fill.Key, Fill.Value, Radius, FillColor, Dim);
+		GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, Fill.Key, Fill.Value, Radius, FillColor, Dim * Pulse);
 		GradientCapsule(OutDrawElements, LayerId + 2, AllottedGeometry, Fill.Key, Fill.Value, Radius,
 			Faded(FillColor, 0.85f * Dim), Faded(FMath::Lerp(FillColor, FLinearColor::White, 0.22f), Dim), !bHorizontal);
 	}
-	const float Bottom = Zero * (1.f - FMath::Clamp(ReverseValue, 0.f, 1.f));
+	const float Bottom = Zero * (1.f - FMath::Clamp(DisplayReverse, 0.f, 1.f));
 	if (Bottom < Zero - 1.f)
 	{
 		const TPair<FVector2f, FVector2f> Fill = Place(Bottom, Zero);
@@ -364,7 +396,8 @@ UTextBlock* USpaceFlightHud::MakeText(const FName Name, float Size, int32 Letter
 	UTextBlock* Text = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), Name);
 	// "Mono" is the engine's DroidSansMono (Slate's built-in typefaces, no asset to import): digits
 	// keep their place as speed changes, and it reads as instrument type rather than UI text.
-	FSlateFontInfo Font = FCoreStyle::GetDefaultFontStyle(Weight, Size);
+	// "Condensed" is the engine's Roboto BoldCondensed loaded from its file; the rest are Slate's own.
+	FSlateFontInfo Font = Weight == FName(TEXT("Condensed")) ? SpaceHudStyle::CondensedFont(Size) : FCoreStyle::GetDefaultFontStyle(Weight, Size);
 	Font.LetterSpacing = LetterSpacing;
 	// A thin dark outline instead of a drop shadow: readable against the sun and a bright planet
 	// from every side.
@@ -467,7 +500,7 @@ void USpaceFlightHud::BuildTree()
 	{
 		const FName Key(LampName);
 		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("LampRow_%s"), LampName)));
-		UTextBlock* Label = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 9.f, 190, TEXT("Bold"));
+		UTextBlock* Label = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 8.f, 170, TEXT("Condensed"));
 		Label->SetText(FText::FromString(LampName));
 		Label->SetJustification(ETextJustify::Center);
 		LampLabels.Add(Key, Label);
@@ -489,11 +522,11 @@ void USpaceFlightHud::BuildTree()
 	AddToVertical(LeftContent, Panelled(TEXT("LampPanel"), LampBox, FMargin(10.f, 8.f, 10.f, 3.f)), HAlign_Right, FMargin(0.f, 0.f, 0.f, 10.f));
 	UVerticalBox* SpeedBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SpeedBox"));
 	AddToVertical(SpeedBox, Sized(TEXT("SpeedGaugeBox"), Gauge(TEXT("SpeedGauge"), false, 10), 11.f, 230.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 10.f));
-	AddToVertical(SpeedBox, MakeText(TEXT("SpeedText"), 21.f, 10, TEXT("Light")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 1.f));
-	AddToVertical(SpeedBox, MakeText(TEXT("LimitText"), 9.f, 120, TEXT("Bold")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
+	AddToVertical(SpeedBox, MakeText(TEXT("SpeedText"), 15.f, 20, TEXT("Light")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 1.f));
+	AddToVertical(SpeedBox, MakeText(TEXT("LimitText"), 7.f, 130, TEXT("Condensed")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
 	UHorizontalBox* GRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("GRow"));
 	AddToHorizontal(GRow, Sized(TEXT("GGaugeBox"), Gauge(TEXT("GGauge"), true, 4), 52.f, 6.f), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
-	AddToHorizontal(GRow, MakeText(TEXT("GText"), 13.f, 20, TEXT("Light")), VAlign_Center, FMargin(0.f));
+	AddToHorizontal(GRow, MakeText(TEXT("GText"), 10.f, 20, TEXT("Light")), VAlign_Center, FMargin(0.f));
 	AddToVertical(SpeedBox, GRow, HAlign_Right, FMargin(0.f));
 	AddToVertical(LeftContent, Panelled(TEXT("SpeedPanel"), SpeedBox, FMargin(12.f, 10.f)), HAlign_Right, FMargin(0.f));
 	AddToHorizontal(Left, LeftContent, VAlign_Center, FMargin(0.f, 0.f, 14.f, 0.f));
@@ -508,11 +541,11 @@ void USpaceFlightHud::BuildTree()
 	auto Column = [&](const TCHAR* Label, const FName GaugeName, const FName TextName, const FMargin& SlotPadding)
 	{
 		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), *GaugeName.ToString())));
-		UTextBlock* Title = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 9.f, 200, TEXT("Bold"));
+		UTextBlock* Title = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 7.f, 200, TEXT("Condensed"));
 		Title->SetText(FText::FromString(Label));
 		AddToVertical(Box, Title, HAlign_Center, FMargin(0.f, 0.f, 0.f, 6.f));
 		AddToVertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 9.f, 180.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
-		AddToVertical(Box, MakeText(TextName, 10.f, 20, TEXT("Light")), HAlign_Center, FMargin(0.f));
+		AddToVertical(Box, MakeText(TextName, 8.f, 20, TEXT("Condensed")), HAlign_Center, FMargin(0.f));
 		AddToHorizontal(Columns, Box, VAlign_Center, SlotPadding);
 	};
 	Column(TEXT("BST"), TEXT("BoostGauge"), TEXT("BoostText"), FMargin(0.f, 0.f, 22.f, 0.f));
@@ -710,7 +743,6 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 void USpaceFlightHud::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
-	Time += InDeltaTime;
 	// The root panel collapses rather than this widget, so the widget keeps ticking and can come back.
 	static const IConsoleVariable* HudMode = IConsoleManager::Get().FindConsoleVariable(TEXT("space.Hud"));
 	ApplyState(MakeState(Cast<ASpaceshipPawn>(GetOwningPlayerPawn()), HudMode ? HudMode->GetInt() : 1));
@@ -746,10 +778,23 @@ USpaceHudLamp* USpaceFlightHud::DebugGetLamp(FName Lamp) const
 
 void USpaceFlightHud::DebugAdvance(float Seconds)
 {
+	// One clock for every animation, advanced here so tests can step it without Slate.
+	Time += Seconds;
+	// A slow, shallow breath: at 0.55 Hz and 8 % it is felt rather than seen, which is the point.
+	const float Breath = 1.f + 0.08f * FMath::Sin(Time * 0.55f * UE_TWO_PI);
 	for (const TPair<FName, TObjectPtr<USpaceHudLamp>>& Pair : Lamps)
 	{
 		if (Pair.Value)
 		{
+			Pair.Value->Pulse = Breath;
+			Pair.Value->Advance(Seconds);
+		}
+	}
+	for (const TPair<FName, TObjectPtr<USpaceHudGauge>>& Pair : Gauges)
+	{
+		if (Pair.Value)
+		{
+			Pair.Value->Pulse = Breath;
 			Pair.Value->Advance(Seconds);
 		}
 	}

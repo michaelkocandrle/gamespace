@@ -86,10 +86,23 @@ check("speed number in the thin face, outlined",
       "Light" in str(speed_font.get_editor_property("typeface_font_name"))
       and speed_font.get_editor_property("outline_settings").get_editor_property("outline_size") >= 1,
       "%s" % speed_font.get_editor_property("typeface_font_name"))
-check("labels in small wide-spaced caps", "Bold" in str(label_font.get_editor_property("typeface_font_name"))
-      and label_font.get_editor_property("letter_spacing") >= 150 and label_font.get_editor_property("size") <= 10,
-      "%s, spacing %d, size %d" % (label_font.get_editor_property("typeface_font_name"),
-                                   label_font.get_editor_property("letter_spacing"), label_font.get_editor_property("size")))
+# Labels use the engine's condensed Roboto, which Slate's typefaces do not expose, so the HUD loads
+# the .ttf by path: a path font has no typeface name, while the fallback (Bold) would have one.
+check("labels in the condensed face, small and wide-spaced", str(label_font.get_editor_property("typeface_font_name")) in ("", "None")
+      and label_font.get_editor_property("letter_spacing") >= 150 and label_font.get_editor_property("size") <= 8,
+      "typeface %r, spacing %d, size %d" % (str(label_font.get_editor_property("typeface_font_name")),
+                                            label_font.get_editor_property("letter_spacing"), label_font.get_editor_property("size")))
+check("numbers are small too (the reference keeps type quiet)", speed_font.get_editor_property("size") <= 16,
+      "%d" % speed_font.get_editor_property("size"))
+
+# The bar springs after the value instead of snapping to it, and the halo breathes.
+gauge = hud.debug_get_gauge("SpeedGauge")
+hud.debug_advance(2.0)
+settled = gauge.get_editor_property("display")
+pulse_a = gauge.get_editor_property("pulse")
+hud.debug_advance(0.9)
+check("the halo breathes", abs(pulse_a - gauge.get_editor_property("pulse")) > 0.02 and 0.85 < gauge.get_editor_property("pulse") < 1.15,
+      "%.3f -> %.3f" % (pulse_a, gauge.get_editor_property("pulse")))
 
 state = unreal.SpaceFlightHud.make_state(None, 1)
 check("no ship: HUD hidden", not state.visible)
@@ -112,6 +125,10 @@ try:
     run(ship, 10.0, lin=(1, 0, 0))
     state = show(hud, ship)
     gauge = hud.debug_get_gauge("SpeedGauge")
+    hud.debug_advance(0.05)
+    check("the bar lags behind a jump in speed, then catches up", 0.0 < gauge.get_editor_property("display") < 0.9,
+          "display %.2f of value %.2f" % (gauge.get_editor_property("display"), gauge.get_editor_property("value")))
+    hud.debug_advance(2.0)
     check("full speed: gauge full, limiter mark at the top", abs(gauge.get_editor_property("value") - 1.0) < 0.01
           and abs(gauge.get_editor_property("marker") - 1.0) < 1e-4, "value %.3f marker %.3f" % (gauge.get_editor_property("value"), gauge.get_editor_property("marker")))
     check("speed number under the gauge", hud.debug_get_text("SpeedText") == "200 M/S", hud.debug_get_text("SpeedText"))
