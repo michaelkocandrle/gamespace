@@ -82,7 +82,7 @@ Obsah k 17. 9. 2026:
 | Soubor | O čem je |
 | --- | --- |
 | `SC_ThrottleHUD_VisualReference.md` | Rozbor letového HUD ze Star Citizen: svislý pruh rychlosti vůči limitu s barevným kódováním, G-metr pod ním, malé stavové indikátory (CPLD, ESP, LOCK / VTOL, GEAR, GSAF), symetrické rozložení kolem středu, tenké cyan linky místo plných panelů, pruh paliva. Doporučuje UMG místo Canvas. |
-| `Screenshot 2026-09-17 180903.png` | Screenshot kokpitu SC, ke kterému se dokument vztahuje (v dokumentu je uvedený pod jménem `SC_throttle_hud_reference.png`). |
+| `SC_throttle_hud_reference.png` | Screenshot kokpitu SC, ke kterému se dokument vztahuje. |
 
 Pozor:
 - Úseky „Náš stav“ v referencích byly psané před posledními kroky a místy jsou zastaralé. Náš
