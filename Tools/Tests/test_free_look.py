@@ -77,8 +77,12 @@ try:
     peak_pitch = max(c[1] for c in cam[31:91])
     low_yaw = min(c[0] for c in cam[91:131])
     low_pitch = min(c[1] for c in cam[91:131])
-    check("yaw limited to +-%.0f" % max_yaw, peak_yaw <= max_yaw + 1e-3 and low_yaw >= -max_yaw - 1e-3 and peak_yaw > max_yaw - 1.0,
-          "range %.1f .. %.1f" % (low_yaw, peak_yaw))
+    if max_yaw >= 180.0:
+        # All the way round (the default): the chase camera orbits the ship.
+        check("yaw unlimited", peak_yaw > 180.0, "range %.1f .. %.1f" % (low_yaw, peak_yaw))
+    else:
+        check("yaw limited to +-%.0f" % max_yaw, peak_yaw <= max_yaw + 1e-3 and low_yaw >= -max_yaw - 1e-3 and peak_yaw > max_yaw - 1.0,
+              "range %.1f .. %.1f" % (low_yaw, peak_yaw))
     check("pitch limited to +-%.0f" % max_pitch, peak_pitch <= max_pitch + 1e-3 and low_pitch >= -max_pitch - 1e-3 and peak_pitch > max_pitch - 1.0,
           "range %.1f .. %.1f" % (low_pitch, peak_pitch))
     first_step = max(abs(cam[31][0] - cam[30][0]), abs(cam[31][1] - cam[30][1]))

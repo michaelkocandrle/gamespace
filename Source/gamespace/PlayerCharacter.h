@@ -68,6 +68,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Player")
 	FFootIKState GetFootIKState() const;
 
+	/** How often the character was put back on top of the terrain (fallen through, or stuck). */
+	UFUNCTION(BlueprintPure, Category = "Player")
+	int32 GetTerrainRecoveryCount() const { return TerrainRecoveries; }
+
+	/**
+	 * The safety net on its own: if the capsule is more than FallThroughToleranceCm under the
+	 * terrain (the analytic height, not the collision mesh), or has been stuck falling without
+	 * moving, lifts it back on top. Tick calls this; returns true when it moved the character.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	bool RecoverFromTerrain(float DeltaSeconds);
+
 	// --- Pure helpers, exposed for tests -------------------------------------------------------
 
 	/** Character Movement's GravityScale for a gravity in cm/s^2 in a world with WorldGravityZ. */
@@ -156,6 +168,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "50.0"))
 	float BoardingRangeCm = 400.f;
 
+	/**
+	 * How far the bottom of the capsule may be under the terrain surface before it counts as
+	 * fallen through, cm. Collision tiles follow the height field to a few cm; this leaves room.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Movement", meta = (ClampMin = "10.0"))
+	float FallThroughToleranceCm = 60.f;
+
+	/** Falling this long without moving means stuck (on a collision seam, inside something). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Movement", meta = (ClampMin = "0.1", Units = "s"))
+	float StuckFallingSeconds = 0.6f;
+
 	/** No boarding for this long after the character appeared (it spawns next to the ship). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "0.0", Units = "s"))
 	float BoardingCooldownSeconds = 0.75f;
@@ -185,4 +208,7 @@ private:
 
 	FVector2D MoveInput = FVector2D::ZeroVector;
 	bool bSprintHeld = false;
+
+	int32 TerrainRecoveries = 0;
+	float StuckSeconds = 0.f;
 };

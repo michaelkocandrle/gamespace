@@ -149,6 +149,43 @@ void APlayerCharacter::UpdateGravity()
 	GravityFrame = (FQuat::FindBetweenNormals(GravityFrame.GetUpVector(), Environment.Up) * GravityFrame).GetNormalized();
 }
 
+bool APlayerCharacter::RecoverFromTerrain(float DeltaSeconds)
+{
+	if (!bHasEnvironment)
+	{
+		UpdateGravity();  // not ticked yet (just spawned, or a test)
+	}
+	if (!bHasEnvironment)
+	{
+		return false;
+	}
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	const float HalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	// Bottom of the capsule above the terrain height field; negative is underground.
+	const double Clearance = Environment.AltitudeAboveTerrainCm - HalfHeight;
+
+	const bool bFallenThrough = Clearance < -FallThroughToleranceCm;
+	// Falling but not getting anywhere, close to the ground: wedged on a seam or in geometry.
+	const bool bStalled = Movement->IsFalling() && Movement->Velocity.SizeSquared() < FMath::Square(5.0) && Clearance < 100.0;
+	StuckSeconds = bStalled ? StuckSeconds + DeltaSeconds : 0.f;
+	if (!bFallenThrough && StuckSeconds < StuckFallingSeconds)
+	{
+		return false;
+	}
+
+	const FVector Up = Environment.Up;
+	const double Lift = FMath::Max(0.0, -Clearance) + 40.0;
+	SetActorLocation(GetActorLocation() + Up * Lift, false, nullptr, ETeleportType::TeleportPhysics);
+	Movement->Velocity = FVector::ZeroVector;
+	Movement->SetMovementMode(MOVE_Falling);
+	StuckSeconds = 0.f;
+	++TerrainRecoveries;
+	UpdateGravity();  // the environment at the new location
+	UE_LOG(LogPlayerCharacter, Warning, TEXT("%s: %s, lifted %.0f cm back onto the terrain (recovery %d)"), *GetName(),
+		bFallenThrough ? TEXT("fell through the ground") : TEXT("stuck while falling"), Lift, TerrainRecoveries);
+	return true;
+}
+
 void APlayerCharacter::FaceDirection(const FVector& Forward)
 {
 	const FVector Up = GravityFrame.GetUpVector();
@@ -178,6 +215,7 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	UpdateGravity();
+	RecoverFromTerrain(DeltaSeconds);
 
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	Movement->MaxWalkSpeed = bSprintHeld ? SprintSpeed : WalkSpeed;

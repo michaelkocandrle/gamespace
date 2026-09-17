@@ -22,6 +22,9 @@ class UStaticMeshComponent;
  * Inside a planet's atmosphere the dome blends from stars to a sky gradient: every frame it
  * samples the environment of the body nearest to the camera and passes AtmosphereAmount,
  * PlanetUp and the sky colours to the material.
+ *
+ * It also points the material's sun disc at the level's first directional light, and scales
+ * star twinkle and nebula brightness (stronger twinkle in air, where real stars scintillate).
  */
 UCLASS()
 class GAMESPACE_API ASkyDome : public AActor
@@ -44,7 +47,28 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "1.0", Units = "km"))
 	float DomeRadiusKm = 1000.f;
 
+	/** Star twinkle in empty space, 0..1 of a star's brightness... */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float SpaceTwinkle = 0.12f;
+
+	/** ...and in full atmosphere. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float AtmosphereTwinkle = 0.6f;
+
+	/** Multiplies the nebula brightness baked into the material. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "0.0"))
+	float NebulaScale = 1.f;
+
+	/** Multiplies the sun disc and glow brightness baked into the material. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "0.0"))
+	float SunScale = 1.f;
+
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> SkyMaterial;
+
+	TWeakObjectPtr<class ADirectionalLight> Sun;
+	float NebulaBase = -1.f;
+	float SunDiscBase = -1.f;
+	float SunGlowBase = -1.f;
 };

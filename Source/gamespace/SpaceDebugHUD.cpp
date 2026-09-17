@@ -136,7 +136,10 @@ namespace
 		case ELandingBlocker::TooSteep: Reason = TEXT("TOO STEEP"); break;
 		case ELandingBlocker::TooFast: Reason = TEXT("too fast"); break;
 		case ELandingBlocker::Tilted: Reason = TEXT("level the ship"); break;
-		case ELandingBlocker::EngineInput: Reason = TEXT("engines on"); break;
+		case ELandingBlocker::EngineInput:
+			Reason = Ship.GetCruiseState() != ECruiseState::Off ? TEXT("cruise on")
+				: (Ship.IsFlightAssistOn() && FMath::Abs(Ship.GetThrottleSetting()) > 0.05f) ? TEXT("throttle to 0 (X)") : TEXT("engines on");
+			break;
 		case ELandingBlocker::TakeoffCooldown: Reason = TEXT("taking off"); break;
 		default: break;
 		}
@@ -179,6 +182,46 @@ namespace
 		return FString::Printf(TEXT("%s   %s   ETA %s"),
 			*Nearest->GetDisplayName().ToString(), *FormatDistance(NearestDistance), *Eta);
 	}
+
+	FString FormatSpeed(double CmPerSecond)
+	{
+		const double Metres = CmPerSecond / 100.0;
+		return Metres < 1000.0 ? FString::Printf(TEXT("%.0f m/s"), Metres) : FString::Printf(TEXT("%.1f km/s"), Metres / 1000.0);
+	}
+
+	/** "DRIVE" readout: cruise drive state, or why it cannot engage. */
+	FString DescribeCruise(const ASpaceshipPawn& Ship, FLinearColor& OutColor)
+	{
+		const TCHAR* Reason = Ship.GetCruiseBlocker() == ECruiseBlocker::TooLow ? TEXT("too low")
+			: Ship.GetCruiseBlocker() == ECruiseBlocker::Landed ? TEXT("landed") : TEXT("off");
+		switch (Ship.GetCruiseState())
+		{
+		case ECruiseState::Spooling:
+			OutColor = FLinearColor(0.55f, 0.75f, 1.f);
+			return FString::Printf(TEXT("CRUISE CHARGING %3.0f %%   (J cancels)"), Ship.GetCruiseSpoolProgress() * 100.f);
+		case ECruiseState::Active:
+			OutColor = FLinearColor(0.4f, 0.85f, 1.f);
+			return FString::Printf(TEXT("CRUISE   limit %s here   throttle sets speed   (J drops out)"), *FormatSpeed(Ship.GetCruiseSpeedLimit()));
+		case ECruiseState::Dropping:
+			OutColor = FLinearColor(1.f, 0.8f, 0.3f);
+			return FString::Printf(TEXT("CRUISE DROP (%s)"), Reason);
+		default:
+			break;
+		}
+		if (Ship.GetCruiseMessageSeconds() > 0.f && Ship.GetCruiseBlocker() == ECruiseBlocker::TooLow)
+		{
+			OutColor = FLinearColor(1.f, 0.55f, 0.25f);
+			return TEXT("cruise needs more altitude above the ground");
+		}
+		OutColor = FLinearColor(0.7f, 0.7f, 0.7f);
+		return TEXT("J cruise drive   V flight assist   X all stop   wheel zoom");
+	}
+
+	FString EnergyBar(float Fraction, int32 Cells = 10)
+	{
+		const int32 Full = FMath::Clamp(FMath::RoundToInt32(Fraction * Cells), 0, Cells);
+		return FString::ChrN(Full, TEXT('|')) + FString::ChrN(Cells - Full, TEXT('.'));
+	}
 }
 
 namespace
@@ -202,10 +245,20 @@ namespace
 		const FString Landing = DescribeLanding(Ship, LandingColor);
 
 		Lines.Add({ TEXT("MODE"), Ship.CanExit() ? TEXT("IN SHIP   [F] get out") : TEXT("IN SHIP"), ModeColor });
-		Lines.Add({ TEXT("SPEED"), FString::Printf(TEXT("%6.1f m/s   %5.0f km/h"), SpeedMetres, SpeedMetres * 3.6f), FLinearColor::White });
-		Lines.Add({ TEXT("THROTTLE"), FString::Printf(TEXT("%+4.0f %%"), Ship.GetThrottle() * 100.f), FLinearColor::White });
-		Lines.Add({ TEXT("BOOST"), Ship.IsBoosting() ? TEXT("ON") : TEXT("off"),
-			Ship.IsBoosting() ? FLinearColor(1.f, 0.55f, 0.1f) : FLinearColor(0.6f, 0.6f, 0.6f) });
+		Lines.Add({ TEXT("SPEED"), SpeedMetres < 1000.f
+			? FString::Printf(TEXT("%6.1f m/s   %5.0f km/h"), SpeedMetres, SpeedMetres * 3.6f)
+			: FString::Printf(TEXT("%6.2f km/s   %5.0f km/h"), SpeedMetres / 1000.f, SpeedMetres * 3.6f), FLinearColor::White });
+
+		FString Throttle = Ship.IsFlightAssistOn()
+			? FString::Printf(TEXT("%+4.0f %%   FA ON"), Ship.GetThrottleSetting() * 100.f)
+			: FString::Printf(TEXT("%+4.0f %%   FA OFF (drift)"), Ship.GetThrottle() * 100.f);
+		const TCHAR* BoostState = Ship.IsBoosting() ? TEXT("BOOST") : Ship.IsBoostLocked() ? TEXT("recharging") : TEXT("boost");
+		Throttle += FString::Printf(TEXT("   %s [%s]"), BoostState, *EnergyBar(Ship.GetBoostEnergy()));
+		Lines.Add({ TEXT("THROTTLE"), Throttle, Ship.IsBoosting() ? FLinearColor(1.f, 0.55f, 0.1f)
+			: Ship.IsFlightAssistOn() ? FLinearColor::White : FLinearColor(1.f, 0.8f, 0.45f) });
+		FLinearColor CruiseColor;
+		const FString Cruise = DescribeCruise(Ship, CruiseColor);
+		Lines.Add({ TEXT("DRIVE"), Cruise, CruiseColor });
 		if (Ship.IsFreeLooking())
 		{
 			const FVector2D Angles = Ship.GetFreeLookAngles();
@@ -279,6 +332,10 @@ namespace
 			: FString(TEXT("off (not standing on planet terrain)")),
 			IK.bClamped ? FLinearColor(1.f, 0.6f, 0.2f) : FLinearColor(0.8f, 0.8f, 0.8f) });
 		Lines.Add({ TEXT("TARGET"), DescribeNearestBody(World, Character.GetActorLocation(), Velocity), FLinearColor(0.6f, 1.f, 0.7f) });
+		if (Character.GetTerrainRecoveryCount() > 0)
+		{
+			Lines.Add({ TEXT("RECOVER"), FString::Printf(TEXT("put back on the terrain %d x (see log)"), Character.GetTerrainRecoveryCount()), FLinearColor(1.f, 0.6f, 0.2f) });
+		}
 	}
 }
 
@@ -320,7 +377,7 @@ void ASpaceDebugHUD::DrawHUD()
 	if (Mode == 1)
 	{
 		// Compact: what matters while playing; the rest is one H press away.
-		static const TSet<FString> Compact = { TEXT("MODE"), TEXT("SPEED"), TEXT("FLIGHT"), TEXT("LANDING"), TEXT("MOVE") };
+		static const TSet<FString> Compact = { TEXT("MODE"), TEXT("SPEED"), TEXT("THROTTLE"), TEXT("DRIVE"), TEXT("FLIGHT"), TEXT("LANDING"), TEXT("MOVE") };
 		const bool bFreeLook = Cast<ASpaceshipPawn>(Pawn) && Cast<ASpaceshipPawn>(Pawn)->IsFreeLooking();
 		Lines.RemoveAll([bFreeLook](const FLine& Line)
 		{
@@ -359,11 +416,30 @@ void ASpaceDebugHUD::DrawHUD()
 		}
 	}
 
-	// Big and central while free looking: the mouse is not doing what it usually does.
+	// Big and central: the mouse is not doing what it usually does, or the drive is doing something.
 	const ASpaceshipPawn* FreeLookShip = Cast<ASpaceshipPawn>(Pawn);
-	if (FreeLookShip && FreeLookShip->IsFreeLooking())
+	FString Label;
+	FLinearColor LabelColor(1.f, 0.65f, 0.15f);
+	if (FreeLookShip && FreeLookShip->GetCruiseState() == ECruiseState::Spooling)
 	{
-		const FString Label = TEXT("FREE LOOK");
+		Label = FString::Printf(TEXT("CRUISE CHARGING %3.0f %%"), FreeLookShip->GetCruiseSpoolProgress() * 100.f);
+		LabelColor = FLinearColor(0.55f, 0.8f, 1.f);
+	}
+	else if (FreeLookShip && FreeLookShip->GetCruiseState() == ECruiseState::Dropping && FreeLookShip->GetCruiseBlocker() == ECruiseBlocker::TooLow)
+	{
+		Label = TEXT("CRUISE DROP - TOO CLOSE TO THE GROUND");
+	}
+	else if (FreeLookShip && FreeLookShip->GetCruiseState() == ECruiseState::Off && FreeLookShip->GetCruiseMessageSeconds() > 0.f
+		&& FreeLookShip->GetCruiseBlocker() == ECruiseBlocker::TooLow)
+	{
+		Label = TEXT("CRUISE: TOO CLOSE TO THE GROUND");
+	}
+	else if (FreeLookShip && FreeLookShip->IsFreeLooking())
+	{
+		Label = TEXT("FREE LOOK");
+	}
+	if (!Label.IsEmpty())
+	{
 		const float LabelScale = Scale * 1.6f;
 		float Width = 0.f;
 		float Height = 0.f;
@@ -371,6 +447,6 @@ void ASpaceDebugHUD::DrawHUD()
 		const float X = (Canvas->ClipX - Width) * 0.5f;
 		const float LabelY = Canvas->ClipY * 0.12f;
 		DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.45f), X - 14.f, LabelY - 6.f, Width + 28.f, Height + 12.f);
-		DrawText(Label, FLinearColor(1.f, 0.65f, 0.15f), X, LabelY, Font, LabelScale);
+		DrawText(Label, LabelColor, X, LabelY, Font, LabelScale);
 	}
 }

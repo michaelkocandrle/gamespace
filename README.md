@@ -39,12 +39,13 @@ git lfs install
 
 | Component     | Purpose                                                         |
 | ------------- | --------------------------------------------------------------- |
-| `HullCollision` | Root. Box 200 x 100 x 35 cm, `Pawn` profile - the ship's only collision. Unscaled, so the cameras do not inherit the hull's scale |
-| `Hull`        | `/Engine/BasicShapes/Cube` stretched to 2.0 x 1.0 x 0.35, visual only |
-| `CameraBoom`  | 900 cm spring arm, mild lag, collision test on: pulls the camera in rather than letting it sink into an asteroid |
+| `HullCollision` | Root. Box (200 x 100 x 35 cm on the placeholder, sized to the mesh by the ship import), `Pawn` profile: what the ship's own movement sweeps. **Ignores pawns**: it encloses the whole ship including the air under the wings, and a pilot getting out inside it got stuck or pushed through the ground. Unscaled, so the cameras do not inherit the hull's scale |
+| `Hull`        | The ship mesh (placeholder: `/Engine/BasicShapes/Cube` stretched to 2.0 x 1.0 x 0.35). Query-only collision from its simple collision (the UCX hulls from Blender) blocking pawns, cameras and visibility: characters walk around the real shape. The ship's own movement never sees it |
+| `CameraBoom`  | 900 cm spring arm (Vanguard: 14.5 m), mild lag, collision test on: pulls the camera in rather than letting it sink into an asteroid. The mouse wheel scales it 0.45x-3x |
 | `ChaseCamera` | Third-person camera                                              |
-| `CockpitCamera` | Nose view at (90, 0, 15), FOV 90, inactive until toggled; hides the hull from the player's own view |
-| `EngineAudio` | Engine loop, not spatialised, started and stopped from `Tick` |
+| `CockpitCamera` | Pilot's eye (Vanguard: 345, 0, 103 in front of the seat, under the canopy), FOV 90, inactive until toggled; the wheel zooms it to `CockpitZoomFov` 40. `bHideHullInCockpit` hides the hull from the pilot, only for the placeholder cube |
+| `EngineAudio` | Thruster loop, not spatialised. Hum, boost and cruise layers are created at runtime next to it |
+| `SpaceDust`   | `USpaceDustComponent`: 400 specks in a 70 m box around the camera that stretch into streaks with speed |
 
 ### Flight model
 
@@ -64,7 +65,7 @@ predictable and cheap to tune.
     with the engines off. `ComputeEnvironmentAcceleration` is the exact formula.
   - **Entry heat** (`Spaceship|Entry`): density x (speed / 100 m/s)^3, from `HeatOnset` to
     `HeatFull`, smoothed; shakes the camera (`HeatShakeCm`) and shows on the HUD.
-- `MaxSpeed` is a hard cap.
+- `MaxSpeed` is a hard cap (times `BoostMultiplier` while boosting); cruise has its own limit.
 - Pitch, yaw and roll drive a target rate that `AngularVelocity` eases towards over
   `AngularResponsiveness`, then apply as a *local* rotation. Local rotation is what makes this
   6DOF rather than an aircraft glued to a horizon, and it avoids gimbal lock at the poles.
@@ -78,25 +79,61 @@ predictable and cheap to tune.
   independent of frame rate; turning pixels-per-frame straight into a turn rate made the ship
   turn half as fast at 120 FPS as at 60. The turn rate itself is capped by `PitchRate` (100),
   `YawRate` (75) and `RollRate` (150) deg/s.
-- **Engine sound** follows the controls, not the speed: main thrust counts fully, strafe and lift
-  60 %, roll 30 %. Volume, pitch (narrow range, 0.8-1.05, +0.15 boost) and a low-pass filter
-  (400 Hz at light load up to 2 kHz at full) spool at `EngineSpoolRate`, and the sound is stopped
-  outright below 1 % load, so a ship at rest is silent. The sound is a procedural placeholder:
-  low-pass filtered noise with a soft narrow-band hum, no pure tones and nothing above ~1 kHz,
-  in a seamless 8 s loop. An earlier version with sine partials and hiss sounded like a vacuum
-  cleaner - its perceived loudness centred at 1.3 kHz, where the ear is most sensitive. Rebuilt with
-  `python Tools/Assets/generate_engine_sound.py Intermediate/GeneratedAssets/engine_loop.wav`
-  and then `.\Tools\run_editor_python.ps1 Tools\Assets\build_ship_audio.py`. A real recording
-  can be reimported onto `/Game/Ships/Audio/SW_EngineLoop`.
-
-- **Speed**: in space `MaxSpeed` (120 m/s, 300 m/s with boost) is the only limit; in the
-  atmosphere drag sets cruise speed (see above).
-- **Boost** (`BoostMultiplier`, default 2.5) multiplies forward thrust and the speed cap while
-  held. Reverse, strafe and lift are unaffected. On release,
-  speed above the normal cap bleeds off at `OverspeedDecay` instead of snapping down.
+- **Speed**: in space `MaxSpeed` (Vanguard 120 m/s, ~264 m/s with boost) is the only limit; in the
+  atmosphere drag sets top speed (see above). Engine sound, boost and cruise: see the next section.
 
 All tuning values are `EditAnywhere` under the `Spaceship|Flight` and `Spaceship|Handling`
 categories.
+
+### Flight assist, throttle, boost and cruise drive
+
+- **Flight assist on** (default, `V` toggles, HUD `FA ON`): `W` / `S` move a **throttle lever**
+  (`ThrottleRate` 0.8 per s) that stays where it is left, from -35 % (`MaxReverseThrottle`) to
+  100 %. The flight computer then chases a target velocity: lever x `MaxSpeed` along the nose,
+  `StrafeSpeedLimit` / `LiftSpeedLimit` (30 m/s) sideways and up while `A` `D` `Space` `Ctrl` are
+  held, zero otherwise. It feeds forward drag and gravity (so the ship hovers in the atmosphere)
+  and closes the rest at `FlightAssistResponse` (2 per s). Every thruster axis keeps its force
+  limit (`ThrustAcceleration`, reverse `ReverseThrustFraction` 65 %, `StrafeAcceleration`,
+  `LiftAcceleration`), so hard turns still slide. Pulling the lever back stops at a **detent at
+  0** until `S` is pressed again. `X` pulls it to 0 at once (all stop).
+- **Near the ground**: the commanded descent speed shrinks to `LandingDescentSpeed` (2.5 m/s) by
+  20 m above the terrain, and with the lever at 0 and the hull under ~4 m up, the computer holds
+  only 75 % of gravity, so the ship settles onto its gear. An open lever counts as engines on for
+  landing (HUD `throttle to 0 (X)`); landing closes it.
+- **Flight assist off** (HUD `FA OFF (drift)`): the keys fire the thrusters directly while held,
+  nothing brakes or holds altitude. Newtonian drift, flip-and-burn. Switching back on picks the
+  lever up at the current forward speed.
+- **Boost** (hold `Shift`): forward thrust and top speed x `BoostMultiplier`, with flight assist
+  straight to boosted top speed. Lasts `BoostDurationSeconds` (4.5 s) of energy, recharges in
+  `BoostRechargeSeconds` (7 s) after `BoostRechargeDelaySeconds` (1 s); run dry, it stays off
+  until `BoostUnlockFraction` (30 %) is back. HUD bar on the THROTTLE line.
+- **Cruise drive** (`J`): charges for `CruiseSpoolSeconds` (2.5 s, camera shake builds, charging
+  sound), then flies along the nose at lever x speed limit (a lever under 25 % is raised to 75 %).
+  The limit is the altitude above the terrain x `CruiseAltitudeRate` (0.4 per s), lowered in thick
+  air (`CruiseAtmosphereSlowdown`), between 250 m/s and `CruiseMaxSpeed` 6 km/s (6 km/s far from
+  bodies). Flying at the ground therefore slows by itself (the altitude shrinks ~33 % per second)
+  and the speed never exceeds the limit. Turn rates drop to `CruiseTurnScale` (45 %). It refuses
+  to engage below `CruiseMinAltitudeM` (2 km) and drops out below `CruiseDropAltitudeM` (1.2 km),
+  on a hit, or on `J`; the drop bleeds speed down to boosted top speed in ~1.5 s. From the start
+  point, Veyra's atmosphere is ~10 s away instead of over a minute.
+- **Feel**: the view widens with boost (+7 degrees) and cruise (+16), the camera shakes with
+  boost, charging, entry heat and a short jolt on boost ignition, engage and drop. Thruster
+  materials (slots named `*Emissive*`) glow with engine load, much brighter in boost and cruise;
+  `*NavWhite*` slots double-flash like anti-collision strobes. Space dust streaks show direction
+  and speed.
+- **Sound** follows what the thrusters really do (`GetEngineDemand`: braking and hovering are
+  heard, a steady cruise through empty space is quiet): a reactor hum while piloted, the thruster
+  roar, an afterburner layer while boosting, a cruise drone, plus one-shots for boost ignition,
+  cruise charge, engage and drop. All procedural placeholders from
+  `python Tools/Assets/generate_ship_sounds.py Intermediate/GeneratedAssets`, imported by
+  `.\Tools\run_editor_python.ps1 Tools\Assets\build_ship_audio.py` to `/Game/Ships/Audio/SW_*`;
+  reimport real recordings onto the same assets. The generator prints each file's band balance:
+  the first engine loop sounded like a vacuum cleaner because of its 1-4 kHz energy, so nothing
+  here has more than a few percent above 2 kHz.
+
+Headless: `Tools/Tests/test_flight_modes.py` (lever, detent, all stop, drift cancelling, FA off,
+boost energy, cruise engage / limit / drop in deep space and over Veyra, free look all round,
+exit candidates and collision setup, character recovery, scene extras).
 
 ### Landing (L5)
 
@@ -130,16 +167,26 @@ of 15 degrees; 87 % of the surface is landable, 4.5 % is steeper than 30 degrees
 | Roll         | `E` / `Q`                  | Shoulder buttons     |
 | Pitch / yaw  | Mouse                      | Right stick          |
 | Boost (hold) | `Left Shift`               | -                    |
+| Flight assist | `V` (on / off)            | -                    |
+| All stop     | `X` (throttle lever to 0)  | -                    |
+| Cruise drive | `J` (charge / cancel / drop out) | -              |
 | Camera       | `C` (chase / cockpit)      | -                    |
+| Zoom         | Mouse wheel (chase distance, cockpit zoom) | -    |
 | Get out      | `F` (only when LANDED)     | -                    |
 | Free look    | hold right mouse button    | -                    |
+| HUD          | `H` (compact / full / off) | -                    |
+
+`V`, `J`, `X` and the wheel are `IA_FlightAssist`, `IA_CruiseDrive`, `IA_AllStop` and
+`IA_CameraZoom`, appended to `IMC_Spaceship` by `Tools/Assets/add_flight_modes_input.py`
+(without it the ship maps the same keys at runtime).
 
 **Free look** (Elite-style head look): while the right mouse button is held, the ship keeps its
 heading (pitch/yaw rotation stops at once; roll keys and the flight path carry on) and the mouse
 turns only the camera - the chase boom swings around the ship, the cockpit camera turns like a
-head. `FreeLookSensitivity` 0.36 deg per mouse count, limits `FreeLookMaxYawDeg` 110 and
-`FreeLookMaxPitchDeg` 70, smoothed at `FreeLookFollowRate`. On release the camera eases back
-(`FreeLookReturnRate` 6: ~95 % in 0.5 s) while steering works again immediately, from a centred
+head. `FreeLookSensitivity` 0.36 deg per mouse count, `FreeLookMaxYawDeg` 180 (all the way
+round, to look at the whole ship) and `FreeLookMaxPitchDeg` 85, smoothed at `FreeLookFollowRate`.
+On release the camera eases back the shorter way (`FreeLookReturnRate` 6: ~95 % in 0.5 s) while
+steering works again immediately, from a centred
 stick. The HUD shows FREE LOOK in the middle of the screen and the camera angles on the CAMERA
 line. Input: `IA_FreeLook` (bool, held), added to `IMC_Spaceship` by
 `Tools/Assets/add_free_look_input.py`; headless test `Tools/Tests/test_free_look.py`.
@@ -222,10 +269,17 @@ the ship's mouse context never swallows the character's mouse look.
   ground is read from the planet's height field (what the visible mesh is built from), the pelvis
   drops up to 40 cm for the lower foot, both legs get two-bone IK in their animated bend plane,
   feet tilt with the slope up to 30 degrees. Off when not standing on planet terrain.
-- **Ship exit / boarding**: on a LANDED ship, F spawns the character at the hull mesh socket
-  `Exit` (`SOCKET_Exit` from Blender) or, without one, 80 cm right of the hull, placed on the
-  terrain, and possesses it. F within `BoardingRangeCm` (4 m from the hull box) of a landed ship
+- **Ship exit / boarding**: on a LANDED ship, F spawns the character at the first free spot of:
+  the hull mesh socket `Exit` (`SOCKET_Exit` from Blender), then right, left, behind and in front
+  of the hull mesh bounds at 0.8, 3.8 and 8.8 m past them. Each spot is put on the terrain and
+  tested with a capsule overlap against everything that blocks pawns, the ship's collision hulls
+  included. The Vanguard's socket is 80 cm clear of its UCX hulls. F within `BoardingRangeCm` (4 m from the hull box) of a landed ship
   possesses the ship again and removes the character (0.75 s cooldown after getting out).
+- **Safety net** (`RecoverFromTerrain`, every tick): a capsule more than `FallThroughToleranceCm`
+  (60) under the terrain height field, or falling without moving for `StuckFallingSeconds`
+  (0.6 s) close to the ground, is lifted back on top and logged (HUD `RECOVER`). The height field
+  is exact where the collision tiles are an approximation, so this catches tunnelling through a
+  tile and wedging on a seam.
 - **HUD**: `MODE` shows IN SHIP / ON FOOT with the F prompt; on foot also MOVE, GRAVITY, FOOT IK.
 
 Headless: `Tools/Tests/test_character_l6.py` (assets and input, gravity frame transport, exit
@@ -318,13 +372,15 @@ Any level without a World Settings override therefore spawns a flyable ship at i
 
 ## SpaceDebugHUD
 
-`AHUD` subclass set as `HUDClass` on `SpaceGameMode`. Draws speed (m/s and km/h), throttle
-(signed %, the raw `IA_Thrust` value), boost state and active camera as plain canvas text in
-the top-left corner. A tuning aid, not UMG - replace it when a real HUD exists.
+`AHUD` subclass set as `HUDClass` on `SpaceGameMode`. Draws speed (m/s or km/s and km/h), the
+throttle lever with FA ON / OFF and the boost energy bar, the cruise drive state (`DRIVE`) and
+active camera as plain canvas text in the top-left corner. Cruise charging, a drop close to the
+ground and free look also show big in the middle of the screen. A tuning aid, not UMG - replace
+it when a real HUD exists.
 
 `H` (`IA_ToggleHud`, appended to `IMC_Spaceship` and `IMC_Character` by
 `Tools/Assets/add_hud_toggle_input.py`) cycles the CVar `space.Hud`: `1` compact (default: mode,
-speed, flight, landing, move), `2` full (every line below), `0` hidden. Position and text size
+speed, throttle, drive, flight, landing, move), `2` full (every line below), `0` hidden. Position and text size
 scale with the viewport height (1.0 at 1080 p), so the panel stays in the corner at any
 resolution.
 
@@ -354,7 +410,7 @@ long the last one took.
 (including `ACelestialBody`) are standard double-precision transforms.
 
 **Origin rebasing** (`USpaceOriginRebasingSubsystem`) still moves the world origin to the ship
-once it is `RebaseDistanceKm` (default 10) away, through the engine's own
+once it is `RebaseDistanceKm` (default 40; cruise drive at 6 km/s would rebase every 1.7 s at 10) away, through the engine's own
 `UWorld::RequestNewWorldOrigin`. It keeps coordinates small for what remains single precision:
 mesh vertices in component space, GPU particles, material world-position maths. Settings are
 on `ASpaceGameMode` (`Space|Origin Rebasing`); during PIE select *SpaceGameMode* in the
@@ -458,8 +514,10 @@ Its space look is built by `Tools/Assets/build_space_scene.py` (see below).
 | ------------------ | ----- |
 | `Sun`              | Directional light, movable, intensity 8, pitch -39 / yaw 45: from behind the player's left shoulder |
 | `SkyLight`         | Movable, real-time capture, intensity 0.35. Captures the star dome, so ambient light is near zero |
-| `StarfieldSky`     | `ASkyDome`: 1000 km sphere that follows the camera, with `M_Starfield_Sky`: unlit, *Is Sky*, procedural stars plus a Milky Way glow cubemap |
+| `StarfieldSky`     | `ASkyDome`: 2000 km sphere that follows the camera, with `M_Starfield_Sky`: unlit, *Is Sky*, procedural twinkling stars, a Milky Way glow cubemap, nebulae and the sun disc |
 | `Planet_Veyra`     | `AQuadSpherePlanet`, radius 25 km, centre 45 km ahead of the start (start is 20 km above sea level, 8 km above the atmosphere) |
+| `Moon_Keth`        | `ADistantBody`, radius 6 km, orbits Veyra at 150 km every 25 min (`M_Moon`: craters, maria) |
+| `GasGiant_Orun`    | `ADistantBody`, radius 150 km with rings to 330 km, 620 km away to the right of Veyra (`M_GasGiant` bands and a storm, `M_PlanetRings`) |
 | `PP_SpaceExposure` | Unbound post-process volume fixing exposure at EV100 3 |
 | `PlayerStart`      | At (0, 0, 300), facing +X towards the planet |
 | `Asteroid_00-15`   | Scaled cubes scattered 30-260 m out |
@@ -489,15 +547,29 @@ near zero.
 **Why the dome follows the camera.** The stars are looked up by view direction, so the dome's
 position and size do not change how they look. A fixed dome could be flown out of; `ASkyDome`
 re-centres on the camera every frame, so the sky works at any distance and across rebases
-(verified 20 km out after a rebase). Its radius (`DomeRadiusKm`, 1000) must exceed the distance
-to the farthest body that should be visible, because anything beyond it is hidden. 1000 km
-is plenty: Veyra is 45 km away and its horizon, even from the start, is under 40 km.
+(verified 20 km out after a rebase). Its radius (`DomeRadiusKm`, 2000) must exceed the distance
+to the farthest body that should be visible, because anything beyond it is hidden: the gas
+giant's far ring edge is 950 km from the start.
+
+**A sky that is not a backdrop.** Painted stars never move, so on their own they read as a
+canvas. Several things break that:
+- **Parallax**: the moon and the gas giant are real geometry (`ADistantBody`: a lit sphere, rings,
+  optional orbit and spin; no gravity, not a `CelestialBody`), so they shift against the stars as
+  the ship travels, especially in cruise. The moon moves visibly along its orbit.
+- **Space dust** around the ship streaks past with speed (`M_SpaceDust`, additive).
+- **Nebulae**: domain-warped fbm clouds in three regions of the sky (magenta, teal, amber),
+  `NebulaBrightness` 3; `ASkyDome.NebulaScale` scales it per level.
+- **The sun**: a limb-darkened disc far above white (it blooms) with a corona, pointed at the
+  level's directional light by `ASkyDome` every frame (`SunDirection`, `SunColor`); warmer and
+  wider seen through air. `ASkyDome.SunScale` scales it.
+- **Twinkle**: every star flickers slightly at its own rates; `ASkyDome` drives `Twinkle` from
+  `SpaceTwinkle` (0.12) in space to `AtmosphereTwinkle` (0.6) in air, where real stars scintillate.
 
 **Atmosphere in the sky.** `ASkyDome` samples the environment at the camera each frame and sets
 `AtmosphereAmount`, `PlanetUp`, `SkyZenithColor`, `SkyHorizonColor` and `SkyBrightness` on a
 dynamic instance of `M_Starfield_Sky`. The material blends a horizon-to-zenith gradient over the
-stars; stars fade with the square of the remaining space. The sky does not know where the sun is
-yet: the night side is blue too.
+stars; stars fade with the square of the remaining space. The sky gradient does not know where
+the sun is yet: the night side is blue too.
 
 **Checking visuals headlessly.** A standalone `-game` run of uncooked content renders newly
 created materials with the default material, even with their shaders compiled. Judge the look

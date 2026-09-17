@@ -89,7 +89,7 @@ def mappings(path):
 
 character_map = mappings("/Game/Input/IMC_Character")
 expected = {("W", "IA_CharMove"), ("S", "IA_CharMove"), ("A", "IA_CharMove"), ("D", "IA_CharMove"), ("Mouse2D", "IA_CharLook"),
-            ("SpaceBar", "IA_CharJump"), ("LeftShift", "IA_CharSprint"), ("F", "IA_Interact")}
+            ("SpaceBar", "IA_CharJump"), ("LeftShift", "IA_CharSprint"), ("F", "IA_Interact"), ("H", "IA_ToggleHud")}
 check("IMC_Character mappings", {(k, a) for k, a, _ in character_map} == expected,
       "; ".join("%s->%s %s" % m for m in character_map))
 mods = {k: m for k, _, m in character_map}

@@ -13,6 +13,7 @@ class UCameraComponent;
 class UInputAction;
 class UInputComponent;
 class UInputMappingContext;
+class UMaterialInstanceDynamic;
 class USoundBase;
 class USpringArmComponent;
 class UStaticMeshComponent;
@@ -68,8 +69,54 @@ enum class ELandingBlocker : uint8
 	TakeoffCooldown
 };
 
+/** A hull material slot whose EmissiveStrength the ship animates (thrusters, strobes). */
+struct FShipGlowMaterial
+{
+	TWeakObjectPtr<UMaterialInstanceDynamic> Material;
+	float BaseStrength = 0.f;
+	float Applied = -1.f;
+};
+
+/** Cruise drive (J): a fast travel mode for crossing kilometres. */
+UENUM(BlueprintType)
+enum class ECruiseState : uint8
+{
+	Off,
+	/** Charging for CruiseSpoolSeconds; normal flight goes on meanwhile. */
+	Spooling,
+	/** Engaged: the ship flies along its nose at up to the cruise speed limit. */
+	Active,
+	/** Leaving cruise: speed bleeds off to normal flight speed over CruiseDropSeconds. */
+	Dropping
+};
+
+/** Why cruise cannot engage, or why it last dropped out. */
+UENUM(BlueprintType)
+enum class ECruiseBlocker : uint8
+{
+	None,
+	Landed,
+	/** Too close to the ground: below CruiseMinAltitudeM to engage, CruiseDropAltitudeM while cruising. */
+	TooLow,
+	/** The pilot switched it off. */
+	Pilot
+};
+
 /**
  * Player-flown spaceship with 6 degrees of freedom: thrust / strafe / lift plus pitch / yaw / roll.
+ *
+ * Flight assist (V) chooses how the controls act:
+ * - On (default, "coupled"): W / S set a throttle lever that stays where it is left. The flight
+ *   computer fires the thrusters to fly at throttle x MaxSpeed along the nose, cancels sideways
+ *   drift, holds altitude against gravity and brakes when the lever is at 0 (X pulls it there).
+ *   Each thruster axis has a limited force, so hard turns still slide.
+ * - Off ("decoupled"): W / S / A / D / Space / Ctrl fire the thrusters directly while held.
+ *   Nothing brakes and nothing holds altitude: Newtonian drift.
+ *
+ * Boost (Shift) multiplies forward thrust and speed while its energy lasts; it recharges after a
+ * pause. Cruise drive (J) charges for a few seconds and then flies at kilometres per second, as
+ * fast as the altitude allows: the limit shrinks towards the ground, so an approach slows down by
+ * itself, and cruise drops out close to the surface.
  *
  * Motion is integrated by hand rather than handed to Chaos. For a space game that keeps the feel
  * predictable and cheap to tune. Velocity lives in LinearVelocity.
@@ -116,8 +163,73 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
 	float GetThrottle() const { return ThrustInput; }
 
+	/** The throttle lever with flight assist on, -MaxReverseThrottle..1. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
+	float GetThrottleSetting() const { return ThrottleSetting; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
+	bool IsFlightAssistOn() const { return bFlightAssist; }
+
+	/** Switches flight assist. Turning it on sets the throttle lever to the current forward speed. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Flight")
+	void SetFlightAssist(bool bOn);
+
+	/** Pulls the throttle lever to 0: with flight assist on the ship brakes to a stop. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Flight")
+	void AllStop();
+
+	/** How hard the thrusters work this frame, 0..1 of their force. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
+	float GetEngineDemand() const { return EngineDemand; }
+
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
-	bool IsBoosting() const { return bBoostHeld; }
+	bool IsBoosting() const { return bBoostActive; }
+
+	/** Boost energy, 0..1. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
+	float GetBoostEnergy() const { return BoostEnergy; }
+
+	/** Boost ran dry and waits for BoostUnlockFraction of energy. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
+	bool IsBoostLocked() const { return bBoostLocked; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
+	ECruiseState GetCruiseState() const { return CruiseState; }
+
+	/** Charging progress while spooling, 0..1. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
+	float GetCruiseSpoolProgress() const;
+
+	/** Speed cruise allows at the ship's current altitude, cm/s. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
+	float GetCruiseSpeedLimit() const { return CruiseSpeedLimit; }
+
+	/** Why cruise cannot engage right now (Off), or why it last dropped out. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
+	ECruiseBlocker GetCruiseBlocker() const { return CruiseBlocker; }
+
+	/** Seconds a cruise refusal or drop stays worth showing. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
+	float GetCruiseMessageSeconds() const { return CruiseMessageSeconds; }
+
+	/** J: starts charging, cancels charging, or drops out of cruise. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Cruise")
+	void ToggleCruise();
+
+	/** Cruise speed limit for these conditions, cm/s. The flight model uses exactly this; for tests. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Cruise")
+	float ComputeCruiseSpeedLimit(float AltitudeAboveTerrainCm, float AtmosphereDensity, bool bNearBody) const;
+
+	/** Chase camera distance as a multiple of the Blueprint's arm length. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
+	float GetCameraZoom() const { return CameraZoom; }
+
+	/**
+	 * Tests: one flight frame of DeltaSeconds with these held inputs, through the same code as Tick
+	 * (environment, throttle, boost, cruise, steering, motion). Returns the velocity afterwards.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	FVector DebugStepFlight(float DeltaSeconds, float Thrust, float Strafe, float Lift, bool bBoost);
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
 	bool IsCockpitView() const { return bCockpitView; }
@@ -231,12 +343,17 @@ public:
 	void OnBoarded();
 
 	/**
-	 * Where the pilot appears: the hull mesh's "Exit" socket (SOCKET_Exit in Blender) if it has
-	 * one, otherwise beside the ship on its right. Placed on the ground, upright to gravity, facing
-	 * the ship's heading.
+	 * Where the pilot appears: the first free spot of the hull mesh's "Exit" socket (SOCKET_Exit in
+	 * Blender), then beside, behind and in front of the hull at growing distances. Placed on the
+	 * ground, upright to gravity, facing the ship's heading. "Free" is a capsule overlap test
+	 * against everything that blocks pawns, including the hull's own collision hulls.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Exit")
 	FTransform ComputeExitTransform() const;
+
+	/** Candidate exit spots in the order ComputeExitTransform tries them, before ground placement. For tests. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Exit")
+	TArray<FVector> GetExitCandidates() const;
 
 	/** Distance from Location to the hull collision box, cm; 0 inside. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Exit")
@@ -255,16 +372,28 @@ protected:
 	// ---------------------------------------------------------------------------------------
 
 	/**
-	 * Root and the only collision of the ship. Swept movement tests the root component alone, so
-	 * the collision shape must be the root: with a plain scene component there, the ship flew
-	 * straight through everything. Unscaled, so children do not inherit the hull scale.
+	 * Root and the ship's collision for its own movement. Swept movement tests the root component
+	 * alone, so the collision shape must be the root: with a plain scene component there, the ship
+	 * flew straight through everything. Unscaled, so children do not inherit the hull scale.
+	 *
+	 * Ignores pawns: the box encloses the whole ship including the air under the wings, and a
+	 * pilot getting out inside it was stuck or pushed through the ground. Characters collide with
+	 * Hull's own collision hulls instead.
 	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UBoxComponent> HullCollision;
 
-	/** Placeholder cube standing in for the real ship mesh. Visual only, no collision. */
+	/**
+	 * The ship mesh (a placeholder cube until an imported ship replaces it). Its simple collision
+	 * (the UCX hulls from Blender) blocks pawns, cameras and visibility traces only: characters
+	 * walk around the real shape, and the ship's own movement never sees it.
+	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UStaticMeshComponent> Hull;
+
+	/** Streaks of dust around the camera that show speed and direction of flight. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<class USpaceDustComponent> SpaceDust;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<USpringArmComponent> CameraBoom;
@@ -352,7 +481,23 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> FreeLookAction;
 
-	/** Maps F / right mouse button when the authored flight context lacks them. */
+	/** Digital, pressed: flight assist on / off (V). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> FlightAssistAction;
+
+	/** Digital, pressed: cruise drive (J). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> CruiseAction;
+
+	/** Digital, pressed: throttle to zero (X). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> AllStopAction;
+
+	/** Axis1D: mouse wheel. Chase camera distance, or cockpit zoom. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> CameraZoomAction;
+
+	/** Maps keys the authored flight context lacks (F, H, V, J, X, right mouse button, wheel). */
 	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> InteractMappingContext;
 
@@ -429,6 +574,115 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "0.0"))
 	float OverspeedDecay = 1.5f;
 
+	/** Seconds of boost a full charge lasts. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "0.1", Units = "s"))
+	float BoostDurationSeconds = 4.5f;
+
+	/** Seconds from empty to full once recharging. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "0.1", Units = "s"))
+	float BoostRechargeSeconds = 7.f;
+
+	/** Recharging starts this long after boost was last used. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "0.0", Units = "s"))
+	float BoostRechargeDelaySeconds = 1.f;
+
+	/** After running dry, boost works again once this much energy is back. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float BoostUnlockFraction = 0.3f;
+
+	// ---------------------------------------------------------------------------------------
+	// Flight assist
+	// ---------------------------------------------------------------------------------------
+
+	/** Coupled flight (see the class comment). V toggles it in game. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist")
+	bool bFlightAssist = true;
+
+	/** How hard the flight computer chases the target velocity, per second of error. Higher is snappier. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.1"))
+	float FlightAssistResponse = 2.f;
+
+	/** Throttle lever travel per second while W / S is held. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.05"))
+	float ThrottleRate = 0.8f;
+
+	/** How far the lever goes into reverse, as a fraction of MaxSpeed. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float MaxReverseThrottle = 0.35f;
+
+	/** Braking and reverse thrust as a fraction of ThrustAcceleration. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float ReverseThrustFraction = 0.65f;
+
+	/** Sideways speed at full strafe input, cm/s. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.0"))
+	float StrafeSpeedLimit = 3000.f;
+
+	/** Vertical speed at full lift input, cm/s. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.0"))
+	float LiftSpeedLimit = 3000.f;
+
+	/**
+	 * Highest descent speed commanded near the ground, cm/s. The limit rises to LiftSpeedLimit by
+	 * 20 m above the terrain, so holding Ctrl lowers the ship onto the ground instead of into it.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "10.0"))
+	float LandingDescentSpeed = 250.f;
+
+	/**
+	 * With the throttle at 0 and a hull gap under ~4 m, the flight computer holds only this much
+	 * less than gravity, so a hovering ship settles gently onto the ground by itself.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight Assist", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float LandingSettleGravityFraction = 0.25f;
+
+	// ---------------------------------------------------------------------------------------
+	// Cruise drive
+	// ---------------------------------------------------------------------------------------
+
+	/** Charging time before cruise engages. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0", Units = "s"))
+	float CruiseSpoolSeconds = 2.5f;
+
+	/** Cruise speed limit per cm of altitude above the terrain, 1/s: approaching a surface, the altitude shrinks by this fraction every second. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.01"))
+	float CruiseAltitudeRate = 0.4f;
+
+	/** Cruise never drops below this speed limit, cm/s (250 m/s). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0"))
+	float CruiseMinSpeed = 25000.f;
+
+	/**
+	 * Top cruise speed, cm/s (6 km/s), also far from any body. Faster flight means more world
+	 * origin rebases per second, each a frame of work.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0"))
+	float CruiseMaxSpeed = 600000.f;
+
+	/** Thicker air lowers the limit: at full density it is (1 - this) of the altitude limit. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float CruiseAtmosphereSlowdown = 0.85f;
+
+	/** Cruise engages only this high above the terrain. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0", Units = "m"))
+	float CruiseMinAltitudeM = 2000.f;
+
+	/** Below this, cruise drops out on its own. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0", Units = "m"))
+	float CruiseDropAltitudeM = 1200.f;
+
+	/** How fast the velocity swings onto the nose and the target speed in cruise, per second. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.1"))
+	float CruiseResponse = 1.2f;
+
+	/** Turn rates in cruise, as a fraction of the normal ones. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.05", ClampMax = "1.0"))
+	float CruiseTurnScale = 0.45f;
+
+	/** Length of the drop out of cruise, while speed bleeds off. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.1", Units = "s"))
+	float CruiseDropSeconds = 1.5f;
+
 	/** Maximum pitch rate, deg/s. The hard ceiling on turning, however fast the mouse moves. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.0"))
 	float PitchRate = 100.f;
@@ -476,13 +730,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Free Look", meta = (ClampMin = "0.0"))
 	float FreeLookSensitivity = 0.36f;
 
-	/** How far the camera can turn left / right from straight ahead. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Free Look", meta = (ClampMin = "0.0", ClampMax = "179.0"))
-	float FreeLookMaxYawDeg = 110.f;
+	/**
+	 * How far the camera can turn left / right from straight ahead. 180 means all the way round:
+	 * the chase camera orbits the ship, and on release it swings back the shorter way.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Free Look", meta = (ClampMin = "0.0", ClampMax = "180.0"))
+	float FreeLookMaxYawDeg = 180.f;
 
 	/** How far the camera can turn up / down from straight ahead. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Free Look", meta = (ClampMin = "0.0", ClampMax = "89.0"))
-	float FreeLookMaxPitchDeg = 70.f;
+	float FreeLookMaxPitchDeg = 85.f;
 
 	/** How fast the camera follows the mouse while held, per second; smooths raw mouse steps. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Free Look", meta = (ClampMin = "0.1"))
@@ -491,6 +748,66 @@ protected:
 	/** How fast the camera swings back after release, per second (6: ~95 % in half a second). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Free Look", meta = (ClampMin = "0.1"))
 	float FreeLookReturnRate = 6.f;
+
+	// ---------------------------------------------------------------------------------------
+	// Camera feel
+	// ---------------------------------------------------------------------------------------
+
+	/** Closest chase camera, as a multiple of the arm length set on the Blueprint. Mouse wheel. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.1"))
+	float CameraZoomMin = 0.45f;
+
+	/** Farthest chase camera, as a multiple of the Blueprint's arm length. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.1"))
+	float CameraZoomMax = 3.f;
+
+	/** Zoom change per wheel notch, as a fraction of the current distance. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.01", ClampMax = "0.5"))
+	float CameraZoomStep = 0.12f;
+
+	/** Cockpit field of view fully zoomed in with the wheel, degrees. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "10.0", ClampMax = "120.0"))
+	float CockpitZoomFov = 40.f;
+
+	/** Degrees added to the field of view at full boost... */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float BoostFovKick = 7.f;
+
+	/** ...and in cruise. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float CruiseFovKick = 16.f;
+
+	/** Camera shake while boosting, cm (cockpit a quarter). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float BoostShakeCm = 2.5f;
+
+	/** Camera shake at the end of cruise charging, cm; a little stays while cruising. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float CruiseShakeCm = 6.f;
+
+	/** Short jolt when boost starts, cruise engages or drops out, cm. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float KickShakeCm = 9.f;
+
+	// ---------------------------------------------------------------------------------------
+	// Ship lights
+	// ---------------------------------------------------------------------------------------
+
+	/** Thruster glow at idle, as a fraction of the material's own EmissiveStrength. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Lights", meta = (ClampMin = "0.0"))
+	float ThrusterIdleGlow = 0.3f;
+
+	/** Glow added at full boost, same units... */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Lights", meta = (ClampMin = "0.0"))
+	float ThrusterBoostGlow = 2.f;
+
+	/** ...and in cruise. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Lights", meta = (ClampMin = "0.0"))
+	float ThrusterCruiseGlow = 3.f;
+
+	/** Seconds between double flashes of the white navigation strobes. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Lights", meta = (ClampMin = "0.2", Units = "s"))
+	float NavStrobePeriodSeconds = 1.4f;
 
 	// ---------------------------------------------------------------------------------------
 	// Atmospheric entry
@@ -618,6 +935,43 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.1"))
 	float EngineSpoolRate = 5.f;
 
+	/** Reactor hum while piloted. /Game/Ships/Audio/SW_EngineHum when empty. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
+	TObjectPtr<USoundBase> EngineHumSound;
+
+	/** Afterburner layer while boosting. /Game/Ships/Audio/SW_BoostLoop when empty. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
+	TObjectPtr<USoundBase> BoostLoopSound;
+
+	/** Cruise drive drone. /Game/Ships/Audio/SW_CruiseLoop when empty. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
+	TObjectPtr<USoundBase> CruiseLoopSound;
+
+	/** One-shots: boost ignition, cruise charging, cruise engaging, cruise dropping out. /Game/Ships/Audio/SW_* when empty. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
+	TObjectPtr<USoundBase> BoostStartSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
+	TObjectPtr<USoundBase> CruiseChargeSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
+	TObjectPtr<USoundBase> CruiseEngageSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
+	TObjectPtr<USoundBase> CruiseDropSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
+	float EngineHumVolume = 0.3f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
+	float BoostVolume = 0.6f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
+	float CruiseVolume = 0.55f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
+	float OneShotVolume = 0.8f;
+
 	// ---------------------------------------------------------------------------------------
 	// Runtime state
 	// ---------------------------------------------------------------------------------------
@@ -642,9 +996,28 @@ private:
 	void HandleToggleHud(const FInputActionValue& Value);
 	void HandleFreeLookStarted(const FInputActionValue& Value);
 	void HandleFreeLookCompleted(const FInputActionValue& Value);
+	void HandleFlightAssist(const FInputActionValue& Value);
+	void HandleCruise(const FInputActionValue& Value);
+	void HandleAllStop(const FInputActionValue& Value);
+	void HandleCameraZoom(const FInputActionValue& Value);
 	void SetFreeLookHeld(bool bHeld);
 	void UpdateFreeLook(float DeltaSeconds);
 	void ClearPilotInput();
+
+	void UpdateThrottle(float DeltaSeconds);
+	void UpdateBoost(float DeltaSeconds);
+	void UpdateCruise(float DeltaSeconds);
+	ECruiseBlocker EvaluateCruiseEngage() const;
+	void BeginCruiseDrop(ECruiseBlocker Reason);
+	/** Everything a flight frame does before the camera and sound: shared by Tick and DebugStepFlight. */
+	void StepFlight(float DeltaSeconds);
+	void UpdateCameraEffects(float DeltaSeconds);
+	void UpdateSpaceDust(float DeltaSeconds);
+	void SetupShipLights();
+	void UpdateShipLights(float DeltaSeconds);
+	void SetupAudioLayers();
+	UAudioComponent* PlayOneShot(USoundBase* Sound, float VolumeScale = 1.f);
+	bool IsExitSpotFree(const FVector& Location, const FVector& Up, float CapsuleRadius, float CapsuleHalfHeight) const;
 
 	/** Fills in any unassigned input asset: first from /Game/Input, then procedurally. */
 	void ResolveInputAssets();
@@ -654,7 +1027,6 @@ private:
 	void UpdateLinearMotion(float DeltaSeconds);
 	void UpdateEngineAudio(float DeltaSeconds);
 	void UpdateEnvironment(float DeltaSeconds);
-	void UpdateHeatShake();
 	void UpdateLanding(float DeltaSeconds);
 	void UpdateLandedMotion(float DeltaSeconds);
 	void EnterLanded();
@@ -687,8 +1059,52 @@ private:
 	/** Smoothed engine load and boost blend, each in [0, 1], driving the engine sound. */
 	float EngineLoad = 0.f;
 	float EngineBoostBlend = 0.f;
+	float HumBlend = 0.f;
 
 	bool bBoostHeld = false;
+	bool bBoostActive = false;
+	bool bBoostLocked = false;
+	float BoostEnergy = 1.f;
+	float BoostRechargeWait = 0.f;
+
+	float ThrottleSetting = 0.f;
+	/** The lever stopped at 0 on its way through; it stays there until W / S is released. */
+	bool bThrottleDetentHold = false;
+	float EngineDemand = 0.f;
+
+	ECruiseState CruiseState = ECruiseState::Off;
+	ECruiseBlocker CruiseBlocker = ECruiseBlocker::None;
+	float CruiseTimer = 0.f;
+	float CruiseSpeedLimit = 0.f;
+	float CruiseMessageSeconds = 0.f;
+
+	/** Eased 0..1 blends driving camera, lights and sound. */
+	float BoostBlend = 0.f;
+	float CruiseBlend = 0.f;
+	float CameraKick = 0.f;
+
+	float CameraZoom = 1.f;
+	float CameraZoomTarget = 1.f;
+	/** Cockpit zoom, 0 normal field of view .. 1 CockpitZoomFov. */
+	float CockpitZoom = 0.f;
+	float CockpitZoomTarget = 0.f;
+	float BaseArmLength = 0.f;
+	FVector BaseSocketOffset = FVector::ZeroVector;
+	float BaseChaseFov = 90.f;
+	float BaseCockpitFov = 90.f;
+
+	TArray<FShipGlowMaterial> ThrusterMaterials;
+	TArray<FShipGlowMaterial> StrobeMaterials;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAudioComponent> EngineHumAudio;
+	UPROPERTY(Transient)
+	TObjectPtr<UAudioComponent> BoostAudio;
+	UPROPERTY(Transient)
+	TObjectPtr<UAudioComponent> CruiseAudio;
+	UPROPERTY(Transient)
+	TObjectPtr<UAudioComponent> CruiseChargeAudio;
+
 	bool bCockpitView = false;
 
 	FCelestialEnvironment Environment;

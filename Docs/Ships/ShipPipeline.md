@@ -423,7 +423,7 @@ nastaví do `BP_Ship_<Loď>` – nic se nepřepočítává ručně. Tabulka ukaz
 | `CameraBoom->SocketOffset.Z` | 200 | ~300–400 | kamera kousek nad lodí (Vanguard 330) |
 | `CameraBoom->ProbeSize` | 25 | 25–50 | |
 | `CameraBoom->CameraLagMaxDistance` | 1500 | ~3000 | |
-| `CockpitCamera` poloha | 90, 0, 15 | ze `SOCKET_Cockpit` | oko musí být pod sklem kokpitu a nad trupem; Vanguard `SOCKET_Cockpit` (Z 111) bylo ve skle, `_setup.json` ho posouvá na 300, 0, 78 |
+| `CockpitCamera` poloha | 90, 0, 15 | ze `SOCKET_Cockpit` | oko pilota: **před opěrkou sedačky**, ~15 cm pod sklem, nad palubní deskou. Vanguard: `_setup.json` 345, 0, 103 (ověřeno řezy a paprsky v Blenderu); 300, 0, 78 bylo za opěrkou a celý výhled zakryla |
 | `LandingFootprintRadiusCm` | 150 | ~500 | půlka menšího rozměru |
 | `LandingMaxGapCm` | 60 | ~100 | |
 | `GroundContactToleranceCm` | 10 | 10–20 | |
@@ -431,6 +431,16 @@ nastaví do `BP_Ship_<Loď>` – nic se nepřepočítává ručně. Tabulka ukaz
 | Planeta `CollisionMinRadiusM` | 60 | 60–100 | musí být ≫ délka lodi |
 | `HeatShakeCm` | 14 | ~30 | větší kamera = větší třes |
 | Zrychlení/rychlosti | 40 m/s², 120 m/s | beze změny, ale **pocit** se změní | 14m loď při 120 m/s působí pomaleji |
+
+### Kolize lodi pro postavu
+
+Kořenový box (`HullCollision`) obaluje celou loď včetně vzduchu pod křídly, a proto **ignoruje
+pawny**. Postava naráží do UCX hullů meshe (`Hull` má query-only kolizi proti Pawn, Camera a
+Visibility). Z toho plyne pro model:
+- UCX hully mají kopírovat tvar tak, aby se kolem lodi dalo chodit (pod křídly nechat volno, pokud
+  tam má jít vejít).
+- `SOCKET_Exit` musí být mimo UCX hully s rezervou aspoň na kapsli postavy (poloměr 42 cm, výška
+  1,92 m). Vanguard: 80 cm volno. Když je obsazený, hra zkouší místa vpravo, vlevo, za a před lodí.
 
 ### Další pasti
 

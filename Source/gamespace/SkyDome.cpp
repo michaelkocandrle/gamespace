@@ -5,7 +5,10 @@
 #include "Camera/PlayerCameraManager.h"
 #include "CelestialBody.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/LightComponent.h"
 #include "Engine/CollisionProfile.h"
+#include "Engine/DirectionalLight.h"
+#include "EngineUtils.h"
 #include "Engine/StaticMesh.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -50,6 +53,17 @@ void ASkyDome::BeginPlay()
 {
 	Super::BeginPlay();
 	SkyMaterial = Dome->CreateDynamicMaterialInstance(0);
+	for (TActorIterator<ADirectionalLight> It(GetWorld()); It; ++It)
+	{
+		Sun = *It;
+		break;
+	}
+	if (SkyMaterial)
+	{
+		NebulaBase = SkyMaterial->K2_GetScalarParameterValue(TEXT("NebulaBrightness"));
+		SunDiscBase = SkyMaterial->K2_GetScalarParameterValue(TEXT("SunDiscBrightness"));
+		SunGlowBase = SkyMaterial->K2_GetScalarParameterValue(TEXT("SunGlowBrightness"));
+	}
 }
 
 void ASkyDome::Tick(float DeltaSeconds)
@@ -71,6 +85,17 @@ void ASkyDome::Tick(float DeltaSeconds)
 		ACelestialBody::FindNearest(GetWorld(), CameraLocation, &Environment, &bHasEnvironment);
 		const float Amount = bHasEnvironment ? Environment.SkyAmount : 0.f;
 		SkyMaterial->SetScalarParameterValue(TEXT("AtmosphereAmount"), Amount);
+		SkyMaterial->SetScalarParameterValue(TEXT("Twinkle"), FMath::Lerp(SpaceTwinkle, AtmosphereTwinkle, Amount));
+		SkyMaterial->SetScalarParameterValue(TEXT("NebulaBrightness"), NebulaBase * NebulaScale);
+		SkyMaterial->SetScalarParameterValue(TEXT("SunDiscBrightness"), SunDiscBase * SunScale);
+		SkyMaterial->SetScalarParameterValue(TEXT("SunGlowBrightness"), SunGlowBase * SunScale);
+		if (const ADirectionalLight* Light = Sun.Get())
+		{
+			// The light shines along its forward vector; the sun sits the other way.
+			const FVector ToSun = -Light->GetActorForwardVector();
+			SkyMaterial->SetVectorParameterValue(TEXT("SunDirection"), FLinearColor(FVector3f(ToSun)));
+			SkyMaterial->SetVectorParameterValue(TEXT("SunColor"), Light->GetLightComponent()->GetLightColor());
+		}
 		if (Amount > 0.f)
 		{
 			SkyMaterial->SetVectorParameterValue(TEXT("PlanetUp"), FLinearColor(FVector3f(Environment.Up)));

@@ -33,10 +33,12 @@ public:
 	 *
 	 * Each rebase costs a frame: every actor moves, and because Chaos cannot shift its physics
 	 * scene as a whole, every physics body is teleported individually. Positions are double
-	 * precision anyway, so there is no reason to rebase often.
+	 * precision anyway, so there is no reason to rebase often. 40 km: cruise drive at its 6 km/s
+	 * top speed rebases every ~7 s instead of every 1.7 s, and single-precision maths stays within
+	 * ~0.5 cm there.
 	 */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Space|Origin Rebasing", meta = (ClampMin = "1.0", ClampMax = "20000.0", Units = "km", EditCondition = "bEnableOriginRebasing"))
-	float RebaseDistanceKm = 10.f;
+	float RebaseDistanceKm = 40.f;
 
 	/** Write a LogSpaceOrigin line for every rebase: shift, new origin and how long it took. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Space|Origin Rebasing")

@@ -50,7 +50,7 @@
       "pawn.engine_boost_pitch = 0.12",
       "pawn.engine_low_pass_full_hz = 1600.0",
       "pawn.engine_spool_rate = 3.0",
-      "pawn.free_look_max_yaw_deg = 120.0",
+      "pawn.free_look_max_yaw_deg = 180.0",
       "pawn.hide_hull_in_cockpit = False",
       "camera_boom.target_arm_length = 1450.0",
       "camera_boom.socket_offset = [0.0, 0.0, 330.0]",
@@ -58,7 +58,7 @@
       "camera_boom.camera_lag_max_distance = 1800.0",
       "camera_boom.probe_size = 40.0",
       "chase_camera.field_of_view = 80.0",
-      "cockpit_camera.relative_location = [300.0, 0.0, 78.0]",
+      "cockpit_camera.relative_location = [345.0, 0.0, 103.0]",
       "cockpit_camera.field_of_view = 88.0",
       "component Canopy = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Canopy"
     ]

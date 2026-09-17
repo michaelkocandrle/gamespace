@@ -1,4 +1,5 @@
-"""Builds the space look of TestSpace: star sky, test planet, sun and exposure.
+"""Builds the space look of TestSpace: star sky (stars, nebulae, sun disc), test planet, a moon and a
+ringed gas giant in the distance, sun, exposure, and the ship's space dust material.
 
 Two steps, editor closed:
 
@@ -35,10 +36,24 @@ STAR_DENSITY = 1.0
 # The diffuse Milky Way band. Kept faint: it is a hint of structure, not a light source.
 GLOW_BRIGHTNESS = 0.06
 
+# Coloured nebula clouds in three regions of the sky (see NEBULA_HLSL). At the fixed exposure
+# ~10 is white, so the brightest wisps reach roughly a third of that. ASkyDome.NebulaScale
+# scales it in the level without rebuilding.
+NEBULA_BRIGHTNESS = 3.0
+
+# The sun disc drawn by the sky, pointed at the directional light by ASkyDome. The disc is far
+# above white so it blooms; the glow is a corona fading over ~20 degrees.
+SUN_DISC_BRIGHTNESS = 400.0
+SUN_GLOW_BRIGHTNESS = 25.0
+
+# Star twinkle defaults; ASkyDome drives the parameter between its SpaceTwinkle and
+# AtmosphereTwinkle.
+STAR_TWINKLE = 0.12
+
 # Sky dome radius. The dome (ASkyDome) follows the camera and the stars are looked up by view
 # direction, so the size does not change how the sky looks. It must exceed the distance to the
 # farthest body that should be visible: anything beyond it is hidden behind the dome.
-SKY_DOME_RADIUS_KM = 1000.0
+SKY_DOME_RADIUS_KM = 2000.0
 
 # Planet: radius 25 km, centre 45 km straight ahead of PlayerStart (which faces +X), so the ship
 # starts 20 km above sea level - above the 12 km atmosphere, in "orbit". The planet fills ~67
@@ -51,11 +66,35 @@ PLANET_LOCATION_CM = (45_000_00, 0, 0)
 # Sun from behind the player's left shoulder, so the planet is seen about three-quarters lit.
 SUN_PITCH, SUN_YAW = -39.0, 45.0
 
+# Distant bodies (ADistantBody): scenery with real parallax, no gravity. Both stay well inside the
+# sky dome. Directions are chosen to be in view from PlayerStart (facing +X) beside Veyra and
+# at least half lit by the sun.
+MOON_NAME = "Keth"
+MOON_RADIUS_KM = 6.0
+MOON_ORBIT = {"orbit_radius_km": 150.0, "orbit_period_seconds": 1500.0, "orbit_inclination_deg": -15.0,
+              "orbit_node_deg": 30.0, "orbit_phase_deg": -100.0}
+GIANT_NAME = "Orun"
+GIANT_RADIUS_KM = 150.0
+GIANT_RING_OUTER_KM = 330.0
+GIANT_RING_INNER_FRACTION = 0.55   # of the outer radius; must clear the planet (150 / 330 = 0.45)
+GIANT_DISTANCE_KM = 620.0
+GIANT_YAW_DEG, GIANT_ELEVATION_DEG = 70.0, 10.0
+GIANT_AXIAL_TILT_DEG = 18.0
+GIANT_SPIN_SECONDS = 1800.0
+
+# Space dust around the ship camera (USpaceDustComponent).
+DUST_COLOR = (0.70, 0.80, 1.00)
+DUST_BRIGHTNESS = 3.0
+
 # ---------------------------------------------------------------------------------------
 
 LEVEL = "/Game/Maps/TestSpace"
 GLOW_TEXTURE = "/Game/Environments/Space/T_MilkyWay_Glow_Cube"
 STARFIELD_MATERIAL = "/Game/Environments/Space/M_Starfield_Sky"
+DUST_MATERIAL = "/Game/Environments/Space/M_SpaceDust"
+GAS_GIANT_MATERIAL = "/Game/Environments/Space/M_GasGiant"
+MOON_MATERIAL = "/Game/Environments/Space/M_Moon"
+RINGS_MATERIAL = "/Game/Environments/Space/M_PlanetRings"
 PLANET_MESH = "/Game/Planets/SM_PlanetSphere"
 PLANET_MATERIAL = "/Game/Planets/M_Planet_Terrain"
 
@@ -255,6 +294,9 @@ for (int layer = 0; layer < 3; layer++)
             // Steep distribution: most stars faint, a handful bright - the contrast that makes
             // a real sky read as depth rather than as uniform noise.
             float flux = layerFlux * lerp(0.03, 1.0, pow(h2.x, 8.0));
+            // Twinkle: two slow sines per star at its own rates and phases.
+            float twinkle = 0.5 * sin(Time * (2.3 + 7.0 * h2.z) + h.x * 6283.0) + 0.5 * sin(Time * (5.1 + 11.0 * h.y) + h2.x * 628.3);
+            flux *= max(0.0, 1.0 + Twinkle * twinkle);
             float3 tint = h2.y < 0.5
                 ? lerp(float3(1.0, 0.72, 0.48), float3(1.0, 0.97, 0.93), h2.y * 2.0)
                 : lerp(float3(1.0, 0.97, 0.93), float3(0.72, 0.83, 1.0), h2.y * 2.0 - 1.0);
@@ -264,6 +306,33 @@ for (int layer = 0; layer < 3; layer++)
 }
 return result;
 """
+
+
+def custom(material, code, inputs, x, y, description, output_type=unreal.CustomMaterialOutputType.CMOT_FLOAT3):
+    expr = node(material, unreal.MaterialExpressionCustom, x, y, code=code, description=description, output_type=output_type)
+    pins = []
+    for name in inputs:
+        custom_pin = unreal.CustomInput()  # struct constructors take no keyword arguments
+        custom_pin.set_editor_property("input_name", name)
+        pins.append(custom_pin)
+    expr.set_editor_property("inputs", pins)
+    return expr
+
+
+def scalar(material, name, value, x, y):
+    return node(material, unreal.MaterialExpressionScalarParameter, x, y, parameter_name=name, default_value=value)
+
+
+def vector(material, name, rgb, x, y):
+    return node(material, unreal.MaterialExpressionVectorParameter, x, y, parameter_name=name,
+                default_value=unreal.LinearColor(rgb[0], rgb[1], rgb[2], 1.0))
+
+
+def sun_direction():
+    """Unit vector towards the sun for the directional light's pitch and yaw (the light shines the other way)."""
+    pitch, yaw = math.radians(SUN_PITCH), math.radians(SUN_YAW)
+    forward = (math.cos(pitch) * math.cos(yaw), math.cos(pitch) * math.sin(yaw), math.sin(pitch))
+    return tuple(-c for c in forward)
 
 
 def build_starfield_material(glow_cube):
@@ -279,22 +348,16 @@ def build_starfield_material(glow_cube):
     link(view, direction, "A")
     link(flip, direction, "B")
 
-    stars = node(m, unreal.MaterialExpressionCustom, -600, 0,
-                 code=STAR_HLSL, description="Procedural stars",
-                 output_type=unreal.CustomMaterialOutputType.CMOT_FLOAT3)
-    inputs = []
-    for name in ("Dir", "Density", "Brightness"):
-        pin = unreal.CustomInput()  # struct constructors take no keyword arguments
-        pin.set_editor_property("input_name", name)
-        inputs.append(pin)
-    stars.set_editor_property("inputs", inputs)
-    density = node(m, unreal.MaterialExpressionScalarParameter, -900, 200,
-                   parameter_name="StarDensity", default_value=STAR_DENSITY)
-    brightness = node(m, unreal.MaterialExpressionScalarParameter, -900, 320,
-                      parameter_name="StarBrightness", default_value=STAR_BRIGHTNESS)
+    stars = custom(m, STAR_HLSL, ("Dir", "Density", "Brightness", "Time", "Twinkle"), -600, 0, "Procedural stars")
+    density = scalar(m, "StarDensity", STAR_DENSITY, -900, 200)
+    brightness = scalar(m, "StarBrightness", STAR_BRIGHTNESS, -900, 320)
+    time = node(m, unreal.MaterialExpressionTime, -900, 440)
+    twinkle = scalar(m, "Twinkle", STAR_TWINKLE, -900, 540)
     link(direction, stars, "Dir")
     link(density, stars, "Density")
     link(brightness, stars, "Brightness")
+    link(time, stars, "Time")
+    link(twinkle, stars, "Twinkle")
 
     glow = node(m, unreal.MaterialExpressionTextureSampleParameterCube, -600, 400,
                 parameter_name="MilkyWayGlow", texture=glow_cube)
@@ -305,15 +368,29 @@ def build_starfield_material(glow_cube):
     link(glow, glow_scaled, "A", "RGB")
     link(glow_brightness, glow_scaled, "B")
 
+    nebula = custom(m, NOISE_STRUCT + NEBULA_HLSL, ("Dir", "Brightness"), -600, 800, "Nebulae")
+    link(direction, nebula, "Dir")
+    link(scalar(m, "NebulaBrightness", NEBULA_BRIGHTNESS, -900, 850), nebula, "Brightness")
+
+    stars_and_glow = node(m, unreal.MaterialExpressionAdd, -300, 0)
+    link(stars, stars_and_glow, "A")
+    link(glow_scaled, stars_and_glow, "B")
     space = node(m, unreal.MaterialExpressionAdd, -150, 0)
-    link(stars, space, "A")
-    link(glow_scaled, space, "B")
+    link(stars_and_glow, space, "A")
+    link(nebula, space, "B")
+
+    sun = custom(m, SUN_HLSL, ("Dir", "SunDir", "SunColor", "Disc", "Glow", "Amount"), -150, 1000, "Sun disc and glow")
+    link(direction, sun, "Dir")
+    link(vector(m, "SunDirection", sun_direction(), -450, 1000), sun, "SunDir")
+    link(vector(m, "SunColor", (1.0, 0.97, 0.92), -450, 1150), sun, "SunColor")
+    link(scalar(m, "SunDiscBrightness", SUN_DISC_BRIGHTNESS, -450, 1300), sun, "Disc")
+    link(scalar(m, "SunGlowBrightness", SUN_GLOW_BRIGHTNESS, -450, 1400), sun, "Glow")
 
     # Atmosphere: ASkyDome sets these every frame from the planet nearest the camera.
     blend = node(m, unreal.MaterialExpressionCustom, 100, 0,
                  code=ATMOSPHERE_HLSL, description="Atmosphere blend",
                  output_type=unreal.CustomMaterialOutputType.CMOT_FLOAT3)
-    names = ("Space", "Dir", "Up", "Zenith", "Horizon", "Brightness", "Amount")
+    names = ("Space", "Dir", "Up", "Zenith", "Horizon", "Brightness", "Amount", "Sun")
     custom_inputs = []
     for name in names:
         custom_pin = unreal.CustomInput()
@@ -337,6 +414,8 @@ def build_starfield_material(glow_cube):
     link(horizon, blend, "Horizon")
     link(sky_brightness, blend, "Brightness")
     link(amount, blend, "Amount")
+    link(amount, sun, "Amount")
+    link(sun, blend, "Sun")
     output(blend, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     finish(m)
     return m
@@ -353,8 +432,204 @@ float3 sky = lerp(Horizon.rgb, Zenith.rgb, sqrt(saturate(mu)));
 sky *= lerp(1.0, 0.35, saturate(-mu * 3.0));
 float a = saturate(Amount);
 float keep = (1.0 - a) * (1.0 - a);
-return Space * keep + sky * Brightness * a;
+return Space * keep + sky * Brightness * a + Sun;
 """
+
+# Value noise and fbm for the sky and the distant bodies. HLSL in a Custom node is the body of one
+# function; a local struct is the way to get helper functions into it.
+NOISE_STRUCT = r"""
+struct FSpaceNoise
+{
+    float Hash(float3 p)
+    {
+        p = frac(p * float3(0.1031, 0.1030, 0.0973));
+        p += dot(p, p.yxz + 33.33);
+        return frac((p.x + p.y) * p.z);
+    }
+    float Noise(float3 x)
+    {
+        float3 i = floor(x);
+        float3 f = frac(x);
+        f = f * f * (3.0 - 2.0 * f);
+        return lerp(lerp(lerp(Hash(i), Hash(i + float3(1, 0, 0)), f.x),
+                         lerp(Hash(i + float3(0, 1, 0)), Hash(i + float3(1, 1, 0)), f.x), f.y),
+                    lerp(lerp(Hash(i + float3(0, 0, 1)), Hash(i + float3(1, 0, 1)), f.x),
+                         lerp(Hash(i + float3(0, 1, 1)), Hash(i + float3(1, 1, 1)), f.x), f.y), f.z);
+    }
+    float Fbm(float3 p, int octaves)
+    {
+        float v = 0.0;
+        float a = 0.5;
+        for (int o = 0; o < octaves; o++)
+        {
+            v += a * Noise(p);
+            p = p * 2.02 + float3(17.1, 5.3, 11.7);
+            a *= 0.5;
+        }
+        return v;
+    }
+};
+FSpaceNoise N;
+"""
+
+# Nebulae: domain-warped fbm clouds, shown only inside three soft regions of the sky so most of it
+# stays dark. Each region has its own colour pair; the fine noise mixes between them.
+NEBULA_HLSL = r"""
+float3 d = normalize(Dir);
+float3 w = float3(N.Fbm(d * 2.5 + 1.7, 4), N.Fbm(d * 2.5 + 9.2, 4), N.Fbm(d * 2.5 + 4.4, 4));
+float cloud = N.Fbm(d * 3.2 + (w - 0.5) * 2.2, 5);
+float fine = N.Fbm(d * 11.0 + (w - 0.5) * 3.0, 4);
+
+float3 c1 = normalize(float3(0.35, -0.55, 0.76));
+float3 c2 = normalize(float3(-0.75, 0.55, 0.25));
+float3 c3 = normalize(float3(0.15, 0.75, -0.62));
+float r1 = saturate(1.0 - acos(saturate(dot(d, c1))) / 0.75);
+float r2 = saturate(1.0 - acos(saturate(dot(d, c2))) / 0.9);
+float r3 = saturate(1.0 - acos(saturate(dot(d, c3))) / 0.6);
+r1 *= r1; r2 *= r2; r3 *= r3;
+
+float density = saturate((cloud - 0.38) * 3.0);
+density = density * density * (0.55 + 0.9 * fine);
+float3 col1 = lerp(float3(0.55, 0.10, 0.35), float3(1.00, 0.45, 0.30), fine);
+float3 col2 = lerp(float3(0.05, 0.25, 0.45), float3(0.25, 0.75, 0.80), fine);
+float3 col3 = lerp(float3(0.35, 0.18, 0.05), float3(0.90, 0.60, 0.25), fine);
+return density * (r1 * col1 + r2 * col2 + r3 * col3) * Brightness;
+"""
+
+# Sun: a limb-darkened disc and a corona of three exponential falloffs. The angle comes from the
+# chord length, which stays precise for tiny angles where acos(dot) would not.
+SUN_HLSL = r"""
+float3 d = normalize(Dir);
+float3 s = normalize(SunDir.xyz);
+float ang = 2.0 * asin(saturate(length(d - s) * 0.5));
+const float radius = 0.0105;
+float disc = 1.0 - smoothstep(radius * 0.9, radius, ang);
+float limb = lerp(0.6, 1.0, sqrt(saturate(1.0 - (ang / radius) * (ang / radius))));
+float corona = 0.55 * exp(-ang / 0.018) + 0.12 * exp(-ang / 0.08) + 0.015 * exp(-ang / 0.35);
+float a = saturate(Amount);
+float3 tint = SunColor.rgb * lerp(float3(1.0, 1.0, 1.0), float3(1.0, 0.85, 0.65), a);
+return tint * (disc * limb * Disc * lerp(1.0, 0.6, a) + corona * Glow * (1.0 + 1.5 * a));
+"""
+
+GAS_GIANT_HLSL = r"""
+float3 n = normalize(Nrm);
+float lat = n.z;
+float swirl = N.Fbm(n * 3.0 + float3(0.0, 0.0, Time * 0.003), 5);
+float bands = lat * 9.0 + (swirl - 0.5) * 1.6 + (N.Fbm(float3(lat * 30.0, n.x * 4.0, n.y * 4.0), 4) - 0.5) * 0.5;
+float b1 = 0.5 + 0.5 * sin(bands * 3.14159);
+float b2 = 0.5 + 0.5 * sin(bands * 1.7 + 1.3);
+float3 cream = float3(0.86, 0.78, 0.62);
+float3 tanColor = float3(0.70, 0.52, 0.36);
+float3 rust = float3(0.52, 0.30, 0.20);
+float3 pale = float3(0.78, 0.80, 0.78);
+float3 col = lerp(lerp(rust, tanColor, b1), lerp(cream, pale, b2), smoothstep(0.3, 0.7, b1));
+float lon = atan2(n.y, n.x);
+float storm = exp(-(pow((lat + 0.33) / 0.06, 2.0) + pow((lon - 0.9) / 0.16, 2.0)));
+col = lerp(col, float3(0.72, 0.36, 0.24), saturate(storm * 1.2));
+col *= lerp(1.0, 0.55, smoothstep(0.75, 0.98, abs(lat)));
+return col;
+"""
+
+MOON_HLSL = r"""
+float3 n = normalize(Nrm);
+float base = N.Fbm(n * 4.0, 5);
+float maria = smoothstep(0.45, 0.6, N.Fbm(n * 1.6 + 3.0, 4));
+float detail = N.Fbm(n * 28.0, 4);
+// Craters: distance to the nearest random point of a 3D grid; a dark floor and a bright rim.
+float3 p = n * 12.0;
+float3 ip = floor(p);
+float3 fp = frac(p);
+float nearest = 10.0;
+for (int x = -1; x <= 1; x++)
+for (int y = -1; y <= 1; y++)
+for (int z = -1; z <= 1; z++)
+{
+    float3 g = float3(x, y, z);
+    float3 o = float3(N.Hash(ip + g), N.Hash(ip + g + 17.3), N.Hash(ip + g + 41.7));
+    nearest = min(nearest, length(g + o - fp));
+}
+float floorDark = 1.0 - 0.25 * (1.0 - smoothstep(0.18, 0.3, nearest));
+float rim = exp(-pow((nearest - 0.32) / 0.04, 2.0));
+float grey = lerp(0.36, 0.60, base) * lerp(1.0, 0.62, maria) * (0.85 + 0.3 * detail) * floorDark + 0.12 * rim;
+return grey * float3(1.0, 0.98, 0.95);
+"""
+
+# Rings on the engine plane (UV 0..1 across the outer diameter). Ringlets are sines of the radius,
+# faded out where they would be finer than a pixel so the rings do not shimmer at a distance.
+RINGS_HLSL = r"""
+float r = length(UV - 0.5) * 2.0;
+float fw = max(fwidth(r), 1e-5);
+float soft = smoothstep(Inner, Inner + 0.02, r) * (1.0 - smoothstep(0.97, 1.0, r));
+float ringlets = 0.55 + 0.25 * sin(r * 260.0) * saturate(1.0 - fw * 260.0 * 0.5)
+               + 0.15 * sin(r * 611.0 + 1.3) * saturate(1.0 - fw * 611.0 * 0.5)
+               + 0.10 * sin(r * 1400.0 + 0.7) * saturate(1.0 - fw * 1400.0 * 0.5);
+float gap = 1.0 - 0.9 * exp(-pow((r - 0.8) / 0.012, 2.0));
+return float4(lerp(float3(0.55, 0.49, 0.40), float3(0.85, 0.80, 0.70), saturate(ringlets)), saturate(soft * ringlets * gap) * 0.85);
+"""
+
+
+def local_normal(material, x, y):
+    """The sphere's own direction at the pixel: the vertex normal in local space (no precision
+    trouble hundreds of kilometres from the origin, unlike world positions)."""
+    normal = node(material, unreal.MaterialExpressionVertexNormalWS, x, y)
+    local = node(material, unreal.MaterialExpressionTransform, x + 150, y,
+                 transform_source_type=unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_WORLD,
+                 transform_type=unreal.MaterialVectorCoordTransform.TRANSFORM_LOCAL)
+    link(normal, local, "")
+    return local
+
+
+def build_body_material(path, hlsl, roughness, with_time):
+    m = fresh_material(path)
+    inputs = ("Nrm", "Time") if with_time else ("Nrm",)
+    colour = custom(m, NOISE_STRUCT + hlsl, inputs, -300, 0, path.rsplit("/", 1)[1])
+    link(local_normal(m, -700, 0), colour, "Nrm")
+    if with_time:
+        link(node(m, unreal.MaterialExpressionTime, -700, 150), colour, "Time")
+    output(colour, unreal.MaterialProperty.MP_BASE_COLOR)
+    output(node(m, unreal.MaterialExpressionConstant, -300, 200, r=roughness), unreal.MaterialProperty.MP_ROUGHNESS)
+    output(node(m, unreal.MaterialExpressionConstant, -300, 300, r=0.2), unreal.MaterialProperty.MP_SPECULAR)
+    finish(m)
+    return m
+
+
+def build_rings_material():
+    m = fresh_material(RINGS_MATERIAL)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    m.set_editor_property("two_sided", True)
+    m.set_editor_property("translucency_lighting_mode", unreal.TranslucencyLightingMode.TLM_SURFACE_PER_PIXEL_LIGHTING)
+    rings = custom(m, RINGS_HLSL, ("UV", "Inner"), -400, 0, "Rings", unreal.CustomMaterialOutputType.CMOT_FLOAT4)
+    link(node(m, unreal.MaterialExpressionTextureCoordinate, -700, 0), rings, "UV")
+    link(scalar(m, "RingInnerFraction", GIANT_RING_INNER_FRACTION, -700, 150), rings, "Inner")
+    rgb = node(m, unreal.MaterialExpressionComponentMask, -150, 0, r=True, g=True, b=True, a=False)
+    link(rings, rgb, "")
+    alpha = node(m, unreal.MaterialExpressionComponentMask, -150, 150, r=False, g=False, b=False, a=True)
+    link(rings, alpha, "")
+    output(rgb, unreal.MaterialProperty.MP_BASE_COLOR)
+    output(alpha, unreal.MaterialProperty.MP_OPACITY)
+    output(node(m, unreal.MaterialExpressionConstant, -150, 300, r=0.9), unreal.MaterialProperty.MP_ROUGHNESS)
+    finish(m)
+    return m
+
+
+def build_dust_material():
+    """USpaceDustComponent specks: additive and unlit, faded per instance (custom data 0)."""
+    m = fresh_material(DUST_MATERIAL)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    fade = node(m, unreal.MaterialExpressionPerInstanceCustomData, -600, 0, data_index=0)
+    colour = vector(m, "DustColor", DUST_COLOR, -600, 150)
+    brightness = scalar(m, "DustBrightness", DUST_BRIGHTNESS, -600, 300)
+    tinted = node(m, unreal.MaterialExpressionMultiply, -400, 100)
+    link(colour, tinted, "A")
+    link(brightness, tinted, "B")
+    faded = node(m, unreal.MaterialExpressionMultiply, -200, 0)
+    link(tinted, faded, "A")
+    link(fade, faded, "B")
+    output(faded, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    finish(m)
+    return m
 
 
 def pin(expr, wanted):
@@ -528,7 +803,7 @@ def upsert_actor(eas, actors, label, cls, location=(0.0, 0.0, 0.0), replace_othe
     return actor
 
 
-def build_level(sky_material, planet_mesh, planet_material):
+def build_level(sky_material, planet_mesh, planet_material, body_materials):
     les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
     eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
     if not les.load_level(LEVEL):
@@ -570,6 +845,31 @@ def build_level(sky_material, planet_mesh, planet_material):
     planet.set_editor_property("terrain_material", planet_material)
     planet.get_component_by_class(unreal.StaticMeshComponent).set_static_mesh(planet_mesh)
 
+    # Distant bodies. Mesh first, then the radius: OnConstruction scales by the mesh's bounds.
+    body_class = unreal.load_class(None, "/Script/gamespace.DistantBody")
+    yaw, elevation = math.radians(GIANT_YAW_DEG), math.radians(GIANT_ELEVATION_DEG)
+    giant_cm = tuple(GIANT_DISTANCE_KM * 100000.0 * c for c in
+                     (math.cos(elevation) * math.cos(yaw), math.cos(elevation) * math.sin(yaw), math.sin(elevation)))
+    giant = upsert_actor(eas, actors, "GasGiant_" + GIANT_NAME, body_class, giant_cm, replace_other_class=True)
+    moon = upsert_actor(eas, actors, "Moon_" + MOON_NAME, body_class, PLANET_LOCATION_CM, replace_other_class=True)
+    for actor, name, radius, material in ((giant, GIANT_NAME, GIANT_RADIUS_KM, body_materials["giant"]),
+                                          (moon, MOON_NAME, MOON_RADIUS_KM, body_materials["moon"])):
+        body = actor.get_editor_property("body")
+        body.set_static_mesh(planet_mesh)
+        body.set_material(0, material)
+        actor.set_editor_property("display_name", unreal.Text(name))
+        actor.set_editor_property("radius_km", radius)
+    giant.set_editor_property("ring_outer_radius_km", GIANT_RING_OUTER_KM)
+    giant.set_editor_property("axial_tilt_deg", GIANT_AXIAL_TILT_DEG)
+    giant.set_editor_property("spin_period_seconds", GIANT_SPIN_SECONDS)
+    giant.get_editor_property("rings").set_material(0, body_materials["rings"])
+    moon.set_editor_property("spin_period_seconds", 0.0)
+    for key, value in MOON_ORBIT.items():
+        moon.set_editor_property(key, value)
+    moon.set_editor_property("orbit_center", planet)  # last: re-runs OnConstruction onto the orbit
+    log("%s at %.0f km, %s orbiting %s at %.0f km" % (giant.get_actor_label(), GIANT_DISTANCE_KM, moon.get_actor_label(),
+                                                     planet.get_actor_label(), MOON_ORBIT["orbit_radius_km"]))
+
     # Exposure: clamp auto exposure to one value, i.e. fixed.
     ppv = upsert_actor(eas, actors, "PP_SpaceExposure", unreal.PostProcessVolume)
     ppv.set_editor_property("unbound", True)
@@ -589,7 +889,13 @@ def main():
     cube, planet_mesh = import_sources()
     sky_material = build_starfield_material(cube)
     planet_material = build_planet_material()
-    build_level(sky_material, planet_mesh, planet_material)
+    build_dust_material()
+    body_materials = {
+        "giant": build_body_material(GAS_GIANT_MATERIAL, GAS_GIANT_HLSL, 0.95, with_time=True),
+        "moon": build_body_material(MOON_MATERIAL, MOON_HLSL, 0.9, with_time=False),
+        "rings": build_rings_material(),
+    }
+    build_level(sky_material, planet_mesh, planet_material, body_materials)
 
     start = unreal.Vector(0.0, 0.0, 300.0)
     centre = unreal.Vector(*PLANET_LOCATION_CM)
