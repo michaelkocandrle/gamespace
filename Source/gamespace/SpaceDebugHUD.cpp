@@ -12,7 +12,9 @@
 #include "PlayerCharacter.h"
 #include "QuadSpherePlanet.h"
 #include "SpaceOriginRebasingSubsystem.h"
+#include "Misc/App.h"
 #include "SpaceshipPawn.h"
+#include "SpaceUserSettings.h"
 
 namespace
 {
@@ -356,6 +358,18 @@ void ASpaceDebugHUD::DrawHUD()
 	const int32 Mode = FMath::Clamp(CVarSpaceHud.GetValueOnGameThread(), 0, 2);
 	const float Scale = TextScale * FMath::Clamp(Canvas->ClipY / 1080.f, 0.5f, 2.5f);
 	UFont* Font = GEngine->GetMediumFont();
+
+	if (USpaceUserSettings::ShouldShowFps())
+	{
+		// Smoothed over about half a second, so the number is readable.
+		const float DeltaSeconds = FMath::Max(float(FApp::GetDeltaTime()), 1e-4f);  // real time: also right while paused
+		SmoothedFrameSeconds = SmoothedFrameSeconds <= 0.f ? DeltaSeconds : FMath::Lerp(SmoothedFrameSeconds, DeltaSeconds, 0.05f);
+		const FString Fps = FString::Printf(TEXT("%.0f FPS  %.1f ms"), 1.f / SmoothedFrameSeconds, SmoothedFrameSeconds * 1000.f);
+		float Width = 0.f;
+		float Height = 0.f;
+		GetTextSize(Fps, Width, Height, Font, Scale);
+		DrawText(Fps, FLinearColor(0.6f, 1.f, 0.6f), Canvas->ClipX - Width - 16.f * Scale, 12.f * Scale, Font, Scale);
+	}
 
 	TArray<FLine> Lines;
 	if (const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Pawn))

@@ -26,7 +26,7 @@ class GAMESPACE_API ASpaceDebugHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 
-	/** Off -> compact -> full -> off. Bound to H on the ship and the character. */
+	/** Off -> compact -> full -> off. Bound to H by ASpacePlayerController. */
 	static void CycleDisplayMode();
 
 protected:
@@ -37,4 +37,8 @@ protected:
 	/** Font scale at a 1080-pixel-high viewport; scaled with the actual height. */
 	UPROPERTY(EditAnywhere, Category = "Debug HUD", meta = (ClampMin = "0.3"))
 	float TextScale = 1.0f;
+
+private:
+	/** For the FPS counter (settings: show FPS). */
+	float SmoothedFrameSeconds = 0.f;
 };

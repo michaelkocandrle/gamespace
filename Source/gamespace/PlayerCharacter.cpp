@@ -20,6 +20,7 @@
 #include "InputTriggers.h"
 #include "SpaceDebugHUD.h"
 #include "SpaceshipPawn.h"
+#include "SpaceUserSettings.h"
 #include "UObject/ConstructorHelpers.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogPlayerCharacter, Log, All);
@@ -307,10 +308,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		Input->BindAction(SprintAction, ETriggerEvent::Triggered, this, &APlayerCharacter::HandleSprint);
 		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::HandleSprintReleased);
 		Input->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::HandleInteract);
-		if (ToggleHudAction)
-		{
-			Input->BindAction(ToggleHudAction, ETriggerEvent::Started, this, &APlayerCharacter::HandleToggleHud);
-		}
 	}
 
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -349,7 +346,7 @@ void APlayerCharacter::HandleMoveCompleted(const FInputActionValue& /*Value*/)
 
 void APlayerCharacter::HandleLook(const FInputActionValue& Value)
 {
-	const FVector2D Delta = Value.Get<FVector2D>() * LookSensitivity;
+	const FVector2D Delta = Value.Get<FVector2D>() * (LookSensitivity * USpaceUserSettings::GetMouseSensitivityScale());
 	LookYaw = FRotator::NormalizeAxis(LookYaw + float(Delta.X));
 	LookPitch = FMath::Clamp(LookPitch + float(Delta.Y) * (bInvertPitch ? -1.f : 1.f), MinViewPitch, MaxViewPitch);
 }

@@ -24,6 +24,8 @@ One-shots:
     cruise_charge.wav  3 s riser: a rising tone with quickening tremolo and a sweeping noise band.
     cruise_engage.wav  deep boom with a falling whoosh.
     cruise_drop.wav    falling tone and whoosh, a thump at the start.
+    touchdown.wav      landing gear taking the weight.
+    ui_hover.wav, ui_confirm.wav, menu_ambience.wav (loop)   title screen and menus.
 
 Design rules learned from the first engine loop: keep energy out of 2-5 kHz (it reads as a
 vacuum cleaner or a whine), use narrow noise bands or low partials rather than bright sines, and
@@ -251,6 +253,61 @@ def cruise_drop(rng):
     return normalise(fade(mix, 1.0, 80.0), peak_dbfs=-2.0), False
 
 
+def touchdown(rng):
+    """Landing gear taking the weight: a low thud, a short metallic clank, a hiss of settling."""
+    n = int(RATE * 1.2)
+    t = np.arange(n) / RATE
+    thud = glide_tone(n, 95.0, 48.0, curve=0.4) * np.exp(-t / 0.09) * (1.0 - np.exp(-t / 0.002))
+    body = unit_rms(brickless_lowpass(rng.standard_normal(n), 260.0, 4)) * np.exp(-t / 0.12)
+    clank = 0.0
+    for frequency, decay, weight in ((410.0, 0.10, 1.0), (655.0, 0.07, 0.6), (1030.0, 0.05, 0.3)):
+        clank = clank + weight * np.sin(2.0 * np.pi * frequency * t + rng.uniform(0, 6.28)) * np.exp(-t / decay)
+    hiss = sweep_noise(rng, n, 1400.0, 500.0, 1.2) * np.exp(-np.maximum(t - 0.08, 0.0) / 0.35) * np.clip((t - 0.05) / 0.05, 0.0, 1.0)
+    mix = 1.0 * thud + 0.45 * body + 0.10 * unit_rms(clank) * np.exp(-t / 0.08) + 0.12 * hiss
+    mix = brickless_lowpass(mix, 4000.0, 3)
+    return normalise(fade(mix, 1.0, 100.0), peak_dbfs=-2.0), False
+
+
+def ui_hover(rng):
+    """A soft, short tick: filtered noise click plus a quiet low blip."""
+    n = int(RATE * 0.07)
+    t = np.arange(n) / RATE
+    blip = np.sin(2.0 * np.pi * 740.0 * t) * np.exp(-t / 0.018)
+    click = unit_rms(brickless_lowpass(rng.standard_normal(n), 2500.0, 2)) * np.exp(-t / 0.006)
+    mix = 0.7 * blip + 0.25 * click
+    return normalise(fade(mix, 0.5, 20.0), peak_dbfs=-6.0), False
+
+
+def ui_confirm(rng):
+    """Confirm: two rising tones a fifth apart with a soft low body."""
+    n = int(RATE * 0.32)
+    t = np.arange(n) / RATE
+    first = np.sin(2.0 * np.pi * 523.0 * t) * np.exp(-t / 0.07)
+    second = np.sin(2.0 * np.pi * 784.0 * t) * np.exp(-np.maximum(t - 0.07, 0.0) / 0.09) * (t > 0.07)
+    body = np.sin(2.0 * np.pi * 131.0 * t) * np.exp(-t / 0.06)
+    mix = 0.6 * first + 0.55 * second + 0.4 * body
+    mix = brickless_lowpass(mix, 3500.0, 2)
+    return normalise(fade(mix, 1.0, 40.0), peak_dbfs=-4.0), False
+
+
+def menu_ambience(rng):
+    """Title screen: a slow, dark pad. Long loop so it does not feel repetitive."""
+    L = Loop(rng, 24.0)
+    f = L.f
+    pad = 0.0
+    # A minor-ish stack, each voice breathing at its own slow rate (whole cycles over the loop).
+    for frequency, weight, rate, phase in ((55.0, 0.8, 1.0 / 24.0, 0.0), (82.5, 0.5, 2.0 / 24.0, 1.1),
+                                           (110.0, 0.55, 3.0 / 24.0, 2.3), (130.8, 0.35, 1.0 / 24.0, 0.7),
+                                           (164.8, 0.25, 2.0 / 24.0, 1.9), (220.0, 0.15, 5.0 / 24.0, 0.4)):
+        voice = L.tone(frequency) + 0.7 * L.tone(frequency + 1.0 / 24.0, phase=1.7)
+        pad = pad + weight * voice * L.lfo(rate, 0.35, phase)
+    air = L.noise(highpass(f, 500.0, 2) * lowpass(f, 2500.0, 3)) * L.lfo(1.0 / 24.0, 0.6, 0.5)
+    rumble = L.noise(highpass(f, 30.0, 3) * lowpass(f, 90.0, 4))
+    mix = unit_rms(pad) + 0.06 * air + 0.25 * rumble
+    mix = L.filtered(mix, lowpass(f, 3000.0, 3))
+    return normalise(mix, rms_dbfs=-19.0, peak_dbfs=-3.0), True
+
+
 SOUNDS = {
     "engine_loop": engine_loop,
     "engine_hum": engine_hum,
@@ -260,6 +317,10 @@ SOUNDS = {
     "cruise_charge": cruise_charge,
     "cruise_engage": cruise_engage,
     "cruise_drop": cruise_drop,
+    "touchdown": touchdown,
+    "ui_hover": ui_hover,
+    "ui_confirm": ui_confirm,
+    "menu_ambience": menu_ambience,
 }
 
 

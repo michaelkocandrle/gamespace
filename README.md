@@ -621,19 +621,53 @@ was the first). If a build or editor start ever fails with Code Integrity event 
 Nothing needs placing by hand: the game mode supplies the pawn and the level has a
 `PlayerStart`.
 
-## Playing fullscreen outside the editor
+## Playable build: title screen, pause menu, settings
 
-The editor viewport costs frame rate and screen space. Two ways out:
+`.\Tools\Package.ps1` (editor closed, ~3-5 min) cooks a Development build into
+`C:\gamespace\Builds\Gamespace`. Double-click `Windows\gamespace.exe` there, or run
+`.\Tools\Play.ps1`. After packaging the script checks that key assets C++ loads by path are in
+the build.
+
+- **Title screen** `/Game/Maps/MainMenu` (built by `Tools/Assets/build_main_menu.py`, the game's
+  `GameDefaultMap`; the editor still starts on TestSpace): the Vanguard with Orun and Keth behind
+  it, a slowly drifting camera (`MenuCamera` around the actor tagged `MenuOrbitCenter`), ambient
+  music. HRÁT / NASTAVENÍ / KONEC. Game mode `ASpaceMenuGameMode`: no pawn.
+- **Pause menu**: Escape (F10 too; in PIE Escape stops the session, so use F10 there) pauses the
+  game: POKRAČOVAT / NASTAVENÍ / HLAVNÍ MENU / UKONČIT HRU.
+- **Settings** (`USpaceUserSettings`, a `UGameUserSettings` subclass registered in
+  DefaultEngine.ini, saved to `GameUserSettings.ini`): window mode, resolution, overall quality,
+  resolution scale, VSync, frame limit; master / effects / music volume (heard live while
+  dragging); mouse sensitivity (multiplies ship steering, free look and on-foot look); inverted
+  ship pitch; HUD mode; FPS counter. POUŽÍT applies and saves, Escape / ZPĚT discards. First
+  start: borderless fullscreen at the desktop resolution, quality High.
+- **Global keys** live in `ASpacePlayerController`'s own mapping context (priority 100): Escape /
+  F10 menu, H HUD (saved to the settings). Pawns no longer bind H.
+- The menus are plain Slate (`SSpaceMenu`), no UMG assets. UI sounds `/Game/UI/Audio`.
+
+**Cooking and path-loaded assets.** The cooker only follows references from the cooked maps.
+Everything C++ loads by path (input actions and contexts, sounds, dust material) was missing from
+the first packaged builds: no sound, no H. `Config/DefaultGame.ini` now lists `MapsToCook` and
+`DirectoriesToAlwaysCook` (`/Game/Input`, `Ships`, `UI`, `Environments`, `Planets`,
+`Characters`, `Blueprints`); add any new folder loaded by path there.
+
+Headless: `Tools/Tests/test_menu_settings.py`.
+
+## Playing fullscreen outside the editor
 
 | Command | What runs | When |
 | --- | --- | --- |
-| `.\Tools\Package.ps1` then `.\Tools\Play.ps1` | Cooked Development build in `Saved\Packaged\Windows`, borderless fullscreen at the desktop resolution | Normal play testing. Re-package after content or C++ changes (editor closed; the first package is slow, later ones are incremental). |
-| `.\Tools\Play.ps1 -Editor` | `UnrealEditor.exe -game`, uncooked | Quick look without packaging. Loads slower; materials the editor has not compiled yet can render grey. |
+| `.\Tools\Package.ps1` then `.\Tools\Play.ps1` | The cooked build in `C:\gamespace\Builds\Gamespace`, window mode and resolution from its settings | Normal play testing. Re-package after content or C++ changes (editor closed). |
+| `.\Tools\Play.ps1 -Editor` | `UnrealEditor.exe -game` on TestSpace, uncooked | Quick look without packaging. Loads slower; materials the editor has not compiled yet can render grey. |
 
-`Play.ps1 -Windowed -Width 1600 -Height 900` for a window, `-Exclusive` for exclusive
-fullscreen. In game: `~` console (`stat fps`, `stat unit`), `Alt+Enter` window/fullscreen,
-`Alt+F4` quit.
+`Play.ps1 -Windowed -Width 1600 -Height 900` (or `-Exclusive`) overrides the settings for one
+launch. In game: `~` console (`stat fps`, `stat unit`), `Alt+Enter` window/fullscreen.
 
 Inside the editor: Play dropdown > **New Editor Window (PIE)** opens a separate window
 (`Alt+Enter` makes it fullscreen), or press `F11` in the viewport for immersive mode. `Shift+F1`
 frees the mouse.
+
+## Handoff
+
+`Docs/HANDOFF.md` is the state of the project for a new session: collaboration rules, the master
+reference folder `starcitizenreference/`, code map, tests, known issues and the Star Citizen
+flight system roadmap.

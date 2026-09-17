@@ -1,10 +1,17 @@
 <#
 .SYNOPSIS
-    Builds a standalone Windows game (cooked, Development) into Saved\Packaged\Windows.
+    Builds the standalone Windows game (cooked, Development) into C:\gamespace\Builds\Gamespace.
 
 .DESCRIPTION
     The packaged game runs without the editor: full frame rate, real fullscreen, the same
     shaders and materials the finished game would use. Run it with Tools\Play.ps1.
+
+    The game starts on the title screen (MainMenu). Double-click Windows\gamespace.exe in the
+    build folder, or run Tools\Play.ps1. The folder is self-contained: copy it anywhere.
+
+    After packaging the script checks that assets C++ loads by path (sounds, input, materials) made
+    it into the build; the cooker only follows references, see DirectoriesToAlwaysCook in
+    Config\DefaultGame.ini.
 
     Close the editor first (cooking loads the same assets). The first run takes long
     (C++ game build, shader compilation for every material); later runs only redo what changed.
@@ -17,13 +24,15 @@ param(
     [string]$Project = (Join-Path $PSScriptRoot "..\gamespace.uproject"),
     [string]$EngineDir = "C:\Program Files\Epic Games\UE_5.8",
     [ValidateSet("Development", "Shipping")]
-    [string]$Config = "Development"
+    [string]$Config = "Development",
+    # Default: <folder above the project>\Builds\Gamespace, i.e. C:\gamespace\Builds\Gamespace
+    [string]$OutputDir = ""
 )
 
 $ErrorActionPreference = "Stop"
 $Project = (Resolve-Path $Project).Path
 $projectDir = Split-Path $Project
-$archive = Join-Path $projectDir "Saved\Packaged"
+$archive = if ($OutputDir) { $OutputDir } else { Join-Path (Split-Path $projectDir) "Builds\Gamespace" }
 $uat = Join-Path $EngineDir "Engine\Build\BatchFiles\RunUAT.bat"
 
 $projectName = [IO.Path]::GetFileName($Project)
@@ -43,6 +52,23 @@ $exe = Join-Path $archive "Windows\gamespace.exe"
 if ($code -ne 0 -or -not (Test-Path $exe)) {
     Write-Host "PACKAGE FAILED (exit $code, $minutes min). The UAT log is under $EngineDir\Engine\Programs\AutomationTool\Saved\Logs."
     exit 1
+}
+# Assets loaded by path from C++ must be in the build (they were not, before DirectoriesToAlwaysCook).
+$manifest = Join-Path $archive "Windows\Manifest_UFSFiles_Win64.txt"
+$required = @(
+    "Maps/MainMenu.umap", "Maps/TestSpace.umap",
+    "Ships/Audio/SW_EngineLoop.uasset", "Ships/Audio/SW_EngineHum.uasset", "Ships/Audio/SW_CruiseCharge.uasset",
+    "UI/Audio/SW_MenuAmbience.uasset", "Input/IMC_Spaceship.uasset", "Input/IA_CruiseDrive.uasset",
+    "Environments/Space/M_SpaceDust.uasset", "Ships/Vanguard/Blueprints/BP_Ship_Vanguard.uasset"
+)
+if (Test-Path $manifest) {
+    $listed = Get-Content $manifest -Raw
+    $missing = $required | Where-Object { $listed -notlike "*Content/$_*" }
+    if ($missing) {
+        Write-Host "PACKAGE INCOMPLETE: not in the build: $($missing -join ', ')"
+        exit 1
+    }
+    Write-Host "Content check OK ($($required.Count) key assets present)"
 }
 Write-Host "PACKAGE OK ($minutes min): $exe"
 Write-Host "Start it with: .\Tools\Play.ps1"

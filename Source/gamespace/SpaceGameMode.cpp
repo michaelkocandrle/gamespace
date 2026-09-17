@@ -3,6 +3,7 @@
 #include "SpaceGameMode.h"
 
 #include "SpaceDebugHUD.h"
+#include "SpacePlayerController.h"
 #include "SpaceshipPawn.h"
 
 ASpaceGameMode::ASpaceGameMode()
@@ -11,4 +12,6 @@ ASpaceGameMode::ASpaceGameMode()
 	// Blueprint child of this game mode can still override it for a specific level.
 	DefaultPawnClass = ASpaceshipPawn::StaticClass();
 	HUDClass = ASpaceDebugHUD::StaticClass();
+	// Escape menu, H, settings.
+	PlayerControllerClass = ASpacePlayerController::StaticClass();
 }

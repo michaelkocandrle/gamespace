@@ -466,7 +466,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> InteractAction;
 
-	/** Digital, pressed: cycle the debug HUD (H). */
+	/** Unused since ASpacePlayerController binds H for every pawn; kept so Blueprints that set it still load. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> ToggleHudAction;
 
@@ -960,8 +960,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
 	TObjectPtr<USoundBase> CruiseDropSound;
 
+	/** Gear touching down when the ship becomes Landed. /Game/Ships/Audio/SW_Touchdown when empty. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
+	TObjectPtr<USoundBase> TouchdownSound;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
-	float EngineHumVolume = 0.3f;
+	float EngineHumVolume = 0.4f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
 	float BoostVolume = 0.6f;

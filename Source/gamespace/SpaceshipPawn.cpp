@@ -26,6 +26,7 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Sound/SoundBase.h"
 #include "SpaceDustComponent.h"
+#include "SpaceUserSettings.h"
 #include "UObject/ConstructorHelpers.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSpaceship, Log, All);
@@ -58,6 +59,7 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const CruiseChargeSoundPath = TEXT("/Game/Ships/Audio/SW_CruiseCharge.SW_CruiseCharge");
 	const TCHAR* const CruiseEngageSoundPath = TEXT("/Game/Ships/Audio/SW_CruiseEngage.SW_CruiseEngage");
 	const TCHAR* const CruiseDropSoundPath = TEXT("/Game/Ships/Audio/SW_CruiseDrop.SW_CruiseDrop");
+	const TCHAR* const TouchdownSoundPath = TEXT("/Game/Ships/Audio/SW_Touchdown.SW_Touchdown");
 
 	/** The material parameter the ship animates on thruster and strobe slots (M_Ship_Hull). */
 	const FName EmissiveStrengthParameter(TEXT("EmissiveStrength"));
@@ -269,14 +271,7 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(InteractAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleInteract);
 	}
 
-	if (!ToggleHudAction)
-	{
-		ToggleHudAction = SpaceshipPawnDefaults::LoadOptional<UInputAction>(SpaceshipPawnDefaults::ToggleHudActionPath);
-	}
-	if (ToggleHudAction)
-	{
-		Input->BindAction(ToggleHudAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleToggleHud);
-	}
+	// H (HUD) and Escape (menu) are bound by ASpacePlayerController, the same in the ship and on foot.
 
 	if (FlightAssistAction)
 	{
@@ -337,10 +332,6 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			if (FreeLookAction && !IsMapped(FreeLookAction))
 			{
 				InteractMappingContext->MapKey(FreeLookAction, EKeys::RightMouseButton);
-			}
-			if (ToggleHudAction && !IsMapped(ToggleHudAction))
-			{
-				InteractMappingContext->MapKey(ToggleHudAction, EKeys::H);
 			}
 			if (FlightAssistAction && !IsMapped(FlightAssistAction))
 			{
@@ -755,12 +746,13 @@ void ASpaceshipPawn::UpdateFreeLook(float DeltaSeconds)
 	if (bFreeLookHeld)
 	{
 		// Mouse up looks up; pitch is not affected by bInvertPitch, which is about steering.
-		FreeLookTarget.X += MouseLookDelta.X * FreeLookSensitivity;
+		const float LookScale = FreeLookSensitivity * USpaceUserSettings::GetMouseSensitivityScale();
+		FreeLookTarget.X += MouseLookDelta.X * LookScale;
 		if (FreeLookMaxYawDeg < 180.f)
 		{
 			FreeLookTarget.X = FMath::Clamp(FreeLookTarget.X, -FreeLookMaxYawDeg, FreeLookMaxYawDeg);
 		}
-		FreeLookTarget.Y = FMath::Clamp(FreeLookTarget.Y + MouseLookDelta.Y * FreeLookSensitivity, -FreeLookMaxPitchDeg, FreeLookMaxPitchDeg);
+		FreeLookTarget.Y = FMath::Clamp(FreeLookTarget.Y + MouseLookDelta.Y * LookScale, -FreeLookMaxPitchDeg, FreeLookMaxPitchDeg);
 		MouseLookDelta = FVector2D::ZeroVector;
 		LookInput = FVector2D::ZeroVector;
 	}
@@ -900,12 +892,22 @@ FTransform ASpaceshipPawn::ComputeExitTransform() const
 	const float CapsuleRadius = PilotDefaults ? PilotDefaults->GetSimpleCollisionRadius() : 42.f;
 	const float CapsuleHalfHeight = PilotDefaults ? PilotDefaults->GetSimpleCollisionHalfHeight() : 96.f;
 
-	FVector Flat = FVector::VectorPlaneProject(GetActorForwardVector(), Up).GetSafeNormal();
-	if (Flat.IsNearlyZero())
+	// Facing the ship: the character's camera then sits on the far side, away from the hull, and
+	// shows the ship. Facing along the ship's heading put the camera boom into a wing, which
+	// pulled the camera in for a moment after getting out.
+	auto FacingFrom = [this, &Up](const FVector& Location)
 	{
-		Flat = FVector::VectorPlaneProject(GetActorUpVector(), Up).GetSafeNormal();
-	}
-	const FQuat Facing = FRotationMatrix::MakeFromXZ(Flat, Up).ToQuat();
+		FVector Flat = FVector::VectorPlaneProject(GetActorLocation() - Location, Up).GetSafeNormal();
+		if (Flat.IsNearlyZero())
+		{
+			Flat = FVector::VectorPlaneProject(GetActorForwardVector(), Up).GetSafeNormal();
+		}
+		if (Flat.IsNearlyZero())
+		{
+			Flat = FVector::VectorPlaneProject(GetActorUpVector(), Up).GetSafeNormal();
+		}
+		return FRotationMatrix::MakeFromXZ(Flat, Up).ToQuat();
+	};
 
 	auto OnGround = [&](FVector Location)
 	{
@@ -929,13 +931,14 @@ FTransform ASpaceshipPawn::ComputeExitTransform() const
 		const FVector Location = OnGround(Candidate);
 		if (IsExitSpotFree(Location, Up, CapsuleRadius, CapsuleHalfHeight))
 		{
-			return FTransform(Facing, Location);
+			return FTransform(FacingFrom(Location), Location);
 		}
 	}
 	// Nowhere free (boxed in): the farthest spot beside the ship, where at least the hull is not.
 	const FVector Fallback = Candidates.Num() > 0 ? Candidates.Last(3) : GetActorLocation() + GetActorRightVector() * 1000.0;
 	UE_LOG(LogSpaceship, Warning, TEXT("%s: no free exit spot among %d candidates; using %s"), *GetName(), Candidates.Num(), *Fallback.ToString());
-	return FTransform(Facing, OnGround(Fallback));
+	const FVector FallbackLocation = OnGround(Fallback);
+	return FTransform(FacingFrom(FallbackLocation), FallbackLocation);
 }
 
 APawn* ASpaceshipPawn::ExitShip()
@@ -1240,7 +1243,7 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 	// the same hand movement turned half as fast. Pushing a spring-centred stick instead makes
 	// the steady-state deflection depend on mouse speed per second, not per frame.
 	MouseStick *= FMath::Exp(-MouseRecenterRate * DeltaSeconds);
-	MouseStick += MouseLookDelta * MouseSensitivity;
+	MouseStick += MouseLookDelta * (MouseSensitivity * USpaceUserSettings::GetMouseSensitivityScale());
 	MouseStick.X = FMath::Clamp(MouseStick.X, -1., 1.);
 	MouseStick.Y = FMath::Clamp(MouseStick.Y, -1., 1.);
 	MouseLookDelta = FVector2D::ZeroVector;
@@ -1249,7 +1252,8 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 	const FVector2D Command(
 		FMath::Clamp(MouseStick.X + LookInput.X, -1., 1.),
 		FMath::Clamp(MouseStick.Y + LookInput.Y, -1., 1.));
-	const float PitchCommand = bFreeLookHeld ? 0.f : Command.Y * (bInvertPitch ? -1.f : 1.f);
+	const bool bInvert = bInvertPitch != USpaceUserSettings::IsShipPitchInverted();
+	const float PitchCommand = bFreeLookHeld ? 0.f : Command.Y * (bInvert ? -1.f : 1.f);
 	const float YawCommand = bFreeLookHeld ? 0.f : Command.X;
 	// A ship at kilometres per second turns wide.
 	const float RateScale = CruiseState == ECruiseState::Active ? CruiseTurnScale : 1.f;
@@ -1594,6 +1598,7 @@ void ASpaceshipPawn::EnterLanded()
 	MouseStick = FVector2D::ZeroVector;
 	ThrottleSetting = 0.f;
 	bBoostActive = false;
+	PlayOneShot(TouchdownSound, FMath::Clamp(LinearVelocity.Size() / FMath::Max(LandingMaxSpeed, 1.f), 0.4f, 1.f));
 	UE_LOG(LogSpaceship, Log, TEXT("%s landed: slope %.1f deg, tilt %.1f deg, gap %.0f cm"),
 		*GetName(), GroundSlopeDeg, GroundTiltDeg, GroundGapCm);
 }
@@ -1700,6 +1705,7 @@ void ASpaceshipPawn::SetupAudioLayers()
 	Load(CruiseChargeSound, CruiseChargeSoundPath);
 	Load(CruiseEngageSound, CruiseEngageSoundPath);
 	Load(CruiseDropSound, CruiseDropSoundPath);
+	Load(TouchdownSound, TouchdownSoundPath);
 
 	// Created at runtime rather than as default subobjects: nothing to configure per ship, and
 	// Blueprints made before these layers existed need no changes.
@@ -1729,7 +1735,7 @@ UAudioComponent* ASpaceshipPawn::PlayOneShot(USoundBase* Sound, float VolumeScal
 	{
 		return nullptr;
 	}
-	return UGameplayStatics::SpawnSound2D(this, Sound, OneShotVolume * VolumeScale);
+	return UGameplayStatics::SpawnSound2D(this, Sound, OneShotVolume * VolumeScale * USpaceUserSettings::GetEffectsVolume());
 }
 
 void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
@@ -1739,12 +1745,17 @@ void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
 	// Eased rather than snapped, so the engines spool up and down instead of clicking. The load is
 	// what the thrusters really do: braking and holding altitude are heard too, a steady cruise
 	// through empty space is quiet.
-	EngineLoad = FMath::FInterpTo(EngineLoad, bPiloted ? EngineDemand : 0.f, DeltaSeconds, EngineSpoolRate);
+	// With flight assist the engines also run at the lever: an idling drone that grows with the set
+	// speed, so steady flight is never silent.
+	const float LeverLoad = (bFlightAssist || CruiseState == ECruiseState::Active) ? 0.35f * FMath::Abs(ThrottleSetting) : 0.f;
+	EngineLoad = FMath::FInterpTo(EngineLoad, bPiloted ? FMath::Max(EngineDemand, LeverLoad) : 0.f, DeltaSeconds, EngineSpoolRate);
 	EngineBoostBlend = FMath::FInterpTo(EngineBoostBlend, bPiloted && bBoostActive ? 1.f : 0.f, DeltaSeconds, EngineSpoolRate);
 	HumBlend = FMath::FInterpTo(HumBlend, bPiloted ? 1.f : 0.f, DeltaSeconds, 1.5f);
 
-	auto Drive = [](UAudioComponent* Layer, float Volume, float Pitch)
+	const float Effects = USpaceUserSettings::GetEffectsVolume();
+	auto Drive = [Effects](UAudioComponent* Layer, float Volume, float Pitch)
 	{
+		Volume *= Effects;
 		if (!Layer || !Layer->GetSound())
 		{
 			return;
