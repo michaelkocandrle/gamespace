@@ -486,6 +486,18 @@ come from `FSlateRoundedBoxBrush` and the fills from `FSlateDrawElement::MakeGra
 radius. A rounded box takes its colour from the **draw tint**, not from the brush - passing it on the
 brush renders solid white.
 
+**Type**: `Content/UI/Fonts` holds the HUD's own faces with their licences - **Rajdhani SemiBold**
+for labels, switch pills and gauge titles, **Share Tech Mono** for every number (speed, limit, G,
+percentages: fixed-width digits do not dance as the value changes), both SIL OFL 1.1. They are loaded
+from the file (`SpaceHudStyle::LabelFont` / `NumberFont`), not imported as Font assets, because the
+font importer needs a Slate application and the headless editor this project scripts with has none;
+each falls back to an engine face if its file goes missing. Raw files under `Content` are not cooked,
+so `DirectoriesToAlwaysStageAsUFS` in `Config/DefaultGame.ini` stages them into the pak.
+
+**Life**: bars ease towards their value (about 1/11 s) so a jump in speed springs rather than snaps,
+and lit lamps and fills breathe at 0.55 Hz by 8 %. One clock (`USpaceFlightHud::DebugAdvance`) drives
+both, which is also how the tests step the animation without Slate.
+
 `USpaceFlightHud::MakeState(Ship, HudMode)` gathers everything shown into `FSpaceFlightHudState` and
 `ApplyState` only displays it, so headless tests check the values without a screen:
 `Tools/Tests/test_flight_hud_sc1c.py`. Layout constants (offsets +-300 px from the centre, gauge sizes)

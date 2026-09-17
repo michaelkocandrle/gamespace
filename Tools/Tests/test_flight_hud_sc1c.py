@@ -82,14 +82,17 @@ check("lamps are the painted widget with an animated intensity", isinstance(lamp
 # labels, and an outline so both stay readable over a bright sky.
 speed_font = hud.debug_get_text_widget("SpeedText").get_editor_property("font")
 label_font = hud.debug_get_text_widget("LampLabel_CPLD").get_editor_property("font")
-check("speed number in the thin face, outlined",
-      "Light" in str(speed_font.get_editor_property("typeface_font_name"))
-      and speed_font.get_editor_property("outline_settings").get_editor_property("outline_size") >= 1,
-      "%s" % speed_font.get_editor_property("typeface_font_name"))
+check("speed number is outlined so it reads over a bright sky",
+      speed_font.get_editor_property("outline_settings").get_editor_property("outline_size") >= 1)
 # Labels use the engine's condensed Roboto, which Slate's typefaces do not expose, so the HUD loads
 # the .ttf by path: a path font has no typeface name, while the fallback (Bold) would have one.
+# A face loaded from a file has neither a font object nor a typeface name; the engine fallbacks
+# (Roboto Bold / DroidSansMono) would have both, so this proves the project fonts are the ones in use.
+check("numbers use the project's Share Tech Mono, not an engine fallback",
+      speed_font.get_editor_property("font_object") is None and str(speed_font.get_editor_property("typeface_font_name")) in ("", "None"))
+check("labels use the project's Rajdhani", label_font.get_editor_property("font_object") is None)
 check("labels in the condensed face, small and wide-spaced", str(label_font.get_editor_property("typeface_font_name")) in ("", "None")
-      and label_font.get_editor_property("letter_spacing") >= 150 and label_font.get_editor_property("size") <= 8,
+      and label_font.get_editor_property("letter_spacing") >= 100 and label_font.get_editor_property("size") <= 9,
       "typeface %r, spacing %d, size %d" % (str(label_font.get_editor_property("typeface_font_name")),
                                             label_font.get_editor_property("letter_spacing"), label_font.get_editor_property("size")))
 check("numbers are small too (the reference keeps type quiet)", speed_font.get_editor_property("size") <= 16,

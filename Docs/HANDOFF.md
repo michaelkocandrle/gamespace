@@ -257,6 +257,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `Assets/import_ship.py` + `ship_materials.py` | Import lodi z Blenderu. |
 | `Assets/generate_ship_sounds.py` → `build_ship_audio.py` | Generátor zvuků (numpy) a jejich import. |
 | `Assets/add_*_input.py` | Přidávání mapování kláves (pouze append). |
+| `Content/UI/Fonts/` | Fonty HUD (Rajdhani, Share Tech Mono) i s licencemi SIL OFL. Načítají se ze souboru, ne jako Font asset: importér fontu potřebuje Slate aplikaci, kterou headless editor nemá. Do balíčku je dostává `DirectoriesToAlwaysStageAsUFS` v `Config/DefaultGame.ini`. |
 | `Assets/install_mannequin_pack.py`, `generate_milky_way_glow.py` | Jednorázová instalace a textura. |
 | `Blender/gamespace_ship_export.py` | Export lodí z Blenderu (FBX, manifest, validace). |
 | `Blender/cockpit_view_survey.py` | Změří, co pilot vidí: paprsky přes zorné pole proti skutečnému modelu, kolik % výhledu je volných a co ho blokuje. Po změně modelu nebo pozice kamery. |

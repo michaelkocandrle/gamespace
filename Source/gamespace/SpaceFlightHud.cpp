@@ -36,16 +36,31 @@ namespace SpaceHudStyle
 	const FLinearColor NavBlue(0.45f, 0.65f, 1.f, 0.95f);
 
 	/**
-	 * The engine's Roboto typefaces (Regular / Bold / Light / Mono) are ordinary UI faces. The one
-	 * condensed cut it ships, Roboto-BoldCondensed, is not among them, so the HUD asks for the file
-	 * directly; it is packed with the game like the rest of Engine/Content/Slate. Falls back to Bold
-	 * if the file ever moves.
+	 * The HUD's own faces, after the reference's instrument type: Rajdhani SemiBold for labels
+	 * (squarish condensed technical sans) and Share Tech Mono for the numbers, where a fixed width
+	 * keeps digits from dancing as speed changes. Both are SIL OFL 1.1, in Content/UI/Fonts with
+	 * their licences, staged into the pak by DirectoriesToAlwaysStageAsUFS.
+	 *
+	 * They are loaded from the file rather than imported as Font assets: the font importer needs a
+	 * Slate application, which the headless editor this project scripts with does not have. Each
+	 * falls back to an engine face if its file is ever missing, so the HUD never loses its text.
 	 */
-	FSlateFontInfo CondensedFont(float Size)
+	FSlateFontInfo ProjectFont(const TCHAR* FileName, const FName Fallback, float Size)
 	{
-		static const FString Path = FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-BoldCondensed.ttf");
-		static const bool bExists = FPaths::FileExists(Path);
-		return bExists ? FSlateFontInfo(Path, Size) : FCoreStyle::GetDefaultFontStyle("Bold", Size);
+		const FString Path = FPaths::ProjectContentDir() / TEXT("UI/Fonts") / FileName;
+		return FPaths::FileExists(Path) ? FSlateFontInfo(Path, Size) : FCoreStyle::GetDefaultFontStyle(Fallback, Size);
+	}
+
+	/** Labels, switch pills, gauge titles. */
+	FSlateFontInfo LabelFont(float Size)
+	{
+		return ProjectFont(TEXT("Rajdhani-SemiBold.ttf"), TEXT("Bold"), Size);
+	}
+
+	/** Speed, G load, percentages. */
+	FSlateFontInfo NumberFont(float Size)
+	{
+		return ProjectFont(TEXT("ShareTechMono-Regular.ttf"), TEXT("Mono"), Size);
 	}
 
 	const FSlateBrush* White()
@@ -396,8 +411,10 @@ UTextBlock* USpaceFlightHud::MakeText(const FName Name, float Size, int32 Letter
 	UTextBlock* Text = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), Name);
 	// "Mono" is the engine's DroidSansMono (Slate's built-in typefaces, no asset to import): digits
 	// keep their place as speed changes, and it reads as instrument type rather than UI text.
-	// "Condensed" is the engine's Roboto BoldCondensed loaded from its file; the rest are Slate's own.
-	FSlateFontInfo Font = Weight == FName(TEXT("Condensed")) ? SpaceHudStyle::CondensedFont(Size) : FCoreStyle::GetDefaultFontStyle(Weight, Size);
+	// "Label" and "Number" are the HUD's own faces from Content/UI/Fonts; anything else is Slate's own.
+	FSlateFontInfo Font = Weight == FName(TEXT("Label")) ? SpaceHudStyle::LabelFont(Size)
+		: Weight == FName(TEXT("Number")) ? SpaceHudStyle::NumberFont(Size)
+		: FCoreStyle::GetDefaultFontStyle(Weight, Size);
 	Font.LetterSpacing = LetterSpacing;
 	// A thin dark outline instead of a drop shadow: readable against the sun and a bright planet
 	// from every side.
@@ -500,7 +517,7 @@ void USpaceFlightHud::BuildTree()
 	{
 		const FName Key(LampName);
 		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("LampRow_%s"), LampName)));
-		UTextBlock* Label = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 8.f, 170, TEXT("Condensed"));
+		UTextBlock* Label = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 9.f, 120, TEXT("Label"));
 		Label->SetText(FText::FromString(LampName));
 		Label->SetJustification(ETextJustify::Center);
 		LampLabels.Add(Key, Label);
@@ -522,11 +539,11 @@ void USpaceFlightHud::BuildTree()
 	AddToVertical(LeftContent, Panelled(TEXT("LampPanel"), LampBox, FMargin(10.f, 8.f, 10.f, 3.f)), HAlign_Right, FMargin(0.f, 0.f, 0.f, 10.f));
 	UVerticalBox* SpeedBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SpeedBox"));
 	AddToVertical(SpeedBox, Sized(TEXT("SpeedGaugeBox"), Gauge(TEXT("SpeedGauge"), false, 10), 11.f, 230.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 10.f));
-	AddToVertical(SpeedBox, MakeText(TEXT("SpeedText"), 15.f, 20, TEXT("Light")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 1.f));
-	AddToVertical(SpeedBox, MakeText(TEXT("LimitText"), 7.f, 130, TEXT("Condensed")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
+	AddToVertical(SpeedBox, MakeText(TEXT("SpeedText"), 15.f, 20, TEXT("Number")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 1.f));
+	AddToVertical(SpeedBox, MakeText(TEXT("LimitText"), 9.f, 40, TEXT("Number")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
 	UHorizontalBox* GRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("GRow"));
 	AddToHorizontal(GRow, Sized(TEXT("GGaugeBox"), Gauge(TEXT("GGauge"), true, 4), 52.f, 6.f), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
-	AddToHorizontal(GRow, MakeText(TEXT("GText"), 10.f, 20, TEXT("Light")), VAlign_Center, FMargin(0.f));
+	AddToHorizontal(GRow, MakeText(TEXT("GText"), 11.f, 20, TEXT("Number")), VAlign_Center, FMargin(0.f));
 	AddToVertical(SpeedBox, GRow, HAlign_Right, FMargin(0.f));
 	AddToVertical(LeftContent, Panelled(TEXT("SpeedPanel"), SpeedBox, FMargin(12.f, 10.f)), HAlign_Right, FMargin(0.f));
 	AddToHorizontal(Left, LeftContent, VAlign_Center, FMargin(0.f, 0.f, 14.f, 0.f));
@@ -541,11 +558,11 @@ void USpaceFlightHud::BuildTree()
 	auto Column = [&](const TCHAR* Label, const FName GaugeName, const FName TextName, const FMargin& SlotPadding)
 	{
 		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), *GaugeName.ToString())));
-		UTextBlock* Title = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 7.f, 200, TEXT("Condensed"));
+		UTextBlock* Title = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 8.f, 160, TEXT("Label"));
 		Title->SetText(FText::FromString(Label));
 		AddToVertical(Box, Title, HAlign_Center, FMargin(0.f, 0.f, 0.f, 6.f));
 		AddToVertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 9.f, 180.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
-		AddToVertical(Box, MakeText(TextName, 8.f, 20, TEXT("Condensed")), HAlign_Center, FMargin(0.f));
+		AddToVertical(Box, MakeText(TextName, 9.f, 20, TEXT("Number")), HAlign_Center, FMargin(0.f));
 		AddToHorizontal(Columns, Box, VAlign_Center, SlotPadding);
 	};
 	Column(TEXT("BST"), TEXT("BoostGauge"), TEXT("BoostText"), FMargin(0.f, 0.f, 22.f, 0.f));
@@ -680,7 +697,7 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 	}
 	SetText(TEXT("SpeedText"), SpaceHudStyle::Speed(State.SpeedCmS), State.ForwardSpeedCmS < -50.f ? Red : Cyan);
 	SetText(TEXT("LimitText"), FString::Printf(TEXT("LIM %s  %3.0f%%"), *SpaceHudStyle::Speed(State.SpeedLimitCmS), State.LimiterFraction * 100.f),
-		Faded(Cyan, 0.7f));
+		Faded(Cyan, 0.85f));
 
 	// --- G meter ------------------------------------------------------------------------------
 	const FLinearColor GColor = State.GForce > State.GSafeMaxG + 0.05f ? Red : State.GForce > State.GSafeMaxG * 0.7f ? Amber : Cyan;
