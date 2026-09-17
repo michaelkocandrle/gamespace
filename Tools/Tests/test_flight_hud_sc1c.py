@@ -78,11 +78,18 @@ panels = {"LampPanel", "SpeedPanel", "PowerPanel", "FrameLeft", "FrameRight"}
 check("clusters sit on cut-corner panels", panels <= names, "missing %s" % sorted(panels - names))
 lamp_widget = hud.debug_get_lamp("CPLD")
 check("lamps are the painted widget with an animated intensity", isinstance(lamp_widget, unreal.SpaceHudLamp))
-font = hud.debug_get_text_widget("SpeedText").get_editor_property("font")
-check("speed reads in the engine's monospace face, letter-spaced and outlined",
-      "Mono" in str(font.get_editor_property("typeface_font_name")) and font.get_editor_property("letter_spacing") > 0
-      and font.get_editor_property("outline_settings").get_editor_property("outline_size") >= 1,
-      "%s, spacing %d" % (font.get_editor_property("typeface_font_name"), font.get_editor_property("letter_spacing")))
+# Typography after the reference: a thin face for the big numbers, small wide-spaced caps for the
+# labels, and an outline so both stay readable over a bright sky.
+speed_font = hud.debug_get_text_widget("SpeedText").get_editor_property("font")
+label_font = hud.debug_get_text_widget("LampLabel_CPLD").get_editor_property("font")
+check("speed number in the thin face, outlined",
+      "Light" in str(speed_font.get_editor_property("typeface_font_name"))
+      and speed_font.get_editor_property("outline_settings").get_editor_property("outline_size") >= 1,
+      "%s" % speed_font.get_editor_property("typeface_font_name"))
+check("labels in small wide-spaced caps", "Bold" in str(label_font.get_editor_property("typeface_font_name"))
+      and label_font.get_editor_property("letter_spacing") >= 150 and label_font.get_editor_property("size") <= 10,
+      "%s, spacing %d, size %d" % (label_font.get_editor_property("typeface_font_name"),
+                                   label_font.get_editor_property("letter_spacing"), label_font.get_editor_property("size")))
 
 state = unreal.SpaceFlightHud.make_state(None, 1)
 check("no ship: HUD hidden", not state.visible)

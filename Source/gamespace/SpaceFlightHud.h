@@ -190,9 +190,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Panel")
 	FLinearColor LineColor = FLinearColor::White;
 
-	/** How much of the panel is filled behind the content (kept very low: the HUD must not block the view). */
+	/** Fill behind the content. 0 by default: the reference frames groups with brackets over the bare view. */
 	UPROPERTY(BlueprintReadOnly, Category = "Panel")
-	float FillAlpha = 0.09f;
+	float FillAlpha = 0.f;
 
 	/** Halo strength around the lines, 0..1. */
 	UPROPERTY(BlueprintReadOnly, Category = "Panel")

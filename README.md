@@ -474,6 +474,18 @@ keeps ticking). Module dependency: `UMG`.
 - **Centre**: the virtual joystick - rim, dead zone, cursor (amber with a line from the centre when
   outside the dead zone); hidden while landed or free looking.
 
+**Look** (matched against the screenshots in `Docs/UI/`, iterated with `Tools/Shots.ps1 -Preset hud`):
+bars are thin capsules - a dark tube with a 1 px cyan outline, a gradient fill that is brightest at
+the leading edge, a halo, and the limiter hanging off the side as a short handle with a nub. Status
+switches are pills around their label (dark fill, cyan outline, brighter when lit), groups are framed
+by corner brackets over the bare view rather than by filled panels, and type is the engine's thin
+Roboto Light for numbers with small wide-spaced Bold caps for labels, both outlined so they read over
+a bright sky. Slate has no additive brush and a scene bloom would light the whole game, so the glow is
+the same shape drawn twice more, inflated and very faint (`GlowLines`, `GlowRounded`); rounded shapes
+come from `FSlateRoundedBoxBrush` and the fills from `FSlateDrawElement::MakeGradient` with a corner
+radius. A rounded box takes its colour from the **draw tint**, not from the brush - passing it on the
+brush renders solid white.
+
 `USpaceFlightHud::MakeState(Ship, HudMode)` gathers everything shown into `FSpaceFlightHudState` and
 `ApplyState` only displays it, so headless tests check the values without a screen:
 `Tools/Tests/test_flight_hud_sc1c.py`. Layout constants (offsets +-300 px from the centre, gauge sizes)

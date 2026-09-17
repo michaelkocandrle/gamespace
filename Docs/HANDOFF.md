@@ -199,7 +199,9 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       omezovač. Má vlastní palivo na 8 s hoření a doplňuje se 40 s. Po vyhoření nebo puštění se
       limit 4 s plynule vrací. G-Safe nevypíná;
     - hodnoty jsou ve `Vanguard_setup.json`, HUD má řádek AFTERBRN a stav boostu na řádku IFCS.
-17. **SC-1c – letový HUD v UMG** (17. 9. 2026), podle `Docs/UI/`:
+17. **SC-1c – letový HUD v UMG** (17. 9. 2026), podle `Docs/UI/`, včetně vizuálního polishe podle
+    referenčních screenshotů (kapsle se zaoblenými konci a přechodem, pilulkové indikátory, rohové
+    konzoly, tenká technická typografie, vrstvená záře):
     - vlevo od středu kontrolky SCM/NAV, CPLD, GSAF, CSTB, BOOST, svislý ukazatel rychlosti
       (výplň = rychlost, značka = omezovač, červená zóna = let pozpátku), rychlost a limit malým
       písmem, G-metr;
@@ -463,6 +465,11 @@ Další otevřené směry mimo let:
   `EngineVolume`, `BoostVolume`, `CruiseVolume`, `OneShotVolume`).
 - **Jas oblohy** (slunce, mlhoviny) je nastavený odhadem. Ladí se v levelu na `StarfieldSky`
   (`NebulaScale`, `SunScale`) nebo v konstantách `build_space_scene.py`.
+- **Vznášení v atmosféře bez zpětné vazby** (autor 17. 9. 2026): loď umí v atmosféře úplně zastavit
+  a viset, ale nic to nedává najevo: trysky nesvítí, zvuk se nemění, G-metr je na nule. Chování je
+  správné (coupled brzdí i svisle), působí ale lacině. **Úkol na budoucí VTOL/hover polish**, ne teď:
+  zapojit svislý tah do `GetEngineDemand` a do záře trysek, přidat hover zvuk a případně ukázat tah
+  na HUD.
 - **Kokpit:** Vanguard nemá modelovaný vnitřek kabiny (canopy je nízká skořepina nad plným trupem a
   rám kabiny je součástí trupu). Sklo canopy se proto pilotovi skrývá (`hide_canopy_in_cockpit`) a
   oko je na (500, 0, 110): obloha je volná a dole je vidět příď jako palubní deska. Z pozice sedadla

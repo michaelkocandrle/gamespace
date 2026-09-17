@@ -18,14 +18,17 @@
 #include "HAL/IConsoleManager.h"
 #include "Rendering/DrawElements.h"
 #include "SpaceshipPawn.h"
+#include "Brushes/SlateRoundedBoxBrush.h"
 #include "Styling/CoreStyle.h"
 
 namespace SpaceHudStyle
 {
 	// Thin translucent cyan, like the reference's glass frame lines; colours carry the state.
-	const FLinearColor Cyan(0.45f, 0.9f, 1.f, 0.9f);
-	const FLinearColor CyanFaint(0.45f, 0.9f, 1.f, 0.3f);
-	const FLinearColor LampOff(0.45f, 0.9f, 1.f, 0.1f);
+	const FLinearColor Cyan(0.30f, 0.88f, 1.f, 0.98f);
+	const FLinearColor CyanFaint(0.30f, 0.88f, 1.f, 0.45f);
+	const FLinearColor LampOff(0.30f, 0.88f, 1.f, 0.12f);
+	/** Behind pills and inside bar tubes: this is why the reference still reads over bright ground. */
+	const FLinearColor Backing(0.01f, 0.05f, 0.08f, 0.55f);
 	const FLinearColor Green(0.35f, 1.f, 0.55f, 0.85f);
 	const FLinearColor Amber(1.f, 0.72f, 0.2f, 0.95f);
 	const FLinearColor Red(1.f, 0.3f, 0.22f, 0.95f);
@@ -44,34 +47,80 @@ namespace SpaceHudStyle
 
 	/**
 	 * Slate has no additive brush and a scene bloom would light up the whole game, so a "glow" here is
-	 * the same stroke drawn two more times, thicker and much fainter: a halo that reads the same way
-	 * at HUD line widths and costs two draw calls.
+	 * the same shape drawn again, larger and much fainter. Two passes read as a halo at HUD line
+	 * widths and cost two draw calls.
 	 */
 	void GlowLines(FSlateWindowElementList& Out, int32 Layer, const FPaintGeometry& Geometry, const TArray<FVector2f>& Points,
 		const FLinearColor& Color, float Thickness, float Glow)
 	{
 		if (Glow > 0.01f)
 		{
-			FSlateDrawElement::MakeLines(Out, Layer, Geometry, Points, ESlateDrawEffect::None, Faded(Color, 0.07f * Glow), true, Thickness + 7.f);
-			FSlateDrawElement::MakeLines(Out, Layer, Geometry, Points, ESlateDrawEffect::None, Faded(Color, 0.16f * Glow), true, Thickness + 3.f);
+			FSlateDrawElement::MakeLines(Out, Layer, Geometry, Points, ESlateDrawEffect::None, Faded(Color, 0.06f * Glow), true, Thickness + 6.f);
+			FSlateDrawElement::MakeLines(Out, Layer, Geometry, Points, ESlateDrawEffect::None, Faded(Color, 0.14f * Glow), true, Thickness + 2.5f);
 		}
 		FSlateDrawElement::MakeLines(Out, Layer, Geometry, Points, ESlateDrawEffect::None, Color, true, Thickness);
 	}
 
-	void GlowBox(FSlateWindowElementList& Out, int32 Layer, const FGeometry& Geometry, const FVector2f& Centre, float HalfSize,
-		const FLinearColor& Color, float Glow)
+	/**
+	 * A rounded rectangle: the reference draws every bar as a capsule and every switch as a pill.
+	 * Fill and outline go in as the draw tint over a white brush - a colour set on the brush itself is
+	 * overridden by the tint, which is what made the first pass render solid white panels.
+	 */
+	void RoundedBox(FSlateWindowElementList& Out, int32 Layer, const FGeometry& Geometry, const FVector2f& Position, const FVector2f& Size,
+		float Radius, const FLinearColor& Fill, const FLinearColor& Outline = FLinearColor::Transparent, float OutlineWidth = 0.f)
 	{
-		auto Box = [&](float Half, const FLinearColor& BoxColor)
+		if (Size.X <= 0.f || Size.Y <= 0.f)
 		{
-			FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(FVector2f(Half * 2.f, Half * 2.f),
-				FSlateLayoutTransform(Centre - FVector2f(Half, Half))), White(), ESlateDrawEffect::None, BoxColor);
-		};
-		if (Glow > 0.01f)
-		{
-			Box(HalfSize + 5.f, Faded(Color, 0.10f * Glow));
-			Box(HalfSize + 2.5f, Faded(Color, 0.18f * Glow));
+			return;
 		}
-		Box(HalfSize, Color);
+		const float Corner = FMath::Min(Radius, FMath::Min(Size.X, Size.Y) * 0.5f);
+		const FPaintGeometry PaintGeometry = Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Position));
+		if (Fill.A > 0.f)
+		{
+			const FSlateRoundedBoxBrush FillBrush(FLinearColor::White, Corner, Size);
+			FSlateDrawElement::MakeBox(Out, Layer, PaintGeometry, &FillBrush, ESlateDrawEffect::None, Fill);
+		}
+		if (OutlineWidth > 0.f && Outline.A > 0.f)
+		{
+			const FSlateRoundedBoxBrush OutlineBrush(FLinearColor::Transparent, Corner, FLinearColor::White, OutlineWidth, Size);
+			FSlateDrawElement::MakeBox(Out, Layer, PaintGeometry, &OutlineBrush, ESlateDrawEffect::None, Outline);
+		}
+	}
+
+	/** Halo around a rounded shape: the same capsule twice, inflated and very faint. */
+	void GlowRounded(FSlateWindowElementList& Out, int32 Layer, const FGeometry& Geometry, const FVector2f& Position, const FVector2f& Size,
+		float Radius, const FLinearColor& Color, float Glow)
+	{
+		if (Glow <= 0.01f)
+		{
+			return;
+		}
+		for (const TPair<float, float>& Pass : { TPair<float, float>(5.f, 0.05f), TPair<float, float>(2.f, 0.11f) })
+		{
+			const FVector2f Grow(Pass.Key, Pass.Key);
+			RoundedBox(Out, Layer, Geometry, Position - Grow, Size + Grow * 2.f, Radius + Pass.Key, Faded(Color, Pass.Value * Glow));
+		}
+	}
+
+	/**
+	 * A bar fill the way the reference draws it: bright at the leading edge, deeper at the root, with
+	 * rounded ends. A flat single colour is what made ours look like a progress bar.
+	 */
+	void GradientCapsule(FSlateWindowElementList& Out, int32 Layer, const FGeometry& Geometry, const FVector2f& Position, const FVector2f& Size,
+		float Radius, const FLinearColor& Root, const FLinearColor& Edge, bool bVertical)
+	{
+		if (Size.X <= 0.f || Size.Y <= 0.f)
+		{
+			return;
+		}
+		TArray<FSlateGradientStop> Stops;
+		// Vertical bars fill upwards, so the bright edge is at the top (stop 0 is the left/top).
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, 0.f), bVertical ? Edge : Root));
+		Stops.Add(FSlateGradientStop(bVertical ? FVector2f(0.f, Size.Y * 0.55f) : FVector2f(Size.X * 0.45f, 0.f), FMath::Lerp(Root, Edge, 0.35f)));
+		Stops.Add(FSlateGradientStop(bVertical ? FVector2f(0.f, Size.Y) : FVector2f(Size.X, 0.f), bVertical ? Root : Edge));
+		const float Corner = FMath::Min(Radius, FMath::Min(Size.X, Size.Y) * 0.5f);
+		FSlateDrawElement::MakeGradient(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Position)), MoveTemp(Stops),
+			bVertical ? Orient_Horizontal : Orient_Vertical, ESlateDrawEffect::None, FVector4f(Corner, Corner, Corner, Corner));
 	}
 
 	FString Speed(double CmPerSecond)
@@ -92,28 +141,31 @@ int32 USpaceHudPanel::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 
 	const FVector2f Size = AllottedGeometry.GetLocalSize();
-	const float Cut = FMath::Clamp(Chamfer, 0.f, FMath::Min(Size.X, Size.Y) * 0.5f);
 	if (Size.X < 4.f || Size.Y < 4.f)
 	{
 		return LayerId;
 	}
-	// A barely-there fill so the lines read as a panel without hiding the view: three boxes make the
-	// chamfered shape, which Slate cannot fill directly.
-	const FLinearColor Fill(0.05f, 0.12f, 0.16f, FillAlpha);
-	auto Box = [&](float X0, float Y0, float X1, float Y1)
+	// The reference frames a group with short corner brackets, not with a filled panel: the view stays
+	// clear and the HUD reads as projected glass rather than as a window.
+	const float Arm = FMath::Min(14.f, FMath::Min(Size.X, Size.Y) * 0.35f);
+	const float Cut = FMath::Min(Chamfer, Arm * 0.7f);
+	if (FillAlpha > 0.f)
 	{
-		FSlateDrawElement::MakeBox(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(FVector2f(X1 - X0, Y1 - Y0),
-			FSlateLayoutTransform(FVector2f(X0, Y0))), White(), ESlateDrawEffect::None, Fill);
+		RoundedBox(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, 3.f, FLinearColor(0.03f, 0.09f, 0.13f, FillAlpha));
+	}
+	auto Bracket = [&](const FVector2f& Corner, float DirX, float DirY)
+	{
+		const TArray<FVector2f> Points = {
+			Corner + FVector2f(DirX * Arm, 0.f),
+			Corner + FVector2f(DirX * Cut, 0.f),
+			Corner + FVector2f(0.f, DirY * Cut),
+			Corner + FVector2f(0.f, DirY * Arm) };
+		GlowLines(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), Points, LineColor, 1.2f, Glow);
 	};
-	Box(0.f, Cut, Size.X, Size.Y - Cut);
-	Box(Cut, 0.f, Size.X - Cut, Cut);
-	Box(Cut, Size.Y - Cut, Size.X - Cut, Size.Y);
-
-	const TArray<FVector2f> Outline = {
-		FVector2f(Cut, 0.f), FVector2f(Size.X - Cut, 0.f), FVector2f(Size.X, Cut),
-		FVector2f(Size.X, Size.Y - Cut), FVector2f(Size.X - Cut, Size.Y), FVector2f(Cut, Size.Y),
-		FVector2f(0.f, Size.Y - Cut), FVector2f(0.f, Cut), FVector2f(Cut, 0.f) };
-	GlowLines(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), Outline, LineColor, 1.2f, Glow);
+	Bracket(FVector2f(0.f, 0.f), 1.f, 1.f);
+	Bracket(FVector2f(Size.X, 0.f), -1.f, 1.f);
+	Bracket(FVector2f(0.f, Size.Y), 1.f, -1.f);
+	Bracket(FVector2f(Size.X, Size.Y), -1.f, -1.f);
 	return LayerId + 1;
 }
 
@@ -150,17 +202,20 @@ int32 USpaceHudLamp::NativePaint(const FPaintArgs& Args, const FGeometry& Allott
 	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 
 	const FVector2f Size = AllottedGeometry.GetLocalSize();
-	const float Half = FMath::Min(Size.X, Size.Y) * 0.5f;
-	if (Half < 1.f)
+	if (Size.X < 4.f || Size.Y < 4.f)
 	{
 		return LayerId;
 	}
-	const float Lit = FMath::Clamp(Intensity + 0.5f * Flash * Intensity, 0.f, 1.5f);
-	// Dark but never invisible, so the row still reads as a row of switches.
-	FLinearColor Core = FMath::Lerp(LampOff, Color, FMath::Min(Lit, 1.f));
-	Core.A = FMath::Lerp(LampOff.A, Color.A, FMath::Min(Lit, 1.f));
-	GlowBox(OutDrawElements, LayerId, AllottedGeometry, Size * 0.5f, Half, Core, Lit);
-	return LayerId + 1;
+	// In the reference a switch is a pill around its label (ESP, CPLD, LOCK), lit by its outline and
+	// a faint inner fill, not a square block beside the text.
+	const float Lit = FMath::Clamp(Intensity + 0.6f * Flash * Intensity, 0.f, 1.5f);
+	const float Radius = FMath::Min(Size.Y * 0.45f, 7.f);
+	const FLinearColor Outline = FMath::Lerp(Faded(Color, 0.35f), Color, FMath::Min(Lit, 1.f));
+	FLinearColor Fill = FMath::Lerp(Backing, FMath::Lerp(Backing, Color, 0.22f), FMath::Min(Lit, 1.f));
+	Fill.A = FMath::Lerp(0.45f, 0.6f, FMath::Min(Lit, 1.f));
+	GlowRounded(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, Radius, Color, Lit * 0.8f);
+	RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, FVector2f::ZeroVector, Size, Radius, Fill, Outline, 1.2f);
+	return LayerId + 2;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -174,80 +229,70 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 
 	const FVector2f Size = AllottedGeometry.GetLocalSize();
-	// Work along the gauge ("along", 0 at the low end) and across it, then map to widget space.
 	const float Length = bHorizontal ? Size.X : Size.Y;
 	const float Width = bHorizontal ? Size.Y : Size.X;
-	if (Length <= 1.f || Width <= 1.f)
+	if (Length <= 2.f || Width <= 2.f)
 	{
 		return LayerId;
 	}
 	const float Dim = bDim ? 0.4f : 1.f;
-	auto Point = [&](float Along, float Across)
+	const float Radius = Width * 0.5f;
+	// Along the gauge: 0 at the low end. Vertical bars grow upwards, horizontal ones to the right.
+	auto Place = [&](float Along0, float Along1) -> TPair<FVector2f, FVector2f>
 	{
-		return bHorizontal ? FVector2f(Along, Width - Across) : FVector2f(Across, Length - Along);
-	};
-	auto Line = [&](float A0, float C0, float A1, float C1, const FLinearColor& Color, float Thickness, float Glow = 0.f)
-	{
-		const TArray<FVector2f> Points = { Point(A0, C0), Point(A1, C1) };
-		GlowLines(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), Points, Faded(Color, Dim), Thickness, Glow * Dim);
-	};
-	auto Box = [&](float A0, float A1, float C0, float C1, const FLinearColor& Color)
-	{
-		if (A1 - A0 < 0.5f)
-		{
-			return;
-		}
-		const FVector2f Position = bHorizontal ? FVector2f(A0, Width - C1) : FVector2f(C0, Length - A1);
-		const FVector2f BoxSize = bHorizontal ? FVector2f(A1 - A0, C1 - C0) : FVector2f(C1 - C0, A1 - A0);
-		FSlateDrawElement::MakeBox(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(BoxSize, FSlateLayoutTransform(Position)),
-			White(), ESlateDrawEffect::None, Faded(Color, Dim));
+		return bHorizontal
+			? TPair<FVector2f, FVector2f>(FVector2f(Along0, 0.f), FVector2f(Along1 - Along0, Width))
+			: TPair<FVector2f, FVector2f>(FVector2f(0.f, Length - Along1), FVector2f(Width, Along1 - Along0));
 	};
 
 	const float Zero = Length * FMath::Clamp(ReverseZone, 0.f, 0.9f);
 	const float Span = Length - Zero;
 
-	// Frame: faint rails along both sides, a brighter cut-corner cap at the top.
-	Line(0.f, 0.f, Length - 4.f, 0.f, CyanFaint, 1.f);
-	Line(0.f, Width, Length - 4.f, Width, CyanFaint, 1.f);
-	Line(Length - 4.f, 0.f, Length, 4.f, Cyan, 1.5f, 0.4f);
-	Line(Length - 4.f, Width, Length, Width - 4.f, Cyan, 1.5f, 0.4f);
-	Line(Length, 4.f, Length, Width - 4.f, Cyan, 1.5f, 0.4f);
-	Line(0.f, 0.f, 0.f, Width, CyanFaint, 1.f);
-	for (int32 Index = 1; Index < Ticks; ++Index)
+	// The tube: a thin capsule outline with an almost black inside, like the reference's bars.
+	RoundedBox(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, Radius,
+		Faded(Backing, Dim), Faded(Cyan, 0.55f * Dim), 1.f);
+
+	// Reverse zone (flying backwards): a red root, as the reference marks its reserve.
+	if (Zero > 1.f)
 	{
-		const float Along = Zero + Span * Index / Ticks;
-		Line(Along, 0.f, Along, Width * (Index * 2 == Ticks ? 0.45f : 0.25f), CyanFaint, 1.f);
+		const TPair<FVector2f, FVector2f> Band = Place(0.f, Zero);
+		RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, Band.Key, Band.Value, Radius, Faded(Red, 0.16f * Dim));
 	}
 
-	// Reverse zone: a faint red band under a bright zero line.
-	if (Zero > 0.f)
-	{
-		Box(0.f, Zero, 0.f, Width, Faded(Red, 0.12f));
-		Line(Zero, -3.f, Zero, Width + 3.f, Cyan, 1.5f);
-	}
-
-	// Fill: a translucent bar inset from the rails with a bright leading edge.
-	const float Inset = FMath::Max(2.f, Width * 0.2f);
+	// The fill: bright at the leading edge, deeper at the root, with a halo.
 	const float Top = Zero + Span * FMath::Clamp(Value, 0.f, 1.f);
-	if (Top > Zero + 0.5f)
+	if (Top > Zero + 1.f)
 	{
-		Box(Zero, Top, Inset, Width - Inset, Faded(FillColor, 0.45f));
-		Line(Top, Inset * 0.5f, Top, Width - Inset * 0.5f, FillColor, 2.f, 1.f);
+		const TPair<FVector2f, FVector2f> Fill = Place(Zero, Top);
+		GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, Fill.Key, Fill.Value, Radius, FillColor, Dim);
+		GradientCapsule(OutDrawElements, LayerId + 2, AllottedGeometry, Fill.Key, Fill.Value, Radius,
+			Faded(FillColor, 0.85f * Dim), Faded(FMath::Lerp(FillColor, FLinearColor::White, 0.22f), Dim), !bHorizontal);
 	}
 	const float Bottom = Zero * (1.f - FMath::Clamp(ReverseValue, 0.f, 1.f));
-	if (Bottom < Zero - 0.5f)
+	if (Bottom < Zero - 1.f)
 	{
-		Box(Bottom, Zero, Inset, Width - Inset, Faded(Red, 0.6f));
-		Line(Bottom, Inset * 0.5f, Bottom, Width - Inset * 0.5f, Red, 2.f);
+		const TPair<FVector2f, FVector2f> Fill = Place(Bottom, Zero);
+		GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, Fill.Key, Fill.Value, Radius, Red, Dim);
+		GradientCapsule(OutDrawElements, LayerId + 2, AllottedGeometry, Fill.Key, Fill.Value, Radius,
+			Faded(Red, 0.9f * Dim), Faded(FMath::Lerp(Red, FLinearColor::White, 0.2f), Dim), !bHorizontal);
 	}
 
-	// Marker (the limiter's handle, the G-Safe line): a bar wider than the gauge.
+	// The handle: the reference hangs the limiter off the tube as a short bar with a nub.
 	if (Marker >= 0.f)
 	{
 		const float Along = Zero + Span * FMath::Clamp(Marker, 0.f, 1.f);
-		Line(Along, -5.f, Along, Width + 5.f, MarkerColor, 2.5f, 0.8f);
+		const float Reach = Width * 1.7f;
+		const TArray<FVector2f> Bar = bHorizontal
+			? TArray<FVector2f>({ FVector2f(Along, -Reach * 0.6f), FVector2f(Along, Width + Reach * 0.6f) })
+			: TArray<FVector2f>({ FVector2f(-Reach * 0.2f, Length - Along), FVector2f(Width + Reach, Length - Along) });
+		GlowLines(OutDrawElements, LayerId + 3, AllottedGeometry.ToPaintGeometry(), Bar, MarkerColor, 1.4f, 0.9f * Dim);
+		const FVector2f Nub(3.f, 3.f);
+		const FVector2f NubAt = bHorizontal
+			? FVector2f(Along - Nub.X * 0.5f, Width + Reach * 0.6f - Nub.Y)
+			: FVector2f(Width + Reach - Nub.X, Length - Along - Nub.Y * 0.5f);
+		RoundedBox(OutDrawElements, LayerId + 3, AllottedGeometry, NubAt, Nub, 1.f, Faded(MarkerColor, Dim));
 	}
-	return LayerId + 1;
+	return LayerId + 4;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -324,7 +369,7 @@ UTextBlock* USpaceFlightHud::MakeText(const FName Name, float Size, int32 Letter
 	// A thin dark outline instead of a drop shadow: readable against the sun and a bright planet
 	// from every side.
 	Font.OutlineSettings.OutlineSize = 1;
-	Font.OutlineSettings.OutlineColor = FLinearColor(0.f, 0.02f, 0.04f, 0.85f);
+	Font.OutlineSettings.OutlineColor = FLinearColor(0.f, 0.02f, 0.04f, 0.95f);
 	Text->SetFont(Font);
 	Text->SetColorAndOpacity(FSlateColor(SpaceHudStyle::Cyan));
 	Texts.Add(Name, Text);
@@ -367,8 +412,14 @@ void USpaceFlightHud::BuildTree()
 	{
 		UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("%sOverlay"), *PanelName.ToString())));
 		USpaceHudPanel* Panel = WidgetTree->ConstructWidget<USpaceHudPanel>(USpaceHudPanel::StaticClass(), PanelName);
-		Panel->LineColor = SpaceHudStyle::CyanFaint;
-		Overlay->AddChildToOverlay(Panel);
+		Panel->LineColor = SpaceHudStyle::Cyan;
+		Panel->FillAlpha = 0.f;
+		Panel->Glow = 0.35f;
+		if (UOverlaySlot* PanelSlot = Overlay->AddChildToOverlay(Panel))
+		{
+			PanelSlot->SetHorizontalAlignment(HAlign_Fill);
+			PanelSlot->SetVerticalAlignment(VAlign_Fill);
+		}
 		if (UOverlaySlot* ContentSlot = Overlay->AddChildToOverlay(Content))
 		{
 			ContentSlot->SetPadding(Inset);
@@ -382,8 +433,8 @@ void USpaceFlightHud::BuildTree()
 		USpaceHudPanel* Panel = WidgetTree->ConstructWidget<USpaceHudPanel>(USpaceHudPanel::StaticClass(), Name);
 		Panel->LineColor = SpaceHudStyle::CyanFaint;
 		Panel->FillAlpha = 0.f;
-		Panel->Chamfer = 5.f;
-		Panel->Glow = 0.3f;
+		Panel->Chamfer = 3.f;
+		Panel->Glow = 0.25f;
 		return Panel;
 	};
 	auto Gauge = [this](const FName Name, bool bHorizontal, int32 Ticks)
@@ -416,28 +467,39 @@ void USpaceFlightHud::BuildTree()
 	{
 		const FName Key(LampName);
 		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("LampRow_%s"), LampName)));
-		UTextBlock* Label = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 10.f, 180);
+		UTextBlock* Label = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 9.f, 190, TEXT("Bold"));
 		Label->SetText(FText::FromString(LampName));
+		Label->SetJustification(ETextJustify::Center);
 		LampLabels.Add(Key, Label);
-		AddToHorizontal(Row, Label, VAlign_Center, FMargin(0.f, 0.f, 7.f, 0.f));
-		AddToHorizontal(Row, Sized(FName(*FString::Printf(TEXT("LampBox_%s"), LampName)),
-			Lamp(FName(*FString::Printf(TEXT("Lamp_%s"), LampName))), 8.f, 8.f), VAlign_Center, FMargin(0.f));
+		UOverlay* Pill = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("Pill_%s"), LampName)));
+		if (UOverlaySlot* LampSlot = Pill->AddChildToOverlay(Lamp(FName(*FString::Printf(TEXT("Lamp_%s"), LampName)))))
+		{
+			LampSlot->SetHorizontalAlignment(HAlign_Fill);
+			LampSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		if (UOverlaySlot* LabelSlot = Pill->AddChildToOverlay(Label))
+		{
+			LabelSlot->SetPadding(FMargin(9.f, 2.f, 8.f, 3.f));
+			LabelSlot->SetHorizontalAlignment(HAlign_Center);
+			LabelSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		AddToHorizontal(Row, Pill, VAlign_Center, FMargin(0.f));
 		AddToVertical(LampBox, Row, HAlign_Right, FMargin(0.f, 0.f, 0.f, 5.f));
 	}
 	AddToVertical(LeftContent, Panelled(TEXT("LampPanel"), LampBox, FMargin(10.f, 8.f, 10.f, 3.f)), HAlign_Right, FMargin(0.f, 0.f, 0.f, 10.f));
 	UVerticalBox* SpeedBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SpeedBox"));
-	AddToVertical(SpeedBox, Sized(TEXT("SpeedGaugeBox"), Gauge(TEXT("SpeedGauge"), false, 10), 26.f, 280.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
-	AddToVertical(SpeedBox, MakeText(TEXT("SpeedText"), 15.f, 30), HAlign_Right, FMargin(0.f));
-	AddToVertical(SpeedBox, MakeText(TEXT("LimitText"), 9.f, 40), HAlign_Right, FMargin(0.f, 0.f, 0.f, 7.f));
+	AddToVertical(SpeedBox, Sized(TEXT("SpeedGaugeBox"), Gauge(TEXT("SpeedGauge"), false, 10), 11.f, 230.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 10.f));
+	AddToVertical(SpeedBox, MakeText(TEXT("SpeedText"), 21.f, 10, TEXT("Light")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 1.f));
+	AddToVertical(SpeedBox, MakeText(TEXT("LimitText"), 9.f, 120, TEXT("Bold")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
 	UHorizontalBox* GRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("GRow"));
-	AddToHorizontal(GRow, Sized(TEXT("GGaugeBox"), Gauge(TEXT("GGauge"), true, 4), 64.f, 8.f), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
-	AddToHorizontal(GRow, MakeText(TEXT("GText"), 12.f, 30), VAlign_Center, FMargin(0.f));
+	AddToHorizontal(GRow, Sized(TEXT("GGaugeBox"), Gauge(TEXT("GGauge"), true, 4), 52.f, 6.f), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
+	AddToHorizontal(GRow, MakeText(TEXT("GText"), 13.f, 20, TEXT("Light")), VAlign_Center, FMargin(0.f));
 	AddToVertical(SpeedBox, GRow, HAlign_Right, FMargin(0.f));
 	AddToVertical(LeftContent, Panelled(TEXT("SpeedPanel"), SpeedBox, FMargin(12.f, 10.f)), HAlign_Right, FMargin(0.f));
 	AddToHorizontal(Left, LeftContent, VAlign_Center, FMargin(0.f, 0.f, 14.f, 0.f));
 	// The glass frame line beside the cluster, cut at both ends like the reference's canopy frame.
 	AddToHorizontal(Left, Sized(TEXT("FrameLeftBox"), Frame(TEXT("FrameLeft")), 10.f, FrameHeight), VAlign_Center, FMargin(0.f));
-	Place(Left, FVector2D(-300.0, 30.0), FVector2D(1.0, 0.5));
+	Place(Left, FVector2D(-250.0, 20.0), FVector2D(1.0, 0.5));
 
 	// --- Right of centre: a frame line, then boost energy and afterburner fuel gauges ----------
 	UHorizontalBox* Right = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RightCluster"));
@@ -446,17 +508,17 @@ void USpaceFlightHud::BuildTree()
 	auto Column = [&](const TCHAR* Label, const FName GaugeName, const FName TextName, const FMargin& SlotPadding)
 	{
 		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), *GaugeName.ToString())));
-		UTextBlock* Title = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 9.f, 180);
+		UTextBlock* Title = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 9.f, 200, TEXT("Bold"));
 		Title->SetText(FText::FromString(Label));
 		AddToVertical(Box, Title, HAlign_Center, FMargin(0.f, 0.f, 0.f, 6.f));
-		AddToVertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 14.f, 220.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 7.f));
-		AddToVertical(Box, MakeText(TextName, 10.f, 40), HAlign_Center, FMargin(0.f));
+		AddToVertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 9.f, 180.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
+		AddToVertical(Box, MakeText(TextName, 10.f, 20, TEXT("Light")), HAlign_Center, FMargin(0.f));
 		AddToHorizontal(Columns, Box, VAlign_Center, SlotPadding);
 	};
 	Column(TEXT("BST"), TEXT("BoostGauge"), TEXT("BoostText"), FMargin(0.f, 0.f, 22.f, 0.f));
 	Column(TEXT("AB"), TEXT("AfterburnerGauge"), TEXT("AfterburnerText"), FMargin(0.f));
 	AddToHorizontal(Right, Panelled(TEXT("PowerPanel"), Columns, FMargin(14.f, 10.f)), VAlign_Center, FMargin(0.f));
-	Place(Right, FVector2D(300.0, 30.0), FVector2D(0.0, 0.5));
+	Place(Right, FVector2D(250.0, 20.0), FVector2D(0.0, 0.5));
 
 	// --- Centre: the virtual joystick ----------------------------------------------------------
 	VirtualJoystick = WidgetTree->ConstructWidget<USpaceHudVirtualJoystick>(USpaceHudVirtualJoystick::StaticClass(), TEXT("VirtualJoystick"));
