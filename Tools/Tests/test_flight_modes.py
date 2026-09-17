@@ -49,7 +49,6 @@ eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 cdo = unreal.get_default_object(unreal.SpaceshipPawn)
 MAX = cdo.get_editor_property("scm_max_speed")
 NAV = cdo.get_editor_property("nav_max_speed")
-BOOST = cdo.get_editor_property("boost_multiplier")
 SWITCH = cdo.get_editor_property("master_mode_switch_seconds")
 
 # Coupled / decoupled, limiter, spacebrake and master modes: Tools/Tests/test_ifcs_sc1.py.
@@ -69,7 +68,7 @@ def to_nav(ship):
     run(ship, SWITCH + 0.05)
 
 
-# --- Boost energy ---------------------------------------------------------------------------
+# --- Boost energy (what boost does: Tools/Tests/test_boost_afterburner_sc1b.py) ---------------------------------------------------------------------------
 ship = spawn()
 try:
     duration = cdo.get_editor_property("boost_duration_seconds")
@@ -81,10 +80,7 @@ try:
         if ship.is_boosting():
             active_frames[0] += 1
 
-    limits = []
-    run(ship, duration + 1.0, thrust=1.0, boost=True, each=lambda i, v: (watch(i, v), limits.append(ship.get_speed_limit())))
-    check("boost raises the speed limit to limit x BoostMultiplier", abs(max(limits) - MAX * BOOST) < 1.0, "%.0f of %.0f cm/s" % (max(limits), MAX * BOOST))
-    check("boost flies past the SCM top speed", peak[0] > 1.2 * MAX, "%.0f m/s" % (peak[0] / 100.0))
+    run(ship, duration + 1.0, thrust=1.0, boost=True, each=watch)
     check("boost lasts BoostDurationSeconds", abs(active_frames[0] * STEP - duration) < 0.1, "%.2f s" % (active_frames[0] * STEP))
     check("empty boost locks", ship.is_boost_locked() and not ship.is_boosting() and ship.get_boost_energy() < 0.01)
 finally:
@@ -139,7 +135,7 @@ try:
     check("J again drops out", ship.get_cruise_state() == unreal.CruiseState.DROPPING
           and ship.get_cruise_blocker() == unreal.CruiseBlocker.PILOT)
     velocity = run(ship, 3.0)
-    check("drop bleeds speed down to boosted NAV flight", length(velocity) <= NAV * BOOST + 1.0 and ship.get_cruise_state() == unreal.CruiseState.OFF,
+    check("drop bleeds speed down to NAV top speed", length(velocity) <= NAV + 1.0 and ship.get_cruise_state() == unreal.CruiseState.OFF,
           "%.0f m/s, state %s" % (length(velocity) / 100.0, ship.get_cruise_state()))
     check("cruise limit function", abs(ship.compute_cruise_speed_limit(1000000.0, 0.0, True) - 400000.0) < 1.0
           and abs(ship.compute_cruise_speed_limit(1000.0, 0.0, True) - cdo.get_editor_property("cruise_min_speed")) < 1.0

@@ -196,7 +196,9 @@ for alt in (12000, 10000, 8000, 5000, 3000, 1000, 0):
 # ---------------------------------------------------------------------------------------
 ship = unreal.SpaceshipPawn.get_default_object()
 thrust = ship.get_editor_property("thrust_acceleration")
-boost = ship.get_editor_property("boost_multiplier")
+# The dive "boosting" is the afterburner (SC-1b): main thrust and speed limit multiplied.
+boost_thrust = ship.get_editor_property("afterburner_thrust_multiplier")
+boost = ship.get_editor_property("afterburner_speed_multiplier")
 max_speed = ship.get_editor_property("scm_max_speed")
 damping = ship.get_editor_property("linear_damping")
 space_damping = ship.get_editor_property("space_linear_damping")
@@ -223,7 +225,7 @@ def simulate(label, start_alt_m, throttle, boosting, stop_throttle_at_m=None, dt
             marks["ground"] = (t, math.sqrt(sum(v * v for v in vel)) / 100.0)
             break
         active = throttle if (stop_throttle_at_m is None or agl > stop_throttle_at_m) else 0.0
-        a_thrust = thrust * (boost if boosting else 1.0) * active
+        a_thrust = thrust * (boost_thrust if boosting else 1.0) * active
         env_speed = math.sqrt(sum(v * v for v in vel))
         # Same order as the pawn: thrust, then clamped drag, then gravity.
         v1 = [vel[i] + down[i] * a_thrust * dt for i in range(3)]
@@ -271,7 +273,7 @@ def simulate(label, start_alt_m, throttle, boosting, stop_throttle_at_m=None, dt
     return ground, max_heat, max_jerk
 
 
-g1, h1, j1 = simulate("boost dive, throttle to 3 km", 20000, 1.0, True, stop_throttle_at_m=3000)
+g1, h1, j1 = simulate("afterburner dive, throttle to 3 km", 20000, 1.0, True, stop_throttle_at_m=3000)
 g2, h2, j2 = simulate("cruise dive (no boost)", 20000, 1.0, False, stop_throttle_at_m=1000)
 g3, h3, j3 = simulate("free fall from 11 km", 11000, 0.0, False)
 check("boost dive reaches the ground", g1 is not None)

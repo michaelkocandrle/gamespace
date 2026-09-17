@@ -67,8 +67,8 @@ predictable and cheap to tune.
     falling with the engines off. `ComputeEnvironmentAcceleration` is the exact formula.
   - **Entry heat** (`Spaceship|Entry`): density x (speed / 200 m/s)^3, from `HeatOnset` to
     `HeatFull`, smoothed; shakes the camera (`HeatShakeCm`) and shows on the HUD.
-- The master mode's top speed (`ScmMaxSpeed` / `NavMaxSpeed`, times `BoostMultiplier` while boosting)
-  is a hard cap; above it (boost released, NAV back to SCM) the excess bleeds off at `OverspeedDecay`.
+- The master mode's top speed (`ScmMaxSpeed` / `NavMaxSpeed`, raised by the afterburner) is a hard
+  cap; above it (afterburner fading, NAV back to SCM) the excess bleeds off at `OverspeedDecay`.
   Cruise has its own limit.
 - Pitch, yaw and roll drive a target rate (`PitchRate`, `YawRate`, `RollRate`, scaled down in NAV,
   in cruise and by G-Safe / ComStab, see below). `AngularVelocity` eases towards it at
@@ -129,11 +129,28 @@ Modelled on Star Citizen's Intelligent Flight Control System (`starcitizenrefere
   sliding sideways and backwards.
 - **Entry heat** is measured against `HeatReferenceSpeed` 200 m/s (the SCM top speed): SCM flight
   stays cool, boost and NAV speeds in thick air heat up.
-- **Boost** (hold `Shift` with `W`): forward thrust and the speed limit x `BoostMultiplier` (G-Safe
-  still caps the acceleration). SC-1b splits this into boost and afterburner. Lasts
-  `BoostDurationSeconds` (4.5 s) of energy, recharges in `BoostRechargeSeconds` (7 s) after
-  `BoostRechargeDelaySeconds` (1 s); run dry, it stays off until `BoostUnlockFraction` (30 %) is
-  back. HUD bar on the IFCS line.
+- **Boost** (hold `Shift`, SC-1b, `Tools/Tests/test_boost_afterburner_sc1b.py`): the manoeuvring
+  thrusters - retro, strafe, up, down - x `BoostManeuverMultiplier` (Vanguard 1.6), turn rates and
+  rotational accelerations x `BoostRotationMultiplier` (1.4). Main thrust and the speed limit stay.
+  **G-Safe is suspended while boost burns**, whatever `K` says (HUD `g-safe (boost)`): no G cap, no
+  turn limit at speed. Burns energy whenever Shift is held (no W needed): `BoostDurationSeconds`
+  (4.5 s), recharges in `BoostRechargeSeconds` (7 s) after `BoostRechargeDelaySeconds` (1 s); run
+  dry, it stays off until `BoostUnlockFraction` (30 %) is back. HUD bar on the IFCS line.
+- **Afterburner** (hold `Tab` with `W`, `IA_Afterburner`, **SCM only**): main thrust x
+  `AfterburnerThrustMultiplier` (1.8); the speed limit becomes SCM top speed x
+  `AfterburnerSpeedMultiplier` (2: 420 m/s on the Vanguard) **x the speed limiter** - at a 50 %
+  limiter the afterburner tops out at 50 % of that. Own fuel: `AfterburnerDurationSeconds` (8 s) of
+  burn, refills slowly in `AfterburnerRefillSeconds` (40 s) after `AfterburnerRefillDelaySeconds`
+  (2 s); empty, it switches itself off and waits for `AfterburnerUnlockFraction` (15 %). The raised
+  limit spools in over `AfterburnerSpoolSeconds` (0.4 s) and fades out over `AfterburnerFadeSeconds`
+  (4 s), so letting go or running dry slows the ship at about retro strength instead of snapping.
+  Works coupled and decoupled.
+  - *Not in NAV*: NAV already flies at five times SCM speed with reduced manoeuvring and has cruise
+    for more; the afterburner is the short combat or escape burst above SCM speed.
+  - *G-Safe stays on*: the afterburner is straight-line forward thrust, exactly the load G-Safe
+    exists for, so with G-Safe on it raises top speed but acceleration stays at 7 G. Turning G-Safe
+    off (K), or holding boost at the same time (Shift + Tab), lets its full 13+ G through.
+  HUD line `AFTERBRN`: fuel bar and %, BURNING / fading / EMPTY - refilling / SCM only.
 - **Cruise drive** (`J`, **NAV only**, a stand-in for quantum travel until SC-4): charges for
   `CruiseSpoolSeconds` (2.5 s, camera shake builds, charging sound), then flies along the nose at the
   speed limiter x cruise limit (at least 10 %).
@@ -142,16 +159,17 @@ Modelled on Star Citizen's Intelligent Flight Control System (`starcitizenrefere
   bodies). Flying at the ground therefore slows by itself (the altitude shrinks ~33 % per second)
   and the speed never exceeds the limit. Turn rates drop to `CruiseTurnScale` (45 %). It refuses
   to engage below `CruiseMinAltitudeM` (2 km) and drops out below `CruiseDropAltitudeM` (1.2 km),
-  on a hit, or on `J`; the drop bleeds speed down to boosted top speed in ~1.5 s. From the start
+  on a hit, or on `J`; the drop bleeds speed down to NAV top speed in ~1.5 s. From the start
   point, Veyra's atmosphere is ~10 s away instead of over a minute.
-- **Feel**: the view widens with boost (+7 degrees) and cruise (+16), the camera shakes with
-  boost, charging, entry heat and a short jolt on boost ignition, engage and drop. Thruster
-  materials (slots named `*Emissive*`) glow with engine load, much brighter in boost and cruise;
+- **Feel**: the view widens with the afterburner (+7 degrees) and cruise (+16), the camera shakes
+  with afterburner, boost (lightly), charging, entry heat and a short jolt on boost and afterburner
+  ignition, engage and drop. Thruster materials (slots named `*Emissive*`) glow with engine load,
+  much brighter with the afterburner and in cruise;
   `*NavWhite*` slots double-flash like anti-collision strobes. Space dust streaks show direction
   and speed.
 - **Sound** follows what the thrusters really do (`GetEngineDemand`: braking and hovering are
   heard, a steady cruise through empty space is quiet): a reactor hum while piloted, the thruster
-  roar, an afterburner layer while boosting, a cruise drone, plus one-shots for boost ignition,
+  roar, an afterburner layer while the afterburner burns, a cruise drone, plus one-shots for afterburner ignition,
   cruise charge, engage and drop. All procedural placeholders from
   `python Tools/Assets/generate_ship_sounds.py Intermediate/GeneratedAssets`, imported by
   `.\Tools\run_editor_python.ps1 Tools\Assets\build_ship_audio.py` to `/Game/Ships/Audio/SW_*`;
@@ -194,7 +212,8 @@ of 15 degrees; 87 % of the surface is landable, 4.5 % is steeper than 30 degrees
 | Lift         | `Space` / `Left Ctrl`      | -                    |
 | Roll         | `E` / `Q`                  | Shoulder buttons     |
 | Pitch / yaw  | Mouse                      | Right stick          |
-| Boost (hold) | `Left Shift` (with `W`)    | -                    |
+| Boost (hold) | `Left Shift`               | -                    |
+| Afterburner (hold, SCM) | `Tab` (with `W`) | -                   |
 | Coupled / decoupled | `V`                 | -                    |
 | Spacebrake (hold) | `X`                   | -                    |
 | Speed limiter | Mouse wheel               | -                    |
@@ -410,7 +429,7 @@ Any level without a World Settings override therefore spawns a flyable ship at i
 
 `AHUD` subclass set as `HUDClass` on `SpaceGameMode`. Draws speed with the speed limiter (`SPEED`),
 the IFCS state (`IFCS`: SCM / NAV and switch progress, CPLD / DECOUPLED / SPACEBRAKE, G-SAFE,
-COMSTAB, G load, boost energy bar), the cruise drive state or the key help (`DRIVE`) and the active
+COMSTAB, boost state and energy bar, G load), the afterburner fuel (`AFTERBRN`), the cruise drive state or the key help (`DRIVE`) and the active
 camera as plain canvas text in the top-left corner. A master mode switch, cruise charging, a drop
 close to the ground and free look also show big in the middle of the screen, and in flight the mouse
 virtual joystick (rim, dead zone, cursor) is drawn in the centre. A tuning aid, not UMG - SC-3

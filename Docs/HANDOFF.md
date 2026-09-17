@@ -86,8 +86,8 @@ Obsah k 17. 9. 2026:
 
 Pozor:
 - Úseky „Náš stav“ v referencích byly psané před posledními kroky a místy jsou zastaralé. Náš
-  let už má SC-1a: coupled/decoupled podle SC, SCM/NAV, omezovač, G-Safe, ComStab, VJoy, boost s
-  energií a cruise (J, jen NAV). Aktuální stav je
+  let už má SC-1a a SC-1b: coupled/decoupled podle SC, SCM/NAV, omezovač, G-Safe, ComStab, VJoy, boost a afterburner s
+  vlastní energií a palivem a cruise (J, jen NAV). Aktuální stav je
   v kapitole 5.
 - Složka je v gitu (autor ji commitnul 17. 9. 2026).
 
@@ -122,14 +122,14 @@ Příkazy (PowerShell, pracovní složka `C:\gamespace\gamespace`, **editor mus�
 
 - **Live Coding vs. restart:** nové soubory, nové `UPROPERTY` nebo `UFUNCTION` a změny hlaviček
   vyžadují zavřít editor a udělat plný build. Změny jen v tělech funkcí jdou Live Codingem.
-- Pracovní postup po změně: build → headless skript nebo testy → `Package.ps1` → commit →
+- Pracovní postup po změně: build → headless skript nebo testy → `Package.ps1` → commit a push →
   odpověď autorovi s testovacím scénářem.
 
 ---
 
 ## 5. Stav vývoje – co je hotové
 
-Od nejstaršího (celkem 25 commitů, posledních ~7 nepushnutých):
+Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 
 1. **Základ lodi:** `ASpaceshipPawn` s ručně integrovaným 6DOF letem, Enhanced Input, chase a
    cockpit kamerou, myší jako virtuálním joystickem a debug HUD.
@@ -187,6 +187,15 @@ Od nejstaršího (celkem 25 commitů, posledních ~7 nepushnutých):
     - G-Safe (K) a ComStab (L);
     - myš jako virtuální joystick SC s kruhem a kurzorem v HUD;
     - entry heat se nově měří proti 200 m/s (rychlost SCM).
+15. **Opravy po SC-1a** (17. 9. 2026): výstup z lodi (postava vedle lodi, kamera normálně daleko)
+    a zobrazení kvality grafiky v menu (kapitola 10).
+16. **SC-1b – boost a afterburner** (17. 9. 2026):
+    - boost (Shift) zesiluje jen manévrovací trysky (retro, strafe, nahoru, dolů) a rotaci a po
+      dobu hoření vypíná G-Safe. Hlavní tah ani rychlost nemění;
+    - afterburner (Tab + W, jen SCM) zesiluje hlavní tah a zvedá rychlostní limit na SCM × 2 ×
+      omezovač. Má vlastní palivo na 8 s hoření a doplňuje se 40 s. Po vyhoření nebo puštění se
+      limit 4 s plynule vrací. G-Safe nevypíná;
+    - hodnoty jsou ve `Vanguard_setup.json`, HUD má řádek AFTERBRN a stav boostu na řádku IFCS.
 
 ---
 
@@ -254,7 +263,8 @@ Od nejstaršího (celkem 25 commitů, posledních ~7 nepushnutých):
 | Nahoru / dolů | Space / Ctrl |
 | Roll | Q / E |
 | Směr (virtuální joystick, kurzor zůstává) | myš |
-| Boost | Shift (s W) |
+| Boost (manévrovací trysky a rotace, vypíná G-Safe) | Shift |
+| Afterburner (jen SCM) | Tab (s W) |
 | Coupled / decoupled | V |
 | Spacebrake (držet) | X |
 | Omezovač rychlosti | kolečko |
@@ -285,6 +295,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_free_look.py` | Free look (neomezený yaw, návrat). |
 | `test_ship_import.py` | Importovaná loď: meshe, kolize, sockety, materiály, všechny hodnoty ze setup JSON (s `GAMESPACE_SHIP_MANIFEST`). |
 | `test_ifcs_sc1.py` | SC-1a: limity trysek podle směru, coupled brzdění, decoupled, omezovač, spacebrake, SCM/NAV, setrvačnost rotace, G-Safe, ComStab, virtuální joystick, input assety, hodnoty Vanguardu. |
+| `test_boost_afterburner_sc1b.py` | SC-1b: boost jen manévrovací trysky a rotace, vypnutí G-Safe, afterburner (tah, limit × omezovač, palivo, zamčení, doplňování, plynulý návrat, coupled i decoupled, jen SCM, G-Safe zůstává), Shift + Tab, input a hodnoty Vanguardu. |
 | `test_flight_modes.py` | Boost energie, cruise jen v NAV (vesmír i nad Veyrou), výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
@@ -312,19 +323,20 @@ a speed limiter).
     omezovač na kolečku, W/S jako cílová rychlost, trysky podle směru a setrvačnost rotace,
     G-Safe, ComStab, spacebrake, myš jako VJoy s kruhem. Hmotnost lodi zatím není samostatný
     parametr: tah je rovnou zadaný jako zrychlení (stejně ho uvádí SC).
-  - **SC-1b:** oddělit boost (manévrovací trysky a rotace, vypíná G-Safe) a afterburner (hlavní
-    tah, vlastní palivo, rychlost relativní k plynu).
-  - **SC-1c:** letový HUD podle referencí v `Docs/UI/` (kapitola 3): svislý pruh rychlosti vůči
-    omezovači, G-metr, indikátory CPLD / GSAF / COMSTAB a pruh paliva a boostu místo textových
-    řádků. Přesný rozsah a vztah k SC-3 domluvit s autorem před začátkem (reference sama mluví o
-    SC-3 a doporučuje UMG).
+  - **SC-1b (hotovo, 17. 9. 2026, čeká na autorův test):** boost (manévrovací trysky a rotace,
+    vypíná G-Safe) a afterburner (hlavní tah, vlastní palivo, rychlost relativní k omezovači, jen
+    SCM, G-Safe nechává zapnutý).
+  - **SC-1c (rozsah potvrzený autorem 17. 9. 2026):** HUD jen pro mechaniky SC-1a/1b podle
+    `Docs/UI/` (kapitola 3): svislý pruh rychlosti vůči omezovači, G-metr, indikátory CPLD, GSAF,
+    COMSTAB, BOOST a SCM/NAV, pruhy energie boostu a paliva afterburneru, kurzor virtuálního
+    joysticku.
   - Ladění hodnot (G, rychlosti, citlivost VJoy) podle autorova hraní.
 - **SC-2 – Přistání SC stylem**
   - Landing gear (N) s vizuálem na socketech `Gear_*`.
   - Precision / landing mode s nízkými limity.
   - Přepínač VTOL.
-- **SC-3 – HUD a MFD:** rychlostní pásky, SCM/NAV, stavové přepínače VTOL/CPLD/ESP/GEAR,
-  velocity vector, G-metr, kurzor VJoy. Nahradí anglický debug HUD (UMG nebo Slate).
+- **SC-3 – zbytek HUD a MFD:** VTOL a GEAR (po SC-2), ESP a LOCK (až budou zbraně), velocity
+  vector, MFD panely, celková přestavba na UMG a náhrada anglického debug HUD.
 - **SC-4 – Quantum travel** místo cruise J: markery cílů (Veyra, Keth, Orun, později stanice),
   natočení, spool + kalibrace (B), engage, efekt tunelu, cooldown, blokace překážkou, palivo.
   Vyžaduje rozhodnutí o měřítku systému (SpaceEnvironment reference doporučuje realistické
@@ -343,7 +355,9 @@ Další otevřené směry mimo let:
 
 ## 10. Známé problémy a neověřené věci
 
-- **Neověřeno autorem:** celý SC-1a (pocit letu, hodnoty G a rychlostí, VJoy kruh, Alt +
+- **Neověřeno autorem:** celý SC-1b (boost a afterburner, jejich hodnoty, Tab ve hře, řádek
+  AFTERBRN). SC-1a autor otestoval a mechanicky funguje; jeho hodnoty se budou dál ladit. Dříve:
+  celý SC-1a (pocit letu, hodnoty G a rychlostí, VJoy kruh, Alt +
   kolečko, přistávání s novým coupled režimem). Headless testy prochází.
 - **Zjištěno autorem v buildu (17. 9. 2026):**
   - *Opraveno, čeká na autorův test:* po výstupu z lodi stála postava skoro v trupu a kamera byla

@@ -220,7 +220,7 @@ namespace
 			return TEXT("cruise needs NAV mode (B)");
 		}
 		OutColor = FLinearColor(0.7f, 0.7f, 0.7f);
-		return TEXT("B SCM/NAV   wheel limiter   Alt+wheel zoom   V cpld   X brake   K g-safe   L comstab   J cruise (NAV)");
+		return TEXT("B SCM/NAV   wheel limiter   Alt+wheel zoom   V cpld   X brake   Shift boost   Tab afterburner   K g-safe   L comstab   J cruise (NAV)");
 	}
 
 	FString EnergyBar(float Fraction, int32 Cells = 10)
@@ -264,15 +264,44 @@ namespace
 				Ship.GetMasterModeSwitchProgress() * 100.f)
 			: FString(ModeName);
 		Ifcs += Ship.IsSpaceBraking() ? TEXT("   SPACEBRAKE") : Ship.IsFlightAssistOn() ? TEXT("   CPLD") : TEXT("   DECOUPLED");
-		Ifcs += Ship.IsGSafeOn() ? TEXT("   G-SAFE") : TEXT("   g-safe off");
+		Ifcs += !Ship.IsGSafeOn() ? TEXT("   g-safe off") : Ship.IsGSafeActive() ? TEXT("   G-SAFE") : TEXT("   g-safe (boost)");
 		Ifcs += Ship.IsComStabOn() ? TEXT("   COMSTAB") : TEXT("   comstab off");
-		Ifcs += FString::Printf(TEXT("   %4.1f G"), Ship.GetGForce());
-		const TCHAR* BoostState = Ship.IsBoosting() ? TEXT("BOOST") : Ship.IsBoostLocked() ? TEXT("recharging") : TEXT("boost");
+		const TCHAR* BoostState = Ship.IsBoosting() ? TEXT("BOOST") : Ship.IsBoostLocked() ? TEXT("boost recharging") : TEXT("boost");
 		Ifcs += FString::Printf(TEXT("   %s [%s]"), BoostState, *EnergyBar(Ship.GetBoostEnergy()));
+		Ifcs += FString::Printf(TEXT("   %4.1f G"), Ship.GetGForce());
 		Lines.Add({ TEXT("IFCS"), Ifcs, Ship.IsBoosting() ? FLinearColor(1.f, 0.55f, 0.1f)
 			: Ship.IsSpaceBraking() ? FLinearColor(1.f, 0.4f, 0.3f)
 			: !Ship.IsFlightAssistOn() ? FLinearColor(1.f, 0.8f, 0.45f)
 			: Ship.GetMasterMode() == EMasterMode::NAV ? FLinearColor(0.55f, 0.85f, 1.f) : FLinearColor::White });
+
+		// Afterburner fuel: its own tank, SCM only.
+		const float Fuel = Ship.GetAfterburnerFuel();
+		FString Afterburner = FString::Printf(TEXT("[%s] %3.0f %%"), *EnergyBar(Fuel, 20), Fuel * 100.f);
+		FLinearColor AfterburnerColor(0.8f, 0.8f, 0.8f);
+		if (Ship.IsAfterburnerActive())
+		{
+			Afterburner += TEXT("   BURNING");
+			AfterburnerColor = FLinearColor(1.f, 0.45f, 0.1f);
+		}
+		else if (Ship.IsAfterburnerLocked())
+		{
+			Afterburner += TEXT("   EMPTY - refilling");
+			AfterburnerColor = FLinearColor(1.f, 0.3f, 0.25f);
+		}
+		else if (Ship.GetMasterMode() == EMasterMode::NAV)
+		{
+			Afterburner += TEXT("   SCM only");
+			AfterburnerColor = FLinearColor(0.55f, 0.55f, 0.55f);
+		}
+		else if (Ship.GetAfterburnerBlend() > 0.f)
+		{
+			Afterburner += TEXT("   fading");
+		}
+		else
+		{
+			Afterburner += TEXT("   Tab + W");
+		}
+		Lines.Add({ TEXT("AFTERBRN"), Afterburner, AfterburnerColor });
 		FLinearColor CruiseColor;
 		const FString Cruise = DescribeCruise(Ship, CruiseColor);
 		Lines.Add({ TEXT("DRIVE"), Cruise, CruiseColor });
@@ -445,7 +474,7 @@ void ASpaceDebugHUD::DrawHUD()
 	if (Mode == 1)
 	{
 		// Compact: what matters while playing; the rest is one H press away.
-		static const TSet<FString> Compact = { TEXT("MODE"), TEXT("SPEED"), TEXT("IFCS"), TEXT("DRIVE"), TEXT("FLIGHT"), TEXT("LANDING"), TEXT("MOVE") };
+		static const TSet<FString> Compact = { TEXT("MODE"), TEXT("SPEED"), TEXT("IFCS"), TEXT("AFTERBRN"), TEXT("DRIVE"), TEXT("FLIGHT"), TEXT("LANDING"), TEXT("MOVE") };
 		const bool bFreeLook = Cast<ASpaceshipPawn>(Pawn) && Cast<ASpaceshipPawn>(Pawn)->IsFreeLooking();
 		Lines.RemoveAll([bFreeLook](const FLine& Line)
 		{

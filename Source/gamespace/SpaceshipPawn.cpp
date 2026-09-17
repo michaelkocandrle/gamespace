@@ -56,6 +56,7 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const SpeedLimiterActionPath = TEXT("/Game/Input/IA_SpeedLimiter.IA_SpeedLimiter");
 	const TCHAR* const GSafeActionPath = TEXT("/Game/Input/IA_GSafe.IA_GSafe");
 	const TCHAR* const ComStabActionPath = TEXT("/Game/Input/IA_ComStab.IA_ComStab");
+	const TCHAR* const AfterburnerActionPath = TEXT("/Game/Input/IA_Afterburner.IA_Afterburner");
 
 	/** 1 G in cm/s^2. */
 	constexpr double StandardGravityCmS2 = 980.665;
@@ -319,6 +320,12 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		Input->BindAction(ComStabAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleComStab);
 	}
+	if (AfterburnerAction)
+	{
+		Input->BindAction(AfterburnerAction, ETriggerEvent::Triggered, this, &ASpaceshipPawn::HandleAfterburner);
+		Input->BindAction(AfterburnerAction, ETriggerEvent::Completed, this, &ASpaceshipPawn::HandleAfterburnerCompleted);
+		Input->BindAction(AfterburnerAction, ETriggerEvent::Canceled, this, &ASpaceshipPawn::HandleAfterburnerCompleted);
+	}
 
 	if (FreeLookAction)
 	{
@@ -394,6 +401,10 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			if (ComStabAction && !IsMapped(ComStabAction))
 			{
 				InteractMappingContext->MapKey(ComStabAction, EKeys::L);
+			}
+			if (AfterburnerAction && !IsMapped(AfterburnerAction))
+			{
+				InteractMappingContext->MapKey(AfterburnerAction, EKeys::Tab);
 			}
 		}
 		if (InteractMappingContext && InteractMappingContext->GetMappings().Num() > 0)
@@ -501,6 +512,7 @@ void ASpaceshipPawn::ResolveInputAssets()
 	LoadOrMake(SpeedLimiterAction, SpeedLimiterActionPath, TEXT("IA_SpeedLimiter_Runtime"), EInputActionValueType::Axis1D);
 	LoadOrMake(GSafeAction, GSafeActionPath, TEXT("IA_GSafe_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(ComStabAction, ComStabActionPath, TEXT("IA_ComStab_Runtime"), EInputActionValueType::Boolean);
+	LoadOrMake(AfterburnerAction, AfterburnerActionPath, TEXT("IA_Afterburner_Runtime"), EInputActionValueType::Boolean);
 
 	BuildProceduralInputAssets();
 }
@@ -731,6 +743,16 @@ void ASpaceshipPawn::HandleGSafe(const FInputActionValue& /*Value*/)
 	SetGSafe(!bGSafe);
 }
 
+void ASpaceshipPawn::HandleAfterburner(const FInputActionValue& /*Value*/)
+{
+	bAfterburnerHeld = true;
+}
+
+void ASpaceshipPawn::HandleAfterburnerCompleted(const FInputActionValue& /*Value*/)
+{
+	bAfterburnerHeld = false;
+}
+
 void ASpaceshipPawn::HandleComStab(const FInputActionValue& /*Value*/)
 {
 	SetComStab(!bComStab);
@@ -853,7 +875,8 @@ float ASpaceshipPawn::GetModeMaxSpeed() const
 
 float ASpaceshipPawn::GetSpeedLimit() const
 {
-	return GetModeMaxSpeed() * SpeedLimiterFraction * (bBoostActive ? BoostMultiplier : 1.f);
+	// The afterburner's raised limit scales with the limiter too: a half-open limiter gets half of it.
+	return GetModeMaxSpeed() * SpeedLimiterFraction * (1.f + (AfterburnerSpeedMultiplier - 1.f) * AfterburnerBlend);
 }
 
 void ASpaceshipPawn::SetGSafe(bool bOn)
@@ -1002,6 +1025,7 @@ void ASpaceshipPawn::ClearPilotInput()
 	MouseLookDelta = FVector2D::ZeroVector;
 	MouseStick = FVector2D::ZeroVector;
 	bBoostHeld = false;
+	bAfterburnerHeld = false;
 	bSpaceBrakeHeld = false;
 }
 
@@ -1290,6 +1314,7 @@ void ASpaceshipPawn::StepFlight(float DeltaSeconds)
 	UpdateMasterMode(DeltaSeconds);
 	UpdateLanding(DeltaSeconds);
 	UpdateBoost(DeltaSeconds);
+	UpdateAfterburner(DeltaSeconds);
 	UpdateCruise(DeltaSeconds);
 	// Before steering: while held it takes the mouse movement for itself.
 	UpdateFreeLook(DeltaSeconds);
@@ -1338,9 +1363,8 @@ void ASpaceshipPawn::UpdateBoost(float DeltaSeconds)
 	{
 		bBoostLocked = false;
 	}
-	// Boost pushes the main thrusters, so it only burns energy while W is held.
-	const bool bForward = ThrustInput > 0.f && !bSpaceBrakeHeld;
-	bBoostActive = bBoostHeld && bForward && !bBoostLocked && BoostEnergy > 0.f
+	// Boost feeds the manoeuvring thrusters and rotation, so it burns energy whenever Shift is held.
+	bBoostActive = bBoostHeld && !bBoostLocked && BoostEnergy > 0.f
 		&& CruiseState == ECruiseState::Off && LandingState != ELandingState::Landed;
 
 	if (bBoostActive)
@@ -1363,6 +1387,49 @@ void ASpaceshipPawn::UpdateBoost(float DeltaSeconds)
 	}
 
 	if (bBoostActive && !bWasActive)
+	{
+		CameraKick = FMath::Max(CameraKick, 0.3f);
+	}
+}
+
+void ASpaceshipPawn::UpdateAfterburner(float DeltaSeconds)
+{
+	const bool bWasActive = bAfterburnerActive;
+	if (bAfterburnerLocked && AfterburnerFuel >= AfterburnerUnlockFraction)
+	{
+		bAfterburnerLocked = false;
+	}
+	// SCM only (NAV already flies at five times SCM speed and has cruise for more), and only while it
+	// can do something: W forward, no spacebrake, flying.
+	bAfterburnerActive = bAfterburnerHeld && ThrustInput > 0.f && !bSpaceBrakeHeld && !bAfterburnerLocked && AfterburnerFuel > 0.f
+		&& MasterMode == EMasterMode::SCM && CruiseState == ECruiseState::Off && LandingState != ELandingState::Landed;
+
+	if (bAfterburnerActive)
+	{
+		AfterburnerFuel = FMath::Max(0.f, AfterburnerFuel - DeltaSeconds / AfterburnerDurationSeconds);
+		AfterburnerRefillWait = AfterburnerRefillDelaySeconds;
+		if (AfterburnerFuel <= 0.f)
+		{
+			bAfterburnerLocked = true;
+			bAfterburnerActive = false;
+		}
+	}
+	else
+	{
+		AfterburnerRefillWait = FMath::Max(0.f, AfterburnerRefillWait - DeltaSeconds);
+		if (AfterburnerRefillWait <= 0.f)
+		{
+			AfterburnerFuel = FMath::Min(1.f, AfterburnerFuel + DeltaSeconds / AfterburnerRefillSeconds);
+		}
+	}
+
+	// The raised limit spools in quickly and fades out slowly, so running dry or letting go never
+	// yanks the ship back to SCM speed.
+	AfterburnerBlend = bAfterburnerActive
+		? FMath::Min(1.f, AfterburnerBlend + DeltaSeconds / AfterburnerSpoolSeconds)
+		: FMath::Max(0.f, AfterburnerBlend - DeltaSeconds / AfterburnerFadeSeconds);
+
+	if (bAfterburnerActive && !bWasActive)
 	{
 		CameraKick = FMath::Max(CameraKick, 0.6f);
 		PlayOneShot(BoostStartSound);
@@ -1477,6 +1544,7 @@ void ASpaceshipPawn::UpdateCruise(float DeltaSeconds)
 			CruiseTimer = 0.f;
 			CruiseBlocker = ECruiseBlocker::None;
 			bBoostActive = false;
+			bAfterburnerActive = false;
 			CameraKick = 1.f;
 			CruiseChargeAudio = nullptr;
 			PlayOneShot(CruiseEngageSound);
@@ -1551,6 +1619,9 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 	{
 		RateScale *= NavTurnScale;
 	}
+	// Boost feeds the manoeuvring thrusters: faster turns, and faster to start and stop them.
+	const double RotationBoost = bBoostActive ? BoostRotationMultiplier : 1.0;
+	RateScale *= float(RotationBoost);
 
 	FVector TargetRates(
 		RollInput * RollRate * RateScale,
@@ -1561,7 +1632,7 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 	SlipAngleDeg = Speed < ComStabMinSpeed ? 0.f
 		: float(FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp((LinearVelocity / Speed) | GetActorForwardVector(), -1.0, 1.0))));
 	const bool bCoupledTurns = (bFlightAssist || bSpaceBrakeHeld) && CruiseState != ECruiseState::Active;
-	if (bCoupledTurns && bGSafe && Speed > 1.0)
+	if (bCoupledTurns && IsGSafeActive() && Speed > 1.0)
 	{
 		// Bending the flight path at rate w takes Speed x w of sideways thrust: keep that under GSafeTurnG.
 		const double MaxRateDeg = FMath::RadiansToDegrees(GSafeTurnG * SpaceshipPawnDefaults::StandardGravityCmS2 / Speed);
@@ -1591,9 +1662,9 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 		return Current + FMath::Clamp((Target - Current) * Ease, -MaxStep, MaxStep);
 	};
 	AngularVelocity = FVector(
-		StepRate(AngularVelocity.X, TargetRates.X, RollAcceleration),
-		StepRate(AngularVelocity.Y, TargetRates.Y, PitchAcceleration),
-		StepRate(AngularVelocity.Z, TargetRates.Z, YawAcceleration));
+		StepRate(AngularVelocity.X, TargetRates.X, RollAcceleration * RotationBoost),
+		StepRate(AngularVelocity.Y, TargetRates.Y, PitchAcceleration * RotationBoost),
+		StepRate(AngularVelocity.Z, TargetRates.Z, YawAcceleration * RotationBoost));
 	if (bFreeLookHeld)
 	{
 		// Heading frozen where it was; roll (keys) still works, and the flight path is untouched.
@@ -1619,7 +1690,6 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 	const double DragRate = SpaceLinearDamping + (LinearDamping + QuadraticDrag * LinearVelocity.Size()) * Density;
 	const double Gravity = bHasEnvironment ? Environment.GravityCmS2 * GravityScale : 0.0;
 	const FVector Up = bHasEnvironment ? FVector(Environment.Up) : FVector::UpVector;
-	const float BoostFactor = bBoostActive ? BoostMultiplier : 1.f;
 
 	if (CruiseState == ECruiseState::Active)
 	{
@@ -1640,10 +1710,11 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 	}
 	else
 	{
-		// What each thruster direction can do. NAV keeps main and retro but halves manoeuvring.
-		const double Maneuver = MasterMode == EMasterMode::NAV ? NavManeuverScale : 1.0;
-		const double ForwardCap = ThrustAcceleration * BoostFactor;
-		const double RetroCap = RetroAcceleration;
+		// What each thruster direction can do. NAV keeps main and retro but halves manoeuvring; boost
+		// strengthens the manoeuvring thrusters (retro included), the afterburner the main ones.
+		const double Maneuver = (MasterMode == EMasterMode::NAV ? NavManeuverScale : 1.0) * (bBoostActive ? BoostManeuverMultiplier : 1.0);
+		const double ForwardCap = ThrustAcceleration * (bAfterburnerActive ? AfterburnerThrustMultiplier : 1.0);
+		const double RetroCap = RetroAcceleration * (bBoostActive ? BoostManeuverMultiplier : 1.0);
 		const double StrafeCap = StrafeAcceleration * Maneuver;
 		const double UpCap = LiftAcceleration * Maneuver;
 		const double DownCap = DownAcceleration * Maneuver;
@@ -1696,11 +1767,12 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 				LiftInput * (LiftInput > 0.f ? UpCap : DownCap));
 		}
 
-		// Every thruster direction has its limit, flight computer or not; then G-Safe on top.
+		// Every thruster direction has its limit, flight computer or not; then G-Safe on top, unless
+		// boost suspends it.
 		LocalAcceleration.X = FMath::Clamp(LocalAcceleration.X, -RetroCap, ForwardCap);
 		LocalAcceleration.Y = FMath::Clamp(LocalAcceleration.Y, -StrafeCap, StrafeCap);
 		LocalAcceleration.Z = FMath::Clamp(LocalAcceleration.Z, -DownCap, UpCap);
-		if (bGSafe)
+		if (IsGSafeActive())
 		{
 			LocalAcceleration = LimitThrustForPilot(LocalAcceleration, bComStab && bCoupled);
 		}
@@ -1730,8 +1802,8 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		const double Speed = LinearVelocity.Size();
 		if (CruiseState == ECruiseState::Dropping)
 		{
-			// Out of cruise: kilometres per second bleed off quickly down to boosted flight speed.
-			const double Cap = GetModeMaxSpeed() * BoostMultiplier;
+			// Out of cruise: kilometres per second bleed off quickly down to NAV top speed.
+			const double Cap = GetModeMaxSpeed();
 			if (Speed > Cap)
 			{
 				LinearVelocity *= FMath::Max(Cap, Speed * FMath::Exp(-2.5 * DeltaSeconds)) / Speed;
@@ -1739,13 +1811,13 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		}
 		else
 		{
-			const double SpeedCap = GetModeMaxSpeed() * BoostFactor;
+			const double SpeedCap = GetModeMaxSpeed() * (1.0 + (AfterburnerSpeedMultiplier - 1.0) * AfterburnerBlend);
 			if (Speed > SpeedCap)
 			{
-				// Above the mode's top speed (after boost, or leaving NAV for SCM): while accelerating
-				// this is an ordinary clamp, otherwise the excess bleeds off instead of snapping.
+				// Above the mode's top speed (afterburner fading, or leaving NAV for SCM): while the
+				// afterburner pushes this is an ordinary clamp, otherwise the excess bleeds off.
 				const double Excess = (Speed - SpeedCap) * FMath::Min(double(OverspeedDecay) * DeltaSeconds, 1.0);
-				const double Target = bBoostActive ? SpeedCap : Speed - Excess;
+				const double Target = bAfterburnerActive ? SpeedCap : Speed - Excess;
 				LinearVelocity *= FMath::Max(Target, SpeedCap) / Speed;
 			}
 			else if (!bCoupled && Speed > SpeedLimit && Speed > SpeedBefore)
@@ -1957,6 +2029,7 @@ void ASpaceshipPawn::EnterLanded()
 	AngularVelocity = FVector::ZeroVector;
 	MouseStick = FVector2D::ZeroVector;
 	bBoostActive = false;
+	bAfterburnerActive = false;
 	PlayOneShot(TouchdownSound, FMath::Clamp(LinearVelocity.Size() / FMath::Max(LandingMaxSpeed, 1.f), 0.4f, 1.f));
 	UE_LOG(LogSpaceship, Log, TEXT("%s landed: slope %.1f deg, tilt %.1f deg, gap %.0f cm"),
 		*GetName(), GroundSlopeDeg, GroundTiltDeg, GroundGapCm);
@@ -2007,6 +2080,7 @@ void ASpaceshipPawn::UpdateLandedMotion(float DeltaSeconds)
 void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 {
 	BoostBlend = FMath::FInterpTo(BoostBlend, bBoostActive ? 1.f : 0.f, DeltaSeconds, 4.f);
+	AfterburnerFeel = FMath::FInterpTo(AfterburnerFeel, bAfterburnerActive ? 1.f : 0.f, DeltaSeconds, 4.f);
 	const float CruiseTarget = CruiseState == ECruiseState::Active ? 1.f
 		: CruiseState == ECruiseState::Spooling ? 0.2f * GetCruiseSpoolProgress() : 0.f;
 	CruiseBlend = FMath::FInterpTo(CruiseBlend, CruiseTarget, DeltaSeconds, CruiseState == ECruiseState::Dropping ? 3.f : 1.5f);
@@ -2023,14 +2097,14 @@ void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 		CameraBoom->SocketOffset = BaseSocketOffset * FMath::Sqrt(CameraZoom);
 	}
 
-	// Speed you can feel: the view widens with boost and much more in cruise.
-	const float FovKick = BoostFovKick * BoostBlend + CruiseFovKick * CruiseBlend;
+	// Speed you can feel: the view widens with the afterburner and much more in cruise.
+	const float FovKick = AfterburnerFovKick * AfterburnerFeel + CruiseFovKick * CruiseBlend;
 	ChaseCamera->SetFieldOfView(BaseChaseFov + FovKick);
 	CockpitCamera->SetFieldOfView(FMath::Lerp(BaseCockpitFov, CockpitZoomFov, CockpitZoom) + 0.6f * FovKick * (1.f - CockpitZoom));
 
 	// Smooth noise rather than random jumps: a rumble, not a flicker. Nothing moves when calm.
 	const float Spool = CruiseState == ECruiseState::Spooling ? GetCruiseSpoolProgress() : 0.f;
-	const float Amplitude = HeatShakeCm * Heat * Heat + BoostShakeCm * BoostBlend
+	const float Amplitude = HeatShakeCm * Heat * Heat + BoostShakeCm * BoostBlend + AfterburnerShakeCm * AfterburnerFeel
 		+ CruiseShakeCm * (Spool * Spool + 0.25f * CruiseBlend) + KickShakeCm * CameraKick;
 	const double Time = GetWorld()->GetTimeSeconds();
 	const FVector Shake = Amplitude < 0.01f
@@ -2109,7 +2183,7 @@ void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
 	const float LeverLoad = CruiseState == ECruiseState::Active ? 0.35f * SpeedLimiterFraction
 		: bFlightAssist ? 0.35f * FMath::Clamp(float(LinearVelocity.Size()) / FMath::Max(GetModeMaxSpeed(), 1.f), 0.f, 1.f) : 0.f;
 	EngineLoad = FMath::FInterpTo(EngineLoad, bPiloted ? FMath::Max(EngineDemand, LeverLoad) : 0.f, DeltaSeconds, EngineSpoolRate);
-	EngineBoostBlend = FMath::FInterpTo(EngineBoostBlend, bPiloted && bBoostActive ? 1.f : 0.f, DeltaSeconds, EngineSpoolRate);
+	EngineBoostBlend = FMath::FInterpTo(EngineBoostBlend, bPiloted && bAfterburnerActive ? 1.f : 0.f, DeltaSeconds, EngineSpoolRate);
 	HumBlend = FMath::FInterpTo(HumBlend, bPiloted ? 1.f : 0.f, DeltaSeconds, 1.5f);
 
 	const float Effects = USpaceUserSettings::GetEffectsVolume();
@@ -2146,7 +2220,7 @@ void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
 	EngineAudio->SetLowPassFilterFrequency(FMath::Exp(FMath::Lerp(
 		FMath::Loge(EngineLowPassIdleHz), FMath::Loge(EngineLowPassFullHz), Load)));
 
-	Drive(BoostAudio, bPiloted ? BoostVolume * BoostBlend : 0.f, 1.f + 0.06f * BoostBlend);
+	Drive(BoostAudio, bPiloted ? BoostVolume * AfterburnerFeel : 0.f, 1.f + 0.06f * AfterburnerFeel);
 	const float CruiseSpeed = FMath::Clamp(LinearVelocity.Size() / FMath::Max(CruiseMaxSpeed, 1.f), 0.f, 1.f);
 	Drive(CruiseAudio, bPiloted ? CruiseVolume * CruiseBlend : 0.f, 0.9f + 0.25f * FMath::Sqrt(CruiseSpeed));
 }
@@ -2200,7 +2274,7 @@ void ASpaceshipPawn::UpdateShipLights(float DeltaSeconds)
 		}
 	};
 
-	const float Thrust = ThrusterIdleGlow + (1.f - ThrusterIdleGlow) * EngineLoad + ThrusterBoostGlow * BoostBlend + ThrusterCruiseGlow * CruiseBlend;
+	const float Thrust = ThrusterIdleGlow + (1.f - ThrusterIdleGlow) * EngineLoad + ThrusterAfterburnerGlow * AfterburnerFeel + 0.3f * BoostBlend + ThrusterCruiseGlow * CruiseBlend;
 	for (FShipGlowMaterial& Glow : ThrusterMaterials)
 	{
 		Apply(Glow, Glow.BaseStrength * Thrust);

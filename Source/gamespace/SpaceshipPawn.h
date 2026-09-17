@@ -136,8 +136,10 @@ enum class EMasterMode : uint8
  * Mouse steering is a Star Citizen virtual joystick: the mouse moves a cursor inside a circle that
  * stays where it is left; its offset from the centre (outside a small dead zone) is the turn rate.
  *
- * Boost (Shift) multiplies forward thrust and speed while its energy lasts; it recharges after a
- * pause. Cruise drive (J) charges for a few seconds and then flies at kilometres per second, as
+ * Boost (Shift) strengthens the manoeuvring thrusters and rotation and suspends G-Safe while its
+ * energy lasts; it recharges after a pause. The afterburner (Tab, SCM only) overloads the main
+ * thrusters and raises the speed limit (relative to the limiter) from its own slowly refilling
+ * fuel tank. Cruise drive (J) charges for a few seconds and then flies at kilometres per second, as
  * fast as the altitude allows: the limit shrinks towards the ground, so an approach slows down by
  * itself, and cruise drops out close to the surface.
  *
@@ -239,7 +241,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
 	float GetModeMaxSpeed() const;
 
-	/** The speed no key goes past right now: mode top speed x limiter (x BoostMultiplier while boosting), cm/s. */
+	/** The speed no key goes past right now: mode top speed x limiter (x the afterburner's share of AfterburnerSpeedMultiplier), cm/s. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
 	float GetSpeedLimit() const;
 
@@ -296,6 +298,30 @@ public:
 	/** Boost ran dry and waits for BoostUnlockFraction of energy. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
 	bool IsBoostLocked() const { return bBoostLocked; }
+
+	/** G-Safe actually limiting right now: switched on (K) and not suspended by boost. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	bool IsGSafeActive() const { return bGSafe && !bBoostActive; }
+
+	/** Afterburner burning this frame (Tab held, W forward, SCM, fuel left). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
+	bool IsAfterburnerActive() const { return bAfterburnerActive; }
+
+	/** Afterburner fuel, 0..1. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
+	float GetAfterburnerFuel() const { return AfterburnerFuel; }
+
+	/** The afterburner ran dry and waits for AfterburnerUnlockFraction of fuel. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
+	bool IsAfterburnerLocked() const { return bAfterburnerLocked; }
+
+	/** How much of the afterburner's raised speed limit is in force, 0..1 (spools in, fades out). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
+	float GetAfterburnerBlend() const { return AfterburnerBlend; }
+
+	/** Afterburner held (Tab). Tests call it directly; the key does the same. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Afterburner")
+	void SetAfterburnerHeld(bool bHeld) { bAfterburnerHeld = bHeld; }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
 	ECruiseState GetCruiseState() const { return CruiseState; }
@@ -636,6 +662,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> ComStabAction;
 
+	/** Digital, held: afterburner (Tab). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> AfterburnerAction;
+
 	/** Maps keys the authored flight context lacks (F, V, J, X, B, K, L, right mouse button, wheel). */
 	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> InteractMappingContext;
@@ -710,13 +740,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Flight")
 	bool bSweepMovement = true;
 
-	/** While boost is held with W, forward thrust and the speed limit are multiplied by this. */
+	/**
+	 * Boost (hold Shift): the manoeuvring thrusters - retro, strafe, up and down - are multiplied by
+	 * this. Main thrust and the speed limit are not (that is the afterburner).
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "1.0"))
-	float BoostMultiplier = 2.5f;
+	float BoostManeuverMultiplier = 1.6f;
+
+	/** Boost: turn rates and rotational accelerations are multiplied by this. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "1.0"))
+	float BoostRotationMultiplier = 1.4f;
 
 	/**
-	 * How quickly speed above the current cap bleeds off once boost is released, as a fraction
-	 * of the excess per second. Avoids a hard velocity snap at the moment Shift comes up.
+	 * How quickly speed above the current cap bleeds off (afterburner fading out, NAV back to SCM),
+	 * as a fraction of the excess per second. Avoids a hard velocity snap.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "0.0"))
 	float OverspeedDecay = 1.5f;
@@ -736,6 +773,48 @@ protected:
 	/** After running dry, boost works again once this much energy is back. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Boost", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float BoostUnlockFraction = 0.3f;
+
+	// ---------------------------------------------------------------------------------------
+	// Afterburner (hold Tab, SCM only)
+	// ---------------------------------------------------------------------------------------
+
+	/** Afterburner: main (forward) thrust is multiplied by this. G-Safe still applies. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "1.0"))
+	float AfterburnerThrustMultiplier = 1.8f;
+
+	/**
+	 * Afterburner: the speed limit becomes SCM top speed x this x the speed limiter. Relative to the
+	 * limiter, as in Star Citizen: at a 50 % limiter the afterburner reaches 50 % of its full top speed.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "1.0"))
+	float AfterburnerSpeedMultiplier = 2.f;
+
+	/** Seconds of burn a full afterburner tank lasts. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "0.1", Units = "s"))
+	float AfterburnerDurationSeconds = 8.f;
+
+	/** Seconds from an empty to a full tank once refilling; slow on purpose. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "0.1", Units = "s"))
+	float AfterburnerRefillSeconds = 40.f;
+
+	/** Refilling starts this long after the afterburner was last used. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "0.0", Units = "s"))
+	float AfterburnerRefillDelaySeconds = 2.f;
+
+	/** After running dry, the afterburner lights again once this much fuel is back. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float AfterburnerUnlockFraction = 0.15f;
+
+	/** Seconds for the raised speed limit to come in fully. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "0.01", Units = "s"))
+	float AfterburnerSpoolSeconds = 0.4f;
+
+	/**
+	 * Seconds for the raised speed limit to fade back to normal when the afterburner stops (released
+	 * or out of fuel), so the ship slows down smoothly instead of braking at full retro.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Afterburner", meta = (ClampMin = "0.01", Units = "s"))
+	float AfterburnerFadeSeconds = 4.f;
 
 	// ---------------------------------------------------------------------------------------
 	// IFCS: coupled flight, master modes, speed limiter, G-Safe, ComStab
@@ -982,9 +1061,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "10.0", ClampMax = "120.0"))
 	float CockpitZoomFov = 40.f;
 
-	/** Degrees added to the field of view at full boost... */
+	/** Degrees added to the field of view at full afterburner... */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
-	float BoostFovKick = 7.f;
+	float AfterburnerFovKick = 7.f;
 
 	/** ...and in cruise. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
@@ -992,13 +1071,17 @@ protected:
 
 	/** Camera shake while boosting, cm (cockpit a quarter). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
-	float BoostShakeCm = 2.5f;
+	float BoostShakeCm = 1.f;
+
+	/** Camera shake at full afterburner, cm (cockpit a quarter). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float AfterburnerShakeCm = 3.f;
 
 	/** Camera shake at the end of cruise charging, cm; a little stays while cruising. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
 	float CruiseShakeCm = 6.f;
 
-	/** Short jolt when boost starts, cruise engages or drops out, cm. */
+	/** Short jolt when boost or the afterburner starts, cruise engages or drops out, cm. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
 	float KickShakeCm = 9.f;
 
@@ -1010,9 +1093,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Lights", meta = (ClampMin = "0.0"))
 	float ThrusterIdleGlow = 0.3f;
 
-	/** Glow added at full boost, same units... */
+	/** Glow added at full afterburner, same units... */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Lights", meta = (ClampMin = "0.0"))
-	float ThrusterBoostGlow = 2.f;
+	float ThrusterAfterburnerGlow = 2.f;
 
 	/** ...and in cruise. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Lights", meta = (ClampMin = "0.0"))
@@ -1135,7 +1218,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.1"))
 	float EngineMaxPitch = 1.05f;
 
-	/** Pitch added on top while boosting forward. */
+	/** Pitch added on top while the afterburner burns. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
 	float EngineBoostPitch = 0.15f;
 
@@ -1143,7 +1226,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "20.0"))
 	float EngineLowPassIdleHz = 400.f;
 
-	/** Low-pass cutoff at full load or boost, Hz. The loop has almost nothing above 1 kHz anyway. */
+	/** Low-pass cutoff at full load or afterburner, Hz. The loop has almost nothing above 1 kHz anyway. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "20.0"))
 	float EngineLowPassFullHz = 2000.f;
 
@@ -1155,7 +1238,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
 	TObjectPtr<USoundBase> EngineHumSound;
 
-	/** Afterburner layer while boosting. /Game/Ships/Audio/SW_BoostLoop when empty. */
+	/** Roar layer while the afterburner burns. /Game/Ships/Audio/SW_BoostLoop when empty. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
 	TObjectPtr<USoundBase> BoostLoopSound;
 
@@ -1225,6 +1308,9 @@ private:
 	void HandleSpeedLimiter(const FInputActionValue& Value);
 	void HandleGSafe(const FInputActionValue& Value);
 	void HandleComStab(const FInputActionValue& Value);
+	void HandleAfterburner(const FInputActionValue& Value);
+	void HandleAfterburnerCompleted(const FInputActionValue& Value);
+	void UpdateAfterburner(float DeltaSeconds);
 	/** Alt held on the controlling player's keyboard: the wheel zooms instead of setting the limiter. */
 	bool IsAltHeld() const;
 	void SetFreeLookHeld(bool bHeld);
@@ -1296,6 +1382,13 @@ private:
 	float BoostEnergy = 1.f;
 	float BoostRechargeWait = 0.f;
 
+	bool bAfterburnerHeld = false;
+	bool bAfterburnerActive = false;
+	bool bAfterburnerLocked = false;
+	float AfterburnerFuel = 1.f;
+	float AfterburnerRefillWait = 0.f;
+	float AfterburnerBlend = 0.f;
+
 	float EngineDemand = 0.f;
 
 	bool bSpaceBrakeHeld = false;
@@ -1315,6 +1408,7 @@ private:
 
 	/** Eased 0..1 blends driving camera, lights and sound. */
 	float BoostBlend = 0.f;
+	float AfterburnerFeel = 0.f;
 	float CruiseBlend = 0.f;
 	float CameraKick = 0.f;
 
