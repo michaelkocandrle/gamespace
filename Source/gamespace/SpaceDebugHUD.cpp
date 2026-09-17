@@ -15,6 +15,8 @@
 #include "Misc/App.h"
 #include "SpaceshipPawn.h"
 #include "SpaceUserSettings.h"
+#include "SpaceFlightHud.h"
+#include "GameFramework/PlayerController.h"
 
 namespace
 {
@@ -385,43 +387,19 @@ namespace
 	}
 }
 
-void ASpaceDebugHUD::DrawVirtualJoystick(const ASpaceshipPawn& Ship, float Scale)
+void ASpaceDebugHUD::BeginPlay()
 {
-	if (!Ship.UsesVirtualJoystick() || Ship.IsLanded() || Ship.IsFreeLooking() || !Canvas)
+	Super::BeginPlay();
+	// The SC-1c flight HUD (UMG): only for a local player; it follows whatever ship that player flies.
+	if (PlayerOwner && PlayerOwner->IsLocalController())
 	{
-		return;
-	}
-	// A circle in the middle of the screen: its rim is full turn rate, the inner ring the dead zone,
-	// the cross is where the mouse left the virtual stick (Y up on the stick is up on screen).
-	const FVector2D Centre(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
-	const float Radius = Canvas->ClipY * 0.11f;
-	const float Thickness = FMath::Max(1.f, Scale);
-	const FLinearColor RimColor(0.55f, 0.85f, 1.f, 0.35f);
-	auto Circle = [&](float R, const FLinearColor& Color)
-	{
-		const int32 Segments = 48;
-		for (int32 Index = 0; Index < Segments; ++Index)
+		FlightHud = CreateWidget<USpaceFlightHud>(PlayerOwner, USpaceFlightHud::StaticClass());
+		if (FlightHud)
 		{
-			const float A = UE_TWO_PI * Index / Segments;
-			const float B = UE_TWO_PI * (Index + 1) / Segments;
-			DrawLine(Centre.X + R * FMath::Cos(A), Centre.Y + R * FMath::Sin(A),
-				Centre.X + R * FMath::Cos(B), Centre.Y + R * FMath::Sin(B), Color, Thickness);
+			// Under the menus (Slate, z-order 50) and the text readout drawn by this HUD's canvas.
+			FlightHud->AddToViewport(-10);
 		}
-	};
-	Circle(Radius, RimColor);
-	Circle(Radius * Ship.GetVirtualJoystickDeadzone(), FLinearColor(0.55f, 0.85f, 1.f, 0.25f));
-
-	const FVector2D Stick = Ship.GetMouseStick();
-	const FVector2D Cursor(Centre.X + Stick.X * Radius, Centre.Y - Stick.Y * Radius);
-	const bool bActive = Stick.Size() > Ship.GetVirtualJoystickDeadzone();
-	const FLinearColor CursorColor = bActive ? FLinearColor(1.f, 0.85f, 0.3f, 0.9f) : FLinearColor(0.8f, 0.9f, 1.f, 0.6f);
-	if (bActive)
-	{
-		DrawLine(Centre.X, Centre.Y, Cursor.X, Cursor.Y, FLinearColor(1.f, 0.85f, 0.3f, 0.35f), Thickness);
 	}
-	const float Arm = 7.f * Scale;
-	DrawLine(Cursor.X - Arm, Cursor.Y, Cursor.X + Arm, Cursor.Y, CursorColor, Thickness * 1.5f);
-	DrawLine(Cursor.X, Cursor.Y - Arm, Cursor.X, Cursor.Y + Arm, CursorColor, Thickness * 1.5f);
 }
 
 void ASpaceDebugHUD::CycleDisplayMode()
@@ -474,7 +452,9 @@ void ASpaceDebugHUD::DrawHUD()
 	if (Mode == 1)
 	{
 		// Compact: what matters while playing; the rest is one H press away.
-		static const TSet<FString> Compact = { TEXT("MODE"), TEXT("SPEED"), TEXT("IFCS"), TEXT("AFTERBRN"), TEXT("DRIVE"), TEXT("FLIGHT"), TEXT("LANDING"), TEXT("MOVE") };
+		// Speed, IFCS state and afterburner are on the UMG flight HUD (USpaceFlightHud) since SC-1c;
+		// the full readout (H again) still prints their numbers for tuning.
+		static const TSet<FString> Compact = { TEXT("MODE"), TEXT("DRIVE"), TEXT("FLIGHT"), TEXT("LANDING"), TEXT("MOVE") };
 		const bool bFreeLook = Cast<ASpaceshipPawn>(Pawn) && Cast<ASpaceshipPawn>(Pawn)->IsFreeLooking();
 		Lines.RemoveAll([bFreeLook](const FLine& Line)
 		{
@@ -514,11 +494,6 @@ void ASpaceDebugHUD::DrawHUD()
 	}
 
 	const ASpaceshipPawn* FreeLookShip = Cast<ASpaceshipPawn>(Pawn);
-	if (Mode > 0 && FreeLookShip)
-	{
-		DrawVirtualJoystick(*FreeLookShip, Scale);
-	}
-
 	// Big and central: the mouse is not doing what it usually does, or the drive is doing something.
 	FString Label;
 	FLinearColor LabelColor(1.f, 0.65f, 0.15f);

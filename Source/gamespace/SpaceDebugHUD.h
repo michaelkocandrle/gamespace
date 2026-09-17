@@ -7,11 +7,11 @@
 #include "SpaceDebugHUD.generated.h"
 
 /**
- * Plain-text flight readout drawn straight onto the canvas: speed and limiter, IFCS state, boost,
- * camera, distance and ETA to the nearest ACelestialBody, plus the mouse virtual joystick.
+ * Plain-text flight readout drawn straight onto the canvas: flight regime, landing, drive, camera,
+ * distance and ETA to the nearest ACelestialBody (and in full mode speed, IFCS and afterburner
+ * numbers). Also creates the UMG flight HUD (USpaceFlightHud, SC-1c) for the local player.
  *
- * A stopgap for tuning the flight model, deliberately not UMG. It needs no widget asset and no
- * extra module, and gets replaced once a real HUD exists.
+ * The text part is a stopgap for tuning the flight model, deliberately not UMG; it goes in SC-3.
  *
  * Three modes, cycled with H (IA_ToggleHud) or set with the console variable space.Hud:
  * 0 off, 1 compact (the few lines needed while flying or walking, the default), 2 full debug.
@@ -25,6 +25,7 @@ class GAMESPACE_API ASpaceDebugHUD : public AHUD
 
 public:
 	virtual void DrawHUD() override;
+	virtual void BeginPlay() override;
 
 	/** Off -> compact -> full -> off. Bound to H by ASpacePlayerController. */
 	static void CycleDisplayMode();
@@ -39,8 +40,9 @@ protected:
 	float TextScale = 1.0f;
 
 private:
-	/** The mouse virtual joystick: rim, dead zone and cursor in the middle of the screen. */
-	void DrawVirtualJoystick(const class ASpaceshipPawn& Ship, float Scale);
+	/** The SC-1c flight HUD (speed gauge, lamps, G meter, boost and afterburner, virtual joystick). */
+	UPROPERTY(Transient)
+	TObjectPtr<class USpaceFlightHud> FlightHud;
 
 	/** For the FPS counter (settings: show FPS). */
 	float SmoothedFrameSeconds = 0.f;

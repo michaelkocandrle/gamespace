@@ -425,19 +425,53 @@ GlobalDefaultGameMode=/Script/gamespace.SpaceGameMode
 Any level without a World Settings override therefore spawns a flyable ship at its
 `PlayerStart`. A Blueprint child of `SpaceGameMode` can still override the pawn per level.
 
+## Flight HUD (SC-1c, UMG)
+
+`Source/gamespace/SpaceFlightHud.*` - after `Docs/UI/SC_ThrottleHUD_VisualReference.md`: thin,
+translucent cyan lines framing the middle of the screen, no panels. Built entirely in C++, no widget
+Blueprint: `USpaceFlightHud` (a `UUserWidget`) constructs its widget tree in `Initialize` from UMG
+widgets (canvas, boxes, `UTextBlock`s, `UBorder` lamps) plus two widgets that paint themselves:
+`USpaceHudGauge` (thin line gauge: rails, ticks, translucent fill with a bright edge, optional red
+reverse zone and a marker; vertical or horizontal) and `USpaceHudVirtualJoystick`. `ASpaceDebugHUD`
+creates it for the local player (z-order -10, under the menus); it follows the flown ship every tick
+and hides with `H` (`space.Hud` 0) or when no ship is flown (the root panel collapses, the widget
+keeps ticking). Module dependency: `UMG`.
+
+- **Left of centre**, right-aligned against a frame line:
+  - status lamps with small squares - `SCM`/`NAV` (blinks while switching, shows the mode being
+    switched to), `CPLD` (reads `BRAKE`, red, under the spacebrake), `GSAF` (amber while boost
+    suspends it), `CSTB`, `BOOST` (amber); dark = off;
+  - the **speed gauge**: full height = the mode's top speed as the afterburner currently raises it
+    (`GetSpeedLimit / GetSpeedLimiter`, so it rescales smoothly while the afterburner spools and
+    fades); fill = speed along the nose (green, amber with the afterburner or above the limiter);
+    the cyan **marker is the speed limiter**; the red zone at the bottom (12 %) fills when flying
+    backwards, at the same metres per pixel;
+  - speed (`157 M/S`) and `LIM 180 M/S 90%` in small type under it;
+  - the **G meter** tied to it: a short horizontal gauge to 12 G with the G-Safe limit as a mark
+    (while G-Safe is limiting) and the value; cyan, amber above 70 % of `GSafeMaxG`, red above it.
+- **Right of centre**, after a frame line: `BOOST` energy and `AFTERBURNER` fuel as vertical gauges in
+  the same style with the % under them (`LOW`, `BURN`, `EMPTY`, `SCM ONLY`; the afterburner gauge
+  dims in NAV).
+- **Centre**: the virtual joystick - rim, dead zone, cursor (amber with a line from the centre when
+  outside the dead zone); hidden while landed or free looking.
+
+`USpaceFlightHud::MakeState(Ship, HudMode)` gathers everything shown into `FSpaceFlightHudState` and
+`ApplyState` only displays it, so headless tests check the values without a screen:
+`Tools/Tests/test_flight_hud_sc1c.py`. Layout constants (offsets +-300 px from the centre, gauge sizes)
+and colours (`SpaceHudStyle`) are at the top of `SpaceFlightHud.cpp`.
+
 ## SpaceDebugHUD
 
-`AHUD` subclass set as `HUDClass` on `SpaceGameMode`. Draws speed with the speed limiter (`SPEED`),
-the IFCS state (`IFCS`: SCM / NAV and switch progress, CPLD / DECOUPLED / SPACEBRAKE, G-SAFE,
-COMSTAB, boost state and energy bar, G load), the afterburner fuel (`AFTERBRN`), the cruise drive state or the key help (`DRIVE`) and the active
-camera as plain canvas text in the top-left corner. A master mode switch, cruise charging, a drop
-close to the ground and free look also show big in the middle of the screen, and in flight the mouse
-virtual joystick (rim, dead zone, cursor) is drawn in the centre. A tuning aid, not UMG - SC-3
-replaces it.
+`AHUD` subclass set as `HUDClass` on `SpaceGameMode`. Creates the UMG flight HUD (above) and draws
+the rest as plain canvas text in the top-left corner: the cruise drive state or the key help
+(`DRIVE`), flight regime, landing, camera, target. In full mode it also prints the numbers the UMG HUD
+shows graphically (`SPEED`, `IFCS`, `AFTERBRN`) for tuning. A master mode switch, cruise charging, a
+drop close to the ground and free look also show big in the middle of the screen. A tuning aid, not
+UMG - SC-3 replaces it.
 
 `H` (`IA_ToggleHud`, appended to `IMC_Spaceship` and `IMC_Character` by
 `Tools/Assets/add_hud_toggle_input.py`) cycles the CVar `space.Hud`: `1` compact (default: mode,
-speed, IFCS, drive, flight, landing, move), `2` full (every line below), `0` hidden. Position and text size
+drive, flight, landing, move; the UMG flight HUD shows speed and IFCS), `2` full (every line below), `0` hidden. Position and text size
 scale with the viewport height (1.0 at 1080 p), so the panel stays in the corner at any
 resolution.
 

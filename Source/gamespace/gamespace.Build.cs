@@ -12,8 +12,8 @@ public class gamespace : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "ProceduralMeshComponent", "AnimationCore" });
 
-		// Menus (SSpaceMenu) are plain Slate.
-		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		// Menus (SSpaceMenu) are plain Slate; the flight HUD (USpaceFlightHud) is UMG.
+		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "UMG" });
 		
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");

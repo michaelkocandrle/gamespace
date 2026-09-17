@@ -196,6 +196,13 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       omezovač. Má vlastní palivo na 8 s hoření a doplňuje se 40 s. Po vyhoření nebo puštění se
       limit 4 s plynule vrací. G-Safe nevypíná;
     - hodnoty jsou ve `Vanguard_setup.json`, HUD má řádek AFTERBRN a stav boostu na řádku IFCS.
+17. **SC-1c – letový HUD v UMG** (17. 9. 2026), podle `Docs/UI/`:
+    - vlevo od středu kontrolky SCM/NAV, CPLD, GSAF, CSTB, BOOST, svislý ukazatel rychlosti
+      (výplň = rychlost, značka = omezovač, červená zóna = let pozpátku), rychlost a limit malým
+      písmem, G-metr;
+    - vpravo ukazatele energie boostu a paliva afterburneru, uprostřed virtuální joystick;
+    - celé v C++ (`USpaceFlightHud`, bez widget Blueprintu), tenké průhledné cyan linky;
+    - kompaktní textový debug HUD už neukazuje SPEED, IFCS ani AFTERBRN, plný (H) ano.
 
 ---
 
@@ -217,7 +224,8 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `ASpacePlayerController` | `SpacePlayerController.*` | Globální klávesy (Escape/F10, H), menu, pauza, kamera a hudba úvodní obrazovky. |
 | `SSpaceMenu` | `SpaceMenuWidget.*` | Menu ve Slate (bez UMG assetů): titul, pauza, nastavení. |
 | `USpaceUserSettings` | `SpaceUserSettings.*` | Nastavení hráče (grafika a hlasitosti, citlivost, invert, HUD, FPS). |
-| `ASpaceDebugHUD` | `SpaceDebugHUD.*` | Textový debug HUD (CVar `space.Hud`), FPS. Anglicky, placeholder, nahradit skutečným HUD. |
+| `USpaceFlightHud`, `USpaceHudGauge`, `USpaceHudVirtualJoystick` | `SpaceFlightHud.*` | SC-1c letový HUD v UMG: kontrolky, ukazatel rychlosti a omezovače, G-metr, boost a afterburner, virtuální joystick. Strom widgetů stavěný v C++. |
+| `ASpaceDebugHUD` | `SpaceDebugHUD.*` | Textový debug HUD (CVar `space.Hud`), FPS; vytváří `USpaceFlightHud`. Anglicky, placeholder, zbytek nahradí SC-3. |
 | `USpaceOriginRebasingSubsystem` | `SpaceOriginRebasingSubsystem.*` | Posun počátku světa. |
 
 ### Obsah (`Content/`)
@@ -295,6 +303,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_free_look.py` | Free look (neomezený yaw, návrat). |
 | `test_ship_import.py` | Importovaná loď: meshe, kolize, sockety, materiály, všechny hodnoty ze setup JSON (s `GAMESPACE_SHIP_MANIFEST`). |
 | `test_ifcs_sc1.py` | SC-1a: limity trysek podle směru, coupled brzdění, decoupled, omezovač, spacebrake, SCM/NAV, setrvačnost rotace, G-Safe, ComStab, virtuální joystick, input assety, hodnoty Vanguardu. |
+| `test_flight_hud_sc1c.py` | SC-1c: strom widgetů, data HUD z lodi (rychlost vůči omezovači, afterburner, pozpátku, kontrolky, G, palivo, joystick) a jejich zobrazení ve widgetech. Vzhled headless ověřit nejde. |
 | `test_boost_afterburner_sc1b.py` | SC-1b: boost jen manévrovací trysky a rotace, vypnutí G-Safe, afterburner (tah, limit × omezovač, palivo, zamčení, doplňování, plynulý návrat, coupled i decoupled, jen SCM, G-Safe zůstává), Shift + Tab, input a hodnoty Vanguardu. |
 | `test_flight_modes.py` | Boost energie, cruise jen v NAV (vesmír i nad Veyrou), výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
@@ -326,7 +335,7 @@ a speed limiter).
   - **SC-1b (hotovo, 17. 9. 2026, čeká na autorův test):** boost (manévrovací trysky a rotace,
     vypíná G-Safe) a afterburner (hlavní tah, vlastní palivo, rychlost relativní k omezovači, jen
     SCM, G-Safe nechává zapnutý).
-  - **SC-1c (rozsah potvrzený autorem 17. 9. 2026):** HUD jen pro mechaniky SC-1a/1b podle
+  - **SC-1c (hotovo, 17. 9. 2026, čeká na autorův test, rozsah potvrzený autorem):** HUD jen pro mechaniky SC-1a/1b podle
     `Docs/UI/` (kapitola 3): svislý pruh rychlosti vůči omezovači, G-metr, indikátory CPLD, GSAF,
     COMSTAB, BOOST a SCM/NAV, pruhy energie boostu a paliva afterburneru, kurzor virtuálního
     joysticku.
@@ -355,8 +364,9 @@ Další otevřené směry mimo let:
 
 ## 10. Známé problémy a neověřené věci
 
-- **Neověřeno autorem:** celý SC-1b (boost a afterburner, jejich hodnoty, Tab ve hře, řádek
-  AFTERBRN). SC-1a autor otestoval a mechanicky funguje; jeho hodnoty se budou dál ladit. Dříve:
+- **Neověřeno autorem:** celý SC-1c, hlavně vzhled (rozmístění, čitelnost na světlém pozadí,
+  velikost na jiném rozlišení než 1080p). SC-1a a SC-1b autor otestoval a fungují; hodnoty se
+  budou dál ladit. Dříve:
   celý SC-1a (pocit letu, hodnoty G a rychlostí, VJoy kruh, Alt +
   kolečko, přistávání s novým coupled režimem). Headless testy prochází.
 - **Zjištěno autorem v buildu (17. 9. 2026):**

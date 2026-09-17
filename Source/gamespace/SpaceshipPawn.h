@@ -251,6 +251,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
 	bool IsGSafeOn() const { return bGSafe; }
 
+	/** G-Safe's total G limit (GSafeMaxG). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
+	float GetGSafeMaxG() const { return GSafeMaxG; }
+
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|IFCS")
 	void SetComStab(bool bOn);
 
