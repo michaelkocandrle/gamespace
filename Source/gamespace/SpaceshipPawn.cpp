@@ -24,6 +24,7 @@
 #include "InputTriggers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "PhysicsEngine/BodySetup.h"
 #include "Sound/SoundBase.h"
 #include "SpaceDustComponent.h"
 #include "SpaceUserSettings.h"
@@ -95,6 +96,10 @@ ASpaceshipPawn::ASpaceshipPawn()
 	HullCollision->SetCollisionProfileName(TEXT("Pawn"));
 	// See the header: characters use the hull's real shape, not this box.
 	HullCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	// Cameras too: a pilot who just got out stands inside this box (it spans the wings), and the
+	// character's camera boom, starting inside it, was pulled right in to the head until the
+	// pilot walked out of it. The hull mesh's own collision still blocks cameras.
+	HullCollision->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	HullCollision->SetSimulatePhysics(false);
 	SetRootComponent(HullCollision);
 
@@ -1026,18 +1031,103 @@ FVector ASpaceshipPawn::ComputeSideExitLocation(const FVector& ShipLocation, con
 	return ShipLocation + Rotation.GetRightVector() * (HullExtent.Y + CapsuleRadius + ClearanceCm);
 }
 
+TArray<FBox> ASpaceshipPawn::GetHullCollisionBoxes() const
+{
+	// Actor space, unscaled: the hull's collision shapes (UCX hulls and boxes from Blender) through
+	// the hull's relative transform; the mesh bounds when it has none; the root box without a mesh.
+	TArray<FBox> Boxes;
+	const FTransform HullToActor = Hull->GetRelativeTransform();
+	if (const UStaticMesh* Mesh = Hull->GetStaticMesh())
+	{
+		if (const UBodySetup* Body = Mesh->GetBodySetup())
+		{
+			for (const FKConvexElem& Convex : Body->AggGeom.ConvexElems)
+			{
+				Boxes.Add(Convex.ElemBox.TransformBy(Convex.GetTransform() * HullToActor));
+			}
+			for (const FKBoxElem& Box : Body->AggGeom.BoxElems)
+			{
+				const FVector Half(Box.X * 0.5, Box.Y * 0.5, Box.Z * 0.5);
+				Boxes.Add(FBox(-Half, Half).TransformBy(Box.GetTransform() * HullToActor));
+			}
+		}
+		if (Boxes.Num() == 0)
+		{
+			Boxes.Add(Mesh->GetBoundingBox().TransformBy(HullToActor));
+		}
+	}
+	if (Boxes.Num() == 0)
+	{
+		const FVector Extent = HullCollision->GetUnscaledBoxExtent();
+		Boxes.Add(FBox(-Extent, Extent));
+	}
+	return Boxes;
+}
+
+double ASpaceshipPawn::GetHullClearance(const FVector& Location, float CapsuleRadius, float CapsuleHalfHeight) const
+{
+	// A pilot standing where the landed ship stands: capsule bottom at the lowest point of the hull
+	// shapes (the gear), whatever height Location has. Only shapes within that height count, then
+	// the gap in the ship's floor plane. Pure geometry, so it also works where collision queries do
+	// not (commandlets) and does not depend on the physics scene being up to date.
+	const TArray<FBox> Boxes = GetHullCollisionBoxes();
+	double Floor = TNumericLimits<double>::Max();
+	for (const FBox& Box : Boxes)
+	{
+		Floor = FMath::Min(Floor, Box.Min.Z);
+	}
+	const double Top = Floor + 2.0 * CapsuleHalfHeight;
+	const FVector Local = GetActorTransform().InverseTransformPositionNoScale(Location);
+	double Clearance = TNumericLimits<double>::Max();
+	for (const FBox& Box : Boxes)
+	{
+		if (Box.Min.Z >= Top || Box.Max.Z <= Floor)
+		{
+			continue;  // above the pilot's head (or below the feet)
+		}
+		const double DX = FMath::Max3(Box.Min.X - Local.X, 0.0, Local.X - Box.Max.X);
+		const double DY = FMath::Max3(Box.Min.Y - Local.Y, 0.0, Local.Y - Box.Max.Y);
+		Clearance = FMath::Min(Clearance, FMath::Sqrt(DX * DX + DY * DY) - CapsuleRadius);
+	}
+	return Clearance;
+}
+
+FVector ASpaceshipPawn::PushClearOfHull(const FVector& Start, const FVector& Direction, float CapsuleRadius, float CapsuleHalfHeight) const
+{
+	const FVector Step = FVector::VectorPlaneProject(Direction, GetActorUpVector()).GetSafeNormal() * 20.0;
+	if (Step.IsNearlyZero())
+	{
+		return Start;
+	}
+	FVector Location = Start;
+	// Out in 20 cm steps until the capsule clears every hull shape by ExitClearanceCm (40 m at most).
+	for (int32 Index = 0; Index < 200 && GetHullClearance(Location, CapsuleRadius, CapsuleHalfHeight) < ExitClearanceCm; ++Index)
+	{
+		Location += Step;
+	}
+	return Location;
+}
+
 TArray<FVector> ASpaceshipPawn::GetExitCandidates() const
 {
 	TArray<FVector> Candidates;
+	const ACharacter* PilotDefaults = Cast<ACharacter>(PilotCharacterClass ? PilotCharacterClass->GetDefaultObject() : nullptr);
+	const float CapsuleRadius = PilotDefaults ? PilotDefaults->GetSimpleCollisionRadius() : 42.f;
+	const float CapsuleHalfHeight = PilotDefaults ? PilotDefaults->GetSimpleCollisionHalfHeight() : 96.f;
+
+	// The Exit socket says which side and where along the hull; the pilot is then moved sideways
+	// until clear of the hull. The Vanguard's socket sits 44 cm off the belly, under the edge of the
+	// fuselage, which put the pilot practically inside the ship.
 	static const FName ExitSockets[] = { FName(TEXT("Exit")), FName(TEXT("SOCKET_Exit")) };
 	if (const FName* Socket = Algo::FindByPredicate(ExitSockets, [this](const FName& Name) { return Hull->DoesSocketExist(Name); }))
 	{
-		Candidates.Add(Hull->GetSocketLocation(*Socket));
+		const FVector SocketLocation = Hull->GetSocketLocation(*Socket);
+		const double Side = GetActorTransform().InverseTransformPositionNoScale(SocketLocation).Y;
+		const FVector Outward = GetActorRightVector() * (Side < 0.0 ? -1.0 : 1.0);
+		Candidates.Add(PushClearOfHull(SocketLocation, Outward, CapsuleRadius, CapsuleHalfHeight));
 	}
 
 	// Then around the hull: its mesh bounds where there is a mesh (wings included), else the box.
-	const ACharacter* PilotDefaults = Cast<ACharacter>(PilotCharacterClass ? PilotCharacterClass->GetDefaultObject() : nullptr);
-	const float CapsuleRadius = PilotDefaults ? PilotDefaults->GetSimpleCollisionRadius() : 42.f;
 	FVector Center = GetActorLocation();
 	FVector Extent = HullCollision->GetScaledBoxExtent();
 	if (const UStaticMesh* Mesh = Hull->GetStaticMesh())
@@ -1057,7 +1147,8 @@ TArray<FVector> ASpaceshipPawn::GetExitCandidates() const
 	{
 		for (const TPair<FVector, double>& Direction : Directions)
 		{
-			Candidates.Add(Center + Direction.Key * (Direction.Value + CapsuleRadius + ExitClearanceCm + Extra));
+			Candidates.Add(PushClearOfHull(Center + Direction.Key * (Direction.Value + CapsuleRadius + ExitClearanceCm + Extra),
+				Direction.Key, CapsuleRadius, CapsuleHalfHeight));
 		}
 	}
 	return Candidates;

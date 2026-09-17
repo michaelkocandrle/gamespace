@@ -57,6 +57,13 @@ void USpaceUserSettings::ApplyGameSettings(const UWorld* World) const
 	}
 }
 
+int32 USpaceUserSettings::GetGraphicsQualityLevel() const
+{
+	// Groups only: GetMinQualityLevel leaves ResolutionQuality out. When the groups disagree (edited
+	// by hand) the lowest one is the safe thing to show.
+	return FMath::Clamp(ScalabilityQuality.GetMinQualityLevel(), 0, 4);
+}
+
 float USpaceUserSettings::GetMouseSensitivityScale()
 {
 	const USpaceUserSettings* Settings = Get();

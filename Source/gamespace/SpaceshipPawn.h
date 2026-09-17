@@ -455,7 +455,8 @@ public:
 
 	/**
 	 * Where the pilot appears: the first free spot of the hull mesh's "Exit" socket (SOCKET_Exit in
-	 * Blender), then beside, behind and in front of the hull at growing distances. Placed on the
+	 * Blender, moved sideways until ExitClearanceCm clear of the hull's collision shapes), then
+	 * beside, behind and in front of the hull at growing distances (also kept clear). Placed on the
 	 * ground, upright to gravity, facing the ship's heading. "Free" is a capsule overlap test
 	 * against everything that blocks pawns, including the hull's own collision hulls.
 	 */
@@ -465,6 +466,17 @@ public:
 	/** Candidate exit spots in the order ComputeExitTransform tries them, before ground placement. For tests. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Exit")
 	TArray<FVector> GetExitCandidates() const;
+
+	/**
+	 * Gap in cm between a pilot capsule standing beside the landed ship at Location and the nearest
+	 * hull collision shape at the pilot's height (negative: overlapping). Pure geometry from the
+	 * hull mesh's collision, no physics query.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Exit")
+	double GetHullClearance(const FVector& Location, float CapsuleRadius, float CapsuleHalfHeight) const;
+
+	/** The hull's collision shapes as boxes in actor space (unscaled). */
+	TArray<FBox> GetHullCollisionBoxes() const;
 
 	/** Distance from Location to the hull collision box, cm; 0 inside. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Exit")
@@ -632,7 +644,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Exit")
 	TSubclassOf<APawn> PilotCharacterClass;
 
-	/** Gap between hull and pilot capsule for the side exit, cm. */
+	/** Gap between the hull's collision shapes and the pilot capsule on getting out, cm. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Exit", meta = (ClampMin = "0.0"))
 	float ExitClearanceCm = 80.f;
 
@@ -1233,6 +1245,8 @@ private:
 	void SetupAudioLayers();
 	UAudioComponent* PlayOneShot(USoundBase* Sound, float VolumeScale = 1.f);
 	bool IsExitSpotFree(const FVector& Location, const FVector& Up, float CapsuleRadius, float CapsuleHalfHeight) const;
+	/** Start moved along Direction (flattened onto the ship's floor plane) until GetHullClearance reaches ExitClearanceCm. */
+	FVector PushClearOfHull(const FVector& Start, const FVector& Direction, float CapsuleRadius, float CapsuleHalfHeight) const;
 
 	/** Fills in any unassigned input asset: first from /Game/Input, then procedurally. */
 	void ResolveInputAssets();

@@ -33,6 +33,15 @@ public:
 	/** Applies what the engine does not apply itself: master volume and the HUD mode. */
 	void ApplyGameSettings(const UWorld* World) const;
 
+	/**
+	 * The graphics quality preset the menu shows, 0 low .. 4 cinematic: the lowest scalability group,
+	 * ignoring the resolution scale. The engine's GetOverallScalabilityLevel() also compares the
+	 * resolution scale with the preset's default and returns -1 ("custom") as soon as the slider is
+	 * not at that default - the menu then showed High every time and applying saved High again.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Settings")
+	int32 GetGraphicsQualityLevel() const;
+
 	// Neutral when there are no settings.
 	static float GetMouseSensitivityScale();
 	static bool IsShipPitchInverted();

@@ -239,11 +239,26 @@ try:
           hull.get_collision_response_to_channel(unreal.CollisionChannel.ECC_PAWN) == unreal.CollisionResponseType.ECR_BLOCK
           and hull.get_collision_response_to_channel(unreal.CollisionChannel.ECC_CAMERA) == unreal.CollisionResponseType.ECR_BLOCK
           and hull.get_collision_enabled() == unreal.CollisionEnabled.QUERY_ONLY)
+    check("root box ignores cameras (a pilot's camera starting inside it was pulled in to the head)",
+          box.get_collision_response_to_channel(unreal.CollisionChannel.ECC_CAMERA) == unreal.CollisionResponseType.ECR_IGNORE)
     candidates = [v3(c) for c in ship.get_exit_candidates()]
     socket = v3(hull.get_socket_location("Exit"))
-    check("exit tries SOCKET_Exit first, then 12 spots around the hull", len(candidates) == 13
-          and length([candidates[0][k] - socket[k] for k in range(3)]) < 1.0, "%d candidates" % len(candidates))
+    check("exit tries SOCKET_Exit first, then 12 spots around the hull", len(candidates) == 13, "%d candidates" % len(candidates))
+    # Ship-local: the ship sits at its spawn rotation (identity), so world offsets are local offsets.
     loc = v3(ship.get_actor_location())
+    first = [candidates[0][k] - loc[k] for k in range(3)]
+    sock = [socket[k] - loc[k] for k in range(3)]
+    clearance_needed = ship.get_editor_property("exit_clearance_cm")
+    radius, half = 42.0, 96.0
+    raw = ship.get_hull_clearance(unreal.Vector(*socket), radius, half)
+    got = ship.get_hull_clearance(unreal.Vector(*candidates[0]), radius, half)
+    # Vanguard: socket at (517, 230), belly hull UCX_08 to x 473 / y 244: only 2 cm of room before the fix.
+    check("raw SOCKET_Exit spot is too close to the hull (the bug)", raw < clearance_needed, "%.0f cm" % raw)
+    check("exit moved sideways out of the hull, same place along it", abs(first[0] - sock[0]) < 1.0 and first[1] > sock[1] + 100.0,
+          "socket (%.0f, %.0f) -> (%.0f, %.0f)" % (sock[0], sock[1], first[0], first[1]))
+    check("exit spot clear of the hull by ExitClearanceCm", clearance_needed <= got < clearance_needed + 30.0, "%.0f cm" % got)
+    worst = min(ship.get_hull_clearance(unreal.Vector(*c), radius, half) for c in candidates)
+    check("every exit candidate clear of the hull", worst >= clearance_needed - 0.5, "worst %.0f cm" % worst)
     rings = [length([c[k] - loc[k] for k in range(3)]) for c in candidates[1:]]
     check("fallback spots move outwards", rings[0] < rings[4] < rings[8], "%.0f / %.0f / %.0f m" % (rings[0] / 100, rings[4] / 100, rings[8] / 100))
     cockpit = v3(ship.get_editor_property("cockpit_camera").get_editor_property("relative_location"))

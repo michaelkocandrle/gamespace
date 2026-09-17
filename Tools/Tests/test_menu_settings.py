@@ -106,4 +106,20 @@ try:
 finally:
     eas.destroy_actor(ship)
 
+# --- Graphics quality in the menu ---------------------------------------------------------------------
+# The engine calls a preset with a non-default resolution scale "custom" (-1); the menu used to show
+# High then, and the next apply saved High over the player's choice. Nothing is saved here.
+settings = unreal.GameUserSettings.get_game_user_settings()
+saved_levels = [settings.get_view_distance_quality(), settings.get_shadow_quality()]
+for level in (0, 1, 3, 4):
+    settings.set_overall_scalability_level(level)
+    settings.set_resolution_scale_value_ex(70.0)
+    check("quality %d with 70 %% resolution scale shows as %d" % (level, level),
+          settings.get_graphics_quality_level() == level and settings.get_overall_scalability_level() == -1,
+          "menu %d, engine overall %d" % (settings.get_graphics_quality_level(), settings.get_overall_scalability_level()))
+settings.set_shadow_quality(0)
+check("mixed groups show the lowest", settings.get_graphics_quality_level() == 0)
+settings.set_view_distance_quality(saved_levels[0])
+settings.set_shadow_quality(saved_levels[1])
+
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

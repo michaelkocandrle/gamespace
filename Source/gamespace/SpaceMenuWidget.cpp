@@ -497,8 +497,9 @@ void SSpaceMenu::LoadDraft()
 		}
 	}
 
-	const int32 Quality = Settings->GetOverallScalabilityLevel();
-	Draft.Quality = Quality < 0 ? 2 : FMath::Clamp(Quality, 0, 4);
+	// Not GetOverallScalabilityLevel(): that is -1 whenever the resolution scale is not the preset's
+	// default, which made this row show High and the next apply save High over the player's choice.
+	Draft.Quality = Settings->GetGraphicsQualityLevel();
 	float Normalized = 1.f;
 	float Scale = 100.f;
 	float MinScale = 50.f;
