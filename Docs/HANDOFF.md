@@ -295,6 +295,17 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       Displeje svítí i s HUD vypnutým (H) – jsou součást lodi;
     - kokpitová světla: klíčové 80 cm před okem (dosah 250 cm), výplňové nad hlavou, obě měkká (12 cm);
       při změně oka v shotech (`cockpit_eye`) se posouvají s ním.
+24. **Tmavý kokpit jako v SC** (18. 9. 2026, krok A podle autorova srovnání se SC): deska byla plošně šedá
+    od klíčového světla 12 cd (bez kokpitových světel je úplně černá – slunce ji nesvítí). Teď:
+    - **displeje svítí do kokpitu**: u každého socketu `Display_*` (build je dává 3 cm před obrazovky)
+      plošné světlo 8 cd, modrozelené (0,4 / 0,75 / 1), bez stínů, dosah 160 cm, natočené k oku
+      (`components.cockpit_displays` v setupu);
+    - klíčové světlo 1,5 cd, výplňové 0,8 cd, interiér ztmavený (`base_color_tint` 0,6);
+    - **vnitřek rámu canopy** má vlastní tmavý slot `M_Ship_Vanguard_CanopyFrame` (recept `canopy_frame`:
+      plochy trupu v boxu, které oko vidí zepředu; zvenku jsou odvrácené) – předtím svítil barvou trupu
+      jako světlé dráty přes výhled;
+    - ladění podle snímků: pole shotu `cockpit_light` [klíčové, výplňové], `display_light`, `interior_tint`,
+      scénář `cockpit_light` (nastavení ze setupu, staré šedé, bez světel, ve vesmíru, v atmosféře).
 
 ---
 
@@ -458,6 +469,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `cockpit` | Pohled z kokpitu a chase kamery nad planetou i ve vesmíru, s HUD i bez něj. |
 | `hud` | Letový HUD ve všech stavech: klid, na limitu, afterburner, boost s vychýleným joystickem, NAV, decoupled s vypnutým G-Safe, let pozpátku, plný textový výpis. |
 | `ship` | Loď zvenku: nad planetou, při sestupu, ve vesmíru, se zářícími tryskami. |
+| `cockpit_light` | Nasvícení kokpitu proti tmavé SC referenci: nastavení ze setupu ve vesmíru a v atmosféře, staré šedé a bez světel pro srovnání. |
 | `cockpit_tune` | Porovnání variant kokpitu vedle sebe (pozice oka, co se pilotovi skrývá). Vzor pro dočasné scénáře při ladění. |
 | `ship_views` | Loď ze všech stran (8 pohledů kolem, shora, zespodu s podvozkem, zblízka, ve vesmíru, se zářícími tryskami). Pro každý nový nebo změněný model. |
 | `landing` | SC-2a: podvozek ze strany (dole, v půlce cesty), zespodu, loď stojící na patkách, varování GEAR UP, loď na břiše bez podvozku, HUD po přistání, precision HUD, kokpit na zemi. |
@@ -466,7 +478,7 @@ Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevy
 Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
 (`horizon`/`planet`/`away`), `speed_ms`, `mode` (`SCM`/`NAV`), `limiter`, `coupled`, `gsafe`,
 `comstab`, `boost`, `afterburner`, `stick` (kurzor VJoy), `settle` (sekundy na ustálení),
-`cockpit_eye`, `hide_hull`, `hide_canopy` (pro ladění kokpitu bez reimportu lodi), `gear` (podvozek
+`cockpit_eye`, `hide_hull`, `hide_canopy`, `cockpit_light` [cd, cd], `display_light`, `interior_tint` (pro ladění kokpitu bez reimportu lodi), `gear` (podvozek
 hned dole / nahoře), `lower_gear` (začne vysouvat, krátký `settle` ho chytí v půlce), `precision`,
 `chase_yaw`, `chase_pitch` (> 0 = zespodu), `chase_zoom` (kamera otočená kolem lodi). Nízká
 `altitude_m` s podvozkem a pár sekund `settle` loď opravdu posadí na zem.

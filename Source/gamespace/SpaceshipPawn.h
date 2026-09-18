@@ -363,6 +363,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	void DebugConfigureCockpit(const FVector& EyeLocation, bool bHideHull, bool bHideCanopy);
 
+	/** Shots / tuning: cockpit key and fill light, display glow (candela) and a multiplier on the interior's
+	 * base colour. Negative leaves that one as it is. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugSetCockpitLighting(float KeyCd, float FillCd, float DisplayCd, float InteriorTint);
+
 	/** Tests and screenshots: finish a master mode switch at once instead of waiting it out. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	void DebugFinishMasterModeSwitch() { if (bMasterModeSwitching) { MasterMode = PendingMasterMode; bMasterModeSwitching = false; MasterModeTimer = 0.f; } }

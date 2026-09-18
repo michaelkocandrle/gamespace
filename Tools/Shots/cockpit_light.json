@@ -1,0 +1,11 @@
+{
+  "_comment": "Cockpit lighting against the dark Star Citizen reference (Docs/UI/Screenshot 2026-09-17 201854.png). Fields: cockpit_light [key, fill] cd, display_light cd per display, interior_tint (multiplier on the interior's base colour). The setup's values are a; the others for comparison. Run: Tools/Shots.ps1 -Preset cockpit_light",
+  "shots": [
+    { "name": "a_setup_space", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "speed_ms": 0, "settle": 1.5 },
+    { "name": "b_setup_space_away", "camera": "cockpit", "altitude_m": 40000, "facing": "away", "speed_ms": 0 },
+    { "name": "c_setup_atmosphere", "camera": "cockpit", "altitude_m": 4000, "facing": "horizon", "speed_ms": 100 },
+    { "name": "d_old_bright_12_5", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "speed_ms": 0, "cockpit_light": [12, 5], "display_light": 0, "interior_tint": 1.67 },
+    { "name": "e_no_lights", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "speed_ms": 0, "cockpit_light": [0, 0], "display_light": 0 },
+    { "name": "f_look_left", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "hud": 0, "chase_yaw": -70, "chase_pitch": -10, "settle": 1.0 }
+  ]
+}

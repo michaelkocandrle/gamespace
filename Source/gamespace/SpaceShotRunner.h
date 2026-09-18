@@ -49,6 +49,12 @@ struct FSpaceShot
 	float ChaseYaw = 0.f;
 	float ChasePitch = 0.f;
 	float ChaseZoom = 0.f;
+	/** Cockpit lighting for this shot (candela; -1 leaves the ship's): key and fill light, the glow of
+	 * the displays onto the cockpit, and a multiplier on the interior's base colour. */
+	float CockpitKeyCd = -1.f;
+	float CockpitFillCd = -1.f;
+	float DisplayLightCd = -1.f;
+	float InteriorTint = -1.f;
 };
 
 /**

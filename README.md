@@ -206,7 +206,9 @@ that show the flight instruments live: `UCockpitDisplayComponent` draws `USpaceC
 flight HUD's widgets, driven by the same `ApplyState`) into a render target 30 times a second while the ship
 is flown from the cockpit, and the unlit `M_Ship_Screen` shows it. Left FLIGHT (mode, speed gauge, speed,
 limiter, G), right SYSTEMS (CPLD, GSAF, CSTB, BOOST, GEAR, PREC, boost and afterburner). The screen HUD stays,
-compacted so it sits above the dashboard.
+compacted so it sits above the dashboard. The cockpit is dark like the reference: the displays light it
+(a rect light at each `Display_*` socket), a faint key and fill light keep the dashboard's shape, and the inside
+of the canopy frame has its own dark slot (`M_Ship_Vanguard_CanopyFrame`).
 Three things make it work in the game, all in the recipe or the setup file:
 - `SM_Ship_Vanguard_Lining`: the hull around the cockpit copied with inward normals (`lining`). The hull is
   one-sided; without it the pilot saw the ground through the floor and the sides. The canopy glass is left out.

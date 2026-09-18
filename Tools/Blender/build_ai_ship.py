@@ -617,6 +617,13 @@ def add_displays(ob, ship, spec, matrix):
         pilot = matrix @ (c + n) - matrix @ c
         if face.normal.dot(pilot) < 0:
             face.normal_flip()
+        # A socket just in front of the screen: the game hangs the display's glow (a rect light) on it.
+        socket = bpy.data.objects.new("SOCKET_Display_%s" % screen.get("name", i), None)
+        socket.empty_display_type = "ARROWS"
+        socket.empty_display_size = 0.1
+        bpy.context.scene.collection.objects.link(socket)
+        socket.parent = ob
+        socket.matrix_world = Matrix.Translation(matrix @ (c + n * spec.get("light_offset_m", 0.03)))
         log("display %s: %d faces of the AI screen cut, quad %.0f x %.0f cm (before scaling)" % (
             screen.get("name", i), len(doomed), (u1 - u0) * 100, (v1 - v0) * 100))
     bm.to_mesh(ob.data)
@@ -656,6 +663,26 @@ def clear_canopy(hull, spec):
     bm.free()
     hull.data.update()
     log("canopy clean-up: %d inward faces inside the canopy deleted" % len(doomed))
+
+
+def frame_canopy(hull, ship, spec, eye):
+    """The inside of the canopy frame gets its own slot M_Ship_<Ship>_CanopyFrame: hull faces inside the
+    box that the pilot's eye sees from the front (from outside they face away and are culled). With the
+    hull's paint they caught the sun and read as bright wires across the view; a real frame is dark
+    from inside."""
+    name = "M_Ship_%s_CanopyFrame" % ship
+    mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
+    mat.diffuse_color = (0.02, 0.022, 0.025, 1.0)
+    hull.data.materials.append(mat)
+    slot = len(hull.data.materials) - 1
+    count = 0
+    for f in hull.data.polygons:
+        c = hull.matrix_world @ f.center
+        n = (hull.matrix_world.to_3x3() @ f.normal).normalized()
+        if in_box(c, spec["box"]) and n.dot((eye - c).normalized()) > spec.get("min_dot", 0.0):
+            f.material_index = slot
+            count += 1
+    log("canopy frame: %d faces seen from the eye get %s" % (count, name))
 
 
 def add_lining(hull, ship, spec):
@@ -736,6 +763,8 @@ def main(argv):
 
     if cfg.get("canopy_clear"):
         clear_canopy(hull, cfg["canopy_clear"])
+    if cfg.get("canopy_frame"):
+        frame_canopy(hull, ship, cfg["canopy_frame"], Vector(cfg["sockets"]["Cockpit"]["location"]))
     if cfg.get("lining"):
         add_lining(hull, ship, cfg["lining"])
     build_collision(ship, lows, cfg.get("collision", []))

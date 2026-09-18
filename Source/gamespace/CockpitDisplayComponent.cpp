@@ -3,7 +3,9 @@
 #include "CockpitDisplayComponent.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Camera/CameraComponent.h"
 #include "Components/MeshComponent.h"
+#include "Components/RectLightComponent.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/World.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -79,6 +81,58 @@ void UCockpitDisplayComponent::BeginPlay()
 	Mesh->SetMaterial(Slot, Material);
 	// Draw on the first tick.
 	SinceDraw = 1.f / UpdateRateHz;
+	CreateDisplayLights();
+}
+
+void UCockpitDisplayComponent::CreateDisplayLights()
+{
+	const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(GetOwner());
+	const UCameraComponent* Eye = Ship ? Ship->FindComponentByClass<UCameraComponent>() : nullptr;
+	for (const UCameraComponent* Camera : TInlineComponentArray<UCameraComponent*>(GetOwner()))
+	{
+		if (Camera->GetName() == TEXT("CockpitCamera"))
+		{
+			Eye = Camera;
+		}
+	}
+	TArray<UMeshComponent*> Meshes;
+	GetOwner()->GetComponents(Meshes);
+	for (UMeshComponent* Mesh : Meshes)
+	{
+		for (const FName& Socket : Mesh->GetAllSocketNames())
+		{
+			if (!Socket.ToString().StartsWith(TEXT("Display_")))
+			{
+				continue;
+			}
+			URectLightComponent* Light = NewObject<URectLightComponent>(GetOwner(), NAME_None, RF_Transient);
+			Light->SetupAttachment(Mesh, Socket);
+			Light->SetCastShadows(false);
+			Light->SetIntensityUnits(ELightUnits::Candelas);
+			Light->SetSourceWidth(DisplayLightSizeCm.X);
+			Light->SetSourceHeight(DisplayLightSizeCm.Y);
+			Light->SetBarnDoorAngle(80.f);
+			Light->SetAttenuationRadius(DisplayLightRadiusCm);
+			Light->SetLightColor(DisplayLightColor);
+			Light->RegisterComponent();
+			// Facing the pilot: the screens are turned towards the eye, and so is their light.
+			const FVector At = Mesh->GetSocketLocation(Socket);
+			const FVector To = Eye ? Eye->GetComponentLocation() : At - Mesh->GetForwardVector() * 100.f;
+			Light->SetWorldRotation((To - At).Rotation());
+			Lights.Add(Light);
+		}
+	}
+	SetDisplayLightIntensity(DisplayLightIntensityCd);
+}
+
+void UCockpitDisplayComponent::SetDisplayLightIntensity(float Candela)
+{
+	DisplayLightIntensityCd = FMath::Max(Candela, 0.f);
+	for (URectLightComponent* Light : Lights)
+	{
+		Light->SetIntensity(DisplayLightIntensityCd);
+		Light->SetVisibility(DisplayLightIntensityCd > 0.f);
+	}
 }
 
 void UCockpitDisplayComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

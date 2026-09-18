@@ -396,7 +396,9 @@ z originálu kdykoli zopakuje (3 minuty). Když něco nesedí, upraví se čísl
     v metrech – nejlíp ortho renderem kolmo na obrazovku s mřížkou). Build plochy za ní vyřízne a dá
     plochý quad se slotem `M_Ship_<Loď>_Screens` (UV: obrazovka i z n dostane i-tou n-tinu textury).
     V setupu materiál s `"master": "screen"` (unlit `M_Ship_Screen`); hra do slotu kreslí displeje
-    (`UCockpitDisplayComponent`, první slot končící na `_Screens`).
+    (`UCockpitDisplayComponent`, první slot končící na `_Screens`). Před každou obrazovkou build dá socket
+    `Display_<jméno>`; hra na něj pověsí plošné světlo (displeje svítí do kokpitu).
+    `canopy_frame` (box): vnitřek rámu canopy, jak ho vidí oko, dostane tmavý slot `M_Ship_<Loď>_CanopyFrame`.
 11. **Testy a snímky:** všechny `Tools\Tests`, pak `Tools\Shots.ps1 -Preset ship_views -Package`, `cockpit`,
     `landing`. Vzdálenost chase kamery se ladí bez balení přes `chase_zoom` v dočasném scénáři.
 

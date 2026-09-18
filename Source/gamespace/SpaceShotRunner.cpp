@@ -122,6 +122,14 @@ bool USpaceShotRunner::ParseShotList(const FString& Json, TArray<FSpaceShot>& Ou
 		if ((*Object)->TryGetNumberField(TEXT("chase_yaw"), Number)) { Shot.ChaseYaw = float(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("chase_pitch"), Number)) { Shot.ChasePitch = float(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("chase_zoom"), Number)) { Shot.ChaseZoom = float(Number); }
+		const TArray<TSharedPtr<FJsonValue>>* Lights = nullptr;
+		if ((*Object)->TryGetArrayField(TEXT("cockpit_light"), Lights) && Lights->Num() == 2)
+		{
+			Shot.CockpitKeyCd = float((*Lights)[0]->AsNumber());
+			Shot.CockpitFillCd = float((*Lights)[1]->AsNumber());
+		}
+		if ((*Object)->TryGetNumberField(TEXT("display_light"), Number)) { Shot.DisplayLightCd = float(Number); }
+		if ((*Object)->TryGetNumberField(TEXT("interior_tint"), Number)) { Shot.InteriorTint = float(Number); }
 		const TArray<TSharedPtr<FJsonValue>>* Eye = nullptr;
 		if ((*Object)->TryGetArrayField(TEXT("cockpit_eye"), Eye) && Eye->Num() == 3)
 		{
@@ -264,6 +272,10 @@ void USpaceShotRunner::ApplyShot(const FSpaceShot& Shot, ASpaceshipPawn& Ship)
 	if (!Shot.CockpitEye.IsNearlyZero() || Shot.HideHull >= 0 || Shot.HideCanopy >= 0)
 	{
 		Ship.DebugConfigureCockpit(Shot.CockpitEye, Shot.HideHull > 0, Shot.HideCanopy != 0);
+	}
+	if (Shot.CockpitKeyCd >= 0.f || Shot.CockpitFillCd >= 0.f || Shot.DisplayLightCd >= 0.f || Shot.InteriorTint >= 0.f)
+	{
+		Ship.DebugSetCockpitLighting(Shot.CockpitKeyCd, Shot.CockpitFillCd, Shot.DisplayLightCd, Shot.InteriorTint);
 	}
 	Ship.SetCockpitView(Shot.Camera.Equals(TEXT("cockpit"), ESearchCase::IgnoreCase));
 }

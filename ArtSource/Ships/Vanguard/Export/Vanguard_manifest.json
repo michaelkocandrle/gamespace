@@ -39,7 +39,9 @@
     {
       "fbx": "SM_Ship_Vanguard_Interior.fbx",
       "objects": [
-        "SM_Ship_Vanguard_Interior"
+        "SM_Ship_Vanguard_Interior",
+        "SOCKET_Display_left",
+        "SOCKET_Display_right"
       ]
     },
     {
@@ -57,7 +59,8 @@
       "verts": 99068,
       "materials": [
         "M_Ship_Vanguard_Hull",
-        "M_Ship_Vanguard_Emissive"
+        "M_Ship_Vanguard_Emissive",
+        "M_Ship_Vanguard_CanopyFrame"
       ],
       "uv_layers": 1,
       "bounds_m": [
@@ -124,7 +127,8 @@
       "tris": 58886,
       "verts": 29627,
       "materials": [
-        "M_Ship_Vanguard_Hull"
+        "M_Ship_Vanguard_Hull",
+        "M_Ship_Vanguard_CanopyFrame"
       ],
       "uv_layers": 1,
       "bounds_m": [
@@ -338,6 +342,32 @@
         174.0,
         -0.0,
         189.0
+      ]
+    },
+    "SOCKET_Display_left": {
+      "parent": "SM_Ship_Vanguard_Interior",
+      "location_m": [
+        3.10219,
+        0.33242,
+        1.42365
+      ],
+      "location_ue_cm": [
+        310.22,
+        -33.24,
+        142.37
+      ]
+    },
+    "SOCKET_Display_right": {
+      "parent": "SM_Ship_Vanguard_Interior",
+      "location_m": [
+        3.10173,
+        -0.33535,
+        1.42376
+      ],
+      "location_ue_cm": [
+        310.17,
+        33.53,
+        142.38
       ]
     },
     "SOCKET_Engine_LowerL": {

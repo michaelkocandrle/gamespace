@@ -247,6 +247,10 @@ void ASpaceshipPawn::PlaceCockpitLights()
 			Light->SetSoftSourceRadius(CockpitLightSourceRadiusCm);
 			Light->SetVisibility(true);
 		}
+		else
+		{
+			Light->SetVisibility(false);
+		}
 	};
 	SetupCockpitLight(CockpitLight, CockpitLightIntensityCd, CockpitLightOffset);
 	SetupCockpitLight(CockpitFillLight, CockpitFillIntensityCd, CockpitFillOffset);
@@ -279,6 +283,44 @@ void ASpaceshipPawn::DebugConfigureCockpit(const FVector& EyeLocation, bool bHid
 	// So do the cockpit lights, or a shot from another eye would be lit differently.
 	PlaceCockpitLights();
 	SetCockpitView(bCockpitView);
+}
+
+void ASpaceshipPawn::DebugSetCockpitLighting(float KeyCd, float FillCd, float DisplayCd, float InteriorTint)
+{
+	if (KeyCd >= 0.f)
+	{
+		CockpitLightIntensityCd = KeyCd;
+	}
+	if (FillCd >= 0.f)
+	{
+		CockpitFillIntensityCd = FillCd;
+	}
+	PlaceCockpitLights();
+	if (DisplayCd >= 0.f && CockpitDisplays)
+	{
+		CockpitDisplays->SetDisplayLightIntensity(DisplayCd);
+	}
+	if (InteriorTint >= 0.f)
+	{
+		TArray<UStaticMeshComponent*> Meshes;
+		GetComponents(Meshes);
+		for (UStaticMeshComponent* Mesh : Meshes)
+		{
+			if (Mesh->GetName() == TEXT("Interior") && Mesh->GetNumMaterials() > 0)
+			{
+				UMaterialInstanceDynamic* Dynamic = Mesh->CreateDynamicMaterialInstance(0);
+				// The imported instance's own tint times the multiplier, so 1 is the ship as imported.
+				FLinearColor Tint = FLinearColor::White;
+				if (Dynamic->Parent)
+				{
+					Dynamic->Parent->GetVectorParameterValue(TEXT("BaseColorTint"), Tint);
+				}
+				Tint = Tint * InteriorTint;
+				Tint.A = 1.f;
+				Dynamic->SetVectorParameterValue(TEXT("BaseColorTint"), Tint);
+			}
+		}
+	}
 }
 
 void ASpaceshipPawn::SetCockpitView(bool bCockpit)

@@ -181,6 +181,24 @@
     "axis_z": 1.2,
     "min_dot": 0.2
   },
+  "canopy_frame": {
+    "_comment": "Inside of the canopy frame, as the pilot sees it: its own dark slot (MI_Ship_Vanguard_CanopyFrame). With the hull's paint the frame struts caught the sun and read as bright wires across the view.",
+    "box": {
+      "x": [
+        1.2,
+        4.8
+      ],
+      "y": [
+        -1.4,
+        1.4
+      ],
+      "z": [
+        1.05,
+        3.0
+      ]
+    },
+    "min_dot": 0.0
+  },
   "lining": {
     "_comment": "From the cockpit the one-sided hull was invisible: the pilot looked through the floor and the sides at the ground. The fuselage around and behind the cabin is copied with inward normals; the canopy glass (above the rail, x 1.9 .. 4.8) is left out so the view stays open.",
     "regions": [

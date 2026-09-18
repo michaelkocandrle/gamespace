@@ -82,6 +82,17 @@ try:
     parent = material.get_editor_property("parent") if isinstance(material, unreal.MaterialInstance) else None
     check("display slot has MI_Ship_Vanguard_Screens on M_Ship_Screen", material is not None and material.get_name() == "MI_Ship_Vanguard_Screens"
           and parent is not None and parent.get_name() == "M_Ship_Screen", "%s / %s" % (material and material.get_name(), parent and parent.get_name()))
+    sockets = [str(n) for n in found.get_all_socket_names()] if found else []
+    check("a Display_ socket in front of each screen (their glow)", sorted(n for n in sockets if n.startswith("Display_")) == ["Display_left", "Display_right"],
+          ", ".join(sockets))
+    displays_component = vanguard.get_editor_property("cockpit_displays")
+    check("displays light the cockpit (setup display_light_intensity_cd > 0)", displays_component.get_editor_property("display_light_intensity_cd") > 0.0)
+    hull_mesh = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard")
+    hull_slots = [str(m.get_editor_property("material_slot_name")) for m in hull_mesh.get_editor_property("static_materials")]
+    check("inside of the canopy frame has its own dark slot", "M_Ship_Vanguard_CanopyFrame" in hull_slots, ", ".join(hull_slots))
+    frame = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Vanguard/Materials/MI_Ship_Vanguard_CanopyFrame")
+    base = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(frame, "BaseColor") if frame else None
+    check("canopy frame material is dark", base is not None and max(base.r, base.g, base.b) < 0.05, str(base))
 finally:
     eas.destroy_actor(vanguard)
 

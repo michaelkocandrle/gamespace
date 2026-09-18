@@ -15,11 +15,14 @@
       "socket Gear_R scale (100, 100, 100) reset to 1"
     ],
     "SM_Ship_Vanguard_Gear": [],
-    "SM_Ship_Vanguard_Interior": [],
+    "SM_Ship_Vanguard_Interior": [
+      "socket Display_left scale (100, 100, 100) reset to 1",
+      "socket Display_right scale (100, 100, 100) reset to 1"
+    ],
     "SM_Ship_Vanguard_Lining": []
   },
   "materials": [
-    "4 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen"
+    "5 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen"
   ],
   "blueprint": {
     "path": "/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard",
@@ -75,11 +78,11 @@
       "pawn.precision_turn_scale = 0.45",
       "pawn.free_look_max_yaw_deg = 180.0",
       "pawn.placeholder_cockpit = False",
-      "pawn.cockpit_light_intensity_cd = 12.0",
+      "pawn.cockpit_light_intensity_cd = 1.5",
       "pawn.cockpit_light_offset = [80.0, 0.0, -10.0]",
       "pawn.cockpit_light_radius_cm = 250.0",
       "pawn.cockpit_light_source_radius_cm = 12.0",
-      "pawn.cockpit_fill_intensity_cd = 5.0",
+      "pawn.cockpit_fill_intensity_cd = 0.8",
       "pawn.cockpit_fill_offset = [-15.0, 0.0, 12.0]",
       "pawn.hide_hull_in_cockpit = False",
       "camera_boom.target_arm_length = 2700.0",
@@ -90,6 +93,7 @@
       "chase_camera.field_of_view = 80.0",
       "cockpit_camera.relative_location = [174.0, 0.0, 189.0]",
       "cockpit_camera.field_of_view = 88.0",
+      "cockpit_displays.display_light_intensity_cd = 8.0",
       "component Gear = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Gear",
       "component Interior = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Interior",
       "component Lining = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Lining"

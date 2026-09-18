@@ -10,6 +10,7 @@ class FWidgetRenderer;
 class SWidget;
 class UMaterialInstanceDynamic;
 class UMeshComponent;
+class URectLightComponent;
 class USpaceCockpitDisplays;
 class UTextureRenderTarget2D;
 
@@ -47,6 +48,34 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
 	bool bOnlyInCockpitView = true;
 
+	/**
+	 * The displays light the cockpit around them: a shadowless rect light in front of each socket named
+	 * Display_* on the ship (build_ai_ship.py puts one in front of every display), facing the pilot.
+	 * Candela per display; 0: no light.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "0.0"))
+	float DisplayLightIntensityCd = 0.f;
+
+	/** The displays' glow colour: a cool cyan-blue, as the reference's screens light its cockpit. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	FLinearColor DisplayLightColor = FLinearColor(0.4f, 0.75f, 1.f);
+
+	/** Size of one display light, cm (about the screen). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	FVector2D DisplayLightSizeCm = FVector2D(32.0, 28.0);
+
+	/** How far the displays' light reaches, cm. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "1.0"))
+	float DisplayLightRadiusCm = 160.f;
+
+	/** Changes the display lights' brightness (tuning, shots). */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
+	void SetDisplayLightIntensity(float Candela);
+
+	/** Tests: the display lights made at BeginPlay. */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
+	int32 GetDisplayLightCount() const { return Lights.Num(); }
+
 	/** Tests: the display slot was found and the displays are set up. */
 	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
 	bool HasDisplays() const { return RenderTarget != nullptr; }
@@ -75,6 +104,11 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<USpaceCockpitDisplays> Widget;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<URectLightComponent>> Lights;
+
+	void CreateDisplayLights();
 
 	TSharedPtr<SWidget> SlateWidget;
 	FWidgetRenderer* Renderer = nullptr;
