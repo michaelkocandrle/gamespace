@@ -69,10 +69,11 @@ les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 check("MainMenu level loads", les.load_level("/Game/Maps/MainMenu"))
 actors = {a.get_actor_label(): a for a in eas.get_all_level_actors()}
-# The ship on the title screen is its hull plus every part its manifest lists, except the gear (stowed in space).
+# The ship on the title screen is its hull plus every part its manifest lists, except the gear (stowed in
+# space) and the cockpit interior (inside the hull).
 _manifest = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                                         "ArtSource", "Ships", "Vanguard", "Export", "Vanguard_manifest.json"), encoding="utf-8"))
-_parts = ["MenuShip_" + info["part"] for name, info in _manifest["meshes"].items() if info.get("part") and info["part"] != "Gear"]
+_parts = ["MenuShip_" + info["part"] for name, info in _manifest["meshes"].items() if info.get("part") and info["part"] not in ("Gear", "Interior", "Lining")]
 _ship_actors = sorted(label for label in actors if label.startswith("MenuShip"))
 check("title ship = hull + the manifest's parts (no gear, nothing from an older model)", _ship_actors == sorted(["MenuShip"] + _parts), str(_ship_actors))
 for label in ("Sun", "SkyLight", "PP_SpaceExposure", "StarfieldSky", "GasGiant_Orun", "Moon_Keth", "MenuShip", "MenuCamera"):

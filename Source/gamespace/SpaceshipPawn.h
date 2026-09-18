@@ -10,6 +10,7 @@
 class UAudioComponent;
 class UBoxComponent;
 class UCameraComponent;
+class UPointLightComponent;
 class UInputAction;
 class UInputComponent;
 class UInputMappingContext;
@@ -706,6 +707,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UCameraComponent> CockpitCamera;
 
+	/**
+	 * Cockpit lighting: the hull shadows the cabin, so without it a modelled interior is nearly black.
+	 * Placed at the eye + CockpitLightOffset at BeginPlay, casts no shadows, off at intensity 0.
+	 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UPointLightComponent> CockpitLight;
+
 	/** Engine loop. Started and stopped by UpdateEngineAudio, never auto-activated. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UAudioComponent> EngineAudio;
@@ -799,6 +807,22 @@ protected:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera")
 	bool bPlaceholderCockpit = false;
+
+	/** Cockpit light brightness, candela (0: no light). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float CockpitLightIntensityCd = 0.f;
+
+	/** Where the cockpit light sits relative to the pilot's eye, cm (above the dashboard, in front of the face). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera")
+	FVector CockpitLightOffset = FVector(45.0, 0.0, 10.0);
+
+	/** How far the cockpit light reaches, cm: the cabin and not the hull around it. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "10.0"))
+	float CockpitLightRadiusCm = 250.f;
+
+	/** Cockpit light colour: slightly cool, like instrument lighting. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera")
+	FLinearColor CockpitLightColor = FLinearColor(0.85f, 0.92f, 1.f);
 
 	/** Engine cube the placeholder cockpit is built from, and its material (Color parameter). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Camera")

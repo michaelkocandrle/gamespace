@@ -26,8 +26,9 @@ MOON_MATERIAL = "/Game/Environments/Space/M_Moon"
 RINGS_MATERIAL = "/Game/Environments/Space/M_PlanetRings"
 SHIP_MESHES = "/Game/Ships/Vanguard/Meshes"
 SHIP_MESH = SHIP_MESHES + "/SM_Ship_Vanguard"
-# Parts left out of the title screen: the ship flies in space there, gear stowed.
-HIDDEN_PARTS = ("_Gear",)
+# Parts left out of the title screen: the ship flies in space there, gear stowed; the cockpit interior
+# is inside the hull and cannot be seen from outside.
+HIDDEN_PARTS = ("_Gear", "_Interior", "_Lining")
 
 EXPOSURE_EV100 = 3.0
 SUN_PITCH, SUN_YAW = -22.0, 25.0          # light travels towards +X: lights what the camera sees

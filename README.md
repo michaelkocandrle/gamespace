@@ -195,8 +195,21 @@ from the seat the pilot would see nothing of the ship; the nose falls away at 29
 The survey now ignores faces seen from behind (add `twosided` for the old behaviour) and takes a sweep
 range (`sweep:X0:X1:Z0:Z1`, cm). The text below is about the procedural Vanguard before it.
 
-**Placeholder cockpit** (`bPlaceholderCockpit`, `placeholder_cockpit` in the setup file): until the ship
-has a modelled interior, simple dark boxes around the pilot's eye give the HUD a cabin to sit in - a
+**Cockpit interior** (18. 9. 2026): the Vanguard has a Meshy cockpit tub (dashboard with screens, consoles,
+side-sticks, pedals) as the part `SM_Ship_Vanguard_Interior` - the `interior` section of
+`Vanguard_ai_build.json`, placed by `Tools/Blender/fit_ship_interior.py` (inside the hull everywhere, rim
+at the canopy rail, eye with a clear view ahead and the dashboard 15 degrees below it: **eye (305, 0, 156)**).
+Three things make it work in the game, all in the recipe or the setup file:
+- `SM_Ship_Vanguard_Lining`: the hull around the cockpit copied with inward normals (`lining`). The hull is
+  one-sided; without it the pilot saw the ground through the floor and the sides. The canopy glass is left out.
+- `canopy_clear`: hull faces inside the canopy that face the cabin (frame undersides behind the opaque
+  panes) are deleted; from the seat they crossed the HUD.
+- `CockpitLight` (`cockpit_light_intensity_cd` 12, `cockpit_light_offset`, `cockpit_light_radius_cm`): a
+  shadowless point light between the eye and the dashboard; the hull shadows the cabin, which was
+  otherwise almost black. Keep it under the canopy roof, or it lights the canopy from outside.
+
+**Placeholder cockpit** (`bPlaceholderCockpit`, `placeholder_cockpit` in the setup file, off on the
+Vanguard since it has an interior): until a ship has a modelled interior, simple dark boxes around the pilot's eye give the HUD a cabin to sit in - a
 sloped instrument panel with three screens whose far edge, with a glare-shield lip, is 16 degrees below
 the horizon (~77 % of the screen's height, just under the HUD), canopy pillars ~30 degrees left and right
 leaning outwards, and a seat behind the eye. Engine cube and `BasicShapeMaterial` (`Color`), built at

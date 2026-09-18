@@ -19,7 +19,21 @@ the whole conversion is repeatable and reviewable as data. Steps, all driven by 
   6. collision: one convex UCX hull per region box (a 26-direction k-DOP of the vertices inside,
      so at most 26 vertices each);
   7. sockets: explicit positions, or "bottom" of a part region (landing gear pad soles);
-  8. saves out_blend. The old source file is never touched.
+  8. interior (optional, "interior" in the config): a second AI export - the cockpit - imported into the
+     same scene, oriented, scaled (width/length and height separately) and placed into the cabin,
+     decimated, given its own UVs and re-baked textures, as the part SM_Ship_<Ship>_Interior with the
+     slot M_Ship_<Ship>_Interior. It stays out of the collision and the sockets. Its placement comes
+     from Tools/Blender/fit_ship_interior.py;
+  9. lining (optional, "lining"): the hull's faces inside region boxes, minus the canopy glass, copied with
+     their normals turned inwards into the part SM_Ship_<Ship>_Lining (same material and UVs). The hull is
+     one-sided, so from the cockpit the fuselage was invisible and the pilot looked through the floor and
+     the sides at the ground; the lining is what the inside of the fuselage looks like, the glass stays
+     clear. A part of its own, so the hull stays a clean outer shell (fit_ship_interior.py tests
+     "inside" against it);
+ 10. canopy clean-up (optional, "canopy_clear"): hull faces inside the canopy that point into the cabin
+     (the undersides of the frame between the panes) are deleted. Nobody sees them from outside - the
+     panes are opaque - but from the seat the windscreen frame crossed the HUD;
+ 11. saves out_blend. The old source file is never touched.
 
 Coordinates in the config are Blender metres AFTER step 2: +X nose, +Y the ship's left, +Z up.
 Measure them in the oriented model (Tools/Blender/build_ai_ship.py -- <config> --no-save prints the
@@ -412,6 +426,107 @@ def build_sockets(ship, hull, parts, sockets):
         log("socket %s at (%.2f, %.2f, %.2f) m" % (empty.name, location.x, location.y, location.z))
 
 
+# --- 8: interior -----------------------------------------------------------------------------------------
+
+def add_interior(ship, spec):
+    """The cockpit interior as its own part: see step 8 in the module notes."""
+    t = time.time()
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.fbx(filepath=path(spec["source_fbx"]))
+    new = [o for o in bpy.data.objects if o not in before]
+    meshes = [o for o in new if o.type == "MESH"]
+    for o in new:
+        if o.type != "MESH":
+            bpy.data.objects.remove(o)
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in meshes:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = meshes[0]
+    if len(meshes) > 1:
+        bpy.ops.object.join()
+    ob = bpy.context.view_layer.objects.active
+    ob.parent = None
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    tris = tri_count(ob)
+    place = spec["placement"]
+    s, r = place["scale"], place.get("height_ratio", 1.0)
+    matrix = (Matrix.Translation(Vector(place["offset"])) @ Matrix.Diagonal((s, s, s * r, 1.0))
+              @ Matrix.Rotation(math.radians(spec.get("rotate_z_deg", 0.0)), 4, "Z"))
+    ob.data.transform(matrix)
+    ob.data.update()
+    ob.name = ob.data.name = "SM_Ship_%s_Interior" % ship
+    lo, hi = bounds([ob])
+    log("interior %s: %d triangles, placed at scale %.2f (height x%.2f): min %s max %s" % (
+        os.path.basename(spec["source_fbx"]), tris, s, r, tuple(round(c, 2) for c in lo), tuple(round(c, 2) for c in hi)))
+
+    source = preview_material("InteriorSourceLook", spec["textures"])
+    ob.data.materials.clear()
+    ob.data.materials.append(source)
+    high = keep_high_copy(ob)
+    decimate(ob, spec.get("target_tris", 120000), [], 1.0, 0.0)
+    select_only(ob)
+    if ob.data.has_custom_normals:
+        bpy.ops.mesh.customdata_custom_splitnormals_clear()
+    ob.data.shade_smooth()
+    ob.data.set_sharp_from_angle(angle=math.radians(spec.get("smooth_angle_deg", 60.0)))
+    bake = spec["rebake"]
+    unwrap([ob], bake.get("uv_margin", 0.002), bake.get("uv_angle_deg", 66.0))
+    rebake([(ob, high)], source, bake)
+    bpy.data.objects.remove(high)
+    ob.data.materials.clear()
+    ob.data.materials.append(preview_material("M_Ship_%s_Interior" % ship, {k: bake[k] for k in ("base_color", "orm", "normal")}))
+    log("interior done: %d triangles in %.0f s" % (tri_count(ob), time.time() - t))
+    return ob
+
+
+# --- 9: lining -----------------------------------------------------------------------------------------
+
+def clear_canopy(hull, spec):
+    """See step 10 in the module notes."""
+    box, axis_z, min_dot = spec["box"], spec.get("axis_z", 1.2), spec.get("min_dot", 0.2)
+    bm = bmesh.new()
+    bm.from_mesh(hull.data)
+    doomed = []
+    for f in bm.faces:
+        c = f.calc_center_median()
+        if not in_box(c, box):
+            continue
+        towards = Vector((0.0, -c.y, axis_z - c.z))
+        if towards.length > 1e-6 and f.normal.dot(towards.normalized()) > min_dot:
+            doomed.append(f)
+    bmesh.ops.delete(bm, geom=doomed, context="FACES")
+    bm.to_mesh(hull.data)
+    bm.free()
+    hull.data.update()
+    log("canopy clean-up: %d inward faces inside the canopy deleted" % len(doomed))
+
+
+def add_lining(hull, ship, spec):
+    """See step 9 in the module notes: a part with the hull's material slots and UVs."""
+    regions, exclude = spec["regions"], spec.get("exclude", [])
+    bm = bmesh.new()
+    bm.from_mesh(hull.data)
+
+    def any_box(v, boxes):
+        return any(in_box(v.co, b) for b in boxes)
+    keep = {f for f in bm.faces if all(any_box(v, regions) for v in f.verts) and not all(any_box(v, exclude) for v in f.verts)}
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f not in keep], context="FACES")
+    bmesh.ops.reverse_faces(bm, faces=list(bm.faces))
+    mesh = hull.data.copy()
+    mesh.name = "SM_Ship_%s_Lining" % ship
+    bm.to_mesh(mesh)
+    bm.free()
+    lining = bpy.data.objects.new(mesh.name, mesh)
+    bpy.context.scene.collection.objects.link(lining)
+    lining.matrix_world = hull.matrix_world.copy()
+    # Only the slots its faces use (the nozzle discs are outside it): the manifest lists the object's
+    # slots, the FBX only the used ones, and the import checks that they agree.
+    select_only(lining)
+    bpy.ops.object.material_slot_remove_unused()
+    log("lining: %s, %d triangles facing inwards" % (lining.name, tri_count(lining)))
+    return lining
+
+
 # --- main ----------------------------------------------------------------------------------------------
 
 def main(argv):
@@ -462,8 +577,14 @@ def main(argv):
     if cfg.get("emissive"):
         assign_emissive(hull, cfg["emissive"], emissive_material(ship, cfg["emissive"].get("colour", (0.35, 0.65, 1.0))))
 
+    if cfg.get("canopy_clear"):
+        clear_canopy(hull, cfg["canopy_clear"])
+    if cfg.get("lining"):
+        add_lining(hull, ship, cfg["lining"])
     build_collision(ship, lows, cfg.get("collision", []))
     build_sockets(ship, hull, parts, cfg.get("sockets", {}))
+    if cfg.get("interior"):
+        add_interior(ship, cfg["interior"])
     lo, hi = bounds(lows)
     log("result: hull %d triangles, parts %s, size %s m, min z %.2f" % (
         tri_count(hull), {k: tri_count(v) for k, v in parts.items()}, tuple(round(c, 2) for c in hi - lo), lo.z))

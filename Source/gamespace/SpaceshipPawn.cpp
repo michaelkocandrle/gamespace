@@ -4,6 +4,7 @@
 
 #include "Camera/CameraComponent.h"
 #include "Components/AudioComponent.h"
+#include "Components/PointLightComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -165,6 +166,13 @@ ASpaceshipPawn::ASpaceshipPawn()
 	// The view comes from the first active camera component, so only one may be active.
 	CockpitCamera->SetAutoActivate(false);
 
+	CockpitLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("CockpitLight"));
+	CockpitLight->SetupAttachment(HullCollision);
+	CockpitLight->SetCastShadows(false);
+	CockpitLight->SetIntensityUnits(ELightUnits::Candelas);
+	CockpitLight->SetIntensity(0.f);
+	CockpitLight->SetVisibility(false);
+
 	PilotCharacterClass = APlayerCharacter::StaticClass();
 
 	EngineAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("EngineAudio"));
@@ -216,6 +224,14 @@ void ASpaceshipPawn::BeginPlay()
 	SetupShipLights();
 	BuildGearLegs();
 	BuildPlaceholderCockpit();
+	if (CockpitLightIntensityCd > 0.f)
+	{
+		CockpitLight->SetRelativeLocation(CockpitCameraBaseLocation + CockpitLightOffset);
+		CockpitLight->SetIntensity(CockpitLightIntensityCd);
+		CockpitLight->SetAttenuationRadius(CockpitLightRadiusCm);
+		CockpitLight->SetLightColor(CockpitLightColor);
+		CockpitLight->SetVisibility(true);
+	}
 }
 
 void ASpaceshipPawn::SnapCameraToShip()

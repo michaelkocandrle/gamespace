@@ -382,7 +382,15 @@ z originálu kdykoli zopakuje (3 minuty). Když něco nesedí, upraví se čísl
    načisto; odstraní komponenty a assety staré lodi, na které už nic neodkazuje (Canopy, staré MI).
    Pak `build_main_menu.py` (loď na úvodní obrazovce se skládá z dílů v manifestu, bez podvozku)
    a ještě jednou `import_ship.py` (uklidí, co držela úvodní obrazovka).
-10. **Testy a snímky:** všechny `Tools\Tests`, pak `Tools\Shots.ps1 -Preset ship_views -Package`, `cockpit`,
+10. **Interiér kokpitu** (volitelně, druhý AI export): sekce `interior` v receptu (zdroj, `rotate_z_deg`,
+    `fit` s mezemi hledání a výškou rukojetí stick-ů `stick_grip`). Nejdřív postav loď bez interiéru, pak
+    `blender -b <Loď>_Meshy.blend --python Tools\Blender\fit_ship_interior.py -- <recept>`: vypíše
+    nejlepší usazení a oko. Zapiš `interior.placement`, `sockets.Cockpit` a oko do setupu, postav znovu.
+    K interiéru patří `lining` (výstelka trupu kolem kokpitu, jinak je zevnitř vidět skrz loď),
+    `canopy_clear` (plochy canopy mířící do kabiny) a v setupu `cockpit_light_*` (trup kabinu stíní) a
+    `placeholder_cockpit: false`. Zkontroluj pohled z oka v Blenderu s backface cullingem (jako UE) a pak
+    `Shots.ps1 -Preset cockpit`.
+11. **Testy a snímky:** všechny `Tools\Tests`, pak `Tools\Shots.ps1 -Preset ship_views -Package`, `cockpit`,
     `landing`. Vzdálenost chase kamery se ladí bez balení přes `chase_zoom` v dočasném scénáři.
 
 ---

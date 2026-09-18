@@ -253,7 +253,26 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     (pod HUD, ~77 % výšky obrazovky), sloupky rámu kabiny ~30° vlevo a vpravo a sedadlo za zády. Jen
     v pohledu z kokpitu, bez kolize a stínů. Rozložení podle SC reference v `Docs/UI/` a snímků;
     oko zůstalo (410, 0, 145), uvnitř kabiny (340, 0, 140) prosvítal zevnitř model. Test
-    `test_cockpit_frame.py`. Zmizí, až bude skutečný interiér (samostatný projekt po SC-2).
+    `test_cockpit_frame.py`. Ve Vanguardu ho 18. 9. 2026 nahradil skutečný interiér (bod 22); v kódu
+    zůstal pro lodě bez interiéru.
+22. **Interiér kokpitu z Meshy** (18. 9. 2026): vana kokpitu (deska s obrazovkami, konzole, side-sticky,
+    pedály; 1,27 mil. → 120 tis. trojúhelníků, nové UV a přepečené textury 2K) jako díl
+    `SM_Ship_Vanguard_Interior`, sekce `interior` v `Vanguard_ai_build.json`:
+    - usazení našel nový `Tools/Blender/fit_ship_interior.py`: vana celá uvnitř trupu (2 cm), okraj
+      ~15 cm od stěn kabiny, měřítko 0,95 (výška × 0,95), okraj na úrovni zábradlí canopy jako u stíhačky;
+      „co největší, co se vejde“ nešlo – deska by došla ke stropu canopy a oko by nemělo kam;
+    - **oko se posunulo na (305, 0, 156)** nad sedadlo za sticky, 22 cm pod strop; deska 15° pod okem
+      (pod HUD). Výš to nejde: střecha canopy se k čelnímu sklu svažuje a z oka na 163 cm byla vidět
+      z boku jako světlý pruh přes HUD – nástroj proto hledá oko s čistým výhledem 0–6° nad horizont;
+    - **výstelka** `SM_Ship_Vanguard_Lining`: trup je jednostranný, z kokpitu byl neviditelný a pilot
+      viděl podlahou a boky na zem. Build kopíruje stěny trupu kolem kokpitu otočené dovnitř (textura
+      trupu), mimo zasklení canopy;
+    - **úklid canopy:** plochy uvnitř canopy mířící do kabiny (spodky rámu, zvenku za neprůhledným
+      zasklením nejsou vidět) build maže;
+    - **kokpitové světlo** (`cockpit_light_*` v setupu): trup kabinu stíní, interiér byl skoro černý;
+      bodové světlo mezi okem a deskou, 12 cd, bez stínů, musí zůstat pod střechou canopy (nad ní svítilo
+      na canopy zvenku);
+    - `placeholder_cockpit` vypnutý.
 
 ---
 
@@ -303,6 +322,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `Content/UI/Fonts/` | Fonty HUD (Rajdhani, Share Tech Mono) i s licencemi SIL OFL. Načítají se ze souboru, ne jako Font asset: importér fontu potřebuje Slate aplikaci, kterou headless editor nemá. Do balíčku je dostává `DirectoriesToAlwaysStageAsUFS` v `Config/DefaultGame.ini`. |
 | `Assets/install_mannequin_pack.py`, `generate_milky_way_glow.py` | Jednorázová instalace a textura. |
 | `Blender/gamespace_ship_export.py` | Export lodí z Blenderu (FBX, manifest, validace). |
+| `Blender/fit_ship_interior.py` | Najde měřítko a polohu AI interiéru v kabině a oko pilota (uvnitř trupu, okraj u stěn, čistý výhled, deska pod HUD). Výsledek do receptu (`interior.placement`, `sockets.Cockpit`) a setupu. |
 | `Blender/build_ai_ship.py` | AI model (Meshy, Higgsfield) → herní `.blend` podle receptu `<Loď>_ai_build.json`: orientace, velikost, díly, decimace, nové UV a přepečené textury, emisivní trysky, UCX hully, sockety. Kapitola 2B v `ShipPipeline.md`. |
 | `Blender/split_ship_gear.py` | Oddělí vymodelovaný podvozek z trupu do dílu `SM_Ship_<Loď>_Gear` (volné díly pod břichem u socketů `SOCKET_Gear_*`, kromě dvířek a světla) a uloží `.blend`. Jednorázové, druhé spuštění nic nedělá. Pak export a import jako obvykle. |
 | `Assets/add_landing_input.py` | Klávesy N (`IA_LandingGear`) a P (`IA_Precision`) do `IMC_Spaceship` (jen přidává). |
@@ -366,7 +386,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_flight_hud_sc1c.py` | SC-1c: strom widgetů, data HUD z lodi (rychlost vůči omezovači, afterburner, pozpátku, kontrolky, G, palivo, joystick) a jejich zobrazení ve widgetech. Vzhled headless ověřit nejde. |
 | `test_boost_afterburner_sc1b.py` | SC-1b: boost jen manévrovací trysky a rotace, vypnutí G-Safe, afterburner (tah, limit × omezovač, palivo, zamčení, doplňování, plynulý návrat, coupled i decoupled, jen SCM, G-Safe zůstává), Shift + Tab, input a hodnoty Vanguardu. |
 | `test_flight_modes.py` | Boost energie, cruise jen v NAV (vesmír i nad Veyrou), výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
-| `test_cockpit_frame.py` | Provizorní kokpit: nic z rámu v okně HUD, horní hrana desky 14–20° pod horizontem, deska kryje spodek obrazu, obrazovky na panelu a vidět, sloupky 24–34° do stran, sedadlo za okem. |
+| `test_cockpit_frame.py` | Kokpit: Vanguard má interiér (díl, oko nad vanou za deskou, deska 12–22° pod okem, provizorium vypnuté); rozložení provizorního rámu pro lodě bez interiéru (nic v okně HUD, deska 14–20° pod horizontem, sloupky 24–34° do stran, sedadlo za okem). |
 | `test_landing_sc2.py` | SC-2a: dosednutí jen s podvozkem (GEAR UP před vším ostatním, mezera pod patkami), stavový automat podvozku (časy, otočení v půlce, zákaz zasunutí na zemi), pohyb modelovaného dílu i zástupných nohou, precision (strop, omezovač uvnitř, jen SCM, bez afterburneru, pomalejší otáčení, brzdění bez skoku), kontrolky GEAR/PREC, klávesy N/P bez kolizí, hodnoty a díl `Gear` Vanguardu, scénář `landing`. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
@@ -531,9 +551,11 @@ Další otevřené směry mimo let:
   změřená: `GetEngineDemand` bere svislou osu × 0,7 proti plné kapacitě zvedacích trysek, visení na
   Veyře (~0,46 G) tak dává zátěž ~0,06, takže záře i zvuk zůstanou skoro na nule. G-metr naopak
   ukazuje 0,5–0,8 G (snímky `landing` 18. 9. 2026), jen je to na stupnici 12 G malý proužek.
-- **Meshy Vanguard, kokpit:** model nemá interiér (zevnitř kabiny UE odřízne všechny stěny). Provizorně
-  ho zastupuje procedurální rám (bod 21 v kapitole 5). Při rozhlížení do stran je vidět konec desky
-  a střecha lodi zvenku (oko je nad střechou). Skutečný interiér je samostatný budoucí projekt.
+- **Meshy Vanguard, kokpit** (interiér od 18. 9. 2026, bod 22): nahoře přes výhled vede tmavá hrana
+  střechy canopy (~11° nad horizontem, nad kontrolkami HUD) – níž oko být nemůže, jinak deska vyleze do
+  HUD. Při rozhlížení do stran jsou vidět tmavé plochy výstelky (zevnitř bez světla) a hrubší tvar
+  decimované vany. Není sedadlo (Meshy vana ho nemá), dozadu je vidět výstelka trupu. Oko je
+  navržené pro 16:9 a FOV 88°.
 - **Meshy Vanguard na dunách:** na snímku `landing/06_landed_side` (18. 9. 2026) leží loď na hřbetu
   duny a spodní gondola je zapuštěná ~0,5 m v písku, i když by kolizní box (spodek = podrážky ližin)
   neměl dovolit nic níž než ližiny. Neověřená podezření: hrubší kolizní síť planety než vykreslený

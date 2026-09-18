@@ -35,14 +35,26 @@
       "objects": [
         "SM_Ship_Vanguard_Gear"
       ]
+    },
+    {
+      "fbx": "SM_Ship_Vanguard_Interior.fbx",
+      "objects": [
+        "SM_Ship_Vanguard_Interior"
+      ]
+    },
+    {
+      "fbx": "SM_Ship_Vanguard_Lining.fbx",
+      "objects": [
+        "SM_Ship_Vanguard_Lining"
+      ]
     }
   ],
   "meshes": {
     "SM_Ship_Vanguard": {
       "lod": 0,
       "part": null,
-      "tris": 200000,
-      "verts": 99102,
+      "tris": 199777,
+      "verts": 99068,
       "materials": [
         "M_Ship_Vanguard_Hull",
         "M_Ship_Vanguard_Emissive"
@@ -80,6 +92,50 @@
           3.8996663093566895,
           2.745610237121582,
           -2.0499467849731445
+        ]
+      ]
+    },
+    "SM_Ship_Vanguard_Interior": {
+      "lod": 0,
+      "part": "Interior",
+      "tris": 120000,
+      "verts": 59828,
+      "materials": [
+        "M_Ship_Vanguard_Interior"
+      ],
+      "uv_layers": 1,
+      "bounds_m": [
+        [
+          2.5569677352905273,
+          -0.9016274213790894,
+          0.6648709177970886
+        ],
+        [
+          3.9463002681732178,
+          0.9029640555381775,
+          1.3314568996429443
+        ]
+      ]
+    },
+    "SM_Ship_Vanguard_Lining": {
+      "lod": 0,
+      "part": "Lining",
+      "tris": 58886,
+      "verts": 29627,
+      "materials": [
+        "M_Ship_Vanguard_Hull"
+      ],
+      "uv_layers": 1,
+      "bounds_m": [
+        [
+          -2.9999663829803467,
+          -3.0498414039611816,
+          -2.609145402908325
+        ],
+        [
+          7.002742767333984,
+          3.0497915744781494,
+          2.743483543395996
         ]
       ]
     }
@@ -273,14 +329,14 @@
     "SOCKET_Cockpit": {
       "parent": "SM_Ship_Vanguard",
       "location_m": [
-        4.1,
+        3.05,
         0.0,
-        1.45
+        1.56
       ],
       "location_ue_cm": [
-        410.0,
+        305.0,
         -0.0,
-        145.0
+        156.0
       ]
     },
     "SOCKET_Engine_LowerL": {
@@ -443,9 +499,9 @@
     "CameraBoom_ProbeSize_cm": 50.0,
     "CameraBoom_CameraLagMaxDistance_cm": 2800.0,
     "CockpitCamera_location_ue_cm": [
-      409.83,
+      304.83,
       0.12,
-      146.7
+      157.7
     ],
     "LandingFootprintRadiusCm": 572.0,
     "LandingMaxGapCm": 200.0,

@@ -1,4 +1,4 @@
-"""Headless checks for the placeholder cockpit (ships without a modelled interior).
+"""Headless checks for the cockpit: the Vanguard's modelled interior, and the placeholder frame for ships without one.
 
     .\\Tools\\run_editor_python.ps1 Tools\\Tests\\test_cockpit_frame.py
 
@@ -10,6 +10,9 @@ which spans roughly +-26 degrees across and down to ~15 degrees below the horizo
   3. the dashboard covers the bottom of the view in the middle; the screens are on it and in view
   4. the pillars stand in view left and right, outside the HUD, 24..34 degrees off centre at the bottom
   5. the seat: back and headrest behind the eye, the cushion under the pilot (free look only)
+  6. the Vanguard: placeholder off, the interior part in the Blueprint, the eye over the interior's tub,
+     behind its dashboard, whose top is 12..22 degrees below the eye (the manifest's interior bounds)
+The placeholder's layout (1-5) is checked whatever ship uses it.
 Prints "COCKPITTEST PASS" / "COCKPITTEST FAIL" lines and a summary.
 """
 
@@ -50,7 +53,6 @@ def edge_samples(corners, steps=8):
 
 
 vanguard = unreal.get_default_object(unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard"))
-check("the Vanguard has the placeholder cockpit switched on", vanguard.get_editor_property("placeholder_cockpit"))
 fov = vanguard.get_editor_property("cockpit_camera").get_editor_property("field_of_view")
 half_h = fov / 2.0
 half_v = math.degrees(math.atan(math.tan(math.radians(half_h)) * 9.0 / 16.0))
@@ -107,5 +109,33 @@ back = [n for n in names if n in ("SeatBack", "Headrest")]
 check("seat back and headrest behind the eye", len(back) == 2 and all(p[0] < 0 for n in back for p in parts[n]))
 check("seat cushion under the pilot, out of the forward view",
       "SeatCushion" in parts and not any(in_view(p) for p in edge_samples(parts["SeatCushion"])))
+
+# 6) the Vanguard's modelled interior
+import json
+import os
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+manifest = json.load(open(os.path.join(REPO, "ArtSource", "Ships", "Vanguard", "Export", "Vanguard_manifest.json"), encoding="utf-8"))
+interior = manifest["meshes"].get("SM_Ship_Vanguard_Interior")
+check("Vanguard: placeholder cockpit off (it has a modelled interior)", not vanguard.get_editor_property("placeholder_cockpit"))
+check("Vanguard: interior part in the manifest", interior is not None and interior["part"] == "Interior", str(interior and interior["tris"]))
+eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+unreal.EditorLoadingAndSavingUtils.new_blank_map(False)
+ship = eas.spawn_actor_from_class(unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard"),
+                                  unreal.Vector(0, 0, 0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
+try:
+    meshes = {c.get_name(): c for c in ship.get_components_by_class(unreal.StaticMeshComponent)}
+    part = meshes.get("Interior")
+    check("Vanguard: Interior component with the interior mesh", part is not None and part.get_editor_property("static_mesh") is not None
+          and part.get_editor_property("static_mesh").get_name() == "SM_Ship_Vanguard_Interior", ", ".join(sorted(meshes)))
+    eye = ship.get_editor_property("cockpit_camera").get_editor_property("relative_location")
+    offset = ship.get_editor_property("hull").get_editor_property("relative_location")
+    (lx, ly, lz), (hx, hy, hz) = [[c * 100.0 for c in corner] for corner in interior["bounds_m"]]
+    ex, ez = eye.x - offset.x, eye.z - offset.z
+    check("Vanguard: eye over the interior's tub, behind its dashboard", lx < ex < hx - 40.0 and abs(eye.y) < 1.0 and ez > hz,
+          "eye (%.0f, %.0f, %.0f), interior x %.0f..%.0f top %.0f" % (eye.x, eye.y, eye.z, lx, hx, hz))
+    angle = math.degrees(math.atan2(ez - hz, hx - ex))
+    check("Vanguard: dashboard top 12..22 deg below the eye (under the HUD)", 12.0 <= angle <= 22.0, "%.1f deg" % angle)
+finally:
+    eas.destroy_actor(ship)
 
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))
