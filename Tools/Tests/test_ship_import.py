@@ -79,16 +79,37 @@ if plan["materials"]:
     for name, spec in sorted(plan["materials"].items()):
         mi = unreal.EditorAssetLibrary.load_asset("%s/%s" % (folder, name))
         parent = mi.get_editor_property("parent") if mi else None
-        want_parent = {"hull": "M_Ship_Hull", "glass": "M_Ship_Glass"}[spec["master"]]
+        want_parent = {"hull": "M_Ship_Hull", "pbr": "M_Ship_PBR", "glass": "M_Ship_Glass"}[spec["master"]]
         check("%s parent %s" % (name, want_parent), parent is not None and parent.get_name() == want_parent,
               parent.get_name() if parent else "missing")
+        for key, param in (("base_color", "BaseColorMap"), ("orm", "ORMMap"), ("normal", "NormalMap")):
+            if mi and key in (spec.get("textures") or {}):
+                texture = MEL.get_material_instance_texture_parameter_value(mi, param)
+                want = "T_" + os.path.splitext(os.path.basename(spec["textures"][key]))[0].replace("T_", "", 1)
+                ok = texture is not None and texture.get_name() == want
+                if ok and key == "normal":
+                    ok = (texture.get_editor_property("compression_settings") == unreal.TextureCompressionSettings.TC_NORMALMAP
+                          and not texture.get_editor_property("srgb") and texture.get_editor_property("flip_green_channel"))
+                elif ok and key == "orm":
+                    ok = (texture.get_editor_property("compression_settings") == unreal.TextureCompressionSettings.TC_MASKS
+                          and not texture.get_editor_property("srgb"))
+                elif ok:
+                    ok = texture.get_editor_property("srgb")
+                check("%s %s = %s, set up for its role" % (name, param, want), ok, texture.get_name() if texture else "none")
         if mi and "emissive_strength" in spec:
             got = MEL.get_material_instance_scalar_parameter_value(mi, "EmissiveStrength")
             check("%s glows" % name, abs(got - spec["emissive_strength"]) < 1e-3 and got > 1.0, "%.1f" % got)
     glass = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Glass")
     check("M_Ship_Glass is translucent", glass is not None and glass.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_TRANSLUCENT)
-    hull_master = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Hull")
-    check("M_Ship_Hull used with Nanite", hull_master is not None and hull_master.get_editor_property("used_with_nanite"))
+    for master in ("M_Ship_Hull", "M_Ship_PBR"):
+        asset = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/" + master)
+        check("%s used with Nanite" % master, asset is not None and asset.get_editor_property("used_with_nanite"))
+
+# --- nothing left over from an earlier model -------------------------------------------------
+root = "/Game/Ships/%s" % plan["ship"]
+leftovers = [p.split(".")[0] for f in ("/Meshes", "/Materials") for p in unreal.EditorAssetLibrary.list_assets(root + f, recursive=False)
+             if p.split(".")[0] not in {m["asset_path"] for m in plan["meshes"]} | {"%s/Materials/%s" % (root, n) for n in plan["materials"]}]
+check("no meshes or material instances of an earlier model left", not leftovers, ", ".join(leftovers))
 
 # --- blueprint: spawn it, so inherited component overrides are what the game would see ------
 bp_class = unreal.EditorAssetLibrary.load_blueprint_class(plan["blueprint"])

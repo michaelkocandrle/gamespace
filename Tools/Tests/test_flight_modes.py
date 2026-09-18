@@ -257,19 +257,28 @@ try:
     check("every exit candidate clear of the hull", worst >= clearance_needed - 0.5, "worst %.0f cm" % worst)
     rings = [length([c[k] - loc[k] for k in range(3)]) for c in candidates[1:]]
     check("fallback spots move outwards", rings[0] < rings[4] < rings[8], "%.0f / %.0f / %.0f m" % (rings[0] / 100, rings[4] / 100, rings[8] / 100))
-    # The pilot's eye at the windscreen, checked against the canopy mesh: inside its footprint along
-    # the ship, in its top half, well forward of its middle (the seat position had the tinted glass
-    # 13 cm from the eye and 0 % open view). The view itself is measured with
-    # Tools/Blender/cockpit_view_survey.py: 97.5 % open, only the nose tip at the bottom.
+    # The pilot's eye is the one picked with Tools/Blender/cockpit_view_survey.py and written into the
+    # model as SOCKET_Cockpit (ArtSource/Ships/<Ship>/<Ship>_ai_build.json): the setup file's camera
+    # has to sit on that socket, on the centreline, in the front half of the hull and inside its height.
     camera = ship.get_editor_property("cockpit_camera")
     cockpit = v3(camera.get_editor_property("relative_location"))
     rotation = camera.get_editor_property("relative_rotation")
-    canopy = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Canopy").get_bounding_box()
-    low, high = v3(canopy.min), v3(canopy.max)
-    check("cockpit eye at the windscreen, not buried in the canopy bubble",
-          low[0] < cockpit[0] < high[0] and cockpit[0] > (low[0] + high[0]) / 2 + 50.0
-          and (low[2] + high[2]) / 2 < cockpit[2] < high[2] and abs(cockpit[1]) < 1.0,
-          "eye %s, canopy x %.0f..%.0f z %.0f..%.0f" % (cockpit, low[0], high[0], low[2], high[2]))
+    hull = ship.get_editor_property("hull")
+    mesh = hull.get_editor_property("static_mesh")
+    socket = mesh.find_socket("Cockpit") or mesh.find_socket("SOCKET_Cockpit")
+    offset = v3(hull.get_editor_property("relative_location"))
+    bounds = mesh.get_bounding_box()
+    low, high = v3(bounds.min), v3(bounds.max)
+    if socket:
+        s = v3(socket.get_editor_property("relative_location"))
+        eye_socket = [s[k] + offset[k] for k in range(3)]
+        check("cockpit eye on the model's SOCKET_Cockpit", length([cockpit[k] - eye_socket[k] for k in range(3)]) < 5.0,
+              "eye %s, socket %s" % (cockpit, [round(c, 1) for c in eye_socket]))
+    else:
+        check("the hull mesh has a Cockpit socket", False)
+    check("cockpit eye on the centreline, in the front half, within the hull's height",
+          abs(cockpit[1]) < 1.0 and cockpit[0] > (low[0] + high[0]) / 2 + offset[0] and low[2] + offset[2] < cockpit[2] < high[2] + offset[2],
+          "eye %s, hull x %.0f..%.0f z %.0f..%.0f" % (cockpit, low[0], high[0], low[2], high[2]))
     check("cockpit camera looks straight ahead", abs(rotation.pitch) < 1e-3 and abs(rotation.yaw) < 1e-3 and abs(rotation.roll) < 1e-3, str(rotation))
     check("free look unlimited on the Vanguard", ship.get_editor_property("free_look_max_yaw_deg") >= 180.0)
 finally:

@@ -188,6 +188,13 @@ exit candidates and collision setup, character recovery, scene extras).
 
 ### Cockpit view
 
+**Meshy Vanguard (18. 9. 2026):** the eye is at (410, 0, 145), 14 cm above the front edge of the cabin
+roof. The model has no interior, and seen from inside every face is a back face that Unreal culls, so
+from the seat the pilot would see nothing of the ship; the nose falls away at 29 degrees, more than the
+25 degrees the view shows below the horizon, so straight ahead shows no ship either - free look does.
+The survey now ignores faces seen from behind (add `twosided` for the old behaviour) and takes a sweep
+range (`sweep:X0:X1:Z0:Z1`, cm). The text below is about the procedural Vanguard before it.
+
 The eye position lives in `<Ship>_setup.json` (`components.cockpit_camera.relative_location`) and is
 measured against the real model, not guessed: `Tools/Blender/cockpit_view_survey.py` casts a grid of
 rays over the camera's field of view in Blender and prints what each one hits and how much of the view
@@ -240,9 +247,11 @@ Star Citizen style: the gear has to be down to land, and lowering it puts the sh
   HUD's GEAR lamp blinks red. With the gear up the ship can still rest on the ground and slide, but it
   never becomes Landed (no alignment, no getting out). The rest is the L5 rule, measured under the pads.
 - **The visible gear.** A mesh component whose name contains `Gear` is the ship's modelled gear: the
-  Vanguard's legs are their own part, `SM_Ship_Vanguard_Gear`, split off the hull mesh in Blender by
-  `Tools/Blender/split_ship_gear.py` (they were modelled down and joined into the hull). Stowed, the part
-  rises `GearStowTravelCm` (95 cm) into the belly, eased, and is hidden; it has no collision. The legs
+  Vanguard's skids are their own part, `SM_Ship_Vanguard_Gear`, cut out of the Meshy model by
+  `Tools/Blender/build_ai_ship.py` (`parts.Gear` in `Vanguard_ai_build.json`; for the earlier procedural
+  model `Tools/Blender/split_ship_gear.py` did the same). Stow travel 115 cm: the nose skid hangs 1.1 m
+  under the belly. Stowed, the part
+  rises `GearStowTravelCm` (95 cm on the procedural Vanguard, 115 on the Meshy one) into the belly, eased, and is hidden; it has no collision. The legs
   already reach the bottom of the collision box (the pads' soles, where `SOCKET_Gear_*` are), so
   `GearExtensionCm` is 0 for the Vanguard and it stands exactly where it did before SC-2a.
 - **Ships without a gear part** get placeholder legs from `/Engine/BasicShapes/Cylinder` on the
@@ -423,6 +432,19 @@ files, checks them against the manifest and writes the manifest's suggested sett
 Vanguard (`ArtSource/Ships/Vanguard`), checked afterwards in a fresh editor by
 `Tools/Tests/test_ship_import.py`. From Git Bash, run Blender with `MSYS_NO_PATHCONV=1`, or
 `--out "//Export"` is rewritten to `/Export` (C:\Export).
+
+**AI models (Meshy, Higgsfield) -> game ship**: `Tools/Blender/build_ai_ship.py` rebuilds a ship from
+the raw AI export, driven by `ArtSource/Ships/<Ship>/<Ship>_ai_build.json` (ShipPipeline.md, 2B):
+orient and scale, cut fused parts out by region boxes (the Vanguard's skids -> `SM_Ship_Vanguard_Gear`),
+decimate with importance rules, **a fresh UV atlas and the source re-baked onto it** (base colour, ORM,
+normal map - AI atlases have thousands of tiny islands that decimation welds together, and Meshy's
+normal map is nearly flat), an emissive slot for the nozzle discs, k-DOP `UCX_` hulls per region box and
+sockets. The current Vanguard (18. 9. 2026) is Meshy's "Ironclad Starfighter": 3.36 M triangles in,
+200 k + 14 k gear out, 14 x 11.4 x 6.2 m, four engine nacelles. Its material is `M_Ship_PBR`
+(`BaseColorMap`, `ORMMap` G roughness / B metallic, `NormalMap` with the green channel flipped on import,
+`Tools/Assets/ship_materials.py`); thrusters keep `M_Ship_Hull` with emission. `import_ship.py` imports
+a mesh fresh when its material slots changed (a reimport kept the old model's slots) and removes the
+Blueprint components, meshes and material instances an earlier model left behind.
 
 The player character pipeline (Higgsfield rig vs. UE5 Mannequin skeleton, camera and animation
 decisions, folder layout and naming) is in
@@ -852,7 +874,7 @@ editor, and nobody has to play to see what a change looks like.
 
 Pictures land in `Saved/Shots/<stamp>_<preset>/NN_<name>.png` (not in git; `-Keep` also copies them
 to `Docs/Shots/` for the repository's visual history). Presets are `cockpit`, `hud`, `ship`,
-`landing` and `cockpit_tune` (variants side by side). A shot list is JSON read from disk at runtime, so
+`landing`, `ship_views` (a model from every side) and `cockpit_tune` (variants side by side). A shot list is JSON read from disk at runtime, so
 editing one needs no repackaging; a shot can set the camera, HUD mode, altitude, facing, speed, master
 mode, limiter, coupled / G-Safe / ComStab, boost, afterburner, the virtual joystick cursor, the gear
 (`gear` straight down or up, `lower_gear` to catch it moving), `precision`, the chase camera swung round

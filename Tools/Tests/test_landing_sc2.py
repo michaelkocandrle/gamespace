@@ -340,8 +340,8 @@ parts = manifest["meshes"]
 gear_part = parts.get("SM_Ship_Vanguard_Gear")
 hull_part = parts.get("SM_Ship_Vanguard")
 check("Vanguard: the legs are a separate part (SM_Ship_Vanguard_Gear), no longer in the hull mesh",
-      gear_part is not None and gear_part["part"] == "Gear" and hull_part["bounds_m"][0][2] > -1.6,
-      "hull bottom %.2f m" % hull_part["bounds_m"][0][2])
+      gear_part is not None and gear_part["part"] == "Gear" and hull_part["bounds_m"][0][2] > gear_part["bounds_m"][0][2] + 0.3,
+      "hull bottom %.2f m, gear bottom %.2f m" % (hull_part["bounds_m"][0][2], gear_part["bounds_m"][0][2] if gear_part else 0.0))
 gear_bottom_cm = gear_part["bounds_m"][0][2] * 100.0 if gear_part else 0.0
 check("Vanguard: pads reach the box bottom, so gear_extension_cm is 0",
       abs(gear_bottom_cm - box_bottom) < 2.0 and vanguard.get_editor_property("gear_extension_cm") == 0.0,

@@ -1,22 +1,34 @@
-"""Ship materials: two master materials and per-ship instances from <Ship>_setup.json.
+"""Ship materials: master materials and per-ship instances from <Ship>_setup.json.
 
 Used by Tools/Assets/import_ship.py. Editor-side only (needs `unreal`).
 
 Masters (rebuilt on every run, like the scene materials):
     /Game/Ships/Shared/Materials/M_Ship_Hull   opaque, Nanite: BaseColor, Metallic, Roughness,
-                                               EmissiveColor x EmissiveStrength
+                                               EmissiveColor x EmissiveStrength (flat colours per slot:
+                                               hand-modelled ships, thruster and light slots)
+    /Game/Ships/Shared/Materials/M_Ship_PBR    opaque, Nanite: textures BaseColorMap, ORMMap (G roughness,
+                                               B metallic) and NormalMap, with BaseColorTint,
+                                               RoughnessScale, MetallicScale (AI models, one texture set)
     /Game/Ships/Shared/Materials/M_Ship_Glass  translucent, two-sided, surface forward shading:
                                                BaseColor, Opacity, Roughness
 
 Instances go to /Game/Ships/<Ship>/Materials/MI_... and are assigned to mesh slots by slot name
-(the Blender material name), optionally only on the meshes an entry lists.
+(the Blender material name), optionally only on the meshes an entry lists. A "pbr" entry names its
+textures (base_color, orm, normal: PNG paths relative to the repository); they are imported to
+/Game/Ships/<Ship>/Textures as T_<file name> with the right settings (normal maps: no sRGB, green
+channel flipped, because Blender bakes OpenGL normal maps and Unreal expects DirectX; ORM: masks).
 """
+
+import os
 
 import unreal
 
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 MEL = unreal.MaterialEditingLibrary
 SHARED = "/Game/Ships/Shared/Materials"
-MASTERS = {"hull": SHARED + "/M_Ship_Hull", "glass": SHARED + "/M_Ship_Glass"}
+MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glass": SHARED + "/M_Ship_Glass"}
+TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap"}
 
 
 def _asset_tools():
@@ -60,6 +72,73 @@ def _scalar(material, name, default, x, y):
     return _node(material, unreal.MaterialExpressionScalarParameter, x, y, parameter_name=name, default_value=default)
 
 
+def _texture_param(material, name, sampler, default_path, x, y):
+    return _node(material, unreal.MaterialExpressionTextureSampleParameter2D, x, y, parameter_name=name,
+                 sampler_type=sampler, texture=unreal.load_asset(default_path))
+
+
+def build_pbr_master():
+    pbr = _fresh_material(MASTERS["pbr"])
+    pbr.set_editor_property("used_with_nanite", True)
+    color = _texture_param(pbr, "BaseColorMap", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR,
+                           "/Engine/EngineResources/WhiteSquareTexture", -900, 0)
+    tint = _node(pbr, unreal.MaterialExpressionMultiply, -400, 0)
+    _link(color, tint, "A")
+    tint_param = _vector(pbr, "BaseColorTint", (1.0, 1.0, 1.0), -900, 200)
+    MEL.connect_material_expressions(tint_param, "", tint, "B")
+    _output(tint, unreal.MaterialProperty.MP_BASE_COLOR)
+    orm = _texture_param(pbr, "ORMMap", unreal.MaterialSamplerType.SAMPLERTYPE_MASKS,
+                         "/Engine/EngineResources/WhiteSquareTexture", -900, 350)
+    rough = _node(pbr, unreal.MaterialExpressionMultiply, -400, 350)
+    if not MEL.connect_material_expressions(orm, "G", rough, "A"):
+        raise RuntimeError("ORM G -> roughness")
+    _link(_scalar(pbr, "RoughnessScale", 1.0, -900, 550), rough, "B")
+    _output(rough, unreal.MaterialProperty.MP_ROUGHNESS)
+    metal = _node(pbr, unreal.MaterialExpressionMultiply, -400, 500)
+    if not MEL.connect_material_expressions(orm, "B", metal, "A"):
+        raise RuntimeError("ORM B -> metallic")
+    _link(_scalar(pbr, "MetallicScale", 1.0, -900, 650), metal, "B")
+    _output(metal, unreal.MaterialProperty.MP_METALLIC)
+    normal = _texture_param(pbr, "NormalMap", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL,
+                            "/Engine/EngineMaterials/DefaultNormal", -900, 800)
+    if not MEL.connect_material_property(normal, "RGB", unreal.MaterialProperty.MP_NORMAL):
+        raise RuntimeError("normal map -> Normal")
+    MEL.recompile_material(pbr)
+    unreal.EditorAssetLibrary.save_loaded_asset(pbr, only_if_is_dirty=False)
+    return pbr
+
+
+def import_texture(ship, key, source):
+    """A PNG from the repository as /Game/Ships/<Ship>/Textures/T_..., set up for its role."""
+    filename = os.path.join(REPO, source) if not os.path.isabs(source) else source
+    name = os.path.splitext(os.path.basename(filename))[0]
+    if not name.startswith("T_"):
+        name = "T_" + name
+    folder = "/Game/Ships/%s/Textures" % ship
+    task = unreal.AssetImportTask()
+    task.set_editor_property("filename", filename)
+    task.set_editor_property("destination_path", folder)
+    task.set_editor_property("destination_name", name)
+    task.set_editor_property("replace_existing", True)
+    task.set_editor_property("automated", True)
+    task.set_editor_property("save", False)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+    texture = unreal.EditorAssetLibrary.load_asset("%s/%s" % (folder, name))
+    if texture is None:
+        raise RuntimeError("could not import %s" % filename)
+    if key == "normal":
+        texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_NORMALMAP)
+        texture.set_editor_property("srgb", False)
+        texture.set_editor_property("flip_green_channel", True)
+    elif key == "orm":
+        texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_MASKS)
+        texture.set_editor_property("srgb", False)
+    else:
+        texture.set_editor_property("srgb", True)
+    unreal.EditorAssetLibrary.save_loaded_asset(texture, only_if_is_dirty=False)
+    return texture
+
+
 def build_masters():
     hull = _fresh_material(MASTERS["hull"])
     hull.set_editor_property("used_with_nanite", True)
@@ -83,10 +162,10 @@ def build_masters():
     _output(_node(glass, unreal.MaterialExpressionConstant, -600, 350, r=1.0), unreal.MaterialProperty.MP_SPECULAR)
     MEL.recompile_material(glass)
     unreal.EditorAssetLibrary.save_loaded_asset(glass, only_if_is_dirty=False)
-    return {"hull": hull, "glass": glass}
+    return {"hull": hull, "pbr": build_pbr_master(), "glass": glass}
 
 
-def build_instance(name, folder, spec, masters):
+def build_instance(name, folder, spec, masters, ship=None):
     path = "%s/%s" % (folder, name)
     mi = unreal.EditorAssetLibrary.load_asset(path) if unreal.EditorAssetLibrary.does_asset_exist(path) else None
     if mi is None:
@@ -96,9 +175,15 @@ def build_instance(name, folder, spec, masters):
         if key in spec:
             c = spec[key]
             MEL.set_material_instance_vector_parameter_value(mi, param, unreal.LinearColor(c[0], c[1], c[2], 1.0))
-    for key, param in (("metallic", "Metallic"), ("roughness", "Roughness"), ("emissive_strength", "EmissiveStrength"), ("opacity", "Opacity")):
+    for key, param in (("metallic", "Metallic"), ("roughness", "Roughness"), ("emissive_strength", "EmissiveStrength"), ("opacity", "Opacity"),
+                       ("roughness_scale", "RoughnessScale"), ("metallic_scale", "MetallicScale")):
         if key in spec:
             MEL.set_material_instance_scalar_parameter_value(mi, param, float(spec[key]))
+    if "base_color_tint" in spec:
+        c = spec["base_color_tint"]
+        MEL.set_material_instance_vector_parameter_value(mi, "BaseColorTint", unreal.LinearColor(c[0], c[1], c[2], 1.0))
+    for key, source in (spec.get("textures") or {}).items():
+        MEL.set_material_instance_texture_parameter_value(mi, TEXTURE_PARAMS[key], import_texture(ship, key, source))
     MEL.update_material_instance(mi)
     unreal.EditorAssetLibrary.save_loaded_asset(mi, only_if_is_dirty=False)
     return mi
@@ -114,7 +199,7 @@ def apply(ship, setup, mesh_assets):
     notes = []
     # Mesh-specific entries win over general ones for the same slot.
     ordered = sorted(specs.items(), key=lambda kv: 1 if kv[1].get("meshes") else 0)
-    instances = {name: build_instance(name, folder, spec, masters) for name, spec in ordered}
+    instances = {name: build_instance(name, folder, spec, masters, ship) for name, spec in ordered}
     for mesh_name, mesh in mesh_assets.items():
         slots = mesh.get_editor_property("static_materials")
         for index, slot in enumerate(slots):

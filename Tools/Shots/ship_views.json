@@ -1,0 +1,18 @@
+{
+  "_comment": "A ship from every side, for checking a new or changed model: eight views around it in daylight over Veyra (chase camera swung round, no HUD), from above and below, a close three-quarter view, in space, and the thrusters lit. Run: Tools/Shots.ps1 -Preset ship_views",
+  "shots": [
+    {"name": "front", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 180, "chase_pitch": -8, "settle": 1.2},
+    {"name": "front_left", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 135, "chase_pitch": -12, "settle": 1.0},
+    {"name": "left", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 90, "chase_pitch": -5, "settle": 1.0},
+    {"name": "rear_left", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 45, "chase_pitch": -12, "settle": 1.0},
+    {"name": "rear", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.0},
+    {"name": "rear_right", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": -45, "chase_pitch": -12, "settle": 1.0},
+    {"name": "right", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": -90, "chase_pitch": -5, "settle": 1.0},
+    {"name": "front_right", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": -135, "chase_pitch": -12, "settle": 1.0},
+    {"name": "top", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 10, "chase_pitch": -80, "settle": 1.0},
+    {"name": "below_gear_down", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 150, "chase_pitch": 35, "settle": 1.0},
+    {"name": "close_three_quarter", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.2},
+    {"name": "space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "settle": 1.0},
+    {"name": "thrusters_lit", "camera": "chase", "altitude_m": 20000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 400, "afterburner": true, "chase_yaw": 25, "chase_pitch": -8, "settle": 1.2}
+  ]
+}

@@ -30,8 +30,11 @@ ArtSource/
     Vanguard/
       Concept/            obrázky pohledů (front/side/top/3-4), prompt.txt s promptem a nastavením
       Higgsfield/         surové GLB z Higgsfieldu, přesně jak přišly (nikdy needitovat)
-      Vanguard.blend      pracovní soubor
-      Textures/           textury rozbalené z GLB a výstupy bake (PNG; normal 16 bit)
+      Meshy/<stažení>/    surový export z Meshy (FBX + PBR textury), přesně jak přišel (nikdy needitovat)
+      Vanguard_ai_build.json  recept „AI model → loď“ (kapitola 2B)
+      Vanguard_Meshy.blend    výsledek receptu: z něj se exportuje (dnešní Vanguard)
+      Vanguard.blend      původní procedurální Vanguard (do 18. 9. 2026), jen pro historii
+      Textures/           textury rozbalené z GLB a výstupy bake (PNG)
       Export/             výstup exportního skriptu: *.fbx + Vanguard_manifest.json
 ```
 
@@ -318,6 +321,69 @@ protože všechno je v souborech.
 4. **Socket Manager**: sockety jsou, `SOCKET_Cockpit` na pozici `location_ue_cm` z manifestu
    a s měřítkem 1.
 5. Nanite: Show > Nanite Visualization > Triangles.
+
+---
+
+## 2B. AI model → hratelná loď (Meshy, Higgsfield): opakovatelný recept
+
+Poprvé použito 18. 9. 2026 na Vanguard (Meshy „Ironclad Starfighter“, 3,36 mil. trojúhelníků). Postup
+je stejný pro každou další loď: **nic se nedělá ručně v Blenderu**, celou přestavbu popisuje jeden
+soubor `ArtSource/Ships/<Loď>/<Loď>_ai_build.json` a skript `Tools/Blender/build_ai_ship.py` ji
+z originálu kdykoli zopakuje (3 minuty). Když něco nesedí, upraví se čísla v receptu a spustí se znovu.
+
+### Co AI modely typicky dělají a proč recept vypadá takhle
+
+| Vlastnost AI exportu | Důsledek | Co s tím recept dělá |
+| --- | --- | --- |
+| Jeden souvislý mesh, miliony trojúhelníků | Nejde oddělit díly podle objektů | Díly (podvozek) se vyřežou **oblastmi** (boxy v metrech) |
+| Orientace a měřítko náhodné (Meshy: příď −X, 1,9 m) | Import do UE by byl otočený a maličký | `orient`: otočení kolem Z a délka lodi v metrech |
+| UV atlas z tisíců malých ostrůvků | Decimace je slepí → trojúhelníky přes půl textury, fleky | **Nové UV** na decimovaném meshi a **přepečení** textur |
+| Normal mapa skoro prázdná, detail je v geometrii | Decimovaný mesh na kovu leskne fleky | Normal mapa se **zapeče z originálu** (Cycles, selected to active) |
+| Podvozek srostlý s trupem | Nejde zasunout | Vyříznout do dílu `_Gear` (kód ho pak posouvá do trupu) |
+| Kabina bez interiéru | Zevnitř UE odřízne všechny stěny (jsou jednostranné) | Oko kokpitu těsně nad předním okrajem kabiny |
+
+### Postup
+
+1. **Surový export** ulož do `ArtSource/Ships/<Loď>/Meshy/<název stažení>/` (FBX + textury), nic v něm neměň.
+2. **Změř model** (orientace, rozměry, kde je příď, kabina, motory, podvozek). Nejrychleji: spusť recept
+   s prázdnými `parts` / `collision` / `sockets` a `--no-save`; vypíše rozměry po otočení a zmenšení.
+   Pro detailnější míry (výšky břicha, středy trysek) se osvědčily histogramy vrcholů v Blenderu
+   (skripty v historii session 18. 9. 2026; hledá se hustá plocha = trup, řídké body = podvozek).
+3. **Napiš recept** `<Loď>_ai_build.json` (vzor: `Vanguard_ai_build.json`, všechny souřadnice jsou metry
+   v Blenderu po otočení: +X příď, +Y levý bok, +Z nahoru):
+   - `source_fbx`, `textures` (base_color, normal, roughness, metallic ze surového exportu);
+   - `orient`: `rotate_z_deg`, `length_m` (malá stíhačka 12–16 m);
+   - `parts.Gear.regions`: boxy, ve kterých leží celé nohy **pod úrovní břicha** (pahýly nad řezem zůstanou
+     jako úchyty); díry v trupu po řezu se zacelí samy;
+   - `decimate`: cíl trojúhelníků (trup 150–250 tis.) a `importance` pravidla (vršky, příď, kabina
+     důležité; spodek a vnitřek trysek ne). Faktor držet nízko (1), vysoký dělal artefakty;
+   - `rebake`: kam uložit `T_Ship_<Loď>_BC/ORM/N.png` a velikost (4K barva a normála, 2K ORM);
+   - `emissive`: středy trysek (y, z), poloměr a x, za kterým jsou; ty plochy dostanou slot
+     `M_Ship_<Loď>_Emissive` a hra je rozsvítí podle tahu;
+   - `collision`: boxy oblastí, z každé vznikne jeden konvexní `UCX_` hull (max 26 vrcholů). Trup
+     rozděl tam, kde se zužuje, každý motor zvlášť, kabinu zvlášť (budoucí interiér), každou nohu zvlášť;
+   - `sockets`: `Cockpit`, `CameraTarget`, `Exit` (vedle kabiny na zemi), `Engine_*` (kolik motorů má
+     model, osa X ven z trysky: `rotate_z_deg: 180`), `Gear_*` jako `bottom_of` dílu podvozku (spodek patky).
+4. **Spusť recept:**
+   `blender -b --python Tools\Blender\build_ai_ship.py -- ArtSource\Ships\<Loď>\<Loď>_ai_build.json`
+   Výpis ukáže počty trojúhelníků, hustotu na důležitých a nedůležitých plochách, hully a sockety.
+5. **Zkontroluj vzhled v Blenderu** proti originálu ze stejných úhlů (kabina zblízka, spodek, 3/4).
+   Fleky na kovu = problém normál/UV, rozmazané textury = moc malé textury nebo UV okraj.
+6. **Kokpit:** `cockpit_view_survey.py` s `sweep:X0:X1:Z0:Z1` v rozsahu kabiny, pak konkrétní oči. Počítá
+   s tím, že UE odvrácené stěny nekreslí; bez interiéru je zevnitř kabiny vidět jen okolí, proto oko
+   těsně nad předním okrajem kabiny. Zapiš ho do `sockets.Cockpit` i do `<Loď>_setup.json`
+   (`components.cockpit_camera.relative_location`, cm, Y s opačným znaménkem).
+7. **Export:** `gamespace_ship_export.py -- --out "//Export"` na výsledném `.blend`. Staré FBX dílů, které nový
+   model nemá, smaž z `Export/`.
+8. **`<Loď>_setup.json`:** materiály `master: "pbr"` s `textures` a trysky `master: "hull"` s emisí; letové
+   hodnoty se nemění; přepočítat jen, co závisí na geometrii (kamera, oko, `gear_stow_travel_cm` = výška
+   nejdelší nohy pod břichem, `gear_extension_cm` 0, když patky leží na spodku kolizního boxu).
+9. **Import:** `import_ship.py`. Když má nový model jiné materiálové sloty, starý mesh smaže a naimportuje
+   načisto; odstraní komponenty a assety staré lodi, na které už nic neodkazuje (Canopy, staré MI).
+   Pak `build_main_menu.py` (loď na úvodní obrazovce se skládá z dílů v manifestu, bez podvozku)
+   a ještě jednou `import_ship.py` (uklidí, co držela úvodní obrazovka).
+10. **Testy a snímky:** všechny `Tools\Tests`, pak `Tools\Shots.ps1 -Preset ship_views -Package`, `cockpit`,
+    `landing`. Vzdálenost chase kamery se ladí bez balení přes `chase_zoom` v dočasném scénáři.
 
 ---
 

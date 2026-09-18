@@ -99,19 +99,30 @@ class ImportPlanTest(unittest.TestCase):
 
     def test_vanguard_setup_covers_every_material_slot(self):
         ship_dir = os.path.join(import_ship.REPO, "ArtSource", "Ships", "Vanguard")
-        manifest = json.load(open(os.path.join(ship_dir, "Export", "Vanguard_manifest.json"), encoding="utf-8"))
+        with open(os.path.join(ship_dir, "Export", "Vanguard_manifest.json"), encoding="utf-8") as f:
+            manifest = json.load(f)
         setup = import_ship.load_setup(os.path.join(ship_dir, "Vanguard_setup.json"))
         self.assertTrue(setup)
+        # Keys starting with _ are notes, as everywhere in the setup file.
+        materials = {n: spec for n, spec in setup["materials"].items() if not n.startswith("_")}
         for mesh_name, info in manifest["meshes"].items():
             if info["lod"] != 0:
                 continue
             for slot in info["materials"]:
-                matches = [n for n, spec in setup["materials"].items()
+                matches = [n for n, spec in materials.items()
                            if slot in spec["slots"] and (not spec.get("meshes") or mesh_name in spec["meshes"])]
                 self.assertTrue(matches, "%s slot %s has no material" % (mesh_name, slot))
-                self.assertIn(setup["materials"][matches[0]]["master"], ("hull", "glass"))
-        canopy = [n for n, spec in setup["materials"].items() if "SM_Ship_Vanguard_Canopy" in spec.get("meshes", [])]
-        self.assertEqual([setup["materials"][n]["master"] for n in canopy], ["glass"])
+                self.assertIn(materials[matches[0]]["master"], ("hull", "pbr", "glass"))
+        # A see-through canopy part, when the model has one, gets the glass master.
+        canopy = [n for n, spec in materials.items() if "SM_Ship_Vanguard_Canopy" in spec.get("meshes", [])]
+        self.assertTrue(all(materials[n]["master"] == "glass" for n in canopy))
+        # PBR entries name textures that exist.
+        for name, spec in materials.items():
+            for key, source in (spec.get("textures") or {}).items():
+                self.assertTrue(os.path.isfile(os.path.join(import_ship.REPO, source)), "%s %s: %s" % (name, key, source))
+        # The plan drops the notes too.
+        plan = import_ship.build_plan(manifest, os.path.join(ship_dir, "Export"), setup)
+        self.assertFalse([n for n in plan["materials"] if n.startswith("_")])
 
     def test_dry_run_from_the_command_line(self):
         script = os.path.join(HERE, "..", "import_ship.py")

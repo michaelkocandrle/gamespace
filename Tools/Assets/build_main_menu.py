@@ -9,9 +9,14 @@ Re-runnable: the level is created once, actors are found by label and updated. T
 mode override is ASpaceMenuGameMode (no pawn; the controller shows the menu).
 """
 
+import json
 import math
+import os
 
 import unreal
+
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+MANIFEST = os.path.join(REPO, "ArtSource", "Ships", "Vanguard", "Export", "Vanguard_manifest.json")
 
 LEVEL = "/Game/Maps/MainMenu"
 SKY_MATERIAL = "/Game/Environments/Space/M_Starfield_Sky"
@@ -19,8 +24,10 @@ PLANET_MESH = "/Game/Planets/SM_PlanetSphere"
 GIANT_MATERIAL = "/Game/Environments/Space/M_GasGiant"
 MOON_MATERIAL = "/Game/Environments/Space/M_Moon"
 RINGS_MATERIAL = "/Game/Environments/Space/M_PlanetRings"
-SHIP_MESH = "/Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard"
-CANOPY_MESH = "/Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Canopy"
+SHIP_MESHES = "/Game/Ships/Vanguard/Meshes"
+SHIP_MESH = SHIP_MESHES + "/SM_Ship_Vanguard"
+# Parts left out of the title screen: the ship flies in space there, gear stowed.
+HIDDEN_PARTS = ("_Gear",)
 
 EXPOSURE_EV100 = 3.0
 SUN_PITCH, SUN_YAW = -22.0, 25.0          # light travels towards +X: lights what the camera sees
@@ -112,13 +119,29 @@ def main():
     giant.set_editor_property("spin_period_seconds", 1800.0)
     giant.get_editor_property("rings").set_material(0, load(RINGS_MATERIAL))
 
+    # The hull and every part the ship has now (a canopy on one model, none on another), one actor
+    # each; actors of parts that no longer exist are removed.
     ship_rotation = unreal.Rotator(roll=0.0, pitch=0.0, yaw=SHIP_YAW)
-    ship = upsert(eas, "MenuShip", unreal.StaticMeshActor, rotation=ship_rotation)
-    canopy = upsert(eas, "MenuShipCanopy", unreal.StaticMeshActor, rotation=ship_rotation)
-    for actor, mesh in ((ship, SHIP_MESH), (canopy, CANOPY_MESH)):
+    # The ship's parts as its manifest lists them (the Meshes folder can still hold an old model's).
+    with open(MANIFEST, encoding="utf-8") as f:
+        meshes = json.load(f)["meshes"]
+    parts = sorted("%s/%s" % (SHIP_MESHES, name) for name, info in meshes.items()
+                   if info.get("part") and info.get("lod", 0) == 0 and not name.endswith(HIDDEN_PARTS))
+    wanted = {"MenuShip": SHIP_MESH}
+    wanted.update({"MenuShip_" + p.split("/")[-1][len("SM_Ship_Vanguard_"):]: p for p in parts})
+    for actor in eas.get_all_level_actors():
+        label = actor.get_actor_label()
+        if label.startswith("MenuShip") and label not in wanted:
+            log("removing %s (the ship has no such part any more)" % label)
+            eas.destroy_actor(actor)
+    ship = None
+    for label, mesh in wanted.items():
+        actor = upsert(eas, label, unreal.StaticMeshActor, rotation=ship_rotation)
         component = actor.get_component_by_class(unreal.StaticMeshComponent)
         component.set_mobility(unreal.ComponentMobility.MOVABLE)
         component.set_static_mesh(load(mesh))
+        if label == "MenuShip":
+            ship = actor
     ship.set_editor_property("tags", [unreal.Name("MenuOrbitCenter")])
 
     camera = upsert(eas, "MenuCamera", unreal.CameraActor, CAMERA_LOCATION,

@@ -24,7 +24,9 @@ rozbité nebo neověřené a co následuje.
   - hratelný prototyp s úvodní obrazovkou;
   - jedna planeta **Veyra** (poloměr 25 km, atmosféra 12 km, gravitace 6 m/s²);
   - kulisy: měsíc **Keth** a plynný obr **Orun** s prstenci;
-  - loď **Vanguard** (lehká stíhačka 17,6 × 13 × 4,4 m, vlastní model z Blenderu);
+  - loď **Vanguard**: od 18. 9. 2026 model z Meshy („Ironclad Starfighter“), 14 × 11,4 × 6,2 m se
+    4 motorovými gondolami, zpracovaný receptem `Tools/Blender/build_ai_ship.py` (kapitola 5, bod 20).
+    Původní procedurální model (17,6 m) je v `ArtSource/Ships/Vanguard/Vanguard.blend` jen pro historii;
   - postava na nohou (placeholder UE Manny).
 - **Další velký cíl autora:** letový systém lodi má být **kompletní kopie systému ze Star
   Citizen**. Nemá vzniknout najednou, ale po krocích (kapitola 10).
@@ -229,6 +231,22 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - HUD má kontrolky GEAR a PREC a ukazatel rychlosti se přeškáluje na precision strop;
     - snímky: nová pole scénáře (`gear`, `lower_gear`, `precision`, `chase_yaw` / `chase_pitch` /
       `chase_zoom`), scénář `landing`, loď umí ve snímku opravdu přistát.
+20. **Vanguard z Meshy – první průchod „AI model → hratelná loď“** (18. 9. 2026, varianta C autora):
+    - recept `ArtSource/Ships/Vanguard/Vanguard_ai_build.json` + obecný skript `Tools/Blender/build_ai_ship.py`
+      postaví z originálu (3,36 mil. trojúhelníků, `ArtSource/Ships/Vanguard/Meshy/`) `Vanguard_Meshy.blend`
+      za 3 minuty: otočení (Meshy mělo příď na −X), 14 m, vyříznutí srostlých ližin do dílu `Gear`,
+      decimace na 200 tis. + 14 tis. (podvozek) s důrazem na vršky, příď a kabinu, **nové UV a přepečení**
+      barvy, ORM a normal mapy z originálu, 10 kolizních hullů, 11 socketů (4 motory, 3 nohy);
+    - proč přepečení: UV atlas Meshy má tisíce malých ostrůvků, decimace je slepila a na kovu vznikaly
+      fleky; normal mapa z Meshy je skoro prázdná, detail je v geometrii;
+    - Unreal: nový master `M_Ship_PBR` (textury místo barev po slotech), trysky dál přes `M_Ship_Hull`
+      s emisí; `import_ship.py` umí naimportovat mesh načisto, když se změnily sloty, a uklidit, co už nic
+      nepoužívá (komponenta Canopy, 12 starých MI, canopy mesh); úvodní obrazovka skládá loď z manifestu;
+    - kamera: rameno 27 m, výška 5,7 m (vybráno porovnávacími snímky), oko kokpitu (410, 0, 145);
+    - barva: Meshy maluje trup velmi tmavě (albedo ~0,04 lineárně, starý Vanguard 0,34) a z 85 % kovově,
+      ve hře byla loď černá silueta. `base_color_tint` 2,2 a `metallic_scale` 0,5 v `Vanguard_setup.json`
+      ji dělají tmavě modrošedou; ladí se bez nového buildu v Blenderu (jen import + balení);
+    - postup pro další lodě je v `Docs/Ships/ShipPipeline.md`, kapitola 2B; nový scénář snímků `ship_views`.
 
 ---
 
@@ -278,6 +296,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `Content/UI/Fonts/` | Fonty HUD (Rajdhani, Share Tech Mono) i s licencemi SIL OFL. Načítají se ze souboru, ne jako Font asset: importér fontu potřebuje Slate aplikaci, kterou headless editor nemá. Do balíčku je dostává `DirectoriesToAlwaysStageAsUFS` v `Config/DefaultGame.ini`. |
 | `Assets/install_mannequin_pack.py`, `generate_milky_way_glow.py` | Jednorázová instalace a textura. |
 | `Blender/gamespace_ship_export.py` | Export lodí z Blenderu (FBX, manifest, validace). |
+| `Blender/build_ai_ship.py` | AI model (Meshy, Higgsfield) → herní `.blend` podle receptu `<Loď>_ai_build.json`: orientace, velikost, díly, decimace, nové UV a přepečené textury, emisivní trysky, UCX hully, sockety. Kapitola 2B v `ShipPipeline.md`. |
 | `Blender/split_ship_gear.py` | Oddělí vymodelovaný podvozek z trupu do dílu `SM_Ship_<Loď>_Gear` (volné díly pod břichem u socketů `SOCKET_Gear_*`, kromě dvířek a světla) a uloží `.blend`. Jednorázové, druhé spuštění nic nedělá. Pak export a import jako obvykle. |
 | `Assets/add_landing_input.py` | Klávesy N (`IA_LandingGear`) a P (`IA_Precision`) do `IMC_Spaceship` (jen přidává). |
 | `Blender/cockpit_view_survey.py` | Změří, co pilot vidí: paprsky přes zorné pole proti skutečnému modelu, kolik % výhledu je volných a co ho blokuje. Po změně modelu nebo pozice kamery. |
@@ -389,6 +408,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `hud` | Letový HUD ve všech stavech: klid, na limitu, afterburner, boost s vychýleným joystickem, NAV, decoupled s vypnutým G-Safe, let pozpátku, plný textový výpis. |
 | `ship` | Loď zvenku: nad planetou, při sestupu, ve vesmíru, se zářícími tryskami. |
 | `cockpit_tune` | Porovnání variant kokpitu vedle sebe (pozice oka, co se pilotovi skrývá). Vzor pro dočasné scénáře při ladění. |
+| `ship_views` | Loď ze všech stran (8 pohledů kolem, shora, zespodu s podvozkem, zblízka, ve vesmíru, se zářícími tryskami). Pro každý nový nebo změněný model. |
 | `landing` | SC-2a: podvozek ze strany (dole, v půlce cesty), zespodu, loď stojící na patkách, varování GEAR UP, loď na břiše bez podvozku, HUD po přistání, precision HUD, kokpit na zemi. |
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
@@ -503,7 +523,17 @@ Další otevřené směry mimo let:
   změřená: `GetEngineDemand` bere svislou osu × 0,7 proti plné kapacitě zvedacích trysek, visení na
   Veyře (~0,46 G) tak dává zátěž ~0,06, takže záře i zvuk zůstanou skoro na nule. G-metr naopak
   ukazuje 0,5–0,8 G (snímky `landing` 18. 9. 2026), jen je to na stupnici 12 G malý proužek.
-- **SC-2a, loď na břiše bez podvozku „visí“ ~0,9 m nad zemí** (snímek `landing/05_belly_gear_up`).
+- **Meshy Vanguard, kokpit bez lodi:** model nemá interiér, zevnitř kabiny UE odřízne všechny stěny
+  a příď klesá pod úhlem 29°, víc než ukáže zorné pole (25° dolů). Z kokpitu je tedy vidět jen okolí
+  a HUD, loď až při rozhlížení (pravé tlačítko) dolů. Řešení je modelovaný interiér kabiny (další krok).
+- **Meshy Vanguard na dunách:** na snímku `landing/06_landed_side` (18. 9. 2026) leží loď na hřbetu
+  duny a spodní gondola je zapuštěná ~0,5 m v písku, i když by kolizní box (spodek = podrážky ližin)
+  neměl dovolit nic níž než ližiny. Neověřená podezření: hrubší kolizní síť planety než vykreslený
+  terén, nebo naklonění při srovnání na průměrný svah (loď je 11,4 m široká). U staré úzké lodi to
+  nebylo vidět. K řešení v dalším kroku (dotyk se zemí z UCX hullů / výšky terénu pod rohy).
+- **Úvodní obrazovka s novou lodí není vyfocená** (snímky menu neumí); kamera zůstala z 17,6m lodi.
+- **SC-2a, loď na břiše bez podvozku „visí“ nad zemí** (snímek `landing/05_belly_gear_up`; u Meshy
+  Vanguardu 0,55 m vzadu a 1,1 m vpředu).
   Kolizní box lodi (root, podle něj se loď pohybuje) končí u patek podvozku. Se zasunutým podvozkem
   tedy loď u země stojí na neviditelném boxu. Nastane to jen, když pilot ignoruje GEAR UP. Oprava
   by znamenala zmenšit box k břichu (−1,5 m), jenže box je symetrický kolem středu lodi, takže by
@@ -514,12 +544,8 @@ Další otevřené směry mimo let:
 - **V BP_Ship_Vanguard zůstaly hodnoty zástupných noh** (`gear_strut_radius_cm` 11,
   `gear_pad_radius_cm` 32, `gear_pad_thickness_cm` 12) z prvního pokusu s válci. Nevadí to: Vanguard má
   modelovaný díl `Gear` a zástupné nohy nestaví (kapitola 12, BP override zůstává).
-- **Kokpit:** Vanguard nemá modelovaný vnitřek kabiny (canopy je nízká skořepina nad plným trupem a
-  rám kabiny je součástí trupu). Sklo canopy se proto pilotovi skrývá (`hide_canopy_in_cockpit`) a
-  oko je na (500, 0, 110): obloha je volná a dole je vidět příď jako palubní deska. Z pozice sedadla
-  (340, 0, 100) trup a rám kabiny zakrývaly většinu obrazu, i se skrytým sklem – viz porovnávací
-  snímky (`Tools\Shots.ps1 -Preset cockpit_tune`). Skutečný interiér je úkol pro budoucí iteraci
-  pipeline lodí.
+- **Kokpit starého Vanguardu** (do 18. 9. 2026): sklo canopy se pilotovi skrývalo a oko bylo na
+  (500, 0, 110) nad přídí. Nový model je popsaný výš („kokpit bez lodi“).
 - **V PIE Escape ukončí hru** (je to zkratka editoru). V PIE otevírá menu **F10**, v buildu Escape.
 - Debug HUD je anglicky, menu česky.
 - Build je **Development** (má konzoli `~`). Shipping zatím nebyl zkoušený.

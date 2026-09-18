@@ -169,7 +169,7 @@ def build_plan(manifest, manifest_dir, setup=None):
         "meshes": meshes,
         "blueprint": "%s/Blueprints/BP_Ship_%s" % (root, ship),
         "pawn_settings": pawn,
-        "materials": setup.get("materials") or {},
+        "materials": {k: v for k, v in (setup.get("materials") or {}).items() if not k.startswith("_")},
         "extra_components": extra_components,
         "planet_settings": [("collision_warmup_reach_m", s["Planet_CollisionWarmupReachM"]),
                             ("collision_min_radius_m", s["Planet_CollisionMinRadiusM"])],
@@ -252,6 +252,8 @@ def import_fbx(mesh, convert_scene_unit=False):
     ui.set_editor_property("import_textures", False)
     ui.set_editor_property("import_animations", False)
     ui.set_editor_property("automated_import_should_detect_type", False)
+    # A new model with other materials: take the FBX's slots, do not keep the old asset's.
+    ui.set_editor_property("reset_to_fbx_on_material_conflict", True)
     data = ui.get_editor_property("static_mesh_import_data")
     # (property, value, required). Required ones change the result in ways the checks after the
     # import cannot repair; the others are verified or fixed afterwards.
@@ -361,11 +363,33 @@ def import_all_meshes(plan, report):
         if verdict != "ok":
             raise ImportFailed("%s imported at %s cm, manifest says %s cm" % (
                 mesh["name"], [round(x, 1) for x in mesh_size_cm(static_mesh)], mesh["expected_size_cm"]))
+        static_mesh = ensure_fbx_slots(static_mesh, mesh, report)
         check_and_fix_mesh(static_mesh, mesh, report)
         unreal.EditorAssetLibrary.save_loaded_asset(static_mesh, only_if_is_dirty=False)
         imported[mesh["name"]] = static_mesh
         log("imported %s" % mesh["asset_path"])
     return imported
+
+
+def slot_names(static_mesh):
+    return [str(s.get_editor_property("material_slot_name")) for s in static_mesh.get_editor_property("static_materials")]
+
+
+def ensure_fbx_slots(static_mesh, mesh, report):
+    """Reimporting a different model over an existing asset kept the old asset's material slots (the
+    Meshy Vanguard came in with the procedural one's twelve, and its own M_Ship_Vanguard_Hull missing,
+    so the hull drew with the Underlayer material). Then the asset is deleted and imported fresh; the
+    Blueprint and the levels get their references back from this script and build_main_menu.py."""
+    if sorted(slot_names(static_mesh)) == sorted(mesh["materials"]):
+        return static_mesh
+    log("%s kept old material slots %s; importing it fresh" % (mesh["name"], slot_names(static_mesh)))
+    report.setdefault(mesh["name"], []).append("deleted and imported fresh: old material slots %s" % slot_names(static_mesh))
+    if not unreal.EditorAssetLibrary.delete_asset(mesh["asset_path"]):
+        raise ImportFailed("%s has old material slots and could not be deleted; delete it in the editor and import again" % mesh["asset_path"])
+    static_mesh = import_fbx(mesh)
+    if sorted(slot_names(static_mesh)) != sorted(mesh["materials"]):
+        raise ImportFailed("%s material slots %s, manifest says %s" % (mesh["name"], slot_names(static_mesh), mesh["materials"]))
+    return static_mesh
 
 
 def load_or_create_blueprint(path, parent_class):
@@ -457,6 +481,47 @@ def add_mesh_component(blueprint, extra):
             extra["component"], extra["mesh"], error)
 
 
+def remove_stale(plan, blueprint, report):
+    """After a model change: drops what the new manifest and setup no longer have - extra mesh
+    components on the Blueprint (a canopy part the new model lacks), and this ship's meshes and
+    material instances that nothing references any more. Script-made assets only; git keeps them."""
+    root = "/Game/Ships/%s" % plan["ship"]
+    keep_components = {e["component"] for e in plan["extra_components"]} | {"Hull"}
+    removed = []
+    try:
+        subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
+        library = unreal.SubobjectDataBlueprintFunctionLibrary
+        handles = subsystem.k2_gather_subobject_data_for_blueprint(blueprint)
+        for handle in handles:
+            obj = library.get_object(library.get_data(handle))
+            if not isinstance(obj, unreal.StaticMeshComponent):
+                continue
+            name = obj.get_name().replace("_GEN_VARIABLE", "")
+            mesh = obj.get_editor_property("static_mesh")
+            if name in keep_components or mesh is None or not mesh.get_path_name().startswith(root + "/Meshes/"):
+                continue
+            subsystem.delete_subobjects(handles[0], [handle], blueprint)
+            removed.append("component " + name)
+        unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
+        unreal.EditorAssetLibrary.save_loaded_asset(blueprint, only_if_is_dirty=False)
+    except Exception as error:
+        removed.append("MANUAL STEP: remove stale components from %s (%s)" % (plan["blueprint"], error))
+
+    keep_assets = {m["asset_path"] for m in plan["meshes"]} | {"%s/Materials/%s" % (root, n) for n in plan["materials"]}
+    for folder in (root + "/Meshes", root + "/Materials"):
+        for path in unreal.EditorAssetLibrary.list_assets(folder, recursive=False):
+            path = path.split(".")[0]
+            if path in keep_assets:
+                continue
+            if unreal.EditorAssetLibrary.find_package_referencers_for_asset(path, True):
+                continue
+            if unreal.EditorAssetLibrary.delete_asset(path):
+                removed.append("asset " + path)
+    report["removed"] = removed
+    for line in removed:
+        log("removed " + line)
+
+
 def apply_level_settings(plan, blueprint, apply_planet, set_game_mode, report):
     if not (apply_planet or set_game_mode):
         return
@@ -514,6 +579,7 @@ def main(argv):
         import ship_materials
         report["materials"] = ship_materials.apply(plan["ship"], {"materials": plan["materials"]}, imported)
     blueprint = apply_pawn_settings(plan, report)
+    remove_stale(plan, blueprint, report)
     apply_level_settings(plan, blueprint, env_flag("GAMESPACE_SHIP_APPLY_PLANET", True),
                          env_flag("GAMESPACE_SHIP_SET_GAME_MODE", True), report)
 
