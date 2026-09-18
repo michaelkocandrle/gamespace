@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/AudioComponent.h"
 #include "Components/PointLightComponent.h"
+#include "CockpitDisplayComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -166,12 +167,16 @@ ASpaceshipPawn::ASpaceshipPawn()
 	// The view comes from the first active camera component, so only one may be active.
 	CockpitCamera->SetAutoActivate(false);
 
-	CockpitLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("CockpitLight"));
-	CockpitLight->SetupAttachment(HullCollision);
-	CockpitLight->SetCastShadows(false);
-	CockpitLight->SetIntensityUnits(ELightUnits::Candelas);
-	CockpitLight->SetIntensity(0.f);
-	CockpitLight->SetVisibility(false);
+	for (TObjectPtr<UPointLightComponent>* Light : { &CockpitLight, &CockpitFillLight })
+	{
+		*Light = CreateDefaultSubobject<UPointLightComponent>(Light == &CockpitLight ? TEXT("CockpitLight") : TEXT("CockpitFillLight"));
+		(*Light)->SetupAttachment(HullCollision);
+		(*Light)->SetCastShadows(false);
+		(*Light)->SetIntensityUnits(ELightUnits::Candelas);
+		(*Light)->SetIntensity(0.f);
+		(*Light)->SetVisibility(false);
+	}
+	CockpitDisplays = CreateDefaultSubobject<UCockpitDisplayComponent>(TEXT("CockpitDisplays"));
 
 	PilotCharacterClass = APlayerCharacter::StaticClass();
 
@@ -224,14 +229,27 @@ void ASpaceshipPawn::BeginPlay()
 	SetupShipLights();
 	BuildGearLegs();
 	BuildPlaceholderCockpit();
-	if (CockpitLightIntensityCd > 0.f)
+	PlaceCockpitLights();
+}
+
+void ASpaceshipPawn::PlaceCockpitLights()
+{
+	// Cockpit key and fill lights: the hull shadows the cabin (see the properties).
+	auto SetupCockpitLight = [this](UPointLightComponent* Light, float IntensityCd, const FVector& Offset)
 	{
-		CockpitLight->SetRelativeLocation(CockpitCameraBaseLocation + CockpitLightOffset);
-		CockpitLight->SetIntensity(CockpitLightIntensityCd);
-		CockpitLight->SetAttenuationRadius(CockpitLightRadiusCm);
-		CockpitLight->SetLightColor(CockpitLightColor);
-		CockpitLight->SetVisibility(true);
-	}
+		if (IntensityCd > 0.f)
+		{
+			Light->SetRelativeLocation(CockpitCameraBaseLocation + Offset);
+			Light->SetIntensity(IntensityCd);
+			Light->SetAttenuationRadius(CockpitLightRadiusCm);
+			Light->SetLightColor(CockpitLightColor);
+			Light->SetSourceRadius(CockpitLightSourceRadiusCm);
+			Light->SetSoftSourceRadius(CockpitLightSourceRadiusCm);
+			Light->SetVisibility(true);
+		}
+	};
+	SetupCockpitLight(CockpitLight, CockpitLightIntensityCd, CockpitLightOffset);
+	SetupCockpitLight(CockpitFillLight, CockpitFillIntensityCd, CockpitFillOffset);
 }
 
 void ASpaceshipPawn::SnapCameraToShip()
@@ -258,6 +276,8 @@ void ASpaceshipPawn::DebugConfigureCockpit(const FVector& EyeLocation, bool bHid
 		// The placeholder cockpit is built around the eye; it moves with it.
 		CockpitFrameRoot->SetRelativeLocation(CockpitCameraBaseLocation);
 	}
+	// So do the cockpit lights, or a shot from another eye would be lit differently.
+	PlaceCockpitLights();
 	SetCockpitView(bCockpitView);
 }
 

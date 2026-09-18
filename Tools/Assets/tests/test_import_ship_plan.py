@@ -112,7 +112,7 @@ class ImportPlanTest(unittest.TestCase):
                 matches = [n for n, spec in materials.items()
                            if slot in spec["slots"] and (not spec.get("meshes") or mesh_name in spec["meshes"])]
                 self.assertTrue(matches, "%s slot %s has no material" % (mesh_name, slot))
-                self.assertIn(materials[matches[0]]["master"], ("hull", "pbr", "glass"))
+                self.assertIn(materials[matches[0]]["master"], ("hull", "pbr", "glass", "screen"))
         # A see-through canopy part, when the model has one, gets the glass master.
         canopy = [n for n, spec in materials.items() if "SM_Ship_Vanguard_Canopy" in spec.get("meshes", [])]
         self.assertTrue(all(materials[n]["master"] == "glass" for n in canopy))

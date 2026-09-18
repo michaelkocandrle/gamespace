@@ -1,4 +1,4 @@
-"""Checks a ship imported by Tools/Assets/import_ship.py, in a fresh editor process (so only what
+﻿"""Checks a ship imported by Tools/Assets/import_ship.py, in a fresh editor process (so only what
 was saved counts).
 
     $env:GAMESPACE_SHIP_MANIFEST = "...\\Vanguard_manifest.json"   (optional, default: the only manifest)
@@ -79,7 +79,7 @@ if plan["materials"]:
     for name, spec in sorted(plan["materials"].items()):
         mi = unreal.EditorAssetLibrary.load_asset("%s/%s" % (folder, name))
         parent = mi.get_editor_property("parent") if mi else None
-        want_parent = {"hull": "M_Ship_Hull", "pbr": "M_Ship_PBR", "glass": "M_Ship_Glass"}[spec["master"]]
+        want_parent = {"hull": "M_Ship_Hull", "pbr": "M_Ship_PBR", "glass": "M_Ship_Glass", "screen": "M_Ship_Screen"}[spec["master"]]
         check("%s parent %s" % (name, want_parent), parent is not None and parent.get_name() == want_parent,
               parent.get_name() if parent else "missing")
         for key, param in (("base_color", "BaseColorMap"), ("orm", "ORMMap"), ("normal", "NormalMap")):
@@ -101,7 +101,7 @@ if plan["materials"]:
             check("%s glows" % name, abs(got - spec["emissive_strength"]) < 1e-3 and got > 1.0, "%.1f" % got)
     glass = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Glass")
     check("M_Ship_Glass is translucent", glass is not None and glass.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_TRANSLUCENT)
-    for master in ("M_Ship_Hull", "M_Ship_PBR"):
+    for master in ("M_Ship_Hull", "M_Ship_PBR", "M_Ship_Screen"):
         asset = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/" + master)
         check("%s used with Nanite" % master, asset is not None and asset.get_editor_property("used_with_nanite"))
 

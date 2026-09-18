@@ -198,15 +198,24 @@ range (`sweep:X0:X1:Z0:Z1`, cm). The text below is about the procedural Vanguard
 **Cockpit interior** (18. 9. 2026): the Vanguard has a Meshy cockpit tub (dashboard with screens, consoles,
 side-sticks, pedals) as the part `SM_Ship_Vanguard_Interior` - the `interior` section of
 `Vanguard_ai_build.json`, placed by `Tools/Blender/fit_ship_interior.py` (inside the hull everywhere, rim
-at the canopy rail, eye with a clear view ahead and the dashboard 15 degrees below it: **eye (305, 0, 156)**).
+at the canopy rail, eye with a clear view ahead). Since 18. 9. 2026 it is Meshy's dark variant, and the pilot
+sits well back from it as in the Star Citizen reference (`Docs/UI/Screenshot 2026-09-17 201854.png`):
+**eye (174, 0, 189)**, the dashboard top 8 degrees and the displays 14-25 degrees below the eye.
+**Displays:** the two big screens are flat quads (slot `M_Ship_Vanguard_Screens`, recipe `interior.displays`)
+that show the flight instruments live: `UCockpitDisplayComponent` draws `USpaceCockpitDisplays` (the
+flight HUD's widgets, driven by the same `ApplyState`) into a render target 30 times a second while the ship
+is flown from the cockpit, and the unlit `M_Ship_Screen` shows it. Left FLIGHT (mode, speed gauge, speed,
+limiter, G), right SYSTEMS (CPLD, GSAF, CSTB, BOOST, GEAR, PREC, boost and afterburner). The screen HUD stays,
+compacted so it sits above the dashboard.
 Three things make it work in the game, all in the recipe or the setup file:
 - `SM_Ship_Vanguard_Lining`: the hull around the cockpit copied with inward normals (`lining`). The hull is
   one-sided; without it the pilot saw the ground through the floor and the sides. The canopy glass is left out.
 - `canopy_clear`: hull faces inside the canopy that face the cabin (frame undersides behind the opaque
   panes) are deleted; from the seat they crossed the HUD.
-- `CockpitLight` (`cockpit_light_intensity_cd` 12, `cockpit_light_offset`, `cockpit_light_radius_cm`): a
-  shadowless point light between the eye and the dashboard; the hull shadows the cabin, which was
-  otherwise almost black. Keep it under the canopy roof, or it lights the canopy from outside.
+- `CockpitLight` (`cockpit_light_intensity_cd` 12, `cockpit_light_offset`, `cockpit_light_radius_cm`) and
+  `CockpitFillLight` (`cockpit_fill_*`), both `cockpit_light_source_radius_cm` large: shadowless point lights
+  between the eye and the dashboard and above the head; the hull shadows the cabin, which was otherwise
+  almost black. Keep them under the canopy roof, or they light the canopy from outside.
 
 **Placeholder cockpit** (`bPlaceholderCockpit`, `placeholder_cockpit` in the setup file, off on the
 Vanguard since it has an interior): until a ship has a modelled interior, simple dark boxes around the pilot's eye give the HUD a cabin to sit in - a

@@ -17,6 +17,9 @@ public class gamespace : ModuleRules
 
 		// Menus (SSpaceMenu) are plain Slate; the flight HUD (USpaceFlightHud) is UMG.
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "UMG" });
+
+		// The cockpit displays (UCockpitDisplayComponent) draw UMG into a render target.
+		PrivateDependencyModuleNames.Add("RenderCore");
 		
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");

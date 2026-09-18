@@ -43,15 +43,22 @@
     "free_look_max_yaw_deg": 180.0,
     "_comment_cockpit": "The cockpit interior (Meshy 'Spaceship Cockpit', part SM_Ship_Vanguard_Interior, placed by Tools/Blender/fit_ship_interior.py) replaced the placeholder boxes on 18. 9. 2026; placeholder_cockpit stays in the code for ships without an interior.",
     "placeholder_cockpit": false,
-    "_comment_cockpit_light": "The hull shadows the cabin: without a light the interior was nearly black in the game. A point light between the eye and the dashboard, no shadows. It must stay inside the canopy: 22 cm above the eye it was above the sloping roof and lit the canopy from outside; at 30 cd 45 cm ahead the middle screen burned out white.",
     "cockpit_light_intensity_cd": 12.0,
     "cockpit_light_offset": [
-      35.0,
+      80.0,
       0.0,
-      -5.0
+      -10.0
     ],
-    "cockpit_light_radius_cm": 150.0,
-    "hide_hull_in_cockpit": false
+    "cockpit_light_radius_cm": 250.0,
+    "cockpit_light_source_radius_cm": 12.0,
+    "cockpit_fill_intensity_cd": 5.0,
+    "cockpit_fill_offset": [
+      -15.0,
+      0.0,
+      12.0
+    ],
+    "hide_hull_in_cockpit": false,
+    "_comment_cockpit_light": "The hull shadows the cabin: without light the interior was nearly black. A key light between the eye and the dashboard (the eye sits 1.5 m back, so 80 cm ahead of it, 250 cm reach) and a weaker fill from above the head, both shadowless and 12 cm large, so highlights are broad and soft. Keep them under the canopy roof, or they light the canopy from outside."
   },
   "components": {
     "camera_boom": {
@@ -70,11 +77,11 @@
       "field_of_view": 80.0
     },
     "cockpit_camera": {
-      "_comment": "Pilot's eye over the seat, behind the side-sticks of the cockpit interior, 22 cm under the canopy roof, with a clear view ahead (SOCKET_Cockpit in Vanguard_ai_build.json, from Tools/Blender/fit_ship_interior.py); the dashboard top is 15 degrees below it. At 163 cm the canopy roof, sloping down to the windscreen, showed edge-on as a bright bar across the HUD. Before the interior the eye sat above the front edge of the cabin roof (410, 0, 145): from inside the empty hull everything was culled.",
+      "_comment": "Pilot's eye (SOCKET_Cockpit in Vanguard_ai_build.json, from Tools/Blender/fit_ship_interior.py): 65 cm behind the side grips of the cockpit interior, 22+ cm under the canopy roof, with a clear view ahead. Framed like the Star Citizen reference (Docs/UI/Screenshot 2026-09-17 201854.png): dashboard top 8 degrees below the eye, the displays 14-25 degrees, the pilot ~1.5 m from the dashboard. The first interior had the eye at (305, 0, 156), 0.75 m from its dashboard and the displays at the bottom edge.",
       "relative_location": [
-        305.0,
+        174.0,
         0.0,
-        156.0
+        189.0
       ],
       "field_of_view": 88.0
     }
@@ -127,7 +134,17 @@
         "base_color": "ArtSource/Ships/Vanguard/Textures/T_Ship_Vanguard_Interior_BC.png",
         "orm": "ArtSource/Ships/Vanguard/Textures/T_Ship_Vanguard_Interior_ORM.png",
         "normal": "ArtSource/Ships/Vanguard/Textures/T_Ship_Vanguard_Interior_N.png"
-      }
+      },
+      "never_stream": true,
+      "_comment": "Cockpit interior, re-baked at 4K with more texture where the pilot looks; never_stream keeps the textures at full resolution, the cockpit is always right in front of the camera. Its displays are a separate slot (MI_Ship_Vanguard_Screens)."
+    },
+    "MI_Ship_Vanguard_Screens": {
+      "_comment": "The cockpit displays: unlit, they show exactly what the game draws into them (UCockpitDisplayComponent sets ScreenTexture to its render target at run time; in the editor they stay black). Lit glass reflected the daylight sky and washed them out.",
+      "master": "screen",
+      "slots": [
+        "M_Ship_Vanguard_Screens"
+      ],
+      "emissive_strength": 3.0
     }
   }
 }

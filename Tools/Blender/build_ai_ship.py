@@ -23,7 +23,10 @@ the whole conversion is repeatable and reviewable as data. Steps, all driven by 
      same scene, oriented, scaled (width/length and height separately) and placed into the cabin,
      decimated, given its own UVs and re-baked textures, as the part SM_Ship_<Ship>_Interior with the
      slot M_Ship_<Ship>_Interior. It stays out of the collision and the sockets. Its placement comes
-     from Tools/Blender/fit_ship_interior.py;
+     from Tools/Blender/fit_ship_interior.py. Optional "displays": the AI's painted screens (generative
+     textures cannot draw readable instruments) are cut out and replaced by flat quads with their own slot
+     M_Ship_<Ship>_Screens, UV-mapped side by side across one texture (the first display the left part of
+     it, and so on); the game draws its flight displays into that texture (UCockpitDisplayComponent);
   9. lining (optional, "lining"): the hull's faces inside region boxes, minus the canopy glass, copied with
      their normals turned inwards into the part SM_Ship_<Ship>_Lining (same material and UVs). The hull is
      one-sided, so from the cockpit the fuselage was invisible and the pilot looked through the floor and
@@ -261,6 +264,41 @@ def preview_material(name, maps):
     return mat
 
 
+def focus_uvs(ob, focus, margin):
+    """More texels where the camera looks: UV islands facing focus["eye"] within focus["reach_m"] are
+    scaled by focus["scale"] and the atlas repacked, so a cockpit's dashboard gets more of the texture
+    than the undersides of its consoles."""
+    from bpy_extras import bmesh_utils
+    eye = Vector(focus["eye"])
+    select_only(ob)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bm = bmesh.from_edit_mesh(ob.data)
+    uv = bm.loops.layers.uv.active
+    scaled = 0
+    for island in bmesh_utils.bmesh_linked_uv_islands(bm, uv):
+        seen = 0.0
+        total = 0.0
+        for f in island:
+            c = f.calc_center_median()
+            area = f.calc_area()
+            total += area
+            to_eye = eye - c
+            if to_eye.length < focus.get("reach_m", 2.0) and f.normal.dot(to_eye.normalized()) > 0.2:
+                seen += area
+        if total > 0 and seen / total > 0.5:
+            loops = [l for f in island for l in f.loops]
+            centre = sum((l[uv].uv for l in loops), Vector((0.0, 0.0))) / len(loops)
+            for l in loops:
+                l[uv].uv = centre + (l[uv].uv - centre) * focus["scale"]
+            scaled += 1
+    bmesh.update_edit_mesh(ob.data)
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.select_all(action="SELECT")
+    bpy.ops.uv.pack_islands(rotate=True, margin=margin)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    log("UV focus: %d islands facing the eye scaled x%.1f, atlas repacked" % (scaled, focus["scale"]))
+
+
 def unwrap(lows, margin, angle_deg):
     """One fresh UV atlas for the decimated hull and parts together. The AI atlas has thousands of tiny
     islands, and decimation welded them: triangles stretched across half the texture."""
@@ -277,10 +315,62 @@ def unwrap(lows, margin, angle_deg):
     log("new UVs for %s in %.0f s" % (", ".join(o.name for o in lows), time.time() - t))
 
 
-def rebake(pairs, source_material, spec):
+def surface_nodes(nt, textures, surface):
+    """Roughness, metallic and the emissive mask as node outputs, after the recipe's surface rules:
+    roughness at least roughness_min, metallic at most metallic_max, and inside the "screens" rectangles
+    (a frame: origin, axes u / v / w, rects [u0, u1, v0, v1], depth along w) the screen's own roughness
+    and metallic, with the mask 1 there. The mask goes into the ORM's R channel; the game makes the
+    base colour glow by it (M_Ship_PBR EmissiveStrength)."""
+    def math(op, a, b):
+        node = nt.nodes.new("ShaderNodeMath")
+        node.operation = op
+        for i, value in enumerate((a, b)):
+            if isinstance(value, (int, float)):
+                node.inputs[i].default_value = value
+            else:
+                nt.links.new(value, node.inputs[i])
+        return node.outputs[0]
+
+    rough = textures["roughness"].outputs[0]
+    metal = textures["metallic"].outputs[0]
+    if "roughness_min" in surface:
+        rough = math("MAXIMUM", rough, surface["roughness_min"])
+    if "metallic_max" in surface:
+        metal = math("MINIMUM", metal, surface["metallic_max"])
+    screens = surface.get("screens")
+    if not screens:
+        return rough, metal, 1.0
+    position = nt.nodes.new("ShaderNodeNewGeometry").outputs["Position"]
+    offset = nt.nodes.new("ShaderNodeVectorMath")
+    offset.operation = "SUBTRACT"
+    nt.links.new(position, offset.inputs[0])
+    offset.inputs[1].default_value = screens["origin"]
+
+    def along(axis):
+        dot = nt.nodes.new("ShaderNodeVectorMath")
+        dot.operation = "DOT_PRODUCT"
+        nt.links.new(offset.outputs[0], dot.inputs[0])
+        dot.inputs[1].default_value = Vector(axis).normalized()
+        return dot.outputs["Value"]
+    u, v, w = along(screens["u"]), along(screens["v"]), along(screens["w"])
+    depth_ok = math("LESS_THAN", math("ABSOLUTE", w, 0.0), screens.get("depth", 0.03))
+    mask = None
+    for u0, u1, v0, v1 in screens["rects"]:
+        inside = math("MULTIPLY", math("MULTIPLY", math("GREATER_THAN", u, u0), math("LESS_THAN", u, u1)),
+                      math("MULTIPLY", math("GREATER_THAN", v, v0), math("LESS_THAN", v, v1)))
+        mask = inside if mask is None else math("MAXIMUM", mask, inside)
+    mask = math("MULTIPLY", mask, depth_ok)
+    keep = math("SUBTRACT", 1.0, mask)
+    rough = math("ADD", math("MULTIPLY", rough, keep), math("MULTIPLY", mask, screens.get("roughness", 0.3)))
+    metal = math("ADD", math("MULTIPLY", metal, keep), math("MULTIPLY", mask, screens.get("metallic", 0.0)))
+    return rough, metal, mask
+
+
+def rebake(pairs, source_material, spec, surface=None):
     """Bakes the full-resolution model onto the decimated one's new UVs (Cycles, selected to active):
     base colour and ORM through an emission shader (exact texture values, no lighting), and a
-    tangent-space normal map of the source's shading, so 200k triangles shade like 3.4 million."""
+    tangent-space normal map of the source's shading, so 200k triangles shade like 3.4 million.
+    surface: optional rules for roughness / metallic and emissive screens (surface_nodes)."""
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
     scene.cycles.device = "CPU"
@@ -291,9 +381,14 @@ def rebake(pairs, source_material, spec):
     textures = {n.label: n for n in nt.nodes if n.type == "TEX_IMAGE"}
     emission = nt.nodes.new("ShaderNodeEmission")
     combine = nt.nodes.new("ShaderNodeCombineColor")
-    combine.inputs[0].default_value = 1.0  # R: ambient occlusion, none
-    nt.links.new(textures["roughness"].outputs[0], combine.inputs[1])
-    nt.links.new(textures["metallic"].outputs[0], combine.inputs[2])
+    rough, metal, glow = surface_nodes(nt, textures, surface or {})
+    # R: emissive mask (1 on the whole hull, where the game leaves EmissiveStrength at 0), G roughness, B metallic
+    if isinstance(glow, float):
+        combine.inputs[0].default_value = glow
+    else:
+        nt.links.new(glow, combine.inputs[0])
+    nt.links.new(rough, combine.inputs[1])
+    nt.links.new(metal, combine.inputs[2])
 
     target = bpy.data.materials.new("BakeTarget")
     target.use_nodes = True
@@ -450,8 +545,8 @@ def add_interior(ship, spec):
     tris = tri_count(ob)
     place = spec["placement"]
     s, r = place["scale"], place.get("height_ratio", 1.0)
-    matrix = (Matrix.Translation(Vector(place["offset"])) @ Matrix.Diagonal((s, s, s * r, 1.0))
-              @ Matrix.Rotation(math.radians(spec.get("rotate_z_deg", 0.0)), 4, "Z"))
+    placement = Matrix.Translation(Vector(place["offset"])) @ Matrix.Diagonal((s, s, s * r, 1.0))
+    matrix = placement @ Matrix.Rotation(math.radians(spec.get("rotate_z_deg", 0.0)), 4, "Z")
     ob.data.transform(matrix)
     ob.data.update()
     ob.name = ob.data.name = "SM_Ship_%s_Interior" % ship
@@ -471,12 +566,74 @@ def add_interior(ship, spec):
     ob.data.set_sharp_from_angle(angle=math.radians(spec.get("smooth_angle_deg", 60.0)))
     bake = spec["rebake"]
     unwrap([ob], bake.get("uv_margin", 0.002), bake.get("uv_angle_deg", 66.0))
-    rebake([(ob, high)], source, bake)
+    if spec.get("uv_focus"):
+        focus_uvs(ob, spec["uv_focus"], bake.get("uv_margin", 0.002))
+    rebake([(ob, high)], source, bake, spec.get("surface"))
     bpy.data.objects.remove(high)
     ob.data.materials.clear()
     ob.data.materials.append(preview_material("M_Ship_%s_Interior" % ship, {k: bake[k] for k in ("base_color", "orm", "normal")}))
+    if spec.get("displays"):
+        add_displays(ob, ship, spec["displays"], placement)
     log("interior done: %d triangles in %.0f s" % (tri_count(ob), time.time() - t))
     return ob
+
+
+def add_displays(ob, ship, spec, matrix):
+    """Flat screens instead of the AI's painted ones: see step 8 in the module notes. Each display is a
+    rectangle in the interior's own frame (rotated, before scale and placement: centre, u = the screen's
+    right, v = its up, rect [u0, u1, v0, v1] in metres), measured once in the source model. Faces of the
+    interior behind it (centre inside the rectangle shrunk by cut_inset_m, within cut_depth_m of the plane)
+    are deleted, and a quad is put on the plane, offset_m towards the pilot. The quads share one slot and
+    one texture: display i of n gets the i-th n-th of it, left to right."""
+    screens = spec["screens"]
+    inset, depth, offset = spec.get("cut_inset_m", 0.012), spec.get("cut_depth_m", 0.02), spec.get("offset_m", 0.002)
+    local = matrix.inverted()
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    uv = bm.loops.layers.uv.active
+    ob.data.materials.append(bpy.data.materials.get("M_Ship_%s_Screens" % ship) or screen_material("M_Ship_%s_Screens" % ship))
+    slot = len(ob.data.materials) - 1
+    for i, screen in enumerate(screens):
+        c, u, v = Vector(screen["centre"]), Vector(screen["u"]).normalized(), Vector(screen["v"]).normalized()
+        n = u.cross(v).normalized()
+        u0, u1, v0, v1 = screen["rect"]
+        doomed = []
+        for f in bm.faces:
+            d = local @ f.calc_center_median() - c
+            a, b = d.dot(u), d.dot(v)
+            if u0 + inset < a < u1 - inset and v0 + inset < b < v1 - inset and abs(d.dot(n)) < depth:
+                doomed.append(f)
+        bmesh.ops.delete(bm, geom=doomed, context="FACES")
+        corners = [(u0, v0), (u1, v0), (u1, v1), (u0, v1)]
+        verts = [bm.verts.new(matrix @ (c + u * a + v * b + n * offset)) for a, b in corners]
+        face = bm.faces.new(verts)
+        face.material_index = slot
+        face.smooth = False
+        # Blender's UV origin is bottom-left; the importer flips V, so the top of the screen lands on
+        # the top row of the texture.
+        for loop, (a, b) in zip(face.loops, corners):
+            loop[uv].uv = ((i + (a - u0) / (u1 - u0)) / len(screens), (b - v0) / (v1 - v0))
+        face.normal_update()
+        pilot = matrix @ (c + n) - matrix @ c
+        if face.normal.dot(pilot) < 0:
+            face.normal_flip()
+        log("display %s: %d faces of the AI screen cut, quad %.0f x %.0f cm (before scaling)" % (
+            screen.get("name", i), len(doomed), (u1 - u0) * 100, (v1 - v0) * 100))
+    bm.to_mesh(ob.data)
+    bm.free()
+    ob.data.update()
+
+
+def screen_material(name):
+    """Blender stand-in for the game's screen: dark glass with a faint glow."""
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    bsdf.inputs["Base Color"].default_value = (0.01, 0.015, 0.02, 1.0)
+    bsdf.inputs["Roughness"].default_value = 0.35
+    bsdf.inputs["Emission Color"].default_value = (0.1, 0.35, 0.3, 1.0)
+    bsdf.inputs["Emission Strength"].default_value = 1.0
+    return mat
 
 
 # --- 9: lining -----------------------------------------------------------------------------------------

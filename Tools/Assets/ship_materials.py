@@ -9,6 +9,11 @@ Masters (rebuilt on every run, like the scene materials):
     /Game/Ships/Shared/Materials/M_Ship_PBR    opaque, Nanite: textures BaseColorMap, ORMMap (G roughness,
                                                B metallic) and NormalMap, with BaseColorTint,
                                                RoughnessScale, MetallicScale (AI models, one texture set)
+    /Game/Ships/Shared/Materials/M_Ship_Screen opaque, unlit, Nanite: a cockpit display - ScreenTexture x
+                                               EmissiveStrength, nothing else (lit glass reflected the sky
+                                               and the cockpit light and washed the instruments out). The game sets
+                                               ScreenTexture to a render target it draws its displays into
+                                               (UCockpitDisplayComponent); in the editor it is black
     /Game/Ships/Shared/Materials/M_Ship_Glass  translucent, two-sided, surface forward shading:
                                                BaseColor, Opacity, Roughness
 
@@ -27,7 +32,8 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 
 MEL = unreal.MaterialEditingLibrary
 SHARED = "/Game/Ships/Shared/Materials"
-MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glass": SHARED + "/M_Ship_Glass"}
+MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glass": SHARED + "/M_Ship_Glass",
+           "screen": SHARED + "/M_Ship_Screen"}
 TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap"}
 
 
@@ -108,8 +114,24 @@ def build_pbr_master():
     return pbr
 
 
-def import_texture(ship, key, source):
-    """A PNG from the repository as /Game/Ships/<Ship>/Textures/T_..., set up for its role."""
+def build_screen_master():
+    screen = _fresh_material(MASTERS["screen"])
+    screen.set_editor_property("used_with_nanite", True)
+    screen.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    image = _texture_param(screen, "ScreenTexture", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR,
+                           "/Engine/EngineResources/Black", -900, 300)
+    emissive = _node(screen, unreal.MaterialExpressionMultiply, -400, 300)
+    MEL.connect_material_expressions(image, "RGB", emissive, "A")
+    _link(_scalar(screen, "EmissiveStrength", 3.0, -900, 500), emissive, "B")
+    _output(emissive, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(screen)
+    unreal.EditorAssetLibrary.save_loaded_asset(screen, only_if_is_dirty=False)
+    return screen
+
+
+def import_texture(ship, key, source, never_stream=False):
+    """A PNG from the repository as /Game/Ships/<Ship>/Textures/T_..., set up for its role. never_stream:
+    always at full resolution (a cockpit, which is always right in front of the camera)."""
     filename = os.path.join(REPO, source) if not os.path.isabs(source) else source
     name = os.path.splitext(os.path.basename(filename))[0]
     if not name.startswith("T_"):
@@ -135,6 +157,7 @@ def import_texture(ship, key, source):
         texture.set_editor_property("srgb", False)
     else:
         texture.set_editor_property("srgb", True)
+    texture.set_editor_property("never_stream", bool(never_stream))
     unreal.EditorAssetLibrary.save_loaded_asset(texture, only_if_is_dirty=False)
     return texture
 
@@ -162,7 +185,7 @@ def build_masters():
     _output(_node(glass, unreal.MaterialExpressionConstant, -600, 350, r=1.0), unreal.MaterialProperty.MP_SPECULAR)
     MEL.recompile_material(glass)
     unreal.EditorAssetLibrary.save_loaded_asset(glass, only_if_is_dirty=False)
-    return {"hull": hull, "pbr": build_pbr_master(), "glass": glass}
+    return {"hull": hull, "pbr": build_pbr_master(), "glass": glass, "screen": build_screen_master()}
 
 
 def build_instance(name, folder, spec, masters, ship=None):
@@ -183,7 +206,7 @@ def build_instance(name, folder, spec, masters, ship=None):
         c = spec["base_color_tint"]
         MEL.set_material_instance_vector_parameter_value(mi, "BaseColorTint", unreal.LinearColor(c[0], c[1], c[2], 1.0))
     for key, source in (spec.get("textures") or {}).items():
-        MEL.set_material_instance_texture_parameter_value(mi, TEXTURE_PARAMS[key], import_texture(ship, key, source))
+        MEL.set_material_instance_texture_parameter_value(mi, TEXTURE_PARAMS[key], import_texture(ship, key, source, spec.get("never_stream", False)))
     MEL.update_material_instance(mi)
     unreal.EditorAssetLibrary.save_loaded_asset(mi, only_if_is_dirty=False)
     return mi

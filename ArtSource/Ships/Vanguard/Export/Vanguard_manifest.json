@@ -98,22 +98,23 @@
     "SM_Ship_Vanguard_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 120000,
-      "verts": 59828,
+      "tris": 148650,
+      "verts": 74291,
       "materials": [
-        "M_Ship_Vanguard_Interior"
+        "M_Ship_Vanguard_Interior",
+        "M_Ship_Vanguard_Screens"
       ],
       "uv_layers": 1,
       "bounds_m": [
         [
-          2.5569677352905273,
-          -0.9016274213790894,
-          0.6648709177970886
+          1.6111210584640503,
+          -1.0914442539215088,
+          0.8229666948318481
         ],
         [
-          3.9463002681732178,
-          0.9029640555381775,
-          1.3314568996429443
+          3.292973279953003,
+          1.0929266214370728,
+          1.6724125146865845
         ]
       ]
     },
@@ -329,14 +330,14 @@
     "SOCKET_Cockpit": {
       "parent": "SM_Ship_Vanguard",
       "location_m": [
-        3.05,
+        1.74,
         0.0,
-        1.56
+        1.89
       ],
       "location_ue_cm": [
-        305.0,
+        174.0,
         -0.0,
-        156.0
+        189.0
       ]
     },
     "SOCKET_Engine_LowerL": {
@@ -499,9 +500,9 @@
     "CameraBoom_ProbeSize_cm": 50.0,
     "CameraBoom_CameraLagMaxDistance_cm": 2800.0,
     "CockpitCamera_location_ue_cm": [
-      304.83,
+      173.83,
       0.12,
-      157.7
+      190.7
     ],
     "LandingFootprintRadiusCm": 572.0,
     "LandingMaxGapCm": 200.0,

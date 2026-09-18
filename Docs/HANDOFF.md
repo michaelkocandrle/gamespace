@@ -273,6 +273,28 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       bodové světlo mezi okem a deskou, 12 cd, bez stínů, musí zůstat pod střechou canopy (nad ní svítilo
       na canopy zvenku);
     - `placeholder_cockpit` vypnutý.
+23. **Tmavý interiér, displeje s HUD a oko dál od desky** (18. 9. 2026): interiér z bodu 22 nahradila
+    tmavá varianta z Meshy (`Interior/Meshy/Spaceship_Cockpit_0918171055/`, matná, metallic 0), stejným
+    postupem (decimace na 150 tis., fit, nové UV, přepečení 4K s víc texelů tam, kam pilot kouká):
+    - **oko (174, 0, 189)**, 65 cm za bočními páčkami, ~1,5 m od desky. Rámování podle SC reference
+      `Docs/UI/Screenshot 2026-09-17 201854.png`: horní hrana desky 8° pod okem (reference ~8°), displeje
+      14–25° (reference 15–24°). Předtím (305, 0, 156), 0,75 m od desky, displeje u spodního okraje.
+      Usazení vany: měřítko 1,15, offset (2,45, 0, 1,25); ověřeno `fit_ship_interior.py`,
+      `cockpit_view_survey.py` (70 % výhledu volné) a porovnávacími snímky `cockpit_tune`;
+    - **displeje:** AI malované ciferníky nejdou přečíst (limit generativních textur), takže build
+      (`interior.displays` v receptu) vyřízne plochy obou velkých obrazovek a dá místo nich ploché
+      quady se slotem `M_Ship_Vanguard_Screens`, UV vedle sebe přes jednu texturu (levý = levá půlka).
+      Hra do ní kreslí `USpaceCockpitDisplays` (widgety HUDu, stejné názvy, stejný `ApplyState`) přes
+      `UCockpitDisplayComponent` (render target 1024 × 448, 30× za s, jen v pohledu z kokpitu).
+      Materiál `M_Ship_Screen` je **unlit** (osvětlené sklo odráželo denní oblohu a slévalo obsah).
+      Rozvržení: **vlevo FLIGHT** (SCM/NAV, rychloměr, rychlost, omezovač, G-metr), **vpravo SYSTEMS**
+      (CPLD, GSAF, CSTB, BOOST, GEAR, PREC, sloupce BST a AB) – jako u SC: let vlevo, systémy vpravo;
+    - **hlavní HUD zůstává**, jen kompaktnější (kontrolky vedle rychloměru jako v SC, kratší sloupce,
+      o 50 px výš), aby byl celý nad deskou. Důvod: v chase kameře displeje vidět nejsou, a i v kokpitu
+      je rychlý údaj v úrovni horizontu (SC to má stejně: letový HUD ve výhledu, MFD pro systémy).
+      Displeje svítí i s HUD vypnutým (H) – jsou součást lodi;
+    - kokpitová světla: klíčové 80 cm před okem (dosah 250 cm), výplňové nad hlavou, obě měkká (12 cm);
+      při změně oka v shotech (`cockpit_eye`) se posouvají s ním.
 
 ---
 
@@ -386,7 +408,8 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_flight_hud_sc1c.py` | SC-1c: strom widgetů, data HUD z lodi (rychlost vůči omezovači, afterburner, pozpátku, kontrolky, G, palivo, joystick) a jejich zobrazení ve widgetech. Vzhled headless ověřit nejde. |
 | `test_boost_afterburner_sc1b.py` | SC-1b: boost jen manévrovací trysky a rotace, vypnutí G-Safe, afterburner (tah, limit × omezovač, palivo, zamčení, doplňování, plynulý návrat, coupled i decoupled, jen SCM, G-Safe zůstává), Shift + Tab, input a hodnoty Vanguardu. |
 | `test_flight_modes.py` | Boost energie, cruise jen v NAV (vesmír i nad Veyrou), výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
-| `test_cockpit_frame.py` | Kokpit: Vanguard má interiér (díl, oko nad vanou za deskou, deska 12–22° pod okem, provizorium vypnuté); rozložení provizorního rámu pro lodě bez interiéru (nic v okně HUD, deska 14–20° pod horizontem, sloupky 24–34° do stran, sedadlo za okem). |
+| `test_cockpit_displays.py` | Displeje v kokpitu: dvě obrazovky (FLIGHT, SYSTEMS) se všemi přístroji a velkým písmem, stejné hodnoty jako HUD pro stejnou loď, komponenta na lodi, slot `M_Ship_Vanguard_Screens` v interiéru s unlit `MI_Ship_Vanguard_Screens`. Jak vypadají: `-Preset cockpit`. |
+| `test_cockpit_frame.py` | Kokpit: Vanguard má interiér (díl, oko nad vanou za deskou, deska 7–13° pod okem jako v SC referenci, pilot ≥ 1,2 m od desky, provizorium vypnuté); rozložení provizorního rámu pro lodě bez interiéru (nic v okně HUD, deska 14–20° pod horizontem, sloupky 24–34° do stran, sedadlo za okem). |
 | `test_landing_sc2.py` | SC-2a: dosednutí jen s podvozkem (GEAR UP před vším ostatním, mezera pod patkami), stavový automat podvozku (časy, otočení v půlce, zákaz zasunutí na zemi), pohyb modelovaného dílu i zástupných nohou, precision (strop, omezovač uvnitř, jen SCM, bez afterburneru, pomalejší otáčení, brzdění bez skoku), kontrolky GEAR/PREC, klávesy N/P bez kolizí, hodnoty a díl `Gear` Vanguardu, scénář `landing`. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
@@ -551,11 +574,13 @@ Další otevřené směry mimo let:
   změřená: `GetEngineDemand` bere svislou osu × 0,7 proti plné kapacitě zvedacích trysek, visení na
   Veyře (~0,46 G) tak dává zátěž ~0,06, takže záře i zvuk zůstanou skoro na nule. G-metr naopak
   ukazuje 0,5–0,8 G (snímky `landing` 18. 9. 2026), jen je to na stupnici 12 G malý proužek.
-- **Meshy Vanguard, kokpit** (interiér od 18. 9. 2026, bod 22): nahoře přes výhled vede tmavá hrana
-  střechy canopy (~11° nad horizontem, nad kontrolkami HUD) – níž oko být nemůže, jinak deska vyleze do
-  HUD. Při rozhlížení do stran jsou vidět tmavé plochy výstelky (zevnitř bez světla) a hrubší tvar
-  decimované vany. Není sedadlo (Meshy vana ho nemá), dozadu je vidět výstelka trupu. Oko je
-  navržené pro 16:9 a FOV 88°.
+- **Meshy Vanguard, kokpit** (tmavý interiér a displeje od 18. 9. 2026, bod 23): z oka (174, 0, 189)
+  jdou z horních rohů k desce sloupky rámu canopy. Při rozhlížení do stran (free look ~70°) je 0,9–2 m
+  od oka kořen křídla trupu v hrubém rozlišení – boční stěny kabiny jsou zevnitř průhledné (jednostranný
+  trup) a oko teď sedí vzadu vedle křídla. Není sedadlo. Dva malé čtverce uprostřed desky mají
+  pořád AI texturu (můžou být další displeje). Render target nemá mipmapy: na menším rozlišení než
+  1600 px může písmo na displejích zrnit; rychle se měnící čísla při zrychlení lehce „duchují“ (TSR).
+  Oko je navržené pro 16:9 a FOV 88°.
 - **Meshy Vanguard na dunách:** na snímku `landing/06_landed_side` (18. 9. 2026) leží loď na hřbetu
   duny a spodní gondola je zapuštěná ~0,5 m v písku, i když by kolizní box (spodek = podrážky ližin)
   neměl dovolit nic níž než ližiny. Neověřená podezření: hrubší kolizní síť planety než vykreslený

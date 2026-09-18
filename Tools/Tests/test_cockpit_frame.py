@@ -134,7 +134,10 @@ try:
     check("Vanguard: eye over the interior's tub, behind its dashboard", lx < ex < hx - 40.0 and abs(eye.y) < 1.0 and ez > hz,
           "eye (%.0f, %.0f, %.0f), interior x %.0f..%.0f top %.0f" % (eye.x, eye.y, eye.z, lx, hx, hz))
     angle = math.degrees(math.atan2(ez - hz, hx - ex))
-    check("Vanguard: dashboard top 12..22 deg below the eye (under the HUD)", 12.0 <= angle <= 22.0, "%.1f deg" % angle)
+    # The Star Citizen reference (Docs/UI/Screenshot 2026-09-17 201854.png): the dashboard top ~8 degrees below the eye,
+    # the pilot sitting well back from it; the HUD is compact and stays above it.
+    check("Vanguard: dashboard top 7..13 deg below the eye (as in the reference)", 7.0 <= angle <= 13.0, "%.1f deg" % angle)
+    check("Vanguard: pilot well back from the dashboard (>= 1.2 m)", hx - ex >= 120.0, "%.0f cm" % (hx - ex))
 finally:
     eas.destroy_actor(ship)
 

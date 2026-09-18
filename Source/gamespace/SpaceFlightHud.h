@@ -263,6 +263,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
 	FLinearColor Color = FLinearColor::White;
 
+	/** Largest size of the state square, pixels: 6 on the HUD, bigger on the cockpit displays, which are seen small. */
+	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
+	float SquareMax = 6.f;
+
 	/** Sets where the lamp should go; a change starts a short flash. */
 	void SetTarget(bool bLit, const FLinearColor& InColor);
 
@@ -298,9 +302,10 @@ protected:
  * SC-1c flight HUD in UMG, after Docs/UI/SC_ThrottleHUD_VisualReference.md: thin, translucent cyan
  * lines around the middle of the screen instead of panels.
  *
- * - Left of centre: status lamps (SCM/NAV, CPLD, GSAF, CSTB, BOOST, GEAR, PREC), the vertical speed gauge
- *   (fill = speed along the nose, marker = speed limiter, red reverse zone at the bottom), speed and
- *   limit as small numbers under it, and the G meter tied to it.
+ * - Left of centre: status lamps (SCM/NAV, CPLD, GSAF, CSTB, BOOST, GEAR, PREC) beside the vertical speed
+ *   gauge (fill = speed along the nose, marker = speed limiter, red reverse zone at the bottom), speed and
+ *   limit as small numbers under it, and the G meter tied to it. Compact and a little above the middle,
+ *   so it stays above the cockpit's dashboard.
  * - Right of centre: boost energy and afterburner fuel gauges in the same style.
  * - Centre: the mouse virtual joystick.
  *
@@ -368,8 +373,8 @@ public:
 protected:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-private:
-	void BuildTree();
+	/** Builds the widget tree. The widgets' names are what ApplyState drives, whatever the layout. */
+	virtual void BuildTree();
 	/** Monospace (the engine's DroidSansMono), letter-spaced and outlined: a technical, readable look. */
 	UTextBlock* MakeText(const FName Name, float Size, int32 LetterSpacing = 60, const FName Weight = TEXT("Mono"));
 
@@ -393,4 +398,30 @@ private:
 
 	TMap<FName, bool> LampLit;
 	float Time = 0.f;
+};
+
+/**
+ * The cockpit's two dashboard displays: the flight HUD's instruments (same widgets, same names, so
+ * USpaceFlightHud::ApplyState drives them) laid out for two screens side by side on one canvas of
+ * 2 x DisplaySize. Left, FLIGHT: master mode, speed gauge, speed and limiter, G meter. Right, SYSTEMS:
+ * the switch lamps (CPLD, GSAF, CSTB, BOOST, GEAR, PREC) and the boost and afterburner gauges.
+ *
+ * Big type and thick lines: a display is ~30 cm wide ~1.2 m from the eye, so the 512 px of one screen
+ * shrink to ~200 on a 1600 px wide view. Never added to the viewport: UCockpitDisplayComponent draws it
+ * into a render target and feeds it the ship's state.
+ */
+UCLASS()
+class GAMESPACE_API USpaceCockpitDisplays : public USpaceFlightHud
+{
+	GENERATED_BODY()
+
+public:
+	/** One display, pixels (the render target is two of them side by side). */
+	static constexpr float DisplayWidth = 512.f;
+	static constexpr float DisplayHeight = 448.f;
+
+protected:
+	/** Driven by UCockpitDisplayComponent, not by a player: nothing to do per Slate tick. */
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	virtual void BuildTree() override;
 };

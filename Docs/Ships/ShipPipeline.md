@@ -389,7 +389,14 @@ z originálu kdykoli zopakuje (3 minuty). Když něco nesedí, upraví se čísl
     K interiéru patří `lining` (výstelka trupu kolem kokpitu, jinak je zevnitř vidět skrz loď),
     `canopy_clear` (plochy canopy mířící do kabiny) a v setupu `cockpit_light_*` (trup kabinu stíní) a
     `placeholder_cockpit: false`. Zkontroluj pohled z oka v Blenderu s backface cullingem (jako UE) a pak
-    `Shots.ps1 -Preset cockpit`.
+    `Shots.ps1 -Preset cockpit`. Rámování oka podle SC reference: `fit.dash_below_eye_deg` [7, 13]
+    a `eye_behind_stick_m` tak, aby displeje vyšly ~15–24° pod okem (Vanguard: 0,65 m).
+    **Displeje** (`interior.displays`): AI malované obrazovky nejdou přečíst. Změř každou obrazovku v
+    otočeném, neškálovaném modelu (střed, `u` = doprava po obrazovce, `v` = nahoru, `rect` [u0, u1, v0, v1]
+    v metrech – nejlíp ortho renderem kolmo na obrazovku s mřížkou). Build plochy za ní vyřízne a dá
+    plochý quad se slotem `M_Ship_<Loď>_Screens` (UV: obrazovka i z n dostane i-tou n-tinu textury).
+    V setupu materiál s `"master": "screen"` (unlit `M_Ship_Screen`); hra do slotu kreslí displeje
+    (`UCockpitDisplayComponent`, první slot končící na `_Screens`).
 11. **Testy a snímky:** všechny `Tools\Tests`, pak `Tools\Shots.ps1 -Preset ship_views -Package`, `cockpit`,
     `landing`. Vzdálenost chase kamery se ladí bez balení přes `chase_zoom` v dočasném scénáři.
 

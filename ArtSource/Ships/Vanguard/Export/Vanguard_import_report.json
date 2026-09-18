@@ -19,7 +19,7 @@
     "SM_Ship_Vanguard_Lining": []
   },
   "materials": [
-    "3 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass"
+    "4 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen"
   ],
   "blueprint": {
     "path": "/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard",
@@ -36,7 +36,7 @@
       "pawn.landing_max_gap_cm = 200.0",
       "pawn.ground_contact_tolerance_cm = 25.0",
       "pawn.heat_shake_cm = 28.0",
-      "cockpit_camera.relative_location = [304.83, 0.12, 157.7]",
+      "cockpit_camera.relative_location = [173.83, 0.12, 190.7]",
       "pawn.thrust_acceleration = 7355.0",
       "pawn.retro_acceleration = 4415.0",
       "pawn.strafe_acceleration = 4415.0",
@@ -76,8 +76,11 @@
       "pawn.free_look_max_yaw_deg = 180.0",
       "pawn.placeholder_cockpit = False",
       "pawn.cockpit_light_intensity_cd = 12.0",
-      "pawn.cockpit_light_offset = [35.0, 0.0, -5.0]",
-      "pawn.cockpit_light_radius_cm = 150.0",
+      "pawn.cockpit_light_offset = [80.0, 0.0, -10.0]",
+      "pawn.cockpit_light_radius_cm = 250.0",
+      "pawn.cockpit_light_source_radius_cm = 12.0",
+      "pawn.cockpit_fill_intensity_cd = 5.0",
+      "pawn.cockpit_fill_offset = [-15.0, 0.0, 12.0]",
       "pawn.hide_hull_in_cockpit = False",
       "camera_boom.target_arm_length = 2700.0",
       "camera_boom.socket_offset = [0.0, 0.0, 570.0]",
@@ -85,7 +88,7 @@
       "camera_boom.camera_lag_max_distance = 3000.0",
       "camera_boom.probe_size = 40.0",
       "chase_camera.field_of_view = 80.0",
-      "cockpit_camera.relative_location = [305.0, 0.0, 156.0]",
+      "cockpit_camera.relative_location = [174.0, 0.0, 189.0]",
       "cockpit_camera.field_of_view = 88.0",
       "component Gear = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Gear",
       "component Interior = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Interior",

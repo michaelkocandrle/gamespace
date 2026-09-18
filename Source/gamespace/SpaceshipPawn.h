@@ -11,6 +11,7 @@ class UAudioComponent;
 class UBoxComponent;
 class UCameraComponent;
 class UPointLightComponent;
+class UCockpitDisplayComponent;
 class UInputAction;
 class UInputComponent;
 class UInputMappingContext;
@@ -714,6 +715,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UPointLightComponent> CockpitLight;
 
+	/** Cockpit fill light: see CockpitFillIntensityCd. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UPointLightComponent> CockpitFillLight;
+
+	/** The dashboard displays: flight instruments drawn into the interior's display slot (if it has one). */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UCockpitDisplayComponent> CockpitDisplays;
+
 	/** Engine loop. Started and stopped by UpdateEngineAudio, never auto-activated. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UAudioComponent> EngineAudio;
@@ -823,6 +832,18 @@ protected:
 	/** Cockpit light colour: slightly cool, like instrument lighting. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera")
 	FLinearColor CockpitLightColor = FLinearColor(0.85f, 0.92f, 1.f);
+
+	/** Size of the cockpit lights, cm: a larger source gives broad, soft highlights instead of a white pinpoint. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float CockpitLightSourceRadiusCm = 0.f;
+
+	/** Fill light, candela (0: none): a second, weaker light from another side so the cabin is not lit or black. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float CockpitFillIntensityCd = 0.f;
+
+	/** Where the fill light sits relative to the pilot's eye, cm. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera")
+	FVector CockpitFillOffset = FVector(-20.0, 0.0, 10.0);
 
 	/** Engine cube the placeholder cockpit is built from, and its material (Color parameter). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Camera")
@@ -1597,6 +1618,9 @@ private:
 	void ApplyGearSupport(float DeltaSeconds);
 	/** Creates the placeholder cockpit (bPlaceholderCockpit), once, at BeginPlay. */
 	void BuildPlaceholderCockpit();
+
+	/** Puts the cockpit key and fill lights at the eye + their offsets (BeginPlay, and when the eye moves). */
+	void PlaceCockpitLights();
 	void UpdateAfterburner(float DeltaSeconds);
 	/** Alt held on the controlling player's keyboard: the wheel zooms instead of setting the limiter. */
 	bool IsAltHeld() const;

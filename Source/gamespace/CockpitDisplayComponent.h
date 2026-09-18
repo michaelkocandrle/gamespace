@@ -1,0 +1,82 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
+#include "CockpitDisplayComponent.generated.h"
+
+class FWidgetRenderer;
+class SWidget;
+class UMaterialInstanceDynamic;
+class UMeshComponent;
+class USpaceCockpitDisplays;
+class UTextureRenderTarget2D;
+
+/**
+ * The cockpit's dashboard displays show the flight instruments: USpaceCockpitDisplays (the flight
+ * HUD's widgets laid out for two screens) is drawn into a render target, and the render target goes
+ * into the ScreenTexture of the interior's display slot - the material slot whose name ends in
+ * ScreenSlotSuffix (M_Ship_<Ship>_Screens, made by Tools/Blender/build_ai_ship.py: flat quads over
+ * the AI model's painted screens, UV-mapped side by side across one texture).
+ *
+ * Drawn UpdateRateHz times a second, and only while the owning ship is flown from the cockpit: from
+ * the chase camera nobody sees the dashboard. A ship without a display slot simply has no displays.
+ */
+UCLASS(ClassGroup = (Spaceship), meta = (BlueprintSpawnableComponent))
+class GAMESPACE_API UCockpitDisplayComponent : public UActorComponent
+{
+	GENERATED_BODY()
+
+public:
+	UCockpitDisplayComponent();
+
+	/** The display slot: the first material slot on the ship whose name ends in this. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	FString ScreenSlotSuffix = TEXT("_Screens");
+
+	/** Texture parameter of the display material (M_Ship_Screen) that gets the render target. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	FName TextureParameter = TEXT("ScreenTexture");
+
+	/** Redraws per second. The instruments ease, so 30 looks smooth and costs little. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "1.0"))
+	float UpdateRateHz = 30.f;
+
+	/** Draw only while the ship is flown from the cockpit (off: always, e.g. for a passenger view). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	bool bOnlyInCockpitView = true;
+
+	/** Tests: the display slot was found and the displays are set up. */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
+	bool HasDisplays() const { return RenderTarget != nullptr; }
+
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
+	UTextureRenderTarget2D* GetRenderTarget() const { return RenderTarget; }
+
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
+	USpaceCockpitDisplays* GetDisplaysWidget() const { return Widget; }
+
+	/** The mesh and slot index the displays are on (null / INDEX_NONE: this ship has none). */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
+	static UMeshComponent* FindDisplaySlot(const AActor* Ship, const FString& Suffix, int32& OutSlot);
+
+protected:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+private:
+	UPROPERTY(Transient)
+	TObjectPtr<UTextureRenderTarget2D> RenderTarget;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> Material;
+
+	UPROPERTY(Transient)
+	TObjectPtr<USpaceCockpitDisplays> Widget;
+
+	TSharedPtr<SWidget> SlateWidget;
+	FWidgetRenderer* Renderer = nullptr;
+	float SinceDraw = 0.f;
+};

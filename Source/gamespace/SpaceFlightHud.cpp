@@ -272,7 +272,7 @@ int32 USpaceHudLamp::NativePaint(const FPaintArgs& Args, const FGeometry& Allott
 	RoundedBox(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, Radius,
 		Backing, FMath::Lerp(Faded(Rail, 0.5f), Rail, FMath::Min(Lit, 1.f)), 1.f);
 
-	const float Square = FMath::Clamp(Size.Y - 8.f, 3.f, 6.f);
+	const float Square = FMath::Clamp(Size.Y - 8.f, 3.f, SquareMax);
 	const FVector2f At(Size.X - Square - 4.f, (Size.Y - Square) * 0.5f);
 	GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, At, FVector2f(Square, Square), 1.f, Color, Lit * 0.9f * Breath);
 	RoundedBox(OutDrawElements, LayerId + 2, AllottedGeometry, At, FVector2f(Square, Square), 1.f,
@@ -560,11 +560,15 @@ void USpaceFlightHud::BuildTree()
 		Slot->SetVerticalAlignment(Align);
 		Slot->SetPadding(SlotPadding);
 	};
-	const float FrameHeight = 430.f;
+	// Compact and a little above the middle, as in the reference: the cockpit's dashboard starts ~8
+	// degrees below the eye (a quarter of the way down from the middle of the screen), and the HUD
+	// stays above it rather than over the displays.
+	const float FrameHeight = 320.f;
+	const double ClusterY = -30.0;
 
-	// --- Left of centre: lamps, speed gauge, speed, limit, G meter, then a frame line ---------
+	// --- Left of centre: lamps beside the speed gauge (speed, limit, G meter under it), then a frame line
 	UHorizontalBox* Left = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("LeftCluster"));
-	UVerticalBox* LeftContent = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("LeftContent"));
+	UHorizontalBox* LeftContent = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("LeftContent"));
 	UVerticalBox* LampBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("LampBox"));
 	for (const TCHAR* LampName : { TEXT("MODE"), TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST"), TEXT("GEAR"), TEXT("PREC") })
 	{
@@ -589,20 +593,20 @@ void USpaceFlightHud::BuildTree()
 		AddToHorizontal(Row, Pill, VAlign_Center, FMargin(0.f));
 		AddToVertical(LampBox, Row, HAlign_Right, FMargin(0.f, 0.f, 0.f, 5.f));
 	}
-	AddToVertical(LeftContent, Panelled(TEXT("LampPanel"), LampBox, FMargin(10.f, 8.f, 10.f, 3.f)), HAlign_Right, FMargin(0.f, 0.f, 0.f, 10.f));
+	AddToHorizontal(LeftContent, Panelled(TEXT("LampPanel"), LampBox, FMargin(10.f, 8.f, 10.f, 3.f)), VAlign_Top, FMargin(0.f, 0.f, 10.f, 0.f));
 	UVerticalBox* SpeedBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SpeedBox"));
-	AddToVertical(SpeedBox, Sized(TEXT("SpeedGaugeBox"), Gauge(TEXT("SpeedGauge"), false, 10), 11.f, 230.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 10.f));
+	AddToVertical(SpeedBox, Sized(TEXT("SpeedGaugeBox"), Gauge(TEXT("SpeedGauge"), false, 10), 11.f, 170.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 10.f));
 	AddToVertical(SpeedBox, MakeText(TEXT("SpeedText"), 15.f, 20, TEXT("Number")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 1.f));
 	AddToVertical(SpeedBox, MakeText(TEXT("LimitText"), 9.f, 40, TEXT("Number")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
 	UHorizontalBox* GRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("GRow"));
 	AddToHorizontal(GRow, Sized(TEXT("GGaugeBox"), Gauge(TEXT("GGauge"), true, 4), 52.f, 6.f), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
 	AddToHorizontal(GRow, MakeText(TEXT("GText"), 11.f, 20, TEXT("Number")), VAlign_Center, FMargin(0.f));
 	AddToVertical(SpeedBox, GRow, HAlign_Right, FMargin(0.f));
-	AddToVertical(LeftContent, Panelled(TEXT("SpeedPanel"), SpeedBox, FMargin(12.f, 10.f)), HAlign_Right, FMargin(0.f));
+	AddToHorizontal(LeftContent, Panelled(TEXT("SpeedPanel"), SpeedBox, FMargin(12.f, 10.f)), VAlign_Top, FMargin(0.f));
 	AddToHorizontal(Left, LeftContent, VAlign_Center, FMargin(0.f, 0.f, 14.f, 0.f));
 	// The glass frame line beside the cluster, cut at both ends like the reference's canopy frame.
 	AddToHorizontal(Left, Sized(TEXT("FrameLeftBox"), Frame(TEXT("FrameLeft")), 10.f, FrameHeight), VAlign_Center, FMargin(0.f));
-	Place(Left, FVector2D(-250.0, 20.0), FVector2D(1.0, 0.5));
+	Place(Left, FVector2D(-250.0, ClusterY), FVector2D(1.0, 0.5));
 
 	// --- Right of centre: a frame line, then boost energy and afterburner fuel gauges ----------
 	UHorizontalBox* Right = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RightCluster"));
@@ -614,14 +618,14 @@ void USpaceFlightHud::BuildTree()
 		UTextBlock* Title = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 8.f, 160, TEXT("Label"));
 		Title->SetText(FText::FromString(Caption));
 		AddToVertical(Box, Title, HAlign_Center, FMargin(0.f, 0.f, 0.f, 6.f));
-		AddToVertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 9.f, 180.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
+		AddToVertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 9.f, 150.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
 		AddToVertical(Box, MakeText(TextName, 9.f, 20, TEXT("Number")), HAlign_Center, FMargin(0.f));
 		AddToHorizontal(Columns, Box, VAlign_Center, SlotPadding);
 	};
 	Column(TEXT("BST"), TEXT("BoostGauge"), TEXT("BoostText"), FMargin(0.f, 0.f, 22.f, 0.f));
 	Column(TEXT("AB"), TEXT("AfterburnerGauge"), TEXT("AfterburnerText"), FMargin(0.f));
 	AddToHorizontal(Right, Panelled(TEXT("PowerPanel"), Columns, FMargin(14.f, 10.f)), VAlign_Center, FMargin(0.f));
-	Place(Right, FVector2D(250.0, 20.0), FVector2D(0.0, 0.5));
+	Place(Right, FVector2D(250.0, ClusterY), FVector2D(0.0, 0.5));
 
 	// --- Centre: the virtual joystick ----------------------------------------------------------
 	VirtualJoystick = WidgetTree->ConstructWidget<USpaceHudVirtualJoystick>(USpaceHudVirtualJoystick::StaticClass(), TEXT("VirtualJoystick"));
@@ -881,6 +885,147 @@ void USpaceFlightHud::DebugAdvance(float Seconds)
 			Pair.Value->Advance(Seconds);
 		}
 	}
+}
+
+void USpaceCockpitDisplays::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	UUserWidget::NativeTick(MyGeometry, InDeltaTime);
+}
+
+void USpaceCockpitDisplays::BuildTree()
+{
+	using namespace SpaceHudStyle;
+
+	UCanvasPanel* Root = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("Root"));
+	WidgetTree->RootWidget = Root;
+
+	auto Sized = [this](const FName Name, UWidget* Content, float Width, float Height)
+	{
+		USizeBox* Box = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), Name);
+		Box->SetWidthOverride(Width);
+		Box->SetHeightOverride(Height);
+		Box->AddChild(Content);
+		return Box;
+	};
+	auto Vertical = [](UVerticalBox* Box, UWidget* Child, EHorizontalAlignment Align, const FMargin& SlotPadding)
+	{
+		UVerticalBoxSlot* Slot = Box->AddChildToVerticalBox(Child);
+		Slot->SetHorizontalAlignment(Align);
+		Slot->SetPadding(SlotPadding);
+	};
+	auto Horizontal = [](UHorizontalBox* Box, UWidget* Child, EVerticalAlignment Align, const FMargin& SlotPadding)
+	{
+		UHorizontalBoxSlot* Slot = Box->AddChildToHorizontalBox(Child);
+		Slot->SetVerticalAlignment(Align);
+		Slot->SetPadding(SlotPadding);
+	};
+	auto Gauge = [this](const FName Name, bool bHorizontal, int32 Ticks)
+	{
+		USpaceHudGauge* NewGauge = WidgetTree->ConstructWidget<USpaceHudGauge>(USpaceHudGauge::StaticClass(), Name);
+		NewGauge->bHorizontal = bHorizontal;
+		NewGauge->Ticks = Ticks;
+		Gauges.Add(Name, NewGauge);
+		return NewGauge;
+	};
+	// A switch as a lit pill with its name on it, as on the HUD, only bigger.
+	auto Pill = [this](const TCHAR* LampName, float Width, float Height)
+	{
+		const FName Key(LampName);
+		UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("Pill_%s"), LampName)));
+		USpaceHudLamp* NewLamp = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), FName(*FString::Printf(TEXT("Lamp_%s"), LampName)));
+		NewLamp->Color = SpaceHudStyle::Cyan;
+		NewLamp->SquareMax = 18.f;
+		Lamps.Add(Key, NewLamp);
+		UTextBlock* LampText = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 26.f, 120, TEXT("Label"));
+		LampText->SetText(FText::FromString(LampName));
+		LampText->SetJustification(ETextJustify::Center);
+		LampLabels.Add(Key, LampText);
+		if (UOverlaySlot* LampSlot = Overlay->AddChildToOverlay(NewLamp))
+		{
+			LampSlot->SetHorizontalAlignment(HAlign_Fill);
+			LampSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		if (UOverlaySlot* LabelSlot = Overlay->AddChildToOverlay(LampText))
+		{
+			LabelSlot->SetPadding(FMargin(0.f, 0.f, 22.f, 0.f));
+			LabelSlot->SetHorizontalAlignment(HAlign_Center);
+			LabelSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		USizeBox* Box = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), FName(*FString::Printf(TEXT("PillBox_%s"), LampName)));
+		Box->SetWidthOverride(Width);
+		Box->SetHeightOverride(Height);
+		Box->AddChild(Overlay);
+		return Box;
+	};
+	// One screen: dark glass, a cut-corner frame and a title, content below.
+	auto Screen = [&](const TCHAR* ScreenName, const TCHAR* Title, float X, UWidget* Content)
+	{
+		UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("%sScreen"), ScreenName)));
+		UBorder* Glass = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), FName(*FString::Printf(TEXT("%sGlass"), ScreenName)));
+		Glass->SetBrushColor(FLinearColor(0.004f, 0.012f, 0.014f, 1.f));
+		Overlay->AddChildToOverlay(Glass)->SetHorizontalAlignment(HAlign_Fill);
+		USpaceHudPanel* Frame = WidgetTree->ConstructWidget<USpaceHudPanel>(USpaceHudPanel::StaticClass(), FName(*FString::Printf(TEXT("%sFrame"), ScreenName)));
+		Frame->LineColor = Cyan;
+		Frame->Chamfer = 22.f;
+		Frame->Glow = 0.6f;
+		if (UOverlaySlot* FrameSlot = Overlay->AddChildToOverlay(Frame))
+		{
+			FrameSlot->SetPadding(FMargin(10.f));
+			FrameSlot->SetHorizontalAlignment(HAlign_Fill);
+			FrameSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), ScreenName)));
+		UTextBlock* TitleText = MakeText(FName(*FString::Printf(TEXT("%sTitle"), ScreenName)), 28.f, 300, TEXT("Label"));
+		TitleText->SetText(FText::FromString(Title));
+		TitleText->SetColorAndOpacity(FSlateColor(Faded(Cyan, 0.9f)));
+		Vertical(Column, TitleText, HAlign_Left, FMargin(0.f, 0.f, 0.f, 10.f));
+		Vertical(Column, Content, HAlign_Fill, FMargin(0.f));
+		if (UOverlaySlot* ColumnSlot = Overlay->AddChildToOverlay(Column))
+		{
+			ColumnSlot->SetPadding(FMargin(48.f, 22.f, 40.f, 24.f));
+			ColumnSlot->SetHorizontalAlignment(HAlign_Fill);
+			ColumnSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		UCanvasPanelSlot* Slot = Root->AddChildToCanvas(Overlay);
+		Slot->SetPosition(FVector2D(X, 0.0));
+		Slot->SetSize(FVector2D(DisplayWidth, DisplayHeight));
+	};
+
+	// --- Left display, FLIGHT: mode, speed gauge, speed, limiter, G ------------------------------
+	UHorizontalBox* Flight = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightContent"));
+	Horizontal(Flight, Sized(TEXT("SpeedGaugeBox"), Gauge(TEXT("SpeedGauge"), false, 10), 26.f, 320.f), VAlign_Top, FMargin(6.f, 4.f, 34.f, 0.f));
+	UVerticalBox* Readouts = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightReadouts"));
+	Vertical(Readouts, Pill(TEXT("MODE"), 150.f, 50.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 26.f));
+	Vertical(Readouts, MakeText(TEXT("SpeedText"), 64.f, 0, TEXT("Number")), HAlign_Left, FMargin(0.f));
+	Vertical(Readouts, MakeText(TEXT("LimitText"), 26.f, 0, TEXT("Number")), HAlign_Left, FMargin(0.f, 0.f, 0.f, 30.f));
+	Vertical(Readouts, Sized(TEXT("GGaugeBox"), Gauge(TEXT("GGauge"), true, 4), 270.f, 16.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 12.f));
+	Vertical(Readouts, MakeText(TEXT("GText"), 40.f, 0, TEXT("Number")), HAlign_Left, FMargin(0.f));
+	Horizontal(Flight, Readouts, VAlign_Top, FMargin(0.f));
+	Screen(TEXT("Flight"), TEXT("FLIGHT"), 0.f, Flight);
+
+	// --- Right display, SYSTEMS: switches and power ---------------------------------------------
+	UHorizontalBox* Systems = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SystemsContent"));
+	UVerticalBox* Switches = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("Switches"));
+	for (const TCHAR* LampName : { TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST"), TEXT("GEAR"), TEXT("PREC") })
+	{
+		Vertical(Switches, Pill(LampName, 170.f, 44.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 10.f));
+	}
+	Horizontal(Systems, Switches, VAlign_Top, FMargin(0.f, 4.f, 40.f, 0.f));
+	auto PowerColumn = [&](const TCHAR* Caption, const FName GaugeName, const FName TextName)
+	{
+		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), *GaugeName.ToString())));
+		UTextBlock* Caption_ = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 24.f, 160, TEXT("Label"));
+		Caption_->SetText(FText::FromString(Caption));
+		Vertical(Box, Caption_, HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
+		Vertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 24.f, 240.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 10.f));
+		Vertical(Box, MakeText(TextName, 24.f, 0, TEXT("Number")), HAlign_Center, FMargin(0.f));
+		Horizontal(Systems, Box, VAlign_Top, FMargin(0.f, 0.f, 22.f, 0.f));
+	};
+	PowerColumn(TEXT("BST"), TEXT("BoostGauge"), TEXT("BoostText"));
+	PowerColumn(TEXT("AB"), TEXT("AfterburnerGauge"), TEXT("AfterburnerText"));
+	Screen(TEXT("Systems"), TEXT("SYSTEMS"), DisplayWidth, Systems);
+
+	SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 FString USpaceFlightHud::DebugGetText(FName TextName) const
