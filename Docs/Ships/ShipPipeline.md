@@ -16,7 +16,7 @@ Nástroje:
 | Velikost lodi | Malá stíhačka **12–16 m** dlouhá | Určuje kameru, přistání, kolize, pocit rychlosti. Změna později = přeladit spoustu čísel (viz kapitola 5). |
 | Nanite | **Ano** pro trup | Není potřeba ručně dělat LODy, zvládne 100–300 tis. trojúhelníků. |
 | Kokpit/sklo | **Samostatný mesh** `SM_Ship_Vanguard_Canopy` bez Nanite | Nanite nepodporuje průhledné materiály. |
-| Pohyblivé části (podvozek, klapky) | Zatím **ne**, jen statický mesh | Přijde později se skeletal meshem nebo samostatnými díly. |
+| Pohyblivé části (podvozek, klapky) | **Samostatné statické díly**, pohyb dělá kód | Podvozek (SC-2a): díl `SM_Ship_<Loď>_Gear` s nohami vymodelovanými ve stavu „vysunuto“. Loď ho při zasunutí posune do trupu (`GearStowTravelCm`) a skryje. Klapky zatím ne. |
 
 ---
 
@@ -60,7 +60,7 @@ Content/Characters/              (později player character, stejná logika)
 | Co | Vzor | Příklad |
 | --- | --- | --- |
 | Hlavní mesh (trup) | `SM_Ship_<Loď>` | `SM_Ship_Vanguard` |
-| Další díl | `SM_Ship_<Loď>_<Díl>` | `SM_Ship_Vanguard_Canopy` |
+| Další díl | `SM_Ship_<Loď>_<Díl>` | `SM_Ship_Vanguard_Canopy`, `SM_Ship_Vanguard_Gear` |
 | LOD (jen bez Nanite) | `SM_Ship_<Loď>[_<Díl>]_LOD<n>` | `SM_Ship_Vanguard_LOD1` |
 | Kolize (konvexní) | `UCX_<jméno meshe>_<NN>` | `UCX_SM_Ship_Vanguard_00`, `_01` |
 | Kolize box/koule/kapsle | `UBX_` / `USP_` / `UCP_` + totéž | `UBX_SM_Ship_Vanguard_00` |
@@ -81,7 +81,7 @@ Blender při duplikaci přidává `.001` – skript to hlásí jako chybu, přej
 | `SOCKET_Cockpit` | pozice kamery v kokpitu (dnes napevno `CockpitCamera` 90, 0, 15 cm) |
 | `SOCKET_Engine_L`, `SOCKET_Engine_R` (nebo `SOCKET_EngineMain`) | trysky: plamen, zvuk; osa X socketu míří **dozadu ven z trysky** |
 | `SOCKET_CameraTarget` (volitelné) | kam se dívá chase kamera, když střed lodi není vizuální těžiště |
-| `SOCKET_Gear_*` (volitelné, později) | body dotyku podvozku pro přesnější přistání |
+| `SOCKET_Gear_Nose`, `SOCKET_Gear_L`, `SOCKET_Gear_R` | podrážky patek podvozku. U Vanguardu leží přesně na spodku kolizního boxu, proto `gear_extension_cm` = 0. Lodi bez dílu `_Gear` na ně kód dá zástupné nohy z válců (SC-2a). Import prefix `SOCKET_` zahodí, kód bere oba tvary. |
 | `SOCKET_Exit` (později, s postavou) | kde se po výstupu z lodi objeví hráčova postava; osa X = směr, kterým se dívá |
 
 ---

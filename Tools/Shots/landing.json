@@ -1,0 +1,16 @@
+{
+  "_comment": "SC-2a landing gear and precision mode: the legs from the side (down, halfway, landed), the ship resting on its pads, the GEAR UP warning and the HUD lamps. chase_yaw / chase_pitch swing the chase camera round the ship (pitch > 0: from below), chase_zoom scales its distance. Low shots put the Vanguard's centre a little more than its collision box's half height (2.14 m, down to the pads' soles) above the terrain and let it settle. Run: .\\Tools\\Shots.ps1 -Preset landing",
+  "shots": [
+    {"name": "gear_down_side", "camera": "chase", "altitude_m": 40, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 90, "chase_pitch": 14, "chase_zoom": 1.0, "settle": 1.2},
+    {"name": "gear_halfway_side", "camera": "chase", "altitude_m": 40, "facing": "horizon", "hud": 0, "lower_gear": true, "chase_yaw": 90, "chase_pitch": 14, "chase_zoom": 1.0, "settle": 1.0},
+    {"name": "gear_down_below", "camera": "chase", "altitude_m": 40, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 150, "chase_pitch": 25, "chase_zoom": 1.0, "settle": 1.2},
+    {"name": "gear_up_warning_a", "camera": "chase", "altitude_m": 12, "facing": "horizon", "hud": 1, "gear": false, "settle": 1.0},
+    {"name": "gear_up_warning_b", "camera": "chase", "altitude_m": 12, "facing": "horizon", "hud": 1, "gear": false, "settle": 1.25},
+    {"name": "belly_gear_up", "camera": "chase", "altitude_m": 2.6, "facing": "horizon", "hud": 1, "gear": false, "chase_yaw": 80, "chase_pitch": 14, "chase_zoom": 1.0, "settle": 3.0},
+    {"name": "landed_side", "camera": "chase", "altitude_m": 2.6, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 80, "chase_pitch": 14, "chase_zoom": 1.0, "settle": 3.0},
+    {"name": "landed_front", "camera": "chase", "altitude_m": 2.6, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 150, "chase_pitch": 12, "chase_zoom": 1.0, "settle": 3.0},
+    {"name": "landed_hud", "camera": "chase", "altitude_m": 2.6, "facing": "horizon", "hud": 1, "gear": true, "settle": 3.0},
+    {"name": "precision_hud", "camera": "chase", "altitude_m": 60, "facing": "horizon", "hud": 1, "gear": false, "precision": true, "speed_ms": 20, "settle": 1.0},
+    {"name": "landed_cockpit", "camera": "cockpit", "altitude_m": 2.6, "facing": "horizon", "hud": 1, "gear": true, "settle": 3.0}
+  ]
+}

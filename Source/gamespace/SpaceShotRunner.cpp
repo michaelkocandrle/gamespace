@@ -116,6 +116,12 @@ bool USpaceShotRunner::ParseShotList(const FString& Json, TArray<FSpaceShot>& Ou
 		(*Object)->TryGetBoolField(TEXT("afterburner"), Shot.bAfterburner);
 		if ((*Object)->TryGetBoolField(TEXT("hide_hull"), bFlag)) { Shot.HideHull = bFlag ? 1 : 0; }
 		if ((*Object)->TryGetBoolField(TEXT("hide_canopy"), bFlag)) { Shot.HideCanopy = bFlag ? 1 : 0; }
+		if ((*Object)->TryGetBoolField(TEXT("gear"), bFlag)) { Shot.Gear = bFlag ? 1 : 0; }
+		(*Object)->TryGetBoolField(TEXT("lower_gear"), Shot.bLowerGear);
+		if ((*Object)->TryGetBoolField(TEXT("precision"), bFlag)) { Shot.Precision = bFlag ? 1 : 0; }
+		if ((*Object)->TryGetNumberField(TEXT("chase_yaw"), Number)) { Shot.ChaseYaw = float(Number); }
+		if ((*Object)->TryGetNumberField(TEXT("chase_pitch"), Number)) { Shot.ChasePitch = float(Number); }
+		if ((*Object)->TryGetNumberField(TEXT("chase_zoom"), Number)) { Shot.ChaseZoom = float(Number); }
 		const TArray<TSharedPtr<FJsonValue>>* Eye = nullptr;
 		if ((*Object)->TryGetArrayField(TEXT("cockpit_eye"), Eye) && Eye->Num() == 3)
 		{
@@ -188,6 +194,8 @@ void USpaceShotRunner::ApplyShot(const FSpaceShot& Shot, ASpaceshipPawn& Ship)
 	// Place the ship at a height over the nearest body, pointing where the shot asks.
 	if (Shot.AltitudeM >= 0.f)
 	{
+		// A ship landed by the previous shot would stay glued to the ground.
+		Ship.DebugForceLanded(false);
 		if (const ACelestialBody* Body = SpaceShotRunnerLocal::FindBody(World, Ship.GetActorLocation()))
 		{
 			const FVector Centre = Body->GetActorLocation();
@@ -235,6 +243,20 @@ void USpaceShotRunner::ApplyShot(const FSpaceShot& Shot, ASpaceshipPawn& Ship)
 	{
 		Ship.SetComStab(Shot.ComStab != 0);
 	}
+	if (Shot.Gear >= 0)
+	{
+		Ship.DebugSetGearInstant(Shot.Gear != 0);
+	}
+	if (Shot.bLowerGear)
+	{
+		Ship.DebugSetGearInstant(false);
+		Ship.SetGearDown(true);
+	}
+	if (Shot.Precision >= 0)
+	{
+		Ship.SetPrecisionMode(Shot.Precision != 0);
+	}
+	Ship.DebugSetChaseView(Shot.ChaseYaw, Shot.ChasePitch, Shot.ChaseZoom);
 	Ship.SetBoostHeld(Shot.bBoost);
 	Ship.SetAfterburnerHeld(Shot.bAfterburner);
 	Ship.DebugSetMouseStick(Shot.Stick);

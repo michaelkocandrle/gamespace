@@ -35,14 +35,20 @@
       "objects": [
         "SM_Ship_Vanguard_Canopy"
       ]
+    },
+    {
+      "fbx": "SM_Ship_Vanguard_Gear.fbx",
+      "objects": [
+        "SM_Ship_Vanguard_Gear"
+      ]
     }
   ],
   "meshes": {
     "SM_Ship_Vanguard": {
       "lod": 0,
       "part": null,
-      "tris": 74843,
-      "verts": 41435,
+      "tris": 70387,
+      "verts": 39131,
       "materials": [
         "M_Ship_Vanguard_Underlayer",
         "M_Ship_Vanguard_HullPaint",
@@ -62,7 +68,7 @@
         [
           -8.781450271606445,
           -6.480000019073486,
-          -2.152841567993164
+          -1.4972296953201294
         ],
         [
           8.79710578918457,
@@ -90,6 +96,30 @@
           6.324999809265137,
           0.7200000286102295,
           1.1971585750579834
+        ]
+      ]
+    },
+    "SM_Ship_Vanguard_Gear": {
+      "lod": 0,
+      "part": "Gear",
+      "tris": 4456,
+      "verts": 2304,
+      "materials": [
+        "M_Ship_Vanguard_HullDark",
+        "M_Ship_Vanguard_BareMetal",
+        "M_Ship_Vanguard_Rubber"
+      ],
+      "uv_layers": 1,
+      "bounds_m": [
+        [
+          -3.9000000953674316,
+          -2.440000057220459,
+          -2.152841567993164
+        ],
+        [
+          4.734999656677246,
+          2.440000057220459,
+          -0.8170459270477295
         ]
       ]
     }

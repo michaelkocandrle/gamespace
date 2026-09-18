@@ -227,6 +227,40 @@ terrain normal averaged over `LandingFootprintRadiusCm` (1.5 m).
 Headless: `Tools/Tests/test_landing_l5.py`. Under a 1.5 m footprint Veyra's slope has a median
 of 15 degrees; 87 % of the surface is landable, 4.5 % is steeper than 30 degrees.
 
+### Landing gear and precision mode (SC-2a)
+
+Star Citizen style: the gear has to be down to land, and lowering it puts the ship into precision
+(landing) mode. Headless: `Tools/Tests/test_landing_sc2.py`; pictures: `Tools/Shots.ps1 -Preset landing`.
+
+- **Gear** (`N`, `IA_LandingGear`): `Retracted` / `Extending` / `Deployed` / `Retracting`, moving over
+  `GearDeploySeconds` (2 s) and reversible halfway; a small camera jolt when it locks down. Raising it
+  while landed is refused (the LANDING line says so for 3 s).
+- **Touchdown needs the gear down and locked**: `EvaluateTouchdown` puts `GearUp` before every other
+  blocker, so from 30 m down (the probe zone) the LANDING line reads `GEAR UP - lower it (N)` and the
+  HUD's GEAR lamp blinks red. With the gear up the ship can still rest on the ground and slide, but it
+  never becomes Landed (no alignment, no getting out). The rest is the L5 rule, measured under the pads.
+- **The visible gear.** A mesh component whose name contains `Gear` is the ship's modelled gear: the
+  Vanguard's legs are their own part, `SM_Ship_Vanguard_Gear`, split off the hull mesh in Blender by
+  `Tools/Blender/split_ship_gear.py` (they were modelled down and joined into the hull). Stowed, the part
+  rises `GearStowTravelCm` (95 cm) into the belly, eased, and is hidden; it has no collision. The legs
+  already reach the bottom of the collision box (the pads' soles, where `SOCKET_Gear_*` are), so
+  `GearExtensionCm` is 0 for the Vanguard and it stands exactly where it did before SC-2a.
+- **Ships without a gear part** get placeholder legs from `/Engine/BasicShapes/Cylinder` on the
+  sockets named in `GearSocketNames` (with or without the `SOCKET_` prefix the FBX import drops): a
+  sleeve, a piston and a pad in the hull's own HullDark / BareMetal / Rubber materials, swinging down
+  (`GearFoldDeg`) and telescoping out (`ComputeGearLegPose`). They hang `GearExtensionCm` (100) below
+  the hull box; the landing code then keeps the ground that far from the box (`ApplyGearSupport`: the
+  descent stops on the pads, and lowering the gear under a ship on its belly lifts it).
+- **Precision mode** (`P`, `IA_Precision`; on with the gear, off with it; `P` overrides either way):
+  the SCM top speed becomes `ScmMaxSpeed x PrecisionSpeedFraction` (0.15: 31.5 m/s on the Vanguard) and
+  the **speed limiter works inside it**, so one wheel notch is ~1.6 m/s instead of 10.5. Turn rates and
+  rotational accelerations x `PrecisionTurnScale` (0.45). Thruster accelerations stay: stopping needs
+  them. SCM only: in NAV it stays switched on but does nothing (HUD PREC amber). The afterburner is
+  refused. Switched on at speed, the ship brakes down with its retro thrusters (~5 G), not with the
+  overspeed bleed: the hard speed cap stays at the full SCM speed.
+- **HUD**: GEAR lamp (green down, amber blinking on the way, red blinking low with it up) and PREC lamp
+  (green, amber in NAV); the speed gauge's full scale follows the precision speed.
+
 ### Controls
 
 | Action       | Keyboard / mouse           | Gamepad              |
@@ -246,6 +280,8 @@ of 15 degrees; 87 % of the surface is landable, 4.5 % is steeper than 30 degrees
 | Cruise drive | `J` (NAV only: charge / cancel / drop out) | -    |
 | Camera       | `C` (chase / cockpit)      | -                    |
 | Zoom         | `Alt` + mouse wheel (chase distance, cockpit zoom) | - |
+| Landing gear | `N` (down also switches precision on) | -          |
+| Precision mode | `P`                      | -                    |
 | Get out      | `F` (only when LANDED)     | -                    |
 | Free look    | hold right mouse button    | -                    |
 | HUD          | `H` (compact / full / off) | -                    |
@@ -253,7 +289,8 @@ of 15 degrees; 87 % of the surface is landable, 4.5 % is steeper than 30 degrees
 `V`, `J`, `X` and the wheel are `IA_FlightAssist`, `IA_CruiseDrive`, `IA_AllStop` and
 `IA_CameraZoom`, appended to `IMC_Spaceship` by `Tools/Assets/add_flight_modes_input.py`; `B`, the
 wheel again, `K` and `L` are `IA_MasterMode`, `IA_SpeedLimiter`, `IA_GSafe` and `IA_ComStab` from
-`Tools/Assets/add_ifcs_input.py` (without them the ship maps the same keys at runtime).
+`Tools/Assets/add_ifcs_input.py`; `N` and `P` are `IA_LandingGear` and `IA_Precision` from
+`Tools/Assets/add_landing_input.py` (without them the ship maps the same keys at runtime).
 
 **Free look** (Elite-style head look): while the right mouse button is held, the ship keeps its
 heading (pitch/yaw rotation stops at once; roll keys and the flight path carry on) and the mouse
@@ -464,7 +501,7 @@ keeps ticking). Module dependency: `UMG`.
 - **Left of centre**, right-aligned against a frame line:
   - status lamps with small squares - `SCM`/`NAV` (blinks while switching, shows the mode being
     switched to), `CPLD` (reads `BRAKE`, red, under the spacebrake), `GSAF` (amber while boost
-    suspends it), `CSTB`, `BOOST` (amber); dark = off;
+    suspends it), `CSTB`, `BOOST` (amber), `GEAR` and `PREC` (SC-2a, see Landing gear); dark = off;
   - the **speed gauge**: full height = the mode's top speed as the afterburner currently raises it
     (`GetSpeedLimit / GetSpeedLimiter`, so it rescales smoothly while the afterburner spools and
     fades); fill = speed along the nose (green, amber with the afterburner or above the limiter);
@@ -814,11 +851,14 @@ editor, and nobody has to play to see what a change looks like.
 ```
 
 Pictures land in `Saved/Shots/<stamp>_<preset>/NN_<name>.png` (not in git; `-Keep` also copies them
-to `Docs/Shots/` for the repository's visual history). Presets are `cockpit`, `hud`, `ship` and
-`cockpit_tune` (variants side by side). A shot list is JSON read from disk at runtime, so editing one
-needs no repackaging; a shot can set the camera, HUD mode, altitude, facing, speed, master mode,
-limiter, coupled / G-Safe / ComStab, boost, afterburner, the virtual joystick cursor, and - for
-tuning a cockpit without reimporting the ship - `cockpit_eye`, `hide_hull` and `hide_canopy`.
+to `Docs/Shots/` for the repository's visual history). Presets are `cockpit`, `hud`, `ship`,
+`landing` and `cockpit_tune` (variants side by side). A shot list is JSON read from disk at runtime, so
+editing one needs no repackaging; a shot can set the camera, HUD mode, altitude, facing, speed, master
+mode, limiter, coupled / G-Safe / ComStab, boost, afterburner, the virtual joystick cursor, the gear
+(`gear` straight down or up, `lower_gear` to catch it moving), `precision`, the chase camera swung round
+the ship (`chase_yaw`, `chase_pitch` > 0 from below, `chase_zoom`), and - for tuning a cockpit without
+reimporting the ship - `cockpit_eye`, `hide_hull` and `hide_canopy`. A low `altitude_m` with the gear
+down and a few seconds of `settle` lands the ship for real (the collision under it is built at once).
 
 `USpaceShotRunner` (`SpaceShotRunner.*`) does the work: `-ShotList=<path> -ShotOut=<dir>` on the
 command line, or `space.Shot [name]` / `space.Shots <path>` in the console during a normal session.

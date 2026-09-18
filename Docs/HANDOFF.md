@@ -1,6 +1,6 @@
 # Gamespace – handoff pro další session
 
-Stav k **17. 9. 2026**. Tento dokument je vstupní bod pro novou session (Claude Code) i pro autora
+Stav k **18. 9. 2026**. Tento dokument je vstupní bod pro novou session (Claude Code) i pro autora
 projektu. Popisuje, co projekt je, jak se s autorem pracuje, kde je co v kódu, co je hotové, co je
 rozbité nebo neověřené a co následuje.
 
@@ -214,6 +214,21 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 18. **Oprava kamery v kokpitu a workflow vizuální kontroly** (17. 9. 2026): sklo canopy se pilotovi
     skrývá, oko je na (500, 0, 110) a vybralo se podle snímků; snímky ze zabalené hry umí
     `Tools/Shots.ps1` (kapitola 9).
+19. **SC-2a – podvozek a precision mode** (18. 9. 2026, rozsah potvrzený autorem):
+    - podvozek na **N** se vysouvá a zasouvá 2 s a jde otočit v půlce. Bez vysunutého podvozku loď
+      **nedosedne** (blokátor `GearUp`, HUD `GEAR UP - lower it (N)` a červeně blikající kontrolka GEAR
+      už od 30 m). Když loď stojí, zasunout podvozek nejde;
+    - **vizuál podvozku:** Vanguard měl nohy už vymodelované, jenže napevno spojené s trupem (byly vidět
+      i za letu). `Tools/Blender/split_ship_gear.py` je oddělil do dílu `SM_Ship_Vanguard_Gear`, ten
+      prošel pipeline a kód ho při zasunutí posune o 95 cm do břicha a skryje. Loď stojí přesně tam,
+      kde dřív (patky = spodek kolizního boxu, `gear_extension_cm` 0). Lodě bez dílu `_Gear` dostanou
+      zástupné nohy z válců na socketech `Gear_*`;
+    - **precision mode:** zapne se s podvozkem a vypne s ním, ručně ho přepíná **P**. Strop je SCM × 0,15
+      (Vanguard 31,5 m/s) a omezovač funguje uvnitř (zub kolečka = ~1,6 m/s). Otáčení × 0,45, jen
+      v SCM, afterburner je odmítnutý. Když se zapne ve 200 m/s, loď zabrzdí retro tryskami (~5 G);
+    - HUD má kontrolky GEAR a PREC a ukazatel rychlosti se přeškáluje na precision strop;
+    - snímky: nová pole scénáře (`gear`, `lower_gear`, `precision`, `chase_yaw` / `chase_pitch` /
+      `chase_zoom`), scénář `landing`, loď umí ve snímku opravdu přistát.
 
 ---
 
@@ -223,7 +238,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 
 | Třída | Soubor | Úloha |
 | --- | --- | --- |
-| `ASpaceshipPawn` | `SpaceshipPawn.*` | Loď: let (FA, plyn, boost, cruise), přistání, výstup, kamery, zvuk, světla, prach. Hlavní soubor letového systému, cíl přestavby na Star Citizen. |
+| `ASpaceshipPawn` | `SpaceshipPawn.*` | Loď: let (FA, plyn, boost, cruise), přistání, podvozek a precision (SC-2a), výstup, kamery, zvuk, světla, prach. Hlavní soubor letového systému, cíl přestavby na Star Citizen. |
 | `APlayerCharacter`, `UPlayerCharacterAnimInstance` | `PlayerCharacter.*`, `PlayerCharacterAnimInstance.*` | Postava na nohou, gravitace, pohled, animace, foot IK, nastupování, záchrana pod terénem. |
 | `ACelestialBody` | `CelestialBody.*` | Základ těles: `SampleEnvironment` (výška, hustota, gravitace, režim letu), `GetSurfaceFrame`, `FindNearest`. |
 | `AQuadSpherePlanet`, `PlanetTerrain` | `QuadSpherePlanet.*`, `PlanetTerrain.*` | Planeta Veyra: terén, LOD, kolize, atmosféra. |
@@ -263,6 +278,8 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `Content/UI/Fonts/` | Fonty HUD (Rajdhani, Share Tech Mono) i s licencemi SIL OFL. Načítají se ze souboru, ne jako Font asset: importér fontu potřebuje Slate aplikaci, kterou headless editor nemá. Do balíčku je dostává `DirectoriesToAlwaysStageAsUFS` v `Config/DefaultGame.ini`. |
 | `Assets/install_mannequin_pack.py`, `generate_milky_way_glow.py` | Jednorázová instalace a textura. |
 | `Blender/gamespace_ship_export.py` | Export lodí z Blenderu (FBX, manifest, validace). |
+| `Blender/split_ship_gear.py` | Oddělí vymodelovaný podvozek z trupu do dílu `SM_Ship_<Loď>_Gear` (volné díly pod břichem u socketů `SOCKET_Gear_*`, kromě dvířek a světla) a uloží `.blend`. Jednorázové, druhé spuštění nic nedělá. Pak export a import jako obvykle. |
+| `Assets/add_landing_input.py` | Klávesy N (`IA_LandingGear`) a P (`IA_Precision`) do `IMC_Spaceship` (jen přidává). |
 | `Blender/cockpit_view_survey.py` | Změří, co pilot vidí: paprsky přes zorné pole proti skutečnému modelu, kolik % výhledu je volných a co ho blokuje. Po změně modelu nebo pozice kamery. |
 | `Shots.ps1` + `Shots/*.json` | Snímky ze zabalené hry podle scénáře (kapitola 9). |
 | `Content/Python/gamespace_assets.py` | Knihovna pro skriptové vytváření IA, IMC a dalších assetů. |
@@ -297,6 +314,8 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | Kamera chase / kokpit | C |
 | Zoom | Alt + kolečko |
 | Free look | pravé tlačítko |
+| Podvozek (vysunutí zapne i precision) | N |
+| Precision mode | P |
 | Vystoupit (jen když LANDED) | F |
 
 **Postava:** WASD, myš, Space skok, Shift sprint, F nastoupit.
@@ -308,7 +327,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 ## 8. Testy
 
 Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). Každý tiskne
-`… SUMMARY OK/FAILED`. K 17. 9. 2026 **všechny prochází**.
+`… SUMMARY OK/FAILED`. K 18. 9. 2026 **všechny prochází**.
 
 | Test | Pokrývá |
 | --- | --- |
@@ -321,6 +340,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_flight_hud_sc1c.py` | SC-1c: strom widgetů, data HUD z lodi (rychlost vůči omezovači, afterburner, pozpátku, kontrolky, G, palivo, joystick) a jejich zobrazení ve widgetech. Vzhled headless ověřit nejde. |
 | `test_boost_afterburner_sc1b.py` | SC-1b: boost jen manévrovací trysky a rotace, vypnutí G-Safe, afterburner (tah, limit × omezovač, palivo, zamčení, doplňování, plynulý návrat, coupled i decoupled, jen SCM, G-Safe zůstává), Shift + Tab, input a hodnoty Vanguardu. |
 | `test_flight_modes.py` | Boost energie, cruise jen v NAV (vesmír i nad Veyrou), výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
+| `test_landing_sc2.py` | SC-2a: dosednutí jen s podvozkem (GEAR UP před vším ostatním, mezera pod patkami), stavový automat podvozku (časy, otočení v půlce, zákaz zasunutí na zemi), pohyb modelovaného dílu i zástupných nohou, precision (strop, omezovač uvnitř, jen SCM, bez afterburneru, pomalejší otáčení, brzdění bez skoku), kontrolky GEAR/PREC, klávesy N/P bez kolizí, hodnoty a díl `Gear` Vanguardu, scénář `landing`. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
 
@@ -369,12 +389,16 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `hud` | Letový HUD ve všech stavech: klid, na limitu, afterburner, boost s vychýleným joystickem, NAV, decoupled s vypnutým G-Safe, let pozpátku, plný textový výpis. |
 | `ship` | Loď zvenku: nad planetou, při sestupu, ve vesmíru, se zářícími tryskami. |
 | `cockpit_tune` | Porovnání variant kokpitu vedle sebe (pozice oka, co se pilotovi skrývá). Vzor pro dočasné scénáře při ladění. |
+| `landing` | SC-2a: podvozek ze strany (dole, v půlce cesty), zespodu, loď stojící na patkách, varování GEAR UP, loď na břiše bez podvozku, HUD po přistání, precision HUD, kokpit na zemi. |
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
 Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
 (`horizon`/`planet`/`away`), `speed_ms`, `mode` (`SCM`/`NAV`), `limiter`, `coupled`, `gsafe`,
 `comstab`, `boost`, `afterburner`, `stick` (kurzor VJoy), `settle` (sekundy na ustálení),
-`cockpit_eye`, `hide_hull`, `hide_canopy` (pro ladění kokpitu bez reimportu lodi).
+`cockpit_eye`, `hide_hull`, `hide_canopy` (pro ladění kokpitu bez reimportu lodi), `gear` (podvozek
+hned dole / nahoře), `lower_gear` (začne vysouvat, krátký `settle` ho chytí v půlce), `precision`,
+`chase_yaw`, `chase_pitch` (> 0 = zespodu), `chase_zoom` (kamera otočená kolem lodi). Nízká
+`altitude_m` s podvozkem a pár sekund `settle` loď opravdu posadí na zem.
 
 ### Jednotlivý snímek při hraní
 
@@ -396,7 +420,8 @@ space.Shots <cesta.json>    # projede celý scénář odsud
 
 Omezení, se kterými je potřeba počítat:
 - Snímek je statický: nepozná se z něj plynulost, pocit z myši ani zvuk.
-- Scénář umí jen to, co má v polích. Přistání, výstup z lodi nebo menu se zatím fotit nedají.
+- Scénář umí jen to, co má v polích. Přistání už jde (scénář `landing`), výstup z lodi a menu zatím ne.
+- Ve snímcích s otočenou kamerou (`chase_yaw`) je nahoře nápis FREE LOOK – kamera jede přes free look.
 - Hra fotí to, co je zabalené. Po změně C++ nebo obsahu je potřeba `-Package`, jinak snímky ukazují
   starý build; skript na to upozorní.
 
@@ -425,10 +450,13 @@ a speed limiter).
     COMSTAB, BOOST a SCM/NAV, pruhy energie boostu a paliva afterburneru, kurzor virtuálního
     joysticku.
   - Ladění hodnot (G, rychlosti, citlivost VJoy) podle autorova hraní.
-- **SC-2 – Přistání SC stylem**
-  - Landing gear (N) s vizuálem na socketech `Gear_*`.
-  - Precision / landing mode s nízkými limity.
-  - Přepínač VTOL.
+- **SC-2 – Přistání SC stylem**, rozdělené na dva kroky (potvrzeno autorem 18. 9. 2026):
+  - **SC-2a (hotovo, 18. 9. 2026, čeká na autorův test):** podvozek (N) jako podmínka dosednutí,
+    vizuál z modelovaných noh Vanguardu, precision mode (s podvozkem nebo P), kontrolky GEAR a PREC.
+  - **SC-2b (další krok):** VTOL (G, jen SCM, přechod ~1,5 s): hlavní tah ~35 %, strop ~60 m/s, svislé
+    trysky ×1,5 a boční ×1,3, Space/Ctrl na stoupavost ~15 m/s, auto-srovnání na horizont, afterburner
+    a cruise odmítnuté. K tomu zpětná vazba při visení z kapitoly 11 (svislý tah v `GetEngineDemand`,
+    záře trysek, hover zvuk).
 - **SC-3 – zbytek HUD a MFD:** VTOL a GEAR (po SC-2), ESP a LOCK (až budou zbraně), velocity
   vector, MFD panely, celková přestavba na UMG a náhrada anglického debug HUD.
 - **SC-4 – Quantum travel** místo cruise J: markery cílů (Veyra, Keth, Orun, později stanice),
@@ -470,10 +498,22 @@ Další otevřené směry mimo let:
 - **Jas oblohy** (slunce, mlhoviny) je nastavený odhadem. Ladí se v levelu na `StarfieldSky`
   (`NebulaScale`, `SunScale`) nebo v konstantách `build_space_scene.py`.
 - **Vznášení v atmosféře bez zpětné vazby** (autor 17. 9. 2026): loď umí v atmosféře úplně zastavit
-  a viset, ale nic to nedává najevo: trysky nesvítí, zvuk se nemění, G-metr je na nule. Chování je
-  správné (coupled brzdí i svisle), působí ale lacině. **Úkol na budoucí VTOL/hover polish**, ne teď:
-  zapojit svislý tah do `GetEngineDemand` a do záře trysek, přidat hover zvuk a případně ukázat tah
-  na HUD.
+  a viset, ale nic to nedává najevo: trysky nesvítí, zvuk se nemění. Chování je
+  správné (coupled brzdí i svisle), působí ale lacině. **Řeší se v SC-2b spolu s VTOL.** Příčina je
+  změřená: `GetEngineDemand` bere svislou osu × 0,7 proti plné kapacitě zvedacích trysek, visení na
+  Veyře (~0,46 G) tak dává zátěž ~0,06, takže záře i zvuk zůstanou skoro na nule. G-metr naopak
+  ukazuje 0,5–0,8 G (snímky `landing` 18. 9. 2026), jen je to na stupnici 12 G malý proužek.
+- **SC-2a, loď na břiše bez podvozku „visí“ ~0,9 m nad zemí** (snímek `landing/05_belly_gear_up`).
+  Kolizní box lodi (root, podle něj se loď pohybuje) končí u patek podvozku. Se zasunutým podvozkem
+  tedy loď u země stojí na neviditelném boxu. Nastane to jen, když pilot ignoruje GEAR UP. Oprava
+  by znamenala zmenšit box k břichu (−1,5 m), jenže box je symetrický kolem středu lodi, takže by
+  se zmenšil i nahoře a kýlovky by mohly zajet do terénu nebo asteroidu. Dáme ji, až bude jasné,
+  jestli to autorovi vadí.
+- **SC-2a, G-metr po přistání** ukazuje poslední hodnotu z letu (~0,5 G), protože v `Landed` se
+  `GForce` nepřepočítává. Kosmetické, doladí se se SC-2b.
+- **V BP_Ship_Vanguard zůstaly hodnoty zástupných noh** (`gear_strut_radius_cm` 11,
+  `gear_pad_radius_cm` 32, `gear_pad_thickness_cm` 12) z prvního pokusu s válci. Nevadí to: Vanguard má
+  modelovaný díl `Gear` a zástupné nohy nestaví (kapitola 12, BP override zůstává).
 - **Kokpit:** Vanguard nemá modelovaný vnitřek kabiny (canopy je nízká skořepina nad plným trupem a
   rám kabiny je součástí trupu). Sklo canopy se proto pilotovi skrývá (`hide_canopy_in_cockpit`) a
   oko je na (500, 0, 110): obloha je volná a dole je vidět příď jako palubní deska. Z pozice sedadla
@@ -523,4 +563,5 @@ Další otevřené směry mimo let:
 Viz `git log --oneline`. Poslední kroky:
 - `73b1410`: letové režimy, cruise, vrstvený zvuk, živá obloha, opravy výstupu a kokpitu;
 - `77b26d6`: hratelný build (úvodní obrazovka, pauza, nastavení, H, cookování, zvuky UI) a handoff;
-- následující commit: SC-1a, jádro IFCS podle Star Citizen.
+- následující commity: SC-1a, SC-1b, SC-1c (jádro IFCS, boost a afterburner, HUD);
+- SC-2a: podvozek (N) a precision mode (P), podvozek Vanguardu jako samostatný díl.

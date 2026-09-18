@@ -38,6 +38,17 @@ struct FSpaceShot
 	/** Hide the hull / the canopy from the pilot for this shot; -1 leaves the ship's setting. */
 	int32 HideHull = -1;
 	int32 HideCanopy = -1;
+	/** Landing gear put straight down (1) or up (0), no animation; -1 leaves it. */
+	int32 Gear = -1;
+	/** Start lowering the gear (animated), so a short settle catches it on the way down. */
+	bool bLowerGear = false;
+	/** Precision mode on (1) / off (0) after the gear; -1 leaves what the gear set. */
+	int32 Precision = -1;
+	/** Chase camera swung round the ship (free look angles, degrees) and its distance as a multiple
+	 * of the normal one (0: unchanged). All zero: the normal view from behind. */
+	float ChaseYaw = 0.f;
+	float ChasePitch = 0.f;
+	float ChaseZoom = 0.f;
 };
 
 /**

@@ -16,6 +16,7 @@ class UInputMappingContext;
 class UMaterialInstanceDynamic;
 class USoundBase;
 class USpringArmComponent;
+class UStaticMesh;
 class UStaticMeshComponent;
 struct FInputActionValue;
 
@@ -66,7 +67,19 @@ enum class ELandingBlocker : uint8
 	/** Thrust or upward lift held at TakeoffInputThreshold or more. */
 	EngineInput,
 	/** Just took off; TakeoffCooldownSeconds not over. */
-	TakeoffCooldown
+	TakeoffCooldown,
+	/** Landing gear not fully down (N). The ship can rest on its belly but never counts as landed. */
+	GearUp
+};
+
+/** Landing gear (N). Moving between the ends takes GearDeploySeconds. */
+UENUM(BlueprintType)
+enum class EGearState : uint8
+{
+	Retracted,
+	Extending,
+	Deployed,
+	Retracting
 };
 
 /** A hull material slot whose EmissiveStrength the ship animates (thrusters, strobes). */
@@ -454,9 +467,104 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
 	float GetGroundTiltDeg() const { return GroundTiltDeg; }
 
+	// --- Landing gear and precision mode (SC-2a) --------------------------------------------------
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
+	EGearState GetGearState() const { return GearState; }
+
+	/** Gear fully down and locked: the only state the ship can land in. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
+	bool IsGearDeployed() const { return GearState == EGearState::Deployed; }
+
+	/** How far out the gear is, 0 stowed .. 1 down and locked (linear in time). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
+	float GetGearDeploy() const { return GearDeploy; }
+
+	/**
+	 * Lowers (true) or raises the gear; it moves over GearDeploySeconds and can reverse halfway.
+	 * Lowering it switches precision mode on, raising it switches it off. Raising is refused while
+	 * landed (the ship stands on it). Returns false when refused.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Gear")
+	bool SetGearDown(bool bDown);
+
+	/** N: lower or raise the gear. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Gear")
+	void ToggleGear();
+
+	/** Seconds the "gear stays down while landed" refusal is still worth showing. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
+	float GetGearMessageSeconds() const { return GearMessageSeconds; }
+
+	/** How far below the hull's collision box the gear reaches right now, cm (GearExtensionCm x deploy). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
+	float GetGearGroundOffsetCm() const;
+
+	/**
+	 * One gear leg relative to its socket at a deploy fraction (0 stowed .. 1 down), as the visible
+	 * legs use it: [0] pivot rotation (X pitch, Y yaw, Z roll), [1] sleeve centre, [2] sleeve scale,
+	 * [3] piston centre, [4] piston scale, [5] pad centre, [6] pad scale - centres and scales in the
+	 * pivot's frame, for the 100 cm engine cylinder. bNose folds forward, the others backward.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Gear")
+	TArray<FVector> ComputeGearLegPose(float Deploy, bool bNose) const;
+
+	/** Tests: advance only the gear by DeltaSeconds (the code the tick runs). */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugStepGear(float DeltaSeconds);
+
+	/** Tests and screenshots: put the gear straight into its end position, no animation. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugSetGearInstant(bool bDown);
+
+	/** Tests: the landing state machine's bookkeeping, as if the ship had just touched down. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugForceLanded(bool bLanded);
+
+	/**
+	 * Screenshots: swing the chase camera round the ship (free look held at these angles, degrees)
+	 * and set its distance as a multiple of the normal one (0 keeps it). Zero angles release it.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugSetChaseView(float YawDeg, float PitchDeg, float Zoom);
+
+	/** Tests: number of placeholder gear legs built on the hull's sockets (0 when the ship has a modelled gear part). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Tests")
+	int32 DebugGetGearLegCount() const { return GearLegs.Num(); }
+
+	/**
+	 * How far a modelled gear part sits above its modelled (down) position at a deploy fraction, cm:
+	 * GearStowTravelCm stowed, 0 down and locked, eased in between. The gear part uses exactly this.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Gear")
+	float ComputeGearStowOffsetCm(float Deploy) const;
+
+	/** Precision mode switched on (gear, or P). In effect only in SCM, see IsPrecisionActive. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Precision")
+	bool IsPrecisionModeOn() const { return bPrecisionMode; }
+
+	/** Precision mode in effect: switched on and in SCM (NAV is for travel and ignores it). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Precision")
+	bool IsPrecisionActive() const { return bPrecisionMode && MasterMode == EMasterMode::SCM; }
+
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Precision")
+	void SetPrecisionMode(bool bOn);
+
+	/** P: precision mode on / off by hand (the gear sets it too). */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Precision")
+	void TogglePrecisionMode() { SetPrecisionMode(!bPrecisionMode); }
+
+	/**
+	 * The touchdown rule with the gear: GearUp unless the gear is down and locked, otherwise
+	 * EvaluateLanding on the gap under the pads (hull gap minus GearExtensionCm; pads already pressed
+	 * into the ground count as 0). HullGap < 0 means nothing below. The state machine uses exactly this.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Landing")
+	ELandingBlocker EvaluateTouchdown(float HullGap, float Speed, float TiltDeg, float SlopeDeg, bool bEngineInput, bool bGearDown) const;
+
 	/**
 	 * The touchdown rule on its own: the first blocker for these measurements, or None. The state
-	 * machine uses exactly this; exposed for tests.
+	 * machine uses it through EvaluateTouchdown, on the gap under the gear; exposed for tests.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Landing")
 	ELandingBlocker EvaluateLanding(float GroundGap, float Speed, float TiltDeg, float SlopeDeg, bool bEngineInput) const;
@@ -586,6 +694,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UAudioComponent> EngineAudio;
 
+	/** What the gear legs are built from (/Engine/BasicShapes/Cylinder): placeholder art until a modelled gear replaces it. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Gear")
+	TObjectPtr<UStaticMesh> GearLegMesh;
+
 	// ---------------------------------------------------------------------------------------
 	// Enhanced Input
 	// ---------------------------------------------------------------------------------------
@@ -703,7 +815,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> AfterburnerAction;
 
-	/** Maps keys the authored flight context lacks (F, V, J, X, B, K, L, right mouse button, wheel). */
+	/** Digital, pressed: landing gear down / up (N). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> LandingGearAction;
+
+	/** Digital, pressed: precision mode on / off (P). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> PrecisionAction;
+
+	/** Maps keys the authored flight context lacks (F, V, J, X, B, K, L, N, P, right mouse button, wheel). */
 	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> InteractMappingContext;
 
@@ -1232,6 +1352,69 @@ protected:
 	float TakeoffCooldownSeconds = 0.75f;
 
 	// ---------------------------------------------------------------------------------------
+	// Landing gear and precision mode (SC-2a)
+	// ---------------------------------------------------------------------------------------
+
+	/**
+	 * How far the deployed gear reaches below the hull's collision box, cm: a landed ship rests this
+	 * high on its pads. The legs themselves have no collision; the ground is kept at this distance
+	 * from the hull box instead, which is far more robust than three thin cylinders.
+	 *
+	 * 0 for a ship whose modelled gear is already inside its collision box (the Vanguard: the box
+	 * ends at the pads' soles, where the SOCKET_Gear_* empties are). The default is for the
+	 * placeholder legs, which hang below the hull.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Gear", meta = (ClampMin = "0.0"))
+	float GearExtensionCm = 100.f;
+
+	/**
+	 * Modelled gear: a mesh component whose name contains "Gear" (the SM_<Ship>_Gear part from
+	 * Blender, see Tools/Blender/split_ship_gear.py) is the gear. Stowed, it rises this far into the
+	 * hull, cm, and is hidden; it comes down over GearDeploySeconds. Ships without such a part get
+	 * placeholder legs on their gear sockets instead.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Gear", meta = (ClampMin = "0.0"))
+	float GearStowTravelCm = 95.f;
+
+	/** Seconds for the gear to go all the way down or up. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Gear", meta = (ClampMin = "0.05", Units = "s"))
+	float GearDeploySeconds = 2.f;
+
+	/**
+	 * Sockets on the hull mesh that get a leg (SOCKET_Gear_* in Blender; the FBX import drops the
+	 * SOCKET_ prefix, and either spelling is found). A name containing "Nose" folds forward, the others back.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Gear")
+	TArray<FName> GearSocketNames = { FName(TEXT("Gear_Nose")), FName(TEXT("Gear_L")), FName(TEXT("Gear_R")) };
+
+	/** Radius of the upper strut sleeve, cm. The piston below it is 65 % of that. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Gear", meta = (ClampMin = "1.0"))
+	float GearStrutRadiusCm = 10.f;
+
+	/** Radius of the foot pad, cm. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Gear", meta = (ClampMin = "1.0"))
+	float GearPadRadiusCm = 30.f;
+
+	/** Thickness of the foot pad, cm. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Gear", meta = (ClampMin = "1.0"))
+	float GearPadThicknessCm = 12.f;
+
+	/** How far a stowed leg is swung up under the hull, degrees (nearly flat). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Gear", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+	float GearFoldDeg = 85.f;
+
+	/**
+	 * Precision mode: top speed as a fraction of the SCM one. The speed limiter still works inside
+	 * it, so the wheel sets the approach speed in fine steps (Vanguard: 31.5 m/s, ~1.6 m/s a notch).
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Precision", meta = (ClampMin = "0.02", ClampMax = "1.0"))
+	float PrecisionSpeedFraction = 0.15f;
+
+	/** Precision mode: turn rates and rotational accelerations as a fraction of the normal ones. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Precision", meta = (ClampMin = "0.05", ClampMax = "1.0"))
+	float PrecisionTurnScale = 0.45f;
+
+	// ---------------------------------------------------------------------------------------
 	// Engine audio
 	// ---------------------------------------------------------------------------------------
 
@@ -1347,6 +1530,15 @@ private:
 	void HandleComStab(const FInputActionValue& Value);
 	void HandleAfterburner(const FInputActionValue& Value);
 	void HandleAfterburnerCompleted(const FInputActionValue& Value);
+	void HandleLandingGear(const FInputActionValue& Value);
+	void HandlePrecision(const FInputActionValue& Value);
+	/** Moves the gear towards its commanded end and poses the legs. */
+	void UpdateGear(float DeltaSeconds);
+	/** Creates the visible gear legs on the hull's gear sockets (once, at BeginPlay). */
+	void BuildGearLegs();
+	void PoseGearLegs();
+	/** Keeps the deployed gear's pads out of the ground: stops the descent there and lifts a ship resting on its belly. */
+	void ApplyGearSupport(float DeltaSeconds);
 	void UpdateAfterburner(float DeltaSeconds);
 	/** Alt held on the controlling player's keyboard: the wheel zooms instead of setting the limiter. */
 	bool IsAltHeld() const;
@@ -1476,6 +1668,27 @@ private:
 	FCelestialEnvironment Environment;
 	bool bHasEnvironment = false;
 	TWeakObjectPtr<ACelestialBody> NearestBody;
+
+	EGearState GearState = EGearState::Retracted;
+	float GearDeploy = 0.f;
+	float GearMessageSeconds = 0.f;
+	bool bPrecisionMode = false;
+
+	/** One visible gear leg: pivot at the socket, a sleeve, a piston and a foot pad. */
+	struct FGearLeg
+	{
+		TWeakObjectPtr<USceneComponent> Pivot;
+		TWeakObjectPtr<UStaticMeshComponent> Sleeve;
+		TWeakObjectPtr<UStaticMeshComponent> Piston;
+		TWeakObjectPtr<UStaticMeshComponent> Pad;
+		bool bNose = false;
+	};
+	TArray<FGearLeg> GearLegs;
+	/** The modelled gear part, when the ship has one, and where it sits with the gear down. */
+	TWeakObjectPtr<UStaticMeshComponent> ModelledGear;
+	FVector ModelledGearDownLocation = FVector::ZeroVector;
+	/** Deploy fraction the legs were last posed at (-1: never). */
+	float GearPosed = -1.f;
 
 	ELandingState LandingState = ELandingState::Flying;
 	ELandingBlocker LandingBlocker = ELandingBlocker::NoSurface;

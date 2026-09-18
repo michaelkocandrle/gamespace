@@ -114,6 +114,11 @@ namespace
 		if (State == ELandingState::Landed)
 		{
 			OutColor = FLinearColor(0.3f, 1.f, 0.35f);
+			if (Ship.GetGearMessageSeconds() > 0.f)
+			{
+				OutColor = FLinearColor(1.f, 0.75f, 0.25f);
+				return TEXT("LANDED   the gear stays down while landed - take off first (W / Space)");
+			}
 			return FString::Printf(TEXT("LANDED   slope %.0f deg   (W / Space to take off)"), Ship.GetGroundSlopeDeg());
 		}
 		if (!Ship.HasGroundInfo())
@@ -122,8 +127,9 @@ namespace
 			return TEXT("-");
 		}
 
+		// Under the pads with the gear down, under the belly without it.
 		const FString Gap = Ship.GetGroundGapCm() < 0.f ? FString(TEXT("> 2 m"))
-			: FString::Printf(TEXT("%.1f m"), Ship.GetGroundGapCm() / 100.f);
+			: FString::Printf(TEXT("%.1f m"), FMath::Max(Ship.GetGroundGapCm() - Ship.GetGearGroundOffsetCm(), 0.f) / 100.f);
 		const FString Measurements = FString::Printf(TEXT("gap %s   slope %.0f deg   tilt %.0f deg"),
 			*Gap, Ship.GetGroundSlopeDeg(), Ship.GetGroundTiltDeg());
 
@@ -144,9 +150,14 @@ namespace
 			Reason = Ship.GetCruiseState() != ECruiseState::Off ? TEXT("cruise on") : TEXT("engines on");
 			break;
 		case ELandingBlocker::TakeoffCooldown: Reason = TEXT("taking off"); break;
+		case ELandingBlocker::GearUp:
+			Reason = Ship.GetGearState() == EGearState::Extending ? TEXT("gear coming down") : TEXT("GEAR UP - lower it (N)");
+			break;
 		default: break;
 		}
-		OutColor = Ship.GetLandingBlocker() == ELandingBlocker::TooSteep ? FLinearColor(1.f, 0.45f, 0.2f) : FLinearColor(0.8f, 0.8f, 0.8f);
+		const ELandingBlocker Blocker = Ship.GetLandingBlocker();
+		OutColor = Blocker == ELandingBlocker::TooSteep || (Blocker == ELandingBlocker::GearUp && Ship.GetGearState() != EGearState::Extending)
+			? FLinearColor(1.f, 0.45f, 0.2f) : FLinearColor(0.8f, 0.8f, 0.8f);
 		return FString::Printf(TEXT("%s   %s"), *Measurements, Reason);
 	}
 

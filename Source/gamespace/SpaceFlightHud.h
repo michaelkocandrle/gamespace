@@ -124,6 +124,26 @@ struct GAMESPACE_API FSpaceFlightHudState
 
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	float Deadzone = 0.f;
+
+	/** Landing gear down and locked (SC-2a). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bGearDown = false;
+
+	/** Gear on its way down or up. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bGearMoving = false;
+
+	/** Low over the ground with the gear up: touchdown is blocked until it comes down. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bGearWarning = false;
+
+	/** Precision mode switched on (gear or P). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bPrecisionOn = false;
+
+	/** Precision mode in effect (on, and in SCM). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bPrecisionActive = false;
 };
 
 /**
@@ -278,7 +298,7 @@ protected:
  * SC-1c flight HUD in UMG, after Docs/UI/SC_ThrottleHUD_VisualReference.md: thin, translucent cyan
  * lines around the middle of the screen instead of panels.
  *
- * - Left of centre: status lamps (SCM/NAV, CPLD, GSAF, CSTB, BOOST), the vertical speed gauge
+ * - Left of centre: status lamps (SCM/NAV, CPLD, GSAF, CSTB, BOOST, GEAR, PREC), the vertical speed gauge
  *   (fill = speed along the nose, marker = speed limiter, red reverse zone at the bottom), speed and
  *   limit as small numbers under it, and the G meter tied to it.
  * - Right of centre: boost energy and afterburner fuel gauges in the same style.
@@ -312,7 +332,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Flight HUD|Tests")
 	TArray<FString> DebugGetWidgetNames() const;
 
-	/** Tests: whether the status lamp (CPLD, GSAF, CSTB, BOOST, MODE) is lit, and its colour. */
+	/** Tests: whether the status lamp (CPLD, GSAF, CSTB, BOOST, MODE, GEAR, PREC) is lit, and its colour. */
 	UFUNCTION(BlueprintCallable, Category = "Flight HUD|Tests")
 	bool DebugIsLampLit(FName Lamp, FLinearColor& OutColor) const;
 

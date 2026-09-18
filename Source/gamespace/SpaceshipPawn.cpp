@@ -5,7 +5,9 @@
 #include "Camera/CameraComponent.h"
 #include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Materials/MaterialInterface.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/CollisionProfile.h"
@@ -57,6 +59,8 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const GSafeActionPath = TEXT("/Game/Input/IA_GSafe.IA_GSafe");
 	const TCHAR* const ComStabActionPath = TEXT("/Game/Input/IA_ComStab.IA_ComStab");
 	const TCHAR* const AfterburnerActionPath = TEXT("/Game/Input/IA_Afterburner.IA_Afterburner");
+	const TCHAR* const LandingGearActionPath = TEXT("/Game/Input/IA_LandingGear.IA_LandingGear");
+	const TCHAR* const PrecisionActionPath = TEXT("/Game/Input/IA_Precision.IA_Precision");
 
 	/** 1 G in cm/s^2. */
 	constexpr double StandardGravityCmS2 = 980.665;
@@ -172,6 +176,13 @@ ASpaceshipPawn::ASpaceshipPawn()
 
 	SpaceDust = CreateDefaultSubobject<USpaceDustComponent>(TEXT("SpaceDust"));
 	SpaceDust->SetupAttachment(HullCollision);
+
+	// A hard reference, so the cooker packs it (engine content loaded by path would be missing).
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> GearCylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+	if (GearCylinder.Succeeded())
+	{
+		GearLegMesh = GearCylinder.Object;
+	}
 }
 
 void ASpaceshipPawn::BeginPlay()
@@ -200,6 +211,7 @@ void ASpaceshipPawn::BeginPlay()
 	}
 	SetupAudioLayers();
 	SetupShipLights();
+	BuildGearLegs();
 }
 
 void ASpaceshipPawn::SnapCameraToShip()
@@ -352,6 +364,15 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		Input->BindAction(AfterburnerAction, ETriggerEvent::Canceled, this, &ASpaceshipPawn::HandleAfterburnerCompleted);
 	}
 
+	if (LandingGearAction)
+	{
+		Input->BindAction(LandingGearAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleLandingGear);
+	}
+	if (PrecisionAction)
+	{
+		Input->BindAction(PrecisionAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandlePrecision);
+	}
+
 	if (FreeLookAction)
 	{
 		Input->BindAction(FreeLookAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleFreeLookStarted);
@@ -430,6 +451,14 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			if (AfterburnerAction && !IsMapped(AfterburnerAction))
 			{
 				InteractMappingContext->MapKey(AfterburnerAction, EKeys::Tab);
+			}
+			if (LandingGearAction && !IsMapped(LandingGearAction))
+			{
+				InteractMappingContext->MapKey(LandingGearAction, EKeys::N);
+			}
+			if (PrecisionAction && !IsMapped(PrecisionAction))
+			{
+				InteractMappingContext->MapKey(PrecisionAction, EKeys::P);
 			}
 		}
 		if (InteractMappingContext && InteractMappingContext->GetMappings().Num() > 0)
@@ -538,6 +567,8 @@ void ASpaceshipPawn::ResolveInputAssets()
 	LoadOrMake(GSafeAction, GSafeActionPath, TEXT("IA_GSafe_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(ComStabAction, ComStabActionPath, TEXT("IA_ComStab_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(AfterburnerAction, AfterburnerActionPath, TEXT("IA_Afterburner_Runtime"), EInputActionValueType::Boolean);
+	LoadOrMake(LandingGearAction, LandingGearActionPath, TEXT("IA_LandingGear_Runtime"), EInputActionValueType::Boolean);
+	LoadOrMake(PrecisionAction, PrecisionActionPath, TEXT("IA_Precision_Runtime"), EInputActionValueType::Boolean);
 
 	BuildProceduralInputAssets();
 }
@@ -783,6 +814,16 @@ void ASpaceshipPawn::HandleComStab(const FInputActionValue& /*Value*/)
 	SetComStab(!bComStab);
 }
 
+void ASpaceshipPawn::HandleLandingGear(const FInputActionValue& /*Value*/)
+{
+	ToggleGear();
+}
+
+void ASpaceshipPawn::HandlePrecision(const FInputActionValue& /*Value*/)
+{
+	TogglePrecisionMode();
+}
+
 bool ASpaceshipPawn::IsAltHeld() const
 {
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -895,7 +936,14 @@ void ASpaceshipPawn::AdjustSpeedLimiter(float Notches)
 
 float ASpaceshipPawn::GetModeMaxSpeed() const
 {
-	return MasterMode == EMasterMode::NAV ? NavMaxSpeed : ScmMaxSpeed;
+	// Precision mode is a smaller SCM for the limiter and the gauge. The hard cap in UpdateLinearMotion
+	// stays at the full SCM speed: switched on at speed, the flight computer brakes down with the
+	// retro thrusters instead of the overspeed bleed (which would pull ~25 G from SCM speed).
+	if (MasterMode == EMasterMode::NAV)
+	{
+		return NavMaxSpeed;
+	}
+	return IsPrecisionActive() ? ScmMaxSpeed * PrecisionSpeedFraction : ScmMaxSpeed;
 }
 
 float ASpaceshipPawn::GetSpeedLimit() const
@@ -1337,6 +1385,7 @@ void ASpaceshipPawn::StepFlight(float DeltaSeconds)
 {
 	UpdateEnvironment(DeltaSeconds);
 	UpdateMasterMode(DeltaSeconds);
+	UpdateGear(DeltaSeconds);
 	UpdateLanding(DeltaSeconds);
 	UpdateBoost(DeltaSeconds);
 	UpdateAfterburner(DeltaSeconds);
@@ -1427,7 +1476,7 @@ void ASpaceshipPawn::UpdateAfterburner(float DeltaSeconds)
 	// SCM only (NAV already flies at five times SCM speed and has cruise for more), and only while it
 	// can do something: W forward, no spacebrake, flying.
 	bAfterburnerActive = bAfterburnerHeld && ThrustInput > 0.f && !bSpaceBrakeHeld && !bAfterburnerLocked && AfterburnerFuel > 0.f
-		&& MasterMode == EMasterMode::SCM && CruiseState == ECruiseState::Off && LandingState != ELandingState::Landed;
+		&& MasterMode == EMasterMode::SCM && !IsPrecisionActive() && CruiseState == ECruiseState::Off && LandingState != ELandingState::Landed;
 
 	if (bAfterburnerActive)
 	{
@@ -1645,7 +1694,8 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 		RateScale *= NavTurnScale;
 	}
 	// Boost feeds the manoeuvring thrusters: faster turns, and faster to start and stop them.
-	const double RotationBoost = bBoostActive ? BoostRotationMultiplier : 1.0;
+	// Precision mode turns gently, and starts and stops turns as gently.
+	const double RotationBoost = (bBoostActive ? BoostRotationMultiplier : 1.0) * (IsPrecisionActive() ? PrecisionTurnScale : 1.0);
 	RateScale *= float(RotationBoost);
 
 	FVector TargetRates(
@@ -1774,7 +1824,7 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 			// Hovering over the ground with nothing held, hold a little less than gravity so the ship
 			// sinks onto its gear on its own.
 			double GravityHold = 1.0;
-			if (bSurfaceValid && GroundGapCm >= 0.f && GroundGapCm < 400.f && ThrustInput == 0.f && LiftInput <= 0.f && !bSpaceBrakeHeld)
+			if (bSurfaceValid && GroundGapCm >= 0.f && GroundGapCm - GetGearGroundOffsetCm() < 400.f && ThrustInput == 0.f && LiftInput <= 0.f && !bSpaceBrakeHeld)
 			{
 				GravityHold = 1.0 - LandingSettleGravityFraction;
 			}
@@ -1836,7 +1886,8 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		}
 		else
 		{
-			const double SpeedCap = GetModeMaxSpeed() * (1.0 + (AfterburnerSpeedMultiplier - 1.0) * AfterburnerBlend);
+			const double ModeTop = MasterMode == EMasterMode::NAV ? NavMaxSpeed : ScmMaxSpeed;
+			const double SpeedCap = ModeTop * (1.0 + (AfterburnerSpeedMultiplier - 1.0) * AfterburnerBlend);
 			if (Speed > SpeedCap)
 			{
 				// Above the mode's top speed (afterburner fading, or leaving NAV for SCM): while the
@@ -1852,6 +1903,8 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 			}
 		}
 	}
+
+	ApplyGearSupport(DeltaSeconds);
 
 	if (LinearVelocity.IsNearlyZero())
 	{
@@ -1925,6 +1978,20 @@ namespace
 		}
 		return FRotationMatrix::MakeFromXZ(Forward.GetSafeNormal(), Normal).ToQuat();
 	}
+}
+
+ELandingBlocker ASpaceshipPawn::EvaluateTouchdown(float HullGap, float Speed, float TiltDeg, float SlopeDeg, bool bEngineInput, bool bGearDown) const
+{
+	// First, so the warning shows all the way down through the probe zone, not only at the ground.
+	if (!bGearDown)
+	{
+		return ELandingBlocker::GearUp;
+	}
+	if (HullGap < 0.f)
+	{
+		return ELandingBlocker::TooHigh;
+	}
+	return EvaluateLanding(FMath::Max(HullGap - GearExtensionCm, 0.f), Speed, TiltDeg, SlopeDeg, bEngineInput);
 }
 
 ELandingBlocker ASpaceshipPawn::EvaluateLanding(float GroundGap, float Speed, float TiltDeg, float SlopeDeg, bool bEngineInput) const
@@ -2004,13 +2071,14 @@ void ASpaceshipPawn::UpdateLanding(float DeltaSeconds)
 		// Straight down with the real hull shape: the gap is what the collision actually sees,
 		// wherever on the hull the first contact would be.
 		const FVector Start = GetActorLocation();
-		const double ProbeLength = FMath::Max(LandingMaxGapCm, GroundContactToleranceCm) + 200.0;
+		const double ProbeLength = FMath::Max(LandingMaxGapCm, GroundContactToleranceCm) + GearExtensionCm + 200.0;
 		FHitResult Hit;
 		if (SweepHull(Start, Start - Environment.Up * ProbeLength, GetActorQuat(), Hit))
 		{
 			GroundGapCm = Hit.bStartPenetrating ? 0.f : float(Hit.Distance);
 		}
-		bGroundContact = GroundGapCm >= 0.f && GroundGapCm <= GroundContactToleranceCm;
+		// Touching means the pads with the gear down, the belly without it.
+		bGroundContact = GroundGapCm >= 0.f && GroundGapCm - GetGearGroundOffsetCm() <= GroundContactToleranceCm;
 	}
 
 	const bool bEngineInput = FMath::Abs(ThrustInput) >= TakeoffInputThreshold || LiftInput >= TakeoffInputThreshold
@@ -2028,7 +2096,7 @@ void ASpaceshipPawn::UpdateLanding(float DeltaSeconds)
 
 	LandingBlocker = !bSurfaceValid ? ELandingBlocker::NoSurface
 		: TakeoffCooldown > 0.f ? ELandingBlocker::TakeoffCooldown
-		: EvaluateLanding(GroundGapCm, LinearVelocity.Size(), GroundTiltDeg, GroundSlopeDeg, bEngineInput);
+		: EvaluateTouchdown(GroundGapCm, LinearVelocity.Size(), GroundTiltDeg, GroundSlopeDeg, bEngineInput, IsGearDeployed());
 
 	if (LandingBlocker == ELandingBlocker::None)
 	{
@@ -2093,10 +2161,12 @@ void ASpaceshipPawn::UpdateLandedMotion(float DeltaSeconds)
 	// Where the hull, in its new rotation, rests on the collision: sweep it down onto the ground
 	// from a metre above, and ease towards that. Keeps the ship sitting on the terrain as it
 	// levels out, without sinking in or hovering.
+	// With the gear down the hull rests GearExtensionCm up, on the pads.
+	const double RestHeight = 1.0 + GetGearGroundOffsetCm();
 	FHitResult Hit;
-	if (SweepHull(Location + GroundNormal * 100.0, Location - GroundNormal * 300.0, Rotation, Hit) && !Hit.bStartPenetrating)
+	if (SweepHull(Location + GroundNormal * 100.0, Location - GroundNormal * (300.0 + RestHeight), Rotation, Hit) && !Hit.bStartPenetrating)
 	{
-		Location = FMath::Lerp(Location, Hit.Location + GroundNormal * 1.0, Alpha);
+		Location = FMath::Lerp(Location, Hit.Location + GroundNormal * RestHeight, Alpha);
 	}
 
 	SetActorLocationAndRotation(Location, Rotation);
@@ -2326,4 +2396,328 @@ void ASpaceshipPawn::UpdateSpaceDust(float DeltaSeconds)
 		return;
 	}
 	SpaceDust->UpdateDust(PlayerController->PlayerCameraManager->GetCameraLocation(), LinearVelocity, 1.f + 1.5f * CruiseBlend);
+}
+
+// -------------------------------------------------------------------------------------------
+// Landing gear and precision mode (SC-2a)
+// -------------------------------------------------------------------------------------------
+
+bool ASpaceshipPawn::SetGearDown(bool bDown)
+{
+	if (!bDown && LandingState == ELandingState::Landed)
+	{
+		// The ship stands on it. Take off first.
+		GearMessageSeconds = 3.f;
+		return false;
+	}
+	const bool bGoingDown = GearState == EGearState::Deployed || GearState == EGearState::Extending;
+	if (bDown == bGoingDown)
+	{
+		return true;
+	}
+	GearState = bDown ? EGearState::Extending : EGearState::Retracting;
+	GearMessageSeconds = 0.f;
+	// Star Citizen puts a ship with its gear down into landing mode; the pilot can still override it (P).
+	SetPrecisionMode(bDown);
+	UE_LOG(LogSpaceship, Log, TEXT("%s: gear %s"), *GetName(), bDown ? TEXT("down") : TEXT("up"));
+	return true;
+}
+
+void ASpaceshipPawn::ToggleGear()
+{
+	const bool bGoingDown = GearState == EGearState::Deployed || GearState == EGearState::Extending;
+	SetGearDown(!bGoingDown);
+}
+
+void ASpaceshipPawn::SetPrecisionMode(bool bOn)
+{
+	if (bOn == bPrecisionMode)
+	{
+		return;
+	}
+	bPrecisionMode = bOn;
+	UE_LOG(LogSpaceship, Log, TEXT("%s: precision mode %s"), *GetName(), bOn ? TEXT("on") : TEXT("off"));
+}
+
+float ASpaceshipPawn::GetGearGroundOffsetCm() const
+{
+	return GearExtensionCm * GearDeploy;
+}
+
+void ASpaceshipPawn::DebugStepGear(float DeltaSeconds)
+{
+	UpdateGear(DeltaSeconds);
+}
+
+void ASpaceshipPawn::DebugSetGearInstant(bool bDown)
+{
+	if (!bDown && LandingState == ELandingState::Landed)
+	{
+		return;
+	}
+	SetPrecisionMode(bDown);
+	GearState = bDown ? EGearState::Deployed : EGearState::Retracted;
+	GearDeploy = bDown ? 1.f : 0.f;
+	PoseGearLegs();
+}
+
+void ASpaceshipPawn::DebugSetChaseView(float YawDeg, float PitchDeg, float Zoom)
+{
+	if (Zoom > 0.f)
+	{
+		CameraZoom = CameraZoomTarget = Zoom;
+	}
+	if (FMath::IsNearlyZero(YawDeg) && FMath::IsNearlyZero(PitchDeg))
+	{
+		SetFreeLookHeld(false);
+		FreeLookAngles = FreeLookTarget = FVector2D::ZeroVector;
+	}
+	else
+	{
+		SetFreeLookHeld(true);
+		FreeLookAngles = FreeLookTarget = FVector2D(YawDeg, PitchDeg);
+	}
+	const FRotator Offset(float(FreeLookAngles.Y), float(FreeLookAngles.X), 0.f);
+	CameraBoom->SetRelativeRotation(Offset);
+	CockpitCamera->SetRelativeRotation(Offset);
+	SnapCameraToShip();
+}
+
+void ASpaceshipPawn::DebugForceLanded(bool bLanded)
+{
+	if (bLanded && LandingState != ELandingState::Landed)
+	{
+		EnterLanded();
+	}
+	else if (!bLanded && LandingState == ELandingState::Landed)
+	{
+		ExitLanded();
+	}
+}
+
+void ASpaceshipPawn::UpdateGear(float DeltaSeconds)
+{
+	GearMessageSeconds = FMath::Max(0.f, GearMessageSeconds - DeltaSeconds);
+	const float Step = DeltaSeconds / FMath::Max(GearDeploySeconds, 0.05f);
+	if (GearState == EGearState::Extending)
+	{
+		GearDeploy = FMath::Min(1.f, GearDeploy + Step);
+		if (GearDeploy >= 1.f)
+		{
+			GearState = EGearState::Deployed;
+			// Locks down with a small jolt, felt in the camera.
+			CameraKick = FMath::Max(CameraKick, 0.15f);
+		}
+	}
+	else if (GearState == EGearState::Retracting)
+	{
+		GearDeploy = FMath::Max(0.f, GearDeploy - Step);
+		if (GearDeploy <= 0.f)
+		{
+			GearState = EGearState::Retracted;
+		}
+	}
+	PoseGearLegs();
+}
+
+TArray<FVector> ASpaceshipPawn::ComputeGearLegPose(float Deploy, bool bNose) const
+{
+	// First the leg swings down from under the hull (0 .. 60 % of the travel), then the piston
+	// extends to full length (40 .. 100 %): the two overlap, so it reads as one movement.
+	auto Ease = [](float X) { X = FMath::Clamp(X, 0.f, 1.f); return X * X * (3.f - 2.f * X); };
+	const float Swing = Ease(Deploy / 0.6f);
+	const float Extend = Ease((Deploy - 0.4f) / 0.6f);
+
+	// Pitch +90 turns straight down (-Z) into forward (+X): the nose leg folds forward, the main legs back.
+	const float Pitch = (bNose ? 1.f : -1.f) * GearFoldDeg * (1.f - Swing);
+
+	// Along the leg (pivot frame, Z up, the socket at 0, the pad's sole at -Reach). The sleeve starts
+	// inside the hull so no gap shows at the root, wherever the belly is above the socket.
+	const double Reach = GearExtensionCm * FMath::Lerp(0.55, 1.0, double(Extend));
+	const double Inside = 40.0;
+	const double SleeveLength = Inside + 0.45 * GearExtensionCm;
+	const double SleeveBottom = Inside - SleeveLength;
+	const double PadTop = -Reach + GearPadThicknessCm;
+	const double PistonTop = SleeveBottom + 10.0;
+	const double PistonLength = FMath::Max(PistonTop - PadTop, 1.0);
+	const double StrutDiameter = 2.0 * GearStrutRadiusCm / 100.0;
+	const double PistonDiameter = 0.65 * StrutDiameter;
+	const double PadDiameter = 2.0 * GearPadRadiusCm / 100.0;
+
+	// The engine cylinder is 100 cm across and 100 cm tall around its centre.
+	return {
+		FVector(Pitch, 0.0, 0.0),
+		FVector(0.0, 0.0, Inside - 0.5 * SleeveLength),
+		FVector(StrutDiameter, StrutDiameter, SleeveLength / 100.0),
+		FVector(0.0, 0.0, PadTop + 0.5 * PistonLength),
+		FVector(PistonDiameter, PistonDiameter, PistonLength / 100.0),
+		FVector(0.0, 0.0, -Reach + 0.5 * GearPadThicknessCm),
+		FVector(PadDiameter, PadDiameter, GearPadThicknessCm / 100.0),
+	};
+}
+
+float ASpaceshipPawn::ComputeGearStowOffsetCm(float Deploy) const
+{
+	const float X = FMath::Clamp(Deploy, 0.f, 1.f);
+	return GearStowTravelCm * (1.f - X * X * (3.f - 2.f * X));
+}
+
+void ASpaceshipPawn::BuildGearLegs()
+{
+	if (GearLegs.Num() > 0 || ModelledGear.IsValid() || !Hull->GetStaticMesh())
+	{
+		return;
+	}
+
+	// A modelled gear part (the ship's own legs from Blender) wins over the placeholder legs.
+	TArray<UStaticMeshComponent*> Meshes;
+	GetComponents<UStaticMeshComponent>(Meshes);
+	for (UStaticMeshComponent* Mesh : Meshes)
+	{
+		if (Mesh != Hull && Mesh->GetStaticMesh() && Mesh->GetName().Contains(TEXT("Gear")))
+		{
+			ModelledGear = Mesh;
+			ModelledGearDownLocation = Mesh->GetRelativeLocation();
+			// Seen, never touched: the ship's movement and the pilot use the hull's collision.
+			Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			GearPosed = -1.f;
+			PoseGearLegs();
+			UE_LOG(LogSpaceship, Log, TEXT("%s: modelled gear part %s"), *GetName(), *Mesh->GetName());
+			return;
+		}
+	}
+	if (!GearLegMesh)
+	{
+		return;
+	}
+
+	// The hull's own materials, found by slot name, so the legs match the paint of the ship.
+	auto HullMaterial = [this](const TCHAR* SlotPart) -> UMaterialInterface*
+	{
+		const TArray<FName> Slots = Hull->GetMaterialSlotNames();
+		for (int32 Index = 0; Index < Slots.Num(); ++Index)
+		{
+			if (Slots[Index].ToString().Contains(SlotPart))
+			{
+				return Hull->GetMaterial(Index);
+			}
+		}
+		return nullptr;
+	};
+	UMaterialInterface* const SleeveMaterial = HullMaterial(TEXT("HullDark"));
+	UMaterialInterface* const PistonMaterial = HullMaterial(TEXT("BareMetal"));
+	UMaterialInterface* const PadMaterial = HullMaterial(TEXT("Rubber"));
+
+	for (const FName& Wanted : GearSocketNames)
+	{
+		// As written, else with / without the SOCKET_ prefix that the FBX import drops.
+		const FString Plain = Wanted.ToString();
+		const FName Candidates[] = { Wanted, FName(*(TEXT("SOCKET_") + Plain)), FName(*Plain.Replace(TEXT("SOCKET_"), TEXT(""))) };
+		const FName* Found = Algo::FindByPredicate(Candidates, [this](const FName& Name) { return Hull->DoesSocketExist(Name); });
+		if (!Found)
+		{
+			continue;
+		}
+		const FName Socket = *Found;
+		FGearLeg Leg;
+		Leg.bNose = Socket.ToString().Contains(TEXT("Nose"));
+
+		USceneComponent* Pivot = NewObject<USceneComponent>(this, FName(*FString::Printf(TEXT("GearPivot_%s"), *Socket.ToString())));
+		Pivot->SetupAttachment(Hull, Socket);
+		// Sized in centimetres whatever the hull's scale.
+		Pivot->SetUsingAbsoluteScale(true);
+		Pivot->RegisterComponent();
+		Leg.Pivot = Pivot;
+
+		auto MakePart = [this, Pivot, &Socket](const TCHAR* Part, UMaterialInterface* Material)
+		{
+			UStaticMeshComponent* Mesh = NewObject<UStaticMeshComponent>(this, FName(*FString::Printf(TEXT("Gear%s_%s"), Part, *Socket.ToString())));
+			Mesh->SetStaticMesh(GearLegMesh);
+			Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Mesh->SetCanEverAffectNavigation(false);
+			Mesh->SetupAttachment(Pivot);
+			if (Material)
+			{
+				Mesh->SetMaterial(0, Material);
+			}
+			Mesh->RegisterComponent();
+			return Mesh;
+		};
+		Leg.Sleeve = MakePart(TEXT("Sleeve"), SleeveMaterial);
+		Leg.Piston = MakePart(TEXT("Piston"), PistonMaterial);
+		Leg.Pad = MakePart(TEXT("Pad"), PadMaterial);
+		GearLegs.Add(Leg);
+	}
+	GearPosed = -1.f;
+	PoseGearLegs();
+	UE_LOG(LogSpaceship, Log, TEXT("%s: %d gear leg(s) on the hull sockets"), *GetName(), GearLegs.Num());
+}
+
+void ASpaceshipPawn::PoseGearLegs()
+{
+	if ((GearLegs.Num() == 0 && !ModelledGear.IsValid()) || GearPosed == GearDeploy)
+	{
+		return;
+	}
+	GearPosed = GearDeploy;
+	if (UStaticMeshComponent* Gear = ModelledGear.Get())
+	{
+		// Straight up into the belly, hidden once all the way in (the Vanguard has no bay doors that open).
+		Gear->SetRelativeLocation(ModelledGearDownLocation + FVector::UpVector * ComputeGearStowOffsetCm(GearDeploy));
+		Gear->SetVisibility(GearDeploy > 0.001f);
+		return;
+	}
+	// Stowed legs are hidden: the Vanguard has no gear bays to fold them into.
+	const bool bVisible = GearDeploy > 0.001f;
+	for (const FGearLeg& Leg : GearLegs)
+	{
+		USceneComponent* Pivot = Leg.Pivot.Get();
+		if (!Pivot)
+		{
+			continue;
+		}
+		const TArray<FVector> Pose = ComputeGearLegPose(GearDeploy, Leg.bNose);
+		Pivot->SetRelativeRotation(FRotator(Pose[0].X, Pose[0].Y, Pose[0].Z));
+		Pivot->SetVisibility(bVisible, true);
+		const TPair<UStaticMeshComponent*, int32> Parts[] = { { Leg.Sleeve.Get(), 1 }, { Leg.Piston.Get(), 3 }, { Leg.Pad.Get(), 5 } };
+		for (const TPair<UStaticMeshComponent*, int32>& Part : Parts)
+		{
+			if (Part.Key)
+			{
+				Part.Key->SetRelativeLocation(Pose[Part.Value]);
+				Part.Key->SetRelativeScale3D(Pose[Part.Value + 1]);
+			}
+		}
+	}
+}
+
+void ASpaceshipPawn::ApplyGearSupport(float DeltaSeconds)
+{
+	const float Offset = GetGearGroundOffsetCm();
+	if (!bSurfaceValid || GroundGapCm < 0.f || Offset <= 1.f || DeltaSeconds <= 0.f)
+	{
+		return;
+	}
+	const FVector Up = bHasEnvironment ? FVector(Environment.Up) : GetActorUpVector();
+	// Room between the pads and the ground; negative: the pads are in it.
+	const double Room = double(GroundGapCm) - Offset;
+	const double Vertical = LinearVelocity | Up;
+	if (Room < 0.0)
+	{
+		// The gear came down under a ship resting on its belly: the legs push it up, about as fast as
+		// they extend, instead of sinking into the ground.
+		const double Lift = FMath::Min(-Room, 1.5 * GearExtensionCm / FMath::Max(GearDeploySeconds, 0.05f) * DeltaSeconds);
+		AddActorWorldOffset(Up * Lift, bSweepMovement);
+		GroundGapCm += float(Lift);
+		if (Vertical < 0.0)
+		{
+			LinearVelocity -= Up * Vertical;
+		}
+		return;
+	}
+	// Coming down onto the pads: stop where they touch. The hull box alone would let the legs sink in.
+	if (Vertical < 0.0 && -Vertical * DeltaSeconds > Room)
+	{
+		LinearVelocity -= Up * (Vertical + Room / DeltaSeconds);
+	}
 }

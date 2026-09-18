@@ -566,7 +566,7 @@ void USpaceFlightHud::BuildTree()
 	UHorizontalBox* Left = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("LeftCluster"));
 	UVerticalBox* LeftContent = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("LeftContent"));
 	UVerticalBox* LampBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("LampBox"));
-	for (const TCHAR* LampName : { TEXT("MODE"), TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST") })
+	for (const TCHAR* LampName : { TEXT("MODE"), TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST"), TEXT("GEAR"), TEXT("PREC") })
 	{
 		const FName Key(LampName);
 		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("LampRow_%s"), LampName)));
@@ -680,6 +680,12 @@ FSpaceFlightHudState USpaceFlightHud::MakeState(const ASpaceshipPawn* Ship, int3
 	State.GSafeMaxG = Ship->GetGSafeMaxG();
 
 	State.bShowVirtualJoystick = Ship->UsesVirtualJoystick() && !Ship->IsLanded() && !Ship->IsFreeLooking();
+
+	State.bGearDown = Ship->IsGearDeployed();
+	State.bGearMoving = Ship->GetGearState() == EGearState::Extending || Ship->GetGearState() == EGearState::Retracting;
+	State.bGearWarning = Ship->HasGroundInfo() && Ship->GetLandingBlocker() == ELandingBlocker::GearUp;
+	State.bPrecisionOn = Ship->IsPrecisionModeOn();
+	State.bPrecisionActive = Ship->IsPrecisionActive();
 	State.Stick = Ship->GetMouseStick();
 	State.Deadzone = Ship->GetVirtualJoystickDeadzone();
 	return State;
@@ -737,6 +743,11 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 	SetLamp(TEXT("GSAF"), State.bGSafeOn, State.bGSafeActive ? Green : Amber);
 	SetLamp(TEXT("CSTB"), State.bComStab, Green);
 	SetLamp(TEXT("BOOST"), State.bBoostActive, GreenBright);
+	// Gear: green down and locked, amber blinking on the way, red blinking low over the ground with it up.
+	SetLamp(TEXT("GEAR"), State.bGearDown || ((State.bGearMoving || State.bGearWarning) && bBlink),
+		State.bGearDown ? Green : State.bGearWarning && !State.bGearMoving ? Red : Amber);
+	// Precision switched on but not in effect (NAV): amber, like G-Safe suspended by boost.
+	SetLamp(TEXT("PREC"), State.bPrecisionOn, State.bPrecisionActive ? Green : Amber);
 
 	// --- Speed gauge, speed, limit -------------------------------------------------------------
 	if (USpaceHudGauge* Speed = Gauges.FindRef(TEXT("SpeedGauge")))
