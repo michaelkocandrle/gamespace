@@ -72,6 +72,7 @@
       "pawn.precision_speed_fraction = 0.15",
       "pawn.precision_turn_scale = 0.45",
       "pawn.free_look_max_yaw_deg = 180.0",
+      "pawn.placeholder_cockpit = True",
       "pawn.hide_hull_in_cockpit = False",
       "camera_boom.target_arm_length = 2700.0",
       "camera_boom.socket_offset = [0.0, 0.0, 570.0]",

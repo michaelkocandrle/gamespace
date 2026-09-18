@@ -247,6 +247,13 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       ve hře byla loď černá silueta. `base_color_tint` 2,2 a `metallic_scale` 0,5 v `Vanguard_setup.json`
       ji dělají tmavě modrošedou; ladí se bez nového buildu v Blenderu (jen import + balení);
     - postup pro další lodě je v `Docs/Ships/ShipPipeline.md`, kapitola 2B; nový scénář snímků `ship_views`.
+21. **Provizorní kokpit** (18. 9. 2026): model z Meshy nemá interiér, z kokpitu nebylo vidět nic z lodi.
+    `bPlaceholderCockpit` (v `Vanguard_setup.json` `placeholder_cockpit`) postaví kolem oka pilota
+    jednoduché tmavé kvádry: šikmý přístrojový panel se třemi obrazovkami a hranou 16° pod horizontem
+    (pod HUD, ~77 % výšky obrazovky), sloupky rámu kabiny ~30° vlevo a vpravo a sedadlo za zády. Jen
+    v pohledu z kokpitu, bez kolize a stínů. Rozložení podle SC reference v `Docs/UI/` a snímků;
+    oko zůstalo (410, 0, 145), uvnitř kabiny (340, 0, 140) prosvítal zevnitř model. Test
+    `test_cockpit_frame.py`. Zmizí, až bude skutečný interiér (samostatný projekt po SC-2).
 
 ---
 
@@ -359,6 +366,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_flight_hud_sc1c.py` | SC-1c: strom widgetů, data HUD z lodi (rychlost vůči omezovači, afterburner, pozpátku, kontrolky, G, palivo, joystick) a jejich zobrazení ve widgetech. Vzhled headless ověřit nejde. |
 | `test_boost_afterburner_sc1b.py` | SC-1b: boost jen manévrovací trysky a rotace, vypnutí G-Safe, afterburner (tah, limit × omezovač, palivo, zamčení, doplňování, plynulý návrat, coupled i decoupled, jen SCM, G-Safe zůstává), Shift + Tab, input a hodnoty Vanguardu. |
 | `test_flight_modes.py` | Boost energie, cruise jen v NAV (vesmír i nad Veyrou), výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
+| `test_cockpit_frame.py` | Provizorní kokpit: nic z rámu v okně HUD, horní hrana desky 14–20° pod horizontem, deska kryje spodek obrazu, obrazovky na panelu a vidět, sloupky 24–34° do stran, sedadlo za okem. |
 | `test_landing_sc2.py` | SC-2a: dosednutí jen s podvozkem (GEAR UP před vším ostatním, mezera pod patkami), stavový automat podvozku (časy, otočení v půlce, zákaz zasunutí na zemi), pohyb modelovaného dílu i zástupných nohou, precision (strop, omezovač uvnitř, jen SCM, bez afterburneru, pomalejší otáčení, brzdění bez skoku), kontrolky GEAR/PREC, klávesy N/P bez kolizí, hodnoty a díl `Gear` Vanguardu, scénář `landing`. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
@@ -523,9 +531,9 @@ Další otevřené směry mimo let:
   změřená: `GetEngineDemand` bere svislou osu × 0,7 proti plné kapacitě zvedacích trysek, visení na
   Veyře (~0,46 G) tak dává zátěž ~0,06, takže záře i zvuk zůstanou skoro na nule. G-metr naopak
   ukazuje 0,5–0,8 G (snímky `landing` 18. 9. 2026), jen je to na stupnici 12 G malý proužek.
-- **Meshy Vanguard, kokpit bez lodi:** model nemá interiér, zevnitř kabiny UE odřízne všechny stěny
-  a příď klesá pod úhlem 29°, víc než ukáže zorné pole (25° dolů). Z kokpitu je tedy vidět jen okolí
-  a HUD, loď až při rozhlížení (pravé tlačítko) dolů. Řešení je modelovaný interiér kabiny (další krok).
+- **Meshy Vanguard, kokpit:** model nemá interiér (zevnitř kabiny UE odřízne všechny stěny). Provizorně
+  ho zastupuje procedurální rám (bod 21 v kapitole 5). Při rozhlížení do stran je vidět konec desky
+  a střecha lodi zvenku (oko je nad střechou). Skutečný interiér je samostatný budoucí projekt.
 - **Meshy Vanguard na dunách:** na snímku `landing/06_landed_side` (18. 9. 2026) leží loď na hřbetu
   duny a spodní gondola je zapuštěná ~0,5 m v písku, i když by kolizní box (spodek = podrážky ližin)
   neměl dovolit nic níž než ližiny. Neověřená podezření: hrubší kolizní síť planety než vykreslený

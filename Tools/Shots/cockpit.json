@@ -1,11 +1,13 @@
 {
-  "_comment": "Cockpit and chase views, for checking the pilot's eye after a change to a ship or its camera. Run: .\\Tools\\Shots.ps1 -Preset cockpit",
+  "_comment": "Cockpit and chase views, for checking the pilot's eye after a change to a ship or its camera. Run: .\\Tools\\Shots.ps1 -Preset cockpit The placeholder cockpit (dashboard, pillars) shows in every cockpit shot; cockpit_look_left turns the head with free look.",
   "shots": [
-    { "name": "cockpit_horizon", "camera": "cockpit", "altitude_m": 4000, "facing": "horizon", "speed_ms": 120, "settle": 1.2 },
-    { "name": "cockpit_planet", "camera": "cockpit", "altitude_m": 4000, "facing": "planet", "speed_ms": 60 },
-    { "name": "cockpit_space", "camera": "cockpit", "altitude_m": 40000, "facing": "away", "speed_ms": 0 },
-    { "name": "cockpit_hud_off", "camera": "cockpit", "altitude_m": 4000, "facing": "horizon", "hud": 0, "speed_ms": 120 },
-    { "name": "chase_horizon", "camera": "chase", "altitude_m": 4000, "facing": "horizon", "hud": 1, "speed_ms": 120, "settle": 1.0 },
-    { "name": "chase_planet", "camera": "chase", "altitude_m": 4000, "facing": "planet", "speed_ms": 60 }
+    {"name": "cockpit_horizon", "camera": "cockpit", "altitude_m": 4000, "facing": "horizon", "speed_ms": 120, "settle": 1.2},
+    {"name": "cockpit_planet", "camera": "cockpit", "altitude_m": 4000, "facing": "planet", "speed_ms": 60},
+    {"name": "cockpit_space", "camera": "cockpit", "altitude_m": 40000, "facing": "away", "speed_ms": 0},
+    {"name": "cockpit_hud_off", "camera": "cockpit", "altitude_m": 4000, "facing": "horizon", "hud": 0, "speed_ms": 120},
+    {"name": "cockpit_look_left", "camera": "cockpit", "altitude_m": 4000, "facing": "horizon", "hud": 0, "chase_yaw": -70, "chase_pitch": -10, "settle": 1.0},
+    {"name": "cockpit_landed", "camera": "cockpit", "altitude_m": 2.6, "facing": "horizon", "hud": 1, "gear": true, "settle": 3.0},
+    {"name": "chase_horizon", "camera": "chase", "altitude_m": 4000, "facing": "horizon", "hud": 1, "speed_ms": 120, "settle": 1.0},
+    {"name": "chase_planet", "camera": "chase", "altitude_m": 4000, "facing": "planet", "speed_ms": 60}
   ]
 }

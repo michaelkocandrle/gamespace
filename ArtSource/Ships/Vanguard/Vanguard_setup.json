@@ -41,6 +41,8 @@
     "precision_speed_fraction": 0.15,
     "precision_turn_scale": 0.45,
     "free_look_max_yaw_deg": 180.0,
+    "_comment_cockpit": "The Meshy model has no interior: seen from inside, its faces are culled and the HUD floated in empty space. placeholder_cockpit adds simple boxes around the pilot's eye (dashboard, canopy pillars, seat) until a modelled interior replaces them.",
+    "placeholder_cockpit": true,
     "hide_hull_in_cockpit": false
   },
   "components": {

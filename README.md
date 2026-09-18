@@ -195,6 +195,16 @@ from the seat the pilot would see nothing of the ship; the nose falls away at 29
 The survey now ignores faces seen from behind (add `twosided` for the old behaviour) and takes a sweep
 range (`sweep:X0:X1:Z0:Z1`, cm). The text below is about the procedural Vanguard before it.
 
+**Placeholder cockpit** (`bPlaceholderCockpit`, `placeholder_cockpit` in the setup file): until the ship
+has a modelled interior, simple dark boxes around the pilot's eye give the HUD a cabin to sit in - a
+sloped instrument panel with three screens whose far edge, with a glare-shield lip, is 16 degrees below
+the horizon (~77 % of the screen's height, just under the HUD), canopy pillars ~30 degrees left and right
+leaning outwards, and a seat behind the eye. Engine cube and `BasicShapeMaterial` (`Color`), built at
+BeginPlay on a root at the eye (not on the camera, so free look turns only the head), pilot's view only,
+no collision, no shadows, shown in cockpit view only. The layout is one table in `SpaceshipPawn.cpp`
+(`SpaceshipCockpitLayout::Parts`), exposed as `GetPlaceholderCockpitCorners` and checked against the
+view and the HUD's window by `Tools/Tests/test_cockpit_frame.py`; pictures: `Tools/Shots.ps1 -Preset cockpit`.
+
 The eye position lives in `<Ship>_setup.json` (`components.cockpit_camera.relative_location`) and is
 measured against the real model, not guessed: `Tools/Blender/cockpit_view_survey.py` casts a grid of
 rays over the camera's field of view in Blender and prints what each one hits and how much of the view

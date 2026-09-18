@@ -121,6 +121,9 @@ ASpaceshipPawn::ASpaceshipPawn()
 	Hull->SetCanEverAffectNavigation(false);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaceholderCube(TEXT("/Engine/BasicShapes/Cube.Cube"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BasicShapeMaterial(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	CockpitPartMesh = PlaceholderCube.Object;
+	CockpitPartMaterial = BasicShapeMaterial.Object;
 	if (PlaceholderCube.Succeeded())
 	{
 		Hull->SetStaticMesh(PlaceholderCube.Object);
@@ -212,6 +215,7 @@ void ASpaceshipPawn::BeginPlay()
 	SetupAudioLayers();
 	SetupShipLights();
 	BuildGearLegs();
+	BuildPlaceholderCockpit();
 }
 
 void ASpaceshipPawn::SnapCameraToShip()
@@ -233,6 +237,11 @@ void ASpaceshipPawn::DebugConfigureCockpit(const FVector& EyeLocation, bool bHid
 	}
 	bHideHullInCockpit = bHideHull;
 	bHideCanopyInCockpit = bHideCanopy;
+	if (CockpitFrameRoot)
+	{
+		// The placeholder cockpit is built around the eye; it moves with it.
+		CockpitFrameRoot->SetRelativeLocation(CockpitCameraBaseLocation);
+	}
 	SetCockpitView(bCockpitView);
 }
 
@@ -243,6 +252,10 @@ void ASpaceshipPawn::SetCockpitView(bool bCockpit)
 	CockpitCamera->SetActive(bCockpit);
 	// Only hidden from this pawn's own view: other players and shadows still see the hull.
 	Hull->SetOwnerNoSee(bCockpit && bHideHullInCockpit);
+	if (CockpitFrameRoot)
+	{
+		CockpitFrameRoot->SetVisibility(bCockpit, true);
+	}
 	// The canopy glass is right in front of the pilot's eye and would fill the view; the chase camera
 	// and everyone else keep it.
 	TArray<UStaticMeshComponent*> Meshes;
@@ -2720,4 +2733,133 @@ void ASpaceshipPawn::ApplyGearSupport(float DeltaSeconds)
 	{
 		LinearVelocity -= Up * (Vertical + Room / DeltaSeconds);
 	}
+}
+
+
+// -------------------------------------------------------------------------------------------
+// Placeholder cockpit
+// -------------------------------------------------------------------------------------------
+
+namespace SpaceshipCockpitLayout
+{
+	/** One box of the placeholder cockpit, relative to the pilot's eye (cm, X forward, Y right, Z up). */
+	struct FPart
+	{
+		const TCHAR* Name;
+		FVector Centre;
+		FVector Size;
+		FRotator Rotation;
+		FLinearColor Colour;
+	};
+
+	/** A box of Thickness from A to B (a pillar or strut). */
+	FPart Strut(const TCHAR* Name, const FVector& A, const FVector& B, float Thickness, const FLinearColor& Colour)
+	{
+		const FVector Axis = B - A;
+		return { Name, (A + B) * 0.5, FVector(Thickness, Thickness, Axis.Size()), FRotationMatrix::MakeFromZ(Axis.GetSafeNormal()).Rotator(), Colour };
+	}
+
+	/** A box lying on the instrument panel: Along across the panel's slope from its centre, Right sideways. */
+	FPart OnPanel(const TCHAR* Name, const FVector& PanelCentre, float SlopeDeg, float Along, float Right, const FVector& Size, const FLinearColor& Colour)
+	{
+		const FRotator Rotation(SlopeDeg, 0.0, 0.0);
+		const FVector Offset = Rotation.RotateVector(FVector(Along, Right, 2.5));
+		return { Name, PanelCentre + Offset, Size, Rotation, Colour };
+	}
+
+	/**
+	 * Laid out against the view at the cockpit's 88 degree field of view (28.5 degrees above and below
+	 * the horizon on 16:9), after the Star Citizen references in Docs/UI:
+	 * - the instrument panel slopes up away from the pilot; its far edge, with the glare-shield lip, is
+	 *   the top of the dashboard at ~17 degrees below the horizon (~78 % of the screen's height, under
+	 *   the HUD, which ends at ~75 %), and the panel with its screens fills the band below it;
+	 * - the canopy pillars stand ~85 cm ahead at ~29 degrees left and right (~21 % and ~79 % of the
+	 *   width), leaning outwards towards the top, framing the HUD;
+	 * - the seat is behind the eye and shows only with free look.
+	 * The first layout had a flat-topped box whose far edge rose to ~67 % and covered the speed readout,
+	 * and pillars 40-60 cm from the eye that filled the screen's sides.
+	 */
+	TArray<FPart> Parts()
+	{
+		const FLinearColor Frame(0.030f, 0.033f, 0.038f);
+		const FLinearColor Lip(0.060f, 0.066f, 0.075f);
+		const FLinearColor Screen(0.012f, 0.050f, 0.080f);
+		const FLinearColor Seat(0.045f, 0.045f, 0.050f);
+		const FVector PanelCentre(68.5, 0.0, -33.0);
+		const float Slope = 17.f;
+		return {
+			{ TEXT("InstrumentPanel"), PanelCentre, FVector(35.0, 150.0, 4.0), FRotator(Slope, 0.0, 0.0), Frame },
+			{ TEXT("DashboardBody"), FVector(72.0, 0.0, -54.0), FVector(36.0, 150.0, 36.0), FRotator::ZeroRotator, Frame },
+			{ TEXT("GlareShield"), FVector(86.0, 0.0, -27.5), FVector(6.0, 150.0, 3.0), FRotator::ZeroRotator, Lip },
+			OnPanel(TEXT("ScreenLeft"), PanelCentre, Slope, 3.0f, -30.0f, FVector(16.0, 28.0, 1.0), Screen),
+			OnPanel(TEXT("ScreenCentre"), PanelCentre, Slope, 3.0f, 0.0f, FVector(14.0, 18.0, 1.0), Screen),
+			OnPanel(TEXT("ScreenRight"), PanelCentre, Slope, 3.0f, 30.0f, FVector(16.0, 28.0, 1.0), Screen),
+			Strut(TEXT("PillarLeft"), FVector(85.0, -48.0, -27.0), FVector(55.0, -66.0, 50.0), 5.0f, Frame),
+			Strut(TEXT("PillarRight"), FVector(85.0, 48.0, -27.0), FVector(55.0, 66.0, 50.0), 5.0f, Frame),
+			{ TEXT("SeatBack"), FVector(-38.0, 0.0, -38.0), FVector(10.0, 52.0, 70.0), FRotator(-8.0, 0.0, 0.0), Seat },
+			{ TEXT("Headrest"), FVector(-35.0, 0.0, 8.0), FVector(10.0, 30.0, 22.0), FRotator(-8.0, 0.0, 0.0), Seat },
+			{ TEXT("SeatCushion"), FVector(-8.0, 0.0, -76.0), FVector(52.0, 52.0, 10.0), FRotator::ZeroRotator, Seat },
+		};
+	}
+}
+
+TArray<FVector> ASpaceshipPawn::GetPlaceholderCockpitCorners() const
+{
+	TArray<FVector> Corners;
+	for (const SpaceshipCockpitLayout::FPart& Part : SpaceshipCockpitLayout::Parts())
+	{
+		const FTransform Transform(Part.Rotation, Part.Centre);
+		for (int32 Index = 0; Index < 8; ++Index)
+		{
+			const FVector Local((Index & 1 ? 0.5 : -0.5) * Part.Size.X, (Index & 2 ? 0.5 : -0.5) * Part.Size.Y, (Index & 4 ? 0.5 : -0.5) * Part.Size.Z);
+			Corners.Add(Transform.TransformPosition(Local));
+		}
+	}
+	return Corners;
+}
+
+TArray<FString> ASpaceshipPawn::GetPlaceholderCockpitPartNames() const
+{
+	TArray<FString> Names;
+	for (const SpaceshipCockpitLayout::FPart& Part : SpaceshipCockpitLayout::Parts())
+	{
+		Names.Add(Part.Name);
+	}
+	return Names;
+}
+
+void ASpaceshipPawn::BuildPlaceholderCockpit()
+{
+	if (!bPlaceholderCockpit || CockpitFrameRoot || !CockpitPartMesh)
+	{
+		return;
+	}
+	CockpitFrameRoot = NewObject<USceneComponent>(this, TEXT("PlaceholderCockpit"));
+	// On the root, not on the camera: free look turns the head, the cockpit stays put.
+	CockpitFrameRoot->SetupAttachment(HullCollision);
+	CockpitFrameRoot->SetRelativeLocation(CockpitCameraBaseLocation);
+	CockpitFrameRoot->RegisterComponent();
+	for (const SpaceshipCockpitLayout::FPart& Part : SpaceshipCockpitLayout::Parts())
+	{
+		UStaticMeshComponent* Mesh = NewObject<UStaticMeshComponent>(this, FName(*FString::Printf(TEXT("Cockpit%s"), Part.Name)));
+		Mesh->SetStaticMesh(CockpitPartMesh);
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Mesh->SetCanEverAffectNavigation(false);
+		// Pilot's view only, and no shadows on the hull seen from the chase camera.
+		Mesh->SetCastShadow(false);
+		Mesh->SetOnlyOwnerSee(true);
+		Mesh->SetupAttachment(CockpitFrameRoot);
+		Mesh->SetRelativeLocationAndRotation(Part.Centre, Part.Rotation);
+		Mesh->SetRelativeScale3D(Part.Size / 100.0);
+		if (CockpitPartMaterial)
+		{
+			UMaterialInstanceDynamic* Material = UMaterialInstanceDynamic::Create(CockpitPartMaterial, this);
+			Material->SetVectorParameterValue(TEXT("Color"), Part.Colour);
+			Mesh->SetMaterial(0, Material);
+		}
+		Mesh->RegisterComponent();
+		CockpitParts.Add(Mesh);
+	}
+	CockpitFrameRoot->SetVisibility(bCockpitView, true);
+	UE_LOG(LogSpaceship, Log, TEXT("%s: placeholder cockpit, %d parts"), *GetName(), CockpitParts.Num());
 }

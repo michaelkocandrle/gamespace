@@ -14,6 +14,7 @@ class UInputAction;
 class UInputComponent;
 class UInputMappingContext;
 class UMaterialInstanceDynamic;
+class UMaterialInterface;
 class USoundBase;
 class USpringArmComponent;
 class UStaticMesh;
@@ -528,6 +529,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	void DebugSetChaseView(float YawDeg, float PitchDeg, float Zoom);
 
+	/**
+	 * The placeholder cockpit's parts, relative to the pilot's eye (cm, X forward, Y right, Z up): eight
+	 * corners per part, in order. Exactly what the visible parts use; for tests of what they cover.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
+	TArray<FVector> GetPlaceholderCockpitCorners() const;
+
+	/** Names of the placeholder cockpit's parts, in the order of GetPlaceholderCockpitCorners. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
+	TArray<FString> GetPlaceholderCockpitPartNames() const;
+
+	/** Tests: placeholder cockpit parts built at BeginPlay (0 when off). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Tests")
+	int32 DebugGetPlaceholderCockpitPartCount() const { return CockpitParts.Num(); }
+
 	/** Tests: number of placeholder gear legs built on the hull's sockets (0 when the ship has a modelled gear part). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Tests")
 	int32 DebugGetGearLegCount() const { return GearLegs.Num(); }
@@ -774,6 +790,22 @@ protected:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera")
 	bool bHideCanopyInCockpit = true;
+
+	/**
+	 * A stand-in cockpit for ships without a modelled interior: dashboard with screens under the view,
+	 * a glare-shield lip, canopy pillars at the sides and a seat behind the pilot, simple dark boxes
+	 * placed relative to the pilot's eye and shown only in cockpit view. Without it an AI hull seen
+	 * from inside is culled away and the HUD floats in empty space. Off once a real interior exists.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera")
+	bool bPlaceholderCockpit = false;
+
+	/** Engine cube the placeholder cockpit is built from, and its material (Color parameter). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Camera")
+	TObjectPtr<UStaticMesh> CockpitPartMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Camera")
+	TObjectPtr<UMaterialInterface> CockpitPartMaterial;
 
 	/** Digital, held: free look (right mouse button). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
@@ -1539,6 +1571,8 @@ private:
 	void PoseGearLegs();
 	/** Keeps the deployed gear's pads out of the ground: stops the descent there and lifts a ship resting on its belly. */
 	void ApplyGearSupport(float DeltaSeconds);
+	/** Creates the placeholder cockpit (bPlaceholderCockpit), once, at BeginPlay. */
+	void BuildPlaceholderCockpit();
 	void UpdateAfterburner(float DeltaSeconds);
 	/** Alt held on the controlling player's keyboard: the wheel zooms instead of setting the limiter. */
 	bool IsAltHeld() const;
@@ -1684,6 +1718,11 @@ private:
 		bool bNose = false;
 	};
 	TArray<FGearLeg> GearLegs;
+	/** The placeholder cockpit: a root at the pilot's eye and its parts. */
+	UPROPERTY(Transient)
+	TObjectPtr<USceneComponent> CockpitFrameRoot;
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UStaticMeshComponent>> CockpitParts;
 	/** The modelled gear part, when the ship has one, and where it sits with the gear down. */
 	TWeakObjectPtr<UStaticMeshComponent> ModelledGear;
 	FVector ModelledGearDownLocation = FVector::ZeroVector;
