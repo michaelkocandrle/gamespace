@@ -14,6 +14,8 @@
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
 #include "Slate/WidgetRenderer.h"
+#include "Input/HittestGrid.h"
+#include "Widgets/SVirtualWindow.h"
 #include "SpaceFlightHud.h"
 #include "SpaceshipPawn.h"
 #include "EngineUtils.h"
@@ -31,6 +33,12 @@ namespace
 		TEXT("space.CockpitCentre"),
 		1,
 		TEXT("The dashboard's centre column (radar over self status): 1 on, 0 off - its screens go dark and the radar stops looking."),
+		ECVF_Default);
+
+	TAutoConsoleVariable<int32> CVarCockpitKeepWindow(
+		TEXT("space.CockpitKeepWindow"),
+		1,
+		TEXT("1: the cockpit displays are drawn in one kept window (Slate reuses its element list). 0: a new window every draw, as FWidgetRenderer::DrawWidget does (A/B only)."),
 		ECVF_Default);
 
 	/** space.MfdPage <left> <right>: the MFDs' pages of the ship flown here (shots, testing). */
@@ -214,6 +222,8 @@ void UCockpitDisplayComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		BeginCleanup(Renderer);
 		Renderer = nullptr;
 	}
+	DrawWindow.Reset();
+	HitTestGrid.Reset();
 	SlateWidget.Reset();
 	Super::EndPlay(EndPlayReason);
 }
@@ -259,7 +269,24 @@ void UCockpitDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 		RenderTarget->ResizeTarget(uint32(NewSize.X), uint32(NewSize.Y));
 	}
 	SCOPE_CYCLE_COUNTER(STAT_CockpitDisplayDraw);
-	Renderer->DrawWidget(RenderTarget, SlateWidget.ToSharedRef(), CurrentScale, FVector2D(RenderTarget->SizeX, RenderTarget->SizeY), SinceDraw);
+	const FVector2D DrawSize(RenderTarget->SizeX, RenderTarget->SizeY);
+	if (CVarCockpitKeepWindow.GetValueOnGameThread() != 0)
+	{
+		if (!DrawWindow.IsValid())
+		{
+			DrawWindow = SNew(SVirtualWindow).Size(DrawSize);
+			DrawWindow->SetContent(SlateWidget.ToSharedRef());
+			HitTestGrid = MakeShared<FHittestGrid>();
+		}
+		DrawWindow->Resize(DrawSize);
+		Renderer->DrawWindow(RenderTarget.Get(), *HitTestGrid, DrawWindow.ToSharedRef(), CurrentScale, DrawSize, SinceDraw);
+	}
+	else
+	{
+		// DrawWidget parents the widget to its own window: take it out of the kept one first.
+		DrawWindow.Reset();
+		Renderer->DrawWidget(RenderTarget, SlateWidget.ToSharedRef(), CurrentScale, DrawSize, SinceDraw);
+	}
 	SinceDraw = 0.f;
 }
 

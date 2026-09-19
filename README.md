@@ -203,7 +203,8 @@ sits well back from it as in the Star Citizen reference (`Docs/UI/Screenshot 202
 **eye (174, 0, 189)**, the dashboard top 8 degrees and the displays 14-25 degrees below the eye.
 **Displays:** the two big screens are flat quads (slot `M_Ship_Vanguard_Screens`, recipe `interior.displays`)
 that show the flight instruments live: `UCockpitDisplayComponent` draws `USpaceCockpitDisplays` (the
-flight HUD's widgets, driven by the same `ApplyState`) into a render target (both displays side by side) 60 times a second
+flight HUD's widgets, driven by the same `ApplyState`) into a render target (both displays side by side) 60 times a second,
+through one kept `SVirtualWindow` (a new window per draw made Slate rebuild its vertex arrays every time),
 while the ship is flown from the cockpit, and the unlit `M_Ship_Screen` (pixel animation) shows it. The screens
 fill the glass in the bezels (~29 x 25 cm; layout 560 x 490, drawn at the size they appear on screen, from the
 window width - `ScreenShareAt88`) and are styled like the reference's MFDs (deep blue glass, a title over a rule,

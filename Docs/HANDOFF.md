@@ -413,6 +413,15 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - stránka se drží v komponentě displejů, konzole `space.MfdPage <levý> <pravý>` (0–2); kreslí se jen
       zobrazená stránka (nové stránky 1,4–2,5 ms kreslení, výchozí FLIGHT/STATUS 4 ms);
     - scénář snímků `mfd_pages`.
+33. **Zrychlení kreslení displejů a HUD** (19. 9. 2026, WORKFLOW 9.2g):
+    - displeje se kreslí do jednoho trvalého virtuálního okna (dřív nové okno při každém kreslení → Slate
+      stavěl pole vrcholů od nuly a každá dávka je kopírovala): „Display draw“ na FLIGHT/STATUS 3,3 → 1,0 ms
+      za snímek (5,6 → 1,9 ms na jedno vykreslení), THRUSTERS/CONTACTS 2,3 → 1,0 ms, NAVIGATION/SELF
+      1,2 → 0,6 ms, herní vlákno v kokpitu ~8,3 → ~6,2 ms;
+    - čáry HUD a displejů se kreslí seskupené podle vrstvy a tloušťky (dávek čar HUD 132 → 63); vzhled
+      beze změny (snímky `hud`, `cockpit`, `mfd_pages` staré proti novým);
+    - přepínače pro A/B měření: `space.CockpitKeepWindow 0/1`, `space.HudLineBatch 0/1`; `stat SpaceHud`
+      ukazuje „Line batches“.
 
 ---
 
@@ -715,8 +724,7 @@ Další otevřené směry mimo let:
 - **Střední sloupek (bod 31), neověřeno autorem:** čitelnost na jiném rozlišení než 1600 px, pocit z radaru
   za letu. Radar zatím nikdy neviděl kontakt ve hře (v TestSpace ve snímcích žádný nebyl v 5 km); jeho
   poloha je ověřená jen headless testem. Kontakty se obnovují 5× za sekundu, rychlý objekt proto na radaru
-  skáče. Silueta SELF STATUS je z kolizních hullů – hranatá, ne přesný obrys modelu. Velké MFD a HUD
-  kreslí dál přes `GlowLines` (tři tloušťky na čáru, WORKFLOW 9.2g) – kandidát na další zrychlení.
+  skáče. Silueta SELF STATUS je z kolizních hullů – hranatá, ne přesný obrys modelu.
 - **Stránky MFD (bod 32), neověřeno autorem:** přepínání F1/F2 ve hře (headless test ověřuje mapování, ne
   stisk). Popisky na SELF STATUS
   (STATE, GEAR…) jsou malé. Stránky mají jen to, co hra umí; SC stránky zbraní, štítů a energie přijdou se
@@ -793,4 +801,5 @@ Viz `git log --oneline`. Poslední kroky:
 - `42a1ff5`, `2380850`: výchozí jen letový HUD, ustálená čísla MFD, jemnější prach, kovový rám;
 - dokumentace workflow a nástrah (`Docs/WORKFLOW.md`), pomocné skripty Blender MCP v `Tools/Blender/mcp/`;
 - střední sloupek desky: RADAR a SELF STATUS (bod 31), kreslení čar bez kvadratického dávkování ve Slate;
-- stránky MFD na F1 a F2 (bod 32).
+- stránky MFD na F1 a F2 (bod 32);
+- rychlejší kreslení displejů (trvalé okno) a seskupené čáry HUD (bod 33).

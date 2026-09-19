@@ -389,7 +389,17 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   přesně o svou velikost – celé pole se zkopíruje. `GlowLines` kreslí čáru třikrát různou tloušťkou, tedy
   tři dávky na čáru. Řešení: v kreslených widgetech **jedna tloušťka a jedna vrstva pro všechny čáry**,
   stejné čáry kreslit za sebou, záři (`GlowLines`) jen na pár krátkých prvků. Barva dávku nerozbíjí (je ve
-  vrcholech). Velké MFD a HUD mají `GlowLines` pořád – kandidát na zrychlení.
+  vrcholech). **Upřesnění (19. 9. 2026 večer):** kopírování pole je drahé jen tam, kde se seznam prvků
+  **nerecykluje**. Slate drží seznam prvků (a kapacitu polí) pro každé okno; `FWidgetRenderer::DrawWidget`
+  ale pro každé kreslení vytváří **nové** `SVirtualWindow`, takže displeje začínaly pokaždé s prázdným
+  polem a každá dávka ho realokovala (~50 µs na dávku; ve viewportu, kde se seznam recykluje, ~2 µs).
+  Řešení: `UCockpitDisplayComponent` drží jedno okno (`DrawWindow`) a kreslí přes
+  `FWidgetRenderer::DrawWindow` – „Display draw“ 5,6 → 1,9 ms na vykreslení, `AddLineElements` 2,75 →
+  0,62 ms. Pro každý další widget kreslený do render targetu platí totéž: **nikdy `DrawWidget` v každém
+  snímku, vždy trvalé okno.** Navíc všechny čáry kreslených prvků (`SpaceHudStyle::PaintLine`) čekají ve
+  frontě a kořen (`USpaceFlightHud::NativePaint`) je vydá seřazené podle vrstvy a tloušťky – dávek čar je
+  polovina (HUD 132 → 63). Přepínače pro A/B: `space.CockpitKeepWindow`, `space.HudLineBatch` (obojí 1),
+  počet dávek ukazuje `stat SpaceHud` (Line batches).
 - h) **FPS ve snímcích hned po přesunu lodi nic neříká.** První snímek scénáře a snímky po velkém přesunu
   (jiná výška, přistání) mají herní vlákno 20–30 ms, protože se staví terén. Na výkon se dívej se
   `settle` ≥ 2 s a srovnávej A/B ve **stejném balíčku** (konzolový přepínač v poli `console`), každou

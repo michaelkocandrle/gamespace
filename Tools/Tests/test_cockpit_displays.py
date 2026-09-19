@@ -245,4 +245,8 @@ ini = open(os.path.join(unreal.Paths.project_dir(), "Config", "DefaultInput.ini"
 check("the engine's debug views are off F1 and F2 (they work in the Development build that is played)",
       '-DebugExecBindings=(Key=F1,Command="viewmode wireframe", bIgnoreShift=True)' in ini and '-DebugExecBindings=(Key=F2,Command="viewmode unlit")' in ini)
 
+# One kept window for the displays: a new one every draw made Slate grow its vertex arrays from nothing each time.
+check("space.CockpitKeepWindow on by default (the displays' element list is reused)",
+      unreal.SystemLibrary.get_console_variable_int_value("space.CockpitKeepWindow") == 1)
+
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

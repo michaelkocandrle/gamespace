@@ -167,6 +167,14 @@ private:
 
 	TSharedPtr<SWidget> SlateWidget;
 	FWidgetRenderer* Renderer = nullptr;
+	/**
+	 * The one window the displays are drawn in. FWidgetRenderer::DrawWidget makes a new window for every
+	 * draw, and Slate keeps an element list, with its vertex arrays, per window: a new window meant arrays
+	 * grown from nothing every draw, re-allocated and copied whole for every render batch - ~3.5 ms of
+	 * Slate::AddLineElements a draw (19. 9. 2026). With one window the list and its capacity are reused.
+	 */
+	TSharedPtr<class SVirtualWindow> DrawWindow;
+	TSharedPtr<class FHittestGrid> HitTestGrid;
 	float SinceDraw = 0.f;
 	float SinceState = 0.f;
 	float CurrentScale = 1.f;
