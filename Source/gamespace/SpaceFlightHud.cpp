@@ -1549,10 +1549,11 @@ float USpaceCockpitDisplays::Steady(FName Figure, float Value, float Step, float
 FSpaceFlightHudState USpaceCockpitDisplays::SteadyState(const FSpaceFlightHudState& State)
 {
 	FSpaceFlightHudState Out = State;
-	// Between two updates (StateRateHz, 5 a second): more than 3 m/s of change shows tens of m/s,
-	// more than 0.2 G shows half G steps.
-	Out.SpeedCmS = Steady(TEXT("Speed"), State.SpeedCmS / 100.f, 10.f, 3.f) * 100.f;
-	Out.GForce = Steady(TEXT("G"), State.GForce, 0.5f, 0.2f);
+	// Between two updates (StateRateHz, 5 a second): any real change (over 0.5 m/s, 0.05 G) shows tens
+	// of m/s and half G steps; the exact figure only once the value holds still. At 3 m/s the last digit
+	// still changed with every update while accelerating gently and blended.
+	Out.SpeedCmS = Steady(TEXT("Speed"), State.SpeedCmS / 100.f, 10.f, 0.5f) * 100.f;
+	Out.GForce = Steady(TEXT("G"), State.GForce, 0.5f, 0.05f);
 	return Out;
 }
 
