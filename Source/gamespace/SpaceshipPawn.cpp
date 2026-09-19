@@ -34,6 +34,37 @@
 #include "SpaceDustComponent.h"
 #include "SpaceUserSettings.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
+#include "EngineUtils.h"
+
+namespace
+{
+	/** space.DashboardFocus 1 / 0: holds the dashboard focus of every ship (shots, testing). */
+	FAutoConsoleCommandWithWorldAndArgs DashboardFocusCommand(
+		TEXT("space.DashboardFocus"),
+		TEXT("space.DashboardFocus 1|0: lean in to the dashboard's displays (Z or the middle mouse button in the game)."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			const bool bOn = Args.Num() == 0 || FCString::Atoi(*Args[0]) != 0;
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				It->SetDashboardFocus(bOn);
+			}
+		}));
+
+	/** space.CockpitPitch <deg>: the cockpit view's rest pitch (comparison shots of the framing). */
+	FAutoConsoleCommandWithWorldAndArgs CockpitPitchCommand(
+		TEXT("space.CockpitPitch"),
+		TEXT("space.CockpitPitch <degrees>: tilt the cockpit view at rest (negative looks down)."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				It->SetCockpitViewPitch(Args.Num() > 0 ? FCString::Atof(*Args[0]) : 0.f);
+			}
+		}));
+}
 
 DEFINE_LOG_CATEGORY_STATIC(LogSpaceship, Log, All);
 
@@ -65,6 +96,7 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const LandingGearActionPath = TEXT("/Game/Input/IA_LandingGear.IA_LandingGear");
 	const TCHAR* const PrecisionActionPath = TEXT("/Game/Input/IA_Precision.IA_Precision");
 	const TCHAR* const MfdLeftActionPath = TEXT("/Game/Input/IA_MfdLeft.IA_MfdLeft");
+	const TCHAR* const DashboardFocusActionPath = TEXT("/Game/Input/IA_DashboardFocus.IA_DashboardFocus");
 	const TCHAR* const MfdRightActionPath = TEXT("/Game/Input/IA_MfdRight.IA_MfdRight");
 
 	/** 1 G in cm/s^2. */
@@ -472,6 +504,12 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		Input->BindAction(PrecisionAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandlePrecision);
 	}
+	if (DashboardFocusAction)
+	{
+		Input->BindAction(DashboardFocusAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleDashboardFocusStarted);
+		Input->BindAction(DashboardFocusAction, ETriggerEvent::Completed, this, &ASpaceshipPawn::HandleDashboardFocusCompleted);
+		Input->BindAction(DashboardFocusAction, ETriggerEvent::Canceled, this, &ASpaceshipPawn::HandleDashboardFocusCompleted);
+	}
 	if (MfdLeftAction)
 	{
 		Input->BindAction(MfdLeftAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleMfdLeft);
@@ -567,6 +605,11 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			if (PrecisionAction && !IsMapped(PrecisionAction))
 			{
 				InteractMappingContext->MapKey(PrecisionAction, EKeys::P);
+			}
+			if (DashboardFocusAction && !IsMapped(DashboardFocusAction))
+			{
+				InteractMappingContext->MapKey(DashboardFocusAction, EKeys::Z);
+				InteractMappingContext->MapKey(DashboardFocusAction, EKeys::MiddleMouseButton);
 			}
 			if (MfdLeftAction && !IsMapped(MfdLeftAction))
 			{
@@ -685,6 +728,7 @@ void ASpaceshipPawn::ResolveInputAssets()
 	LoadOrMake(AfterburnerAction, AfterburnerActionPath, TEXT("IA_Afterburner_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(LandingGearAction, LandingGearActionPath, TEXT("IA_LandingGear_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(PrecisionAction, PrecisionActionPath, TEXT("IA_Precision_Runtime"), EInputActionValueType::Boolean);
+	LoadOrMake(DashboardFocusAction, DashboardFocusActionPath, TEXT("IA_DashboardFocus_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(MfdLeftAction, MfdLeftActionPath, TEXT("IA_MfdLeft_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(MfdRightAction, MfdRightActionPath, TEXT("IA_MfdRight_Runtime"), EInputActionValueType::Boolean);
 
@@ -1192,13 +1236,21 @@ void ASpaceshipPawn::UpdateFreeLook(float DeltaSeconds)
 	}
 
 	const FVector2D Previous = FreeLookAngles;
+	const float PreviousFocus = DashboardFocusBlend;
+	DashboardFocusBlend = FMath::FInterpTo(DashboardFocusBlend, bDashboardFocusHeld && bDashboardFocusValid ? 1.f : 0.f, DeltaSeconds, DashboardFocusRate);
+	if (!bDashboardFocusHeld && DashboardFocusBlend < 0.001f)
+	{
+		DashboardFocusBlend = 0.f;
+	}
 	const float Rate = bFreeLookHeld ? FreeLookFollowRate : FreeLookReturnRate;
 	FreeLookAngles += (FreeLookTarget - FreeLookAngles) * (1.0 - FMath::Exp(-Rate * DeltaSeconds));
 	if (!bFreeLookHeld && FreeLookAngles.GetAbsMax() < 0.05)
 	{
 		FreeLookAngles = FVector2D::ZeroVector;
 	}
-	if (FreeLookAngles == Previous)
+	// While focused the head's turn is set every frame: anything that puts the camera straight (getting
+	// in, the shots) would otherwise leave the view zoomed in on the sky.
+	if (FreeLookAngles == Previous && DashboardFocusBlend == PreviousFocus && DashboardFocusBlend == 0.f && CockpitViewPitchDeg == 0.f)
 	{
 		return;  // nothing moved (the usual case: not free looking)
 	}
@@ -1206,7 +1258,97 @@ void ASpaceshipPawn::UpdateFreeLook(float DeltaSeconds)
 	// Chase: the boom swings around the ship. Cockpit: the head turns.
 	const FRotator Offset(float(FreeLookAngles.Y), float(FreeLookAngles.X), 0.f);
 	CameraBoom->SetRelativeRotation(Offset);
-	CockpitCamera->SetRelativeRotation(Offset);
+	ApplyCockpitRotation();
+}
+
+void ASpaceshipPawn::ApplyCockpitRotation()
+{
+	// The head turns to the dashboard first, free look on top of that.
+	const FQuat Rest = FRotator(CockpitViewPitchDeg, 0.f, 0.f).Quaternion();
+	const FQuat Focus = FQuat::Slerp(Rest, DashboardFocusRotation.Quaternion(), DashboardFocusBlend);
+	const FRotator Offset(float(FreeLookAngles.Y), float(FreeLookAngles.X), 0.f);
+	CockpitCamera->SetRelativeRotation(Focus * Offset.Quaternion());
+}
+
+void ASpaceshipPawn::HandleDashboardFocusStarted(const FInputActionValue& /*Value*/)
+{
+	SetDashboardFocus(true);
+}
+
+void ASpaceshipPawn::HandleDashboardFocusCompleted(const FInputActionValue& /*Value*/)
+{
+	SetDashboardFocus(false);
+}
+
+void ASpaceshipPawn::SetDashboardFocus(bool bFocus)
+{
+	if (bFocus && !bDashboardFocusHeld)
+	{
+		bDashboardFocusValid = ComputeDashboardFocus(DashboardFocusEye, DashboardFocusRotation, DashboardFocusFov);
+	}
+	bDashboardFocusHeld = bFocus;
+}
+
+void ASpaceshipPawn::DebugAdvanceDashboardFocus(float Seconds)
+{
+	for (float Left = Seconds; Left > 0.f; Left -= 1.f / 60.f)
+	{
+		UpdateFreeLook(FMath::Min(Left, 1.f / 60.f));
+	}
+}
+
+bool ASpaceshipPawn::ComputeDashboardFocus(FVector& OutEye, FRotator& OutRotation, float& OutFovDeg) const
+{
+	// Where the displays are, in the ship's frame (the cockpit camera hangs off the root).
+	const FTransform ActorTransform = GetActorTransform();
+	TArray<FVector> Displays;
+	TInlineComponentArray<UMeshComponent*> Meshes(this);
+	for (const UMeshComponent* Mesh : Meshes)
+	{
+		for (const FName& Socket : Mesh->GetAllSocketNames())
+		{
+			if (Socket.ToString().StartsWith(TEXT("Display_")))
+			{
+				Displays.Add(ActorTransform.InverseTransformPositionNoScale(Mesh->GetSocketLocation(Socket)));
+			}
+		}
+	}
+	if (Displays.Num() == 0)
+	{
+		return false;
+	}
+	FVector Centre = FVector::ZeroVector;
+	for (const FVector& Display : Displays)
+	{
+		Centre += Display / Displays.Num();
+	}
+	// Before BeginPlay (headless tests) the base is not known yet: the camera is still on it.
+	const FVector Eye0 = CockpitCameraBaseLocation.IsZero() ? CockpitCamera->GetRelativeLocation() : CockpitCameraBaseLocation;
+	const FVector Towards = (Centre - Eye0).GetSafeNormal();
+	OutEye = Eye0 + Towards * DashboardFocusLeanCm;
+	OutRotation = (Centre - OutEye).Rotation();
+	OutRotation.Roll = 0.f;
+	// The narrowest view that still holds every display with a margin, at the window's shape.
+	FVector2D Viewport(16.0, 9.0);
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(Viewport);
+	}
+	const double Aspect = Viewport.Y > 0.0 ? Viewport.X / Viewport.Y : 16.0 / 9.0;
+	const FVector2D Half = DashboardDisplayHalfSizeCm * (1.0 + DashboardFocusMargin);
+	double TanWide = 0.0;
+	for (const FVector& Display : Displays)
+	{
+		const FVector Local = OutRotation.UnrotateVector(Display - OutEye);
+		if (Local.X <= 1.0)
+		{
+			continue;
+		}
+		TanWide = FMath::Max(TanWide, (FMath::Abs(Local.Y) + Half.X) / Local.X);
+		TanWide = FMath::Max(TanWide, (FMath::Abs(Local.Z) + Half.Y) / Local.X * Aspect);
+	}
+	OutFovDeg = float(FMath::Clamp(2.0 * FMath::RadiansToDegrees(FMath::Atan(TanWide)), 20.0, double(BaseCockpitFov)));
+	return true;
 }
 
 TArray<FVector> ASpaceshipPawn::DebugSimulateFreeLook(const TArray<FVector>& Frames)
@@ -2341,7 +2483,8 @@ void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 	// Speed you can feel: the view widens with the afterburner and much more in cruise.
 	const float FovKick = AfterburnerFovKick * AfterburnerFeel + CruiseFovKick * CruiseBlend;
 	ChaseCamera->SetFieldOfView(BaseChaseFov + FovKick);
-	CockpitCamera->SetFieldOfView(FMath::Lerp(BaseCockpitFov, CockpitZoomFov, CockpitZoom) + 0.6f * FovKick * (1.f - CockpitZoom));
+	const float CockpitFov = FMath::Lerp(BaseCockpitFov, CockpitZoomFov, CockpitZoom) + 0.6f * FovKick * (1.f - CockpitZoom);
+	CockpitCamera->SetFieldOfView(FMath::Lerp(CockpitFov, DashboardFocusFov, DashboardFocusBlend));
 
 	// Smooth noise rather than random jumps: a rumble, not a flicker. Nothing moves when calm.
 	static const IConsoleVariable* ShakeScale = IConsoleManager::Get().RegisterConsoleVariable(TEXT("space.CameraShake"), 1.f,
@@ -2357,7 +2500,8 @@ void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 			FMath::PerlinNoise1D(float(Time * 12.4 + 17.1)),
 			FMath::PerlinNoise1D(float(Time * 10.0 + 41.9))) * Amplitude;
 	ChaseCamera->SetRelativeLocation(ChaseCameraBaseLocation + Shake);
-	CockpitCamera->SetRelativeLocation(CockpitCameraBaseLocation + Shake * 0.25);
+	// Dashboard focus leans the head in; the shake stays, a little, on the way.
+	CockpitCamera->SetRelativeLocation(FMath::Lerp(CockpitCameraBaseLocation, DashboardFocusEye, DashboardFocusBlend) + Shake * 0.25 * (1.f - 0.6f * DashboardFocusBlend));
 }
 
 // -------------------------------------------------------------------------------------------

@@ -107,4 +107,41 @@ try:
 finally:
     eas.destroy_actor(ship)
 
+# --- Dashboard focus (Z / middle mouse button): lean in to the displays, as the reference does -----------
+vanguard = eas.spawn_actor_from_class(unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard"),
+                                      unreal.Vector(0.0, 0.0, 80000.0))
+try:
+    camera = vanguard.get_editor_property("cockpit_camera")
+    eye0 = camera.get_editor_property("relative_location")
+    # Python gives the out parameters, or None when the function returns false.
+    found = vanguard.compute_dashboard_focus()
+    ok = found is not None
+    eye, rotation, fov = found if ok else (eye0, unreal.Rotator(), 0.0)
+    lean = (eye - eye0).length()
+    check("focus found from the Display_ sockets: the head leans ~15 cm towards them", ok and 14.0 < lean < 16.0 and eye.x > eye0.x and eye.z < eye0.z,
+          "%s, %.1f cm" % (ok, lean))
+    check("focus looks down at the dashboard (the displays are 14-25 degrees under the eye)", -30.0 < rotation.pitch < -10.0 and abs(rotation.yaw) < 2.0,
+          "pitch %.1f yaw %.1f" % (rotation.pitch, rotation.yaw))
+    check("focus narrows the view so the displays fill it (30-60 degrees, the normal view is ~88)", 30.0 < fov < 60.0, "%.1f" % fov)
+    vanguard.set_dashboard_focus(True)
+    vanguard.debug_advance_dashboard_focus(1.0)
+    turned_to = camera.get_editor_property("relative_rotation")
+    check("held: the head turns to the dashboard within a second", vanguard.get_dashboard_focus() > 0.95 and abs(turned_to.pitch - rotation.pitch) < 1.5,
+          "%.2f, pitch %.1f" % (vanguard.get_dashboard_focus(), turned_to.pitch))
+    vanguard.set_dashboard_focus(False)
+    vanguard.debug_advance_dashboard_focus(1.5)
+    back = camera.get_editor_property("relative_rotation")
+    rest = vanguard.get_editor_property("cockpit_view_pitch_deg")
+    check("released: back to the normal view (its rest tilt, setup cockpit_view_pitch_deg)", vanguard.get_dashboard_focus() == 0.0 and abs(back.pitch - rest) < 0.01,
+          "%.3f, pitch %.2f, rest %.2f" % (vanguard.get_dashboard_focus(), back.pitch, rest))
+    check("the Vanguard's view rests a little tilted down, towards its displays (-2..-5 deg)", -5.0 <= rest <= -2.0, "%.1f" % rest)
+    imc = unreal.EditorAssetLibrary.load_asset("/Game/Input/IMC_Spaceship")
+    keys = [str(m.get_editor_property("key").get_editor_property("key_name")) for m in imc.get_editor_property("default_key_mappings").get_editor_property("mappings")
+            if m.get_editor_property("action") and m.get_editor_property("action").get_name() == "IA_DashboardFocus"]
+    others = [m.get_editor_property("action").get_name() for m in imc.get_editor_property("default_key_mappings").get_editor_property("mappings")
+              if str(m.get_editor_property("key").get_editor_property("key_name")) in ("Z", "MiddleMouseButton") and m.get_editor_property("action").get_name() != "IA_DashboardFocus"]
+    check("focus on Z and the middle mouse button, nothing else there", sorted(keys) == ["MiddleMouseButton", "Z"] and not others, "%s %s" % (keys, others))
+finally:
+    eas.destroy_actor(vanguard)
+
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

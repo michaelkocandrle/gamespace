@@ -240,6 +240,12 @@ fuel). Only what the game has data for: no weapons, shields, power or cooling pa
 `UWidgetSwitcher` (only the one shown is painted); `UCockpitDisplayComponent` keeps the page
 (`CyclePage`, `SetPage`, `GetPage`), `space.MfdPage <left> <right>` sets it from the console. The thrust
 figures come from `ASpaceshipPawn::GetThrusterAcceleration` / `GetThrusterCapacity`.
+**Readable from the seat** (19. 9. 2026): an MFD is ~0.4 of its layout size on a 1080p screen from the eye, so
+the pages carry less and larger type (speed 96, G 56, nothing under 26; tested). Holding `Z` or the middle
+mouse button leans in to the dashboard as the reference does (`SetDashboardFocus`: the head moves 15 cm
+towards the `Display_*` sockets, turns to them and the view narrows until they fill it; the flight HUD
+steps aside). The Vanguard's eye moved 20 cm nearer the dashboard with a 3 degree tilt down
+(`cockpit_view_pitch_deg`) so the displays are larger at rest.
 The screen HUD stays,
 compacted so it sits above the dashboard. The cockpit is dark like the reference: the displays light it
 (a rect light at each `Display_*` socket), a faint key and fill light keep the dashboard's shape, and the inside
@@ -360,6 +366,7 @@ Star Citizen style: the gear has to be down to land, and lowering it puts the sh
 | Zoom         | `Alt` + mouse wheel (chase distance, cockpit zoom) | - |
 | Landing gear | `N` (down also switches precision on) | -          |
 | Precision mode | `P`                      | -                    |
+| Dashboard focus | hold `Z` or the middle mouse button | -            |
 | MFD pages    | `F1` left, `F2` right (`Alt` + key: back; `[` `]` on a US keyboard) | - |
 | Get out      | `F` (only when LANDED)     | -                    |
 | Free look    | hold right mouse button    | -                    |

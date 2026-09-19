@@ -397,6 +397,18 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 31b. **Displeje až pod rámeček** (19. 9. 2026, podle autorových detailů): plochy všech čtyř displejů sahají
     o ~5 mm pod vyvýšenou hranu rámečku (`grow_m` v receptu), řez AI skla zůstal na obrysu. Světlé proužky
     v rozích zmizely; zubatá levá hrana rámu pravého MFD je v AI modelu (WORKFLOW 9.6d).
+32b. **Čitelnost displejů z křesla** (19. 9. 2026, autor: čísla z výchozího pohledu moc malá; zvolil všechny tři
+    cesty):
+    - **větší písmo, méně obsahu:** z oka ~1,3 m od desky je MFD na 1080p obrazovce ~0,4 své velikosti v návrhu.
+      Rychlost 96, G 56, režim 62, všechno ostatní ≥ 26 (malé displeje ≥ 21); test to hlídá. Pryč: sloupec G (G je
+      velké číslo), tlačítka na STATUS (opakovala seznam) a jeho řádek FLIGHT, sloupec elevace v seznamech,
+      palivo AB na SELF STATUS; seznamy mají 3 tělesa / 4 kontakty;
+    - **přiblížení na desku jako v SC:** držet **Z** nebo **prostřední tlačítko myši** – hlava se nakloní k displejům
+      (15 cm, ~19° dolů), zorné pole se zúží na ~44°, aby displeje vyplnily obraz; letový HUD se mezitím schová;
+      puštěním zpět. Poloha se počítá ze socketů `Display_*` (každá loď). Konzole `space.DashboardFocus 1/0`;
+    - **kompozice:** oko o 20 cm blíž k desce a o 3 cm níž (194, 0, 186) a pohled o 3° dolů
+      (`cockpit_view_pitch_deg`): displeje ~20 % větší, celá deska v záběru, výhled dopředu zůstal. Srovnání se
+      starým okem ve scénáři `cockpit_readability` (poslední snímek); vrátit jde v `Vanguard_setup.json`.
 32. **Stránky MFD** (19. 9. 2026, WORKFLOW kap. 10 bod 2, klávesy a rozsah vybral autor):
     - **F1** přepíná levý MFD, **F2** pravý, **Alt + F1 / F2** zpět (Shift by zapnul boost). Autor nejdřív
       vybral [ a ], jenže na jeho české klávesnici to nejsou samostatné klávesy (vpravo od P je „ú“), proto
@@ -516,6 +528,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | Podvozek (vysunutí zapne i precision) | N |
 | Precision mode | P |
 | Stránky MFD (levý / pravý, s Alt zpět) | F1 / F2 |
+| Přiblížení na displeje (držet) | Z / prostřední tlačítko myši |
 | Vystoupit (jen když LANDED) | F |
 
 **Postava:** WASD, myš, Space skok, Shift sprint, F nastoupit.
@@ -595,6 +608,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `ship_views` | Loď ze všech stran (8 pohledů kolem, shora, zespodu s podvozkem, zblízka, ve vesmíru, se zářícími tryskami). Pro každý nový nebo změněný model. |
 | `landing` | SC-2a: podvozek ze strany (dole, v půlce cesty), zespodu, loď stojící na patkách, varování GEAR UP, loď na břiše bez podvozku, HUD po přistání, precision HUD, kokpit na zemi. |
 | `cockpit_centre` | Střední sloupek desky (RADAR, SELF STATUS): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé: vyříznout a zvětšit. |
+| `cockpit_readability` | Čitelnost displejů: výchozí pohled, přiblížení (Z) na FLIGHT/STATUS a THRUSTERS/CONTACTS, na konci staré oko pro srovnání. |
 | `mfd_pages` | Stránky MFD: FLIGHT/STATUS, THRUSTERS/CONTACTS s afterburnerem, NAVIGATION/SELF STATUS ve vesmíru a po přistání, THRUSTERS při visení. Stránky nastavuje pole `console` (`space.MfdPage`). |
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.

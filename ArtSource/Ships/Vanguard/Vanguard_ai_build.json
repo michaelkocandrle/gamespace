@@ -408,11 +408,11 @@
   ],
   "sockets": {
     "Cockpit": {
-      "_comment": "The pilot's eye, 65 cm behind the side grips of the cockpit interior with a clear view ahead, the dashboard top ~8 degrees below (Tools/Blender/fit_ship_interior.py; framing checked against the SC reference with Tools/Shots.ps1 -Preset cockpit_tune).",
+      "_comment": "The pilot's eye, 65 cm behind the side grips of the cockpit interior with a clear view ahead, the dashboard top ~8 degrees below (Tools/Blender/fit_ship_interior.py; framing checked against the SC reference with Tools/Shots.ps1 -Preset cockpit_tune). 19. 9. 2026: moved 20 cm nearer the dashboard and 3 cm lower (the author found the displays' figures too small from the fitted eye), with the view tilted 3 degrees down in the setup (cockpit_view_pitch_deg).",
       "location": [
-        1.74,
+        1.94,
         0.0,
-        1.89
+        1.86
       ]
     },
     "CameraTarget": {

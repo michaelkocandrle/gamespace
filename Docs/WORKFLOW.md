@@ -245,6 +245,7 @@ Presety (`Tools/Shots/*.json`):
 | `cockpit_tune` | ladění (tint, světla) |
 | `display_sharpness` | ostrost displejů při rychlém letu |
 | `cockpit_centre` | střední sloupek (radar, self status): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé, vyřízni a zvětši oblast ~745–855 × 630–880 px |
+| `cockpit_readability` | čitelnost z křesla, přiblížení Z, srovnání se starým okem |
 | `mfd_pages` | stránky MFD ve stavech, které je naplní. Vyřízni levý MFD ~495–710 × 640–825 a pravý ~893–1105 × 640–825 px |
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
@@ -287,6 +288,10 @@ Hra během snímků krátce převezme popředí. Když autor zrovna hraje, nejd�
   směr na okraji a jen do 60° nad/pod křídly) a SELF STATUS (`USpaceHudShipStatus`: obrysy kolizních hullů
   shora, motory ze socketů `Engine_*` podle tahu, podvozek ze `Gear_*`). Vypínač `space.CockpitCentre 0`.
 - **Měření:** `stat SpaceCockpit` (stav a kreslení displejů), `stat SpaceHud` (kreslené prvky).
+- **Čitelnost:** z oka je MFD na 1080p ~0,4 své velikosti v návrhu (560 px → ~230 px). Písmo pod 26 se z křesla
+  nečte; `test_cockpit_displays.py` hlídá minimum. Obsah přidávej jen s tímhle rozpočtem, detail patří do
+  přiblížení (Z, `ASpaceshipPawn::SetDashboardFocus`, `space.DashboardFocus`). Text se nezalamuje ani
+  neořezává: přetečení poznáš jen na snímku (hodnota přes záložku stránky).
 - **Stránky MFD** (`F1` levý, `F2` pravý, s Alt zpět; `[` `]` pro US klávesnici): vlevo FLIGHT / THRUSTERS / NAVIGATION, vpravo STATUS /
   CONTACTS / SELF STATUS, `UWidgetSwitcher` (kreslí se jen zobrazená). Stránku drží
   `UCockpitDisplayComponent` (`CyclePage`, `SetPage`), ve snímcích `console: ["space.MfdPage 1 2"]`.

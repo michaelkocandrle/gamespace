@@ -447,6 +447,33 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
 	bool IsFreeLooking() const { return bFreeLookHeld; }
 
+	/**
+	 * Dashboard focus, as the reference leans in to read its MFDs: while held (Z or the middle mouse
+	 * button) the pilot's head leans towards the dashboard, turns to it and the view narrows until the
+	 * displays fill it; released, the view goes back. Free look still works on top.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
+	void SetDashboardFocus(bool bFocus);
+
+	/** The cockpit view's pitch at rest, degrees (negative looks down). */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
+	void SetCockpitViewPitch(float Degrees) { CockpitViewPitchDeg = FMath::Clamp(Degrees, -20.f, 20.f); }
+
+	/** 0 the normal view .. 1 fully on the dashboard (eased). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
+	float GetDashboardFocus() const { return DashboardFocusBlend; }
+
+	/**
+	 * The focused view, from the Display_* sockets: the eye (actor space, cm), where it looks (relative to
+	 * the ship) and the horizontal field of view that holds every display. False without displays.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
+	bool ComputeDashboardFocus(FVector& OutEye, FRotator& OutRotation, float& OutFovDeg) const;
+
+	/** Tests: runs the focus easing for this long. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugAdvanceDashboardFocus(float Seconds);
+
 	/** Current camera offset from straight ahead, degrees: X yaw, Y pitch. Eases back to 0 on release. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
 	FVector2D GetFreeLookAngles() const { return FreeLookAngles; }
@@ -928,6 +955,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> PrecisionAction;
 
+	/** Digital, held: dashboard focus (Z, middle mouse button). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> DashboardFocusAction;
+
 	/** Digital, pressed: the left MFD's next page (F1, or [ on a US keyboard; with Alt the previous one). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> MfdLeftAction;
@@ -1331,6 +1362,26 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "10.0", ClampMax = "120.0"))
 	float CockpitZoomFov = 40.f;
 
+	/** The cockpit view's pitch at rest, degrees (negative looks down): framing of the dashboard. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "-20.0", ClampMax = "20.0"))
+	float CockpitViewPitchDeg = 0.f;
+
+	/** Dashboard focus: how far the head leans towards the displays, cm. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float DashboardFocusLeanCm = 15.f;
+
+	/** Dashboard focus: room round the displays, as a share of each display's half size (0.1 = 10 %). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float DashboardFocusMargin = 0.08f;
+
+	/** Dashboard focus: half size of a display round its socket, cm (the Vanguard's MFDs are ~33 x 29 cm). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "1.0"))
+	FVector2D DashboardDisplayHalfSizeCm = FVector2D(17.0, 15.0);
+
+	/** Dashboard focus: how fast the view goes in and out (1/s). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.1"))
+	float DashboardFocusRate = 7.f;
+
 	/** Degrees added to the field of view at full afterburner... */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
 	float AfterburnerFovKick = 9.f;
@@ -1645,6 +1696,10 @@ private:
 	void HandleAfterburnerCompleted(const FInputActionValue& Value);
 	void HandleLandingGear(const FInputActionValue& Value);
 	void HandlePrecision(const FInputActionValue& Value);
+	void HandleDashboardFocusStarted(const FInputActionValue& Value);
+	void HandleDashboardFocusCompleted(const FInputActionValue& Value);
+	/** The cockpit camera's turn: free look on top of the dashboard focus. */
+	void ApplyCockpitRotation();
 	void HandleMfdLeft(const FInputActionValue& Value);
 	void HandleMfdRight(const FInputActionValue& Value);
 	/** Pages an MFD (0 left, 1 right): forward, or back with Alt held. */
@@ -1835,6 +1890,14 @@ private:
 	float Heat = 0.f;
 	FVector ChaseCameraBaseLocation = FVector::ZeroVector;
 	FVector CockpitCameraBaseLocation = FVector::ZeroVector;
+
+	bool bDashboardFocusHeld = false;
+	float DashboardFocusBlend = 0.f;
+	/** The focused view, computed when the focus starts (the eye can move in shots). */
+	bool bDashboardFocusValid = false;
+	FVector DashboardFocusEye = FVector::ZeroVector;
+	FRotator DashboardFocusRotation = FRotator::ZeroRotator;
+	float DashboardFocusFov = 90.f;
 
 	/** Ticks left with camera lag switched off after SnapCameraToShip. */
 	int32 CameraSnapTicks = 0;

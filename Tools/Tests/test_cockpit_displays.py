@@ -42,18 +42,24 @@ def check(name, ok, detail=""):
 displays = unreal.new_object(unreal.SpaceCockpitDisplays)
 displays.debug_initialize()
 names = set(displays.debug_get_widget_names())
-expected = {"FlightScreen", "StatusScreen", "FlightTitle", "StatusTitle", "FlightGlass", "StatusGlass", "FlightKeys", "StatusKeys",
-            "SpeedGauge", "GGauge", "BoostGauge", "AfterburnerGauge", "SpeedValue", "SpeedUnit", "GText", "GValue", "BoostText",
-            "AfterburnerValue", "RowLimitValue", "GMax", "ModeText", "SubModeText", "RowGearValue", "RowCruiseValue", "RowRAltValue",
+expected = {"FlightScreen", "StatusScreen", "FlightTitle", "StatusTitle", "FlightGlass", "StatusGlass", "FlightKeys",
+            "SpeedGauge", "BoostGauge", "AfterburnerGauge", "SpeedValue", "SpeedUnit", "GText", "BoostText",
+            "AfterburnerValue", "RowLimitValue", "GMax", "ModeText", "RowGearValue", "RowCruiseValue", "RowRAltValue",
             "RowVsiValue", "RowAtmoValue", "FlightPages", "StatusPages",
-            "Lamp_MODE", "Lamp_CPLD", "Lamp_GSAF", "Lamp_CSTB", "Lamp_BOOST", "Lamp_GEAR", "Lamp_PREC", "Lamp_CRUISE"}
+            "Lamp_CPLD", "Lamp_GSAF", "Lamp_CSTB", "Lamp_BOOST", "Lamp_PREC"}
 check("two screens in the reference's MFD style (glass, title, keys, page tab) with every instrument", expected <= names, "missing %s" % sorted(expected - names))
 check("no virtual joystick on the dashboard", "VirtualJoystick" not in names)
 check("titles FLIGHT and STATUS", displays.debug_get_text("FlightTitle") == "FLIGHT" and displays.debug_get_text("StatusTitle") == "STATUS")
 size = lambda name: displays.debug_get_text_widget(name).get_editor_property("font").get_editor_property("size")
-check("big type: speed >= 48, keys and small figures >= 18 (a display is ~250 px wide on a 1600 px view)",
-      size("SpeedValue") >= 48 and size("LampLabel_CPLD") >= 18 and size("RowLimitValue") >= 18 and size("BoostText") >= 18,
-      "speed %d, key %d, limit %d, boost %d" % (size("SpeedValue"), size("LampLabel_CPLD"), size("RowLimitValue"), size("BoostText")))
+# Readable from the seat (author, 19. 9. 2026: the figures were too small): at ~1.5 m an MFD is ~0.38 of its
+# layout on a 1080p screen, so 26 is ~10 px - the least that reads; the speed and G are the large figures.
+check("big type from the seat: speed >= 96, G >= 56, mode >= 60", size("SpeedValue") >= 96 and size("GText") >= 56 and size("NavMode") >= 60,
+      "speed %d, G %d, mode %d" % (size("SpeedValue"), size("GText"), size("NavMode")))
+readable = ["LampLabel_CPLD", "RowLimitValue", "BoostText", "RowName_GEAR", "RowGearValue", "ThrustName_MAIN", "ThrustValue_MAIN", "ThrustBoost",
+            "NavSpeed", "NavName_0", "NavDist_0", "NavBrg_0", "ContactsRange", "ContactName_0", "ContactDist_0", "SelfGear", "SelfEngines",
+            "FlightTitle", "FlightPage", "RadarRange", "RadarHeading", "ShipGear", "ShipThrust"]
+small = ["%s %d" % (n, size(n)) for n in readable if size(n) < (21 if n in ("RadarRange", "RadarHeading", "ShipGear", "ShipThrust") else 26)]
+check("every figure and name at least 26 on the MFDs (21 on the centre column's small screens)", not small, ", ".join(small))
 check("switches drawn as the keys beside the reference's MFDs", displays.debug_get_lamp("CPLD").get_editor_property("button"))
 check("power-page bars are blocks, not tubes", displays.debug_get_gauge("BoostGauge").get_editor_property("segments") > 0)
 centre = {"RadarScreen", "ShipScreen", "RadarGlass", "ShipGlass", "Radar", "ShipStatus", "RadarRange", "RadarHeading", "RadarCount",
@@ -66,7 +72,7 @@ check("centre screens' type readable (>= 16, the glass is ~11 cm wide)", size("R
 # --- MFD pages ------------------------------------------------------------------------------------------
 pages = {"FlightSwitcher", "StatusSwitcher", "ThrustPage", "NavPage", "ContactsPage", "SelfPage", "ShipStatusLarge"}
 pages |= {"ThrustRow_%s" % a for a in ("MAIN", "RETRO", "STRAFE", "UP", "DOWN")} | {"ThrustGauge_%s" % a for a in ("MAIN", "RETRO", "STRAFE", "UP", "DOWN")}
-pages |= {"NavRow_%d" % i for i in range(4)} | {"ContactRow_%d" % i for i in range(6)} | {"SelfGear", "SelfEngines", "SelfBoost", "SelfAfterburner", "SelfState"}
+pages |= {"NavRow_%d" % i for i in range(3)} | {"ContactRow_%d" % i for i in range(4)} | {"SelfGear", "SelfEngines", "SelfBoost", "SelfState"}
 check("MFD pages: THRUSTERS and NAVIGATION on the left, CONTACTS and SELF STATUS on the right", pages <= names, "missing %s" % sorted(pages - names))
 check("each MFD starts on its first page", displays.debug_get_page(0) == 0 and displays.debug_get_page(1) == 0)
 displays.set_pages(1, 2)
@@ -112,7 +118,7 @@ try:
     hud.apply_state(state)
     displays.apply_state(state)
     same = [displays.debug_get_text("SpeedValue") == hud.debug_get_text("SpeedValue"),
-            displays.debug_get_text("GValue") == hud.debug_get_text("GValue"),
+            displays.debug_get_text("GMax") == hud.debug_get_text("GMax"),
             displays.debug_get_text("BoostText") == hud.debug_get_text("RowBoostValue"),
             displays.debug_get_text("AfterburnerValue") == hud.debug_get_text("AfterburnerValue")]
     check("the displays read the same as the HUD", all(same), "%s; speed %r vs %r" % (same, displays.debug_get_text("SpeedText"), hud.debug_get_text("SpeedValue")))
@@ -168,8 +174,8 @@ try:
               and displays.debug_get_text("RadarRange") == "5.0 KM",
               "%d, %r, %r" % (shown_contacts, displays.debug_get_text("RadarCount"), displays.debug_get_text("RadarRange")))
         check("no body near: heading shown as ---", displays.debug_get_text("RadarHeading") == "---", displays.debug_get_text("RadarHeading"))
-        row = [displays.debug_get_text(n) for n in ("ContactName_0", "ContactDist_0", "ContactBrg_0", "ContactElev_0")]
-        check("contacts page lists the cube: name, range, bearing from the nose, elevation", row == ["CUBE", "1.02 KM", "011\u00b0", "+6\u00b0"]
+        row = [displays.debug_get_text(n) for n in ("ContactName_0", "ContactDist_0", "ContactBrg_0")]
+        check("contacts page lists the cube: name, range, bearing from the nose", row == ["CUBE", "1.02 KM", "011\u00b0"]
               and displays.debug_is_shown("ContactRow_0") and not displays.debug_is_shown("ContactRow_1") and not displays.debug_is_shown("ContactsEmpty"), repr(row))
         nav = [displays.debug_get_text(n) for n in ("NavDist_0", "NavBrg_0")]
         check("navigation page lists the body: range to its surface and bearing (left: 270)", nav == ["900 KM", "270\u00b0"]

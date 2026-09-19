@@ -127,8 +127,8 @@ namespace SpaceHudStyle
 	const FLinearColor MfdText(0.85f, 0.92f, 1.f, 0.95f);
 
 	/** Rows of the navigation page's body list and of the contacts page. */
-	constexpr int32 NavRows = 4;
-	constexpr int32 ContactRows = 6;
+	constexpr int32 NavRows = 3;
+	constexpr int32 ContactRows = 4;
 
 	/** Every line on the centre column's pages (radar, self status): one thickness, so Slate batches them. */
 	constexpr float SmallScreenLine = 1.5f;
@@ -1111,7 +1111,7 @@ int32 USpaceHudRadar::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	Line({ Centre + FVector2f(-6.f, 6.f), Centre + FVector2f(0.f, -8.f), Centre + FVector2f(6.f, 6.f), Centre + FVector2f(0.f, 2.f),
 		Centre + FVector2f(-6.f, 6.f) }, Accent);
 
-	const FSlateFontInfo Font = LabelFont(17.f);
+	const FSlateFontInfo Font = LabelFont(22.f);
 	for (const FSpaceRadarContact& Contact : Contacts)
 	{
 		const FVector2D Plot = PlotPosition(Contact, RangeM);
@@ -1912,14 +1912,10 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 		return Metres < 1000.f ? FString::Printf(TEXT("%.0f M"), Metres) : Metres < 10000.f ? FString::Printf(TEXT("%.2f KM"), Metres / 1000.f)
 			: Metres < 1.0e6f ? FString::Printf(TEXT("%.0f KM"), Metres / 1000.f) : FString::Printf(TEXT("%.1f MM"), Metres / 1.0e6f);
 	};
-	// Bearing clockwise from the nose, and elevation above the wings, as the reference's contact list.
+	// Bearing clockwise from the nose, as the reference's contact list.
 	auto Bearing = [](const FSpaceRadarContact& Contact)
 	{
 		return FString::Printf(TEXT("%03.0f\u00B0"), FMath::Fmod(FMath::RoundToFloat(FMath::RadiansToDegrees(float(FMath::Atan2(Contact.Position.X, Contact.Position.Y)))) + 360.f, 360.f));
-	};
-	auto Elevation = [](const FSpaceRadarContact& Contact)
-	{
-		return FString::Printf(TEXT("%+.0f\u00B0"), FMath::RadiansToDegrees(float(FMath::Atan2(double(Contact.HeightM), Contact.Position.Size()))));
 	};
 	struct FThrustAxis { const TCHAR* Name; float Value; float Cap; };
 	const FThrustAxis Axes[] = {
@@ -1960,7 +1956,6 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 			SetText(FName(*FString::Printf(TEXT("NavName_%d"), Index)), Bodies[Index].Label.ToUpper(), Label);
 			SetText(FName(*FString::Printf(TEXT("NavDist_%d"), Index)), Distance(Bodies[Index].DistanceM), Label);
 			SetText(FName(*FString::Printf(TEXT("NavBrg_%d"), Index)), Bearing(Bodies[Index]), Faded(Label, 0.85f));
-			SetText(FName(*FString::Printf(TEXT("NavElev_%d"), Index)), Elevation(Bodies[Index]), Faded(Label, 0.85f));
 		}
 	}
 	Show(TEXT("NavEmpty"), Bodies.Num() == 0);
@@ -1977,7 +1972,6 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 			SetText(FName(*FString::Printf(TEXT("ContactName_%d"), Index)), NearContacts[Index].Label, Label);
 			SetText(FName(*FString::Printf(TEXT("ContactDist_%d"), Index)), Distance(NearContacts[Index].DistanceM), Label);
 			SetText(FName(*FString::Printf(TEXT("ContactBrg_%d"), Index)), Bearing(NearContacts[Index]), Faded(Label, 0.85f));
-			SetText(FName(*FString::Printf(TEXT("ContactElev_%d"), Index)), Elevation(NearContacts[Index]), Faded(Label, 0.85f));
 		}
 	}
 	Show(TEXT("ContactsEmpty"), NearContacts.Num() == 0);
@@ -2015,6 +2009,8 @@ void USpaceFlightHud::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	static const IConsoleVariable* HudMode = IConsoleManager::Get().FindConsoleVariable(TEXT("space.Hud"));
 	const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(GetOwningPlayerPawn());
 	FSpaceFlightHudState State = MakeState(Ship, HudMode ? HudMode->GetInt() : 1);
+	// Leaning in to the dashboard (Z), the HUD would lie over the displays: it steps aside.
+	State.bVisible = State.bVisible && !(Ship && Ship->GetDashboardFocus() > 0.35f);
 	// The HUD is drawn over the view, so its horizon and heading are the view's.
 	if (const APlayerController* Player = GetOwningPlayer())
 	{
@@ -2160,7 +2156,7 @@ void USpaceCockpitDisplays::BuildTree()
 	};
 	auto Words = [&](const FName Name, const TCHAR* Initial, float Size, const FLinearColor& Color = SpaceHudStyle::MfdText)
 	{
-		UTextBlock* Text = MakeText(Name, Size, 30, TEXT("Label"));
+		UTextBlock* Text = MakeText(Name, Size, Size >= 60.f ? 0 : 30, TEXT("Label"));
 		Text->SetText(FText::FromString(Initial));
 		Text->SetColorAndOpacity(FSlateColor(Color));
 		return Text;
@@ -2190,7 +2186,7 @@ void USpaceCockpitDisplays::BuildTree()
 		NewLamp->bBadge = !bButtonStyle;
 		NewLamp->Color = MfdBlue;
 		Lamps.Add(KeyName, NewLamp);
-		UTextBlock* LampText = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 22.f, 60, TEXT("Label"));
+		UTextBlock* LampText = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 26.f, 40, TEXT("Label"));
 		LampText->SetText(FText::FromString(LampName));
 		LampText->SetJustification(ETextJustify::Center);
 		LampLabels.Add(KeyName, LampText);
@@ -2211,7 +2207,7 @@ void USpaceCockpitDisplays::BuildTree()
 		UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), Name);
 		for (const TCHAR* LampName : LampNames)
 		{
-			Vertical(Column, Key(LampName, 96.f, 46.f, true), HAlign_Center, FMargin(0.f, 0.f, 0.f, 12.f));
+			Vertical(Column, Key(LampName, 104.f, 50.f, true), HAlign_Center, FMargin(0.f, 0.f, 0.f, 10.f));
 		}
 		return Column;
 	};
@@ -2247,11 +2243,11 @@ void USpaceCockpitDisplays::BuildTree()
 			GlassSlot->SetVerticalAlignment(VAlign_Fill);
 		}
 		UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), ScreenName)));
-		Vertical(Column, Words(FName(*FString::Printf(TEXT("%sTitle"), ScreenName)), Title, 26.f, Faded(MfdText, 0.85f)), HAlign_Left, FMargin(4.f, 0.f, 0.f, 4.f));
-		Vertical(Column, Rule(FName(*FString::Printf(TEXT("%sRule"), ScreenName)), 0.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 10.f));
+		Vertical(Column, Words(FName(*FString::Printf(TEXT("%sTitle"), ScreenName)), Title, 32.f, Faded(MfdText, 0.85f)), HAlign_Left, FMargin(4.f, 0.f, 0.f, 2.f));
+		Vertical(Column, Rule(FName(*FString::Printf(TEXT("%sRule"), ScreenName)), 0.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 6.f));
 		Vertical(Column, Content, HAlign_Fill, FMargin(0.f), true);
 		UHorizontalBox* Pages = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("%sPages"), ScreenName)));
-		Horizontal(Pages, Words(FName(*FString::Printf(TEXT("%sPrev"), ScreenName)), TEXT("<"), 26.f, MfdBlue), VAlign_Center, FMargin(4.f, 0.f, 12.f, 0.f));
+		Horizontal(Pages, Words(FName(*FString::Printf(TEXT("%sPrev"), ScreenName)), TEXT("<"), 32.f, MfdBlue), VAlign_Center, FMargin(4.f, 0.f, 12.f, 0.f));
 		UOverlay* Tab = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("%sTab"), ScreenName)));
 		USpaceHudLamp* TabShape = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), FName(*FString::Printf(TEXT("%sTabShape"), ScreenName)));
 		TabShape->bButton = true;
@@ -2263,18 +2259,18 @@ void USpaceCockpitDisplays::BuildTree()
 			ShapeSlot->SetHorizontalAlignment(HAlign_Fill);
 			ShapeSlot->SetVerticalAlignment(VAlign_Fill);
 		}
-		if (UOverlaySlot* PageSlot = Tab->AddChildToOverlay(Words(FName(*FString::Printf(TEXT("%sPage"), ScreenName)), Title, 22.f, MfdText)))
+		if (UOverlaySlot* PageSlot = Tab->AddChildToOverlay(Words(FName(*FString::Printf(TEXT("%sPage"), ScreenName)), Title, 28.f, MfdText)))
 		{
 			PageSlot->SetHorizontalAlignment(HAlign_Center);
 			PageSlot->SetVerticalAlignment(VAlign_Center);
 			PageSlot->SetPadding(FMargin(0.f, 3.f));
 		}
 		Horizontal(Pages, Tab, VAlign_Fill, FMargin(0.f), true);
-		Horizontal(Pages, Words(FName(*FString::Printf(TEXT("%sNext"), ScreenName)), TEXT(">"), 26.f, MfdBlue), VAlign_Center, FMargin(12.f, 0.f, 4.f, 0.f));
-		Vertical(Column, Sized(FName(*FString::Printf(TEXT("%sPagesBox"), ScreenName)), Pages, 0.f, 38.f), HAlign_Fill, FMargin(0.f, 8.f, 0.f, 0.f));
+		Horizontal(Pages, Words(FName(*FString::Printf(TEXT("%sNext"), ScreenName)), TEXT(">"), 32.f, MfdBlue), VAlign_Center, FMargin(12.f, 0.f, 4.f, 0.f));
+		Vertical(Column, Sized(FName(*FString::Printf(TEXT("%sPagesBox"), ScreenName)), Pages, 0.f, 44.f), HAlign_Fill, FMargin(0.f, 6.f, 0.f, 0.f));
 		if (UOverlaySlot* ColumnSlot = Overlay->AddChildToOverlay(Column))
 		{
-			ColumnSlot->SetPadding(FMargin(26.f, 16.f, 26.f, 16.f));
+			ColumnSlot->SetPadding(FMargin(20.f, 12.f, 20.f, 12.f));
 			ColumnSlot->SetHorizontalAlignment(HAlign_Fill);
 			ColumnSlot->SetVerticalAlignment(VAlign_Fill);
 		}
@@ -2304,7 +2300,7 @@ void USpaceCockpitDisplays::BuildTree()
 		Horizontal(Row, Words(FName(*(Name.ToString() + TEXT("Caption"))), Caption, CaptionSize, CaptionColor), VAlign_Center, FMargin(0.f), true);
 		if (!ValueName.IsNone())
 		{
-			Horizontal(Row, Words(ValueName, TEXT("-"), 19.f), VAlign_Center, FMargin(0.f));
+			Horizontal(Row, Words(ValueName, TEXT("-"), 22.f), VAlign_Center, FMargin(8.f, 0.f, 0.f, 0.f));
 		}
 		return Row;
 	};
@@ -2317,8 +2313,8 @@ void USpaceCockpitDisplays::BuildTree()
 	auto Figure = [&](const TCHAR* Caption, const FName ValueName)
 	{
 		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("Figure_%s"), Caption)));
-		Vertical(Box, Words(ValueName, TEXT("-"), 22.f), HAlign_Center, FMargin(0.f));
-		Vertical(Box, Words(FName(*FString::Printf(TEXT("FigureCaption_%s"), Caption)), Caption, 16.f, Faded(MfdText, 0.55f)), HAlign_Center, FMargin(0.f));
+		Vertical(Box, Words(ValueName, TEXT("-"), 34.f), HAlign_Center, FMargin(0.f));
+		Vertical(Box, Words(FName(*FString::Printf(TEXT("FigureCaption_%s"), Caption)), Caption, 20.f, Faded(MfdText, 0.55f)), HAlign_Center, FMargin(0.f));
 		Horizontal(Figures, Box, VAlign_Top, FMargin(0.f), true);
 	};
 	Figure(TEXT("LIMIT"), TEXT("RowLimitValue"));
@@ -2328,22 +2324,28 @@ void USpaceCockpitDisplays::BuildTree()
 	Vertical(FlightMain, Rule(TEXT("FlightFiguresRule"), 0.f, 0.2f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 8.f));
 	UHorizontalBox* Readout = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightReadout"));
 	UVerticalBox* Big = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightBig"));
-	Vertical(Big, Words(TEXT("SpeedValue"), TEXT("0"), 58.f), HAlign_Left, FMargin(0.f));
-	Vertical(Big, Words(TEXT("SpeedUnit"), TEXT("m/s"), 20.f, Faded(MfdText, 0.6f)), HAlign_Left, FMargin(2.f, 0.f, 0.f, 14.f));
-	Vertical(Big, Words(TEXT("GText"), TEXT("0.0 G"), 34.f), HAlign_Left, FMargin(0.f));
+	// Read from the seat at ~1.5 m, where a display is ~0.38 of its layout on a 1080p screen: the speed and G
+	// as large as the reference's own MFD figures, the rest no smaller than 26 (Z leans in for the detail).
+	// The unit beside the speed, not under it: stacked, the G ran into the page tab.
+	UHorizontalBox* SpeedLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightSpeedLine"));
+	Horizontal(SpeedLine, Words(TEXT("SpeedValue"), TEXT("0"), 96.f), VAlign_Bottom, FMargin(0.f));
+	Horizontal(SpeedLine, Words(TEXT("SpeedUnit"), TEXT("m/s"), 22.f, Faded(MfdText, 0.6f)), VAlign_Bottom, FMargin(4.f, 0.f, 0.f, 18.f));
+	Vertical(Big, SpeedLine, HAlign_Left, FMargin(0.f, -12.f, 0.f, 0.f));
+	Vertical(Big, Words(TEXT("GText"), TEXT("0.0 G"), 56.f), HAlign_Left, FMargin(0.f, -6.f, 0.f, 0.f));
 	Horizontal(Readout, Big, VAlign_Top, FMargin(0.f), true);
 	auto Bar = [&](const TCHAR* Caption, const FName GaugeName, const FName ValueName)
 	{
 		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), *GaugeName.ToString())));
-		Vertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, 8), 34.f, 186.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 4.f));
-		Vertical(Box, Words(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), Caption, 18.f, Faded(MfdText, 0.75f)), HAlign_Center, FMargin(0.f));
-		Vertical(Box, Words(ValueName, TEXT("-"), 18.f), HAlign_Center, FMargin(0.f));
-		Horizontal(Readout, Box, VAlign_Top, FMargin(8.f, 0.f, 0.f, 0.f));
+		Vertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, 8), 38.f, 150.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 4.f));
+		Vertical(Box, Words(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), Caption, 24.f, Faded(MfdText, 0.75f)), HAlign_Center, FMargin(0.f));
+		Vertical(Box, Words(ValueName, TEXT("-"), 26.f), HAlign_Center, FMargin(0.f));
+		// Tight columns: the speed and its unit need the room beside them.
+		Horizontal(Readout, Box, VAlign_Top, FMargin(2.f, 0.f, 0.f, 0.f));
 	};
 	Bar(TEXT("SPD"), TEXT("SpeedGauge"), TEXT("SpeedPercent"));
 	Bar(TEXT("BST"), TEXT("BoostGauge"), TEXT("BoostText"));
 	Bar(TEXT("AB"), TEXT("AfterburnerGauge"), TEXT("AfterburnerValue"));
-	Bar(TEXT("G"), TEXT("GGauge"), TEXT("GValue"));
+	// No G bar: G is the large figure beside the bars.
 	if (USpaceHudGauge* Afterburner = Gauges.FindRef(TEXT("AfterburnerGauge")))
 	{
 		Afterburner->ReserveZone = 0.25f;
@@ -2364,57 +2366,55 @@ void USpaceCockpitDisplays::BuildTree()
 	for (const TCHAR* Axis : { TEXT("MAIN"), TEXT("RETRO"), TEXT("STRAFE"), TEXT("UP"), TEXT("DOWN") })
 	{
 		UHorizontalBox* ThrustLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("ThrustRow_%s"), Axis)));
-		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustNameBox_%s"), Axis)), Words(FName(*FString::Printf(TEXT("ThrustName_%s"), Axis)), Axis, 21.f), 104.f, 0.f),
+		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustNameBox_%s"), Axis)), Words(FName(*FString::Printf(TEXT("ThrustName_%s"), Axis)), Axis, 30.f), 134.f, 0.f),
 			VAlign_Center, FMargin(0.f));
 		// The strafe row says which side it fires to.
 		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustSideBox_%s"), Axis)),
-			FCString::Strcmp(Axis, TEXT("STRAFE")) == 0 ? static_cast<UWidget*>(Words(TEXT("ThrustStrafeSide"), TEXT(""), 21.f)) : static_cast<UWidget*>(WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass())),
-			22.f, 0.f), VAlign_Center, FMargin(0.f));
+			FCString::Strcmp(Axis, TEXT("STRAFE")) == 0 ? static_cast<UWidget*>(Words(TEXT("ThrustStrafeSide"), TEXT(""), 30.f)) : static_cast<UWidget*>(WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass())),
+			28.f, 0.f), VAlign_Center, FMargin(0.f));
 		USpaceHudGauge* ThrustGauge = Gauge(FName(*FString::Printf(TEXT("ThrustGauge_%s"), Axis)), 12);
 		ThrustGauge->bHorizontal = true;
-		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustGaugeBox_%s"), Axis)), ThrustGauge, 0.f, 26.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f), true);
+		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustGaugeBox_%s"), Axis)), ThrustGauge, 0.f, 24.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f), true);
 		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustValueBox_%s"), Axis)),
-			AlignedWords(FName(*FString::Printf(TEXT("ThrustValue_%s"), Axis)), TEXT("-"), 19.f, ETextJustify::Right), 128.f, 0.f), VAlign_Center, FMargin(0.f));
-		Vertical(ThrustPage, ThrustLine, HAlign_Fill, FMargin(0.f, 7.f));
+			AlignedWords(FName(*FString::Printf(TEXT("ThrustValue_%s"), Axis)), TEXT("-"), 28.f, ETextJustify::Right), 168.f, 0.f), VAlign_Center, FMargin(0.f));
+		Vertical(ThrustPage, ThrustLine, HAlign_Fill, FMargin(0.f, 1.f));
 	}
-	Vertical(ThrustPage, Rule(TEXT("ThrustRule"), 0.f, 0.2f), HAlign_Fill, FMargin(0.f, 6.f));
+	Vertical(ThrustPage, Rule(TEXT("ThrustRule"), 0.f, 0.2f), HAlign_Fill, FMargin(0.f, 3.f));
 	UHorizontalBox* ThrustFooter = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ThrustFooter"));
-	Horizontal(ThrustFooter, Words(TEXT("ThrustBoost"), TEXT("BOOST OFF"), 20.f), VAlign_Center, FMargin(0.f), true);
-	Horizontal(ThrustFooter, Words(TEXT("ThrustGSafe"), TEXT("G-SAFE"), 20.f), VAlign_Center, FMargin(0.f));
-	Vertical(ThrustPage, ThrustFooter, HAlign_Fill, FMargin(0.f, 4.f));
+	Horizontal(ThrustFooter, Words(TEXT("ThrustBoost"), TEXT("BOOST OFF"), 26.f), VAlign_Center, FMargin(0.f), true);
+	Horizontal(ThrustFooter, Words(TEXT("ThrustGSafe"), TEXT("G-SAFE"), 26.f), VAlign_Center, FMargin(0.f));
+	Vertical(ThrustPage, ThrustFooter, HAlign_Fill, FMargin(0.f));
 
 	// --- Left display, page 3: NAVIGATION - master mode, cruise, and the bodies with range and bearing ---
 	UVerticalBox* NavPage = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("NavPage"));
 	UHorizontalBox* NavTop = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("NavTop"));
 	UVerticalBox* NavModeBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("NavModeBox"));
-	Vertical(NavModeBox, Words(TEXT("NavMode"), TEXT("SCM"), 46.f), HAlign_Left, FMargin(0.f));
-	Vertical(NavModeBox, Words(TEXT("NavSub"), TEXT("FLIGHT"), 20.f, Faded(MfdText, 0.8f)), HAlign_Left, FMargin(2.f, 0.f, 0.f, 0.f));
+	Vertical(NavModeBox, Words(TEXT("NavMode"), TEXT("SCM"), 62.f), HAlign_Left, FMargin(0.f, -10.f, 0.f, -8.f));
+	Vertical(NavModeBox, Words(TEXT("NavSub"), TEXT("FLIGHT"), 26.f, Faded(MfdText, 0.8f)), HAlign_Left, FMargin(2.f, 0.f, 0.f, 0.f));
 	Horizontal(NavTop, NavModeBox, VAlign_Top, FMargin(0.f, 0.f, 24.f, 0.f));
 	UVerticalBox* NavFigures = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("NavFigures"));
 	for (const TPair<const TCHAR*, const TCHAR*>& NavFigure : { TPair<const TCHAR*, const TCHAR*>(TEXT("SPEED"), TEXT("NavSpeed")),
 		TPair<const TCHAR*, const TCHAR*>(TEXT("LIMIT"), TEXT("NavLimit")), TPair<const TCHAR*, const TCHAR*>(TEXT("CRUISE"), TEXT("NavCruise")) })
 	{
 		UHorizontalBox* FigureLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("NavFigure_%s"), NavFigure.Key)));
-		Horizontal(FigureLine, Words(FName(*FString::Printf(TEXT("NavCaption_%s"), NavFigure.Key)), NavFigure.Key, 17.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f), true);
-		Horizontal(FigureLine, Words(NavFigure.Value, TEXT("-"), 20.f), VAlign_Center, FMargin(0.f));
-		Vertical(NavFigures, FigureLine, HAlign_Fill, FMargin(0.f, 1.f));
+		Horizontal(FigureLine, Words(FName(*FString::Printf(TEXT("NavCaption_%s"), NavFigure.Key)), NavFigure.Key, 22.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f), true);
+		Horizontal(FigureLine, Words(NavFigure.Value, TEXT("-"), 28.f), VAlign_Center, FMargin(0.f));
+		Vertical(NavFigures, FigureLine, HAlign_Fill, FMargin(0.f, -2.f));
 	}
 	Horizontal(NavTop, NavFigures, VAlign_Top, FMargin(0.f), true);
-	Vertical(NavPage, NavTop, HAlign_Fill, FMargin(0.f, 0.f, 0.f, 8.f));
-	Vertical(NavPage, Rule(TEXT("NavRule"), 0.f, 0.2f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 4.f));
+	Vertical(NavPage, NavTop, HAlign_Fill, FMargin(0.f, 0.f, 0.f, 2.f));
+	Vertical(NavPage, Rule(TEXT("NavRule"), 0.f, 0.2f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 0.f));
 	auto ListHeader = [&](const FName Name, const TCHAR* First)
 	{
 		UHorizontalBox* Header = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), Name);
-		Horizontal(Header, Words(FName(*(Name.ToString() + TEXT("Name"))), First, 16.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f), true);
-		Horizontal(Header, Sized(FName(*(Name.ToString() + TEXT("DistBox"))), AlignedWords(FName(*(Name.ToString() + TEXT("Dist"))), TEXT("RANGE"), 16.f, ETextJustify::Right,
-			Faded(MfdText, 0.55f)), 120.f, 0.f), VAlign_Center, FMargin(0.f));
-		Horizontal(Header, Sized(FName(*(Name.ToString() + TEXT("BrgBox"))), AlignedWords(FName(*(Name.ToString() + TEXT("Brg"))), TEXT("BRG"), 16.f, ETextJustify::Right,
-			Faded(MfdText, 0.55f)), 74.f, 0.f), VAlign_Center, FMargin(0.f));
-		Horizontal(Header, Sized(FName(*(Name.ToString() + TEXT("ElevBox"))), AlignedWords(FName(*(Name.ToString() + TEXT("Elev"))), TEXT("EL"), 16.f, ETextJustify::Right,
-			Faded(MfdText, 0.55f)), 62.f, 0.f), VAlign_Center, FMargin(0.f));
+		Horizontal(Header, Words(FName(*(Name.ToString() + TEXT("Name"))), First, 22.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f), true);
+		Horizontal(Header, Sized(FName(*(Name.ToString() + TEXT("DistBox"))), AlignedWords(FName(*(Name.ToString() + TEXT("Dist"))), TEXT("RANGE"), 22.f, ETextJustify::Right,
+			Faded(MfdText, 0.55f)), 160.f, 0.f), VAlign_Center, FMargin(0.f));
+		Horizontal(Header, Sized(FName(*(Name.ToString() + TEXT("BrgBox"))), AlignedWords(FName(*(Name.ToString() + TEXT("Brg"))), TEXT("BRG"), 22.f, ETextJustify::Right,
+			Faded(MfdText, 0.55f)), 100.f, 0.f), VAlign_Center, FMargin(0.f));
 		return Header;
 	};
-	// A row of a list: name, range, bearing, elevation.
+	// A row of a list: name, range, bearing.
 	auto ListRow = [&](UVerticalBox* Into, const FString& Prefix, int32 Index)
 	{
 		// The row and its rule in one box: a hidden row takes its rule with it.
@@ -2422,14 +2422,12 @@ void USpaceCockpitDisplays::BuildTree()
 		UVerticalBox* RowBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*Row));
 		Parts.Add(FName(*Row), RowBox);
 		UHorizontalBox* ListLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*(Row + TEXT("Line"))));
-		Horizontal(ListLine, Words(FName(*FString::Printf(TEXT("%sName_%d"), *Prefix, Index)), TEXT("-"), 20.f), VAlign_Center, FMargin(0.f), true);
-		Horizontal(ListLine, Sized(FName(*(Row + TEXT("DistBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sDist_%d"), *Prefix, Index)), TEXT("-"), 20.f, ETextJustify::Right), 120.f, 0.f),
+		Horizontal(ListLine, Words(FName(*FString::Printf(TEXT("%sName_%d"), *Prefix, Index)), TEXT("-"), 30.f), VAlign_Center, FMargin(0.f), true);
+		Horizontal(ListLine, Sized(FName(*(Row + TEXT("DistBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sDist_%d"), *Prefix, Index)), TEXT("-"), 30.f, ETextJustify::Right), 160.f, 0.f),
 			VAlign_Center, FMargin(0.f));
-		Horizontal(ListLine, Sized(FName(*(Row + TEXT("BrgBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sBrg_%d"), *Prefix, Index)), TEXT("-"), 19.f, ETextJustify::Right), 74.f, 0.f),
+		Horizontal(ListLine, Sized(FName(*(Row + TEXT("BrgBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sBrg_%d"), *Prefix, Index)), TEXT("-"), 28.f, ETextJustify::Right), 100.f, 0.f),
 			VAlign_Center, FMargin(0.f));
-		Horizontal(ListLine, Sized(FName(*(Row + TEXT("ElevBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sElev_%d"), *Prefix, Index)), TEXT("-"), 19.f, ETextJustify::Right), 62.f, 0.f),
-			VAlign_Center, FMargin(0.f));
-		Vertical(RowBox, ListLine, HAlign_Fill, FMargin(0.f, 3.f));
+		Vertical(RowBox, ListLine, HAlign_Fill, FMargin(0.f, 0.f));
 		Vertical(RowBox, Rule(FName(*(Row + TEXT("Rule"))), 0.f, 0.12f), HAlign_Fill, FMargin(0.f, 1.f));
 		Vertical(Into, RowBox, HAlign_Fill, FMargin(0.f));
 	};
@@ -2438,17 +2436,16 @@ void USpaceCockpitDisplays::BuildTree()
 	{
 		ListRow(NavPage, TEXT("Nav"), Index);
 	}
-	Vertical(NavPage, Words(TEXT("NavEmpty"), TEXT("NO BODY NEAR"), 20.f, Faded(MfdText, 0.5f)), HAlign_Left, FMargin(0.f, 6.f));
+	Vertical(NavPage, Words(TEXT("NavEmpty"), TEXT("NO BODY NEAR"), 28.f, Faded(MfdText, 0.5f)), HAlign_Left, FMargin(0.f, 6.f));
 	Screen(TEXT("Flight"), ScreenRect(TEXT("left")), { Flight, ThrustPage, NavPage });
 
-	// --- Right display, STATUS: keys on the side towards the middle, a list like the contacts page -------
+	// --- Right display, STATUS: a list like the contacts page (the MODE / GEAR / CRUISE keys repeated it) ----
 	UHorizontalBox* Status = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("StatusContent"));
-	Horizontal(Status, Keys(TEXT("StatusKeys"), { TEXT("MODE"), TEXT("GEAR"), TEXT("CRUISE") }), VAlign_Top, FMargin(0.f, 0.f, 16.f, 0.f));
 	UVerticalBox* List = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("StatusList"));
 	auto Row = [&](const TCHAR* Name, const FName ValueName)
 	{
 		UHorizontalBox* Line = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("Row_%s"), Name)));
-		Horizontal(Line, Words(FName(*FString::Printf(TEXT("RowName_%s"), Name)), *FString::Printf(TEXT("> %s"), Name), 20.f), VAlign_Center, FMargin(0.f), true);
+		Horizontal(Line, Words(FName(*FString::Printf(TEXT("RowName_%s"), Name)), *FString::Printf(TEXT("> %s"), Name), 30.f), VAlign_Center, FMargin(0.f), true);
 		UOverlay* Value = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("RowPill_%s"), Name)));
 		USpaceHudLamp* Pill = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), FName(*FString::Printf(TEXT("RowPillShape_%s"), Name)));
 		Pill->bBadge = true;
@@ -2460,16 +2457,15 @@ void USpaceCockpitDisplays::BuildTree()
 			PillSlot->SetHorizontalAlignment(HAlign_Fill);
 			PillSlot->SetVerticalAlignment(VAlign_Fill);
 		}
-		if (UOverlaySlot* ValueSlot = Value->AddChildToOverlay(Words(ValueName, TEXT("-"), 20.f)))
+		if (UOverlaySlot* ValueSlot = Value->AddChildToOverlay(Words(ValueName, TEXT("-"), 30.f)))
 		{
 			ValueSlot->SetHorizontalAlignment(HAlign_Center);
 			ValueSlot->SetVerticalAlignment(VAlign_Center);
 		}
-		Horizontal(Line, Sized(FName(*FString::Printf(TEXT("RowPillBox_%s"), Name)), Value, 118.f, 30.f), VAlign_Center, FMargin(0.f));
+		Horizontal(Line, Sized(FName(*FString::Printf(TEXT("RowPillBox_%s"), Name)), Value, 176.f, 44.f), VAlign_Center, FMargin(0.f));
 		Vertical(List, Line, HAlign_Fill, FMargin(0.f, 2.f));
 		Vertical(List, Rule(FName(*FString::Printf(TEXT("RowRule_%s"), Name)), 0.f, 0.15f), HAlign_Fill, FMargin(0.f, 2.f));
 	};
-	Row(TEXT("FLIGHT"), TEXT("SubModeText"));
 	Row(TEXT("GEAR"), TEXT("RowGearValue"));
 	Row(TEXT("CRUISE"), TEXT("RowCruiseValue"));
 	Row(TEXT("R-ALT"), TEXT("RowRAltValue"));
@@ -2479,17 +2475,17 @@ void USpaceCockpitDisplays::BuildTree()
 	// --- Right display, page 2: CONTACTS - the radar's contacts as a list, like the reference's -----------
 	UVerticalBox* ContactsPage = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ContactsPage"));
 	UHorizontalBox* ContactsTop = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ContactsTop"));
-	Horizontal(ContactsTop, Words(TEXT("ContactsRangeCaption"), TEXT("RANGE"), 17.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
-	Horizontal(ContactsTop, Words(TEXT("ContactsRange"), TEXT("-"), 20.f), VAlign_Center, FMargin(0.f), true);
-	Horizontal(ContactsTop, Words(TEXT("ContactsCountCaption"), TEXT("CONTACTS"), 17.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
-	Horizontal(ContactsTop, Words(TEXT("ContactsCount"), TEXT("0"), 20.f), VAlign_Center, FMargin(0.f));
+	Horizontal(ContactsTop, Words(TEXT("ContactsRangeCaption"), TEXT("RANGE"), 22.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
+	Horizontal(ContactsTop, Words(TEXT("ContactsRange"), TEXT("-"), 30.f), VAlign_Center, FMargin(0.f), true);
+	Horizontal(ContactsTop, Words(TEXT("ContactsCountCaption"), TEXT("CONTACTS"), 22.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
+	Horizontal(ContactsTop, Words(TEXT("ContactsCount"), TEXT("0"), 30.f), VAlign_Center, FMargin(0.f));
 	Vertical(ContactsPage, ContactsTop, HAlign_Fill, FMargin(0.f, 0.f, 0.f, 6.f));
 	Vertical(ContactsPage, ListHeader(TEXT("ContactsHeader"), TEXT("CONTACT")), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 2.f));
 	for (int32 Index = 0; Index < ContactRows; ++Index)
 	{
 		ListRow(ContactsPage, TEXT("Contact"), Index);
 	}
-	Vertical(ContactsPage, Words(TEXT("ContactsEmpty"), TEXT("NO CONTACTS IN RANGE"), 20.f, Faded(MfdText, 0.5f)), HAlign_Left, FMargin(0.f, 6.f));
+	Vertical(ContactsPage, Words(TEXT("ContactsEmpty"), TEXT("NO CONTACTS IN RANGE"), 28.f, Faded(MfdText, 0.5f)), HAlign_Left, FMargin(0.f, 6.f));
 
 	// --- Right display, page 3: SELF STATUS - the ship large, with its state beside it -------------------
 	UHorizontalBox* SelfPage = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SelfPage"));
@@ -2500,44 +2496,43 @@ void USpaceCockpitDisplays::BuildTree()
 	UVerticalBox* SelfList = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SelfList"));
 	for (const TPair<const TCHAR*, const TCHAR*>& SelfFigure : { TPair<const TCHAR*, const TCHAR*>(TEXT("STATE"), TEXT("SelfState")),
 		TPair<const TCHAR*, const TCHAR*>(TEXT("GEAR"), TEXT("SelfGear")), TPair<const TCHAR*, const TCHAR*>(TEXT("ENGINES"), TEXT("SelfEngines")),
-		TPair<const TCHAR*, const TCHAR*>(TEXT("BOOST"), TEXT("SelfBoost")), TPair<const TCHAR*, const TCHAR*>(TEXT("AB FUEL"), TEXT("SelfAfterburner")) })
+		TPair<const TCHAR*, const TCHAR*>(TEXT("BOOST"), TEXT("SelfBoost")) })
 	{
-		// Caption and value on one line each, tight: five of them fill the page above its tab.
-		Vertical(SelfList, Words(FName(*FString::Printf(TEXT("SelfCaption_%s"), SelfFigure.Key)), SelfFigure.Key, 14.f, Faded(MfdText, 0.55f)), HAlign_Left, FMargin(0.f, 1.f, 0.f, 0.f));
-		Vertical(SelfList, Words(SelfFigure.Value, TEXT("-"), 20.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 1.f));
+		// Four figures (the afterburner fuel is on the FLIGHT page), each caption over its value.
+		Vertical(SelfList, Words(FName(*FString::Printf(TEXT("SelfCaption_%s"), SelfFigure.Key)), SelfFigure.Key, 20.f, Faded(MfdText, 0.55f)), HAlign_Left, FMargin(0.f));
+		Vertical(SelfList, Words(SelfFigure.Value, TEXT("-"), 30.f), HAlign_Left, FMargin(0.f, -4.f, 0.f, 0.f));
 	}
-	Horizontal(SelfPage, Sized(TEXT("SelfListBox"), SelfList, 150.f, 0.f), VAlign_Top, FMargin(0.f));
+	Horizontal(SelfPage, Sized(TEXT("SelfListBox"), SelfList, 170.f, 0.f), VAlign_Top, FMargin(0.f));
 	Screen(TEXT("Status"), ScreenRect(TEXT("right")), { Status, ContactsPage, SelfPage });
 
 	// --- Centre column, top: RADAR, the disc in the middle of the reference's dashboard --------------
 	UVerticalBox* RadarPage = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("RadarPage"));
-	Vertical(RadarPage, Line(TEXT("RadarHeader"), TEXT("RADAR"), 19.f, TEXT("RadarRange"), Faded(MfdText, 0.85f)), HAlign_Fill, FMargin(2.f, 0.f, 2.f, 2.f));
+	Vertical(RadarPage, Line(TEXT("RadarHeader"), TEXT("RADAR"), 21.f, TEXT("RadarRange"), Faded(MfdText, 0.85f)), HAlign_Fill, FMargin(2.f, 0.f, 2.f, 2.f));
 	Vertical(RadarPage, Rule(TEXT("RadarRule"), 0.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 4.f));
 	USpaceHudRadar* Radar = WidgetTree->ConstructWidget<USpaceHudRadar>(USpaceHudRadar::StaticClass(), TEXT("Radar"));
 	Radar->Color = MfdBlue;
 	Radar->Accent = MfdText;
 	Parts.Add(TEXT("Radar"), Radar);
 	Vertical(RadarPage, Radar, HAlign_Fill, FMargin(0.f), true);
-	UHorizontalBox* RadarFooter = Line(TEXT("RadarFooter"), TEXT("HDG"), 16.f, TEXT("RadarHeading"), Faded(MfdText, 0.55f));
-	Horizontal(RadarFooter, Words(TEXT("RadarCountCaption"), TEXT("CT"), 16.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(14.f, 0.f, 6.f, 0.f));
-	Horizontal(RadarFooter, Words(TEXT("RadarCount"), TEXT("0"), 19.f), VAlign_Center, FMargin(0.f));
+	UHorizontalBox* RadarFooter = Line(TEXT("RadarFooter"), TEXT("HDG"), 20.f, TEXT("RadarHeading"), Faded(MfdText, 0.55f));
+	Horizontal(RadarFooter, Words(TEXT("RadarCountCaption"), TEXT("CT"), 20.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(12.f, 0.f, 5.f, 0.f));
+	Horizontal(RadarFooter, Words(TEXT("RadarCount"), TEXT("0"), 24.f), VAlign_Center, FMargin(0.f));
 	Vertical(RadarPage, RadarFooter, HAlign_Fill, FMargin(2.f, 3.f, 2.f, 0.f));
 	SmallScreen(TEXT("Radar"), ScreenRect(TEXT("centre_top")), RadarPage);
 
 	// --- Centre column, bottom: SELF STATUS, the ship from above -----------------------------------
 	UVerticalBox* ShipPage = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ShipPage"));
-	Vertical(ShipPage, Line(TEXT("ShipHeader"), TEXT("SELF STATUS"), 19.f, NAME_None, Faded(MfdText, 0.85f)), HAlign_Fill, FMargin(2.f, 0.f, 2.f, 2.f));
+	Vertical(ShipPage, Line(TEXT("ShipHeader"), TEXT("SELF STATUS"), 24.f, NAME_None, Faded(MfdText, 0.85f)), HAlign_Fill, FMargin(2.f, 0.f, 2.f, 2.f));
 	Vertical(ShipPage, Rule(TEXT("ShipRule"), 0.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 2.f));
 	USpaceHudShipStatus* ShipStatus = WidgetTree->ConstructWidget<USpaceHudShipStatus>(USpaceHudShipStatus::StaticClass(), TEXT("ShipStatus"));
 	ShipStatus->Color = MfdBlue;
 	Parts.Add(TEXT("ShipStatus"), ShipStatus);
 	Vertical(ShipPage, ShipStatus, HAlign_Fill, FMargin(0.f), true);
 	UHorizontalBox* ShipFooter = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ShipFooter"));
-	// Gear on the left, the engines' thrust (LANDED on the ground) on the right: "GEAR MOVING" and
-	// "THR 100%" did not fit side by side on ~11 cm of glass.
-	Horizontal(ShipFooter, Words(TEXT("ShipGearCaption"), TEXT("GEAR"), 15.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f, 0.f, 5.f, 0.f));
-	Horizontal(ShipFooter, Words(TEXT("ShipGear"), TEXT("UP"), 17.f), VAlign_Center, FMargin(0.f), true);
-	Horizontal(ShipFooter, Words(TEXT("ShipThrust"), TEXT("0%"), 17.f), VAlign_Center, FMargin(0.f));
+	// The gear's state on the left (its legs are lit on the picture), the engines' thrust or LANDED on the
+	// right; no captions, ~11 cm of glass has room for two readable words.
+	Horizontal(ShipFooter, Words(TEXT("ShipGear"), TEXT("UP"), 22.f), VAlign_Center, FMargin(0.f), true);
+	Horizontal(ShipFooter, Words(TEXT("ShipThrust"), TEXT("0%"), 22.f), VAlign_Center, FMargin(0.f));
 	Vertical(ShipPage, ShipFooter, HAlign_Fill, FMargin(2.f, 2.f, 2.f, 0.f));
 	SmallScreen(TEXT("Ship"), ScreenRect(TEXT("centre_bottom")), ShipPage);
 

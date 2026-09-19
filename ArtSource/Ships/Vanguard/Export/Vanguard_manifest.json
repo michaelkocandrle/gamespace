@@ -336,14 +336,14 @@
     "SOCKET_Cockpit": {
       "parent": "SM_Ship_Vanguard",
       "location_m": [
-        1.74,
+        1.94,
         0.0,
-        1.89
+        1.86
       ],
       "location_ue_cm": [
-        174.0,
+        194.0,
         -0.0,
-        189.0
+        186.0
       ]
     },
     "SOCKET_Display_centre_bottom": {
@@ -558,9 +558,9 @@
     "CameraBoom_ProbeSize_cm": 50.0,
     "CameraBoom_CameraLagMaxDistance_cm": 2800.0,
     "CockpitCamera_location_ue_cm": [
-      173.83,
+      193.83,
       0.12,
-      190.7
+      187.7
     ],
     "LandingFootprintRadiusCm": 572.0,
     "LandingMaxGapCm": 200.0,
