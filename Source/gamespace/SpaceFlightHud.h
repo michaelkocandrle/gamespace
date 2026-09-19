@@ -9,6 +9,7 @@
 class ASpaceshipPawn;
 class UBorder;
 class UTextBlock;
+class UWidgetSwitcher;
 
 /**
  * Something on the cockpit radar, in the ship's own frame (plan view, the nose up). A celestial body
@@ -234,6 +235,19 @@ struct GAMESPACE_API FSpaceFlightHudState
 	/** Turn rate, -1..1 of the ship's top rate: X yaw right, Y pitch up (the gyro's rate line). */
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	FVector2D TurnRate = FVector2D::ZeroVector;
+
+	/**
+	 * What the thrusters put out, ship-local G (X ahead / retro when negative, Y right, Z up), and what
+	 * each direction can do right now: positive = main / right / up, negative = retro / left / down.
+	 */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FVector ThrustG = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FVector ThrustCapPositiveG = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FVector ThrustCapNegativeG = FVector::ZeroVector;
 
 	/** How hard the engines work, 0..1 (the self status page's engines). */
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
@@ -852,6 +866,24 @@ public:
 	void SetCentreColumn(bool bOn);
 
 	/**
+	 * MFD pages, as the reference's MFDs page with the keys beside them. Left (0): FLIGHT, THRUSTERS,
+	 * NAVIGATION; right (1): STATUS, CONTACTS, SELF STATUS - only what the game has data for (no weapons,
+	 * shields, power or cooling pages until those systems exist).
+	 */
+	static constexpr int32 PageCount = 3;
+
+	/** The page titles of a display (0 left, 1 right). */
+	static const TArray<FString>& PageTitles(int32 Display);
+
+	/** Shows these pages (wrapped into 0..PageCount-1); the title and the page tab follow. */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
+	void SetPages(int32 LeftPage, int32 RightPage);
+
+	/** Tests: the page a display shows. */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
+	int32 DebugGetPage(int32 Display) const;
+
+	/**
 	 * A figure as the display shows it: while it changes fast between two updates it is shown in
 	 * Step-sized steps (the speed in tens of m/s while accelerating), and exactly once it settles. A
 	 * number rewritten digit by digit is what temporal AA blended into two values over each other.
@@ -867,4 +899,7 @@ protected:
 
 private:
 	TMap<FName, float> LastFigures;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UWidgetSwitcher>> PageSwitchers;
 };

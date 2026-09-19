@@ -394,6 +394,22 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       nalezená přes Unreal Insights: Slate dávkuje vyhlazené čáry kvadraticky, když se střídá tloušťka nebo
       vrstva (WORKFLOW 9.2g). Radar a silueta teď kreslí jednou tloušťkou v jedné vrstvě: +0,5–1 ms;
     - měření: `stat SpaceCockpit`, `stat SpaceHud`; scénář snímků `cockpit_centre`.
+32. **Stránky MFD** (19. 9. 2026, WORKFLOW kap. 10 bod 2, klávesy a rozsah vybral autor):
+    - **F1** přepíná levý MFD, **F2** pravý, **Alt + F1 / F2** zpět (Shift by zapnul boost). Autor nejdřív
+      vybral [ a ], jenže na jeho české klávesnici to nejsou samostatné klávesy (vpravo od P je „ú“), proto
+      F1/F2; [ a ] zůstaly navíc pro US klávesnici. Engine měl na F1/F2 v Development buildu ladicí
+      zobrazení (drátový model, unlit) – `Config/DefaultInput.ini` je odebírá. Akce `IA_MfdLeft`,
+      `IA_MfdRight` přidává `Tools/Assets/add_mfd_input.py` (jen připojuje mapování do `IMC_Spaceship`);
+    - jen stránky se skutečnými daty (zbraně, štíty, energii ani chlazení hra nemá, nic se nepředstírá):
+      vlevo **FLIGHT → THRUSTERS → NAVIGATION**, vpravo **STATUS → CONTACTS → SELF STATUS**;
+    - THRUSTERS: tah každého směru (main, retro, strafe se stranou, up, down) proti tomu, co směr právě
+      zvládne (s boostem, afterburnerem a NAV), v G, a pod tím BOOST a G-SAFE. Data z nového
+      `GetThrusterAcceleration` / `GetThrusterCapacity` lodi; NAVIGATION: režim, pod-režim, rychlost, limit,
+      cruise a tělesa (vzdálenost k povrchu, směr od nosu, elevace); CONTACTS: kontakty radaru jako seznam
+      (SHIP, EVA nebo jméno meshe); SELF STATUS: velká silueta a stav, podvozek, motory, boost, palivo AB;
+    - stránka se drží v komponentě displejů, konzole `space.MfdPage <levý> <pravý>` (0–2); kreslí se jen
+      zobrazená stránka (nové stránky 1,4–2,5 ms kreslení, výchozí FLIGHT/STATUS 4 ms);
+    - scénář snímků `mfd_pages`.
 
 ---
 
@@ -487,6 +503,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | Free look | pravé tlačítko |
 | Podvozek (vysunutí zapne i precision) | N |
 | Precision mode | P |
+| Stránky MFD (levý / pravý, s Alt zpět) | F1 / F2 |
 | Vystoupit (jen když LANDED) | F |
 
 **Postava:** WASD, myš, Space skok, Shift sprint, F nastoupit.
@@ -511,7 +528,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_flight_hud_sc1c.py` | HUD (logika SC-1c v rozložení podle současného SC): všechny prvky reference, pásky (kurz přes 360, výška), žebřík (poloha čar podle FOV a náklonu), odznaky jen zapnuté, bez tělesa bez kurzu a výšek, rychlost vůči omezovači, afterburner, pozpátku, kontrolky, G a limit G-Safe, strafe, joystick. Vzhled headless ověřit nejde. |
 | `test_boost_afterburner_sc1b.py` | SC-1b: boost jen manévrovací trysky a rotace, vypnutí G-Safe, afterburner (tah, limit × omezovač, palivo, zamčení, doplňování, plynulý návrat, coupled i decoupled, jen SCM, G-Safe zůstává), Shift + Tab, input a hodnoty Vanguardu. |
 | `test_flight_modes.py` | Boost energie, cruise jen v NAV (vesmír i nad Veyrou), výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
-| `test_cockpit_displays.py` | Displeje v kokpitu: dvě obrazovky (FLIGHT, SYSTEMS) se všemi přístroji a velkým písmem, stejné hodnoty jako HUD pro stejnou loď, komponenta na lodi, slot `M_Ship_Vanguard_Screens` v interiéru s unlit `MI_Ship_Vanguard_Screens`. Střední sloupek: RADAR a SELF STATUS, `texture_rect` v receptu = `ScreenRect` v kódu, poměr stran jako sklo, radar vidí objekt v dosahu přesně tam, kde je (a ten mimo dosah ne), těleso jako směr, planeta pod lodí bez směru, silueta z 10 hullů Vanguardu, 4 motory, 3 nohy, 4 sockety `Display_*`. Jak vypadají: `-Preset cockpit` a `cockpit_centre`. |
+| `test_cockpit_displays.py` | Displeje v kokpitu: dvě obrazovky (FLIGHT, SYSTEMS) se všemi přístroji a velkým písmem, stejné hodnoty jako HUD pro stejnou loď, komponenta na lodi, slot `M_Ship_Vanguard_Screens` v interiéru s unlit `MI_Ship_Vanguard_Screens`. Stránky MFD (přepínání, obtékání, titulek a záložka, obsah seznamů a tahu, klávesy F1/F2 a [ ] bez kolizí, ladicí zobrazení enginu z F1/F2 odebrané). Střední sloupek: RADAR a SELF STATUS, `texture_rect` v receptu = `ScreenRect` v kódu, poměr stran jako sklo, radar vidí objekt v dosahu přesně tam, kde je (a ten mimo dosah ne), těleso jako směr, planeta pod lodí bez směru, silueta z 10 hullů Vanguardu, 4 motory, 3 nohy, 4 sockety `Display_*`. Jak vypadají: `-Preset cockpit` a `cockpit_centre`. |
 | `test_cockpit_frame.py` | Kokpit: Vanguard má interiér (díl, oko nad vanou za deskou, deska 7–13° pod okem jako v SC referenci, pilot ≥ 1,2 m od desky, provizorium vypnuté); rozložení provizorního rámu pro lodě bez interiéru (nic v okně HUD, deska 14–20° pod horizontem, sloupky 24–34° do stran, sedadlo za okem). |
 | `test_landing_sc2.py` | SC-2a: dosednutí jen s podvozkem (GEAR UP před vším ostatním, mezera pod patkami), stavový automat podvozku (časy, otočení v půlce, zákaz zasunutí na zemi), pohyb modelovaného dílu i zástupných nohou, precision (strop, omezovač uvnitř, jen SCM, bez afterburneru, pomalejší otáčení, brzdění bez skoku), kontrolky GEAR/PREC, klávesy N/P bez kolizí, hodnoty a díl `Gear` Vanguardu, scénář `landing`. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
@@ -566,6 +583,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `ship_views` | Loď ze všech stran (8 pohledů kolem, shora, zespodu s podvozkem, zblízka, ve vesmíru, se zářícími tryskami). Pro každý nový nebo změněný model. |
 | `landing` | SC-2a: podvozek ze strany (dole, v půlce cesty), zespodu, loď stojící na patkách, varování GEAR UP, loď na břiše bez podvozku, HUD po přistání, precision HUD, kokpit na zemi. |
 | `cockpit_centre` | Střední sloupek desky (RADAR, SELF STATUS): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé: vyříznout a zvětšit. |
+| `mfd_pages` | Stránky MFD: FLIGHT/STATUS, THRUSTERS/CONTACTS s afterburnerem, NAVIGATION/SELF STATUS ve vesmíru a po přistání, THRUSTERS při visení. Stránky nastavuje pole `console` (`space.MfdPage`). |
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
 Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
@@ -696,6 +714,10 @@ Další otevřené směry mimo let:
   poloha je ověřená jen headless testem. Kontakty se obnovují 5× za sekundu, rychlý objekt proto na radaru
   skáče. Silueta SELF STATUS je z kolizních hullů – hranatá, ne přesný obrys modelu. Velké MFD a HUD
   kreslí dál přes `GlowLines` (tři tloušťky na čáru, WORKFLOW 9.2g) – kandidát na další zrychlení.
+- **Stránky MFD (bod 32), neověřeno autorem:** přepínání F1/F2 ve hře (headless test ověřuje mapování, ne
+  stisk). Popisky na SELF STATUS
+  (STATE, GEAR…) jsou malé. Stránky mají jen to, co hra umí; SC stránky zbraní, štítů a energie přijdou se
+  systémy. Stránky se zatím nedají přepnout myší jako v SC (režim interakce, klik na displej).
 - **Úvodní obrazovka s novou lodí není vyfocená** (snímky menu neumí); kamera zůstala z 17,6m lodi.
 - **SC-2a, loď na břiše bez podvozku „visí“ nad zemí** (snímek `landing/05_belly_gear_up`; u Meshy
   Vanguardu 0,55 m vzadu a 1,1 m vpředu).
@@ -767,4 +789,5 @@ Viz `git log --oneline`. Poslední kroky:
 - `440c31b`–`d287603`: MFD ve stylu SC, čísla 5 Hz, displeje napasované do rámečků přes Blender MCP;
 - `42a1ff5`, `2380850`: výchozí jen letový HUD, ustálená čísla MFD, jemnější prach, kovový rám;
 - dokumentace workflow a nástrah (`Docs/WORKFLOW.md`), pomocné skripty Blender MCP v `Tools/Blender/mcp/`;
-- střední sloupek desky: RADAR a SELF STATUS (bod 31), kreslení čar bez kvadratického dávkování ve Slate.
+- střední sloupek desky: RADAR a SELF STATUS (bod 31), kreslení čar bez kvadratického dávkování ve Slate;
+- stránky MFD na F1 a F2 (bod 32).

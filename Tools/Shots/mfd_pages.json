@@ -1,0 +1,10 @@
+{
+  "_comment": "The MFDs' pages ([ and ], Alt back; space.MfdPage <left> <right> here): FLIGHT / THRUSTERS / NAVIGATION on the left, STATUS / CONTACTS / SELF STATUS on the right, in states that fill them - thrusters under the afterburner, navigation and self status in space and landed. The console setting stays for the following shots. Run: .\\Tools\\Shots.ps1 -Preset mfd_pages",
+  "shots": [
+    {"name": "pages_flight_status", "camera": "cockpit", "altitude_m": 4000, "facing": "horizon", "speed_ms": 120, "hud": 1, "settle": 1.5, "console": ["space.MfdPage 0 0"]},
+    {"name": "pages_thrusters_contacts", "camera": "cockpit", "altitude_m": 4000, "facing": "horizon", "speed_ms": 150, "afterburner": true, "hud": 1, "settle": 1.0, "console": ["space.MfdPage 1 1"]},
+    {"name": "pages_navigation_self_space", "camera": "cockpit", "altitude_m": 40000, "facing": "away", "speed_ms": 0, "hud": 1, "settle": 1.5, "console": ["space.MfdPage 2 2"]},
+    {"name": "pages_navigation_self_landed", "camera": "cockpit", "altitude_m": 2.6, "facing": "horizon", "hud": 1, "gear": true, "settle": 3.0},
+    {"name": "pages_thrusters_hover", "camera": "cockpit", "altitude_m": 300, "facing": "horizon", "speed_ms": 0, "hud": 1, "settle": 1.5, "console": ["space.MfdPage 1 0"]}
+  ]
+}

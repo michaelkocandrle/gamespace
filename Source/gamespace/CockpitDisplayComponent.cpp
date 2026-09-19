@@ -16,6 +16,7 @@
 #include "Slate/WidgetRenderer.h"
 #include "SpaceFlightHud.h"
 #include "SpaceshipPawn.h"
+#include "EngineUtils.h"
 #include "HAL/IConsoleManager.h"
 #include "Stats/Stats.h"
 
@@ -31,6 +32,24 @@ namespace
 		1,
 		TEXT("The dashboard's centre column (radar over self status): 1 on, 0 off - its screens go dark and the radar stops looking."),
 		ECVF_Default);
+
+	/** space.MfdPage <left> <right>: the MFDs' pages of the ship flown here (shots, testing). */
+	FAutoConsoleCommandWithWorldAndArgs MfdPageCommand(
+		TEXT("space.MfdPage"),
+		TEXT("space.MfdPage <left 0-2> <right 0-2>: FLIGHT / THRUSTERS / NAVIGATION on the left, STATUS / CONTACTS / SELF STATUS on the right."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				if (UCockpitDisplayComponent* Displays = It->FindComponentByClass<UCockpitDisplayComponent>())
+				{
+					for (int32 Display = 0; Display < 2 && Display < Args.Num(); ++Display)
+					{
+						Displays->SetPage(Display, FCString::Atoi(*Args[Display]));
+					}
+				}
+			}
+		}));
 }
 
 UCockpitDisplayComponent::UCockpitDisplayComponent()
@@ -161,6 +180,28 @@ void UCockpitDisplayComponent::SetDisplayLightIntensity(float Candela)
 	}
 }
 
+void UCockpitDisplayComponent::CyclePage(int32 Display, int32 Direction)
+{
+	SetPage(Display, GetPage(Display) + (Direction < 0 ? -1 : 1));
+}
+
+void UCockpitDisplayComponent::SetPage(int32 Display, int32 Page)
+{
+	if (Display < 0 || Display > 1)
+	{
+		return;
+	}
+	const int32 Count = USpaceCockpitDisplays::PageCount;
+	Pages[Display] = ((Page % Count) + Count) % Count;
+	// Fill the new page's figures on the next draw rather than up to 200 ms later.
+	SinceState = 1.f / FMath::Max(StateRateHz, 1.f);
+}
+
+int32 UCockpitDisplayComponent::GetPage(int32 Display) const
+{
+	return Display >= 0 && Display <= 1 ? Pages[Display] : 0;
+}
+
 float UCockpitDisplayComponent::GetDisplayLightIntensity(int32 Index) const
 {
 	return Lights.IsValidIndex(Index) ? Lights[Index]->Intensity : -1.f;
@@ -199,6 +240,7 @@ void UCockpitDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	}
 	// The displays are part of the ship: H hides the HUD overlay, not the dashboard. The figures change
 	// StateRateHz times a second (see there); the drawing goes on at UpdateRateHz.
+	Widget->SetPages(Pages[0], Pages[1]);
 	if (SinceState >= 1.f / StateRateHz)
 	{
 		SCOPE_CYCLE_COUNTER(STAT_CockpitDisplayState);

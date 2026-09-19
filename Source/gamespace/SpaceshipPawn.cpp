@@ -64,6 +64,8 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const AfterburnerActionPath = TEXT("/Game/Input/IA_Afterburner.IA_Afterburner");
 	const TCHAR* const LandingGearActionPath = TEXT("/Game/Input/IA_LandingGear.IA_LandingGear");
 	const TCHAR* const PrecisionActionPath = TEXT("/Game/Input/IA_Precision.IA_Precision");
+	const TCHAR* const MfdLeftActionPath = TEXT("/Game/Input/IA_MfdLeft.IA_MfdLeft");
+	const TCHAR* const MfdRightActionPath = TEXT("/Game/Input/IA_MfdRight.IA_MfdRight");
 
 	/** 1 G in cm/s^2. */
 	constexpr double StandardGravityCmS2 = 980.665;
@@ -470,6 +472,14 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		Input->BindAction(PrecisionAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandlePrecision);
 	}
+	if (MfdLeftAction)
+	{
+		Input->BindAction(MfdLeftAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleMfdLeft);
+	}
+	if (MfdRightAction)
+	{
+		Input->BindAction(MfdRightAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleMfdRight);
+	}
 
 	if (FreeLookAction)
 	{
@@ -557,6 +567,14 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			if (PrecisionAction && !IsMapped(PrecisionAction))
 			{
 				InteractMappingContext->MapKey(PrecisionAction, EKeys::P);
+			}
+			if (MfdLeftAction && !IsMapped(MfdLeftAction))
+			{
+				InteractMappingContext->MapKey(MfdLeftAction, EKeys::F1);
+			}
+			if (MfdRightAction && !IsMapped(MfdRightAction))
+			{
+				InteractMappingContext->MapKey(MfdRightAction, EKeys::F2);
 			}
 		}
 		if (InteractMappingContext && InteractMappingContext->GetMappings().Num() > 0)
@@ -667,6 +685,8 @@ void ASpaceshipPawn::ResolveInputAssets()
 	LoadOrMake(AfterburnerAction, AfterburnerActionPath, TEXT("IA_Afterburner_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(LandingGearAction, LandingGearActionPath, TEXT("IA_LandingGear_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(PrecisionAction, PrecisionActionPath, TEXT("IA_Precision_Runtime"), EInputActionValueType::Boolean);
+	LoadOrMake(MfdLeftAction, MfdLeftActionPath, TEXT("IA_MfdLeft_Runtime"), EInputActionValueType::Boolean);
+	LoadOrMake(MfdRightAction, MfdRightActionPath, TEXT("IA_MfdRight_Runtime"), EInputActionValueType::Boolean);
 
 	BuildProceduralInputAssets();
 }
@@ -915,6 +935,27 @@ void ASpaceshipPawn::HandleComStab(const FInputActionValue& /*Value*/)
 void ASpaceshipPawn::HandleLandingGear(const FInputActionValue& /*Value*/)
 {
 	ToggleGear();
+}
+
+void ASpaceshipPawn::HandleMfdLeft(const FInputActionValue& /*Value*/)
+{
+	CycleMfdPage(0);
+}
+
+void ASpaceshipPawn::HandleMfdRight(const FInputActionValue& /*Value*/)
+{
+	CycleMfdPage(1);
+}
+
+void ASpaceshipPawn::CycleMfdPage(int32 Display)
+{
+	// Alt goes back: Shift would be the boost as well.
+	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	const bool bBack = PlayerController && (PlayerController->IsInputKeyDown(EKeys::LeftAlt) || PlayerController->IsInputKeyDown(EKeys::RightAlt));
+	if (CockpitDisplays)
+	{
+		CockpitDisplays->CyclePage(Display, bBack ? -1 : 1);
+	}
 }
 
 void ASpaceshipPawn::HandlePrecision(const FInputActionValue& /*Value*/)
@@ -1879,6 +1920,7 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 			LinearVelocity *= CruiseSpeedLimit / Speed;
 		}
 		EngineDemand = 0.6f;
+		ThrusterAcceleration = FVector::ZeroVector;
 		GForce = FMath::FInterpTo(GForce, 0.f, DeltaSeconds, 8.f);
 	}
 	else
@@ -1954,6 +1996,9 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 			0.7 * FMath::Abs(LocalAcceleration.Y) / FMath::Max(StrafeCap, 1.0),
 			0.7 * FMath::Abs(LocalAcceleration.Z) / FMath::Max(LocalAcceleration.Z >= 0.0 ? UpCap : DownCap, 1.0)), 0.0, 1.0));
 		GForce = FMath::FInterpTo(GForce, float(LocalAcceleration.Size() / SpaceshipPawnDefaults::StandardGravityCmS2), DeltaSeconds, 8.f);
+		ThrusterAcceleration = LocalAcceleration;
+		ThrusterCapPositive = FVector(ForwardCap, StrafeCap, UpCap);
+		ThrusterCapNegative = FVector(RetroCap, StrafeCap, DownCap);
 
 		LinearVelocity += Rotation.RotateVector(LocalAcceleration) * DeltaSeconds;
 

@@ -15,6 +15,7 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Components/WidgetSwitcher.h"
 #include "HAL/IConsoleManager.h"
 #include "Rendering/DrawElements.h"
 #include "SpaceshipPawn.h"
@@ -122,6 +123,10 @@ namespace SpaceHudStyle
 	const FLinearColor MfdBlue(0.3f, 0.55f, 1.f, 0.95f);
 	const FLinearColor MfdBlueFaint(0.3f, 0.55f, 1.f, 0.3f);
 	const FLinearColor MfdText(0.85f, 0.92f, 1.f, 0.95f);
+
+	/** Rows of the navigation page's body list and of the contacts page. */
+	constexpr int32 NavRows = 4;
+	constexpr int32 ContactRows = 6;
 
 	/** Every line on the centre column's pages (radar, self status): one thickness, so Slate batches them. */
 	constexpr float SmallScreenLine = 1.5f;
@@ -1516,6 +1521,12 @@ FSpaceFlightHudState USpaceFlightHud::MakeState(const ASpaceshipPawn* Ship, int3
 	const FVector Rate = Ship->GetAngularVelocity() / FMath::Max(Ship->GetMaxTurnRate(), 1.f);
 	State.TurnRate = FVector2D(Rate.Z, Rate.Y);
 	State.EngineDemand = Ship->GetEngineDemand();
+	FVector CapPositive, CapNegative;
+	Ship->GetThrusterCapacity(CapPositive, CapNegative);
+	const double G = 980.665;
+	State.ThrustG = Ship->GetThrusterAcceleration() / G;
+	State.ThrustCapPositiveG = CapPositive / G;
+	State.ThrustCapNegativeG = CapNegative / G;
 	State.bLanded = Ship->IsLanded();
 
 	State.bHasEnvironment = Ship->HasEnvironment();
@@ -1771,7 +1782,8 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 		Near += Contact.bBody ? 0 : 1;
 	}
 	SetText(TEXT("RadarCount"), FString::Printf(TEXT("%d"), Near), Near > 0 ? Label : Faded(Label, 0.5f));
-	if (USpaceHudShipStatus* ShipStatus = Cast<USpaceHudShipStatus>(Parts.FindRef(TEXT("ShipStatus"))))
+	for (const TCHAR* ShipPart : { TEXT("ShipStatus"), TEXT("ShipStatusLarge") })
+	if (USpaceHudShipStatus* ShipStatus = Cast<USpaceHudShipStatus>(Parts.FindRef(ShipPart)))
 	{
 		ShipStatus->EngineDemand = State.EngineDemand;
 		ShipStatus->EngineColor = State.bAfterburnerActive || State.bBoostActive ? InstrumentBright : Instrument;
@@ -1782,6 +1794,88 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 	SetText(TEXT("ShipGear"), State.GearLabel, State.bGearWarning && !State.bGearDown ? Red : State.bGearMoving ? Amber : Label);
 	SetText(TEXT("ShipThrust"), State.bLanded ? TEXT("LANDED") : FString::Printf(TEXT("%.0f%%"), State.EngineDemand * 100.f),
 		State.bLanded ? Instrument : Label);
+
+	// --- MFD pages: thrusters, navigation, contacts, self status ------------------------------------------
+	auto Distance = [](float Metres)
+	{
+		return Metres < 1000.f ? FString::Printf(TEXT("%.0f M"), Metres) : Metres < 10000.f ? FString::Printf(TEXT("%.2f KM"), Metres / 1000.f)
+			: Metres < 1.0e6f ? FString::Printf(TEXT("%.0f KM"), Metres / 1000.f) : FString::Printf(TEXT("%.1f MM"), Metres / 1.0e6f);
+	};
+	// Bearing clockwise from the nose, and elevation above the wings, as the reference's contact list.
+	auto Bearing = [](const FSpaceRadarContact& Contact)
+	{
+		return FString::Printf(TEXT("%03.0f\u00B0"), FMath::Fmod(FMath::RoundToFloat(FMath::RadiansToDegrees(float(FMath::Atan2(Contact.Position.X, Contact.Position.Y)))) + 360.f, 360.f));
+	};
+	auto Elevation = [](const FSpaceRadarContact& Contact)
+	{
+		return FString::Printf(TEXT("%+.0f\u00B0"), FMath::RadiansToDegrees(float(FMath::Atan2(double(Contact.HeightM), Contact.Position.Size()))));
+	};
+	struct FThrustAxis { const TCHAR* Name; float Value; float Cap; };
+	const FThrustAxis Axes[] = {
+		{ TEXT("MAIN"), float(FMath::Max(State.ThrustG.X, 0.0)), float(State.ThrustCapPositiveG.X) },
+		{ TEXT("RETRO"), float(FMath::Max(-State.ThrustG.X, 0.0)), float(State.ThrustCapNegativeG.X) },
+		{ TEXT("STRAFE"), float(FMath::Abs(State.ThrustG.Y)), float(State.ThrustCapPositiveG.Y) },
+		{ TEXT("UP"), float(FMath::Max(State.ThrustG.Z, 0.0)), float(State.ThrustCapPositiveG.Z) },
+		{ TEXT("DOWN"), float(FMath::Max(-State.ThrustG.Z, 0.0)), float(State.ThrustCapNegativeG.Z) } };
+	for (const FThrustAxis& Axis : Axes)
+	{
+		if (USpaceHudGauge* Thrust = Gauges.FindRef(FName(*FString::Printf(TEXT("ThrustGauge_%s"), Axis.Name))))
+		{
+			Thrust->Value = Axis.Cap > 0.01f ? Axis.Value / Axis.Cap : 0.f;
+			Thrust->FillColor = State.bBoostActive || State.bAfterburnerActive ? InstrumentBright : Instrument;
+		}
+		SetText(FName(*FString::Printf(TEXT("ThrustValue_%s"), Axis.Name)), FString::Printf(TEXT("%.1f / %.1f G"), Axis.Value, Axis.Cap),
+			Axis.Value > 0.05f ? Label : Faded(Label, 0.6f));
+	}
+	SetText(TEXT("ThrustStrafeSide"), State.ThrustG.Y > 0.05 ? TEXT("R") : State.ThrustG.Y < -0.05 ? TEXT("L") : TEXT(""), Label);
+	SetText(TEXT("ThrustBoost"), State.bBoostActive ? TEXT("BOOST ON") : State.bBoostLocked ? TEXT("BOOST EMPTY") : TEXT("BOOST OFF"),
+		State.bBoostActive ? InstrumentBright : State.bBoostLocked ? Red : Faded(Label, 0.7f));
+	SetText(TEXT("ThrustGSafe"), State.bGSafeActive ? FString::Printf(TEXT("G-SAFE %.1f G"), State.GSafeMaxG) : State.bGSafeOn ? TEXT("G-SAFE SUSPENDED") : TEXT("G-SAFE OFF"),
+		State.bGSafeActive ? Label : Amber);
+
+	SetText(TEXT("NavMode"), State.ModeLabel, !State.bModeSwitching || bBlink ? Label : Faded(Label, 0.3f));
+	SetText(TEXT("NavSub"), State.SubModeLabel, Faded(Label, 0.8f));
+	SetText(TEXT("NavLimit"), SpaceHudStyle::Speed(State.SpeedLimitCmS), Label);
+	SetText(TEXT("NavCruise"), State.CruiseLabel, State.CruiseLabel == TEXT("OFF") ? Faded(Label, 0.6f) : Instrument);
+	SetText(TEXT("NavSpeed"), SpaceHudStyle::Speed(State.SpeedCmS), Label);
+	TArray<FSpaceRadarContact> Bodies = State.RadarContacts.FilterByPredicate([](const FSpaceRadarContact& Contact) { return Contact.bBody; });
+	Bodies.Sort([](const FSpaceRadarContact& A, const FSpaceRadarContact& B) { return A.DistanceM < B.DistanceM; });
+	for (int32 Index = 0; Index < NavRows; ++Index)
+	{
+		const bool bRow = Bodies.IsValidIndex(Index);
+		Show(FName(*FString::Printf(TEXT("NavRow_%d"), Index)), bRow);
+		if (bRow)
+		{
+			SetText(FName(*FString::Printf(TEXT("NavName_%d"), Index)), Bodies[Index].Label.ToUpper(), Label);
+			SetText(FName(*FString::Printf(TEXT("NavDist_%d"), Index)), Distance(Bodies[Index].DistanceM), Label);
+			SetText(FName(*FString::Printf(TEXT("NavBrg_%d"), Index)), Bearing(Bodies[Index]), Faded(Label, 0.85f));
+			SetText(FName(*FString::Printf(TEXT("NavElev_%d"), Index)), Elevation(Bodies[Index]), Faded(Label, 0.85f));
+		}
+	}
+	Show(TEXT("NavEmpty"), Bodies.Num() == 0);
+
+	TArray<FSpaceRadarContact> NearContacts = State.RadarContacts.FilterByPredicate([](const FSpaceRadarContact& Contact) { return !Contact.bBody; });
+	SetText(TEXT("ContactsRange"), Distance(State.RadarRangeM), Label);
+	SetText(TEXT("ContactsCount"), FString::Printf(TEXT("%d"), NearContacts.Num()), NearContacts.Num() > 0 ? Label : Faded(Label, 0.5f));
+	for (int32 Index = 0; Index < ContactRows; ++Index)
+	{
+		const bool bRow = NearContacts.IsValidIndex(Index);
+		Show(FName(*FString::Printf(TEXT("ContactRow_%d"), Index)), bRow);
+		if (bRow)
+		{
+			SetText(FName(*FString::Printf(TEXT("ContactName_%d"), Index)), NearContacts[Index].Label, Label);
+			SetText(FName(*FString::Printf(TEXT("ContactDist_%d"), Index)), Distance(NearContacts[Index].DistanceM), Label);
+			SetText(FName(*FString::Printf(TEXT("ContactBrg_%d"), Index)), Bearing(NearContacts[Index]), Faded(Label, 0.85f));
+			SetText(FName(*FString::Printf(TEXT("ContactElev_%d"), Index)), Elevation(NearContacts[Index]), Faded(Label, 0.85f));
+		}
+	}
+	Show(TEXT("ContactsEmpty"), NearContacts.Num() == 0);
+
+	SetText(TEXT("SelfGear"), State.GearLabel, State.bGearWarning && !State.bGearDown ? Red : State.bGearMoving ? Amber : Label);
+	SetText(TEXT("SelfEngines"), FString::Printf(TEXT("%.0f%%"), State.EngineDemand * 100.f), Label);
+	SetText(TEXT("SelfBoost"), FString::Printf(TEXT("%.0f%%"), State.BoostEnergy * 100.f), State.bBoostLocked ? Red : Label);
+	SetText(TEXT("SelfAfterburner"), FString::Printf(TEXT("%.0f%%"), State.AfterburnerFuel * 100.f), State.bAfterburnerLocked ? Red : Label);
+	SetText(TEXT("SelfState"), State.bLanded ? TEXT("LANDED") : TEXT("FLYING"), State.bLanded ? Instrument : Label);
 
 	// --- Virtual joystick ---------------------------------------------------------------------------
 	if (VirtualJoystickBox)
@@ -1898,6 +1992,9 @@ FSpaceFlightHudState USpaceCockpitDisplays::SteadyState(const FSpaceFlightHudSta
 	Out.GForce = Steady(TEXT("G"), State.GForce, 0.5f, 0.05f);
 	// The self status page's thrust in tens of per cent while it changes (and its engines with it).
 	Out.EngineDemand = Steady(TEXT("Engine"), State.EngineDemand, 0.1f, 0.01f);
+	// The thrusters page's figures in half G while they change.
+	Out.ThrustG = FVector(Steady(TEXT("ThrustX"), float(State.ThrustG.X), 0.5f, 0.05f), Steady(TEXT("ThrustY"), float(State.ThrustG.Y), 0.5f, 0.05f),
+		Steady(TEXT("ThrustZ"), float(State.ThrustG.Z), 0.5f, 0.05f));
 	return Out;
 }
 
@@ -2014,8 +2111,16 @@ void USpaceCockpitDisplays::BuildTree()
 		ScreenSlot->SetPosition(Rect.Min);
 		ScreenSlot->SetSize(Rect.GetSize());
 	};
-	auto Screen = [&](const TCHAR* ScreenName, const TCHAR* Title, const FBox2D& Rect, UWidget* Content)
+	// An MFD: its pages in a switcher under the title, the page tab showing which one is up.
+	auto Screen = [&](const TCHAR* ScreenName, const FBox2D& Rect, const TArray<UWidget*>& PageWidgets)
 	{
+		const TCHAR* Title = *PageTitles(PageSwitchers.Num())[0];
+		UWidgetSwitcher* Content = WidgetTree->ConstructWidget<UWidgetSwitcher>(UWidgetSwitcher::StaticClass(), FName(*FString::Printf(TEXT("%sSwitcher"), ScreenName)));
+		for (UWidget* PageWidget : PageWidgets)
+		{
+			Content->AddChild(PageWidget);
+		}
+		PageSwitchers.Add(Content);
 		UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("%sScreen"), ScreenName)));
 		if (UOverlaySlot* GlassSlot = Overlay->AddChildToOverlay(Symbol(FName(*FString::Printf(TEXT("%sGlass"), ScreenName)), ESpaceHudSymbol::MfdGlass, MfdBlue)))
 		{
@@ -2129,7 +2234,93 @@ void USpaceCockpitDisplays::BuildTree()
 	Horizontal(Flight, FlightMain, VAlign_Fill, FMargin(0.f), true);
 	Horizontal(Flight, Keys(TEXT("FlightKeys"), { TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST"), TEXT("PREC") }), VAlign_Top,
 		FMargin(16.f, 0.f, 0.f, 0.f));
-	Screen(TEXT("Flight"), TEXT("FLIGHT"), ScreenRect(TEXT("left")), Flight);
+	// --- Left display, page 2: THRUSTERS - what each direction puts out against what it can -----------
+	auto AlignedWords = [&](const FName Name, const TCHAR* Initial, float Size, ETextJustify::Type Justify, const FLinearColor& Color = SpaceHudStyle::MfdText)
+	{
+		UTextBlock* Text = Words(Name, Initial, Size, Color);
+		Text->SetJustification(Justify);
+		return Text;
+	};
+	UVerticalBox* ThrustPage = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ThrustPage"));
+	for (const TCHAR* Axis : { TEXT("MAIN"), TEXT("RETRO"), TEXT("STRAFE"), TEXT("UP"), TEXT("DOWN") })
+	{
+		UHorizontalBox* ThrustLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("ThrustRow_%s"), Axis)));
+		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustNameBox_%s"), Axis)), Words(FName(*FString::Printf(TEXT("ThrustName_%s"), Axis)), Axis, 21.f), 104.f, 0.f),
+			VAlign_Center, FMargin(0.f));
+		// The strafe row says which side it fires to.
+		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustSideBox_%s"), Axis)),
+			FCString::Strcmp(Axis, TEXT("STRAFE")) == 0 ? static_cast<UWidget*>(Words(TEXT("ThrustStrafeSide"), TEXT(""), 21.f)) : static_cast<UWidget*>(WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass())),
+			22.f, 0.f), VAlign_Center, FMargin(0.f));
+		USpaceHudGauge* ThrustGauge = Gauge(FName(*FString::Printf(TEXT("ThrustGauge_%s"), Axis)), 12);
+		ThrustGauge->bHorizontal = true;
+		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustGaugeBox_%s"), Axis)), ThrustGauge, 0.f, 26.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f), true);
+		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustValueBox_%s"), Axis)),
+			AlignedWords(FName(*FString::Printf(TEXT("ThrustValue_%s"), Axis)), TEXT("-"), 19.f, ETextJustify::Right), 128.f, 0.f), VAlign_Center, FMargin(0.f));
+		Vertical(ThrustPage, ThrustLine, HAlign_Fill, FMargin(0.f, 7.f));
+	}
+	Vertical(ThrustPage, Rule(TEXT("ThrustRule"), 0.f, 0.2f), HAlign_Fill, FMargin(0.f, 6.f));
+	UHorizontalBox* ThrustFooter = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ThrustFooter"));
+	Horizontal(ThrustFooter, Words(TEXT("ThrustBoost"), TEXT("BOOST OFF"), 20.f), VAlign_Center, FMargin(0.f), true);
+	Horizontal(ThrustFooter, Words(TEXT("ThrustGSafe"), TEXT("G-SAFE"), 20.f), VAlign_Center, FMargin(0.f));
+	Vertical(ThrustPage, ThrustFooter, HAlign_Fill, FMargin(0.f, 4.f));
+
+	// --- Left display, page 3: NAVIGATION - master mode, cruise, and the bodies with range and bearing ---
+	UVerticalBox* NavPage = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("NavPage"));
+	UHorizontalBox* NavTop = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("NavTop"));
+	UVerticalBox* NavModeBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("NavModeBox"));
+	Vertical(NavModeBox, Words(TEXT("NavMode"), TEXT("SCM"), 46.f), HAlign_Left, FMargin(0.f));
+	Vertical(NavModeBox, Words(TEXT("NavSub"), TEXT("FLIGHT"), 20.f, Faded(MfdText, 0.8f)), HAlign_Left, FMargin(2.f, 0.f, 0.f, 0.f));
+	Horizontal(NavTop, NavModeBox, VAlign_Top, FMargin(0.f, 0.f, 24.f, 0.f));
+	UVerticalBox* NavFigures = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("NavFigures"));
+	for (const TPair<const TCHAR*, const TCHAR*>& NavFigure : { TPair<const TCHAR*, const TCHAR*>(TEXT("SPEED"), TEXT("NavSpeed")),
+		TPair<const TCHAR*, const TCHAR*>(TEXT("LIMIT"), TEXT("NavLimit")), TPair<const TCHAR*, const TCHAR*>(TEXT("CRUISE"), TEXT("NavCruise")) })
+	{
+		UHorizontalBox* FigureLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("NavFigure_%s"), NavFigure.Key)));
+		Horizontal(FigureLine, Words(FName(*FString::Printf(TEXT("NavCaption_%s"), NavFigure.Key)), NavFigure.Key, 17.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f), true);
+		Horizontal(FigureLine, Words(NavFigure.Value, TEXT("-"), 20.f), VAlign_Center, FMargin(0.f));
+		Vertical(NavFigures, FigureLine, HAlign_Fill, FMargin(0.f, 1.f));
+	}
+	Horizontal(NavTop, NavFigures, VAlign_Top, FMargin(0.f), true);
+	Vertical(NavPage, NavTop, HAlign_Fill, FMargin(0.f, 0.f, 0.f, 8.f));
+	Vertical(NavPage, Rule(TEXT("NavRule"), 0.f, 0.2f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 4.f));
+	auto ListHeader = [&](const FName Name, const TCHAR* First)
+	{
+		UHorizontalBox* Header = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), Name);
+		Horizontal(Header, Words(FName(*(Name.ToString() + TEXT("Name"))), First, 16.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f), true);
+		Horizontal(Header, Sized(FName(*(Name.ToString() + TEXT("DistBox"))), AlignedWords(FName(*(Name.ToString() + TEXT("Dist"))), TEXT("RANGE"), 16.f, ETextJustify::Right,
+			Faded(MfdText, 0.55f)), 120.f, 0.f), VAlign_Center, FMargin(0.f));
+		Horizontal(Header, Sized(FName(*(Name.ToString() + TEXT("BrgBox"))), AlignedWords(FName(*(Name.ToString() + TEXT("Brg"))), TEXT("BRG"), 16.f, ETextJustify::Right,
+			Faded(MfdText, 0.55f)), 74.f, 0.f), VAlign_Center, FMargin(0.f));
+		Horizontal(Header, Sized(FName(*(Name.ToString() + TEXT("ElevBox"))), AlignedWords(FName(*(Name.ToString() + TEXT("Elev"))), TEXT("EL"), 16.f, ETextJustify::Right,
+			Faded(MfdText, 0.55f)), 62.f, 0.f), VAlign_Center, FMargin(0.f));
+		return Header;
+	};
+	// A row of a list: name, range, bearing, elevation.
+	auto ListRow = [&](UVerticalBox* Into, const FString& Prefix, int32 Index)
+	{
+		// The row and its rule in one box: a hidden row takes its rule with it.
+		const FString Row = FString::Printf(TEXT("%sRow_%d"), *Prefix, Index);
+		UVerticalBox* RowBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*Row));
+		Parts.Add(FName(*Row), RowBox);
+		UHorizontalBox* ListLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*(Row + TEXT("Line"))));
+		Horizontal(ListLine, Words(FName(*FString::Printf(TEXT("%sName_%d"), *Prefix, Index)), TEXT("-"), 20.f), VAlign_Center, FMargin(0.f), true);
+		Horizontal(ListLine, Sized(FName(*(Row + TEXT("DistBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sDist_%d"), *Prefix, Index)), TEXT("-"), 20.f, ETextJustify::Right), 120.f, 0.f),
+			VAlign_Center, FMargin(0.f));
+		Horizontal(ListLine, Sized(FName(*(Row + TEXT("BrgBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sBrg_%d"), *Prefix, Index)), TEXT("-"), 19.f, ETextJustify::Right), 74.f, 0.f),
+			VAlign_Center, FMargin(0.f));
+		Horizontal(ListLine, Sized(FName(*(Row + TEXT("ElevBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sElev_%d"), *Prefix, Index)), TEXT("-"), 19.f, ETextJustify::Right), 62.f, 0.f),
+			VAlign_Center, FMargin(0.f));
+		Vertical(RowBox, ListLine, HAlign_Fill, FMargin(0.f, 3.f));
+		Vertical(RowBox, Rule(FName(*(Row + TEXT("Rule"))), 0.f, 0.12f), HAlign_Fill, FMargin(0.f, 1.f));
+		Vertical(Into, RowBox, HAlign_Fill, FMargin(0.f));
+	};
+	Vertical(NavPage, ListHeader(TEXT("NavHeader"), TEXT("BODY")), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 2.f));
+	for (int32 Index = 0; Index < NavRows; ++Index)
+	{
+		ListRow(NavPage, TEXT("Nav"), Index);
+	}
+	Vertical(NavPage, Words(TEXT("NavEmpty"), TEXT("NO BODY NEAR"), 20.f, Faded(MfdText, 0.5f)), HAlign_Left, FMargin(0.f, 6.f));
+	Screen(TEXT("Flight"), ScreenRect(TEXT("left")), { Flight, ThrustPage, NavPage });
 
 	// --- Right display, STATUS: keys on the side towards the middle, a list like the contacts page -------
 	UHorizontalBox* Status = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("StatusContent"));
@@ -2166,7 +2357,38 @@ void USpaceCockpitDisplays::BuildTree()
 	Row(TEXT("VSI"), TEXT("RowVsiValue"));
 	Row(TEXT("ATMO"), TEXT("RowAtmoValue"));
 	Horizontal(Status, List, VAlign_Top, FMargin(0.f), true);
-	Screen(TEXT("Status"), TEXT("STATUS"), ScreenRect(TEXT("right")), Status);
+	// --- Right display, page 2: CONTACTS - the radar's contacts as a list, like the reference's -----------
+	UVerticalBox* ContactsPage = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ContactsPage"));
+	UHorizontalBox* ContactsTop = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ContactsTop"));
+	Horizontal(ContactsTop, Words(TEXT("ContactsRangeCaption"), TEXT("RANGE"), 17.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
+	Horizontal(ContactsTop, Words(TEXT("ContactsRange"), TEXT("-"), 20.f), VAlign_Center, FMargin(0.f), true);
+	Horizontal(ContactsTop, Words(TEXT("ContactsCountCaption"), TEXT("CONTACTS"), 17.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
+	Horizontal(ContactsTop, Words(TEXT("ContactsCount"), TEXT("0"), 20.f), VAlign_Center, FMargin(0.f));
+	Vertical(ContactsPage, ContactsTop, HAlign_Fill, FMargin(0.f, 0.f, 0.f, 6.f));
+	Vertical(ContactsPage, ListHeader(TEXT("ContactsHeader"), TEXT("CONTACT")), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 2.f));
+	for (int32 Index = 0; Index < ContactRows; ++Index)
+	{
+		ListRow(ContactsPage, TEXT("Contact"), Index);
+	}
+	Vertical(ContactsPage, Words(TEXT("ContactsEmpty"), TEXT("NO CONTACTS IN RANGE"), 20.f, Faded(MfdText, 0.5f)), HAlign_Left, FMargin(0.f, 6.f));
+
+	// --- Right display, page 3: SELF STATUS - the ship large, with its state beside it -------------------
+	UHorizontalBox* SelfPage = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SelfPage"));
+	USpaceHudShipStatus* ShipLarge = WidgetTree->ConstructWidget<USpaceHudShipStatus>(USpaceHudShipStatus::StaticClass(), TEXT("ShipStatusLarge"));
+	ShipLarge->Color = MfdBlue;
+	Parts.Add(TEXT("ShipStatusLarge"), ShipLarge);
+	Horizontal(SelfPage, ShipLarge, VAlign_Fill, FMargin(0.f, 0.f, 16.f, 0.f), true);
+	UVerticalBox* SelfList = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SelfList"));
+	for (const TPair<const TCHAR*, const TCHAR*>& SelfFigure : { TPair<const TCHAR*, const TCHAR*>(TEXT("STATE"), TEXT("SelfState")),
+		TPair<const TCHAR*, const TCHAR*>(TEXT("GEAR"), TEXT("SelfGear")), TPair<const TCHAR*, const TCHAR*>(TEXT("ENGINES"), TEXT("SelfEngines")),
+		TPair<const TCHAR*, const TCHAR*>(TEXT("BOOST"), TEXT("SelfBoost")), TPair<const TCHAR*, const TCHAR*>(TEXT("AB FUEL"), TEXT("SelfAfterburner")) })
+	{
+		// Caption and value on one line each, tight: five of them fill the page above its tab.
+		Vertical(SelfList, Words(FName(*FString::Printf(TEXT("SelfCaption_%s"), SelfFigure.Key)), SelfFigure.Key, 14.f, Faded(MfdText, 0.55f)), HAlign_Left, FMargin(0.f, 1.f, 0.f, 0.f));
+		Vertical(SelfList, Words(SelfFigure.Value, TEXT("-"), 20.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 1.f));
+	}
+	Horizontal(SelfPage, Sized(TEXT("SelfListBox"), SelfList, 150.f, 0.f), VAlign_Top, FMargin(0.f));
+	Screen(TEXT("Status"), ScreenRect(TEXT("right")), { Status, ContactsPage, SelfPage });
 
 	// --- Centre column, top: RADAR, the disc in the middle of the reference's dashboard --------------
 	UVerticalBox* RadarPage = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("RadarPage"));
@@ -2299,7 +2521,15 @@ TArray<FSpaceRadarContact> USpaceCockpitDisplays::MakeRadarContacts(const ASpace
 		const double Distance = FVector::Dist(Origin, Centre);
 		if (Distance <= RangeCm)
 		{
-			Near.Add(Contact(Centre, Distance, false, Actor->GetName()));
+			// What it is, as far as the game knows: a ship, someone on foot, or the mesh's name (ROCK_A).
+			FString Label = Actor->IsA<ASpaceshipPawn>() ? TEXT("SHIP") : Actor->IsA<APawn>() ? TEXT("EVA") : FString();
+			if (Label.IsEmpty() && MeshActor)
+			{
+				Label = MeshActor->GetStaticMeshComponent()->GetStaticMesh()->GetName();
+				Label.RemoveFromStart(TEXT("SM_"));
+				Label = Label.Replace(TEXT("_"), TEXT(" ")).ToUpper();
+			}
+			Near.Add(Contact(Centre, Distance, false, Label));
 		}
 	}
 	Near.Sort([](const FSpaceRadarContact& A, const FSpaceRadarContact& B) { return A.DistanceM < B.DistanceM; });
@@ -2332,8 +2562,47 @@ void USpaceCockpitDisplays::SetCentreColumn(bool bOn)
 
 void USpaceCockpitDisplays::SetShip(const AActor* Ship)
 {
-	if (USpaceHudShipStatus* ShipStatus = Cast<USpaceHudShipStatus>(Parts.FindRef(TEXT("ShipStatus"))))
+	for (const TCHAR* ShipPart : { TEXT("ShipStatus"), TEXT("ShipStatusLarge") })
 	{
-		ShipStatus->SetShip(Ship);
+		if (USpaceHudShipStatus* ShipStatus = Cast<USpaceHudShipStatus>(Parts.FindRef(ShipPart)))
+		{
+			ShipStatus->SetShip(Ship);
+		}
 	}
+}
+
+const TArray<FString>& USpaceCockpitDisplays::PageTitles(int32 Display)
+{
+	static const TArray<FString> Left = { TEXT("FLIGHT"), TEXT("THRUSTERS"), TEXT("NAVIGATION") };
+	static const TArray<FString> Right = { TEXT("STATUS"), TEXT("CONTACTS"), TEXT("SELF STATUS") };
+	return Display == 0 ? Left : Right;
+}
+
+void USpaceCockpitDisplays::SetPages(int32 LeftPage, int32 RightPage)
+{
+	const TCHAR* Screens[] = { TEXT("Flight"), TEXT("Status") };
+	const int32 Wanted[] = { LeftPage, RightPage };
+	for (int32 Display = 0; Display < 2 && Display < PageSwitchers.Num(); ++Display)
+	{
+		const int32 Page = ((Wanted[Display] % PageCount) + PageCount) % PageCount;
+		if (!PageSwitchers[Display] || PageSwitchers[Display]->GetActiveWidgetIndex() == Page)
+		{
+			continue;
+		}
+		// Only the page shown is laid out and painted: a page costs nothing while another is up.
+		PageSwitchers[Display]->SetActiveWidgetIndex(Page);
+		const FText Title = FText::FromString(PageTitles(Display)[Page]);
+		for (const TCHAR* Part : { TEXT("Title"), TEXT("Page") })
+		{
+			if (UTextBlock* Text = Texts.FindRef(FName(*FString::Printf(TEXT("%s%s"), Screens[Display], Part))))
+			{
+				Text->SetText(Title);
+			}
+		}
+	}
+}
+
+int32 USpaceCockpitDisplays::DebugGetPage(int32 Display) const
+{
+	return PageSwitchers.IsValidIndex(Display) && PageSwitchers[Display] ? PageSwitchers[Display]->GetActiveWidgetIndex() : -1;
 }

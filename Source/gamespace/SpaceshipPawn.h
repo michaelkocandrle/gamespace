@@ -317,6 +317,20 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
 	float GetEngineDemand() const { return EngineDemand; }
 
+	/**
+	 * What the thrusters put out this frame, ship-local cm/s^2 (X ahead, Y right, Z up; negative X is the
+	 * retro thrusters), after the per-direction limits and G-Safe. Zero on the ground.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
+	FVector GetThrusterAcceleration() const { return ThrusterAcceleration; }
+
+	/**
+	 * What each thruster direction can do right now, cm/s^2 (boost, the afterburner and NAV included):
+	 * OutPositive = main / right strafe / up, OutNegative = retro / left strafe / down (as magnitudes).
+	 */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
+	void GetThrusterCapacity(FVector& OutPositive, FVector& OutNegative) const { OutPositive = ThrusterCapPositive; OutNegative = ThrusterCapNegative; }
+
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
 	bool IsBoosting() const { return bBoostActive; }
 
@@ -913,6 +927,14 @@ protected:
 	/** Digital, pressed: precision mode on / off (P). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> PrecisionAction;
+
+	/** Digital, pressed: the left MFD's next page (F1, or [ on a US keyboard; with Alt the previous one). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> MfdLeftAction;
+
+	/** Digital, pressed: the right MFD's next page (F2, or ]; with Alt the previous one). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> MfdRightAction;
 
 	/** Maps keys the authored flight context lacks (F, V, J, X, B, K, L, N, P, right mouse button, wheel). */
 	UPROPERTY(Transient)
@@ -1623,6 +1645,10 @@ private:
 	void HandleAfterburnerCompleted(const FInputActionValue& Value);
 	void HandleLandingGear(const FInputActionValue& Value);
 	void HandlePrecision(const FInputActionValue& Value);
+	void HandleMfdLeft(const FInputActionValue& Value);
+	void HandleMfdRight(const FInputActionValue& Value);
+	/** Pages an MFD (0 left, 1 right): forward, or back with Alt held. */
+	void CycleMfdPage(int32 Display);
 	/** Moves the gear towards its commanded end and poses the legs. */
 	void UpdateGear(float DeltaSeconds);
 	/** Creates the visible gear legs on the hull's gear sockets (once, at BeginPlay). */
@@ -1715,6 +1741,11 @@ private:
 	float AfterburnerBlend = 0.f;
 
 	float EngineDemand = 0.f;
+
+	/** See GetThrusterAcceleration / GetThrusterCapacity. */
+	FVector ThrusterAcceleration = FVector::ZeroVector;
+	FVector ThrusterCapPositive = FVector::ZeroVector;
+	FVector ThrusterCapNegative = FVector::ZeroVector;
 
 	bool bSpaceBrakeHeld = false;
 	EMasterMode MasterMode = EMasterMode::SCM;

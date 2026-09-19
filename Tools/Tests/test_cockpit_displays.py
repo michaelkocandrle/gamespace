@@ -9,6 +9,8 @@ Nothing is drawn in a commandlet, so this checks what can be checked without a s
 - ApplyState puts a ship's state into them exactly as into the HUD (same texts, same lamps);
 - each screen's rectangle on the canvas is where the recipe maps its quad (texture_rect), and the centre
   screens have the shape of their glass;
+- MFD pages: left FLIGHT / THRUSTERS / NAVIGATION, right STATUS / CONTACTS / SELF STATUS, switched with
+  F1 and F2 (and [ ], Alt back) through the display component, the title and page tab following; what they list;
 - the radar sees objects in range where they are (and not beyond it) and bodies as bearings; the self
   status page reads the Vanguard's hulls, engines and gear;
 - the Vanguard's interior has the display slot (M_Ship_Vanguard_Screens, flat quads made by
@@ -61,6 +63,23 @@ check("centre screens titled like the reference (RADAR, SELF STATUS)",
       displays.debug_get_text("RadarHeaderCaption") == "RADAR" and displays.debug_get_text("ShipHeaderCaption") == "SELF STATUS")
 check("centre screens' type readable (>= 16, the glass is ~11 cm wide)", size("RadarRange") >= 16 and size("ShipGear") >= 16 and size("RadarFooterCaption") >= 16)
 
+# --- MFD pages ------------------------------------------------------------------------------------------
+pages = {"FlightSwitcher", "StatusSwitcher", "ThrustPage", "NavPage", "ContactsPage", "SelfPage", "ShipStatusLarge"}
+pages |= {"ThrustRow_%s" % a for a in ("MAIN", "RETRO", "STRAFE", "UP", "DOWN")} | {"ThrustGauge_%s" % a for a in ("MAIN", "RETRO", "STRAFE", "UP", "DOWN")}
+pages |= {"NavRow_%d" % i for i in range(4)} | {"ContactRow_%d" % i for i in range(6)} | {"SelfGear", "SelfEngines", "SelfBoost", "SelfAfterburner", "SelfState"}
+check("MFD pages: THRUSTERS and NAVIGATION on the left, CONTACTS and SELF STATUS on the right", pages <= names, "missing %s" % sorted(pages - names))
+check("each MFD starts on its first page", displays.debug_get_page(0) == 0 and displays.debug_get_page(1) == 0)
+displays.set_pages(1, 2)
+check("pages switch, title and page tab follow", displays.debug_get_page(0) == 1 and displays.debug_get_page(1) == 2
+      and displays.debug_get_text("FlightTitle") == "THRUSTERS" and displays.debug_get_text("FlightPage") == "THRUSTERS"
+      and displays.debug_get_text("StatusTitle") == "SELF STATUS", "%d %d %r %r" % (displays.debug_get_page(0), displays.debug_get_page(1),
+                                                                             displays.debug_get_text("FlightTitle"), displays.debug_get_text("StatusTitle")))
+displays.set_pages(3, -1)
+check("pages wrap round both ways", displays.debug_get_page(0) == 0 and displays.debug_get_page(1) == 2)
+displays.set_pages(0, 0)
+check("thrust bars are block bars along the row", displays.debug_get_gauge("ThrustGauge_MAIN").get_editor_property("horizontal")
+      and displays.debug_get_gauge("ThrustGauge_MAIN").get_editor_property("segments") > 0)
+
 # --- The canvas and the recipe agree ---------------------------------------------------------------
 recipe_path = os.path.join(unreal.Paths.project_dir(), "ArtSource", "Ships", "Vanguard", "Vanguard_ai_build.json")
 recipe = json.load(open(recipe_path, encoding="utf-8"))["interior"]["displays"]
@@ -103,6 +122,16 @@ try:
     pp = cockpit_camera.get_editor_property("post_process_settings")
     check("no motion blur from the seat (camera shake smeared the displays)",
           pp.get_editor_property("override_motion_blur_amount") and pp.get_editor_property("motion_blur_amount") == 0.0)
+    component = ship.get_editor_property("cockpit_displays")
+    component.cycle_page(0, 1)
+    first = component.get_page(0)
+    component.cycle_page(0, -1)
+    component.cycle_page(0, -1)
+    component.set_page(1, 5)
+    check("the display component pages: [ forward, Alt+[ back, wrapping", first == 1 and component.get_page(0) == 2 and component.get_page(1) == 2,
+          "%d %d %d" % (first, component.get_page(0), component.get_page(1)))
+    component.set_page(0, 0)
+    component.set_page(1, 0)
     scale = ship.get_editor_property("cockpit_displays").pixel_scale()
     check("displays drawn at about their size on screen (1920 px wide: ~0.65 of the 560 px layout)", 0.5 < scale < 0.8, "%.2f" % scale)
 
@@ -137,6 +166,16 @@ try:
               and displays.debug_get_text("RadarRange") == "5.0 KM",
               "%d, %r, %r" % (shown_contacts, displays.debug_get_text("RadarCount"), displays.debug_get_text("RadarRange")))
         check("no body near: heading shown as ---", displays.debug_get_text("RadarHeading") == "---", displays.debug_get_text("RadarHeading"))
+        row = [displays.debug_get_text(n) for n in ("ContactName_0", "ContactDist_0", "ContactBrg_0", "ContactElev_0")]
+        check("contacts page lists the cube: name, range, bearing from the nose, elevation", row == ["CUBE", "1.02 KM", "011\u00b0", "+6\u00b0"]
+              and displays.debug_is_shown("ContactRow_0") and not displays.debug_is_shown("ContactRow_1") and not displays.debug_is_shown("ContactsEmpty"), repr(row))
+        nav = [displays.debug_get_text(n) for n in ("NavDist_0", "NavBrg_0")]
+        check("navigation page lists the body: range to its surface and bearing (left: 270)", nav == ["900 KM", "270\u00b0"]
+              and displays.debug_is_shown("NavRow_0") and not displays.debug_is_shown("NavRow_1"), repr(nav))
+        thrust = displays.debug_get_text("ThrustValue_MAIN")
+        check("thrusters page: main thrust against its capacity (8.0 G)", thrust.endswith("/ 8.0 G"), thrust)
+        check("self status page: state, gear, engines, boost, afterburner", displays.debug_get_text("SelfState") == "FLYING"
+              and displays.debug_get_text("SelfGear") == "UP" and displays.debug_get_text("SelfBoost").endswith("%"), displays.debug_get_text("SelfState"))
         check("self status: gear and thrust in the footer (LANDED in its place on the ground)", displays.debug_get_text("ShipGear") == "UP"
               and displays.debug_get_text("ShipThrust").endswith("%"), "%r %r" % (displays.debug_get_text("ShipGear"), displays.debug_get_text("ShipThrust")))
         below = unreal.SpaceRadarContact()
@@ -191,5 +230,17 @@ try:
     check("canopy frame material is dark (below 0.1)", base is not None and max(base.r, base.g, base.b) < 0.1, str(base))
 finally:
     eas.destroy_actor(vanguard)
+
+# --- The keys: F1 and F2 (and [ ]) ---------------------------------------------------------------------
+imc = unreal.EditorAssetLibrary.load_asset("/Game/Input/IMC_Spaceship")
+mappings = [(str(m.get_editor_property("key").get_editor_property("key_name")), m.get_editor_property("action").get_name() if m.get_editor_property("action") else "")
+            for m in imc.get_editor_property("default_key_mappings").get_editor_property("mappings")]
+check("F1 pages the left MFD, F2 the right one; [ and ] too, for a US keyboard (IMC_Spaceship)",
+      all(m in mappings for m in (("F1", "IA_MfdLeft"), ("F2", "IA_MfdRight"), ("LeftBracket", "IA_MfdLeft"), ("RightBracket", "IA_MfdRight"))), repr(mappings))
+check("nothing else on F1, F2, [ and ]", sorted(a for k, a in mappings if k in ("F1", "F2", "LeftBracket", "RightBracket"))
+      == ["IA_MfdLeft", "IA_MfdLeft", "IA_MfdRight", "IA_MfdRight"])
+ini = open(os.path.join(unreal.Paths.project_dir(), "Config", "DefaultInput.ini"), encoding="utf-8").read()
+check("the engine's debug views are off F1 and F2 (they work in the Development build that is played)",
+      '-DebugExecBindings=(Key=F1,Command="viewmode wireframe", bIgnoreShift=True)' in ini and '-DebugExecBindings=(Key=F2,Command="viewmode unlit")' in ini)
 
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

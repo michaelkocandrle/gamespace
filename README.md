@@ -227,6 +227,18 @@ left 0-560, right 560-1120, centre 1120-1330 (radar over 0-259) - `USpaceCockpit
 `texture_size` / `texture_rect` in the recipe map each quad to its rectangle. Every line on those pages has one
 thickness and one layer: Slate starts a new batch at each change of either and re-reserves the whole vertex list
 per batch, and drawn with glow passes the two pages cost ~15 ms a frame (`stat SpaceCockpit`, `stat SpaceHud`).
+**MFD pages** (19. 9. 2026): `F1` pages the left MFD, `F2` the right one, `Alt` with the key goes back
+(Shift would boost); `[` and `]` do the same on a US keyboard (on a Czech one they are not keys of their
+own). `Config/DefaultInput.ini` removes the engine's debug views from F1 / F2 (wireframe, unlit - they work
+in Development builds). Left: FLIGHT, THRUSTERS (each direction's thrust against what it can do now -
+main, retro, strafe with its side, up, down, in G - with BOOST and G-SAFE under it), NAVIGATION (master
+mode and sub-mode, speed, limit, cruise, and the bodies with the range to their surface, bearing from the
+nose and elevation). Right: STATUS, CONTACTS (the radar's contacts as a list: name - SHIP, EVA or the mesh's
+name - range, bearing, elevation), SELF STATUS (the ship large, state, gear, engines, boost, afterburner
+fuel). Only what the game has data for: no weapons, shields, power or cooling pages. The pages live in a
+`UWidgetSwitcher` (only the one shown is painted); `UCockpitDisplayComponent` keeps the page
+(`CyclePage`, `SetPage`, `GetPage`), `space.MfdPage <left> <right>` sets it from the console. The thrust
+figures come from `ASpaceshipPawn::GetThrusterAcceleration` / `GetThrusterCapacity`.
 The screen HUD stays,
 compacted so it sits above the dashboard. The cockpit is dark like the reference: the displays light it
 (a rect light at each `Display_*` socket), a faint key and fill light keep the dashboard's shape, and the inside
@@ -347,6 +359,7 @@ Star Citizen style: the gear has to be down to land, and lowering it puts the sh
 | Zoom         | `Alt` + mouse wheel (chase distance, cockpit zoom) | - |
 | Landing gear | `N` (down also switches precision on) | -          |
 | Precision mode | `P`                      | -                    |
+| MFD pages    | `F1` left, `F2` right (`Alt` + key: back; `[` `]` on a US keyboard) | - |
 | Get out      | `F` (only when LANDED)     | -                    |
 | Free look    | hold right mouse button    | -                    |
 | HUD          | `H` (compact / full / off) | -                    |
@@ -355,7 +368,8 @@ Star Citizen style: the gear has to be down to land, and lowering it puts the sh
 `IA_CameraZoom`, appended to `IMC_Spaceship` by `Tools/Assets/add_flight_modes_input.py`; `B`, the
 wheel again, `K` and `L` are `IA_MasterMode`, `IA_SpeedLimiter`, `IA_GSafe` and `IA_ComStab` from
 `Tools/Assets/add_ifcs_input.py`; `N` and `P` are `IA_LandingGear` and `IA_Precision` from
-`Tools/Assets/add_landing_input.py` (without them the ship maps the same keys at runtime).
+`Tools/Assets/add_landing_input.py`; `F1` / `F2` (and `[` / `]`) are `IA_MfdLeft` and `IA_MfdRight` from
+`Tools/Assets/add_mfd_input.py` (without them the ship maps the same keys at runtime).
 
 **Free look** (Elite-style head look): while the right mouse button is held, the ship keeps its
 heading (pitch/yaw rotation stops at once; roll keys and the flight path carry on) and the mouse

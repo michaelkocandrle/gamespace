@@ -240,6 +240,7 @@ Presety (`Tools/Shots/*.json`):
 | `cockpit_tune` | ladění (tint, světla) |
 | `display_sharpness` | ostrost displejů při rychlém letu |
 | `cockpit_centre` | střední sloupek (radar, self status): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé, vyřízni a zvětši oblast ~745–855 × 630–880 px |
+| `mfd_pages` | stránky MFD ve stavech, které je naplní. Vyřízni levý MFD ~495–710 × 640–825 a pravý ~893–1105 × 640–825 px |
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
 | `ship_views`, `ship` | loď zvenku |
@@ -281,6 +282,11 @@ Hra během snímků krátce převezme popředí. Když autor zrovna hraje, nejd�
   směr na okraji a jen do 60° nad/pod křídly) a SELF STATUS (`USpaceHudShipStatus`: obrysy kolizních hullů
   shora, motory ze socketů `Engine_*` podle tahu, podvozek ze `Gear_*`). Vypínač `space.CockpitCentre 0`.
 - **Měření:** `stat SpaceCockpit` (stav a kreslení displejů), `stat SpaceHud` (kreslené prvky).
+- **Stránky MFD** (`F1` levý, `F2` pravý, s Alt zpět; `[` `]` pro US klávesnici): vlevo FLIGHT / THRUSTERS / NAVIGATION, vpravo STATUS /
+  CONTACTS / SELF STATUS, `UWidgetSwitcher` (kreslí se jen zobrazená). Stránku drží
+  `UCockpitDisplayComponent` (`CyclePage`, `SetPage`), ve snímcích `console: ["space.MfdPage 1 2"]`.
+  Novou stránku přidej do `PageTitles` a do pole stránek v `Screen(...)` v `BuildTree`; jen se skutečnými
+  daty. Skryté řádky seznamů skrývej i s jejich linkou (řádek a linka v jednom boxu).
 
 ### 7.2 HUD
 
@@ -344,6 +350,12 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   - socket jen s GUI;
   - nástroje chtějí argument `user_prompt`;
   - běžící GUI Blender drží .blend.
+- g) **Klávesy a rozložení klávesnice.** Autor má **českou klávesnici** (rozložení 0405): `[`, `]`, `;`, `'`
+  a podobné nejsou samostatné klávesy (vpravo od P je „ú“) a Unreal klávesu hledá podle znaku. Nové
+  klávesy vybírej z písmen, čísel, F-kláves, čárky a tečky. **F1–F5, F9, F11, PgUp/PgDn a `;`** mají
+  v Development buildu (ten autor hraje) ladicí příkazy enginu (`DebugExecBindings` v `BaseInput.ini`:
+  F1 drátový model, F2 unlit…); klávesu pro hru z nich uvolni řádkem `-DebugExecBindings=(…)` v
+  `Config/DefaultInput.ini` (přesná kopie řádku z enginu), jako u F1/F2 pro stránky MFD.
 
 ### 9.2 Vykreslování (UE 5.8)
 
@@ -448,8 +460,9 @@ Menší kroky, podle pořadí:
 
 1. ~~Třetí displej ve středním sloupku~~ – hotovo 19. 9. 2026: RADAR nahoře, SELF STATUS dole
    (HANDOFF kapitola 5, bod 31).
-2. **Přepínání stránek MFD** (SC má stránky: zbraně, štíty, energie…). Klávesy podle master
-   reference.
+2. ~~Přepínání stránek MFD~~ – hotovo 19. 9. 2026 (F1 / F2, HANDOFF kapitola 5, bod 32). Navazuje:
+   přepínání myší jako v SC (režim interakce, klik na tlačítko displeje) a stránky zbraní, štítů a
+   energie, až budou systémy.
 3. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
 4. **Silnější záře displejů na rámu** a okolní desce.
 5. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).

@@ -100,6 +100,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "100.0"))
 	float RadarRangeM = 5000.f;
 
+	/**
+	 * MFD pages (F1 and F2 in the ship, [ and ] too; Alt goes back): Display 0 left, 1 right. Kept here, so the page
+	 * stays when the displays are rebuilt, and works headless.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
+	void CyclePage(int32 Display, int32 Direction);
+
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
+	void SetPage(int32 Display, int32 Page);
+
+	UFUNCTION(BlueprintPure, Category = "Cockpit Displays")
+	int32 GetPage(int32 Display) const;
+
 	/** Changes the display lights' brightness (tuning, shots). */
 	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
 	void SetDisplayLightIntensity(float Candela);
@@ -146,6 +159,9 @@ private:
 
 	/** Each light's share of DisplayLightIntensityCd: its screen's area against a big display's. */
 	TArray<float> LightShares;
+
+	/** The MFDs' pages, left and right. */
+	int32 Pages[2] = { 0, 0 };
 
 	void CreateDisplayLights();
 
