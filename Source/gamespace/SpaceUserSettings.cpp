@@ -53,7 +53,7 @@ void USpaceUserSettings::ApplyGameSettings(const UWorld* World) const
 	if (IConsoleVariable* Hud = IConsoleManager::Get().FindConsoleVariable(TEXT("space.Hud")))
 	{
 		// Same priority as the H key and the console, so neither locks the other out.
-		Hud->Set(FMath::Clamp(HudMode, 0, 2), ECVF_SetByConsole);
+		Hud->Set(FMath::Clamp(HudMode, 0, 3), ECVF_SetByConsole);
 	}
 }
 

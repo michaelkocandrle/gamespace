@@ -9,6 +9,6 @@
     { "name": "hud_nav", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "mode": "NAV", "speed_ms": 800, "settle": 1.0 },
     { "name": "hud_decoupled_gsafe_off", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": 150, "coupled": false, "gsafe": false, "comstab": false },
     { "name": "hud_reverse", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": -40 },
-    { "name": "hud_full_text", "camera": "chase", "altitude_m": 6000, "facing": "horizon", "hud": 2, "speed_ms": 210, "settle": 1.0 }
+    { "name": "hud_full_text", "camera": "chase", "altitude_m": 6000, "facing": "horizon", "hud": 3, "speed_ms": 210, "settle": 1.0 }
   ]
 }

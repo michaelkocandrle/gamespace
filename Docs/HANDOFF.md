@@ -367,6 +367,11 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       vyřízne AI sklo uvnitř obrysu a dá tam čtyřúhelník. Levý displej sedí na rám, pravý má dole vlevo
       zubatou hranu samotného rámu (decimovaná AI geometrie);
     - opraveno: `ModeColor` v HUDu kolidoval v unity buildu hry se stejnojmennou konstantou v `SpaceDebugHUD.cpp`.
+30. **Doladění vzhledu** (19. 9. 2026): `space.Hud` má čtyři režimy – 0 skrytý, **1 jen letový HUD (výchozí, jako
+    SC, bez textového panelu)**, 2 s kompaktním textem, 3 s plným textem; H je projde dokola, menu je nabízí.
+    Čísla na MFD se při rychlé změně ukazují po krocích (rychlost po 10 m/s, G po 0,5), přesně až když se
+    ustálí (`USpaceCockpitDisplays::Steady`). Prach tenčí a kratší (3 cm, 22 ms, max. 25 m, jas 1,6). Vzpěry
+    canopy tmavý kov (0,06, metallic 0,6, roughness 0,35) místo matné černé.
 
 ---
 

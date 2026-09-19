@@ -84,7 +84,7 @@ GIANT_SPIN_SECONDS = 1800.0
 
 # Space dust around the ship camera (USpaceDustComponent).
 DUST_COLOR = (0.70, 0.80, 1.00)
-DUST_BRIGHTNESS = 3.0
+DUST_BRIGHTNESS = 1.6  # 3.0 until 19. 9. 2026: bright white sticks over the view
 
 # ---------------------------------------------------------------------------------------
 

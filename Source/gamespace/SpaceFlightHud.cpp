@@ -1231,9 +1231,10 @@ FSpaceFlightHudState USpaceFlightHud::ApplyView(const FSpaceFlightHudState& Stat
 	return Out;
 }
 
-void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
+void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 {
 	using namespace SpaceHudStyle;
+	const FSpaceFlightHudState State = SteadyState(InState);
 	if (!WidgetTree || !WidgetTree->RootWidget)
 	{
 		return;
@@ -1535,6 +1536,24 @@ void USpaceFlightHud::DebugAdvance(float Seconds)
 void USpaceCockpitDisplays::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	UUserWidget::NativeTick(MyGeometry, InDeltaTime);
+}
+
+float USpaceCockpitDisplays::Steady(FName Figure, float Value, float Step, float FastChange)
+{
+	float& Last = LastFigures.FindOrAdd(Figure, Value);
+	const bool bFast = FMath::Abs(Value - Last) > FastChange;
+	Last = Value;
+	return bFast ? FMath::RoundToFloat(Value / Step) * Step : Value;
+}
+
+FSpaceFlightHudState USpaceCockpitDisplays::SteadyState(const FSpaceFlightHudState& State)
+{
+	FSpaceFlightHudState Out = State;
+	// Between two updates (StateRateHz, 5 a second): more than 3 m/s of change shows tens of m/s,
+	// more than 0.2 G shows half G steps.
+	Out.SpeedCmS = Steady(TEXT("Speed"), State.SpeedCmS / 100.f, 10.f, 3.f) * 100.f;
+	Out.GForce = Steady(TEXT("G"), State.GForce, 0.5f, 0.2f);
+	return Out;
 }
 
 void USpaceCockpitDisplays::BuildTree()

@@ -14,7 +14,7 @@ struct FSpaceShot
 	FString Name;
 	/** "cockpit" or "chase". */
 	FString Camera = TEXT("chase");
-	/** space.Hud: 0 hidden, 1 compact, 2 full; -1 leaves it alone. */
+	/** space.Hud: 0 hidden, 1 flight HUD only, 2 plus compact text, 3 plus full text; -1 leaves it alone. */
 	int32 HudMode = 1;
 	/** Place the ship this far above the nearest body's terrain (negative: leave it where it is). */
 	float AltitudeM = -1.f;

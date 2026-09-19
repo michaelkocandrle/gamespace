@@ -625,6 +625,9 @@ protected:
 
 	/** Builds the widget tree. The widgets' names are what ApplyState drives, whatever the layout. */
 	virtual void BuildTree();
+
+	/** The state as this layout shows it (the cockpit displays steady their figures); the HUD shows it as is. */
+	virtual FSpaceFlightHudState SteadyState(const FSpaceFlightHudState& State) { return State; }
 	/** Monospace (the engine's DroidSansMono), letter-spaced and outlined: a technical, readable look. */
 	UTextBlock* MakeText(const FName Name, float Size, int32 LetterSpacing = 60, const FName Weight = TEXT("Mono"));
 
@@ -679,8 +682,20 @@ public:
 	static constexpr float DisplayWidth = 560.f;
 	static constexpr float DisplayHeight = 490.f;
 
+	/**
+	 * A figure as the display shows it: while it changes fast between two updates it is shown in
+	 * Step-sized steps (the speed in tens of m/s while accelerating), and exactly once it settles. A
+	 * number rewritten digit by digit is what temporal AA blended into two values over each other.
+	 */
+	float Steady(FName Figure, float Value, float Step, float FastChange);
+
 protected:
 	/** Driven by UCockpitDisplayComponent, not by a player: nothing to do per Slate tick. */
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual void BuildTree() override;
+
+	virtual FSpaceFlightHudState SteadyState(const FSpaceFlightHudState& State) override;
+
+private:
+	TMap<FName, float> LastFigures;
 };

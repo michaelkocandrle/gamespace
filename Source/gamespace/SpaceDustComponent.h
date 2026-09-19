@@ -42,17 +42,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Dust", meta = (ClampMin = "100.0"))
 	float BoxHalfSizeCm = 3500.f;
 
-	/** Thickness of a speck, cm. */
+	/** Thickness of a speck, cm. 3 (was 7): next to the cockpit the specks read as thick white sticks;
+	 * the reference's dust is fine and short (19. 9. 2026). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Dust", meta = (ClampMin = "0.1"))
-	float ParticleSizeCm = 7.f;
+	float ParticleSizeCm = 3.f;
 
 	/** A streak is as long as the distance flown in this time. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Dust", meta = (ClampMin = "0.0", Units = "s"))
-	float StreakSeconds = 0.035f;
+	float StreakSeconds = 0.022f;
 
 	/** Longest streak, cm. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Dust", meta = (ClampMin = "1.0"))
-	float MaxStreakCm = 5000.f;
+	float MaxStreakCm = 2500.f;
 
 	/** Invisible below this speed, fully visible at four times it, cm/s. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Dust", meta = (ClampMin = "0.0"))

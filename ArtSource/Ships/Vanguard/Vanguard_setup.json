@@ -161,18 +161,18 @@
       "emissive_strength": 1.8
     },
     "MI_Ship_Vanguard_CanopyFrame": {
-      "_comment": "Inside of the canopy frame (build_ai_ship.py canopy_frame): dark matt paint, like a real frame seen from the seat.",
+      "_comment": "Inside of the canopy frame (build_ai_ship.py canopy_frame): dark painted metal that catches a little light - at base colour 0.02, matt, the struts read as flat black bars across the view.",
       "master": "hull",
       "slots": [
         "M_Ship_Vanguard_CanopyFrame"
       ],
       "base_color": [
-        0.02,
-        0.022,
-        0.025
+        0.06,
+        0.065,
+        0.075
       ],
-      "metallic": 0.1,
-      "roughness": 0.6
+      "metallic": 0.6,
+      "roughness": 0.35
     }
   }
 }

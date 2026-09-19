@@ -22,7 +22,7 @@ namespace
 {
 	TAutoConsoleVariable<int32> CVarSpaceHud(
 		TEXT("space.Hud"), 1,
-		TEXT("Debug HUD: 0 off, 1 compact (default), 2 full. H cycles it in game."));
+		TEXT("HUD: 0 off, 1 flight HUD only (default, as in Star Citizen), 2 plus the compact text readout, 3 plus the full one. H cycles it in game."));
 
 	/** "TERRAIN" readout: quad-sphere LOD state of the first planet in the level. */
 	FString DescribeTerrain(const UWorld* World)
@@ -415,7 +415,7 @@ void ASpaceDebugHUD::BeginPlay()
 
 void ASpaceDebugHUD::CycleDisplayMode()
 {
-	CVarSpaceHud->Set((CVarSpaceHud.GetValueOnGameThread() + 1) % 3, ECVF_SetByConsole);
+	CVarSpaceHud->Set((CVarSpaceHud.GetValueOnGameThread() + 1) % 4, ECVF_SetByConsole);
 }
 
 void ASpaceDebugHUD::DrawHUD()
@@ -427,7 +427,7 @@ void ASpaceDebugHUD::DrawHUD()
 	{
 		return;
 	}
-	const int32 Mode = FMath::Clamp(CVarSpaceHud.GetValueOnGameThread(), 0, 2);
+	const int32 Mode = FMath::Clamp(CVarSpaceHud.GetValueOnGameThread(), 0, 3);
 	const float Scale = TextScale * FMath::Clamp(Canvas->ClipY / 1080.f, 0.5f, 2.5f);
 	UFont* Font = GEngine->GetMediumFont();
 
@@ -460,7 +460,7 @@ void ASpaceDebugHUD::DrawHUD()
 	Lines.Add({ TEXT("REBASE"), DescribeRebases(GetWorld()), FLinearColor(0.85f, 0.85f, 0.6f) });
 	Lines.Add({ TEXT("TERRAIN"), DescribeTerrain(GetWorld()), FLinearColor(0.85f, 0.7f, 0.5f) });
 
-	if (Mode == 1)
+	if (Mode == 2)
 	{
 		// Compact: what matters while playing; the rest is one H press away.
 		// Speed, IFCS state and afterburner are on the UMG flight HUD (USpaceFlightHud) since SC-1c;
@@ -489,10 +489,11 @@ void ASpaceDebugHUD::DrawHUD()
 		WidestValue = FMath::Max(WidestValue, Width);
 	}
 
-	if (Mode > 0)
+	// Mode 1 is the flight HUD alone, as in the reference: no text panel over the view.
+	if (Mode >= 2)
 	{
 		// Dark backing so the numbers stay readable against a bright sky or a lit asteroid.
-		DrawRect(FLinearColor(0.f, 0.f, 0.f, Mode == 1 ? 0.35f : 0.55f), TopLeft.X - Padding, TopLeft.Y - Padding,
+		DrawRect(FLinearColor(0.f, 0.f, 0.f, Mode == 2 ? 0.35f : 0.55f), TopLeft.X - Padding, TopLeft.Y - Padding,
 			ValueColumn + WidestValue + Padding * 2.f, LineHeight * Lines.Num() + Padding * 2.f);
 
 		float Y = TopLeft.Y;

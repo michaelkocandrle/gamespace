@@ -304,10 +304,11 @@ TSharedRef<SWidget> SSpaceMenu::BuildSettingsPage()
 
 	Add(MakeSection(LOCTEXT("Game", "HRA")));
 	Add(MakeChoiceRow(LOCTEXT("Hud", "HUD (klávesa H)"),
-		[this]() { return Draft.HudMode; }, [this](int32 I) { Draft.HudMode = I; }, []() { return 3; },
+		[this]() { return Draft.HudMode; }, [this](int32 I) { Draft.HudMode = I; }, []() { return 4; },
 		[](int32 I)
 		{
-			return I == 0 ? LOCTEXT("HudOff", "Skrytý") : I == 1 ? LOCTEXT("HudCompact", "Kompaktní") : LOCTEXT("HudFull", "Plný");
+			return I == 0 ? LOCTEXT("HudOff", "Skrytý") : I == 1 ? LOCTEXT("HudFlight", "Jen letový HUD")
+				: I == 2 ? LOCTEXT("HudCompact", "S textem") : LOCTEXT("HudFull", "S plným textem");
 		}));
 	Add(MakeToggleRow(LOCTEXT("ShowFps", "Zobrazit FPS"), &Draft.bShowFps));
 
@@ -523,7 +524,7 @@ void SSpaceMenu::LoadDraft()
 	Draft.MusicVolume = Settings->MusicVolume;
 	Draft.MouseSensitivity = Settings->MouseSensitivity;
 	Draft.bInvertPitch = Settings->bInvertShipPitch;
-	Draft.HudMode = FMath::Clamp(Settings->HudMode, 0, 2);
+	Draft.HudMode = FMath::Clamp(Settings->HudMode, 0, 3);
 	Draft.bShowFps = Settings->bShowFps;
 }
 

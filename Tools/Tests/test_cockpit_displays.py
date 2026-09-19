@@ -109,7 +109,7 @@ try:
     check("inside of the canopy frame has its own dark slot", "M_Ship_Vanguard_CanopyFrame" in hull_slots, ", ".join(hull_slots))
     frame = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Vanguard/Materials/MI_Ship_Vanguard_CanopyFrame")
     base = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(frame, "BaseColor") if frame else None
-    check("canopy frame material is dark", base is not None and max(base.r, base.g, base.b) < 0.05, str(base))
+    check("canopy frame material is dark (below 0.1)", base is not None and max(base.r, base.g, base.b) < 0.1, str(base))
 finally:
     eas.destroy_actor(vanguard)
 

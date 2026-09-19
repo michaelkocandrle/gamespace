@@ -69,7 +69,7 @@ public:
 	UPROPERTY(Config, BlueprintReadOnly, Category = "Settings")
 	bool bInvertShipPitch = false;
 
-	/** space.Hud at start: 0 hidden, 1 compact, 2 full. H changes and saves it. */
+	/** space.Hud at start: 0 hidden, 1 flight HUD only, 2 plus compact text, 3 plus full text. H changes and saves it. */
 	UPROPERTY(Config, BlueprintReadOnly, Category = "Settings")
 	int32 HudMode = 1;
 
