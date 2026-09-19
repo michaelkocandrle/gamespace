@@ -1287,9 +1287,9 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 	{
 		ModeLabel->SetText(FText::FromString(State.ModeLabel));
 	}
-	const FLinearColor ModeColor = State.ModeLabel == TEXT("NAV") ? NavBlue : Instrument;
+	const FLinearColor MasterModeColor = State.ModeLabel == TEXT("NAV") ? NavBlue : Instrument;
 	// Switching blinks the mode being switched to.
-	SetLamp(TEXT("MODE"), !State.bModeSwitching || bBlink, ModeColor);
+	SetLamp(TEXT("MODE"), !State.bModeSwitching || bBlink, MasterModeColor);
 	SetText(TEXT("ModeText"), State.ModeLabel, !State.bModeSwitching || bBlink ? Label : Faded(Label, 0.3f));
 	SetText(TEXT("SubModeText"), State.SubModeLabel, Faded(Label, 0.8f));
 	if (UTextBlock* CoupledLabel = LampLabels.FindRef(TEXT("CPLD")))

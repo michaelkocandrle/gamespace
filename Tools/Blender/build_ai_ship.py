@@ -586,6 +586,14 @@ def add_displays(ob, ship, spec, matrix):
     are deleted, and a quad is put on the plane, offset_m towards the pilot. The quads share one slot and
     one texture: display i of n gets the i-th n-th of it, left to right."""
     screens = spec["screens"]
+
+    def inside_quad(a, b, quad):
+        # Convex quad TL TR BR BL (clockwise on screen): inside when on the same side of every edge.
+        signs = []
+        for k in range(4):
+            (x0, y0), (x1, y1) = quad[k], quad[(k + 1) % 4]
+            signs.append((x1 - x0) * (b - y0) - (y1 - y0) * (a - x0))
+        return all(s <= 0 for s in signs) or all(s >= 0 for s in signs)
     inset, depth, offset = spec.get("cut_inset_m", 0.012), spec.get("cut_depth_m", 0.02), spec.get("offset_m", 0.002)
     local = matrix.inverted()
     bm = bmesh.new()
@@ -596,23 +604,31 @@ def add_displays(ob, ship, spec, matrix):
     for i, screen in enumerate(screens):
         c, u, v = Vector(screen["centre"]), Vector(screen["u"]).normalized(), Vector(screen["v"]).normalized()
         n = u.cross(v).normalized()
-        u0, u1, v0, v1 = screen["rect"]
+        # The screen's outline: "corners" (top-left, top-right, bottom-right, bottom-left, as the bezel
+        # opening really is - not a rectangle), or a "rect" [u0, u1, v0, v1].
+        if "corners" in screen:
+            tl, tr, br, bl = [tuple(p) for p in screen["corners"]]
+        else:
+            u0, u1, v0, v1 = screen["rect"]
+            tl, tr, br, bl = (u0, v1), (u1, v1), (u1, v0), (u0, v0)
+        quad = [tl, tr, br, bl]
         doomed = []
         for f in bm.faces:
             d = local @ f.calc_center_median() - c
             a, b = d.dot(u), d.dot(v)
-            if u0 + inset < a < u1 - inset and v0 + inset < b < v1 - inset and abs(d.dot(n)) < depth:
+            if inside_quad(a, b, quad) and abs(d.dot(n)) < depth:
                 doomed.append(f)
         bmesh.ops.delete(bm, geom=doomed, context="FACES")
-        corners = [(u0, v0), (u1, v0), (u1, v1), (u0, v1)]
+        corners = [bl, br, tr, tl]
+        texture_corners = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
         verts = [bm.verts.new(matrix @ (c + u * a + v * b + n * offset)) for a, b in corners]
         face = bm.faces.new(verts)
         face.material_index = slot
         face.smooth = False
         # Blender's UV origin is bottom-left; the importer flips V, so the top of the screen lands on
-        # the top row of the texture.
-        for loop, (a, b) in zip(face.loops, corners):
-            loop[uv].uv = ((i + (a - u0) / (u1 - u0)) / len(screens), (b - v0) / (v1 - v0))
+        # the top row of the texture. The whole texture share goes onto the quad, whatever its shape.
+        for loop, (x, y) in zip(face.loops, texture_corners):
+            loop[uv].uv = ((i + x) / len(screens), y)
         face.normal_update()
         pilot = matrix @ (c + n) - matrix @ c
         if face.normal.dot(pilot) < 0:
@@ -625,7 +641,7 @@ def add_displays(ob, ship, spec, matrix):
         socket.parent = ob
         socket.matrix_world = Matrix.Translation(matrix @ (c + n * spec.get("light_offset_m", 0.03)))
         log("display %s: %d faces of the AI screen cut, quad %.0f x %.0f cm (before scaling)" % (
-            screen.get("name", i), len(doomed), (u1 - u0) * 100, (v1 - v0) * 100))
+            screen.get("name", i), len(doomed), (tr[0] - tl[0]) * 100, (tl[1] - bl[1]) * 100))
     bm.to_mesh(ob.data)
     bm.free()
     ob.data.update()

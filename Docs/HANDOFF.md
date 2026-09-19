@@ -352,6 +352,21 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       podrženo ~200 ms se ustálí. Vyzkoušené a zamítnuté: pixelová animace sama, průhledný materiál
       s responsive AA (i s výstupem rychlosti), průhlednost až po TSR (rozmazané i v klidu), vypnutí
       anti-flickeru TSR a kratší historie TSR.
+29. **Blender MCP a displeje přesně do rámu** (19. 9. 2026):
+    - nainstalovaný Blender MCP (ahujasid/blender-mcp, PyPI `blender-mcp` 2.0.0): `uv` přes winget, server v Claude
+      Code (`claude mcp add blender`, scope local pro C:\gamespace, s plnou cestou k `uvx.exe` a
+      `DISABLE_TELEMETRY=true` – balíček jinak posílá anonymní statistiky a se souhlasem i prompty, snímky
+      a stav scény na Supabase autora), doplněk `blender_mcp_addon` v Blenderu 5.2 (z balíčku, souhlas
+      s telemetrií vypnutý). Doplněk po startu Blenderu s GUI otevře server na `localhost:9876`, který
+      spouští libovolný Python v Blenderu (jen lokálně). V dávkových `-b` bězích pipeline se jen zaregistruje;
+    - MCP nástroje (31: scéna, snímek viewportu, `execute_blender_code`, …) se v Claude Code načtou
+      v nové relaci; `get_scene_info` a spol. chtějí argument `user_prompt` (stačí prázdný);
+    - první použití: v živém viewportu z oka pilota (kamera 174/0/189 cm, FOV 88°, backface culling jako
+      v Unrealu) s měřicí mřížkou na rovině displejů se ukázalo, že otvory rámečků nejsou obdélníky
+      (pravý se naklání). Displeje mají teď v receptu `corners` (4 rohy otvoru) místo `rect`; build
+      vyřízne AI sklo uvnitř obrysu a dá tam čtyřúhelník. Levý displej sedí na rám, pravý má dole vlevo
+      zubatou hranu samotného rámu (decimovaná AI geometrie);
+    - opraveno: `ModeColor` v HUDu kolidoval v unity buildu hry se stejnojmennou konstantou v `SpaceDebugHUD.cpp`.
 
 ---
 
@@ -405,6 +420,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `Blender/build_ai_ship.py` | AI model (Meshy, Higgsfield) → herní `.blend` podle receptu `<Loď>_ai_build.json`: orientace, velikost, díly, decimace, nové UV a přepečené textury, emisivní trysky, UCX hully, sockety. Kapitola 2B v `ShipPipeline.md`. |
 | `Blender/split_ship_gear.py` | Oddělí vymodelovaný podvozek z trupu do dílu `SM_Ship_<Loď>_Gear` (volné díly pod břichem u socketů `SOCKET_Gear_*`, kromě dvířek a světla) a uloží `.blend`. Jednorázové, druhé spuštění nic nedělá. Pak export a import jako obvykle. |
 | `Assets/add_landing_input.py` | Klávesy N (`IA_LandingGear`) a P (`IA_Precision`) do `IMC_Spaceship` (jen přidává). |
+| Blender MCP (`blender` v Claude Code) | Živý Blender: snímky viewportu, spouštění Pythonu ve scéně. Blender spustit s GUI a otevřít .blend; doplněk `blender_mcp_addon` sám poslouchá na `localhost:9876`. Pro modely a materiály: iterovat ve viewportu, teprve pak export do Unrealu. |
 | `Blender/cockpit_view_survey.py` | Změří, co pilot vidí: paprsky přes zorné pole proti skutečnému modelu, kolik % výhledu je volných a co ho blokuje. Po změně modelu nebo pozice kamery. |
 | `Shots.ps1` + `Shots/*.json` | Snímky ze zabalené hry podle scénáře (kapitola 9). |
 | `Content/Python/gamespace_assets.py` | Knihovna pro skriptové vytváření IA, IMC a dalších assetů. |
