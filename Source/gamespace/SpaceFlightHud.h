@@ -766,6 +766,11 @@ public:
 protected:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
+	/** Makes the lines the drawn parts queued while painting, grouped by layer and thickness: Slate runs
+	 * this after the children. See SpaceHudStyle::PaintLine. */
+	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+
 	/** Builds the widget tree. The widgets' names are what ApplyState drives, whatever the layout. */
 	virtual void BuildTree();
 

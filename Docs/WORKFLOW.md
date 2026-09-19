@@ -88,6 +88,11 @@ MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 - `texture_rect` [x0, y0, x1, y1]: kde displej leží na plátně hry (pixely od levého horního rohu, přesně
   jako `USpaceCockpitDisplays::ScreenRect`); celé plátno je `texture_size` [1330, 490]. Bez nich dostane
   displej i jednu n-tinu šířky textury (starý způsob);
+- `grow_m` (0,0045, ~5 mm ve hře): displej sahá o tolik dál než řez, pod vyvýšenou hranu rámečku. Přesně
+  na obrys otvoru v některých rozích prosvítal světlý proužek AI skla (autorovy detaily 19. 9. 2026).
+  Řez zůstává na obrysu, aby rámeček neztratil vnitřní hranu. Porovnáno 0 / 5 / 8 mm v Blenderu z oka
+  s fialovými displeji – pozor, `get_viewport_screenshot` fotí před překreslením, vynuť
+  `bpy.ops.wm.redraw_timer(type="DRAW_WIN_SWAP")`;
 - `cut_depth_m` u displeje přebije společnou hloubku řezu. Malé displeje ve sloupku mají 6 mm, aby
   zůstaly knoflíky na rámečku (se 2 cm by je řez utrhl).
 

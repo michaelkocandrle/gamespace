@@ -37,6 +37,7 @@
 #include "EngineUtils.h"
 #include "PhysicsEngine/BodySetup.h"
 #include "Stats/Stats.h"
+#include "Algo/StableSort.h"
 
 // "stat SpaceHud": the drawn instruments' paint.
 DECLARE_STATS_GROUP(TEXT("SpaceHud"), STATGROUP_SpaceHud, STATCAT_Advanced);
@@ -44,6 +45,7 @@ DECLARE_CYCLE_STAT(TEXT("Radar paint"), STAT_SpaceHudRadarPaint, STATGROUP_Space
 DECLARE_CYCLE_STAT(TEXT("Ship status paint"), STAT_SpaceHudShipPaint, STATGROUP_SpaceHud);
 DECLARE_CYCLE_STAT(TEXT("Symbol paint"), STAT_SpaceHudSymbolPaint, STATGROUP_SpaceHud);
 DECLARE_CYCLE_STAT(TEXT("Painted text"), STAT_SpaceHudText, STATGROUP_SpaceHud);
+DECLARE_DWORD_COUNTER_STAT(TEXT("Line batches"), STAT_SpaceHudLineBatches, STATGROUP_SpaceHud);
 
 namespace SpaceHudStyle
 {
@@ -143,19 +145,134 @@ namespace SpaceHudStyle
 	}
 
 	/**
+	 * Every line of the painted parts goes through PaintLine. Slate starts a new render batch whenever a
+	 * line's layer or thickness (the anti-aliasing shader's parameter) differs from the line before it,
+	 * and every batch re-reserves the window's whole vertex list, text included: the cost grows with the
+	 * number of batches times everything drawn (Docs/WORKFLOW.md, 9.2g). Drawn as they came, the glow
+	 * passes made three batches for every line, ~4 ms a frame on the MFD pages FLIGHT and STATUS.
+	 *
+	 * So the lines are queued per element list, and the root widget (USpaceFlightHud::NativePaint, which
+	 * Slate runs after the children) makes them sorted by layer, then thickest first: one batch for each
+	 * layer and thickness. Every line keeps its layer, so nothing changes places with the boxes and text
+	 * around it; within a layer the halos now all go under the cores. space.HudLineBatch 0 draws the
+	 * lines as they come, for an A/B in one build.
+	 */
+	TAutoConsoleVariable<int32> CVarHudLineBatch(
+		TEXT("space.HudLineBatch"), 1,
+		TEXT("1: the HUD's and the cockpit displays' lines are drawn grouped by layer and thickness (few Slate batches). 0: in paint order."));
+
+	struct FQueuedLine
+	{
+		FPaintGeometry Geometry;
+		TArray<FVector2f> Points;
+		FLinearColor Color;
+		float Thickness = 1.f;
+		int32 Layer = 0;
+		bool bAntialias = true;
+	};
+
+	struct FLineQueue
+	{
+		uint64 Frame = 0;
+		TArray<FQueuedLine> Lines;
+	};
+
+	/** The lines waiting for their root widget, by the element list they are for. */
+	TMap<const FSlateWindowElementList*, FLineQueue>& LineQueues()
+	{
+		static TMap<const FSlateWindowElementList*, FLineQueue> Queues;
+		return Queues;
+	}
+
+	/** Paint order mode only: the last line's batch key, to count the batches Slate will make. */
+	struct FLineBatchKey
+	{
+		const FSlateWindowElementList* List = nullptr;
+		int32 Layer = 0;
+		float Thickness = 0.f;
+		bool bAntialias = true;
+	};
+
+	void CountLineBatch(const FSlateWindowElementList& Out, int32 Layer, float Thickness, bool bAntialias)
+	{
+		static FLineBatchKey Last;
+		if (Last.List != &Out || Last.Layer != Layer || Last.Thickness != Thickness || Last.bAntialias != bAntialias)
+		{
+			INC_DWORD_STAT(STAT_SpaceHudLineBatches);
+			Last = { &Out, Layer, Thickness, bAntialias };
+		}
+	}
+
+	void PaintLine(FSlateWindowElementList& Out, int32 Layer, const FPaintGeometry& Geometry, TArray<FVector2f> Points,
+		const FLinearColor& Color, bool bAntialias, float Thickness)
+	{
+		if (CVarHudLineBatch.GetValueOnGameThread() == 0 || !IsInGameThread())
+		{
+			CountLineBatch(Out, Layer, Thickness, bAntialias);
+			FSlateDrawElement::MakeLines(Out, Layer, Geometry, MoveTemp(Points), ESlateDrawEffect::None, Color, bAntialias, Thickness);
+			return;
+		}
+		if (Points.Num() < 2 || Color.A <= 0.f)
+		{
+			return;
+		}
+		FLineQueue& Queue = LineQueues().FindOrAdd(&Out);
+		if (Queue.Frame != GFrameCounter)
+		{
+			// Left over from a list whose root did not paint (a list at the same address last frame).
+			Queue.Lines.Reset();
+			Queue.Frame = GFrameCounter;
+		}
+		Queue.Lines.Add({ Geometry, MoveTemp(Points), Color, Thickness, Layer, bAntialias });
+	}
+
+	/** Makes the lines queued for this element list: by layer, then thickest first, else in paint order. */
+	void FlushLines(FSlateWindowElementList& Out)
+	{
+		FLineQueue Queue;
+		if (!LineQueues().RemoveAndCopyValue(&Out, Queue) || Queue.Frame != GFrameCounter)
+		{
+			return;
+		}
+		Algo::StableSort(Queue.Lines, [](const FQueuedLine& A, const FQueuedLine& B)
+		{
+			if (A.Layer != B.Layer)
+			{
+				return A.Layer < B.Layer;
+			}
+			if (A.bAntialias != B.bAntialias)
+			{
+				return !A.bAntialias;
+			}
+			return A.Thickness > B.Thickness;
+		});
+		for (int32 Index = 0; Index < Queue.Lines.Num(); ++Index)
+		{
+			FQueuedLine& Line = Queue.Lines[Index];
+			if (Index == 0 || Line.Layer != Queue.Lines[Index - 1].Layer || Line.Thickness != Queue.Lines[Index - 1].Thickness
+				|| Line.bAntialias != Queue.Lines[Index - 1].bAntialias)
+			{
+				INC_DWORD_STAT(STAT_SpaceHudLineBatches);
+			}
+			FSlateDrawElement::MakeLines(Out, Line.Layer, Line.Geometry, MoveTemp(Line.Points), ESlateDrawEffect::None, Line.Color,
+				Line.bAntialias, Line.Thickness);
+		}
+	}
+
+	/**
 	 * Slate has no additive brush and a scene bloom would light up the whole game, so a "glow" here is
 	 * the same shape drawn again, larger and much fainter. Two passes read as a halo at HUD line
-	 * widths and cost two draw calls.
+	 * widths.
 	 */
 	void GlowLines(FSlateWindowElementList& Out, int32 Layer, const FPaintGeometry& Geometry, const TArray<FVector2f>& Points,
 		const FLinearColor& Color, float Thickness, float Glow)
 	{
 		if (Glow > 0.01f)
 		{
-			FSlateDrawElement::MakeLines(Out, Layer, Geometry, Points, ESlateDrawEffect::None, Faded(Color, 0.06f * Glow), true, Thickness + 6.f);
-			FSlateDrawElement::MakeLines(Out, Layer, Geometry, Points, ESlateDrawEffect::None, Faded(Color, 0.14f * Glow), true, Thickness + 2.5f);
+			PaintLine(Out, Layer, Geometry, Points, Faded(Color, 0.06f * Glow), true, Thickness + 6.f);
+			PaintLine(Out, Layer, Geometry, Points, Faded(Color, 0.14f * Glow), true, Thickness + 2.5f);
 		}
-		FSlateDrawElement::MakeLines(Out, Layer, Geometry, Points, ESlateDrawEffect::None, Color, true, Thickness);
+		PaintLine(Out, Layer, Geometry, Points, Color, true, Thickness);
 	}
 
 	/**
@@ -196,7 +313,7 @@ namespace SpaceHudStyle
 			}
 			const FVector2f Start = Points[0];
 			Points.Add(Start);
-			FSlateDrawElement::MakeLines(Out, Layer, Geometry.ToPaintGeometry(), Points, ESlateDrawEffect::None, Outline, true, OutlineWidth);
+			PaintLine(Out, Layer, Geometry.ToPaintGeometry(), MoveTemp(Points), Outline, true, OutlineWidth);
 		}
 	}
 
@@ -459,8 +576,7 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 			const TArray<FVector2f> Line = bHorizontal
 				? TArray<FVector2f>({ FVector2f(At, 1.f), FVector2f(At, Width - 1.f) })
 				: TArray<FVector2f>({ FVector2f(1.f, Length - At), FVector2f(Width - 1.f, Length - At) });
-			FSlateDrawElement::MakeLines(OutDrawElements, LayerId + 3, AllottedGeometry.ToPaintGeometry(), Line,
-				ESlateDrawEffect::None, Faded(Backing, 0.6f * Dim), false, 1.f);
+			PaintLine(OutDrawElements, LayerId + 3, AllottedGeometry.ToPaintGeometry(), Line, Faded(Backing, 0.6f * Dim), false, 1.f);
 		}
 	};
 
@@ -475,8 +591,7 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 		{
 			const float Along = Zero + Span * Index / Ticks;
 			const TArray<FVector2f> Tick = { FVector2f(-4.f, Length - Along), FVector2f(-1.f, Length - Along) };
-			FSlateDrawElement::MakeLines(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), Tick,
-				ESlateDrawEffect::None, Faded(Rail, (Index * 2 == Ticks ? 0.9f : 0.5f) * Dim), true, 1.f);
+			PaintLine(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), Tick, Faded(Rail, (Index * 2 == Ticks ? 0.9f : 0.5f) * Dim), true, 1.f);
 		}
 	}
 
@@ -730,13 +845,11 @@ int32 USpaceHudSymbol::NativePaint(const FPaintArgs& Args, const FGeometry& Allo
 		// A faint pixel grid.
 		for (float X = 24.f; X < Size.X; X += 24.f)
 		{
-			FSlateDrawElement::MakeLines(OutDrawElements, LayerId + 1, Paint, { FVector2f(X, 4.f), FVector2f(X, Size.Y - 4.f) },
-				ESlateDrawEffect::None, Faded(Color, 0.035f), false, 1.f);
+			PaintLine(OutDrawElements, LayerId + 1, Paint, { FVector2f(X, 4.f), FVector2f(X, Size.Y - 4.f) }, Faded(Color, 0.035f), false, 1.f);
 		}
 		for (float Y = 24.f; Y < Size.Y; Y += 24.f)
 		{
-			FSlateDrawElement::MakeLines(OutDrawElements, LayerId + 1, Paint, { FVector2f(4.f, Y), FVector2f(Size.X - 4.f, Y) },
-				ESlateDrawEffect::None, Faded(Color, 0.035f), false, 1.f);
+			PaintLine(OutDrawElements, LayerId + 1, Paint, { FVector2f(4.f, Y), FVector2f(Size.X - 4.f, Y) }, Faded(Color, 0.035f), false, 1.f);
 		}
 		// Darker towards the edges, as glass set in a bezel.
 		const float Edge = 36.f;
@@ -830,8 +943,7 @@ int32 USpaceHudTape::NativePaint(const FPaintArgs& Args, const FGeometry& Allott
 		const float Tick = bMajor ? 6.f : 3.f;
 		if (bVertical)
 		{
-			FSlateDrawElement::MakeLines(OutDrawElements, LayerId, Paint, { FVector2f(0.f, Along), FVector2f(Tick, Along) },
-				ESlateDrawEffect::None, Faded(Color, bMajor ? 0.8f : 0.45f), true, 1.f);
+			PaintLine(OutDrawElements, LayerId, Paint, { FVector2f(0.f, Along), FVector2f(Tick, Along) }, Faded(Color, bMajor ? 0.8f : 0.45f), true, 1.f);
 			if (bMajor && FMath::Abs(Along - Mark) > 12.f)
 			{
 				Text(OutDrawElements, LayerId, AllottedGeometry, FVector2f(12.f, Along), Format(At), Small, Faded(Color, 0.75f), FVector2f(0.f, 0.5f));
@@ -840,8 +952,7 @@ int32 USpaceHudTape::NativePaint(const FPaintArgs& Args, const FGeometry& Allott
 		else
 		{
 			const float Base = 16.f;
-			FSlateDrawElement::MakeLines(OutDrawElements, LayerId, Paint, { FVector2f(Along, Base), FVector2f(Along, Base + Tick) },
-				ESlateDrawEffect::None, Faded(Color, bMajor ? 0.8f : 0.45f), true, 1.f);
+			PaintLine(OutDrawElements, LayerId, Paint, { FVector2f(Along, Base), FVector2f(Along, Base + Tick) }, Faded(Color, bMajor ? 0.8f : 0.45f), true, 1.f);
 			if (bMajor)
 			{
 				Text(OutDrawElements, LayerId, AllottedGeometry, FVector2f(Along, Base - 2.f), Format(At), Small, Faded(Color, 0.8f), FVector2f(0.5f, 1.f));
@@ -972,7 +1083,7 @@ int32 USpaceHudRadar::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	const int32 LineLayer = LayerId + 1;
 	auto Line = [&](const TArray<FVector2f>& Points, const FLinearColor& InColor)
 	{
-		FSlateDrawElement::MakeLines(OutDrawElements, LineLayer, Paint, Points, ESlateDrawEffect::None, InColor, true, SmallScreenLine);
+		PaintLine(OutDrawElements, LineLayer, Paint, Points, InColor, true, SmallScreenLine);
 	};
 	// The disc: a faint fill, the rim, two range rings, the cross and a tick every 30 degrees.
 	RoundedBox(OutDrawElements, LayerId, AllottedGeometry, Centre - FVector2f(Radius, Radius), FVector2f(Radius, Radius) * 2.f, Radius,
@@ -1199,7 +1310,7 @@ int32 USpaceHudShipStatus::NativePaint(const FPaintArgs& Args, const FGeometry& 
 		}
 		const FVector2f First = Points[0];
 		Points.Add(First);
-		FSlateDrawElement::MakeLines(OutDrawElements, LineLayer, Paint, Points, ESlateDrawEffect::None, Faded(Color, 0.75f), true, SmallScreenLine);
+		PaintLine(OutDrawElements, LineLayer, Paint, Points, Faded(Color, 0.75f), true, SmallScreenLine);
 	}
 	// Engines: a ring each, filled and trailing a plume behind as they work.
 	const float Demand = FMath::Clamp(EngineDemand, 0.f, 1.f);
@@ -1887,6 +1998,14 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 		VirtualJoystick->Stick = State.Stick;
 		VirtualJoystick->Deadzone = State.Deadzone;
 	}
+}
+
+int32 USpaceFlightHud::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	SpaceHudStyle::FlushLines(OutDrawElements);
+	return LayerId;
 }
 
 void USpaceFlightHud::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)

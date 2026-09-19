@@ -394,6 +394,9 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       nalezená přes Unreal Insights: Slate dávkuje vyhlazené čáry kvadraticky, když se střídá tloušťka nebo
       vrstva (WORKFLOW 9.2g). Radar a silueta teď kreslí jednou tloušťkou v jedné vrstvě: +0,5–1 ms;
     - měření: `stat SpaceCockpit`, `stat SpaceHud`; scénář snímků `cockpit_centre`.
+31b. **Displeje až pod rámeček** (19. 9. 2026, podle autorových detailů): plochy všech čtyř displejů sahají
+    o ~5 mm pod vyvýšenou hranu rámečku (`grow_m` v receptu), řez AI skla zůstal na obrysu. Světlé proužky
+    v rozích zmizely; zubatá levá hrana rámu pravého MFD je v AI modelu (WORKFLOW 9.6d).
 32. **Stránky MFD** (19. 9. 2026, WORKFLOW kap. 10 bod 2, klávesy a rozsah vybral autor):
     - **F1** přepíná levý MFD, **F2** pravý, **Alt + F1 / F2** zpět (Shift by zapnul boost). Autor nejdřív
       vybral [ a ], jenže na jeho české klávesnici to nejsou samostatné klávesy (vpravo od P je „ú“), proto

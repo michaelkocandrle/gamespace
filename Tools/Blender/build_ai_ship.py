@@ -623,6 +623,13 @@ def add_displays(ob, ship, spec, matrix):
             if inside_quad(a, b, quad) and abs(d.dot(n)) < cut:
                 doomed.append(f)
         bmesh.ops.delete(bm, geom=doomed, context="FACES")
+        # The screen itself reaches grow_m further out than the cut, under the bezel's raised lip: fitted to
+        # the opening exactly, the AI glass still showed as a thin light strip at some corners (19. 9. 2026).
+        # The cut stays on the outline, so the bezel keeps its inner edge.
+        grow = screen.get("grow_m", spec.get("grow_m", 0.0))
+        if grow:
+            quad = grow_quad(quad, grow)
+            tl, tr, br, bl = quad
         corners = [bl, br, tr, tl]
         texture_corners = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
         verts = [bm.verts.new(matrix @ (c + u * a + v * b + n * offset)) for a, b in corners]
@@ -654,6 +661,23 @@ def add_displays(ob, ship, spec, matrix):
     bm.to_mesh(ob.data)
     bm.free()
     ob.data.update()
+
+
+def grow_quad(quad, grow):
+    """The quad (u, v points, convex) with every edge moved grow outwards (corners along both edge normals)."""
+    cu = sum(p[0] for p in quad) / len(quad)
+    cv = sum(p[1] for p in quad) / len(quad)
+    def outward(a, b):
+        du, dv = b[0] - a[0], b[1] - a[1]
+        length = math.hypot(du, dv) or 1.0
+        nu, nv = dv / length, -du / length
+        mu, mv = (a[0] + b[0]) / 2 - cu, (a[1] + b[1]) / 2 - cv
+        return (nu, nv) if nu * mu + nv * mv > 0 else (-nu, -nv)
+    grown = []
+    for i, p in enumerate(quad):
+        n1, n2 = outward(quad[i - 1], p), outward(p, quad[(i + 1) % len(quad)])
+        grown.append((p[0] + (n1[0] + n2[0]) * grow, p[1] + (n1[1] + n2[1]) * grow))
+    return grown
 
 
 def screen_material(name):

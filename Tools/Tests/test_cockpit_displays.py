@@ -95,6 +95,8 @@ for screen in recipe["screens"]:
     glass = ((tr[0] - tl[0] + br[0] - bl[0]) / 2.0) / ((tl[1] - bl[1] + tr[1] - br[1]) / 2.0)
     shown = (r.z - r.x) / (r.w - r.y)
     check("screen %s drawn in the shape of its glass (%.2f vs %.2f)" % (screen["name"], shown, glass), abs(shown / glass - 1.0) < 0.08)
+check("screens reach under the bezel lips (grow_m 3-6 mm): no AI glass strip at the corners", 0.003 <= recipe.get("grow_m", 0.0) <= 0.006,
+      str(recipe.get("grow_m")))
 check("the four screens: two MFDs and the centre column", sorted(s["name"] for s in recipe["screens"]) == ["centre_bottom", "centre_top", "left", "right"])
 
 # --- Driven like the HUD ------------------------------------------------------------------------------

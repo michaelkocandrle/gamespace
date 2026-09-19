@@ -280,4 +280,9 @@ try:
 finally:
     eas.destroy_actor(ship)
 
+# --- Line batching (WORKFLOW 9.2g) --------------------------------------------------------------------------
+# The drawn parts' lines are made by the root widget grouped by layer and thickness; 0 is only for an A/B.
+check("space.HudLineBatch on by default (lines grouped: few Slate batches)",
+      unreal.SystemLibrary.get_console_variable_int_value("space.HudLineBatch") == 1)
+
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

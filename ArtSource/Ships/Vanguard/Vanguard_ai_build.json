@@ -584,7 +584,7 @@
       "scale": 3.0
     },
     "displays": {
-      "_comment": "The two big displays, in the rotated, unscaled model: centre, u = the screen's right, v = its up, and the corners of the bezel opening (top-left, top-right, bottom-right, bottom-left, metres in u / v). The openings are not rectangles (slanted sides, the right one leans); the corners were fitted by eye in the live Blender viewport from the pilot's eye with a measuring grid on the display plane (Blender MCP, 19. 9. 2026). The AI glass inside the outline is cut, a flat quad takes its place; the game draws its displays into the texture of slot M_Ship_Vanguard_Screens: left display = left half, right display = right half (UCockpitDisplayComponent). The centre column's two small screens (centre_top: radar, centre_bottom: self status) were measured the same way (19. 9. 2026): ray casts from the eye fitted their glass plane (the same tilt as the big displays), a flood fill found the openings, and outlines drawn in the live viewport were corrected by eye - the bottom edges are level, a knob on the bezel sits at each bottom-right corner (cut_depth_m 6 mm: only the glass is cut, the knobs stay). texture_size / texture_rect: where each screen is on the game's canvas (USpaceCockpitDisplays::ScreenRect), the same pixels per centimetre on every screen.",
+      "_comment": "The two big displays, in the rotated, unscaled model: centre, u = the screen's right, v = its up, and the corners of the bezel opening (top-left, top-right, bottom-right, bottom-left, metres in u / v). The openings are not rectangles (slanted sides, the right one leans); the corners were fitted by eye in the live Blender viewport from the pilot's eye with a measuring grid on the display plane (Blender MCP, 19. 9. 2026). The AI glass inside the outline is cut, a flat quad takes its place; the game draws its displays into the texture of slot M_Ship_Vanguard_Screens: left display = left half, right display = right half (UCockpitDisplayComponent). The centre column's two small screens (centre_top: radar, centre_bottom: self status) were measured the same way (19. 9. 2026): ray casts from the eye fitted their glass plane (the same tilt as the big displays), a flood fill found the openings, and outlines drawn in the live viewport were corrected by eye - the bottom edges are level, a knob on the bezel sits at each bottom-right corner (cut_depth_m 6 mm: only the glass is cut, the knobs stay). texture_size / texture_rect: where each screen is on the game's canvas (USpaceCockpitDisplays::ScreenRect), the same pixels per centimetre on every screen. grow_m 0.0045 (~5 mm in the game): the screens reach that far under the bezel lips beyond the cut outline - fitted exactly, the AI glass still showed as thin light strips at some corners (author's close-ups, 19. 9. 2026); 0 / 5 / 8 mm compared in the live viewport from the eye, 5 mm fills every opening, 8 mm adds nothing.",
       "screens": [
         {
           "name": "left",
@@ -763,7 +763,8 @@
       "texture_size": [
         1330,
         490
-      ]
+      ],
+      "grow_m": 0.0045
     }
   }
 }
