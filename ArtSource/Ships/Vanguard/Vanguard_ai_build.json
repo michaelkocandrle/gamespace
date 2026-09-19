@@ -65,8 +65,8 @@
     }
   },
   "decimate": {
-    "_comment": "Importance 1 = keep detail, 0 = decimate freely; the last matching rule wins. protect_factor scales how much importance matters.",
-    "hull_target_tris": 200000,
+    "_comment": "Importance 1 = keep detail, 0 = decimate freely; the last matching rule wins. protect_factor scales how much importance matters. 20. 9. 2026: the hull keeps 1 million triangles instead of 200 thousand (the author found it too soft up close in the chase camera). Nanite draws it at whatever detail the screen needs, so the cost is the file and the bake time, not the frame; the original Meshy model has 3.36 million.",
+    "hull_target_tris": 1000000,
     "default_importance": 0.5,
     "protect_factor": 1.0,
     "importance": [

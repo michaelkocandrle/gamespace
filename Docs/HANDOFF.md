@@ -435,6 +435,27 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - přepínače pro A/B měření: `space.CockpitKeepWindow 0/1`, `space.HudLineBatch 0/1`; `stat SpaceHud`
       ukazuje „Line batches“.
 
+33. **Loď zblízka: detailní vrstva materiálu a víc geometrie** (20. 9. 2026, autor: z chase kamery je loď
+    zblízka rozmazaná; vybral obě cesty):
+    - **proč to bylo měkké:** model z Meshy má jednu 4K texturu na celou 14m loď, tedy ~3 mm na pixel.
+      Přepečení to nezlepší, chybějící detail v ní prostě není. Ověřeno, že to není streamováním textur
+      (snímek s `r.Streaming.FullyLoadUsedTextures 1` vypadá stejně);
+    - **detailní vrstva v `M_Ship_PBR`** jako vrstvené materiály v SC: dlaždicová mikro-normála (kovová
+      zrnitost a řídké škrábance) a velké skvrny opotřebení pro drsnost, promítnuté **triplanárně v
+      souřadnicích lodi** (neplavou, když loď letí). Textury generuje
+      `Tools/Assets/generate_detail_textures.py` (numpy, bezešvé, 1024²) do
+      `ArtSource/Ships/Shared/Textures`; materiál je importuje do `/Game/Ships/Shared/Textures`;
+    - parametry v setupu lodi: `detail_tile_cm` (18), `detail_normal_strength` (0,8; 0 vrstvu vypne),
+      `detail_grunge_tile_cm` (60), `detail_rough_variation` (0,12). Opotřebení drsnost **jen zvyšuje** –
+      když ji i snižovalo, dělaly se na trupu lesklé fleky;
+    - převod mezi prostory dělá HLSL uvnitř Custom uzlu (`GetPrimitiveData(Parameters).WorldToLocal`,
+      `Parameters.TangentToWorld`). S uzly Transform (world→local, local→tangent) vyšla normála špatně a
+      **loď byla celá černá**;
+    - **geometrie:** trup má místo 200 tis. **1 milion trojúhelníků** (`decimate.hull_target_tris`),
+      originál z Meshy má 3,36 mil. Nanite kreslí jen to, co je na obrazovce potřeba: ve snímcích 92 FPS
+      proti 94 FPS bez vrstvy i bez geometrie. FBX trupu má 93 MB (Git LFS);
+    - scénář snímků `hull_detail` (tryska, bok, vršek, celá loď) a srovnání se `detail_normal_strength` 0.
+
 ---
 
 ## 6. Mapa kódu a obsahu
@@ -481,6 +502,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `Assets/build_main_menu.py` | Level úvodní obrazovky. |
 | `Assets/import_ship.py` + `ship_materials.py` | Import lodi z Blenderu. |
 | `Assets/generate_ship_sounds.py` → `build_ship_audio.py` | Generátor zvuků (numpy) a jejich import. |
+| `Assets/generate_detail_textures.py` | Dlaždicová mikro-normála a skvrny opotřebení pro detailní vrstvu trupu (numpy, bezešvé). |
 | `Assets/add_*_input.py` | Přidávání mapování kláves (pouze append). |
 | `Content/UI/Fonts/` | Fonty HUD (Rajdhani, Share Tech Mono) i s licencemi SIL OFL. Načítají se ze souboru, ne jako Font asset: importér fontu potřebuje Slate aplikaci, kterou headless editor nemá. Do balíčku je dostává `DirectoriesToAlwaysStageAsUFS` v `Config/DefaultGame.ini`. |
 | `Assets/install_mannequin_pack.py`, `generate_milky_way_glow.py` | Jednorázová instalace a textura. |
@@ -609,6 +631,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `landing` | SC-2a: podvozek ze strany (dole, v půlce cesty), zespodu, loď stojící na patkách, varování GEAR UP, loď na břiše bez podvozku, HUD po přistání, precision HUD, kokpit na zemi. |
 | `cockpit_centre` | Střední sloupek desky (RADAR, SELF STATUS): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé: vyříznout a zvětšit. |
 | `cockpit_readability` | Čitelnost displejů: výchozí pohled, přiblížení (Z) na FLIGHT/STATUS a THRUSTERS/CONTACTS, na konci staré oko pro srovnání. |
+| `hull_detail` | Trup zblízka (tryska, bok, vršek, celá loď): posouzení detailní vrstvy materiálu. Srovnání: `detail_normal_strength` 0 v setupu, znovu import a balení. |
 | `mfd_pages` | Stránky MFD: FLIGHT/STATUS, THRUSTERS/CONTACTS s afterburnerem, NAVIGATION/SELF STATUS ve vesmíru a po přistání, THRUSTERS při visení. Stránky nastavuje pole `console` (`space.MfdPage`). |
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
@@ -743,6 +766,9 @@ Další otevřené směry mimo let:
   stisk). Popisky na SELF STATUS
   (STATE, GEAR…) jsou malé. Stránky mají jen to, co hra umí; SC stránky zbraní, štítů a energie přijdou se
   systémy. Stránky se zatím nedají přepnout myší jako v SC (režim interakce, klik na displej).
+- **Detail lodi (bod 33), neověřeno autorem:** jak to vypadá za letu a na jeho monitoru. Detailní vrstva
+  nezostří samotnou kresbu (panely, nápisy) – ta je v AI textuře a ostřejší bude až s lepším modelem nebo
+  decaly. Trup s 1 mil. trojúhelníků dělá z FBX 93 MB v Git LFS; u dalších lodí zvaž, jestli to stojí za to.
 - **Úvodní obrazovka s novou lodí není vyfocená** (snímky menu neumí); kamera zůstala z 17,6m lodi.
 - **SC-2a, loď na břiše bez podvozku „visí“ nad zemí** (snímek `landing/05_belly_gear_up`; u Meshy
   Vanguardu 0,55 m vzadu a 1,1 m vpředu).

@@ -104,6 +104,21 @@ if plan["materials"]:
     for master in ("M_Ship_Hull", "M_Ship_PBR"):
         asset = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/" + master)
         check("%s used with Nanite" % master, asset is not None and asset.get_editor_property("used_with_nanite"))
+    # The micro-detail layer (20. 9. 2026): the generated tiling textures are in the game and the hull uses them.
+    detail = [unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Textures/" + name)
+              for name in ("T_Ship_Detail_N", "T_Ship_Detail_Grunge")]
+    check("the detail textures are imported (Tools/Assets/generate_detail_textures.py)", all(detail),
+          "%s" % [d.get_name() if d else None for d in detail])
+    check("the detail normal is a normal map with its green channel flipped", detail[0] is not None
+          and detail[0].get_editor_property("compression_settings") == unreal.TextureCompressionSettings.TC_NORMALMAP
+          and detail[0].get_editor_property("flip_green_channel"))
+    hull_mi = unreal.EditorAssetLibrary.load_asset("/Game/Ships/%s/Materials/MI_Ship_%s_Hull" % (plan["ship"], plan["ship"]))
+    if hull_mi:
+        strength = MEL.get_material_instance_scalar_parameter_value(hull_mi, "DetailNormalStrength")
+        tile = MEL.get_material_instance_scalar_parameter_value(hull_mi, "DetailTileCm")
+        wear = MEL.get_material_instance_scalar_parameter_value(hull_mi, "DetailRoughVariation")
+        check("the hull wears the detail layer (strength > 0, tile 5..60 cm, wear <= 0.3)",
+              strength > 0.0 and 5.0 <= tile <= 60.0 and 0.0 <= wear <= 0.3, "strength %.2f, tile %.0f cm, wear %.2f" % (strength, tile, wear))
 
 # --- nothing left over from an earlier model -------------------------------------------------
 root = "/Game/Ships/%s" % plan["ship"]

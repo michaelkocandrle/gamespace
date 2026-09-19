@@ -195,6 +195,21 @@ from the seat the pilot would see nothing of the ship; the nose falls away at 29
 The survey now ignores faces seen from behind (add `twosided` for the old behaviour) and takes a sweep
 range (`sweep:X0:X1:Z0:Z1`, cm). The text below is about the procedural Vanguard before it.
 
+**Hull detail** (20. 9. 2026): an AI model's paint is one 4K texture over a 14 m hull (~3 mm a pixel), so it
+goes soft as soon as the camera comes close (it is not texture streaming: a shot with
+`r.Streaming.FullyLoadUsedTextures 1` looks the same). `M_Ship_PBR` adds a micro-detail layer, the way Star
+Citizen's hulls are layered: a tiling normal (metal grain, sparse scratches) and large wear blotches for the
+roughness, projected triplanar **in the ship's own space**, so the detail keeps its size in centimetres and
+does not swim as the ship moves. `Tools/Assets/generate_detail_textures.py` generates the seamless textures
+(numpy) into `ArtSource/Ships/Shared/Textures`; the setup file tunes the layer per ship (`detail_tile_cm`,
+`detail_normal_strength` - 0 turns it off -, `detail_grunge_tile_cm`, `detail_rough_variation`). Wear only
+raises the roughness; lowering it too gave the hull bright specular patches. The space conversions are done
+in HLSL inside a Custom node (`GetPrimitiveData(Parameters).WorldToLocal`, `Parameters.TangentToWorld`):
+with Transform expressions the normal came out wrong and the ship rendered black. The Vanguard's hull also
+keeps **1 million triangles** instead of 200 thousand (`decimate.hull_target_tris`; the Meshy original has
+3.36 million) - Nanite draws only what the screen needs, and the shots measured 92 FPS against 94 without
+either change.
+
 **Cockpit interior** (18. 9. 2026): the Vanguard has a Meshy cockpit tub (dashboard with screens, consoles,
 side-sticks, pedals) as the part `SM_Ship_Vanguard_Interior` - the `interior` section of
 `Vanguard_ai_build.json`, placed by `Tools/Blender/fit_ship_interior.py` (inside the hull everywhere, rim

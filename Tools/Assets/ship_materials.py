@@ -99,7 +99,7 @@ def build_pbr_master():
     if not MEL.connect_material_expressions(orm, "G", rough, "A"):
         raise RuntimeError("ORM G -> roughness")
     _link(_scalar(pbr, "RoughnessScale", 1.0, -900, 550), rough, "B")
-    _output(rough, unreal.MaterialProperty.MP_ROUGHNESS)
+    # Roughness goes out through the detail layer (see _add_detail_layer).
     metal = _node(pbr, unreal.MaterialExpressionMultiply, -400, 500)
     if not MEL.connect_material_expressions(orm, "B", metal, "A"):
         raise RuntimeError("ORM B -> metallic")
@@ -107,11 +107,152 @@ def build_pbr_master():
     _output(metal, unreal.MaterialProperty.MP_METALLIC)
     normal = _texture_param(pbr, "NormalMap", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL,
                             "/Engine/EngineMaterials/DefaultNormal", -900, 800)
-    if not MEL.connect_material_property(normal, "RGB", unreal.MaterialProperty.MP_NORMAL):
-        raise RuntimeError("normal map -> Normal")
+    _add_detail_layer(pbr, normal, rough)
     MEL.recompile_material(pbr)
     unreal.EditorAssetLibrary.save_loaded_asset(pbr, only_if_is_dirty=False)
     return pbr
+
+
+DETAIL_TEXTURES = {"T_Ship_Detail_N": "normal", "T_Ship_Detail_Grunge": "orm"}
+SHARED_TEXTURES = "/Game/Ships/Shared/Textures"
+
+# Triplanar in the ship's own space: the detail keeps its size in centimetres, and it does not swim when
+# the ship moves (world-space projection would). Each plane's sample is put back into local space through
+# that plane's axes, and what the node returns is only the difference from the flat surface, so the graph
+# can add it to the baked normal in tangent space.
+_TRIPLANAR = """
+float3x3 WorldToLocal = (float3x3)GetPrimitiveData(Parameters).WorldToLocal;
+float3 p = LocalPos / max(Tile, 1.0);
+float3 n = normalize(mul(Parameters.TangentToWorld[2], WorldToLocal));
+float3 w = pow(abs(n), 4);
+w /= (w.x + w.y + w.z + 0.0001);
+"""
+
+_DETAIL_NORMAL_CODE = _TRIPLANAR + """
+float3 sx = Texture2DSample(TexN, TexNSampler, p.yz).rgb * 2.0 - 1.0;
+float3 sy = Texture2DSample(TexN, TexNSampler, p.zx).rgb * 2.0 - 1.0;
+float3 sz = Texture2DSample(TexN, TexNSampler, p.xy).rgb * 2.0 - 1.0;
+float3 ax = float3(1.0, 0.0, 0.0) * (n.x < 0.0 ? -1.0 : 1.0);
+float3 ay = float3(0.0, 1.0, 0.0) * (n.y < 0.0 ? -1.0 : 1.0);
+float3 az = float3(0.0, 0.0, 1.0) * (n.z < 0.0 ? -1.0 : 1.0);
+float3 nx = normalize(float3(0.0, 1.0, 0.0) * sx.x + float3(0.0, 0.0, 1.0) * sx.y + ax * sx.z);
+float3 ny = normalize(float3(0.0, 0.0, 1.0) * sy.x + float3(1.0, 0.0, 0.0) * sy.y + ay * sy.z);
+float3 nz = normalize(float3(1.0, 0.0, 0.0) * sz.x + float3(0.0, 1.0, 0.0) * sz.y + az * sz.z);
+float3 detail = normalize(w.x * nx + w.y * ny + w.z * nz);
+float3 flat = normalize(w.x * ax + w.y * ay + w.z * az + 0.0001);
+// The difference, back in tangent space, so the graph can add it to the baked normal map.
+float3 offset = mul(detail - flat, (float3x3)GetPrimitiveData(Parameters).LocalToWorld);
+float3 tangent = float3(dot(offset, Parameters.TangentToWorld[0]), dot(offset, Parameters.TangentToWorld[1]),
+                        dot(offset, Parameters.TangentToWorld[2]));
+return clamp(tangent, -1.0, 1.0);
+"""
+
+_DETAIL_GRUNGE_CODE = _TRIPLANAR + """
+float g = w.x * Texture2DSample(TexG, TexGSampler, p.yz).r
+        + w.y * Texture2DSample(TexG, TexGSampler, p.zx).r
+        + w.z * Texture2DSample(TexG, TexGSampler, p.xy).r;
+return g;
+"""
+
+
+def import_shared_texture(name):
+    """A generated detail texture (Tools/Assets/generate_detail_textures.py) as /Game/Ships/Shared/Textures/<name>."""
+    filename = os.path.join(REPO, "ArtSource", "Ships", "Shared", "Textures", name + ".png")
+    if not os.path.isfile(filename):
+        return None
+    task = unreal.AssetImportTask()
+    task.set_editor_property("filename", filename)
+    task.set_editor_property("destination_path", SHARED_TEXTURES)
+    task.set_editor_property("destination_name", name)
+    task.set_editor_property("replace_existing", True)
+    task.set_editor_property("automated", True)
+    task.set_editor_property("save", False)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+    texture = unreal.EditorAssetLibrary.load_asset("%s/%s" % (SHARED_TEXTURES, name))
+    if texture is None:
+        raise RuntimeError("could not import %s" % filename)
+    if DETAIL_TEXTURES[name] == "normal":
+        texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_NORMALMAP)
+        texture.set_editor_property("srgb", False)
+        texture.set_editor_property("flip_green_channel", True)
+    else:
+        texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_MASKS)
+        texture.set_editor_property("srgb", False)
+    unreal.EditorAssetLibrary.save_loaded_asset(texture, only_if_is_dirty=False)
+    return texture
+
+
+def _custom(material, name, code, output_type, input_names, x, y):
+    node = _node(material, unreal.MaterialExpressionCustom, x, y, code=code, output_type=output_type, description=name)
+    inputs = []
+    for input_name in input_names:
+        # Struct wrappers take no keyword arguments (Docs/WORKFLOW.md 9.5b).
+        custom_input = unreal.CustomInput()
+        custom_input.set_editor_property("input_name", input_name)
+        inputs.append(custom_input)
+    node.set_editor_property("inputs", inputs)
+    return node
+
+
+def _add_detail_layer(pbr, normal, rough):
+    """The micro surface the AI paint has no room for: a tiling normal and a roughness breakup, projected
+    in the ship's own space, added on top of the baked maps. Parameters: DetailTileCm (how many centimetres
+    one tile covers), DetailNormalStrength, DetailGrungeTileCm, DetailRoughVariation; 0 strength turns it off."""
+    textures = {name: import_shared_texture(name) for name in DETAIL_TEXTURES}
+    if not all(textures.values()):
+        # No generated textures in the repository: the master keeps its baked maps alone.
+        if not MEL.connect_material_property(normal, "RGB", unreal.MaterialProperty.MP_NORMAL):
+            raise RuntimeError("normal map -> Normal")
+        _output(rough, unreal.MaterialProperty.MP_ROUGHNESS)
+        return
+    tex_normal = _node(pbr, unreal.MaterialExpressionTextureObjectParameter, -1700, 1000, parameter_name="DetailNormalMap",
+                       sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL, texture=textures["T_Ship_Detail_N"])
+    tex_grunge = _node(pbr, unreal.MaterialExpressionTextureObjectParameter, -1700, 1200, parameter_name="DetailGrungeMap",
+                       sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_MASKS, texture=textures["T_Ship_Detail_Grunge"])
+    local_position = _node(pbr, unreal.MaterialExpressionLocalPosition, -1700, 800)
+
+    # --- Normal: the detail's deviation from the flat surface, added to the baked normal ---------------
+    detail = _custom(pbr, "DetailNormal", _DETAIL_NORMAL_CODE, unreal.CustomMaterialOutputType.CMOT_FLOAT3,
+                     ["TexN", "LocalPos", "Tile"], -1300, 1000)
+    _link(tex_normal, detail, "TexN")
+    _link(local_position, detail, "LocalPos")
+    _link(_scalar(pbr, "DetailTileCm", 30.0, -1700, 1400), detail, "Tile")
+    scaled = _node(pbr, unreal.MaterialExpressionMultiply, -800, 1000)
+    _link(detail, scaled, "A")
+    _link(_scalar(pbr, "DetailNormalStrength", 0.7, -1700, 1500), scaled, "B")
+    combined = _node(pbr, unreal.MaterialExpressionAdd, -600, 900)
+    if not MEL.connect_material_expressions(normal, "RGB", combined, "A"):
+        raise RuntimeError("normal map -> detail add")
+    _link(scaled, combined, "B")
+    final_normal = _node(pbr, unreal.MaterialExpressionNormalize, -400, 900)
+    _link(combined, final_normal, "")
+    _output(final_normal, unreal.MaterialProperty.MP_NORMAL)
+
+    # --- Roughness: the blotches lift and lower it a little, so the paint is not uniformly polished -----
+    grunge = _custom(pbr, "DetailGrunge", _DETAIL_GRUNGE_CODE, unreal.CustomMaterialOutputType.CMOT_FLOAT1,
+                     ["TexG", "LocalPos", "Tile"], -1300, 1300)
+    _link(tex_grunge, grunge, "TexG")
+    _link(local_position, grunge, "LocalPos")
+    _link(_scalar(pbr, "DetailGrungeTileCm", 140.0, -1700, 1600), grunge, "Tile")
+    centred = _node(pbr, unreal.MaterialExpressionSubtract, -1000, 1300, const_b=0.5)
+    _link(grunge, centred, "A")
+    # Only upwards: dirt and wear make a surface rougher, never more polished. Lowering the roughness
+    # under a blotch gave the hull bright specular patches up close (20. 9. 2026).
+    positive = _node(pbr, unreal.MaterialExpressionClamp, -930, 1300, min_default=0.0, max_default=1.0)
+    _link(centred, positive, "")
+    spread = _node(pbr, unreal.MaterialExpressionMultiply, -850, 1300, const_b=2.0)
+    _link(positive, spread, "A")
+    amount = _node(pbr, unreal.MaterialExpressionMultiply, -700, 1300)
+    _link(spread, amount, "A")
+    _link(_scalar(pbr, "DetailRoughVariation", 0.12, -1700, 1700), amount, "B")
+    factor = _node(pbr, unreal.MaterialExpressionAdd, -550, 1300, const_a=1.0)
+    _link(amount, factor, "B")
+    varied = _node(pbr, unreal.MaterialExpressionMultiply, -400, 1250)
+    _link(rough, varied, "A")
+    _link(factor, varied, "B")
+    clamped = _node(pbr, unreal.MaterialExpressionClamp, -250, 1250, min_default=0.03, max_default=1.0)
+    _link(varied, clamped, "")
+    _output(clamped, unreal.MaterialProperty.MP_ROUGHNESS)
 
 
 def build_screen_master():
@@ -210,7 +351,9 @@ def build_instance(name, folder, spec, masters, ship=None):
             c = spec[key]
             MEL.set_material_instance_vector_parameter_value(mi, param, unreal.LinearColor(c[0], c[1], c[2], 1.0))
     for key, param in (("metallic", "Metallic"), ("roughness", "Roughness"), ("emissive_strength", "EmissiveStrength"), ("opacity", "Opacity"),
-                       ("roughness_scale", "RoughnessScale"), ("metallic_scale", "MetallicScale")):
+                       ("roughness_scale", "RoughnessScale"), ("metallic_scale", "MetallicScale"),
+                       ("detail_tile_cm", "DetailTileCm"), ("detail_normal_strength", "DetailNormalStrength"),
+                       ("detail_grunge_tile_cm", "DetailGrungeTileCm"), ("detail_rough_variation", "DetailRoughVariation")):
         if key in spec:
             MEL.set_material_instance_scalar_parameter_value(mi, param, float(spec[key]))
     if "base_color_tint" in spec:

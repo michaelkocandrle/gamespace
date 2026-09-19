@@ -29,10 +29,10 @@
   "blueprint": {
     "path": "/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard",
     "applied": [
-      "hull_collision.box_extent = [700.1, 572.0, 309.1]",
+      "hull_collision.box_extent = [700.0, 572.2, 309.2]",
       "hull.static_mesh = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard",
       "hull.relative_scale3d = [1.0, 1.0, 1.0]",
-      "hull.relative_location = [-0.17, 0.12, 1.7]",
+      "hull.relative_location = [-0.03, 0.01, 1.63]",
       "camera_boom.target_arm_length = 2520.0",
       "camera_boom.socket_offset_z = 618.0",
       "camera_boom.probe_size = 50.0",
@@ -41,7 +41,7 @@
       "pawn.landing_max_gap_cm = 200.0",
       "pawn.ground_contact_tolerance_cm = 25.0",
       "pawn.heat_shake_cm = 28.0",
-      "cockpit_camera.relative_location = [193.83, 0.12, 187.7]",
+      "cockpit_camera.relative_location = [193.97, 0.01, 187.63]",
       "pawn.thrust_acceleration = 7355.0",
       "pawn.retro_acceleration = 4415.0",
       "pawn.strafe_acceleration = 4415.0",

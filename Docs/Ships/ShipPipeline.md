@@ -358,6 +358,11 @@ z originálu kdykoli zopakuje (3 minuty). Když něco nesedí, upraví se čísl
    - `decimate`: cíl trojúhelníků (trup 150–250 tis.) a `importance` pravidla (vršky, příď, kabina
      důležité; spodek a vnitřek trysek ne). Faktor držet nízko (1), vysoký dělal artefakty;
    - `rebake`: kam uložit `T_Ship_<Loď>_BC/ORM/N.png` a velikost (4K barva a normála, 2K ORM);
+     Pozor: 4K na celou 14m loď jsou ~3 mm na pixel, takže zblízka je paint měkký vždy. Detail zblízka
+     nedělá větší textura, ale **detailní vrstva materiálu** (`M_Ship_PBR`, dlaždicová mikro-normála a
+     opotřebení triplanárně v prostoru lodi; `Tools/Assets/generate_detail_textures.py`, parametry
+     `detail_*` v `<Loď>_setup.json`). Trup Vanguardu má od 20. 9. 2026 1 mil. trojúhelníků místo 200 tis.
+     (Nanite si vybere, co kreslí; cena je velikost FBX a čas pečení, ne snímkování);
    - `emissive`: středy trysek (y, z), poloměr a x, za kterým jsou; ty plochy dostanou slot
      `M_Ship_<Loď>_Emissive` a hra je rozsvítí podle tahu;
    - `collision`: boxy oblastí, z každé vznikne jeden konvexní `UCX_` hull (max 26 vrcholů). Trup

@@ -246,6 +246,7 @@ Presety (`Tools/Shots/*.json`):
 | `display_sharpness` | ostrost displejů při rychlém letu |
 | `cockpit_centre` | střední sloupek (radar, self status): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé, vyřízni a zvětši oblast ~745–855 × 630–880 px |
 | `cockpit_readability` | čitelnost z křesla, přiblížení Z, srovnání se starým okem |
+| `hull_detail` | trup zblízka: detailní vrstva materiálu (srovnání se `detail_normal_strength` 0) |
 | `mfd_pages` | stránky MFD ve stavech, které je naplní. Vyřízni levý MFD ~495–710 × 640–825 a pravý ~893–1105 × 640–825 px |
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
@@ -369,6 +370,13 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
 
 ### 9.2 Vykreslování (UE 5.8)
 
+- **Materiál z Pythonu:** uzly `Transform` (world→local, local→tangent) daly v `M_Ship_PBR` nulový vektor a
+  **loď byla černá**. Převody prostorů dělej v HLSL uvnitř `MaterialExpressionCustom`
+  (`GetPrimitiveData(Parameters).WorldToLocal`, `Parameters.TangentToWorld`), vstupy uzlu připojuj jménem
+  (`unreal.CustomInput` se plní přes `set_editor_property`, struktury neberou keyword argumenty).
+  Shadery se v commandletu nekompilují, chybu uvidíš až po zabalení – proto po každé změně materiálu
+  snímek. Detail, který drsnost i snižuje, dělá na kovu lesklé fleky: opotřebení ji má jen zvyšovat.
+
 - a) **Nanite + TSR na meshi připojeném ke kameře.** Příznak: kokpit a displeje se při rychlém
   letu rozmazávají a „trhají“. Příčina: Nanite dává špatné motion vectory pro mesh, který se hýbe
   s kamerou. S `r.Nanite 0` byl obraz ostrý. Řešení: `no_nanite_parts: ["Interior"]` (interiér bez
@@ -483,7 +491,9 @@ Menší kroky, podle pořadí:
 2. ~~Přepínání stránek MFD~~ – hotovo 19. 9. 2026 (F1 / F2, HANDOFF kapitola 5, bod 32). Navazuje:
    přepínání myší jako v SC (režim interakce, klik na tlačítko displeje) a stránky zbraní, štítů a
    energie, až budou systémy.
-3. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
+3. ~~Detail lodi zblízka~~ – hotovo 20. 9. 2026 (detailní vrstva materiálu, trup 1 mil. trojúhelníků,
+   HANDOFF bod 33). Navazuje: decaly a nápisy, lepší zdrojové modely z Meshy/Higgsfield.
+4. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
 4. **Silnější záře displejů na rámu** a okolní desce.
 5. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
 

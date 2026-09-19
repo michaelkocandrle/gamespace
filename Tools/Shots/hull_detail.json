@@ -1,0 +1,49 @@
+{
+  "_comment": "The hull up close: is the micro detail layer of M_Ship_PBR doing its job (author 19. 9. 2026: the ship is blurry from the chase camera up close). Compare the same shots with detail_normal_strength 0 in Vanguard_setup.json. Run: Tools/Shots.ps1 -Preset hull_detail",
+  "shots": [
+    {
+      "name": "nozzle_close",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "chase_yaw": 150,
+      "chase_pitch": -22,
+      "chase_zoom": 0.3,
+      "settle": 3.0
+    },
+    {
+      "name": "flank_close",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "chase_yaw": 95,
+      "chase_pitch": -6,
+      "chase_zoom": 0.32,
+      "settle": 2.0
+    },
+    {
+      "name": "top_close",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "chase_yaw": 150,
+      "chase_pitch": -45,
+      "chase_zoom": 0.5,
+      "settle": 2.0
+    },
+    {
+      "name": "whole_ship",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 1.0,
+      "settle": 2.0
+    }
+  ]
+}
