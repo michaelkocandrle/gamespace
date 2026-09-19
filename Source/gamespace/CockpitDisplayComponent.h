@@ -62,7 +62,7 @@ public:
 
 	/** Size of one display light, cm (about the screen). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
-	FVector2D DisplayLightSizeCm = FVector2D(32.0, 28.0);
+	FVector2D DisplayLightSizeCm = FVector2D(42.0, 28.0);
 
 	/** How far the displays' light reaches, cm. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "1.0"))

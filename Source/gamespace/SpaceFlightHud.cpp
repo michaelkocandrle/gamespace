@@ -20,6 +20,7 @@
 #include "SpaceshipPawn.h"
 #include "Brushes/SlateRoundedBoxBrush.h"
 #include "Misc/Paths.h"
+#include "HAL/FileManager.h"
 #include "Styling/CoreStyle.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Framework/Application/SlateApplication.h"
@@ -70,17 +71,42 @@ namespace SpaceHudStyle
 		return FPaths::FileExists(Path) ? FSlateFontInfo(Path, Size) : FCoreStyle::GetDefaultFontStyle(Fallback, Size);
 	}
 
+	/**
+	 * The player's own face for every HUD and display text: the first .ttf or .otf (by name) in
+	 * Content/UI/Fonts/Custom, empty if there is none. That folder is not in git: a font dropped there
+	 * may be one that must not be redistributed, and the repository is on GitHub.
+	 */
+	const FString& CustomFont()
+	{
+		static const FString Path = []()
+		{
+			const FString Folder = FPaths::ProjectContentDir() / TEXT("UI/Fonts/Custom");
+			TArray<FString> Found;
+			IFileManager::Get().FindFiles(Found, *(Folder / TEXT("*.ttf")), true, false);
+			IFileManager::Get().FindFiles(Found, *(Folder / TEXT("*.otf")), true, false);
+			Found.Sort();
+			return Found.Num() > 0 ? Folder / Found[0] : FString();
+		}();
+		return Path;
+	}
+
 	/** Labels, switch pills, gauge titles. */
 	FSlateFontInfo LabelFont(float Size)
 	{
-		return ProjectFont(TEXT("Rajdhani-Medium.ttf"), TEXT("Regular"), Size);
+		return !CustomFont().IsEmpty() ? FSlateFontInfo(CustomFont(), Size) : ProjectFont(TEXT("Rajdhani-Medium.ttf"), TEXT("Regular"), Size);
 	}
 
 	/** Speed, G load, percentages. */
 	FSlateFontInfo NumberFont(float Size)
 	{
-		return ProjectFont(TEXT("ShareTechMono-Regular.ttf"), TEXT("Mono"), Size);
+		return !CustomFont().IsEmpty() ? FSlateFontInfo(CustomFont(), Size) : ProjectFont(TEXT("ShareTechMono-Regular.ttf"), TEXT("Mono"), Size);
 	}
+
+	/** The cockpit displays after the reference's MFDs: deep blue glass, blue chrome, near-white text. */
+	const FLinearColor MfdGlass(0.004f, 0.01f, 0.03f, 1.f);
+	const FLinearColor MfdBlue(0.3f, 0.55f, 1.f, 0.95f);
+	const FLinearColor MfdBlueFaint(0.3f, 0.55f, 1.f, 0.3f);
+	const FLinearColor MfdText(0.85f, 0.92f, 1.f, 0.95f);
 
 	const FSlateBrush* White()
 	{
@@ -1441,36 +1467,63 @@ void USpaceCockpitDisplays::BuildTree()
 		Box->AddChild(Content);
 		return Box;
 	};
-	auto Vertical = [](UVerticalBox* Box, UWidget* Child, EHorizontalAlignment Align, const FMargin& SlotPadding)
+	auto Vertical = [](UVerticalBox* Box, UWidget* Child, EHorizontalAlignment Align, const FMargin& SlotPadding, bool bFill = false)
 	{
-		UVerticalBoxSlot* Slot = Box->AddChildToVerticalBox(Child);
-		Slot->SetHorizontalAlignment(Align);
-		Slot->SetPadding(SlotPadding);
+		UVerticalBoxSlot* BoxSlot = Box->AddChildToVerticalBox(Child);
+		BoxSlot->SetHorizontalAlignment(Align);
+		BoxSlot->SetPadding(SlotPadding);
+		if (bFill)
+		{
+			BoxSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
 	};
-	auto Horizontal = [](UHorizontalBox* Box, UWidget* Child, EVerticalAlignment Align, const FMargin& SlotPadding)
+	auto Horizontal = [](UHorizontalBox* Box, UWidget* Child, EVerticalAlignment Align, const FMargin& SlotPadding, bool bFill = false)
 	{
-		UHorizontalBoxSlot* Slot = Box->AddChildToHorizontalBox(Child);
-		Slot->SetVerticalAlignment(Align);
-		Slot->SetPadding(SlotPadding);
+		UHorizontalBoxSlot* BoxSlot = Box->AddChildToHorizontalBox(Child);
+		BoxSlot->SetVerticalAlignment(Align);
+		BoxSlot->SetPadding(SlotPadding);
+		if (bFill)
+		{
+			BoxSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
 	};
-	auto Gauge = [this](const FName Name, bool bHorizontal, int32 Ticks)
+	auto Words = [&](const FName Name, const TCHAR* Initial, float Size, const FLinearColor& Color = SpaceHudStyle::MfdText)
+	{
+		UTextBlock* Text = MakeText(Name, Size, 30, TEXT("Label"));
+		Text->SetText(FText::FromString(Initial));
+		Text->SetColorAndOpacity(FSlateColor(Color));
+		return Text;
+	};
+	auto Gauge = [this](const FName Name, int32 Ticks)
 	{
 		USpaceHudGauge* NewGauge = WidgetTree->ConstructWidget<USpaceHudGauge>(USpaceHudGauge::StaticClass(), Name);
-		NewGauge->bHorizontal = bHorizontal;
 		NewGauge->Ticks = Ticks;
 		Gauges.Add(Name, NewGauge);
 		return NewGauge;
 	};
-	// A switch as a lit pill with its name on it, as on the HUD, only bigger.
-	auto Pill = [this](const TCHAR* LampName, float Width, float Height)
+	auto Rule = [this](const FName Name, float Width)
+	{
+		USpaceHudSymbol* Line = WidgetTree->ConstructWidget<USpaceHudSymbol>(USpaceHudSymbol::StaticClass(), Name);
+		Line->Symbol = ESpaceHudSymbol::Line;
+		Line->Color = MfdBlueFaint;
+		Line->Thickness = 1.5f;
+		Line->Points = { FVector2D(0.0, 0.5), FVector2D(1.0, 0.5) };
+		USizeBox* Box = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), FName(*(Name.ToString() + TEXT("Box"))));
+		Box->SetWidthOverride(Width);
+		Box->SetHeightOverride(4.f);
+		Box->AddChild(Line);
+		return Box;
+	};
+	// A switch as the reference's list buttons: a rounded outline in the switch's colour round its name.
+	auto Pill = [&](const TCHAR* LampName, float Width)
 	{
 		const FName Key(LampName);
 		UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("Pill_%s"), LampName)));
 		USpaceHudLamp* NewLamp = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), FName(*FString::Printf(TEXT("Lamp_%s"), LampName)));
-		NewLamp->Color = SpaceHudStyle::Cyan;
-		NewLamp->SquareMax = 18.f;
+		NewLamp->bBadge = true;
+		NewLamp->Color = MfdBlue;
 		Lamps.Add(Key, NewLamp);
-		UTextBlock* LampText = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 26.f, 120, TEXT("Label"));
+		UTextBlock* LampText = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 22.f, 60, TEXT("Label"));
 		LampText->SetText(FText::FromString(LampName));
 		LampText->SetJustification(ETextJustify::Center);
 		LampLabels.Add(Key, LampText);
@@ -1481,83 +1534,103 @@ void USpaceCockpitDisplays::BuildTree()
 		}
 		if (UOverlaySlot* LabelSlot = Overlay->AddChildToOverlay(LampText))
 		{
-			LabelSlot->SetPadding(FMargin(0.f, 0.f, 22.f, 0.f));
 			LabelSlot->SetHorizontalAlignment(HAlign_Center);
 			LabelSlot->SetVerticalAlignment(VAlign_Center);
 		}
-		USizeBox* Box = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), FName(*FString::Printf(TEXT("PillBox_%s"), LampName)));
-		Box->SetWidthOverride(Width);
-		Box->SetHeightOverride(Height);
-		Box->AddChild(Overlay);
-		return Box;
+		return Sized(FName(*FString::Printf(TEXT("PillBox_%s"), LampName)), Overlay, Width, 28.f);
 	};
-	// One screen: dark glass, a cut-corner frame and a title, content below.
-	auto Screen = [&](const TCHAR* ScreenName, const TCHAR* Title, float X, UWidget* Content)
+	// One screen: deep blue glass, a title over a rule, the content, and the reference's page bar at the
+	// bottom (a page name in a filled tab between two arrows).
+	auto Screen = [&](const TCHAR* ScreenName, const TCHAR* Title, float X, UWidget* Content, UWidget* HeaderRight)
 	{
 		UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("%sScreen"), ScreenName)));
 		UBorder* Glass = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), FName(*FString::Printf(TEXT("%sGlass"), ScreenName)));
-		Glass->SetBrushColor(FLinearColor(0.004f, 0.012f, 0.014f, 1.f));
-		Overlay->AddChildToOverlay(Glass)->SetHorizontalAlignment(HAlign_Fill);
-		USpaceHudPanel* Frame = WidgetTree->ConstructWidget<USpaceHudPanel>(USpaceHudPanel::StaticClass(), FName(*FString::Printf(TEXT("%sFrame"), ScreenName)));
-		Frame->LineColor = Cyan;
-		Frame->Chamfer = 22.f;
-		Frame->Glow = 0.6f;
-		if (UOverlaySlot* FrameSlot = Overlay->AddChildToOverlay(Frame))
+		Glass->SetBrushColor(MfdGlass);
+		if (UOverlaySlot* GlassSlot = Overlay->AddChildToOverlay(Glass))
 		{
-			FrameSlot->SetPadding(FMargin(10.f));
-			FrameSlot->SetHorizontalAlignment(HAlign_Fill);
-			FrameSlot->SetVerticalAlignment(VAlign_Fill);
+			GlassSlot->SetHorizontalAlignment(HAlign_Fill);
+			GlassSlot->SetVerticalAlignment(VAlign_Fill);
 		}
 		UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), ScreenName)));
-		UTextBlock* TitleText = MakeText(FName(*FString::Printf(TEXT("%sTitle"), ScreenName)), 28.f, 300, TEXT("Label"));
-		TitleText->SetText(FText::FromString(Title));
-		TitleText->SetColorAndOpacity(FSlateColor(Faded(Cyan, 0.9f)));
-		Vertical(Column, TitleText, HAlign_Left, FMargin(0.f, 0.f, 0.f, 10.f));
-		Vertical(Column, Content, HAlign_Fill, FMargin(0.f));
+		UHorizontalBox* Header = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("%sHeader"), ScreenName)));
+		Horizontal(Header, Words(FName(*FString::Printf(TEXT("%sTitle"), ScreenName)), Title, 30.f, MfdText), VAlign_Center, FMargin(0.f), true);
+		if (HeaderRight)
+		{
+			Horizontal(Header, HeaderRight, VAlign_Center, FMargin(0.f));
+		}
+		Vertical(Column, Header, HAlign_Fill, FMargin(0.f, 0.f, 0.f, 6.f));
+		Vertical(Column, Rule(FName(*FString::Printf(TEXT("%sRule"), ScreenName)), DisplayWidth - 60.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 8.f));
+		Vertical(Column, Content, HAlign_Fill, FMargin(0.f), true);
+		UHorizontalBox* Pages = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("%sPages"), ScreenName)));
+		Horizontal(Pages, Words(FName(*FString::Printf(TEXT("%sPrev"), ScreenName)), TEXT("<"), 26.f, MfdBlue), VAlign_Center, FMargin(0.f, 0.f, 14.f, 0.f));
+		UBorder* Tab = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), FName(*FString::Printf(TEXT("%sTab"), ScreenName)));
+		Tab->SetBrushColor(FLinearColor(0.3f, 0.55f, 1.f, 0.28f));
+		Tab->SetHorizontalAlignment(HAlign_Center);
+		Tab->SetPadding(FMargin(8.f, 2.f));
+		Tab->SetContent(Words(FName(*FString::Printf(TEXT("%sPage"), ScreenName)), Title, 22.f, MfdText));
+		Horizontal(Pages, Tab, VAlign_Center, FMargin(0.f), true);
+		Horizontal(Pages, Words(FName(*FString::Printf(TEXT("%sNext"), ScreenName)), TEXT(">"), 26.f, MfdBlue), VAlign_Center, FMargin(14.f, 0.f, 0.f, 0.f));
+		Vertical(Column, Pages, HAlign_Fill, FMargin(0.f, 8.f, 0.f, 0.f));
 		if (UOverlaySlot* ColumnSlot = Overlay->AddChildToOverlay(Column))
 		{
-			ColumnSlot->SetPadding(FMargin(48.f, 22.f, 40.f, 24.f));
+			ColumnSlot->SetPadding(FMargin(34.f, 14.f, 34.f, 14.f));
 			ColumnSlot->SetHorizontalAlignment(HAlign_Fill);
 			ColumnSlot->SetVerticalAlignment(VAlign_Fill);
 		}
-		UCanvasPanelSlot* Slot = Root->AddChildToCanvas(Overlay);
-		Slot->SetPosition(FVector2D(X, 0.0));
-		Slot->SetSize(FVector2D(DisplayWidth, DisplayHeight));
+		UCanvasPanelSlot* ScreenSlot = Root->AddChildToCanvas(Overlay);
+		ScreenSlot->SetPosition(FVector2D(X, 0.0));
+		ScreenSlot->SetSize(FVector2D(DisplayWidth, DisplayHeight));
 	};
 
-	// --- Left display, FLIGHT: mode, speed gauge, speed, limiter, G ------------------------------
+	// --- Left display, FLIGHT: the speed large, then four bars like the reference's power page --------
 	UHorizontalBox* Flight = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightContent"));
-	Horizontal(Flight, Sized(TEXT("SpeedGaugeBox"), Gauge(TEXT("SpeedGauge"), false, 10), 26.f, 320.f), VAlign_Top, FMargin(6.f, 4.f, 34.f, 0.f));
 	UVerticalBox* Readouts = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightReadouts"));
-	Vertical(Readouts, Pill(TEXT("MODE"), 150.f, 50.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 26.f));
-	Vertical(Readouts, MakeText(TEXT("SpeedText"), 64.f, 0, TEXT("Number")), HAlign_Left, FMargin(0.f));
-	Vertical(Readouts, MakeText(TEXT("LimitText"), 26.f, 0, TEXT("Number")), HAlign_Left, FMargin(0.f, 0.f, 0.f, 30.f));
-	Vertical(Readouts, Sized(TEXT("GGaugeBox"), Gauge(TEXT("GGauge"), true, 4), 270.f, 16.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 12.f));
-	Vertical(Readouts, MakeText(TEXT("GText"), 40.f, 0, TEXT("Number")), HAlign_Left, FMargin(0.f));
-	Horizontal(Flight, Readouts, VAlign_Top, FMargin(0.f));
-	Screen(TEXT("Flight"), TEXT("FLIGHT"), 0.f, Flight);
-
-	// --- Right display, SYSTEMS: switches and power ---------------------------------------------
-	UHorizontalBox* Systems = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SystemsContent"));
-	UVerticalBox* Switches = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("Switches"));
-	for (const TCHAR* LampName : { TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST"), TEXT("GEAR"), TEXT("PREC") })
-	{
-		Vertical(Switches, Pill(LampName, 170.f, 44.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 10.f));
-	}
-	Horizontal(Systems, Switches, VAlign_Top, FMargin(0.f, 4.f, 40.f, 0.f));
-	auto PowerColumn = [&](const TCHAR* Caption, const FName GaugeName, const FName TextName)
+	Vertical(Readouts, Words(TEXT("SpeedText"), TEXT("0 M/S"), 50.f), HAlign_Left, FMargin(0.f, 4.f, 0.f, 0.f));
+	Vertical(Readouts, Words(TEXT("LimitText"), TEXT("LIM"), 24.f, Faded(MfdText, 0.75f)), HAlign_Left, FMargin(0.f, 0.f, 0.f, 20.f));
+	Vertical(Readouts, Words(TEXT("GText"), TEXT("0.0 G"), 40.f), HAlign_Left, FMargin(0.f));
+	Horizontal(Flight, Readouts, VAlign_Top, FMargin(0.f), true);
+	auto Bar = [&](const TCHAR* Caption, const FName GaugeName, UWidget* Under)
 	{
 		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), *GaugeName.ToString())));
-		UTextBlock* Caption_ = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 24.f, 160, TEXT("Label"));
-		Caption_->SetText(FText::FromString(Caption));
-		Vertical(Box, Caption_, HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
-		Vertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 24.f, 240.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 10.f));
-		Vertical(Box, MakeText(TextName, 24.f, 0, TEXT("Number")), HAlign_Center, FMargin(0.f));
-		Horizontal(Systems, Box, VAlign_Top, FMargin(0.f, 0.f, 22.f, 0.f));
+		Vertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, 0), 24.f, 150.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 6.f));
+		Vertical(Box, Words(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), Caption, 20.f, Faded(MfdText, 0.8f)), HAlign_Center, FMargin(0.f));
+		if (Under)
+		{
+			Vertical(Box, Under, HAlign_Center, FMargin(0.f));
+		}
+		Horizontal(Flight, Box, VAlign_Top, FMargin(8.f, 0.f, 0.f, 0.f));
 	};
-	PowerColumn(TEXT("BST"), TEXT("BoostGauge"), TEXT("BoostText"));
-	PowerColumn(TEXT("AB"), TEXT("AfterburnerGauge"), TEXT("AfterburnerText"));
-	Screen(TEXT("Systems"), TEXT("SYSTEMS"), DisplayWidth, Systems);
+	Bar(TEXT("SPD"), TEXT("SpeedGauge"), nullptr);
+	Bar(TEXT("BST"), TEXT("BoostGauge"), Words(TEXT("BoostText"), TEXT("100%"), 22.f));
+	Bar(TEXT("AB"), TEXT("AfterburnerGauge"), Words(TEXT("AfterburnerValue"), TEXT("100%"), 22.f));
+	Bar(TEXT("G"), TEXT("GGauge"), nullptr);
+	if (USpaceHudGauge* Afterburner = Gauges.FindRef(TEXT("AfterburnerGauge")))
+	{
+		Afterburner->ReserveZone = 0.25f;
+		Afterburner->ReserveColor = Red;
+	}
+	Screen(TEXT("Flight"), TEXT("FLIGHT"), 0.f, Flight, Pill(TEXT("MODE"), 110.f));
+
+	// --- Right display, SYSTEMS: a list like the reference's contacts page, a switch per row --------------
+	UVerticalBox* Systems = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SystemsContent"));
+	auto Row = [&](const TCHAR* Name, UWidget* Right)
+	{
+		UHorizontalBox* Line = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("Row_%s"), Name)));
+		Horizontal(Line, Words(FName(*FString::Printf(TEXT("RowName_%s"), Name)), *FString::Printf(TEXT("> %s"), Name), 22.f), VAlign_Center, FMargin(0.f), true);
+		Horizontal(Line, Right, VAlign_Center, FMargin(0.f));
+		Vertical(Systems, Line, HAlign_Fill, FMargin(0.f));
+	};
+	Row(TEXT("COUPLED"), Pill(TEXT("CPLD"), 118.f));
+	Row(TEXT("G-SAFE"), Pill(TEXT("GSAF"), 118.f));
+	Row(TEXT("COMSTAB"), Pill(TEXT("CSTB"), 118.f));
+	Row(TEXT("BOOST"), Pill(TEXT("BOOST"), 118.f));
+	Row(TEXT("PRECISION"), Pill(TEXT("PREC"), 118.f));
+	UHorizontalBox* GearRight = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("GearRight"));
+	Horizontal(GearRight, Words(TEXT("RowGearValue"), TEXT("UP"), 22.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
+	Horizontal(GearRight, Pill(TEXT("GEAR"), 118.f), VAlign_Center, FMargin(0.f));
+	Row(TEXT("GEAR"), GearRight);
+	Row(TEXT("CRUISE"), Words(TEXT("RowCruiseValue"), TEXT("OFF"), 22.f));
+	Screen(TEXT("Systems"), TEXT("SYSTEMS"), DisplayWidth, Systems, nullptr);
 
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 }

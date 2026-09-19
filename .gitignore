@@ -89,3 +89,6 @@ __pycache__/
 # Blender backups
 *.blend1
 *.blend2
+
+# A font the player drops in for the HUD (Tools: SpaceFlightHud CustomFont); it may not be redistributable.
+Content/UI/Fonts/Custom/

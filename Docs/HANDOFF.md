@@ -313,6 +313,18 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     režimu s pod-režimem, odznaky přepínačů (jen zapnuté), řádky BOOST / LIMIT a GEAR / CRUISE. Vynechané:
     palivo H/Q, DECOY/NOISE, GUN – hra ty systémy nemá a HUD nic nepředstírá. Oprava: obrysy (trubice,
     odznaky, pilulky na displejích) se kreslily jako plné světlé plochy. Podrobnosti v README („Flight HUD“).
+26. **Displeje jako SC MFD a vlastní písmo** (19. 9. 2026):
+    - obrazovky rozšířené přes boční lišty s tlačítky na ~38 × 25 cm (1,5 : 1), render target 2 × 640 × 420;
+    - styl SC MFD: tmavě modré sklo, titulek nad linkou, dole lišta stránky „< FLIGHT >“. Vlevo FLIGHT:
+      rychlost, omezovač, G velkým písmem, pilulka režimu, sloupce SPD/BST/AB/G (jako SC power management).
+      Vpravo SYSTEMS: seznam jako SC kontakty – COUPLED, G-SAFE, COMSTAB, BOOST, PRECISION, GEAR s pilulkou
+      přepínače, CRUISE se stavem;
+    - **vlastní písmo:** první .ttf/.otf v `Content/UI/Fonts/Custom/` použije HUD i displeje (pak zabalit hru).
+      Složka je v `.gitignore` – písmo, které se nesmí šířit, se tak nedostane na GitHub. Ověřeno s dočasně
+      vloženým Roboto Light;
+    - **oprava:** písma HUDu se do zabalené hry nikdy nedostala (`DirectoriesToAlwaysStageAsUFS` měl cestu
+      `Content/UI/Fonts` místo `UI/Fonts`), HUD v balíčku tak vždy ukazoval záložní Roboto. `Package.ps1`
+      teď kontroluje, že písma v buildu jsou.
 
 ---
 

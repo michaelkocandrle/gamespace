@@ -203,9 +203,12 @@ sits well back from it as in the Star Citizen reference (`Docs/UI/Screenshot 202
 **eye (174, 0, 189)**, the dashboard top 8 degrees and the displays 14-25 degrees below the eye.
 **Displays:** the two big screens are flat quads (slot `M_Ship_Vanguard_Screens`, recipe `interior.displays`)
 that show the flight instruments live: `UCockpitDisplayComponent` draws `USpaceCockpitDisplays` (the
-flight HUD's widgets, driven by the same `ApplyState`) into a render target 30 times a second while the ship
-is flown from the cockpit, and the unlit `M_Ship_Screen` shows it. Left FLIGHT (mode, speed gauge, speed,
-limiter, G), right SYSTEMS (CPLD, GSAF, CSTB, BOOST, GEAR, PREC, boost and afterburner). The screen HUD stays,
+flight HUD's widgets, driven by the same `ApplyState`) into a render target (2 x 640 x 420) 30 times a second
+while the ship is flown from the cockpit, and the unlit `M_Ship_Screen` shows it. The screens are widened over
+the side button strips (~38 x 25 cm) and styled like the reference's MFDs (deep blue glass, a title over a rule,
+a `< PAGE >` bar): left FLIGHT (speed, limiter and G large, the mode pill, SPD / BST / AB / G bars like the
+power page), right SYSTEMS (a list like the contacts page: COUPLED, G-SAFE, COMSTAB, BOOST, PRECISION and GEAR
+with their switch pills, CRUISE with its state). The screen HUD stays,
 compacted so it sits above the dashboard. The cockpit is dark like the reference: the displays light it
 (a rect light at each `Display_*` socket), a faint key and fill light keep the dashboard's shape, and the inside
 of the canopy frame has its own dark slot (`M_Ship_Vanguard_CanopyFrame`).
@@ -560,6 +563,10 @@ ice-cyan and near-white in Rajdhani Medium with a faint cyan halo:
   `CRUISE` rows at the top and `R-ALT` / `VSI` / `ATMO` at the bottom.
 - Heading, ladder and altitudes only near a body. SC's fuel, countermeasure and weapon readouts are left
   out: this game has no such systems yet, and the HUD shows nothing it cannot back with real data.
+- **Your own font:** the first `.ttf` / `.otf` in `Content/UI/Fonts/Custom/` replaces Rajdhani and Share Tech Mono
+  everywhere (HUD and cockpit displays); package the game after adding it. The folder is git-ignored, so a font
+  that may not be redistributed never reaches the repository. The fonts are staged as raw files
+  (`DirectoriesToAlwaysStageAsUFS` = `UI/Fonts`, relative to `Content`; `Tools/Package.ps1` checks they are in).
 - Painted widgets: `USpaceHudSymbol` (mode icon, strafe cross, gyro, shield, ring, reticle, plus,
   brackets), `USpaceHudTape` (heading / altitude), `USpaceHudLadder`; `USpaceHudGauge` gained a reserve
   band. The cockpit displays (`USpaceCockpitDisplays`) use the same palette.

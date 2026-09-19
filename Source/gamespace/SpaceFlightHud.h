@@ -648,8 +648,11 @@ protected:
 /**
  * The cockpit's two dashboard displays: the flight HUD's instruments (same widgets, same names, so
  * USpaceFlightHud::ApplyState drives them) laid out for two screens side by side on one canvas of
- * 2 x DisplaySize. Left, FLIGHT: master mode, speed gauge, speed and limiter, G meter. Right, SYSTEMS:
- * the switch lamps (CPLD, GSAF, CSTB, BOOST, GEAR, PREC) and the boost and afterburner gauges.
+ * 2 x DisplaySize, in the style of the reference's MFDs (deep blue glass, a title over a rule, a page
+ * bar at the bottom). Left, FLIGHT: speed, limiter, G and the sub-mode large, the master mode pill, and
+ * bars for speed, boost, afterburner and G like the reference's power page. Right, SYSTEMS: a list like
+ * its contacts page - COUPLED, G-SAFE, COMSTAB, BOOST, PRECISION and GEAR each with its switch pill,
+ * CRUISE with its state.
  *
  * Big type and thick lines: a display is ~30 cm wide ~1.2 m from the eye, so the 512 px of one screen
  * shrink to ~200 on a 1600 px wide view. Never added to the viewport: UCockpitDisplayComponent draws it
@@ -662,8 +665,8 @@ class GAMESPACE_API USpaceCockpitDisplays : public USpaceFlightHud
 
 public:
 	/** One display, pixels (the render target is two of them side by side). */
-	static constexpr float DisplayWidth = 512.f;
-	static constexpr float DisplayHeight = 448.f;
+	static constexpr float DisplayWidth = 640.f;
+	static constexpr float DisplayHeight = 420.f;
 
 protected:
 	/** Driven by UCockpitDisplayComponent, not by a player: nothing to do per Slate tick. */

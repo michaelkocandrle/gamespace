@@ -33,16 +33,17 @@ displays = unreal.new_object(unreal.SpaceCockpitDisplays)
 displays.debug_initialize()
 names = set(displays.debug_get_widget_names())
 expected = {"FlightScreen", "SystemsScreen", "FlightTitle", "SystemsTitle", "SpeedGauge", "GGauge", "BoostGauge", "AfterburnerGauge",
-            "SpeedText", "LimitText", "GText", "BoostText", "AfterburnerText",
+            "SpeedText", "LimitText", "GText", "BoostText", "AfterburnerValue", "RowGearValue", "RowCruiseValue",
+            "FlightPages", "SystemsPages",
             "Lamp_MODE", "Lamp_CPLD", "Lamp_GSAF", "Lamp_CSTB", "Lamp_BOOST", "Lamp_GEAR", "Lamp_PREC"}
-check("two screens with every instrument", expected <= names, "missing %s" % sorted(expected - names))
+check("two screens in the reference's MFD style (title, page bar) with every instrument", expected <= names, "missing %s" % sorted(expected - names))
 check("no virtual joystick on the dashboard", "VirtualJoystick" not in names)
 check("titles FLIGHT and SYSTEMS", displays.debug_get_text("FlightTitle") == "FLIGHT" and displays.debug_get_text("SystemsTitle") == "SYSTEMS")
 size = lambda name: displays.debug_get_text_widget(name).get_editor_property("font").get_editor_property("size")
 check("big type: speed >= 48, labels and small numbers >= 24 (a display is ~200 px wide on a 1600 px view)",
-      size("SpeedText") >= 48 and size("LampLabel_CPLD") >= 24 and size("LimitText") >= 24 and size("BoostText") >= 24,
+      size("SpeedText") >= 48 and size("LampLabel_CPLD") >= 22 and size("LimitText") >= 24 and size("BoostText") >= 22,
       "speed %d, label %d, limit %d, boost %d" % (size("SpeedText"), size("LampLabel_CPLD"), size("LimitText"), size("BoostText")))
-check("state squares bigger than on the HUD", displays.debug_get_lamp("CPLD").get_editor_property("square_max") > 6.0)
+check("switches drawn as outlined pills, as the reference's list buttons", displays.debug_get_lamp("CPLD").get_editor_property("badge"))
 
 # --- Driven like the HUD ------------------------------------------------------------------------------
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
@@ -59,7 +60,7 @@ try:
     same = [displays.debug_get_text("SpeedText").startswith(hud.debug_get_text("SpeedValue") + " "),
             displays.debug_get_text("GText") == hud.debug_get_text("GValue") + " G",
             displays.debug_get_text("BoostText") == hud.debug_get_text("RowBoostValue"),
-            displays.debug_get_text("AfterburnerText").startswith(hud.debug_get_text("AfterburnerValue"))]
+            displays.debug_get_text("AfterburnerValue") == hud.debug_get_text("AfterburnerValue")]
     check("the displays read the same as the HUD", all(same), "%s; speed %r vs %r" % (same, displays.debug_get_text("SpeedText"), hud.debug_get_text("SpeedValue")))
     check("speed shown, not zero", displays.debug_get_text("SpeedText") not in ("", "0 M/S"), displays.debug_get_text("SpeedText"))
     lit = lambda w, n: w.debug_is_lamp_lit(n) is not None

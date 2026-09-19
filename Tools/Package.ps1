@@ -59,7 +59,10 @@ $required = @(
     "Maps/MainMenu.umap", "Maps/TestSpace.umap",
     "Ships/Audio/SW_EngineLoop.uasset", "Ships/Audio/SW_EngineHum.uasset", "Ships/Audio/SW_CruiseCharge.uasset",
     "UI/Audio/SW_MenuAmbience.uasset", "Input/IMC_Spaceship.uasset", "Input/IA_CruiseDrive.uasset",
-    "Environments/Space/M_SpaceDust.uasset", "Ships/Vanguard/Blueprints/BP_Ship_Vanguard.uasset"
+    "Environments/Space/M_SpaceDust.uasset", "Ships/Vanguard/Blueprints/BP_Ship_Vanguard.uasset",
+    # The HUD's fonts are raw .ttf files staged as UFS (DefaultGame.ini); without them the packaged
+    # HUD silently fell back to Roboto (until 19. 9. 2026 the staging path was wrong).
+    "UI/Fonts/Rajdhani-Medium.ttf", "UI/Fonts/ShareTechMono-Regular.ttf"
 )
 if (Test-Path $manifest) {
     $listed = Get-Content $manifest -Raw
