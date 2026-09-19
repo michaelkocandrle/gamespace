@@ -84,6 +84,7 @@ void UCockpitDisplayComponent::BeginPlay()
 	Mesh->SetMaterial(Slot, Material);
 	// Draw on the first tick.
 	SinceDraw = 1.f / UpdateRateHz;
+	SinceState = 1.f / StateRateHz;
 	CreateDisplayLights();
 }
 
@@ -164,12 +165,18 @@ void UCockpitDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	// The lamps and gauges ease every frame; the picture is taken UpdateRateHz times a second.
 	Widget->DebugAdvance(DeltaTime);
 	SinceDraw += DeltaTime;
+	SinceState += DeltaTime;
 	if (SinceDraw < 1.f / UpdateRateHz)
 	{
 		return;
 	}
-	// The displays are part of the ship: H hides the HUD overlay, not the dashboard.
-	Widget->ApplyState(USpaceFlightHud::MakeState(Ship, 1));
+	// The displays are part of the ship: H hides the HUD overlay, not the dashboard. The figures change
+	// StateRateHz times a second (see there); the drawing goes on at UpdateRateHz.
+	if (SinceState >= 1.f / StateRateHz)
+	{
+		Widget->ApplyState(USpaceFlightHud::MakeState(Ship, 1));
+		SinceState = 0.f;
+	}
 	// Follow the window size: the type is laid out for 560 x 490 and drawn at the scale the screen shows
 	// it, so the font rasteriser draws every letter at its real size. Re-made only on a real change.
 	const float Scale = PixelScale();

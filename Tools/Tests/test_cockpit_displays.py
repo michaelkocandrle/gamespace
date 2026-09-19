@@ -32,18 +32,20 @@ def check(name, ok, detail=""):
 displays = unreal.new_object(unreal.SpaceCockpitDisplays)
 displays.debug_initialize()
 names = set(displays.debug_get_widget_names())
-expected = {"FlightScreen", "SystemsScreen", "FlightTitle", "SystemsTitle", "SpeedGauge", "GGauge", "BoostGauge", "AfterburnerGauge",
-            "SpeedText", "LimitText", "GText", "BoostText", "AfterburnerValue", "RowGearValue", "RowCruiseValue",
-            "FlightPages", "SystemsPages",
-            "Lamp_MODE", "Lamp_CPLD", "Lamp_GSAF", "Lamp_CSTB", "Lamp_BOOST", "Lamp_GEAR", "Lamp_PREC"}
-check("two screens in the reference's MFD style (title, page bar) with every instrument", expected <= names, "missing %s" % sorted(expected - names))
+expected = {"FlightScreen", "StatusScreen", "FlightTitle", "StatusTitle", "FlightGlass", "StatusGlass", "FlightKeys", "StatusKeys",
+            "SpeedGauge", "GGauge", "BoostGauge", "AfterburnerGauge", "SpeedValue", "SpeedUnit", "GText", "GValue", "BoostText",
+            "AfterburnerValue", "RowLimitValue", "GMax", "ModeText", "SubModeText", "RowGearValue", "RowCruiseValue", "RowRAltValue",
+            "RowVsiValue", "RowAtmoValue", "FlightPages", "StatusPages",
+            "Lamp_MODE", "Lamp_CPLD", "Lamp_GSAF", "Lamp_CSTB", "Lamp_BOOST", "Lamp_GEAR", "Lamp_PREC", "Lamp_CRUISE"}
+check("two screens in the reference's MFD style (glass, title, keys, page tab) with every instrument", expected <= names, "missing %s" % sorted(expected - names))
 check("no virtual joystick on the dashboard", "VirtualJoystick" not in names)
-check("titles FLIGHT and SYSTEMS", displays.debug_get_text("FlightTitle") == "FLIGHT" and displays.debug_get_text("SystemsTitle") == "SYSTEMS")
+check("titles FLIGHT and STATUS", displays.debug_get_text("FlightTitle") == "FLIGHT" and displays.debug_get_text("StatusTitle") == "STATUS")
 size = lambda name: displays.debug_get_text_widget(name).get_editor_property("font").get_editor_property("size")
-check("big type: speed >= 48, labels and small numbers >= 24 (a display is ~200 px wide on a 1600 px view)",
-      size("SpeedText") >= 48 and size("LampLabel_CPLD") >= 22 and size("LimitText") >= 24 and size("BoostText") >= 22,
-      "speed %d, label %d, limit %d, boost %d" % (size("SpeedText"), size("LampLabel_CPLD"), size("LimitText"), size("BoostText")))
-check("switches drawn as outlined pills, as the reference's list buttons", displays.debug_get_lamp("CPLD").get_editor_property("badge"))
+check("big type: speed >= 48, keys and small figures >= 18 (a display is ~250 px wide on a 1600 px view)",
+      size("SpeedValue") >= 48 and size("LampLabel_CPLD") >= 18 and size("RowLimitValue") >= 18 and size("BoostText") >= 18,
+      "speed %d, key %d, limit %d, boost %d" % (size("SpeedValue"), size("LampLabel_CPLD"), size("RowLimitValue"), size("BoostText")))
+check("switches drawn as the keys beside the reference's MFDs", displays.debug_get_lamp("CPLD").get_editor_property("button"))
+check("power-page bars are blocks, not tubes", displays.debug_get_gauge("BoostGauge").get_editor_property("segments") > 0)
 
 # --- Driven like the HUD ------------------------------------------------------------------------------
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
@@ -57,21 +59,22 @@ try:
     state = unreal.SpaceFlightHud.make_state(ship, 1)
     hud.apply_state(state)
     displays.apply_state(state)
-    same = [displays.debug_get_text("SpeedText").startswith(hud.debug_get_text("SpeedValue") + " "),
-            displays.debug_get_text("GText") == hud.debug_get_text("GValue") + " G",
+    same = [displays.debug_get_text("SpeedValue") == hud.debug_get_text("SpeedValue"),
+            displays.debug_get_text("GValue") == hud.debug_get_text("GValue"),
             displays.debug_get_text("BoostText") == hud.debug_get_text("RowBoostValue"),
             displays.debug_get_text("AfterburnerValue") == hud.debug_get_text("AfterburnerValue")]
     check("the displays read the same as the HUD", all(same), "%s; speed %r vs %r" % (same, displays.debug_get_text("SpeedText"), hud.debug_get_text("SpeedValue")))
-    check("speed shown, not zero", displays.debug_get_text("SpeedText") not in ("", "0 M/S"), displays.debug_get_text("SpeedText"))
+    check("speed shown, not zero", displays.debug_get_text("SpeedValue") not in ("", "0"), displays.debug_get_text("SpeedValue"))
     lit = lambda w, n: w.debug_is_lamp_lit(n) is not None
-    check("lamps match the HUD's", all(lit(displays, n) == lit(hud, n) for n in ("MODE", "CPLD", "GSAF", "CSTB", "BOOST", "GEAR", "PREC")))
+    check("lamps match the HUD's", all(lit(displays, n) == lit(hud, n) for n in ("MODE", "CPLD", "GSAF", "CSTB", "BOOST", "GEAR", "PREC", "CRUISE")))
     check("the pawn has the display component", isinstance(ship.get_editor_property("cockpit_displays"), unreal.CockpitDisplayComponent))
     cockpit_camera = ship.get_editor_property("cockpit_camera")
     pp = cockpit_camera.get_editor_property("post_process_settings")
     check("no motion blur from the seat (camera shake smeared the displays)",
           pp.get_editor_property("override_motion_blur_amount") and pp.get_editor_property("motion_blur_amount") == 0.0)
     scale = ship.get_editor_property("cockpit_displays").pixel_scale()
-    check("displays drawn at about their size on screen (1920 px wide, 88 deg: ~0.65 of the 560 px layout)", 0.5 < scale < 0.8, "%.2f" % scale)
+    check("displays drawn at about their size on screen (1920 px wide: ~0.65 of the 560 px layout)", 0.5 < scale < 0.8, "%.2f" % scale)
+
 finally:
     eas.destroy_actor(ship)
 
@@ -82,7 +85,7 @@ check("interior mesh has the display slot", "M_Ship_Vanguard_Screens" in slots, 
 master = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Screen")
 check("display master is unlit (no sky reflections over the instruments)",
       master is not None and master.get_editor_property("shading_model") == unreal.MaterialShadingModel.MSM_UNLIT)
-check("display master: opaque with pixel animation (temporal AA keeps the type; translucent doubled it under shake)",
+check("display master opaque with pixel animation (the variants past or around temporal AA were worse)",
       master.get_editor_property("has_pixel_animation") and master.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_OPAQUE)
 vanguard = eas.spawn_actor_from_class(unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard"),
                                       unreal.Vector(0, 0, 0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
@@ -98,6 +101,8 @@ try:
     check("a Display_ socket in front of each screen (their glow)", sorted(n for n in sockets if n.startswith("Display_")) == ["Display_left", "Display_right"],
           ", ".join(sockets))
     displays_component = vanguard.get_editor_property("cockpit_displays")
+    check("figures change at most ~6 times a second, so temporal AA settles on each number (setup state_rate_hz)",
+          displays_component.get_editor_property("state_rate_hz") <= 6.0, "%.1f" % displays_component.get_editor_property("state_rate_hz"))
     check("displays light the cockpit (setup display_light_intensity_cd > 0)", displays_component.get_editor_property("display_light_intensity_cd") > 0.0)
     hull_mesh = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard")
     hull_slots = [str(m.get_editor_property("material_slot_name")) for m in hull_mesh.get_editor_property("static_materials")]

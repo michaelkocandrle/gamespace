@@ -117,11 +117,17 @@ def build_pbr_master():
 def build_screen_master():
     screen = _fresh_material(MASTERS["screen"])
     screen.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
-    # The texture changes every frame on a surface that does not move: pixel animation tells temporal AA
-    # (TSR) so, and it keeps less history there. Opaque on purpose: a translucent screen with responsive
-    # AA writes no motion vectors, and with the camera shake whole rows of type doubled.
+    # Opaque, with pixel animation so temporal AA (TSR) keeps less history on the changing texture.
+    # Tried and dropped (19. 9. 2026, Tools/Shots/display_sharpness.json): translucent with responsive
+    # AA (rows doubled under camera shake: no motion vectors), the same with "Output Depth and Velocity"
+    # (numbers still blended), and translucency after motion blur, past TSR (blurred and doubled even
+    # standing still). What keeps changing numbers sharp is the display itself: its figures change 12
+    # times a second (UCockpitDisplayComponent::StateRateHz), so TSR settles between them.
     screen.set_editor_property("has_pixel_animation", True)
     screen.set_editor_property("blend_mode", unreal.BlendMode.BLEND_OPAQUE)
+    screen.set_editor_property("translucency_pass", unreal.MaterialTranslucencyPass.MTP_BEFORE_DOF)
+    screen.set_editor_property("enable_responsive_aa", False)
+    screen.set_editor_property("output_translucent_velocity", False)
     screen.set_editor_property("used_with_nanite", True)
     image = _texture_param(screen, "ScreenTexture", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR,
                            "/Engine/EngineResources/Black", -900, 300)

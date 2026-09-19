@@ -101,8 +101,8 @@
     "SM_Ship_Vanguard_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 148650,
-      "verts": 74291,
+      "tris": 149473,
+      "verts": 74657,
       "materials": [
         "M_Ship_Vanguard_Interior",
         "M_Ship_Vanguard_Screens"

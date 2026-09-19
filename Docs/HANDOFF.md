@@ -339,6 +339,19 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       zdvojovaly řádky), mipmapy render targetu (engine je pro tenhle případ nevystavuje);
     - nástroje: pole shotu `console` (konzolové příkazy), `space.CameraShake` (násobitel třesení kamery),
       scénář `display_sharpness` (displeje za rychlého letu).
+28. **MFD jako v SC, plocha uvnitř rámu, pomalejší číslice** (19. 9. 2026, autor: pořád záškuby, nesedí do
+    rámu, nepůsobí jako skutečné MFD):
+    - plocha obrazovky zmenšená o ~8 mm dovnitř otvoru rámečku (otvor není obdélník: šikmý spodek,
+      zaoblené rohy); kolem zůstává tmavý okraj původního skla;
+    - vzhled podle SC MFD: sklo (modrý přechod, jemná mřížka, ztmavení ke krajům, odlesk nahoře, tenký
+      rámeček), sloupec „fyzických“ tlačítek u vnitřní strany (vlevo CPLD/GSAF/CSTB/BOOST/PREC, vpravo
+      MODE/GEAR/CRUISE; zapnuté svítí výplní), záložka stránky jako pilulka, blokové sloupce SPD/BST/AB/G
+      (jako SC power management), vpravo seznam STATUS s hodnotami v pilulkách (jako SC komunikace);
+    - **čísla na displejích se mění 5× za sekundu** (`state_rate_hz` v setupu), sloupce a kontrolky dál
+      plynule 60×. Časové vyhlazování (TSR) míchá číslo, které se mění každých pár snímků, s předchozím;
+      podrženo ~200 ms se ustálí. Vyzkoušené a zamítnuté: pixelová animace sama, průhledný materiál
+      s responsive AA (i s výstupem rychlosti), průhlednost až po TSR (rozmazané i v klidu), vypnutí
+      anti-flickeru TSR a kratší historie TSR.
 
 ---
 

@@ -60,7 +60,15 @@ public:
 	/** Render target size for a layout scale (both displays side by side). */
 	static FVector2D TargetSize(float Scale);
 
-	/** Redraws per second: 60, so changing numbers step no coarser than the view. */
+	/**
+	 * How often the figures change, per second. Like a real instrument's readout: a number rewritten
+	 * every frame (speed while accelerating) was a blur of two values under temporal AA; held for a few
+	 * frames it is sharp. Bars and lamps still move smoothly (they ease between these updates).
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "1.0"))
+	float StateRateHz = 12.f;
+
+	/** Redraws per second: 60, so bars and lamps move smoothly. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "1.0"))
 	float UpdateRateHz = 60.f;
 
@@ -133,5 +141,6 @@ private:
 	TSharedPtr<SWidget> SlateWidget;
 	FWidgetRenderer* Renderer = nullptr;
 	float SinceDraw = 0.f;
+	float SinceState = 0.f;
 	float CurrentScale = 1.f;
 };

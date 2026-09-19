@@ -249,6 +249,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
 	FLinearColor ReserveColor = FLinearColor::Red;
 
+	/** More than 0: a column of this many blocks, as the reference's power bars, instead of a tube. */
+	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
+	int32 Segments = 0;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
 	bool bHorizontal = false;
 
@@ -338,6 +342,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
 	bool bBadge = false;
 
+	/** Drawn as one of the buttons beside the reference's MFDs (PWR, WPN, ...): a rounded key, filled when lit. */
+	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
+	bool bButton = false;
+
 	/** Sets where the lamp should go; a change starts a short flash. */
 	void SetTarget(bool bLit, const FLinearColor& InColor);
 
@@ -389,6 +397,8 @@ enum class ESpaceHudSymbol : uint8
 	Plus,
 	/** A polyline through Points: the thin brackets beside the reference's text blocks. */
 	Line,
+	/** An MFD's glass: deep blue gradient, faint grid, darker edges, a soft reflection, a thin inner rim. */
+	MfdGlass,
 };
 
 /** One of the Star Citizen HUD's drawn symbols (see ESpaceHudSymbol). */

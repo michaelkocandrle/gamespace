@@ -90,8 +90,9 @@
       "field_of_view": 88.0
     },
     "cockpit_displays": {
-      "_comment": "The displays' glow on the cockpit around them (rect lights at the Display_* sockets, UCockpitDisplayComponent).",
-      "display_light_intensity_cd": 8.0
+      "_comment": "The displays' glow on the cockpit around them (rect lights at the Display_* sockets, UCockpitDisplayComponent). state_rate_hz 5: the figures change five times a second, like a real instrument's readout. Temporal AA (TSR) blends a number that changes every few frames with the one before (two values over each other, 19. 9. 2026: pixel animation, responsive AA, translucency after TSR and TSR's anti-flicker settings did not stop it); held for ~200 ms it settles and reads sharp.",
+      "display_light_intensity_cd": 8.0,
+      "state_rate_hz": 5.0
     }
   },
   "materials": {

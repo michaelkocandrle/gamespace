@@ -94,6 +94,7 @@
       "cockpit_camera.relative_location = [174.0, 0.0, 189.0]",
       "cockpit_camera.field_of_view = 88.0",
       "cockpit_displays.display_light_intensity_cd = 8.0",
+      "cockpit_displays.state_rate_hz = 5.0",
       "component Gear = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Gear",
       "component Interior = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Interior",
       "component Lining = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Lining"

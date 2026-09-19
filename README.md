@@ -209,7 +209,11 @@ fill the glass in the bezels (~29 x 25 cm; layout 560 x 490, drawn at the size t
 window width - `ScreenShareAt88`) and are styled like the reference's MFDs (deep blue glass, a title over a rule,
 a `< PAGE >` bar): left FLIGHT (speed, limiter and G large, the mode pill, SPD / BST / AB / G bars like the
 power page), right SYSTEMS (a list like the contacts page: COUPLED, G-SAFE, COMSTAB, BOOST, PRECISION and GEAR
-with their switch pills, CRUISE with its state). The interior is imported without Nanite (`no_nanite_parts` in
+with their switch pills, CRUISE with its state). Since 19. 9. 2026 (see Docs/HANDOFF.md 28) the look follows the
+reference's MFDs more closely: lit glass with a faint grid and darker edges, a column of keys on the inner side
+(left: CPLD, GSAF, CSTB, BOOST, PREC; right: MODE, GEAR, CRUISE), block bars like the power page, a STATUS list
+like the contacts page, and the figures change 5 times a second (`state_rate_hz` in the setup) so temporal AA
+does not blend each number with the one before; bars and lamps still move at 60 Hz. The interior is imported without Nanite (`no_nanite_parts` in
 the setup): with Nanite its motion vectors were wrong in fast flight and temporal AA broke the displays' type
 up. The cockpit camera has no motion blur. The screen HUD stays,
 compacted so it sits above the dashboard. The cockpit is dark like the reference: the displays light it
