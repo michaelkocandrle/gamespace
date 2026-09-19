@@ -1,6 +1,6 @@
 # Gamespace – handoff pro další session
 
-Stav k **18. 9. 2026**. Tento dokument je vstupní bod pro novou session (Claude Code) i pro autora
+Stav k **19. 9. 2026**. Tento dokument je vstupní bod pro novou session (Claude Code) i pro autora
 projektu. Popisuje, co projekt je, jak se s autorem pracuje, kde je co v kódu, co je hotové, co je
 rozbité nebo neověřené a co následuje.
 
@@ -10,6 +10,8 @@ rozbité nebo neověřené a co následuje.
 > 3. Přečti `README.md` (technická dokumentace systémů, anglicky) a podle úkolu
 >    `Docs/Ships/ShipPipeline.md` nebo `Docs/Characters/CharacterPipeline.md`.
 > 4. Než cokoli změníš, přečti si pravidla spolupráce (kapitola 2).
+> 5. Přečti **`Docs/WORKFLOW.md`**: postup jednoho kroku (Blender → Unreal → testy → balení →
+>    snímky → commit), Blender MCP a úplný seznam nástrah, na kterých jsme se už spálili.
 
 ---
 
@@ -435,6 +437,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 - `Docs/Ships/ShipPipeline.md`: pipeline lodí (česky).
 - `Docs/Characters/CharacterPipeline.md`: pipeline postav (česky).
 - `Docs/HANDOFF.md`: tento dokument.
+- `Docs/WORKFLOW.md`: postup práce krok za krokem, Blender MCP, úplný seznam nástrah (česky).
 
 ---
 
@@ -692,6 +695,9 @@ Další otevřené směry mimo let:
 
 ## 12. Technické pasti (ušetří hodiny)
 
+> Úplný a novější seznam (vykreslování, displeje, Blender MCP, unity build…) je v
+> `Docs/WORKFLOW.md`, kapitola 9. Tady zůstávají ty nejstarší.
+
 - **Cookování:** C++ načítá assety podle cesty (`StaticLoadObject`). Cooker je nevidí, a proto
   jsou složky v `Config/DefaultGame.ini` pod `DirectoriesToAlwaysCook`. Nový assetový adresář
   načítaný podle cesty tam přidej. `Package.ps1` klíčové assety po buildu kontroluje.
@@ -725,3 +731,11 @@ Viz `git log --oneline`. Poslední kroky:
 - `77b26d6`: hratelný build (úvodní obrazovka, pauza, nastavení, H, cookování, zvuky UI) a handoff;
 - následující commity: SC-1a, SC-1b, SC-1c (jádro IFCS, boost a afterburner, HUD);
 - SC-2a: podvozek (N) a precision mode (P), podvozek Vanguardu jako samostatný díl.
+- `8367595`–`a998767`: Meshy Vanguard z receptu, kokpitový interiér z Meshy;
+- `1253827`: tmavý kokpit, živé displeje s HUD na desce, oko posunuté dozadu jako v SC;
+- `b4ae34a`: displeje svítí do kokpitu, tmavý rám canopy;
+- `6a4e43b`: letový HUD rozložený jako v současném SC;
+- `d3cadc3`–`ca16a32`: široké MFD, vlastní písmo, ostré displeje v letu (interiér bez Nanite);
+- `440c31b`–`d287603`: MFD ve stylu SC, čísla 5 Hz, displeje napasované do rámečků přes Blender MCP;
+- `42a1ff5`, `2380850`: výchozí jen letový HUD, ustálená čísla MFD, jemnější prach, kovový rám;
+- dokumentace workflow a nástrah (`Docs/WORKFLOW.md`), pomocné skripty Blender MCP v `Tools/Blender/mcp/`.
