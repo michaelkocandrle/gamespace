@@ -21,32 +21,41 @@
 #include "Brushes/SlateRoundedBoxBrush.h"
 #include "Misc/Paths.h"
 #include "Styling/CoreStyle.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Fonts/FontMeasure.h"
+#include "Rendering/SlateRenderer.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
 
 namespace SpaceHudStyle
 {
 	/**
-	 * The reference's instruments are yellow-green on near-black, labels near-white, the reserve red;
-	 * cyan belongs to the canopy frame lines, not to the readouts. Ours was cyan with amber states,
-	 * which is what read as orange.
+	 * After the current Star Citizen HUD (Docs/UI/Screenshot 2026-09-17 201854.png and 201804.png):
+	 * ice-cyan instruments and near-white text with a faint glow, red for the reserve and reverse
+	 * zones and the strafe arrows, orange for the turn rate. (SC-1c followed an older reference in
+	 * yellow-green.)
 	 */
-	const FLinearColor Green(0.62f, 0.95f, 0.28f, 0.95f);
-	const FLinearColor GreenBright(0.80f, 1.f, 0.45f, 1.f);
-	const FLinearColor Label(0.86f, 0.93f, 0.90f, 0.95f);
+	const FLinearColor Instrument(0.45f, 0.85f, 1.f, 0.95f);
+	const FLinearColor InstrumentBright(0.75f, 0.95f, 1.f, 1.f);
+	const FLinearColor Label(0.85f, 0.92f, 1.f, 0.92f);
 	/** Tube outlines and ticks: thin cool white, as on the reference's gauges. */
-	const FLinearColor Rail(0.78f, 0.88f, 0.90f, 0.50f);
+	const FLinearColor Rail(0.75f, 0.87f, 1.f, 0.50f);
 	/** Frames and the virtual joystick only. */
 	const FLinearColor Cyan(0.30f, 0.88f, 1.f, 0.85f);
 	const FLinearColor CyanFaint(0.30f, 0.88f, 1.f, 0.40f);
-	const FLinearColor LampOff(0.55f, 0.65f, 0.65f, 0.18f);
+	const FLinearColor LampOff(0.55f, 0.65f, 0.75f, 0.18f);
 	/** Behind pills and inside bar tubes: this is why the reference still reads over bright ground. */
-	const FLinearColor Backing(0.02f, 0.04f, 0.04f, 0.62f);
+	const FLinearColor Backing(0.01f, 0.03f, 0.05f, 0.55f);
 	/** Caution only (G-Safe suspended by boost), never a whole bar. */
 	const FLinearColor Amber(1.f, 0.78f, 0.25f, 0.95f);
-	const FLinearColor Red(0.95f, 0.26f, 0.18f, 0.95f);
-	const FLinearColor NavBlue(0.55f, 0.85f, 1.f, 0.95f);
+	const FLinearColor Red(1.f, 0.33f, 0.24f, 0.95f);
+	/** The gyro's turn-rate line. */
+	const FLinearColor Orange(1.f, 0.55f, 0.25f, 0.95f);
+	const FLinearColor NavBlue(0.65f, 0.75f, 1.f, 0.95f);
 
 	/**
-	 * The HUD's own faces, after the reference's instrument type: Rajdhani SemiBold for labels
+	 * The HUD's own faces, after the reference's instrument type: Rajdhani Medium for labels
 	 * (squarish condensed technical sans) and Share Tech Mono for the numbers, where a fixed width
 	 * keeps digits from dancing as speed changes. Both are SIL OFL 1.1, in Content/UI/Fonts with
 	 * their licences, staged into the pak by DirectoriesToAlwaysStageAsUFS.
@@ -64,7 +73,7 @@ namespace SpaceHudStyle
 	/** Labels, switch pills, gauge titles. */
 	FSlateFontInfo LabelFont(float Size)
 	{
-		return ProjectFont(TEXT("Rajdhani-SemiBold.ttf"), TEXT("Bold"), Size);
+		return ProjectFont(TEXT("Rajdhani-Medium.ttf"), TEXT("Regular"), Size);
 	}
 
 	/** Speed, G load, percentages. */
@@ -121,8 +130,24 @@ namespace SpaceHudStyle
 		}
 		if (OutlineWidth > 0.f && Outline.A > 0.f)
 		{
-			const FSlateRoundedBoxBrush OutlineBrush(FLinearColor::Transparent, Corner, FLinearColor::White, OutlineWidth, Size);
-			FSlateDrawElement::MakeBox(Out, Layer, PaintGeometry, &OutlineBrush, ESlateDrawEffect::None, Outline);
+			// Drawn as a line round the shape: a rounded-box brush with a transparent fill still came out
+			// filled in the outline colour under a draw tint, which turned every thin tube, badge and
+			// switch into a solid light block.
+			TArray<FVector2f> Points;
+			const FVector2f Corners[] = { FVector2f(Size.X - Corner, Corner), FVector2f(Size.X - Corner, Size.Y - Corner),
+				FVector2f(Corner, Size.Y - Corner), FVector2f(Corner, Corner) };
+			for (int32 Index = 0; Index < 4; ++Index)
+			{
+				const float From = -90.f + 90.f * Index;
+				for (int32 Step = 0; Step <= 6; ++Step)
+				{
+					const float Angle = FMath::DegreesToRadians(From + 15.f * Step);
+					Points.Add(Position + Corners[Index] + FVector2f(FMath::Cos(Angle), FMath::Sin(Angle)) * Corner);
+				}
+			}
+			const FVector2f Start = Points[0];
+			Points.Add(Start);
+			FSlateDrawElement::MakeLines(Out, Layer, Geometry.ToPaintGeometry(), Points, ESlateDrawEffect::None, Outline, true, OutlineWidth);
 		}
 	}
 
@@ -160,6 +185,52 @@ namespace SpaceHudStyle
 		const float Corner = FMath::Min(Radius, FMath::Min(Size.X, Size.Y) * 0.5f);
 		FSlateDrawElement::MakeGradient(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Position)), MoveTemp(Stops),
 			bVertical ? Orient_Horizontal : Orient_Vertical, ESlateDrawEffect::None, FVector4f(Corner, Corner, Corner, Corner));
+	}
+
+	/** Text drawn by a painting widget, placed by Align (0..1 of its own size) at At. */
+	void Text(FSlateWindowElementList& Out, int32 Layer, const FGeometry& Geometry, const FVector2f& At, const FString& String,
+		const FSlateFontInfo& Font, const FLinearColor& Color, const FVector2f& Align = FVector2f(0.5f, 0.5f))
+	{
+		if (!FSlateApplication::IsInitialized() || String.IsEmpty())
+		{
+			return;
+		}
+		const FVector2f Size(FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(String, Font));
+		FSlateDrawElement::MakeText(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(At - Size * Align)), String, Font,
+			ESlateDrawEffect::None, Color);
+	}
+
+	/** A closed or open circle as a polyline. */
+	TArray<FVector2f> Circle(const FVector2f& Centre, float Radius, float FromDeg = 0.f, float ToDeg = 360.f, int32 Segments = 32)
+	{
+		TArray<FVector2f> Points;
+		for (int32 Index = 0; Index <= Segments; ++Index)
+		{
+			const float Angle = FMath::DegreesToRadians(FMath::Lerp(FromDeg, ToDeg, float(Index) / Segments));
+			Points.Add(Centre + FVector2f(FMath::Cos(Angle), FMath::Sin(Angle)) * Radius);
+		}
+		return Points;
+	}
+
+	/**
+	 * Heading (0 = north: the world's Z axis projected on the local horizon, 90 east), pitch and roll of
+	 * a frame against the horizon whose up is Up. At the poles north falls back to the world X axis.
+	 */
+	void Attitude(const FVector& Up, const FVector& Forward, const FVector& Right, const FVector& FrameUp,
+		float& OutHeading, float& OutPitch, float& OutRoll)
+	{
+		FVector North = FVector::UpVector - Up * (FVector::UpVector | Up);
+		if (North.SizeSquared() < 1e-4)
+		{
+			North = FVector::ForwardVector - Up * (FVector::ForwardVector | Up);
+		}
+		North.Normalize();
+		const FVector East = Up ^ North;
+		const FVector Flat = Forward - Up * (Forward | Up);
+		OutHeading = Flat.SizeSquared() > 1e-8
+			? float(FMath::Fmod(FMath::RadiansToDegrees(FMath::Atan2(Flat | East, Flat | North)) + 360.0, 360.0)) : 0.f;
+		OutPitch = float(FMath::RadiansToDegrees(FMath::Asin(FMath::Clamp(Forward | Up, -1.0, 1.0))));
+		OutRoll = float(FMath::RadiansToDegrees(FMath::Atan2(-(Right | Up), FrameUp | Up)));
 	}
 
 	FString Speed(double CmPerSecond)
@@ -268,6 +339,14 @@ int32 USpaceHudLamp::NativePaint(const FPaintArgs& Args, const FGeometry& Allott
 	// small square lamp inside on the right. The box keeps its colour; the square carries the state.
 	const float Lit = FMath::Clamp(Intensity + 0.6f * Flash * Intensity, 0.f, 1.5f);
 	const float Breath = FMath::Lerp(1.f, Pulse, FMath::Min(Lit, 1.f));
+	if (bBadge)
+	{
+		// The reference's switch badge (ESP, CPLD): a thin outline round the label, in the switch's colour.
+		const FLinearColor Edge = FMath::Lerp(Faded(Label, 0.3f), Color, FMath::Min(Lit, 1.f));
+		GlowRounded(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, 2.f, Edge, 0.5f * Lit * Breath);
+		RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, FVector2f::ZeroVector, Size, 2.f, Faded(Backing, 0.5f), Edge, 1.f);
+		return LayerId + 2;
+	}
 	const float Radius = FMath::Min(Size.Y * 0.35f, 4.f);
 	RoundedBox(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, Radius,
 		Backing, FMath::Lerp(Faded(Rail, 0.5f), Rail, FMath::Min(Lit, 1.f)), 1.f);
@@ -347,25 +426,29 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 	}
 
 	// The fill: bright at the leading edge, deeper at the root, with a halo.
+	auto FillPart = [&](float Along0, float Along1, const FLinearColor& Color)
+	{
+		if (Along1 <= Along0 + 1.f)
+		{
+			return;
+		}
+		const TPair<FVector2f, FVector2f> Fill = Place(Along0, Along1);
+		GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, Fill.Key, Fill.Value, Radius, Color, Dim * Pulse);
+		GradientCapsule(OutDrawElements, LayerId + 2, AllottedGeometry, Fill.Key, Fill.Value, Radius,
+			Faded(Color, 0.85f * Dim), Faded(FMath::Lerp(Color, FLinearColor::White, 0.22f), Dim), !bHorizontal);
+		Rungs(Along0, Along1);
+	};
 	const float Top = Zero + Span * FMath::Clamp(Display, 0.f, 1.f);
 	if (Top > Zero + 1.f)
 	{
 		// Past the marker (over the speed limiter) the rest of the fill goes red, the way the
-		// reference marks the part of a gauge that is outside its allowed range.
+		// reference marks the part of a gauge that is outside its allowed range; the reserve at the
+		// root is drawn in its own colour.
 		const float Allowed = Marker >= 0.f ? FMath::Min(Top, Zero + Span * FMath::Clamp(Marker, 0.f, 1.f)) : Top;
-		const TPair<FVector2f, FVector2f> Fill = Place(Zero, Allowed);
-		GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, Fill.Key, Fill.Value, Radius, FillColor, Dim * Pulse);
-		GradientCapsule(OutDrawElements, LayerId + 2, AllottedGeometry, Fill.Key, Fill.Value, Radius,
-			Faded(FillColor, 0.85f * Dim), Faded(FMath::Lerp(FillColor, FLinearColor::White, 0.22f), Dim), !bHorizontal);
-		Rungs(Zero, Allowed);
-		if (Top > Allowed + 1.f)
-		{
-			const TPair<FVector2f, FVector2f> Over = Place(Allowed, Top);
-			GlowRounded(OutDrawElements, LayerId + 1, AllottedGeometry, Over.Key, Over.Value, Radius, Red, Dim * Pulse);
-			GradientCapsule(OutDrawElements, LayerId + 2, AllottedGeometry, Over.Key, Over.Value, Radius,
-				Faded(Red, 0.85f * Dim), Faded(FMath::Lerp(Red, FLinearColor::White, 0.2f), Dim), !bHorizontal);
-			Rungs(Allowed, Top);
-		}
+		const float Reserve = Zero + Span * FMath::Clamp(ReserveZone, 0.f, 1.f);
+		FillPart(Zero, FMath::Min(Allowed, Reserve), ReserveColor);
+		FillPart(FMath::Max(Zero, Reserve), Allowed, FillColor);
+		FillPart(Allowed, Top, Red);
 	}
 	const float Bottom = Zero * (1.f - FMath::Clamp(DisplayReverse, 0.f, 1.f));
 	if (Bottom < Zero - 1.f)
@@ -428,7 +511,8 @@ int32 USpaceHudVirtualJoystick::NativePaint(const FPaintArgs& Args, const FGeome
 		Draw(MoveTemp(Points), Color, 1.f);
 	};
 
-	Circle(Radius, Faded(CyanFaint, 0.9f));
+	// Faint: the reference shows the mouse cursor, hardly a ring.
+	Circle(Radius, Faded(CyanFaint, 0.35f));
 	Circle(Radius * FMath::Clamp(Deadzone, 0.f, 1.f), CyanFaint);
 
 	// Stick Y up is screen up.
@@ -443,6 +527,277 @@ int32 USpaceHudVirtualJoystick::NativePaint(const FPaintArgs& Args, const FGeome
 	Draw({ CursorAt - FVector2f(Arm, 0.f), CursorAt + FVector2f(Arm, 0.f) }, CursorColor, 2.f, bTurning ? 1.f : 0.4f);
 	Draw({ CursorAt - FVector2f(0.f, Arm), CursorAt + FVector2f(0.f, Arm) }, CursorColor, 2.f, bTurning ? 1.f : 0.4f);
 	return LayerId;
+}
+
+// -------------------------------------------------------------------------------------------
+// Symbols
+// -------------------------------------------------------------------------------------------
+
+int32 USpaceHudSymbol::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	using namespace SpaceHudStyle;
+	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	const FVector2f Size = AllottedGeometry.GetLocalSize();
+	const FVector2f Centre = Size * 0.5f;
+	const float Half = FMath::Min(Size.X, Size.Y) * 0.5f;
+	if (Half < 2.f)
+	{
+		return LayerId;
+	}
+	const FPaintGeometry Paint = AllottedGeometry.ToPaintGeometry();
+	auto Draw = [&](const TArray<FVector2f>& Points, const FLinearColor& InColor, float InThickness, float Glow = 0.5f)
+	{
+		GlowLines(OutDrawElements, LayerId, Paint, Points, InColor, InThickness, Glow);
+	};
+	// Screen Y grows downwards; the values' Y grows upwards.
+	const FVector2f Flip(1.f, -1.f);
+	switch (Symbol)
+	{
+	case ESpaceHudSymbol::ModeIcon:
+	{
+		Draw(Circle(Centre, Half - 1.f), Color, Thickness);
+		for (int32 Bar = 0; Bar < 4; ++Bar)
+		{
+			const float X = Centre.X + (Bar - 1.5f) * Half * 0.34f;
+			Draw({ FVector2f(X, Centre.Y - Half * 0.42f), FVector2f(X, Centre.Y + Half * 0.42f) }, Color, 1.6f, 0.3f);
+		}
+		break;
+	}
+	case ESpaceHudSymbol::Strafe:
+	{
+		const float Arm = Half - 6.f;
+		for (float At = 5.f; At < Arm - 3.f; At += 4.f)
+		{
+			for (const FVector2f& Dir : { FVector2f(1.f, 0.f), FVector2f(-1.f, 0.f), FVector2f(0.f, 1.f), FVector2f(0.f, -1.f) })
+			{
+				Draw({ Centre + Dir * At, Centre + Dir * (At + 1.6f) }, Faded(Color, 0.7f), 1.f, 0.f);
+			}
+		}
+		// Arrow heads: dim, lit in the direction the pilot strafes.
+		const TPair<FVector2f, float> Heads[] = {
+			{ FVector2f(1.f, 0.f), float(Value.X) }, { FVector2f(-1.f, 0.f), float(-Value.X) },
+			{ FVector2f(0.f, -1.f), float(Value.Y) }, { FVector2f(0.f, 1.f), float(-Value.Y) } };
+		for (const TPair<FVector2f, float>& Head : Heads)
+		{
+			const FVector2f Tip = Centre + Head.Key * Arm;
+			const FVector2f Side(-Head.Key.Y, Head.Key.X);
+			const float Lit = FMath::Clamp(Head.Value, 0.f, 1.f);
+			Draw({ Tip - Head.Key * 6.f + Side * 5.5f, Tip, Tip - Head.Key * 6.f - Side * 5.5f },
+				Faded(Accent, 0.8f + 0.2f * Lit), 1.6f + Lit, 0.5f + Lit);
+		}
+		const FVector2f Dot = Centre + FVector2f(Value2.X, Value2.Y).GetClampedToMaxSize(1.f) * Flip * (Arm - 6.f);
+		RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, Dot - FVector2f(2.f, 2.f), FVector2f(4.f, 4.f), 2.f, Color);
+		break;
+	}
+	case ESpaceHudSymbol::Gyro:
+	{
+		const float Arm = Half - 4.f;
+		Draw({ Centre - FVector2f(Arm - 3.f, 0.f), Centre + FVector2f(Arm - 3.f, 0.f) }, Faded(Color, 0.8f), 1.f, 0.2f);
+		Draw({ Centre - FVector2f(0.f, Arm - 3.f), Centre + FVector2f(0.f, Arm - 3.f) }, Faded(Color, 0.8f), 1.f, 0.2f);
+		for (const FVector2f& Dir : { FVector2f(1.f, 0.f), FVector2f(-1.f, 0.f), FVector2f(0.f, 1.f), FVector2f(0.f, -1.f) })
+		{
+			Draw(Circle(Centre + Dir * Arm, 2.5f, 0.f, 360.f, 12), Color, 1.f, 0.2f);
+		}
+		const FVector2f Rate = FVector2f(Value.X, Value.Y).GetClampedToMaxSize(1.f) * Flip * Arm;
+		if (Rate.Size() > 1.f)
+		{
+			Draw({ Centre, Centre + Rate }, Accent, 1.6f, 0.6f);
+		}
+		RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, Centre + Rate - FVector2f(2.f, 2.f), FVector2f(4.f, 4.f), 2.f, Accent);
+		break;
+	}
+	case ESpaceHudSymbol::Shield:
+	{
+		const TArray<FVector2f> Outline = {
+			FVector2f(0.5f, 0.f) * Size, FVector2f(1.f, 0.16f) * Size, FVector2f(0.92f, 0.66f) * Size, FVector2f(0.5f, 1.f) * Size,
+			FVector2f(0.08f, 0.66f) * Size, FVector2f(0.f, 0.16f) * Size, FVector2f(0.5f, 0.f) * Size };
+		Draw(Outline, Color, 1.2f);
+		Text(OutDrawElements, LayerId + 1, AllottedGeometry, Centre + FVector2f(0.f, -0.5f), TEXT("G"), LabelFont(Size.Y * 0.5f), Color);
+		break;
+	}
+	case ESpaceHudSymbol::Ring:
+		Draw(Circle(Centre, Half - 1.5f, -60.f, 250.f, 24), Color, 1.4f);
+		break;
+	case ESpaceHudSymbol::Reticle:
+		for (const FVector2f& Dir : { FVector2f(1.f, 0.f), FVector2f(-1.f, 0.f), FVector2f(0.f, 1.f), FVector2f(0.f, -1.f) })
+		{
+			Draw({ Centre + Dir * 5.f, Centre + Dir * (Half - 2.f) }, Color, 1.4f);
+		}
+		RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, Centre - FVector2f(1.f, 1.f), FVector2f(2.f, 2.f), 1.f, Color);
+		break;
+	case ESpaceHudSymbol::Plus:
+		Draw({ Centre - FVector2f(Half - 1.f, 0.f), Centre + FVector2f(Half - 1.f, 0.f) }, Color, 1.6f);
+		Draw({ Centre - FVector2f(0.f, Half - 1.f), Centre + FVector2f(0.f, Half - 1.f) }, Color, 1.6f);
+		break;
+	case ESpaceHudSymbol::Line:
+	{
+		TArray<FVector2f> Scaled;
+		for (const FVector2D& Point : Points)
+		{
+			Scaled.Add(FVector2f(Point) * Size);
+		}
+		if (Scaled.Num() > 1)
+		{
+			Draw(Scaled, Color, Thickness, 0.3f);
+		}
+		break;
+	}
+	}
+	return LayerId + 2;
+}
+
+// -------------------------------------------------------------------------------------------
+// Tapes
+// -------------------------------------------------------------------------------------------
+
+FString USpaceHudTape::Format(float InValue) const
+{
+	float Shown = InValue * LabelScale;
+	if (bWrap360)
+	{
+		Shown = FMath::Fmod(FMath::Fmod(Shown, 360.f) + 360.f, 360.f);
+		if (FMath::RoundToInt(Shown) == 360)
+		{
+			Shown = 0.f;
+		}
+	}
+	return FString::Printf(TEXT("%.*f"), LabelDecimals, Shown);
+}
+
+int32 USpaceHudTape::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	using namespace SpaceHudStyle;
+	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	const FVector2f Size = AllottedGeometry.GetLocalSize();
+	const float Length = bVertical ? Size.Y : Size.X;
+	if (Length < 10.f || Span <= 0.f || MajorStep <= 0.f)
+	{
+		return LayerId;
+	}
+	const FPaintGeometry Paint = AllottedGeometry.ToPaintGeometry();
+	const float PerUnit = Length / Span;
+	const float Minor = MajorStep / FMath::Max(MinorPerMajor, 1);
+	const float Mark = Length * MarkAt;
+	const FSlateFontInfo Small = LabelFont(10.f);
+	const float First = FMath::FloorToFloat((Value - Mark / PerUnit) / Minor) * Minor;
+	const float Last = Value + (Length - Mark) / PerUnit;
+	for (float At = First; At <= Last + Minor * 0.5f; At += Minor)
+	{
+		// Along the tape from its start (left, or top for the vertical tape, where values are higher).
+		const float Along = bVertical ? Mark - (At - Value) * PerUnit : Mark + (At - Value) * PerUnit;
+		if (Along < 0.f || Along > Length)
+		{
+			continue;
+		}
+		const float Steps = At / MajorStep;
+		const bool bMajor = FMath::Abs(Steps - FMath::RoundToFloat(Steps)) < 0.01f;
+		const float Tick = bMajor ? 6.f : 3.f;
+		if (bVertical)
+		{
+			FSlateDrawElement::MakeLines(OutDrawElements, LayerId, Paint, { FVector2f(0.f, Along), FVector2f(Tick, Along) },
+				ESlateDrawEffect::None, Faded(Color, bMajor ? 0.8f : 0.45f), true, 1.f);
+			if (bMajor && FMath::Abs(Along - Mark) > 12.f)
+			{
+				Text(OutDrawElements, LayerId, AllottedGeometry, FVector2f(12.f, Along), Format(At), Small, Faded(Color, 0.75f), FVector2f(0.f, 0.5f));
+			}
+		}
+		else
+		{
+			const float Base = 16.f;
+			FSlateDrawElement::MakeLines(OutDrawElements, LayerId, Paint, { FVector2f(Along, Base), FVector2f(Along, Base + Tick) },
+				ESlateDrawEffect::None, Faded(Color, bMajor ? 0.8f : 0.45f), true, 1.f);
+			if (bMajor)
+			{
+				Text(OutDrawElements, LayerId, AllottedGeometry, FVector2f(Along, Base - 2.f), Format(At), Small, Faded(Color, 0.8f), FVector2f(0.5f, 1.f));
+			}
+		}
+	}
+	const FSlateFontInfo Big = LabelFont(12.f);
+	if (bVertical)
+	{
+		// The value in a box at the mark, a caret pointing at it from the ticks.
+		const FVector2f BoxAt(4.f, Mark - 8.f);
+		const FVector2f BoxSize(Size.X - 6.f, 16.f);
+		RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, BoxAt, BoxSize, 1.f, Faded(Backing, 0.8f), Color, 1.f);
+		Text(OutDrawElements, LayerId + 2, AllottedGeometry, BoxAt + BoxSize * 0.5f, Format(Value), Big, Color);
+		GlowLines(OutDrawElements, LayerId + 2, Paint, { FVector2f(-6.f, Mark - 4.f), FVector2f(-2.f, Mark), FVector2f(-6.f, Mark + 4.f) }, Color, 1.2f, 0.4f);
+	}
+	else
+	{
+		const float Base = 23.f;
+		GlowLines(OutDrawElements, LayerId + 1, Paint, { FVector2f(Mark - 4.f, Base + 4.f), FVector2f(Mark, Base), FVector2f(Mark + 4.f, Base + 4.f) }, Color, 1.4f, 0.5f);
+		Text(OutDrawElements, LayerId + 1, AllottedGeometry, FVector2f(Mark, Base + 5.f), Format(Value), Big, Color, FVector2f(0.5f, 0.f));
+	}
+	return LayerId + 3;
+}
+
+// -------------------------------------------------------------------------------------------
+// Pitch ladder
+// -------------------------------------------------------------------------------------------
+
+FVector2D USpaceHudLadder::LineCentre(float PitchLineDeg, float InPitchDeg, float InRollDeg, float InFovDeg, float ViewWidth)
+{
+	const double Focal = (ViewWidth * 0.5) / FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(InFovDeg, 10.f, 170.f)) * 0.5);
+	const double Offset = FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(PitchLineDeg - InPitchDeg, -85.f, 85.f))) * Focal;
+	const double Roll = FMath::DegreesToRadians(InRollDeg);
+	// Screen up for the rolled horizon (screen Y grows downwards): banking right turns the world left.
+	const FVector2D Up(-FMath::Sin(Roll), -FMath::Cos(Roll));
+	return Up * Offset;
+}
+
+int32 USpaceHudLadder::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	using namespace SpaceHudStyle;
+	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	const FVector2f Size = AllottedGeometry.GetLocalSize();
+	if (Size.X < 100.f)
+	{
+		return LayerId;
+	}
+	const FPaintGeometry Paint = AllottedGeometry.ToPaintGeometry();
+	const FVector2f Centre = Size * 0.5f;
+	const float Roll = FMath::DegreesToRadians(RollDeg);
+	const FVector2f Right(FMath::Cos(Roll), -FMath::Sin(Roll));
+	const FVector2f Up(-FMath::Sin(Roll), -FMath::Cos(Roll));
+	const FSlateFontInfo Font = LabelFont(10.f);
+	// Only the lines near the nose, as in the reference: the ladder frames the view, it does not fill it.
+	for (int32 Line = -90; Line <= 90; Line += 5)
+	{
+		if (FMath::Abs(Line - PitchDeg) > 7.f)
+		{
+			continue;
+		}
+		const FVector2f At = Centre + FVector2f(LineCentre(float(Line), PitchDeg, RollDeg, FovDeg, Size.X));
+		if (Line == 0)
+		{
+			for (const float Side : { -1.f, 1.f })
+			{
+				GlowLines(OutDrawElements, LayerId, Paint, { At + Right * Side * 95.f, At + Right * Side * 150.f }, Faded(Color, 0.7f), 1.2f, 0.3f);
+			}
+			continue;
+		}
+		// A bracket each side: a short stroke with a tick towards the horizon, dashed below it.
+		const FVector2f Towards = Line > 0 ? -Up : Up;
+		for (const float Side : { -1.f, 1.f })
+		{
+			const FVector2f Inner = At + Right * Side * 60.f;
+			const FVector2f Outer = At + Right * Side * 88.f;
+			if (Line > 0)
+			{
+				GlowLines(OutDrawElements, LayerId, Paint, { Inner, Outer, Outer + Towards * 7.f }, Faded(Color, 0.75f), 1.2f, 0.3f);
+			}
+			else
+			{
+				GlowLines(OutDrawElements, LayerId, Paint, { Inner, FMath::Lerp(Inner, Outer, 0.4f) }, Faded(Color, 0.75f), 1.2f, 0.3f);
+				GlowLines(OutDrawElements, LayerId, Paint, { FMath::Lerp(Inner, Outer, 0.6f), Outer, Outer + Towards * 7.f }, Faded(Color, 0.75f), 1.2f, 0.3f);
+			}
+			Text(OutDrawElements, LayerId, AllottedGeometry, Outer + Right * Side * 10.f, FString::FromInt(Line), Font, Faded(Color, 0.75f));
+		}
+	}
+	return LayerId + 1;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -469,12 +824,12 @@ UTextBlock* USpaceFlightHud::MakeText(const FName Name, float Size, int32 Letter
 		: Weight == FName(TEXT("Number")) ? SpaceHudStyle::NumberFont(Size)
 		: FCoreStyle::GetDefaultFontStyle(Weight, Size);
 	Font.LetterSpacing = LetterSpacing;
-	// A thin dark outline instead of a drop shadow: readable against the sun and a bright planet
-	// from every side.
+	// A faint cyan halo, as the reference's projected type has, instead of the dark outline SC-1c
+	// used: that made every word heavy.
 	Font.OutlineSettings.OutlineSize = 1;
-	Font.OutlineSettings.OutlineColor = FLinearColor(0.f, 0.02f, 0.04f, 0.95f);
+	Font.OutlineSettings.OutlineColor = FLinearColor(0.2f, 0.6f, 0.85f, 0.22f);
 	Text->SetFont(Font);
-	Text->SetColorAndOpacity(FSlateColor(Weight == FName(TEXT("Number")) ? SpaceHudStyle::Green : SpaceHudStyle::Label));
+	Text->SetColorAndOpacity(FSlateColor(Weight == FName(TEXT("Number")) ? SpaceHudStyle::Instrument : SpaceHudStyle::Label));
 	Texts.Add(Name, Text);
 	return Text;
 }
@@ -486,152 +841,184 @@ void USpaceFlightHud::BuildTree()
 	UCanvasPanel* Root = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("Root"));
 	WidgetTree->RootWidget = Root;
 
-	// Everything hangs off the middle of the screen, so it frames the view at any resolution.
-	auto Place = [Root](UWidget* Widget, const FVector2D& Offset, const FVector2D& Alignment)
+	// Everything is placed from the middle of the screen in 1080p units (the reference's pixels);
+	// Slate's DPI scale fits it to other resolutions.
+	auto At = [Root](UWidget* Widget, const FVector2D& Position, const FVector2D& Alignment, const FVector2D& Size = FVector2D::ZeroVector)
 	{
 		UCanvasPanelSlot* Slot = Root->AddChildToCanvas(Widget);
 		Slot->SetAnchors(FAnchors(0.5f, 0.5f));
 		Slot->SetAlignment(Alignment);
-		Slot->SetAutoSize(true);
-		Slot->SetPosition(Offset);
-	};
-	auto Sized = [this](const FName Name, UWidget* Content, float Width, float Height)
-	{
-		USizeBox* Box = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), Name);
-		Box->SetWidthOverride(Width);
-		Box->SetHeightOverride(Height);
-		Box->AddChild(Content);
-		return Box;
-	};
-	auto Lamp = [this](const FName Name)
-	{
-		USpaceHudLamp* NewLamp = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), Name);
-		NewLamp->Color = SpaceHudStyle::Cyan;
-		Lamps.Add(FName(*Name.ToString().RightChop(5)), NewLamp);  // Lamp_CPLD -> CPLD
-		return NewLamp;
-	};
-	// Content over a cut-corner panel, like the reference's instrument frames.
-	auto Panelled = [this](const FName PanelName, UWidget* Content, const FMargin& Inset)
-	{
-		UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("%sOverlay"), *PanelName.ToString())));
-		USpaceHudPanel* Panel = WidgetTree->ConstructWidget<USpaceHudPanel>(USpaceHudPanel::StaticClass(), PanelName);
-		Panel->LineColor = SpaceHudStyle::Cyan;
-		Panel->FillAlpha = 0.f;
-		Panel->Glow = 0.35f;
-		if (UOverlaySlot* PanelSlot = Overlay->AddChildToOverlay(Panel))
+		Slot->SetAutoSize(Size.IsZero());
+		if (!Size.IsZero())
 		{
-			PanelSlot->SetHorizontalAlignment(HAlign_Fill);
-			PanelSlot->SetVerticalAlignment(VAlign_Fill);
+			Slot->SetSize(Size);
 		}
-		if (UOverlaySlot* ContentSlot = Overlay->AddChildToOverlay(Content))
-		{
-			ContentSlot->SetPadding(Inset);
-			ContentSlot->SetHorizontalAlignment(HAlign_Fill);
-			ContentSlot->SetVerticalAlignment(VAlign_Fill);
-		}
-		return Overlay;
+		Slot->SetPosition(Position);
+		return Slot;
 	};
-	auto Frame = [this](const FName Name)
+	auto Symbol = [&](const FName Name, ESpaceHudSymbol Kind, const FVector2D& Centre, const FVector2D& Size, const FLinearColor& Color)
 	{
-		USpaceHudPanel* Panel = WidgetTree->ConstructWidget<USpaceHudPanel>(USpaceHudPanel::StaticClass(), Name);
-		Panel->LineColor = SpaceHudStyle::CyanFaint;
-		Panel->FillAlpha = 0.f;
-		Panel->Chamfer = 3.f;
-		Panel->Glow = 0.25f;
-		return Panel;
+		USpaceHudSymbol* New = WidgetTree->ConstructWidget<USpaceHudSymbol>(USpaceHudSymbol::StaticClass(), Name);
+		New->Symbol = Kind;
+		New->Color = Color;
+		Parts.Add(Name, New);
+		At(New, Centre, FVector2D(0.5, 0.5), Size);
+		return New;
 	};
-	auto Gauge = [this](const FName Name, bool bHorizontal, int32 Ticks)
+	// The thin brackets beside the reference's text blocks, through points given in screen units.
+	auto Bracket = [&](const FName Name, const TArray<FVector2D>& Points, const FLinearColor& Color)
+	{
+		FBox2D Box(ForceInit);
+		for (const FVector2D& Point : Points)
+		{
+			Box += Point;
+		}
+		Box = Box.ExpandBy(2.0);
+		USpaceHudSymbol* New = WidgetTree->ConstructWidget<USpaceHudSymbol>(USpaceHudSymbol::StaticClass(), Name);
+		New->Symbol = ESpaceHudSymbol::Line;
+		New->Color = Color;
+		New->Thickness = 1.f;
+		for (const FVector2D& Point : Points)
+		{
+			New->Points.Add((Point - Box.Min) / Box.GetSize());
+		}
+		Parts.Add(Name, New);
+		At(New, Box.Min, FVector2D::ZeroVector, Box.GetSize());
+	};
+	auto Words = [&](const FName Name, const TCHAR* Initial, float Size, const FVector2D& Position, const FVector2D& Alignment,
+		const FLinearColor& Color = SpaceHudStyle::Label)
+	{
+		UTextBlock* Text = MakeText(Name, Size, 40, TEXT("Label"));
+		Text->SetText(FText::FromString(Initial));
+		Text->SetColorAndOpacity(FSlateColor(Color));
+		At(Text, Position, Alignment);
+		return Text;
+	};
+	auto Gauge = [this](const FName Name)
 	{
 		USpaceHudGauge* NewGauge = WidgetTree->ConstructWidget<USpaceHudGauge>(USpaceHudGauge::StaticClass(), Name);
-		NewGauge->bHorizontal = bHorizontal;
-		NewGauge->Ticks = Ticks;
+		NewGauge->Ticks = 0;
 		Gauges.Add(Name, NewGauge);
 		return NewGauge;
 	};
-	auto AddToVertical = [](UVerticalBox* Box, UWidget* Child, EHorizontalAlignment Align, const FMargin& SlotPadding)
-	{
-		UVerticalBoxSlot* Slot = Box->AddChildToVerticalBox(Child);
-		Slot->SetHorizontalAlignment(Align);
-		Slot->SetPadding(SlotPadding);
-	};
-	auto AddToHorizontal = [](UHorizontalBox* Box, UWidget* Child, EVerticalAlignment Align, const FMargin& SlotPadding)
-	{
-		UHorizontalBoxSlot* Slot = Box->AddChildToHorizontalBox(Child);
-		Slot->SetVerticalAlignment(Align);
-		Slot->SetPadding(SlotPadding);
-	};
-	// Compact and a little above the middle, as in the reference: the cockpit's dashboard starts ~8
-	// degrees below the eye (a quarter of the way down from the middle of the screen), and the HUD
-	// stays above it rather than over the displays.
-	const float FrameHeight = 320.f;
-	const double ClusterY = -30.0;
 
-	// --- Left of centre: lamps beside the speed gauge (speed, limit, G meter under it), then a frame line
-	UHorizontalBox* Left = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("LeftCluster"));
-	UHorizontalBox* LeftContent = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("LeftContent"));
-	UVerticalBox* LampBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("LampBox"));
-	for (const TCHAR* LampName : { TEXT("MODE"), TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST"), TEXT("GEAR"), TEXT("PREC") })
+	// --- Middle: pitch ladder over the whole view, heading tape, nose reticle, virtual joystick --------
+	USpaceHudLadder* Ladder = WidgetTree->ConstructWidget<USpaceHudLadder>(USpaceHudLadder::StaticClass(), TEXT("Ladder"));
+	Ladder->Color = Label;
+	Parts.Add(TEXT("Ladder"), Ladder);
+	if (UCanvasPanelSlot* LadderSlot = Root->AddChildToCanvas(Ladder))
+	{
+		LadderSlot->SetAnchors(FAnchors(0.f, 0.f, 1.f, 1.f));
+		LadderSlot->SetOffsets(FMargin(0.f));
+	}
+	USpaceHudTape* Heading = WidgetTree->ConstructWidget<USpaceHudTape>(USpaceHudTape::StaticClass(), TEXT("HeadingTape"));
+	Heading->bWrap360 = true;
+	Heading->Span = 80.f;
+	Heading->MajorStep = 20.f;
+	Heading->MinorPerMajor = 4;
+	Heading->Color = Label;
+	Parts.Add(TEXT("HeadingTape"), Heading);
+	At(Heading, FVector2D(0.0, -140.0), FVector2D(0.5, 0.0), FVector2D(200.0, 44.0));
+	Symbol(TEXT("Reticle"), ESpaceHudSymbol::Reticle, FVector2D::ZeroVector, FVector2D(28.0, 28.0), Label);
+	VirtualJoystick = WidgetTree->ConstructWidget<USpaceHudVirtualJoystick>(USpaceHudVirtualJoystick::StaticClass(), TEXT("VirtualJoystick"));
+	USizeBox* JoystickBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("VirtualJoystickBox"));
+	JoystickBox->SetWidthOverride(220.f);
+	JoystickBox->SetHeightOverride(220.f);
+	JoystickBox->AddChild(VirtualJoystick);
+	VirtualJoystickBox = JoystickBox;
+	At(JoystickBox, FVector2D::ZeroVector, FVector2D(0.5, 0.5));
+
+	// --- Left: master mode, switch badges, strafe cross, speed tube, BOOST / LIMIT rows ------------
+	Symbol(TEXT("ModeIcon"), ESpaceHudSymbol::ModeIcon, FVector2D(-306.0, -77.0), FVector2D(22.0, 22.0), Label);
+	Words(TEXT("ModeText"), TEXT("SCM"), 12.f, FVector2D(-290.0, -83.0), FVector2D(0.0, 0.5));
+	Words(TEXT("SubModeText"), TEXT("FLIGHT"), 10.f, FVector2D(-290.0, -69.0), FVector2D(0.0, 0.5));
+	Bracket(TEXT("BracketMode"), { FVector2D(-262.0, -100.0), FVector2D(-262.0, -62.0), FVector2D(-252.0, -50.0) }, Faded(Label, 0.6f));
+
+	UVerticalBox* Badges = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("BadgeBox"));
+	for (const TCHAR* LampName : { TEXT("CSTB"), TEXT("CPLD"), TEXT("PREC"), TEXT("BOOST") })
 	{
 		const FName Key(LampName);
-		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("LampRow_%s"), LampName)));
-		UTextBlock* LampText = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 9.f, 120, TEXT("Label"));
+		UOverlay* Badge = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("Badge_%s"), LampName)));
+		USpaceHudLamp* NewLamp = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), FName(*FString::Printf(TEXT("Lamp_%s"), LampName)));
+		NewLamp->bBadge = true;
+		NewLamp->Color = Instrument;
+		Lamps.Add(Key, NewLamp);
+		UTextBlock* LampText = MakeText(FName(*FString::Printf(TEXT("LampLabel_%s"), LampName)), 10.f, 60, TEXT("Label"));
 		LampText->SetText(FText::FromString(LampName));
 		LampText->SetJustification(ETextJustify::Center);
 		LampLabels.Add(Key, LampText);
-		UOverlay* Pill = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("Pill_%s"), LampName)));
-		if (UOverlaySlot* LampSlot = Pill->AddChildToOverlay(Lamp(FName(*FString::Printf(TEXT("Lamp_%s"), LampName)))))
+		if (UOverlaySlot* LampSlot = Badge->AddChildToOverlay(NewLamp))
 		{
 			LampSlot->SetHorizontalAlignment(HAlign_Fill);
 			LampSlot->SetVerticalAlignment(VAlign_Fill);
 		}
-		if (UOverlaySlot* LabelSlot = Pill->AddChildToOverlay(LampText))
+		if (UOverlaySlot* LabelSlot = Badge->AddChildToOverlay(LampText))
 		{
-			LabelSlot->SetPadding(FMargin(7.f, 2.f, 15.f, 3.f));
+			LabelSlot->SetPadding(FMargin(5.f, 1.f, 5.f, 1.f));
 			LabelSlot->SetHorizontalAlignment(HAlign_Center);
 			LabelSlot->SetVerticalAlignment(VAlign_Center);
 		}
-		AddToHorizontal(Row, Pill, VAlign_Center, FMargin(0.f));
-		AddToVertical(LampBox, Row, HAlign_Right, FMargin(0.f, 0.f, 0.f, 5.f));
+		Parts.Add(Badge->GetFName(), Badge);
+		UVerticalBoxSlot* BadgeSlot = Badges->AddChildToVerticalBox(Badge);
+		BadgeSlot->SetHorizontalAlignment(HAlign_Center);
+		BadgeSlot->SetPadding(FMargin(0.f, 2.f));
 	}
-	AddToHorizontal(LeftContent, Panelled(TEXT("LampPanel"), LampBox, FMargin(10.f, 8.f, 10.f, 3.f)), VAlign_Top, FMargin(0.f, 0.f, 10.f, 0.f));
-	UVerticalBox* SpeedBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SpeedBox"));
-	AddToVertical(SpeedBox, Sized(TEXT("SpeedGaugeBox"), Gauge(TEXT("SpeedGauge"), false, 10), 11.f, 170.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 10.f));
-	AddToVertical(SpeedBox, MakeText(TEXT("SpeedText"), 15.f, 20, TEXT("Number")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 1.f));
-	AddToVertical(SpeedBox, MakeText(TEXT("LimitText"), 9.f, 40, TEXT("Number")), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
-	UHorizontalBox* GRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("GRow"));
-	AddToHorizontal(GRow, Sized(TEXT("GGaugeBox"), Gauge(TEXT("GGauge"), true, 4), 52.f, 6.f), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
-	AddToHorizontal(GRow, MakeText(TEXT("GText"), 11.f, 20, TEXT("Number")), VAlign_Center, FMargin(0.f));
-	AddToVertical(SpeedBox, GRow, HAlign_Right, FMargin(0.f));
-	AddToHorizontal(LeftContent, Panelled(TEXT("SpeedPanel"), SpeedBox, FMargin(12.f, 10.f)), VAlign_Top, FMargin(0.f));
-	AddToHorizontal(Left, LeftContent, VAlign_Center, FMargin(0.f, 0.f, 14.f, 0.f));
-	// The glass frame line beside the cluster, cut at both ends like the reference's canopy frame.
-	AddToHorizontal(Left, Sized(TEXT("FrameLeftBox"), Frame(TEXT("FrameLeft")), 10.f, FrameHeight), VAlign_Center, FMargin(0.f));
-	Place(Left, FVector2D(-250.0, ClusterY), FVector2D(1.0, 0.5));
+	At(Badges, FVector2D(-301.0, -3.0), FVector2D(0.5, 0.5));
 
-	// --- Right of centre: a frame line, then boost energy and afterburner fuel gauges ----------
-	UHorizontalBox* Right = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RightCluster"));
-	AddToHorizontal(Right, Sized(TEXT("FrameRightBox"), Frame(TEXT("FrameRight")), 10.f, FrameHeight), VAlign_Center, FMargin(0.f, 0.f, 14.f, 0.f));
-	UHorizontalBox* Columns = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RightColumns"));
-	auto Column = [&](const TCHAR* Caption, const FName GaugeName, const FName TextName, const FMargin& SlotPadding)
-	{
-		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), *GaugeName.ToString())));
-		UTextBlock* Title = MakeText(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), 8.f, 160, TEXT("Label"));
-		Title->SetText(FText::FromString(Caption));
-		AddToVertical(Box, Title, HAlign_Center, FMargin(0.f, 0.f, 0.f, 6.f));
-		AddToVertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, false, 5), 9.f, 150.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 8.f));
-		AddToVertical(Box, MakeText(TextName, 9.f, 20, TEXT("Number")), HAlign_Center, FMargin(0.f));
-		AddToHorizontal(Columns, Box, VAlign_Center, SlotPadding);
-	};
-	Column(TEXT("BST"), TEXT("BoostGauge"), TEXT("BoostText"), FMargin(0.f, 0.f, 22.f, 0.f));
-	Column(TEXT("AB"), TEXT("AfterburnerGauge"), TEXT("AfterburnerText"), FMargin(0.f));
-	AddToHorizontal(Right, Panelled(TEXT("PowerPanel"), Columns, FMargin(14.f, 10.f)), VAlign_Center, FMargin(0.f));
-	Place(Right, FVector2D(250.0, ClusterY), FVector2D(0.0, 0.5));
+	USpaceHudSymbol* Strafe = Symbol(TEXT("Strafe"), ESpaceHudSymbol::Strafe, FVector2D(-250.0, -3.0), FVector2D(56.0, 56.0), Label);
+	Strafe->Accent = Red;
+	Symbol(TEXT("LimiterPlus"), ESpaceHudSymbol::Plus, FVector2D(-204.0, -14.0), FVector2D(10.0, 10.0), Faded(Label, 0.8f));
+	USpaceHudGauge* SpeedGauge = Gauge(TEXT("SpeedGauge"));
+	At(SpeedGauge, FVector2D(-190.0, -80.0), FVector2D::ZeroVector, FVector2D(11.0, 132.0));
+	Words(TEXT("SpeedValue"), TEXT("0"), 22.f, FVector2D(-184.0, 72.0), FVector2D(0.5, 0.5));
+	Words(TEXT("SpeedUnit"), TEXT("m/s"), 11.f, FVector2D(-184.0, 90.0), FVector2D(0.5, 0.5));
+	Words(TEXT("RowBoostValue"), TEXT("100%"), 12.f, FVector2D(-300.0, 69.0), FVector2D(1.0, 0.5));
+	Words(TEXT("RowBoostLabel"), TEXT("BOOST"), 12.f, FVector2D(-294.0, 69.0), FVector2D(0.0, 0.5));
+	Words(TEXT("RowLimitValue"), TEXT("100%"), 12.f, FVector2D(-300.0, 83.0), FVector2D(1.0, 0.5));
+	Words(TEXT("RowLimitLabel"), TEXT("LIMIT"), 12.f, FVector2D(-294.0, 83.0), FVector2D(0.0, 0.5));
+	Bracket(TEXT("BracketRows"), { FVector2D(-253.0, 40.0), FVector2D(-265.0, 53.0), FVector2D(-265.0, 90.0) }, Faded(Label, 0.6f));
 
-	// --- Centre: the virtual joystick ----------------------------------------------------------
-	VirtualJoystick = WidgetTree->ConstructWidget<USpaceHudVirtualJoystick>(USpaceHudVirtualJoystick::StaticClass(), TEXT("VirtualJoystick"));
-	USizeBox* JoystickBox = Sized(TEXT("VirtualJoystickBox"), VirtualJoystick, 240.f, 240.f);
-	VirtualJoystickBox = JoystickBox;
-	Place(JoystickBox, FVector2D::ZeroVector, FVector2D(0.5, 0.5));
+	// --- Right: afterburner tube, altitude tape, gyro and G, status rows ------------------------------
+	USpaceHudGauge* Afterburner = Gauge(TEXT("AfterburnerGauge"));
+	Afterburner->ReserveZone = 0.25f;
+	Afterburner->ReserveColor = Red;
+	At(Afterburner, FVector2D(205.0, -77.0), FVector2D::ZeroVector, FVector2D(12.0, 130.0));
+	Symbol(TEXT("AbRing"), ESpaceHudSymbol::Ring, FVector2D(177.0, 76.0), FVector2D(13.0, 13.0), Label);
+	Words(TEXT("AfterburnerValue"), TEXT("100%"), 22.f, FVector2D(187.0, 75.0), FVector2D(0.0, 0.5));
+	Words(TEXT("AfterburnerLabel"), TEXT("AB"), 11.f, FVector2D(211.0, 92.0), FVector2D(0.5, 0.5));
+
+	Words(TEXT("AltitudeUnit"), TEXT("KM"), 12.f, FVector2D(267.0, -71.0), FVector2D(0.5, 0.5));
+	USpaceHudTape* Altitude = WidgetTree->ConstructWidget<USpaceHudTape>(USpaceHudTape::StaticClass(), TEXT("AltitudeTape"));
+	Altitude->bVertical = true;
+	Altitude->Span = 0.2f;
+	Altitude->MajorStep = 0.1f;
+	Altitude->MinorPerMajor = 5;
+	Altitude->LabelDecimals = 2;
+	Altitude->MarkAt = 0.47f;
+	Altitude->Color = Label;
+	Parts.Add(TEXT("AltitudeTape"), Altitude);
+	At(Altitude, FVector2D(252.0, -55.0), FVector2D::ZeroVector, FVector2D(44.0, 143.0));
+
+	USpaceHudSymbol* Gyro = Symbol(TEXT("Gyro"), ESpaceHudSymbol::Gyro, FVector2D(321.0, 1.0), FVector2D(50.0, 50.0), Label);
+	Gyro->Accent = Orange;
+	Symbol(TEXT("Shield"), ESpaceHudSymbol::Shield, FVector2D(303.0, 19.0), FVector2D(14.0, 16.0), Instrument);
+	Words(TEXT("GValue"), TEXT("0.0"), 22.f, FVector2D(398.0, -6.0), FVector2D(1.0, 0.5));
+	Words(TEXT("GUnit"), TEXT("G"), 15.f, FVector2D(401.0, -1.0), FVector2D(0.0, 0.5));
+	Bracket(TEXT("GSeparator"), { FVector2D(360.0, 4.0), FVector2D(398.0, 4.0) }, Faded(Label, 0.6f));
+	Words(TEXT("GMax"), TEXT("7.0"), 11.f, FVector2D(380.0, 13.0), FVector2D(0.5, 0.5));
+
+	Words(TEXT("RowGearLabel"), TEXT("GEAR"), 11.f, FVector2D(339.0, -72.0), FVector2D(0.0, 0.5));
+	Words(TEXT("RowGearValue"), TEXT("UP"), 11.f, FVector2D(398.0, -72.0), FVector2D(0.0, 0.5));
+	Words(TEXT("RowCruiseLabel"), TEXT("CRUISE"), 11.f, FVector2D(339.0, -57.0), FVector2D(0.0, 0.5));
+	Words(TEXT("RowCruiseValue"), TEXT("OFF"), 11.f, FVector2D(398.0, -57.0), FVector2D(0.0, 0.5));
+	Bracket(TEXT("BracketStatus"), { FVector2D(322.0, -44.0), FVector2D(335.0, -57.0), FVector2D(335.0, -87.0) }, Faded(Label, 0.6f));
+	Words(TEXT("RowRAltLabel"), TEXT("R-ALT"), 11.f, FVector2D(341.0, 60.0), FVector2D(0.0, 0.5));
+	Words(TEXT("RowRAltValue"), TEXT("-"), 11.f, FVector2D(391.0, 60.0), FVector2D(0.0, 0.5));
+	Words(TEXT("RowVsiLabel"), TEXT("VSI"), 11.f, FVector2D(341.0, 74.0), FVector2D(0.0, 0.5));
+	Words(TEXT("RowVsiValue"), TEXT("-"), 11.f, FVector2D(391.0, 74.0), FVector2D(0.0, 0.5));
+	Words(TEXT("RowAtmoLabel"), TEXT("ATMO"), 11.f, FVector2D(341.0, 88.0), FVector2D(0.0, 0.5));
+	Words(TEXT("RowAtmoValue"), TEXT("-"), 11.f, FVector2D(391.0, 88.0), FVector2D(0.0, 0.5));
+	Bracket(TEXT("BracketAir"), { FVector2D(325.0, 45.0), FVector2D(337.0, 58.0), FVector2D(337.0, 93.0) }, Faded(Label, 0.6f));
 
 	// A display, never in the way of the mouse or the menus.
 	Root->SetVisibility(ESlateVisibility::Collapsed);
@@ -692,7 +1079,47 @@ FSpaceFlightHudState USpaceFlightHud::MakeState(const ASpaceshipPawn* Ship, int3
 	State.bPrecisionActive = Ship->IsPrecisionActive();
 	State.Stick = Ship->GetMouseStick();
 	State.Deadzone = Ship->GetVirtualJoystickDeadzone();
+
+	const ECruiseState Cruise = Ship->GetCruiseState();
+	State.CruiseLabel = Cruise == ECruiseState::Spooling ? TEXT("SPOOL") : Cruise == ECruiseState::Active ? TEXT("ON")
+		: Cruise == ECruiseState::Dropping ? TEXT("DROP") : TEXT("OFF");
+	State.SubModeLabel = Cruise == ECruiseState::Active || Cruise == ECruiseState::Dropping ? TEXT("CRUISE")
+		: Cruise == ECruiseState::Spooling ? TEXT("SPOOL") : State.bPrecisionActive ? TEXT("PREC") : TEXT("FLIGHT");
+	State.GearLabel = State.bGearMoving ? TEXT("MOVING") : State.bGearDown ? TEXT("DOWN") : TEXT("UP");
+
+	// Across the nose: strafe input, drift (50 m/s full scale) and turn rate (the ship's top rate).
+	const FVector Input = Ship->GetLinearInput();
+	State.StrafeInput = FVector2D(Input.Y, Input.Z);
+	const FVector Local = Ship->GetActorTransform().InverseTransformVectorNoScale(Velocity) / 5000.0;
+	State.Drift = FVector2D(Local.Y, Local.Z);
+	const FVector Rate = Ship->GetAngularVelocity() / FMath::Max(Ship->GetMaxTurnRate(), 1.f);
+	State.TurnRate = FVector2D(Rate.Z, Rate.Y);
+
+	State.bHasEnvironment = Ship->HasEnvironment();
+	if (State.bHasEnvironment)
+	{
+		const FCelestialEnvironment& Environment = Ship->GetEnvironment();
+		State.AltitudeAslM = float(Environment.AltitudeAboveSeaLevelCm / 100.0);
+		State.AltitudeAglM = float(FMath::Max(Environment.AltitudeAboveTerrainCm, 0.0) / 100.0);
+		State.VerticalSpeedMS = float((Velocity | Environment.Up) / 100.0);
+		State.AtmosphereDensity = Environment.AtmosphereDensity;
+		SpaceHudStyle::Attitude(Environment.Up, Ship->GetActorForwardVector(), Ship->GetActorRightVector(), Ship->GetActorUpVector(),
+			State.HeadingDeg, State.PitchDeg, State.RollDeg);
+	}
 	return State;
+}
+
+FSpaceFlightHudState USpaceFlightHud::ApplyView(const FSpaceFlightHudState& State, const ASpaceshipPawn* Ship, FRotator ViewRotation, float FovDeg)
+{
+	FSpaceFlightHudState Out = State;
+	Out.ViewFovDeg = FovDeg;
+	if (Ship && Ship->HasEnvironment())
+	{
+		const FRotationMatrix View(ViewRotation);
+		SpaceHudStyle::Attitude(Ship->GetEnvironment().Up, View.GetUnitAxis(EAxis::X), View.GetUnitAxis(EAxis::Y), View.GetUnitAxis(EAxis::Z),
+			Out.HeadingDeg, Out.PitchDeg, Out.RollDeg);
+	}
+	return Out;
 }
 
 void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
@@ -709,7 +1136,19 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 	}
 
 	const bool bBlink = FMath::Fmod(Time, 0.5f) < 0.25f;
-	auto SetLamp = [this](const FName Name, bool bLit, const FLinearColor& Color)
+	auto Show = [this](const FName Name, bool bShown)
+	{
+		UWidget* Widget = Parts.FindRef(Name);
+		if (!Widget)
+		{
+			Widget = Texts.FindRef(Name);
+		}
+		if (Widget)
+		{
+			Widget->SetVisibility(bShown ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		}
+	};
+	auto SetLamp = [this, &Show](const FName Name, bool bLit, const FLinearColor& Color)
 	{
 		if (USpaceHudLamp* Lamp = Lamps.FindRef(Name))
 		{
@@ -718,9 +1157,12 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 		}
 		if (UTextBlock* LabelText = LampLabels.FindRef(Name))
 		{
-			LabelText->SetColorAndOpacity(FSlateColor(bLit ? Label : Faded(Label, 0.45f)));
+			LabelText->SetColorAndOpacity(FSlateColor(bLit ? (Lamps.FindRef(Name) && Lamps.FindRef(Name)->bBadge ? Color : Label) : Faded(Label, 0.45f)));
 		}
+		// The reference shows a switch badge only while its switch is on.
+		Show(FName(*FString::Printf(TEXT("Badge_%s"), *Name.ToString())), bLit);
 		LampLit.Add(Name, bLit);
+		LampColors.Add(Name, Color);
 	};
 	auto SetText = [this](const FName Name, const FString& Value, const FLinearColor& Color)
 	{
@@ -731,29 +1173,36 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 		}
 	};
 
-	// --- Lamps -------------------------------------------------------------------------------
+	// --- Master mode and switches --------------------------------------------------------------
 	if (UTextBlock* ModeLabel = LampLabels.FindRef(TEXT("MODE")))
 	{
 		ModeLabel->SetText(FText::FromString(State.ModeLabel));
 	}
+	const FLinearColor ModeColor = State.ModeLabel == TEXT("NAV") ? NavBlue : Instrument;
 	// Switching blinks the mode being switched to.
-	SetLamp(TEXT("MODE"), !State.bModeSwitching || bBlink, State.ModeLabel == TEXT("NAV") ? NavBlue : Green);
+	SetLamp(TEXT("MODE"), !State.bModeSwitching || bBlink, ModeColor);
+	SetText(TEXT("ModeText"), State.ModeLabel, !State.bModeSwitching || bBlink ? Label : Faded(Label, 0.3f));
+	SetText(TEXT("SubModeText"), State.SubModeLabel, Faded(Label, 0.8f));
 	if (UTextBlock* CoupledLabel = LampLabels.FindRef(TEXT("CPLD")))
 	{
 		CoupledLabel->SetText(FText::FromString(State.bSpaceBrake ? TEXT("BRAKE") : TEXT("CPLD")));
 	}
-	SetLamp(TEXT("CPLD"), State.bCoupled || State.bSpaceBrake, State.bSpaceBrake ? Red : Green);
+	SetLamp(TEXT("CPLD"), State.bCoupled || State.bSpaceBrake, State.bSpaceBrake ? Red : Instrument);
 	// G-Safe switched on but suspended by boost: amber.
-	SetLamp(TEXT("GSAF"), State.bGSafeOn, State.bGSafeActive ? Green : Amber);
-	SetLamp(TEXT("CSTB"), State.bComStab, Green);
-	SetLamp(TEXT("BOOST"), State.bBoostActive, GreenBright);
-	// Gear: green down and locked, amber blinking on the way, red blinking low over the ground with it up.
-	SetLamp(TEXT("GEAR"), State.bGearDown || ((State.bGearMoving || State.bGearWarning) && bBlink),
-		State.bGearDown ? Green : State.bGearWarning && !State.bGearMoving ? Red : Amber);
+	SetLamp(TEXT("GSAF"), State.bGSafeOn, State.bGSafeActive ? Instrument : Amber);
+	SetLamp(TEXT("CSTB"), State.bComStab, Instrument);
+	SetLamp(TEXT("BOOST"), State.bBoostActive, InstrumentBright);
+	// Gear: lit down and locked, amber blinking on the way, red blinking low over the ground with it up.
+	const FLinearColor GearColor = State.bGearDown ? Instrument : State.bGearWarning && !State.bGearMoving ? Red : Amber;
+	SetLamp(TEXT("GEAR"), State.bGearDown || ((State.bGearMoving || State.bGearWarning) && bBlink), GearColor);
 	// Precision switched on but not in effect (NAV): amber, like G-Safe suspended by boost.
-	SetLamp(TEXT("PREC"), State.bPrecisionOn, State.bPrecisionActive ? Green : Amber);
+	SetLamp(TEXT("PREC"), State.bPrecisionOn, State.bPrecisionActive ? Instrument : Amber);
+	if (USpaceHudSymbol* Shield = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("Shield"))))
+	{
+		Shield->Color = !State.bGSafeOn ? Faded(Label, 0.3f) : State.bGSafeActive ? Instrument : Amber;
+	}
 
-	// --- Speed gauge, speed, limit -------------------------------------------------------------
+	// --- Speed tube, speed, limiter ------------------------------------------------------------------
 	if (USpaceHudGauge* Speed = Gauges.FindRef(TEXT("SpeedGauge")))
 	{
 		Speed->ReverseZone = SpeedReverseZone;
@@ -761,14 +1210,31 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 		Speed->ReverseValue = State.ReverseFraction;
 		Speed->Marker = State.LimiterFraction;
 		Speed->MarkerColor = Label;
-		Speed->FillColor = State.bAfterburnerActive ? GreenBright : Green;
+		Speed->FillColor = State.bAfterburnerActive ? InstrumentBright : Instrument;
+		// The + rides beside the limiter handle, as in the reference.
+		if (UWidget* Plus = Parts.FindRef(TEXT("LimiterPlus")))
+		{
+			if (UCanvasPanelSlot* PlusSlot = Cast<UCanvasPanelSlot>(Plus->Slot))
+			{
+				const float Along = SpeedReverseZone + (1.f - SpeedReverseZone) * State.LimiterFraction;
+				PlusSlot->SetPosition(FVector2D(-204.0, -80.0 + 132.0 * (1.0 - Along)));
+			}
+		}
 	}
-	SetText(TEXT("SpeedText"), SpaceHudStyle::Speed(State.SpeedCmS), State.ForwardSpeedCmS < -50.f ? Red : Green);
+	const FLinearColor SpeedColor = State.ForwardSpeedCmS < -50.f ? Red : Instrument;
+	SetText(TEXT("SpeedText"), SpaceHudStyle::Speed(State.SpeedCmS), SpeedColor);
+	const bool bKilometres = State.SpeedCmS >= 100000.f;
+	SetText(TEXT("SpeedValue"), bKilometres ? FString::Printf(TEXT("%.2f"), State.SpeedCmS / 100000.f) : FString::Printf(TEXT("%.0f"), State.SpeedCmS / 100.f),
+		State.ForwardSpeedCmS < -50.f ? Red : Label);
+	SetText(TEXT("SpeedUnit"), bKilometres ? TEXT("km/s") : TEXT("m/s"), Faded(Label, 0.8f));
 	SetText(TEXT("LimitText"), FString::Printf(TEXT("LIM %s  %3.0f%%"), *SpaceHudStyle::Speed(State.SpeedLimitCmS), State.LimiterFraction * 100.f),
 		Faded(Label, 0.75f));
+	SetText(TEXT("RowLimitValue"), FString::Printf(TEXT("%.0f%%"), State.LimiterFraction * 100.f), Label);
+	SetText(TEXT("RowBoostValue"), FString::Printf(TEXT("%.0f%%"), State.BoostEnergy * 100.f),
+		State.bBoostLocked || State.BoostEnergy < 0.25f ? Red : State.bBoostActive ? InstrumentBright : Label);
 
-	// --- G meter ------------------------------------------------------------------------------
-	const FLinearColor GColor = State.GForce > State.GSafeMaxG + 0.05f ? Red : State.GForce > State.GSafeMaxG * 0.7f ? Amber : Green;
+	// --- G ----------------------------------------------------------------------------------------------
+	const FLinearColor GColor = State.GForce > State.GSafeMaxG + 0.05f ? Red : State.GForce > State.GSafeMaxG * 0.7f ? Amber : Instrument;
 	if (USpaceHudGauge* GGauge = Gauges.FindRef(TEXT("GGauge")))
 	{
 		GGauge->Value = State.GForce / GMeterRangeG;
@@ -778,42 +1244,90 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& State)
 		GGauge->MarkerColor = Faded(Label, 0.8f);
 	}
 	SetText(TEXT("GText"), FString::Printf(TEXT("%.1f G"), State.GForce), GColor);
+	SetText(TEXT("GValue"), FString::Printf(TEXT("%.1f"), State.GForce), GColor == Instrument ? Label : GColor);
+	SetText(TEXT("GMax"), FString::Printf(TEXT("%.1f"), State.GSafeMaxG), State.bGSafeActive ? Faded(Label, 0.8f) : Faded(Label, 0.4f));
 
 	// --- Boost and afterburner ---------------------------------------------------------------------
 	if (USpaceHudGauge* Boost = Gauges.FindRef(TEXT("BoostGauge")))
 	{
 		Boost->Value = State.BoostEnergy;
 		Boost->ReverseZone = 0.f;
-		Boost->FillColor = State.bBoostLocked || State.BoostEnergy < 0.25f ? Red : State.bBoostActive ? GreenBright : Green;
+		Boost->FillColor = State.bBoostLocked || State.BoostEnergy < 0.25f ? Red : State.bBoostActive ? InstrumentBright : Instrument;
 	}
 	SetText(TEXT("BoostText"), FString::Printf(TEXT("%.0f%%"), State.BoostEnergy * 100.f),
-		State.bBoostLocked ? Red : State.bBoostActive ? GreenBright : Green);
+		State.bBoostLocked ? Red : State.bBoostActive ? InstrumentBright : Instrument);
 
 	if (USpaceHudGauge* Afterburner = Gauges.FindRef(TEXT("AfterburnerGauge")))
 	{
 		Afterburner->Value = State.AfterburnerFuel;
 		Afterburner->bDim = !State.bAfterburnerAvailable;
-		Afterburner->FillColor = State.bAfterburnerLocked || State.AfterburnerFuel < 0.25f ? Red
-			: State.bAfterburnerActive ? GreenBright : Green;
+		Afterburner->FillColor = State.bAfterburnerLocked ? Red : State.bAfterburnerActive ? InstrumentBright : Instrument;
 	}
-	FString AfterburnerText = FString::Printf(TEXT("%.0f%%"), State.AfterburnerFuel * 100.f);
-	FLinearColor AfterburnerColor = Green;
+	FString AfterburnerSuffix;
+	FLinearColor AfterburnerColor = Instrument;
 	if (!State.bAfterburnerAvailable)
 	{
-		AfterburnerText += TEXT(" SCM");
+		AfterburnerSuffix = TEXT("SCM");
 		AfterburnerColor = Faded(Label, 0.45f);
 	}
 	else if (State.bAfterburnerLocked)
 	{
-		AfterburnerText += TEXT(" DRY");
+		AfterburnerSuffix = TEXT("DRY");
 		AfterburnerColor = Red;
 	}
 	else if (State.bAfterburnerActive)
 	{
-		AfterburnerText += TEXT(" BURN");
-		AfterburnerColor = GreenBright;
+		AfterburnerSuffix = TEXT("BURN");
+		AfterburnerColor = InstrumentBright;
 	}
-	SetText(TEXT("AfterburnerText"), AfterburnerText, AfterburnerColor);
+	const FString Percent = FString::Printf(TEXT("%.0f%%"), State.AfterburnerFuel * 100.f);
+	SetText(TEXT("AfterburnerText"), AfterburnerSuffix.IsEmpty() ? Percent : Percent + TEXT(" ") + AfterburnerSuffix, AfterburnerColor);
+	SetText(TEXT("AfterburnerValue"), Percent, AfterburnerColor == Instrument ? Label : AfterburnerColor);
+	SetText(TEXT("AfterburnerLabel"), AfterburnerSuffix.IsEmpty() ? TEXT("AB") : TEXT("AB ") + AfterburnerSuffix, Faded(AfterburnerColor == Instrument ? Label : AfterburnerColor, 0.85f));
+
+	// --- Where the ship is: heading, ladder, altitudes, climb, air ---------------------------------
+	for (const TCHAR* Name : { TEXT("HeadingTape"), TEXT("Ladder"), TEXT("AltitudeTape"), TEXT("AltitudeUnit") })
+	{
+		Show(Name, State.bHasEnvironment);
+	}
+	if (USpaceHudTape* Heading = Cast<USpaceHudTape>(Parts.FindRef(TEXT("HeadingTape"))))
+	{
+		Heading->Value = State.HeadingDeg;
+	}
+	if (USpaceHudLadder* Ladder = Cast<USpaceHudLadder>(Parts.FindRef(TEXT("Ladder"))))
+	{
+		Ladder->PitchDeg = State.PitchDeg;
+		Ladder->RollDeg = State.RollDeg;
+		Ladder->FovDeg = State.ViewFovDeg;
+	}
+	if (USpaceHudTape* Altitude = Cast<USpaceHudTape>(Parts.FindRef(TEXT("AltitudeTape"))))
+	{
+		// Kilometres with two decimals and 100 m between labels low down; whole kilometres high up.
+		const bool bHigh = State.AltitudeAslM > 100000.f;
+		Altitude->Value = State.AltitudeAslM / 1000.f;
+		Altitude->Span = bHigh ? 20.f : 0.2f;
+		Altitude->MajorStep = bHigh ? 10.f : 0.1f;
+		Altitude->LabelDecimals = bHigh ? 0 : 2;
+	}
+	const FString None = TEXT("-");
+	SetText(TEXT("RowRAltValue"), !State.bHasEnvironment ? None : State.AltitudeAglM < 10000.f ? FString::Printf(TEXT("%.0fm"), State.AltitudeAglM)
+		: FString::Printf(TEXT("%.1fkm"), State.AltitudeAglM / 1000.f), Label);
+	SetText(TEXT("RowVsiValue"), State.bHasEnvironment ? FString::Printf(TEXT("%+.0fm/s"), State.VerticalSpeedMS) : None, Label);
+	SetText(TEXT("RowAtmoValue"), State.bHasEnvironment ? FString::Printf(TEXT("%.3fp"), State.AtmosphereDensity) : None, Label);
+	SetText(TEXT("RowGearValue"), State.GearLabel, State.bGearWarning && !State.bGearDown ? (bBlink ? Red : Faded(Red, 0.4f))
+		: State.bGearMoving ? Amber : State.bGearDown ? Instrument : Label);
+	SetText(TEXT("RowCruiseValue"), State.CruiseLabel, State.CruiseLabel == TEXT("OFF") ? Faded(Label, 0.6f) : Instrument);
+
+	// --- Strafe cross and gyro ---------------------------------------------------------------------------
+	if (USpaceHudSymbol* Strafe = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("Strafe"))))
+	{
+		Strafe->Value = State.StrafeInput;
+		Strafe->Value2 = State.Drift;
+	}
+	if (USpaceHudSymbol* Gyro = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("Gyro"))))
+	{
+		Gyro->Value = State.TurnRate;
+	}
 
 	// --- Virtual joystick ---------------------------------------------------------------------------
 	if (VirtualJoystickBox)
@@ -832,8 +1346,28 @@ void USpaceFlightHud::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	Super::NativeTick(MyGeometry, InDeltaTime);
 	// The root panel collapses rather than this widget, so the widget keeps ticking and can come back.
 	static const IConsoleVariable* HudMode = IConsoleManager::Get().FindConsoleVariable(TEXT("space.Hud"));
-	ApplyState(MakeState(Cast<ASpaceshipPawn>(GetOwningPlayerPawn()), HudMode ? HudMode->GetInt() : 1));
+	const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(GetOwningPlayerPawn());
+	FSpaceFlightHudState State = MakeState(Ship, HudMode ? HudMode->GetInt() : 1);
+	// The HUD is drawn over the view, so its horizon and heading are the view's.
+	if (const APlayerController* Player = GetOwningPlayer())
+	{
+		if (Player->PlayerCameraManager)
+		{
+			State = ApplyView(State, Ship, Player->PlayerCameraManager->GetCameraRotation(), Player->PlayerCameraManager->GetFOVAngle());
+		}
+	}
+	ApplyState(State);
 	DebugAdvance(InDeltaTime);
+}
+
+bool USpaceFlightHud::DebugIsShown(FName WidgetName) const
+{
+	const UWidget* Widget = Parts.FindRef(WidgetName);
+	if (!Widget)
+	{
+		Widget = Texts.FindRef(WidgetName);
+	}
+	return Widget && Widget->GetVisibility() != ESlateVisibility::Collapsed && Widget->GetVisibility() != ESlateVisibility::Hidden;
 }
 
 TArray<FString> USpaceFlightHud::DebugGetWidgetNames() const
@@ -848,8 +1382,8 @@ TArray<FString> USpaceFlightHud::DebugGetWidgetNames() const
 
 bool USpaceFlightHud::DebugIsLampLit(FName Lamp, FLinearColor& OutColor) const
 {
-	const USpaceHudLamp* Found = Lamps.FindRef(Lamp);
-	OutColor = Found ? Found->Color : FLinearColor::Transparent;
+	// The colour the state gave the switch, whether or not this layout draws it as a lamp.
+	OutColor = LampColors.FindRef(Lamp);
 	return LampLit.FindRef(Lamp);
 }
 

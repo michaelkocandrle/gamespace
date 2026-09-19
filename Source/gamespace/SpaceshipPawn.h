@@ -204,6 +204,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
 	float GetThrottle() const { return ThrustInput; }
 
+	/** Pilot's translation input this tick, -1..1: X forward, Y strafe right, Z lift up (the HUD's strafe cross). */
+	FVector GetLinearInput() const { return FVector(ThrustInput, StrafeInput, LiftInput); }
+
+	/** Rotation rate, deg/s, local: X roll, Y pitch, Z yaw. */
+	FVector GetAngularVelocity() const { return AngularVelocity; }
+
+	/** The faster of the pitch and yaw rates, deg/s: full scale of the HUD's rate indicator. */
+	float GetMaxTurnRate() const { return FMath::Max(PitchRate, YawRate); }
+
 	/** Coupled flight (the flight computer brakes what the keys do not ask for). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Flight")
 	bool IsFlightAssistOn() const { return bFlightAssist; }

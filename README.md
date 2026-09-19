@@ -544,6 +544,29 @@ Any level without a World Settings override therefore spawns a flyable ship at i
 
 ## Flight HUD (SC-1c, UMG)
 
+**Since 19. 9. 2026 the layout follows the current Star Citizen HUD** (`Docs/UI/Screenshot 2026-09-17 201854.png`,
+every element measured at 1080p from the middle of the screen; Slate's DPI scale fits other resolutions), in
+ice-cyan and near-white in Rajdhani Medium with a faint cyan halo:
+- **left:** master mode icon, `SCM`/`NAV` over the sub-mode (`FLIGHT`, `PREC`, `SPOOL`, `CRUISE`); switch
+  badges shown only while on (`CSTB`, `CPLD`/`BRAKE`, `PREC`, `BOOST`); the strafe cross (red arrow heads
+  lit in the strafe direction, a dot for drift across the nose); the tall thin speed tube with the limiter
+  handle and a `+` beside it; the speed and `m/s` under it; `BOOST` / `LIMIT` rows under a bracket;
+- **middle:** heading tape (0 = north, the world Z axis on the local horizon), the pitch ladder (horizon
+  strokes and 5-degree brackets, rolled and projected with the view's field of view), the nose reticle,
+  the virtual joystick (now faint);
+- **right:** the afterburner tube with its red reserve, the percentage and `AB` (`AB BURN/DRY/SCM`); the
+  altitude tape in km above sea level with the value in a box; the gyro (turn rate as an orange line) and
+  the G-Safe shield (dim when off, amber when suspended); G with the G-Safe limit under a line; `GEAR` /
+  `CRUISE` rows at the top and `R-ALT` / `VSI` / `ATMO` at the bottom.
+- Heading, ladder and altitudes only near a body. SC's fuel, countermeasure and weapon readouts are left
+  out: this game has no such systems yet, and the HUD shows nothing it cannot back with real data.
+- Painted widgets: `USpaceHudSymbol` (mode icon, strafe cross, gyro, shield, ring, reticle, plus,
+  brackets), `USpaceHudTape` (heading / altitude), `USpaceHudLadder`; `USpaceHudGauge` gained a reserve
+  band. The cockpit displays (`USpaceCockpitDisplays`) use the same palette.
+
+The rest of this section describes SC-1c's first layout; its logic (lamps, limiter, reverse zone,
+afterburner states, virtual joystick) is unchanged.
+
 `Source/gamespace/SpaceFlightHud.*` - after `Docs/UI/SC_ThrottleHUD_VisualReference.md`: thin,
 translucent cyan lines framing the middle of the screen, no panels. Built entirely in C++, no widget
 Blueprint: `USpaceFlightHud` (a `UUserWidget`) constructs its widget tree in `Initialize` from UMG

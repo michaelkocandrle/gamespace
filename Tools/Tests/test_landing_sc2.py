@@ -62,7 +62,8 @@ def lamp(hud, name):
 
 
 def green(color):
-    return color.r < 0.85 and color.g > 0.9 and color.b < 0.5
+    # The HUD's "in effect" colour: ice-cyan since the HUD follows the current SC HUD (was green).
+    return color.r < 0.8 and color.g > 0.8 and color.b > 0.95
 
 
 def amber(color):
@@ -270,7 +271,7 @@ check("precision turns at PrecisionTurnScale of the normal rate",
 hud = unreal.new_object(unreal.SpaceFlightHud)
 hud.debug_initialize()
 names = set(hud.debug_get_widget_names())
-check("HUD has GEAR and PREC lamps", {"Lamp_GEAR", "Lamp_PREC"} <= names)
+check("HUD shows gear and precision (GEAR row, PREC badge)", {"RowGearValue", "Lamp_PREC"} <= names)
 ship = spawn()
 try:
     state = unreal.SpaceFlightHud.make_state(ship, 1)
@@ -282,7 +283,8 @@ try:
     hud.apply_state(state)
     lit_gear, gear_color = lamp(hud, "GEAR")
     lit_prec, prec_color = lamp(hud, "PREC")
-    check("gear down: GEAR green, PREC green", state.gear_down and lit_gear and green(gear_color) and lit_prec and green(prec_color))
+    check("gear down: GEAR and PREC lit in the instrument colour, GEAR row DOWN",
+          state.gear_down and lit_gear and green(gear_color) and lit_prec and green(prec_color) and hud.debug_get_text("RowGearValue") == "DOWN")
     ship.request_master_mode(unreal.MasterMode.NAV)
     ship.debug_finish_master_mode_switch()
     state = unreal.SpaceFlightHud.make_state(ship, 1)

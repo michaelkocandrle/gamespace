@@ -56,8 +56,11 @@ try:
     state = unreal.SpaceFlightHud.make_state(ship, 1)
     hud.apply_state(state)
     displays.apply_state(state)
-    same = [n for n in ("SpeedText", "LimitText", "GText", "BoostText", "AfterburnerText") if displays.debug_get_text(n) == hud.debug_get_text(n)]
-    check("the displays read the same as the HUD", len(same) == 5, "same: %s; speed %r" % (same, displays.debug_get_text("SpeedText")))
+    same = [displays.debug_get_text("SpeedText").startswith(hud.debug_get_text("SpeedValue") + " "),
+            displays.debug_get_text("GText") == hud.debug_get_text("GValue") + " G",
+            displays.debug_get_text("BoostText") == hud.debug_get_text("RowBoostValue"),
+            displays.debug_get_text("AfterburnerText").startswith(hud.debug_get_text("AfterburnerValue"))]
+    check("the displays read the same as the HUD", all(same), "%s; speed %r vs %r" % (same, displays.debug_get_text("SpeedText"), hud.debug_get_text("SpeedValue")))
     check("speed shown, not zero", displays.debug_get_text("SpeedText") not in ("", "0 M/S"), displays.debug_get_text("SpeedText"))
     lit = lambda w, n: w.debug_is_lamp_lit(n) is not None
     check("lamps match the HUD's", all(lit(displays, n) == lit(hud, n) for n in ("MODE", "CPLD", "GSAF", "CSTB", "BOOST", "GEAR", "PREC")))

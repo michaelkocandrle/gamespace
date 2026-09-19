@@ -144,6 +144,66 @@ struct GAMESPACE_API FSpaceFlightHudState
 	/** Precision mode in effect (on, and in SCM). */
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	bool bPrecisionActive = false;
+
+	/** Second line under the master mode: FLIGHT, PREC, SPOOL (cruise charging) or CRUISE. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FString SubModeLabel;
+
+	/** Landing gear for the HUD's status rows: UP, DOWN or MOVING. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FString GearLabel;
+
+	/** Cruise for the HUD's status rows: OFF, SPOOL, ON or DROP. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FString CruiseLabel;
+
+	/** Near a body: altitudes, climb rate, air and the horizon are known. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bHasEnvironment = false;
+
+	/** Above sea level (the altitude tape) and above the terrain below (R-ALT), metres. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float AltitudeAslM = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float AltitudeAglM = 0.f;
+
+	/** Climb rate, m/s (VSI). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float VerticalSpeedMS = 0.f;
+
+	/** Air density relative to sea level, 0..1 (ATMO). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float AtmosphereDensity = 0.f;
+
+	/**
+	 * Heading (0 north = the body's axis, 90 east), pitch (nose up +) and roll (right wing down +),
+	 * degrees, against the local horizon. From the ship's nose; ApplyView replaces them with the view's.
+	 */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float HeadingDeg = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float PitchDeg = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float RollDeg = 0.f;
+
+	/** Horizontal field of view the pitch ladder is projected with. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float ViewFovDeg = 90.f;
+
+	/** Strafe input, -1..1: X right, Y up (the strafe cross's arrow heads). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FVector2D StrafeInput = FVector2D::ZeroVector;
+
+	/** Drift across the nose, -1..1 of 50 m/s: X right, Y up (the strafe cross's dot). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FVector2D Drift = FVector2D::ZeroVector;
+
+	/** Turn rate, -1..1 of the ship's top rate: X yaw right, Y pitch up (the gyro's rate line). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FVector2D TurnRate = FVector2D::ZeroVector;
 };
 
 /**
@@ -181,6 +241,13 @@ public:
 	/** Frame and ticks drawn fainter (system unavailable). */
 	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
 	bool bDim = false;
+
+	/** The lowest part of the fill, 0..1 of the gauge, is drawn in ReserveColor (the reference's red reserve). */
+	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
+	float ReserveZone = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
+	FLinearColor ReserveColor = FLinearColor::Red;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
 	bool bHorizontal = false;
@@ -267,6 +334,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
 	float SquareMax = 6.f;
 
+	/** Drawn as the reference's switch badge: a thin outline round the label in the lamp's colour, no square. */
+	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
+	bool bBadge = false;
+
 	/** Sets where the lamp should go; a change starts a short flash. */
 	void SetTarget(bool bLit, const FLinearColor& InColor);
 
@@ -298,9 +369,165 @@ protected:
 		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 };
 
+/** What a USpaceHudSymbol draws. */
+UENUM(BlueprintType)
+enum class ESpaceHudSymbol : uint8
+{
+	/** Master mode: a ring with bars in it. */
+	ModeIcon,
+	/** Dotted cross with arrow heads, lit in the direction of the strafe input; a dot for the drift. */
+	Strafe,
+	/** Cross with a small ring at each end and the turn rate as a line from the middle. */
+	Gyro,
+	/** G-Safe: a shield with a G. */
+	Shield,
+	/** A small open ring (beside the afterburner percentage). */
+	Ring,
+	/** The nose reticle: four short ticks round a dot. */
+	Reticle,
+	/** A plus (beside the speed limiter). */
+	Plus,
+	/** A polyline through Points: the thin brackets beside the reference's text blocks. */
+	Line,
+};
+
+/** One of the Star Citizen HUD's drawn symbols (see ESpaceHudSymbol). */
+UCLASS()
+class GAMESPACE_API USpaceHudSymbol : public UUserWidget
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
+	ESpaceHudSymbol Symbol = ESpaceHudSymbol::Line;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
+	FLinearColor Color = FLinearColor::White;
+
+	/** Strafe arrow heads, the gyro's rate line. */
+	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
+	FLinearColor Accent = FLinearColor::Red;
+
+	/** Strafe: input; gyro: turn rate. -1..1, X right, Y up. */
+	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
+	FVector2D Value = FVector2D::ZeroVector;
+
+	/** Strafe: drift. -1..1, X right, Y up. */
+	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
+	FVector2D Value2 = FVector2D::ZeroVector;
+
+	/** Line: the points as fractions of the widget's size. */
+	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
+	TArray<FVector2D> Points;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
+	float Thickness = 1.2f;
+
+protected:
+	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+};
+
 /**
- * SC-1c flight HUD in UMG, after Docs/UI/SC_ThrottleHUD_VisualReference.md: thin, translucent cyan
- * lines around the middle of the screen instead of panels.
+ * A scale moving under a fixed mark: the heading tape (horizontal, labels above the ticks, the value
+ * under a caret, wraps at 360) or the altitude tape (vertical, labels right of the ticks, the value in
+ * a box at the mark).
+ */
+UCLASS()
+class GAMESPACE_API USpaceHudTape : public UUserWidget
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintReadOnly, Category = "Tape")
+	bool bVertical = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Tape")
+	bool bWrap360 = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Tape")
+	float Value = 0.f;
+
+	/** Units shown over the tape's length. */
+	UPROPERTY(BlueprintReadOnly, Category = "Tape")
+	float Span = 70.f;
+
+	/** Labelled tick every MajorStep units, MinorPerMajor ticks between. */
+	UPROPERTY(BlueprintReadOnly, Category = "Tape")
+	float MajorStep = 20.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Tape")
+	int32 MinorPerMajor = 4;
+
+	/** Labels and the value print Value x LabelScale with LabelDecimals decimals. */
+	UPROPERTY(BlueprintReadOnly, Category = "Tape")
+	float LabelScale = 1.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Tape")
+	int32 LabelDecimals = 0;
+
+	/** The mark along the tape, 0..1 (vertical: from the top). */
+	UPROPERTY(BlueprintReadOnly, Category = "Tape")
+	float MarkAt = 0.5f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Tape")
+	FLinearColor Color = FLinearColor::White;
+
+	/** The text a value prints as (labels and the mark). */
+	UFUNCTION(BlueprintCallable, Category = "Tape")
+	FString Format(float InValue) const;
+
+protected:
+	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+};
+
+/**
+ * The pitch ladder over the whole view: two horizon strokes and a bracket every 5 degrees with its
+ * number, rolled with the view and projected with its field of view, so the lines sit on the real
+ * horizon and on the real 5-degree lines.
+ */
+UCLASS()
+class GAMESPACE_API USpaceHudLadder : public UUserWidget
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintReadOnly, Category = "Ladder")
+	float PitchDeg = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Ladder")
+	float RollDeg = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Ladder")
+	float FovDeg = 90.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Ladder")
+	FLinearColor Color = FLinearColor::White;
+
+	/** Where the line for PitchLineDeg is drawn, relative to the view's centre (pixels of a view this wide). */
+	UFUNCTION(BlueprintCallable, Category = "Ladder")
+	static FVector2D LineCentre(float PitchLineDeg, float InPitchDeg, float InRollDeg, float InFovDeg, float ViewWidth);
+
+protected:
+	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+};
+
+/**
+ * The flight HUD in UMG, laid out after the current Star Citizen HUD (Docs/UI/Screenshot 2026-09-17
+ * 201854.png, measured at 1080p from the middle of the screen). SC-1c's version followed an older
+ * reference (Docs/UI/SC_ThrottleHUD_VisualReference.md); the lines below describe that one where the
+ * new layout does not say otherwise:
+ * - left: master mode icon with SCM/NAV over the sub-mode, switch badges (CSTB, CPLD, PREC, BOOST),
+ *   the strafe cross, the tall speed tube with the limiter handle and a +, speed and m/s under it, and
+ *   BOOST / LIMIT rows under a bracket;
+ * - middle: heading tape, pitch ladder, nose reticle, the mouse virtual joystick;
+ * - right: afterburner tube (red reserve) with its percentage, the altitude tape in km, the gyro
+ *   (turn rate) with the G-Safe shield, G and the G-Safe limit, GEAR / CRUISE rows at the top and
+ *   R-ALT / VSI / ATMO at the bottom.
+ * Heading, ladder and altitudes only near a body. What SC shows and this game has no system for yet
+ * (fuel, countermeasures, weapons) is left out rather than faked.
  *
  * - Left of centre: status lamps (SCM/NAV, CPLD, GSAF, CSTB, BOOST, GEAR, PREC) beside the vertical speed
  *   gauge (fill = speed along the nose, marker = speed limiter, red reverse zone at the bottom), speed and
@@ -324,6 +551,11 @@ public:
 	/** What the HUD shows for this ship (null: nothing, not visible). The widgets display exactly this. */
 	UFUNCTION(BlueprintCallable, Category = "Flight HUD")
 	static FSpaceFlightHudState MakeState(const ASpaceshipPawn* Ship, int32 HudMode);
+
+	/** Heading, pitch and roll of the view instead of the ship's nose, and the view's field of view:
+	 * the HUD is drawn over the view, so its horizon has to be the view's. */
+	UFUNCTION(BlueprintCallable, Category = "Flight HUD")
+	static FSpaceFlightHudState ApplyView(const FSpaceFlightHudState& State, const ASpaceshipPawn* Ship, FRotator ViewRotation, float FovDeg);
 
 	/** Pushes a state into the widgets. Called every tick; public for tests. */
 	UFUNCTION(BlueprintCallable, Category = "Flight HUD")
@@ -364,6 +596,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Flight HUD|Tests")
 	USpaceHudVirtualJoystick* DebugGetVirtualJoystick() const { return VirtualJoystick; }
 
+	/** Tests: a drawn symbol, tape or the ladder by widget name. */
+	UFUNCTION(BlueprintCallable, Category = "Flight HUD|Tests")
+	UWidget* DebugGetPart(FName PartName) const { return Parts.FindRef(PartName); }
+
+	/** Tests: whether a widget is shown (not collapsed or hidden). */
+	UFUNCTION(BlueprintCallable, Category = "Flight HUD|Tests")
+	bool DebugIsShown(FName WidgetName) const;
+
 	/** Share of the speed gauge's length below zero, for flying backwards. */
 	static constexpr float SpeedReverseZone = 0.12f;
 
@@ -393,10 +633,15 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<USpaceHudVirtualJoystick> VirtualJoystick;
 
+	/** Symbols, tapes and the ladder by name. */
+	UPROPERTY(Transient)
+	TMap<FName, TObjectPtr<UWidget>> Parts;
+
 	UPROPERTY(Transient)
 	TObjectPtr<UWidget> VirtualJoystickBox;
 
 	TMap<FName, bool> LampLit;
+	TMap<FName, FLinearColor> LampColors;
 	float Time = 0.f;
 };
 

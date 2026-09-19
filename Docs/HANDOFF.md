@@ -306,6 +306,13 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       jako světlé dráty přes výhled;
     - ladění podle snímků: pole shotu `cockpit_light` [klíčové, výplňové], `display_light`, `interior_tint`,
       scénář `cockpit_light` (nastavení ze setupu, staré šedé, bez světel, ve vesmíru, v atmosféře).
+25. **HUD podle současného SC** (19. 9. 2026, krok B podle autorova „1:1“): rozložení prvek po prvku podle
+    `Docs/UI/Screenshot 2026-09-17 201854.png` (změřeno v 1080p od středu), barvy ledově azurové a téměř
+    bílé místo zelené ze SC-1c, písmo Rajdhani Medium se slabou září. Nové: kurzová páska, žebřík sklonu,
+    výšková páska v km, R-ALT / VSI / ATMO, gyro s rychlostí otáčení, štít G-Safe, kříž strafe, ikona
+    režimu s pod-režimem, odznaky přepínačů (jen zapnuté), řádky BOOST / LIMIT a GEAR / CRUISE. Vynechané:
+    palivo H/Q, DECOY/NOISE, GUN – hra ty systémy nemá a HUD nic nepředstírá. Oprava: obrysy (trubice,
+    odznaky, pilulky na displejích) se kreslily jako plné světlé plochy. Podrobnosti v README („Flight HUD“).
 
 ---
 
@@ -416,7 +423,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_free_look.py` | Free look (neomezený yaw, návrat). |
 | `test_ship_import.py` | Importovaná loď: meshe, kolize, sockety, materiály, všechny hodnoty ze setup JSON (s `GAMESPACE_SHIP_MANIFEST`). |
 | `test_ifcs_sc1.py` | SC-1a: limity trysek podle směru, coupled brzdění, decoupled, omezovač, spacebrake, SCM/NAV, setrvačnost rotace, G-Safe, ComStab, virtuální joystick, input assety, hodnoty Vanguardu. |
-| `test_flight_hud_sc1c.py` | SC-1c: strom widgetů, data HUD z lodi (rychlost vůči omezovači, afterburner, pozpátku, kontrolky, G, palivo, joystick) a jejich zobrazení ve widgetech. Vzhled headless ověřit nejde. |
+| `test_flight_hud_sc1c.py` | HUD (logika SC-1c v rozložení podle současného SC): všechny prvky reference, pásky (kurz přes 360, výška), žebřík (poloha čar podle FOV a náklonu), odznaky jen zapnuté, bez tělesa bez kurzu a výšek, rychlost vůči omezovači, afterburner, pozpátku, kontrolky, G a limit G-Safe, strafe, joystick. Vzhled headless ověřit nejde. |
 | `test_boost_afterburner_sc1b.py` | SC-1b: boost jen manévrovací trysky a rotace, vypnutí G-Safe, afterburner (tah, limit × omezovač, palivo, zamčení, doplňování, plynulý návrat, coupled i decoupled, jen SCM, G-Safe zůstává), Shift + Tab, input a hodnoty Vanguardu. |
 | `test_flight_modes.py` | Boost energie, cruise jen v NAV (vesmír i nad Veyrou), výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
 | `test_cockpit_displays.py` | Displeje v kokpitu: dvě obrazovky (FLIGHT, SYSTEMS) se všemi přístroji a velkým písmem, stejné hodnoty jako HUD pro stejnou loď, komponenta na lodi, slot `M_Ship_Vanguard_Screens` v interiéru s unlit `MI_Ship_Vanguard_Screens`. Jak vypadají: `-Preset cockpit`. |
