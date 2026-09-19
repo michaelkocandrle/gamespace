@@ -43,6 +43,14 @@ class ImportPlanTest(unittest.TestCase):
         # A hull with small glass bits keeps Nanite.
         self.assertFalse(import_ship.is_glass_part("SM_Ship_X", {"materials": ["M_Ship_X_Hull", "M_Ship_X_Glass"]}))
 
+    def test_setup_can_turn_nanite_off_for_a_part(self):
+        manifest = json.loads(json.dumps(self.manifest))
+        manifest["meshes"]["SM_Ship_Vanguard"]["part"] = "Interior"
+        without = import_ship.build_plan(manifest, "C:/art/Vanguard/Export")
+        with_setup = import_ship.build_plan(manifest, "C:/art/Vanguard/Export", {"no_nanite_parts": ["Interior"]})
+        self.assertTrue(without["meshes"][0]["nanite"])
+        self.assertFalse(with_setup["meshes"][0]["nanite"])
+
     def test_pawn_settings_come_from_the_manifest(self):
         settings = {(c, p): v for c, p, v in self.plan["pawn_settings"]}
         s = self.manifest["suggested_pawn_settings"]

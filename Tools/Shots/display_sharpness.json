@@ -1,0 +1,9 @@
+{
+  "_comment": "Cockpit displays and dashboard in fast flight, with the game's own settings (TSR, Nanite on, camera shake): they must stay sharp. They broke up while the interior was Nanite (wrong motion vectors; sharp with r.Nanite 0), now it is not (no_nanite_parts in the setup). The console field runs console commands before a shot, for comparing settings; they stay set for the next shots. Run: Tools/Shots.ps1 -Preset display_sharpness",
+  "shots": [
+    { "name": "a_afterburner_400", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": 400, "afterburner": true, "settle": 1.0, "console": ["r.AntiAliasingMethod 4", "r.Nanite 1", "space.CameraShake 1"] },
+    { "name": "b_boost_turning", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": 180, "boost": true, "stick": [0.55, 0.3], "settle": 1.0 },
+    { "name": "c_nav_fast", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "speed_ms": 900, "mode": "NAV", "settle": 1.0 },
+    { "name": "d_slow", "camera": "cockpit", "altitude_m": 6000, "facing": "horizon", "speed_ms": 50, "settle": 1.0 }
+  ]
+}

@@ -101,7 +101,7 @@ if plan["materials"]:
             check("%s glows" % name, abs(got - spec["emissive_strength"]) < 1e-3 and got > 1.0, "%.1f" % got)
     glass = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Glass")
     check("M_Ship_Glass is translucent", glass is not None and glass.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_TRANSLUCENT)
-    for master in ("M_Ship_Hull", "M_Ship_PBR", "M_Ship_Screen"):
+    for master in ("M_Ship_Hull", "M_Ship_PBR"):
         asset = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/" + master)
         check("%s used with Nanite" % master, asset is not None and asset.get_editor_property("used_with_nanite"))
 

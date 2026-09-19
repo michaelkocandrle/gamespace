@@ -203,12 +203,15 @@ sits well back from it as in the Star Citizen reference (`Docs/UI/Screenshot 202
 **eye (174, 0, 189)**, the dashboard top 8 degrees and the displays 14-25 degrees below the eye.
 **Displays:** the two big screens are flat quads (slot `M_Ship_Vanguard_Screens`, recipe `interior.displays`)
 that show the flight instruments live: `UCockpitDisplayComponent` draws `USpaceCockpitDisplays` (the
-flight HUD's widgets, driven by the same `ApplyState`) into a render target (2 x 640 x 420) 30 times a second
-while the ship is flown from the cockpit, and the unlit `M_Ship_Screen` shows it. The screens are widened over
-the side button strips (~38 x 25 cm) and styled like the reference's MFDs (deep blue glass, a title over a rule,
+flight HUD's widgets, driven by the same `ApplyState`) into a render target (both displays side by side) 60 times a second
+while the ship is flown from the cockpit, and the unlit `M_Ship_Screen` (pixel animation) shows it. The screens
+fill the glass in the bezels (~29 x 25 cm; layout 560 x 490, drawn at the size they appear on screen, from the
+window width - `ScreenShareAt88`) and are styled like the reference's MFDs (deep blue glass, a title over a rule,
 a `< PAGE >` bar): left FLIGHT (speed, limiter and G large, the mode pill, SPD / BST / AB / G bars like the
 power page), right SYSTEMS (a list like the contacts page: COUPLED, G-SAFE, COMSTAB, BOOST, PRECISION and GEAR
-with their switch pills, CRUISE with its state). The screen HUD stays,
+with their switch pills, CRUISE with its state). The interior is imported without Nanite (`no_nanite_parts` in
+the setup): with Nanite its motion vectors were wrong in fast flight and temporal AA broke the displays' type
+up. The cockpit camera has no motion blur. The screen HUD stays,
 compacted so it sits above the dashboard. The cockpit is dark like the reference: the displays light it
 (a rect light at each `Display_*` socket), a faint key and fill light keep the dashboard's shape, and the inside
 of the canopy frame has its own dark slot (`M_Ship_Vanguard_CanopyFrame`).

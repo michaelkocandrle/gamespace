@@ -55,6 +55,8 @@ struct FSpaceShot
 	float CockpitFillCd = -1.f;
 	float DisplayLightCd = -1.f;
 	float InteriorTint = -1.f;
+	/** Console commands run before the shot (e.g. "r.AntiAliasingMethod 2"), for comparing settings. */
+	TArray<FString> Console;
 };
 
 /**

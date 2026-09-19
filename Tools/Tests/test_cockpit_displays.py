@@ -66,6 +66,12 @@ try:
     lit = lambda w, n: w.debug_is_lamp_lit(n) is not None
     check("lamps match the HUD's", all(lit(displays, n) == lit(hud, n) for n in ("MODE", "CPLD", "GSAF", "CSTB", "BOOST", "GEAR", "PREC")))
     check("the pawn has the display component", isinstance(ship.get_editor_property("cockpit_displays"), unreal.CockpitDisplayComponent))
+    cockpit_camera = ship.get_editor_property("cockpit_camera")
+    pp = cockpit_camera.get_editor_property("post_process_settings")
+    check("no motion blur from the seat (camera shake smeared the displays)",
+          pp.get_editor_property("override_motion_blur_amount") and pp.get_editor_property("motion_blur_amount") == 0.0)
+    scale = ship.get_editor_property("cockpit_displays").pixel_scale()
+    check("displays drawn at about their size on screen (1920 px wide, 88 deg: ~0.65 of the 560 px layout)", 0.5 < scale < 0.8, "%.2f" % scale)
 finally:
     eas.destroy_actor(ship)
 
@@ -76,6 +82,8 @@ check("interior mesh has the display slot", "M_Ship_Vanguard_Screens" in slots, 
 master = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Screen")
 check("display master is unlit (no sky reflections over the instruments)",
       master is not None and master.get_editor_property("shading_model") == unreal.MaterialShadingModel.MSM_UNLIT)
+check("display master: opaque with pixel animation (temporal AA keeps the type; translucent doubled it under shake)",
+      master.get_editor_property("has_pixel_animation") and master.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_OPAQUE)
 vanguard = eas.spawn_actor_from_class(unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard"),
                                       unreal.Vector(0, 0, 0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
 try:

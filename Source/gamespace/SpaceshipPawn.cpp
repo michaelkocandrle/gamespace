@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/AudioComponent.h"
 #include "Components/PointLightComponent.h"
+#include "HAL/IConsoleManager.h"
 #include "CockpitDisplayComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
@@ -166,6 +167,12 @@ ASpaceshipPawn::ASpaceshipPawn()
 	CockpitCamera->bUsePawnControlRotation = false;
 	// The view comes from the first active camera component, so only one may be active.
 	CockpitCamera->SetAutoActivate(false);
+	// No motion blur from the seat: the cockpit moves with the eye except for the camera shake (boost,
+	// afterburner, heat), and the engine's default blur smeared the whole dashboard and its displays
+	// with every shake. The Star Citizen reference keeps the cockpit sharp.
+	CockpitCamera->PostProcessSettings.bOverride_MotionBlurAmount = true;
+	CockpitCamera->PostProcessSettings.MotionBlurAmount = 0.f;
+	CockpitCamera->PostProcessBlendWeight = 1.f;
 
 	for (TObjectPtr<UPointLightComponent>* Light : { &CockpitLight, &CockpitFillLight })
 	{
@@ -2292,9 +2299,11 @@ void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 	CockpitCamera->SetFieldOfView(FMath::Lerp(BaseCockpitFov, CockpitZoomFov, CockpitZoom) + 0.6f * FovKick * (1.f - CockpitZoom));
 
 	// Smooth noise rather than random jumps: a rumble, not a flicker. Nothing moves when calm.
+	static const IConsoleVariable* ShakeScale = IConsoleManager::Get().RegisterConsoleVariable(TEXT("space.CameraShake"), 1.f,
+		TEXT("Camera shake multiplier (boost, afterburner, cruise, heat, kicks); 0 = none."), ECVF_Default);
 	const float Spool = CruiseState == ECruiseState::Spooling ? GetCruiseSpoolProgress() : 0.f;
-	const float Amplitude = HeatShakeCm * Heat * Heat + BoostShakeCm * BoostBlend + AfterburnerShakeCm * AfterburnerFeel
-		+ CruiseShakeCm * (Spool * Spool + 0.25f * CruiseBlend) + KickShakeCm * CameraKick;
+	const float Amplitude = ShakeScale->GetFloat() * (HeatShakeCm * Heat * Heat + BoostShakeCm * BoostBlend + AfterburnerShakeCm * AfterburnerFeel
+		+ CruiseShakeCm * (Spool * Spool + 0.25f * CruiseBlend) + KickShakeCm * CameraKick);
 	const double Time = GetWorld()->GetTimeSeconds();
 	const FVector Shake = Amplitude < 0.01f
 		? FVector::ZeroVector

@@ -11,6 +11,8 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Misc/App.h"
 #include "RenderDeferredCleanup.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
 #include "Slate/WidgetRenderer.h"
 #include "SpaceFlightHud.h"
 #include "SpaceshipPawn.h"
@@ -70,9 +72,10 @@ void UCockpitDisplayComponent::BeginPlay()
 	}
 	SlateWidget = Widget->TakeWidget();
 
-	// Like UWidgetComponent: Slate draws in linear space into an sRGB target, the material samples it as colour.
-	const FVector2D Size(USpaceCockpitDisplays::DisplayWidth * 2.f, USpaceCockpitDisplays::DisplayHeight);
-	RenderTarget = FWidgetRenderer::CreateTargetFor(Size, TF_Bilinear, false);
+	// Like UWidgetComponent: Slate draws in linear space into an sRGB target, the material samples it as
+	// colour. Sized to how large the displays are on screen (see PixelScale), not to their layout.
+	CurrentScale = PixelScale();
+	RenderTarget = FWidgetRenderer::CreateTargetFor(TargetSize(CurrentScale), TF_Bilinear, false);
 	RenderTarget->ClearColor = FLinearColor::Black;
 	Renderer = new FWidgetRenderer(false);
 
@@ -167,7 +170,35 @@ void UCockpitDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	}
 	// The displays are part of the ship: H hides the HUD overlay, not the dashboard.
 	Widget->ApplyState(USpaceFlightHud::MakeState(Ship, 1));
-	const FVector2D Size(RenderTarget->SizeX, RenderTarget->SizeY);
-	Renderer->DrawWidget(RenderTarget, SlateWidget.ToSharedRef(), Size, SinceDraw);
+	// Follow the window size: the type is laid out for 560 x 490 and drawn at the scale the screen shows
+	// it, so the font rasteriser draws every letter at its real size. Re-made only on a real change.
+	const float Scale = PixelScale();
+	if (FMath::Abs(Scale - CurrentScale) > 0.099f)
+	{
+		CurrentScale = Scale;
+		const FVector2D NewSize = TargetSize(Scale);
+		RenderTarget->ResizeTarget(uint32(NewSize.X), uint32(NewSize.Y));
+	}
+	Renderer->DrawWidget(RenderTarget, SlateWidget.ToSharedRef(), CurrentScale, FVector2D(RenderTarget->SizeX, RenderTarget->SizeY), SinceDraw);
 	SinceDraw = 0.f;
+}
+
+float UCockpitDisplayComponent::PixelScale() const
+{
+	FVector2D Viewport(1920.0, 1080.0);
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(Viewport);
+	}
+	// From the window's width only, not the live field of view: the afterburner and cruise widen the
+	// view a little every frame, the scale flipped between two steps and the target was re-made (and
+	// drawn half-made) every frame, which broke the type up in flight.
+	const float OnScreen = float(Viewport.X) * ScreenShareAt88;
+	const float Scale = OnScreen * Oversample / USpaceCockpitDisplays::DisplayWidth;
+	return FMath::Clamp(FMath::RoundToFloat(Scale * 20.f) / 20.f, 0.3f, 2.f);
+}
+
+FVector2D UCockpitDisplayComponent::TargetSize(float Scale)
+{
+	return FVector2D(FMath::RoundToDouble(USpaceCockpitDisplays::DisplayWidth * 2.f * Scale), FMath::RoundToDouble(USpaceCockpitDisplays::DisplayHeight * Scale));
 }

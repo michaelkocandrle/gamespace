@@ -584,7 +584,7 @@
       "scale": 3.0
     },
     "displays": {
-      "_comment": "The two big displays, measured square to each screen in the rotated, unscaled model (u = the screen's right, v = its up), widened outwards over the side button strips (to ~38 x 25 cm, 1.5 : 1) for the reference's wide MFDs; cut_depth 5 cm takes the buttons under them away. The game draws its displays into the texture of slot M_Ship_Vanguard_Screens: left display = left half, right display = right half (UCockpitDisplayComponent).",
+      "_comment": "The two big displays, measured square to each screen in the rotated, unscaled model (u = the screen's right, v = its up): exactly the glass in each bezel (a wider version over the side button strips did not fit the frame). The game draws its displays into the texture of slot M_Ship_Vanguard_Screens: left display = left half, right display = right half (UCockpitDisplayComponent).",
       "screens": [
         {
           "name": "left",
@@ -604,7 +604,7 @@
             0.8099
           ],
           "rect": [
-            -0.235,
+            -0.14,
             0.149,
             -0.126,
             0.126
@@ -629,14 +629,14 @@
           ],
           "rect": [
             -0.139,
-            0.235,
+            0.136,
             -0.127,
             0.125
           ]
         }
       ],
       "cut_inset_m": 0.0,
-      "cut_depth_m": 0.05,
+      "cut_depth_m": 0.02,
       "offset_m": 0.005
     }
   }

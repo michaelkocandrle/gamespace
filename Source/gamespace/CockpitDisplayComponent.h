@@ -40,9 +40,29 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
 	FName TextureParameter = TEXT("ScreenTexture");
 
-	/** Redraws per second. The instruments ease, so 30 looks smooth and costs little. */
+	/**
+	 * How wide one display is on screen as a share of the window's width at the cockpit's 88 degree
+	 * field of view (measured on the Vanguard: ~295 of 1911 px). The render target follows the window
+	 * from this, so the type is drawn at the size it is seen: drawn larger and shrunk by the GPU, its
+	 * thin strokes fell between samples and the words broke up.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "0.01"))
+	float ScreenShareAt88 = 0.155f;
+
+	/** Render target pixels per screen pixel (a little over 1 keeps edges smooth). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "0.5"))
+	float Oversample = 1.25f;
+
+	/** Tests: the layout scale the displays are drawn at. */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
+	float PixelScale() const;
+
+	/** Render target size for a layout scale (both displays side by side). */
+	static FVector2D TargetSize(float Scale);
+
+	/** Redraws per second: 60, so changing numbers step no coarser than the view. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "1.0"))
-	float UpdateRateHz = 30.f;
+	float UpdateRateHz = 60.f;
 
 	/** Draw only while the ship is flown from the cockpit (off: always, e.g. for a passenger view). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
@@ -62,7 +82,7 @@ public:
 
 	/** Size of one display light, cm (about the screen). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
-	FVector2D DisplayLightSizeCm = FVector2D(42.0, 28.0);
+	FVector2D DisplayLightSizeCm = FVector2D(32.0, 28.0);
 
 	/** How far the displays' light reaches, cm. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "1.0"))
@@ -113,4 +133,5 @@ private:
 	TSharedPtr<SWidget> SlateWidget;
 	FWidgetRenderer* Renderer = nullptr;
 	float SinceDraw = 0.f;
+	float CurrentScale = 1.f;
 };

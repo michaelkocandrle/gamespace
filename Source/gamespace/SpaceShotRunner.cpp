@@ -122,6 +122,14 @@ bool USpaceShotRunner::ParseShotList(const FString& Json, TArray<FSpaceShot>& Ou
 		if ((*Object)->TryGetNumberField(TEXT("chase_yaw"), Number)) { Shot.ChaseYaw = float(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("chase_pitch"), Number)) { Shot.ChasePitch = float(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("chase_zoom"), Number)) { Shot.ChaseZoom = float(Number); }
+		const TArray<TSharedPtr<FJsonValue>>* Commands = nullptr;
+		if ((*Object)->TryGetArrayField(TEXT("console"), Commands))
+		{
+			for (const TSharedPtr<FJsonValue>& Command : *Commands)
+			{
+				Shot.Console.Add(Command->AsString());
+			}
+		}
 		const TArray<TSharedPtr<FJsonValue>>* Lights = nullptr;
 		if ((*Object)->TryGetArrayField(TEXT("cockpit_light"), Lights) && Lights->Num() == 2)
 		{
@@ -190,6 +198,11 @@ ASpaceshipPawn* USpaceShotRunner::FindShip() const
 
 void USpaceShotRunner::ApplyShot(const FSpaceShot& Shot, ASpaceshipPawn& Ship)
 {
+	for (const FString& Command : Shot.Console)
+	{
+		UE_LOG(LogSpaceShots, Display, TEXT("SHOTS console: %s"), *Command);
+		GEngine->Exec(Ship.GetWorld(), *Command);
+	}
 	UWorld* World = GetWorld();
 	if (Shot.HudMode >= 0)
 	{

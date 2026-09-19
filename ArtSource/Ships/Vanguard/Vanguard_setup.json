@@ -1,5 +1,9 @@
 {
   "_comment": "Hand-tuned look and feel for BP_Ship_Vanguard. Applied by Tools/Assets/import_ship.py after the size-based values from the manifest, so everything here wins. Edit, then run the import again (editor closed).",
+  "_comment_no_nanite": "Parts imported without Nanite. The cockpit interior flies with the camera; with Nanite its motion vectors were wrong in fast flight, temporal anti-aliasing smeared the dashboard and broke the displays' type up (sharp with r.Nanite 0, Tools/Shots/display_sharpness.json, 19. 9. 2026). 150 k triangles, no LODs needed.",
+  "no_nanite_parts": [
+    "Interior"
+  ],
   "pawn": {
     "_comment_flight": "SC-1a light fighter: thruster accelerations per direction in cm/s^2 (981 = 1 G), SCM / NAV top speeds in cm/s, rotational inertia in deg/s^2. G-Safe and ComStab use the C++ defaults.",
     "thrust_acceleration": 7355.0,
@@ -148,12 +152,12 @@
       ]
     },
     "MI_Ship_Vanguard_Screens": {
-      "_comment": "The cockpit displays: unlit, they show exactly what the game draws into them (UCockpitDisplayComponent sets ScreenTexture to its render target at run time; in the editor they stay black). Lit glass reflected the daylight sky and washed them out.",
+      "_comment": "The cockpit displays: unlit, they show exactly what the game draws into them (UCockpitDisplayComponent sets ScreenTexture to its render target at run time; in the editor they stay black). Lit glass reflected the daylight sky and washed them out. Emissive 1.8: at 3 the white type bloomed and blurred.",
       "master": "screen",
       "slots": [
         "M_Ship_Vanguard_Screens"
       ],
-      "emissive_strength": 3.0
+      "emissive_strength": 1.8
     },
     "MI_Ship_Vanguard_CanopyFrame": {
       "_comment": "Inside of the canopy frame (build_ai_ship.py canopy_frame): dark matt paint, like a real frame seen from the seat.",

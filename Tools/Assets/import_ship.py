@@ -20,7 +20,7 @@ Steps:
   1. Validate the manifest (gamespace_ship_export.validate_manifest). Errors stop everything.
   2. Import every LOD0 FBX into /Game/Ships/<Ship>/Meshes with the legacy FBX importer:
      no generated collision (UCX hulls), absolute vertex transform, no materials/textures,
-     Nanite on except for glass parts.
+     Nanite on except for glass parts and the setup's no_nanite_parts.
   3. Check each mesh against the manifest: size (retries once with Convert Scene Unit if it
      came in 100x small), orientation, collision hull count, material slots, sockets (location
      and scale fixed to the manifest values if the importer changed them).
@@ -129,7 +129,9 @@ def build_plan(manifest, manifest_dir, setup=None):
             "destination": root + "/Meshes",
             "asset_path": "%s/Meshes/%s" % (root, name),
             "part": info.get("part"),
-            "nanite": not glass,
+            # Glass never (Nanite draws no translucency); parts listed in the setup's no_nanite_parts
+            # neither (the cockpit interior: Nanite gave it wrong motion vectors in fast flight).
+            "nanite": not glass and info.get("part") not in ((setup or {}).get("no_nanite_parts") or []),
             "materials": info["materials"],
             "collision_hulls": sum(1 for h in manifest["collision"].values() if h["mesh"] == name),
             "sockets": {sock_name: sock["location_ue_cm"] for sock_name, sock in manifest["sockets"].items()

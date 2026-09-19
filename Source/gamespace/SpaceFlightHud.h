@@ -665,8 +665,9 @@ class GAMESPACE_API USpaceCockpitDisplays : public USpaceFlightHud
 
 public:
 	/** One display, pixels (the render target is two of them side by side). */
-	static constexpr float DisplayWidth = 640.f;
-	static constexpr float DisplayHeight = 420.f;
+	/** The glass is ~29 x 25 cm: the same shape, so nothing is stretched. */
+	static constexpr float DisplayWidth = 560.f;
+	static constexpr float DisplayHeight = 490.f;
 
 protected:
 	/** Driven by UCockpitDisplayComponent, not by a player: nothing to do per Slate tick. */

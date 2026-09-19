@@ -9,7 +9,7 @@ Masters (rebuilt on every run, like the scene materials):
     /Game/Ships/Shared/Materials/M_Ship_PBR    opaque, Nanite: textures BaseColorMap, ORMMap (G roughness,
                                                B metallic) and NormalMap, with BaseColorTint,
                                                RoughnessScale, MetallicScale (AI models, one texture set)
-    /Game/Ships/Shared/Materials/M_Ship_Screen opaque, unlit, Nanite: a cockpit display - ScreenTexture x
+    /Game/Ships/Shared/Materials/M_Ship_Screen opaque, unlit, pixel animation: a cockpit display - ScreenTexture x
                                                EmissiveStrength, nothing else (lit glass reflected the sky
                                                and the cockpit light and washed the instruments out). The game sets
                                                ScreenTexture to a render target it draws its displays into
@@ -116,8 +116,13 @@ def build_pbr_master():
 
 def build_screen_master():
     screen = _fresh_material(MASTERS["screen"])
-    screen.set_editor_property("used_with_nanite", True)
     screen.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    # The texture changes every frame on a surface that does not move: pixel animation tells temporal AA
+    # (TSR) so, and it keeps less history there. Opaque on purpose: a translucent screen with responsive
+    # AA writes no motion vectors, and with the camera shake whole rows of type doubled.
+    screen.set_editor_property("has_pixel_animation", True)
+    screen.set_editor_property("blend_mode", unreal.BlendMode.BLEND_OPAQUE)
+    screen.set_editor_property("used_with_nanite", True)
     image = _texture_param(screen, "ScreenTexture", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR,
                            "/Engine/EngineResources/Black", -900, 300)
     emissive = _node(screen, unreal.MaterialExpressionMultiply, -400, 300)

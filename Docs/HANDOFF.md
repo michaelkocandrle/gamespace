@@ -325,6 +325,20 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - **oprava:** písma HUDu se do zabalené hry nikdy nedostala (`DirectoriesToAlwaysStageAsUFS` měl cestu
       `Content/UI/Fonts` místo `UI/Fonts`), HUD v balíčku tak vždy ukazoval záložní Roboto. `Package.ps1`
       teď kontroluje, že písma v buildu jsou.
+27. **Ostré displeje za letu, zpět v rámu** (19. 9. 2026, podle autorova snímku: MFD rozmazané a mimo rám):
+    - obrazovky zase přesně ve skle rámečku (29 × 25 cm), layout 560 × 490 (stejný poměr);
+    - **hlavní příčina rozmazání: Nanite.** Interiér letí s kamerou a Nanite mu za rychlého letu dávalo
+      špatné pohybové vektory; časové vyhlazování (TSR) pak míchalo obraz z nesprávného místa – rozpadal
+      se text i rám (ověřeno: s `r.Nanite 0` ostré, s FXAA bez rozpadu). Interiér je teď bez Nanite
+      (`no_nanite_parts` v setupu, import to čte);
+    - render target se kreslí v rozlišení, v jakém je displej vidět (podle šířky okna, `ScreenShareAt88`),
+      písmo se tak rasterizuje v cílové velikosti; mění se jen při změně okna (dřív reagoval na FOV
+      afterburneru a přealokovával se každý snímek);
+    - materiál displeje s příznakem pixelové animace; kokpitová kamera bez motion bluru; jas 1,8; 60 Hz;
+    - zkoušené a zamítnuté: průhledný materiál s responsive AA (bez pohybových vektorů se při třesení
+      zdvojovaly řádky), mipmapy render targetu (engine je pro tenhle případ nevystavuje);
+    - nástroje: pole shotu `console` (konzolové příkazy), `space.CameraShake` (násobitel třesení kamery),
+      scénář `display_sharpness` (displeje za rychlého letu).
 
 ---
 
@@ -497,7 +511,7 @@ Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevy
 Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
 (`horizon`/`planet`/`away`), `speed_ms`, `mode` (`SCM`/`NAV`), `limiter`, `coupled`, `gsafe`,
 `comstab`, `boost`, `afterburner`, `stick` (kurzor VJoy), `settle` (sekundy na ustálení),
-`cockpit_eye`, `hide_hull`, `hide_canopy`, `cockpit_light` [cd, cd], `display_light`, `interior_tint` (pro ladění kokpitu bez reimportu lodi), `gear` (podvozek
+`cockpit_eye`, `hide_hull`, `hide_canopy`, `cockpit_light` [cd, cd], `display_light`, `interior_tint` (pro ladění kokpitu bez reimportu lodi), `console` (seznam konzolových příkazů před snímkem, pro srovnání nastavení), `gear` (podvozek
 hned dole / nahoře), `lower_gear` (začne vysouvat, krátký `settle` ho chytí v půlce), `precision`,
 `chase_yaw`, `chase_pitch` (> 0 = zespodu), `chase_zoom` (kamera otočená kolem lodi). Nízká
 `altitude_m` s podvozkem a pár sekund `settle` loď opravdu posadí na zem.
