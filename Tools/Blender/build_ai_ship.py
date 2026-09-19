@@ -584,7 +584,10 @@ def add_displays(ob, ship, spec, matrix):
     right, v = its up, rect [u0, u1, v0, v1] in metres), measured once in the source model. Faces of the
     interior behind it (centre inside the rectangle shrunk by cut_inset_m, within cut_depth_m of the plane)
     are deleted, and a quad is put on the plane, offset_m towards the pilot. The quads share one slot and
-    one texture: display i of n gets the i-th n-th of it, left to right."""
+    one texture: with "texture_size" [w, h] each screen's "texture_rect" [x0, y0, x1, y1] (pixels from the
+    top-left, as the game lays its canvas out: USpaceCockpitDisplays::ScreenRect), else display i of n
+    gets the i-th n-th of it, left to right. A screen's own "cut_depth_m" overrides the spec's (small
+    glass with knobs on its bezel: cut only the glass)."""
     screens = spec["screens"]
 
     def inside_quad(a, b, quad):
@@ -613,10 +616,11 @@ def add_displays(ob, ship, spec, matrix):
             tl, tr, br, bl = (u0, v1), (u1, v1), (u1, v0), (u0, v0)
         quad = [tl, tr, br, bl]
         doomed = []
+        cut = screen.get("cut_depth_m", depth)
         for f in bm.faces:
             d = local @ f.calc_center_median() - c
             a, b = d.dot(u), d.dot(v)
-            if inside_quad(a, b, quad) and abs(d.dot(n)) < depth:
+            if inside_quad(a, b, quad) and abs(d.dot(n)) < cut:
                 doomed.append(f)
         bmesh.ops.delete(bm, geom=doomed, context="FACES")
         corners = [bl, br, tr, tl]
@@ -627,8 +631,13 @@ def add_displays(ob, ship, spec, matrix):
         face.smooth = False
         # Blender's UV origin is bottom-left; the importer flips V, so the top of the screen lands on
         # the top row of the texture. The whole texture share goes onto the quad, whatever its shape.
+        if "texture_rect" in screen:
+            (w, h), (x0, y0, x1, y1) = spec["texture_size"], screen["texture_rect"]
+            place = lambda x, y: ((x0 + x * (x1 - x0)) / w, 1.0 - (y1 - y * (y1 - y0)) / h)
+        else:
+            place = lambda x, y: ((i + x) / len(screens), y)
         for loop, (x, y) in zip(face.loops, texture_corners):
-            loop[uv].uv = ((i + x) / len(screens), y)
+            loop[uv].uv = place(x, y)
         face.normal_update()
         pilot = matrix @ (c + n) - matrix @ c
         if face.normal.dot(pilot) < 0:

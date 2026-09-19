@@ -84,11 +84,19 @@ MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 **Displeje v receptu** (`interior.displays.screens[]`):
 - `centre`, `u`, `v` (osy roviny displeje v souřadnicích modelu kokpitu);
 - `corners`: čtyři rohy TL, TR, BR, BL v metrech (u, v). Otvory rámečků nejsou obdélníky, proto
-  rohy, ne `rect`.
+  rohy, ne `rect`;
+- `texture_rect` [x0, y0, x1, y1]: kde displej leží na plátně hry (pixely od levého horního rohu, přesně
+  jako `USpaceCockpitDisplays::ScreenRect`); celé plátno je `texture_size` [1330, 490]. Bez nich dostane
+  displej i jednu n-tinu šířky textury (starý způsob);
+- `cut_depth_m` u displeje přebije společnou hloubku řezu. Malé displeje ve sloupku mají 6 mm, aby
+  zůstaly knoflíky na rámečku (se 2 cm by je řez utrhl).
 
-Skript vyřízne plochu uvnitř čtyřúhelníku (`inside_quad`), dá jí slot `*_Screens` a UV, kde má každý
-displej svůj díl šířky. Na střed displeje dá socket `Display_<name>`. Rohy se ladí v Blender MCP
-(kapitola 3).
+Skript vyřízne plochu uvnitř čtyřúhelníku (`inside_quad`), dá jí slot `*_Screens` a UV podle
+`texture_rect`. Na střed displeje dá socket `Display_<name>`. Rohy se ladí v Blender MCP
+(kapitola 3). Displeje ve Vanguardu (19. 9. 2026): `left` a `right` (MFD 29 × 25 cm), `centre_top`
+(radar, 11 × 13,5 cm) a `centre_bottom` (self status, 11 × 12 cm) ve středním sloupku. Test
+`test_cockpit_displays.py` hlídá, že `texture_rect` v receptu = `ScreenRect` v kódu a že poměr stran
+obdélníku odpovídá sklu.
 
 ### 2.2 .blend → Unreal
 
@@ -143,7 +151,7 @@ headless renderů. Nainstalováno 19. 9. 2026.
 | `mcp_eye_view.py out.png` | kamera v oku (1,74 / 0 / 1,89 m, FOV 88°), backface culling jako v UE, screenshot |
 | `mcp_grid.py out.png` | měřicí mřížka na rovině displeje (1 cm žlutá, 5 cm červená, osy zelené) |
 | `mcp_measure_openings.py` | paprsky z oka: najde otvor v rámečku a vypíše jeho rohy (u, v) |
-| `mcp_corners.py '<json>' out.png` | posune plochy displejů na zadané rohy a vyfotí pohled z oka |
+| `mcp_corners.py '<json>' out.png` | posune plochy displejů na zadané rohy a vyfotí pohled z oka (displeje, které v JSON nejsou, nechá být) |
 
 3. **Postup ladění rohů:**
    - pohled z oka;
@@ -155,6 +163,19 @@ headless renderů. Nainstalováno 19. 9. 2026.
    - snímky `cockpit` z hry.
 
    Živé úpravy v GUI Blenderu se **neukládají**, pravda je vždy recept.
+
+   **Nový otvor, který ještě nemá plochu displeje** (tak se měřil střední sloupek, 19. 9. 2026):
+   - pohled z oka, odečti pixely otvoru;
+   - paprsky z oka přes ty pixely → body skla v souřadnicích modelu kokpitu (`placement` matice
+     inverzně), rovina proložená SVD: střed a normála. Osy: `u` = (0, −1, 0) (doprava z pohledu pilota),
+     `v` = normála × `u`;
+   - flood fill jako `mcp_measure_openings.py` (stačí mu podstrčit seznam displejů);
+   - obrys kandidátních rohů jako tenké emisivní čáry, kamera **v oku** jen natočená na otvor
+     s úzkým FOV (perspektiva se nezmění, jen zoom). Pozor: kamera potřebuje
+     `to_track_quat("-Z", "Y")`, s `"Z"` je snímek otočený o 90°;
+   - flood fill se zastaví o knoflíky na rámečku a spodní hranu „zkosí“ – skutečná hrana skla je
+     vodorovná, oprav ji ručně podle zoomu;
+   - `get_viewport_screenshot` chce **absolutní** cestu k souboru.
 4. Po skončení Blender zavři. Když ho necháš běžet, drží .blend a build receptu může selhat na zápisu.
 
 ---
@@ -218,6 +239,7 @@ Presety (`Tools/Shots/*.json`):
 | `cockpit_light` | varianty světel kokpitu |
 | `cockpit_tune` | ladění (tint, světla) |
 | `display_sharpness` | ostrost displejů při rychlém letu |
+| `cockpit_centre` | střední sloupek (radar, self status): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé, vyřízni a zvětši oblast ~745–855 × 630–880 px |
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
 | `ship_views`, `ship` | loď zvenku |
@@ -250,7 +272,15 @@ Hra během snímků krátce převezme popředí. Když autor zrovna hraje, nejd�
   (`Steady`/`SteadyState`, prahy 0,5 m/s a 0,05 G za aktualizaci). Proč: TSR jinak míchá dva snímky
   čísel a vznikají „duchy“.
 - **Světla:** Rect lighty na socketech `Display_*` (8 cd, barva 0,4/0,75/1). Displeje tak
-  prosvětlují kokpit jako v SC.
+  prosvětlují kokpit jako v SC. Malé displeje ve sloupku svítí úměrně ploše (velikost i cd podle
+  `ScreenRect`).
+- **Plátno** 1330 × 490: vlevo FLIGHT 0–560, vpravo STATUS 560–1120, sloupek 1120–1330 (radar 0–259,
+  self status 259–490). Stejná hustota pixelů na centimetr skla na všech displejích.
+- **Střední sloupek:** RADAR (`USpaceHudRadar`, dosah `RadarRangeM` 5 km, kontakty z
+  `USpaceCockpitDisplays::MakeRadarContacts` 5×/s: pawny a static meshe s kolizí v dosahu, tělesa jen jako
+  směr na okraji a jen do 60° nad/pod křídly) a SELF STATUS (`USpaceHudShipStatus`: obrysy kolizních hullů
+  shora, motory ze socketů `Engine_*` podle tahu, podvozek ze `Gear_*`). Vypínač `space.CockpitCentre 0`.
+- **Měření:** `stat SpaceCockpit` (stav a kreslení displejů), `stat SpaceHud` (kreslené prvky).
 
 ### 7.2 HUD
 
@@ -335,6 +365,33 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   zůstal translucent). Blend mode a další klíčové vlastnosti vždy nastav explicitně.
 - e) **Uncooked `-game`** kreslí nové materiály šedě. Vzhled posuzuj jen v zabalené hře (Shots).
 - f) RT nemá mipmapy. Na menším rozlišení než ~1600 px může písmo na displejích zrnit.
+- g) **Kreslení čar ve Slate je kvadratické s počtem dávek** (19. 9. 2026). Příznak: po přidání radaru
+  a siluety lodi spadl kokpit z ~64 na ~31 FPS, herní vlákno +6 až 17 ms, GPU beze změny. Příčina
+  (Unreal Insights: `Slate::AddLineElements` 6,5 ms na volání): každá změna **tloušťky** vyhlazené čáry
+  (jiné parametry shaderu) nebo **vrstvy** začne novou dávku a každá dávka rezervuje sdílené pole vrcholů
+  přesně o svou velikost – celé pole se zkopíruje. `GlowLines` kreslí čáru třikrát různou tloušťkou, tedy
+  tři dávky na čáru. Řešení: v kreslených widgetech **jedna tloušťka a jedna vrstva pro všechny čáry**,
+  stejné čáry kreslit za sebou, záři (`GlowLines`) jen na pár krátkých prvků. Barva dávku nerozbíjí (je ve
+  vrcholech). Velké MFD a HUD mají `GlowLines` pořád – kandidát na zrychlení.
+- h) **FPS ve snímcích hned po přesunu lodi nic neříká.** První snímek scénáře a snímky po velkém přesunu
+  (jiná výška, přistání) mají herní vlákno 20–30 ms, protože se staví terén. Na výkon se dívej se
+  `settle` ≥ 2 s a srovnávej A/B ve **stejném balíčku** (konzolový přepínač v poli `console`), každou
+  variantu v samostatném spuštění hry – průměry `stat` se jinak mezi snímky přelévají.
+
+### Profilování zabalené hry (Unreal Insights bez GUI, k nástrahám 9.2g a 9.2h)
+
+```powershell
+# trace (hra se scénářem snímků, pak se sama ukončí)
+& C:\gamespace\Builds\Gamespace\Windows\gamespace.exe /Game/Maps/TestSpace -windowed -ResX=1600 -ResY=900 -nosplash -unattended `
+  -ShotList="<scénář.json>" -ShotOut="<složka>" -trace=cpu,frame -statnamedevents -tracefile="<soubor>.utrace"
+# export statistik časovačů do CSV (čekat na konec procesu: Start-Process ... -PassThru, WaitForExit)
+& "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealInsights.exe" -OpenTraceFile="<soubor>.utrace" -NoUI -AutoQuit `
+  -ExecOnAnalysisCompleteCmd="TimingInsights.ExportTimerStatistics <soubor>.csv"
+```
+
+CSV má sloupce `Name, Count, Incl, Excl, I.Avg…` v sekundách; seřaď podle `Excl`. Rychlejší orientace bez
+trace: pole `console` ve scénáři s `stat unit`, `stat Slate`, `stat SpaceCockpit` – statistiky jsou vidět ve
+snímku.
 
 ### 9.3 Obsah a cookování
 
@@ -389,9 +446,8 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
 
 Menší kroky, podle pořadí:
 
-1. **Třetí displej ve středním sloupku** (dva malé čtverce uprostřed desky mají pořád AI
-   texturu). Změřit otvor přes Blender MCP, přidat do `displays.screens` a obsah (radar nebo stav
-   lodi).
+1. ~~Třetí displej ve středním sloupku~~ – hotovo 19. 9. 2026: RADAR nahoře, SELF STATUS dole
+   (HANDOFF kapitola 5, bod 31).
 2. **Přepínání stránek MFD** (SC má stránky: zbraně, štíty, energie…). Klávesy podle master
    reference.
 3. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).

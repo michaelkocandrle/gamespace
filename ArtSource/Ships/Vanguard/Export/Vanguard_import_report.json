@@ -16,6 +16,8 @@
     ],
     "SM_Ship_Vanguard_Gear": [],
     "SM_Ship_Vanguard_Interior": [
+      "socket Display_centre_bottom scale (100, 100, 100) reset to 1",
+      "socket Display_centre_top scale (100, 100, 100) reset to 1",
       "socket Display_left scale (100, 100, 100) reset to 1",
       "socket Display_right scale (100, 100, 100) reset to 1"
     ],

@@ -16,6 +16,22 @@
 #include "Slate/WidgetRenderer.h"
 #include "SpaceFlightHud.h"
 #include "SpaceshipPawn.h"
+#include "HAL/IConsoleManager.h"
+#include "Stats/Stats.h"
+
+// "stat SpaceCockpit": what the dashboard displays cost the game thread.
+DECLARE_STATS_GROUP(TEXT("SpaceCockpit"), STATGROUP_SpaceCockpit, STATCAT_Advanced);
+DECLARE_CYCLE_STAT(TEXT("Display state (radar, figures)"), STAT_CockpitDisplayState, STATGROUP_SpaceCockpit);
+DECLARE_CYCLE_STAT(TEXT("Display draw"), STAT_CockpitDisplayDraw, STATGROUP_SpaceCockpit);
+
+namespace
+{
+	TAutoConsoleVariable<int32> CVarCockpitCentre(
+		TEXT("space.CockpitCentre"),
+		1,
+		TEXT("The dashboard's centre column (radar over self status): 1 on, 0 off - its screens go dark and the radar stops looking."),
+		ECVF_Default);
+}
 
 UCockpitDisplayComponent::UCockpitDisplayComponent()
 {
@@ -71,6 +87,7 @@ void UCockpitDisplayComponent::BeginPlay()
 		return;
 	}
 	SlateWidget = Widget->TakeWidget();
+	Widget->SetShip(GetOwner());
 
 	// Like UWidgetComponent: Slate draws in linear space into an sRGB target, the material samples it as
 	// colour. Sized to how large the displays are on screen (see PixelScale), not to their layout.
@@ -109,12 +126,16 @@ void UCockpitDisplayComponent::CreateDisplayLights()
 			{
 				continue;
 			}
+			// As large and as bright as its screen: the centre column's small ones light less than the MFDs.
+			const FBox2D Rect = USpaceCockpitDisplays::ScreenRect(Socket.ToString().RightChop(8));
+			const FVector2D Share = Rect.bIsValid ? Rect.GetSize() / FVector2D(USpaceCockpitDisplays::DisplayWidth, USpaceCockpitDisplays::DisplayHeight)
+				: FVector2D(1.0, 1.0);
 			URectLightComponent* Light = NewObject<URectLightComponent>(GetOwner(), NAME_None, RF_Transient);
 			Light->SetupAttachment(Mesh, Socket);
 			Light->SetCastShadows(false);
 			Light->SetIntensityUnits(ELightUnits::Candelas);
-			Light->SetSourceWidth(DisplayLightSizeCm.X);
-			Light->SetSourceHeight(DisplayLightSizeCm.Y);
+			Light->SetSourceWidth(DisplayLightSizeCm.X * Share.X);
+			Light->SetSourceHeight(DisplayLightSizeCm.Y * Share.Y);
 			Light->SetBarnDoorAngle(80.f);
 			Light->SetAttenuationRadius(DisplayLightRadiusCm);
 			Light->SetLightColor(DisplayLightColor);
@@ -124,6 +145,7 @@ void UCockpitDisplayComponent::CreateDisplayLights()
 			const FVector To = Eye ? Eye->GetComponentLocation() : At - Mesh->GetForwardVector() * 100.f;
 			Light->SetWorldRotation((To - At).Rotation());
 			Lights.Add(Light);
+			LightShares.Add(float(Share.X * Share.Y));
 		}
 	}
 	SetDisplayLightIntensity(DisplayLightIntensityCd);
@@ -132,11 +154,16 @@ void UCockpitDisplayComponent::CreateDisplayLights()
 void UCockpitDisplayComponent::SetDisplayLightIntensity(float Candela)
 {
 	DisplayLightIntensityCd = FMath::Max(Candela, 0.f);
-	for (URectLightComponent* Light : Lights)
+	for (int32 Index = 0; Index < Lights.Num(); ++Index)
 	{
-		Light->SetIntensity(DisplayLightIntensityCd);
-		Light->SetVisibility(DisplayLightIntensityCd > 0.f);
+		Lights[Index]->SetIntensity(DisplayLightIntensityCd * LightShares[Index]);
+		Lights[Index]->SetVisibility(DisplayLightIntensityCd > 0.f);
 	}
+}
+
+float UCockpitDisplayComponent::GetDisplayLightIntensity(int32 Index) const
+{
+	return Lights.IsValidIndex(Index) ? Lights[Index]->Intensity : -1.f;
 }
 
 void UCockpitDisplayComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -174,10 +201,13 @@ void UCockpitDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	// StateRateHz times a second (see there); the drawing goes on at UpdateRateHz.
 	if (SinceState >= 1.f / StateRateHz)
 	{
-		Widget->ApplyState(USpaceFlightHud::MakeState(Ship, 1));
+		SCOPE_CYCLE_COUNTER(STAT_CockpitDisplayState);
+		const bool bCentre = CVarCockpitCentre.GetValueOnGameThread() != 0;
+		Widget->SetCentreColumn(bCentre);
+		Widget->ApplyState(bCentre ? USpaceCockpitDisplays::MakeDisplayState(Ship, RadarRangeM) : USpaceFlightHud::MakeState(Ship, 1));
 		SinceState = 0.f;
 	}
-	// Follow the window size: the type is laid out for 560 x 490 and drawn at the scale the screen shows
+	// Follow the window size: the type is laid out for 560 x 490 per MFD and drawn at the scale the screen shows
 	// it, so the font rasteriser draws every letter at its real size. Re-made only on a real change.
 	const float Scale = PixelScale();
 	if (FMath::Abs(Scale - CurrentScale) > 0.099f)
@@ -186,6 +216,7 @@ void UCockpitDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 		const FVector2D NewSize = TargetSize(Scale);
 		RenderTarget->ResizeTarget(uint32(NewSize.X), uint32(NewSize.Y));
 	}
+	SCOPE_CYCLE_COUNTER(STAT_CockpitDisplayDraw);
 	Renderer->DrawWidget(RenderTarget, SlateWidget.ToSharedRef(), CurrentScale, FVector2D(RenderTarget->SizeX, RenderTarget->SizeY), SinceDraw);
 	SinceDraw = 0.f;
 }
@@ -207,5 +238,5 @@ float UCockpitDisplayComponent::PixelScale() const
 
 FVector2D UCockpitDisplayComponent::TargetSize(float Scale)
 {
-	return FVector2D(FMath::RoundToDouble(USpaceCockpitDisplays::DisplayWidth * 2.f * Scale), FMath::RoundToDouble(USpaceCockpitDisplays::DisplayHeight * Scale));
+	return FVector2D(FMath::RoundToDouble(USpaceCockpitDisplays::CanvasWidth * Scale), FMath::RoundToDouble(USpaceCockpitDisplays::CanvasHeight * Scale));
 }

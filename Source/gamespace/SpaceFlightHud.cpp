@@ -28,6 +28,21 @@
 #include "Rendering/SlateRenderer.h"
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/PlayerController.h"
+#include "CelestialBody.h"
+#include "Components/StaticMeshComponent.h"
+#include "DistantBody.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/StaticMeshActor.h"
+#include "EngineUtils.h"
+#include "PhysicsEngine/BodySetup.h"
+#include "Stats/Stats.h"
+
+// "stat SpaceHud": the drawn instruments' paint.
+DECLARE_STATS_GROUP(TEXT("SpaceHud"), STATGROUP_SpaceHud, STATCAT_Advanced);
+DECLARE_CYCLE_STAT(TEXT("Radar paint"), STAT_SpaceHudRadarPaint, STATGROUP_SpaceHud);
+DECLARE_CYCLE_STAT(TEXT("Ship status paint"), STAT_SpaceHudShipPaint, STATGROUP_SpaceHud);
+DECLARE_CYCLE_STAT(TEXT("Symbol paint"), STAT_SpaceHudSymbolPaint, STATGROUP_SpaceHud);
+DECLARE_CYCLE_STAT(TEXT("Painted text"), STAT_SpaceHudText, STATGROUP_SpaceHud);
 
 namespace SpaceHudStyle
 {
@@ -107,6 +122,9 @@ namespace SpaceHudStyle
 	const FLinearColor MfdBlue(0.3f, 0.55f, 1.f, 0.95f);
 	const FLinearColor MfdBlueFaint(0.3f, 0.55f, 1.f, 0.3f);
 	const FLinearColor MfdText(0.85f, 0.92f, 1.f, 0.95f);
+
+	/** Every line on the centre column's pages (radar, self status): one thickness, so Slate batches them. */
+	constexpr float SmallScreenLine = 1.5f;
 
 	const FSlateBrush* White()
 	{
@@ -217,6 +235,7 @@ namespace SpaceHudStyle
 	void Text(FSlateWindowElementList& Out, int32 Layer, const FGeometry& Geometry, const FVector2f& At, const FString& String,
 		const FSlateFontInfo& Font, const FLinearColor& Color, const FVector2f& Align = FVector2f(0.5f, 0.5f))
 	{
+		SCOPE_CYCLE_COUNTER(STAT_SpaceHudText);
 		if (!FSlateApplication::IsInitialized() || String.IsEmpty())
 		{
 			return;
@@ -599,6 +618,7 @@ int32 USpaceHudVirtualJoystick::NativePaint(const FPaintArgs& Args, const FGeome
 int32 USpaceHudSymbol::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
 	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
+	SCOPE_CYCLE_COUNTER(STAT_SpaceHudSymbolPaint);
 	using namespace SpaceHudStyle;
 	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 	const FVector2f Size = AllottedGeometry.GetLocalSize();
@@ -910,6 +930,298 @@ int32 USpaceHudLadder::NativePaint(const FPaintArgs& Args, const FGeometry& Allo
 }
 
 // -------------------------------------------------------------------------------------------
+// Radar
+// -------------------------------------------------------------------------------------------
+
+FVector2D USpaceHudRadar::PlotPosition(const FSpaceRadarContact& Contact, float InRangeM)
+{
+	// A body is only a bearing: on the rim, or nowhere when it is more than 60 degrees above or below the
+	// wings - the planet under the ship has no bearing worth showing, even landed on a slope.
+	if (Contact.bBody)
+	{
+		const double Flat = Contact.Position.Size();
+		const double Full = FMath::Sqrt(Flat * Flat + double(Contact.HeightM) * Contact.HeightM);
+		return Full > 0.0 && Flat / Full >= 0.5 ? Contact.Position / Flat : FVector2D::ZeroVector;
+	}
+	return Contact.Position / FMath::Max(InRangeM, 1.f);
+}
+
+int32 USpaceHudRadar::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	SCOPE_CYCLE_COUNTER(STAT_SpaceHudRadarPaint);
+	using namespace SpaceHudStyle;
+	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	const FVector2f Size = AllottedGeometry.GetLocalSize();
+	const FVector2f Centre = Size * 0.5f;
+	const float Radius = FMath::Min(Size.X, Size.Y) * 0.5f - 4.f;
+	if (Radius < 10.f)
+	{
+		return LayerId;
+	}
+	const FPaintGeometry Paint = AllottedGeometry.ToPaintGeometry();
+	// Every line in one thickness and one layer, so that Slate puts them all in one batch. A change of
+	// thickness or layer starts a new batch, and every batch re-reserves the window's whole vertex list:
+	// drawn with glow passes (three thicknesses a line) over four layers, this page and the self status
+	// page cost the displays ~15 ms a frame (19. 9. 2026, Unreal Insights: Slate::AddLineElements).
+	const int32 LineLayer = LayerId + 1;
+	auto Line = [&](const TArray<FVector2f>& Points, const FLinearColor& InColor)
+	{
+		FSlateDrawElement::MakeLines(OutDrawElements, LineLayer, Paint, Points, ESlateDrawEffect::None, InColor, true, SmallScreenLine);
+	};
+	// The disc: a faint fill, the rim, two range rings, the cross and a tick every 30 degrees.
+	RoundedBox(OutDrawElements, LayerId, AllottedGeometry, Centre - FVector2f(Radius, Radius), FVector2f(Radius, Radius) * 2.f, Radius,
+		Faded(Color, 0.06f));
+	Line(Circle(Centre, Radius, 0.f, 360.f, 72), Color);
+	for (const float Ring : { 1.f / 3.f, 2.f / 3.f })
+	{
+		Line(Circle(Centre, Radius * Ring, 0.f, 360.f, 56), Faded(Color, 0.35f));
+	}
+	Line({ Centre - FVector2f(Radius, 0.f), Centre + FVector2f(Radius, 0.f) }, Faded(Color, 0.22f));
+	Line({ Centre - FVector2f(0.f, Radius), Centre + FVector2f(0.f, Radius) }, Faded(Color, 0.22f));
+	for (int32 Degrees = 0; Degrees < 360; Degrees += 30)
+	{
+		const float Angle = FMath::DegreesToRadians(float(Degrees));
+		const FVector2f Out(FMath::Sin(Angle), -FMath::Cos(Angle));
+		Line({ Centre + Out * Radius, Centre + Out * (Radius - (Degrees % 90 == 0 ? 9.f : 5.f)) }, Faded(Color, 0.8f));
+	}
+	// The pilot's view ahead (88 degrees), as the reference's radar marks its forward sector.
+	for (const float Side : { -1.f, 1.f })
+	{
+		const float Angle = FMath::DegreesToRadians(44.f) * Side;
+		Line({ Centre, Centre + FVector2f(FMath::Sin(Angle), -FMath::Cos(Angle)) * Radius }, Faded(Color, 0.3f));
+	}
+	// The own ship: a chevron, nose up.
+	Line({ Centre + FVector2f(-6.f, 6.f), Centre + FVector2f(0.f, -8.f), Centre + FVector2f(6.f, 6.f), Centre + FVector2f(0.f, 2.f),
+		Centre + FVector2f(-6.f, 6.f) }, Accent);
+
+	const FSlateFontInfo Font = LabelFont(17.f);
+	for (const FSpaceRadarContact& Contact : Contacts)
+	{
+		const FVector2D Plot = PlotPosition(Contact, RangeM);
+		if (Contact.bBody)
+		{
+			if (Plot.IsNearlyZero())
+			{
+				continue;
+			}
+			// A mark pointing out through the rim, and the body's initial just inside it.
+			const FVector2f Towards(float(Plot.X), -float(Plot.Y));
+			const FVector2f Across(-Towards.Y, Towards.X);
+			const FVector2f At = Centre + Towards * Radius;
+			Line({ At + Towards * 3.f, At - Towards * 9.f + Across * 6.f, At - Towards * 9.f - Across * 6.f, At + Towards * 3.f }, Accent);
+			Text(OutDrawElements, LineLayer + 1, AllottedGeometry, At - Towards * 22.f, Contact.Label.Left(1).ToUpper(), Font, Faded(Accent, 0.9f));
+			continue;
+		}
+		if (Plot.SizeSquared() > 1.0)
+		{
+			continue;
+		}
+		// On the disc where it is, raised on a stalk by its height (half the radius per range).
+		const FVector2f Base = Centre + FVector2f(float(Plot.X), -float(Plot.Y)) * Radius;
+		const float Lift = FMath::Clamp(Contact.HeightM / FMath::Max(RangeM, 1.f), -1.f, 1.f) * Radius * 0.5f;
+		const FVector2f At = Base - FVector2f(0.f, Lift);
+		if (FMath::Abs(Lift) > 1.5f)
+		{
+			Line({ Base, At }, Faded(Accent, 0.5f));
+			Line({ Base - FVector2f(2.5f, 0.f), Base + FVector2f(2.5f, 0.f) }, Faded(Accent, 0.5f));
+		}
+		const float D = 4.5f;
+		Line({ At + FVector2f(0.f, -D), At + FVector2f(D, 0.f), At + FVector2f(0.f, D), At + FVector2f(-D, 0.f), At + FVector2f(0.f, -D) }, Accent);
+	}
+	return LineLayer + 2;
+}
+
+// -------------------------------------------------------------------------------------------
+// Self status
+// -------------------------------------------------------------------------------------------
+
+namespace SpaceShipStatusGeometry
+{
+	/** The convex hull of points in a plane (monotone chain), counter-clockwise, not closed. */
+	TArray<FVector2D> ConvexHull(TArray<FVector2D> Points)
+	{
+		Points.Sort([](const FVector2D& A, const FVector2D& B) { return A.X < B.X || (A.X == B.X && A.Y < B.Y); });
+		if (Points.Num() < 3)
+		{
+			return Points;
+		}
+		auto Cross = [](const FVector2D& O, const FVector2D& A, const FVector2D& B) { return (A.X - O.X) * (B.Y - O.Y) - (A.Y - O.Y) * (B.X - O.X); };
+		TArray<FVector2D> Hull;
+		Hull.SetNum(Points.Num() * 2);
+		int32 Count = 0;
+		for (int32 Index = 0; Index < Points.Num(); ++Index)
+		{
+			while (Count >= 2 && Cross(Hull[Count - 2], Hull[Count - 1], Points[Index]) <= 0.0)
+			{
+				--Count;
+			}
+			Hull[Count++] = Points[Index];
+		}
+		for (int32 Index = Points.Num() - 2, Lower = Count + 1; Index >= 0; --Index)
+		{
+			while (Count >= Lower && Cross(Hull[Count - 2], Hull[Count - 1], Points[Index]) <= 0.0)
+			{
+				--Count;
+			}
+			Hull[Count++] = Points[Index];
+		}
+		Hull.SetNum(FMath::Max(Count - 1, 0));
+		return Hull;
+	}
+}
+
+void USpaceHudShipStatus::SetShip(const AActor* Ship)
+{
+	Outlines.Reset();
+	Engines.Reset();
+	Gear.Reset();
+	if (!Ship)
+	{
+		return;
+	}
+	// From above with the nose up: X to the right (the actor's Y), Y ahead (its X), metres.
+	const FTransform ActorTransform = Ship->GetActorTransform();
+	auto Plan = [](const FVector& Local) { return FVector2D(Local.Y / 100.0, Local.X / 100.0); };
+	TSet<FName> SeenSockets;
+	TInlineComponentArray<UStaticMeshComponent*> Meshes(Ship);
+	for (const UStaticMeshComponent* Mesh : Meshes)
+	{
+		const FTransform ToActor = Mesh->GetComponentTransform().GetRelativeTransform(ActorTransform);
+		// The hull's collision hulls (the UCX shapes from Blender): the ship's real shape, cheap to draw.
+		if (Mesh->GetFName() == TEXT("Hull") && Mesh->GetStaticMesh() && Mesh->GetStaticMesh()->GetBodySetup())
+		{
+			const FKAggregateGeom& Geometry = Mesh->GetStaticMesh()->GetBodySetup()->AggGeom;
+			for (const FKConvexElem& Convex : Geometry.ConvexElems)
+			{
+				const FTransform ElementToActor = Convex.GetTransform() * ToActor;
+				TArray<FVector2D> Points;
+				if (Convex.VertexData.Num() >= 3)
+				{
+					for (const FVector& Vertex : Convex.VertexData)
+					{
+						Points.Add(Plan(ElementToActor.TransformPosition(Vertex)));
+					}
+				}
+				else
+				{
+					FVector Corners[8];
+					Convex.ElemBox.GetVertices(Corners);
+					for (const FVector& Corner : Corners)
+					{
+						Points.Add(Plan(ElementToActor.TransformPosition(Corner)));
+					}
+				}
+				Outlines.Add(SpaceShipStatusGeometry::ConvexHull(MoveTemp(Points)));
+			}
+			for (const FKBoxElem& Box : Geometry.BoxElems)
+			{
+				const FVector Half(Box.X * 0.5, Box.Y * 0.5, Box.Z * 0.5);
+				FVector Corners[8];
+				FBox(-Half, Half).GetVertices(Corners);
+				TArray<FVector2D> Points;
+				for (const FVector& Corner : Corners)
+				{
+					Points.Add(Plan((Box.GetTransform() * ToActor).TransformPosition(Corner)));
+				}
+				Outlines.Add(SpaceShipStatusGeometry::ConvexHull(MoveTemp(Points)));
+			}
+		}
+		for (const FName& Socket : Mesh->GetAllSocketNames())
+		{
+			const FString Name = Socket.ToString();
+			const bool bEngine = Name.StartsWith(TEXT("Engine_"));
+			if ((!bEngine && !Name.StartsWith(TEXT("Gear_"))) || SeenSockets.Contains(Socket))
+			{
+				continue;
+			}
+			SeenSockets.Add(Socket);
+			const FVector2D At = Plan(ActorTransform.InverseTransformPositionNoScale(Mesh->GetSocketLocation(Socket)));
+			(bEngine ? Engines : Gear).Add(At);
+		}
+	}
+}
+
+int32 USpaceHudShipStatus::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	SCOPE_CYCLE_COUNTER(STAT_SpaceHudShipPaint);
+	using namespace SpaceHudStyle;
+	LayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	const FVector2f Size = AllottedGeometry.GetLocalSize();
+	if (Size.X < 10.f || Size.Y < 10.f || Outlines.Num() == 0)
+	{
+		return LayerId;
+	}
+	// Fit the whole ship (and its engines and gear) into the page, keeping its proportions.
+	FBox2D Bounds(ForceInit);
+	for (const TArray<FVector2D>& Outline : Outlines)
+	{
+		for (const FVector2D& Point : Outline)
+		{
+			Bounds += Point;
+		}
+	}
+	for (const FVector2D& Point : Engines)
+	{
+		Bounds += Point;
+	}
+	for (const FVector2D& Point : Gear)
+	{
+		Bounds += Point;
+	}
+	const FVector2D Extent = Bounds.GetSize();
+	const float Margin = 10.f;
+	const float Scale = FMath::Min((Size.X - 2.f * Margin) / FMath::Max(float(Extent.X), 0.1f), (Size.Y - 2.f * Margin) / FMath::Max(float(Extent.Y), 0.1f));
+	const FVector2D Middle = Bounds.GetCenter();
+	const FVector2f Centre = Size * 0.5f;
+	auto ToScreen = [&](const FVector2D& Point) { return Centre + FVector2f(float(Point.X - Middle.X), -float(Point.Y - Middle.Y)) * Scale; };
+	const FPaintGeometry Paint = AllottedGeometry.ToPaintGeometry();
+
+	// The hulls as a hologram: thin lines, the overlaps reading as the ship's structure. One thickness and
+	// one layer for every line, as on the radar (see there: Slate batches them together).
+	const int32 LineLayer = LayerId + 1;
+	for (const TArray<FVector2D>& Outline : Outlines)
+	{
+		if (Outline.Num() < 2)
+		{
+			continue;
+		}
+		TArray<FVector2f> Points;
+		for (const FVector2D& Point : Outline)
+		{
+			Points.Add(ToScreen(Point));
+		}
+		const FVector2f First = Points[0];
+		Points.Add(First);
+		FSlateDrawElement::MakeLines(OutDrawElements, LineLayer, Paint, Points, ESlateDrawEffect::None, Faded(Color, 0.75f), true, SmallScreenLine);
+	}
+	// Engines: a ring each, filled and trailing a plume behind as they work.
+	const float Demand = FMath::Clamp(EngineDemand, 0.f, 1.f);
+	for (const FVector2D& Engine : Engines)
+	{
+		const FVector2f At = ToScreen(Engine);
+		RoundedBox(OutDrawElements, LineLayer, AllottedGeometry, At - FVector2f(5.f, 5.f), FVector2f(10.f, 10.f), 5.f,
+			Faded(EngineColor, 0.15f + 0.85f * Demand), EngineColor, SmallScreenLine);
+		if (Demand > 0.02f)
+		{
+			GradientCapsule(OutDrawElements, LayerId, AllottedGeometry, At + FVector2f(-3.f, 5.f), FVector2f(6.f, 4.f + 22.f * Demand), 3.f,
+				Faded(EngineColor, 0.f), Faded(EngineColor, 0.7f * Demand), true);
+		}
+	}
+	// Gear legs, only while they are out.
+	if (GearColor.A > 0.01f)
+	{
+		for (const FVector2D& Leg : Gear)
+		{
+			const FVector2f At = ToScreen(Leg);
+			RoundedBox(OutDrawElements, LineLayer, AllottedGeometry, At - FVector2f(4.f, 4.f), FVector2f(8.f, 8.f), 1.5f, Faded(GearColor, 0.35f), GearColor, SmallScreenLine);
+		}
+	}
+	return LineLayer + 1;
+}
+
+// -------------------------------------------------------------------------------------------
 // Flight HUD
 // -------------------------------------------------------------------------------------------
 
@@ -1203,6 +1515,8 @@ FSpaceFlightHudState USpaceFlightHud::MakeState(const ASpaceshipPawn* Ship, int3
 	State.Drift = FVector2D(Local.Y, Local.Z);
 	const FVector Rate = Ship->GetAngularVelocity() / FMath::Max(Ship->GetMaxTurnRate(), 1.f);
 	State.TurnRate = FVector2D(Rate.Z, Rate.Y);
+	State.EngineDemand = Ship->GetEngineDemand();
+	State.bLanded = Ship->IsLanded();
 
 	State.bHasEnvironment = Ship->HasEnvironment();
 	if (State.bHasEnvironment)
@@ -1441,6 +1755,34 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 		Gyro->Value = State.TurnRate;
 	}
 
+	// --- Cockpit radar and self status (the centre column's displays) ------------------------------
+	if (USpaceHudRadar* Radar = Cast<USpaceHudRadar>(Parts.FindRef(TEXT("Radar"))))
+	{
+		Radar->Contacts = State.RadarContacts;
+		Radar->RangeM = State.RadarRangeM;
+	}
+	SetText(TEXT("RadarRange"), State.RadarRangeM < 10000.f ? FString::Printf(TEXT("%.1f KM"), State.RadarRangeM / 1000.f)
+		: FString::Printf(TEXT("%.0f KM"), State.RadarRangeM / 1000.f), Label);
+	SetText(TEXT("RadarHeading"), State.bHasEnvironment ? FString::Printf(TEXT("%03.0f°"), FMath::Fmod(FMath::RoundToFloat(State.HeadingDeg), 360.f)) : TEXT("---"),
+		State.bHasEnvironment ? Label : Faded(Label, 0.5f));
+	int32 Near = 0;
+	for (const FSpaceRadarContact& Contact : State.RadarContacts)
+	{
+		Near += Contact.bBody ? 0 : 1;
+	}
+	SetText(TEXT("RadarCount"), FString::Printf(TEXT("%d"), Near), Near > 0 ? Label : Faded(Label, 0.5f));
+	if (USpaceHudShipStatus* ShipStatus = Cast<USpaceHudShipStatus>(Parts.FindRef(TEXT("ShipStatus"))))
+	{
+		ShipStatus->EngineDemand = State.EngineDemand;
+		ShipStatus->EngineColor = State.bAfterburnerActive || State.bBoostActive ? InstrumentBright : Instrument;
+		// Out and locked: lit; on the way: amber, blinking; up: not drawn (red blinking when it is needed).
+		ShipStatus->GearColor = State.bGearDown ? Instrument : State.bGearMoving ? (bBlink ? Amber : Faded(Amber, 0.3f))
+			: State.bGearWarning ? (bBlink ? Red : FLinearColor::Transparent) : FLinearColor::Transparent;
+	}
+	SetText(TEXT("ShipGear"), State.GearLabel, State.bGearWarning && !State.bGearDown ? Red : State.bGearMoving ? Amber : Label);
+	SetText(TEXT("ShipThrust"), State.bLanded ? TEXT("LANDED") : FString::Printf(TEXT("%.0f%%"), State.EngineDemand * 100.f),
+		State.bLanded ? Instrument : Label);
+
 	// --- Virtual joystick ---------------------------------------------------------------------------
 	if (VirtualJoystickBox)
 	{
@@ -1554,6 +1896,8 @@ FSpaceFlightHudState USpaceCockpitDisplays::SteadyState(const FSpaceFlightHudSta
 	// still changed with every update while accelerating gently and blended.
 	Out.SpeedCmS = Steady(TEXT("Speed"), State.SpeedCmS / 100.f, 10.f, 0.5f) * 100.f;
 	Out.GForce = Steady(TEXT("G"), State.GForce, 0.5f, 0.05f);
+	// The self status page's thrust in tens of per cent while it changes (and its engines with it).
+	Out.EngineDemand = Steady(TEXT("Engine"), State.EngineDemand, 0.1f, 0.01f);
 	return Out;
 }
 
@@ -1664,7 +2008,13 @@ void USpaceCockpitDisplays::BuildTree()
 		return NewGauge;
 	};
 	// One screen: glass, a title over a rule, the content, and the reference's page tab between arrows.
-	auto Screen = [&](const TCHAR* ScreenName, const TCHAR* Title, float X, UWidget* Content)
+	auto Place = [&](UWidget* Widget, const FBox2D& Rect)
+	{
+		UCanvasPanelSlot* ScreenSlot = Root->AddChildToCanvas(Widget);
+		ScreenSlot->SetPosition(Rect.Min);
+		ScreenSlot->SetSize(Rect.GetSize());
+	};
+	auto Screen = [&](const TCHAR* ScreenName, const TCHAR* Title, const FBox2D& Rect, UWidget* Content)
 	{
 		UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("%sScreen"), ScreenName)));
 		if (UOverlaySlot* GlassSlot = Overlay->AddChildToOverlay(Symbol(FName(*FString::Printf(TEXT("%sGlass"), ScreenName)), ESpaceHudSymbol::MfdGlass, MfdBlue)))
@@ -1704,9 +2054,35 @@ void USpaceCockpitDisplays::BuildTree()
 			ColumnSlot->SetHorizontalAlignment(HAlign_Fill);
 			ColumnSlot->SetVerticalAlignment(VAlign_Fill);
 		}
-		UCanvasPanelSlot* ScreenSlot = Root->AddChildToCanvas(Overlay);
-		ScreenSlot->SetPosition(FVector2D(X, 0.0));
-		ScreenSlot->SetSize(FVector2D(DisplayWidth, DisplayHeight));
+		Place(Overlay, Rect);
+	};
+	// One of the centre column's small screens: glass and the content, which brings its own header.
+	auto SmallScreen = [&](const TCHAR* ScreenName, const FBox2D& Rect, UWidget* Content)
+	{
+		UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("%sScreen"), ScreenName)));
+		if (UOverlaySlot* GlassSlot = Overlay->AddChildToOverlay(Symbol(FName(*FString::Printf(TEXT("%sGlass"), ScreenName)), ESpaceHudSymbol::MfdGlass, MfdBlue)))
+		{
+			GlassSlot->SetHorizontalAlignment(HAlign_Fill);
+			GlassSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		if (UOverlaySlot* ContentSlot = Overlay->AddChildToOverlay(Content))
+		{
+			ContentSlot->SetPadding(FMargin(12.f, 9.f, 12.f, 9.f));
+			ContentSlot->SetHorizontalAlignment(HAlign_Fill);
+			ContentSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		Place(Overlay, Rect);
+	};
+	// A small screen's header or footer: a caption on the left, a value on the right.
+	auto Line = [&](const FName Name, const TCHAR* Caption, float CaptionSize, const FName ValueName, const FLinearColor& CaptionColor)
+	{
+		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), Name);
+		Horizontal(Row, Words(FName(*(Name.ToString() + TEXT("Caption"))), Caption, CaptionSize, CaptionColor), VAlign_Center, FMargin(0.f), true);
+		if (!ValueName.IsNone())
+		{
+			Horizontal(Row, Words(ValueName, TEXT("-"), 19.f), VAlign_Center, FMargin(0.f));
+		}
+		return Row;
 	};
 
 	// --- Left display, FLIGHT: like the reference's power page, keys on the side towards the middle -----
@@ -1753,7 +2129,7 @@ void USpaceCockpitDisplays::BuildTree()
 	Horizontal(Flight, FlightMain, VAlign_Fill, FMargin(0.f), true);
 	Horizontal(Flight, Keys(TEXT("FlightKeys"), { TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST"), TEXT("PREC") }), VAlign_Top,
 		FMargin(16.f, 0.f, 0.f, 0.f));
-	Screen(TEXT("Flight"), TEXT("FLIGHT"), 0.f, Flight);
+	Screen(TEXT("Flight"), TEXT("FLIGHT"), ScreenRect(TEXT("left")), Flight);
 
 	// --- Right display, STATUS: keys on the side towards the middle, a list like the contacts page -------
 	UHorizontalBox* Status = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("StatusContent"));
@@ -1790,7 +2166,39 @@ void USpaceCockpitDisplays::BuildTree()
 	Row(TEXT("VSI"), TEXT("RowVsiValue"));
 	Row(TEXT("ATMO"), TEXT("RowAtmoValue"));
 	Horizontal(Status, List, VAlign_Top, FMargin(0.f), true);
-	Screen(TEXT("Status"), TEXT("STATUS"), DisplayWidth, Status);
+	Screen(TEXT("Status"), TEXT("STATUS"), ScreenRect(TEXT("right")), Status);
+
+	// --- Centre column, top: RADAR, the disc in the middle of the reference's dashboard --------------
+	UVerticalBox* RadarPage = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("RadarPage"));
+	Vertical(RadarPage, Line(TEXT("RadarHeader"), TEXT("RADAR"), 19.f, TEXT("RadarRange"), Faded(MfdText, 0.85f)), HAlign_Fill, FMargin(2.f, 0.f, 2.f, 2.f));
+	Vertical(RadarPage, Rule(TEXT("RadarRule"), 0.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 4.f));
+	USpaceHudRadar* Radar = WidgetTree->ConstructWidget<USpaceHudRadar>(USpaceHudRadar::StaticClass(), TEXT("Radar"));
+	Radar->Color = MfdBlue;
+	Radar->Accent = MfdText;
+	Parts.Add(TEXT("Radar"), Radar);
+	Vertical(RadarPage, Radar, HAlign_Fill, FMargin(0.f), true);
+	UHorizontalBox* RadarFooter = Line(TEXT("RadarFooter"), TEXT("HDG"), 16.f, TEXT("RadarHeading"), Faded(MfdText, 0.55f));
+	Horizontal(RadarFooter, Words(TEXT("RadarCountCaption"), TEXT("CT"), 16.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(14.f, 0.f, 6.f, 0.f));
+	Horizontal(RadarFooter, Words(TEXT("RadarCount"), TEXT("0"), 19.f), VAlign_Center, FMargin(0.f));
+	Vertical(RadarPage, RadarFooter, HAlign_Fill, FMargin(2.f, 3.f, 2.f, 0.f));
+	SmallScreen(TEXT("Radar"), ScreenRect(TEXT("centre_top")), RadarPage);
+
+	// --- Centre column, bottom: SELF STATUS, the ship from above -----------------------------------
+	UVerticalBox* ShipPage = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ShipPage"));
+	Vertical(ShipPage, Line(TEXT("ShipHeader"), TEXT("SELF STATUS"), 19.f, NAME_None, Faded(MfdText, 0.85f)), HAlign_Fill, FMargin(2.f, 0.f, 2.f, 2.f));
+	Vertical(ShipPage, Rule(TEXT("ShipRule"), 0.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 2.f));
+	USpaceHudShipStatus* ShipStatus = WidgetTree->ConstructWidget<USpaceHudShipStatus>(USpaceHudShipStatus::StaticClass(), TEXT("ShipStatus"));
+	ShipStatus->Color = MfdBlue;
+	Parts.Add(TEXT("ShipStatus"), ShipStatus);
+	Vertical(ShipPage, ShipStatus, HAlign_Fill, FMargin(0.f), true);
+	UHorizontalBox* ShipFooter = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ShipFooter"));
+	// Gear on the left, the engines' thrust (LANDED on the ground) on the right: "GEAR MOVING" and
+	// "THR 100%" did not fit side by side on ~11 cm of glass.
+	Horizontal(ShipFooter, Words(TEXT("ShipGearCaption"), TEXT("GEAR"), 15.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f, 0.f, 5.f, 0.f));
+	Horizontal(ShipFooter, Words(TEXT("ShipGear"), TEXT("UP"), 17.f), VAlign_Center, FMargin(0.f), true);
+	Horizontal(ShipFooter, Words(TEXT("ShipThrust"), TEXT("0%"), 17.f), VAlign_Center, FMargin(0.f));
+	Vertical(ShipPage, ShipFooter, HAlign_Fill, FMargin(2.f, 2.f, 2.f, 0.f));
+	SmallScreen(TEXT("Ship"), ScreenRect(TEXT("centre_bottom")), ShipPage);
 
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 }
@@ -1804,4 +2212,128 @@ FString USpaceFlightHud::DebugGetText(FName TextName) const
 USpaceHudGauge* USpaceFlightHud::DebugGetGauge(FName GaugeName) const
 {
 	return Gauges.FindRef(GaugeName);
+}
+
+FBox2D USpaceCockpitDisplays::ScreenRect(const FString& Name)
+{
+	if (Name == TEXT("left"))
+	{
+		return FBox2D(FVector2D(0.0, 0.0), FVector2D(DisplayWidth, DisplayHeight));
+	}
+	if (Name == TEXT("right"))
+	{
+		return FBox2D(FVector2D(DisplayWidth, 0.0), FVector2D(2.0 * DisplayWidth, DisplayHeight));
+	}
+	if (Name == TEXT("centre_top"))
+	{
+		return FBox2D(FVector2D(2.0 * DisplayWidth, 0.0), FVector2D(CanvasWidth, CentreTopHeight));
+	}
+	if (Name == TEXT("centre_bottom"))
+	{
+		return FBox2D(FVector2D(2.0 * DisplayWidth, CentreTopHeight), FVector2D(CanvasWidth, CanvasHeight));
+	}
+	return FBox2D(ForceInit);
+}
+
+FVector4 USpaceCockpitDisplays::DebugGetScreenRect(const FString& Name)
+{
+	const FBox2D Rect = ScreenRect(Name);
+	return Rect.bIsValid ? FVector4(Rect.Min.X, Rect.Min.Y, Rect.Max.X, Rect.Max.Y) : FVector4(0.0, 0.0, 0.0, 0.0);
+}
+
+TArray<FSpaceRadarContact> USpaceCockpitDisplays::MakeRadarContacts(const ASpaceshipPawn* Ship, float RangeM, int32 MaxContacts)
+{
+	TArray<FSpaceRadarContact> Bodies;
+	TArray<FSpaceRadarContact> Near;
+	if (!Ship || !Ship->GetWorld())
+	{
+		return Bodies;
+	}
+	const FTransform Frame = Ship->GetActorTransform();
+	const FVector Origin = Frame.GetLocation();
+	const double RangeCm = double(RangeM) * 100.0;
+	auto Contact = [&Frame](const FVector& Location, double DistanceCm, bool bBody, const FString& Label)
+	{
+		const FVector Local = Frame.InverseTransformPositionNoScale(Location);
+		FSpaceRadarContact Out;
+		Out.Position = FVector2D(Local.Y / 100.0, Local.X / 100.0);
+		Out.HeightM = float(Local.Z / 100.0);
+		Out.DistanceM = float(DistanceCm / 100.0);
+		Out.bBody = bBody;
+		Out.Label = Label;
+		return Out;
+	};
+	for (TActorIterator<AActor> It(Ship->GetWorld()); It; ++It)
+	{
+		const AActor* Actor = *It;
+		if (Actor == Ship || Actor->IsHidden())
+		{
+			continue;
+		}
+		if (const ACelestialBody* Body = Cast<ACelestialBody>(Actor))
+		{
+			Bodies.Add(Contact(Body->GetActorLocation(), FMath::Max(Body->GetSurfaceDistance(Origin), 0.0), true, Body->GetDisplayName().ToString()));
+			continue;
+		}
+		if (const ADistantBody* Distant = Cast<ADistantBody>(Actor))
+		{
+			const double Surface = FVector::Dist(Origin, Distant->GetActorLocation()) - double(Distant->GetRadiusKm()) * 100000.0;
+			Bodies.Add(Contact(Distant->GetActorLocation(), FMath::Max(Surface, 0.0), true, Distant->GetDisplayName().ToString()));
+			continue;
+		}
+		// Objects: other ships and characters, and meshes that can be hit (asteroids, stations, wrecks).
+		const AStaticMeshActor* MeshActor = Cast<AStaticMeshActor>(Actor);
+		const bool bObject = Actor->IsA<APawn>() || (MeshActor && MeshActor->GetStaticMeshComponent() && MeshActor->GetStaticMeshComponent()->GetStaticMesh()
+			&& MeshActor->GetActorEnableCollision() && MeshActor->GetStaticMeshComponent()->IsCollisionEnabled());
+		if (!bObject)
+		{
+			continue;
+		}
+		FVector Centre, Extent;
+		Actor->GetActorBounds(true, Centre, Extent);
+		// Larger than the whole range (ground, a planet mesh): not a contact.
+		if (Extent.Size() > RangeCm)
+		{
+			continue;
+		}
+		const double Distance = FVector::Dist(Origin, Centre);
+		if (Distance <= RangeCm)
+		{
+			Near.Add(Contact(Centre, Distance, false, Actor->GetName()));
+		}
+	}
+	Near.Sort([](const FSpaceRadarContact& A, const FSpaceRadarContact& B) { return A.DistanceM < B.DistanceM; });
+	if (Near.Num() > MaxContacts)
+	{
+		Near.SetNum(FMath::Max(MaxContacts, 0));
+	}
+	Bodies.Append(Near);
+	return Bodies;
+}
+
+FSpaceFlightHudState USpaceCockpitDisplays::MakeDisplayState(const ASpaceshipPawn* Ship, float RadarRangeM)
+{
+	FSpaceFlightHudState State = MakeState(Ship, 1);
+	State.RadarRangeM = RadarRangeM;
+	State.RadarContacts = MakeRadarContacts(Ship, RadarRangeM);
+	return State;
+}
+
+void USpaceCockpitDisplays::SetCentreColumn(bool bOn)
+{
+	for (const TCHAR* Name : { TEXT("RadarScreen"), TEXT("ShipScreen") })
+	{
+		if (UWidget* Screen = WidgetTree ? WidgetTree->FindWidget(Name) : nullptr)
+		{
+			Screen->SetVisibility(bOn ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		}
+	}
+}
+
+void USpaceCockpitDisplays::SetShip(const AActor* Ship)
+{
+	if (USpaceHudShipStatus* ShipStatus = Cast<USpaceHudShipStatus>(Parts.FindRef(TEXT("ShipStatus"))))
+	{
+		ShipStatus->SetShip(Ship);
+	}
 }

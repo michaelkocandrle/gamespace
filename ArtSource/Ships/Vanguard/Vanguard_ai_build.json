@@ -584,7 +584,7 @@
       "scale": 3.0
     },
     "displays": {
-      "_comment": "The two big displays, in the rotated, unscaled model: centre, u = the screen's right, v = its up, and the corners of the bezel opening (top-left, top-right, bottom-right, bottom-left, metres in u / v). The openings are not rectangles (slanted sides, the right one leans); the corners were fitted by eye in the live Blender viewport from the pilot's eye with a measuring grid on the display plane (Blender MCP, 19. 9. 2026). The AI glass inside the outline is cut, a flat quad takes its place; the game draws its displays into the texture of slot M_Ship_Vanguard_Screens: left display = left half, right display = right half (UCockpitDisplayComponent).",
+      "_comment": "The two big displays, in the rotated, unscaled model: centre, u = the screen's right, v = its up, and the corners of the bezel opening (top-left, top-right, bottom-right, bottom-left, metres in u / v). The openings are not rectangles (slanted sides, the right one leans); the corners were fitted by eye in the live Blender viewport from the pilot's eye with a measuring grid on the display plane (Blender MCP, 19. 9. 2026). The AI glass inside the outline is cut, a flat quad takes its place; the game draws its displays into the texture of slot M_Ship_Vanguard_Screens: left display = left half, right display = right half (UCockpitDisplayComponent). The centre column's two small screens (centre_top: radar, centre_bottom: self status) were measured the same way (19. 9. 2026): ray casts from the eye fitted their glass plane (the same tilt as the big displays), a flood fill found the openings, and outlines drawn in the live viewport were corrected by eye - the bottom edges are level, a knob on the bezel sits at each bottom-right corner (cut_depth_m 6 mm: only the glass is cut, the knobs stay). texture_size / texture_rect: where each screen is on the game's canvas (USpaceCockpitDisplays::ScreenRect), the same pixels per centimetre on every screen.",
       "screens": [
         {
           "name": "left",
@@ -620,6 +620,12 @@
               -0.131,
               -0.127
             ]
+          ],
+          "texture_rect": [
+            0,
+            0,
+            560,
+            490
           ]
         },
         {
@@ -656,12 +662,108 @@
               -0.132,
               -0.121
             ]
+          ],
+          "texture_rect": [
+            560,
+            0,
+            1120,
+            490
+          ]
+        },
+        {
+          "name": "centre_top",
+          "centre": [
+            0.6085,
+            0.0075,
+            0.1975
+          ],
+          "u": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "v": [
+            0.6113,
+            0.0,
+            0.7914
+          ],
+          "corners": [
+            [
+              -0.054,
+              0.068
+            ],
+            [
+              0.056,
+              0.068
+            ],
+            [
+              0.056,
+              -0.067
+            ],
+            [
+              -0.052,
+              -0.068
+            ]
+          ],
+          "cut_depth_m": 0.006,
+          "texture_rect": [
+            1120,
+            0,
+            1330,
+            259
+          ]
+        },
+        {
+          "name": "centre_bottom",
+          "centre": [
+            0.4979,
+            0.0068,
+            0.0624
+          ],
+          "u": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "v": [
+            0.6113,
+            0.0,
+            0.7914
+          ],
+          "corners": [
+            [
+              -0.05,
+              0.064
+            ],
+            [
+              0.058,
+              0.063
+            ],
+            [
+              0.053,
+              -0.055
+            ],
+            [
+              -0.052,
+              -0.055
+            ]
+          ],
+          "cut_depth_m": 0.006,
+          "texture_rect": [
+            1120,
+            259,
+            1330,
+            490
           ]
         }
       ],
       "cut_inset_m": 0.0,
       "cut_depth_m": 0.02,
-      "offset_m": 0.005
+      "offset_m": 0.005,
+      "texture_size": [
+        1330,
+        490
+      ]
     }
   }
 }

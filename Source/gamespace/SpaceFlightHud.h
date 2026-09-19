@@ -11,6 +11,36 @@ class UBorder;
 class UTextBlock;
 
 /**
+ * Something on the cockpit radar, in the ship's own frame (plan view, the nose up). A celestial body
+ * is only a bearing on the rim: it is kilometres away and larger than any radar range.
+ */
+USTRUCT(BlueprintType)
+struct GAMESPACE_API FSpaceRadarContact
+{
+	GENERATED_BODY()
+
+	/** Metres from the ship: X to the right, Y ahead. */
+	UPROPERTY(BlueprintReadWrite, Category = "Radar")
+	FVector2D Position = FVector2D::ZeroVector;
+
+	/** Metres above (+) or below the ship's wings. */
+	UPROPERTY(BlueprintReadWrite, Category = "Radar")
+	float HeightM = 0.f;
+
+	/** Metres to it (to the surface for a body). */
+	UPROPERTY(BlueprintReadWrite, Category = "Radar")
+	float DistanceM = 0.f;
+
+	/** A planet or moon: drawn as a bearing on the rim, whatever the range. */
+	UPROPERTY(BlueprintReadWrite, Category = "Radar")
+	bool bBody = false;
+
+	/** Name (bodies: their display name). */
+	UPROPERTY(BlueprintReadWrite, Category = "Radar")
+	FString Label;
+};
+
+/**
  * Everything the flight HUD shows, read from the ship in one place. The widgets only display this,
  * so what they show can be checked headless without drawing anything.
  */
@@ -204,6 +234,23 @@ struct GAMESPACE_API FSpaceFlightHudState
 	/** Turn rate, -1..1 of the ship's top rate: X yaw right, Y pitch up (the gyro's rate line). */
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	FVector2D TurnRate = FVector2D::ZeroVector;
+
+	/** How hard the engines work, 0..1 (the self status page's engines). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float EngineDemand = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bLanded = false;
+
+	/**
+	 * The cockpit radar: contacts within RadarRangeM and the bodies' bearings. Filled by the cockpit
+	 * displays only (USpaceCockpitDisplays::MakeRadarContacts); the HUD has no radar.
+	 */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	TArray<FSpaceRadarContact> RadarContacts;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float RadarRangeM = 5000.f;
 };
 
 /**
@@ -525,6 +572,88 @@ protected:
 };
 
 /**
+ * The cockpit radar, after the disc in the middle of the reference's dashboard (Docs/UI/Screenshot
+ * 2026-09-17 201854.png): a plan view in the ship's frame with the nose up - range rings, a cross,
+ * the own ship in the middle, contacts as diamonds with a stalk for their height, and the bodies'
+ * bearings as marks on the rim with their initial.
+ */
+UCLASS()
+class GAMESPACE_API USpaceHudRadar : public UUserWidget
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintReadOnly, Category = "Radar")
+	TArray<FSpaceRadarContact> Contacts;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Radar")
+	float RangeM = 5000.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Radar")
+	FLinearColor Color = FLinearColor::White;
+
+	/** Contacts. */
+	UPROPERTY(BlueprintReadOnly, Category = "Radar")
+	FLinearColor Accent = FLinearColor::White;
+
+	/** Where a contact is drawn, as a fraction of the disc's radius from its centre (X right, Y up); length over 1: off the disc. */
+	UFUNCTION(BlueprintCallable, Category = "Radar")
+	static FVector2D PlotPosition(const FSpaceRadarContact& Contact, float InRangeM);
+
+protected:
+	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+};
+
+/**
+ * The self status page, after the reference's (Docs/UI/Screenshot 2026-09-17 194942.png): the ship
+ * seen from above as a hologram - its collision hulls' outlines, the engines glowing with the thrust,
+ * the landing gear lit when down. Only what the game has: no shields, no hull damage.
+ */
+UCLASS()
+class GAMESPACE_API USpaceHudShipStatus : public UUserWidget
+{
+	GENERATED_BODY()
+
+public:
+	/** The hulls from above, metres: X right, Y ahead (each a convex outline). */
+	TArray<TArray<FVector2D>> Outlines;
+
+	/** Engines and gear legs from above, metres. */
+	UPROPERTY(BlueprintReadOnly, Category = "Ship Status")
+	TArray<FVector2D> Engines;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Ship Status")
+	TArray<FVector2D> Gear;
+
+	/** 0..1. */
+	UPROPERTY(BlueprintReadOnly, Category = "Ship Status")
+	float EngineDemand = 0.f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Ship Status")
+	FLinearColor EngineColor = FLinearColor::White;
+
+	/** The gear legs' colour; transparent alpha: not drawn (up). */
+	UPROPERTY(BlueprintReadOnly, Category = "Ship Status")
+	FLinearColor GearColor = FLinearColor::Transparent;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Ship Status")
+	FLinearColor Color = FLinearColor::White;
+
+	/** Tests: how many hull outlines the page draws. */
+	UFUNCTION(BlueprintCallable, Category = "Ship Status|Tests")
+	int32 GetOutlineCount() const { return Outlines.Num(); }
+
+	/** Reads the ship's shape: hull outlines from its collision, engines and gear from its sockets. */
+	UFUNCTION(BlueprintCallable, Category = "Ship Status")
+	void SetShip(const AActor* Ship);
+
+protected:
+	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+};
+
+/**
  * The flight HUD in UMG, laid out after the current Star Citizen HUD (Docs/UI/Screenshot 2026-09-17
  * 201854.png, measured at 1080p from the middle of the screen). SC-1c's version followed an older
  * reference (Docs/UI/SC_ThrottleHUD_VisualReference.md); the lines below describe that one where the
@@ -659,13 +788,18 @@ protected:
 };
 
 /**
- * The cockpit's two dashboard displays: the flight HUD's instruments (same widgets, same names, so
- * USpaceFlightHud::ApplyState drives them) laid out for two screens side by side on one canvas of
- * 2 x DisplaySize, in the style of the reference's MFDs (deep blue glass, a title over a rule, a page
- * bar at the bottom). Left, FLIGHT: speed, limiter, G and the sub-mode large, the master mode pill, and
- * bars for speed, boost, afterburner and G like the reference's power page. Right, SYSTEMS: a list like
- * its contacts page - COUPLED, G-SAFE, COMSTAB, BOOST, PRECISION and GEAR each with its switch pill,
- * CRUISE with its state.
+ * The cockpit's dashboard displays: the flight HUD's instruments (same widgets, same names, so
+ * USpaceFlightHud::ApplyState drives them) laid out on one canvas, in the style of the reference's
+ * MFDs (deep blue glass, a title over a rule, a page bar at the bottom). Left, FLIGHT: speed, limiter,
+ * G and the sub-mode large, the master mode pill, and bars for speed, boost, afterburner and G like the
+ * reference's power page. Right, SYSTEMS: a list like its contacts page - COUPLED, G-SAFE, COMSTAB,
+ * BOOST, PRECISION and GEAR each with its switch pill, CRUISE with its state. In the middle column
+ * of the dashboard, two small screens one over the other: RADAR (the reference's centre radar) and
+ * SELF STATUS (the ship from above).
+ *
+ * Canvas: left 0..560, right 560..1120, the centre column 1120..1330 (radar over 0..259, self status
+ * under it) - the same pixels per centimetre on every screen, and each screen the shape of its glass.
+ * Tools/Blender/build_ai_ship.py maps each screen's quad to its rectangle (texture_rect in the recipe).
  *
  * Big type and thick lines: a display is ~30 cm wide ~1.2 m from the eye, so the 512 px of one screen
  * shrink to ~200 on a 1600 px wide view. Never added to the viewport: UCockpitDisplayComponent draws it
@@ -681,6 +815,41 @@ public:
 	/** The glass is ~29 x 25 cm: the same shape, so nothing is stretched. */
 	static constexpr float DisplayWidth = 560.f;
 	static constexpr float DisplayHeight = 490.f;
+
+	/** The centre column's two screens: ~11 x 13.5 and ~11 x 12 cm of glass at the big displays' density. */
+	static constexpr float CentreWidth = 210.f;
+	static constexpr float CentreTopHeight = 259.f;
+
+	/** The whole canvas (the render target's layout size). */
+	static constexpr float CanvasWidth = 2.f * DisplayWidth + CentreWidth;
+	static constexpr float CanvasHeight = DisplayHeight;
+
+	/**
+	 * A screen's rectangle on the canvas, by the name of its socket (Display_<name>): left, right,
+	 * centre_top, centre_bottom. Empty for an unknown name.
+	 */
+	static FBox2D ScreenRect(const FString& Name);
+
+	/** Tests: ScreenRect as (min X, min Y, max X, max Y); zeros for an unknown name. */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
+	static FVector4 DebugGetScreenRect(const FString& Name);
+
+	/**
+	 * What the radar shows around the ship: pawns and static meshes (asteroids, stations) within RangeM,
+	 * nearest first and at most MaxContacts, and every celestial or distant body as a bearing.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
+	static TArray<FSpaceRadarContact> MakeRadarContacts(const ASpaceshipPawn* Ship, float RangeM, int32 MaxContacts = 24);
+
+	/** What the displays show for this ship: the HUD's state with the radar's contacts. */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
+	static FSpaceFlightHudState MakeDisplayState(const ASpaceshipPawn* Ship, float RadarRangeM);
+
+	/** Reads the ship's shape for the self status page. */
+	void SetShip(const AActor* Ship);
+
+	/** Shows or hides the centre column's screens (space.CockpitCentre). */
+	void SetCentreColumn(bool bOn);
 
 	/**
 	 * A figure as the display shows it: while it changes fast between two updates it is shown in

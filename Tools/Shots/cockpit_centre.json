@@ -1,0 +1,10 @@
+{
+  "_comment": "The centre column's displays (RADAR over SELF STATUS) in the states they show: bodies' bearings in space and near Veyra, engines working (afterburner), gear coming down, landed with the gear out. Run: .\\Tools\\Shots.ps1 -Preset cockpit_centre. The screens are small in a 1600 px shot: crop and enlarge the middle of the dashboard to judge them.",
+  "shots": [
+    {"name": "centre_space", "camera": "cockpit", "altitude_m": 40000, "facing": "away", "speed_ms": 0, "hud": 1, "settle": 1.2},
+    {"name": "centre_horizon", "camera": "cockpit", "altitude_m": 4000, "facing": "horizon", "speed_ms": 120, "hud": 1, "settle": 1.2},
+    {"name": "centre_afterburner", "camera": "cockpit", "altitude_m": 4000, "facing": "horizon", "speed_ms": 200, "afterburner": true, "hud": 1, "settle": 1.0},
+    {"name": "centre_gear_lowering", "camera": "cockpit", "altitude_m": 300, "facing": "horizon", "speed_ms": 20, "lower_gear": true, "hud": 1, "settle": 0.6},
+    {"name": "centre_landed", "camera": "cockpit", "altitude_m": 2.6, "facing": "horizon", "hud": 1, "gear": true, "settle": 3.0}
+  ]
+}

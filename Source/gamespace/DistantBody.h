@@ -33,6 +33,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Distant Body")
 	FVector ComputeOrbitOffset(double TimeSeconds) const;
 
+	UFUNCTION(BlueprintPure, Category = "Distant Body")
+	const FText& GetDisplayName() const { return DisplayName; }
+
+	UFUNCTION(BlueprintPure, Category = "Distant Body")
+	float GetRadiusKm() const { return RadiusKm; }
+
 protected:
 	/** Sphere with a radius of 100 cm (SM_PlanetSphere), scaled to RadiusKm. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Distant Body")

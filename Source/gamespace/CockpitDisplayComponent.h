@@ -57,7 +57,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
 	float PixelScale() const;
 
-	/** Render target size for a layout scale (both displays side by side). */
+	/** Render target size for a layout scale (the whole canvas: both MFDs and the centre column). */
 	static FVector2D TargetSize(float Scale);
 
 	/**
@@ -96,6 +96,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "1.0"))
 	float DisplayLightRadiusCm = 160.f;
 
+	/** The cockpit radar's range, metres (the reference's shows 2 km; asteroids here are kilometres apart). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "100.0"))
+	float RadarRangeM = 5000.f;
+
 	/** Changes the display lights' brightness (tuning, shots). */
 	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
 	void SetDisplayLightIntensity(float Candela);
@@ -103,6 +107,10 @@ public:
 	/** Tests: the display lights made at BeginPlay. */
 	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
 	int32 GetDisplayLightCount() const { return Lights.Num(); }
+
+	/** Tests: a display light's candela (smaller screens light less), -1 for a bad index. */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
+	float GetDisplayLightIntensity(int32 Index) const;
 
 	/** Tests: the display slot was found and the displays are set up. */
 	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
@@ -135,6 +143,9 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<URectLightComponent>> Lights;
+
+	/** Each light's share of DisplayLightIntensityCd: its screen's area against a big display's. */
+	TArray<float> LightShares;
 
 	void CreateDisplayLights();
 

@@ -215,7 +215,19 @@ reference's MFDs more closely: lit glass with a faint grid and darker edges, a c
 like the contacts page, and the figures change 5 times a second (`state_rate_hz` in the setup) so temporal AA
 does not blend each number with the one before; bars and lamps still move at 60 Hz. The interior is imported without Nanite (`no_nanite_parts` in
 the setup): with Nanite its motion vectors were wrong in fast flight and temporal AA broke the displays' type
-up. The cockpit camera has no motion blur. The screen HUD stays,
+up. The cockpit camera has no motion blur. **Centre column** (19. 9. 2026): the two small screens between the
+MFDs are displays too - RADAR (a plan view with the nose up, 5 km rings, the pilot's 88-degree view, contacts
+within range - pawns and static meshes with collision - as diamonds on a stalk for their height, and the
+celestial bodies as bearings on the rim with their initial, unless more than 60 degrees above or below the
+wings; heading and contact count under it) and SELF STATUS (the ship from above as its collision hulls'
+outlines, the `Engine_*` sockets glowing with the engine demand, the `Gear_*` legs lit while out, GEAR and
+thrust / LANDED). `USpaceHudRadar`, `USpaceHudShipStatus`, contacts from `USpaceCockpitDisplays::MakeRadarContacts`
+(5 Hz, with the figures); `space.CockpitCentre 0` switches the column off. The canvas is 1330 x 490:
+left 0-560, right 560-1120, centre 1120-1330 (radar over 0-259) - `USpaceCockpitDisplays::ScreenRect`, and
+`texture_size` / `texture_rect` in the recipe map each quad to its rectangle. Every line on those pages has one
+thickness and one layer: Slate starts a new batch at each change of either and re-reserves the whole vertex list
+per batch, and drawn with glow passes the two pages cost ~15 ms a frame (`stat SpaceCockpit`, `stat SpaceHud`).
+The screen HUD stays,
 compacted so it sits above the dashboard. The cockpit is dark like the reference: the displays light it
 (a rect light at each `Display_*` socket), a faint key and fill light keep the dashboard's shape, and the inside
 of the canopy frame has its own dark slot (`M_Ship_Vanguard_CanopyFrame`).

@@ -40,6 +40,8 @@
       "fbx": "SM_Ship_Vanguard_Interior.fbx",
       "objects": [
         "SM_Ship_Vanguard_Interior",
+        "SOCKET_Display_centre_bottom",
+        "SOCKET_Display_centre_top",
         "SOCKET_Display_left",
         "SOCKET_Display_right"
       ]
@@ -101,8 +103,8 @@
     "SM_Ship_Vanguard_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 149076,
-      "verts": 74510,
+      "tris": 148785,
+      "verts": 74435,
       "materials": [
         "M_Ship_Vanguard_Interior",
         "M_Ship_Vanguard_Screens"
@@ -342,6 +344,32 @@
         174.0,
         -0.0,
         189.0
+      ]
+    },
+    "SOCKET_Display_centre_bottom": {
+      "parent": "SM_Ship_Vanguard_Interior",
+      "location_m": [
+        2.99528,
+        0.00782,
+        1.34285
+      ],
+      "location_ue_cm": [
+        299.53,
+        -0.78,
+        134.28
+      ]
+    },
+    "SOCKET_Display_centre_top": {
+      "parent": "SM_Ship_Vanguard_Interior",
+      "location_m": [
+        3.12247,
+        0.00862,
+        1.49821
+      ],
+      "location_ue_cm": [
+        312.25,
+        -0.86,
+        149.82
       ]
     },
     "SOCKET_Display_left": {
