@@ -1,0 +1,11 @@
+{
+  "_comment": "Tuning the hull's look in one packaged run: every shot sets material parameters with space.ShipMat / space.ShipMatColor (live dynamic instances, nothing saved). Settings stay for the following shots, so each shot lists everything it changes. What looks right goes into ArtSource/Ships/<Ship>/<Ship>_setup.json. Run: Tools/Shots.ps1 -Preset hull_tune",
+  "shots": [
+    {"name": "a_current", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 3.0},
+    {"name": "b_detail_off", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 1.0, "console": ["space.ShipMat DetailNormalStrength 0"]},
+    {"name": "c_detail_strong", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 1.0, "console": ["space.ShipMat DetailNormalStrength 1.4"]},
+    {"name": "d_tile_small", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 1.0, "console": ["space.ShipMat DetailNormalStrength 0.8", "space.ShipMat DetailTileCm 8"]},
+    {"name": "e_lighter_paint", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 1.0, "console": ["space.ShipMat DetailTileCm 18", "space.ShipMatColor BaseColorTint 3.4 3.4 3.4"]},
+    {"name": "f_lighter_rougher", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 1.0, "console": ["space.ShipMat RoughnessScale 1.3", "space.ShipMat MetallicScale 0.35"]}
+  ]
+}

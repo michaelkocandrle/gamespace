@@ -456,6 +456,11 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       proti 94 FPS bez vrstvy i bez geometrie. FBX trupu má 93 MB (Git LFS);
     - scénář snímků `hull_detail` (tryska, bok, vršek, celá loď) a srovnání se `detail_normal_strength` 0.
 
+34. **Ladění vzhledu za běhu** (20. 9. 2026): `space.ShipMat <parametr> <hodnota>` a
+    `space.ShipMatColor <parametr> <r> <g> <b>` mění materiály lodi v běžící zabalené hře (dynamické
+    instance, nic se neukládá). Scénář `hull_tune` udělá v jednom balíčku šest variant. Důvod: každá
+    varianta přes recept a balení stála ~4 minuty, teď ~20 s. Co sedí, přepíše se do setupu lodi.
+
 ---
 
 ## 6. Mapa kódu a obsahu
@@ -631,6 +636,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `landing` | SC-2a: podvozek ze strany (dole, v půlce cesty), zespodu, loď stojící na patkách, varování GEAR UP, loď na břiše bez podvozku, HUD po přistání, precision HUD, kokpit na zemi. |
 | `cockpit_centre` | Střední sloupek desky (RADAR, SELF STATUS): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé: vyříznout a zvětšit. |
 | `cockpit_readability` | Čitelnost displejů: výchozí pohled, přiblížení (Z) na FLIGHT/STATUS a THRUSTERS/CONTACTS, na konci staré oko pro srovnání. |
+| `hull_tune` | Ladění materiálu trupu: šest variant v jednom běhu přes `space.ShipMat` (síla detailu, velikost dlaždice, světlejší lak, drsnost). |
 | `hull_detail` | Trup zblízka (tryska, bok, vršek, celá loď): posouzení detailní vrstvy materiálu. Srovnání: `detail_normal_strength` 0 v setupu, znovu import a balení. |
 | `mfd_pages` | Stránky MFD: FLIGHT/STATUS, THRUSTERS/CONTACTS s afterburnerem, NAVIGATION/SELF STATUS ve vesmíru a po přistání, THRUSTERS při visení. Stránky nastavuje pole `console` (`space.MfdPage`). |
 

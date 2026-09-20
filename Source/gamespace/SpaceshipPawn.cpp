@@ -53,6 +53,45 @@ namespace
 			}
 		}));
 
+	/** Material parameters of every ship here, live: space.ShipMat <Parameter> <Value>. */
+	FAutoConsoleCommandWithWorldAndArgs ShipMaterialCommand(
+		TEXT("space.ShipMat"),
+		TEXT("space.ShipMat <Parameter> <Value>: set a scalar on every material of the ship (DetailNormalStrength, DetailTileCm, RoughnessScale...). Not saved."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			if (Args.Num() < 2)
+			{
+				UE_LOG(LogTemp, Display, TEXT("space.ShipMat <Parameter> <Value>"));
+				return;
+			}
+			int32 Changed = 0;
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				Changed += It->DebugSetMaterialScalar(FName(*Args[0]), FCString::Atof(*Args[1]));
+			}
+			UE_LOG(LogTemp, Display, TEXT("space.ShipMat %s = %s on %d materials"), *Args[0], *Args[1], Changed);
+		}));
+
+	/** The same for a colour: space.ShipMatColor <Parameter> <R> <G> <B>. */
+	FAutoConsoleCommandWithWorldAndArgs ShipMaterialColorCommand(
+		TEXT("space.ShipMatColor"),
+		TEXT("space.ShipMatColor <Parameter> <R> <G> <B>: set a colour on every material of the ship (BaseColorTint...). Not saved."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			if (Args.Num() < 4)
+			{
+				UE_LOG(LogTemp, Display, TEXT("space.ShipMatColor <Parameter> <R> <G> <B>"));
+				return;
+			}
+			const FLinearColor Colour(FCString::Atof(*Args[1]), FCString::Atof(*Args[2]), FCString::Atof(*Args[3]), 1.f);
+			int32 Changed = 0;
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				Changed += It->DebugSetMaterialColor(FName(*Args[0]), Colour);
+			}
+			UE_LOG(LogTemp, Display, TEXT("space.ShipMatColor %s on %d materials"), *Args[0], Changed);
+		}));
+
 	/** space.CockpitPitch <deg>: the cockpit view's rest pitch (comparison shots of the framing). */
 	FAutoConsoleCommandWithWorldAndArgs CockpitPitchCommand(
 		TEXT("space.CockpitPitch"),
@@ -1278,6 +1317,52 @@ void ASpaceshipPawn::HandleDashboardFocusStarted(const FInputActionValue& /*Valu
 void ASpaceshipPawn::HandleDashboardFocusCompleted(const FInputActionValue& /*Value*/)
 {
 	SetDashboardFocus(false);
+}
+
+int32 ASpaceshipPawn::DebugSetMaterialScalar(FName Parameter, float Value)
+{
+	int32 Changed = 0;
+	TInlineComponentArray<UMeshComponent*> Meshes(this);
+	for (UMeshComponent* Mesh : Meshes)
+	{
+		for (int32 Slot = 0; Slot < Mesh->GetNumMaterials(); ++Slot)
+		{
+			UMaterialInstanceDynamic* Dynamic = Cast<UMaterialInstanceDynamic>(Mesh->GetMaterial(Slot));
+			if (!Dynamic)
+			{
+				Dynamic = Mesh->CreateDynamicMaterialInstance(Slot);
+			}
+			if (Dynamic)
+			{
+				Dynamic->SetScalarParameterValue(Parameter, Value);
+				++Changed;
+			}
+		}
+	}
+	return Changed;
+}
+
+int32 ASpaceshipPawn::DebugSetMaterialColor(FName Parameter, FLinearColor Value)
+{
+	int32 Changed = 0;
+	TInlineComponentArray<UMeshComponent*> Meshes(this);
+	for (UMeshComponent* Mesh : Meshes)
+	{
+		for (int32 Slot = 0; Slot < Mesh->GetNumMaterials(); ++Slot)
+		{
+			UMaterialInstanceDynamic* Dynamic = Cast<UMaterialInstanceDynamic>(Mesh->GetMaterial(Slot));
+			if (!Dynamic)
+			{
+				Dynamic = Mesh->CreateDynamicMaterialInstance(Slot);
+			}
+			if (Dynamic)
+			{
+				Dynamic->SetVectorParameterValue(Parameter, Value);
+				++Changed;
+			}
+		}
+	}
+	return Changed;
 }
 
 void ASpaceshipPawn::SetDashboardFocus(bool bFocus)

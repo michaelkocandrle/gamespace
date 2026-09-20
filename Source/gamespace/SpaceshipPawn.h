@@ -455,6 +455,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
 	void SetDashboardFocus(bool bFocus);
 
+	/**
+	 * Tuning a ship's material without re-importing and re-packaging (the loop that made look work slow):
+	 * sets a parameter on every material of this ship, through dynamic instances made on the first call.
+	 * Console: space.ShipMat <Parameter> <Value> and space.ShipMatColor <Parameter> <R> <G> <B>.
+	 * Nothing is saved - what looks right goes into <Ship>_setup.json.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	int32 DebugSetMaterialScalar(FName Parameter, float Value);
+
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	int32 DebugSetMaterialColor(FName Parameter, FLinearColor Value);
+
 	/** The cockpit view's pitch at rest, degrees (negative looks down). */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Camera")
 	void SetCockpitViewPitch(float Degrees) { CockpitViewPitchDeg = FMath::Clamp(Degrees, -20.f, 20.f); }

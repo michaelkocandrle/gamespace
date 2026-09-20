@@ -266,6 +266,24 @@ Hra během snímků krátce převezme popředí. Když autor zrovna hraje, nejd�
 
 ## 7. Kokpit: displeje, HUD, světla
 
+### 6.1 Ladění vzhledu za běhu (šetří hodiny)
+
+Každá varianta materiálu přes recept a balení stojí ~4 minuty. Proto se parametry lodi dají měnit
+**v běžící zabalené hře** a jeden balíček pak pokryje desítky variant (~20 s na jednu):
+
+```
+space.ShipMat DetailNormalStrength 1.2      # skalár na všech materiálech lodi
+space.ShipMat DetailTileCm 12
+space.ShipMatColor BaseColorTint 3.4 3.4 3.4
+space.CockpitPitch -3                        # sklon pohledu v kokpitu
+space.DashboardFocus 1                       # přiblížení na displeje
+space.MfdPage 1 2                            # stránky MFD
+```
+
+Ve scénáři snímků je dej do pole `console` (platí i pro další snímky, viz nástraha 9.2h) – vzor je
+`Tools/Shots/hull_tune.json`: jeden běh, šest variant vedle sebe. Příkaz dělá dynamické instance
+materiálu, takže **nic neukládá**: co vypadá dobře, přepiš do `<Loď>_setup.json` a jednou přeimportuj.
+
 ### 7.1 Displeje (MFD)
 
 - `UCockpitDisplayComponent` (`Source/gamespace/CockpitDisplayComponent.*`) kreslí widget
