@@ -92,6 +92,19 @@ namespace
 			UE_LOG(LogTemp, Display, TEXT("space.ShipMatColor %s on %d materials"), *Args[0], Changed);
 		}));
 
+	/** space.Vtol 1 / 0: VTOL on every ship here, for shots that should not depend on a key. */
+	FAutoConsoleCommandWithWorldAndArgs VtolCommand(
+		TEXT("space.Vtol"),
+		TEXT("space.Vtol 1|0: VTOL (G in the game). SCM only."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			const bool bOn = Args.Num() == 0 || FCString::Atoi(*Args[0]) != 0;
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				It->SetVtol(bOn);
+			}
+		}));
+
 	/** space.CockpitPitch <deg>: the cockpit view's rest pitch (comparison shots of the framing). */
 	FAutoConsoleCommandWithWorldAndArgs CockpitPitchCommand(
 		TEXT("space.CockpitPitch"),
@@ -134,6 +147,7 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const AfterburnerActionPath = TEXT("/Game/Input/IA_Afterburner.IA_Afterburner");
 	const TCHAR* const LandingGearActionPath = TEXT("/Game/Input/IA_LandingGear.IA_LandingGear");
 	const TCHAR* const PrecisionActionPath = TEXT("/Game/Input/IA_Precision.IA_Precision");
+	const TCHAR* const VtolActionPath = TEXT("/Game/Input/IA_Vtol.IA_Vtol");
 	const TCHAR* const MfdLeftActionPath = TEXT("/Game/Input/IA_MfdLeft.IA_MfdLeft");
 	const TCHAR* const DashboardFocusActionPath = TEXT("/Game/Input/IA_DashboardFocus.IA_DashboardFocus");
 	const TCHAR* const MfdRightActionPath = TEXT("/Game/Input/IA_MfdRight.IA_MfdRight");
@@ -543,6 +557,10 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		Input->BindAction(PrecisionAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandlePrecision);
 	}
+	if (VtolAction)
+	{
+		Input->BindAction(VtolAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleVtol);
+	}
 	if (DashboardFocusAction)
 	{
 		Input->BindAction(DashboardFocusAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleDashboardFocusStarted);
@@ -644,6 +662,10 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			if (PrecisionAction && !IsMapped(PrecisionAction))
 			{
 				InteractMappingContext->MapKey(PrecisionAction, EKeys::P);
+			}
+			if (VtolAction && !IsMapped(VtolAction))
+			{
+				InteractMappingContext->MapKey(VtolAction, EKeys::G);
 			}
 			if (DashboardFocusAction && !IsMapped(DashboardFocusAction))
 			{
@@ -767,6 +789,7 @@ void ASpaceshipPawn::ResolveInputAssets()
 	LoadOrMake(AfterburnerAction, AfterburnerActionPath, TEXT("IA_Afterburner_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(LandingGearAction, LandingGearActionPath, TEXT("IA_LandingGear_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(PrecisionAction, PrecisionActionPath, TEXT("IA_Precision_Runtime"), EInputActionValueType::Boolean);
+	LoadOrMake(VtolAction, VtolActionPath, TEXT("IA_Vtol_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(DashboardFocusAction, DashboardFocusActionPath, TEXT("IA_DashboardFocus_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(MfdLeftAction, MfdLeftActionPath, TEXT("IA_MfdLeft_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(MfdRightAction, MfdRightActionPath, TEXT("IA_MfdRight_Runtime"), EInputActionValueType::Boolean);
@@ -1165,7 +1188,9 @@ float ASpaceshipPawn::GetModeMaxSpeed() const
 	{
 		return NavMaxSpeed;
 	}
-	return IsPrecisionActive() ? ScmMaxSpeed * PrecisionSpeedFraction : ScmMaxSpeed;
+	const float Scm = IsPrecisionActive() ? ScmMaxSpeed * PrecisionSpeedFraction : ScmMaxSpeed;
+	// VTOL is slower than SCM but never faster than precision mode, which is slower still.
+	return FMath::Lerp(Scm, FMath::Min(Scm, VtolMaxSpeed), VtolBlend);
 }
 
 float ASpaceshipPawn::GetSpeedLimit() const
@@ -1751,6 +1776,7 @@ void ASpaceshipPawn::StepFlight(float DeltaSeconds)
 {
 	UpdateEnvironment(DeltaSeconds);
 	UpdateMasterMode(DeltaSeconds);
+	UpdateVtol(DeltaSeconds);
 	UpdateGear(DeltaSeconds);
 	UpdateLanding(DeltaSeconds);
 	UpdateBoost(DeltaSeconds);
@@ -1840,9 +1866,11 @@ void ASpaceshipPawn::UpdateAfterburner(float DeltaSeconds)
 		bAfterburnerLocked = false;
 	}
 	// SCM only (NAV already flies at five times SCM speed and has cruise for more), and only while it
-	// can do something: W forward, no spacebrake, flying.
+	// can do something: W forward, no spacebrake, flying. VTOL refuses it too - the mains are down to a
+	// third and the ship is standing on its lift thrusters (SC-2b).
 	bAfterburnerActive = bAfterburnerHeld && ThrustInput > 0.f && !bSpaceBrakeHeld && !bAfterburnerLocked && AfterburnerFuel > 0.f
-		&& MasterMode == EMasterMode::SCM && !IsPrecisionActive() && CruiseState == ECruiseState::Off && LandingState != ELandingState::Landed;
+		&& MasterMode == EMasterMode::SCM && !IsPrecisionActive() && !bVtolMode && CruiseState == ECruiseState::Off
+		&& LandingState != ELandingState::Landed;
 
 	if (bAfterburnerActive)
 	{
@@ -2113,6 +2141,13 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 		AngularVelocity.Z = 0.0;
 	}
 
+	// VTOL holds the ship level (SC-2b): with the stick still and gravity to tell it which way is up,
+	// pitch and roll are turned back towards the horizon. Any stick input takes it straight back.
+	if (bHasEnvironment && FMath::IsNearlyZero(TargetRates.X) && FMath::IsNearlyZero(TargetRates.Y))
+	{
+		AddActorLocalRotation(ComputeVtolLevelStep(Environment.Up, DeltaSeconds));
+	}
+
 	// Local rotation, so pitch/yaw/roll stay relative to the hull. That is what makes this 6DOF
 	// rather than an aircraft glued to a horizon, and it sidesteps gimbal lock at the poles.
 	AddActorLocalRotation(FRotator(
@@ -2155,11 +2190,16 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		// What each thruster direction can do. NAV keeps main and retro but halves manoeuvring; boost
 		// strengthens the manoeuvring thrusters (retro included), the afterburner the main ones.
 		const double Maneuver = (MasterMode == EMasterMode::NAV ? NavManeuverScale : 1.0) * (bBoostActive ? BoostManeuverMultiplier : 1.0);
-		const double ForwardCap = ThrustAcceleration * (bAfterburnerActive ? AfterburnerThrustMultiplier : 1.0);
-		const double RetroCap = RetroAcceleration * (bBoostActive ? BoostManeuverMultiplier : 1.0);
-		const double StrafeCap = StrafeAcceleration * Maneuver;
-		const double UpCap = LiftAcceleration * Maneuver;
-		const double DownCap = DownAcceleration * Maneuver;
+		// VTOL (SC-2b): the thrust moves off the mains and onto the lift and lateral thrusters.
+		const double Vtol = double(VtolBlend);
+		const double VtolMain = FMath::Lerp(1.0, double(VtolThrustFraction), Vtol);
+		const double VtolLift = FMath::Lerp(1.0, double(VtolLiftMultiplier), Vtol);
+		const double VtolStrafe = FMath::Lerp(1.0, double(VtolStrafeMultiplier), Vtol);
+		const double ForwardCap = ThrustAcceleration * (bAfterburnerActive ? AfterburnerThrustMultiplier : 1.0) * VtolMain;
+		const double RetroCap = RetroAcceleration * (bBoostActive ? BoostManeuverMultiplier : 1.0) * VtolMain;
+		const double StrafeCap = StrafeAcceleration * Maneuver * VtolStrafe;
+		const double UpCap = LiftAcceleration * Maneuver * VtolLift;
+		const double DownCap = DownAcceleration * Maneuver * VtolLift;
 		const double SpeedLimit = GetSpeedLimit();
 		const double SpeedBefore = LinearVelocity.Size();
 		// The spacebrake is coupled flight towards zero, whatever the coupled switch says.
@@ -2177,6 +2217,12 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 				if (DesiredLocal.Size() > SpeedLimit)
 				{
 					DesiredLocal *= SpeedLimit / DesiredLocal.Size();
+				}
+				if (VtolBlend > 0.f)
+				{
+					// In VTOL Space and Ctrl are a climb rate, not another way of reaching the top speed.
+					const double ClimbLimit = FMath::Lerp(SpeedLimit, double(VtolClimbSpeed) * SpeedLimiterFraction, double(VtolBlend));
+					DesiredLocal.Z = FMath::Clamp(DesiredLocal.Z, -ClimbLimit, ClimbLimit);
 				}
 				if (LiftInput < 0.f && bHasEnvironment)
 				{
@@ -2218,10 +2264,15 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		{
 			LocalAcceleration = LimitThrustForPilot(LocalAcceleration, bComStab && bCoupled);
 		}
+		// How hard the engines are working, for the glow and the sound. The vertical axis is measured
+		// against a hover's worth of thrust (HoverThrustReferenceG), not against what the lift
+		// thrusters could do: holding station over Veyra is 0.46 G of a possible 5.5, so against the
+		// full capacity it read as 0.06 and hovering looked dead (HANDOFF kapitola 11, SC-2b).
+		const double HoverReference = FMath::Max(double(HoverThrustReferenceG) * SpaceshipPawnDefaults::StandardGravityCmS2, 1.0);
 		EngineDemand = float(FMath::Clamp(FMath::Max3(
 			FMath::Abs(LocalAcceleration.X) / FMath::Max(LocalAcceleration.X >= 0.0 ? ForwardCap : RetroCap, 1.0),
 			0.7 * FMath::Abs(LocalAcceleration.Y) / FMath::Max(StrafeCap, 1.0),
-			0.7 * FMath::Abs(LocalAcceleration.Z) / FMath::Max(LocalAcceleration.Z >= 0.0 ? UpCap : DownCap, 1.0)), 0.0, 1.0));
+			FMath::Abs(LocalAcceleration.Z) / HoverReference), 0.0, 1.0));
 		GForce = FMath::FInterpTo(GForce, float(LocalAcceleration.Size() / SpaceshipPawnDefaults::StandardGravityCmS2), DeltaSeconds, 8.f);
 		ThrusterAcceleration = LocalAcceleration;
 		ThrusterCapPositive = FVector(ForwardCap, StrafeCap, UpCap);
@@ -2811,6 +2862,61 @@ void ASpaceshipPawn::SetPrecisionMode(bool bOn)
 	}
 	bPrecisionMode = bOn;
 	UE_LOG(LogSpaceship, Log, TEXT("%s: precision mode %s"), *GetName(), bOn ? TEXT("on") : TEXT("off"));
+}
+
+void ASpaceshipPawn::SetVtol(bool bOn)
+{
+	if (bOn == bVtolMode)
+	{
+		return;
+	}
+	// NAV is for travel: asking for VTOL there does nothing, and switching to NAV drops it (UpdateVtol).
+	if (bOn && MasterMode != EMasterMode::SCM)
+	{
+		UE_LOG(LogSpaceship, Log, TEXT("%s: VTOL refused, SCM only"), *GetName());
+		return;
+	}
+	bVtolMode = bOn;
+	if (bOn && CruiseState != ECruiseState::Off)
+	{
+		// Both are ways of going fast in a straight line; neither belongs to standing on the thrusters.
+		BeginCruiseDrop(ECruiseBlocker::Pilot);
+	}
+	UE_LOG(LogSpaceship, Log, TEXT("%s: VTOL %s"), *GetName(), bOn ? TEXT("on") : TEXT("off"));
+}
+
+void ASpaceshipPawn::UpdateVtol(float DeltaSeconds)
+{
+	if (bVtolMode && MasterMode != EMasterMode::SCM)
+	{
+		bVtolMode = false;
+		UE_LOG(LogSpaceship, Log, TEXT("%s: VTOL off (NAV)"), *GetName());
+	}
+	const float Target = bVtolMode ? 1.f : 0.f;
+	const float Step = DeltaSeconds / FMath::Max(VtolTransitionSeconds, 0.01f);
+	VtolBlend = FMath::Clamp(VtolBlend + FMath::Clamp(Target - VtolBlend, -Step, Step), 0.f, 1.f);
+}
+
+FRotator ASpaceshipPawn::ComputeVtolLevelStep(const FVector& WorldUp, float DeltaSeconds) const
+{
+	if (VtolBlend <= 0.f || VtolLevelRate <= 0.f || WorldUp.IsNearlyZero())
+	{
+		return FRotator::ZeroRotator;
+	}
+	// Where the hull's own up points, seen from the hull: level means straight up its Z.
+	const FVector LocalUp = GetActorQuat().UnrotateVector(WorldUp.GetSafeNormal());
+	// Negated: a nose-up hull sees the world's up leaning towards its own nose, and levelling means
+	// turning the other way (checked against the measured step in test_vtol_sc2b.py).
+	const double PitchError = FMath::RadiansToDegrees(FMath::Atan2(-LocalUp.X, LocalUp.Z));
+	const double RollError = FMath::RadiansToDegrees(FMath::Atan2(LocalUp.Y, LocalUp.Z));
+	// The whole rate only once VTOL is fully in; half way in, half the authority.
+	const double Step = double(VtolLevelRate) * double(VtolBlend) * double(DeltaSeconds);
+	return FRotator(FMath::Clamp(PitchError, -Step, Step), 0.0, FMath::Clamp(RollError, -Step, Step));
+}
+
+void ASpaceshipPawn::HandleVtol(const FInputActionValue& Value)
+{
+	ToggleVtol();
 }
 
 float ASpaceshipPawn::GetGearGroundOffsetCm() const

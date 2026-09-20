@@ -360,6 +360,27 @@ Star Citizen style: the gear has to be down to land, and lowering it puts the sh
 - **HUD**: GEAR lamp (green down, amber blinking on the way, red blinking low with it up) and PREC lamp
   (green, amber in NAV); the speed gauge's full scale follows the precision speed.
 
+
+### VTOL (SC-2b)
+
+`G` stands the ship on its lift thrusters instead of its main engines - the reference's VTOL switch,
+one of four that are on at the same time (VTOL / CPLD / ESP / GEAR). SCM only; NAV turns it off. The
+transition takes `VtolTransitionSeconds` so nothing snaps, and `GetVtolBlend` is how far through it
+is. In VTOL the mains keep `VtolThrustFraction` of their thrust, the lift thrusters gain
+`VtolLiftMultiplier` and the lateral ones `VtolStrafeMultiplier`, the top speed becomes
+`VtolMaxSpeed` (the limiter still works inside it), and `Space` / `Left Ctrl` become a climb rate
+(`VtolClimbSpeed`) rather than another way of reaching the top speed. With the stick still the ship
+rights itself towards the horizon at `VtolLevelRate`; any stick input takes it straight back. The
+afterburner is refused and the cruise drive is dropped.
+
+Hovering also shows on the engines now. `EngineDemand` measured the vertical axis against the full
+capacity of the lift thrusters, so holding station over Veyra - 0.46 G out of a possible 5.5 - read
+as 0.06 and neither the nozzles nor the sound moved. It is measured against one G of thrust
+(`HoverThrustReferenceG`) instead.
+
+Headless: `Tools/Tests/test_vtol_sc2b.py`; pictures: `Tools/Shots.ps1 -Preset vtol`. The key comes
+from `Tools/Assets/add_vtol_input.py`, and `space.Vtol 1|0` switches it from the console.
+
 ### Controls
 
 | Action       | Keyboard / mouse           | Gamepad              |
@@ -381,6 +402,7 @@ Star Citizen style: the gear has to be down to land, and lowering it puts the sh
 | Zoom         | `Alt` + mouse wheel (chase distance, cockpit zoom) | - |
 | Landing gear | `N` (down also switches precision on) | -          |
 | Precision mode | `P`                      | -                    |
+| VTOL (SCM only) | `G`                     | -                    |
 | Dashboard focus | hold `Z` or the middle mouse button | -            |
 | MFD pages    | `F1` left, `F2` right (`Alt` + key: back; `[` `]` on a US keyboard) | - |
 | Get out      | `F` (only when LANDED)     | -                    |

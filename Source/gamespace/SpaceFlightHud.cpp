@@ -1472,7 +1472,7 @@ void USpaceFlightHud::BuildTree()
 	Bracket(TEXT("BracketMode"), { FVector2D(-262.0, -100.0), FVector2D(-262.0, -62.0), FVector2D(-252.0, -50.0) }, Faded(Label, 0.6f));
 
 	UVerticalBox* Badges = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("BadgeBox"));
-	for (const TCHAR* LampName : { TEXT("CSTB"), TEXT("CPLD"), TEXT("PREC"), TEXT("BOOST") })
+	for (const TCHAR* LampName : { TEXT("CSTB"), TEXT("CPLD"), TEXT("PREC"), TEXT("VTOL"), TEXT("BOOST") })
 	{
 		const FName Key(LampName);
 		UOverlay* Badge = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("Badge_%s"), LampName)));
@@ -1614,6 +1614,8 @@ FSpaceFlightHudState USpaceFlightHud::MakeState(const ASpaceshipPawn* Ship, int3
 	State.bGearWarning = Ship->HasGroundInfo() && Ship->GetLandingBlocker() == ELandingBlocker::GearUp;
 	State.bPrecisionOn = Ship->IsPrecisionModeOn();
 	State.bPrecisionActive = Ship->IsPrecisionActive();
+	State.bVtolOn = Ship->IsVtolOn();
+	State.bVtolActive = Ship->IsVtolActive();
 	State.Stick = Ship->GetMouseStick();
 	State.Deadzone = Ship->GetVirtualJoystickDeadzone();
 
@@ -1621,7 +1623,8 @@ FSpaceFlightHudState USpaceFlightHud::MakeState(const ASpaceshipPawn* Ship, int3
 	State.CruiseLabel = Cruise == ECruiseState::Spooling ? TEXT("SPOOL") : Cruise == ECruiseState::Active ? TEXT("ON")
 		: Cruise == ECruiseState::Dropping ? TEXT("DROP") : TEXT("OFF");
 	State.SubModeLabel = Cruise == ECruiseState::Active || Cruise == ECruiseState::Dropping ? TEXT("CRUISE")
-		: Cruise == ECruiseState::Spooling ? TEXT("SPOOL") : State.bPrecisionActive ? TEXT("PREC") : TEXT("FLIGHT");
+		: Cruise == ECruiseState::Spooling ? TEXT("SPOOL") : State.bVtolActive ? TEXT("VTOL")
+		: State.bPrecisionActive ? TEXT("PREC") : TEXT("FLIGHT");
 	State.GearLabel = State.bGearMoving ? TEXT("MOVING") : State.bGearDown ? TEXT("DOWN") : TEXT("UP");
 
 	// Across the nose: strafe input, drift (50 m/s full scale) and turn rate (the ship's top rate).
@@ -1743,6 +1746,8 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 	SetLamp(TEXT("GEAR"), State.bGearDown || ((State.bGearMoving || State.bGearWarning) && bBlink), GearColor);
 	// Precision switched on but not in effect (NAV): amber, like G-Safe suspended by boost.
 	SetLamp(TEXT("PREC"), State.bPrecisionOn, State.bPrecisionActive ? Instrument : Amber);
+	// Amber while switched on but not in effect, the same rule as G-Safe and precision mode.
+	SetLamp(TEXT("VTOL"), State.bVtolOn, State.bVtolActive ? Instrument : Amber);
 	SetLamp(TEXT("CRUISE"), State.CruiseLabel != TEXT("OFF"), State.CruiseLabel == TEXT("ON") ? Instrument : Amber);
 	if (USpaceHudSymbol* Shield = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("Shield"))))
 	{
@@ -2353,7 +2358,7 @@ void USpaceCockpitDisplays::BuildTree()
 	}
 	Vertical(FlightMain, Readout, HAlign_Fill, FMargin(0.f), true);
 	Horizontal(Flight, FlightMain, VAlign_Fill, FMargin(0.f), true);
-	Horizontal(Flight, Keys(TEXT("FlightKeys"), { TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST"), TEXT("PREC") }), VAlign_Top,
+	Horizontal(Flight, Keys(TEXT("FlightKeys"), { TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST"), TEXT("PREC"), TEXT("VTOL") }), VAlign_Top,
 		FMargin(16.f, 0.f, 0.f, 0.f));
 	// --- Left display, page 2: THRUSTERS - what each direction puts out against what it can -----------
 	auto AlignedWords = [&](const FName Name, const TCHAR* Initial, float Size, ETextJustify::Type Justify, const FLinearColor& Color = SpaceHudStyle::MfdText)

@@ -640,6 +640,40 @@ public:
 	void TogglePrecisionMode() { SetPrecisionMode(!bPrecisionMode); }
 
 	/**
+	 * VTOL (G), SC-2b. The ship stands on its manoeuvring thrusters instead of flying on its main
+	 * engines: the mains drop to VtolThrustFraction, the vertical and lateral thrusters gain, the
+	 * speed drops to VtolMaxSpeed, Space and Ctrl become a climb rate rather than an acceleration,
+	 * and the ship holds itself level. Only in SCM, like the reference's VTOL switch; the afterburner
+	 * and the cruise drive are refused while it is on. It comes in and goes out over
+	 * VtolTransitionSeconds, so nothing snaps - IsVtolOn is the switch, GetVtolBlend the amount.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|VTOL")
+	bool IsVtolOn() const { return bVtolMode; }
+
+	/** 0 fully on the mains .. 1 fully on the lift thrusters. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|VTOL")
+	float GetVtolBlend() const { return VtolBlend; }
+
+	/** Switched on and in SCM: NAV is for travel and turns VTOL off. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|VTOL")
+	bool IsVtolActive() const { return bVtolMode && MasterMode == EMasterMode::SCM; }
+
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|VTOL")
+	void SetVtol(bool bOn);
+
+	/**
+	 * How far VTOL turns the hull back towards level this frame, as a local pitch / roll step.
+	 * WorldUp is the direction gravity says is up. Zero without VTOL, without an up, or once level.
+	 * UpdateAngularMotion uses exactly this; separate so a test can check it without a planet.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|VTOL")
+	FRotator ComputeVtolLevelStep(const FVector& WorldUp, float DeltaSeconds) const;
+
+	/** G: VTOL on / off. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|VTOL")
+	void ToggleVtol() { SetVtol(!bVtolMode); }
+
+	/**
 	 * The touchdown rule with the gear: GearUp unless the gear is down and locked, otherwise
 	 * EvaluateLanding on the gap under the pads (hull gap minus GearExtensionCm; pads already pressed
 	 * into the ground count as 0). HullGap < 0 means nothing below. The state machine uses exactly this.
@@ -966,6 +1000,10 @@ protected:
 	/** Digital, pressed: precision mode on / off (P). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> PrecisionAction;
+
+	/** G: VTOL (SC-2b). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Input")
+	TObjectPtr<UInputAction> VtolAction;
 
 	/** Digital, held: dashboard focus (Z, middle mouse button). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
@@ -1586,6 +1624,43 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Precision", meta = (ClampMin = "0.02", ClampMax = "1.0"))
 	float PrecisionSpeedFraction = 0.15f;
 
+	/** VTOL: how long the ship takes to move its thrust from the mains to the lift thrusters, seconds. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|VTOL", meta = (ClampMin = "0.1", ClampMax = "6.0"))
+	float VtolTransitionSeconds = 1.5f;
+
+	/** VTOL: what is left of the main engines' thrust. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|VTOL", meta = (ClampMin = "0.05", ClampMax = "1.0"))
+	float VtolThrustFraction = 0.35f;
+
+	/** VTOL: the lift thrusters (up and down) gain this much. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|VTOL", meta = (ClampMin = "1.0", ClampMax = "3.0"))
+	float VtolLiftMultiplier = 1.5f;
+
+	/** VTOL: the lateral thrusters gain this much. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|VTOL", meta = (ClampMin = "1.0", ClampMax = "3.0"))
+	float VtolStrafeMultiplier = 1.3f;
+
+	/** VTOL: top speed, cm/s (the limiter still works inside it). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|VTOL", meta = (ClampMin = "500.0"))
+	float VtolMaxSpeed = 6000.f;
+
+	/** VTOL: how fast Space and Ctrl climb and sink, cm/s. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|VTOL", meta = (ClampMin = "100.0"))
+	float VtolClimbSpeed = 1500.f;
+
+	/** VTOL: how fast the ship rights itself towards the horizon when the stick is still, deg/s. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|VTOL", meta = (ClampMin = "0.0", ClampMax = "120.0"))
+	float VtolLevelRate = 25.f;
+
+	/**
+	 * What counts as the engines working hard vertically, in G. Holding a hover is a small fraction of
+	 * what the lift thrusters can do (on Veyra ~0.46 G of 5.5 G), so against their full capacity the
+	 * glow and the sound stayed at nothing and hovering looked dead (HANDOFF kapitola 11). Against one
+	 * G of thrust instead, a hover reads as the work it is.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|VTOL", meta = (ClampMin = "0.2", ClampMax = "6.0"))
+	float HoverThrustReferenceG = 1.f;
+
 	/** Precision mode: turn rates and rotational accelerations as a fraction of the normal ones. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Precision", meta = (ClampMin = "0.05", ClampMax = "1.0"))
 	float PrecisionTurnScale = 0.45f;
@@ -1708,6 +1783,7 @@ private:
 	void HandleAfterburnerCompleted(const FInputActionValue& Value);
 	void HandleLandingGear(const FInputActionValue& Value);
 	void HandlePrecision(const FInputActionValue& Value);
+	void HandleVtol(const FInputActionValue& Value);
 	void HandleDashboardFocusStarted(const FInputActionValue& Value);
 	void HandleDashboardFocusCompleted(const FInputActionValue& Value);
 	/** The cockpit camera's turn: free look on top of the dashboard focus. */
@@ -1718,6 +1794,9 @@ private:
 	void CycleMfdPage(int32 Display);
 	/** Moves the gear towards its commanded end and poses the legs. */
 	void UpdateGear(float DeltaSeconds);
+
+	/** Moves VtolBlend towards the switch and drops VTOL when the ship leaves SCM. */
+	void UpdateVtol(float DeltaSeconds);
 	/** Creates the visible gear legs on the hull's gear sockets (once, at BeginPlay). */
 	void BuildGearLegs();
 	void PoseGearLegs();
@@ -1867,6 +1946,10 @@ private:
 	float GearDeploy = 0.f;
 	float GearMessageSeconds = 0.f;
 	bool bPrecisionMode = false;
+
+	/** VTOL switched on (G), and how far the thrust has moved to the lift thrusters, 0..1. */
+	bool bVtolMode = false;
+	float VtolBlend = 0.f;
 
 	/** One visible gear leg: pivot at the socket, a sleeve, a piston and a foot pad. */
 	struct FGearLeg

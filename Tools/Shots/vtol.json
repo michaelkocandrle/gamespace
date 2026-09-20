@@ -1,0 +1,14 @@
+{
+  "_comment": "SC-2b: VTOL and hovering. The badge on the HUD and the MFD, the ship holding station on its lift thrusters with the nozzles lit, the transition, and the refusals. VTOL is switched with space.Vtol so the shots do not depend on a key. Run: Tools/Shots.ps1 -Preset vtol",
+  "shots": [
+    {"name": "hud_vtol_off", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "settle": 3.0,
+     "console": ["space.Vtol 0"]},
+    {"name": "hud_vtol_on", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "settle": 3.0,
+     "console": ["space.Vtol 1"]},
+    {"name": "hover_side", "camera": "chase", "altitude_m": 120, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 95, "chase_pitch": -4, "chase_zoom": 0.6, "settle": 3.0},
+    {"name": "hover_rear", "camera": "chase", "altitude_m": 120, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 20, "chase_pitch": -14, "chase_zoom": 0.5, "settle": 2.5},
+    {"name": "hover_cockpit", "camera": "cockpit", "altitude_m": 120, "facing": "horizon", "hud": 1, "gear": true, "settle": 2.5},
+    {"name": "nozzles_off_for_comparison", "camera": "chase", "altitude_m": 120, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 20, "chase_pitch": -14, "chase_zoom": 0.5, "settle": 2.5,
+     "console": ["space.Vtol 0"]}
+  ]
+}

@@ -593,6 +593,27 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Menu ukazuje předvolbu, kterou hráč vybral (`GraphicsQualityLevel`), ne nejnižší skupinu –
       skupiny se s předvolbou nikdy neshodují, protože GI je zastropované a rozlišení drží na 100 %.
 
+43. **SC-2b – VTOL a visící let** (20. 9. 2026, rozsah z roadmapy potvrzený autorem):
+    **G** postaví loď na zvedací trysky místo hlavních motorů. Jen v SCM, jako přepínač VTOL
+    v referenci; přechod trvá `VtolTransitionSeconds` (1,5 s), takže nic neskočí, a `GetVtolBlend`
+    říká, jak daleko je.
+    - Hlavní tah klesne na **35 %**, zvedací trysky ×**1,5**, boční ×**1,3**; strop rychlosti je
+      **60 m/s** (omezovač uvnitř něj pořád platí) a **Space/Ctrl jsou stoupavost 15 m/s**, ne další
+      cesta k maximální rychlosti.
+    - **Auto-srovnání na horizont**: s klidnou pákou se trup vrací k rovině rychlostí
+      `VtolLevelRate` (25°/s). Jakýkoli vstup do páky to okamžitě přebije. Je to čistá funkce
+      `ComputeVtolLevelStep`, takže se dá otestovat bez planety – a taky se hned ukázalo, že první
+      verze točila loď na opačnou stranu.
+    - **Odmítne afterburner** a **shodí cruise**; přechod do NAV VTOL vypne.
+    - HUD i MFD mají odznak **VTOL** vedle CPLD, GSAF, CSTB, BOOST a PREC (v referenci je VTOL
+      jeden ze čtyř souběžných přepínačů), a druhý řádek pod režimem ukazuje `VTOL`.
+    - **Visení už je vidět na motorech** (známý problém z kapitoly 11, 17. 9. 2026): `EngineDemand`
+      měřil svislou osu proti **plné kapacitě** zvedacích trysek, takže visení na Veyře (0,46 G
+      z možných 5,5) dávalo zátěž 0,06 a trysky i zvuk zůstaly na nule. Teď se svislá osa měří proti
+      **jednomu G tahu** (`HoverThrustReferenceG`), takže visení čte jako práce, kterou to je.
+    - Klávesa: `Tools/Assets/add_vtol_input.py` (IA_Vtol na G); bez něj si ji loď namapuje za běhu.
+      Konzole: `space.Vtol 1|0`. Testy: `Tools/Tests/test_vtol_sc2b.py`, snímky: `Tools/Shots/vtol.json`.
+
 ---
 
 ## 6. Mapa kódu a obsahu
@@ -690,6 +711,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | Free look | pravé tlačítko |
 | Podvozek (vysunutí zapne i precision) | N |
 | Precision mode | P |
+| VTOL (jen SCM) | G |
 | Stránky MFD (levý / pravý, s Alt zpět) | F1 / F2 |
 | Přiblížení na displeje (držet) | Z / prostřední tlačítko myši |
 | Vystoupit (jen když LANDED) | F |
@@ -719,6 +741,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_cockpit_displays.py` | Displeje v kokpitu: dvě obrazovky (FLIGHT, SYSTEMS) se všemi přístroji a velkým písmem, stejné hodnoty jako HUD pro stejnou loď, komponenta na lodi, slot `M_Ship_Vanguard_Screens` v interiéru s unlit `MI_Ship_Vanguard_Screens`. Stránky MFD (přepínání, obtékání, titulek a záložka, obsah seznamů a tahu, klávesy F1/F2 a [ ] bez kolizí, ladicí zobrazení enginu z F1/F2 odebrané). Střední sloupek: RADAR a SELF STATUS, `texture_rect` v receptu = `ScreenRect` v kódu, poměr stran jako sklo, radar vidí objekt v dosahu přesně tam, kde je (a ten mimo dosah ne), těleso jako směr, planeta pod lodí bez směru, silueta z 10 hullů Vanguardu, 4 motory, 3 nohy, 4 sockety `Display_*`. Jak vypadají: `-Preset cockpit` a `cockpit_centre`. |
 | `test_cockpit_frame.py` | Kokpit: Vanguard má interiér (díl, oko nad vanou za deskou, deska 7–13° pod okem jako v SC referenci, pilot ≥ 1,2 m od desky, provizorium vypnuté); rozložení provizorního rámu pro lodě bez interiéru (nic v okně HUD, deska 14–20° pod horizontem, sloupky 24–34° do stran, sedadlo za okem). |
 | `test_landing_sc2.py` | SC-2a: dosednutí jen s podvozkem (GEAR UP před vším ostatním, mezera pod patkami), stavový automat podvozku (časy, otočení v půlce, zákaz zasunutí na zemi), pohyb modelovaného dílu i zástupných nohou, precision (strop, omezovač uvnitř, jen SCM, bez afterburneru, pomalejší otáčení, brzdění bez skoku), kontrolky GEAR/PREC, klávesy N/P bez kolizí, hodnoty a díl `Gear` Vanguardu, scénář `landing`. |
+| `test_vtol_sc2b.py` | SC-2b: VTOL jen v SCM (v NAV odmítnutý a shozený), přechod trvá svůj čas, hlavní tah / zvedací a boční trysky podle násobků, strop rychlosti a stoupavost Space/Ctrl, odmítnutý afterburner, auto-srovnání (`ComputeVtolLevelStep` proti zadanému „nahoru“), visení čte jako práce motorů, odznak VTOL na HUD, klávesa G bez kolize, scénář snímků. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
 | `test_scene_look.py` | Vzhled uložené úrovně proti receptu: intenzita sky lightu, contact shadows a šířka slunce, všechna nastavení `POST_SETTINGS` v neohraničeném volume (a že chromatická aberace a vyvážení bílé zůstala vypnutá), lak trupu z `Vanguard_setup.json`. Chytá zapomenuté spuštění `build_space_scene.py` / `import_ship.py`. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
@@ -771,6 +794,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `cockpit_tune` | Porovnání variant kokpitu vedle sebe (pozice oka, co se pilotovi skrývá). Vzor pro dočasné scénáře při ladění. |
 | `ship_views` | Loď ze všech stran (8 pohledů kolem, shora, zespodu s podvozkem, zblízka, ve vesmíru, se zářícími tryskami). Pro každý nový nebo změněný model. |
 | `landing` | SC-2a: podvozek ze strany (dole, v půlce cesty), zespodu, loď stojící na patkách, varování GEAR UP, loď na břiše bez podvozku, HUD po přistání, precision HUD, kokpit na zemi. |
+| `vtol` | SC-2b: odznak VTOL na desce zapnutý i vypnutý, loď visící na zvedacích tryskách ze strany, zezadu a z kokpitu. VTOL přepíná `space.Vtol`, ne klávesa. |
 | `cockpit_centre` | Střední sloupek desky (RADAR, SELF STATUS): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé: vyříznout a zvětšit. |
 | `cockpit_readability` | Čitelnost displejů: výchozí pohled, přiblížení (Z) na FLIGHT/STATUS a THRUSTERS/CONTACTS, na konci staré oko pro srovnání. |
 | `hull_tune` | Ladění materiálu trupu: šest variant v jednom běhu přes `space.ShipMat` (síla detailu, velikost dlaždice, světlejší lak, drsnost). |
@@ -849,10 +873,10 @@ a speed limiter).
 - **SC-2 – Přistání SC stylem**, rozdělené na dva kroky (potvrzeno autorem 18. 9. 2026):
   - **SC-2a (hotovo, 18. 9. 2026, čeká na autorův test):** podvozek (N) jako podmínka dosednutí,
     vizuál z modelovaných noh Vanguardu, precision mode (s podvozkem nebo P), kontrolky GEAR a PREC.
-  - **SC-2b (další krok):** VTOL (G, jen SCM, přechod ~1,5 s): hlavní tah ~35 %, strop ~60 m/s, svislé
-    trysky ×1,5 a boční ×1,3, Space/Ctrl na stoupavost ~15 m/s, auto-srovnání na horizont, afterburner
-    a cruise odmítnuté. K tomu zpětná vazba při visení z kapitoly 11 (svislý tah v `GetEngineDemand`,
-    záře trysek, hover zvuk).
+  - **SC-2b (hotovo, 20. 9. 2026, čeká na autorův test):** VTOL (G, jen SCM, přechod 1,5 s): hlavní tah
+    35 %, strop 60 m/s, svislé trysky ×1,5 a boční ×1,3, Space/Ctrl na stoupavost 15 m/s, auto-srovnání
+    na horizont, afterburner a cruise odmítnuté, odznak VTOL na HUD i MFD. Visení už je vidět na
+    tryskách (`HoverThrustReferenceG`). Bod 43.
 - **SC-3 – zbytek HUD a MFD:** VTOL a GEAR (po SC-2), ESP a LOCK (až budou zbraně), velocity
   vector, MFD panely, celková přestavba na UMG a náhrada anglického debug HUD.
 - **SC-4 – Quantum travel** místo cruise J: markery cílů (Veyra, Keth, Orun, později stanice),
@@ -893,12 +917,10 @@ Další otevřené směry mimo let:
   `EngineVolume`, `BoostVolume`, `CruiseVolume`, `OneShotVolume`).
 - **Jas oblohy** (slunce, mlhoviny) je nastavený odhadem. Ladí se v levelu na `StarfieldSky`
   (`NebulaScale`, `SunScale`) nebo v konstantách `build_space_scene.py`.
-- **Vznášení v atmosféře bez zpětné vazby** (autor 17. 9. 2026): loď umí v atmosféře úplně zastavit
-  a viset, ale nic to nedává najevo: trysky nesvítí, zvuk se nemění. Chování je
-  správné (coupled brzdí i svisle), působí ale lacině. **Řeší se v SC-2b spolu s VTOL.** Příčina je
-  změřená: `GetEngineDemand` bere svislou osu × 0,7 proti plné kapacitě zvedacích trysek, visení na
-  Veyře (~0,46 G) tak dává zátěž ~0,06, takže záře i zvuk zůstanou skoro na nule. G-metr naopak
-  ukazuje 0,5–0,8 G (snímky `landing` 18. 9. 2026), jen je to na stupnici 12 G malý proužek.
+- ~~**Vznášení v atmosféře bez zpětné vazby**~~ (autor 17. 9. 2026) – vyřešeno 20. 9. 2026 v SC-2b
+  (bod 43): `EngineDemand` měřil svislou osu proti plné kapacitě zvedacích trysek, takže visení na
+  Veyře (0,46 G z možných 5,5) dávalo 0,06 a trysky ani zvuk se nehnuly. Teď se měří proti jednomu G
+  tahu (`HoverThrustReferenceG`).
 - **Meshy Vanguard, kokpit** (tmavý interiér a displeje od 18. 9. 2026, bod 23): z oka (174, 0, 189)
   jdou z horních rohů k desce sloupky rámu canopy. Při rozhlížení do stran (free look ~70°) je 0,9–2 m
   od oka kořen křídla trupu v hrubém rozlišení – boční stěny kabiny jsou zevnitř průhledné (jednostranný
@@ -1003,4 +1025,5 @@ Viz `git log --oneline`. Poslední kroky:
 - nápisy a výstražné pruhy na trupu jako decaly (bod 39);
 - panelové spáry jako dlaždicová vrstva materiálu (bod 40);
 - spálený plech u trysek, první zóna materiálu (bod 41);
-- hra běžela na Medium: výchozí předvolba Cinematic a doostření (bod 42).
+- hra běžela na Medium: výchozí předvolba Cinematic a doostření (bod 42);
+- SC-2b: VTOL, visící let a záře trysek při visení (bod 43).

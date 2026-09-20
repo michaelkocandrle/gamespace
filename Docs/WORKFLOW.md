@@ -254,6 +254,7 @@ Presety (`Tools/Shots/*.json`):
 | `hull_decals` | kam dosedly nápisy; šmouhy místo textu znamenají špatně otočený decal |
 | `hull_panels` | panelové spáry: velikost listu a síla (`space.ShipMat`) |
 | `hull_scorch` | spálený plech u trysek: síla a dosah (`space.ShipMat`) |
+| `vtol` | SC-2b: odznak VTOL, visení na zvedacích tryskách (`space.Vtol`) |
 | `look_sharp`, `look_groups` | proč je obraz měkký a co která škálovací skupina stojí |
 | `look_artifacts` | film grain, motion blur a stopy za pohybem – změřeno, žádný z nich obraz nekazí |
 | `hud` | HUD ve všech situacích |
@@ -546,7 +547,8 @@ Velké celky:
 - tělo pilota v sedadle;
 - lepší model kokpitu (sedadlo, boční stěny);
 - chybějící systémy SC HUD (palivo, zbraně, protiopatření);
-- SC-2b VTOL a zpětná vazba při visení (HANDOFF kap. 10 a 11).
+- ~~SC-2b VTOL a zpětná vazba při visení~~ – hotovo 20. 9. 2026 (HANDOFF bod 43). Další v letové
+  roadmapě je SC-3 (zbytek HUD a MFD) nebo SC-4 (quantum travel místo cruise).
 
 ---
 

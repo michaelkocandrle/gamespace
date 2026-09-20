@@ -176,6 +176,14 @@ struct GAMESPACE_API FSpaceFlightHudState
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	bool bPrecisionActive = false;
 
+	/** VTOL switched on (G). The reference shows VTOL beside CPLD and GEAR. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bVtolOn = false;
+
+	/** VTOL in effect (on, and in SCM). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bVtolActive = false;
+
 	/** Second line under the master mode: FLIGHT, PREC, SPOOL (cruise charging) or CRUISE. */
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	FString SubModeLabel;
