@@ -1,0 +1,26 @@
+{
+  "_comment": "Burnt plating around the nozzles, tuned in one packaged run through space.ShipMat: first without it, then three amounts and two reaches. The rear three-quarter view is the one that shows it; the front shot checks that the scorch stays at the back where it belongs. Run: Tools/Shots.ps1 -Preset hull_scorch",
+  "shots": [
+    {"name": "a_off_rear", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 25, "chase_pitch": -18, "chase_zoom": 0.45, "settle": 3.0,
+     "console": ["space.ShipMat ScorchAmount 0"]},
+    {"name": "a_off_front", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "b_soft_rear", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 25, "chase_pitch": -18, "chase_zoom": 0.45, "settle": 2.0,
+     "console": ["space.ShipMat ScorchAmount 0.45", "space.ShipMat ScorchStartCm -150", "space.ShipMat ScorchEndCm -600"]},
+    {"name": "b_soft_front", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "c_strong_rear", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 25, "chase_pitch": -18, "chase_zoom": 0.45, "settle": 2.0,
+     "console": ["space.ShipMat ScorchAmount 0.8"]},
+    {"name": "c_strong_front", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "d_short_rear", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 25, "chase_pitch": -18, "chase_zoom": 0.45, "settle": 2.0,
+     "console": ["space.ShipMat ScorchAmount 0.6", "space.ShipMat ScorchStartCm -350", "space.ShipMat ScorchEndCm -650"]},
+
+    {"name": "e_long_rear", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 25, "chase_pitch": -18, "chase_zoom": 0.45, "settle": 2.0,
+     "console": ["space.ShipMat ScorchStartCm 0", "space.ShipMat ScorchEndCm -650"]},
+
+    {"name": "f_nozzle_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat ScorchAmount 0.6", "space.ShipMat ScorchStartCm -150", "space.ShipMat ScorchEndCm -600"]},
+    {"name": "g_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 25, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.5}
+  ]
+}

@@ -142,6 +142,14 @@ if plan["materials"]:
         check("the hull's plating is there and restrained",
               0.0 < panel_strength <= 0.8 and 100.0 <= panel_tile <= 500.0,
               "strength %.2f, sheet %.0f cm" % (panel_strength, panel_tile))
+        scorch = MEL.get_material_instance_scalar_parameter_value(hull_mi, "ScorchAmount")
+        start = MEL.get_material_instance_scalar_parameter_value(hull_mi, "ScorchStartCm")
+        end = MEL.get_material_instance_scalar_parameter_value(hull_mi, "ScorchEndCm")
+        # Both behind the origin and end behind start, or the mask runs the wrong way and burns the
+        # nose instead of the tail. Above ~0.8 the back of the ship reads as a shadow, not as soot.
+        check("the scorch is behind the ship and restrained",
+              0.0 <= scorch <= 0.8 and end < start <= 0.0,
+              "amount %.2f, %.0f cm -> %.0f cm" % (scorch, start, end))
 
 # --- nothing left over from an earlier model -------------------------------------------------
 root = "/Game/Ships/%s" % plan["ship"]

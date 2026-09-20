@@ -564,6 +564,16 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Výkon: 86–88 FPS se spárami i bez nich (tři odběry textury navíc). `panel_strength` 0 vrstvu
       vypne; loď bez listu v repozitáři vypadá jako předtím.
 
+41. **Spálený plech u trysek: první zóna materiálu** (20. 9. 2026): celý trup je jeden materiál, takže jediné zóny, které jdou udělat bez druhé sady UV, jsou ty, které dává tvar lodi sám.
+    Nejsilnější je ocas: `M_Ship_PBR` bere polohu v prostoru lodi a od `scorch_start_cm` dozadu
+    ztmavuje a zdrsňuje lak, dokud za `scorch_end_cm` není černý. Je to to, co na referencích SC
+    říká, kde je motor.
+    - Hodnoty Vanguardu (`Tools/Shots/hull_scorch.json`): `scorch_amount` **0.55**, od **-200 cm**
+      do **-620 cm**. Začátek na -150 se plazil dopředu na prostředek trupu, nad ~0,8 vypadá celá záď
+      jako stín, ne jako saze. Z předu se mění 1,5 % pixelů, tedy nic – zůstává to vzadu.
+    - `scorch_amount` je ve výchozím stavu **0**: délky jsou v centimetrech a na lodi jiné velikosti
+      nic neříkají, takže každá loď si je musí nastavit.
+
 ---
 
 ## 6. Mapa kódu a obsahu
@@ -754,6 +764,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `hull_zones` | Rozbití jednolitého trupu: okluze, kavita ve dvou sílách a odřený lak ve třech, první dvojice bez všeho pro srovnání. |
 | `hull_decals` | Kam dosedly nápisy: zblízka na každý z nich a pak celá loď. Decal, který není kolmý na svůj povrch, se rozmaže do šmouh místo aby četl – to je to, co se na snímcích hledá. |
 | `hull_panels` | Panelové spáry: bez nich, pak list ve třech velikostech a třech sílách (`space.ShipMat`). |
+| `hull_scorch` | Spálený plech u trysek: bez něj, tři síly a dva dosahy; pohled zepředu kontroluje, že zůstává vzadu. |
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
 Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
@@ -969,4 +980,5 @@ Viz `git log --oneline`. Poslední kroky:
 - světlo a post scény, loď v kosmu přestala být silueta; rychlá smyčka `space.Post` / `space.Sun` / `space.Sky` (bod 36);
 - dopečená okluze, kavita a odřený lak na trupu (bod 38);
 - nápisy a výstražné pruhy na trupu jako decaly (bod 39);
-- panelové spáry jako dlaždicová vrstva materiálu (bod 40).
+- panelové spáry jako dlaždicová vrstva materiálu (bod 40);
+- spálený plech u trysek, první zóna materiálu (bod 41).

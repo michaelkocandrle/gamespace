@@ -564,7 +564,14 @@ into it would break at every island edge. The groove also darkens and roughens t
 numbers matter: a seam narrower than about 2 cm never survives the mip chain and simply is not
 there, and above `panel_strength` ~0.8 the seams run over greebles and curves the model has no
 plating on, which reads as an overlay rather than a hull. The Vanguard uses a 260 cm sheet at 0.55,
-and the layer costs no frames. `import_ship.py` imports
+and the layer costs no frames.
+
+The whole hull is one material, so the only **zones** available without a second UV set are the ones
+the ship's own shape gives. The one that earns its keep is the tail: from `scorch_start_cm` back to
+`scorch_end_cm` (both negative, along the ship's X) the material darkens and roughens the paint, so
+the plating around the nozzles is burnt and the viewer can tell which end is the engine.
+`scorch_amount` defaults to 0 - the lengths are centimetres and mean nothing on a ship of another
+size, so each ship sets its own in `<Ship>_setup.json`. `import_ship.py` imports
 a mesh fresh when its material slots changed (a reimport kept the old model's slots) and removes the
 Blueprint components, meshes and material instances an earlier model left behind.
 

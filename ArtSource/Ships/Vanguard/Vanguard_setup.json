@@ -135,7 +135,17 @@
       "panel_tile_cm": 260.0,
       "panel_strength": 0.55,
       "panel_seam_darken": 0.4,
-      "panel_seam_rough": 0.18
+      "panel_seam_rough": 0.18,
+      "_comment_scorch": "Burnt plating towards the nozzles: the whole hull is one material, so the only zones available without a second UV set are the ones the ship's own shape gives, and the strongest is the tail. The mask runs along the ship's X, from scorch_start_cm (nothing yet) to scorch_end_cm (fully burnt); both are behind the origin, so both are negative. Starting at -150 crept forward onto the middle of the fuselage, and above ~0.8 the whole back of the ship reads as a shadow rather than as soot (Tools/Shots/hull_scorch.json, 20. 9. 2026). scorch_amount 0 turns it off, which is the default for ships that have not been tuned - the lengths are in centimetres and mean nothing on a ship of another size.",
+      "scorch_amount": 0.55,
+      "scorch_start_cm": -200.0,
+      "scorch_end_cm": -620.0,
+      "scorch_rough": 0.25,
+      "scorch_color": [
+        0.1,
+        0.09,
+        0.09
+      ]
     },
     "MI_Ship_Vanguard_Thruster": {
       "master": "hull",

@@ -253,6 +253,7 @@ Presety (`Tools/Shots/*.json`):
 | `hull_zones` | okluze, kavita a odřený lak na trupu (`space.ShipMat`) |
 | `hull_decals` | kam dosedly nápisy; šmouhy místo textu znamenají špatně otočený decal |
 | `hull_panels` | panelové spáry: velikost listu a síla (`space.ShipMat`) |
+| `hull_scorch` | spálený plech u trysek: síla a dosah (`space.ShipMat`) |
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
 | `ship_views`, `ship` | loď zvenku |
@@ -529,11 +530,12 @@ Menší kroky, podle pořadí:
 7. ~~Nápisy a výstražné pruhy~~ – hotovo 20. 9. 2026 (HANDOFF bod 39): decaly ze seznamu v setupu lodi.
    Navazuje: víc nápisů a další místa (zatím jich je sedm).
 8. ~~Panelové spáry~~ – hotovo 20. 9. 2026 (HANDOFF bod 40): dlaždicový list triplanárně v prostoru lodi.
-   Navazuje: různé povrchy na různých dílech (gondoly proti trupu, okolí trysek) – zatím je celý
-   trup jeden materiál.
-9. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
-10. **Silnější záře displejů na rámu** a okolní desce.
-11. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
+9. ~~První zóna materiálu~~ – hotovo 20. 9. 2026 (HANDOFF bod 41): spálený plech u trysek z polohy
+   v prostoru lodi. Navazuje: další zóny (gondoly proti trupu, břicho po vstupu do atmosféry)
+   a nakonec druhá sada UV, až bude třeba zóny kreslit ručně a ne odvozovat z tvaru.
+10. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
+11. **Silnější záře displejů na rámu** a okolní desce.
+12. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
 
 Velké celky:
 - tělo pilota v sedadle;

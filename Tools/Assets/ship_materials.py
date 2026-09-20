@@ -108,8 +108,9 @@ def build_pbr_master():
     normal = _texture_param(pbr, "NormalMap", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL,
                             "/Engine/EngineMaterials/DefaultNormal", -900, 800)
     panel_offset, panel_groove = _add_panel_layer(pbr)
-    grunge = _add_detail_layer(pbr, normal, rough, panel_offset, panel_groove)
-    _add_cavity_and_wear(pbr, tint, metal, grunge, panel_groove)
+    scorch = _add_scorch_mask(pbr)
+    grunge = _add_detail_layer(pbr, normal, rough, panel_offset, panel_groove, scorch)
+    _add_cavity_and_wear(pbr, tint, metal, grunge, panel_groove, scorch)
     MEL.recompile_material(pbr)
     unreal.EditorAssetLibrary.save_loaded_asset(pbr, only_if_is_dirty=False)
     return pbr
@@ -282,7 +283,50 @@ def _custom(material, name, code, output_type, input_names, x, y):
     return node
 
 
-def _add_detail_layer(pbr, normal, rough, panel_offset=None, panel_groove=None):
+def _apply_scorch(pbr, colour, scorch):
+    """Soot over the paint towards the tail. Returns the node to send to Base Color."""
+    if scorch is None:
+        return colour
+    burnt = _node(pbr, unreal.MaterialExpressionLinearInterpolate, 50, 0)
+    _link(colour, burnt, "A")
+    _link(_vector(pbr, "ScorchColor", (0.10, 0.09, 0.09), -700, 800), burnt, "B")
+    _link(scorch, burnt, "Alpha")
+    return burnt
+
+
+def _add_scorch_mask(pbr):
+    """How burnt the plating is, from the ship's own X: 0 ahead of ScorchStartCm, 1 behind ScorchEndCm.
+
+    Every ship here is one material over the whole hull, so the only zones available without a second
+    UV set are the ones the geometry itself gives. The strongest is the tail: the plating around the
+    nozzles takes the exhaust and goes dark and rough, which is what the Star Citizen references show
+    and what tells a viewer which end is the engine. Parameters: ScorchAmount (0 turns it off),
+    ScorchStartCm, ScorchEndCm (both negative, behind the ship's origin), ScorchColor, ScorchRough.
+    The lengths are centimetres in the ship's space, so they belong in <Ship>_setup.json, not here.
+    """
+    position = _node(pbr, unreal.MaterialExpressionLocalPosition, -1700, 2700)
+    forward = _node(pbr, unreal.MaterialExpressionComponentMask, -1500, 2700, r=True, g=False, b=False, a=False)
+    _link(position, forward, "")
+    start = _scalar(pbr, "ScorchStartCm", -150.0, -1700, 2800)
+    end = _scalar(pbr, "ScorchEndCm", -600.0, -1700, 2900)
+    behind = _node(pbr, unreal.MaterialExpressionSubtract, -1350, 2700)
+    _link(start, behind, "A")
+    _link(forward, behind, "B")
+    span = _node(pbr, unreal.MaterialExpressionSubtract, -1350, 2850)
+    _link(start, span, "A")
+    _link(end, span, "B")
+    ratio = _node(pbr, unreal.MaterialExpressionDivide, -1200, 2700)
+    _link(behind, ratio, "A")
+    _link(span, ratio, "B")
+    mask = _node(pbr, unreal.MaterialExpressionClamp, -1050, 2700, min_default=0.0, max_default=1.0)
+    _link(ratio, mask, "")
+    amount = _node(pbr, unreal.MaterialExpressionMultiply, -900, 2700)
+    _link(mask, amount, "A")
+    _link(_scalar(pbr, "ScorchAmount", 0.0, -1700, 3000), amount, "B")
+    return amount
+
+
+def _add_detail_layer(pbr, normal, rough, panel_offset=None, panel_groove=None, scorch=None):
     """The micro surface the AI paint has no room for: a tiling normal and a roughness breakup, projected
     in the ship's own space, added on top of the baked maps. Parameters: DetailTileCm (how many centimetres
     one tile covers), DetailNormalStrength, DetailGrungeTileCm, DetailRoughVariation; 0 strength turns it off."""
@@ -365,11 +409,20 @@ def _add_detail_layer(pbr, normal, rough, panel_offset=None, panel_groove=None):
         _link(seam_rough, with_seam, "B")
         clamped = _node(pbr, unreal.MaterialExpressionClamp, -60, 1300, min_default=0.03, max_default=1.0)
         _link(with_seam, clamped, "")
+    if scorch is not None:
+        burnt = _node(pbr, unreal.MaterialExpressionMultiply, -60, 1500)
+        _link(scorch, burnt, "A")
+        _link(_scalar(pbr, "ScorchRough", 0.25, -1700, 3100), burnt, "B")
+        with_burn = _node(pbr, unreal.MaterialExpressionAdd, 20, 1350)
+        _link(clamped, with_burn, "A")
+        _link(burnt, with_burn, "B")
+        clamped = _node(pbr, unreal.MaterialExpressionClamp, 100, 1350, min_default=0.03, max_default=1.0)
+        _link(with_burn, clamped, "")
     _output(clamped, unreal.MaterialProperty.MP_ROUGHNESS)
     return grunge
 
 
-def _add_cavity_and_wear(pbr, tint, metal, grunge, panel_groove=None):
+def _add_cavity_and_wear(pbr, tint, metal, grunge, panel_groove=None, scorch=None):
     """What makes a hull stop reading as one flat colour.
 
     Cavity: the baked ambient occlusion (the ORM's red channel, unused until 20. 9. 2026) both goes to
@@ -418,7 +471,7 @@ def _add_cavity_and_wear(pbr, tint, metal, grunge, panel_groove=None):
 
     if grunge is None:
         # No generated detail textures: the paint keeps the cavity, there is nothing to wear it with.
-        _output(shaded, unreal.MaterialProperty.MP_BASE_COLOR)
+        _output(_apply_scorch(pbr, shaded, scorch), unreal.MaterialProperty.MP_BASE_COLOR)
         _output(metal, unreal.MaterialProperty.MP_METALLIC)
         return
 
@@ -445,7 +498,7 @@ def _add_cavity_and_wear(pbr, tint, metal, grunge, panel_groove=None):
     _link(shaded, worn_colour, "A")
     _link(_vector(pbr, "WearColor", (0.34, 0.34, 0.36), -700, 0), worn_colour, "B")
     _link(amount, worn_colour, "Alpha")
-    _output(worn_colour, unreal.MaterialProperty.MP_BASE_COLOR)
+    _output(_apply_scorch(pbr, worn_colour, scorch), unreal.MaterialProperty.MP_BASE_COLOR)
 
     worn_metal = _node(pbr, unreal.MaterialExpressionLinearInterpolate, -150, 500)
     _link(metal, worn_metal, "A")
@@ -641,10 +694,12 @@ def build_instance(name, folder, spec, masters, ship=None):
                        ("cavity_strength", "CavityStrength"), ("ao_strength", "AOStrength"),
                        ("wear_amount", "WearAmount"), ("wear_threshold", "WearThreshold"), ("wear_metallic", "WearMetallic"),
                        ("panel_tile_cm", "PanelTileCm"), ("panel_strength", "PanelStrength"),
-                       ("panel_seam_darken", "PanelSeamDarken"), ("panel_seam_rough", "PanelSeamRough")):
+                       ("panel_seam_darken", "PanelSeamDarken"), ("panel_seam_rough", "PanelSeamRough"),
+                       ("scorch_amount", "ScorchAmount"), ("scorch_start_cm", "ScorchStartCm"),
+                       ("scorch_end_cm", "ScorchEndCm"), ("scorch_rough", "ScorchRough")):
         if key in spec:
             MEL.set_material_instance_scalar_parameter_value(mi, param, float(spec[key]))
-    for key, param in (("base_color_tint", "BaseColorTint"), ("wear_color", "WearColor")):
+    for key, param in (("base_color_tint", "BaseColorTint"), ("wear_color", "WearColor"), ("scorch_color", "ScorchColor")):
         if key in spec:
             c = spec[key]
             MEL.set_material_instance_vector_parameter_value(mi, param, unreal.LinearColor(c[0], c[1], c[2], 1.0))
