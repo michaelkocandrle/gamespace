@@ -32,11 +32,9 @@ void USpaceUserSettings::SetToDefaults()
 		ResolutionSizeX = LastUserConfirmedResolutionSizeX = Desktop.X;
 		ResolutionSizeY = LastUserConfirmedResolutionSizeY = Desktop.Y;
 	}
-	ScalabilityQuality.SetFromSingleQualityLevel(2);
-	// Full render resolution: the quality level's own scale is below 100 %, and upscaling softens
-	// everything - the ship's edges, the cockpit displays and the HUD. Lower it in the settings
-	// (Škálování rozlišení) if a machine needs the frames.
-	ScalabilityQuality.ResolutionQuality = 100.f;
+	GraphicsQualityLevel = 4;
+	ScalabilityQuality.SetFromSingleQualityLevel(GraphicsQualityLevel);
+	ApplyQualityRules();
 
 	MasterVolume = 0.8f;
 	EffectsVolume = 1.f;
@@ -63,11 +61,25 @@ void USpaceUserSettings::MigrateSettings()
 	// resolution and upscaled - ships, cockpit displays and the HUD stayed soft whatever else changed
 	// (20. 9. 2026). Scalability::SetQualityLevels is what puts it into the sg. console variables, which is
 	// what both the renderer and SaveSettings read; setting the struct alone did nothing.
-	if (ScalabilityQuality.ResolutionQuality < 100.f)
+	// Version 3: the quality preset. Everything ran at Medium, which is where the engine's anti-aliasing,
+	// texture and post process quality sit - the hull up close came out smeared with stepped edges, and the
+	// type on the cockpit displays was soft (20. 9. 2026, Tools/Shots/look_sharp.json). Of the eight groups
+	// only global illumination costs frames, so the rest go to cinematic and it stays where it was.
+	const bool bOldPreset = SettingsVersion < 3;
+	if (ScalabilityQuality.ResolutionQuality < 100.f || bOldPreset)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Settings: render scale %.0f %% -> 100 %% (an older build saved it)"),
-			ScalabilityQuality.ResolutionQuality);
-		ScalabilityQuality.ResolutionQuality = 100.f;
+		if (bOldPreset)
+		{
+			GraphicsQualityLevel = 4;
+			ScalabilityQuality.SetFromSingleQualityLevel(GraphicsQualityLevel);
+			UE_LOG(LogTemp, Display, TEXT("Settings: graphics preset -> cinematic (an older build saved medium)"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Display, TEXT("Settings: render scale %.0f %% -> 100 %% (an older build saved it)"),
+				ScalabilityQuality.ResolutionQuality);
+		}
+		ApplyQualityRules();
 		Scalability::SetQualityLevels(ScalabilityQuality);
 		ApplyNonResolutionSettings();
 	}
@@ -94,9 +106,27 @@ void USpaceUserSettings::ApplyGameSettings(const UWorld* World) const
 
 int32 USpaceUserSettings::GetGraphicsQualityLevel() const
 {
-	// Groups only: GetMinQualityLevel leaves ResolutionQuality out. When the groups disagree (edited
-	// by hand) the lowest one is the safe thing to show.
-	return FMath::Clamp(ScalabilityQuality.GetMinQualityLevel(), 0, 4);
+	// What the player picked, not what the groups say: the groups never all match the preset, because
+	// global illumination is capped and the render scale is held at 100 % (see ApplyQualityRules).
+	return FMath::Clamp(GraphicsQualityLevel, 0, 4);
+}
+
+void USpaceUserSettings::SetOverallScalabilityLevel(int32 Value)
+{
+	GraphicsQualityLevel = FMath::Clamp(Value, 0, 4);
+	Super::SetOverallScalabilityLevel(GraphicsQualityLevel);
+	ApplyQualityRules();
+}
+
+void USpaceUserSettings::ApplyQualityRules()
+{
+	// Full render resolution: the preset's own scale is below 100 % from High down, and upscaling softens
+	// everything - the ship's edges, the cockpit displays and the HUD. Lower it in the settings
+	// (Škálování rozlišení) if a machine needs the frames.
+	ScalabilityQuality.ResolutionQuality = 100.f;
+	// Global illumination is the one group worth paying attention to; see MaxGlobalIlluminationQuality.
+	ScalabilityQuality.GlobalIlluminationQuality =
+		FMath::Min(ScalabilityQuality.GlobalIlluminationQuality, MaxGlobalIlluminationQuality);
 }
 
 float USpaceUserSettings::GetMouseSensitivityScale()

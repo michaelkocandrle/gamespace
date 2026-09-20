@@ -254,6 +254,7 @@ Presety (`Tools/Shots/*.json`):
 | `hull_decals` | kam dosedly nápisy; šmouhy místo textu znamenají špatně otočený decal |
 | `hull_panels` | panelové spáry: velikost listu a síla (`space.ShipMat`) |
 | `hull_scorch` | spálený plech u trysek: síla a dosah (`space.ShipMat`) |
+| `look_sharp`, `look_groups` | proč je obraz měkký a co která škálovací skupina stojí |
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
 | `ship_views`, `ship` | loď zvenku |
@@ -533,9 +534,12 @@ Menší kroky, podle pořadí:
 9. ~~První zóna materiálu~~ – hotovo 20. 9. 2026 (HANDOFF bod 41): spálený plech u trysek z polohy
    v prostoru lodi. Navazuje: další zóny (gondoly proti trupu, břicho po vstupu do atmosféry)
    a nakonec druhá sada UV, až bude třeba zóny kreslit ručně a ne odvozovat z tvaru.
-10. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
-11. **Silnější záře displejů na rámu** a okolní desce.
-12. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
+10. ~~Hra běžela na Medium~~ – hotovo 20. 9. 2026 (HANDOFF bod 42): výchozí předvolba je Cinematic
+    kromě global illumination, plus doostření po tonemapperu. **Než začneš hledat rozmazanost
+    v modelu nebo materiálu, změř nastavení** – dvakrát za den to bylo ono (rozlišení 50 %, pak Medium).
+11. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
+12. **Silnější záře displejů na rámu** a okolní desce.
+13. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
 
 Velké celky:
 - tělo pilota v sedadle;

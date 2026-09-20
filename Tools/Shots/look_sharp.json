@@ -1,0 +1,30 @@
+{
+  "_comment": "Why the picture is soft. The game runs every scalability group at level 2 (medium), which is where the engine's anti-aliasing, texture and post process quality sit; on top of that motion blur is at the engine default and nothing sharpens after the tonemapper. Each stage turns one of those up and shoots the cockpit (where soft type is most annoying) and the hull up close in motion. Settings stay for the following shots. Run: Tools/Shots.ps1 -Preset look_sharp",
+  "shots": [
+    {"name": "a_medium_cockpit", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "speed_ms": 120, "settle": 3.0},
+    {"name": "a_medium_hull", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 120, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0},
+
+    {"name": "b_aa_epic_cockpit", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "speed_ms": 120, "settle": 2.5,
+     "console": ["sg.AntiAliasingQuality 4"]},
+    {"name": "b_aa_epic_hull", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 120, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0},
+
+    {"name": "c_all_epic_cockpit", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "speed_ms": 120, "settle": 3.0,
+     "console": ["sg.TextureQuality 4", "sg.PostProcessQuality 4", "sg.ShadowQuality 4", "sg.EffectsQuality 4",
+                 "sg.ViewDistanceQuality 4", "sg.GlobalIlluminationQuality 4", "sg.ReflectionQuality 4"]},
+    {"name": "c_all_epic_hull", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 120, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.5},
+
+    {"name": "d_no_motion_blur_cockpit", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "speed_ms": 120, "settle": 2.5,
+     "console": ["r.MotionBlurQuality 0"]},
+    {"name": "d_no_motion_blur_hull", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 120, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0},
+
+    {"name": "e_sharpen_cockpit", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "speed_ms": 120, "settle": 2.5,
+     "console": ["r.Tonemapper.Sharpen 0.6"]},
+    {"name": "e_sharpen_hull", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 120, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0},
+
+    {"name": "f_tsr_history_cockpit", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "speed_ms": 120, "settle": 3.0,
+     "console": ["r.TSR.History.ScreenPercentage 200"]},
+    {"name": "f_tsr_history_hull", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 120, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.5},
+
+    {"name": "g_fast_hull", "camera": "chase", "altitude_m": 20000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 400, "afterburner": true, "chase_yaw": 25, "chase_pitch": -8, "settle": 2.0}
+  ]
+}

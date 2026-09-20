@@ -126,9 +126,31 @@ for level in (0, 1, 3, 4):
           settings.get_graphics_quality_level() == level and settings.get_overall_scalability_level() == -1,
           "menu %d, engine overall %d" % (settings.get_graphics_quality_level(), settings.get_overall_scalability_level()))
 settings.set_shadow_quality(0)
-check("mixed groups show the lowest", settings.get_graphics_quality_level() == 0)
+check("a group changed by hand does not change the preset the menu shows",
+      settings.get_graphics_quality_level() == 4, "menu %d" % settings.get_graphics_quality_level())
 settings.set_view_distance_quality(saved_levels[0])
 settings.set_shadow_quality(saved_levels[1])
+
+# --- What the preset actually sets --------------------------------------------------------------------
+# Everything ran at Medium until 20. 9. 2026, which is where the engine's anti-aliasing, texture and
+# post process quality sit: the hull came out smeared with stepped edges. Of the eight groups only
+# global illumination costs frames (Tools/Shots/look_groups.json), so it is the one that is capped.
+quality = unreal.new_object(unreal.SpaceUserSettings)
+quality.set_to_defaults()
+check("new settings are cinematic, not medium", quality.get_graphics_quality_level() == 4,
+      "preset %d" % quality.get_graphics_quality_level())
+groups = {"anti-aliasing": quality.get_anti_aliasing_quality(), "texture": quality.get_texture_quality(),
+          "post process": quality.get_post_processing_quality(), "shadow": quality.get_shadow_quality(),
+          "effects": quality.get_visual_effect_quality(), "view distance": quality.get_view_distance_quality(),
+          "reflection": quality.get_reflection_quality()}
+check("every group that costs nothing is at cinematic", all(v == 4 for v in groups.values()),
+      ", ".join("%s %d" % (k, v) for k, v in sorted(groups.items())))
+gi = quality.get_global_illumination_quality()
+check("global illumination is capped (it halves the frame rate at cinematic)", gi <= 2, "global illumination %d" % gi)
+quality.set_overall_scalability_level(4)
+check("the cap survives picking cinematic in the menu", quality.get_global_illumination_quality() <= 2
+      and abs(quality.debug_get_render_scale() - 100.0) < 0.01,
+      "global illumination %d, scale %.0f %%" % (quality.get_global_illumination_quality(), quality.debug_get_render_scale()))
 
 # --- Render scale: the game draws at full resolution unless the player lowers it -------------------------
 fresh = unreal.new_object(unreal.SpaceUserSettings)
@@ -140,5 +162,13 @@ fresh.debug_set_settings_version(0)
 fresh.migrate_settings()
 check("settings saved by an older build are brought up to 100 %", abs(fresh.debug_get_render_scale() - 100.0) < 0.01
       and fresh.debug_get_settings_version() >= 2, "%.0f %%, version %d" % (fresh.debug_get_render_scale(), fresh.debug_get_settings_version()))
+older = unreal.new_object(unreal.SpaceUserSettings)
+older.set_to_defaults()
+older.set_overall_scalability_level(2)
+older.debug_set_settings_version(2)
+older.migrate_settings()
+check("a saved medium preset is brought up to cinematic",
+      older.get_graphics_quality_level() == 4 and older.get_anti_aliasing_quality() == 4,
+      "preset %d, anti-aliasing %d" % (older.get_graphics_quality_level(), older.get_anti_aliasing_quality()))
 
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

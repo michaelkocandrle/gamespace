@@ -571,7 +571,15 @@ the ship's own shape gives. The one that earns its keep is the tail: from `scorc
 `scorch_end_cm` (both negative, along the ship's X) the material darkens and roughens the paint, so
 the plating around the nozzles is burnt and the viewer can tell which end is the engine.
 `scorch_amount` defaults to 0 - the lengths are centimetres and mean nothing on a ship of another
-size, so each ship sets its own in `<Ship>_setup.json`. `import_ship.py` imports
+size, so each ship sets its own in `<Ship>_setup.json`.
+
+**Graphics quality.** New settings are Cinematic, not the engine's Medium. Of the eight scalability
+groups only global illumination costs anything - at Cinematic it halves the frame rate and in these
+scenes, lit by a sun and a sky light, the pictures did not change - so it is capped
+(`USpaceUserSettings::MaxGlobalIlluminationQuality`) and the rest go all the way up, which costs
+about 10 % of the frame rate and measurably sharpens the image. `Tools/Shots.ps1 -Preset look_groups`
+re-measures one group at a time. Before hunting a soft image in a model or a material, check the
+settings: twice in one day that is what it turned out to be (a 50 % render scale, then Medium). `import_ship.py` imports
 a mesh fresh when its material slots changed (a reimport kept the old model's slots) and removes the
 Blueprint components, meshes and material instances an earlier model left behind.
 

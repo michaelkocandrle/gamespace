@@ -54,6 +54,19 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Settings")
 	int32 GetGraphicsQualityLevel() const;
 
+	/**
+	 * The menu's quality preset, and the two rules the game keeps on top of it (see the .cpp): the render
+	 * scale stays at 100 %, and global illumination is capped, because it is the only scalability group
+	 * that costs anything here.
+	 */
+	virtual void SetOverallScalabilityLevel(int32 Value) override;
+
+private:
+	/** The render scale and the global illumination cap, applied on top of whatever preset was set. */
+	void ApplyQualityRules();
+
+public:
+
 	// Neutral when there are no settings.
 	static float GetMouseSensitivityScale();
 	static bool IsShipPitchInverted();
@@ -93,8 +106,20 @@ public:
 	UPROPERTY(Config)
 	int32 SettingsVersion = 0;
 
+	/** The preset the player picked, 0 low .. 4 cinematic. The scalability groups follow from it. */
+	UPROPERTY(Config, BlueprintReadOnly, Category = "Settings")
+	int32 GraphicsQualityLevel = 4;
+
+	/**
+	 * How far global illumination is allowed to go. Measured on 20. 9. 2026 with Tools/Shots/look_groups.json:
+	 * of the eight groups it is the only one that costs anything - at cinematic the frame rate halves (85 ->
+	 * 46 FPS) - and in these scenes, lit by a sun and a sky light, nothing in the pictures changed. Worth
+	 * revisiting when there are dark interiors or night sides, where indirect light does the work.
+	 */
+	static constexpr int32 MaxGlobalIlluminationQuality = 2;
+
 	/** The newest settings version this build knows. */
-	static constexpr int32 CurrentSettingsVersion = 2;
+	static constexpr int32 CurrentSettingsVersion = 3;
 
 	/** Tests: the render scale in per cent (sg.ResolutionQuality) and a way to set it without applying. */
 	UFUNCTION(BlueprintCallable, Category = "Settings|Tests")

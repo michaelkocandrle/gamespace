@@ -574,6 +574,25 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - `scorch_amount` je ve výchozím stavu **0**: délky jsou v centimetrech a na lodi jiné velikosti
       nic neříkají, takže každá loď si je musí nastavit.
 
+42. **Proč to bylo rozmazané: hra běžela na Medium** (20. 9. 2026, autor: „pořád si všímám
+    nedokonalostí a artefaktů, které to rozostřují“):
+    - **Nález**: `SetFromSingleQualityLevel(2)` nastavilo **všech osm** škálovacích skupin na Medium.
+      Tam sedí engineův antialiasing (TSR), kvalita textur i post processu. Trup zblízka z toho
+      vycházel rozmazaný a se schodovitými artefakty po obrysech, písmo na displejích bylo měkké.
+      Je to stejná třída chyby jako těch 50 % rozlišení z bodu 35 – ne vada modelu ani materiálu.
+    - **Měření** (`Tools/Shots/look_groups.json`, každá skupina zvlášť na Cinematic): jediná drahá
+      skupina je **global illumination** (Lumen) – půlí snímkování (85 → 46 FPS) a v těchto scénách,
+      osvětlených sluncem a sky lightem, na obrázcích nezměnila nic. Antialiasing, textury, post
+      process, stíny, efekty, dohled a odrazy jsou **zadarmo**.
+    - **Řešení**: výchozí předvolba je **Cinematic** s **global illumination zastropovaným na 2**
+      (`USpaceUserSettings::ApplyQualityRules`, `MaxGlobalIlluminationQuality`) a uložený soubor se
+      jednou převede (`SettingsVersion` 3). K tomu `r.Tonemapper.Sharpen=0.6` v `DefaultEngine.ini`:
+      TSR ze své podstaty rozostřuje a tohle vrátí hranu písmu i nýtům, bez lemů.
+    - **Výsledek** (Laplace na výřezu): trup zblízka **5,2 → 7,2** (+39 %), deska v kokpitu
+      **19,1 → 25,1** (+31 %). Cena zhruba **10 %** snímků (kokpit 61 → 54, chase 91 → 82).
+    - Menu ukazuje předvolbu, kterou hráč vybral (`GraphicsQualityLevel`), ne nejnižší skupinu –
+      skupiny se s předvolbou nikdy neshodují, protože GI je zastropované a rozlišení drží na 100 %.
+
 ---
 
 ## 6. Mapa kódu a obsahu
@@ -765,6 +784,8 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `hull_decals` | Kam dosedly nápisy: zblízka na každý z nich a pak celá loď. Decal, který není kolmý na svůj povrch, se rozmaže do šmouh místo aby četl – to je to, co se na snímcích hledá. |
 | `hull_panels` | Panelové spáry: bez nich, pak list ve třech velikostech a třech sílách (`space.ShipMat`). |
 | `hull_scorch` | Spálený plech u trysek: bez něj, tři síly a dva dosahy; pohled zepředu kontroluje, že zůstává vzadu. |
+| `look_sharp` | Proč je obraz měkký: antialiasing, ostatní skupiny, motion blur, doostření a historie TSR po vrstvách. |
+| `look_groups` | Co která škálovací skupina stojí a co přináší: jedna po druhé na Cinematic ve stejném záběru. |
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
 Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
@@ -981,4 +1002,5 @@ Viz `git log --oneline`. Poslední kroky:
 - dopečená okluze, kavita a odřený lak na trupu (bod 38);
 - nápisy a výstražné pruhy na trupu jako decaly (bod 39);
 - panelové spáry jako dlaždicová vrstva materiálu (bod 40);
-- spálený plech u trysek, první zóna materiálu (bod 41).
+- spálený plech u trysek, první zóna materiálu (bod 41);
+- hra běžela na Medium: výchozí předvolba Cinematic a doostření (bod 42).
