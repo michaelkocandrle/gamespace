@@ -112,6 +112,13 @@ if plan["materials"]:
     check("the detail normal is a normal map with its green channel flipped", detail[0] is not None
           and detail[0].get_editor_property("compression_settings") == unreal.TextureCompressionSettings.TC_NORMALMAP
           and detail[0].get_editor_property("flip_green_channel"))
+    # Occlusion (20. 9. 2026): its own baked map, because the ORM's red channel is the emissive mask.
+    ao_map = unreal.EditorAssetLibrary.load_asset("/Game/Ships/%s/Textures/T_Ship_%s_AO" % (plan["ship"], plan["ship"]))
+    check("the baked AO map is imported (Tools/Blender/bake_ship_ao.py)", ao_map is not None)
+    if ao_map:
+        check("the AO map is masks, not sRGB",
+              ao_map.get_editor_property("compression_settings") == unreal.TextureCompressionSettings.TC_MASKS
+              and not ao_map.get_editor_property("srgb"))
     hull_mi = unreal.EditorAssetLibrary.load_asset("/Game/Ships/%s/Materials/MI_Ship_%s_Hull" % (plan["ship"], plan["ship"]))
     if hull_mi:
         strength = MEL.get_material_instance_scalar_parameter_value(hull_mi, "DetailNormalStrength")
@@ -119,6 +126,13 @@ if plan["materials"]:
         wear = MEL.get_material_instance_scalar_parameter_value(hull_mi, "DetailRoughVariation")
         check("the hull wears the detail layer (strength > 0, tile 5..60 cm, wear <= 0.3)",
               strength > 0.0 and 5.0 <= tile <= 60.0 and 0.0 <= wear <= 0.3, "strength %.2f, tile %.0f cm, wear %.2f" % (strength, tile, wear))
+        check("the hull's AO map is the baked one, not the white default",
+              MEL.get_material_instance_texture_parameter_value(hull_mi, "AOMap") == ao_map, "%s" % ao_map)
+        cavity = MEL.get_material_instance_scalar_parameter_value(hull_mi, "CavityStrength")
+        wear_amount = MEL.get_material_instance_scalar_parameter_value(hull_mi, "WearAmount")
+        # Above ~0.3 the wear reads as dirt rather than worn paint (Tools/Shots/hull_zones.json).
+        check("the hull has cavity and a restrained amount of wear",
+              cavity > 0.0 and 0.0 <= wear_amount <= 0.3, "cavity %.2f, wear %.2f" % (cavity, wear_amount))
 
 # --- nothing left over from an earlier model -------------------------------------------------
 root = "/Game/Ships/%s" % plan["ship"]

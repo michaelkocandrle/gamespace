@@ -34,7 +34,7 @@ MEL = unreal.MaterialEditingLibrary
 SHARED = "/Game/Ships/Shared/Materials"
 MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glass": SHARED + "/M_Ship_Glass",
            "screen": SHARED + "/M_Ship_Screen"}
-TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap"}
+TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap"}
 
 
 def _asset_tools():
@@ -92,7 +92,7 @@ def build_pbr_master():
     _link(color, tint, "A")
     tint_param = _vector(pbr, "BaseColorTint", (1.0, 1.0, 1.0), -900, 200)
     MEL.connect_material_expressions(tint_param, "", tint, "B")
-    _output(tint, unreal.MaterialProperty.MP_BASE_COLOR)
+    # Base colour goes out through the cavity and wear layer (see _add_cavity_and_wear).
     orm = _texture_param(pbr, "ORMMap", unreal.MaterialSamplerType.SAMPLERTYPE_MASKS,
                          "/Engine/EngineResources/WhiteSquareTexture", -900, 350)
     rough = _node(pbr, unreal.MaterialExpressionMultiply, -400, 350)
@@ -104,10 +104,11 @@ def build_pbr_master():
     if not MEL.connect_material_expressions(orm, "B", metal, "A"):
         raise RuntimeError("ORM B -> metallic")
     _link(_scalar(pbr, "MetallicScale", 1.0, -900, 650), metal, "B")
-    _output(metal, unreal.MaterialProperty.MP_METALLIC)
+    # Metallic goes out through the cavity and wear layer too.
     normal = _texture_param(pbr, "NormalMap", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL,
                             "/Engine/EngineMaterials/DefaultNormal", -900, 800)
-    _add_detail_layer(pbr, normal, rough)
+    grunge = _add_detail_layer(pbr, normal, rough)
+    _add_cavity_and_wear(pbr, tint, metal, grunge)
     MEL.recompile_material(pbr)
     unreal.EditorAssetLibrary.save_loaded_asset(pbr, only_if_is_dirty=False)
     return pbr
@@ -204,7 +205,7 @@ def _add_detail_layer(pbr, normal, rough):
         if not MEL.connect_material_property(normal, "RGB", unreal.MaterialProperty.MP_NORMAL):
             raise RuntimeError("normal map -> Normal")
         _output(rough, unreal.MaterialProperty.MP_ROUGHNESS)
-        return
+        return None
     tex_normal = _node(pbr, unreal.MaterialExpressionTextureObjectParameter, -1700, 1000, parameter_name="DetailNormalMap",
                        sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL, texture=textures["T_Ship_Detail_N"])
     tex_grunge = _node(pbr, unreal.MaterialExpressionTextureObjectParameter, -1700, 1200, parameter_name="DetailGrungeMap",
@@ -253,6 +254,81 @@ def _add_detail_layer(pbr, normal, rough):
     clamped = _node(pbr, unreal.MaterialExpressionClamp, -250, 1250, min_default=0.03, max_default=1.0)
     _link(varied, clamped, "")
     _output(clamped, unreal.MaterialProperty.MP_ROUGHNESS)
+    return grunge
+
+
+def _add_cavity_and_wear(pbr, tint, metal, grunge):
+    """What makes a hull stop reading as one flat colour.
+
+    Cavity: the baked ambient occlusion (the ORM's red channel, unused until 20. 9. 2026) both goes to
+    the material's Ambient Occlusion output and darkens the paint a little, so panel gaps, recesses and
+    the shade under greebles are there even in light that does not reach them.
+
+    Wear: where the surface is exposed (high occlusion) and the grunge blotches are strongest, the paint
+    thins out to bare metal - lighter, fully metallic. That is what breaks up the single-colour look of
+    the Star Citizen references. Parameters: CavityStrength, AOStrength, WearAmount, WearThreshold,
+    WearColor, WearMetallic; WearAmount 0 turns the wear off, CavityStrength 0 the cavity.
+    """
+    # Its own map, not a channel of the ORM: the ORM's red is the emissive mask for the screens
+    # (Tools/Blender/build_ai_ship.py, surface_nodes), 1 over the whole hull, so reading occlusion out
+    # of it darkened nothing (20. 9. 2026, found by painting the wear red and watching it cover the hull
+    # evenly). White by default, so a ship without a baked AO map looks exactly as it did.
+    ao_map = _texture_param(pbr, "AOMap", unreal.MaterialSamplerType.SAMPLERTYPE_MASKS,
+                            "/Engine/EngineResources/WhiteSquareTexture", -1100, 200)
+    ao = _node(pbr, unreal.MaterialExpressionMultiply, -700, 200, const_b=1.0)
+    if not MEL.connect_material_expressions(ao_map, "R", ao, "A"):
+        raise RuntimeError("AO map R -> ambient occlusion")
+
+    # Ambient Occlusion output: lerp(1, ao, AOStrength).
+    ao_out = _node(pbr, unreal.MaterialExpressionLinearInterpolate, -450, 150, const_a=1.0)
+    _link(ao, ao_out, "B")
+    _link(_scalar(pbr, "AOStrength", 0.6, -900, 100), ao_out, "Alpha")
+    _output(ao_out, unreal.MaterialProperty.MP_AMBIENT_OCCLUSION)
+
+    # Paint darkened in the cavities: tint * lerp(1, ao, CavityStrength).
+    cavity = _node(pbr, unreal.MaterialExpressionLinearInterpolate, -450, 250, const_a=1.0)
+    _link(ao, cavity, "B")
+    _link(_scalar(pbr, "CavityStrength", 0.35, -900, 150), cavity, "Alpha")
+    shaded = _node(pbr, unreal.MaterialExpressionMultiply, -300, 0)
+    _link(tint, shaded, "A")
+    _link(cavity, shaded, "B")
+
+    if grunge is None:
+        # No generated detail textures: the paint keeps the cavity, there is nothing to wear it with.
+        _output(shaded, unreal.MaterialProperty.MP_BASE_COLOR)
+        _output(metal, unreal.MaterialProperty.MP_METALLIC)
+        return
+
+    # The wear mask: the top of the grunge blotches, and only where the surface is exposed.
+    above = _node(pbr, unreal.MaterialExpressionSubtract, -1000, 1800)
+    _link(grunge, above, "A")
+    threshold = _scalar(pbr, "WearThreshold", 0.62, -1700, 1800)
+    _link(threshold, above, "B")
+    headroom = _node(pbr, unreal.MaterialExpressionOneMinus, -1000, 1900)
+    _link(threshold, headroom, "")
+    spread = _node(pbr, unreal.MaterialExpressionDivide, -850, 1800)
+    _link(above, spread, "A")
+    _link(headroom, spread, "B")
+    mask = _node(pbr, unreal.MaterialExpressionClamp, -700, 1800, min_default=0.0, max_default=1.0)
+    _link(spread, mask, "")
+    exposed = _node(pbr, unreal.MaterialExpressionMultiply, -550, 1800)
+    _link(mask, exposed, "A")
+    _link(ao, exposed, "B")
+    amount = _node(pbr, unreal.MaterialExpressionMultiply, -400, 1800)
+    _link(exposed, amount, "A")
+    _link(_scalar(pbr, "WearAmount", 0.3, -1700, 1900), amount, "B")
+
+    worn_colour = _node(pbr, unreal.MaterialExpressionLinearInterpolate, -150, 0)
+    _link(shaded, worn_colour, "A")
+    _link(_vector(pbr, "WearColor", (0.34, 0.34, 0.36), -700, 0), worn_colour, "B")
+    _link(amount, worn_colour, "Alpha")
+    _output(worn_colour, unreal.MaterialProperty.MP_BASE_COLOR)
+
+    worn_metal = _node(pbr, unreal.MaterialExpressionLinearInterpolate, -150, 500)
+    _link(metal, worn_metal, "A")
+    _link(_scalar(pbr, "WearMetallic", 1.0, -700, 600), worn_metal, "B")
+    _link(amount, worn_metal, "Alpha")
+    _output(worn_metal, unreal.MaterialProperty.MP_METALLIC)
 
 
 def build_screen_master():
@@ -304,7 +380,8 @@ def import_texture(ship, key, source, never_stream=False):
         texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_NORMALMAP)
         texture.set_editor_property("srgb", False)
         texture.set_editor_property("flip_green_channel", True)
-    elif key == "orm":
+    elif key in ("orm", "ao"):
+        # Values, not colour: no sRGB curve on the way in.
         texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_MASKS)
         texture.set_editor_property("srgb", False)
     else:
@@ -353,12 +430,15 @@ def build_instance(name, folder, spec, masters, ship=None):
     for key, param in (("metallic", "Metallic"), ("roughness", "Roughness"), ("emissive_strength", "EmissiveStrength"), ("opacity", "Opacity"),
                        ("roughness_scale", "RoughnessScale"), ("metallic_scale", "MetallicScale"),
                        ("detail_tile_cm", "DetailTileCm"), ("detail_normal_strength", "DetailNormalStrength"),
-                       ("detail_grunge_tile_cm", "DetailGrungeTileCm"), ("detail_rough_variation", "DetailRoughVariation")):
+                       ("detail_grunge_tile_cm", "DetailGrungeTileCm"), ("detail_rough_variation", "DetailRoughVariation"),
+                       ("cavity_strength", "CavityStrength"), ("ao_strength", "AOStrength"),
+                       ("wear_amount", "WearAmount"), ("wear_threshold", "WearThreshold"), ("wear_metallic", "WearMetallic")):
         if key in spec:
             MEL.set_material_instance_scalar_parameter_value(mi, param, float(spec[key]))
-    if "base_color_tint" in spec:
-        c = spec["base_color_tint"]
-        MEL.set_material_instance_vector_parameter_value(mi, "BaseColorTint", unreal.LinearColor(c[0], c[1], c[2], 1.0))
+    for key, param in (("base_color_tint", "BaseColorTint"), ("wear_color", "WearColor")):
+        if key in spec:
+            c = spec[key]
+            MEL.set_material_instance_vector_parameter_value(mi, param, unreal.LinearColor(c[0], c[1], c[2], 1.0))
     for key, source in (spec.get("textures") or {}).items():
         MEL.set_material_instance_texture_parameter_value(mi, TEXTURE_PARAMS[key], import_texture(ship, key, source, spec.get("never_stream", False)))
     MEL.update_material_instance(mi)

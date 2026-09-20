@@ -535,7 +535,16 @@ normal map is nearly flat), an emissive slot for the nozzle discs, k-DOP `UCX_` 
 sockets. The current Vanguard (18. 9. 2026) is Meshy's "Ironclad Starfighter": 3.36 M triangles in,
 200 k + 14 k gear out, 14 x 11.4 x 6.2 m, four engine nacelles. Its material is `M_Ship_PBR`
 (`BaseColorMap`, `ORMMap` G roughness / B metallic, `NormalMap` with the green channel flipped on import,
-`Tools/Assets/ship_materials.py`); thrusters keep `M_Ship_Hull` with emission. `import_ship.py` imports
+`Tools/Assets/ship_materials.py`); thrusters keep `M_Ship_Hull` with emission.
+
+The ORM's **red channel is not occlusion** here, it is the emissive mask for the cockpit screens, so
+the re-bake leaves the ship with no occlusion at all and the hull reads as one flat colour whatever
+the lighting does. `Tools/Blender/bake_ship_ao.py` bakes `T_Ship_<Ship>_AO.png` afterwards, from the
+built meshes, through an occlusion shader limited to half a metre (Cycles' own AO bake has no limit,
+and on a closed 14 m hull that reads as dirt rather than panel gaps). The material darkens the paint
+by it (`CavityStrength`), sends it to the Ambient Occlusion output (`AOStrength`) and uses it to keep
+worn paint (`WearAmount`) on the exposed surfaces. `AOMap` defaults to white, so a ship without the
+bake looks exactly as it did. `import_ship.py` imports
 a mesh fresh when its material slots changed (a reimport kept the old model's slots) and removes the
 Blueprint components, meshes and material instances an earlier model left behind.
 

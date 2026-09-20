@@ -500,6 +500,29 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     A/B ve viewportu (ostrý úhel 60° vs. 35°, bevel 2 mm) změnilo **1 % pixelů**. Hrany mají smysl až
     u modelů s rovnými panely; teď je větší rozdíl proti SC v decalech a zónách materiálu.
 
+38. **Trup přestal být jednolitá barva: okluze, kavity a odřený lak** (20. 9. 2026, navazuje na bod 36):
+    - **Nález**: v pečených texturách lodi **není žádná okluze**. Červený kanál ORM, kde by podle
+      `Docs/Ships/ShipPipeline.md` měla být, je v receptu z AI modelu **emisní maska obrazovek**
+      (`build_ai_ship.py`, `surface_nodes`), na trupu rovná 1. Proto byl trup všude stejně světlý,
+      bez ohledu na to, jestli je to rovný panel nebo zápich pod greeblem.
+    - Jak se to našlo: první pokus (kavita z ORM.R) nezměnil **nic** – 0,7 % pixelů, tedy šum.
+      Nátěr odřeného laku na červenou ukázal, proč: červená pokryla celou loď rovnoměrně, takže
+      maska okluze byla všude 1. Druhý pokus (kavita z normálové mapy, `generate_cavity_map.py`)
+      skončil šumem taky, protože atlas z `smart_project` má tisíce drobných ostrůvků a gradient
+      přes jejich hranice nic neznamená – ten skript proto v repozitáři není.
+    - **Řešení**: `Tools/Blender/bake_ship_ao.py` dopeče `T_Ship_<Loď>_AO.png` (4096², 16 vzorků,
+      ~30 s) z hotových meshů přes occlusion shader s **dosahem paprsku 0,5 m** – Cycles vlastní
+      AO bake je bez limitu a na uzavřeném 14m trupu dal průměr 0,27, tedy špinavou loď místo spár.
+      `M_Ship_PBR` má novou vrstvu: `CavityStrength` (ztmavení laku), `AOStrength` (výstup Ambient
+      Occlusion), `WearAmount` / `WearThreshold` / `WearColor` / `WearMetallic` (lak prodřený na kov
+      tam, kde jsou skvrny grunge a povrch je exponovaný).
+    - **Hodnoty** (`Tools/Shots/hull_zones.json`, sedm variant v jednom běhu): cavity 0.5, AO 0.6,
+      wear 0.2. Nad ~0,3 vypadá odřený lak spíš jako špína než jako opotřebení. Kavita mění 7–10 %
+      pixelů v detailu, na celou loď z dálky je to jemné; zblízka je v ní hloubka, která tam nebyla.
+    - Bez mapy (`AOMap` je bílá) vypadá materiál přesně jako předtím, takže lodě bez dopečené okluze
+      nic nerozbije. `test_ship_import.py` hlídá, že je mapa importovaná jako Masks bez sRGB, že ji
+      materiál lodi opravdu má a že wear zůstal do 0,3.
+
 ---
 
 ## 6. Mapa kódu a obsahu
@@ -544,6 +567,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `run_editor_python.ps1` | Spouští Python headless v editoru. |
 | `Package.ps1`, `Play.ps1` | Build hry a spuštění. |
 | `Assets/build_space_scene.py` | TestSpace: obloha, planeta, tělesa, prach, materiály, světla a grade (`SKY_LIGHT_INTENSITY`, `POST_SETTINGS`). |
+| `Blender/bake_ship_ao.py` | Dopeče `T_Ship_<Loď>_AO.png` pro už postavenou loď (okluze v pečených texturách není, viz bod 38). |
 | `Assets/build_main_menu.py` | Level úvodní obrazovky. |
 | `Assets/import_ship.py` + `ship_materials.py` | Import lodi z Blenderu. |
 | `Assets/generate_ship_sounds.py` → `build_ship_audio.py` | Generátor zvuků (numpy) a jejich import. |
@@ -684,6 +708,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `look_fill` | Odděluje světlo od laku: sweep intenzity sky lightu 0.35–1.5, pak světlejší lak, méně kovu a tvrdší slunce. |
 | `look_tune` | Post process po vrstvách (contact shadows, Lumen, sky light, grade, film) v kosmu i v atmosféře; poslední snímek vypíše `space.PostDump`. |
 | `look_final` | Vybrané hodnoty proti úrovni tak, jak je: vesmír, atmosféra, kokpit, detail – a Lumen kvalita zvlášť, aby byla vidět cena ve snímcích. |
+| `hull_zones` | Rozbití jednolitého trupu: okluze, kavita ve dvou sílách a odřený lak ve třech, první dvojice bez všeho pro srovnání. |
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
 Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
@@ -896,4 +921,5 @@ Viz `git log --oneline`. Poslední kroky:
 - rychlejší kreslení displejů (trvalé okno) a seskupené čáry HUD (bod 33);
 - detailní vrstva materiálu a trup 1 mil. trojúhelníků, ladicí příkazy `space.ShipMat` (body 33 a 34);
 - hra kreslila v polovičním rozlišení, zpět na 100 % (bod 35);
-- světlo a post scény, loď v kosmu přestala být silueta; rychlá smyčka `space.Post` / `space.Sun` / `space.Sky` (bod 36).
+- světlo a post scény, loď v kosmu přestala být silueta; rychlá smyčka `space.Post` / `space.Sun` / `space.Sky` (bod 36);
+- dopečená okluze, kavita a odřený lak na trupu (bod 38).

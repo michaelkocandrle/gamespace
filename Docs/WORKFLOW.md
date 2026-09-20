@@ -250,6 +250,7 @@ Presety (`Tools/Shots/*.json`):
 | `mfd_pages` | stránky MFD ve stavech, které je naplní. Vyřízni levý MFD ~495–710 × 640–825 a pravý ~893–1105 × 640–825 px |
 | `look_sun`, `look_fill` | proč je loď v kosmu silueta: směr slunce, výplň sky lightu, lak trupu |
 | `look_tune`, `look_final` | post process po vrstvách a výsledná volba proti úrovni tak, jak je |
+| `hull_zones` | okluze, kavita a odřený lak na trupu (`space.ShipMat`) |
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
 | `ship_views`, `ship` | loď zvenku |
@@ -520,11 +521,13 @@ Menší kroky, podle pořadí:
 4. ~~Hrany trupu (zkosení, vážené normály)~~ – změřeno 20. 9. 2026 a **zahozeno**: trup z Meshy má
    92 % hran pod 36° (organický sken, ne rovné panely), takže ostrejší úhel i 2mm bevel změnily jen 1 %
    pixelů. Hrany budou dávat smysl až u modelů s rovnými panely.
-5. ~~Světlo a post scény~~ – hotovo 20. 9. 2026 (kapitola 11, HANDOFF bod 36). Navazuje: zóny materiálu,
-   dlaždicové PBR a decaly (panelové spáry, nápisy) – to je teď největší rozdíl proti SC.
-6. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
-7. **Silnější záře displejů na rámu** a okolní desce.
-8. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
+5. ~~Světlo a post scény~~ – hotovo 20. 9. 2026 (kapitola 11, HANDOFF bod 36).
+6. ~~Okluze a kavita na trupu~~ – hotovo 20. 9. 2026 (HANDOFF bod 38): v pečených texturách žádná
+   okluze nebyla, `Tools/Blender/bake_ship_ao.py` ji dopeče. Navazuje: **decaly a nápisy**
+   (panelové spáry, registrační čísla, výstražné pruhy u trysek) – to je teď největší rozdíl proti SC.
+7. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
+8. **Silnější záře displejů na rámu** a okolní desce.
+9. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
 
 Velké celky:
 - tělo pilota v sedadle;

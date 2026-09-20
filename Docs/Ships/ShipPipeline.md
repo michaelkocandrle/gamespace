@@ -167,10 +167,26 @@ Blender při duplikaci přidává `.001` – skript to hlásí jako chybu, přej
 | `_BC` Base Color | PNG 8 bit, sRGB | Default, sRGB **on** |
 | `_N` Normal | PNG 16 bit | Normalmap, **Flip Green Channel on** (Blender i glTF používají OpenGL, Unreal DirectX) |
 | `_ORM` (R AO, G Roughness, B Metallic) | PNG 8 bit, Non-Color | Masks (no sRGB), sRGB **off** |
+| `_AO` Ambient Occlusion | PNG 8 bit, Non-Color | Masks (no sRGB), sRGB **off** |
 | `_E` Emissive | PNG 8 bit | Default, sRGB on |
 
 Tip: GLB „metallicRoughness“ textura má roughness v G a metallic v B – stejné rozložení jako
 ORM, jde použít přímo (R je bez AO obvykle bílý).
+
+**Okluze má vlastní mapu, ne červený kanál ORM** (20. 9. 2026). V receptu z AI modelu je R emisní
+maska obrazovek (`Tools/Blender/build_ai_ship.py`, `surface_nodes`), takže je na trupu 1 a žádná
+okluze v pečených texturách není. Dopeče ji:
+
+```bash
+MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b   ArtSource/Ships/Vanguard/Vanguard_Meshy.blend --python Tools/Blender/bake_ship_ao.py -- Vanguard
+```
+
+Trvá ~30 s (4096², 16 vzorků, dosah paprsku 0,5 m – tedy spáry a greebly, ne špinavá loď). Peče se
+z hotových meshů, ne z originálu: milion trojúhelníků nese všechny prohlubně a originál už v `.blend`
+není. V setupu loďi se mapa přidá jako `"ao"` mezi textury a `M_Ship_PBR` ji použije na
+`cavity_strength` (ztmavení laku ve spárách), `ao_strength` (výstup Ambient Occlusion) a jako masku
+pro `wear_amount` (oddřený lak na exponovaných místech). Bez mapy je parametr bílý a materiál vypadá
+jako předtím.
 
 Rozlišení: trup 4096², malé díly 1024–2048². Rozměry vždy mocnina dvou.
 

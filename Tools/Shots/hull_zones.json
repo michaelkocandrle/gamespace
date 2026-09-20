@@ -1,0 +1,36 @@
+{
+  "_comment": "Breaking up the one-colour hull: the baked ambient occlusion (cavity, AO output) and worn paint on exposed surfaces, layer by layer in one packaged run through space.ShipMat / space.ShipMatColor. The first pair is the look without any of it, for comparison. Settings stay for the following shots. What looks right goes into ArtSource/Ships/Vanguard/Vanguard_setup.json. Run: Tools/Shots.ps1 -Preset hull_zones",
+  "shots": [
+    {"name": "a_none_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 3.0,
+     "console": ["space.ShipMat AOStrength 0", "space.ShipMat CavityStrength 0", "space.ShipMat WearAmount 0"]},
+    {"name": "a_none_whole", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "b_ao_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat AOStrength 0.6"]},
+    {"name": "b_ao_whole", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "c_cavity_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat CavityStrength 0.35"]},
+    {"name": "c_cavity_whole", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "d_cavity_strong_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat CavityStrength 0.6"]},
+    {"name": "d_cavity_strong_whole", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "e_wear_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat CavityStrength 0.35", "space.ShipMat WearAmount 0.3"]},
+    {"name": "e_wear_whole", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "f_wear_strong_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat WearAmount 0.55", "space.ShipMat WearThreshold 0.55"]},
+    {"name": "f_wear_strong_whole", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "g_wear_fine_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat WearAmount 0.3", "space.ShipMat WearThreshold 0.62", "space.ShipMat DetailGrungeTileCm 30"]},
+    {"name": "g_wear_fine_whole", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "h_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.5,
+     "console": ["space.ShipMat DetailGrungeTileCm 60"]},
+    {"name": "i_cockpit", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "settle": 2.0}
+  ]
+}
