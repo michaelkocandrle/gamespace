@@ -628,6 +628,21 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - K tomu dvě věci do nástrojů: pole `drift` ve scénáři snímků (rychlost v osách lodi, m/s – `speed_ms`
       umí jen rovně vpřed) a konzolový `space.Drift <vpřed> <vpravo> <nahoru>` pro hraní.
 
+45. **Rychlostní čáry** (21. 9. 2026, autor: protýpová laciná verze proti snímku ze Star Citizen):
+    prach byl pole **stejně dlouhých, stejně jasných bílých klacíků** s ostře uříznutými konci.
+    - `M_SpaceDust` teď každou čáru **zužuje do ztracena** podél i napříč, takže z kvádru je měkké
+      vřeteno. Každá částice má navíc **vlastní délku a jas** (`LengthSpread`, `BrightnessSpread`,
+      jas třetí mocninou, takže je většina slabých a pár výrazných).
+    - **Past**: `LocalPosition` u instancovaného meshe nevrací prostor instance, ale primitiva, takže
+      taper vyšel všude záporně a prach **úplně zmizel**. Tvar se počítá z `ObjectPositionWS` (ta u
+      instancí funguje) a komponenta posílá směr letu a poloviční rozměry do dynamické instance
+      materiálu; délka konkrétní částice je v custom data 2.
+    - Zužování sebere zhruba tři čtvrtiny světla, proto `DUST_BRIGHTNESS` 1.6 → 5.0.
+    - Hustota 400 → **2600** částic v krabici 30 m: pole bylo příliš řídké, než aby v pohybu četlo
+      jako prach. **Nestojí to nic měřitelného** (80 FPS s 900 i s 3500, `Tools/Shots/dust_tune.json`).
+    - Ladí se za běhu: `space.Dust <Vlastnost> <hodnota>`, `space.DustList`. Změna počtu se projeví
+      hned (pole se přestaví).
+
 ---
 
 ## 6. Mapa kódu a obsahu
@@ -811,6 +826,8 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `landing` | SC-2a: podvozek ze strany (dole, v půlce cesty), zespodu, loď stojící na patkách, varování GEAR UP, loď na břiše bez podvozku, HUD po přistání, precision HUD, kokpit na zemi. |
 | `vtol` | SC-2b: odznak VTOL na desce zapnutý i vypnutý, loď visící na zvedacích tryskách ze strany, zezadu a z kokpitu. VTOL přepíná `space.Vtol`, ne klávesa. |
 | `velocity_vector` | SC-3: značka dráhy letu v ose, při letu bokem, šikmo dolů, pozpátku a ve stoje. Rychlosti nastavuje pole `drift`, ne motory. |
+| `dust_tune` | Rychlostní čáry: hustota, délka, tloušťka a velikost krabice přes `space.Dust` v jednom běhu. |
+| `space_look` | Prohlídka prostředí tak, jak je: prach ve třech rychlostech, planeta od 120 km po povrch, tělesa a holá obloha. |
 | `cockpit_centre` | Střední sloupek desky (RADAR, SELF STATUS): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé: vyříznout a zvětšit. |
 | `cockpit_readability` | Čitelnost displejů: výchozí pohled, přiblížení (Z) na FLIGHT/STATUS a THRUSTERS/CONTACTS, na konci staré oko pro srovnání. |
 | `hull_tune` | Ladění materiálu trupu: šest variant v jednom běhu přes `space.ShipMat` (síla detailu, velikost dlaždice, světlejší lak, drsnost). |
@@ -1043,4 +1060,5 @@ Viz `git log --oneline`. Poslední kroky:
 - spálený plech u trysek, první zóna materiálu (bod 41);
 - hra běžela na Medium: výchozí předvolba Cinematic a doostření (bod 42);
 - SC-2b: VTOL, visící let a záře trysek při visení (bod 43);
-- SC-3: značka dráhy letu na HUD (bod 44).
+- SC-3: značka dráhy letu na HUD (bod 44);
+- rychlostní čáry: měkká vřetena místo bílých klacíků (bod 45).

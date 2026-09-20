@@ -256,6 +256,7 @@ Presety (`Tools/Shots/*.json`):
 | `hull_scorch` | spálený plech u trysek: síla a dosah (`space.ShipMat`) |
 | `vtol` | SC-2b: odznak VTOL, visení na zvedacích tryskách (`space.Vtol`) |
 | `velocity_vector` | SC-3: značka dráhy letu (pole `drift` ve scénáři) |
+| `dust_tune`, `space_look` | rychlostní čáry (`space.Dust`) a prohlídka prostředí |
 | `look_sharp`, `look_groups` | proč je obraz měkký a co která škálovací skupina stojí |
 | `look_artifacts` | film grain, motion blur a stopy za pohybem – změřeno, žádný z nich obraz nekazí |
 | `hud` | HUD ve všech situacích |

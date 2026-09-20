@@ -32,7 +32,8 @@ USpaceDustComponent::USpaceDustComponent()
 	bAffectDistanceFieldLighting = false;
 	bAffectDynamicIndirectLighting = false;
 	SetVisibleInRayTracing(false);
-	NumCustomDataFloats = 1;
+	// 0 the fade (distance and speed), 1 the speck's own brightness, 2 its length as a multiplier.
+	NumCustomDataFloats = 3;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	if (Cube.Succeeded())
@@ -51,7 +52,10 @@ void USpaceDustComponent::BeginPlay()
 		: nullptr;
 	if (Material)
 	{
-		SetMaterial(0, Material);
+		// A dynamic instance: the shape of a speck is measured from the flight direction and the sizes,
+		// and those change every frame (see UpdateDust).
+		DustMaterial = UMaterialInstanceDynamic::Create(Material, this);
+		SetMaterial(0, DustMaterial ? static_cast<UMaterialInterface*>(DustMaterial) : Material);
 	}
 	else
 	{
@@ -80,15 +84,27 @@ void USpaceDustComponent::UpdateDust(const FVector& ViewLocation, const FVector&
 	}
 
 	const double Half = BoxHalfSizeCm;
+	if (bCreated && Positions.Num() != ParticleCount)
+	{
+		// The count was changed (space.Dust ParticleCount while tuning): start the field again.
+		ClearInstances();
+		bCreated = false;
+	}
 	if (!bCreated)
 	{
 		FRandomStream Random(0x5DA7);
 		Positions.SetNum(ParticleCount);
 		Transforms.SetNum(ParticleCount);
+		LengthScales.SetNum(ParticleCount);
+		Brightnesses.SetNum(ParticleCount);
 		for (int32 Index = 0; Index < ParticleCount; ++Index)
 		{
 			Positions[Index] = ViewLocation + FVector(Random.FRandRange(-Half, Half), Random.FRandRange(-Half, Half), Random.FRandRange(-Half, Half));
 			Transforms[Index] = FTransform(Positions[Index] - ViewLocation);
+			// Fixed for the speck's life, so it keeps its character as it wraps round the box.
+			LengthScales[Index] = 1.f + Random.FRandRange(-LengthSpread, LengthSpread);
+			// Cubed: most specks come out faint and a few bright, which is what dust looks like.
+			Brightnesses[Index] = 1.f - BrightnessSpread * FMath::Pow(Random.FRand(), 3.f);
 		}
 		SetWorldLocationAndRotation(ViewLocation, FQuat::Identity);
 		AddInstances(Transforms, false, false, false);
@@ -104,7 +120,13 @@ void USpaceDustComponent::UpdateDust(const FVector& ViewLocation, const FVector&
 	const FVector Direction = Speed > 1.0 ? Velocity / Speed : FVector::ForwardVector;
 	const FQuat Align = FRotationMatrix::MakeFromX(Direction).ToQuat();
 	const double Length = FMath::Clamp(Speed * StreakSeconds, double(ParticleSizeCm), double(MaxStreakCm));
-	const FVector Scale(Length / SpaceDust::CubeSizeCm, ParticleSizeCm / SpaceDust::CubeSizeCm, ParticleSizeCm / SpaceDust::CubeSizeCm);
+	const double Across = ParticleSizeCm / SpaceDust::CubeSizeCm;
+	if (DustMaterial)
+	{
+		DustMaterial->SetVectorParameterValue(TEXT("DustDirection"), FLinearColor(Direction));
+		DustMaterial->SetScalarParameterValue(TEXT("DustHalfLengthCm"), float(Length * 0.5));
+		DustMaterial->SetScalarParameterValue(TEXT("DustHalfWidthCm"), ParticleSizeCm * 0.5f);
+	}
 
 	auto Wrap = [Half](double Value)
 	{
@@ -121,12 +143,15 @@ void USpaceDustComponent::UpdateDust(const FVector& ViewLocation, const FVector&
 		FVector Relative = Positions[Index] - ViewLocation;
 		Relative.Set(Wrap(Relative.X), Wrap(Relative.Y), Wrap(Relative.Z));
 		Positions[Index] = ViewLocation + Relative;
-		Transforms[Index] = FTransform(Align, Relative, Scale);
+		const double Stretched = FMath::Max(Length * double(LengthScales[Index]), double(ParticleSizeCm));
+		Transforms[Index] = FTransform(Align, Relative, FVector(Stretched / SpaceDust::CubeSizeCm, Across, Across));
 
 		// Fade out towards the box edge (no popping where specks wrap round) and right at the camera.
 		const double Distance = Relative.Size();
 		const float Fade = float((1.0 - FMath::SmoothStep(0.55 * Half, Half, Distance)) * FMath::SmoothStep(80.0, 400.0, Distance));
 		SetCustomDataValue(Index, 0, Fade * SpeedAlpha, false);
+		SetCustomDataValue(Index, 1, Brightnesses[Index], false);
+		SetCustomDataValue(Index, 2, LengthScales[Index], false);
 	}
 	BatchUpdateInstancesTransforms(0, Transforms, false, true, true);
 }

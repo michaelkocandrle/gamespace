@@ -18,6 +18,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/DirectionalLightComponent.h"
+#include "SpaceDustComponent.h"
 #include "Components/SkyLightComponent.h"
 #include "Engine/DirectionalLight.h"
 #include "Engine/PostProcessVolume.h"
@@ -287,6 +288,46 @@ namespace
 			});
 			UE_LOG(LogTemp, Display, TEXT("space.Sky %s on %d lights"),
 				Result.IsEmpty() ? *FString::Printf(TEXT("%s: no such property"), *Args[0]) : *Result, Count);
+		}));
+
+	FAutoConsoleCommandWithWorldAndArgs DustCommand(
+		TEXT("space.Dust"),
+		TEXT("space.Dust <Property> <Value>: a property of the space dust (ParticleCount, ParticleSizeCm, StreakSeconds, MaxStreakCm, LengthSpread, BrightnessSpread). Not saved; a changed count takes the next flight."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			if (Args.Num() < 2)
+			{
+				UE_LOG(LogTemp, Display, TEXT("space.Dust <Property> <Value> (space.DustList <part of a name>)"));
+				return;
+			}
+			FString Result;
+			int32 Count = 0;
+			for (TActorIterator<AActor> It(World); It; ++It)
+			{
+				for (USpaceDustComponent* Dust : TInlineComponentArray<USpaceDustComponent*>(*It))
+				{
+					Result = SetByName(Dust->GetClass(), Dust, Args, 1);
+					++Count;
+				}
+			}
+			UE_LOG(LogTemp, Display, TEXT("space.Dust %s on %d components"),
+				Result.IsEmpty() ? *FString::Printf(TEXT("%s: no such property"), *Args[0]) : *Result, Count);
+		}));
+
+	FAutoConsoleCommandWithWorldAndArgs DustListCommand(
+		TEXT("space.DustList"),
+		TEXT("space.DustList <part of a name>: what space.Dust takes, with its value here."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			const FString Filter = Args.Num() > 0 ? Args[0] : FString();
+			for (TActorIterator<AActor> It(World); It; ++It)
+			{
+				for (USpaceDustComponent* Dust : TInlineComponentArray<USpaceDustComponent*>(*It))
+				{
+					ListProperties(Dust->GetClass(), Dust, Filter);
+					return;
+				}
+			}
 		}));
 
 	FAutoConsoleCommandWithWorldAndArgs LightListCommand(

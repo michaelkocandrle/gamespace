@@ -1,0 +1,26 @@
+{
+  "_comment": "The speed streaks, tuned in one packaged run through space.Dust. The prototype drew them as hard white sticks, all the same length and weight (20. 9. 2026, the author against a Star Citizen frame); the material now tapers each one to a soft spindle and every speck has its own length and brightness. Each stage changes one thing and holds it for the shots after it. Run: Tools/Shots.ps1 -Preset dust_tune",
+  "shots": [
+    {"name": "a_now_cockpit", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "drift": [1000, 0, 0], "settle": 3.0},
+    {"name": "a_now_scm", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "drift": [210, 0, 0], "settle": 1.5},
+
+    {"name": "b_dense", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "drift": [1000, 0, 0], "settle": 2.0,
+     "console": ["space.Dust ParticleCount 2000"]},
+    {"name": "b_dense_scm", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "drift": [210, 0, 0], "settle": 1.5},
+
+    {"name": "c_dense_short", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "drift": [1000, 0, 0], "settle": 2.0,
+     "console": ["space.Dust StreakSeconds 0.009", "space.Dust MaxStreakCm 900"]},
+
+    {"name": "d_dense_fine", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "drift": [1000, 0, 0], "settle": 2.0,
+     "console": ["space.Dust StreakSeconds 0.014", "space.Dust MaxStreakCm 1500", "space.Dust ParticleSizeCm 1.8"]},
+
+    {"name": "e_very_dense", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "drift": [1000, 0, 0], "settle": 2.5,
+     "console": ["space.Dust ParticleCount 3500", "space.Dust ParticleSizeCm 2.8"]},
+
+    {"name": "f_closer_box", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "drift": [1000, 0, 0], "settle": 2.5,
+     "console": ["space.Dust ParticleCount 2000", "space.Dust BoxHalfSizeCm 2200"]},
+
+    {"name": "g_chase", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -12, "chase_zoom": 0.8, "drift": [1000, 0, 0], "settle": 2.0},
+    {"name": "h_atmosphere", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 0, "drift": [300, 0, 0], "settle": 2.0}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "_comment": "A survey of the environment as it stands, before tuning it: the dust streaks at three speeds, the planet from far out down to the surface, the gas giant and the moon, and the bare sky. Not a comparison - a record of what there is to fix. Run: Tools/Shots.ps1 -Preset space_look",
+  "shots": [
+    {"name": "dust_slow", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -12, "chase_zoom": 0.8, "drift": [40, 0, 0], "settle": 2.5},
+    {"name": "dust_scm", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -12, "chase_zoom": 0.8, "drift": [210, 0, 0], "settle": 1.5},
+    {"name": "dust_nav", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -12, "chase_zoom": 0.8, "drift": [1000, 0, 0], "settle": 1.5},
+    {"name": "dust_cockpit_nav", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "drift": [1000, 0, 0], "settle": 1.5},
+
+    {"name": "planet_far", "camera": "chase", "altitude_m": 120000, "facing": "planet", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -10, "chase_zoom": 1.4, "settle": 2.5},
+    {"name": "planet_60km", "camera": "cockpit", "altitude_m": 60000, "facing": "planet", "hud": 0, "settle": 2.0},
+    {"name": "planet_20km", "camera": "cockpit", "altitude_m": 20000, "facing": "planet", "hud": 0, "settle": 2.0},
+    {"name": "planet_5km", "camera": "cockpit", "altitude_m": 5000, "facing": "planet", "hud": 0, "settle": 2.0},
+    {"name": "planet_1km", "camera": "cockpit", "altitude_m": 1000, "facing": "horizon", "hud": 0, "settle": 2.0},
+    {"name": "surface_200m", "camera": "chase", "altitude_m": 200, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 120, "chase_pitch": -10, "chase_zoom": 1.0, "settle": 2.5},
+    {"name": "surface_close", "camera": "cockpit", "altitude_m": 60, "facing": "horizon", "hud": 0, "gear": true, "settle": 2.0},
+
+    {"name": "sky_away", "camera": "cockpit", "altitude_m": 120000, "facing": "away", "hud": 0, "settle": 2.5},
+    {"name": "bodies", "camera": "chase", "altitude_m": 120000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 60, "chase_pitch": -20, "chase_zoom": 1.6, "settle": 2.0}
+  ]
+}

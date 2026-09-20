@@ -110,7 +110,9 @@ GIANT_SPIN_SECONDS = 1800.0
 
 # Space dust around the ship camera (USpaceDustComponent).
 DUST_COLOR = (0.70, 0.80, 1.00)
-DUST_BRIGHTNESS = 1.6  # 3.0 until 19. 9. 2026: bright white sticks over the view
+DUST_BRIGHTNESS = 5.0  # 3.0 until 19. 9. 2026 (bright white sticks), 1.6 until 21. 9. 2026: the material
+                       # now tapers every speck to a point, which throws away about three quarters of its
+                       # light, so the number that survives is higher than the one on screen suggests.
 
 # ---------------------------------------------------------------------------------------
 
@@ -639,21 +641,93 @@ def build_rings_material():
 
 
 def build_dust_material():
-    """USpaceDustComponent specks: additive and unlit, faded per instance (custom data 0)."""
+    """USpaceDustComponent specks: additive and unlit.
+
+    A speck is a stretched cube, and a cube has ends. Drawn flat they are white sticks cut off
+    square, which is exactly what the prototype looked like (20. 9. 2026, the author against a
+    Star Citizen frame). So the material tapers the brightness along the streak and across it,
+    turning the box into a soft spindle: bright in the middle, nothing at the tips and edges.
+
+    The shape is measured from the instance's own centre, not from LocalPosition: on an instanced
+    mesh that node returns the primitive's space, not the instance's, so the taper came out negative
+    everywhere and the dust vanished (21. 9. 2026). ObjectPositionWS is per instance, and the
+    component pushes the direction and the half sizes in as parameters (it sets them every frame on
+    a dynamic instance), with the speck's own length multiplier in custom data 2.
+
+    Per instance: custom data 0 is the fade (distance from the camera and speed), 1 is that speck's
+    own brightness, 2 its length as a multiple of the common one.
+    """
     m = fresh_material(DUST_MATERIAL)
     m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
     m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
     m.set_editor_property("used_with_instanced_static_meshes", True)
-    fade = node(m, unreal.MaterialExpressionPerInstanceCustomData, -600, 0, data_index=0)
-    colour = vector(m, "DustColor", DUST_COLOR, -600, 150)
-    brightness = scalar(m, "DustBrightness", DUST_BRIGHTNESS, -600, 300)
-    tinted = node(m, unreal.MaterialExpressionMultiply, -400, 100)
+
+    here = node(m, unreal.MaterialExpressionWorldPosition, -1700, -100)
+    centre = node(m, unreal.MaterialExpressionObjectPositionWS, -1700, 20)
+    delta = node(m, unreal.MaterialExpressionSubtract, -1500, -60)
+    link(here, delta, "A")
+    link(centre, delta, "B")
+
+    direction = vector(m, "DustDirection", (1.0, 0.0, 0.0), -1700, 160)
+    along = node(m, unreal.MaterialExpressionDotProduct, -1340, -60)
+    link(delta, along, "A")
+    link(direction, along, "B")
+
+    # Across: what is left of the offset once the along part is taken out.
+    along_vec = node(m, unreal.MaterialExpressionMultiply, -1200, 120)
+    link(direction, along_vec, "A")
+    link(along, along_vec, "B")
+    across_vec = node(m, unreal.MaterialExpressionSubtract, -1060, 60)
+    link(delta, across_vec, "A")
+    link(along_vec, across_vec, "B")
+    across_len = node(m, unreal.MaterialExpressionLength, -920, 60)
+    link(across_vec, across_len, "")
+
+    # Along, as a fraction of this speck's own half length.
+    own_length = node(m, unreal.MaterialExpressionPerInstanceCustomData, -1700, 300, data_index=2)
+    half_length = node(m, unreal.MaterialExpressionMultiply, -1400, 300)
+    link(scalar(m, "DustHalfLengthCm", 700.0, -1700, 400), half_length, "A")
+    link(own_length, half_length, "B")
+    along_unit = node(m, unreal.MaterialExpressionDivide, -1100, -60)
+    link(along, along_unit, "A")
+    link(half_length, along_unit, "B")
+    along_abs = node(m, unreal.MaterialExpressionAbs, -960, -60)
+    link(along_unit, along_abs, "")
+    along_pow = node(m, unreal.MaterialExpressionPower, -820, -60)
+    link(along_abs, along_pow, "Base")
+    link(scalar(m, "DustTipSharpness", 3.0, -960, -160), along_pow, "Exp")
+    along_fade = node(m, unreal.MaterialExpressionOneMinus, -680, -60)
+    link(along_pow, along_fade, "")
+
+    across_unit = node(m, unreal.MaterialExpressionDivide, -780, 60)
+    link(across_len, across_unit, "A")
+    link(scalar(m, "DustHalfWidthCm", 1.4, -920, 160), across_unit, "B")
+    across_fade = node(m, unreal.MaterialExpressionOneMinus, -640, 60)
+    link(across_unit, across_fade, "")
+
+    shape = node(m, unreal.MaterialExpressionMultiply, -480, 0)
+    link(along_fade, shape, "A")
+    link(across_fade, shape, "B")
+    shape_clamped = node(m, unreal.MaterialExpressionClamp, -340, 0, min_default=0.0, max_default=1.0)
+    link(shape, shape_clamped, "")
+
+    fade = node(m, unreal.MaterialExpressionPerInstanceCustomData, -1700, 520, data_index=0)
+    own = node(m, unreal.MaterialExpressionPerInstanceCustomData, -1700, 620, data_index=1)
+    colour = vector(m, "DustColor", DUST_COLOR, -1700, 720)
+    brightness = scalar(m, "DustBrightness", DUST_BRIGHTNESS, -1700, 820)
+    tinted = node(m, unreal.MaterialExpressionMultiply, -1400, 720)
     link(colour, tinted, "A")
     link(brightness, tinted, "B")
-    faded = node(m, unreal.MaterialExpressionMultiply, -200, 0)
+    per_instance = node(m, unreal.MaterialExpressionMultiply, -1400, 560)
+    link(fade, per_instance, "A")
+    link(own, per_instance, "B")
+    faded = node(m, unreal.MaterialExpressionMultiply, -1000, 640)
     link(tinted, faded, "A")
-    link(fade, faded, "B")
-    output(faded, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    link(per_instance, faded, "B")
+    final = node(m, unreal.MaterialExpressionMultiply, -200, 300)
+    link(faded, final, "A")
+    link(shape_clamped, final, "B")
+    output(final, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     finish(m)
     return m
 

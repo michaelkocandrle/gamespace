@@ -922,6 +922,7 @@ Its space look is built by `Tools/Assets/build_space_scene.py` (see below).
 | `Sun`              | Directional light, movable, intensity 8, pitch -39 / yaw 45: from behind the player's left shoulder. Contact shadows 0.08 m, source angle 0.5 deg |
 | `SkyLight`         | Movable, real-time capture, intensity 0.7 (`SKY_LIGHT_INTENSITY`). It fills the ship's shadow side; at the old 0.35 the hull was a black silhouette against space |
 | `StarfieldSky`     | `ASkyDome`: 2000 km sphere that follows the camera, with `M_Starfield_Sky`: unlit, *Is Sky*, procedural twinkling stars, a Milky Way glow cubemap, nebulae and the sun disc |
+| Space dust         | `USpaceDustComponent` on the ship: 2600 specks in a 30 m box, wrapped around the camera. A speck is a stretched cube that `M_SpaceDust` tapers to a soft spindle, with its own length and brightness, so the field reads as dust rather than as a row of identical white sticks. `space.Dust <Property> <Value>` tunes it live; the shape is measured from `ObjectPositionWS`, because `LocalPosition` on an instanced mesh is the primitive's space, not the instance's |
 | `Planet_Veyra`     | `AQuadSpherePlanet`, radius 25 km, centre 45 km ahead of the start (start is 20 km above sea level, 8 km above the atmosphere) |
 | `Moon_Keth`        | `ADistantBody`, radius 6 km, orbits Veyra at 150 km every 25 min (`M_Moon`: craters, maria) |
 | `GasGiant_Orun`    | `ADistantBody`, radius 150 km with rings to 330 km, 620 km away to the right of Veyra (`M_GasGiant` bands and a storm, `M_PlanetRings`) |
