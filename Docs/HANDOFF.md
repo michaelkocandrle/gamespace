@@ -461,6 +461,16 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     instance, nic se neukládá). Scénář `hull_tune` udělá v jednom balíčku šest variant. Důvod: každá
     varianta přes recept a balení stála ~4 minuty, teď ~20 s. Co sedí, přepíše se do setupu lodi.
 
+35. **Hra běžela na polovičním rozlišení** (20. 9. 2026, nález při hledání „proč je to rozmazané“):
+    v `GameUserSettings.ini` bylo `sg.ResolutionQuality=50`, takže engine kreslil scénu v 800 × 450 a
+    škáloval ji na 1600 × 900. Týkalo se to **všeho**: hran lodi, displejů v kokpitu i HUD; žádné
+    vylepšení textur se proti tomu neprosadí. Nové nastavení má **100 %** a uložený soubor se jednou
+    převede (`USpaceUserSettings::MigrateSettings`, `SettingsVersion` 2). Slider „Škálování rozlišení“
+    v menu zůstává, kdyby bylo potřeba ubrat. **Výkon se nezměnil** (66 → 65 FPS), protože scéna je
+    omezená procesorem a GPU mělo rezervu.
+    - pozor: `ScalabilityQuality.ResolutionQuality` samo nestačí, hodnotu do renderu i do ukládání dostane
+      až `Scalability::SetQualityLevels`.
+
 ---
 
 ## 6. Mapa kódu a obsahu

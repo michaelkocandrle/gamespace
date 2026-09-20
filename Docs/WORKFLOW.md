@@ -431,6 +431,10 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   frontě a kořen (`USpaceFlightHud::NativePaint`) je vydá seřazené podle vrstvy a tloušťky – dávek čar je
   polovina (HUD 132 → 63). Přepínače pro A/B: `space.CockpitKeepWindow`, `space.HudLineBatch` (obojí 1),
   počet dávek ukazuje `stat SpaceHud` (Line batches).
+- i) **Ostrost obrazu hlídej přes `stat unit` → RenderRes.** Hra běžela půl roku na 50 % rozlišení
+  (`sg.ResolutionQuality` v `GameUserSettings.ini`, auto-detekce enginu) a všechno bylo měkké. Nové
+  nastavení je 100 % a stará konfigurace se jednou převede (`USpaceUserSettings::MigrateSettings`).
+  Když se posuzuje ostrost čehokoli, nejdřív zkontroluj RenderRes ve snímku.
 - h) **FPS ve snímcích hned po přesunu lodi nic neříká.** První snímek scénáře a snímky po velkém přesunu
   (jiná výška, přistání) mají herní vlákno 20–30 ms, protože se staví terén. Na výkon se dívej se
   `settle` ≥ 2 s a srovnávej A/B ve **stejném balíčku** (konzolový přepínač v poli `console`), každou

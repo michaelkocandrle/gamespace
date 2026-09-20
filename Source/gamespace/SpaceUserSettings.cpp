@@ -2,6 +2,8 @@
 
 #include "SpaceUserSettings.h"
 
+#include "Scalability.h"
+
 #include "AudioDevice.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -31,6 +33,10 @@ void USpaceUserSettings::SetToDefaults()
 		ResolutionSizeY = LastUserConfirmedResolutionSizeY = Desktop.Y;
 	}
 	ScalabilityQuality.SetFromSingleQualityLevel(2);
+	// Full render resolution: the quality level's own scale is below 100 %, and upscaling softens
+	// everything - the ship's edges, the cockpit displays and the HUD. Lower it in the settings
+	// (Škálování rozlišení) if a machine needs the frames.
+	ScalabilityQuality.ResolutionQuality = 100.f;
 
 	MasterVolume = 0.8f;
 	EffectsVolume = 1.f;
@@ -41,8 +47,37 @@ void USpaceUserSettings::SetToDefaults()
 	bShowFps = false;
 }
 
+void USpaceUserSettings::LoadSettings(bool bForceReload)
+{
+	Super::LoadSettings(bForceReload);
+	MigrateSettings();
+}
+
+void USpaceUserSettings::MigrateSettings()
+{
+	if (SettingsVersion >= CurrentSettingsVersion)
+	{
+		return;
+	}
+	// Version 2: the render scale. The engine had left it at 50 % here, so the whole game was drawn at half
+	// resolution and upscaled - ships, cockpit displays and the HUD stayed soft whatever else changed
+	// (20. 9. 2026). Scalability::SetQualityLevels is what puts it into the sg. console variables, which is
+	// what both the renderer and SaveSettings read; setting the struct alone did nothing.
+	if (ScalabilityQuality.ResolutionQuality < 100.f)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Settings: render scale %.0f %% -> 100 %% (an older build saved it)"),
+			ScalabilityQuality.ResolutionQuality);
+		ScalabilityQuality.ResolutionQuality = 100.f;
+		Scalability::SetQualityLevels(ScalabilityQuality);
+		ApplyNonResolutionSettings();
+	}
+	SettingsVersion = CurrentSettingsVersion;
+	SaveSettings();
+}
+
 void USpaceUserSettings::ApplyGameSettings(const UWorld* World) const
 {
+	const_cast<USpaceUserSettings*>(this)->MigrateSettings();
 	if (World)
 	{
 		if (FAudioDeviceHandle AudioDevice = World->GetAudioDevice())

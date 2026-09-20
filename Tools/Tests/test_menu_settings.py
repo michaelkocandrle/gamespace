@@ -130,4 +130,15 @@ check("mixed groups show the lowest", settings.get_graphics_quality_level() == 0
 settings.set_view_distance_quality(saved_levels[0])
 settings.set_shadow_quality(saved_levels[1])
 
+# --- Render scale: the game draws at full resolution unless the player lowers it -------------------------
+fresh = unreal.new_object(unreal.SpaceUserSettings)
+fresh.set_to_defaults()
+scale = fresh.debug_get_render_scale()
+check("new settings render at 100 % (half resolution made everything soft, 20. 9. 2026)", abs(scale - 100.0) < 0.01, "%.0f %%" % scale)
+fresh.debug_set_render_scale(50.0)
+fresh.debug_set_settings_version(0)
+fresh.migrate_settings()
+check("settings saved by an older build are brought up to 100 %", abs(fresh.debug_get_render_scale() - 100.0) < 0.01
+      and fresh.debug_get_settings_version() >= 2, "%.0f %%, version %d" % (fresh.debug_get_render_scale(), fresh.debug_get_settings_version()))
+
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

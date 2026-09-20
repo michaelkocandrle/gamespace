@@ -30,6 +30,18 @@ public:
 	/** First start: borderless fullscreen at the desktop resolution, high quality, sensible volumes. */
 	virtual void SetToDefaults() override;
 
+	/**
+	 * Settings saved by an older build are brought forward here. Version 1: the render scale. The engine
+	 * had left it at 50 % on this machine, so the game drew at half resolution and upscaled - every edge,
+	 * the cockpit displays and the HUD were soft (20. 9. 2026, the author's "blurry up close").
+	 */
+	virtual void LoadSettings(bool bForceReload = false) override;
+
+	/** Brings a saved settings file forward (see LoadSettings); called again when the game applies settings,
+	 *  because the engine re-applies the saved scalability state after LoadSettings. */
+	UFUNCTION(BlueprintCallable, Category = "Settings")
+	void MigrateSettings();
+
 	/** Applies what the engine does not apply itself: master volume and the HUD mode. */
 	void ApplyGameSettings(const UWorld* World) const;
 
@@ -76,4 +88,25 @@ public:
 	/** Frame rate in the top right corner. */
 	UPROPERTY(Config, BlueprintReadOnly, Category = "Settings")
 	bool bShowFps = false;
+
+	/** What the saved settings were last brought forward to (see LoadSettings). */
+	UPROPERTY(Config)
+	int32 SettingsVersion = 0;
+
+	/** The newest settings version this build knows. */
+	static constexpr int32 CurrentSettingsVersion = 2;
+
+	/** Tests: the render scale in per cent (sg.ResolutionQuality) and a way to set it without applying. */
+	UFUNCTION(BlueprintCallable, Category = "Settings|Tests")
+	float DebugGetRenderScale() const { return ScalabilityQuality.ResolutionQuality; }
+
+	UFUNCTION(BlueprintCallable, Category = "Settings|Tests")
+	void DebugSetRenderScale(float Percent) { ScalabilityQuality.ResolutionQuality = Percent; }
+
+	/** Tests: the saved settings version (Config only, so Python cannot read it directly). */
+	UFUNCTION(BlueprintCallable, Category = "Settings|Tests")
+	int32 DebugGetSettingsVersion() const { return SettingsVersion; }
+
+	UFUNCTION(BlueprintCallable, Category = "Settings|Tests")
+	void DebugSetSettingsVersion(int32 InSettingsVersion) { SettingsVersion = InSettingsVersion; }
 };
