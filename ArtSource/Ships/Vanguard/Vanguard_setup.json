@@ -130,7 +130,12 @@
         0.34,
         0.36
       ],
-      "detail_rough_variation": 0.12
+      "detail_rough_variation": 0.12,
+      "_comment_panels": "Panel seams from the tiling sheet (Tools/Assets/generate_panel_lines.py), projected triplanar in the ship's space like the micro detail. 260 cm a sheet gives plates of roughly half a metre; at panel_strength above ~0.8 the seams start running over greebles and curves, where the model has no plating, and it reads as an overlay rather than as a hull (Tools/Shots/hull_panels.json, 20. 9. 2026). Seams under ~2 cm wide never survive the mip chain, hence SEAM_PX in the generator. panel_strength 0 turns the whole layer off; it costs no frames (86-88 FPS either way).",
+      "panel_tile_cm": 260.0,
+      "panel_strength": 0.55,
+      "panel_seam_darken": 0.4,
+      "panel_seam_rough": 0.18
     },
     "MI_Ship_Vanguard_Thruster": {
       "master": "hull",

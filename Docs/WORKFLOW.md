@@ -252,6 +252,7 @@ Presety (`Tools/Shots/*.json`):
 | `look_tune`, `look_final` | post process po vrstvách a výsledná volba proti úrovni tak, jak je |
 | `hull_zones` | okluze, kavita a odřený lak na trupu (`space.ShipMat`) |
 | `hull_decals` | kam dosedly nápisy; šmouhy místo textu znamenají špatně otočený decal |
+| `hull_panels` | panelové spáry: velikost listu a síla (`space.ShipMat`) |
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
 | `ship_views`, `ship` | loď zvenku |
@@ -526,11 +527,13 @@ Menší kroky, podle pořadí:
 6. ~~Okluze a kavita na trupu~~ – hotovo 20. 9. 2026 (HANDOFF bod 38): v pečených texturách žádná
    okluze nebyla, `Tools/Blender/bake_ship_ao.py` ji dopeče.
 7. ~~Nápisy a výstražné pruhy~~ – hotovo 20. 9. 2026 (HANDOFF bod 39): decaly ze seznamu v setupu lodi.
-   Navazuje: víc nápisů a další místa (zatím jich je sedm), a **panelové spáry** jako dlaždicový
-   materiál po zónách – to je teď největší rozdíl proti SC.
-8. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
-9. **Silnější záře displejů na rámu** a okolní desce.
-10. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
+   Navazuje: víc nápisů a další místa (zatím jich je sedm).
+8. ~~Panelové spáry~~ – hotovo 20. 9. 2026 (HANDOFF bod 40): dlaždicový list triplanárně v prostoru lodi.
+   Navazuje: různé povrchy na různých dílech (gondoly proti trupu, okolí trysek) – zatím je celý
+   trup jeden materiál.
+9. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
+10. **Silnější záře displejů na rámu** a okolní desce.
+11. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
 
 Velké celky:
 - tělo pilota v sedadle;

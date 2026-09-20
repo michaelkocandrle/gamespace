@@ -555,7 +555,16 @@ material instance. Two things to know before placing one. A decal projects along
 catches. And the texture lands the way the box is turned, which on the flanks came out mirrored -
 rotations cannot mirror, so the material has `DecalFlipU` / `DecalFlipV` (`flip_u`, `flip_v` in the
 setup). Pick the spots by raycasting the model in Blender: a decal on a curved or hidden surface
-simply does not read. `import_ship.py` imports
+simply does not read.
+
+**Panel seams** come from a tiling sheet as well (`Tools/Assets/generate_panel_lines.py`,
+`T_Ship_Panels.png`: the seam's normal in RG, the groove in B), projected triplanar in the ship's
+space like the micro detail, because the ship's atlas is thousands of tiny islands and a line drawn
+into it would break at every island edge. The groove also darkens and roughens the paint. Two
+numbers matter: a seam narrower than about 2 cm never survives the mip chain and simply is not
+there, and above `panel_strength` ~0.8 the seams run over greebles and curves the model has no
+plating on, which reads as an overlay rather than a hull. The Vanguard uses a 260 cm sheet at 0.55,
+and the layer costs no frames. `import_ship.py` imports
 a mesh fresh when its material slots changed (a reimport kept the old model's slots) and removes the
 Blueprint components, meshes and material instances an earlier model left behind.
 

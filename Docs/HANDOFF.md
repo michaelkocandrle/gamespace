@@ -546,6 +546,24 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - `test_ship_import.py` hlídá, že každý decal ze setupu má svou instanci se svou texturou a že
       loď má nápis na obou bocích.
 
+40. **Panelové spáry na trupu** (20. 9. 2026, poslední díl „zón materiálu“):
+    `Tools/Assets/generate_panel_lines.py` kreslí dlaždicový list `T_Ship_Panels.png` (RG normála
+    spáry, B drážka) a `M_Ship_PBR` ho promítá **triplanárně v prostoru lodi** stejně jako mikrodetail,
+    takže spáry drží velikost v centimetrech a neplavou. Do atlasu lodi je nakreslit nejde – je to
+    tisíce drobných ostrůvků ze `smart_project`, čára by se lámala na každé hranici.
+    - Drážka zároveň **ztmaví lak** (`panel_seam_darken`) a **zdrsní** ho (`panel_seam_rough`), protože
+      na dně spáry je holý kov ve vlastním stínu.
+    - Hodnoty Vanguardu (`Tools/Shots/hull_panels.json`, šest variant v jednom běhu): list **260 cm**
+      (plechy zhruba půl metru), `panel_strength` **0.55**. Nad ~0,8 začnou spáry běžet i přes greebly
+      a zaoblení, kde loď žádné plechování nemá, a vypadá to jako přelepka místo trupu.
+    - **Spára užší než ~2 cm nepřežije mip řetězec** – první verze měla 5 px na 1024 listu (asi 9 mm)
+      a v hře nebylo vidět nic, změna byla 1 % pixelů. Teď je 12 px, tedy ~2 cm při listu 180 cm.
+      Druhá verze zase vyšla jako tapeta: samé průběžné řezy přes celý list. Layout proto dělí každý
+      plech ještě jednou (a někdy podruhé) řezy, které zůstávají uvnitř plechu, takže dlaždice pořád
+      navazuje.
+    - Výkon: 86–88 FPS se spárami i bez nich (tři odběry textury navíc). `panel_strength` 0 vrstvu
+      vypne; loď bez listu v repozitáři vypadá jako předtím.
+
 ---
 
 ## 6. Mapa kódu a obsahu
@@ -592,6 +610,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `Assets/build_space_scene.py` | TestSpace: obloha, planeta, tělesa, prach, materiály, světla a grade (`SKY_LIGHT_INTENSITY`, `POST_SETTINGS`). |
 | `Blender/bake_ship_ao.py` | Dopeče `T_Ship_<Loď>_AO.png` pro už postavenou loď (okluze v pečených texturách není, viz bod 38). |
 | `Assets/generate_decals.py` | Kreslí nápisy a výstražné pruhy do `ArtSource/Ships/Shared/Decals` (bod 39). |
+| `Assets/generate_panel_lines.py` | Kreslí dlaždicový list panelových spár `T_Ship_Panels.png` (bod 40). |
 | `Assets/build_main_menu.py` | Level úvodní obrazovky. |
 | `Assets/import_ship.py` + `ship_materials.py` | Import lodi z Blenderu. |
 | `Assets/generate_ship_sounds.py` → `build_ship_audio.py` | Generátor zvuků (numpy) a jejich import. |
@@ -734,6 +753,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `look_final` | Vybrané hodnoty proti úrovni tak, jak je: vesmír, atmosféra, kokpit, detail – a Lumen kvalita zvlášť, aby byla vidět cena ve snímcích. |
 | `hull_zones` | Rozbití jednolitého trupu: okluze, kavita ve dvou sílách a odřený lak ve třech, první dvojice bez všeho pro srovnání. |
 | `hull_decals` | Kam dosedly nápisy: zblízka na každý z nich a pak celá loď. Decal, který není kolmý na svůj povrch, se rozmaže do šmouh místo aby četl – to je to, co se na snímcích hledá. |
+| `hull_panels` | Panelové spáry: bez nich, pak list ve třech velikostech a třech sílách (`space.ShipMat`). |
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
 Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
@@ -948,4 +968,5 @@ Viz `git log --oneline`. Poslední kroky:
 - hra kreslila v polovičním rozlišení, zpět na 100 % (bod 35);
 - světlo a post scény, loď v kosmu přestala být silueta; rychlá smyčka `space.Post` / `space.Sun` / `space.Sky` (bod 36);
 - dopečená okluze, kavita a odřený lak na trupu (bod 38);
-- nápisy a výstražné pruhy na trupu jako decaly (bod 39).
+- nápisy a výstražné pruhy na trupu jako decaly (bod 39);
+- panelové spáry jako dlaždicová vrstva materiálu (bod 40).

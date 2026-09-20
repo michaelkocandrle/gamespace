@@ -133,6 +133,15 @@ if plan["materials"]:
         # Above ~0.3 the wear reads as dirt rather than worn paint (Tools/Shots/hull_zones.json).
         check("the hull has cavity and a restrained amount of wear",
               cavity > 0.0 and 0.0 <= wear_amount <= 0.3, "cavity %.2f, wear %.2f" % (cavity, wear_amount))
+        panels = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Textures/T_Ship_Panels")
+        check("the panel seam sheet is imported (Tools/Assets/generate_panel_lines.py)", panels is not None)
+        panel_strength = MEL.get_material_instance_scalar_parameter_value(hull_mi, "PanelStrength")
+        panel_tile = MEL.get_material_instance_scalar_parameter_value(hull_mi, "PanelTileCm")
+        # Above ~0.8 the seams run over greebles and curves and read as an overlay; a sheet under a
+        # metre makes plates too small to be plating (Tools/Shots/hull_panels.json).
+        check("the hull's plating is there and restrained",
+              0.0 < panel_strength <= 0.8 and 100.0 <= panel_tile <= 500.0,
+              "strength %.2f, sheet %.0f cm" % (panel_strength, panel_tile))
 
 # --- nothing left over from an earlier model -------------------------------------------------
 root = "/Game/Ships/%s" % plan["ship"]

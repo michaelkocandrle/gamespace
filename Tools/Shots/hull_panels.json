@@ -1,0 +1,29 @@
+{
+  "_comment": "Panel seams on the hull, tuned in one packaged run through space.ShipMat: first without them, then the sheet at three sizes and three strengths. Settings stay for the following shots. What looks right goes into ArtSource/Ships/<Ship>/<Ship>_setup.json. Run: Tools/Shots.ps1 -Preset hull_panels",
+  "shots": [
+    {"name": "a_off_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 3.0,
+     "console": ["space.ShipMat PanelStrength 0"]},
+    {"name": "a_off_whole", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "b_tile180_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat PanelStrength 0.6", "space.ShipMat PanelTileCm 180"]},
+    {"name": "b_tile180_whole", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "c_tile300_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat PanelTileCm 300"]},
+    {"name": "c_tile300_whole", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "d_tile100_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat PanelTileCm 100"]},
+
+    {"name": "e_strong_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat PanelTileCm 180", "space.ShipMat PanelStrength 1.2", "space.ShipMat PanelSeamDarken 0.7"]},
+    {"name": "e_strong_whole", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "f_soft_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0,
+     "console": ["space.ShipMat PanelStrength 0.35", "space.ShipMat PanelSeamDarken 0.3"]},
+
+    {"name": "g_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.5},
+    {"name": "h_cockpit", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "settle": 2.0}
+  ]
+}

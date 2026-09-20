@@ -107,14 +107,15 @@ def build_pbr_master():
     # Metallic goes out through the cavity and wear layer too.
     normal = _texture_param(pbr, "NormalMap", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL,
                             "/Engine/EngineMaterials/DefaultNormal", -900, 800)
-    grunge = _add_detail_layer(pbr, normal, rough)
-    _add_cavity_and_wear(pbr, tint, metal, grunge)
+    panel_offset, panel_groove = _add_panel_layer(pbr)
+    grunge = _add_detail_layer(pbr, normal, rough, panel_offset, panel_groove)
+    _add_cavity_and_wear(pbr, tint, metal, grunge, panel_groove)
     MEL.recompile_material(pbr)
     unreal.EditorAssetLibrary.save_loaded_asset(pbr, only_if_is_dirty=False)
     return pbr
 
 
-DETAIL_TEXTURES = {"T_Ship_Detail_N": "normal", "T_Ship_Detail_Grunge": "orm"}
+DETAIL_TEXTURES = {"T_Ship_Detail_N": "normal", "T_Ship_Detail_Grunge": "orm", "T_Ship_Panels": "orm"}
 SHARED_TEXTURES = "/Game/Ships/Shared/Textures"
 SHARED_DECALS = "/Game/Ships/Shared/Decals"
 
@@ -155,6 +156,63 @@ float g = w.x * Texture2DSample(TexG, TexGSampler, p.yz).r
         + w.z * Texture2DSample(TexG, TexGSampler, p.xy).r;
 return g;
 """
+
+
+# Panel seams, the same triplanar projection as the micro detail. One texture, three taps: the seam's
+# normal is in RG (z is rebuilt) and the groove itself in B, so the material can darken and roughen it.
+_PANEL_CODE = _TRIPLANAR + """
+float3 sx = Texture2DSample(TexP, TexPSampler, p.yz).rgb;
+float3 sy = Texture2DSample(TexP, TexPSampler, p.zx).rgb;
+float3 sz = Texture2DSample(TexP, TexPSampler, p.xy).rgb;
+float3 tx = float3(sx.rg * 2.0 - 1.0, 0.0); tx.z = sqrt(saturate(1.0 - dot(tx.xy, tx.xy)));
+float3 ty = float3(sy.rg * 2.0 - 1.0, 0.0); ty.z = sqrt(saturate(1.0 - dot(ty.xy, ty.xy)));
+float3 tz = float3(sz.rg * 2.0 - 1.0, 0.0); tz.z = sqrt(saturate(1.0 - dot(tz.xy, tz.xy)));
+float3 ax = float3(1.0, 0.0, 0.0) * (n.x < 0.0 ? -1.0 : 1.0);
+float3 ay = float3(0.0, 1.0, 0.0) * (n.y < 0.0 ? -1.0 : 1.0);
+float3 az = float3(0.0, 0.0, 1.0) * (n.z < 0.0 ? -1.0 : 1.0);
+float3 nx = normalize(float3(0.0, 1.0, 0.0) * tx.x + float3(0.0, 0.0, 1.0) * tx.y + ax * tx.z);
+float3 ny = normalize(float3(0.0, 0.0, 1.0) * ty.x + float3(1.0, 0.0, 0.0) * ty.y + ay * ty.z);
+float3 nz = normalize(float3(1.0, 0.0, 0.0) * tz.x + float3(0.0, 1.0, 0.0) * tz.y + az * tz.z);
+float3 seam = normalize(w.x * nx + w.y * ny + w.z * nz);
+float3 flat = normalize(w.x * ax + w.y * ay + w.z * az + 0.0001);
+float3 offset = mul(seam - flat, (float3x3)GetPrimitiveData(Parameters).LocalToWorld);
+float3 tangent = float3(dot(offset, Parameters.TangentToWorld[0]), dot(offset, Parameters.TangentToWorld[1]),
+                        dot(offset, Parameters.TangentToWorld[2]));
+float groove = w.x * sx.b + w.y * sy.b + w.z * sz.b;
+return float4(clamp(tangent, -1.0, 1.0), groove);
+"""
+
+
+def _add_panel_layer(pbr):
+    """Plating: a tiling sheet of seams projected in the ship's own space (Tools/Assets/generate_panel_lines.py).
+
+    The ship's UV atlas is thousands of tiny islands, so a seam drawn into it would break at every
+    island edge; projected this way it keeps its size in centimetres wherever it lands. Parameters:
+    PanelTileCm (how many centimetres one sheet covers), PanelStrength, PanelSeamDarken;
+    PanelStrength 0 turns the whole thing off. Returns (normal offset, groove) or (None, None).
+    """
+    texture = import_shared_texture("T_Ship_Panels")
+    if texture is None:
+        return None, None
+    sheet = _node(pbr, unreal.MaterialExpressionTextureObjectParameter, -1700, 2100, parameter_name="PanelMap",
+                  sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_MASKS, texture=texture)
+    panel = _custom(pbr, "PanelSeams", _PANEL_CODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4,
+                    ["TexP", "LocalPos", "Tile"], -1300, 2100)
+    _link(sheet, panel, "TexP")
+    _link(_node(pbr, unreal.MaterialExpressionLocalPosition, -1700, 2000), panel, "LocalPos")
+    _link(_scalar(pbr, "PanelTileCm", 180.0, -1700, 2300), panel, "Tile")
+    strength = _scalar(pbr, "PanelStrength", 0.6, -1700, 2400)
+    offset = _node(pbr, unreal.MaterialExpressionComponentMask, -1100, 2100, r=True, g=True, b=True, a=False)
+    _link(panel, offset, "")
+    scaled = _node(pbr, unreal.MaterialExpressionMultiply, -950, 2100)
+    _link(offset, scaled, "A")
+    _link(strength, scaled, "B")
+    groove = _node(pbr, unreal.MaterialExpressionComponentMask, -1100, 2300, r=False, g=False, b=False, a=True)
+    _link(panel, groove, "")
+    shown = _node(pbr, unreal.MaterialExpressionMultiply, -950, 2300)
+    _link(groove, shown, "A")
+    _link(strength, shown, "B")
+    return scaled, shown
 
 
 def import_decal_texture(name):
@@ -224,15 +282,25 @@ def _custom(material, name, code, output_type, input_names, x, y):
     return node
 
 
-def _add_detail_layer(pbr, normal, rough):
+def _add_detail_layer(pbr, normal, rough, panel_offset=None, panel_groove=None):
     """The micro surface the AI paint has no room for: a tiling normal and a roughness breakup, projected
     in the ship's own space, added on top of the baked maps. Parameters: DetailTileCm (how many centimetres
     one tile covers), DetailNormalStrength, DetailGrungeTileCm, DetailRoughVariation; 0 strength turns it off."""
-    textures = {name: import_shared_texture(name) for name in DETAIL_TEXTURES}
+    textures = {name: import_shared_texture(name) for name in ("T_Ship_Detail_N", "T_Ship_Detail_Grunge")}
     if not all(textures.values()):
-        # No generated textures in the repository: the master keeps its baked maps alone.
-        if not MEL.connect_material_property(normal, "RGB", unreal.MaterialProperty.MP_NORMAL):
-            raise RuntimeError("normal map -> Normal")
+        # No generated micro detail in the repository: the master keeps its baked maps, plus the panel
+        # seams if those are there.
+        if panel_offset is None:
+            if not MEL.connect_material_property(normal, "RGB", unreal.MaterialProperty.MP_NORMAL):
+                raise RuntimeError("normal map -> Normal")
+        else:
+            only_panels = _node(pbr, unreal.MaterialExpressionAdd, -600, 900)
+            if not MEL.connect_material_expressions(normal, "RGB", only_panels, "A"):
+                raise RuntimeError("normal map -> panel add")
+            _link(panel_offset, only_panels, "B")
+            straight = _node(pbr, unreal.MaterialExpressionNormalize, -400, 900)
+            _link(only_panels, straight, "")
+            _output(straight, unreal.MaterialProperty.MP_NORMAL)
         _output(rough, unreal.MaterialProperty.MP_ROUGHNESS)
         return None
     tex_normal = _node(pbr, unreal.MaterialExpressionTextureObjectParameter, -1700, 1000, parameter_name="DetailNormalMap",
@@ -254,6 +322,11 @@ def _add_detail_layer(pbr, normal, rough):
     if not MEL.connect_material_expressions(normal, "RGB", combined, "A"):
         raise RuntimeError("normal map -> detail add")
     _link(scaled, combined, "B")
+    if panel_offset is not None:
+        with_panels = _node(pbr, unreal.MaterialExpressionAdd, -500, 900)
+        _link(combined, with_panels, "A")
+        _link(panel_offset, with_panels, "B")
+        combined = with_panels
     final_normal = _node(pbr, unreal.MaterialExpressionNormalize, -400, 900)
     _link(combined, final_normal, "")
     _output(final_normal, unreal.MaterialProperty.MP_NORMAL)
@@ -282,11 +355,21 @@ def _add_detail_layer(pbr, normal, rough):
     _link(factor, varied, "B")
     clamped = _node(pbr, unreal.MaterialExpressionClamp, -250, 1250, min_default=0.03, max_default=1.0)
     _link(varied, clamped, "")
+    if panel_groove is not None:
+        # A seam is bare, unpainted metal at the bottom of a groove: rougher than the plate around it.
+        seam_rough = _node(pbr, unreal.MaterialExpressionMultiply, -250, 1450)
+        _link(panel_groove, seam_rough, "A")
+        _link(_scalar(pbr, "PanelSeamRough", 0.18, -1700, 2500), seam_rough, "B")
+        with_seam = _node(pbr, unreal.MaterialExpressionAdd, -150, 1300)
+        _link(clamped, with_seam, "A")
+        _link(seam_rough, with_seam, "B")
+        clamped = _node(pbr, unreal.MaterialExpressionClamp, -60, 1300, min_default=0.03, max_default=1.0)
+        _link(with_seam, clamped, "")
     _output(clamped, unreal.MaterialProperty.MP_ROUGHNESS)
     return grunge
 
 
-def _add_cavity_and_wear(pbr, tint, metal, grunge):
+def _add_cavity_and_wear(pbr, tint, metal, grunge, panel_groove=None):
     """What makes a hull stop reading as one flat colour.
 
     Cavity: the baked ambient occlusion (the ORM's red channel, unused until 20. 9. 2026) both goes to
@@ -321,6 +404,17 @@ def _add_cavity_and_wear(pbr, tint, metal, grunge):
     shaded = _node(pbr, unreal.MaterialExpressionMultiply, -300, 0)
     _link(tint, shaded, "A")
     _link(cavity, shaded, "B")
+    if panel_groove is not None:
+        # The groove is in shadow of its own walls, so the paint in it reads darker.
+        darken = _node(pbr, unreal.MaterialExpressionMultiply, -450, 400)
+        _link(panel_groove, darken, "A")
+        _link(_scalar(pbr, "PanelSeamDarken", 0.45, -900, 400), darken, "B")
+        lit = _node(pbr, unreal.MaterialExpressionOneMinus, -350, 400)
+        _link(darken, lit, "")
+        seamed = _node(pbr, unreal.MaterialExpressionMultiply, -250, 100)
+        _link(shaded, seamed, "A")
+        _link(lit, seamed, "B")
+        shaded = seamed
 
     if grunge is None:
         # No generated detail textures: the paint keeps the cavity, there is nothing to wear it with.
@@ -545,7 +639,9 @@ def build_instance(name, folder, spec, masters, ship=None):
                        ("detail_tile_cm", "DetailTileCm"), ("detail_normal_strength", "DetailNormalStrength"),
                        ("detail_grunge_tile_cm", "DetailGrungeTileCm"), ("detail_rough_variation", "DetailRoughVariation"),
                        ("cavity_strength", "CavityStrength"), ("ao_strength", "AOStrength"),
-                       ("wear_amount", "WearAmount"), ("wear_threshold", "WearThreshold"), ("wear_metallic", "WearMetallic")):
+                       ("wear_amount", "WearAmount"), ("wear_threshold", "WearThreshold"), ("wear_metallic", "WearMetallic"),
+                       ("panel_tile_cm", "PanelTileCm"), ("panel_strength", "PanelStrength"),
+                       ("panel_seam_darken", "PanelSeamDarken"), ("panel_seam_rough", "PanelSeamRough")):
         if key in spec:
             MEL.set_material_instance_scalar_parameter_value(mi, param, float(spec[key]))
     for key, param in (("base_color_tint", "BaseColorTint"), ("wear_color", "WearColor")):
