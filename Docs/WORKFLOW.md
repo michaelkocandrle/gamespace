@@ -248,6 +248,8 @@ Presety (`Tools/Shots/*.json`):
 | `cockpit_readability` | čitelnost z křesla, přiblížení Z, srovnání se starým okem |
 | `hull_detail` | trup zblízka: detailní vrstva materiálu (srovnání se `detail_normal_strength` 0) |
 | `mfd_pages` | stránky MFD ve stavech, které je naplní. Vyřízni levý MFD ~495–710 × 640–825 a pravý ~893–1105 × 640–825 px |
+| `look_sun`, `look_fill` | proč je loď v kosmu silueta: směr slunce, výplň sky lightu, lak trupu |
+| `look_tune`, `look_final` | post process po vrstvách a výsledná volba proti úrovni tak, jak je |
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
 | `ship_views`, `ship` | loď zvenku |
@@ -515,12 +517,70 @@ Menší kroky, podle pořadí:
    energie, až budou systémy.
 3. ~~Detail lodi zblízka~~ – hotovo 20. 9. 2026 (detailní vrstva materiálu, trup 1 mil. trojúhelníků,
    HANDOFF bod 33). Navazuje: decaly a nápisy, lepší zdrojové modely z Meshy/Higgsfield.
-4. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
-4. **Silnější záře displejů na rámu** a okolní desce.
-5. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
+4. ~~Hrany trupu (zkosení, vážené normály)~~ – změřeno 20. 9. 2026 a **zahozeno**: trup z Meshy má
+   92 % hran pod 36° (organický sken, ne rovné panely), takže ostrejší úhel i 2mm bevel změnily jen 1 %
+   pixelů. Hrany budou dávat smysl až u modelů s rovnými panely.
+5. ~~Světlo a post scény~~ – hotovo 20. 9. 2026 (kapitola 11, HANDOFF bod 36). Navazuje: zóny materiálu,
+   dlaždicové PBR a decaly (panelové spáry, nápisy) – to je teď největší rozdíl proti SC.
+6. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
+7. **Silnější záře displejů na rámu** a okolní desce.
+8. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
 
 Velké celky:
 - tělo pilota v sedadle;
 - lepší model kokpitu (sedadlo, boční stěny);
 - chybějící systémy SC HUD (palivo, zbraně, protiopatření);
 - SC-2b VTOL a zpětná vazba při visení (HANDOFF kap. 10 a 11).
+
+---
+
+## 11. Vzhled scény: světlo, grade a rychlá smyčka
+
+Nejdražší část „vypadat jako SC“ není textura ani počet trojúhelníků, ale **světlo**. Proto se ladí
+v běžící zabalené hře a teprve hotová čísla se přepíšou do receptu. Jeden průchod trvá **~30 s**
+(bez balení), ne ~4 minuty.
+
+### 11.1 Konzolové příkazy (`Source/gamespace/SpacePostTuning.cpp`)
+
+Všechno jde přes reflexi, takže žádný seznam vlastností se neudržuje ručně:
+
+| příkaz | co dělá |
+| --- | --- |
+| `space.PostList <část jména>` | vypíše nastavení post processu a hodnoty v této úrovni (`[x]` = úroveň je přepisuje) |
+| `space.Post <Nastavení> <hodnota...>` | přepíše jedno nastavení; barvy a vektory se píšou po složkách (`space.Post ColorGain 1 1 1.04 1`) |
+| `space.PostDump` | vypíše všechny přepsané hodnoty **rovnou jako řádky pro `POST_SETTINGS`** v `Tools/Assets/build_space_scene.py` |
+| `space.Sun <Vlastnost> <hodnota>` | vlastnost směrového světla (`Intensity`, `ContactShadowLength`, `LightSourceAngle`, `SpecularScale`) |
+| `space.SunDir <pitch> <yaw>` | kam slunce svítí, ve stupních |
+| `space.Sky <Vlastnost> <hodnota>` | vlastnost sky lightu (`Intensity`, `CubemapResolution`) |
+| `space.LightList sun\|sky <část jména>` | co ty dva příkazy berou |
+| `space.ShipMat` / `space.ShipMatColor` | materiály lodi (bod 34 v HANDOFF) |
+
+Nic z toho se neukládá. Po restartu hry je zpátky to, co je v úrovni.
+
+### 11.2 Postup
+
+1. Napsat scénář do `Tools/Shots/<něco>.json`, kde každý snímek má `console` s tím, co mění.
+   **Nastavení zůstávají i pro další snímky**, takže se stavějí po vrstvách a poslední snímek je
+   všechno dohromady (vzory: `look_sun`, `look_fill`, `look_final`).
+2. `.\Tools\Shots.ps1 -Preset <něco>` – bez `-Package`, pokud se neměnilo C++ ani obsah.
+3. Snímky složit vedle sebe (PIL v scratchpadu) a **podívat se na ně**; rozdíl se dá i změřit
+   (průměrná odchylka jasu, kolik procent pixelů se změnilo) – ušetří to hádání, jestli je změna vidět.
+4. Co sedí, přepsat do `Tools/Assets/build_space_scene.py` (`SKY_LIGHT_INTENSITY`,
+   `SUN_CONTACT_SHADOW_M`, `SUN_SOURCE_ANGLE_DEG`, `POST_SETTINGS`) a materiály do
+   `<Loď>_setup.json`. `space.PostDump` vypíše řádky `POST_SETTINGS` k vložení.
+5. `.\Tools\run_editor_python.ps1 Tools\Assets\build_space_scene.py` (a `import_ship.py`, když se
+   měnil materiál lodi), pak `Tools\Tests\test_scene_look.py` – ten porovnává **úroveň proti receptu**,
+   takže chytí zapomenutý krok 5.
+
+### 11.3 Co se z toho zatím ví (20. 9. 2026)
+
+- **Loď byla v kosmu silueta, protože jí nic nesvítilo do stínu.** Sky light měl intenzitu 0.35 a
+  směr slunce s tím skoro nehnul (`look_sun`: čtyři úhly slunce, žádný nepomohl, jas sky lightu ano).
+- **Sky light 0.7 + `base_color_tint` 3.2.** Pod 0.5 je trup černý, nad ~1.1 ztrácí planeta terminátor;
+  lak 2.2 mizel v siluetě, 4.5 je křídový (`look_fill`).
+- **Chromatická aberace a vyvážení bílé jsou zakázané.** `scene_fringe_intensity` kreslí barevné
+  lemy po hranách desky v kokpitu, `white_temp` 6200 zmodrá celý interiér (`look_final`, srovnání
+  s `cockpit`). Test `test_scene_look.py` hlídá, že je úroveň nepřepisuje.
+- **Lumen na kvalitu 2 (reflections, final gather) nic nepřidal** a stál ~1 FPS, takže v receptu není.
+- Contact shadows (0.08 m) a širší slunce (0.5°) stojí nula a hrají do detailu panelů.
+- Celkově: 80 → 88 FPS (změna vzhledu výkon nezhoršila).

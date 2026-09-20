@@ -1,0 +1,31 @@
+{
+  "_comment": "Tuning the look of the whole scene in one packaged run: every stage adds lighting and post process settings with space.Sun / space.Sky / space.Post (live, nothing saved) and shoots the ship close over Veyra and against black in space. Settings stay for the following shots, so the last stage is everything together. What looks right goes into POST_SETTINGS and the light section of Tools/Assets/build_space_scene.py. Run: Tools/Shots.ps1 -Preset look_tune",
+  "shots": [
+    {"name": "a_current", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 3.0},
+    {"name": "a_current_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "b_contact", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5,
+     "console": ["space.Sun ContactShadowLength 0.08", "space.Sun LightSourceAngle 0.5"]},
+    {"name": "b_contact_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "c_lumen", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 2.5,
+     "console": ["space.Post LumenReflectionQuality 2", "space.Post LumenFinalGatherQuality 2", "space.Post LumenSceneDetail 2", "space.Post LumenRayLightingMode 2"]},
+    {"name": "c_lumen_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.0},
+
+    {"name": "d_sky", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 2.0,
+     "console": ["space.Sky CubemapResolution 512", "space.Sky Intensity 0.45"]},
+    {"name": "d_sky_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.0},
+
+    {"name": "e_grade", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5,
+     "console": ["space.Post ColorContrast 1.08 1.08 1.08 1", "space.Post ColorGain 1 1 1.04 1", "space.Post ColorSaturation 1.06 1.06 1.06 1", "space.Post WhiteTemp 6200"]},
+    {"name": "e_grade_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "f_film", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5,
+     "console": ["space.Post BloomIntensity 0.45", "space.Post FilmGrainIntensity 0.2", "space.Post VignetteIntensity 0.35", "space.Post SceneFringeIntensity 1.2"]},
+    {"name": "f_film_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5},
+
+    {"name": "g_cockpit_all", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "settle": 2.0},
+    {"name": "h_names", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 0.5,
+     "console": ["space.PostDump", "space.LightList sun Contact", "space.LightList sky Cubemap"]}
+  ]
+}

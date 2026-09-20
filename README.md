@@ -838,8 +838,8 @@ Its space look is built by `Tools/Assets/build_space_scene.py` (see below).
 
 | Actor              | Notes |
 | ------------------ | ----- |
-| `Sun`              | Directional light, movable, intensity 8, pitch -39 / yaw 45: from behind the player's left shoulder |
-| `SkyLight`         | Movable, real-time capture, intensity 0.35. Captures the star dome, so ambient light is near zero |
+| `Sun`              | Directional light, movable, intensity 8, pitch -39 / yaw 45: from behind the player's left shoulder. Contact shadows 0.08 m, source angle 0.5 deg |
+| `SkyLight`         | Movable, real-time capture, intensity 0.7 (`SKY_LIGHT_INTENSITY`). It fills the ship's shadow side; at the old 0.35 the hull was a black silhouette against space |
 | `StarfieldSky`     | `ASkyDome`: 2000 km sphere that follows the camera, with `M_Starfield_Sky`: unlit, *Is Sky*, procedural twinkling stars, a Milky Way glow cubemap, nebulae and the sun disc |
 | `Planet_Veyra`     | `AQuadSpherePlanet`, radius 25 km, centre 45 km ahead of the start (start is 20 km above sea level, 8 km above the atmosphere) |
 | `Moon_Keth`        | `ADistantBody`, radius 6 km, orbits Veyra at 150 km every 25 min (`M_Moon`: craters, maria) |
@@ -913,7 +913,13 @@ python Tools/Assets/generate_milky_way_glow.py Intermediate/GeneratedAssets/milk
 The generator runs in the system Python with numpy and is deterministic. The build script is
 safe to re-run: it rebuilds its own two materials, finds its actors by label, and imports the
 glow cubemap and planet mesh only if they are missing. Brightness, exposure, planet size and
-position are constants at the top of `build_space_scene.py`.
+position are constants at the top of `build_space_scene.py`, together with the
+lighting and the grade (`SKY_LIGHT_INTENSITY`, `SUN_CONTACT_SHADOW_M`, `SUN_SOURCE_ANGLE_DEG`,
+`POST_SETTINGS`). Tune those in the running game first - `space.Post`, `space.PostList`,
+`space.PostDump`, `space.Sun`, `space.SunDir`, `space.Sky`, `space.LightList` in
+`Source/gamespace/SpacePostTuning.cpp` reach every setting by name through the reflection data -
+then write the numbers here and re-run this script. `Tools/Tests/test_scene_look.py` compares the
+saved level with the recipe, so a forgotten re-run shows up as a failing test.
 
 Assets it creates:
 

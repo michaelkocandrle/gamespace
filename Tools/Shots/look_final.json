@@ -1,0 +1,20 @@
+{
+  "_comment": "The look picked out of look_sun and look_fill, against the level as it stands: a sky light twice as bright for fill, lighter paint, contact shadows, a softer sun and a restrained grade. No chromatic aberration and no white balance - both showed on the cockpit's edges as colour fringes and a blue cast. The Lumen quality overrides are last on their own; they cost a frame and showed nothing. Live, nothing saved; these values go into build_space_scene.py and Vanguard_setup.json. Run: Tools/Shots.ps1 -Preset look_final",
+  "shots": [
+    {"name": "a_base_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.5},
+    {"name": "a_base_atmo", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 2.0},
+    {"name": "a_base_cockpit", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "settle": 2.0},
+
+    {"name": "b_look_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.5,
+     "console": ["space.Sky Intensity 0.7", "space.Sun ContactShadowLength 0.08", "space.Sun LightSourceAngle 0.5",
+                 "space.ShipMatColor BaseColorTint 3.2 3.2 3.2",
+                 "space.Post ColorContrast 1.08 1.08 1.08 1", "space.Post ColorGain 1 1 1.04 1", "space.Post ColorSaturation 1.06 1.06 1.06 1",
+                 "space.Post BloomIntensity 0.45", "space.Post FilmGrainIntensity 0.2", "space.Post VignetteIntensity 0.35"]},
+    {"name": "b_look_atmo", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 2.0},
+    {"name": "b_look_cockpit", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "settle": 2.0},
+    {"name": "b_look_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 2.0},
+
+    {"name": "c_lumen_space", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 3.0,
+     "console": ["space.Post LumenReflectionQuality 2", "space.Post LumenFinalGatherQuality 2"]}
+  ]
+}

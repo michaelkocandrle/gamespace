@@ -28,6 +28,32 @@ import gamespace_assets as ga
 # bloom out, then darken again whenever a lit asteroid fills the view.
 EXPOSURE_EV100 = 3.0
 
+# How the ship is lit (found on 20. 9. 2026 with Tools/Shots/look_sun.json and look_fill.json:
+# in space the ship was a silhouette, because almost nothing filled its shadow side).
+#   SKY_LIGHT_INTENSITY - the fill. 0.35 left the hull black against space; above ~1.1 the
+#     planet loses its terminator. 0.7 with lighter paint (Vanguard_setup.json) is the balance.
+#   SUN_CONTACT_SHADOW_M - small shadows in the panel gaps, in metres of screen ray.
+#   SUN_SOURCE_ANGLE_DEG - how wide the sun is, i.e. how soft the terminator is.
+SKY_LIGHT_INTENSITY = 0.7
+SUN_CONTACT_SHADOW_M = 0.08
+SUN_SOURCE_ANGLE_DEG = 0.5
+
+# The grade, in the unbound volume together with the exposure. Restrained on purpose: a little
+# contrast and saturation, a hint of blue in the highlights, film grain and a vignette for the
+# filmic feel of the Star Citizen references. Two settings were tried and dropped, both because
+# of the cockpit: chromatic aberration (scene_fringe_intensity) drew colour fringes along the
+# dashboard's edges, and white balance (white_temp) turned the whole interior blue.
+# Tune them in the running game with space.Post / space.Sun / space.Sky, then space.PostDump
+# prints these lines (Source/gamespace/SpacePostTuning.cpp, Docs/WORKFLOW.md kapitola 11).
+POST_SETTINGS = (
+    ("color_contrast", unreal.Vector4(1.08, 1.08, 1.08, 1.0)),
+    ("color_gain", unreal.Vector4(1.0, 1.0, 1.04, 1.0)),
+    ("color_saturation", unreal.Vector4(1.06, 1.06, 1.06, 1.0)),
+    ("bloom_intensity", 0.45),
+    ("film_grain_intensity", 0.2),
+    ("vignette_intensity", 0.35),
+)
+
 # Stars are computed per pixel in the sky material (see STAR_HLSL). Brightness scales every
 # star; density scales how many there are (1.0 is roughly 45k over the whole sky).
 STAR_BRIGHTNESS = 8.0
@@ -820,10 +846,16 @@ def build_level(sky_material, planet_mesh, planet_material, body_materials):
     for actor in actors:
         if isinstance(actor, unreal.DirectionalLight):
             actor.set_actor_rotation(unreal.Rotator(roll=0.0, pitch=SUN_PITCH, yaw=SUN_YAW), False)
+            sun = actor.get_component_by_class(unreal.DirectionalLightComponent)
+            sun.set_editor_property("contact_shadow_length", SUN_CONTACT_SHADOW_M)
+            sun.set_editor_property("light_source_angle", SUN_SOURCE_ANGLE_DEG)
+            log("sun: contact shadows %.2f m, source angle %.2f deg" % (SUN_CONTACT_SHADOW_M, SUN_SOURCE_ANGLE_DEG))
         if isinstance(actor, unreal.SkyLight):
             sky_light = actor.get_component_by_class(unreal.SkyLightComponent)
             # Stars exist below the horizon too; don't clamp the captured lower half to black.
             sky_light.set_editor_property("lower_hemisphere_is_black", False)
+            sky_light.set_editor_property("intensity", SKY_LIGHT_INTENSITY)
+            log("sky light intensity %.2f" % SKY_LIGHT_INTENSITY)
 
     # Star dome: ASkyDome sets its own mesh, collision, shadow and scale (from the radius) and
     # follows the camera at runtime; only the material and radius are set here.
@@ -870,15 +902,16 @@ def build_level(sky_material, planet_mesh, planet_material, body_materials):
     log("%s at %.0f km, %s orbiting %s at %.0f km" % (giant.get_actor_label(), GIANT_DISTANCE_KM, moon.get_actor_label(),
                                                      planet.get_actor_label(), MOON_ORBIT["orbit_radius_km"]))
 
-    # Exposure: clamp auto exposure to one value, i.e. fixed.
+    # Exposure: clamp auto exposure to one value, i.e. fixed. Then the grade.
     ppv = upsert_actor(eas, actors, "PP_SpaceExposure", unreal.PostProcessVolume)
     ppv.set_editor_property("unbound", True)
     settings = ppv.get_editor_property("settings")
-    for key, value in (("auto_exposure_min_brightness", EXPOSURE_EV100),
-                       ("auto_exposure_max_brightness", EXPOSURE_EV100)):
+    for key, value in ((("auto_exposure_min_brightness", EXPOSURE_EV100),
+                        ("auto_exposure_max_brightness", EXPOSURE_EV100)) + POST_SETTINGS):
         settings.set_editor_property("override_" + key, True)
         settings.set_editor_property(key, value)
     ppv.set_editor_property("settings", settings)
+    log("post process: %s" % ", ".join(key for key, _ in POST_SETTINGS))
 
     if not les.save_current_level():
         raise RuntimeError("could not save " + LEVEL)

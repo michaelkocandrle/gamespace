@@ -1,0 +1,21 @@
+{
+  "_comment": "Why the ship is a silhouette in space: the same framing with the sun swung round in four steps (space.SunDir), first as the level has it, then with a brighter sky light for fill, then with a less rough, more metallic hull. Live, nothing saved. Run: Tools/Shots.ps1 -Preset look_sun",
+  "shots": [
+    {"name": "a_yaw0", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.5, "console": ["space.SunDir -25 0"]},
+    {"name": "a_yaw90", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.SunDir -25 90"]},
+    {"name": "a_yaw180", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.SunDir -25 180"]},
+    {"name": "a_yaw270", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.SunDir -25 270"]},
+
+    {"name": "b_fill_yaw0", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.0, "console": ["space.Sky Intensity 1.5", "space.SunDir -25 0"]},
+    {"name": "b_fill_yaw90", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.SunDir -25 90"]},
+    {"name": "b_fill_yaw180", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.SunDir -25 180"]},
+    {"name": "b_fill_yaw270", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.SunDir -25 270"]},
+
+    {"name": "c_metal_yaw0", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.0, "console": ["space.ShipMat RoughnessScale 0.75", "space.ShipMat MetallicScale 0.8", "space.SunDir -25 0"]},
+    {"name": "c_metal_yaw90", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.SunDir -25 90"]},
+    {"name": "c_metal_yaw180", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.SunDir -25 180"]},
+    {"name": "c_metal_yaw270", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.SunDir -25 270"]},
+
+    {"name": "d_atmosphere", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 2.0, "console": ["space.SunDir -39 45"]}
+  ]
+}

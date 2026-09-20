@@ -471,6 +471,35 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - pozor: `ScalabilityQuality.ResolutionQuality` samo nestačí, hodnotu do renderu i do ukládání dostane
       až `Scalability::SetQualityLevels`.
 
+36. **Světlo a post scény; loď v kosmu přestala být silueta** (20. 9. 2026, po „SC úrovni grafiky
+    s co nejrychlejším workflow“):
+    - **Nález**: loď v kosmu vycházela jako černá silueta (průměrný jas plochy lodi 10/255, nad 60
+      jen 3,9 % pixelů). Sweep směru slunce ve čtyřech krocích (`Tools/Shots/look_sun.json`,
+      `space.SunDir`) ukázal, že **na směru slunce nezáleží** – chyběl **výplňový svit**: sky light
+      měl intenzitu 0.35 a lak trupu byl skoro černý.
+    - **Řešení** (`Tools/Shots/look_fill.json` oddělil světlo od laku): sky light **0.7**,
+      `base_color_tint` trupu **3.2** (z 2.2), contact shadows slunce **0.08 m**, šířka slunce
+      **0.5°**, a zdrženlivý grade v neohraničeném post process volume – kontrast 1.08, sytost 1.06,
+      modro do světel (gain B 1.04), bloom 0.45, film grain 0.2, vinětace 0.35.
+    - **Zahozeno po kontrole snímků**: chromatická aberace (barevné lemy po hranách desky v kokpitu),
+      vyvážení bílé 6200 K (zmodralý interiér) a Lumen kvalita 2 (nic vidět, ~1 FPS).
+      Interiér kokpitu zůstal na `base_color_tint` 0.6, takže kokpit je pořád tmavý jako v SC.
+    - **Rychlá smyčka** (WORKFLOW kapitola 11): `space.Post`, `space.PostList`, `space.PostDump`,
+      `space.Sun`, `space.SunDir`, `space.Sky`, `space.LightList` v
+      `Source/gamespace/SpacePostTuning.cpp` sahají na nastavení přes reflexi, takže se nic
+      neudržuje ručně a `space.PostDump` vypíše rovnou řádky pro recept. Jeden průchod ladění stojí
+      ~30 s místo ~4 minut, protože se nemusí balit.
+    - Hodnoty jsou v `Tools/Assets/build_space_scene.py` (`SKY_LIGHT_INTENSITY`,
+      `SUN_CONTACT_SHADOW_M`, `SUN_SOURCE_ANGLE_DEG`, `POST_SETTINGS`) a v `Vanguard_setup.json`;
+      `Tools/Tests/test_scene_look.py` porovnává uloženou úroveň s receptem.
+    - Výkon: 80 → 88 FPS (změna vzhledu nic nestojí).
+
+37. **Hrany trupu: změřeno a zahozeno** (20. 9. 2026): plán byl zkosit hrany a zostřit normály, aby
+    hrany chytaly světlo jako na referencích. Histogram trupu v Blenderu (1,5 mil. hran) ale ukázal
+    **92 % hran pod 36°** a jen 2,3 % nad 72° – model z Meshy je organický sken, ne panelová loď.
+    A/B ve viewportu (ostrý úhel 60° vs. 35°, bevel 2 mm) změnilo **1 % pixelů**. Hrany mají smysl až
+    u modelů s rovnými panely; teď je větší rozdíl proti SC v decalech a zónách materiálu.
+
 ---
 
 ## 6. Mapa kódu a obsahu
@@ -497,6 +526,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `USpaceShotRunner` | `SpaceShotRunner.*` | Snímky podle scénáře pro vizuální kontrolu (kapitola 9): `-ShotList=` z příkazové řádky, `space.Shot` a `space.Shots` v konzoli. |
 | `ASpaceDebugHUD` | `SpaceDebugHUD.*` | Textový debug HUD (CVar `space.Hud`), FPS; vytváří `USpaceFlightHud`. Anglicky, placeholder, zbytek nahradí SC-3. |
 | `USpaceOriginRebasingSubsystem` | `SpaceOriginRebasingSubsystem.*` | Posun počátku světa. |
+| – (jen konzolové příkazy) | `SpacePostTuning.cpp` | Ladění vzhledu za běhu přes reflexi: `space.Post`, `space.PostList`, `space.PostDump`, `space.Sun`, `space.SunDir`, `space.Sky`, `space.LightList` (WORKFLOW kapitola 11). |
 
 ### Obsah (`Content/`)
 - `Maps/MainMenu` (úvodní obrazovka) a `Maps/TestSpace` (hra, start editoru).
@@ -513,7 +543,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | --- | --- |
 | `run_editor_python.ps1` | Spouští Python headless v editoru. |
 | `Package.ps1`, `Play.ps1` | Build hry a spuštění. |
-| `Assets/build_space_scene.py` | TestSpace: obloha, planeta, tělesa, prach, materiály. |
+| `Assets/build_space_scene.py` | TestSpace: obloha, planeta, tělesa, prach, materiály, světla a grade (`SKY_LIGHT_INTENSITY`, `POST_SETTINGS`). |
 | `Assets/build_main_menu.py` | Level úvodní obrazovky. |
 | `Assets/import_ship.py` + `ship_materials.py` | Import lodi z Blenderu. |
 | `Assets/generate_ship_sounds.py` → `build_ship_audio.py` | Generátor zvuků (numpy) a jejich import. |
@@ -594,10 +624,11 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_cockpit_frame.py` | Kokpit: Vanguard má interiér (díl, oko nad vanou za deskou, deska 7–13° pod okem jako v SC referenci, pilot ≥ 1,2 m od desky, provizorium vypnuté); rozložení provizorního rámu pro lodě bez interiéru (nic v okně HUD, deska 14–20° pod horizontem, sloupky 24–34° do stran, sedadlo za okem). |
 | `test_landing_sc2.py` | SC-2a: dosednutí jen s podvozkem (GEAR UP před vším ostatním, mezera pod patkami), stavový automat podvozku (časy, otočení v půlce, zákaz zasunutí na zemi), pohyb modelovaného dílu i zástupných nohou, precision (strop, omezovač uvnitř, jen SCM, bez afterburneru, pomalejší otáčení, brzdění bez skoku), kontrolky GEAR/PREC, klávesy N/P bez kolizí, hodnoty a díl `Gear` Vanguardu, scénář `landing`. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
+| `test_scene_look.py` | Vzhled uložené úrovně proti receptu: intenzita sky lightu, contact shadows a šířka slunce, všechna nastavení `POST_SETTINGS` v neohraničeném volume (a že chromatická aberace a vyvážení bílé zůstala vypnutá), lak trupu z `Vanguard_setup.json`. Chytá zapomenuté spuštění `build_space_scene.py` / `import_ship.py`. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
 
 Co headless **nejde** ověřit a musí vyzkoušet autor ve hře:
-- vzhled (obloha, jas, rámování úvodní obrazovky);
+- vzhled (obloha, jas, rámování úvodní obrazovky) – čísla hlídá `test_scene_look.py`, jak to vypadá jen snímky (kapitola 9);
 - zvuk;
 - chování Slate menu;
 - skutečné kolize (v commandletu nefungují traces ani sweepy).
@@ -649,6 +680,10 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `hull_tune` | Ladění materiálu trupu: šest variant v jednom běhu přes `space.ShipMat` (síla detailu, velikost dlaždice, světlejší lak, drsnost). |
 | `hull_detail` | Trup zblízka (tryska, bok, vršek, celá loď): posouzení detailní vrstvy materiálu. Srovnání: `detail_normal_strength` 0 v setupu, znovu import a balení. |
 | `mfd_pages` | Stránky MFD: FLIGHT/STATUS, THRUSTERS/CONTACTS s afterburnerem, NAVIGATION/SELF STATUS ve vesmíru a po přistání, THRUSTERS při visení. Stránky nastavuje pole `console` (`space.MfdPage`). |
+| `look_sun` | Proč je loď v kosmu silueta: stejný záběr se sluncem otočeným po 90° (`space.SunDir`), pak s jasnějším sky lightem a méně drsným trupem. |
+| `look_fill` | Odděluje světlo od laku: sweep intenzity sky lightu 0.35–1.5, pak světlejší lak, méně kovu a tvrdší slunce. |
+| `look_tune` | Post process po vrstvách (contact shadows, Lumen, sky light, grade, film) v kosmu i v atmosféře; poslední snímek vypíše `space.PostDump`. |
+| `look_final` | Vybrané hodnoty proti úrovni tak, jak je: vesmír, atmosféra, kokpit, detail – a Lumen kvalita zvlášť, aby byla vidět cena ve snímcích. |
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
 Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
@@ -858,4 +893,7 @@ Viz `git log --oneline`. Poslední kroky:
 - dokumentace workflow a nástrah (`Docs/WORKFLOW.md`), pomocné skripty Blender MCP v `Tools/Blender/mcp/`;
 - střední sloupek desky: RADAR a SELF STATUS (bod 31), kreslení čar bez kvadratického dávkování ve Slate;
 - stránky MFD na F1 a F2 (bod 32);
-- rychlejší kreslení displejů (trvalé okno) a seskupené čáry HUD (bod 33).
+- rychlejší kreslení displejů (trvalé okno) a seskupené čáry HUD (bod 33);
+- detailní vrstva materiálu a trup 1 mil. trojúhelníků, ladicí příkazy `space.ShipMat` (body 33 a 34);
+- hra kreslila v polovičním rozlišení, zpět na 100 % (bod 35);
+- světlo a post scény, loď v kosmu přestala být silueta; rychlá smyčka `space.Post` / `space.Sun` / `space.Sky` (bod 36).

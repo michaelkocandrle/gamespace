@@ -1,0 +1,18 @@
+{
+  "_comment": "The ship is a silhouette in space because almost nothing fills its shadow side and the hull's paint is nearly black. This separates the two: first the sky light alone, then a lighter hull at a middling sky light, then less metal, then a harder sun. The sun keeps the level's own direction. Live, nothing saved. Run: Tools/Shots.ps1 -Preset look_fill",
+  "shots": [
+    {"name": "a_sky035", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.5},
+    {"name": "b_sky070", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.0, "console": ["space.Sky Intensity 0.7"]},
+    {"name": "c_sky110", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.0, "console": ["space.Sky Intensity 1.1"]},
+    {"name": "d_sky150", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.0, "console": ["space.Sky Intensity 1.5"]},
+
+    {"name": "e_paint32", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 2.0, "console": ["space.Sky Intensity 0.7", "space.ShipMatColor BaseColorTint 3.2 3.2 3.2"]},
+    {"name": "f_paint45", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.ShipMatColor BaseColorTint 4.5 4.5 4.5"]},
+    {"name": "g_less_metal", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.ShipMatColor BaseColorTint 3.2 3.2 3.2", "space.ShipMat MetallicScale 0.25"]},
+    {"name": "h_hard_sun", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.ShipMat MetallicScale 0.5", "space.Sun Intensity 16", "space.Post AutoExposureMinBrightness 4", "space.Post AutoExposureMaxBrightness 4"]},
+
+    {"name": "i_atmo_tuned", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 2.5},
+    {"name": "j_atmo_soft_sun", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -18, "chase_zoom": 0.6, "settle": 1.5, "console": ["space.Sun Intensity 8", "space.Post AutoExposureMinBrightness 3", "space.Post AutoExposureMaxBrightness 3"]},
+    {"name": "k_cockpit", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 1, "settle": 2.0}
+  ]
+}

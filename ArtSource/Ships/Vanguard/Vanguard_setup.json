@@ -108,12 +108,12 @@
         "orm": "ArtSource/Ships/Vanguard/Textures/T_Ship_Vanguard_ORM.png",
         "normal": "ArtSource/Ships/Vanguard/Textures/T_Ship_Vanguard_N.png"
       },
-      "_comment": "Meshy's paint is very dark navy (base colour ~0.04 linear, the procedural Vanguard's was 0.34) and ~85 % metallic, so in the game it read as a black silhouette (Tools/Shots.ps1 -Preset ship_views, 18. 9. 2026); metallic alone made no visible difference. base_color_tint 2.2 lifts the paint to a dark blue-grey steel, metallic_scale 0.5 keeps some sheen. 20. 9. 2026 (author: the ship is blurry up close in the chase camera): the micro detail layer of M_Ship_PBR (Tools/Assets/generate_detail_textures.py, triplanar in the ship's own space) carries the surface the AI paint cannot - its 4K over a 14 m hull is ~3 mm a pixel. detail_normal_strength 0 turns it off.",
+      "_comment": "Meshy's paint is very dark navy (base colour ~0.04 linear, the procedural Vanguard's was 0.34) and ~85 % metallic, so in the game it read as a black silhouette (Tools/Shots.ps1 -Preset ship_views, 18. 9. 2026); metallic alone made no visible difference. base_color_tint 3.2 lifts the paint to a dark blue-grey steel, metallic_scale 0.5 keeps some sheen (2.2 until 20. 9. 2026: with the sky light raised to 0.7 for fill, Tools/Shots/look_fill.json showed 3.2 is where the panels read in space instead of blending into a silhouette; 4.5 went chalky). 20. 9. 2026 (author: the ship is blurry up close in the chase camera): the micro detail layer of M_Ship_PBR (Tools/Assets/generate_detail_textures.py, triplanar in the ship's own space) carries the surface the AI paint cannot - its 4K over a 14 m hull is ~3 mm a pixel. detail_normal_strength 0 turns it off.",
       "metallic_scale": 0.5,
       "base_color_tint": [
-        2.2,
-        2.2,
-        2.2
+        3.2,
+        3.2,
+        3.2
       ],
       "detail_tile_cm": 18.0,
       "detail_normal_strength": 0.8,
