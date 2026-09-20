@@ -24,7 +24,8 @@
     "SM_Ship_Vanguard_Lining": []
   },
   "materials": [
-    "5 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen"
+    "7 decal materials: Hatch_Roof, Hazard_L, Hazard_R, NoStep_L, NoStep_R, Registration_L, Registration_R",
+    "5 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal"
   ],
   "blueprint": {
     "path": "/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard",
@@ -100,7 +101,14 @@
       "cockpit_displays.state_rate_hz = 5.0",
       "component Gear = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Gear",
       "component Interior = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Interior",
-      "component Lining = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Lining"
+      "component Lining = /Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Lining",
+      "decal Decal_Registration_L = D_Registration at [-275.0, 564.0, 210.0]",
+      "decal Decal_Registration_R = D_Registration at [-275.0, -564.0, 210.0]",
+      "decal Decal_Hazard_L = D_Hazard_Stripes at [-250.0, 160.0, 176.0]",
+      "decal Decal_Hazard_R = D_Hazard_Stripes at [-250.0, -160.0, 176.0]",
+      "decal Decal_Hatch_Roof = D_Hatch_Access at [-150.0, 0.0, 300.0]",
+      "decal Decal_NoStep_L = D_No_Step at [-250.0, 260.0, 240.0]",
+      "decal Decal_NoStep_R = D_No_Step at [-250.0, -260.0, 240.0]"
     ]
   },
   "removed": [],

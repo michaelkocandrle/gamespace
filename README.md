@@ -544,7 +544,18 @@ built meshes, through an occlusion shader limited to half a metre (Cycles' own A
 and on a closed 14 m hull that reads as dirt rather than panel gaps). The material darkens the paint
 by it (`CavityStrength`), sends it to the Ambient Occlusion output (`AOStrength`) and uses it to keep
 worn paint (`WearAmount`) on the exposed surfaces. `AOMap` defaults to white, so a ship without the
-bake looks exactly as it did. `import_ship.py` imports
+bake looks exactly as it did.
+
+**Markings** (registration, hazard bands, a service hatch) are deferred decals, not paint in the
+atlas: `Tools/Assets/generate_decals.py` draws `ArtSource/Ships/Shared/Decals/D_*.png`, and the
+`decals` list in `<Ship>_setup.json` places `Decal_<name>` components under Hull with their own
+material instance. Two things to know before placing one. A decal projects along its component's
+**-X**, so the rotation has to point X *away* from the surface (roof: pitch +90; left flank: yaw
++90); backwards it paints thin air and smears into streaks across whatever grazing geometry it
+catches. And the texture lands the way the box is turned, which on the flanks came out mirrored -
+rotations cannot mirror, so the material has `DecalFlipU` / `DecalFlipV` (`flip_u`, `flip_v` in the
+setup). Pick the spots by raycasting the model in Blender: a decal on a curved or hidden surface
+simply does not read. `import_ship.py` imports
 a mesh fresh when its material slots changed (a reimport kept the old model's slots) and removes the
 Blueprint components, meshes and material instances an earlier model left behind.
 

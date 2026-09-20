@@ -191,5 +191,150 @@
       "metallic": 0.6,
       "roughness": 0.35
     }
-  }
+  },
+  "_comment_decals": "Markings projected onto the hull as deferred decals (M_Ship_Decal, textures from Tools/Assets/generate_decals.py). rotation is [pitch, yaw, roll] and turns the component's X axis so that it points AWAY from the surface, because a decal projects along its own -X: a marking on the roof has pitch +90 (X up), one on the left flank yaw +90 (X out to +Y). Getting that backwards was the whole first day of this - the decal then projects into thin air and only smears across whatever grazing geometry it catches (Tools/Shots/hull_decals.json, 20. 9. 2026). size is [depth, half width, half height] in centimetres. The places come from raycasts onto the model in Blender: the outer wall of the upper nacelle at y=+-5.64 m is the ship's one big flat billboard, the roof at x=-1.5 m is flat, the inner nacelle walls take the hazard bands.",
+  "decals": [
+    {
+      "name": "Registration_L",
+      "texture": "D_Registration",
+      "location": [
+        -275.0,
+        564.0,
+        210.0
+      ],
+      "rotation": [
+        0.0,
+        90.0,
+        -90.0
+      ],
+      "size": [
+        60.0,
+        17.0,
+        70.0
+      ],
+      "opacity": 0.9,
+      "flip_u": 1.0
+    },
+    {
+      "name": "Registration_R",
+      "texture": "D_Registration",
+      "location": [
+        -275.0,
+        -564.0,
+        210.0
+      ],
+      "rotation": [
+        0.0,
+        -90.0,
+        90.0
+      ],
+      "size": [
+        60.0,
+        17.0,
+        70.0
+      ],
+      "opacity": 0.9,
+      "flip_u": 1.0
+    },
+    {
+      "name": "Hazard_L",
+      "texture": "D_Hazard_Stripes",
+      "location": [
+        -250.0,
+        160.0,
+        176.0
+      ],
+      "rotation": [
+        0.0,
+        90.0,
+        0.0
+      ],
+      "size": [
+        40.0,
+        70.0,
+        17.0
+      ],
+      "opacity": 0.95
+    },
+    {
+      "name": "Hazard_R",
+      "texture": "D_Hazard_Stripes",
+      "location": [
+        -250.0,
+        -160.0,
+        176.0
+      ],
+      "rotation": [
+        0.0,
+        -90.0,
+        0.0
+      ],
+      "size": [
+        40.0,
+        70.0,
+        17.0
+      ],
+      "opacity": 0.95
+    },
+    {
+      "name": "Hatch_Roof",
+      "texture": "D_Hatch_Access",
+      "location": [
+        -150.0,
+        0.0,
+        300.0
+      ],
+      "rotation": [
+        90.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        150.0,
+        60.0,
+        60.0
+      ],
+      "opacity": 0.9
+    },
+    {
+      "name": "NoStep_L",
+      "texture": "D_No_Step",
+      "location": [
+        -250.0,
+        260.0,
+        240.0
+      ],
+      "rotation": [
+        90.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        100.0,
+        44.0,
+        11.0
+      ],
+      "opacity": 0.85
+    },
+    {
+      "name": "NoStep_R",
+      "texture": "D_No_Step",
+      "location": [
+        -250.0,
+        -260.0,
+        240.0
+      ],
+      "rotation": [
+        90.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        100.0,
+        44.0,
+        11.0
+      ],
+      "opacity": 0.85
+    }
+  ]
 }

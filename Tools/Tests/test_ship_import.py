@@ -136,8 +136,11 @@ if plan["materials"]:
 
 # --- nothing left over from an earlier model -------------------------------------------------
 root = "/Game/Ships/%s" % plan["ship"]
+expected_assets = ({m["asset_path"] for m in plan["meshes"]}
+                   | {"%s/Materials/%s" % (root, n) for n in plan["materials"]}
+                   | {"%s/Materials/MI_Ship_%s_Decal_%s" % (root, plan["ship"], d["name"]) for d in plan["decals"]})
 leftovers = [p.split(".")[0] for f in ("/Meshes", "/Materials") for p in unreal.EditorAssetLibrary.list_assets(root + f, recursive=False)
-             if p.split(".")[0] not in {m["asset_path"] for m in plan["meshes"]} | {"%s/Materials/%s" % (root, n) for n in plan["materials"]}]
+             if p.split(".")[0] not in expected_assets]
 check("no meshes or material instances of an earlier model left", not leftovers, ", ".join(leftovers))
 
 # --- blueprint: spawn it, so inherited component overrides are what the game would see ------
@@ -182,6 +185,26 @@ if ship:
             check("component %s with its mesh" % extra, ok, ", ".join(sorted(names)))
     finally:
         eas.destroy_actor(ship)
+
+# --- markings ------------------------------------------------------------------------------
+# A decal only reads when its component's X points AWAY from the surface: the projection runs along
+# -X (Tools/Shots/hull_decals.json, 20. 9. 2026). Backwards it paints thin air and smears.
+for decal in plan["decals"]:
+    mi = unreal.EditorAssetLibrary.load_asset(
+        "/Game/Ships/%s/Materials/MI_Ship_%s_Decal_%s" % (plan["ship"], plan["ship"], decal["name"]))
+    check("decal %s has its material" % decal["name"], mi is not None)
+    if mi:
+        texture = MEL.get_material_instance_texture_parameter_value(mi, "DecalTexture")
+        check("decal %s wears %s" % (decal["name"], decal["texture"]),
+              texture is not None and texture.get_name() == decal["texture"],
+              str(texture.get_name() if texture else None))
+    size = decal["size"]
+    check("decal %s has a depth and a plane" % decal["name"],
+          len(size) == 3 and size[0] > 0.0 and size[1] > 0.0 and size[2] > 0.0, str(size))
+if plan["decals"]:
+    names = {d["name"] for d in plan["decals"]}
+    check("the ship carries markings on both flanks",
+          {"Registration_L", "Registration_R"} <= names, ", ".join(sorted(names)))
 
 # --- level ---------------------------------------------------------------------------------
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)

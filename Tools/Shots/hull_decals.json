@@ -1,0 +1,77 @@
+{
+  "_comment": "Where the markings landed: close on each one, so the placement and the orientation in the ship's setup can be checked, then the whole ship. A decal that is not square on to its surface smears into streaks instead of reading - that is the thing to look for. Run: Tools/Shots.ps1 -Preset hull_decals",
+  "shots": [
+    {
+      "name": "roof_close",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 5,
+      "chase_pitch": -80,
+      "chase_zoom": 0.4,
+      "settle": 3.0
+    },
+    {
+      "name": "registration_right",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": -90,
+      "chase_pitch": -8,
+      "chase_zoom": 0.25,
+      "settle": 1.5
+    },
+    {
+      "name": "hatch_roof",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 10,
+      "chase_pitch": -82,
+      "chase_zoom": 0.3,
+      "settle": 1.5
+    },
+    {
+      "name": "no_step_and_hazard",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 0,
+      "chase_pitch": -45,
+      "chase_zoom": 0.35,
+      "settle": 1.5
+    },
+    {
+      "name": "flank_wide",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 90,
+      "chase_pitch": -5,
+      "chase_zoom": 0.45,
+      "settle": 1.5
+    },
+    {
+      "name": "whole",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.7,
+      "settle": 1.5
+    }
+  ]
+}

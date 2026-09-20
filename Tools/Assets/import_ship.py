@@ -173,6 +173,7 @@ def build_plan(manifest, manifest_dir, setup=None):
         "pawn_settings": pawn,
         "materials": {k: v for k, v in (setup.get("materials") or {}).items() if not k.startswith("_")},
         "extra_components": extra_components,
+        "decals": [d for d in (setup.get("decals") or []) if not str(d.get("name", "")).startswith("_")],
         "planet_settings": [("collision_warmup_reach_m", s["Planet_CollisionWarmupReachM"]),
                             ("collision_min_radius_m", s["Planet_CollisionMinRadiusM"])],
         "game_mode": GAME_MODE_PATH,
@@ -438,6 +439,8 @@ def apply_pawn_settings(plan, report):
 
     for extra in plan["extra_components"]:
         applied.append(add_mesh_component(blueprint, extra))
+    for decal in plan["decals"]:
+        applied.append(add_decal_component(blueprint, plan, decal))
 
     unreal.EditorAssetLibrary.save_loaded_asset(blueprint, only_if_is_dirty=False)
     report["blueprint"] = {"path": plan["blueprint"], "applied": applied}
@@ -483,12 +486,62 @@ def add_mesh_component(blueprint, extra):
             extra["component"], extra["mesh"], error)
 
 
+def add_decal_component(blueprint, plan, decal):
+    """A marking projected onto the hull (a stencil, a hazard band): a DecalComponent under Hull.
+
+    A decal projects along its component's -X, so the rotation has to turn X so it points AWAY from
+    the surface: on the roof pitch +90 (X up), on the left flank yaw +90 (X out to +Y). Backwards, the
+    decal projects into thin air and smears across whatever grazing geometry it catches. size is
+    [depth, half width, half height] in centimetres, as UDecalComponent.DecalSize wants it, and the
+    depth only has to reach through the plating - too deep and it paints what is behind it too.
+    """
+    name = "Decal_" + decal["name"]
+    material = "/Game/Ships/%s/Materials/MI_Ship_%s_Decal_%s" % (plan["ship"], plan["ship"], decal["name"])
+    try:
+        subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
+        library = unreal.SubobjectDataBlueprintFunctionLibrary
+        handles = subsystem.k2_gather_subobject_data_for_blueprint(blueprint)
+        parent = handles[0]
+        existing = None
+        for handle in handles:
+            obj = library.get_object(library.get_data(handle))
+            if obj is None:
+                continue
+            if obj.get_name().replace("_GEN_VARIABLE", "") == "Hull":
+                parent = handle
+            if obj.get_name().replace("_GEN_VARIABLE", "") == name:
+                existing = obj
+        if existing is None:
+            params = unreal.AddNewSubobjectParams()  # struct constructors take no keyword arguments
+            params.set_editor_property("parent_handle", parent)
+            params.set_editor_property("new_class", unreal.DecalComponent)
+            params.set_editor_property("blueprint_context", blueprint)
+            handle, fail_reason = subsystem.add_new_subobject(params)
+            if not library.is_handle_valid(handle):
+                raise RuntimeError(str(fail_reason))
+            subsystem.rename_subobject(handle, unreal.Text(name))
+            existing = library.get_object(library.get_data(handle))
+        existing.set_editor_property("decal_material", unreal.EditorAssetLibrary.load_asset(material))
+        existing.set_editor_property("relative_location", vec(decal["location"]))
+        # Keyword arguments on purpose: unreal.Rotator's positional order is roll, pitch, yaw.
+        pitch, yaw, roll = (list(decal.get("rotation", [0.0, 0.0, 0.0])) + [0.0, 0.0, 0.0])[:3]
+        existing.set_editor_property("relative_rotation", unreal.Rotator(roll=roll, pitch=pitch, yaw=yaw))
+        existing.set_editor_property("decal_size", vec(decal["size"]))
+        existing.set_editor_property("sort_order", int(decal.get("sort_order", 0)))
+        existing.set_editor_property("fade_screen_size", float(decal.get("fade_screen_size", 0.0005)))
+        unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
+        return "decal %s = %s at %s" % (name, decal["texture"], decal["location"])
+    except Exception as error:
+        return "MANUAL STEP: add a Decal component %r under Hull with %s (automatic add failed: %s)" % (name, material, error)
+
+
 def remove_stale(plan, blueprint, report):
     """After a model change: drops what the new manifest and setup no longer have - extra mesh
     components on the Blueprint (a canopy part the new model lacks), and this ship's meshes and
     material instances that nothing references any more. Script-made assets only; git keeps them."""
     root = "/Game/Ships/%s" % plan["ship"]
-    keep_components = {e["component"] for e in plan["extra_components"]} | {"Hull"}
+    keep_components = ({e["component"] for e in plan["extra_components"]}
+                       | {"Decal_" + d["name"] for d in plan["decals"]} | {"Hull"})
     removed = []
     try:
         subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
@@ -496,12 +549,19 @@ def remove_stale(plan, blueprint, report):
         handles = subsystem.k2_gather_subobject_data_for_blueprint(blueprint)
         for handle in handles:
             obj = library.get_object(library.get_data(handle))
-            if not isinstance(obj, unreal.StaticMeshComponent):
+            if not isinstance(obj, (unreal.StaticMeshComponent, unreal.DecalComponent)):
                 continue
             name = obj.get_name().replace("_GEN_VARIABLE", "")
-            mesh = obj.get_editor_property("static_mesh")
-            if name in keep_components or mesh is None or not mesh.get_path_name().startswith(root + "/Meshes/"):
+            if name in keep_components:
                 continue
+            if isinstance(obj, unreal.DecalComponent):
+                # A marking the setup no longer lists.
+                if not name.startswith("Decal_"):
+                    continue
+            else:
+                mesh = obj.get_editor_property("static_mesh")
+                if mesh is None or not mesh.get_path_name().startswith(root + "/Meshes/"):
+                    continue
             subsystem.delete_subobjects(handles[0], [handle], blueprint)
             removed.append("component " + name)
         unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
@@ -509,7 +569,9 @@ def remove_stale(plan, blueprint, report):
     except Exception as error:
         removed.append("MANUAL STEP: remove stale components from %s (%s)" % (plan["blueprint"], error))
 
-    keep_assets = {m["asset_path"] for m in plan["meshes"]} | {"%s/Materials/%s" % (root, n) for n in plan["materials"]}
+    keep_assets = ({m["asset_path"] for m in plan["meshes"]}
+                   | {"%s/Materials/%s" % (root, n) for n in plan["materials"]}
+                   | {"%s/Materials/MI_Ship_%s_Decal_%s" % (root, plan["ship"], d["name"]) for d in plan["decals"]})
     for folder in (root + "/Meshes", root + "/Materials"):
         for path in unreal.EditorAssetLibrary.list_assets(folder, recursive=False):
             path = path.split(".")[0]
@@ -579,7 +641,8 @@ def main(argv):
     if plan["materials"]:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import ship_materials
-        report["materials"] = ship_materials.apply(plan["ship"], {"materials": plan["materials"]}, imported)
+        report["materials"] = ship_materials.apply(
+        plan["ship"], {"materials": plan["materials"], "decals": plan["decals"]}, imported)
     blueprint = apply_pawn_settings(plan, report)
     remove_stale(plan, blueprint, report)
     apply_level_settings(plan, blueprint, env_flag("GAMESPACE_SHIP_APPLY_PLANET", True),

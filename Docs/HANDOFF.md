@@ -523,6 +523,29 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       nic nerozbije. `test_ship_import.py` hlídá, že je mapa importovaná jako Masks bez sRGB, že ji
       materiál lodi opravdu má a že wear zůstal do 0,3.
 
+39. **Nápisy na trupu: decaly** (20. 9. 2026, navazuje na bod 38): registrační číslo, výstražné pruhy,
+    servisní poklop a NO STEP se promítají na trup jako deferred decaly, takže nemusí mít místo
+    v UV atlasu lodi a zblízka zůstanou ostré.
+    - `Tools/Assets/generate_decals.py` kreslí `ArtSource/Ships/Shared/Decals/D_*.png` (RGBA, písmo
+      projektu z `Content/UI/Fonts`, jemný šum do alfy, aby hrana nebyla břitva). Registrace je
+      `VNG-014 / CROSSFIELD DYNAMICS` – smyšlená loděnice, ne cizí značka; změní se jedním řetězcem.
+    - Master `M_Ship_Decal`, instance `MI_Ship_<Loď>_Decal_<jméno>`, komponenty `Decal_<jméno>` pod
+      Hull podle seznamu `decals` v `<Loď>_setup.json` (`import_ship.py`, `add_decal_component`).
+    - **Dvě pasti, které stály většinu času** (obě jsou teď v komentáři v setupu i v testu):
+      - **Decal promítá podél `-X` své komponenty**, takže rotace musí otočit X *pryč* od povrchu:
+        na střeše pitch **+90**, na levém boku yaw **+90**. Obráceně se promítá do prázdna a jen se
+        rozmaže přes to, co náhodou chytne pod ostrým úhlem – vypadá to jako vodorovné šmouhy, ne
+        jako chybějící decal, takže je snadné hledat chybu jinde.
+      - Textura se na plochu položí podle toho, jak je krabice otočená; na boku vyšlo písmo
+        **zrcadlově**. Rotace zrcadlit neumí, proto má materiál `DecalFlipU` / `DecalFlipV`
+        (v setupu `flip_u`, `flip_v`).
+    - Místa vybral raycast do modelu v Blenderu: vnější stěna horní gondoly (`y = +-5.64 m`) je
+      jediná velká rovná plocha lodi a nese registraci, vnitřní stěny gondol výstražné pruhy.
+      Decal na zakřiveném nebo zvenku neviditelném místě prostě nečte – první pokus dal registraci
+      mezi gondoly, kde ji nebylo vidět.
+    - `test_ship_import.py` hlídá, že každý decal ze setupu má svou instanci se svou texturou a že
+      loď má nápis na obou bocích.
+
 ---
 
 ## 6. Mapa kódu a obsahu
@@ -568,6 +591,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `Package.ps1`, `Play.ps1` | Build hry a spuštění. |
 | `Assets/build_space_scene.py` | TestSpace: obloha, planeta, tělesa, prach, materiály, světla a grade (`SKY_LIGHT_INTENSITY`, `POST_SETTINGS`). |
 | `Blender/bake_ship_ao.py` | Dopeče `T_Ship_<Loď>_AO.png` pro už postavenou loď (okluze v pečených texturách není, viz bod 38). |
+| `Assets/generate_decals.py` | Kreslí nápisy a výstražné pruhy do `ArtSource/Ships/Shared/Decals` (bod 39). |
 | `Assets/build_main_menu.py` | Level úvodní obrazovky. |
 | `Assets/import_ship.py` + `ship_materials.py` | Import lodi z Blenderu. |
 | `Assets/generate_ship_sounds.py` → `build_ship_audio.py` | Generátor zvuků (numpy) a jejich import. |
@@ -709,6 +733,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `look_tune` | Post process po vrstvách (contact shadows, Lumen, sky light, grade, film) v kosmu i v atmosféře; poslední snímek vypíše `space.PostDump`. |
 | `look_final` | Vybrané hodnoty proti úrovni tak, jak je: vesmír, atmosféra, kokpit, detail – a Lumen kvalita zvlášť, aby byla vidět cena ve snímcích. |
 | `hull_zones` | Rozbití jednolitého trupu: okluze, kavita ve dvou sílách a odřený lak ve třech, první dvojice bez všeho pro srovnání. |
+| `hull_decals` | Kam dosedly nápisy: zblízka na každý z nich a pak celá loď. Decal, který není kolmý na svůj povrch, se rozmaže do šmouh místo aby četl – to je to, co se na snímcích hledá. |
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
 Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
@@ -922,4 +947,5 @@ Viz `git log --oneline`. Poslední kroky:
 - detailní vrstva materiálu a trup 1 mil. trojúhelníků, ladicí příkazy `space.ShipMat` (body 33 a 34);
 - hra kreslila v polovičním rozlišení, zpět na 100 % (bod 35);
 - světlo a post scény, loď v kosmu přestala být silueta; rychlá smyčka `space.Post` / `space.Sun` / `space.Sky` (bod 36);
-- dopečená okluze, kavita a odřený lak na trupu (bod 38).
+- dopečená okluze, kavita a odřený lak na trupu (bod 38);
+- nápisy a výstražné pruhy na trupu jako decaly (bod 39).

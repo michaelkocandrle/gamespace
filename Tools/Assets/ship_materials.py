@@ -33,7 +33,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 MEL = unreal.MaterialEditingLibrary
 SHARED = "/Game/Ships/Shared/Materials"
 MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glass": SHARED + "/M_Ship_Glass",
-           "screen": SHARED + "/M_Ship_Screen"}
+           "screen": SHARED + "/M_Ship_Screen", "decal": SHARED + "/M_Ship_Decal"}
 TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap"}
 
 
@@ -116,6 +116,7 @@ def build_pbr_master():
 
 DETAIL_TEXTURES = {"T_Ship_Detail_N": "normal", "T_Ship_Detail_Grunge": "orm"}
 SHARED_TEXTURES = "/Game/Ships/Shared/Textures"
+SHARED_DECALS = "/Game/Ships/Shared/Decals"
 
 # Triplanar in the ship's own space: the detail keeps its size in centimetres, and it does not swim when
 # the ship moves (world-space projection would). Each plane's sample is put back into local space through
@@ -154,6 +155,34 @@ float g = w.x * Texture2DSample(TexG, TexGSampler, p.yz).r
         + w.z * Texture2DSample(TexG, TexGSampler, p.xy).r;
 return g;
 """
+
+
+def import_decal_texture(name):
+    """A generated marking (Tools/Assets/generate_decals.py) as /Game/Ships/Shared/Decals/<name>. Colour
+    with an alpha: sRGB on, and no compression that would eat the alpha of thin stencil type."""
+    filename = os.path.join(REPO, "ArtSource", "Ships", "Shared", "Decals", name + ".png")
+    if not os.path.isfile(filename):
+        return None
+    texture = _import_png(filename, SHARED_DECALS, name)
+    texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_BC7)
+    texture.set_editor_property("srgb", True)
+    unreal.EditorAssetLibrary.save_loaded_asset(texture, only_if_is_dirty=False)
+    return texture
+
+
+def _import_png(filename, folder, name):
+    task = unreal.AssetImportTask()
+    task.set_editor_property("filename", filename)
+    task.set_editor_property("destination_path", folder)
+    task.set_editor_property("destination_name", name)
+    task.set_editor_property("replace_existing", True)
+    task.set_editor_property("automated", True)
+    task.set_editor_property("save", False)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+    texture = unreal.EditorAssetLibrary.load_asset("%s/%s" % (folder, name))
+    if texture is None:
+        raise RuntimeError("could not import %s" % filename)
+    return texture
 
 
 def import_shared_texture(name):
@@ -414,7 +443,91 @@ def build_masters():
     _output(_node(glass, unreal.MaterialExpressionConstant, -600, 350, r=1.0), unreal.MaterialProperty.MP_SPECULAR)
     MEL.recompile_material(glass)
     unreal.EditorAssetLibrary.save_loaded_asset(glass, only_if_is_dirty=False)
-    return {"hull": hull, "pbr": build_pbr_master(), "glass": glass, "screen": build_screen_master()}
+    return {"hull": hull, "pbr": build_pbr_master(), "glass": glass, "screen": build_screen_master(),
+            "decal": build_decal_master()}
+
+
+def build_decal_master():
+    """The markings: a deferred decal projected onto the hull, so a stencil does not need a place in the
+    ship's UV atlas and stays sharp from any distance. Parameters: DecalTexture, DecalTint, DecalOpacity
+    (the paint's age), DecalRoughness (fresh paint is smoother than the hull around it)."""
+    decal = _fresh_material(MASTERS["decal"])
+    decal.set_editor_property("material_domain", unreal.MaterialDomain.MD_DEFERRED_DECAL)
+    # decal_blend_mode is read-only from Python and already defaults to translucent, which is the one
+    # that paints base colour and roughness and leaves the hull's normal alone.
+    decal.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    texture = _texture_param(decal, "DecalTexture", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR,
+                             "/Engine/EngineResources/WhiteSquareTexture", -800, 0)
+    _link(_decal_uvs(decal), texture, "UVs")
+    tinted = _node(decal, unreal.MaterialExpressionMultiply, -400, 0)
+    if not MEL.connect_material_expressions(texture, "RGB", tinted, "A"):
+        raise RuntimeError("decal texture RGB -> base colour")
+    _link(_vector(decal, "DecalTint", (1.0, 1.0, 1.0), -800, 250), tinted, "B")
+    _output(tinted, unreal.MaterialProperty.MP_BASE_COLOR)
+    opacity = _node(decal, unreal.MaterialExpressionMultiply, -400, 400)
+    if not MEL.connect_material_expressions(texture, "A", opacity, "A"):
+        raise RuntimeError("decal texture A -> opacity")
+    _link(_scalar(decal, "DecalOpacity", 1.0, -800, 450), opacity, "B")
+    _output(opacity, unreal.MaterialProperty.MP_OPACITY)
+    _output(_scalar(decal, "DecalRoughness", 0.55, -800, 600), unreal.MaterialProperty.MP_ROUGHNESS)
+    MEL.recompile_material(decal)
+    unreal.EditorAssetLibrary.save_loaded_asset(decal, only_if_is_dirty=False)
+    return decal
+
+
+def _decal_uvs(decal):
+    """The decal's own UVs, with a switch for each axis: DecalFlipU, DecalFlipV (0 or 1).
+
+    A decal's texture lands on the surface the way the projection box is turned, and which way round
+    that is depends on the rotation - stencil type came out mirrored on the ship's flanks (20. 9. 2026).
+    A rotation cannot mirror, so the flip belongs here.
+    """
+    uvs = _node(decal, unreal.MaterialExpressionTextureCoordinate, -1600, 0)
+    axes = []
+    for index, (channel, name) in enumerate((("R", "DecalFlipU"), ("G", "DecalFlipV"))):
+        part = _node(decal, unreal.MaterialExpressionComponentMask, -1400, index * 200,
+                     r=(channel == "R"), g=(channel == "G"), b=False, a=False)
+        _link(uvs, part, "")
+        flipped = _node(decal, unreal.MaterialExpressionOneMinus, -1250, index * 200)
+        _link(part, flipped, "")
+        pick = _node(decal, unreal.MaterialExpressionLinearInterpolate, -1100, index * 200)
+        _link(part, pick, "A")
+        _link(flipped, pick, "B")
+        _link(_scalar(decal, name, 0.0, -1600, 200 + index * 200), pick, "Alpha")
+        axes.append(pick)
+    joined = _node(decal, unreal.MaterialExpressionAppendVector, -950, 100)
+    _link(axes[0], joined, "A")
+    _link(axes[1], joined, "B")
+    return joined
+
+
+def build_decal_instances(ship, setup, masters):
+    """One material instance per marking in the setup's "decals" list, as MI_Ship_<Ship>_Decal_<name>.
+    Returns {name: instance} for the components import_ship.py puts on the Blueprint."""
+    folder = "/Game/Ships/%s/Materials" % ship
+    instances = {}
+    for spec in setup.get("decals") or []:
+        texture = import_decal_texture(spec["texture"])
+        if texture is None:
+            continue
+        name = "MI_Ship_%s_Decal_%s" % (ship, spec["name"])
+        path = "%s/%s" % (folder, name)
+        mi = unreal.EditorAssetLibrary.load_asset(path) if unreal.EditorAssetLibrary.does_asset_exist(path) else None
+        if mi is None:
+            mi = _asset_tools().create_asset(name, folder, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+        MEL.set_material_instance_parent(mi, masters["decal"])
+        MEL.set_material_instance_texture_parameter_value(mi, "DecalTexture", texture)
+        for key, param in (("opacity", "DecalOpacity"), ("roughness", "DecalRoughness"),
+                           ("flip_u", "DecalFlipU"), ("flip_v", "DecalFlipV")):
+            if key in spec:
+                MEL.set_material_instance_scalar_parameter_value(mi, param, float(spec[key]))
+        if "tint" in spec:
+            c = spec["tint"]
+            MEL.set_material_instance_vector_parameter_value(mi, "DecalTint", unreal.LinearColor(c[0], c[1], c[2], 1.0))
+        MEL.update_material_instance(mi)
+        unreal.EditorAssetLibrary.save_loaded_asset(mi, only_if_is_dirty=False)
+        instances[spec["name"]] = path
+    return instances
 
 
 def build_instance(name, folder, spec, masters, ship=None):
@@ -470,5 +583,8 @@ def apply(ship, setup, mesh_assets):
                 continue
             mesh.set_material(index, instances[chosen])
         unreal.EditorAssetLibrary.save_loaded_asset(mesh, only_if_is_dirty=False)
+    decals = build_decal_instances(ship, setup, masters)
+    if decals:
+        notes.append("%d decal materials: %s" % (len(decals), ", ".join(sorted(decals))))
     notes.append("%d material instances, masters %s" % (len(instances), ", ".join(MASTERS.values())))
     return notes
