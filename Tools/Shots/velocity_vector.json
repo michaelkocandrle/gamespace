@@ -1,0 +1,89 @@
+{
+  "_comment": "SC-3: the flight path marker. Where the ship is actually going, which decoupled is nowhere near where the nose points. Shot in space, where nothing bleeds the velocity off before the frame is taken, with drift [forward, right, up] in m/s setting what speed_ms cannot: sliding sideways and going backwards. Decoupled, or the flight computer undoes it. Run: Tools/Shots.ps1 -Preset velocity_vector",
+  "shots": [
+    {
+      "name": "ahead_in_the_reticle",
+      "camera": "cockpit",
+      "altitude_m": 60000,
+      "facing": "away",
+      "hud": 1,
+      "coupled": 0,
+      "settle": 1.2,
+      "drift": [
+        150,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "sliding_right",
+      "camera": "cockpit",
+      "altitude_m": 60000,
+      "facing": "away",
+      "hud": 1,
+      "coupled": 0,
+      "settle": 1.2,
+      "drift": [
+        150,
+        60,
+        0
+      ]
+    },
+    {
+      "name": "sliding_right_and_down",
+      "camera": "cockpit",
+      "altitude_m": 60000,
+      "facing": "away",
+      "hud": 1,
+      "coupled": 0,
+      "settle": 1.2,
+      "drift": [
+        150,
+        90,
+        -60
+      ]
+    },
+    {
+      "name": "flying_backwards",
+      "camera": "cockpit",
+      "altitude_m": 60000,
+      "facing": "away",
+      "hud": 1,
+      "coupled": 0,
+      "settle": 1.2,
+      "drift": [
+        -120,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "sideways_past_ninety",
+      "camera": "cockpit",
+      "altitude_m": 60000,
+      "facing": "away",
+      "hud": 1,
+      "coupled": 0,
+      "settle": 1.2,
+      "drift": [
+        -40,
+        120,
+        0
+      ]
+    },
+    {
+      "name": "standing_still",
+      "camera": "cockpit",
+      "altitude_m": 60000,
+      "facing": "away",
+      "hud": 1,
+      "coupled": 0,
+      "settle": 1.2,
+      "drift": [
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

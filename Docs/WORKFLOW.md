@@ -255,6 +255,7 @@ Presety (`Tools/Shots/*.json`):
 | `hull_panels` | panelové spáry: velikost listu a síla (`space.ShipMat`) |
 | `hull_scorch` | spálený plech u trysek: síla a dosah (`space.ShipMat`) |
 | `vtol` | SC-2b: odznak VTOL, visení na zvedacích tryskách (`space.Vtol`) |
+| `velocity_vector` | SC-3: značka dráhy letu (pole `drift` ve scénáři) |
 | `look_sharp`, `look_groups` | proč je obraz měkký a co která škálovací skupina stojí |
 | `look_artifacts` | film grain, motion blur a stopy za pohybem – změřeno, žádný z nich obraz nekazí |
 | `hud` | HUD ve všech situacích |
@@ -262,7 +263,8 @@ Presety (`Tools/Shots/*.json`):
 | `ship_views`, `ship` | loď zvenku |
 
 Pole jednoho snímku:
-- základ: `camera`, `altitude_m`, `facing`, `speed_ms`, `boost`, `afterburner`, `stick`, `mode`, `settle`;
+- základ: `camera`, `altitude_m`, `facing`, `speed_ms` (nebo `drift` [vpřed, vpravo, nahoru] v m/s,
+  když loď má lítat jinam, než kam míří), `boost`, `afterburner`, `stick`, `mode`, `settle`;
 - kokpit: `cockpit_eye`, `hide_hull`, `hide_canopy`, `cockpit_light` [key, fill], `display_light`, `interior_tint`;
 - ostatní: `console` (konzolové příkazy, **zůstanou nastavené i pro další snímky**), `gear`, `precision`, `chase_*`, `hud` (0–3).
 

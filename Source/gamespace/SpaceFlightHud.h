@@ -232,6 +232,23 @@ struct GAMESPACE_API FSpaceFlightHudState
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	float ViewFovDeg = 90.f;
 
+	/**
+	 * Where the ship is going, as an offset from the middle of the screen in the HUD's 1080p units
+	 * (SC-3). Star Citizen flies by this marker, especially decoupled, where the nose and the flight
+	 * path part company. Pinned to a circle so it never leaves the screen; behind the nose it is drawn
+	 * hollow and mirrored, which is the direction to turn to put it back in front.
+	 */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FVector2D VelocityMarker = FVector2D::ZeroVector;
+
+	/** The marker is worth showing: moving fast enough that the direction means something. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bVelocityVisible = false;
+
+	/** The flight path runs behind the nose (the ship is flying backwards or sideways past 90 degrees). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bVelocityBehind = false;
+
 	/** Strafe input, -1..1: X right, Y up (the strafe cross's arrow heads). */
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	FVector2D StrafeInput = FVector2D::ZeroVector;
@@ -468,6 +485,10 @@ enum class ESpaceHudSymbol : uint8
 	Line,
 	/** An MFD's glass: deep blue gradient, faint grid, darker edges, a soft reflection, a thin inner rim. */
 	MfdGlass,
+	/** Where the ship is actually going: a ring with three stubs, the aviation flight path marker. */
+	Velocity,
+	/** The same ring hollowed out, for the velocity that is behind the nose. */
+	VelocityBehind,
 };
 
 /** One of the Star Citizen HUD's drawn symbols (see ESpaceHudSymbol). */

@@ -92,6 +92,28 @@ namespace
 			UE_LOG(LogTemp, Display, TEXT("space.ShipMatColor %s on %d materials"), *Args[0], Changed);
 		}));
 
+	/**
+	 * space.Drift <forward> <right> <up>: sets the ship's velocity in its own axes, m/s. For shots of
+	 * the HUD in states the shot runner cannot fly into - sliding sideways, going backwards - where
+	 * the flight path marker is the whole point. The flight computer takes over again immediately in
+	 * coupled flight, so pair it with decoupled.
+	 */
+	FAutoConsoleCommandWithWorldAndArgs DriftCommand(
+		TEXT("space.Drift"),
+		TEXT("space.Drift <forward> <right> <up>: set the ship's velocity in its own axes, m/s."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			const FVector Local(Args.Num() > 0 ? FCString::Atof(*Args[0]) * 100.f : 0.f,
+				Args.Num() > 1 ? FCString::Atof(*Args[1]) * 100.f : 0.f,
+				Args.Num() > 2 ? FCString::Atof(*Args[2]) * 100.f : 0.f);
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				It->DebugSetLinearVelocity(It->GetActorQuat().RotateVector(Local));
+			}
+			UE_LOG(LogTemp, Display, TEXT("space.Drift %.0f %.0f %.0f m/s (ship axes)"),
+				Local.X / 100.f, Local.Y / 100.f, Local.Z / 100.f);
+		}));
+
 	/** space.Vtol 1 / 0: VTOL on every ship here, for shots that should not depend on a key. */
 	FAutoConsoleCommandWithWorldAndArgs VtolCommand(
 		TEXT("space.Vtol"),

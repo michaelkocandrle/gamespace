@@ -22,6 +22,14 @@ struct FSpaceShot
 	FString Facing = TEXT("horizon");
 	/** Speed along the nose after placing, m/s. */
 	float SpeedMS = 0.f;
+
+	/**
+	 * Velocity in the ship's own axes, m/s: forward, right, up. Set, it replaces speed_ms, which can
+	 * only fly straight ahead. For the flight path marker, which only says anything when the ship is
+	 * going somewhere other than where its nose points (SC-3).
+	 */
+	FVector Drift = FVector::ZeroVector;
+	bool bHasDrift = false;
 	FString MasterMode;
 	float Limiter = -1.f;
 	int32 Coupled = -1;

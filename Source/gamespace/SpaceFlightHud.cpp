@@ -383,6 +383,47 @@ namespace SpaceHudStyle
 	 * Heading (0 = north: the world's Z axis projected on the local horizon, 90 east), pitch and roll of
 	 * a frame against the horizon whose up is Up. At the poles north falls back to the world X axis.
 	 */
+	/** The HUD is laid out in 1080p units, so that is the width a screen projection works in. */
+	constexpr double DesignWidth = 1920.0;
+
+	/** How far a marker is allowed from the middle of the screen, 1080p units. */
+	constexpr double MarkerRadius = 330.0;
+
+	/** Under this the flight path is noise rather than a direction, cm/s (5 m/s). */
+	constexpr double VelocityMarkerMinSpeed = 500.0;
+
+	/**
+	 * Where a direction lands on the screen, in the HUD's own units. Returns false when the direction
+	 * is behind the nose, and then gives the mirrored point pinned to the circle - which is the way to
+	 * turn to bring it back in front, the way Star Citizen draws a flight path that has gone behind.
+	 */
+	bool ProjectDirection(const FVector& Direction, const FVector& Forward, const FVector& Right, const FVector& FrameUp,
+		float FovDeg, FVector2D& OutPoint)
+	{
+		const double Focal = (DesignWidth * 0.5) / FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(FovDeg, 10.f, 170.f)) * 0.5);
+		const double AlongNose = FVector::DotProduct(Direction, Forward);
+		// Screen Y grows downwards, so the up component is negated.
+		FVector2D Plane(FVector::DotProduct(Direction, Right), -FVector::DotProduct(Direction, FrameUp));
+		const bool bAhead = AlongNose > 0.01;
+		if (bAhead)
+		{
+			OutPoint = Plane * (Focal / AlongNose);
+		}
+		else
+		{
+			// Behind: no projection exists, so point the marker the way that brings it back. Straight
+			// behind has no such way - every direction is as good - so it goes to the bottom of the
+			// circle, which at least stays put instead of flickering round it.
+			const FVector2D Way = Plane.GetSafeNormal();
+			OutPoint = (Way.IsNearlyZero() ? FVector2D(0.0, 1.0) : Way) * MarkerRadius;
+		}
+		if (OutPoint.Size() > MarkerRadius)
+		{
+			OutPoint *= MarkerRadius / OutPoint.Size();
+		}
+		return bAhead;
+	}
+
 	void Attitude(const FVector& Up, const FVector& Forward, const FVector& Right, const FVector& FrameUp,
 		float& OutHeading, float& OutPitch, float& OutRoll)
 	{
@@ -829,6 +870,31 @@ int32 USpaceHudSymbol::NativePaint(const FPaintArgs& Args, const FGeometry& Allo
 		}
 		RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, Centre - FVector2f(1.f, 1.f), FVector2f(2.f, 2.f), 1.f, Color);
 		break;
+	case ESpaceHudSymbol::Velocity:
+	case ESpaceHudSymbol::VelocityBehind:
+	{
+		// The aviation flight path marker: a ring with a stub left, right and on top. Hollow (a dashed
+		// ring) when the flight path is behind the nose.
+		const float Radius = Half * 0.55f;
+		const int32 Steps = 24;
+		const bool bDashed = Symbol == ESpaceHudSymbol::VelocityBehind;
+		for (int32 i = 0; i < Steps; ++i)
+		{
+			if (bDashed && (i % 2) == 1)
+			{
+				continue;
+			}
+			const float A0 = 2.f * PI * float(i) / float(Steps);
+			const float A1 = 2.f * PI * float(i + 1) / float(Steps);
+			Draw({ Centre + FVector2f(FMath::Cos(A0), FMath::Sin(A0)) * Radius,
+				   Centre + FVector2f(FMath::Cos(A1), FMath::Sin(A1)) * Radius }, Color, 1.4f);
+		}
+		for (const FVector2f& Dir : { FVector2f(1.f, 0.f), FVector2f(-1.f, 0.f), FVector2f(0.f, -1.f) })
+		{
+			Draw({ Centre + Dir * Radius, Centre + Dir * (Half - 1.f) }, Color, 1.4f);
+		}
+		break;
+	}
 	case ESpaceHudSymbol::Plus:
 		Draw({ Centre - FVector2f(Half - 1.f, 0.f), Centre + FVector2f(Half - 1.f, 0.f) }, Color, 1.6f);
 		Draw({ Centre - FVector2f(0.f, Half - 1.f), Centre + FVector2f(0.f, Half - 1.f) }, Color, 1.6f);
@@ -1457,6 +1523,8 @@ void USpaceFlightHud::BuildTree()
 	Parts.Add(TEXT("HeadingTape"), Heading);
 	At(Heading, FVector2D(0.0, -140.0), FVector2D(0.5, 0.0), FVector2D(200.0, 44.0));
 	Symbol(TEXT("Reticle"), ESpaceHudSymbol::Reticle, FVector2D::ZeroVector, FVector2D(28.0, 28.0), Label);
+	// The flight path marker moves every frame (ApplyState), so it starts in the middle.
+	Symbol(TEXT("Velocity"), ESpaceHudSymbol::Velocity, FVector2D::ZeroVector, FVector2D(30.0, 30.0), Instrument);
 	VirtualJoystick = WidgetTree->ConstructWidget<USpaceHudVirtualJoystick>(USpaceHudVirtualJoystick::StaticClass(), TEXT("VirtualJoystick"));
 	USizeBox* JoystickBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("VirtualJoystickBox"));
 	JoystickBox->SetWidthOverride(220.f);
@@ -1661,11 +1729,23 @@ FSpaceFlightHudState USpaceFlightHud::ApplyView(const FSpaceFlightHudState& Stat
 {
 	FSpaceFlightHudState Out = State;
 	Out.ViewFovDeg = FovDeg;
+	const FRotationMatrix View(ViewRotation);
 	if (Ship && Ship->HasEnvironment())
 	{
-		const FRotationMatrix View(ViewRotation);
 		SpaceHudStyle::Attitude(Ship->GetEnvironment().Up, View.GetUnitAxis(EAxis::X), View.GetUnitAxis(EAxis::Y), View.GetUnitAxis(EAxis::Z),
 			Out.HeadingDeg, Out.PitchDeg, Out.RollDeg);
+	}
+	if (Ship)
+	{
+		// Below a walking pace the direction is noise, and a marker that jitters round the middle of
+		// the screen is worse than none.
+		const FVector Velocity = Ship->GetLinearVelocity();
+		Out.bVelocityVisible = Velocity.Size() > SpaceHudStyle::VelocityMarkerMinSpeed;
+		if (Out.bVelocityVisible)
+		{
+			Out.bVelocityBehind = !SpaceHudStyle::ProjectDirection(Velocity.GetSafeNormal(), View.GetUnitAxis(EAxis::X),
+				View.GetUnitAxis(EAxis::Y), View.GetUnitAxis(EAxis::Z), FovDeg, Out.VelocityMarker);
+		}
 	}
 	return Out;
 }
@@ -1748,6 +1828,19 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 	SetLamp(TEXT("PREC"), State.bPrecisionOn, State.bPrecisionActive ? Instrument : Amber);
 	// Amber while switched on but not in effect, the same rule as G-Safe and precision mode.
 	SetLamp(TEXT("VTOL"), State.bVtolOn, State.bVtolActive ? Instrument : Amber);
+
+	// The flight path marker (SC-3): where the ship is going, not where the nose points.
+	Show(TEXT("Velocity"), State.bVelocityVisible);
+	if (USpaceHudSymbol* Marker = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("Velocity"))))
+	{
+		Marker->Symbol = State.bVelocityBehind ? ESpaceHudSymbol::VelocityBehind : ESpaceHudSymbol::Velocity;
+		Marker->Color = State.bVelocityBehind ? Amber : Instrument;
+		// Named MarkerSlot: "Slot" is a member of UWidget and would shadow it (pitfall 9.4d).
+		if (UCanvasPanelSlot* MarkerSlot = Cast<UCanvasPanelSlot>(Marker->Slot))
+		{
+			MarkerSlot->SetPosition(State.VelocityMarker);
+		}
+	}
 	SetLamp(TEXT("CRUISE"), State.CruiseLabel != TEXT("OFF"), State.CruiseLabel == TEXT("ON") ? Instrument : Amber);
 	if (USpaceHudSymbol* Shield = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("Shield"))))
 	{

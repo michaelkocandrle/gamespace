@@ -614,6 +614,20 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Klávesa: `Tools/Assets/add_vtol_input.py` (IA_Vtol na G); bez něj si ji loď namapuje za běhu.
       Konzole: `space.Vtol 1|0`. Testy: `Tools/Tests/test_vtol_sc2b.py`, snímky: `Tools/Shots/vtol.json`.
 
+44. **SC-3 – značka dráhy letu** (20. 9. 2026): na HUD přibyla značka toho, **kam loď doopravdy letí**,
+    ne kam míří nos. V SC se podle ní lítá – v decoupled se nos a dráha letu rozejdou úplně.
+    - Kroužek se třemi vousy (letecký flight path marker) na místě, kam rychlost dopadá na obrazovku.
+      Počítá se z ohniskové délky pohledu v `USpaceFlightHud::ApplyView`, v jednotkách 1080p plátna HUD.
+    - **Za nosem** (couvání, let bokem přes 90°) průmět neexistuje: značka zezlátne, vykreslí se
+      čárkovaně a přilepí se na kruh **na opačnou stranu**, což je směr, kam se otočit. Přesně vzadu
+      zaparkuje dole, aby neposkakovala dokola.
+    - Pod 5 m/s se nekreslí: pod tím je směr šum a značka by poskakovala kolem středu.
+    - Nikdy neopustí kruh o poloměru 330 jednotek kolem středu.
+    - `Tools/Tests/test_flight_hud_sc3.py` měří průmět proti geometrii, kterou tvrdí, že dělá – značka
+      s přehozeným znaménkem je horší než žádná.
+    - K tomu dvě věci do nástrojů: pole `drift` ve scénáři snímků (rychlost v osách lodi, m/s – `speed_ms`
+      umí jen rovně vpřed) a konzolový `space.Drift <vpřed> <vpravo> <nahoru>` pro hraní.
+
 ---
 
 ## 6. Mapa kódu a obsahu
@@ -742,6 +756,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_cockpit_frame.py` | Kokpit: Vanguard má interiér (díl, oko nad vanou za deskou, deska 7–13° pod okem jako v SC referenci, pilot ≥ 1,2 m od desky, provizorium vypnuté); rozložení provizorního rámu pro lodě bez interiéru (nic v okně HUD, deska 14–20° pod horizontem, sloupky 24–34° do stran, sedadlo za okem). |
 | `test_landing_sc2.py` | SC-2a: dosednutí jen s podvozkem (GEAR UP před vším ostatním, mezera pod patkami), stavový automat podvozku (časy, otočení v půlce, zákaz zasunutí na zemi), pohyb modelovaného dílu i zástupných nohou, precision (strop, omezovač uvnitř, jen SCM, bez afterburneru, pomalejší otáčení, brzdění bez skoku), kontrolky GEAR/PREC, klávesy N/P bez kolizí, hodnoty a díl `Gear` Vanguardu, scénář `landing`. |
 | `test_vtol_sc2b.py` | SC-2b: VTOL jen v SCM (v NAV odmítnutý a shozený), přechod trvá svůj čas, hlavní tah / zvedací a boční trysky podle násobků, strop rychlosti a stoupavost Space/Ctrl, odmítnutý afterburner, auto-srovnání (`ComputeVtolLevelStep` proti zadanému „nahoru“), visení čte jako práce motorů, odznak VTOL na HUD, klávesa G bez kolize, scénář snímků. |
+| `test_flight_hud_sc3.py` | SC-3: značka dráhy letu – nic pod 5 m/s, střed při letu po ose pohledu, správná strana a velikost odchylky podle ohniskové délky, přilepení na kruh, čárkovaná značka za nosem, scénář snímků. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
 | `test_scene_look.py` | Vzhled uložené úrovně proti receptu: intenzita sky lightu, contact shadows a šířka slunce, všechna nastavení `POST_SETTINGS` v neohraničeném volume (a že chromatická aberace a vyvážení bílé zůstala vypnutá), lak trupu z `Vanguard_setup.json`. Chytá zapomenuté spuštění `build_space_scene.py` / `import_ship.py`. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
@@ -795,6 +810,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `ship_views` | Loď ze všech stran (8 pohledů kolem, shora, zespodu s podvozkem, zblízka, ve vesmíru, se zářícími tryskami). Pro každý nový nebo změněný model. |
 | `landing` | SC-2a: podvozek ze strany (dole, v půlce cesty), zespodu, loď stojící na patkách, varování GEAR UP, loď na břiše bez podvozku, HUD po přistání, precision HUD, kokpit na zemi. |
 | `vtol` | SC-2b: odznak VTOL na desce zapnutý i vypnutý, loď visící na zvedacích tryskách ze strany, zezadu a z kokpitu. VTOL přepíná `space.Vtol`, ne klávesa. |
+| `velocity_vector` | SC-3: značka dráhy letu v ose, při letu bokem, šikmo dolů, pozpátku a ve stoje. Rychlosti nastavuje pole `drift`, ne motory. |
 | `cockpit_centre` | Střední sloupek desky (RADAR, SELF STATUS): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé: vyříznout a zvětšit. |
 | `cockpit_readability` | Čitelnost displejů: výchozí pohled, přiblížení (Z) na FLIGHT/STATUS a THRUSTERS/CONTACTS, na konci staré oko pro srovnání. |
 | `hull_tune` | Ladění materiálu trupu: šest variant v jednom běhu přes `space.ShipMat` (síla detailu, velikost dlaždice, světlejší lak, drsnost). |
@@ -817,7 +833,7 @@ Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `alti
 `comstab`, `boost`, `afterburner`, `stick` (kurzor VJoy), `settle` (sekundy na ustálení),
 `cockpit_eye`, `hide_hull`, `hide_canopy`, `cockpit_light` [cd, cd], `display_light`, `interior_tint` (pro ladění kokpitu bez reimportu lodi), `console` (seznam konzolových příkazů před snímkem, pro srovnání nastavení), `gear` (podvozek
 hned dole / nahoře), `lower_gear` (začne vysouvat, krátký `settle` ho chytí v půlce), `precision`,
-`chase_yaw`, `chase_pitch` (> 0 = zespodu), `chase_zoom` (kamera otočená kolem lodi). Nízká
+`chase_yaw`, `chase_pitch` (> 0 = zespodu), `chase_zoom` (kamera otočená kolem lodi), `drift` [vpřed, vpravo, nahoru] v m/s (rychlost v osách lodi místo `speed_ms`, pro značku dráhy letu). Nízká
 `altitude_m` s podvozkem a pár sekund `settle` loď opravdu posadí na zem.
 
 ### Jednotlivý snímek při hraní
@@ -877,7 +893,7 @@ a speed limiter).
     35 %, strop 60 m/s, svislé trysky ×1,5 a boční ×1,3, Space/Ctrl na stoupavost 15 m/s, auto-srovnání
     na horizont, afterburner a cruise odmítnuté, odznak VTOL na HUD i MFD. Visení už je vidět na
     tryskách (`HoverThrustReferenceG`). Bod 43.
-- **SC-3 – zbytek HUD a MFD:** VTOL a GEAR (po SC-2), ESP a LOCK (až budou zbraně), velocity
+- **SC-3 – zbytek HUD a MFD** (začato 20. 9. 2026: značka dráhy letu, bod 44; VTOL a GEAR už jsou): VTOL a GEAR (po SC-2), ESP a LOCK (až budou zbraně), velocity
   vector, MFD panely, celková přestavba na UMG a náhrada anglického debug HUD.
 - **SC-4 – Quantum travel** místo cruise J: markery cílů (Veyra, Keth, Orun, později stanice),
   natočení, spool + kalibrace (B), engage, efekt tunelu, cooldown, blokace překážkou, palivo.
@@ -1026,4 +1042,5 @@ Viz `git log --oneline`. Poslední kroky:
 - panelové spáry jako dlaždicová vrstva materiálu (bod 40);
 - spálený plech u trysek, první zóna materiálu (bod 41);
 - hra běžela na Medium: výchozí předvolba Cinematic a doostření (bod 42);
-- SC-2b: VTOL, visící let a záře trysek při visení (bod 43).
+- SC-2b: VTOL, visící let a záře trysek při visení (bod 43);
+- SC-3: značka dráhy letu na HUD (bod 44).

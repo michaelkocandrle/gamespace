@@ -761,6 +761,21 @@ both, which is also how the tests step the animation without Slate.
 `Tools/Tests/test_flight_hud_sc1c.py`. Layout constants (offsets +-300 px from the centre, gauge sizes)
 and colours (`SpaceHudStyle`) are at the top of `SpaceFlightHud.cpp`.
 
+
+**Flight path marker (SC-3).** The HUD shows where the ship is actually going, not where its nose
+points - in Star Citizen that is what you fly by, and decoupled the two part company entirely. A
+ring with three stubs sits where the velocity lands on the screen, projected from the view's focal
+length in `USpaceFlightHud::ApplyView` in the HUD's own 1080p units. Behind the nose - reversing, or
+sliding sideways past 90 degrees - there is no projection, so it goes amber, draws dashed and pins
+to the opposite side of a circle, which is the way to turn to bring it back; exactly behind it parks
+at the bottom rather than flickering round the ring. Below 5 m/s it is not drawn, because under that
+the direction is noise. `Tools/Tests/test_flight_hud_sc3.py` checks the projection against the
+geometry it claims to do; `Tools/Shots.ps1 -Preset velocity_vector` shows it.
+
+Two things came with it, both for putting the ship in states it cannot fly into by itself: the shot
+list's `drift` field (`[forward, right, up]` in m/s, the ship's own axes, instead of `speed_ms`
+which only flies straight ahead) and `space.Drift <forward> <right> <up>` in the console.
+
 ## SpaceDebugHUD
 
 `AHUD` subclass set as `HUDClass` on `SpaceGameMode`. Creates the UMG flight HUD (above) and draws

@@ -106,6 +106,12 @@ bool USpaceShotRunner::ParseShotList(const FString& Json, TArray<FSpaceShot>& Ou
 		if ((*Object)->TryGetNumberField(TEXT("hud"), Number)) { Shot.HudMode = int32(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("altitude_m"), Number)) { Shot.AltitudeM = float(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("speed_ms"), Number)) { Shot.SpeedMS = float(Number); }
+		const TArray<TSharedPtr<FJsonValue>>* DriftValues = nullptr;
+		if ((*Object)->TryGetArrayField(TEXT("drift"), DriftValues) && DriftValues->Num() == 3)
+		{
+			Shot.Drift = FVector((*DriftValues)[0]->AsNumber(), (*DriftValues)[1]->AsNumber(), (*DriftValues)[2]->AsNumber());
+			Shot.bHasDrift = true;
+		}
 		if ((*Object)->TryGetNumberField(TEXT("limiter"), Number)) { Shot.Limiter = float(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("settle"), Number)) { Shot.Settle = float(Number); }
 		bool bFlag = false;
@@ -281,7 +287,9 @@ void USpaceShotRunner::ApplyShot(const FSpaceShot& Shot, ASpaceshipPawn& Ship)
 	Ship.SetBoostHeld(Shot.bBoost);
 	Ship.SetAfterburnerHeld(Shot.bAfterburner);
 	Ship.DebugSetMouseStick(Shot.Stick);
-	Ship.DebugSetLinearVelocity(Ship.GetActorForwardVector() * (Shot.SpeedMS * 100.f));
+	Ship.DebugSetLinearVelocity(Shot.bHasDrift
+		? Ship.GetActorQuat().RotateVector(Shot.Drift * 100.f)
+		: Ship.GetActorForwardVector() * (Shot.SpeedMS * 100.f));
 	if (!Shot.CockpitEye.IsNearlyZero() || Shot.HideHull >= 0 || Shot.HideCanopy >= 0)
 	{
 		Ship.DebugConfigureCockpit(Shot.CockpitEye, Shot.HideHull > 0, Shot.HideCanopy != 0);
