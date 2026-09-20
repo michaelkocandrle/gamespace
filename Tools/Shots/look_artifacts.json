@@ -1,0 +1,28 @@
+{
+  "_comment": "The three things left that could soften or dirty the picture: the film grain this project added, motion blur (at the engine default, and the cinematic preset runs it at full quality), and TSR trailing behind what moves. The grain is measured standing still, where two frames are identical; motion blur is measured in flight, twice per setting, because at 400 m/s no two frames frame the ship the same way - the spread between the pair is the error bar, and the telling number is how directional the blur is, not how much detail there is. Run: Tools/Shots.ps1 -Preset look_artifacts",
+  "shots": [
+    {"name": "still_grain_on", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 0, "settle": 3.0,
+     "console": ["space.Post FilmGrainIntensity 0.2"]},
+    {"name": "still_grain_off", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 0, "settle": 2.0,
+     "console": ["space.Post FilmGrainIntensity 0"]},
+    {"name": "still_grain_on2", "camera": "cockpit", "altitude_m": 3000, "facing": "horizon", "hud": 0, "settle": 2.0,
+     "console": ["space.Post FilmGrainIntensity 0.2"]},
+
+    {"name": "fast_blur_on_1", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 400, "afterburner": true, "chase_yaw": 120, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 2.5,
+     "console": ["r.MotionBlurQuality 4", "r.MotionBlur.Amount 0.5"]},
+    {"name": "fast_blur_on_2", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 400, "afterburner": true, "chase_yaw": 120, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 2.5},
+
+    {"name": "fast_blur_off_1", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 400, "afterburner": true, "chase_yaw": 120, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 2.5,
+     "console": ["r.MotionBlurQuality 0"]},
+    {"name": "fast_blur_off_2", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 400, "afterburner": true, "chase_yaw": 120, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 2.5},
+
+    {"name": "fast_blur_half_1", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 400, "afterburner": true, "chase_yaw": 120, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 2.5,
+     "console": ["r.MotionBlurQuality 4", "r.MotionBlur.Amount 0.2"]},
+    {"name": "fast_blur_half_2", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "speed_ms": 400, "afterburner": true, "chase_yaw": 120, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 2.5},
+
+    {"name": "ghost_dust", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "speed_ms": 400, "afterburner": true, "chase_yaw": 150, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 2.5,
+     "console": ["r.MotionBlurQuality 0"]},
+    {"name": "ghost_dust_blur", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "speed_ms": 400, "afterburner": true, "chase_yaw": 150, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 2.5,
+     "console": ["r.MotionBlurQuality 4", "r.MotionBlur.Amount 0.5"]}
+  ]
+}

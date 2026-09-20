@@ -255,6 +255,7 @@ Presety (`Tools/Shots/*.json`):
 | `hull_panels` | panelové spáry: velikost listu a síla (`space.ShipMat`) |
 | `hull_scorch` | spálený plech u trysek: síla a dosah (`space.ShipMat`) |
 | `look_sharp`, `look_groups` | proč je obraz měkký a co která škálovací skupina stojí |
+| `look_artifacts` | film grain, motion blur a stopy za pohybem – změřeno, žádný z nich obraz nekazí |
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
 | `ship_views`, `ship` | loď zvenku |
@@ -599,3 +600,15 @@ Nic z toho se neukládá. Po restartu hry je zpátky to, co je v úrovni.
 - **Lumen na kvalitu 2 (reflections, final gather) nic nepřidal** a stál ~1 FPS, takže v receptu není.
 - Contact shadows (0.08 m) a širší slunce (0.5°) stojí nula a hrají do detailu panelů.
 - Celkově: 80 → 88 FPS (změna vzhledu výkon nezhoršila).
+
+### 11.4 Co bylo podezřelé a měření ho vyvrátilo (20. 9. 2026)
+
+Po tom, co se předvolba zvedla na Cinematic (HANDOFF bod 42), zůstaly tři podezřelí. `Tools/Shots/look_artifacts.json` je změřil a **ani jeden obraz nekazí**:
+
+- **Film grain 0.2** (přidaný tímhle projektem): šum v ploché obloze **3,90 s ním proti 3,80 bez něj**,   tedy 2,5 % – a opakované měření se shoduje na 0,006. Zbylých 3,8 je šum scény samotné, ne grain.
+- **Motion blur** (výchozí 0.5, na Cinematic běží v plné kvalitě): při 400 m/s je poměr svislých a   vodorovných hran v terénu **0,47 se zapnutým i vypnutým** rozmazáním. Kdyby rozmazával, poměr spadne –   chase kamera ale letí s lodí, takže v záběru se skoro nic nehne.
+- **Stopy za pohybem (TSR)**: silueta lodi proti obloze je při 5× zvětšení čistá, bez schodů i bez teček.
+
+Jemné „pruhování“ na hladkých plochách trupu je **mikrodetailní vrstva materiálu**, ne chyba: `DetailNormalStrength 0` ubere 17 % vysokých frekvencí, `PanelStrength 0` dalších 7 %. Je to povrch, ne artefakt.
+
+**Jak měřit, aby to něco znamenalo:** při 400 m/s není žádných dvou snímků stejně zarámováno, takže absolutní „ostrost“ (Laplace) skáče o desítky procent podle toho, kde zrovna loď je. Proto: statické věci měř ve stoje, kde jsou snímky totožné, pohyblivé dvakrát za nastavení (rozdíl dvojice je chyba měření) a raději **poměrem** (směrovostí rozmazání) než absolutním číslem.
