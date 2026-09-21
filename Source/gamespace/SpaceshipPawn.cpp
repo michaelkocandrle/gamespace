@@ -32,6 +32,7 @@
 #include "PhysicsEngine/BodySetup.h"
 #include "Sound/SoundBase.h"
 #include "SpaceDustComponent.h"
+#include "SpaceSpeedTunnelComponent.h"
 #include "SpaceUserSettings.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/Engine.h"
@@ -308,6 +309,8 @@ ASpaceshipPawn::ASpaceshipPawn()
 
 	SpaceDust = CreateDefaultSubobject<USpaceDustComponent>(TEXT("SpaceDust"));
 	SpaceDust->SetupAttachment(HullCollision);
+	SpeedTunnel = CreateDefaultSubobject<USpaceSpeedTunnelComponent>(TEXT("SpeedTunnel"));
+	SpeedTunnel->SetupAttachment(HullCollision);
 
 	// A hard reference, so the cooker packs it (engine content loaded by path would be missing).
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> GearCylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
@@ -2840,9 +2843,32 @@ void ASpaceshipPawn::UpdateSpaceDust(float DeltaSeconds)
 	if (!PlayerController || !PlayerController->PlayerCameraManager || LandingState == ELandingState::Landed)
 	{
 		SpaceDust->HideDust();
+		SpeedTunnel->HideTunnel();
 		return;
 	}
-	SpaceDust->UpdateDust(PlayerController->PlayerCameraManager->GetCameraLocation(), LinearVelocity, 1.f + 1.5f * CruiseBlend);
+	// The camera manager still holds last frame's view (it updates after the pawn ticks). At 1.2 km/s
+	// that is 20 m behind, which put the dust's "nothing right at the lens" fade 20 m off and let a
+	// streak run through the lens as a white wedge (21. 9. 2026). The camera travels with the ship,
+	// so this frame's move is added.
+	const FVector View = PlayerController->PlayerCameraManager->GetCameraLocation() + LinearVelocity * DeltaSeconds;
+	// No cruise boost for the dust any more (it was 1 + 1.5 x cruise while the dust was the only look
+	// of speed): at 1.2 km/s cruise it drew thick white wedges over the tunnel (21. 9. 2026).
+	SpaceDust->UpdateDust(View, LinearVelocity, 1.f);
+	SpeedTunnel->UpdateTunnel(View, LinearVelocity, DeltaSeconds);
+}
+
+void ASpaceshipPawn::DebugEngageCruise()
+{
+	CruiseState = ECruiseState::Active;
+	CruiseTimer = 0.f;
+	CruiseBlocker = ECruiseBlocker::None;
+	CruiseBlend = 1.f;
+	bBoostActive = false;
+	bAfterburnerActive = false;
+	CruiseSpeedLimit = ComputeCruiseSpeedLimit(bHasEnvironment ? float(Environment.AltitudeAboveTerrainCm) : 0.f,
+		bHasEnvironment ? Environment.AtmosphereDensity : 0.f, bHasEnvironment);
+	LinearVelocity = GetActorForwardVector() * (CruiseSpeedLimit * FMath::Clamp(SpeedLimiterFraction, 0.1f, 1.f));
+	UE_LOG(LogSpaceship, Log, TEXT("%s: cruise forced at %.0f m/s"), *GetName(), LinearVelocity.Size() / 100.0);
 }
 
 // -------------------------------------------------------------------------------------------

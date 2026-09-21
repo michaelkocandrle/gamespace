@@ -31,6 +31,8 @@ struct FSpaceShot
 	FVector Drift = FVector::ZeroVector;
 	bool bHasDrift = false;
 	FString MasterMode;
+	/** Cruise at once (ASpaceshipPawn::DebugEngageCruise), at the limit times "limiter". */
+	bool bCruise = false;
 	float Limiter = -1.f;
 	int32 Coupled = -1;
 	int32 GSafe = -1;

@@ -106,6 +106,7 @@ bool USpaceShotRunner::ParseShotList(const FString& Json, TArray<FSpaceShot>& Ou
 		if ((*Object)->TryGetNumberField(TEXT("hud"), Number)) { Shot.HudMode = int32(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("altitude_m"), Number)) { Shot.AltitudeM = float(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("speed_ms"), Number)) { Shot.SpeedMS = float(Number); }
+		(*Object)->TryGetBoolField(TEXT("cruise"), Shot.bCruise);
 		const TArray<TSharedPtr<FJsonValue>>* DriftValues = nullptr;
 		if ((*Object)->TryGetArrayField(TEXT("drift"), DriftValues) && DriftValues->Num() == 3)
 		{
@@ -290,6 +291,10 @@ void USpaceShotRunner::ApplyShot(const FSpaceShot& Shot, ASpaceshipPawn& Ship)
 	Ship.DebugSetLinearVelocity(Shot.bHasDrift
 		? Ship.GetActorQuat().RotateVector(Shot.Drift * 100.f)
 		: Ship.GetActorForwardVector() * (Shot.SpeedMS * 100.f));
+	if (Shot.bCruise)
+	{
+		Ship.DebugEngageCruise();
+	}
 	if (!Shot.CockpitEye.IsNearlyZero() || Shot.HideHull >= 0 || Shot.HideCanopy >= 0)
 	{
 		Ship.DebugConfigureCockpit(Shot.CockpitEye, Shot.HideHull > 0, Shot.HideCanopy != 0);

@@ -1,0 +1,23 @@
+{
+  "_comment": "The cruise speed tunnel (USpaceSpeedTunnelComponent), tuned live through space.Tunnel. White dust streaks alone read as cheap at cruise speed (21. 9. 2026, the author against two Star Citizen quantum travel frames: streaks radiating from the vanishing point, soft cold beams converging on it, a glow there). Each stage changes one thing and holds it for the shots after it. Run: Tools/Shots.ps1 -Preset tunnel_tune",
+  "shots": [
+    {"name": "a_cruise_chase", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "mode": "NAV", "limiter": 1.0, "cruise": true, "chase_yaw": 20, "chase_pitch": -8, "settle": 3.0},
+    {"name": "a_cruise_cockpit", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "mode": "NAV", "limiter": 1.0, "cruise": true, "settle": 3.0},
+    {"name": "a_cruise_planet", "camera": "chase", "altitude_m": 60000, "facing": "planet", "hud": 0, "gear": false, "mode": "NAV", "limiter": 1.0, "cruise": true, "chase_yaw": 25, "chase_pitch": -10, "settle": 2.0},
+    {"name": "a_cruise_slow", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "mode": "NAV", "limiter": 0.2, "cruise": true, "chase_yaw": 20, "chase_pitch": -8, "settle": 3.0},
+    {"name": "a_nav_top", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "mode": "NAV", "speed_ms": 1000, "chase_yaw": 20, "chase_pitch": -8, "settle": 2.0},
+
+    {"name": "b_beams_faint", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "mode": "NAV", "limiter": 1.0, "cruise": true, "chase_yaw": 20, "chase_pitch": -8, "settle": 2.0,
+     "console": ["space.Tunnel BeamBrightness 0.6"]},
+    {"name": "c_beams_strong", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "mode": "NAV", "limiter": 1.0, "cruise": true, "chase_yaw": 20, "chase_pitch": -8, "settle": 2.0,
+     "console": ["space.Tunnel BeamBrightness 2.5"]},
+
+    {"name": "d_wide", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "mode": "NAV", "limiter": 1.0, "cruise": true, "chase_yaw": 20, "chase_pitch": -8, "settle": 2.0,
+     "console": ["space.Tunnel BeamBrightness 1.2", "space.Tunnel StreakWidthCm 11"]},
+    {"name": "e_sparse_near", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "mode": "NAV", "limiter": 1.0, "cruise": true, "chase_yaw": 20, "chase_pitch": -8, "settle": 2.0,
+     "console": ["space.Tunnel StreakWidthCm 7", "space.Tunnel Layers ((RadiusCm=2500,Brightness=1,Lanes=24,BeamWeight=0),(RadiusCm=6000,Brightness=0.8,Lanes=90,BeamWeight=0.3),(RadiusCm=15000,Brightness=0.6,Lanes=280,BeamWeight=1))"]},
+    {"name": "f_teal", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "mode": "NAV", "limiter": 1.0, "cruise": true, "chase_yaw": 20, "chase_pitch": -8, "settle": 2.0,
+     "console": ["space.Tunnel BeamColor 0.2 0.7 0.8"]},
+    {"name": "f_teal_cockpit", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "mode": "NAV", "limiter": 1.0, "cruise": true, "settle": 2.0}
+  ]
+}

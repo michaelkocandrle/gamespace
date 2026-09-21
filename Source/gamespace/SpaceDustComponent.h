@@ -65,6 +65,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Dust", meta = (ClampMin = "0.0"))
 	float FadeInSpeed = 800.f;
 
+	/**
+	 * Fading out again from this speed to FadeOutEndSpeed, cm/s. From ~1 km/s the ship crosses the
+	 * box in a few frames, every speck lands somewhere new each frame, and near the camera the
+	 * specks are 15 m white bars across the view (seen in the chase view at NAV top speed,
+	 * 21. 9. 2026); the speed tunnel (USpaceSpeedTunnelComponent) carries the look from there.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Dust", meta = (ClampMin = "0.0"))
+	float FadeOutStartSpeed = 60000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Dust", meta = (ClampMin = "0.0"))
+	float FadeOutEndSpeed = 150000.f;
+
 	/** A speck's length is the common one times 1 +- this: 0.6 means a third as long to nearly twice. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Dust", meta = (ClampMin = "0.0", ClampMax = "0.95"))
 	float LengthSpread = 0.6f;

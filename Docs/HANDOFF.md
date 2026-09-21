@@ -642,6 +642,37 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       jako prach. **Nestojí to nic měřitelného** (80 FPS s 900 i s 3500, `Tools/Shots/dust_tune.json`).
     - Ladí se za běhu: `space.Dust <Vlastnost> <hodnota>`, `space.DustList`. Změna počtu se projeví
       hned (pole se přestaví).
+46. **Rychlostní tunel v cruise** (21. 9. 2026, autor: bílé čáry samy nestačí, dva snímky quantum
+    travel ze Star Citizen): nová komponenta `USpaceSpeedTunnelComponent` na lodi.
+    - **Proč nestačí prach:** jeho smítka stojí ve světě. V cruise loď přeletí celou 30m krabici za
+      snímek, každé smítko skočí jinam a čáry se rozpadnou na blikání. Nad ~600 m/s proto vzhled
+      přebírá tunel a prach mezi 600 a 1500 m/s mizí (`FadeOutStartSpeed`, `FadeOutEndSpeed`).
+    - **Jak funguje:** tři otevřené válce kolem kamery (25, 60 a 150 m), osa ve směru letu. Uvnitř
+      válce se stěna perspektivou sbíhá do úběžníku, takže čáry vycházejí z bodu, kam loď letí,
+      bez triků v obrazovém prostoru, a loď zůstává před nimi. `M_SpeedTunnel` (HLSL v Custom node)
+      kreslí na stěnu **čáry** (dráhy kolem osy, v každé jedna čára na periodu, většina slabých,
+      pár jasných, některé do modra), **měkké světelné pruhy** sbíhající se do úběžníku a **záři**
+      na úběžníku (vzdálené víko válce).
+    - Čáry se posouvají o dráhu, kterou počítá komponenta, ne o čas materiálu: zdánlivá rychlost
+      sleduje skutečnou, ale nepřekročí `MaxApparentSpeed` (2 km/s). Čára, která za snímek skočí
+      dál, než je sama dlouhá, bliká místo toho, aby tekla; test hlídá aspoň dvojnásobek.
+    - **Šířka čar v cm, škálovaná vzdáleností stěny.** Podíl dráhy dělal z blízké stěny tlusté
+      pruhy, jedna šířka pro všechny stěny zase nechala vzdálené zmizet.
+    - **Pruhy pokračují přes víko.** V první verzi končily kousek před úběžníkem a kolem záře zůstal
+      tmavý kotouč; bez ditheru navíc měkké přechody dělaly schody.
+    - **Dvě chyby prachu, které tunel odhalil:** (a) pawn prach v cruise zesiloval 2,5× (z doby, kdy byl
+      jediným efektem) – pryč; (b) prach se stavěl kolem polohy kamery z **minulého snímku** (camera
+      manager se aktualizuje až po pawnu). Při 1,2 km/s je to 20 m, ochrana „nic u objektivu“ měřila
+      od špatného místa a smítko projelo kamerou jako bílý klín přes půl obrazu. Poloha se teď
+      posune o pohyb lodi za snímek a blízkost se měří k nejbližšímu bodu čáry, ne k jejímu středu.
+    - Hodnoty (`Tools/Shots/tunnel_tune.json`, tři kola): `StreakBrightness` 10, `StreakWidthCm` 7,
+      `BeamBrightness` 2, `BeamCount` 24, `BeamSharpness` 6, `GlowBrightness` 2, modré pruhy
+      (tyrkysová varianta ze druhého SC snímku je v tune sadě). Plně od 2,5 km/s.
+    - Ladí se za běhu: `space.Tunnel <Vlastnost> <hodnota>`, `space.TunnelList`; stěny přes
+      `space.Tunnel Layers ((RadiusCm=2500,Brightness=1,Lanes=50,BeamWeight=0),...)`.
+    - Snímky umí cruise: pole `"cruise": true` (`ASpaceshipPawn::DebugEngageCruise`, rychlost =
+      limit × `limiter`). Výsledek: `-Preset speed_tunnel` (SCM → NAV → cruise 1,2 a 6 km/s).
+    - Výkon: 82–87 FPS s tunelem, stejně jako bez něj.
 
 ---
 
@@ -773,6 +804,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_vtol_sc2b.py` | SC-2b: VTOL jen v SCM (v NAV odmítnutý a shozený), přechod trvá svůj čas, hlavní tah / zvedací a boční trysky podle násobků, strop rychlosti a stoupavost Space/Ctrl, odmítnutý afterburner, auto-srovnání (`ComputeVtolLevelStep` proti zadanému „nahoru“), visení čte jako práce motorů, odznak VTOL na HUD, klávesa G bez kolize, scénář snímků. |
 | `test_flight_hud_sc3.py` | SC-3: značka dráhy letu – nic pod 5 m/s, střed při letu po ose pohledu, správná strana a velikost odchylky podle ohniskové délky, přilepení na kruh, čárkovaná značka za nosem, scénář snímků. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
+| `test_speed_tunnel.py` | Rychlostní tunel: nic v SCM, jen část v NAV, plný v cruise a monotónně; prach mizí až když tunel naskočí a je pryč, než ho cruise rozbliká; čára delší než dvojnásobek posunu za snímek při 60 FPS (neblikne); čáry v dráze do sebe nenarazí; stěny od nejbližší, loď Vanguard se vejde do nejbližší; materiál aditivní, oboustranný, se všemi parametry, které komponenta nastavuje; scénář snímků včetně `cruise`. |
 | `test_scene_look.py` | Vzhled uložené úrovně proti receptu: intenzita sky lightu, contact shadows a šířka slunce, všechna nastavení `POST_SETTINGS` v neohraničeném volume (a že chromatická aberace a vyvážení bílé zůstala vypnutá), lak trupu z `Vanguard_setup.json`. Chytá zapomenuté spuštění `build_space_scene.py` / `import_ship.py`. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
 
@@ -827,6 +859,8 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `vtol` | SC-2b: odznak VTOL na desce zapnutý i vypnutý, loď visící na zvedacích tryskách ze strany, zezadu a z kokpitu. VTOL přepíná `space.Vtol`, ne klávesa. |
 | `velocity_vector` | SC-3: značka dráhy letu v ose, při letu bokem, šikmo dolů, pozpátku a ve stoje. Rychlosti nastavuje pole `drift`, ne motory. |
 | `dust_tune` | Rychlostní čáry: hustota, délka, tloušťka a velikost krabice přes `space.Dust` v jednom běhu. |
+| `tunnel_tune` | Rychlostní tunel v cruise: jas čar, pruhů a záře, šířka, stěny a barva přes `space.Tunnel` v jednom běhu. |
+| `speed_tunnel` | Vzhled rychlosti od SCM po 6 km/s: prach, předávka v NAV, tunel v cruise z venku, z kokpitu a proti planetě. |
 | `space_look` | Prohlídka prostředí tak, jak je: prach ve třech rychlostech, planeta od 120 km po povrch, tělesa a holá obloha. |
 | `cockpit_centre` | Střední sloupek desky (RADAR, SELF STATUS): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé: vyříznout a zvětšit. |
 | `cockpit_readability` | Čitelnost displejů: výchozí pohled, přiblížení (Z) na FLIGHT/STATUS a THRUSTERS/CONTACTS, na konci staré oko pro srovnání. |
@@ -929,6 +963,9 @@ Další otevřené směry mimo let:
 ---
 
 ## 11. Známé problémy a neověřené věci
+
+- **Neověřeno autorem (21. 9. 2026):** rychlostní tunel v cruise (bod 46) – jen ze snímků. Hlavně
+  jak čáry tečou v pohybu a jak působí při zatáčení v cruise (tunel se natáčí se směrem rychlosti).
 
 - **Neověřeno autorem:** celý SC-1c, hlavně vzhled (rozmístění, čitelnost na světlém pozadí,
   velikost na jiném rozlišení než 1080p), a nová pozice kamery v kokpitu (C). SC-1a a SC-1b autor otestoval a fungují; hodnoty se
@@ -1061,4 +1098,5 @@ Viz `git log --oneline`. Poslední kroky:
 - hra běžela na Medium: výchozí předvolba Cinematic a doostření (bod 42);
 - SC-2b: VTOL, visící let a záře trysek při visení (bod 43);
 - SC-3: značka dráhy letu na HUD (bod 44);
-- rychlostní čáry: měkká vřetena místo bílých klacíků (bod 45).
+- rychlostní čáry: měkká vřetena místo bílých klacíků (bod 45);
+- rychlostní tunel v cruise, prach bez zpoždění kamery (bod 46).

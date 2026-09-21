@@ -257,6 +257,7 @@ Presety (`Tools/Shots/*.json`):
 | `vtol` | SC-2b: odznak VTOL, visení na zvedacích tryskách (`space.Vtol`) |
 | `velocity_vector` | SC-3: značka dráhy letu (pole `drift` ve scénáři) |
 | `dust_tune`, `space_look` | rychlostní čáry (`space.Dust`) a prohlídka prostředí |
+| `tunnel_tune`, `speed_tunnel` | rychlostní tunel v cruise (`space.Tunnel`, pole `"cruise": true`) a vzhled rychlosti od SCM po 6 km/s |
 | `look_sharp`, `look_groups` | proč je obraz měkký a co která škálovací skupina stojí |
 | `look_artifacts` | film grain, motion blur a stopy za pohybem – změřeno, žádný z nich obraz nekazí |
 | `hud` | HUD ve všech situacích |
@@ -407,6 +408,13 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   Shadery se v commandletu nekompilují, chybu uvidíš až po zabalení – proto po každé změně materiálu
   snímek. Detail, který drsnost i snižuje, dělá na kovu lesklé fleky: opotřebení ji má jen zvyšovat.
 
+- **Poloha kamery v Ticku pawnu je z minulého snímku.** `PlayerCameraManager` se aktualizuje až po
+  pawnu. Co se staví kolem kamery (prach, tunel), je při 1,2 km/s o 20 m pozadu; přičti
+  `LinearVelocity * DeltaSeconds`. Příznak: bílý klín přes obraz, který se v jiném snímku nezopakuje
+  jinde, jen v rychlosti (21. 9. 2026).
+- **Efekt kolem kamery z válce:** kamera uvnitř otevřeného válce ve směru letu dostane úběžník
+  zadarmo z perspektivy (`USpaceSpeedTunnelComponent`). Materiál oboustranný, aditivní; rozměry
+  z bounds meshe, takže na pivotu válce nezáleží.
 - a) **Nanite + TSR na meshi připojeném ke kameře.** Příznak: kokpit a displeje se při rychlém
   letu rozmazávají a „trhají“. Příčina: Nanite dává špatné motion vectory pro mesh, který se hýbe
   s kamerou. S `r.Nanite 0` byl obraz ostrý. Řešení: `no_nanite_parts: ["Interior"]` (interiér bez
@@ -552,6 +560,9 @@ Velké celky:
 - chybějící systémy SC HUD (palivo, zbraně, protiopatření);
 - ~~SC-2b VTOL a zpětná vazba při visení~~ – hotovo 20. 9. 2026 (HANDOFF bod 43). Další v letové
   roadmapě je SC-3 (zbytek HUD a MFD) nebo SC-4 (quantum travel místo cruise).
+- rychlostní tunel v cruise je hotový (HANDOFF bod 46); k SC-4 patří z referenčních snímků ještě
+  **modré jiskry proudící z hran trupu** při quantum skoku a nabíjení (spool) – tunel dostane jiný
+  odstín a intenzitu podle stavu drive.
 
 ---
 

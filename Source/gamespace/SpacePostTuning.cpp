@@ -19,6 +19,7 @@
 #include "CoreMinimal.h"
 #include "Components/DirectionalLightComponent.h"
 #include "SpaceDustComponent.h"
+#include "SpaceSpeedTunnelComponent.h"
 #include "Components/SkyLightComponent.h"
 #include "Engine/DirectionalLight.h"
 #include "Engine/PostProcessVolume.h"
@@ -325,6 +326,46 @@ namespace
 				for (USpaceDustComponent* Dust : TInlineComponentArray<USpaceDustComponent*>(*It))
 				{
 					ListProperties(Dust->GetClass(), Dust, Filter);
+					return;
+				}
+			}
+		}));
+
+	FAutoConsoleCommandWithWorldAndArgs TunnelCommand(
+		TEXT("space.Tunnel"),
+		TEXT("space.Tunnel <Property> <Value>: a property of the cruise speed tunnel (StreakBrightness, BeamBrightness, GlowBrightness, StreakColor R,G,B, Layers, ...). Not saved."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			if (Args.Num() < 2)
+			{
+				UE_LOG(LogTemp, Display, TEXT("space.Tunnel <Property> <Value> (space.TunnelList <part of a name>)"));
+				return;
+			}
+			FString Result;
+			int32 Count = 0;
+			for (TActorIterator<AActor> It(World); It; ++It)
+			{
+				for (USpaceSpeedTunnelComponent* Tunnel : TInlineComponentArray<USpaceSpeedTunnelComponent*>(*It))
+				{
+					Result = SetByName(Tunnel->GetClass(), Tunnel, Args, 1);
+					++Count;
+				}
+			}
+			UE_LOG(LogTemp, Display, TEXT("space.Tunnel %s on %d components"),
+				Result.IsEmpty() ? *FString::Printf(TEXT("%s: no such property"), *Args[0]) : *Result, Count);
+		}));
+
+	FAutoConsoleCommandWithWorldAndArgs TunnelListCommand(
+		TEXT("space.TunnelList"),
+		TEXT("space.TunnelList <part of a name>: what space.Tunnel takes, with its value here."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			const FString Filter = Args.Num() > 0 ? Args[0] : FString();
+			for (TActorIterator<AActor> It(World); It; ++It)
+			{
+				for (USpaceSpeedTunnelComponent* Tunnel : TInlineComponentArray<USpaceSpeedTunnelComponent*>(*It))
+				{
+					ListProperties(Tunnel->GetClass(), Tunnel, Filter);
 					return;
 				}
 			}

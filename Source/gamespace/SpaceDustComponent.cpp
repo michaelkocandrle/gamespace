@@ -76,7 +76,8 @@ void USpaceDustComponent::HideDust()
 void USpaceDustComponent::UpdateDust(const FVector& ViewLocation, const FVector& Velocity, float Intensity)
 {
 	const double Speed = Velocity.Size();
-	const float SpeedAlpha = Intensity * float(FMath::Clamp((Speed - FadeInSpeed) / FMath::Max(3.0 * FadeInSpeed, 1.0), 0.0, 1.0));
+	const float SpeedAlpha = Intensity * float(FMath::Clamp((Speed - FadeInSpeed) / FMath::Max(3.0 * FadeInSpeed, 1.0), 0.0, 1.0))
+		* (1.f - FMath::SmoothStep(FadeOutStartSpeed, FMath::Max(FadeOutEndSpeed, FadeOutStartSpeed + 1.f), float(Speed)));
 	if (ParticleCount <= 0 || SpeedAlpha <= 0.001f)
 	{
 		HideDust();
@@ -146,9 +147,15 @@ void USpaceDustComponent::UpdateDust(const FVector& ViewLocation, const FVector&
 		const double Stretched = FMath::Max(Length * double(LengthScales[Index]), double(ParticleSizeCm));
 		Transforms[Index] = FTransform(Align, Relative, FVector(Stretched / SpaceDust::CubeSizeCm, Across, Across));
 
-		// Fade out towards the box edge (no popping where specks wrap round) and right at the camera.
+		// Fade out towards the box edge (no popping where specks wrap round) and near the camera. Near
+		// is measured to the closest point of the streak, not its middle: a 15 m streak whose middle is
+		// 8 m away can still have an end right at the lens, and that end is a white wedge across the
+		// whole view (1.2 km/s in the chase view, 21. 9. 2026).
 		const double Distance = Relative.Size();
-		const float Fade = float((1.0 - FMath::SmoothStep(0.55 * Half, Half, Distance)) * FMath::SmoothStep(80.0, 400.0, Distance));
+		const double HalfStreak = 0.5 * Stretched;
+		const FVector Closest = Relative - Direction * FMath::Clamp(FVector::DotProduct(Relative, Direction), -HalfStreak, HalfStreak);
+		const float Fade = float((1.0 - FMath::SmoothStep(0.55 * Half, Half, Distance))
+			* FMath::SmoothStep(80.0, 400.0, Closest.Size()));
 		SetCustomDataValue(Index, 0, Fade * SpeedAlpha, false);
 		SetCustomDataValue(Index, 1, Brightnesses[Index], false);
 		SetCustomDataValue(Index, 2, LengthScales[Index], false);

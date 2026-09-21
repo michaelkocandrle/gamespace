@@ -120,6 +120,7 @@ LEVEL = "/Game/Maps/TestSpace"
 GLOW_TEXTURE = "/Game/Environments/Space/T_MilkyWay_Glow_Cube"
 STARFIELD_MATERIAL = "/Game/Environments/Space/M_Starfield_Sky"
 DUST_MATERIAL = "/Game/Environments/Space/M_SpaceDust"
+TUNNEL_MATERIAL = "/Game/Environments/Space/M_SpeedTunnel"
 GAS_GIANT_MATERIAL = "/Game/Environments/Space/M_GasGiant"
 MOON_MATERIAL = "/Game/Environments/Space/M_Moon"
 RINGS_MATERIAL = "/Game/Environments/Space/M_PlanetRings"
@@ -732,6 +733,134 @@ def build_dust_material():
     return m
 
 
+# The cruise speed tunnel (USpaceSpeedTunnelComponent), per pixel of a cylinder wall round the flight
+# path. P is the pixel relative to the camera (the instance origin); z runs along the flight path.
+# The wall is cut into lanes round the axis, each with one streak per period that scrolls backwards
+# by Offset, so it flows the way stationary dust does past a moving ship. Beams are a smooth noise
+# round the axis, strongest far ahead where they converge. The far end cap is the glow on the
+# vanishing point. Everything is multiplied by Alpha (speed) and the layer's brightness.
+TUNNEL_HLSL = r"""
+float3 dir = Dir.xyz;
+float z = dot(P, dir);
+float3 rv = P - z * dir;
+float r = length(rv);
+float zn = z / HalfLength;
+bool cap = abs(zn) > 0.985;
+float a = atan2(dot(rv, Up.xyz), dot(rv, Right.xyz)) / 6.2831853 + 0.5;
+// A little per-pixel noise: the smooth beams band into visible steps without it.
+float dither = frac(sin(dot(P, float3(12.9898, 78.233, 37.719))) * 43758.5453) - 0.5;
+float3 result = 0;
+
+// Beams: smooth noise round the axis, strongest far ahead where they converge. They carry on over
+// the far cap, so the vanishing point is not a dark disc where the wall stops.
+if (Beam > 0.0)
+{
+    float count = max(floor(BeamCount), 1.0);
+    float bt = a * count;
+    float bi = floor(bt);
+    float n0 = frac(sin((bi + Seed * 13.1) * 91.345) * 47453.5453);
+    float n1 = frac(sin((fmod(bi + 1.0, count) + Seed * 13.1) * 91.345) * 47453.5453);
+    float n = lerp(n0, n1, smoothstep(0.0, 1.0, frac(bt)));
+    float count2 = floor(count * 2.7);
+    float bt2 = a * count2;
+    float ci = floor(bt2);
+    float c0 = frac(sin((ci + Seed * 5.7) * 17.231) * 23421.631);
+    float c1 = frac(sin((fmod(ci + 1.0, count2) + Seed * 5.7) * 17.231) * 23421.631);
+    n = n * 0.6 + 0.4 * lerp(c0, c1, smoothstep(0.0, 1.0, frac(bt2)));
+    float shafts = pow(saturate(n), BeamSharp);
+    float fb = cap ? (zn > 0.0 ? 1.0 : 0.0) : smoothstep(0.02, 0.7, zn);
+    result += BeamColor.rgb * BeamBright * Beam * shafts * fb;
+}
+if (cap)
+{
+    // The far end: the glow on the vanishing point.
+    float g = saturate(1.0 - r / Radius);
+    g = g * g * g;
+    result += GlowColor.rgb * GlowBright * g * (zn > 0.0 ? 1.0 : 0.1);
+    return max(result * (1.0 + 0.1 * dither) * Alpha * Bright, 0.0);
+}
+
+// Streaks
+float lanes = max(floor(Lanes), 1.0);
+float la = a * lanes;
+float lane = floor(la);
+float2 hs = float2(lane, Seed);
+float h1 = frac(sin(dot(hs, float2(12.9898, 78.233))) * 43758.5453);
+float h2 = frac(sin(dot(hs, float2(39.3468, 11.135))) * 24634.6345);
+float h3 = frac(sin(dot(hs, float2(73.156, 52.235))) * 15731.7431);
+float h4 = frac(sin(dot(hs, float2(94.673, 23.914))) * 31337.4297);
+// Width in cm on a wall 25 m out, scaled with the wall's distance, so every wall's streaks are
+// equally thin on screen whatever its lane count (a share of the lane made the near wall's bars fat).
+float laneCm = 6.2831853 * max(r, 1.0) / lanes;
+float u = (frac(la) - 0.5 - (h1 - 0.5) * 0.6) * laneCm;
+float across = saturate(1.0 - abs(u) / (StreakWidth * Radius / 2500.0));
+across *= across;
+float len = StreakLen * (0.45 + 1.1 * h2);
+float x = frac((z + Offset) / Period + h3) * Period / len;
+float along = x < 1.0 ? 1.0 - pow(abs(2.0 * x - 1.0), 3.0) : 0.0;
+// Most streaks faint and a few bright, as dust is; the rest of the lanes empty.
+float own = h4 < Fill ? 0.2 + 0.8 * pow(frac(h4 * 7.31), 3.0) : 0.0;
+float3 tint = lerp(StreakColor.rgb, BeamColor.rgb * 1.4, ColorSpread * frac(h2 * 3.77));
+float nearFar = smoothstep(-0.02, 0.06, zn) * (1.0 - smoothstep(0.45, 0.95, zn));
+result += tint * StreakBright * across * along * own * nearFar;
+return max(result * (1.0 + 0.1 * dither) * Alpha * Bright, 0.0);
+"""
+
+
+def build_tunnel_material():
+    """USpaceSpeedTunnelComponent walls: additive, unlit, two sided (the camera is inside them).
+
+    All the shape is in TUNNEL_HLSL; the component pushes the flight direction, the scroll and
+    every look value into a dynamic instance each frame, so space.Tunnel tunes it live. Per
+    instance: custom data 0 radius, 1 brightness, 2 seed, 3 beam weight, 4 lanes.
+    """
+    m = fresh_material(TUNNEL_MATERIAL)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
+    m.set_editor_property("two_sided", True)
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+
+    here = node(m, unreal.MaterialExpressionWorldPosition, -1700, -100)
+    centre = node(m, unreal.MaterialExpressionObjectPositionWS, -1700, 20)
+    delta = node(m, unreal.MaterialExpressionSubtract, -1500, -60)
+    link(here, delta, "A")
+    link(centre, delta, "B")
+
+    names = ["P", "Dir", "Right", "Up", "Radius", "Bright", "Seed", "Beam", "Lanes", "HalfLength", "Offset", "Period",
+             "StreakLen", "StreakWidth", "Fill", "ColorSpread", "StreakColor", "StreakBright", "BeamColor", "BeamBright", "BeamCount",
+             "BeamSharp", "GlowColor", "GlowBright", "Alpha"]
+    tunnel = custom(m, TUNNEL_HLSL, names, -400, 0, "SpeedTunnel")
+    sources = {
+        "P": delta,
+        "Dir": vector(m, "TunnelDirection", (1.0, 0.0, 0.0), -1100, -300),
+        "Right": vector(m, "TunnelRight", (0.0, 1.0, 0.0), -1100, -200),
+        "Up": vector(m, "TunnelUp", (0.0, 0.0, 1.0), -1100, -100),
+        "HalfLength": scalar(m, "TunnelHalfLengthCm", 150000.0, -1100, 0),
+        "Offset": scalar(m, "TunnelOffsetCm", 0.0, -1100, 100),
+        "Period": scalar(m, "TunnelPeriodCm", 40000.0, -1100, 200),
+        "StreakLen": scalar(m, "StreakLengthCm", 8000.0, -1100, 300),
+        "StreakWidth": scalar(m, "StreakWidthCm", 8.0, -1100, 400),
+        "ColorSpread": scalar(m, "StreakColorSpread", 0.5, -1300, 400),
+        "Fill": scalar(m, "StreakFill", 0.55, -1100, 500),
+        "StreakColor": vector(m, "StreakColor", (0.85, 0.92, 1.0), -1100, 600),
+        "StreakBright": scalar(m, "StreakBrightness", 6.0, -1100, 700),
+        "BeamColor": vector(m, "BeamColor", (0.35, 0.6, 1.0), -1100, 800),
+        "BeamBright": scalar(m, "BeamBrightness", 0.25, -1100, 900),
+        "BeamCount": scalar(m, "BeamCount", 14.0, -1100, 1000),
+        "BeamSharp": scalar(m, "BeamSharpness", 4.0, -1100, 1100),
+        "GlowColor": vector(m, "GlowColor", (0.8, 0.9, 1.0), -1100, 1200),
+        "GlowBright": scalar(m, "GlowBrightness", 2.0, -1100, 1300),
+        "Alpha": scalar(m, "TunnelAlpha", 0.0, -1100, 1400),
+    }
+    for index, name in enumerate(["Radius", "Bright", "Seed", "Beam", "Lanes"]):
+        sources[name] = node(m, unreal.MaterialExpressionPerInstanceCustomData, -1700, 300 + 100 * index, data_index=index)
+    for name in names:
+        link(sources[name], tunnel, name)
+    output(tunnel, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    finish(m)
+    return m
+
+
 def pin(expr, wanted):
     """Input pin name, checked against the node - pin names are not always the obvious ones."""
     names = [str(n) for n in MEL.get_material_expression_input_names(expr)]
@@ -997,6 +1126,7 @@ def main():
     sky_material = build_starfield_material(cube)
     planet_material = build_planet_material()
     build_dust_material()
+    build_tunnel_material()
     body_materials = {
         "giant": build_body_material(GAS_GIANT_MATERIAL, GAS_GIANT_HLSL, 0.95, with_time=True),
         "moon": build_body_material(MOON_MATERIAL, MOON_HLSL, 0.9, with_time=False),

@@ -374,6 +374,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	void DebugSetLinearVelocity(const FVector& Velocity) { LinearVelocity = Velocity; }
 
+	/**
+	 * Cruise at once, at the limit times the speed limiter: no spool, no checks. For shots of the
+	 * speed tunnel, which only shows at kilometres per second.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Debug")
+	void DebugEngageCruise();
+
 	/** Tests and screenshots: place the mouse virtual joystick cursor. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	void DebugSetMouseStick(const FVector2D& InStick) { MouseStick = InStick; }
@@ -798,6 +805,10 @@ protected:
 	/** Streaks of dust around the camera that show speed and direction of flight. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<class USpaceDustComponent> SpaceDust;
+
+	/** The look of cruise speed: streaks radiating from the flight path, beams and a glow on it. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<class USpaceSpeedTunnelComponent> SpeedTunnel;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<USpringArmComponent> CameraBoom;
