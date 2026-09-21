@@ -878,6 +878,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<class USpaceSpeedTunnelComponent> SpeedTunnel;
 
+	/** Streaks pouring off the hull from the nose back: blue in a quantum jump, a few white ones in flight. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<class USpaceHullSparksComponent> HullSparks;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<USpringArmComponent> CameraBoom;
 

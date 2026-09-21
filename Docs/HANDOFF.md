@@ -706,8 +706,32 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       `"quantum_progress"`, `"quantum_ready"` a `"facing": "body:Orun"`.
     - Vstup: `Tools/Assets/add_quantum_input.py` (IA_QuantumEngage na levé tlačítko, IA_CruiseDrive
       odmapovaná a smazaná). Test `Tools/Tests/test_quantum_sc4.py`, snímky `-Preset quantum`.
-    - Chybí proti SC: mapa systému (F2) a výběr cíle z ní, modré jiskry z trupu (zvenku), modrá
-      záře pod přídí z kokpitu, doplňování paliva, interdikce.
+    - Chybí proti SC: mapa systému (F2) a výběr cíle z ní, modrá záře pod přídí z kokpitu,
+      doplňování paliva, interdikce (jiskry z trupu: bod 48).
+
+---
+48. **Quantum podruhé: jiskry u lodi, tunel místo mlhy, kamera** (21. 9. 2026, autor po prvním testu:
+    mechanismus solidní, mlha všude a moc hustá, chyba při free looku, chce modré jiskry kolem lodi
+    jako ve videu a méně bílých čar, a ty u lodi).
+    - **Chyba při free looku:** loď ve skoku ujela ze záběru (a na jejím místě zůstal tmavý „duch“).
+      Příčina: zpoždění kamery (spring arm lag). Omezené na 15 m, ale ty metry jdou podél dráhy letu
+      a při pohledu z boku vystrčí loď z obrazu. Ve skoku je zpoždění **vypnuté**. **Past:**
+      `CameraLagMaxDistance = 0` neznamená žádné zpoždění, ale **žádný strop** – kamera zůstala
+      kilometry vzadu. Duch lodi: průsvitná mlha se nehýbe se světem, TSR neměl čím odmítnout starý
+      pixel; mlha i tunel mají teď `enable_responsive_aa` a mlha `output_translucent_velocity`.
+    - **Tunel místo mlhy:** mlha je hustá (0,9), ale **tmavá uprostřed** a u stěn světlá ve 13 měkkých
+      pruzích kolem osy (`FogCentreOpacity`, `FogNearColor`, `FogFarColor`). Řídká mlha všude četla jako
+      zamlžení a cíl pak prosvítal celý; tmavá díra se světlými stěnami je to, co je ve videu.
+    - **Modré jiskry kolem lodi** (`USpaceHullSparksComponent`, materiál prachu s vlastní barvou):
+      420 krátkých jisker se rodí na povrchu lodi (60 % na přední polovině – příď „rozráží“), žijí
+      0,2–0,55 s a proudí dozadu podél trupu a trochu od něj. Body: z kolize trupu, když ji trasování
+      najde, jinak obal 85 % hranic lodi (tak to je teď – kolize trupu se trasovat nedá, ale obal kolem
+      Vanguardu stačí, jiskry obtékají motory i příď). Z kokpitu jsou jiskry blíž než 5–12 m skryté,
+      jinak šly přes sklo jako tlusté pruhy.
+    - **Bílé čáry v normálním letu:** tatáž komponenta, 60 bílých slabých jisker u lodi od 30 m/s
+      (plně od 200 m/s); prach kolem kamery jen 250 smítek s jasem 1,8. Tloušťka 5 cm: 2 cm byly
+      z chase kamery (25–35 m) pod pixelem.
+    - Snímky `-Preset quantum_look` (skok zezadu, z boku, zepředu, free look, kokpit; SCM a NAV).
 
 ---
 
@@ -840,7 +864,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_flight_hud_sc3.py` | SC-3: značka dráhy letu – nic pod 5 m/s, střed při letu po ose pohledu, správná strana a velikost odchylky podle ohniskové délky, přilepení na kruh, čárkovaná značka za nosem, scénář snímků. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
 | `test_quantum_sc4.py` | SC-4: nic v SCM; v NAV cíl podle nosu, Veyra ze startu TOO CLOSE; spool, kalibrace, READY, krátký stisk neskočí, podržení ano; spálené palivo podle vzdálenosti; ve skoku nejde řídit; příjezd na výšku příletu v rychlosti NAV do minuty; chlazení; B přeruší skok; OBSTRUCTED s planetou v cestě; NO QT FUEL; kalibrace padá, když nos uhne; HUD (rámeček, oblouky 0/1/2/3, cíl); LMB namapované, J ne; scénář snímků. Plus profil rychlosti, výška příletu, palivo a test úsečka–koule samostatně. |
-| `test_speed_tunnel.py` | Tunel quantum skoku: prach je pryč, než by ho rychlost rozblikala; čára delší než dvojnásobek posunu za snímek při 60 FPS (neblikne); čáry v dráze do sebe nenarazí; stěny od nejbližší, loď Vanguard se vejde do nejbližší; materiál aditivní, oboustranný, se všemi parametry, které komponenta nastavuje; scénář snímků se skokem (`quantum`). |
+| `test_speed_tunnel.py` | Tunel quantum skoku: prach je pryč, než by ho rychlost rozblikala; čára delší než dvojnásobek posunu za snímek při 60 FPS (neblikne); čáry v dráze do sebe nenarazí; stěny od nejbližší, loď Vanguard se vejde do nejbližší; materiál aditivní, oboustranný, se všemi parametry, které komponenta nastavuje; jiskry u lodi (bodů na trupu ≥ 32, ve skoku mnohem víc než v letu), prachu jen pár set; scénář snímků se skokem (`quantum`). |
 | `test_scene_look.py` | Vzhled uložené úrovně proti receptu: intenzita sky lightu, contact shadows a šířka slunce, všechna nastavení `POST_SETTINGS` v neohraničeném volume (a že chromatická aberace a vyvážení bílé zůstala vypnutá), lak trupu z `Vanguard_setup.json`. Chytá zapomenuté spuštění `build_space_scene.py` / `import_ship.py`. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
 
@@ -896,6 +920,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `velocity_vector` | SC-3: značka dráhy letu v ose, při letu bokem, šikmo dolů, pozpátku a ve stoje. Rychlosti nastavuje pole `drift`, ne motory. |
 | `dust_tune` | Rychlostní čáry: hustota, délka, tloušťka a velikost krabice přes `space.Dust` v jednom běhu. |
 | `quantum` | SC-4: HUD v SCM (nic), SPOOLING, READY, TOO CLOSE; skok v prvním okamžiku (zelený záblesk), zvenku, z kokpitu a z boku; příjezd s chlazením; prach v SCM. |
+| `quantum_look` | Vzhled skoku a letu: skok zezadu, z boku, zepředu, s free lookem a z kokpitu (jiskry, mlha, kamera), SCM a NAV z chase i kokpitu (bílé jiskry, prach), a jedna varianta mlhy. |
 | `tunnel_tune` | Tunel ve skoku na Orun: jas čar, pruhů a záře, šířka, stěny a barva přes `space.Tunnel` v jednom běhu (hodnoty etap jsou z doby cruise, před dalším laděním je přepiš). |
 | `space_look` | Prohlídka prostředí tak, jak je: prach ve třech rychlostech, planeta od 120 km po povrch, tělesa a holá obloha. |
 | `cockpit_centre` | Střední sloupek desky (RADAR, SELF STATUS): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé: vyříznout a zvětšit. |
@@ -1001,7 +1026,8 @@ Další otevřené směry mimo let:
 
 - **Neověřeno autorem (21. 9. 2026):** quantum drive (bod 47) – jen z testů a snímků. Hlavně jak
   sedí časy (spool 6 s, kalibrace 2,5 s, podržení 0,6 s, chlazení 10 s), jak čáry tečou v pohybu
-  a jestli je mlha v tunelu dost/moc hustá. Cruise (J) už není.
+  a jestli je mlha v tunelu dost/moc hustá (po bodu 48: tmavý střed, světlé stěny). Cruise (J) už není.
+  Jiskry kolem lodi a bílé čáry v letu (bod 48) jsou zatím jen ze snímků.
 
 - **Neověřeno autorem:** celý SC-1c, hlavně vzhled (rozmístění, čitelnost na světlém pozadí,
   velikost na jiném rozlišení než 1080p), a nová pozice kamery v kokpitu (C). SC-1a a SC-1b autor otestoval a fungují; hodnoty se
@@ -1137,4 +1163,5 @@ Viz `git log --oneline`. Poslední kroky:
 - rychlostní čáry: měkká vřetena místo bílých klacíků (bod 45);
 - rychlostní tunel, prach bez zpoždění kamery (bod 46);
 - workflow s referenčním videem (`Tools/Reference/fetch_video.py`) a poznámky ke quantum travel;
-- SC-4: quantum drive místo cruise, HUD podle videa, tunel s mlhou (bod 47).
+- SC-4: quantum drive místo cruise, HUD podle videa, tunel s mlhou (bod 47);
+- jiskry kolem lodi, tunel s tmavým středem, kamera bez zpoždění ve skoku, méně bílých čar (bod 48).

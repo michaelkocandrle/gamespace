@@ -170,13 +170,22 @@ public:
 	float FogRadiusCm = 25000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float FogOpacity = 0.97f;
+	float FogOpacity = 0.9f;
+
+	/**
+	 * The fog's cover down the middle towards the vanishing point, as a share of FogOpacity. Thin fog
+	 * everywhere read as a wash (the author, 21. 9. 2026) and thin down the middle showed the
+	 * destination planet whole; what reads as a tunnel is dense fog that is dark in the middle and
+	 * lit, in shafts, on the walls - the reference's dark hole.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float FogCentreOpacity = 0.95f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
-	FLinearColor FogNearColor = FLinearColor(0.04f, 0.055f, 0.09f);
+	FLinearColor FogNearColor = FLinearColor(0.035f, 0.05f, 0.09f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
-	FLinearColor FogFarColor = FLinearColor(0.004f, 0.006f, 0.012f);
+	FLinearColor FogFarColor = FLinearColor(0.002f, 0.003f, 0.006f);
 
 	/** The walls, nearest first. The near one sweeps past fast and sparse, the far one carries the beams. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")

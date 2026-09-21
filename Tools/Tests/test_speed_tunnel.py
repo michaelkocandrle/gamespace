@@ -53,6 +53,15 @@ try:
     check("streaks never run into the next one in their lane",
           tunnel.compute_streak_length(cruise_top * 10.0) <= 0.6 * tunnel.get_editor_property("period_cm") + 0.5)
 
+    # The hull sparks (blue in a jump, a few white in flight) are born on the hull's collision.
+    sparks = ship.get_editor_property("hull_sparks")
+    check("the ship has hull sparks", sparks is not None)
+    if sparks is not None:
+        count, from_collision = sparks.debug_get_spawn_point_count()
+        check("and finds points to pour them from on the Vanguard's hull", count >= 32, "%d points, collision %s" % (count, from_collision))
+        check("a jump has many sparks, normal flight few", sparks.get_editor_property("quantum_count") >= 5 * sparks.get_editor_property("flight_count") > 0)
+    check("the dust is only a hint (a few hundred specks)", dust.get_editor_property("particle_count") <= 400)
+
     layers = tunnel.get_editor_property("layers")
     radii = [layer.get_editor_property("radius_cm") for layer in layers]
     check("at least two walls, nearest first", len(radii) >= 2 and radii == sorted(radii), str(radii))

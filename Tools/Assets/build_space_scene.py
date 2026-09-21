@@ -110,9 +110,10 @@ GIANT_SPIN_SECONDS = 1800.0
 
 # Space dust around the ship camera (USpaceDustComponent).
 DUST_COLOR = (0.70, 0.80, 1.00)
-DUST_BRIGHTNESS = 2.5  # 3.0 until 19. 9. 2026 (bright white sticks), 1.6, then 5.0 when the material began
+DUST_BRIGHTNESS = 1.8  # 3.0 until 19. 9. 2026 (bright white sticks), 1.6, then 5.0 when the material began
                        # tapering every speck to a point; 2.5 since the quantum reference video (21. 9. 2026):
-                       # outside quantum Star Citizen's dust is only a hint of motion.
+                       # outside quantum Star Citizen's dust is only a hint of motion. 1.8 when the hull
+                       # sparks (USpaceHullSparksComponent) took over the speed lines near the ship.
 
 # ---------------------------------------------------------------------------------------
 
@@ -842,6 +843,7 @@ def build_tunnel_material():
     m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
     m.set_editor_property("two_sided", True)
     m.set_editor_property("used_with_instanced_static_meshes", True)
+    m.set_editor_property("enable_responsive_aa", True)
 
     here = node(m, unreal.MaterialExpressionWorldPosition, -1700, -100)
     centre = node(m, unreal.MaterialExpressionObjectPositionWS, -1700, 20)
@@ -893,10 +895,22 @@ def build_tunnel_material():
 # beside the ship and dark down the middle towards the vanishing point. Translucent rather than
 # additive, because additive light can brighten the sky but never cover it.
 FOG_HLSL = r"""
-float zn = dot(P, Dir.xyz) / HalfLength;
+float z = dot(P, Dir.xyz);
+float zn = z / HalfLength;
+float3 rv = P - z * Dir.xyz;
+float a = atan2(dot(rv, Up.xyz), dot(rv, Right.xyz)) / 6.2831853 + 0.5;
+// Soft light shafts round the axis, so the fog reads as the walls of a tunnel and not a wash.
+float count = 13.0;
+float i0 = floor(a * count);
+float n0 = frac(sin((i0 + 3.0) * 91.345) * 47453.5453);
+float n1 = frac(sin((fmod(i0 + 1.0, count) + 3.0) * 91.345) * 47453.5453);
+float n = lerp(n0, n1, smoothstep(0.0, 1.0, frac(a * count)));
+float shafts = 0.45 + 1.1 * n * n;
 float far = smoothstep(0.0, 0.65, zn);
-float3 colour = lerp(Near.rgb, Far.rgb, far);
-return float4(colour, saturate(Opacity * Alpha));
+float3 colour = lerp(Near.rgb * shafts, Far.rgb, far);
+// Thick on the walls beside the ship, thin down the middle: a tunnel you look along, not a fog bank.
+float opacity = Opacity * lerp(1.0, CentreOpacity, far) * lerp(0.7, 1.0, shafts / 1.55);
+return float4(colour, saturate(opacity * Alpha));
 """
 
 
@@ -910,15 +924,23 @@ def build_fog_material():
     delta = node(m, unreal.MaterialExpressionSubtract, -900, -60)
     link(here, delta, "A")
     link(centre, delta, "B")
-    names = ["P", "Dir", "HalfLength", "Near", "Far", "Opacity", "Alpha"]
+    # Neither history nor ghosts: the fog does not move with the world, so TSR had nothing to reject a
+    # stale pixel with and the ship left a dark copy of itself where it had been (free look in a jump,
+    # the author's screenshot, 21. 9. 2026).
+    m.set_editor_property("enable_responsive_aa", True)
+    m.set_editor_property("output_translucent_velocity", True)
+    names = ["P", "Dir", "Right", "Up", "HalfLength", "Near", "Far", "Opacity", "CentreOpacity", "Alpha"]
     fog = custom(m, FOG_HLSL, names, -400, 0, "QuantumFog", unreal.CustomMaterialOutputType.CMOT_FLOAT4)
     sources = {
         "P": delta,
         "Dir": vector(m, "TunnelDirection", (1.0, 0.0, 0.0), -900, 100),
+        "Right": vector(m, "TunnelRight", (0.0, 1.0, 0.0), -1100, 150),
+        "Up": vector(m, "TunnelUp", (0.0, 0.0, 1.0), -1100, 250),
+        "CentreOpacity": scalar(m, "FogCentreOpacity", 0.35, -1100, 550),
         "HalfLength": scalar(m, "TunnelHalfLengthCm", 150000.0, -900, 200),
         "Near": vector(m, "FogNearColor", (0.04, 0.055, 0.09), -900, 300),
         "Far": vector(m, "FogFarColor", (0.004, 0.006, 0.012), -900, 400),
-        "Opacity": scalar(m, "FogOpacity", 0.92, -900, 500),
+        "Opacity": scalar(m, "FogOpacity", 0.8, -900, 500),
         "Alpha": scalar(m, "TunnelAlpha", 0.0, -900, 600),
     }
     for name in names:

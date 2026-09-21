@@ -267,7 +267,7 @@ Presety (`Tools/Shots/*.json`):
 | `vtol` | SC-2b: odznak VTOL, visení na zvedacích tryskách (`space.Vtol`) |
 | `velocity_vector` | SC-3: značka dráhy letu (pole `drift` ve scénáři) |
 | `dust_tune`, `space_look` | rychlostní čáry (`space.Dust`) a prohlídka prostředí |
-| `quantum`, `tunnel_tune` | SC-4: HUD quantum drivu a skok (pole `quantum`, `quantum_progress`, `quantum_ready`, `facing: body:<jméno>`), ladění tunelu (`space.Tunnel`) |
+| `quantum`, `quantum_look`, `tunnel_tune` | SC-4: HUD quantum drivu a skok (pole `quantum`, `quantum_progress`, `quantum_ready`, `facing: body:<jméno>`), ladění tunelu (`space.Tunnel`) |
 | `look_sharp`, `look_groups` | proč je obraz měkký a co která škálovací skupina stojí |
 | `look_artifacts` | film grain, motion blur a stopy za pohybem – změřeno, žádný z nich obraz nekazí |
 | `hud` | HUD ve všech situacích |
@@ -422,6 +422,14 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   pawnu. Co se staví kolem kamery (prach, tunel), je při 1,2 km/s o 20 m pozadu; přičti
   `LinearVelocity * DeltaSeconds`. Příznak: bílý klín přes obraz, který se v jiném snímku nezopakuje
   jinde, jen v rychlosti (21. 9. 2026).
+- **`CameraLagMaxDistance = 0` není „bez zpoždění“, ale „bez stropu“.** Chceš-li zpoždění pryč,
+  vypni `bEnableCameraLag`. A zpoždění i s rozumným stropem jde podél dráhy letu: při rychlém letu
+  a pohledu z boku vystrčí loď ze záběru (quantum, 21. 9. 2026).
+- **Průsvitná vrstva přes celý obraz (mlha) a TSR:** bez vlastního pohybu nemá TSR čím odmítnout
+  starou historii a objekty za ní nechávají tmavé „duchy“. Takové materiály: `enable_responsive_aa`
+  a `output_translucent_velocity`.
+- **Záporná `TranslucentSortPriority`** řadí objekt před *všechny* průsvitné věci ve scéně, ne jen
+  před ty, se kterými ho chceš seřadit. Zvedni prioritu těm, které mají být navrchu.
 - **Efekt kolem kamery z válce:** kamera uvnitř otevřeného válce ve směru letu dostane úběžník
   zadarmo z perspektivy (`USpaceSpeedTunnelComponent`). Materiál oboustranný, aditivní; rozměry
   z bounds meshe, takže na pivotu válce nezáleží.

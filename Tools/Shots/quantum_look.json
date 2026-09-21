@@ -1,0 +1,15 @@
+{
+  "_comment": "The quantum jump's look and the speed lines in normal flight, second round (21. 9. 2026, the author: the fog is too thick and everywhere, blue sparks round the ship as in the reference, fewer white lines in flight and close to the ship). The jump from behind, the side and the cockpit, with free look (the ghost bug), and flight at SCM and NAV speeds. Run: Tools/Shots.ps1 -Preset quantum_look",
+  "shots": [
+    {"name": "a_jump_chase", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "chase_yaw": 20, "chase_pitch": -8, "settle": 2.0},
+    {"name": "b_jump_side", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "chase_yaw": 100, "chase_pitch": -5, "chase_zoom": 0.7, "settle": 2.0},
+    {"name": "c_jump_front", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "chase_yaw": 160, "chase_pitch": -10, "chase_zoom": 0.8, "settle": 2.0},
+    {"name": "d_jump_freelook", "camera": "chase", "altitude_m": 60000, "facing": "body:Keth", "hud": 1, "gear": false, "mode": "NAV", "quantum": "Keth", "quantum_progress": 0.3, "chase_yaw": 67, "chase_pitch": -9, "settle": 2.0},
+    {"name": "e_jump_cockpit", "camera": "cockpit", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "settle": 2.0},
+    {"name": "f_scm_chase", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "mode": "SCM", "speed_ms": 210, "chase_yaw": 25, "chase_pitch": -8, "settle": 2.0},
+    {"name": "g_nav_chase", "camera": "chase", "altitude_m": 60000, "facing": "away", "hud": 0, "gear": false, "mode": "NAV", "speed_ms": 900, "chase_yaw": 25, "chase_pitch": -8, "settle": 2.0},
+    {"name": "h_scm_cockpit", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "mode": "SCM", "speed_ms": 210, "settle": 2.0},
+    {"name": "i_fog_thinner", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "chase_yaw": 20, "chase_pitch": -8, "settle": 2.0,
+     "console": ["space.Tunnel FogOpacity 0.8", "space.Tunnel FogCentreOpacity 0.8"]}
+  ]
+}

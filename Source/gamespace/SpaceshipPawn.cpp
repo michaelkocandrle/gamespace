@@ -35,6 +35,7 @@
 #include "DistantBody.h"
 #include "SpaceDustComponent.h"
 #include "SpaceSpeedTunnelComponent.h"
+#include "SpaceHullSparksComponent.h"
 #include "SpaceUserSettings.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/Engine.h"
@@ -332,6 +333,8 @@ ASpaceshipPawn::ASpaceshipPawn()
 	SpaceDust->SetupAttachment(HullCollision);
 	SpeedTunnel = CreateDefaultSubobject<USpaceSpeedTunnelComponent>(TEXT("SpeedTunnel"));
 	SpeedTunnel->SetupAttachment(HullCollision);
+	HullSparks = CreateDefaultSubobject<USpaceHullSparksComponent>(TEXT("HullSparks"));
+	HullSparks->SetupAttachment(Hull);
 
 	// A hard reference, so the cooker packs it (engine content loaded by path would be missing).
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> GearCylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
@@ -347,6 +350,7 @@ void ASpaceshipPawn::BeginPlay()
 
 	ChaseCameraBaseLocation = ChaseCamera->GetRelativeLocation();
 	CockpitCameraBaseLocation = CockpitCamera->GetRelativeLocation();
+	HullSparks->SetHull(Hull);
 	BaseArmLength = CameraBoom->TargetArmLength;
 	BaseSocketOffset = CameraBoom->SocketOffset;
 	BaseChaseFov = ChaseCamera->FieldOfView;
@@ -2850,6 +2854,14 @@ void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 		? FMath::Clamp((1.f - GetQuantumTravelProgress()) / 0.05f, 0.f, 1.f) : 0.f;
 	QuantumBlend = FMath::FInterpTo(QuantumBlend, QuantumTarget01, DeltaSeconds, QuantumTarget01 > QuantumBlend ? 2.5f : 4.f);
 	CameraKick *= FMath::Exp(-5.f * DeltaSeconds);
+	// No camera lag in a quantum jump: even capped at 15 m it trails along the flight path, and
+	// looked at from the side (free look) that pushed the ship out of the frame (21. 9. 2026).
+	// Switched off rather than capped at 0: a CameraLagMaxDistance of 0 means no cap at all, and the
+	// camera was left kilometres behind.
+	if (CameraSnapTicks == 0)
+	{
+		CameraBoom->bEnableCameraLag = QuantumState != EQuantumState::Traveling && QuantumBlend < 0.01f;
+	}
 
 	// Mouse wheel zoom, eased.
 	CameraZoom = FMath::FInterpTo(CameraZoom, CameraZoomTarget, DeltaSeconds, 8.f);
@@ -3065,6 +3077,7 @@ void ASpaceshipPawn::UpdateSpaceDust(float DeltaSeconds)
 	{
 		SpaceDust->HideDust();
 		SpeedTunnel->HideTunnel();
+		HullSparks->UpdateSparks(DeltaSeconds, 0.f, 0.f, GetActorLocation());
 		return;
 	}
 	// The camera manager still holds last frame's view (it updates after the pawn ticks). At 1.2 km/s
@@ -3076,6 +3089,7 @@ void ASpaceshipPawn::UpdateSpaceDust(float DeltaSeconds)
 	// there); Star Citizen shows almost no speed lines outside quantum (the reference video, 21. 9. 2026).
 	SpaceDust->UpdateDust(View, LinearVelocity, 1.f - QuantumBlend);
 	SpeedTunnel->UpdateTunnel(View, LinearVelocity, DeltaSeconds, QuantumBlend);
+	HullSparks->UpdateSparks(DeltaSeconds, float(LinearVelocity.Size()), QuantumBlend, View);
 }
 
 // -------------------------------------------------------------------------------------------

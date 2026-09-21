@@ -44,7 +44,7 @@ public:
 	 *  speed lines outside quantum (the reference video), and the author found 2600 far too many.
 	 *  The count costs nothing measurable either way (Tools/Shots/dust_tune.json). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Dust", meta = (ClampMin = "0", ClampMax = "4000"))
-	int32 ParticleCount = 700;
+	int32 ParticleCount = 250;
 
 	/** Half the edge of the box around the camera, cm. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Dust", meta = (ClampMin = "100.0"))
