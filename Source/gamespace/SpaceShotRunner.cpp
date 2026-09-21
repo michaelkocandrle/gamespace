@@ -3,6 +3,7 @@
 #include "SpaceShotRunner.h"
 
 #include "CelestialBody.h"
+#include "DistantBody.h"
 #include "Dom/JsonObject.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -106,7 +107,9 @@ bool USpaceShotRunner::ParseShotList(const FString& Json, TArray<FSpaceShot>& Ou
 		if ((*Object)->TryGetNumberField(TEXT("hud"), Number)) { Shot.HudMode = int32(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("altitude_m"), Number)) { Shot.AltitudeM = float(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("speed_ms"), Number)) { Shot.SpeedMS = float(Number); }
-		(*Object)->TryGetBoolField(TEXT("cruise"), Shot.bCruise);
+		(*Object)->TryGetStringField(TEXT("quantum"), Shot.QuantumTarget);
+		if ((*Object)->TryGetNumberField(TEXT("quantum_progress"), Number)) { Shot.QuantumProgress = float(Number); }
+		(*Object)->TryGetBoolField(TEXT("quantum_ready"), Shot.bQuantumReady);
 		const TArray<TSharedPtr<FJsonValue>>* DriftValues = nullptr;
 		if ((*Object)->TryGetArrayField(TEXT("drift"), DriftValues) && DriftValues->Num() == 3)
 		{
@@ -250,6 +253,31 @@ void USpaceShotRunner::ApplyShot(const FSpaceShot& Shot, ASpaceshipPawn& Ship)
 		}
 	}
 
+	// "facing": "body:Orun" - the nose on a body by its display name (the quantum drive picks what the nose is on).
+	if (Shot.Facing.StartsWith(TEXT("body:"), ESearchCase::IgnoreCase))
+	{
+		const FString Name = Shot.Facing.Mid(5);
+		const AActor* Found = nullptr;
+		for (TActorIterator<ACelestialBody> It(World); It && !Found; ++It)
+		{
+			Found = It->GetDisplayName().ToString().Equals(Name, ESearchCase::IgnoreCase) ? *It : nullptr;
+		}
+		for (TActorIterator<ADistantBody> It(World); It && !Found; ++It)
+		{
+			Found = It->GetDisplayName().ToString().Equals(Name, ESearchCase::IgnoreCase) ? *It : nullptr;
+		}
+		if (Found)
+		{
+			const FVector Forward = (Found->GetActorLocation() - Ship.GetActorLocation()).GetSafeNormal();
+			Ship.SetActorRotation(FRotationMatrix::MakeFromXZ(Forward, Ship.GetActorUpVector()).ToQuat(), ETeleportType::TeleportPhysics);
+			Ship.SnapCameraToShip();
+		}
+		else
+		{
+			UE_LOG(LogSpaceShots, Warning, TEXT("SHOTS no body called %s"), *Name);
+		}
+	}
+
 	if (!Shot.MasterMode.IsEmpty())
 	{
 		Ship.RequestMasterMode(Shot.MasterMode.Equals(TEXT("NAV"), ESearchCase::IgnoreCase) ? EMasterMode::NAV : EMasterMode::SCM);
@@ -291,9 +319,13 @@ void USpaceShotRunner::ApplyShot(const FSpaceShot& Shot, ASpaceshipPawn& Ship)
 	Ship.DebugSetLinearVelocity(Shot.bHasDrift
 		? Ship.GetActorQuat().RotateVector(Shot.Drift * 100.f)
 		: Ship.GetActorForwardVector() * (Shot.SpeedMS * 100.f));
-	if (Shot.bCruise)
+	if (!Shot.QuantumTarget.IsEmpty())
 	{
-		Ship.DebugEngageCruise();
+		Ship.DebugEngageQuantum(Shot.QuantumTarget, Shot.QuantumProgress);
+	}
+	if (Shot.bQuantumReady)
+	{
+		Ship.DebugFinishQuantumCharge();
 	}
 	if (!Shot.CockpitEye.IsNearlyZero() || Shot.HideHull >= 0 || Shot.HideCanopy >= 0)
 	{

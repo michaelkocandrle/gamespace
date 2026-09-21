@@ -18,7 +18,7 @@ struct FSpaceShot
 	int32 HudMode = 1;
 	/** Place the ship this far above the nearest body's terrain (negative: leave it where it is). */
 	float AltitudeM = -1.f;
-	/** "planet", "away", "horizon": where the nose points after placing. */
+	/** "planet", "away", "horizon", or "body:<name>": where the nose points after placing. */
 	FString Facing = TEXT("horizon");
 	/** Speed along the nose after placing, m/s. */
 	float SpeedMS = 0.f;
@@ -31,8 +31,14 @@ struct FSpaceShot
 	FVector Drift = FVector::ZeroVector;
 	bool bHasDrift = false;
 	FString MasterMode;
-	/** Cruise at once (ASpaceshipPawn::DebugEngageCruise), at the limit times "limiter". */
-	bool bCruise = false;
+	/**
+	 * Quantum jump at once to the body whose name starts with this ("quantum"; ASpaceshipPawn::
+	 * DebugEngageQuantum), QuantumProgress of the way there ("quantum_progress"). Empty: no jump.
+	 */
+	FString QuantumTarget;
+	float QuantumProgress = 0.f;
+	/** Spool and calibration full ("quantum_ready"), for shots of the READY HUD. */
+	bool bQuantumReady = false;
 	float Limiter = -1.f;
 	int32 Coupled = -1;
 	int32 GSafe = -1;

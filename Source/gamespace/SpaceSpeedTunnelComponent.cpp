@@ -13,6 +13,8 @@ namespace SpeedTunnel
 	/** Built by Tools/Assets/build_space_scene.py. Without it the walls would be opaque grey cylinders, so none are shown. */
 	const TCHAR* const MaterialPackage = TEXT("/Game/Environments/Space/M_SpeedTunnel");
 	const TCHAR* const MaterialPath = TEXT("/Game/Environments/Space/M_SpeedTunnel.M_SpeedTunnel");
+	const TCHAR* const FogPackage = TEXT("/Game/Environments/Space/M_QuantumFog");
+	const TCHAR* const FogPath = TEXT("/Game/Environments/Space/M_QuantumFog.M_QuantumFog");
 }
 
 USpaceSpeedTunnelComponent::USpaceSpeedTunnelComponent()
@@ -32,11 +34,11 @@ USpaceSpeedTunnelComponent::USpaceSpeedTunnelComponent()
 	SetVisibleInRayTracing(false);
 	NumCustomDataFloats = 5;
 
-	// Near and sparse, the main field, far and dense with the beams (tuned in Tools/Shots/tunnel_tune.json).
+	// Near and sparse, the main field, far with the beams, fog and flares (Tools/Shots/quantum_tune.json).
 	Layers = {
-		FSpeedTunnelLayer{2500.f, 1.f, 50.f, 0.f},
-		FSpeedTunnelLayer{6000.f, 0.8f, 120.f, 0.3f},
-		FSpeedTunnelLayer{15000.f, 0.6f, 220.f, 1.f},
+		FSpeedTunnelLayer{2500.f, 1.f, 40.f, 0.f},
+		FSpeedTunnelLayer{6000.f, 0.8f, 90.f, 0.5f},
+		FSpeedTunnelLayer{15000.f, 0.6f, 160.f, 1.f},
 	};
 
 	// A hard reference, so the cooker packs it (engine content loaded by path would be missing).
@@ -72,6 +74,32 @@ void USpaceSpeedTunnelComponent::BeginPlay()
 		Layers.Reset();
 	}
 	SetVisibility(false);
+
+	UMaterialInterface* FogBase = FPackageName::DoesPackageExist(SpeedTunnel::FogPackage)
+		? LoadObject<UMaterialInterface>(nullptr, SpeedTunnel::FogPath) : nullptr;
+	if (FogBase && GetStaticMesh() && GetOwner())
+	{
+		Fog = NewObject<UStaticMeshComponent>(GetOwner(), TEXT("QuantumFog"));
+		Fog->SetStaticMesh(GetStaticMesh());
+		Fog->SetUsingAbsoluteLocation(true);
+		Fog->SetUsingAbsoluteRotation(true);
+		Fog->SetUsingAbsoluteScale(true);
+		Fog->SetMobility(EComponentMobility::Movable);
+		Fog->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+		Fog->SetCastShadow(false);
+		Fog->bAffectDistanceFieldLighting = false;
+		Fog->bAffectDynamicIndirectLighting = false;
+		Fog->SetVisibleInRayTracing(false);
+		// Behind the streak walls, which get a higher sort priority below (both are centred on the camera,
+		// so distance cannot order them). Not a negative priority on the fog: that sorts it before every
+		// other translucent thing too, and the gas giant's rings showed straight through (21. 9. 2026).
+		FogMaterial = UMaterialInstanceDynamic::Create(FogBase, this);
+		Fog->SetMaterial(0, FogMaterial);
+		Fog->SetupAttachment(GetAttachParent());
+		Fog->RegisterComponent();
+		Fog->SetVisibility(false);
+		SetTranslucentSortPriority(10);
+	}
 }
 
 void USpaceSpeedTunnelComponent::HideTunnel()
@@ -79,13 +107,38 @@ void USpaceSpeedTunnelComponent::HideTunnel()
 	if (!bHidden)
 	{
 		SetVisibility(false);
+		if (Fog)
+		{
+			Fog->SetVisibility(false);
+		}
 		bHidden = true;
 	}
 }
 
-float USpaceSpeedTunnelComponent::ComputeAlpha(float Speed) const
+void USpaceSpeedTunnelComponent::TriggerFlare(float Strength)
 {
-	return FMath::SmoothStep(FadeInSpeed, FMath::Max(FullSpeed, FadeInSpeed + 1.f), Speed);
+	FlareTime = 0.f;
+	FlareStrength = Strength;
+	FlareSeed = FlareRandom.FRandRange(1.f, 97.f);
+	FlareWait = FlareRandom.FRandRange(FlareIntervalMinSeconds, FMath::Max(FlareIntervalMinSeconds, FlareIntervalMaxSeconds));
+}
+
+void USpaceSpeedTunnelComponent::UpdateFlare(float DeltaSeconds)
+{
+	if (FlareTime >= 0.f)
+	{
+		FlareTime += DeltaSeconds;
+		if (FlareTime > FlareSeconds)
+		{
+			FlareTime = -1.f;
+		}
+		return;
+	}
+	FlareWait -= DeltaSeconds;
+	if (FlareWait <= 0.f)
+	{
+		TriggerFlare(1.f);
+	}
 }
 
 float USpaceSpeedTunnelComponent::ComputeApparentSpeed(float Speed) const
@@ -122,17 +175,25 @@ void USpaceSpeedTunnelComponent::PushParameters(const FVector& Direction, float 
 	TunnelMaterial->SetScalarParameterValue(TEXT("BeamSharpness"), BeamSharpness);
 	TunnelMaterial->SetVectorParameterValue(TEXT("GlowColor"), GlowColor);
 	TunnelMaterial->SetScalarParameterValue(TEXT("GlowBrightness"), GlowBrightness);
+	TunnelMaterial->SetVectorParameterValue(TEXT("HazeColor"), HazeColor);
+	TunnelMaterial->SetVectorParameterValue(TEXT("FlareColor"), FlareColor);
+	TunnelMaterial->SetScalarParameterValue(TEXT("FlareSeed"), FlareSeed);
+	// Quick in, slow out, like the reference's bursts.
+	const float Envelope = FlareTime < 0.f ? 0.f
+		: FMath::Min(FlareTime / 0.15f, 1.f) * FMath::Square(1.f - FMath::Clamp(FlareTime / FMath::Max(FlareSeconds, 0.1f), 0.f, 1.f));
+	TunnelMaterial->SetScalarParameterValue(TEXT("FlareAlpha"), FlareStrength * Envelope);
 }
 
-void USpaceSpeedTunnelComponent::UpdateTunnel(const FVector& ViewLocation, const FVector& Velocity, float DeltaSeconds)
+void USpaceSpeedTunnelComponent::UpdateTunnel(const FVector& ViewLocation, const FVector& Velocity, float DeltaSeconds, float Intensity)
 {
 	const double Speed = Velocity.Size();
-	const float Alpha = ComputeAlpha(float(Speed));
-	if (!TunnelMaterial || Layers.Num() == 0 || Alpha <= 0.001f)
+	const float Alpha = FMath::Clamp(Intensity, 0.f, 1.f);
+	if (!TunnelMaterial || Layers.Num() == 0 || Alpha <= 0.001f || Speed < 1.0)
 	{
 		HideTunnel();
 		return;
 	}
+	UpdateFlare(DeltaSeconds);
 
 	// The scroll, wrapped at the period so it stays small; the pattern repeats exactly there.
 	OffsetCm = FMath::Fmod(OffsetCm + double(ComputeApparentSpeed(float(Speed))) * DeltaSeconds, double(PeriodCm));
@@ -165,9 +226,25 @@ void USpaceSpeedTunnelComponent::UpdateTunnel(const FVector& ViewLocation, const
 	}
 	MarkRenderStateDirty();
 
+	if (Fog && FogMaterial)
+	{
+		const FVector FogScale(FogRadiusCm / FMath::Max(Extent.X, 1.0), FogRadiusCm / FMath::Max(Extent.Y, 1.0), HalfLengthCm / FMath::Max(Extent.Z, 1.0));
+		Fog->SetWorldTransform(FTransform(GetComponentQuat(), ViewLocation, FogScale));
+		FogMaterial->SetVectorParameterValue(TEXT("TunnelDirection"), FLinearColor(Direction));
+		FogMaterial->SetScalarParameterValue(TEXT("TunnelHalfLengthCm"), HalfLengthCm);
+		FogMaterial->SetScalarParameterValue(TEXT("TunnelAlpha"), Alpha);
+		FogMaterial->SetScalarParameterValue(TEXT("FogOpacity"), FogOpacity);
+		FogMaterial->SetVectorParameterValue(TEXT("FogNearColor"), FogNearColor);
+		FogMaterial->SetVectorParameterValue(TEXT("FogFarColor"), FogFarColor);
+	}
+
 	if (bHidden)
 	{
 		SetVisibility(true);
+		if (Fog)
+		{
+			Fog->SetVisibility(true);
+		}
 		bHidden = false;
 	}
 }

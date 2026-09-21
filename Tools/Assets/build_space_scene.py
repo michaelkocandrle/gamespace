@@ -110,9 +110,9 @@ GIANT_SPIN_SECONDS = 1800.0
 
 # Space dust around the ship camera (USpaceDustComponent).
 DUST_COLOR = (0.70, 0.80, 1.00)
-DUST_BRIGHTNESS = 5.0  # 3.0 until 19. 9. 2026 (bright white sticks), 1.6 until 21. 9. 2026: the material
-                       # now tapers every speck to a point, which throws away about three quarters of its
-                       # light, so the number that survives is higher than the one on screen suggests.
+DUST_BRIGHTNESS = 2.5  # 3.0 until 19. 9. 2026 (bright white sticks), 1.6, then 5.0 when the material began
+                       # tapering every speck to a point; 2.5 since the quantum reference video (21. 9. 2026):
+                       # outside quantum Star Citizen's dust is only a hint of motion.
 
 # ---------------------------------------------------------------------------------------
 
@@ -121,6 +121,7 @@ GLOW_TEXTURE = "/Game/Environments/Space/T_MilkyWay_Glow_Cube"
 STARFIELD_MATERIAL = "/Game/Environments/Space/M_Starfield_Sky"
 DUST_MATERIAL = "/Game/Environments/Space/M_SpaceDust"
 TUNNEL_MATERIAL = "/Game/Environments/Space/M_SpeedTunnel"
+FOG_MATERIAL = "/Game/Environments/Space/M_QuantumFog"
 GAS_GIANT_MATERIAL = "/Game/Environments/Space/M_GasGiant"
 MOON_MATERIAL = "/Game/Environments/Space/M_Moon"
 RINGS_MATERIAL = "/Game/Environments/Space/M_PlanetRings"
@@ -751,6 +752,13 @@ float a = atan2(dot(rv, Up.xyz), dot(rv, Right.xyz)) / 6.2831853 + 0.5;
 float dither = frac(sin(dot(P, float3(12.9898, 78.233, 37.719))) * 43758.5453) - 0.5;
 float3 result = 0;
 
+// Haze: the tunnel is a lit fog, brightest on the walls beside the ship and dark down the middle
+// towards the vanishing point (the reference's "hole").
+if (!cap)
+{
+    result += Haze.rgb * Beam * (1.0 - smoothstep(0.0, 0.5, zn)) * smoothstep(-0.05, 0.05, zn);
+}
+
 // Beams: smooth noise round the axis, strongest far ahead where they converge. They carry on over
 // the far cap, so the vanishing point is not a dark disc where the wall stops.
 if (Beam > 0.0)
@@ -770,6 +778,21 @@ if (Beam > 0.0)
     float shafts = pow(saturate(n), BeamSharp);
     float fb = cap ? (zn > 0.0 ? 1.0 : 0.0) : smoothstep(0.02, 0.7, zn);
     result += BeamColor.rgb * BeamBright * Beam * shafts * fb;
+
+    // Flares: a few broad green beams out of the vanishing point that come and go (Flare 0..1, a
+    // new FlareSeed each time, so every flare points elsewhere). Strongest at the jump itself.
+    if (Flare > 0.001)
+    {
+        float fcount = 7.0;
+        float ft = a * fcount;
+        float fi = floor(ft);
+        float fh = frac(sin((fi + FlareSeed * 3.31) * 51.713) * 31718.123);
+        float fx = frac(ft) - 0.2 - 0.6 * frac(fh * 7.13);
+        float beam = fh > 0.45 ? saturate(1.0 - abs(fx) / 0.09) : 0.0;
+        beam *= beam;
+        float ff = cap ? (zn > 0.0 ? 1.0 : 0.0) : smoothstep(-0.05, 0.4, zn);
+        result += FlareColor.rgb * Flare * beam * ff * Beam;
+    }
 }
 if (cap)
 {
@@ -828,7 +851,7 @@ def build_tunnel_material():
 
     names = ["P", "Dir", "Right", "Up", "Radius", "Bright", "Seed", "Beam", "Lanes", "HalfLength", "Offset", "Period",
              "StreakLen", "StreakWidth", "Fill", "ColorSpread", "StreakColor", "StreakBright", "BeamColor", "BeamBright", "BeamCount",
-             "BeamSharp", "GlowColor", "GlowBright", "Alpha"]
+             "BeamSharp", "GlowColor", "GlowBright", "Alpha", "Haze", "Flare", "FlareSeed", "FlareColor"]
     tunnel = custom(m, TUNNEL_HLSL, names, -400, 0, "SpeedTunnel")
     sources = {
         "P": delta,
@@ -851,12 +874,61 @@ def build_tunnel_material():
         "GlowColor": vector(m, "GlowColor", (0.8, 0.9, 1.0), -1100, 1200),
         "GlowBright": scalar(m, "GlowBrightness", 2.0, -1100, 1300),
         "Alpha": scalar(m, "TunnelAlpha", 0.0, -1100, 1400),
+        "Haze": vector(m, "HazeColor", (0.02, 0.03, 0.06), -1300, 1500),
+        "Flare": scalar(m, "FlareAlpha", 0.0, -1300, 1600),
+        "FlareSeed": scalar(m, "FlareSeed", 1.0, -1300, 1700),
+        "FlareColor": vector(m, "FlareColor", (0.1, 0.9, 0.45), -1300, 1800),
     }
     for index, name in enumerate(["Radius", "Bright", "Seed", "Beam", "Lanes"]):
         sources[name] = node(m, unreal.MaterialExpressionPerInstanceCustomData, -1700, 300 + 100 * index, data_index=index)
     for name in names:
         link(sources[name], tunnel, name)
     output(tunnel, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    finish(m)
+    return m
+
+
+# The quantum tunnel's fog (USpaceSpeedTunnelComponent's second mesh, behind the streak walls). In the
+# reference the tunnel hides the stars and planets outside: a dim blue-grey fog, lighter on the walls
+# beside the ship and dark down the middle towards the vanishing point. Translucent rather than
+# additive, because additive light can brighten the sky but never cover it.
+FOG_HLSL = r"""
+float zn = dot(P, Dir.xyz) / HalfLength;
+float far = smoothstep(0.0, 0.65, zn);
+float3 colour = lerp(Near.rgb, Far.rgb, far);
+return float4(colour, saturate(Opacity * Alpha));
+"""
+
+
+def build_fog_material():
+    m = fresh_material(FOG_MATERIAL)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    m.set_editor_property("two_sided", True)
+    here = node(m, unreal.MaterialExpressionWorldPosition, -1100, -100)
+    centre = node(m, unreal.MaterialExpressionObjectPositionWS, -1100, 20)
+    delta = node(m, unreal.MaterialExpressionSubtract, -900, -60)
+    link(here, delta, "A")
+    link(centre, delta, "B")
+    names = ["P", "Dir", "HalfLength", "Near", "Far", "Opacity", "Alpha"]
+    fog = custom(m, FOG_HLSL, names, -400, 0, "QuantumFog", unreal.CustomMaterialOutputType.CMOT_FLOAT4)
+    sources = {
+        "P": delta,
+        "Dir": vector(m, "TunnelDirection", (1.0, 0.0, 0.0), -900, 100),
+        "HalfLength": scalar(m, "TunnelHalfLengthCm", 150000.0, -900, 200),
+        "Near": vector(m, "FogNearColor", (0.04, 0.055, 0.09), -900, 300),
+        "Far": vector(m, "FogFarColor", (0.004, 0.006, 0.012), -900, 400),
+        "Opacity": scalar(m, "FogOpacity", 0.92, -900, 500),
+        "Alpha": scalar(m, "TunnelAlpha", 0.0, -900, 600),
+    }
+    for name in names:
+        link(sources[name], fog, name)
+    rgb = node(m, unreal.MaterialExpressionComponentMask, -200, 0, r=True, g=True, b=True, a=False)
+    link(fog, rgb, "")
+    alpha = node(m, unreal.MaterialExpressionComponentMask, -200, 150, r=False, g=False, b=False, a=True)
+    link(fog, alpha, "")
+    output(rgb, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    output(alpha, unreal.MaterialProperty.MP_OPACITY)
     finish(m)
     return m
 
@@ -1127,6 +1199,7 @@ def main():
     planet_material = build_planet_material()
     build_dust_material()
     build_tunnel_material()
+    build_fog_material()
     body_materials = {
         "giant": build_body_material(GAS_GIANT_MATERIAL, GAS_GIANT_HLSL, 0.95, with_time=True),
         "moon": build_body_material(MOON_MATERIAL, MOON_HLSL, 0.9, with_time=False),

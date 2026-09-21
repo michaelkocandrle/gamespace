@@ -156,26 +156,27 @@ Modelled on Star Citizen's Intelligent Flight Control System (`starcitizenrefere
     (+9 degrees of FOV, eased in at 9 per second, back at 2.5) with a jolt and
     `AfterburnerShakeCm` 4.5 of shake, then fades over `AfterburnerFadeSeconds`.
   HUD line `AFTERBRN`: fuel bar and %, BURNING / fading / EMPTY - refilling / SCM only.
-- **Cruise drive** (`J`, **NAV only**, a stand-in for quantum travel until SC-4): charges for
-  `CruiseSpoolSeconds` (2.5 s, camera shake builds, charging sound), then flies along the nose at the
-  speed limiter x cruise limit (at least 10 %).
-  The limit is the altitude above the terrain x `CruiseAltitudeRate` (0.4 per s), lowered in thick
-  air (`CruiseAtmosphereSlowdown`), between 250 m/s and `CruiseMaxSpeed` 6 km/s (6 km/s far from
-  bodies). Flying at the ground therefore slows by itself (the altitude shrinks ~33 % per second)
-  and the speed never exceeds the limit. Turn rates drop to `CruiseTurnScale` (45 %). It refuses
-  to engage below `CruiseMinAltitudeM` (2 km) and drops out below `CruiseDropAltitudeM` (1.2 km),
-  on a hit, or on `J`; the drop bleeds speed down to NAV top speed in ~1.5 s. From the start
-  point, Veyra's atmosphere is ~10 s away instead of over a minute.
-- **Feel**: the view widens with the afterburner (+7 degrees) and cruise (+16), the camera shakes
+- **Quantum drive** (SC-4, NAV only, after the reference video in
+  `starcitizenreference/QuantumTravel_VideoNotes.md`; it replaced the cruise drive on `J`): the body
+  nearest the nose (within `QuantumPickDeg`, 35 degrees) is the destination. The drive spools by itself
+  (`QuantumSpoolSeconds` 6 s) and calibrates while the nose is within `QuantumAlignDeg` (6 degrees) of
+  it (`QuantumCalibrationSeconds` 2.5 s). READY, then the left mouse button held for
+  `QuantumEngageHoldSeconds` (0.6 s) jumps: no steering, the nose stays on the destination, speed
+  rises at `QuantumAccelerationKmS2` (8) to `QuantumMaxSpeedKmS` (30) and brakes to arrive at
+  `QuantumExitSpeed` (300 m/s) `max(0.6 radii, 15 km)` above the surface. Then the drive cools for
+  `QuantumCooldownSeconds` (10 s). Refused: shorter than `QuantumMinJumpKm` (20 km), a body on the
+  way, or not enough fuel (`QuantumFuelPer1000Km` 12 %). `B` back to SCM ends a jump where the ship is.
+  `space.Quantum <name> [0..1]` jumps at once for testing; shots take `"quantum": "<name>"`.
+- **Feel**: the view widens with the afterburner (+7 degrees) and in a quantum jump (+12), the camera shakes
   with afterburner, boost (lightly), charging, entry heat and a short jolt on boost and afterburner
   ignition, engage and drop. Thruster materials (slots named `*Emissive*`) glow with engine load,
-  much brighter with the afterburner and in cruise;
+  much brighter with the afterburner and in a quantum jump;
   `*NavWhite*` slots double-flash like anti-collision strobes. Space dust streaks show direction
   and speed.
 - **Sound** follows what the thrusters really do (`GetEngineDemand`: braking and hovering are
-  heard, a steady cruise through empty space is quiet): a reactor hum while piloted, the thruster
-  roar, an afterburner layer while the afterburner burns, a cruise drone, plus one-shots for afterburner ignition,
-  cruise charge, engage and drop. All procedural placeholders from
+  heard, a steady coast through empty space is quiet): a reactor hum while piloted, the thruster
+  roar, an afterburner layer while the afterburner burns, a quantum drone, plus one-shots for afterburner ignition,
+  quantum engage held, jump and arrival (the former cruise sounds). All procedural placeholders from
   `python Tools/Assets/generate_ship_sounds.py Intermediate/GeneratedAssets`, imported by
   `.\Tools\run_editor_python.ps1 Tools\Assets\build_ship_audio.py` to `/Game/Ships/Audio/SW_*`;
   reimport real recordings onto the same assets. The generator prints each file's band balance:
@@ -397,7 +398,7 @@ from `Tools/Assets/add_vtol_input.py`, and `space.Vtol 1|0` switches it from the
 | Speed limiter | Mouse wheel               | -                    |
 | SCM / NAV    | `B`                        | -                    |
 | G-Safe / ComStab | `K` / `L`              | -                    |
-| Cruise drive | `J` (NAV only: charge / cancel / drop out) | -    |
+| Quantum jump | hold left mouse button (NAV, nose on a body, READY) | - |
 | Camera       | `C` (chase / cockpit)      | -                    |
 | Zoom         | `Alt` + mouse wheel (chase distance, cockpit zoom) | - |
 | Landing gear | `N` (down also switches precision on) | -          |
@@ -409,8 +410,9 @@ from `Tools/Assets/add_vtol_input.py`, and `space.Vtol 1|0` switches it from the
 | Free look    | hold right mouse button    | -                    |
 | HUD          | `H` (compact / full / off) | -                    |
 
-`V`, `J`, `X` and the wheel are `IA_FlightAssist`, `IA_CruiseDrive`, `IA_AllStop` and
-`IA_CameraZoom`, appended to `IMC_Spaceship` by `Tools/Assets/add_flight_modes_input.py`; `B`, the
+`V`, `X` and the wheel are `IA_FlightAssist`, `IA_AllStop` and `IA_CameraZoom`, appended to
+`IMC_Spaceship` by `Tools/Assets/add_flight_modes_input.py`; the left mouse button is `IA_QuantumEngage`
+(`Tools/Assets/add_quantum_input.py`); `B`, the
 wheel again, `K` and `L` are `IA_MasterMode`, `IA_SpeedLimiter`, `IA_GSafe` and `IA_ComStab` from
 `Tools/Assets/add_ifcs_input.py`; `N` and `P` are `IA_LandingGear` and `IA_Precision` from
 `Tools/Assets/add_landing_input.py`; `F1` / `F2` (and `[` / `]`) are `IA_MfdLeft` and `IA_MfdRight` from
@@ -922,8 +924,8 @@ Its space look is built by `Tools/Assets/build_space_scene.py` (see below).
 | `Sun`              | Directional light, movable, intensity 8, pitch -39 / yaw 45: from behind the player's left shoulder. Contact shadows 0.08 m, source angle 0.5 deg |
 | `SkyLight`         | Movable, real-time capture, intensity 0.7 (`SKY_LIGHT_INTENSITY`). It fills the ship's shadow side; at the old 0.35 the hull was a black silhouette against space |
 | `StarfieldSky`     | `ASkyDome`: 2000 km sphere that follows the camera, with `M_Starfield_Sky`: unlit, *Is Sky*, procedural twinkling stars, a Milky Way glow cubemap, nebulae and the sun disc |
-| Space dust         | `USpaceDustComponent` on the ship: 2600 specks in a 30 m box, wrapped around the camera. A speck is a stretched cube that `M_SpaceDust` tapers to a soft spindle, with its own length and brightness, so the field reads as dust rather than as a row of identical white sticks. `space.Dust <Property> <Value>` tunes it live; the shape is measured from `ObjectPositionWS`, because `LocalPosition` on an instanced mesh is the primitive's space, not the instance's |
-| Speed tunnel       | `USpaceSpeedTunnelComponent` on the ship: the look of cruise speed, where the dust breaks up into flicker (the ship crosses its box in a frame). Three open cylinders round the camera along the flight path (25, 60, 150 m); from inside, their walls converge on the vanishing point by plain perspective. `M_SpeedTunnel` draws streaks (lanes round the axis, one streak per period, scrolled by a distance the component accumulates and capped at 2 km/s apparent so they never strobe), soft beams converging on the vanishing point and a glow there (the far cap). Fades in from 500 m/s, full at 2.5 km/s; the dust fades out between 600 and 1500 m/s. `space.Tunnel <Property> <Value>` tunes it live |
+| Space dust         | `USpaceDustComponent` on the ship: 700 specks (only a hint of motion, as in Star Citizen; none in a quantum jump) in a 30 m box, wrapped around the camera. A speck is a stretched cube that `M_SpaceDust` tapers to a soft spindle, with its own length and brightness, so the field reads as dust rather than as a row of identical white sticks. `space.Dust <Property> <Value>` tunes it live; the shape is measured from `ObjectPositionWS`, because `LocalPosition` on an instanced mesh is the primitive's space, not the instance's |
+| Speed tunnel       | `USpaceSpeedTunnelComponent` on the ship: the look of a quantum jump, shown only in one (the pawn's quantum blend). `M_QuantumFog`, a translucent cylinder behind the streaks, hides the sky as the reference's fog does; green flares come at the jump and every 8-18 s. Three open cylinders round the camera along the flight path (25, 60, 150 m); from inside, their walls converge on the vanishing point by plain perspective. `M_SpeedTunnel` draws streaks (lanes round the axis, one streak per period, scrolled by a distance the component accumulates and capped at 2 km/s apparent so they never strobe), soft beams converging on the vanishing point and a glow there (the far cap). `space.Tunnel <Property> <Value>` tunes it live |
 | `Planet_Veyra`     | `AQuadSpherePlanet`, radius 25 km, centre 45 km ahead of the start (start is 20 km above sea level, 8 km above the atmosphere) |
 | `Moon_Keth`        | `ADistantBody`, radius 6 km, orbits Veyra at 150 km every 25 min (`M_Moon`: craters, maria) |
 | `GasGiant_Orun`    | `ADistantBody`, radius 150 km with rings to 330 km, 620 km away to the right of Veyra (`M_GasGiant` bands and a storm, `M_PlanetRings`) |

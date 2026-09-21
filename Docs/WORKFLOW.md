@@ -267,7 +267,7 @@ Presety (`Tools/Shots/*.json`):
 | `vtol` | SC-2b: odznak VTOL, visení na zvedacích tryskách (`space.Vtol`) |
 | `velocity_vector` | SC-3: značka dráhy letu (pole `drift` ve scénáři) |
 | `dust_tune`, `space_look` | rychlostní čáry (`space.Dust`) a prohlídka prostředí |
-| `tunnel_tune`, `speed_tunnel` | rychlostní tunel v cruise (`space.Tunnel`, pole `"cruise": true`) a vzhled rychlosti od SCM po 6 km/s |
+| `quantum`, `tunnel_tune` | SC-4: HUD quantum drivu a skok (pole `quantum`, `quantum_progress`, `quantum_ready`, `facing: body:<jméno>`), ladění tunelu (`space.Tunnel`) |
 | `look_sharp`, `look_groups` | proč je obraz měkký a co která škálovací skupina stojí |
 | `look_artifacts` | film grain, motion blur a stopy za pohybem – změřeno, žádný z nich obraz nekazí |
 | `hud` | HUD ve všech situacích |
@@ -570,9 +570,9 @@ Velké celky:
 - chybějící systémy SC HUD (palivo, zbraně, protiopatření);
 - ~~SC-2b VTOL a zpětná vazba při visení~~ – hotovo 20. 9. 2026 (HANDOFF bod 43). Další v letové
   roadmapě je SC-3 (zbytek HUD a MFD) nebo SC-4 (quantum travel místo cruise).
-- rychlostní tunel v cruise je hotový (HANDOFF bod 46); k SC-4 patří z referenčních snímků ještě
-  **modré jiskry proudící z hran trupu** při quantum skoku a nabíjení (spool) – tunel dostane jiný
-  odstín a intenzitu podle stavu drive.
+- SC-4 quantum drive je hotový (HANDOFF bod 47). Z videa zbývá: **mapa systému (F2)** s výběrem
+  cíle, **modré jiskry z hran trupu** ve skoku (zvenku), **modrá záře pod přídí** z kokpitu,
+  doplňování quantum paliva.
 
 ---
 

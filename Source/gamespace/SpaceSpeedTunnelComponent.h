@@ -31,9 +31,12 @@ struct FSpeedTunnelLayer
 };
 
 /**
- * The look of high speed, for cruise (21. 9. 2026, the author against two Star Citizen quantum
- * travel frames): streaks radiating from the point the ship flies at, soft cold beams of light
- * converging on it, and a glow at that point.
+ * The look of a quantum jump (SC-4, after the reference video in starcitizenreference/
+ * QuantumTravel_VideoNotes.md): a dim blue-grey fog tunnel, dark down the middle, a few thin streaks
+ * radiating from the point the ship flies at, soft cold beams converging on it, a glow there, and now
+ * and then a few broad green flares - strongest at the moment of the jump. It shows only in a jump
+ * (UpdateTunnel's Intensity is the pawn's quantum blend): outside quantum Star Citizen has almost no
+ * speed lines at all.
  *
  * The space dust (USpaceDustComponent) cannot do this on its own. Its specks stand still in the
  * world, which is right up to a few hundred m/s; at cruise the ship covers the whole dust box in a
@@ -59,15 +62,14 @@ public:
 
 	virtual void BeginPlay() override;
 
-	/** Places the tunnel round ViewLocation for an observer moving at Velocity (cm/s). */
-	void UpdateTunnel(const FVector& ViewLocation, const FVector& Velocity, float DeltaSeconds);
+	/** Places the tunnel round ViewLocation for an observer moving at Velocity (cm/s), at Intensity 0..1. */
+	void UpdateTunnel(const FVector& ViewLocation, const FVector& Velocity, float DeltaSeconds, float Intensity);
+
+	/** A flare now, at this strength (the jump itself: 1.5). */
+	void TriggerFlare(float Strength);
 
 	/** Hides the tunnel until the next UpdateTunnel. */
 	void HideTunnel();
-
-	/** 0..1: how much of the tunnel is showing at this speed (cm/s). For tests. */
-	UFUNCTION(BlueprintPure, Category = "Speed Tunnel")
-	float ComputeAlpha(float Speed) const;
 
 	/** How far the streaks scroll per second at this speed (cm/s), for tests. */
 	UFUNCTION(BlueprintPure, Category = "Speed Tunnel")
@@ -76,14 +78,6 @@ public:
 	/** Streak length at this speed (cm/s), cm. For tests. */
 	UFUNCTION(BlueprintPure, Category = "Speed Tunnel")
 	float ComputeStreakLength(float Speed) const;
-
-	/** Nothing below this speed, cm/s (500 m/s: above SCM, where the dust starts to give out). */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
-	float FadeInSpeed = 50000.f;
-
-	/** Full strength from this speed, cm/s. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
-	float FullSpeed = 250000.f;
 
 	/** The streaks never scroll faster than this, cm/s; see the class comment. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "1.0"))
@@ -122,27 +116,27 @@ public:
 
 	/** Fraction of the lanes that hold a streak at all; the rest stay dark so the streaks do not form a comb. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float Fill = 0.55f;
+	float Fill = 0.2f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
 	FLinearColor StreakColor = FLinearColor(0.85f, 0.92f, 1.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
-	float StreakBrightness = 10.f;
+	float StreakBrightness = 12.f;
 
 	/** The soft shafts of light converging on the vanishing point. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
-	FLinearColor BeamColor = FLinearColor(0.35f, 0.6f, 1.f);
+	FLinearColor BeamColor = FLinearColor(0.4f, 0.55f, 1.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
-	float BeamBrightness = 2.f;
+	float BeamBrightness = 1.2f;
 
 	/** Beams round the tunnel, and how sharply they stand out of the gaps between them. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "1.0"))
-	float BeamCount = 24.f;
+	float BeamCount = 16.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.5"))
-	float BeamSharpness = 6.f;
+	float BeamSharpness = 3.f;
 
 	/** The glow on the vanishing point, where the tunnel's far end closes. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
@@ -151,16 +145,64 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
 	float GlowBrightness = 2.f;
 
+	/** The lit fog on the walls beside the ship (its colour carries the brightness). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
+	FLinearColor HazeColor = FLinearColor(0.05f, 0.07f, 0.13f);
+
+	/** The green flares: colour (with brightness), how often (s, a random time between the two) and how long. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
+	FLinearColor FlareColor = FLinearColor(0.15f, 1.4f, 0.6f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.5", Units = "s"))
+	float FlareIntervalMinSeconds = 8.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.5", Units = "s"))
+	float FlareIntervalMaxSeconds = 18.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.1", Units = "s"))
+	float FlareSeconds = 1.8f;
+
+	/**
+	 * The fog behind the streak walls that hides the sky in a jump (M_QuantumFog, a second cylinder):
+	 * its distance, how much it covers, and its colour beside the ship and down the middle.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "100.0"))
+	float FogRadiusCm = 25000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float FogOpacity = 0.97f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
+	FLinearColor FogNearColor = FLinearColor(0.04f, 0.055f, 0.09f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
+	FLinearColor FogFarColor = FLinearColor(0.004f, 0.006f, 0.012f);
+
 	/** The walls, nearest first. The near one sweeps past fast and sparse, the far one carries the beams. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
 	TArray<FSpeedTunnelLayer> Layers;
 
 private:
 	void PushParameters(const FVector& Direction, float Alpha, float StreakLength);
+	void UpdateFlare(float DeltaSeconds);
+
+	/** The running flare: time into it (negative: none), its strength and pattern, and the wait for the next. */
+	float FlareTime = -1.f;
+	float FlareStrength = 1.f;
+	float FlareSeed = 1.f;
+	float FlareWait = 10.f;
+	FRandomStream FlareRandom = FRandomStream(0x0F1A);
 
 	/** The mesh's own bounds: the tunnel is scaled from them, so the pivot of the cylinder does not matter. */
 	FBox MeshBounds = FBox(ForceInit);
 	TObjectPtr<UMaterialInstanceDynamic> TunnelMaterial;
+
+	/** The fog cylinder, made in BeginPlay when M_QuantumFog exists. */
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMeshComponent> Fog;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> FogMaterial;
 	double OffsetCm = 0.0;
 	bool bHidden = true;
 };

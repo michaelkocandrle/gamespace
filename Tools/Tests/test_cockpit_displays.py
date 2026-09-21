@@ -44,7 +44,7 @@ displays.debug_initialize()
 names = set(displays.debug_get_widget_names())
 expected = {"FlightScreen", "StatusScreen", "FlightTitle", "StatusTitle", "FlightGlass", "StatusGlass", "FlightKeys",
             "SpeedGauge", "BoostGauge", "AfterburnerGauge", "SpeedValue", "SpeedUnit", "GText", "BoostText",
-            "AfterburnerValue", "RowLimitValue", "GMax", "ModeText", "RowGearValue", "RowCruiseValue", "RowRAltValue",
+            "AfterburnerValue", "RowLimitValue", "GMax", "ModeText", "RowGearValue", "RowQuantumValue", "RowRAltValue",
             "RowVsiValue", "RowAtmoValue", "FlightPages", "StatusPages",
             "Lamp_CPLD", "Lamp_GSAF", "Lamp_CSTB", "Lamp_BOOST", "Lamp_PREC"}
 check("two screens in the reference's MFD style (glass, title, keys, page tab) with every instrument", expected <= names, "missing %s" % sorted(expected - names))
@@ -124,7 +124,7 @@ try:
     check("the displays read the same as the HUD", all(same), "%s; speed %r vs %r" % (same, displays.debug_get_text("SpeedText"), hud.debug_get_text("SpeedValue")))
     check("speed shown, not zero", displays.debug_get_text("SpeedValue") not in ("", "0"), displays.debug_get_text("SpeedValue"))
     lit = lambda w, n: w.debug_is_lamp_lit(n) is not None
-    check("lamps match the HUD's", all(lit(displays, n) == lit(hud, n) for n in ("MODE", "CPLD", "GSAF", "CSTB", "BOOST", "GEAR", "PREC", "CRUISE")))
+    check("lamps match the HUD's", all(lit(displays, n) == lit(hud, n) for n in ("MODE", "CPLD", "GSAF", "CSTB", "BOOST", "GEAR", "PREC")))
     check("the pawn has the display component", isinstance(ship.get_editor_property("cockpit_displays"), unreal.CockpitDisplayComponent))
     cockpit_camera = ship.get_editor_property("cockpit_camera")
     pp = cockpit_camera.get_editor_property("post_process_settings")

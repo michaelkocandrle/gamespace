@@ -673,6 +673,41 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Snímky umí cruise: pole `"cruise": true` (`ASpaceshipPawn::DebugEngageCruise`, rychlost =
       limit × `limiter`). Výsledek: `-Preset speed_tunnel` (SCM → NAV → cruise 1,2 a 6 km/s).
     - Výkon: 82–87 FPS s tunelem, stejně jako bez něj.
+    - *Tentýž den nahrazeno bodem 47:* tunel teď patří quantum skoku, cruise zmizel.
+47. **SC-4 – quantum drive místo cruise** (21. 9. 2026, podle referenčního videa, poznámky
+    v `starcitizenreference/QuantumTravel_VideoNotes.md`; autor: cruise ve SC není, rychlostních čar
+    je mimo quantum šíleně moc). Cruise (J) je pryč celý: stav, klávesa, `IA_CruiseDrive`, výškový limit.
+    - **Průběh jako ve videu:** v NAV je cílem těleso nejblíž nosu (do `QuantumPickDeg` 35°). Drive
+      se sám **spooluje** (`QuantumSpoolSeconds` 6 s) a **kalibruje**, dokud je nos do 6° od cíle
+      (`QuantumCalibrationSeconds` 2,5 s, mimo cíl rychle padá). Pak **READY** a **podržené levé
+      tlačítko myši** (0,6 s) skočí. Ve skoku **nejde řídit**, nos se drží na cíli. Loď dorazí
+      `max(0,6 poloměru, 15 km)` nad povrch v rychlosti NAV (300 m/s) a drive **chladne 10 s**.
+      B zpět do SCM skok přeruší tam, kde loď je.
+    - **Blokace:** `TOO CLOSE` (skok kratší než 20 km – z výchozího bodu je Veyra moc blízko),
+      `OBSTRUCTED` (těleso v cestě, počítá se úsečka na místo příletu proti koulím těles), `NO QT FUEL`
+      (12 % nádrže na 1000 km, doplňování zatím není).
+    - **Rychlost ve skoku:** zrychlení 8 km/s², strop 30 km/s, brzdění tak, aby dorazil přesně
+      rychlostí výstupu. Na Orun (380 km od startu) to je asi 17 s, 600 km zhruba 24 s. Měřítko
+      systému je naše (desítky až stovky km), ne gigametry SC; doba skoku je ale podobná.
+    - **HUD podle 4K výřezů z videa:** zelený rámeček nahoře (`SPOOLING 37%`, `CALIBRATING`, `READY`,
+      `COOLING 44%`, oranžově důvod blokace), dva oblouky kolem středu (fialové → zelené se šipkami
+      `> <` → červené při chlazení), značka cíle (kroužek, jméno, vzdálenost `394.5km`), a když je
+      cíl mimo obraz, šipka kam zatočit. Displeje mají řádek QUANTUM (OFF/SPOOL/CALIB/READY/JUMP/COOL).
+    - **Tunel jen ve skoku** (řídí ho `GetQuantumBlend`, ne rychlost). Podle videa: **mlha** zakrývá
+      vesmír (nový `M_QuantumFog`, průsvitný válec za stěnami s čarami – aditivní světlo oblohu
+      jen zesvětlí, nikdy ji nezakryje), světlejší u stěn a tmavá ke středu; **řídké** tenké čáry
+      (`Fill` 0,2); záře na úběžníku; **zelené záblesky** z úběžníku na začátku skoku a pak náhodně
+      každých 8–18 s. **Past:** záporná `TranslucentSortPriority` na mlze ji řadí před *všechny*
+      průsvitné věci a prstence Orunu jí prosvítaly celé; mlha má 0, stěny s čarami 10.
+    - **Prach** v normálním letu jen jako náznak: 700 smítek místo 2600, jas 2,5 místo 5; ve skoku
+      žádný. Jeho poloha se počítá z kamery posunuté o pohyb za snímek (bod 46).
+    - Ladění za běhu: `space.Quantum <jméno> [0..1]` (skok hned, bez spoolu), `space.Quantum ready`,
+      `space.Tunnel FogOpacity 0.97` a ostatní vlastnosti tunelu. Snímky: pole `"quantum": "Orun"`,
+      `"quantum_progress"`, `"quantum_ready"` a `"facing": "body:Orun"`.
+    - Vstup: `Tools/Assets/add_quantum_input.py` (IA_QuantumEngage na levé tlačítko, IA_CruiseDrive
+      odmapovaná a smazaná). Test `Tools/Tests/test_quantum_sc4.py`, snímky `-Preset quantum`.
+    - Chybí proti SC: mapa systému (F2) a výběr cíle z ní, modré jiskry z trupu (zvenku), modrá
+      záře pod přídí z kokpitu, doplňování paliva, interdikce.
 
 ---
 
@@ -765,7 +800,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | Omezovač rychlosti | kolečko |
 | SCM / NAV | B |
 | G-Safe / ComStab | K / L |
-| Cruise (jen v NAV) | J |
+| Quantum skok (jen v NAV, nos na tělese, READY) | držet levé tlačítko myši |
 | Kamera chase / kokpit | C |
 | Zoom | Alt + kolečko |
 | Free look | pravé tlačítko |
@@ -797,14 +832,15 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_ifcs_sc1.py` | SC-1a: limity trysek podle směru, coupled brzdění, decoupled, omezovač, spacebrake, SCM/NAV, setrvačnost rotace, G-Safe, ComStab, virtuální joystick, input assety, hodnoty Vanguardu. |
 | `test_flight_hud_sc1c.py` | HUD (logika SC-1c v rozložení podle současného SC): všechny prvky reference, pásky (kurz přes 360, výška), žebřík (poloha čar podle FOV a náklonu), odznaky jen zapnuté, bez tělesa bez kurzu a výšek, rychlost vůči omezovači, afterburner, pozpátku, kontrolky, G a limit G-Safe, strafe, joystick. Vzhled headless ověřit nejde. |
 | `test_boost_afterburner_sc1b.py` | SC-1b: boost jen manévrovací trysky a rotace, vypnutí G-Safe, afterburner (tah, limit × omezovač, palivo, zamčení, doplňování, plynulý návrat, coupled i decoupled, jen SCM, G-Safe zůstává), Shift + Tab, input a hodnoty Vanguardu. |
-| `test_flight_modes.py` | Boost energie, cruise jen v NAV (vesmír i nad Veyrou), výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
+| `test_flight_modes.py` | Boost energie, výstup, kolize lodi, záchrana postavy, tělesa, zvuky. |
 | `test_cockpit_displays.py` | Displeje v kokpitu: dvě obrazovky (FLIGHT, SYSTEMS) se všemi přístroji a velkým písmem, stejné hodnoty jako HUD pro stejnou loď, komponenta na lodi, slot `M_Ship_Vanguard_Screens` v interiéru s unlit `MI_Ship_Vanguard_Screens`. Stránky MFD (přepínání, obtékání, titulek a záložka, obsah seznamů a tahu, klávesy F1/F2 a [ ] bez kolizí, ladicí zobrazení enginu z F1/F2 odebrané). Střední sloupek: RADAR a SELF STATUS, `texture_rect` v receptu = `ScreenRect` v kódu, poměr stran jako sklo, radar vidí objekt v dosahu přesně tam, kde je (a ten mimo dosah ne), těleso jako směr, planeta pod lodí bez směru, silueta z 10 hullů Vanguardu, 4 motory, 3 nohy, 4 sockety `Display_*`. Jak vypadají: `-Preset cockpit` a `cockpit_centre`. |
 | `test_cockpit_frame.py` | Kokpit: Vanguard má interiér (díl, oko nad vanou za deskou, deska 7–13° pod okem jako v SC referenci, pilot ≥ 1,2 m od desky, provizorium vypnuté); rozložení provizorního rámu pro lodě bez interiéru (nic v okně HUD, deska 14–20° pod horizontem, sloupky 24–34° do stran, sedadlo za okem). |
 | `test_landing_sc2.py` | SC-2a: dosednutí jen s podvozkem (GEAR UP před vším ostatním, mezera pod patkami), stavový automat podvozku (časy, otočení v půlce, zákaz zasunutí na zemi), pohyb modelovaného dílu i zástupných nohou, precision (strop, omezovač uvnitř, jen SCM, bez afterburneru, pomalejší otáčení, brzdění bez skoku), kontrolky GEAR/PREC, klávesy N/P bez kolizí, hodnoty a díl `Gear` Vanguardu, scénář `landing`. |
 | `test_vtol_sc2b.py` | SC-2b: VTOL jen v SCM (v NAV odmítnutý a shozený), přechod trvá svůj čas, hlavní tah / zvedací a boční trysky podle násobků, strop rychlosti a stoupavost Space/Ctrl, odmítnutý afterburner, auto-srovnání (`ComputeVtolLevelStep` proti zadanému „nahoru“), visení čte jako práce motorů, odznak VTOL na HUD, klávesa G bez kolize, scénář snímků. |
 | `test_flight_hud_sc3.py` | SC-3: značka dráhy letu – nic pod 5 m/s, střed při letu po ose pohledu, správná strana a velikost odchylky podle ohniskové délky, přilepení na kruh, čárkovaná značka za nosem, scénář snímků. |
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
-| `test_speed_tunnel.py` | Rychlostní tunel: nic v SCM, jen část v NAV, plný v cruise a monotónně; prach mizí až když tunel naskočí a je pryč, než ho cruise rozbliká; čára delší než dvojnásobek posunu za snímek při 60 FPS (neblikne); čáry v dráze do sebe nenarazí; stěny od nejbližší, loď Vanguard se vejde do nejbližší; materiál aditivní, oboustranný, se všemi parametry, které komponenta nastavuje; scénář snímků včetně `cruise`. |
+| `test_quantum_sc4.py` | SC-4: nic v SCM; v NAV cíl podle nosu, Veyra ze startu TOO CLOSE; spool, kalibrace, READY, krátký stisk neskočí, podržení ano; spálené palivo podle vzdálenosti; ve skoku nejde řídit; příjezd na výšku příletu v rychlosti NAV do minuty; chlazení; B přeruší skok; OBSTRUCTED s planetou v cestě; NO QT FUEL; kalibrace padá, když nos uhne; HUD (rámeček, oblouky 0/1/2/3, cíl); LMB namapované, J ne; scénář snímků. Plus profil rychlosti, výška příletu, palivo a test úsečka–koule samostatně. |
+| `test_speed_tunnel.py` | Tunel quantum skoku: prach je pryč, než by ho rychlost rozblikala; čára delší než dvojnásobek posunu za snímek při 60 FPS (neblikne); čáry v dráze do sebe nenarazí; stěny od nejbližší, loď Vanguard se vejde do nejbližší; materiál aditivní, oboustranný, se všemi parametry, které komponenta nastavuje; scénář snímků se skokem (`quantum`). |
 | `test_scene_look.py` | Vzhled uložené úrovně proti receptu: intenzita sky lightu, contact shadows a šířka slunce, všechna nastavení `POST_SETTINGS` v neohraničeném volume (a že chromatická aberace a vyvážení bílé zůstala vypnutá), lak trupu z `Vanguard_setup.json`. Chytá zapomenuté spuštění `build_space_scene.py` / `import_ship.py`. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
 
@@ -859,8 +895,8 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `vtol` | SC-2b: odznak VTOL na desce zapnutý i vypnutý, loď visící na zvedacích tryskách ze strany, zezadu a z kokpitu. VTOL přepíná `space.Vtol`, ne klávesa. |
 | `velocity_vector` | SC-3: značka dráhy letu v ose, při letu bokem, šikmo dolů, pozpátku a ve stoje. Rychlosti nastavuje pole `drift`, ne motory. |
 | `dust_tune` | Rychlostní čáry: hustota, délka, tloušťka a velikost krabice přes `space.Dust` v jednom běhu. |
-| `tunnel_tune` | Rychlostní tunel v cruise: jas čar, pruhů a záře, šířka, stěny a barva přes `space.Tunnel` v jednom běhu. |
-| `speed_tunnel` | Vzhled rychlosti od SCM po 6 km/s: prach, předávka v NAV, tunel v cruise z venku, z kokpitu a proti planetě. |
+| `quantum` | SC-4: HUD v SCM (nic), SPOOLING, READY, TOO CLOSE; skok v prvním okamžiku (zelený záblesk), zvenku, z kokpitu a z boku; příjezd s chlazením; prach v SCM. |
+| `tunnel_tune` | Tunel ve skoku na Orun: jas čar, pruhů a záře, šířka, stěny a barva přes `space.Tunnel` v jednom běhu (hodnoty etap jsou z doby cruise, před dalším laděním je přepiš). |
 | `space_look` | Prohlídka prostředí tak, jak je: prach ve třech rychlostech, planeta od 120 km po povrch, tělesa a holá obloha. |
 | `cockpit_centre` | Střední sloupek desky (RADAR, SELF STATUS): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé: vyříznout a zvětšit. |
 | `cockpit_readability` | Čitelnost displejů: výchozí pohled, přiblížení (Z) na FLIGHT/STATUS a THRUSTERS/CONTACTS, na konci staré oko pro srovnání. |
@@ -920,7 +956,7 @@ Autor chce **kompletní kopii SC pilotování**, ale ne v jednom kroku. Níže j
 **Před začátkem každé fáze** ho potvrď s autorem a zkontroluj master referenci. Každá fáze má
 končit hratelným buildem, testy a scénářem.
 
-Dnešní systém (FA on/off, páka, boost, cruise J) je mezikrok. Části se převezmou (per-axis limity
+Dnešní systém (FA on/off, páka, boost) je mezikrok; cruise J už nahradil quantum drive (SC-4). Části se převezmou (per-axis limity
 trysek, environment, přistání), jiné se nahradí (J cruise → quantum travel, páka → SC throttle
 a speed limiter).
 
@@ -946,10 +982,9 @@ a speed limiter).
     tryskách (`HoverThrustReferenceG`). Bod 43.
 - **SC-3 – zbytek HUD a MFD** (začato 20. 9. 2026: značka dráhy letu, bod 44; VTOL a GEAR už jsou): VTOL a GEAR (po SC-2), ESP a LOCK (až budou zbraně), velocity
   vector, MFD panely, celková přestavba na UMG a náhrada anglického debug HUD.
-- **SC-4 – Quantum travel** místo cruise J: markery cílů (Veyra, Keth, Orun, později stanice),
-  natočení, spool + kalibrace (B), engage, efekt tunelu, cooldown, blokace překážkou, palivo.
-  Vyžaduje rozhodnutí o měřítku systému (SpaceEnvironment reference doporučuje realistické
-  vzdálenosti + QT).
+- **SC-4 – Quantum travel** (hotovo 21. 9. 2026, bod 47): cíl nosem, spool + kalibrace v NAV, READY,
+  skok na podržení LMB, tunel s mlhou, příjezd, chlazení, blokace, palivo. Zbývá: mapa systému (F2),
+  jiskry z trupu, doplňování paliva, interdikce; měřítko systému je zatím naše (stovky km).
 - **SC-5 – Pocit z přetížení:** blackout a redout, dýchání pilota, reakce kamery a zvuku na G.
 - **SC-6 – Systémy lodi:** power triangle, ESP (až budou zbraně a štíty).
 
@@ -964,8 +999,9 @@ Další otevřené směry mimo let:
 
 ## 11. Známé problémy a neověřené věci
 
-- **Neověřeno autorem (21. 9. 2026):** rychlostní tunel v cruise (bod 46) – jen ze snímků. Hlavně
-  jak čáry tečou v pohybu a jak působí při zatáčení v cruise (tunel se natáčí se směrem rychlosti).
+- **Neověřeno autorem (21. 9. 2026):** quantum drive (bod 47) – jen z testů a snímků. Hlavně jak
+  sedí časy (spool 6 s, kalibrace 2,5 s, podržení 0,6 s, chlazení 10 s), jak čáry tečou v pohybu
+  a jestli je mlha v tunelu dost/moc hustá. Cruise (J) už není.
 
 - **Neověřeno autorem:** celý SC-1c, hlavně vzhled (rozmístění, čitelnost na světlém pozadí,
   velikost na jiném rozlišení než 1080p), a nová pozice kamery v kokpitu (C). SC-1a a SC-1b autor otestoval a fungují; hodnoty se
@@ -1099,4 +1135,6 @@ Viz `git log --oneline`. Poslední kroky:
 - SC-2b: VTOL, visící let a záře trysek při visení (bod 43);
 - SC-3: značka dráhy letu na HUD (bod 44);
 - rychlostní čáry: měkká vřetena místo bílých klacíků (bod 45);
-- rychlostní tunel v cruise, prach bez zpoždění kamery (bod 46).
+- rychlostní tunel, prach bez zpoždění kamery (bod 46);
+- workflow s referenčním videem (`Tools/Reference/fetch_video.py`) a poznámky ke quantum travel;
+- SC-4: quantum drive místo cruise, HUD podle videa, tunel s mlhou (bod 47).

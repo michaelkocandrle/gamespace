@@ -1,0 +1,15 @@
+{
+  "_comment": "SC-4 quantum drive against the reference video (starcitizenreference/QuantumTravel_VideoNotes.md): HUD in SCM (nothing), spooling, READY, too close; the jump from outside and from the cockpit, its first moment (the green flare) and the arrival with the drive cooling; and the dust at SCM speed, which should be only a hint. Run: Tools/Shots.ps1 -Preset quantum",
+  "shots": [
+    {"name": "a_scm_no_qt", "camera": "cockpit", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "mode": "SCM", "settle": 1.0},
+    {"name": "b_nav_spooling", "camera": "cockpit", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "mode": "NAV", "settle": 2.0},
+    {"name": "c_nav_ready", "camera": "cockpit", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "mode": "NAV", "quantum_ready": true, "settle": 0.6},
+    {"name": "d_too_close", "camera": "cockpit", "altitude_m": 20000, "facing": "planet", "hud": 1, "mode": "NAV", "settle": 1.0},
+    {"name": "e_jump_start", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "chase_yaw": 20, "chase_pitch": -8, "settle": 0.35},
+    {"name": "f_jump_chase", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.25, "chase_yaw": 20, "chase_pitch": -8, "settle": 2.5},
+    {"name": "g_jump_cockpit", "camera": "cockpit", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "settle": 2.5},
+    {"name": "h_jump_side", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.35, "chase_yaw": 110, "chase_pitch": -5, "settle": 2.5},
+    {"name": "i_arrived_cooling", "camera": "cockpit", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.9, "settle": 7.0},
+    {"name": "j_scm_dust", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "mode": "SCM", "speed_ms": 210, "settle": 2.0}
+  ]
+}

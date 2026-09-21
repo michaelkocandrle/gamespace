@@ -147,7 +147,7 @@ namespace
 		case ELandingBlocker::TooFast: Reason = TEXT("too fast"); break;
 		case ELandingBlocker::Tilted: Reason = TEXT("level the ship"); break;
 		case ELandingBlocker::EngineInput:
-			Reason = Ship.GetCruiseState() != ECruiseState::Off ? TEXT("cruise on") : TEXT("engines on");
+			Reason = Ship.GetQuantumState() == EQuantumState::Traveling ? TEXT("in quantum") : TEXT("engines on");
 			break;
 		case ELandingBlocker::TakeoffCooldown: Reason = TEXT("taking off"); break;
 		case ELandingBlocker::GearUp:
@@ -203,37 +203,46 @@ namespace
 		return Metres < 1000.0 ? FString::Printf(TEXT("%.0f m/s"), Metres) : FString::Printf(TEXT("%.1f km/s"), Metres / 1000.0);
 	}
 
-	/** "DRIVE" readout: cruise drive state, or why it cannot engage. */
-	FString DescribeCruise(const ASpaceshipPawn& Ship, FLinearColor& OutColor)
+	/** "DRIVE" readout: the quantum drive's state, or why it is not getting ready. */
+	FString DescribeQuantum(const ASpaceshipPawn& Ship, FLinearColor& OutColor)
 	{
-		const TCHAR* Reason = Ship.GetCruiseBlocker() == ECruiseBlocker::TooLow ? TEXT("too low")
-			: Ship.GetCruiseBlocker() == ECruiseBlocker::Landed ? TEXT("landed") : TEXT("off");
-		switch (Ship.GetCruiseState())
+		const FString Target = Ship.HasQuantumTarget()
+			? FString::Printf(TEXT("%s %.0f km"), *Ship.GetQuantumTargetName().ToString(), Ship.GetQuantumTargetDistance() / 100000.0)
+			: FString(TEXT("no destination ahead"));
+		switch (Ship.GetQuantumState())
 		{
-		case ECruiseState::Spooling:
-			OutColor = FLinearColor(0.55f, 0.75f, 1.f);
-			return FString::Printf(TEXT("CRUISE CHARGING %3.0f %%   (J cancels)"), Ship.GetCruiseSpoolProgress() * 100.f);
-		case ECruiseState::Active:
+		case EQuantumState::Charging:
+			OutColor = FLinearColor(0.55f, 0.52f, 1.f);
+			return FString::Printf(TEXT("QT %s   spool %3.0f %%   calibration %3.0f %%   fuel %3.0f %%"), *Target,
+				Ship.GetQuantumSpool() * 100.f, Ship.GetQuantumCalibration() * 100.f, Ship.GetQuantumFuel() * 100.f);
+		case EQuantumState::Ready:
+			OutColor = FLinearColor(0.35f, 1.f, 0.4f);
+			return FString::Printf(TEXT("QT READY %s   hold left mouse button to jump"), *Target);
+		case EQuantumState::Traveling:
 			OutColor = FLinearColor(0.4f, 0.85f, 1.f);
-			return FString::Printf(TEXT("CRUISE   limit %s here   wheel sets speed   (J drops out)"), *FormatSpeed(Ship.GetCruiseSpeedLimit()));
-		case ECruiseState::Dropping:
-			OutColor = FLinearColor(1.f, 0.8f, 0.3f);
-			return FString::Printf(TEXT("CRUISE DROP (%s)"), Reason);
+			return FString::Printf(TEXT("QUANTUM %s   %3.0f %%   %s"), *Target, Ship.GetQuantumTravelProgress() * 100.f, *FormatSpeed(Ship.GetLinearVelocity().Size()));
+		case EQuantumState::Cooling:
+			OutColor = FLinearColor(1.f, 0.4f, 0.3f);
+			return FString::Printf(TEXT("QT COOLING %3.0f %%"), Ship.GetQuantumCooling() * 100.f);
 		default:
 			break;
 		}
-		if (Ship.GetCruiseMessageSeconds() > 0.f && Ship.GetCruiseBlocker() == ECruiseBlocker::TooLow)
-		{
-			OutColor = FLinearColor(1.f, 0.55f, 0.25f);
-			return TEXT("cruise needs more altitude above the ground");
-		}
-		if (Ship.GetCruiseMessageSeconds() > 0.f && Ship.GetCruiseBlocker() == ECruiseBlocker::NeedsNav)
-		{
-			OutColor = FLinearColor(1.f, 0.55f, 0.25f);
-			return TEXT("cruise needs NAV mode (B)");
-		}
 		OutColor = FLinearColor(0.7f, 0.7f, 0.7f);
-		return TEXT("B SCM/NAV   wheel limiter   Alt+wheel zoom   V cpld   X brake   Shift boost   Tab afterburner   K g-safe   L comstab   J cruise (NAV)");
+		switch (Ship.GetQuantumBlocker())
+		{
+		case EQuantumBlocker::Obstructed: return FString::Printf(TEXT("QT %s: obstructed"), *Target);
+		case EQuantumBlocker::TooClose: return FString::Printf(TEXT("QT %s: too close"), *Target);
+		case EQuantumBlocker::NoFuel: return FString::Printf(TEXT("QT %s: not enough quantum fuel"), *Target);
+		case EQuantumBlocker::NoTarget:
+			if (Ship.GetMasterMode() == EMasterMode::NAV)
+			{
+				return TEXT("QT: point the nose at a planet or moon");
+			}
+			break;
+		default:
+			break;
+		}
+		return TEXT("B SCM/NAV   wheel limiter   Alt+wheel zoom   V cpld   X brake   Shift boost   Tab afterburner   K g-safe   L comstab   NAV: nose on a body, hold LMB = quantum");
 	}
 
 	FString EnergyBar(float Fraction, int32 Cells = 10)
@@ -315,9 +324,9 @@ namespace
 			Afterburner += TEXT("   Tab + W");
 		}
 		Lines.Add({ TEXT("AFTERBRN"), Afterburner, AfterburnerColor });
-		FLinearColor CruiseColor;
-		const FString Cruise = DescribeCruise(Ship, CruiseColor);
-		Lines.Add({ TEXT("DRIVE"), Cruise, CruiseColor });
+		FLinearColor QuantumColor;
+		const FString Quantum = DescribeQuantum(Ship, QuantumColor);
+		Lines.Add({ TEXT("DRIVE"), Quantum, QuantumColor });
 		if (Ship.IsFreeLooking())
 		{
 			const FVector2D Angles = Ship.GetFreeLookAngles();
@@ -514,25 +523,6 @@ void ASpaceDebugHUD::DrawHUD()
 		Label = FString::Printf(TEXT("%s MODE %3.0f %%"), FreeLookShip->GetPendingMasterMode() == EMasterMode::NAV ? TEXT("NAV") : TEXT("SCM"),
 			FreeLookShip->GetMasterModeSwitchProgress() * 100.f);
 		LabelColor = FLinearColor(0.55f, 0.85f, 1.f);
-	}
-	else if (FreeLookShip && FreeLookShip->GetCruiseState() == ECruiseState::Off && FreeLookShip->GetCruiseMessageSeconds() > 0.f
-		&& FreeLookShip->GetCruiseBlocker() == ECruiseBlocker::NeedsNav)
-	{
-		Label = TEXT("CRUISE NEEDS NAV MODE (B)");
-	}
-	else if (FreeLookShip && FreeLookShip->GetCruiseState() == ECruiseState::Spooling)
-	{
-		Label = FString::Printf(TEXT("CRUISE CHARGING %3.0f %%"), FreeLookShip->GetCruiseSpoolProgress() * 100.f);
-		LabelColor = FLinearColor(0.55f, 0.8f, 1.f);
-	}
-	else if (FreeLookShip && FreeLookShip->GetCruiseState() == ECruiseState::Dropping && FreeLookShip->GetCruiseBlocker() == ECruiseBlocker::TooLow)
-	{
-		Label = TEXT("CRUISE DROP - TOO CLOSE TO THE GROUND");
-	}
-	else if (FreeLookShip && FreeLookShip->GetCruiseState() == ECruiseState::Off && FreeLookShip->GetCruiseMessageSeconds() > 0.f
-		&& FreeLookShip->GetCruiseBlocker() == ECruiseBlocker::TooLow)
-	{
-		Label = TEXT("CRUISE: TOO CLOSE TO THE GROUND");
 	}
 	else if (FreeLookShip && FreeLookShip->IsFreeLooking())
 	{

@@ -184,7 +184,7 @@ struct GAMESPACE_API FSpaceFlightHudState
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	bool bVtolActive = false;
 
-	/** Second line under the master mode: FLIGHT, PREC, SPOOL (cruise charging) or CRUISE. */
+	/** Second line under the master mode: FLIGHT, PREC, VTOL, or QUANTUM in a jump. */
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	FString SubModeLabel;
 
@@ -192,9 +192,42 @@ struct GAMESPACE_API FSpaceFlightHudState
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	FString GearLabel;
 
-	/** Cruise for the HUD's status rows: OFF, SPOOL, ON or DROP. */
+	/** The quantum drive for the status rows: OFF, SPOOL, CALIB, READY, JUMP or COOL. */
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
-	FString CruiseLabel;
+	FString QuantumLabel;
+
+	/**
+	 * Quantum drive (SC-4), NAV only, as in the reference video: the status in a box at the top
+	 * (SPOOLING 37%, CALIBRATING 34%, READY, COOLING 18%, or why it cannot: OBSTRUCTED, TOO CLOSE, NO
+	 * QT FUEL), empty when there is nothing to say.
+	 */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FString QuantumStatus;
+
+	/** The two arcs round the middle: 0 hidden, 1 not ready (violet), 2 ready (green, with arrows), 3 cooling (red). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	int32 QuantumArcs = 0;
+
+	/** The destination: shown, its name and range, and where it is (1080p units from the middle). */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bQuantumTargetVisible = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FString QuantumTargetName;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FString QuantumTargetRange;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FVector2D QuantumTargetMarker = FVector2D::ZeroVector;
+
+	/** The destination is off the screen: the marker is an arrow on the circle pointing the way to turn. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bQuantumTargetOffscreen = false;
+
+	/** Quantum fuel, 0..1. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float QuantumFuel = 1.f;
 
 	/** Near a body: altitudes, climb rate, air and the horizon are known. */
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
@@ -489,6 +522,14 @@ enum class ESpaceHudSymbol : uint8
 	Velocity,
 	/** The same ring hollowed out, for the velocity that is behind the nose. */
 	VelocityBehind,
+	/** Quantum drive: two arcs left and right of the middle; Value.X > 0.5 adds the READY arrows. */
+	QuantumArcs,
+	/** Quantum destination: a thin ring with a small ring inside. */
+	QuantumTarget,
+	/** Quantum destination off screen: an arrow pointing along Value (X right, Y down). */
+	QuantumArrow,
+	/** The status box behind the quantum text: dark fill and a short bar at each end. */
+	StatusBox,
 };
 
 /** One of the Star Citizen HUD's drawn symbols (see ESpaceHudSymbol). */
@@ -706,7 +747,7 @@ protected:
  *   BOOST / LIMIT rows under a bracket;
  * - middle: heading tape, pitch ladder, nose reticle, the mouse virtual joystick;
  * - right: afterburner tube (red reserve) with its percentage, the altitude tape in km, the gyro
- *   (turn rate) with the G-Safe shield, G and the G-Safe limit, GEAR / CRUISE rows at the top and
+ *   (turn rate) with the G-Safe shield, G and the G-Safe limit, GEAR / QT rows at the top and
  *   R-ALT / VSI / ATMO at the bottom.
  * Heading, ladder and altitudes only near a body. What SC shows and this game has no system for yet
  * (fuel, countermeasures, weapons) is left out rather than faked.
@@ -803,6 +844,9 @@ protected:
 	/** Builds the widget tree. The widgets' names are what ApplyState drives, whatever the layout. */
 	virtual void BuildTree();
 
+	/** The quantum drive's arcs, destination and status box (SC-4). */
+	void ApplyQuantum(const FSpaceFlightHudState& State);
+
 	/** The state as this layout shows it (the cockpit displays steady their figures); the HUD shows it as is. */
 	virtual FSpaceFlightHudState SteadyState(const FSpaceFlightHudState& State) { return State; }
 	/** Monospace (the engine's DroidSansMono), letter-spaced and outlined: a technical, readable look. */
@@ -841,7 +885,7 @@ protected:
  * MFDs (deep blue glass, a title over a rule, a page bar at the bottom). Left, FLIGHT: speed, limiter,
  * G and the sub-mode large, the master mode pill, and bars for speed, boost, afterburner and G like the
  * reference's power page. Right, SYSTEMS: a list like its contacts page - COUPLED, G-SAFE, COMSTAB,
- * BOOST, PRECISION and GEAR each with its switch pill, CRUISE with its state. In the middle column
+ * BOOST, PRECISION and GEAR each with its switch pill, QUANTUM with its state. In the middle column
  * of the dashboard, two small screens one over the other: RADAR (the reference's centre radar) and
  * SELF STATUS (the ship from above).
  *

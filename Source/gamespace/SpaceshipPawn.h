@@ -93,31 +93,44 @@ struct FShipGlowMaterial
 	float Applied = -1.f;
 };
 
-/** Cruise drive (J): a fast travel mode for crossing kilometres. */
+/**
+ * Quantum drive (SC-4), after Star Citizen's quantum travel (starcitizenreference/QuantumTravel_VideoNotes.md):
+ * in NAV with a destination picked, the drive spools and calibrates on its own; holding the left mouse
+ * button then jumps. It replaced the earlier cruise drive (J), which Star Citizen does not have.
+ */
 UENUM(BlueprintType)
-enum class ECruiseState : uint8
+enum class EQuantumState : uint8
 {
-	Off,
-	/** Charging for CruiseSpoolSeconds; normal flight goes on meanwhile. */
-	Spooling,
-	/** Engaged: the ship flies along its nose at up to the cruise speed limit. */
-	Active,
-	/** Leaving cruise: speed bleeds off to normal flight speed over CruiseDropSeconds. */
-	Dropping
+	/** Nothing to do: SCM, no destination, or blocked (see EQuantumBlocker). */
+	Idle,
+	/** Spooling and calibrating: SPOOLING n% / CALIBRATING n% on the HUD. */
+	Charging,
+	/** Spooled, calibrated and nothing in the way: hold the left mouse button to jump. */
+	Ready,
+	/** In the jump: the ship cannot be steered and flies straight at the destination. */
+	Traveling,
+	/** Out of a jump: the drive cools for QuantumCooldownSeconds before the next one. */
+	Cooling
 };
 
-/** Why cruise cannot engage, or why it last dropped out. */
+/** Why the quantum drive will not get ready (or why the last jump ended early). */
 UENUM(BlueprintType)
-enum class ECruiseBlocker : uint8
+enum class EQuantumBlocker : uint8
 {
 	None,
+	/** The drive only works in NAV (B). */
+	NeedsNav,
+	/** No destination in front of the nose. */
+	NoTarget,
+	/** The destination is closer than QuantumMinJumpKm. */
+	TooClose,
+	/** A body lies between the ship and the destination. */
+	Obstructed,
+	/** Not enough quantum fuel for the distance. */
+	NoFuel,
 	Landed,
-	/** Too close to the ground: below CruiseMinAltitudeM to engage, CruiseDropAltitudeM while cruising. */
-	TooLow,
-	/** The pilot switched it off. */
-	Pilot,
-	/** Cruise only works in NAV master mode (B). */
-	NeedsNav
+	/** The pilot left NAV mid-jump. */
+	Pilot
 };
 
 /** Star Citizen master modes: what the ship is set up for. B switches, taking MasterModeSwitchSeconds. */
@@ -126,7 +139,7 @@ enum class EMasterMode : uint8
 {
 	/** Space Combat Maneuvering: combat speed, full manoeuvrability. */
 	SCM,
-	/** Navigation: much higher speed, reduced turning and manoeuvring thrust, cruise drive available. */
+	/** Navigation: much higher speed, reduced turning and manoeuvring thrust, quantum drive available. */
 	NAV
 };
 
@@ -144,8 +157,7 @@ enum class EMasterMode : uint8
  * - Spacebrake (hold X): brakes to a stop with every thruster, coupled or not.
  *
  * Speed limiter (mouse wheel): a fraction of the master mode's top speed that no key goes past.
- * Master modes (B): SCM for combat speed and full manoeuvring, NAV for travel. Cruise drive (J)
- * works only in NAV, until quantum travel replaces it.
+ * Master modes (B): SCM for combat speed and full manoeuvring, NAV for travel and the quantum drive.
  * G-Safe (K) keeps the pilot under GSafeMaxG and turns the nose slower at high speed; ComStab (L)
  * gives cancelling a slide priority over forward thrust and slows turning while the ship slides.
  *
@@ -155,9 +167,9 @@ enum class EMasterMode : uint8
  * Boost (Shift) strengthens the manoeuvring thrusters and rotation and suspends G-Safe while its
  * energy lasts; it recharges after a pause. The afterburner (Tab, SCM only) overloads the main
  * thrusters and raises the speed limit (relative to the limiter) from its own slowly refilling
- * fuel tank. Cruise drive (J) charges for a few seconds and then flies at kilometres per second, as
- * fast as the altitude allows: the limit shrinks towards the ground, so an approach slows down by
- * itself, and cruise drops out close to the surface.
+ * fuel tank. The quantum drive (NAV, SC-4) jumps to the body the nose points at: it spools and
+ * calibrates by itself, the left mouse button held jumps, and the ship arrives above the destination
+ * and cools down before the next jump.
  *
  * Motion is integrated by hand rather than handed to Chaos. For a space game that keeps the feel
  * predictable and cheap to tune. Velocity lives in LinearVelocity.
@@ -375,11 +387,20 @@ public:
 	void DebugSetLinearVelocity(const FVector& Velocity) { LinearVelocity = Velocity; }
 
 	/**
-	 * Cruise at once, at the limit times the speed limiter: no spool, no checks. For shots of the
-	 * speed tunnel, which only shows at kilometres per second.
+	 * Shots and tests: jump at once to the destination whose display name starts with TargetName (any
+	 * body when empty: the one nearest the nose), skipping spool, calibration and checks, and fly
+	 * TravelFraction of the way before letting the frame run. Returns false when there is no such body.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Debug")
-	void DebugEngageCruise();
+	bool DebugEngageQuantum(const FString& TargetName, float TravelFraction = 0.f);
+
+	/** Tests: spool and calibration full at once (the ship still has to be pointed and unblocked). */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugFinishQuantumCharge() { QuantumSpool = 1.f; QuantumCalibration = 1.f; }
+
+	/** Tests: set the quantum fuel, 0..1. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugSetQuantumFuel(float Fuel) { QuantumFuel = FMath::Clamp(Fuel, 0.f, 1.f); }
 
 	/** Tests and screenshots: place the mouse virtual joystick cursor. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
@@ -402,32 +423,79 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	void DebugFinishMasterModeSwitch() { if (bMasterModeSwitching) { MasterMode = PendingMasterMode; bMasterModeSwitching = false; MasterModeTimer = 0.f; } }
 
-	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
-	ECruiseState GetCruiseState() const { return CruiseState; }
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	EQuantumState GetQuantumState() const { return QuantumState; }
 
-	/** Charging progress while spooling, 0..1. */
-	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
-	float GetCruiseSpoolProgress() const;
+	/** Why the drive is not getting ready, or why the last jump ended early. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	EQuantumBlocker GetQuantumBlocker() const { return QuantumBlocker; }
 
-	/** Speed cruise allows at the ship's current altitude, cm/s. */
-	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
-	float GetCruiseSpeedLimit() const { return CruiseSpeedLimit; }
+	/** Spool, 0..1: fills in NAV with a destination, whether or not the nose is on it. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	float GetQuantumSpool() const { return QuantumSpool; }
 
-	/** Why cruise cannot engage right now (Off), or why it last dropped out. */
-	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
-	ECruiseBlocker GetCruiseBlocker() const { return CruiseBlocker; }
+	/** Calibration, 0..1: fills only while the nose is within QuantumAlignDeg of the destination. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	float GetQuantumCalibration() const { return QuantumCalibration; }
 
-	/** Seconds a cruise refusal or drop stays worth showing. */
-	UFUNCTION(BlueprintPure, Category = "Spaceship|Cruise")
-	float GetCruiseMessageSeconds() const { return CruiseMessageSeconds; }
+	/** Cooling after a jump, 0..1 (1 = cool again). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	float GetQuantumCooling() const;
 
-	/** J: starts charging, cancels charging, or drops out of cruise. */
-	UFUNCTION(BlueprintCallable, Category = "Spaceship|Cruise")
-	void ToggleCruise();
+	/** Share of the jump flown, 0..1, while traveling. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	float GetQuantumTravelProgress() const;
 
-	/** Cruise speed limit for these conditions, cm/s. The flight model uses exactly this; for tests. */
-	UFUNCTION(BlueprintCallable, Category = "Spaceship|Cruise")
-	float ComputeCruiseSpeedLimit(float AltitudeAboveTerrainCm, float AtmosphereDensity, bool bNearBody) const;
+	/** How far the engage button has been held, 0..1 of QuantumEngageHoldSeconds. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	float GetQuantumEngageHold() const;
+
+	/** Quantum fuel, 0..1. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	float GetQuantumFuel() const { return QuantumFuel; }
+
+	/** Destination: whether there is one, its name, where it is (its centre) and how far to where the jump would end, cm. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	bool HasQuantumTarget() const { return QuantumTarget.IsValid(); }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	FText GetQuantumTargetName() const { return QuantumTargetName; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	FVector GetQuantumTargetLocation() const { return QuantumTargetCentre; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	double GetQuantumTargetDistance() const { return QuantumTargetDistanceCm; }
+
+	/**
+	 * 0..1: how much of the quantum look is showing (the tunnel, the view widening, the drone). Rises
+	 * over the first second of a jump and falls over the last.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	float GetQuantumBlend() const { return QuantumBlend; }
+
+	/** Tests: hold (or let go of) the engage button, as the left mouse button does. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Quantum")
+	void SetQuantumEngageHeld(bool bHeld);
+
+	/** Where a jump to a body of this radius ends: this far from its surface, cm. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	double ComputeQuantumArrivalAltitude(double BodyRadiusCm) const;
+
+	/**
+	 * Speed in the jump for this remaining distance and current speed, cm/s: accelerates at
+	 * QuantumAccelerationKmS2 up to QuantumMaxSpeedKmS and brakes so it arrives at QuantumExitSpeed.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	double ComputeQuantumSpeed(double RemainingCm, double CurrentSpeedCmS, float DeltaSeconds) const;
+
+	/** Share of a full tank a jump of this length burns, 0..1. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	float ComputeQuantumFuelUse(double DistanceCm) const;
+
+	/** Whether the straight segment Start-End passes within Radius of Centre (a body in the way). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	static bool SegmentHitsSphere(const FVector& Start, const FVector& End, const FVector& Centre, double Radius);
 
 	/** Chase camera distance as a multiple of the Blueprint's arm length. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Camera")
@@ -435,7 +503,7 @@ public:
 
 	/**
 	 * Tests: one flight frame of DeltaSeconds with these held inputs, through the same code as Tick
-	 * (environment, throttle, boost, cruise, steering, motion). Returns the velocity afterwards.
+	 * (environment, throttle, boost, quantum drive, steering, motion). Returns the velocity afterwards.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	FVector DebugStepFlight(float DeltaSeconds, float Thrust, float Strafe, float Lift, bool bBoost);
@@ -806,7 +874,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<class USpaceDustComponent> SpaceDust;
 
-	/** The look of cruise speed: streaks radiating from the flight path, beams and a glow on it. */
+	/** The look of a quantum jump: streaks radiating from the flight path, beams and a glow on it. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<class USpaceSpeedTunnelComponent> SpeedTunnel;
 
@@ -972,9 +1040,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> FlightAssistAction;
 
-	/** Digital, pressed: cruise drive (J). */
+	/** Digital, held: quantum jump (left mouse button, held QuantumEngageHoldSeconds). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
-	TObjectPtr<UInputAction> CruiseAction;
+	TObjectPtr<UInputAction> QuantumEngageAction;
 
 	/** Digital, held: spacebrake (X). The asset keeps its old name, IA_AllStop. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
@@ -1267,51 +1335,61 @@ protected:
 	float LandingSettleGravityFraction = 0.25f;
 
 	// ---------------------------------------------------------------------------------------
-	// Cruise drive
+	// Quantum drive (SC-4). Distances are this system's, not Star Citizen's: its bodies are tens to
+	// hundreds of km apart, not gigametres, so a jump takes seconds to half a minute as there.
 	// ---------------------------------------------------------------------------------------
 
-	/** Charging time before cruise engages. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0", Units = "s"))
-	float CruiseSpoolSeconds = 2.5f;
+	/** Spool from cold, s (the video's small ship: about 6 s). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.0", Units = "s"))
+	float QuantumSpoolSeconds = 6.f;
 
-	/** Cruise speed limit per cm of altitude above the terrain, 1/s: approaching a surface, the altitude shrinks by this fraction every second. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.01"))
-	float CruiseAltitudeRate = 0.4f;
+	/** Calibration with the nose on the destination, s. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.0", Units = "s"))
+	float QuantumCalibrationSeconds = 2.5f;
 
-	/** Cruise never drops below this speed limit, cm/s (250 m/s). */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0"))
-	float CruiseMinSpeed = 25000.f;
+	/** The nose must be within this of the destination to calibrate and to jump, degrees. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.5", ClampMax = "45.0", Units = "deg"))
+	float QuantumAlignDeg = 6.f;
 
-	/**
-	 * Top cruise speed, cm/s (6 km/s), also far from any body. Faster flight means more world
-	 * origin rebases per second, each a frame of work.
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0"))
-	float CruiseMaxSpeed = 600000.f;
+	/** A destination is picked when the nose is within this of it, degrees. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "1.0", ClampMax = "180.0", Units = "deg"))
+	float QuantumPickDeg = 35.f;
 
-	/** Thicker air lowers the limit: at full density it is (1 - this) of the altitude limit. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float CruiseAtmosphereSlowdown = 0.85f;
+	/** How long the left mouse button has to be held to jump, s. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.0", Units = "s"))
+	float QuantumEngageHoldSeconds = 0.6f;
 
-	/** Cruise engages only this high above the terrain. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0", Units = "m"))
-	float CruiseMinAltitudeM = 2000.f;
+	/** Cooling after a jump, s. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.0", Units = "s"))
+	float QuantumCooldownSeconds = 10.f;
 
-	/** Below this, cruise drops out on its own. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.0", Units = "m"))
-	float CruiseDropAltitudeM = 1200.f;
+	/** Top speed in a jump, km/s. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "1.0"))
+	float QuantumMaxSpeedKmS = 30.f;
 
-	/** How fast the velocity swings onto the nose and the target speed in cruise, per second. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.1"))
-	float CruiseResponse = 1.2f;
+	/** Acceleration and braking in a jump, km/s per second. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.1"))
+	float QuantumAccelerationKmS2 = 8.f;
 
-	/** Turn rates in cruise, as a fraction of the normal ones. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.05", ClampMax = "1.0"))
-	float CruiseTurnScale = 0.45f;
+	/** Speed at the end of a jump, cm/s; NAV flight takes over from there. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.0"))
+	float QuantumExitSpeed = 30000.f;
 
-	/** Length of the drop out of cruise, while speed bleeds off. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Cruise", meta = (ClampMin = "0.1", Units = "s"))
-	float CruiseDropSeconds = 1.5f;
+	/** A jump ends this many body radii above the surface (a planet: above its atmosphere)... */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.0"))
+	float QuantumArrivalRadii = 0.6f;
+
+	/** ...but never closer than this, km. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.0", Units = "km"))
+	float QuantumMinArrivalKm = 15.f;
+
+	/** No jump shorter than this, km. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.0", Units = "km"))
+	float QuantumMinJumpKm = 20.f;
+
+	/** Share of the tank burnt per 1000 km of jump. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.0"))
+	float QuantumFuelPer1000Km = 0.12f;
 
 	/** Maximum pitch rate, deg/s. The hard ceiling on turning, however fast the mouse moves. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Handling", meta = (ClampMin = "0.0"))
@@ -1447,9 +1525,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
 	float AfterburnerFovKick = 9.f;
 
-	/** ...and in cruise. */
+	/** ...and in a quantum jump. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
-	float CruiseFovKick = 16.f;
+	float QuantumFovKick = 12.f;
 
 	/** Camera shake while boosting, cm (cockpit a quarter). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
@@ -1459,11 +1537,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
 	float AfterburnerShakeCm = 4.5f;
 
-	/** Camera shake at the end of cruise charging, cm; a little stays while cruising. */
+	/** Camera shake at the start of a quantum jump, cm; a little stays while traveling. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
-	float CruiseShakeCm = 6.f;
+	float QuantumShakeCm = 6.f;
 
-	/** Short jolt when boost or the afterburner starts, cruise engages or drops out, cm. */
+	/** Short jolt when boost or the afterburner starts, or a quantum jump starts or ends, cm. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
 	float KickShakeCm = 9.f;
 
@@ -1479,9 +1557,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Lights", meta = (ClampMin = "0.0"))
 	float ThrusterAfterburnerGlow = 2.f;
 
-	/** ...and in cruise. */
+	/** ...and in a quantum jump. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Lights", meta = (ClampMin = "0.0"))
-	float ThrusterCruiseGlow = 3.f;
+	float ThrusterQuantumGlow = 3.f;
 
 	/** Seconds between double flashes of the white navigation strobes. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Lights", meta = (ClampMin = "0.2", Units = "s"))
@@ -1724,22 +1802,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
 	TObjectPtr<USoundBase> BoostLoopSound;
 
-	/** Cruise drive drone. /Game/Ships/Audio/SW_CruiseLoop when empty. */
+	/** Quantum jump drone (the former cruise sounds). /Game/Ships/Audio/SW_CruiseLoop when empty. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
-	TObjectPtr<USoundBase> CruiseLoopSound;
+	TObjectPtr<USoundBase> QuantumLoopSound;
 
-	/** One-shots: boost ignition, cruise charging, cruise engaging, cruise dropping out. /Game/Ships/Audio/SW_* when empty. */
+	/** One-shots: boost ignition, quantum engage held (charge), jump, arrival. /Game/Ships/Audio/SW_* when empty. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
 	TObjectPtr<USoundBase> BoostStartSound;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
-	TObjectPtr<USoundBase> CruiseChargeSound;
+	TObjectPtr<USoundBase> QuantumChargeSound;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
-	TObjectPtr<USoundBase> CruiseEngageSound;
+	TObjectPtr<USoundBase> QuantumEngageSound;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
-	TObjectPtr<USoundBase> CruiseDropSound;
+	TObjectPtr<USoundBase> QuantumExitSound;
 
 	/** Gear touching down when the ship becomes Landed. /Game/Ships/Audio/SW_Touchdown when empty. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
@@ -1752,7 +1830,7 @@ protected:
 	float BoostVolume = 0.6f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
-	float CruiseVolume = 0.55f;
+	float QuantumVolume = 0.55f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
 	float OneShotVolume = 0.8f;
@@ -1782,7 +1860,8 @@ private:
 	void HandleFreeLookStarted(const FInputActionValue& Value);
 	void HandleFreeLookCompleted(const FInputActionValue& Value);
 	void HandleFlightAssist(const FInputActionValue& Value);
-	void HandleCruise(const FInputActionValue& Value);
+	void HandleQuantumEngageStarted(const FInputActionValue& Value);
+	void HandleQuantumEngageCompleted(const FInputActionValue& Value);
 	void HandleAllStop(const FInputActionValue& Value);
 	void HandleAllStopCompleted(const FInputActionValue& Value);
 	void HandleCameraZoom(const FInputActionValue& Value);
@@ -1827,9 +1906,15 @@ private:
 
 	void UpdateMasterMode(float DeltaSeconds);
 	void UpdateBoost(float DeltaSeconds);
-	void UpdateCruise(float DeltaSeconds);
-	ECruiseBlocker EvaluateCruiseEngage() const;
-	void BeginCruiseDrop(ECruiseBlocker Reason);
+	void UpdateQuantum(float DeltaSeconds);
+	/** Picks the destination in front of the nose and measures it (sets QuantumTarget* members). */
+	void UpdateQuantumTarget();
+	/** What stops the drive from getting ready now, for the current destination. */
+	EQuantumBlocker EvaluateQuantum() const;
+	void BeginQuantumJump();
+	void EndQuantumJump(EQuantumBlocker Reason);
+	/** One frame of a jump: straight at the arrival point, no steering, no thrusters. */
+	void UpdateQuantumTravel(float DeltaSeconds);
 	/** Everything a flight frame does before the camera and sound: shared by Tick and DebugStepFlight. */
 	void StepFlight(float DeltaSeconds);
 	void UpdateCameraEffects(float DeltaSeconds);
@@ -1913,16 +1998,27 @@ private:
 	float GForce = 0.f;
 	float SlipAngleDeg = 0.f;
 
-	ECruiseState CruiseState = ECruiseState::Off;
-	ECruiseBlocker CruiseBlocker = ECruiseBlocker::None;
-	float CruiseTimer = 0.f;
-	float CruiseSpeedLimit = 0.f;
-	float CruiseMessageSeconds = 0.f;
+	EQuantumState QuantumState = EQuantumState::Idle;
+	EQuantumBlocker QuantumBlocker = EQuantumBlocker::NoTarget;
+	float QuantumSpool = 0.f;
+	float QuantumCalibration = 0.f;
+	float QuantumCooldownTimer = 0.f;
+	float QuantumEngageTimer = 0.f;
+	bool bQuantumEngageHeld = false;
+	float QuantumFuel = 1.f;
+	/** The destination: its actor, name, centre, radius, and the jump that would reach it. */
+	TWeakObjectPtr<AActor> QuantumTarget;
+	FText QuantumTargetName;
+	FVector QuantumTargetCentre = FVector::ZeroVector;
+	double QuantumTargetRadiusCm = 0.0;
+	double QuantumTargetDistanceCm = 0.0;
+	/** While traveling: the jump's length at the start, for progress and fuel. */
+	double QuantumJumpLengthCm = 0.0;
 
 	/** Eased 0..1 blends driving camera, lights and sound. */
 	float BoostBlend = 0.f;
 	float AfterburnerFeel = 0.f;
-	float CruiseBlend = 0.f;
+	float QuantumBlend = 0.f;
 	float CameraKick = 0.f;
 
 	float CameraZoom = 1.f;
@@ -1943,9 +2039,9 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UAudioComponent> BoostAudio;
 	UPROPERTY(Transient)
-	TObjectPtr<UAudioComponent> CruiseAudio;
+	TObjectPtr<UAudioComponent> QuantumAudio;
 	UPROPERTY(Transient)
-	TObjectPtr<UAudioComponent> CruiseChargeAudio;
+	TObjectPtr<UAudioComponent> QuantumChargeAudio;
 
 	bool bCockpitView = false;
 

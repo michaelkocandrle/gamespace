@@ -31,6 +31,8 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "PhysicsEngine/BodySetup.h"
 #include "Sound/SoundBase.h"
+#include "CelestialBody.h"
+#include "DistantBody.h"
 #include "SpaceDustComponent.h"
 #include "SpaceSpeedTunnelComponent.h"
 #include "SpaceUserSettings.h"
@@ -115,6 +117,25 @@ namespace
 				Local.X / 100.f, Local.Y / 100.f, Local.Z / 100.f);
 		}));
 
+	/** space.Quantum <name> [progress]: jump at once (shots, testing a destination without flying to it). */
+	FAutoConsoleCommandWithWorldAndArgs QuantumCommand(
+		TEXT("space.Quantum"),
+		TEXT("space.Quantum <destination name> [0..1 of the way]: quantum jump at once, no spool. space.Quantum ready: spool and calibration full."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				if (Args.Num() > 0 && Args[0].Equals(TEXT("ready"), ESearchCase::IgnoreCase))
+				{
+					It->DebugFinishQuantumCharge();
+				}
+				else
+				{
+					It->DebugEngageQuantum(Args.Num() > 0 ? Args[0] : FString(), Args.Num() > 1 ? FCString::Atof(*Args[1]) : 0.f);
+				}
+			}
+		}));
+
 	/** space.Vtol 1 / 0: VTOL on every ship here, for shots that should not depend on a key. */
 	FAutoConsoleCommandWithWorldAndArgs VtolCommand(
 		TEXT("space.Vtol"),
@@ -160,7 +181,7 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const MouseLookActionPath = TEXT("/Game/Input/IA_LookMouse.IA_LookMouse");
 	const TCHAR* const MouseMappingContextPath = TEXT("/Game/Input/IMC_SpaceshipMouse.IMC_SpaceshipMouse");
 	const TCHAR* const FlightAssistActionPath = TEXT("/Game/Input/IA_FlightAssist.IA_FlightAssist");
-	const TCHAR* const CruiseActionPath = TEXT("/Game/Input/IA_CruiseDrive.IA_CruiseDrive");
+	const TCHAR* const QuantumEngageActionPath = TEXT("/Game/Input/IA_QuantumEngage.IA_QuantumEngage");
 	const TCHAR* const AllStopActionPath = TEXT("/Game/Input/IA_AllStop.IA_AllStop");
 	const TCHAR* const CameraZoomActionPath = TEXT("/Game/Input/IA_CameraZoom.IA_CameraZoom");
 	const TCHAR* const MasterModeActionPath = TEXT("/Game/Input/IA_MasterMode.IA_MasterMode");
@@ -537,9 +558,11 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	{
 		Input->BindAction(FlightAssistAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleFlightAssist);
 	}
-	if (CruiseAction)
+	if (QuantumEngageAction)
 	{
-		Input->BindAction(CruiseAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleCruise);
+		Input->BindAction(QuantumEngageAction, ETriggerEvent::Started, this, &ASpaceshipPawn::HandleQuantumEngageStarted);
+		Input->BindAction(QuantumEngageAction, ETriggerEvent::Completed, this, &ASpaceshipPawn::HandleQuantumEngageCompleted);
+		Input->BindAction(QuantumEngageAction, ETriggerEvent::Canceled, this, &ASpaceshipPawn::HandleQuantumEngageCompleted);
 	}
 	if (AllStopAction)
 	{
@@ -648,9 +671,9 @@ void ASpaceshipPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			{
 				InteractMappingContext->MapKey(FlightAssistAction, EKeys::V);
 			}
-			if (CruiseAction && !IsMapped(CruiseAction))
+			if (QuantumEngageAction && !IsMapped(QuantumEngageAction))
 			{
-				InteractMappingContext->MapKey(CruiseAction, EKeys::J);
+				InteractMappingContext->MapKey(QuantumEngageAction, EKeys::LeftMouseButton);
 			}
 			if (AllStopAction && !IsMapped(AllStopAction))
 			{
@@ -804,7 +827,7 @@ void ASpaceshipPawn::ResolveInputAssets()
 		}
 	};
 	LoadOrMake(FlightAssistAction, FlightAssistActionPath, TEXT("IA_FlightAssist_Runtime"), EInputActionValueType::Boolean);
-	LoadOrMake(CruiseAction, CruiseActionPath, TEXT("IA_CruiseDrive_Runtime"), EInputActionValueType::Boolean);
+	LoadOrMake(QuantumEngageAction, QuantumEngageActionPath, TEXT("IA_QuantumEngage_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(AllStopAction, AllStopActionPath, TEXT("IA_AllStop_Runtime"), EInputActionValueType::Boolean);
 	LoadOrMake(CameraZoomAction, CameraZoomActionPath, TEXT("IA_CameraZoom_Runtime"), EInputActionValueType::Axis1D);
 	LoadOrMake(MasterModeAction, MasterModeActionPath, TEXT("IA_MasterMode_Runtime"), EInputActionValueType::Boolean);
@@ -1014,9 +1037,14 @@ void ASpaceshipPawn::HandleFlightAssist(const FInputActionValue& /*Value*/)
 	SetFlightAssist(!bFlightAssist);
 }
 
-void ASpaceshipPawn::HandleCruise(const FInputActionValue& /*Value*/)
+void ASpaceshipPawn::HandleQuantumEngageStarted(const FInputActionValue& /*Value*/)
 {
-	ToggleCruise();
+	SetQuantumEngageHeld(true);
+}
+
+void ASpaceshipPawn::HandleQuantumEngageCompleted(const FInputActionValue& /*Value*/)
+{
+	SetQuantumEngageHeld(false);
 }
 
 void ASpaceshipPawn::HandleAllStop(const FInputActionValue& /*Value*/)
@@ -1154,17 +1182,10 @@ void ASpaceshipPawn::RequestMasterMode(EMasterMode Mode)
 	PendingMasterMode = Mode;
 	bMasterModeSwitching = true;
 	MasterModeTimer = 0.f;
-	if (Mode == EMasterMode::SCM)
+	if (Mode == EMasterMode::SCM && QuantumState == EQuantumState::Traveling)
 	{
-		// Cruise belongs to NAV: leaving NAV ends it now.
-		if (CruiseState == ECruiseState::Active)
-		{
-			BeginCruiseDrop(ECruiseBlocker::Pilot);
-		}
-		else if (CruiseState == ECruiseState::Spooling)
-		{
-			ToggleCruise();
-		}
+		// The quantum drive belongs to NAV: leaving NAV drops out of the jump where the ship is.
+		EndQuantumJump(EQuantumBlocker::Pilot);
 	}
 	UE_LOG(LogSpaceship, Log, TEXT("%s: switching to %s"), *GetName(), Mode == EMasterMode::NAV ? TEXT("NAV") : TEXT("SCM"));
 }
@@ -1261,10 +1282,21 @@ FVector ASpaceshipPawn::LimitThrustForPilot(const FVector& LocalAcceleration, bo
 	return Result;
 }
 
-float ASpaceshipPawn::GetCruiseSpoolProgress() const
+float ASpaceshipPawn::GetQuantumCooling() const
 {
-	return CruiseState == ECruiseState::Spooling ? FMath::Clamp(CruiseTimer / FMath::Max(CruiseSpoolSeconds, 0.01f), 0.f, 1.f)
-		: CruiseState == ECruiseState::Active ? 1.f : 0.f;
+	return QuantumState == EQuantumState::Cooling
+		? FMath::Clamp(1.f - QuantumCooldownTimer / FMath::Max(QuantumCooldownSeconds, 0.01f), 0.f, 1.f) : 1.f;
+}
+
+float ASpaceshipPawn::GetQuantumTravelProgress() const
+{
+	return QuantumState == EQuantumState::Traveling && QuantumJumpLengthCm > 1.0
+		? float(FMath::Clamp(1.0 - QuantumTargetDistanceCm / QuantumJumpLengthCm, 0.0, 1.0)) : 0.f;
+}
+
+float ASpaceshipPawn::GetQuantumEngageHold() const
+{
+	return FMath::Clamp(QuantumEngageTimer / FMath::Max(QuantumEngageHoldSeconds, 0.01f), 0.f, 1.f);
 }
 
 // -------------------------------------------------------------------------------------------
@@ -1806,12 +1838,16 @@ void ASpaceshipPawn::StepFlight(float DeltaSeconds)
 	UpdateLanding(DeltaSeconds);
 	UpdateBoost(DeltaSeconds);
 	UpdateAfterburner(DeltaSeconds);
-	UpdateCruise(DeltaSeconds);
+	UpdateQuantum(DeltaSeconds);
 	// Before steering: while held it takes the mouse movement for itself.
 	UpdateFreeLook(DeltaSeconds);
 	if (LandingState == ELandingState::Landed)
 	{
 		UpdateLandedMotion(DeltaSeconds);
+	}
+	else if (QuantumState == EQuantumState::Traveling)
+	{
+		UpdateQuantumTravel(DeltaSeconds);
 	}
 	else
 	{
@@ -1844,7 +1880,7 @@ FVector ASpaceshipPawn::DebugStepFlightInput(float DeltaSeconds, const FVector& 
 }
 
 // -------------------------------------------------------------------------------------------
-// Boost and cruise
+// Boost, afterburner and the quantum drive
 // -------------------------------------------------------------------------------------------
 
 void ASpaceshipPawn::UpdateBoost(float DeltaSeconds)
@@ -1856,7 +1892,7 @@ void ASpaceshipPawn::UpdateBoost(float DeltaSeconds)
 	}
 	// Boost feeds the manoeuvring thrusters and rotation, so it burns energy whenever Shift is held.
 	bBoostActive = bBoostHeld && !bBoostLocked && BoostEnergy > 0.f
-		&& CruiseState == ECruiseState::Off && LandingState != ELandingState::Landed;
+		&& QuantumState != EQuantumState::Traveling && LandingState != ELandingState::Landed;
 
 	if (bBoostActive)
 	{
@@ -1890,11 +1926,11 @@ void ASpaceshipPawn::UpdateAfterburner(float DeltaSeconds)
 	{
 		bAfterburnerLocked = false;
 	}
-	// SCM only (NAV already flies at five times SCM speed and has cruise for more), and only while it
+	// SCM only (NAV already flies at five times SCM speed and has the quantum drive), and only while it
 	// can do something: W forward, no spacebrake, flying. VTOL refuses it too - the mains are down to a
 	// third and the ship is standing on its lift thrusters (SC-2b).
 	bAfterburnerActive = bAfterburnerHeld && ThrustInput > 0.f && !bSpaceBrakeHeld && !bAfterburnerLocked && AfterburnerFuel > 0.f
-		&& MasterMode == EMasterMode::SCM && !IsPrecisionActive() && !bVtolMode && CruiseState == ECruiseState::Off
+		&& MasterMode == EMasterMode::SCM && !IsPrecisionActive() && !bVtolMode && QuantumState != EQuantumState::Traveling
 		&& LandingState != ELandingState::Landed;
 
 	if (bAfterburnerActive)
@@ -1929,141 +1965,359 @@ void ASpaceshipPawn::UpdateAfterburner(float DeltaSeconds)
 	}
 }
 
-float ASpaceshipPawn::ComputeCruiseSpeedLimit(float AltitudeAboveTerrainCm, float AtmosphereDensity, bool bNearBody) const
+namespace SpaceshipQuantum
 {
-	if (!bNearBody)
+	/** A body the quantum drive can jump to. */
+	struct FBody
 	{
-		return CruiseMaxSpeed;
+		AActor* Actor = nullptr;
+		FText Name;
+		FVector Centre = FVector::ZeroVector;
+		double RadiusCm = 0.0;
+	};
+
+	/**
+	 * Every body in the level: the terrain planets (ACelestialBody, radius measured towards Location, so
+	 * it is the terrain's there) and the distant ones (ADistantBody: moons, the gas giant).
+	 */
+	void Gather(const UWorld* World, const FVector& Location, TArray<FBody>& OutBodies)
+	{
+		OutBodies.Reset();
+		if (!World)
+		{
+			return;
+		}
+		for (TActorIterator<ACelestialBody> It(World); It; ++It)
+		{
+			const FVector Centre = It->GetActorLocation();
+			const double Radius = FVector::Dist(Location, Centre) - It->GetSurfaceDistance(Location);
+			OutBodies.Add({ *It, It->GetDisplayName().IsEmpty() ? FText::FromString(It->GetName()) : It->GetDisplayName(), Centre, FMath::Max(Radius, 1.0) });
+		}
+		for (TActorIterator<ADistantBody> It(World); It; ++It)
+		{
+			OutBodies.Add({ *It, It->GetDisplayName().IsEmpty() ? FText::FromString(It->GetName()) : It->GetDisplayName(),
+				It->GetActorLocation(), double(It->GetRadiusKm()) * 100000.0 });
+		}
 	}
-	const double Thin = 1.0 - CruiseAtmosphereSlowdown * FMath::Sqrt(FMath::Clamp(double(AtmosphereDensity), 0.0, 1.0));
-	return float(FMath::Clamp(double(AltitudeAboveTerrainCm) * CruiseAltitudeRate * Thin, double(CruiseMinSpeed), double(FMath::Max(CruiseMinSpeed, CruiseMaxSpeed))));
 }
 
-ECruiseBlocker ASpaceshipPawn::EvaluateCruiseEngage() const
+bool ASpaceshipPawn::SegmentHitsSphere(const FVector& Start, const FVector& End, const FVector& Centre, double Radius)
+{
+	const FVector Segment = End - Start;
+	const double LengthSq = Segment.SizeSquared();
+	const double T = LengthSq > 0.0 ? FMath::Clamp(FVector::DotProduct(Centre - Start, Segment) / LengthSq, 0.0, 1.0) : 0.0;
+	return FVector::DistSquared(Start + Segment * T, Centre) < Radius * Radius;
+}
+
+double ASpaceshipPawn::ComputeQuantumArrivalAltitude(double BodyRadiusCm) const
+{
+	return FMath::Max(double(QuantumArrivalRadii) * BodyRadiusCm, double(QuantumMinArrivalKm) * 100000.0);
+}
+
+double ASpaceshipPawn::ComputeQuantumSpeed(double RemainingCm, double CurrentSpeedCmS, float DeltaSeconds) const
+{
+	const double Accel = double(QuantumAccelerationKmS2) * 100000.0;
+	const double Top = double(QuantumMaxSpeedKmS) * 100000.0;
+	const double Exit = QuantumExitSpeed;
+	// The speed from which braking at Accel arrives at Exit exactly at the arrival point.
+	const double Braking = FMath::Sqrt(Exit * Exit + 2.0 * Accel * FMath::Max(RemainingCm, 0.0));
+	const double Rising = FMath::Max(CurrentSpeedCmS, Exit) + Accel * DeltaSeconds;
+	return FMath::Max(Exit, FMath::Min3(Top, Braking, Rising));
+}
+
+float ASpaceshipPawn::ComputeQuantumFuelUse(double DistanceCm) const
+{
+	return float(DistanceCm / 1.0e8) * QuantumFuelPer1000Km;
+}
+
+void ASpaceshipPawn::SetQuantumEngageHeld(bool bHeld)
+{
+	bQuantumEngageHeld = bHeld;
+	if (!bHeld)
+	{
+		QuantumEngageTimer = 0.f;
+		if (QuantumChargeAudio)
+		{
+			QuantumChargeAudio->FadeOut(0.2f, 0.f);
+			QuantumChargeAudio = nullptr;
+		}
+	}
+}
+
+void ASpaceshipPawn::UpdateQuantumTarget()
+{
+	const FVector Location = GetActorLocation();
+	const FVector Nose = GetActorForwardVector();
+	TArray<SpaceshipQuantum::FBody> Bodies;
+	SpaceshipQuantum::Gather(GetWorld(), Location, Bodies);
+
+	// In a jump the destination is fixed; otherwise it is the body closest to the nose, within QuantumPickDeg.
+	const SpaceshipQuantum::FBody* Picked = nullptr;
+	if (QuantumState == EQuantumState::Traveling)
+	{
+		Picked = Bodies.FindByPredicate([this](const SpaceshipQuantum::FBody& Body) { return Body.Actor == QuantumTarget.Get(); });
+	}
+	else
+	{
+		double BestCos = FMath::Cos(FMath::DegreesToRadians(double(QuantumPickDeg)));
+		for (const SpaceshipQuantum::FBody& Body : Bodies)
+		{
+			const double Cos = FVector::DotProduct((Body.Centre - Location).GetSafeNormal(), Nose);
+			if (Cos > BestCos)
+			{
+				BestCos = Cos;
+				Picked = &Body;
+			}
+		}
+	}
+
+	if (!Picked)
+	{
+		QuantumTarget.Reset();
+		QuantumTargetName = FText::GetEmpty();
+		QuantumTargetDistanceCm = 0.0;
+		return;
+	}
+	if (QuantumTarget.Get() != Picked->Actor)
+	{
+		// A new destination: calibration was for the old one.
+		QuantumCalibration = 0.f;
+	}
+	QuantumTarget = Picked->Actor;
+	QuantumTargetName = Picked->Name;
+	QuantumTargetCentre = Picked->Centre;
+	QuantumTargetRadiusCm = Picked->RadiusCm;
+	const double ArrivalFromCentre = Picked->RadiusCm + ComputeQuantumArrivalAltitude(Picked->RadiusCm);
+	QuantumTargetDistanceCm = FMath::Max(FVector::Dist(Location, Picked->Centre) - ArrivalFromCentre, 0.0);
+}
+
+EQuantumBlocker ASpaceshipPawn::EvaluateQuantum() const
 {
 	if (LandingState == ELandingState::Landed)
 	{
-		return ECruiseBlocker::Landed;
+		return EQuantumBlocker::Landed;
 	}
 	if (MasterMode != EMasterMode::NAV || bMasterModeSwitching)
 	{
-		return ECruiseBlocker::NeedsNav;
+		return EQuantumBlocker::NeedsNav;
 	}
-	if (bHasEnvironment && Environment.AltitudeAboveTerrainCm < CruiseMinAltitudeM * 100.0)
+	if (!QuantumTarget.IsValid())
 	{
-		return ECruiseBlocker::TooLow;
+		return EQuantumBlocker::NoTarget;
 	}
-	return ECruiseBlocker::None;
+	if (QuantumTargetDistanceCm < double(QuantumMinJumpKm) * 100000.0)
+	{
+		return EQuantumBlocker::TooClose;
+	}
+	if (ComputeQuantumFuelUse(QuantumTargetDistanceCm) > QuantumFuel)
+	{
+		return EQuantumBlocker::NoFuel;
+	}
+	// Anything on the way to the arrival point, the destination itself included (the far side of a
+	// planet). Each body counts with its arrival shell, so the jump never skims a surface.
+	const FVector Location = GetActorLocation();
+	const FVector Arrival = QuantumTargetCentre + (Location - QuantumTargetCentre).GetSafeNormal()
+		* (QuantumTargetRadiusCm + ComputeQuantumArrivalAltitude(QuantumTargetRadiusCm));
+	TArray<SpaceshipQuantum::FBody> Bodies;
+	SpaceshipQuantum::Gather(GetWorld(), Location, Bodies);
+	for (const SpaceshipQuantum::FBody& Body : Bodies)
+	{
+		// The body the ship is leaving does not block: the path starts above it and heads away.
+		const double Clearance = Body.Actor == QuantumTarget.Get() ? Body.RadiusCm * 0.99 : Body.RadiusCm;
+		if (FVector::Dist(Location, Body.Centre) > Body.RadiusCm * 1.01 && SegmentHitsSphere(Location, Arrival, Body.Centre, Clearance))
+		{
+			return EQuantumBlocker::Obstructed;
+		}
+	}
+	return EQuantumBlocker::None;
 }
 
-void ASpaceshipPawn::ToggleCruise()
+void ASpaceshipPawn::UpdateQuantum(float DeltaSeconds)
 {
-	switch (CruiseState)
+	UpdateQuantumTarget();
+
+	if (QuantumState == EQuantumState::Traveling)
 	{
-	case ECruiseState::Off:
-	case ECruiseState::Dropping:
-		CruiseBlocker = EvaluateCruiseEngage();
-		if (CruiseBlocker != ECruiseBlocker::None)
-		{
-			CruiseMessageSeconds = 3.f;
-			return;
-		}
-		CruiseState = ECruiseState::Spooling;
-		CruiseTimer = 0.f;
-		CruiseMessageSeconds = 0.f;
-		if (CruiseChargeAudio)
-		{
-			CruiseChargeAudio->Stop();
-		}
-		CruiseChargeAudio = PlayOneShot(CruiseChargeSound);
-		break;
+		return;  // UpdateQuantumTravel flies it and ends it
+	}
+	if (QuantumState == EQuantumState::Cooling)
+	{
+		QuantumCooldownTimer = FMath::Max(0.f, QuantumCooldownTimer - DeltaSeconds);
+	}
 
-	case ECruiseState::Spooling:
-		CruiseState = ECruiseState::Off;
-		CruiseBlocker = ECruiseBlocker::Pilot;
-		CruiseMessageSeconds = 2.f;
-		if (CruiseChargeAudio)
-		{
-			CruiseChargeAudio->FadeOut(0.25f, 0.f);
-			CruiseChargeAudio = nullptr;
-		}
-		break;
+	QuantumBlocker = EvaluateQuantum();
+	const bool bSpooling = QuantumBlocker != EQuantumBlocker::NeedsNav && QuantumBlocker != EQuantumBlocker::Landed
+		&& QuantumBlocker != EQuantumBlocker::NoTarget;
+	// The spool runs in NAV with a destination and holds while blocked; it winds down in SCM.
+	QuantumSpool = bSpooling
+		? FMath::Min(1.f, QuantumSpool + DeltaSeconds / FMath::Max(QuantumSpoolSeconds, 0.01f))
+		: FMath::Max(0.f, QuantumSpool - DeltaSeconds / FMath::Max(QuantumSpoolSeconds, 0.01f));
 
-	case ECruiseState::Active:
-		BeginCruiseDrop(ECruiseBlocker::Pilot);
-		break;
+	// Calibration needs the nose on the destination and falls back fast when it leaves.
+	const bool bAligned = QuantumTarget.IsValid()
+		&& FVector::DotProduct((QuantumTargetCentre - GetActorLocation()).GetSafeNormal(), GetActorForwardVector())
+			>= FMath::Cos(FMath::DegreesToRadians(double(QuantumAlignDeg)));
+	QuantumCalibration = bSpooling && bAligned && QuantumBlocker == EQuantumBlocker::None
+		? FMath::Min(1.f, QuantumCalibration + DeltaSeconds / FMath::Max(QuantumCalibrationSeconds, 0.01f))
+		: FMath::Max(0.f, QuantumCalibration - 2.f * DeltaSeconds / FMath::Max(QuantumCalibrationSeconds, 0.01f));
+
+	const bool bCool = QuantumState != EQuantumState::Cooling || QuantumCooldownTimer <= 0.f;
+	if (!bCool)
+	{
+		QuantumState = EQuantumState::Cooling;
+	}
+	else if (!bSpooling)
+	{
+		QuantumState = EQuantumState::Idle;
+	}
+	else if (QuantumSpool >= 1.f && QuantumCalibration >= 1.f && QuantumBlocker == EQuantumBlocker::None && bAligned)
+	{
+		QuantumState = EQuantumState::Ready;
+	}
+	else
+	{
+		QuantumState = EQuantumState::Charging;
+	}
+
+	// Engage: the button held for QuantumEngageHoldSeconds while ready.
+	if (bQuantumEngageHeld && QuantumState == EQuantumState::Ready)
+	{
+		if (QuantumEngageTimer <= 0.f && !QuantumChargeAudio)
+		{
+			QuantumChargeAudio = PlayOneShot(QuantumChargeSound);
+		}
+		QuantumEngageTimer += DeltaSeconds;
+		if (QuantumEngageTimer >= QuantumEngageHoldSeconds)
+		{
+			BeginQuantumJump();
+		}
+	}
+	else if (!bQuantumEngageHeld)
+	{
+		QuantumEngageTimer = 0.f;
 	}
 }
 
-void ASpaceshipPawn::BeginCruiseDrop(ECruiseBlocker Reason)
+void ASpaceshipPawn::BeginQuantumJump()
 {
-	CruiseState = ECruiseState::Dropping;
-	CruiseTimer = 0.f;
-	CruiseBlocker = Reason;
-	CruiseMessageSeconds = 3.f;
+	QuantumState = EQuantumState::Traveling;
+	QuantumBlocker = EQuantumBlocker::None;
+	QuantumEngageTimer = 0.f;
+	QuantumJumpLengthCm = FMath::Max(QuantumTargetDistanceCm, 1.0);
+	QuantumFuel = FMath::Max(0.f, QuantumFuel - ComputeQuantumFuelUse(QuantumTargetDistanceCm));
+	bBoostActive = false;
+	bAfterburnerActive = false;
+	bVtolMode = false;
 	CameraKick = 1.f;
-	PlayOneShot(CruiseDropSound);
-	UE_LOG(LogSpaceship, Log, TEXT("%s: cruise drop (%s) at %.0f m/s"), *GetName(),
-		Reason == ECruiseBlocker::TooLow ? TEXT("too low") : TEXT("pilot"), LinearVelocity.Size() / 100.0);
+	QuantumChargeAudio = nullptr;
+	PlayOneShot(QuantumEngageSound);
+	// The jump's burst of green light (the reference at 4:10).
+	SpeedTunnel->TriggerFlare(1.6f);
+	UE_LOG(LogSpaceship, Log, TEXT("%s: quantum jump to %s, %.0f km, fuel left %.0f%%"), *GetName(),
+		*QuantumTargetName.ToString(), QuantumJumpLengthCm / 100000.0, QuantumFuel * 100.f);
 }
 
-void ASpaceshipPawn::UpdateCruise(float DeltaSeconds)
+void ASpaceshipPawn::EndQuantumJump(EQuantumBlocker Reason)
 {
-	CruiseMessageSeconds = FMath::Max(0.f, CruiseMessageSeconds - DeltaSeconds);
-	CruiseSpeedLimit = ComputeCruiseSpeedLimit(bHasEnvironment ? float(Environment.AltitudeAboveTerrainCm) : 0.f,
-		bHasEnvironment ? Environment.AtmosphereDensity : 0.f, bHasEnvironment);
+	QuantumState = EQuantumState::Cooling;
+	QuantumCooldownTimer = QuantumCooldownSeconds;
+	QuantumBlocker = Reason;
+	QuantumSpool = 0.f;
+	QuantumCalibration = 0.f;
+	QuantumEngageTimer = 0.f;
+	CameraKick = 1.f;
+	// Out at NAV speed at most; the overspeed bleed takes the rest.
+	const double Speed = LinearVelocity.Size();
+	if (Speed > QuantumExitSpeed)
+	{
+		LinearVelocity *= QuantumExitSpeed / Speed;
+	}
+	AngularVelocity = FVector::ZeroVector;
+	PlayOneShot(QuantumExitSound);
+	UE_LOG(LogSpaceship, Log, TEXT("%s: quantum exit (%s) %.0f km from %s"), *GetName(),
+		Reason == EQuantumBlocker::Pilot ? TEXT("pilot") : TEXT("arrived"), QuantumTargetDistanceCm / 100000.0, *QuantumTargetName.ToString());
+}
 
-	switch (CruiseState)
+void ASpaceshipPawn::UpdateQuantumTravel(float DeltaSeconds)
+{
+	if (!QuantumTarget.IsValid())
 	{
-	case ECruiseState::Spooling:
+		EndQuantumJump(EQuantumBlocker::NoTarget);
+		return;
+	}
+	const FVector Location = GetActorLocation();
+	const FVector Direction = (QuantumTargetCentre - Location).GetSafeNormal();
+	const double Remaining = QuantumTargetDistanceCm;
+	const double Speed = ComputeQuantumSpeed(Remaining, LinearVelocity.Size(), DeltaSeconds);
+	const double Step = Speed * DeltaSeconds;
+
+	// No steering in a jump (the reference says so outright): the nose swings onto the destination.
+	const FQuat Facing = FRotationMatrix::MakeFromXZ(Direction, GetActorUpVector()).ToQuat();
+	const FQuat Rotation = FQuat::Slerp(GetActorQuat(), Facing, FMath::Min(1.f, 3.f * DeltaSeconds));
+	AngularVelocity = FVector::ZeroVector;
+	EngineDemand = 0.6f;
+	ThrusterAcceleration = FVector::ZeroVector;
+	GForce = FMath::FInterpTo(GForce, 0.f, DeltaSeconds, 8.f);
+
+	if (Step >= Remaining)
 	{
-		const ECruiseBlocker Blocker = EvaluateCruiseEngage();
-		if (Blocker != ECruiseBlocker::None)
+		SetActorLocationAndRotation(Location + Direction * Remaining, Rotation);
+		LinearVelocity = Direction * QuantumExitSpeed;
+		QuantumTargetDistanceCm = 0.0;
+		EndQuantumJump(EQuantumBlocker::None);
+		return;
+	}
+	LinearVelocity = Direction * Speed;
+	// No sweep: the path was checked for bodies before the jump, and at tens of km/s a sweep per
+	// frame against the terrain would cost more than it could ever find.
+	SetActorLocationAndRotation(Location + Direction * Step, Rotation);
+}
+
+bool ASpaceshipPawn::DebugEngageQuantum(const FString& TargetName, float TravelFraction)
+{
+	TArray<SpaceshipQuantum::FBody> Bodies;
+	SpaceshipQuantum::Gather(GetWorld(), GetActorLocation(), Bodies);
+	const SpaceshipQuantum::FBody* Picked = nullptr;
+	double BestCos = -2.0;
+	for (const SpaceshipQuantum::FBody& Body : Bodies)
+	{
+		if (!TargetName.IsEmpty())
 		{
-			CruiseState = ECruiseState::Off;
-			CruiseBlocker = Blocker;
-			CruiseMessageSeconds = 3.f;
-			if (CruiseChargeAudio)
+			if (Body.Name.ToString().StartsWith(TargetName) || Body.Actor->GetName().Contains(TargetName))
 			{
-				CruiseChargeAudio->FadeOut(0.25f, 0.f);
-				CruiseChargeAudio = nullptr;
+				Picked = &Body;
+				break;
 			}
-			break;
+			continue;
 		}
-		CruiseTimer += DeltaSeconds;
-		if (CruiseTimer >= CruiseSpoolSeconds)
+		const double Cos = FVector::DotProduct((Body.Centre - GetActorLocation()).GetSafeNormal(), GetActorForwardVector());
+		if (Cos > BestCos)
 		{
-			CruiseState = ECruiseState::Active;
-			CruiseTimer = 0.f;
-			CruiseBlocker = ECruiseBlocker::None;
-			bBoostActive = false;
-			bAfterburnerActive = false;
-			CameraKick = 1.f;
-			CruiseChargeAudio = nullptr;
-			PlayOneShot(CruiseEngageSound);
-			UE_LOG(LogSpaceship, Log, TEXT("%s: cruise engaged, limit %.0f m/s"), *GetName(), CruiseSpeedLimit / 100.0);
+			BestCos = Cos;
+			Picked = &Body;
 		}
-		break;
 	}
-	case ECruiseState::Active:
-		if (bHasEnvironment && Environment.AltitudeAboveTerrainCm < CruiseDropAltitudeM * 100.0)
-		{
-			BeginCruiseDrop(ECruiseBlocker::TooLow);
-		}
-		break;
-
-	case ECruiseState::Dropping:
-		CruiseTimer += DeltaSeconds;
-		if (CruiseTimer >= CruiseDropSeconds)
-		{
-			CruiseState = ECruiseState::Off;
-			CruiseTimer = 0.f;
-		}
-		break;
-
-	default:
-		break;
+	if (!Picked)
+	{
+		UE_LOG(LogSpaceship, Warning, TEXT("%s: no quantum destination '%s'"), *GetName(), *TargetName);
+		return false;
 	}
+	MasterMode = EMasterMode::NAV;
+	bMasterModeSwitching = false;
+	QuantumTarget = Picked->Actor;
+	UpdateQuantumTarget();
+	const FVector Direction = (QuantumTargetCentre - GetActorLocation()).GetSafeNormal();
+	SetActorRotation(FRotationMatrix::MakeFromXZ(Direction, GetActorUpVector()).ToQuat());
+	BeginQuantumJump();
+	if (TravelFraction > 0.f)
+	{
+		const double Skip = QuantumJumpLengthCm * FMath::Clamp(double(TravelFraction), 0.0, 0.95);
+		SetActorLocation(GetActorLocation() + Direction * Skip);
+		QuantumTargetDistanceCm -= Skip;
+	}
+	LinearVelocity = Direction * ComputeQuantumSpeed(QuantumTargetDistanceCm, double(QuantumMaxSpeedKmS) * 100000.0, 0.f);
+	QuantumBlend = 1.f;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -2106,8 +2360,8 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 	const bool bInvert = bInvertPitch != USpaceUserSettings::IsShipPitchInverted();
 	const float PitchCommand = bFreeLookHeld ? 0.f : Command.Y * (bInvert ? -1.f : 1.f);
 	const float YawCommand = bFreeLookHeld ? 0.f : Command.X;
-	// A ship at kilometres per second turns wide; NAV turns slower than SCM.
-	float RateScale = CruiseState == ECruiseState::Active ? CruiseTurnScale : 1.f;
+	// NAV turns slower than SCM.
+	float RateScale = 1.f;
 	if (MasterMode == EMasterMode::NAV)
 	{
 		RateScale *= NavTurnScale;
@@ -2125,7 +2379,7 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 	const double Speed = LinearVelocity.Size();
 	SlipAngleDeg = Speed < ComStabMinSpeed ? 0.f
 		: float(FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp((LinearVelocity / Speed) | GetActorForwardVector(), -1.0, 1.0))));
-	const bool bCoupledTurns = (bFlightAssist || bSpaceBrakeHeld) && CruiseState != ECruiseState::Active;
+	const bool bCoupledTurns = bFlightAssist || bSpaceBrakeHeld;
 	if (bCoupledTurns && IsGSafeActive() && Speed > 1.0)
 	{
 		// Bending the flight path at rate w takes Speed x w of sideways thrust: keep that under GSafeTurnG.
@@ -2192,25 +2446,6 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 	const double Gravity = bHasEnvironment ? Environment.GravityCmS2 * GravityScale : 0.0;
 	const FVector Up = bHasEnvironment ? FVector(Environment.Up) : FVector::UpVector;
 
-	if (CruiseState == ECruiseState::Active)
-	{
-		// The drive carries the ship along its nose; thrusters, drag and gravity do not matter at
-		// these speeds. Velocity swings onto the nose and the target speed at CruiseResponse; the
-		// speed limiter (wheel) sets how much of the cruise limit to use.
-		const double Target = CruiseSpeedLimit * FMath::Clamp(SpeedLimiterFraction, 0.1f, 1.f);
-		const FVector Desired = Rotation.GetForwardVector() * Target;
-		LinearVelocity = Desired + (LinearVelocity - Desired) * FMath::Exp(-CruiseResponse * DeltaSeconds);
-		// The limit falls as the ground comes closer; never lag behind it on the way down.
-		const double Speed = LinearVelocity.Size();
-		if (Speed > CruiseSpeedLimit)
-		{
-			LinearVelocity *= CruiseSpeedLimit / Speed;
-		}
-		EngineDemand = 0.6f;
-		ThrusterAcceleration = FVector::ZeroVector;
-		GForce = FMath::FInterpTo(GForce, 0.f, DeltaSeconds, 8.f);
-	}
-	else
 	{
 		// What each thruster direction can do. NAV keeps main and retro but halves manoeuvring; boost
 		// strengthens the manoeuvring thrusters (retro included), the afterburner the main ones.
@@ -2321,16 +2556,6 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		}
 
 		const double Speed = LinearVelocity.Size();
-		if (CruiseState == ECruiseState::Dropping)
-		{
-			// Out of cruise: kilometres per second bleed off quickly down to NAV top speed.
-			const double Cap = GetModeMaxSpeed();
-			if (Speed > Cap)
-			{
-				LinearVelocity *= FMath::Max(Cap, Speed * FMath::Exp(-2.5 * DeltaSeconds)) / Speed;
-			}
-		}
-		else
 		{
 			const double ModeTop = MasterMode == EMasterMode::NAV ? NavMaxSpeed : ScmMaxSpeed;
 			const double SpeedCap = ModeTop * (1.0 + (AfterburnerSpeedMultiplier - 1.0) * AfterburnerBlend);
@@ -2367,11 +2592,6 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		// Drop the component of velocity pointing into the surface so the ship slides along it
 		// instead of pressing into it and stalling.
 		LinearVelocity = FVector::VectorPlaneProject(LinearVelocity, Hit.Normal);
-		if (CruiseState == ECruiseState::Active)
-		{
-			BeginCruiseDrop(ECruiseBlocker::TooLow);
-		}
-
 		// Spend the rest of this frame's movement sliding, so touching a surface does not cost
 		// a frame of motion and stutter.
 		const FVector Slide = FVector::VectorPlaneProject(Delta * (1.f - Hit.Time), Hit.Normal);
@@ -2528,7 +2748,7 @@ void ASpaceshipPawn::UpdateLanding(float DeltaSeconds)
 	}
 
 	const bool bEngineInput = FMath::Abs(ThrustInput) >= TakeoffInputThreshold || LiftInput >= TakeoffInputThreshold
-		|| CruiseState != ECruiseState::Off;
+		|| QuantumState == EQuantumState::Traveling;
 
 	if (LandingState == ELandingState::Landed)
 	{
@@ -2625,9 +2845,10 @@ void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 	// made lighting the afterburner feel soft, which is most of what "no kick" was about.
 	AfterburnerFeel = FMath::FInterpTo(AfterburnerFeel, bAfterburnerActive ? 1.f : 0.f, DeltaSeconds,
 		bAfterburnerActive ? 9.f : 2.5f);
-	const float CruiseTarget = CruiseState == ECruiseState::Active ? 1.f
-		: CruiseState == ECruiseState::Spooling ? 0.2f * GetCruiseSpoolProgress() : 0.f;
-	CruiseBlend = FMath::FInterpTo(CruiseBlend, CruiseTarget, DeltaSeconds, CruiseState == ECruiseState::Dropping ? 3.f : 1.5f);
+	// The quantum look arrives in about a second and leaves faster; the last 5% of a jump fades it out.
+	const float QuantumTarget01 = QuantumState == EQuantumState::Traveling
+		? FMath::Clamp((1.f - GetQuantumTravelProgress()) / 0.05f, 0.f, 1.f) : 0.f;
+	QuantumBlend = FMath::FInterpTo(QuantumBlend, QuantumTarget01, DeltaSeconds, QuantumTarget01 > QuantumBlend ? 2.5f : 4.f);
 	CameraKick *= FMath::Exp(-5.f * DeltaSeconds);
 
 	// Mouse wheel zoom, eased.
@@ -2641,18 +2862,18 @@ void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 		CameraBoom->SocketOffset = BaseSocketOffset * FMath::Sqrt(CameraZoom);
 	}
 
-	// Speed you can feel: the view widens with the afterburner and much more in cruise.
-	const float FovKick = AfterburnerFovKick * AfterburnerFeel + CruiseFovKick * CruiseBlend;
+	// Speed you can feel: the view widens with the afterburner and more in a quantum jump.
+	const float FovKick = AfterburnerFovKick * AfterburnerFeel + QuantumFovKick * QuantumBlend;
 	ChaseCamera->SetFieldOfView(BaseChaseFov + FovKick);
 	const float CockpitFov = FMath::Lerp(BaseCockpitFov, CockpitZoomFov, CockpitZoom) + 0.6f * FovKick * (1.f - CockpitZoom);
 	CockpitCamera->SetFieldOfView(FMath::Lerp(CockpitFov, DashboardFocusFov, DashboardFocusBlend));
 
 	// Smooth noise rather than random jumps: a rumble, not a flicker. Nothing moves when calm.
 	static const IConsoleVariable* ShakeScale = IConsoleManager::Get().RegisterConsoleVariable(TEXT("space.CameraShake"), 1.f,
-		TEXT("Camera shake multiplier (boost, afterburner, cruise, heat, kicks); 0 = none."), ECVF_Default);
-	const float Spool = CruiseState == ECruiseState::Spooling ? GetCruiseSpoolProgress() : 0.f;
+		TEXT("Camera shake multiplier (boost, afterburner, quantum, heat, kicks); 0 = none."), ECVF_Default);
+	const float Spool = QuantumState == EQuantumState::Ready ? GetQuantumEngageHold() : 0.f;
 	const float Amplitude = ShakeScale->GetFloat() * (HeatShakeCm * Heat * Heat + BoostShakeCm * BoostBlend + AfterburnerShakeCm * AfterburnerFeel
-		+ CruiseShakeCm * (Spool * Spool + 0.25f * CruiseBlend) + KickShakeCm * CameraKick);
+		+ QuantumShakeCm * (Spool * Spool + 0.25f * QuantumBlend) + KickShakeCm * CameraKick);
 	const double Time = GetWorld()->GetTimeSeconds();
 	const FVector Shake = Amplitude < 0.01f
 		? FVector::ZeroVector
@@ -2681,11 +2902,11 @@ void ASpaceshipPawn::SetupAudioLayers()
 	};
 	Load(EngineHumSound, EngineHumSoundPath);
 	Load(BoostLoopSound, BoostLoopSoundPath);
-	Load(CruiseLoopSound, CruiseLoopSoundPath);
+	Load(QuantumLoopSound, CruiseLoopSoundPath);
 	Load(BoostStartSound, BoostStartSoundPath);
-	Load(CruiseChargeSound, CruiseChargeSoundPath);
-	Load(CruiseEngageSound, CruiseEngageSoundPath);
-	Load(CruiseDropSound, CruiseDropSoundPath);
+	Load(QuantumChargeSound, CruiseChargeSoundPath);
+	Load(QuantumEngageSound, CruiseEngageSoundPath);
+	Load(QuantumExitSound, CruiseDropSoundPath);
 	Load(TouchdownSound, TouchdownSoundPath);
 
 	// Created at runtime rather than as default subobjects: nothing to configure per ship, and
@@ -2706,7 +2927,7 @@ void ASpaceshipPawn::SetupAudioLayers()
 	};
 	EngineHumAudio = MakeLayer(EngineHumSound, TEXT("EngineHumAudio"));
 	BoostAudio = MakeLayer(BoostLoopSound, TEXT("BoostAudio"));
-	CruiseAudio = MakeLayer(CruiseLoopSound, TEXT("CruiseAudio"));
+	QuantumAudio = MakeLayer(QuantumLoopSound, TEXT("QuantumAudio"));
 }
 
 UAudioComponent* ASpaceshipPawn::PlayOneShot(USoundBase* Sound, float VolumeScale)
@@ -2724,11 +2945,11 @@ void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
 	const bool bPiloted = IsPlayerControlled();
 
 	// Eased rather than snapped, so the engines spool up and down instead of clicking. The load is
-	// what the thrusters really do: braking and holding altitude are heard too, a steady cruise
+	// what the thrusters really do: braking and holding altitude are heard too, a steady coast
 	// through empty space is quiet.
-	// Coupled, the engines also drone with speed (cruise: with the limiter), so steady flight is
+	// Coupled, the engines also drone with speed (in a quantum jump: a steady drone), so steady flight is
 	// never silent.
-	const float LeverLoad = CruiseState == ECruiseState::Active ? 0.35f * SpeedLimiterFraction
+	const float LeverLoad = QuantumState == EQuantumState::Traveling ? 0.35f
 		: bFlightAssist ? 0.35f * FMath::Clamp(float(LinearVelocity.Size()) / FMath::Max(GetModeMaxSpeed(), 1.f), 0.f, 1.f) : 0.f;
 	EngineLoad = FMath::FInterpTo(EngineLoad, bPiloted ? FMath::Max(EngineDemand, LeverLoad) : 0.f, DeltaSeconds, EngineSpoolRate);
 	EngineBoostBlend = FMath::FInterpTo(EngineBoostBlend, bPiloted && bAfterburnerActive ? 1.f : 0.f, DeltaSeconds, EngineSpoolRate);
@@ -2759,7 +2980,7 @@ void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
 		Layer->SetPitchMultiplier(Pitch);
 	};
 
-	Drive(EngineHumAudio, EngineHumVolume * HumBlend * (0.85f + 0.3f * EngineLoad), 1.f + 0.04f * EngineLoad + 0.06f * CruiseBlend);
+	Drive(EngineHumAudio, EngineHumVolume * HumBlend * (0.85f + 0.3f * EngineLoad), 1.f + 0.04f * EngineLoad + 0.06f * QuantumBlend);
 
 	const float Load = FMath::Min(EngineLoad + 0.35f * EngineBoostBlend, 1.f);
 	Drive(EngineAudio, EngineVolume * Load,
@@ -2769,8 +2990,8 @@ void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
 		FMath::Loge(EngineLowPassIdleHz), FMath::Loge(EngineLowPassFullHz), Load)));
 
 	Drive(BoostAudio, bPiloted ? BoostVolume * AfterburnerFeel : 0.f, 1.f + 0.06f * AfterburnerFeel);
-	const float CruiseSpeed = FMath::Clamp(LinearVelocity.Size() / FMath::Max(CruiseMaxSpeed, 1.f), 0.f, 1.f);
-	Drive(CruiseAudio, bPiloted ? CruiseVolume * CruiseBlend : 0.f, 0.9f + 0.25f * FMath::Sqrt(CruiseSpeed));
+	const float QuantumSpeed = FMath::Clamp(float(LinearVelocity.Size() / (double(QuantumMaxSpeedKmS) * 100000.0)), 0.f, 1.f);
+	Drive(QuantumAudio, bPiloted ? QuantumVolume * QuantumBlend : 0.f, 0.9f + 0.25f * FMath::Sqrt(QuantumSpeed));
 }
 
 // -------------------------------------------------------------------------------------------
@@ -2822,7 +3043,7 @@ void ASpaceshipPawn::UpdateShipLights(float DeltaSeconds)
 		}
 	};
 
-	const float Thrust = ThrusterIdleGlow + (1.f - ThrusterIdleGlow) * EngineLoad + ThrusterAfterburnerGlow * AfterburnerFeel + 0.3f * BoostBlend + ThrusterCruiseGlow * CruiseBlend;
+	const float Thrust = ThrusterIdleGlow + (1.f - ThrusterIdleGlow) * EngineLoad + ThrusterAfterburnerGlow * AfterburnerFeel + 0.3f * BoostBlend + ThrusterQuantumGlow * QuantumBlend;
 	for (FShipGlowMaterial& Glow : ThrusterMaterials)
 	{
 		Apply(Glow, Glow.BaseStrength * Thrust);
@@ -2851,24 +3072,10 @@ void ASpaceshipPawn::UpdateSpaceDust(float DeltaSeconds)
 	// streak run through the lens as a white wedge (21. 9. 2026). The camera travels with the ship,
 	// so this frame's move is added.
 	const FVector View = PlayerController->PlayerCameraManager->GetCameraLocation() + LinearVelocity * DeltaSeconds;
-	// No cruise boost for the dust any more (it was 1 + 1.5 x cruise while the dust was the only look
-	// of speed): at 1.2 km/s cruise it drew thick white wedges over the tunnel (21. 9. 2026).
-	SpaceDust->UpdateDust(View, LinearVelocity, 1.f);
-	SpeedTunnel->UpdateTunnel(View, LinearVelocity, DeltaSeconds);
-}
-
-void ASpaceshipPawn::DebugEngageCruise()
-{
-	CruiseState = ECruiseState::Active;
-	CruiseTimer = 0.f;
-	CruiseBlocker = ECruiseBlocker::None;
-	CruiseBlend = 1.f;
-	bBoostActive = false;
-	bAfterburnerActive = false;
-	CruiseSpeedLimit = ComputeCruiseSpeedLimit(bHasEnvironment ? float(Environment.AltitudeAboveTerrainCm) : 0.f,
-		bHasEnvironment ? Environment.AtmosphereDensity : 0.f, bHasEnvironment);
-	LinearVelocity = GetActorForwardVector() * (CruiseSpeedLimit * FMath::Clamp(SpeedLimiterFraction, 0.1f, 1.f));
-	UE_LOG(LogSpaceship, Log, TEXT("%s: cruise forced at %.0f m/s"), *GetName(), LinearVelocity.Size() / 100.0);
+	// The dust only as a hint of motion in normal flight, and none in a jump (the tunnel is the look
+	// there); Star Citizen shows almost no speed lines outside quantum (the reference video, 21. 9. 2026).
+	SpaceDust->UpdateDust(View, LinearVelocity, 1.f - QuantumBlend);
+	SpeedTunnel->UpdateTunnel(View, LinearVelocity, DeltaSeconds, QuantumBlend);
 }
 
 // -------------------------------------------------------------------------------------------
@@ -2924,12 +3131,8 @@ void ASpaceshipPawn::SetVtol(bool bOn)
 		UE_LOG(LogSpaceship, Log, TEXT("%s: VTOL refused, SCM only"), *GetName());
 		return;
 	}
+	// SCM only, so never in a quantum jump (NAV).
 	bVtolMode = bOn;
-	if (bOn && CruiseState != ECruiseState::Off)
-	{
-		// Both are ways of going fast in a straight line; neither belongs to standing on the thrusters.
-		BeginCruiseDrop(ECruiseBlocker::Pilot);
-	}
 	UE_LOG(LogSpaceship, Log, TEXT("%s: VTOL %s"), *GetName(), bOn ? TEXT("on") : TEXT("off"));
 }
 

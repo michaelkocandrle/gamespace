@@ -71,7 +71,7 @@ expected = {"Root", "Ladder", "HeadingTape", "Reticle", "VirtualJoystick",
             "ModeIcon", "ModeText", "SubModeText", "Lamp_CSTB", "Lamp_CPLD", "Lamp_PREC", "Lamp_BOOST", "Strafe", "LimiterPlus",
             "SpeedGauge", "SpeedValue", "SpeedUnit", "RowBoostValue", "RowBoostLabel", "RowLimitValue", "RowLimitLabel",
             "AfterburnerGauge", "AbRing", "AfterburnerValue", "AfterburnerLabel", "AltitudeUnit", "AltitudeTape",
-            "Gyro", "Shield", "GValue", "GUnit", "GMax", "RowGearValue", "RowCruiseValue", "RowRAltValue", "RowVsiValue", "RowAtmoValue"}
+            "Gyro", "Shield", "GValue", "GUnit", "GMax", "RowGearValue", "RowQuantumValue", "RowRAltValue", "RowVsiValue", "RowAtmoValue"}
 check("widget tree has every element of the SC reference", expected <= names, "missing %s" % sorted(expected - names))
 check("gauges, symbols, tapes and the ladder are the custom widgets",
       isinstance(hud.debug_get_gauge("SpeedGauge"), unreal.SpaceHudGauge) and isinstance(hud.debug_get_virtual_joystick(), unreal.SpaceHudVirtualJoystick)
@@ -143,7 +143,7 @@ try:
     check("no body nearby: heading, ladder and altitude tape hidden, air rows blank",
           not state.has_environment and not hud.debug_is_shown("HeadingTape") and not hud.debug_is_shown("Ladder")
           and not hud.debug_is_shown("AltitudeTape") and hud.debug_get_text("RowRAltValue") == "-")
-    check("status rows: GEAR UP, CRUISE OFF", hud.debug_get_text("RowGearValue") == "UP" and hud.debug_get_text("RowCruiseValue") == "OFF")
+    check("status rows: GEAR UP, QT OFF", hud.debug_get_text("RowGearValue") == "UP" and hud.debug_get_text("RowQuantumValue") == "OFF")
 
     # --- Speed gauge against the limiter -----------------------------------------------------------
     run(ship, 10.0, lin=(1, 0, 0))

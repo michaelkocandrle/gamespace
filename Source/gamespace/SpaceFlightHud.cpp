@@ -72,6 +72,9 @@ namespace SpaceHudStyle
 	/** The gyro's turn-rate line. */
 	const FLinearColor Orange(1.f, 0.55f, 0.25f, 0.95f);
 	const FLinearColor NavBlue(0.65f, 0.75f, 1.f, 0.95f);
+	/** The quantum drive's colours in the reference: violet not ready, green ready, red cooling. */
+	const FLinearColor QuantumViolet(0.55f, 0.52f, 1.f, 0.9f);
+	const FLinearColor QuantumGreen(0.35f, 1.f, 0.4f, 0.95f);
 
 	/**
 	 * The HUD's own faces, after the reference's instrument type: Rajdhani Medium for labels
@@ -391,6 +394,66 @@ namespace SpaceHudStyle
 
 	/** Under this the flight path is noise rather than a direction, cm/s (5 m/s). */
 	constexpr double VelocityMarkerMinSpeed = 500.0;
+
+	/** A quantum range the way the reference writes it: 850m, 12.4km, 3.2Mm, 19.0Gm. */
+	FString FormatRange(double Cm)
+	{
+		const double M = Cm / 100.0;
+		return M < 1000.0 ? FString::Printf(TEXT("%.0fm"), M)
+			: M < 1.0e6 ? FString::Printf(TEXT("%.1fkm"), M / 1000.0)
+			: M < 1.0e9 ? FString::Printf(TEXT("%.1fMm"), M / 1.0e6)
+			: FString::Printf(TEXT("%.1fGm"), M / 1.0e9);
+	}
+
+	/** Everything the HUD says about the quantum drive, from the ship's state (SC-4). */
+	void DescribeQuantum(const ASpaceshipPawn& Ship, FSpaceFlightHudState& State)
+	{
+		const EQuantumState Quantum = Ship.GetQuantumState();
+		const EQuantumBlocker Blocker = Ship.GetQuantumBlocker();
+		const bool bNav = Ship.GetMasterMode() == EMasterMode::NAV && Blocker != EQuantumBlocker::NeedsNav;
+		State.QuantumFuel = Ship.GetQuantumFuel();
+		State.QuantumLabel = Quantum == EQuantumState::Traveling ? TEXT("JUMP") : Quantum == EQuantumState::Cooling ? TEXT("COOL")
+			: Quantum == EQuantumState::Ready ? TEXT("READY")
+			: Quantum == EQuantumState::Charging ? (Ship.GetQuantumSpool() < 1.f ? TEXT("SPOOL") : TEXT("CALIB")) : TEXT("OFF");
+		State.bQuantumTargetVisible = bNav && Ship.HasQuantumTarget();
+		State.QuantumTargetName = Ship.GetQuantumTargetName().ToString().ToUpper();
+		State.QuantumTargetRange = FormatRange(Ship.GetQuantumTargetDistance());
+		State.QuantumArcs = !bNav ? 0 : Quantum == EQuantumState::Cooling ? 3 : Quantum == EQuantumState::Ready || Quantum == EQuantumState::Traveling ? 2 : 1;
+		if (!bNav)
+		{
+			State.QuantumStatus.Reset();
+		}
+		else if (Quantum == EQuantumState::Cooling)
+		{
+			State.QuantumStatus = FString::Printf(TEXT("COOLING %d%%"), FMath::FloorToInt(Ship.GetQuantumCooling() * 100.f));
+		}
+		else if (Quantum == EQuantumState::Ready || Quantum == EQuantumState::Traveling)
+		{
+			State.QuantumStatus = TEXT("READY");
+		}
+		else if (Blocker == EQuantumBlocker::Obstructed)
+		{
+			State.QuantumStatus = TEXT("OBSTRUCTED");
+		}
+		else if (Blocker == EQuantumBlocker::TooClose)
+		{
+			State.QuantumStatus = TEXT("TOO CLOSE");
+		}
+		else if (Blocker == EQuantumBlocker::NoFuel)
+		{
+			State.QuantumStatus = TEXT("NO QT FUEL");
+		}
+		else if (Quantum == EQuantumState::Charging)
+		{
+			State.QuantumStatus = Ship.GetQuantumSpool() < 1.f
+				? FString::Printf(TEXT("SPOOLING %d%%"), FMath::FloorToInt(Ship.GetQuantumSpool() * 100.f))
+				: FString::Printf(TEXT("CALIBRATING %d%%"), FMath::FloorToInt(Ship.GetQuantumCalibration() * 100.f));
+		}
+		else
+		{
+			State.QuantumStatus = TEXT("ONLINE");
+		}
+	}
 
 	/**
 	 * Where a direction lands on the screen, in the HUD's own units. Returns false when the direction
@@ -893,6 +956,52 @@ int32 USpaceHudSymbol::NativePaint(const FPaintArgs& Args, const FGeometry& Allo
 		{
 			Draw({ Centre + Dir * Radius, Centre + Dir * (Half - 1.f) }, Color, 1.4f);
 		}
+		break;
+	}
+	case ESpaceHudSymbol::QuantumArcs:
+	{
+		// Two arcs of one circle round the middle, 40 degrees either side of the horizontal, like the
+		// reference; READY puts a chevron on each pointing in at the destination.
+		const float Radius = Half - 2.f;
+		for (const float Side : { -1.f, 1.f })
+		{
+			TArray<FVector2f> Arc;
+			for (int32 Step = 0; Step <= 20; ++Step)
+			{
+				const float Angle = FMath::DegreesToRadians(-40.f + 4.f * float(Step));
+				Arc.Add(Centre + FVector2f(Side * FMath::Cos(Angle), FMath::Sin(Angle)) * Radius);
+			}
+			Draw(Arc, Color, 1.6f);
+			if (Value.X > 0.5f)
+			{
+				const FVector2f Tip = Centre + FVector2f(Side * (Radius - 14.f), 0.f);
+				Draw({ Tip + FVector2f(Side * 7.f, -7.f), Tip, Tip + FVector2f(Side * 7.f, 7.f) }, Color, 1.8f);
+			}
+		}
+		break;
+	}
+	case ESpaceHudSymbol::QuantumTarget:
+		Draw(Circle(Centre, Half - 1.5f), Color, 1.4f);
+		Draw(Circle(Centre, Half * 0.35f), Color, 1.2f);
+		break;
+	case ESpaceHudSymbol::QuantumArrow:
+	{
+		const FVector2f Along = FVector2f(float(Value.X), float(Value.Y)).GetSafeNormal();
+		const FVector2f Across(-Along.Y, Along.X);
+		const FVector2f Tip = Centre + Along * (Half - 2.f);
+		const FVector2f Tail = Centre - Along * (Half - 2.f);
+		Draw({ Tail, Tip }, Color, 1.8f);
+		Draw({ Tip - Along * 9.f + Across * 7.f, Tip, Tip - Along * 9.f - Across * 7.f }, Color, 1.8f);
+		break;
+	}
+	case ESpaceHudSymbol::StatusBox:
+	{
+		TArray<FSlateGradientStop> Stops;
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, 0.f), FLinearColor(0.02f, 0.12f, 0.04f, 0.55f)));
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, Size.Y), FLinearColor(0.02f, 0.12f, 0.04f, 0.55f)));
+		FSlateDrawElement::MakeGradient(OutDrawElements, LayerId, Paint, MoveTemp(Stops), Orient_Horizontal);
+		Draw({ FVector2f(3.f, 4.f), FVector2f(3.f, Size.Y - 4.f) }, Color, 2.f);
+		Draw({ FVector2f(Size.X - 3.f, 4.f), FVector2f(Size.X - 3.f, Size.Y - 4.f) }, Color, 2.f);
 		break;
 	}
 	case ESpaceHudSymbol::Plus:
@@ -1525,6 +1634,14 @@ void USpaceFlightHud::BuildTree()
 	Symbol(TEXT("Reticle"), ESpaceHudSymbol::Reticle, FVector2D::ZeroVector, FVector2D(28.0, 28.0), Label);
 	// The flight path marker moves every frame (ApplyState), so it starts in the middle.
 	Symbol(TEXT("Velocity"), ESpaceHudSymbol::Velocity, FVector2D::ZeroVector, FVector2D(30.0, 30.0), Instrument);
+	// Quantum drive (SC-4, the reference video): arcs round the middle, the destination, the status box.
+	Symbol(TEXT("QuantumArcs"), ESpaceHudSymbol::QuantumArcs, FVector2D::ZeroVector, FVector2D(380.0, 380.0), QuantumViolet);
+	Symbol(TEXT("QuantumTarget"), ESpaceHudSymbol::QuantumTarget, FVector2D::ZeroVector, FVector2D(20.0, 20.0), QuantumViolet);
+	Symbol(TEXT("QuantumArrow"), ESpaceHudSymbol::QuantumArrow, FVector2D::ZeroVector, FVector2D(44.0, 44.0), QuantumViolet);
+	Words(TEXT("QuantumTargetName"), TEXT(""), 11.f, FVector2D(0.0, 18.0), FVector2D(0.5, 0.0), QuantumViolet);
+	Words(TEXT("QuantumTargetRange"), TEXT(""), 10.f, FVector2D(0.0, 33.0), FVector2D(0.5, 0.0), QuantumViolet);
+	Symbol(TEXT("QuantumStatusBox"), ESpaceHudSymbol::StatusBox, FVector2D(0.0, -284.0), FVector2D(220.0, 26.0), QuantumGreen);
+	Words(TEXT("QuantumStatus"), TEXT(""), 13.f, FVector2D(0.0, -284.0), FVector2D(0.5, 0.5), QuantumGreen);
 	VirtualJoystick = WidgetTree->ConstructWidget<USpaceHudVirtualJoystick>(USpaceHudVirtualJoystick::StaticClass(), TEXT("VirtualJoystick"));
 	USizeBox* JoystickBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("VirtualJoystickBox"));
 	JoystickBox->SetWidthOverride(220.f);
@@ -1614,8 +1731,8 @@ void USpaceFlightHud::BuildTree()
 
 	Words(TEXT("RowGearLabel"), TEXT("GEAR"), 11.f, FVector2D(339.0, -72.0), FVector2D(0.0, 0.5));
 	Words(TEXT("RowGearValue"), TEXT("UP"), 11.f, FVector2D(398.0, -72.0), FVector2D(0.0, 0.5));
-	Words(TEXT("RowCruiseLabel"), TEXT("CRUISE"), 11.f, FVector2D(339.0, -57.0), FVector2D(0.0, 0.5));
-	Words(TEXT("RowCruiseValue"), TEXT("OFF"), 11.f, FVector2D(398.0, -57.0), FVector2D(0.0, 0.5));
+	Words(TEXT("RowQuantumLabel"), TEXT("QT"), 11.f, FVector2D(339.0, -57.0), FVector2D(0.0, 0.5));
+	Words(TEXT("RowQuantumValue"), TEXT("OFF"), 11.f, FVector2D(398.0, -57.0), FVector2D(0.0, 0.5));
 	Bracket(TEXT("BracketStatus"), { FVector2D(322.0, -44.0), FVector2D(335.0, -57.0), FVector2D(335.0, -87.0) }, Faded(Label, 0.6f));
 	Words(TEXT("RowRAltLabel"), TEXT("R-ALT"), 11.f, FVector2D(341.0, 60.0), FVector2D(0.0, 0.5));
 	Words(TEXT("RowRAltValue"), TEXT("-"), 11.f, FVector2D(391.0, 60.0), FVector2D(0.0, 0.5));
@@ -1670,7 +1787,7 @@ FSpaceFlightHudState USpaceFlightHud::MakeState(const ASpaceshipPawn* Ship, int3
 	// The reverse zone keeps the same speed per pixel as the rest of the gauge.
 	const float ReverseSpan = State.GaugeScaleCmS * SpeedReverseZone / (1.f - SpeedReverseZone);
 	State.ReverseFraction = FMath::Clamp(-State.ForwardSpeedCmS / ReverseSpan, 0.f, 1.f);
-	State.bOverLimit = Ship->GetCruiseState() == ECruiseState::Off && State.SpeedCmS > State.SpeedLimitCmS * 1.02f + 50.f;
+	State.bOverLimit = Ship->GetQuantumState() != EQuantumState::Traveling && State.SpeedCmS > State.SpeedLimitCmS * 1.02f + 50.f;
 
 	State.GForce = Ship->GetGForce();
 	State.GSafeMaxG = Ship->GetGSafeMaxG();
@@ -1687,11 +1804,8 @@ FSpaceFlightHudState USpaceFlightHud::MakeState(const ASpaceshipPawn* Ship, int3
 	State.Stick = Ship->GetMouseStick();
 	State.Deadzone = Ship->GetVirtualJoystickDeadzone();
 
-	const ECruiseState Cruise = Ship->GetCruiseState();
-	State.CruiseLabel = Cruise == ECruiseState::Spooling ? TEXT("SPOOL") : Cruise == ECruiseState::Active ? TEXT("ON")
-		: Cruise == ECruiseState::Dropping ? TEXT("DROP") : TEXT("OFF");
-	State.SubModeLabel = Cruise == ECruiseState::Active || Cruise == ECruiseState::Dropping ? TEXT("CRUISE")
-		: Cruise == ECruiseState::Spooling ? TEXT("SPOOL") : State.bVtolActive ? TEXT("VTOL")
+	SpaceHudStyle::DescribeQuantum(*Ship, State);
+	State.SubModeLabel = Ship->GetQuantumState() == EQuantumState::Traveling ? TEXT("QUANTUM") : State.bVtolActive ? TEXT("VTOL")
 		: State.bPrecisionActive ? TEXT("PREC") : TEXT("FLIGHT");
 	State.GearLabel = State.bGearMoving ? TEXT("MOVING") : State.bGearDown ? TEXT("DOWN") : TEXT("UP");
 
@@ -1746,8 +1860,94 @@ FSpaceFlightHudState USpaceFlightHud::ApplyView(const FSpaceFlightHudState& Stat
 			Out.bVelocityBehind = !SpaceHudStyle::ProjectDirection(Velocity.GetSafeNormal(), View.GetUnitAxis(EAxis::X),
 				View.GetUnitAxis(EAxis::Y), View.GetUnitAxis(EAxis::Z), FovDeg, Out.VelocityMarker);
 		}
+		// The quantum destination: on screen where it is, or an arrow on the circle the way to turn.
+		if (Out.bQuantumTargetVisible)
+		{
+			const FVector ToTarget = (Ship->GetQuantumTargetLocation() - Ship->GetActorLocation()).GetSafeNormal();
+			const bool bAhead = SpaceHudStyle::ProjectDirection(ToTarget, View.GetUnitAxis(EAxis::X),
+				View.GetUnitAxis(EAxis::Y), View.GetUnitAxis(EAxis::Z), FovDeg, Out.QuantumTargetMarker);
+			Out.bQuantumTargetOffscreen = !bAhead || Out.QuantumTargetMarker.Size() >= SpaceHudStyle::MarkerRadius - 0.5;
+		}
 	}
 	return Out;
+}
+
+void USpaceFlightHud::ApplyQuantum(const FSpaceFlightHudState& State)
+{
+	using namespace SpaceHudStyle;
+	auto Show = [this](const FName Name, bool bShow)
+	{
+		UWidget* Widget = Parts.FindRef(Name);
+		if (!Widget)
+		{
+			Widget = Texts.FindRef(Name);
+		}
+		if (Widget)
+		{
+			Widget->SetVisibility(bShow ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		}
+	};
+	auto Place = [](UWidget* Widget, const FVector2D& Position)
+	{
+		if (UCanvasPanelSlot* WidgetSlot = Widget ? Cast<UCanvasPanelSlot>(Widget->Slot) : nullptr)
+		{
+			WidgetSlot->SetPosition(Position);
+		}
+	};
+	const FLinearColor ArcColor = State.QuantumArcs == 3 ? Red : State.QuantumArcs == 2 ? QuantumGreen : QuantumViolet;
+	const FLinearColor TargetColor = State.QuantumArcs == 3 ? Red : QuantumViolet;
+
+	Show(TEXT("QuantumArcs"), State.QuantumArcs > 0);
+	if (USpaceHudSymbol* Arcs = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("QuantumArcs"))))
+	{
+		Arcs->Color = ArcColor;
+		Arcs->Value = FVector2D(State.QuantumArcs == 2 ? 1.0 : 0.0, 0.0);
+	}
+
+	const bool bMarker = State.bQuantumTargetVisible && !State.bQuantumTargetOffscreen;
+	const bool bArrow = State.bQuantumTargetVisible && State.bQuantumTargetOffscreen;
+	Show(TEXT("QuantumTarget"), bMarker);
+	Show(TEXT("QuantumArrow"), bArrow);
+	Show(TEXT("QuantumTargetName"), State.bQuantumTargetVisible);
+	Show(TEXT("QuantumTargetRange"), State.bQuantumTargetVisible);
+	if (USpaceHudSymbol* Target = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("QuantumTarget"))))
+	{
+		Target->Color = TargetColor;
+		Place(Target, State.QuantumTargetMarker);
+	}
+	if (USpaceHudSymbol* Arrow = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("QuantumArrow"))))
+	{
+		Arrow->Color = TargetColor;
+		Arrow->Value = State.QuantumTargetMarker.GetSafeNormal();
+		Place(Arrow, State.QuantumTargetMarker);
+	}
+	// The name and range under the marker, or under the arrow when it is off screen.
+	for (const TPair<const TCHAR*, const FString*>& Line : { TPair<const TCHAR*, const FString*>(TEXT("QuantumTargetName"), &State.QuantumTargetName),
+		TPair<const TCHAR*, const FString*>(TEXT("QuantumTargetRange"), &State.QuantumTargetRange) })
+	{
+		if (UTextBlock* Text = Texts.FindRef(Line.Key))
+		{
+			Text->SetText(FText::FromString(*Line.Value));
+			Text->SetColorAndOpacity(FSlateColor(TargetColor));
+			const double Below = FCString::Strcmp(Line.Key, TEXT("QuantumTargetName")) == 0 ? 18.0 : 33.0;
+			Place(Text, State.QuantumTargetMarker + FVector2D(0.0, bArrow ? Below + 14.0 : Below));
+		}
+	}
+
+	const bool bStatus = !State.QuantumStatus.IsEmpty();
+	Show(TEXT("QuantumStatusBox"), bStatus);
+	Show(TEXT("QuantumStatus"), bStatus);
+	const bool bWarning = State.QuantumStatus == TEXT("OBSTRUCTED") || State.QuantumStatus == TEXT("TOO CLOSE") || State.QuantumStatus == TEXT("NO QT FUEL");
+	const FLinearColor StatusColor = bWarning ? Amber : QuantumGreen;
+	if (USpaceHudSymbol* Box = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("QuantumStatusBox"))))
+	{
+		Box->Color = StatusColor;
+	}
+	if (UTextBlock* Text = Texts.FindRef(TEXT("QuantumStatus")))
+	{
+		Text->SetText(FText::FromString(State.QuantumStatus));
+		Text->SetColorAndOpacity(FSlateColor(StatusColor));
+	}
 }
 
 void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
@@ -1841,7 +2041,7 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 			MarkerSlot->SetPosition(State.VelocityMarker);
 		}
 	}
-	SetLamp(TEXT("CRUISE"), State.CruiseLabel != TEXT("OFF"), State.CruiseLabel == TEXT("ON") ? Instrument : Amber);
+	ApplyQuantum(State);
 	if (USpaceHudSymbol* Shield = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("Shield"))))
 	{
 		Shield->Color = !State.bGSafeOn ? Faded(Label, 0.3f) : State.bGSafeActive ? Instrument : Amber;
@@ -1962,7 +2162,8 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 	SetText(TEXT("RowAtmoValue"), State.bHasEnvironment ? FString::Printf(TEXT("%.3fp"), State.AtmosphereDensity) : None, Label);
 	SetText(TEXT("RowGearValue"), State.GearLabel, State.bGearWarning && !State.bGearDown ? (bBlink ? Red : Faded(Red, 0.4f))
 		: State.bGearMoving ? Amber : State.bGearDown ? Instrument : Label);
-	SetText(TEXT("RowCruiseValue"), State.CruiseLabel, State.CruiseLabel == TEXT("OFF") ? Faded(Label, 0.6f) : Instrument);
+	SetText(TEXT("RowQuantumValue"), State.QuantumLabel, State.QuantumLabel == TEXT("OFF") ? Faded(Label, 0.6f)
+		: State.QuantumLabel == TEXT("COOL") ? Red : State.QuantumLabel == TEXT("READY") || State.QuantumLabel == TEXT("JUMP") ? QuantumGreen : Instrument);
 
 	// --- Strafe cross and gyro ---------------------------------------------------------------------------
 	if (USpaceHudSymbol* Strafe = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("Strafe"))))
@@ -2041,7 +2242,8 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 	SetText(TEXT("NavMode"), State.ModeLabel, !State.bModeSwitching || bBlink ? Label : Faded(Label, 0.3f));
 	SetText(TEXT("NavSub"), State.SubModeLabel, Faded(Label, 0.8f));
 	SetText(TEXT("NavLimit"), SpaceHudStyle::Speed(State.SpeedLimitCmS), Label);
-	SetText(TEXT("NavCruise"), State.CruiseLabel, State.CruiseLabel == TEXT("OFF") ? Faded(Label, 0.6f) : Instrument);
+	SetText(TEXT("NavQuantum"), State.QuantumLabel, State.QuantumLabel == TEXT("OFF") ? Faded(Label, 0.6f)
+		: State.QuantumLabel == TEXT("COOL") ? Red : State.QuantumLabel == TEXT("READY") || State.QuantumLabel == TEXT("JUMP") ? QuantumGreen : Instrument);
 	SetText(TEXT("NavSpeed"), SpaceHudStyle::Speed(State.SpeedCmS), Label);
 	TArray<FSpaceRadarContact> Bodies = State.RadarContacts.FilterByPredicate([](const FSpaceRadarContact& Contact) { return Contact.bBody; });
 	Bodies.Sort([](const FSpaceRadarContact& A, const FSpaceRadarContact& B) { return A.DistanceM < B.DistanceM; });
@@ -2492,7 +2694,7 @@ void USpaceCockpitDisplays::BuildTree()
 	Horizontal(NavTop, NavModeBox, VAlign_Top, FMargin(0.f, 0.f, 24.f, 0.f));
 	UVerticalBox* NavFigures = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("NavFigures"));
 	for (const TPair<const TCHAR*, const TCHAR*>& NavFigure : { TPair<const TCHAR*, const TCHAR*>(TEXT("SPEED"), TEXT("NavSpeed")),
-		TPair<const TCHAR*, const TCHAR*>(TEXT("LIMIT"), TEXT("NavLimit")), TPair<const TCHAR*, const TCHAR*>(TEXT("CRUISE"), TEXT("NavCruise")) })
+		TPair<const TCHAR*, const TCHAR*>(TEXT("LIMIT"), TEXT("NavLimit")), TPair<const TCHAR*, const TCHAR*>(TEXT("QUANTUM"), TEXT("NavQuantum")) })
 	{
 		UHorizontalBox* FigureLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("NavFigure_%s"), NavFigure.Key)));
 		Horizontal(FigureLine, Words(FName(*FString::Printf(TEXT("NavCaption_%s"), NavFigure.Key)), NavFigure.Key, 22.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f), true);
@@ -2537,7 +2739,7 @@ void USpaceCockpitDisplays::BuildTree()
 	Vertical(NavPage, Words(TEXT("NavEmpty"), TEXT("NO BODY NEAR"), 28.f, Faded(MfdText, 0.5f)), HAlign_Left, FMargin(0.f, 6.f));
 	Screen(TEXT("Flight"), ScreenRect(TEXT("left")), { Flight, ThrustPage, NavPage });
 
-	// --- Right display, STATUS: a list like the contacts page (the MODE / GEAR / CRUISE keys repeated it) ----
+	// --- Right display, STATUS: a list like the contacts page (the MODE / GEAR / QUANTUM keys repeated it) ----
 	UHorizontalBox* Status = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("StatusContent"));
 	UVerticalBox* List = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("StatusList"));
 	auto Row = [&](const TCHAR* Name, const FName ValueName)
@@ -2565,7 +2767,7 @@ void USpaceCockpitDisplays::BuildTree()
 		Vertical(List, Rule(FName(*FString::Printf(TEXT("RowRule_%s"), Name)), 0.f, 0.15f), HAlign_Fill, FMargin(0.f, 2.f));
 	};
 	Row(TEXT("GEAR"), TEXT("RowGearValue"));
-	Row(TEXT("CRUISE"), TEXT("RowCruiseValue"));
+	Row(TEXT("QUANTUM"), TEXT("RowQuantumValue"));
 	Row(TEXT("R-ALT"), TEXT("RowRAltValue"));
 	Row(TEXT("VSI"), TEXT("RowVsiValue"));
 	Row(TEXT("ATMO"), TEXT("RowAtmoValue"));

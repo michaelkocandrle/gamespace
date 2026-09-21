@@ -10,7 +10,7 @@ there is. Covers:
   2. what it does to the thrusters: the mains fall to VtolThrustFraction, the lift and lateral ones gain
   3. speed: the top speed becomes VtolMaxSpeed, the limiter still works inside it, and Space / Ctrl are
      a climb rate (VtolClimbSpeed), not another way of reaching the top speed
-  4. what it refuses: the afterburner, and it drops the cruise drive
+  4. what it refuses: the afterburner (and VTOL is SCM only, so never in a quantum jump)
   5. levelling: ComputeVtolLevelStep turns the hull back towards the up it is given, at VtolLevelRate,
      and does nothing without VTOL or without an up
   6. hovering shows on the engines: a vertical thrust of about one G reads as most of the engine demand,

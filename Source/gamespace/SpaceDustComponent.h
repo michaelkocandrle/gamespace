@@ -40,10 +40,11 @@ public:
 	/** Hides the dust until the next UpdateDust. */
 	void HideDust();
 
-	/** Number of specks. 400 until 21. 9. 2026: the field was too thin to read as dust in motion.
-	 *  2600 in a 30 m box costs nothing measurable (80 FPS either way, Tools/Shots/dust_tune.json). */
+	/** Number of specks. 2600 for a day (21. 9. 2026), then back down: Star Citizen shows almost no
+	 *  speed lines outside quantum (the reference video), and the author found 2600 far too many.
+	 *  The count costs nothing measurable either way (Tools/Shots/dust_tune.json). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Dust", meta = (ClampMin = "0", ClampMax = "4000"))
-	int32 ParticleCount = 2600;
+	int32 ParticleCount = 700;
 
 	/** Half the edge of the box around the camera, cm. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Dust", meta = (ClampMin = "100.0"))

@@ -1,4 +1,5 @@
-"""Headless checks for boost energy, cruise drive (NAV only), free look, exits and the scene extras.
+"""Headless checks for boost energy, free look, exits and the scene extras (the quantum drive,
+which replaced the cruise drive, is in test_quantum_sc4.py).
 
     .\\Tools\\run_editor_python.ps1 Tools\\Tests\\test_flight_modes.py
 
@@ -111,48 +112,6 @@ try:
 finally:
     eas.destroy_actor(ship)
 
-# --- Cruise in deep space ------------------------------------------------------------------
-ship = spawn()
-try:
-    spool = cdo.get_editor_property("cruise_spool_seconds")
-    cruise_max = cdo.get_editor_property("cruise_max_speed")
-    ship.toggle_cruise()
-    check("J refused in SCM", ship.get_cruise_state() == unreal.CruiseState.OFF and ship.get_cruise_blocker() == unreal.CruiseBlocker.NEEDS_NAV)
-    to_nav(ship)
-    ship.set_speed_limiter(0.75)
-    ship.toggle_cruise()
-    check("J starts charging in NAV", ship.get_cruise_state() == unreal.CruiseState.SPOOLING)
-    run(ship, spool - 0.1)
-    check("still charging just before CruiseSpoolSeconds", ship.get_cruise_state() == unreal.CruiseState.SPOOLING,
-          "%.0f %%" % (100 * ship.get_cruise_spool_progress()))
-    run(ship, 0.2)
-    check("engaged after CruiseSpoolSeconds", ship.get_cruise_state() == unreal.CruiseState.ACTIVE)
-    check("limit in deep space is CruiseMaxSpeed", abs(ship.get_cruise_speed_limit() - cruise_max) < 1.0)
-    velocity = run(ship, 6.0)
-    check("cruise flies at limiter x limit", abs(velocity[0] - 0.75 * cruise_max) < 0.02 * cruise_max,
-          "%.0f m/s" % (velocity[0] / 100.0))
-    ship.toggle_cruise()
-    check("J again drops out", ship.get_cruise_state() == unreal.CruiseState.DROPPING
-          and ship.get_cruise_blocker() == unreal.CruiseBlocker.PILOT)
-    velocity = run(ship, 3.0)
-    check("drop bleeds speed down to NAV top speed", length(velocity) <= NAV + 1.0 and ship.get_cruise_state() == unreal.CruiseState.OFF,
-          "%.0f m/s, state %s" % (length(velocity) / 100.0, ship.get_cruise_state()))
-    check("cruise limit function", abs(ship.compute_cruise_speed_limit(1000000.0, 0.0, True) - 400000.0) < 1.0
-          and abs(ship.compute_cruise_speed_limit(1000.0, 0.0, True) - cdo.get_editor_property("cruise_min_speed")) < 1.0
-          and ship.compute_cruise_speed_limit(1000000.0, 1.0, True) < ship.compute_cruise_speed_limit(1000000.0, 0.0, True))
-finally:
-    eas.destroy_actor(ship)
-
-ship = spawn()
-try:
-    to_nav(ship)
-    ship.toggle_cruise()
-    run(ship, cdo.get_editor_property("cruise_spool_seconds") + 0.1)
-    ship.toggle_master_mode()
-    check("B back to SCM drops out of cruise", ship.get_cruise_state() == unreal.CruiseState.DROPPING and ship.is_master_mode_switching())
-finally:
-    eas.destroy_actor(ship)
-
 # --- Free look all the way round -------------------------------------------------------------
 ship = spawn()
 try:
@@ -185,43 +144,7 @@ def above_surface(direction, altitude_cm):
     return unreal.Vector(*[C[k] + d[k] * (R + terrain + altitude_cm) for k in range(3)])
 
 
-# --- Cruise near the ground ------------------------------------------------------------------
 up = (-1.0, 0.0, 0.0)  # the side of Veyra facing PlayerStart
-ship = eas.spawn_actor_from_class(unreal.SpaceshipPawn, above_surface(up, 150000.0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
-try:
-    to_nav(ship)
-    ship.toggle_cruise()
-    check("cruise refused 1.5 km above ground", ship.get_cruise_state() == unreal.CruiseState.OFF
-          and ship.get_cruise_blocker() == unreal.CruiseBlocker.TOO_LOW)
-finally:
-    eas.destroy_actor(ship)
-
-# Nose straight down at the planet from 6 km: the limit shrinks with altitude and cruise drops out low.
-ship = eas.spawn_actor_from_class(unreal.SpaceshipPawn, above_surface(up, 600000.0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
-try:
-    to_nav(ship)
-    ship.toggle_cruise()
-    run(ship, cdo.get_editor_property("cruise_spool_seconds") + 0.1)
-    check("cruise engages 6 km up", ship.get_cruise_state() == unreal.CruiseState.ACTIVE)
-    worst = [0.0]
-    dropped_at = [None]
-
-    def dive(i, v):
-        if ship.get_cruise_state() == unreal.CruiseState.ACTIVE:
-            limit = ship.get_cruise_speed_limit()
-            worst[0] = max(worst[0], length(v3(v)) / max(limit, 1.0))
-        elif dropped_at[0] is None:
-            loc = v3(ship.get_actor_location())
-            dropped_at[0] = length([loc[k] - C[k] for k in range(3)]) - R
-
-    # debug_step_flight has no mouse, so point the nose at the ground by rotating the actor.
-    ship.set_actor_rotation(unreal.MathLibrary.find_look_at_rotation(ship.get_actor_location(), unreal.Vector(*C)), False)
-    run(ship, 30.0, each=dive)
-    check("never faster than the altitude limit", worst[0] < 1.001, "worst %.3f x limit" % worst[0])
-    check("drops out close to the ground", dropped_at[0] is not None and ship.get_cruise_blocker() == unreal.CruiseBlocker.TOO_LOW,
-          "dropped %.0f m above sea level" % ((dropped_at[0] or 0) / 100.0))
-finally:
-    eas.destroy_actor(ship)
 
 # --- Exit and hull collision ------------------------------------------------------------------
 vanguard = unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard")
@@ -316,7 +239,7 @@ if giant:
           "%.0f km + rings %.0f km, dome %.0f km" % (distance, giant.get_editor_property("ring_outer_radius_km"), dome_km))
 for path in ("/Game/Environments/Space/M_SpaceDust", "/Game/Environments/Space/M_GasGiant", "/Game/Environments/Space/M_Moon",
              "/Game/Environments/Space/M_PlanetRings", "/Game/Ships/Audio/SW_EngineHum", "/Game/Ships/Audio/SW_CruiseCharge",
-             "/Game/Input/IA_CruiseDrive", "/Game/Input/IA_FlightAssist"):
+             "/Game/Input/IA_QuantumEngage", "/Game/Input/IA_FlightAssist"):
     check("asset %s" % path.rsplit("/", 1)[1], unreal.EditorAssetLibrary.does_asset_exist(path))
 sky = unreal.EditorAssetLibrary.load_asset("/Game/Environments/Space/M_Starfield_Sky")
 names = [str(n) for n in unreal.MaterialEditingLibrary.get_scalar_parameter_names(sky)]
@@ -327,7 +250,7 @@ pairs = set()
 for m in imc.get_editor_property("default_key_mappings").get_editor_property("mappings"):
     a = m.get_editor_property("action")
     pairs.add((str(m.get_editor_property("key").get_editor_property("key_name")), a.get_name() if a else None))
-check("V / J / X / wheel / B mapped", {("V", "IA_FlightAssist"), ("J", "IA_CruiseDrive"), ("X", "IA_AllStop"), ("MouseWheelAxis", "IA_CameraZoom"),
+check("V / LMB / X / wheel / B mapped", {("V", "IA_FlightAssist"), ("LeftMouseButton", "IA_QuantumEngage"), ("X", "IA_AllStop"), ("MouseWheelAxis", "IA_CameraZoom"),
                                       ("B", "IA_MasterMode")} <= pairs)
 
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

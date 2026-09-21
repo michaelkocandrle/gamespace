@@ -199,8 +199,9 @@ finally:
 ship = spawn()
 try:
     switch = P["master_mode_switch_seconds"]
-    ship.toggle_cruise()
-    check("cruise refused in SCM", ship.get_cruise_state() == unreal.CruiseState.OFF and ship.get_cruise_blocker() == unreal.CruiseBlocker.NEEDS_NAV)
+    ship.debug_step_flight(1.0 / 60.0, 0.0, 0.0, 0.0, False)
+    check("no quantum drive in SCM", ship.get_quantum_state() == unreal.QuantumState.IDLE
+          and ship.get_quantum_blocker() == unreal.QuantumBlocker.NEEDS_NAV)
     ship.toggle_master_mode()
     check("B starts switching to NAV", ship.is_master_mode_switching() and ship.get_pending_master_mode() == unreal.MasterMode.NAV
           and ship.get_master_mode() == unreal.MasterMode.SCM)
