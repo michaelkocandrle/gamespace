@@ -46,6 +46,16 @@ nakopíruje starý exe.** Hru nikdy neukončuj sám. Požádej autora, ať ji za
 
 ---
 
+### 1.1 Reference z videa (21. 9. 2026)
+
+Když jde o pohyb, průběh nebo HUD (quantum skok, přistání, efekty), jeden screenshot nestačí.
+`python Tools/Reference/fetch_video.py <url> <název> [--every 2] [--from 3:40 --to 5:10]` stáhne video
+z YouTube v nejlepší kvalitě do 4K (yt-dlp, `pip install yt-dlp`), vypíše skutečné rozlišení, nařeže
+snímky pojmenované časem (`tHH_MM_SS.jpg`) a složí přehledové listy po 12. Postup: projít listy,
+zajímavé časy otevřít v plném rozlišení nebo vyříznout výřez HUD, poznatky zapsat do
+`starcitizenreference/` (vlastními slovy, časy jako odkazy). Video a snímky jsou cizí záznam:
+leží jen v `ArtSource/Reference/Video/` (v `.gitignore`).
+
 ## 2. Loď z AI modelu: Blender → Unreal
 
 Podrobně je to v `Docs/Ships/ShipPipeline.md`. Tady je jen pořadí a místa, kde se chybuje.

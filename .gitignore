@@ -92,3 +92,6 @@ __pycache__/
 
 # A font the player drops in for the HUD (Tools: SpaceFlightHud CustomFont); it may not be redistributable.
 Content/UI/Fonts/Custom/
+
+# Reference footage (someone else's video, local only): Tools/Reference/fetch_video.py
+ArtSource/Reference/Video/
