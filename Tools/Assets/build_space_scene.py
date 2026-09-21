@@ -109,6 +109,22 @@ GIANT_YAW_DEG, GIANT_ELEVATION_DEG = 70.0, 10.0
 GIANT_AXIAL_TILT_DEG = 18.0
 GIANT_SPIN_SECONDS = 1800.0
 
+# Veyra's ground (TERRAIN_HLSL), after the planet reference video: regions of different rock seen
+# from orbit, bare rock on slopes and dust in the lows. RegionScale is how many region-sized
+# features wrap round the planet (the noise is sampled on the unit sphere). Slope is 1 - cos(angle):
+# 0.05 is about 18 degrees, 0.15 about 32.
+TERRAIN_REGION_SCALE = 3.0
+TERRAIN_SLOPE_ROCK = (0.04, 0.14)
+TERRAIN_COLORS = {
+    "Plain": (0.50, 0.36, 0.24),
+    "Ochre": (0.55, 0.33, 0.14),
+    "Basin": (0.34, 0.15, 0.08),
+    "Basalt": (0.17, 0.13, 0.11),
+    "Rock": (0.20, 0.16, 0.13),
+    "Dust": (0.66, 0.52, 0.38),
+}
+TERRAIN_HLSL = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "terrain.hlsl"), encoding="utf-8").read()
+
 # Veyra's atmosphere: the engine's SkyAtmosphere, sized to the planet (21. 9. 2026, after the planet
 # reference video: a thin bright limb from space, hazy layered distance and a coloured sky from the
 # surface - starcitizenreference/Planets_VideoNotes.md). Earth's coefficients are per km over an
@@ -117,10 +133,10 @@ GIANT_SPIN_SECONDS = 1800.0
 # (Mie) three times Earth's for a desert. Aerial perspective is stretched for the same reason: the
 # horizon here is kilometres away, not a hundred.
 ATMO_HEIGHT_KM = 12.0
-ATMO_RAYLEIGH_SCALE = 0.09            # Earth 0.0331; 0.16 painted the desert blue-violet
+ATMO_RAYLEIGH_SCALE = 0.035           # Earth 0.0331; 0.16, then 0.09 still painted the desert blue-violet (terrain_atmo)
 ATMO_RAYLEIGH_COLOR = (0.175, 0.409, 1.0)   # Earth's ratios (0.0058, 0.0135, 0.0331 per km)
 ATMO_RAYLEIGH_HEIGHT_KM = 1.5         # Earth 8; 3 km made a halo as thick as a tenth of the planet
-ATMO_MIE_SCALE = 0.07                 # Earth 0.003996: a dusty desert, the haze in its dust colour
+ATMO_MIE_SCALE = 0.12                 # Earth 0.003996: a dusty desert, the haze in its dust colour
 ATMO_MIE_COLOR = (1.0, 0.75, 0.5)     # warm dust
 ATMO_MIE_HEIGHT_KM = 0.6
 ATMO_MIE_ANISOTROPY = 0.8
@@ -128,7 +144,7 @@ ATMO_GROUND_ALBEDO = (0.45, 0.36, 0.28)
 # The atmosphere's own ground sits this far below sea level. At sea level, rays just over the real
 # horizon hit that virtual ground wherever the terrain is higher, and the horizon had a black band.
 ATMO_GROUND_BELOW_SEA_KM = 2.0
-ATMO_AERIAL_DISTANCE_SCALE = 16.0     # layered distance within a few km, as in the reference
+ATMO_AERIAL_DISTANCE_SCALE = 10.0     # layered distance within a few km, as in the reference
 # Sky material: how much of the atmosphere's light to add over the stars, and how fast the stars
 # go behind it (1 / luminance at which they are gone).
 ATMO_SKY_SCALE = 4.0
@@ -138,8 +154,8 @@ ATMO_STAR_FADE = 4.0
 # on the ground had no fill at all and was black even at five times the sky light (ship_dark_probe,
 # 21. 9. 2026). It also pales the sky towards the reference's dusty desert skies.
 PAINTED_SKY_AMOUNT = 0.4
-PAINTED_SKY_ZENITH = (0.30, 0.40, 0.58)
-PAINTED_SKY_HORIZON = (0.78, 0.72, 0.64)
+PAINTED_SKY_ZENITH = (0.40, 0.41, 0.46)   # 0.30, 0.40, 0.58 gave the ground a violet cast through the sky light
+PAINTED_SKY_HORIZON = (0.82, 0.71, 0.57)
 
 # Space dust around the ship camera (USpaceDustComponent).
 DUST_COLOR = (0.70, 0.80, 1.00)
@@ -1064,40 +1080,30 @@ def build_planet_material():
     link(planet_local, unit, pin(unit, "A"))
     link(radius, unit, pin(unit, "B"))
 
-    # Continents: one multi-octave noise over the surface blends two terrain colours.
-    noise = node(m, unreal.MaterialExpressionNoise, -1000, 0,
-                 scale=1.6, levels=6, output_min=0.0, output_max=1.0)
-    link(unit, noise, "World Position")
-    lowland = node(m, unreal.MaterialExpressionVectorParameter, -1000, 250,
-                   parameter_name="LowlandColor", default_value=unreal.LinearColor(0.30, 0.12, 0.06, 1.0))
-    highland = node(m, unreal.MaterialExpressionVectorParameter, -1000, 450,
-                    parameter_name="HighlandColor", default_value=unreal.LinearColor(0.62, 0.42, 0.24, 1.0))
-    terrain = node(m, unreal.MaterialExpressionLinearInterpolate, -700, 250)
-    link(lowland, terrain, "A")
-    link(highland, terrain, "B")
-    link(noise, terrain, "Alpha")
-
-    # Polar caps: |z| near 1, with the edge broken up by the same noise.
-    z = node(m, unreal.MaterialExpressionComponentMask, -1000, -250, r=False, g=False, b=True, a=False)
-    link(unit, z, "")
-    abs_z = node(m, unreal.MaterialExpressionAbs, -850, -250)
-    link(z, abs_z, "")
-    wobble_amount = node(m, unreal.MaterialExpressionConstant, -850, -120, r=0.12)
-    wobble = node(m, unreal.MaterialExpressionMultiply, -700, -120)
-    link(noise, wobble, "A")
-    link(wobble_amount, wobble, "B")
-    latitude = node(m, unreal.MaterialExpressionAdd, -550, -250)
-    link(abs_z, latitude, "A")
-    link(wobble, latitude, "B")
-    cap = node(m, unreal.MaterialExpressionSmoothStep, -400, -250, const_min=0.86, const_max=0.93)
-    link(latitude, cap, "Value")
-
-    ice = node(m, unreal.MaterialExpressionVectorParameter, -700, 600,
-               parameter_name="IceColor", default_value=unreal.LinearColor(0.85, 0.88, 0.90, 1.0))
-    base = node(m, unreal.MaterialExpressionLinearInterpolate, -300, 250)
-    link(terrain, base, "A")
-    link(ice, base, "B")
-    link(cap, base, "Alpha")
+    # Ground in three scales (TERRAIN_HLSL): regions seen from orbit, rock on slopes and dust in the
+    # lows, and fine breakup up close. Replaced one noise between two colours (21. 9. 2026).
+    names = ["P", "Radius", "Nrm", "RegionScale", "Plain", "Ochre", "Basin", "Basalt", "Rock", "Dust",
+             "SlopeRockStart", "SlopeRockEnd", "DustRough", "RockRough"]
+    ground = custom(m, NOISE_STRUCT + TERRAIN_HLSL, names, -600, 250, "Terrain",
+                    unreal.CustomMaterialOutputType.CMOT_FLOAT4)
+    sources = {
+        "P": planet_local,
+        "Radius": radius,
+        "Nrm": node(m, unreal.MaterialExpressionVertexNormalWS, -900, 300),
+        "RegionScale": scalar(m, "RegionScale", TERRAIN_REGION_SCALE, -900, 400),
+        "SlopeRockStart": scalar(m, "SlopeRockStart", TERRAIN_SLOPE_ROCK[0], -900, 1300),
+        "SlopeRockEnd": scalar(m, "SlopeRockEnd", TERRAIN_SLOPE_ROCK[1], -900, 1400),
+        "DustRough": scalar(m, "DustRoughness", 0.95, -900, 1500),
+        "RockRough": scalar(m, "RockRoughness", 0.78, -900, 1600),
+    }
+    for index, (name, rgb) in enumerate(TERRAIN_COLORS.items()):
+        sources[name] = vector(m, name + "Color", rgb, -900, 500 + 120 * index)
+    for name in names:
+        link(sources[name], ground, name)
+    base = node(m, unreal.MaterialExpressionComponentMask, -300, 250, r=True, g=True, b=True, a=False)
+    link(ground, base, "")
+    ground_rough = node(m, unreal.MaterialExpressionComponentMask, -300, 500, r=False, g=False, b=False, a=True)
+    link(ground, ground_rough, "")
 
     # Debug: space.TerrainDebugLOD 1 tints each tile by its quadtree depth.
     depth = primitive_data(m, "TileDepth", 6, -700, 850)
@@ -1115,8 +1121,7 @@ def build_planet_material():
     link(debug_flag, shown, "Alpha")
     output(shown, unreal.MaterialProperty.MP_BASE_COLOR)
 
-    rough = node(m, unreal.MaterialExpressionConstant, -300, 500, r=0.85)
-    output(rough, unreal.MaterialProperty.MP_ROUGHNESS)
+    output(ground_rough, unreal.MaterialProperty.MP_ROUGHNESS)
 
     # Geomorph: move each vertex towards where the parent tile would put it (UV1.xy, UV2.x, in
     # the tile's local frame) as the camera distance goes from MorphStart to MorphEnd.

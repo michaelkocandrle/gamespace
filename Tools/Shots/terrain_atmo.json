@@ -1,0 +1,16 @@
+{
+  "_comment": "Warmer haze over Veyra's desert: the ground came out blue-grey through Rayleigh aerial perspective (terrain_look, 21. 9. 2026). Three variants live through space.Atmo. Run: Tools/Shots.ps1 -Preset terrain_atmo",
+  "shots": [
+    {"name": "a_now_60km", "camera": "cockpit", "altitude_m": 60000, "facing": "planet", "hud": 0, "settle": 3.0},
+    {"name": "a_now_2km", "camera": "chase", "altitude_m": 2000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "settle": 3.0},
+    {"name": "a_now_landed", "camera": "chase", "altitude_m": 3, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 140, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 4.0},
+    {"name": "b_warm_60km", "camera": "cockpit", "altitude_m": 60000, "facing": "planet", "hud": 0, "settle": 3.0,
+     "console": ["space.Atmo RayleighScatteringScale 0.05", "space.Atmo MieScatteringScale 0.09"]},
+    {"name": "b_warm_2km", "camera": "chase", "altitude_m": 2000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "settle": 3.0},
+    {"name": "b_warm_landed", "camera": "chase", "altitude_m": 3, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 140, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 4.0},
+    {"name": "c_warmer_60km", "camera": "cockpit", "altitude_m": 60000, "facing": "planet", "hud": 0, "settle": 3.0,
+     "console": ["space.Atmo RayleighScatteringScale 0.035", "space.Atmo MieScatteringScale 0.12", "space.Atmo AerialPespectiveViewDistanceScale 10"]},
+    {"name": "c_warmer_2km", "camera": "chase", "altitude_m": 2000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "settle": 3.0},
+    {"name": "c_warmer_landed", "camera": "chase", "altitude_m": 3, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 140, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 4.0}
+  ]
+}

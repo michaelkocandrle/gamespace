@@ -1,0 +1,13 @@
+{
+  "_comment": "Veyra's ground in three scales against the planet reference video (starcitizenreference/Planets_VideoNotes.md): regions from orbit, rock and dust from mid height, breakup up close. Material values live in M_Planet_Terrain; space.TerrainParam is not needed - rebuild with build_space_scene.py. Run: Tools/Shots.ps1 -Preset terrain_look",
+  "shots": [
+    {"name": "a_300km", "camera": "cockpit", "altitude_m": 300000, "facing": "planet", "hud": 0, "settle": 3.0},
+    {"name": "b_60km", "camera": "cockpit", "altitude_m": 60000, "facing": "planet", "hud": 0, "settle": 3.0},
+    {"name": "c_15km_oblique", "camera": "chase", "altitude_m": 15000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 160, "chase_pitch": -25, "settle": 3.0},
+    {"name": "d_5km", "camera": "cockpit", "altitude_m": 5000, "facing": "planet", "hud": 0, "settle": 3.0},
+    {"name": "e_2km_horizon", "camera": "chase", "altitude_m": 2000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -15, "settle": 3.0},
+    {"name": "f_500m", "camera": "chase", "altitude_m": 500, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 120, "chase_pitch": -20, "settle": 3.0},
+    {"name": "g_60m", "camera": "cockpit", "altitude_m": 60, "facing": "horizon", "hud": 0, "gear": true, "settle": 3.0},
+    {"name": "h_landed", "camera": "chase", "altitude_m": 3, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 140, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 4.0}
+  ]
+}

@@ -772,6 +772,24 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Snímek `planet_300km` v `-Preset space_look` (celá planeta s lemem, Orun, Keth).
 
 ---
+51. **Planety 3/4: povrch ve třech měřítkách** (21. 9. 2026, podle videa). `M_Planet_Terrain` měl
+    jeden šum mezi dvěma barvami a polární čepičky. Teď je celá barva v `Tools/Assets/terrain.hlsl`
+    (Custom uzel, konstanty `TERRAIN_*` v `build_space_scene.py`):
+    - **Oblasti z orbity:** zdeformovaný nízkofrekvenční šum na jednotkové kouli dělí planetu na
+      planiny, okrové vysočiny, červenohnědé pánve a tmavou skálu, s členitými, ale čitelnými okraji.
+    - **Střední měřítko:** holá skála na svazích (sklon 18–32°, `TERRAIN_SLOPE_ROCK`), prach v údolích,
+      bledší nejvyšší vrcholy; drsnost skály 0,78, prachu 0,95.
+    - **Zblízka:** rozbití barvy na ~40 m, ~3 m a ~0,6 m a tmavší kamínky na rovinách.
+    - **Atmosféra do teplé:** terén vycházel fialovošedý – modrý Rayleigh přes leteckou perspektivu
+      a modrý malovaný zenit přes sky light. Rayleigh 0,035, prach 0,12, perspektiva ×10, zenit šedý.
+      Varianty v `Tools/Shots/terrain_atmo.json`.
+    - Snímky `-Preset terrain_look` (300 km → přistání). `Tools/Shots/sheet.py` skládá složku snímků
+      do jednoho přehledu.
+    - **Známé:** zblízka je zem pořád hladká (kameny jsou krok 4); u země se objevuje hláška VSM
+      „Non-Nanite Marking Job Queue overflow“ (dlaždice terénu nejsou Nanite) – zatím bez vlivu na FPS
+      ve snímcích (60–80), sledovat; na snímku z 15 km šikmo je jedna podezřele rovná hrana stínu.
+
+---
 
 ## 6. Mapa kódu a obsahu
 
@@ -1204,4 +1222,5 @@ Viz `git log --oneline`. Poslední kroky:
 - SC-4: quantum drive místo cruise, HUD podle videa, tunel s mlhou (bod 47);
 - jiskry kolem lodi, tunel s tmavým středem, kamera bez zpoždění ve skoku, méně bílých čar (bod 48);
 - planety 1/4: atmosféra Veyry podle videa (bod 49);
-- planety 2/4: Veyra 120 km, kulaté siluety, pryč zástupné asteroidy (bod 50).
+- planety 2/4: Veyra 120 km, kulaté siluety, pryč zástupné asteroidy (bod 50);
+- planety 3/4: povrch ve třech měřítkách, teplá atmosféra (bod 51).
