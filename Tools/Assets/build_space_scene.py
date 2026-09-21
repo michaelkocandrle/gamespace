@@ -9,8 +9,8 @@ Two steps, editor closed:
 Re-runnable. Assets and level actors this script owns are updated in place: materials are
 rebuilt from the graph below and actors are found by label. Imported source assets (glow
 cubemap, planet mesh) are imported once and then left alone. Nothing else in the level is
-touched, except that the SkyAtmosphere actor is removed - it renders an Earth-like sky and
-horizon, which is the opposite of space.
+touched. The level's one SkyAtmosphere belongs to Veyra (Atmosphere_Veyra, sized to the planet);
+any other is removed - the engine's default is an Earth-sized sky and horizon, the opposite of space.
 """
 
 import math
@@ -107,6 +107,38 @@ GIANT_DISTANCE_KM = 620.0
 GIANT_YAW_DEG, GIANT_ELEVATION_DEG = 70.0, 10.0
 GIANT_AXIAL_TILT_DEG = 18.0
 GIANT_SPIN_SECONDS = 1800.0
+
+# Veyra's atmosphere: the engine's SkyAtmosphere, sized to the planet (21. 9. 2026, after the planet
+# reference video: a thin bright limb from space, hazy layered distance and a coloured sky from the
+# surface - starcitizenreference/Planets_VideoNotes.md). Earth's coefficients are per km over an
+# 8 km scale height and a 6400 km planet; Veyra is 25 km across with a 3 km scale height, so the
+# coefficients are raised until the optical depth matches: blue zenith ~1.2 as on Earth, and dust
+# (Mie) three times Earth's for a desert. Aerial perspective is stretched for the same reason: the
+# horizon here is kilometres away, not a hundred.
+ATMO_HEIGHT_KM = 12.0
+ATMO_RAYLEIGH_SCALE = 0.09            # Earth 0.0331; 0.16 painted the desert blue-violet
+ATMO_RAYLEIGH_COLOR = (0.175, 0.409, 1.0)   # Earth's ratios (0.0058, 0.0135, 0.0331 per km)
+ATMO_RAYLEIGH_HEIGHT_KM = 1.5         # Earth 8; 3 km made a halo as thick as a tenth of the planet
+ATMO_MIE_SCALE = 0.07                 # Earth 0.003996: a dusty desert, the haze in its dust colour
+ATMO_MIE_COLOR = (1.0, 0.75, 0.5)     # warm dust
+ATMO_MIE_HEIGHT_KM = 0.6
+ATMO_MIE_ANISOTROPY = 0.8
+ATMO_GROUND_ALBEDO = (0.45, 0.36, 0.28)
+# The atmosphere's own ground sits this far below sea level. At sea level, rays just over the real
+# horizon hit that virtual ground wherever the terrain is higher, and the horizon had a black band.
+ATMO_GROUND_BELOW_SEA_KM = 2.0
+ATMO_AERIAL_DISTANCE_SCALE = 16.0     # layered distance within a few km, as in the reference
+# Sky material: how much of the atmosphere's light to add over the stars, and how fast the stars
+# go behind it (1 / luminance at which they are gone).
+ATMO_SKY_SCALE = 4.0
+ATMO_STAR_FADE = 4.0
+# The painted sky gradient mixed back in, in the planet's dusty colours. Not for its looks alone: the
+# sky light's capture gets no light from the atmosphere node, and without the painted sky the ship
+# on the ground had no fill at all and was black even at five times the sky light (ship_dark_probe,
+# 21. 9. 2026). It also pales the sky towards the reference's dusty desert skies.
+PAINTED_SKY_AMOUNT = 0.4
+PAINTED_SKY_ZENITH = (0.30, 0.40, 0.58)
+PAINTED_SKY_HORIZON = (0.78, 0.72, 0.64)
 
 # Space dust around the ship camera (USpaceDustComponent).
 DUST_COLOR = (0.70, 0.80, 1.00)
@@ -421,7 +453,7 @@ def build_starfield_material(glow_cube):
     blend = node(m, unreal.MaterialExpressionCustom, 100, 0,
                  code=ATMOSPHERE_HLSL, description="Atmosphere blend",
                  output_type=unreal.CustomMaterialOutputType.CMOT_FLOAT3)
-    names = ("Space", "Dir", "Up", "Zenith", "Horizon", "Brightness", "Amount", "Sun")
+    names = ("Space", "Dir", "Up", "Zenith", "Horizon", "Brightness", "Amount", "Sun", "Atmo", "AtmoScale", "StarFade", "FakeSky")
     custom_inputs = []
     for name in names:
         custom_pin = unreal.CustomInput()
@@ -447,6 +479,12 @@ def build_starfield_material(glow_cube):
     link(amount, blend, "Amount")
     link(amount, sun, "Amount")
     link(sun, blend, "Sun")
+    atmo = node(m, unreal.MaterialExpressionSkyAtmosphereViewLuminance, -150, 1500)
+    link(atmo, blend, "Atmo")
+    link(scalar(m, "AtmosphereSkyScale", ATMO_SKY_SCALE, -150, 1600), blend, "AtmoScale")
+    link(scalar(m, "AtmosphereStarFade", ATMO_STAR_FADE, -150, 1700), blend, "StarFade")
+    # The painted sky gradient, partly (PAINTED_SKY_AMOUNT: the sky light's capture needs it).
+    link(scalar(m, "FakeSkyAmount", PAINTED_SKY_AMOUNT, -150, 1800), blend, "FakeSky")
     output(blend, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     finish(m)
     return m
@@ -462,8 +500,12 @@ float mu = dot(d, up);
 float3 sky = lerp(Horizon.rgb, Zenith.rgb, sqrt(saturate(mu)));
 sky *= lerp(1.0, 0.35, saturate(-mu * 3.0));
 float a = saturate(Amount);
-float keep = (1.0 - a) * (1.0 - a);
-return Space * keep + sky * Brightness * a + Sun;
+// The real atmosphere (SkyAtmosphere, Veyra's): its light along this view, and the stars behind
+// it fading as it brightens - the limb from space, the day sky from the ground.
+float3 atmo = Atmo * AtmoScale;
+float hide = saturate(1.0 - dot(atmo, float3(0.3, 0.59, 0.11)) * StarFade);
+float keep = (1.0 - a) * (1.0 - a) * hide;
+return Space * keep + sky * Brightness * a * FakeSky + atmo + Sun;
 """
 
 # Value noise and fbm for the sky and the distant bodies. HLSL in a Custom node is the body of one
@@ -1134,10 +1176,31 @@ def build_level(sky_material, planet_mesh, planet_material, body_materials):
     actors = eas.get_all_level_actors()
 
     for actor in actors:
-        if isinstance(actor, unreal.SkyAtmosphere):
+        if isinstance(actor, unreal.SkyAtmosphere) and actor.get_actor_label() != "Atmosphere_" + PLANET_NAME:
             log("removing %s" % actor.get_actor_label())
             eas.destroy_actor(actor)
     actors = eas.get_all_level_actors()
+
+    # Veyra's atmosphere, centred on the planet (see ATMO_* above).
+    atmo_actor = upsert_actor(eas, actors, "Atmosphere_" + PLANET_NAME, unreal.SkyAtmosphere, PLANET_LOCATION_CM)
+    atmo = atmo_actor.get_component_by_class(unreal.SkyAtmosphereComponent)
+    for key, value in (
+            ("transform_mode", unreal.SkyAtmosphereTransformMode.PLANET_CENTER_AT_COMPONENT_TRANSFORM),
+            ("bottom_radius", PLANET_RADIUS_CM / 100000.0 - ATMO_GROUND_BELOW_SEA_KM),
+            ("atmosphere_height", ATMO_HEIGHT_KM),
+            ("ground_albedo", unreal.Color(*[int(round(255 * c)) for c in ATMO_GROUND_ALBEDO], 255)),
+            ("rayleigh_scattering_scale", ATMO_RAYLEIGH_SCALE),
+            ("rayleigh_scattering", unreal.LinearColor(*ATMO_RAYLEIGH_COLOR, 1.0)),
+            ("rayleigh_exponential_distribution", ATMO_RAYLEIGH_HEIGHT_KM),
+            ("mie_scattering_scale", ATMO_MIE_SCALE),
+            ("mie_scattering", unreal.LinearColor(*ATMO_MIE_COLOR, 1.0)),
+            ("mie_exponential_distribution", ATMO_MIE_HEIGHT_KM),
+            ("mie_anisotropy", ATMO_MIE_ANISOTROPY),
+            ("aerial_pespective_view_distance_scale", ATMO_AERIAL_DISTANCE_SCALE)):
+        atmo.set_editor_property(key, value)
+    log("atmosphere: %s, %.0f km thick, Rayleigh %.3f / %.1f km, Mie %.3f / %.1f km, aerial x%.0f" % (
+        atmo_actor.get_actor_label(), ATMO_HEIGHT_KM, ATMO_RAYLEIGH_SCALE, ATMO_RAYLEIGH_HEIGHT_KM,
+        ATMO_MIE_SCALE, ATMO_MIE_HEIGHT_KM, ATMO_AERIAL_DISTANCE_SCALE))
 
     # Keyword arguments on purpose: unreal.Rotator's positional order is roll, pitch, yaw.
     for actor in actors:
@@ -1146,6 +1209,8 @@ def build_level(sky_material, planet_mesh, planet_material, body_materials):
             sun = actor.get_component_by_class(unreal.DirectionalLightComponent)
             sun.set_editor_property("contact_shadow_length", SUN_CONTACT_SHADOW_M)
             sun.set_editor_property("light_source_angle", SUN_SOURCE_ANGLE_DEG)
+            # Lights Veyra's atmosphere (and is dimmed and reddened through it on the ground).
+            sun.set_editor_property("atmosphere_sun_light", True)
             log("sun: contact shadows %.2f m, source angle %.2f deg" % (SUN_CONTACT_SHADOW_M, SUN_SOURCE_ANGLE_DEG))
         if isinstance(actor, unreal.SkyLight):
             sky_light = actor.get_component_by_class(unreal.SkyLightComponent)
@@ -1172,6 +1237,8 @@ def build_level(sky_material, planet_mesh, planet_material, body_materials):
     planet.set_editor_property("display_name", unreal.Text(PLANET_NAME))
     planet.set_editor_property("radius_km", PLANET_RADIUS_CM / 100000.0)
     planet.set_editor_property("terrain_material", planet_material)
+    planet.set_editor_property("sky_zenith_color", unreal.LinearColor(*PAINTED_SKY_ZENITH, 1.0))
+    planet.set_editor_property("sky_horizon_color", unreal.LinearColor(*PAINTED_SKY_HORIZON, 1.0))
     planet.get_component_by_class(unreal.StaticMeshComponent).set_static_mesh(planet_mesh)
 
     # Distant bodies. Mesh first, then the radius: OnConstruction scales by the mesh's bounds.

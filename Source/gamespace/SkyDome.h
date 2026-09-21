@@ -32,6 +32,9 @@ class GAMESPACE_API ASkyDome : public AActor
 	GENERATED_BODY()
 
 public:
+	/** The dome's own material instance (tuning: space.SkyParam). Null before BeginPlay. */
+	UMaterialInstanceDynamic* GetSkyMaterial() const { return SkyMaterial; }
+
 	ASkyDome();
 
 	virtual void OnConstruction(const FTransform& Transform) override;

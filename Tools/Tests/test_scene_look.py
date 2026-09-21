@@ -22,7 +22,10 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 LEVEL = "/Game/Maps/TestSpace"
 RECIPE = os.path.join(REPO, "Tools", "Assets", "build_space_scene.py")
 SETUP = os.path.join(REPO, "ArtSource", "Ships", "Vanguard", "Vanguard_setup.json")
-WANTED = ("EXPOSURE_EV100", "SKY_LIGHT_INTENSITY", "SUN_CONTACT_SHADOW_M", "SUN_SOURCE_ANGLE_DEG", "POST_SETTINGS")
+WANTED = ("EXPOSURE_EV100", "SKY_LIGHT_INTENSITY", "SUN_CONTACT_SHADOW_M", "SUN_SOURCE_ANGLE_DEG", "POST_SETTINGS",
+          "PLANET_NAME", "PLANET_RADIUS_CM", "PLANET_LOCATION_CM", "ATMO_HEIGHT_KM", "ATMO_RAYLEIGH_SCALE",
+          "ATMO_RAYLEIGH_HEIGHT_KM", "ATMO_MIE_SCALE", "ATMO_MIE_HEIGHT_KM", "ATMO_AERIAL_DISTANCE_SCALE",
+          "ATMO_GROUND_BELOW_SEA_KM")
 
 failures = []
 
@@ -81,6 +84,29 @@ if skies:
     # Below 0.5 the hull was a silhouette in space, above ~1.1 the planet lost its terminator
     # (Tools/Shots/look_fill.json, 20. 9. 2026).
     check("the sky light stays in the range the shots showed works", 0.5 <= intensity <= 1.1, "%.2f" % intensity)
+
+# --- Veyra's atmosphere (planet reference video, 21. 9. 2026) --------------------------------
+atmospheres = [a for a in actors if isinstance(a, unreal.SkyAtmosphere)]
+check("one atmosphere, Veyra's", len(atmospheres) == 1 and atmospheres[0].get_actor_label() == "Atmosphere_" + R["PLANET_NAME"],
+      ", ".join(a.get_actor_label() for a in atmospheres))
+if atmospheres:
+    atmo = atmospheres[0].get_component_by_class(unreal.SkyAtmosphereComponent)
+    where = atmospheres[0].get_actor_location()
+    check("centred on the planet", all(close(getattr(where, axis), R["PLANET_LOCATION_CM"][k], 1.0) for k, axis in enumerate("xyz")))
+    check("its ground below the lowest terrain, so the horizon has no black band",
+          close(atmo.get_editor_property("bottom_radius"), R["PLANET_RADIUS_CM"] / 100000.0 - R["ATMO_GROUND_BELOW_SEA_KM"])
+          and R["ATMO_GROUND_BELOW_SEA_KM"] >= 1.6, "%.2f km" % atmo.get_editor_property("bottom_radius"))
+    for key, name in (("atmosphere_height", "ATMO_HEIGHT_KM"), ("rayleigh_scattering_scale", "ATMO_RAYLEIGH_SCALE"),
+                      ("rayleigh_exponential_distribution", "ATMO_RAYLEIGH_HEIGHT_KM"), ("mie_scattering_scale", "ATMO_MIE_SCALE"),
+                      ("mie_exponential_distribution", "ATMO_MIE_HEIGHT_KM"),
+                      ("aerial_pespective_view_distance_scale", "ATMO_AERIAL_DISTANCE_SCALE")):
+        check("atmosphere %s as in the recipe" % key, close(atmo.get_editor_property(key), R[name]),
+              "%.4f, recipe %.4f" % (atmo.get_editor_property(key), R[name]))
+    # A halo a tenth of the planet thick, not the reference's thin limb (atmo_tune, 21. 9. 2026).
+    check("a thin limb: scale height under 10 % of the radius",
+          R["ATMO_RAYLEIGH_HEIGHT_KM"] < 0.1 * R["PLANET_RADIUS_CM"] / 100000.0)
+if suns:
+    check("the sun lights the atmosphere", suns[0].get_editor_property("atmosphere_sun_light"))
 
 # --- the grade ---------------------------------------------------------------------------
 volumes = [a for a in actors if isinstance(a, unreal.PostProcessVolume)]

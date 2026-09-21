@@ -734,6 +734,30 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Snímky `-Preset quantum_look` (skok zezadu, z boku, zepředu, free look, kokpit; SCM a NAV).
 
 ---
+49. **Planety 1/4: atmosféra Veyry** (21. 9. 2026, podle referenčního videa průletu planetami,
+    poznámky `starcitizenreference/Planets_VideoNotes.md`, snímky `ArtSource/Reference/Video/sc_pyro_planets/`).
+    Dřív byla obloha jen malovaný přechod v materiálu hvězd a Unreal atmosféru skript mazal.
+    - **SkyAtmosphere velikosti Veyry** (`Atmosphere_Veyra`, střed v planetě). Koeficienty Země
+      přepočtené na planetu 25 km: Rayleigh 0,09 s výškou hustoty 1,5 km (3 km dělalo halo tlusté
+      jako desetina planety, 0,16 barvilo poušť do fialova), prach (Mie) 0,07 teplé barvy s výškou
+      0,6 km, letecká perspektiva ×16 (obzor je tu kilometry daleko, ne sto). Hodnoty `ATMO_*`
+      v `build_space_scene.py`.
+    - **Obloha hvězd má uzel atmosféry** (`SkyAtmosphereViewLuminance`): světlo atmosféry přes
+      hvězdy a hvězdy za světlou atmosférou mizí – lem z vesmíru, denní obloha ze země.
+    - **Past 1 – černý pruh na obzoru:** atmosféra má vlastní „zem“ ve výšce hladiny, náš terén je
+      místy o 1,6 km výš a paprsky těsně nad skutečným obzorem narážely na tmavou virtuální zem.
+      Zem atmosféry je 2 km pod hladinou (`ATMO_GROUND_BELOW_SEA_KM`).
+    - **Past 2 – černá loď na zemi:** sky light zachytává oblohu do cubemapy a uzel atmosféry v tom
+      záchytu nedává nic. Loď pak neměla výplň ani při 5× sky lightu. Malovaný přechod je proto
+      zpátky na 40 % (`PAINTED_SKY_AMOUNT`) v prachových barvách planety – dává výplň a zároveň
+      zesvětlí oblohu k zaprášeným pouštním oblohám z videa.
+    - Slunce svítí do atmosféry (`atmosphere_sun_light`).
+    - Rychlé ladění bez balení: `space.Atmo <vlastnost> <hodnota>` (SkyAtmosphere) a
+      `space.SkyParam <parametr> <hodnota>` (materiál oblohy). Etapy: `Tools/Shots/atmo_tune*.json`.
+    - Zbývá z videa: kulatá silueta (dnes „brambora“ z dálky), materiál povrchu ve třech měřítkách,
+      kameny, mraky. Orun a Keth zatím atmosféru nemají (jedna SkyAtmosphere na level).
+
+---
 
 ## 6. Mapa kódu a obsahu
 
@@ -865,7 +889,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_menu_settings.py` | Třída nastavení, herní režimy a controller, config cookování, level MainMenu, zvuky UI, orientace při výstupu. |
 | `test_quantum_sc4.py` | SC-4: nic v SCM; v NAV cíl podle nosu, Veyra ze startu TOO CLOSE; spool, kalibrace, READY, krátký stisk neskočí, podržení ano; spálené palivo podle vzdálenosti; ve skoku nejde řídit; příjezd na výšku příletu v rychlosti NAV do minuty; chlazení; B přeruší skok; OBSTRUCTED s planetou v cestě; NO QT FUEL; kalibrace padá, když nos uhne; HUD (rámeček, oblouky 0/1/2/3, cíl); LMB namapované, J ne; scénář snímků. Plus profil rychlosti, výška příletu, palivo a test úsečka–koule samostatně. |
 | `test_speed_tunnel.py` | Tunel quantum skoku: prach je pryč, než by ho rychlost rozblikala; čára delší než dvojnásobek posunu za snímek při 60 FPS (neblikne); čáry v dráze do sebe nenarazí; stěny od nejbližší, loď Vanguard se vejde do nejbližší; materiál aditivní, oboustranný, se všemi parametry, které komponenta nastavuje; jiskry u lodi (bodů na trupu ≥ 32, ve skoku mnohem víc než v letu), prachu jen pár set; scénář snímků se skokem (`quantum`). |
-| `test_scene_look.py` | Vzhled uložené úrovně proti receptu: intenzita sky lightu, contact shadows a šířka slunce, všechna nastavení `POST_SETTINGS` v neohraničeném volume (a že chromatická aberace a vyvážení bílé zůstala vypnutá), lak trupu z `Vanguard_setup.json`. Chytá zapomenuté spuštění `build_space_scene.py` / `import_ship.py`. |
+| `test_scene_look.py` | Vzhled uložené úrovně proti receptu: atmosféra Veyry (jediná, ve středu planety, zem 2 km pod hladinou, koeficienty z receptu, tenký lem, slunce ji osvětluje), intenzita sky lightu, contact shadows a šířka slunce, všechna nastavení `POST_SETTINGS` v neohraničeném volume (a že chromatická aberace a vyvážení bílé zůstala vypnutá), lak trupu z `Vanguard_setup.json`. Chytá zapomenuté spuštění `build_space_scene.py` / `import_ship.py`. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
 
 Co headless **nejde** ověřit a musí vyzkoušet autor ve hře:
@@ -920,6 +944,7 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 | `velocity_vector` | SC-3: značka dráhy letu v ose, při letu bokem, šikmo dolů, pozpátku a ve stoje. Rychlosti nastavuje pole `drift`, ne motory. |
 | `dust_tune` | Rychlostní čáry: hustota, délka, tloušťka a velikost krabice přes `space.Dust` v jednom běhu. |
 | `quantum` | SC-4: HUD v SCM (nic), SPOOLING, READY, TOO CLOSE; skok v prvním okamžiku (zelený záblesk), zvenku, z kokpitu a z boku; příjezd s chlazením; prach v SCM. |
+| `atmo_tune`, `atmo_tune2`–`4` | Atmosféra Veyry etapami přes `space.Atmo` / `space.SkyParam`: tloušťka, černý pruh na obzoru, opar, barva prachu, jas oblohy a výplň. |
 | `quantum_look` | Vzhled skoku a letu: skok zezadu, z boku, zepředu, s free lookem a z kokpitu (jiskry, mlha, kamera), SCM a NAV z chase i kokpitu (bílé jiskry, prach), a jedna varianta mlhy. |
 | `tunnel_tune` | Tunel ve skoku na Orun: jas čar, pruhů a záře, šířka, stěny a barva přes `space.Tunnel` v jednom běhu (hodnoty etap jsou z doby cruise, před dalším laděním je přepiš). |
 | `space_look` | Prohlídka prostředí tak, jak je: prach ve třech rychlostech, planeta od 120 km po povrch, tělesa a holá obloha. |
@@ -1164,4 +1189,5 @@ Viz `git log --oneline`. Poslední kroky:
 - rychlostní tunel, prach bez zpoždění kamery (bod 46);
 - workflow s referenčním videem (`Tools/Reference/fetch_video.py`) a poznámky ke quantum travel;
 - SC-4: quantum drive místo cruise, HUD podle videa, tunel s mlhou (bod 47);
-- jiskry kolem lodi, tunel s tmavým středem, kamera bez zpoždění ve skoku, méně bílých čar (bod 48).
+- jiskry kolem lodi, tunel s tmavým středem, kamera bez zpoždění ve skoku, méně bílých čar (bod 48);
+- planety 1/4: atmosféra Veyry podle videa (bod 49).

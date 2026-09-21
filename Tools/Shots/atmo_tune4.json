@@ -1,0 +1,16 @@
+{
+  "_comment": "Fourth atmosphere pass: the sky on the ground was dark navy and the ship nearly black (the painted sky it replaced was bright and filled the shadows). Brighter sky, more fill, hazier (whiter) sky. Run: Tools/Shots.ps1 -Preset atmo_tune4",
+  "shots": [
+    {"name": "a_sky10_200m", "camera": "chase", "altitude_m": 200, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 120, "chase_pitch": -10, "settle": 3.0,
+     "console": ["space.SkyParam AtmosphereSkyScale 10"]},
+    {"name": "a_sky10_1km", "camera": "cockpit", "altitude_m": 1000, "facing": "horizon", "hud": 0, "settle": 2.0},
+    {"name": "b_fill_200m", "camera": "chase", "altitude_m": 200, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 120, "chase_pitch": -10, "settle": 3.0,
+     "console": ["space.Sky Intensity 1.1"]},
+    {"name": "b_fill_1km", "camera": "cockpit", "altitude_m": 1000, "facing": "horizon", "hud": 0, "settle": 2.0},
+    {"name": "c_hazy_200m", "camera": "chase", "altitude_m": 200, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 120, "chase_pitch": -10, "settle": 3.0,
+     "console": ["space.Atmo MieScatteringScale 0.14", "space.Atmo MieExponentialDistribution 1.0"]},
+    {"name": "c_hazy_1km", "camera": "cockpit", "altitude_m": 1000, "facing": "horizon", "hud": 0, "settle": 2.0},
+    {"name": "c_hazy_60km", "camera": "cockpit", "altitude_m": 60000, "facing": "planet", "hud": 0, "settle": 2.0},
+    {"name": "c_hazy_space", "camera": "chase", "altitude_m": 60000, "facing": "planet", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -10, "settle": 2.0}
+  ]
+}

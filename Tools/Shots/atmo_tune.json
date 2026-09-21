@@ -1,0 +1,23 @@
+{
+  "_comment": "Veyra's atmosphere (SkyAtmosphere) against the planet reference video (starcitizenreference/Planets_VideoNotes.md): a thin bright limb from space, hazy layered distance and a coloured sky on the ground. Stages change one thing through space.Atmo / space.SkyParam and hold it. Run: Tools/Shots.ps1 -Preset atmo_tune",
+  "shots": [
+    {"name": "a_60km", "camera": "cockpit", "altitude_m": 60000, "facing": "planet", "hud": 0, "settle": 2.0},
+    {"name": "a_orbit_side", "camera": "chase", "altitude_m": 15000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 30, "chase_pitch": -5, "settle": 2.0},
+    {"name": "a_1km", "camera": "cockpit", "altitude_m": 1000, "facing": "horizon", "hud": 0, "settle": 2.0},
+    {"name": "a_200m", "camera": "chase", "altitude_m": 200, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 120, "chase_pitch": -10, "settle": 2.5},
+
+    {"name": "b_sky_x8_1km", "camera": "cockpit", "altitude_m": 1000, "facing": "horizon", "hud": 0, "settle": 1.5,
+     "console": ["space.SkyParam AtmosphereSkyScale 8"]},
+    {"name": "b_sky_x8_200m", "camera": "chase", "altitude_m": 200, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 120, "chase_pitch": -10, "settle": 2.5},
+
+    {"name": "c_sun_bright_1km", "camera": "cockpit", "altitude_m": 1000, "facing": "horizon", "hud": 0, "settle": 1.5,
+     "console": ["space.SkyParam AtmosphereSkyScale 4", "space.Sun Intensity 20"]},
+    {"name": "c_sun_bright_200m", "camera": "chase", "altitude_m": 200, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 120, "chase_pitch": -10, "settle": 2.5},
+    {"name": "c_sun_bright_60km", "camera": "cockpit", "altitude_m": 60000, "facing": "planet", "hud": 0, "settle": 2.0},
+
+    {"name": "d_haze_more_1km", "camera": "cockpit", "altitude_m": 1000, "facing": "horizon", "hud": 0, "settle": 1.5,
+     "console": ["space.Sun Intensity 8", "space.Atmo MieScatteringScale 0.05", "space.Atmo AerialPespectiveViewDistanceScale 8"]},
+    {"name": "d_haze_more_200m", "camera": "chase", "altitude_m": 200, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 120, "chase_pitch": -10, "settle": 2.5},
+    {"name": "d_haze_more_60km", "camera": "cockpit", "altitude_m": 60000, "facing": "planet", "hud": 0, "settle": 2.0}
+  ]
+}

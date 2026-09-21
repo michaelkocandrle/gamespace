@@ -21,6 +21,9 @@
 #include "SpaceDustComponent.h"
 #include "SpaceSpeedTunnelComponent.h"
 #include "Components/SkyLightComponent.h"
+#include "Components/SkyAtmosphereComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "SkyDome.h"
 #include "Engine/DirectionalLight.h"
 #include "Engine/PostProcessVolume.h"
 #include "Engine/Scene.h"
@@ -289,6 +292,53 @@ namespace
 			});
 			UE_LOG(LogTemp, Display, TEXT("space.Sky %s on %d lights"),
 				Result.IsEmpty() ? *FString::Printf(TEXT("%s: no such property"), *Args[0]) : *Result, Count);
+		}));
+
+	/** space.Atmo: the planet atmosphere (SkyAtmosphere), live - scale heights, scattering, aerial perspective. */
+	FAutoConsoleCommandWithWorldAndArgs AtmoCommand(
+		TEXT("space.Atmo"),
+		TEXT("space.Atmo <Property> <Value...>: a property of the level's SkyAtmosphere (RayleighScatteringScale, RayleighExponentialDistribution, MieScatteringScale, AerialPespectiveViewDistanceScale, AtmosphereHeight...). Not saved."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			if (Args.Num() < 2)
+			{
+				UE_LOG(LogTemp, Display, TEXT("space.Atmo <Property> <Value...>"));
+				return;
+			}
+			FString Result;
+			int32 Count = 0;
+			for (TActorIterator<AActor> It(World); It; ++It)
+			{
+				for (USkyAtmosphereComponent* Atmo : TInlineComponentArray<USkyAtmosphereComponent*>(*It))
+				{
+					Result = SetByName(Atmo->GetClass(), Atmo, Args, 1);
+					Atmo->MarkRenderStateDirty();
+					++Count;
+				}
+			}
+			UE_LOG(LogTemp, Display, TEXT("space.Atmo %s on %d atmospheres"),
+				Result.IsEmpty() ? *FString::Printf(TEXT("%s: no such property"), *Args[0]) : *Result, Count);
+		}));
+
+	/** space.SkyParam: a scalar of the star dome's material (AtmosphereSkyScale, AtmosphereStarFade, FakeSkyAmount...). */
+	FAutoConsoleCommandWithWorldAndArgs SkyParamCommand(
+		TEXT("space.SkyParam"),
+		TEXT("space.SkyParam <Parameter> <Value>: a scalar parameter of the star dome's material. Not saved."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			if (Args.Num() < 2)
+			{
+				UE_LOG(LogTemp, Display, TEXT("space.SkyParam <Parameter> <Value>"));
+				return;
+			}
+			for (TActorIterator<ASkyDome> It(World); It; ++It)
+			{
+				if (UMaterialInstanceDynamic* Material = It->GetSkyMaterial())
+				{
+					Material->SetScalarParameterValue(FName(*Args[0]), FCString::Atof(*Args[1]));
+					UE_LOG(LogTemp, Display, TEXT("space.SkyParam %s = %s"), *Args[0], *Args[1]);
+				}
+			}
 		}));
 
 	FAutoConsoleCommandWithWorldAndArgs DustCommand(

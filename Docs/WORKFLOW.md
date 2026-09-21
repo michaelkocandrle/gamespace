@@ -422,6 +422,12 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   pawnu. Co se staví kolem kamery (prach, tunel), je při 1,2 km/s o 20 m pozadu; přičti
   `LinearVelocity * DeltaSeconds`. Příznak: bílý klín přes obraz, který se v jiném snímku nezopakuje
   jinde, jen v rychlosti (21. 9. 2026).
+- **SkyAtmosphere a obloha s `IsSky`:** s vlastní kopulí oblohy se atmosféra nekreslí sama, materiál
+  kopule ji musí přidat uzlem `SkyAtmosphereViewLuminance`. V záchytu sky lightu ten uzel ale nedává
+  nic – výplň z oblohy pak chybí a stíny jsou černé; něco jiného (u nás malovaný přechod) musí
+  do záchytu světlo dodat.
+- **Virtuální zem SkyAtmosphere** (`bottom_radius`) musí být pod nejnižším terénem, jinak má obzor
+  černý pruh (paprsky nad skutečným obzorem narazí na tmavou zem atmosféry).
 - **`CameraLagMaxDistance = 0` není „bez zpoždění“, ale „bez stropu“.** Chceš-li zpoždění pryč,
   vypni `bEnableCameraLag`. A zpoždění i s rozumným stropem jde podél dráhy letu: při rychlém letu
   a pohledu z boku vystrčí loď ze záběru (quantum, 21. 9. 2026).
