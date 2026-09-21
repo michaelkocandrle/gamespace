@@ -215,7 +215,21 @@ def import_sources():
         write_sphere_obj(obj)
         mesh = ga.import_file(PLANET_MESH, obj)
     ensure_sphere_collision(mesh)
+    ensure_sphere_not_nanite(mesh)
     return cube, mesh
+
+
+def ensure_sphere_not_nanite(mesh):
+    """The distant bodies (Orun, Keth) are this sphere scaled to 6-150 km. With Nanite on, their
+    silhouettes came out as visible straight edges - a polygon, not a planet (quantum shots, 21. 9.
+    2026). The plain mesh keeps all 256 segments, which is round even with Orun filling half the view."""
+    settings = mesh.get_editor_property("nanite_settings")
+    if not settings.get_editor_property("enabled"):
+        return
+    settings.set_editor_property("enabled", False)
+    mesh.set_editor_property("nanite_settings", settings)
+    unreal.EditorAssetLibrary.save_loaded_asset(mesh, only_if_is_dirty=False)
+    log("planet mesh: Nanite off (round silhouettes)")
 
 
 def ensure_sphere_collision(mesh):
