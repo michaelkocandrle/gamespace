@@ -7,6 +7,7 @@
     {"name": "dust_cockpit_nav", "camera": "cockpit", "altitude_m": 60000, "facing": "away", "hud": 0, "drift": [1000, 0, 0], "settle": 1.5},
 
     {"name": "planet_far", "camera": "chase", "altitude_m": 120000, "facing": "planet", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -10, "chase_zoom": 1.4, "settle": 2.5},
+    {"name": "planet_300km", "camera": "cockpit", "altitude_m": 300000, "facing": "planet", "hud": 0, "settle": 2.5},
     {"name": "planet_60km", "camera": "cockpit", "altitude_m": 60000, "facing": "planet", "hud": 0, "settle": 2.0},
     {"name": "planet_20km", "camera": "cockpit", "altitude_m": 20000, "facing": "planet", "hud": 0, "settle": 2.0},
     {"name": "planet_5km", "camera": "cockpit", "altitude_m": 5000, "facing": "planet", "hud": 0, "settle": 2.0},

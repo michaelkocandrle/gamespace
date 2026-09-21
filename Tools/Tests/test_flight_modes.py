@@ -227,7 +227,8 @@ giant = next((a for a in actors if a.get_actor_label() == "GasGiant_Orun"), None
 check("moon and gas giant placed", moon is not None and giant is not None)
 if moon:
     offset = v3(moon.compute_orbit_offset(0.0))
-    check("moon orbit radius", abs(length(offset) - 150.0 * 100000.0) < 1.0, "%.1f km" % (length(offset) / 100000.0))
+    # 420 km since Veyra grew to 120 km (21. 9. 2026): well clear of its 72 km quantum arrival shell.
+    check("moon orbit radius", abs(length(offset) - 420.0 * 100000.0) < 1.0, "%.1f km" % (length(offset) / 100000.0))
     quarter = v3(moon.compute_orbit_offset(moon.get_editor_property("orbit_period_seconds") / 4.0))
     dot = sum(offset[k] * quarter[k] for k in range(3)) / (length(offset) * length(quarter))
     check("moon moves a quarter turn in a quarter period", abs(dot) < 1e-3, "cos %.4f" % dot)

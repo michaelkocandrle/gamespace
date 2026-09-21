@@ -867,7 +867,7 @@ level, local up, air density, gravity, sky colours and amount, and the flight re
 
 - **Height**: fBm of `PlanetTerrain::GradientNoise3D` - improved Perlin noise entirely in double
   precision, with a hashed (never repeating) lattice - sampled on the unit sphere. Veyra: radius
-  25 km, amplitude 800 m, largest features 8 km, 12 octaves (smallest ~4 m); relief up to about
+  120 km (25 km until 21. 9. 2026), amplitude 800 m, largest features 8 km, 12 octaves (smallest ~4 m); relief up to about
   +/-1.6 km, typically +/-260 m. Normals come from the height field, so they match across LODs.
 - **LOD**: a tile splits when the camera is within `LodDistanceFactor` (1.5) tile sizes of its
   bounds, merges with 15 % hysteresis; 48x48 cells, finest tiles ~10 m (`LeafTileSizeM` 16),
@@ -928,12 +928,11 @@ Its space look is built by `Tools/Assets/build_space_scene.py` (see below).
 | Space dust         | `USpaceDustComponent` on the ship: 250 specks (only a hint of motion, as in Star Citizen; none in a quantum jump) in a 30 m box, wrapped around the camera. A speck is a stretched cube that `M_SpaceDust` tapers to a soft spindle, with its own length and brightness, so the field reads as dust rather than as a row of identical white sticks. `space.Dust <Property> <Value>` tunes it live; the shape is measured from `ObjectPositionWS`, because `LocalPosition` on an instanced mesh is the primitive's space, not the instance's |
 | Speed tunnel       | `USpaceSpeedTunnelComponent` on the ship: the look of a quantum jump, shown only in one (the pawn's quantum blend). `M_QuantumFog`, a translucent cylinder behind the streaks, hides the sky as the reference's fog does: dark down the middle, lit in soft shafts on the walls; green flares come at the jump and every 8-18 s. Three open cylinders round the camera along the flight path (25, 60, 150 m); from inside, their walls converge on the vanishing point by plain perspective. `M_SpeedTunnel` draws streaks (lanes round the axis, one streak per period, scrolled by a distance the component accumulates and capped at 2 km/s apparent so they never strobe), soft beams converging on the vanishing point and a glow there (the far cap). `space.Tunnel <Property> <Value>` tunes it live |
 | `Atmosphere_Veyra` | `ASkyAtmosphere` centred on Veyra, sized to it (`ATMO_*` in the script): Rayleigh 0.09 / 1.5 km, dust 0.07 / 0.6 km, aerial perspective x16, ground 2 km below sea level. The star dome adds it through `SkyAtmosphereViewLuminance` (a thin limb from space, a dusty sky on the ground) and still mixes 40 % of the painted sky in, because the sky light's capture gets nothing from that node. `space.Atmo` / `space.SkyParam` tune it live |
-| `Planet_Veyra`     | `AQuadSpherePlanet`, radius 25 km, centre 45 km ahead of the start (start is 20 km above sea level, 8 km above the atmosphere) |
-| `Moon_Keth`        | `ADistantBody`, radius 6 km, orbits Veyra at 150 km every 25 min (`M_Moon`: craters, maria) |
+| `Planet_Veyra`     | `AQuadSpherePlanet`, radius 120 km (25 km until 21. 9. 2026: from space a lumpy potato), centre 140 km ahead of the start (start is 20 km above sea level, 8 km above the atmosphere) |
+| `Moon_Keth`        | `ADistantBody`, radius 6 km, orbits Veyra at 420 km every 60 min (`M_Moon`: craters, maria) |
 | `GasGiant_Orun`    | `ADistantBody`, radius 150 km with rings to 330 km, 620 km away to the right of Veyra (`M_GasGiant` bands and a storm, `M_PlanetRings`) |
 | `PP_SpaceExposure` | Unbound post-process volume fixing exposure at EV100 3 |
 | `PlayerStart`      | At (0, 0, 300), facing +X towards the planet |
-| `Asteroid_00-15`   | Scaled cubes scattered 30-260 m out |
 
 The asteroids are placeholder reference geometry, not a design decision. Without something to
 fly past, an empty sky gives no sense of motion whatsoever. Delete them once real props exist.

@@ -81,13 +81,14 @@ STAR_TWINKLE = 0.12
 # farthest body that should be visible: anything beyond it is hidden behind the dome.
 SKY_DOME_RADIUS_KM = 2000.0
 
-# Planet: radius 25 km, centre 45 km straight ahead of PlayerStart (which faces +X), so the ship
-# starts 20 km above sea level - above the 12 km atmosphere, in "orbit". The planet fills ~67
-# degrees of view. Descent at the 300 m/s boost cap takes a bit over a minute to the atmosphere
-# edge. The sky dome (1000 km) stays far outside everything here.
+# Planet: radius 120 km, centre 140 km straight ahead of PlayerStart (which faces +X), so the ship
+# starts 20 km above sea level - above the 12 km atmosphere, in "orbit". 25 km until 21. 9. 2026:
+# with +/-1.6 km of relief that was 6 % of the radius, and from space the planet was a lumpy potato
+# rather than a planet (the author, against the planet reference video); at 120 km the same
+# mountains are 1.3 % and the limb is round. The sky dome (2000 km) stays far outside everything.
 PLANET_NAME = "Veyra"
-PLANET_RADIUS_CM = 25_000_00
-PLANET_LOCATION_CM = (45_000_00, 0, 0)
+PLANET_RADIUS_CM = 120_000_00
+PLANET_LOCATION_CM = (140_000_00, 0, 0)
 
 # Sun from behind the player's left shoulder, so the planet is seen about three-quarters lit.
 SUN_PITCH, SUN_YAW = -39.0, 45.0
@@ -97,7 +98,7 @@ SUN_PITCH, SUN_YAW = -39.0, 45.0
 # at least half lit by the sun.
 MOON_NAME = "Keth"
 MOON_RADIUS_KM = 6.0
-MOON_ORBIT = {"orbit_radius_km": 150.0, "orbit_period_seconds": 1500.0, "orbit_inclination_deg": -15.0,
+MOON_ORBIT = {"orbit_radius_km": 420.0, "orbit_period_seconds": 3600.0, "orbit_inclination_deg": -15.0,
               "orbit_node_deg": 30.0, "orbit_phase_deg": -100.0}
 GIANT_NAME = "Orun"
 GIANT_RADIUS_KM = 150.0
@@ -1187,6 +1188,14 @@ def build_level(sky_material, planet_mesh, planet_material, body_materials):
     eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
     if not les.load_level(LEVEL):
         raise RuntimeError("could not load " + LEVEL)
+    actors = eas.get_all_level_actors()
+
+    # The prototype's placeholder asteroids (grey cubes round PlayerStart). With Veyra at 120 km they
+    # sat in the middle of the view from orbit as black boxes (space_look, 21. 9. 2026).
+    for actor in actors:
+        if actor.get_actor_label().startswith("Asteroid_"):
+            eas.destroy_actor(actor)
+            log("removed placeholder %s" % actor.get_actor_label())
     actors = eas.get_all_level_actors()
 
     for actor in actors:

@@ -24,7 +24,7 @@ rozbité nebo neověřené a co následuje.
   let z vesmíru až na povrch planety, vystoupení z lodi a chůze po planetě.
 - Dnešní obsah:
   - hratelný prototyp s úvodní obrazovkou;
-  - jedna planeta **Veyra** (poloměr 25 km, atmosféra 12 km, gravitace 6 m/s²);
+  - jedna planeta **Veyra** (poloměr 120 km od 21. 9. 2026, předtím 25 km, atmosféra 12 km, gravitace 6 m/s²);
   - kulisy: měsíc **Keth** a plynný obr **Orun** s prstenci;
   - loď **Vanguard**: od 18. 9. 2026 model z Meshy („Ironclad Starfighter“), 14 × 11,4 × 6,2 m se
     4 motorovými gondolami, zpracovaný receptem `Tools/Blender/build_ai_ship.py` (kapitola 5, bod 20).
@@ -758,6 +758,20 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       kameny, mraky. Orun a Keth zatím atmosféru nemají (jedna SkyAtmosphere na level).
 
 ---
+50. **Planety 2/4: kulaté siluety, Veyra 120 km** (21. 9. 2026, autor zvolil zvětšení planety).
+    - **Veyra** měla na poloměr 25 km reliéf ±1,6 km (6 % poloměru) a z vesmíru byla „brambora“.
+      Teď má **poloměr 120 km** (reliéf 1,3 %), střed 140 km před startem, takže start je pořád
+      20 km nad hladinou. Terén, gravitace a atmosféra zůstaly; dlaždic terénu je skoro stejně (780
+      místo 750 u země), protože LOD se řídí vzdáleností, ne velikostí planety.
+    - **Keth** obíhá na 420 km (60 min) místo 150 km – jinak by byl skoro na povrchu a uvnitř
+      skořepiny příletu quantum skoku (72 km).
+    - **Orun a Keth hranatí kvůli Nanite:** koule s 256 segmenty zvětšená na 6–150 km měla s Nanite
+      viditelné rovné hrany. Na `SM_PlanetSphere` je Nanite vypnuté (`ensure_sphere_not_nanite`).
+    - **Pryč zástupné asteroidy** (16 šedých krychlí kolem startu z prvního prototypu): s velkou
+      Veyrou visely uprostřed výhledu z orbity jako černé kostky.
+    - Snímek `planet_300km` v `-Preset space_look` (celá planeta s lemem, Orun, Keth).
+
+---
 
 ## 6. Mapa kódu a obsahu
 
@@ -1121,7 +1135,6 @@ Další otevřené směry mimo let:
 - Build je **Development** (má konzoli `~`). Shipping zatím nebyl zkoušený.
 - `IMC_Spaceship` a `IMC_Character` pořád mapují H na `IA_ToggleHud`. Nic na to není navázané
   (H obsluhuje controller), je to neškodné.
-- Asteroidy v TestSpace jsou šedé placeholder krychle.
 - Obloha nerozlišuje denní a noční stranu planety: v atmosféře je modrá všude.
 
 ---
@@ -1190,4 +1203,5 @@ Viz `git log --oneline`. Poslední kroky:
 - workflow s referenčním videem (`Tools/Reference/fetch_video.py`) a poznámky ke quantum travel;
 - SC-4: quantum drive místo cruise, HUD podle videa, tunel s mlhou (bod 47);
 - jiskry kolem lodi, tunel s tmavým středem, kamera bez zpoždění ve skoku, méně bílých čar (bod 48);
-- planety 1/4: atmosféra Veyry podle videa (bod 49).
+- planety 1/4: atmosféra Veyry podle videa (bod 49);
+- planety 2/4: Veyra 120 km, kulaté siluety, pryč zástupné asteroidy (bod 50).
