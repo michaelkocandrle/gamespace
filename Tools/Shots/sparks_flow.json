@@ -1,0 +1,85 @@
+{
+  "_comment": "How far the plume reaches and how dense it is, from behind like the reference. Run: Tools/Shots.ps1 -Preset sparks_flow",
+  "shots": [
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 1.0,
+      "settle": 2.5,
+      "name": "a_now"
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 1.0,
+      "settle": 2.5,
+      "name": "b_short",
+      "console": [
+        "space.Sparks MaxLifeSeconds 0.7",
+        "space.Sparks MinLifeSeconds 0.35",
+        "space.Sparks QuantumCount 260",
+        "space.Sparks QuantumBrightness 110"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 1.0,
+      "settle": 2.5,
+      "name": "c_shorter_thin",
+      "console": [
+        "space.Sparks MaxLifeSeconds 0.5",
+        "space.Sparks MinLifeSeconds 0.25",
+        "space.Sparks QuantumCount 220",
+        "space.Sparks QuantumBrightness 90",
+        "space.Sparks MaxTrailCm 700"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 1.0,
+      "settle": 2.5,
+      "name": "d_short_dense",
+      "console": [
+        "space.Sparks MaxLifeSeconds 0.6",
+        "space.Sparks MinLifeSeconds 0.3",
+        "space.Sparks QuantumCount 500",
+        "space.Sparks QuantumBrightness 70",
+        "space.Sparks MinScreenThickness 0.0035"
+      ]
+    }
+  ]
+}

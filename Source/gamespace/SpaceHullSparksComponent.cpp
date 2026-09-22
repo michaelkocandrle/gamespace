@@ -127,17 +127,11 @@ int32 USpaceHullSparksComponent::DebugGetSpawnPointCount(bool& bOutFromCollision
 	return Points.Num();
 }
 
-void USpaceHullSparksComponent::MoveEmitter(FEmitter& Emitter)
-{
-	const TArray<int32>& From = (Random.FRand() < NoseBias && FrontPoints.Num() > 0) || BackPoints.Num() == 0 ? FrontPoints : BackPoints;
-	Emitter.Point = From.Num() > 0 ? From[Random.RandHelper(From.Num())] : 0;
-	Emitter.TimeLeft = Random.FRandRange(EmitterMinSeconds, FMath::Max(EmitterMinSeconds, EmitterMaxSeconds));
-}
-
 void USpaceHullSparksComponent::Respawn(FSpark& Spark, bool bRandomAge)
 {
-	Spark.Emitter = Emitters.Num() > 0 ? Random.RandHelper(Emitters.Num()) : 0;
-	const int32 Point = Emitters.IsValidIndex(Spark.Emitter) ? Emitters[Spark.Emitter].Point : 0;
+	// Anywhere on the hull, the front half favoured: the flow runs the whole length of the ship.
+	const TArray<int32>& From = (Random.FRand() < NoseBias && FrontPoints.Num() > 0) || BackPoints.Num() == 0 ? FrontPoints : BackPoints;
+	const int32 Point = From.Num() > 0 ? From[Random.RandHelper(From.Num())] : 0;
 	const FVector Normal = Normals.IsValidIndex(Point) ? Normals[Point] : FVector::UpVector;
 	FVector Side = FVector::CrossProduct(Normal, FVector::ForwardVector).GetSafeNormal();
 	if (Side.IsNearlyZero())
@@ -145,13 +139,18 @@ void USpaceHullSparksComponent::Respawn(FSpark& Spark, bool bRandomAge)
 		Side = FVector::RightVector;
 	}
 	const FVector Up = FVector::CrossProduct(Normal, Side);
-	// A tuft: all from one spot (a few cm apart), in a cone round the normal, a little backwards.
-	Spark.Origin = (Points.IsValidIndex(Point) ? Points[Point] : FVector::ZeroVector) + Normal * 5.0
-		+ Side * Random.FRandRange(-8.f, 8.f) + Up * Random.FRandRange(-8.f, 8.f);
-	const FVector Dir = Normal * Random.FRandRange(0.3f, 1.f)
-		+ (Side * Random.FRandRange(-1.f, 1.f) + Up * Random.FRandRange(-1.f, 1.f)) * ConeSpread
-		- FVector::ForwardVector * Random.FRandRange(0.f, 0.6f);
-	Spark.Velocity = Dir.GetSafeNormal(UE_SMALL_NUMBER, Normal) * BurstSpeed * Random.FRandRange(0.4f, 1.f);
+	Spark.Origin = (Points.IsValidIndex(Point) ? Points[Point] : FVector::ZeroVector) + Normal * Random.FRandRange(2.f, 30.f);
+	// Carried back along the hull, lifting off it slowly: it hugs the ship instead of shooting away.
+	Spark.Velocity = -FVector::ForwardVector * (FlowSpeed * Random.FRandRange(0.75f, 1.25f))
+		+ Normal * (LiftSpeed * Random.FRandRange(0.3f, 1.4f));
+	// Two waves across the flow, so the trail snakes rather than running straight.
+	Spark.WaveA = Side;
+	Spark.WaveB = Up;
+	Spark.RateA = TurbulenceRate * Random.FRandRange(0.6f, 1.6f);
+	Spark.RateB = TurbulenceRate * Random.FRandRange(0.4f, 1.2f);
+	Spark.PhaseA = Random.FRandRange(0.f, UE_TWO_PI);
+	Spark.PhaseB = Random.FRandRange(0.f, UE_TWO_PI);
+	Spark.Turbulence = Random.FRandRange(0.35f, 1.6f);
 	Spark.Life = Random.FRandRange(MinLifeSeconds, FMath::Max(MinLifeSeconds, MaxLifeSeconds));
 	Spark.Age = bRandomAge ? Random.FRandRange(0.f, Spark.Life) : 0.f;
 	// Cubed: most faint, a few bright.
@@ -161,7 +160,11 @@ void USpaceHullSparksComponent::Respawn(FSpark& Spark, bool bRandomAge)
 FVector USpaceHullSparksComponent::SparkAt(const FSpark& Spark, float Seconds, float Sweep) const
 {
 	const double T = FMath::Max(Seconds, 0.f);
-	return Spark.Origin + Spark.Velocity * T - FVector::ForwardVector * (0.5 * Sweep * T * T);
+	// The waves widen as the spark goes: right at the hull the flow is smooth, out in the wake it boils.
+	const double Wave = TurbulenceCm * Spark.Turbulence * FMath::Min(T / FMath::Max(Spark.Life, 0.01f), 1.f);
+	return Spark.Origin + Spark.Velocity * T - FVector::ForwardVector * (0.5 * Sweep * T * T)
+		+ Spark.WaveA * (Wave * FMath::Sin(Spark.RateA * T + Spark.PhaseA))
+		+ Spark.WaveB * (Wave * 0.7 * FMath::Sin(Spark.RateB * T + Spark.PhaseB));
 }
 
 void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, float Quantum, const FVector& ViewLocation)
@@ -187,23 +190,6 @@ void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, fl
 		}
 	}
 
-	if (Emitters.Num() != EmitterCount)
-	{
-		Emitters.SetNum(EmitterCount);
-		for (FEmitter& Emitter : Emitters)
-		{
-			MoveEmitter(Emitter);
-		}
-	}
-	for (FEmitter& Emitter : Emitters)
-	{
-		Emitter.TimeLeft -= DeltaSeconds;
-		if (Emitter.TimeLeft <= 0.f)
-		{
-			MoveEmitter(Emitter);
-		}
-	}
-
 	const int32 Segments = FMath::Clamp(TrailSegments, 1, 12);
 	const int32 Pool = FMath::Max(QuantumCount, FlightCount);
 	if (Sparks.Num() != Pool || Transforms.Num() != Pool * Segments)
@@ -225,7 +211,6 @@ void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, fl
 	SparkMaterial->SetScalarParameterValue(TEXT("DustBrightness"), 1.f);
 
 	const FTransform& ToWorld = GetComponentTransform();
-	const float Step = TrailSeconds / float(Segments);
 	for (int32 Index = 0; Index < Sparks.Num(); ++Index)
 	{
 		FSpark& Spark = Sparks[Index];
@@ -235,7 +220,13 @@ void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, fl
 			Respawn(Spark, false);
 		}
 		const float T = Spark.Age / FMath::Max(Spark.Life, 0.01f);
-		float SparkFade = Index < ActiveCount ? FMath::SmoothStep(0.f, 0.1f, T) * FMath::Pow(1.f - T, 1.5f) : 0.f;
+		float SparkFade = Index < ActiveCount ? FMath::SmoothStep(0.f, 0.1f, T) * FMath::Pow(1.f - T, 2.5f) : 0.f;
+		// How long a slice of the path to draw: older sparks fly faster (the sweep), so the same
+		// time would draw a rail tens of metres long.
+		const float Pace = float((Spark.Velocity - FVector::ForwardVector * (Sweep * Spark.Age)).Size()
+			+ TurbulenceCm * Spark.Turbulence * FMath::Max(Spark.RateA, Spark.RateB));
+		const float Slice = FMath::Min(TrailSeconds, MaxTrailCm / FMath::Max(Pace, 1.f));
+		const float Step = Slice / float(Segments);
 		const FVector Head = SparkAt(Spark, Spark.Age, Sweep);
 		// Nothing on the lens (the cockpit's eye is inside the hull's bounds).
 		const double Distance = FVector::Dist(ToWorld.TransformPosition(Head), ViewLocation);

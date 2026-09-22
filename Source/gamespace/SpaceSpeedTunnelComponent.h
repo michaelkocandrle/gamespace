@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -112,7 +112,7 @@ public:
 
 	/** How far a streak's colour may lean towards BeamColor, 0..1: a few cold blue ones among the white. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float StreakColorSpread = 0.f;
+	float StreakColorSpread = 0.35f;
 
 	/** Fraction of the lanes that hold a streak at all; the rest stay dark so the streaks do not form a comb. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
@@ -122,7 +122,7 @@ public:
 	FLinearColor StreakColor = FLinearColor(0.85f, 0.92f, 1.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
-	float StreakBrightness = 16.f;
+	float StreakBrightness = 160.f;
 
 	/** The soft shafts of light converging on the vanishing point. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
@@ -169,15 +169,50 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "100.0"))
 	float FogRadiusCm = 25000.f;
 
+	/** The walls run through a spectrum: the clouds pile up warm, thin out cool (the reference is not one flat blue). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
+	FLinearColor FogWarmColor = FLinearColor(0.022f, 0.019f, 0.016f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
+	FLinearColor FogCoolColor = FLinearColor(0.006f, 0.012f, 0.028f);
+
+	/** The destination as a point of light down the tunnel: how far ahead, how wide it looks (degrees). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "100.0"))
+	float BeaconDistanceCm = 120000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.05", ClampMax = "20.0"))
+	float BeaconSizeDeg = 1.4f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
+	float BeaconBrightness = 260.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
+	FLinearColor BeaconColor = FLinearColor(0.75f, 0.85f, 1.f);
+
+	/** The beacon also lights the ship from ahead, which is what makes it a silhouette (candela). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
+	float BeaconLightCandela = 220000.f;
+
+	/** Wide bands of another colour drifting across the walls (the reference has a green-teal one). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
+	FLinearColor FogBandColor = FLinearColor(0.03f, 0.09f, 0.07f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float FogBandAmount = 0.8f;
+
+	/** How much the clouds darken and brighten the walls (0 = one even layer). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float FogCloudAmount = 0.45f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float FogOpacity = 1.f;
 
 	/** The fog's light shafts round the axis: how many, and how much they stand out (0 flat). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "1.0"))
-	float FogShaftCount = 11.f;
+	float FogShaftCount = 7.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float FogShaftContrast = 0.9f;
+	float FogShaftContrast = 0.7f;
 
 	/**
 	 * The fog's cover down the middle towards the vanishing point, as a share of FogOpacity. 1: the
@@ -188,7 +223,7 @@ public:
 	float FogCentreOpacity = 1.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
-	FLinearColor FogNearColor = FLinearColor(0.02f, 0.03f, 0.055f);
+	FLinearColor FogNearColor = FLinearColor(0.3f, 0.36f, 0.52f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
 	FLinearColor FogFarColor = FLinearColor(0.001f, 0.002f, 0.004f);
@@ -215,6 +250,9 @@ private:
 	/** The fog cylinder, made in BeginPlay when M_QuantumFog exists. */
 	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> Fog;
+	TObjectPtr<UStaticMeshComponent> Beacon;
+	TObjectPtr<class UPointLightComponent> BeaconLight;
+	TObjectPtr<UMaterialInstanceDynamic> BeaconMaterial;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> FogMaterial;

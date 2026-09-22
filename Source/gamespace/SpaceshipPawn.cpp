@@ -282,7 +282,7 @@ ASpaceshipPawn::ASpaceshipPawn()
 	CameraBoom->ProbeChannel = ECC_Camera;
 	CameraBoom->ProbeSize = 25.f;
 	CameraBoom->bEnableCameraLag = true;
-	CameraBoom->CameraLagSpeed = 8.f;
+	CameraBoom->CameraLagSpeed = BaseCameraLagSpeed;
 	// Lag trails by roughly speed / CameraLagSpeed: ~10 m at boost, but a kilometre at orbital
 	// speeds, and the whole distance after a teleport. Cap it so the ship stays in frame.
 	CameraBoom->CameraLagMaxDistance = 1500.f;
@@ -2899,11 +2899,15 @@ void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 	CameraKick *= FMath::Exp(-5.f * DeltaSeconds);
 	// No camera lag in a quantum jump: even capped at 15 m it trails along the flight path, and
 	// looked at from the side (free look) that pushed the ship out of the frame (21. 9. 2026).
-	// Switched off rather than capped at 0: a CameraLagMaxDistance of 0 means no cap at all, and the
-	// camera was left kilometres behind.
+	// The lag is not switched off any more, it is wound up: at the moment it went off, the boom
+	// snapped to its exact place and the ship jumped across the screen (the author, 22. 9. 2026).
+	// Switched off rather than capped at 0 would not do either: a CameraLagMaxDistance of 0 means no
+	// cap at all, and the camera was left kilometres behind.
 	if (CameraSnapTicks == 0)
 	{
-		CameraBoom->bEnableCameraLag = QuantumState != EQuantumState::Traveling && QuantumBlend < 0.01f;
+		const float Catching = FMath::Max(QuantumState == EQuantumState::Traveling ? 1.f : 0.f, QuantumBlend);
+		CameraBoom->bEnableCameraLag = true;
+		CameraBoom->CameraLagSpeed = FMath::Lerp(BaseCameraLagSpeed, QuantumCameraLagSpeed, FMath::SmoothStep(0.f, 1.f, Catching));
 	}
 
 	// Mouse wheel zoom, eased.
@@ -2915,6 +2919,21 @@ void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 		// The height above the ship grows slower than the distance, so a far camera does not end
 		// up looking steeply down on it.
 		CameraBoom->SocketOffset = BaseSocketOffset * FMath::Sqrt(CameraZoom);
+	}
+
+	// A jump is dark: the tunnel is nearly black with a bright point ahead, and letting the eye
+	// adapt to it washed the whole frame out to a flat navy blue (the author against the reference,
+	// 22. 9. 2026). So the exposure is pinned while the jump lasts.
+	for (UCameraComponent* Camera : { ToRawPtr(ChaseCamera), ToRawPtr(CockpitCamera) })
+	{
+		FPostProcessSettings& Post = Camera->PostProcessSettings;
+		Post.bOverride_AutoExposureMinBrightness = QuantumBlend > 0.001f;
+		Post.bOverride_AutoExposureMaxBrightness = QuantumBlend > 0.001f;
+		Post.bOverride_AutoExposureBias = QuantumBlend > 0.001f;
+		const float Pinned = FMath::Lerp(0.f, QuantumExposure, QuantumBlend);
+		Post.AutoExposureMinBrightness = FMath::Max(Pinned, 0.03f);
+		Post.AutoExposureMaxBrightness = FMath::Max(Pinned, 0.03f);
+		Post.AutoExposureBias = FMath::Lerp(0.f, QuantumExposureBias, QuantumBlend);
 	}
 
 	// Speed you can feel: the view widens with the afterburner and more in a quantum jump.
@@ -3098,7 +3117,10 @@ void ASpaceshipPawn::UpdateShipLights(float DeltaSeconds)
 		}
 	};
 
-	const float Thrust = ThrusterIdleGlow + (1.f - ThrusterIdleGlow) * EngineLoad + ThrusterAfterburnerGlow * AfterburnerFeel + 0.3f * BoostBlend + ThrusterQuantumGlow * QuantumBlend;
+	// The jump runs on a pinned, dark exposure, and at full glow the engines read as four headlights
+	// instead of the soft blue of the reference (the author, 22. 9. 2026).
+	const float Thrust = (ThrusterIdleGlow + (1.f - ThrusterIdleGlow) * EngineLoad + ThrusterAfterburnerGlow * AfterburnerFeel
+		+ 0.3f * BoostBlend + ThrusterQuantumGlow * QuantumBlend) * FMath::Lerp(1.f, QuantumThrusterScale, QuantumBlend);
 	for (FShipGlowMaterial& Glow : ThrusterMaterials)
 	{
 		Apply(Glow, Glow.BaseStrength * Thrust);

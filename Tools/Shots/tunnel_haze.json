@@ -1,0 +1,82 @@
+{
+  "_comment": "How milky the tunnel walls are, against the reference haze. Run: Tools/Shots.ps1 -Preset tunnel_haze",
+  "shots": [
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 0.8,
+      "settle": 2.5,
+      "name": "a_haze_low",
+      "console": [
+        "space.Tunnel FogNearColor 0.055 0.07 0.105"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 0.8,
+      "settle": 2.5,
+      "name": "b_haze_mid",
+      "console": [
+        "space.Tunnel FogNearColor 0.16 0.2 0.30",
+        "space.Tunnel FogShaftContrast 0.8"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 0.8,
+      "settle": 2.5,
+      "name": "c_haze_high",
+      "console": [
+        "space.Tunnel FogNearColor 0.3 0.36 0.52",
+        "space.Tunnel FogShaftContrast 0.7",
+        "space.Tunnel FogCloudAmount 0.45"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 0.8,
+      "settle": 2.5,
+      "name": "d_haze_high_dim_engines",
+      "console": [
+        "space.Tunnel FogNearColor 0.3 0.36 0.52",
+        "space.Tunnel FogShaftContrast 0.7",
+        "space.Ship QuantumExposure 2.2"
+      ]
+    }
+  ]
+}

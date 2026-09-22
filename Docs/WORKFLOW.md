@@ -427,6 +427,13 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   pawnu. Co se staví kolem kamery (prach, tunel), je při 1,2 km/s o 20 m pozadu; přičti
   `LinearVelocity * DeltaSeconds`. Příznak: bílý klín přes obraz, který se v jiném snímku nezopakuje
   jinde, jen v rychlosti (21. 9. 2026).
+- **Co jde postavit uzly, nedávej do Custom uzlu.** Custom uzel s `LocalPosition` se v editoru
+  postavil, cook log mlčel, a v zabalené hře se objekt kreslil výchozím šedým materiálem. Plochý
+  šedý povrch tam, kde má být efekt, znamená „materiál spadl na default“ – zkus ho přepsat bez
+  Custom uzlu, než budeš hledat chybu v HLSL.
+- **Tmavá scéna s automatickou expozicí není tmavá.** Skoro černý tunel si oko vytáhne na sytě modrou.
+  Když má něco zůstat tmavé, připíchni expozici (`AutoExposureMin/MaxBrightness` + `AutoExposureBias`
+  přes `PostProcessSettings` kamery) a teprve pak lad' jas všeho svítícího – měřítko se posune ~6x.
 - **Průhledný materiál svět nezakryje, jen dobarví.** Ať má krytí jakékoliv, hvězdy a planety pod ním
   budou vidět. Když má něco zakrýt svět (mlha v tunelu), musí být neprůhledné – a řídnutí se dělá
   maskou s modrým šumem (`MaterialExpressionScalarBlueNoise`, práh `opacity_mask_clip_value` 0,5).

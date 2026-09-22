@@ -1,0 +1,10 @@
+{
+  "_comment": "The first seconds of a jump, where the tunnel closes in: does anything show through, and how do the walls vary? Run: Tools/Shots.ps1 -Preset quantum_ramp",
+  "shots": [
+    {"name": "a_engage", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.01, "chase_yaw": 25, "chase_pitch": -8, "settle": 0.8},
+    {"name": "b_closing", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.03, "chase_yaw": 25, "chase_pitch": -8, "settle": 1.6},
+    {"name": "c_closed", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.1, "chase_yaw": 25, "chase_pitch": -8, "settle": 3.0},
+    {"name": "d_cruise_side", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "chase_yaw": 110, "chase_pitch": -4, "chase_zoom": 0.75, "settle": 2.5},
+    {"name": "e_cockpit", "camera": "cockpit", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "settle": 2.5}
+  ]
+}

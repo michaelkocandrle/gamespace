@@ -1,5 +1,5 @@
 {
-  "_comment": "The jump as it stands, for comparing with the reference frames. Run: Tools/Shots.ps1 -Preset quantum_look",
+  "_comment": "Lighting in the jump: the beacon as the one bright source, the ship a silhouette. Run: Tools/Shots.ps1 -Preset quantum_light",
   "shots": [
     {
       "camera": "chase",
@@ -14,7 +14,7 @@
       "chase_pitch": -8,
       "chase_zoom": 1.0,
       "settle": 2.5,
-      "name": "a_front"
+      "name": "a_light_on"
     },
     {
       "camera": "chase",
@@ -25,11 +25,15 @@
       "mode": "NAV",
       "quantum": "Orun",
       "quantum_progress": 0.3,
-      "chase_yaw": 110,
-      "chase_pitch": -4,
-      "chase_zoom": 0.75,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 1.0,
       "settle": 2.5,
-      "name": "b_side"
+      "name": "b_light_strong",
+      "console": [
+        "space.Tunnel BeaconLightCandela 400000",
+        "space.Tunnel BeaconBrightness 260"
+      ]
     },
     {
       "camera": "chase",
@@ -40,22 +44,33 @@
       "mode": "NAV",
       "quantum": "Orun",
       "quantum_progress": 0.3,
-      "chase_yaw": 140,
-      "chase_pitch": 8,
-      "chase_zoom": 0.8,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 1.0,
       "settle": 2.5,
-      "name": "c_low_front"
+      "name": "c_light_off",
+      "console": [
+        "space.Tunnel BeaconLightCandela 0"
+      ]
     },
     {
-      "camera": "cockpit",
+      "camera": "chase",
       "altitude_m": 60000,
       "facing": "body:Orun",
-      "hud": 1,
+      "hud": 0,
+      "gear": false,
       "mode": "NAV",
       "quantum": "Orun",
       "quantum_progress": 0.3,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 1.0,
       "settle": 2.5,
-      "name": "d_cockpit"
+      "name": "d_sun_up",
+      "console": [
+        "space.Tunnel BeaconLightCandela 250000",
+        "space.Ship QuantumSunScale 0.8"
+      ]
     }
   ]
 }

@@ -890,6 +890,34 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       Z kokpitu jiskry skoro vidět nejsou – stejně jako v referenci.
 
 ---
+56. **Skok podle reference, kolo 2** (22. 9. 2026, autor vypsal pět konkrétních rozdílů proti SC snímkům).
+    - **Prosvítající cíl byl chyba vykreslování, ne barvy.** Mlha tunelu se při náběhu prolínala
+      tečkovanou maskou, a těmi dírami byla vidět celá planeta. Teď mlha zakryje svět hned, jak skok
+      začne (`cover` = 0/1), a *rozsvěcí se barvou*. Cíl je místo toho **maják**: malá zářící koule
+      (`M_QuantumBeacon`, `BeaconSizeDeg` 1,4°) v úběžníku, která taky **svítí na loď** zepředu
+      (bodové světlo 220 000 cd) – z toho je ta silueta jako v referenci.
+    - **Pozadí bylo modré kvůli expozici, ne kvůli materiálu.** V tmavém tunelu se automatická
+      expozice vytáhla a z téměř černé udělala sytě modrou. Při skoku je teď expozice připíchnutá
+      (`QuantumExposure` 1,6, bias -0,8) a všechno svítící se tomu přizpůsobilo: čáry 160, maják 260,
+      jiskry 70, záře motorů se v skoku škrtí na 35 % (`QuantumThrusterScale`), jinak z nich byly
+      čtyři reflektory.
+    - **Jiskry místo výbuchu proudí.** `USpaceHullSparksComponent` už nemá emitory-body: jiskra se
+      rodí kdekoliv na trupu, unáší ji tok dozadu podél lodi (`FlowSpeed` 2600 cm/s), pomalu se
+      zvedá od povrchu (`LiftSpeed`) a vlní se na dvou turbulentních vlnách, které se s věkem
+      rozšiřují (`TurbulenceCm`, `TurbulenceRate`). Stopa se kreslí po úsecích a nikdy není delší
+      než `MaxTrailCm`, jinak z ní při zrychlování byly kolejnice přes celou obrazovku.
+    - **Barevná variace:** stěny mají široké barevné pásy (`FogBandColor`, tři pomalu plující),
+      oblaka mění jas, a mezi bílými čarami jsou řídce zelené a zlaté (v `TUNNEL_HLSL`).
+    - **Kamera už neteleportuje loď do středu:** zpoždění kamery se při skoku nevypíná, ale
+      navíjí (`BaseCameraLagSpeed` → `QuantumCameraLagSpeed`), takže loď do středu plynule dojede.
+    - **Past:** Custom uzel s `LocalPosition` se v zabalené hře nezkompiloval a maják se kreslil
+      výchozím šedým materiálem – v editoru i v cook logu bez chyby. Materiál majáku je proto bez
+      Custom uzlu (jen emisivní barva × jas). Platí to samé pravidlo jako u `Texture2DSample`:
+      **co jde postavit uzly, nedávej do Custom uzlu.**
+    - Nové ladění: `space.Ship <Property> <Value>` (vlastnosti lodi za běhu).
+      Snímky `-Preset quantum_look`, `-Preset quantum_ramp`, `-Preset sparks_flow`, `-Preset tunnel_haze`.
+
+---
 
 ## 6. Mapa kódu a obsahu
 
@@ -1156,6 +1184,8 @@ Další otevřené směry mimo let:
   (`HeightVariationWithinTileCm`) pro hřebenové oktávy nesedí, dlaždice se dělí pozdě a geomorph
   jde k rodiči, který je daleko od skutečné země. Neověřeno.
 - **Kameny nemají kolizi** (bod 52): loď i postava jimi projdou.
+- **Stěny tunelu nejsou tak „mléčné“ jako v referenci** (bod 56): reference má širší měkké světelné
+  klíny přes celý obraz, naše jsou užší a tmavší. Neověřeno autorem.
 - **Ohony jisker jsou dál místy tečkované** (bod 55): nejrychlejší a nejvzdálenější kusy dráhy
   TSR pořád neudrží celé. Čte se to jako jiskření, ale v referenci jsou vlásky celé.
 
@@ -1305,4 +1335,5 @@ Viz `git log --oneline`. Poslední kroky:
 - planety 4/4: fotoskenovaná zem, kameny, Zen restart v Package.ps1 (bod 52);
 - quantum tunel po autorově testu: bez prosvítání, uzavřený tmavý prostor, jiskry u lodi (bod 53);
 - náběh skoku, QT FUEL na HUD v NAV, rovný pohled z kokpitu (bod 54);
-- tunel nic neprosvítá (maskovaná mlha) a jiskry vypadají jako jiskry (bod 55).
+- tunel nic neprosvítá (maskovaná mlha) a jiskry vypadají jako jiskry (bod 55);
+- skok podle reference: maják v úběžníku, připíchnutá expozice, proudící jiskry (bod 56).

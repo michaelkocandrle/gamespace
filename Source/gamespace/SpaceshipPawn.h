@@ -1547,6 +1547,24 @@ protected:
 	/** Degrees added to the field of view at full afterburner... */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
 	float AfterburnerFovKick = 9.f;
+	/** Chase camera lag, normally and in a quantum jump (wound up over the ramp, never switched off). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "0.1"))
+	float BaseCameraLagSpeed = 8.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "0.1"))
+	float QuantumCameraLagSpeed = 40.f;
+
+	/** The exposure the jump is locked to (scene luminance) and the bias on top of it: a jump is dark. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "0.01"))
+	float QuantumExposure = 1.6f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float QuantumExposureBias = -0.8f;
+
+	/** The thruster glow is scaled by this in a jump: at full it blows out against the pinned exposure. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float QuantumThrusterScale = 0.35f;
+
 
 	/** ...and in a quantum jump. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
@@ -1569,7 +1587,7 @@ protected:
 	 * tunnel's blue sparks; at full sun it read as a lit model pasted on a background (22. 9. 2026).
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float QuantumSunScale = 0.2f;
+	float QuantumSunScale = 0.75f;
 
 	/** Brightness of the nose glow at a full jump, candela. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))

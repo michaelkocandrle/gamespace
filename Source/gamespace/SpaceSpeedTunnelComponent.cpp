@@ -2,6 +2,7 @@
 
 #include "SpaceSpeedTunnelComponent.h"
 
+#include "Components/PointLightComponent.h"
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInterface.h"
@@ -13,6 +14,8 @@ namespace SpeedTunnel
 	/** Built by Tools/Assets/build_space_scene.py. Without it the walls would be opaque grey cylinders, so none are shown. */
 	const TCHAR* const MaterialPackage = TEXT("/Game/Environments/Space/M_SpeedTunnel");
 	const TCHAR* const MaterialPath = TEXT("/Game/Environments/Space/M_SpeedTunnel.M_SpeedTunnel");
+	const TCHAR* const BeaconPackage = TEXT("/Game/Environments/Space/M_QuantumBeacon");
+	const TCHAR* const BeaconPath = TEXT("/Game/Environments/Space/M_QuantumBeacon.M_QuantumBeacon");
 	const TCHAR* const FogPackage = TEXT("/Game/Environments/Space/M_QuantumFog");
 	const TCHAR* const FogPath = TEXT("/Game/Environments/Space/M_QuantumFog.M_QuantumFog");
 }
@@ -100,6 +103,42 @@ void USpaceSpeedTunnelComponent::BeginPlay()
 		Fog->SetVisibility(false);
 		SetTranslucentSortPriority(10);
 	}
+
+	UMaterialInterface* BeaconBase = FPackageName::DoesPackageExist(SpeedTunnel::BeaconPackage)
+		? LoadObject<UMaterialInterface>(nullptr, SpeedTunnel::BeaconPath) : nullptr;
+	UStaticMesh* Sphere = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+	if (BeaconBase && Sphere && GetOwner())
+	{
+		// The destination as a point of light at the vanishing point: the tunnel is opaque, so the
+		// real body is hidden, and letting it through made it bleed over the frame (the author, 22. 9. 2026).
+		Beacon = NewObject<UStaticMeshComponent>(GetOwner(), TEXT("QuantumBeacon"));
+		Beacon->SetStaticMesh(Sphere);
+		Beacon->SetUsingAbsoluteLocation(true);
+		Beacon->SetUsingAbsoluteRotation(true);
+		Beacon->SetUsingAbsoluteScale(true);
+		Beacon->SetMobility(EComponentMobility::Movable);
+		Beacon->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+		Beacon->SetCastShadow(false);
+		Beacon->bAffectDistanceFieldLighting = false;
+		Beacon->bAffectDynamicIndirectLighting = false;
+		Beacon->SetVisibleInRayTracing(false);
+		Beacon->SetTranslucentSortPriority(15);
+		BeaconMaterial = UMaterialInstanceDynamic::Create(BeaconBase, this);
+		Beacon->SetMaterial(0, BeaconMaterial);
+		Beacon->SetupAttachment(GetAttachParent());
+		Beacon->RegisterComponent();
+		Beacon->SetVisibility(false);
+
+		BeaconLight = NewObject<UPointLightComponent>(GetOwner(), TEXT("QuantumBeaconLight"));
+		BeaconLight->SetUsingAbsoluteLocation(true);
+		BeaconLight->SetMobility(EComponentMobility::Movable);
+		BeaconLight->SetCastShadows(false);
+		BeaconLight->SetIntensityUnits(ELightUnits::Candelas);
+		BeaconLight->SetAttenuationRadius(200000.f);
+		BeaconLight->SetupAttachment(GetAttachParent());
+		BeaconLight->RegisterComponent();
+		BeaconLight->SetVisibility(false);
+	}
 }
 
 void USpaceSpeedTunnelComponent::HideTunnel()
@@ -110,6 +149,10 @@ void USpaceSpeedTunnelComponent::HideTunnel()
 		if (Fog)
 		{
 			Fog->SetVisibility(false);
+		}
+		if (Beacon)
+		{
+			Beacon->SetVisibility(false);
 		}
 		bHidden = true;
 	}
@@ -244,6 +287,31 @@ void USpaceSpeedTunnelComponent::UpdateTunnel(const FVector& ViewLocation, const
 		FogMaterial->SetVectorParameterValue(TEXT("TunnelUp"), FLinearColor(Frame.GetUnitAxis(EAxis::Z)));
 		FogMaterial->SetVectorParameterValue(TEXT("FogNearColor"), FogNearColor);
 		FogMaterial->SetVectorParameterValue(TEXT("FogFarColor"), FogFarColor);
+		FogMaterial->SetVectorParameterValue(TEXT("FogWarmColor"), FogWarmColor);
+		FogMaterial->SetVectorParameterValue(TEXT("FogCoolColor"), FogCoolColor);
+		FogMaterial->SetScalarParameterValue(TEXT("FogCloudAmount"), FogCloudAmount);
+		FogMaterial->SetVectorParameterValue(TEXT("FogBandColor"), FogBandColor);
+		FogMaterial->SetScalarParameterValue(TEXT("FogBandAmount"), FogBandAmount);
+	}
+
+	if (Beacon && BeaconMaterial)
+	{
+		// Sized by the angle it should take up from here, so it stays a small point however long the
+		// tunnel is; the engine sphere is 100 cm across.
+		const double Radius = BeaconDistanceCm * FMath::Tan(FMath::DegreesToRadians(FMath::Max(BeaconSizeDeg, 0.05f) * 0.5f));
+		Beacon->SetWorldTransform(FTransform(GetComponentQuat(), ViewLocation + Direction * BeaconDistanceCm,
+			FVector(Radius / 50.0)));
+		BeaconMaterial->SetVectorParameterValue(TEXT("BeaconColor"), BeaconColor);
+		BeaconMaterial->SetScalarParameterValue(TEXT("BeaconBrightness"), BeaconBrightness * Alpha);
+		Beacon->SetVisibility(Alpha > 0.01f);
+		if (BeaconLight)
+		{
+			// Close enough to reach the ship: the light sits a ship length ahead, not out at the beacon.
+			BeaconLight->SetWorldLocation(ViewLocation + Direction * 6000.0);
+			BeaconLight->SetLightColor(BeaconColor);
+			BeaconLight->SetIntensity(BeaconLightCandela * Alpha);
+			BeaconLight->SetVisibility(Alpha > 0.01f);
+		}
 	}
 
 	if (bHidden)

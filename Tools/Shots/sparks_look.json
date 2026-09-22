@@ -1,9 +1,0 @@
-{
-  "_comment": "The hull sparks in a quantum jump, as shipped, from the angles of the reference (sc_quantum_travel_tutorial 0:20-0:45: side, low front, behind). Run: Tools/Shots.ps1 -Preset sparks_look",
-  "shots": [
-    {"name": "a_side", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "chase_yaw": 110, "chase_pitch": -4, "chase_zoom": 0.75, "settle": 2.5},
-    {"name": "b_low_front", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "chase_yaw": 140, "chase_pitch": 10, "chase_zoom": 0.7, "settle": 2.5},
-    {"name": "c_behind", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "chase_yaw": 25, "chase_pitch": -8, "settle": 2.5},
-    {"name": "d_cockpit", "camera": "cockpit", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "settle": 2.5}
-  ]
-}

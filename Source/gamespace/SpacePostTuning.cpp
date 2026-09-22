@@ -21,6 +21,7 @@
 #include "SpaceDustComponent.h"
 #include "SpaceSpeedTunnelComponent.h"
 #include "SpaceHullSparksComponent.h"
+#include "SpaceshipPawn.h"
 #include "Components/SkyLightComponent.h"
 #include "Components/SkyAtmosphereComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -427,6 +428,27 @@ namespace
 				}
 			}
 			UE_LOG(LogTemp, Display, TEXT("space.Sparks %s on %d components"),
+				Result.IsEmpty() ? *FString::Printf(TEXT("%s: no such property"), *Args[0]) : *Result, Count);
+		}));
+
+	FAutoConsoleCommandWithWorldAndArgs ShipCommand(
+		TEXT("space.Ship"),
+		TEXT("space.Ship <Property> <Value...>: a property of the player's ship (QuantumExposure, QuantumExposureBias, QuantumFovKick, QuantumCameraLagSpeed, ...). Not saved."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			if (Args.Num() < 2)
+			{
+				UE_LOG(LogTemp, Display, TEXT("space.Ship <Property> <Value...>"));
+				return;
+			}
+			int32 Count = 0;
+			FString Result;
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				Result = SetByName(It->GetClass(), *It, Args, 1);
+				++Count;
+			}
+			UE_LOG(LogTemp, Display, TEXT("space.Ship %s on %d ships"),
 				Result.IsEmpty() ? *FString::Printf(TEXT("%s: no such property"), *Args[0]) : *Result, Count);
 		}));
 

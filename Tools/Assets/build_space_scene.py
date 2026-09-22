@@ -194,6 +194,7 @@ GLOW_TEXTURE = "/Game/Environments/Space/T_MilkyWay_Glow_Cube"
 STARFIELD_MATERIAL = "/Game/Environments/Space/M_Starfield_Sky"
 DUST_MATERIAL = "/Game/Environments/Space/M_SpaceDust"
 TUNNEL_MATERIAL = "/Game/Environments/Space/M_SpeedTunnel"
+BEACON_MATERIAL = "/Game/Environments/Space/M_QuantumBeacon"
 SPARK_MATERIAL = "/Game/Environments/Space/M_HullSpark"
 FOG_MATERIAL = "/Game/Environments/Space/M_QuantumFog"
 GAS_GIANT_MATERIAL = "/Game/Environments/Space/M_GasGiant"
@@ -979,6 +980,9 @@ float along = x < 1.0 ? 1.0 - pow(abs(2.0 * x - 1.0), 3.0) : 0.0;
 // Most streaks faint and a few bright, as dust is; the rest of the lanes empty.
 float own = h4 < Fill ? 0.2 + 0.8 * pow(frac(h4 * 7.31), 3.0) : 0.0;
 float3 tint = lerp(StreakColor.rgb, BeamColor.rgb * 1.4, ColorSpread * frac(h2 * 3.77));
+// A few in other colours: the reference tunnel is not all white lines (the author, 22. 9. 2026).
+float rare = frac(h3 * 5.13);
+tint = rare > 0.94 ? float3(0.5, 1.0, 0.72) : (rare > 0.88 ? float3(1.0, 0.84, 0.5) : tint);
 float nearFar = smoothstep(-0.02, 0.06, zn) * (1.0 - smoothstep(0.45, 0.95, zn));
 result += tint * StreakBright * across * along * own * nearFar;
 return max(result * (1.0 + 0.1 * dither) * Alpha * Bright, 0.0);
@@ -1049,28 +1053,73 @@ def build_tunnel_material():
 # beside the ship and dark down the middle towards the vanishing point. Translucent rather than
 # additive, because additive light can brighten the sky but never cover it.
 FOG_HLSL = r"""
-float z = dot(P, Dir.xyz);
+float3 dir = Dir.xyz;
+float z = dot(P, dir);
+float3 rv = P - z * dir;
+float r = length(rv);
 float zn = z / HalfLength;
-float3 rv = P - z * Dir.xyz;
 float a = atan2(dot(rv, Up.xyz), dot(rv, Right.xyz)) / 6.2831853 + 0.5;
-// Broad, low-contrast light shafts round the axis converging on the vanishing point (the reference's
-// dim radial rays), with a finer layer on top so the walls are not smooth bands.
+
+// The tunnel shuts the world out the moment the jump starts and then lights up: covered or not,
+// never half. Fading the cover itself (a dither, or an opening cone down the middle) let the
+// destination planet show through, which is exactly what the author called an artefact (22. 9. 2026).
+float cover = smoothstep(0.0, 0.05, Alpha);
+float lit0 = smoothstep(0.03, 0.55, Alpha);
+
+// Broad light shafts round the axis converging on the vanishing point, drifting slowly.
 float count = max(floor(ShaftCount), 1.0);
-float i0 = floor(a * count);
+float ad = a + Time * 0.004;
+float i0 = floor(ad * count);
 float n0 = frac(sin((i0 + 3.0) * 91.345) * 47453.5453);
 float n1 = frac(sin((fmod(i0 + 1.0, count) + 3.0) * 91.345) * 47453.5453);
-float n = lerp(n0, n1, smoothstep(0.0, 1.0, frac(a * count)));
+float n = lerp(n0, n1, smoothstep(0.0, 1.0, frac(ad * count)));
 float fine = floor(count * 4.3);
-float j0 = floor(a * fine);
+float j0 = floor(ad * fine);
 float m0 = frac(sin((j0 + 7.0) * 37.719) * 23421.631);
 float m1 = frac(sin((fmod(j0 + 1.0, fine) + 7.0) * 37.719) * 23421.631);
-float m = lerp(m0, m1, smoothstep(0.0, 1.0, frac(a * fine)));
+float m = lerp(m0, m1, smoothstep(0.0, 1.0, frac(ad * fine)));
 float shafts = lerp(1.0, 0.4 + 1.2 * n * n, ShaftContrast) * lerp(1.0, 0.7 + 0.6 * m, ShaftContrast);
+
+// Clouds: value noise in (angle, length), two octaves, flowing towards the vanishing point. The
+// reference tunnel is not one even layer - it is blotchy and keeps changing (the author).
+float2 q = float2(a * 9.0, zn * 2.2 - Time * 0.35);
+float cloud = 0.0;
+float amp = 0.62;
+for (int o = 0; o < 3; ++o)
+{
+    float2 g = floor(q);
+    float2 f = frac(q);
+    f = f * f * (3.0 - 2.0 * f);
+    float h00 = frac(sin(dot(g + float2(0.0, 0.0), float2(12.989, 78.233))) * 43758.545);
+    float h10 = frac(sin(dot(g + float2(1.0, 0.0), float2(12.989, 78.233))) * 43758.545);
+    float h01 = frac(sin(dot(g + float2(0.0, 1.0), float2(12.989, 78.233))) * 43758.545);
+    float h11 = frac(sin(dot(g + float2(1.0, 1.0), float2(12.989, 78.233))) * 43758.545);
+    cloud += amp * lerp(lerp(h00, h10, f.x), lerp(h01, h11, f.x), f.y);
+    q = q * 2.03 + 17.0;
+    amp *= 0.5;
+}
+cloud = saturate(cloud);
+// The clouds carry the colour too: cool blue-grey where they are thin, warm and violet where they
+// pile up, so the walls run through a spectrum instead of one flat blue.
+float3 wall = lerp(Near.rgb, Warm.rgb, saturate((cloud - 0.5) * 2.0));
+wall = lerp(wall, Cool.rgb, saturate((0.45 - cloud) * 2.2));
+float lit = lerp(1.0 - CloudAmount, 1.0 + CloudAmount, cloud);
+
+// A few very wide bands in another colour, drifting the other way: the reference tunnel runs
+// through a spectrum (the author, 22. 9. 2026), it is not one blue.
+float bcount = 3.0;
+float bd = a - Time * 0.011;
+float b0 = floor(bd * bcount);
+float p0 = frac(sin((b0 + 11.0) * 27.611) * 19231.17);
+float p1 = frac(sin((fmod(b0 + 1.0, bcount) + 11.0) * 27.611) * 19231.17);
+float band = lerp(p0, p1, smoothstep(0.0, 1.0, frac(bd * bcount)));
+float3 tinted = lerp(wall, Band.rgb, BandAmount * smoothstep(0.55, 1.0, band));
+
 float far = smoothstep(0.0, 0.65, zn);
-float3 colour = lerp(Near.rgb * shafts, Far.rgb, far);
-// Fully opaque (times the jump's blend): the tunnel is a closed space. Anything less let the
-// destination planet and the stars show through as ghosts (the author's playtest, 22. 9. 2026).
-return float4(colour, saturate(Opacity * lerp(1.0, CentreOpacity, far) * Alpha));
+float3 colour = lerp(tinted * shafts * lit, Far.rgb, far) * lit0;
+// Opaque where it covers: the tunnel is a closed space, and only a real depth write keeps the
+// destination and the stars out of it.
+return float4(colour, saturate(Opacity * lerp(1.0, CentreOpacity, far) * cover));
 """
 
 
@@ -1087,7 +1136,8 @@ def build_fog_material():
     delta = node(m, unreal.MaterialExpressionSubtract, -900, -60)
     link(here, delta, "A")
     link(centre, delta, "B")
-    names = ["P", "Dir", "Right", "Up", "HalfLength", "Near", "Far", "Opacity", "CentreOpacity", "Alpha", "ShaftCount", "ShaftContrast"]
+    names = ["P", "Dir", "Right", "Up", "HalfLength", "Near", "Far", "Warm", "Cool", "CloudAmount", "Time",
+             "Band", "BandAmount", "Opacity", "CentreOpacity", "Alpha", "ShaftCount", "ShaftContrast"]
     fog = custom(m, FOG_HLSL, names, -400, 0, "QuantumFog", unreal.CustomMaterialOutputType.CMOT_FLOAT4)
     sources = {
         "P": delta,
@@ -1099,6 +1149,12 @@ def build_fog_material():
         "ShaftContrast": scalar(m, "FogShaftContrast", 0.6, -1100, 750),
         "HalfLength": scalar(m, "TunnelHalfLengthCm", 150000.0, -900, 200),
         "Near": vector(m, "FogNearColor", (0.04, 0.055, 0.09), -900, 300),
+        "Warm": vector(m, "FogWarmColor", (0.07, 0.055, 0.045), -1100, 300),
+        "Cool": vector(m, "FogCoolColor", (0.015, 0.03, 0.07), -1300, 300),
+        "CloudAmount": scalar(m, "FogCloudAmount", 0.75, -1300, 400),
+        "Band": vector(m, "FogBandColor", (0.03, 0.09, 0.07), -1300, 600),
+        "BandAmount": scalar(m, "FogBandAmount", 0.8, -1300, 700),
+        "Time": node(m, unreal.MaterialExpressionTime, -1300, 500),
         "Far": vector(m, "FogFarColor", (0.004, 0.006, 0.012), -900, 400),
         "Opacity": scalar(m, "FogOpacity", 1.0, -900, 500),
         "Alpha": scalar(m, "TunnelAlpha", 0.0, -900, 600),
@@ -1130,6 +1186,25 @@ def build_fog_material():
 # has its own direction (custom data 3-5, world space) - they fan out and curve off the hull. With one
 # shared direction they were a comb of parallel rods (the author, 22. 9. 2026). A hot core inside a
 # faint halo, so they read as sparks rather than lines.
+def build_beacon_material():
+    """USpaceSpeedTunnelComponent's beacon: the destination as a small bright point in the middle of
+    the tunnel (the reference has one, and it is what gives the jump its direction). A real body
+    would either be hidden by the fog or - if it were let through - bleed across the frame.
+
+    Plain emissive on a sphere, no Custom node: the bloom makes the star out of it."""
+    m = fresh_material(BEACON_MATERIAL)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
+    colour = vector(m, "BeaconColor", (0.75, 0.85, 1.0), -700, 0)
+    brightness = scalar(m, "BeaconBrightness", 14.0, -700, 150)
+    lit = node(m, unreal.MaterialExpressionMultiply, -400, 50)
+    link(colour, lit, "A")
+    link(brightness, lit, "B")
+    output(lit, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    finish(m)
+    return m
+
+
 SPARK_HLSL = r"""
 // Measured on the cube itself (-50..50 cm before the instance's scale): along it and across it.
 // A pixel is on the box's surface, so one of the two across axes is always at the edge; the other
@@ -1522,6 +1597,7 @@ def main():
     build_tunnel_material()
     build_fog_material()
     build_spark_material()
+    build_beacon_material()
     body_materials = {
         "giant": build_body_material(GAS_GIANT_MATERIAL, GAS_GIANT_HLSL, 0.95, with_time=True),
         "moon": build_body_material(MOON_MATERIAL, MOON_HLSL, 0.9, with_time=False),
