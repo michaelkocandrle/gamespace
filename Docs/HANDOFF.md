@@ -1202,6 +1202,12 @@ Další otevřené směry mimo let:
 - **Kameny nemají kolizi** (bod 52): loď i postava jimi projdou.
 - **Stěny tunelu nejsou tak „mléčné“ jako v referenci** (bod 56): reference má širší měkké světelné
   klíny přes celý obraz, naše jsou užší a tmavší. Neověřeno autorem.
+- **Černé čáry kolem jisker za letu** (bod 56, autor 22. 9. 2026, po opravách zbývá): u rychlých
+  tenkých jisker se objevují tmavé „stíny“ podél nich. Není to materiál (je aditivní, zápornou barvu
+  vrátit neumí) ani mlha – je to TSR: historie se u rychlé tenké jasné čáry přestřelí a vedle ní
+  vznikne záporný ghost. `enable_responsive_aa` to přesouvá jinam (černé škrábance na světlém pozadí).
+  Zkusit: menší kontrast jisker, `r.TSR.ShadingRejection.*`, nebo jiskry kreslit do vlastního průchodu.
+  Autor to zatím nechal být.
 - **Ohony jisker jsou dál místy tečkované** (bod 55): nejrychlejší a nejvzdálenější kusy dráhy
   TSR pořád neudrží celé. Čte se to jako jiskření, ale v referenci jsou vlásky celé.
 
