@@ -82,6 +82,9 @@ def download(url, path):
 def main(argv):
     refine = "--refine" in argv
     dry_run = "--dry-run" in argv
+    # --hi asks for geometry, not just a silhouette: the finest voxel grid Meshy offers and a much
+    # higher triangle budget. Used to see how far the cheap route gets before paying for UltraShape.
+    hi = "--hi" in argv
     wanted = [a for a in argv if not a.startswith("-")]
 
     spec = json.load(open(SPEC, encoding="utf-8"))
@@ -108,8 +111,10 @@ def main(argv):
             "prompt": prompt[:800],
             "ai_model": "latest",
             "should_remesh": True,
-            "target_polycount": int(part.get("target_polycount", 3000)),
+            "target_polycount": 30000 if hi else int(part.get("target_polycount", 3000)),
         }
+        if hi:
+            body["geometry_resolution"] = "4k"
         task_id = call("POST", BASE, key, body)["result"]
         log("  preview task %s" % task_id)
         task = wait_for(task_id, key)
@@ -127,10 +132,10 @@ def main(argv):
         url = (task.get("model_urls") or {}).get("glb")
         if not url:
             raise SystemExit("meshy: task %s has no glb in model_urls" % task.get("id"))
-        path = os.path.join(OUT, "%s.glb" % part["name"])
+        path = os.path.join(OUT, "%s%s.glb" % (part["name"], "_hi" if hi else ""))
         size = download(url, path)
         log("  saved %s (%.1f MB, %s credits)" % (path, size / 1e6, task.get("consumed_credits")))
-        report[part["name"]] = {
+        report[part["name"] + ("_hi" if hi else "")] = {
             "task": task.get("id"),
             "glb": os.path.relpath(path, ROOT).replace("\\", "/"),
             "size_cm": part["size_cm"],

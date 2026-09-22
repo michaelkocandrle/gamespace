@@ -89,3 +89,21 @@ proti 440–920 u procedurálních. Renders: `Saved/Kitbash/compare_all.png` (d�
 a čitelnost. Na **tenké protáhlé struktury** (kabely, trubky, madla) selhává a procedurální skript
 je rychlejší i přesnější. Povrch z AI je navíc zvlněný a rozměry nesedí na zadání (Meshy vrací
 normalizovaný model, měřítko si musí srovnat import podle `size_cm`).
+
+### Geometrické rozlišení u Meshy vs. UltraShape (23. 9. 2026)
+
+UltraShape na Scenariu je zamčený za tarifem Pro (`accessRestrictions` 50, účet má `cu-basic`,
+běh vrací 403 `ModelAccessRestrictedError`; Pro stojí od 45 $/měsíc). Než za to platit, zkusilo se,
+kam došahne Meshy, když se mu řekne o geometrii: `--hi` v `Tools/Assets/meshy_generate.py` posílá
+`geometry_resolution: "4k"` a `target_polycount: 30000`.
+
+| Verze | Trojúhelníky | Povrch |
+| --- | --- | --- |
+| Procedurálně | 788 | ostré, ale holé |
+| Meshy standard (3 000) | 2 928 | zvlněná deska, měkké detaily |
+| **Meshy 4k (`--hi`)** | **28 624** | rovná deska, ostré šrouby, čitelné kolébkové přepínače, vystouplý štítek |
+
+Stálo to 25 kreditů místo 20. Srovnání: `Saved/Kitbash/compare_resolution.png`. Závěr: na hrubý
+povrchový detail u panelových dílů stačí Meshy ve 4k a předplatné Pro kvůli UltraShape zatím nemá
+opodstatnění; vstupy pro UltraShape jsou ve Scenariu nahrané, takže případný test bude na jedno
+zapnutí tarifu.

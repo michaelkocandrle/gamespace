@@ -1,32 +1,12 @@
 {
-  "VentGrille": {
-    "task": "01a0cb39-47a3-77cb-8adc-23290618d692",
-    "glb": "ArtSource/Ships/Vanguard/Kitbash/Meshy/VentGrille.glb",
+  "SwitchPanel_hi": {
+    "task": "01a0cb5d-c0fd-72a7-912f-0275758a0737",
+    "glb": "ArtSource/Ships/Vanguard/Kitbash/Meshy/SwitchPanel_hi.glb",
     "size_cm": [
-      10.0,
-      6.0,
-      1.2
+      12.0,
+      8.0,
+      3.4
     ],
-    "credits": 20
-  },
-  "CableBundle": {
-    "task": "01a0cb3a-7f77-753c-9970-2d8810368ce7",
-    "glb": "ArtSource/Ships/Vanguard/Kitbash/Meshy/CableBundle.glb",
-    "size_cm": [
-      22.2,
-      3.2,
-      4.2
-    ],
-    "credits": 20
-  },
-  "DisplayFrame": {
-    "task": "01a0cb3c-0baa-7583-a88e-816d64bc5130",
-    "glb": "ArtSource/Ships/Vanguard/Kitbash/Meshy/DisplayFrame.glb",
-    "size_cm": [
-      16.0,
-      11.2,
-      3.1
-    ],
-    "credits": 20
+    "credits": 25
   }
 }
