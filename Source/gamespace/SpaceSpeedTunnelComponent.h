@@ -193,12 +193,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
 	float BeaconLightCandela = 220000.f;
 
+	/** How much the sun's side of the tunnel outshines the far side (0 = the same light all round). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float FogSunAmount = 0.6f;
+
 	/** Wide bands of another colour drifting across the walls (the reference has a green-teal one). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
 	FLinearColor FogBandColor = FLinearColor(0.03f, 0.09f, 0.07f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float FogBandAmount = 0.8f;
+
+	/** The fog shell round the camera, cm: everything else in the tunnel lives inside it. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "10000.0"))
+	float FogShellRadiusCm = 250000.f;
 
 	/** How much the clouds darken and brighten the walls (0 = one even layer). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
@@ -209,7 +217,7 @@ public:
 
 	/** The fog's light shafts round the axis: how many, and how much they stand out (0 flat). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "1.0"))
-	float FogShaftCount = 7.f;
+	float FogShaftCount = 13.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float FogShaftContrast = 0.7f;
@@ -223,7 +231,7 @@ public:
 	float FogCentreOpacity = 1.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
-	FLinearColor FogNearColor = FLinearColor(0.3f, 0.36f, 0.52f);
+	FLinearColor FogNearColor = FLinearColor(0.15f, 0.18f, 0.26f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
 	FLinearColor FogFarColor = FLinearColor(0.001f, 0.002f, 0.004f);
@@ -252,6 +260,8 @@ private:
 	TObjectPtr<UStaticMeshComponent> Fog;
 	TObjectPtr<UStaticMeshComponent> Beacon;
 	TObjectPtr<class UPointLightComponent> BeaconLight;
+	/** The level's sun, to light one side of the tunnel more than the other. */
+	TWeakObjectPtr<class UDirectionalLightComponent> Sun;
 	TObjectPtr<UMaterialInstanceDynamic> BeaconMaterial;
 
 	UPROPERTY(Transient)

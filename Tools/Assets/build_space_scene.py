@@ -1078,7 +1078,9 @@ float j0 = floor(ad * fine);
 float m0 = frac(sin((j0 + 7.0) * 37.719) * 23421.631);
 float m1 = frac(sin((fmod(j0 + 1.0, fine) + 7.0) * 37.719) * 23421.631);
 float m = lerp(m0, m1, smoothstep(0.0, 1.0, frac(ad * fine)));
-float shafts = lerp(1.0, 0.4 + 1.2 * n * n, ShaftContrast) * lerp(1.0, 0.7 + 0.6 * m, ShaftContrast);
+// Softened twice: hard-edged lanes looked like flat cardboard wedges once the walls were lit.
+float soft = smoothstep(0.0, 1.0, smoothstep(0.0, 1.0, n));
+float shafts = lerp(1.0, 0.45 + 1.1 * soft * soft, ShaftContrast) * lerp(1.0, 0.75 + 0.5 * m, ShaftContrast * 0.7);
 
 // Clouds: value noise in (angle, length), two octaves, flowing towards the vanishing point. The
 // reference tunnel is not one even layer - it is blotchy and keeps changing (the author).
@@ -1115,8 +1117,13 @@ float p1 = frac(sin((fmod(b0 + 1.0, bcount) + 11.0) * 27.611) * 19231.17);
 float band = lerp(p0, p1, smoothstep(0.0, 1.0, frac(bd * bcount)));
 float3 tinted = lerp(wall, Band.rgb, BandAmount * smoothstep(0.55, 1.0, band));
 
+// Where the sun stands matters: the wall facing it is washed out, the far side is nearly black.
+// In the reference the light is never the same all the way round (the author, 22. 9. 2026).
+float sunFace = dot(normalize(rv + 1e-4), -SunDir.xyz) * 0.5 + 0.5;
+float sunLit = lerp(1.0 - SunAmount * 0.8, 1.0 + SunAmount, smoothstep(0.0, 1.0, sunFace));
+
 float far = smoothstep(0.0, 0.65, zn);
-float3 colour = lerp(tinted * shafts * lit, Far.rgb, far) * lit0;
+float3 colour = lerp(tinted * shafts * lit * sunLit, Far.rgb, far) * lit0;
 // Opaque where it covers: the tunnel is a closed space, and only a real depth write keeps the
 // destination and the stars out of it.
 return float4(colour, saturate(Opacity * lerp(1.0, CentreOpacity, far) * cover));
@@ -1137,7 +1144,7 @@ def build_fog_material():
     link(here, delta, "A")
     link(centre, delta, "B")
     names = ["P", "Dir", "Right", "Up", "HalfLength", "Near", "Far", "Warm", "Cool", "CloudAmount", "Time",
-             "Band", "BandAmount", "Opacity", "CentreOpacity", "Alpha", "ShaftCount", "ShaftContrast"]
+             "Band", "BandAmount", "SunDir", "SunAmount", "Opacity", "CentreOpacity", "Alpha", "ShaftCount", "ShaftContrast"]
     fog = custom(m, FOG_HLSL, names, -400, 0, "QuantumFog", unreal.CustomMaterialOutputType.CMOT_FLOAT4)
     sources = {
         "P": delta,
@@ -1154,6 +1161,8 @@ def build_fog_material():
         "CloudAmount": scalar(m, "FogCloudAmount", 0.75, -1300, 400),
         "Band": vector(m, "FogBandColor", (0.03, 0.09, 0.07), -1300, 600),
         "BandAmount": scalar(m, "FogBandAmount", 0.8, -1300, 700),
+        "SunDir": vector(m, "FogSunDirection", (1.0, 0.0, 0.0), -1300, 800),
+        "SunAmount": scalar(m, "FogSunAmount", 0.75, -1300, 900),
         "Time": node(m, unreal.MaterialExpressionTime, -1300, 500),
         "Far": vector(m, "FogFarColor", (0.004, 0.006, 0.012), -900, 400),
         "Opacity": scalar(m, "FogOpacity", 1.0, -900, 500),
@@ -1210,13 +1219,16 @@ SPARK_HLSL = r"""
 // A pixel is on the box's surface, so one of the two across axes is always at the edge; the other
 // one is the distance from the streak's middle line (the 3D distance from the axis never fell under
 // the half width and the sparks drew nothing, 22. 9. 2026).
+// The ribbon is turned to face the camera every frame, so it is never seen edge on - as a box it
+// broke into dashes wherever it crossed the screen quickly (the author, 22. 9. 2026).
 float u = abs(Local.x) / 50.0;
-float v = min(abs(Local.y), abs(Local.z)) / 50.0;
+float v = abs(Local.y) / 50.0;
 // Segments of one trail overlap: soft only at the very ends, or the chain reads as dashes.
 float tail = saturate((1.0 - u) * 8.0);
-float core = saturate(1.0 - v * 2.0);
+float core = saturate(1.0 - v * 3.0);
 float halo = saturate(1.0 - v);
-float shape = tail * (core * core * 1.6 + halo * halo * 0.35);
+// A hot thin thread in a soft glow: from a distance it reads as a smooth filament, not a dash.
+float shape = tail * (core * core * 2.2 + halo * halo * halo * 0.5);
 return Colour.rgb * Brightness * Fade * Own * shape;
 """
 
@@ -1230,9 +1242,12 @@ def build_spark_material():
     m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
     m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
     m.set_editor_property("used_with_instanced_static_meshes", True)
-    # Out of the temporal pass: a thin streak crossing the screen at thousands of cm/s came out as a
-    # dotted line, because TSR could not keep it between frames (22. 9. 2026).
-    m.set_editor_property("enable_responsive_aa", True)
+    # NOT responsive AA: it kept the fast streaks from dotting, but once the tunnel walls were lit it
+    # drew black scribbles behind the ship, where TSR had no history to fall back on (the author's
+    # screenshot, 22. 9. 2026). A camera-facing ribbon is what keeps the streaks solid.
+    # Set explicitly: fresh_material keeps the asset's old flags.
+    m.set_editor_property("enable_responsive_aa", False)
+    m.set_editor_property("two_sided", True)
     names = ["Local", "Colour", "Brightness", "Fade", "Own"]
     spark = custom(m, SPARK_HLSL, names, -400, 0, "HullSpark")
     sources = {

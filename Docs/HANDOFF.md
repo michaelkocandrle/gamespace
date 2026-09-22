@@ -914,6 +914,13 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       výchozím šedým materiálem – v editoru i v cook logu bez chyby. Materiál majáku je proto bez
       Custom uzlu (jen emisivní barva × jas). Platí to samé pravidlo jako u `Texture2DSample`:
       **co jde postavit uzly, nedávej do Custom uzlu.**
+    - **Kolo 3 po dalším autorově snímku:** černé „škrábance“ kolem lodi byl `enable_responsive_aa`
+      na jiskrách – jakmile se stěny rozsvítily, TSR tam neměl co vzít a kreslil tmu; vypnuto.
+      Jiskry se teď kreslí jako **plošky natočené ke kameře** (`Plane` místo `Cube`), takže rychlé
+      stopy nesekají; tok jde podél povrchu trupu (tangenciálně, nikdy dopředu), takže obtéká loď.
+      Mlha je **koule kolem kamery** a její barva závisí jen na směru pohledu – válec dělal přes
+      obraz ostrou rovnou hranu (vlastní silueta). Jedna strana tunelu je světlejší podle toho, kde
+      stojí slunce (`FogSunAmount`).
     - Nové ladění: `space.Ship <Property> <Value>` (vlastnosti lodi za běhu).
       Snímky `-Preset quantum_look`, `-Preset quantum_ramp`, `-Preset sparks_flow`, `-Preset tunnel_haze`.
 

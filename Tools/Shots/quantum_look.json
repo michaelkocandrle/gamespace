@@ -1,5 +1,5 @@
 {
-  "_comment": "The jump as it stands, for comparing with the reference frames. Run: Tools/Shots.ps1 -Preset quantum_look",
+  "_comment": "The jump from the angles the author shoots it at. Run: Tools/Shots.ps1 -Preset quantum_look",
   "shots": [
     {
       "camera": "chase",
@@ -10,11 +10,11 @@
       "mode": "NAV",
       "quantum": "Orun",
       "quantum_progress": 0.3,
+      "settle": 2.5,
+      "name": "a_behind",
       "chase_yaw": 25,
       "chase_pitch": -8,
-      "chase_zoom": 1.0,
-      "settle": 2.5,
-      "name": "a_front"
+      "chase_zoom": 0.8
     },
     {
       "camera": "chase",
@@ -25,26 +25,26 @@
       "mode": "NAV",
       "quantum": "Orun",
       "quantum_progress": 0.3,
+      "settle": 2.5,
+      "name": "b_behind_left",
+      "chase_yaw": -40,
+      "chase_pitch": -5,
+      "chase_zoom": 0.8
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "settle": 2.5,
+      "name": "c_side",
       "chase_yaw": 110,
       "chase_pitch": -4,
-      "chase_zoom": 0.75,
-      "settle": 2.5,
-      "name": "b_side"
-    },
-    {
-      "camera": "chase",
-      "altitude_m": 60000,
-      "facing": "body:Orun",
-      "hud": 0,
-      "gear": false,
-      "mode": "NAV",
-      "quantum": "Orun",
-      "quantum_progress": 0.3,
-      "chase_yaw": 140,
-      "chase_pitch": 8,
-      "chase_zoom": 0.8,
-      "settle": 2.5,
-      "name": "c_low_front"
+      "chase_zoom": 0.75
     },
     {
       "camera": "cockpit",

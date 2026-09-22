@@ -64,10 +64,12 @@ try:
         spark_material = unreal.load_asset("/Game/Environments/Space/M_HullSpark")
         check("the sparks have their own material", spark_material is not None)
         if spark_material is not None:
-            check("additive, on instances, and out of the temporal pass (or a fast streak comes out dotted)",
+            check("additive, on instances, two sided (the ribbons face the camera from either side)",
                   spark_material.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_ADDITIVE
                   and spark_material.get_editor_property("used_with_instanced_static_meshes")
-                  and spark_material.get_editor_property("enable_responsive_aa"))
+                  and spark_material.get_editor_property("two_sided"))
+            check("and NOT responsive AA (it drew black scribbles over the lit walls)",
+                  not spark_material.get_editor_property("enable_responsive_aa"))
     check("the dust is only a hint (a few hundred specks)", dust.get_editor_property("particle_count") <= 400)
 
     layers = tunnel.get_editor_property("layers")

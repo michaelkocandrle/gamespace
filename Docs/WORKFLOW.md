@@ -444,8 +444,12 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   s `local_origin=INSTANCE`, u kvádru -50..50 cm).
 - **Tvar natažené kostky se neměří 3D vzdáleností od osy.** Pixel je vždycky na povrchu, takže je od
   osy aspoň půl šířky daleko a tvar vyjde nula. Ber `min(|y|, |z|)` v prostoru instance.
-- **Tenká rychlá čára v TSR vyjde tečkovaná.** Dej materiálu `enable_responsive_aa` a nech šířku růst
-  se vzdáleností od kamery (aspoň ~4 px), jinak se mezi snímky ztrácí.
+- **Tenká rychlá čára v TSR vyjde tečkovaná.** Kresli ji jako **plošku natočenou ke kameře**
+  (`Plane` v ISM, rotace `MakeFromXZ(směr, k_kameře)`) a nech šířku růst se vzdáleností (~3 px).
+  `enable_responsive_aa` to sice taky spraví, ale na světlém pozadí za to zaplatíš černými šmouhami
+  tam, kde TSR nemá historii.
+- **Neprůhledná „obloha“ kolem kamery patří na kouli, ne na válec.** Silueta válce udělá přes obraz
+  ostrou rovnou hranu. Když barvu počítáš jen ze směru pohledu, na tvaru nezáleží – a koule nemá švy.
 - **Custom uzel s texturami: `Texture2DSample(Tex, TexSampler, uv)`, nikdy `Tex.Sample(...)`.** Ray tracing
   hit shadery nemají derivace, `.Sample` v nich neprojde a celý materiál se v buildu nahradí výchozím
   šedým. V editoru ani v headless buildu materiálu chyba vidět není – jen v cook logu

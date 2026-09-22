@@ -46,7 +46,7 @@ public:
 
 	/** How many sparks live at once in a jump, and in normal flight at full strength (each is TrailSegments instances). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0", ClampMax = "2000"))
-	int32 QuantumCount = 500;
+	int32 QuantumCount = 260;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0", ClampMax = "2000"))
 	int32 FlightCount = 40;
@@ -67,10 +67,10 @@ public:
 
 	/** Turbulence: how far a spark weaves off the flow (cm, reached at the end of its life) and how fast. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
-	float TurbulenceCm = 120.f;
+	float TurbulenceCm = 70.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
-	float TurbulenceRate = 7.f;
+	float TurbulenceRate = 4.5f;
 
 	/** Backwards acceleration that bends the sparks round, cm/s2 (in normal flight scaled by its strength). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
@@ -78,22 +78,22 @@ public:
 
 	/** Life of a spark, s (each gets a random time between the two). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.02"))
-	float MinLifeSeconds = 0.3f;
+	float MinLifeSeconds = 0.45f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.02"))
-	float MaxLifeSeconds = 0.6f;
+	float MaxLifeSeconds = 0.95f;
 
 	/** How much of its path a spark shows behind it, s, in how many segments. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.005"))
-	float TrailSeconds = 0.16f;
+	float TrailSeconds = 0.3f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "1", ClampMax = "12"))
-	int32 TrailSegments = 4;
+	int32 TrailSegments = 7;
 
 	/** However fast a spark ends up going, its trail is never longer than this (cm): with the sweep it
 	 * grew into a rail across the whole screen, and in the reference the plume stays by the hull. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "10.0"))
-	float MaxTrailCm = 1300.f;
+	float MaxTrailCm = 2000.f;
 
 	/** Thickness, cm, and at least this share of the distance to the camera (0.005: ~4 px at 1600 px, 90 degrees). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.1"))
@@ -106,7 +106,7 @@ public:
 	FLinearColor QuantumColor = FLinearColor(0.2f, 0.5f, 1.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
-	float QuantumBrightness = 70.f;
+	float QuantumBrightness = 110.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks")
 	FLinearColor FlightColor = FLinearColor(0.8f, 0.88f, 1.f);
@@ -116,14 +116,14 @@ public:
 
 	/** Sparks fade out between these distances from the camera (cm): none on the lens in the cockpit. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
-	float CameraFadeNearCm = 500.f;
+	float CameraFadeNearCm = 900.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
-	float CameraFadeFarCm = 1200.f;
+	float CameraFadeFarCm = 2600.f;
 
 	/** Share of the emitters at the front half of the hull: the nose is what cuts through. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float NoseBias = 0.6f;
+	float NoseBias = 0.75f;
 
 	/** Tests: how many points on the hull the sparks are born at, and whether they came from the collision. */
 	UFUNCTION(BlueprintCallable, Category = "Hull Sparks")

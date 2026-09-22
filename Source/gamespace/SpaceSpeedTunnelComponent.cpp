@@ -2,7 +2,9 @@
 
 #include "SpaceSpeedTunnelComponent.h"
 
+#include "Components/DirectionalLightComponent.h"
 #include "Components/PointLightComponent.h"
+#include "UObject/UObjectIterator.h"
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInterface.h"
@@ -83,7 +85,11 @@ void USpaceSpeedTunnelComponent::BeginPlay()
 	if (FogBase && GetStaticMesh() && GetOwner())
 	{
 		Fog = NewObject<UStaticMeshComponent>(GetOwner(), TEXT("QuantumFog"));
-		Fog->SetStaticMesh(GetStaticMesh());
+		// A sphere round the camera, not a cylinder: the cylinder's own silhouette cut a hard straight
+		// edge across the frame once the walls were lit (the author, 22. 9. 2026). The fog's colour is
+		// a function of the view direction alone, so the shape it is painted on does not matter.
+		UStaticMesh* FogSphere = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+		Fog->SetStaticMesh(FogSphere ? FogSphere : ToRawPtr(GetStaticMesh()));
 		Fog->SetUsingAbsoluteLocation(true);
 		Fog->SetUsingAbsoluteRotation(true);
 		Fog->SetUsingAbsoluteScale(true);
@@ -273,8 +279,10 @@ void USpaceSpeedTunnelComponent::UpdateTunnel(const FVector& ViewLocation, const
 	{
 		// A little longer than the streak walls: the fog now has depth, and its far end must not cover
 		// the walls' far end (where the beams converge).
-		const FVector FogScale(FogRadiusCm / FMath::Max(Extent.X, 1.0), FogRadiusCm / FMath::Max(Extent.Y, 1.0), 1.05 * HalfLengthCm / FMath::Max(Extent.Z, 1.0));
-		Fog->SetWorldTransform(FTransform(GetComponentQuat(), ViewLocation, FogScale));
+		// Wide enough to hold the streak walls and the beacon inside it.
+		const FVector FogExtent = Fog->GetStaticMesh() ? Fog->GetStaticMesh()->GetBounds().BoxExtent : FVector(50.0);
+		const double FogScale = FogShellRadiusCm / FMath::Max(FogExtent.GetMax(), 1.0);
+		Fog->SetWorldTransform(FTransform(GetComponentQuat(), ViewLocation, FVector(FogScale)));
 		FogMaterial->SetVectorParameterValue(TEXT("TunnelDirection"), FLinearColor(Direction));
 		FogMaterial->SetScalarParameterValue(TEXT("TunnelHalfLengthCm"), HalfLengthCm);
 		FogMaterial->SetScalarParameterValue(TEXT("TunnelAlpha"), Alpha);
@@ -292,6 +300,20 @@ void USpaceSpeedTunnelComponent::UpdateTunnel(const FVector& ViewLocation, const
 		FogMaterial->SetScalarParameterValue(TEXT("FogCloudAmount"), FogCloudAmount);
 		FogMaterial->SetVectorParameterValue(TEXT("FogBandColor"), FogBandColor);
 		FogMaterial->SetScalarParameterValue(TEXT("FogBandAmount"), FogBandAmount);
+		if (!Sun.IsValid())
+		{
+			for (TObjectIterator<UDirectionalLightComponent> It; It; ++It)
+			{
+				if (It->GetWorld() == GetWorld())
+				{
+					Sun = *It;
+					break;
+				}
+			}
+		}
+		const FVector SunDirection = Sun.IsValid() ? Sun->GetForwardVector() : FVector::ForwardVector;
+		FogMaterial->SetVectorParameterValue(TEXT("FogSunDirection"), FLinearColor(SunDirection));
+		FogMaterial->SetScalarParameterValue(TEXT("FogSunAmount"), FogSunAmount);
 	}
 
 	if (Beacon && BeaconMaterial)

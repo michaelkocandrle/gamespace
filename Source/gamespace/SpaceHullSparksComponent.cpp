@@ -38,10 +38,11 @@ USpaceHullSparksComponent::USpaceHullSparksComponent()
 	// priorities the fog sorted after the sparks now and then and drew them over as black streaks.
 	SetTranslucentSortPriority(20);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	if (Cube.Succeeded())
+	// A flat ribbon turned to face the camera, not a box: a box thinner than a pixel broke into dashes.
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Plane(TEXT("/Engine/BasicShapes/Plane.Plane"));
+	if (Plane.Succeeded())
 	{
-		SetStaticMesh(Cube.Object);
+		SetStaticMesh(Plane.Object);
 	}
 }
 
@@ -140,9 +141,17 @@ void USpaceHullSparksComponent::Respawn(FSpark& Spark, bool bRandomAge)
 	}
 	const FVector Up = FVector::CrossProduct(Normal, Side);
 	Spark.Origin = (Points.IsValidIndex(Point) ? Points[Point] : FVector::ZeroVector) + Normal * Random.FRandRange(2.f, 30.f);
-	// Carried back along the hull, lifting off it slowly: it hugs the ship instead of shooting away.
-	Spark.Velocity = -FVector::ForwardVector * (FlowSpeed * Random.FRandRange(0.75f, 1.25f))
-		+ Normal * (LiftSpeed * Random.FRandRange(0.3f, 1.4f));
+	// The flow runs along the surface, not off it: the backwards pull is projected onto the hull at
+	// this point, so a spark born on the nose wraps round the sides instead of leaving straight back
+	// (the author: "it should flow round the ship", 22. 9. 2026). Only a little of it lifts away.
+	const FVector Back = -FVector::ForwardVector;
+	FVector Along = (Back - Normal * FVector::DotProduct(Back, Normal)).GetSafeNormal(UE_SMALL_NUMBER, Back);
+	// Never forwards: on the nose the surface runs the other way, and sparks shot up the front of the
+	// ship read as a firework rather than a flow (the author's screenshot, 22. 9. 2026).
+	Along.X = FMath::Min(Along.X, 0.0);
+	Spark.Velocity = Back * (FlowSpeed * Random.FRandRange(0.8f, 1.2f))
+		+ Along * (FlowSpeed * 0.45f)
+		+ Normal * (LiftSpeed * Random.FRandRange(0.1f, 0.9f));
 	// Two waves across the flow, so the trail snakes rather than running straight.
 	Spark.WaveA = Side;
 	Spark.WaveB = Up;
@@ -211,6 +220,7 @@ void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, fl
 	SparkMaterial->SetScalarParameterValue(TEXT("DustBrightness"), 1.f);
 
 	const FTransform& ToWorld = GetComponentTransform();
+	const FVector LocalView = ToWorld.InverseTransformPosition(ViewLocation);
 	for (int32 Index = 0; Index < Sparks.Num(); ++Index)
 	{
 		FSpark& Spark = Sparks[Index];
@@ -247,8 +257,11 @@ void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, fl
 			const FVector Dir = Length > UE_KINDA_SMALL_NUMBER ? Along / Length : FVector::ForwardVector;
 			// Overlap the joints so the chain reads as one curve (at 1.15 it was a dotted line).
 			const double Drawn = Length * 1.5 + Width * 2.0;
-			Transforms[Instance] = FTransform(FRotationMatrix::MakeFromX(Dir).ToQuat(), (Newer + Older) * 0.5,
-				FVector(Drawn / HullSparks::CubeSizeCm, Width / HullSparks::CubeSizeCm, Width / HullSparks::CubeSizeCm));
+			const FVector Middle = (Newer + Older) * 0.5;
+			// Face the camera, so the ribbon's whole width is always seen.
+			const FVector ToCamera = (LocalView - Middle).GetSafeNormal(UE_SMALL_NUMBER, FVector::UpVector);
+			Transforms[Instance] = FTransform(FRotationMatrix::MakeFromXZ(Dir, ToCamera).ToQuat(), Middle,
+				FVector(Drawn / HullSparks::CubeSizeCm, Width / HullSparks::CubeSizeCm, 1.0));
 			// Brightest at the head, thinning out towards the tail; nothing from before the spark was born.
 			const float Fade = Length > 0.5 ? SparkFade * (1.f - float(Segment) / float(Segments)) : 0.f;
 			SetCustomDataValue(Instance, 0, Fade, false);
