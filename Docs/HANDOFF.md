@@ -925,6 +925,11 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       takže se převalují místo rovnoměrného klouzání; jejich součet se váží, ne sčítá – sečtený se
       ořezával na 1 a dělal ploché obdélníky. Jiskry mají teplotu: u trupu bílé, v úplavu tmavě modré
       (custom data 2, `HotColor` a `HeatFalloff`; hlava mladé jiskry je nejteplejší).
+    - **Loď je v tunelu silueta, ne bílý plast** (autor, 22. 9. 2026). Vinu nesly dvě věci, ne expozice:
+      bodové světlo u majáku svítilo 220 000 cd ze 60 m (teď 35 000, dělá jen obrys) a bílá část
+      jisker obalovala trup (`HotColor` ztlumená, `HeatFalloff` 4 – jiskra chladne dřív). Ambientní
+      světlo scény se teď v skoku škrtí jako slunce (`QuantumSkyScale` 0,15, slunce 0,45); v tunelu
+      stejně není od čeho se odrazit. Ověřeno vypínáním zdrojů po jednom (`Tools/Shots/ship_dark.json`).
     - Nové ladění: `space.Ship <Property> <Value>` (vlastnosti lodi za běhu).
       Snímky `-Preset quantum_look`, `-Preset quantum_ramp`, `-Preset sparks_flow`, `-Preset tunnel_haze`.
 

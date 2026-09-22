@@ -1587,7 +1587,11 @@ protected:
 	 * tunnel's blue sparks; at full sun it read as a lit model pasted on a background (22. 9. 2026).
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float QuantumSunScale = 0.75f;
+	float QuantumSunScale = 0.45f;
+
+	/** The level's sky light (fill) is scaled by this in a jump: there is nothing to bounce off in a tunnel. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quantum", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float QuantumSkyScale = 0.15f;
 
 	/** Brightness of the nose glow at a full jump, candela. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
@@ -2075,6 +2079,8 @@ private:
 	/** The level's sun and its own intensity, for QuantumSunScale. */
 	TWeakObjectPtr<class UDirectionalLightComponent> QuantumSun;
 	float QuantumSunBaseIntensity = -1.f;
+	TWeakObjectPtr<class USkyLightComponent> QuantumSky;
+	float QuantumSkyBaseIntensity = -1.f;
 	float QuantumBlend = 0.f;
 	float CameraKick = 0.f;
 

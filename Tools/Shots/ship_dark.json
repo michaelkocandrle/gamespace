@@ -1,0 +1,84 @@
+{
+  "_comment": "The beacon as a rim light, and how white the plume is by the hull. Run: Tools/Shots.ps1 -Preset ship_dark",
+  "shots": [
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "settle": 2.5,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 1.4,
+      "name": "a_beacon30_heat35",
+      "console": [
+        "space.Tunnel BeaconLightCandela 30000",
+        "space.Sparks HeatFalloff 3.5"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "settle": 2.5,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 1.4,
+      "name": "b_beacon60_heat35",
+      "console": [
+        "space.Tunnel BeaconLightCandela 60000",
+        "space.Sparks HeatFalloff 3.5"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "settle": 2.5,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 1.4,
+      "name": "c_beacon60_hot_dim",
+      "console": [
+        "space.Tunnel BeaconLightCandela 60000",
+        "space.Sparks HeatFalloff 3.5",
+        "space.Sparks HotColor 0.55 0.7 0.95"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Orun",
+      "hud": 0,
+      "gear": false,
+      "mode": "NAV",
+      "quantum": "Orun",
+      "quantum_progress": 0.3,
+      "settle": 2.5,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "chase_zoom": 1.4,
+      "name": "d_beacon30_hot_dim_cool",
+      "console": [
+        "space.Tunnel BeaconLightCandela 30000",
+        "space.Sparks HeatFalloff 5",
+        "space.Sparks HotColor 0.5 0.65 0.95",
+        "space.Sparks QuantumBrightness 85"
+      ]
+    }
+  ]
+}

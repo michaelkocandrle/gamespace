@@ -106,14 +106,14 @@ public:
 	FLinearColor QuantumColor = FLinearColor(0.1f, 0.35f, 1.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
-	float QuantumBrightness = 110.f;
+	float QuantumBrightness = 90.f;
 
 	/** What a spark looks like while it is still hot, and how fast it cools (higher = cools sooner). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks")
-	FLinearColor HotColor = FLinearColor(0.85f, 0.95f, 1.f);
+	FLinearColor HotColor = FLinearColor(0.55f, 0.68f, 0.95f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.1"))
-	float HeatFalloff = 2.5f;
+	float HeatFalloff = 4.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks")
 	FLinearColor FlightColor = FLinearColor(0.8f, 0.88f, 1.f);

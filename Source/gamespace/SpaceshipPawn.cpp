@@ -37,7 +37,9 @@
 #include "SpaceSpeedTunnelComponent.h"
 #include "SpaceHullSparksComponent.h"
 #include "Components/DirectionalLightComponent.h"
+#include "Components/SkyLightComponent.h"
 #include "Engine/DirectionalLight.h"
+#include "Engine/SkyLight.h"
 #include "SpaceUserSettings.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/Engine.h"
@@ -374,6 +376,11 @@ void ASpaceshipPawn::BeginPlay()
 			QuantumSun = Light;
 			break;
 		}
+	}
+	for (TActorIterator<ASkyLight> It(GetWorld()); It; ++It)
+	{
+		QuantumSky = It->GetLightComponent();
+		break;
 	}
 	BaseArmLength = CameraBoom->TargetArmLength;
 	BaseSocketOffset = CameraBoom->SocketOffset;
@@ -3159,6 +3166,23 @@ void ASpaceshipPawn::UpdateSpaceDust(float DeltaSeconds)
 	// The jump's own light: sun down, blue glow at the nose (only the player's ship touches the sun).
 	QuantumGlow->SetIntensity(QuantumGlowCandela * QuantumBlend);
 	QuantumGlow->SetVisibility(QuantumBlend > 0.01f);
+	// The level's fill light goes down with it: inside the tunnel there is nothing to bounce off, and
+	// against the pinned exposure the ship came out white instead of a silhouette (the author, 22. 9. 2026).
+	if (USkyLightComponent* Sky = QuantumSky.Get())
+	{
+		if (QuantumBlend > 0.001f || QuantumSkyBaseIntensity >= 0.f)
+		{
+			if (QuantumSkyBaseIntensity < 0.f)
+			{
+				QuantumSkyBaseIntensity = Sky->Intensity;
+			}
+			Sky->SetIntensity(QuantumSkyBaseIntensity * FMath::Lerp(1.f, QuantumSkyScale, QuantumBlend));
+			if (QuantumBlend <= 0.001f)
+			{
+				QuantumSkyBaseIntensity = -1.f;
+			}
+		}
+	}
 	if (UDirectionalLightComponent* Sun = QuantumSun.Get())
 	{
 		if (QuantumBlend > 0.001f || QuantumSunBaseIntensity >= 0.f)

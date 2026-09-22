@@ -191,7 +191,7 @@ public:
 
 	/** The beacon also lights the ship from ahead, which is what makes it a silhouette (candela). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
-	float BeaconLightCandela = 220000.f;
+	float BeaconLightCandela = 35000.f;
 
 	/** How much the sun's side of the tunnel outshines the far side (0 = the same light all round). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
