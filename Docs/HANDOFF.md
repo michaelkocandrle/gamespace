@@ -963,38 +963,8 @@ pracovní materiál. Když má nějaký zachytit stav pro historii (před/po u v
 
 ### Scénáře (`Tools\Shots\*.json`)
 
-| Scénář | K čemu |
-| --- | --- |
-| `cockpit` | Pohled z kokpitu a chase kamery nad planetou i ve vesmíru, s HUD i bez něj. |
-| `hud` | Letový HUD ve všech stavech: klid, na limitu, afterburner, boost s vychýleným joystickem, NAV, decoupled s vypnutým G-Safe, let pozpátku, plný textový výpis. |
-| `ship` | Loď zvenku: nad planetou, při sestupu, ve vesmíru, se zářícími tryskami. |
-| `cockpit_light` | Nasvícení kokpitu proti tmavé SC referenci: nastavení ze setupu ve vesmíru a v atmosféře, staré šedé a bez světel pro srovnání. |
-| `cockpit_tune` | Porovnání variant kokpitu vedle sebe (pozice oka, co se pilotovi skrývá). Vzor pro dočasné scénáře při ladění. |
-| `ship_views` | Loď ze všech stran (8 pohledů kolem, shora, zespodu s podvozkem, zblízka, ve vesmíru, se zářícími tryskami). Pro každý nový nebo změněný model. |
-| `landing` | SC-2a: podvozek ze strany (dole, v půlce cesty), zespodu, loď stojící na patkách, varování GEAR UP, loď na břiše bez podvozku, HUD po přistání, precision HUD, kokpit na zemi. |
-| `vtol` | SC-2b: odznak VTOL na desce zapnutý i vypnutý, loď visící na zvedacích tryskách ze strany, zezadu a z kokpitu. VTOL přepíná `space.Vtol`, ne klávesa. |
-| `velocity_vector` | SC-3: značka dráhy letu v ose, při letu bokem, šikmo dolů, pozpátku a ve stoje. Rychlosti nastavuje pole `drift`, ne motory. |
-| `dust_tune` | Rychlostní čáry: hustota, délka, tloušťka a velikost krabice přes `space.Dust` v jednom běhu. |
-| `quantum` | SC-4: HUD v SCM (nic), SPOOLING, READY, TOO CLOSE; skok v prvním okamžiku (zelený záblesk), zvenku, z kokpitu a z boku; příjezd s chlazením; prach v SCM. |
-| `atmo_tune`, `atmo_tune2`–`4` | Atmosféra Veyry etapami přes `space.Atmo` / `space.SkyParam`: tloušťka, černý pruh na obzoru, opar, barva prachu, jas oblohy a výplň. |
-| `quantum_look` | Vzhled skoku a letu: skok zezadu, z boku, zepředu, s free lookem a z kokpitu (jiskry, mlha, kamera), SCM a NAV z chase i kokpitu (bílé jiskry, prach), a jedna varianta mlhy. |
-| `tunnel_tune` | Tunel ve skoku na Orun: jas čar, pruhů a záře, šířka, stěny a barva přes `space.Tunnel` v jednom běhu (hodnoty etap jsou z doby cruise, před dalším laděním je přepiš). |
-| `space_look` | Prohlídka prostředí tak, jak je: prach ve třech rychlostech, planeta od 120 km po povrch, tělesa a holá obloha. |
-| `cockpit_centre` | Střední sloupek desky (RADAR, SELF STATUS): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé: vyříznout a zvětšit. |
-| `cockpit_readability` | Čitelnost displejů: výchozí pohled, přiblížení (Z) na FLIGHT/STATUS a THRUSTERS/CONTACTS, na konci staré oko pro srovnání. |
-| `hull_tune` | Ladění materiálu trupu: šest variant v jednom běhu přes `space.ShipMat` (síla detailu, velikost dlaždice, světlejší lak, drsnost). |
-| `hull_detail` | Trup zblízka (tryska, bok, vršek, celá loď): posouzení detailní vrstvy materiálu. Srovnání: `detail_normal_strength` 0 v setupu, znovu import a balení. |
-| `mfd_pages` | Stránky MFD: FLIGHT/STATUS, THRUSTERS/CONTACTS s afterburnerem, NAVIGATION/SELF STATUS ve vesmíru a po přistání, THRUSTERS při visení. Stránky nastavuje pole `console` (`space.MfdPage`). |
-| `look_sun` | Proč je loď v kosmu silueta: stejný záběr se sluncem otočeným po 90° (`space.SunDir`), pak s jasnějším sky lightem a méně drsným trupem. |
-| `look_fill` | Odděluje světlo od laku: sweep intenzity sky lightu 0.35–1.5, pak světlejší lak, méně kovu a tvrdší slunce. |
-| `look_tune` | Post process po vrstvách (contact shadows, Lumen, sky light, grade, film) v kosmu i v atmosféře; poslední snímek vypíše `space.PostDump`. |
-| `look_final` | Vybrané hodnoty proti úrovni tak, jak je: vesmír, atmosféra, kokpit, detail – a Lumen kvalita zvlášť, aby byla vidět cena ve snímcích. |
-| `hull_zones` | Rozbití jednolitého trupu: okluze, kavita ve dvou sílách a odřený lak ve třech, první dvojice bez všeho pro srovnání. |
-| `hull_decals` | Kam dosedly nápisy: zblízka na každý z nich a pak celá loď. Decal, který není kolmý na svůj povrch, se rozmaže do šmouh místo aby četl – to je to, co se na snímcích hledá. |
-| `hull_panels` | Panelové spáry: bez nich, pak list ve třech velikostech a třech sílách (`space.ShipMat`). |
-| `hull_scorch` | Spálený plech u trysek: bez něj, tři síly a dva dosahy; pohled zepředu kontroluje, že zůstává vzadu. |
-| `look_sharp` | Proč je obraz měkký: antialiasing, ostatní skupiny, motion blur, doostření a historie TSR po vrstvách. |
-| `look_groups` | Co která škálovací skupina stojí a co přináší: jedna po druhé na Cinematic ve stejném záběru. |
+> **Aktuální a úplný seznam scénářů je v `Docs/WORKFLOW.md`, kapitola 6.** Nedrž ho na dvou
+> místech – tenhle seznam se přestal ručně udržovat 21. 9. 2026, aby nešel z synchronizace.
 
 Scénář je JSON a **čte se z disku za běhu**, takže úprava scénáře nevyžaduje nové zabalení hry.
 Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `altitude_m`, `facing`
