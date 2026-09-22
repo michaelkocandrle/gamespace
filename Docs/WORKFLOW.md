@@ -434,6 +434,9 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
 - **Tmavá scéna s automatickou expozicí není tmavá.** Skoro černý tunel si oko vytáhne na sytě modrou.
   Když má něco zůstat tmavé, připíchni expozici (`AutoExposureMin/MaxBrightness` + `AutoExposureBias`
   přes `PostProcessSettings` kamery) a teprve pak lad' jas všeho svítícího – měřítko se posune ~6x.
+- **Konzolové příkazy ve snímkovém běhu platí do konce běhu.** Druhá varianta zdědí nastavení první,
+  takže „A/B“ porovnání vyjde falešně. Každý snímek musí začít návratem na výchozí hodnoty a první
+  snímek zahoď (loď se do něj nestihne natočit).
 - **Průhledný materiál svět nezakryje, jen dobarví.** Ať má krytí jakékoliv, hvězdy a planety pod ním
   budou vidět. Když má něco zakrýt svět (mlha v tunelu), musí být neprůhledné – a řídnutí se dělá
   maskou s modrým šumem (`MaterialExpressionScalarBlueNoise`, práh `opacity_mask_clip_value` 0,5).

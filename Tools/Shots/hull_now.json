@@ -1,0 +1,49 @@
+{
+  "_comment": "The hull as it ships now, no console tuning: space, over the planet, and the cockpit interior (which must not have followed the hull). Run: Tools/Shots.ps1 -Preset hull_now",
+  "shots": [
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "z_warmup"
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "a_space"
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -22,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "b_over_planet"
+    },
+    {
+      "camera": "cockpit",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 1,
+      "settle": 5.0,
+      "name": "c_cockpit"
+    }
+  ]
+}

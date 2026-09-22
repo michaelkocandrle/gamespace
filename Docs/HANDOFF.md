@@ -934,6 +934,22 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       Snímky `-Preset quantum_look`, `-Preset quantum_ramp`, `-Preset sparks_flow`, `-Preset tunnel_haze`.
 
 ---
+57. **Plastový vzhled trupu: změřeno a opraveno** (22. 9. 2026, krok 2 a 3 domluveného postupu).
+    - **Co to nebylo** (měřeno na zabalené hře, `Tools/Shots/plastic_diag.json`; jas trupu, rozptyl a
+      99. percentil ze snímků): traced odrazy (`r.Lumen.Reflections.MaxRoughnessToTrace` 0,4 → 1,0)
+      **žádná měřitelná změna**; lokální expozice vypnutá (kontrast 0,8 → 1,0) kontrast **snížila**
+      (std 0,170 → 0,141), takže 0,8 pomáhá; sky light 0,7 → 0,3 posunul jas o 0,006 – výplň to neplácá.
+    - **Past v měření:** konzolové příkazy platí do konce běhu, takže druhý snímek „zdědí“ nastavení
+      prvního. Každá varianta teď začíná návratem na výchozí hodnoty a první snímek je zahřívací
+      (loď se do něj ještě nestihne natočit).
+    - **Co to bylo:** materiál. `metallic_scale` 0,5 → **2,0**, `roughness_scale` → **0,75**,
+      `detail_normal_strength` 0,8 → **1,2** (`Vanguard_setup.json`, varianty v `Tools/Shots/plastic_mat.json`).
+      Šedá barva se změní na lakovaný kov: světla (p99) 0,749 → 0,871, rozptyl 0,174 → 0,196.
+      ×2,5 / 0,6 vypadalo nad planetou mokře. **Interiér kokpitu hodnoty nedědí** – v setupu je nemá
+      a musí zůstat na hodnotách masteru.
+    - Kontrolní snímky bez ladění: `-Preset hull_now` (vesmír, nad planetou, kokpit).
+
+---
 
 ## 6. Mapa kódu a obsahu
 
@@ -1358,4 +1374,5 @@ Viz `git log --oneline`. Poslední kroky:
 - quantum tunel po autorově testu: bez prosvítání, uzavřený tmavý prostor, jiskry u lodi (bod 53);
 - náběh skoku, QT FUEL na HUD v NAV, rovný pohled z kokpitu (bod 54);
 - tunel nic neprosvítá (maskovaná mlha) a jiskry vypadají jako jiskry (bod 55);
-- skok podle reference: maják v úběžníku, připíchnutá expozice, proudící jiskry (bod 56).
+- skok podle reference: maják v úběžníku, připíchnutá expozice, proudící jiskry (bod 56);
+- plastový trup: změřeno, že to byl materiál, ne světlo (bod 57).
