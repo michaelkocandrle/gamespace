@@ -127,3 +127,20 @@ server (dokončovací krok vícedílného uploadu není v REST dokumentaci), spo
 REST `POST /v1/generate/custom/<modelId>` a `GET /v1/jobs/<id>`.
 
 Ceny prvních běhů: retopologie hustého panelu 113 CU, Tripo 3.1 s texturou 75 CU.
+
+### AI retopologie místo decimace (23. 9. 2026, první ostrý běh)
+
+Hustý panel z Meshy 4k prošel přes `model_tencent-smarttopology` (Hunyuan Polygen 1.5,
+`polygonType` triangle, `faceLevel` medium):
+
+| | Trojúhelníky | Vrcholy | Soubor |
+| --- | --- | --- | --- |
+| Meshy 4k (vstup) | 28 624 | 26 143 | 1,0 MB |
+| **Polygen retopologie** | **3 131** | 1 611 | 56,8 kB |
+
+Devítinásobné zmenšení a deska, šrouby, přepínače i štítek zůstaly čitelné (`Saved/Kitbash/compare_retopo.png`).
+Běh stál 113 CU a trval ~20 minut; průběh přitom hlásí 10 % a pak skočí rovnou na hotovo, takže
+podle `progress` se nedá poznat, jestli úloha žije — kouká se na `updatedAt`.
+
+Praktický závěr pro `build_ai_ship.py`: krok `decimate` (Blender) může nahradit Polygen, protože
+drží ostré hrany hard-surface dílů líp než decimace podle chyby.

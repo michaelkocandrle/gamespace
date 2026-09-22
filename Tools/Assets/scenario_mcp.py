@@ -190,7 +190,9 @@ def main(argv):
         job_id = job.get("job", {}).get("jobId") or job.get("jobId")
         log("job %s" % job_id)
         finished = wait_for_job(job_id)
-        assets = (finished.get("metadata", {}).get("output", {}) or {}).get("assetIds") or []
+        # The result ids sit straight under metadata, not under metadata.output.
+        meta = finished.get("metadata", {}) or {}
+        assets = meta.get("assetIds") or (meta.get("output", {}) or {}).get("assetIds") or []
         print(json.dumps({"status": finished.get("status"), "assets": assets,
                           "cu": finished.get("billing", {}).get("cuCost")}, indent=2))
         return 0
