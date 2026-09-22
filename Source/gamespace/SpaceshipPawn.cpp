@@ -36,6 +36,8 @@
 #include "SpaceDustComponent.h"
 #include "SpaceSpeedTunnelComponent.h"
 #include "SpaceHullSparksComponent.h"
+#include "Components/DirectionalLightComponent.h"
+#include "Engine/DirectionalLight.h"
 #include "SpaceUserSettings.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/Engine.h"
@@ -335,6 +337,14 @@ ASpaceshipPawn::ASpaceshipPawn()
 	SpeedTunnel->SetupAttachment(HullCollision);
 	HullSparks = CreateDefaultSubobject<USpaceHullSparksComponent>(TEXT("HullSparks"));
 	HullSparks->SetupAttachment(Hull);
+	QuantumGlow = CreateDefaultSubobject<UPointLightComponent>(TEXT("QuantumGlow"));
+	QuantumGlow->SetupAttachment(Hull);
+	QuantumGlow->SetIntensityUnits(ELightUnits::Candelas);
+	QuantumGlow->SetIntensity(0.f);
+	QuantumGlow->SetLightColor(FLinearColor(0.3f, 0.55f, 1.f));
+	QuantumGlow->SetAttenuationRadius(900.f);
+	QuantumGlow->SetCastShadows(false);
+	QuantumGlow->SetVisibility(false);
 
 	// A hard reference, so the cooker packs it (engine content loaded by path would be missing).
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> GearCylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
@@ -351,6 +361,20 @@ void ASpaceshipPawn::BeginPlay()
 	ChaseCameraBaseLocation = ChaseCamera->GetRelativeLocation();
 	CockpitCameraBaseLocation = CockpitCamera->GetRelativeLocation();
 	HullSparks->SetHull(Hull);
+	// The nose glow sits just ahead of and below the hull's front, whatever the ship.
+	if (Hull->GetStaticMesh())
+	{
+		const FBox Box = Hull->GetStaticMesh()->GetBoundingBox();
+		QuantumGlow->SetRelativeLocation(FVector(Box.Max.X + 150.0, 0.0, Box.GetCenter().Z - Box.GetExtent().Z * 0.3));
+	}
+	for (TActorIterator<ADirectionalLight> It(GetWorld()); It; ++It)
+	{
+		if (UDirectionalLightComponent* Light = Cast<UDirectionalLightComponent>(It->GetLightComponent()))
+		{
+			QuantumSun = Light;
+			break;
+		}
+	}
 	BaseArmLength = CameraBoom->TargetArmLength;
 	BaseSocketOffset = CameraBoom->SocketOffset;
 	BaseChaseFov = ChaseCamera->FieldOfView;
@@ -3090,6 +3114,26 @@ void ASpaceshipPawn::UpdateSpaceDust(float DeltaSeconds)
 	SpaceDust->UpdateDust(View, LinearVelocity, 1.f - QuantumBlend);
 	SpeedTunnel->UpdateTunnel(View, LinearVelocity, DeltaSeconds, QuantumBlend);
 	HullSparks->UpdateSparks(DeltaSeconds, float(LinearVelocity.Size()), QuantumBlend, View);
+
+	// The jump's own light: sun down, blue glow at the nose (only the player's ship touches the sun).
+	QuantumGlow->SetIntensity(QuantumGlowCandela * QuantumBlend);
+	QuantumGlow->SetVisibility(QuantumBlend > 0.01f);
+	if (UDirectionalLightComponent* Sun = QuantumSun.Get())
+	{
+		if (QuantumBlend > 0.001f || QuantumSunBaseIntensity >= 0.f)
+		{
+			if (QuantumSunBaseIntensity < 0.f)
+			{
+				QuantumSunBaseIntensity = Sun->Intensity;
+			}
+			Sun->SetIntensity(QuantumSunBaseIntensity * FMath::Lerp(1.f, QuantumSunScale, QuantumBlend));
+			if (QuantumBlend <= 0.001f)
+			{
+				// Back to the level's own value; tuning (space.Sun) works again outside jumps.
+				QuantumSunBaseIntensity = -1.f;
+			}
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------

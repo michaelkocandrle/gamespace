@@ -31,6 +31,9 @@ USpaceHullSparksComponent::USpaceHullSparksComponent()
 	bAffectDynamicIndirectLighting = false;
 	SetVisibleInRayTracing(false);
 	NumCustomDataFloats = 3;
+	// Over the quantum tunnel's fog (sort priority 0, fully opaque, centred on the camera): with equal
+	// priorities the fog sorted after the sparks now and then and drew them over as black streaks.
+	SetTranslucentSortPriority(20);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	if (Cube.Succeeded())
@@ -194,7 +197,8 @@ void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, fl
 		float Fade = Index < ActiveCount ? FMath::SmoothStep(0.f, 0.15f, T) * FMath::Pow(1.f - T, 1.5f) : 0.f;
 		// Nothing on the lens (the cockpit's eye is inside the hull's bounds).
 		// 5-12 m: from the cockpit the sparks off the canopy frame crossed the glass as thick bars.
-		Fade *= float(FMath::SmoothStep(500.0, 1200.0, FVector::Dist(ToWorld.TransformPosition(Local), ViewLocation)));
+		Fade *= float(FMath::SmoothStep(double(CameraFadeNearCm), double(FMath::Max(CameraFadeFarCm, CameraFadeNearCm + 1.f)),
+			FVector::Dist(ToWorld.TransformPosition(Local), ViewLocation)));
 		SetCustomDataValue(Index, 0, Fade, false);
 		SetCustomDataValue(Index, 1, Spark.Brightness, false);
 		SetCustomDataValue(Index, 2, Spark.Length, false);

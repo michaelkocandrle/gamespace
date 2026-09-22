@@ -112,24 +112,24 @@ public:
 
 	/** How far a streak's colour may lean towards BeamColor, 0..1: a few cold blue ones among the white. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float StreakColorSpread = 0.5f;
+	float StreakColorSpread = 0.f;
 
 	/** Fraction of the lanes that hold a streak at all; the rest stay dark so the streaks do not form a comb. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float Fill = 0.2f;
+	float Fill = 0.08f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
 	FLinearColor StreakColor = FLinearColor(0.85f, 0.92f, 1.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
-	float StreakBrightness = 12.f;
+	float StreakBrightness = 16.f;
 
 	/** The soft shafts of light converging on the vanishing point. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
 	FLinearColor BeamColor = FLinearColor(0.4f, 0.55f, 1.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
-	float BeamBrightness = 1.2f;
+	float BeamBrightness = 0.3f;
 
 	/** Beams round the tunnel, and how sharply they stand out of the gaps between them. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "1.0"))
@@ -143,7 +143,7 @@ public:
 	FLinearColor GlowColor = FLinearColor(0.8f, 0.9f, 1.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
-	float GlowBrightness = 2.f;
+	float GlowBrightness = 0.f;
 
 	/** The lit fog on the walls beside the ship (its colour carries the brightness). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
@@ -170,22 +170,28 @@ public:
 	float FogRadiusCm = 25000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float FogOpacity = 0.9f;
+	float FogOpacity = 1.f;
+
+	/** The fog's light shafts round the axis: how many, and how much they stand out (0 flat). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "1.0"))
+	float FogShaftCount = 11.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float FogShaftContrast = 0.9f;
 
 	/**
-	 * The fog's cover down the middle towards the vanishing point, as a share of FogOpacity. Thin fog
-	 * everywhere read as a wash (the author, 21. 9. 2026) and thin down the middle showed the
-	 * destination planet whole; what reads as a tunnel is dense fog that is dark in the middle and
-	 * lit, in shafts, on the walls - the reference's dark hole.
+	 * The fog's cover down the middle towards the vanishing point, as a share of FogOpacity. 1: the
+	 * tunnel is a closed space. Below 1 the destination planet showed through as a ghost (the author's
+	 * playtest, 22. 9. 2026); the look comes from the colours - dark in the middle, lit shafts on the walls.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float FogCentreOpacity = 0.95f;
+	float FogCentreOpacity = 1.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
-	FLinearColor FogNearColor = FLinearColor(0.035f, 0.05f, 0.09f);
+	FLinearColor FogNearColor = FLinearColor(0.02f, 0.03f, 0.055f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
-	FLinearColor FogFarColor = FLinearColor(0.002f, 0.003f, 0.006f);
+	FLinearColor FogFarColor = FLinearColor(0.001f, 0.002f, 0.004f);
 
 	/** The walls, nearest first. The near one sweeps past fast and sparse, the far one carries the beams. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")

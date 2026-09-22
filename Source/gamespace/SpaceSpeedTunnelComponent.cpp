@@ -235,6 +235,8 @@ void USpaceSpeedTunnelComponent::UpdateTunnel(const FVector& ViewLocation, const
 		FogMaterial->SetScalarParameterValue(TEXT("TunnelAlpha"), Alpha);
 		FogMaterial->SetScalarParameterValue(TEXT("FogOpacity"), FogOpacity);
 		FogMaterial->SetScalarParameterValue(TEXT("FogCentreOpacity"), FogCentreOpacity);
+		FogMaterial->SetScalarParameterValue(TEXT("FogShaftCount"), FogShaftCount);
+		FogMaterial->SetScalarParameterValue(TEXT("FogShaftContrast"), FogShaftContrast);
 		const FMatrix Frame = FRotationMatrix::MakeFromX(Direction);
 		FogMaterial->SetVectorParameterValue(TEXT("TunnelRight"), FLinearColor(Frame.GetUnitAxis(EAxis::Y)));
 		FogMaterial->SetVectorParameterValue(TEXT("TunnelUp"), FLinearColor(Frame.GetUnitAxis(EAxis::Z)));

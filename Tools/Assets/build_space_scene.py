@@ -1052,18 +1052,24 @@ float z = dot(P, Dir.xyz);
 float zn = z / HalfLength;
 float3 rv = P - z * Dir.xyz;
 float a = atan2(dot(rv, Up.xyz), dot(rv, Right.xyz)) / 6.2831853 + 0.5;
-// Soft light shafts round the axis, so the fog reads as the walls of a tunnel and not a wash.
-float count = 13.0;
+// Broad, low-contrast light shafts round the axis converging on the vanishing point (the reference's
+// dim radial rays), with a finer layer on top so the walls are not smooth bands.
+float count = max(floor(ShaftCount), 1.0);
 float i0 = floor(a * count);
 float n0 = frac(sin((i0 + 3.0) * 91.345) * 47453.5453);
 float n1 = frac(sin((fmod(i0 + 1.0, count) + 3.0) * 91.345) * 47453.5453);
 float n = lerp(n0, n1, smoothstep(0.0, 1.0, frac(a * count)));
-float shafts = 0.45 + 1.1 * n * n;
+float fine = floor(count * 4.3);
+float j0 = floor(a * fine);
+float m0 = frac(sin((j0 + 7.0) * 37.719) * 23421.631);
+float m1 = frac(sin((fmod(j0 + 1.0, fine) + 7.0) * 37.719) * 23421.631);
+float m = lerp(m0, m1, smoothstep(0.0, 1.0, frac(a * fine)));
+float shafts = lerp(1.0, 0.4 + 1.2 * n * n, ShaftContrast) * lerp(1.0, 0.7 + 0.6 * m, ShaftContrast);
 float far = smoothstep(0.0, 0.65, zn);
 float3 colour = lerp(Near.rgb * shafts, Far.rgb, far);
-// Thick on the walls beside the ship, thin down the middle: a tunnel you look along, not a fog bank.
-float opacity = Opacity * lerp(1.0, CentreOpacity, far) * lerp(0.7, 1.0, shafts / 1.55);
-return float4(colour, saturate(opacity * Alpha));
+// Fully opaque (times the jump's blend): the tunnel is a closed space. Anything less let the
+// destination planet and the stars show through as ghosts (the author's playtest, 22. 9. 2026).
+return float4(colour, saturate(Opacity * lerp(1.0, CentreOpacity, far) * Alpha));
 """
 
 
@@ -1082,18 +1088,20 @@ def build_fog_material():
     # the author's screenshot, 21. 9. 2026).
     m.set_editor_property("enable_responsive_aa", True)
     m.set_editor_property("output_translucent_velocity", True)
-    names = ["P", "Dir", "Right", "Up", "HalfLength", "Near", "Far", "Opacity", "CentreOpacity", "Alpha"]
+    names = ["P", "Dir", "Right", "Up", "HalfLength", "Near", "Far", "Opacity", "CentreOpacity", "Alpha", "ShaftCount", "ShaftContrast"]
     fog = custom(m, FOG_HLSL, names, -400, 0, "QuantumFog", unreal.CustomMaterialOutputType.CMOT_FLOAT4)
     sources = {
         "P": delta,
         "Dir": vector(m, "TunnelDirection", (1.0, 0.0, 0.0), -900, 100),
         "Right": vector(m, "TunnelRight", (0.0, 1.0, 0.0), -1100, 150),
         "Up": vector(m, "TunnelUp", (0.0, 0.0, 1.0), -1100, 250),
-        "CentreOpacity": scalar(m, "FogCentreOpacity", 0.35, -1100, 550),
+        "CentreOpacity": scalar(m, "FogCentreOpacity", 1.0, -1100, 550),
+        "ShaftCount": scalar(m, "FogShaftCount", 11.0, -1100, 650),
+        "ShaftContrast": scalar(m, "FogShaftContrast", 0.6, -1100, 750),
         "HalfLength": scalar(m, "TunnelHalfLengthCm", 150000.0, -900, 200),
         "Near": vector(m, "FogNearColor", (0.04, 0.055, 0.09), -900, 300),
         "Far": vector(m, "FogFarColor", (0.004, 0.006, 0.012), -900, 400),
-        "Opacity": scalar(m, "FogOpacity", 0.8, -900, 500),
+        "Opacity": scalar(m, "FogOpacity", 1.0, -900, 500),
         "Alpha": scalar(m, "TunnelAlpha", 0.0, -900, 600),
     }
     for name in names:

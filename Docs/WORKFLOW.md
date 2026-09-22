@@ -444,6 +444,9 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
 - **Průsvitná vrstva přes celý obraz (mlha) a TSR:** bez vlastního pohybu nemá TSR čím odmítnout
   starou historii a objekty za ní nechávají tmavé „duchy“. Takové materiály: `enable_responsive_aa`
   a `output_translucent_velocity`.
+- **Plně krycí průsvitná vrstva kolem kamery** (mlha tunelu) má střed v kameře, takže se při řazení
+  podle vzdálenosti vykreslí jako poslední a přemaže ostatní průsvitné věci (vypadá to jako černé
+  kostičkované čáry). Věci, které mají být před ní, potřebují vyšší `TranslucentSortPriority`.
 - **Záporná `TranslucentSortPriority`** řadí objekt před *všechny* průsvitné věci ve scéně, ne jen
   před ty, se kterými ho chceš seřadit. Zvedni prioritu těm, které mají být navrchu.
 - **Efekt kolem kamery z válce:** kamera uvnitř otevřeného válce ve směru letu dostane úběžník

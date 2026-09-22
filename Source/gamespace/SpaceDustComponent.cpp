@@ -34,6 +34,8 @@ USpaceDustComponent::USpaceDustComponent()
 	SetVisibleInRayTracing(false);
 	// 0 the fade (distance and speed), 1 the speck's own brightness, 2 its length as a multiplier.
 	NumCustomDataFloats = 3;
+	// Over the quantum tunnel's fog, like the hull sparks (see USpaceHullSparksComponent).
+	SetTranslucentSortPriority(20);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	if (Cube.Succeeded())

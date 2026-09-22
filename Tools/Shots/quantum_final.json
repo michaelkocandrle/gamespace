@@ -1,0 +1,12 @@
+{
+  "_comment": "The quantum jump as shipped, no console tuning: the start, the jump from the side, behind, below and the cockpit, and a free look, then the arrival. For a clean check against starcitizenreference/QuantumTravel_VideoNotes.md. Run: Tools/Shots.ps1 -Preset quantum_final",
+  "shots": [
+    {"name": "a_start", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "chase_yaw": 25, "chase_pitch": -8, "settle": 0.4},
+    {"name": "b_side", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "chase_yaw": 110, "chase_pitch": -4, "chase_zoom": 0.75, "settle": 2.5},
+    {"name": "c_behind", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "chase_yaw": 25, "chase_pitch": -8, "settle": 2.5},
+    {"name": "d_below", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 0, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "chase_yaw": 150, "chase_pitch": 12, "chase_zoom": 0.8, "settle": 2.5},
+    {"name": "e_cockpit", "camera": "cockpit", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.3, "settle": 2.5},
+    {"name": "f_freelook", "camera": "chase", "altitude_m": 60000, "facing": "body:Keth", "hud": 1, "gear": false, "mode": "NAV", "quantum": "Keth", "quantum_progress": 0.3, "chase_yaw": 67, "chase_pitch": -9, "settle": 2.5},
+    {"name": "g_arrived", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "gear": false, "mode": "NAV", "quantum": "Orun", "quantum_progress": 0.9, "chase_yaw": 25, "chase_pitch": -8, "settle": 7.0}
+  ]
+}

@@ -20,6 +20,7 @@
 #include "Components/DirectionalLightComponent.h"
 #include "SpaceDustComponent.h"
 #include "SpaceSpeedTunnelComponent.h"
+#include "SpaceHullSparksComponent.h"
 #include "Components/SkyLightComponent.h"
 #include "Components/SkyAtmosphereComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -402,6 +403,30 @@ namespace
 				}
 			}
 			UE_LOG(LogTemp, Display, TEXT("space.Tunnel %s on %d components"),
+				Result.IsEmpty() ? *FString::Printf(TEXT("%s: no such property"), *Args[0]) : *Result, Count);
+		}));
+
+	FAutoConsoleCommandWithWorldAndArgs SparksCommand(
+		TEXT("space.Sparks"),
+		TEXT("space.Sparks <Property> <Value>: a property of the hull sparks (QuantumCount, FlightCount, QuantumBrightness, ThicknessCm, Spread, ...). Not saved; a changed count takes effect at once."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			if (Args.Num() < 2)
+			{
+				UE_LOG(LogTemp, Display, TEXT("space.Sparks <Property> <Value>"));
+				return;
+			}
+			FString Result;
+			int32 Count = 0;
+			for (TActorIterator<AActor> It(World); It; ++It)
+			{
+				for (USpaceHullSparksComponent* Sparks : TInlineComponentArray<USpaceHullSparksComponent*>(*It))
+				{
+					Result = SetByName(Sparks->GetClass(), Sparks, Args, 1);
+					++Count;
+				}
+			}
+			UE_LOG(LogTemp, Display, TEXT("space.Sparks %s on %d components"),
 				Result.IsEmpty() ? *FString::Printf(TEXT("%s: no such property"), *Args[0]) : *Result, Count);
 		}));
 

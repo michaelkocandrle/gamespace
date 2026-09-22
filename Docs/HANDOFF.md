@@ -819,6 +819,28 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Test `Tools/Tests/test_planet_rocks.py`, snímky `-Preset rocks_look`, přehled `Tools/Shots/sheet.py`.
 
 ---
+53. **Quantum tunel podle autorova testu** (22. 9. 2026, autor po SC-4: planeta prosvítá tunelem
+    jako duch, tunel je plochý paprskovitý vzor, v referenci je to uzavřený tmavý prostor s modrými
+    jiskrami těsně u lodi).
+    - **Prosvítání:** mlha (`M_QuantumFog`) krývala jen 60–90 %, takže jasný Orun, hvězdy i mlhovina
+      prosvítaly. Teď krývá 100 % (`FogOpacity` 1, `FogCentreOpacity` 1) a vzhled dělají jen barvy:
+      tmavě modrá u stěn v širokých radiálních paprscích (`FogShaftCount`, `FogShaftContrast`), černá
+      díra v úběžníku, žádná záře uprostřed (`GlowBrightness` 0).
+    - **Past – černé čáry:** jakmile byla mlha plně krycí, občas se vykreslila až po jiskrách (stejná
+      priorita řazení průhledných věcí, řadí se podle vzdálenosti a střed mlhy je v kameře) a jiskry
+      přemazala na černé kostičkované čáry. Jiskry a prach mají `TranslucentSortPriority` 20, stěny
+      tunelu 10, mlha 0. (Po změně počtu jisker přes konzoli se čáry mohou ještě krátce objevit.)
+    - **Čáry:** jen 8 % drah (`Fill` 0,08), bílé (`StreakColorSpread` 0), jasnější.
+    - **Jiskry u lodi:** 300 tenkých modrých, život do 0,35 s, tok 35 m/s, rozptyl 0,08 – drží se
+      trupu na délku lodi. Hustší a delší varianty dělaly mrak daleko za lodí.
+    - **Loď je silueta:** slunce se ve skoku stáhne na pětinu (`QuantumSunScale`), u přídě svítí modré
+      světlo (`QuantumGlow`, 60 cd) – to je modrá záře na spodku přídě.
+    - Nové konzolové ladění `space.Sparks`; varianty `Tools/Shots/tunnel_variants.json`, výsledek bez
+      ladění `-Preset quantum_final`.
+    - Z kokpitu je modrá záře pod přídí pořád slabší než v referenci (jiskry blízko oka jsou skryté,
+      bližší dávaly přes sklo tlusté pruhy) – k posouzení autorem.
+
+---
 
 ## 6. Mapa kódu a obsahu
 
@@ -1229,4 +1251,5 @@ Viz `git log --oneline`. Poslední kroky:
 - planety 1/4: atmosféra Veyry podle videa (bod 49);
 - planety 2/4: Veyra 120 km, kulaté siluety, pryč zástupné asteroidy (bod 50);
 - planety 3/4: povrch ve třech měřítkách, teplá atmosféra (bod 51);
-- planety 4/4: fotoskenovaná zem, kameny, Zen restart v Package.ps1 (bod 52).
+- planety 4/4: fotoskenovaná zem, kameny, Zen restart v Package.ps1 (bod 52);
+- quantum tunel po autorově testu: bez prosvítání, uzavřený tmavý prostor, jiskry u lodi (bod 53).

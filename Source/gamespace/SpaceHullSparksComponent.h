@@ -43,7 +43,7 @@ public:
 
 	/** How many sparks live at once in a jump, and in normal flight at full strength. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0", ClampMax = "2000"))
-	int32 QuantumCount = 420;
+	int32 QuantumCount = 300;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0", ClampMax = "2000"))
 	int32 FlightCount = 60;
@@ -57,43 +57,50 @@ public:
 
 	/** How fast the sparks stream back along the hull, cm/s: in a jump, and at most in normal flight. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
-	float QuantumFlowSpeed = 6000.f;
+	float QuantumFlowSpeed = 3500.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
 	float FlightFlowSpeed = 4500.f;
 
 	/** How far a spark drifts off the hull while it lives, as a share of its backwards flow. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0", ClampMax = "2.0"))
-	float Spread = 0.25f;
+	float Spread = 0.08f;
 
 	/** Life of a spark, s (each gets a random time between the two). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.02"))
 	float MinLifeSeconds = 0.18f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.02"))
-	float MaxLifeSeconds = 0.55f;
+	float MaxLifeSeconds = 0.35f;
 
 	/** Streak length, cm, and thickness (seen from the chase camera 25-35 m away, 2 cm was under a pixel). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "1.0"))
-	float QuantumLengthCm = 260.f;
+	float QuantumLengthCm = 520.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "1.0"))
 	float FlightLengthCm = 420.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.1"))
-	float ThicknessCm = 5.f;
+	float ThicknessCm = 3.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks")
 	FLinearColor QuantumColor = FLinearColor(0.25f, 0.55f, 1.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
-	float QuantumBrightness = 14.f;
+	float QuantumBrightness = 22.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks")
 	FLinearColor FlightColor = FLinearColor(0.8f, 0.88f, 1.f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
 	float FlightBrightness = 6.f;
+
+	/** Sparks fade out between these distances from the camera (cm): none on the lens in the cockpit. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
+	float CameraFadeNearCm = 500.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0"))
+	float CameraFadeFarCm = 1200.f;
 
 	/** Share of the sparks born at the front half of the hull: the nose is what cuts through. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hull Sparks", meta = (ClampMin = "0.0", ClampMax = "1.0"))

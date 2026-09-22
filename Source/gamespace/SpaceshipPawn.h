@@ -882,6 +882,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<class USpaceHullSparksComponent> HullSparks;
 
+	/** Blue light at the nose in a quantum jump: the reference's glow under the canopy, and what lights the hull. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<class UPointLightComponent> QuantumGlow;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<USpringArmComponent> CameraBoom;
 
@@ -1545,6 +1549,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
 	float QuantumShakeCm = 6.f;
 
+	/**
+	 * The sun's share in a quantum jump. In the reference the ship is a dark silhouette lit only by the
+	 * tunnel's blue sparks; at full sun it read as a lit model pasted on a background (22. 9. 2026).
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float QuantumSunScale = 0.2f;
+
+	/** Brightness of the nose glow at a full jump, candela. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
+	float QuantumGlowCandela = 60.f;
+
 	/** Short jolt when boost or the afterburner starts, or a quantum jump starts or ends, cm. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
 	float KickShakeCm = 9.f;
@@ -2022,6 +2037,9 @@ private:
 	/** Eased 0..1 blends driving camera, lights and sound. */
 	float BoostBlend = 0.f;
 	float AfterburnerFeel = 0.f;
+	/** The level's sun and its own intensity, for QuantumSunScale. */
+	TWeakObjectPtr<class UDirectionalLightComponent> QuantumSun;
+	float QuantumSunBaseIntensity = -1.f;
 	float QuantumBlend = 0.f;
 	float CameraKick = 0.f;
 
