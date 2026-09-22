@@ -34,7 +34,9 @@ Než se cokoliv pošle do Meshy/Tripo, rozhodni:
 
 - **Meshy Retexture** (text prompt, bez nových referenčních obrázků) — upgraduje
   materiál/texturu existující geometrie. Použitelné a ověřené, nemění tvar.
-- **UltraShape 1.0** (scenario.com, open-source) — "3D geometry super-resolution": dovybaví
+- **UltraShape 1.0** (scenario.com, předplatné od 23. 9. 2026; chce referenční obrázek *i* hrubý mesh,
+  viz `WORKFLOW.md` 3.1b; vstupy pro první test: `ArtSource/Ships/Vanguard/Kitbash/UltraShape_input_SwitchPanel.glb`
+  a `.../UltraShape/SwitchPanel_three_quarter.png`) — "3D geometry super-resolution": dovybaví
   hrubý mesh o skutečné povrchové detaily (až 8 mil. trojúhelníků na výstupu, čeká ho tedy
   stejný decimate krok jako ostatní AI modely). Podle popisu cílí primárně na organické tvary,
   u hard-surface sci-fi dílů neověřeno — vyzkoušet na konkrétním kusu, ne rovnou nasadit plošně.

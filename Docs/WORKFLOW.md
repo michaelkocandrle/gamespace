@@ -154,6 +154,27 @@ headless renderů. Nainstalováno 19. 9. 2026.
 - Addon do Blenderu: `Tools/Blender/mcp/install_blender_mcp_addon.py` (bere `bundled/addon.py`
   z uv cache, zapne addon a vypne `telemetry_consent`).
 
+### 3.1b Scenario MCP (UltraShape a spol., 23. 9. 2026)
+
+3D modely se do Scenaria přes REST nahrávají vícedílným uploadem (`POST /v1/uploads` → `PUT` na
+presigned URL → dokončovací volání), a to poslední volání není ve veřejné dokumentaci (všechno pod
+`docs.scenario.com` vrací bez přihlášení 404). Proto se používá jejich vlastní MCP server, který
+upload řeší sám:
+
+```
+claude mcp add --transport http scenario https://mcp.scenario.com/mcp --header "Authorization: Basic <base64 klíč:secret>"
+```
+
+- Autentizace je HTTP Basic, tedy `API key:API secret` v Base64 (samotný klíč nestačí).
+- Hlavička se uloží do `.claude.json` v domovském adresáři k tomuhle projektu — **ne do repozitáře**;
+  klíče leží v `C:/gamespace/secrets/` (mimo git).
+- **Nástroje serveru se načtou až při startu session**, po přidání je potřeba session restartovat.
+- `claude mcp list` ověří spojení (`✓ Connected`).
+
+UltraShape 1.0 (`model_ultrashape-1-0`, capability `3d23d`) chce **obojí**: `image` (referenční
+obrázek) i `model` (hrubý mesh), k tomu `numInferenceSteps` (1–50, výchozí 50),
+`octreeResolution` (128–1024, výchozí 1024) a `seed`.
+
 ### 3.2 Použití
 
 1. Spusť Blender **s GUI** na pozadí. Socket na `localhost:9876` běží jen s GUI; v `-b` se addon jen
