@@ -3,16 +3,18 @@
 #include "SpaceHullSparksComponent.h"
 
 #include "Engine/CollisionProfile.h"
+#include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "PhysicsEngine/BodySetup.h"
 #include "Materials/MaterialInterface.h"
 #include "Misc/PackageName.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace HullSparks
 {
-	/** The space dust's material: a soft spindle along DustDirection, with fade, brightness and length per instance. */
-	const TCHAR* const MaterialPackage = TEXT("/Game/Environments/Space/M_SpaceDust");
-	const TCHAR* const MaterialPath = TEXT("/Game/Environments/Space/M_SpaceDust.M_SpaceDust");
+	/** M_HullSpark: a hot core in a faint halo along each instance's own direction (custom data 3-5). */
+	const TCHAR* const MaterialPackage = TEXT("/Game/Environments/Space/M_HullSpark");
+	const TCHAR* const MaterialPath = TEXT("/Game/Environments/Space/M_HullSpark.M_HullSpark");
 	constexpr double CubeSizeCm = 100.0;
 	constexpr int32 TraceAttempts = 900;
 }
@@ -30,7 +32,8 @@ USpaceHullSparksComponent::USpaceHullSparksComponent()
 	bAffectDistanceFieldLighting = false;
 	bAffectDynamicIndirectLighting = false;
 	SetVisibleInRayTracing(false);
-	NumCustomDataFloats = 3;
+	// 0 fade, 1 brightness (flickers). M_HullSpark measures the rest on the cube itself.
+	NumCustomDataFloats = 2;
 	// Over the quantum tunnel's fog (sort priority 0, fully opaque, centred on the camera): with equal
 	// priorities the fog sorted after the sparks now and then and drew them over as black streaks.
 	SetTranslucentSortPriority(20);
@@ -69,19 +72,29 @@ void USpaceHullSparksComponent::FindSpawnPoints()
 	}
 	const FBoxSphereBounds HullBounds = HullComponent->Bounds;
 	const FVector Centre = HullBounds.Origin;
-	const double Reach = HullBounds.SphereRadius * 1.5;
 	FRandomStream Stream(0x7E11);
 
-	// Trace the hull's collision from outside towards the middle, from every side.
-	FCollisionQueryParams Params(TEXT("HullSparks"), false);
-	for (int32 Attempt = 0; Attempt < HullSparks::TraceAttempts; ++Attempt)
+	// The hull's collision shapes (UCX hulls and boxes from Blender), read as geometry: from random
+	// spots round the ship, the nearest point on them and its normal. Line traces against the hull
+	// found nothing (the shapes are convex elements, and the tests run without a physics scene), so
+	// the sparks came out of a box round the ship, in mid-air (22. 9. 2026).
+	const UStaticMeshComponent* MeshComponent = Cast<UStaticMeshComponent>(HullComponent);
+	const UBodySetup* Body = MeshComponent && MeshComponent->GetStaticMesh() ? MeshComponent->GetStaticMesh()->GetBodySetup() : nullptr;
+	if (Body)
 	{
-		const FVector Dir = Stream.GetUnitVector();
-		FHitResult Hit;
-		if (HullComponent->LineTraceComponent(Hit, Centre + Dir * Reach, Centre, Params) && Hit.bBlockingHit)
+		const FTransform BodyToWorld = HullComponent->GetComponentTransform();
+		const FVector Extent = HullBounds.BoxExtent * 1.1;
+		for (int32 Attempt = 0; Attempt < HullSparks::TraceAttempts; ++Attempt)
 		{
-			Points.Add(GetComponentTransform().InverseTransformPosition(Hit.ImpactPoint));
-			Normals.Add(GetComponentTransform().InverseTransformVectorNoScale(Hit.ImpactNormal));
+			const FVector From = Centre + FVector(Stream.FRandRange(-1.f, 1.f), Stream.FRandRange(-1.f, 1.f), Stream.FRandRange(-1.f, 1.f)) * Extent;
+			FVector Closest;
+			FVector Normal;
+			// 0 inside a shape: no surface to pour from there.
+			if (Body->GetClosestPointAndNormal(From, BodyToWorld, Closest, Normal, true) > 1.f && !Normal.IsNearlyZero())
+			{
+				Points.Add(GetComponentTransform().InverseTransformPosition(Closest));
+				Normals.Add(GetComponentTransform().InverseTransformVectorNoScale(Normal.GetSafeNormal()));
+			}
 		}
 	}
 	bPointsFromCollision = Points.Num() >= 32;
@@ -114,16 +127,41 @@ int32 USpaceHullSparksComponent::DebugGetSpawnPointCount(bool& bOutFromCollision
 	return Points.Num();
 }
 
-void USpaceHullSparksComponent::Respawn(FSpark& Spark, bool bRandomAge)
+void USpaceHullSparksComponent::MoveEmitter(FEmitter& Emitter)
 {
 	const TArray<int32>& From = (Random.FRand() < NoseBias && FrontPoints.Num() > 0) || BackPoints.Num() == 0 ? FrontPoints : BackPoints;
-	Spark.Point = From.Num() > 0 ? From[Random.RandHelper(From.Num())] : 0;
+	Emitter.Point = From.Num() > 0 ? From[Random.RandHelper(From.Num())] : 0;
+	Emitter.TimeLeft = Random.FRandRange(EmitterMinSeconds, FMath::Max(EmitterMinSeconds, EmitterMaxSeconds));
+}
+
+void USpaceHullSparksComponent::Respawn(FSpark& Spark, bool bRandomAge)
+{
+	Spark.Emitter = Emitters.Num() > 0 ? Random.RandHelper(Emitters.Num()) : 0;
+	const int32 Point = Emitters.IsValidIndex(Spark.Emitter) ? Emitters[Spark.Emitter].Point : 0;
+	const FVector Normal = Normals.IsValidIndex(Point) ? Normals[Point] : FVector::UpVector;
+	FVector Side = FVector::CrossProduct(Normal, FVector::ForwardVector).GetSafeNormal();
+	if (Side.IsNearlyZero())
+	{
+		Side = FVector::RightVector;
+	}
+	const FVector Up = FVector::CrossProduct(Normal, Side);
+	// A tuft: all from one spot (a few cm apart), in a cone round the normal, a little backwards.
+	Spark.Origin = (Points.IsValidIndex(Point) ? Points[Point] : FVector::ZeroVector) + Normal * 5.0
+		+ Side * Random.FRandRange(-8.f, 8.f) + Up * Random.FRandRange(-8.f, 8.f);
+	const FVector Dir = Normal * Random.FRandRange(0.3f, 1.f)
+		+ (Side * Random.FRandRange(-1.f, 1.f) + Up * Random.FRandRange(-1.f, 1.f)) * ConeSpread
+		- FVector::ForwardVector * Random.FRandRange(0.f, 0.6f);
+	Spark.Velocity = Dir.GetSafeNormal(UE_SMALL_NUMBER, Normal) * BurstSpeed * Random.FRandRange(0.4f, 1.f);
 	Spark.Life = Random.FRandRange(MinLifeSeconds, FMath::Max(MinLifeSeconds, MaxLifeSeconds));
 	Spark.Age = bRandomAge ? Random.FRandRange(0.f, Spark.Life) : 0.f;
-	Spark.Pace = Random.FRandRange(0.6f, 1.4f);
 	// Cubed: most faint, a few bright.
 	Spark.Brightness = 1.f - 0.8f * FMath::Pow(Random.FRand(), 3.f);
-	Spark.Length = Random.FRandRange(0.4f, 1.3f);
+}
+
+FVector USpaceHullSparksComponent::SparkAt(const FSpark& Spark, float Seconds, float Sweep) const
+{
+	const double T = FMath::Max(Seconds, 0.f);
+	return Spark.Origin + Spark.Velocity * T - FVector::ForwardVector * (0.5 * Sweep * T * T);
 }
 
 void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, float Quantum, const FVector& ViewLocation)
@@ -149,59 +187,83 @@ void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, fl
 		}
 	}
 
+	if (Emitters.Num() != EmitterCount)
+	{
+		Emitters.SetNum(EmitterCount);
+		for (FEmitter& Emitter : Emitters)
+		{
+			MoveEmitter(Emitter);
+		}
+	}
+	for (FEmitter& Emitter : Emitters)
+	{
+		Emitter.TimeLeft -= DeltaSeconds;
+		if (Emitter.TimeLeft <= 0.f)
+		{
+			MoveEmitter(Emitter);
+		}
+	}
+
+	const int32 Segments = FMath::Clamp(TrailSegments, 1, 12);
 	const int32 Pool = FMath::Max(QuantumCount, FlightCount);
-	if (Sparks.Num() != Pool)
+	if (Sparks.Num() != Pool || Transforms.Num() != Pool * Segments)
 	{
 		ClearInstances();
 		Sparks.SetNum(Pool);
-		Transforms.SetNum(Pool);
 		for (FSpark& Spark : Sparks)
 		{
 			Respawn(Spark, true);
 		}
-		for (int32 Index = 0; Index < Pool; ++Index)
-		{
-			Transforms[Index] = FTransform::Identity;
-		}
+		Transforms.Init(FTransform::Identity, Pool * Segments);
 		AddInstances(Transforms, false, false, false);
 	}
 
 	// White in normal flight, blue in a jump; the colour carries the brightness.
 	const FLinearColor Colour = FMath::Lerp(FlightColor * FlightBrightness * FlightAlpha, QuantumColor * QuantumBrightness, Quantum);
-	const float Flow = FMath::Lerp(FMath::Min(Speed * 0.5f, FlightFlowSpeed), QuantumFlowSpeed, Quantum);
-	const float BaseLength = FMath::Lerp(FlightLengthCm, QuantumLengthCm, Quantum);
-	SparkMaterial->SetVectorParameterValue(TEXT("DustDirection"), FLinearColor(GetComponentQuat().GetForwardVector()));
-	SparkMaterial->SetScalarParameterValue(TEXT("DustHalfLengthCm"), BaseLength * 0.5f);
-	SparkMaterial->SetScalarParameterValue(TEXT("DustHalfWidthCm"), ThicknessCm * 0.5f);
+	const float Sweep = SweepBack * FMath::Max(Quantum, FlightAlpha);
 	SparkMaterial->SetVectorParameterValue(TEXT("DustColor"), Colour);
 	SparkMaterial->SetScalarParameterValue(TEXT("DustBrightness"), 1.f);
 
 	const FTransform& ToWorld = GetComponentTransform();
-	const double Across = ThicknessCm / HullSparks::CubeSizeCm;
+	const float Step = TrailSeconds / float(Segments);
 	for (int32 Index = 0; Index < Sparks.Num(); ++Index)
 	{
 		FSpark& Spark = Sparks[Index];
-		Spark.Age += DeltaSeconds * Spark.Pace;
+		Spark.Age += DeltaSeconds;
 		if (Spark.Age >= Spark.Life)
 		{
 			Respawn(Spark, false);
 		}
 		const float T = Spark.Age / FMath::Max(Spark.Life, 0.01f);
-		const float Travel = Flow * Spark.Age;
-		const FVector Normal = Normals.IsValidIndex(Spark.Point) ? Normals[Spark.Point] : FVector::UpVector;
-		// Streams back along the ship and lifts a little off the surface as it goes.
-		const FVector Local = Points[Spark.Point] + Normal * (ThicknessCm * 3.0 + Travel * Spread) - FVector::ForwardVector * Travel;
-		const double Length = BaseLength * Spark.Length;
-		Transforms[Index] = FTransform(FQuat::Identity, Local, FVector(Length / HullSparks::CubeSizeCm, Across, Across));
-
-		float Fade = Index < ActiveCount ? FMath::SmoothStep(0.f, 0.15f, T) * FMath::Pow(1.f - T, 1.5f) : 0.f;
+		float SparkFade = Index < ActiveCount ? FMath::SmoothStep(0.f, 0.1f, T) * FMath::Pow(1.f - T, 1.5f) : 0.f;
+		const FVector Head = SparkAt(Spark, Spark.Age, Sweep);
 		// Nothing on the lens (the cockpit's eye is inside the hull's bounds).
-		// 5-12 m: from the cockpit the sparks off the canopy frame crossed the glass as thick bars.
-		Fade *= float(FMath::SmoothStep(double(CameraFadeNearCm), double(FMath::Max(CameraFadeFarCm, CameraFadeNearCm + 1.f)),
-			FVector::Dist(ToWorld.TransformPosition(Local), ViewLocation)));
-		SetCustomDataValue(Index, 0, Fade, false);
-		SetCustomDataValue(Index, 1, Spark.Brightness, false);
-		SetCustomDataValue(Index, 2, Spark.Length, false);
+		const double Distance = FVector::Dist(ToWorld.TransformPosition(Head), ViewLocation);
+		SparkFade *= float(FMath::SmoothStep(double(CameraFadeNearCm), double(FMath::Max(CameraFadeFarCm, CameraFadeNearCm + 1.f)), Distance));
+		// At least a pixel or so wide; drawn wider than the spark is, so dimmer.
+		const double Width = FMath::Max(double(ThicknessCm), Distance * MinScreenThickness);
+		const float Dim = float(FMath::Sqrt(ThicknessCm / Width));
+		// Flicker every frame: sparks crackle, lines do not.
+		const float Own = Spark.Brightness * Random.FRandRange(0.35f, 1.f) * Dim;
+
+		FVector Newer = Head;
+		for (int32 Segment = 0; Segment < Segments; ++Segment)
+		{
+			const int32 Instance = Index * Segments + Segment;
+			const FVector Older = SparkAt(Spark, Spark.Age - Step * float(Segment + 1), Sweep);
+			const FVector Along = Newer - Older;
+			const double Length = Along.Size();
+			const FVector Dir = Length > UE_KINDA_SMALL_NUMBER ? Along / Length : FVector::ForwardVector;
+			// Overlap the joints so the chain reads as one curve (at 1.15 it was a dotted line).
+			const double Drawn = Length * 1.5 + Width * 2.0;
+			Transforms[Instance] = FTransform(FRotationMatrix::MakeFromX(Dir).ToQuat(), (Newer + Older) * 0.5,
+				FVector(Drawn / HullSparks::CubeSizeCm, Width / HullSparks::CubeSizeCm, Width / HullSparks::CubeSizeCm));
+			// Brightest at the head, thinning out towards the tail; nothing from before the spark was born.
+			const float Fade = Length > 0.5 ? SparkFade * (1.f - float(Segment) / float(Segments)) : 0.f;
+			SetCustomDataValue(Instance, 0, Fade, false);
+			SetCustomDataValue(Instance, 1, Own, false);
+			Newer = Older;
+		}
 	}
 	BatchUpdateInstancesTransforms(0, Transforms, false, true, true);
 

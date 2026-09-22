@@ -228,7 +228,9 @@ void USpaceSpeedTunnelComponent::UpdateTunnel(const FVector& ViewLocation, const
 
 	if (Fog && FogMaterial)
 	{
-		const FVector FogScale(FogRadiusCm / FMath::Max(Extent.X, 1.0), FogRadiusCm / FMath::Max(Extent.Y, 1.0), HalfLengthCm / FMath::Max(Extent.Z, 1.0));
+		// A little longer than the streak walls: the fog now has depth, and its far end must not cover
+		// the walls' far end (where the beams converge).
+		const FVector FogScale(FogRadiusCm / FMath::Max(Extent.X, 1.0), FogRadiusCm / FMath::Max(Extent.Y, 1.0), 1.05 * HalfLengthCm / FMath::Max(Extent.Z, 1.0));
 		Fog->SetWorldTransform(FTransform(GetComponentQuat(), ViewLocation, FogScale));
 		FogMaterial->SetVectorParameterValue(TEXT("TunnelDirection"), FLinearColor(Direction));
 		FogMaterial->SetScalarParameterValue(TEXT("TunnelHalfLengthCm"), HalfLengthCm);

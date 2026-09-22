@@ -194,6 +194,7 @@ GLOW_TEXTURE = "/Game/Environments/Space/T_MilkyWay_Glow_Cube"
 STARFIELD_MATERIAL = "/Game/Environments/Space/M_Starfield_Sky"
 DUST_MATERIAL = "/Game/Environments/Space/M_SpaceDust"
 TUNNEL_MATERIAL = "/Game/Environments/Space/M_SpeedTunnel"
+SPARK_MATERIAL = "/Game/Environments/Space/M_HullSpark"
 FOG_MATERIAL = "/Game/Environments/Space/M_QuantumFog"
 GAS_GIANT_MATERIAL = "/Game/Environments/Space/M_GasGiant"
 MOON_MATERIAL = "/Game/Environments/Space/M_Moon"
@@ -1076,18 +1077,16 @@ return float4(colour, saturate(Opacity * lerp(1.0, CentreOpacity, far) * Alpha))
 def build_fog_material():
     m = fresh_material(FOG_MATERIAL)
     m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
-    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    # Masked, not translucent: real depth, so it hides everything outside the tunnel whatever the sort
+    # order. Translucent, even fully opaque, still let Orun and its rings through as rings and a dark
+    # disc (the author's screenshots, 22. 9. 2026). It fades in and out by a dither.
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED)
     m.set_editor_property("two_sided", True)
     here = node(m, unreal.MaterialExpressionWorldPosition, -1100, -100)
     centre = node(m, unreal.MaterialExpressionObjectPositionWS, -1100, 20)
     delta = node(m, unreal.MaterialExpressionSubtract, -900, -60)
     link(here, delta, "A")
     link(centre, delta, "B")
-    # Neither history nor ghosts: the fog does not move with the world, so TSR had nothing to reject a
-    # stale pixel with and the ship left a dark copy of itself where it had been (free look in a jump,
-    # the author's screenshot, 21. 9. 2026).
-    m.set_editor_property("enable_responsive_aa", True)
-    m.set_editor_property("output_translucent_velocity", True)
     names = ["P", "Dir", "Right", "Up", "HalfLength", "Near", "Far", "Opacity", "CentreOpacity", "Alpha", "ShaftCount", "ShaftContrast"]
     fog = custom(m, FOG_HLSL, names, -400, 0, "QuantumFog", unreal.CustomMaterialOutputType.CMOT_FLOAT4)
     sources = {
@@ -1110,8 +1109,69 @@ def build_fog_material():
     link(fog, rgb, "")
     alpha = node(m, unreal.MaterialExpressionComponentMask, -200, 150, r=False, g=False, b=False, a=True)
     link(fog, alpha, "")
+    # Dither by blue noise (DitherTemporalAA is not exposed to Python): a pixel is fog where the fade is
+    # above the noise; 0.5 is the clip value.
+    noise = node(m, unreal.MaterialExpressionScalarBlueNoise, -200, 300)
+    above = node(m, unreal.MaterialExpressionSubtract, -50, 150)
+    link(alpha, above, "A")
+    link(noise, above, "B")
+    half = node(m, unreal.MaterialExpressionConstant, -200, 400, r=0.5)
+    dither = node(m, unreal.MaterialExpressionAdd, 50, 150)
+    link(above, dither, "A")
+    link(half, dither, "B")
+    m.set_editor_property("opacity_mask_clip_value", 0.5)
     output(rgb, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
-    output(alpha, unreal.MaterialProperty.MP_OPACITY)
+    output(dither, unreal.MaterialProperty.MP_OPACITY_MASK)
+    finish(m)
+    return m
+
+
+# Hull sparks (USpaceHullSparksComponent): like the dust, a soft spindle per instance, but each spark
+# has its own direction (custom data 3-5, world space) - they fan out and curve off the hull. With one
+# shared direction they were a comb of parallel rods (the author, 22. 9. 2026). A hot core inside a
+# faint halo, so they read as sparks rather than lines.
+SPARK_HLSL = r"""
+// Measured on the cube itself (-50..50 cm before the instance's scale): along it and across it.
+// A pixel is on the box's surface, so one of the two across axes is always at the edge; the other
+// one is the distance from the streak's middle line (the 3D distance from the axis never fell under
+// the half width and the sparks drew nothing, 22. 9. 2026).
+float u = abs(Local.x) / 50.0;
+float v = min(abs(Local.y), abs(Local.z)) / 50.0;
+// Segments of one trail overlap: soft only at the very ends, or the chain reads as dashes.
+float tail = saturate((1.0 - u) * 8.0);
+float core = saturate(1.0 - v * 2.0);
+float halo = saturate(1.0 - v);
+float shape = tail * (core * core * 1.6 + halo * halo * 0.35);
+return Colour.rgb * Brightness * Fade * Own * shape;
+"""
+
+
+def build_spark_material():
+    """USpaceHullSparksComponent: each instance is one segment of a spark's curved trail, a stretched
+    cube drawn as a soft glowing line. Custom data 0 is the fade, 1 the spark's brightness (flickers);
+    the component also writes the segment's length, direction and half width (2-6), which this
+    material does not need since it measures on the cube itself."""
+    m = fresh_material(SPARK_MATERIAL)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
+    m.set_editor_property("used_with_instanced_static_meshes", True)
+    # Out of the temporal pass: a thin streak crossing the screen at thousands of cm/s came out as a
+    # dotted line, because TSR could not keep it between frames (22. 9. 2026).
+    m.set_editor_property("enable_responsive_aa", True)
+    names = ["Local", "Colour", "Brightness", "Fade", "Own"]
+    spark = custom(m, SPARK_HLSL, names, -400, 0, "HullSpark")
+    sources = {
+        "Local": node(m, unreal.MaterialExpressionLocalPosition, -900, -100,
+                      local_origin=unreal.LocalPositionOrigin.INSTANCE,
+                      included_offsets=unreal.PositionIncludedOffsets.EXCLUDE_OFFSETS),
+        "Colour": vector(m, "DustColor", (0.25, 0.55, 1.0), -900, 100),
+        "Brightness": scalar(m, "DustBrightness", 1.0, -900, 200),
+        "Fade": node(m, unreal.MaterialExpressionPerInstanceCustomData, -900, 300, data_index=0),
+        "Own": node(m, unreal.MaterialExpressionPerInstanceCustomData, -900, 400, data_index=1),
+    }
+    for name in names:
+        link(sources[name], spark, name)
+    output(spark, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     finish(m)
     return m
 
@@ -1461,6 +1521,7 @@ def main():
     build_dust_material()
     build_tunnel_material()
     build_fog_material()
+    build_spark_material()
     body_materials = {
         "giant": build_body_material(GAS_GIANT_MATERIAL, GAS_GIANT_HLSL, 0.95, with_time=True),
         "moon": build_body_material(MOON_MATERIAL, MOON_HLSL, 0.9, with_time=False),

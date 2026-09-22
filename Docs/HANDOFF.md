@@ -860,6 +860,36 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       ve scéně nejsou (radar v 5 km nemá co ukázat).
 
 ---
+55. **Tunel bez prosvítání a jiskry místo čar** (22. 9. 2026, autor ke snímkům ze skoku: „dějou se tam
+    tyhle artefakty, plus ty modré čáry působí blbě, jsou to jen čáry – má to podle reference
+    vypadat jinak, spíš jako jiskry“).
+    - **Artefakty = Orun a jeho prstence skrz tunel.** Mlha tunelu byla průhledná (`BLEND_TRANSLUCENT`),
+      a průhledný materiál svět pod sebou vždycky jen dobarvuje – zakrýt ho neumí, ať má krytí
+      jakékoliv. Mlha je teď **maskovaná** (neprůhledná, s děrami): kde má být řidší, tam se pixely
+      vyřezávají podle modrého šumu (`ScalarBlueNoise`, práh 0,5) – z dálky to vypadá jako závoj,
+      ale skutečně zakrývá. `DitherTemporalAA` v Pythonu není.
+    - **Jiskry podle reference** (`sc_quantum_travel_tutorial` 0:20–0:45): v SC nejsou rovné čáry, ale
+      tenké modré „vlásky“ v trsech z několika míst na trupu, rozevřou se do vějíře a strhne je to
+      dozadu. `USpaceHullSparksComponent` je přepsaný: 7 emitorů na trupu, každý se po 0,4–1,3 s
+      přesune jinam; jiskra vyletí v kuželu kolem normály (1800 cm/s) a stálé zrychlení dozadu
+      (14 000 cm/s²) jí dráhu zakřiví; kreslí se jako řetěz 5 krátkých úseků po poslední 0,09 s dráhy,
+      slábnoucí do ohonu. 260 jisker = 1300 instancí, snímek to nestojí nic (85–90 FPS).
+    - **Tři pasti, kvůli kterým jiskry nešly vidět vůbec** (materiál se přitom kompiloval bez chyby):
+      1. Tvar se měřil jako 3D vzdálenost od osy kvádru – jenže pixel na povrchu kvádru je od osy
+         vždycky aspoň půl šířky daleko, takže jas vycházel všude nula. Teď se měří v souřadnicích
+         instance (`LocalPosition`, origin `INSTANCE`) a napříč se bere **menší** ze dvou os.
+      2. Vstupy Custom uzlu jsou `float`. Odečítat v něm dvě světové pozice u planety vzdálené
+         100 000 km znamená chybu v řádu decimetrů – u 2cm jiskry konec. Rozdíly se počítají uzly
+         mimo Custom (LWC), nebo se world space nepoužije vůbec (tady to druhé).
+      3. Jiskra užší než pixel se v TSR rozpadne na tečkovanou čáru. Materiál je proto
+         `enable_responsive_aa` a šířka jiskry roste se vzdáleností (`MinScreenThickness` 0,005 ≈ 4 px).
+    - **Body na trupu:** raycast do kolize lodi nic netrefil (konvexní tvary UCX, a testy běží bez
+      fyziky), jiskry tak létaly z krabice kolem lodi, ve vzduchu. Teď se čtou přímo z tvarů kolize
+      (`UBodySetup::GetClosestPointAndNormal`, `bUseConvexShapes`) – 674 bodů na trupu.
+    - Snímky `-Preset sparks_look` (bok, zespoda zepředu, zezadu, kokpit) a `-Preset quantum_final`.
+      Z kokpitu jiskry skoro vidět nejsou – stejně jako v referenci.
+
+---
 
 ## 6. Mapa kódu a obsahu
 
@@ -1126,6 +1156,8 @@ Další otevřené směry mimo let:
   (`HeightVariationWithinTileCm`) pro hřebenové oktávy nesedí, dlaždice se dělí pozdě a geomorph
   jde k rodiči, který je daleko od skutečné země. Neověřeno.
 - **Kameny nemají kolizi** (bod 52): loď i postava jimi projdou.
+- **Ohony jisker jsou dál místy tečkované** (bod 55): nejrychlejší a nejvzdálenější kusy dráhy
+  TSR pořád neudrží celé. Čte se to jako jiskření, ale v referenci jsou vlásky celé.
 
 - **Neověřeno autorem (21. 9. 2026):** quantum drive (bod 47) – jen z testů a snímků. Hlavně jak
   sedí časy (spool 6 s, kalibrace 2,5 s, podržení 0,6 s, chlazení 10 s), jak čáry tečou v pohybu
@@ -1272,4 +1304,5 @@ Viz `git log --oneline`. Poslední kroky:
 - planety 3/4: povrch ve třech měřítkách, teplá atmosféra (bod 51);
 - planety 4/4: fotoskenovaná zem, kameny, Zen restart v Package.ps1 (bod 52);
 - quantum tunel po autorově testu: bez prosvítání, uzavřený tmavý prostor, jiskry u lodi (bod 53);
-- náběh skoku, QT FUEL na HUD v NAV, rovný pohled z kokpitu (bod 54).
+- náběh skoku, QT FUEL na HUD v NAV, rovný pohled z kokpitu (bod 54);
+- tunel nic neprosvítá (maskovaná mlha) a jiskry vypadají jako jiskry (bod 55).

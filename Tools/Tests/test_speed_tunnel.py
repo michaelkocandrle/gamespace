@@ -58,8 +58,16 @@ try:
     check("the ship has hull sparks", sparks is not None)
     if sparks is not None:
         count, from_collision = sparks.debug_get_spawn_point_count()
-        check("and finds points to pour them from on the Vanguard's hull", count >= 32, "%d points, collision %s" % (count, from_collision))
+        check("and finds points to pour them from on the Vanguard's hull (its collision shapes, not a box round it)",
+              count >= 32 and from_collision, "%d points, collision %s" % (count, from_collision))
         check("a jump has many sparks, normal flight few", sparks.get_editor_property("quantum_count") >= 5 * sparks.get_editor_property("flight_count") > 0)
+        spark_material = unreal.load_asset("/Game/Environments/Space/M_HullSpark")
+        check("the sparks have their own material", spark_material is not None)
+        if spark_material is not None:
+            check("additive, on instances, and out of the temporal pass (or a fast streak comes out dotted)",
+                  spark_material.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_ADDITIVE
+                  and spark_material.get_editor_property("used_with_instanced_static_meshes")
+                  and spark_material.get_editor_property("enable_responsive_aa"))
     check("the dust is only a hint (a few hundred specks)", dust.get_editor_property("particle_count") <= 400)
 
     layers = tunnel.get_editor_property("layers")

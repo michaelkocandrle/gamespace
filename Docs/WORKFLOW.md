@@ -427,6 +427,18 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   pawnu. Co se staví kolem kamery (prach, tunel), je při 1,2 km/s o 20 m pozadu; přičti
   `LinearVelocity * DeltaSeconds`. Příznak: bílý klín přes obraz, který se v jiném snímku nezopakuje
   jinde, jen v rychlosti (21. 9. 2026).
+- **Průhledný materiál svět nezakryje, jen dobarví.** Ať má krytí jakékoliv, hvězdy a planety pod ním
+  budou vidět. Když má něco zakrýt svět (mlha v tunelu), musí být neprůhledné – a řídnutí se dělá
+  maskou s modrým šumem (`MaterialExpressionScalarBlueNoise`, práh `opacity_mask_clip_value` 0,5).
+  `MaterialExpressionDitherTemporalAA` v Pythonu neexistuje.
+- **Vstupy Custom uzlu jsou `float`, ne LWC.** Odečítat v něm dvě světové pozice (`WorldPosition` minus
+  `ObjectPositionWS`) znamená u vzdáleného tělesa chybu v decimetrech a efekt zmizí. Rozdíl počítej
+  uzlem `Subtract` mimo Custom, nebo měř v prostoru instance (`MaterialExpressionLocalPosition`
+  s `local_origin=INSTANCE`, u kvádru -50..50 cm).
+- **Tvar natažené kostky se neměří 3D vzdáleností od osy.** Pixel je vždycky na povrchu, takže je od
+  osy aspoň půl šířky daleko a tvar vyjde nula. Ber `min(|y|, |z|)` v prostoru instance.
+- **Tenká rychlá čára v TSR vyjde tečkovaná.** Dej materiálu `enable_responsive_aa` a nech šířku růst
+  se vzdáleností od kamery (aspoň ~4 px), jinak se mezi snímky ztrácí.
 - **Custom uzel s texturami: `Texture2DSample(Tex, TexSampler, uv)`, nikdy `Tex.Sample(...)`.** Ray tracing
   hit shadery nemají derivace, `.Sample` v nich neprojde a celý materiál se v buildu nahradí výchozím
   šedým. V editoru ani v headless buildu materiálu chyba vidět není – jen v cook logu
