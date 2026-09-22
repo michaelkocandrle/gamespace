@@ -175,6 +175,19 @@ UltraShape 1.0 (`model_ultrashape-1-0`, capability `3d23d`) chce **obojí**: `im
 obrázek) i `model` (hrubý mesh), k tomu `numInferenceSteps` (1–50, výchozí 50),
 `octreeResolution` (128–1024, výchozí 1024) a `seed`.
 
+Nástrahy (23. 9. 2026):
+- **UltraShape není v plánu `cu-basic`.** `model_run` vrací 403 `ModelAccessRestrictedError`,
+  vyžaduje plán `cu-pro-q3-25`. Blokuje to i `dry_run`, cenu tedy nezjistíš dřív než po upgradu.
+- MCP server je registrovaný s rozsahem *local* pro `C:\gamespace\gamespace`. Session spuštěná
+  v `C:\gamespace` jeho nástroje vůbec nedostane. Buď startuj session v adresáři repa, nebo mluv
+  se serverem napřímo přes JSON-RPC (`initialize` → `notifications/initialized` → `tools/call`,
+  hlavička `Mcp-Session-Id`, Basic auth ze `scenario.key`).
+- Upload přes MCP: `upload_asset` (s `file_size`, bez `data`) vrací `parts[].upload_url`.
+  Na každou URL udělej `PUT` se syrovými bajty (bez `x-amz-checksum-*` hlaviček) a zavolej
+  `upload_asset_complete` s `upload_id`. Takhle prošly PNG i GLB pro test SwitchPanel: obrázek
+  `asset_rmnHbeqKqDFkHQGpGqtpGEeL`, mesh `asset_ep4gbRYJxXJqvkDhuGmGkMpr`. Po upgradu je stačí
+  znovu použít.
+
 ### 3.2 Použití
 
 1. Spusť Blender **s GUI** na pozadí. Socket na `localhost:9876` běží jen s GUI; v `-b` se addon jen
