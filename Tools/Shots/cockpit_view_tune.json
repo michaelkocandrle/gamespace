@@ -1,0 +1,15 @@
+{
+  "_comment": "The cockpit's default view, higher and with less frame (the author's playtest, 22. 9. 2026: the view sat too low). The eye is at (194, 0, 186) cm on the hull with the view tilted 3 degrees down (Vanguard_setup.json). Variants through cockpit_eye and space.CockpitPitch, each in space facing Veyra's limb and low over the ground. Run: Tools/Shots.ps1 -Preset cockpit_view_tune",
+  "shots": [
+    {"name": "a_now_space", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "hud": 1, "settle": 2.0, "console": ["space.CockpitPitch -3"]},
+    {"name": "a_now_ground", "camera": "cockpit", "altitude_m": 150, "facing": "horizon", "hud": 1, "settle": 3.0},
+    {"name": "b_level_space", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "hud": 1, "settle": 2.0, "console": ["space.CockpitPitch 0"]},
+    {"name": "b_level_ground", "camera": "cockpit", "altitude_m": 150, "facing": "horizon", "hud": 1, "settle": 3.0},
+    {"name": "c_up3_space", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "hud": 1, "settle": 2.0, "console": ["space.CockpitPitch 3"]},
+    {"name": "c_up3_ground", "camera": "cockpit", "altitude_m": 150, "facing": "horizon", "hud": 1, "settle": 3.0},
+    {"name": "d_eye8_level_space", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "hud": 1, "cockpit_eye": [194, 0, 194], "settle": 2.0, "console": ["space.CockpitPitch 0"]},
+    {"name": "d_eye8_level_ground", "camera": "cockpit", "altitude_m": 150, "facing": "horizon", "hud": 1, "cockpit_eye": [194, 0, 194], "settle": 3.0},
+    {"name": "e_eye8_up2_space", "camera": "cockpit", "altitude_m": 20000, "facing": "horizon", "hud": 1, "cockpit_eye": [194, 0, 194], "settle": 2.0, "console": ["space.CockpitPitch 2"]},
+    {"name": "e_eye8_up2_ground", "camera": "cockpit", "altitude_m": 150, "facing": "horizon", "hud": 1, "cockpit_eye": [194, 0, 194], "settle": 3.0}
+  ]
+}

@@ -489,6 +489,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
 	double ComputeQuantumSpeed(double RemainingCm, double CurrentSpeedCmS, float DeltaSeconds) const;
 
+	/**
+	 * The same, SecondsIntoJump into the jump: the acceleration builds up over QuantumRampSeconds
+	 * instead of starting at full (the author, 22. 9. 2026: the jump snapped to full speed).
+	 */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
+	double ComputeQuantumSpeedAt(double RemainingCm, double CurrentSpeedCmS, float DeltaSeconds, float SecondsIntoJump) const;
+
 	/** Share of a full tank a jump of this length burns, 0..1. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
 	float ComputeQuantumFuelUse(double DistanceCm) const;
@@ -1379,6 +1386,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.1"))
 	float QuantumAccelerationKmS2 = 8.f;
 
+	/** How long the jump's acceleration takes to build up to QuantumAccelerationKmS2, s. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.0", Units = "s"))
+	float QuantumRampSeconds = 2.5f;
+
+	/** The tunnel and the rest of the jump's look are full from this share of top speed. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.01", ClampMax = "1.0"))
+	float QuantumLookFullSpeedShare = 0.25f;
+
 	/** Speed at the end of a jump, cm/s; NAV flight takes over from there. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Quantum", meta = (ClampMin = "0.0"))
 	float QuantumExitSpeed = 30000.f;
@@ -2033,6 +2048,8 @@ private:
 	double QuantumTargetDistanceCm = 0.0;
 	/** While traveling: the jump's length at the start, for progress and fuel. */
 	double QuantumJumpLengthCm = 0.0;
+	/** Seconds since the jump began, for the acceleration ramp. */
+	float QuantumTravelSeconds = 0.f;
 
 	/** Eased 0..1 blends driving camera, lights and sound. */
 	float BoostBlend = 0.f;

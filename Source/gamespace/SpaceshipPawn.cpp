@@ -2044,12 +2044,19 @@ double ASpaceshipPawn::ComputeQuantumArrivalAltitude(double BodyRadiusCm) const
 
 double ASpaceshipPawn::ComputeQuantumSpeed(double RemainingCm, double CurrentSpeedCmS, float DeltaSeconds) const
 {
+	return ComputeQuantumSpeedAt(RemainingCm, CurrentSpeedCmS, DeltaSeconds, 1.0e6f);
+}
+
+double ASpaceshipPawn::ComputeQuantumSpeedAt(double RemainingCm, double CurrentSpeedCmS, float DeltaSeconds, float SecondsIntoJump) const
+{
+	// Braking keeps the full rate (the arrival must be exact); speeding up eases in.
+	const double Ramp = QuantumRampSeconds > 0.f ? FMath::Max(0.03, double(FMath::SmoothStep(0.f, QuantumRampSeconds, SecondsIntoJump))) : 1.0;
 	const double Accel = double(QuantumAccelerationKmS2) * 100000.0;
 	const double Top = double(QuantumMaxSpeedKmS) * 100000.0;
 	const double Exit = QuantumExitSpeed;
 	// The speed from which braking at Accel arrives at Exit exactly at the arrival point.
 	const double Braking = FMath::Sqrt(Exit * Exit + 2.0 * Accel * FMath::Max(RemainingCm, 0.0));
-	const double Rising = FMath::Max(CurrentSpeedCmS, Exit) + Accel * DeltaSeconds;
+	const double Rising = FMath::Max(CurrentSpeedCmS, Exit) + Accel * Ramp * DeltaSeconds;
 	return FMath::Max(Exit, FMath::Min3(Top, Braking, Rising));
 }
 
@@ -2232,11 +2239,13 @@ void ASpaceshipPawn::BeginQuantumJump()
 	QuantumBlocker = EQuantumBlocker::None;
 	QuantumEngageTimer = 0.f;
 	QuantumJumpLengthCm = FMath::Max(QuantumTargetDistanceCm, 1.0);
+	QuantumTravelSeconds = 0.f;
 	QuantumFuel = FMath::Max(0.f, QuantumFuel - ComputeQuantumFuelUse(QuantumTargetDistanceCm));
 	bBoostActive = false;
 	bAfterburnerActive = false;
 	bVtolMode = false;
-	CameraKick = 1.f;
+	// A lighter jolt than a drop-out: the jump now builds up (QuantumRampSeconds) rather than snapping.
+	CameraKick = 0.4f;
 	QuantumChargeAudio = nullptr;
 	PlayOneShot(QuantumEngageSound);
 	// The jump's burst of green light (the reference at 4:10).
@@ -2276,7 +2285,8 @@ void ASpaceshipPawn::UpdateQuantumTravel(float DeltaSeconds)
 	const FVector Location = GetActorLocation();
 	const FVector Direction = (QuantumTargetCentre - Location).GetSafeNormal();
 	const double Remaining = QuantumTargetDistanceCm;
-	const double Speed = ComputeQuantumSpeed(Remaining, LinearVelocity.Size(), DeltaSeconds);
+	QuantumTravelSeconds += DeltaSeconds;
+	const double Speed = ComputeQuantumSpeedAt(Remaining, LinearVelocity.Size(), DeltaSeconds, QuantumTravelSeconds);
 	const double Step = Speed * DeltaSeconds;
 
 	// No steering in a jump (the reference says so outright): the nose swings onto the destination.
@@ -2344,7 +2354,13 @@ bool ASpaceshipPawn::DebugEngageQuantum(const FString& TargetName, float TravelF
 		QuantumTargetDistanceCm -= Skip;
 	}
 	LinearVelocity = Direction * ComputeQuantumSpeed(QuantumTargetDistanceCm, double(QuantumMaxSpeedKmS) * 100000.0, 0.f);
-	QuantumBlend = 1.f;
+	// Shots part-way through a jump start past the acceleration ramp; at 0 the ramp plays out.
+	QuantumTravelSeconds = TravelFraction > 0.f ? QuantumRampSeconds + 1.f : 0.f;
+	if (TravelFraction <= 0.f)
+	{
+		LinearVelocity = Direction * double(QuantumExitSpeed);
+	}
+	QuantumBlend = TravelFraction > 0.f ? 1.f : 0.f;
 	return true;
 }
 
@@ -2874,9 +2890,12 @@ void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 	AfterburnerFeel = FMath::FInterpTo(AfterburnerFeel, bAfterburnerActive ? 1.f : 0.f, DeltaSeconds,
 		bAfterburnerActive ? 9.f : 2.5f);
 	// The quantum look arrives in about a second and leaves faster; the last 5% of a jump fades it out.
+	// The jump's look follows its speed, so it builds up with the acceleration ramp instead of snapping
+	// on (the author, 22. 9. 2026); the last 5 % of the jump fades it out again.
+	const float SpeedShare = float(LinearVelocity.Size() / FMath::Max(double(QuantumMaxSpeedKmS) * 100000.0 * QuantumLookFullSpeedShare, 1.0));
 	const float QuantumTarget01 = QuantumState == EQuantumState::Traveling
-		? FMath::Clamp((1.f - GetQuantumTravelProgress()) / 0.05f, 0.f, 1.f) : 0.f;
-	QuantumBlend = FMath::FInterpTo(QuantumBlend, QuantumTarget01, DeltaSeconds, QuantumTarget01 > QuantumBlend ? 2.5f : 4.f);
+		? FMath::SmoothStep(0.f, 1.f, FMath::Clamp(SpeedShare, 0.f, 1.f)) * FMath::Clamp((1.f - GetQuantumTravelProgress()) / 0.05f, 0.f, 1.f) : 0.f;
+	QuantumBlend = FMath::FInterpTo(QuantumBlend, QuantumTarget01, DeltaSeconds, QuantumTarget01 > QuantumBlend ? 4.f : 4.f);
 	CameraKick *= FMath::Exp(-5.f * DeltaSeconds);
 	// No camera lag in a quantum jump: even capped at 15 m it trails along the flight path, and
 	// looked at from the side (free look) that pushed the ship out of the frame (21. 9. 2026).

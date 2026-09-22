@@ -63,7 +63,7 @@
     ],
     "hide_hull_in_cockpit": false,
     "_comment_cockpit_light": "Dark cockpit as in the Star Citizen reference: the displays' glow (components.cockpit_displays) does most of the lighting, a faint key light 80 cm ahead of the eye (250 cm reach) and a fainter fill above the head keep the dashboard's shape readable. At 12 / 5 cd the dashboard was flat grey; with none it is black (Tools/Shots.ps1 -Preset cockpit_light, 18. 9. 2026). Shadowless, 12 cm large; keep them under the canopy roof.",
-    "cockpit_view_pitch_deg": -3.0
+    "cockpit_view_pitch_deg": 0.0
   },
   "components": {
     "camera_boom": {
@@ -82,7 +82,7 @@
       "field_of_view": 80.0
     },
     "cockpit_camera": {
-      "_comment": "Pilot's eye (SOCKET_Cockpit in Vanguard_ai_build.json, from Tools/Blender/fit_ship_interior.py): 65 cm behind the side grips of the cockpit interior, 22+ cm under the canopy roof, with a clear view ahead. Framed like the Star Citizen reference (Docs/UI/Screenshot 2026-09-17 201854.png): dashboard top 8 degrees below the eye, the displays 14-25 degrees, the pilot ~1.5 m from the dashboard. The first interior had the eye at (305, 0, 156), 0.75 m from its dashboard and the displays at the bottom edge. 19. 9. 2026 (author: the figures on the displays too small from the seat): the eye 20 cm nearer the dashboard and 3 cm lower, the view tilted 3 degrees down (pawn cockpit_view_pitch_deg): the displays ~20 % larger, the whole dashboard including the lower centre screen in view, the view ahead kept (Tools/Shots/cockpit_readability.json compares it with the old eye). SOCKET_Cockpit in the recipe moved with it (test_flight_modes: the camera sits on the socket).",
+      "_comment": "Pilot's eye (SOCKET_Cockpit in Vanguard_ai_build.json, from Tools/Blender/fit_ship_interior.py): 65 cm behind the side grips of the cockpit interior, 22+ cm under the canopy roof, with a clear view ahead. Framed like the Star Citizen reference (Docs/UI/Screenshot 2026-09-17 201854.png): dashboard top 8 degrees below the eye, the displays 14-25 degrees, the pilot ~1.5 m from the dashboard. The first interior had the eye at (305, 0, 156), 0.75 m from its dashboard and the displays at the bottom edge. 19. 9. 2026 (author: the figures on the displays too small from the seat): the eye 20 cm nearer the dashboard and 3 cm lower, the view tilted 3 degrees down (pawn cockpit_view_pitch_deg): the displays ~20 % larger, the whole dashboard including the lower centre screen in view, the view ahead kept (Tools/Shots/cockpit_readability.json compares it with the old eye). 22. 9. 2026 (author after the SC-1c playtest: the view sat too low, too much frame): the view level again (0 degrees), same eye - a third more of the outside, the displays still whole; higher eyes or an upward tilt cut the displays (Tools/Shots/cockpit_view_tune.json). SOCKET_Cockpit in the recipe moved with it (test_flight_modes: the camera sits on the socket).",
       "relative_location": [
         194.0,
         0.0,

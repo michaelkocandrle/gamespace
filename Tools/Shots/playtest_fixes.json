@@ -1,0 +1,11 @@
+{
+  "_comment": "The fixes from the author's SC-1c / SC-4 playtest (22. 9. 2026) as shipped, no console: the level cockpit view in SCM and NAV (NAV shows QT FUEL where the afterburner block is), and the jump's ease-in at 0.3, 1.0 and 3.0 s after it starts. Run: Tools/Shots.ps1 -Preset playtest_fixes",
+  "shots": [
+    {"name": "a_cockpit_scm", "camera": "cockpit", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "mode": "SCM", "settle": 2.0},
+    {"name": "b_cockpit_nav", "camera": "cockpit", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "mode": "NAV", "settle": 2.0},
+    {"name": "c_cockpit_ground", "camera": "cockpit", "altitude_m": 150, "facing": "horizon", "hud": 1, "settle": 3.0},
+    {"name": "d_jump_0_3s", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "gear": false, "mode": "NAV", "quantum": "Orun", "chase_yaw": 25, "chase_pitch": -8, "settle": 0.3},
+    {"name": "e_jump_1s", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "gear": false, "mode": "NAV", "quantum": "Orun", "chase_yaw": 25, "chase_pitch": -8, "settle": 1.0},
+    {"name": "f_jump_3s", "camera": "chase", "altitude_m": 60000, "facing": "body:Orun", "hud": 1, "gear": false, "mode": "NAV", "quantum": "Orun", "chase_yaw": 25, "chase_pitch": -8, "settle": 3.0}
+  ]
+}

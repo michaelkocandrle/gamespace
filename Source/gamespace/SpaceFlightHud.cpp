@@ -2130,6 +2130,22 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 	SetText(TEXT("AfterburnerText"), AfterburnerSuffix.IsEmpty() ? Percent : Percent + TEXT(" ") + AfterburnerSuffix, AfterburnerColor);
 	SetText(TEXT("AfterburnerValue"), Percent, AfterburnerColor == Instrument ? Label : AfterburnerColor);
 	SetText(TEXT("AfterburnerLabel"), AfterburnerSuffix.IsEmpty() ? TEXT("AB") : TEXT("AB ") + AfterburnerSuffix, Faded(AfterburnerColor == Instrument ? Label : AfterburnerColor, 0.85f));
+	// NAV swaps the combat block for navigation, as Star Citizen's HUD does (its weapons panel turns
+	// into H2 / QT FUEL in NAV, the reference video): the afterburner cannot fire in NAV, so its gauge
+	// shows the quantum fuel there. Only on the flight HUD; the dashboard's AB bar keeps its meaning.
+	if (!State.bAfterburnerAvailable && !IsA<USpaceCockpitDisplays>())
+	{
+		if (USpaceHudGauge* Afterburner = Gauges.FindRef(TEXT("AfterburnerGauge")))
+		{
+			Afterburner->Value = State.QuantumFuel;
+			Afterburner->bDim = false;
+			Afterburner->FillColor = State.QuantumFuel < 0.15f ? Red : QuantumViolet;
+		}
+		const FString Fuel = FString::Printf(TEXT("%.0f%%"), State.QuantumFuel * 100.f);
+		SetText(TEXT("AfterburnerValue"), Fuel, State.QuantumFuel < 0.15f ? Red : Label);
+		SetText(TEXT("AfterburnerLabel"), TEXT("QT FUEL"), Faded(Label, 0.85f));
+		SetText(TEXT("AfterburnerText"), Fuel + TEXT(" QT"), State.QuantumFuel < 0.15f ? Red : Instrument);
+	}
 
 	// --- Where the ship is: heading, ladder, altitudes, climb, air ---------------------------------
 	for (const TCHAR* Name : { TEXT("HeadingTape"), TEXT("Ladder"), TEXT("AltitudeTape"), TEXT("AltitudeUnit") })

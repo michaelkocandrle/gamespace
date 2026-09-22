@@ -90,6 +90,17 @@ check("a 600 km jump takes seconds, not minutes", 10.0 < elapsed < 60.0, "%.1f s
 check("and never goes over the top speed", peak <= TOP + 1.0, "%.1f km/s" % (peak / 100000.0))
 check("it arrives at the exit speed", abs(cdo.compute_quantum_speed(0.0, TOP, STEP) - EXIT) < 1.0)
 
+# The start eases in: after half a second of a jump it is still slow, after the ramp at full acceleration.
+RAMP = cdo.get_editor_property("quantum_ramp_seconds")
+speed, t = EXIT, 0.0
+while t < 0.5:
+    speed = cdo.compute_quantum_speed_at(6.0e7, speed, STEP, t)
+    t += STEP
+check("half a second in, still under 1 km/s (the author: it snapped to full speed)", speed < 100000.0, "%.0f m/s" % (speed / 100.0))
+early = cdo.compute_quantum_speed_at(6.0e7, 500000.0, STEP, 0.1) - 500000.0
+late = cdo.compute_quantum_speed_at(6.0e7, 500000.0, STEP, RAMP + 0.1) - 500000.0
+check("and the acceleration builds up over the ramp", 0.0 < early < 0.2 * late, "%.0f vs %.0f cm/s per frame" % (early, late))
+
 # =========================================================================================
 # TestSpace
 # =========================================================================================
@@ -127,6 +138,11 @@ ship = spawn()
 try:
     run(ship, 0.5)
     check("SCM: no quantum drive", ship.get_quantum_state() == State.IDLE and ship.get_quantum_blocker() == Blocker.NEEDS_NAV)
+    widget = unreal.new_object(unreal.SpaceFlightHud)
+    widget.debug_initialize()
+    widget.apply_state(hud(ship))
+    check("SCM: the afterburner block is the afterburner", widget.debug_get_text("AfterburnerLabel").startswith("AB"),
+          widget.debug_get_text("AfterburnerLabel"))
     state = hud(ship)
     check("SCM: no arcs, no status, no destination on the HUD",
           state.quantum_arcs == 0 and state.quantum_status == "" and not state.quantum_target_visible)
@@ -144,6 +160,13 @@ ship = spawn(look_at=ORUN)
 try:
     to_nav(ship)
     check("nose on Orun picks it", str(ship.get_quantum_target_name()) == "Orun", str(ship.get_quantum_target_name()))
+    # NAV swaps the afterburner block for the quantum fuel, as SC swaps weapons for fuel (22. 9. 2026).
+    widget = unreal.new_object(unreal.SpaceFlightHud)
+    widget.debug_initialize()
+    widget.apply_state(hud(ship))
+    check("NAV: the HUD shows QT FUEL where the afterburner is", widget.debug_get_text("AfterburnerLabel") == "QT FUEL"
+          and widget.debug_get_text("AfterburnerValue") == "%.0f%%" % (100.0 * ship.get_quantum_fuel()),
+          "%s %s" % (widget.debug_get_text("AfterburnerLabel"), widget.debug_get_text("AfterburnerValue")))
     check("and it is in reach", ship.get_quantum_blocker() == Blocker.NONE, str(ship.get_quantum_blocker()))
     run(ship, SPOOL * 0.5)
     state = hud(ship)

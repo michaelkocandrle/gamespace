@@ -841,6 +841,25 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       bližší dávaly přes sklo tlusté pruhy) – k posouzení autorem.
 
 ---
+54. **Další opravy z autorova testu SC-1c/SC-4** (22. 9. 2026, `Docs/TestScenario_SC1c_SC4.md`).
+    - **Náběh skoku:** zrychlení skoku roste během `QuantumRampSeconds` (2,5 s) místo plných 8 km/s²
+      od začátku; brzdění u cíle je beze změny, takže dojezd je pořád přesný. Tunel, zorné pole
+      a zvuk skoku se řídí rychlostí (plné od čtvrtiny maxima), ne časem – přijdou spolu s rychlostí.
+      Po 0,3 s 356 m/s, po 1 s 1,4 km/s, po 3 s 14 km/s (`-Preset playtest_fixes`). Skok na 600 km
+      trvá 23,6 s místo 22. Menší škubnutí kamery na startu.
+    - **HUD v NAV:** v SC se v NAV bojový blok HUD (zbraně, munice) vymění za H2/QT FUEL (referenční
+      video). Zbraně nemáme, ale ukazatel afterburneru (v NAV nepoužitelný) se v NAV mění na **QT FUEL**
+      – tím je quantum palivo konečně na HUD. Displeje v kokpitu mají dál svůj AB sloupec.
+    - **HUD v kokpitu a zvenku stejný – záměr:** SC promítá HUD na hledí a ve třetí osobě ukazuje
+      totéž; podrobnosti nesou displeje v kokpitu (stránky MFD, radar, stav lodi).
+    - **Kokpit:** výchozí pohled rovně (`cockpit_view_pitch_deg` 0 místo -3), oko beze změny – asi
+      o třetinu víc výhledu ven, displeje celé. Vyšší oko nebo náklon nahoru displeje ořezávaly
+      (`Tools/Shots/cockpit_view_tune.json`).
+    - Nesoulady scénáře se hrou (pro další testy): spool běží sám po B a namíření, levé tlačítko se
+      drží až při READY; TOO CLOSE = cíl blíž než 20 km, překážka v cestě je OBSTRUCTED; asteroidy
+      ve scéně nejsou (radar v 5 km nemá co ukázat).
+
+---
 
 ## 6. Mapa kódu a obsahu
 
@@ -1252,4 +1271,5 @@ Viz `git log --oneline`. Poslední kroky:
 - planety 2/4: Veyra 120 km, kulaté siluety, pryč zástupné asteroidy (bod 50);
 - planety 3/4: povrch ve třech měřítkách, teplá atmosféra (bod 51);
 - planety 4/4: fotoskenovaná zem, kameny, Zen restart v Package.ps1 (bod 52);
-- quantum tunel po autorově testu: bez prosvítání, uzavřený tmavý prostor, jiskry u lodi (bod 53).
+- quantum tunel po autorově testu: bez prosvítání, uzavřený tmavý prostor, jiskry u lodi (bod 53);
+- náběh skoku, QT FUEL na HUD v NAV, rovný pohled z kokpitu (bod 54).
