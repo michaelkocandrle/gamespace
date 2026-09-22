@@ -139,11 +139,33 @@ namespace PlanetTerrain
 		double Sum = 0.0;
 		double Amplitude = 1.0;
 		double Frequency = 1.0;
+		// Ridged octaves: each one's crests feed the next (Weight), so ridges sharpen on ridges and
+		// valleys stay smooth. Crest (0 valley .. 1 ridge) then scales the fine octaves.
+		double Weight = 1.0;
+		double Crest = 0.0;
 		for (int32 Octave = 0; Octave < Settings.Octaves; ++Octave)
 		{
 			// A different offset and seed per octave, so octaves don't line up on the same lattice.
 			const FVector Offset(Octave * 31.4159, Octave * -17.1234, Octave * 11.7310);
-			Sum += Amplitude * GradientNoise3D(Point * Frequency + Offset, Settings.Seed + uint32(Octave) * 1013u);
+			const double Noise = GradientNoise3D(Point * Frequency + Offset, Settings.Seed + uint32(Octave) * 1013u);
+			if (Octave < Settings.RidgedOctaves)
+			{
+				// Linear, not squared: squared doubled the slopes and left under half the ground landable.
+				const double Ridge = 1.0 - FMath::Min(FMath::Abs(Noise), 1.0);  // 0..1
+				// 1.5 x rather than the full 2 x: ridges steeper than plain noise, but not so steep that
+				// most of the ground is too steep to land on (test_landing_l5).
+				Sum += Amplitude * 1.5 * (Ridge * Weight - 0.5);
+				Weight = FMath::Clamp(Ridge * 1.6, 0.0, 1.0);
+				Crest = Octave == 0 ? Ridge : FMath::Lerp(Crest, Ridge, 0.5);
+			}
+			else
+			{
+				// Only real crests count as rough: 1 - |noise| averages ~0.6, so without the smoothstep
+				// nearly everything was a "ridge" and the valleys kept all their bumps.
+				const double Detail = Settings.RidgedOctaves > 0
+					? FMath::Lerp(Settings.DetailInValleys, 1.0, FMath::SmoothStep(0.55, 0.95, Crest)) : 1.0;
+				Sum += Amplitude * Detail * Noise;
+			}
 			Frequency *= Settings.Lacunarity;
 			Amplitude *= Settings.Gain;
 		}
@@ -161,7 +183,9 @@ namespace PlanetTerrain
 		{
 			// Gradient noise changes by at most ~3 amplitudes per wavelength, and never by more
 			// than its full range of 2 amplitudes.
-			SumSquares += FMath::Square(FMath::Min(2.0 * Amplitude, 3.0 * Amplitude * Reach / Wavelength));
+			// Ridged octaves (1.5 x |noise|) have a crease and half as much slope again.
+			const double SlopeFactor = Octave < Settings.RidgedOctaves ? 4.5 : 3.0;
+			SumSquares += FMath::Square(FMath::Min(2.0 * Amplitude, SlopeFactor * Amplitude * Reach / Wavelength));
 			Amplitude *= Settings.Gain;
 			Wavelength /= Settings.Lacunarity;
 		}

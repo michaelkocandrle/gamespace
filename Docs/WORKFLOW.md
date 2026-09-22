@@ -427,6 +427,11 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   pawnu. Co se staví kolem kamery (prach, tunel), je při 1,2 km/s o 20 m pozadu; přičti
   `LinearVelocity * DeltaSeconds`. Příznak: bílý klín přes obraz, který se v jiném snímku nezopakuje
   jinde, jen v rychlosti (21. 9. 2026).
+- **Custom uzel s texturami: `Texture2DSample(Tex, TexSampler, uv)`, nikdy `Tex.Sample(...)`.** Ray tracing
+  hit shadery nemají derivace, `.Sample` v nich neprojde a celý materiál se v buildu nahradí výchozím
+  šedým. V editoru ani v headless buildu materiálu chyba vidět není – jen v cook logu
+  („Failed to compile Material“, `%APPDATA%\Unreal Engine\AutomationTool\Logs\...\Cook-*.txt`).
+- **Rozměry z Poly Haven API (`dimensions`) jsou v milimetrech**, ne v centimetrech.
 - **SkyAtmosphere a obloha s `IsSky`:** s vlastní kopulí oblohy se atmosféra nekreslí sama, materiál
   kopule ji musí přidat uzlem `SkyAtmosphereViewLuminance`. V záchytu sky lightu ten uzel ale nedává
   nic – výplň z oblohy pak chybí a stíny jsou černé; něco jiného (u nás malovaný přechod) musí

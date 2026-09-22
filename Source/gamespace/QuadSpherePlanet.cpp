@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "QuadSpherePlanet.h"
+#include "PlanetRockScatter.h"
 
 #include "Async/Async.h"
 #include "Camera/PlayerCameraManager.h"
@@ -38,6 +39,8 @@ namespace
 		CPD_PlanetRadius = 5,
 		CPD_Depth = 6,
 		CPD_DebugTint = 7,
+		CPD_TileCenterWrapped = 8,   // 8..10: the tile centre modulo TextureWrapCm, in double precision
+
 	};
 
 	double SmoothStep01(double X)
@@ -61,6 +64,9 @@ AQuadSpherePlanet::AQuadSpherePlanet()
 	Body->SetHiddenInGame(true);
 	Body->SetCastShadow(false);
 
+	Rocks = CreateDefaultSubobject<UPlanetRockScatter>(TEXT("Rocks"));
+	Rocks->SetupAttachment(TerrainRoot);
+
 	RefreshDerivedSettings();
 }
 
@@ -74,6 +80,8 @@ FPlanetTerrainSettings AQuadSpherePlanet::MakeSettings() const
 	Result.Lacunarity = NoiseLacunarity;
 	Result.Gain = NoiseGain;
 	Result.Seed = uint32(NoiseSeed);
+	Result.RidgedOctaves = RidgedOctaves;
+	Result.DetailInValleys = DetailInValleys;
 	return Result;
 }
 
@@ -84,6 +92,10 @@ void AQuadSpherePlanet::RefreshDerivedSettings()
 		|| NewSettings.BaseWavelengthCm != Settings.BaseWavelengthCm || NewSettings.Octaves != Settings.Octaves
 		|| NewSettings.Lacunarity != Settings.Lacunarity || NewSettings.Gain != Settings.Gain || NewSettings.Seed != Settings.Seed;
 	Settings = NewSettings;
+	if (Rocks)
+	{
+		Rocks->SetTerrain(Settings);
+	}
 	if (bShapeChanged)
 	{
 		BoundsCache.Reset();
@@ -125,6 +137,7 @@ void AQuadSpherePlanet::BeginPlay()
 {
 	Super::BeginPlay();
 	RefreshDerivedSettings();
+	Rocks->Initialize(Settings);
 
 	// The six root tiles are built synchronously, so there is always something to fall back on.
 	for (uint8 Face = 0; Face < 6; ++Face)
@@ -182,6 +195,7 @@ void AQuadSpherePlanet::Tick(float DeltaSeconds)
 				LastLodCameraLocal = CameraLocal;
 				UpdateRenderLod(CameraLocal, GetWorld()->GetTimeSeconds());
 			}
+			Rocks->UpdateScatter(CameraLocal, Altitude);
 		}
 	}
 
@@ -717,6 +731,17 @@ UProceduralMeshComponent* AQuadSpherePlanet::CreateTileComponent(const FTerrainT
 		Component->SetCustomPrimitiveDataFloat(CPD_MorphEnd, float(MorphEnd));
 		Component->SetCustomPrimitiveDataFloat(CPD_PlanetRadius, float(Settings.RadiusCm));
 		Component->SetCustomPrimitiveDataFloat(CPD_Depth, float(Depth));
+		// Only tiles up to ShadowCasterMaxTileKm cast shadows. The big distant ones are not Nanite and
+		// each covers a huge area of the virtual shadow map: on the ground VSM reported "Non-Nanite
+		// Marking Job Queue overflow" every frame (21. 9. 2026). Relief that far away is shaded by
+		// its normals; cast shadows there are sub-pixel anyway.
+		Component->SetCastShadow(PlanetTerrain::TileSizeCm(Settings, Depth) <= ShadowCasterMaxTileKm * 100000.0);
+		// The ground textures are tiled in planet space. The centre above is float, a centimetre off
+		// 120 km out, and a centimetre is several texels of a 2.5 m texture: tiles showed seams. Wrapped
+		// here in double precision at a length every texture scale divides, it stays exact.
+		const FVector Wrapped(FMath::Fmod(Mesh.CenterLocal.X, TerrainTextureWrapCm), FMath::Fmod(Mesh.CenterLocal.Y, TerrainTextureWrapCm),
+			FMath::Fmod(Mesh.CenterLocal.Z, TerrainTextureWrapCm));
+		Component->SetCustomPrimitiveDataVector3(CPD_TileCenterWrapped, Wrapped);
 		ApplyDebugTint(Component);
 	}
 	return Component;

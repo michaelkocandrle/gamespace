@@ -790,6 +790,35 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       ve snímcích (60–80), sledovat; na snímku z 15 km šikmo je jedna podezřele rovná hrana stínu.
 
 ---
+52. **Planety 4/4: fotoskenovaná zem a kameny** (22. 9. 2026, autor: zblízka „low grafika, rozmazané“).
+    - **Příčina rozmazání:** povrch byl jen barva ze šumu, bez textur a bez normal mapy – světlo nemělo
+      na čem ukázat zrno, kamínky a praskliny. Teď tři fotoskenované materiály z Poly Haven (CC0,
+      `Tools/Assets/fetch_polyhaven.py` → `ArtSource/Textures/PolyHaven/`): štěrkový písek na rovinách
+      (repeat 2,5 m), rozpraskaná skála na svazích (4 m), vrstvená skála na útesech (6 m). Promítnuté
+      triplanárně v prostoru planety, normála ve world space (`tangent_space_normal` off), barvu dál
+      určují oblasti a sklon – textura se dělí svým průměrem (`means.json`), takže přidává detail,
+      ne barvu. Drsnost aspoň 0,8 (skeny se na hřebenech leskly jako mokré).
+    - **Přesnost textur 120 km od středu:** střed dlaždice ve floatu je o centimetr vedle, to je u 2,5 m
+      textury několik texelů a švy mezi dlaždicemi. Planeta posílá střed dlaždice modulo
+      `TerrainTextureWrapCm` (60 m) v double (custom data 8–10); každé měřítko textury ho musí dělit.
+    - **Past:** `.Sample()` v Custom uzlu shodí celý materiál na výchozí šedý – ray tracing hit shadery
+      nemají derivace. `Texture2DSample()` projde. Chyba je vidět jen v cook logu („Failed to compile Material“).
+    - **Kameny** (`UPlanetRockScatter` na planetě, 4 fotoskenované modely z Poly Haven, Nanite): buňky
+      ~46 m na mřížce stěn krychle, obsah buňky z hashe (pořád stejné kameny na stejném místě), stojí na
+      přesném výškovém poli, zapuštěné o čtvrtinu výšky, víc na svazích, některé buňky skoro prázdné.
+      Okruh 700 m, nad 2,5 km nic; kolem 10 000 instancí. **Zatím bez kolize** – loď kameny proletí.
+      Pozor: `rock_09` je sken velký 14 cm (Poly Haven udává rozměry v mm).
+    - **Stíny:** dlaždice terénu větší než 2 km stíny nevrhají (VSM hlásil přetečení fronty non-Nanite
+      meshů). Změřeno u země: 62 FPS s VSM, 51 bez – hláška nic nestojí, jen se skrývá
+      (`r.Shadow.Virtual.AllowScreenOverflowMessages=0`).
+    - **Hřebenový terén vypnutý:** `RidgedOctaves` (ostré hřebeny, klidná údolí) vypadal z 300 m–2 km
+      mnohem líp, ale kamera po přistání končila pod vykreslenou zemí a u okraje planety byly díry.
+      Kód zůstal, `RidgedOctaves = 0`, příčina se musí najít, než se zapne (kap. 11).
+    - `Package.ps1` teď sám ukončí zaseknutou hru a při „Failed reading oplog from Zen“ restartuje Zen
+      a balí znovu.
+    - Test `Tools/Tests/test_planet_rocks.py`, snímky `-Preset rocks_look`, přehled `Tools/Shots/sheet.py`.
+
+---
 
 ## 6. Mapa kódu a obsahu
 
@@ -1051,6 +1080,12 @@ Další otevřené směry mimo let:
 
 ## 11. Známé problémy a neověřené věci
 
+- **Hřebenový terén (`RidgedOctaves`) vypnutý** (22. 9. 2026, bod 52): s ním byla kamera po přistání pod
+  vykreslenou zemí a u okraje Veyry díry v terénu. Podezření: odhad výšky uvnitř dlaždice
+  (`HeightVariationWithinTileCm`) pro hřebenové oktávy nesedí, dlaždice se dělí pozdě a geomorph
+  jde k rodiči, který je daleko od skutečné země. Neověřeno.
+- **Kameny nemají kolizi** (bod 52): loď i postava jimi projdou.
+
 - **Neověřeno autorem (21. 9. 2026):** quantum drive (bod 47) – jen z testů a snímků. Hlavně jak
   sedí časy (spool 6 s, kalibrace 2,5 s, podržení 0,6 s, chlazení 10 s), jak čáry tečou v pohybu
   a jestli je mlha v tunelu dost/moc hustá (po bodu 48: tmavý střed, světlé stěny). Cruise (J) už není.
@@ -1193,4 +1228,5 @@ Viz `git log --oneline`. Poslední kroky:
 - jiskry kolem lodi, tunel s tmavým středem, kamera bez zpoždění ve skoku, méně bílých čar (bod 48);
 - planety 1/4: atmosféra Veyry podle videa (bod 49);
 - planety 2/4: Veyra 120 km, kulaté siluety, pryč zástupné asteroidy (bod 50);
-- planety 3/4: povrch ve třech měřítkách, teplá atmosféra (bod 51).
+- planety 3/4: povrch ve třech měřítkách, teplá atmosféra (bod 51);
+- planety 4/4: fotoskenovaná zem, kameny, Zen restart v Package.ps1 (bod 52).
