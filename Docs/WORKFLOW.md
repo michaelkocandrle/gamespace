@@ -60,6 +60,11 @@ leží jen v `ArtSource/Reference/Video/` (v `.gitignore`).
 
 Podrobně je to v `Docs/Ships/ShipPipeline.md`. Tady je jen pořadí a místa, kde se chybuje.
 
+> **Než se cokoliv nového pošle do Meshy/Tripo, přečti `Docs/AssetPipeline_Modular.md`.**
+> Jednoduchý tvar (trup, tělo) jde generovat vcelku jako doteď. Komplexní kompozice (kokpit
+> interiér a cokoliv podobného) se má rozložit na díly a poskládat přes Blender MCP, ne
+> generovat jedním promptem — to je přesně to, co se pokazilo u kokpitu.
+
 ### 2.1 Recept → .blend
 
 Recept je `ArtSource/Ships/Vanguard/Vanguard_ai_build.json`. `Tools/Blender/build_ai_ship.py` ho
