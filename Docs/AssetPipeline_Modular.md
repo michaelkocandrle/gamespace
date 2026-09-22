@@ -144,3 +144,19 @@ podle `progress` se nedá poznat, jestli úloha žije — kouká se na `updatedA
 
 Praktický závěr pro `build_ai_ship.py`: krok `decimate` (Blender) může nahradit Polygen, protože
 drží ostré hrany hard-surface dílů líp než decimace podle chyby.
+
+### Tripo 3.1 na stejném dílu: neúspěch (23. 9. 2026)
+
+Stejný referenční obrázek (šedý clay render panelu), `geometryQuality: detailed`, `smartLowPoly`,
+PBR, `faceLimit` 20 000 → 21 302 trojúhelníků, ale **model je rozbitý**: díry v desce, přepínače
+chybí, textura přepálená do bílé (`Saved/Kitbash/tripo_textured.png`). 75 CU.
+
+Dvě vysvětlení, obě se dají příště otestovat:
+- vstup byl **šedý clay render bez barvy a bez kontextu**; image-to-3D čeká spíš barevný koncept
+  s materiálem a osvětlením (Meshy dostal textový popis, ne tenhle obrázek),
+- `smartLowPoly` zjednodušuje geometrii už při generování a u malých technických prvků ji zřejmě
+  smete.
+
+Zatím tedy platí: **geometrii generovat v Meshy ve 4k**, a Scenario používat na kroky za tím
+(retopologie, UV, dělení na díly, textury). Než Tripo zavrhnout, stojí za zkoušku barevný koncept
+jako vstup a `smartLowPoly` vypnuté.
