@@ -58,7 +58,7 @@ aby se daly generovat kterýmkoliv nástrojem a pak porovnat se stejným měří
 | Zdroj | Stav | Poznámka |
 | --- | --- | --- |
 | **Procedurálně v Blenderu** | **funguje, hotovo** | Přepínací panel (788 tris), mřížka (920), svazek kabelů (816), rám displeje (436). Přesné rozměry, čistá topologie, zadarmo a opakovatelné. Pro malé technické díly je to rychlejší než generovat a pak opravovat. |
-| **Meshy** | připraveno, čeká na klíč | `Tools/Assets/meshy_generate.py` (text-to-3D v2, preview + volitelný refine, stáhne GLB do `ArtSource/Ships/Vanguard/Kitbash/Meshy/`). Klíč se bere z `MESHY_API_KEY`, nikdy z repozitáře. `--dry-run` vypíše prompty bez volání. |
+| **Meshy** | **funguje** | `Tools/Assets/meshy_generate.py` (text-to-3D v2, preview + volitelný refine, stáhne GLB do `ArtSource/Ships/Vanguard/Kitbash/Meshy/`). Klíč se bere z `MESHY_API_KEY`, nikdy z repozitáře. `--dry-run` vypíše prompty bez volání. |
 | **Hyper3D Rodin** (Blender MCP) | **nepoužitelné zadarmo** | Zapíná se `blendermcp_use_hyper3d` + klíč; vestavěný zkušební klíč (`vibecoding`) vrací `API_INSUFFICIENT_FUNDS` – je vyčerpaný. Potřebuje vlastní klíč (hyper3d.ai nebo FAL). |
 | **Hunyuan3D** (Blender MCP) | nevyzkoušeno | Vypnuté, chce vlastní klíč. |
 
@@ -69,3 +69,21 @@ aby se daly generovat kterýmkoliv nástrojem a pak porovnat se stejným měří
 - `get_viewport_screenshot` je u dílů velikosti 10 cm k ničemu (v okně jsou to tři pixely a
   nastavení `region_3d` se na snímku neprojeví). Spolehlivé je **renderovat přes kameru do souboru**
   (Workbench, `bpy.ops.render.render(write_still=True)`) a ten soubor si přečíst.
+
+### Srovnání obou zdrojů na stejném zadání (23. 9. 2026)
+
+Meshy text-to-3D, preview (bez refine): **20 kreditů a asi minuta na díl**, 2 300–3 000 trojúhelníků
+proti 440–920 u procedurálních. Renders: `Saved/Kitbash/compare_all.png` (díly) a
+`compare_consoles.png` (obě konzole vedle sebe).
+
+| Díl | Meshy | Procedurálně | Kdo vyhrál |
+| --- | --- | --- | --- |
+| Přepínací panel | zaoblený rám, kolébkové přepínače, šrouby v rozích | čisté, ale generické válečky | **Meshy** (lepší „design“) |
+| Ventilační mřížka | hluboký rám s lamelami | placatější, ale přesná | **Meshy** o kousek |
+| Svazek kabelů | **selhal** – chuchvalec jako chobotnice, nepoužitelné | přesně to, co má být | **procedurálně** |
+| Rám displeje | rám, zapuštěné sklo, clona | holý rámeček | **Meshy** |
+
+**Pravidlo z toho:** AI je dobrá na **„panelové“ díly** – plochá deska s ovladači, kde jde o design
+a čitelnost. Na **tenké protáhlé struktury** (kabely, trubky, madla) selhává a procedurální skript
+je rychlejší i přesnější. Povrch z AI je navíc zvlněný a rozměry nesedí na zadání (Meshy vrací
+normalizovaný model, měřítko si musí srovnat import podle `size_cm`).
