@@ -42,10 +42,32 @@ if ($openEditors) {
     Write-Error "Close the Unreal Editor first (PID $(($openEditors | ForEach-Object ProcessId) -join ', '))."
 }
 
+# A game left running (a shot run that hung) locks gamespace.exe and the archive step fails later.
+Get-Process gamespace -ErrorAction SilentlyContinue | Stop-Process -Force
+
+# The local Zen storage server the cook writes to dies now and then; the pak step then fails with
+# "Failed reading oplog from Zen" (WORKFLOW.md 9). Start it if it is not there, and on that failure
+# restart it and run once more.
+$zenLaunch = Join-Path $EngineDir "Engine\Binaries\Win64\ZenLaunch.exe"
+function Start-Zen([switch]$Restart) {
+    if ($Restart) { Get-Process zenserver -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep 2 }
+    if (-not (Get-Process zenserver -ErrorAction SilentlyContinue) -and (Test-Path $zenLaunch)) {
+        Start-Process $zenLaunch -WindowStyle Hidden
+        Start-Sleep 6
+    }
+}
+Start-Zen
+
 $started = Get-Date
-& $uat BuildCookRun "-project=$Project" -noP4 -platform=Win64 "-clientconfig=$Config" `
-    -build -cook -stage -pak -archive "-archivedirectory=$archive" -utf8output -nocompileeditor
-$code = $LASTEXITCODE
+for ($attempt = 1; $attempt -le 2; $attempt++) {
+    $output = & $uat BuildCookRun "-project=$Project" -noP4 -platform=Win64 "-clientconfig=$Config" `
+        -build -cook -stage -pak -archive "-archivedirectory=$archive" -utf8output -nocompileeditor 2>&1 |
+        Tee-Object -Variable lines
+    $code = $LASTEXITCODE
+    if ($code -eq 0 -or -not ($lines -match "Failed reading oplog from Zen")) { break }
+    Write-Host "Zen storage server dropped out; restarting it and packaging once more."
+    Start-Zen -Restart
+}
 $minutes = [math]::Round(((Get-Date) - $started).TotalMinutes, 1)
 
 $exe = Join-Path $archive "Windows\gamespace.exe"

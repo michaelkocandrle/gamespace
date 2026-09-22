@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -140,10 +140,26 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Planet")
 	TObjectPtr<USceneComponent> TerrainRoot;
 
+	/** Rocks and boulders on the ground round the camera (kinds set by Tools/Assets/build_space_scene.py). */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Planet")
+	TObjectPtr<class UPlanetRockScatter> Rocks;
+
 	// --- Shape -------------------------------------------------------------------------------
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Planet|Shape", meta = (ClampMin = "0.05", Units = "km"))
 	float RadiusKm = 25.f;
+
+	/**
+	 * The ground textures repeat every this many cm in planet space; every texture scale in
+	 * M_Planet_Terrain must divide it (TERRAIN_TEXTURES in build_space_scene.py). Tiles pass their
+	 * centre modulo this to the material in double precision (custom data 8-10).
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Planet|Shape", meta = (ClampMin = "100.0"))
+	double TerrainTextureWrapCm = 6000.0;
+
+	/** Tiles larger than this cast no shadows (see CreateTileComponent). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Planet|Shape", meta = (ClampMin = "0.0", Units = "km"))
+	float ShadowCasterMaxTileKm = 2.f;
 
 	/**
 	 * Height of the largest terrain features; each further octave adds NoiseGain times less.
@@ -168,6 +184,17 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Planet|Shape")
 	int32 NoiseSeed = 1;
+
+	/**
+	 * Ridged octaves and fine detail in the valleys: see FPlanetTerrainSettings. Off (0) since 22. 9. 2026:
+	 * 3 looked far better from 300 m to 2 km, but the camera ended up under the rendered ground after
+	 * landing and the limb had holes - to be found before it goes back on (Docs/HANDOFF.md, known issues).
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Planet|Shape", meta = (ClampMin = "0", ClampMax = "16"))
+	int32 RidgedOctaves = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Planet|Shape", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float DetailInValleys = 0.1f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Planet|Shape")
 	TObjectPtr<UMaterialInterface> TerrainMaterial;

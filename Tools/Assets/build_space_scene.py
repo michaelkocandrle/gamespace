@@ -123,6 +123,29 @@ TERRAIN_COLORS = {
     "Rock": (0.20, 0.16, 0.13),
     "Dust": (0.66, 0.52, 0.38),
 }
+# Photo-scanned ground up close (Poly Haven, CC0; Tools/Assets/fetch_polyhaven.py downloads them to
+# ArtSource/Textures/PolyHaven). Scale is the size of one texture repeat in cm; each must divide
+# AQuadSpherePlanet::TerrainTextureWrapCm (6000). DetailStrength: how much of the texture's own
+# contrast and hue reaches the ground; NormalStrength: how much of its relief.
+TERRAIN_TEXTURES = {
+    "Sand": ("gravelly_sand", 250.0),
+    "Rock": ("rock_face_03", 400.0),
+    "Strata": ("dry_riverbed_rock", 600.0),
+}
+# Rocks and boulders round the camera (UPlanetRockScatter; Poly Haven scans, CC0, fetched with
+# Tools/Assets/fetch_polyhaven.py --models). Per kind: rocks per ~46 m cell on flat ground and on
+# slopes, and the scale range (1 = the scan's own size).
+ROCK_FOLDER = "/Game/Planets/Rocks"
+ROCK_KINDS = [
+    # Doubled on 22. 9. 2026: the first counts hardly showed from the chase camera (rocks_look).
+    ("rock_09", 10.0, 16.0, 2.0, 7.0),                  # a 14 cm scan: stones of 30 cm to 1 m, everywhere
+    ("boulder_01", 0.8, 3.0, 0.3, 1.0),                 # 1.8 m
+    ("namaqualand_boulder_02", 0.3, 1.2, 0.4, 1.2),     # 2.5 m
+    ("namaqualand_boulder_03", 0.1, 0.8, 0.5, 1.5),     # 3 m, the rare big ones
+]
+TERRAIN_DETAIL_STRENGTH = 0.9
+TERRAIN_NORMAL_STRENGTH = 1.0
+TERRAIN_TEXTURE_FOLDER = "/Game/Planets/Textures"
 TERRAIN_HLSL = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "terrain.hlsl"), encoding="utf-8").read()
 
 # Veyra's atmosphere: the engine's SkyAtmosphere, sized to the planet (21. 9. 2026, after the planet
@@ -234,6 +257,63 @@ def import_sources():
     ensure_sphere_collision(mesh)
     ensure_sphere_not_nanite(mesh)
     return cube, mesh
+
+
+def import_rocks():
+    """The Poly Haven rock scans as Nanite static meshes (the importer brings their materials and
+    textures along). Returns [(mesh, flat, slope, min_scale, max_scale)]."""
+    root = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "ArtSource", "Models", "PolyHaven")
+    kinds = []
+    for asset, flat, slope, low, high in ROCK_KINDS:
+        source = os.path.join(root, asset, "%s_2k.gltf" % asset)
+        path = "%s/%s/SM_%s" % (ROCK_FOLDER, asset, asset)
+        mesh = ga.existing_or_none(path)
+        if mesh is None:
+            task = unreal.AssetImportTask()
+            task.set_editor_property("filename", source)
+            task.set_editor_property("destination_path", "%s/%s" % (ROCK_FOLDER, asset))
+            task.set_editor_property("automated", True)
+            task.set_editor_property("save", True)
+            unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+            meshes = [a for a in unreal.EditorAssetLibrary.list_assets("%s/%s" % (ROCK_FOLDER, asset), recursive=True)
+                      if isinstance(unreal.load_asset(a), unreal.StaticMesh)]
+            if not meshes:
+                raise RuntimeError("importing %s produced no static mesh" % source)
+            mesh = unreal.load_asset(meshes[0])
+            if mesh.get_path_name().split(".")[0] != path:
+                unreal.EditorAssetLibrary.rename_asset(mesh.get_path_name().split(".")[0], path)
+                mesh = unreal.load_asset(path)
+        nanite = mesh.get_editor_property("nanite_settings")
+        if not nanite.get_editor_property("enabled"):
+            nanite.set_editor_property("enabled", True)
+            mesh.set_editor_property("nanite_settings", nanite)
+            unreal.EditorAssetLibrary.save_loaded_asset(mesh, only_if_is_dirty=False)
+        bounds = mesh.get_bounds()
+        log("rock %s: %.0f x %.0f x %.0f cm" % (asset, bounds.box_extent.x * 2, bounds.box_extent.y * 2, bounds.box_extent.z * 2))
+        kinds.append((mesh, flat, slope, low, high))
+    return kinds
+
+
+def import_terrain_textures():
+    """The Poly Haven maps as T_<asset>_<map>: colour (sRGB), normal (BC5, green flipped from
+    OpenGL to Unreal's convention) and ARM (linear masks). Returns {slot: (diffuse, normal, arm, mean)}."""
+    import json
+    root = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "ArtSource", "Textures", "PolyHaven")
+    means = json.load(open(os.path.join(root, "means.json")))
+    result = {}
+    for slot, (asset, _) in TERRAIN_TEXTURES.items():
+        maps = []
+        for short, properties in (("diff", {}),
+                                  ("nor_gl", {"compression_settings": unreal.TextureCompressionSettings.TC_NORMALMAP,
+                                              "srgb": False, "flip_green_channel": True}),
+                                  ("arm", {"compression_settings": unreal.TextureCompressionSettings.TC_MASKS, "srgb": False})):
+            source = os.path.join(root, asset, "%s_%s_2k.jpg" % (asset, short))
+            texture = ga.import_file("%s/T_%s_%s" % (TERRAIN_TEXTURE_FOLDER, asset, short), source, properties=properties,
+                                     on_exists="skip")
+            maps.append(texture)
+        result[slot] = (maps[0], maps[1], maps[2], means[asset])
+    log("terrain textures: %s" % ", ".join("%s=%s" % (slot, asset) for slot, (asset, _) in TERRAIN_TEXTURES.items()))
+    return result
 
 
 def ensure_sphere_not_nanite(mesh):
@@ -1042,7 +1122,7 @@ def primitive_data(material, name, index, x, y):
                 use_custom_primitive_data=True, primitive_data_index=index)
 
 
-def build_planet_material():
+def build_planet_material(textures):
     """Terrain material for AQuadSpherePlanet tiles.
 
     Each tile is its own component, so object position and radius describe the tile, not the
@@ -1082,20 +1162,63 @@ def build_planet_material():
 
     # Ground in three scales (TERRAIN_HLSL): regions seen from orbit, rock on slopes and dust in the
     # lows, and fine breakup up close. Replaced one noise between two colours (21. 9. 2026).
-    names = ["P", "Radius", "Nrm", "RegionScale", "Plain", "Ochre", "Basin", "Basalt", "Rock", "Dust",
-             "SlopeRockStart", "SlopeRockEnd", "DustRough", "RockRough"]
+    names = ["P", "T", "Radius", "Nrm", "RegionScale", "Plain", "Ochre", "Basin", "Basalt", "Rock", "Dust",
+             "SlopeRockStart", "SlopeRockEnd", "DetailStrength", "NormalStrength", "MinRoughness"]
+    for slot in TERRAIN_TEXTURES:
+        names += [slot + "D", slot + "N", slot + "A", slot + "Mean", slot + "Scale"]
     ground = custom(m, NOISE_STRUCT + TERRAIN_HLSL, names, -600, 250, "Terrain",
                     unreal.CustomMaterialOutputType.CMOT_FLOAT4)
+    extra = []
+    for out_name, out_type in (("NormalOut", unreal.CustomMaterialOutputType.CMOT_FLOAT3),
+                               ("AOOut", unreal.CustomMaterialOutputType.CMOT_FLOAT1)):
+        output_pin = unreal.CustomOutput()
+        output_pin.set_editor_property("output_name", out_name)
+        output_pin.set_editor_property("output_type", out_type)
+        extra.append(output_pin)
+    ground.set_editor_property("additional_outputs", extra)
+    # The Normal pin takes a world-space normal: the triplanar blend works in world (= planet) space.
+    m.set_editor_property("tangent_space_normal", False)
+    # One-sided. Two-sided was tried against holes near the limb with the ridged terrain (22. 9. 2026)
+    # and did not remove them: they were missing ground, not folded triangles.
+    m.set_editor_property("two_sided", False)
+
+    # T: the planet-local position wrapped at TerrainTextureWrapCm, from the tile's exactly wrapped
+    # centre (custom data 8-10) plus the small in-tile offset - exact to the texel 120 km out.
+    wx = primitive_data(m, "TileCenterWrappedX", 8, -2000, 600)
+    wy = primitive_data(m, "TileCenterWrappedY", 9, -2000, 700)
+    wz = primitive_data(m, "TileCenterWrappedZ", 10, -2000, 800)
+    wxy = node(m, unreal.MaterialExpressionAppendVector, -1850, 650)
+    link(wx, wxy, pin(wxy, "A"))
+    link(wy, wxy, pin(wxy, "B"))
+    wrapped = node(m, unreal.MaterialExpressionAppendVector, -1700, 700)
+    link(wxy, wrapped, pin(wrapped, "A"))
+    link(wz, wrapped, pin(wrapped, "B"))
+    texture_pos = node(m, unreal.MaterialExpressionAdd, -1550, 650)
+    link(in_tile, texture_pos, pin(texture_pos, "A"))
+    link(wrapped, texture_pos, pin(texture_pos, "B"))
     sources = {
         "P": planet_local,
         "Radius": radius,
         "Nrm": node(m, unreal.MaterialExpressionVertexNormalWS, -900, 300),
         "RegionScale": scalar(m, "RegionScale", TERRAIN_REGION_SCALE, -900, 400),
+        "T": texture_pos,
         "SlopeRockStart": scalar(m, "SlopeRockStart", TERRAIN_SLOPE_ROCK[0], -900, 1300),
         "SlopeRockEnd": scalar(m, "SlopeRockEnd", TERRAIN_SLOPE_ROCK[1], -900, 1400),
-        "DustRough": scalar(m, "DustRoughness", 0.95, -900, 1500),
-        "RockRough": scalar(m, "RockRoughness", 0.78, -900, 1600),
+        "DetailStrength": scalar(m, "DetailStrength", TERRAIN_DETAIL_STRENGTH, -900, 1500),
+        "NormalStrength": scalar(m, "NormalStrength", TERRAIN_NORMAL_STRENGTH, -900, 1600),
+        "MinRoughness": scalar(m, "MinRoughness", 0.8, -900, 1700),
     }
+    y = 1800
+    for slot, (asset, scale) in TERRAIN_TEXTURES.items():
+        diffuse, normal, arm, mean = textures[slot]
+        for suffix, texture in (("D", diffuse), ("N", normal), ("A", arm)):
+            sources[slot + suffix] = node(m, unreal.MaterialExpressionTextureObjectParameter, -1100, y,
+                                          parameter_name="%s%s" % (slot, {"D": "Albedo", "N": "NormalMap", "A": "ARMMap"}[suffix]),
+                                          texture=texture)
+            y += 120
+        sources[slot + "Mean"] = vector(m, slot + "Mean", tuple(mean), -900, y)
+        sources[slot + "Scale"] = scalar(m, slot + "ScaleCm", scale, -900, y + 100)
+        y += 250
     for index, (name, rgb) in enumerate(TERRAIN_COLORS.items()):
         sources[name] = vector(m, name + "Color", rgb, -900, 500 + 120 * index)
     for name in names:
@@ -1122,6 +1245,8 @@ def build_planet_material():
     output(shown, unreal.MaterialProperty.MP_BASE_COLOR)
 
     output(ground_rough, unreal.MaterialProperty.MP_ROUGHNESS)
+    output(ground, unreal.MaterialProperty.MP_NORMAL, "NormalOut")
+    output(ground, unreal.MaterialProperty.MP_AMBIENT_OCCLUSION, "AOOut")
 
     # Geomorph: move each vertex towards where the parent tile would put it (UV1.xy, UV2.x, in
     # the tile's local frame) as the camera distance goes from MorphStart to MorphEnd.
@@ -1188,7 +1313,7 @@ def upsert_actor(eas, actors, label, cls, location=(0.0, 0.0, 0.0), replace_othe
     return actor
 
 
-def build_level(sky_material, planet_mesh, planet_material, body_materials):
+def build_level(sky_material, planet_mesh, planet_material, body_materials, rocks):
     les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
     eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
     if not les.load_level(LEVEL):
@@ -1265,6 +1390,17 @@ def build_level(sky_material, planet_mesh, planet_material, body_materials):
     planet.set_editor_property("display_name", unreal.Text(PLANET_NAME))
     planet.set_editor_property("radius_km", PLANET_RADIUS_CM / 100000.0)
     planet.set_editor_property("terrain_material", planet_material)
+    rock_kinds = []
+    for mesh, flat, slope, low, high in rocks:
+        kind = unreal.PlanetRockKind()
+        kind.set_editor_property("mesh", mesh)
+        kind.set_editor_property("per_cell_flat", flat)
+        kind.set_editor_property("per_cell_slope", slope)
+        kind.set_editor_property("min_scale", low)
+        kind.set_editor_property("max_scale", high)
+        rock_kinds.append(kind)
+    planet.get_editor_property("rocks").set_editor_property("kinds", rock_kinds)
+    log("rocks: %d kinds on %s" % (len(rock_kinds), planet.get_actor_label()))
     planet.set_editor_property("sky_zenith_color", unreal.LinearColor(*PAINTED_SKY_ZENITH, 1.0))
     planet.set_editor_property("sky_horizon_color", unreal.LinearColor(*PAINTED_SKY_HORIZON, 1.0))
     planet.get_component_by_class(unreal.StaticMeshComponent).set_static_mesh(planet_mesh)
@@ -1313,7 +1449,7 @@ def build_level(sky_material, planet_mesh, planet_material, body_materials):
 def main():
     cube, planet_mesh = import_sources()
     sky_material = build_starfield_material(cube)
-    planet_material = build_planet_material()
+    planet_material = build_planet_material(import_terrain_textures())
     build_dust_material()
     build_tunnel_material()
     build_fog_material()
@@ -1322,7 +1458,7 @@ def main():
         "moon": build_body_material(MOON_MATERIAL, MOON_HLSL, 0.9, with_time=False),
         "rings": build_rings_material(),
     }
-    build_level(sky_material, planet_mesh, planet_material, body_materials)
+    build_level(sky_material, planet_mesh, planet_material, body_materials, import_rocks())
 
     start = unreal.Vector(0.0, 0.0, 300.0)
     centre = unreal.Vector(*PLANET_LOCATION_CM)

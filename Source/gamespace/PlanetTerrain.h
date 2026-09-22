@@ -29,6 +29,16 @@ struct FPlanetTerrainSettings
 	/** Different seeds give different planets (mixed into the noise lattice hash). */
 	uint32 Seed = 1;
 	/**
+	 * The first this many octaves are ridged (1 - |noise|): sharp crests, rounded valleys,
+	 * instead of plain fBm's even, rolling bumps that read as water up close (21. 9. 2026). 0 is plain fBm.
+	 */
+	int32 RidgedOctaves = 0;
+	/**
+	 * The finer octaves are scaled by how much of a crest the point is on: this on the flats and in the
+	 * valleys, 1 on the ridges. Dust fills the lows; rock stays rough.
+	 */
+	double DetailInValleys = 1.0;
+	/**
 	 * Finite-difference step for normals. Fixed, not per-LOD, so a point gets exactly the same
 	 * normal whichever LOD level renders it - otherwise lighting shows seams between levels.
 	 */

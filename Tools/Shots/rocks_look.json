@@ -1,0 +1,11 @@
+{
+  "_comment": "Rocks and boulders on Veyra (UPlanetRockScatter, planets 4/4) and the textured ground, from landed to a few hundred metres. The first shot settles 12 s: straight after the jump down from 20 km the fine terrain tiles are not built yet and the rocks, which stand on the exact height field, float over a coarse tile. Run: Tools/Shots.ps1 -Preset rocks_look",
+  "shots": [
+    {"name": "a_landed", "camera": "chase", "altitude_m": 3, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 140, "chase_pitch": -12, "chase_zoom": 0.7, "settle": 12.0},
+    {"name": "b_landed_low", "camera": "chase", "altitude_m": 3, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 60, "chase_pitch": -4, "chase_zoom": 0.9, "settle": 3.0},
+    {"name": "c_cockpit_landed", "camera": "cockpit", "altitude_m": 3, "facing": "horizon", "hud": 0, "gear": true, "settle": 3.0},
+    {"name": "d_60m", "camera": "chase", "altitude_m": 60, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 150, "chase_pitch": -20, "settle": 3.0},
+    {"name": "e_300m", "camera": "chase", "altitude_m": 300, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -25, "settle": 3.0},
+    {"name": "f_300km", "camera": "cockpit", "altitude_m": 300000, "facing": "planet", "hud": 0, "settle": 3.0}
+  ]
+}
