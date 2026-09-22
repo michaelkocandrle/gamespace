@@ -107,3 +107,23 @@ Stálo to 25 kreditů místo 20. Srovnání: `Saved/Kitbash/compare_resolution.p
 povrchový detail u panelových dílů stačí Meshy ve 4k a předplatné Pro kvůli UltraShape zatím nemá
 opodstatnění; vstupy pro UltraShape jsou ve Scenariu nahrané, takže případný test bude na jedno
 zapnutí tarifu.
+
+### Co umí Scenario v základním tarifu (23. 9. 2026)
+
+Účet `cu-basic` vidí 161 modelů; `accessRestrictions` 0 znamená dostupné, 50 je Pro (tam sedí
+UltraShape). Kroky, které jsme dosud dělali ručně, jsou dostupné jako modely:
+
+| Model | K čemu | Nahrazuje |
+| --- | --- | --- |
+| `model_tencent-smarttopology` (Hunyuan Polygen 1.5) | AI retopologie hustého GLB na čistou geometrii, `polygonType` triangle/quad, `faceLevel` | `decimate` v `build_ai_ship.py` |
+| `model_tencent-uv-unwrapping` | automatické UV do 30 000 ploch | ruční UV před `rebake` |
+| `model_hunyuan-3d-part` | rozdělení meshe na díly (dobré na hard-surface) | krok `split` |
+| `model_tripo-v3-0-texturing` | PBR textury na hotový mesh z promptu nebo obrázku | doplněk k `rebake` |
+| `model_tripo-v3-1-image-to-3d` (Tripo 3.1) | obrázek → 3D, `smartLowPoly`, `quad`, `generateParts`, PBR | placené Meshy |
+| `model_hunyuan-3d-v2-1` | obrázek → 3D, `targetFaceNum` | placené Meshy |
+
+Klient: `Tools/Assets/scenario_mcp.py` (`tools`, `upload`, `run`, `get`). Upload jde přes MCP
+server (dokončovací krok vícedílného uploadu není v REST dokumentaci), spouštění a stahování přes
+REST `POST /v1/generate/custom/<modelId>` a `GET /v1/jobs/<id>`.
+
+Ceny prvních běhů: retopologie hustého panelu 113 CU, Tripo 3.1 s texturou 75 CU.
