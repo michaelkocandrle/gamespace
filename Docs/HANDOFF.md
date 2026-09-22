@@ -921,6 +921,10 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       Mlha je **koule kolem kamery** a její barva závisí jen na směru pohledu – válec dělal přes
       obraz ostrou rovnou hranu (vlastní silueta). Jedna strana tunelu je světlejší podle toho, kde
       stojí slunce (`FogSunAmount`).
+    - **Kolo 4 (doladění):** mraky na stěnách jsou dvě vrstvy šumu běžící různě rychle (`FogCloudSpeed`),
+      takže se převalují místo rovnoměrného klouzání; jejich součet se váží, ne sčítá – sečtený se
+      ořezával na 1 a dělal ploché obdélníky. Jiskry mají teplotu: u trupu bílé, v úplavu tmavě modré
+      (custom data 2, `HotColor` a `HeatFalloff`; hlava mladé jiskry je nejteplejší).
     - Nové ladění: `space.Ship <Property> <Value>` (vlastnosti lodi za běhu).
       Snímky `-Preset quantum_look`, `-Preset quantum_ramp`, `-Preset sparks_flow`, `-Preset tunnel_haze`.
 

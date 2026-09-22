@@ -298,6 +298,7 @@ void USpaceSpeedTunnelComponent::UpdateTunnel(const FVector& ViewLocation, const
 		FogMaterial->SetVectorParameterValue(TEXT("FogWarmColor"), FogWarmColor);
 		FogMaterial->SetVectorParameterValue(TEXT("FogCoolColor"), FogCoolColor);
 		FogMaterial->SetScalarParameterValue(TEXT("FogCloudAmount"), FogCloudAmount);
+		FogMaterial->SetScalarParameterValue(TEXT("FogCloudSpeed"), FogCloudSpeed);
 		FogMaterial->SetVectorParameterValue(TEXT("FogBandColor"), FogBandColor);
 		FogMaterial->SetScalarParameterValue(TEXT("FogBandAmount"), FogBandAmount);
 		if (!Sun.IsValid())

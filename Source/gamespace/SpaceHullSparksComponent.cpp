@@ -32,8 +32,8 @@ USpaceHullSparksComponent::USpaceHullSparksComponent()
 	bAffectDistanceFieldLighting = false;
 	bAffectDynamicIndirectLighting = false;
 	SetVisibleInRayTracing(false);
-	// 0 fade, 1 brightness (flickers). M_HullSpark measures the rest on the cube itself.
-	NumCustomDataFloats = 2;
+	// 0 fade, 1 brightness (flickers), 2 heat (white at the hull, blue in the wake).
+	NumCustomDataFloats = 3;
 	// Over the quantum tunnel's fog (sort priority 0, fully opaque, centred on the camera): with equal
 	// priorities the fog sorted after the sparks now and then and drew them over as black streaks.
 	SetTranslucentSortPriority(20);
@@ -217,6 +217,7 @@ void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, fl
 	const FLinearColor Colour = FMath::Lerp(FlightColor * FlightBrightness * FlightAlpha, QuantumColor * QuantumBrightness, Quantum);
 	const float Sweep = SweepBack * FMath::Max(Quantum, FlightAlpha);
 	SparkMaterial->SetVectorParameterValue(TEXT("DustColor"), Colour);
+	SparkMaterial->SetVectorParameterValue(TEXT("DustHotColor"), HotColor * Colour.GetLuminance() / FMath::Max(HotColor.GetLuminance(), 0.01f));
 	SparkMaterial->SetScalarParameterValue(TEXT("DustBrightness"), 1.f);
 
 	const FTransform& ToWorld = GetComponentTransform();
@@ -246,6 +247,8 @@ void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, fl
 		const float Dim = float(FMath::Sqrt(ThicknessCm / Width));
 		// Flicker every frame: sparks crackle, lines do not.
 		const float Own = Spark.Brightness * Random.FRandRange(0.35f, 1.f) * Dim;
+		// Plasma cools as it is carried back: white by the hull, deep blue out in the wake.
+		const float Heat = FMath::Pow(1.f - T, HeatFalloff);
 
 		FVector Newer = Head;
 		for (int32 Segment = 0; Segment < Segments; ++Segment)
@@ -266,6 +269,8 @@ void USpaceHullSparksComponent::UpdateSparks(float DeltaSeconds, float Speed, fl
 			const float Fade = Length > 0.5 ? SparkFade * (1.f - float(Segment) / float(Segments)) : 0.f;
 			SetCustomDataValue(Instance, 0, Fade, false);
 			SetCustomDataValue(Instance, 1, Own, false);
+			// Hottest at the head of a young spark, cold at the tail of an old one.
+			SetCustomDataValue(Instance, 2, Heat * (1.f - 0.7f * float(Segment) / float(Segments)), false);
 			Newer = Older;
 		}
 	}

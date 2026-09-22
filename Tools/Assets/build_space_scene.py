@@ -1084,28 +1084,39 @@ float shafts = lerp(1.0, 0.45 + 1.1 * soft * soft, ShaftContrast) * lerp(1.0, 0.
 
 // Clouds: value noise in (angle, length), two octaves, flowing towards the vanishing point. The
 // reference tunnel is not one even layer - it is blotchy and keeps changing (the author).
-float2 q = float2(a * 9.0, zn * 2.2 - Time * 0.35);
+// Two layers running at different speeds, so the clouds boil and pile up instead of sliding past
+// as one even sheet (the author against the reference, 22. 9. 2026).
 float cloud = 0.0;
-float amp = 0.62;
-for (int o = 0; o < 3; ++o)
+for (int layer = 0; layer < 2; ++layer)
 {
-    float2 g = floor(q);
-    float2 f = frac(q);
-    f = f * f * (3.0 - 2.0 * f);
-    float h00 = frac(sin(dot(g + float2(0.0, 0.0), float2(12.989, 78.233))) * 43758.545);
-    float h10 = frac(sin(dot(g + float2(1.0, 0.0), float2(12.989, 78.233))) * 43758.545);
-    float h01 = frac(sin(dot(g + float2(0.0, 1.0), float2(12.989, 78.233))) * 43758.545);
-    float h11 = frac(sin(dot(g + float2(1.0, 1.0), float2(12.989, 78.233))) * 43758.545);
-    cloud += amp * lerp(lerp(h00, h10, f.x), lerp(h01, h11, f.x), f.y);
-    q = q * 2.03 + 17.0;
-    amp *= 0.5;
+    float2 q = layer == 0
+        ? float2(a * 7.0, zn * 4.0 - Time * CloudSpeed)
+        : float2(a * 13.0 + Time * CloudSpeed * 0.18, zn * 9.0 - Time * CloudSpeed * 2.1);
+    float amp = layer == 0 ? 0.66 : 0.34;
+    float sum = 0.0;
+    for (int o = 0; o < 3; ++o)
+    {
+        float2 g = floor(q);
+        float2 f = frac(q);
+        f = f * f * (3.0 - 2.0 * f);
+        float h00 = frac(sin(dot(g + float2(0.0, 0.0), float2(12.989, 78.233))) * 43758.545);
+        float h10 = frac(sin(dot(g + float2(1.0, 0.0), float2(12.989, 78.233))) * 43758.545);
+        float h01 = frac(sin(dot(g + float2(0.0, 1.0), float2(12.989, 78.233))) * 43758.545);
+        float h11 = frac(sin(dot(g + float2(1.0, 1.0), float2(12.989, 78.233))) * 43758.545);
+        sum += amp * lerp(lerp(h00, h10, f.x), lerp(h01, h11, f.x), f.y);
+        q = q * 2.03 + 17.0;
+        amp *= 0.5;
+    }
+    // Weighted, not added: the sum clipped at 1 and the clouds flattened into blank slabs.
+    cloud += sum * (layer == 0 ? 0.62 : 0.38);
 }
 cloud = saturate(cloud);
 // The clouds carry the colour too: cool blue-grey where they are thin, warm and violet where they
 // pile up, so the walls run through a spectrum instead of one flat blue.
 float3 wall = lerp(Near.rgb, Warm.rgb, saturate((cloud - 0.5) * 2.0));
 wall = lerp(wall, Cool.rgb, saturate((0.45 - cloud) * 2.2));
-float lit = lerp(1.0 - CloudAmount, 1.0 + CloudAmount, cloud);
+// Contrasted: thin where the clouds part, bright where they pile up.
+float lit = lerp(1.0 - CloudAmount, 1.0 + CloudAmount * 1.6, smoothstep(0.2, 0.8, cloud));
 
 // A few very wide bands in another colour, drifting the other way: the reference tunnel runs
 // through a spectrum (the author, 22. 9. 2026), it is not one blue.
@@ -1144,7 +1155,8 @@ def build_fog_material():
     link(here, delta, "A")
     link(centre, delta, "B")
     names = ["P", "Dir", "Right", "Up", "HalfLength", "Near", "Far", "Warm", "Cool", "CloudAmount", "Time",
-             "Band", "BandAmount", "SunDir", "SunAmount", "Opacity", "CentreOpacity", "Alpha", "ShaftCount", "ShaftContrast"]
+             "Band", "BandAmount", "SunDir", "SunAmount", "CloudSpeed", "Opacity", "CentreOpacity", "Alpha",
+             "ShaftCount", "ShaftContrast"]
     fog = custom(m, FOG_HLSL, names, -400, 0, "QuantumFog", unreal.CustomMaterialOutputType.CMOT_FLOAT4)
     sources = {
         "P": delta,
@@ -1163,6 +1175,7 @@ def build_fog_material():
         "BandAmount": scalar(m, "FogBandAmount", 0.8, -1300, 700),
         "SunDir": vector(m, "FogSunDirection", (1.0, 0.0, 0.0), -1300, 800),
         "SunAmount": scalar(m, "FogSunAmount", 0.75, -1300, 900),
+        "CloudSpeed": scalar(m, "FogCloudSpeed", 0.9, -1300, 1000),
         "Time": node(m, unreal.MaterialExpressionTime, -1300, 500),
         "Far": vector(m, "FogFarColor", (0.004, 0.006, 0.012), -900, 400),
         "Opacity": scalar(m, "FogOpacity", 1.0, -900, 500),
@@ -1229,7 +1242,9 @@ float core = saturate(1.0 - v * 3.0);
 float halo = saturate(1.0 - v);
 // A hot thin thread in a soft glow: from a distance it reads as a smooth filament, not a dash.
 float shape = tail * (core * core * 2.2 + halo * halo * halo * 0.5);
-return Colour.rgb * Brightness * Fade * Own * shape;
+// White hot where it leaves the hull, deep blue by the time it is far back in the wake (custom data 2).
+float3 tint = lerp(Colour.rgb, Hot.rgb, Heat * Heat);
+return tint * Brightness * Fade * Own * shape;
 """
 
 
@@ -1248,13 +1263,15 @@ def build_spark_material():
     # Set explicitly: fresh_material keeps the asset's old flags.
     m.set_editor_property("enable_responsive_aa", False)
     m.set_editor_property("two_sided", True)
-    names = ["Local", "Colour", "Brightness", "Fade", "Own"]
+    names = ["Local", "Colour", "Hot", "Heat", "Brightness", "Fade", "Own"]
     spark = custom(m, SPARK_HLSL, names, -400, 0, "HullSpark")
     sources = {
         "Local": node(m, unreal.MaterialExpressionLocalPosition, -900, -100,
                       local_origin=unreal.LocalPositionOrigin.INSTANCE,
                       included_offsets=unreal.PositionIncludedOffsets.EXCLUDE_OFFSETS),
         "Colour": vector(m, "DustColor", (0.25, 0.55, 1.0), -900, 100),
+        "Hot": vector(m, "DustHotColor", (1.0, 1.0, 1.0), -900, 150),
+        "Heat": node(m, unreal.MaterialExpressionPerInstanceCustomData, -900, 500, data_index=2),
         "Brightness": scalar(m, "DustBrightness", 1.0, -900, 200),
         "Fade": node(m, unreal.MaterialExpressionPerInstanceCustomData, -900, 300, data_index=0),
         "Own": node(m, unreal.MaterialExpressionPerInstanceCustomData, -900, 400, data_index=1),

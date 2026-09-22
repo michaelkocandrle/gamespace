@@ -210,7 +210,11 @@ public:
 
 	/** How much the clouds darken and brighten the walls (0 = one even layer). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float FogCloudAmount = 0.45f;
+	float FogCloudAmount = 0.95f;
+
+	/** How fast the clouds boil past (0 = still). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0"))
+	float FogCloudSpeed = 0.9f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float FogOpacity = 1.f;
@@ -231,7 +235,7 @@ public:
 	float FogCentreOpacity = 1.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
-	FLinearColor FogNearColor = FLinearColor(0.15f, 0.18f, 0.26f);
+	FLinearColor FogNearColor = FLinearColor(0.26f, 0.31f, 0.42f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Tunnel")
 	FLinearColor FogFarColor = FLinearColor(0.001f, 0.002f, 0.004f);
