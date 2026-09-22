@@ -1,0 +1,121 @@
+{
+  "_comment": "Step 2, the plastic look: one cause per shot, every shot resets the others first (console commands stick for the whole run). z_warmup is thrown away - the first shot fires before the ship has settled. Run: Tools/Shots.ps1 -Preset plastic_diag",
+  "shots": [
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "z_warmup",
+      "console": [
+        "r.Lumen.Reflections.MaxRoughnessToTrace 0.4",
+        "space.Post LocalExposureHighlightContrastScale 0.8",
+        "space.Post LocalExposureShadowContrastScale 0.8",
+        "space.Sky Intensity 0.7"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "a_now",
+      "console": [
+        "r.Lumen.Reflections.MaxRoughnessToTrace 0.4",
+        "space.Post LocalExposureHighlightContrastScale 0.8",
+        "space.Post LocalExposureShadowContrastScale 0.8",
+        "space.Sky Intensity 0.7"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "b_traced_reflections",
+      "console": [
+        "r.Lumen.Reflections.MaxRoughnessToTrace 0.4",
+        "space.Post LocalExposureHighlightContrastScale 0.8",
+        "space.Post LocalExposureShadowContrastScale 0.8",
+        "space.Sky Intensity 0.7",
+        "r.Lumen.Reflections.MaxRoughnessToTrace 1.0"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "c_local_exposure_off",
+      "console": [
+        "r.Lumen.Reflections.MaxRoughnessToTrace 0.4",
+        "space.Post LocalExposureHighlightContrastScale 0.8",
+        "space.Post LocalExposureShadowContrastScale 0.8",
+        "space.Sky Intensity 0.7",
+        "space.Post LocalExposureHighlightContrastScale 1.0",
+        "space.Post LocalExposureShadowContrastScale 1.0"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "d_less_fill",
+      "console": [
+        "r.Lumen.Reflections.MaxRoughnessToTrace 0.4",
+        "space.Post LocalExposureHighlightContrastScale 0.8",
+        "space.Post LocalExposureShadowContrastScale 0.8",
+        "space.Sky Intensity 0.7",
+        "space.Sky Intensity 0.3"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "e_all_three",
+      "console": [
+        "r.Lumen.Reflections.MaxRoughnessToTrace 0.4",
+        "space.Post LocalExposureHighlightContrastScale 0.8",
+        "space.Post LocalExposureShadowContrastScale 0.8",
+        "space.Sky Intensity 0.7",
+        "r.Lumen.Reflections.MaxRoughnessToTrace 1.0",
+        "space.Post LocalExposureHighlightContrastScale 1.0",
+        "space.Post LocalExposureShadowContrastScale 1.0",
+        "space.Sky Intensity 0.3"
+      ]
+    }
+  ]
+}

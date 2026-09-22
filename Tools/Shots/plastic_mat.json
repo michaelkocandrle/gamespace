@@ -1,0 +1,176 @@
+{
+  "_comment": "Step 2c: how metal the hull should be, in space and over the planet. Run: Tools/Shots.ps1 -Preset plastic_mat",
+  "shots": [
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "z_warmup",
+      "console": [
+        "space.ShipMat RoughnessScale 1.0",
+        "space.ShipMat MetallicScale 1.0",
+        "space.ShipMat DetailNormalStrength 0.7"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "s_a_now",
+      "console": [
+        "space.ShipMat RoughnessScale 1.0",
+        "space.ShipMat MetallicScale 1.0",
+        "space.ShipMat DetailNormalStrength 0.7"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "s_b_mild",
+      "console": [
+        "space.ShipMat RoughnessScale 1.0",
+        "space.ShipMat MetallicScale 1.0",
+        "space.ShipMat DetailNormalStrength 0.7",
+        "space.ShipMat MetallicScale 1.6",
+        "space.ShipMat RoughnessScale 0.85",
+        "space.ShipMat DetailNormalStrength 1.0"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "s_c_mid",
+      "console": [
+        "space.ShipMat RoughnessScale 1.0",
+        "space.ShipMat MetallicScale 1.0",
+        "space.ShipMat DetailNormalStrength 0.7",
+        "space.ShipMat MetallicScale 2.0",
+        "space.ShipMat RoughnessScale 0.75",
+        "space.ShipMat DetailNormalStrength 1.2"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "body:Veyra",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -18,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "s_d_metal",
+      "console": [
+        "space.ShipMat RoughnessScale 1.0",
+        "space.ShipMat MetallicScale 1.0",
+        "space.ShipMat DetailNormalStrength 0.7",
+        "space.ShipMat MetallicScale 2.5",
+        "space.ShipMat RoughnessScale 0.6",
+        "space.ShipMat DetailNormalStrength 1.4"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -22,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "p_a_now",
+      "console": [
+        "space.ShipMat RoughnessScale 1.0",
+        "space.ShipMat MetallicScale 1.0",
+        "space.ShipMat DetailNormalStrength 0.7"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -22,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "p_b_mild",
+      "console": [
+        "space.ShipMat RoughnessScale 1.0",
+        "space.ShipMat MetallicScale 1.0",
+        "space.ShipMat DetailNormalStrength 0.7",
+        "space.ShipMat MetallicScale 1.6",
+        "space.ShipMat RoughnessScale 0.85",
+        "space.ShipMat DetailNormalStrength 1.0"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -22,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "p_c_mid",
+      "console": [
+        "space.ShipMat RoughnessScale 1.0",
+        "space.ShipMat MetallicScale 1.0",
+        "space.ShipMat DetailNormalStrength 0.7",
+        "space.ShipMat MetallicScale 2.0",
+        "space.ShipMat RoughnessScale 0.75",
+        "space.ShipMat DetailNormalStrength 1.2"
+      ]
+    },
+    {
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 150,
+      "chase_pitch": -22,
+      "chase_zoom": 0.32,
+      "settle": 5.0,
+      "name": "p_d_metal",
+      "console": [
+        "space.ShipMat RoughnessScale 1.0",
+        "space.ShipMat MetallicScale 1.0",
+        "space.ShipMat DetailNormalStrength 0.7",
+        "space.ShipMat MetallicScale 2.5",
+        "space.ShipMat RoughnessScale 0.6",
+        "space.ShipMat DetailNormalStrength 1.4"
+      ]
+    }
+  ]
+}
