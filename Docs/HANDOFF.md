@@ -1094,6 +1094,20 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       s tmavými vzpěrami a sklem i nad hlavou, nízký pult u přídě, dvě MFD na ramenech pro každého
       pilota po stranách výhledu, vysoká černá sedadla s bílými pruhy, joystickem a plynem v područkách,
       boční konzole a panel nad hlavou s tlačítky. Obrazovky jsou modré plochy (jas emise 1,5).
+64. **Srovnání se SC a výchozí kvalita pro autorův počítač** (23. 9. 2026). Autor: RTX 2060 6 GB, 1920 × 1080;
+    směr grafiky **podle SC** (teplá architektura se světelnými lištami, tmavý základ, studené hologramové UI –
+    nahrazuje modrou ocel z bodu 59), assety zdarma nebo po dílech z Meshy/Scenario, žádné placené balíky
+    (průzkum zdrojů: `Docs/AssetSources_Free.md`).
+    - **Srovnání** (reference `ArtSource/Reference/Mood/sc_cockpit_*.webp`, lokálně): náš interiér je 2–3×
+      světlejší (střední jas 0,42–0,44 proti 0,08–0,18), bez jasných světelných lišt (p99 0,71–0,78 proti
+      0,71–0,88), celý studený (B/R 1,2–1,27 proti teplým 0,72–1,05), o ~40 % méně jemného detailu, s jedním
+      materiálem kitu a prázdnými obrazovkami. Plán v tomto pořadí: výkon → světlo podle SC → hologramové
+      obrazovky s obsahem → materiály (ambientCG) → detail geometrie → letový kokpit Vanguardu.
+    - **Výkon ve 1080p** (`-Preset perf_quality -Width 1920 -Height 1080`): filmová 100 % = 49 FPS v interiéru,
+      70 v letu; epická + TSR 75 % = 70–78 a 90–98. Interiér brzdí počet pixelů (skupiny kvality o stupeň níž
+      0–1 ms, rozlišení vykreslování 6 ms). **Nové výchozí nastavení: epická, vykreslení 75 %, TSR** –
+      `USpaceUserSettings` verze 4 převede uložená nastavení jednou; v menu „Kvalita grafiky“ a „Rozlišení
+      vykreslování (TSR)“ jde zpět na filmovou a 100 %. Pod 50 % nikdy.
 
 ---
 

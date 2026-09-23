@@ -298,7 +298,7 @@ TSharedRef<SWidget> SSpaceMenu::BuildSettingsPage()
 				LOCTEXT("Epic", "Epická"), LOCTEXT("Cinematic", "Filmová") };
 			return Names[FMath::Clamp(I, 0, 4)];
 		}));
-	Add(MakeSliderRow(LOCTEXT("ResolutionScale", "Škálování rozlišení"), &Draft.ResolutionScale, 50.f, 100.f,
+	Add(MakeSliderRow(LOCTEXT("ResolutionScale", "Rozlišení vykreslování (TSR)"), &Draft.ResolutionScale, 50.f, 100.f,
 		[](float V) { return FText::FromString(FString::Printf(TEXT("%d %%"), FMath::RoundToInt32(V))); }));
 	Add(MakeToggleRow(LOCTEXT("VSync", "Vertikální synchronizace"), &Draft.bVSync));
 	Add(MakeChoiceRow(LOCTEXT("FrameLimit", "Limit snímků"),

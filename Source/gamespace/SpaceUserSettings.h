@@ -108,7 +108,7 @@ public:
 
 	/** The preset the player picked, 0 low .. 4 cinematic. The scalability groups follow from it. */
 	UPROPERTY(Config, BlueprintReadOnly, Category = "Settings")
-	int32 GraphicsQualityLevel = 4;
+	int32 GraphicsQualityLevel = DefaultQualityLevel;
 
 	/**
 	 * How far global illumination is allowed to go. Measured on 20. 9. 2026 with Tools/Shots/look_groups.json:
@@ -119,7 +119,10 @@ public:
 	static constexpr int32 MaxGlobalIlluminationQuality = 2;
 
 	/** The newest settings version this build knows. */
-	static constexpr int32 CurrentSettingsVersion = 3;
+	static constexpr int32 CurrentSettingsVersion = 4;
+	/** New and migrated settings: epic, drawn at 75 % and upscaled by TSR (see MigrateSettings). */
+	static constexpr int32 DefaultQualityLevel = 3;
+	static constexpr float DefaultRenderScale = 75.f;
 
 	/** Tests: the render scale in per cent (sg.ResolutionQuality) and a way to set it without applying. */
 	UFUNCTION(BlueprintCallable, Category = "Settings|Tests")

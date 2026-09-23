@@ -137,38 +137,51 @@ settings.set_shadow_quality(saved_levels[1])
 # global illumination costs frames (Tools/Shots/look_groups.json), so it is the one that is capped.
 quality = unreal.new_object(unreal.SpaceUserSettings)
 quality.set_to_defaults()
-check("new settings are cinematic, not medium", quality.get_graphics_quality_level() == 4,
+# Since 23. 9. 2026 (version 4) new settings are epic at a 75 % render scale upscaled by TSR: on the
+# author's RTX 2060 at 1080p cinematic at 100 % was 49 FPS inside the ship, epic + TSR 75 % is 70.
+check("new settings are epic", quality.get_graphics_quality_level() == 3,
       "preset %d" % quality.get_graphics_quality_level())
 groups = {"anti-aliasing": quality.get_anti_aliasing_quality(), "texture": quality.get_texture_quality(),
           "post process": quality.get_post_processing_quality(), "shadow": quality.get_shadow_quality(),
           "effects": quality.get_visual_effect_quality(), "view distance": quality.get_view_distance_quality(),
           "reflection": quality.get_reflection_quality()}
-check("every group that costs nothing is at cinematic", all(v == 4 for v in groups.values()),
+check("every group is at epic", all(v == 3 for v in groups.values()),
       ", ".join("%s %d" % (k, v) for k, v in sorted(groups.items())))
 gi = quality.get_global_illumination_quality()
 check("global illumination is capped (it halves the frame rate at cinematic)", gi <= 2, "global illumination %d" % gi)
 quality.set_overall_scalability_level(4)
-check("the cap survives picking cinematic in the menu", quality.get_global_illumination_quality() <= 2
-      and abs(quality.debug_get_render_scale() - 100.0) < 0.01,
+check("the cap survives picking cinematic in the menu, and the render scale stays the player's",
+      quality.get_global_illumination_quality() <= 2 and abs(quality.debug_get_render_scale() - 75.0) < 0.01,
       "global illumination %d, scale %.0f %%" % (quality.get_global_illumination_quality(), quality.debug_get_render_scale()))
 
 # --- Render scale: the game draws at full resolution unless the player lowers it -------------------------
 fresh = unreal.new_object(unreal.SpaceUserSettings)
 fresh.set_to_defaults()
 scale = fresh.debug_get_render_scale()
-check("new settings render at 100 % (half resolution made everything soft, 20. 9. 2026)", abs(scale - 100.0) < 0.01, "%.0f %%" % scale)
-fresh.debug_set_render_scale(50.0)
-fresh.debug_set_settings_version(0)
+check("new settings render at 75 %, upscaled by TSR", abs(scale - 75.0) < 0.01, "%.0f %%" % scale)
+fresh.debug_set_render_scale(30.0)
+fresh.set_overall_scalability_level(2)
+check("the render scale never drops under 50 % (half resolution made everything soft, 20. 9. 2026)",
+      fresh.debug_get_render_scale() >= 50.0, "%.0f %%" % fresh.debug_get_render_scale())
+fresh.debug_set_render_scale(100.0)
+fresh.set_overall_scalability_level(4)
+fresh.debug_set_settings_version(3)
 fresh.migrate_settings()
-check("settings saved by an older build are brought up to 100 %", abs(fresh.debug_get_render_scale() - 100.0) < 0.01
-      and fresh.debug_get_settings_version() >= 2, "%.0f %%, version %d" % (fresh.debug_get_render_scale(), fresh.debug_get_settings_version()))
+check("settings saved by an older build go to epic at 75 % once", abs(fresh.debug_get_render_scale() - 75.0) < 0.01
+      and fresh.get_graphics_quality_level() == 3 and fresh.debug_get_settings_version() >= 4,
+      "%.0f %%, preset %d, version %d" % (fresh.debug_get_render_scale(), fresh.get_graphics_quality_level(), fresh.debug_get_settings_version()))
+fresh.set_overall_scalability_level(4)
+fresh.debug_set_render_scale(100.0)
+fresh.migrate_settings()
+check("after that the player's cinematic at 100 % is left alone", fresh.get_graphics_quality_level() == 4
+      and abs(fresh.debug_get_render_scale() - 100.0) < 0.01)
 older = unreal.new_object(unreal.SpaceUserSettings)
 older.set_to_defaults()
 older.set_overall_scalability_level(2)
 older.debug_set_settings_version(2)
 older.migrate_settings()
-check("a saved medium preset is brought up to cinematic",
-      older.get_graphics_quality_level() == 4 and older.get_anti_aliasing_quality() == 4,
+check("a saved medium preset is brought up to epic",
+      older.get_graphics_quality_level() == 3 and older.get_anti_aliasing_quality() == 3,
       "preset %d, anti-aliasing %d" % (older.get_graphics_quality_level(), older.get_anti_aliasing_quality()))
 
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

@@ -318,6 +318,7 @@ Presety (`Tools/Shots/*.json`):
 | `ceiling_tune` | světla nákladového prostoru se stropem: jas a kužel bodovek, oranžové akcenty; celek a pohled na strop |
 | `accent_tune` | jas oranžových akcentů v celém interiéru (prostor, strop, chodba, strojovna) |
 | `flicker_check` | blikání: každý pohled 8× za sebou stejnou kamerou; vyhodnocení = podíl pixelů, které se mezi snímky mění (`python Tools/Shots/measure_flicker.py <složka> <mapa.png>`) |
+| `perf_quality` | cena kvality ve 1080p: filmová proti epické po skupinách a TSR 75 %, v letovém kokpitu i interiéru (spouštět s `-Width 1920 -Height 1080` – autor hraje ve 1080p, výchozích 1600 × 900 dává o ~40 % lepší čísla) |
 | `perf_interior` | výkon interiéru: `stat unit` a varianty stínů / dosahu světel přes `space.KitLight` |
 | `interior_walk` | chůze interiérem v zabalené hře: `space.Interior`, `space.Walk`, kamera postavy (`"camera": "pawn"`); výsledek je i v logu hry (`WALK end at …`) |
 

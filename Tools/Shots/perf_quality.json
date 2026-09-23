@@ -1,0 +1,581 @@
+{
+ "_comment": "Cena kvality grafiky ve 1920x1080 (HANDOFF bod 64): filmová (4) proti epické (3) po skupinách a TSR se 75 % vnitřním rozlišením, v letovém kokpitu i v interiéru. stat unit ve snímku. Run: Tools/Shots.ps1 -Preset perf_quality -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "hud": 1,
+   "settle": 3.0,
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0,
+   "name": "cockpit_space_cinematic",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0,
+   "name": "cockpit_space_epic",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 3",
+    "sg.EffectsQuality 3",
+    "sg.AntiAliasingQuality 3",
+    "sg.ShadingQuality 3",
+    "sg.ViewDistanceQuality 3",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0,
+   "name": "cockpit_space_cinematic_shadow3",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0,
+   "name": "cockpit_space_cinematic_reflect3",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0,
+   "name": "cockpit_space_cinematic_tsr75",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 75"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0,
+   "name": "cockpit_space_epic_tsr75",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 3",
+    "sg.EffectsQuality 3",
+    "sg.AntiAliasingQuality 3",
+    "sg.ShadingQuality 3",
+    "sg.ViewDistanceQuality 3",
+    "r.ScreenPercentage 75"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "horizon",
+   "speed_ms": 120,
+   "name": "cockpit_planet_cinematic",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "horizon",
+   "speed_ms": 120,
+   "name": "cockpit_planet_epic",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 3",
+    "sg.EffectsQuality 3",
+    "sg.AntiAliasingQuality 3",
+    "sg.ShadingQuality 3",
+    "sg.ViewDistanceQuality 3",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "horizon",
+   "speed_ms": 120,
+   "name": "cockpit_planet_cinematic_shadow3",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "horizon",
+   "speed_ms": 120,
+   "name": "cockpit_planet_cinematic_reflect3",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "horizon",
+   "speed_ms": 120,
+   "name": "cockpit_planet_cinematic_tsr75",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 75"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "horizon",
+   "speed_ms": 120,
+   "name": "cockpit_planet_epic_tsr75",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 3",
+    "sg.EffectsQuality 3",
+    "sg.AntiAliasingQuality 3",
+    "sg.ShadingQuality 3",
+    "sg.ViewDistanceQuality 3",
+    "r.ScreenPercentage 75"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "name": "interior_bay_cinematic",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "name": "interior_bay_epic",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 3",
+    "sg.EffectsQuality 3",
+    "sg.AntiAliasingQuality 3",
+    "sg.ShadingQuality 3",
+    "sg.ViewDistanceQuality 3",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "name": "interior_bay_cinematic_shadow3",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "name": "interior_bay_cinematic_reflect3",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "name": "interior_bay_cinematic_tsr75",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 75"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "name": "interior_bay_epic_tsr75",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 3",
+    "sg.EffectsQuality 3",
+    "sg.AntiAliasingQuality 3",
+    "sg.ShadingQuality 3",
+    "sg.ViewDistanceQuality 3",
+    "r.ScreenPercentage 75"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    19.95,
+    500.95,
+    1.25
+   ],
+   "camera_look_at": [
+    23,
+    500.8,
+    1.1
+   ],
+   "fov": 88,
+   "exposure": 2.0,
+   "name": "interior_cockpit_cinematic",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    19.95,
+    500.95,
+    1.25
+   ],
+   "camera_look_at": [
+    23,
+    500.8,
+    1.1
+   ],
+   "fov": 88,
+   "exposure": 2.0,
+   "name": "interior_cockpit_epic",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 3",
+    "sg.EffectsQuality 3",
+    "sg.AntiAliasingQuality 3",
+    "sg.ShadingQuality 3",
+    "sg.ViewDistanceQuality 3",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    19.95,
+    500.95,
+    1.25
+   ],
+   "camera_look_at": [
+    23,
+    500.8,
+    1.1
+   ],
+   "fov": 88,
+   "exposure": 2.0,
+   "name": "interior_cockpit_cinematic_shadow3",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    19.95,
+    500.95,
+    1.25
+   ],
+   "camera_look_at": [
+    23,
+    500.8,
+    1.1
+   ],
+   "fov": 88,
+   "exposure": 2.0,
+   "name": "interior_cockpit_cinematic_reflect3",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 100"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    19.95,
+    500.95,
+    1.25
+   ],
+   "camera_look_at": [
+    23,
+    500.8,
+    1.1
+   ],
+   "fov": 88,
+   "exposure": 2.0,
+   "name": "interior_cockpit_cinematic_tsr75",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 4",
+    "sg.ReflectionQuality 4",
+    "sg.PostProcessQuality 4",
+    "sg.EffectsQuality 4",
+    "sg.AntiAliasingQuality 4",
+    "sg.ShadingQuality 4",
+    "sg.ViewDistanceQuality 4",
+    "r.ScreenPercentage 75"
+   ]
+  },
+  {
+   "camera": "free",
+   "camera_location": [
+    19.95,
+    500.95,
+    1.25
+   ],
+   "camera_look_at": [
+    23,
+    500.8,
+    1.1
+   ],
+   "fov": 88,
+   "exposure": 2.0,
+   "name": "interior_cockpit_epic_tsr75",
+   "hud": 0,
+   "settle": 3.0,
+   "console": [
+    "sg.ShadowQuality 3",
+    "sg.ReflectionQuality 3",
+    "sg.PostProcessQuality 3",
+    "sg.EffectsQuality 3",
+    "sg.AntiAliasingQuality 3",
+    "sg.ShadingQuality 3",
+    "sg.ViewDistanceQuality 3",
+    "r.ScreenPercentage 75"
+   ]
+  }
+ ]
+}
