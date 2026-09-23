@@ -1119,6 +1119,16 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - **Výsledek:** prostor, chodba a strojovna B/R 0,70–0,77, sytost 0,27–0,35, p99 0,72–0,96 – v rozsahu SC.
       Kokpit zatím B/R 1,08–1,23 a p99 0,56 (bez lišt, obrazovky bez obsahu) – krok 3.
     - Jemného detailu je pořád méně (0,024–0,027 proti SC 0,024–0,035) – materiály a geometrie, kroky 4–5.
+66. **Hologramové obrazovky v kokpitu** (23. 9. 2026, krok 3). `Tools/Assets/draw_holo_screens.py` kreslí obsah ve
+    stylu SC UI (naše písma Rajdhani / Share Tech Mono): POWER MANAGEMENT (PWR/WPN/THR/SHLD/COOL), SELF STATUS se
+    siluetou lodi, COMMUNICATIONS, SCANNING, dvě obrazovky pultu a disk radaru. Jména jsou naše (Veyra, Halcyon),
+    ne ze SC. Obrázky leží v `ArtSource/Ships/Steadfast/Interior/Screens/`.
+    - Obrazovky jsou vlastní mesh `CockpitScreens.glb` (bez Nanite, bez kolize, bez stínu) s přesným mapováním
+      obrázku; materiál `M_KitHolo` aditivní, unlit, oboustranný: obrázek × modrý tint × jas 5 × jemné řádky.
+      Černá je průhledná, všechno nakreslené svítí. Každá obrazovka má instanci `MI_Holo_<stránka>`.
+    - Levý pilot Self Status | Power, pravý Comms | Scan, na pultu Flight a Systems, nad pultem radar.
+    - Statické – živá data (jako displeje Vanguardu, `UCockpitDisplayComponent`) přijdou, až Steadfast poletí.
+    - Zbývá v kokpitu: hranatá sedadla, žádné světelné lišty (p99 0,53–0,56).
 
 ---
 

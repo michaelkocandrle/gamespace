@@ -22,7 +22,8 @@ SCRIPT = os.path.join(REPO, "Tools", "Assets", "import_interior.py")
 LAYOUT = os.path.join(REPO, "ArtSource", "Ships", "Steadfast", "Interior", "Interior_layout.json")
 WANTED = ("MATERIAL", "MAP", "GUNMETAL", "LIFT", "METALLIC_SCALE", "ROUGHNESS_SCALE", "ROUGHNESS_FLOOR",
           "INTERIOR_TAG", "WORK_LIGHT_TAG", "ACCENT_LIGHT_TAG", "WORK_LIGHT_LUMENS", "WORK_LIGHT_KELVIN", "WORK_LIGHT_CONE", "ACCENT_LIGHT_LUMENS", "PACKAGE", "ROOMS",
-          "GLASS", "DOOR_LEAF", "GLASS_TAG", "DOOR_TAG", "SPAWN_TAG", "GRAVITY_CMS2", "GLASS_MATERIAL", "PLACE_AT", "WORK_LIGHT_RADIUS")
+          "GLASS", "DOOR_LEAF", "GLASS_TAG", "DOOR_TAG", "SPAWN_TAG", "GRAVITY_CMS2", "GLASS_MATERIAL", "PLACE_AT", "WORK_LIGHT_RADIUS",
+          "SCREENS", "SCREENS_TAG", "HOLO_MATERIAL")
 
 failures = []
 
@@ -139,6 +140,26 @@ glass_material = unreal.EditorAssetLibrary.load_asset(C["GLASS_MATERIAL"])
 check("M_KitGlass translucent and two-sided", glass_material is not None
       and glass_material.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_TRANSLUCENT
       and glass_material.get_editor_property("two_sided"))
+# The cockpit's holograms: their own actor, not Nanite, no collision, additive, a picture on each.
+screens = tagged(C["SCREENS_TAG"])
+holo = unreal.EditorAssetLibrary.load_asset(C["HOLO_MATERIAL"])
+check("hologram master additive, unlit, two-sided", holo is not None
+      and holo.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_ADDITIVE
+      and holo.get_editor_property("shading_model") == unreal.MaterialShadingModel.MSM_UNLIT
+      and holo.get_editor_property("two_sided"))
+if screens:
+    screen_mesh = screens[0].static_mesh_component.static_mesh
+    pictures = [MEL.get_material_instance_texture_parameter_value(screen_mesh.get_material(i), "Page")
+                for i in range(len(screen_mesh.static_materials))]
+    check("cockpit screens: one actor, not Nanite, no collision, a hologram page on every slot",
+          len(screens) == 1 and not screen_mesh.get_editor_property("nanite_settings").enabled
+          and screens[0].static_mesh_component.get_collision_enabled() == unreal.CollisionEnabled.NO_COLLISION
+          and all(p is not None and p.get_name().startswith("Holo_") for p in pictures),
+          "nanite %s, collision %s, %s" % (screen_mesh.get_editor_property("nanite_settings").enabled,
+                                           screens[0].static_mesh_component.get_collision_enabled(),
+                                           ", ".join(p.get_name() if p else "None" for p in pictures)))
+else:
+    check("cockpit screens actor", False)
 doors = tagged(C["DOOR_TAG"])
 check("a sliding door per layout door (%d)" % len(layout["doors"]), len(doors) == len(layout["doors"]))
 for door in doors:

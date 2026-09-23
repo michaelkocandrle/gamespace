@@ -32,9 +32,18 @@ INTERIOR = os.path.join(ROOT, "ArtSource", "Ships", "Steadfast", "Interior")
 # so they all stand at PLACE_AT.
 ROOMS = ("CargoBay", "Corridor", "EngineRoom", "Cockpit")
 GLASS = "CockpitGlass"          # its own mesh: translucent, so not Nanite
+SCREENS = "CockpitScreens"      # the holograms: additive, so not Nanite either
+SCREEN_PAGES = os.path.join(INTERIOR, "Screens")   # Tools/Assets/draw_holo_screens.py draws them
+# Hologram look: the picture added onto the scene (black is see-through), blue-tinted, with faint
+# scan lines. Strength is what bloom picks up - SC's screens glow round their edges.
+HOLO_TINT = (0.75, 0.9, 1.0)
+HOLO_STRENGTH = 5.0             # 3 washed out against a bright planet through the canopy
+HOLO_SCANLINES = 240.0          # lines per screen height
+SCREENS_TAG = "SpaceInteriorScreens"
 DOOR_LEAF = "DoorLeaf"
 LAYOUT = os.path.join(INTERIOR, "Interior_layout.json")
 PACKAGE = "/Game/Environments/Steadfast"
+HOLO_MATERIAL = PACKAGE + "/M_KitHolo"
 MATERIAL = PACKAGE + "/M_KitTrim"
 MAP = "/Game/Maps/TestSpace"
 PLACE_AT = unreal.Vector(0.0, 50000.0, 0.0)      # 500 m sideways from the ship's spawn
@@ -223,7 +232,7 @@ def import_mesh():
         for path in EAL.list_assets(PACKAGE, recursive=True, include_folder=False):
             EAL.delete_asset(path)
     tasks = []
-    for room in ROOMS + (GLASS, DOOR_LEAF):
+    for room in ROOMS + (GLASS, SCREENS, DOOR_LEAF):
         task = unreal.AssetImportTask()
         task.filename = os.path.join(INTERIOR, room + ".glb")
         task.destination_path = PACKAGE
@@ -376,6 +385,86 @@ def build_glass():
     return material
 
 
+def import_pages():
+    """The hologram pictures as textures, {page: texture}."""
+    tasks = []
+    for name in sorted(os.listdir(SCREEN_PAGES)):
+        if not name.endswith(".png"):
+            continue
+        task = unreal.AssetImportTask()
+        task.filename = os.path.join(SCREEN_PAGES, name)
+        task.destination_path = PACKAGE + "/Screens"
+        task.automated = True
+        task.replace_existing = True
+        task.save = True
+        tasks.append(task)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks(tasks)
+    pages = {}
+    for task in tasks:
+        for path in task.get_editor_property("imported_object_paths") or []:
+            texture = EAL.load_asset(path)
+            if isinstance(texture, unreal.Texture2D):
+                pages[texture.get_name().replace("Holo_", "")] = texture
+    return pages
+
+
+def build_holo(default_page):
+    """The hologram master: additive, unlit, two-sided; picture x tint x strength x scan lines."""
+    if EAL.does_asset_exist(HOLO_MATERIAL):
+        EAL.delete_asset(HOLO_MATERIAL)
+    material = unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+        HOLO_MATERIAL.split("/")[-1], PACKAGE, unreal.Material, unreal.MaterialFactoryNew())
+    material.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
+    material.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    material.set_editor_property("two_sided", True)
+    material.set_editor_property("used_with_static_mesh", True)
+    page = node(material, unreal.MaterialExpressionTextureSampleParameter2D, -900, -100, parameter_name="Page")
+    page.set_editor_property("texture", default_page)       # a sampler never without a texture (WORKFLOW 9.3 f)
+    tint = node(material, unreal.MaterialExpressionVectorParameter, -900, 150, parameter_name="Tint",
+                default_value=unreal.LinearColor(HOLO_TINT[0], HOLO_TINT[1], HOLO_TINT[2], 1.0))
+    strength = node(material, unreal.MaterialExpressionScalarParameter, -900, 300, parameter_name="Strength",
+                    default_value=HOLO_STRENGTH)
+    uv = node(material, unreal.MaterialExpressionTextureCoordinate, -1100, 450)
+    v = node(material, unreal.MaterialExpressionComponentMask, -950, 450, r=False, g=True, b=False, a=False)
+    link(uv, v, "")
+    lines = node(material, unreal.MaterialExpressionMultiply, -800, 450)
+    link(v, lines, "A")
+    link(node(material, unreal.MaterialExpressionConstant, -950, 550, r=HOLO_SCANLINES * 6.2832), lines, "B")
+    wave = node(material, unreal.MaterialExpressionSine, -650, 450)
+    link(lines, wave, "")
+    ripple = node(material, unreal.MaterialExpressionMultiply, -500, 450)
+    link(wave, ripple, "A")
+    link(node(material, unreal.MaterialExpressionConstant, -650, 550, r=0.12), ripple, "B")
+    scan = node(material, unreal.MaterialExpressionAdd, -350, 450)
+    link(ripple, scan, "A")
+    link(node(material, unreal.MaterialExpressionConstant, -500, 550, r=0.88), scan, "B")
+    lit = node(material, unreal.MaterialExpressionMultiply, -600, 0)
+    link(page, lit, "A", "RGB")
+    link(tint, lit, "B")
+    hot = node(material, unreal.MaterialExpressionMultiply, -400, 0)
+    link(lit, hot, "A")
+    link(strength, hot, "B")
+    out = node(material, unreal.MaterialExpressionMultiply, -200, 100)
+    link(hot, out, "A")
+    link(scan, out, "B")
+    MEL.connect_material_property(out, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(material)
+    EAL.save_loaded_asset(material, only_if_is_dirty=False)
+    return material
+
+
+def make_holo(master, page_name, texture):
+    path = "%s/MI_Holo_%s" % (PACKAGE, page_name)
+    if EAL.does_asset_exist(path):
+        EAL.delete_asset(path)
+    instance = unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+        "MI_Holo_%s" % page_name, PACKAGE, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+    MEL.set_material_instance_parent(instance, master)
+    MEL.set_material_instance_texture_parameter_value(instance, "Page", texture)
+    EAL.save_loaded_asset(instance, only_if_is_dirty=False)
+    return instance
+
+
 def collide_per_polygon(mesh):
     """Walkable: the character collides with the mesh itself, not a box round it."""
     body = mesh.get_editor_property("body_setup")
@@ -454,6 +543,10 @@ def main():
     white = make_plain(master, "MI_KitWhite", (0.75, 0.77, 0.8), maps)      # seat stripes, stick tops, buttons
     strip = make_plain(master, "MI_KitStrip", (0.05, 0.05, 0.05), maps, emissive=STRIP_COLOUR, strength=STRIP_STRENGTH, glow=True)
     glass = build_glass()
+    pages = import_pages()
+    holo_master = build_holo(pages.get("Power") or next(iter(pages.values())))
+    holos = {name: make_holo(holo_master, name, texture) for name, texture in pages.items()}
+    log("hologramy: %s" % ", ".join(sorted(holos)))
     for mesh in meshes:
         for index, slot in enumerate(mesh.static_materials):
             name = str(slot.material_slot_name).lower()
@@ -469,6 +562,9 @@ def main():
                 pick = lamp
             elif "glass" in name:
                 pick = glass
+            elif name.startswith("m_holo_"):
+                page = str(slot.material_slot_name).split("_")[2]
+                pick = holos.get(page, pick)
             elif "white" in name:
                 pick = white
             elif "strip" in name:
@@ -479,14 +575,16 @@ def main():
                 pick = glow
             if pick:
                 mesh.set_material(index, pick)
-        if mesh.get_name() == GLASS:
-            # Nanite draws no translucency; the glass is an ordinary mesh.
+        if mesh.get_name() in (GLASS, SCREENS):
+            # Nanite draws no translucency; the glass and the holograms are ordinary meshes.
             settings = mesh.get_editor_property("nanite_settings")
             settings.set_editor_property("enabled", False)
             # set_editor_property rebuilds the mesh (PostEditChange); the StaticMeshEditorSubsystem that
             # would do it explicitly is not there in a headless editor (23. 9. 2026).
             mesh.set_editor_property("nanite_settings", settings)
-        if not collide_per_polygon(mesh):
+        if mesh.get_name() == SCREENS:
+            pass                          # light, not a surface: nothing to bump into
+        elif not collide_per_polygon(mesh):
             log("VAROVÁNÍ: %s nemá body setup, kolize nebude" % mesh.get_name())
         EAL.save_loaded_asset(mesh, only_if_is_dirty=False)
     log("materiály a kolize na %d meshích" % len(meshes))
@@ -503,13 +601,19 @@ def main():
         # mesh afterwards is the stable way (23. 9. 2026).
         actor = actors.spawn_actor_from_class(unreal.StaticMeshActor, PLACE_AT, unreal.Rotator(0, 0, 0))
         actor.set_actor_label("Steadfast_Interior_%s" % mesh.get_name())
-        actor.set_editor_property("tags", [unreal.Name(GLASS_TAG if mesh.get_name() == GLASS else INTERIOR_TAG)])
+        tag = {GLASS: GLASS_TAG, SCREENS: SCREENS_TAG}.get(mesh.get_name(), INTERIOR_TAG)
+        actor.set_editor_property("tags", [unreal.Name(tag)])
         component = actor.static_mesh_component
         component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
         component.set_static_mesh(mesh)
+        if mesh.get_name() == SCREENS:
+            # A profile, not set_collision_enabled(): only the profile is saved with the level.
+            component.set_collision_profile_name("NoCollision")
+            component.set_editor_property("cast_shadow", False)
     place_lights(actors)
     place_interior_actors(actors, leaf_mesh)
-    kept = [master, dark, glow, lamp, screen, white, strip, glass] + list(instances.values()) + meshes
+    kept = [master, dark, glow, lamp, screen, white, strip, glass, holo_master] + list(holos.values()) \
+        + list(pages.values()) + list(instances.values()) + meshes
     for instance in [dark, glow, lamp, screen, white, strip] + list(instances.values()):
         for parameter in ("BaseColor", "NormalMap", "ORMMap", "EmissiveMap"):
             kept.append(MEL.get_material_instance_texture_parameter_value(instance, parameter))

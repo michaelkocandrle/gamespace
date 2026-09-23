@@ -192,7 +192,7 @@ class Room:
         self.objects.append(obj)
         return obj
 
-    def add(self, name, bm, mat, face_towards=None):
+    def add(self, name, bm, mat, face_towards=None, uvs=None):
         """A procedural piece (bmesh in world metres) with one material and box-projected UVs.
         `face_towards`: turn every face to look at this point - for single-sided panels that must
         face into the room (a panel facing out is not there from inside, WORKFLOW 9.3 h)."""
@@ -202,7 +202,17 @@ class Room:
             flip = [f for f in bm.faces if f.normal.dot(target - f.calc_center_median()) < 0.0]
             bmesh.ops.reverse_faces(bm, faces=flip)
         uv = bm.loops.layers.uv.verify()
-        for face in bm.faces:
+        if uvs is not None:
+            bm.verts.index_update()      # new vertices have index -1 until this
+            # A screen: one face whose vertices were made in the order the picture's corners are
+            # given (bottom left, bottom right, top right, top left, or a disc's rim).
+            for face in bm.faces:
+                for loop in face.loops:
+                    loop[uv].uv = uvs[loop.vert.index]
+            uvs_done = True
+        else:
+            uvs_done = False
+        for face in ([] if uvs_done else bm.faces):
             n = face.normal
             axis = max(range(3), key=lambda i: abs(n[i]))
             u, v = [i for i in range(3) if i != axis]
@@ -633,7 +643,29 @@ def seat(room, y, black, white, dark):
             room.add("Throttle", box((x + 0.10, ay - 0.03, 0.70), (x + 0.24, ay + 0.03, 0.78), bevel=0.012), black)
 
 
-def mfd(room, centre, facing, size, screen, dark):
+def screen_quad(screens, name, centre, facing, size, mat):
+    """A picture on a rectangle facing `facing` (towards the viewer), right way round and upright."""
+    c = mathutils.Vector(centre)
+    f = mathutils.Vector(facing).normalized()
+    right = mathutils.Vector((0.0, 0.0, 1.0)).cross(f).normalized()     # the viewer's right
+    up = f.cross(right).normalized()
+    w, h = size
+    corners = [c + right * sx * w / 2 + up * sz * h / 2 for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+    screens.add(name, polygon(corners), mat, uvs=[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)])
+
+
+def radar_disc(screens, centre, radius, mat, segments=40):
+    """The radar hologram: a flat disc above the console, the picture mapped across it."""
+    c = mathutils.Vector(centre)
+    pts, uvs = [], []
+    for i in range(segments):
+        a = 2.0 * math.pi * i / segments
+        pts.append(c + mathutils.Vector((math.cos(a) * radius, math.sin(a) * radius, 0.0)))
+        uvs.append((0.5 + 0.5 * math.cos(a), 0.5 + 0.5 * math.sin(a)))
+    screens.add("HoloRadar", polygon(pts), mat, uvs=uvs)
+
+
+def mfd(room, centre, facing, size, screen, dark, screens=None):
     """A display on a thin arm: a dark bezel, the glowing screen just in front, a stalk down to the
     console. `facing` is the unit vector the screen looks along."""
     c = mathutils.Vector(centre)
@@ -654,13 +686,18 @@ def mfd(room, centre, facing, size, screen, dark):
     room.add("MfdBezel", bezel, dark)
     inset = [c + side * sx * (w / 2 - 0.02) + up * sz * (h / 2 - 0.02) + f * 0.004
              for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
-    room.add("Mfd", polygon(inset), screen)
+    if screens is not None:
+        # The picture is a hologram: its own mesh (translucent, not Nanite), a hair in front.
+        screen_quad(screens, "Mfd", c + f * 0.006, f, (w - 0.04, h - 0.04), screen)
+    else:
+        room.add("Mfd", polygon(inset), screen)
     base = c - up * h / 2 - f * 0.015
     room.add("MfdStalk", box((base.x - 0.02, base.y - 0.02, 0.85), (base.x + 0.02, base.y + 0.02, base.z)), dark)
 
 
-def console(room, lo, hi, top_tilt, body, button, white, dark, rows=3):
-    """A console box whose top slopes towards -X by top_tilt metres, with rows of buttons on it."""
+def console(room, lo, hi, top_tilt, body, button, white, dark, rows=3, keep_clear=()):
+    """A console box whose top slopes towards -X by top_tilt metres, with rows of buttons on it.
+    `keep_clear`: (x0, x1, y0, y1) areas with no buttons - where a screen lies on the top."""
     x0, y0, z0 = lo
     x1, y1, z1 = hi
     section = [(x1, z0), (x0, z0), (x0, z1 - top_tilt), (x1, z1)]
@@ -672,6 +709,8 @@ def console(room, lo, hi, top_tilt, body, button, white, dark, rows=3):
         count = max(2, int((y1 - y0) / 0.09))
         for i in range(count):
             y = y0 + 0.06 + i * (y1 - y0 - 0.12) / max(1, count - 1)
+            if any(a <= x <= b and c <= y <= d for a, b, c, d in keep_clear):
+                continue
             mat = button if (i + r) % 3 else white
             room.add("Button", box((x - 0.025, y - 0.025, z - 0.01), (x + 0.025, y + 0.025, z + 0.012)), mat)
 
@@ -682,6 +721,7 @@ def build_cockpit(templates, mats):
     the canopy's glass as a room of its own (translucent: not Nanite)."""
     room = Room("Cockpit")
     glass = Room("CockpitGlass")
+    screens = Room("CockpitScreens")
     x0 = COCKPIT_X[0]
     y0, y1 = COCKPIT_Y
     # The deck at the back, the door wall a little behind the frame so the leaves slide in behind it.
@@ -723,17 +763,31 @@ def build_cockpit(templates, mats):
     glass.add("Glass", polygon(nose), mats["glass"])
     # The low console at the nose, following the taper, with a screen for each pilot.
     dx0, dx1 = DASH_X
-    console(room, (dx0, -1.1, 0.0), (dx1, 1.1, 0.95), 0.2, mats["dark"], mats["button"], mats["white"], mats["dark"], rows=2)
-    for y in SEATS_Y:
-        room.add("DashScreen", polygon([(dx0 + 0.12, y - 0.28, 0.80), (dx0 + 0.12, y + 0.28, 0.80),
-                                        (dx0 + 0.45, y + 0.28, 0.88), (dx0 + 0.45, y - 0.28, 0.88)][::-1]), mats["screen"])
+    clear = [(dx0 + 0.1, dx0 + 0.5, y - 0.3, y + 0.3) for y in SEATS_Y]
+    console(room, (dx0, -1.1, 0.0), (dx1, 1.1, 0.95), 0.2, mats["dark"], mats["button"], mats["white"], mats["dark"],
+            rows=2, keep_clear=clear)
+    # The console's two screens, tipped back towards the pilots (the console top rises 0.2 m over 1.2 m).
+    tilt = math.atan2(0.2, dx1 - dx0)
+    face_up = mathutils.Vector((-math.sin(tilt), 0.0, math.cos(tilt)))
+    for y, page in zip(SEATS_Y, ("DashLeft", "DashRight")):
+        centre = mathutils.Vector((dx0 + 0.3, y, 0.75 + 0.2 * 0.3 / (dx1 - dx0) + 0.012))
+        # Facing up the slope, "up" on the picture pointing forward: seen from the seat it reads upright.
+        f = face_up
+        fwd = mathutils.Vector((math.cos(tilt), 0.0, math.sin(tilt)))
+        side = fwd.cross(f).normalized()            # the pilot's right, looking forward and down
+        w, h = 0.5, 0.3
+        corners = [centre + side * sx * w / 2 + fwd * sz * h / 2 for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+        screens.add("DashScreen", polygon(corners), mats["holo"][page], uvs=[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)])
+    radar_disc(screens, ((dx0 + dx1) / 2.0, 0.0, 1.08), 0.26, mats["holo"]["Radar"])
     # Two MFDs per pilot on arms, out to the sides and a little low so the view ahead stays open
     # (in the reference they sit at the edges of the view), turned towards the pilot's eyes.
+    # Which page each MFD shows: left seat Status | Power, right seat Comms | Scan (as seen sitting).
+    pages = {(SEATS_Y[0], 1.0): "Status", (SEATS_Y[0], -1.0): "Power", (SEATS_Y[1], 1.0): "Comms", (SEATS_Y[1], -1.0): "Scan"}
     for y in SEATS_Y:
         for side in (-1.0, 1.0):
             centre = mathutils.Vector((SEAT_X + 0.7, y + side * 0.62, 1.02))
             eye = mathutils.Vector((SEAT_X - 0.1, y, 1.25))
-            mfd(room, centre, tuple(eye - centre), (0.3, 0.21), mats["screen"], mats["dark"])
+            mfd(room, centre, tuple(eye - centre), (0.3, 0.21), mats["holo"][pages[(y, side)]], mats["dark"], screens)
     # Side consoles by the canopy wall, an overhead panel between the seats.
     for side in (-1.0, 1.0):
         lo_y, hi_y = sorted((side * 1.55, side * 2.05))
@@ -751,7 +805,7 @@ def build_cockpit(templates, mats):
         seat(room, y, mats["black"], mats["white"], mats["dark"])
     lamps(room, templates["lamp"], COCKPIT_LAMPS)
     room.screens = list(COCKPIT_SCREENS)
-    return room, glass
+    return room, glass, screens
 
 
 def build_door_leaf(templates):
@@ -825,9 +879,12 @@ def main():
                 cushion=shell_materials["MI_PaddedWall"], trim=shell_materials["MI_Trim_01"],
                 frame=shell_materials["M_Black"])      # the reference's canopy beams are near black
 
-    cockpit, canopy_glass = build_cockpit(templates, mats)
+    mats["holo"] = {page: material("M_Holo_" + page, emission=(0.3, 0.6, 1.0))
+                    for page in ("Power", "Status", "Comms", "Scan", "DashLeft", "DashRight", "Radar")}
+    own.update({"holo_" + k: v for k, v in mats["holo"].items()})
+    cockpit, canopy_glass, cockpit_screens = build_cockpit(templates, mats)
     rooms = [build_engine_room(templates, mats), build_bay(shell, templates, mats), build_corridor(templates, mats),
-             cockpit, canopy_glass]
+             cockpit, canopy_glass, cockpit_screens]
     leaf, leaf_width, leaf_height = build_door_leaf(templates)
     layout = {
         "_comment": "Interiér Steadfastu v metrech, souřadnice Blenderu (Unreal: Y zrcadlené). Píše "

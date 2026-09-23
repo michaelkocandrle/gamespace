@@ -660,7 +660,13 @@ snímku.
 - r) **Stíny lokálních světel jsou drahé.** 22 stínovaných světel byla většina snímku (15 ms ze 18).
   Doplňková světla (akcenty, displeje) bez stínů, pracovním světlům dosah jen na vlastní místnost.
 - s) **Blender bmesh: `faces.new()` má nulovou normálu**, dokud nezavoláš `bm.normal_update()`.
-  Otočení ploch „k místnosti“ podle normály bez toho nic neudělá.
+  Otočení ploch „k místnosti“ podle normály bez toho nic neudělá. Stejně tak nové vrcholy mají
+  `index` −1 až do `bm.verts.index_update()` – mapování obrázku podle indexu vrcholu se jinak rozsype.
+- t) **`set_collision_enabled()` v editorovém skriptu se neuloží** s levelem (herec v testu měl kolizi
+  dál). Uloží se kolizní profil: `set_collision_profile_name("NoCollision")`.
+- u) **Průsvitné a aditivní materiály nesmí na Nanite mesh** – sklo i hologramy jsou vlastní GLB,
+  import jim Nanite vypne (`nanite_settings`).
+- v) **Žádná jména ze Star Citizenu** v obsahu (stanice, lodě, firmy) – vzhled ano, cizí značky ne.
 
 ### 9.4 C++ a UHT
 
