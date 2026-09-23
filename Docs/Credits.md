@@ -27,3 +27,4 @@ CC-BY model.
 ## Fonty a zvuky
 
 Řeší se v `Docs/UI/` a `Docs/WORKFLOW.md`; sem patří, jen pokud u nich licence vyžaduje kredit.
+| PBR materiály PaintedMetal004, PaintedMetal013, MetalPlates006, Leather033A, Rubber004 (CC0) | [ambientCG](https://ambientcg.com) | povrchy interiéru Steadfastu (`ArtSource/Textures/ambientCG/`) |

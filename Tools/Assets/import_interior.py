@@ -44,6 +44,23 @@ DOOR_LEAF = "DoorLeaf"
 LAYOUT = os.path.join(INTERIOR, "Interior_layout.json")
 PACKAGE = "/Game/Environments/Steadfast"
 HOLO_MATERIAL = PACKAGE + "/M_KitHolo"
+LEATHER_MATERIAL = PACKAGE + "/M_KitLeather"
+# Surface layers from ambientCG (CC0, ArtSource/Textures/ambientCG, Docs/AssetSources_Free.md): the kit
+# has one trim sheet and a uniform finish, SC has worn paint, grime and deck plate (HANDOFF point 67).
+# Projected in world space from three sides, so the kit's atlas UVs do not matter.
+SURFACES = os.path.join(ROOT, "ArtSource", "Textures", "ambientCG")
+SURFACE_PACKAGE = PACKAGE + "/Surfaces"
+# Wear measured on 23. 9. 2026 (Tools/Shots/wear_tune.json): 0.8 with a fifth of it away from the
+# edges turned whole walls into camouflage (fine detail 0.040, above SC's 0.024-0.035); half the
+# strength, almost all of it on the edges, reads as SC's worn bevels at 0.027-0.030.
+WEAR_AMOUNT = 0.5               # scratches through to bare metal, mostly on the kit's bevelled edges
+WEAR_EVERYWHERE = 0.05          # how much of the wear shows away from the edges
+GRIME_AMOUNT = 0.5              # blotches and dirt in the kit's cavities (its AO)
+FLOOR_PLATES = 0.65             # deck plate blended over upward-facing surfaces
+BARE_METAL = (0.52, 0.52, 0.54)
+WEAR_TILE_CM = 120.0
+GRIME_TILE_CM = 300.0
+PLATE_TILE_CM = 100.0
 MATERIAL = PACKAGE + "/M_KitTrim"
 MAP = "/Game/Maps/TestSpace"
 PLACE_AT = unreal.Vector(0.0, 50000.0, 0.0)      # 500 m sideways from the ship's spawn
@@ -143,7 +160,102 @@ def link(src, dst, dst_input, src_output=""):
         raise RuntimeError("nelze spojit %s -> %s.%s" % (src.get_class().get_name(), dst.get_class().get_name(), dst_input))
 
 
-def build_master(defaults):
+def import_surfaces():
+    """The ambientCG maps, with the compression each sampler type needs (WORKFLOW 9.3 f)."""
+    tasks = []
+    for folder in sorted(os.listdir(SURFACES)):
+        for name in sorted(os.listdir(os.path.join(SURFACES, folder))):
+            task = unreal.AssetImportTask()
+            task.filename = os.path.join(SURFACES, folder, name)
+            task.destination_path = SURFACE_PACKAGE
+            task.destination_name = name.replace("_2K-JPG", "").replace(".jpg", "")
+            task.automated = True
+            task.replace_existing = True
+            task.save = True
+            tasks.append(task)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks(tasks)
+    textures = {}
+    for task in tasks:
+        for path in task.get_editor_property("imported_object_paths") or []:
+            texture = EAL.load_asset(path)
+            if not isinstance(texture, unreal.Texture2D):
+                continue
+            name = texture.get_name()
+            if name.endswith("_NormalDX"):
+                texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_NORMALMAP)
+                texture.set_editor_property("srgb", False)
+            elif not name.endswith("_Color"):
+                texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_MASKS)
+                texture.set_editor_property("srgb", False)
+            EAL.save_loaded_asset(texture, only_if_is_dirty=False)
+            textures[name] = texture
+    log("povrchy ambientCG: %d textur" % len(textures))
+    return textures
+
+
+def sample(material, texture, uv, x, y, kind="color"):
+    """A plain texture sample of `texture` at `uv`, sampler type matching its compression."""
+    s = node(material, unreal.MaterialExpressionTextureSample, x, y, texture=texture)
+    s.set_editor_property("sampler_type", {"color": unreal.MaterialSamplerType.SAMPLERTYPE_COLOR,
+                                           "normal": unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL,
+                                           "mask": unreal.MaterialSamplerType.SAMPLERTYPE_MASKS}[kind])
+    link(uv, s, "UVs")
+    return s
+
+
+def triplanar(material, texture, tile_cm, weights, x, y, kind="mask", channel="R"):
+    """`texture` projected along world X, Y and Z and blended by how much the surface faces each."""
+    world = node(material, unreal.MaterialExpressionWorldPosition, x - 700, y)
+    scaled = node(material, unreal.MaterialExpressionDivide, x - 560, y)
+    link(world, scaled, "A")
+    link(node(material, unreal.MaterialExpressionConstant, x - 700, y + 80, r=tile_cm), scaled, "B")
+    parts = []
+    for i, (mask, weight) in enumerate(((dict(r=False, g=True, b=True, a=False), "R"),      # along X: YZ
+                                        (dict(r=True, g=False, b=True, a=False), "G"),      # along Y: XZ
+                                        (dict(r=True, g=True, b=False, a=False), "B"))):    # along Z: XY
+        uv = node(material, unreal.MaterialExpressionComponentMask, x - 420, y + i * 120, **mask)
+        link(scaled, uv, "")
+        s = sample(material, texture, uv, x - 260, y + i * 120, kind)
+        w = node(material, unreal.MaterialExpressionComponentMask, x - 260, y + 60 + i * 120,
+                 r=weight == "R", g=weight == "G", b=weight == "B", a=False)
+        link(weights, w, "")
+        part = node(material, unreal.MaterialExpressionMultiply, x - 100, y + i * 120)
+        link(s, part, "A", channel if kind == "mask" else "RGB")
+        link(w, part, "B")
+        parts.append(part)
+    sum1 = node(material, unreal.MaterialExpressionAdd, x, y)
+    link(parts[0], sum1, "A")
+    link(parts[1], sum1, "B")
+    total = node(material, unreal.MaterialExpressionAdd, x + 120, y)
+    link(sum1, total, "A")
+    link(parts[2], total, "B")
+    return total
+
+
+def lerp(material, a, b, alpha, x, y):
+    l = node(material, unreal.MaterialExpressionLinearInterpolate, x, y)
+    link(a, l, "A")
+    link(b, l, "B")
+    link(alpha, l, "Alpha")
+    return l
+
+
+def const(material, value, x, y):
+    if isinstance(value, tuple):
+        return node(material, unreal.MaterialExpressionConstant3Vector, x, y,
+                    constant=unreal.LinearColor(value[0], value[1], value[2], 1.0))
+    return node(material, unreal.MaterialExpressionConstant, x, y, r=value)
+
+
+def binary(material, cls, a, b, x, y):
+    n = node(material, cls, x, y)
+    first, second = ("Base", "Exp") if cls is unreal.MaterialExpressionPower else ("A", "B")
+    link(a, n, first)
+    link(b, n, second)
+    return n
+
+
+def build_master(defaults, surfaces=None):
     """The palette, as a material: desaturate, tint to gunmetal, orange emissive from the kit's map.
 
     `defaults` are the textures the sampler nodes fall back to when an instance binds nothing. They
@@ -193,8 +305,81 @@ def build_master(defaults):
     link(node(material, unreal.MaterialExpressionScalarParameter, -350, 960, parameter_name="AccentStrength",
               default_value=9.0), hot, "B")
 
-    MEL.connect_material_property(tint, "", unreal.MaterialProperty.MP_BASE_COLOR)
-    MEL.connect_material_property(normal, "", unreal.MaterialProperty.MP_NORMAL)
+    albedo_out, normal_out = tint, normal
+    wear = grime = floor = plate_rough = None
+    if surfaces:
+        # Which way the surface faces, as blend weights for the world projections: |N|^4, normalised.
+        n = node(material, unreal.MaterialExpressionVertexNormalWS, -2600, 1300)
+        absn = node(material, unreal.MaterialExpressionAbs, -2450, 1300)
+        link(n, absn, "")
+        sharp = binary(material, unreal.MaterialExpressionPower, absn, const(material, 4.0, -2450, 1380), -2300, 1300)
+        total = node(material, unreal.MaterialExpressionDotProduct, -2150, 1380)
+        link(sharp, total, "A")
+        link(const(material, (1.0, 1.0, 1.0), -2300, 1460), total, "B")
+        weights = binary(material, unreal.MaterialExpressionDivide, sharp, total, -2000, 1300)
+        # Scratches (PaintedMetal004's metalness is exactly where the paint is worn through), strongest
+        # on the kit's bevels - where its normal map leans away from flat.
+        scratch = triplanar(material, surfaces["PaintedMetal004_Metalness"], WEAR_TILE_CM, weights, -1400, 1300)
+        nb = node(material, unreal.MaterialExpressionComponentMask, -1400, 1700, r=False, g=False, b=True, a=False)
+        link(normal, nb, "")
+        edge = node(material, unreal.MaterialExpressionOneMinus, -1250, 1700)
+        link(nb, edge, "")
+        edge8 = binary(material, unreal.MaterialExpressionMultiply, edge, const(material, 8.0, -1250, 1780), -1100, 1700)
+        edge_sat = node(material, unreal.MaterialExpressionSaturate, -950, 1700)
+        link(edge8, edge_sat, "")
+        everywhere = node(material, unreal.MaterialExpressionScalarParameter, -950, 1780, parameter_name="WearEverywhere",
+                          default_value=WEAR_EVERYWHERE)
+        edge_bias = lerp(material, everywhere, const(material, 1.0, -950, 1860), edge_sat, -800, 1700)
+        wear_raw = binary(material, unreal.MaterialExpressionMultiply, scratch, edge_bias, -650, 1300)
+        wear_amt = node(material, unreal.MaterialExpressionScalarParameter, -650, 1400, parameter_name="WearAmount",
+                        default_value=WEAR_AMOUNT)
+        wear = binary(material, unreal.MaterialExpressionMultiply, wear_raw, wear_amt, -500, 1300)
+        # Grime: large blotches (PaintedMetal013's occlusion) plus the kit's own cavities.
+        blotch = triplanar(material, surfaces["PaintedMetal013_AmbientOcclusion"], GRIME_TILE_CM, weights, -1400, 2000)
+        blotch_inv = node(material, unreal.MaterialExpressionOneMinus, -1100, 2000)
+        link(blotch, blotch_inv, "")
+        cavity = node(material, unreal.MaterialExpressionOneMinus, -1100, 2100)
+        link(orm, cavity, "", "R")
+        grime_sum = binary(material, unreal.MaterialExpressionAdd, blotch_inv, cavity, -950, 2000)
+        grime_amt = node(material, unreal.MaterialExpressionScalarParameter, -950, 2100, parameter_name="GrimeAmount",
+                         default_value=GRIME_AMOUNT)
+        grime_raw = binary(material, unreal.MaterialExpressionMultiply, grime_sum, grime_amt, -800, 2000)
+        grime = node(material, unreal.MaterialExpressionSaturate, -650, 2000)
+        link(grime_raw, grime, "")
+        # Deck plate on everything that faces up.
+        nz = node(material, unreal.MaterialExpressionComponentMask, -1400, 2400, r=False, g=False, b=True, a=False)
+        link(n, nz, "")
+        up = binary(material, unreal.MaterialExpressionSubtract, nz, const(material, 0.8, -1400, 2480), -1250, 2400)
+        up5 = binary(material, unreal.MaterialExpressionMultiply, up, const(material, 5.0, -1250, 2480), -1100, 2400)
+        up_sat = node(material, unreal.MaterialExpressionSaturate, -950, 2400)
+        link(up5, up_sat, "")
+        plates_amt = node(material, unreal.MaterialExpressionScalarParameter, -950, 2480, parameter_name="FloorPlates",
+                          default_value=FLOOR_PLATES)
+        floor = binary(material, unreal.MaterialExpressionMultiply, up_sat, plates_amt, -800, 2400)
+        world = node(material, unreal.MaterialExpressionWorldPosition, -1700, 2700)
+        top = node(material, unreal.MaterialExpressionComponentMask, -1550, 2700, r=True, g=True, b=False, a=False)
+        link(world, top, "")
+        top_uv = binary(material, unreal.MaterialExpressionDivide, top, const(material, PLATE_TILE_CM, -1550, 2780), -1400, 2700)
+        plate_col = sample(material, surfaces["MetalPlates006_Color"], top_uv, -1250, 2700, "color")
+        plate_nrm = sample(material, surfaces["MetalPlates006_NormalDX"], top_uv, -1250, 2850, "normal")
+        plate_rgh = sample(material, surfaces["MetalPlates006_Roughness"], top_uv, -1250, 3000, "mask")
+        plate_grey = node(material, unreal.MaterialExpressionDesaturation, -1100, 2700)
+        link(plate_col, plate_grey, "")
+        plate_tone = binary(material, unreal.MaterialExpressionMultiply, plate_grey,
+                            node(material, unreal.MaterialExpressionVectorParameter, -1100, 2780, parameter_name="PlateTint",
+                                 default_value=unreal.LinearColor(0.9, 0.9, 0.92, 1.0)), -950, 2700)
+        plated = lerp(material, tint, plate_tone, floor, -800, 2700)
+        worn_paint = lerp(material, plated, const(material, BARE_METAL, -650, 2800), wear, -500, 2700)
+        dirt = binary(material, unreal.MaterialExpressionMultiply, grime, const(material, 0.35, -500, 2880), -350, 2800)
+        clean = node(material, unreal.MaterialExpressionOneMinus, -200, 2800)
+        link(dirt, clean, "")
+        albedo_out = binary(material, unreal.MaterialExpressionMultiply, worn_paint, clean, -50, 2700)
+        blended_n = lerp(material, normal, plate_nrm, floor, -800, 2900)
+        normal_out = node(material, unreal.MaterialExpressionNormalize, -650, 2900)
+        link(blended_n, normal_out, "")
+        plate_rough = plate_rgh
+    MEL.connect_material_property(albedo_out, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    MEL.connect_material_property(normal_out, "", unreal.MaterialProperty.MP_NORMAL)
     # Straight off the ORM map the kit is chrome: metal everywhere, and polished. Pull the metal
     # back a little and put a floor under the roughness, or the bay mirrors the work lights.
     metal = node(material, unreal.MaterialExpressionMultiply, -600, 560)
@@ -210,8 +395,16 @@ def build_master(defaults):
     link(node(material, unreal.MaterialExpressionScalarParameter, -600, 340, parameter_name="RoughnessFloor",
               default_value=ROUGHNESS_FLOOR), rough, "B")
 
-    MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
-    MEL.connect_material_property(metal, "", unreal.MaterialProperty.MP_METALLIC)
+    rough_out, metal_out = rough, metal
+    if surfaces:
+        on_plate = lerp(material, rough, plate_rough, floor, -300, 3100)
+        on_wear = lerp(material, on_plate, const(material, 0.28, -300, 3200), wear, -150, 3100)
+        rough_out = binary(material, unreal.MaterialExpressionAdd, on_wear,
+                           binary(material, unreal.MaterialExpressionMultiply, grime, const(material, 0.15, -300, 3300), -150, 3300),
+                           0, 3100)
+        metal_out = lerp(material, metal, const(material, 1.0, -300, 3400), wear, -150, 3400)
+    MEL.connect_material_property(rough_out, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    MEL.connect_material_property(metal_out, "", unreal.MaterialProperty.MP_METALLIC)
     MEL.connect_material_property(orm, "R", unreal.MaterialProperty.MP_AMBIENT_OCCLUSION)
     MEL.connect_material_property(hot, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     # Nanite is on for imported meshes, and a material without the matching usage flag cannot
@@ -465,6 +658,30 @@ def make_holo(master, page_name, texture):
     return instance
 
 
+def build_leather(surfaces):
+    """Black leather for the pilot seats: ambientCG Leather033A drained of its brown."""
+    if EAL.does_asset_exist(LEATHER_MATERIAL):
+        EAL.delete_asset(LEATHER_MATERIAL)
+    material = unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+        LEATHER_MATERIAL.split("/")[-1], PACKAGE, unreal.Material, unreal.MaterialFactoryNew())
+    uv0 = node(material, unreal.MaterialExpressionTextureCoordinate, -900, 0, u_tiling=4.0, v_tiling=4.0)
+    col = sample(material, surfaces["Leather033A_Color"], uv0, -700, 0, "color")
+    nrm = sample(material, surfaces["Leather033A_NormalDX"], uv0, -700, 200, "normal")
+    rgh = sample(material, surfaces["Leather033A_Roughness"], uv0, -700, 400, "mask")
+    grey = node(material, unreal.MaterialExpressionDesaturation, -500, 0)
+    link(col, grey, "")
+    dark = binary(material, unreal.MaterialExpressionMultiply, grey, const(material, 0.12, -500, 80), -350, 0)
+    MEL.connect_material_property(dark, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    MEL.connect_material_property(nrm, "", unreal.MaterialProperty.MP_NORMAL)
+    soft = binary(material, unreal.MaterialExpressionMultiply, rgh, const(material, 0.85, -500, 480), -350, 400)
+    MEL.connect_material_property(soft, "R", unreal.MaterialProperty.MP_ROUGHNESS)
+    for usage in ("used_with_nanite", "used_with_static_mesh"):
+        material.set_editor_property(usage, True)
+    MEL.recompile_material(material)
+    EAL.save_loaded_asset(material, only_if_is_dirty=False)
+    return material
+
+
 def collide_per_polygon(mesh):
     """Walkable: the character collides with the mesh itself, not a box round it."""
     body = mesh.get_editor_property("body_setup")
@@ -509,7 +726,9 @@ def main():
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level(MAP)
     import_mesh()
     reference = texture_sets().get("T_Trim_01") or {}
-    master = build_master(reference)
+    surfaces = import_surfaces()
+    master = build_master(reference, surfaces)
+    leather = build_leather(surfaces)
 
     tools = unreal.AssetToolsHelpers.get_asset_tools()
     instances = {}
@@ -556,7 +775,9 @@ def main():
                 if key in name:
                     pick = instance
                     break
-            if "black" in name:
+            if name.startswith("m_black_seat"):
+                pick = leather
+            elif "black" in name:
                 pick = dark
             elif "lamp" in name:
                 pick = lamp
@@ -612,7 +833,8 @@ def main():
             component.set_editor_property("cast_shadow", False)
     place_lights(actors)
     place_interior_actors(actors, leaf_mesh)
-    kept = [master, dark, glow, lamp, screen, white, strip, glass, holo_master] + list(holos.values()) \
+    kept = [master, dark, glow, lamp, screen, white, strip, glass, holo_master, leather] + list(holos.values()) \
+        + list(surfaces.values()) \
         + list(pages.values()) + list(instances.values()) + meshes
     for instance in [dark, glow, lamp, screen, white, strip] + list(instances.values()):
         for parameter in ("BaseColor", "NormalMap", "ORMMap", "EmissiveMap"):

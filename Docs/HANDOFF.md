@@ -1129,6 +1129,19 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Levý pilot Self Status | Power, pravý Comms | Scan, na pultu Flight a Systems, nad pultem radar.
     - Statické – živá data (jako displeje Vanguardu, `UCockpitDisplayComponent`) přijdou, až Steadfast poletí.
     - Zbývá v kokpitu: hranatá sedadla, žádné světelné lišty (p99 0,53–0,56).
+67. **Materiály: opotřebení, špína, podlahové desky, kůže** (23. 9. 2026, krok 4). Materiály z ambientCG
+    (CC0, `ArtSource/Textures/ambientCG/`, 2K: PaintedMetal004 a 013, MetalPlates006, Leather033A, Rubber004)
+    importuje `import_interior.py` (`/Game/Environments/Steadfast/Surfaces`) a `M_KitTrim` je vrství
+    na kit:
+    - **opotřebení** – škrábance na holý kov (metalness mapa PaintedMetal004 = kde je lak prodřený), hlavně
+      na hranách kitu (kde jeho normála uhýbá od roviny); parametry `WearAmount` 0,5, `WearEverywhere` 0,05;
+    - **špína** – velké skvrny (AO PaintedMetal013) a dutiny kitu (jeho AO), `GrimeAmount` 0,5;
+    - **podlahové desky** MetalPlates006 na všem, co míří nahoru (`FloorPlates` 0,65).
+    Vše promítané ze tří stran ve světových souřadnicích, UV kitu nevadí. Sedadla mají `M_KitLeather`
+    (černá kůže z Leather033A).
+    - **Měřeno** (`-Preset wear_tune`): opotřebení 0,8 s pětinou mimo hrany dělalo z celých stěn maskáč (detail
+      0,040, nad SC); 0,5 skoro jen na hranách = 0,027–0,030, v rozsahu SC (0,024–0,035). Barva a jas beze změny.
+    - Ladění za běhu: `space.Kit WearAmount / WearEverywhere / GrimeAmount / FloorPlates`.
 
 ---
 

@@ -320,6 +320,7 @@ Presety (`Tools/Shots/*.json`):
 | `flicker_check` | blikání: každý pohled 8× za sebou stejnou kamerou; vyhodnocení = podíl pixelů, které se mezi snímky mění (`python Tools/Shots/measure_flicker.py <složka> <mapa.png>`) |
 | `sc_look` | interiér s automatickou expozicí ve 1080p proti SC referencím; čísla `python Tools/Shots/measure_look.py <složka>` (rozsahy SC v hlavičce skriptu) |
 | `sc_tune` | varianty barvy SC vzhledu (kov, teplota světel, barva lišt, akcenty) přes `space.Kit*` |
+| `wear_tune` | opotřebení a špína materiálu (`space.Kit WearAmount / WearEverywhere / GrimeAmount`) |
 | `perf_quality` | cena kvality ve 1080p: filmová proti epické po skupinách a TSR 75 %, v letovém kokpitu i interiéru (spouštět s `-Width 1920 -Height 1080` – autor hraje ve 1080p, výchozích 1600 × 900 dává o ~40 % lepší čísla) |
 | `perf_interior` | výkon interiéru: `stat unit` a varianty stínů / dosahu světel přes `space.KitLight` |
 | `interior_walk` | chůze interiérem v zabalené hře: `space.Interior`, `space.Walk`, kamera postavy (`"camera": "pawn"`); výsledek je i v logu hry (`WALK end at …`) |
@@ -666,6 +667,9 @@ snímku.
   dál). Uloží se kolizní profil: `set_collision_profile_name("NoCollision")`.
 - u) **Průsvitné a aditivní materiály nesmí na Nanite mesh** – sklo i hologramy jsou vlastní GLB,
   import jim Nanite vypne (`nanite_settings`).
+- w) **Piny uzlů materiálu v Pythonu mají vlastní jména:** `Power` má `Base`/`Exp`, ne `A`/`B`;
+  `TextureSample` bere souřadnice na pinu `UVs`, ne `Coordinates`. `connect_material_expressions`
+  při špatném jménu jen vrátí False – skript musí chybu ohlásit (`link()` v `import_interior.py`).
 - v) **Žádná jména ze Star Citizenu** v obsahu (stanice, lodě, firmy) – vzhled ano, cizí značky ne.
 
 ### 9.4 C++ a UHT

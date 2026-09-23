@@ -84,8 +84,9 @@ check("one tagged mesh actor per room %s" % (C["ROOMS"],), len(interior) == len(
 for actor in interior:
     mesh = actor.static_mesh_component.static_mesh
     slots = [s.material_interface for s in mesh.static_materials] if mesh else []
-    check("%s: every slot wears an M_KitTrim instance" % mesh.get_name(),
-          bool(slots) and all(s and s.get_base_material() == material for s in slots),
+    # Seats wear the leather material (HANDOFF point 67); everything else is the kit trim.
+    check("%s: every slot wears an M_KitTrim instance (or the seats' leather)" % mesh.get_name(),
+          bool(slots) and all(s and (s.get_base_material() == material or s.get_name() == "M_KitLeather") for s in slots),
           ", ".join(s.get_name() if s else "None" for s in slots))
     # Walkable: the character collides with the polygons, not a box round the room.
     body = mesh.get_editor_property("body_setup")

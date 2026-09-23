@@ -1,0 +1,247 @@
+{
+ "_comment": "Ladění opotřebení a špíny (HANDOFF bod 67): WearAmount, WearEverywhere, GrimeAmount přes space.Kit; automatická expozice. Run: Tools/Shots.ps1 -Preset wear_tune -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset"
+   ]
+  },
+  {
+   "name": "w80_e20_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "space.KitReset",
+    "space.Kit WearAmount 0.8",
+    "space.Kit WearEverywhere 0.2"
+   ]
+  },
+  {
+   "name": "w80_e20_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.Kit WearAmount 0.8",
+    "space.Kit WearEverywhere 0.2"
+   ]
+  },
+  {
+   "name": "w50_e05_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "space.KitReset",
+    "space.Kit WearAmount 0.5",
+    "space.Kit WearEverywhere 0.05"
+   ]
+  },
+  {
+   "name": "w50_e05_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.Kit WearAmount 0.5",
+    "space.Kit WearEverywhere 0.05"
+   ]
+  },
+  {
+   "name": "w35_e02_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "space.KitReset",
+    "space.Kit WearAmount 0.35",
+    "space.Kit WearEverywhere 0.02"
+   ]
+  },
+  {
+   "name": "w35_e02_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.Kit WearAmount 0.35",
+    "space.Kit WearEverywhere 0.02"
+   ]
+  },
+  {
+   "name": "w50_e02_g30_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "space.KitReset",
+    "space.Kit WearAmount 0.5",
+    "space.Kit WearEverywhere 0.02",
+    "space.Kit GrimeAmount 0.3"
+   ]
+  },
+  {
+   "name": "w50_e02_g30_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.Kit WearAmount 0.5",
+    "space.Kit WearEverywhere 0.02",
+    "space.Kit GrimeAmount 0.3"
+   ]
+  },
+  {
+   "name": "w25_e0_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "space.KitReset",
+    "space.Kit WearAmount 0.25",
+    "space.Kit WearEverywhere 0.0"
+   ]
+  },
+  {
+   "name": "w25_e0_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.Kit WearAmount 0.25",
+    "space.Kit WearEverywhere 0.0"
+   ]
+  }
+ ]
+}
