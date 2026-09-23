@@ -217,3 +217,21 @@ modular pipes. Filtrováno na stažitelné, 300–60 000 ploch.
 **Pořadí, v jakém to zkoušet u Steadfastu:** nejdřív Quaternius (CC0, žádné závazky, modulární
 grid), pak Sketchfab kusy pro věci, co v kitu chybí (a zapsat autora do `Docs/Credits.md`),
 a procedurálně dodělat technický detail, který má být přesný (tlačítka, přepínače, rámy).
+
+## Paleta gamespace a restylizace staženého kitu (23. 9. 2026)
+
+Do téhle chvíle byla paleta popsaná jen slovy („gunmetal + oranžové akcenty“). Čísla, lineární RGB:
+
+| | Hodnota | Kde |
+| --- | --- | --- |
+| **Gunmetal** (trup, stěny, podlahy) | `0.62, 0.65, 0.70` jako násobek po odbarvení | odpovídá ošoupané šedomodré oceli Vanguardu (`wear_color` 0.34/0.34/0.36) |
+| **Oranžová** (akcenty, pásy, západky) | `0.85, 0.34, 0.06` | Halcyon Freightworks |
+
+Restylizaci dělá `Tools/Blender/recolour_kit.py`: texturu kitu odbarví, zesvětlí a přetónuje do
+gunmetalu (kresba panelů a špína zůstanou), červené akcenty v base colouru přebarví na oranžovou
+a **emisivní mapu kitu použije jako oranžové svítící pásy**. To poslední je u Quaternius MegaKitu
+to podstatné — jeho díly mají akcent výhradně v emisivní mapě, v base colouru žádný barevný pruh
+není, takže bez toho vyjde všechno jednolitě šedé.
+
+Ověřeno na nákladovém prostoru Steadfastu 8 × 6 m se stropem 2 m: **16 806 trojúhelníků** i s
+bednami, sudy, potrubím a ventilací (`Saved/Kitbash/steadfast_cargobay.png`).
