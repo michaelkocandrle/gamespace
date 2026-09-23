@@ -34,3 +34,29 @@ nenarazíme na konkrétní chybějící kus.
 Chodby, nákladový prostor, strojovna — tedy všechno, co je „prostředí“. **Kokpit z toho
 nepostavíme**: kit nemá dashboardy, sedačky pilota ani panely s přepínači. Ty zůstávají
 procedurální (přesný technický detail) podle `Docs/AssetPipeline_Modular.md`.
+
+## Měřítko: kit je stavěný na 4m grid (zjištěno 23. 9. 2026)
+
+Naměřeno po importu do Blenderu:
+
+| Díl | Nativní rozměr |
+| --- | --- |
+| `ShortWall_*_Straight` | 4,0 × 2,0 m (plochý quad, detail je v textuře) |
+| `Platform_Metal` | 4,0 × 4,0 m |
+| `Door_Frame_Square` | 4,85 × 5,0 m |
+| `Column_Pipes` | 5,0 m vysoký |
+| `Prop_Crate4` | 1,12 m |
+| `Prop_Computer` | 1,59 m |
+| `Prop_Vent_Wide` | 1,94 m |
+
+**Architektura je pro prochozí základnu, ne pro loď.** Pro Steadfast (30 m dlouhý, 9,5 m vysoký)
+se stěny, podlahy a dveře škálují **×0,5** — pak vyjde chodba 2 m široká se stropem ve 2 m,
+což je na loď správně. **Propy (bedny, ventilace, terminál, kabely) se nechávají 1:1**, ty mají
+reálnou velikost rovnou.
+
+Zkouška chodby: 8 m chodby = **5 727 trojúhelníků** i s podlahou, stropem a propy, což je na
+interiér lodi velmi levné. Render `Saved/Kitbash/steadfast_corridor.png`.
+
+**Pozor na textury:** glTF soubory odkazují textury holým jménem, ale ty leží ve sdílené složce
+`Textures/`. Před importem je nutné je nakopírovat vedle modelů, jinak Blender importuje materiály
+bez textur (všechno růžové).
