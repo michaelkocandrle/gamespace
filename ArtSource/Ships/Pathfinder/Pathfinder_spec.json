@@ -1,0 +1,53 @@
+{
+  "identity": {
+    "model": "Pathfinder",
+    "manufacturer": "Kestrel Dynamics",
+    "focus": "Long-range Scout / Exploration",
+    "size_class": "Snub",
+    "production_state": "planned"
+  },
+  "dimensions": {
+    "length_m": 10.0,
+    "beam_m": 8.0,
+    "height_m": 4.0,
+    "mass_kg": null,
+    "cargo_capacity": null
+  },
+  "flight": {
+    "scm_speed_ms": 190,
+    "afterburner_speed_ms": 380,
+    "pitch_max_deg_s": 90,
+    "yaw_max_deg_s": 70,
+    "roll_max_deg_s": 140,
+    "acceleration": {
+      "main_ms2": null,
+      "retro_ms2": null,
+      "strafe_ms2": null,
+      "vertical_ms2": null
+    }
+  },
+  "crew": {
+    "crew_size": 1
+  },
+  "propulsion": {
+    "main_fuel_capacity": null,
+    "afterburner_fuel_seconds": null,
+    "quantum_drive": "extended-range variant (longer jump distance, planned, not yet a real system)"
+  },
+  "systems": {
+    "power_plant": null,
+    "cooler": null,
+    "shield_generator": null
+  },
+  "weaponry": {
+    "weapons": [],
+    "turrets": [],
+    "missiles": [],
+    "utility_items": ["long-range sensor array", "extended fuel/quantum tankage", "no cargo hold"]
+  },
+  "design_notes": [
+    "Complementary role to Vanguard: similar size/speed class, but built for range and sensors instead of combat. Weak or no weapons by design.",
+    "Smallest crew (1), smallest dimensions in the fleet after Vanguard - built to go far, not to carry things or people.",
+    "Not started as of 23.9.2026. Comes after Steadfast is finished (see Fleet.md)."
+  ]
+}

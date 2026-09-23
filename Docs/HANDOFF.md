@@ -24,6 +24,10 @@ rozbité nebo neověřené a co následuje.
   let z vesmíru až na povrch planety, vystoupení z lodi a chůze po planetě.
 - Dnešní obsah:
   - hratelný prototyp s úvodní obrazovkou;
+  - **flotila (přehled a plán v `Docs/Ships/Fleet.md`)**: čtyři plánované lodě, dvě odlišné
+    fiktivní frakce/výrobci (Kestrel Dynamics = bojová/průzkumná technika, Halcyon
+    Freightworks = nákladní/těžební technika). Vanguard je z Kestrel Dynamics (doplnit
+    do jeho specu, vznikl před zavedením šablony);
   - jedna planeta **Veyra** (poloměr 120 km od 21. 9. 2026, předtím 25 km, atmosféra 12 km, gravitace 6 m/s²);
   - kulisy: měsíc **Keth** a plynný obr **Orun** s prstenci;
   - loď **Vanguard**: od 18. 9. 2026 model z Meshy („Ironclad Starfighter“), 14 × 11,4 × 6,2 m se
@@ -31,7 +35,7 @@ rozbité nebo neověřené a co následuje.
     Původní procedurální model (17,6 m) je v `ArtSource/Ships/Vanguard/Vanguard.blend` jen pro historii;
   - druhá loď **Steadfast** (výrobce Halcyon Freightworks, nákladní/průzkumná, posádka 3,
     pomalejší a větší než Vanguard) — rozjeto 23. 9. 2026, autor pracoval z jiného PC bez
-    Claude Code. Hotovo: jméno a specifikace `ArtSource/Ships/Steadfast/Steadfast_setup.json`
+    Claude Code. Hotovo: jméno a specifikace `ArtSource/Ships/Steadfast/Steadfast_spec.json` (design/identity list, NENÍ totéž co funkční `*_setup.json` build config jako u Vanguardu)
     (rozměry/let jsou odhady, přeměřit po importu jako u Vanguardu), hrubý exteriér z Meshy
     (Smart Topology, vysoký polygon count, ještě nestažený/needitovaný v Blenderu), koncept
     interiéru `ArtSource/Ships/Steadfast/Concept/interior_hero.png` a rozpis dílů

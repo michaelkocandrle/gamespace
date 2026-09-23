@@ -1,0 +1,54 @@
+{
+  "identity": {
+    "model": "Delver",
+    "manufacturer": "Halcyon Freightworks",
+    "focus": "Mining / Industrial Utility",
+    "size_class": "Small-Medium",
+    "production_state": "planned"
+  },
+  "dimensions": {
+    "length_m": 18.0,
+    "beam_m": 14.0,
+    "height_m": 7.0,
+    "mass_kg": null,
+    "cargo_capacity": null
+  },
+  "flight": {
+    "scm_speed_ms": 100,
+    "afterburner_speed_ms": 180,
+    "pitch_max_deg_s": 35,
+    "yaw_max_deg_s": 25,
+    "roll_max_deg_s": 45,
+    "acceleration": {
+      "main_ms2": null,
+      "retro_ms2": null,
+      "strafe_ms2": null,
+      "vertical_ms2": null
+    }
+  },
+  "crew": {
+    "crew_size": 2
+  },
+  "propulsion": {
+    "main_fuel_capacity": null,
+    "afterburner_fuel_seconds": null,
+    "quantum_drive": null
+  },
+  "systems": {
+    "power_plant": null,
+    "cooler": null,
+    "shield_generator": null
+  },
+  "weaponry": {
+    "weapons": [],
+    "turrets": [],
+    "missiles": [],
+    "utility_items": ["mining laser mount", "ore cargo pod", "tractor beam"]
+  },
+  "design_notes": [
+    "Slowest, least agile ship in the fleet - trades all mobility for mining equipment and ore capacity.",
+    "Smaller crew than Steadfast (2 vs 3), but role is specialised (mining) not general cargo.",
+    "Blocked on gameplay design, not on art: needs the economy/mining mechanic designed first (see Gamespace_ReferenceLibrary_Plan.md topic 4) so we know what equipment the ship actually needs to carry. Do not start the 3D pipeline before that exists.",
+    "Not started as of 23.9.2026. Last of the four planned ships (see Fleet.md)."
+  ]
+}
