@@ -1,6 +1,6 @@
 {
   "identity": {
-    "model": "Pathfinder",
+    "model": "Farsight",
     "manufacturer": "Kestrel Dynamics",
     "focus": "Long-range Scout / Exploration",
     "size_class": "Snub",
@@ -43,7 +43,11 @@
     "weapons": [],
     "turrets": [],
     "missiles": [],
-    "utility_items": ["long-range sensor array", "extended fuel/quantum tankage", "no cargo hold"]
+    "utility_items": [
+      "long-range sensor array",
+      "extended fuel/quantum tankage",
+      "no cargo hold"
+    ]
   },
   "design_notes": [
     "Complementary role to Vanguard: similar size/speed class, but built for range and sensors instead of combat. Weak or no weapons by design.",

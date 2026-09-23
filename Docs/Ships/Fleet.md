@@ -26,7 +26,7 @@ novou frakci pro každou loď:
 | --- | --- | --- | --- | --- | --- |
 | **Vanguard** | Kestrel Dynamics *(doplnit do specu)* | Interceptor | Snub | 1 | ✅ hotovo (exteriér, letový model, HUD) |
 | **Steadfast** | Halcyon Freightworks | Multi-crew Freight/Exploration | Medium | 3 | 🔶 rozjeto (exteriér hrubý tvar z Meshy, koncept interiéru) |
-| **Pathfinder** | Kestrel Dynamics | Long-range Scout/Exploration | Snub | 1 | 📋 naplánováno, nezačato |
+| **Farsight** | Kestrel Dynamics | Long-range Scout/Exploration | Snub | 1 | 📋 naplánováno, nezačato |
 | **Delver** | Halcyon Freightworks | Mining/Industrial Utility | Small–Medium | 2 | 📋 naplánováno, nezačato |
 
 ## Role a jak se doplňují
@@ -35,7 +35,7 @@ novou frakci pro každou loď:
 
 - **Vanguard** — rychlý, obratný, bojový. Malý náklad, krátký dolet, jedna posádka.
 - **Steadfast** — pomalý, odolný, velký náklad, víc posádky. Základna pro delší výpravy.
-- **Pathfinder** — rychlý jako Vanguard, ale stavěný na dolet/senzory místo boje. Slabě
+- **Farsight** — rychlý jako Vanguard, ale stavěný na dolet/senzory místo boje. Slabě
   vyzbrojený nebo bezbranný, dlouhý dolet, jedna posádka. Vhodný pro objevování nových
   planet/POI, ne pro boj.
 - **Delver** — pomalý jako Steadfast, ale menší a specializovaný na těžbu (těžební laser,
@@ -49,7 +49,7 @@ lodí zatím neplánovat, dokud tyhle čtyři nebudou hotové a otestované. Dr�
 
 1. ✅ Vanguard — hotovo
 2. 🔶 Steadfast — v procesu (dokončit exteriér → interiér přes kitbash/procedurální detail)
-3. Pathfinder — až po Steadfastu
+3. Farsight — až po Steadfastu
 4. Delver — poslední ze čtyř, protože těžba jako gameplay mechanika ještě není navržená
    (viz `Gamespace_ReferenceLibrary_Plan.md`, téma 4 "Ekonomika, obchod a těžba" — tohle
    téma referenční knihovny by mělo vzniknout dřív, než začneme stavět Delver, ať víme,
