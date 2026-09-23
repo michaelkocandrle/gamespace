@@ -1108,6 +1108,17 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       0–1 ms, rozlišení vykreslování 6 ms). **Nové výchozí nastavení: epická, vykreslení 75 %, TSR** –
       `USpaceUserSettings` verze 4 převede uložená nastavení jednou; v menu „Kvalita grafiky“ a „Rozlišení
       vykreslování (TSR)“ jde zpět na filmovou a 100 %. Pod 50 % nikdy.
+65. **Světlo interiéru podle SC** (23. 9. 2026, krok 2 plánu z bodu 64). Měřeno s **automatickou expozicí**,
+    jak hru vidí hráč (`-Preset sc_look -Width 1920 -Height 1080`, čísla `python Tools/Shots/measure_look.py`):
+    průměrný jas byl už v rozsahu SC (0,16–0,26), chyběla jasná světla (p99 0,56–0,69 proti 0,56–0,88) a barva
+    byla studená (B/R 1,10–1,33 proti 0,72–1,05).
+    - **Světelné lišty** (`M_Strip` → `MI_KitStrip`, teplá bílá, emise 14): po hraně stropu všech místností,
+      u podlahy v chodbě, svisle v rozích strojovny a na vnitřních stranách rámů dveří.
+    - **Paleta:** neutrální tmavý kov (gunmetal 0,33/0,33/0,34), pracovní světla 5200 K, svítidla teplá bílá.
+      Teplý kov pod teplým světlem byl moc hnědý (B/R 0,57–0,63, sytost 0,42–0,49) – `-Preset sc_tune`.
+    - **Výsledek:** prostor, chodba a strojovna B/R 0,70–0,77, sytost 0,27–0,35, p99 0,72–0,96 – v rozsahu SC.
+      Kokpit zatím B/R 1,08–1,23 a p99 0,56 (bez lišt, obrazovky bez obsahu) – krok 3.
+    - Jemného detailu je pořád méně (0,024–0,027 proti SC 0,024–0,035) – materiály a geometrie, kroky 4–5.
 
 ---
 

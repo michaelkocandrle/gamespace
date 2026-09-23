@@ -41,7 +41,12 @@ PLACE_AT = unreal.Vector(0.0, 50000.0, 0.0)      # 500 m sideways from the ship'
 # Blue steel. Measured on 23. 9. 2026 (Tools/Shots/interior_tune.json, HANDOFF point 59) against the
 # author's mood references (cool, B/R 1.1-1.6 in sRGB): (0.62, 0.65, 0.70) under warm lights came out
 # warm silver, B/R 0.95. The tint alone barely moves the hue - the light colour does most of it.
-GUNMETAL = (0.35, 0.42, 0.55)
+# Star Citizen style (author, 23. 9. 2026, HANDOFF point 65): the architecture is charcoal and
+# warm-neutral, the colour comes from warm light strips and blue screens. Blue steel measured B/R
+# 1.1-1.33 with auto exposure against SC's 0.72-1.05. A warm tint on top of warm light was too much
+# (B/R 0.57-0.63, saturation 0.42-0.49); neutral metal under 5200 K gives B/R 0.70-0.76 and saturation
+# 0.27-0.35, SC's own range (Tools/Shots/sc_tune.json).
+GUNMETAL = (0.33, 0.33, 0.34)
 BLACK = "/Engine/EngineResources/Black"
 WHITE = "/Engine/EngineResources/WhiteSquareTexture"
 ORANGE = (0.85, 0.34, 0.06)
@@ -67,7 +72,7 @@ GRAVITY_CMS2 = 981.0
 # 65-degree cone left the walls nearly black (mean 0.21 against the references' 0.24-0.42); a wider
 # cone reaches the walls and 1150 lm lifts them, while 1800 already burns the floor out (p90 0.83).
 WORK_LIGHT_LUMENS = 1150.0
-WORK_LIGHT_KELVIN = 7000.0
+WORK_LIGHT_KELVIN = 5200.0          # warm white, as SC's corridors (7000 K belonged to the blue look)
 WORK_LIGHT_CONE = (25.0, 80.0)      # inner, outer half angle in degrees
 # The orange accents: at 550 lm they painted the whole ceiling brown (B/R 0.93 looking up). Once they
 # stood inside the rooms rather than behind the bay's walls, 200 lm still warmed the bay and engine
@@ -80,13 +85,16 @@ ACCENT_LIGHT_LUMENS = 100.0
 # shadows of the rooms next door: 11.5 ms, with the crates' and columns' shadows kept.
 WORK_LIGHT_RADIUS = 450.0
 # The fixtures' glowing face: cold white, not the kit's orange.
-LAMP_COLOUR = (0.78, 0.88, 1.0)
+LAMP_COLOUR = (1.0, 0.9, 0.75)
 LAMP_STRENGTH = 20.0
 # Cockpit displays: blue, and a blue light off them (the holo-blue screens of the mood references).
 SCREEN_COLOUR = (0.15, 0.55, 1.0)
 SCREEN_STRENGTH = 1.5          # 6 burnt the displays out to white at exposure 2 (HANDOFF point 63)
 SCREEN_LIGHT = unreal.Color(r=90, g=170, b=255, a=255)
 GLASS_MATERIAL = PACKAGE + "/M_KitGlass"
+# Light strips: warm white and hot enough to bloom - SC's highlights (p99 0.56-0.88) come from them.
+STRIP_COLOUR = (1.0, 0.8, 0.58)
+STRIP_STRENGTH = 14.0
 
 
 def read_layout():
@@ -444,6 +452,7 @@ def main():
     lamp = make_plain(master, "MI_KitLamp", (0.02, 0.02, 0.02), maps, emissive=LAMP_COLOUR, strength=LAMP_STRENGTH, glow=True)
     screen = make_plain(master, "MI_KitScreen", (0.01, 0.015, 0.03), maps, emissive=SCREEN_COLOUR, strength=SCREEN_STRENGTH, glow=True)
     white = make_plain(master, "MI_KitWhite", (0.75, 0.77, 0.8), maps)      # seat stripes, stick tops, buttons
+    strip = make_plain(master, "MI_KitStrip", (0.05, 0.05, 0.05), maps, emissive=STRIP_COLOUR, strength=STRIP_STRENGTH, glow=True)
     glass = build_glass()
     for mesh in meshes:
         for index, slot in enumerate(mesh.static_materials):
@@ -462,6 +471,8 @@ def main():
                 pick = glass
             elif "white" in name:
                 pick = white
+            elif "strip" in name:
+                pick = strip
             elif name.startswith("m_screen"):
                 pick = screen
             elif "light" in name or "screen" in name:
@@ -498,8 +509,8 @@ def main():
         component.set_static_mesh(mesh)
     place_lights(actors)
     place_interior_actors(actors, leaf_mesh)
-    kept = [master, dark, glow, lamp, screen, white, glass] + list(instances.values()) + meshes
-    for instance in [dark, glow, lamp, screen, white] + list(instances.values()):
+    kept = [master, dark, glow, lamp, screen, white, strip, glass] + list(instances.values()) + meshes
+    for instance in [dark, glow, lamp, screen, white, strip] + list(instances.values()):
         for parameter in ("BaseColor", "NormalMap", "ORMMap", "EmissiveMap"):
             kept.append(MEL.get_material_instance_texture_parameter_value(instance, parameter))
     for parameter in ("BaseColor", "NormalMap", "ORMMap"):

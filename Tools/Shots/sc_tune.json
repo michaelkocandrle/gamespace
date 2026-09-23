@@ -1,0 +1,361 @@
+{
+ "_comment": "Ladění barvy SC vzhledu (HANDOFF bod 65): kov, teplota světel, barva lišt, akcenty; automatická expozice. Run: Tools/Shots.ps1 -Preset sc_tune -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset"
+   ]
+  },
+  {
+   "name": "base_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "space.KitReset"
+   ]
+  },
+  {
+   "name": "base_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset"
+   ]
+  },
+  {
+   "name": "base_i_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.7
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset"
+   ]
+  },
+  {
+   "name": "neutral_5200_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.33 0.33 0.34 MI_T_",
+    "space.KitLight Work Temperature 5200"
+   ]
+  },
+  {
+   "name": "neutral_5200_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.33 0.33 0.34 MI_T_",
+    "space.KitLight Work Temperature 5200"
+   ]
+  },
+  {
+   "name": "neutral_5200_i_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.7
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.33 0.33 0.34 MI_T_",
+    "space.KitLight Work Temperature 5200"
+   ]
+  },
+  {
+   "name": "neutral_5500_strip_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.33 0.33 0.34 MI_T_",
+    "space.KitLight Work Temperature 5500",
+    "space.KitColor Accent 1.0 0.88 0.72 KitStrip"
+   ]
+  },
+  {
+   "name": "neutral_5500_strip_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.33 0.33 0.34 MI_T_",
+    "space.KitLight Work Temperature 5500",
+    "space.KitColor Accent 1.0 0.88 0.72 KitStrip"
+   ]
+  },
+  {
+   "name": "neutral_5500_strip_i_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.7
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.33 0.33 0.34 MI_T_",
+    "space.KitLight Work Temperature 5500",
+    "space.KitColor Accent 1.0 0.88 0.72 KitStrip"
+   ]
+  },
+  {
+   "name": "cool_5800_strip_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.32 0.33 0.35 MI_T_",
+    "space.KitLight Work Temperature 5800",
+    "space.KitColor Accent 1.0 0.9 0.78 KitStrip"
+   ]
+  },
+  {
+   "name": "cool_5800_strip_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.32 0.33 0.35 MI_T_",
+    "space.KitLight Work Temperature 5800",
+    "space.KitColor Accent 1.0 0.9 0.78 KitStrip"
+   ]
+  },
+  {
+   "name": "cool_5800_strip_i_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.7
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.32 0.33 0.35 MI_T_",
+    "space.KitLight Work Temperature 5800",
+    "space.KitColor Accent 1.0 0.9 0.78 KitStrip"
+   ]
+  },
+  {
+   "name": "cool_5800_strip_acc50_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.32 0.33 0.35 MI_T_",
+    "space.KitLight Work Temperature 5800",
+    "space.KitColor Accent 1.0 0.9 0.78 KitStrip",
+    "space.KitLight Accent Intensity 50"
+   ]
+  },
+  {
+   "name": "cool_5800_strip_acc50_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.32 0.33 0.35 MI_T_",
+    "space.KitLight Work Temperature 5800",
+    "space.KitColor Accent 1.0 0.9 0.78 KitStrip",
+    "space.KitLight Accent Intensity 50"
+   ]
+  },
+  {
+   "name": "cool_5800_strip_acc50_i_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.7
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.32 0.33 0.35 MI_T_",
+    "space.KitLight Work Temperature 5800",
+    "space.KitColor Accent 1.0 0.9 0.78 KitStrip",
+    "space.KitLight Accent Intensity 50"
+   ]
+  }
+ ]
+}

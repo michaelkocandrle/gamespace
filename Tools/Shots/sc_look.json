@@ -1,0 +1,141 @@
+{
+ "_comment": "Vzhled interiéru proti SC referencím s automatickou expozicí, jak ho hráč vidí (HANDOFF bod 65). Porovnává se jas, kontrast, barva a detail s ArtSource/Reference/Mood/sc_cockpit_*.webp. Run: Tools/Shots.ps1 -Preset sc_look -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80
+  },
+  {
+   "name": "b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "c_corner",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.5,
+    497.3,
+    1.7
+   ],
+   "camera_look_at": [
+    7,
+    502,
+    0.8
+   ],
+   "fov": 80
+  },
+  {
+   "name": "g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80
+  },
+  {
+   "name": "h_bay_aft",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    7,
+    499,
+    1.6
+   ],
+   "camera_look_at": [
+    -7,
+    500,
+    1.0
+   ],
+   "fov": 80
+  },
+  {
+   "name": "i_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.7
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80
+  },
+  {
+   "name": "k_cockpit",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    17.6,
+    499.7,
+    1.75
+   ],
+   "camera_look_at": [
+    22.4,
+    500,
+    1.0
+   ],
+   "fov": 80
+  },
+  {
+   "name": "n_pilot_seat",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    19.95,
+    500.95,
+    1.25
+   ],
+   "camera_look_at": [
+    23,
+    500.8,
+    1.1
+   ],
+   "fov": 88
+  }
+ ]
+}

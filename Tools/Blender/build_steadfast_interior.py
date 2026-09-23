@@ -314,6 +314,9 @@ def doorway(room, templates, centre, passage_dir, mats):
         room.add("Jamb", box((x - d, lo, 0.0), (x + d, hi, DOOR_HEIGHT), bevel=0.02), mats["body"])
     room.add("Lintel", box((x - d, y - OPEN_WIDTH / 2.0, OPEN_HEIGHT), (x + d, y + OPEN_WIDTH / 2.0, DOOR_HEIGHT),
                            bevel=0.02), mats["body"])
+    for side in (-1.0, 1.0):
+        face = y + side * (OPEN_WIDTH / 2.0 - 0.012)
+        strip(room, (x, face, 0.15), (x, face, OPEN_HEIGHT - 0.1), mats["strip"], size=(0.03, 0.02))
     for sign in (-1.0, 1.0):
         face = x + sign * (d + 0.004)
         room.add("DoorStrip", box((min(face, face + sign * 0.01), y - OPEN_WIDTH / 2.0 + 0.1, OPEN_HEIGHT + 0.05),
@@ -444,6 +447,34 @@ def open_shell(shell):
 
 # --- rooms ----------------------------------------------------------------------------------------
 
+def strip(room, a, b, mat, size=(0.03, 0.05)):
+    """A light strip from a to b: a thin glowing bar. The Star Citizen look lives on these - the
+    light sits in lines along door frames, ceiling edges and floors, and the rest stays dark
+    (HANDOFF point 65)."""
+    a, b = mathutils.Vector(a), mathutils.Vector(b)
+    lo = [min(a[k], b[k]) for k in range(3)]
+    hi = [max(a[k], b[k]) for k in range(3)]
+    for k in range(3):
+        if hi[k] - lo[k] < 1e-3:                      # the thin directions get the strip's size
+            half = size[0] / 2.0 if k == 2 or (k != 2 and hi[2] - lo[2] > 1e-3) else size[1] / 2.0
+            lo[k] -= half
+            hi[k] += half
+    room.add("Strip", box(lo, hi), mat)
+
+
+def ceiling_strips(room, xs, ys, mat, skip_x_walls=False):
+    """Strips along the wall-ceiling edge all round a room (the end walls' middle left for doors)."""
+    z = HEIGHT - 0.035
+    inset = 0.03
+    for y in (ys[0] + inset, ys[1] - inset):
+        strip(room, (xs[0] + 0.1, y, z), (xs[1] - 0.1, y, z), mat)
+    if not skip_x_walls:
+        for x in (xs[0] + inset, xs[1] - inset):
+            for y0, y1 in ((ys[0] + 0.1, -DOOR_HALF - 0.1), (DOOR_HALF + 0.1, ys[1] - 0.1)):
+                if y1 - y0 > 0.2:
+                    strip(room, (x, y0, z), (x, y1, z), mat)
+
+
 def hull(room, mat):
     """A dark closed box round the engine room, the bay and the corridor, facing in. Where two wall
     panels only meet edge to edge, the raster leaves pixel cracks; through them the planet
@@ -497,6 +528,7 @@ def build_bay(shell, templates, room_mats):
     doorway(room, templates, (BAY_X[1], 0.0), (1.0, 0.0), room_mats)
     doorway(room, templates, (BAY_X[0], 0.0), (-1.0, 0.0), room_mats)
     hull(room, room_mats["dark"])
+    ceiling_strips(room, BAY_X, BAY_Y, room_mats["strip"])
     room.accents = list(BAY_ACCENTS)
     return room
 
@@ -509,13 +541,16 @@ def build_corridor(templates, room_mats):
     wall(room, templates["wall"], (CORRIDOR_X[0], CORRIDOR_Y[1]), (CORRIDOR_X[1], CORRIDOR_Y[1]), (0.0, -1.0))
     doorway(room, templates, (CORRIDOR_X[1], 0.0), (1.0, 0.0), room_mats)   # the sliding door is its own actor
     lamps(room, templates["lamp"], CORRIDOR_LAMPS)
+    ceiling_strips(room, CORRIDOR_X, CORRIDOR_Y, room_mats["strip"], skip_x_walls=True)
+    for y in (CORRIDOR_Y[0] + 0.03, CORRIDOR_Y[1] - 0.03):             # low guide lines by the floor
+        strip(room, (CORRIDOR_X[0] + 0.1, y, 0.06), (CORRIDOR_X[1] - 0.3, y, 0.06), room_mats["strip"], size=(0.02, 0.03))
     room.place(templates["terminal"], (16.0, CORRIDOR_Y[1] - 0.25, 1.35), yaw=-math.pi / 2.0)
     room.place(templates["vent"], (12.0, 0.0, HEIGHT - 0.04), roll=math.pi)
     room.accents = list(CORRIDOR_ACCENTS)
     return room
 
 
-def build_engine_room(templates):
+def build_engine_room(templates, room_mats):
     room = Room("EngineRoom")
     floor(room, templates["floor_dark"], ENGINE_X, ENGINE_Y)
     ceiling(room, templates["ceiling"], ENGINE_X, ENGINE_Y)
@@ -535,6 +570,10 @@ def build_engine_room(templates):
     for y, yaw in ((y0 + 0.65, 0.0), (y1 - 0.65, math.pi)):
         room.place(templates["pipe_holder"], (core_x, y, 0.47), yaw=yaw)
     room.place(templates["computer"], (x1 - 0.55, -1.6, 0.8), yaw=-math.pi / 2.0)
+    ceiling_strips(room, ENGINE_X, ENGINE_Y, room_mats["strip"])
+    for cx in (x0 + 0.03, x1 - 0.03):                                   # upright strips in the corners
+        for cy in (y0 + 0.03, y1 - 0.03):
+            strip(room, (cx, cy, 0.2), (cx, cy, HEIGHT - 0.2), room_mats["strip"], size=(0.03, 0.03))
     room.accents = list(ENGINE_ACCENTS)
     return room
 
@@ -780,13 +819,14 @@ def main():
         "glass": material("M_Glass", colour=(0.6, 0.7, 0.8), alpha=0.15),
         "white": material("M_White", colour=(0.8, 0.8, 0.8)),
         "black": material("M_Black_Seat", colour=(0.02, 0.02, 0.02)),
+        "strip": material("M_Strip", emission=(1.0, 0.82, 0.6)),
     }
     mats = dict(own, body=shell_materials["MI_Trim_02"], dark=shell_materials["M_Black"],
                 cushion=shell_materials["MI_PaddedWall"], trim=shell_materials["MI_Trim_01"],
                 frame=shell_materials["M_Black"])      # the reference's canopy beams are near black
 
     cockpit, canopy_glass = build_cockpit(templates, mats)
-    rooms = [build_engine_room(templates), build_bay(shell, templates, mats), build_corridor(templates, mats),
+    rooms = [build_engine_room(templates, mats), build_bay(shell, templates, mats), build_corridor(templates, mats),
              cockpit, canopy_glass]
     leaf, leaf_width, leaf_height = build_door_leaf(templates)
     layout = {
