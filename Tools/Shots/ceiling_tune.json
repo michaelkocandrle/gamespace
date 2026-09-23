@@ -1,0 +1,342 @@
+{
+ "_comment": "Světla nákladového prostoru se stropem (HANDOFF bod 60): jas a kužel bodovek pod svítidly, oranžové akcenty. Každá varianta začíná space.KitReset, expozice 2.0; kamery uvnitř, celek a pohled na strop. Run: Tools/Shots.ps1 -Preset ceiling_tune",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "base_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "base_up",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ],
+   "camera_location": [
+    0.5,
+    502.5,
+    1.2
+   ],
+   "camera_look_at": [
+    6,
+    498.5,
+    2.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "work_1150_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work Intensity 1150"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "work_1150_up",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work Intensity 1150"
+   ],
+   "camera_location": [
+    0.5,
+    502.5,
+    1.2
+   ],
+   "camera_look_at": [
+    6,
+    498.5,
+    2.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "cone_80_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work OuterConeAngle 80"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "cone_80_up",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work OuterConeAngle 80"
+   ],
+   "camera_location": [
+    0.5,
+    502.5,
+    1.2
+   ],
+   "camera_look_at": [
+    6,
+    498.5,
+    2.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "work_1150_cone_80_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work Intensity 1150",
+    "space.KitLight Work OuterConeAngle 80"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "work_1150_cone_80_up",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work Intensity 1150",
+    "space.KitLight Work OuterConeAngle 80"
+   ],
+   "camera_location": [
+    0.5,
+    502.5,
+    1.2
+   ],
+   "camera_look_at": [
+    6,
+    498.5,
+    2.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "accent_200_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent Intensity 200"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "accent_200_up",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent Intensity 200"
+   ],
+   "camera_location": [
+    0.5,
+    502.5,
+    1.2
+   ],
+   "camera_look_at": [
+    6,
+    498.5,
+    2.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "combo_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work Intensity 1150",
+    "space.KitLight Work OuterConeAngle 80",
+    "space.KitLight Accent Intensity 200"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "combo_up",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work Intensity 1150",
+    "space.KitLight Work OuterConeAngle 80",
+    "space.KitLight Accent Intensity 200"
+   ],
+   "camera_location": [
+    0.5,
+    502.5,
+    1.2
+   ],
+   "camera_look_at": [
+    6,
+    498.5,
+    2.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "combo_1800_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work Intensity 1800",
+    "space.KitLight Work OuterConeAngle 80",
+    "space.KitLight Accent Intensity 200"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "combo_1800_up",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work Intensity 1800",
+    "space.KitLight Work OuterConeAngle 80",
+    "space.KitLight Accent Intensity 200"
+   ],
+   "camera_location": [
+    0.5,
+    502.5,
+    1.2
+   ],
+   "camera_look_at": [
+    6,
+    498.5,
+    2.2
+   ],
+   "fov": 75
+  }
+ ]
+}

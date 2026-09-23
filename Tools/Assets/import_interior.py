@@ -4,7 +4,8 @@
 
 Co to dělá:
 
-1. Naimportuje `ArtSource/Ships/Steadfast/Interior/CargoBay.glb` do `/Game/Environments/Steadfast/`.
+1. Naimportuje `ArtSource/Ships/Steadfast/Interior/CargoBay.glb` do `/Game/Environments/Steadfast/`
+   (GLB staví `Tools/Blender/build_cargo_bay.py`: shell z kitu + strop a svítidla).
 2. Postaví materiál `M_KitTrim`, který v enginu dělá totéž co `Tools/Blender/recolour_kit.py`
    v Blenderu: texturu kitu odbarví, přetónuje do gunmetalu a emisivní mapu kitu použije jako
    oranžové svítící pásy. Bez toho vypadá kit v enginu šedě a cize.
@@ -16,6 +17,7 @@ Buď se textury vypečou (drahé, ztratí se opakovatelnost), nebo se stejná ma
 materiálu UE - tahle cesta.
 """
 
+import ast
 import os
 import unreal
 
@@ -42,10 +44,33 @@ ROUGHNESS_FLOOR = 0.32
 INTERIOR_TAG = "SpaceInterior"
 WORK_LIGHT_TAG = "SpaceInteriorLight_Work"
 ACCENT_LIGHT_TAG = "SpaceInteriorLight_Accent"
-# Work lights: cold white, and half of what they were. Warm light (255, 238, 214) cancelled the blue
-# of the steel; 7000 K is what turns the bay blue at all.
-WORK_LIGHT_LUMENS = 575.0
+# Work lights: cold white. Warm light (255, 238, 214) cancelled the blue of the steel; 7000 K is
+# what turns the bay blue at all. Since the bay has a ceiling (Tools/Blender/build_cargo_bay.py) they
+# are spots under its fixtures pointing down, so the ceiling and corners stay dark - the contrast
+# the mood references have and the open bay did not.
+# Measured with the ceiling on (Tools/Shots/ceiling_tune.json, HANDOFF point 60): 575 lm under a
+# 65-degree cone left the walls nearly black (mean 0.21 against the references' 0.24-0.42); a wider
+# cone reaches the walls and 1150 lm lifts them, while 1800 already burns the floor out (p90 0.83).
+WORK_LIGHT_LUMENS = 1150.0
 WORK_LIGHT_KELVIN = 7000.0
+WORK_LIGHT_CONE = (25.0, 80.0)      # inner, outer half angle in degrees
+# The orange strips by the floor: at 550 lm they painted the whole ceiling brown (B/R 0.93 looking up);
+# 200 keeps the accent on the crates and gives the ceiling back its blue (1.22).
+ACCENT_LIGHT_LUMENS = 200.0
+# The fixtures' glowing face: cold white, not the kit's orange.
+LAMP_COLOUR = (0.78, 0.88, 1.0)
+LAMP_STRENGTH = 20.0
+BUILD_SCRIPT = os.path.join(ROOT, "Tools", "Blender", "build_cargo_bay.py")
+
+
+def fixture_layout():
+    """Where build_cargo_bay.py hung the fixtures, read out of it rather than copied (Blender metres)."""
+    tree = ast.parse(open(BUILD_SCRIPT, encoding="utf-8").read(), BUILD_SCRIPT)
+    wanted = ("CEILING_Z", "LAMP_ROWS_Y", "LAMP_X")
+    body = [n for n in tree.body if isinstance(n, ast.Assign) and any(getattr(t, "id", None) in wanted for t in n.targets)]
+    namespace = {}
+    exec(compile(ast.Module(body=body, type_ignores=[]), BUILD_SCRIPT, "exec"), namespace)
+    return namespace["CEILING_Z"], namespace["LAMP_ROWS_Y"], namespace["LAMP_X"]
 
 MEL = unreal.MaterialEditingLibrary
 EAL = unreal.EditorAssetLibrary
@@ -231,7 +256,7 @@ def prune(keep):
 
 
 def place_lights(actors, mesh):
-    """Work lights under the ceiling, plus two orange strips low down.
+    """Work lights under the ceiling fixtures, plus two orange strips low down.
 
     The kit's panels are metal in the ORM map, and metal with nothing to reflect renders black -
     in space there is no sky to fill it in. Without these the bay is a silhouette (23. 9. 2026).
@@ -243,25 +268,23 @@ def place_lights(actors, mesh):
         return
     bounds = mesh.get_bounds()
     origin, extent = bounds.origin, bounds.box_extent
-    floor = origin.z - extent.z
-    # Two rows: under the upper deck, where the crates stand, and above it. A single row at
-    # ceiling height only lit the deck plate and left the bay below it black (23. 9. 2026).
-    heights = (floor + 190.0, origin.z + extent.z - 40.0)
+    ceiling, rows, columns = fixture_layout()
     lights = 0
-    for height in heights:
-        for x in (-0.55, 0.0, 0.55):
-            spot = unreal.Vector(PLACE_AT.x + origin.x + x * extent.x,
-                                 PLACE_AT.y + origin.y + (0.45 * extent.y if height == heights[1] else 0.0),
-                                 PLACE_AT.z + height)
-            light = actors.spawn_actor_from_class(unreal.PointLight, spot, unreal.Rotator(0, 0, 0))
+    for row in rows:
+        for column in columns:
+            # Blender and Unreal share X and Z; Unreal's Y is Blender's mirrored.
+            spot = unreal.Vector(PLACE_AT.x + column * 100.0, PLACE_AT.y - row * 100.0, PLACE_AT.z + ceiling * 100.0 - 20.0)
+            light = actors.spawn_actor_from_class(unreal.SpotLight, spot, unreal.Rotator(roll=0.0, pitch=-90.0, yaw=0.0))
             lights += 1
             light.set_actor_label("Steadfast_Light_Work_%d" % lights)
             light.set_editor_property("tags", [unreal.Name(WORK_LIGHT_TAG)])
-            component = light.point_light_component
+            component = light.spot_light_component
             component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
             component.set_editor_property("intensity_units", unreal.LightUnits.LUMENS)
             component.set_editor_property("intensity", WORK_LIGHT_LUMENS)
             component.set_editor_property("attenuation_radius", 900.0)
+            component.set_editor_property("inner_cone_angle", WORK_LIGHT_CONE[0])
+            component.set_editor_property("outer_cone_angle", WORK_LIGHT_CONE[1])
             component.set_editor_property("light_color", unreal.Color(r=255, g=255, b=255, a=255))
             component.set_editor_property("use_temperature", True)
             component.set_editor_property("temperature", WORK_LIGHT_KELVIN)
@@ -275,7 +298,7 @@ def place_lights(actors, mesh):
         component = light.point_light_component
         component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
         component.set_editor_property("intensity_units", unreal.LightUnits.LUMENS)
-        component.set_editor_property("intensity", 550.0)
+        component.set_editor_property("intensity", ACCENT_LIGHT_LUMENS)
         component.set_editor_property("attenuation_radius", 600.0)
         component.set_editor_property("light_color", unreal.Color(r=255, g=140, b=40, a=255))
     log("rozsvíceno %d světel" % lights)
@@ -316,6 +339,7 @@ def main():
     maps = {p: t for p, t in reference.items() if p != "EmissiveMap"}
     dark = make_plain(master, "MI_KitDark", (0.02, 0.02, 0.022), maps)
     glow = make_plain(master, "MI_KitGlow", (0.02, 0.02, 0.02), maps, emissive=ORANGE, strength=14.0, glow=True)
+    lamp = make_plain(master, "MI_KitLamp", (0.02, 0.02, 0.02), maps, emissive=LAMP_COLOUR, strength=LAMP_STRENGTH, glow=True)
     for mesh in meshes:
         for index, slot in enumerate(mesh.static_materials):
             name = str(slot.material_slot_name).lower()
@@ -327,6 +351,8 @@ def main():
                     break
             if "black" in name:
                 pick = dark
+            elif "lamp" in name:
+                pick = lamp
             elif "light" in name or "screen" in name:
                 pick = glow
             if pick:
@@ -348,8 +374,8 @@ def main():
         component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
         component.set_static_mesh(mesh)
     place_lights(actors, meshes[0] if meshes else None)
-    kept = [master, dark, glow] + list(instances.values()) + meshes
-    for instance in [dark, glow] + list(instances.values()):
+    kept = [master, dark, glow, lamp] + list(instances.values()) + meshes
+    for instance in [dark, glow, lamp] + list(instances.values()):
         for parameter in ("BaseColor", "NormalMap", "ORMMap", "EmissiveMap"):
             kept.append(MEL.get_material_instance_texture_parameter_value(instance, parameter))
     for parameter in ("BaseColor", "NormalMap", "ORMMap"):

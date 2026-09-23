@@ -19,7 +19,7 @@ import unreal
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SCRIPT = os.path.join(REPO, "Tools", "Assets", "import_interior.py")
 WANTED = ("MATERIAL", "MAP", "GUNMETAL", "LIFT", "METALLIC_SCALE", "ROUGHNESS_SCALE", "ROUGHNESS_FLOOR",
-          "INTERIOR_TAG", "WORK_LIGHT_TAG", "ACCENT_LIGHT_TAG", "WORK_LIGHT_LUMENS", "WORK_LIGHT_KELVIN")
+          "INTERIOR_TAG", "WORK_LIGHT_TAG", "ACCENT_LIGHT_TAG", "WORK_LIGHT_LUMENS", "WORK_LIGHT_KELVIN", "WORK_LIGHT_CONE", "ACCENT_LIGHT_LUMENS", "PACKAGE")
 
 failures = []
 
@@ -83,11 +83,27 @@ for actor in interior:
 work = tagged(C["WORK_LIGHT_TAG"])
 check("6 work lights tagged", len(work) == 6, "%d" % len(work))
 for light in work:
-    component = light.point_light_component
+    component = light.get_component_by_class(unreal.SpotLightComponent)
+    if not component:
+        check("%s is a spot light" % light.get_actor_label(), False)
+        continue
+    down = light.get_actor_forward_vector()
+    check("%s points down, cone %s" % (light.get_actor_label(), C["WORK_LIGHT_CONE"]),
+          down.z < -0.99 and abs(component.outer_cone_angle - C["WORK_LIGHT_CONE"][1]) < 0.01,
+          "forward %s, outer %.1f" % (down, component.outer_cone_angle))
     check("%s: %s lm, %s K" % (light.get_actor_label(), C["WORK_LIGHT_LUMENS"], C["WORK_LIGHT_KELVIN"]),
           abs(component.intensity - C["WORK_LIGHT_LUMENS"]) < 0.5 and component.use_temperature
           and abs(component.temperature - C["WORK_LIGHT_KELVIN"]) < 0.5,
           "%.0f lm, %s, %.0f K" % (component.intensity, component.use_temperature, component.temperature))
+lamp = unreal.EditorAssetLibrary.load_asset(C["PACKAGE"] + "/MI_KitLamp")
+check("ceiling fixtures wear MI_KitLamp (cold, not the kit's orange)",
+      lamp is not None and any(actor.static_mesh_component.static_mesh.get_material(i) == lamp
+                               for actor in interior
+                               for i in range(len(actor.static_mesh_component.static_mesh.static_materials))))
 check("2 accent lights tagged", len(tagged(C["ACCENT_LIGHT_TAG"])) == 2, "%d" % len(tagged(C["ACCENT_LIGHT_TAG"])))
+for light in tagged(C["ACCENT_LIGHT_TAG"]):
+    component = light.point_light_component
+    check("%s: %s lm" % (light.get_actor_label(), C["ACCENT_LIGHT_LUMENS"]),
+          abs(component.intensity - C["ACCENT_LIGHT_LUMENS"]) < 0.5, "%.0f" % component.intensity)
 
 log("SUMMARY %s (%d failures)" % ("PASS" if not failures else "FAIL", len(failures)))

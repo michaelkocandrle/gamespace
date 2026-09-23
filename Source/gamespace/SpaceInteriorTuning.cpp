@@ -10,7 +10,7 @@
  *                                           last word keeps it to materials whose name contains it
  *   space.KitColor Gunmetal .45 .52 .62 Trim   the same for a colour
  *   space.KitLight Work Temperature 7000    a property of the interior lights (Work, Accent or All);
- *   space.KitLight All UseTemperature 1     Intensity (lm), LightColor, AttenuationRadius...
+ *   space.KitLight All UseTemperature 1     Intensity (lm), LightColor, AttenuationRadius, OuterConeAngle...
  *   space.KitReset                          everything above, and the sun and sky light, back to what
  *                                           the level has
  *
@@ -23,6 +23,7 @@
 #include "Components/DirectionalLightComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SkyLightComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/DirectionalLight.h"
 #include "Engine/SkyLight.h"
@@ -47,6 +48,8 @@ namespace
 		float Temperature = 6500.f;
 		bool bUseTemperature = false;
 		float AttenuationRadius = 0.f;
+		float InnerCone = 0.f;
+		float OuterCone = 0.f;
 	};
 	TMap<TWeakObjectPtr<ULightComponentBase>, FLightDefaults> SavedLights;
 
@@ -69,6 +72,11 @@ namespace
 		{
 			Defaults.AttenuationRadius = Point->AttenuationRadius;
 		}
+		if (const USpotLightComponent* Spot = Cast<USpotLightComponent>(Light))
+		{
+			Defaults.InnerCone = Spot->InnerConeAngle;
+			Defaults.OuterCone = Spot->OuterConeAngle;
+		}
 		SavedLights.Add(Light, Defaults);
 	}
 
@@ -86,6 +94,11 @@ namespace
 		if (UPointLightComponent* Point = Cast<UPointLightComponent>(Light))
 		{
 			Point->AttenuationRadius = Defaults.AttenuationRadius;
+		}
+		if (USpotLightComponent* Spot = Cast<USpotLightComponent>(Light))
+		{
+			Spot->InnerConeAngle = Defaults.InnerCone;
+			Spot->OuterConeAngle = Defaults.OuterCone;
 		}
 		Light->MarkRenderStateDirty();
 	}
@@ -195,30 +208,34 @@ namespace
 				UE_LOG(LogTemp, Display, TEXT("space.KitLight Work|Accent|All <Property> <Value...>"));
 				return;
 			}
-			FProperty* Property = nullptr;
-			for (TFieldIterator<FProperty> It(UPointLightComponent::StaticClass()); It; ++It)
-			{
-				if (It->GetName().Equals(Args[1], ESearchCase::IgnoreCase)
-					|| It->GetName().Equals(TEXT("b") + Args[1], ESearchCase::IgnoreCase))
-				{
-					Property = *It;
-					break;
-				}
-			}
-			if (!Property)
-			{
-				UE_LOG(LogTemp, Display, TEXT("space.KitLight %s: no such property"), *Args[1]);
-				return;
-			}
-			// Colours by name, R G B: FColor declares its bytes B, G, R (Docs/WORKFLOW.md 9.5 e).
-			FString Text = FString::Join(TArrayView<const FString>(Args.GetData() + 2, Args.Num() - 2), TEXT(" "));
-			if (CastField<FStructProperty>(Property) && Args.Num() >= 5)
-			{
-				Text = FString::Printf(TEXT("(R=%s,G=%s,B=%s,A=255)"), *Args[2], *Args[3], *Args[4]);
-			}
+			// Looked up on each light's own class: the work lights are spots (OuterConeAngle), the
+			// accent lights plain point lights.
+			FString Name;
+			FString Text;
 			int32 Count = 0;
 			for (UPointLightComponent* Light : InteriorLights(World, Args[0]))
 			{
+				FProperty* Property = nullptr;
+				for (TFieldIterator<FProperty> It(Light->GetClass()); It; ++It)
+				{
+					if (It->GetName().Equals(Args[1], ESearchCase::IgnoreCase)
+						|| It->GetName().Equals(TEXT("b") + Args[1], ESearchCase::IgnoreCase))
+					{
+						Property = *It;
+						break;
+					}
+				}
+				if (!Property)
+				{
+					continue;
+				}
+				Name = Property->GetName();
+				// Colours by name, R G B: FColor declares its bytes B, G, R (Docs/WORKFLOW.md 9.5 e).
+				Text = FString::Join(TArrayView<const FString>(Args.GetData() + 2, Args.Num() - 2), TEXT(" "));
+				if (CastField<FStructProperty>(Property) && Args.Num() >= 5)
+				{
+					Text = FString::Printf(TEXT("(R=%s,G=%s,B=%s,A=255)"), *Args[2], *Args[3], *Args[4]);
+				}
 				Remember(Light);
 				if (Property->ImportText_Direct(*Text, Property->ContainerPtrToValuePtr<void>(Light), Light, PPF_None))
 				{
@@ -226,7 +243,12 @@ namespace
 					++Count;
 				}
 			}
-			UE_LOG(LogTemp, Display, TEXT("space.KitLight %s %s = %s on %d lights"), *Args[0], *Property->GetName(), *Text, Count);
+			if (Name.IsEmpty())
+			{
+				UE_LOG(LogTemp, Display, TEXT("space.KitLight %s: no such property"), *Args[1]);
+				return;
+			}
+			UE_LOG(LogTemp, Display, TEXT("space.KitLight %s %s = %s on %d lights"), *Args[0], *Name, *Text, Count);
 		}));
 
 	FAutoConsoleCommandWithWorldAndArgs KitResetCommand(

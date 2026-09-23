@@ -315,6 +315,7 @@ Presety (`Tools/Shots/*.json`):
 | `ship_views`, `ship` | loď zvenku |
 | `steadfast_interior` | nákladový prostor Steadfastu, volná kamera, pevná expozice |
 | `interior_tune` | varianty materiálu a světel interiéru (`space.Kit*`), každá začíná `space.KitReset`; celek a detail stěny |
+| `ceiling_tune` | světla nákladového prostoru se stropem: jas a kužel bodovek, oranžové akcenty; celek a pohled na strop |
 
 Pole jednoho snímku:
 - základ: `camera`, `altitude_m`, `facing`, `speed_ms` (nebo `drift` [vpřed, vpravo, nahoru] v m/s,
@@ -609,7 +610,15 @@ snímku.
   Modřejší gunmetal pod teplými světly (255, 238, 214) posunul B/R stěny jen 0,95 → 1,05, teplota
   světel 7000 K sama 0,95 → 1,06, obojí dohromady 1,26. Když má být povrch „studený“, lad' nejdřív
   světlo. A nižší metallic povrch zesvětlí, nezbarví – kov s bílým base colour je prostě stříbrný.
-- h) **Statické světlo za běhu nejde měnit setterem.** `SetIntensity`/`SetLightColor` světlo s
+- h) **Díl z kitu lícem špatným směrem je z druhé strany neviditelný.** Unreal kreslí jednostranně
+  (i když glTF kitu hlásí `doubleSided`), takže podlahová deska použitá jako strop nebo stěnový
+  panel otočený ven zevnitř „neexistuje“ a prostor je otevřený do vesmíru (23. 9. 2026, nákladový
+  prostor). Blender to v běžném náhledu neukáže. Kontrola: paprsky ze středu místnosti ven a
+  u zásahu `normal.dot(směr) > 0` = rub (`build_cargo_bay.py`, bod 60 v HANDOFF). Oprava: díl lícem
+  dovnitř, nebo obložení za stěnou.
+- i) **Kamera snímků za stěnou vidí dovnitř** – ze stejného důvodu (rub stěny je průhledný). Snímek
+  pak vypadá v pořádku, ale ukazuje místnost „bez čtvrté stěny“. Kamery interiéru patří dovnitř.
+- j) **Statické světlo za běhu nejde měnit setterem.** `SetIntensity`/`SetLightColor` světlo s
   mobilitou Static ve hře odmítnou (i s `r.AllowStaticLighting=False`). Ladicí příkazy proto píšou
   přímo do vlastností a volají `MarkRenderStateDirty()` (`SpaceInteriorTuning.cpp`, `SpacePostTuning.cpp`).
 
@@ -725,7 +734,7 @@ Všechno jde přes reflexi, takže žádný seznam vlastností se neudržuje ru�
 | `space.LightList sun\|sky <část jména>` | co ty dva příkazy berou |
 | `space.ShipMat` / `space.ShipMatColor` | materiály lodi (bod 34 v HANDOFF) |
 | `space.Kit <Param> <hodnota> [část jména]` / `space.KitColor` | materiály interiéru (`Lift`, `MetallicScale`, `RoughnessFloor`, `Gunmetal`…); filtr `MI_T_` = jen trim sheety (`Source/gamespace/SpaceInteriorTuning.cpp`) |
-| `space.KitLight Work\|Accent\|All <Vlastnost> <hodnota>` | světla interiéru (`Intensity` v lm, `UseTemperature True`, `Temperature`, `LightColor R G B`) |
+| `space.KitLight Work\|Accent\|All <Vlastnost> <hodnota>` | světla interiéru (`Intensity` v lm, `UseTemperature True`, `Temperature`, `LightColor R G B`, u bodovek `OuterConeAngle`) |
 | `space.KitReset` | interiér, slunce a sky light zpátky na hodnoty z úrovně – první příkaz každé varianty |
 
 Nic z toho se neukládá. Po restartu hry je zpátky to, co je v úrovni.
