@@ -74,12 +74,17 @@ WORK_LIGHT_CONE = (25.0, 80.0)      # inner, outer half angle in degrees
 # room to B/R 0.97-1.11; 100 lm keeps every view at 1.10-1.26 and the orange spots still read
 # (Tools/Shots/accent_tune.json; 50 lm all but lost them).
 ACCENT_LIGHT_LUMENS = 100.0
+# Performance (Tools/Shots/perf_interior.json, HANDOFF point 63): shadows of the 22 local lights were
+# most of the frame - 15.3 ms in the bay, 9.9 with none. The small orange and blue fills cast none
+# (no visible loss), and the work lights reach 4.5 m instead of 9, so each no longer renders the
+# shadows of the rooms next door: 11.5 ms, with the crates' and columns' shadows kept.
+WORK_LIGHT_RADIUS = 450.0
 # The fixtures' glowing face: cold white, not the kit's orange.
 LAMP_COLOUR = (0.78, 0.88, 1.0)
 LAMP_STRENGTH = 20.0
 # Cockpit displays: blue, and a blue light off them (the holo-blue screens of the mood references).
 SCREEN_COLOUR = (0.15, 0.55, 1.0)
-SCREEN_STRENGTH = 6.0
+SCREEN_STRENGTH = 1.5          # 6 burnt the displays out to white at exposure 2 (HANDOFF point 63)
 SCREEN_LIGHT = unreal.Color(r=90, g=170, b=255, a=255)
 GLASS_MATERIAL = PACKAGE + "/M_KitGlass"
 
@@ -310,7 +315,7 @@ def place_lights(actors):
             component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
             component.set_editor_property("intensity_units", unreal.LightUnits.LUMENS)
             component.set_editor_property("intensity", WORK_LIGHT_LUMENS)
-            component.set_editor_property("attenuation_radius", 900.0)
+            component.set_editor_property("attenuation_radius", WORK_LIGHT_RADIUS)
             component.set_editor_property("inner_cone_angle", WORK_LIGHT_CONE[0])
             component.set_editor_property("outer_cone_angle", WORK_LIGHT_CONE[1])
             component.set_editor_property("light_color", unreal.Color(r=255, g=255, b=255, a=255))
@@ -326,6 +331,7 @@ def place_lights(actors):
             component.set_editor_property("intensity_units", unreal.LightUnits.LUMENS)
             component.set_editor_property("intensity", ACCENT_LIGHT_LUMENS)
             component.set_editor_property("attenuation_radius", 600.0)
+            component.set_editor_property("cast_shadows", False)
             component.set_editor_property("light_color", unreal.Color(r=255, g=140, b=40, a=255))
         for point in layout.get("screen", []):
             light = actors.spawn_actor_from_class(unreal.PointLight, to_unreal(point), unreal.Rotator(0, 0, 0))
@@ -337,6 +343,7 @@ def place_lights(actors):
             component.set_editor_property("intensity_units", unreal.LightUnits.LUMENS)
             component.set_editor_property("intensity", ACCENT_LIGHT_LUMENS)
             component.set_editor_property("attenuation_radius", 350.0)
+            component.set_editor_property("cast_shadows", False)
             component.set_editor_property("light_color", SCREEN_LIGHT)
     log("rozsvíceno %d světel" % lights)
 
@@ -436,6 +443,7 @@ def main():
     glow = make_plain(master, "MI_KitGlow", (0.02, 0.02, 0.02), maps, emissive=ORANGE, strength=14.0, glow=True)
     lamp = make_plain(master, "MI_KitLamp", (0.02, 0.02, 0.02), maps, emissive=LAMP_COLOUR, strength=LAMP_STRENGTH, glow=True)
     screen = make_plain(master, "MI_KitScreen", (0.01, 0.015, 0.03), maps, emissive=SCREEN_COLOUR, strength=SCREEN_STRENGTH, glow=True)
+    white = make_plain(master, "MI_KitWhite", (0.75, 0.77, 0.8), maps)      # seat stripes, stick tops, buttons
     glass = build_glass()
     for mesh in meshes:
         for index, slot in enumerate(mesh.static_materials):
@@ -452,6 +460,8 @@ def main():
                 pick = lamp
             elif "glass" in name:
                 pick = glass
+            elif "white" in name:
+                pick = white
             elif name.startswith("m_screen"):
                 pick = screen
             elif "light" in name or "screen" in name:
@@ -488,8 +498,8 @@ def main():
         component.set_static_mesh(mesh)
     place_lights(actors)
     place_interior_actors(actors, leaf_mesh)
-    kept = [master, dark, glow, lamp, screen, glass] + list(instances.values()) + meshes
-    for instance in [dark, glow, lamp, screen] + list(instances.values()):
+    kept = [master, dark, glow, lamp, screen, white, glass] + list(instances.values()) + meshes
+    for instance in [dark, glow, lamp, screen, white] + list(instances.values()):
         for parameter in ("BaseColor", "NormalMap", "ORMMap", "EmissiveMap"):
             kept.append(MEL.get_material_instance_texture_parameter_value(instance, parameter))
     for parameter in ("BaseColor", "NormalMap", "ORMMap"):

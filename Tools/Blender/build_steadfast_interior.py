@@ -33,7 +33,7 @@ panely míří ven, proto je za nimi obložení lícem dovnitř (HANDOFF bod 60,
 Materiály dílů se přemapují na materiály shellu stejného jména (MI_Trim_01 -> MI_Trim_01), takže
 nepřibývá žádná textura. Vlastní materiály podle jména rozpozná import: `M_Lamp` (svítidla, studená
 bílá), `M_Screen` (displeje kokpitu, modrá), `M_Light_Button` (tlačítka, oranžová, obsahuje
-„light“), `M_Glass` (sklo).
+„light“), `M_Glass` (sklo), `M_White` (bílé plasty), `M_Black_Seat` (sedadla, obsahuje „black“).
 """
 
 import json
@@ -64,6 +64,8 @@ DOOR_HEIGHT = 2.25             # top of the frame; a header wall closes the rest
 FRAME_DEPTH = 0.24
 ARCH = 0.5                     # kit architecture is built for a 4 m grid; a ship wants half
 LINER_OFFSET = 0.05            # the cargo bay's liner, just behind its walls
+HULL_GAP = 0.25                # the dark hull box stands this far outside the outermost walls
+HULL_TOP = 2.7
 DOOR_HALF = 1.0                # every doorway is 2 m wide, centred on y = 0
 
 BAY_X = (0.0, 8.0)
@@ -82,18 +84,27 @@ ENGINE_Y = (-3.0, 3.0)
 ENGINE_LAMPS = [(x, y) for y in (-1.5, 1.5) for x in (-5.5, -2.5)]
 ENGINE_ACCENTS = [(-4.0, -1.4, 0.3), (-4.0, 1.4, 0.3)]    # at the foot of the core
 
-COCKPIT_X = (17.0, 22.0)
+COCKPIT_X = (17.0, 22.4)
 COCKPIT_Y = (-2.5, 2.5)
-COCKPIT_LAMPS = [(18.4, -1.3), (18.4, 1.3)]
-WINDOW_Z = (0.95, 2.05)        # the canopy opening in the front wall
-MULLIONS_Y = (-0.9, 0.9)
-DASH_Y = (-2.1, 2.1)
+# The canopy, after the author's reference (Docs/UI, Constellation cockpit 20. 9. 2026): glass over
+# the pilots' heads and down the sides, carried by heavy dark beams. Three ribs, each a polyline
+# (y, z) from the left sill over the roof to the right sill; beams run along every rib and from rib
+# to rib, glass fills between. The back of the room (x 17..CANOPY_START) is an ordinary deck.
+CANOPY_START = 18.6
+CANOPY_RIBS = [
+    (18.6, [(-2.5, 0.95), (-2.5, 2.4), (-1.0, 2.8), (1.0, 2.8), (2.5, 2.4), (2.5, 0.95)]),
+    (20.6, [(-2.3, 0.9), (-2.2, 2.3), (-0.9, 2.65), (0.9, 2.65), (2.2, 2.3), (2.3, 0.9)]),
+    (22.4, [(-1.35, 0.95), (-1.25, 1.65), (-0.6, 1.95), (0.6, 1.95), (1.25, 1.65), (1.35, 0.95)]),
+]
+BEAM = (0.16, 0.12)            # width, depth of a canopy beam
+COCKPIT_LAMPS = [(17.8, 0.0)]
 SEATS_Y = (-0.95, 0.95)
-SEAT_X = 20.15
-# Blue light off the displays, and where the player starts: in the cargo bay, facing forward.
-COCKPIT_SCREENS = [(21.0, -0.95, 1.05), (21.0, 0.95, 1.05)]
+SEAT_X = 19.9
+DASH_X = (21.0, 22.2)
+# Blue light off the MFDs in front of each pilot, and where the player starts: in the cargo bay.
+COCKPIT_SCREENS = [(20.9, -0.95, 1.2), (20.9, 0.95, 1.2)]
 SPAWN = (1.5, 0.0, 0.05)
-GRAVITY_BOX = ((-7.3, -3.3, -0.4), (22.4, 3.3, 2.8))
+GRAVITY_BOX = ((-7.3, -3.3, -0.4), (22.8, 3.3, 3.0))
 DOORS = [{"at": (COCKPIT_X[0], 0.0, 0.0), "dir": (1.0, 0.0, 0.0)}]
 
 PARTS = {
@@ -181,8 +192,15 @@ class Room:
         self.objects.append(obj)
         return obj
 
-    def add(self, name, bm, mat):
-        """A procedural piece (bmesh in world metres) with one material and box-projected UVs."""
+    def add(self, name, bm, mat, face_towards=None):
+        """A procedural piece (bmesh in world metres) with one material and box-projected UVs.
+        `face_towards`: turn every face to look at this point - for single-sided panels that must
+        face into the room (a panel facing out is not there from inside, WORKFLOW 9.3 h)."""
+        if face_towards is not None:
+            bm.normal_update()           # a face made with faces.new() has a zero normal until now
+            target = mathutils.Vector(face_towards)
+            flip = [f for f in bm.faces if f.normal.dot(target - f.calc_center_median()) < 0.0]
+            bmesh.ops.reverse_faces(bm, faces=flip)
         uv = bm.loops.layers.uv.verify()
         for face in bm.faces:
             n = face.normal
@@ -313,6 +331,72 @@ def lamps(room, template, spots):
         room.lamps.append((x, y, HEIGHT))
 
 
+def duplicate_islands(bm):
+    """Loose parts that lie over another part face for face: the kit-bash put six crates twice into
+    the same space. Their sides fight for the same pixels (z-fighting), which is the flicker the
+    author saw on the crates (23. 9. 2026). Returns the faces of every second copy."""
+    island = {}
+    for start in bm.faces:
+        if start.index in island:
+            continue
+        mark = len(set(island.values()))
+        island[start.index] = mark
+        stack = [start]
+        while stack:
+            face = stack.pop()
+            for edge in face.edges:
+                for other in edge.link_faces:
+                    if other.index not in island:
+                        island[other.index] = mark
+                        stack.append(other)
+    planes = {}
+    for face in bm.faces:
+        if face.calc_area() < 0.01:
+            continue
+        n = face.normal
+        key = (round(n.x, 2), round(n.y, 2), round(n.z, 2), round(n.dot(face.calc_center_median()), 3))
+        planes.setdefault(key, []).append(face)
+    overlap = {}
+    for faces in planes.values():
+        for i, a in enumerate(faces):
+            box_a = [(min(v.co[k] for v in a.verts), max(v.co[k] for v in a.verts)) for k in range(3)]
+            for b in faces[i + 1:]:
+                pair = tuple(sorted((island[a.index], island[b.index])))
+                if pair[0] == pair[1]:
+                    continue
+                box_b = [(min(v.co[k] for v in b.verts), max(v.co[k] for v in b.verts)) for k in range(3)]
+                area = 1.0
+                for k in range(3):
+                    lo, hi = max(box_a[k][0], box_b[k][0]), min(box_a[k][1], box_b[k][1])
+                    if hi < lo:
+                        area = 0.0
+                        break
+                    area *= max(hi - lo, 1.0) if hi - lo < 1e-3 else hi - lo
+                overlap[pair] = overlap.get(pair, 0.0) + area
+    # Only true copies: the same footprint to 3 cm. Floor tiles overlap their neighbours a little
+    # by design, and "every part that overlaps another" took the whole floor with it.
+    bounds = {}
+    for face in bm.faces:
+        lo, hi = bounds.setdefault(island[face.index], ([1e9] * 3, [-1e9] * 3))
+        for v in face.verts:
+            for k in range(3):
+                lo[k] = min(lo[k], v.co[k])
+                hi[k] = max(hi[k], v.co[k])
+
+    def same(a, b):
+        return all(abs(bounds[a][e][k] - bounds[b][e][k]) < 0.03 for e in (0, 1) for k in range(3))
+
+    doomed_islands = {pair[1] for pair, area in overlap.items() if area > 0.3 and same(*pair)}
+    # And the crates the kit-bash sank half into the floor (-0.52..0.52 m) where another one of the
+    # same size already stands on it (0.04..1.08 m): in the 0.04..0.52 m band their sides were the
+    # same plane, which is the flicker on the crates' sides and at their feet.
+    for pair, area in overlap.items():
+        for mine, other in (pair, pair[::-1]):
+            if area > 0.3 and bounds[mine][0][2] < -0.3 and bounds[other][0][2] > -0.05:
+                doomed_islands.add(mine)
+    return [f for f in bm.faces if island[f.index] in doomed_islands], len(doomed_islands)
+
+
 def open_shell(shell):
     """Cut the doorways into the shell's end walls, take out its door frame - it stood across the
     far wall edge-on (turned 90 degrees in the kit-bash) and led nowhere - and its upward-facing
@@ -341,15 +425,45 @@ def open_shell(shell):
         # and all that stuck out was its top plate, which threw a black wedge of shadow down the
         # wall. build_bay() hangs a proper one in its place.
         sunk_terminal = -0.35 < c.x < 1.0 and 1.1 < c.y < 1.95 and 1.05 < c.z < 1.65
-        if in_doorway or stray_frame or old_ceiling or sunk_terminal:
+        # The walls closing the shell's floor overhang lie in the very plane of the engine room's and
+        # the corridor's end walls, facing the other way: two faces in one plane make shadows
+        # flicker. The rooms' own walls are the ones to keep.
+        overhang_end = abs(n.z) < 0.5 and (abs(c.x - ENGINE_X[1]) < 0.06 or abs(c.x - CORRIDOR_X[0]) < 0.06)
+        if in_doorway or stray_frame or old_ceiling or sunk_terminal or overhang_end:
             doomed.append(face)
     bmesh.ops.delete(bm, geom=doomed, context="FACES")
+    bm.faces.ensure_lookup_table()
+    bm.faces.index_update()
+    twins, count = duplicate_islands(bm)
+    bmesh.ops.delete(bm, geom=twins, context="FACES")
     bm.to_mesh(mesh)
     bm.free()
-    log("shell: vyříznuto %d ploch (průchody, starý dveřní rám, deska ve 2 m, zapuštěný terminál)" % len(doomed))
+    log("shell: vyříznuto %d ploch (průchody, starý dveřní rám, deska ve 2 m, zapuštěný terminál), "
+        "%d zdvojených dílů (%d ploch)" % (len(doomed), count, len(twins)))
 
 
 # --- rooms ----------------------------------------------------------------------------------------
+
+def hull(room, mat):
+    """A dark closed box round the engine room, the bay and the corridor, facing in. Where two wall
+    panels only meet edge to edge, the raster leaves pixel cracks; through them the planet
+    sparkled (author, 23. 9. 2026, find_interior_holes.py). Behind the walls it shows dark instead,
+    and it holds the player in too. The cockpit has its own canopy and stays outside it."""
+    x0, x1 = ENGINE_X[0] - HULL_GAP, CORRIDOR_X[1] - 0.02
+    y0, y1 = min(ENGINE_Y[0], BAY_Y[0]) - HULL_GAP, max(ENGINE_Y[1], BAY_Y[1]) + HULL_GAP
+    z0, z1 = -HULL_GAP, HULL_TOP
+    bm = box((x0, y0, z0), (x1, y1, z1))
+    bmesh.ops.reverse_faces(bm, faces=bm.faces)       # facing in
+    # Its fore end stands right behind the cockpit door: leave the doorway open there, or the hull
+    # shuts the door from behind (the walk stopped 44 cm short of it, 23. 9. 2026).
+    bm.normal_update()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.normal.x < -0.9], context="FACES")
+    room.add("Hull", bm, mat)
+    for lo, hi in (((x1, y0, z0), (x1, -DOOR_HALF, z1)), ((x1, DOOR_HALF, z0), (x1, y1, z1)),
+                   ((x1, -DOOR_HALF, DOOR_HEIGHT), (x1, DOOR_HALF, z1))):
+        room.add("HullEnd", polygon([(lo[0], lo[1], lo[2]), (lo[0], hi[1], lo[2]), (lo[0], hi[1], hi[2]),
+                                     (lo[0], lo[1], hi[2])]), mat, face_towards=(x0, 0.0, 1.0))
+
 
 def build_bay(shell, templates, room_mats):
     room = Room("CargoBay")
@@ -382,6 +496,7 @@ def build_bay(shell, templates, room_mats):
     room.place(templates["terminal"], (BAY_X[0] + 0.25, 1.6, 1.35), yaw=0.0)
     doorway(room, templates, (BAY_X[1], 0.0), (1.0, 0.0), room_mats)
     doorway(room, templates, (BAY_X[0], 0.0), (-1.0, 0.0), room_mats)
+    hull(room, room_mats["dark"])
     room.accents = list(BAY_ACCENTS)
     return room
 
@@ -424,89 +539,180 @@ def build_engine_room(templates):
     return room
 
 
-def seat(room, y, frame, cushion):
-    """A pilot's seat facing +X: pedestal, seat pan, reclined back, headrest, armrests."""
+def beam(p, q, width, depth):
+    """A square-section beam from p to q (world metres), its depth pointing away from the canopy's
+    centre line so it reads from inside."""
+    p, q = mathutils.Vector(p), mathutils.Vector(q)
+    axis = (q - p)
+    length = axis.length
+    axis.normalize()
+    outward = mathutils.Vector((0.0, (p.y + q.y) / 2.0, (p.z + q.z) / 2.0 - 1.2))
+    outward = (outward - axis * outward.dot(axis))
+    if outward.length < 1e-4:
+        outward = mathutils.Vector((0.0, 0.0, 1.0)) - axis * axis.z
+    outward.normalize()
+    side = axis.cross(outward).normalized()
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1.0)
+    frame = mathutils.Matrix((axis, side, outward)).transposed()
+    for v in bm.verts:
+        v.co = frame @ mathutils.Vector((v.co.x * length, v.co.y * width, v.co.z * depth)) + (p + q) / 2.0
+    return bm
+
+
+def polygon(points):
+    bm = bmesh.new()
+    bm.faces.new([bm.verts.new(p) for p in points])
+    return bm
+
+
+def seat(room, y, black, white, dark):
+    """A pilot's seat facing +X after the reference: tall black racing back with side bolsters and a
+    white stripe, a pedestal, armrests with a stick (right) and a throttle (left)."""
     x = SEAT_X
-    room.add("SeatBase", box((x - 0.14, y - 0.14, 0.0), (x + 0.14, y + 0.14, 0.38), bevel=0.02), frame)
-    room.add("SeatPan", box((x - 0.28, y - 0.27, 0.38), (x + 0.26, y + 0.27, 0.5), bevel=0.03), cushion)
-    back = box((x - 0.36, y - 0.27, 0.48), (x - 0.24, y + 0.27, 1.18), bevel=0.03)
-    bmesh.ops.rotate(back, verts=back.verts, cent=(x - 0.3, y, 0.5),
-                     matrix=mathutils.Matrix.Rotation(math.radians(-12.0), 3, "Y"))
-    room.add("SeatBack", back, cushion)
-    head = box((x - 0.52, y - 0.14, 1.2), (x - 0.4, y + 0.14, 1.42), bevel=0.03)
-    room.add("SeatHead", head, cushion)
-    for side in (-1.0, 1.0):
-        arm = box((x - 0.22, y + side * 0.33 - 0.04, 0.62), (x + 0.2, y + side * 0.33 + 0.04, 0.68), bevel=0.01)
-        room.add("SeatArm", arm, frame)
-
-
-def dashboard(room, body, screen, button, dark):
-    """The console along the canopy: a slanted desk with three displays and rows of buttons."""
-    front = COCKPIT_X[1] - 0.05
-    section = [(front, 0.0), (front - 0.55, 0.0), (front - 0.55, 0.62), (front - 0.95, 0.74),
-               (front - 0.92, 0.82), (front, 1.0)]
-    room.add("Dash", prism(section, DASH_Y[0], DASH_Y[1]), body)
-    # The slanted face runs from (front-0.92, 0.82) to (front, 1.0); screens sit on it.
-    a = mathutils.Vector((front - 0.86, 0.0, 0.835))
-    b = mathutils.Vector((front - 0.12, 0.0, 0.985))
-    normal = mathutils.Vector((-(b - a).z, 0.0, (b - a).x)).normalized() * -1.0
-    if normal.z < 0.0:
-        normal = -normal
-    lift = normal * 0.006
-    for y0, y1 in ((-1.75, -0.2), (-0.55, 0.55), (0.2, 1.75)):
-        if (y0, y1) == (-0.55, 0.55):
-            p0 = a + (b - a) * 0.08
-            p1 = a + (b - a) * 0.62
+    room.add("SeatBase", box((x - 0.18, y - 0.18, 0.0), (x + 0.18, y + 0.18, 0.36), bevel=0.03), dark)
+    room.add("SeatPan", box((x - 0.30, y - 0.27, 0.36), (x + 0.28, y + 0.27, 0.50), bevel=0.04), black)
+    tilt = mathutils.Matrix.Rotation(math.radians(-14.0), 3, "Y")
+    pivot = mathutils.Vector((x - 0.3, y, 0.5))
+    for lo, hi, mat in (((x - 0.40, y - 0.25, 0.48), (x - 0.26, y + 0.25, 1.55), black),       # back
+                        ((x - 0.38, y - 0.33, 0.55), (x - 0.18, y - 0.25, 1.35), black),       # bolsters
+                        ((x - 0.38, y + 0.25, 0.55), (x - 0.18, y + 0.33, 1.35), black),
+                        ((x - 0.27, y - 0.30, 0.60), (x - 0.25, y - 0.27, 1.30), white),       # stripes
+                        ((x - 0.27, y + 0.27, 0.60), (x - 0.25, y + 0.30, 1.30), white),
+                        ((x - 0.27, y - 0.07, 1.30), (x - 0.25, y + 0.07, 1.50), white)):      # head badge
+        piece = box(lo, hi, bevel=0.025)
+        bmesh.ops.rotate(piece, verts=piece.verts, cent=pivot, matrix=tilt)
+        room.add("SeatBack", piece, mat)
+    for side, control in ((-1.0, "throttle"), (1.0, "stick")):
+        ay = y + side * 0.36
+        room.add("SeatArm", box((x - 0.25, ay - 0.06, 0.62), (x + 0.30, ay + 0.06, 0.70), bevel=0.015), dark)
+        room.add("SeatArmPost", box((x - 0.05, ay - 0.04, 0.36), (x + 0.05, ay + 0.04, 0.62)), dark)
+        if control == "stick":
+            room.add("Stick", box((x + 0.18, ay - 0.025, 0.70), (x + 0.23, ay + 0.025, 0.86), bevel=0.012), black)
+            room.add("StickTop", box((x + 0.16, ay - 0.035, 0.86), (x + 0.25, ay + 0.035, 0.90), bevel=0.01), white)
         else:
-            p0 = a + (b - a) * 0.25
-            p1 = a + (b - a) * 0.95
-        # Wound so that the face points up towards the pilot (the other way round it faced the floor).
-        corners = [(p0.x, y0, p0.z), (p1.x, y0, p1.z), (p1.x, y1, p1.z), (p0.x, y1, p0.z)]
-        room.add("Screen", quad([mathutils.Vector(c) + lift for c in corners]), screen)
-    # Buttons along the edge nearest the pilot, a dark lip under them.
-    room.add("DashLip", box((front - 0.97, DASH_Y[0], 0.70), (front - 0.9, DASH_Y[1], 0.76)), dark)
-    for i in range(24):
-        y = DASH_Y[0] + 0.2 + i * (DASH_Y[1] - DASH_Y[0] - 0.4) / 23.0
-        if abs(y) < 0.6:
-            continue
-        p = a + (b - a) * 0.12
-        room.add("Button", box((p.x - 0.02, y - 0.03, p.z - 0.01), (p.x + 0.02, y + 0.03, p.z + 0.012)), button)
+            room.add("Throttle", box((x + 0.10, ay - 0.03, 0.70), (x + 0.24, ay + 0.03, 0.78), bevel=0.012), black)
+
+
+def mfd(room, centre, facing, size, screen, dark):
+    """A display on a thin arm: a dark bezel, the glowing screen just in front, a stalk down to the
+    console. `facing` is the unit vector the screen looks along."""
+    c = mathutils.Vector(centre)
+    f = mathutils.Vector(facing).normalized()
+    side = mathutils.Vector((0.0, 0.0, 1.0)).cross(f).normalized()
+    up = f.cross(side).normalized()
+    w, h = size
+    corners = [c + side * sx * w / 2 + up * sz * h / 2 for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+    bezel = bmesh.new()
+    back = [bezel.verts.new(p - f * 0.03) for p in corners]
+    front = [bezel.verts.new(p + side * 0 ) for p in corners]
+    bezel.faces.new(front[::-1])
+    bezel.faces.new(back)
+    for i in range(4):
+        j = (i + 1) % 4
+        bezel.faces.new((front[i], front[j], back[j], back[i]))
+    bmesh.ops.recalc_face_normals(bezel, faces=bezel.faces)
+    room.add("MfdBezel", bezel, dark)
+    inset = [c + side * sx * (w / 2 - 0.02) + up * sz * (h / 2 - 0.02) + f * 0.004
+             for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+    room.add("Mfd", polygon(inset), screen)
+    base = c - up * h / 2 - f * 0.015
+    room.add("MfdStalk", box((base.x - 0.02, base.y - 0.02, 0.85), (base.x + 0.02, base.y + 0.02, base.z)), dark)
+
+
+def console(room, lo, hi, top_tilt, body, button, white, dark, rows=3):
+    """A console box whose top slopes towards -X by top_tilt metres, with rows of buttons on it."""
+    x0, y0, z0 = lo
+    x1, y1, z1 = hi
+    section = [(x1, z0), (x0, z0), (x0, z1 - top_tilt), (x1, z1)]
+    room.add("Console", prism(section, y0, y1), body)
+    for r in range(rows):
+        t = (r + 0.7) / (rows + 0.4)
+        x = x0 + (x1 - x0) * t
+        z = z1 - top_tilt + top_tilt * t + 0.012
+        count = max(2, int((y1 - y0) / 0.09))
+        for i in range(count):
+            y = y0 + 0.06 + i * (y1 - y0 - 0.12) / max(1, count - 1)
+            mat = button if (i + r) % 3 else white
+            room.add("Button", box((x - 0.025, y - 0.025, z - 0.01), (x + 0.025, y + 0.025, z + 0.012)), mat)
 
 
 def build_cockpit(templates, mats):
+    """The cockpit: a deck at the back with the door, the canopy over the front, a low console at
+    the nose, MFDs on arms, two seats, side consoles and an overhead panel. Returns the room and
+    the canopy's glass as a room of its own (translucent: not Nanite)."""
     room = Room("Cockpit")
-    x0, x1 = COCKPIT_X
+    glass = Room("CockpitGlass")
+    x0 = COCKPIT_X[0]
     y0, y1 = COCKPIT_Y
-    floor(room, templates["floor"], COCKPIT_X, COCKPIT_Y)
-    ceiling(room, templates["ceiling"], COCKPIT_X, COCKPIT_Y)
-    wall(room, templates["wall_dark"], (x0, y0), (x1, y0), (0.0, 1.0))
-    wall(room, templates["wall_dark"], (x0, y1), (x1, y1), (0.0, -1.0))
-    # Back wall either side of the door, a little behind the frame so the door leaves slide in
-    # behind it rather than through it.
+    # The deck at the back, the door wall a little behind the frame so the leaves slide in behind it.
+    floor(room, templates["floor"], (x0, CANOPY_START), COCKPIT_Y)
+    ceiling(room, templates["ceiling"], (x0, CANOPY_START + 0.1), COCKPIT_Y)   # a little under the canopy's edge
+    wall(room, templates["wall_dark"], (x0, y0), (CANOPY_START, y0), (0.0, 1.0))
+    wall(room, templates["wall_dark"], (x0, y1), (CANOPY_START, y1), (0.0, -1.0))
     for a, b in (((x0 + 0.12, y0), (x0 + 0.12, -DOOR_HALF)), ((x0 + 0.12, DOOR_HALF), (x0 + 0.12, y1))):
         wall(room, templates["wall_dark"], a, b, (1.0, 0.0))
-    # Front: a low wall, the canopy opening, a band to the ceiling; mullions split the glass.
-    wall(room, templates["wall_dark"], (x1, y0), (x1, y1), (-1.0, 0.0), z1=WINDOW_Z[0])
-    wall(room, templates["wall_dark"], (x1, y0), (x1, y1), (-1.0, 0.0), z0=WINDOW_Z[1])
-    frame = mats["dark"]
-    for y in (y0 + 0.05,) + MULLIONS_Y + (y1 - 0.05,):
-        room.add("Mullion", box((x1 - 0.08, y - 0.05, WINDOW_Z[0] - 0.02), (x1 + 0.04, y + 0.05, WINDOW_Z[1] + 0.02), bevel=0.01), frame)
-    for z in WINDOW_Z:
-        room.add("Sill", box((x1 - 0.1, y0, z - 0.04), (x1 + 0.04, y1, z + 0.04), bevel=0.01), frame)
-    dashboard(room, mats["body"], mats["screen"], mats["button"], mats["dark"])
+    ribs = [(x, [mathutils.Vector((x, y, z)) for y, z in pts]) for x, pts in CANOPY_RIBS]
+    # Under the canopy: the floor follows the ribs' footprint, a tub of dark panels up to the sills.
+    outline = [(x, pts[0].y) for x, pts in ribs] + [(x, pts[-1].y) for x, pts in reversed(ribs)]
+    inside = (20.0, 0.0, 1.2)
+    room.add("CanopyFloor", polygon([(x, y, 0.0) for x, y in outline]), mats["body"], face_towards=inside)
+    for (xa, pa), (xb, pb) in zip(ribs, ribs[1:]):
+        for index in (0, -1):
+            a, b = pa[index], pb[index]
+            room.add("Tub", polygon([(a.x, a.y, 0.0), (b.x, b.y, 0.0), (b.x, b.y, b.z), (a.x, a.y, a.z)]), mats["trim"],
+                     face_towards=inside)
+    nose = ribs[-1][1]
+    room.add("Tub", polygon([(nose[0].x, nose[0].y, 0.0), (nose[0].x, nose[0].y, nose[0].z),
+                             (nose[-1].x, nose[-1].y, nose[-1].z), (nose[-1].x, nose[-1].y, 0.0)]), mats["trim"],
+             face_towards=inside)
+    # Where the canopy meets the deck's ceiling: close the gap above 2.4 m at the first rib.
+    first = ribs[0][1]
+    room.add("CanopyHeader", polygon([(CANOPY_START, first[1].y, HEIGHT)] + [(p.x, p.y, p.z) for p in first[1:-1]]
+                                     + [(CANOPY_START, first[-2].y, HEIGHT)]), mats["trim"], face_towards=inside)
+    # The canopy: beams along and between the ribs, glass in between. The nose rib's glass closes
+    # the front.
+    width, depth = BEAM
+    for x, pts in ribs:
+        for a, b in zip(pts, pts[1:]):
+            room.add("Beam", beam(a, b, width, depth), mats["frame"])
+    for (xa, pa), (xb, pb) in zip(ribs, ribs[1:]):
+        for i in range(len(pa)):
+            room.add("Beam", beam(pa[i], pb[i], width * 0.8, depth), mats["frame"])
+        for i in range(len(pa) - 1):
+            glass.add("Glass", polygon([pa[i], pa[i + 1], pb[i + 1], pb[i]]), mats["glass"])
+    glass.add("Glass", polygon(nose), mats["glass"])
+    # The low console at the nose, following the taper, with a screen for each pilot.
+    dx0, dx1 = DASH_X
+    console(room, (dx0, -1.1, 0.0), (dx1, 1.1, 0.95), 0.2, mats["dark"], mats["button"], mats["white"], mats["dark"], rows=2)
     for y in SEATS_Y:
-        seat(room, y, mats["dark"], mats["cushion"])
+        room.add("DashScreen", polygon([(dx0 + 0.12, y - 0.28, 0.80), (dx0 + 0.12, y + 0.28, 0.80),
+                                        (dx0 + 0.45, y + 0.28, 0.88), (dx0 + 0.45, y - 0.28, 0.88)][::-1]), mats["screen"])
+    # Two MFDs per pilot on arms, out to the sides and a little low so the view ahead stays open
+    # (in the reference they sit at the edges of the view), turned towards the pilot's eyes.
+    for y in SEATS_Y:
+        for side in (-1.0, 1.0):
+            centre = mathutils.Vector((SEAT_X + 0.7, y + side * 0.62, 1.02))
+            eye = mathutils.Vector((SEAT_X - 0.1, y, 1.25))
+            mfd(room, centre, tuple(eye - centre), (0.3, 0.21), mats["screen"], mats["dark"])
+    # Side consoles by the canopy wall, an overhead panel between the seats.
+    for side in (-1.0, 1.0):
+        lo_y, hi_y = sorted((side * 1.55, side * 2.05))
+        console(room, (SEAT_X - 0.4, lo_y, 0.0), (SEAT_X + 0.7, hi_y, 0.8), 0.15, mats["body"], mats["button"],
+                mats["white"], mats["dark"], rows=3)
+    over = box((SEAT_X - 0.1, -0.55, 2.42), (SEAT_X + 0.9, 0.55, 2.6), bevel=0.02)
+    room.add("Overhead", over, mats["dark"])
+    for i in range(5):
+        for j in range(4):
+            x = SEAT_X + 0.08 + i * 0.18
+            y = -0.4 + j * 0.27
+            room.add("OverheadButton", box((x - 0.03, y - 0.04, 2.40), (x + 0.03, y + 0.04, 2.42)),
+                     mats["button"] if (i + j) % 2 else mats["white"])
+    for y in SEATS_Y:
+        seat(room, y, mats["black"], mats["white"], mats["dark"])
     lamps(room, templates["lamp"], COCKPIT_LAMPS)
     room.screens = list(COCKPIT_SCREENS)
-    return room
-
-
-def build_glass(mat):
-    room = Room("CockpitGlass")
-    x = COCKPIT_X[1] + 0.02
-    room.add("Glass", quad([(x, COCKPIT_Y[0], WINDOW_Z[0]), (x, COCKPIT_Y[1], WINDOW_Z[0]),
-                            (x, COCKPIT_Y[1], WINDOW_Z[1]), (x, COCKPIT_Y[0], WINDOW_Z[1])]), mat)
-    return room
+    return room, glass
 
 
 def build_door_leaf(templates):
@@ -572,12 +778,16 @@ def main():
         "screen": material("M_Screen", emission=(0.2, 0.6, 1.0)),
         "button": material("M_Light_Button", emission=(1.0, 0.4, 0.1)),
         "glass": material("M_Glass", colour=(0.6, 0.7, 0.8), alpha=0.15),
+        "white": material("M_White", colour=(0.8, 0.8, 0.8)),
+        "black": material("M_Black_Seat", colour=(0.02, 0.02, 0.02)),
     }
     mats = dict(own, body=shell_materials["MI_Trim_02"], dark=shell_materials["M_Black"],
-                cushion=shell_materials["MI_PaddedWall"])
+                cushion=shell_materials["MI_PaddedWall"], trim=shell_materials["MI_Trim_01"],
+                frame=shell_materials["M_Black"])      # the reference's canopy beams are near black
 
+    cockpit, canopy_glass = build_cockpit(templates, mats)
     rooms = [build_engine_room(templates), build_bay(shell, templates, mats), build_corridor(templates, mats),
-             build_cockpit(templates, mats), build_glass(own["glass"])]
+             cockpit, canopy_glass]
     leaf, leaf_width, leaf_height = build_door_leaf(templates)
     layout = {
         "_comment": "Interiér Steadfastu v metrech, souřadnice Blenderu (Unreal: Y zrcadlené). Píše "

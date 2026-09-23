@@ -22,7 +22,7 @@ SCRIPT = os.path.join(REPO, "Tools", "Assets", "import_interior.py")
 LAYOUT = os.path.join(REPO, "ArtSource", "Ships", "Steadfast", "Interior", "Interior_layout.json")
 WANTED = ("MATERIAL", "MAP", "GUNMETAL", "LIFT", "METALLIC_SCALE", "ROUGHNESS_SCALE", "ROUGHNESS_FLOOR",
           "INTERIOR_TAG", "WORK_LIGHT_TAG", "ACCENT_LIGHT_TAG", "WORK_LIGHT_LUMENS", "WORK_LIGHT_KELVIN", "WORK_LIGHT_CONE", "ACCENT_LIGHT_LUMENS", "PACKAGE", "ROOMS",
-          "GLASS", "DOOR_LEAF", "GLASS_TAG", "DOOR_TAG", "SPAWN_TAG", "GRAVITY_CMS2", "GLASS_MATERIAL", "PLACE_AT")
+          "GLASS", "DOOR_LEAF", "GLASS_TAG", "DOOR_TAG", "SPAWN_TAG", "GRAVITY_CMS2", "GLASS_MATERIAL", "PLACE_AT", "WORK_LIGHT_RADIUS")
 
 failures = []
 
@@ -117,8 +117,15 @@ check("every accent light (%d)" % wanted_accent, len(tagged(C["ACCENT_LIGHT_TAG"
       "%d" % len(tagged(C["ACCENT_LIGHT_TAG"])))
 for light in tagged(C["ACCENT_LIGHT_TAG"]):
     component = light.point_light_component
-    check("%s: %s lm" % (light.get_actor_label(), C["ACCENT_LIGHT_LUMENS"]),
-          abs(component.intensity - C["ACCENT_LIGHT_LUMENS"]) < 0.5, "%.0f" % component.intensity)
+    # Fills cast no shadows: 22 shadowed local lights were most of the frame (HANDOFF point 63).
+    check("%s: %s lm, no shadows" % (light.get_actor_label(), C["ACCENT_LIGHT_LUMENS"]),
+          abs(component.intensity - C["ACCENT_LIGHT_LUMENS"]) < 0.5 and not component.cast_shadows,
+          "%.0f lm, shadows %s" % (component.intensity, component.cast_shadows))
+for light in work:
+    component = light.get_component_by_class(unreal.SpotLightComponent)
+    if component:
+        check("%s: reach %.0f cm" % (light.get_actor_label(), C["WORK_LIGHT_RADIUS"]),
+              abs(component.attenuation_radius - C["WORK_LIGHT_RADIUS"]) < 0.5, "%.0f" % component.attenuation_radius)
 
 
 # The walk: glass that stops the player, a door that opens, gravity round all of it, a start.

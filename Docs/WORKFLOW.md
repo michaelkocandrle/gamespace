@@ -317,6 +317,8 @@ Presety (`Tools/Shots/*.json`):
 | `interior_tune` | varianty materiálu a světel interiéru (`space.Kit*`), každá začíná `space.KitReset`; celek a detail stěny |
 | `ceiling_tune` | světla nákladového prostoru se stropem: jas a kužel bodovek, oranžové akcenty; celek a pohled na strop |
 | `accent_tune` | jas oranžových akcentů v celém interiéru (prostor, strop, chodba, strojovna) |
+| `flicker_check` | blikání: každý pohled 8× za sebou stejnou kamerou; vyhodnocení = podíl pixelů, které se mezi snímky mění (`python Tools/Shots/measure_flicker.py <složka> <mapa.png>`) |
+| `perf_interior` | výkon interiéru: `stat unit` a varianty stínů / dosahu světel přes `space.KitLight` |
 | `interior_walk` | chůze interiérem v zabalené hře: `space.Interior`, `space.Walk`, kamera postavy (`"camera": "pawn"`); výsledek je i v logu hry (`WALK end at …`) |
 
 Pole jednoho snímku:
@@ -642,6 +644,20 @@ snímku.
   `mesh.set_editor_property("nanite_settings", …)`, což mesh přestaví samo. `rerun_construction_scripts`
   v Pythonu neexistuje – co má C++ herec přepočítat, vystav jako `UFUNCTION(BlueprintCallable)`
   (`ASpaceSlidingDoor::LayoutLeaves`). `get_relative_location` není; `get_editor_property("relative_location")`.
+
+- p) **Blikání bez zjevné příčiny = dvě plochy v jedné rovině.** Kitbash může mít díl dvakrát (bedna
+  na podlaze a stejná napůl zapuštěná) nebo stěnu přesně na místě cizí stěny. Na snímku to nepoznáš,
+  jen v pohybu. Najdi to měřením (`flicker_check`: stejná kamera 8×, co se mění, bliká) a v geometrii
+  (plochy se stejnou rovinou z různých kusů, které se překrývají). Mazat jen skutečné kopie (stejný
+  obrys) – „každý díl, který se s jiným překrývá“ smazal i podlahu, protože dlaždice se překrývají.
+- q) **Díry se hledají paprsky, ne očima.** `find_interior_holes.py`: z mřížky bodů ve všech směrech,
+  rub plochy se prochází (Unreal ho nekreslí), únik = díra. Body uvnitř rekvizit (sloup, pult) dávají
+  falešné úniky – vyřazuj body blíž než 30 cm ke geometrii. Škvíry v rozích, kde se panely jen
+  dotýkají hranou, zavírá tmavý plášť za stěnami.
+- r) **Stíny lokálních světel jsou drahé.** 22 stínovaných světel byla většina snímku (15 ms ze 18).
+  Doplňková světla (akcenty, displeje) bez stínů, pracovním světlům dosah jen na vlastní místnost.
+- s) **Blender bmesh: `faces.new()` má nulovou normálu**, dokud nezavoláš `bm.normal_update()`.
+  Otočení ploch „k místnosti“ podle normály bez toho nic neudělá.
 
 ### 9.4 C++ a UHT
 

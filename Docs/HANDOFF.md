@@ -1074,6 +1074,26 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       gravitace; píše Blender skript, čte import).
     - **Zbývá:** vnější trup Steadfastu (interiér zatím stojí sám v prostoru, zvenku otevřený) – samostatný
       projekt jako u Vanguardu, čeká na autorovo rozhodnutí.
+63. **Interiér po autorově projití: díry, blikání, kokpit, výkon** (23. 9. 2026, autor: „glitchující
+    krabice… díry ve stěnách… cockpit úplně mimo reference… výkon slabší“).
+    - **Díry:** `Tools/Blender/find_interior_holes.py` střílí paprsky z mřížky bodů v každé místnosti
+      a hlásí ty, které utečou ven (rub plochy se prochází, protože ho Unreal nekreslí). Našel škvíry
+      v rozích, kde se panely jen dotýkají hranou, a 5 cm mezery v rozích obložení. Oprava: tmavý
+      uzavřený plášť lícem dovnitř kolem strojovny, prostoru a chodby (s otvorem pro dveře kokpitu)
+      – škvíra ukáže tmu, ne planetu. Kokpit má vlastní uzavřenou kabinu. Výsledek: žádný skutečný
+      únik (zbývá 28 falešných paprsků z bodu uvnitř pultu).
+    - **Blikání beden:** kitbash měl bedny dvakrát – jednu na podlaze (0,04–1,08 m) a stejnou napůl
+      zapuštěnou (−0,52–0,52 m); v pásu 4–52 cm se jejich stěny přetahovaly (z-fighting). Stavitel
+      teď zapuštěné a přesně zdvojené díly maže (26 dílů) a také vnější stěny shellu, které ležely ve
+      stejné rovině jako stěny strojovny a chodby. Měřeno `-Preset flicker_check` (8 snímků stejné
+      kamery, podíl pixelů, které se mění o víc než 8 %): prostor 0,84 % → 0,01 %.
+    - **Výkon:** `-Preset perf_interior` (stat unit): stíny 22 lokálních světel byly většina snímku.
+      Akcenty a světla displejů stíny nevrhají, pracovní světla dosvítí 4,5 m místo 9 (už nestínují
+      sousední místnosti). Prostor 15,3–18,8 → 12,0 ms, strojovna → 10,7, chodba → 10,7, kokpit ~10,5.
+    - **Kokpit podle reference** (`Docs/UI`, kokpit Constellation): prosklená kabina ze tří žeber
+      s tmavými vzpěrami a sklem i nad hlavou, nízký pult u přídě, dvě MFD na ramenech pro každého
+      pilota po stranách výhledu, vysoká černá sedadla s bílými pruhy, joystickem a plynem v područkách,
+      boční konzole a panel nad hlavou s tlačítky. Obrazovky jsou modré plochy (jas emise 1,5).
 
 ---
 
@@ -1435,10 +1455,12 @@ Další otevřené směry mimo let:
 - `IMC_Spaceship` a `IMC_Character` pořád mapují H na `IA_ToggleHud`. Nic na to není navázané
   (H obsluhuje controller), je to neškodné.
 - Obloha nerozlišuje denní a noční stranu planety: v atmosféře je modrá všude.
-- **Interiér Steadfastu (body 58–62), neověřeno autorem:** jak se v něm chodí a jak působí za pohybu,
-  výška stropu a kamera za postavou v úzké chodbě (kamera se o stěny zkracuje). Sedačky jsou hranaté
-  (procedurální, první verze), displeje kokpitu jsou jednobarevné plochy bez obsahu. Interiér stojí
-  v prostoru sám, bez trupu lodi; z lodi k němu nevede nástup (jen klávesa I).
+- **Interiér Steadfastu (body 58–63), neověřeno autorem:** jak se v něm chodí a jak působí za pohybu,
+  výška stropu a kamera za postavou v úzké chodbě (kamera se o stěny zkracuje). Kokpit (bod 63) je
+  první verze podle reference: sedadla a konzole jsou hranaté, obrazovky jsou jednobarevné plochy bez
+  obsahu (napojení na displeje lodi přijde s laděním). Na tenkých hranách příhradových sloupů ve
+  strojovně zůstává drobné mihotání odlesků (0,06 % pixelů). Interiér stojí v prostoru sám, bez
+  trupu lodi; z lodi k němu nevede nástup (jen klávesa I).
 
 ---
 

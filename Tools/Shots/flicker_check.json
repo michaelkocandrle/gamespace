@@ -1,0 +1,599 @@
+{
+ "_comment": "Blikání v interiéru (HANDOFF bod 63): každý pohled 8x rychle za sebou se stejnou kamerou; co se mezi snímky mění, bliká. Vyhodnocení: rozptyl pixelů mezi snímky. Run: Tools/Shots.ps1 -Preset flicker_check",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_crates_0",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    2.2,
+    497.2,
+    1.9
+   ],
+   "camera_look_at": [
+    0.6,
+    494.5,
+    0.9
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_crates_1",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    2.2,
+    497.2,
+    1.9
+   ],
+   "camera_look_at": [
+    0.6,
+    494.5,
+    0.9
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_crates_2",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    2.2,
+    497.2,
+    1.9
+   ],
+   "camera_look_at": [
+    0.6,
+    494.5,
+    0.9
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_crates_3",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    2.2,
+    497.2,
+    1.9
+   ],
+   "camera_look_at": [
+    0.6,
+    494.5,
+    0.9
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_crates_4",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    2.2,
+    497.2,
+    1.9
+   ],
+   "camera_look_at": [
+    0.6,
+    494.5,
+    0.9
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_crates_5",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    2.2,
+    497.2,
+    1.9
+   ],
+   "camera_look_at": [
+    0.6,
+    494.5,
+    0.9
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_crates_6",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    2.2,
+    497.2,
+    1.9
+   ],
+   "camera_look_at": [
+    0.6,
+    494.5,
+    0.9
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_crates_7",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    2.2,
+    497.2,
+    1.9
+   ],
+   "camera_look_at": [
+    0.6,
+    494.5,
+    0.9
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_wide_0",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_wide_1",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_wide_2",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_wide_3",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_wide_4",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_wide_5",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_wide_6",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "bay_wide_7",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "engine_0",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "engine_1",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "engine_2",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "engine_3",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "engine_4",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "engine_5",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "engine_6",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "engine_7",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "corridor_0",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "corridor_1",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "corridor_2",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "corridor_3",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "corridor_4",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "corridor_5",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "corridor_6",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "corridor_7",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.07,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  }
+ ]
+}

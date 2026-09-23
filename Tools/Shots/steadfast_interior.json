@@ -187,12 +187,12 @@
    "hud": 0,
    "settle": 1.5,
    "camera_location": [
-    17.8,
-    500,
+    17.6,
+    499.7,
     1.75
    ],
    "camera_look_at": [
-    22,
+    22.4,
     500,
     1.0
    ],
@@ -205,14 +205,14 @@
    "hud": 0,
    "settle": 1.5,
    "camera_location": [
-    18.2,
+    18.0,
     502.1,
-    1.8
+    1.9
    ],
    "camera_look_at": [
-    21.6,
-    499,
-    0.9
+    21.5,
+    498.8,
+    0.8
    ],
    "fov": 80,
    "exposure": 2.0
@@ -223,16 +223,34 @@
    "hud": 0,
    "settle": 1.5,
    "camera_location": [
-    21.2,
-    497.9,
-    1.6
+    21.0,
+    498.6,
+    1.5
    ],
    "camera_look_at": [
     17,
     500.5,
-    1.0
+    1.2
    ],
    "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "n_pilot_seat",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "camera_location": [
+    19.95,
+    500.95,
+    1.25
+   ],
+   "camera_look_at": [
+    23,
+    500.8,
+    1.1
+   ],
+   "fov": 88,
    "exposure": 2.0
   }
  ]

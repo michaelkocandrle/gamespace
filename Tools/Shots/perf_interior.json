@@ -1,0 +1,363 @@
+{
+ "_comment": "Výkon interiéru Steadfastu (HANDOFF bod 63): stat unit a stat gpu (zapnou se v prvním snímku a platí dál), varianty stínů světel přes space.KitLight. Čte se ze snímků. Run: Tools/Shots.ps1 -Preset perf_interior",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 4.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "base_bay",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ]
+  },
+  {
+   "name": "base_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ]
+  },
+  {
+   "name": "base_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ]
+  },
+  {
+   "name": "accent_noshadow_bay",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False"
+   ]
+  },
+  {
+   "name": "accent_noshadow_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False"
+   ]
+  },
+  {
+   "name": "accent_noshadow_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False"
+   ]
+  },
+  {
+   "name": "r450_bay",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False",
+    "space.KitLight Work AttenuationRadius 450"
+   ]
+  },
+  {
+   "name": "r450_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False",
+    "space.KitLight Work AttenuationRadius 450"
+   ]
+  },
+  {
+   "name": "r450_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False",
+    "space.KitLight Work AttenuationRadius 450"
+   ]
+  },
+  {
+   "name": "r350_bay",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False",
+    "space.KitLight Work AttenuationRadius 350"
+   ]
+  },
+  {
+   "name": "r350_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False",
+    "space.KitLight Work AttenuationRadius 350"
+   ]
+  },
+  {
+   "name": "r350_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False",
+    "space.KitLight Work AttenuationRadius 350"
+   ]
+  },
+  {
+   "name": "all_noshadow_bay",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False",
+    "space.KitLight Work CastShadows False"
+   ]
+  },
+  {
+   "name": "all_noshadow_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False",
+    "space.KitLight Work CastShadows False"
+   ]
+  },
+  {
+   "name": "all_noshadow_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent CastShadows False",
+    "space.KitLight Work CastShadows False"
+   ]
+  }
+ ]
+}
