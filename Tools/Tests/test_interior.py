@@ -12,14 +12,16 @@ What it guards:
 """
 
 import ast
+import json
 import os
 
 import unreal
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SCRIPT = os.path.join(REPO, "Tools", "Assets", "import_interior.py")
+LIGHTS = os.path.join(REPO, "ArtSource", "Ships", "Steadfast", "Interior", "Interior_lights.json")
 WANTED = ("MATERIAL", "MAP", "GUNMETAL", "LIFT", "METALLIC_SCALE", "ROUGHNESS_SCALE", "ROUGHNESS_FLOOR",
-          "INTERIOR_TAG", "WORK_LIGHT_TAG", "ACCENT_LIGHT_TAG", "WORK_LIGHT_LUMENS", "WORK_LIGHT_KELVIN", "WORK_LIGHT_CONE", "ACCENT_LIGHT_LUMENS", "PACKAGE")
+          "INTERIOR_TAG", "WORK_LIGHT_TAG", "ACCENT_LIGHT_TAG", "WORK_LIGHT_LUMENS", "WORK_LIGHT_KELVIN", "WORK_LIGHT_CONE", "ACCENT_LIGHT_LUMENS", "PACKAGE", "ROOMS")
 
 failures = []
 
@@ -72,8 +74,10 @@ def tagged(tag):
     return [a for a in actors if unreal.Name(tag) in list(a.tags)]
 
 
+layout = json.load(open(LIGHTS, encoding="utf-8"))
 interior = tagged(C["INTERIOR_TAG"])
-check("interior mesh actor tagged", len(interior) == 1, "%d" % len(interior))
+check("one tagged mesh actor per room %s" % (C["ROOMS"],), len(interior) == len(C["ROOMS"]),
+      ", ".join(a.static_mesh_component.static_mesh.get_name() for a in interior))
 for actor in interior:
     mesh = actor.static_mesh_component.static_mesh
     slots = [s.material_interface for s in mesh.static_materials] if mesh else []
@@ -81,7 +85,9 @@ for actor in interior:
           bool(slots) and all(s and s.get_base_material() == material for s in slots),
           ", ".join(s.get_name() if s else "None" for s in slots))
 work = tagged(C["WORK_LIGHT_TAG"])
-check("6 work lights tagged", len(work) == 6, "%d" % len(work))
+wanted_work = sum(len(layout[room]["work"]) for room in C["ROOMS"])
+wanted_accent = sum(len(layout[room]["accent"]) for room in C["ROOMS"])
+check("a work light under every fixture (%d)" % wanted_work, len(work) == wanted_work, "%d" % len(work))
 for light in work:
     component = light.get_component_by_class(unreal.SpotLightComponent)
     if not component:
@@ -96,11 +102,13 @@ for light in work:
           and abs(component.temperature - C["WORK_LIGHT_KELVIN"]) < 0.5,
           "%.0f lm, %s, %.0f K" % (component.intensity, component.use_temperature, component.temperature))
 lamp = unreal.EditorAssetLibrary.load_asset(C["PACKAGE"] + "/MI_KitLamp")
-check("ceiling fixtures wear MI_KitLamp (cold, not the kit's orange)",
-      lamp is not None and any(actor.static_mesh_component.static_mesh.get_material(i) == lamp
-                               for actor in interior
-                               for i in range(len(actor.static_mesh_component.static_mesh.static_materials))))
-check("2 accent lights tagged", len(tagged(C["ACCENT_LIGHT_TAG"])) == 2, "%d" % len(tagged(C["ACCENT_LIGHT_TAG"])))
+check("ceiling fixtures in every room wear MI_KitLamp (cold, not the kit's orange)",
+      lamp is not None and bool(interior) and all(
+          any(actor.static_mesh_component.static_mesh.get_material(i) == lamp
+              for i in range(len(actor.static_mesh_component.static_mesh.static_materials)))
+          for actor in interior))
+check("every accent light (%d)" % wanted_accent, len(tagged(C["ACCENT_LIGHT_TAG"])) == wanted_accent,
+      "%d" % len(tagged(C["ACCENT_LIGHT_TAG"])))
 for light in tagged(C["ACCENT_LIGHT_TAG"]):
     component = light.point_light_component
     check("%s: %s lm" % (light.get_actor_label(), C["ACCENT_LIGHT_LUMENS"]),

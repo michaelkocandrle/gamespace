@@ -313,9 +313,10 @@ Presety (`Tools/Shots/*.json`):
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
 | `ship_views`, `ship` | loď zvenku |
-| `steadfast_interior` | nákladový prostor Steadfastu, volná kamera, pevná expozice |
+| `steadfast_interior` | interiér Steadfastu: nákladový prostor (a–e), průchod a chodba (f–g), strojovna (h–j); volná kamera, pevná expozice |
 | `interior_tune` | varianty materiálu a světel interiéru (`space.Kit*`), každá začíná `space.KitReset`; celek a detail stěny |
 | `ceiling_tune` | světla nákladového prostoru se stropem: jas a kužel bodovek, oranžové akcenty; celek a pohled na strop |
+| `accent_tune` | jas oranžových akcentů v celém interiéru (prostor, strop, chodba, strojovna) |
 
 Pole jednoho snímku:
 - základ: `camera`, `altitude_m`, `facing`, `speed_ms` (nebo `drift` [vpřed, vpravo, nahoru] v m/s,
@@ -614,13 +615,20 @@ snímku.
   (i když glTF kitu hlásí `doubleSided`), takže podlahová deska použitá jako strop nebo stěnový
   panel otočený ven zevnitř „neexistuje“ a prostor je otevřený do vesmíru (23. 9. 2026, nákladový
   prostor). Blender to v běžném náhledu neukáže. Kontrola: paprsky ze středu místnosti ven a
-  u zásahu `normal.dot(směr) > 0` = rub (`build_cargo_bay.py`, bod 60 v HANDOFF). Oprava: díl lícem
+  u zásahu `normal.dot(směr) > 0` = rub (`build_steadfast_interior.py`, bod 60 v HANDOFF). Oprava: díl lícem
   dovnitř, nebo obložení za stěnou.
 - i) **Kamera snímků za stěnou vidí dovnitř** – ze stejného důvodu (rub stěny je průhledný). Snímek
   pak vypadá v pořádku, ale ukazuje místnost „bez čtvrté stěny“. Kamery interiéru patří dovnitř.
 - j) **Statické světlo za běhu nejde měnit setterem.** `SetIntensity`/`SetLightColor` světlo s
   mobilitou Static ve hře odmítnou (i s `r.AllowStaticLighting=False`). Ladicí příkazy proto píšou
   přímo do vlastností a volají `MarkRenderStateDirty()` (`SpaceInteriorTuning.cpp`, `SpacePostTuning.cpp`).
+- k) **Průchod do cizího kitbashe má za stěnou další stěnu.** Otvor vyříznutý jen v rovině stěny
+  ukázal v rámu dveří panel – shell měl 1 m za ní ještě vnější stěnu na konci přečnívající podlahy.
+  A řez podle polohy bez kontroly normály smazal i podlahu v průchodu. Před řezem si vypiš plochy
+  v celém objemu průchodu po materiálu a normále (bod 61 v HANDOFF) a mazej jen svislé.
+- l) **Světlo za stěnou interiér nesvítí, jen se tak tváří.** Oranžová světla nákladového prostoru
+  stála 40 cm za stěnou; když se přesunula dovnitř, stejných 200 lm najednou oteplilo celou
+  místnost. Po přesunu světla měř znovu.
 
 ### 9.4 C++ a UHT
 

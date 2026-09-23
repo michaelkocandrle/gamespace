@@ -1,5 +1,5 @@
 {
- "_comment": "Nákladový prostor Steadfastu v enginu (od bodu 60 se stropem; kamery b-e stojí uvnitř, a_above je zvenku nad střechou). Volná kamera (camera: free, camera_location / camera_look_at v metrech) - prostor stojí v TestSpace 500 m stranou od startu lodi. Expozice je zafixovaná (exposure), jinak automatika vyrovná každou změnu materiálu. Run: Tools/Shots.ps1 -Preset steadfast_interior",
+ "_comment": "Interiér Steadfastu v enginu: nákladový prostor (a-e, od bodu 60 se stropem), průchod a chodba ke kokpitu (f-g), strojovna (h-j). Volná kamera v metrech; interiér stojí v TestSpace na (0, 500, 0) m, Y je proti Blenderu zrcadlené. Expozice pevná 2.0. Run: Tools/Shots.ps1 -Preset steadfast_interior",
  "shots": [
   {
    "name": "a_above",
@@ -89,6 +89,96 @@
     2.2
    ],
    "fov": 75,
+   "exposure": 2.0
+  },
+  {
+   "name": "f_door_fore",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    6.3,
+    499.7,
+    1.3
+   ],
+   "camera_look_at": [
+    9,
+    500,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "h_bay_aft",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    7,
+    499,
+    1.6
+   ],
+   "camera_look_at": [
+    -7,
+    500,
+    1.0
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "i_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.7
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "j_engine_back",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    -6.5,
+    497.6,
+    1.7
+   ],
+   "camera_look_at": [
+    -2,
+    501,
+    0.8
+   ],
+   "fov": 80,
    "exposure": 2.0
   }
  ]

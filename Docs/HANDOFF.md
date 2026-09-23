@@ -1019,6 +1019,30 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       průhledná); přibyl záběr `e_ceiling`. Pro snímky zvenku zůstává `a_above`.
     - Zadní stěna má za dveřním rámem mezeru, kterou teď zavírá obložení – vchod do chodby ke
       kokpitu se do obložení vyřízne v dalším kroku.
+61. **Chodba ke kokpitu a strojovna** (23. 9. 2026). Steadfast zatím nemá rozvržení lodi, zvoleno:
+    +X je směr letu; strojovna (x −7..−1 m, 6 × 6 m) | přepážka 1 m | nákladový prostor (0..8) |
+    přepážka | chodba (9..17, 2 m široká) | zavřené dveře ke kokpitu. Přepážky jsou tam, kde podlaha
+    shellu přečnívá o metr za jeho stěny.
+    - **`Tools/Blender/build_steadfast_interior.py`** (přejmenovaný `build_cargo_bay.py`) staví
+      místnosti z obecných kusů – podlaha, stěny s otvory, strop, svítidla, dveřní rám (kit
+      `Door_Frame_Square` ×0,4), vybavení – a každou exportuje jako vlastní GLB (`CargoBay`,
+      `Corridor` 2 106 trojúhelníků, `EngineRoom` 39 083). Pozice světel zapíše do
+      `Interior_lights.json`; `import_interior.py` podle něj staví bodovky a akcenty (18 světel).
+    - Chodba: panely `ShortWall_Metal2`, svítidla uprostřed, průduch ve stropě, terminál a oranžové
+      světlo nad zavřenými dveřmi. Strojovna: tmavé panely a podlaha, jádro (`Column_Hollow`) se
+      čtyřmi trubkovými sloupy, regály s potrubím podél stěn, konzole, oranžový svit u paty jádra.
+    - **Průchody do shellu:** skript vyřízne svislé plochy v otvoru 2 m přes celou přepážku (shell
+      má za stěnou ještě vnější stěnu na konci přečnívající podlahy) a odstraní starý dveřní rám,
+      který stál kolmo přes zadní stěnu a nikam nevedl. Přečnívající podlaha míří lícem dolů, proto
+      mají průchody vlastní podlahu.
+    - **Akcenty 100 lm** (`-Preset accent_tune`): uvnitř místností (dřív stály za stěnou prostoru)
+      už 200 lm oteplilo prostor a strojovnu na B/R 0,97–1,11; se 100 lm jsou všechny záběry
+      1,10–1,28 a oranžová místa pořád čitelná.
+    - Výsledek (`-Preset steadfast_interior`, 10 záběrů): B/R 1,10–1,28, průměrný jas 0,22–0,32, stíny
+      p10 0,01–0,04, světla p90 0,66–0,79 – v rozsahu autorových referencí.
+    - **Omezení:** interiér nemá kolize (postava jím zatím nechodí, jde jen o vzhled), stojí v
+      `TestSpace` samostatně mimo loď, dveře ke kokpitu se neotvírají a kokpit Steadfastu (procedurální
+      dashboard) ještě není. Zvenku jsou místnosti otevřené – zakryje je trup lodi.
 
 ---
 
@@ -1153,7 +1177,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_quantum_sc4.py` | SC-4: nic v SCM; v NAV cíl podle nosu, Veyra ze startu TOO CLOSE; spool, kalibrace, READY, krátký stisk neskočí, podržení ano; spálené palivo podle vzdálenosti; ve skoku nejde řídit; příjezd na výšku příletu v rychlosti NAV do minuty; chlazení; B přeruší skok; OBSTRUCTED s planetou v cestě; NO QT FUEL; kalibrace padá, když nos uhne; HUD (rámeček, oblouky 0/1/2/3, cíl); LMB namapované, J ne; scénář snímků. Plus profil rychlosti, výška příletu, palivo a test úsečka–koule samostatně. |
 | `test_speed_tunnel.py` | Tunel quantum skoku: prach je pryč, než by ho rychlost rozblikala; čára delší než dvojnásobek posunu za snímek při 60 FPS (neblikne); čáry v dráze do sebe nenarazí; stěny od nejbližší, loď Vanguard se vejde do nejbližší; materiál aditivní, oboustranný, se všemi parametry, které komponenta nastavuje; jiskry u lodi (bodů na trupu ≥ 32, ve skoku mnohem víc než v letu), prachu jen pár set; scénář snímků se skokem (`quantum`). |
 | `test_scene_look.py` | Vzhled uložené úrovně proti receptu: atmosféra Veyry (jediná, ve středu planety, zem 2 km pod hladinou, koeficienty z receptu, tenký lem, slunce ji osvětluje), intenzita sky lightu, contact shadows a šířka slunce, všechna nastavení `POST_SETTINGS` v neohraničeném volume (a že chromatická aberace a vyvážení bílé zůstala vypnutá), lak trupu z `Vanguard_setup.json`. Chytá zapomenuté spuštění `build_space_scene.py` / `import_ship.py`. |
-| `test_interior.py` | Interiér Steadfastu po `import_interior.py`: `M_KitTrim` má usage flagy Nanite/static/instanced a každý sampler výchozí texturu (jinak šachovnice v buildu), parametry `Lift`, `MetallicScale`, `Roughness*`, `Gunmetal` s hodnotami ze skriptu, všechny sloty na instancích `M_KitTrim`, svítidla na `MI_KitLamp`, tagy pro `space.Kit*`, 6 pracovních bodovek mířících dolů (lm, K, kužel) a 2 akcentní (lm). |
+| `test_interior.py` | Interiér Steadfastu po `import_interior.py`: `M_KitTrim` má usage flagy Nanite/static/instanced a každý sampler výchozí texturu (jinak šachovnice v buildu), parametry `Lift`, `MetallicScale`, `Roughness*`, `Gunmetal` s hodnotami ze skriptu, jeden otagovaný herec na místnost, všechny sloty na instancích `M_KitTrim`, svítidla v každé místnosti na `MI_KitLamp`, bodovka pod každým svítidlem z `Interior_lights.json` (míří dolů; lm, K, kužel) a všechny akcenty (lm). |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
 
 Co headless **nejde** ověřit a musí vyzkoušet autor ve hře:
@@ -1377,6 +1401,9 @@ Další otevřené směry mimo let:
 - `IMC_Spaceship` a `IMC_Character` pořád mapují H na `IA_ToggleHud`. Nic na to není navázané
   (H obsluhuje controller), je to neškodné.
 - Obloha nerozlišuje denní a noční stranu planety: v atmosféře je modrá všude.
+- **Interiér Steadfastu (body 58–61), neověřeno autorem:** jak působí za pohybu a na jeho monitoru.
+  Známé drobnosti: u průchodu do strojovny jsou vidět černé klínové plochy (rub nějakého dílu
+  shellu), interiér nemá kolize a v záběru `steadfast_interior/f_door_fore` je nápis FREE LOOK.
 
 ---
 

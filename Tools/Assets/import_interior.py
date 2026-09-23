@@ -4,8 +4,9 @@
 
 Co to dělá:
 
-1. Naimportuje `ArtSource/Ships/Steadfast/Interior/CargoBay.glb` do `/Game/Environments/Steadfast/`
-   (GLB staví `Tools/Blender/build_cargo_bay.py`: shell z kitu + strop a svítidla).
+1. Naimportuje místnosti z `ArtSource/Ships/Steadfast/Interior/` (`CargoBay.glb`, `Corridor.glb`,
+   `EngineRoom.glb`) do `/Game/Environments/Steadfast/`. GLB i rozmístění světel
+   (`Interior_lights.json`) staví `Tools/Blender/build_steadfast_interior.py`.
 2. Postaví materiál `M_KitTrim`, který v enginu dělá totéž co `Tools/Blender/recolour_kit.py`
    v Blenderu: texturu kitu odbarví, přetónuje do gunmetalu a emisivní mapu kitu použije jako
    oranžové svítící pásy. Bez toho vypadá kit v enginu šedě a cize.
@@ -17,12 +18,16 @@ Buď se textury vypečou (drahé, ztratí se opakovatelnost), nebo se stejná ma
 materiálu UE - tahle cesta.
 """
 
-import ast
+import json
 import os
 import unreal
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SOURCE = os.path.join(ROOT, "ArtSource", "Ships", "Steadfast", "Interior", "CargoBay.glb")
+INTERIOR = os.path.join(ROOT, "ArtSource", "Ships", "Steadfast", "Interior")
+# One GLB per room, built by Tools/Blender/build_steadfast_interior.py, which also writes where the
+# lights go (LIGHTS). The rooms share one origin, so they all stand at PLACE_AT.
+ROOMS = ("CargoBay", "Corridor", "EngineRoom")
+LIGHTS = os.path.join(INTERIOR, "Interior_lights.json")
 PACKAGE = "/Game/Environments/Steadfast"
 MATERIAL = PACKAGE + "/M_KitTrim"
 MAP = "/Game/Maps/TestSpace"
@@ -45,7 +50,7 @@ INTERIOR_TAG = "SpaceInterior"
 WORK_LIGHT_TAG = "SpaceInteriorLight_Work"
 ACCENT_LIGHT_TAG = "SpaceInteriorLight_Accent"
 # Work lights: cold white. Warm light (255, 238, 214) cancelled the blue of the steel; 7000 K is
-# what turns the bay blue at all. Since the bay has a ceiling (Tools/Blender/build_cargo_bay.py) they
+# what turns the bay blue at all. Since the bay has a ceiling (Tools/Blender/build_steadfast_interior.py) they
 # are spots under its fixtures pointing down, so the ceiling and corners stay dark - the contrast
 # the mood references have and the open bay did not.
 # Measured with the ceiling on (Tools/Shots/ceiling_tune.json, HANDOFF point 60): 575 lm under a
@@ -54,23 +59,27 @@ ACCENT_LIGHT_TAG = "SpaceInteriorLight_Accent"
 WORK_LIGHT_LUMENS = 1150.0
 WORK_LIGHT_KELVIN = 7000.0
 WORK_LIGHT_CONE = (25.0, 80.0)      # inner, outer half angle in degrees
-# The orange strips by the floor: at 550 lm they painted the whole ceiling brown (B/R 0.93 looking up);
-# 200 keeps the accent on the crates and gives the ceiling back its blue (1.22).
-ACCENT_LIGHT_LUMENS = 200.0
+# The orange accents: at 550 lm they painted the whole ceiling brown (B/R 0.93 looking up). Once they
+# stood inside the rooms rather than behind the bay's walls, 200 lm still warmed the bay and engine
+# room to B/R 0.97-1.11; 100 lm keeps every view at 1.10-1.26 and the orange spots still read
+# (Tools/Shots/accent_tune.json; 50 lm all but lost them).
+ACCENT_LIGHT_LUMENS = 100.0
 # The fixtures' glowing face: cold white, not the kit's orange.
 LAMP_COLOUR = (0.78, 0.88, 1.0)
 LAMP_STRENGTH = 20.0
-BUILD_SCRIPT = os.path.join(ROOT, "Tools", "Blender", "build_cargo_bay.py")
 
 
-def fixture_layout():
-    """Where build_cargo_bay.py hung the fixtures, read out of it rather than copied (Blender metres)."""
-    tree = ast.parse(open(BUILD_SCRIPT, encoding="utf-8").read(), BUILD_SCRIPT)
-    wanted = ("CEILING_Z", "LAMP_ROWS_Y", "LAMP_X")
-    body = [n for n in tree.body if isinstance(n, ast.Assign) and any(getattr(t, "id", None) in wanted for t in n.targets)]
-    namespace = {}
-    exec(compile(ast.Module(body=body, type_ignores=[]), BUILD_SCRIPT, "exec"), namespace)
-    return namespace["CEILING_Z"], namespace["LAMP_ROWS_Y"], namespace["LAMP_X"]
+def light_layout():
+    """{room: {"work": [[x, y, z]...], "accent": [...]}} in Blender metres, as the builder wrote it."""
+    with open(LIGHTS, encoding="utf-8") as source:
+        layout = json.load(source)
+    return {room: layout[room] for room in ROOMS}
+
+
+def to_unreal(point):
+    """Blender metres to Unreal centimetres at PLACE_AT: X and Z shared, Y mirrored."""
+    return unreal.Vector(PLACE_AT.x + point[0] * 100.0, PLACE_AT.y - point[1] * 100.0, PLACE_AT.z + point[2] * 100.0)
+
 
 MEL = unreal.MaterialEditingLibrary
 EAL = unreal.EditorAssetLibrary
@@ -180,15 +189,18 @@ def import_mesh():
     if EAL.does_directory_exist(PACKAGE):
         for path in EAL.list_assets(PACKAGE, recursive=True, include_folder=False):
             EAL.delete_asset(path)
-    task = unreal.AssetImportTask()
-    task.filename = SOURCE
-    task.destination_path = PACKAGE
-    task.automated = True
-    task.replace_existing = True
-    task.save = True
-    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
-    imported = list(task.get_editor_property("imported_object_paths") or [])
-    log("naimportováno %d objektů" % len(imported))
+    tasks = []
+    for room in ROOMS:
+        task = unreal.AssetImportTask()
+        task.filename = os.path.join(INTERIOR, room + ".glb")
+        task.destination_path = PACKAGE
+        task.automated = True
+        task.replace_existing = True
+        task.save = True
+        tasks.append(task)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks(tasks)
+    imported = [path for task in tasks for path in (task.get_editor_property("imported_object_paths") or [])]
+    log("naimportováno %d objektů z %d místností" % (len(imported), len(ROOMS)))
     return imported
 
 
@@ -255,8 +267,8 @@ def prune(keep):
     log("uklizeno %d nepoužitých assetů" % removed)
 
 
-def place_lights(actors, mesh):
-    """Work lights under the ceiling fixtures, plus two orange strips low down.
+def place_lights(actors):
+    """Work lights under every ceiling fixture, and the orange accents, room by room.
 
     The kit's panels are metal in the ORM map, and metal with nothing to reflect renders black -
     in space there is no sky to fill it in. Without these the bay is a silhouette (23. 9. 2026).
@@ -264,19 +276,14 @@ def place_lights(actors, mesh):
     for actor in actors.get_all_level_actors():
         if actor.get_actor_label().startswith("Steadfast_Light"):
             actors.destroy_actor(actor)
-    if not mesh:
-        return
-    bounds = mesh.get_bounds()
-    origin, extent = bounds.origin, bounds.box_extent
-    ceiling, rows, columns = fixture_layout()
     lights = 0
-    for row in rows:
-        for column in columns:
-            # Blender and Unreal share X and Z; Unreal's Y is Blender's mirrored.
-            spot = unreal.Vector(PLACE_AT.x + column * 100.0, PLACE_AT.y - row * 100.0, PLACE_AT.z + ceiling * 100.0 - 20.0)
+    for room, layout in light_layout().items():
+        for point in layout["work"]:
+            # 20 cm under the ceiling, pointing straight down.
+            spot = to_unreal(point) - unreal.Vector(0.0, 0.0, 20.0)
             light = actors.spawn_actor_from_class(unreal.SpotLight, spot, unreal.Rotator(roll=0.0, pitch=-90.0, yaw=0.0))
             lights += 1
-            light.set_actor_label("Steadfast_Light_Work_%d" % lights)
+            light.set_actor_label("Steadfast_Light_Work_%s_%d" % (room, lights))
             light.set_editor_property("tags", [unreal.Name(WORK_LIGHT_TAG)])
             component = light.spot_light_component
             component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
@@ -288,25 +295,24 @@ def place_lights(actors, mesh):
             component.set_editor_property("light_color", unreal.Color(r=255, g=255, b=255, a=255))
             component.set_editor_property("use_temperature", True)
             component.set_editor_property("temperature", WORK_LIGHT_KELVIN)
-    for y in (-0.85, 0.85):
-        spot = unreal.Vector(PLACE_AT.x + origin.x, PLACE_AT.y + origin.y + y * extent.y,
-                             PLACE_AT.z + origin.z - extent.z + 60.0)
-        light = actors.spawn_actor_from_class(unreal.PointLight, spot, unreal.Rotator(0, 0, 0))
-        lights += 1
-        light.set_actor_label("Steadfast_Light_Accent_%d" % lights)
-        light.set_editor_property("tags", [unreal.Name(ACCENT_LIGHT_TAG)])
-        component = light.point_light_component
-        component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
-        component.set_editor_property("intensity_units", unreal.LightUnits.LUMENS)
-        component.set_editor_property("intensity", ACCENT_LIGHT_LUMENS)
-        component.set_editor_property("attenuation_radius", 600.0)
-        component.set_editor_property("light_color", unreal.Color(r=255, g=140, b=40, a=255))
+        for point in layout["accent"]:
+            light = actors.spawn_actor_from_class(unreal.PointLight, to_unreal(point), unreal.Rotator(0, 0, 0))
+            lights += 1
+            light.set_actor_label("Steadfast_Light_Accent_%s_%d" % (room, lights))
+            light.set_editor_property("tags", [unreal.Name(ACCENT_LIGHT_TAG)])
+            component = light.point_light_component
+            component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
+            component.set_editor_property("intensity_units", unreal.LightUnits.LUMENS)
+            component.set_editor_property("intensity", ACCENT_LIGHT_LUMENS)
+            component.set_editor_property("attenuation_radius", 600.0)
+            component.set_editor_property("light_color", unreal.Color(r=255, g=140, b=40, a=255))
     log("rozsvíceno %d světel" % lights)
 
 
 def main():
-    if not os.path.exists(SOURCE):
-        raise SystemExit("import_interior: chybí %s" % SOURCE)
+    for path in [os.path.join(INTERIOR, room + ".glb") for room in ROOMS] + [LIGHTS]:
+        if not os.path.exists(path):
+            raise SystemExit("import_interior: chybí %s (Tools/Blender/build_steadfast_interior.py)" % path)
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level(MAP)
     import_mesh()
     reference = texture_sets().get("T_Trim_01") or {}
@@ -373,7 +379,7 @@ def main():
         component = actor.static_mesh_component
         component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
         component.set_static_mesh(mesh)
-    place_lights(actors, meshes[0] if meshes else None)
+    place_lights(actors)
     kept = [master, dark, glow, lamp] + list(instances.values()) + meshes
     for instance in [dark, glow, lamp] + list(instances.values()):
         for parameter in ("BaseColor", "NormalMap", "ORMMap", "EmissiveMap"):

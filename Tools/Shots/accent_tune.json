@@ -1,0 +1,286 @@
+{
+ "_comment": "Jas oranžových akcentů v celém interiéru Steadfastu (HANDOFF bod 61). Každá varianta začíná space.KitReset, expozice 2.0. Run: Tools/Shots.ps1 -Preset accent_tune",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "base_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "base_e_ceiling",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ],
+   "camera_location": [
+    0.5,
+    502.5,
+    1.2
+   ],
+   "camera_look_at": [
+    6,
+    498.5,
+    2.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "base_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ],
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80
+  },
+  {
+   "name": "base_i_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ],
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.7
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80
+  },
+  {
+   "name": "accent_100_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent Intensity 100"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "accent_100_e_ceiling",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent Intensity 100"
+   ],
+   "camera_location": [
+    0.5,
+    502.5,
+    1.2
+   ],
+   "camera_look_at": [
+    6,
+    498.5,
+    2.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "accent_100_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent Intensity 100"
+   ],
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80
+  },
+  {
+   "name": "accent_100_i_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent Intensity 100"
+   ],
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.7
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80
+  },
+  {
+   "name": "accent_50_b_inside",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent Intensity 50"
+   ],
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "accent_50_e_ceiling",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent Intensity 50"
+   ],
+   "camera_location": [
+    0.5,
+    502.5,
+    1.2
+   ],
+   "camera_look_at": [
+    6,
+    498.5,
+    2.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "accent_50_g_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent Intensity 50"
+   ],
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 80
+  },
+  {
+   "name": "accent_50_i_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Accent Intensity 50"
+   ],
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.7
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80
+  }
+ ]
+}
