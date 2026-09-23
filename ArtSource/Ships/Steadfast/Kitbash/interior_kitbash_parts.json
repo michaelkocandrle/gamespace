@@ -1,0 +1,54 @@
+{
+  "reference_concept": "hf_20260923_082826_steadfast_interior_hero.png",
+  "notes": "Wider dual-seat cabin vs. Vanguard's single-seat cockpit. Base shape + pieces, per Docs/AssetPipeline_Modular.md — do not send this whole scene into Meshy as one generation.",
+  "base_shape": {
+    "name": "SteadfastCabinFrame",
+    "description": "Canopy frame + floor/walls only, no dashboard/seats/panels — those are separate pieces below. Multi-pane wide canopy, two-seat width.",
+    "source": "multi-view (front/side) through Meshy, same as ship exterior, OR procedural in Blender if the wide canopy shape proves simple enough"
+  },
+  "pieces": [
+    {
+      "name": "PilotSeat",
+      "description": "Worn leather/composite pilot seat with high headrest, articulated frame, visible wear on edges",
+      "size_cm_approx": "50x50x90",
+      "source_recommendation": "Meshy (panel-like complexity, should do fine per kitbash pilot findings)"
+    },
+    {
+      "name": "CoPilotSeat",
+      "description": "Same as PilotSeat, mirrored/duplicate — reuse the same generated piece, do not regenerate",
+      "size_cm_approx": "50x50x90",
+      "source_recommendation": "duplicate of PilotSeat"
+    },
+    {
+      "name": "OverheadSwitchPanel",
+      "description": "Overhead panel with two clusters of lit toggle/rocker switches, cable routing along edges",
+      "size_cm_approx": "60x20x8",
+      "source_recommendation": "Meshy 4k (panel-like, per kitbash findings this is where Meshy wins)"
+    },
+    {
+      "name": "DashboardDisplayLeft",
+      "description": "Flat rectangular display bezel, radar/circular readout style — intended as a RENDER TARGET surface for our own HUD, same approach as Vanguard. Generate the bezel/frame only, do not rely on AI-generated screen content.",
+      "size_cm_approx": "20x15x3",
+      "source_recommendation": "procedural in Blender (frame is simple, avoids repeating the Vanguard 'AI-generated unreadable display' mistake)"
+    },
+    {
+      "name": "DashboardDisplayCentre",
+      "description": "Same render-target-bezel approach as DashboardDisplayLeft, centre position",
+      "size_cm_approx": "18x14x3",
+      "source_recommendation": "procedural in Blender"
+    },
+    {
+      "name": "SidePanelRight",
+      "description": "Secondary switch/status panel to the co-pilot's right, smaller lit buttons",
+      "size_cm_approx": "30x25x8",
+      "source_recommendation": "Meshy 4k"
+    },
+    {
+      "name": "CableBundle",
+      "description": "Cable routing along canopy frame pillars",
+      "size_cm_approx": "long, thin, follows frame curve",
+      "source_recommendation": "procedural in Blender — per kitbash pilot findings, Meshy fails badly on thin elongated structures"
+    }
+  ],
+  "explicit_lesson_applied": "Vanguard's cockpit displays were AI-generated with unreadable blurred 'fake' text/UI, which we later replaced with render-target surfaces showing our real UMG HUD. For Steadfast we skip straight to that — display pieces above are meant as blank/simple bezels from the start, not AI-textured screens."
+}
