@@ -1,0 +1,12 @@
+{
+  "FrontConsole": {
+    "task": "01a0d00b-73c8-735e-8588-d52c7aa9ec7b",
+    "glb": "ArtSource/Ships/Steadfast/Kitbash/Meshy/FrontConsole.glb",
+    "size_cm": [
+      120,
+      220,
+      95
+    ],
+    "credits": 10
+  }
+}

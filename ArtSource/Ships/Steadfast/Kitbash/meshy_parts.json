@@ -1,0 +1,37 @@
+{
+  "_comment": "Steadfast cockpit hero props from Meshy, one piece at a time (author 23. 9. 2026: AI piece by piece, then re-materialed with our ambientCG materials; HANDOFF point 68). size_cm is the size in the cockpit; the importer rescales. Style after the author's SC mood references but no Star Citizen design copied.",
+  "style": "realistic AAA sci-fi spaceship interior prop, hard-surface, chamfered edges, dark charcoal painted metal with subtle edge wear, black leather padding, small white plastic trim accents, clean game-ready asset, no text, no logos",
+  "parts": [
+    {
+      "name": "PilotSeat",
+      "size_cm": [
+        75,
+        70,
+        150
+      ],
+      "target_polycount": 20000,
+      "prompt": "spaceship pilot seat facing forward: tall racing-style backrest with integrated headrest and deep side bolsters, perforated black leather cushions, white plastic side panels along the backrest edges, sturdy metal pedestal base with rails, padded armrests, a flight control joystick on the right armrest and a throttle lever on the left armrest"
+    },
+    {
+      "name": "EquipmentRack",
+      "size_cm": [
+        120,
+        220,
+        95
+      ],
+      "target_polycount": 20000,
+      "prompt": "a single standalone rectangular control desk block, like a low wide cabinet, nothing else in the scene: flat top sloping towards the viewer, two empty rectangular recessed screen bays on the top surface, one row of small square backlit buttons and toggle switches along the front edge, vent slots on the front face, chamfered metal box body, no seats, no frame, no arches, no canopy",
+      "note": "Asked for a low front console, came out as an equipment rack with two screens on its face (23. 9. 2026); used as that in the engine room. The first try (PilotConsole) was a whole cockpit with arches and was dropped."
+    },
+    {
+      "name": "SideConsole",
+      "size_cm": [
+        110,
+        50,
+        80
+      ],
+      "target_polycount": 12000,
+      "prompt": "spaceship cockpit side console: narrow sloped control panel box with grouped toggle switches, rotary knobs, small indicator lights in rows, hinged safety covers, a handle along the top edge, chamfered metal body"
+    }
+  ]
+}

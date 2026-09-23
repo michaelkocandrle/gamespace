@@ -103,6 +103,17 @@ SEAT_X = 19.9
 DASH_X = (21.0, 22.2)
 # Blue light off the MFDs in front of each pilot, and where the player starts: in the cargo bay.
 COCKPIT_SCREENS = [(20.9, -0.95, 1.2), (20.9, 0.95, 1.2)]
+# Hero props from Meshy (ArtSource/Ships/Steadfast/Kitbash/Meshy, HANDOFF point 68): placed by the
+# import as their own actors with their own textures, instead of the blocky procedural pieces.
+# at = floor point under the prop's centre, yaw = where its front faces (degrees, Blender, +X = 0),
+# width = the size of its bounding box along its own X after scaling (uniform scale).
+MESHY_PROPS = [
+    {"mesh": "PilotSeat", "at": (SEAT_X - 0.05, y, 0.0), "yaw": 0.0, "width": 0.84} for y in SEATS_Y
+] + [
+    {"mesh": "SideConsole", "at": (SEAT_X + 0.15, side * 1.82, 0.0), "yaw": 0.0, "width": 1.15} for side in (-1.0, 1.0)
+] + [
+    {"mesh": "EquipmentRack", "at": (ENGINE_X[0] + 0.45, 1.9, 0.0), "yaw": 0.0, "width": 1.3},
+]
 SPAWN = (1.5, 0.0, 0.05)
 GRAVITY_BOX = ((-7.3, -3.3, -0.4), (22.8, 3.3, 3.0))
 DOORS = [{"at": (COCKPIT_X[0], 0.0, 0.0), "dir": (1.0, 0.0, 0.0)}]
@@ -615,34 +626,6 @@ def polygon(points):
     return bm
 
 
-def seat(room, y, black, white, dark):
-    """A pilot's seat facing +X after the reference: tall black racing back with side bolsters and a
-    white stripe, a pedestal, armrests with a stick (right) and a throttle (left)."""
-    x = SEAT_X
-    room.add("SeatBase", box((x - 0.18, y - 0.18, 0.0), (x + 0.18, y + 0.18, 0.36), bevel=0.03), dark)
-    room.add("SeatPan", box((x - 0.30, y - 0.27, 0.36), (x + 0.28, y + 0.27, 0.50), bevel=0.04), black)
-    tilt = mathutils.Matrix.Rotation(math.radians(-14.0), 3, "Y")
-    pivot = mathutils.Vector((x - 0.3, y, 0.5))
-    for lo, hi, mat in (((x - 0.40, y - 0.25, 0.48), (x - 0.26, y + 0.25, 1.55), black),       # back
-                        ((x - 0.38, y - 0.33, 0.55), (x - 0.18, y - 0.25, 1.35), black),       # bolsters
-                        ((x - 0.38, y + 0.25, 0.55), (x - 0.18, y + 0.33, 1.35), black),
-                        ((x - 0.27, y - 0.30, 0.60), (x - 0.25, y - 0.27, 1.30), white),       # stripes
-                        ((x - 0.27, y + 0.27, 0.60), (x - 0.25, y + 0.30, 1.30), white),
-                        ((x - 0.27, y - 0.07, 1.30), (x - 0.25, y + 0.07, 1.50), white)):      # head badge
-        piece = box(lo, hi, bevel=0.025)
-        bmesh.ops.rotate(piece, verts=piece.verts, cent=pivot, matrix=tilt)
-        room.add("SeatBack", piece, mat)
-    for side, control in ((-1.0, "throttle"), (1.0, "stick")):
-        ay = y + side * 0.36
-        room.add("SeatArm", box((x - 0.25, ay - 0.06, 0.62), (x + 0.30, ay + 0.06, 0.70), bevel=0.015), dark)
-        room.add("SeatArmPost", box((x - 0.05, ay - 0.04, 0.36), (x + 0.05, ay + 0.04, 0.62)), dark)
-        if control == "stick":
-            room.add("Stick", box((x + 0.18, ay - 0.025, 0.70), (x + 0.23, ay + 0.025, 0.86), bevel=0.012), black)
-            room.add("StickTop", box((x + 0.16, ay - 0.035, 0.86), (x + 0.25, ay + 0.035, 0.90), bevel=0.01), white)
-        else:
-            room.add("Throttle", box((x + 0.10, ay - 0.03, 0.70), (x + 0.24, ay + 0.03, 0.78), bevel=0.012), black)
-
-
 def screen_quad(screens, name, centre, facing, size, mat):
     """A picture on a rectangle facing `facing` (towards the viewer), right way round and upright."""
     c = mathutils.Vector(centre)
@@ -788,11 +771,7 @@ def build_cockpit(templates, mats):
             centre = mathutils.Vector((SEAT_X + 0.7, y + side * 0.62, 1.02))
             eye = mathutils.Vector((SEAT_X - 0.1, y, 1.25))
             mfd(room, centre, tuple(eye - centre), (0.3, 0.21), mats["holo"][pages[(y, side)]], mats["dark"], screens)
-    # Side consoles by the canopy wall, an overhead panel between the seats.
-    for side in (-1.0, 1.0):
-        lo_y, hi_y = sorted((side * 1.55, side * 2.05))
-        console(room, (SEAT_X - 0.4, lo_y, 0.0), (SEAT_X + 0.7, hi_y, 0.8), 0.15, mats["body"], mats["button"],
-                mats["white"], mats["dark"], rows=3)
+    # Side consoles and seats are Meshy props now (MESHY_PROPS); an overhead panel between the seats.
     over = box((SEAT_X - 0.1, -0.55, 2.42), (SEAT_X + 0.9, 0.55, 2.6), bevel=0.02)
     room.add("Overhead", over, mats["dark"])
     for i in range(5):
@@ -801,8 +780,6 @@ def build_cockpit(templates, mats):
             y = -0.4 + j * 0.27
             room.add("OverheadButton", box((x - 0.03, y - 0.04, 2.40), (x + 0.03, y + 0.04, 2.42)),
                      mats["button"] if (i + j) % 2 else mats["white"])
-    for y in SEATS_Y:
-        seat(room, y, mats["black"], mats["white"], mats["dark"])
     lamps(room, templates["lamp"], COCKPIT_LAMPS)
     room.screens = list(COCKPIT_SCREENS)
     return room, glass, screens
@@ -895,6 +872,7 @@ def main():
         "rooms": {},
         "doors": [dict(d, leaf=[leaf_width, leaf_height]) for d in DOORS],
         "spawn": list(SPAWN),
+        "props": [dict(p, at=list(p["at"])) for p in MESHY_PROPS],
         "gravity_box": [list(GRAVITY_BOX[0]), list(GRAVITY_BOX[1])],
     }
     for room in rooms + [leaf]:

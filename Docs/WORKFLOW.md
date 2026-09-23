@@ -320,6 +320,7 @@ Presety (`Tools/Shots/*.json`):
 | `flicker_check` | blikání: každý pohled 8× za sebou stejnou kamerou; vyhodnocení = podíl pixelů, které se mezi snímky mění (`python Tools/Shots/measure_flicker.py <složka> <mapa.png>`) |
 | `sc_look` | interiér s automatickou expozicí ve 1080p proti SC referencím; čísla `python Tools/Shots/measure_look.py <složka>` (rozsahy SC v hlavičce skriptu) |
 | `sc_tune` | varianty barvy SC vzhledu (kov, teplota světel, barva lišt, akcenty) přes `space.Kit*` |
+| `wear_check` | opotřebení zblízka (stěna, bedna, rám dveří, podlaha) bez něj a s výchozím nastavením |
 | `wear_tune` | opotřebení a špína materiálu (`space.Kit WearAmount / WearEverywhere / GrimeAmount`) |
 | `perf_quality` | cena kvality ve 1080p: filmová proti epické po skupinách a TSR 75 %, v letovém kokpitu i interiéru (spouštět s `-Width 1920 -Height 1080` – autor hraje ve 1080p, výchozích 1600 × 900 dává o ~40 % lepší čísla) |
 | `perf_interior` | výkon interiéru: `stat unit` a varianty stínů / dosahu světel přes `space.KitLight` |
@@ -670,6 +671,13 @@ snímku.
 - w) **Piny uzlů materiálu v Pythonu mají vlastní jména:** `Power` má `Base`/`Exp`, ne `A`/`B`;
   `TextureSample` bere souřadnice na pinu `UVs`, ne `Coordinates`. `connect_material_expressions`
   při špatném jménu jen vrátí False – skript musí chybu ohlásit (`link()` v `import_interior.py`).
+- x) **Meshy a „celá sestava“:** zadání „pult do kokpitu“ vrátilo celý kokpit s oblouky a sedadly; ani
+  „samostatný blok, nic jiného“ nedalo nízký pult, ale skříň. Samostatné předměty (sedadlo, boční panel,
+  skříň) umí dobře, přesný tvar na míru ne. Každý díl si prohlédni ze tří stran (render v Blenderu) dřív,
+  než ho zapojíš; co nesedí, použij jinde nebo zahoď.
+- y) **Opotřebení podle normálové mapy funguje jen na kitu.** Procedurální díly mají v materiálu kitu
+  UV na náhodném místě atlasu, takže „hrana“ z normálové mapy padne doprostřed plochy. Proto slabé
+  opotřebení a nic mimo hrany.
 - v) **Žádná jména ze Star Citizenu** v obsahu (stanice, lodě, firmy) – vzhled ano, cizí značky ne.
 
 ### 9.4 C++ a UHT

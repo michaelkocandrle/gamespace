@@ -24,6 +24,7 @@ CC-BY model.
 | 4 skenované kameny (`rock_*`) | [Poly Haven](https://polyhaven.com) | rozptyl kamenů na planetě (`PlanetRockScatter`) |
 | Modular Sci-Fi MegaKit (Standard), 190 modelů | [Quaternius](https://quaternius.itch.io/modular-sci-fi-megakit) | interiér Steadfastu — chodby, nákladový prostor (`ArtSource/ThirdParty/Quaternius/README.md`) |
 | PBR materiály PaintedMetal004, PaintedMetal013, MetalPlates006, Leather033A, Rubber004 (CC0) | [ambientCG](https://ambientcg.com) | povrchy interiéru Steadfastu (`ArtSource/Textures/ambientCG/`) |
+| Pilotní sedadlo, boční konzole, skříň s přístroji (vygenerováno) | [Meshy AI](https://www.meshy.ai), placený plán autora (výstup patří autorovi) | kokpit a strojovna Steadfastu (`ArtSource/Ships/Steadfast/Kitbash/Meshy/`) |
 
 ## Fonty a zvuky
 

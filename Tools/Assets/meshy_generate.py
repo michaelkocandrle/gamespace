@@ -5,6 +5,7 @@
     python Tools/Assets/meshy_generate.py SwitchPanel  # one part
     python Tools/Assets/meshy_generate.py --refine     # also run the texture pass
     python Tools/Assets/meshy_generate.py --dry-run    # print the prompts, call nothing
+    python Tools/Assets/meshy_generate.py --spec ArtSource/Ships/Steadfast/Kitbash/meshy_parts.json         --out ArtSource/Ships/Steadfast/Kitbash/Meshy --refine      # another ship's list
 
 Why a script and not clicking the site: the four parts have to be regenerable with the same
 prompts and the same sizes, and the recipe belongs next to the rest of the pipeline
@@ -85,19 +86,29 @@ def main(argv):
     # --hi asks for geometry, not just a silhouette: the finest voxel grid Meshy offers and a much
     # higher triangle budget. Used to see how far the cheap route gets before paying for UltraShape.
     hi = "--hi" in argv
+    # --spec <json> --out <folder>: another ship's part list (default: the Vanguard's kitbash parts).
+    spec_path, out_dir = SPEC, OUT
+    for flag in ("--spec", "--out"):
+        if flag in argv:
+            value = argv[argv.index(flag) + 1]
+            argv = [a for i, a in enumerate(argv) if a != flag and (i == 0 or argv[i - 1] != flag)]
+            if flag == "--spec":
+                spec_path = os.path.join(ROOT, value)
+            else:
+                out_dir = os.path.join(ROOT, value)
     wanted = [a for a in argv if not a.startswith("-")]
 
-    spec = json.load(open(SPEC, encoding="utf-8"))
+    spec = json.load(open(spec_path, encoding="utf-8"))
     style = spec.get("style", "")
     parts = [p for p in spec["parts"] if not wanted or p["name"] in wanted]
     if not parts:
-        raise SystemExit("meshy: no part called %s in %s" % (", ".join(wanted), SPEC))
+        raise SystemExit("meshy: no part called %s in %s" % (", ".join(wanted), spec_path))
 
     key = os.environ.get("MESHY_API_KEY", "").strip()
     if not key and not dry_run:
         raise SystemExit("meshy: set MESHY_API_KEY first (the key never goes in the repo)")
 
-    os.makedirs(OUT, exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
     report = {}
     for part in parts:
         prompt = "%s. Style: %s" % (part["prompt"], style) if style else part["prompt"]
@@ -132,7 +143,7 @@ def main(argv):
         url = (task.get("model_urls") or {}).get("glb")
         if not url:
             raise SystemExit("meshy: task %s has no glb in model_urls" % task.get("id"))
-        path = os.path.join(OUT, "%s%s.glb" % (part["name"], "_hi" if hi else ""))
+        path = os.path.join(out_dir, "%s%s.glb" % (part["name"], "_hi" if hi else ""))
         size = download(url, path)
         log("  saved %s (%.1f MB, %s credits)" % (path, size / 1e6, task.get("consumed_credits")))
         report[part["name"] + ("_hi" if hi else "")] = {
@@ -143,7 +154,7 @@ def main(argv):
         }
 
     if report:
-        path = os.path.join(OUT, "meshy_report.json")
+        path = os.path.join(out_dir, "meshy_report.json")
         json.dump(report, open(path, "w", encoding="utf-8"), indent=2)
         log("report %s" % path)
     return 0

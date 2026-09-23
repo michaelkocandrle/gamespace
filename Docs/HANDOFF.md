@@ -1142,6 +1142,21 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - **Měřeno** (`-Preset wear_tune`): opotřebení 0,8 s pětinou mimo hrany dělalo z celých stěn maskáč (detail
       0,040, nad SC); 0,5 skoro jen na hranách = 0,027–0,030, v rozsahu SC (0,024–0,035). Barva a jas beze změny.
     - Ladění za běhu: `space.Kit WearAmount / WearEverywhere / GrimeAmount / FloorPlates`.
+68. **Opotřebení prověřené zblízka a první díly z Meshy** (23. 9. 2026, autor: „prověř to opotřebení“, krok 5).
+    - **Opotřebení** (`-Preset wear_check`, stěna / bedna / rám dveří / podlaha zblízka proti výřezům SC):
+      v SC referencích jsou lakované panely skoro čisté. Naše 0,5 vypadalo jako bílé oděrky a na
+      procedurálních dílech (rámy dveří, víka) sedělo náhodně uprostřed ploch. Teď `WearAmount` 0,2,
+      jen na hranách (`WearEverywhere` 0), holý kov jen o stupeň světlejší než lak (0,30) a matný (0,45).
+    - **Meshy** (`Tools/Assets/meshy_generate.py --spec ArtSource/Ships/Steadfast/Kitbash/meshy_parts.json
+      --out ArtSource/Ships/Steadfast/Kitbash/Meshy --refine`, 10 kreditů za díl):
+      - `PilotSeat` – vysoké černé kožené sedadlo s bílými bočnicemi, joystickem a lyžinami; výborné, ve hře.
+      - `SideConsole` – boční panel s oranžovými přepínači a pákou; ve hře u obou stěn kokpitu.
+      - Přední pult nevyšel dvakrát: poprvé celá kabina s oblouky (zahozeno), podruhé skříň s obrazovkami –
+        ta stojí jako `EquipmentRack` ve strojovně. Přední pult zůstává procedurální s hologramy.
+    - Díly jsou samostatné herce s vlastními texturami z Meshy (`/Game/Environments/Steadfast/Props`),
+      rozmístění v `MESHY_PROPS` stavitele → `Interior_layout.json` → `import_interior.py` (`place_props`:
+      jednotné měřítko podle šířky, postavené na podlahu, Meshy dívá do −Y → otočení −90°). Kolize podle
+      polygonů. Procedurální sedadla a boční konzole jsou pryč.
 
 ---
 

@@ -252,6 +252,24 @@
    ],
    "fov": 88,
    "exposure": 2.0
+  },
+  {
+   "name": "o_engine_rack",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "camera_location": [
+    -3.5,
+    498.6,
+    1.7
+   ],
+   "camera_look_at": [
+    -6.8,
+    498.2,
+    0.5
+   ],
+   "fov": 80,
+   "exposure": 2.0
   }
  ]
 }

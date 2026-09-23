@@ -40,9 +40,17 @@ HOLO_TINT = (0.75, 0.9, 1.0)
 HOLO_STRENGTH = 5.0             # 3 washed out against a bright planet through the canopy
 HOLO_SCANLINES = 240.0          # lines per screen height
 SCREENS_TAG = "SpaceInteriorScreens"
+# Meshy hero props (HANDOFF point 68): own meshes with Meshy's own PBR textures, in their own folder
+# so the kit's material mapping leaves them alone.
+MESHY_DIR = os.path.join(ROOT, "ArtSource", "Ships", "Steadfast", "Kitbash", "Meshy")
+PROP_TAG = "SpaceInteriorProp"
+# Meshy's models face their own -Y; in Unreal (Y mirrored) that is +Y, so a prop turned by the
+# layout's yaw first needs this to face +X.
+MESHY_FRONT_YAW = -90.0
 DOOR_LEAF = "DoorLeaf"
 LAYOUT = os.path.join(INTERIOR, "Interior_layout.json")
 PACKAGE = "/Game/Environments/Steadfast"
+PROPS_PACKAGE = PACKAGE + "/Props"
 HOLO_MATERIAL = PACKAGE + "/M_KitHolo"
 LEATHER_MATERIAL = PACKAGE + "/M_KitLeather"
 # Surface layers from ambientCG (CC0, ArtSource/Textures/ambientCG, Docs/AssetSources_Free.md): the kit
@@ -53,11 +61,16 @@ SURFACE_PACKAGE = PACKAGE + "/Surfaces"
 # Wear measured on 23. 9. 2026 (Tools/Shots/wear_tune.json): 0.8 with a fifth of it away from the
 # edges turned whole walls into camouflage (fine detail 0.040, above SC's 0.024-0.035); half the
 # strength, almost all of it on the edges, reads as SC's worn bevels at 0.027-0.030.
-WEAR_AMOUNT = 0.5               # scratches through to bare metal, mostly on the kit's bevelled edges
-WEAR_EVERYWHERE = 0.05          # how much of the wear shows away from the edges
+# Checked up close against the SC references on 23. 9. 2026 (Tools/Shots/wear_check.json): their
+# painted panels read nearly clean; at 0.5 our wear showed as white chips, and on the procedural
+# pieces (door jambs, lids) it landed mid-face. Now: faint, edges only, bare metal only a step
+# lighter than the paint and not glossy.
+WEAR_AMOUNT = 0.2               # scratches through to bare metal, on the kit's bevelled edges
+WEAR_EVERYWHERE = 0.0           # how much of the wear shows away from the edges
 GRIME_AMOUNT = 0.5              # blotches and dirt in the kit's cavities (its AO)
 FLOOR_PLATES = 0.65             # deck plate blended over upward-facing surfaces
-BARE_METAL = (0.52, 0.52, 0.54)
+BARE_METAL = (0.3, 0.3, 0.31)
+BARE_ROUGHNESS = 0.45
 WEAR_TILE_CM = 120.0
 GRIME_TILE_CM = 300.0
 PLATE_TILE_CM = 100.0
@@ -398,7 +411,7 @@ def build_master(defaults, surfaces=None):
     rough_out, metal_out = rough, metal
     if surfaces:
         on_plate = lerp(material, rough, plate_rough, floor, -300, 3100)
-        on_wear = lerp(material, on_plate, const(material, 0.28, -300, 3200), wear, -150, 3100)
+        on_wear = lerp(material, on_plate, const(material, BARE_ROUGHNESS, -300, 3200), wear, -150, 3100)
         rough_out = binary(material, unreal.MaterialExpressionAdd, on_wear,
                            binary(material, unreal.MaterialExpressionMultiply, grime, const(material, 0.15, -300, 3300), -150, 3300),
                            0, 3100)
@@ -682,6 +695,56 @@ def build_leather(surfaces):
     return material
 
 
+def place_props(actors):
+    """Import the Meshy props the layout asks for and stand them on the floor, scaled uniformly to
+    their width, turned to face where the layout says."""
+    for actor in actors.get_all_level_actors():
+        if actor.get_actor_label().startswith("Steadfast_Prop"):
+            actors.destroy_actor(actor)
+    wanted = sorted({p["mesh"] for p in read_layout().get("props", [])})
+    tasks = []
+    for name in wanted:
+        task = unreal.AssetImportTask()
+        task.filename = os.path.join(MESHY_DIR, name + ".glb")
+        task.destination_path = PROPS_PACKAGE + "/" + name
+        task.automated = True
+        task.replace_existing = True
+        task.save = True
+        tasks.append(task)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks(tasks)
+    meshes = {}
+    for name, task in zip(wanted, tasks):
+        for path in task.get_editor_property("imported_object_paths") or []:
+            asset = EAL.load_asset(path)
+            if isinstance(asset, unreal.StaticMesh):
+                meshes[name] = asset
+                collide_per_polygon(asset)
+                EAL.save_loaded_asset(asset, only_if_is_dirty=False)
+    count = 0
+    for index, prop in enumerate(read_layout().get("props", [])):
+        mesh = meshes.get(prop["mesh"])
+        if not mesh:
+            log("VAROVÁNÍ: Meshy díl %s chybí" % prop["mesh"])
+            continue
+        box = mesh.get_bounding_box()
+        scale = prop["width"] * 100.0 / max(box.max.x - box.min.x, 1.0)
+        yaw = MESHY_FRONT_YAW - prop["yaw"]                       # Blender yaw -> Unreal (Y mirrored)
+        centre = unreal.Vector((box.min.x + box.max.x) / 2.0 * scale, (box.min.y + box.max.y) / 2.0 * scale, 0.0)
+        c, si = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+        turned = unreal.Vector(centre.x * c - centre.y * si, centre.x * si + centre.y * c, 0.0)
+        spot = to_unreal(prop["at"]) - turned + unreal.Vector(0.0, 0.0, -box.min.z * scale)
+        actor = actors.spawn_actor_from_class(unreal.StaticMeshActor, spot, unreal.Rotator(roll=0.0, pitch=0.0, yaw=yaw))
+        actor.set_actor_label("Steadfast_Prop_%s_%d" % (prop["mesh"], index))
+        actor.set_actor_scale3d(unreal.Vector(scale, scale, scale))
+        actor.set_editor_property("tags", [unreal.Name(PROP_TAG)])
+        component = actor.static_mesh_component
+        component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
+        component.set_static_mesh(mesh)
+        count += 1
+    log("Meshy díly: %d (%s)" % (count, ", ".join(wanted)))
+    return count
+
+
 def collide_per_polygon(mesh):
     """Walkable: the character collides with the mesh itself, not a box round it."""
     body = mesh.get_editor_property("body_setup")
@@ -749,7 +812,7 @@ def main():
     log("instance materiálu: %s" % ", ".join(sorted(instances)))
 
     meshes = [EAL.load_asset(p) for p in EAL.list_assets(PACKAGE, recursive=True, include_folder=False)]
-    meshes = [m for m in meshes if isinstance(m, unreal.StaticMesh)]
+    meshes = [m for m in meshes if isinstance(m, unreal.StaticMesh) and "/Props/" not in m.get_path_name()]
     # Slots come in named after the kit's own materials (MI_Trim_01_007, M_Black_002, M_LightFade_Red)
     # while the texture sets are called T_Trim_01 and friends - so the "T_" has to come off before
     # matching, or every slot falls back to the first instance (which is what happened first time).
@@ -841,6 +904,8 @@ def main():
             kept.append(MEL.get_material_instance_texture_parameter_value(instance, parameter))
     for parameter in ("BaseColor", "NormalMap", "ORMMap"):
         kept.append(reference.get(parameter))
+    props = place_props(actors)
+    kept += [EAL.load_asset(p) for p in EAL.list_assets(PROPS_PACKAGE, recursive=True, include_folder=False)] if props else []
     prune(kept)
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).save_current_level()
     log("postaveno v %s na %s" % (MAP, PLACE_AT))
