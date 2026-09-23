@@ -19,16 +19,29 @@ Než se cokoliv pošle do Meshy/Tripo, rozhodni:
 
 ## Postup u komplexní kompozice
 
-1. **Rozděl na logické díly** podle funkce a geometrické složitosti:
-   - Základní tvar/rám (velký, jednoduchý) — může jít přímo z multi-view generování
-   - Malé detailní kousky (knoflík, displej rám, ventilace, kabeláž, šroubky) — **každý
-     samostatně**, jako vlastní jednoduchý objekt. Tohle je přesně ta kategorie, kde je AI
-     nejspolehlivější (jednoduchá silueta, čitelná plocha materiálu).
-2. **Sesaď (kitbash) díly na základní tvar** přes Blender MCP s živou vizuální kontrolou
-   (nainstalováno 19. 9. 2026, postup v `WORKFLOW.md` kapitola 3). Tohle je krok, který
-   předtím chyběl úplně — zkoušelo se generovat rovnou hotovou kompozici.
-3. Zbytek pipeline (decimate, UV, rebake, export, import) beze změny podle
-   `Docs/Ships/ShipPipeline.md`.
+1. **Meshy dělá jen hrubou obálku/objem** — celkový tvar kabiny, sklon dashboardu,
+   silueta sedadel. Z dálky/na celek to Meshy zvládá slušně (je to pořád "jeden
+   velký tvar" z pohledu pravidla výše).
+2. **Veškerý funkční/technický detail je procedurální, NE AI-generovaný kus po
+   kuse.** Tlačítka, přepínače, rámy displejů, panely s pravidelným rozestupem —
+   tohle dělá Claude Code přímo v Blenderu (bmesh, přesné primitivy), ne Meshy/
+   Tripo, a to ani po jednotlivých malých dílech. Důvod, zjištěno na Steadfast
+   interiéru 23. 9. 2026: i malé samostatně generované AI kusy (viz kitbash pilot
+   níže) nemají strojovou přesnost — hrany nejsou rovné, rozestupy nejsou
+   pravidelné, vypadá to jako "organická aproximace" tlačítka, ne vyrobená
+   součástka. Lidské oko tohle u technických předmětů okamžitě pozná jako špatně.
+   Procedurální přístup navíc stojí nula kreditů a je neomezeně opakovatelný.
+3. **Sesaď** obojí (obálka + procedurální detail) přes Blender MCP s živou
+   vizuální kontrolou (postup v `WORKFLOW.md` kapitola 3).
+4. Zbytek pipeline (decimate/retopologie, UV, rebake, export, import) beze
+   změny podle `Docs/Ships/ShipPipeline.md`.
+
+Tohle nahrazuje dřívější plán "kitbash z malých AI-generovaných dílů" (viz sekce
+kitbash pilot níže pro Vanguard) — ten pilot ukázal částečně dobré výsledky u
+Vanguardu, ale u Steadfast interiéru se ukázalo, že i "vyhrávající" AI díly
+nemají dost geometrickou přesnost na blízký pohled hráče v kokpitu. Kitbash
+pilot zůstává jako cenný záznam SROVNÁNÍ (kdy AI vyhrává na "designu", kdy
+prohrává na přesnosti), ne jako doporučený finální postup.
 
 ## Nástroje k vyzkoušení pro geometrický detail (ne jen texturu)
 
