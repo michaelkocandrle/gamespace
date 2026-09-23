@@ -962,6 +962,21 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       ×2,5 / 0,6 vypadalo nad planetou mokře. **Interiér kokpitu hodnoty nedědí** – v setupu je nemá
       a musí zůstat na hodnotách masteru.
     - Kontrolní snímky bez ladění: `-Preset hull_now` (vesmír, nad planetou, kokpit).
+58. **Nákladový prostor Steadfastu ve hře** (23. 9. 2026, autor: „dej to do hry ať to vidíme“).
+    - Prostor postavený z CC0 kitu Quaternius (Blender, `Tools/Blender/recolour_kit.py`) je slitý do
+      jednoho meshe (16 806 trojúhelníků, 10,2 × 8,0 × 3,1 m) a leží v `ArtSource/Ships/Steadfast/
+      Interior/CargoBay.glb`.
+    - `Tools/Assets/import_interior.py` ho naimportuje do `/Game/Environments/Steadfast`, postaví
+      materiál `M_KitTrim` (odbarvit → zesvětlit → gunmetal, ORM na roughness/metallic/AO, oranžová
+      emise), přiřadí instance na sloty, postaví herce v `TestSpace` 500 m stranou a rozsvítí
+      osm světel. Celé se to dá kdykoliv přehrát znovu.
+    - **Tři pasti, které to držely šedé** (podrobně kap. 12): chybějící usage flag Nanite,
+      nepřipojený texturní parametr se sRGB `DefaultTexture` (materiál se v zabalené hře vůbec
+      nezkompiloval a engine kreslil šachovnici `WorldGridMaterial`) a `unreal.Color` v pořadí BGRA.
+    - Volná kamera snímků umí `exposure` – bez zafixované expozice automatika vyrovnala každou
+      změnu materiálu a měření nedávalo smysl. Pro interiér sedí 2,0.
+    - Snímky: `-Preset steadfast_interior`. **Zbývá doladit:** gunmetal je pořád spíš stříbrný než
+      šedomodrý a kit nemá strop.
 
 ---
 
@@ -1148,6 +1163,11 @@ Pole jednoho snímku: `name`, `camera` (`cockpit`/`chase`), `hud` (0/1/2), `alti
 hned dole / nahoře), `lower_gear` (začne vysouvat, krátký `settle` ho chytí v půlce), `precision`,
 `chase_yaw`, `chase_pitch` (> 0 = zespodu), `chase_zoom` (kamera otočená kolem lodi), `drift` [vpřed, vpravo, nahoru] v m/s (rychlost v osách lodi místo `speed_ms`, pro značku dráhy letu). Nízká
 `altitude_m` s podvozkem a pár sekund `settle` loď opravdu posadí na zem.
+
+**Volná kamera** (23. 9. 2026, pro interiéry a statické scény): `camera: "free"` s `camera_location`
+a `camera_look_at` v **metrech** (svět je v cm, skript čísla násobí stem), `fov` a `exposure`.
+`exposure` zafixuje automatiku (min = max jas); bez něj kamera dál adaptuje, takže ztmavení
+materiálu se na snímku neprojeví – oko se prostě víc otevře. Pro nákladový prostor sedí 2,0.
 
 ### Jednotlivý snímek při hraní
 

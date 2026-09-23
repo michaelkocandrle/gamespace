@@ -588,6 +588,19 @@ snímku.
   `add_*_input.py`, které je doplňují.
 - e) **Příliš silné světlo v kokpitu** (stará bodovka 12 cd) dělalo celý kokpit šedým a plochým.
   Tmavý SC vzhled dělají slabé světlo, displeje jako zdroje a tint interiéru.
+- f) **Šedá šachovnice přes celý interiér = materiál se v zabalené hře nezkompiloval.** Engine v
+  takovém případě tiše nasadí `WorldGridMaterial` a v editoru je přitom všechno v pořádku. Dvě
+  příčiny, obě v `M_KitTrim` (23. 9. 2026):
+  1. **Chybí usage flag.** Naimportovaný mesh má zapnutý Nanite, materiál dělaný skriptem ne
+     (`used_with_nanite`). Editor si flag doplní, až materiál na mesh přetáhneš myší; skript si ho
+     musí nastavit sám (`used_with_nanite`, `used_with_static_mesh`, `used_with_instanced_static_meshes`).
+  2. **Nepřipojený texturní parametr.** Sampler bez textury spadne na engine `DefaultTexture`, což je
+     sRGB Color - pro sampler typu Normal nebo Linear Color je to **chyba kompilace**
+     („Sampler type is Normal, should be Color"). Každému samplerovi nastav výchozí texturu
+     odpovídajícího typu.
+  Kde se to pozná: cook log `%APPDATA%\Unreal Engine\AutomationTool\Logs\...\Log.txt`, hledej
+  „Failed to compile Material" - hlásí i konkrétní uzel. Log zabalené hry říká jen následek
+  („missing usage flag", „Invalid shader map ID").
 
 ### 9.4 C++ a UHT
 
@@ -611,6 +624,12 @@ snímku.
   - animace potřebují `++GFrameCounter`;
   - shadery se nekompilují.
 - d) Vlastnosti jen `Config` bez `BlueprintReadOnly` nebo `Edit` nejsou z Pythonu vidět.
+- e) **`unreal.Color(255, 238, 214)` je modrá.** FColor má pořadí **B, G, R, A**, takže poziční
+  argumenty barvu prohodí - světla v nákladovém prostoru svítila modře. Používej keyword argumenty
+  (`unreal.Color(r=255, g=238, b=214, a=255)`).
+- f) `spawn_actor_from_object` v headless editoru padá (EXCEPTION_ACCESS_VIOLATION). Stabilní cesta
+  je `spawn_actor_from_class(StaticMeshActor)` a `set_static_mesh` dodatečně.
+- g) `asset_import_data` z Interchange nemá `source_data`; starší skripty na ní spadnou.
 
 ### 9.6 Blender pipeline
 

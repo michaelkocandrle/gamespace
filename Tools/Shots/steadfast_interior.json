@@ -1,0 +1,13 @@
+{
+  "_comment": "Nákladový prostor Steadfastu v enginu. Volná kamera (camera: free, camera_location / camera_look_at v metrech) - prostor stojí v TestSpace 500 m stranou od startu lodi. Expozice je zafixovaná (exposure), jinak automatika vyrovná každou změnu materiálu. Run: Tools/Shots.ps1 -Preset steadfast_interior",
+  "shots": [
+    {"name": "a_above", "camera": "free", "hud": 0, "settle": 3.0,
+     "camera_location": [-6, 494, 9], "camera_look_at": [4, 500, 1], "fov": 60, "exposure": 2.0},
+    {"name": "b_inside", "camera": "free", "hud": 0, "settle": 2.0,
+     "camera_location": [-1.5, 500, 1.65], "camera_look_at": [8, 500, 1.2], "fov": 75, "exposure": 2.0},
+    {"name": "c_corner", "camera": "free", "hud": 0, "settle": 2.0,
+     "camera_location": [-2, 495.5, 2.4], "camera_look_at": [6, 502, 0.8], "fov": 70, "exposure": 2.0},
+    {"name": "d_side", "camera": "free", "hud": 0, "settle": 2.0,
+     "camera_location": [4, 492, 1.6], "camera_look_at": [4, 500, 1.2], "fov": 70, "exposure": 2.0}
+  ]
+}

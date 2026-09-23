@@ -7,13 +7,26 @@
 #include "SpaceShotRunner.generated.h"
 
 class ASpaceshipPawn;
+class ACameraActor;
 
 /** One screenshot: where the ship is, what it is doing and which camera takes the picture. */
 struct FSpaceShot
 {
 	FString Name;
-	/** "cockpit" or "chase". */
+	/** "cockpit", "chase", or "free" (a camera placed by camera_location / camera_look_at). */
 	FString Camera = TEXT("chase");
+	/**
+	 * Free camera, metres in world space: where it stands and what it looks at. For pictures of
+	 * something that is not the ship - an interior, a prop, a piece of the level.
+	 */
+	FVector CameraLocation = FVector::ZeroVector;
+	FVector CameraLookAt = FVector::ZeroVector;
+	bool bFreeCamera = false;
+	/** Field of view of the free camera, degrees; 0 keeps the default. */
+	float CameraFov = 0.f;
+
+	/** Free camera only: pinned exposure, so two shots of the same room can be compared. 0 = auto. */
+	float Exposure = 0.f;
 	/** space.Hud: 0 hidden, 1 flight HUD only, 2 plus compact text, 3 plus full text; -1 leaves it alone. */
 	int32 HudMode = 1;
 	/** Place the ship this far above the nearest body's terrain (negative: leave it where it is). */
@@ -114,10 +127,13 @@ public:
 	static FString DefaultOutputDirectory();
 
 private:
+	void ApplyFreeCamera(const FSpaceShot& Shot, ASpaceshipPawn& Ship);
 	void ApplyShot(const FSpaceShot& Shot, ASpaceshipPawn& Ship);
 	ASpaceshipPawn* FindShip() const;
 
 	TArray<FSpaceShot> Shots;
+	/** Spawned only when a shot asks for a free camera. */
+	TWeakObjectPtr<ACameraActor> FreeCamera;
 	FString OutputDirectory;
 	int32 ShotIndex = INDEX_NONE;
 	float Timer = 0.f;

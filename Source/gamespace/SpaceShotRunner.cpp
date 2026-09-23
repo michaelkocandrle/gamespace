@@ -2,6 +2,10 @@
 
 #include "SpaceShotRunner.h"
 
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/PlayerController.h"
+
 #include "CelestialBody.h"
 #include "DistantBody.h"
 #include "Dom/JsonObject.h"
@@ -153,6 +157,20 @@ bool USpaceShotRunner::ParseShotList(const FString& Json, TArray<FSpaceShot>& Ou
 		{
 			Shot.CockpitEye = FVector((*Eye)[0]->AsNumber(), (*Eye)[1]->AsNumber(), (*Eye)[2]->AsNumber());
 		}
+		const TArray<TSharedPtr<FJsonValue>>* FreeLoc = nullptr;
+		if ((*Object)->TryGetArrayField(TEXT("camera_location"), FreeLoc) && FreeLoc->Num() == 3)
+		{
+			// Metres in the JSON, centimetres in the engine.
+			Shot.CameraLocation = FVector((*FreeLoc)[0]->AsNumber(), (*FreeLoc)[1]->AsNumber(), (*FreeLoc)[2]->AsNumber()) * 100.0;
+			Shot.bFreeCamera = true;
+		}
+		const TArray<TSharedPtr<FJsonValue>>* FreeLook = nullptr;
+		if ((*Object)->TryGetArrayField(TEXT("camera_look_at"), FreeLook) && FreeLook->Num() == 3)
+		{
+			Shot.CameraLookAt = FVector((*FreeLook)[0]->AsNumber(), (*FreeLook)[1]->AsNumber(), (*FreeLook)[2]->AsNumber()) * 100.0;
+		}
+		if ((*Object)->TryGetNumberField(TEXT("fov"), Number)) { Shot.CameraFov = float(Number); }
+		if ((*Object)->TryGetNumberField(TEXT("exposure"), Number)) { Shot.Exposure = float(Number); }
 		const TArray<TSharedPtr<FJsonValue>>* Stick = nullptr;
 		if ((*Object)->TryGetArrayField(TEXT("stick"), Stick) && Stick->Num() == 2)
 		{
@@ -336,6 +354,57 @@ void USpaceShotRunner::ApplyShot(const FSpaceShot& Shot, ASpaceshipPawn& Ship)
 		Ship.DebugSetCockpitLighting(Shot.CockpitKeyCd, Shot.CockpitFillCd, Shot.DisplayLightCd, Shot.InteriorTint);
 	}
 	Ship.SetCockpitView(Shot.Camera.Equals(TEXT("cockpit"), ESearchCase::IgnoreCase));
+	ApplyFreeCamera(Shot, Ship);
+}
+
+void USpaceShotRunner::ApplyFreeCamera(const FSpaceShot& Shot, ASpaceshipPawn& Ship)
+{
+	APlayerController* Controller = Ship.GetWorld() ? Ship.GetWorld()->GetFirstPlayerController() : nullptr;
+	if (!Controller)
+	{
+		return;
+	}
+	const bool bFree = Shot.bFreeCamera || Shot.Camera.Equals(TEXT("free"), ESearchCase::IgnoreCase);
+	if (!bFree)
+	{
+		if (FreeCamera.IsValid())
+		{
+			// Back to the ship's own cameras for the shots that follow.
+			Controller->SetViewTarget(&Ship);
+			FreeCamera->Destroy();
+			FreeCamera = nullptr;
+		}
+		return;
+	}
+	if (!FreeCamera.IsValid())
+	{
+		FreeCamera = Ship.GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass());
+	}
+	if (!FreeCamera.IsValid())
+	{
+		return;
+	}
+	const FVector Look = Shot.CameraLookAt.IsNearlyZero() ? Ship.GetActorLocation() : Shot.CameraLookAt;
+	FreeCamera->SetActorLocation(Shot.CameraLocation);
+	FreeCamera->SetActorRotation((Look - Shot.CameraLocation).GetSafeNormal().Rotation());
+	UCameraComponent* Camera = FreeCamera->GetCameraComponent();
+	if (Shot.CameraFov > 0.f)
+	{
+		Camera->SetFieldOfView(Shot.CameraFov);
+	}
+	// Auto exposure quietly undoes whatever a shot is meant to measure: darken the material, and
+	// the eye simply opens wider. A shot that says "exposure" pins it, the way the ship's own
+	// camera does; without it the camera keeps adapting, as every earlier preset expects.
+	FPostProcessSettings& Post = Camera->PostProcessSettings;
+	const bool bPinned = Shot.Exposure > 0.f;
+	Post.bOverride_AutoExposureMinBrightness = bPinned;
+	Post.bOverride_AutoExposureMaxBrightness = bPinned;
+	if (bPinned)
+	{
+		Post.AutoExposureMinBrightness = Shot.Exposure;
+		Post.AutoExposureMaxBrightness = Shot.Exposure;
+	}
+	Controller->SetViewTarget(FreeCamera.Get());
 }
 
 void USpaceShotRunner::TakeSingleShot(const FString& Name)
