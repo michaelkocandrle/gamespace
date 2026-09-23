@@ -654,6 +654,10 @@ Menší kroky, podle pořadí:
 11. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
 12. **Silnější záře displejů na rámu** a okolní desce.
 13. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
+14. **ambientCG.com** (sesterská stránka k Poly Havenu, stejná CC0 licence, volné API bez
+    klíče, 2000+ materiálů) – zvážit `fetch_ambientcg.py` podle vzoru `fetch_polyhaven.py`
+    pro variaci materiálu trupu (viz plastic_diag/plastic_mat) a pro interiér (kůže sedadel,
+    guma, opotřebený kov na panelech). Nalezeno autorem 23. 9. 2026, zatím nezapojeno.
 
 Velké celky:
 - tělo pilota v sedadle;
