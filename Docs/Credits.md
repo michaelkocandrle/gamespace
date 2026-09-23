@@ -22,6 +22,7 @@ CC-BY model.
 | --- | --- | --- |
 | `gravelly_sand`, `rock_face_03`, `dry_riverbed_rock` | [Poly Haven](https://polyhaven.com) | povrch planety Veyra (`build_space_scene.py`) |
 | 4 skenované kameny (`rock_*`) | [Poly Haven](https://polyhaven.com) | rozptyl kamenů na planetě (`PlanetRockScatter`) |
+| Modular Sci-Fi MegaKit (Standard), 190 modelů | [Quaternius](https://quaternius.itch.io/modular-sci-fi-megakit) | interiér Steadfastu — chodby, nákladový prostor (`ArtSource/ThirdParty/Quaternius/README.md`) |
 
 ## Fonty a zvuky
 

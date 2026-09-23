@@ -100,3 +100,6 @@ ArtSource/Reference/Video/
 # assets under Content/Planets are committed.
 ArtSource/Textures/PolyHaven/*/
 ArtSource/Models/PolyHaven/
+
+# Stažené balíky třetích stran: v repozitáři je jen README a to, co z nich skutečně použijeme.
+ArtSource/ThirdParty/**/*.zip
