@@ -43,7 +43,29 @@ nemají dost geometrickou přesnost na blízký pohled hráče v kokpitu. Kitbas
 pilot zůstává jako cenný záznam SROVNÁNÍ (kdy AI vyhrává na "designu", kdy
 prohrává na přesnosti), ne jako doporučený finální postup.
 
-## Nástroje k vyzkoušení pro geometrický detail (ne jen texturu)
+## Zdroje geometrie — tři rovnocenné cesty
+
+Vedle "generovat v Meshy" a "postavit procedurálně v Blenderu" existuje ještě třetí
+legitimní cesta, kterou stojí za to zvážit u každého nového kusu, ne jen jako výjimku:
+
+- **Koupený/stažený hotový model** s komerční licencí (Fab, Sketchfab, CGTrader, TurboSquid,
+  itch.io). Profesionálně vymodelovaná geometrie má přesně to, co AI generování postrádá —
+  čisté strojové hrany, promyšlené UV, žádný organický šum. Restylizace na náš vizuální
+  jazyk (gunmetal + oranžové akcenty, Kestrel Dynamics/Halcyon Freightworks paleta) jde
+  přes stejnou Meshy Retexture funkci, co už používáme, nebo ručně v materiálových nodech.
+  **Kontrola licence PŘED stažením je povinná** — CC0, royalty-free komerční nebo CC-BY
+  (s atribucí v creditech) jsou v pořádku; "personal use only", "non-commercial" a
+  "editorial use only" NE, bez ohledu na to, že se to tváří jako "free asset".
+- Zbytek pipeline (import do Blenderu, kolize, sockety, Nanite rozhodnutí, export) je
+  stejný bez ohledu na to, odkud geometrie pochází — `ShipPipeline.md` na tom nic nemění.
+
+Volba mezi třemi cestami podle situace:
+- Velký jednoduchý tvar, kde chceme rychlý první průchod → Meshy multi-view
+- Malý přesný technický díl (knoflík, panel, displej rám) → procedurálně v Blenderu
+- Kdykoliv existuje kvalitní hotový model odpovídající stylu → koupený/stažený base,
+  restylizovaný
+
+
 
 - **Meshy Retexture** (text prompt, bez nových referenčních obrázků) — upgraduje
   materiál/texturu existující geometrie. Použitelné a ověřené, nemění tvar.
