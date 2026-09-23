@@ -1,0 +1,716 @@
+{
+ "_comment": "Ladění barvy a světla nákladového prostoru Steadfastu (HANDOFF bod 59). Každá varianta začíná space.KitReset (konzolové příkazy platí do konce běhu), expozice pevná 2.0, dvě kamery: celek jako steadfast_interior/b_inside a detail zadní stěny. Příkazy: Source/gamespace/SpaceInteriorTuning.cpp. Run: Tools/Shots.ps1 -Preset interior_tune",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "base_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "base_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "env_off_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Sun Intensity 0",
+    "space.Sky Intensity 0"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "env_off_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Sun Intensity 0",
+    "space.Sky Intensity 0"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "metal_040_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit MetallicScale 0.4"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "metal_040_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit MetallicScale 0.4"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "metal_020_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit MetallicScale 0.2"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "metal_020_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit MetallicScale 0.2"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "lift_100_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit Lift 1.0"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "lift_100_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit Lift 1.0"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "lift_080_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit Lift 0.8"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "lift_080_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit Lift 0.8"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "lift_060_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit Lift 0.6"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "lift_060_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit Lift 0.6"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "gun_blue1_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.45 0.52 0.62 MI_T_"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "gun_blue1_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.45 0.52 0.62 MI_T_"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "gun_blue2_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.35 0.42 0.55 MI_T_"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "gun_blue2_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitColor Gunmetal 0.35 0.42 0.55 MI_T_"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "light_5500K_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work LightColor 255 255 255",
+    "space.KitLight Work UseTemperature True",
+    "space.KitLight Work Temperature 5500"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "light_5500K_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work LightColor 255 255 255",
+    "space.KitLight Work UseTemperature True",
+    "space.KitLight Work Temperature 5500"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "light_7000K_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work LightColor 255 255 255",
+    "space.KitLight Work UseTemperature True",
+    "space.KitLight Work Temperature 7000"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "light_7000K_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work LightColor 255 255 255",
+    "space.KitLight Work UseTemperature True",
+    "space.KitLight Work Temperature 7000"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "light_half_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work Intensity 575"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "light_half_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.KitLight Work Intensity 575"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "rough_045_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit RoughnessFloor 0.45"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "rough_045_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit RoughnessFloor 0.45"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "combo_a_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit Lift 0.8",
+    "space.Kit MetallicScale 0.4",
+    "space.KitColor Gunmetal 0.45 0.52 0.62 MI_T_",
+    "space.KitLight Work LightColor 255 255 255",
+    "space.KitLight Work UseTemperature True",
+    "space.KitLight Work Temperature 7000"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "combo_a_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit Lift 0.8",
+    "space.Kit MetallicScale 0.4",
+    "space.KitColor Gunmetal 0.45 0.52 0.62 MI_T_",
+    "space.KitLight Work LightColor 255 255 255",
+    "space.KitLight Work UseTemperature True",
+    "space.KitLight Work Temperature 7000"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  },
+  {
+   "name": "combo_b_wide",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit Lift 0.8",
+    "space.Kit MetallicScale 0.4",
+    "space.KitColor Gunmetal 0.35 0.42 0.55 MI_T_",
+    "space.KitLight Work LightColor 255 255 255",
+    "space.KitLight Work UseTemperature True",
+    "space.KitLight Work Temperature 7000",
+    "space.KitLight Work Intensity 575"
+   ],
+   "camera_location": [
+    -1.5,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "combo_b_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "exposure": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.Kit Lift 0.8",
+    "space.Kit MetallicScale 0.4",
+    "space.KitColor Gunmetal 0.35 0.42 0.55 MI_T_",
+    "space.KitLight Work LightColor 255 255 255",
+    "space.KitLight Work UseTemperature True",
+    "space.KitLight Work Temperature 7000",
+    "space.KitLight Work Intensity 575"
+   ],
+   "camera_location": [
+    1,
+    500,
+    1.6
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.6
+   ],
+   "fov": 35
+  }
+ ]
+}

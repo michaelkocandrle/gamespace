@@ -267,6 +267,7 @@ Spouštěj **nástrojem PowerShell** (přes bash se rozbije `$PSScriptRoot`):
 | `test_landing_sc2.py`, `test_landing_l5.py` | podvozek, přistání |
 | `test_ifcs_sc1.py`, `test_boost_afterburner_sc1b.py`, `test_flight_modes.py`, `test_free_look.py` | let |
 | `test_character_l6.py`, `test_planet_l3.py`, `test_menu_settings.py` | postava, planeta, menu |
+| `test_interior.py` | interiér Steadfastu: usage flagy, výchozí textury samplerů, parametry `M_KitTrim`, tagy, světla |
 
 Testy mimo UE (obyčejný Python):
 - `Tools/Assets/tests/test_import_ship_plan.py`;
@@ -312,6 +313,8 @@ Presety (`Tools/Shots/*.json`):
 | `hud` | HUD ve všech situacích |
 | `landing` | přistání, podvozek |
 | `ship_views`, `ship` | loď zvenku |
+| `steadfast_interior` | nákladový prostor Steadfastu, volná kamera, pevná expozice |
+| `interior_tune` | varianty materiálu a světel interiéru (`space.Kit*`), každá začíná `space.KitReset`; celek a detail stěny |
 
 Pole jednoho snímku:
 - základ: `camera`, `altitude_m`, `facing`, `speed_ms` (nebo `drift` [vpřed, vpravo, nahoru] v m/s,
@@ -602,6 +605,14 @@ snímku.
   „Failed to compile Material" - hlásí i konkrétní uzel. Log zabalené hry říká jen následek
   („missing usage flag", „Invalid shader map ID").
 
+- g) **Barva materiálu nestačí, když světlo má opačný odstín** (23. 9. 2026, `interior_tune`).
+  Modřejší gunmetal pod teplými světly (255, 238, 214) posunul B/R stěny jen 0,95 → 1,05, teplota
+  světel 7000 K sama 0,95 → 1,06, obojí dohromady 1,26. Když má být povrch „studený“, lad' nejdřív
+  světlo. A nižší metallic povrch zesvětlí, nezbarví – kov s bílým base colour je prostě stříbrný.
+- h) **Statické světlo za běhu nejde měnit setterem.** `SetIntensity`/`SetLightColor` světlo s
+  mobilitou Static ve hře odmítnou (i s `r.AllowStaticLighting=False`). Ladicí příkazy proto píšou
+  přímo do vlastností a volají `MarkRenderStateDirty()` (`SpaceInteriorTuning.cpp`, `SpacePostTuning.cpp`).
+
 ### 9.4 C++ a UHT
 
 - a) **Unity build, kolize jmen.** `ModeColor` v `SpaceFlightHud.cpp` a `SpaceDebugHUD.cpp` spadl
@@ -630,6 +641,9 @@ snímku.
 - f) `spawn_actor_from_object` v headless editoru padá (EXCEPTION_ACCESS_VIOLATION). Stabilní cesta
   je `spawn_actor_from_class(StaticMeshActor)` a `set_static_mesh` dodatečně.
 - g) `asset_import_data` z Interchange nemá `source_data`; starší skripty na ní spadnou.
+- h) **Jméno herce (label) v zabalené hře neexistuje.** `set_actor_label` je jen editor; C++ v buildu
+  herce podle něj nenajde. Co má hra najít (konzolové příkazy, logika), dostane **tag**
+  (`set_editor_property("tags", [unreal.Name(...)])`) – tak to dělá `import_interior.py`.
 
 ### 9.6 Blender pipeline
 
@@ -710,6 +724,9 @@ Všechno jde přes reflexi, takže žádný seznam vlastností se neudržuje ru�
 | `space.Sky <Vlastnost> <hodnota>` | vlastnost sky lightu (`Intensity`, `CubemapResolution`) |
 | `space.LightList sun\|sky <část jména>` | co ty dva příkazy berou |
 | `space.ShipMat` / `space.ShipMatColor` | materiály lodi (bod 34 v HANDOFF) |
+| `space.Kit <Param> <hodnota> [část jména]` / `space.KitColor` | materiály interiéru (`Lift`, `MetallicScale`, `RoughnessFloor`, `Gunmetal`…); filtr `MI_T_` = jen trim sheety (`Source/gamespace/SpaceInteriorTuning.cpp`) |
+| `space.KitLight Work\|Accent\|All <Vlastnost> <hodnota>` | světla interiéru (`Intensity` v lm, `UseTemperature True`, `Temperature`, `LightColor R G B`) |
+| `space.KitReset` | interiér, slunce a sky light zpátky na hodnoty z úrovně – první příkaz každé varianty |
 
 Nic z toho se neukládá. Po restartu hry je zpátky to, co je v úrovni.
 

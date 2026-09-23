@@ -95,6 +95,7 @@ Content/UI/Fonts/Custom/
 
 # Reference footage (someone else's video, local only): Tools/Reference/fetch_video.py
 ArtSource/Reference/Video/
+ArtSource/Reference/Mood/
 
 # Poly Haven sources (CC0): Tools/Assets/fetch_polyhaven.py downloads them again. The imported
 # assets under Content/Planets are committed.

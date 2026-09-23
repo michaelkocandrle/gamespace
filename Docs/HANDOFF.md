@@ -977,6 +977,27 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       změnu materiálu a měření nedávalo smysl. Pro interiér sedí 2,0.
     - Snímky: `-Preset steadfast_interior`. **Zbývá doladit:** gunmetal je pořád spíš stříbrný než
       šedomodrý a kit nemá strop.
+59. **Nákladový prostor: modrá ocel místo stříbra, změřeno** (23. 9. 2026). Autor upřesnil cíl: **ne
+    kopie jedné reference, ale styl** – futuristické sci-fi, každá loď vlastní design, stejný „vibe“
+    (tři jeho obrázky jsou lokálně v `ArtSource/Reference/Mood/`, mimo git). Změřené rozsahy těch
+    obrázků (sRGB): B/R 1,1–1,6 (studené), sytost 0,25–0,45, stíny p10 0,05–0,13, světla p90 ~0,7.
+    - **Ladění za běhu:** `space.Kit`, `space.KitColor`, `space.KitLight`, `space.KitReset`
+      (`Source/gamespace/SpaceInteriorTuning.cpp`). Zesvětlení, metallic a drsnost jsou teď parametry
+      `M_KitTrim`; interiér a světla se hledají podle tagů (`SpaceInterior`, `SpaceInteriorLight_Work`,
+      `_Accent`), protože jména herců z editoru v zabalené hře nejsou.
+    - **Měření** (`-Preset interior_tune`, 15 variant, pevná expozice 2,0, stěna/podlaha/detail stěny):
+      výchozí stav stěna B/R **0,95**, sytost 0,05 – tedy teplé stříbro, ne šedomodrá.
+      - Otevřený strop to **nebyl**: slunce i sky light na nulu změnily barvu stěny o ~1 %.
+      - Samotná modřejší barva gunmetalu posune B/R jen na 1,00–1,05: **teplá světla modrou vyruší**.
+      - Světla 7000 K místo teplých (255, 238, 214) jsou největší páka (B/R 1,06 samo o sobě).
+      - Nižší metallic povrch **zesvětlí** (víc difuzní složky), nezmodří.
+      - Zesvětlení ×1,25 je hlavní příčina „křídového“ vzhledu; jas jde s ním lineárně.
+    - **Nové hodnoty** (`import_interior.py`): gunmetal (0,35, 0,42, 0,55), zesvětlení 0,8, metallic
+      ×0,4, pracovní světla 575 lm a 7000 K; oranžové akcenty beze změny. Výsledek v zabalené hře:
+      stěna B/R **1,26**, sytost 0,21, jas 0,58; podlaha 1,28 / 0,24 / 0,52 – v rozsahu referencí.
+    - **Zbývá:** stíny jsou pořád světlé (p10 0,19 proti 0,05–0,13). To už je rozložení světla,
+      ne materiál: kontrast přinese strop se světelnými pásy a tmavšími kouty (další krok).
+    - Test `test_interior.py` hlídá parametry, usage flagy, výchozí textury samplerů, tagy a světla.
 
 ---
 
@@ -1111,6 +1132,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_quantum_sc4.py` | SC-4: nic v SCM; v NAV cíl podle nosu, Veyra ze startu TOO CLOSE; spool, kalibrace, READY, krátký stisk neskočí, podržení ano; spálené palivo podle vzdálenosti; ve skoku nejde řídit; příjezd na výšku příletu v rychlosti NAV do minuty; chlazení; B přeruší skok; OBSTRUCTED s planetou v cestě; NO QT FUEL; kalibrace padá, když nos uhne; HUD (rámeček, oblouky 0/1/2/3, cíl); LMB namapované, J ne; scénář snímků. Plus profil rychlosti, výška příletu, palivo a test úsečka–koule samostatně. |
 | `test_speed_tunnel.py` | Tunel quantum skoku: prach je pryč, než by ho rychlost rozblikala; čára delší než dvojnásobek posunu za snímek při 60 FPS (neblikne); čáry v dráze do sebe nenarazí; stěny od nejbližší, loď Vanguard se vejde do nejbližší; materiál aditivní, oboustranný, se všemi parametry, které komponenta nastavuje; jiskry u lodi (bodů na trupu ≥ 32, ve skoku mnohem víc než v letu), prachu jen pár set; scénář snímků se skokem (`quantum`). |
 | `test_scene_look.py` | Vzhled uložené úrovně proti receptu: atmosféra Veyry (jediná, ve středu planety, zem 2 km pod hladinou, koeficienty z receptu, tenký lem, slunce ji osvětluje), intenzita sky lightu, contact shadows a šířka slunce, všechna nastavení `POST_SETTINGS` v neohraničeném volume (a že chromatická aberace a vyvážení bílé zůstala vypnutá), lak trupu z `Vanguard_setup.json`. Chytá zapomenuté spuštění `build_space_scene.py` / `import_ship.py`. |
+| `test_interior.py` | Interiér Steadfastu po `import_interior.py`: `M_KitTrim` má usage flagy Nanite/static/instanced a každý sampler výchozí texturu (jinak šachovnice v buildu), parametry `Lift`, `MetallicScale`, `Roughness*`, `Gunmetal` s hodnotami ze skriptu, všechny sloty na instancích `M_KitTrim`, tagy pro `space.Kit*`, 6 pracovních světel (lm, K) a 2 akcentní. |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
 
 Co headless **nejde** ověřit a musí vyzkoušet autor ve hře:

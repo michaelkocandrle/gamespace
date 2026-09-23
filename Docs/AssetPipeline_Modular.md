@@ -224,7 +224,7 @@ Do téhle chvíle byla paleta popsaná jen slovy („gunmetal + oranžové akcen
 
 | | Hodnota | Kde |
 | --- | --- | --- |
-| **Gunmetal** (trup, stěny, podlahy) | `0.62, 0.65, 0.70` jako násobek po odbarvení | odpovídá ošoupané šedomodré oceli Vanguardu (`wear_color` 0.34/0.34/0.36) |
+| **Gunmetal** (trup, stěny, podlahy) | `0.35, 0.42, 0.55` jako násobek po odbarvení (zesvětlení ×0,8, metallic ×0,4) | modrá ocel; platí jen se **studeným světlem** (pracovní světla 7000 K) – pod teplým světlem vyjde stříbrně (měřeno 23. 9. 2026, HANDOFF bod 59; původně 0.62/0.65/0.70) |
 | **Oranžová** (akcenty, pásy, západky) | `0.85, 0.34, 0.06` | Halcyon Freightworks |
 
 Restylizaci dělá `Tools/Blender/recolour_kit.py`: texturu kitu odbarví, zesvětlí a přetónuje do

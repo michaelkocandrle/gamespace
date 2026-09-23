@@ -25,10 +25,27 @@ PACKAGE = "/Game/Environments/Steadfast"
 MATERIAL = PACKAGE + "/M_KitTrim"
 MAP = "/Game/Maps/TestSpace"
 PLACE_AT = unreal.Vector(0.0, 50000.0, 0.0)      # 500 m sideways from the ship's spawn
-GUNMETAL = (0.62, 0.65, 0.70)
+# Blue steel. Measured on 23. 9. 2026 (Tools/Shots/interior_tune.json, HANDOFF point 59) against the
+# author's mood references (cool, B/R 1.1-1.6 in sRGB): (0.62, 0.65, 0.70) under warm lights came out
+# warm silver, B/R 0.95. The tint alone barely moves the hue - the light colour does most of it.
+GUNMETAL = (0.35, 0.42, 0.55)
 BLACK = "/Engine/EngineResources/Black"
 WHITE = "/Engine/EngineResources/WhiteSquareTexture"
 ORANGE = (0.85, 0.34, 0.06)
+# The look knobs, as material parameters so that space.Kit can try other values in the running game
+# (Source/gamespace/SpaceInteriorTuning.cpp) without a repackage.
+LIFT = 0.8                  # brightness of the desaturated kit texture before the tint (1.25 was chalky)
+METALLIC_SCALE = 0.4        # straight off the ORM map the kit is chrome; less metal keeps the tint
+ROUGHNESS_SCALE = 0.68      # roughness = floor + scale * ORM green
+ROUGHNESS_FLOOR = 0.32
+# Tags the console commands find the interior by: actor labels do not survive cooking.
+INTERIOR_TAG = "SpaceInterior"
+WORK_LIGHT_TAG = "SpaceInteriorLight_Work"
+ACCENT_LIGHT_TAG = "SpaceInteriorLight_Accent"
+# Work lights: cold white, and half of what they were. Warm light (255, 238, 214) cancelled the blue
+# of the steel; 7000 K is what turns the bay blue at all.
+WORK_LIGHT_LUMENS = 575.0
+WORK_LIGHT_KELVIN = 7000.0
 
 MEL = unreal.MaterialEditingLibrary
 EAL = unreal.EditorAssetLibrary
@@ -82,7 +99,8 @@ def build_master(defaults):
     link(base, grey, "")
     lift = node(material, unreal.MaterialExpressionMultiply, -430, -200)
     link(grey, lift, "A")
-    link(node(material, unreal.MaterialExpressionConstant, -600, -60, r=1.25), lift, "B")
+    link(node(material, unreal.MaterialExpressionScalarParameter, -600, -60, parameter_name="Lift",
+              default_value=LIFT), lift, "B")
     tint = node(material, unreal.MaterialExpressionMultiply, -260, -200)
     link(lift, tint, "A")
     link(node(material, unreal.MaterialExpressionVectorParameter, -430, -40, parameter_name="Gunmetal",
@@ -105,13 +123,16 @@ def build_master(defaults):
     # back a little and put a floor under the roughness, or the bay mirrors the work lights.
     metal = node(material, unreal.MaterialExpressionMultiply, -600, 560)
     link(orm, metal, "A", "B")
-    link(node(material, unreal.MaterialExpressionConstant, -760, 640, r=0.75), metal, "B")
+    link(node(material, unreal.MaterialExpressionScalarParameter, -760, 640, parameter_name="MetallicScale",
+              default_value=METALLIC_SCALE), metal, "B")
     worn = node(material, unreal.MaterialExpressionMultiply, -600, 420)
     link(orm, worn, "A", "G")
-    link(node(material, unreal.MaterialExpressionConstant, -760, 470, r=0.68), worn, "B")
+    link(node(material, unreal.MaterialExpressionScalarParameter, -760, 470, parameter_name="RoughnessScale",
+              default_value=ROUGHNESS_SCALE), worn, "B")
     rough = node(material, unreal.MaterialExpressionAdd, -440, 420)
     link(worn, rough, "A")
-    link(node(material, unreal.MaterialExpressionConstant, -600, 340, r=0.32), rough, "B")
+    link(node(material, unreal.MaterialExpressionScalarParameter, -600, 340, parameter_name="RoughnessFloor",
+              default_value=ROUGHNESS_FLOOR), rough, "B")
 
     MEL.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
     MEL.connect_material_property(metal, "", unreal.MaterialProperty.MP_METALLIC)
@@ -235,18 +256,22 @@ def place_lights(actors, mesh):
             light = actors.spawn_actor_from_class(unreal.PointLight, spot, unreal.Rotator(0, 0, 0))
             lights += 1
             light.set_actor_label("Steadfast_Light_Work_%d" % lights)
+            light.set_editor_property("tags", [unreal.Name(WORK_LIGHT_TAG)])
             component = light.point_light_component
             component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
             component.set_editor_property("intensity_units", unreal.LightUnits.LUMENS)
-            component.set_editor_property("intensity", 1150.0)
+            component.set_editor_property("intensity", WORK_LIGHT_LUMENS)
             component.set_editor_property("attenuation_radius", 900.0)
-            component.set_editor_property("light_color", unreal.Color(r=255, g=238, b=214, a=255))
+            component.set_editor_property("light_color", unreal.Color(r=255, g=255, b=255, a=255))
+            component.set_editor_property("use_temperature", True)
+            component.set_editor_property("temperature", WORK_LIGHT_KELVIN)
     for y in (-0.85, 0.85):
         spot = unreal.Vector(PLACE_AT.x + origin.x, PLACE_AT.y + origin.y + y * extent.y,
                              PLACE_AT.z + origin.z - extent.z + 60.0)
         light = actors.spawn_actor_from_class(unreal.PointLight, spot, unreal.Rotator(0, 0, 0))
         lights += 1
         light.set_actor_label("Steadfast_Light_Accent_%d" % lights)
+        light.set_editor_property("tags", [unreal.Name(ACCENT_LIGHT_TAG)])
         component = light.point_light_component
         component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
         component.set_editor_property("intensity_units", unreal.LightUnits.LUMENS)
@@ -318,6 +343,7 @@ def main():
         # mesh afterwards is the stable way (23. 9. 2026).
         actor = actors.spawn_actor_from_class(unreal.StaticMeshActor, PLACE_AT, unreal.Rotator(0, 0, 0))
         actor.set_actor_label("Steadfast_Interior_%s" % mesh.get_name())
+        actor.set_editor_property("tags", [unreal.Name(INTERIOR_TAG)])
         component = actor.static_mesh_component
         component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
         component.set_static_mesh(mesh)
