@@ -29,6 +29,16 @@ rozbité nebo neověřené a co následuje.
   - loď **Vanguard**: od 18. 9. 2026 model z Meshy („Ironclad Starfighter“), 14 × 11,4 × 6,2 m se
     4 motorovými gondolami, zpracovaný receptem `Tools/Blender/build_ai_ship.py` (kapitola 5, bod 20).
     Původní procedurální model (17,6 m) je v `ArtSource/Ships/Vanguard/Vanguard.blend` jen pro historii;
+  - druhá loď **Steadfast** (výrobce Halcyon Freightworks, nákladní/průzkumná, posádka 3,
+    pomalejší a větší než Vanguard) — rozjeto 23. 9. 2026, autor pracoval z jiného PC bez
+    Claude Code. Hotovo: jméno a specifikace `ArtSource/Ships/Steadfast/Steadfast_setup.json`
+    (rozměry/let jsou odhady, přeměřit po importu jako u Vanguardu), hrubý exteriér z Meshy
+    (Smart Topology, vysoký polygon count, ještě nestažený/needitovaný v Blenderu), koncept
+    interiéru `ArtSource/Ships/Steadfast/Concept/interior_hero.png` a rozpis dílů
+    `ArtSource/Ships/Steadfast/Kitbash/interior_kitbash_parts.json` (revidováno podle nového
+    pravidla v `Docs/AssetPipeline_Modular.md` — všechny funkční díly procedurálně, ne z AI).
+    Další krok: stáhnout exteriér z Meshy, naimportovat podle `Docs/Ships/ShipPipeline.md`,
+    pak procedurální detail interiéru přes Blender MCP;
   - postava na nohou (placeholder UE Manny).
 - **Další velký cíl autora:** letový systém lodi má být **kompletní kopie systému ze Star
   Citizen**. Nemá vzniknout najednou, ale po krocích (kapitola 10).
