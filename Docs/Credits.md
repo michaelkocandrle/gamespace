@@ -23,8 +23,8 @@ CC-BY model.
 | `gravelly_sand`, `rock_face_03`, `dry_riverbed_rock` | [Poly Haven](https://polyhaven.com) | povrch planety Veyra (`build_space_scene.py`) |
 | 4 skenované kameny (`rock_*`) | [Poly Haven](https://polyhaven.com) | rozptyl kamenů na planetě (`PlanetRockScatter`) |
 | Modular Sci-Fi MegaKit (Standard), 190 modelů | [Quaternius](https://quaternius.itch.io/modular-sci-fi-megakit) | interiér Steadfastu — chodby, nákladový prostor (`ArtSource/ThirdParty/Quaternius/README.md`) |
+| PBR materiály PaintedMetal004, PaintedMetal013, MetalPlates006, Leather033A, Rubber004 (CC0) | [ambientCG](https://ambientcg.com) | povrchy interiéru Steadfastu (`ArtSource/Textures/ambientCG/`) |
 
 ## Fonty a zvuky
 
 Řeší se v `Docs/UI/` a `Docs/WORKFLOW.md`; sem patří, jen pokud u nich licence vyžaduje kredit.
-| PBR materiály PaintedMetal004, PaintedMetal013, MetalPlates006, Leather033A, Rubber004 (CC0) | [ambientCG](https://ambientcg.com) | povrchy interiéru Steadfastu (`ArtSource/Textures/ambientCG/`) |
