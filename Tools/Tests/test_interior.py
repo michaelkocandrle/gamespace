@@ -23,7 +23,7 @@ LAYOUT = os.path.join(REPO, "ArtSource", "Ships", "Steadfast", "Interior", "Inte
 WANTED = ("MATERIAL", "MAP", "GUNMETAL", "LIFT", "METALLIC_SCALE", "ROUGHNESS_SCALE", "ROUGHNESS_FLOOR",
           "INTERIOR_TAG", "WORK_LIGHT_TAG", "ACCENT_LIGHT_TAG", "WORK_LIGHT_LUMENS", "WORK_LIGHT_KELVIN", "WORK_LIGHT_CONE", "ACCENT_LIGHT_LUMENS", "PACKAGE", "ROOMS",
           "GLASS", "DOOR_LEAF", "GLASS_TAG", "DOOR_TAG", "SPAWN_TAG", "GRAVITY_CMS2", "GLASS_MATERIAL", "PLACE_AT", "WORK_LIGHT_RADIUS",
-          "SCREENS", "SCREENS_TAG", "HOLO_MATERIAL")
+          "SCREENS", "SCREENS_TAG", "HOLO_MATERIAL", "DECAL_TAG", "PROP_TAG")
 
 failures = []
 
@@ -161,6 +161,16 @@ if screens:
                                            ", ".join(p.get_name() if p else "None" for p in pictures)))
 else:
     check("cockpit screens actor", False)
+# Stencil decals and Meshy props (HANDOFF points 68-69).
+decals = tagged(C["DECAL_TAG"])
+check("a decal per layout entry (%d)" % len(layout.get("decals", [])), len(decals) == len(layout.get("decals", [])))
+decal_ok = all(d.get_editor_property("decal").get_editor_property("decal_material") is not None
+               and d.get_editor_property("decal").get_editor_property("decal_material").get_base_material()
+               .get_editor_property("material_domain") == unreal.MaterialDomain.MD_DEFERRED_DECAL for d in decals)
+check("every decal wears the deferred decal material", bool(decals) and decal_ok)
+props = tagged(C["PROP_TAG"])
+check("a Meshy prop per layout entry (%d)" % len(layout.get("props", [])), len(props) == len(layout.get("props", [])),
+      ", ".join(sorted(a.static_mesh_component.static_mesh.get_name() for a in props)))
 doors = tagged(C["DOOR_TAG"])
 check("a sliding door per layout door (%d)" % len(layout["doors"]), len(doors) == len(layout["doors"]))
 for door in doors:

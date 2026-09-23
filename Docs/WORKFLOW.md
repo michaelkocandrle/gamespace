@@ -678,6 +678,9 @@ snímku.
 - y) **Opotřebení podle normálové mapy funguje jen na kitu.** Procedurální díly mají v materiálu kitu
   UV na náhodném místě atlasu, takže „hrana“ z normálové mapy padne doprostřed plochy. Proto slabé
   opotřebení a nic mimo hrany.
+- z) **Text v obrázku z AI:** GPT Image 2.5 (Scenario) napsal všech 16 nápisů atlasu přesně. Zadávej
+  pevnou mřížku („exact 4 by 4 grid, one element centered in each cell, black background“) – políčka
+  se pak dají vyříznout výpočtem bez ručního ořezu.
 - v) **Žádná jména ze Star Citizenu** v obsahu (stanice, lodě, firmy) – vzhled ano, cizí značky ne.
 
 ### 9.4 C++ a UHT

@@ -1157,6 +1157,18 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       rozmístění v `MESHY_PROPS` stavitele → `Interior_layout.json` → `import_interior.py` (`place_props`:
       jednotné měřítko podle šířky, postavené na podlahu, Meshy dívá do −Y → otočení −90°). Kolize podle
       polygonů. Procedurální sedadla a boční konzole jsou pryč.
+69. **Šablonové nápisy a značky (decaly) ze Scenario** (23. 9. 2026, krok 5). Jeden atlas 4 × 4 (2048 px)
+    vygenerovaný ve Scenario (GPT Image 2.5 Sunburst, 12 CU): žluté a oranžové výstražné pruhy, CARGO BAY,
+    ENGINE ROOM, COCKPIT, DECK A-01…03, šipka, výstražný trojúhelník, CAUTION HIGH VOLTAGE, NO STEP,
+    HALCYON FREIGHTWORKS s logem, FIRE SUPPRESSION, AIRLOCK, „07“ – ošoupaná šablonová barva na černé.
+    Texty vyšly přesně podle zadání, jména jsou naše. Leží v `ArtSource/Ships/Steadfast/Interior/Decals/`.
+    - `M_Decal` (deferred decal, translucent): políčko atlasu podle `CellU`/`CellV`, černá = bez barvy
+      (neprůhlednost z jasu), barva ztlumená na 0,7. Instance `MI_Decal_NN` pro každé políčko.
+    - Rozmístění v `DECALS` stavitele (políčko, bod na povrchu, normála povrchu, velikost) →
+      `Interior_layout.json` → `place_decals`: 17 decalů – nápisy u dveří, šipka ke kokpitu, pruhy na
+      podlaze před průchody, výstrahy ve strojovně.
+    - Natočení na stěně: decal promítá podél své +X a atlas na stěně leží na boku – potřebuje roll +90°
+      (−90° ho obrátí vzhůru nohama). Podlaha pitch −90°.
 
 ---
 

@@ -114,6 +114,33 @@ MESHY_PROPS = [
 ] + [
     {"mesh": "EquipmentRack", "at": (ENGINE_X[0] + 0.45, 1.9, 0.0), "yaw": 0.0, "width": 1.3},
 ]
+# Stencil decals from the Scenario atlas (ArtSource/Ships/Steadfast/Interior/Decals, HANDOFF point 69).
+# cell = index in the 4 x 4 atlas, left to right, top to bottom: 0 yellow hazard stripes, 1 CARGO BAY,
+# 2 ENGINE ROOM, 3 COCKPIT, 4-6 DECK A-01..03, 7 arrow (points right), 8 warning triangle,
+# 9 CAUTION HIGH VOLTAGE, 10 NO STEP, 11 HALCYON FREIGHTWORKS, 12 FIRE SUPPRESSION, 13 AIRLOCK, 14 "07",
+# 15 orange hazard stripes. at = point on the surface, normal = which way the surface faces, size = m.
+DECALS = [
+    # cargo bay
+    {"cell": 1, "at": (7.95, 2.0, 1.55), "normal": (-1, 0, 0), "size": 0.9},
+    {"cell": 14, "at": (2.5, 2.95, 1.35), "normal": (0, -1, 0), "size": 0.9},
+    {"cell": 12, "at": (5.5, -2.95, 1.5), "normal": (0, 1, 0), "size": 0.7},
+    {"cell": 5, "at": (0.05, -2.0, 1.55), "normal": (1, 0, 0), "size": 0.8},
+    {"cell": 0, "at": (7.45, 0.0, 0.01), "normal": (0, 0, 1), "size": 1.2},
+    {"cell": 0, "at": (0.55, 0.0, 0.01), "normal": (0, 0, 1), "size": 1.2},
+    # corridor
+    {"cell": 3, "at": (11.0, -0.97, 1.55), "normal": (0, 1, 0), "size": 0.8},
+    {"cell": 7, "at": (12.0, -0.97, 1.55), "normal": (0, 1, 0), "size": 0.5},
+    {"cell": 11, "at": (13.5, 0.97, 1.5), "normal": (0, -1, 0), "size": 0.8},
+    {"cell": 6, "at": (10.2, 0.97, 1.55), "normal": (0, -1, 0), "size": 0.6},
+    {"cell": 15, "at": (16.45, 0.0, 0.01), "normal": (0, 0, 1), "size": 1.1},
+    # engine room
+    {"cell": 2, "at": (-1.07, -2.0, 1.6), "normal": (-1, 0, 0), "size": 0.9},
+    {"cell": 9, "at": (-3.5, -2.95, 1.4), "normal": (0, 1, 0), "size": 0.8},
+    {"cell": 8, "at": (-2.2, 2.95, 1.45), "normal": (0, -1, 0), "size": 0.5},
+    {"cell": 10, "at": (-4.0, 1.9, 0.01), "normal": (0, 0, 1), "size": 0.8},
+    {"cell": 4, "at": (-6.93, -1.8, 1.6), "normal": (1, 0, 0), "size": 0.7},
+    {"cell": 0, "at": (-1.55, 0.0, 0.01), "normal": (0, 0, 1), "size": 1.2},
+]
 SPAWN = (1.5, 0.0, 0.05)
 GRAVITY_BOX = ((-7.3, -3.3, -0.4), (22.8, 3.3, 3.0))
 DOORS = [{"at": (COCKPIT_X[0], 0.0, 0.0), "dir": (1.0, 0.0, 0.0)}]
@@ -873,6 +900,7 @@ def main():
         "doors": [dict(d, leaf=[leaf_width, leaf_height]) for d in DOORS],
         "spawn": list(SPAWN),
         "props": [dict(p, at=list(p["at"])) for p in MESHY_PROPS],
+        "decals": [dict(d, at=list(d["at"]), normal=list(d["normal"])) for d in DECALS],
         "gravity_box": [list(GRAVITY_BOX[0]), list(GRAVITY_BOX[1])],
     }
     for room in rooms + [leaf]:

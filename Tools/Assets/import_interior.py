@@ -44,6 +44,11 @@ SCREENS_TAG = "SpaceInteriorScreens"
 # so the kit's material mapping leaves them alone.
 MESHY_DIR = os.path.join(ROOT, "ArtSource", "Ships", "Steadfast", "Kitbash", "Meshy")
 PROP_TAG = "SpaceInteriorProp"
+# Stencil decals (HANDOFF point 69): a 4 x 4 atlas generated in Scenario (GPT Image 2.5), black =
+# no paint. One deferred decal material, an instance per cell.
+DECAL_ATLAS = os.path.join(INTERIOR, "Decals", "DecalAtlas_raw.png")
+DECAL_TAG = "SpaceInteriorDecal"
+DECAL_DEPTH_CM = 12.0
 # Meshy's models face their own -Y; in Unreal (Y mirrored) that is +Y, so a prop turned by the
 # layout's yaw first needs this to face +X.
 MESHY_FRONT_YAW = -90.0
@@ -745,6 +750,93 @@ def place_props(actors):
     return count
 
 
+def build_decal_material():
+    """Deferred decal: the atlas cell's colour, opacity from how bright it is (black = no paint)."""
+    task = unreal.AssetImportTask()
+    task.filename = DECAL_ATLAS
+    task.destination_path = PACKAGE + "/Decals"
+    task.destination_name = "T_DecalAtlas"
+    task.automated = True
+    task.replace_existing = True
+    task.save = True
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+    atlas = EAL.load_asset(PACKAGE + "/Decals/T_DecalAtlas")
+    path = PACKAGE + "/Decals/M_Decal"
+    if EAL.does_asset_exist(path):
+        EAL.delete_asset(path)
+    material = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_Decal", PACKAGE + "/Decals", unreal.Material,
+                                                                      unreal.MaterialFactoryNew())
+    material.set_editor_property("material_domain", unreal.MaterialDomain.MD_DEFERRED_DECAL)
+    material.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    uv = node(material, unreal.MaterialExpressionTextureCoordinate, -1200, 0)
+    quarter = binary(material, unreal.MaterialExpressionMultiply, uv, const(material, 0.25, -1200, 100), -1050, 0)
+    cu = node(material, unreal.MaterialExpressionScalarParameter, -1200, 200, parameter_name="CellU", default_value=0.0)
+    cv = node(material, unreal.MaterialExpressionScalarParameter, -1200, 300, parameter_name="CellV", default_value=0.0)
+    cell = node(material, unreal.MaterialExpressionAppendVector, -1050, 250)
+    link(cu, cell, "A")
+    link(cv, cell, "B")
+    offset = binary(material, unreal.MaterialExpressionMultiply, cell, const(material, 0.25, -1050, 350), -900, 250)
+    cell_uv = binary(material, unreal.MaterialExpressionAdd, quarter, offset, -750, 100)
+    tex = node(material, unreal.MaterialExpressionTextureSampleParameter2D, -600, 100, parameter_name="Atlas", texture=atlas)
+    link(cell_uv, tex, "UVs")
+    level = node(material, unreal.MaterialExpressionDesaturation, -300, 300)
+    link(tex, level, "", "RGB")
+    lifted = binary(material, unreal.MaterialExpressionSubtract, level, const(material, 0.12, -300, 400), -150, 300)
+    steep = binary(material, unreal.MaterialExpressionMultiply, lifted, const(material, 4.0, -150, 400), 0, 300)
+    alpha = node(material, unreal.MaterialExpressionSaturate, 150, 300)
+    link(steep, alpha, "")
+    strength = node(material, unreal.MaterialExpressionScalarParameter, 150, 400, parameter_name="Opacity", default_value=0.85)
+    opacity = binary(material, unreal.MaterialExpressionMultiply, alpha, strength, 300, 300)
+    # The paint a little darker than the atlas: stencils on a dim ship, not stickers under a lamp.
+    paint = binary(material, unreal.MaterialExpressionMultiply, tex, const(material, 0.7, -400, 0), -200, 0)
+    MEL.connect_material_property(paint, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    MEL.connect_material_property(opacity, "", unreal.MaterialProperty.MP_OPACITY)
+    MEL.connect_material_property(const(material, 0.55, 0, 500), "", unreal.MaterialProperty.MP_ROUGHNESS)
+    MEL.recompile_material(material)
+    EAL.save_loaded_asset(material, only_if_is_dirty=False)
+    return material, atlas
+
+
+def place_decals(actors, material):
+    """A decal actor per layout entry, projecting into the surface it names."""
+    for actor in actors.get_all_level_actors():
+        if actor.get_actor_label().startswith("Steadfast_Decal"):
+            actors.destroy_actor(actor)
+    instances = {}
+    kept = []
+    for index, decal in enumerate(read_layout().get("decals", [])):
+        cell = decal["cell"]
+        if cell not in instances:
+            path = "%s/Decals/MI_Decal_%02d" % (PACKAGE, cell)
+            if EAL.does_asset_exist(path):
+                EAL.delete_asset(path)
+            instance = unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+                "MI_Decal_%02d" % cell, PACKAGE + "/Decals", unreal.MaterialInstanceConstant,
+                unreal.MaterialInstanceConstantFactoryNew())
+            MEL.set_material_instance_parent(instance, material)
+            MEL.set_material_instance_scalar_parameter_value(instance, "CellU", float(cell % 4))
+            MEL.set_material_instance_scalar_parameter_value(instance, "CellV", float(cell // 4))
+            EAL.save_loaded_asset(instance, only_if_is_dirty=False)
+            instances[cell] = instance
+            kept.append(instance)
+        n = decal["normal"]
+        # The decal projects along its +X: into the surface, against its normal (Blender -> Unreal: Y mirrored).
+        if n[2] > 0.5:
+            rotation = unreal.Rotator(roll=0.0, pitch=-90.0, yaw=0.0)
+        else:
+            # Roll 90: without it the atlas lies on its side on walls (text read bottom to top; -90 put it upside down).
+            rotation = unreal.Rotator(roll=90.0, pitch=0.0, yaw=math.degrees(math.atan2(n[1], -n[0])))
+        actor = actors.spawn_actor_from_class(unreal.DecalActor, to_unreal(decal["at"]), rotation)
+        actor.set_actor_label("Steadfast_Decal_%02d_%d" % (cell, index))
+        actor.set_editor_property("tags", [unreal.Name(DECAL_TAG)])
+        component = actor.get_editor_property("decal")
+        component.set_editor_property("decal_material", instances[cell])
+        half = decal["size"] * 50.0
+        component.set_editor_property("decal_size", unreal.Vector(DECAL_DEPTH_CM, half, half))
+    log("decaly: %d (%d druhů)" % (len(read_layout().get("decals", [])), len(instances)))
+    return kept
+
+
 def collide_per_polygon(mesh):
     """Walkable: the character collides with the mesh itself, not a box round it."""
     body = mesh.get_editor_property("body_setup")
@@ -905,6 +997,8 @@ def main():
     for parameter in ("BaseColor", "NormalMap", "ORMMap"):
         kept.append(reference.get(parameter))
     props = place_props(actors)
+    decal_material, decal_atlas = build_decal_material()
+    kept += [decal_material, decal_atlas] + place_decals(actors, decal_material)
     kept += [EAL.load_asset(p) for p in EAL.list_assets(PROPS_PACKAGE, recursive=True, include_folder=False)] if props else []
     prune(kept)
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).save_current_level()
