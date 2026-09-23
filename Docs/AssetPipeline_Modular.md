@@ -195,3 +195,25 @@ Dvě vysvětlení, obě se dají příště otestovat:
 Zatím tedy platí: **geometrii generovat v Meshy ve 4k**, a Scenario používat na kroky za tím
 (retopologie, UV, dělení na díly, textury). Než Tripo zavrhnout, stojí za zkoušku barevný koncept
 jako vstup a `smartLowPoly` vypnuté.
+
+## Kde brát hotové díly interiéru (průzkum 23. 9. 2026)
+
+Průzkum volně dostupných zdrojů pro třetí cestu („koupený/stažený base“), seřazeno podle toho,
+jak draho vyjde licence:
+
+| Zdroj | Licence | Co tam je | Poznámka |
+| --- | --- | --- | --- |
+| **Quaternius** ([packs](https://quaternius.com/packs/)) | **CC0**, bez atribuce | modulární sci-fi interiéry: Modular Sci-Fi MegaKit (270+ dílů), Ultimate Modular Sci-Fi (46), Sci-Fi Essentials Kit | FBX/OBJ/glTF/Blend; stahuje se přes itch.io, přímý odkaz na webu není |
+| **Poly Haven** | CC0 | fotoskeny reálných věcí: sudy, bedny, nářadí, svěráky, ventily (521 modelů, z toho ~177 průmyslových) | **ne sci-fi**; dobré na nákladový prostor a dílnu Steadfastu, ne na kokpit. Už máme `fetch_polyhaven.py` |
+| **ambientCG** | CC0 | materiály, ne modely | zapsáno ve `WORKFLOW.md` bod 14 |
+| **Sketchfab** | většinou **CC-BY** (CC0 u sci-fi prakticky nula) | panely, terminály, konzole, dveře, sedačky, bedny v rozumné hustotě (350–8 000 ploch) | **vyžaduje uvedení autora** → `Docs/Credits.md`; stahování chce přihlášení/token |
+| Fab, CGTrader, TurboSquid | placené i free s různými licencemi | kvalitní hotové kity | licenci číst kus po kuse |
+
+Konkrétní kandidáti ze Sketchfabu (71 kusů s licencí, autorem, počtem ploch a odkazem) jsou
+v `ArtSource/Ships/Steadfast/Kitbash/free_asset_survey.json`. Dotazy: sci-fi control panel,
+sci-fi console, spaceship cockpit interior, vent grille, cockpit seat, door panel, crate,
+modular pipes. Filtrováno na stažitelné, 300–60 000 ploch.
+
+**Pořadí, v jakém to zkoušet u Steadfastu:** nejdřív Quaternius (CC0, žádné závazky, modulární
+grid), pak Sketchfab kusy pro věci, co v kitu chybí (a zapsat autora do `Docs/Credits.md`),
+a procedurálně dodělat technický detail, který má být přesný (tlačítka, přepínače, rámy).
