@@ -221,7 +221,20 @@ ASpaceshipPawn* USpaceShotRunner::FindShip() const
 {
 	const UWorld* World = GetWorld();
 	const APlayerController* Controller = World ? World->GetFirstPlayerController() : nullptr;
-	return Controller ? Cast<ASpaceshipPawn>(Controller->GetPawn()) : nullptr;
+	if (ASpaceshipPawn* Flown = Controller ? Cast<ASpaceshipPawn>(Controller->GetPawn()) : nullptr)
+	{
+		return Flown;
+	}
+	// On foot (space.Interior in a shot): the ship is still there, just not possessed. Shots keep
+	// working on it, and the free camera does not need it at all.
+	if (Controller && Controller->GetPawn())
+	{
+		for (TActorIterator<ASpaceshipPawn> It(const_cast<UWorld*>(World)); It; ++It)
+		{
+			return *It;
+		}
+	}
+	return nullptr;
 }
 
 void USpaceShotRunner::ApplyShot(const FSpaceShot& Shot, ASpaceshipPawn& Ship)
@@ -369,8 +382,9 @@ void USpaceShotRunner::ApplyFreeCamera(const FSpaceShot& Shot, ASpaceshipPawn& S
 	{
 		if (FreeCamera.IsValid())
 		{
-			// Back to the ship's own cameras for the shots that follow.
-			Controller->SetViewTarget(&Ship);
+			// Back to the pawn's own camera for the shots that follow - the ship's, or the character's
+			// when the shot list walks the interior (space.Interior).
+			Controller->SetViewTarget(Controller->GetPawn() ? static_cast<AActor*>(Controller->GetPawn()) : &Ship);
 			FreeCamera->Destroy();
 			FreeCamera = nullptr;
 		}
@@ -450,10 +464,9 @@ void USpaceShotRunner::Tick(float DeltaTime)
 				}
 				ShotIndex = INDEX_NONE;
 			}
-			else
-			{
-				ApplyShot(Shots[ShotIndex], *Ship);
-			}
+			// The next shot is set up by the first-frame branch below (Timer is 0 again). Applying it
+			// here as well ran every shot's console commands twice - harmless for settings, but a
+			// toggle such as space.Interior went in and straight back out (23. 9. 2026).
 		}
 		return;
 	}

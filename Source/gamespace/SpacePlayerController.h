@@ -62,6 +62,22 @@ public:
 	/** Hear volume sliders while dragging them, before they are applied. */
 	void PreviewVolumes(float MasterVolume, float EffectsVolume, float MusicVolume);
 
+	/**
+	 * Into the Steadfast interior on foot (spawned at the actor tagged SpaceInteriorSpawn), or back
+	 * where the player came from: the ship they were flying, or the spot they were standing on.
+	 * I in the game, space.Interior in the console, a button in the pause menu. False when there
+	 * is no interior in the level.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Interior")
+	bool ToggleInterior();
+
+	UFUNCTION(BlueprintPure, Category = "Interior")
+	bool IsWalkingInterior() const { return bWalkingInterior; }
+
+	/** Whether this level has an interior to walk. */
+	UFUNCTION(BlueprintPure, Category = "Interior")
+	bool HasInterior() const;
+
 protected:
 	/** Level "Play" opens. */
 	UPROPERTY(EditDefaultsOnly, Category = "Menu")
@@ -74,6 +90,7 @@ protected:
 private:
 	void HandleMenuKey(const FInputActionValue& Value);
 	void HandleToggleHud(const FInputActionValue& Value);
+	void HandleInteriorKey(const FInputActionValue& Value);
 	void ShowMenu(bool bTitleScreen);
 	void HideMenu();
 	void UpdateTitleCamera(float DeltaTime);
@@ -87,6 +104,13 @@ private:
 	TObjectPtr<UInputAction> MenuAction;
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> HudAction;
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> InteriorAction;
+
+	/** Where ToggleInterior goes back to: the ship that was being flown, or a place on foot. */
+	TWeakObjectPtr<APawn> ReturnShip;
+	FTransform ReturnTransform;
+	bool bWalkingInterior = false;
 
 	UPROPERTY(Transient)
 	TObjectPtr<USoundBase> UiHoverSound;

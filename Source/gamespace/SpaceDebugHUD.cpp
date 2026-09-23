@@ -524,7 +524,8 @@ void ASpaceDebugHUD::DrawHUD()
 			FreeLookShip->GetMasterModeSwitchProgress() * 100.f);
 		LabelColor = FLinearColor(0.55f, 0.85f, 1.f);
 	}
-	else if (FreeLookShip && FreeLookShip->IsFreeLooking())
+	// Not while something else holds the view (a shot's free camera): then the label is noise.
+	else if (FreeLookShip && FreeLookShip->IsFreeLooking() && PlayerOwner && PlayerOwner->GetViewTarget() == FreeLookShip)
 	{
 		Label = TEXT("FREE LOOK");
 	}

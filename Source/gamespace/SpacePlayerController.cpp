@@ -18,6 +18,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Sound/SoundBase.h"
+#include "PlayerCharacter.h"
+#include "SpaceshipPawn.h"
 #include "SpaceDebugHUD.h"
 #include "SpaceMenuGameMode.h"
 #include "SpaceMenuWidget.h"
@@ -67,11 +69,17 @@ void ASpacePlayerController::SetupInputComponent()
 	GlobalContext->MapKey(MenuAction, EKeys::F10);
 	GlobalContext->MapKey(MenuAction, EKeys::Gamepad_Special_Right);
 	GlobalContext->MapKey(HudAction, EKeys::H);
+	// I: walk the Steadfast interior. A letter on purpose - the Czech layout has no [ ] ; keys and
+	// F1-F5 are the engine's debug views in a Development build (Docs/WORKFLOW.md 9.1 g).
+	InteriorAction = NewObject<UInputAction>(this, TEXT("IA_Interior_Runtime"));
+	InteriorAction->ValueType = EInputActionValueType::Boolean;
+	GlobalContext->MapKey(InteriorAction, EKeys::I);
 
 	if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(InputComponent))
 	{
 		Input->BindAction(MenuAction, ETriggerEvent::Started, this, &ASpacePlayerController::HandleMenuKey);
 		Input->BindAction(HudAction, ETriggerEvent::Started, this, &ASpacePlayerController::HandleToggleHud);
+		Input->BindAction(InteriorAction, ETriggerEvent::Started, this, &ASpacePlayerController::HandleInteriorKey);
 	}
 	else
 	{
@@ -310,4 +318,109 @@ void ASpacePlayerController::PreviewVolumes(float MasterVolume, float EffectsVol
 	{
 		MenuMusic->SetVolumeMultiplier(FMath::Clamp(MusicVolume, 0.f, 1.f));
 	}
+}
+
+// -------------------------------------------------------------------------------------------
+// Interior
+// -------------------------------------------------------------------------------------------
+
+namespace
+{
+	const FName InteriorSpawnTag(TEXT("SpaceInteriorSpawn"));
+
+	AActor* FindInteriorSpawn(UWorld* World)
+	{
+		for (TActorIterator<AActor> It(World); It; ++It)
+		{
+			if (It->ActorHasTag(InteriorSpawnTag))
+			{
+				return *It;
+			}
+		}
+		return nullptr;
+	}
+}
+
+bool ASpacePlayerController::HasInterior() const
+{
+	return GetWorld() && FindInteriorSpawn(GetWorld()) != nullptr;
+}
+
+void ASpacePlayerController::HandleInteriorKey(const FInputActionValue& /*Value*/)
+{
+	if (!IsMenuOpen() && !IsTitleScreen())
+	{
+		ToggleInterior();
+	}
+}
+
+bool ASpacePlayerController::ToggleInterior()
+{
+	UWorld* World = GetWorld();
+	APawn* Current = GetPawn();
+	if (!World || IsTitleScreen())
+	{
+		return false;
+	}
+
+	if (bWalkingInterior)
+	{
+		// Back: into the ship that was being flown, or to where the player stood.
+		if (APawn* Ship = ReturnShip.Get())
+		{
+			UnPossess();
+			if (Current)
+			{
+				Current->Destroy();
+			}
+			Possess(Ship);
+		}
+		else if (Current)
+		{
+			Current->SetActorTransform(ReturnTransform, false, nullptr, ETeleportType::TeleportPhysics);
+		}
+		bWalkingInterior = false;
+		ReturnShip = nullptr;
+		return true;
+	}
+
+	AActor* Spawn = FindInteriorSpawn(World);
+	if (!Spawn || !Current)
+	{
+		return false;
+	}
+	const FTransform Start(Spawn->GetActorRotation(), Spawn->GetActorLocation() + Spawn->GetActorUpVector() * 100.0);
+	if (APlayerCharacter* Walker = Cast<APlayerCharacter>(Current))
+	{
+		// Already on foot somewhere else: take the same character across.
+		ReturnShip = nullptr;
+		ReturnTransform = Walker->GetActorTransform();
+		Walker->SetActorTransform(Start, false, nullptr, ETeleportType::TeleportPhysics);
+		Walker->FaceDirection(Spawn->GetActorForwardVector());
+		bWalkingInterior = true;
+		return true;
+	}
+	const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Current);
+	const TSubclassOf<APawn> WalkerClass = Ship ? Ship->GetPilotCharacterClass() : nullptr;
+	if (!WalkerClass)
+	{
+		return false;
+	}
+	FActorSpawnParameters Params;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	APawn* Walker = World->SpawnActor<APawn>(WalkerClass, Start, Params);
+	if (!Walker)
+	{
+		return false;
+	}
+	ReturnShip = Current;
+	UnPossess();
+	Possess(Walker);
+	if (APlayerCharacter* OnFoot = Cast<APlayerCharacter>(Walker))
+	{
+		OnFoot->FaceDirection(Spawn->GetActorForwardVector());
+	}
+	bWalkingInterior = true;
+	UE_LOG(LogSpacePlayer, Log, TEXT("%s: walking the interior from %s"), *GetName(), *Start.GetLocation().ToString());
+	return true;
 }

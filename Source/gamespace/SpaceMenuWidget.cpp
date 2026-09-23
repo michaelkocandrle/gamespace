@@ -7,6 +7,7 @@
 #include "SpaceUserSettings.h"
 #include "Styling/CoreStyle.h"
 #include "Widgets/Images/SImage.h"
+#include "Widgets/SNullWidget.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SSlider.h"
 #include "Widgets/Layout/SBorder.h"
@@ -201,6 +202,21 @@ TSharedRef<SWidget> SSpaceMenu::BuildPausePage()
 								Controller->ResumeGame();
 							}
 						})
+					]
+					+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 5.f)
+					[
+						// Walk the Steadfast interior, or back (the same as I). Only where there is one.
+						Owner.IsValid() && Owner->HasInterior()
+							? MakeButton(Owner->IsWalkingInterior() ? LOCTEXT("InteriorBack", "ZPĚT (I)")
+							                                         : LOCTEXT("Interior", "INTERIÉR STEADFASTU (I)"), [this]()
+							{
+								if (ASpacePlayerController* Controller = Owner.Get())
+								{
+									Controller->ResumeGame();
+									Controller->ToggleInterior();
+								}
+							})
+							: SNullWidget::NullWidget
 					]
 					+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 5.f)
 					[

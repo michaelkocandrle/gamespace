@@ -1,0 +1,136 @@
+{
+ "_comment": "Chůze interiérem Steadfastu v zabalené hře (HANDOFF bod 62): space.Interior postaví hráče do nákladového prostoru, space.Walk ho nechá jít (dopředu/do strany, sekundy, směr ve stupních). Log hry zapisuje WALK start/end - kde se postava zastavila (kolize, dveře, gravitace). camera pawn = kamera postavy. Run: Tools/Shots.ps1 -Preset interior_walk",
+ "shots": [
+  {
+   "name": "warmup",
+   "hud": 0,
+   "settle": 3.0
+  },
+  {
+   "name": "a_enter",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 2.5,
+   "console": [
+    "space.Interior"
+   ]
+  },
+  {
+   "name": "b_walk_to_corridor",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 4.5,
+   "console": [
+    "space.Walk 1 0 4.0 0"
+   ]
+  },
+  {
+   "name": "c_walk_into_cockpit",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 4.0,
+   "console": [
+    "space.Walk 1 0 3.5 0"
+   ]
+  },
+  {
+   "name": "d_cockpit_from_behind",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "camera_location": [
+    17.8,
+    500,
+    1.75
+   ],
+   "camera_look_at": [
+    22,
+    500,
+    1.1
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "e_bump_side_wall",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 2.5,
+   "console": [
+    "space.Walk 0 1 2.0 0"
+   ]
+  },
+  {
+   "name": "e2_back_to_middle",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 1.2,
+   "console": [
+    "space.Walk 0 -1 0.86 0"
+   ]
+  },
+  {
+   "name": "f_turn_back",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 0.8,
+   "console": [
+    "space.Walk 1 0 0.2 180"
+   ]
+  },
+  {
+   "name": "g_walk_to_bay",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 5.5,
+   "console": [
+    "space.Walk 1 0 5.0 180"
+   ]
+  },
+  {
+   "name": "h_walk_to_engine",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 5.5,
+   "console": [
+    "space.Walk 1 0 5.0 180"
+   ]
+  },
+  {
+   "name": "i_engine_room",
+   "camera": "free",
+   "hud": 0,
+   "settle": 1.5,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 80,
+   "exposure": 2.0
+  },
+  {
+   "name": "j_bump_bay_wall",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 6.5,
+   "console": [
+    "space.Walk 1 0 6.0 90"
+   ]
+  },
+  {
+   "name": "k_back_to_ship",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 2.5,
+   "console": [
+    "space.Interior"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,188 @@
+{
+ "_comment": "Interiér Steadfastu v metrech, souřadnice Blenderu (Unreal: Y zrcadlené). Píše Tools/Blender/build_steadfast_interior.py, čte Tools/Assets/import_interior.py. work = svítidla pod stropem (bodovka míří dolů), accent = oranžová světla, screen = modré světlo displejů, doors = posuvné dveře (at = střed prahu, dir = směr průchodu), spawn = kde hráč začíná, gravity_box = umělá gravitace.",
+ "rooms": {
+  "EngineRoom": {
+   "work": [
+    [
+     -5.5,
+     -1.5,
+     2.4
+    ],
+    [
+     -2.5,
+     -1.5,
+     2.4
+    ],
+    [
+     -5.5,
+     1.5,
+     2.4
+    ],
+    [
+     -2.5,
+     1.5,
+     2.4
+    ]
+   ],
+   "accent": [
+    [
+     -4.0,
+     -1.4,
+     0.3
+    ],
+    [
+     -4.0,
+     1.4,
+     0.3
+    ]
+   ],
+   "screen": []
+  },
+  "CargoBay": {
+   "work": [
+    [
+     1.4,
+     -1.5,
+     2.4
+    ],
+    [
+     4.0,
+     -1.5,
+     2.4
+    ],
+    [
+     6.6,
+     -1.5,
+     2.4
+    ],
+    [
+     1.4,
+     1.5,
+     2.4
+    ],
+    [
+     4.0,
+     1.5,
+     2.4
+    ],
+    [
+     6.6,
+     1.5,
+     2.4
+    ]
+   ],
+   "accent": [
+    [
+     4.0,
+     -2.6,
+     0.6
+    ],
+    [
+     4.0,
+     2.6,
+     0.6
+    ]
+   ],
+   "screen": []
+  },
+  "Corridor": {
+   "work": [
+    [
+     10.5,
+     0.0,
+     2.4
+    ],
+    [
+     13.0,
+     0.0,
+     2.4
+    ],
+    [
+     15.5,
+     0.0,
+     2.4
+    ]
+   ],
+   "accent": [
+    [
+     16.6,
+     0.0,
+     2.2
+    ]
+   ],
+   "screen": []
+  },
+  "Cockpit": {
+   "work": [
+    [
+     18.4,
+     -1.3,
+     2.4
+    ],
+    [
+     18.4,
+     1.3,
+     2.4
+    ]
+   ],
+   "accent": [],
+   "screen": [
+    [
+     21.0,
+     -0.95,
+     1.05
+    ],
+    [
+     21.0,
+     0.95,
+     1.05
+    ]
+   ]
+  },
+  "CockpitGlass": {
+   "work": [],
+   "accent": [],
+   "screen": []
+  },
+  "DoorLeaf": {
+   "work": [],
+   "accent": [],
+   "screen": []
+  }
+ },
+ "doors": [
+  {
+   "at": [
+    17.0,
+    0.0,
+    0.0
+   ],
+   "dir": [
+    1.0,
+    0.0,
+    0.0
+   ],
+   "leaf": [
+    0.68,
+    2.12
+   ]
+  }
+ ],
+ "spawn": [
+  1.5,
+  0.0,
+  0.05
+ ],
+ "gravity_box": [
+  [
+   -7.3,
+   -3.3,
+   -0.4
+  ],
+  [
+   22.4,
+   3.3,
+   2.8
+  ]
+ ]
+}

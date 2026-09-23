@@ -1042,7 +1042,38 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       p10 0,01–0,04, světla p90 0,66–0,79 – v rozsahu autorových referencí.
     - **Omezení:** interiér nemá kolize (postava jím zatím nechodí, jde jen o vzhled), stojí v
       `TestSpace` samostatně mimo loď, dveře ke kokpitu se neotvírají a kokpit Steadfastu (procedurální
-      dashboard) ještě není. Zvenku jsou místnosti otevřené – zakryje je trup lodi.
+      dashboard) ještě není. Zvenku jsou místnosti otevřené – zakryje je trup lodi. *(Vše kromě trupu
+      vyřešil bod 62.)*
+62. **Interiér Steadfastu k projití** (23. 9. 2026, autor: „chci si to ozkoušet i v té hře samotné a mít
+    možnost tam projít“).
+    - **Jak se tam dostat:** klávesa **I** (kdekoliv v TestSpace, z lodi i pěšky), tlačítko
+      **INTERIÉR STEADFASTU (I)** v menu pauzy, nebo `space.Interior`. Hráč se objeví v nákladovém
+      prostoru čelem dopředu; další I (nebo tlačítko ZPĚT) ho vrátí do lodi, kterou řídil, nebo na
+      místo, kde stál. Loď zatím stojí tam, kde ji opustil (`ASpacePlayerController::ToggleInterior`).
+    - **Umělá gravitace:** `ASpaceGravityVolume` (box kolem celého interiéru, 981 cm/s², „dolů“ je -Z
+      boxu). `APlayerCharacter::UpdateGravity` se na něj ptá dřív než na planetu a uvnitř vypne
+      záchranu z terénu.
+    - **Kolize:** všechny místnosti a sklo kolidují podle polygonů (`CTF_USE_COMPLEX_AS_SIMPLE`).
+      Ověřeno v zabalené hře scénářem `-Preset interior_walk`: `space.Walk` postavu posílá a do logu
+      píše `WALK end` – prošla prostor → chodba → dveře → kokpit, zastavila se o boční stěnu na 2,16 m
+      (stěna 2,5 m minus poloměr kapsle), o sedačku a o potrubí ve strojovně.
+    - **Dveře:** `ASpaceSlidingDoor` mezi chodbou a kokpitem, dvě křídla (`DoorLeaf.glb`) se odsunou,
+      když je hráč blíž než 2,6 m (0,55 s), a zablokují, když jsou zavřená. `space.Door 1|0|-1`.
+    - **Strop 2,4 m** místo 2 m (postava s kamerou za zády byla ve 2 m stísněná). Nad stěnami shellu je
+      pás obložení, deska ve 2 m je pryč (svítidla visí nad ní).
+    - **Vlastní dveřní rámy:** rám z kitu měl průchod jen 1,4 m vysoký (masivní nadpraží); nové rámy
+      mají průchod 1,3 × 2,1 m, oranžový pruh a nadpraží ke stropu.
+    - **Kokpit** (x 17–22 m, 5 × 5 m): procedurální dashboard (šikmý pult, tři modré displeje, řada
+      oranžových tlačítek), dvě sedačky, okno přes celou šířku se sloupky a sklem (`CockpitGlass.glb`,
+      průsvitný oboustranný `M_KitGlass`, bez Nanite), modré světlo od displejů. B/R snímků 1,39–1,50.
+    - **Opravy:** černé klíny u zadního průchodu byl stín terminálu, který kitbash zapustil napůl do
+      stěny (smazán, nahrazen celým terminálem); tenká deska podél osy prostoru před předními dveřmi
+      („sloup“ ve snímcích) zastavovala hráče – smazána; nápis FREE LOOK se už nekreslí, když pohled drží
+      volná kamera snímků; runner snímků spouštěl konzolové příkazy každého snímku dvakrát.
+    - Rozvržení je v `ArtSource/Ships/Steadfast/Interior/Interior_layout.json` (světla, dveře, start,
+      gravitace; píše Blender skript, čte import).
+    - **Zbývá:** vnější trup Steadfastu (interiér zatím stojí sám v prostoru, zvenku otevřený) – samostatný
+      projekt jako u Vanguardu, čeká na autorovo rozhodnutí.
 
 ---
 
@@ -1070,6 +1101,8 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | `USpaceShotRunner` | `SpaceShotRunner.*` | Snímky podle scénáře pro vizuální kontrolu (kapitola 9): `-ShotList=` z příkazové řádky, `space.Shot` a `space.Shots` v konzoli. |
 | `ASpaceDebugHUD` | `SpaceDebugHUD.*` | Textový debug HUD (CVar `space.Hud`), FPS; vytváří `USpaceFlightHud`. Anglicky, placeholder, zbytek nahradí SC-3. |
 | `USpaceOriginRebasingSubsystem` | `SpaceOriginRebasingSubsystem.*` | Posun počátku světa. |
+| `ASpaceGravityVolume`, `ASpaceSlidingDoor` | `SpaceInterior.*` | Interiér lodi: umělá gravitace (box), posuvné dveře, `space.Interior`, `space.Walk`, `space.Door` (bod 62). Vstup do interiéru dělá `ASpacePlayerController::ToggleInterior` (klávesa I). |
+| – (jen konzolové příkazy) | `SpaceInteriorTuning.cpp` | Ladění interiéru za běhu: `space.Kit`, `space.KitColor`, `space.KitLight`, `space.KitReset` (bod 59). |
 | – (jen konzolové příkazy) | `SpacePostTuning.cpp` | Ladění vzhledu za běhu přes reflexi: `space.Post`, `space.PostList`, `space.PostDump`, `space.Sun`, `space.SunDir`, `space.Sky`, `space.LightList` (WORKFLOW kapitola 11). |
 
 ### Obsah (`Content/`)
@@ -1148,7 +1181,8 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 
 **Postava:** WASD, myš, Space skok, Shift sprint, F nastoupit.
 
-**Globální:** Escape (F10) menu a pauza, H HUD (kompaktní / plný / skrytý).
+**Globální:** Escape (F10) menu a pauza, H HUD (kompaktní / plný / skrytý), **I** interiér Steadfastu
+(tam a zpátky; totéž tlačítko v menu pauzy).
 
 ---
 
@@ -1177,7 +1211,7 @@ Všechny jsou headless (`.\Tools\run_editor_python.ps1 Tools\Tests\<soubor>`). K
 | `test_quantum_sc4.py` | SC-4: nic v SCM; v NAV cíl podle nosu, Veyra ze startu TOO CLOSE; spool, kalibrace, READY, krátký stisk neskočí, podržení ano; spálené palivo podle vzdálenosti; ve skoku nejde řídit; příjezd na výšku příletu v rychlosti NAV do minuty; chlazení; B přeruší skok; OBSTRUCTED s planetou v cestě; NO QT FUEL; kalibrace padá, když nos uhne; HUD (rámeček, oblouky 0/1/2/3, cíl); LMB namapované, J ne; scénář snímků. Plus profil rychlosti, výška příletu, palivo a test úsečka–koule samostatně. |
 | `test_speed_tunnel.py` | Tunel quantum skoku: prach je pryč, než by ho rychlost rozblikala; čára delší než dvojnásobek posunu za snímek při 60 FPS (neblikne); čáry v dráze do sebe nenarazí; stěny od nejbližší, loď Vanguard se vejde do nejbližší; materiál aditivní, oboustranný, se všemi parametry, které komponenta nastavuje; jiskry u lodi (bodů na trupu ≥ 32, ve skoku mnohem víc než v letu), prachu jen pár set; scénář snímků se skokem (`quantum`). |
 | `test_scene_look.py` | Vzhled uložené úrovně proti receptu: atmosféra Veyry (jediná, ve středu planety, zem 2 km pod hladinou, koeficienty z receptu, tenký lem, slunce ji osvětluje), intenzita sky lightu, contact shadows a šířka slunce, všechna nastavení `POST_SETTINGS` v neohraničeném volume (a že chromatická aberace a vyvážení bílé zůstala vypnutá), lak trupu z `Vanguard_setup.json`. Chytá zapomenuté spuštění `build_space_scene.py` / `import_ship.py`. |
-| `test_interior.py` | Interiér Steadfastu po `import_interior.py`: `M_KitTrim` má usage flagy Nanite/static/instanced a každý sampler výchozí texturu (jinak šachovnice v buildu), parametry `Lift`, `MetallicScale`, `Roughness*`, `Gunmetal` s hodnotami ze skriptu, jeden otagovaný herec na místnost, všechny sloty na instancích `M_KitTrim`, svítidla v každé místnosti na `MI_KitLamp`, bodovka pod každým svítidlem z `Interior_lights.json` (míří dolů; lm, K, kužel) a všechny akcenty (lm). |
+| `test_interior.py` | Interiér Steadfastu po `import_interior.py` (od bodu 62 i kokpit, sklo bez Nanite s průsvitným oboustranným materiálem, posuvné dveře s křídly zavřenými uprostřed, gravitační box, start chůze a kolize podle polygonů u každé místnosti): `M_KitTrim` má usage flagy Nanite/static/instanced a každý sampler výchozí texturu (jinak šachovnice v buildu), parametry `Lift`, `MetallicScale`, `Roughness*`, `Gunmetal` s hodnotami ze skriptu, jeden otagovaný herec na místnost, všechny sloty na instancích `M_KitTrim`, svítidla v každé místnosti na `MI_KitLamp`, bodovka pod každým svítidlem z `Interior_lights.json` (míří dolů; lm, K, kužel) a všechny akcenty (lm). |
 | `Tools/Assets/tests/*`, `Tools/Blender/tests/*` | Čistý Python bez Unrealu: plán importu, manifest (`python <soubor>`). |
 
 Co headless **nejde** ověřit a musí vyzkoušet autor ve hře:
@@ -1401,9 +1435,10 @@ Další otevřené směry mimo let:
 - `IMC_Spaceship` a `IMC_Character` pořád mapují H na `IA_ToggleHud`. Nic na to není navázané
   (H obsluhuje controller), je to neškodné.
 - Obloha nerozlišuje denní a noční stranu planety: v atmosféře je modrá všude.
-- **Interiér Steadfastu (body 58–61), neověřeno autorem:** jak působí za pohybu a na jeho monitoru.
-  Známé drobnosti: u průchodu do strojovny jsou vidět černé klínové plochy (rub nějakého dílu
-  shellu), interiér nemá kolize a v záběru `steadfast_interior/f_door_fore` je nápis FREE LOOK.
+- **Interiér Steadfastu (body 58–62), neověřeno autorem:** jak se v něm chodí a jak působí za pohybu,
+  výška stropu a kamera za postavou v úzké chodbě (kamera se o stěny zkracuje). Sedačky jsou hranaté
+  (procedurální, první verze), displeje kokpitu jsou jednobarevné plochy bez obsahu. Interiér stojí
+  v prostoru sám, bez trupu lodi; z lodi k němu nevede nástup (jen klávesa I).
 
 ---
 

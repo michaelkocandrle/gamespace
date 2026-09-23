@@ -19,6 +19,7 @@
 #include "InputModifiers.h"
 #include "InputTriggers.h"
 #include "SpaceDebugHUD.h"
+#include "SpaceInterior.h"
 #include "SpaceshipPawn.h"
 #include "SpaceUserSettings.h"
 #include "UObject/ConstructorHelpers.h"
@@ -138,20 +139,37 @@ FRotator APlayerCharacter::ComputeViewRotation(const FRotator& Frame, float Yaw,
 void APlayerCharacter::UpdateGravity()
 {
 	ACelestialBody::FindNearest(GetWorld(), GetActorLocation(), &Environment, &bHasEnvironment);
-	if (!bHasEnvironment)
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	// Inside a ship, its artificial gravity wins over any planet (and works where there is none).
+	const ASpaceGravityVolume* Ship = ASpaceGravityVolume::FindAt(GetWorld(), GetActorLocation());
+	bInGravityVolume = Ship != nullptr;
+	if (!Ship && !bHasEnvironment)
 	{
 		return;
 	}
-	UCharacterMovementComponent* Movement = GetCharacterMovement();
-	Movement->SetGravityDirection(-Environment.Up);
-	Movement->GravityScale = ComputeGravityScale(float(Environment.GravityCmS2), GetWorld()->GetGravityZ());
+	const FVector Up = Ship ? Ship->GetUp() : Environment.Up;
+	const float Gravity = Ship ? Ship->GravityCmS2 : float(Environment.GravityCmS2);
+	Movement->SetGravityDirection(-Up);
+	Movement->GravityScale = ComputeGravityScale(Gravity, GetWorld()->GetGravityZ());
 
 	// Quaternion version of TransportGravityFrame: no rotator round trip every frame.
-	GravityFrame = (FQuat::FindBetweenNormals(GravityFrame.GetUpVector(), Environment.Up) * GravityFrame).GetNormalized();
+	GravityFrame = (FQuat::FindBetweenNormals(GravityFrame.GetUpVector(), Up) * GravityFrame).GetNormalized();
+}
+
+void APlayerCharacter::DebugWalk(FVector2D Input, float Seconds)
+{
+	DebugWalkInput = Input;
+	DebugWalkSeconds = FMath::Max(0.f, Seconds);
+	UE_LOG(LogPlayerCharacter, Display, TEXT("WALK start at %s, input (%.2f, %.2f) for %.1f s"),
+		*GetActorLocation().ToString(), Input.X, Input.Y, Seconds);
 }
 
 bool APlayerCharacter::RecoverFromTerrain(float DeltaSeconds)
 {
+	if (bInGravityVolume)
+	{
+		return false;  // a ship's deck, not the planet's terrain
+	}
 	if (!bHasEnvironment)
 	{
 		UpdateGravity();  // not ticked yet (just spawned, or a test)
@@ -222,12 +240,23 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 	Movement->MaxWalkSpeed = bSprintHeld ? SprintSpeed : WalkSpeed;
 	Movement->JumpZVelocity = JumpVelocity;
 
-	if (!MoveInput.IsNearlyZero())
+	FVector2D Input = MoveInput;
+	if (DebugWalkSeconds > 0.f)
+	{
+		Input = DebugWalkInput;
+		DebugWalkSeconds -= DeltaSeconds;
+		if (DebugWalkSeconds <= 0.f)
+		{
+			UE_LOG(LogPlayerCharacter, Display, TEXT("WALK end at %s, %s, speed %.0f cm/s"), *GetActorLocation().ToString(),
+				Movement->IsFalling() ? TEXT("falling") : TEXT("on the ground"), Movement->Velocity.Size());
+		}
+	}
+	if (!Input.IsNearlyZero())
 	{
 		// Relative to where the camera looks, flattened onto the local ground.
 		const FQuat Heading = GravityFrame * FRotator(0.f, LookYaw, 0.f).Quaternion();
-		AddMovementInput(Heading.GetForwardVector(), float(MoveInput.Y));
-		AddMovementInput(Heading.GetRightVector(), float(MoveInput.X));
+		AddMovementInput(Heading.GetForwardVector(), float(Input.Y));
+		AddMovementInput(Heading.GetRightVector(), float(Input.X));
 	}
 
 	UpdateView();

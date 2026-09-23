@@ -596,6 +596,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
 	bool IsLanded() const { return LandingState == ELandingState::Landed; }
 
+	/** Who gets out (and who walks the ship's interior). */
+	TSubclassOf<APawn> GetPilotCharacterClass() const { return PilotCharacterClass; }
+
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
 	ELandingBlocker GetLandingBlocker() const { return LandingBlocker; }
 

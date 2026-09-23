@@ -317,6 +317,7 @@ Presety (`Tools/Shots/*.json`):
 | `interior_tune` | varianty materiálu a světel interiéru (`space.Kit*`), každá začíná `space.KitReset`; celek a detail stěny |
 | `ceiling_tune` | světla nákladového prostoru se stropem: jas a kužel bodovek, oranžové akcenty; celek a pohled na strop |
 | `accent_tune` | jas oranžových akcentů v celém interiéru (prostor, strop, chodba, strojovna) |
+| `interior_walk` | chůze interiérem v zabalené hře: `space.Interior`, `space.Walk`, kamera postavy (`"camera": "pawn"`); výsledek je i v logu hry (`WALK end at …`) |
 
 Pole jednoho snímku:
 - základ: `camera`, `altitude_m`, `facing`, `speed_ms` (nebo `drift` [vpřed, vpravo, nahoru] v m/s,
@@ -630,6 +631,18 @@ snímku.
   stála 40 cm za stěnou; když se přesunula dovnitř, stejných 200 lm najednou oteplilo celou
   místnost. Po přesunu světla měř znovu.
 
+- m) **Konzolové příkazy snímku běžely dvakrát.** Runner nastavoval další snímek hned po uložení
+  předchozího a znovu v jeho prvním snímku. U nastavení to nevadilo, přepínač (`space.Interior`)
+  hráče poslal dovnitř a hned zpátky. Opraveno v `SpaceShotRunner.cpp`; příkazy scénáře ať jsou i tak
+  pokud možno idempotentní.
+- n) **Rám dveří z kitu má průchod jen 70 % výšky.** `Door_Frame_Square` je 5 m, ale průchod 3,5 m;
+  po zmenšení na palubu 2,4 m zbyl průchod 1,4 m a postava by neprošla. Než díl použiješ jako
+  průchod, změř jeho otvor (vrcholy, ne bounding box). Rámy jsou teď procedurální.
+- o) **Headless Python v UE:** `StaticMeshEditorSubsystem` tam není (vrací `None`) – Nanite se vypne
+  `mesh.set_editor_property("nanite_settings", …)`, což mesh přestaví samo. `rerun_construction_scripts`
+  v Pythonu neexistuje – co má C++ herec přepočítat, vystav jako `UFUNCTION(BlueprintCallable)`
+  (`ASpaceSlidingDoor::LayoutLeaves`). `get_relative_location` není; `get_editor_property("relative_location")`.
+
 ### 9.4 C++ a UHT
 
 - a) **Unity build, kolize jmen.** `ModeColor` v `SpaceFlightHud.cpp` a `SpaceDebugHUD.cpp` spadl
@@ -744,6 +757,9 @@ Všechno jde přes reflexi, takže žádný seznam vlastností se neudržuje ru�
 | `space.Kit <Param> <hodnota> [část jména]` / `space.KitColor` | materiály interiéru (`Lift`, `MetallicScale`, `RoughnessFloor`, `Gunmetal`…); filtr `MI_T_` = jen trim sheety (`Source/gamespace/SpaceInteriorTuning.cpp`) |
 | `space.KitLight Work\|Accent\|All <Vlastnost> <hodnota>` | světla interiéru (`Intensity` v lm, `UseTemperature True`, `Temperature`, `LightColor R G B`, u bodovek `OuterConeAngle`) |
 | `space.KitReset` | interiér, slunce a sky light zpátky na hodnoty z úrovně – první příkaz každé varianty |
+| `space.Interior` | do interiéru Steadfastu a zpátky (ve hře klávesa I) |
+| `space.Walk <dopředu> <doprava> <s> [směr°]` | postava jde, jako by držela klávesy; do logu píše, kde skončila (kolize) |
+| `space.Door 1\|0\|-1` | posuvné dveře otevřít / zavřít / zpět na automatiku |
 
 Nic z toho se neukládá. Po restartu hry je zpátky to, co je v úrovni.
 

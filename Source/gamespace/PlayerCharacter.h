@@ -65,6 +65,21 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Player")
 	FVector GetGravityUp() const { return GravityFrame.GetUpVector(); }
 
+	/** Standing in a ship's artificial gravity (ASpaceGravityVolume) rather than a planet's. */
+	UFUNCTION(BlueprintPure, Category = "Player")
+	bool IsInArtificialGravity() const { return bInGravityVolume; }
+
+	/** Turns the view (and so the walking direction) to yaw degrees in the gravity frame. */
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	void SetLookYaw(float Yaw) { LookYaw = FRotator::NormalizeAxis(Yaw); }
+
+	/**
+	 * Walks as if the movement keys were held (X right, Y forward, -1..1) for Seconds, then logs
+	 * where the character stopped. space.Walk; checks collision in the packaged game.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Player|Tests")
+	void DebugWalk(FVector2D Input, float Seconds);
+
 	UFUNCTION(BlueprintPure, Category = "Player")
 	FFootIKState GetFootIKState() const;
 
@@ -200,6 +215,10 @@ private:
 
 	FCelestialEnvironment Environment;
 	bool bHasEnvironment = false;
+	bool bInGravityVolume = false;
+
+	FVector2D DebugWalkInput = FVector2D::ZeroVector;
+	float DebugWalkSeconds = 0.f;
 
 	/** Carried along the planet: Z is up, X is the reference heading for LookYaw. */
 	FQuat GravityFrame = FQuat::Identity;
