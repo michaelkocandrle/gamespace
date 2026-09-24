@@ -307,6 +307,16 @@ def place_greebles(hull, specs, coll, bevel):
             hit, normal, _, _ = tree.ray_cast(origin, d)
             if hit is None:
                 continue
+            # the part's footprint can straddle a seam groove or a curvature change: one ray's normal
+            # then tilts the whole part (the roof hatch stood up at an angle, 24. 9. 2026). Average the
+            # normals of rays over the footprint (along the ship and across it).
+            across = Vector((0, 0, 1)) if g["from"] == "side" else Vector((0, 1, 0))
+            normals = [normal]
+            for dx, da in ((0.4, 0), (-0.4, 0), (0, 0.25), (0, -0.25), (0.25, 0.15), (-0.25, -0.15)):
+                h2, n2, _, _ = tree.ray_cast(origin + Vector((dx, 0, 0)) + across * da, d)
+                if h2 is not None and (h2 - hit).length < 0.6 and n2.dot(normal) > 0.5:
+                    normals.append(n2)
+            normal = sum(normals, Vector()).normalized()
             z = normal.normalized()
             xdir = (Vector((1, 0, 0)) - z * z.x).normalized()
             y = z.cross(xdir)
@@ -456,6 +466,12 @@ def main(argv):
         bm.to_mesh(hull.data)
         bm.free()
         report["hull_zones"] = [z["name"] for z in hz]
+    if recipe.get("detail"):
+        # medium shape layer on the exact base (Tools/Blender/hs_detail.py): before greebles and the canopy
+        # cut, so rays see the plates and recesses
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hs_detail
+        report["detail"] = hs_detail.apply(recipe, made, coll, mats, ship)
     if recipe["parts"].get("hull", {}).get("greebles") and "hull" in made:
         report["hull_greebles"] = place_greebles(made["hull"], recipe["parts"]["hull"]["greebles"], coll, recipe.get("kit_bevel", {"angle_deg": 30, "width": 0.004, "segments": 2}))
     if "canopy" in views and "hull" in made:
