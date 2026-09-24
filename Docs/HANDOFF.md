@@ -1319,6 +1319,28 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Test `test_ship_import` se u lodi s `panel_strength` 0 v setupu řídí tím nastavením.
     Snímky ze zabalené hry jsou prohlédnuté (`Docs/Shots/Wayfarer/`) a dossier je aktualizovaný.
     Zbývá: tvar z AI (zvlněné plochy, gondoly u trupu), neprůhledné sklo, střepy v kokpitu.
+86. **Wayfarer exteriér v2: přesně podle výkresu, bez AI geometrie** (24. 9. 2026, autor: „geometrie je mimo, lak
+    s tím nesedí, tohle není dost dobré, myslel jsem že tu geometrii zvládneš přesně“). Image-to-3D neumí přesný
+    hard-surface; AI model zůstává jen jako reference stylu.
+    - `Tools/Blender/hs_build_ship.py` + `HardSurface/Wayfarer_hs.json` staví díly z obrysů layoutu, které spojuje klíč
+      `part` v bloku `exterior`:
+      - trup je loft (tvar čela natažený na šířku shora a výšku z boku);
+      - ostatní díly jsou průnik vytažených obrysů;
+      - gondoly jsou rotační přes `hs_build_part.build_into` (panely, pásy, sání, tryska);
+      - zbraně jsou válce.
+    - Navrch přibylo:
+      - panelové drážky: prstence na přepážkách layoutu a podélné linie;
+      - rám kabiny se zapuštěným sklem;
+      - přesné řezy podél čar (`bisect`) pro okraj skla, oranžový pruh, tmavý nos a záď;
+      - účelové detaily přes kit (`place_greebles`, paprsek na trup).
+    - `Tools/Blender/hs_assemble_ship.py` (blok `assemble`) dělá herní meshe: aplikuje modifikátory, realizuje instance,
+      spojí díly do trupu, skla a podvozku, posune loď do středu, rozbalí UV a postaví k-DOP kolize a sockety
+      v souřadnicích layoutu. Pak export a import jako dřív.
+    - Každá zóna laku má vlastní slot (M_Ship_Hull: lak, tmavá, oranžová, kov; sklo; emise trysek). Žádná textura.
+    - Silueta herního modelu proti výkresu: bok 0,978, shora 0,988, zepředu 0,911 (AI model měl 0,91 / 0,78 / 0,59).
+    - Stavba odhalila chybu ve výkresu: ploutev byla shora užší (y 3,55), než je zepředu vykloněná (3,95). Opraveno.
+    - Zbývá detail: křídla a ploutve jsou rovné desky, podvozek jsou hranoly, lak je bez jemné struktury, velký poklop
+      na střeše trčí šikmo, sklo je do prázdna, rampa není samostatný díl.
 
 ---
 

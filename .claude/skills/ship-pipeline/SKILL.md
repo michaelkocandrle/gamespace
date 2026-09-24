@@ -321,6 +321,35 @@ python Tools/Blender/silhouette_compare.py run --blend Ship.blend --collection X
 - **Cíle:** hard-surface díl proti AI objemu ≥ 0,88 na pohled. Nižší číslo znamená špatnou osu nebo
   poloměr, ne detail. Proti konceptu je cíl ≥ 0,9 a `aspect_model` do 3 % od `aspect_ref`.
 
+## 3b2. Exteriér přesně podle výkresu (Wayfarer v2, výchozí cesta od 24. 9. 2026)
+
+**AI image-to-3D nedává přesný hard-surface** (Wayfarer v1: roztavené plochy, rozeklané hrany, lak na tom nesedí;
+autor: „tohle není dost dobré“). Exteriér se proto staví přímo z obrysů schváleného výkresu. AI slouží jen jako
+reference stylu.
+
+```bash
+MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/hs_build_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
+MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend --python Tools/Blender/hs_assemble_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
+# pak gamespace_ship_export.py na <Loď>_HS_Game.blend a import_ship.py jako obvykle
+```
+- **Výkres:** každý obrys v `exterior` má `part`, který ho spojuje přes pohledy. Díl chybějící v pohledu si ho může
+  půjčit (`borrow`).
+- **Stavba dílů:**
+  - `loft: true` (trup): řez = obrys zepředu natažený na šířku shora a výšku z boku;
+  - ostatní díly: průnik vytažených obrysů (boolean EXACT);
+  - `revolve`: recept `hs_build_part` (poloměry z boku výkresu), obě strany zrcadlově;
+  - `cylinders`: válce.
+- **Detail:**
+  - `seams` na loftu jsou skutečné drážky (`x` stanice přepážek, `around` [strana, výška 0–1], `width`, `depth`);
+  - `zones` jsou přesné řezy (`view` x/z nebo polyline side/top) plus materiál podle středu plošky;
+  - `canopy_frame`: vzpěry, páteř, zapuštění skla;
+  - `greebles`: díly kitu na paprsku k trupu, každý s `_what` (účel), barva laku.
+- **Kontrola:** `silhouette_compare.py` proti `guides/<Loď>_mask_*` má být ≥ 0,95. Když díl nesedí, bývá chyba ve
+  výkresu (Wayfarer: ploutev shora užší, než je vykloněná), a opravuje se výkres.
+- **Assemble:** `groups` (Canopy, Gear), `offset` (layout → střed), `collision` a `sockets` v souřadnicích layoutu,
+  `greeble_material`. Instance kitu se před převodem realizují, jinak se detaily neexportují.
+- **Materiály v setupu:** slot na zónu, master `hull` s barvou (lineární), sklo `glass`, emise `_Emissive`.
+
 ## 3c. Exteriér hard-surface (AssetPipeline_Modular „Exteriér: hard-surface“)
 
 - AI trup je jen **objemová reference**. Loď se staví po dílech z JSON receptů v

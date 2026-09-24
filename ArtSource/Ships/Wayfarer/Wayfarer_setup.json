@@ -1,5 +1,5 @@
 {
- "_comment": "Look and feel of BP_Ship_Wayfarer, applied by Tools/Assets/import_ship.py after the size-based values from the manifest (everything here wins). Flight numbers from Wayfarer_spec.json (SCM 225 m/s, accelerations main 70 / retro 45 / strafe 40 / up 45 / down 35 m/s2, pitch / yaw / roll 55 / 48 / 150 deg/s). First flyable version (24. 9. 2026): Higgsfield exterior, no modelled interior yet, so the placeholder cockpit is on.",
+ "_comment": "Look and feel of BP_Ship_Wayfarer, applied by Tools/Assets/import_ship.py after the size-based values from the manifest (everything here wins). Flight numbers from Wayfarer_spec.json. Exterior v2 (24. 9. 2026): built straight from the approved drawing (Tools/Blender/hs_build_ship.py + hs_assemble_ship.py), one flat material per paint zone, no AI texture. No modelled interior yet, so the placeholder cockpit is on.",
  "pawn": {
   "_comment_flight": "cm/s2 and cm/s; rotation deg/s.",
   "thrust_acceleration": 7000.0,
@@ -22,9 +22,9 @@
   "pitch_acceleration": 200.0,
   "yaw_acceleration": 160.0,
   "roll_acceleration": 450.0,
-  "_comment_gear": "Modelled gear (SM_Ship_Wayfarer_Gear): two collision hulls reach down to the pads (z -2.70 m), so the root box ends at the soles and gear_extension_cm is 0; stowed, the legs rise 110 cm (longest leg below the belly at -1.63).",
+  "_comment_gear": "Modelled gear (SM_Ship_Wayfarer_Gear): collision hulls reach down to the pads, so gear_extension_cm is 0; stowed, the legs rise 100 cm (layout: belly -0.6 m, pads -1.6 m).",
   "gear_extension_cm": 0.0,
-  "gear_stow_travel_cm": 110.0,
+  "gear_stow_travel_cm": 100.0,
   "gear_deploy_seconds": 2.0,
   "precision_speed_fraction": 0.15,
   "precision_turn_scale": 0.45,
@@ -39,45 +39,106 @@
   "camera_boom": {
    "_comment": "About 0.8 x the length, as the chase camera settled for the previous ship.",
    "target_arm_length": 1750.0,
-   "socket_offset": [0.0, 0.0, 420.0],
+   "socket_offset": [
+    0.0,
+    0.0,
+    420.0
+   ],
    "camera_lag_speed": 6.0,
    "camera_lag_max_distance": 3000.0,
    "probe_size": 40.0
   },
-  "chase_camera": {"field_of_view": 80.0},
-  "cockpit_camera": {"field_of_view": 88.0}
+  "chase_camera": {
+   "field_of_view": 80.0
+  },
+  "cockpit_camera": {
+   "field_of_view": 88.0
+  }
  },
  "materials": {
-  "_comment": "One re-baked texture set (Tools/Blender/build_ai_ship.py) on the PBR master, plus the pod nozzle discs. The Higgsfield paint is already light (warm off-white), so no tint.",
-  "MI_Ship_Wayfarer_Hull": {
-   "master": "pbr",
-   "slots": ["M_Ship_Wayfarer_Hull"],
-   "textures": {
-    "base_color": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_BC.png",
-    "orm": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_ORM.png",
-    "normal": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_N.png",
-    "ao": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_AO.png"
-   },
-   "_comment_clean": "Clean paint (author 24. 9. 2026: the ship looked broken and dirty). The repainted base colour and ORM (Tools/Blender/repaint_ship.py) carry flat zones; the panel lines come from the normal map and the AO. The master's own dirt is turned down: no procedural panel sheets on top of the modelled ones, almost no wear, grunge variation low, a little scorch only right at the nozzles.",
-   "cavity_strength": 0.5,
-   "ao_strength": 0.6,
-   "detail_tile_cm": 18.0,
-   "detail_normal_strength": 0.8,
-   "detail_rough_variation": 0.04,
-   "panel_strength": 0.0,
-   "wear_amount": 0.03,
-   "scorch_amount": 0.25,
-   "scorch_start_cm": -950.0,
-   "scorch_end_cm": -1075.0,
-   "roughness_scale": 1.0
+  "_comment": "Hard-surface exterior: one slot per paint zone, flat colours on the hull master (linear), the panel grooves, bevels and kit greebles carry the detail. Glass is the translucent master.",
+  "MI_Ship_Wayfarer_Paint": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_Paint"
+   ],
+   "base_color": [
+    0.6,
+    0.57,
+    0.5
+   ],
+   "metallic": 0.0,
+   "roughness": 0.42
+  },
+  "MI_Ship_Wayfarer_Dark": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_Dark"
+   ],
+   "base_color": [
+    0.035,
+    0.037,
+    0.042
+   ],
+   "metallic": 0.3,
+   "roughness": 0.5
+  },
+  "MI_Ship_Wayfarer_Accent": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_Accent"
+   ],
+   "base_color": [
+    0.72,
+    0.17,
+    0.02
+   ],
+   "metallic": 0.0,
+   "roughness": 0.45
+  },
+  "MI_Ship_Wayfarer_Metal": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_Metal"
+   ],
+   "base_color": [
+    0.25,
+    0.25,
+    0.27
+   ],
+   "metallic": 0.9,
+   "roughness": 0.35
+  },
+  "MI_Ship_Wayfarer_Glass": {
+   "master": "glass",
+   "slots": [
+    "M_Ship_Wayfarer_Glass"
+   ],
+   "base_color": [
+    0.02,
+    0.03,
+    0.035
+   ],
+   "opacity": 0.55,
+   "roughness": 0.03
   },
   "MI_Ship_Wayfarer_Thruster": {
    "master": "hull",
-   "slots": ["M_Ship_Wayfarer_Emissive"],
-   "base_color": [0.35, 0.2, 0.1],
+   "slots": [
+    "M_Ship_Wayfarer_Emissive"
+   ],
+   "base_color": [
+    0.35,
+    0.2,
+    0.1
+   ],
    "metallic": 0.0,
    "roughness": 0.4,
-   "emissive_color": [1.0, 0.55, 0.25],
+   "emissive_color": [
+    1.0,
+    0.55,
+    0.25
+   ],
    "emissive_strength": 8.0
   }
  }

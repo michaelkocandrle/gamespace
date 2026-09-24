@@ -773,6 +773,14 @@ snímku.
   vyřezávat po texelech z AI kresby (medián 5 px, práh).
 - t) **Blender nemá Pillow ani SciPy.** Jeho Python má ale stejnou verzi jako systémový (3.13):
   `repaint_ship._borrow()` přidá systémové site-packages.
+- u) **AI image-to-3D loď po přebarvení pořád „roztavená“.** Geometrie je z AI, lak ji nespraví. Stavět exteriér
+  z obrysů výkresu (`hs_build_ship.py`).
+- v) **Díl postavený průnikem obrysů je uříznutý** (Wayfarer: ploutev končila ve 3,25 m místo 4,0 m). Obrysy
+  výkresu si odporovaly: šikmá ploutev byla shora nakreslená užší, než je. Opravit výkres, ne model.
+- w) **Sklo kabiny pruhované.** Trup kopíruje horní hranu obrysu kabiny přesně a test bodu v polygonu na hraně
+  kolísá. Testovat jen proti spodní hraně a trup předtím rozříznout podél čáry (`cut_polyline`).
+- x) **Detaily kitu ve hře chybí.** `new_from_object` zahodí instance z geometry nodes. Do instanceru přidat
+  Realize Instances (`hs_assemble_ship.py` to dělá).
 
 ---
 

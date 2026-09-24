@@ -93,10 +93,13 @@ check("thrust bars are block bars along the row", displays.debug_get_gauge("Thru
       and displays.debug_get_gauge("ThrustGauge_MAIN").get_editor_property("segments") > 0)
 
 # --- The canvas and the recipe agree ---------------------------------------------------------------
+recipe_displays = ((sut.recipe() or {}).get("interior") or {}).get("displays") if sut.SHIP else None
 if not sut.SHIP:
     sut.skip(log, "the ship recipe's screens map where the game draws them")
+elif not recipe_displays:
+    sut.skip(log, "the ship recipe's screens map where the game draws them", "%s has no modelled cockpit displays yet" % sut.SHIP)
 else:
-    recipe = sut.recipe()["interior"]["displays"]
+    recipe = recipe_displays
     rect = lambda name: displays.debug_get_screen_rect(name)
     screen_names = ("left", "right", "centre_top", "centre_bottom")
     canvas = [max(rect(n).z for n in screen_names), max(rect(n).w for n in screen_names)]
@@ -217,6 +220,9 @@ check("display master opaque with pixel animation (the variants past or around t
 # --- The ship's display slot and material (Tools/Tests/ship_under_test.py) -----------------------------
 if not sut.SHIP:
     sut.skip(log, "the ship's display slot, Display_ sockets, self status outline and canopy frame material")
+elif not sut.has_part("Interior"):
+    sut.skip(log, "the ship's display slot, Display_ sockets, self status outline and canopy frame material",
+             "%s has no modelled interior yet" % sut.SHIP)
 else:
     mesh = unreal.EditorAssetLibrary.load_asset(sut.asset("Meshes/SM_Ship_{ship}_Interior"))
     slots = [str(m.get_editor_property("material_slot_name")) for m in mesh.get_editor_property("static_materials")]

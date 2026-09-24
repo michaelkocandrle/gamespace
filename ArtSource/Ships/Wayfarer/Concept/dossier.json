@@ -1,6 +1,6 @@
 {
  "_comment": "Input for Tools/Design/build_ship_matrix.py: status line, card image, concept captions, the concepts used as front/side/top check views (measured on every build) and the author's decisions.",
- "status": "Létá ve hře – verze 1.1: čistý lak a ostré textury; další krok průchozí interiér",
+ "status": "Létá ve hře – exteriér v2 postavený přesně podle výkresu; další krok detail a materiály, pak interiér",
  "concepts": [
   {
    "file": "side_a.png",
@@ -70,58 +70,53 @@
   ]
  ],
  "model": {
-  "title": "Verze 1.1: létá ve hře, čistý lak (24. 9. 2026)",
-  "note": "Higgsfield multi-image to 3D (Meshy) ze čtyř schválených pohledů, 310 tis. trojúhelníků. Recept Wayfarer_ai_build.json ho otočí, zmenší na 21,5 m, svaří rozpadlé trojúhelníky, oddělí podvozek a rampu, rozbalí nový UV atlas, přepeče 4K a postaví kolize a sockety; repaint_ship.py pak nahradí špinavou AI barvu čistými zónami laku. Verze 1 vypadala rozbitě a špinavě (autor): UV atlas využíval jen 0,4 % textury (4K se chovala jako ~260 px), AI textura měla šmouhy na hranách ostrůvků a zapečené odlesky a materiál přidával procedurální panely, grunge a opotřebení. Teď atlas využívá 55 % textury, lak má jednotné zóny (lomená bílá, gunmetal, oranžová, sklo, kov trysek), pruhy se berou po texelech z AI kresby a panelové spáry z normálové mapy a AO. Tvar se od výkresu pořád liší (gondoly u trupu, křídla dolů).",
+  "title": "Exteriér v2: přesně podle výkresu (24. 9. 2026)",
+  "note": "AI model (verze 1 a 1.1) měl roztavenou geometrii a lak to nespravil (autor: „geometrie je mimo, tohle není dost dobré“). Exteriér v2 staví Tools/Blender/hs_build_ship.py přímo z obrysů schváleného výkresu: trup jako loft (v každém řezu tvar čela natažený na šířku shora a výšku z boku), ostatní díly jako průnik vytažených obrysů, gondoly rotačně podle poloměrů z výkresu se sáním a tryskou. Navrch skutečné panelové drážky, rám kabiny se zapuštěným sklem, řezy přesně podle čar pro oranžový pruh a tmavý nos, účelové detaily (servisní poklopy komponent, větrání chladičů, plnicí hrdlo, senzor). hs_assemble_ship.py z toho udělá herní meshe, kolize a sockety. Žádná AI geometrie ani AI textura. Stavba odhalila chybu ve výkresu (ploutev shora byla užší, než je vykloněná) – opraveno ve výkresu.",
   "renders": [
    {
     "file": "Renders/Wayfarer_front34.png",
-    "caption": "Blender po receptu a přebarvení: 3/4 zepředu."
+    "caption": "Blender, herní model v2: 3/4 zepředu."
    },
    {
     "file": "Renders/Wayfarer_rear34.png",
-    "caption": "3/4 zezadu: gondoly, rampa, trysky."
+    "caption": "3/4 zezadu: gondoly s tryskami, ploutve, tmavá záď."
    },
    {
     "file": "Renders/Wayfarer_side.png",
-    "caption": "Bok: pruhy, poklopy a spáry jsou ostré."
+    "caption": "Bok: panelové drážky, pruh, poklopy."
    }
   ],
   "shots": [
    {
-    "file": "Docs/Shots/Wayfarer/01_front_left.jpg",
-    "caption": "Let nad Veyrou (verze 1.1)."
+    "file": "Docs/Shots/Wayfarer/v2_close_three_quarter.jpg",
+    "caption": "Zblízka ve hře: čisté hrany, drážky, poklopy."
    },
    {
-    "file": "Docs/Shots/Wayfarer/02_left.jpg",
-    "caption": "Bok ze hry."
+    "file": "Docs/Shots/Wayfarer/v2_left.jpg",
+    "caption": "Bok ve hře."
    },
    {
-    "file": "Docs/Shots/Wayfarer/10_close_three_quarter.jpg",
-    "caption": "Zblízka: čistý lak, spáry, gondoly."
-   },
-   {
-    "file": "Docs/Shots/Wayfarer/09_below_gear_down.jpg",
+    "file": "Docs/Shots/Wayfarer/v2_below_gear_down.jpg",
     "caption": "Zespodu s podvozkem."
    },
    {
-    "file": "Docs/Shots/Wayfarer/12_thrusters_lit.jpg",
-    "caption": "Svítící trysky ve vesmíru."
+    "file": "Docs/Shots/Wayfarer/v2_rear.jpg",
+    "caption": "Zezadu z chase kamery."
    },
    {
-    "file": "Docs/Shots/Wayfarer/06_landed_side_v1.jpg",
-    "caption": "Přistáno (snímek z verze 1, před přebarvením)."
+    "file": "Docs/Shots/Wayfarer/v2_thrusters_lit.jpg",
+    "caption": "Trysky ve vesmíru."
    },
    {
-    "file": "Docs/Shots/Wayfarer/00_cockpit_horizon.jpg",
-    "caption": "Z kokpitu: dočasná palubní deska a sloupky."
+    "file": "Docs/Shots/Wayfarer/v2_landed_side.jpg",
+    "caption": "Přistáno."
    }
   ],
   "known": [
-   "Tvar trupu je z AI: gondoly blíž k trupu (y ±2,46 m místo 3,4 m), křídla skloněná dolů, plochy místy zvlněné.",
-   "Zevnitř kokpitu jsou vidět tmavé střepy vnitřních ploch AI trupu; zmizí s modelovaným interiérem.",
-   "Sklo kabiny je neprůhledné (tmavý lesklý lak); skutečné sklo přijde s interiérem.",
-   "Rampa visí pootevřená; je to samostatný díl, později se bude otevírat a zavírat.",
-   "Hranice černé špičky nosu je místy zubatá (hranice zón po trojúhelnících)."
+   "Detail je zatím střídmý: křídla a ploutve jsou rovné desky, podvozek jsou hranoly, materiál je jednobarevný lak bez jemné struktury.",
+   "Velký poklop na střeše nad kajutou trčí šikmo – opravit orientaci.",
+   "Kokpit je zevnitř prázdný (dočasná palubní deska), sklo je poloprůhledné do prázdna – přijde s interiérem.",
+   "Rampa zatím není samostatný díl (je součástí trupu)."
   ]
  }
 }

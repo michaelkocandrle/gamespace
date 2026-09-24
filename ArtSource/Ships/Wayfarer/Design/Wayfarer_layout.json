@@ -229,81 +229,93 @@
   }
  ],
  "exterior": {
-  "_comment": "Parts drawn in list order (later on top). side = from starboard, nose right (x, z); top = from above, nose right, port up (x, y); front = looking at the nose, port on the right (y, z). mirror: true copies a top/front part to the other side (y -> -y). kind: hull | wing | engine | fin | glass | gear | weapon | nozzle.",
+  "_comment": "Parts drawn in list order (later on top). side = from starboard, nose right (x, z); top = from above, nose right, port up (x, y); front = looking at the nose, port on the right (y, z). mirror: true copies a top/front part to the other side (y -> -y). kind: hull | wing | engine | fin | glass | gear | weapon | nozzle. part: the id that ties one piece across the three views; Tools/Blender/hs_build_ship.py builds each part from all views it appears in (the hull as a loft, the rest as the intersection of the extruded outlines), so the 3D model matches the drawing by construction.",
   "side": [
    {
     "name": "levá gondola (za trupem)",
     "kind": "engine",
-    "poly": [[-0.5, 0.45], [0.3, 0.25], [5.2, 0.35], [5.9, 0.8], [5.9, 1.6], [5.2, 2.05], [0.3, 2.15], [-0.5, 1.95]]
+    "poly": [[-0.5, 0.45], [0.3, 0.25], [5.2, 0.35], [5.9, 0.8], [5.9, 1.6], [5.2, 2.05], [0.3, 2.15], [-0.5, 1.95]],
+    "part": "pod"
    },
    {
     "name": "křídlo",
     "kind": "wing",
-    "poly": [[2.5, 0.55], [11.5, 0.55], [11.5, 0.95], [2.5, 0.95]]
+    "poly": [[2.5, 0.55], [11.5, 0.55], [11.5, 0.95], [2.5, 0.95]],
+    "part": "wing"
    },
    {
     "name": "trup",
     "kind": "hull",
     "poly": [[0.0, -0.35], [1.0, -0.6], [14.5, -0.6], [18.5, -0.2], [21.0, 0.7], [20.6, 1.3], [19.2, 2.2], [17.6, 3.05], [16.0, 3.3], [13.5, 3.1], [3.0, 2.95], [0.4, 2.6], [0.0, 1.8]],
     "label": "trup (tlakový prostor)",
-    "label_at": [8.0, 1.2]
+    "label_at": [8.0, 1.2],
+    "part": "hull"
    },
    {
     "name": "kabina",
     "kind": "glass",
     "poly": [[15.3, 3.0], [16.0, 3.3], [17.6, 3.05], [19.2, 2.2], [19.9, 1.65], [18.7, 1.9], [16.9, 2.6], [15.6, 2.75]],
     "label": "prosklená kabina",
-    "label_at": [17.4, 3.75]
+    "label_at": [17.4, 3.75],
+    "part": "canopy"
    },
    {
     "name": "rampa (zavřená)",
     "kind": "hull",
     "poly": [[0.0, -0.35], [1.0, -0.6], [1.0, 1.9], [0.0, 1.8]],
     "label": "zadní rampa",
-    "label_at": [0.6, 3.3]
+    "label_at": [0.6, 3.3],
+    "part": "ramp"
    },
    {
     "name": "pravá gondola",
     "kind": "engine",
     "poly": [[-0.5, 0.45], [0.3, 0.25], [5.2, 0.35], [5.9, 0.8], [5.9, 1.6], [5.2, 2.05], [0.3, 2.15], [-0.5, 1.95]],
     "label": "motorová gondola",
-    "label_at": [3.0, -0.15]
+    "label_at": [3.0, -0.15],
+    "part": "pod"
    },
    {
     "name": "tryska",
     "kind": "nozzle",
-    "poly": [[-0.5, 0.55], [-0.2, 0.55], [-0.2, 1.85], [-0.5, 1.85]]
+    "poly": [[-0.5, 0.55], [-0.2, 0.55], [-0.2, 1.85], [-0.5, 1.85]],
+    "part": "nozzle"
    },
    {
     "name": "ploutev",
     "kind": "fin",
     "poly": [[0.3, 2.0], [1.3, 4.0], [2.3, 4.0], [3.6, 2.0]],
     "label": "ploutev",
-    "label_at": [3.1, 3.55]
+    "label_at": [3.1, 3.55],
+    "part": "fin"
    },
    {
     "name": "zbraň S3 na konci křídla",
     "kind": "weapon",
-    "poly": [[6.0, 0.55], [11.0, 0.55], [11.0, 0.95], [12.6, 0.8], [12.6, 0.7], [11.0, 0.55]],
+    "poly": [[6.0, 0.6], [11.0, 0.6], [11.0, 0.7], [12.6, 0.7], [12.6, 0.8], [11.0, 0.8], [11.0, 0.9], [6.0, 0.9]],
     "label": "zbraň S3",
-    "label_at": [12.3, 0.1]
+    "label_at": [12.3, 0.1],
+    "part": "gun"
    },
    {
     "name": "raketnice S2",
     "kind": "weapon",
-    "poly": [[6.4, 0.2], [9.4, 0.2], [9.4, 0.5], [6.4, 0.5]]
+    "poly": [[6.4, 0.2], [9.4, 0.2], [9.4, 0.5], [6.4, 0.5]],
+    "part": "missile_rack"
    },
    {
     "name": "hlavní podvozek",
     "kind": "gear",
     "poly": [[5.0, -0.6], [5.4, -0.6], [5.4, -1.45], [5.8, -1.45], [5.8, -1.6], [4.6, -1.6], [4.6, -1.45], [5.0, -1.45]],
     "label": "podvozek",
-    "label_at": [7.0, -1.3]
+    "label_at": [7.0, -1.3],
+    "part": "gear_main"
    },
    {
     "name": "příďový podvozek",
     "kind": "gear",
-    "poly": [[16.8, -0.55], [17.2, -0.5], [17.2, -1.45], [17.6, -1.45], [17.6, -1.6], [16.4, -1.6], [16.4, -1.45], [16.8, -1.45]]
+    "poly": [[16.8, -0.55], [17.2, -0.5], [17.2, -1.45], [17.6, -1.45], [17.6, -1.6], [16.4, -1.6], [16.4, -1.45], [16.8, -1.45]],
+    "part": "gear_nose"
    }
   ],
   "top": [
@@ -313,7 +325,8 @@
     "mirror": true,
     "poly": [[2.5, 2.2], [11.5, 2.2], [8.6, 7.0], [5.0, 7.0]],
     "label": "křídlo s nádržemi vodíku",
-    "label_at": [7.6, 5.0]
+    "label_at": [7.6, 5.0],
+    "part": "wing"
    },
    {
     "name": "zbraň S3",
@@ -321,7 +334,8 @@
     "mirror": true,
     "poly": [[5.8, 6.95], [11.0, 6.95], [12.6, 7.15], [11.0, 7.35], [5.8, 7.35]],
     "label": "zbraň S3",
-    "label_at": [13.8, 7.15]
+    "label_at": [13.8, 7.15],
+    "part": "gun"
    },
    {
     "name": "gondola",
@@ -329,30 +343,36 @@
     "mirror": true,
     "poly": [[-0.5, 2.55], [0.3, 2.45], [5.2, 2.45], [5.9, 2.8], [5.9, 4.0], [5.2, 4.35], [0.3, 4.35], [-0.5, 4.25]],
     "label": "gondola s hlavním motorem",
-    "label_at": [2.8, 5.0]
+    "label_at": [2.8, 5.0],
+    "part": "pod"
    },
    {
     "name": "trup",
     "kind": "hull",
-    "poly": [[0.0, -2.3], [13.5, -2.3], [16.2, -2.0], [18.6, -1.35], [20.4, -0.55], [21.0, 0.0], [20.4, 0.55], [18.6, 1.35], [16.2, 2.0], [13.5, 2.3], [0.0, 2.3]]
+    "poly": [[0.0, -2.3], [13.5, -2.3], [16.2, -2.0], [18.6, -1.35], [20.4, -0.55], [21.0, 0.0], [20.4, 0.55], [18.6, 1.35], [16.2, 2.0], [13.5, 2.3], [0.0, 2.3]],
+    "part": "hull"
    },
    {
     "name": "kabina",
     "kind": "glass",
-    "poly": [[15.4, -1.2], [17.6, -1.3], [19.4, -0.75], [19.9, 0.0], [19.4, 0.75], [17.6, 1.3], [15.4, 1.2]]
+    "poly": [[15.4, -1.2], [17.6, -1.3], [19.4, -0.75], [19.9, 0.0], [19.4, 0.75], [17.6, 1.3], [15.4, 1.2]],
+    "part": "canopy"
    },
    {
     "name": "hřbet",
     "kind": "fin",
     "poly": [[3.0, -0.6], [13.5, -0.6], [15.0, -0.3], [15.0, 0.3], [13.5, 0.6], [3.0, 0.6]],
     "label": "hřbetní kryt rozvodů",
-    "label_at": [8.5, 1.3]
+    "label_at": [8.5, 1.3],
+    "part": "spine"
    },
    {
     "name": "ploutev",
     "kind": "fin",
     "mirror": true,
-    "poly": [[0.3, 3.3], [3.6, 3.3], [3.6, 3.55], [0.3, 3.55]]
+    "poly": [[0.3, 3.3], [3.6, 3.3], [3.6, 3.95], [0.3, 3.95]],
+    "part": "fin",
+    "_note": "Plan width of the canted fin (front view: y 3.3 at the root to 3.95 at the tip); was 3.55, which cut the fin off at 3.25 m in the 3D build."
    }
   ],
   "front": [
@@ -360,52 +380,61 @@
     "name": "křídlo",
     "kind": "wing",
     "mirror": true,
-    "poly": [[2.0, 0.55], [7.0, 0.6], [7.0, 0.85], [2.0, 0.95]]
+    "poly": [[2.0, 0.55], [7.0, 0.6], [7.0, 0.85], [2.0, 0.95]],
+    "part": "wing"
    },
    {
     "name": "zbraň S3",
     "kind": "weapon",
     "mirror": true,
-    "poly": [[6.95, 0.55], [7.35, 0.55], [7.35, 0.95], [6.95, 0.95]]
+    "poly": [[6.95, 0.55], [7.35, 0.55], [7.35, 0.95], [6.95, 0.95]],
+    "part": "gun"
    },
    {
     "name": "raketnice S2",
     "kind": "weapon",
     "mirror": true,
-    "poly": [[4.2, 0.2], [4.6, 0.2], [4.6, 0.5], [4.2, 0.5]]
+    "poly": [[4.2, 0.2], [4.6, 0.2], [4.6, 0.5], [4.2, 0.5]],
+    "part": "missile_rack"
    },
    {
     "name": "gondola",
     "kind": "engine",
     "mirror": true,
-    "circle": [3.4, 1.2, 0.95]
+    "circle": [3.4, 1.2, 0.95],
+    "part": "pod"
    },
    {
     "name": "ploutev",
     "kind": "fin",
     "mirror": true,
-    "poly": [[3.3, 2.0], [3.6, 2.0], [3.95, 4.0], [3.7, 4.0]]
+    "poly": [[3.3, 2.0], [3.6, 2.0], [3.95, 4.0], [3.7, 4.0]],
+    "part": "fin"
    },
    {
     "name": "trup",
     "kind": "hull",
-    "poly": [[-1.6, -0.6], [1.6, -0.6], [2.3, 0.1], [2.3, 2.4], [1.6, 3.05], [0.9, 3.3], [-0.9, 3.3], [-1.6, 3.05], [-2.3, 2.4], [-2.3, 0.1]]
+    "poly": [[-1.6, -0.6], [1.6, -0.6], [2.3, 0.1], [2.3, 2.4], [1.6, 3.05], [0.9, 3.3], [-0.9, 3.3], [-1.6, 3.05], [-2.3, 2.4], [-2.3, 0.1]],
+    "part": "hull"
    },
    {
     "name": "kabina",
     "kind": "glass",
-    "poly": [[-1.2, 1.9], [1.2, 1.9], [1.35, 2.7], [0.8, 3.2], [-0.8, 3.2], [-1.35, 2.7]]
+    "poly": [[-1.2, 1.9], [1.2, 1.9], [1.35, 2.7], [0.8, 3.2], [-0.8, 3.2], [-1.35, 2.7]],
+    "part": "canopy"
    },
    {
     "name": "hlavní podvozek",
     "kind": "gear",
     "mirror": true,
-    "poly": [[2.1, -0.6], [2.4, -0.6], [2.4, -1.45], [2.65, -1.45], [2.65, -1.6], [1.85, -1.6], [1.85, -1.45], [2.1, -1.45]]
+    "poly": [[2.1, -0.6], [2.4, -0.6], [2.4, -1.45], [2.65, -1.45], [2.65, -1.6], [1.85, -1.6], [1.85, -1.45], [2.1, -1.45]],
+    "part": "gear_main"
    },
    {
     "name": "příďový podvozek",
     "kind": "gear",
-    "poly": [[-0.15, -0.6], [0.15, -0.6], [0.15, -1.45], [0.4, -1.45], [0.4, -1.6], [-0.4, -1.6], [-0.4, -1.45], [-0.15, -1.45]]
+    "poly": [[-0.15, -0.6], [0.15, -0.6], [0.15, -1.45], [0.4, -1.45], [0.4, -1.6], [-0.4, -1.6], [-0.4, -1.45], [-0.15, -1.45]],
+    "part": "gear_nose"
    }
   ]
  },

@@ -1,0 +1,643 @@
+{
+ "_comment": "Tools/Blender/hs_build_ship.py: the Wayfarer's exterior straight from the approved drawing (Design/Wayfarer_layout.json, exterior). Every part matches the drawing by construction (loft / intersection of the outlines, or revolved to the drawing's radii); on top: real panel grooves, a canopy frame, revolved pods with intake and nozzle (Tools/Blender/hs_build_part.py), cylindrical guns. Materials by part, no AI texture.",
+ "layout": "ArtSource/Ships/Wayfarer/Design/Wayfarer_layout.json",
+ "out_blend": "ArtSource/Ships/Wayfarer/HardSurface/Wayfarer_HS.blend",
+ "borrow": {},
+ "parts": {
+  "hull": {
+   "loft": true,
+   "step": 0.05,
+   "ring": 96,
+   "name": "Hull",
+   "seams": {
+    "_comment": "Panel breaks at the bulkheads of the layout (hold / tech corridor / cabin / cockpit) and two lines along each side.",
+    "x": [1.4, 3.0, 4.3, 5.6, 6.9, 8.2, 9.3, 10.4, 11.6, 12.8, 14.0, 15.2, 16.7, 18.2, 19.4],
+    "around": [[1, 0.12], [-1, 0.12], [1, 0.28], [-1, 0.28], [1, 0.55], [-1, 0.55], [1, 0.8], [-1, 0.8]],
+    "width": 0.03,
+    "depth": 0.02
+   },
+   "zones": [
+    {
+     "name": "nose tip",
+     "material": "dark",
+     "cuts": [
+      {
+       "view": "x",
+       "value": 20.3
+      }
+     ],
+     "where": {
+      "x": [20.3, 22]
+     }
+    },
+    {
+     "name": "aft cap",
+     "material": "dark",
+     "cuts": [
+      {
+       "view": "x",
+       "value": 3.0
+      },
+      {
+       "view": "z",
+       "value": 2.2
+      }
+     ],
+     "where": {
+      "x": [0, 3.0],
+      "z": [2.2, 5]
+     }
+    },
+    {
+     "name": "side stripe",
+     "material": "accent",
+     "cuts": [
+      {
+       "view": "z",
+       "value": 1.1
+      },
+      {
+       "view": "z",
+       "value": 1.22
+      },
+      {
+       "view": "x",
+       "value": 12.0
+      },
+      {
+       "view": "x",
+       "value": 17.2
+      }
+     ],
+     "where": {
+      "x": [12.0, 17.2],
+      "z": [1.1, 1.22],
+      "normal_abs_y_min": 0.6
+     }
+    }
+   ],
+   "greebles": [
+    {
+     "_what": "component access panels of the technical corridor (reactor / shield)",
+     "from": "side",
+     "x": 8.9,
+     "z": 0.95,
+     "part": "hatch_large"
+    },
+    {
+     "_what": "coolers access",
+     "from": "side",
+     "x": 9.9,
+     "z": 0.7,
+     "part": "hatch"
+    },
+    {
+     "_what": "cooler exhausts at the wing roots",
+     "from": "side",
+     "x": 9.8,
+     "z": 1.9,
+     "part": "vent"
+    },
+    {
+     "from": "side",
+     "x": 10.25,
+     "z": 1.9,
+     "part": "vent"
+    },
+    {
+     "_what": "life-support intake by the cabin",
+     "from": "side",
+     "x": 13.9,
+     "z": 1.95,
+     "part": "vent"
+    },
+    {
+     "_what": "cabin service hatch (hygiene / water)",
+     "from": "side",
+     "x": 12.4,
+     "z": 0.8,
+     "part": "hatch"
+    },
+    {
+     "_what": "ramp hydraulics service hatch",
+     "from": "side",
+     "x": 1.9,
+     "z": 0.35,
+     "part": "hatch"
+    },
+    {
+     "_what": "hold cargo-grid lock servos",
+     "from": "side",
+     "x": 4.9,
+     "z": 0.3,
+     "part": "strip"
+    },
+    {
+     "from": "side",
+     "x": 6.2,
+     "z": 0.3,
+     "part": "strip"
+    },
+    {
+     "_what": "navigation / position light housings",
+     "from": "side",
+     "x": 19.6,
+     "z": 1.1,
+     "part": "sensor"
+    },
+    {
+     "from": "side",
+     "x": 2.6,
+     "z": 2.0,
+     "part": "sensor"
+    },
+    {
+     "_what": "quantum fuel filler on the belly",
+     "from": "bottom",
+     "x": 6.4,
+     "y": 0.8,
+     "part": "hatch"
+    },
+    {
+     "_what": "belly access to the quantum drive",
+     "from": "bottom",
+     "x": 2.0,
+     "y": 0.0,
+     "part": "hatch_large"
+    },
+    {
+     "_what": "avionics bay hatch under the cockpit",
+     "from": "bottom",
+     "x": 18.4,
+     "y": 0.0,
+     "part": "hatch"
+    },
+    {
+     "_what": "radar / sensor blister on the nose",
+     "from": "top",
+     "x": 19.4,
+     "y": 0.0,
+     "part": "sensor"
+    },
+    {
+     "_what": "comms antenna base behind the canopy",
+     "from": "top",
+     "x": 14.6,
+     "y": 0.0,
+     "part": "sensor"
+    },
+    {
+     "_what": "dorsal cable-run covers",
+     "from": "top",
+     "x": 4.2,
+     "y": 0.9,
+     "part": "strip"
+    },
+    {
+     "from": "top",
+     "x": 4.2,
+     "y": -0.9,
+     "part": "strip"
+    },
+    {
+     "from": "top",
+     "x": 6.0,
+     "y": 0.9,
+     "part": "strip"
+    },
+    {
+     "from": "top",
+     "x": 6.0,
+     "y": -0.9,
+     "part": "strip"
+    },
+    {
+     "from": "top",
+     "x": 7.6,
+     "y": 0.9,
+     "part": "strip"
+    },
+    {
+     "from": "top",
+     "x": 7.6,
+     "y": -0.9,
+     "part": "strip"
+    },
+    {
+     "from": "top",
+     "x": 11.0,
+     "y": 0.9,
+     "part": "strip"
+    },
+    {
+     "from": "top",
+     "x": 11.0,
+     "y": -0.9,
+     "part": "strip"
+    },
+    {
+     "_what": "reactor heat vents on the spine",
+     "from": "top",
+     "x": 9.0,
+     "y": 0.5,
+     "part": "vent"
+    },
+    {
+     "from": "top",
+     "x": 9.0,
+     "y": -0.5,
+     "part": "vent"
+    },
+    {
+     "_what": "roof maintenance hatch over the cabin",
+     "from": "top",
+     "x": 12.8,
+     "y": 0.0,
+     "part": "hatch_large"
+    }
+   ]
+  },
+  "pod": {
+   "name": "Pod",
+   "material": "paint",
+   "materials": {
+    "_Band": "accent",
+    "_FwdBand": "accent",
+    "_Exhaust": "metal",
+    "_Intake": "dark",
+    "_Substructure": "dark"
+   },
+   "revolve": {
+    "_comment": "Radii from the drawing's side outline of the pod (x -0.5 .. 5.9, centre z 1.2, r 0.95 in the middle).",
+    "axis": {
+     "y": 3.4,
+     "z": 1.2
+    },
+    "segments": 64,
+    "bevel": {
+     "angle_deg": 30,
+     "width": 0.008,
+     "segments": 2
+    },
+    "profile": [[-0.5, 0.75], [-0.3, 0.84], [0.0, 0.9], [0.3, 0.95], [0.6, 0.95], [0.6, 0.98], [0.9, 0.98], [0.9, 0.95], [4.4, 0.92], [4.4, 0.95], [4.7, 0.95], [4.7, 0.9], [5.2, 0.85], [5.55, 0.66], [5.9, 0.42]],
+    "sections": [
+     {
+      "name": "AftCowl",
+      "x": [-0.5, 0.6],
+      "kind": "panels",
+      "around": 6,
+      "rows": 1,
+      "thickness": 0.03,
+      "gap": 0.008,
+      "phase_deg": 15
+     },
+     {
+      "name": "Band",
+      "x": [0.6, 0.9],
+      "kind": "ring",
+      "wall": 0.06
+     },
+     {
+      "name": "Body",
+      "x": [0.9, 4.4],
+      "kind": "panels",
+      "around": 8,
+      "rows": 3,
+      "thickness": 0.03,
+      "gap": 0.008,
+      "phase_deg": 0
+     },
+     {
+      "name": "FwdBand",
+      "x": [4.4, 4.7],
+      "kind": "ring",
+      "wall": 0.06
+     },
+     {
+      "name": "Nose",
+      "x": [4.7, 5.9],
+      "kind": "panels",
+      "around": 6,
+      "rows": 1,
+      "thickness": 0.03,
+      "gap": 0.008,
+      "phase_deg": 15
+     }
+    ],
+    "intake": {
+     "x_lip": 5.9,
+     "depth": 0.6,
+     "r_lip": 0.42,
+     "r_duct": 0.34,
+     "hub_r": 0.14,
+     "spokes": 4,
+     "spoke_w": 0.03,
+     "ring_r": [0.3, 0.36]
+    },
+    "exhaust": {
+     "x_lip": -0.5,
+     "depth": 0.5,
+     "r_lip": 0.75,
+     "r_duct": 0.62,
+     "cone_r": 0.28,
+     "cone_tip": -0.15
+    },
+    "greebles": [
+     {
+      "surface": "Body",
+      "x": 1.6,
+      "angle_deg": 90,
+      "part": "vent"
+     },
+     {
+      "surface": "Body",
+      "x": 3.2,
+      "angle_deg": 90,
+      "part": "hatch"
+     },
+     {
+      "surface": "Body",
+      "x": 2.4,
+      "angle_deg": 30,
+      "part": "strip"
+     },
+     {
+      "surface": "Body",
+      "x": 2.4,
+      "angle_deg": 150,
+      "part": "strip"
+     }
+    ]
+   }
+  },
+  "nozzle": {
+   "name": "NozzleGlow",
+   "material": "nozzle",
+   "cylinders": [
+    {
+     "_comment": "glowing disc at the bottom of each pod's exhaust duct",
+     "x": [-0.03, 0.0],
+     "r": 0.6,
+     "y": 3.4,
+     "z": 1.2,
+     "mirror": true,
+     "segments": 48
+    }
+   ]
+  },
+  "gun": {
+   "name": "Guns",
+   "material": "dark",
+   "cylinders": [
+    {
+     "x": [6.0, 11.0],
+     "r": 0.18,
+     "y": 7.15,
+     "z": 0.75,
+     "mirror": true
+    },
+    {
+     "x": [11.0, 12.6],
+     "r": 0.055,
+     "y": 7.15,
+     "z": 0.75,
+     "mirror": true
+    },
+    {
+     "x": [12.45, 12.6],
+     "r": 0.08,
+     "y": 7.15,
+     "z": 0.75,
+     "mirror": true
+    }
+   ]
+  },
+  "wing": {
+   "name": "Wings"
+  },
+  "fin": {
+   "name": "Fins"
+  },
+  "missile_rack": {
+   "name": "MissileRacks",
+   "material": "dark"
+  },
+  "gear_main": {
+   "name": "GearMain",
+   "material": "metal"
+  },
+  "gear_nose": {
+   "name": "GearNose",
+   "material": "metal"
+  },
+  "ramp": {
+   "skip": true
+  },
+  "spine": {
+   "skip": true
+  },
+  "canopy": {
+   "skip": true
+  }
+ },
+ "canopy_frame": {
+  "_comment": "Struts across the canopy and a spine along its top stay hull; the glass sits 15 mm below them.",
+  "struts_x": [16.3, 17.6, 18.8],
+  "strut_width": 0.09,
+  "spine_width": 0.1,
+  "recess": 0.015
+ },
+ "materials": {
+  "paint": {
+   "slot": "Paint",
+   "colour": [0.6, 0.57, 0.5],
+   "roughness": 0.45,
+   "metallic": 0.0
+  },
+  "dark": {
+   "slot": "Dark",
+   "colour": [0.035, 0.037, 0.042],
+   "roughness": 0.5,
+   "metallic": 0.3
+  },
+  "accent": {
+   "slot": "Accent",
+   "colour": [0.72, 0.17, 0.02],
+   "roughness": 0.45,
+   "metallic": 0.0
+  },
+  "metal": {
+   "slot": "Metal",
+   "colour": [0.25, 0.25, 0.27],
+   "roughness": 0.35,
+   "metallic": 0.9
+  },
+  "glass": {
+   "slot": "Glass",
+   "colour": [0.02, 0.025, 0.03],
+   "roughness": 0.05,
+   "metallic": 0.0
+  },
+  "nozzle": {
+   "slot": "Emissive",
+   "colour": [0.1, 0.05, 0.02],
+   "roughness": 0.4,
+   "metallic": 0.0,
+   "emit": [1.0, 0.55, 0.25]
+  }
+ },
+ "bevel": {
+  "width": 0.025,
+  "segments": 2,
+  "angle_deg": 30,
+  "sharp_deg": 35
+ },
+ "assemble": {
+  "_comment": "Tools/Blender/hs_assemble_ship.py: game meshes, collision and sockets. Boxes and sockets in LAYOUT coordinates (x from the aft end, z from the deck); offset moves the ship so its bounding box is centred on the origin (x -0.5 .. 21 -> -10.75 .. 10.75, z -1.6 .. 4.0 -> -2.8 .. 2.8).",
+  "out_blend": "ArtSource/Ships/Wayfarer/Wayfarer_HS_Game.blend",
+  "offset": [-10.25, 0.0, -1.2],
+  "groups": {
+   "Canopy": [
+    "SM_Ship_Wayfarer_Canopy"
+   ],
+   "Gear": [
+    "SM_Ship_Wayfarer_GearMain",
+    "SM_Ship_Wayfarer_GearNose"
+   ]
+  },
+  "collision": [
+   {
+    "name": "nose",
+    "box": {
+     "x": [15.2, 21.1],
+     "y": [-2.4, 2.4],
+     "z": [-0.7, 3.4]
+    }
+   },
+   {
+    "name": "forward body",
+    "box": {
+     "x": [8.2, 15.2],
+     "y": [-2.4, 2.4],
+     "z": [-0.7, 3.4]
+    }
+   },
+   {
+    "name": "aft body",
+    "box": {
+     "x": [-0.1, 8.2],
+     "y": [-2.4, 2.4],
+     "z": [-0.7, 3.4]
+    }
+   },
+   {
+    "name": "pod left",
+    "box": {
+     "x": [-0.6, 6.0],
+     "y": [2.35, 4.45],
+     "z": [0.15, 2.25]
+    }
+   },
+   {
+    "name": "pod right",
+    "box": {
+     "x": [-0.6, 6.0],
+     "y": [-4.45, -2.35],
+     "z": [0.15, 2.25]
+    }
+   },
+   {
+    "name": "fin left",
+    "box": {
+     "x": [0.2, 3.7],
+     "y": [3.2, 4.05],
+     "z": [2.0, 4.05]
+    }
+   },
+   {
+    "name": "fin right",
+    "box": {
+     "x": [0.2, 3.7],
+     "y": [-4.05, -3.2],
+     "z": [2.0, 4.05]
+    }
+   },
+   {
+    "name": "wing left with gun",
+    "box": {
+     "x": [2.4, 12.7],
+     "y": [2.3, 7.45],
+     "z": [0.5, 1.0]
+    }
+   },
+   {
+    "name": "wing right with gun",
+    "box": {
+     "x": [2.4, 12.7],
+     "y": [-7.45, -2.3],
+     "z": [0.5, 1.0]
+    }
+   },
+   {
+    "name": "gear main down to the pads",
+    "box": {
+     "x": [4.5, 5.9],
+     "y": [-2.7, 2.7],
+     "z": [-1.65, -0.55]
+    }
+   },
+   {
+    "name": "gear nose down to the pad",
+    "box": {
+     "x": [16.3, 17.7],
+     "y": [-0.45, 0.45],
+     "z": [-1.65, -0.5]
+    }
+   }
+  ],
+  "sockets": {
+   "Cockpit": {
+    "_comment": "Pilot's eye above the seat of the drawing (seat x 16.55 .. 17.35, cockpit floor 0.35 + seated eye 1.3).",
+    "location": [16.95, 0.0, 1.65]
+   },
+   "CameraTarget": {
+    "location": [10.0, 0.0, 1.2]
+   },
+   "Exit": {
+    "_comment": "Behind the rear ramp, on the ground.",
+    "location": [-2.4, 0.0, -1.55]
+   },
+   "Engine_L": {
+    "location": [-0.45, 3.4, 1.2],
+    "rotate_z_deg": 180
+   },
+   "Engine_R": {
+    "location": [-0.45, -3.4, 1.2],
+    "rotate_z_deg": 180
+   },
+   "Gear_Nose": {
+    "bottom_of": "Gear",
+    "box": {
+     "x": [16.3, 17.7],
+     "y": [-0.5, 0.5]
+    }
+   },
+   "Gear_L": {
+    "bottom_of": "Gear",
+    "box": {
+     "x": [4.5, 5.9],
+     "y": [1.8, 2.7]
+    }
+   },
+   "Gear_R": {
+    "bottom_of": "Gear",
+    "box": {
+     "x": [4.5, 5.9],
+     "y": [-2.7, -1.8]
+    }
+   }
+  },
+  "greeble_material": "paint",
+  "_comment_greebles": "Kit greebles (hatches, strips, sensors) take the hull paint: in dark they read as black boxes stuck on the hull (24. 9. 2026)."
+ }
+}

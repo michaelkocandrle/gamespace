@@ -300,11 +300,27 @@ def surface_frame(pts, axis, x, angle):
 def build(recipe):
     for ob in list(bpy.data.objects):
         bpy.data.objects.remove(ob)
+    coll = bpy.data.collections.new("HS_" + recipe["name"])
+    bpy.context.scene.collection.children.link(coll)
+    places = build_into(recipe, coll)
+    out = os.path.join(ROOT, recipe["out_blend"])
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=out, compress=True)
+    tris = 0
+    dg = bpy.context.evaluated_depsgraph_get()
+    for ob in coll.objects:
+        ev = ob.evaluated_get(dg)
+        if ev.type == "MESH":
+            tris += sum(len(p.vertices) - 2 for p in ev.data.polygons)
+    print("HS_BUILD", out, "objects", len(coll.objects), "tris(excl. instances)", tris, "kit points", len(places))
+
+
+def build_into(recipe, coll):
+    """Builds the revolved part into an existing collection (also used by hs_build_ship.py for a ship's
+    pods). Returns the kit placements."""
     axis = (recipe["axis"]["y"], recipe["axis"]["z"])
     n = recipe["segments"]
     bevel = recipe["bevel"]
-    coll = bpy.data.collections.new("HS_" + recipe["name"])
-    bpy.context.scene.collection.children.link(coll)
     profile = [tuple(p) for p in recipe["profile"]]
     surfaces = {}
 
@@ -395,18 +411,9 @@ def build(recipe):
             rot = Matrix((radial, y, z)).transposed().to_euler()
             pos = Vector((br["x"], axis[0], axis[1])) + radial * br["r"]
             places.append((tuple(pos), "bolt", tuple(rot)))
-    kit_points(recipe["name"] + "_Greebles", coll, places, instancer)
-
-    out = os.path.join(ROOT, recipe["out_blend"])
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    bpy.ops.wm.save_as_mainfile(filepath=out, compress=True)
-    tris = 0
-    dg = bpy.context.evaluated_depsgraph_get()
-    for ob in coll.objects:
-        ev = ob.evaluated_get(dg)
-        if ev.type == "MESH":
-            tris += sum(len(p.vertices) - 2 for p in ev.data.polygons)
-    print("HS_BUILD", out, "objects", len(coll.objects), "tris(excl. instances)", tris, "kit points", len(places))
+    if places:
+        kit_points(recipe["name"] + "_Greebles", coll, places, instancer)
+    return places
 
 
 if __name__ == "__main__":

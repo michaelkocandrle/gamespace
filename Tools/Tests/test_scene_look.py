@@ -137,6 +137,16 @@ if unbound:
 # --- the hull's paint (per ship: its <Ship>_setup.json, Tools/Tests/ship_under_test.py) -------------------
 if not sut.SHIP:
     sut.skip(log, "the hull wears the paint from its setup JSON")
+elif "base_color_tint" not in sut.setup()["materials"].get("MI_Ship_%s_Hull" % sut.SHIP, {}):
+    # A hard-surface ship (hs_build_ship.py): flat paint zones on the hull master, one colour each.
+    for name, spec in sut.setup()["materials"].items():
+        if not isinstance(spec, dict) or spec.get("master") != "hull" or "base_color" not in spec:
+            continue
+        mi = unreal.EditorAssetLibrary.load_asset(sut.asset("Materials/" + name))
+        have = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(mi, "BaseColor") if mi else None
+        check("%s wears the paint from %s_setup.json" % (name, sut.SHIP),
+              have is not None and all(close(getattr(have, axis), spec["base_color"][i]) for i, axis in enumerate(("r", "g", "b"))),
+              "%s, setup %s" % (have, spec["base_color"]))
 else:
     setup = sut.setup()
     hull_name = "MI_Ship_%s_Hull" % sut.SHIP
