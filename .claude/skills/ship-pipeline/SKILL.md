@@ -1,13 +1,14 @@
 ---
 name: ship-pipeline
-description: How a ship goes from idea to Unreal in gamespace - the mandatory 2D design stage (ArtSource/Ships/<Ship>/Design, <Ship>_layout.json, draw_ship_design.py, <Ship>_spec.json in RSI Ship Matrix shape, author approval), concept views for Higgsfield/Meshy, the AI-model recipe (<Ship>_ai_build.json, build_ai_ship.py), Blender export (gamespace_ship_export.py, manifest) and Unreal import (import_ship.py, <Ship>_setup.json). Load when designing a new ship, generating or processing a ship model, touching sockets/UCX collision/pivot/LODs/ship materials/naming, or running the ship export/import scripts.
+description: How a ship goes from idea to Unreal in gamespace - Ship Matrix reference set (fetch_ship_matrix.py), the mandatory 2D design stage (ArtSource/Ships/<Ship>/Design, <Ship>_layout.json with exterior outlines, draw_ship_design.py, <Ship>_spec.json in RSI Ship Matrix shape, author approval), the design dossier and fleet Ship Matrix page (build_ship_matrix.py, published as an Artifact), concept views for Higgsfield/Meshy, the AI-model recipe (<Ship>_ai_build.json, build_ai_ship.py), Blender export (gamespace_ship_export.py, manifest) and Unreal import (import_ship.py, <Ship>_setup.json). Load when designing a new ship, generating or processing a ship model, touching sockets/UCX collision/pivot/LODs/ship materials/naming, or running the ship export/import scripts.
 ---
 
 # Loď: od nápadu do Unrealu
 
 Podrobný zdroj: `Docs/Ships/ShipPipeline.md` (kap. 0–5, hlavně 2A a 2B), `Docs/WORKFLOW.md` kap. 2
 a nástrahy 9.6, `Docs/AssetPipeline_Modular.md` (kdy generovat vcelku, kdy po dílech).
-Vzor 2D návrhu: `ArtSource/Ships/Steadfast/Design/Steadfast_Design.md`.
+Vzor celého návrhu (reference, spec, layout s exteriérem, koncepty, dossier): **`ArtSource/Ships/Wayfarer/`**
+(schválen 24. 9. 2026). Starší vzor jen interiéru: `ArtSource/Ships/Steadfast/Design/`.
 Autor není herní vývojář: **všechno skriptem / receptem**, nic ručním klikáním v Blenderu ani editoru.
 Kapitoly C–D, G–I v ShipPipeline popisují ruční kliky v Blenderu; dnes je dělá recept (2B).
 
@@ -21,14 +22,33 @@ rozbije `$PSScriptRoot`.
 
 ## 0. Pořadí fází (nepřeskakovat)
 
-1. **2D návrh** → schválení autorem. **Dokud autor neschválí, nic se nestaví ve 3D.**
-2. Koncept (pohledy) → AI model (Meshy / Higgsfield) nebo kitbash/stažený model.
+1. **Reference ze Ship Matrix** (1a) → **spec** → **2D návrh** (layout, výkresy, kontrola siluet) →
+   **koncepty** (2a) → **dossier + Ship Matrix** (1b) → schválení autorem.
+   **Dokud autor neschválí, nic se nestaví ve 3D.**
+2. AI model (Meshy / Higgsfield) nebo kitbash/stažený model; silueta modelu se měří proti maskám z výkresu.
 3. Recept `<Loď>_ai_build.json` → `build_ai_ship.py` → `<Loď>_Meshy.blend`.
 4. `gamespace_ship_export.py` → FBX + `<Loď>_manifest.json`.
 5. `import_ship.py` + `<Loď>_setup.json` → `BP_Ship_<Loď>`; pak `build_main_menu.py`.
 6. Testy + `Tools\Shots.ps1` (snímky si sám prohlédni).
 
-## 1. 2D návrh (povinný první krok každé lodi)
+## 1a. Reference ze Ship Matrix (první krok každé lodi)
+
+Autor chce každou loď „naplno inspirovanou“ referencemi z RSI Ship Matrix (24. 9. 2026).
+
+```bash
+python Tools/Design/fetch_ship_matrix.py --class small_multirole \
+    --ships "Avenger Titan" "Mustang Alpha" "Aurora Mk I MR" 100i Cutter "C8X Pisces Expedition" Nomad Syulen
+```
+- Stáhne celou matici (`https://robertsspaceindustries.com/ship-matrix/index`, 255 lodí, s komponentami)
+  do `starcitizenreference/ship_matrix/ship_matrix_index.json`. `--offline` použije uloženou.
+- Pro třídu zapíše `<class>.md` a `<class>.json` (tabulka, medián, komponenty) a `<class>/<loď>.jpg`.
+- Jména musí přesně sedět; při překlepu skript vypíše podobná.
+- Vyber 6–10 lodí `flight-ready` té role; spec nové lodi má `_reference` (set, ships, median) a každou
+  odchylku od mediánu vysvětli v `<Loď>_Design.md`.
+- **Obrázky CIG jen ke studiu: nikdy do Higgsfieldu, Meshy ani Scenaria, nikdy do hry.**
+- Jméno lodi zkontroluj proti jménům v matici (žádná shoda s lodí SC).
+
+## 1. 2D návrh (povinný každé lodi)
 
 Adresář `ArtSource/Ships/<Loď>/Design/`:
 
@@ -37,6 +57,18 @@ Adresář `ArtSource/Ships/<Loď>/Design/`:
 | `<Loď>_layout.json` | **jediný zdroj pravdy**: `decks` (floor_z, clear_height, outline), `rooms` (id, deck, name, rect, purpose), `objects` (room, name, rect, purpose), `doors` (deck, at, axis, width, name). Metry, x dopředu od zádě, y na levobok. |
 | `<Loď>_Design.md` | vize, parametry, uspořádání, pohyb posádky, designový jazyk, **otevřené otázky pro autora**; stav „čeká na schválení“ |
 | `<Loď>_deck_upper.png`, `_deck_lower.png`, `_cutaway.png` | výkresy v měřítku, generované – nikdy ručně |
+| `<Loď>_exterior.png`, `guides/<Loď>_mask_*.png` | jen s blokem `exterior` v layoutu: exteriér ve třech pohledech s kótami a masky siluet (vodítka pro AI, měřítko pro 3D) |
+
+**Obecný formát layoutu (vzor `Wayfarer_layout.json`):** `ship`, `sheet` (`subtitle`, `plan_extent`,
+`cutaway_extent`, `ground_z`), libovolné `decks` (`title`), místnost má `zone`
+(command/crew/service/cargo/engineering) a volitelně `floor_z`, objekt volitelně `z` [od, do] (kreslí se
+do řezu) a `below: true` (pod podlahou, čárkovaně). `exterior`: `side` (x, z; ze pravoboku), `top` (x, y;
+levobok nahoře), `front` (y, z; levobok vpravo) = seznam dílů `{name, kind, poly | circle, mirror, label,
+label_at}` kreslených v pořadí; `kind` hull | wing | engine | fin | glass | gear | weapon | nozzle.
+`cutaway`: `lines` (rampa, schod) a `labels`. Kreslí `Tools/Design/ship_sheets.py`, rozměry vypíše
+řádek `SHIP_SHEETS` a **musí se rovnat specu**. Bez bloku `exterior` se kreslí starým způsobem (Steadfast).
+Pak kontrola výkresu: `silhouette_compare.py views` na maskách (uzávěr ~0 %, symetrie ≥ 0,98).
+JSON měň skriptem (Write do scratchpadu, pak Python); pole čísel drž na jednom řádku.
 
 Specifikace je **o úroveň výš**: `ArtSource/Ships/<Loď>/<Loď>_spec.json` ve tvaru RSI Ship Matrix
 (`identity`, `dimensions`, `crew`, `flight`, `components`, `weapons`, `_status`). Kód ho nečte; není to
@@ -61,6 +93,31 @@ Pravidla návrhu (autor 24. 9. 2026):
   dvakrát, nástup ze země i ze stanice).
 - Ship Matrix pole: délka/šířka/výška, hmotnost, SCU, posádka a stanoviště, SCM/AB, pitch/yaw/roll,
   zrychlení po osách, komponenty (avionika, pohon, moduly), zbraně/utility.
+- Průchody pro postavu: dveře ≥ 1,0 m, uličky ≥ 1,0 m (kapsle 0,84 m); pilotní křeslo s přístupem zezadu.
+
+## 1b. Dossier a Ship Matrix flotily (povinné u každé lodi, autor 24. 9. 2026)
+
+Autor chce u každé lodi vidět celý postup specifikace a návrhu, jako na RSI Ship Matrix: „přesně takhle
+si to představuju a chci to takhle ke každé lodi“.
+
+```bash
+python Tools/Design/build_ship_matrix.py                 # celá flotila -> Saved/Dossier/ShipMatrix.html
+python Tools/Design/build_ship_matrix.py --ship <Loď>    # jedna loď    -> Saved/Dossier/<Loď>.html
+```
+- Stránka **Ship Matrix**: karty všech lodí (obrázek, výrobce, role, rozměry, posádka, SCU, SCM, stav),
+  filtr velikosti, tabulka s řazením; klik na loď otevře její dossier (hash `#<Loď>`).
+- **Dossier** lodi se skládá sám z dat, sekce jen když data existují: stav pipeline (9 kroků se zjistí
+  ze souborů), reference ze Ship Matrix, spec proti mediánu, komponenty a zbraně, exteriér, paluby a řez
+  s místnostmi a objekty, kontrola siluet výkresu, koncepty s měřením proti výkresu (počítá se při každém
+  sestavení), otázky nebo rozhodnutí autora.
+- Vstup navíc jen `ArtSource/Ships/<Loď>/Concept/dossier.json`: `status`, `card`, `concepts` (soubor
+  a popisek), `check_views` (front/side/top koncepty k měření, u světlého trupu verze `*_cut.png` po
+  `remove_background`), `concepts_note`, `questions` → po schválení `decided` a `decisions` [[otázka, odpověď]].
+- Stav „schváleno“ bere z `_status` specu (obsahuje `approved`).
+- **Publikace:** Artifact vždy do stejných adres (`url` parametr z jiné konverzace):
+  - Ship Matrix: https://claude.ai/artifact/VvqHBqFf3xesWcBznpcmHU (`Saved/Dossier/ShipMatrix.html`)
+  - dossier Wayfarer: https://claude.ai/artifact/Busq7MdkvGSXMp7RsgP7Ga
+  Novou loď nebo nový krok vždy zapiš a Ship Matrix publikuj znovu; autorovi dej odkaz.
 
 ## 2. Koncept → AI model (ShipPipeline 2A, 2B; AssetPipeline_Modular)
 
@@ -107,12 +164,20 @@ Co z toho plyne:
   **Každý pohled si před použitím prohlédni** (Read na PNG), číslo nestačí.
 - Modely někdy kreslí podlahu a stín i přes „no floor“ → před měřením `remove_background` (Higgsfield,
   výstup s alfou, `extract_reference_mask` alfu použije).
+- **Světlý trup na světle šedém pozadí** rozbije vyříznutí siluety (díry, falešné IoU 0,56). Generuj na
+  pozadí kontrastním k trupu (světlý trup → „plain uniform dark charcoal background“), jinak `remove_background`.
+- Model rád „zjednoduší“ půdorys (Wayfarer: gondoly přilepené k trupu, rozpětí −20 %). Pomohla třetí
+  reference (pohled zepředu, kde gondoly stojí zvlášť) a slovní popis rozestupu; nebo prompt „Fill the dark
+  silhouette in the first image with the starship from the second image“ (vodítko jako první reference).
 
-Postup pro novou loď (vše přes MCP a skripty, nic ručně):
-1. Hero obrázek (3/4) schválený autorem → `mcp__higgsfield__media_upload` + `curl -X PUT` + `media_confirm`.
-2. Vodítka: `python Tools/Blender/silhouette_compare.py guide --mask side=<profil.png> --mask top=<půdorys.png>
-   --mask front=<čelo.png> --out ArtSource/Ships/<Loď>/Concept/guides` (tmavá silueta na světle šedé, 16:9;
-   z hotového modelu `--model <render prefix>`). Nahrát stejně jako hero.
+Postup pro novou loď (vše přes MCP a skripty, nic ručně; ověřeno na Wayfareru 24. 9. 2026):
+1. Vodítka z masek výkresu: `python Tools/Blender/silhouette_compare.py guide --mask side=Design/guides/<Loď>_mask_side.png
+   --mask top=... --mask front=... --out ArtSource/Ships/<Loď>/Design/guides` (tmavá silueta na světle šedé, 16:9).
+   Nahrát: `mcp__higgsfield__media_upload` (files[]) → `curl -X PUT` každé → `media_confirm`.
+2. **Stylový vzor:** bok jen z vodítka a stylového textu ve 2 variantách (styl značky, barvy, opotřebení);
+   vybrat tu, co drží siluetu (Wayfarer: A 0,83 vs. B 0,79). Pak shora, zepředu a 3/4 s referencemi
+   *job id vybraného boku* + vodítko daného pohledu („Keep the first image's exact paint …“). Hero jen
+   z vodítek bez stylového vzoru tvarově ujede → jen na náladu.
 3. `generate_image_batch`, model `nano_banana_pro` (`resolution: 2k`, `aspect_ratio: 16:9`, 2 kredity;
    v odpovědi se hlásí jako `nano_banana_2`), `medias`: hero + vodítko, obojí role `image_references`.
    Do promptu „no floor, no shadow“. Záloha `gpt_image_2_5` (`quality: high`, 2,75 kreditu).

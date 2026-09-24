@@ -11,6 +11,10 @@ specifikace podle `Docs/Ships/ShipSpecification_System.md`).
   (`pawn`, `components`, `materials`, `decals`...). Vzniká **až při stavbě** v Blenderu/Unrealu,
   řídí, jak je loď skutečně postavená.
 
+**Přehled se specifikacemi a dossierem každé lodi (jako RSI Ship Matrix):**
+`python Tools/Design/build_ship_matrix.py` → Saved/Dossier/ShipMatrix.html, publikováno na
+https://claude.ai/artifact/VvqHBqFf3xesWcBznpcmHU (skill `ship-pipeline` 1b).
+
 ## Výrobci (lore)
 
 Dva fiktivní výrobci pro začátek, ať mají lodě konzistentní identitu bez nutnosti vymýšlet
@@ -23,7 +27,7 @@ novou frakci pro každou loď:
 
 | Loď | Výrobce | Role | Velikost | Posádka | Stav |
 | --- | --- | --- | --- | --- | --- |
-| *nová malá loď* (jméno zatím není) | *(doplnit do specu)* | Multirole | Small | *(doplnit)* | 📐 2D návrh (nahrazuje první stíhačku, odstraněnou 24. 9. 2026) |
+| **Wayfarer** | Halcyon Freightworks | Starter / Light Freight (multirole) | Small | 1 | ✅ 2D návrh v1 schválen 24. 9. 2026, další krok 3D (nahrazuje první stíhačku, odstraněnou 24. 9. 2026) |
 | **Steadfast** | Halcyon Freightworks | Multi-crew Freight/Exploration | Medium | 3 | 🔶 rozjeto (exteriér hrubý tvar z Meshy, koncept interiéru) |
 | **Farsight** | Kestrel Dynamics | Long-range Scout/Exploration | Snub | 1 | 📋 naplánováno, nezačato |
 | **Delver** | Halcyon Freightworks | Mining/Industrial Utility | Small–Medium | 2 | 📋 naplánováno, nezačato |
@@ -32,8 +36,8 @@ novou frakci pro každou loď:
 
 Čtyři lodě, čtyři jasně odlišené role — žádná náhodná duplicita:
 
-- **Nová malá multirole loď** — malá a obratná, víc rolí včetně boje; přesné role, náklad a posádku
-  určí 2D návrh a spec.
+- **Wayfarer** — malá multirole pro jednoho pilota (21,5 m, 8 SCU, 2× S3): hráčova první loď,
+  průchozí interiér od rampy přes náklad a kajutu do kokpitu.
 - **Steadfast** — pomalý, odolný, velký náklad, víc posádky. Základna pro delší výpravy.
 - **Farsight** — rychlý jako malá stíhačka, ale stavěný na dolet/senzory místo boje. Slabě
   vyzbrojený nebo bezbranný, dlouhý dolet, jedna posádka. Vhodný pro objevování nových
@@ -47,7 +51,7 @@ lodí zatím neplánovat, dokud tyhle čtyři nebudou hotové a otestované. Dr�
 
 ## Pořadí práce
 
-1. 📐 Nová malá multirole loď — 2D návrh (první stíhačka byla 24. 9. 2026 odstraněna)
+1. ✅ Wayfarer — 2D návrh schválen 24. 9. 2026; další krok 3D model (první stíhačka byla 24. 9. 2026 odstraněna)
 2. 🔶 Steadfast — v procesu (dokončit exteriér → interiér přes kitbash/procedurální detail)
 3. Farsight — až po Steadfastu
 4. Delver — poslední ze čtyř, protože těžba jako gameplay mechanika ještě není navržená

@@ -1254,6 +1254,31 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - `silhouette_compare.py` má nové příkazy `views` (konzistence konceptů mezi sebou a proti rozměrům ze spec, bez
       modelu) a `guide` (vodicí siluety); test 20 kontrol. Postup, tabulka a přijímací prahy: skill `ship-pipeline` 2a.
     - Surové obrázky a prompty: `ArtSource/Ships/Vanguard/Concept/higgsfield_test/`. Spotřeba ~40 kreditů z ~1000.
+82. **Vanguard odstraněn** (24. 9. 2026, autor: „vanguard smaž kompletně“). Obsah `/Game/Ships/Vanguard`, zdroje
+    `ArtSource/Ships/Vanguard`, presety snímků i dokumentace; commit `558afe7`, historie v gitu.
+    - `BP_SpaceGameMode` spawnuje nativní `ASpaceshipPawn` (šedá krychle, létá). Úvodní obrazovka je bez lodi,
+      loď do ní dá `MENU_SHIP` v `build_main_menu.py`.
+    - Loď pod testem se nastavuje na jednom místě: `Tools/Tests/ship_under_test.py` (dnes `None`). Hodnoty konkrétní
+      lodi testy berou z jejího `<Loď>_setup.json`.
+    - Výsledek testů: 20/20 OK, 12 kontrol přeskočeno kvůli chybějícímu modelu.
+    - V první osobě zatím chybí rám kokpitu, protože placeholder kokpit je vypnutý.
+83. **Wayfarer: nová loď od reference po schválený návrh + Ship Matrix flotily** (24. 9. 2026). Malá multirole pro
+    jednoho pilota (Halcyon Freightworks), nahrazuje Vanguard. **Návrh v1 schválen autorem** („schvaluju všechno“),
+    další krok 3D.
+    - `Tools/Design/fetch_ship_matrix.py`: celá RSI Ship Matrix (255 lodí) a referenční sada `small_multirole`
+      (8 lodí, medián, komponenty, obrázky jen ke studiu) v `starcitizenreference/ship_matrix/`.
+    - `ArtSource/Ships/Wayfarer/`: spec ve tvaru Ship Matrix proti mediánu, layout (4 místnosti, 19 objektů
+      s účelem), `Design.md`, výkresy.
+    - Rozměry lodi: 21,5 × 14,7 × 5,6 m, 52 t, 8 SCU, SCM 225 m/s.
+    - `draw_ship_design.py` čte obecný layout s blokem `exterior` (nový `ship_sheets.py`): exteriér ve třech pohledech
+      s kótami, paluby, řez podle dat a masky siluet. Výkresy Steadfastu zůstaly bajtově stejné.
+    - Koncepty (Nano Banana Pro s vodítky z masek, stylový vzor = bok A) proti výkresu: bok 0,95, zepředu 0,88,
+      shora 0,89 (první pokus shora 0,64 zamítnut), uzávěr 7 %. Rozpětí v konceptu je o 8 % větší → ve 3D platí výkres.
+    - **Ship Matrix a dossier** (`Tools/Design/build_ship_matrix.py`): karty a tabulka všech lodí a u každé lodi
+      dossier se stavem pipeline a měřením siluet při každém sestavení. Autor ho chce **u každé další lodi** (skill
+      `ship-pipeline` 1b).
+    - Publikováno: Ship Matrix https://claude.ai/artifact/VvqHBqFf3xesWcBznpcmHU, dossier Wayfarer
+      https://claude.ai/artifact/Busq7MdkvGSXMp7RsgP7Ga.
 
 ---
 

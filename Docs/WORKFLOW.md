@@ -755,6 +755,9 @@ snímku.
 - l) **Maska konceptu zabrala polovinu obrázku.** Model nakreslil podlahu a stín i přes „no floor“.
   Před měřením Higgsfield `remove_background` (alfa). A pozor, aby hero render patřil ke stejné
   verzi modelu, se kterou se měří.
+- m) **Světlý trup na světle šedém pozadí: děravá maska, IoU koncepce shora jen 0,56.** Vyříznutí siluety podle
+  mediánu okraje nerozliší lomenou bílou od šedé. Generuj na kontrastním pozadí (tmavé pro světlý trup),
+  nebo měř verzi po `remove_background` (`*_cut.png`).
 
 ---
 

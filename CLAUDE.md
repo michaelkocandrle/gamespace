@@ -5,7 +5,9 @@ Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**. Projekt je v `C:\gamespace\g
 
 - **Cíl:** let a interiéry 1:1 se Star Citizen. Hráč letí z vesmíru až na povrch planety, vystoupí a chodí po ní.
 - **Lodě:**
-  - Vanguard (stíhačka z Meshy) byl 24. 9. 2026 odstraněn; nová malá multirole loď je ve 2D návrhu;
+  - Wayfarer (Halcyon Freightworks) je malá multirole pro jednoho pilota, nahrazuje odstraněný Vanguard.
+    2D návrh v1 schválen 24. 9. 2026, další krok 3D. Přehled flotily a dossiery: Ship Matrix
+    (`Tools/Design/build_ship_matrix.py`, skill `ship-pipeline` 1b);
   - Steadfast (Halcyon Freightworks) je nákladní loď s interiérem. Její 2D návrh v2 čeká na schválení.
 - **Autor** není herní vývojář. Mluví česky a hraje zabalenou hru ve 1080p na RTX 2060 6 GB.
 

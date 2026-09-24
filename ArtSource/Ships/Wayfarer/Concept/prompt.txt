@@ -1,0 +1,26 @@
+Wayfarer concept images, Higgsfield MCP, 2026-09-24 (ship-pipeline skill 2a). Raw output, never edit.
+Model: nano_banana_pro (reports as nano_banana_2), resolution 2k, aspect 16:9, ~2 credits each.
+Guides: ../Design/guides/guide_{side,top,front}.png, made from the drawing's masks
+  (python Tools/Blender/silhouette_compare.py guide --mask side=... --out ../Design/guides).
+
+side_a.png   style A (chosen style master). Refs: guide_side.
+  "Pure orthographic side elevation, right (starboard) side, nose to the right, of a small single-seat
+  multirole starship. The reference image is its exact side silhouette: outline, proportions and the
+  position of every part (long fuselage with raised canopy at the front, engine pod with small tail fin at
+  the rear, wing with wingtip cannon, landing gear) must match that dark silhouette exactly. Style: Star
+  Citizen-like industrial realism but an original design by the fictional maker Halcyon Freightworks:
+  rugged and practical, warm off-white and gunmetal painted hull panels with fine panel lines, hatches and
+  service markings, orange accent stripes, dark grey engine pod with a glowing nozzle, tinted canopy with
+  frame struts, closed rear cargo ramp, landing gear down, subtle edge wear. Camera level with the
+  centreline, no perspective, same framing and scale as the silhouette, plain uniform light grey
+  background, no floor, even soft studio light, no shadow, no text."
+side_b.png   style B (sand-beige, chunky armour, grime). Same structure, other style sentence.
+hero_pad.png 3/4 on a landing pad at golden hour from guide_side + guide_top only (no style master):
+             mood only, its shape drifted (wings, nose, side ladder).
+top.png, front.png, threequarter.png  Refs: side_a (job c84ff5dc-1b12-4f98-baf3-58a99f502746) + the
+  matching guide. "Render the starship from the first image as a pure orthographic <view> ... The second
+  image is the exact <view> silhouette of this ship ... must match that dark silhouette exactly. Keep the
+  first image's exact paint, materials, panel lines, orange stripes and markings. ..."
+*_cut.png    the same after Higgsfield remove_background (alpha), for measuring: the light hull on a
+             light grey background broke the silhouette extraction. Next time: a background clearly
+             darker or lighter than the hull.

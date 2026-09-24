@@ -1,0 +1,72 @@
+{
+ "_comment": "Input for Tools/Design/build_ship_matrix.py: status line, card image, concept captions, the concepts used as front/side/top check views (measured on every build) and the author's decisions.",
+ "status": "Návrh v1 schválen autorem 24. 9. 2026 – další krok: 3D model",
+ "concepts": [
+  {
+   "file": "side_a.png",
+   "caption": "Bok, styl A – vybraný stylový vzor (IoU proti výkresu 0,95)."
+  },
+  {
+   "file": "side_b.png",
+   "caption": "Bok, styl B – hrubší béžová varianta; uhnula od siluety (0,79) a ztratila křídlo."
+  },
+  {
+   "file": "threequarter.png",
+   "caption": "3/4 zepředu podle stylu A a půdorysu."
+  },
+  {
+   "file": "front.png",
+   "caption": "Zepředu (0,88). Pozor: model přidal do gondol lopatky ventilátoru jako u proudového motoru – ve 3D je nechceme."
+  },
+  {
+   "file": "top_v2a.png",
+   "caption": "Shora, druhý pokus (0,89): gondoly oddělené od trupu, rozpětí o 8 % větší než ve výkresu."
+  },
+  {
+   "file": "top.png",
+   "caption": "Shora, první pokus – zamítnuto: gondoly přilepené k trupu, rozpětí o 20 % menší (0,64)."
+  },
+  {
+   "file": "hero_pad.png",
+   "caption": "Nálada na přistávací ploše, jen z vodítek bez stylového vzoru – tvar ujel (jiná křídla i nos), slouží jen pro atmosféru."
+  }
+ ],
+ "card": "side_a.png",
+ "check_views": {
+  "front": "front_cut.png",
+  "side": "side_a_cut.png",
+  "top": "top_v2a.png"
+ },
+ "concepts_note": "Koncepty z Higgsfieldu (Nano Banana Pro) s vodicí siluetou z výkresu. Nejdřív bok ve dvou stylech, vybraný styl A je vzor pro ostatní pohledy. Každý pohled se měří proti výkresu a prohlíží; měření níže se počítají při každém sestavení stránky.",
+ "decided": "Návrh v1 schválen (24. 9. 2026)",
+ "decisions": [
+  [
+   "Jméno a výrobce:",
+   "Wayfarer, Halcyon Freightworks (rodina se Steadfastem)."
+  ],
+  [
+   "Vzhled:",
+   "styl A – lomená bílá a gunmetal, oranžové pruhy, lehké opotřebení hran."
+  ],
+  [
+   "Náklad:",
+   "8 SCU, délka 21,5 m."
+  ],
+  [
+   "Kajuta:",
+   "s hygienickou buňkou."
+  ],
+  [
+   "Výstup:",
+   "jen zadní rampou."
+  ],
+  [
+   "Zbraně:",
+   "2× S3 na koncích křídel a 2 raketnice S2 pod křídly."
+  ],
+  [
+   "Před 3D opravit:",
+   "rozpětí v konceptu shora je o 8 % větší než ve výkresu – ve 3D platí výkres; gondoly bez lopatek ventilátoru."
+  ]
+ ]
+}

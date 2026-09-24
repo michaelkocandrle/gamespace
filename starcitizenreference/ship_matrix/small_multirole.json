@@ -1,0 +1,519 @@
+{
+ "class": "small_multirole",
+ "source": "https://robertsspaceindustries.com/ship-matrix/index",
+ "ships": [
+  {
+   "name": "Avenger Titan",
+   "manufacturer": "Aegis Dynamics",
+   "focus": "Light Freight",
+   "size": "Small",
+   "status": "flight-ready",
+   "url": "/pledge/ships/aegis-avenger/Avenger-Titan",
+   "description": "With extra room in the back, the Titan’s hold is free to carry cargo. Couple that with the Avenger’s tried and true combat abilities and you’ve got a light cargo hauler that’s more than capable of handling itself in a fight.",
+   "components": {
+    "radar": [
+     "S1 Ecouter"
+    ],
+    "fuel_tanks": [
+     "2x Internal Tank"
+    ],
+    "quantum_drives": [
+     "S1 Expedition"
+    ],
+    "jump_modules": [
+     "S1 Explorer"
+    ],
+    "quantum_fuel_tanks": [
+     "Internal Tank"
+    ],
+    "power_plants": [
+     "S1 Endurance"
+    ],
+    "coolers": [
+     "2x S1 Bracer"
+    ],
+    "shield_generators": [
+     "2x S1 Bulwark"
+    ],
+    "life_support": [
+     "S1 ComfortAir"
+    ],
+    "weapons": [
+     "S4 VariPuck S4 Gimbal Mount (Revenant Gatling S4)",
+     "2x S3 VariPuck S3 Gimbal Mount (Omnisky IX Cannon S3)"
+    ],
+    "missiles": [
+     "2x S3 MSD-322 Missile Rack"
+    ]
+   },
+   "length": 20.0,
+   "beam": 15.0,
+   "height": 6.5,
+   "mass": 48986.3,
+   "cargocapacity": 8.0,
+   "max_crew": 1.0,
+   "scm_speed": 262.0,
+   "afterburner_speed": 1425.0,
+   "pitch_max": 53.0,
+   "yaw_max": 48.0,
+   "roll_max": 190.0,
+   "image_url": "https://media.robertsspaceindustries.com/dogyaf0p2eup4/slideshow_wide.jpg",
+   "image": "starcitizenreference/ship_matrix/small_multirole/Avenger_Titan.jpg"
+  },
+  {
+   "name": "Mustang Alpha",
+   "manufacturer": "Consolidated Outland",
+   "focus": "Starter / Light Freight",
+   "size": "Small",
+   "status": "flight-ready",
+   "url": "/pledge/ships/mustang/Mustang-Alpha",
+   "description": "Inspired by Consolidated Outland CEO Silas Koerner’s cutting edge vision, the Mustang Alpha is a sleek, stylish spacecraft that uses ultralight alloys to push power ratios to the limits, albeit sometimes unsafely. And now, with the optional Cargo Carrier, you can have the Alpha’s advantages without sacrificing carrying capacity.",
+   "components": {
+    "radar": [
+     "S1 Capston"
+    ],
+    "fuel_tanks": [
+     "2x Internal Tank"
+    ],
+    "quantum_drives": [
+     "S1 Rush"
+    ],
+    "jump_modules": [
+     "S1 Explorer"
+    ],
+    "quantum_fuel_tanks": [
+     "Internal Tank"
+    ],
+    "power_plants": [
+     "S1 ZapJet"
+    ],
+    "coolers": [
+     "2x S1 Winter-Star"
+    ],
+    "shield_generators": [
+     "2x S1 INK"
+    ],
+    "life_support": [
+     "S1 ComfortAir"
+    ],
+    "weapons": [
+     "S2 Consolidated Outland Mustang Nose Turret (CF-227 Badger Repeater S2)"
+    ]
+   },
+   "length": 21.5,
+   "beam": 18.0,
+   "height": 9.0,
+   "mass": 31221.0,
+   "cargocapacity": 4.0,
+   "max_crew": 1.0,
+   "scm_speed": 228.0,
+   "afterburner_speed": 1218.0,
+   "pitch_max": 70.0,
+   "yaw_max": 53.0,
+   "roll_max": 205.0,
+   "image_url": "https://media.robertsspaceindustries.com/g0lupo5x3wp8u/slideshow_wide.jpg",
+   "image": "starcitizenreference/ship_matrix/small_multirole/Mustang_Alpha.jpg"
+  },
+  {
+   "name": "Aurora Mk I MR",
+   "manufacturer": "Roberts Space Industries",
+   "focus": "Light Fighter",
+   "size": "Small",
+   "status": "flight-ready",
+   "url": "/pledge/ships/rsi-aurora/Aurora-Mk-I-MR",
+   "description": "Perhaps you're looking for something that offers carrying capacity but has combat capabilities too? The Aurora Marque comes with a pair of Behring-quality lasers and a high quality gun cooler system.",
+   "components": {
+    "radar": [
+     "S1 Capston"
+    ],
+    "fuel_tanks": [
+     "Internal Tank"
+    ],
+    "quantum_drives": [
+     "S1 Eos"
+    ],
+    "quantum_fuel_tanks": [
+     "Internal Tank"
+    ],
+    "power_plants": [
+     "S1 Roughneck"
+    ],
+    "coolers": [
+     "2x S1 Hydrocel"
+    ],
+    "shield_generators": [
+     "2x S1 Bulwark"
+    ],
+    "life_support": [
+     "S1 ComfortAir"
+    ],
+    "weapons": [
+     "2x S1 VariPuck S1 Gimbal Mount (CF-117 Bulldog Repeater S1)",
+     "2x S1 VariPuck S1 Gimbal Mount"
+    ],
+    "missiles": [
+     "S2 MSD-221 Missile Rack"
+    ]
+   },
+   "length": 19.0,
+   "beam": 8.75,
+   "height": 4.5,
+   "mass": 24774.0,
+   "cargocapacity": 3.0,
+   "max_crew": 1.0,
+   "scm_speed": 227.0,
+   "afterburner_speed": 1230.0,
+   "pitch_max": 59.0,
+   "yaw_max": 51.0,
+   "roll_max": 137.0,
+   "image_url": "https://media.robertsspaceindustries.com/kinuf02r7s4oq/slideshow_wide.jpg",
+   "image": "starcitizenreference/ship_matrix/small_multirole/Aurora_Mk_I_MR.jpg"
+  },
+  {
+   "name": "100i",
+   "manufacturer": "Origin Jumpworks",
+   "focus": "Starter / Pathfinder",
+   "size": "Small",
+   "status": "flight-ready",
+   "url": "/pledge/ships/origin-100/100i",
+   "description": "Tour the universe with the perfect coupling of luxury and performance. The 100i features Origin Jumpworks' patented AIR fuel system, making it the most efficient and eco-friendly ship on the market. Capable of long distance flights that most ships of its size aren't equipped for, the 100i is perfect for solo pilots looking to turn heads without sacrificing functionality or reliability.",
+   "components": {
+    "radar": [
+     "S1 Ecouter"
+    ],
+    "fuel_tanks": [
+     "2x Internal Tank"
+    ],
+    "quantum_drives": [
+     "S1 Expedition"
+    ],
+    "jump_modules": [
+     "S1 Explorer"
+    ],
+    "quantum_fuel_tanks": [
+     "Internal Tank"
+    ],
+    "power_plants": [
+     "S1 PowerBolt"
+    ],
+    "coolers": [
+     "2x S1 ArcticStorm"
+    ],
+    "shield_generators": [
+     "S1 WEB"
+    ],
+    "life_support": [
+     "S1 ComfortAir"
+    ],
+    "weapons": [
+     "2x S3 VariPuck S3 Gimbal Mount (CF-337 Panther Repeater S3)"
+    ],
+    "missiles": [
+     "S2 Origin 100i Missile Rack"
+    ]
+   },
+   "length": 19.0,
+   "beam": 12.0,
+   "height": 5.0,
+   "mass": 45143.0,
+   "cargocapacity": 2.0,
+   "max_crew": 1.0,
+   "scm_speed": 223.0,
+   "afterburner_speed": 1230.0,
+   "pitch_max": 60.0,
+   "yaw_max": 52.0,
+   "roll_max": 155.0,
+   "image_url": "https://media.robertsspaceindustries.com/ofxowq9rhbyvc/slideshow_wide.jpg",
+   "image": "starcitizenreference/ship_matrix/small_multirole/100i.jpg"
+  },
+  {
+   "name": "Cutter",
+   "manufacturer": "Drake Interplanetary",
+   "focus": "Starter / Pathfinder",
+   "size": "Small",
+   "status": "flight-ready",
+   "url": "/pledge/ships/cutter/Cutter",
+   "description": "Designed for hard-working folks of all stripes, the Cutter packs 4 SCU of cargo room and plenty of wallop into a rough and tumble, compact frame. It’s a ship that truly embodies the spirit of Drake: that no matter who you are or what you do, you can reach the stars.",
+   "components": {
+    "radar": [
+     "S1 Ecouter"
+    ],
+    "fuel_tanks": [
+     "Internal Tank"
+    ],
+    "quantum_drives": [
+     "S1 FoxFire"
+    ],
+    "jump_modules": [
+     "S1 Explorer"
+    ],
+    "quantum_fuel_tanks": [
+     "Internal Tank"
+    ],
+    "power_plants": [
+     "S1 LightBlossom"
+    ],
+    "coolers": [
+     "S1 BlastChill"
+    ],
+    "shield_generators": [
+     "S1 HEX"
+    ],
+    "life_support": [
+     "S1 ComfortAir"
+    ],
+    "weapons": [
+     "2x S2 VariPuck S2 Gimbal Mount (CF-227 Badger Repeater S2)"
+    ],
+    "missiles": [
+     "2x S2 MSD-221 Missile Rack"
+    ]
+   },
+   "length": 20.0,
+   "beam": 16.0,
+   "height": 6.0,
+   "mass": 81677.0,
+   "cargocapacity": 4.0,
+   "max_crew": 1.0,
+   "scm_speed": 180.0,
+   "afterburner_speed": 1010.0,
+   "pitch_max": 36.0,
+   "yaw_max": 36.0,
+   "roll_max": 100.0,
+   "image_url": "https://media.robertsspaceindustries.com/f1g97yucvp6np/slideshow_wide.jpg",
+   "image": "starcitizenreference/ship_matrix/small_multirole/Cutter.jpg"
+  },
+  {
+   "name": "C8X Pisces Expedition",
+   "manufacturer": "Anvil Aerospace",
+   "focus": "Pathfinder",
+   "size": "Small",
+   "status": "flight-ready",
+   "url": "/pledge/ships/anvil-pisces/C8X-Pisces-Expedition",
+   "description": "Additional firepower turns the base Pisces into a highly capable mini-explorer. Ideal for inter-system travel or investigating tight spots inaccessible to larger ships, it’s a small ship ready for big adventures.  ",
+   "components": {
+    "radar": [
+     "S1 Ecouter"
+    ],
+    "fuel_tanks": [
+     "Internal Tank"
+    ],
+    "quantum_drives": [
+     "S1 Expedition"
+    ],
+    "jump_modules": [
+     "S1 Explorer"
+    ],
+    "quantum_fuel_tanks": [
+     "Internal Tank"
+    ],
+    "power_plants": [
+     "S1 Regulus"
+    ],
+    "coolers": [
+     "S1 Bracer"
+    ],
+    "shield_generators": [
+     "S1 Shimmer"
+    ],
+    "life_support": [
+     "S1 ComfortAir"
+    ],
+    "weapons": [
+     "2x S1 VariPuck S1 Gimbal Mount (CF-117 Bulldog Repeater S1)",
+     "2x S1 VariPuck S1 Gimbal Mount (FL-11 Cannon S1)"
+    ],
+    "missiles": [
+     "2x S1 MSD-111 Missile Rack"
+    ]
+   },
+   "length": 16.0,
+   "beam": 12.0,
+   "height": 8.0,
+   "mass": 45243.0,
+   "cargocapacity": 4.0,
+   "max_crew": 1.0,
+   "scm_speed": 220.0,
+   "afterburner_speed": 1150.0,
+   "pitch_max": 60.0,
+   "yaw_max": 60.0,
+   "roll_max": 150.0,
+   "image_url": "https://media.robertsspaceindustries.com/kj7oh12zn2f1l/slideshow_wide.jpg",
+   "image": "starcitizenreference/ship_matrix/small_multirole/C8X_Pisces_Expedition.jpg"
+  },
+  {
+   "name": "Nomad",
+   "manufacturer": "Consolidated Outland",
+   "focus": "Starter / Light Freight",
+   "size": "Small",
+   "status": "flight-ready",
+   "url": "/pledge/ships/nomad/Nomad",
+   "description": "Imagine the versatility of a medium-sized, multi-purpose freighter packed into a compact frame. Imagine a ship designed for lone pilots finding their way across a galaxy teeming with possibilities.\n\nThe Nomad is ready to go anywhere and do anything - the perfect solution for anyone yearning to start a brand-new adventure.",
+   "components": {
+    "radar": [
+     "S1 Ecouter"
+    ],
+    "fuel_tanks": [
+     "2x Internal Tank"
+    ],
+    "quantum_drives": [
+     "S1 Expedition"
+    ],
+    "jump_modules": [
+     "S1 Explorer"
+    ],
+    "quantum_fuel_tanks": [
+     "Internal Tank"
+    ],
+    "power_plants": [
+     "S1 IonBurst"
+    ],
+    "coolers": [
+     "2x S1 Ultra-Flow"
+    ],
+    "shield_generators": [
+     "3x S1 WEB"
+    ],
+    "life_support": [
+     "S1 ComfortAir"
+    ],
+    "weapons": [
+     "3x S3 VariPuck S3 Gimbal Mount (CF-337 Panther Repeater S3)"
+    ],
+    "missiles": [
+     "2x S4 MSD-442 Missile Rack"
+    ],
+    "utility_items": [
+     "S4 Remote Turret (SureGrip S1 Tractor Beam S1)"
+    ]
+   },
+   "length": 19.0,
+   "beam": 27.0,
+   "height": 10.0,
+   "mass": 216323.0,
+   "cargocapacity": 24.0,
+   "max_crew": 1.0,
+   "scm_speed": 205.0,
+   "afterburner_speed": 1100.0,
+   "pitch_max": 45.0,
+   "yaw_max": 45.0,
+   "roll_max": 120.0,
+   "image_url": "https://media.robertsspaceindustries.com/inqdpb67v815c/slideshow_wide.jpg",
+   "image": "starcitizenreference/ship_matrix/small_multirole/Nomad.jpg"
+  },
+  {
+   "name": "Syulen",
+   "manufacturer": "Gatac Manufacture",
+   "focus": "Starter / Pathfinder",
+   "size": "Medium",
+   "status": "flight-ready",
+   "url": "/pledge/ships/syulen/Syulen",
+   "description": "The Syulen cargo vessel has been artfully crafted by the renowned House Gatac to perfectly suit both Human and Xi’an pilots. With an agile frame, the Syulen lends itself to quickly ferrying important deliveries across the universe or as the ideal ship for those making their transport career debut.",
+   "components": {
+    "radar": [
+     "S1 Ecouter"
+    ],
+    "fuel_tanks": [
+     "Internal Tank"
+    ],
+    "quantum_drives": [
+     "S1 FoxFire"
+    ],
+    "jump_modules": [
+     "S1 Explorer"
+    ],
+    "quantum_fuel_tanks": [
+     "Internal Tank"
+    ],
+    "power_plants": [
+     "S1 LightBlossom"
+    ],
+    "coolers": [
+     "S1 BlastChill"
+    ],
+    "shield_generators": [
+     "2x S1 HEX"
+    ],
+    "life_support": [
+     "S1 ComfortAir"
+    ],
+    "weapons": [
+     "3x S3 VariPuck S3 Gimbal Mount (CF-337 Panther Repeater S3)"
+    ],
+    "missiles": [
+     "3x S4 MSD-442 Missile Rack"
+    ]
+   },
+   "length": 25.0,
+   "beam": 28.0,
+   "height": 16.0,
+   "mass": 77877.0,
+   "cargocapacity": 6.0,
+   "max_crew": 1.0,
+   "scm_speed": 225.0,
+   "afterburner_speed": 1175.0,
+   "pitch_max": 42.0,
+   "yaw_max": 42.0,
+   "roll_max": 135.0,
+   "image_url": "https://media.robertsspaceindustries.com/8xho65s0f1emp/slideshow_wide.jpg",
+   "image": "starcitizenreference/ship_matrix/small_multirole/Syulen.jpg"
+  }
+ ],
+ "stats": {
+  "length": {
+   "min": 16.0,
+   "median": 19.5,
+   "max": 25.0
+  },
+  "beam": {
+   "min": 8.75,
+   "median": 15.5,
+   "max": 28.0
+  },
+  "height": {
+   "min": 4.5,
+   "median": 7.25,
+   "max": 16.0
+  },
+  "mass": {
+   "min": 24774.0,
+   "median": 47114.65,
+   "max": 216323.0
+  },
+  "cargocapacity": {
+   "min": 2.0,
+   "median": 4.0,
+   "max": 24.0
+  },
+  "max_crew": {
+   "min": 1.0,
+   "median": 1.0,
+   "max": 1.0
+  },
+  "scm_speed": {
+   "min": 180.0,
+   "median": 224.0,
+   "max": 262.0
+  },
+  "afterburner_speed": {
+   "min": 1010.0,
+   "median": 1196.5,
+   "max": 1425.0
+  },
+  "pitch_max": {
+   "min": 36.0,
+   "median": 56.0,
+   "max": 70.0
+  },
+  "yaw_max": {
+   "min": 36.0,
+   "median": 49.5,
+   "max": 60.0
+  },
+  "roll_max": {
+   "min": 100.0,
+   "median": 143.5,
+   "max": 205.0
+  }
+ }
+}

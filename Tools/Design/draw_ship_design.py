@@ -1,4 +1,6 @@
 """Draws a ship's 2D design sheets to scale from its layout JSON: one plan per deck and a side cutaway.
+A layout with an "exterior" block (generic format, e.g. Wayfarer) also gets the exterior general
+arrangement (top / side / front), a data-driven cutaway and silhouette masks: see ship_sheets.py.
 
 Every room is named and tinted by zone, every object gets a number that the legend explains with its
 purpose, so the author can approve the design before any 3D is built (HANDOFF point 75).
@@ -139,9 +141,17 @@ def zone_key(draw, x, y):
         x += 60 + f.getlength(ZONE_NAMES[zone])
 
 
+def zone_of(room_id, rooms):
+    """Zone of a room: its own "zone" key (generic layouts) or the Steadfast table."""
+    r = next((r for r in rooms if r["id"] == room_id), None)
+    return ZONES[(r or {}).get("zone") or ROOM_ZONE[room_id]]
+
+
 def draw_deck(layout, deck_id, title, out_path):
     deck = layout["decks"][deck_id]
-    x0, x1, y0, y1 = -0.5, 30.5, -3.8, 3.8
+    sheet = layout.get("sheet", {})
+    x0, x1, y0, y1 = sheet.get("plan_extent", (-0.5, 30.5, -3.8, 3.8))
+    all_rooms = layout["rooms"]
     plan = Plan(x0, x1, y0, y1)
     rooms = [r for r in layout["rooms"] if r["deck"] == deck_id]
     objects = [o for o in layout["objects"] if any(r["id"] == o["room"] for r in rooms)]
@@ -154,7 +164,7 @@ def draw_deck(layout, deck_id, title, out_path):
 
     outline = [plan.p(*v) for v in deck["outline"]]
     for r in rooms:
-        c = ZONES[ROOM_ZONE[r["id"]]]
+        c = zone_of(r["id"], all_rooms)
         if "poly" in r:
             d.polygon([plan.p(*v) for v in r["poly"]], fill=c)
         else:
@@ -163,11 +173,15 @@ def draw_deck(layout, deck_id, title, out_path):
     numbered = []
     for o in objects:
         rr = plan.rect(o["rect"])
-        base = ZONES[ROOM_ZONE[o["room"]]]
-        if o.get("overhead"):
+        base = zone_of(o["room"], all_rooms)
+        if o.get("overhead") or o.get("below"):
             for k in range(int(rr[0]), int(rr[2]), 14):
                 d.line([(k, rr[1]), (min(k + 7, rr[2]), rr[1])], fill=ACCENT, width=2)
                 d.line([(k, rr[3]), (min(k + 7, rr[2]), rr[3])], fill=ACCENT, width=2)
+            if o.get("below"):
+                for k in range(int(rr[1]), int(rr[3]), 14):
+                    d.line([(rr[0], k), (rr[0], min(k + 7, rr[3]))], fill=ACCENT, width=2)
+                    d.line([(rr[2], k), (rr[2], min(k + 7, rr[3]))], fill=ACCENT, width=2)
         else:
             d.rectangle(rr, fill=lighter(base, 0.28), outline=lighter(base, 0.6), width=2)
         numbered.append((o, rr))
@@ -194,7 +208,7 @@ def draw_deck(layout, deck_id, title, out_path):
         lines = name.splitlines()
         tw = max(f.getlength(t) for t in lines) + 8
         th = 30 * len(lines)
-        rects = [rr for o, rr in numbered if o["room"] == r["id"] and not o.get("overhead")]
+        rects = [rr for o, rr in numbered if o["room"] == r["id"] and not (o.get("overhead") or o.get("below"))]
         mx, my = (rx[0] + rx[2]) / 2, (rx[1] + rx[3]) / 2
         cands = [(mx, rx[1] + 22), (mx, rx[3] - 22), (mx, my), (rx[0] + tw / 2 + 8, rx[1] + 22),
                  (rx[2] - tw / 2 - 8, rx[1] + 22), (rx[0] + tw / 2 + 8, rx[3] - 22), (rx[2] - tw / 2 - 8, rx[3] - 22),
@@ -213,16 +227,16 @@ def draw_deck(layout, deck_id, title, out_path):
         cx, cy = (rr[0] + rr[2]) / 2, (rr[1] + rr[3]) / 2
         d.ellipse([cx - 14, cy - 14, cx + 14, cy + 14], fill=BG, outline=ACCENT, width=2)
         centred(d, (cx, cy), str(i), font(16, True), ACCENT)
-        items.append((i, o["name"], o["purpose"]))
+        items.append((i, o["name"] + (" (pod podlahou)" if o.get("below") else ""), o["purpose"]))
     # Nose arrow and scale.
-    ax, ay = plan.p(30.2, 0)
+    ax, ay = plan.p(x1 - 0.3, 0)
     d.polygon([(ax, ay - 12), (ax + 22, ay), (ax, ay + 12)], fill=ACCENT)
     scale_bar(d, MARGIN, plan.h - 50)
 
     img.paste(img_plan, (0, head))
     draw.text((MARGIN, 26), title, font=font(44, True), fill=TEXT)
-    draw.text((MARGIN, 80), "Halcyon Freightworks Steadfast · návrh v2 ke schválení · měřítko 1 m = %d px · příď vpravo" % PX,
-              font=font(20), fill=DIM)
+    draw.text((MARGIN, 80), "%s · měřítko 1 m = %d px · příď vpravo" % (
+        sheet.get("subtitle", "Halcyon Freightworks Steadfast · návrh v2 ke schválení"), PX), font=font(20), fill=DIM)
     zone_key(draw, MARGIN, head + plan.h + 10)
     # Room purposes under the plan.
     y = head + plan.h + 60
@@ -232,7 +246,7 @@ def draw_deck(layout, deck_id, title, out_path):
     for k, r in enumerate(rooms):
         c = 0 if ys[0] <= ys[1] else 1
         yy = ys[c]
-        draw.rectangle([cols[c], yy + 4, cols[c] + 16, yy + 20], fill=ZONES[ROOM_ZONE[r["id"]]])
+        draw.rectangle([cols[c], yy + 4, cols[c] + 16, yy + 20], fill=zone_of(r["id"], all_rooms))
         draw.text((cols[c] + 26, yy), r["name"], font=font(21, True), fill=TEXT)
         yy += 28
         for line in wrap(r["purpose"], font(19), col_w - 30):
@@ -348,6 +362,10 @@ def main():
     layout = json.load(io.open(path, encoding="utf-8"))
     out = os.path.dirname(path)
     name = os.path.basename(path).split("_")[0]
+    if "exterior" in layout:
+        import ship_sheets
+        ship_sheets.draw_all(layout, name, out)
+        return
     draw_deck(layout, "upper", name + " – horní paluba (obytná)", os.path.join(out, name + "_deck_upper.png"))
     draw_deck(layout, "lower", name + " – dolní paluba (náklad a technika)", os.path.join(out, name + "_deck_lower.png"))
     draw_cutaway(layout, os.path.join(out, name + "_cutaway.png"))

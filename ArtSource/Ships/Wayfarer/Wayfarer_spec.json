@@ -1,0 +1,76 @@
+{
+  "_comment": "Ship Matrix shape (robertsspaceindustries.com/ship-matrix fields). Every number is set against the reference set starcitizenreference/ship_matrix/small_multirole.json (8 flight-ready small multirole / starter ships, median in _reference). Dimensions are measured from the exterior drawing (Tools/Design/draw_ship_design.py prints SHIP_SHEETS) and must stay equal to it. Layout: Design/Wayfarer_layout.json, drawings: Design/*.png, text: Design/Wayfarer_Design.md. Status: 2D design v1 approved by the author on 24. 9. 2026 (all proposed defaults); next: the 3D model.",
+  "_status": "design_v1_approved",
+  "_reference": {
+    "set": "starcitizenreference/ship_matrix/small_multirole.json",
+    "ships": ["Avenger Titan", "Mustang Alpha", "Aurora Mk I MR", "100i", "Cutter", "C8X Pisces Expedition", "Nomad", "Syulen"],
+    "median": {"length_m": 19.5, "beam_m": 15.5, "height_m": 7.25, "mass_kg": 47115, "cargo_scu": 4, "crew": 1,
+               "scm_ms": 224, "afterburner_ms": 1196, "pitch_deg_s": 56, "yaw_deg_s": 49.5, "roll_deg_s": 143.5},
+    "closest": "Avenger Titan (walk-through hold behind a single cockpit, 8 SCU) and Cutter (bed, rear entry)"
+  },
+  "identity": {
+    "name": "Wayfarer",
+    "manufacturer": "Halcyon Freightworks",
+    "description": "A lone pilot's first real home among the stars: a single-seat ship you walk into up the rear ramp, with an 8 SCU hold, serviceable components along the corridor, a cabin with a bed and a washroom, and a glass cockpit. Enough guns to defend itself, enough range to wander.",
+    "production_status": "in-concept",
+    "size": "small",
+    "type": "multi-role",
+    "focus": "Starter / Light Freight"
+  },
+  "dimensions": {
+    "length_m": 21.5,
+    "beam_m": 14.7,
+    "height_m": 5.6,
+    "mass_kg": 52000,
+    "cargo_capacity_scu": 8,
+    "decks": 1,
+    "_note": "Length includes the engine nozzles (hull 21.0 m), beam the wingtip cannons, height the tail fins and the deployed gear. Pressure hull 4.6 m wide, interior 3.8 m wide, clear height 2.3 m (cockpit floor 0.35 m higher)."
+  },
+  "crew": {
+    "min_crew": 1,
+    "max_crew": 1,
+    "beds": 1,
+    "stations": ["pilot (flies, fires the wing guns and missiles, runs power / shields / quantum from the side consoles)"]
+  },
+  "flight": {
+    "scm_speed_ms": 225,
+    "afterburner_speed_ms": 1200,
+    "pitch_max_deg_s": 55,
+    "yaw_max_deg_s": 48,
+    "roll_max_deg_s": 150,
+    "acceleration_ms2": {"main": 70, "retro": 45, "strafe": 40, "up": 45, "down": 35},
+    "_note": "Design intent, near the reference median; a little heavier and slower than the Aurora, lighter than the Cutter. The game's flight model gets tuned to these in the build step."
+  },
+  "components": {
+    "avionics": {
+      "radar": "1x S1 (under the cockpit floor)",
+      "computer": "1x S1 (under the cockpit floor)"
+    },
+    "propulsion": {
+      "fuel_tanks": "2x hydrogen in the wing roots",
+      "quantum_drive": "1x S1 (under the hold floor by the ramp)",
+      "quantum_fuel_tanks": "1x under the hold floor, filler on the belly"
+    },
+    "thrusters": {
+      "main": "2x TR2 in the engine pods",
+      "maneuvering": "8x TR1 (4 around the nose, 2 on each pod)"
+    },
+    "modular": {
+      "power_plant": "1x S1 (technical corridor, port)",
+      "coolers": "2x S1 (technical corridor, both sides)",
+      "shield_generators": "1x S1 (technical corridor, starboard)",
+      "life_support": "1x S1 (under the bed)"
+    }
+  },
+  "weapons": {
+    "pilot": ["2x S3 on the wingtips (gimballed)"],
+    "turrets": [],
+    "missiles": ["2x S2 racks under the wings, 2 missiles each"],
+    "utility": ["handheld tractor beam with charger by the ramp"]
+  },
+  "interior": {
+    "entry": "rear ramp from the ground (22 degrees, hinge at the hold floor), controlled from the left console or mobiGlas - no door keypads",
+    "path": "ramp -> hold (port aisle 1.25 m) -> technical corridor (2.1 m between components) -> cabin -> step -> cockpit, pilot seat entered from behind",
+    "rooms": ["hold 8 SCU", "technical corridor", "cabin: bed, suit locker, washroom, food and water", "cockpit"]
+  }
+}
