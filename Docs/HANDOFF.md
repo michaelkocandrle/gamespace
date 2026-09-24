@@ -1185,6 +1185,17 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     trojúhelníků celý kokpit). Horní linie pultu beze změny, obrazovky a radar sedí na stejném místě.
     - **Autor k interiéru (24. 9. 2026), vstup do příštího hodnocení:** proti SC „pořád znatelně něco chybí“,
       předměty v místnostech působí osaměle a některé jsou špatně umístěné.
+72. **Letový kokpit Vanguardu podle SC** (24. 9. 2026, krok 6). Srovnání s referencemi (`Docs/UI`, kokpit
+    ve vesmíru a nad planetou): displeje už obsahem odpovídají, rozdíl byl v jasu – náš kokpit nad
+    planetou měl střední jas 0,26–0,43, SC 0,13–0,19 (tmavý kokpit, jasné displeje).
+    - `ASpaceshipPawn::CockpitExposureBias` = −0,7 EV jen pro kokpitovou kameru (ve skoku dál platí
+      `QuantumExposureBias`). Změřeno `-Preset cockpit_look` (0 / −0,5 / −1 / −1,5 EV přes `space.Post`).
+    - Displeje jsou emisivní a ztmavly by s expozicí: `emissive_strength` 1,8 → 2,9 (= ×2^0,7) ve
+      `Vanguard_setup.json`, po expozici tedy stejně jasné jako dřív (a nekvetou víc).
+    - Sklo displejů (`ESpaceHudSymbol::MfdGlass`) poloviční jas a slabší mřížka – tmavé sklo, jasný obsah.
+    - Výsledek (`-Preset cockpit`, 1080p): nad planetou 0,10–0,19, ve vesmíru 0,05.
+    - Nedělal jsem tlačítka PWR/WPN/THR/SHLD/COOL a QTM/RADR/PROX/HIT/MISL: v SC ovládají systémy (energie,
+      zbraně, štíty), které hra zatím nemá – přijdou se SC-6.
 
 ---
 

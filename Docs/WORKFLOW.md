@@ -322,6 +322,7 @@ Presety (`Tools/Shots/*.json`):
 | `sc_tune` | varianty barvy SC vzhledu (kov, teplota světel, barva lišt, akcenty) přes `space.Kit*` |
 | `wear_check` | opotřebení zblízka (stěna, bedna, rám dveří, podlaha) bez něj a s výchozím nastavením |
 | `wear_tune` | opotřebení a špína materiálu (`space.Kit WearAmount / WearEverywhere / GrimeAmount`) |
+| `cockpit_look` | expozice v letovém kokpitu: `space.Post AutoExposureBias` 0 / −0,5 / −1 / −1,5 nad planetou, ve vesmíru, dolů |
 | `perf_quality` | cena kvality ve 1080p: filmová proti epické po skupinách a TSR 75 %, v letovém kokpitu i interiéru (spouštět s `-Width 1920 -Height 1080` – autor hraje ve 1080p, výchozích 1600 × 900 dává o ~40 % lepší čísla) |
 | `perf_interior` | výkon interiéru: `stat unit` a varianty stínů / dosahu světel přes `space.KitLight` |
 | `interior_walk` | chůze interiérem v zabalené hře: `space.Interior`, `space.Walk`, kamera postavy (`"camera": "pawn"`); výsledek je i v logu hry (`WALK end at …`) |

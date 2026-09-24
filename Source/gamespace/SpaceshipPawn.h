@@ -1564,6 +1564,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float QuantumExposureBias = -0.8f;
 
+	/**
+	 * Exposure bias of the cockpit view outside a jump. The Star Citizen references keep the cockpit
+	 * dim against the outside (mean brightness 0.13-0.19, ours was 0.26-0.43 over the planet); -0.7 EV
+	 * lands there (Tools/Shots/cockpit_look.json, HANDOFF point 72). The displays are emissive and would
+	 * dim with it, so their emissive strength in Vanguard_setup.json is raised by the same 2^0.7.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float CockpitExposureBias = -0.7f;
+
 	/** The thruster glow is scaled by this in a jump: at full it blows out against the pinned exposure. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float QuantumThrusterScale = 0.35f;

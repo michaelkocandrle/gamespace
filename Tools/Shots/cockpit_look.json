@@ -1,0 +1,158 @@
+{
+ "_comment": "Expozice v letovém kokpitu (HANDOFF bod 72): AutoExposureBias úrovně 0 / -0.5 / -1 / -1.5, horizont, vesmír, planeta. Run: Tools/Shots.ps1 -Preset cockpit_look -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "hud": 1,
+   "settle": 3.0,
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "horizon",
+   "speed_ms": 120,
+   "name": "bias00_horizon",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias 0.0"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0,
+   "name": "bias00_space",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias 0.0"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "planet",
+   "speed_ms": 60,
+   "name": "bias00_planet",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias 0.0"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "horizon",
+   "speed_ms": 120,
+   "name": "biasm05_horizon",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias -0.5"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0,
+   "name": "biasm05_space",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias -0.5"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "planet",
+   "speed_ms": 60,
+   "name": "biasm05_planet",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias -0.5"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "horizon",
+   "speed_ms": 120,
+   "name": "biasm10_horizon",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias -1.0"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0,
+   "name": "biasm10_space",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias -1.0"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "planet",
+   "speed_ms": 60,
+   "name": "biasm10_planet",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias -1.0"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "horizon",
+   "speed_ms": 120,
+   "name": "biasm15_horizon",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias -1.5"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 40000,
+   "facing": "away",
+   "speed_ms": 0,
+   "name": "biasm15_space",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias -1.5"
+   ]
+  },
+  {
+   "camera": "cockpit",
+   "altitude_m": 4000,
+   "facing": "planet",
+   "speed_ms": 60,
+   "name": "biasm15_planet",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Post AutoExposureBias -1.5"
+   ]
+  }
+ ]
+}

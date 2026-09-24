@@ -187,12 +187,12 @@
       ]
     },
     "MI_Ship_Vanguard_Screens": {
-      "_comment": "The cockpit displays: unlit, they show exactly what the game draws into them (UCockpitDisplayComponent sets ScreenTexture to its render target at run time; in the editor they stay black). Lit glass reflected the daylight sky and washed them out. Emissive 1.8: at 3 the white type bloomed and blurred.",
+      "_comment": "The cockpit displays: unlit, they show exactly what the game draws into them (UCockpitDisplayComponent sets ScreenTexture to its render target at run time; in the editor they stay black). Lit glass reflected the daylight sky and washed them out. Emissive 1.8: at 3 the white type bloomed and blurred. 24. 9. 2026: 2.9 = 1.8 x 2^0.7, because the cockpit view now has its own -0.7 EV (ASpaceshipPawn::CockpitExposureBias) - after exposure the type is as bright as it was at 1.8, so it blooms no more than it did.",
       "master": "screen",
       "slots": [
         "M_Ship_Vanguard_Screens"
       ],
-      "emissive_strength": 1.8
+      "emissive_strength": 2.9
     },
     "MI_Ship_Vanguard_CanopyFrame": {
       "_comment": "Inside of the canopy frame (build_ai_ship.py canopy_frame): dark painted metal that catches a little light - at base colour 0.02, matt, the struts read as flat black bars across the view.",

@@ -2936,11 +2936,12 @@ void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 		FPostProcessSettings& Post = Camera->PostProcessSettings;
 		Post.bOverride_AutoExposureMinBrightness = QuantumBlend > 0.001f;
 		Post.bOverride_AutoExposureMaxBrightness = QuantumBlend > 0.001f;
-		Post.bOverride_AutoExposureBias = QuantumBlend > 0.001f;
+		const float OwnBias = Camera == CockpitCamera ? CockpitExposureBias : 0.f;
+		Post.bOverride_AutoExposureBias = QuantumBlend > 0.001f || OwnBias != 0.f;
 		const float Pinned = FMath::Lerp(0.f, QuantumExposure, QuantumBlend);
 		Post.AutoExposureMinBrightness = FMath::Max(Pinned, 0.03f);
 		Post.AutoExposureMaxBrightness = FMath::Max(Pinned, 0.03f);
-		Post.AutoExposureBias = FMath::Lerp(0.f, QuantumExposureBias, QuantumBlend);
+		Post.AutoExposureBias = FMath::Lerp(OwnBias, QuantumExposureBias, QuantumBlend);
 	}
 
 	// Speed you can feel: the view widens with the afterburner and more in a quantum jump.

@@ -1010,21 +1010,22 @@ int32 USpaceHudSymbol::NativePaint(const FPaintArgs& Args, const FGeometry& Allo
 		break;
 	case ESpaceHudSymbol::MfdGlass:
 	{
-		// Deep blue, lighter at the top, like lit glass.
+		// Deep blue-black, a little lighter at the top, like lit glass. Half as bright as it was: the
+		// Star Citizen screens are dark glass the content stands out of (24. 9. 2026, HANDOFF point 72).
 		TArray<FSlateGradientStop> Stops;
-		Stops.Add(FSlateGradientStop(FVector2f(0.f, 0.f), FLinearColor(0.035f, 0.08f, 0.18f, 1.f)));
-		Stops.Add(FSlateGradientStop(FVector2f(0.f, Size.Y * 0.45f), FLinearColor(0.012f, 0.03f, 0.075f, 1.f)));
-		Stops.Add(FSlateGradientStop(FVector2f(0.f, Size.Y), FLinearColor(0.004f, 0.012f, 0.03f, 1.f)));
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, 0.f), FLinearColor(0.017f, 0.04f, 0.09f, 1.f)));
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, Size.Y * 0.45f), FLinearColor(0.006f, 0.015f, 0.037f, 1.f)));
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, Size.Y), FLinearColor(0.002f, 0.006f, 0.015f, 1.f)));
 		FSlateDrawElement::MakeGradient(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), MoveTemp(Stops), Orient_Horizontal,
 			ESlateDrawEffect::None, FVector4f(14.f, 14.f, 14.f, 14.f));
 		// A faint pixel grid.
 		for (float X = 24.f; X < Size.X; X += 24.f)
 		{
-			PaintLine(OutDrawElements, LayerId + 1, Paint, { FVector2f(X, 4.f), FVector2f(X, Size.Y - 4.f) }, Faded(Color, 0.035f), false, 1.f);
+			PaintLine(OutDrawElements, LayerId + 1, Paint, { FVector2f(X, 4.f), FVector2f(X, Size.Y - 4.f) }, Faded(Color, 0.02f), false, 1.f);
 		}
 		for (float Y = 24.f; Y < Size.Y; Y += 24.f)
 		{
-			PaintLine(OutDrawElements, LayerId + 1, Paint, { FVector2f(4.f, Y), FVector2f(Size.X - 4.f, Y) }, Faded(Color, 0.035f), false, 1.f);
+			PaintLine(OutDrawElements, LayerId + 1, Paint, { FVector2f(4.f, Y), FVector2f(Size.X - 4.f, Y) }, Faded(Color, 0.02f), false, 1.f);
 		}
 		// Darker towards the edges, as glass set in a bezel.
 		const float Edge = 36.f;
