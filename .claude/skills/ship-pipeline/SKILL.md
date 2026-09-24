@@ -413,6 +413,37 @@ MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/decal_libra
 - Rychlý náhled bez UE: Eevee render herního `.blend` s atlasy na slotech Decal / DecalPaint / Trim /
   TrimPaint. Normal-only čtverce v něm vypadají světlejší, protože Eevee neumí „ponechat barvu trupu“.
 
+**Knihovna v2 a typy decalů** (autor 24. 9. 2026, závazné):
+- Atlas 4096 px s pevnou hustotou 2048 px/m (0,5 mm na texel). Položky se automaticky rozmístí podle stopy
+  (`pack`), takže všechny jsou stejně ostré. Recept: `decal_library.json` (`size_px`, `px_per_m`, položky s `type`
+  a `tags`). Plná přestavba trvá asi 10 min, `-- refine` jen přepočítá alfu.
+- **Strukturní** decaly (spáry, štěrbiny, nýty, šrouby, zapuštěné panely, mřížky, poklopy, zásuvky) **nemají
+  zapečenou barvu**. Nesou normálu, drsnost a AO a barvu berou z podkladu:
+  - kreslí se normal-only čtvercem (`meshdecal`, slot Decal) a nad ním čtvercem s AO (`meshdecal_ao`, slot
+    DecalAO);
+  - AO čtverec píše jen černou barvu s krytím (1 − AO), takže DBuffer lak pod sebou ztmaví.
+- **Informační** decaly (nápisy, registrace, čísla panelů, štítky, šipky, výstražné pruhy, madla) mají vlastní
+  barvu (`meshdecal_paint`, M.R × BC.A).
+- **Opotřebení** (stékání, škrábance, oděry) je procedurální s měkkou alfou a používá se střídmě.
+- Alfa strukturních decalů pokrývá jen skutečné prvky (`feature_alpha`: odchylka normály nebo výšky, 5 texelů
+  od okraje stopy nic). Plochá stopa jinak přepisovala drsnost laku a kreslila obdélník kolem každého decalu.
+- Text jde z fontů projektu (`Content/UI/Fonts`: Rajdhani, Share Tech Mono) jako vystouplá geometrie. Díly
+  typu `poly` (šipky), `rivet`, `ring` a `corner_screws` dávají položkám vnitřní strukturu.
+
+**Rozmístění podle pravidel** (`hs_decals.py`, `decals.rules`, `seed`; vše se znovu vygeneruje):
+- `hull_seams`: prstence nýtů po spárách trupu a podélné linie. `pod_gaps`: spáry gondol z receptu gondoly;
+  `avoid` vynechá šachtu.
+- `plate_edges`: nýty podél okrajů desek. `panel_marks`: číslo na každém panelu gondoly a vyjmenované značky
+  trupu.
+- `clusters`: shluky kolem motorů, šachty, sání, rampy a podvozku. `companions`: štítek a madlo u každého
+  poklopu, stékání pod mřížkou (`streak_chance`).
+- Hero položky (`items`) se kladou první. Kontrolují se tak:
+  - překryv orientovaných obdélníků (SAT);
+  - hrany (bod mimo povrch, normála nad 30°, schod přes 12 mm mezi sousedními body);
+  - pás se na nespojitosti nebo převisu přeruší.
+- Text a šipky jsou na bocích a svazích vždy nahoru; na střeše a břiše se čtou z bližší strany lodi.
+- Assemble vypíše počty podle dílů, pravidel a typů (`HSASSEMBLE ... "decals"`).
+
 **Vrstva tvaru** (`Tools/Blender/hs_detail.py`, blok `detail`, volá `hs_build_ship.py` po zónách):
 - `hull_plates`: oblast (`x`, `z` / `abs_y`, `normal_z`, `centre`) se rozřízne rovinami hranic, zkopíruje, dostane
   Solidify ven (`t`) a zkosení. `secondary` znamená sekundární lak.

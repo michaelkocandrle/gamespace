@@ -120,6 +120,82 @@
    "facing": "horizon",
    "hud": 0,
    "gear": false,
+   "settle": 1.5,
+   "fov": 50,
+   "name": "pilot_decals_light",
+   "camera_local": [
+    -7.05,
+    -5.4,
+    -0.3
+   ],
+   "look_local": [
+    -7.05,
+    -4.15,
+    -0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 50,
+   "name": "pilot_decals_dark",
+   "camera_local": [
+    -8.65,
+    -3.3,
+    2.2
+   ],
+   "look_local": [
+    -8.65,
+    -1.4,
+    1.35
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 50,
+   "name": "pilot_bay",
+   "camera_local": [
+    -7.35,
+    -5.6,
+    0.8
+   ],
+   "look_local": [
+    -7.6,
+    -4.0,
+    0.25
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 50,
+   "name": "pilot_rear_close",
+   "camera_local": [
+    -13.75,
+    -1.8,
+    0.1
+   ],
+   "look_local": [
+    -10.25,
+    -1.2,
+    -0.4
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
    "settle": 2.0,
    "fov": 60,
    "name": "pilot_rear_left_night",

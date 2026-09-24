@@ -58,21 +58,21 @@
  "materials": {
   "_comment": "Hard-surface exterior: one slot per paint zone, flat colours on the hull master (linear), the panel grooves, bevels and kit greebles carry the detail. Glass is the translucent master.",
   "MI_Ship_Wayfarer_Paint": {
-   "_comment": "Layered paint (M_Ship_Layered, step 5): primary warm light grey, secondary darker warm grey on the armour plates (paint2 mask), edge wear to bare metal, dirt in the AO cavities, grunge. Only where the vertex colour's A says so (the pilot); elsewhere the flat primary colour.",
+   "_comment": "Layered paint, clean Origin-like look (author 24. 9. 2026): warm white primary, cool grey secondary on the armour, fine roughness variation, wear only on the most exposed edges, hardly any dirt.",
    "master": "layered",
    "slots": [
     "M_Ship_Wayfarer_Paint"
    ],
    "vectors": {
     "PrimaryColor": [
-     0.6,
-     0.57,
-     0.5
+     0.7,
+     0.69,
+     0.65
     ],
     "SecondaryColor": [
-     0.3,
-     0.29,
-     0.27
+     0.26,
+     0.265,
+     0.275
     ],
     "BareMetalColor": [
      0.72,
@@ -86,16 +86,17 @@
     ]
    },
    "scalars": {
-    "GrungeTileCm": 180.0,
-    "GrungeAmount": 0.55,
-    "DirtAmount": 0.55,
-    "EdgeWear": 1.0,
-    "CavityStrength": 0.45,
+    "GrungeTileCm": 160.0,
+    "GrungeAmount": 0.15,
+    "DirtAmount": 0.15,
+    "EdgeWear": 0.8,
+    "WearThreshold": 0.45,
+    "CavityStrength": 0.3,
     "AOStrength": 0.8,
-    "RoughVariation": 0.2,
-    "BareMetalRoughness": 0.3,
-    "PrimaryRoughness": 0.42,
-    "SecondaryRoughness": 0.5,
+    "RoughVariation": 0.28,
+    "BareMetalRoughness": 0.28,
+    "PrimaryRoughness": 0.32,
+    "SecondaryRoughness": 0.4,
     "PaintMetallic": 0.0
    }
   },
@@ -106,19 +107,19 @@
    ],
    "vectors": {
     "PrimaryColor": [
-     0.035,
-     0.037,
-     0.042
+     0.03,
+     0.032,
+     0.036
     ],
     "SecondaryColor": [
-     0.06,
-     0.06,
-     0.065
+     0.05,
+     0.052,
+     0.056
     ],
     "BareMetalColor": [
-     0.72,
-     0.72,
-     0.74
+     0.5,
+     0.5,
+     0.52
     ],
     "DirtColor": [
      0.02,
@@ -127,17 +128,18 @@
     ]
    },
    "scalars": {
-    "GrungeTileCm": 180.0,
-    "GrungeAmount": 0.45,
-    "DirtAmount": 0.55,
-    "EdgeWear": 1.0,
-    "CavityStrength": 0.45,
+    "GrungeTileCm": 160.0,
+    "GrungeAmount": 0.15,
+    "DirtAmount": 0.15,
+    "EdgeWear": 0.5,
+    "WearThreshold": 0.45,
+    "CavityStrength": 0.3,
     "AOStrength": 0.8,
-    "RoughVariation": 0.2,
-    "BareMetalRoughness": 0.3,
-    "PrimaryRoughness": 0.5,
-    "SecondaryRoughness": 0.55,
-    "PaintMetallic": 0.3
+    "RoughVariation": 0.28,
+    "BareMetalRoughness": 0.28,
+    "PrimaryRoughness": 0.45,
+    "SecondaryRoughness": 0.5,
+    "PaintMetallic": 0.2
    }
   },
   "MI_Ship_Wayfarer_Accent": {
@@ -168,16 +170,17 @@
     ]
    },
    "scalars": {
-    "GrungeTileCm": 180.0,
-    "GrungeAmount": 0.45,
-    "DirtAmount": 0.55,
-    "EdgeWear": 1.0,
-    "CavityStrength": 0.45,
+    "GrungeTileCm": 160.0,
+    "GrungeAmount": 0.15,
+    "DirtAmount": 0.15,
+    "EdgeWear": 0.8,
+    "WearThreshold": 0.45,
+    "CavityStrength": 0.3,
     "AOStrength": 0.8,
-    "RoughVariation": 0.2,
-    "BareMetalRoughness": 0.3,
-    "PrimaryRoughness": 0.45,
-    "SecondaryRoughness": 0.5,
+    "RoughVariation": 0.28,
+    "BareMetalRoughness": 0.28,
+    "PrimaryRoughness": 0.35,
+    "SecondaryRoughness": 0.4,
     "PaintMetallic": 0.0
    }
   },
@@ -188,19 +191,19 @@
    ],
    "vectors": {
     "PrimaryColor": [
-     0.25,
-     0.25,
-     0.27
+     0.52,
+     0.52,
+     0.54
     ],
     "SecondaryColor": [
-     0.25,
-     0.25,
-     0.27
+     0.52,
+     0.52,
+     0.54
     ],
     "BareMetalColor": [
-     0.6,
-     0.6,
-     0.62
+     0.7,
+     0.7,
+     0.72
     ],
     "DirtColor": [
      0.05,
@@ -209,18 +212,20 @@
     ]
    },
    "scalars": {
-    "GrungeTileCm": 180.0,
-    "GrungeAmount": 0.3,
-    "DirtAmount": 0.55,
-    "EdgeWear": 0.5,
-    "CavityStrength": 0.45,
+    "GrungeTileCm": 160.0,
+    "GrungeAmount": 0.1,
+    "DirtAmount": 0.15,
+    "EdgeWear": 0.3,
+    "WearThreshold": 0.45,
+    "CavityStrength": 0.3,
     "AOStrength": 0.8,
-    "RoughVariation": 0.2,
-    "BareMetalRoughness": 0.3,
-    "PrimaryRoughness": 0.35,
-    "SecondaryRoughness": 0.35,
-    "PaintMetallic": 0.9
-   }
+    "RoughVariation": 0.28,
+    "BareMetalRoughness": 0.28,
+    "PrimaryRoughness": 0.28,
+    "SecondaryRoughness": 0.28,
+    "PaintMetallic": 1.0
+   },
+   "_comment": "bare metal: pipes, actuators, nozzle rings - polished, the contrast to the paint"
   },
   "MI_Ship_Wayfarer_Glass": {
    "master": "glass",
@@ -255,7 +260,7 @@
    "emissive_strength": 8.0
   },
   "MI_Ship_Wayfarer_Decal": {
-   "_comment": "mesh decals: normal + roughness + metallic, the hull keeps its paint",
+   "_comment": "structural mesh decals (seams, rivets, grilles, hatches): normal + roughness only, the hull keeps its paint",
    "master": "meshdecal",
    "slots": [
     "M_Ship_Wayfarer_Decal"
@@ -268,7 +273,7 @@
    "decal_opacity": 1.0
   },
   "MI_Ship_Wayfarer_DecalPaint": {
-   "_comment": "second quad of items with their own colour (labels, recess floors, bolts)",
+   "_comment": "info and wear decals (stencils, labels, stripes, handles, drips): their own colour",
    "master": "meshdecal_paint",
    "slots": [
     "M_Ship_Wayfarer_DecalPaint"
@@ -290,19 +295,6 @@
    "textures": {
     "decal_normal": "ArtSource/Ships/Shared/Decals/T_Trim_N.png",
     "decal_m": "ArtSource/Ships/Shared/Decals/T_Trim_M.png"
-   },
-   "decal_normal_strength": 1.0,
-   "decal_opacity": 1.0
-  },
-  "MI_Ship_Wayfarer_TrimPaint": {
-   "master": "meshdecal_paint",
-   "slots": [
-    "M_Ship_Wayfarer_TrimPaint"
-   ],
-   "textures": {
-    "decal_normal": "ArtSource/Ships/Shared/Decals/T_Trim_N.png",
-    "decal_m": "ArtSource/Ships/Shared/Decals/T_Trim_M.png",
-    "decal_bc": "ArtSource/Ships/Shared/Decals/T_Trim_BC.png"
    },
    "decal_normal_strength": 1.0,
    "decal_opacity": 1.0
@@ -363,7 +355,7 @@
     0.95,
     0.88
    ],
-   "emissive_strength": 25
+   "emissive_strength": 6
   },
   "MI_Ship_Wayfarer_LightAmber": {
    "master": "hull",
@@ -421,6 +413,72 @@
     0.38
    ],
    "emissive_strength": 25
+  },
+  "MI_Ship_Wayfarer_DecalAO": {
+   "_comment": "the structural decals' occlusion: colour-only quad darkening the paint under it",
+   "master": "meshdecal_ao",
+   "slots": [
+    "M_Ship_Wayfarer_DecalAO"
+   ],
+   "textures": {
+    "decal_ao": "ArtSource/Ships/Shared/Decals/T_Decals_AO.png",
+    "decal_m": "ArtSource/Ships/Shared/Decals/T_Decals_M.png"
+   },
+   "decal_ao_strength": 0.85
+  },
+  "MI_Ship_Wayfarer_TrimAO": {
+   "master": "meshdecal_ao",
+   "slots": [
+    "M_Ship_Wayfarer_TrimAO"
+   ],
+   "textures": {
+    "decal_ao": "ArtSource/Ships/Shared/Decals/T_Trim_AO.png",
+    "decal_m": "ArtSource/Ships/Shared/Decals/T_Trim_M.png"
+   },
+   "decal_ao_strength": 0.85
+  },
+  "MI_Ship_Wayfarer_BayInterior": {
+   "_comment": "inside the open service bay: dark gunmetal, a little metallic",
+   "master": "layered",
+   "slots": [
+    "M_Ship_Wayfarer_BayInterior"
+   ],
+   "vectors": {
+    "PrimaryColor": [
+     0.1,
+     0.105,
+     0.115
+    ],
+    "SecondaryColor": [
+     0.1,
+     0.105,
+     0.115
+    ],
+    "BareMetalColor": [
+     0.5,
+     0.5,
+     0.52
+    ],
+    "DirtColor": [
+     0.03,
+     0.03,
+     0.03
+    ]
+   },
+   "scalars": {
+    "GrungeTileCm": 160.0,
+    "GrungeAmount": 0.15,
+    "DirtAmount": 0.4,
+    "EdgeWear": 0.8,
+    "WearThreshold": 0.45,
+    "CavityStrength": 0.5,
+    "AOStrength": 0.8,
+    "RoughVariation": 0.28,
+    "BareMetalRoughness": 0.28,
+    "PrimaryRoughness": 0.55,
+    "SecondaryRoughness": 0.55,
+    "PaintMetallic": 0.5
+   }
   }
  },
  "no_nanite_parts": [

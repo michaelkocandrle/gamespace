@@ -131,6 +131,8 @@ def _in_region(f, reg, side, margin=0.0):
         return False
     if "normal_z" in reg and not (reg["normal_z"][0] - mn <= n.z <= reg["normal_z"][1] + mn):
         return False
+    if "normal_x" in reg and not (reg["normal_x"][0] - mn <= n.x <= reg["normal_x"][1] + mn):
+        return False
     if side and c.y * side <= 0:
         return False
     return True
@@ -154,12 +156,38 @@ def _cut_region(bm, reg, side):
     """Region faces with straight edges: the faces near the region are bisected on its bounds first
     (picking whole faces by their centre gave staircase outlines, 24. 9. 2026), then the ones inside
     are returned."""
-    near = [f for f in bm.faces if _in_region(f, reg, side, margin=0.12)]
+    near = [f for f in bm.faces if _box_touches(f, reg, side)]
     for co, no in _clip_planes(reg, side):
         geom = list({e for f in near if f.is_valid for e in list(f.verts) + list(f.edges)} | {f for f in near if f.is_valid})
-        res = bmesh.ops.bisect_plane(bm, geom=geom, dist=1e-6, plane_co=co, plane_no=no)
-        near = [f for f in bm.faces if f.is_valid and _in_region(f, reg, side, margin=0.12)]
+        bmesh.ops.bisect_plane(bm, geom=geom, dist=1e-6, plane_co=co, plane_no=no)
+        near = [f for f in bm.faces if f.is_valid and _box_touches(f, reg, side)]
     return [f for f in near if _in_region(f, reg, side)]
+
+
+def _box_touches(f, reg, side, m=0.12):
+    """Coarse pick before clipping: the face's bounding box overlaps the region (a face's centre is not
+    enough: the loft's rear end is one big n-gon whose centre lies outside every region on it)."""
+    n = f.normal
+    mn = 0.15
+    if "normal_z" in reg and not (reg["normal_z"][0] - mn <= n.z <= reg["normal_z"][1] + mn):
+        return False
+    if "normal_x" in reg and not (reg["normal_x"][0] - mn <= n.x <= reg["normal_x"][1] + mn):
+        return False
+    xs = [v.co.x for v in f.verts]
+    ys = [v.co.y for v in f.verts]
+    zs = [v.co.z for v in f.verts]
+    if max(xs) < reg["x"][0] - m or min(xs) > reg["x"][1] + m:
+        return False
+    if "z" in reg and (max(zs) < reg["z"][0] - m or min(zs) > reg["z"][1] + m):
+        return False
+    if "abs_y" in reg:
+        a0, a1 = reg["abs_y"]
+        spans = [(a0, a1)] if side > 0 else ([(-a1, -a0)] if side < 0 else [(a0, a1), (-a1, -a0)])
+        if not any(max(ys) >= lo - m and min(ys) <= hi + m for lo, hi in spans):
+            return False
+    elif side and max(ys) * side < -m and min(ys) * side < -m:
+        return False
+    return True
 
 
 def hull_plates(hull, specs, coll, mats, bevel):
@@ -381,10 +409,51 @@ def pod_detail(coll, pod_cfg, spec, mats, bevel, ship):
             p = _pod_frame(axis, xc, (a0 + a1) / 2, r_sub(xc) - depth + 0.03)
             outward = (p - Vector((xc, axis[0], axis[1]))).normalized()
             oriented_box(mech, p, Vector((1, 0, 0)), outward, (0.03, (r_sub(xc) - depth) * span * 0.9, 0.05))
-        for b in (tub, mech):
+        # a working space, not an empty tub: junction boxes on the floor, a cable bundle, a coolant line in
+        # the accent colour, a valve wheel
+        bits = bmesh.new()
+        accent = bmesh.new()
+        r_floor = lambda x: r_sub(x) - depth  # noqa: E731
+        for xf, af, (bl, bw, bh) in bay.get("boxes", []):
+            xc, a = x0 + (x1 - x0) * xf, a0 + span * af
+            p = _pod_frame(axis, xc, a, r_floor(xc) + bh / 2)
+            outward = (p - Vector((xc, axis[0], axis[1]))).normalized()
+            oriented_box(bits, p, Vector((1, 0, 0)), outward, (bl, bw, bh))
+            # a cover plate and a gland on each box
+            oriented_box(bits, p + outward * (bh / 2 + 0.003), Vector((1, 0, 0)), outward, (bl * 0.8, bw * 0.8, 0.006))
+        for cb in bay.get("cables", []):
+            for j in range(cb.get("count", 4)):
+                a = a0 + span * (cb["at"] + j * cb.get("spread", 0.025))
+                r0 = r_floor((x0 + x1) / 2) + 0.012 + j * 0.002
+                path = []
+                for k in range(9):
+                    xk = x0 - 0.01 + (x1 - x0 + 0.02) * k / 8
+                    path.append(_pod_frame(axis, xk, a + math.sin(k * 0.9 + j) * 0.01, r0 + 0.006 * math.sin(k * 1.3 + j)))
+                tube(bits, path, cb.get("r", 0.007), seg=8, bend=0.05)
+        for fr, r in bay.get("accent_pipes", []):
+            a = a0 + span * fr
+            rr = r_floor((x0 + x1) / 2) + r + 0.05
+            xa, xb = x0 + 0.08, x1 - 0.08
+            tube(accent, [_pod_frame(axis, x0 - 0.01, a, rr - 0.03), _pod_frame(axis, xa, a, rr),
+                          _pod_frame(axis, xb, a, rr), _pod_frame(axis, x1 + 0.01, a, rr - 0.03)], r, seg=14, bend=0.06)
+        vw = bay.get("valve")
+        if vw:
+            xc, a = x0 + (x1 - x0) * vw["x"], a0 + span * vw["at"]
+            c = _pod_frame(axis, xc, a, r_floor(xc) + vw["h"])
+            outward = (c - Vector((xc, axis[0], axis[1]))).normalized()
+            t1 = Vector((1, 0, 0))
+            t2 = outward.cross(t1)
+            ring = [c + (t1 * math.cos(k * math.pi / 8) + t2 * math.sin(k * math.pi / 8)) * vw["r"] for k in range(17)]
+            tube(accent, ring, 0.006, seg=8, bend=0.001)
+            tube(mech, [c - outward * vw["h"], c], 0.01, seg=10, bend=0.001)
+        for b in (tub, mech, bits, accent):
             mirror_into(b)
-        made.append(new_object("SM_Ship_Detail_PodBay", tub, coll, mats["dark"], bevel, width=0.004))
+        made.append(new_object("SM_Ship_Detail_PodBay", tub, coll, mats.get("bay", mats["dark"]), bevel, width=0.004))
         made.append(new_object("SM_Ship_Detail_PodBayMech", mech, coll, mats["metal"], bevel, width=0.003))
+        if bits.verts:
+            made.append(new_object("SM_Ship_Detail_PodBayBits", bits, coll, mats["dark"], bevel, width=0.003))
+        if accent.verts:
+            made.append(new_object("SM_Ship_Detail_PodBayAccent", accent, coll, mats["accent"], bevel, width=0.002))
         report["bay"] = {"x": bay["x"], "deg": bay["deg"], "depth": depth}
 
     # 3) external pipe run along the pod with clamps, ends bending into the panels

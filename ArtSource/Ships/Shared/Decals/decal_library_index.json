@@ -1,326 +1,1110 @@
 {
  "decals": {
-  "slot": {
-   "uv": [
-    0.05,
-    0.855,
-    0.2,
-    0.895
-   ],
-   "size_m": [
-    0.3,
-    0.08
-   ],
-   "purpose": "narrow slot: vents, drain, hinge gaps",
-   "paint_color": false,
-   "has_color": true
-  },
-  "vent_grille": {
-   "uv": [
-    0.27,
-    0.8049999999999999,
-    0.48,
-    0.9450000000000001
-   ],
-   "size_m": [
-    0.42,
-    0.28
-   ],
-   "purpose": "ventilation grille over a recess (coolers, life support)",
-   "paint_color": false,
-   "has_color": true
-  },
   "seam_straight": {
    "uv": [
-    0.505,
-    0.8625,
-    0.745,
-    0.8875
+    0.010000000000000009,
+    0.30499999999999994,
+    0.26,
+    0.32499999999999996
    ],
    "size_m": [
-    0.48,
-    0.05
+    0.5,
+    0.04
    ],
    "purpose": "straight panel seam",
-   "paint_color": false,
-   "has_color": true
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "seam"
+   ]
   },
   "seam_corner": {
    "uv": [
-    0.8,
-    0.8,
-    0.95,
-    0.95
+    0.009999999999999995,
+    0.6499999999999999,
+    0.13,
+    0.77
    ],
    "size_m": [
-    0.3,
-    0.3
+    0.24,
+    0.24
    ],
    "purpose": "panel seam corner (L)",
-   "paint_color": false,
-   "has_color": true
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "seam"
+   ]
   },
   "seam_t": {
    "uv": [
-    0.05,
-    0.55,
-    0.2,
-    0.7
+    0.14,
+    0.6499999999999999,
+    0.26,
+    0.77
    ],
    "size_m": [
-    0.3,
-    0.3
+    0.24,
+    0.24
    ],
    "purpose": "panel seam T junction",
-   "paint_color": false,
-   "has_color": true
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "seam"
+   ]
+  },
+  "slot_s": {
+   "uv": [
+    0.49000000000000005,
+    0.41000000000000003,
+    0.5900000000000001,
+    0.43500000000000005
+   ],
+   "size_m": [
+    0.2,
+    0.05
+   ],
+   "purpose": "short slot (drain, hinge gap)",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "slot"
+   ]
+  },
+  "slot_l": {
+   "uv": [
+    0.71,
+    0.45,
+    0.9099999999999999,
+    0.48000000000000004
+   ],
+   "size_m": [
+    0.4,
+    0.06
+   ],
+   "purpose": "long slot (vent, gap)",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "slot"
+   ]
+  },
+  "rivet_row_4": {
+   "uv": [
+    0.27,
+    0.30999999999999994,
+    0.37,
+    0.32499999999999996
+   ],
+   "size_m": [
+    0.2,
+    0.03
+   ],
+   "purpose": "4 rivets, 5 cm",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "rivets"
+   ]
+  },
+  "rivet_row_8": {
+   "uv": [
+    0.38,
+    0.30999999999999994,
+    0.58,
+    0.32499999999999996
+   ],
+   "size_m": [
+    0.4,
+    0.03
+   ],
+   "purpose": "8 rivets, 5 cm",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "rivets"
+   ]
+  },
+  "rivet_row_16": {
+   "uv": [
+    0.5900000000000001,
+    0.30999999999999994,
+    0.99,
+    0.32499999999999996
+   ],
+   "size_m": [
+    0.8,
+    0.03
+   ],
+   "purpose": "16 rivets, 5 cm",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "rivets"
+   ]
+  },
+  "rivet_double_8": {
+   "uv": [
+    0.6,
+    0.41000000000000003,
+    0.7999999999999999,
+    0.43500000000000005
+   ],
+   "size_m": [
+    0.4,
+    0.05
+   ],
+   "purpose": "double rivet row, staggered",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "rivets"
+   ]
+  },
+  "bolt_row_4": {
+   "uv": [
+    0.009999999999999995,
+    0.37,
+    0.21999999999999997,
+    0.395
+   ],
+   "size_m": [
+    0.42,
+    0.05
+   ],
+   "purpose": "4 hex bolts with washers (plate edges)",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "bolts"
+   ]
   },
   "bolt": {
    "uv": [
-    0.3625,
-    0.6125,
-    0.3875,
-    0.6375
+    0.23,
+    0.37,
+    0.255,
+    0.395
    ],
    "size_m": [
     0.05,
     0.05
    ],
    "purpose": "single hex bolt with washer",
-   "paint_color": false,
-   "has_color": true
-  },
-  "bolt_row": {
-   "uv": [
-    0.52,
-    0.6125,
-    0.73,
-    0.6375
-   ],
-   "size_m": [
-    0.42,
-    0.05
-   ],
-   "purpose": "four bolts in a row (plate edges)",
-   "paint_color": false,
-   "has_color": true
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "bolts"
+   ]
   },
   "hatch": {
    "uv": [
-    0.77,
-    0.545,
-    0.98,
-    0.705
+    0.09000000000000001,
+    0.8200000000000001,
+    0.31,
+    0.99
    ],
    "size_m": [
-    0.42,
-    0.32
+    0.44,
+    0.34
    ],
-   "purpose": "service hatch: seam frame, hinge, latch, bolts",
-   "paint_color": false,
-   "has_color": true
+   "purpose": "service hatch: seam frame, hinge, latch, corner screws, embossed marking",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "hatch"
+   ]
   },
-  "handle": {
+  "hatch_small": {
    "uv": [
-    0.06,
-    0.355,
-    0.19,
-    0.395
+    0.6700000000000002,
+    0.6699999999999999,
+    0.8,
+    0.77
    ],
    "size_m": [
     0.26,
-    0.08
+    0.2
    ],
-   "purpose": "grab handle for EVA and ground crew",
-   "paint_color": false,
-   "has_color": true
-  },
-  "warning_label": {
-   "uv": [
-    0.3,
-    0.345,
-    0.45,
-    0.405
-   ],
-   "size_m": [
-    0.3,
-    0.12
-   ],
-   "purpose": "hazard plate (engine, intake, landing gear)",
-   "paint_color": true,
-   "has_color": true
+   "purpose": "small inspection hatch",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "hatch"
+   ]
   },
   "recessed_panel": {
    "uv": [
-    0.515,
-    0.3,
-    0.735,
-    0.45
+    0.32,
+    0.8400000000000001,
+    0.54,
+    0.99
    ],
    "size_m": [
     0.44,
     0.3
    ],
    "purpose": "recessed panel with corner bolts",
-   "paint_color": false,
-   "has_color": true
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "panel"
+   ]
   },
   "access_panel": {
    "uv": [
-    0.79,
-    0.315,
-    0.96,
-    0.435
+    0.27,
+    0.6499999999999999,
+    0.44000000000000006,
+    0.77
    ],
    "size_m": [
     0.34,
     0.24
    ],
-   "purpose": "raised access panel with screws",
-   "paint_color": false,
-   "has_color": true
+   "purpose": "raised access panel with screws and micro bevel",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "panel",
+    "hatch"
+   ]
   },
-  "fuel_cap": {
+  "vent_grille": {
    "uv": [
-    0.075,
-    0.075,
-    0.175,
-    0.175
+    0.7100000000000001,
+    0.8499999999999999,
+    0.92,
+    0.99
+   ],
+   "size_m": [
+    0.42,
+    0.28
+   ],
+   "purpose": "ventilation grille over a recess, framed",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "grille"
+   ]
+  },
+  "vent_small": {
+   "uv": [
+    0.09999999999999999,
+    0.57,
+    0.2,
+    0.64
    ],
    "size_m": [
     0.2,
-    0.2
+    0.14
    ],
-   "purpose": "fuel / coolant filler cap",
-   "paint_color": false,
-   "has_color": true
+   "purpose": "small vent",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "grille"
+   ]
   },
   "louvers": {
    "uv": [
-    0.3,
-    0.07,
     0.45,
-    0.18
+    0.6599999999999999,
+    0.6,
+    0.77
    ],
    "size_m": [
     0.3,
     0.22
    ],
    "purpose": "raised exhaust louvers",
-   "paint_color": false,
-   "has_color": true
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "grille"
+   ]
+  },
+  "fuel_cap": {
+   "uv": [
+    0.8100000000000002,
+    0.6699999999999999,
+    0.9100000000000003,
+    0.77
+   ],
+   "size_m": [
+    0.2,
+    0.2
+   ],
+   "purpose": "filler cap in a recess",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "cap",
+    "service"
+   ]
+  },
+  "socket": {
+   "uv": [
+    0.26,
+    0.5,
+    0.32000000000000006,
+    0.54
+   ],
+   "size_m": [
+    0.12,
+    0.08
+   ],
+   "purpose": "service connector port with pins",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "socket",
+    "service"
+   ]
+  },
+  "socket_round": {
+   "uv": [
+    0.76,
+    0.59,
+    0.81,
+    0.64
+   ],
+   "size_m": [
+    0.1,
+    0.1
+   ],
+   "purpose": "round umbilical port",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "socket",
+    "service"
+   ]
+  },
+  "lift_point": {
+   "uv": [
+    0.21,
+    0.57,
+    0.28,
+    0.64
+   ],
+   "size_m": [
+    0.14,
+    0.14
+   ],
+   "purpose": "lifting eye with bolts",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "service"
+   ]
   },
   "light_housing": {
    "uv": [
-    0.585,
-    0.105,
-    0.665,
-    0.145
+    0.33,
+    0.5,
+    0.41,
+    0.54
    ],
    "size_m": [
     0.16,
     0.08
    ],
-   "purpose": "navigation / flood light housing",
-   "paint_color": false,
-   "has_color": true
+   "purpose": "light housing frame",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "light"
+   ]
   },
   "cable_run": {
    "uv": [
-    0.755,
-    0.1,
-    0.995,
-    0.15
+    0.010000000000000009,
+    0.49,
+    0.25,
+    0.54
    ],
    "size_m": [
     0.48,
     0.1
    ],
-   "purpose": "cable run with clamps along a seam",
-   "paint_color": false,
-   "has_color": true
+   "purpose": "cable run with clamps",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "cable"
+   ]
+  },
+  "warning_label": {
+   "uv": [
+    0.29,
+    0.58,
+    0.44,
+    0.64
+   ],
+   "size_m": [
+    0.3,
+    0.12
+   ],
+   "purpose": "hazard plate, yellow and black stripes",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "warning"
+   ]
+  },
+  "hazard_stripe": {
+   "uv": [
+    0.010000000000000009,
+    0.405,
+    0.26,
+    0.43500000000000005
+   ],
+   "size_m": [
+    0.5,
+    0.06
+   ],
+   "purpose": "hazard stripe band (ramp edge, gear bay)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "warning"
+   ]
+  },
+  "stencil_nostep": {
+   "uv": [
+    0.56,
+    0.5050000000000001,
+    0.71,
+    0.54
+   ],
+   "size_m": [
+    0.3,
+    0.07
+   ],
+   "purpose": "NO STEP stencil",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "stencil",
+    "walk"
+   ]
+  },
+  "stencil_thrust": {
+   "uv": [
+    0.7200000000000001,
+    0.5050000000000001,
+    0.9400000000000001,
+    0.54
+   ],
+   "size_m": [
+    0.44,
+    0.07
+   ],
+   "purpose": "CAUTION THRUST stencil by the engines",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "stencil",
+    "engine"
+   ]
+  },
+  "stencil_lift": {
+   "uv": [
+    0.010000000000000002,
+    0.5499999999999999,
+    0.09,
+    0.64
+   ],
+   "size_m": [
+    0.16,
+    0.18
+   ],
+   "purpose": "LIFT point arrow",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "stencil",
+    "service"
+   ]
+  },
+  "arrow_access": {
+   "uv": [
+    0.27,
+    0.405,
+    0.39,
+    0.43500000000000005
+   ],
+   "size_m": [
+    0.24,
+    0.06
+   ],
+   "purpose": "ACCESS arrow",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "stencil",
+    "service"
+   ]
+  },
+  "label_coolant": {
+   "uv": [
+    0.010000000000000002,
+    0.445,
+    0.11000000000000001,
+    0.48000000000000004
+   ],
+   "size_m": [
+    0.2,
+    0.07
+   ],
+   "purpose": "service label: coolant",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "label",
+    "service"
+   ]
+  },
+  "label_fuel": {
+   "uv": [
+    0.11999999999999998,
+    0.445,
+    0.21999999999999997,
+    0.48000000000000004
+   ],
+   "size_m": [
+    0.2,
+    0.07
+   ],
+   "purpose": "service label: quantum fuel",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "label",
+    "service",
+    "fuel"
+   ]
+  },
+  "label_power": {
+   "uv": [
+    0.22999999999999998,
+    0.445,
+    0.32999999999999996,
+    0.48000000000000004
+   ],
+   "size_m": [
+    0.2,
+    0.07
+   ],
+   "purpose": "service label: power",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "label",
+    "service"
+   ]
+  },
+  "label_o2": {
+   "uv": [
+    0.4,
+    0.405,
+    0.48,
+    0.43500000000000005
+   ],
+   "size_m": [
+    0.16,
+    0.06
+   ],
+   "purpose": "service label: life support",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "label",
+    "service"
+   ]
+  },
+  "label_hydraulic": {
+   "uv": [
+    0.33999999999999997,
+    0.445,
+    0.43999999999999995,
+    0.48000000000000004
+   ],
+   "size_m": [
+    0.2,
+    0.07
+   ],
+   "purpose": "service label: hydraulics",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "label",
+    "service"
+   ]
+  },
+  "reg_number": {
+   "uv": [
+    0.44999999999999996,
+    0.58,
+    0.75,
+    0.64
+   ],
+   "size_m": [
+    0.6,
+    0.12
+   ],
+   "purpose": "registration",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "stencil",
+    "reg"
+   ]
+  },
+  "maker": {
+   "uv": [
+    0.265,
+    0.37,
+    0.5650000000000001,
+    0.395
+   ],
+   "size_m": [
+    0.6,
+    0.05
+   ],
+   "purpose": "maker's mark",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "stencil"
+   ]
+  },
+  "ship_name": {
+   "uv": [
+    0.44999999999999996,
+    0.445,
+    0.7,
+    0.48000000000000004
+   ],
+   "size_m": [
+    0.5,
+    0.07
+   ],
+   "purpose": "ship class",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "stencil"
+   ]
+  },
+  "handle": {
+   "uv": [
+    0.42000000000000004,
+    0.5,
+    0.55,
+    0.54
+   ],
+   "size_m": [
+    0.26,
+    0.08
+   ],
+   "purpose": "grab handle, yellow grip",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "handle"
+   ]
+  },
+  "panel_A12": {
+   "uv": [
+    0.575,
+    0.37,
+    0.645,
+    0.395
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "panel_A14": {
+   "uv": [
+    0.6549999999999999,
+    0.37,
+    0.725,
+    0.395
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "panel_B03": {
+   "uv": [
+    0.7349999999999999,
+    0.37,
+    0.8049999999999999,
+    0.395
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "panel_B07": {
+   "uv": [
+    0.8149999999999998,
+    0.37,
+    0.8849999999999999,
+    0.395
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "panel_C21": {
+   "uv": [
+    0.8949999999999998,
+    0.37,
+    0.9649999999999999,
+    0.395
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "panel_C22": {
+   "uv": [
+    0.010000000000000002,
+    0.33499999999999996,
+    0.08000000000000002,
+    0.36
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "panel_D05": {
+   "uv": [
+    0.09,
+    0.33499999999999996,
+    0.16,
+    0.36
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "panel_E11": {
+   "uv": [
+    0.16999999999999998,
+    0.33499999999999996,
+    0.24,
+    0.36
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "panel_E16": {
+   "uv": [
+    0.25,
+    0.33499999999999996,
+    0.32000000000000006,
+    0.36
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "panel_F02": {
+   "uv": [
+    0.32999999999999996,
+    0.33499999999999996,
+    0.4,
+    0.36
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "panel_G08": {
+   "uv": [
+    0.41000000000000003,
+    0.33499999999999996,
+    0.4800000000000001,
+    0.36
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "panel_H19": {
+   "uv": [
+    0.49,
+    0.33499999999999996,
+    0.56,
+    0.36
+   ],
+   "size_m": [
+    0.14,
+    0.05
+   ],
+   "purpose": "panel number",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panelno"
+   ]
+  },
+  "streak_drip": {
+   "uv": [
+    0.010000000000000002,
+    0.78,
+    0.08000000000000002,
+    0.99
+   ],
+   "size_m": [
+    0.14,
+    0.42
+   ],
+   "purpose": "dirt streaks running down from a grille or seam",
+   "type": "wear",
+   "has_color": true,
+   "tags": [
+    "streak"
+   ]
+  },
+  "streak_short": {
+   "uv": [
+    0.6100000000000001,
+    0.6599999999999999,
+    0.6600000000000001,
+    0.77
+   ],
+   "size_m": [
+    0.1,
+    0.22
+   ],
+   "purpose": "short drip below a small vent",
+   "type": "wear",
+   "has_color": true,
+   "tags": [
+    "streak"
+   ]
+  },
+  "scratches": {
+   "uv": [
+    0.55,
+    0.8400000000000001,
+    0.7,
+    0.99
+   ],
+   "size_m": [
+    0.3,
+    0.3
+   ],
+   "purpose": "fine scratches to bare metal (step areas, handles)",
+   "type": "wear",
+   "has_color": true,
+   "tags": [
+    "scratch"
+   ]
+  },
+  "edge_scuff": {
+   "uv": [
+    0.5700000000000001,
+    0.33499999999999996,
+    0.77,
+    0.36
+   ],
+   "size_m": [
+    0.4,
+    0.05
+   ],
+   "purpose": "worn band along an exposed edge",
+   "type": "wear",
+   "has_color": true,
+   "tags": [
+    "scuff"
+   ]
   }
  },
  "trim": {
-  "panel_lip": {
+  "seam_rivets": {
    "v": [
-    0.97,
+    0.9650000000000001,
     1.0
    ],
-   "height_m": 0.06,
+   "height_m": 0.07,
    "tile_m": 2.0,
-   "purpose": "raised plate lip with a groove below (plate edges)",
-   "has_color": true
+   "purpose": "rivet row either side of a panel seam, clear in the middle",
+   "type": "structural",
+   "has_color": false
   },
-  "ribbing": {
+  "rivet_line": {
    "v": [
-    0.9099999999999999,
-    0.97
+    0.9500000000000001,
+    0.965
    ],
-   "height_m": 0.12,
+   "height_m": 0.03,
    "tile_m": 2.0,
-   "purpose": "structural ribbing (bays, frames)",
+   "purpose": "single rivet row every 5 cm (plate edges)",
+   "type": "structural",
    "has_color": false
   },
   "bolt_row": {
    "v": [
-    0.885,
-    0.9099999999999999
+    0.925,
+    0.95
    ],
    "height_m": 0.05,
    "tile_m": 2.0,
-   "purpose": "row of bolts every 5 cm",
-   "has_color": true
+   "purpose": "row of hex bolts every 10 cm",
+   "type": "structural",
+   "has_color": false
   },
-  "rail": {
+  "panel_lip": {
    "v": [
-    0.8600000000000001,
-    0.885
+    0.895,
+    0.925
    ],
-   "height_m": 0.05,
+   "height_m": 0.06,
    "tile_m": 2.0,
-   "purpose": "round rail / pipe",
-   "has_color": true
+   "purpose": "raised plate lip with a groove below",
+   "type": "structural",
+   "has_color": false
+  },
+  "ribbing": {
+   "v": [
+    0.835,
+    0.895
+   ],
+   "height_m": 0.12,
+   "tile_m": 2.0,
+   "purpose": "structural ribbing",
+   "type": "structural",
+   "has_color": false
   },
   "studs_band": {
    "v": [
-    0.8099999999999999,
-    0.86
+    0.785,
+    0.8350000000000001
    ],
    "height_m": 0.1,
    "tile_m": 2.0,
-   "purpose": "band with studs (armour strap)",
-   "has_color": true
-  },
-  "step_edge": {
-   "v": [
-    0.77,
-    0.81
-   ],
-   "height_m": 0.08,
-   "tile_m": 2.0,
-   "purpose": "stepped edge (plate over plate)",
+   "purpose": "armour strap with studs",
+   "type": "structural",
    "has_color": false
   },
   "grille_band": {
    "v": [
-    0.72,
-    0.77
+    0.735,
+    0.785
    ],
    "height_m": 0.1,
    "tile_m": 2.0,
    "purpose": "long intake / exhaust grille",
-   "has_color": true
+   "type": "structural",
+   "has_color": false
   },
   "seam_double": {
    "v": [
-    0.7,
-    0.72
+    0.715,
+    0.735
    ],
    "height_m": 0.04,
    "tile_m": 2.0,
    "purpose": "double panel seam",
-   "has_color": true
+   "type": "structural",
+   "has_color": false
+  },
+  "step_edge": {
+   "v": [
+    0.6749999999999999,
+    0.715
+   ],
+   "height_m": 0.08,
+   "tile_m": 2.0,
+   "purpose": "stepped edge (plate over plate)",
+   "type": "structural",
+   "has_color": false
   }
  },
  "decal_atlas_m": 2.0,
@@ -329,7 +1113,7 @@
   "N": "tangent normal, OpenGL (+Y up): Unreal flip green",
   "H": "height, 0.5 = surface, +-0.030 m",
   "AO": "ambient occlusion",
-  "BC": "sRGB colour x AO, A = colour opacity (labels + parts with their own colour)",
+  "BC": "sRGB colour x AO, A = colour opacity (info and wear items only)",
   "M": "R alpha (normal/AO opacity), G roughness, B metallic"
  }
 }

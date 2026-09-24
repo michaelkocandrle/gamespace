@@ -64,37 +64,6 @@
    ]
   },
   {
-   "name": "tail",
-   "type": "point",
-   "color": [
-    1.0,
-    0.95,
-    0.88
-   ],
-   "intensity_cd": 8,
-   "radius_m": 1.5,
-   "location": [
-    0.2606,
-    0.0,
-    2.4868
-   ],
-   "direction": [
-    -0.8944,
-    0.0,
-    0.4472
-   ],
-   "location_ue_cm": [
-    -998.9,
-    -0.0,
-    128.7
-   ],
-   "direction_ue": [
-    -0.8944,
-    -0.0,
-    0.4472
-   ]
-  },
-  {
    "name": "flood_L",
    "type": "spot",
    "color": [

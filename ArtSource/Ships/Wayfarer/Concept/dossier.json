@@ -89,31 +89,27 @@
   "shots": [
    {
     "file": "Docs/Shots/Wayfarer/pilot_rear_left.jpg",
-    "caption": "Pilot detailu: záď a gondola, desky, šachta, decaly, dvoubarevný lak."
+    "caption": "Pilot kolo 2: záď a gondola, rozmístění decalů pravidly, styl Origin."
    },
    {
-    "file": "Docs/Shots/Wayfarer/pilot_pod_close.jpg",
-    "caption": "Otevřená servisní šachta gondoly se světlem, poklop, víčko plnění, madla."
+    "file": "Docs/Shots/Wayfarer/pilot_decals_light.jpg",
+    "caption": "Strukturní decaly berou barvu podkladu: světlý lak i grafitový pás."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/pilot_bay.jpg",
+    "caption": "Servisní šachta: potrubí, kabely, skříňky, chladicí trubka s ventilem, světlo."
    },
    {
     "file": "Docs/Shots/Wayfarer/pilot_rear.jpg",
-    "caption": "Záď: obrys rampy, výstražné štítky, žaluzie, zadní a obrysová světla."
+    "caption": "Záď: dveře rampy, pancéřování, mřížky, štítky."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/pilot_pod_close.jpg",
+    "caption": "Gondola zblízka."
    },
    {
     "file": "Docs/Shots/Wayfarer/pilot_dusk.jpg",
-    "caption": "Soumrak: polohové světlo, světlo v šachtě, reflektor."
-   },
-   {
-    "file": "Docs/Shots/Wayfarer/v2_close_three_quarter.jpg",
-    "caption": "Zblízka ve hře: čisté hrany, drážky, poklopy."
-   },
-   {
-    "file": "Docs/Shots/Wayfarer/v2_left.jpg",
-    "caption": "Bok ve hře."
-   },
-   {
-    "file": "Docs/Shots/Wayfarer/v2_below_gear_down.jpg",
-    "caption": "Zespodu s podvozkem."
+    "caption": "Soumrak: polohová světla, šachta."
    }
   ],
   "known": [

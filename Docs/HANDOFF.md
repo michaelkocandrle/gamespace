@@ -1376,6 +1376,32 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       - křídla a ploutve ploché;
       - noc netestovaná (jen soumrak).
     - Celou loď přestavím až po schválení pilotu autorem.
+88. **Pilot kolo 2: knihovna decalů v2, pravidla, detail zádi, šachta, styl Origin** (24. 9. 2026 večer).
+    - Knihovna v2: 4096 px při 2048 px/m, 55 položek s typy strukturní / informační / opotřebení.
+      - Strukturní decaly nemají barvu a AO dává nový master `M_Ship_MeshDecalAO`.
+      - Texty jsou z Rajdhani a Share Tech Mono; přibyly řady nýtů, čísla panelů, štítky, šipky a stékání.
+    - Rozmístění pravidly: 258 decalů (gondoly po 73, trup 112) a 240 běhů nýtů, asi 250 m, zatím jen pilot.
+    - Tvar:
+      - pancéřové desky a dveře rampy na zadní stěně a zkosení;
+      - šachta gondoly se skříňkami, svazkem kabelů, chladicí trubkou a ventilem, vnitřek `BayInterior`;
+      - mřížky zádi jsou decaly (výřez do n-úhelníku zadní stěny se protrhl).
+    - Materiál ve stylu Origin: světlý lak 0,32, šedý sekundární, leštěný kov, opotřebení jen nad prahem, málo
+      špíny.
+    - Opravy:
+      - černé tahy na přídi gondoly (mřížka na silném zakřivení) a tečkovaný pás na šikmé stěně krytu;
+      - alfa výstražného štítku;
+      - zadní světlo je jen čočka;
+      - obrysy decalů přes drsnost;
+      - čísla vzhůru nohama.
+    - Výkon 1080p (stejné záběry, `perf_pilot`):
+
+      | Záběr | Čistá v2 | Pilot | Bez decalů a světel |
+      | --- | --- | --- | --- |
+      | Zezadu zleva | 88 FPS | 82 FPS | 84 FPS |
+      | Tři čtvrtiny | 85 FPS | 80 FPS | 81 FPS |
+      | Detail zádi | 82 FPS | 75 FPS | 76 FPS |
+
+    - Iterace se od teď kontroluje v Blenderu; balí se a testuje jednou před předáním (CLAUDE.md).
 
 ---
 

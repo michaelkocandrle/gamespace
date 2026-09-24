@@ -21,6 +21,16 @@ hull that carry alpha, normal, height, AO and colour. This script is the library
   - the passes are written as 8-bit PNGs next to the recipe and a JSON index with every item's UV rect,
     its size in metres and its purpose, so the ship builder can place it by name.
 
+Item types ("type"), because a DBuffer decal has one opacity for everything it writes:
+  structural  seams, slots, rivets, bolts, recessed panels, grilles, hatches: normal, roughness and AO only,
+              no colour of their own (BC alpha 0) - the hull's paint shows through, the AO darkens it
+              through a separate colour-only quad (M_Ship_MeshDecalAO)
+  info        stencils, labels, numbers, arrows, hazard stripes, handles: their own colour (BC alpha = where)
+  wear        scratches, edge scuffs, drips below grilles: procedural colour with soft alpha, used sparingly
+Items are packed onto one sheet at a fixed texel density ("px_per_m", 2048 = 0.5 mm per texel), so every
+decal is equally sharp; parts can be boxes, cylinders, hex bolts, domed rivets, rings, extruded outlines
+("poly": arrows) and text in the project's fonts (Content/UI/Fonts: Rajdhani, Share Tech Mono).
+
 The same script builds the trim sheet (recipe key "trim"): horizontal strips that tile along U, for
 long edges and bands. Both are regenerated from the recipe; to add a detail, add an item.
 Prints DECALLIB {...}.
@@ -76,6 +86,43 @@ def add_hex(bm, c, r, h):
     return add_cyl(bm, c, r, h, seg=6)
 
 
+def add_poly(bm, pts, z0, h):
+    """A flat outline (list of [x, y]) extruded from z0 to z0 + h (arrows, chevrons)."""
+    verts = [bm.verts.new((x, y, z0)) for x, y in pts]
+    face = bm.faces.new(verts)
+    res = bmesh.ops.extrude_face_region(bm, geom=[face])
+    top = [e for e in res["geom"] if isinstance(e, bmesh.types.BMVert)]
+    bmesh.ops.translate(bm, vec=(0, 0, h), verts=top)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+
+
+FONTS = {"rajdhani": "Content/UI/Fonts/Rajdhani-SemiBold.ttf", "rajdhani_medium": "Content/UI/Fonts/Rajdhani-Medium.ttf",
+         "mono": "Content/UI/Fonts/ShareTechMono-Regular.ttf"}
+
+
+def add_text(bm, body, font, size, c, z0, h, rot_deg=0.0, align="CENTER"):
+    """Text in one of the project's fonts, as raised geometry: size = the font's em in metres."""
+    cu = bpy.data.curves.new("txt", "FONT")
+    cu.body = body
+    cu.font = bpy.data.fonts.load(path(FONTS[font]), check_existing=True)
+    cu.size = size
+    cu.align_x = align
+    cu.align_y = "CENTER"
+    cu.extrude = h / 2
+    ob = bpy.data.objects.new("txt", cu)
+    bpy.context.scene.collection.objects.link(ob)
+    ob.rotation_euler = (0, 0, math.radians(rot_deg))
+    ob.location = (c[0], c[1], z0 + h / 2)
+    bpy.context.view_layer.update()
+    dg = bpy.context.evaluated_depsgraph_get()
+    me = bpy.data.meshes.new_from_object(ob.evaluated_get(dg))
+    me.transform(ob.matrix_world)
+    bm.from_mesh(me)
+    bpy.data.objects.remove(ob)
+    bpy.data.curves.remove(cu)
+    bpy.data.meshes.remove(me)
+
+
 def new_object(name, bm, coll, color, rough, metal, bevel=0.0015):
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
@@ -125,10 +172,19 @@ def build_item(item, origin, coll, defaults):
         else:
             add_box(bm, (ox + r["at"][0], oy + r["at"][1], -d - 0.001), (r["size"][0], r["size"][1], 0.002))
         floor = new_object(item["name"] + "_floor", bm, coll, tuple(r.get("color", defaults["dark"])), 0.6, 0.0, bevel=0.0)
-        floor["own"] = 1.0
+        floor["own"] = 1.0 if item_type(item) == "info" else 0.0
         made.append(floor)
     made.append(plate)
-    for i, p in enumerate(item.get("parts", [])):
+    parts = list(item.get("parts", []))
+    if item.get("corner_screws"):
+        # a screw in each corner, inset: the small detail that makes a panel read as fastened
+        cs = item["corner_screws"]
+        ix, iy = fw / 2 - cs.get("inset", 0.015), fh / 2 - cs.get("inset", 0.015)
+        for sx in (-ix, ix):
+            for sy in (-iy, iy):
+                parts.append({"kind": "hex", "at": [sx, sy], "r": cs.get("r", 0.006), "h": 0.004, "z": cs.get("z", 0.0),
+                              "rough": 0.35})
+    for i, p in enumerate(parts):
         bm = bmesh.new()
         n = p.get("repeat", 1)
         step = p.get("step", [0, 0])
@@ -147,10 +203,20 @@ def build_item(item, origin, coll, defaults):
                 add_cyl(bm, (at[0], at[1], p.get("z", 0.0) + p["r"]), p["r"], p["size"][0], seg=16, axis="X")
             elif kind == "bar_y":
                 add_cyl(bm, (at[0], at[1], p.get("z", 0.0) + p["r"]), p["r"], p["size"][1], seg=16, axis="Y")
+            elif kind == "rivet":    # domed rivet head
+                add_cyl(bm, (at[0], at[1], p.get("z", 0.0) + h / 2), p["r"], h, seg=16, r2=p["r"] * 0.55)
+            elif kind == "ring":
+                add_cyl(bm, (at[0], at[1], z), p["r"], h, seg=p.get("seg", 32))
+                add_cyl(bm, (at[0], at[1], z + h * 0.6), p["r"] * p.get("inner", 0.6), h * 0.6, seg=p.get("seg", 32))
+            elif kind == "poly":
+                add_poly(bm, [(at[0] + x, at[1] + y) for x, y in p["points"]], p.get("z", 0.0), h)
+            elif kind == "text":
+                add_text(bm, p["body"], p.get("font", "rajdhani"), p["size"], at, p.get("z", 0.0), h,
+                         p.get("rot", 0.0), p.get("align", "CENTER"))
         ob = new_object("%s_p%d" % (item["name"], i), bm, coll, tuple(p.get("color", paint)),
                         p.get("rough", defaults["rough"]), p.get("metal", 0.0), bevel=p.get("bevel", 0.0012))
-        # a part with its own colour (dark slats, metal bolts) shows it; the rest keeps the hull's paint
-        ob["own"] = 1.0 if ("color" in p or item.get("paint_color")) else 0.0
+        # only info items carry colour; a structural item takes the hull's paint (its AO darkens it)
+        ob["own"] = 1.0 if item_type(item) == "info" and not p.get("no_color") else 0.0
         made.append(ob)
     return made
 
@@ -248,7 +314,7 @@ def render_passes(scene, mats, size_px, extent_m, centre, out_dir, prefix):
     return files
 
 
-def exr_to_png(files, out_dir, prefix, footprint_mask=None):
+def exr_to_png(files, out_dir, prefix, wear=()):
     """EXR passes -> 8-bit PNG maps with raw (linear) values: the data maps must not get an sRGB curve;
     only the colour map is sRGB."""
     borrow("PIL")
@@ -283,15 +349,22 @@ def exr_to_png(files, out_dir, prefix, footprint_mask=None):
         Image.fromarray(a8, "RGB" if a8.ndim == 3 else "L").save(fn)
         written[key] = fn
     # colour + its own opacity (1 only where an item says its colour replaces the hull's)
-    copa = footprint_mask if footprint_mask is not None else np.zeros_like(alpha)
     own = np.where(alpha > 0.5, load(files["own"])[..., 0], 0.0)
-    copa = np.maximum(copa, (own > 0.5).astype(np.float32))
-    bc = np.dstack([dilate_colour(np.clip(srgb, 0, 1), copa > 0.5), copa[..., None]])
-    fn = os.path.join(out_dir, "%s_BC.png" % prefix)
-    Image.fromarray((bc * 255 + 0.5).astype(np.uint8), "RGBA").save(fn)
-    written["BC"] = fn
+    copa = (own > 0.5).astype(np.float32)
+    bc = np.dstack([np.clip(srgb, 0, 1), copa[..., None]]).astype(np.float32)
     # M: R = alpha (where normal / AO apply), G = roughness, B = metallic
-    m = np.dstack([alpha, np.clip(rm[..., 0], 0, 1), np.clip(rm[..., 1], 0, 1)])
+    m = np.dstack([alpha, np.clip(rm[..., 0], 0, 1), np.clip(rm[..., 1], 0, 1)]).astype(np.float32)
+    maps2 = {"BC": bc, "M": m}
+    keep = np.zeros(alpha.shape, bool)
+    keep |= bc[..., 3] > 0.02
+    for it, rect in wear:
+        procedural_wear(maps2, m[..., 0], it, rect)
+        keep[rect[1]:rect[3], rect[0]:rect[2]] = True
+    m[..., 0] = feature_alpha(m[..., 0], maps["N"] * 2 - 1, maps["H"], keep)
+    bc[..., :3] = dilate_colour(bc[..., :3], bc[..., 3] > 0.02)
+    fn = os.path.join(out_dir, "%s_BC.png" % prefix)
+    Image.fromarray((np.clip(bc, 0, 1) * 255 + 0.5).astype(np.uint8), "RGBA").save(fn)
+    written["BC"] = fn
     fn = os.path.join(out_dir, "%s_M.png" % prefix)
     Image.fromarray((m * 255 + 0.5).astype(np.uint8), "RGB").save(fn)
     written["M"] = fn
@@ -300,7 +373,53 @@ def exr_to_png(files, out_dir, prefix, footprint_mask=None):
     return written
 
 
-def dilate_colour(rgb, mask, steps=64):
+def feature_alpha(m_r, n, hgt, keep):
+    """Alpha of structural decals only where there is a feature: the normal leaves the plane or the height
+    leaves the surface (rivets, grooves, grilles, embossed text), grown by a few texels and softened. The
+    flat rest of the footprint wrote the item's roughness over the paint and drew the outline of every
+    decal (24. 9. 2026). keep: texels of info / wear items, whose alpha stays as rendered."""
+    import numpy as np
+    feat = ((np.abs(n[..., 0]) > 0.03) | (np.abs(n[..., 1]) > 0.03) | (np.abs(hgt - 0.5) > 0.003)).astype(np.float32)
+    # the footprint plate's own rim is not a feature: drop what lies within 5 texels of the footprint edge
+    inner = (m_r > 0.5).astype(np.float32)
+    for _ in range(5):
+        inner = np.minimum.reduce([inner, np.roll(inner, 1, 0), np.roll(inner, -1, 0), np.roll(inner, 1, 1), np.roll(inner, -1, 1)])
+    feat *= inner
+    grown = feat.copy()
+    for _ in range(4):
+        grown = np.maximum.reduce([grown, np.roll(grown, 1, 0), np.roll(grown, -1, 0), np.roll(grown, 1, 1), np.roll(grown, -1, 1)])
+    soft = grown.copy()
+    for _ in range(2):
+        soft = (soft + np.roll(soft, 1, 0) + np.roll(soft, -1, 0) + np.roll(soft, 1, 1) + np.roll(soft, -1, 1)) / 5.0
+    return np.where(keep, m_r, np.minimum(m_r, soft))
+
+
+def refine(recipe_path):
+    """Rewrites T_Decals_M / T_Trim_M alpha from the existing maps (feature_alpha) without rendering."""
+    borrow("PIL")
+    import numpy as np
+    from PIL import Image
+    out_dir = os.path.dirname(path(recipe_path))
+    index = json.load(open(os.path.join(out_dir, "decal_library_index.json"), encoding="utf-8"))
+    for prefix in ("T_Decals", "T_Trim"):
+        m = np.array(Image.open(os.path.join(out_dir, prefix + "_M.png"))).astype(np.float32) / 255
+        n = np.array(Image.open(os.path.join(out_dir, prefix + "_N.png"))).astype(np.float32)[..., :3] / 255 * 2 - 1
+        hgt = np.array(Image.open(os.path.join(out_dir, prefix + "_H.png"))).astype(np.float32) / 255
+        if hgt.ndim == 3:
+            hgt = hgt[..., 0]
+        keep = np.zeros(m.shape[:2], bool)
+        if prefix == "T_Decals":
+            H, W = keep.shape
+            for it in index["decals"].values():
+                if it.get("type") in ("info", "wear"):
+                    u0, v0, u1, v1 = it["uv"]
+                    keep[int((1 - v1) * H):int((1 - v0) * H), int(u0 * W):int(u1 * W)] = True
+        m[..., 0] = feature_alpha(m[..., 0], n, hgt, keep)
+        Image.fromarray((np.clip(m, 0, 1) * 255 + 0.5).astype(np.uint8), "RGB").save(os.path.join(out_dir, prefix + "_M.png"))
+    print("DECALLIB refined alpha")
+
+
+def dilate_colour(rgb, mask, steps=48):
     """Colour grown out of the opaque texels into the transparent ones around them. The decal material
     uses straight alpha, so in the smaller mips a half-transparent texel averages the opaque part's colour
     with whatever colour the transparent part had - the light plate colour, which drew a light frame round
@@ -323,24 +442,77 @@ def dilate_colour(rgb, mask, steps=64):
     return out
 
 
-def colour_opacity_mask(items, cells, cell_px, size_px):
-    """Where an item's colour replaces the hull's: its footprint when "paint_color" is set."""
-    borrow("PIL")
-    import numpy as np
-    m = np.zeros((size_px, size_px), np.float32)
-    for it in items:
-        if not it.get("paint_color"):
-            continue
-        c, r = it["cell"]
-        span = it.get("span", [1, 1])
-        m[r * cell_px:(r + span[1]) * cell_px, c * cell_px:(c + span[0]) * cell_px] = 1.0
-    return m
+def item_type(item):
+    return item.get("type") or ("info" if item.get("paint_color") else "structural")
 
 
 def has_color(item):
-    """Does any of the item show its own colour (BC alpha > 0)? The ship builder then adds a second quad
-    with the paint material; items without it need only the normal-only decal."""
-    return bool(item.get("paint_color") or item.get("recesses") or any("color" in p for p in item.get("parts", [])))
+    """Does the item carry its own colour (info and wear items)? The ship builder uses the paint material
+    for those and the normal + AO pair for structural ones."""
+    return item_type(item) in ("info", "wear")
+
+
+def pack(items, sheet_m, pad):
+    """Shelf packing of the items' footprints onto a square sheet (metres, y up). Returns the centre of each
+    item; fails loudly if the sheet is too small (then raise px_per_m's sheet or split the library)."""
+    order = sorted(items, key=lambda it: -it["footprint"][1])
+    x, y_top, row_h, centres = pad, sheet_m - pad, 0.0, {}
+    for it in order:
+        w, h = it["footprint"]
+        if x + w + pad > sheet_m:
+            x, y_top, row_h = pad, y_top - row_h - pad, 0.0
+        if y_top - h < 0:
+            raise RuntimeError("decal sheet full at %s: make the sheet larger" % it["name"])
+        centres[it["name"]] = (x + w / 2, y_top - h / 2)
+        x += w + pad
+        row_h = max(row_h, h)
+    return centres
+
+
+def procedural_wear(maps, alpha, it, rect):
+    """Wear items have no geometry: their colour, alpha and roughness are drawn here, into their rectangle."""
+    borrow("PIL")
+    import numpy as np
+    x0, y0, x1, y1 = rect
+    w, h = x1 - x0, y1 - y0
+    rng = np.random.default_rng(it["procedural"].get("seed", 1))
+    kind = it["procedural"]["kind"]
+    a = np.zeros((h, w), np.float32)
+    col = np.array(it["procedural"].get("color", [0.08, 0.07, 0.06]), np.float32)
+    rough = it["procedural"].get("rough", 0.7)
+    metal = it["procedural"].get("metal", 0.0)
+    if kind == "streak":
+        # drips running down from a seam or grille: a few streaks, strongest at the top, fading down
+        yy = np.linspace(0, 1, h)[:, None]
+        for _ in range(it["procedural"].get("count", 7)):
+            cx, sw = rng.uniform(0.1, 0.9) * w, rng.uniform(0.02, 0.08) * w
+            length = rng.uniform(0.4, 1.0)
+            xs = np.arange(w)[None, :]
+            prof = np.exp(-((xs - cx) / sw) ** 2)
+            fade = np.clip(1 - yy / length, 0, 1) ** 1.5
+            a = np.maximum(a, prof * fade * rng.uniform(0.4, 0.9))
+        a *= 0.85 + 0.15 * rng.random((h, w))
+    elif kind == "scratches":
+        # thin bright scratches through the paint to bare metal
+        for _ in range(it["procedural"].get("count", 40)):
+            px, py = rng.uniform(0, w), rng.uniform(0, h)
+            ang, length = rng.uniform(0, math.pi), rng.uniform(0.05, 0.35) * max(w, h)
+            steps = int(length)
+            for k in range(steps):
+                qx, qy = int(px + math.cos(ang) * k), int(py + math.sin(ang) * k)
+                if 0 <= qx < w and 0 <= qy < h:
+                    a[qy, qx] = max(a[qy, qx], 0.8 * (1 - abs(k / max(steps, 1) - 0.5)))
+    elif kind == "scuff":
+        # a worn band along an edge (top of the rectangle), broken up
+        yy = np.linspace(0, 1, h)[:, None]
+        noise = rng.random((h // 4 + 1, w // 4 + 1))
+        noise = np.kron(noise, np.ones((4, 4)))[:h, :w]
+        a = np.clip((1 - yy * 1.6) * (noise * 1.3 - 0.35), 0, 1)
+    maps["BC"][y0:y1, x0:x1, :3] = np.where(a[..., None] > 0.01, col, maps["BC"][y0:y1, x0:x1, :3])
+    maps["BC"][y0:y1, x0:x1, 3] = a
+    alpha[y0:y1, x0:x1] = a
+    maps["M"][y0:y1, x0:x1, 1] = rough
+    maps["M"][y0:y1, x0:x1, 2] = metal
 
 
 # ----------------------------------------------------------------------------------- main
@@ -356,25 +528,28 @@ def main(argv):
 
     # decal atlas
     d = recipe["decals"]
-    cells, cell_m = d["cells"], d["cell_m"]
-    extent = cells * cell_m
     size = d["size_px"]
+    extent = size / d["px_per_m"]          # fixed texel density: every decal equally sharp
     coll = bpy.data.collections.new("Decals")
     scene.collection.children.link(coll)
+    centres = pack(d["items"], extent, d.get("pad_m", 0.02))
+    wear = []
     for it in d["items"]:
-        c, r = it["cell"]
-        span = it.get("span", [1, 1])
-        centre = ((c + span[0] / 2) * cell_m, extent - (r + span[1] / 2) * cell_m)
-        build_item(it, centre, coll, defaults)
+        cx, cy = centres[it["name"]]
         fw, fh = it["footprint"]
-        cx, cy = centre
+        if it.get("procedural"):
+            px = size / extent
+            wear.append((it, (int((cx - fw / 2) * px), int((extent - cy - fh / 2) * px),
+                              int((cx + fw / 2) * px), int((extent - cy + fh / 2) * px))))
+        else:
+            build_item(it, (cx, cy), coll, defaults)
         index["decals"][it["name"]] = {
             "uv": [(cx - fw / 2) / extent, (cy - fh / 2) / extent, (cx + fw / 2) / extent, (cy + fh / 2) / extent],
-            "size_m": [fw, fh], "purpose": it.get("purpose", ""), "paint_color": bool(it.get("paint_color")),
-            "has_color": has_color(it)}
+            "size_m": [fw, fh], "purpose": it.get("purpose", ""), "type": item_type(it), "has_color": has_color(it),
+            "tags": it.get("tags", [])}
     mats = pass_materials(recipe)
     files = render_passes(scene, mats, size, extent, (extent / 2, extent / 2), out_dir, "T_Decals")
-    result["decals"] = exr_to_png(files, out_dir, "T_Decals", colour_opacity_mask(d["items"], cells, size // cells, size))
+    result["decals"] = exr_to_png(files, out_dir, "T_Decals", wear)
     for o in list(coll.objects):
         bpy.data.objects.remove(o)
 
@@ -392,17 +567,22 @@ def main(argv):
         item["footprint"] = [tw * 1.2, hgt]     # the plate overhangs both ends so the strip tiles
         build_item(item, (tw / 2, cy), coll2, defaults)
         index["trim"][strip["name"]] = {"v": [(cy - hgt / 2) / tw, (cy + hgt / 2) / tw], "height_m": hgt,
-                                         "tile_m": tw, "purpose": strip.get("purpose", ""), "has_color": has_color(strip)}
+                                         "tile_m": tw, "purpose": strip.get("purpose", ""), "type": item_type(strip),
+                                         "has_color": has_color(strip)}
         v += hgt
     files = render_passes(scene, mats, tsize, tw, (tw / 2, tw / 2), out_dir, "T_Trim")
     result["trim"] = exr_to_png(files, out_dir, "T_Trim")
     index["decal_atlas_m"], index["trim_width_m"] = extent, tw
     index["maps"] = {"N": "tangent normal, OpenGL (+Y up): Unreal flip green", "H": "height, 0.5 = surface, +-%.3f m" % recipe["height_range_m"],
-                     "AO": "ambient occlusion", "BC": "sRGB colour x AO, A = colour opacity (labels + parts with their own colour)", "M": "R alpha (normal/AO opacity), G roughness, B metallic"}
+                     "AO": "ambient occlusion", "BC": "sRGB colour x AO, A = colour opacity (info and wear items only)", "M": "R alpha (normal/AO opacity), G roughness, B metallic"}
     with open(os.path.join(out_dir, "decal_library_index.json"), "w", encoding="utf-8") as f:
         json.dump(index, f, indent=1, ensure_ascii=False)
     print("DECALLIB " + json.dumps({"decals": len(index["decals"]), "trim": len(index["trim"]), "files": result}))
 
 
 if __name__ == "__main__":
-    main(sys.argv[sys.argv.index("--") + 1:])
+    args = sys.argv[sys.argv.index("--") + 1:]
+    if args and args[0] == "refine":
+        refine(args[1])       # only the alpha rule changed: no need to render the passes again
+    else:
+        main(args)

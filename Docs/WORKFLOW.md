@@ -800,6 +800,21 @@ snímku.
   pro zrcadlo je `(180 − fáze) mod rozteč`.
 - ag) **Volná kamera snímku je „nakloněná“.** Nad kulatou planetou není osa Z světa „nahoru“ lodi. Kamera
   v prostoru lodi (`camera_local`) bere up vektor lodi.
+- ah) **Kolem každého decalu je vidět obdélník.** Plochá stopa decalu přepisuje drsnost laku (0,32 proti 0,45).
+  Alfa strukturních decalů jen na prvcích (`decal_library.feature_alpha`).
+- ai) **Výklenek vyříznutý do zadní stěny je černá díra, skrz kterou je vidět terén.** Konec loftu je jeden
+  n-úhelník a inset a extrude na něm nevytvoří uzavřené stěny. Na zadní stěnu jen desky (výběr podle obálky plochy,
+  `_box_touches`) a mřížky jako decaly.
+- aj) **Deska na n-úhelníku nevznikla („no faces“).** Předvýběr podle středu plochy minul n-úhelník, jehož střed
+  leží jinde. Vybírat podle překryvu obálky.
+- ak) **Štítek visí přes schod okraje desky.** Kontrola normál ho nepozná, protože obě plochy mají stejný směr.
+  `laid_grid` odmítne i výškový skok přes 12 mm mezi sousedními body.
+- al) **Doprovodné decaly (štítek, madlo u poklopu) se nevytvořily.** Kruhový test překryvu je u protáhlých
+  decalů příliš přísný. Test orientovaných obdélníků (SAT) a doprovodné decaly bez testu.
+- am) **Čísla panelů na svazích a střeše jsou vzhůru nohama.** Rám decalu: na bocích a svazích „nahoru“ po
+  povrchu, na střeše a břiše podle bližší strany lodi.
+- an) **Příkaz bash uvnitř PowerShellu se tiše nespustil** (uvozovky), import pak vzal staré FBX. Build v Blenderu
+  pouštět nástrojem Bash, import a balení nástrojem PowerShell.
 
 ---
 

@@ -1,412 +1,483 @@
 {
- "_comment": "Mesh-decal and trim-sheet library, built by Tools/Blender/decal_library.py (skill ship-pipeline, section decals). Every item is real geometry captured top-down into texture atlases; add an item and rebuild. Units: metres; decal item coordinates relative to its cell centre, x right / y up.",
+ "_comment": "Mesh-decal and trim-sheet library v2, built by Tools/Blender/decal_library.py (skill ship-pipeline 3b3). Typed items (structural: normal/AO/roughness only, take the hull paint; info: own colour; wear: procedural, sparingly), packed at a fixed texel density. Add an item and rebuild. Units: metres, item coordinates relative to its centre, x right / y up.",
  "height_range_m": 0.03,
  "ao_distance_m": 0.03,
  "defaults": {
-  "color": [0.6, 0.57, 0.5],
+  "color": [0.62, 0.6, 0.55],
   "dark": [0.08, 0.08, 0.09],
   "rough": 0.45
  },
  "decals": {
-  "cells": 4,
-  "cell_m": 0.5,
-  "size_px": 2048,
+  "size_px": 4096,
+  "px_per_m": 2048,
+  "pad_m": 0.02,
   "items": [
    {
-    "name": "slot",
-    "purpose": "narrow slot: vents, drain, hinge gaps",
-    "footprint": [0.3, 0.08],
-    "recesses": [
-     {
-      "at": [0, 0],
-      "size": [0.26, 0.03],
-      "depth": 0.015
-     }
-    ],
-    "cell": [0, 0]
-   },
-   {
-    "name": "vent_grille",
-    "purpose": "ventilation grille over a recess (coolers, life support)",
-    "footprint": [0.42, 0.28],
-    "recesses": [
-     {
-      "at": [0, 0],
-      "size": [0.38, 0.24],
-      "depth": 0.022
-     }
-    ],
-    "parts": [
-     {
-      "kind": "box",
-      "at": [0, -0.09],
-      "size": [0.36, 0.012],
-      "h": 0.012,
-      "z": -0.02,
-      "repeat": 7,
-      "step": [0, 0.03],
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.6,
-      "rough": 0.45
-     }
-    ],
-    "cell": [1, 0]
-   },
-   {
     "name": "seam_straight",
+    "type": "structural",
+    "footprint": [0.5, 0.04],
     "purpose": "straight panel seam",
-    "footprint": [0.48, 0.05],
+    "tags": [
+     "seam"
+    ],
     "recesses": [
      {
       "at": [0, 0],
-      "size": [0.48, 0.006],
-      "depth": 0.006
+      "size": [0.5, 0.005],
+      "depth": 0.005
      }
-    ],
-    "cell": [2, 0]
+    ]
    },
    {
     "name": "seam_corner",
+    "type": "structural",
+    "footprint": [0.24, 0.24],
     "purpose": "panel seam corner (L)",
-    "footprint": [0.3, 0.3],
+    "tags": [
+     "seam"
+    ],
     "recesses": [
      {
-      "at": [0.075, 0],
-      "size": [0.156, 0.006],
-      "depth": 0.006
+      "at": [0.06, 0],
+      "size": [0.125, 0.005],
+      "depth": 0.005
      },
      {
-      "at": [0, 0.075],
-      "size": [0.006, 0.156],
-      "depth": 0.006
+      "at": [0, 0.06],
+      "size": [0.005, 0.125],
+      "depth": 0.005
      }
-    ],
-    "cell": [3, 0]
+    ]
    },
    {
     "name": "seam_t",
+    "type": "structural",
+    "footprint": [0.24, 0.24],
     "purpose": "panel seam T junction",
-    "footprint": [0.3, 0.3],
+    "tags": [
+     "seam"
+    ],
     "recesses": [
      {
       "at": [0, 0],
-      "size": [0.3, 0.006],
-      "depth": 0.006
+      "size": [0.24, 0.005],
+      "depth": 0.005
      },
      {
-      "at": [0, -0.075],
-      "size": [0.006, 0.15],
-      "depth": 0.006
+      "at": [0, -0.06],
+      "size": [0.005, 0.12],
+      "depth": 0.005
+     }
+    ]
+   },
+   {
+    "name": "slot_s",
+    "type": "structural",
+    "footprint": [0.2, 0.05],
+    "purpose": "short slot (drain, hinge gap)",
+    "tags": [
+     "slot"
+    ],
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [0.16, 0.018],
+      "depth": 0.012
      }
     ],
-    "cell": [0, 1]
+    "corner_screws": {
+     "inset": 0.012,
+     "r": 0.004
+    }
+   },
+   {
+    "name": "slot_l",
+    "type": "structural",
+    "footprint": [0.4, 0.06],
+    "purpose": "long slot (vent, gap)",
+    "tags": [
+     "slot"
+    ],
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [0.36, 0.022],
+      "depth": 0.014
+     }
+    ]
+   },
+   {
+    "name": "rivet_row_4",
+    "type": "structural",
+    "footprint": [0.2, 0.03],
+    "purpose": "4 rivets, 5 cm",
+    "tags": [
+     "rivets"
+    ],
+    "parts": [
+     {
+      "kind": "rivet",
+      "at": [-0.07500000000000001, 0.0],
+      "r": 0.0045,
+      "h": 0.003,
+      "repeat": 4,
+      "step": [0.05, 0],
+      "rough": 0.4
+     }
+    ]
+   },
+   {
+    "name": "rivet_row_8",
+    "type": "structural",
+    "footprint": [0.4, 0.03],
+    "purpose": "8 rivets, 5 cm",
+    "tags": [
+     "rivets"
+    ],
+    "parts": [
+     {
+      "kind": "rivet",
+      "at": [-0.17500000000000002, 0.0],
+      "r": 0.0045,
+      "h": 0.003,
+      "repeat": 8,
+      "step": [0.05, 0],
+      "rough": 0.4
+     }
+    ]
+   },
+   {
+    "name": "rivet_row_16",
+    "type": "structural",
+    "footprint": [0.8, 0.03],
+    "purpose": "16 rivets, 5 cm",
+    "tags": [
+     "rivets"
+    ],
+    "parts": [
+     {
+      "kind": "rivet",
+      "at": [-0.375, 0.0],
+      "r": 0.0045,
+      "h": 0.003,
+      "repeat": 16,
+      "step": [0.05, 0],
+      "rough": 0.4
+     }
+    ]
+   },
+   {
+    "name": "rivet_double_8",
+    "type": "structural",
+    "footprint": [0.4, 0.05],
+    "purpose": "double rivet row, staggered",
+    "tags": [
+     "rivets"
+    ],
+    "parts": [
+     {
+      "kind": "rivet",
+      "at": [-0.17500000000000002, 0.012],
+      "r": 0.0045,
+      "h": 0.003,
+      "repeat": 8,
+      "step": [0.05, 0],
+      "rough": 0.4
+     },
+     {
+      "kind": "rivet",
+      "at": [-0.15, -0.012],
+      "r": 0.0045,
+      "h": 0.003,
+      "repeat": 7,
+      "step": [0.05, 0]
+     }
+    ]
+   },
+   {
+    "name": "bolt_row_4",
+    "type": "structural",
+    "footprint": [0.42, 0.05],
+    "purpose": "4 hex bolts with washers (plate edges)",
+    "tags": [
+     "bolts"
+    ],
+    "parts": [
+     {
+      "kind": "cyl",
+      "at": [-0.15, 0],
+      "r": 0.013,
+      "h": 0.002,
+      "repeat": 4,
+      "step": [0.1, 0]
+     },
+     {
+      "kind": "hex",
+      "at": [-0.15, 0],
+      "r": 0.009,
+      "h": 0.006,
+      "z": 0.002,
+      "repeat": 4,
+      "step": [0.1, 0]
+     }
+    ]
    },
    {
     "name": "bolt",
-    "purpose": "single hex bolt with washer",
+    "type": "structural",
     "footprint": [0.05, 0.05],
+    "purpose": "single hex bolt with washer",
+    "tags": [
+     "bolts"
+    ],
     "parts": [
      {
       "kind": "cyl",
       "at": [0, 0],
       "r": 0.018,
-      "h": 0.003,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.4
+      "h": 0.003
      },
      {
       "kind": "hex",
       "at": [0, 0],
       "r": 0.011,
       "h": 0.007,
-      "z": 0.003,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
+      "z": 0.003
      }
-    ],
-    "cell": [1, 1]
-   },
-   {
-    "name": "bolt_row",
-    "purpose": "four bolts in a row (plate edges)",
-    "footprint": [0.42, 0.05],
-    "parts": [
-     {
-      "kind": "hex",
-      "at": [-0.15, 0],
-      "r": 0.009,
-      "h": 0.006,
-      "repeat": 4,
-      "step": [0.1, 0],
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     }
-    ],
-    "cell": [2, 1]
+    ]
    },
    {
     "name": "hatch",
-    "purpose": "service hatch: seam frame, hinge, latch, bolts",
-    "footprint": [0.42, 0.32],
+    "type": "structural",
+    "footprint": [0.44, 0.34],
+    "purpose": "service hatch: seam frame, hinge, latch, corner screws, embossed marking",
+    "tags": [
+     "hatch"
+    ],
     "recesses": [
      {
-      "at": [0, 0.14],
-      "size": [0.4, 0.006],
-      "depth": 0.006
+      "at": [0, 0.15],
+      "size": [0.42, 0.005],
+      "depth": 0.005
      },
      {
-      "at": [0, -0.14],
-      "size": [0.4, 0.006],
-      "depth": 0.006
+      "at": [0, -0.15],
+      "size": [0.42, 0.005],
+      "depth": 0.005
      },
      {
-      "at": [0.197, 0],
-      "size": [0.006, 0.286],
-      "depth": 0.006
+      "at": [0.207, 0],
+      "size": [0.005, 0.305],
+      "depth": 0.005
      },
      {
-      "at": [-0.197, 0],
-      "size": [0.006, 0.286],
+      "at": [-0.207, 0],
+      "size": [0.005, 0.305],
+      "depth": 0.005
+     },
+     {
+      "at": [0.15, 0.0],
+      "size": [0.06, 0.035],
       "depth": 0.006
      }
     ],
     "parts": [
      {
       "kind": "bar_y",
-      "at": [-0.17, 0],
-      "r": 0.008,
-      "size": [0, 0.2],
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.6
+      "at": [-0.18, 0],
+      "r": 0.007,
+      "size": [0, 0.22]
      },
      {
       "kind": "box",
       "at": [0.15, 0],
-      "size": [0.05, 0.03],
-      "h": 0.008,
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.4
+      "size": [0.04, 0.02],
+      "h": 0.005,
+      "z": -0.006
      },
      {
-      "kind": "hex",
-      "at": [-0.17, -0.11],
-      "r": 0.008,
-      "h": 0.005,
-      "z": 0.0,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     },
-     {
-      "kind": "hex",
-      "at": [-0.17, 0.11],
-      "r": 0.008,
-      "h": 0.005,
-      "z": 0.0,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     },
-     {
-      "kind": "hex",
-      "at": [0.17, -0.11],
-      "r": 0.008,
-      "h": 0.005,
-      "z": 0.0,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     },
-     {
-      "kind": "hex",
-      "at": [0.17, 0.11],
-      "r": 0.008,
-      "h": 0.005,
-      "z": 0.0,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
+      "kind": "text",
+      "body": "ACCESS 04",
+      "size": 0.03,
+      "at": [0.0, -0.1],
+      "font": "mono",
+      "h": 0.0008,
+      "rot": 0,
+      "z": 0.0
      }
     ],
-    "cell": [3, 1]
+    "corner_screws": {
+     "inset": 0.03,
+     "r": 0.006
+    }
    },
    {
-    "name": "handle",
-    "purpose": "grab handle for EVA and ground crew",
-    "footprint": [0.26, 0.08],
-    "parts": [
+    "name": "hatch_small",
+    "type": "structural",
+    "footprint": [0.26, 0.2],
+    "purpose": "small inspection hatch",
+    "tags": [
+     "hatch"
+    ],
+    "recesses": [
      {
-      "kind": "box",
-      "at": [-0.09, 0],
-      "size": [0.02, 0.02],
-      "h": 0.03,
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.5
+      "at": [0, 0.085],
+      "size": [0.24, 0.004],
+      "depth": 0.004
      },
      {
-      "kind": "box",
-      "at": [0.09, 0],
-      "size": [0.02, 0.02],
-      "h": 0.03,
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.5
+      "at": [0, -0.085],
+      "size": [0.24, 0.004],
+      "depth": 0.004
      },
      {
-      "kind": "bar",
-      "at": [0, 0],
-      "r": 0.009,
-      "size": [0.2, 0],
-      "z": 0.025,
-      "color": [0.75, 0.55, 0.05],
-      "metal": 0.0,
-      "rough": 0.5
+      "at": [0.118, 0],
+      "size": [0.004, 0.17],
+      "depth": 0.004
+     },
+     {
+      "at": [-0.118, 0],
+      "size": [0.004, 0.17],
+      "depth": 0.004
      }
     ],
-    "cell": [0, 2]
-   },
-   {
-    "name": "warning_label",
-    "purpose": "hazard plate (engine, intake, landing gear)",
-    "footprint": [0.3, 0.12],
-    "paint_color": true,
-    "color": [0.75, 0.55, 0.05],
-    "parts": [
-     {
-      "kind": "box",
-      "at": [0, 0],
-      "size": [0.3, 0.12],
-      "h": 0.0015,
-      "color": [0.75, 0.55, 0.05]
-     },
-     {
-      "kind": "box",
-      "at": [-0.12, 0],
-      "size": [0.03, 0.12],
-      "h": 0.002,
-      "repeat": 5,
-      "step": [0.06, 0],
-      "color": [0.02, 0.02, 0.02]
-     }
-    ],
-    "cell": [1, 2]
+    "corner_screws": {
+     "inset": 0.022,
+     "r": 0.005
+    }
    },
    {
     "name": "recessed_panel",
-    "purpose": "recessed panel with corner bolts",
+    "type": "structural",
     "footprint": [0.44, 0.3],
+    "purpose": "recessed panel with corner bolts",
+    "tags": [
+     "panel"
+    ],
     "recesses": [
      {
       "at": [0, 0],
       "size": [0.4, 0.26],
-      "depth": 0.01,
-      "color": [0.3, 0.3, 0.3]
+      "depth": 0.008
      }
     ],
-    "parts": [
-     {
-      "kind": "hex",
-      "at": [-0.17, -0.1],
-      "r": 0.008,
-      "h": 0.005,
-      "z": -0.01,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     },
-     {
-      "kind": "hex",
-      "at": [-0.17, 0.1],
-      "r": 0.008,
-      "h": 0.005,
-      "z": -0.01,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     },
-     {
-      "kind": "hex",
-      "at": [0.17, -0.1],
-      "r": 0.008,
-      "h": 0.005,
-      "z": -0.01,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     },
-     {
-      "kind": "hex",
-      "at": [0.17, 0.1],
-      "r": 0.008,
-      "h": 0.005,
-      "z": -0.01,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     }
-    ],
-    "cell": [2, 2]
+    "corner_screws": {
+     "inset": 0.035,
+     "r": 0.007,
+     "z": -0.008
+    }
    },
    {
     "name": "access_panel",
-    "purpose": "raised access panel with screws",
+    "type": "structural",
     "footprint": [0.34, 0.24],
+    "purpose": "raised access panel with screws and micro bevel",
+    "tags": [
+     "panel",
+     "hatch"
+    ],
     "parts": [
      {
       "kind": "box",
       "at": [0, 0],
       "size": [0.3, 0.2],
-      "h": 0.006
-     },
-     {
-      "kind": "hex",
-      "at": [-0.13, -0.08],
-      "r": 0.008,
       "h": 0.005,
-      "z": 0.006,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     },
-     {
-      "kind": "hex",
-      "at": [-0.13, 0.08],
-      "r": 0.008,
-      "h": 0.005,
-      "z": 0.006,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     },
-     {
-      "kind": "hex",
-      "at": [0.13, -0.08],
-      "r": 0.008,
-      "h": 0.005,
-      "z": 0.006,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     },
-     {
-      "kind": "hex",
-      "at": [0.13, 0.08],
-      "r": 0.008,
-      "h": 0.005,
-      "z": 0.006,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
+      "bevel": 0.002
      }
     ],
-    "cell": [3, 2]
+    "corner_screws": {
+     "inset": 0.035,
+     "r": 0.006,
+     "z": 0.005
+    }
+   },
+   {
+    "name": "vent_grille",
+    "type": "structural",
+    "footprint": [0.42, 0.28],
+    "purpose": "ventilation grille over a recess, framed",
+    "tags": [
+     "grille"
+    ],
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [0.36, 0.22],
+      "depth": 0.022
+     }
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, -0.084],
+      "size": [0.35, 0.012],
+      "h": 0.012,
+      "z": -0.02,
+      "repeat": 7,
+      "step": [0, 0.028]
+     }
+    ],
+    "corner_screws": {
+     "inset": 0.016,
+     "r": 0.005
+    }
+   },
+   {
+    "name": "vent_small",
+    "type": "structural",
+    "footprint": [0.2, 0.14],
+    "purpose": "small vent",
+    "tags": [
+     "grille"
+    ],
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [0.16, 0.1],
+      "depth": 0.015
+     }
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, -0.036],
+      "size": [0.155, 0.008],
+      "h": 0.008,
+      "z": -0.013,
+      "repeat": 5,
+      "step": [0, 0.018]
+     }
+    ]
+   },
+   {
+    "name": "louvers",
+    "type": "structural",
+    "footprint": [0.3, 0.22],
+    "purpose": "raised exhaust louvers",
+    "tags": [
+     "grille"
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, -0.075],
+      "size": [0.26, 0.018],
+      "h": 0.012,
+      "repeat": 6,
+      "step": [0, 0.03],
+      "bevel": 0.002
+     }
+    ]
    },
    {
     "name": "fuel_cap",
-    "purpose": "fuel / coolant filler cap",
+    "type": "structural",
     "footprint": [0.2, 0.2],
+    "purpose": "filler cap in a recess",
+    "tags": [
+     "cap",
+     "service"
+    ],
     "recesses": [
      {
       "at": [0, 0],
@@ -422,9 +493,6 @@
       "r": 0.062,
       "h": 0.01,
       "z": -0.012,
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.3,
       "seg": 32
      },
      {
@@ -432,106 +500,1191 @@
       "at": [0, 0],
       "size": [0.08, 0.014],
       "h": 0.008,
-      "z": -0.002,
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.5
+      "z": -0.002
+     },
+     {
+      "kind": "hex",
+      "at": [0.07, 0.07],
+      "r": 0.006,
+      "h": 0.004
+     },
+     {
+      "kind": "hex",
+      "at": [-0.07, -0.07],
+      "r": 0.006,
+      "h": 0.004
      }
-    ],
-    "cell": [0, 3]
+    ]
    },
    {
-    "name": "louvers",
-    "purpose": "raised exhaust louvers",
-    "footprint": [0.3, 0.22],
-    "parts": [
+    "name": "socket",
+    "type": "structural",
+    "footprint": [0.12, 0.08],
+    "purpose": "service connector port with pins",
+    "tags": [
+     "socket",
+     "service"
+    ],
+    "recesses": [
      {
-      "kind": "box",
-      "at": [0, -0.075],
-      "size": [0.26, 0.018],
-      "h": 0.012,
-      "repeat": 6,
-      "step": [0, 0.03],
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.5
+      "at": [0, 0],
+      "size": [0.09, 0.05],
+      "depth": 0.01
      }
     ],
-    "cell": [1, 3]
+    "parts": [
+     {
+      "kind": "cyl",
+      "at": [-0.025, 0],
+      "r": 0.006,
+      "h": 0.006,
+      "z": -0.01,
+      "repeat": 3,
+      "step": [0.025, 0]
+     }
+    ]
+   },
+   {
+    "name": "socket_round",
+    "type": "structural",
+    "footprint": [0.1, 0.1],
+    "purpose": "round umbilical port",
+    "tags": [
+     "socket",
+     "service"
+    ],
+    "parts": [
+     {
+      "kind": "ring",
+      "at": [0, 0],
+      "r": 0.04,
+      "h": 0.006,
+      "inner": 0.7
+     },
+     {
+      "kind": "cyl",
+      "at": [0, 0],
+      "r": 0.015,
+      "h": 0.004
+     }
+    ]
+   },
+   {
+    "name": "lift_point",
+    "type": "structural",
+    "footprint": [0.14, 0.14],
+    "purpose": "lifting eye with bolts",
+    "tags": [
+     "service"
+    ],
+    "parts": [
+     {
+      "kind": "ring",
+      "at": [0, 0],
+      "r": 0.045,
+      "h": 0.01,
+      "inner": 0.55
+     },
+     {
+      "kind": "hex",
+      "at": [0.055, 0.055],
+      "r": 0.006,
+      "h": 0.004
+     },
+     {
+      "kind": "hex",
+      "at": [-0.055, 0.055],
+      "r": 0.006,
+      "h": 0.004
+     },
+     {
+      "kind": "hex",
+      "at": [0.055, -0.055],
+      "r": 0.006,
+      "h": 0.004
+     },
+     {
+      "kind": "hex",
+      "at": [-0.055, -0.055],
+      "r": 0.006,
+      "h": 0.004
+     }
+    ]
    },
    {
     "name": "light_housing",
-    "purpose": "navigation / flood light housing",
+    "type": "structural",
     "footprint": [0.16, 0.08],
+    "purpose": "light housing frame",
+    "tags": [
+     "light"
+    ],
     "parts": [
      {
       "kind": "box",
       "at": [0, 0],
       "size": [0.14, 0.06],
-      "h": 0.012,
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.4
-     },
-     {
-      "kind": "box",
-      "at": [0, 0],
-      "size": [0.1, 0.03],
-      "h": 0.003,
-      "z": 0.012,
-      "color": [0.9, 0.9, 0.85],
-      "rough": 0.1
+      "h": 0.01
      }
     ],
-    "cell": [2, 3]
+    "corner_screws": {
+     "inset": 0.012,
+     "r": 0.004,
+     "z": 0.01
+    }
    },
    {
     "name": "cable_run",
-    "purpose": "cable run with clamps along a seam",
+    "type": "structural",
     "footprint": [0.48, 0.1],
+    "purpose": "cable run with clamps",
+    "tags": [
+     "cable"
+    ],
     "parts": [
      {
       "kind": "bar",
       "at": [0, -0.02],
-      "r": 0.012,
-      "size": [0.46, 0],
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.2,
-      "rough": 0.7
+      "r": 0.011,
+      "size": [0.46, 0]
      },
      {
       "kind": "bar",
       "at": [0, 0.02],
       "r": 0.008,
-      "size": [0.46, 0],
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.2,
-      "rough": 0.7
+      "size": [0.46, 0]
      },
      {
       "kind": "box",
       "at": [-0.18, 0],
       "size": [0.02, 0.08],
-      "h": 0.03,
+      "h": 0.028,
       "repeat": 4,
-      "step": [0.12, 0],
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0
+      "step": [0.12, 0]
      }
+    ]
+   },
+   {
+    "name": "warning_label",
+    "type": "info",
+    "footprint": [0.3, 0.12],
+    "purpose": "hazard plate, yellow and black stripes",
+    "tags": [
+     "warning"
     ],
-    "cell": [3, 3]
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.3, 0.12],
+      "h": 0.0012,
+      "color": [0.78, 0.58, 0.06]
+     },
+     {
+      "kind": "poly",
+      "at": [-0.09, 0],
+      "points": [
+       [0, -0.06],
+       [0.03, -0.06],
+       [0.0, 0.06],
+       [-0.03, 0.06]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     },
+     {
+      "kind": "poly",
+      "at": [-0.03, 0],
+      "points": [
+       [0, -0.06],
+       [0.03, -0.06],
+       [0.0, 0.06],
+       [-0.03, 0.06]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     },
+     {
+      "kind": "poly",
+      "at": [0.03, 0],
+      "points": [
+       [0, -0.06],
+       [0.03, -0.06],
+       [0.0, 0.06],
+       [-0.03, 0.06]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     },
+     {
+      "kind": "poly",
+      "at": [0.09, 0],
+      "points": [
+       [0, -0.06],
+       [0.03, -0.06],
+       [0.0, 0.06],
+       [-0.03, 0.06]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     }
+    ]
+   },
+   {
+    "name": "hazard_stripe",
+    "type": "info",
+    "footprint": [0.5, 0.06],
+    "purpose": "hazard stripe band (ramp edge, gear bay)",
+    "tags": [
+     "warning"
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.5, 0.06],
+      "h": 0.0012,
+      "color": [0.78, 0.58, 0.06]
+     },
+     {
+      "kind": "poly",
+      "at": [-0.2, 0],
+      "points": [
+       [0, -0.03],
+       [0.025, -0.03],
+       [0.0, 0.03],
+       [-0.025, 0.03]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     },
+     {
+      "kind": "poly",
+      "at": [-0.15, 0],
+      "points": [
+       [0, -0.03],
+       [0.025, -0.03],
+       [0.0, 0.03],
+       [-0.025, 0.03]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     },
+     {
+      "kind": "poly",
+      "at": [-0.09999999999999998, 0],
+      "points": [
+       [0, -0.03],
+       [0.025, -0.03],
+       [0.0, 0.03],
+       [-0.025, 0.03]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     },
+     {
+      "kind": "poly",
+      "at": [-0.04999999999999999, 0],
+      "points": [
+       [0, -0.03],
+       [0.025, -0.03],
+       [0.0, 0.03],
+       [-0.025, 0.03]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     },
+     {
+      "kind": "poly",
+      "at": [0.0, 0],
+      "points": [
+       [0, -0.03],
+       [0.025, -0.03],
+       [0.0, 0.03],
+       [-0.025, 0.03]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     },
+     {
+      "kind": "poly",
+      "at": [0.050000000000000044, 0],
+      "points": [
+       [0, -0.03],
+       [0.025, -0.03],
+       [0.0, 0.03],
+       [-0.025, 0.03]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     },
+     {
+      "kind": "poly",
+      "at": [0.10000000000000003, 0],
+      "points": [
+       [0, -0.03],
+       [0.025, -0.03],
+       [0.0, 0.03],
+       [-0.025, 0.03]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     },
+     {
+      "kind": "poly",
+      "at": [0.15000000000000002, 0],
+      "points": [
+       [0, -0.03],
+       [0.025, -0.03],
+       [0.0, 0.03],
+       [-0.025, 0.03]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     },
+     {
+      "kind": "poly",
+      "at": [0.2, 0],
+      "points": [
+       [0, -0.03],
+       [0.025, -0.03],
+       [0.0, 0.03],
+       [-0.025, 0.03]
+      ],
+      "h": 0.0015,
+      "color": [0.02, 0.02, 0.022]
+     }
+    ]
+   },
+   {
+    "name": "stencil_nostep",
+    "type": "info",
+    "footprint": [0.3, 0.07],
+    "purpose": "NO STEP stencil",
+    "tags": [
+     "stencil",
+     "walk"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "NO STEP",
+      "size": 0.055,
+      "at": [0, 0],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "stencil_thrust",
+    "type": "info",
+    "footprint": [0.44, 0.07],
+    "purpose": "CAUTION THRUST stencil by the engines",
+    "tags": [
+     "stencil",
+     "engine"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "CAUTION  THRUST",
+      "size": 0.05,
+      "at": [0, 0],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.62, 0.08, 0.05]
+     }
+    ]
+   },
+   {
+    "name": "stencil_lift",
+    "type": "info",
+    "footprint": [0.16, 0.18],
+    "purpose": "LIFT point arrow",
+    "tags": [
+     "stencil",
+     "service"
+    ],
+    "parts": [
+     {
+      "kind": "poly",
+      "at": [0, 0.03],
+      "points": [
+       [-0.04, -0.01],
+       [0, 0.05],
+       [0.04, -0.01],
+       [0.015, -0.01],
+       [0.015, -0.05],
+       [-0.015, -0.05],
+       [-0.015, -0.01]
+      ],
+      "h": 0.0012,
+      "color": [0.3, 0.3, 0.31]
+     },
+     {
+      "kind": "text",
+      "body": "LIFT",
+      "size": 0.04,
+      "at": [0, -0.06],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "arrow_access",
+    "type": "info",
+    "footprint": [0.24, 0.06],
+    "purpose": "ACCESS arrow",
+    "tags": [
+     "stencil",
+     "service"
+    ],
+    "parts": [
+     {
+      "kind": "poly",
+      "at": [0.08, 0],
+      "points": [
+       [-0.02, -0.02],
+       [0.03, 0],
+       [-0.02, 0.02]
+      ],
+      "h": 0.0012,
+      "color": [0.3, 0.3, 0.31]
+     },
+     {
+      "kind": "text",
+      "body": "ACCESS",
+      "size": 0.04,
+      "at": [-0.03, 0],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "label_coolant",
+    "type": "info",
+    "footprint": [0.2, 0.07],
+    "purpose": "service label: coolant",
+    "tags": [
+     "label",
+     "service"
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.2, 0.07],
+      "h": 0.001,
+      "color": [0.06, 0.062, 0.068]
+     },
+     {
+      "kind": "text",
+      "body": "COOLANT 12 BAR",
+      "size": 0.022,
+      "at": [0, 0.01],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [0.82, 0.82, 0.8]
+     },
+     {
+      "kind": "text",
+      "body": "HF-CL 03",
+      "size": 0.016,
+      "at": [0, -0.018],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [0.82, 0.82, 0.8]
+     }
+    ]
+   },
+   {
+    "name": "label_fuel",
+    "type": "info",
+    "footprint": [0.2, 0.07],
+    "purpose": "service label: quantum fuel",
+    "tags": [
+     "label",
+     "service",
+     "fuel"
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.2, 0.07],
+      "h": 0.001,
+      "color": [0.06, 0.062, 0.068]
+     },
+     {
+      "kind": "text",
+      "body": "QT FUEL  FILL",
+      "size": 0.022,
+      "at": [0, 0.01],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [0.78, 0.58, 0.06]
+     },
+     {
+      "kind": "text",
+      "body": "MAX 4.2 kPa",
+      "size": 0.016,
+      "at": [0, -0.018],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [0.82, 0.82, 0.8]
+     }
+    ]
+   },
+   {
+    "name": "label_power",
+    "type": "info",
+    "footprint": [0.2, 0.07],
+    "purpose": "service label: power",
+    "tags": [
+     "label",
+     "service"
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.2, 0.07],
+      "h": 0.001,
+      "color": [0.06, 0.062, 0.068]
+     },
+     {
+      "kind": "text",
+      "body": "PWR 48V DC",
+      "size": 0.024,
+      "at": [0, 0.01],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [0.82, 0.82, 0.8]
+     },
+     {
+      "kind": "text",
+      "body": "ISOLATE FIRST",
+      "size": 0.015,
+      "at": [0, -0.018],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [0.78, 0.58, 0.06]
+     }
+    ]
+   },
+   {
+    "name": "label_o2",
+    "type": "info",
+    "footprint": [0.16, 0.06],
+    "purpose": "service label: life support",
+    "tags": [
+     "label",
+     "service"
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.16, 0.06],
+      "h": 0.001,
+      "color": [0.06, 0.062, 0.068]
+     },
+     {
+      "kind": "text",
+      "body": "O2 / N2",
+      "size": 0.024,
+      "at": [0, 0.006],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [0.82, 0.82, 0.8]
+     },
+     {
+      "kind": "text",
+      "body": "LS-02",
+      "size": 0.014,
+      "at": [0, -0.017],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [0.82, 0.82, 0.8]
+     }
+    ]
+   },
+   {
+    "name": "label_hydraulic",
+    "type": "info",
+    "footprint": [0.2, 0.07],
+    "purpose": "service label: hydraulics",
+    "tags": [
+     "label",
+     "service"
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.2, 0.07],
+      "h": 0.001,
+      "color": [0.06, 0.062, 0.068]
+     },
+     {
+      "kind": "text",
+      "body": "HYDRAULIC",
+      "size": 0.024,
+      "at": [0, 0.01],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [0.82, 0.82, 0.8]
+     },
+     {
+      "kind": "text",
+      "body": "210 BAR  RAMP",
+      "size": 0.015,
+      "at": [0, -0.018],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [0.82, 0.82, 0.8]
+     }
+    ]
+   },
+   {
+    "name": "reg_number",
+    "type": "info",
+    "footprint": [0.6, 0.12],
+    "purpose": "registration",
+    "tags": [
+     "stencil",
+     "reg"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "HF-0417",
+      "size": 0.11,
+      "at": [0, 0],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "maker",
+    "type": "info",
+    "footprint": [0.6, 0.05],
+    "purpose": "maker's mark",
+    "tags": [
+     "stencil"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "HALCYON FREIGHTWORKS",
+      "size": 0.045,
+      "at": [0, 0],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "ship_name",
+    "type": "info",
+    "footprint": [0.5, 0.07],
+    "purpose": "ship class",
+    "tags": [
+     "stencil"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "WAYFARER",
+      "size": 0.07,
+      "at": [0, 0],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "handle",
+    "type": "info",
+    "footprint": [0.26, 0.08],
+    "purpose": "grab handle, yellow grip",
+    "tags": [
+     "handle"
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [-0.09, 0],
+      "size": [0.02, 0.02],
+      "h": 0.028,
+      "color": [0.06, 0.062, 0.068]
+     },
+     {
+      "kind": "box",
+      "at": [0.09, 0],
+      "size": [0.02, 0.02],
+      "h": 0.028,
+      "color": [0.06, 0.062, 0.068]
+     },
+     {
+      "kind": "bar",
+      "at": [0, 0],
+      "r": 0.009,
+      "size": [0.2, 0],
+      "z": 0.022,
+      "color": [0.78, 0.58, 0.06]
+     }
+    ]
+   },
+   {
+    "name": "panel_A12",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "A12",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "panel_A14",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "A14",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "panel_B03",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "B03",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "panel_B07",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "B07",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "panel_C21",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "C21",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "panel_C22",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "C22",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "panel_D05",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "D05",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "panel_E11",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "E11",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "panel_E16",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "E16",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "panel_F02",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "F02",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "panel_G08",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "G08",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "panel_H19",
+    "type": "info",
+    "footprint": [0.14, 0.05],
+    "purpose": "panel number",
+    "tags": [
+     "panelno"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "H19",
+      "size": 0.042,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [0.3, 0.3, 0.31]
+     }
+    ]
+   },
+   {
+    "name": "streak_drip",
+    "type": "wear",
+    "footprint": [0.14, 0.42],
+    "purpose": "dirt streaks running down from a grille or seam",
+    "procedural": {
+     "kind": "streak",
+     "count": 7,
+     "seed": 3,
+     "color": [0.07, 0.06, 0.05],
+     "rough": 0.75
+    },
+    "tags": [
+     "streak"
+    ]
+   },
+   {
+    "name": "streak_short",
+    "type": "wear",
+    "footprint": [0.1, 0.22],
+    "purpose": "short drip below a small vent",
+    "procedural": {
+     "kind": "streak",
+     "count": 4,
+     "seed": 9,
+     "color": [0.07, 0.06, 0.05],
+     "rough": 0.75
+    },
+    "tags": [
+     "streak"
+    ]
+   },
+   {
+    "name": "scratches",
+    "type": "wear",
+    "footprint": [0.3, 0.3],
+    "purpose": "fine scratches to bare metal (step areas, handles)",
+    "procedural": {
+     "kind": "scratches",
+     "count": 45,
+     "seed": 5,
+     "color": [0.62, 0.62, 0.64],
+     "rough": 0.3,
+     "metal": 1.0
+    },
+    "tags": [
+     "scratch"
+    ]
+   },
+   {
+    "name": "edge_scuff",
+    "type": "wear",
+    "footprint": [0.4, 0.05],
+    "purpose": "worn band along an exposed edge",
+    "procedural": {
+     "kind": "scuff",
+     "seed": 7,
+     "color": [0.55, 0.55, 0.56],
+     "rough": 0.35,
+     "metal": 1.0
+    },
+    "tags": [
+     "scuff"
+    ]
    }
   ]
  },
  "trim": {
   "width_m": 2.0,
-  "size_px": 2048,
+  "size_px": 4096,
   "strips": [
    {
+    "name": "seam_rivets",
+    "purpose": "rivet row either side of a panel seam, clear in the middle",
+    "height_m": 0.07,
+    "parts": [
+     {
+      "kind": "rivet",
+      "at": [-0.975, 0.022],
+      "r": 0.004,
+      "h": 0.003,
+      "repeat": 40,
+      "step": [0.05, 0]
+     },
+     {
+      "kind": "rivet",
+      "at": [-0.95, -0.022],
+      "r": 0.004,
+      "h": 0.003,
+      "repeat": 40,
+      "step": [0.05, 0]
+     }
+    ]
+   },
+   {
+    "name": "rivet_line",
+    "purpose": "single rivet row every 5 cm (plate edges)",
+    "height_m": 0.03,
+    "parts": [
+     {
+      "kind": "rivet",
+      "at": [-0.975, 0],
+      "r": 0.0042,
+      "h": 0.003,
+      "repeat": 40,
+      "step": [0.05, 0]
+     }
+    ]
+   },
+   {
+    "name": "bolt_row",
+    "purpose": "row of hex bolts every 10 cm",
+    "height_m": 0.05,
+    "parts": [
+     {
+      "kind": "cyl",
+      "at": [-0.95, 0],
+      "r": 0.012,
+      "h": 0.002,
+      "repeat": 20,
+      "step": [0.1, 0]
+     },
+     {
+      "kind": "hex",
+      "at": [-0.95, 0],
+      "r": 0.008,
+      "h": 0.006,
+      "z": 0.002,
+      "repeat": 20,
+      "step": [0.1, 0]
+     }
+    ]
+   },
+   {
     "name": "panel_lip",
-    "purpose": "raised plate lip with a groove below (plate edges)",
+    "purpose": "raised plate lip with a groove below",
     "height_m": 0.06,
     "recesses": [
      {
       "at": [0, -0.017],
-      "size": [2.4, 0.006],
+      "size": [2.4, 0.005],
       "depth": 0.005
      }
     ],
@@ -540,61 +1693,28 @@
       "kind": "box",
       "at": [0, 0.01],
       "size": [2.4, 0.03],
-      "h": 0.006
+      "h": 0.005
      }
     ]
    },
    {
     "name": "ribbing",
-    "purpose": "structural ribbing (bays, frames)",
+    "purpose": "structural ribbing",
     "height_m": 0.12,
     "parts": [
      {
       "kind": "box",
-      "at": [-1.175, 0],
+      "at": [-0.975, 0],
       "size": [0.02, 0.1],
       "h": 0.01,
-      "repeat": 48,
+      "repeat": 40,
       "step": [0.05, 0]
      }
     ]
    },
    {
-    "name": "bolt_row",
-    "purpose": "row of bolts every 5 cm",
-    "height_m": 0.05,
-    "parts": [
-     {
-      "kind": "hex",
-      "at": [-1.175, 0],
-      "r": 0.008,
-      "h": 0.006,
-      "repeat": 48,
-      "step": [0.05, 0],
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0,
-      "rough": 0.35
-     }
-    ]
-   },
-   {
-    "name": "rail",
-    "purpose": "round rail / pipe",
-    "height_m": 0.05,
-    "parts": [
-     {
-      "kind": "bar",
-      "at": [0, 0],
-      "r": 0.012,
-      "size": [2.4, 0],
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.6
-     }
-    ]
-   },
-   {
     "name": "studs_band",
-    "purpose": "band with studs (armour strap)",
+    "purpose": "armour strap with studs",
     "height_m": 0.1,
     "parts": [
      {
@@ -604,26 +1724,62 @@
       "h": 0.004
      },
      {
-      "kind": "cyl",
-      "at": [-1.175, 0.02],
-      "r": 0.009,
+      "kind": "rivet",
+      "at": [-0.975, 0.022],
+      "r": 0.006,
       "h": 0.004,
       "z": 0.004,
-      "repeat": 48,
-      "step": [0.05, 0],
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0
+      "repeat": 40,
+      "step": [0.05, 0]
      },
      {
-      "kind": "cyl",
-      "at": [-1.15, -0.02],
-      "r": 0.009,
+      "kind": "rivet",
+      "at": [-0.95, -0.022],
+      "r": 0.006,
       "h": 0.004,
       "z": 0.004,
-      "repeat": 48,
-      "step": [0.05, 0],
-      "color": [0.55, 0.55, 0.57],
-      "metal": 1.0
+      "repeat": 40,
+      "step": [0.05, 0]
+     }
+    ]
+   },
+   {
+    "name": "grille_band",
+    "purpose": "long intake / exhaust grille",
+    "height_m": 0.1,
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [2.4, 0.07],
+      "depth": 0.015
+     }
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [-0.9875, 0],
+      "size": [0.008, 0.07],
+      "h": 0.012,
+      "z": -0.015,
+      "repeat": 80,
+      "step": [0.025, 0]
+     }
+    ]
+   },
+   {
+    "name": "seam_double",
+    "purpose": "double panel seam",
+    "height_m": 0.04,
+    "recesses": [
+     {
+      "at": [0, 0.01],
+      "size": [2.4, 0.005],
+      "depth": 0.005
+     },
+     {
+      "at": [0, -0.01],
+      "size": [2.4, 0.005],
+      "depth": 0.005
      }
     ]
    },
@@ -643,48 +1799,6 @@
       "at": [0, -0.02],
       "size": [2.4, 0.04],
       "h": 0.005
-     }
-    ]
-   },
-   {
-    "name": "grille_band",
-    "purpose": "long intake / exhaust grille",
-    "height_m": 0.1,
-    "recesses": [
-     {
-      "at": [0, 0],
-      "size": [2.4, 0.07],
-      "depth": 0.015
-     }
-    ],
-    "parts": [
-     {
-      "kind": "box",
-      "at": [-1.1875, 0],
-      "size": [0.008, 0.07],
-      "h": 0.012,
-      "z": -0.015,
-      "repeat": 96,
-      "step": [0.025, 0],
-      "color": [0.05, 0.052, 0.058],
-      "metal": 0.6
-     }
-    ]
-   },
-   {
-    "name": "seam_double",
-    "purpose": "double panel seam",
-    "height_m": 0.04,
-    "recesses": [
-     {
-      "at": [0, 0.01],
-      "size": [2.4, 0.005],
-      "depth": 0.005
-     },
-     {
-      "at": [0, -0.01],
-      "size": [2.4, 0.005],
-      "depth": 0.005
      }
     ]
    }

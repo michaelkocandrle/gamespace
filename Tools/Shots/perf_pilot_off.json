@@ -1,0 +1,62 @@
+{
+ "_comment": "perf_pilot with decals and local lights off (ShowFlag.Decals / PointLights / SpotLights 0): what the pilot's decals and lights cost.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 4.0,
+   "console": [
+    "stat unit",
+    "ShowFlag.Decals 0",
+    "ShowFlag.PointLights 0",
+    "ShowFlag.SpotLights 0"
+   ]
+  },
+  {
+   "name": "rear_left",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "chase_yaw": 45,
+   "chase_pitch": -12,
+   "settle": 3.0
+  },
+  {
+   "name": "close_three_quarter",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "chase_yaw": 150,
+   "chase_pitch": -18,
+   "chase_zoom": 0.6,
+   "settle": 3.0
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "name": "pilot_rear_left",
+   "camera_local": [
+    -14.75,
+    -8.5,
+    4.3
+   ],
+   "look_local": [
+    -7.65,
+    -2.8,
+    0.3
+   ]
+  }
+ ]
+}

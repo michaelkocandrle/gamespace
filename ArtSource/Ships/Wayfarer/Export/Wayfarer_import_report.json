@@ -17,7 +17,7 @@
     "SM_Ship_Wayfarer_Gear": []
   },
   "materials": [
-    "16 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_Layered"
+    "18 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_MeshDecalAO, /Game/Ships/Shared/Materials/M_Ship_Layered"
   ],
   "blueprint": {
     "path": "/Game/Ships/Wayfarer/Blueprints/BP_Ship_Wayfarer",
@@ -77,14 +77,15 @@
       "component Gear = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Gear",
       "light Light_nav_L (point, 3 cd) at [-524.6, -431.3, 0.1]",
       "light Light_nav_R (point, 3 cd) at [-524.6, 431.3, 0.1]",
-      "light Light_tail (point, 8 cd) at [-998.9, -0.0, 128.7]",
       "light Light_flood_L (spot, 150 cd) at [-365.1, -190.7, 141.3]",
       "light Light_flood_R (spot, 150 cd) at [-365.1, 190.7, 141.3]",
       "light Light_bay_glow_L (point, 10 cd) at [-757.4, -405.6, 55.0]",
       "light Light_bay_glow_R (point, 10 cd) at [-757.4, 405.6, 55.0]"
     ]
   },
-  "removed": [],
+  "removed": [
+    "component Light_tail"
+  ],
   "planet": {
     "collision_warmup_reach_m": 16.1,
     "collision_min_radius_m": 108.0

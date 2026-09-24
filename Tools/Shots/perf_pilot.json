@@ -1,0 +1,59 @@
+{
+ "_comment": "Frame cost of the detail pilot at 1920x1080 (author asked 24. 9. 2026): the same chase angles as ship_views plus the close pilot view, stat unit on. Run once per build (before / after): Tools/Shots.ps1 -Preset perf_pilot -Width 1920 -Height 1080. perf_pilot_off.json repeats it with decals and local lights switched off (show flags).",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 4.0,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "name": "rear_left",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "chase_yaw": 45,
+   "chase_pitch": -12,
+   "settle": 3.0
+  },
+  {
+   "name": "close_three_quarter",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "chase_yaw": 150,
+   "chase_pitch": -18,
+   "chase_zoom": 0.6,
+   "settle": 3.0
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "name": "pilot_rear_left",
+   "camera_local": [
+    -14.75,
+    -8.5,
+    4.3
+   ],
+   "look_local": [
+    -7.65,
+    -2.8,
+    0.3
+   ]
+  }
+ ]
+}

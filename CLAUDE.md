@@ -41,6 +41,14 @@ Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**. Projekt je v `C:\gamespace\g
    - co musí posoudit jen autor;
    - rizika.
 
+**Iterace vzhledu vs. předání** (autor, 24. 9. 2026):
+- Při iteraci vzhledu (modelování, decaly, materiály, světla) se po každé změně **nebalí** a nepouští celá sada testů:
+  - kontrola přes render v Blenderu (Eevee náhled s atlasy), případně snímky z už zabaleného buildu;
+  - jen testy, kterých se změna přímo týká (např. `test_ship_import.py`).
+- **Před předáním autorovi:** jednou celá sada testů, zabalení hry a finální snímky.
+- Změny C++ a herní logiky dál plným postupem (build, testy, balení, snímky).
+- V odpovědi uveď zhruba čas práce vs. čas testů, balení a snímků.
+
 **Lodě a interiéry:** nejdřív detailní 2D návrh a až po schválení 3D (skill `ship-pipeline`).
 Každý objekt musí mít účel; žádná výplň a žádné kompromisy.
 

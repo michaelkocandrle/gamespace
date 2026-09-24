@@ -35,9 +35,11 @@ SHARED = "/Game/Ships/Shared/Materials"
 MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glass": SHARED + "/M_Ship_Glass",
            "screen": SHARED + "/M_Ship_Screen", "decal": SHARED + "/M_Ship_Decal",
            "meshdecal": SHARED + "/M_Ship_MeshDecal", "meshdecal_paint": SHARED + "/M_Ship_MeshDecalPaint",
+           "meshdecal_ao": SHARED + "/M_Ship_MeshDecalAO",
            "layered": SHARED + "/M_Ship_Layered"}
 TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap",
-                  "decal_normal": "DecalNormalMap", "decal_m": "DecalMMap", "decal_bc": "DecalColorMap"}
+                  "decal_normal": "DecalNormalMap", "decal_m": "DecalMMap", "decal_bc": "DecalColorMap",
+                  "decal_ao": "DecalAOMap"}
 
 
 def _asset_tools():
@@ -559,7 +561,7 @@ def import_texture(ship, key, source, never_stream=False):
         texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_NORMALMAP)
         texture.set_editor_property("srgb", False)
         texture.set_editor_property("flip_green_channel", True)
-    elif key in ("orm", "ao", "decal_m"):
+    elif key in ("orm", "ao", "decal_m", "decal_ao"):
         # Values, not colour: no sRGB curve on the way in.
         texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_MASKS)
         texture.set_editor_property("srgb", False)
@@ -595,7 +597,37 @@ def build_masters():
     unreal.EditorAssetLibrary.save_loaded_asset(glass, only_if_is_dirty=False)
     return {"hull": hull, "pbr": build_pbr_master(), "glass": glass, "screen": build_screen_master(),
             "decal": build_decal_master(), "meshdecal": build_mesh_decal_master(False),
-            "meshdecal_paint": build_mesh_decal_master(True), "layered": build_layered_master()}
+            "meshdecal_paint": build_mesh_decal_master(True), "meshdecal_ao": build_mesh_decal_ao_master(),
+            "layered": build_layered_master()}
+
+
+def build_mesh_decal_ao_master():
+    """The occlusion of a structural mesh decal (seams, rivets, grilles take the hull's paint): a
+    colour-only DBuffer decal, black with opacity (1 - AO) x DecalAOStrength x the item's alpha. DBuffer
+    colour blends as lerp(paint, black, opacity), i.e. it darkens whatever paint is under it - AO a DBuffer
+    decal cannot write otherwise. Only Base Color and Opacity are connected, so it writes colour and
+    nothing else; its quad lies on the normal-only one (hs_decals.py)."""
+    m = _fresh_material(MASTERS["meshdecal_ao"])
+    m.set_editor_property("material_domain", unreal.MaterialDomain.MD_DEFERRED_DECAL)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    white = "/Engine/EngineResources/WhiteSquareTexture"
+    aom = _texture_param(m, "DecalAOMap", unreal.MaterialSamplerType.SAMPLERTYPE_MASKS, white, -900, 0)
+    mm = _texture_param(m, "DecalMMap", unreal.MaterialSamplerType.SAMPLERTYPE_MASKS, white, -900, 300)
+    inv = _node(m, unreal.MaterialExpressionOneMinus, -600, 0)
+    if not MEL.connect_material_expressions(aom, "R", inv, ""):
+        raise RuntimeError("decal AO -> one minus")
+    k = _node(m, unreal.MaterialExpressionMultiply, -450, 50)
+    _link(inv, k, "A")
+    _link(_scalar(m, "DecalAOStrength", 0.9, -900, 500), k, "B")
+    a = _node(m, unreal.MaterialExpressionMultiply, -300, 100)
+    _link(k, a, "A")
+    if not MEL.connect_material_expressions(mm, "R", a, "B"):
+        raise RuntimeError("decal M.R -> AO opacity")
+    _output(a, unreal.MaterialProperty.MP_OPACITY)
+    _output(_vector(m, "DecalAOColor", (0.0, 0.0, 0.0), -600, 300), unreal.MaterialProperty.MP_BASE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
+    return m
 
 
 # Masks of the layered master, shared by its two Custom nodes. VC is the mesh's vertex colour from
@@ -614,7 +646,8 @@ float ao = lerp(1.0, VC.r, Amount);
 float edge = (1.0 - VC.g) * Amount;
 float p2 = 1.0 - VC.b;
 float dirt = saturate((1.0 - ao) * 1.8) * saturate(0.3 + g) * DirtAmount * Amount;
-float wear = saturate(edge * (0.55 + 1.2 * g)) * EdgeWear;
+// only the most exposed edges, where the grunge is strongest too (clean Origin-like look, 24. 9. 2026)
+float wear = saturate((edge * (0.5 + 1.0 * g) - WearThreshold) * 3.0) * EdgeWear;
 """
 
 _LAYER_COLOUR = _LAYER_MASKS + """
@@ -667,12 +700,13 @@ def build_layered_master():
         "BareRough": _scalar(m, "BareMetalRoughness", 0.3, -1700, 1950),
         "RoughVariation": _scalar(m, "RoughVariation", 0.2, -1700, 2050),
         "AOStrength": _scalar(m, "AOStrength", 0.8, -1700, 2150),
+        "WearThreshold": _scalar(m, "WearThreshold", 0.45, -1700, 2250),
     }
     common = ["VC", "Amount", "LocalPos", "TexG", "Tile"]
     colour_in = common + ["Primary", "Secondary", "BareMetal", "DirtColor", "GrungeAmount", "DirtAmount", "EdgeWear",
-                          "CavityStrength"]
+                          "CavityStrength", "WearThreshold"]
     surface_in = common + ["PrimaryRough", "SecondaryRough", "PaintMetal", "BareRough", "EdgeWear", "DirtAmount",
-                           "AOStrength", "RoughVariation"]
+                           "AOStrength", "RoughVariation", "WearThreshold"]
     nodes = {}
     for key, code, names, y in (("colour", _LAYER_COLOUR, colour_in, 0), ("surface", _LAYER_SURFACE, surface_in, 700)):
         node = _custom(m, "Layered_" + key, code, unreal.CustomMaterialOutputType.CMOT_FLOAT3, names, -1000, y)
@@ -847,6 +881,7 @@ def build_instance(name, folder, spec, masters, ship=None):
             MEL.set_material_instance_vector_parameter_value(mi, param, unreal.LinearColor(c[0], c[1], c[2], 1.0))
     for key, param in (("metallic", "Metallic"), ("roughness", "Roughness"), ("emissive_strength", "EmissiveStrength"), ("opacity", "Opacity"),
                        ("decal_normal_strength", "DecalNormalStrength"), ("decal_opacity", "DecalOpacity"),
+                       ("decal_ao_strength", "DecalAOStrength"),
                        ("decal_roughness_scale", "DecalRoughnessScale"),
                        ("roughness_scale", "RoughnessScale"), ("metallic_scale", "MetallicScale"),
                        ("detail_tile_cm", "DetailTileCm"), ("detail_normal_strength", "DetailNormalStrength"),
