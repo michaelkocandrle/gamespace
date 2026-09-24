@@ -1244,6 +1244,16 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Postup je v AssetPipeline_Modular, v části „Exteriér: hard-surface“.
     - Otevřené: ohnout velké díly kitu podle povrchu, pylon, UV a materiály, import do UE.
     - **Celou loď zatím nepřestavovat, čeká se na rozhodnutí autora.**
+81. **Higgsfield: konzistentní pohledy lodi ověřené měřením** (24. 9. 2026, krok 4 plánu vylepšení). Test na starém
+    Vanguardu (`Vanguard.blend`), aby šel každý vygenerovaný pohled porovnat se skutečným modelem.
+    - Z jednoho hero obrázku GPT Image 2.5 i Nano Banana Pro dobře trefí bok (IoU 0,79–0,82), ale půdorys si domyslí
+      (GPT: rozpětí −37 %) a „zepředu“ kreslí šikmo. List 2 × 2 v jednom obrázku je nepoužitelný.
+    - **Vodicí silueta jako druhá reference** je hlavní páka. Nejlépe Nano Banana Pro + vodítko: bok 0,97, zepředu 0,90,
+      shora 0,98, rozměry do 0,5 %; GPT Image 2.5 + vodítko 0,89 / 0,54 / 0,92. U nové lodi vodítko vzniká z 2D návrhu.
+      Zepředu Nano Banana přikreslil dvě plovoucí špičky ploutví → pohledy vždy i prohlédnout.
+    - `silhouette_compare.py` má nové příkazy `views` (konzistence konceptů mezi sebou a proti rozměrům ze spec, bez
+      modelu) a `guide` (vodicí siluety); test 20 kontrol. Postup, tabulka a přijímací prahy: skill `ship-pipeline` 2a.
+    - Surové obrázky a prompty: `ArtSource/Ships/Vanguard/Concept/higgsfield_test/`. Spotřeba ~40 kreditů z ~1000.
 
 ---
 

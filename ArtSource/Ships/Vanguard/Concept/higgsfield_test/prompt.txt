@@ -1,0 +1,37 @@
+Higgsfield concept-view test, 2026-09-24 (ship-pipeline skill, section 2a).
+Goal: are 4 generated views (side, front, top, 3/4) of one ship consistent enough for multi-image to 3D?
+Test ship: the OLD Vanguard (ArtSource/Ships/Vanguard/Vanguard.blend, 17.58 x 12.96 x 4.36 m incl. gear),
+so every view can be scored against the real model with silhouette_compare.py.
+
+Reference 1 (all runs): Renders/Vanguard_hero.png (3/4 render of Vanguard.blend).
+Reference 2 (runs "g"): silhouette guide from the model masks
+  (silhouette_compare.py guide --model Saved/HiggsViews/model_old/model).
+
+Files (raw Higgsfield output, never edit):
+  gpt25_{side,front,top,34}.png  GPT Image 2.5, quality high, 2k, 16:9, hero only
+  gpt25_sheet.png                GPT Image 2.5, one 2x2 turnaround sheet
+  nbp_{side,front,top}.png       Nano Banana Pro (runs as nano_banana_2), 2k, 16:9, hero only
+  nbp_front_cut.png              nbp_front after Higgsfield remove_background (it drew a floor)
+  gpt25g_{side,front,top}.png    GPT Image 2.5 + silhouette guide
+  nbpg_{side,front,top}.png      Nano Banana Pro + silhouette guide
+
+Prompt, unguided (view sentence varies):
+  "Pure side elevation of exactly the same spaceship as in the reference image, seen from its right
+  (starboard) side, nose pointing to the right, camera exactly level with the ship's centreline. Same hull
+  shape and proportions, same swept wings, twin angled tail fins, engine nacelles, canopy, grey and orange
+  colours and markings; landing gear deployed as in the reference. Orthographic technical view with no
+  perspective distortion, whole ship in frame with a generous margin, centred, plain uniform light grey
+  background, even soft studio lighting, no ground shadow, no motion blur, no text or labels."
+  front: "Pure front elevation ... looking straight at the nose along the ship's axis, camera level with the
+  centreline, left-right symmetric."  top: "Pure top-down plan view ... camera looking straight down, nose
+  pointing to the right, symmetric about the ship's axis."
+
+Prompt, guided:
+  "Render the spaceship from the first image as a pure side elevation from its right side, nose to the
+  right. The second image is the exact orthographic side silhouette of this ship: the outline, proportions
+  and position of every part (nose, canopy, fins, engines, landing gear) must match that dark silhouette
+  exactly, filled with the ship's real surface detail, grey and orange colours and markings from the first
+  image. Orthographic, no perspective, camera level with the centreline, same framing and scale as the
+  silhouette, plain uniform light grey background, no floor, even soft studio lighting, no shadow, no text."
+
+Results: see the table in .claude/skills/ship-pipeline/SKILL.md section 2a.

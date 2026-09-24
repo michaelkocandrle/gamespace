@@ -97,6 +97,36 @@ def test_compare_cli(tmp):
           and os.path.exists(saved["diff_sheet"]))
 
 
+def test_views_consistency(tmp):
+    # A 14 x 7 x 3.5 m box drawn at a different scale in every view.
+    def rect(path, w, h, scale):
+        concept(path, (600, 400), lambda d, fg: d.rectangle([50, 50, 50 + w * scale, 50 + h * scale], fill=fg))
+    rect(os.path.join(tmp, "v_side.png"), 14, 3.5, 30)
+    rect(os.path.join(tmp, "v_top.png"), 14, 7, 25)
+    rect(os.path.join(tmp, "v_front.png"), 7, 3.5, 40)
+    argv = ["views", "--out", os.path.join(tmp, "views"), "--dims", "14,7,3.5"]
+    for view in sc.VIEWS:
+        argv += ["--ref", "%s=%s" % (view, os.path.join(tmp, "v_%s.png" % view))]
+    rep = sc.main_cli(argv)
+    check("consistent views close", rep["closure_error_pct"] < 3, rep)
+    check("dims match spec", rep["beam_error_pct"] < 3 and rep["height_error_pct"] < 3, rep)
+    check("rectangles are symmetric", rep["symmetry_front"] > 0.97 and rep["symmetry_top"] > 0.97, rep)
+    rect(os.path.join(tmp, "v_front.png"), 7, 7, 30)   # front twice as tall: inconsistent
+    rep = sc.main_cli(argv)
+    check("inconsistent front detected", rep["closure_error_pct"] > 40, rep["closure_error_pct"])
+
+
+def test_guide(tmp):
+    for view in sc.VIEWS:
+        Image.fromarray((mask_from_shape((300, 200), lambda d: d.ellipse([20, 70, 280, 130], fill=255)) * 255)
+                        .astype("uint8")).save(os.path.join(tmp, "g_%s.png" % view))
+    out = sc.main_cli(["guide", "--model", os.path.join(tmp, "g"), "--out", os.path.join(tmp, "guides")])
+    check("guide per view", set(out) == set(sc.VIEWS), out)
+    stats, _, _ = sc.compare_masks(sc.load_render_mask(os.path.join(tmp, "g_side.png")),
+                                   sc.extract_reference_mask(out["side"]))
+    check("guide silhouette round-trips", stats["iou"] > 0.97, stats)
+
+
 def test_blender_render(tmp):
     if not os.path.exists(sc.BLENDER):
         print("SKIP blender render (no Blender 5.2)")
@@ -120,6 +150,8 @@ if __name__ == "__main__":
         test_mirror()
         test_concept_extraction(tmp)
         test_compare_cli(tmp)
+        test_views_consistency(tmp)
+        test_guide(tmp)
         test_blender_render(tmp)
     print("FAILED: %s" % FAILED if FAILED else "ALL PASSED")
     sys.exit(1 if FAILED else 0)

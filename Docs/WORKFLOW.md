@@ -747,6 +747,12 @@ snímku.
 - j) **Python z heredocu přes nástroj Bash dostane jiná zpětná lomítka.** Nástroj mění `\\` na `\`
   i v uvozovaném `<<'EOF'`: `'\\n'` se stane skutečným koncem řádku, `split('\\')` neuzavřeným
   řetězcem. Python, ve kterém jsou zpětná lomítka, zapiš nástrojem Write do scratchpadu a spusť soubor.
+- k) **AI pohledy „téže lodi“ mají jiný půdorys a zepředu jsou šikmo seshora.** Obrázkový model
+  z jednoho hero obrázku tvar domýšlí (GPT Image 2.5: křídla o třetinu kratší a šípová dopředu).
+  Vodicí silueta jako druhá reference a kontrola `silhouette_compare.py views` (ship-pipeline 2a).
+- l) **Maska konceptu zabrala polovinu obrázku.** Model nakreslil podlahu a stín i přes „no floor“.
+  Před měřením Higgsfield `remove_background` (alfa). A pozor, `Vanguard_Meshy.blend` je dnešní
+  čtyřgondolový Vanguard, starý hero render (`Renders/Vanguard_hero.png`) patří k `Vanguard.blend`.
 
 ---
 

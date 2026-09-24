@@ -21,6 +21,14 @@ Three stages, in one file so the conventions stay together:
    coordinates. Concept images are always normalised to their bounding box.
 3. run: both in one go (calls Blender, then compares); prints the JSON.
        python Tools/Blender/silhouette_compare.py run --blend Ship.blend --objects A,B --ref ... --out DIR
+4. views: are concept views of one ship consistent with each other (no model needed, the check
+   before any 3D)? Each view shows two of length/beam/height, so side+top predict the front
+   proportion; also left-right symmetry of front and top, and optionally the spec's dimensions.
+       python Tools/Blender/silhouette_compare.py views --ref front=f.png --ref side=s.png            --ref top=t.png [--dims 14,11.4,6.2] --out DIR
+5. guide: silhouette guide images for an image model (dark silhouette on light grey, 16:9), from
+   render masks (--model DIR/model) or any white-on-black / concept image (--mask view=img). Passed
+   to the generator as a second reference with "match this silhouette exactly".
+       python Tools/Blender/silhouette_compare.py guide --model Saved/Silhouette/x/model --out DIR
 
 Views (Blender: nose +X, up +Z, port +Y), always drawn the same way so references must match:
   front = looking at the nose (from +X), port side on the right;
@@ -167,12 +175,19 @@ def load_render_mask(path):
     return np.asarray(Image.open(path).convert("L")) > 127
 
 
+MAX_REF_PX = 1400   # concept images are downscaled to this (AI output is 2-4K; only proportions matter)
+
+
 def extract_reference_mask(path, threshold=30):
     """Silhouette from a concept image: alpha if it has one, else everything that differs from the
-    neutral background (median of the border pixels), holes filled, specks removed."""
+    neutral background (median of the border pixels), holes filled, specks and detached blobs
+    smaller than 2 % of the largest removed (bleed from a neighbouring cell of a turnaround sheet)."""
     import numpy as np
     from PIL import Image, ImageDraw, ImageFilter
     img = Image.open(path)
+    if max(img.size) > MAX_REF_PX:
+        k = MAX_REF_PX / max(img.size)
+        img = img.resize((round(img.width * k), round(img.height * k)), Image.LANCZOS)
     if img.mode in ("RGBA", "LA") or "transparency" in img.info:
         alpha = np.asarray(img.convert("RGBA"))[..., 3]
         if alpha.min() < 128 <= alpha.max():
@@ -193,7 +208,21 @@ def extract_reference_mask(path, threshold=30):
         if (grown == seed).all():
             break
         seed = grown
-    return _fill_holes(seed)
+    return _drop_small_blobs(_fill_holes(seed))
+
+
+def _drop_small_blobs(mask, keep_frac=0.02):
+    try:
+        from scipy import ndimage
+    except ImportError:
+        return mask
+    import numpy as np
+    labels, n = ndimage.label(mask)
+    if n <= 1:
+        return mask
+    sizes = np.bincount(labels.ravel())[1:]
+    keep = np.nonzero(sizes >= keep_frac * sizes.max())[0] + 1
+    return np.isin(labels, keep)
 
 
 def _fill_holes(mask):
@@ -352,6 +381,109 @@ def compare(args):
     return report
 
 
+def _bbox_px(mask):
+    import numpy as np
+    ys, xs = np.nonzero(mask)
+    if len(xs) == 0:
+        raise ValueError("empty silhouette")
+    return float(xs.max() - xs.min() + 1), float(ys.max() - ys.min() + 1)
+
+
+def _symmetry(mask, axis):
+    """IoU of the bbox-normalised silhouette with its own mirror (axis 1 = left-right)."""
+    import numpy as np
+    m, _ = normalise(mask)
+    f = m[:, ::-1] if axis == 1 else m[::-1, :]
+    union = np.logical_or(m, f).sum()
+    return round(float(np.logical_and(m, f).sum() / union), 4) if union else 0.0
+
+
+def view_consistency(masks, dims=None):
+    """masks: {view: bool array} for front/side/top drawn by the VIEWS convention.
+    side = L x H, top = L x W, front = W x H (px, each view its own unknown scale)."""
+    L_s, H_s = _bbox_px(masks["side"])
+    L_t, W_t = _bbox_px(masks["top"])
+    W_f, H_f = _bbox_px(masks["front"])
+    # Common scale: length from side, beam from top (scaled to the side's length), height from side.
+    L = 1.0
+    W = W_t / L_t
+    H = H_s / L_s
+    predicted_front = W / H
+    measured_front = W_f / H_f
+    rep = {
+        "proportions_L_W_H": [1.0, round(W, 4), round(H, 4)],
+        "front_aspect_measured": round(measured_front, 4),
+        "front_aspect_from_side_top": round(predicted_front, 4),
+        "closure_error_pct": round(100.0 * abs(measured_front / predicted_front - 1.0), 2),
+        "symmetry_front": _symmetry(masks["front"], 1),
+        "symmetry_top": _symmetry(masks["top"], 0),
+    }
+    if dims:
+        dl, dw, dh = dims
+        rep["spec_L_W_H_m"] = list(dims)
+        rep["concept_W_H_m_at_spec_length"] = [round(W * dl, 2), round(H * dl, 2)]
+        rep["beam_error_pct"] = round(100.0 * abs(W * dl / dw - 1.0), 2)
+        rep["height_error_pct"] = round(100.0 * abs(H * dl / dh - 1.0), 2)
+    return rep
+
+
+def views(args):
+    from PIL import Image, ImageDraw
+    os.makedirs(args.out, exist_ok=True)
+    refs = dict(r.split("=", 1) for r in (args.ref or []))
+    missing = [v for v in VIEWS if v not in refs]
+    if missing:
+        raise SystemExit("silhouette_compare views: need --ref for %s" % ", ".join(missing))
+    masks = {v: extract_reference_mask(refs[v], args.threshold) for v in VIEWS}
+    dims = [float(x) for x in args.dims.split(",")] if args.dims else None
+    rep = view_consistency(masks, dims)
+    rep["references"] = refs
+    sheet = Image.new("RGB", (NORM * 3, NORM + 40), (18, 22, 30))
+    d = ImageDraw.Draw(sheet)
+    for i, v in enumerate(VIEWS):
+        m, _ = normalise(masks[v])
+        sheet.paste(Image.fromarray((m * 255).astype("uint8")).convert("RGB"), (i * NORM, 40))
+        d.text((i * NORM + 10, 10), v, fill=(230, 230, 230))
+    d.text((10, 26), "closure %.1f %%  sym front %.3f  sym top %.3f" % (
+        rep["closure_error_pct"], rep["symmetry_front"], rep["symmetry_top"]), fill=(230, 200, 120))
+    rep["mask_sheet"] = os.path.join(args.out, "views_masks.png")
+    sheet.save(rep["mask_sheet"])
+    with open(os.path.join(args.out, "views.json"), "w", encoding="utf-8") as fh:
+        json.dump(rep, fh, indent=1)
+    print(json.dumps(rep, indent=1))
+    return rep
+
+
+def make_guide(mask, size=(1920, 1080), fill=0.8):
+    import numpy as np
+    from PIL import Image
+    ys, xs = np.nonzero(mask)
+    c = mask[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+    h, w = c.shape
+    k = min(size[0] * fill / w, size[1] * fill * 0.875 / h)
+    sil = Image.fromarray((c * 255).astype("uint8")).resize((max(1, int(w * k)), max(1, int(h * k))), Image.LANCZOS)
+    out = Image.new("RGB", size, (208, 208, 208))
+    out.paste(Image.new("RGB", sil.size, (40, 44, 52)), ((size[0] - sil.width) // 2, (size[1] - sil.height) // 2), sil)
+    return out
+
+
+def guides(args):
+    os.makedirs(args.out, exist_ok=True)
+    srcs = dict(m.split("=", 1) for m in (args.mask or []))
+    written = {}
+    for view in VIEWS:
+        if args.model and os.path.exists("%s_%s.png" % (args.model, view)):
+            mask = load_render_mask("%s_%s.png" % (args.model, view))
+        elif view in srcs:
+            mask = extract_reference_mask(srcs[view], args.threshold)
+        else:
+            continue
+        written[view] = os.path.join(args.out, "guide_%s.png" % view)
+        make_guide(mask).save(written[view])
+    print(json.dumps(written, indent=1))
+    return written
+
+
 def run(args, rest):
     cmd = [BLENDER, "-b"] + ([args.blend] if args.blend else ["--factory-startup"]) + [
         "--python", os.path.abspath(__file__), "--", "render", "--out", args.out, "--prefix", "model"]
@@ -391,7 +523,21 @@ def main_cli(argv):
             p.add_argument("--collection", default="")
             p.add_argument("--crop-box", default="")
             p.add_argument("--crop-cylinder", default="")
+    p = sub.add_parser("views")
+    p.add_argument("--out", required=True)
+    p.add_argument("--ref", action="append", help="view=image (front, side, top), all three")
+    p.add_argument("--threshold", type=int, default=30)
+    p.add_argument("--dims", default="", help="spec length,beam,height in metres")
+    p = sub.add_parser("guide")
+    p.add_argument("--out", required=True)
+    p.add_argument("--model", default="", help="render prefix (white-on-black masks)")
+    p.add_argument("--mask", action="append", help="view=image, silhouette cut like a concept")
+    p.add_argument("--threshold", type=int, default=30)
     args = ap.parse_args(argv)
+    if args.cmd == "views":
+        return views(args)
+    if args.cmd == "guide":
+        return guides(args)
     return compare(args) if args.cmd == "compare" else run(args, argv)
 
 

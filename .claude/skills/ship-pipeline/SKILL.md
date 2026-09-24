@@ -74,10 +74,61 @@ Kdy co:
   autor do `Docs/Credits.md`). **Licenci zkontroluj před stažením**; „personal/non-commercial/editorial“ ne.
 - AI je dobrá na panelové díly, selhává na tenkých protáhlých (kabely, trubky, madla) → procedurálně.
 
-Koncept pro AI (2A):
-1. **2–4 konzistentní pohledy téže lodi: bok, zepředu, shora, 3/4.** Neutrální pozadí, rovnoměrné světlo,
-   bez motion bluru a dramatických stínů, celá loď v záběru. Z jednoho obrázku si AI záda a spodek vymyslí.
-2. Ulož do `ArtSource/Ships/<Loď>/Concept/`, prompt a nastavení do `prompt.txt`.
+Koncept pro AI (2A): **2–4 konzistentní pohledy téže lodi: bok, zepředu, shora, 3/4.** Neutrální
+pozadí, rovnoměrné světlo, bez motion bluru a dramatických stínů, celá loď v záběru. Z jednoho obrázku si
+AI záda a spodek vymyslí. Postup a ověření viz 2a.
+
+## 2a. Konzistentní pohledy přes Higgsfield MCP (ověřeno 24. 9. 2026)
+
+Test na starém Vanguardu (`Vanguard.blend`, 17,58 × 12,96 × 4,36 m), aby šel každý pohled změřit proti
+skutečnému modelu. Soubory a prompty: `ArtSource/Ships/Vanguard/Concept/higgsfield_test/prompt.txt`,
+listy rozdílů `Docs/Shots/HiggsViews/`.
+
+| Varianta (IoU proti modelu) | bok | zepředu | shora | uzávěr | rozpětí/výška proti spec |
+| --- | --- | --- | --- | --- | --- |
+| GPT Image 2.5, jen hero obrázek | 0,79 | 0,29 | 0,65 | 24 % | −37 % / +4 % |
+| GPT Image 2.5, list 2 × 2 v jednom obrázku | 0,22 | 0,56 | 0,58 | 138 % | nepoužitelné |
+| Nano Banana Pro, jen hero (zepředu po `remove_background`) | 0,82 | 0,73 | 0,76 | 15 % | −4 % / +9 % |
+| GPT Image 2.5 + vodicí silueta | 0,89 | 0,54 | 0,92 | 17 % | −3 % / +5 % |
+| **Nano Banana Pro + vodicí silueta** | **0,97** | **0,90** | **0,98** | **0,3 %** | **0,1 % / 0,4 %** |
+
+Co z toho plyne:
+- **Bez vodítka si model domyslí půdorys** (GPT udělal křídla dopředu šípová a o třetinu kratší) a „zepředu“
+  kreslí seshora šikmo. Hezký obrázek neznamená správný tvar – vždy měř.
+- **List všech pohledů v jednom obrázku nepoužívej**: pohledy mají každý jiné měřítko, přetékají přes
+  buňky a půdorys neodpovídá boku.
+- **Vodicí silueta jako druhá reference** („The second image is the exact orthographic … silhouette of this
+  ship … must match exactly“) je hlavní páka. **Výchozí volba: Nano Banana Pro + vodítko** – siluetu
+  drží téměř přesně a přitom kreslí skutečný povrch a barvy z hero obrázku. U nové lodi vodítko vzniká
+  z našeho 2D návrhu (obrys paluby z `<Loď>_layout.json`, profil z řezu), ne z AI.
+- Pohled **zepředu je nejslabší** (tenká křídla = malý posun rozhodí IoU). Nano Banana v něm nakreslil
+  navíc dvě plovoucí špičky ploutví nad lodí – měření je jako odtržené skvrny zahodí, ale obrázek
+  do multi-image to 3D takhle nesmí → přegenerovat, nebo poslat jen bok + shora + 3/4.
+  **Každý pohled si před použitím prohlédni** (Read na PNG), číslo nestačí.
+- Modely někdy kreslí podlahu a stín i přes „no floor“ → před měřením `remove_background` (Higgsfield,
+  výstup s alfou, `extract_reference_mask` alfu použije).
+
+Postup pro novou loď (vše přes MCP a skripty, nic ručně):
+1. Hero obrázek (3/4) schválený autorem → `mcp__higgsfield__media_upload` + `curl -X PUT` + `media_confirm`.
+2. Vodítka: `python Tools/Blender/silhouette_compare.py guide --mask side=<profil.png> --mask top=<půdorys.png>
+   --mask front=<čelo.png> --out ArtSource/Ships/<Loď>/Concept/guides` (tmavá silueta na světle šedé, 16:9;
+   z hotového modelu `--model <render prefix>`). Nahrát stejně jako hero.
+3. `generate_image_batch`, model `nano_banana_pro` (`resolution: 2k`, `aspect_ratio: 16:9`, 2 kredity;
+   v odpovědi se hlásí jako `nano_banana_2`), `medias`: hero + vodítko, obojí role `image_references`.
+   Do promptu „no floor, no shadow“. Záloha `gpt_image_2_5` (`quality: high`, 2,75 kreditu).
+   Fronta bývá 5–15 min → `jobs_wait` opakovaně.
+4. Stáhnout `result_url` curlem do `ArtSource/Ships/<Loď>/Concept/` (surové, needitovat), prompt
+   a nastavení do `prompt.txt`.
+5. Kontrola konzistence (bez modelu):
+   ```bash
+   python Tools/Blender/silhouette_compare.py views --ref front=f.png --ref side=s.png --ref top=t.png \
+       --dims <délka,šířka,výška ze spec> --out Saved/Concept/<Loď>
+   ```
+   Každý pohled ukazuje dva ze tří rozměrů, takže bok + shora předpovídají poměr stran zepředu
+   (`closure_error_pct`); dál symetrie zepředu a shora a odchylka od rozměrů ze `_spec.json`.
+   **Přijmout:** rozměry proti spec ≤ 5 %, symetrie ≥ 0,9, uzávěr ≤ 10 % (vyšší = jeden pohled má jinou
+   výšku, obvykle zepředu → přegenerovat ten). Masky si prohlédni (`views_masks.png`).
+6. Teprve pak multi-image to 3D (níže).
 
 Generování:
 - **Higgsfield** multi-image to 3D: Topology triangle, 200–300 tis. tris, **PBR maps zapnout** (jinak
@@ -171,7 +222,10 @@ python Tools/Blender/silhouette_compare.py run --blend Ship.blend --collection X
   z alfy. Otvory se vyplní, skvrny se odstraní rekonstrukcí, takže tenké špičky zůstanou.
 - **Render proti renderu** se porovnává ve světových souřadnicích (`--align world`). Normalizace
   podle bboxu by kvůli jedné zbloudilé části posunula celou masku (WORKFLOW 9.6 g).
-- **Test:** `python Tools/Blender/tests/test_silhouette_compare.py`, 14 kontrol včetně renderu
+- **`views`** (konzistence konceptů mezi sebou, bez modelu) a **`guide`** (vodicí siluety pro obrázkový
+  model) popisuje sekce 2a. Koncepty nad 1400 px se před vyříznutím zmenší; odtržené skvrny pod 2 %
+  největšího kusu se zahodí.
+- **Test:** `python Tools/Blender/tests/test_silhouette_compare.py`, 20 kontrol včetně renderu
   krychle v Blenderu.
 - **Cíle:** hard-surface díl proti AI objemu ≥ 0,88 na pohled. Nižší číslo znamená špatnou osu nebo
   poloměr, ne detail. Proti konceptu je cíl ≥ 0,9 a `aspect_model` do 3 % od `aspect_ref`.

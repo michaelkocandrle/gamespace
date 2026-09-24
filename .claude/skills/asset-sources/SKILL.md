@@ -167,8 +167,10 @@ python Tools/Assets/meshy_generate.py --spec ArtSource/Ships/Steadfast/Kitbash/m
   (složka zatím neexistuje, vytvoř ji).
 - Dál `Tools/Blender/build_ai_ship.py` s receptem `<Loď>_ai_build.json` (WORKFLOW 2.1, ShipPipeline 2B).
 - Licenci výstupů Higgsfieldu pro komerční použití ověř, než loď půjde do vydané hry; zapiš do Credits.
-- Higgsfield MCP (`claude mcp add --transport http higgsfield https://mcp.higgsfield.ai/mcp`) se
-  zavádí v plánu vylepšení (krok 4); postup generování pohledů patří do skillu `ship-pipeline`.
+- Higgsfield MCP (`claude mcp add --transport http higgsfield https://mcp.higgsfield.ai/mcp`) je zapojený
+  (tarif plus, ~1000 kreditů; GPT Image 2.5 high 2k = 2,75 kr., Nano Banana Pro 2k = 2 kr.). Generování
+  a ověření konzistentních pohledů lodi: skill `ship-pipeline` sekce 2a (vodicí silueta jako druhá
+  reference, `silhouette_compare.py views`). Nahrávání: `media_upload` → `curl -X PUT` → `media_confirm`.
 
 ## Hotové modely zdarma
 
