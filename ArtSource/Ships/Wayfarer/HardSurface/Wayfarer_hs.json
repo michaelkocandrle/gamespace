@@ -715,7 +715,7 @@
   "_comment_greebles": "Kit greebles (hatches, strips, sensors) take the hull paint: in dark they read as black boxes stuck on the hull (24. 9. 2026)."
  },
  "detail": {
-  "_comment": "Medium shape layer (Tools/Blender/hs_detail.py, skill ship-pipeline 3b3). PILOT: engine pods and the aft hull (x 0 .. 6.9) only; the rest of the ship follows after approval. Layout coordinates; pod angles: 0 outboard, 90 top (starboard mirrored).",
+  "_comment": "Medium shape layer (Tools/Blender/hs_detail.py, skill ship-pipeline 3b3). Whole hull (pilot approved 24. 9. 2026): pods, aft hull, mid hull and nose. Layout coordinates; pod angles: 0 outboard, 90 top (starboard mirrored).",
   "bevel": {
    "angle_deg": 30,
    "width": 0.006,
@@ -820,6 +820,84 @@
     "z": [1.52, 2.12],
     "normal_x": [-0.95, -0.45],
     "t": 0.025
+   },
+   {
+    "_what": "upper side armour behind the wing root (secondary)",
+    "x": [7.1, 8.1],
+    "z": [1.35, 2.2],
+    "t": 0.025,
+    "_why": "primary paint: dark squares down the whole side made the hull patchy (24. 9. 2026)"
+   },
+   {
+    "_what": "upper side armour over the tech corridor",
+    "x": [10.5, 11.5],
+    "z": [1.35, 2.2],
+    "t": 0.025,
+    "_why": "primary paint: dark squares down the whole side made the hull patchy (24. 9. 2026)"
+   },
+   {
+    "_what": "upper side armour behind the cockpit",
+    "x": [14.1, 15.1],
+    "z": [1.3, 2.2],
+    "t": 0.025,
+    "_why": "primary paint: dark squares down the whole side made the hull patchy (24. 9. 2026)"
+   },
+   {
+    "_what": "lower side armour ahead of the wing",
+    "x": [13.0, 14.0],
+    "z": [0.05, 0.95],
+    "t": 0.025,
+    "_why": "primary paint: dark squares down the whole side made the hull patchy (24. 9. 2026)"
+   },
+   {
+    "_what": "shoulder armour over the reactor",
+    "x": [7.1, 8.1],
+    "z": [2.36, 2.9],
+    "normal_z": [0.2, 0.95],
+    "t": 0.03,
+    "secondary": true
+   },
+   {
+    "_what": "shoulder armour over the cabin",
+    "x": [11.7, 12.7],
+    "z": [2.36, 2.95],
+    "normal_z": [0.2, 0.95],
+    "t": 0.03,
+    "secondary": true
+   },
+   {
+    "_what": "spine plate over the reactor",
+    "x": [7.1, 8.1],
+    "abs_y": [0, 0.7],
+    "normal_z": [0.85, 1.01],
+    "centre": true,
+    "t": 0.025
+   },
+   {
+    "_what": "spine plate over the cabin",
+    "x": [11.7, 12.7],
+    "abs_y": [0, 0.7],
+    "normal_z": [0.85, 1.01],
+    "centre": true,
+    "t": 0.025
+   },
+   {
+    "_what": "belly skid over the reactor",
+    "x": [7.1, 8.1],
+    "abs_y": [0, 1.4],
+    "normal_z": [-1.01, -0.85],
+    "centre": true,
+    "t": 0.03,
+    "material": "dark"
+   },
+   {
+    "_what": "belly skid under the cabin",
+    "x": [11.7, 12.7],
+    "abs_y": [0, 1.2],
+    "normal_z": [-1.01, -0.85],
+    "centre": true,
+    "t": 0.03,
+    "material": "dark"
    }
   ],
   "pod": {
@@ -1195,6 +1273,85 @@
     "at": [-1.0, 0.55, -0.05],
     "dir": [1, 0, 0],
     "_what": "worn step on the ramp lip (the only wear by hand)"
+   },
+   {
+    "item": "reg_number",
+    "on": "side",
+    "x": 17.6,
+    "z": 1.55,
+    "scale": 0.9,
+    "_what": "registration on the nose sides"
+   },
+   {
+    "item": "ship_name",
+    "on": "side",
+    "x": 9.0,
+    "z": 2.28,
+    "scale": 0.9,
+    "_what": "class name on the upper side"
+   },
+   {
+    "item": "maker",
+    "on": "side",
+    "x": 14.6,
+    "z": 0.7,
+    "_what": "maker's mark ahead of the wing"
+   },
+   {
+    "item": "stencil_nostep",
+    "on": "top",
+    "x": 15.0,
+    "y": 0.0,
+    "rot": 90,
+    "mirror": false
+   },
+   {
+    "item": "tri_warning",
+    "on": "side",
+    "x": 19.9,
+    "z": 1.3,
+    "_what": "sensor radiation warning on the nose"
+   },
+   {
+    "item": "hazard_subtle",
+    "on": "bottom",
+    "x": 17.0,
+    "y": 0.6,
+    "rot": 90,
+    "_what": "nose gear bay marking"
+   },
+   {
+    "item": "access_panel",
+    "on": "bottom",
+    "x": 14.5,
+    "y": 0.7
+   },
+   {
+    "item": "hatch_small",
+    "on": "side",
+    "x": 16.2,
+    "z": 0.55
+   },
+   {
+    "item": "fuel_cap",
+    "on": "top",
+    "x": 10.0,
+    "y": 0.9,
+    "_what": "coolant filler over the reactor"
+   },
+   {
+    "item": "vent_grille",
+    "on": "side",
+    "x": 8.75,
+    "z": 1.8,
+    "_what": "reactor cooler grille (decal: a recess next to the 9.3 seam read as a hole)"
+   },
+   {
+    "item": "vent_small",
+    "on": "side",
+    "x": 15.6,
+    "z": 1.75,
+    "_what": "life support intake behind the cockpit"
    }
   ],
   "trim": [
@@ -1465,6 +1622,71 @@
       "st_service",
       "st_torque"
      ]
+    },
+    {
+     "_what": "cockpit surround: canopy frame service points",
+     "on": "top",
+     "x": 17.0,
+     "dx": 1.4,
+     "y": 0.9,
+     "dy": 0.3,
+     "count": 6,
+     "items": [
+      "bolt",
+      "st_nopaint",
+      "red_dot",
+      "chevrons_port",
+      "st_inspect",
+      "rivet_row_4"
+     ]
+    },
+    {
+     "_what": "nose sensor bay",
+     "on": "side",
+     "x": 19.3,
+     "dx": 0.5,
+     "z": 1.1,
+     "dz": 0.3,
+     "count": 5,
+     "items": [
+      "vent_small",
+      "socket_round",
+      "st_gnd",
+      "red_marker",
+      "slot_s"
+     ]
+    },
+    {
+     "_what": "wing root, above the wing",
+     "on": "side",
+     "x": 8.0,
+     "dx": 2.5,
+     "z": 1.1,
+     "dz": 0.1,
+     "count": 6,
+     "items": [
+      "hazard_subtle",
+      "st_service",
+      "bolt_row_4",
+      "red_dot",
+      "tri_warning"
+     ]
+    },
+    {
+     "_what": "cabin entry side (crew hatch area)",
+     "on": "side",
+     "x": 12.4,
+     "dx": 0.8,
+     "z": 1.5,
+     "dz": 0.4,
+     "count": 5,
+     "items": [
+      "label_o2",
+      "st_extpwr",
+      "socket",
+      "arrow_access",
+      "red_marker"
+     ]
     }
    ],
    "companions": {
@@ -1473,12 +1695,16 @@
     "marker_chance": 0.7
    },
    "hull_seams": {
-    "region_x": [-0.6, 6.95],
+    "region_x": [-0.6, 20.3],
     "strip": "seam_rivets",
     "lines": [
      {
-      "x": [3.0, 6.85],
+      "x": [3.0, 14.9],
       "z": 2.28
+     },
+     {
+      "x": [7.0, 17.0],
+      "z": 0.28
      }
     ]
    },
@@ -1540,7 +1766,7 @@
      },
      {
       "on": "side",
-      "u": [0.2, 6.8],
+      "u": [0.2, 20.0],
       "v": [0.2, 2.2],
       "step": 0.6,
       "dv": 0.5,
@@ -1563,7 +1789,7 @@
      },
      {
       "on": "top",
-      "u": [0.2, 6.8],
+      "u": [0.2, 20.0],
       "v": [0.2, 1.9],
       "step": 0.7,
       "dv": 0.6,
@@ -1584,7 +1810,7 @@
      },
      {
       "on": "bottom",
-      "u": [0.2, 6.8],
+      "u": [0.2, 20.0],
       "v": [0.2, 2.0],
       "step": 0.7,
       "dv": 0.6,
@@ -1606,7 +1832,7 @@
    },
    "panel_lines": {
     "_comment": "Thin engraved panel lines with 45-degree jogs, per bay between the hull seams (SC: the main density).",
-    "region_x": [0.0, 6.95],
+    "region_x": [0.0, 20.2],
     "side_bands": [
      {
       "z": [0.2, 1.0],
@@ -1614,7 +1840,7 @@
      },
      {
       "z": [1.3, 2.15],
-      "per_bay": 1
+      "per_bay": 2
      }
     ],
     "top_bands": [
@@ -1640,12 +1866,15 @@
       }
      ]
     }
+   },
+   "greeble_companions": {
+    "_comment": "labels, markers, chevrons and stencils beside the hull's kit greebles"
    }
   }
  },
  "layers": {
-  "_comment": "Vertex-colour masks for M_Ship_Layered (Tools/Blender/hs_layers.py). PILOT: the layering applies only in region_x (layout x, pods and aft hull); elsewhere A = 0 keeps the clean look for comparison.",
-  "region_x": [-1.0, 6.9],
+  "_comment": "Vertex-colour masks for M_Ship_Layered (Tools/Blender/hs_layers.py). Whole ship (region_x covers the hull).",
+  "region_x": [-1.0, 21.5],
   "ao_rays": 24,
   "ao_distance_m": 0.5,
   "edge": [0.28, 0.45],

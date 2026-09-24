@@ -536,6 +536,35 @@ def rule_coverage(pl, r, rng):
                 u += step
 
 
+def rule_greeble_companions(pl, r, recipe, rng):
+    """The kit greebles of the hull (hatches, vents, sensors, hs_build_ship place_greebles) get the same
+    companions as decal hatches: a service label beside a hatch, a red marker, chevrons by a sensor,
+    a small stencil by a vent."""
+    labels = sorted(n for n, it in pl.index["decals"].items() if "label" in it.get("tags", []))
+    small = sorted(n for n, it in pl.index["decals"].items() if "small_stencil" in it.get("tags", []))
+    for g in recipe["parts"]["hull"].get("greebles", []):
+        kind = g["part"]
+        size = {"hatch_large": (1.1, 0.7), "hatch": (0.62, 0.42), "vent": (0.42, 0.24), "sensor": (0.16, 0.1),
+                "strip": (0.55, 0.07)}.get(kind, (0.3, 0.2))
+        sides = (1, -1) if g["from"] == "side" and g.get("mirror", True) else (1,)
+        for side in sides:
+            if g["from"] == "side":
+                spec = {"on": "side", "x": g["x"], "z": g["z"] + size[1] / 2 + 0.07}
+                spec2 = {"on": "side", "x": g["x"] - size[0] / 2 - 0.08, "z": g["z"]}
+            else:
+                off = size[1] / 2 + 0.07
+                spec = {"on": g["from"], "x": g["x"], "y": g.get("y", 0.0) + off}
+                spec2 = {"on": g["from"], "x": g["x"] - size[0] / 2 - 0.08, "y": g.get("y", 0.0)}
+            key = (kind, g["x"], side)
+            if kind in ("hatch", "hatch_large"):
+                pl.decal(dict(spec, item=labels[_stable(*key) % len(labels)]), side, "greeble_companions")
+                pl.decal(dict(spec2, item="red_marker"), side, "greeble_companions")
+            elif kind == "sensor":
+                pl.decal(dict(spec, item="chevrons_port"), side, "greeble_companions")
+            elif kind == "vent":
+                pl.decal(dict(spec, item=small[_stable(*key) % len(small)]), side, "greeble_companions")
+
+
 def rule_companions(pl, r, rng):
     """Next to every hatch: a service label above and a handle beside. Below grilles on side surfaces: a
     dirt streak, only now and then ("streak_chance": the clean look)."""
@@ -595,6 +624,8 @@ def build(recipe, target, ship, off, root):
         rule_panel_marks(pl, rules["panel_marks"], recipe)
     if "clusters" in rules:
         rule_clusters(pl, rules["clusters"], rng, rules.get("pod_gaps", {}).get("avoid", []))
+    if "greeble_companions" in rules:
+        rule_greeble_companions(pl, rules["greeble_companions"], recipe, rng)
     if "companions" in rules:
         rule_companions(pl, rules["companions"], rng)
     if "coverage" in rules:

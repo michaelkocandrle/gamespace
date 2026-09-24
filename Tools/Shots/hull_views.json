@@ -1,0 +1,112 @@
+{
+ "_comment": "Close views of the hull and nose (whole-ship rebuild, part 1). Run: Tools/Shots.ps1 -Preset hull_views -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 4.0,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "name": "front34",
+   "camera_local": [
+    15.75,
+    -8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "name": "mid_side",
+   "camera_local": [
+    0.75,
+    -9,
+    0.6
+   ],
+   "look_local": [
+    0.75,
+    0,
+    0.3
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "name": "top_mid",
+   "camera_local": [
+    1.75,
+    -5,
+    6.8
+   ],
+   "look_local": [
+    0.75,
+    0,
+    1.3
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "name": "nose_close",
+   "camera_local": [
+    10.75,
+    -3.5,
+    0.8
+   ],
+   "look_local": [
+    8.25,
+    -0.8,
+    0.1
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "name": "below_mid",
+   "camera_local": [
+    1.75,
+    -6,
+    -4.2
+   ],
+   "look_local": [
+    1.75,
+    0,
+    -1.2
+   ]
+  }
+ ]
+}
