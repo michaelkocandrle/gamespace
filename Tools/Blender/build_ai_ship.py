@@ -122,6 +122,21 @@ def import_source(cfg, ship):
     hull = bpy.context.view_layer.objects.active
     hull.parent = None
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    weld = cfg.get("weld_m", 0.0)
+    if weld > 0:
+        # AI exports are often a soup of split triangles (every face its own vertices): the UV unwrap then
+        # makes one island per triangle and shrinks them to nothing (Wayfarer: 0.4 % of the texture used,
+        # 0.06 px per triangle at 4K), and the shading breaks at every edge. Weld first. In source units,
+        # before scaling: ~0.5 mm on the final ship is 0.0005 / scale.
+        bm = bmesh.new()
+        bm.from_mesh(hull.data)
+        before = len(bm.verts)
+        lo0, hi0 = bounds([hull])
+        dist = weld * (hi0 - lo0).length / max(cfg["orient"].get("length_m", 1.0), 1e-6)
+        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=dist)
+        bm.to_mesh(hull.data)
+        bm.free()
+        log("welded vertices closer than %.2f mm (ship scale): %d -> %d" % (weld * 1000, before, len(hull.data.vertices)))
     orient = cfg["orient"]
     # Rotate first, then measure: the length is the extent along +X after the rotation, whichever
     # axis the source model had it on.
@@ -322,9 +337,23 @@ def unwrap(lows, margin, angle_deg):
     t = time.time()
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.smart_project(angle_limit=math.radians(angle_deg), island_margin=margin, area_weight=0.0,
+    # Margin 0 in the projection, then one packing pass with a fixed added gap: smart_project's own margin
+    # is per island, and with tens of thousands of islands (AI meshes) the gaps ate the whole atlas.
+    bpy.ops.uv.smart_project(angle_limit=math.radians(angle_deg), island_margin=0.0, area_weight=0.0,
                              correct_aspect=True, scale_to_bounds=False)
+    bpy.ops.uv.select_all(action="SELECT")
+    bpy.ops.uv.pack_islands(rotate=True, margin_method="ADD", margin=margin)
     bpy.ops.object.mode_set(mode="OBJECT")
+    area = 0.0
+    for ob in lows:
+        uv = np.empty(len(ob.data.loops) * 2, np.float32)
+        ob.data.uv_layers.active.data.foreach_get("uv", uv)
+        uv = uv.reshape(-1, 2)
+        for p in ob.data.polygons:
+            if p.loop_total == 3:
+                a, b, c = uv[p.loop_start], uv[p.loop_start + 1], uv[p.loop_start + 2]
+                area += 0.5 * abs((b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1]))
+    log("UV atlas uses %.1f %% of the texture" % (100 * area))
     log("new UVs for %s in %.0f s" % (", ".join(o.name for o in lows), time.time() - t))
 
 

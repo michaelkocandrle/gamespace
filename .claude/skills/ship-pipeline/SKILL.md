@@ -229,10 +229,23 @@ cd /c/gamespace/gamespace
 # měření: prázdné parts/collision/sockets a --no-save vypíše rozměry po otočení
 MSYS_NO_PATHCONV=1 "$BL" -b --python Tools/Blender/build_ai_ship.py -- ArtSource/Ships/<Loď>/<Loď>_ai_build.json --no-save
 MSYS_NO_PATHCONV=1 "$BL" -b --python Tools/Blender/build_ai_ship.py -- ArtSource/Ships/<Loď>/<Loď>_ai_build.json
+# čistý lak místo špinavé AI barvy (blok "repaint" v receptu; čte *_BC_AI.png, píše mapy pro hru), ~1 min
+MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/<Loď>_AI.blend --python Tools/Blender/repaint_ship.py -- ArtSource/Ships/<Loď>/<Loď>_ai_build.json
 # okluze (R kanál ORM je emisní maska obrazovek, AO má vlastní mapu), ~30 s
 MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/<Loď>_Meshy.blend --python Tools/Blender/bake_ship_ao.py -- <Loď>
 ```
 AO se v setupu přidá jako `"ao"` mezi textury (`cavity_strength`, `ao_strength`, maska `wear_amount`).
+
+**Kvalita povrchu AI lodi (Wayfarer 1.1, autor: „vypadá rozbitě a špinavě“):**
+- `"weld_m": 0.0005` v receptu: AI mesh bývá polévka rozpojených trojúhelníků. Bez svaření vznikne ostrůvek na
+  každý trojúhelník a atlas využije 0,4 % textury. Build vypisuje `UV atlas uses N %`; **cíl ≥ 40 %**.
+- Unwrap: `smart_project` s nulovým marginem a pak `pack_islands` ADD `uv_margin` (0,0005).
+- Barva: AI textura se nepoužívá přímo. `repaint_ship.py` dělá zóny laku podle bloku `repaint` (`zones` s barvou
+  sRGB, roughness a metallic; `glass_boxes`, `engine_boxes`, `accent_exclude_boxes`, `speck_area_m2`,
+  `detail_strength` 0,3). Rebake píše `T_Ship_<Loď>_BC_AI/ORM_AI`, repaint `T_Ship_<Loď>_BC/ORM`.
+- Materiál s vymodelovanými panely: `panel_strength` 0, `wear_amount` ≤ 0,05, `detail_rough_variation` ~0,04.
+- Kontrola: `render_ship_views.py --swap T_Ship_<Loď>_BC_AI.png=<nová BC>` a snímky `ship_views` ze hry, vždy
+  zblízka (`10_close_three_quarter`).
 
 Pravidla čísel:
 - Délka: malá stíhačka 12–16 m, Steadfast 30 m. AI modely chodí 1–2 m

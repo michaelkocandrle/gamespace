@@ -766,6 +766,13 @@ snímku.
   nepřesnou normálu. `kdop_hull` teď slučuje extrémy do 10 cm a zahazuje vrcholy nejkratších hran.
 - q) **Test podvozku: sockety 2,5 cm nad spodkem boxu.** Box je vycentrovaný na aktéra, trup posunutý k pivotu
   (`Hull_RelativeLocation_cm`). V prostoru meshe je spodek boxu −extent − posun.
+- r) **AI loď ve hře rozmazaná, flekatá a „špinavá“, i s 4K texturou.** UV atlas využíval 0,4 % textury, protože
+  mesh byl polévka rozpojených trojúhelníků a margin na každý ostrůvek sežral místo. Svařit (`weld_m`),
+  unwrap bez marginu a `pack_islands`, pak měřit využití atlasu. Pak čistý lak (`repaint_ship.py`), ne AI barvu.
+- s) **Oranžové pruhy jako roztřepené „plamínky“.** Zóny se zařazovaly po celých trojúhelnících. Tenké pruhy
+  vyřezávat po texelech z AI kresby (medián 5 px, práh).
+- t) **Blender nemá Pillow ani SciPy.** Jeho Python má ale stejnou verzi jako systémový (3.13):
+  `repaint_ship._borrow()` přidá systémové site-packages.
 
 ---
 

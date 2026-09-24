@@ -1298,6 +1298,27 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Nové nástroje: `Tools/Blender/render_ship_views.py` (rendery s texturami ze 6 úhlů) a sekce „3D model“
       v dossieru (`dossier.json` → `model`).
     - Další krok: průchozí interiér podle layoutu, uvnitř létající lodi.
+85. **Wayfarer 1.1: proč vypadal rozbitě a špinavě, a oprava** (24. 9. 2026, autor: „vypadá nekvalitně, jak kdyby
+    byla rozbitá špinavá“). Změřené příčiny:
+    - **UV atlas využíval 0,4 % textury.** AI mesh byl polévka rozpojených trojúhelníků (309 tis. vrcholů → 149 tis.
+      po svaření) a `smart_project` s marginem na každý z 52 tis. ostrůvků je zmenšil na nic. 4K textura se chovala
+      jako ~260 px.
+    - Zdrojová AI textura (2K mozaika) měla šmouhy na hranách ostrůvků a zapečené fialové odlesky.
+    - `M_Ship_PBR` přidával procedurální panely (`PanelStrength` 0,6) přes vymodelované, grunge a opotřebení.
+    - Trysky svítily jen na ploškách mířících přímo dozadu, takže vznikl vzorovaný „medailon“.
+    Opravy:
+    - `build_ai_ship.py`: `weld_m` (svaření vrcholů) a unwrap s nulovým marginem a jedním `pack_islands` (ADD
+      0,0005). Atlas teď využívá 55 % textury a log to vypisuje.
+    - Nový `Tools/Blender/repaint_ship.py` (po každém buildu, před AO), řízený blokem `repaint` v receptu:
+      - AI barva jen rozhodne zónu (bílá, gunmetal, oranžová, sklo, kov trysek); zóny se vyhladí přes sousedy
+        a odstraní ostrůvky pod 0,2 m²;
+      - každá zóna dostane jednu čistou barvu a jen 30 % AI jasu normalizovaného na zónu;
+      - pruhy se berou po texelech z AI kresby (medián, práh), mimo oblast trysek.
+    - AI mapy mají příponu `_AI`, hra používá přebarvené.
+    - Materiál: `panel_strength` 0, `wear_amount` 0,03, grunge 0,04; emise trysek přes celý disk.
+    - Test `test_ship_import` se u lodi s `panel_strength` 0 v setupu řídí tím nastavením.
+    Snímky ze zabalené hry jsou prohlédnuté (`Docs/Shots/Wayfarer/`) a dossier je aktualizovaný.
+    Zbývá: tvar z AI (zvlněné plochy, gondoly u trupu), neprůhledné sklo, střepy v kokpitu.
 
 ---
 

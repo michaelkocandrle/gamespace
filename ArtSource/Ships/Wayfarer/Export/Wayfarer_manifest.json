@@ -45,8 +45,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 297461,
-      "verts": 309328,
+      "tris": 297459,
+      "verts": 148525,
       "materials": [
         "M_Ship_Wayfarer_Hull",
         "M_Ship_Wayfarer_Emissive"
@@ -69,7 +69,7 @@
       "lod": 0,
       "part": "Gear",
       "tris": 8694,
-      "verts": 8278,
+      "verts": 4476,
       "materials": [
         "M_Ship_Wayfarer_Hull"
       ],
@@ -91,7 +91,7 @@
       "lod": 0,
       "part": "Ramp",
       "tris": 4484,
-      "verts": 4234,
+      "verts": 2289,
       "materials": [
         "M_Ship_Wayfarer_Hull"
       ],

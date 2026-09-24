@@ -26,7 +26,15 @@ def main(argv):
     ap.add_argument("--out", required=True)
     ap.add_argument("--prefix", default="ship")
     ap.add_argument("--res", type=int, default=1600)
+    ap.add_argument("--swap", action="append", default=[],
+                    help="old_file_name=new_path: render with another texture, e.g. the repainted base colour")
     args = ap.parse_args(argv)
+    for pair in args.swap:
+        old, new = pair.split("=", 1)
+        for img in bpy.data.images:
+            if os.path.basename(img.filepath) == old:
+                img.filepath = os.path.abspath(new)
+                img.reload()
     out = os.path.abspath(args.out)
     os.makedirs(out, exist_ok=True)
     scene = bpy.context.scene

@@ -58,15 +58,18 @@
     "normal": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_N.png",
     "ao": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_AO.png"
    },
+   "_comment_clean": "Clean paint (author 24. 9. 2026: the ship looked broken and dirty). The repainted base colour and ORM (Tools/Blender/repaint_ship.py) carry flat zones; the panel lines come from the normal map and the AO. The master's own dirt is turned down: no procedural panel sheets on top of the modelled ones, almost no wear, grunge variation low, a little scorch only right at the nozzles.",
    "cavity_strength": 0.5,
    "ao_strength": 0.6,
    "detail_tile_cm": 18.0,
-   "detail_normal_strength": 1.0,
-   "wear_amount": 0.2,
-   "scorch_amount": 0.4,
-   "scorch_start_cm": -800.0,
+   "detail_normal_strength": 0.8,
+   "detail_rough_variation": 0.04,
+   "panel_strength": 0.0,
+   "wear_amount": 0.03,
+   "scorch_amount": 0.25,
+   "scorch_start_cm": -950.0,
    "scorch_end_cm": -1075.0,
-   "roughness_scale": 0.85
+   "roughness_scale": 1.0
   },
   "MI_Ship_Wayfarer_Thruster": {
    "master": "hull",
@@ -75,7 +78,7 @@
    "metallic": 0.0,
    "roughness": 0.4,
    "emissive_color": [1.0, 0.55, 0.25],
-   "emissive_strength": 15.0
+   "emissive_strength": 8.0
   }
  }
 }

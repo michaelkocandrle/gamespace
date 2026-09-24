@@ -146,9 +146,17 @@ def main():
             panel_tile = MEL.get_material_instance_scalar_parameter_value(hull_mi, "PanelTileCm")
             # Above ~0.8 the seams run over greebles and curves and read as an overlay; a sheet under a
             # metre makes plates too small to be plating (Tools/Shots/hull_panels.json).
-            check("the hull's plating is there and restrained",
-                  0.0 < panel_strength <= 0.8 and 100.0 <= panel_tile <= 500.0,
-                  "strength %.2f, sheet %.0f cm" % (panel_strength, panel_tile))
+            wanted = next((m.get("panel_strength") for m in (setup or {}).get("materials", {}).values()
+                           if isinstance(m, dict) and "panel_strength" in m), None)
+            if wanted == 0.0:
+                # A ship with modelled panel lines (the Wayfarer's repainted AI hull) turns the procedural sheets off:
+                # drawn over the modelled seams they doubled up and read as dirt (author 24. 9. 2026).
+                check("the hull's own panels: procedural plating off, as its setup says", panel_strength == 0.0,
+                      "strength %.2f" % panel_strength)
+            else:
+                check("the hull's plating is there and restrained",
+                      0.0 < panel_strength <= 0.8 and 100.0 <= panel_tile <= 500.0,
+                      "strength %.2f, sheet %.0f cm" % (panel_strength, panel_tile))
             scorch = MEL.get_material_instance_scalar_parameter_value(hull_mi, "ScorchAmount")
             start = MEL.get_material_instance_scalar_parameter_value(hull_mi, "ScorchStartCm")
             end = MEL.get_material_instance_scalar_parameter_value(hull_mi, "ScorchEndCm")

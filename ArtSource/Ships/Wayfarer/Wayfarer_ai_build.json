@@ -9,6 +9,7 @@
   "metallic": "ArtSource/Ships/Wayfarer/Higgsfield/Wayfarer_multiview_v1_tex/metallic.png"
  },
  "out_blend": "ArtSource/Ships/Wayfarer/Wayfarer_AI.blend",
+ "weld_m": 0.0005,
  "orient": {
   "_comment": "The GLB has the nose along -X.",
   "rotate_z_deg": 180,
@@ -57,12 +58,12 @@
   "importance": []
  },
  "rebake": {
-  "base_color": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_BC.png",
-  "orm": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_ORM.png",
+  "base_color": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_BC_AI.png",
+  "orm": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_ORM_AI.png",
   "normal": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_N.png",
   "size": 4096,
   "orm_size": 2048,
-  "uv_margin": 0.002,
+  "uv_margin": 0.0005,
   "uv_angle_deg": 66,
   "cage_extrusion_m": 0.05,
   "max_ray_m": 0.2
@@ -192,11 +193,70 @@
   }
  },
  "emissive": {
-  "_comment": "Nozzle discs of the two pod engines glow with engine load (the small central cluster is left out: its disc caught the ramp surroundings).",
+  "_comment": "The whole nozzle disc of each pod glows evenly (normal_x_max -0.1): with only the faces pointing straight back it glowed as a patterned medallion (author, 24. 9. 2026).",
   "x_max": -8.5,
-  "normal_x_max": -0.6,
-  "radius": 0.9,
+  "normal_x_max": -0.1,
+  "radius": 0.8,
   "centres_yz": [[2.46, 0.0], [-2.46, 0.0]],
   "colour": [1.0, 0.55, 0.25]
+ },
+ "repaint": {
+  "_comment": "Tools/Blender/repaint_ship.py after every build: the AI colours only decide which paint zone a face belongs to; each zone gets one clean colour. Colours are sRGB (texture values): warm off-white and gunmetal of the approved style A, Halcyon orange.",
+  "out_base_color": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_BC.png",
+  "out_orm": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_ORM.png",
+  "light_min": 0.5,
+  "glass_light_max": 0.35,
+  "smooth_passes": 4,
+  "accent_weight": 1.6,
+  "glass_boxes": [
+   {
+    "x": [2.5, 8.3],
+    "y": [-1.6, 1.6],
+    "z": [0.9, 2.4]
+   }
+  ],
+  "engine_boxes": [
+   {
+    "x": [-10.8, -9.0],
+    "y": [1.3, 3.7]
+   },
+   {
+    "x": [-10.8, -9.0],
+    "y": [-3.7, -1.3]
+   }
+  ],
+  "zones": {
+   "paint": {
+    "colour": [0.8, 0.78, 0.73],
+    "roughness": 0.45,
+    "metallic": 0.0
+   },
+   "dark": {
+    "colour": [0.2, 0.21, 0.23],
+    "roughness": 0.5,
+    "metallic": 0.3
+   },
+   "accent": {
+    "colour": [0.86, 0.43, 0.1],
+    "roughness": 0.45,
+    "metallic": 0.0
+   },
+   "glass": {
+    "colour": [0.03, 0.035, 0.04],
+    "roughness": 0.06,
+    "metallic": 0.0
+   },
+   "engine": {
+    "colour": [0.24, 0.24, 0.26],
+    "roughness": 0.35,
+    "metallic": 0.85
+   }
+  },
+  "detail_strength": 0.3,
+  "accent_exclude_boxes": [
+   {
+    "x": [-10.8, -9.6]
+   }
+  ]
  }
 }
