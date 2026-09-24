@@ -133,7 +133,7 @@ Od 24. 9. 2026 běží **oba servery naráz** v jednom Blenderu, každý na své
 
 - **Online přístup:** oficiální addon startuje jen s povoleným online přístupem.
   - Buď Blender spusť s `--online-mode` (platí jen pro to spuštění),
-  - nebo autor jednou zapne *Preferences → System → Network → Allow Online Access*.
+  - nebo autor jednou zapne *Preferences → System → Network → Allow Online Access* (**zapnuto 24. 9. 2026**, takže obyčejné spuštění Blenderu stačí).
   - Bez toho port 9877 neposlouchá a v preferencích addonu je chyba „online access“.
 - **Instalace (hotovo, pro obnovu):**
   - Addon: `blender --command extension install-file -r user_default --enable mcp-1.0.3.zip`. Zip je z `https://projects.blender.org/lab/blender_mcp/releases`.
