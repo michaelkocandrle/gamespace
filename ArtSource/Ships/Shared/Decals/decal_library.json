@@ -1,0 +1,693 @@
+{
+ "_comment": "Mesh-decal and trim-sheet library, built by Tools/Blender/decal_library.py (skill ship-pipeline, section decals). Every item is real geometry captured top-down into texture atlases; add an item and rebuild. Units: metres; decal item coordinates relative to its cell centre, x right / y up.",
+ "height_range_m": 0.03,
+ "ao_distance_m": 0.03,
+ "defaults": {
+  "color": [0.6, 0.57, 0.5],
+  "dark": [0.08, 0.08, 0.09],
+  "rough": 0.45
+ },
+ "decals": {
+  "cells": 4,
+  "cell_m": 0.5,
+  "size_px": 2048,
+  "items": [
+   {
+    "name": "slot",
+    "purpose": "narrow slot: vents, drain, hinge gaps",
+    "footprint": [0.3, 0.08],
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [0.26, 0.03],
+      "depth": 0.015
+     }
+    ],
+    "cell": [0, 0]
+   },
+   {
+    "name": "vent_grille",
+    "purpose": "ventilation grille over a recess (coolers, life support)",
+    "footprint": [0.42, 0.28],
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [0.38, 0.24],
+      "depth": 0.022
+     }
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, -0.09],
+      "size": [0.36, 0.012],
+      "h": 0.012,
+      "z": -0.02,
+      "repeat": 7,
+      "step": [0, 0.03],
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.6,
+      "rough": 0.45
+     }
+    ],
+    "cell": [1, 0]
+   },
+   {
+    "name": "seam_straight",
+    "purpose": "straight panel seam",
+    "footprint": [0.48, 0.05],
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [0.48, 0.006],
+      "depth": 0.006
+     }
+    ],
+    "cell": [2, 0]
+   },
+   {
+    "name": "seam_corner",
+    "purpose": "panel seam corner (L)",
+    "footprint": [0.3, 0.3],
+    "recesses": [
+     {
+      "at": [0.075, 0],
+      "size": [0.156, 0.006],
+      "depth": 0.006
+     },
+     {
+      "at": [0, 0.075],
+      "size": [0.006, 0.156],
+      "depth": 0.006
+     }
+    ],
+    "cell": [3, 0]
+   },
+   {
+    "name": "seam_t",
+    "purpose": "panel seam T junction",
+    "footprint": [0.3, 0.3],
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [0.3, 0.006],
+      "depth": 0.006
+     },
+     {
+      "at": [0, -0.075],
+      "size": [0.006, 0.15],
+      "depth": 0.006
+     }
+    ],
+    "cell": [0, 1]
+   },
+   {
+    "name": "bolt",
+    "purpose": "single hex bolt with washer",
+    "footprint": [0.05, 0.05],
+    "parts": [
+     {
+      "kind": "cyl",
+      "at": [0, 0],
+      "r": 0.018,
+      "h": 0.003,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.4
+     },
+     {
+      "kind": "hex",
+      "at": [0, 0],
+      "r": 0.011,
+      "h": 0.007,
+      "z": 0.003,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     }
+    ],
+    "cell": [1, 1]
+   },
+   {
+    "name": "bolt_row",
+    "purpose": "four bolts in a row (plate edges)",
+    "footprint": [0.42, 0.05],
+    "parts": [
+     {
+      "kind": "hex",
+      "at": [-0.15, 0],
+      "r": 0.009,
+      "h": 0.006,
+      "repeat": 4,
+      "step": [0.1, 0],
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     }
+    ],
+    "cell": [2, 1]
+   },
+   {
+    "name": "hatch",
+    "purpose": "service hatch: seam frame, hinge, latch, bolts",
+    "footprint": [0.42, 0.32],
+    "recesses": [
+     {
+      "at": [0, 0.14],
+      "size": [0.4, 0.006],
+      "depth": 0.006
+     },
+     {
+      "at": [0, -0.14],
+      "size": [0.4, 0.006],
+      "depth": 0.006
+     },
+     {
+      "at": [0.197, 0],
+      "size": [0.006, 0.286],
+      "depth": 0.006
+     },
+     {
+      "at": [-0.197, 0],
+      "size": [0.006, 0.286],
+      "depth": 0.006
+     }
+    ],
+    "parts": [
+     {
+      "kind": "bar_y",
+      "at": [-0.17, 0],
+      "r": 0.008,
+      "size": [0, 0.2],
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.6
+     },
+     {
+      "kind": "box",
+      "at": [0.15, 0],
+      "size": [0.05, 0.03],
+      "h": 0.008,
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.4
+     },
+     {
+      "kind": "hex",
+      "at": [-0.17, -0.11],
+      "r": 0.008,
+      "h": 0.005,
+      "z": 0.0,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     },
+     {
+      "kind": "hex",
+      "at": [-0.17, 0.11],
+      "r": 0.008,
+      "h": 0.005,
+      "z": 0.0,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     },
+     {
+      "kind": "hex",
+      "at": [0.17, -0.11],
+      "r": 0.008,
+      "h": 0.005,
+      "z": 0.0,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     },
+     {
+      "kind": "hex",
+      "at": [0.17, 0.11],
+      "r": 0.008,
+      "h": 0.005,
+      "z": 0.0,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     }
+    ],
+    "cell": [3, 1]
+   },
+   {
+    "name": "handle",
+    "purpose": "grab handle for EVA and ground crew",
+    "footprint": [0.26, 0.08],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [-0.09, 0],
+      "size": [0.02, 0.02],
+      "h": 0.03,
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.5
+     },
+     {
+      "kind": "box",
+      "at": [0.09, 0],
+      "size": [0.02, 0.02],
+      "h": 0.03,
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.5
+     },
+     {
+      "kind": "bar",
+      "at": [0, 0],
+      "r": 0.009,
+      "size": [0.2, 0],
+      "z": 0.025,
+      "color": [0.75, 0.55, 0.05],
+      "metal": 0.0,
+      "rough": 0.5
+     }
+    ],
+    "cell": [0, 2]
+   },
+   {
+    "name": "warning_label",
+    "purpose": "hazard plate (engine, intake, landing gear)",
+    "footprint": [0.3, 0.12],
+    "paint_color": true,
+    "color": [0.75, 0.55, 0.05],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.3, 0.12],
+      "h": 0.0015,
+      "color": [0.75, 0.55, 0.05]
+     },
+     {
+      "kind": "box",
+      "at": [-0.12, 0],
+      "size": [0.03, 0.12],
+      "h": 0.002,
+      "repeat": 5,
+      "step": [0.06, 0],
+      "color": [0.02, 0.02, 0.02]
+     }
+    ],
+    "cell": [1, 2]
+   },
+   {
+    "name": "recessed_panel",
+    "purpose": "recessed panel with corner bolts",
+    "footprint": [0.44, 0.3],
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [0.4, 0.26],
+      "depth": 0.01,
+      "color": [0.3, 0.3, 0.3]
+     }
+    ],
+    "parts": [
+     {
+      "kind": "hex",
+      "at": [-0.17, -0.1],
+      "r": 0.008,
+      "h": 0.005,
+      "z": -0.01,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     },
+     {
+      "kind": "hex",
+      "at": [-0.17, 0.1],
+      "r": 0.008,
+      "h": 0.005,
+      "z": -0.01,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     },
+     {
+      "kind": "hex",
+      "at": [0.17, -0.1],
+      "r": 0.008,
+      "h": 0.005,
+      "z": -0.01,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     },
+     {
+      "kind": "hex",
+      "at": [0.17, 0.1],
+      "r": 0.008,
+      "h": 0.005,
+      "z": -0.01,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     }
+    ],
+    "cell": [2, 2]
+   },
+   {
+    "name": "access_panel",
+    "purpose": "raised access panel with screws",
+    "footprint": [0.34, 0.24],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.3, 0.2],
+      "h": 0.006
+     },
+     {
+      "kind": "hex",
+      "at": [-0.13, -0.08],
+      "r": 0.008,
+      "h": 0.005,
+      "z": 0.006,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     },
+     {
+      "kind": "hex",
+      "at": [-0.13, 0.08],
+      "r": 0.008,
+      "h": 0.005,
+      "z": 0.006,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     },
+     {
+      "kind": "hex",
+      "at": [0.13, -0.08],
+      "r": 0.008,
+      "h": 0.005,
+      "z": 0.006,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     },
+     {
+      "kind": "hex",
+      "at": [0.13, 0.08],
+      "r": 0.008,
+      "h": 0.005,
+      "z": 0.006,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     }
+    ],
+    "cell": [3, 2]
+   },
+   {
+    "name": "fuel_cap",
+    "purpose": "fuel / coolant filler cap",
+    "footprint": [0.2, 0.2],
+    "recesses": [
+     {
+      "at": [0, 0],
+      "r": 0.08,
+      "depth": 0.012,
+      "round": true
+     }
+    ],
+    "parts": [
+     {
+      "kind": "cyl",
+      "at": [0, 0],
+      "r": 0.062,
+      "h": 0.01,
+      "z": -0.012,
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.3,
+      "seg": 32
+     },
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.08, 0.014],
+      "h": 0.008,
+      "z": -0.002,
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.5
+     }
+    ],
+    "cell": [0, 3]
+   },
+   {
+    "name": "louvers",
+    "purpose": "raised exhaust louvers",
+    "footprint": [0.3, 0.22],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, -0.075],
+      "size": [0.26, 0.018],
+      "h": 0.012,
+      "repeat": 6,
+      "step": [0, 0.03],
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.5
+     }
+    ],
+    "cell": [1, 3]
+   },
+   {
+    "name": "light_housing",
+    "purpose": "navigation / flood light housing",
+    "footprint": [0.16, 0.08],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.14, 0.06],
+      "h": 0.012,
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.4
+     },
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [0.1, 0.03],
+      "h": 0.003,
+      "z": 0.012,
+      "color": [0.9, 0.9, 0.85],
+      "rough": 0.1
+     }
+    ],
+    "cell": [2, 3]
+   },
+   {
+    "name": "cable_run",
+    "purpose": "cable run with clamps along a seam",
+    "footprint": [0.48, 0.1],
+    "parts": [
+     {
+      "kind": "bar",
+      "at": [0, -0.02],
+      "r": 0.012,
+      "size": [0.46, 0],
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.2,
+      "rough": 0.7
+     },
+     {
+      "kind": "bar",
+      "at": [0, 0.02],
+      "r": 0.008,
+      "size": [0.46, 0],
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.2,
+      "rough": 0.7
+     },
+     {
+      "kind": "box",
+      "at": [-0.18, 0],
+      "size": [0.02, 0.08],
+      "h": 0.03,
+      "repeat": 4,
+      "step": [0.12, 0],
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0
+     }
+    ],
+    "cell": [3, 3]
+   }
+  ]
+ },
+ "trim": {
+  "width_m": 2.0,
+  "size_px": 2048,
+  "strips": [
+   {
+    "name": "panel_lip",
+    "purpose": "raised plate lip with a groove below (plate edges)",
+    "height_m": 0.06,
+    "recesses": [
+     {
+      "at": [0, -0.017],
+      "size": [2.4, 0.006],
+      "depth": 0.005
+     }
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0.01],
+      "size": [2.4, 0.03],
+      "h": 0.006
+     }
+    ]
+   },
+   {
+    "name": "ribbing",
+    "purpose": "structural ribbing (bays, frames)",
+    "height_m": 0.12,
+    "parts": [
+     {
+      "kind": "box",
+      "at": [-1.175, 0],
+      "size": [0.02, 0.1],
+      "h": 0.01,
+      "repeat": 48,
+      "step": [0.05, 0]
+     }
+    ]
+   },
+   {
+    "name": "bolt_row",
+    "purpose": "row of bolts every 5 cm",
+    "height_m": 0.05,
+    "parts": [
+     {
+      "kind": "hex",
+      "at": [-1.175, 0],
+      "r": 0.008,
+      "h": 0.006,
+      "repeat": 48,
+      "step": [0.05, 0],
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0,
+      "rough": 0.35
+     }
+    ]
+   },
+   {
+    "name": "rail",
+    "purpose": "round rail / pipe",
+    "height_m": 0.05,
+    "parts": [
+     {
+      "kind": "bar",
+      "at": [0, 0],
+      "r": 0.012,
+      "size": [2.4, 0],
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.6
+     }
+    ]
+   },
+   {
+    "name": "studs_band",
+    "purpose": "band with studs (armour strap)",
+    "height_m": 0.1,
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0],
+      "size": [2.4, 0.08],
+      "h": 0.004
+     },
+     {
+      "kind": "cyl",
+      "at": [-1.175, 0.02],
+      "r": 0.009,
+      "h": 0.004,
+      "z": 0.004,
+      "repeat": 48,
+      "step": [0.05, 0],
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0
+     },
+     {
+      "kind": "cyl",
+      "at": [-1.15, -0.02],
+      "r": 0.009,
+      "h": 0.004,
+      "z": 0.004,
+      "repeat": 48,
+      "step": [0.05, 0],
+      "color": [0.55, 0.55, 0.57],
+      "metal": 1.0
+     }
+    ]
+   },
+   {
+    "name": "step_edge",
+    "purpose": "stepped edge (plate over plate)",
+    "height_m": 0.08,
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0.02],
+      "size": [2.4, 0.04],
+      "h": 0.01
+     },
+     {
+      "kind": "box",
+      "at": [0, -0.02],
+      "size": [2.4, 0.04],
+      "h": 0.005
+     }
+    ]
+   },
+   {
+    "name": "grille_band",
+    "purpose": "long intake / exhaust grille",
+    "height_m": 0.1,
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [2.4, 0.07],
+      "depth": 0.015
+     }
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [-1.1875, 0],
+      "size": [0.008, 0.07],
+      "h": 0.012,
+      "z": -0.015,
+      "repeat": 96,
+      "step": [0.025, 0],
+      "color": [0.05, 0.052, 0.058],
+      "metal": 0.6
+     }
+    ]
+   },
+   {
+    "name": "seam_double",
+    "purpose": "double panel seam",
+    "height_m": 0.04,
+    "recesses": [
+     {
+      "at": [0, 0.01],
+      "size": [2.4, 0.005],
+      "depth": 0.005
+     },
+     {
+      "at": [0, -0.01],
+      "size": [2.4, 0.005],
+      "depth": 0.005
+     }
+    ]
+   }
+  ]
+ }
+}

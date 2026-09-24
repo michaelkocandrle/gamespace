@@ -1,0 +1,311 @@
+{
+ "decals": {
+  "slot": {
+   "uv": [
+    0.05,
+    0.855,
+    0.2,
+    0.895
+   ],
+   "size_m": [
+    0.3,
+    0.08
+   ],
+   "purpose": "narrow slot: vents, drain, hinge gaps",
+   "paint_color": false
+  },
+  "vent_grille": {
+   "uv": [
+    0.27,
+    0.8049999999999999,
+    0.48,
+    0.9450000000000001
+   ],
+   "size_m": [
+    0.42,
+    0.28
+   ],
+   "purpose": "ventilation grille over a recess (coolers, life support)",
+   "paint_color": false
+  },
+  "seam_straight": {
+   "uv": [
+    0.505,
+    0.8625,
+    0.745,
+    0.8875
+   ],
+   "size_m": [
+    0.48,
+    0.05
+   ],
+   "purpose": "straight panel seam",
+   "paint_color": false
+  },
+  "seam_corner": {
+   "uv": [
+    0.8,
+    0.8,
+    0.95,
+    0.95
+   ],
+   "size_m": [
+    0.3,
+    0.3
+   ],
+   "purpose": "panel seam corner (L)",
+   "paint_color": false
+  },
+  "seam_t": {
+   "uv": [
+    0.05,
+    0.55,
+    0.2,
+    0.7
+   ],
+   "size_m": [
+    0.3,
+    0.3
+   ],
+   "purpose": "panel seam T junction",
+   "paint_color": false
+  },
+  "bolt": {
+   "uv": [
+    0.3625,
+    0.6125,
+    0.3875,
+    0.6375
+   ],
+   "size_m": [
+    0.05,
+    0.05
+   ],
+   "purpose": "single hex bolt with washer",
+   "paint_color": false
+  },
+  "bolt_row": {
+   "uv": [
+    0.52,
+    0.6125,
+    0.73,
+    0.6375
+   ],
+   "size_m": [
+    0.42,
+    0.05
+   ],
+   "purpose": "four bolts in a row (plate edges)",
+   "paint_color": false
+  },
+  "hatch": {
+   "uv": [
+    0.77,
+    0.545,
+    0.98,
+    0.705
+   ],
+   "size_m": [
+    0.42,
+    0.32
+   ],
+   "purpose": "service hatch: seam frame, hinge, latch, bolts",
+   "paint_color": false
+  },
+  "handle": {
+   "uv": [
+    0.06,
+    0.355,
+    0.19,
+    0.395
+   ],
+   "size_m": [
+    0.26,
+    0.08
+   ],
+   "purpose": "grab handle for EVA and ground crew",
+   "paint_color": false
+  },
+  "warning_label": {
+   "uv": [
+    0.3,
+    0.345,
+    0.45,
+    0.405
+   ],
+   "size_m": [
+    0.3,
+    0.12
+   ],
+   "purpose": "hazard plate (engine, intake, landing gear)",
+   "paint_color": true
+  },
+  "recessed_panel": {
+   "uv": [
+    0.515,
+    0.3,
+    0.735,
+    0.45
+   ],
+   "size_m": [
+    0.44,
+    0.3
+   ],
+   "purpose": "recessed panel with corner bolts",
+   "paint_color": false
+  },
+  "access_panel": {
+   "uv": [
+    0.79,
+    0.315,
+    0.96,
+    0.435
+   ],
+   "size_m": [
+    0.34,
+    0.24
+   ],
+   "purpose": "raised access panel with screws",
+   "paint_color": false
+  },
+  "fuel_cap": {
+   "uv": [
+    0.075,
+    0.075,
+    0.175,
+    0.175
+   ],
+   "size_m": [
+    0.2,
+    0.2
+   ],
+   "purpose": "fuel / coolant filler cap",
+   "paint_color": false
+  },
+  "louvers": {
+   "uv": [
+    0.3,
+    0.07,
+    0.45,
+    0.18
+   ],
+   "size_m": [
+    0.3,
+    0.22
+   ],
+   "purpose": "raised exhaust louvers",
+   "paint_color": false
+  },
+  "light_housing": {
+   "uv": [
+    0.585,
+    0.105,
+    0.665,
+    0.145
+   ],
+   "size_m": [
+    0.16,
+    0.08
+   ],
+   "purpose": "navigation / flood light housing",
+   "paint_color": false
+  },
+  "cable_run": {
+   "uv": [
+    0.755,
+    0.1,
+    0.995,
+    0.15
+   ],
+   "size_m": [
+    0.48,
+    0.1
+   ],
+   "purpose": "cable run with clamps along a seam",
+   "paint_color": false
+  }
+ },
+ "trim": {
+  "panel_lip": {
+   "v": [
+    0.97,
+    1.0
+   ],
+   "height_m": 0.06,
+   "tile_m": 2.0,
+   "purpose": "raised plate lip with a groove below (plate edges)"
+  },
+  "ribbing": {
+   "v": [
+    0.9099999999999999,
+    0.97
+   ],
+   "height_m": 0.12,
+   "tile_m": 2.0,
+   "purpose": "structural ribbing (bays, frames)"
+  },
+  "bolt_row": {
+   "v": [
+    0.885,
+    0.9099999999999999
+   ],
+   "height_m": 0.05,
+   "tile_m": 2.0,
+   "purpose": "row of bolts every 5 cm"
+  },
+  "rail": {
+   "v": [
+    0.8600000000000001,
+    0.885
+   ],
+   "height_m": 0.05,
+   "tile_m": 2.0,
+   "purpose": "round rail / pipe"
+  },
+  "studs_band": {
+   "v": [
+    0.8099999999999999,
+    0.86
+   ],
+   "height_m": 0.1,
+   "tile_m": 2.0,
+   "purpose": "band with studs (armour strap)"
+  },
+  "step_edge": {
+   "v": [
+    0.77,
+    0.81
+   ],
+   "height_m": 0.08,
+   "tile_m": 2.0,
+   "purpose": "stepped edge (plate over plate)"
+  },
+  "grille_band": {
+   "v": [
+    0.72,
+    0.77
+   ],
+   "height_m": 0.1,
+   "tile_m": 2.0,
+   "purpose": "long intake / exhaust grille"
+  },
+  "seam_double": {
+   "v": [
+    0.7,
+    0.72
+   ],
+   "height_m": 0.04,
+   "tile_m": 2.0,
+   "purpose": "double panel seam"
+  }
+ },
+ "decal_atlas_m": 2.0,
+ "trim_width_m": 2.0,
+ "maps": {
+  "N": "tangent normal, OpenGL (+Y up): Unreal flip green",
+  "H": "height, 0.5 = surface, +-0.030 m",
+  "AO": "ambient occlusion",
+  "BC": "sRGB colour, A = colour opacity",
+  "M": "R alpha (normal/AO opacity), G roughness, B metallic"
+ }
+}
