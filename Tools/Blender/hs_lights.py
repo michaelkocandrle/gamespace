@@ -137,7 +137,7 @@ def apply(recipe, made, coll, mats_factory, bevel):
                 lights.append(_light_entry(name, lens["light"], colour, hit + n * (0.03 + lh), n, side))
     for st in spec.get("strips", []):
         x0, x1 = st["x"]
-        steps = max(4, int((x1 - x0) / 0.05))
+        steps = max(4, int((x1 - x0) / st.get("step", 0.05)))
         for side in ((1, -1) if st.get("mirror", True) else (1,)):
             colour = st["color"]
             pts = []

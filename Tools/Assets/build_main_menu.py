@@ -31,7 +31,7 @@ MOON_MATERIAL = "/Game/Environments/Space/M_Moon"
 RINGS_MATERIAL = "/Game/Environments/Space/M_PlanetRings"
 # Parts left out of the title screen: the ship flies in space there, gear stowed; the cockpit interior
 # is inside the hull and cannot be seen from outside.
-HIDDEN_PARTS = ("_Gear", "_Interior", "_Lining")
+HIDDEN_PARTS = ("_Gear", "_Interior", "_Lining", "_Screens")
 
 EXPOSURE_EV100 = 3.0
 SUN_PITCH, SUN_YAW = -22.0, 25.0          # light travels towards +X: lights what the camera sees

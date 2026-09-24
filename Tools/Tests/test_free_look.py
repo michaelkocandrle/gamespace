@@ -144,7 +144,9 @@ else:
         rest = ship.get_editor_property("cockpit_view_pitch_deg")
         check("released: back to the normal view (its rest tilt, setup cockpit_view_pitch_deg)", ship.get_dashboard_focus() == 0.0 and abs(back.pitch - rest) < 0.01,
               "%.3f, pitch %.2f, rest %.2f" % (ship.get_dashboard_focus(), back.pitch, rest))
-        check("the ship's view rests a little tilted down, towards its displays (-2..-5 deg)", -5.0 <= rest <= -2.0, "%.1f" % rest)
+        # 19. 9. 2026 tilted 3 deg down towards the displays; 22. 9. 2026 the author wanted the view level again
+        # (more of the outside) - so level or a little down, never up (the displays would leave the view).
+        check("the ship's view rests level or a little tilted down, towards its displays (-5..0 deg)", -5.0 <= rest <= 0.0, "%.1f" % rest)
     finally:
         eas.destroy_actor(ship)
 imc = unreal.EditorAssetLibrary.load_asset("/Game/Input/IMC_Spaceship")

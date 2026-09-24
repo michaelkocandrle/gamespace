@@ -85,7 +85,7 @@ if "MenuShip" in actors:
     check("title ship's hull is an SM_Ship_<Ship> mesh", _menu_ship is not None, str(_mesh and _mesh.get_name()))
 if _menu_ship:
     _manifest = json.load(open(os.path.join(REPO, "ArtSource", "Ships", _menu_ship, "Export", "%s_manifest.json" % _menu_ship), encoding="utf-8"))
-    _parts = ["MenuShip_" + info["part"] for name, info in _manifest["meshes"].items() if info.get("part") and info["part"] not in ("Gear", "Interior", "Lining")]
+    _parts = ["MenuShip_" + info["part"] for name, info in _manifest["meshes"].items() if info.get("part") and info["part"] not in ("Gear", "Interior", "Lining", "Screens")]
     check("title ship = hull + the manifest's parts (no gear, nothing from an older model)", _ship_actors == sorted(["MenuShip"] + _parts), str(_ship_actors))
     orbit_label = "MenuShip"
 else:

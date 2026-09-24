@@ -10,6 +10,16 @@ je průchozí, stojí v `TestSpace` 500 m stranou od lodi, bez vnějšího trupu
 jako nedostatečný a nový Steadfast se staví podle 2D návrhu** (HANDOFF bod 73–75). Stávající
 skripty jsou pracovní pipeline a zdroj ověřených postupů, ne cílový vzhled.
 
+**Wayfarer (25. 9. 2026): interiér uvnitř létajícího trupu**, jiná cesta než Steadfast:
+- `Tools/Blender/hs_interior.py` volá `hs_build_ship.py` po rozdělení kabiny. Recept `interior` v
+  `ArtSource/Ships/Wayfarer/HardSurface/Wayfarer_hs.json` (`height_m`, `sill_z`, `lights`, `seat`).
+  Místnosti a předměty bere z `Design/Wayfarer_layout.json`; předmět se pozná podle klíčového slova
+  v českém názvu (`Hydraulika`, `Reaktor`, `Lůžko`, `Přístrojová`, `křeslo`…). Neznámý se přeskočí.
+- Výstup: part `Interior` (bez Nanite a kolize) a `Screens` (canvas 1330×490, 4 obdélníky `RECTS`), sockety
+  `Display_*`, světla do `Wayfarer_lights.json`. Materiály `MI_Ship_Wayfarer_Int*` jsou na vrstveném masteru.
+- Snímky `Tools/Shots/wayfarer_interior.json` (`camera_local` / `look_local` v prostoru lodi, m).
+- Cíl jasu jako výše (průměr 0,13–0,23, B/R 0,72–1,05). Bodovky 20 cd na 2,3 m vysokou místnost.
+
 ## Pravidla autora (závazná)
 
 - **Nic nového do 3D bez schváleného 2D návrhu.** Pro každou loď: technický list ve tvaru RSI Ship

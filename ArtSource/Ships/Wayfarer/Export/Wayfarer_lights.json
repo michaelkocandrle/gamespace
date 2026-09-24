@@ -188,6 +188,595 @@
     0.766,
     0.6428
    ]
+  },
+  {
+   "name": "int_0",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    2.2,
+    -1.4399999999999997,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -805.0,
+    144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_1",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    4.6,
+    -1.4399999999999997,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -565.0,
+    144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_2",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    7.0,
+    -1.4399999999999997,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -325.0,
+    144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_3",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    2.2,
+    1.44,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -805.0,
+    -144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_4",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    4.6,
+    1.44,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -565.0,
+    -144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_5",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    7.0,
+    1.44,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -325.0,
+    -144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_6",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    8.566666666666666,
+    -1.4399999999999997,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -168.3,
+    144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_7",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    9.3,
+    -1.4399999999999997,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -95.0,
+    144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_8",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    10.033333333333333,
+    -1.4399999999999997,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -21.7,
+    144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_9",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    8.566666666666666,
+    1.44,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -168.3,
+    -144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_10",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    9.3,
+    1.44,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -95.0,
+    -144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_11",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    10.033333333333333,
+    1.44,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    -21.7,
+    -144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_12",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    11.2,
+    -1.4399999999999997,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    95.0,
+    144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_13",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    12.8,
+    -1.4399999999999997,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    255.0,
+    144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_14",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    14.399999999999999,
+    -1.4399999999999997,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    415.0,
+    144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_15",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    11.2,
+    1.44,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    95.0,
+    -144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_16",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    12.8,
+    1.44,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    255.0,
+    -144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_17",
+   "type": "point",
+   "color": [
+    1.0,
+    0.93,
+    0.86
+   ],
+   "intensity_cd": 20,
+   "radius_m": 5.0,
+   "location": [
+    14.399999999999999,
+    1.44,
+    2.1999999999999997
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    415.0,
+    -144.0,
+    100.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_18",
+   "type": "point",
+   "color": [
+    1.0,
+    0.72,
+    0.45
+   ],
+   "intensity_cd": 6,
+   "radius_m": 5.0,
+   "location": [
+    13.75,
+    1.55,
+    1.25
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "location_ue_cm": [
+    350.0,
+    -155.0,
+    5.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
   }
  ]
 }

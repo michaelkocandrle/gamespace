@@ -1,0 +1,159 @@
+{
+ "_comment": "Wayfarer interior inside the flying hull (free camera in ship space, eye 1.65 m over the deck) + the pilot's view + the cockpit seen through the canopy. Run -Width 1920 -Height 1080.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 4.0,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "hold",
+   "camera_local": [
+    -8.65,
+    1.2,
+    0.45
+   ],
+   "look_local": [
+    -2.75,
+    -0.6,
+    -0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "hold_back",
+   "camera_local": [
+    -2.65,
+    -0.9,
+    0.45
+   ],
+   "look_local": [
+    -9.05,
+    0.8,
+    -0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "tech",
+   "camera_local": [
+    -2.85,
+    -0.8,
+    0.45
+   ],
+   "look_local": [
+    0.35,
+    0.3,
+    -0.1
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "cabin",
+   "camera_local": [
+    0.55,
+    -0.2,
+    0.45
+   ],
+   "look_local": [
+    4.75,
+    -0.3,
+    -0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "cabin_back",
+   "camera_local": [
+    4.65,
+    0.3,
+    0.45
+   ],
+   "look_local": [
+    0.25,
+    -0.8,
+    -0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "cockpit_back",
+   "camera_local": [
+    8.05,
+    -0.6,
+    0.3
+   ],
+   "look_local": [
+    5.25,
+    0.6,
+    -0.2
+   ]
+  },
+  {
+   "name": "pilot_view",
+   "camera": "cockpit",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 1,
+   "gear": false,
+   "settle": 2.0
+  },
+  {
+   "name": "canopy_outside",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 50,
+   "camera_local": [
+    11.25,
+    -3.5,
+    2.0
+   ],
+   "look_local": [
+    6.75,
+    0,
+    0.1
+   ]
+  }
+ ]
+}

@@ -833,6 +833,15 @@ snímku.
   materiály.
 - ax) **Nové funkční díly ubraly siluetu** (anténa 0,6 m, objímky zbraní). Trysky zapustit, antény ≤ 0,3 m,
   objímky ≤ 1,15 × hlaveň.
+- ay) **Pilotní pohled nahoře černý, sklo kabiny zakryté.** Interiér se stavěl před oddělením kabiny z trupu,
+  obložení nad parapetem zkopírovalo i plochy budoucího skla. Blok `interior` v `hs_build_ship.py` běží až po
+  rozdělení kabiny.
+- az) **Interiér přesvícený do bíla** (průměr snímku 0,75, cíl SC 0,13–0,23). Automatická expozice
+  místnost s bodovkami 110 cd neztmaví. Bodovky 20 cd, tmavé albedo (≤ 0,13), měřit `measure_look.py`.
+  B/R pod 0,72 = příliš oranžové světlo, (1, 0,93, 0,86) dává 0,79.
+- ba) **Testy kokpitu padaly po přidání interiéru.** Kontroly předpokládaly Vanguard: part `Interior` jen
+  s kokpitem, 4 motory, slot `CanopyFrame`. Měřit vůči partu `Screens`, počet motorů brát z manifestu
+  (`SOCKET_Engine*`), `Display_` sockety hledat na všech meshích lodi.
 
 ---
 

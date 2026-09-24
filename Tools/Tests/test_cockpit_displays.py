@@ -224,26 +224,31 @@ elif not sut.has_part("Interior"):
     sut.skip(log, "the ship's display slot, Display_ sockets, self status outline and canopy frame material",
              "%s has no modelled interior yet" % sut.SHIP)
 else:
-    mesh = unreal.EditorAssetLibrary.load_asset(sut.asset("Meshes/SM_Ship_{ship}_Interior"))
+    # The screens are in the interior mesh or in a part of their own ("Screens", so the unwrap leaves their
+    # canvas UVs alone - Tools/Blender/hs_assemble_ship.py).
+    screen_part = "Screens" if sut.has_part("Screens") else "Interior"
+    mesh = unreal.EditorAssetLibrary.load_asset(sut.asset("Meshes/SM_Ship_{ship}_" + screen_part))
     slots = [str(m.get_editor_property("material_slot_name")) for m in mesh.get_editor_property("static_materials")]
-    check("interior mesh has the display slot", "M_Ship_%s_Screens" % sut.SHIP in slots, ", ".join(slots))
+    check("the %s mesh has the display slot" % screen_part, "M_Ship_%s_Screens" % sut.SHIP in slots, ", ".join(slots))
     ship_bp = eas.spawn_actor_from_class(sut.bp_class(),
                                           unreal.Vector(0, 0, 0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
     try:
         found, slot = unreal.CockpitDisplayComponent.find_display_slot(ship_bp, "_Screens")
-        check("display component finds the slot on the Interior component", found is not None and found.get_name() == "Interior" and slot >= 0,
+        check("display component finds the slot on the %s component" % screen_part, found is not None and found.get_name() == screen_part and slot >= 0,
               "%s slot %s" % (found and found.get_name(), slot))
         material = found.get_material(slot) if found else None
         parent = material.get_editor_property("parent") if isinstance(material, unreal.MaterialInstance) else None
         check("display slot has MI_Ship_<Ship>_Screens on M_Ship_Screen", material is not None and material.get_name() == "MI_Ship_%s_Screens" % sut.SHIP
               and parent is not None and parent.get_name() == "M_Ship_Screen", "%s / %s" % (material and material.get_name(), parent and parent.get_name()))
-        sockets = [str(n) for n in found.get_all_socket_names()] if found else []
+        # the display lights look for Display_ sockets on any of the ship's meshes
+        sockets = [str(n) for c in ship_bp.get_components_by_class(unreal.StaticMeshComponent) for n in c.get_all_socket_names()]
         check("a Display_ socket in front of each screen (their glow)", sorted(n for n in sockets if n.startswith("Display_"))
               == ["Display_centre_bottom", "Display_centre_top", "Display_left", "Display_right"], ", ".join(sockets))
         status = displays.debug_get_part("ShipStatus")
         status.set_ship(ship_bp)
-        check("self status reads the ship: its collision hulls, 4 engines, 3 gear legs", status.get_outline_count() >= 8
-              and len(status.get_editor_property("engines")) == 4 and len(status.get_editor_property("gear")) == 3,
+        engines = len([n for n in sut.manifest().get("sockets", {}) if n.startswith("SOCKET_Engine")])
+        check("self status reads the ship: its collision hulls, every engine socket (%d), 3 gear legs" % engines, status.get_outline_count() >= 8
+              and len(status.get_editor_property("engines")) == engines > 0 and len(status.get_editor_property("gear")) == 3,
               "%d outlines, %d engines, %d gear" % (status.get_outline_count(), len(status.get_editor_property("engines")), len(status.get_editor_property("gear"))))
         displays_component = ship_bp.get_editor_property("cockpit_displays")
         check("figures change at most ~6 times a second, so temporal AA settles on each number (setup state_rate_hz)",
@@ -251,10 +256,20 @@ else:
         check("displays light the cockpit (setup display_light_intensity_cd > 0)", displays_component.get_editor_property("display_light_intensity_cd") > 0.0)
         hull_mesh = unreal.EditorAssetLibrary.load_asset(sut.asset("Meshes/SM_Ship_{ship}"))
         hull_slots = [str(m.get_editor_property("material_slot_name")) for m in hull_mesh.get_editor_property("static_materials")]
-        check("inside of the canopy frame has its own dark slot", "M_Ship_%s_CanopyFrame" % sut.SHIP in hull_slots, ", ".join(hull_slots))
-        frame = unreal.EditorAssetLibrary.load_asset(sut.asset("Materials/MI_Ship_{ship}_CanopyFrame"))
-        base = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(frame, "BaseColor") if frame else None
-        check("canopy frame material is dark (below 0.1)", base is not None and max(base.r, base.g, base.b) < 0.1, str(base))
+        if "M_Ship_%s_CanopyFrame" % sut.SHIP in hull_slots:
+            # an AI-built hull: its canopy frame's inside has a slot of its own (build_ai_ship.py canopy_frame)
+            frame = unreal.EditorAssetLibrary.load_asset(sut.asset("Materials/MI_Ship_{ship}_CanopyFrame"))
+            param = "BaseColor"
+        else:
+            # a hard-surface hull: the interior lines the hull's inside around the canopy (hs_interior.py liner,
+            # slot IntWall) - a hull seen from inside is culled
+            int_mesh = unreal.EditorAssetLibrary.load_asset(sut.asset("Meshes/SM_Ship_{ship}_Interior"))
+            int_slots = [str(m.get_editor_property("material_slot_name")) for m in int_mesh.get_editor_property("static_materials")]
+            check("inside of the canopy frame lined by the interior (slot IntWall)", "M_Ship_%s_IntWall" % sut.SHIP in int_slots, ", ".join(int_slots))
+            frame = unreal.EditorAssetLibrary.load_asset(sut.asset("Materials/MI_Ship_{ship}_IntWall"))
+            param = "PrimaryColor"
+        base = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(frame, param) if frame else None
+        check("canopy frame's inside is dark (below 0.1)", base is not None and max(base.r, base.g, base.b) < 0.1, str(base))
     finally:
         eas.destroy_actor(ship_bp)
 

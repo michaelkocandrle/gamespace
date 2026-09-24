@@ -537,6 +537,20 @@ def main(argv):
         glass.data.materials.append(mats["glass"])
         made["canopy"] = glass
         report["canopy"] = {"object": glass.name, "faces": n, "cut_from": "hull"}
+    if recipe.get("interior") and "hull" in made:
+        # the interior from the approved deck plan, inside the hull (Tools/Blender/hs_interior.py); after the
+        # canopy cut, so the cockpit liner has holes where the glass is
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hs_interior
+        iobjs, isockets, ilights, report["interior"] = hs_interior.build(recipe, layout, coll, mats, ship, made["hull"])
+        for ob in iobjs:
+            made["int_" + ob.name] = ob
+        bpy.context.scene["hs_display_sockets"] = json.dumps({k: list(v) for k, v in isockets.items()})
+        ispec = recipe["interior"]["lights"]
+        extra = [{"name": "int_%d" % i, "type": "point", "color": ispec["warm_color"] if l.get("warm") else ispec["color"],
+                  "intensity_cd": l.get("cd", ispec["intensity_cd"]), "radius_m": ispec["radius_m"],
+                  "location": l["at"], "direction": [0, 0, -1]} for i, l in enumerate(ilights)]
+        bpy.context.scene["hs_lights"] = json.dumps(json.loads(bpy.context.scene.get("hs_lights", "[]")) + extra)
     for part, ob in made.items():
         if ob.modifiers:
             continue   # revolved parts come finished from hs_build_part

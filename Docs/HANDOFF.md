@@ -1429,6 +1429,23 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Autor zvolil livrej A. Doplněno: emisní světelné lišty podél spodní části boků, pod kabinou a na břiše
       (`hs_lights` strips s `"on": side / bottom`); stínový kanál s kabely podél boků mezi horním a spodním
       oplechováním (hloubka 5 cm, uvnitř obrysu). Silueta: bok 0,9812, shora 0,9886, zepředu 0,916.
+91. **Wayfarer: interiér ze schváleného půdorysu v1, uvnitř létajícího trupu** (25. 9. 2026).
+    - `Tools/Blender/hs_interior.py` (recept `interior` v `Wayfarer_hs.json`) staví nákladový prostor, techniku,
+      kajutu a kokpit: podlahy z dlaždic, panelové stěny (tmavý spodní pás, žebra, soklová lišta), stropy
+      se světelnými lištami, přepážky s průchody podle dveří v layoutu a všech 19 předmětů z půdorysu
+      (hydraulika rampy, tažný paprsek, úchytná mřížka, reaktor, chladič, generátor štítů, skříně, hygienický
+      kout, výdejník, lůžko, konzole, přístrojová deska, pilotní křeslo z Meshy). Díly pod podlahou mají poklop.
+    - Kokpit: vana do parapetu 1,05 m, nad ním obložení vnitřku trupu (trup zevnitř UE nekreslí).
+      Přístrojová deska má 4 obrazovky hry (part `Screens`, sockety `Display_*`), takže MFD fungují
+      z pilotního místa. Placeholder kokpit je vypnutý.
+    - Světla: 3 bodovky na místnost (20 cd, 5 m, bez stínů), neutrálně teplé (1, 0,93, 0,86); tmavá teplá
+      paleta SC (panely 0,13, stěny 0,085, podlaha 0,055). Měření 1080p: průměr 0,32–0,39, B/R 0,78–0,80,
+      FPS 62 (nákladový prostor) / 72 (pilotní pohled).
+    - Obrazovky na desce jsou o 7 cm výš: při vodorovném pohledu (autor 22. 9.) jsou celé v obraze (15,6–27,8°
+      pod okem). Pilot sedí 1,01 m od desky, schválený půdorys (Vanguard měl 1,5 m).
+    - Testy psané pro kokpit Vanguardu jsou zobecněné (`test_cockpit_frame` 6, `test_cockpit_displays`,
+      `test_free_look` klid −5..0°, menu bez `Screens`). Setup má znovu `cockpit_displays` (5 Hz, 8 cd).
+    - Ještě chybí: chůze po přistání (rampa, posuvné dveře, gravitace, vstup postavy) a usednutí do křesla.
 
 ---
 

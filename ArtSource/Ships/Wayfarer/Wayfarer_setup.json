@@ -1,5 +1,5 @@
 {
- "_comment": "Look and feel of BP_Ship_Wayfarer, applied by Tools/Assets/import_ship.py after the size-based values from the manifest (everything here wins). Flight numbers from Wayfarer_spec.json. Exterior v2 (24. 9. 2026): built straight from the approved drawing (Tools/Blender/hs_build_ship.py + hs_assemble_ship.py), one flat material per paint zone, no AI texture. No modelled interior yet, so the placeholder cockpit is on.",
+ "_comment": "Look and feel of BP_Ship_Wayfarer, applied by Tools/Assets/import_ship.py after the size-based values from the manifest (everything here wins). Flight numbers from Wayfarer_spec.json. Exterior v2 (24. 9. 2026): built straight from the approved drawing (Tools/Blender/hs_build_ship.py + hs_assemble_ship.py), one flat material per paint zone, no AI texture. The interior (hs_interior.py, 25. 9. 2026) replaces the placeholder cockpit.",
  "pawn": {
   "_comment_flight": "cm/s2 and cm/s; rotation deg/s.",
   "thrust_acceleration": 7000.0,
@@ -29,8 +29,8 @@
   "precision_speed_fraction": 0.15,
   "precision_turn_scale": 0.45,
   "free_look_max_yaw_deg": 180.0,
-  "_comment_cockpit": "No interior yet (step 4 builds it from the layout): the placeholder cockpit keeps the HUD from floating in empty space.",
-  "placeholder_cockpit": true,
+  "_comment_cockpit": "The interior (hs_interior.py) replaces the placeholder cockpit: seat, consoles and the dashboard with the four screens (24. 9. 2026).",
+  "placeholder_cockpit": false,
   "cockpit_light_intensity_cd": 1.5,
   "hide_hull_in_cockpit": false,
   "cockpit_view_pitch_deg": 0.0
@@ -53,6 +53,11 @@
   },
   "cockpit_camera": {
    "field_of_view": 88.0
+  },
+  "cockpit_displays": {
+   "_comment": "The displays' glow on the cockpit around them (rect lights at the Display_* sockets, UCockpitDisplayComponent). state_rate_hz 5: the figures change five times a second, so temporal AA (TSR) settles on each number and it reads sharp (the Vanguard's finding, 19. 9. 2026).",
+   "display_light_intensity_cd": 8.0,
+   "state_rate_hz": 5.0
   }
  },
  "materials": {
@@ -530,10 +535,310 @@
    ],
    "metallic": 0.0,
    "roughness": 0.55
+  },
+  "MI_Ship_Wayfarer_IntWall": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.085,
+     0.08,
+     0.074
+    ],
+    "SecondaryColor": [
+     0.085,
+     0.08,
+     0.074
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.5,
+    "SecondaryRoughness": 0.5,
+    "PaintMetallic": 0.4,
+    "GrungeAmount": 0.25,
+    "EdgeWear": 0.0,
+    "DirtAmount": 0.0
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntWall"
+   ]
+  },
+  "MI_Ship_Wayfarer_IntPanel": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.13,
+     0.125,
+     0.118
+    ],
+    "SecondaryColor": [
+     0.13,
+     0.125,
+     0.118
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.45,
+    "SecondaryRoughness": 0.45,
+    "PaintMetallic": 0.1,
+    "GrungeAmount": 0.25,
+    "EdgeWear": 0.0,
+    "DirtAmount": 0.0
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntPanel"
+   ]
+  },
+  "MI_Ship_Wayfarer_IntFloor": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.055,
+     0.056,
+     0.06
+    ],
+    "SecondaryColor": [
+     0.055,
+     0.056,
+     0.06
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.6,
+    "SecondaryRoughness": 0.6,
+    "PaintMetallic": 0.5,
+    "GrungeAmount": 0.25,
+    "EdgeWear": 0.0,
+    "DirtAmount": 0.0
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntFloor"
+   ]
+  },
+  "MI_Ship_Wayfarer_IntTrim": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.3,
+     0.3,
+     0.31
+    ],
+    "SecondaryColor": [
+     0.3,
+     0.3,
+     0.31
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.35,
+    "SecondaryRoughness": 0.35,
+    "PaintMetallic": 0.8,
+    "GrungeAmount": 0.25,
+    "EdgeWear": 0.0,
+    "DirtAmount": 0.0
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntTrim"
+   ]
+  },
+  "MI_Ship_Wayfarer_IntDark": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.035,
+     0.036,
+     0.04
+    ],
+    "SecondaryColor": [
+     0.035,
+     0.036,
+     0.04
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.55,
+    "SecondaryRoughness": 0.55,
+    "PaintMetallic": 0.3,
+    "GrungeAmount": 0.25,
+    "EdgeWear": 0.0,
+    "DirtAmount": 0.0
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntDark"
+   ]
+  },
+  "MI_Ship_Wayfarer_IntFabric": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.08,
+     0.095,
+     0.12
+    ],
+    "SecondaryColor": [
+     0.08,
+     0.095,
+     0.12
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.85,
+    "SecondaryRoughness": 0.85,
+    "PaintMetallic": 0.0,
+    "GrungeAmount": 0.25,
+    "EdgeWear": 0.0,
+    "DirtAmount": 0.0
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntFabric"
+   ]
+  },
+  "MI_Ship_Wayfarer_IntLeather": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.04,
+     0.038,
+     0.036
+    ],
+    "SecondaryColor": [
+     0.04,
+     0.038,
+     0.036
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.5,
+    "SecondaryRoughness": 0.5,
+    "PaintMetallic": 0.0,
+    "GrungeAmount": 0.25,
+    "EdgeWear": 0.0,
+    "DirtAmount": 0.0
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntLeather"
+   ]
+  },
+  "MI_Ship_Wayfarer_IntLight": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_IntLight"
+   ],
+   "base_color": [
+    0.1,
+    0.1,
+    0.1
+   ],
+   "metallic": 0.0,
+   "roughness": 0.3,
+   "emissive_color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "emissive_strength": 14
+  },
+  "MI_Ship_Wayfarer_IntGlow": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_IntGlow"
+   ],
+   "base_color": [
+    0.05,
+    0.05,
+    0.06
+   ],
+   "metallic": 0.0,
+   "roughness": 0.3,
+   "emissive_color": [
+    0.35,
+    0.7,
+    1.0
+   ],
+   "emissive_strength": 8
+  },
+  "MI_Ship_Wayfarer_Screens": {
+   "_comment": "cockpit displays: unlit, the game's render target (UCockpitDisplayComponent); 2.9 as the Vanguard (cockpit -0.7 EV)",
+   "master": "screen",
+   "slots": [
+    "M_Ship_Wayfarer_Screens"
+   ],
+   "emissive_strength": 2.9
   }
  },
  "no_nanite_parts": [
-  "Decals"
+  "Decals",
+  "Interior",
+  "Screens"
  ],
  "_comment_no_nanite": "Decals: mesh decals (Tools/Blender/hs_decals.py) use Deferred Decal materials, which Nanite cannot draw (skill ship-pipeline 3b3).",
  "_livery_variants": {

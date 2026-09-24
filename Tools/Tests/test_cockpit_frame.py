@@ -11,8 +11,9 @@ down to ~15 degrees below the horizon:
   3. the dashboard covers the bottom of the view in the middle; the screens are on it and in view
   4. the pillars stand in view left and right, outside the HUD, 24..34 degrees off centre at the bottom
   5. the seat: back and headrest behind the eye, the cushion under the pilot (free look only)
-  6. the ship under test (skipped without one): placeholder off, the interior part in the Blueprint, the eye over
-     the interior's tub, behind its dashboard, whose top is 7..13 degrees below the eye (the manifest's interior bounds)
+  6. the ship under test (skipped without one): placeholder off, the interior part in the Blueprint, the eye inside
+     the interior, behind the dashboard and over its screens (part Screens), the screens under the HUD and whole
+     in the level view, the pilot >= 0.9 m back (the manifest's bounds)
 The placeholder's layout (1-5) is checked whatever ship uses it.
 Prints "COCKPITTEST PASS" / "COCKPITTEST FAIL" lines and a summary.
 """
@@ -140,15 +141,24 @@ else:
               and part.get_editor_property("static_mesh").get_name() == "SM_Ship_%s_Interior" % sut.SHIP, ", ".join(sorted(meshes)))
         eye = ship.get_editor_property("cockpit_camera").get_editor_property("relative_location")
         offset = ship.get_editor_property("hull").get_editor_property("relative_location")
+        # The interior part holds the whole ship's interior; the dashboard is where its screens are (their own
+        # part "Screens", the game's four displays on the fascia; Tools/Blender/hs_interior.py).
+        screens = manifest["meshes"].get("SM_Ship_%s_Screens" % sut.SHIP)
+        check("the dashboard's screens in the manifest (part Screens)", screens is not None and screens["part"] == "Screens")
         (lx, ly, lz), (hx, hy, hz) = [[c * 100.0 for c in corner] for corner in interior["bounds_m"]]
+        (sx, _, sz0), (_, _, sz1) = [[c * 100.0 for c in corner] for corner in screens["bounds_m"]]
         ex, ez = eye.x - offset.x, eye.z - offset.z
-        check("eye over the interior's tub, behind its dashboard", lx < ex < hx - 40.0 and abs(eye.y) < 1.0 and ez > hz,
-              "eye (%.0f, %.0f, %.0f), interior x %.0f..%.0f top %.0f" % (eye.x, eye.y, eye.z, lx, hx, hz))
-        angle = math.degrees(math.atan2(ez - hz, hx - ex))
-        # The Star Citizen reference (Docs/UI/Screenshot 2026-09-17 201854.png): the dashboard top ~8 degrees below the eye,
-        # the pilot sitting well back from it; the HUD is compact and stays above it.
-        check("dashboard top 7..13 deg below the eye (as in the reference)", 7.0 <= angle <= 13.0, "%.1f deg" % angle)
-        check("pilot well back from the dashboard (>= 1.2 m)", hx - ex >= 120.0, "%.0f cm" % (hx - ex))
+        check("eye inside the interior, behind its dashboard and over its screens", lx < ex < sx - 40.0 and abs(eye.y) < 1.0 and sz1 < ez < hz,
+              "eye (%.0f, %.0f, %.0f), interior x %.0f..%.0f, screens x %.0f top %.0f" % (eye.x, eye.y, eye.z, lx, hx, sx, sz1))
+        # The Star Citizen reference (Docs/UI/Screenshot 2026-09-17 201854.png): the displays 14-25 degrees under the eye,
+        # under the compact HUD; with the view level (author 22. 9. 2026) they must fit into the lower half of the view.
+        fov = ship.get_editor_property("cockpit_camera").get_editor_property("field_of_view")
+        half_v = math.degrees(math.atan(math.tan(math.radians(fov / 2.0)) * 9.0 / 16.0))
+        top, bottom = [math.degrees(math.atan2(ez - z, sx - ex)) for z in (sz1, sz0)]
+        check("screens under the HUD, whole in the level view (top >= 12 deg down, bottom inside the 16:9 frame)",
+              top >= 12.0 and bottom <= half_v - 0.5, "%.1f..%.1f deg, half view %.1f" % (top, bottom, half_v))
+        # The Vanguard sat 1.5 m back; the Wayfarer's approved deck plan (v1) puts the fascia ~1 m ahead.
+        check("pilot back from the dashboard (>= 0.9 m, in reach, not in the face)", sx - ex >= 90.0, "%.0f cm" % (sx - ex))
     finally:
         eas.destroy_actor(ship)
 

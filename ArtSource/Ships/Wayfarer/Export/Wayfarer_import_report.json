@@ -5,6 +5,10 @@
     "SM_Ship_Wayfarer": [
       "socket CameraTarget scale (100, 100, 100) reset to 1",
       "socket Cockpit scale (100, 100, 100) reset to 1",
+      "socket Display_centre_bottom scale (100, 100, 100) reset to 1",
+      "socket Display_centre_top scale (100, 100, 100) reset to 1",
+      "socket Display_left scale (100, 100, 100) reset to 1",
+      "socket Display_right scale (100, 100, 100) reset to 1",
       "socket Engine_L scale (100, 100, 100) reset to 1",
       "socket Engine_R scale (100, 100, 100) reset to 1",
       "socket Exit scale (100, 100, 100) reset to 1",
@@ -14,11 +18,13 @@
     ],
     "SM_Ship_Wayfarer_Canopy": [],
     "SM_Ship_Wayfarer_Decals": [],
-    "SM_Ship_Wayfarer_Gear": []
+    "SM_Ship_Wayfarer_Gear": [],
+    "SM_Ship_Wayfarer_Interior": [],
+    "SM_Ship_Wayfarer_Screens": []
   },
   "materials": [
     "9 decal materials: HazardExhaust_L, HazardExhaust_R, HazardRamp, Logo_L, Logo_R, Name_L, Name_R, Reg_L, Reg_R",
-    "19 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_MeshDecalAO, /Game/Ships/Shared/Materials/M_Ship_Layered"
+    "29 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_MeshDecalAO, /Game/Ships/Shared/Materials/M_Ship_Layered"
   ],
   "blueprint": {
     "path": "/Game/Ships/Wayfarer/Blueprints/BP_Ship_Wayfarer",
@@ -62,7 +68,7 @@
       "pawn.precision_speed_fraction = 0.15",
       "pawn.precision_turn_scale = 0.45",
       "pawn.free_look_max_yaw_deg = 180.0",
-      "pawn.placeholder_cockpit = True",
+      "pawn.placeholder_cockpit = False",
       "pawn.cockpit_light_intensity_cd = 1.5",
       "pawn.hide_hull_in_cockpit = False",
       "pawn.cockpit_view_pitch_deg = 0.0",
@@ -73,9 +79,13 @@
       "camera_boom.probe_size = 40.0",
       "chase_camera.field_of_view = 80.0",
       "cockpit_camera.field_of_view = 88.0",
+      "cockpit_displays.display_light_intensity_cd = 8.0",
+      "cockpit_displays.state_rate_hz = 5.0",
       "component Canopy = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Canopy",
       "component Decals = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Decals",
       "component Gear = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Gear",
+      "component Interior = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Interior",
+      "component Screens = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Screens",
       "decal Decal_Name_L = D_Big_Wayfarer at [5.0, -250.0, 65.0]",
       "decal Decal_Reg_L = D_Big_Registration at [605.0, -210.0, -40.0]",
       "decal Decal_Logo_L = D_Big_Logo at [-635.0, -250.0, 30.0]",
@@ -90,7 +100,26 @@
       "light Light_flood_L (spot, 150 cd) at [-365.1, -190.7, 141.3]",
       "light Light_flood_R (spot, 150 cd) at [-365.1, 190.7, 141.3]",
       "light Light_bay_glow_L (point, 10 cd) at [-757.4, -405.6, 55.0]",
-      "light Light_bay_glow_R (point, 10 cd) at [-757.4, 405.6, 55.0]"
+      "light Light_bay_glow_R (point, 10 cd) at [-757.4, 405.6, 55.0]",
+      "light Light_int_0 (point, 20 cd) at [-805.0, 144.0, 100.0]",
+      "light Light_int_1 (point, 20 cd) at [-565.0, 144.0, 100.0]",
+      "light Light_int_2 (point, 20 cd) at [-325.0, 144.0, 100.0]",
+      "light Light_int_3 (point, 20 cd) at [-805.0, -144.0, 100.0]",
+      "light Light_int_4 (point, 20 cd) at [-565.0, -144.0, 100.0]",
+      "light Light_int_5 (point, 20 cd) at [-325.0, -144.0, 100.0]",
+      "light Light_int_6 (point, 20 cd) at [-168.3, 144.0, 100.0]",
+      "light Light_int_7 (point, 20 cd) at [-95.0, 144.0, 100.0]",
+      "light Light_int_8 (point, 20 cd) at [-21.7, 144.0, 100.0]",
+      "light Light_int_9 (point, 20 cd) at [-168.3, -144.0, 100.0]",
+      "light Light_int_10 (point, 20 cd) at [-95.0, -144.0, 100.0]",
+      "light Light_int_11 (point, 20 cd) at [-21.7, -144.0, 100.0]",
+      "light Light_int_12 (point, 20 cd) at [95.0, 144.0, 100.0]",
+      "light Light_int_13 (point, 20 cd) at [255.0, 144.0, 100.0]",
+      "light Light_int_14 (point, 20 cd) at [415.0, 144.0, 100.0]",
+      "light Light_int_15 (point, 20 cd) at [95.0, -144.0, 100.0]",
+      "light Light_int_16 (point, 20 cd) at [255.0, -144.0, 100.0]",
+      "light Light_int_17 (point, 20 cd) at [415.0, -144.0, 100.0]",
+      "light Light_int_18 (point, 6 cd) at [350.0, -155.0, 5.0]"
     ]
   },
   "removed": [],

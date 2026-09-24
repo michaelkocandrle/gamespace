@@ -93,6 +93,11 @@ def main(argv):
     for suffix, names in cfg.get("groups", {}).items():
         for n in names:
             assign[n] = suffix
+    # the interior (hs_interior.py): its own part; the screens a part of their own too, so the unwrap
+    # does not touch their canvas UVs
+    for o in meshes:
+        if "_Int_" in o.name:
+            assign[o.name] = "Screens" if o.name.endswith("_Int_Screens") else "Interior"
     groups = {}
     for o in meshes:
         if not o.data.polygons:
@@ -143,7 +148,7 @@ def main(argv):
         out["Decals"] = decals
     # 4) UVs
     for key, ob in out.items():
-        if key == "Decals":
+        if key in ("Decals", "Screens"):
             continue
         bpy.ops.object.select_all(action="DESELECT")
         ob.select_set(True)
@@ -162,8 +167,10 @@ def main(argv):
     hull = out[""]
     parts = {k: v for k, v in out.items() if k}
     regions = [{"name": c["name"], "box": shift_box(c["box"], off)} for c in cfg["collision"]]
-    ai.build_collision(ship, [o for k, o in out.items() if k not in ("Canopy", "Decals")], regions)
+    ai.build_collision(ship, [o for k, o in out.items() if k not in ("Canopy", "Decals", "Interior", "Screens")], regions)
     sockets = {}
+    for name, loc in json.loads(bpy.context.scene.get("hs_display_sockets", "{}")).items():
+        cfg["sockets"]["Display_" + name] = {"location": loc}
     for name, s in cfg["sockets"].items():
         s = dict(s)
         if "location" in s:
