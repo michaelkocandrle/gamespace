@@ -1352,6 +1352,50 @@
     "x": 15.6,
     "z": 1.75,
     "_what": "life support intake behind the cockpit"
+   },
+   {
+    "item": "stencil_nostep",
+    "on": "top",
+    "x": 9.0,
+    "y": 5.0,
+    "rot": 90,
+    "_what": "NO STEP on the flap"
+   },
+   {
+    "item": "stencil_nostep",
+    "on": "top",
+    "x": 6.0,
+    "y": 6.0,
+    "rot": 90
+   },
+   {
+    "item": "hazard_subtle",
+    "on": "top",
+    "x": 10.4,
+    "y": 3.3,
+    "_what": "walkway limit at the wing root"
+   },
+   {
+    "item": "red_marker",
+    "on": "top",
+    "x": 6.4,
+    "y": 6.8,
+    "_what": "wing tip marker"
+   },
+   {
+    "item": "ship_name",
+    "on": "side",
+    "x": 1.9,
+    "z": 3.2,
+    "scale": 0.7,
+    "_what": "class name on the fins"
+   },
+   {
+    "item": "red_marker",
+    "on": "side",
+    "x": 2.9,
+    "z": 3.95,
+    "_what": "fin tip marker"
    }
   ],
   "trim": [
@@ -1827,6 +1871,59 @@
        "corner_mark",
        "hazard_subtle"
       ]
+     },
+     {
+      "on": "top",
+      "u": [3.0, 11.2],
+      "v": [2.6, 6.6],
+      "step": 0.8,
+      "dv": 0.7,
+      "chance": 0.5,
+      "_what": "wing top",
+      "items": [
+       "st_nopaint",
+       "corner_mark",
+       "red_dot",
+       "panel_E11",
+       "panel_E16",
+       "hazard_subtle",
+       "st_inspect"
+      ]
+     },
+     {
+      "on": "bottom",
+      "u": [3.0, 11.2],
+      "v": [2.6, 6.6],
+      "step": 0.9,
+      "dv": 0.8,
+      "chance": 0.45,
+      "_what": "wing underside",
+      "items": [
+       "st_gnd",
+       "corner_mark",
+       "hatch_small",
+       "panel_F02",
+       "st_torque"
+      ]
+     },
+     {
+      "on": "side",
+      "u": [0.5, 3.4],
+      "v": [2.4, 3.9],
+      "step": 0.45,
+      "dv": 0.4,
+      "chance": 0.8,
+      "_what": "fins (outboard faces)",
+      "items": [
+       "st_nopaint",
+       "corner_mark",
+       "red_marker",
+       "panel_G08",
+       "panel_H19",
+       "st_inspect",
+       "hazard_subtle",
+       "maker"
+      ]
      }
     ]
    },
@@ -1839,8 +1936,12 @@
       "per_bay": 1
      },
      {
-      "z": [1.3, 2.15],
-      "per_bay": 2
+      "z": [1.3, 1.7],
+      "per_bay": 1
+     },
+     {
+      "z": [1.78, 2.15],
+      "per_bay": 1
      }
     ],
     "top_bands": [
@@ -1852,6 +1953,17 @@
       "y": [0.4, 1.8],
       "per_bay": 1,
       "on": "bottom_line"
+     },
+     {
+      "y": [2.7, 6.3],
+      "per_bay": 1,
+      "_what": "wing top"
+     },
+     {
+      "y": [2.7, 6.3],
+      "per_bay": 1,
+      "on": "bottom_line",
+      "_what": "wing underside"
      }
     ],
     "pod": {
@@ -1968,5 +2080,46 @@
     "_what": "work light on the bay floor"
    }
   ]
+ },
+ "wings": {
+  "_comment": "Shaped wings and fins inside the drawing's slabs (Tools/Blender/hs_wings.py): NACA section, leading-edge strip in bare metal, flap / rudder cut out of the box in secondary paint, flap track fairings.",
+  "wing": {
+   "step": 0.08,
+   "t_ratio": 1.0,
+   "le": 0.08,
+   "gap": 0.005,
+   "flap": {
+    "span": [0.3, 0.9],
+    "chord": 0.72
+   },
+   "fairings": [0.4, 0.75],
+   "bevel_m": 0.003,
+   "materials": {
+    "box": "paint",
+    "le": "metal",
+    "flap": "paint",
+    "fairing": "dark",
+    "core": "dark"
+   },
+   "core": 0.92
+  },
+  "fin": {
+   "step": 0.06,
+   "t_ratio": 1.0,
+   "le": 0.1,
+   "gap": 0.005,
+   "flap": {
+    "span": [0.2, 0.85],
+    "chord": 0.68
+   },
+   "bevel_m": 0.003,
+   "materials": {
+    "box": "paint",
+    "le": "metal",
+    "flap": "paint",
+    "core": "dark"
+   },
+   "core": 0.92
+  }
  }
 }

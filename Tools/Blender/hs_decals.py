@@ -119,8 +119,13 @@ class Placer:
         return (hit, n.normalized()) if hit is not None else (None, None)
 
     def part_of(self, p_ship):
-        y = (p_ship - self.off).y
-        return "pod_L" if y > POD_Y else ("pod_R" if y < -POD_Y else "hull")
+        q = p_ship - self.off
+        side = "_L" if q.y > 0 else "_R"
+        if math.hypot(abs(q.y) - self.pod[0], q.z - self.pod[1]) < 1.05 and -0.7 < q.x < 6.0:
+            return "pod" + side
+        if abs(q.y) > POD_Y - 0.1:
+            return ("fin" if q.z > 2.05 else "wing") + side
+        return "hull"
 
     def lay(self, p, n, reach=0.12):
         hit, hn = self.cast(p - self.off + n * reach, -n)

@@ -438,6 +438,21 @@ def main(argv):
         ob.data.materials.append(mats[cfg.get("material", "paint")])
         made[part] = ob
         report[part] = {"object": name, "faces": len(ob.data.polygons), "views": sorted(vs)}
+    if recipe.get("wings"):
+        # shaped wings and fins with leading edge, flaps and fairings inside the drawing's slab
+        # (Tools/Blender/hs_wings.py)
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hs_wings
+        for part, wspec in recipe["wings"].items():
+            if part.startswith("_") or part not in made:
+                continue
+            slab = made.pop(part)
+            new = hs_wings.build(slab, wspec, coll, mats, recipe.get("detail", {}).get("bevel", {"angle_deg": 30, "width": 0.006, "segments": 2}),
+                                 slab.name)
+            bpy.data.objects.remove(slab)
+            for ob in new:
+                made["wing_" + ob.name] = ob
+            report[part] = {"shaped": [ob.name for ob in new]}
     hz = recipe["parts"].get("hull", {}).get("zones", [])
     if hz and "hull" in made:
         hull = made["hull"]
