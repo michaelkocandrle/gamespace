@@ -1220,6 +1220,18 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - `Steadfast_layout.json`: jediný zdroj pravdy – místnosti, objekty s účelem, dveře; metry, x dopředu, y na levobok.
     - Výkresy `Steadfast_deck_upper.png`, `Steadfast_deck_lower.png`, `Steadfast_cutaway.png` kreslí `Tools/Design/draw_ship_design.py <layout.json>` (Pillow, písmo Bahnschrift).
     - `ArtSource/Ships/Steadfast/Steadfast_spec.json` je ve tvaru RSI Ship Matrix. Kód ho nečte; letové hodnoty se ladí jinde.
+76. **CLAUDE.md a skills** (24. 9. 2026). Vstupní bod je krátký `CLAUDE.md` v kořeni repozitáře.
+    Know-how je rozdělené do sedmi skills v `.claude/skills/`, které se načítají podle úkolu: ship-pipeline, ship-interior, blender-mcp, unreal-scripting, unreal-shots-and-look, cockpit-displays a asset-sources.
+    HANDOFF, WORKFLOW a README zůstávají jako historie a úplný seznam; hledej v nich grepem.
+77. **Oficiální Blender MCP (Blender Lab) vedle komunitního** (24. 9. 2026).
+    - Server `blender-lab` (uvx z git tagu v1.0.3, `BLENDER_MCP_PORT=9877`); addon `bl_ext.user_default.mcp` na portu 9877.
+    - Komunitní `blender` zůstává na 9876, oba běží naráz.
+    - Oficiální addon potřebuje online přístup: Blender spusť s `--online-mode`, nebo zapni Allow Online Access.
+    - Přímý klient socketu je `Tools/Blender/mcp/lab_socket.py`. Podrobnosti a srovnání jsou ve skillu `blender-mcp`.
+78. **Operátory přes MCP** (24. 9. 2026). Helper `Tools/Blender/mcp/ops_context.py` (`run_op`, `edit_mode`) dává operátorům kontext 3D viewportu.
+    - Test `test_ops_context.py`: join, modifier_apply, bevel s profilem, boolean a inset projdou headless i živě; knife_project jen živě.
+    - Headless ho helper odmítne, protože by tiše nic neudělal.
+    - Pravidlo „přes MCP žádné operátory“ ve WORKFLOW 9.2 a AssetPipeline_Modular je nahrazené.
 
 ---
 

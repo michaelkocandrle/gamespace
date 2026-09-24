@@ -117,23 +117,78 @@ Nový otvor bez plochy displeje: paprsky z oka přes pixely otvoru, rovina SVD, 
 - Barvu materiálu nastavuj na vstupech uzlu, `material.diffuse_color` je jen viewport.
 - Objekty vytvářej `bpy.data.objects.new(...)` + `collection.objects.link(...)`.
 
-## Operátory vs. bmesh (platné pravidlo do kroku 3)
+## Oficiální Blender MCP (Blender Lab) – `blender-lab`, port 9877
 
-- **Přes MCP zatím nepoužívej `bpy.ops`** pro práci s geometrií: `bpy.ops.object.join` a spol.
-  padají na `poll() failed, context is incorrect` (chybí kontext viewportu). Geometrii skládej
-  přes `bmesh`, objekty přes `bpy.data.objects.new`.
-- Výjimky, které fungují: `bpy.ops.wm.redraw_timer(type="DRAW_WIN_SWAP")`,
-  `bpy.ops.render.render(write_still=True)`; v headless skriptech (`-b`) jsou operátory běžně
-  použité (import, bake, `preferences.addon_refresh`).
-- Toto pravidlo se po kroku 3 mění, viz sekce „Operátory přes MCP“.
+Od 24. 9. 2026 běží **oba servery naráz** v jednom Blenderu, každý na svém portu:
 
-## Oficiální Blender MCP (Blender Lab)
+| | `blender` (komunitní ahujasid) | `blender-lab` (oficiální, blender.org/lab) |
+| --- | --- | --- |
+| Port addonu | 9876 | **9877** (přenastaveno, výchozí je také 9876) |
+| Addon v Blenderu | `blender_mcp_addon` (scripts/addons) | rozšíření `bl_ext.user_default.mcp` (extensions/user_default/mcp), v1.0.3 |
+| Server v Claude Code | `uvx.exe blender-mcp` (PyPI), `DISABLE_TELEMETRY=true` | `uvx.exe --from git+https://projects.blender.org/lab/blender_mcp.git@v1.0.3#subdirectory=mcp blender-mcp`, env `BLENDER_MCP_PORT=9877`, `BLENDER_PATH=<blender.exe>` |
+| Protokol socketu | JSON `{"type","params"}` → `Tools/Blender/mcp/mcp_socket.py` | JSON `{"type":"execute","code","strict_json"}` + NUL → `Tools/Blender/mcp/lab_socket.py` |
+| Silné stránky | screenshot viewportu, Poly Haven / Sketchfab / Hyper3D / Hunyuan importy | dokumentace bpy API a manuálu (`get_python_api_docs`), screenshot okna nebo oblasti, souhrny .blend, `*_for_cli` nástroje v Blenderu na pozadí bez GUI, žádná telemetrie |
 
-TODO: doplní krok 2
+`blender-lab` je scope **local** pro `C:\gamespace` i `C:\gamespace\gamespace`; `blender` jen pro `C:\gamespace`.
 
-## Operátory přes MCP
+- **Online přístup:** oficiální addon startuje jen s povoleným online přístupem.
+  - Buď Blender spusť s `--online-mode` (platí jen pro to spuštění),
+  - nebo autor jednou zapne *Preferences → System → Network → Allow Online Access*.
+  - Bez toho port 9877 neposlouchá a v preferencích addonu je chyba „online access“.
+- **Instalace (hotovo, pro obnovu):**
+  - Addon: `blender --command extension install-file -r user_default --enable mcp-1.0.3.zip`. Zip je z `https://projects.blender.org/lab/blender_mcp/releases`.
+  - Pak v `-b` nastav `prefs.port = 9877`, `use_autostart = True` a `bpy.ops.wm.save_userpref()`.
+  - Server: `claude mcp add blender-lab -s local -e BLENDER_MCP_PORT=9877 -e "BLENDER_PATH=..." -- <uvx.exe> --from "git+...@v1.0.3#subdirectory=mcp" blender-mcp`.
+- **Pozor:** **neinstaluj oficiální server jako `uv tool install blender-mcp`.**
+  - Obě implementace mají spustitelný soubor `blender-mcp`.
+  - `uvx blender-mcp` (komunitní) by pak spouštěl nainstalovaný tool, tedy oficiální server.
+- **Přepínání:** nic přepínat není potřeba, oba běží naráz.
+  - Když by jeden překážel: `claude mcp remove <jméno> -s local` a potom restart Claude Code.
+  - Addon se vypíná v Preferences, nebo `addon_utils.disable(...)` a `save_userpref`.
+- **Srovnání na stejné úloze:** viz sekce níže.
+  - Doplní se po restartu Claude Code, až budou nástroje `blender-lab` načtené.
+  - Na úrovni socketu (stejný Blender, stejný test operátorů) dávají oba servery shodný výsledek.
 
-TODO: doplní krok 3
+## Operátory přes MCP – helper `Tools/Blender/mcp/ops_context.py`
+
+Staré pravidlo „přes MCP žádné operátory“ už neplatí. Operátory padaly na
+`poll() failed, context is incorrect` jen kvůli chybějícímu kontextu okna. Helper najde okno, oblast
+`VIEW_3D` a její region a operátor spustí v `bpy.context.temp_override(window, area, region,
+active_object, selected_objects…)`:
+
+```python
+import sys; sys.path.insert(0, r"C:\gamespace\gamespace\Tools\Blender\mcp")
+from ops_context import run_op, edit_mode, OpsContextError
+run_op("object.join", active=hull, selected=[hull, fin])
+run_op("object.modifier_apply", active=ob, selected=[ob], modifier="Bevel")
+with edit_mode(panel):
+    run_op("mesh.select_all", active=panel, action="SELECT")
+    run_op("mesh.bevel", active=panel, offset=0.02, segments=3, profile=0.7, affect="EDGES")
+```
+
+Test: `Tools/Blender/mcp/test_ops_context.py`. Headless se spouští
+`blender -b --factory-startup --python …`, přes MCP `exec(open("C:/gamespace/…/test_ops_context.py").read())`
+(cestu piš s `/`; `\t` v cestě by byl tabulátor). Výsledek 24. 9. 2026, Blender 5.2:
+
+| Operátor | Headless `-b` | Živý Blender přes 9876 i 9877 |
+| --- | --- | --- |
+| `object.join` | OK | OK |
+| `object.modifier_apply` (bevel) | OK | OK |
+| `mesh.bevel` s profilem | OK | OK |
+| boolean EXACT (modifier + apply) | OK | OK |
+| `mesh.inset` (individual) | OK | OK |
+| `mesh.knife_project` | **SKIP** – helper vrátí `OpsContextError` | OK (pohled shora ortho, `rv3d.update()`) |
+
+- V Blenderu 5.2 prošel přes oba servery i holý `bpy.ops.object.join()` bez helperu. Helper přesto
+  používej: nastaví i výběr a aktivní objekt, vrací čitelnou chybu a funguje stejně headless.
+- **Headless past:** `blender -b` má okno a oblasti ze startup souboru, ale nikdy se nevykreslí.
+  Operátory promítající z pohledu (`knife_project`, `view3d.*`, `transform.*`) pak **tiše nic
+  neudělají**. Helper je proto v `-b` odmítne (`bpy.app.background`).
+- `knife_project` potřebuje řezací objekt s **okrajovými nebo drátovými hranami** (plocha, křivka).
+  Uzavřená krychle nestačí: „No other selected objects have wire or boundary edges“.
+- **bmesh zůstává alternativou** pro čistě geometrické operace bez kontextu (`bmesh.ops.bevel`,
+  `inset_region`, `bisect_plane`, `create_grid`…). Je rychlejší ve smyčkách a funguje všude.
+  Po vytvoření ploch zavolej `normal_update()`, u nových prvků `index_update()`.
 
 ## Nástrahy (příznak → příčina → řešení)
 
