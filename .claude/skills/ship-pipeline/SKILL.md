@@ -389,6 +389,33 @@ MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/decal_libra
 - Proti z-fightingu: čtverce decalů 2 mm nad povrchem (`r.MeshDecals.DepthBias` je 0).
 - Textury v setupu: klíče `decal_normal`, `decal_m`, `decal_bc` (import nastaví normálovou mapu nebo masky).
   Parametry `decal_normal_strength`, `decal_opacity`, `decal_roughness_scale`.
+- **Ověřeno ve hře (24. 9. 2026, pilot Wayfarer):** mesh decaly se kreslí i na Nanite trupu a na Nanite
+  gondolách (šrouby, poklopy, štítky, madla). Díl `Decals` má `cast_shadow` a distance field vypnuté
+  (`import_ship.py`).
+- **Barva přes dva čtverce:** DBuffer decal má jedno krytí pro všechno, co zapisuje. Každá položka
+  s vlastní barvou má proto normal-only čtverec a nad ním (0,8 mm) paint čtverec s krytím
+  M.R × BC.A. BC.A je 1 jen tam, kde má díl vlastní barvu (průchod `own`), barva je vynásobená AO.
+- **Pozor na mip bleed:** při přímé alfě se v menších mipech průhledná barva mísí do okraje.
+  Tmavé mřížky tak měly na tmavém krytu světlý rámeček. `decal_library.py` proto rozšiřuje barvu
+  do průhledných texelů (`dilate_colour`, 64 px).
+
+**Rozmístění na lodi** (`Tools/Blender/hs_decals.py`, blok `decals` v `<Loď>_hs.json`, volá
+`hs_assemble_ship.py` po spojení a posunu):
+- `items`: položka z indexu, `on` = `pod` (x, deg), `side` (x, z), `top`/`bottom` (x, y) nebo `ray` (at, dir).
+  Dále `rot`, `scale`, `mirror` a `along` {step, count}.
+- `trim`: pás `strip` jako `pod_ring` (x, rozsah úhlů), `pod_line`, `top_cross`/`bottom_cross`.
+- Každý bod mřížky (6 cm) se paprskem položí zpět na trup a zvedne o 2 mm, takže sleduje zakřivení.
+- Decal, který by přečníval hranu (bod mine povrch nebo má normálu odchýlenou o víc než 30°), se
+  vynechá a vypíše (`HSDECALS skipped`). Pás se na nespojitosti rozdělí; jinak visel přes okraj
+  střechy do vzduchu.
+- Osa x decalu jde po lodi a z venku doprava, takže atlas se čte správně na obou bocích a není
+  zrcadlený.
+- Rychlý náhled bez UE: Eevee render herního `.blend` s atlasy na slotech Decal / DecalPaint / Trim /
+  TrimPaint. Normal-only čtverce v něm vypadají světlejší, protože Eevee neumí „ponechat barvu trupu“.
+
+**Detail ve hře zblízka:** preset `Tools/Shots/pilot_views.json` používá volnou kameru v prostoru lodi
+(`camera_local` / `look_local` v metrech; X dopředu, Y doprava, Z nahoru; up vektor bere z lodi).
+Převod ze souřadnic layoutu: x − offset_x, −y, z − offset_z.
 
 ## 3c. Exteriér hard-surface (AssetPipeline_Modular „Exteriér: hard-surface“)
 

@@ -821,5 +821,268 @@
     "clamps": 5
    }
   }
+ },
+ "decals": {
+  "_comment": "Mesh decals and trim strips (Tools/Blender/hs_decals.py, library ArtSource/Ships/Shared/Decals). PILOT: pods and aft hull only. Layout coordinates; pod angles 0 outboard, 90 top; the fin covers the pod crown 55..96 deg from x 0.2 to 3.7, so decals there keep off it.",
+  "index": "ArtSource/Ships/Shared/Decals/decal_library_index.json",
+  "offset_m": 0.002,
+  "grid_m": 0.06,
+  "items": [
+   {
+    "item": "bolt_row",
+    "on": "pod",
+    "x": 1.25,
+    "deg": 49,
+    "along": {
+     "step": 0.46,
+     "count": 2
+    },
+    "_what": "bolts along the lower edge of the aft outboard armour"
+   },
+   {
+    "item": "bolt_row",
+    "on": "pod",
+    "x": 3.59,
+    "deg": 49,
+    "along": {
+     "step": 0.46,
+     "count": 2
+    }
+   },
+   {
+    "item": "bolt_row",
+    "on": "pod",
+    "x": 4.05,
+    "deg": 75
+   },
+   {
+    "item": "hatch",
+    "on": "pod",
+    "x": 4.0,
+    "deg": 63,
+    "_what": "inspection hatch on the forward armour"
+   },
+   {
+    "item": "handle",
+    "on": "pod",
+    "x": 1.98,
+    "deg": 22,
+    "rot": 90,
+    "_what": "grab handles either side of the open bay"
+   },
+   {
+    "item": "handle",
+    "on": "pod",
+    "x": 3.32,
+    "deg": 22,
+    "rot": 90
+   },
+   {
+    "item": "access_panel",
+    "on": "pod",
+    "x": 1.45,
+    "deg": 22
+   },
+   {
+    "item": "fuel_cap",
+    "on": "pod",
+    "x": 3.85,
+    "deg": 22,
+    "_what": "coolant filler"
+   },
+   {
+    "item": "warning_label",
+    "on": "pod",
+    "x": 0.05,
+    "deg": 25,
+    "_what": "exhaust hazard"
+   },
+   {
+    "item": "vent_grille",
+    "on": "pod",
+    "x": 5.25,
+    "deg": 35,
+    "_what": "intake bleed grille"
+   },
+   {
+    "item": "louvers",
+    "on": "pod",
+    "x": 0.1,
+    "deg": -25,
+    "_what": "aft cowl heat louvers"
+   },
+   {
+    "item": "slot",
+    "on": "pod",
+    "x": 1.48,
+    "deg": 119
+   },
+   {
+    "item": "slot",
+    "on": "pod",
+    "x": 3.82,
+    "deg": 119
+   },
+   {
+    "item": "cable_run",
+    "on": "pod",
+    "x": 2.65,
+    "deg": 118,
+    "_what": "cable run between the inboard plates"
+   },
+   {
+    "item": "recessed_panel",
+    "on": "pod",
+    "x": 1.5,
+    "deg": -60
+   },
+   {
+    "item": "recessed_panel",
+    "on": "pod",
+    "x": 3.8,
+    "deg": -60
+   },
+   {
+    "item": "light_housing",
+    "on": "pod",
+    "x": 5.0,
+    "deg": 0,
+    "_what": "position light housing (lit in step 6)"
+   },
+   {
+    "item": "bolt_row",
+    "on": "pod",
+    "x": 1.3,
+    "deg": -9,
+    "along": {
+     "step": 0.5,
+     "count": 6
+    },
+    "_what": "bolts along the lower strake"
+   },
+   {
+    "item": "vent_grille",
+    "on": "top",
+    "x": 1.0,
+    "y": 0.55,
+    "_what": "engine room exhaust on the aft cap"
+   },
+   {
+    "item": "warning_label",
+    "on": "top",
+    "x": 2.3,
+    "y": 0.6
+   },
+   {
+    "item": "bolt_row",
+    "on": "ray",
+    "at": [3.4, 1.85, 2.62],
+    "dir": [0, -1, -1],
+    "along": {
+     "step": 0.46,
+     "count": 2
+    },
+    "_what": "shoulder armour bolts"
+   },
+   {
+    "item": "bolt_row",
+    "on": "ray",
+    "at": [5.9, 1.85, 2.62],
+    "dir": [0, -1, -1],
+    "along": {
+     "step": 0.46,
+     "count": 2
+    }
+   },
+   {
+    "item": "hatch",
+    "on": "top",
+    "x": 3.75,
+    "y": 0.62
+   },
+   {
+    "item": "access_panel",
+    "on": "top",
+    "x": 6.2,
+    "y": 0.0,
+    "mirror": false
+   },
+   {
+    "item": "bolt_row",
+    "on": "top",
+    "x": 5.9,
+    "y": 0.6,
+    "along": {
+     "step": 0.46,
+     "count": 2
+    }
+   },
+   {
+    "item": "access_panel",
+    "on": "bottom",
+    "x": 3.7,
+    "y": 0.8
+   },
+   {
+    "item": "warning_label",
+    "on": "bottom",
+    "x": 5.2,
+    "y": 1.2,
+    "_what": "landing gear hazard"
+   },
+   {
+    "item": "vent_grille",
+    "on": "side",
+    "x": 6.4,
+    "z": 1.6
+   },
+   {
+    "item": "slot",
+    "on": "side",
+    "x": 6.4,
+    "z": 0.9
+   }
+  ],
+  "trim": [
+   {
+    "strip": "studs_band",
+    "on": "pod_ring",
+    "x": 0.75,
+    "deg": [100, 435],
+    "_what": "armour strap over the aft band (not under the fin)"
+   },
+   {
+    "strip": "bolt_row",
+    "on": "pod_ring",
+    "x": 4.55,
+    "deg": [0, 360]
+   },
+   {
+    "strip": "grille_band",
+    "on": "pod_ring",
+    "x": 5.4,
+    "deg": [-50, 50],
+    "_what": "nose cooling grille"
+   },
+   {
+    "strip": "ribbing",
+    "on": "pod_ring",
+    "x": 0.2,
+    "deg": [200, 340]
+   },
+   {
+    "strip": "bolt_row",
+    "on": "top_cross",
+    "x": 2.8,
+    "y": [-1.6, 1.6],
+    "_what": "bolts along the front edge of the aft armour cap"
+   },
+   {
+    "strip": "panel_lip",
+    "on": "bottom_cross",
+    "x": 3.14,
+    "y": [-1.5, 1.5]
+   }
+  ]
  }
 }

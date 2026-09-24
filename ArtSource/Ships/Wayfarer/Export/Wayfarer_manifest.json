@@ -36,6 +36,12 @@
       ]
     },
     {
+      "fbx": "SM_Ship_Wayfarer_Decals.fbx",
+      "objects": [
+        "SM_Ship_Wayfarer_Decals"
+      ]
+    },
+    {
       "fbx": "SM_Ship_Wayfarer_Gear.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Gear"
@@ -88,6 +94,31 @@
           9.60855484008789,
           1.287068247795105,
           2.085254430770874
+        ]
+      ]
+    },
+    "SM_Ship_Wayfarer_Decals": {
+      "lod": 0,
+      "part": "Decals",
+      "tris": 7064,
+      "verts": 6362,
+      "materials": [
+        "M_Ship_Wayfarer_Decal",
+        "M_Ship_Wayfarer_DecalPaint",
+        "M_Ship_Wayfarer_Trim",
+        "M_Ship_Wayfarer_TrimPaint"
+      ],
+      "uv_layers": 1,
+      "bounds_m": [
+        [
+          -10.347986221313477,
+          -7.281188011169434,
+          -1.8328001499176025
+        ],
+        [
+          -3.6399998664855957,
+          7.281188011169434,
+          1.8288019895553589
         ]
       ]
     },
@@ -254,7 +285,7 @@
     "UCX_SM_Ship_Wayfarer_08": {
       "kind": "UCX",
       "mesh": "SM_Ship_Wayfarer",
-      "verts": 14,
+      "verts": 15,
       "bounds_m": [
         [
           -7.849999904632568,

@@ -13,7 +13,9 @@ hull that carry alpha, normal, height, AO and colour. This script is the library
         normal  tangent-space normal, +X right, +Y up (OpenGL; Unreal flips green on import)
         height  0.5 at the hull surface, +- height_range_m
         ao      ambient occlusion within ao_distance_m
-        color   the part's colour, alpha = where the colour should replace the hull's (labels, stripes)
+        color   the part's colour darkened by its AO; alpha = where the colour replaces the hull's: labels
+                and stripes ("paint_color") and parts with their own colour (recess floors, dark slats,
+                metal bolts, pass "own"); everything else keeps the hull's paint
         rm      R = roughness, G = metallic of the part
         alpha   footprint of the item (where the decal's normal / AO apply)
   - the passes are written as 8-bit PNGs next to the recipe and a JSON index with every item's UV rect,
@@ -122,7 +124,9 @@ def build_item(item, origin, coll, defaults):
             add_cyl(bm, (ox + r["at"][0], oy + r["at"][1], -d - 0.001), r["r"], 0.002, seg=32)
         else:
             add_box(bm, (ox + r["at"][0], oy + r["at"][1], -d - 0.001), (r["size"][0], r["size"][1], 0.002))
-        made.append(new_object(item["name"] + "_floor", bm, coll, tuple(r.get("color", defaults["dark"])), 0.6, 0.0, bevel=0.0))
+        floor = new_object(item["name"] + "_floor", bm, coll, tuple(r.get("color", defaults["dark"])), 0.6, 0.0, bevel=0.0)
+        floor["own"] = 1.0
+        made.append(floor)
     made.append(plate)
     for i, p in enumerate(item.get("parts", [])):
         bm = bmesh.new()
@@ -143,8 +147,11 @@ def build_item(item, origin, coll, defaults):
                 add_cyl(bm, (at[0], at[1], p.get("z", 0.0) + p["r"]), p["r"], p["size"][0], seg=16, axis="X")
             elif kind == "bar_y":
                 add_cyl(bm, (at[0], at[1], p.get("z", 0.0) + p["r"]), p["r"], p["size"][1], seg=16, axis="Y")
-        made.append(new_object("%s_p%d" % (item["name"], i), bm, coll, tuple(p.get("color", paint)),
-                               p.get("rough", defaults["rough"]), p.get("metal", 0.0), bevel=p.get("bevel", 0.0012)))
+        ob = new_object("%s_p%d" % (item["name"], i), bm, coll, tuple(p.get("color", paint)),
+                        p.get("rough", defaults["rough"]), p.get("metal", 0.0), bevel=p.get("bevel", 0.0012))
+        # a part with its own colour (dark slats, metal bolts) shows it; the rest keeps the hull's paint
+        ob["own"] = 1.0 if ("color" in p or item.get("paint_color")) else 0.0
+        made.append(ob)
     return made
 
 
@@ -199,8 +206,12 @@ def pass_materials(cfg):
         nt.links.new(g.outputs["Fac"], comb.inputs["Y"])
         nt.links.new(comb.outputs[0], em.inputs["Color"])
 
+    def own(nt, em):
+        a = nt.nodes.new("ShaderNodeAttribute"); a.attribute_type = "OBJECT"; a.attribute_name = "own"
+        nt.links.new(a.outputs["Fac"], em.inputs["Color"])
+
     return {k: emission_override("PASS_" + k, f) for k, f in
-            (("normal", normal), ("height", height), ("ao", ao), ("color", color), ("rm", rm))}
+            (("normal", normal), ("height", height), ("ao", ao), ("color", color), ("rm", rm), ("own", own))}
 
 
 def render_passes(scene, mats, size_px, extent_m, centre, out_dir, prefix):
@@ -260,7 +271,9 @@ def exr_to_png(files, out_dir, prefix, footprint_mask=None):
     hgt = load(files["height"])[..., 0]
     maps["H"] = np.where(alpha > 0.5, hgt, 0.5)
     maps["AO"] = np.where(alpha > 0.5, load(files["ao"])[..., 0], 1.0)
-    col = load(files["color"])[..., :3]
+    # colour darkened by the item's own occlusion: the paint master's colour is all the AO a DBuffer
+    # decal can show (there is no AO channel)
+    col = load(files["color"])[..., :3] * maps["AO"][..., None]
     srgb = np.where(col <= 0.0031308, col * 12.92, 1.055 * np.power(np.clip(col, 0, None), 1 / 2.4) - 0.055)
     rm = load(files["rm"])
     written = {}
@@ -271,7 +284,9 @@ def exr_to_png(files, out_dir, prefix, footprint_mask=None):
         written[key] = fn
     # colour + its own opacity (1 only where an item says its colour replaces the hull's)
     copa = footprint_mask if footprint_mask is not None else np.zeros_like(alpha)
-    bc = np.dstack([np.clip(srgb, 0, 1), copa[..., None]])
+    own = np.where(alpha > 0.5, load(files["own"])[..., 0], 0.0)
+    copa = np.maximum(copa, (own > 0.5).astype(np.float32))
+    bc = np.dstack([dilate_colour(np.clip(srgb, 0, 1), copa > 0.5), copa[..., None]])
     fn = os.path.join(out_dir, "%s_BC.png" % prefix)
     Image.fromarray((bc * 255 + 0.5).astype(np.uint8), "RGBA").save(fn)
     written["BC"] = fn
@@ -283,6 +298,29 @@ def exr_to_png(files, out_dir, prefix, footprint_mask=None):
     for f in files.values():
         os.remove(f)
     return written
+
+
+def dilate_colour(rgb, mask, steps=64):
+    """Colour grown out of the opaque texels into the transparent ones around them. The decal material
+    uses straight alpha, so in the smaller mips a half-transparent texel averages the opaque part's colour
+    with whatever colour the transparent part had - the light plate colour, which drew a light frame round
+    every dark grille on the dark hull in the game (24. 9. 2026)."""
+    import numpy as np
+    out = rgb * mask[..., None]
+    filled = mask.copy()
+    for _ in range(steps):
+        acc = np.zeros_like(out)
+        cnt = np.zeros(mask.shape, np.float32)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            acc += np.roll(np.roll(out * filled[..., None], dy, 0), dx, 1)
+            cnt += np.roll(np.roll(filled.astype(np.float32), dy, 0), dx, 1)
+        new = (~filled) & (cnt > 0)
+        if not new.any():
+            break
+        out[new] = acc[new] / cnt[new][..., None]
+        filled |= new
+    out[~filled] = rgb[~filled]
+    return out
 
 
 def colour_opacity_mask(items, cells, cell_px, size_px):
@@ -297,6 +335,12 @@ def colour_opacity_mask(items, cells, cell_px, size_px):
         span = it.get("span", [1, 1])
         m[r * cell_px:(r + span[1]) * cell_px, c * cell_px:(c + span[0]) * cell_px] = 1.0
     return m
+
+
+def has_color(item):
+    """Does any of the item show its own colour (BC alpha > 0)? The ship builder then adds a second quad
+    with the paint material; items without it need only the normal-only decal."""
+    return bool(item.get("paint_color") or item.get("recesses") or any("color" in p for p in item.get("parts", [])))
 
 
 # ----------------------------------------------------------------------------------- main
@@ -326,7 +370,8 @@ def main(argv):
         cx, cy = centre
         index["decals"][it["name"]] = {
             "uv": [(cx - fw / 2) / extent, (cy - fh / 2) / extent, (cx + fw / 2) / extent, (cy + fh / 2) / extent],
-            "size_m": [fw, fh], "purpose": it.get("purpose", ""), "paint_color": bool(it.get("paint_color"))}
+            "size_m": [fw, fh], "purpose": it.get("purpose", ""), "paint_color": bool(it.get("paint_color")),
+            "has_color": has_color(it)}
     mats = pass_materials(recipe)
     files = render_passes(scene, mats, size, extent, (extent / 2, extent / 2), out_dir, "T_Decals")
     result["decals"] = exr_to_png(files, out_dir, "T_Decals", colour_opacity_mask(d["items"], cells, size // cells, size))
@@ -347,13 +392,13 @@ def main(argv):
         item["footprint"] = [tw * 1.2, hgt]     # the plate overhangs both ends so the strip tiles
         build_item(item, (tw / 2, cy), coll2, defaults)
         index["trim"][strip["name"]] = {"v": [(cy - hgt / 2) / tw, (cy + hgt / 2) / tw], "height_m": hgt,
-                                         "tile_m": tw, "purpose": strip.get("purpose", "")}
+                                         "tile_m": tw, "purpose": strip.get("purpose", ""), "has_color": has_color(strip)}
         v += hgt
     files = render_passes(scene, mats, tsize, tw, (tw / 2, tw / 2), out_dir, "T_Trim")
     result["trim"] = exr_to_png(files, out_dir, "T_Trim")
     index["decal_atlas_m"], index["trim_width_m"] = extent, tw
     index["maps"] = {"N": "tangent normal, OpenGL (+Y up): Unreal flip green", "H": "height, 0.5 = surface, +-%.3f m" % recipe["height_range_m"],
-                     "AO": "ambient occlusion", "BC": "sRGB colour, A = colour opacity", "M": "R alpha (normal/AO opacity), G roughness, B metallic"}
+                     "AO": "ambient occlusion", "BC": "sRGB colour x AO, A = colour opacity (labels + parts with their own colour)", "M": "R alpha (normal/AO opacity), G roughness, B metallic"}
     with open(os.path.join(out_dir, "decal_library_index.json"), "w", encoding="utf-8") as f:
         json.dump(index, f, indent=1, ensure_ascii=False)
     print("DECALLIB " + json.dumps({"decals": len(index["decals"]), "trim": len(index["trim"]), "files": result}))

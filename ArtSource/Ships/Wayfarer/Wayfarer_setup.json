@@ -140,6 +140,63 @@
     0.25
    ],
    "emissive_strength": 8.0
+  },
+  "MI_Ship_Wayfarer_Decal": {
+   "_comment": "mesh decals: normal + roughness + metallic, the hull keeps its paint",
+   "master": "meshdecal",
+   "slots": [
+    "M_Ship_Wayfarer_Decal"
+   ],
+   "textures": {
+    "decal_normal": "ArtSource/Ships/Shared/Decals/T_Decals_N.png",
+    "decal_m": "ArtSource/Ships/Shared/Decals/T_Decals_M.png"
+   },
+   "decal_normal_strength": 1.0,
+   "decal_opacity": 1.0
+  },
+  "MI_Ship_Wayfarer_DecalPaint": {
+   "_comment": "second quad of items with their own colour (labels, recess floors, bolts)",
+   "master": "meshdecal_paint",
+   "slots": [
+    "M_Ship_Wayfarer_DecalPaint"
+   ],
+   "textures": {
+    "decal_normal": "ArtSource/Ships/Shared/Decals/T_Decals_N.png",
+    "decal_m": "ArtSource/Ships/Shared/Decals/T_Decals_M.png",
+    "decal_bc": "ArtSource/Ships/Shared/Decals/T_Decals_BC.png"
+   },
+   "decal_normal_strength": 1.0,
+   "decal_opacity": 1.0
+  },
+  "MI_Ship_Wayfarer_Trim": {
+   "_comment": "trim strips as decal ribbons",
+   "master": "meshdecal",
+   "slots": [
+    "M_Ship_Wayfarer_Trim"
+   ],
+   "textures": {
+    "decal_normal": "ArtSource/Ships/Shared/Decals/T_Trim_N.png",
+    "decal_m": "ArtSource/Ships/Shared/Decals/T_Trim_M.png"
+   },
+   "decal_normal_strength": 1.0,
+   "decal_opacity": 1.0
+  },
+  "MI_Ship_Wayfarer_TrimPaint": {
+   "master": "meshdecal_paint",
+   "slots": [
+    "M_Ship_Wayfarer_TrimPaint"
+   ],
+   "textures": {
+    "decal_normal": "ArtSource/Ships/Shared/Decals/T_Trim_N.png",
+    "decal_m": "ArtSource/Ships/Shared/Decals/T_Trim_M.png",
+    "decal_bc": "ArtSource/Ships/Shared/Decals/T_Trim_BC.png"
+   },
+   "decal_normal_strength": 1.0,
+   "decal_opacity": 1.0
   }
- }
+ },
+ "no_nanite_parts": [
+  "Decals"
+ ],
+ "_comment_no_nanite": "Decals: mesh decals (Tools/Blender/hs_decals.py) use Deferred Decal materials, which Nanite cannot draw (skill ship-pipeline 3b3)."
 }

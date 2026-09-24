@@ -387,6 +387,13 @@ def main(argv):
                 rec = json.loads(json.dumps(cfg["revolve"]))
                 rec["name"] = "%s_%s" % (name, tag)
                 rec["axis"] = {"y": cfg["revolve"]["axis"]["y"] * sign, "z": cfg["revolve"]["axis"]["z"]}
+                if sign < 0:
+                    # the starboard pod is the port one mirrored: panel breaks at 180 - phase (the same
+                    # phase put the starboard gaps elsewhere, so decals fitting port crossed a gap)
+                    for sec in rec["sections"]:
+                        if sec.get("kind") == "panels":
+                            span = 360.0 / sec["around"]
+                            sec["phase_deg"] = (180.0 - sec.get("phase_deg", 0.0)) % span
                 before = set(bpy.data.objects)
                 hs_build_part.build_into(rec, coll)
                 for ob in set(bpy.data.objects) - before:

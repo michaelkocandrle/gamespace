@@ -7,7 +7,8 @@ Driven by the recipe's "assemble" block:
   2. parts are joined into the export meshes: "groups" maps a part suffix ("" = the main mesh
      SM_Ship_<Ship>, "Canopy", "Gear", ...) to the objects that go in (the rest goes to the main mesh);
   3. everything moves by "offset" (layout coordinates -> ship coordinates centred on the origin);
-  4. a UV map per mesh (smart project) for the engine;
+  3b. mesh decals and trim strips (Tools/Blender/hs_decals.py, recipe "decals") as the "Decals" part;
+  4. a UV map per mesh (smart project) for the engine (not for the decals: they carry atlas UVs);
   5. convex collision hulls (k-DOP, Tools/Blender/build_ai_ship.py) from "collision" boxes and sockets from
      "sockets" - both given in LAYOUT coordinates, like the drawing;
   6. saves "out_blend". Prints HSASSEMBLE {...}.
@@ -106,8 +107,16 @@ def main(argv):
         ob.data.transform(Matrix.Translation(Vector(off)) @ ob.matrix_world)
         ob.matrix_world = Matrix()
         out[suffix] = ob
+    # 3b) mesh decals and trim strips laid onto the finished hull (Tools/Blender/hs_decals.py): their own
+    #     part with atlas UVs, no unwrap, no collision, not Nanite (setup no_nanite_parts)
+    import hs_decals
+    decals, decal_report = hs_decals.build(recipe, out[""], ship, off, ROOT)
+    if decals is not None:
+        out["Decals"] = decals
     # 4) UVs
-    for ob in out.values():
+    for key, ob in out.items():
+        if key == "Decals":
+            continue
         bpy.ops.object.select_all(action="DESELECT")
         ob.select_set(True)
         bpy.context.view_layer.objects.active = ob
@@ -121,7 +130,7 @@ def main(argv):
     hull = out[""]
     parts = {k: v for k, v in out.items() if k}
     regions = [{"name": c["name"], "box": shift_box(c["box"], off)} for c in cfg["collision"]]
-    ai.build_collision(ship, [o for k, o in out.items() if k != "Canopy"], regions)
+    ai.build_collision(ship, [o for k, o in out.items() if k not in ("Canopy", "Decals")], regions)
     sockets = {}
     for name, s in cfg["sockets"].items():
         s = dict(s)
@@ -136,6 +145,7 @@ def main(argv):
     hi = [round(max(p[i] for p in pts), 3) for i in range(3)]
     bpy.ops.wm.save_as_mainfile(filepath=path(cfg["out_blend"]))
     print("HSASSEMBLE " + json.dumps({"out": cfg["out_blend"], "meshes": {o.name: len(o.data.polygons) for o in out.values()},
+                                       "decals": decal_report,
                                        "bounds": [lo, hi]}))
 
 

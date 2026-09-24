@@ -479,6 +479,11 @@ def add_mesh_component(blueprint, extra):
         # Attached under Hull, which already carries the offset.
         existing.set_editor_property("relative_location", unreal.Vector(0.0, 0.0, 0.0))
         existing.set_collision_profile_name("NoCollision")
+        if extra["component"] == "Decals":
+            # mesh decals (Deferred Decal materials) only paint the hull under them: no shadow, no
+            # distance field of their own
+            existing.set_editor_property("cast_shadow", False)
+            existing.set_editor_property("affect_distance_field_lighting", False)
         unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
         return "component %s = %s" % (extra["component"], extra["mesh"])
     except Exception as error:

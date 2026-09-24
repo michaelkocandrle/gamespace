@@ -22,6 +22,9 @@ struct FSpaceShot
 	FVector CameraLocation = FVector::ZeroVector;
 	FVector CameraLookAt = FVector::ZeroVector;
 	bool bFreeCamera = false;
+	// camera_local / look_local: the free camera in the ship's own space (metres, X forward, Y right,
+	// Z up), for close views of one part of a ship wherever the ship happens to be.
+	bool bLocalCamera = false;
 	/** Field of view of the free camera, degrees; 0 keeps the default. */
 	float CameraFov = 0.f;
 

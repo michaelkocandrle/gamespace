@@ -169,6 +169,18 @@ bool USpaceShotRunner::ParseShotList(const FString& Json, TArray<FSpaceShot>& Ou
 		{
 			Shot.CameraLookAt = FVector((*FreeLook)[0]->AsNumber(), (*FreeLook)[1]->AsNumber(), (*FreeLook)[2]->AsNumber()) * 100.0;
 		}
+		const TArray<TSharedPtr<FJsonValue>>* LocalLoc = nullptr;
+		if ((*Object)->TryGetArrayField(TEXT("camera_local"), LocalLoc) && LocalLoc->Num() == 3)
+		{
+			Shot.CameraLocation = FVector((*LocalLoc)[0]->AsNumber(), (*LocalLoc)[1]->AsNumber(), (*LocalLoc)[2]->AsNumber()) * 100.0;
+			Shot.bFreeCamera = true;
+			Shot.bLocalCamera = true;
+		}
+		const TArray<TSharedPtr<FJsonValue>>* LocalLook = nullptr;
+		if ((*Object)->TryGetArrayField(TEXT("look_local"), LocalLook) && LocalLook->Num() == 3)
+		{
+			Shot.CameraLookAt = FVector((*LocalLook)[0]->AsNumber(), (*LocalLook)[1]->AsNumber(), (*LocalLook)[2]->AsNumber()) * 100.0;
+		}
 		if ((*Object)->TryGetNumberField(TEXT("fov"), Number)) { Shot.CameraFov = float(Number); }
 		if ((*Object)->TryGetNumberField(TEXT("exposure"), Number)) { Shot.Exposure = float(Number); }
 		const TArray<TSharedPtr<FJsonValue>>* Stick = nullptr;
@@ -398,9 +410,20 @@ void USpaceShotRunner::ApplyFreeCamera(const FSpaceShot& Shot, ASpaceshipPawn& S
 	{
 		return;
 	}
-	const FVector Look = Shot.CameraLookAt.IsNearlyZero() ? Ship.GetActorLocation() : Shot.CameraLookAt;
-	FreeCamera->SetActorLocation(Shot.CameraLocation);
-	FreeCamera->SetActorRotation((Look - Shot.CameraLocation).GetSafeNormal().Rotation());
+	FVector Where = Shot.CameraLocation;
+	FVector Look = Shot.CameraLookAt.IsNearlyZero() ? Ship.GetActorLocation() : Shot.CameraLookAt;
+	if (Shot.bLocalCamera)
+	{
+		const FTransform ShipTransform = Ship.GetActorTransform();
+		Where = ShipTransform.TransformPosition(Shot.CameraLocation);
+		Look = ShipTransform.TransformPosition(Shot.CameraLookAt);
+	}
+	FreeCamera->SetActorLocation(Where);
+	// A ship-space camera keeps the ship's up (over a round planet world Z is not the ship's up, and
+	// the views came out rolled).
+	FreeCamera->SetActorRotation(Shot.bLocalCamera
+		? FRotationMatrix::MakeFromXZ((Look - Where).GetSafeNormal(), Ship.GetActorUpVector()).Rotator()
+		: (Look - Where).GetSafeNormal().Rotation());
 	UCameraComponent* Camera = FreeCamera->GetCameraComponent();
 	if (Shot.CameraFov > 0.f)
 	{

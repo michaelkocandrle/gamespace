@@ -1,0 +1,119 @@
+{
+ "_comment": "Close views of the detail pilot (engine pods and the aft hull, skill ship-pipeline 3b3) from a free camera in the ship's own space (camera_local / look_local, metres, X forward, Y right, Z up). The same cameras as the Blender previews (layout coordinates minus the assemble offset, y mirrored). Run: Tools/Shots.ps1 -Preset pilot_views -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 60,
+   "name": "pilot_rear_left",
+   "camera_local": [
+    -14.75,
+    -8.5,
+    4.3
+   ],
+   "look_local": [
+    -7.65,
+    -2.8,
+    0.3
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 60,
+   "name": "pilot_side",
+   "camera_local": [
+    -7.65,
+    -9.0,
+    0.6
+   ],
+   "look_local": [
+    -7.65,
+    -3.0,
+    0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 60,
+   "name": "pilot_top",
+   "camera_local": [
+    -3.75,
+    -6.0,
+    5.8
+   ],
+   "look_local": [
+    -7.85,
+    -2.2,
+    0.7
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 60,
+   "name": "pilot_below",
+   "camera_local": [
+    -9.25,
+    -7.5,
+    -4.7
+   ],
+   "look_local": [
+    -7.25,
+    -2.5,
+    -0.6
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 60,
+   "name": "pilot_pod_close",
+   "camera_local": [
+    -5.45,
+    -6.2,
+    1.4
+   ],
+   "look_local": [
+    -7.45,
+    -3.6,
+    0.3
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 60,
+   "name": "pilot_rear",
+   "camera_local": [
+    -16.25,
+    -0.0,
+    2.3
+   ],
+   "look_local": [
+    -7.25,
+    -0.0,
+    0.3
+   ]
+  }
+ ]
+}

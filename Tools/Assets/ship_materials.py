@@ -602,7 +602,8 @@ def build_mesh_decal_master(paint):
     part): a static mesh with a Deferred Decal material, drawn into the DBuffer (r.DBuffer is on). The engine
     derives what the decal writes from the connected pins, so there are two masters:
       meshdecal        normal + roughness + metallic only - seams, grilles, bolts keep the hull's paint;
-      meshdecal_paint  also base colour (labels, stripes), darkened by the item's AO.
+      meshdecal_paint  also base colour (labels, stripes, parts with their own colour; baked AO in it),
+                       opacity x DecalColorMap alpha, as a second quad over the normal-only one.
     Textures: DecalNormalMap (tangent, OpenGL -> flip green on import), DecalMMap (R alpha = where the decal
     applies, G roughness, B metallic), DecalColorMap (sRGB). DecalNormalStrength flattens the normal."""
     m = _fresh_material(MASTERS["meshdecal_paint" if paint else "meshdecal"])
@@ -629,10 +630,18 @@ def build_mesh_decal_master(paint):
     if not MEL.connect_material_expressions(mm, "R", opacity, "A"):
         raise RuntimeError("decal M.R -> opacity")
     _link(_scalar(m, "DecalOpacity", 1.0, -900, 850), opacity, "B")
-    _output(opacity, unreal.MaterialProperty.MP_OPACITY)
     if paint:
+        # colour only where the item has its own (DecalColorMap alpha: labels, recess floors, slats,
+        # bolts); a DBuffer decal has one opacity for all it writes, so the paint quad sits on top of
+        # the normal-only one and covers just those parts
         col = _texture_param(m, "DecalColorMap", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR, white, -900, 1000)
         _output(col, unreal.MaterialProperty.MP_BASE_COLOR)
+        own = _node(m, unreal.MaterialExpressionMultiply, -350, 850)
+        _link(opacity, own, "A")
+        if not MEL.connect_material_expressions(col, "A", own, "B"):
+            raise RuntimeError("decal BC.A -> opacity")
+        opacity = own
+    _output(opacity, unreal.MaterialProperty.MP_OPACITY)
     MEL.recompile_material(m)
     unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
     return m
