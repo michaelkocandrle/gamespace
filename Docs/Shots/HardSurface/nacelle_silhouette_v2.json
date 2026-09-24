@@ -1,0 +1,40 @@
+{
+ "model": "hs (recipe v2)",
+ "views": {
+  "front": {
+   "iou": 0.8776,
+   "mirrored": false,
+   "aspect_model": 1.009,
+   "aspect_ref": 1.049,
+   "extra_pct": 8.79,
+   "missing_pct": 4.52,
+   "align": "world",
+   "reference": "meshy crop (box + cylinder r 1.24)",
+   "diff": "diff_front.png"
+  },
+  "side": {
+   "iou": 0.9059,
+   "mirrored": false,
+   "aspect_model": 2.756,
+   "aspect_ref": 2.754,
+   "extra_pct": 9.84,
+   "missing_pct": 0.49,
+   "align": "world",
+   "reference": "meshy crop (box + cylinder r 1.24)",
+   "diff": "diff_side.png"
+  },
+  "top": {
+   "iou": 0.898,
+   "mirrored": false,
+   "aspect_model": 2.74,
+   "aspect_ref": 2.646,
+   "extra_pct": 8.75,
+   "missing_pct": 2.34,
+   "align": "world",
+   "reference": "meshy crop (box + cylinder r 1.24)",
+   "diff": "diff_top.png"
+  }
+ },
+ "mean_iou": 0.8938,
+ "diff_sheet": "nacelle_silhouette_v2.png"
+}

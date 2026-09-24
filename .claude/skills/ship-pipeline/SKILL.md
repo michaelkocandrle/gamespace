@@ -139,6 +139,66 @@ Kokpit a interiér (2B kroky 6 a 10):
   `grow_m` 0,0045, `cut_depth_m` (malé 6 mm). Slot `M_Ship_<Loď>_Screens`, socket `Display_<jméno>`.
   Podrobně WORKFLOW 2.1; hlídá `test_cockpit_displays.py`.
 
+## 3b. Měřitelná shoda siluety (`Tools/Blender/silhouette_compare.py`)
+
+Při modelování optimalizuj **číslo**, ne dojem z obrázku.
+
+```bash
+B="/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
+# 1) masky modelu (Workbench, ortho, headless); --collection / --objects, volitelně výřez
+MSYS_NO_PATHCONV=1 "$B" -b Ship.blend --python Tools/Blender/silhouette_compare.py -- render \
+    --collection HS_Vanguard_Nacelle_UL --out Saved/Silhouette/nacelle --prefix hs
+# reference jako výřez AI modelu (box + válec kolem osy, bez pylonu)
+MSYS_NO_PATHCONV=1 "$B" -b ArtSource/Ships/Vanguard/Vanguard_Meshy.blend --python Tools/Blender/silhouette_compare.py -- render \
+    --objects SM_Ship_Vanguard --crop-box=-6.8,3.0,0.4,0.35,6.0,3.4 --crop-cylinder=4.551,1.892,1.24 \
+    --out Saved/Silhouette/nacelle --prefix meshy
+# 2) porovnání: render proti renderu (světové souřadnice) nebo proti konceptům (bbox)
+python Tools/Blender/silhouette_compare.py compare --model Saved/Silhouette/nacelle/hs --ref-model Saved/Silhouette/nacelle/meshy --out Saved/Silhouette/nacelle
+python Tools/Blender/silhouette_compare.py compare --model DIR/model --ref front=Concept/front.png --ref side=Concept/side.png --ref top=Concept/top.png --out DIR
+# 3) všechno najednou
+python Tools/Blender/silhouette_compare.py run --blend Ship.blend --collection X --ref side=... --out DIR
+```
+
+- **Pohledy:**
+  - front = na nos z +X, levobok vpravo;
+  - side = ze pravoboku (−Y), nos vpravo;
+  - top = shora, nos vpravo.
+  - Koncept otočený opačně se porovná zrcadlově (`mirrored`).
+- **Výstup:** `silhouette.json` (IoU, poměr stran bboxu modelu/reference, `extra_pct` / `missing_pct`
+  po pohledech, `mean_iou`), dále `diff_<pohled>.png` a `diff_sheet.png`. Šedá = obojí, červená =
+  model má navíc, tyrkys = modelu chybí.
+- **Koncept:** silueta se vyřízne z neutrálního pozadí (medián okraje, práh `--threshold` 30) nebo
+  z alfy. Otvory se vyplní, skvrny se odstraní rekonstrukcí, takže tenké špičky zůstanou.
+- **Render proti renderu** se porovnává ve světových souřadnicích (`--align world`). Normalizace
+  podle bboxu by kvůli jedné zbloudilé části posunula celou masku (WORKFLOW 9.6 g).
+- **Test:** `python Tools/Blender/tests/test_silhouette_compare.py`, 14 kontrol včetně renderu
+  krychle v Blenderu.
+- **Cíle:** hard-surface díl proti AI objemu ≥ 0,88 na pohled. Nižší číslo znamená špatnou osu nebo
+  poloměr, ne detail. Proti konceptu je cíl ≥ 0,9 a `aspect_model` do 3 % od `aspect_ref`.
+
+## 3c. Exteriér hard-surface (AssetPipeline_Modular „Exteriér: hard-surface“)
+
+- AI trup je jen **objemová reference**. Loď se staví po dílech z JSON receptů v
+  `ArtSource/Ships/<Loď>/HardSurface/`.
+- **Rotační díly** staví `Tools/Blender/hs_build_part.py`:
+  - panely se skutečnými spárami, prstence, sání a tryska;
+  - bevel s harden normals a weighted normals;
+  - kit `HS_Kit` a GN `HS_KitInstancer`.
+  ```bash
+  MSYS_NO_PATHCONV=1 "$B" -b --factory-startup --python Tools/Blender/hs_build_part.py -- ArtSource/Ships/Vanguard/HardSurface/nacelle.json
+  MSYS_NO_PATHCONV=1 "$B" -b ArtSource/Ships/Vanguard/HardSurface/Vanguard_Nacelle_HS.blend --python Tools/Blender/hs_render_views.py -- --collection HS_Vanguard_Nacelle_UL --out Saved/HardSurface/hs --prefix hs
+  ```
+- **Smyčka:**
+  1. změř osu a profil z masek AI objemu;
+  2. uprav recept;
+  3. build;
+  4. `silhouette_compare`;
+  5. `hs_render_views` a list vedle sebe s Meshy výřezem;
+  6. prohlédni detail zblízka.
+- **Pilot gondoly:** IoU 0,854 → 0,894 jen úpravou osy a poloměrů v receptu.
+  - Otevřené: ohnout velké díly kitu podle povrchu, pylon, UV a materiály, import do UE.
+  - Celou loď nepřestavovat bez rozhodnutí autora.
+
 ## 4. Pojmenování a sockety (ShipPipeline kap. 1)
 
 | Co | Vzor |

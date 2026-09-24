@@ -734,6 +734,19 @@ snímku.
   hrubá geometrie.
 - d) **Pravý displej má vlevo dole zubatou hranu** rámečku z AI textury. Neopravené.
 - e) Oko je navržené pro 16:9 a FOV 88°. Měření z jiného FOV nesedí.
+- f) **Render z `blender -b` zmizel.** Relativní `scene.render.filepath` (`Saved/...`) Blender bere
+  vůči .blend, ne vůči aktuálnímu adresáři. Ve skriptech dělej `os.path.abspath` výstupní složky.
+- g) **IoU siluety bylo nesmyslně nízké, i když díl seděl.** Výřez AI modelu obsahoval kousky
+  pylonu, normalizace podle bboxu tím zvětšila a posunula masku. Dva rendery ve stejných
+  souřadnicích porovnávej ve světovém prostoru (`silhouette_compare.py --align world`, výchozí)
+  a díl vyřízni i válcem (`--crop-cylinder yc,zc,r`).
+- h) **Poloměr změřený jako maximální vzdálenost vrcholů od osy je o ~5 % větší**, protože započítá
+  výstupky a greebly AI modelu. Měř z masky (střed a rovný okraj), ne z extrémů vrcholů.
+- i) **Rovný díl kitu na zakřiveném plášti odstává na krajích** (průhyb = šířka² / (8 · r); víko
+  0,7 m na r 1,12 m ≈ 5 cm). Velké díly je třeba ohnout podle povrchu.
+- j) **Python z heredocu přes nástroj Bash dostane jiná zpětná lomítka.** Nástroj mění `\\` na `\`
+  i v uvozovaném `<<'EOF'`: `'\\n'` se stane skutečným koncem řádku, `split('\\')` neuzavřeným
+  řetězcem. Python, ve kterém jsou zpětná lomítka, zapiš nástrojem Write do scratchpadu a spusť soubor.
 
 ---
 

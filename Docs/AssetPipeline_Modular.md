@@ -197,6 +197,66 @@ Zatím tedy platí: **geometrii generovat v Meshy ve 4k**, a Scenario používat
 (retopologie, UV, dělení na díly, textury). Než Tripo zavrhnout, stojí za zkoušku barevný koncept
 jako vstup a `smartLowPoly` vypnuté.
 
+## Exteriér: hard-surface místo AI skenu (24. 9. 2026, pilot na gondole Vanguardu)
+
+Pravidlo „AI dělá obálku, detail je procedurální“ platí i pro exteriér.
+
+**Proč:** trup z Meshy má 92 % hran pod 36° (WORKFLOW kap. 10, bod 4). Je to organický sken a
+nemá rovné panely. Bevel ani vážené normály na něm nic nezmění a na úroveň SC se z něj nedostaneme.
+
+### Postup
+
+1. **AI model je jen objemová reference.**
+   - Meshy / Higgsfield trup se nepoužije jako herní mesh.
+   - Změří se na něm osy, poloměry a délky: `silhouette_compare.py` masky ve světových souřadnicích,
+     střed a profil z masek.
+   - Může sloužit i jako cíl pro shrinkwrap volných ploch.
+   - Nic z jeho trojúhelníků se nepřebírá.
+2. **Loď se staví po dílech:** nos, trup, křídla, gondoly motorů, podvozek. Každý díl má vlastní JSON
+   recept v `ArtSource/Ships/<Loď>/HardSurface/<díl>.json` a builder skript v `Tools/Blender/hs_*.py`.
+   - Rotační díly (gondola, nádrž, věž, tryska): `Tools/Blender/hs_build_part.py`. Profil (x, r)
+     má skoky jako dvojice bodů se stejným x.
+   - Ploché a skořepinové díly (nos, trup, křídla): další builder stejného typu (zatím není). Plochy
+     z polygonů a průřezů, shrinkwrap na AI objem.
+3. **Skutečná hard-surface geometrie:**
+   - panely jako samostatné skořepiny s tloušťkou a mezerou 8 mm nad tmavou nosnou konstrukcí, takže
+     spára je skutečná, ne namalovaná;
+   - pásy, příruby a drážky jako plné prstence se schody mezi sekcemi;
+   - sání a tryska modelované (kanál, náboj, loukotě, prstenec);
+   - na všem `Bevel` (limit úhel 30°, 6 mm, 3 segmenty, harden normals) a `WeightedNormal` (keep sharp);
+     ostré hrany jsou označené podle úhlu.
+4. **Greebly jako znovupoužitelný kit.**
+   - Kolekce `HS_Kit` je vyloučená z view layeru, obsahuje vent, hatch, hatch_large, sensor, strip a bolt.
+   - Geometry nodes skupina `HS_KitInstancer` je instancuje na mračno bodů s atributy `kit_index`
+     a `rot` (Euler).
+   - Kam co patří, říká recept (`greebles`, `bolt_rings`), takže je to opakovatelné a upravitelné bez
+     klikání.
+5. **Kontrola:**
+   - `hs_render_views.py`: tři pravoúhlé pohledy a 3/4, Workbench s kavitou a obrysy, stejně pro
+     dnešní Meshy díl (výřez) i pro nový díl;
+   - `silhouette_compare.py`: IoU proti výřezu AI objemu;
+   - list vedle sebe a detail zblízka.
+
+### Pilot: horní levá gondola Vanguardu (recept `ArtSource/Ships/Vanguard/HardSurface/nacelle.json`)
+
+- **Postavení:** 37 objektů, ~91 tis. trojúhelníků bez instancí kitu, 123 bodů kitu. Soubor
+  `Vanguard_Nacelle_HS.blend`, build ~15 s headless.
+- **Shoda siluety s Meshy gondolou** (výřez s válcem r 1,24 m, bez pylonu), průměr IoU:
+  - **0,854** – první verze, poloměry z maximální vzdálenosti vrcholů, což započítává i výstupky;
+  - **0,894** – druhá verze, osa a poloměry dopočítané z masek (střed y 4,49, z 1,92; tělo r 1,12).
+    Po pohledech: zepředu 0,878, z boku 0,906, shora 0,898.
+  - Zbylý rozdíl (~9 % „navíc“) dělají hlavně greebly a pásy nad obrysem. Meshy má na obrysu
+    zaoblené a zdeformované tvary, rovné panely je nekopírují 1:1. To je záměr.
+- **Vzhled:** rovné panely, skutečné spáry, čisté zkosení, čitelné sání s nábojem a loukotěmi. Meshy je
+  vedle toho hrbolatý sken se zubatými okraji. Listy jsou v `Docs/Shots/HardSurface/`.
+- **Známé nedostatky pilotu:**
+  - díly kitu jsou rovné, takže velké víko (1,1 × 0,7 m) na válci r 1,12 odstává na krajích asi o 5 cm.
+    Řešení: ohýbat instance podle povrchu (GN raycast / deform), nebo zakřivené varianty dílů;
+  - chybí pylon a napojení na křídlo;
+  - chybí UV a materiálové zóny;
+  - díl ještě nešel do Unrealu.
+- **Rozhodnutí o celé lodi čeká na autora.**
+
 ## Kde brát hotové díly interiéru (průzkum 23. 9. 2026)
 
 Průzkum volně dostupných zdrojů pro třetí cestu („koupený/stažený base“), seřazeno podle toho,

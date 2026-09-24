@@ -1,0 +1,269 @@
+{
+ "_comment": "Hard-surface pilot: Vanguard upper port engine nacelle rebuilt as real panels (HANDOFF point 80, AssetPipeline_Modular.md 'Exteriér: hard-surface'). Built by Tools/Blender/hs_build_part.py. Blender coordinates in metres, nose +X. Axis and radii fitted to the Meshy hull with silhouette_compare.py (world-space masks, reference crop below): v1 by vertex max-distance gave IoU 0.854, v2 fitted to the mask centroid and edge profile. The Meshy mesh is only the volume reference; nothing is taken from its triangles.",
+ "name": "Vanguard_Nacelle_UL",
+ "out_blend": "ArtSource/Ships/Vanguard/HardSurface/Vanguard_Nacelle_HS.blend",
+ "axis": {
+  "y": 4.49,
+  "z": 1.92
+ },
+ "segments": 96,
+ "reference": {
+  "blend": "ArtSource/Ships/Vanguard/Vanguard_Meshy.blend",
+  "object": "SM_Ship_Vanguard",
+  "crop_box": [-6.8, 3.0, 0.4, 0.35, 6.0, 3.4],
+  "crop_cylinder": [4.551, 1.892, 1.24]
+ },
+ "profile": [
+  [-6.4, 0.8],
+  [-6.25, 0.88],
+  [-6.0, 0.95],
+  [-5.7, 1.04],
+  [-5.4, 1.09],
+  [-5.0, 1.12],
+  [-5.0, 1.15],
+  [-4.62, 1.15],
+  [-4.62, 1.0],
+  [-4.02, 1.0],
+  [-4.02, 1.12],
+  [-1.78, 1.12],
+  [-1.78, 1.05],
+  [-1.48, 1.05],
+  [-1.48, 1.11],
+  [-1.05, 1.11],
+  [-1.05, 1.03],
+  [-0.7, 1.02],
+  [-0.4, 0.97],
+  [-0.15, 0.89],
+  [-0.02, 0.84]
+ ],
+ "sections": [
+  {
+   "name": "AftCowl",
+   "x": [-6.4, -5.0],
+   "kind": "panels",
+   "around": 6,
+   "rows": 1,
+   "thickness": 0.035,
+   "gap": 0.008,
+   "phase_deg": 15
+  },
+  {
+   "name": "Flange",
+   "x": [-5.0, -4.62],
+   "kind": "ring",
+   "wall": 0.07
+  },
+  {
+   "name": "Collar",
+   "x": [-4.62, -4.02],
+   "kind": "ring",
+   "wall": 0.07
+  },
+  {
+   "name": "Body",
+   "x": [-4.02, -1.78],
+   "kind": "panels",
+   "around": 8,
+   "rows": 2,
+   "thickness": 0.035,
+   "gap": 0.008,
+   "phase_deg": 0
+  },
+  {
+   "name": "Groove",
+   "x": [-1.78, -1.48],
+   "kind": "ring",
+   "wall": 0.07
+  },
+  {
+   "name": "FwdBand",
+   "x": [-1.48, -1.05],
+   "kind": "ring",
+   "wall": 0.07
+  },
+  {
+   "name": "IntakeCowl",
+   "x": [-1.05, -0.02],
+   "kind": "panels",
+   "around": 4,
+   "rows": 1,
+   "thickness": 0.035,
+   "gap": 0.008,
+   "phase_deg": 45
+  }
+ ],
+ "rings": [
+  {
+   "name": "CollarRibA",
+   "x": [-4.5, -4.44],
+   "r_out": 1.05,
+   "r_in": 0.97
+  },
+  {
+   "name": "CollarRibB",
+   "x": [-4.22, -4.16],
+   "r_out": 1.05,
+   "r_in": 0.97
+  }
+ ],
+ "intake": {
+  "x_lip": -0.02,
+  "r_lip": 0.84,
+  "r_duct": 0.72,
+  "depth": 0.42,
+  "hub_r": 0.29,
+  "hub_tip": 0.04,
+  "spokes": 4,
+  "spoke_w": 0.08,
+  "ring_r": [0.47, 0.53]
+ },
+ "exhaust": {
+  "x_lip": -6.4,
+  "r_lip": 0.8,
+  "r_duct": 0.67,
+  "depth": 0.38,
+  "cone_r": 0.32,
+  "cone_tip": -6.34
+ },
+ "bolt_rings": [
+  {
+   "x": -4.99,
+   "r": 1.135,
+   "count": 36,
+   "facing": "aft"
+  },
+  {
+   "x": -4.63,
+   "r": 1.135,
+   "count": 36,
+   "facing": "fwd"
+  },
+  {
+   "x": -1.47,
+   "r": 1.095,
+   "count": 32,
+   "facing": "aft"
+  }
+ ],
+ "greebles": [
+  {
+   "part": "vent",
+   "x": -3.55,
+   "angle_deg": 70,
+   "surface": "Body"
+  },
+  {
+   "part": "vent",
+   "x": -3.55,
+   "angle_deg": -70,
+   "surface": "Body"
+  },
+  {
+   "part": "vent",
+   "x": -2.25,
+   "angle_deg": 110,
+   "surface": "Body"
+  },
+  {
+   "part": "sensor",
+   "x": -2.3,
+   "angle_deg": 20,
+   "surface": "Body"
+  },
+  {
+   "part": "strip",
+   "x": -5.7,
+   "angle_deg": 0,
+   "surface": "AftCowl"
+  },
+  {
+   "part": "strip",
+   "x": -5.7,
+   "angle_deg": 60,
+   "surface": "AftCowl"
+  },
+  {
+   "part": "strip",
+   "x": -5.7,
+   "angle_deg": 120,
+   "surface": "AftCowl"
+  },
+  {
+   "part": "strip",
+   "x": -5.7,
+   "angle_deg": 180,
+   "surface": "AftCowl"
+  },
+  {
+   "part": "strip",
+   "x": -5.7,
+   "angle_deg": 240,
+   "surface": "AftCowl"
+  },
+  {
+   "part": "strip",
+   "x": -5.7,
+   "angle_deg": 300,
+   "surface": "AftCowl"
+  },
+  {
+   "part": "strip",
+   "x": -0.62,
+   "angle_deg": 0,
+   "surface": "IntakeCowl"
+  },
+  {
+   "part": "strip",
+   "x": -0.62,
+   "angle_deg": 90,
+   "surface": "IntakeCowl"
+  },
+  {
+   "part": "strip",
+   "x": -0.62,
+   "angle_deg": 180,
+   "surface": "IntakeCowl"
+  },
+  {
+   "part": "strip",
+   "x": -0.62,
+   "angle_deg": 270,
+   "surface": "IntakeCowl"
+  },
+  {
+   "part": "hatch_large",
+   "x": -2.9,
+   "angle_deg": 180,
+   "surface": "Body"
+  },
+  {
+   "part": "hatch_large",
+   "x": -2.9,
+   "angle_deg": 90,
+   "surface": "Body"
+  },
+  {
+   "part": "vent",
+   "x": -2.25,
+   "angle_deg": 250,
+   "surface": "Body"
+  },
+  {
+   "part": "sensor",
+   "x": -3.6,
+   "angle_deg": 135,
+   "surface": "Body"
+  },
+  {
+   "part": "hatch",
+   "x": -2.95,
+   "angle_deg": 0,
+   "surface": "Body"
+  }
+ ],
+ "bevel": {
+  "width": 0.006,
+  "segments": 3,
+  "angle_deg": 30
+ }
+}

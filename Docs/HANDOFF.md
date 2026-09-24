@@ -1232,6 +1232,18 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Test `test_ops_context.py`: join, modifier_apply, bevel s profilem, boolean a inset projdou headless i živě; knife_project jen živě.
     - Headless ho helper odmítne, protože by tiše nic neudělal.
     - Pravidlo „přes MCP žádné operátory“ ve WORKFLOW 9.2 a AssetPipeline_Modular je nahrazené.
+79. **Měřitelná shoda siluety** (24. 9. 2026). `Tools/Blender/silhouette_compare.py` má tři kroky:
+    - render: ortografické masky ve Workbench, headless, zepředu, z boku a shora; výřez boxem nebo válcem;
+    - compare: vyřízne siluetu konceptu z neutrálního pozadí, spočítá IoU po pohledech, poměr stran a obrázky rozdílu;
+    - run: obojí najednou.
+    Dva rendery se porovnávají ve světových souřadnicích. Test `Tools/Blender/tests/test_silhouette_compare.py` má 14 kontrol. Postup je ve skillu `ship-pipeline` 3b.
+80. **Pilot hard-surface exteriéru: gondola Vanguardu** (24. 9. 2026). AI trup slouží jen jako objemová reference, díl se staví receptem
+    `ArtSource/Ships/Vanguard/HardSurface/nacelle.json` přes `Tools/Blender/hs_build_part.py`.
+    - Geometrie: panely se skutečnými spárami, prstence, sání a tryska, bevel a weighted normals, greebly z kitu `HS_Kit` přes GN `HS_KitInstancer`.
+    - IoU proti Meshy gondole vzrostlo z 0,854 na 0,894 po změření osy a poloměrů z masek. Listy jsou v `Docs/Shots/HardSurface/`.
+    - Postup je v AssetPipeline_Modular, v části „Exteriér: hard-surface“.
+    - Otevřené: ohnout velké díly kitu podle povrchu, pylon, UV a materiály, import do UE.
+    - **Celou loď zatím nepřestavovat, čeká se na rozhodnutí autora.**
 
 ---
 
