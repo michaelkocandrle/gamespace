@@ -58,7 +58,7 @@
  "materials": {
   "_comment": "Hard-surface exterior: one slot per paint zone, flat colours on the hull master (linear), the panel grooves, bevels and kit greebles carry the detail. Glass is the translucent master.",
   "MI_Ship_Wayfarer_Paint": {
-   "_comment": "Layered paint with an Origin-like clear coat (author 24. 9. 2026): livery A (graphite saddle, orange stripe), panel variation (tone, roughness, 8 % bare-metal and 5 % carbon panels, UV1 panel ids), clear coat 1 / 0.05.",
+   "_comment": "Layered paint with an Origin-like clear coat (author 24. 9. 2026): livery A (graphite saddle, orange stripe), panel variation (tone, roughness, 8 % bare-metal and 5 % carbon panels, UV1 panel ids), clear coat 1 / 0.05. Author chose livery A (24. 9. 2026).",
    "master": "layered",
    "slots": [
     "M_Ship_Wayfarer_Paint"
@@ -430,7 +430,7 @@
     0.85,
     1.0
    ],
-   "emissive_strength": 30
+   "emissive_strength": 40
   },
   "MI_Ship_Wayfarer_LightWarm": {
    "master": "hull",

@@ -1426,6 +1426,9 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - `hs_functional.py`: 26 bloků RCS, 2 lopatkové antény, bičová anténa, 2 senzorové kopule, 4 přípojky,
       6 závěsů klapek, objímky zbraní.
     - Silueta: bok 0,9781, shora 0,9898, zepředu 0,917.
+    - Autor zvolil livrej A. Doplněno: emisní světelné lišty podél spodní části boků, pod kabinou a na břiše
+      (`hs_lights` strips s `"on": side / bottom`); stínový kanál s kabely podél boků mezi horním a spodním
+      oplechováním (hloubka 5 cm, uvnitř obrysu). Silueta: bok 0,9812, shora 0,9886, zepředu 0,916.
 
 ---
 

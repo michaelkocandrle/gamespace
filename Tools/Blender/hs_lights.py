@@ -7,7 +7,8 @@ the shape layers. Recipe block "lights", LAYOUT coordinates:
           (default true; "mirror_color" for the starboard copy: red port, green starboard), and optionally
           "light": a real light in front of it {"type": point / spot, "intensity_cd", "radius_m",
           "cone_deg", "aim": [x, y, z] layout point for a spot}.
-  strips  emissive light strips in a dark channel along a pod ("pod_line": x range at deg; "r" places it at
+  strips  emissive light strips in a dark channel along a pod or, with "on": side / bottom / top and "z" / "y",
+          along the hull; ("pod_line": x range at deg; "r" places it at
           that radius instead of on the surface, e.g. inside the open bay), "width" m, "color".
   points  bare lights without a fitting (inside a bay): "at" layout point, "color", "light" as above.
 
@@ -148,11 +149,15 @@ def apply(recipe, made, coll, mats_factory, bevel):
                     centre = Vector((xx, axis[0] * side, axis[1]))
                     pts.append((centre + radial * st["r"], -radial if st.get("facing") == "in" else radial))
                 else:
-                    origin, d = _ray({"on": "pod", "x": xx, "deg": st["deg"]}, side, axis)
+                    if st.get("on") in ("side", "bottom", "top"):
+                        # hull strips: running lights along the side / belly (z or y fixed)
+                        origin, d = _ray({"on": st["on"], "x": xx, "z": st.get("z", 0.0), "y": st.get("y", 0.0)}, side, axis)
+                    else:
+                        origin, d = _ray({"on": "pod", "x": xx, "deg": st["deg"]}, side, axis)
                     hit, n, _, _ = tree.ray_cast(origin, d, 20.0)
                     if hit is not None:
                         pts.append((hit, n.normalized()))
-            if "r" not in st and len(pts) > 4:
+            if "r" not in st and st.get("on", "pod") == "pod" and len(pts) > 4:
                 # a ray that fell into a panel gap lands on the substructure 3 cm deeper: drop it
                 def rad(p, side=side):
                     return (Vector((0.0, p.y, p.z)) - Vector((0.0, axis[0] * side, axis[1]))).length
