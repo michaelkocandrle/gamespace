@@ -815,6 +815,15 @@ snímku.
   povrchu, na střeše a břiše podle bližší strany lodi.
 - an) **Příkaz bash uvnitř PowerShellu se tiše nespustil** (uvozovky), import pak vzal staré FBX. Build v Blenderu
   pouštět nástrojem Bash, import a balení nástrojem PowerShell.
+- ao) **Tvarovaná křídla o třetinu tenčí, silueta zepředu klesla.** Profil NACA normalizovaný číslem 0,15014.
+  Správná závorka v 30 % tětivy je 0,10003.
+- ap) **Křídla se nepřestavěla („shaped: []“).** Bmesh vytvořený z ploch nemá normály, a osy desky vyšly nulové.
+  Po stavbě zavolat `bm.normal_update()`.
+- aq) **Silueta shora klesla o spáry mezi díly křídla.** Pod díly patří tmavé jádro bez spár.
+- ar) **„Noc“ se ztlumeným sluncem je pořád den.** `space.SunDir 25 45` dá slunce pod horizont, `space.Sun Intensity 0`
+  a `space.Sky Intensity 0.03`. Obloha levelu přesto zůstává světlá (skybox nesleduje slunce).
+- as) **Chromová náběžná hrana ploutve je flekatá.** Leštěný kov 0,28 odráží šum Lumenu. Náběžné hrany tmavým
+  materiálem.
 
 ---
 

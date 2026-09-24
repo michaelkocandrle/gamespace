@@ -444,6 +444,33 @@ MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/decal_libra
 - Text a šipky jsou na bocích a svazích vždy nahoru; na střeše a břiše se čtou z bližší strany lodi.
 - Assemble vypíše počty podle dílů, pravidel a typů (`HSASSEMBLE ... "decals"`).
 
+**Hustota podle referencí SC** (rozbor Pisces, 100i, Mustang a Titan, 24. 9. 2026):
+- Hustotu dělají **tenké panelové linky** po 0,3–0,8 m se zalomením 45°, ne nýty. Pravidlo `panel_lines` (pásy
+  pro boky, střechu, břicho a křídla, gondoly po panelech); pásy se nesmí křížit.
+- Značení je **tón v tónu**: šedá na bílé a na tmavé. Výstražné pruhy na laku jsou šedé (`hazard_subtle`,
+  `tri_warning`), žluté jen u podvozku a rampy.
+- Porty a senzory mají šipky ‹‹ ●  ›› (`chevrons_port`); drobné červené značky (`red_marker`, `red_dot`) u poklopů.
+- Malé servisní nápisy mají písmo 2 cm (`st_*`, Share Tech Mono).
+- Aspoň jeden decal na každém panelu nad 0,5 m (`coverage`, mřížka s jitterem); u servisních míst shluky.
+- Celá loď: kolem 800 decalů a 650 m pásů. Decaly se plynule stmívají mezi 60 a 90 m
+  (`DecalFadeStartCm` / `EndCm`); díl Decals se přestane kreslit v 95 m. Menu (24 m), chase kamera a přistání
+  jsou v plném rozsahu (preset `decal_fade`).
+
+**Křídla a ploutve** (`Tools/Blender/hs_wings.py`, blok `wings`): desku z obrysů přestaví na tvarovaný profil
+uvnitř ní.
+- Řezy po rozpětí mají přesný interval tětivy (bisekce paprskem), takže obrys výkresu zůstane.
+- Profil NACA má maximum rovné tloušťce desky v 30 % tětivy. Pozor na normalizaci: závorka je 0,10003.
+- Díly jsou oddělené skutečnou spárou: náběžná hrana, box, klapka nebo směrovka (sekundární lak) nad tmavým
+  jádrem bez spár (silueta zůstává zavřená), kryty mechanismu klapek. Decaly na nich pravidly
+  `coverage` / `panel_lines` s rozsahem y křídla.
+
+**Podvozek** (`Tools/Blender/hs_gear.py`, blok `gear`): noha v obálce výkresu.
+- Úchyt a olejopneumatický tlumič s lesklým pístem a objímkou.
+- Nůžkové vzpěry, šikmá vzpěra, hydraulika.
+- Kryt nohy s výstražným pruhem vyplní obálku v bočním pohledu.
+- Kloub a patka s pryžovou podrážkou a žebry.
+- Výsledek je jeden objekt pod původním jménem (skupina Gear, kterou pawn zvedá a spouští).
+
 **Vrstva tvaru** (`Tools/Blender/hs_detail.py`, blok `detail`, volá `hs_build_ship.py` po zónách):
 - `hull_plates`: oblast (`x`, `z` / `abs_y`, `normal_z`, `centre`) se rozřízne rovinami hranic, zkopíruje, dostane
   Solidify ven (`t`) a zkosení. `secondary` znamená sekundární lak.

@@ -70,8 +70,8 @@
   ]
  ],
  "model": {
-  "title": "Exteriér v2 + pilot vrstev detailu (24. 9. 2026)",
-  "note": "AI model (verze 1 a 1.1) měl roztavenou geometrii a lak to nespravil (autor: „geometrie je mimo, tohle není dost dobré“). Exteriér v2 staví Tools/Blender/hs_build_ship.py přímo z obrysů schváleného výkresu: trup jako loft (v každém řezu tvar čela natažený na šířku shora a výšku z boku), ostatní díly jako průnik vytažených obrysů, gondoly rotačně podle poloměrů z výkresu se sáním a tryskou. Navrch skutečné panelové drážky, rám kabiny se zapuštěným sklem, řezy přesně podle čar pro oranžový pruh a tmavý nos, účelové detaily (servisní poklopy komponent, větrání chladičů, plnicí hrdlo, senzor). hs_assemble_ship.py z toho udělá herní meshe, kolize a sockety. Žádná AI geometrie ani AI textura. Stavba odhalila chybu ve výkresu (ploutev shora byla užší, než je vykloněná) – opraveno ve výkresu. Pilot vrstev detailu podle SC na gondolách a zádi: knihovna mesh decalů a trim sheet, střední vrstva tvaru (desky s tloušťkou a stupni, otevřená šachta s potrubím a aktuátorem, zapuštěné mřížky), vrstvený materiál (dva laky, AO a špína, opotřebení hran, grunge) a světla (polohová, obrysová, reflektory, světlo v šachtě). Silueta proti výkresu se nezhoršila (bok 0,9786, shora 0,9898, zepředu 0,915). Zbytek lodi čeká na schválení pilotu.",
+  "title": "Exteriér v3: celá loď s vrstvami detailu podle SC (24. 9. 2026)",
+  "note": "AI model (verze 1 a 1.1) měl roztavenou geometrii a lak to nespravil (autor: „geometrie je mimo, tohle není dost dobré“). Exteriér v2 staví Tools/Blender/hs_build_ship.py přímo z obrysů schváleného výkresu: trup jako loft (v každém řezu tvar čela natažený na šířku shora a výšku z boku), ostatní díly jako průnik vytažených obrysů, gondoly rotačně podle poloměrů z výkresu se sáním a tryskou. Navrch skutečné panelové drážky, rám kabiny se zapuštěným sklem, řezy přesně podle čar pro oranžový pruh a tmavý nos, účelové detaily (servisní poklopy komponent, větrání chladičů, plnicí hrdlo, senzor). hs_assemble_ship.py z toho udělá herní meshe, kolize a sockety. Žádná AI geometrie ani AI textura. Stavba odhalila chybu ve výkresu (ploutev shora byla užší, než je vykloněná) – opraveno ve výkresu. Pilot vrstev detailu podle SC na gondolách a zádi: knihovna mesh decalů a trim sheet, střední vrstva tvaru (desky s tloušťkou a stupni, otevřená šachta s potrubím a aktuátorem, zapuštěné mřížky), vrstvený materiál (dva laky, AO a špína, opotřebení hran, grunge) a světla (polohová, obrysová, reflektory, světlo v šachtě). Silueta proti výkresu se nezhoršila (bok 0,9786, shora 0,9898, zepředu 0,915). Zbytek lodi čeká na schválení pilotu. Celá loď po schválení pilotu: pravidla podle rozboru referencí SC (panelové linky, značení tón v tónu, červené značky) na trupu a přídi, tvarovaná křídla a ploutve s náběžnou hranou a klapkami (hs_wings.py), skutečný podvozek (hs_gear.py). 800 decalů, silueta bok 0,9787 / shora 0,9892 / zepředu 0,915.",
   "renders": [
    {
     "file": "Renders/Wayfarer_front34.png",
@@ -88,36 +88,34 @@
   ],
   "shots": [
    {
-    "file": "Docs/Shots/Wayfarer/pilot_rear_left.jpg",
-    "caption": "Pilot kolo 2: záď a gondola, rozmístění decalů pravidly, styl Origin."
+    "file": "Docs/Shots/Wayfarer/ship_front34.jpg",
+    "caption": "Příď a trup: panelové linky, štítky tón v tónu, desky."
    },
    {
-    "file": "Docs/Shots/Wayfarer/pilot_decals_light.jpg",
-    "caption": "Strukturní decaly berou barvu podkladu: světlý lak i grafitový pás."
+    "file": "Docs/Shots/Wayfarer/ship_wing_top.jpg",
+    "caption": "Tvarované křídlo: náběžná hrana, klapka, decaly."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/ship_fin.jpg",
+    "caption": "Ploutev se směrovkou a tmavou náběžnou hranou."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/ship_gear_main.jpg",
+    "caption": "Hlavní podvozek: tlumič, nůžkové vzpěry, kryt s pruhem, patka."
    },
    {
     "file": "Docs/Shots/Wayfarer/pilot_bay.jpg",
-    "caption": "Servisní šachta: potrubí, kabely, skříňky, chladicí trubka s ventilem, světlo."
+    "caption": "Servisní šachta gondoly."
    },
    {
-    "file": "Docs/Shots/Wayfarer/pilot_rear.jpg",
-    "caption": "Záď: dveře rampy, pancéřování, mřížky, štítky."
-   },
-   {
-    "file": "Docs/Shots/Wayfarer/pilot_pod_close.jpg",
-    "caption": "Gondola zblízka."
-   },
-   {
-    "file": "Docs/Shots/Wayfarer/pilot_dusk.jpg",
-    "caption": "Soumrak: polohová světla, šachta."
+    "file": "Docs/Shots/Wayfarer/ship_night_rear.jpg",
+    "caption": "Noc: navigační světla, šachta, trysky."
    }
   ],
   "known": [
-   "Pilot vrstev detailu je jen na gondolách a zádi; zbytek lodi je čistá v2 do schválení pilotu.",
-   "Střední hustota je pod úrovní SC: velké plochy gondol mezi deskami, chybí textové decaly (registrace, výrobce).",
-   "Křídla a ploutve jsou rovné desky, podvozek jsou hranoly (další krok po pilotu).",
+   "Obloha levelu v noci zůstává světlá (skybox nesleduje slunce).",
    "Kokpit je zevnitř prázdný (dočasná palubní deska), sklo je poloprůhledné do prázdna – přijde s interiérem.",
-   "Rampa zatím není samostatný díl (je součástí trupu)."
+   "Rampa zatím není samostatný pohyblivý díl; podvozek nemá dvířka šachet."
   ]
  }
 }

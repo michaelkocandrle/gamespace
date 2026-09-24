@@ -453,6 +453,11 @@ def main(argv):
             for ob in new:
                 made["wing_" + ob.name] = ob
             report[part] = {"shaped": [ob.name for ob in new]}
+    if recipe.get("gear"):
+        # real landing gear legs inside the drawing's gear envelopes (Tools/Blender/hs_gear.py)
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hs_gear
+        report["gear"] = hs_gear.build(recipe, made, coll, mats, recipe.get("detail", {}).get("bevel", {"angle_deg": 30, "width": 0.006, "segments": 2}), ship)
     hz = recipe["parts"].get("hull", {}).get("zones", [])
     if hz and "hull" in made:
         hull = made["hull"]

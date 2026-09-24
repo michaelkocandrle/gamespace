@@ -1402,6 +1402,18 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       | Detail zádi | 82 FPS | 75 FPS | 76 FPS |
 
     - Iterace se od teď kontroluje v Blenderu; balí se a testuje jednou před předáním (CLAUDE.md).
+89. **Wayfarer: celá loď podle schváleného pilotu** (24. 9. 2026 v noci, autor pilot schválil).
+    - Rozbor referencí SC: hustotu dělají panelové linky, značení je tón v tónu, drobné červené značky, šipky u
+      portů. Knihovna má 69 položek a 11 pásů.
+    - Úspory: grunge se vzorkuje jen jednou. Decaly se plynule stmívají mezi 60 a 90 m (ověřeno: menu, chase,
+      přistání).
+    - Noční test (`night_views`, slunce pod horizontem): světla čtou. Obloha levelu v noci zůstává světlá.
+    - Část 1 (trup a příď): 686 decalů, desky a pravidlo `greeble_companions`.
+    - Část 2: tvarovaná křídla a ploutve (`hs_wings.py`) s decaly.
+    - Část 3: podvozek (`hs_gear.py`).
+    - Celkem 800 decalů (trup 345, gondoly 109 / 117, křídla 94 / 96, ploutve 19 / 20) a kolem 650 m pásů.
+    - Silueta: bok 0,9787, shora 0,9892, zepředu 0,915.
+    - FPS 1080p perf_pilot: čistá v2 88 / 85 / 82, celá loď 82 / 79 / 74.
 
 ---
 

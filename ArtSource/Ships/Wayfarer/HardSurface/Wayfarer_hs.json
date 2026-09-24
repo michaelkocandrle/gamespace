@@ -2082,7 +2082,7 @@
   ]
  },
  "wings": {
-  "_comment": "Shaped wings and fins inside the drawing's slabs (Tools/Blender/hs_wings.py): NACA section, leading-edge strip in bare metal, flap / rudder cut out of the box in secondary paint, flap track fairings.",
+  "_comment": "Shaped wings and fins inside the drawing's slabs (Tools/Blender/hs_wings.py): NACA section, leading-edge strip in the dark material (bare metal read as chrome with Lumen noise on the fins), flap / rudder cut out of the box in secondary paint, flap track fairings.",
   "wing": {
    "step": 0.08,
    "t_ratio": 1.0,
@@ -2096,7 +2096,7 @@
    "bevel_m": 0.003,
    "materials": {
     "box": "paint",
-    "le": "metal",
+    "le": "dark",
     "flap": "paint",
     "fairing": "dark",
     "core": "dark"
@@ -2115,11 +2115,28 @@
    "bevel_m": 0.003,
    "materials": {
     "box": "paint",
-    "le": "metal",
+    "le": "dark",
     "flap": "paint",
     "core": "dark"
    },
    "core": 0.92
+  }
+ },
+ "gear": {
+  "_comment": "Real landing gear inside the drawing's gear envelopes (Tools/Blender/hs_gear.py): oleo strut, torque links, drag brace, hydraulic lines, leg door with a hazard band, ankle and foot pad.",
+  "gear_main": {
+   "at": [5.2, 2.25, -0.6],
+   "mirror": true,
+   "strut": [0.4, 0.3, -0.6, -1.45],
+   "pad": [1.2, 0.8, -1.6, 0.15],
+   "door": "outboard"
+  },
+  "gear_nose": {
+   "at": [17.0, 0.0, -0.55],
+   "mirror": false,
+   "strut": [0.4, 0.3, -0.55, -1.45],
+   "pad": [1.2, 0.8, -1.6, 0.15],
+   "door": "front"
   }
  }
 }
