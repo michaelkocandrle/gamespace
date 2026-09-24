@@ -92,9 +92,9 @@
   },
   "rivet_row_4": {
    "uv": [
-    0.27,
+    0.38,
     0.30999999999999994,
-    0.37,
+    0.48,
     0.32499999999999996
    ],
    "size_m": [
@@ -110,9 +110,9 @@
   },
   "rivet_row_8": {
    "uv": [
-    0.38,
+    0.49,
     0.30999999999999994,
-    0.58,
+    0.69,
     0.32499999999999996
    ],
    "size_m": [
@@ -128,10 +128,10 @@
   },
   "rivet_row_16": {
    "uv": [
-    0.5900000000000001,
-    0.30999999999999994,
-    0.99,
-    0.32499999999999996
+    0.010000000000000009,
+    0.2799999999999999,
+    0.41000000000000003,
+    0.29499999999999993
    ],
    "size_m": [
     0.8,
@@ -365,9 +365,9 @@
   },
   "socket_round": {
    "uv": [
-    0.76,
+    0.83,
     0.59,
-    0.81,
+    0.88,
     0.64
    ],
    "size_m": [
@@ -474,9 +474,9 @@
   },
   "stencil_nostep": {
    "uv": [
-    0.56,
+    0.6100000000000001,
     0.5050000000000001,
-    0.71,
+    0.76,
     0.54
    ],
    "size_m": [
@@ -493,9 +493,9 @@
   },
   "stencil_thrust": {
    "uv": [
-    0.7200000000000001,
+    0.7700000000000001,
     0.5050000000000001,
-    0.9400000000000001,
+    0.9900000000000001,
     0.54
    ],
    "size_m": [
@@ -1004,6 +1004,259 @@
    "tags": [
     "scuff"
    ]
+  },
+  "chevrons_port": {
+   "uv": [
+    0.27,
+    0.30499999999999994,
+    0.37,
+    0.32499999999999996
+   ],
+   "size_m": [
+    0.2,
+    0.04
+   ],
+   "purpose": "chevrons either side of a port or sensor (SC ‹‹ ● ››)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "bracket"
+   ]
+  },
+  "red_marker": {
+   "uv": [
+    0.20375,
+    0.2579999999999999,
+    0.21575,
+    0.2699999999999999
+   ],
+   "size_m": [
+    0.024,
+    0.024
+   ],
+   "purpose": "tiny red triangle marker (SC service point)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "marker"
+   ]
+  },
+  "red_dot": {
+   "uv": [
+    0.22574999999999998,
+    0.2609999999999999,
+    0.23475,
+    0.2699999999999999
+   ],
+   "size_m": [
+    0.018,
+    0.018
+   ],
+   "purpose": "tiny red dot marker",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "marker"
+   ]
+  },
+  "corner_mark": {
+   "uv": [
+    0.56,
+    0.5,
+    0.6000000000000001,
+    0.54
+   ],
+   "size_m": [
+    0.08,
+    0.08
+   ],
+   "purpose": "thin L corner stencil of a panel",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "mark"
+   ]
+  },
+  "hazard_subtle": {
+   "uv": [
+    0.78,
+    0.33499999999999996,
+    0.96,
+    0.36
+   ],
+   "size_m": [
+    0.36,
+    0.05
+   ],
+   "purpose": "tone-on-tone hazard band (SC: grey stripes on white)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "warning_subtle"
+   ]
+  },
+  "tri_warning": {
+   "uv": [
+    0.76,
+    0.58,
+    0.8200000000000001,
+    0.64
+   ],
+   "size_m": [
+    0.12,
+    0.12
+   ],
+   "purpose": "warning triangle with text below (SC)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "stencil",
+    "warning_subtle"
+   ]
+  },
+  "st_nopaint": {
+   "uv": [
+    0.42000000000000004,
+    0.2799999999999999,
+    0.504,
+    0.29499999999999993
+   ],
+   "size_m": [
+    0.168,
+    0.03
+   ],
+   "purpose": "small service stencil 'DO NOT PAINT' (2 cm letters)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "small_stencil"
+   ]
+  },
+  "st_gnd": {
+   "uv": [
+    0.514,
+    0.2799999999999999,
+    0.5807500000000001,
+    0.29499999999999993
+   ],
+   "size_m": [
+    0.1335,
+    0.03
+   ],
+   "purpose": "small service stencil 'GND POINT' (2 cm letters)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "small_stencil"
+   ]
+  },
+  "st_extpwr": {
+   "uv": [
+    0.59075,
+    0.2799999999999999,
+    0.646,
+    0.29499999999999993
+   ],
+   "size_m": [
+    0.1105,
+    0.03
+   ],
+   "purpose": "small service stencil 'EXT PWR' (2 cm letters)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "small_stencil"
+   ]
+  },
+  "st_vent": {
+   "uv": [
+    0.656,
+    0.2799999999999999,
+    0.7687499999999999,
+    0.29499999999999993
+   ],
+   "size_m": [
+    0.2255,
+    0.03
+   ],
+   "purpose": "small service stencil 'VENT - KEEP CLEAR' (2 cm letters)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "small_stencil"
+   ]
+  },
+  "st_service": {
+   "uv": [
+    0.77875,
+    0.2799999999999999,
+    0.87425,
+    0.29499999999999993
+   ],
+   "size_m": [
+    0.191,
+    0.03
+   ],
+   "purpose": "small service stencil 'SERVICE ACCESS' (2 cm letters)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "small_stencil"
+   ]
+  },
+  "st_hfcl": {
+   "uv": [
+    0.8842500000000001,
+    0.2799999999999999,
+    0.94525,
+    0.29499999999999993
+   ],
+   "size_m": [
+    0.122,
+    0.03
+   ],
+   "purpose": "small service stencil 'HF-CL 07' (2 cm letters)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "small_stencil"
+   ]
+  },
+  "st_torque": {
+   "uv": [
+    0.010000000000000002,
+    0.2549999999999999,
+    0.094,
+    0.2699999999999999
+   ],
+   "size_m": [
+    0.168,
+    0.03
+   ],
+   "purpose": "small service stencil 'TORQUE 42 Nm' (2 cm letters)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "small_stencil"
+   ]
+  },
+  "st_inspect": {
+   "uv": [
+    0.10399999999999998,
+    0.2549999999999999,
+    0.19374999999999998,
+    0.2699999999999999
+   ],
+   "size_m": [
+    0.1795,
+    0.03
+   ],
+   "purpose": "small service stencil 'INSPECT 500 H' (2 cm letters)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "small_stencil"
+   ]
   }
  },
  "trim": {
@@ -1103,6 +1356,28 @@
    "height_m": 0.08,
    "tile_m": 2.0,
    "purpose": "stepped edge (plate over plate)",
+   "type": "structural",
+   "has_color": false
+  },
+  "panel_line": {
+   "v": [
+    0.6689999999999999,
+    0.6749999999999999
+   ],
+   "height_m": 0.012,
+   "tile_m": 2.0,
+   "purpose": "thin engraved panel line (SC: the main source of density)",
+   "type": "structural",
+   "has_color": false
+  },
+  "panel_line_step": {
+   "v": [
+    0.6589999999999999,
+    0.6689999999999999
+   ],
+   "height_m": 0.02,
+   "tile_m": 2.0,
+   "purpose": "panel line with a slight step (plate over plate)",
    "type": "structural",
    "has_color": false
   }

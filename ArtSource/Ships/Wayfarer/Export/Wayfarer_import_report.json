@@ -83,9 +83,7 @@
       "light Light_bay_glow_R (point, 10 cd) at [-757.4, 405.6, 55.0]"
     ]
   },
-  "removed": [
-    "component Light_tail"
-  ],
+  "removed": [],
   "planet": {
     "collision_warmup_reach_m": 16.1,
     "collision_min_radius_m": 108.0

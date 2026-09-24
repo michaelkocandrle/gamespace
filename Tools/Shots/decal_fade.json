@@ -1,0 +1,92 @@
+{
+ "_comment": "Decal fade check (60-90 m): the title-screen camera distance (build_main_menu CAMERA_LOCATION, 24 m), the chase camera at its normal distance, and 50 / 75 / 100 m away. Run with -Width 1920 -Height 1080.",
+ "shots": [
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "name": "menu_distance",
+   "camera_local": [
+    -22.0,
+    -9.0,
+    3.5
+   ],
+   "look_local": [
+    0,
+    0,
+    0
+   ],
+   "fov": 60
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "name": "chase_normal",
+   "camera": "chase",
+   "chase_yaw": 35,
+   "chase_pitch": -12
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "name": "far_50m",
+   "camera_local": [
+    -40.0,
+    -30.0,
+    6.0
+   ],
+   "look_local": [
+    -6,
+    0,
+    0
+   ],
+   "fov": 25
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "name": "far_75m",
+   "camera_local": [
+    -60.0,
+    -45.0,
+    8.0
+   ],
+   "look_local": [
+    -6,
+    0,
+    0
+   ],
+   "fov": 17
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "name": "far_100m",
+   "camera_local": [
+    -80.0,
+    -60.0,
+    10.0
+   ],
+   "look_local": [
+    -6,
+    0,
+    0
+   ],
+   "fov": 13
+  }
+ ]
+}

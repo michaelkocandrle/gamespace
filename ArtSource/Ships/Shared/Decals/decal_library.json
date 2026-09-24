@@ -875,7 +875,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -925,7 +925,7 @@
        [-0.015, -0.01]
       ],
       "h": 0.0012,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      },
      {
       "kind": "text",
@@ -936,7 +936,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -959,7 +959,7 @@
        [-0.02, 0.02]
       ],
       "h": 0.0012,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      },
      {
       "kind": "text",
@@ -970,7 +970,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1199,7 +1199,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1221,7 +1221,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1243,7 +1243,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1298,7 +1298,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1320,7 +1320,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1342,7 +1342,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1364,7 +1364,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1386,7 +1386,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1408,7 +1408,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1430,7 +1430,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1452,7 +1452,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1474,7 +1474,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1496,7 +1496,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1518,7 +1518,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1540,7 +1540,7 @@
       "h": 0.0006,
       "rot": 0,
       "z": 0.0,
-      "color": [0.3, 0.3, 0.31]
+      "color": [0.42, 0.42, 0.43]
      }
     ]
    },
@@ -1607,6 +1607,439 @@
     },
     "tags": [
      "scuff"
+    ]
+   },
+   {
+    "name": "chevrons_port",
+    "type": "info",
+    "footprint": [0.2, 0.04],
+    "purpose": "chevrons either side of a port or sensor (SC ‹‹ ● ››)",
+    "tags": [
+     "bracket"
+    ],
+    "parts": [
+     {
+      "kind": "poly",
+      "at": [-0.06, 0],
+      "points": [
+       [0, -0.012],
+       [-0.008, 0],
+       [0, 0.012],
+       [-0.004, 0]
+      ],
+      "h": 0.0008,
+      "color": [0.42, 0.42, 0.43]
+     },
+     {
+      "kind": "poly",
+      "at": [-0.075, 0],
+      "points": [
+       [0, -0.012],
+       [-0.008, 0],
+       [0, 0.012],
+       [-0.004, 0]
+      ],
+      "h": 0.0008,
+      "color": [0.42, 0.42, 0.43]
+     },
+     {
+      "kind": "poly",
+      "at": [0.06, 0],
+      "points": [
+       [0, -0.012],
+       [0.008, 0],
+       [0, 0.012],
+       [0.004, 0]
+      ],
+      "h": 0.0008,
+      "color": [0.42, 0.42, 0.43]
+     },
+     {
+      "kind": "poly",
+      "at": [0.075, 0],
+      "points": [
+       [0, -0.012],
+       [0.008, 0],
+       [0, 0.012],
+       [0.004, 0]
+      ],
+      "h": 0.0008,
+      "color": [0.42, 0.42, 0.43]
+     }
+    ]
+   },
+   {
+    "name": "red_marker",
+    "type": "info",
+    "footprint": [0.024, 0.024],
+    "purpose": "tiny red triangle marker (SC service point)",
+    "tags": [
+     "marker"
+    ],
+    "parts": [
+     {
+      "kind": "poly",
+      "at": [0, 0],
+      "points": [
+       [-0.009, -0.007],
+       [0.009, -0.007],
+       [0, 0.009]
+      ],
+      "h": 0.0008,
+      "color": [0.62, 0.08, 0.05]
+     }
+    ]
+   },
+   {
+    "name": "red_dot",
+    "type": "info",
+    "footprint": [0.018, 0.018],
+    "purpose": "tiny red dot marker",
+    "tags": [
+     "marker"
+    ],
+    "parts": [
+     {
+      "kind": "cyl",
+      "at": [0, 0],
+      "r": 0.006,
+      "h": 0.0008,
+      "color": [0.62, 0.08, 0.05],
+      "seg": 20
+     }
+    ]
+   },
+   {
+    "name": "corner_mark",
+    "type": "info",
+    "footprint": [0.08, 0.08],
+    "purpose": "thin L corner stencil of a panel",
+    "tags": [
+     "mark"
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [-0.02, -0.037],
+      "size": [0.06, 0.004],
+      "h": 0.0006,
+      "color": [0.42, 0.42, 0.43]
+     },
+     {
+      "kind": "box",
+      "at": [-0.037, -0.02],
+      "size": [0.004, 0.06],
+      "h": 0.0006,
+      "color": [0.42, 0.42, 0.43]
+     }
+    ]
+   },
+   {
+    "name": "hazard_subtle",
+    "type": "info",
+    "footprint": [0.36, 0.05],
+    "purpose": "tone-on-tone hazard band (SC: grey stripes on white)",
+    "tags": [
+     "warning_subtle"
+    ],
+    "parts": [
+     {
+      "kind": "poly",
+      "at": [-0.13999999999999999, 0],
+      "points": [
+       [0, -0.025],
+       [0.018, -0.025],
+       [0.0, 0.025],
+       [-0.018, 0.025]
+      ],
+      "h": 0.0008,
+      "color": [0.24, 0.24, 0.25]
+     },
+     {
+      "kind": "poly",
+      "at": [-0.09999999999999999, 0],
+      "points": [
+       [0, -0.025],
+       [0.018, -0.025],
+       [0.0, 0.025],
+       [-0.018, 0.025]
+      ],
+      "h": 0.0008,
+      "color": [0.24, 0.24, 0.25]
+     },
+     {
+      "kind": "poly",
+      "at": [-0.06, 0],
+      "points": [
+       [0, -0.025],
+       [0.018, -0.025],
+       [0.0, 0.025],
+       [-0.018, 0.025]
+      ],
+      "h": 0.0008,
+      "color": [0.24, 0.24, 0.25]
+     },
+     {
+      "kind": "poly",
+      "at": [-0.01999999999999999, 0],
+      "points": [
+       [0, -0.025],
+       [0.018, -0.025],
+       [0.0, 0.025],
+       [-0.018, 0.025]
+      ],
+      "h": 0.0008,
+      "color": [0.24, 0.24, 0.25]
+     },
+     {
+      "kind": "poly",
+      "at": [0.020000000000000018, 0],
+      "points": [
+       [0, -0.025],
+       [0.018, -0.025],
+       [0.0, 0.025],
+       [-0.018, 0.025]
+      ],
+      "h": 0.0008,
+      "color": [0.24, 0.24, 0.25]
+     },
+     {
+      "kind": "poly",
+      "at": [0.06, 0],
+      "points": [
+       [0, -0.025],
+       [0.018, -0.025],
+       [0.0, 0.025],
+       [-0.018, 0.025]
+      ],
+      "h": 0.0008,
+      "color": [0.24, 0.24, 0.25]
+     },
+     {
+      "kind": "poly",
+      "at": [0.10000000000000003, 0],
+      "points": [
+       [0, -0.025],
+       [0.018, -0.025],
+       [0.0, 0.025],
+       [-0.018, 0.025]
+      ],
+      "h": 0.0008,
+      "color": [0.24, 0.24, 0.25]
+     },
+     {
+      "kind": "poly",
+      "at": [0.14, 0],
+      "points": [
+       [0, -0.025],
+       [0.018, -0.025],
+       [0.0, 0.025],
+       [-0.018, 0.025]
+      ],
+      "h": 0.0008,
+      "color": [0.24, 0.24, 0.25]
+     }
+    ]
+   },
+   {
+    "name": "tri_warning",
+    "type": "info",
+    "footprint": [0.12, 0.12],
+    "purpose": "warning triangle with text below (SC)",
+    "tags": [
+     "stencil",
+     "warning_subtle"
+    ],
+    "parts": [
+     {
+      "kind": "poly",
+      "at": [0, 0.012],
+      "points": [
+       [-0.04, -0.03],
+       [0.04, -0.03],
+       [0, 0.038]
+      ],
+      "h": 0.0008,
+      "color": [0.24, 0.24, 0.25]
+     },
+     {
+      "kind": "text",
+      "body": "CAUTION",
+      "size": 0.018,
+      "at": [0, -0.042],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [0.42, 0.42, 0.43],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "st_nopaint",
+    "type": "info",
+    "footprint": [0.168, 0.03],
+    "purpose": "small service stencil 'DO NOT PAINT' (2 cm letters)",
+    "tags": [
+     "small_stencil"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "DO NOT PAINT",
+      "size": 0.02,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [0.42, 0.42, 0.43],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "st_gnd",
+    "type": "info",
+    "footprint": [0.1335, 0.03],
+    "purpose": "small service stencil 'GND POINT' (2 cm letters)",
+    "tags": [
+     "small_stencil"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "GND POINT",
+      "size": 0.02,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [0.42, 0.42, 0.43],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "st_extpwr",
+    "type": "info",
+    "footprint": [0.1105, 0.03],
+    "purpose": "small service stencil 'EXT PWR' (2 cm letters)",
+    "tags": [
+     "small_stencil"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "EXT PWR",
+      "size": 0.02,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [0.42, 0.42, 0.43],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "st_vent",
+    "type": "info",
+    "footprint": [0.2255, 0.03],
+    "purpose": "small service stencil 'VENT - KEEP CLEAR' (2 cm letters)",
+    "tags": [
+     "small_stencil"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "VENT - KEEP CLEAR",
+      "size": 0.02,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [0.42, 0.42, 0.43],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "st_service",
+    "type": "info",
+    "footprint": [0.191, 0.03],
+    "purpose": "small service stencil 'SERVICE ACCESS' (2 cm letters)",
+    "tags": [
+     "small_stencil"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "SERVICE ACCESS",
+      "size": 0.02,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [0.42, 0.42, 0.43],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "st_hfcl",
+    "type": "info",
+    "footprint": [0.122, 0.03],
+    "purpose": "small service stencil 'HF-CL 07' (2 cm letters)",
+    "tags": [
+     "small_stencil"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "HF-CL 07",
+      "size": 0.02,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [0.42, 0.42, 0.43],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "st_torque",
+    "type": "info",
+    "footprint": [0.168, 0.03],
+    "purpose": "small service stencil 'TORQUE 42 Nm' (2 cm letters)",
+    "tags": [
+     "small_stencil"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "TORQUE 42 Nm",
+      "size": 0.02,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [0.42, 0.42, 0.43],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "st_inspect",
+    "type": "info",
+    "footprint": [0.1795, 0.03],
+    "purpose": "small service stencil 'INSPECT 500 H' (2 cm letters)",
+    "tags": [
+     "small_stencil"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "INSPECT 500 H",
+      "size": 0.02,
+      "at": [0, 0],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [0.42, 0.42, 0.43],
+      "rot": 0
+     }
     ]
    }
   ]
@@ -1799,6 +2232,38 @@
       "at": [0, -0.02],
       "size": [2.4, 0.04],
       "h": 0.005
+     }
+    ]
+   },
+   {
+    "name": "panel_line",
+    "purpose": "thin engraved panel line (SC: the main source of density)",
+    "height_m": 0.012,
+    "recesses": [
+     {
+      "at": [0, 0],
+      "size": [2.4, 0.0016],
+      "depth": 0.0018
+     }
+    ]
+   },
+   {
+    "name": "panel_line_step",
+    "purpose": "panel line with a slight step (plate over plate)",
+    "height_m": 0.02,
+    "recesses": [
+     {
+      "at": [0, -0.003],
+      "size": [2.4, 0.0016],
+      "depth": 0.0018
+     }
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [0, 0.005],
+      "size": [2.4, 0.01],
+      "h": 0.0012
      }
     ]
    }

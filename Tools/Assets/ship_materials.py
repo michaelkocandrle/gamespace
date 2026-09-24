@@ -623,7 +623,7 @@ def build_mesh_decal_ao_master():
     _link(k, a, "A")
     if not MEL.connect_material_expressions(mm, "R", a, "B"):
         raise RuntimeError("decal M.R -> AO opacity")
-    _output(a, unreal.MaterialProperty.MP_OPACITY)
+    _output(_decal_fade(m, a), unreal.MaterialProperty.MP_OPACITY)
     _output(_vector(m, "DecalAOColor", (0.0, 0.0, 0.0), -600, 300), unreal.MaterialProperty.MP_BASE_COLOR)
     MEL.recompile_material(m)
     unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
@@ -650,7 +650,15 @@ float dirt = saturate((1.0 - ao) * 1.8) * saturate(0.3 + g) * DirtAmount * Amoun
 float wear = saturate((edge * (0.5 + 1.0 * g) - WearThreshold) * 3.0) * EdgeWear;
 """
 
-_LAYER_COLOUR = _LAYER_MASKS + """
+_LAYER_MASK_NODE = _LAYER_MASKS + """
+return float4(g, ao, dirt, wear);
+"""
+
+# The colour and surface nodes read the masks from the one mask node (M = g, ao, dirt, wear): the grunge
+# texture is sampled once per pixel (six taps), not twice (24. 9. 2026).
+_LAYER_COLOUR = """
+float g = M.x; float ao = M.y; float dirt = M.z; float wear = M.w;
+float p2 = 1.0 - VC.b;
 float3 paint = lerp(Primary, Secondary, p2);
 paint *= lerp(1.0, 0.8 + 0.4 * g, GrungeAmount * Amount);
 paint *= lerp(1.0, ao, CavityStrength);
@@ -659,7 +667,9 @@ paint = lerp(paint, BareMetal, wear);
 return paint;
 """
 
-_LAYER_SURFACE = _LAYER_MASKS + """
+_LAYER_SURFACE = """
+float g = M.x; float ao = M.y; float dirt = M.z; float wear = M.w;
+float p2 = 1.0 - VC.b;
 float rough = lerp(PrimaryRough, SecondaryRough, p2);
 rough = saturate(rough + (g - 0.5) * RoughVariation * Amount);
 rough = lerp(rough, 0.85, dirt);
@@ -702,22 +712,28 @@ def build_layered_master():
         "AOStrength": _scalar(m, "AOStrength", 0.8, -1700, 2150),
         "WearThreshold": _scalar(m, "WearThreshold", 0.45, -1700, 2250),
     }
-    common = ["VC", "Amount", "LocalPos", "TexG", "Tile"]
-    colour_in = common + ["Primary", "Secondary", "BareMetal", "DirtColor", "GrungeAmount", "DirtAmount", "EdgeWear",
-                          "CavityStrength", "WearThreshold"]
-    surface_in = common + ["PrimaryRough", "SecondaryRough", "PaintMetal", "BareRough", "EdgeWear", "DirtAmount",
-                           "AOStrength", "RoughVariation", "WearThreshold"]
+    mask_in = ["VC", "Amount", "LocalPos", "TexG", "Tile", "DirtAmount", "EdgeWear", "WearThreshold"]
+    masks = _custom(m, "Layered_masks", _LAYER_MASK_NODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4, mask_in, -1250, 300)
+    if not MEL.connect_material_expressions(vc, "", masks, "VC"):
+        raise RuntimeError("vertex colour -> masks")
+    if not MEL.connect_material_expressions(vc, "A", masks, "Amount"):
+        raise RuntimeError("vertex colour A -> masks")
+    _link(local_position, masks, "LocalPos")
+    _link(tex, masks, "TexG")
+    _link(tile, masks, "Tile")
+    for name in mask_in[5:]:
+        _link(params[name], masks, name)
+    colour_in = ["M", "VC", "Amount", "Primary", "Secondary", "BareMetal", "DirtColor", "GrungeAmount", "CavityStrength"]
+    surface_in = ["M", "VC", "Amount", "PrimaryRough", "SecondaryRough", "PaintMetal", "BareRough", "AOStrength", "RoughVariation"]
     nodes = {}
     for key, code, names, y in (("colour", _LAYER_COLOUR, colour_in, 0), ("surface", _LAYER_SURFACE, surface_in, 700)):
-        node = _custom(m, "Layered_" + key, code, unreal.CustomMaterialOutputType.CMOT_FLOAT3, names, -1000, y)
+        node = _custom(m, "Layered_" + key, code, unreal.CustomMaterialOutputType.CMOT_FLOAT3, names, -900, y)
+        _link(masks, node, "M")
         if not MEL.connect_material_expressions(vc, "", node, "VC"):
             raise RuntimeError("vertex colour -> " + key)
         if not MEL.connect_material_expressions(vc, "A", node, "Amount"):
             raise RuntimeError("vertex colour A -> " + key)
-        _link(local_position, node, "LocalPos")
-        _link(tex, node, "TexG")
-        _link(tile, node, "Tile")
-        for name in names[len(common):]:
+        for name in names[3:]:
             _link(params[name], node, name)
         nodes[key] = node
     _output(nodes["colour"], unreal.MaterialProperty.MP_BASE_COLOR)
@@ -734,6 +750,33 @@ def build_layered_master():
     MEL.recompile_material(m)
     unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
     return m
+
+
+def _decal_fade(m, opacity, x=-350, y=1100):
+    """Opacity x a smooth fade with camera distance: 1 up to DecalFadeStartCm, 0 at DecalFadeEndCm. The
+    Decals component's draw distance lies just past the end, so the part disappears without a pop."""
+    dist = _node(m, unreal.MaterialExpressionCameraPositionWS, x - 500, y)
+    wp = _node(m, unreal.MaterialExpressionWorldPosition, x - 500, y + 100)
+    d = _node(m, unreal.MaterialExpressionDistance, x - 350, y)
+    _link(dist, d, "A")
+    _link(wp, d, "B")
+    end = _scalar(m, "DecalFadeEndCm", 9000.0, x - 500, y + 250)
+    start = _scalar(m, "DecalFadeStartCm", 6000.0, x - 500, y + 350)
+    num = _node(m, unreal.MaterialExpressionSubtract, x - 200, y)
+    _link(end, num, "A")
+    _link(d, num, "B")
+    den = _node(m, unreal.MaterialExpressionSubtract, x - 200, y + 200)
+    _link(end, den, "A")
+    _link(start, den, "B")
+    ratio = _node(m, unreal.MaterialExpressionDivide, x - 100, y)
+    _link(num, ratio, "A")
+    _link(den, ratio, "B")
+    fade = _node(m, unreal.MaterialExpressionSaturate, x, y)
+    _link(ratio, fade, "")
+    out = _node(m, unreal.MaterialExpressionMultiply, x + 120, y - 100)
+    _link(opacity, out, "A")
+    _link(fade, out, "B")
+    return out
 
 
 def build_mesh_decal_master(paint):
@@ -780,7 +823,7 @@ def build_mesh_decal_master(paint):
         if not MEL.connect_material_expressions(col, "A", own, "B"):
             raise RuntimeError("decal BC.A -> opacity")
         opacity = own
-    _output(opacity, unreal.MaterialProperty.MP_OPACITY)
+    _output(_decal_fade(m, opacity), unreal.MaterialProperty.MP_OPACITY)
     MEL.recompile_material(m)
     unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
     return m

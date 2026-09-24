@@ -1,0 +1,99 @@
+{
+ "_comment": "Night: sun below the horizon (space.SunDir 25 45), off, sky light nearly off, exposure pinned - navigation lights, the lit service bay, the thrusters. Run: Tools/Shots.ps1 -Preset night_views -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "console": [
+    "space.SunDir 25 45",
+    "space.Sun Intensity 0.0",
+    "space.Sky Intensity 0.03"
+   ],
+   "exposure": 0.6,
+   "name": "night_rear_left",
+   "camera_local": [
+    -14.75,
+    -8.5,
+    4.3
+   ],
+   "look_local": [
+    -7.65,
+    -2.8,
+    0.3
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "console": [
+    "space.SunDir 25 45",
+    "space.Sun Intensity 0.0",
+    "space.Sky Intensity 0.03"
+   ],
+   "exposure": 0.6,
+   "name": "night_bay",
+   "camera_local": [
+    -5.45,
+    -6.2,
+    1.4
+   ],
+   "look_local": [
+    -7.45,
+    -3.6,
+    0.3
+   ]
+  },
+  {
+   "name": "night_thrusters",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "speed_ms": 200,
+   "afterburner": true,
+   "chase_yaw": 20,
+   "chase_pitch": -10,
+   "settle": 3.0,
+   "console": [
+    "space.SunDir 25 45",
+    "space.Sun Intensity 0.0",
+    "space.Sky Intensity 0.03"
+   ],
+   "exposure": 0.6
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "console": [
+    "space.SunDir 25 45",
+    "space.Sun Intensity 0.0",
+    "space.Sky Intensity 0.03"
+   ],
+   "exposure": 0.6,
+   "name": "night_front",
+   "camera_local": [
+    3.75,
+    -7.5,
+    1.8
+   ],
+   "look_local": [
+    -7.25,
+    -2.0,
+    0.2
+   ]
+  }
+ ]
+}
