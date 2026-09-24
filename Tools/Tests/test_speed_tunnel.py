@@ -15,6 +15,11 @@ import os
 
 import unreal
 
+import os as _os
+import sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import ship_under_test as sut  # noqa: E402
+
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 failures = []
 
@@ -32,9 +37,9 @@ def check(name, ok, detail=""):
 les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 les.new_level("/Temp/TunnelTest")
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
-# The real ship (its hull decides whether it fits inside the nearest wall), the bare pawn if it is missing.
-ship_class = unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard") or unreal.SpaceshipPawn
-ship = eas.spawn_actor_from_class(ship_class, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
+# The ship under test (its hull decides whether it fits inside the nearest wall; Tools/Tests/ship_under_test.py),
+# the bare pawn with its placeholder hull while there is none.
+ship = eas.spawn_actor_from_class(sut.flight_class(), unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
 
 try:
     tunnel = ship.get_editor_property("speed_tunnel")
@@ -58,8 +63,12 @@ try:
     check("the ship has hull sparks", sparks is not None)
     if sparks is not None:
         count, from_collision = sparks.debug_get_spawn_point_count()
-        check("and finds points to pour them from on the Vanguard's hull (its collision shapes, not a box round it)",
-              count >= 32 and from_collision, "%d points, collision %s" % (count, from_collision))
+        if sut.SHIP:
+            check("and finds points to pour them from on the ship's hull (its collision shapes, not a box round it)",
+                  count >= 32 and from_collision, "%d points, collision %s" % (count, from_collision))
+        else:
+            check("and finds points to pour them from on the placeholder hull", count > 0, "%d points, collision %s" % (count, from_collision))
+            sut.skip(log, "spark points from the modelled hull's collision shapes")
         check("a jump has many sparks, normal flight few", sparks.get_editor_property("quantum_count") >= 5 * sparks.get_editor_property("flight_count") > 0)
         spark_material = unreal.load_asset("/Game/Environments/Space/M_HullSpark")
         check("the sparks have their own material", spark_material is not None)

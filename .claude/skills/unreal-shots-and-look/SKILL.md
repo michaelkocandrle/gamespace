@@ -124,7 +124,7 @@ Kód: `Source/gamespace/SpacePostTuning.cpp`, `Source/gamespace/SpaceInteriorTun
 - Film grain, motion blur i TSR stopy změřeny jako neškodné (`look_artifacts`). „Pruhování“ trupu je
   mikrodetail materiálu (`DetailNormalStrength`, `PanelStrength`), ne artefakt.
 - Expozice: vesmír pevně EV100 3; `CockpitExposureBias` −0,7 EV (displeje jsou emisivní, kompenzace
-  `emissive_strength` 2,9 ve `Vanguard_setup.json`), `QuantumExposureBias` −0,8 (`SpaceshipPawn.h`).
+  `emissive_strength` 2,9 v `<Ship>_setup.json`), `QuantumExposureBias` −0,8 (`SpaceshipPawn.h`).
   Kokpit key 1,5 / fill 0,8 (`cockpit_light` ve snímku).
 - Interiér podle SC: gunmetal 0,33/0,33/0,34, pracovní světla 5200 K, teplé světelné lišty
   (`MI_KitStrip`, emise 14).
@@ -204,10 +204,9 @@ je v sekundách, řaď podle `Excl`.
 | preset | obsah |
 | --- | --- |
 | `cockpit` | oko pilota, displeje, rám + chase – po každé změně lodi nebo kamery |
-| `cockpit_light`, `cockpit_tune`, `cockpit_view_tune` | světla kokpitu; oko a tint; výchozí výška pohledu |
+| `cockpit_light` | světla kokpitu |
 | `cockpit_look` | expozice letového kokpitu: `space.Post AutoExposureBias` 0 / −0,5 / −1 / −1,5 |
 | `cockpit_centre` | střední sloupek (radar, self status) ve stavech |
-| `cockpit_readability` | čitelnost MFD z křesla, `DashboardFocus` |
 | `display_sharpness` | ostrost displejů v rychlém letu (Nanite / TSR) |
 | `mfd_pages` | stránky MFD ve stavech, které je naplní |
 | `hud`, `velocity_vector`, `vtol`, `landing` | HUD ve stavech; značka dráhy (`drift`); VTOL (`space.Vtol`); podvozek a přistání |

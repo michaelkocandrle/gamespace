@@ -80,9 +80,9 @@ AI záda a spodek vymyslí. Postup a ověření viz 2a.
 
 ## 2a. Konzistentní pohledy přes Higgsfield MCP (ověřeno 24. 9. 2026)
 
-Test na starém Vanguardu (`Vanguard.blend`, 17,58 × 12,96 × 4,36 m), aby šel každý pohled změřit proti
-skutečnému modelu. Soubory a prompty: `ArtSource/Ships/Vanguard/Concept/higgsfield_test/prompt.txt`,
-listy rozdílů `Docs/Shots/HiggsViews/`.
+Test na procedurálním modelu první stíhačky (17,58 × 12,96 × 4,36 m), aby šel každý pohled změřit proti
+skutečnému modelu. Testovací soubory, prompty a listy rozdílů byly smazány spolu s lodí (24. 9. 2026);
+historie je v gitu, commit `2919d8a`. Naměřené výsledky platí dál:
 
 | Varianta (IoU proti modelu) | bok | zepředu | shora | uzávěr | rozpětí/výška proti spec |
 | --- | --- | --- | --- | --- | --- |
@@ -143,8 +143,8 @@ Generování:
 
 ## 3. Recept AI model → .blend (ShipPipeline 2B, WORKFLOW 2.1)
 
-Nic ručně: přestavbu popisuje `ArtSource/Ships/<Loď>/<Loď>_ai_build.json` (vzor
-`Vanguard_ai_build.json`) a `Tools/Blender/build_ai_ship.py` ji z originálu zopakuje (~3 min).
+Nic ručně: přestavbu popisuje `ArtSource/Ships/<Loď>/<Loď>_ai_build.json` (první
+recept zůstal jen v gitové historii) a `Tools/Blender/build_ai_ship.py` ji z originálu zopakuje (~3 min).
 Souřadnice v receptu: metry v Blenderu **po otočení**, +X příď, +Y levý bok, +Z nahoru.
 
 Klíče receptu: `ship`, `source_fbx`, `textures` (base_color, normal, roughness, metallic), `out_blend`,
@@ -165,9 +165,9 @@ MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/<Loď>_Meshy.blend --python T
 AO se v setupu přidá jako `"ao"` mezi textury (`cavity_strength`, `ao_strength`, maska `wear_amount`).
 
 Pravidla čísel:
-- Délka: malá stíhačka 12–16 m (Vanguard 14 × 11,4 × 6,2 m), Steadfast 30 m. AI modely chodí 1–2 m
+- Délka: malá stíhačka 12–16 m, Steadfast 30 m. AI modely chodí 1–2 m
   a s náhodnou orientací (Meshy: příď −X).
-- Trup s Nanite: Vanguard má 1 mil. tris (Nanite si vybere; cena = velikost FBX a čas pečení).
+- Trup s Nanite může mít ~1 mil. tris (Nanite si vybere; cena = velikost FBX a čas pečení).
 - 4K na 14m loď ≈ 3 mm/px → detail zblízka dělá **detailní vrstva materiálu** `M_Ship_PBR`
   (`detail_*` v setupu, `Tools/Assets/generate_detail_textures.py`), ne větší textura.
 - Kolize: trup rozděl, kde se zužuje; každý motor, kabina a noha podvozku zvlášť.
@@ -183,8 +183,8 @@ Kokpit a interiér (2B kroky 6 a 10):
 - `Tools/Blender/fit_ship_interior.py -- <recept>` na hotovém `<Loď>_Meshy.blend` vypíše usazení a oko →
   `interior.placement`, `sockets.Cockpit`, oko do setupu (`components.cockpit_camera.relative_location`,
   cm, **Y s opačným znaménkem**), postav znovu.
-- Rámování oka: `fit.dash_below_eye_deg` [7, 13], displeje ~15–24° pod okem, Vanguard
-  `eye_behind_stick_m` 0,65. Oko navržené pro 16:9 a FOV 88°.
+- Rámování oka: `fit.dash_below_eye_deg` [7, 13], displeje ~15–24° pod okem, první stíhačka
+  měla `eye_behind_stick_m` 0,65. Oko navržené pro 16:9 a FOV 88°.
 - Displeje (`interior.displays.screens[]`): `centre`, `u`, `v`, `corners` TL/TR/BR/BL (otvory nejsou
   obdélníky), `texture_rect` = `USpaceCockpitDisplays::ScreenRect` (plátno `texture_size` [1330, 490]),
   `grow_m` 0,0045, `cut_depth_m` (malé 6 mm). Slot `M_Ship_<Loď>_Screens`, socket `Display_<jméno>`.
@@ -198,10 +198,10 @@ Při modelování optimalizuj **číslo**, ne dojem z obrázku.
 B="/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 # 1) masky modelu (Workbench, ortho, headless); --collection / --objects, volitelně výřez
 MSYS_NO_PATHCONV=1 "$B" -b Ship.blend --python Tools/Blender/silhouette_compare.py -- render \
-    --collection HS_Vanguard_Nacelle_UL --out Saved/Silhouette/nacelle --prefix hs
+    --collection HS_<Loď>_Nacelle_UL --out Saved/Silhouette/nacelle --prefix hs
 # reference jako výřez AI modelu (box + válec kolem osy, bez pylonu)
-MSYS_NO_PATHCONV=1 "$B" -b ArtSource/Ships/Vanguard/Vanguard_Meshy.blend --python Tools/Blender/silhouette_compare.py -- render \
-    --objects SM_Ship_Vanguard --crop-box=-6.8,3.0,0.4,0.35,6.0,3.4 --crop-cylinder=4.551,1.892,1.24 \
+MSYS_NO_PATHCONV=1 "$B" -b ArtSource/Ships/<Loď>/<Loď>_Meshy.blend --python Tools/Blender/silhouette_compare.py -- render \
+    --objects SM_Ship_<Loď> --crop-box=-6.8,3.0,0.4,0.35,6.0,3.4 --crop-cylinder=4.551,1.892,1.24 \
     --out Saved/Silhouette/nacelle --prefix meshy
 # 2) porovnání: render proti renderu (světové souřadnice) nebo proti konceptům (bbox)
 python Tools/Blender/silhouette_compare.py compare --model Saved/Silhouette/nacelle/hs --ref-model Saved/Silhouette/nacelle/meshy --out Saved/Silhouette/nacelle
@@ -239,8 +239,8 @@ python Tools/Blender/silhouette_compare.py run --blend Ship.blend --collection X
   - bevel s harden normals a weighted normals;
   - kit `HS_Kit` a GN `HS_KitInstancer`.
   ```bash
-  MSYS_NO_PATHCONV=1 "$B" -b --factory-startup --python Tools/Blender/hs_build_part.py -- ArtSource/Ships/Vanguard/HardSurface/nacelle.json
-  MSYS_NO_PATHCONV=1 "$B" -b ArtSource/Ships/Vanguard/HardSurface/Vanguard_Nacelle_HS.blend --python Tools/Blender/hs_render_views.py -- --collection HS_Vanguard_Nacelle_UL --out Saved/HardSurface/hs --prefix hs
+  MSYS_NO_PATHCONV=1 "$B" -b --factory-startup --python Tools/Blender/hs_build_part.py -- ArtSource/Ships/<Loď>/HardSurface/nacelle.json
+  MSYS_NO_PATHCONV=1 "$B" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_Nacelle_HS.blend --python Tools/Blender/hs_render_views.py -- --collection HS_<Loď>_Nacelle_UL --out Saved/HardSurface/hs --prefix hs
   ```
 - **Smyčka:**
   1. změř osu a profil z masek AI objemu;
@@ -272,7 +272,7 @@ Sockety, se kterými počítá kód:
 - `Cockpit` (X dopředu; skutečné oko ale bere `<Loď>_setup.json` → `cockpit_camera.relative_location`).
 - `Engine_L/R/…` nebo `EngineMain`: osa X **dozadu ven z trysky** (v receptu `rotate_z_deg: 180`).
 - `CameraTarget` (volitelně), `Exit` (mimo UCX s rezervou na kapsli postavy r 42 cm, výška 1,92 m;
-  Vanguard 80 cm), `Gear_Nose/L/R` (`bottom_of` dílu podvozku = spodek patky), `Display_<jméno>`.
+  ideálně ~80 cm), `Gear_Nose/L/R` (`bottom_of` dílu podvozku = spodek patky), `Display_<jméno>`.
 
 Adresáře: zdroje `ArtSource/Ships/<Loď>/` (Concept, Higgsfield, Meshy, Textures, Export, Design,
 Interior, Kitbash; `.blend/.glb/.fbx/.png` přes Git LFS, `*.blend1` ignorované), Unreal
@@ -321,7 +321,7 @@ starý mesh a importuje načisto, uklidí osiřelé assety.
   vektory `[x, y, z]`), `no_nanite_parts` (např. `["Interior"]`), `decals`.
 - Geometrie → přepočítat jen kameru, oko, `gear_stow_travel_cm` (nejdelší noha pod břichem),
   `gear_extension_cm` 0 když patky leží na spodku kolizního boxu. Letové hodnoty nesahat.
-- Chase kamera: manifest navrhuje ~1,8 × délka, v praxi ~0,8 × délka (Vanguard 1450 cm, SocketOffset.Z 330).
+- Chase kamera: manifest navrhuje ~1,8 × délka, v praxi ~0,8 × délka (SocketOffset.Z ~300–400).
 
 Textury v UE: `_BC` sRGB on; `_N` Normalmap + **Flip Green on** (Blender/glTF = OpenGL); `_ORM` a `_AO`
 Masks, sRGB off. Rozměry mocnina dvou, trup 4096², malé díly 1–2K.

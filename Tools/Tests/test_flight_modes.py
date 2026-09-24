@@ -14,6 +14,11 @@ import math
 
 import unreal
 
+import os as _os
+import sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import ship_under_test as sut  # noqa: E402
+
 LEVEL = "/Game/Maps/TestSpace"
 STEP = 1.0 / 60.0
 failures = []
@@ -147,8 +152,9 @@ def above_surface(direction, altitude_cm):
 up = (-1.0, 0.0, 0.0)  # the side of Veyra facing PlayerStart
 
 # --- Exit and hull collision ------------------------------------------------------------------
-vanguard = unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard")
-ship = eas.spawn_actor_from_class(vanguard, above_surface(up, 250.0), unreal.Rotator())
+# The collision setup is the pawn's own (C++), so it is checked on whatever flies: the ship under test
+# (Tools/Tests/ship_under_test.py) or the native pawn with its placeholder hull.
+ship = eas.spawn_actor_from_class(sut.flight_class(), above_surface(up, 250.0), unreal.Rotator())
 try:
     box = ship.get_editor_property("hull_collision")
     hull = ship.get_editor_property("hull")
@@ -161,51 +167,66 @@ try:
     check("root box ignores cameras (a pilot's camera starting inside it was pulled in to the head)",
           box.get_collision_response_to_channel(unreal.CollisionChannel.ECC_CAMERA) == unreal.CollisionResponseType.ECR_IGNORE)
     candidates = [v3(c) for c in ship.get_exit_candidates()]
-    socket = v3(hull.get_socket_location("Exit"))
-    check("exit tries SOCKET_Exit first, then 12 spots around the hull", len(candidates) == 13, "%d candidates" % len(candidates))
-    # Ship-local: the ship sits at its spawn rotation (identity), so world offsets are local offsets.
     loc = v3(ship.get_actor_location())
-    first = [candidates[0][k] - loc[k] for k in range(3)]
-    sock = [socket[k] - loc[k] for k in range(3)]
     clearance_needed = ship.get_editor_property("exit_clearance_cm")
     radius, half = 42.0, 96.0
-    raw = ship.get_hull_clearance(unreal.Vector(*socket), radius, half)
-    got = ship.get_hull_clearance(unreal.Vector(*candidates[0]), radius, half)
-    # Vanguard: socket at (517, 230), belly hull UCX_08 to x 473 / y 244: only 2 cm of room before the fix.
-    check("raw SOCKET_Exit spot is too close to the hull (the bug)", raw < clearance_needed, "%.0f cm" % raw)
-    check("exit moved sideways out of the hull, same place along it", abs(first[0] - sock[0]) < 1.0 and first[1] > sock[1] + 100.0,
-          "socket (%.0f, %.0f) -> (%.0f, %.0f)" % (sock[0], sock[1], first[0], first[1]))
-    check("exit spot clear of the hull by ExitClearanceCm", clearance_needed <= got < clearance_needed + 30.0, "%.0f cm" % got)
     worst = min(ship.get_hull_clearance(unreal.Vector(*c), radius, half) for c in candidates)
     check("every exit candidate clear of the hull", worst >= clearance_needed - 0.5, "worst %.0f cm" % worst)
     rings = [length([c[k] - loc[k] for k in range(3)]) for c in candidates[1:]]
-    check("fallback spots move outwards", rings[0] < rings[4] < rings[8], "%.0f / %.0f / %.0f m" % (rings[0] / 100, rings[4] / 100, rings[8] / 100))
-    # The pilot's eye is the one picked with Tools/Blender/cockpit_view_survey.py and written into the
-    # model as SOCKET_Cockpit (ArtSource/Ships/<Ship>/<Ship>_ai_build.json): the setup file's camera
-    # has to sit on that socket, on the centreline, in the front half of the hull and inside its height.
-    camera = ship.get_editor_property("cockpit_camera")
-    cockpit = v3(camera.get_editor_property("relative_location"))
-    rotation = camera.get_editor_property("relative_rotation")
-    hull = ship.get_editor_property("hull")
-    mesh = hull.get_editor_property("static_mesh")
-    socket = mesh.find_socket("Cockpit") or mesh.find_socket("SOCKET_Cockpit")
-    offset = v3(hull.get_editor_property("relative_location"))
-    bounds = mesh.get_bounding_box()
-    low, high = v3(bounds.min), v3(bounds.max)
-    if socket:
-        s = v3(socket.get_editor_property("relative_location"))
-        eye_socket = [s[k] + offset[k] for k in range(3)]
-        check("cockpit eye on the model's SOCKET_Cockpit", length([cockpit[k] - eye_socket[k] for k in range(3)]) < 5.0,
-              "eye %s, socket %s" % (cockpit, [round(c, 1) for c in eye_socket]))
-    else:
-        check("the hull mesh has a Cockpit socket", False)
-    check("cockpit eye on the centreline, in the front half, within the hull's height",
-          abs(cockpit[1]) < 1.0 and cockpit[0] > (low[0] + high[0]) / 2 + offset[0] and low[2] + offset[2] < cockpit[2] < high[2] + offset[2],
-          "eye %s, hull x %.0f..%.0f z %.0f..%.0f" % (cockpit, low[0], high[0], low[2], high[2]))
-    check("cockpit camera looks straight ahead", abs(rotation.pitch) < 1e-3 and abs(rotation.yaw) < 1e-3 and abs(rotation.roll) < 1e-3, str(rotation))
-    check("free look unlimited on the Vanguard", ship.get_editor_property("free_look_max_yaw_deg") >= 180.0)
+    check("fallback spots move outwards", len(rings) > 8 and rings[0] < rings[4] < rings[8],
+          "%s" % " / ".join("%.0f" % (r / 100) for r in rings[:9:4]))
 finally:
     eas.destroy_actor(ship)
+
+# The model's own exit socket and cockpit eye: only with a modelled ship.
+if not sut.SHIP:
+    sut.skip(log, "SOCKET_Exit moved clear of the hull, cockpit eye on SOCKET_Cockpit")
+else:
+    ship = eas.spawn_actor_from_class(sut.bp_class(), above_surface(up, 250.0), unreal.Rotator())
+    try:
+        hull = ship.get_editor_property("hull")
+        candidates = [v3(c) for c in ship.get_exit_candidates()]
+        socket = v3(hull.get_socket_location("Exit"))
+        check("exit tries SOCKET_Exit first, then 12 spots around the hull", len(candidates) == 13, "%d candidates" % len(candidates))
+        # Ship-local: the ship sits at its spawn rotation (identity), so world offsets are local offsets.
+        loc = v3(ship.get_actor_location())
+        first = [candidates[0][k] - loc[k] for k in range(3)]
+        sock = [socket[k] - loc[k] for k in range(3)]
+        clearance_needed = ship.get_editor_property("exit_clearance_cm")
+        radius, half = 42.0, 96.0
+        raw = ship.get_hull_clearance(unreal.Vector(*socket), radius, half)
+        got = ship.get_hull_clearance(unreal.Vector(*candidates[0]), radius, half)
+        # The first fighter's socket sat 2 cm from a belly hull shape before ExitClearanceCm moved it out.
+        check("raw SOCKET_Exit spot is too close to the hull (the bug)", raw < clearance_needed, "%.0f cm" % raw)
+        check("exit moved sideways out of the hull, same place along it", abs(first[0] - sock[0]) < 1.0 and first[1] > sock[1] + 100.0,
+              "socket (%.0f, %.0f) -> (%.0f, %.0f)" % (sock[0], sock[1], first[0], first[1]))
+        check("exit spot clear of the hull by ExitClearanceCm", clearance_needed <= got < clearance_needed + 30.0, "%.0f cm" % got)
+        # The pilot's eye is the one picked with Tools/Blender/cockpit_view_survey.py and written into the
+        # model as SOCKET_Cockpit (ArtSource/Ships/<Ship>/<Ship>_ai_build.json): the setup file's camera
+        # has to sit on that socket, on the centreline, in the front half of the hull and inside its height.
+        camera = ship.get_editor_property("cockpit_camera")
+        cockpit = v3(camera.get_editor_property("relative_location"))
+        rotation = camera.get_editor_property("relative_rotation")
+        hull = ship.get_editor_property("hull")
+        mesh = hull.get_editor_property("static_mesh")
+        socket = mesh.find_socket("Cockpit") or mesh.find_socket("SOCKET_Cockpit")
+        offset = v3(hull.get_editor_property("relative_location"))
+        bounds = mesh.get_bounding_box()
+        low, high = v3(bounds.min), v3(bounds.max)
+        if socket:
+            s = v3(socket.get_editor_property("relative_location"))
+            eye_socket = [s[k] + offset[k] for k in range(3)]
+            check("cockpit eye on the model's SOCKET_Cockpit", length([cockpit[k] - eye_socket[k] for k in range(3)]) < 5.0,
+                  "eye %s, socket %s" % (cockpit, [round(c, 1) for c in eye_socket]))
+        else:
+            check("the hull mesh has a Cockpit socket", False)
+        check("cockpit eye on the centreline, in the front half, within the hull's height",
+              abs(cockpit[1]) < 1.0 and cockpit[0] > (low[0] + high[0]) / 2 + offset[0] and low[2] + offset[2] < cockpit[2] < high[2] + offset[2],
+              "eye %s, hull x %.0f..%.0f z %.0f..%.0f" % (cockpit, low[0], high[0], low[2], high[2]))
+        check("cockpit camera looks straight ahead", abs(rotation.pitch) < 1e-3 and abs(rotation.yaw) < 1e-3 and abs(rotation.roll) < 1e-3, str(rotation))
+        check("free look unlimited in the ship", ship.get_editor_property("free_look_max_yaw_deg") >= 180.0)
+    finally:
+        eas.destroy_actor(ship)
 
 # --- Character safety net ----------------------------------------------------------------------
 character = eas.spawn_actor_from_class(unreal.PlayerCharacter, above_surface(up, -300.0), unreal.Rotator())

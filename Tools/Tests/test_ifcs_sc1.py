@@ -13,6 +13,11 @@ import math
 
 import unreal
 
+import os as _os
+import sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import ship_under_test as sut  # noqa: E402
+
 STEP = 1.0 / 60.0
 G = 980.665
 failures = []
@@ -329,10 +334,9 @@ check("B / wheel / K / L mapped, zoom and spacebrake kept",
        ("MouseWheelAxis", "IA_CameraZoom"), ("X", "IA_AllStop"), ("W", "IA_Thrust")} <= pairs, "%d mappings" % len(pairs))
 all_stop = unreal.EditorAssetLibrary.load_asset("/Game/Input/IA_AllStop")
 check("IA_AllStop has no Pressed trigger, so holding X is seen", len(all_stop.get_editor_property("triggers")) == 0)
-vanguard = unreal.get_default_object(unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard"))
-check("Vanguard has its SC-1a thruster values",
-      abs(vanguard.get_editor_property("retro_acceleration") - 4415.0) < 1 and abs(vanguard.get_editor_property("scm_max_speed") - 21000.0) < 1
-      and abs(vanguard.get_editor_property("yaw_acceleration") - 180.0) < 1,
-      "retro %.0f, SCM %.0f" % (vanguard.get_editor_property("retro_acceleration"), vanguard.get_editor_property("scm_max_speed")))
+# Per-ship expectation: the ship's own SC-1a thruster values (skipped while there is no modelled ship).
+sut.check_setup_values(check, log, ("thrust_acceleration", "retro_acceleration", "strafe_acceleration", "lift_acceleration",
+                                    "down_acceleration", "scm_max_speed", "nav_max_speed", "pitch_acceleration", "yaw_acceleration",
+                                    "roll_acceleration"), "SC-1a thruster values")
 
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

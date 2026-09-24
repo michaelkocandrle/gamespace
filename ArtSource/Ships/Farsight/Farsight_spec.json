@@ -50,8 +50,8 @@
     ]
   },
   "design_notes": [
-    "Complementary role to Vanguard: similar size/speed class, but built for range and sensors instead of combat. Weak or no weapons by design.",
-    "Smallest crew (1), smallest dimensions in the fleet after Vanguard - built to go far, not to carry things or people.",
+    "Complementary role to the fleet's fighter: similar size/speed class, but built for range and sensors instead of combat. Weak or no weapons by design.",
+    "Smallest crew (1), smallest dimensions in the fleet - built to go far, not to carry things or people.",
     "Not started as of 23.9.2026. Comes after Steadfast is finished (see Fleet.md)."
   ]
 }

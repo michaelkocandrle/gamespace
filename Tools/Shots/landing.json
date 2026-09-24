@@ -1,5 +1,5 @@
 {
-  "_comment": "SC-2a landing gear and precision mode: the legs from the side (down, halfway, landed), the ship resting on its pads, the GEAR UP warning and the HUD lamps. chase_yaw / chase_pitch swing the chase camera round the ship (pitch > 0: from below), chase_zoom scales its distance. Low shots put the Vanguard's centre a little more than its collision box's half height (2.14 m, down to the pads' soles) above the terrain and let it settle. Run: .\\Tools\\Shots.ps1 -Preset landing",
+  "_comment": "SC-2a landing gear and precision mode: the legs from the side (down, halfway, landed), the ship resting on its pads, the GEAR UP warning and the HUD lamps. chase_yaw / chase_pitch swing the chase camera round the ship (pitch > 0: from below), chase_zoom scales its distance. Low shots put the ship's centre a little more than its collision box's half height (down to the pads' soles) above the terrain and let it settle. Run: .\\Tools\\Shots.ps1 -Preset landing",
   "shots": [
     {"name": "gear_down_side", "camera": "chase", "altitude_m": 40, "facing": "horizon", "hud": 0, "gear": true, "chase_yaw": 90, "chase_pitch": 14, "chase_zoom": 1.0, "settle": 1.2},
     {"name": "gear_halfway_side", "camera": "chase", "altitude_m": 40, "facing": "horizon", "hud": 0, "lower_gear": true, "chase_yaw": 90, "chase_pitch": 14, "chase_zoom": 1.0, "settle": 1.0},

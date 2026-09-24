@@ -1,6 +1,6 @@
 # Loď: Higgsfield → Blender → Unreal
 
-Postup pro první skutečnou loď místo placeholder krychle. Příklad jména lodi: **Vanguard**
+Postup pro první skutečnou loď místo placeholder krychle. Příklad jména lodi: **Example**
 (nahraď svým, vždy jedno slovo s velkým písmenem, bez mezer a podtržítek).
 
 Nástroje:
@@ -15,7 +15,7 @@ Nástroje:
 | --- | --- | --- |
 | Velikost lodi | Malá stíhačka **12–16 m** dlouhá | Určuje kameru, přistání, kolize, pocit rychlosti. Změna později = přeladit spoustu čísel (viz kapitola 5). |
 | Nanite | **Ano** pro trup | Není potřeba ručně dělat LODy, zvládne 100–300 tis. trojúhelníků. |
-| Kokpit/sklo | **Samostatný mesh** `SM_Ship_Vanguard_Canopy` bez Nanite | Nanite nepodporuje průhledné materiály. |
+| Kokpit/sklo | **Samostatný mesh** `SM_Ship_Example_Canopy` bez Nanite | Nanite nepodporuje průhledné materiály. |
 | Pohyblivé části (podvozek, klapky) | **Samostatné statické díly**, pohyb dělá kód | Podvozek (SC-2a): díl `SM_Ship_<Loď>_Gear` s nohami vymodelovanými ve stavu „vysunuto“. Loď ho při zasunutí posune do trupu (`GearStowTravelCm`) a skryje. Klapky zatím ne. |
 
 ---
@@ -27,15 +27,14 @@ Nástroje:
 ```
 ArtSource/
   Ships/
-    Vanguard/
+    Example/
       Concept/            obrázky pohledů (front/side/top/3-4), prompt.txt s promptem a nastavením
       Higgsfield/         surové GLB z Higgsfieldu, přesně jak přišly (nikdy needitovat)
       Meshy/<stažení>/    surový export z Meshy (FBX + PBR textury), přesně jak přišel (nikdy needitovat)
-      Vanguard_ai_build.json  recept „AI model → loď“ (kapitola 2B)
-      Vanguard_Meshy.blend    výsledek receptu: z něj se exportuje (dnešní Vanguard)
-      Vanguard.blend      původní procedurální Vanguard (do 18. 9. 2026), jen pro historii
+      Example_ai_build.json   recept „AI model → loď“ (kapitola 2B)
+      Example.blend       výsledek receptu (nebo ručně/procedurálně stavěný model): z něj se exportuje
       Textures/           textury rozbalené z GLB a výstupy bake (PNG)
-      Export/             výstup exportního skriptu: *.fbx + Vanguard_manifest.json
+      Export/             výstup exportního skriptu: *.fbx + Example_manifest.json
 ```
 
 `.blend`, `.glb`, `.fbx`, `.png` jdou přes Git LFS (`.gitattributes`); zálohy `*.blend1` jsou ignorované.
@@ -48,12 +47,12 @@ Content/Ships/
   Shared/
     Materials/                   M_Ship_Master (master materiál), MF_* funkce
     Textures/                    sdílené detaily, decaly, trim sheety
-  Vanguard/
-    Meshes/                      SM_Ship_Vanguard, SM_Ship_Vanguard_Canopy
-    Materials/                   MI_Ship_Vanguard_Hull, MI_Ship_Vanguard_Glass, MI_Ship_Vanguard_Emissive
-    Textures/                    T_Ship_Vanguard_Hull_BC, _N, _ORM, _E
-    Blueprints/                  BP_Ship_Vanguard (potomek ASpaceshipPawn)
-    VFX/                         NS_Ship_Vanguard_EngineTrail
+  Example/
+    Meshes/                      SM_Ship_Example, SM_Ship_Example_Canopy
+    Materials/                   MI_Ship_Example_Hull, MI_Ship_Example_Glass, MI_Ship_Example_Emissive
+    Textures/                    T_Ship_Example_Hull_BC, _N, _ORM, _E
+    Blueprints/                  BP_Ship_Example (potomek ASpaceshipPawn)
+    VFX/                         NS_Ship_Example_EngineTrail
     Audio/                       zvuky specifické pro tuto loď
 Content/Characters/              (později player character, stejná logika)
 ```
@@ -62,16 +61,16 @@ Content/Characters/              (později player character, stejná logika)
 
 | Co | Vzor | Příklad |
 | --- | --- | --- |
-| Hlavní mesh (trup) | `SM_Ship_<Loď>` | `SM_Ship_Vanguard` |
-| Další díl | `SM_Ship_<Loď>_<Díl>` | `SM_Ship_Vanguard_Canopy`, `SM_Ship_Vanguard_Gear` |
-| LOD (jen bez Nanite) | `SM_Ship_<Loď>[_<Díl>]_LOD<n>` | `SM_Ship_Vanguard_LOD1` |
-| Kolize (konvexní) | `UCX_<jméno meshe>_<NN>` | `UCX_SM_Ship_Vanguard_00`, `_01` |
-| Kolize box/koule/kapsle | `UBX_` / `USP_` / `UCP_` + totéž | `UBX_SM_Ship_Vanguard_00` |
+| Hlavní mesh (trup) | `SM_Ship_<Loď>` | `SM_Ship_Example` |
+| Další díl | `SM_Ship_<Loď>_<Díl>` | `SM_Ship_Example_Canopy`, `SM_Ship_Example_Gear` |
+| LOD (jen bez Nanite) | `SM_Ship_<Loď>[_<Díl>]_LOD<n>` | `SM_Ship_Example_LOD1` |
+| Kolize (konvexní) | `UCX_<jméno meshe>_<NN>` | `UCX_SM_Ship_Example_00`, `_01` |
+| Kolize box/koule/kapsle | `UBX_` / `USP_` / `UCP_` + totéž | `UBX_SM_Ship_Example_00` |
 | Socket | `SOCKET_<Jméno>` (Empty, rodič = mesh) | `SOCKET_Cockpit`, `SOCKET_Engine_L` |
-| Materiál (Blender = jméno slotu v UE) | `M_Ship_<Loď>_<Slot>` | `M_Ship_Vanguard_Hull` |
-| Instance materiálu (UE) | `MI_Ship_<Loď>_<Slot>` | `MI_Ship_Vanguard_Hull` |
+| Materiál (Blender = jméno slotu v UE) | `M_Ship_<Loď>_<Slot>` | `M_Ship_Example_Hull` |
+| Instance materiálu (UE) | `MI_Ship_<Loď>_<Slot>` | `MI_Ship_Example_Hull` |
 | Textury (UE) | `T_Ship_<Loď>_<Slot>_<mapa>` | `_BC` barva, `_N` normal, `_ORM` AO/Roughness/Metallic, `_E` emissive, `_M` maska |
-| Referenční high-poly v Blenderu | `HIGH_<cokoli>` | `HIGH_Vanguard` (skript ignoruje) |
+| Referenční high-poly v Blenderu | `HIGH_<cokoli>` | `HIGH_Example` (skript ignoruje) |
 | Blueprint | `BP_Ship_<Loď>` | |
 | VFX / zvuk | `NS_…` / `SW_…`, `SC_…` | |
 
@@ -84,7 +83,7 @@ Blender při duplikaci přidává `.001` – skript to hlásí jako chybu, přej
 | `SOCKET_Cockpit` | pozice kamery v kokpitu (dnes napevno `CockpitCamera` 90, 0, 15 cm) |
 | `SOCKET_Engine_L`, `SOCKET_Engine_R` (nebo `SOCKET_EngineMain`) | trysky: plamen, zvuk; osa X socketu míří **dozadu ven z trysky** |
 | `SOCKET_CameraTarget` (volitelné) | kam se dívá chase kamera, když střed lodi není vizuální těžiště |
-| `SOCKET_Gear_Nose`, `SOCKET_Gear_L`, `SOCKET_Gear_R` | podrážky patek podvozku. U Vanguardu leží přesně na spodku kolizního boxu, proto `gear_extension_cm` = 0. Lodi bez dílu `_Gear` na ně kód dá zástupné nohy z válců (SC-2a). Import prefix `SOCKET_` zahodí, kód bere oba tvary. |
+| `SOCKET_Gear_Nose`, `SOCKET_Gear_L`, `SOCKET_Gear_R` | podrážky patek podvozku. Když leží přesně na spodku kolizního boxu, je `gear_extension_cm` = 0. Lodi bez dílu `_Gear` na ně kód dá zástupné nohy z válců (SC-2a). Import prefix `SOCKET_` zahodí, kód bere oba tvary. |
 | `SOCKET_Exit` (později, s postavou) | kde se po výstupu z lodi objeví hráčova postava; osa X = směr, kterým se dívá |
 
 ---
@@ -97,7 +96,7 @@ Blender při duplikaci přidává `.001` – skript to hlásí jako chybu, přej
    pozadí, rovnoměrné světlo, bez motion blur, bez dramatických stínů, celá loď v záběru.
 2. Proč: Higgsfield staví mesh jen z toho, co je na obrázcích vidět. Z jednoho obrázku si
    záda a spodek lodi vymyslí (typicky rozteklé nebo prázdné).
-3. Ulož do `ArtSource/Ships/Vanguard/Concept/`, prompt a nastavení do `prompt.txt`.
+3. Ulož do `ArtSource/Ships/Example/Concept/`, prompt a nastavení do `prompt.txt`.
 
 ### B. Higgsfield 3D
 
@@ -108,19 +107,19 @@ Blender při duplikaci přidává `.001` – skript to hlásí jako chybu, přej
      světlo a stíny a v Unrealu pod naším sluncem vypadá špatně.
    - Volitelně druhý běh **Topology: quad, ~30 tis.** – čistší základ pro herní mesh.
    - Rigging nepoužívat (funguje dobře jen pro humanoidy).
-3. Stáhni GLB do `ArtSource/Ships/Vanguard/Higgsfield/` a **neupravuj ho**.
+3. Stáhni GLB do `ArtSource/Ships/Example/Higgsfield/` a **neupravuj ho**.
 4. Higgsfield má i addon pro Blender (Blender 5.1+), který výsledek vloží rovnou do scény.
    Výsledek je stejný jako přes GLB; GLB si ale stejně ulož jako zálohu zdroje.
 
 ### C. Blender: import a úklid
 
-1. Nový soubor, ulož jako `ArtSource/Ships/Vanguard/Vanguard.blend`.
+1. Nový soubor, ulož jako `ArtSource/Ships/Example/Example.blend`.
 2. **Scene Properties > Units**: Unit System **Metric**, Unit Scale **1.0**, Length **Meters**.
 3. **File > Import > glTF 2.0**, vyber GLB. V importu zapni **Merge Vertices**.
 4. **File > External Data > Unpack Resources > Write files to current directory** – textury
    z GLB se vybalí vedle .blend; přesuň je do `Textures/`.
 5. Outliner: pokud je mesh pod prázdným rodičem, vyber mesh, **Alt+P > Clear and Keep
-   Transformation**, prázdného rodiče smaž. Přejmenuj mesh na `HIGH_Vanguard`.
+   Transformation**, prázdného rodiče smaž. Přejmenuj mesh na `HIGH_Example`.
 6. **Orientace**: nos lodi do **+X** (červená osa), vršek do **+Z**. Otáčej v Object Mode (R Z 90 …).
 7. **Velikost**: N panel > Item > Dimensions > nastav X na cílovou délku (např. 14 m), Y a Z
    se nastaví proporcionálně (uzamkni poměr nebo dopočítej). AI modely přicházejí velké cca 1–2 m.
@@ -137,7 +136,7 @@ Blender při duplikaci přidává `.001` – skript to hlásí jako chybu, přej
 ### D. Herní mesh – vyber jednu cestu
 
 **Cesta 1 – rychlá (Nanite, první iterace, doporučená na začátek)**
-1. Duplikuj `HIGH_Vanguard` (Shift+D, Esc), přejmenuj na `SM_Ship_Vanguard`, `HIGH_` skryj.
+1. Duplikuj `HIGH_Example` (Shift+D, Esc), přejmenuj na `SM_Ship_Example`, `HIGH_` skryj.
 2. **Decimate modifier**, Collapse, ratio tak, aby v horní liště (Statistics) bylo
    **100–150 tis. trojúhelníků**. Zapni *Symmetry* (osa Y), pokud je loď souměrná.
 3. UV a textury z Higgsfieldu zůstávají – nic se nepeče. Apply modifier až před exportem
@@ -155,10 +154,10 @@ Blender při duplikaci přidává `.001` – skript to hlásí jako chybu, přej
    (Margin 0.005). Jedna UV mapa `UVMap`, bez překryvů.
 5. **Bake** (Render Engine Cycles, GPU): vyber `HIGH_`, pak Ctrl+klik `SM_…` (aktivní),
    Bake panel > **Selected to Active**, **Extrusion** 0.02–0.05 m (nebo cage):
-   - **Normal** (Tangent) → `T_Ship_Vanguard_Hull_N.png`, 4096², 16 bit, Non-Color
+   - **Normal** (Tangent) → `T_Ship_Example_Hull_N.png`, 4096², 16 bit, Non-Color
    - **Diffuse**, jen Color → `_BC.png`, 4096², sRGB
    - **Roughness** → do zeleného kanálu ORM; metallic přes Emit trik → modrý; **AO** → červený
-   - Emisivní části (trysky, světla) → vlastní slot `M_Ship_Vanguard_Emissive` nebo `_E` maska
+   - Emisivní části (trysky, světla) → vlastní slot `M_Ship_Example_Emissive` nebo `_E` maska
 
 ### E. Textury – pravidla
 
@@ -178,7 +177,7 @@ maska obrazovek (`Tools/Blender/build_ai_ship.py`, `surface_nodes`), takže je n
 okluze v pečených texturách není. Dopeče ji:
 
 ```bash
-MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b   ArtSource/Ships/Vanguard/Vanguard_Meshy.blend --python Tools/Blender/bake_ship_ao.py -- Vanguard
+MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b   ArtSource/Ships/Example/Example.blend --python Tools/Blender/bake_ship_ao.py -- Example
 ```
 
 Trvá ~30 s (4096², 16 vzorků, dosah paprsku 0,5 m – tedy spáry a greebly, ne špinavá loď). Peče se
@@ -205,7 +204,7 @@ Rozlišení: trup 4096², malé díly 1024–2048². Rozměry vždy mocnina dvou
    **≤ 32 vrcholů**.
 2. Každá kolize musí být **konvexní** (žádné prohlubně). Trup = 1 hull, každé křídlo = 1 hull,
    motory 1–2. Celkem **3–8 hullů**.
-3. Pojmenuj `UCX_SM_Ship_Vanguard_00`, `_01`, … Object Properties > Viewport Display >
+3. Pojmenuj `UCX_SM_Ship_Example_00`, `_01`, … Object Properties > Viewport Display >
    **Display As: Wire**, ať neruší.
 4. Kolize **nesmí vyčnívat** z viditelného meshe (skript hlásí > 5 % délky).
 5. `Ctrl+A > All Transforms` i na kolizích.
@@ -239,17 +238,17 @@ Opacity, Roughness).
    `Tools/Blender/gamespace_ship_export.py` a zaškrtni ho. (Nebo otevři soubor v Text
    Editoru a **Run Script**.)
 2. N panel > záložka **Gamespace**:
-   - **Export folder**: `//Export` (= `ArtSource/Ships/Vanguard/Export`)
+   - **Export folder**: `//Export` (= `ArtSource/Ships/Example/Export`)
    - **Validate ship** – výsledek v dolní liště a celý v Text Editoru, text `gamespace_ship_report`.
      ERROR musí být 0; WARN si přečti.
    - **Export FBX for Unreal** – při ERRORech export odmítne.
 3. Z příkazové řádky (bez UI):
    ```
-   blender -b ArtSource/Ships/Vanguard/Vanguard.blend --python Tools/Blender/gamespace_ship_export.py -- --out "//Export" --validate-only
-   blender -b ArtSource/Ships/Vanguard/Vanguard.blend --python Tools/Blender/gamespace_ship_export.py -- --out "//Export"
+   blender -b ArtSource/Ships/Example/Example.blend --python Tools/Blender/gamespace_ship_export.py -- --out "//Export" --validate-only
+   blender -b ArtSource/Ships/Example/Example.blend --python Tools/Blender/gamespace_ship_export.py -- --out "//Export"
    ```
-4. Výstup: `SM_Ship_Vanguard.fbx` (mesh + UCX + sockety), `SM_Ship_Vanguard_Canopy.fbx`,
-   případně `_LODn.fbx`, a `Vanguard_manifest.json` (rozměry, počty, pozice socketů v cm pro
+4. Výstup: `SM_Ship_Example.fbx` (mesh + UCX + sockety), `SM_Ship_Example_Canopy.fbx`,
+   případně `_LODn.fbx`, a `Example_manifest.json` (rozměry, počty, pozice socketů v cm pro
    Unreal, doporučené hodnoty pro pawn).
 
 Co skript kontroluje: jednotky scény, jména, aplikované transformace, zrcadlení, počty
@@ -268,17 +267,17 @@ export hlásí chybu.
 
 **L1. Kontrola manifestu – kdykoli, bez Blenderu i bez Unrealu:**
 ```
-python Tools/Blender/gamespace_ship_export.py --check-manifest ArtSource/Ships/Vanguard/Export/Vanguard_manifest.json
-python Tools/Assets/import_ship.py ArtSource/Ships/Vanguard/Export/Vanguard_manifest.json
+python Tools/Blender/gamespace_ship_export.py --check-manifest ArtSource/Ships/Example/Export/Example_manifest.json
+python Tools/Assets/import_ship.py ArtSource/Ships/Example/Export/Example_manifest.json
 ```
 První příkaz ověří strukturu, typy, rozsahy a vnitřní konzistenci (verze, všechna pole
 `suggested_pawn_settings`, převod cm/osy, existence FBX souborů vedle manifestu, rozumná
 velikost lodi). Druhý navíc vypíše přesný plán importu (co se kam naimportuje a jaké hodnoty
-se nastaví do `BP_Ship_Vanguard`) a nic nezmění.
+se nastaví do `BP_Ship_Example`) a nic nezmění.
 
 **L2. Automatický import – editor zavřený:**
 ```
-$env:GAMESPACE_SHIP_MANIFEST = "C:\gamespace\gamespace\ArtSource\Ships\Vanguard\Export\Vanguard_manifest.json"
+$env:GAMESPACE_SHIP_MANIFEST = "C:\gamespace\gamespace\ArtSource\Ships\Example\Export\Example_manifest.json"
 .\Tools\run_editor_python.ps1 Tools\Assets\import_ship.py
 ```
 `Tools/Assets/import_ship.py`:
@@ -286,20 +285,21 @@ $env:GAMESPACE_SHIP_MANIFEST = "C:\gamespace\gamespace\ArtSource\Ships\Vanguard\
 2. naimportuje LOD0 FBX s nastavením z tabulky níže (Nanite zapne jen pro neprůhledné díly),
 3. ověří velikost (při stokrát menší lodi zkusí jednou Convert Scene Unit), otočení, počet
    kolizních hullů, sloty materiálů a sockety (polohu a měřítko srovná podle manifestu),
-4. vytvoří/aktualizuje `BP_Ship_Vanguard` (potomek `ASpaceshipPawn`) s hodnotami ze
+4. vytvoří/aktualizuje `BP_Ship_Example` (potomek `ASpaceshipPawn`) s hodnotami ze
    `suggested_pawn_settings` (tabulka v kapitole 5), sklo přidá jako komponentu pod `Hull`,
 5. nastaví `Planet_Veyra` (warm-up dosah, minimální kolizní poloměr) a vytvoří
    `/Game/Blueprints/BP_SpaceGameMode`, který v TestSpace spawnuje novou loď
    (vypnout: `$env:GAMESPACE_SHIP_APPLY_PLANET = "0"`, `$env:GAMESPACE_SHIP_SET_GAME_MODE = "0"`),
-6. zapíše `Vanguard_import_report.json` vedle manifestu (co se opravilo, co je ruční krok).
+6. zapíše `Example_import_report.json` vedle manifestu (co se opravilo, co je ruční krok).
 
-Ověřeno na lodi Vanguard (09/2026). Kontrola po importu v čerstvém editoru:
-`.\Tools\run_editor_python.ps1 Tools\Tests\test_ship_import.py`. Zjištění z prvního běhu:
+Ověřeno na první stíhačce (09/2026, odstraněna 24. 9. 2026). Kontrola po importu v čerstvém editoru:
+`.\Tools\run_editor_python.ps1 Tools\Tests\test_ship_import.py` (testuje loď z
+`Tools/Tests/ship_under_test.py`; dokud je `SHIP = None`, vypíše SKIP). Zjištění z prvního běhu:
 sockety přicházejí z FBX s měřítkem 100 (skript je srovná na 1) a pole `Sockets` je v UE 5.8 pro
 Python chráněné (skript používá `find_socket`). Blender z Git Bash spouštějte s
 `MSYS_NO_PATHCONV=1`, jinak se `//Export` přepíše na `/Export`.
 
-Ruční import (kdyby skript selhal) – FBX do `Content/Ships/Vanguard/Meshes/`:
+Ruční import (kdyby skript selhal) – FBX do `Content/Ships/Example/Meshes/`:
 
 | Volba | Hodnota |
 | --- | --- |
@@ -342,7 +342,7 @@ protože všechno je v souborech.
 
 ## 2B. AI model → hratelná loď (Meshy, Higgsfield): opakovatelný recept
 
-Poprvé použito 18. 9. 2026 na Vanguard (Meshy „Ironclad Starfighter“, 3,36 mil. trojúhelníků). Postup
+Poprvé použito 18. 9. 2026 na první stíhačce (Meshy, 3,36 mil. trojúhelníků; odstraněna 24. 9. 2026). Postup
 je stejný pro každou další loď: **nic se nedělá ručně v Blenderu**, celou přestavbu popisuje jeden
 soubor `ArtSource/Ships/<Loď>/<Loď>_ai_build.json` a skript `Tools/Blender/build_ai_ship.py` ji
 z originálu kdykoli zopakuje (3 minuty). Když něco nesedí, upraví se čísla v receptu a spustí se znovu.
@@ -365,7 +365,7 @@ z originálu kdykoli zopakuje (3 minuty). Když něco nesedí, upraví se čísl
    s prázdnými `parts` / `collision` / `sockets` a `--no-save`; vypíše rozměry po otočení a zmenšení.
    Pro detailnější míry (výšky břicha, středy trysek) se osvědčily histogramy vrcholů v Blenderu
    (skripty v historii session 18. 9. 2026; hledá se hustá plocha = trup, řídké body = podvozek).
-3. **Napiš recept** `<Loď>_ai_build.json` (vzor: `Vanguard_ai_build.json`, všechny souřadnice jsou metry
+3. **Napiš recept** `<Loď>_ai_build.json` (vzor zatím není – první recept zůstal v gitové historii; všechny souřadnice jsou metry
    v Blenderu po otočení: +X příď, +Y levý bok, +Z nahoru):
    - `source_fbx`, `textures` (base_color, normal, roughness, metallic ze surového exportu);
    - `orient`: `rotate_z_deg`, `length_m` (malá stíhačka 12–16 m);
@@ -377,7 +377,7 @@ z originálu kdykoli zopakuje (3 minuty). Když něco nesedí, upraví se čísl
      Pozor: 4K na celou 14m loď jsou ~3 mm na pixel, takže zblízka je paint měkký vždy. Detail zblízka
      nedělá větší textura, ale **detailní vrstva materiálu** (`M_Ship_PBR`, dlaždicová mikro-normála a
      opotřebení triplanárně v prostoru lodi; `Tools/Assets/generate_detail_textures.py`, parametry
-     `detail_*` v `<Loď>_setup.json`). Trup Vanguardu má od 20. 9. 2026 1 mil. trojúhelníků místo 200 tis.
+     `detail_*` v `<Loď>_setup.json`). Trup může mít i 1 mil. trojúhelníků místo 200 tis.
      (Nanite si vybere, co kreslí; cena je velikost FBX a čas pečení, ne snímkování);
    - `emissive`: středy trysek (y, z), poloměr a x, za kterým jsou; ty plochy dostanou slot
      `M_Ship_<Loď>_Emissive` a hra je rozsvítí podle tahu;
@@ -411,7 +411,7 @@ z originálu kdykoli zopakuje (3 minuty). Když něco nesedí, upraví se čísl
     `canopy_clear` (plochy canopy mířící do kabiny) a v setupu `cockpit_light_*` (trup kabinu stíní) a
     `placeholder_cockpit: false`. Zkontroluj pohled z oka v Blenderu s backface cullingem (jako UE) a pak
     `Shots.ps1 -Preset cockpit`. Rámování oka podle SC reference: `fit.dash_below_eye_deg` [7, 13]
-    a `eye_behind_stick_m` tak, aby displeje vyšly ~15–24° pod okem (Vanguard: 0,65 m).
+    a `eye_behind_stick_m` tak, aby displeje vyšly ~15–24° pod okem (první stíhačka: 0,65 m).
     **Displeje** (`interior.displays`): AI malované obrazovky nejdou přečíst. Změř každou obrazovku v
     otočeném, neškálovaném modelu (střed, `u` = doprava po obrazovce, `v` = nahoru, `rect` [u0, u1, v0, v1]
     v metrech – nejlíp ortho renderem kolmo na obrazovku s mřížkou). Build plochy za ní vyřízne a dá
@@ -498,9 +498,9 @@ Stav dnes (`Source/gamespace/SpaceshipPawn.cpp`):
      narazí „vzduchem“ vedle trupu;
    - box jen kolem trupu → křídla občas zajedou do terénu/asteroidu.
    Pro začátek **celé rozpětí**.
-3. `Hull` → `SM_Ship_Vanguard`, **NoCollision**, **měřítko 1** (smazat
+3. `Hull` → `SM_Ship_Example`, **NoCollision**, **měřítko 1** (smazat
    `SetRelativeScale3D(2, 1, 0.35)`), relativní poloha 0, pokud pivot sedí (krok I).
-4. Mesh nepřiřazovat přes `ConstructorHelpers` napevno v C++; dát ho do `BP_Ship_Vanguard`
+4. Mesh nepřiřazovat přes `ConstructorHelpers` napevno v C++; dát ho do `BP_Ship_Example`
    (potomek `ASpaceshipPawn`) a ten nastavit jako `DefaultPawnClass` – další lodě pak bez
    zásahu do C++.
 
@@ -523,11 +523,11 @@ nastaví do `BP_Ship_<Loď>` – nic se nepřepočítává ručně. Tabulka ukaz
 | Kde | Dnes | Pro ~14 m loď | Poznámka |
 | --- | --- | --- | --- |
 | `HullCollision` BoxExtent | 100, 50, 17,5 | z manifestu (~700, 500, 150) | |
-| `CameraBoom->TargetArmLength` | 900 | ~2500 (1.8 × délka) | manifest: `CameraBoom_TargetArmLength_cm`; při hraní bylo moc daleko, Vanguard (17,6 m) má v `_setup.json` 1450 (~0,8 × délka) |
-| `CameraBoom->SocketOffset.Z` | 200 | ~300–400 | kamera kousek nad lodí (Vanguard 330) |
+| `CameraBoom->TargetArmLength` | 900 | ~2500 (1.8 × délka) | manifest: `CameraBoom_TargetArmLength_cm`; při hraní bylo moc daleko, v praxi ~0,8 × délka (v `_setup.json`) |
+| `CameraBoom->SocketOffset.Z` | 200 | ~300–400 | kamera kousek nad lodí |
 | `CameraBoom->ProbeSize` | 25 | 25–50 | |
 | `CameraBoom->CameraLagMaxDistance` | 1500 | ~3000 | |
-| `CockpitCamera` poloha | 90, 0, 15 | ze `SOCKET_Cockpit` | oko pilota: **před opěrkou sedačky**, ~15 cm pod sklem, nad palubní deskou. Vanguard: `_setup.json` 345, 0, 103 (ověřeno řezy a paprsky v Blenderu); 300, 0, 78 bylo za opěrkou a celý výhled zakryla |
+| `CockpitCamera` poloha | 90, 0, 15 | ze `SOCKET_Cockpit` | oko pilota: **před opěrkou sedačky**, ~15 cm pod sklem, nad palubní deskou; ověřit řezy a paprsky v Blenderu (`cockpit_view_survey.py`). Oko za opěrkou má celý výhled zakrytý |
 | `LandingFootprintRadiusCm` | 150 | ~500 | půlka menšího rozměru |
 | `LandingMaxGapCm` | 60 | ~100 | |
 | `GroundContactToleranceCm` | 10 | 10–20 | |
@@ -544,7 +544,7 @@ Visibility). Z toho plyne pro model:
 - UCX hully mají kopírovat tvar tak, aby se kolem lodi dalo chodit (pod křídly nechat volno, pokud
   tam má jít vejít).
 - `SOCKET_Exit` musí být mimo UCX hully s rezervou aspoň na kapsli postavy (poloměr 42 cm, výška
-  1,92 m). Vanguard: 80 cm volno. Když je obsazený, hra zkouší místa vpravo, vlevo, za a před lodí.
+  1,92 m), ideálně ~80 cm volno. Když je obsazený, hra zkouší místa vpravo, vlevo, za a před lodí.
 
 ### Další pasti
 

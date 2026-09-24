@@ -1,5 +1,9 @@
-"""Builds /Game/Maps/MainMenu, the title screen level: the Vanguard in the foreground, the ringed gas
-giant Orun and a moon behind it, the star sky, and a camera for ASpacePlayerController to drift.
+"""Builds /Game/Maps/MainMenu, the title screen level: a ship in the foreground (MENU_SHIP, optional), the
+ringed gas giant Orun and a moon behind it, the star sky, and a camera for ASpacePlayerController to drift.
+
+MENU_SHIP names the ship shown (ArtSource/Ships/<Ship>/Export/<Ship>_manifest.json and its imported meshes in
+/Game/Ships/<Ship>/Meshes); $env:GAMESPACE_MENU_SHIP overrides it. With none (no modelled ship yet: the new
+small multirole ship is in design) the level has no ship: the camera drifts round an empty MenuOrbitCenter.
 
 Editor closed, after build_space_scene.py and import_ship.py (it uses their assets):
 
@@ -16,7 +20,8 @@ import os
 import unreal
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MANIFEST = os.path.join(REPO, "ArtSource", "Ships", "Vanguard", "Export", "Vanguard_manifest.json")
+# The ship on the title screen, e.g. "Example"; None: no ship.
+MENU_SHIP = None
 
 LEVEL = "/Game/Maps/MainMenu"
 SKY_MATERIAL = "/Game/Environments/Space/M_Starfield_Sky"
@@ -24,8 +29,6 @@ PLANET_MESH = "/Game/Planets/SM_PlanetSphere"
 GIANT_MATERIAL = "/Game/Environments/Space/M_GasGiant"
 MOON_MATERIAL = "/Game/Environments/Space/M_Moon"
 RINGS_MATERIAL = "/Game/Environments/Space/M_PlanetRings"
-SHIP_MESHES = "/Game/Ships/Vanguard/Meshes"
-SHIP_MESH = SHIP_MESHES + "/SM_Ship_Vanguard"
 # Parts left out of the title screen: the ship flies in space there, gear stowed; the cockpit interior
 # is inside the hull and cannot be seen from outside.
 HIDDEN_PARTS = ("_Gear", "_Interior", "_Lining")
@@ -121,29 +124,39 @@ def main():
     giant.get_editor_property("rings").set_material(0, load(RINGS_MATERIAL))
 
     # The hull and every part the ship has now (a canopy on one model, none on another), one actor
-    # each; actors of parts that no longer exist are removed.
-    ship_rotation = unreal.Rotator(roll=0.0, pitch=0.0, yaw=SHIP_YAW)
-    # The ship's parts as its manifest lists them (the Meshes folder can still hold an old model's).
-    with open(MANIFEST, encoding="utf-8") as f:
-        meshes = json.load(f)["meshes"]
-    parts = sorted("%s/%s" % (SHIP_MESHES, name) for name, info in meshes.items()
-                   if info.get("part") and info.get("lod", 0) == 0 and not name.endswith(HIDDEN_PARTS))
-    wanted = {"MenuShip": SHIP_MESH}
-    wanted.update({"MenuShip_" + p.split("/")[-1][len("SM_Ship_Vanguard_"):]: p for p in parts})
+    # each; actors of parts that no longer exist, or of a ship no longer shown, are removed.
+    ship_name = os.environ.get("GAMESPACE_MENU_SHIP") or MENU_SHIP
+    wanted = {}
+    if ship_name:
+        ship_meshes = "/Game/Ships/%s/Meshes" % ship_name
+        hull_name = "SM_Ship_%s" % ship_name
+        # The ship's parts as its manifest lists them (the Meshes folder can still hold an old model's).
+        manifest = os.path.join(REPO, "ArtSource", "Ships", ship_name, "Export", "%s_manifest.json" % ship_name)
+        with open(manifest, encoding="utf-8") as f:
+            meshes = json.load(f)["meshes"]
+        parts = sorted("%s/%s" % (ship_meshes, name) for name, info in meshes.items()
+                       if info.get("part") and info.get("lod", 0) == 0 and not name.endswith(HIDDEN_PARTS))
+        wanted = {"MenuShip": "%s/%s" % (ship_meshes, hull_name)}
+        wanted.update({"MenuShip_" + p.split("/")[-1][len(hull_name + "_"):]: p for p in parts})
     for actor in eas.get_all_level_actors():
         label = actor.get_actor_label()
-        if label.startswith("MenuShip") and label not in wanted:
-            log("removing %s (the ship has no such part any more)" % label)
+        if (label.startswith("MenuShip") and label not in wanted) or (label == "MenuOrbitCenter" and ship_name):
+            log("removing %s (not part of the ship shown)" % label)
             eas.destroy_actor(actor)
-    ship = None
+    ship_rotation = unreal.Rotator(roll=0.0, pitch=0.0, yaw=SHIP_YAW)
+    orbit_center = None
     for label, mesh in wanted.items():
         actor = upsert(eas, label, unreal.StaticMeshActor, rotation=ship_rotation)
         component = actor.get_component_by_class(unreal.StaticMeshComponent)
         component.set_mobility(unreal.ComponentMobility.MOVABLE)
         component.set_static_mesh(load(mesh))
         if label == "MenuShip":
-            ship = actor
-    ship.set_editor_property("tags", [unreal.Name("MenuOrbitCenter")])
+            orbit_center = actor
+    if orbit_center is None:
+        # No ship: the camera still drifts round the spot where it would be.
+        orbit_center = upsert(eas, "MenuOrbitCenter", unreal.TargetPoint)
+        log("no ship on the title screen (MENU_SHIP is None)")
+    orbit_center.set_editor_property("tags", [unreal.Name("MenuOrbitCenter")])
 
     camera = upsert(eas, "MenuCamera", unreal.CameraActor, CAMERA_LOCATION,
                     unreal.MathLibrary.find_look_at_rotation(unreal.Vector(*CAMERA_LOCATION), unreal.Vector(0.0, 0.0, 150.0)))

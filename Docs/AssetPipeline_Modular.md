@@ -1,7 +1,7 @@
 # Modulární AI asset pipeline: kdy generovat vcelku, kdy rozkládat na díly
 
-Zjištěno a zapsáno 22. 9. 2026, po srovnání dvou výsledků: exteriér lodi (Ironclad Vanguard)
-dopadl dobře, interiér kokpitu ne, i po několika kolech opravování textur a osvětlení. Rozdíl
+Zjištěno a zapsáno 22. 9. 2026, po srovnání dvou výsledků: exteriér první stíhačky (Meshy;
+odstraněna 24. 9. 2026) dopadl dobře, interiér kokpitu ne, i po několika kolech opravování textur a osvětlení. Rozdíl
 není v úsilí ani v promptu — je v tom, **co přesně se po AI chtělo vygenerovat najednou**.
 
 ## Pravidlo
@@ -37,8 +37,8 @@ Než se cokoliv pošle do Meshy/Tripo, rozhodni:
    změny podle `Docs/Ships/ShipPipeline.md`.
 
 Tohle nahrazuje dřívější plán "kitbash z malých AI-generovaných dílů" (viz sekce
-kitbash pilot níže pro Vanguard) — ten pilot ukázal částečně dobré výsledky u
-Vanguardu, ale u Steadfast interiéru se ukázalo, že i "vyhrávající" AI díly
+kitbash pilot níže na první stíhačce) — ten pilot ukázal částečně dobré výsledky u
+stíhačky, ale u Steadfast interiéru se ukázalo, že i "vyhrávající" AI díly
 nemají dost geometrickou přesnost na blízký pohled hráče v kokpitu. Kitbash
 pilot zůstává jako cenný záznam SROVNÁNÍ (kdy AI vyhrává na "designu", kdy
 prohrává na přesnosti), ne jako doporučený finální postup.
@@ -70,8 +70,8 @@ Volba mezi třemi cestami podle situace:
 - **Meshy Retexture** (text prompt, bez nových referenčních obrázků) — upgraduje
   materiál/texturu existující geometrie. Použitelné a ověřené, nemění tvar.
 - **UltraShape 1.0** (scenario.com, předplatné od 23. 9. 2026; chce referenční obrázek *i* hrubý mesh,
-  viz `WORKFLOW.md` 3.1b; vstupy pro první test: `ArtSource/Ships/Vanguard/Kitbash/UltraShape_input_SwitchPanel.glb`
-  a `.../UltraShape/SwitchPanel_three_quarter.png`) — "3D geometry super-resolution": dovybaví
+  viz `WORKFLOW.md` 3.1b; vstupy prvního testu, přepínací panel, byly smazány s první stíhačkou
+  24. 9. 2026) — "3D geometry super-resolution": dovybaví
   hrubý mesh o skutečné povrchové detaily (až 8 mil. trojúhelníků na výstupu, čeká ho tedy
   stejný decimate krok jako ostatní AI modely). Podle popisu cílí primárně na organické tvary,
   u hard-surface sci-fi dílů neověřeno — vyzkoušet na konkrétním kusu, ne rovnou nasadit plošně.
@@ -86,16 +86,17 @@ Volba mezi třemi cestami podle situace:
 ## Pilot na středové konzoli kokpitu (23. 9. 2026)
 
 První reálné použití postupu. Čtyři díly ve skutečném měřítku kokpitu, sesazené na klínový
-základ konzole 46 × 28 cm: `ArtSource/Ships/Vanguard/Kitbash/CentreConsole.blend`, celkem
-3 936 trojúhelníků. Zadání dílů (jméno, rozměr, prompt) je v `Tools/Assets/kitbash_parts.json`,
-aby se daly generovat kterýmkoliv nástrojem a pak porovnat se stejným měřítkem.
+základ konzole 46 × 28 cm (první stíhačka), celkem 3 936 trojúhelníků. Zadání dílů (jméno, rozměr,
+prompt) bylo v JSON spec, aby se daly generovat kterýmkoliv nástrojem a pak porovnat se stejným
+měřítkem. Soubory pilotu byly smazány s první stíhačkou 24. 9. 2026 (historie v gitu); vzor spec pro
+další loď je `ArtSource/Ships/Steadfast/Kitbash/meshy_parts.json`.
 
 ### Co který zdroj dílů umí
 
 | Zdroj | Stav | Poznámka |
 | --- | --- | --- |
 | **Procedurálně v Blenderu** | **funguje, hotovo** | Přepínací panel (788 tris), mřížka (920), svazek kabelů (816), rám displeje (436). Přesné rozměry, čistá topologie, zadarmo a opakovatelné. Pro malé technické díly je to rychlejší než generovat a pak opravovat. |
-| **Meshy** | **funguje** | `Tools/Assets/meshy_generate.py` (text-to-3D v2, preview + volitelný refine, stáhne GLB do `ArtSource/Ships/Vanguard/Kitbash/Meshy/`). Klíč se bere z `MESHY_API_KEY`, nikdy z repozitáře. `--dry-run` vypíše prompty bez volání. |
+| **Meshy** | **funguje** | `Tools/Assets/meshy_generate.py` (text-to-3D v2, preview + volitelný refine, `--spec <parts.json> --out <složka>`, stáhne GLB, např. do `ArtSource/Ships/<Loď>/Kitbash/Meshy/`). Klíč se bere z `MESHY_API_KEY`, nikdy z repozitáře. `--dry-run` vypíše prompty bez volání. |
 | **Hyper3D Rodin** (Blender MCP) | **nepoužitelné zadarmo** | Zapíná se `blendermcp_use_hyper3d` + klíč; vestavěný zkušební klíč (`vibecoding`) vrací `API_INSUFFICIENT_FUNDS` – je vyčerpaný. Potřebuje vlastní klíč (hyper3d.ai nebo FAL). |
 | **Hunyuan3D** (Blender MCP) | nevyzkoušeno | Vypnuté, chce vlastní klíč. |
 
@@ -197,7 +198,7 @@ Zatím tedy platí: **geometrii generovat v Meshy ve 4k**, a Scenario používat
 (retopologie, UV, dělení na díly, textury). Než Tripo zavrhnout, stojí za zkoušku barevný koncept
 jako vstup a `smartLowPoly` vypnuté.
 
-## Exteriér: hard-surface místo AI skenu (24. 9. 2026, pilot na gondole Vanguardu)
+## Exteriér: hard-surface místo AI skenu (24. 9. 2026, pilot na gondole první stíhačky)
 
 Pravidlo „AI dělá obálku, detail je procedurální“ platí i pro exteriér.
 
@@ -237,10 +238,10 @@ nemá rovné panely. Bevel ani vážené normály na něm nic nezmění a na úr
    - `silhouette_compare.py`: IoU proti výřezu AI objemu;
    - list vedle sebe a detail zblízka.
 
-### Pilot: horní levá gondola Vanguardu (recept `ArtSource/Ships/Vanguard/HardSurface/nacelle.json`)
+### Pilot: horní levá gondola první stíhačky (recept a soubory smazány s lodí 24. 9. 2026, historie v gitu)
 
-- **Postavení:** 37 objektů, ~91 tis. trojúhelníků bez instancí kitu, 123 bodů kitu. Soubor
-  `Vanguard_Nacelle_HS.blend`, build ~15 s headless.
+- **Postavení:** 37 objektů, ~91 tis. trojúhelníků bez instancí kitu, 123 bodů kitu, build ~15 s
+  headless.
 - **Shoda siluety s Meshy gondolou** (výřez s válcem r 1,24 m, bez pylonu), průměr IoU:
   - **0,854** – první verze, poloměry z maximální vzdálenosti vrcholů, což započítává i výstupky;
   - **0,894** – druhá verze, osa a poloměry dopočítané z masek (střed y 4,49, z 1,92; tělo r 1,12).
@@ -248,14 +249,14 @@ nemá rovné panely. Bevel ani vážené normály na něm nic nezmění a na úr
   - Zbylý rozdíl (~9 % „navíc“) dělají hlavně greebly a pásy nad obrysem. Meshy má na obrysu
     zaoblené a zdeformované tvary, rovné panely je nekopírují 1:1. To je záměr.
 - **Vzhled:** rovné panely, skutečné spáry, čisté zkosení, čitelné sání s nábojem a loukotěmi. Meshy je
-  vedle toho hrbolatý sken se zubatými okraji. Listy jsou v `Docs/Shots/HardSurface/`.
+  vedle toho hrbolatý sken se zubatými okraji.
 - **Známé nedostatky pilotu:**
   - díly kitu jsou rovné, takže velké víko (1,1 × 0,7 m) na válci r 1,12 odstává na krajích asi o 5 cm.
     Řešení: ohýbat instance podle povrchu (GN raycast / deform), nebo zakřivené varianty dílů;
   - chybí pylon a napojení na křídlo;
   - chybí UV a materiálové zóny;
   - díl ještě nešel do Unrealu.
-- **Rozhodnutí o celé lodi čeká na autora.**
+- **Loď byla 24. 9. 2026 celá odstraněna;** postup platí pro další lodě.
 
 ## Kde brát hotové díly interiéru (průzkum 23. 9. 2026)
 

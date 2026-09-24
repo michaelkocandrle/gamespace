@@ -1,6 +1,6 @@
 """What the pilot sees: ray-casts a ship's cockpit view against the real model in Blender.
 
-    & "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe" -b ArtSource\\Ships\\Vanguard\\Vanguard.blend ^
+    & "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe" -b ArtSource\\Ships\\<Ship>\\<Ship>.blend ^
         --python Tools\\Blender\\cockpit_view_survey.py -- 520 0 110 88
 
 Add hide:Canopy (or any mesh name fragment) to ignore a mesh, for a cockpit view that hides it.
@@ -10,7 +10,7 @@ that has no modelled interior the pilot looks straight through the canopy (and a
 away). Add "twosided" to count them like the first version of this script did.
 
 Sweep range for a ship without an eye yet: sweep:X0:X1:Z0:Z1 in UE centimetres (default 300:660:90:130,
-the old Vanguard), e.g. sweep:200:460:90:190.
+sized for a small fighter), e.g. sweep:200:460:90:190.
 
 Arguments (all optional): eye X Y Z in UE centimetres (the value of cockpit_camera.relative_location in
 <Ship>_setup.json), then the camera's horizontal field of view in degrees. Without arguments it sweeps
@@ -20,7 +20,7 @@ Blender metres = UE centimetres / 100 with Y mirrored, and the ship looks along 
 (520, 0, 110) in the setup file is (5.2, 0, 1.1) here. Meshes whose name starts with UCX_ (collision)
 are ignored; everything else the pilot would see is not.
 
-Why: the Vanguard has no modelled cockpit interior. From inside the canopy bubble the tinted glass
+Why: the first fighter had no modelled cockpit interior. From inside the canopy bubble the tinted glass
 sits ~13 cm from the eye and fills the view (0 % open sky), so the eye belongs at the windscreen.
 Run this after changing a ship's model or its cockpit_camera, then put the numbers in the setup file.
 """

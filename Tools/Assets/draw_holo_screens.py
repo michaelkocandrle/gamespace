@@ -7,7 +7,7 @@ material adds the picture on top of the scene, so black is see-through and every
 The layouts follow the author's SC references (ArtSource/Reference/Mood/sc_cockpit_*.webp, Docs/UI):
 power management with PWR/WPN/THR/SHLD/COOL, a ship self-status silhouette, a communications list,
 a scanning panel, and a radar disc for the hologram above the console. Static for now; the live
-cockpit displays of the Vanguard (UCockpitDisplayComponent) take over once the Steadfast flies.
+cockpit displays (UCockpitDisplayComponent) take over once the Steadfast flies.
 """
 
 import math

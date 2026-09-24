@@ -1,5 +1,5 @@
 {
-  "_comment": "The hull up close: is the micro detail layer of M_Ship_PBR doing its job (author 19. 9. 2026: the ship is blurry from the chase camera up close). Compare the same shots with detail_normal_strength 0 in Vanguard_setup.json. Run: Tools/Shots.ps1 -Preset hull_detail",
+  "_comment": "The hull up close: is the micro detail layer of M_Ship_PBR doing its job (author 19. 9. 2026: the ship is blurry from the chase camera up close). Compare the same shots with detail_normal_strength 0 in the ship's <Ship>_setup.json. Run: Tools/Shots.ps1 -Preset hull_detail",
   "shots": [
     {
       "name": "nozzle_close",

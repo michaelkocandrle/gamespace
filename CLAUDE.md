@@ -5,7 +5,7 @@ Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**. Projekt je v `C:\gamespace\g
 
 - **Cíl:** let a interiéry 1:1 se Star Citizen. Hráč letí z vesmíru až na povrch planety, vystoupí a chodí po ní.
 - **Lodě:**
-  - Vanguard (Kestrel Dynamics) je stíhačka z Meshy;
+  - Vanguard (stíhačka z Meshy) byl 24. 9. 2026 odstraněn; nová malá multirole loď je ve 2D návrhu;
   - Steadfast (Halcyon Freightworks) je nákladní loď s interiérem. Její 2D návrh v2 čeká na schválení.
 - **Autor** není herní vývojář. Mluví česky a hraje zabalenou hru ve 1080p na RTX 2060 6 GB.
 
@@ -93,10 +93,10 @@ python Tools/Design/draw_ship_design.py ArtSource/Ships/<Loď>/Design/<Loď>_lay
 
 ## Git
 
-- Před commitem `git status`. Commituj **vždy** takto; tyhle dvě cesty autora se nikdy necommitují:
+- Před commitem `git status`. Commituj **vždy** takto; tahle cesta autora se nikdy necommituje:
 
   ```bash
-  git add -A -- . ':!ArtSource/Ships/Vanguard/Export/Meshy_AI_Sci_Fi_Transport_Ship_0918125120_texture_fbx' ':!Docs/UI/Screenshot 2026-09-21 150400.png'
+  git add -A -- . ':!Docs/UI/Screenshot 2026-09-21 150400.png'
   ```
 
 - Commit message je anglicky a končí řádkem `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.

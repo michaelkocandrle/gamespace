@@ -1696,7 +1696,7 @@ TArray<FVector> ASpaceshipPawn::GetExitCandidates() const
 	const float CapsuleHalfHeight = PilotDefaults ? PilotDefaults->GetSimpleCollisionHalfHeight() : 96.f;
 
 	// The Exit socket says which side and where along the hull; the pilot is then moved sideways
-	// until clear of the hull. The Vanguard's socket sits 44 cm off the belly, under the edge of the
+	// until clear of the hull. The first fighter's socket sat 44 cm off the belly, under the edge of the
 	// fuselage, which put the pilot practically inside the ship.
 	static const FName ExitSockets[] = { FName(TEXT("Exit")), FName(TEXT("SOCKET_Exit")) };
 	if (const FName* Socket = Algo::FindByPredicate(ExitSockets, [this](const FName& Name) { return Hull->DoesSocketExist(Name); }))
@@ -3517,12 +3517,12 @@ void ASpaceshipPawn::PoseGearLegs()
 	GearPosed = GearDeploy;
 	if (UStaticMeshComponent* Gear = ModelledGear.Get())
 	{
-		// Straight up into the belly, hidden once all the way in (the Vanguard has no bay doors that open).
+		// Straight up into the belly, hidden once all the way in (for a ship without bay doors that open).
 		Gear->SetRelativeLocation(ModelledGearDownLocation + FVector::UpVector * ComputeGearStowOffsetCm(GearDeploy));
 		Gear->SetVisibility(GearDeploy > 0.001f);
 		return;
 	}
-	// Stowed legs are hidden: the Vanguard has no gear bays to fold them into.
+	// Stowed legs are hidden: a ship without gear bays has nowhere to fold them into.
 	const bool bVisible = GearDeploy > 0.001f;
 	for (const FGearLeg& Leg : GearLegs)
 	{

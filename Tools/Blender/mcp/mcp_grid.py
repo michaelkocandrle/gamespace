@@ -1,12 +1,34 @@
-"""Blender MCP helpers for the live-viewport workflow, see Docs/WORKFLOW.md (chapter Blender MCP)."""
+"""Blender MCP helpers for the live-viewport workflow, see Docs/WORKFLOW.md (chapter Blender MCP).
+
+    python mcp_grid.py <Ship> out.png
+
+Reads ArtSource/Ships/<Ship>/<Ship>_ai_build.json and works on SM_Ship_<Ship>_Interior."""
 import json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mcp_socket import send
 
+
+def ship_paths(argv, usage):
+    """The ship is the first command-line argument: its AI build config and interior object name."""
+    if len(argv) < 2 or argv[1].startswith("-"):
+        raise SystemExit("usage: " + usage)
+    ship = argv[1]
+    repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    cfg = os.path.join(repo, "ArtSource", "Ships", ship, "%s_ai_build.json" % ship)
+    if not os.path.isfile(cfg):
+        raise SystemExit("No AI build config for ship %r: %s" % (ship, cfg))
+    return ship, cfg, "SM_Ship_%s_Interior" % ship
+
+
+USAGE = "python mcp_grid.py <Ship> out.png"
+SHIP, CFG_PATH, INTERIOR = ship_paths(sys.argv, USAGE)
+if len(sys.argv) < 3:
+    raise SystemExit("usage: " + USAGE)
+
 CODE = r'''
 import bpy, bmesh, json
 from mathutils import Vector, Matrix
-cfg = json.load(open(r"C:\gamespace\gamespace\ArtSource\Ships\Vanguard\Vanguard_ai_build.json", encoding="utf-8"))
+cfg = json.load(open(__CFG_PATH__, encoding="utf-8"))
 spec = cfg["interior"]; p = spec["placement"]
 M = Matrix.Translation(Vector(p["offset"])) @ Matrix.Diagonal((p["scale"], p["scale"], p["scale"] * p["height_ratio"], 1.0))
 def mat(name, rgb):
@@ -18,7 +40,7 @@ def mat(name, rgb):
 fine, major, axis = mat("GridFine", (0.9, 0.9, 0.2)), mat("GridMajor", (1.0, 0.1, 0.1)), mat("GridAxis", (0.1, 1.0, 0.2))
 for o in [o for o in bpy.data.objects if o.name.startswith("MeasureGrid")]:
     bpy.data.objects.remove(o)
-ob = bpy.data.objects["SM_Ship_Vanguard_Interior"]
+ob = bpy.data.objects[__INTERIOR__]
 screens_slot = [i for i, m in enumerate(ob.data.materials) if m and m.name.endswith("_Screens")][0]
 ob.data.materials[screens_slot].diffuse_color = (0.05, 0.1, 0.12, 1)
 for s in spec["displays"]["screens"]:
@@ -42,5 +64,6 @@ for s in spec["displays"]["screens"]:
         me.materials.append(m)
 print("GRID ok")
 '''
+CODE = CODE.replace("__CFG_PATH__", repr(CFG_PATH)).replace("__INTERIOR__", repr(INTERIOR))
 print(send("execute_code", {"code": CODE}))
-print(send("get_viewport_screenshot", {"max_size": 2400, "filepath": sys.argv[1], "format": "png"}))
+print(send("get_viewport_screenshot", {"max_size": 2400, "filepath": sys.argv[2], "format": "png"}))

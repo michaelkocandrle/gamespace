@@ -31,7 +31,7 @@ EXPOSURE_EV100 = 3.0
 # How the ship is lit (found on 20. 9. 2026 with Tools/Shots/look_sun.json and look_fill.json:
 # in space the ship was a silhouette, because almost nothing filled its shadow side).
 #   SKY_LIGHT_INTENSITY - the fill. 0.35 left the hull black against space; above ~1.1 the
-#     planet loses its terminator. 0.7 with lighter paint (Vanguard_setup.json) is the balance.
+#     planet loses its terminator. 0.7 with lighter paint (the first fighter's <Ship>_setup.json) is the balance.
 #   SUN_CONTACT_SHADOW_M - small shadows in the panel gaps, in metres of screen ray.
 #   SUN_SOURCE_ANGLE_DEG - how wide the sun is, i.e. how soft the terminator is.
 SKY_LIGHT_INTENSITY = 0.7

@@ -8,13 +8,13 @@ Three stages, in one file so the conventions stay together:
 
 1. render (inside Blender, headless): orthographic Workbench masks, white model on black.
        MSYS_NO_PATHCONV=1 blender -b Ship.blend --python Tools/Blender/silhouette_compare.py -- \\
-           render --objects SM_Ship_Vanguard --out Saved/Silhouette/vanguard --prefix model \\
+           render --objects SM_Ship_<Ship> --out Saved/Silhouette/<ship> --prefix model \\
            [--crop-box xmin,ymin,zmin,xmax,ymax,zmax] [--res 1024]
    Without a .blend (--factory-startup) the default Cube renders, which the test uses.
 2. compare (plain Python, needs numpy + Pillow):
-       python Tools/Blender/silhouette_compare.py compare --model Saved/Silhouette/vanguard/model \\
+       python Tools/Blender/silhouette_compare.py compare --model Saved/Silhouette/<ship>/model \\
            --ref front=concept_front.png --ref side=concept_side.png --ref top=concept_top.png \\
-           --out Saved/Silhouette/vanguard
+           --out Saved/Silhouette/<ship>
    A reference can be a concept image (the silhouette is cut from its neutral background, or taken
    from alpha) or another render prefix: --ref-model Saved/Silhouette/meshy/model. Two renders are
    compared in world space (--align world, the default): a volume reference in the same

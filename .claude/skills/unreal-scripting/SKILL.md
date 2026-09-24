@@ -55,7 +55,7 @@ PowerShell, **editor musí být zavřený**:
   `FAILED - the script never ran` = editor nenastartoval (typicky herní modul nejde načíst, chybí build).
 - Delší skripty (patche, generátory) piš nástrojem Write do scratchpadu, ne heredocem v bashi
   (apostrofy). Cesty v Pythonu jako `r"C:\..."` (`\U` = unicode escape).
-- Env proměnná pro skript: `$env:GAMESPACE_SHIP_MANIFEST = "...\Vanguard_manifest.json"; .\Tools\run_editor_python.ps1 ...`
+- Env proměnná pro skript: `$env:GAMESPACE_SHIP_MANIFEST = "...\<Ship>_manifest.json"; .\Tools\run_editor_python.ps1 ...`
 
 ## 3. Testy
 
@@ -73,6 +73,13 @@ Spusť ty, kterých se změna týká; po větší změně všechny. Každý tisk
 | `test_interior.py` | interiér Steadfastu: usage flagy, výchozí textury samplerů, `M_KitTrim`, tagy, světla |
 | `test_scene_look.py` | uložená úroveň proti receptu (atmosféra, post process, lak) – chytá zapomenutý `build_space_scene.py` / `import_ship.py` |
 | `test_planet_l3.py`, `test_planet_rocks.py`, `test_character_l6.py`, `test_menu_settings.py` | planeta, kameny, postava, menu a nastavení |
+
+Testovaná loď je jmenovaná na **jednom místě**: `Tools/Tests/ship_under_test.py` (`SHIP = None`, dokud
+není importovaná nová loď; první stíhačka byla 24. 9. 2026 odstraněna). Testy, které potřebují model
+(displeje a rám kokpitu, sockety podvozku, import lodi), do té doby vypíšou SKIP „no ship model yet —
+new ship in design“; letové testy běží na nativním `ASpaceshipPawn` (kvádr místo trupu), který je i
+výchozím pawnem `BP_SpaceGameMode`. Úvodní obrazovka (`build_main_menu.py`) loď ukáže, až bude v
+`MENU_SHIP`.
 
 Mimo UE (obyčejný `python <soubor>`):
 - `Tools/Assets/tests/test_import_ship_plan.py`
@@ -99,7 +106,7 @@ Pravidlo: když se opraví chyba, kterou autor viděl, přidej do testu kontrolu
 - Selhání: `PACKAGE FAILED` → UAT log v `C:\Program Files\Epic Games\UE_5.8\Engine\Programs\AutomationTool\Saved\Logs`
   a cook log `%APPDATA%\Unreal Engine\AutomationTool\Logs\...\Log.txt`.
 - Po buildu kontroluje `Manifest_UFSFiles_Win64.txt`: 12 klíčových assetů (mapy, zvuky, input,
-  `M_SpaceDust`, `BP_Ship_Vanguard`, písma). Chybí-li, `PACKAGE INCOMPLETE`.
+  `M_SpaceDust`, `BP_SpaceGameMode`, písma). Chybí-li, `PACKAGE INCOMPLETE`.
 
 **Assety načítané z C++ podle cesty** (`StaticLoadObject`, `ConstructorHelpers`) cooker nevidí.
 Musí být ve složce z `Config/DefaultGame.ini`:
@@ -119,10 +126,9 @@ Uncooked `-game` (bez zabalení) kreslí nové materiály šedě – vzhled posu
   (https://github.com/michaelkocandrle/gamespace). Nic nenechávej jen lokálně.
 - **Před commitem `git status`** a kontrola, co jde dovnitř.
 - **Nikdy nepřidávej:**
-  - `ArtSource/Ships/Vanguard/Export/Meshy_AI_Sci_Fi_Transport_Ship_0918125120_texture_fbx/` (autorova složka)
   - `Docs/UI/Screenshot 2026-09-21 150400.png`
   ```bash
-  git add -A -- . ':!ArtSource/Ships/Vanguard/Export/Meshy_AI_Sci_Fi_Transport_Ship_0918125120_texture_fbx' ':!Docs/UI/Screenshot 2026-09-21 150400.png'
+  git add -A -- . ':!Docs/UI/Screenshot 2026-09-21 150400.png'
   ```
 - **Nikdy force push**, žádné přepisování historie, žádné `--no-verify`.
 - Zpráva anglicky, krátký nadpis, na konci:

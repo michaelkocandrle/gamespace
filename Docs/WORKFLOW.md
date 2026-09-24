@@ -70,7 +70,7 @@ Podrobně je to v `Docs/Ships/ShipPipeline.md`. Tady je jen pořadí a místa, k
 
 ### 2.1 Recept → .blend
 
-Recept je `ArtSource/Ships/Vanguard/Vanguard_ai_build.json`. `Tools/Blender/build_ai_ship.py` ho
+Recept je `ArtSource/Ships/<Ship>/<Ship>_ai_build.json`. `Tools/Blender/build_ai_ship.py` ho
 provádí v tomto pořadí:
 
 1. `import` (FBX/GLB z Meshy)
@@ -91,13 +91,13 @@ provádí v tomto pořadí:
 
 ```bash
 cd /c/gamespace/gamespace
-MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b --python Tools/Blender/build_ai_ship.py -- ArtSource/Ships/Vanguard/Vanguard_ai_build.json
-cd ArtSource/Ships/Vanguard
-MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b Vanguard_Meshy.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
+MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b --python Tools/Blender/build_ai_ship.py -- ArtSource/Ships/<Ship>/<Ship>_ai_build.json
+cd ArtSource/Ships/<Ship>
+MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b <Ship>.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
 ```
 
 `--no-save` recept jen vyzkouší. Výstup exportu je
-`Export/Vanguard_manifest.json` a FBX pro každý díl.
+`Export/<Ship>_manifest.json` a FBX pro každý díl.
 
 **Displeje v receptu** (`interior.displays.screens[]`):
 - `centre`, `u`, `v` (osy roviny displeje v souřadnicích modelu kokpitu);
@@ -116,26 +116,27 @@ MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 
 Skript vyřízne plochu uvnitř čtyřúhelníku (`inside_quad`), dá jí slot `*_Screens` a UV podle
 `texture_rect`. Na střed displeje dá socket `Display_<name>`. Rohy se ladí v Blender MCP
-(kapitola 3). Displeje ve Vanguardu (19. 9. 2026): `left` a `right` (MFD 29 × 25 cm), `centre_top`
-(radar, 11 × 13,5 cm) a `centre_bottom` (self status, 11 × 12 cm) ve středním sloupku. Test
-`test_cockpit_displays.py` hlídá, že `texture_rect` v receptu = `ScreenRect` v kódu a že poměr stran
+(kapitola 3). Sada displejů na první stíhačce (odstraněna 24. 9. 2026): `left` a `right` (MFD 29 × 25 cm),
+`centre_top` (radar, 11 × 13,5 cm) a `centre_bottom` (self status, 11 × 12 cm) ve středním sloupku. Test
+`test_cockpit_displays.py` (loď z `Tools/Tests/ship_under_test.py`, bez modelu SKIP) hlídá, že `texture_rect` v receptu = `ScreenRect` v kódu a že poměr stran
 obdélníku odpovídá sklu.
 
 ### 2.2 .blend → Unreal
 
 ```powershell
-$env:GAMESPACE_SHIP_MANIFEST = "C:\gamespace\gamespace\ArtSource\Ships\Vanguard\Export\Vanguard_manifest.json"
+$env:GAMESPACE_SHIP_MANIFEST = "C:\gamespace\gamespace\ArtSource\Ships\<Ship>\Export\<Ship>_manifest.json"
 .\Tools\run_editor_python.ps1 Tools\Assets\import_ship.py
 .\Tools\run_editor_python.ps1 Tools\Assets\build_main_menu.py
 ```
 
 - Nastavení lodi (pawn, komponenty, materiály, světla, kamera) je v
-  `ArtSource/Ships/Vanguard/Vanguard_setup.json`. Po odebrání hodnoty z něj zůstane v Blueprintu
+  `ArtSource/Ships/<Ship>/<Ship>_setup.json`. Po odebrání hodnoty z něj zůstane v Blueprintu
   stará hodnota (nástraha 9.3c).
 - `no_nanite_parts: ["Interior"]`: interiér **nesmí** mít Nanite (nástraha 9.2a).
 - Materiály staví `Tools/Assets/ship_materials.py`. Displeje používají master `M_Ship_Screen`
   (unlit, opaque, pixel animation, parametr `EmissiveStrength`).
-- `build_main_menu.py` po importu obnoví úvodní scénu s lodí.
+- `build_main_menu.py` po importu obnoví úvodní scénu s lodí; loď se zobrazí, až bude nastavená v
+  `MENU_SHIP` (teď žádná, kamera krouží kolem prázdného `MenuOrbitCenter`).
 
 ---
 
@@ -196,7 +197,7 @@ Nástrahy (23. 9. 2026):
 1. Spusť Blender **s GUI** na pozadí. Socket na `localhost:9876` běží jen s GUI; v `-b` se addon jen
    zaregistruje.
    ```bash
-   cd /c/gamespace/gamespace && MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" ArtSource/Ships/Vanguard/Vanguard_Meshy.blend
+   cd /c/gamespace/gamespace && MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" ArtSource/Ships/<Ship>/<Ship>.blend
    ```
 2. Buď MCP nástroje `blender` (`get_viewport_screenshot`, `execute_blender_code`…; mnoho jich
    vyžaduje argument `user_prompt`), nebo pomocné skripty v `Tools/Blender/mcp/`, které mluví přímo
@@ -205,10 +206,10 @@ Nástrahy (23. 9. 2026):
 | Skript | Co dělá |
 | --- | --- |
 | `mcp_socket.py` | `send(type, params)`; z příkazové řádky `python mcp_socket.py execute_code '{"code": "..."}'` |
-| `mcp_eye_view.py out.png` | kamera v oku (1,74 / 0 / 1,89 m, FOV 88°), backface culling jako v UE, screenshot |
-| `mcp_grid.py out.png` | měřicí mřížka na rovině displeje (1 cm žlutá, 5 cm červená, osy zelené) |
-| `mcp_measure_openings.py` | paprsky z oka: najde otvor v rámečku a vypíše jeho rohy (u, v) |
-| `mcp_corners.py '<json>' out.png` | posune plochy displejů na zadané rohy a vyfotí pohled z oka (displeje, které v JSON nejsou, nechá být) |
+| `mcp_eye_view.py out.png` | kamera `EyeCam` v oku (poloha je ve skriptu, uprav pro danou loď; FOV 88°), backface culling jako v UE, screenshot |
+| `mcp_grid.py <Ship> out.png` | měřicí mřížka na rovině displeje (1 cm žlutá, 5 cm červená, osy zelené) |
+| `mcp_measure_openings.py <Ship>` | paprsky z oka: najde otvor v rámečku a vypíše jeho rohy (u, v) |
+| `mcp_corners.py <Ship> '<json>' out.png` | posune plochy displejů na zadané rohy a vyfotí pohled z oka (displeje, které v JSON nejsou, nechá být) |
 
 3. **Postup ladění rohů:**
    - pohled z oka;
@@ -266,11 +267,15 @@ Spouštěj **nástrojem PowerShell** (přes bash se rozbije `$PSScriptRoot`):
 | `test_cockpit_displays.py` | displeje v kokpitu: slot, render target, velikost, světla, stav |
 | `test_cockpit_frame.py` | pozice oka, deska 7–13° pod horizontem, ≥ 1,2 m od oka |
 | `test_flight_hud_sc1c.py` | rozložení HUD podle SC, barvy, režimy space.Hud |
-| `test_ship_import.py` | import Meshy Vanguardu, díly, sockety, materiály |
+| `test_ship_import.py` | import lodi, díly, sockety, materiály |
 | `test_landing_sc2.py`, `test_landing_l5.py` | podvozek, přistání |
 | `test_ifcs_sc1.py`, `test_boost_afterburner_sc1b.py`, `test_flight_modes.py`, `test_free_look.py` | let |
 | `test_character_l6.py`, `test_planet_l3.py`, `test_menu_settings.py` | postava, planeta, menu |
 | `test_interior.py` | interiér Steadfastu: usage flagy, výchozí textury samplerů, parametry `M_KitTrim`, tagy, světla |
+
+Testovaná loď je jmenovaná na jednom místě: `Tools/Tests/ship_under_test.py` (`SHIP = None`, dokud není
+importovaná nová loď). Testy, které potřebují model (displeje, rám kokpitu, sockety podvozku, import),
+do té doby vypíšou SKIP „no ship model yet"; letové testy běží na nativním `ASpaceshipPawn` (kvádr).
 
 Testy mimo UE (obyčejný Python):
 - `Tools/Assets/tests/test_import_ship_plan.py`;
@@ -295,10 +300,8 @@ Presety (`Tools/Shots/*.json`):
 | --- | --- |
 | `cockpit` | pohled z oka, displeje, rám |
 | `cockpit_light` | varianty světel kokpitu |
-| `cockpit_tune` | ladění (tint, světla) |
 | `display_sharpness` | ostrost displejů při rychlém letu |
 | `cockpit_centre` | střední sloupek (radar, self status): vesmír, horizont, afterburner, vysouvání podvozku, přistání. Obrazovky jsou malé, vyřízni a zvětši oblast ~745–855 × 630–880 px |
-| `cockpit_readability` | čitelnost z křesla, přiblížení Z, srovnání se starým okem |
 | `hull_detail` | trup zblízka: detailní vrstva materiálu (srovnání se `detail_normal_strength` 0) |
 | `mfd_pages` | stránky MFD ve stavech, které je naplní. Vyřízni levý MFD ~495–710 × 640–825 a pravý ~893–1105 × 640–825 px |
 | `look_sun`, `look_fill` | proč je loď v kosmu silueta: směr slunce, výplň sky lightu, lak trupu |
@@ -421,10 +424,9 @@ materiálu, takže **nic neukládá**: co vypadá dobře, přepiš do `<Loď>_se
 ## 8. Git a commit
 
 - **Před commitem `git status`.**
-- **Nikdy nepřidávej** autorovu složku
-  `ArtSource/Ships/Vanguard/Export/Meshy_AI_Sci_Fi_Transport_Ship_0918125120_texture_fbx/`. Vždy:
+- **Nikdy nepřidávej** autorův soubor `Docs/UI/Screenshot 2026-09-21 150400.png`. Vždy:
   ```bash
-  git add -A -- . ':!ArtSource/Ships/Vanguard/Export/Meshy_AI_Sci_Fi_Transport_Ship_0918125120_texture_fbx'
+  git add -A -- . ':!Docs/UI/Screenshot 2026-09-21 150400.png'
   ```
 - Zprávy commitů jsou anglicky, krátký nadpis a konec:
   `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
@@ -751,8 +753,8 @@ snímku.
   z jednoho hero obrázku tvar domýšlí (GPT Image 2.5: křídla o třetinu kratší a šípová dopředu).
   Vodicí silueta jako druhá reference a kontrola `silhouette_compare.py views` (ship-pipeline 2a).
 - l) **Maska konceptu zabrala polovinu obrázku.** Model nakreslil podlahu a stín i přes „no floor“.
-  Před měřením Higgsfield `remove_background` (alfa). A pozor, `Vanguard_Meshy.blend` je dnešní
-  čtyřgondolový Vanguard, starý hero render (`Renders/Vanguard_hero.png`) patří k `Vanguard.blend`.
+  Před měřením Higgsfield `remove_background` (alfa). A pozor, aby hero render patřil ke stejné
+  verzi modelu, se kterou se měří.
 
 ---
 

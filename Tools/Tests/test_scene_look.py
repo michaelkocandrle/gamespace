@@ -18,10 +18,14 @@ import os
 
 import unreal
 
+import os as _os
+import sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import ship_under_test as sut  # noqa: E402
+
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 LEVEL = "/Game/Maps/TestSpace"
 RECIPE = os.path.join(REPO, "Tools", "Assets", "build_space_scene.py")
-SETUP = os.path.join(REPO, "ArtSource", "Ships", "Vanguard", "Vanguard_setup.json")
 WANTED = ("EXPOSURE_EV100", "SKY_LIGHT_INTENSITY", "SUN_CONTACT_SHADOW_M", "SUN_SOURCE_ANGLE_DEG", "POST_SETTINGS",
           "PLANET_NAME", "PLANET_RADIUS_CM", "PLANET_LOCATION_CM", "ATMO_HEIGHT_KM", "ATMO_RAYLEIGH_SCALE",
           "ATMO_RAYLEIGH_HEIGHT_KM", "ATMO_MIE_SCALE", "ATMO_MIE_HEIGHT_KM", "ATMO_AERIAL_DISTANCE_SCALE",
@@ -130,19 +134,23 @@ if unbound:
     for key in ("scene_fringe_intensity", "white_temp"):
         check("the level leaves %s alone" % key, not settings.get_editor_property("override_" + key))
 
-# --- the hull's paint --------------------------------------------------------------------
-setup = json.load(open(SETUP, encoding="utf-8"))
-tint = setup["materials"]["MI_Ship_Vanguard_Hull"]["base_color_tint"]
-hull = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Vanguard/Materials/MI_Ship_Vanguard_Hull")
-if hull:
-    have = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(hull, "BaseColorTint")
-    check("the hull wears the paint from Vanguard_setup.json",
-          all(close(getattr(have, axis), tint[i]) for i, axis in enumerate(("r", "g", "b"))),
-          "%s, setup %s" % (have, tint))
-    # 2.2 left it a silhouette against space, 4.5 went chalky (Tools/Shots/look_fill.json).
-    check("the paint stays in the range the shots showed works", all(2.6 <= c <= 4.0 for c in tint), "%s" % tint)
+# --- the hull's paint (per ship: its <Ship>_setup.json, Tools/Tests/ship_under_test.py) -------------------
+if not sut.SHIP:
+    sut.skip(log, "the hull wears the paint from its setup JSON")
 else:
-    check("MI_Ship_Vanguard_Hull exists", False)
+    setup = sut.setup()
+    hull_name = "MI_Ship_%s_Hull" % sut.SHIP
+    tint = setup["materials"][hull_name]["base_color_tint"]
+    hull = unreal.EditorAssetLibrary.load_asset(sut.asset("Materials/MI_Ship_{ship}_Hull"))
+    if hull:
+        have = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(hull, "BaseColorTint")
+        check("the hull wears the paint from %s_setup.json" % sut.SHIP,
+              all(close(getattr(have, axis), tint[i]) for i, axis in enumerate(("r", "g", "b"))),
+              "%s, setup %s" % (have, tint))
+        # 2.2 left it a silhouette against space, 4.5 went chalky (Tools/Shots/look_fill.json).
+        check("the paint stays in the range the shots showed works", all(2.6 <= c <= 4.0 for c in tint), "%s" % tint)
+    else:
+        check("%s exists" % hull_name, False)
 
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))
 if failures:

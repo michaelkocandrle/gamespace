@@ -2,7 +2,7 @@
 
 Editor closed:
 
-    $env:GAMESPACE_SHIP_MANIFEST = "C:\\gamespace\\gamespace\\ArtSource\\Ships\\Vanguard\\Export\\Vanguard_manifest.json"
+    $env:GAMESPACE_SHIP_MANIFEST = "C:\\gamespace\\gamespace\\ArtSource\\Ships\\<Ship>\\Export\\<Ship>_manifest.json"
     .\\Tools\\run_editor_python.ps1 Tools\\Assets\\import_ship.py
 
 Without GAMESPACE_SHIP_MANIFEST the script uses the only *_manifest.json under
@@ -14,7 +14,7 @@ ArtSource/Ships/*/Export/. Optional switches (environment variables, "0" turns t
 
 Dry run without Unreal (plain Python, any time):
 
-    python Tools/Assets/import_ship.py ArtSource/Ships/Vanguard/Export/Vanguard_manifest.json
+    python Tools/Assets/import_ship.py ArtSource/Ships/<Ship>/Export/<Ship>_manifest.json
 
 Steps:
   1. Validate the manifest (gamespace_ship_export.validate_manifest). Errors stop everything.
@@ -379,8 +379,8 @@ def slot_names(static_mesh):
 
 
 def ensure_fbx_slots(static_mesh, mesh, report):
-    """Reimporting a different model over an existing asset kept the old asset's material slots (the
-    Meshy Vanguard came in with the procedural one's twelve, and its own M_Ship_Vanguard_Hull missing,
+    """Reimporting a different model over an existing asset kept the old asset's material slots (a
+    Meshy fighter came in with the procedural model's twelve, and its own M_Ship_<Ship>_Hull missing,
     so the hull drew with the Underlayer material). Then the asset is deleted and imported fresh; the
     Blueprint and the levels get their references back from this script and build_main_menu.py."""
     if sorted(slot_names(static_mesh)) == sorted(mesh["materials"]):

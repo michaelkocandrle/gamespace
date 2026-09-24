@@ -17,6 +17,11 @@ import math
 
 import unreal
 
+import os as _os
+import sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import ship_under_test as sut  # noqa: E402
+
 STEP = 1.0 / 60.0
 G = 980.665
 failures = []
@@ -292,14 +297,8 @@ for m in imc.get_editor_property("default_key_mappings").get_editor_property("ma
 check("Tab mapped to IA_Afterburner, Shift still boost", {("Tab", "IA_Afterburner"), ("LeftShift", "IA_Boost")} <= pairs)
 action = unreal.EditorAssetLibrary.load_asset("/Game/Input/IA_Afterburner")
 check("IA_Afterburner is a held bool", action is not None and len(action.get_editor_property("triggers")) == 0)
-vanguard = unreal.get_default_object(unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard"))
-check("Vanguard boost / afterburner values from its setup JSON",
-      abs(vanguard.get_editor_property("boost_maneuver_multiplier") - 1.6) < 1e-4 and abs(vanguard.get_editor_property("boost_rotation_multiplier") - 1.4) < 1e-4
-      and abs(vanguard.get_editor_property("afterburner_thrust_multiplier") - 2.1) < 1e-4
-      and abs(vanguard.get_editor_property("afterburner_speed_multiplier") - 2.5) < 1e-4
-      and abs(vanguard.get_editor_property("afterburner_duration_seconds") - 8.0) < 1e-4,
-      "thrust x%.2f, speed x%.2f" % (vanguard.get_editor_property("afterburner_thrust_multiplier"),
-                                     vanguard.get_editor_property("afterburner_speed_multiplier")))
+# Per-ship expectation: the ship's own boost / afterburner values (skipped while there is no modelled ship).
+sut.check_setup_values(check, log, ("boost_", "afterburner_"), "boost / afterburner values")
 
 # What the tuning actually buys, printed so the numbers are in the log next to the feel.
 g = cdo.get_editor_property("g_safe_max_g") * G

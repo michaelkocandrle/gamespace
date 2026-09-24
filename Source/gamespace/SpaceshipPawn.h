@@ -998,8 +998,8 @@ protected:
 	bool bHideHullInCockpit = false;
 
 	/**
-	 * Hide mesh components whose name contains "Canopy" from the pilot in cockpit view. The Vanguard
-	 * has no modelled interior: its canopy is a shallow tinted shell that sits ~13 cm from the eye and
+	 * Hide mesh components whose name contains "Canopy" from the pilot in cockpit view. Meant for a ship
+	 * without a modelled interior, whose canopy is a shallow tinted shell that sits ~13 cm from the eye and
 	 * fills the whole view (see Tools/Blender/cockpit_view_survey.py). Hidden, the pilot looks out
 	 * through the open frame; everyone else, and the chase camera, still see the glass.
 	 */
@@ -1539,7 +1539,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "0.0"))
 	float DashboardFocusMargin = 0.08f;
 
-	/** Dashboard focus: half size of a display round its socket, cm (the Vanguard's MFDs are ~33 x 29 cm). */
+	/** Dashboard focus: half size of a display round its socket, cm (a fighter's MFDs are ~33 x 29 cm). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera", meta = (ClampMin = "1.0"))
 	FVector2D DashboardDisplayHalfSizeCm = FVector2D(17.0, 15.0);
 
@@ -1568,7 +1568,7 @@ protected:
 	 * Exposure bias of the cockpit view outside a jump. The Star Citizen references keep the cockpit
 	 * dim against the outside (mean brightness 0.13-0.19, ours was 0.26-0.43 over the planet); -0.7 EV
 	 * lands there (Tools/Shots/cockpit_look.json, HANDOFF point 72). The displays are emissive and would
-	 * dim with it, so their emissive strength in Vanguard_setup.json is raised by the same 2^0.7.
+	 * dim with it, so their emissive strength in the ship's <Ship>_setup.json is raised by the same 2^0.7.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float CockpitExposureBias = -0.7f;
@@ -1731,7 +1731,7 @@ protected:
 	 * high on its pads. The legs themselves have no collision; the ground is kept at this distance
 	 * from the hull box instead, which is far more robust than three thin cylinders.
 	 *
-	 * 0 for a ship whose modelled gear is already inside its collision box (the Vanguard: the box
+	 * 0 for a ship whose modelled gear is already inside its collision box (the box then
 	 * ends at the pads' soles, where the SOCKET_Gear_* empties are). The default is for the
 	 * placeholder legs, which hang below the hull.
 	 */
@@ -1776,7 +1776,7 @@ protected:
 
 	/**
 	 * Precision mode: top speed as a fraction of the SCM one. The speed limiter still works inside
-	 * it, so the wheel sets the approach speed in fine steps (Vanguard: 31.5 m/s, ~1.6 m/s a notch).
+	 * it, so the wheel sets the approach speed in fine steps (a light fighter: 31.5 m/s, ~1.6 m/s a notch).
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Precision", meta = (ClampMin = "0.02", ClampMax = "1.0"))
 	float PrecisionSpeedFraction = 0.15f;

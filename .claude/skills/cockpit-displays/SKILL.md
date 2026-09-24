@@ -5,7 +5,9 @@ description: Cockpit MFD displays, flight HUD and cockpit lighting/exposure in t
 
 # Kokpit: displeje (MFD), letový HUD, světla a expozice
 
-Týká se letového kokpitu **Vanguardu** (živé displeje). Kokpit Steadfastu má zatím jen **statické**
+Týká se letového kokpitu s **živými displeji** (kód je obecný; první stíhačka, na které vznikl, byla
+24. 9. 2026 odstraněna a nová loď je ve 2D návrhu, takže teď žádná loď živé displeje nemá). Kokpit
+Steadfastu má zatím jen **statické**
 hologramové obrazovky (`Tools/Assets/draw_holo_screens.py` → `ArtSource/Ships/Steadfast/Interior/Screens/`,
 mesh `CockpitScreens.glb`, materiál `M_KitHolo`, HANDOFF bod 66); živá data přijdou, až Steadfast poletí.
 Podrobná historie: HANDOFF body 23–33, 32b, 72; postup WORKFLOW kap. 7, nástrahy 9.2 a)–i), 9.3 a).
@@ -18,17 +20,17 @@ Podrobná historie: HANDOFF body 23–33, 32b, 72; postup WORKFLOW kap. 7, nást
 | HUD + widget displejů (`USpaceFlightHud`, podtřída `USpaceCockpitDisplays`) | `Source/gamespace/SpaceFlightHud.{h,cpp}` |
 | Textový debug HUD, cvar `space.Hud` | `Source/gamespace/SpaceDebugHUD.cpp` |
 | Kokpitová kamera, světla, expozice, přiblížení | `Source/gamespace/SpaceshipPawn.{h,cpp}` |
-| Hodnoty lodi (světla, `cockpit_displays`, emissive obrazovek) | `ArtSource/Ships/Vanguard/Vanguard_setup.json` |
+| Hodnoty lodi (světla, `cockpit_displays`, emissive obrazovek) | `ArtSource/Ships/<Loď>/<Loď>_setup.json` |
 | Písma | `Content/UI/Fonts/` (Rajdhani-Medium/SemiBold, ShareTechMono-Regular + OFL licence), `Custom/` |
 | Vstup MFD | `Content/Input/IA_MfdLeft`, `IA_MfdRight`; přidává `Tools/Assets/add_mfd_input.py` |
-| Testy | `Tools/Tests/test_cockpit_displays.py`, `test_cockpit_frame.py`, `test_flight_hud_sc1c.py`, `test_flight_hud_sc3.py` (značka dráhy letu) |
+| Testy | `Tools/Tests/test_cockpit_displays.py`, `test_cockpit_frame.py` (loď z `Tools/Tests/ship_under_test.py`; bez modelu SKIP), `test_flight_hud_sc1c.py`, `test_flight_hud_sc3.py` (značka dráhy letu) |
 | Snímky | `Tools/Shots/cockpit*.json`, `mfd_pages.json`, `hud.json`, `display_sharpness.json` |
 | Reference SC | `Docs/UI/` (hlavně `Screenshot 2026-09-17 201854.png`), `ArtSource/Reference/Mood/sc_cockpit_*.webp` (lokálně) |
 
 ## Jak displeje fungují
 
 - `UCockpitDisplayComponent` kreslí widget `USpaceCockpitDisplays` přes `FWidgetRenderer` do **render
-  targetu**, ten jde jako `ScreenTexture` do MID slotu `*_Screens` (`MI_Ship_Vanguard_Screens`, unlit,
+  targetu**, ten jde jako `ScreenTexture` do MID slotu `*_Screens` (`MI_Ship_<Loď>_Screens`, unlit,
   opaque, pixel animation). V editoru jsou obrazovky černé – obsah vznikne až za běhu.
 - `USpaceCockpitDisplays` je podtřída `USpaceFlightHud`: **stejné názvy widgetů a stejné `ApplyState`**.
   Nový údaj tedy obvykle = stav v `FSpaceFlightHudState` (make_state) + widget v `BuildTree`.
@@ -110,7 +112,7 @@ Podrobná historie: HANDOFF body 23–33, 32b, 72; postup WORKFLOW kap. 7, nást
 
 ## Světla a expozice kokpitu
 
-- Key + fill (setup Vanguardu): `cockpit_light_intensity_cd` 1,5, offset [80, 0, −10], radius 250 cm,
+- Key + fill (setup první stíhačky, dobrý výchozí bod): `cockpit_light_intensity_cd` 1,5, offset [80, 0, −10], radius 250 cm,
   source radius 12 cm; `cockpit_fill_intensity_cd` 0,8, offset [−15, 0, 12]. Bez stínů, pod střechou
   canopy. Posouvají se s okem (`cockpit_eye` ve snímcích).
   - 12 / 5 cd = plošně šedá deska; bez světel černá (slunce dovnitř nesvítí). Většinu světla dávají displeje.
@@ -120,7 +122,7 @@ Podrobná historie: HANDOFF body 23–33, 32b, 72; postup WORKFLOW kap. 7, nást
 - **Expozice:** kokpitová kamera má vlastní `ASpaceshipPawn::CockpitExposureBias` = **−0,7 EV** (ve skoku
   quantum se prolíná na `QuantumExposureBias` −0,8 a expozice se připíchne). Cíl proti SC: střední jas
   kokpitu nad planetou ~0,10–0,19, ve vesmíru ~0,05 (tmavý kokpit, jasné displeje).
-  - Displeje jsou emisivní a s expozicí tmavnou → `MI_Ship_Vanguard_Screens.emissive_strength`
+  - Displeje jsou emisivní a s expozicí tmavnou → `MI_Ship_<Loď>_Screens.emissive_strength`
     **2,9 = 1,8 × 2^0,7**. Změníš-li bias, přepočítej emissive stejně (jinak tmavé / kvetoucí písmo;
     efektivní jas nad ~3 = bílé písmo kvete a rozmazává se).
   - Sklo displejů (`ESpaceHudSymbol::MfdGlass`) tmavé, obsah jasný.
@@ -145,8 +147,7 @@ Vzhled jen v **zabalené** hře (uncooked `-game` kreslí nové materiály šed�
 .\Tools\Shots.ps1 -Preset cockpit_look -Width 1920 -Height 1080   # expozice; autor hraje 1080p
 ```
 
-Presety: `cockpit` (oko, displeje, rám), `cockpit_light`, `cockpit_tune`, `cockpit_centre`,
-`cockpit_readability` (čitelnost z křesla, Z, staré oko), `cockpit_view_tune` (sklon/oko), `cockpit_look`,
+Presety: `cockpit` (oko, displeje, rám), `cockpit_light`, `cockpit_centre`, `cockpit_look`,
 `mfd_pages`, `hud` (HUD ve všech situacích), `display_sharpness` (displeje za rychlého letu).
 Pole snímku pro kokpit: `cockpit_eye`, `hide_hull`, `hide_canopy`, `cockpit_light`, `display_light`,
 `interior_tint`, `hud`, `console` (např. `["space.MfdPage 1 2"]`).

@@ -1,17 +1,37 @@
-"""Blender MCP helpers for the live-viewport workflow, see Docs/WORKFLOW.md (chapter Blender MCP)."""
+"""Blender MCP helpers for the live-viewport workflow, see Docs/WORKFLOW.md (chapter Blender MCP).
+
+    python mcp_measure_openings.py <Ship>
+
+Reads ArtSource/Ships/<Ship>/<Ship>_ai_build.json and works on SM_Ship_<Ship>_Interior."""
 import json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mcp_socket import send
+
+
+def ship_paths(argv, usage):
+    """The ship is the first command-line argument: its AI build config and interior object name."""
+    if len(argv) < 2 or argv[1].startswith("-"):
+        raise SystemExit("usage: " + usage)
+    ship = argv[1]
+    repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    cfg = os.path.join(repo, "ArtSource", "Ships", ship, "%s_ai_build.json" % ship)
+    if not os.path.isfile(cfg):
+        raise SystemExit("No AI build config for ship %r: %s" % (ship, cfg))
+    return ship, cfg, "SM_Ship_%s_Interior" % ship
+
+
+USAGE = "python mcp_measure_openings.py <Ship>"
+SHIP, CFG_PATH, INTERIOR = ship_paths(sys.argv, USAGE)
 
 CODE = r'''
 import bpy, json
 from mathutils import Vector, Matrix
 from mathutils.bvhtree import BVHTree
-cfg = json.load(open(r"C:\gamespace\gamespace\ArtSource\Ships\Vanguard\Vanguard_ai_build.json", encoding="utf-8"))
+cfg = json.load(open(__CFG_PATH__, encoding="utf-8"))
 spec = cfg["interior"]; p = spec["placement"]
 M = Matrix.Translation(Vector(p["offset"])) @ Matrix.Diagonal((p["scale"], p["scale"], p["scale"] * p["height_ratio"], 1.0))
 eye = Vector(cfg["sockets"]["Cockpit"]["location"])
-ob = bpy.data.objects["SM_Ship_Vanguard_Interior"]
+ob = bpy.data.objects[__INTERIOR__]
 screens_slot = [i for i, m in enumerate(ob.data.materials) if m and m.name.endswith("_Screens")][0]
 bvh = BVHTree.FromObject(ob, bpy.context.evaluated_depsgraph_get())
 polys = ob.data.polygons
@@ -53,5 +73,6 @@ for s in spec["displays"]["screens"]:
                       "u_range": [min(q[0] for q in pts), max(q[0] for q in pts)], "v_range": [min(q[1] for q in pts), max(q[1] for q in pts)]}
 print("OPENINGS " + json.dumps(out))
 '''
+CODE = CODE.replace("__CFG_PATH__", repr(CFG_PATH)).replace("__INTERIOR__", repr(INTERIOR))
 r = send("execute_code", {"code": CODE}, timeout=600)
 print(json.dumps(r)[:2500])

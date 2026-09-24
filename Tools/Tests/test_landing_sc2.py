@@ -12,8 +12,9 @@ need the ground are tested through their pure functions (EvaluateTouchdown, the 
   4. precision mode: top speed, the limiter inside it, SCM only, afterburner refused, gentler turning,
      speed bleeding down smoothly when it comes on at speed
   5. the HUD: GEAR and PREC lamps and their colours
-  6. input assets (N, P, no clashes), Vanguard values from its setup JSON, its modelled gear part (split off
-     in Blender) standing on the collision box's bottom and disappearing into the belly, the landing shot list
+  6. input assets (N, P, no clashes), the landing shot list; per ship (Tools/Tests/ship_under_test.py, skipped
+     without one): its values from its setup JSON, its modelled gear part (split off in Blender) standing on the
+     collision box's bottom and disappearing into the belly
 Nothing is saved. Prints "SC2TEST PASS" / "SC2TEST FAIL" lines and a summary.
 """
 
@@ -22,6 +23,11 @@ import math
 import os
 
 import unreal
+
+import os as _os
+import sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import ship_under_test as sut  # noqa: E402
 
 STEP = 1.0 / 60.0
 G = 980.665
@@ -306,7 +312,7 @@ finally:
     eas.destroy_actor(ship)
 
 # ---------------------------------------------------------------------------------------
-# 6) Assets, Vanguard, shot list
+# 6) Assets, the ship under test, shot list
 # ---------------------------------------------------------------------------------------
 imc = unreal.EditorAssetLibrary.load_asset("/Game/Input/IMC_Spaceship")
 by_key = {}
@@ -319,49 +325,51 @@ for path in ("/Game/Input/IA_LandingGear", "/Game/Input/IA_Precision"):
     action = unreal.EditorAssetLibrary.load_asset(path)
     check(path.split("/")[-1] + " is a bool action", action is not None and action.get_editor_property("value_type") == unreal.InputActionValueType.BOOLEAN)
 
-setup = json.load(open(os.path.join(REPO, "ArtSource", "Ships", "Vanguard", "Vanguard_setup.json"), encoding="utf-8"))["pawn"]
-vanguard = unreal.get_default_object(unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard"))
-keys = [k for k in setup if k.startswith("gear_") or k.startswith("precision_")]
-check("Vanguard gear / precision values from its setup JSON (%d)" % len(keys),
-      len(keys) >= 5 and all(abs(vanguard.get_editor_property(k) - setup[k]) < 1e-4 for k in keys))
-mesh = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard")
-manifest = json.load(open(os.path.join(REPO, "ArtSource", "Ships", "Vanguard", "Export", "Vanguard_manifest.json"), encoding="utf-8"))
-box_bottom = -manifest["suggested_pawn_settings"]["HullCollision_BoxExtent_cm"][2]
-sockets = []
-for name in vanguard.get_editor_property("gear_socket_names"):
-    # The FBX import drops the SOCKET_ prefix; the ship accepts either spelling.
-    socket = mesh.find_socket(str(name)) or mesh.find_socket(str(name).replace("SOCKET_", ""))
-    if socket:
-        sockets.append((str(name), socket.get_editor_property("relative_location").z))
-check("the Vanguard mesh has all three gear sockets", len(sockets) == 3, str(sockets))
-check("gear sockets (the pads' soles) sit on the hull box's bottom",
-      all(abs(z - box_bottom) < 2.0 for _, z in sockets), "box bottom %.1f, sockets %s" % (box_bottom, [round(z, 1) for _, z in sockets]))
+# Per ship (Tools/Tests/ship_under_test.py): its gear / precision values from its setup JSON, and its modelled
+# gear part (split off in Blender) standing on the collision box's bottom and disappearing into the belly.
+sut.check_setup_values(check, log, ("gear_", "precision_"), "gear / precision values")
+if not sut.SHIP:
+    sut.skip(log, "gear sockets on the hull mesh, the modelled gear part and its stow travel")
+else:
+    ship_cdo = unreal.get_default_object(sut.bp_class())
+    mesh = unreal.EditorAssetLibrary.load_asset(sut.asset("Meshes/SM_Ship_{ship}"))
+    manifest = sut.manifest()
+    box_bottom = -manifest["suggested_pawn_settings"]["HullCollision_BoxExtent_cm"][2]
+    sockets = []
+    for name in ship_cdo.get_editor_property("gear_socket_names"):
+        # The FBX import drops the SOCKET_ prefix; the ship accepts either spelling.
+        socket = mesh.find_socket(str(name)) or mesh.find_socket(str(name).replace("SOCKET_", ""))
+        if socket:
+            sockets.append((str(name), socket.get_editor_property("relative_location").z))
+    check("the ship mesh has all three gear sockets", len(sockets) == 3, str(sockets))
+    check("gear sockets (the pads' soles) sit on the hull box's bottom",
+          all(abs(z - box_bottom) < 2.0 for _, z in sockets), "box bottom %.1f, sockets %s" % (box_bottom, [round(z, 1) for _, z in sockets]))
 
-# The modelled legs are their own part now, inside the collision box: nothing hangs below it.
-parts = manifest["meshes"]
-gear_part = parts.get("SM_Ship_Vanguard_Gear")
-hull_part = parts.get("SM_Ship_Vanguard")
-check("Vanguard: the legs are a separate part (SM_Ship_Vanguard_Gear), no longer in the hull mesh",
-      gear_part is not None and gear_part["part"] == "Gear" and hull_part["bounds_m"][0][2] > gear_part["bounds_m"][0][2] + 0.3,
-      "hull bottom %.2f m, gear bottom %.2f m" % (hull_part["bounds_m"][0][2], gear_part["bounds_m"][0][2] if gear_part else 0.0))
-gear_bottom_cm = gear_part["bounds_m"][0][2] * 100.0 if gear_part else 0.0
-check("Vanguard: pads reach the box bottom, so gear_extension_cm is 0",
-      abs(gear_bottom_cm - box_bottom) < 2.0 and vanguard.get_editor_property("gear_extension_cm") == 0.0,
-      "pads %.1f cm" % gear_bottom_cm)
-travel = vanguard.get_editor_property("gear_stow_travel_cm")
-check("Vanguard: stowed, the pads rise above the hull's lowest point (hidden in the belly)",
-      gear_bottom_cm + travel > hull_part["bounds_m"][0][2] * 100.0,
-      "stowed soles %.0f cm, hull bottom %.0f cm" % (gear_bottom_cm + travel, hull_part["bounds_m"][0][2] * 100.0))
-bp_ship = eas.spawn_actor_from_class(unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard"),
-                                     unreal.Vector(0.0, 0.0, 0.0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
-try:
-    gear_meshes = [c for c in bp_ship.get_components_by_class(unreal.StaticMeshComponent)
-                   if "Gear" in c.get_name() and c.get_editor_property("static_mesh")
-                   and c.get_editor_property("static_mesh").get_name() == "SM_Ship_Vanguard_Gear"]
-    check("BP_Ship_Vanguard has the Gear component with the gear mesh", len(gear_meshes) == 1,
-          ", ".join(c.get_name() for c in bp_ship.get_components_by_class(unreal.StaticMeshComponent)))
-finally:
-    eas.destroy_actor(bp_ship)
+    # The modelled legs are their own part now, inside the collision box: nothing hangs below it.
+    parts = manifest["meshes"]
+    gear_part = parts.get("SM_Ship_%s_Gear" % sut.SHIP)
+    hull_part = parts.get("SM_Ship_%s" % sut.SHIP)
+    check("the legs are a separate part (SM_Ship_<Ship>_Gear), no longer in the hull mesh",
+          gear_part is not None and gear_part["part"] == "Gear" and hull_part["bounds_m"][0][2] > gear_part["bounds_m"][0][2] + 0.3,
+          "hull bottom %.2f m, gear bottom %.2f m" % (hull_part["bounds_m"][0][2], gear_part["bounds_m"][0][2] if gear_part else 0.0))
+    gear_bottom_cm = gear_part["bounds_m"][0][2] * 100.0 if gear_part else 0.0
+    check("pads reach the box bottom, so gear_extension_cm is 0",
+          abs(gear_bottom_cm - box_bottom) < 2.0 and ship_cdo.get_editor_property("gear_extension_cm") == 0.0,
+          "pads %.1f cm" % gear_bottom_cm)
+    travel = ship_cdo.get_editor_property("gear_stow_travel_cm")
+    check("stowed, the pads rise above the hull's lowest point (hidden in the belly)",
+          gear_bottom_cm + travel > hull_part["bounds_m"][0][2] * 100.0,
+          "stowed soles %.0f cm, hull bottom %.0f cm" % (gear_bottom_cm + travel, hull_part["bounds_m"][0][2] * 100.0))
+    bp_ship = eas.spawn_actor_from_class(sut.bp_class(),
+                                         unreal.Vector(0.0, 0.0, 0.0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
+    try:
+        gear_meshes = [c for c in bp_ship.get_components_by_class(unreal.StaticMeshComponent)
+                       if "Gear" in c.get_name() and c.get_editor_property("static_mesh")
+                       and c.get_editor_property("static_mesh").get_name() == "SM_Ship_%s_Gear" % sut.SHIP]
+        check("the ship Blueprint has the Gear component with the gear mesh", len(gear_meshes) == 1,
+              ", ".join(c.get_name() for c in bp_ship.get_components_by_class(unreal.StaticMeshComponent)))
+    finally:
+        eas.destroy_actor(bp_ship)
 
 shots = json.load(open(os.path.join(REPO, "Tools", "Shots", "landing.json"), encoding="utf-8"))["shots"]
 known = {"name", "camera", "hud", "altitude_m", "facing", "speed_ms", "mode", "limiter", "coupled", "gsafe", "comstab",

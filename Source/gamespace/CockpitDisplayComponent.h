@@ -42,7 +42,7 @@ public:
 
 	/**
 	 * How wide one display is on screen as a share of the window's width at the cockpit's 88 degree
-	 * field of view (measured on the Vanguard: ~295 of 1911 px). The render target follows the window
+	 * field of view (measured on the first fighter model: ~295 of 1911 px). The render target follows the window
 	 * from this, so the type is drawn at the size it is seen: drawn larger and shrunk by the GPU, its
 	 * thin strokes fell between samples and the words broke up.
 	 */

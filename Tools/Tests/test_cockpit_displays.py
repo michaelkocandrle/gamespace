@@ -1,4 +1,4 @@
-"""Headless checks for the cockpit displays: the flight HUD's instruments on the Vanguard's dashboard.
+"""Headless checks for the cockpit displays: the flight HUD's instruments on a ship's dashboard.
 
     .\\Tools\\run_editor_python.ps1 Tools\\Tests\\test_cockpit_displays.py
 
@@ -12,9 +12,10 @@ Nothing is drawn in a commandlet, so this checks what can be checked without a s
 - MFD pages: left FLIGHT / THRUSTERS / NAVIGATION, right STATUS / CONTACTS / SELF STATUS, switched with
   F1 and F2 (and [ ], Alt back) through the display component, the title and page tab following; what they list;
 - the radar sees objects in range where they are (and not beyond it) and bodies as bearings; the self
-  status page reads the Vanguard's hulls, engines and gear;
-- the Vanguard's interior has the display slot (M_Ship_Vanguard_Screens, flat quads made by
-  Tools/Blender/build_ai_ship.py), with the unlit display material, and UCockpitDisplayComponent finds it.
+  status page reads a ship's hulls, engines and gear;
+- the ship under test (Tools/Tests/ship_under_test.py; skipped without one): its recipe's screens map where the
+  game draws them, its interior has the display slot (M_Ship_<Ship>_Screens, flat quads made by
+  Tools/Blender/build_ai_ship.py) with the unlit display material, and UCockpitDisplayComponent finds it.
 How the displays look: Tools/Shots.ps1 -Preset cockpit, and the step's report. Nothing is saved.
 Prints "DISPTEST PASS" / "DISPTEST FAIL" lines and a summary.
 """
@@ -23,6 +24,11 @@ import json
 import os
 
 import unreal
+
+import os as _os
+import sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import ship_under_test as sut  # noqa: E402
 
 STEP = 1.0 / 60.0
 failures = []
@@ -87,23 +93,25 @@ check("thrust bars are block bars along the row", displays.debug_get_gauge("Thru
       and displays.debug_get_gauge("ThrustGauge_MAIN").get_editor_property("segments") > 0)
 
 # --- The canvas and the recipe agree ---------------------------------------------------------------
-recipe_path = os.path.join(unreal.Paths.project_dir(), "ArtSource", "Ships", "Vanguard", "Vanguard_ai_build.json")
-recipe = json.load(open(recipe_path, encoding="utf-8"))["interior"]["displays"]
-rect = lambda name: displays.debug_get_screen_rect(name)
-screen_names = ("left", "right", "centre_top", "centre_bottom")
-canvas = [max(rect(n).z for n in screen_names), max(rect(n).w for n in screen_names)]
-check("recipe texture_size is the game's canvas", [round(v) for v in canvas] == recipe["texture_size"], "%s vs %s" % (canvas, recipe["texture_size"]))
-for screen in recipe["screens"]:
-    r = rect(screen["name"])
-    check("screen %s maps where the game draws it" % screen["name"], [round(r.x), round(r.y), round(r.z), round(r.w)] == screen.get("texture_rect"),
-          "%s vs %s" % ([r.x, r.y, r.z, r.w], screen.get("texture_rect")))
-    tl, tr, br, bl = screen["corners"]
-    glass = ((tr[0] - tl[0] + br[0] - bl[0]) / 2.0) / ((tl[1] - bl[1] + tr[1] - br[1]) / 2.0)
-    shown = (r.z - r.x) / (r.w - r.y)
-    check("screen %s drawn in the shape of its glass (%.2f vs %.2f)" % (screen["name"], shown, glass), abs(shown / glass - 1.0) < 0.08)
-check("screens reach under the bezel lips (grow_m 3-6 mm): no AI glass strip at the corners", 0.003 <= recipe.get("grow_m", 0.0) <= 0.006,
-      str(recipe.get("grow_m")))
-check("the four screens: two MFDs and the centre column", sorted(s["name"] for s in recipe["screens"]) == ["centre_bottom", "centre_top", "left", "right"])
+if not sut.SHIP:
+    sut.skip(log, "the ship recipe's screens map where the game draws them")
+else:
+    recipe = sut.recipe()["interior"]["displays"]
+    rect = lambda name: displays.debug_get_screen_rect(name)
+    screen_names = ("left", "right", "centre_top", "centre_bottom")
+    canvas = [max(rect(n).z for n in screen_names), max(rect(n).w for n in screen_names)]
+    check("recipe texture_size is the game's canvas", [round(v) for v in canvas] == recipe["texture_size"], "%s vs %s" % (canvas, recipe["texture_size"]))
+    for screen in recipe["screens"]:
+        r = rect(screen["name"])
+        check("screen %s maps where the game draws it" % screen["name"], [round(r.x), round(r.y), round(r.z), round(r.w)] == screen.get("texture_rect"),
+              "%s vs %s" % ([r.x, r.y, r.z, r.w], screen.get("texture_rect")))
+        tl, tr, br, bl = screen["corners"]
+        glass = ((tr[0] - tl[0] + br[0] - bl[0]) / 2.0) / ((tl[1] - bl[1] + tr[1] - br[1]) / 2.0)
+        shown = (r.z - r.x) / (r.w - r.y)
+        check("screen %s drawn in the shape of its glass (%.2f vs %.2f)" % (screen["name"], shown, glass), abs(shown / glass - 1.0) < 0.08)
+    check("screens reach under the bezel lips (grow_m 3-6 mm): no AI glass strip at the corners", 0.003 <= recipe.get("grow_m", 0.0) <= 0.006,
+          str(recipe.get("grow_m")))
+    check("the four screens: two MFDs and the centre column", sorted(s["name"] for s in recipe["screens"]) == ["centre_bottom", "centre_top", "left", "right"])
 
 # --- Driven like the HUD ------------------------------------------------------------------------------
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
@@ -199,45 +207,50 @@ try:
 finally:
     eas.destroy_actor(ship)
 
-# --- The Vanguard's display slot and material ----------------------------------------------------
-mesh = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard_Interior")
-slots = [str(m.get_editor_property("material_slot_name")) for m in mesh.get_editor_property("static_materials")]
-check("interior mesh has the display slot", "M_Ship_Vanguard_Screens" in slots, ", ".join(slots))
+# --- The display master material ---------------------------------------------------------------
 master = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Screen")
 check("display master is unlit (no sky reflections over the instruments)",
       master is not None and master.get_editor_property("shading_model") == unreal.MaterialShadingModel.MSM_UNLIT)
 check("display master opaque with pixel animation (the variants past or around temporal AA were worse)",
       master.get_editor_property("has_pixel_animation") and master.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_OPAQUE)
-vanguard = eas.spawn_actor_from_class(unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard"),
-                                      unreal.Vector(0, 0, 0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
-try:
-    found, slot = unreal.CockpitDisplayComponent.find_display_slot(vanguard, "_Screens")
-    check("display component finds the slot on the Interior component", found is not None and found.get_name() == "Interior" and slot >= 0,
-          "%s slot %s" % (found and found.get_name(), slot))
-    material = found.get_material(slot) if found else None
-    parent = material.get_editor_property("parent") if isinstance(material, unreal.MaterialInstance) else None
-    check("display slot has MI_Ship_Vanguard_Screens on M_Ship_Screen", material is not None and material.get_name() == "MI_Ship_Vanguard_Screens"
-          and parent is not None and parent.get_name() == "M_Ship_Screen", "%s / %s" % (material and material.get_name(), parent and parent.get_name()))
-    sockets = [str(n) for n in found.get_all_socket_names()] if found else []
-    check("a Display_ socket in front of each screen (their glow)", sorted(n for n in sockets if n.startswith("Display_"))
-          == ["Display_centre_bottom", "Display_centre_top", "Display_left", "Display_right"], ", ".join(sockets))
-    status = displays.debug_get_part("ShipStatus")
-    status.set_ship(vanguard)
-    check("self status reads the Vanguard: its collision hulls, 4 engines, 3 gear legs", status.get_outline_count() >= 8
-          and len(status.get_editor_property("engines")) == 4 and len(status.get_editor_property("gear")) == 3,
-          "%d outlines, %d engines, %d gear" % (status.get_outline_count(), len(status.get_editor_property("engines")), len(status.get_editor_property("gear"))))
-    displays_component = vanguard.get_editor_property("cockpit_displays")
-    check("figures change at most ~6 times a second, so temporal AA settles on each number (setup state_rate_hz)",
-          displays_component.get_editor_property("state_rate_hz") <= 6.0, "%.1f" % displays_component.get_editor_property("state_rate_hz"))
-    check("displays light the cockpit (setup display_light_intensity_cd > 0)", displays_component.get_editor_property("display_light_intensity_cd") > 0.0)
-    hull_mesh = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard")
-    hull_slots = [str(m.get_editor_property("material_slot_name")) for m in hull_mesh.get_editor_property("static_materials")]
-    check("inside of the canopy frame has its own dark slot", "M_Ship_Vanguard_CanopyFrame" in hull_slots, ", ".join(hull_slots))
-    frame = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Vanguard/Materials/MI_Ship_Vanguard_CanopyFrame")
-    base = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(frame, "BaseColor") if frame else None
-    check("canopy frame material is dark (below 0.1)", base is not None and max(base.r, base.g, base.b) < 0.1, str(base))
-finally:
-    eas.destroy_actor(vanguard)
+
+# --- The ship's display slot and material (Tools/Tests/ship_under_test.py) -----------------------------
+if not sut.SHIP:
+    sut.skip(log, "the ship's display slot, Display_ sockets, self status outline and canopy frame material")
+else:
+    mesh = unreal.EditorAssetLibrary.load_asset(sut.asset("Meshes/SM_Ship_{ship}_Interior"))
+    slots = [str(m.get_editor_property("material_slot_name")) for m in mesh.get_editor_property("static_materials")]
+    check("interior mesh has the display slot", "M_Ship_%s_Screens" % sut.SHIP in slots, ", ".join(slots))
+    ship_bp = eas.spawn_actor_from_class(sut.bp_class(),
+                                          unreal.Vector(0, 0, 0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
+    try:
+        found, slot = unreal.CockpitDisplayComponent.find_display_slot(ship_bp, "_Screens")
+        check("display component finds the slot on the Interior component", found is not None and found.get_name() == "Interior" and slot >= 0,
+              "%s slot %s" % (found and found.get_name(), slot))
+        material = found.get_material(slot) if found else None
+        parent = material.get_editor_property("parent") if isinstance(material, unreal.MaterialInstance) else None
+        check("display slot has MI_Ship_<Ship>_Screens on M_Ship_Screen", material is not None and material.get_name() == "MI_Ship_%s_Screens" % sut.SHIP
+              and parent is not None and parent.get_name() == "M_Ship_Screen", "%s / %s" % (material and material.get_name(), parent and parent.get_name()))
+        sockets = [str(n) for n in found.get_all_socket_names()] if found else []
+        check("a Display_ socket in front of each screen (their glow)", sorted(n for n in sockets if n.startswith("Display_"))
+              == ["Display_centre_bottom", "Display_centre_top", "Display_left", "Display_right"], ", ".join(sockets))
+        status = displays.debug_get_part("ShipStatus")
+        status.set_ship(ship_bp)
+        check("self status reads the ship: its collision hulls, 4 engines, 3 gear legs", status.get_outline_count() >= 8
+              and len(status.get_editor_property("engines")) == 4 and len(status.get_editor_property("gear")) == 3,
+              "%d outlines, %d engines, %d gear" % (status.get_outline_count(), len(status.get_editor_property("engines")), len(status.get_editor_property("gear"))))
+        displays_component = ship_bp.get_editor_property("cockpit_displays")
+        check("figures change at most ~6 times a second, so temporal AA settles on each number (setup state_rate_hz)",
+              displays_component.get_editor_property("state_rate_hz") <= 6.0, "%.1f" % displays_component.get_editor_property("state_rate_hz"))
+        check("displays light the cockpit (setup display_light_intensity_cd > 0)", displays_component.get_editor_property("display_light_intensity_cd") > 0.0)
+        hull_mesh = unreal.EditorAssetLibrary.load_asset(sut.asset("Meshes/SM_Ship_{ship}"))
+        hull_slots = [str(m.get_editor_property("material_slot_name")) for m in hull_mesh.get_editor_property("static_materials")]
+        check("inside of the canopy frame has its own dark slot", "M_Ship_%s_CanopyFrame" % sut.SHIP in hull_slots, ", ".join(hull_slots))
+        frame = unreal.EditorAssetLibrary.load_asset(sut.asset("Materials/MI_Ship_{ship}_CanopyFrame"))
+        base = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(frame, "BaseColor") if frame else None
+        check("canopy frame material is dark (below 0.1)", base is not None and max(base.r, base.g, base.b) < 0.1, str(base))
+    finally:
+        eas.destroy_actor(ship_bp)
 
 # --- The keys: F1 and F2 (and [ ]) ---------------------------------------------------------------------
 imc = unreal.EditorAssetLibrary.load_asset("/Game/Input/IMC_Spaceship")

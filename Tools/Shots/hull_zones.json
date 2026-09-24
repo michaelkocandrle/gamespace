@@ -1,5 +1,5 @@
 {
-  "_comment": "Breaking up the one-colour hull: the baked ambient occlusion (cavity, AO output) and worn paint on exposed surfaces, layer by layer in one packaged run through space.ShipMat / space.ShipMatColor. The first pair is the look without any of it, for comparison. Settings stay for the following shots. What looks right goes into ArtSource/Ships/Vanguard/Vanguard_setup.json. Run: Tools/Shots.ps1 -Preset hull_zones",
+  "_comment": "Breaking up the one-colour hull: the baked ambient occlusion (cavity, AO output) and worn paint on exposed surfaces, layer by layer in one packaged run through space.ShipMat / space.ShipMatColor. The first pair is the look without any of it, for comparison. Settings stay for the following shots. What looks right goes into the ship's ArtSource/Ships/<Ship>/<Ship>_setup.json. Run: Tools/Shots.ps1 -Preset hull_zones",
   "shots": [
     {"name": "a_none_close", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 150, "chase_pitch": -22, "chase_zoom": 0.3, "settle": 3.0,
      "console": ["space.ShipMat AOStrength 0", "space.ShipMat CavityStrength 0", "space.ShipMat WearAmount 0"]},

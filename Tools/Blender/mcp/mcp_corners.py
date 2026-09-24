@@ -1,20 +1,38 @@
 """Move the live screen quads to corner sets (u, v in the display frame, TL TR BR BL) and screenshot the eye view.
-python mcp_corners.py '<json {left:[[u,v]x4], right:[...], centre_top:[...]}>' out.png (screens left out keep theirs)"""
+python mcp_corners.py <Ship> '<json {left:[[u,v]x4], right:[...], centre_top:[...]}>' out.png (screens left out keep theirs)
+Reads ArtSource/Ships/<Ship>/<Ship>_ai_build.json and moves quads on SM_Ship_<Ship>_Interior."""
 import json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mcp_socket import send
 
-corners = sys.argv[1]
+
+def ship_paths(argv, usage):
+    """The ship is the first command-line argument: its AI build config and interior object name."""
+    if len(argv) < 2 or argv[1].startswith("-"):
+        raise SystemExit("usage: " + usage)
+    ship = argv[1]
+    repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    cfg = os.path.join(repo, "ArtSource", "Ships", ship, "%s_ai_build.json" % ship)
+    if not os.path.isfile(cfg):
+        raise SystemExit("No AI build config for ship %r: %s" % (ship, cfg))
+    return ship, cfg, "SM_Ship_%s_Interior" % ship
+
+
+USAGE = "python mcp_corners.py <Ship> '<corners json>' out.png"
+SHIP, CFG_PATH, INTERIOR = ship_paths(sys.argv, USAGE)
+if len(sys.argv) < 4:
+    raise SystemExit("usage: " + USAGE)
+corners = sys.argv[2]
 CODE = r'''
 import bpy, bmesh, json
 from mathutils import Vector, Matrix
 corners = json.loads(%r)
-cfg = json.load(open(r"C:\gamespace\gamespace\ArtSource\Ships\Vanguard\Vanguard_ai_build.json", encoding="utf-8"))
+cfg = json.load(open(__CFG_PATH__, encoding="utf-8"))
 spec = cfg["interior"]; p = spec["placement"]
 M = Matrix.Translation(Vector(p["offset"])) @ Matrix.Diagonal((p["scale"], p["scale"], p["scale"] * p["height_ratio"], 1.0))
 for o in [o for o in bpy.data.objects if o.name.startswith("MeasureGrid")]:
     o.hide_set(True)
-ob = bpy.data.objects["SM_Ship_Vanguard_Interior"]
+ob = bpy.data.objects[__INTERIOR__]
 slot = [i for i, m in enumerate(ob.data.materials) if m and m.name.endswith("_Screens")][0]
 bm = bmesh.new(); bm.from_mesh(ob.data)
 quads = [f for f in bm.faces if f.material_index == slot]
@@ -45,5 +63,6 @@ for s in spec["displays"]["screens"]:
 bm.to_mesh(ob.data); bm.free(); ob.data.update()
 print("CORNERS set")
 ''' % corners
+CODE = CODE.replace("__CFG_PATH__", repr(CFG_PATH)).replace("__INTERIOR__", repr(INTERIOR))
 print(send("execute_code", {"code": CODE}))
-print(send("get_viewport_screenshot", {"max_size": 1600, "filepath": sys.argv[2], "format": "png"}))
+print(send("get_viewport_screenshot", {"max_size": 1600, "filepath": sys.argv[3], "format": "png"}))

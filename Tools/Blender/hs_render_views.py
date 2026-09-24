@@ -3,7 +3,7 @@ review of hard-surface work. Workbench studio light with cavity and outlines, so
 and shading errors (bad normals, smoothing across hard edges) read at a glance.
 
     MSYS_NO_PATHCONV=1 blender -b Ship.blend --python Tools/Blender/hs_render_views.py -- \\
-        --objects SM_Ship_Vanguard --crop-box -6.8,2.9,0.3,1.2,5.8,3.2 --out Saved/HardSurface/meshy --prefix meshy
+        --objects SM_Ship_<Ship> --crop-box -6.8,2.9,0.3,1.2,5.8,3.2 --out Saved/HardSurface/meshy --prefix meshy
 
 --crop-box keeps only faces whose centre lies in the box (same as silhouette_compare.py). Views follow
 silhouette_compare.py: front from +X, side from -Y (nose right), top from +Z (nose right).

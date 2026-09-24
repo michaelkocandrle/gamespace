@@ -14,6 +14,11 @@ import os
 
 import unreal
 
+import os as _os
+import sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import ship_under_test as sut  # noqa: E402
+
 failures = []
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -69,24 +74,33 @@ les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 check("MainMenu level loads", les.load_level("/Game/Maps/MainMenu"))
 actors = {a.get_actor_label(): a for a in eas.get_all_level_actors()}
-# The ship on the title screen is its hull plus every part its manifest lists, except the gear (stowed in
-# space) and the cockpit interior (inside the hull).
-_manifest = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                                        "ArtSource", "Ships", "Vanguard", "Export", "Vanguard_manifest.json"), encoding="utf-8"))
-_parts = ["MenuShip_" + info["part"] for name, info in _manifest["meshes"].items() if info.get("part") and info["part"] not in ("Gear", "Interior", "Lining")]
+# The ship on the title screen (Tools/Assets/build_main_menu.py MENU_SHIP) is its hull plus every part its
+# manifest lists, except the gear (stowed in space) and the cockpit interior (inside the hull). Without a
+# ship (none modelled yet) the level has no MenuShip actors and the camera orbits an empty MenuOrbitCenter.
 _ship_actors = sorted(label for label in actors if label.startswith("MenuShip"))
-check("title ship = hull + the manifest's parts (no gear, nothing from an older model)", _ship_actors == sorted(["MenuShip"] + _parts), str(_ship_actors))
-for label in ("Sun", "SkyLight", "PP_SpaceExposure", "StarfieldSky", "GasGiant_Orun", "Moon_Keth", "MenuShip", "MenuCamera"):
+_menu_ship = None
+if "MenuShip" in actors:
+    _mesh = actors["MenuShip"].get_component_by_class(unreal.StaticMeshComponent).get_editor_property("static_mesh")
+    _menu_ship = _mesh.get_name()[len("SM_Ship_"):] if _mesh and _mesh.get_name().startswith("SM_Ship_") else None
+    check("title ship's hull is an SM_Ship_<Ship> mesh", _menu_ship is not None, str(_mesh and _mesh.get_name()))
+if _menu_ship:
+    _manifest = json.load(open(os.path.join(REPO, "ArtSource", "Ships", _menu_ship, "Export", "%s_manifest.json" % _menu_ship), encoding="utf-8"))
+    _parts = ["MenuShip_" + info["part"] for name, info in _manifest["meshes"].items() if info.get("part") and info["part"] not in ("Gear", "Interior", "Lining")]
+    check("title ship = hull + the manifest's parts (no gear, nothing from an older model)", _ship_actors == sorted(["MenuShip"] + _parts), str(_ship_actors))
+    orbit_label = "MenuShip"
+else:
+    check("no ship on the title screen: no MenuShip actors left from an older model", not _ship_actors, str(_ship_actors))
+    orbit_label = "MenuOrbitCenter"
+for label in ("Sun", "SkyLight", "PP_SpaceExposure", "StarfieldSky", "GasGiant_Orun", "Moon_Keth", orbit_label, "MenuCamera"):
     check("title actor %s" % label, label in actors)
-if "MenuCamera" in actors and "MenuShip" in actors:
-    check("camera and orbit centre tagged", actors["MenuCamera"].actor_has_tag("MenuCamera") and actors["MenuShip"].actor_has_tag("MenuOrbitCenter"))
+check("exactly one orbit centre", sum(1 for a in actors.values() if a.actor_has_tag("MenuOrbitCenter")) == 1)
+if "MenuCamera" in actors and orbit_label in actors:
+    check("camera and orbit centre tagged", actors["MenuCamera"].actor_has_tag("MenuCamera") and actors[orbit_label].actor_has_tag("MenuOrbitCenter"))
     camera = actors["MenuCamera"].get_actor_location()
     forward = unreal.MathLibrary.get_forward_vector(actors["MenuCamera"].get_actor_rotation())
-    to_ship = actors["MenuShip"].get_actor_location() - camera
+    to_ship = actors[orbit_label].get_actor_location() - camera
     cos = forward.dot(to_ship) / max(to_ship.length(), 1.0)
-    check("camera looks at the ship", cos > 0.9, "cos %.3f" % cos)
-    mesh = actors["MenuShip"].get_component_by_class(unreal.StaticMeshComponent).get_editor_property("static_mesh")
-    check("ship mesh is the Vanguard", mesh is not None and mesh.get_name() == "SM_Ship_Vanguard")
+    check("camera looks at the orbit centre (the ship, when there is one)", cos > 0.9, "cos %.3f" % cos)
 world = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world()
 mode = world.get_world_settings().get_editor_property("default_game_mode")
 check("MainMenu game mode override", mode == unreal.SpaceMenuGameMode.static_class(), str(mode.get_name() if mode else None))
@@ -99,8 +113,8 @@ R = planet.get_editor_property("radius_km") * 100000.0
 up = unreal.Vector(-1.0, 0.0, 0.0)
 probe = C + up * (R + 1000000.0)
 spot = C + up * (R + planet.get_terrain_height_at(probe) + 250.0)
-vanguard = unreal.EditorAssetLibrary.load_blueprint_class("/Game/Ships/Vanguard/Blueprints/BP_Ship_Vanguard")
-ship = eas.spawn_actor_from_class(vanguard, spot, unreal.MathLibrary.make_rot_from_z(up))
+# The ship under test (Tools/Tests/ship_under_test.py), or the native pawn with its placeholder hull.
+ship = eas.spawn_actor_from_class(sut.flight_class(), spot, unreal.MathLibrary.make_rot_from_z(up))
 try:
     ship.debug_step_flight(1.0 / 60.0, 0.0, 0.0, 0.0, False)  # samples the environment
     exit_transform = ship.compute_exit_transform()

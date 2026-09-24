@@ -1,11 +1,11 @@
 """Moves a ship's modelled landing gear out of the hull mesh into its own part, SM_Ship_<Ship>_Gear.
 
-The Vanguard was modelled with its gear down and joined into SM_Ship_Vanguard: three legs (struts,
+A ship modelled with its gear down has it joined into SM_Ship_<Ship>: three legs (struts,
 pistons, feet and rubber pads) hanging under the belly, their soles exactly on the SOCKET_Gear_*
 empties. A separate part is exported as its own FBX and becomes its own mesh component in Unreal,
 which ASpaceshipPawn raises into the hull when the gear goes up (SC-2a).
 
-    blender -b ArtSource\\Ships\\Vanguard\\Vanguard.blend --python Tools\\Blender\\split_ship_gear.py -- [--dry-run]
+    blender -b ArtSource\\Ships\\<Ship>\\<Ship>.blend --python Tools\\Blender\\split_ship_gear.py -- [--dry-run]
 
 What counts as gear: every loose part of the hull mesh that reaches below the belly (lower than
 BELOW_M) inside a box around one of the gear sockets (GEAR_BOX_M half extent in X and Y), except

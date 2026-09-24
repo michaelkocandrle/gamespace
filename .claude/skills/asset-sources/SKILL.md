@@ -29,7 +29,7 @@ WORKFLOW 1.1 (video reference), 3.1b (Scenario MCP), 9.3 x/z/v (nástrahy AI obs
    commitu ani v URL. MCP hlavičky leží v uživatelském `~/.claude.json`, ne v repu.
 6. **Žádná jména ze Star Citizenu** (stanice, lodě, firmy, loga) v obsahu ani ve výstupech –
    vzhled ano, značky ne. Naše jména: Halcyon Freightworks, Kestrel Dynamics, Veyra, Steadfast,
-   Vanguard (WORKFLOW 9.3 v).
+   Farsight, Delver (WORKFLOW 9.3 v).
 7. **Žádné výplňové rekvizity.** Každý předmět v lodi musí mít účel z 2D návrhu lodi
    (`ArtSource/Ships/<Loď>/Design/`, `<Loď>_layout.json`). Klávesnice u dveří (`Prop_AccessPoint`)
    a procedurální „krabicové“ pulty jsou no-go. Nová loď: nejdřív 2D návrh + spec ve tvaru RSI Ship
@@ -92,16 +92,16 @@ WORKFLOW 1.1 (video reference), 3.1b (Scenario MCP), 9.3 x/z/v (nástrahy AI obs
 ```
 # PowerShell: klíč jen do proměnné prostředí, ze souboru mimo repo
 $env:MESHY_API_KEY = (Get-Content C:\gamespace\secrets\meshy.key -Raw).Trim()
-python Tools/Assets/meshy_generate.py --dry-run          # jen vypíše prompty, nic nevolá
-python Tools/Assets/meshy_generate.py SwitchPanel        # jeden díl (výchozí spec Vanguardu)
+python Tools/Assets/meshy_generate.py --spec <parts.json> --out <složka> --dry-run   # jen vypíše prompty, nic nevolá
+python Tools/Assets/meshy_generate.py --spec <parts.json> --out <složka> <Díl>       # jeden díl ze spec
 python Tools/Assets/meshy_generate.py --spec ArtSource/Ships/Steadfast/Kitbash/meshy_parts.json --out ArtSource/Ships/Steadfast/Kitbash/Meshy --refine
 ```
 
 - Skript čte **jen `MESHY_API_KEY`**; soubor `meshy.key` sám neotevře.
 - Spec JSON: `style` (přidá se ke každému promptu) + `parts[]` s `name`, `prompt`, `size_cm`,
-  volitelně `target_polycount`. Výchozí spec `Tools/Assets/kitbash_parts.json` → výstup
-  `ArtSource/Ships/Vanguard/Kitbash/Meshy/`. Steadfast: `ArtSource/Ships/Steadfast/Kitbash/meshy_parts.json`.
-  Výstup GLB + `meshy_report.json`. Cesty `--spec/--out` jsou relativně ke kořeni repa.
+  volitelně `target_polycount`. `--spec` a `--out` jsou povinné (výchozí spec není), cesty jsou
+  relativně ke kořeni repa. Vzor: `ArtSource/Ships/Steadfast/Kitbash/meshy_parts.json` → výstup
+  `ArtSource/Ships/Steadfast/Kitbash/Meshy/`. Výstup GLB + `meshy_report.json`.
 - Přepínače: `--refine` (PBR textury 2K, druhý běh), `--hi` (`geometry_resolution` 4k,
   30 000 tris – rovná deska, ostré šrouby, čitelné přepínače; 25 kreditů místo 20), `--dry-run`.
 - Ceny: preview ~20 kreditů/díl (~1 min); Steadfast díly s refine 10 kreditů/díl (HANDOFF 68).
@@ -162,8 +162,7 @@ python Tools/Assets/meshy_generate.py --spec ArtSource/Ships/Steadfast/Kitbash/m
   Z jednoho obrázku si AI záda a spodek vymyslí.
 - Multi-image to 3D: topology triangle 200–300 tis. (`HIGH_`), **PBR mapy zapnout** (jinak zapečené
   světlo), volitelně druhý běh quad ~30 tis. Rigging ne.
-- Surový GLB do `ArtSource/Ships/<Loď>/Higgsfield/` a **nikdy needitovat** (dnes je tam jen
-  `Vanguard/Higgsfield/Vanguard_preview.glb`). Koncepty + `prompt.txt` do `ArtSource/Ships/<Loď>/Concept/`
+- Surový GLB do `ArtSource/Ships/<Loď>/Higgsfield/` a **nikdy needitovat**. Koncepty + `prompt.txt` do `ArtSource/Ships/<Loď>/Concept/`
   (složka zatím neexistuje, vytvoř ji).
 - Dál `Tools/Blender/build_ai_ship.py` s receptem `<Loď>_ai_build.json` (WORKFLOW 2.1, ShipPipeline 2B).
 - Licenci výstupů Higgsfieldu pro komerční použití ověř, než loď půjde do vydané hry; zapiš do Credits.

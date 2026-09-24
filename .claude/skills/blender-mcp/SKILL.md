@@ -24,13 +24,13 @@ Autor v Blenderu neklikává – všechno jde přes `blender -b --python …` ne
 cd /c/gamespace/gamespace
 B="/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 # AI loď -> herní .blend podle receptu (--no-save jen vyzkouší)
-MSYS_NO_PATHCONV=1 "$B" -b --python Tools/Blender/build_ai_ship.py -- ArtSource/Ships/Vanguard/Vanguard_ai_build.json
+MSYS_NO_PATHCONV=1 "$B" -b --python Tools/Blender/build_ai_ship.py -- ArtSource/Ships/<Loď>/<Loď>_ai_build.json
 # export FBX + manifest (z adresáře lodi kvůli //Export)
-cd ArtSource/Ships/Vanguard
-MSYS_NO_PATHCONV=1 "$B" -b Vanguard_Meshy.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
+cd ArtSource/Ships/<Loď>
+MSYS_NO_PATHCONV=1 "$B" -b <Loď>.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
 ```
 
-Výstup exportu: `ArtSource/Ships/Vanguard/Export/Vanguard_manifest.json` + FBX na díl. Import do
+Výstup exportu: `ArtSource/Ships/<Loď>/Export/<Loď>_manifest.json` + FBX na díl. Import do
 Unrealu je `Tools/Assets/import_ship.py` (přes `Tools\run_editor_python.ps1`, nástrojem PowerShell,
 podrobně WORKFLOW 2.2) – to už není Blender.
 
@@ -42,7 +42,7 @@ podrobně WORKFLOW 2.2) – to už není Blender.
 | `gamespace_ship_export.py` | `-b Ship.blend --python … -- --out "//Export" [--validate-only] [--force]`. Bez Blenderu: `python Tools/Blender/gamespace_ship_export.py --check-manifest <manifest.json>`. Konvence `SM_Ship_<Loď>[_<Díl>][_LOD<n>]`, `UCX_<Mesh>_<NN>`, `SOCKET_<Jméno>`; zbytek (HIGH_, světla, kamery) se ignoruje. |
 | `bake_ship_ao.py` | `-b ArtSource/Ships/<Loď>/<Loď>_Meshy.blend --python … -- <Loď>` → `Textures/T_Ship_<Loď>_AO.png` (ORM okluzi nemá, R kanál = maska displejů). |
 | `fit_ship_interior.py` | `-b <Loď>_Meshy.blend --python … -- <recept>`: najde měřítko/polohu AI kokpitu v kabině a oko. Výsledek ručně do receptu (`interior.placement`, `sockets.Cockpit`) a `<Loď>_setup.json`. |
-| `cockpit_view_survey.py` | `-b Vanguard.blend --python … -- 520 0 110 88` (oko X Y Z v UE cm, FOV). Paprsky: % volného výhledu. Blender m = UE cm / 100, Y zrcadlené. |
+| `cockpit_view_survey.py` | `-b <Loď>.blend --python … -- <X> <Y> <Z> <FOV>` (oko X Y Z v UE cm, FOV). Paprsky: % volného výhledu. Blender m = UE cm / 100, Y zrcadlené. |
 | `split_ship_gear.py` | Jednorázově oddělí podvozek do `SM_Ship_<Loď>_Gear` a uloží .blend (`--dry-run`). |
 | `build_steadfast_interior.py` | `-b --python …`: interiér Steadfastu z `CargoBay_Shell.glb` + Quaternius kitu (`ArtSource/ThirdParty/Quaternius/ModularSciFiMegaKit.zip`, mimo git) → GLB místností + `Interior_layout.json` v `ArtSource/Ships/Steadfast/Interior/`. |
 | `find_interior_holes.py` | `-b --python …`: díry v interiéru paprsky, na konci `HOLES <n>` (0 = zavřeno). |
@@ -79,7 +79,7 @@ headless renderů. Server na `localhost:9876` spouští libovolný Python ve sc�
 
 1. Blender **s GUI** na pozadí (socket běží jen s GUI; v `-b` se addon jen zaregistruje):
    ```bash
-   cd /c/gamespace/gamespace && MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" ArtSource/Ships/Vanguard/Vanguard_Meshy.blend
+   cd /c/gamespace/gamespace && MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" ArtSource/Ships/<Loď>/<Loď>.blend
    ```
    (spusť na pozadí, `run_in_background`).
 2. Na začátku `get_addon_status()` (verze Blenderu) a `get_scene_info()`.
@@ -91,12 +91,13 @@ headless renderů. Server na `localhost:9876` spouští libovolný Python ve sc�
 | Skript | Co dělá |
 | --- | --- |
 | `mcp_socket.py` | `send(type, params)`; CLI `python mcp_socket.py execute_code '{"code": "..."}'` |
-| `mcp_eye_view.py out.png` | kamera `EyeCam` v oku Vanguardu (1,74 / 0 / 1,89 m, FOV 88°), backface culling jako v UE, screenshot |
-| `mcp_grid.py out.png` | měřicí mřížka na rovině displeje (1 cm žlutá, 5 cm červená, osy zelené) |
-| `mcp_measure_openings.py` | paprsky z oka: najde otvor v rámečku a vypíše rohy (u, v) |
-| `mcp_corners.py '<json>' out.png` | posune plochy displejů na zadané rohy a vyfotí pohled z oka |
+| `mcp_eye_view.py out.png` | kamera `EyeCam` v oku (poloha je ve skriptu, uprav pro danou loď; FOV 88°), backface culling jako v UE, screenshot |
+| `mcp_grid.py <Loď> out.png` | měřicí mřížka na rovině displeje (1 cm žlutá, 5 cm červená, osy zelené) |
+| `mcp_measure_openings.py <Loď>` | paprsky z oka: najde otvor v rámečku a vypíše rohy (u, v) |
+| `mcp_corners.py <Loď> '<json>' out.png` | posune plochy displejů na zadané rohy a vyfotí pohled z oka |
 
-Pozn.: `mcp_*` skripty mají natvrdo Vanguard (`Vanguard_ai_build.json`, `SM_Ship_Vanguard_Interior`).
+Pozn.: `mcp_grid`, `mcp_measure_openings` a `mcp_corners` berou jméno lodi jako první argument
+(čtou `ArtSource/Ships/<Loď>/<Loď>_ai_build.json` a objekt `SM_Ship_<Loď>_Interior`).
 
 5. Po skončení Blender **zavři** (drží .blend, build receptu pak selže na zápisu).
 
@@ -246,7 +247,6 @@ Test: `Tools/Blender/mcp/test_ops_context.py`. Headless se spouští
 - Trup zevnitř průhledný (jednostranný) → krok `lining`; u oka blízko křídla je vidět hrubá geometrie.
 - Světlý proužek AI skla v rozích displeje → `grow_m` 0,0045 (displej o ~5 mm pod hranu rámečku);
   malé displeje ve sloupku `cut_depth_m` 6 mm, jinak řez utrhne knoflíky.
-- Známá neopravená vada: pravý displej Vanguardu má vlevo dole zubatou hranu z AI textury.
 - Po odebrání hodnoty ze `<Loď>_setup.json` zůstane v Blueprintu stará (9.3 c) – to je strana Unrealu.
 - Interiér nesmí mít Nanite (`no_nanite_parts: ["Interior"]`), sklo/hologramy jako vlastní mesh
   bez Nanite (9.2 a, 9.3 u).

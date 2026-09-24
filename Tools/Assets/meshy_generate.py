@@ -1,16 +1,17 @@
 """Generate the kitbash detail parts with Meshy's text-to-3D API and download them.
 
     set MESHY_API_KEY=...            (never put the key in the repo)
-    python Tools/Assets/meshy_generate.py              # every part in Tools/Assets/kitbash_parts.json
-    python Tools/Assets/meshy_generate.py SwitchPanel  # one part
-    python Tools/Assets/meshy_generate.py --refine     # also run the texture pass
-    python Tools/Assets/meshy_generate.py --dry-run    # print the prompts, call nothing
-    python Tools/Assets/meshy_generate.py --spec ArtSource/Ships/Steadfast/Kitbash/meshy_parts.json         --out ArtSource/Ships/Steadfast/Kitbash/Meshy --refine      # another ship's list
+    --spec <json> and --out <folder> are required (paths relative to the repo root):
+    python Tools/Assets/meshy_generate.py --spec ArtSource/Ships/<Ship>/Kitbash/meshy_parts.json
+        --out ArtSource/Ships/<Ship>/Kitbash/Meshy      # every part in the spec
+    ... SwitchPanel     # one part
+    ... --refine        # also run the texture pass
+    ... --dry-run       # print the prompts, call nothing
 
-Why a script and not clicking the site: the four parts have to be regenerable with the same
+Why a script and not clicking the site: the parts have to be regenerable with the same
 prompts and the same sizes, and the recipe belongs next to the rest of the pipeline
-(Docs/AssetPipeline_Modular.md). The models land in ArtSource/Ships/Vanguard/Kitbash/Meshy/ as
-GLB, which is what Tools/Blender/build_ai_ship.py already reads.
+(Docs/AssetPipeline_Modular.md). The models land in the --out folder (e.g.
+ArtSource/Ships/<Ship>/Kitbash/Meshy/) as GLB, which is what Tools/Blender/build_ai_ship.py reads.
 
 API (docs.meshy.ai, checked 23. 9. 2026): POST https://api.meshy.ai/openapi/v2/text-to-3d with
 mode "preview" returns {"result": "<task id>"}; GET .../text-to-3d/<id> returns status
@@ -27,8 +28,6 @@ import urllib.request
 
 BASE = "https://api.meshy.ai/openapi/v2/text-to-3d"
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SPEC = os.path.join(ROOT, "Tools", "Assets", "kitbash_parts.json")
-OUT = os.path.join(ROOT, "ArtSource", "Ships", "Vanguard", "Kitbash", "Meshy")
 POLL_SECONDS = 10
 GIVE_UP_AFTER = 20 * 60
 
@@ -86,16 +85,23 @@ def main(argv):
     # --hi asks for geometry, not just a silhouette: the finest voxel grid Meshy offers and a much
     # higher triangle budget. Used to see how far the cheap route gets before paying for UltraShape.
     hi = "--hi" in argv
-    # --spec <json> --out <folder>: another ship's part list (default: the Vanguard's kitbash parts).
-    spec_path, out_dir = SPEC, OUT
+    # --spec <json> --out <folder>: the ship's part list and where its models go. Both required.
+    spec_path, out_dir = None, None
     for flag in ("--spec", "--out"):
         if flag in argv:
-            value = argv[argv.index(flag) + 1]
+            i = argv.index(flag)
+            if i + 1 >= len(argv) or argv[i + 1].startswith("-"):
+                raise SystemExit("meshy: %s needs a value" % flag)
+            value = argv[i + 1]
             argv = [a for i, a in enumerate(argv) if a != flag and (i == 0 or argv[i - 1] != flag)]
             if flag == "--spec":
                 spec_path = os.path.join(ROOT, value)
             else:
                 out_dir = os.path.join(ROOT, value)
+    if not spec_path or not out_dir:
+        raise SystemExit("meshy: --spec <parts json> and --out <folder> are required, e.g.\n"
+                         "  python Tools/Assets/meshy_generate.py --spec ArtSource/Ships/<Ship>/Kitbash/meshy_parts.json"
+                         " --out ArtSource/Ships/<Ship>/Kitbash/Meshy [--dry-run]")
     wanted = [a for a in argv if not a.startswith("-")]
 
     spec = json.load(open(spec_path, encoding="utf-8"))

@@ -9,7 +9,7 @@ hard-surface geometry:
   - greebles and bolts from a reusable kit (collection HS_Kit) instanced by the geometry-nodes group
     HS_KitInstancer on a point cloud whose attributes (kit_index, rot) say what goes where.
 
-    MSYS_NO_PATHCONV=1 blender -b --factory-startup --python Tools/Blender/hs_build_part.py -- ArtSource/Ships/Vanguard/HardSurface/nacelle.json
+    MSYS_NO_PATHCONV=1 blender -b --factory-startup --python Tools/Blender/hs_build_part.py -- ArtSource/Ships/<Ship>/HardSurface/nacelle.json
 
 Writes recipe["out_blend"]; everything lives in the collection HS_<name>. Blender coordinates, metres.
 """

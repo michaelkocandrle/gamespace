@@ -2,8 +2,7 @@
 
 Standardizovaná struktura pro definici parametrů každé lodi v gamespace,
 podle kategorií používaných oficiální Star Citizen Ship Matrix
-(robertsspaceindustries.com/en/ship-matrix). Cíl: každá nová loď (a
-existující Vanguard) se definuje stejnou sadou kategorií, ať máme
+(robertsspaceindustries.com/en/ship-matrix). Cíl: každá loď se definuje stejnou sadou kategorií, ať máme
 konzistentní, srovnatelný a rozšiřitelný systém napříč celou flotilou.
 
 Poznámka k IP: přebíráme obecnou STRUKTURU/KATEGORIE specifikace, ne
@@ -15,7 +14,7 @@ konkrétní jména lodí, přesné statistiky nebo popisy výrobců z RSI webu.
 
 | Pole | Popis | Stav u nás |
 |---|---|---|
-| **Model** | Jméno lodi (např. "Vanguard") | ✅ máme |
+| **Model** | Jméno lodi (např. "Steadfast") | ✅ máme |
 | **Manufacturer** | Výrobce/frakce v našem univerzu — zatím nemáme vlastní frakce definované, do budoucna | ⏳ budoucí |
 | **Focus** | Role lodi (Interceptor, Freight, Exploration, Multi-role, atd.) | ⏳ zavést teď jako pole |
 | **Description** | Krátký lore popis | ⏳ budoucí, kosmetické |
@@ -25,7 +24,7 @@ konkrétní jména lodí, přesné statistiky nebo popisy výrobců z RSI webu.
 
 | Pole | Popis | Stav u nás |
 |---|---|---|
-| **Length / Beam / Height** | Rozměry v metrech | ✅ máme (Ironclad 14m délka) |
+| **Length / Beam / Height** | Rozměry v metrech | ✅ máme (manifest z exportu) |
 | **Size** | Velikostní třída (Snub/Small/Medium/Large...) | ⏳ zavést jako kategorie, hlavně pro budoucí docking/hangár mechaniky |
 | **Mass** | Hmotnost — ovlivňuje setrvačnost/manévrovatelnost | ⏳ zatím parametry letu (ThrustAcceleration atd.) řeší efekt hmotnosti nepřímo, formální pole zatím nemáme |
 | **Cargo Capacity** | Nákladní prostor (SCU nebo vlastní jednotka) | ⏳ budoucí, až bude ekonomika/těžba |
@@ -34,12 +33,12 @@ konkrétní jména lodí, přesné statistiky nebo popisy výrobců z RSI webu.
 
 | Pole | Popis | Stav u nás |
 |---|---|---|
-| **SCM Speed** | Standardní bojová rychlost | ✅ máme (`Vanguard_setup.json`, SC-1a) |
+| **SCM Speed** | Standardní bojová rychlost | ✅ máme (`<Loď>_setup.json`, SC-1a) |
 | **Afterburner Speed** | Max. rychlost s afterburnerem | ✅ máme (SC-1b) |
 | **Pitch/Yaw/Roll Max** | Max. úhlové rychlosti otáčení | ✅ máme (SC-1a rotace se setrvačností) |
 | **X/Y/Z-Axis Acceleration** | Zrychlení v jednotlivých osách (hlavní tah, strafe, vertikální) | ✅ máme (samostatné zrychlení pro každý směr, SC-1a) |
 
-**Poznámka:** naše `Vanguard_setup.json` už fakticky pokrývá celou tuhle
+**Poznámka:** náš `<Loď>_setup.json` už fakticky pokrývá celou tuhle
 sekci. Pro novou loď stačí stejný soubor s jinými hodnotami.
 
 ## 4. Posádka
@@ -94,13 +93,13 @@ sekci. Pro novou loď stačí stejný soubor s jinými hodnotami.
 ## Navrhovaná JSON struktura pro budoucí lodě
 
 Na základě týhle šablony navrhuji rozšířit formát `*_setup.json` (co už
-používáme pro Vanguard) o identity/rozměrové pole, zatímco letová
+používáme pro lodě) o identity/rozměrové pole, zatímco letová
 sekce zůstává v podstatě stejná jako teď:
 
 ```json
 {
   "identity": {
-    "model": "Vanguard",
+    "model": "Example",
     "manufacturer": "",
     "focus": "Interceptor",
     "size_class": "Snub",
@@ -155,7 +154,7 @@ quantum travel, atd.).
 
 ## Doporučení pro Claude Code prompty
 
-Až budeme zadávat novou loď (nebo rozšiřovat Vanguard), odkazovat na
+Až budeme zadávat novou loď (nebo rozšiřovat existující), odkazovat na
 tenhle dokument a žádat, aby nové `*_setup.json` soubory následovaly
 tuhle strukturu — i pro pole, která zatím nejsou funkční (necháme je
 jako `null`/prázdná pro budoucí rozšíření, ne úplně vynechaná).

@@ -19,7 +19,7 @@ Materiál se označí `recoloured`, takže druhé spuštění ho nechá být.
 import os
 import bpy
 
-# Paleta gamespace, lineární RGB. Gunmetal odpovídá trupu Vanguardu (ošoupaná šedomodrá ocel),
+# Paleta gamespace, lineární RGB. Gunmetal je ošoupaná šedomodrá ocel trupu,
 # oranžová je akcent Halcyon Freightworks.
 GUNMETAL = (0.62, 0.65, 0.70)
 ORANGE = (0.85, 0.34, 0.06)

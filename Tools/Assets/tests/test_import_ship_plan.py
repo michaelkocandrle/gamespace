@@ -20,18 +20,18 @@ import test_ship_export_core as blender_tests  # noqa: E402
 class ImportPlanTest(unittest.TestCase):
     def setUp(self):
         self.manifest = json.loads(json.dumps(blender_tests.good_manifest()))
-        self.plan = import_ship.build_plan(self.manifest, "C:/art/Vanguard/Export")
+        self.plan = import_ship.build_plan(self.manifest, "C:/art/Testship/Export")
 
     def test_meshes_main_first_lods_skipped(self):
         names = [m["name"] for m in self.plan["meshes"]]
-        self.assertEqual(names, ["SM_Ship_Vanguard", "SM_Ship_Vanguard_Canopy"])
-        self.assertEqual(sorted(self.plan["skipped_lods"]), ["SM_Ship_Vanguard_LOD1.fbx", "SM_Ship_Vanguard_LOD2.fbx"])
+        self.assertEqual(names, ["SM_Ship_Testship", "SM_Ship_Testship_Canopy"])
+        self.assertEqual(sorted(self.plan["skipped_lods"]), ["SM_Ship_Testship_LOD1.fbx", "SM_Ship_Testship_LOD2.fbx"])
         main = self.plan["meshes"][0]
-        self.assertEqual(main["asset_path"], "/Game/Ships/Vanguard/Meshes/SM_Ship_Vanguard")
+        self.assertEqual(main["asset_path"], "/Game/Ships/Testship/Meshes/SM_Ship_Testship")
         self.assertEqual(main["collision_hulls"], 2)
         self.assertEqual(sorted(main["sockets"]), ["SOCKET_Cockpit", "SOCKET_EngineMain"])
         self.assertEqual(main["expected_size_cm"], [1400.0, 1000.0, 300.0])
-        self.assertTrue(main["fbx"].endswith("SM_Ship_Vanguard.fbx"))
+        self.assertTrue(main["fbx"].endswith("SM_Ship_Testship.fbx"))
 
     def test_glass_parts_skip_nanite_and_become_components(self):
         canopy = self.plan["meshes"][1]
@@ -45,9 +45,9 @@ class ImportPlanTest(unittest.TestCase):
 
     def test_setup_can_turn_nanite_off_for_a_part(self):
         manifest = json.loads(json.dumps(self.manifest))
-        manifest["meshes"]["SM_Ship_Vanguard"]["part"] = "Interior"
-        without = import_ship.build_plan(manifest, "C:/art/Vanguard/Export")
-        with_setup = import_ship.build_plan(manifest, "C:/art/Vanguard/Export", {"no_nanite_parts": ["Interior"]})
+        manifest["meshes"]["SM_Ship_Testship"]["part"] = "Interior"
+        without = import_ship.build_plan(manifest, "C:/art/Testship/Export")
+        with_setup = import_ship.build_plan(manifest, "C:/art/Testship/Export", {"no_nanite_parts": ["Interior"]})
         self.assertTrue(without["meshes"][0]["nanite"])
         self.assertFalse(with_setup["meshes"][0]["nanite"])
 
@@ -91,8 +91,8 @@ class ImportPlanTest(unittest.TestCase):
         setup = {"pawn": {"_comment": "x", "pitch_rate": 70.0, "hide_hull_in_cockpit": False},
                  "components": {"camera_boom": {"target_arm_length": 1450.0},
                                 "cockpit_camera": {"relative_location": [300.0, 0.0, 78.0]}},
-                 "materials": {"MI_A": {"master": "hull", "slots": ["M_Ship_Vanguard_Hull"]}}}
-        plan = import_ship.build_plan(self.manifest, "C:/art/Vanguard/Export", setup)
+                 "materials": {"MI_A": {"master": "hull", "slots": ["M_Ship_Testship_Hull"]}}}
+        plan = import_ship.build_plan(self.manifest, "C:/art/Testship/Export", setup)
         settings = {}
         for c, p, v in plan["pawn_settings"]:
             settings[(c, p)] = v  # later entries win, as in apply_pawn_settings
@@ -102,40 +102,67 @@ class ImportPlanTest(unittest.TestCase):
         self.assertNotIn((None, "_comment"), settings)
         self.assertIn("MI_A", plan["materials"])
         self.assertIn("material MI_A (hull)", import_ship.format_plan(plan))
-        self.assertEqual(import_ship.setup_path("C:/art/Vanguard/Export", "Vanguard").replace("\\", "/"),
-                         "C:/art/Vanguard/Vanguard_setup.json")
+        self.assertEqual(import_ship.setup_path("C:/art/Testship/Export", "Testship").replace("\\", "/"),
+                         "C:/art/Testship/Testship_setup.json")
 
-    def test_vanguard_setup_covers_every_material_slot(self):
-        ship_dir = os.path.join(import_ship.REPO, "ArtSource", "Ships", "Vanguard")
-        with open(os.path.join(ship_dir, "Export", "Vanguard_manifest.json"), encoding="utf-8") as f:
-            manifest = json.load(f)
-        setup = import_ship.load_setup(os.path.join(ship_dir, "Vanguard_setup.json"))
-        self.assertTrue(setup)
-        # Keys starting with _ are notes, as everywhere in the setup file.
-        materials = {n: spec for n, spec in setup["materials"].items() if not n.startswith("_")}
-        for mesh_name, info in manifest["meshes"].items():
-            if info["lod"] != 0:
-                continue
-            for slot in info["materials"]:
-                matches = [n for n, spec in materials.items()
-                           if slot in spec["slots"] and (not spec.get("meshes") or mesh_name in spec["meshes"])]
-                self.assertTrue(matches, "%s slot %s has no material" % (mesh_name, slot))
-                self.assertIn(materials[matches[0]]["master"], ("hull", "pbr", "glass", "screen"))
-        # A see-through canopy part, when the model has one, gets the glass master.
-        canopy = [n for n, spec in materials.items() if "SM_Ship_Vanguard_Canopy" in spec.get("meshes", [])]
-        self.assertTrue(all(materials[n]["master"] == "glass" for n in canopy))
-        # PBR entries name textures that exist.
-        for name, spec in materials.items():
-            for key, source in (spec.get("textures") or {}).items():
-                self.assertTrue(os.path.isfile(os.path.join(import_ship.REPO, source)), "%s %s: %s" % (name, key, source))
-        # The plan drops the notes too.
-        plan = import_ship.build_plan(manifest, os.path.join(ship_dir, "Export"), setup)
-        self.assertFalse([n for n in plan["materials"] if n.startswith("_")])
+    def test_setup_covers_every_material_slot(self):
+        # A synthetic ship folder laid out like ArtSource/Ships/<Ship>/: <Ship>_setup.json next to Export/.
+        with tempfile.TemporaryDirectory() as root:
+            ship_dir = os.path.join(root, "Testship")
+            export_dir = os.path.join(ship_dir, "Export")
+            os.makedirs(os.path.join(ship_dir, "Textures"))
+            os.makedirs(export_dir)
+            with open(os.path.join(export_dir, "Testship_manifest.json"), "w", encoding="utf-8") as f:
+                json.dump(self.manifest, f)
+            texture = os.path.join(ship_dir, "Textures", "T_Ship_Testship_BC.png")
+            open(texture, "wb").close()
+            setup_file = import_ship.setup_path(export_dir, "Testship")
+            self.assertEqual(os.path.normcase(setup_file), os.path.normcase(os.path.join(ship_dir, "Testship_setup.json")))
+            self.assertEqual(import_ship.load_setup(setup_file), {})  # no setup file yet: no hand tuning
+            with open(setup_file, "w", encoding="utf-8") as f:
+                json.dump({
+                    "_comment": "Synthetic setup for the tests.",
+                    "no_nanite_parts": ["Interior"],
+                    "materials": {
+                        "_comment": "A note, dropped by the plan.",
+                        "MI_Ship_Testship_Hull": {"master": "pbr", "slots": ["M_Ship_Testship_Hull"],
+                                                  "textures": {"base_color": texture}},
+                        "MI_Ship_Testship_Glass": {"master": "glass", "slots": ["M_Ship_Testship_Glass"],
+                                                   "meshes": ["SM_Ship_Testship_Canopy"]},
+                    },
+                }, f)
+
+            with open(os.path.join(export_dir, "Testship_manifest.json"), encoding="utf-8") as f:
+                manifest = json.load(f)
+            setup = import_ship.load_setup(setup_file)
+            self.assertTrue(setup)
+            # Keys starting with _ are notes, as everywhere in the setup file.
+            materials = {n: spec for n, spec in setup["materials"].items() if not n.startswith("_")}
+            for mesh_name, info in manifest["meshes"].items():
+                if info["lod"] != 0:
+                    continue
+                for slot in info["materials"]:
+                    matches = [n for n, spec in materials.items()
+                               if slot in spec["slots"] and (not spec.get("meshes") or mesh_name in spec["meshes"])]
+                    self.assertTrue(matches, "%s slot %s has no material" % (mesh_name, slot))
+                    self.assertIn(materials[matches[0]]["master"], ("hull", "pbr", "glass", "screen"))
+            # A see-through canopy part gets the glass master.
+            canopy = [n for n, spec in materials.items() if "SM_Ship_Testship_Canopy" in spec.get("meshes", [])]
+            self.assertEqual(canopy, ["MI_Ship_Testship_Glass"])
+            self.assertTrue(all(materials[n]["master"] == "glass" for n in canopy))
+            # PBR entries name textures that exist.
+            for name, spec in materials.items():
+                for key, source in (spec.get("textures") or {}).items():
+                    self.assertTrue(os.path.isfile(os.path.join(import_ship.REPO, source)), "%s %s: %s" % (name, key, source))
+            # The plan drops the notes too and keeps the real entries.
+            plan = import_ship.build_plan(manifest, export_dir, setup)
+            self.assertFalse([n for n in plan["materials"] if n.startswith("_")])
+            self.assertEqual(sorted(plan["materials"]), ["MI_Ship_Testship_Glass", "MI_Ship_Testship_Hull"])
 
     def test_dry_run_from_the_command_line(self):
         script = os.path.join(HERE, "..", "import_ship.py")
         with tempfile.TemporaryDirectory() as folder:
-            path = os.path.join(folder, "Vanguard_manifest.json")
+            path = os.path.join(folder, "Testship_manifest.json")
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(self.manifest, f)
             missing = subprocess.run([sys.executable, script, path], capture_output=True, text=True)
@@ -146,7 +173,7 @@ class ImportPlanTest(unittest.TestCase):
             ok = subprocess.run([sys.executable, script, path], capture_output=True, text=True)
             self.assertEqual(ok.returncode, 0, ok.stdout + ok.stderr)
             self.assertIn("dry run", ok.stdout)
-            self.assertIn("BP_Ship_Vanguard", ok.stdout)
+            self.assertIn("BP_Ship_Testship", ok.stdout)
 
 
 if __name__ == "__main__":

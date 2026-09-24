@@ -41,9 +41,9 @@ git lfs install
 | ------------- | --------------------------------------------------------------- |
 | `HullCollision` | Root. Box (200 x 100 x 35 cm on the placeholder, sized to the mesh by the ship import), `Pawn` profile: what the ship's own movement sweeps. **Ignores pawns**: it encloses the whole ship including the air under the wings, and a pilot getting out inside it got stuck or pushed through the ground. Unscaled, so the cameras do not inherit the hull's scale |
 | `Hull`        | The ship mesh (placeholder: `/Engine/BasicShapes/Cube` stretched to 2.0 x 1.0 x 0.35). Query-only collision from its simple collision (the UCX hulls from Blender) blocking pawns, cameras and visibility: characters walk around the real shape. The ship's own movement never sees it |
-| `CameraBoom`  | 900 cm spring arm (Vanguard: 14.5 m), mild lag, collision test on: pulls the camera in rather than letting it sink into an asteroid. The mouse wheel scales it 0.45x-3x |
+| `CameraBoom`  | 900 cm spring arm (each ship sets its own in `<Ship>_setup.json`), mild lag, collision test on: pulls the camera in rather than letting it sink into an asteroid. The mouse wheel scales it 0.45x-3x |
 | `ChaseCamera` | Third-person camera                                              |
-| `CockpitCamera` | Pilot's eye (Vanguard: 520, 0, 110 - at the windscreen, see below), FOV 90, inactive until toggled; `Alt` + wheel zooms it to `CockpitZoomFov` 40. `bHideHullInCockpit` hides the hull from the pilot, only for the placeholder cube |
+| `CockpitCamera` | Pilot's eye (per ship in `<Ship>_setup.json`, measured against the model - see below), FOV 90, inactive until toggled; `Alt` + wheel zooms it to `CockpitZoomFov` 40. `bHideHullInCockpit` hides the hull from the pilot, only for the placeholder cube |
 | `EngineAudio` | Thruster loop, not spatialised. Hum, boost and cruise layers are created at runtime next to it |
 | `SpaceDust`   | `USpaceDustComponent`: 400 specks in a 70 m box around the camera that stretch into streaks with speed |
 
@@ -114,7 +114,7 @@ Modelled on Star Citizen's Intelligent Flight Control System (`starcitizenrefere
   `Alt` + wheel is the camera zoom (both actions are on the wheel; the ship checks Alt).
 - **Master modes** (`B`, `IA_MasterMode`): switching takes `MasterModeSwitchSeconds` (2 s, the HUD
   shows the progress; `B` again cancels).
-  - **SCM**: `ScmMaxSpeed` (Vanguard 210 m/s), full manoeuvrability. Cruise refused (`NeedsNav`).
+  - **SCM**: `ScmMaxSpeed` (200 m/s by default; each ship sets its own), full manoeuvrability. Cruise refused (`NeedsNav`).
   - **NAV**: `NavMaxSpeed` (1 km/s), turn rates x `NavTurnScale` (0.5), strafe / up / down thrust x
     `NavManeuverScale` (0.5), cruise drive available. Back to SCM drops out of cruise and bleeds the
     speed down.
@@ -130,7 +130,7 @@ Modelled on Star Citizen's Intelligent Flight Control System (`starcitizenrefere
 - **Entry heat** is measured against `HeatReferenceSpeed` 200 m/s (the SCM top speed): SCM flight
   stays cool, boost and NAV speeds in thick air heat up.
 - **Boost** (hold `Shift`, SC-1b, `Tools/Tests/test_boost_afterburner_sc1b.py`): the manoeuvring
-  thrusters - retro, strafe, up, down - x `BoostManeuverMultiplier` (Vanguard 1.6), turn rates and
+  thrusters - retro, strafe, up, down - x `BoostManeuverMultiplier` (1.6), turn rates and
   rotational accelerations x `BoostRotationMultiplier` (1.4). Main thrust and the speed limit stay.
   **G-Safe is suspended while boost burns**, whatever `K` says (HUD `g-safe (boost)`): no G cap, no
   turn limit at speed. Burns energy whenever Shift is held (no W needed): `BoostDurationSeconds`
@@ -138,7 +138,7 @@ Modelled on Star Citizen's Intelligent Flight Control System (`starcitizenrefere
   dry, it stays off until `BoostUnlockFraction` (30 %) is back. HUD bar on the IFCS line.
 - **Afterburner** (hold `Tab` with `W`, `IA_Afterburner`, **SCM only**): main thrust x
   `AfterburnerThrustMultiplier` (2.1); the speed limit becomes SCM top speed x
-  `AfterburnerSpeedMultiplier` (2.5: 525 m/s on the Vanguard) **x the speed limiter** - at a 50 %
+  `AfterburnerSpeedMultiplier` (2.5: 500 m/s at the default SCM speed) **x the speed limiter** - at a 50 %
   limiter the afterburner tops out at 50 % of that. Own fuel: `AfterburnerDurationSeconds` (8 s) of
   burn, refills slowly in `AfterburnerRefillSeconds` (40 s) after `AfterburnerRefillDelaySeconds`
   (2 s); empty, it switches itself off and waits for `AfterburnerUnlockFraction` (15 %). The raised
@@ -189,12 +189,11 @@ exit candidates and collision setup, character recovery, scene extras).
 
 ### Cockpit view
 
-**Meshy Vanguard (18. 9. 2026):** the eye is at (410, 0, 145), 14 cm above the front edge of the cabin
-roof. The model has no interior, and seen from inside every face is a back face that Unreal culls, so
-from the seat the pilot would see nothing of the ship; the nose falls away at 29 degrees, more than the
-25 degrees the view shows below the horizon, so straight ahead shows no ship either - free look does.
-The survey now ignores faces seen from behind (add `twosided` for the old behaviour) and takes a sweep
-range (`sweep:X0:X1:Z0:Z1`, cm). The text below is about the procedural Vanguard before it.
+**Lesson from the first fighter** (a Meshy model, removed 24. 9. 2026): an AI model has no interior, and
+seen from inside every face is a back face that Unreal culls, so from the seat the pilot sees nothing of the
+ship until the cockpit is modelled; a nose that falls away more steeply than the 25 degrees the view shows
+below the horizon leaves straight ahead empty too - only free look shows the ship. The survey ignores faces
+seen from behind (add `twosided` for the old behaviour) and takes a sweep range (`sweep:X0:X1:Z0:Z1`, cm).
 
 **Hull detail** (20. 9. 2026): an AI model's paint is one 4K texture over a 14 m hull (~3 mm a pixel), so it
 goes soft as soon as the camera comes close (it is not texture streaming: a shot with
@@ -206,18 +205,17 @@ does not swim as the ship moves. `Tools/Assets/generate_detail_textures.py` gene
 `detail_normal_strength` - 0 turns it off -, `detail_grunge_tile_cm`, `detail_rough_variation`). Wear only
 raises the roughness; lowering it too gave the hull bright specular patches. The space conversions are done
 in HLSL inside a Custom node (`GetPrimitiveData(Parameters).WorldToLocal`, `Parameters.TangentToWorld`):
-with Transform expressions the normal came out wrong and the ship rendered black. The Vanguard's hull also
-keeps **1 million triangles** instead of 200 thousand (`decimate.hull_target_tris`; the Meshy original has
-3.36 million) - Nanite draws only what the screen needs, and the shots measured 92 FPS against 94 without
-either change.
+with Transform expressions the normal came out wrong and the ship rendered black. A hull can also keep
+**1 million triangles** instead of 200 thousand (`decimate.hull_target_tris`) - Nanite draws only what the
+screen needs; on the first fighter the shots measured 92 FPS against 94 without either change.
 
-**Cockpit interior** (18. 9. 2026): the Vanguard has a Meshy cockpit tub (dashboard with screens, consoles,
-side-sticks, pedals) as the part `SM_Ship_Vanguard_Interior` - the `interior` section of
-`Vanguard_ai_build.json`, placed by `Tools/Blender/fit_ship_interior.py` (inside the hull everywhere, rim
-at the canopy rail, eye with a clear view ahead). Since 18. 9. 2026 it is Meshy's dark variant, and the pilot
-sits well back from it as in the Star Citizen reference (`Docs/UI/Screenshot 2026-09-17 201854.png`):
-**eye (174, 0, 189)**, the dashboard top 8 degrees and the displays 14-25 degrees below the eye.
-**Displays:** the two big screens are flat quads (slot `M_Ship_Vanguard_Screens`, recipe `interior.displays`)
+**Cockpit interior** (18. 9. 2026, built on the first fighter, removed 24. 9. 2026): a ship can have a cockpit
+tub (dashboard with screens, consoles, side-sticks, pedals) as the part `SM_Ship_<Ship>_Interior` - the
+`interior` section of `<Ship>_ai_build.json`, placed by `Tools/Blender/fit_ship_interior.py` (inside the hull
+everywhere, rim at the canopy rail, eye with a clear view ahead). The pilot sits well back from it as in the
+Star Citizen reference (`Docs/UI/Screenshot 2026-09-17 201854.png`): the dashboard top ~8 degrees and the
+displays 14-25 degrees below the eye.
+**Displays:** the two big screens are flat quads (slot `M_Ship_<Ship>_Screens`, recipe `interior.displays`)
 that show the flight instruments live: `UCockpitDisplayComponent` draws `USpaceCockpitDisplays` (the
 flight HUD's widgets, driven by the same `ApplyState`) into a render target (both displays side by side) 60 times a second,
 through one kept `SVirtualWindow` (a new window per draw made Slate rebuild its vertex arrays every time),
@@ -260,14 +258,14 @@ figures come from `ASpaceshipPawn::GetThrusterAcceleration` / `GetThrusterCapaci
 the pages carry less and larger type (speed 96, G 56, nothing under 26; tested). Holding `Z` or the middle
 mouse button leans in to the dashboard as the reference does (`SetDashboardFocus`: the head moves 15 cm
 towards the `Display_*` sockets, turns to them and the view narrows until they fill it; the flight HUD
-steps aside). The Vanguard's eye moved 20 cm nearer the dashboard with a 3 degree tilt down
-(`cockpit_view_pitch_deg`) so the displays are larger at rest.
+steps aside). A slight tilt down (`cockpit_view_pitch_deg`, 3 degrees on the first fighter, with the eye
+20 cm nearer the dashboard) makes the displays larger at rest.
 The screen HUD stays,
 compacted so it sits above the dashboard. The cockpit is dark like the reference: the displays light it
 (a rect light at each `Display_*` socket), a faint key and fill light keep the dashboard's shape, and the inside
-of the canopy frame has its own dark slot (`M_Ship_Vanguard_CanopyFrame`).
+of the canopy frame has its own dark slot (`M_Ship_<Ship>_CanopyFrame`).
 Three things make it work in the game, all in the recipe or the setup file:
-- `SM_Ship_Vanguard_Lining`: the hull around the cockpit copied with inward normals (`lining`). The hull is
+- `SM_Ship_<Ship>_Lining`: the hull around the cockpit copied with inward normals (`lining`). The hull is
   one-sided; without it the pilot saw the ground through the floor and the sides. The canopy glass is left out.
 - `canopy_clear`: hull faces inside the canopy that face the cabin (frame undersides behind the opaque
   panes) are deleted; from the seat they crossed the HUD.
@@ -276,8 +274,8 @@ Three things make it work in the game, all in the recipe or the setup file:
   between the eye and the dashboard and above the head; the hull shadows the cabin, which was otherwise
   almost black. Keep them under the canopy roof, or they light the canopy from outside.
 
-**Placeholder cockpit** (`bPlaceholderCockpit`, `placeholder_cockpit` in the setup file, off on the
-Vanguard since it has an interior): until a ship has a modelled interior, simple dark boxes around the pilot's eye give the HUD a cabin to sit in - a
+**Placeholder cockpit** (`bPlaceholderCockpit`, `placeholder_cockpit` in the setup file, off on a ship
+with a modelled interior): until a ship has a modelled interior, simple dark boxes around the pilot's eye give the HUD a cabin to sit in - a
 sloped instrument panel with three screens whose far edge, with a glare-shield lip, is 16 degrees below
 the horizon (~77 % of the screen's height, just under the HUD), canopy pillars ~30 degrees left and right
 leaning outwards, and a seat behind the eye. Engine cube and `BasicShapeMaterial` (`Color`), built at
@@ -291,13 +289,13 @@ measured against the real model, not guessed: `Tools/Blender/cockpit_view_survey
 rays over the camera's field of view in Blender and prints what each one hits and how much of the view
 is open.
 
-    blender.exe -b ArtSource\Ships\Vanguard\Vanguard.blend --python Tools\Blender\cockpit_view_survey.py -- 520 0 110 88
+    blender.exe -b ArtSource\Ships\<Ship>\<Ship>.blend --python Tools\Blender\cockpit_view_survey.py -- <X> <Y> <Z> <FOV>
 
-The Vanguard has no modelled cockpit interior: the canopy is a shallow shell over a solid fuselage,
-and its frame is part of the hull mesh. From a seat position (345, 0, 103) the survey found the tinted
-glass 13 cm above the eye, filling 70 % of the view, the fuselage and frame the rest - **0 % open sky**,
-which is what a player sees as a blue tunnel with a dark mass below. At (520, 0, 110), just in front of
-the glass and 47 cm above the nose deck, **97.5 % of the view is open**, no glass is in the forward view
+Lesson from the first fighter's procedural model (no cockpit interior; the canopy a shallow shell over a
+solid fuselage, its frame part of the hull mesh): from a seat deep under the canopy the survey found the
+tinted glass 13 cm above the eye, filling 70 % of the view, the fuselage and frame the rest - **0 % open
+sky**, which is what a player sees as a blue tunnel with a dark mass below. Just in front of the glass,
+47 cm above the nose deck, **97.5 % of the view was open**, no glass in the forward view
 and only the nose tip shows at the bottom, like the Star Citizen reference in `Docs/UI/`. Free look
 still swings round to the canopy and the hull. Run the survey again after changing a ship's model, and
 put the result in its setup file; `Tools/Tests/test_flight_modes.py` then checks the eye against the
@@ -337,14 +335,13 @@ Star Citizen style: the gear has to be down to land, and lowering it puts the sh
   blocker, so from 30 m down (the probe zone) the LANDING line reads `GEAR UP - lower it (N)` and the
   HUD's GEAR lamp blinks red. With the gear up the ship can still rest on the ground and slide, but it
   never becomes Landed (no alignment, no getting out). The rest is the L5 rule, measured under the pads.
-- **The visible gear.** A mesh component whose name contains `Gear` is the ship's modelled gear: the
-  Vanguard's skids are their own part, `SM_Ship_Vanguard_Gear`, cut out of the Meshy model by
-  `Tools/Blender/build_ai_ship.py` (`parts.Gear` in `Vanguard_ai_build.json`; for the earlier procedural
-  model `Tools/Blender/split_ship_gear.py` did the same). Stow travel 115 cm: the nose skid hangs 1.1 m
-  under the belly. Stowed, the part
-  rises `GearStowTravelCm` (95 cm on the procedural Vanguard, 115 on the Meshy one) into the belly, eased, and is hidden; it has no collision. The legs
-  already reach the bottom of the collision box (the pads' soles, where `SOCKET_Gear_*` are), so
-  `GearExtensionCm` is 0 for the Vanguard and it stands exactly where it did before SC-2a.
+- **The visible gear.** A mesh component whose name contains `Gear` is the ship's modelled gear: its own
+  part, `SM_Ship_<Ship>_Gear`, cut out of an AI model by `Tools/Blender/build_ai_ship.py` (`parts.Gear` in
+  `<Ship>_ai_build.json`) or out of a procedural model by `Tools/Blender/split_ship_gear.py`. Stowed, the
+  part rises `GearStowTravelCm` (95 cm by default; set it to how far the gear hangs under the belly) into
+  the belly, eased, and is hidden; it has no collision. When the legs already reach the bottom of the
+  collision box (the pads' soles, where `SOCKET_Gear_*` are), `GearExtensionCm` is 0 and the ship stands
+  where it would without gear logic.
 - **Ships without a gear part** get placeholder legs from `/Engine/BasicShapes/Cylinder` on the
   sockets named in `GearSocketNames` (with or without the `SOCKET_` prefix the FBX import drops): a
   sleeve, a piston and a pad in the hull's own HullDark / BareMetal / Rubber materials, swinging down
@@ -352,8 +349,8 @@ Star Citizen style: the gear has to be down to land, and lowering it puts the sh
   the hull box; the landing code then keeps the ground that far from the box (`ApplyGearSupport`: the
   descent stops on the pads, and lowering the gear under a ship on its belly lifts it).
 - **Precision mode** (`P`, `IA_Precision`; on with the gear, off with it; `P` overrides either way):
-  the SCM top speed becomes `ScmMaxSpeed x PrecisionSpeedFraction` (0.15: 31.5 m/s on the Vanguard) and
-  the **speed limiter works inside it**, so one wheel notch is ~1.6 m/s instead of 10.5. Turn rates and
+  the SCM top speed becomes `ScmMaxSpeed x PrecisionSpeedFraction` (0.15: 30 m/s at the default SCM speed) and
+  the **speed limiter works inside it**, so one wheel notch is ~1.5 m/s instead of 10. Turn rates and
   rotational accelerations x `PrecisionTurnScale` (0.45). Thruster accelerations stay: stopping needs
   them. SCM only: in NAV it stays switched on but does nothing (HUD PREC amber). The afterburner is
   refused. Switched on at speed, the ship brakes down with its retro thrusters (~5 G), not with the
@@ -512,8 +509,8 @@ the ship's mouse context never swallows the character's mouse look.
   of the hull mesh bounds at 0.8, 3.8 and 8.8 m past them. Every spot is first pushed outward
   (sideways for the socket) until the pilot capsule, standing at the gear's height, is
   `ExitClearanceCm` (80 cm) clear of the hull's collision shapes (`GetHullClearance`: geometry of the
-  UCX hulls, no physics query). The Vanguard's socket is only 2 cm clear of its belly hull, so the
-  pilot now appears 1.4 m further out. Then each spot is put on the terrain and tested with a
+  UCX hulls, no physics query); a socket tucked against the belly hull thus moves the pilot out to a
+  safe distance. Then each spot is put on the terrain and tested with a
   capsule overlap against everything that blocks pawns. The ship's root box ignores cameras, or the
   character's camera, starting inside it, would be pulled in to the head. F within `BoardingRangeCm` (4 m from the hull box) of a landed ship
   possesses the ship again and removes the character (0.75 s cooldown after getting out).
@@ -545,19 +542,18 @@ The manifest can be checked on its own before any import
 `Tools/Assets/import_ship.py` (editor closed, `GAMESPACE_SHIP_MANIFEST` set) imports the FBX
 files, checks them against the manifest and writes the manifest's suggested settings into
 `BP_Ship_<Ship>`; run with plain Python it is a dry run that prints the plan
-(`python Tools/Assets/tests/test_import_ship_plan.py` tests that part). First real run: the
-Vanguard (`ArtSource/Ships/Vanguard`), checked afterwards in a fresh editor by
-`Tools/Tests/test_ship_import.py`. From Git Bash, run Blender with `MSYS_NO_PATHCONV=1`, or
+(`python Tools/Assets/tests/test_import_ship_plan.py` tests that part). A fresh editor then checks the
+import with `Tools/Tests/test_ship_import.py`, for the ship named in `Tools/Tests/ship_under_test.py`
+(`SHIP = None` until the new ship is imported: the test prints SKIP "no ship model yet"). From Git Bash, run Blender with `MSYS_NO_PATHCONV=1`, or
 `--out "//Export"` is rewritten to `/Export` (C:\Export).
 
 **AI models (Meshy, Higgsfield) -> game ship**: `Tools/Blender/build_ai_ship.py` rebuilds a ship from
 the raw AI export, driven by `ArtSource/Ships/<Ship>/<Ship>_ai_build.json` (ShipPipeline.md, 2B):
-orient and scale, cut fused parts out by region boxes (the Vanguard's skids -> `SM_Ship_Vanguard_Gear`),
+orient and scale, cut fused parts out by region boxes (e.g. landing skids -> `SM_Ship_<Ship>_Gear`),
 decimate with importance rules, **a fresh UV atlas and the source re-baked onto it** (base colour, ORM,
 normal map - AI atlases have thousands of tiny islands that decimation welds together, and Meshy's
 normal map is nearly flat), an emissive slot for the nozzle discs, k-DOP `UCX_` hulls per region box and
-sockets. The current Vanguard (18. 9. 2026) is Meshy's "Ironclad Starfighter": 3.36 M triangles in,
-200 k + 14 k gear out, 14 x 11.4 x 6.2 m, four engine nacelles. Its material is `M_Ship_PBR`
+sockets. The ship material is `M_Ship_PBR`
 (`BaseColorMap`, `ORMMap` G roughness / B metallic, `NormalMap` with the green channel flipped on import,
 `Tools/Assets/ship_materials.py`); thrusters keep `M_Ship_Hull` with emission.
 
@@ -587,7 +583,7 @@ space like the micro detail, because the ship's atlas is thousands of tiny islan
 into it would break at every island edge. The groove also darkens and roughens the paint. Two
 numbers matter: a seam narrower than about 2 cm never survives the mip chain and simply is not
 there, and above `panel_strength` ~0.8 the seams run over greebles and curves the model has no
-plating on, which reads as an overlay rather than a hull. The Vanguard uses a 260 cm sheet at 0.55,
+plating on, which reads as an overlay rather than a hull. The first fighter used a 260 cm sheet at 0.55,
 and the layer costs no frames.
 
 The whole hull is one material, so the only **zones** available without a second UV set are the ones
@@ -667,7 +663,9 @@ GlobalDefaultGameMode=/Script/gamespace.SpaceGameMode
 ```
 
 Any level without a World Settings override therefore spawns a flyable ship at its
-`PlayerStart`. A Blueprint child of `SpaceGameMode` can still override the pawn per level.
+`PlayerStart`. `BP_SpaceGameMode`'s default pawn is the native `ASpaceshipPawn` too (placeholder cube
+hull) until a modelled ship exists; the headless flight tests fly the same native pawn, and the tests
+that need a modelled ship read its name from `Tools/Tests/ship_under_test.py` and skip while it is `None`. A Blueprint child of `SpaceGameMode` can still override the pawn per level.
 
 ## Flight HUD (SC-1c, UMG)
 
@@ -1047,9 +1045,9 @@ Nothing needs placing by hand: the game mode supplies the pawn and the level has
 the build.
 
 - **Title screen** `/Game/Maps/MainMenu` (built by `Tools/Assets/build_main_menu.py`, the game's
-  `GameDefaultMap`; the editor still starts on TestSpace): the Vanguard with Orun and Keth behind
-  it, a slowly drifting camera (`MenuCamera` around the actor tagged `MenuOrbitCenter`), ambient
-  music. HRÁT / NASTAVENÍ / KONEC. Game mode `ASpaceMenuGameMode`: no pawn.
+  `GameDefaultMap`; the editor still starts on TestSpace): Orun and Keth, a slowly drifting camera
+  (`MenuCamera` around the actor tagged `MenuOrbitCenter`), ambient music. No ship is shown until one
+  is set as `MENU_SHIP` in `build_main_menu.py`; until then the camera orbits the empty `MenuOrbitCenter`. HRÁT / NASTAVENÍ / KONEC. Game mode `ASpaceMenuGameMode`: no pawn.
 - **Pause menu**: Escape (F10 too; in PIE Escape stops the session, so use F10 there) pauses the
   game: POKRAČOVAT / NASTAVENÍ / HLAVNÍ MENU / UKONČIT HRU.
 - **Settings** (`USpaceUserSettings`, a `UGameUserSettings` subclass registered in
@@ -1086,7 +1084,7 @@ editor, and nobody has to play to see what a change looks like.
 
 Pictures land in `Saved/Shots/<stamp>_<preset>/NN_<name>.png` (not in git; `-Keep` also copies them
 to `Docs/Shots/` for the repository's visual history). Presets are `cockpit`, `hud`, `ship`,
-`landing`, `ship_views` (a model from every side) and `cockpit_tune` (variants side by side). A shot list is JSON read from disk at runtime, so
+`landing`, `ship_views` (a model from every side) and others in `Tools/Shots/`. A shot list is JSON read from disk at runtime, so
 editing one needs no repackaging; a shot can set the camera, HUD mode, altitude, facing, speed, master
 mode, limiter, coupled / G-Safe / ComStab, boost, afterburner, the virtual joystick cursor, the gear
 (`gear` straight down or up, `lower_gear` to catch it moving), `precision`, the chase camera swung round

@@ -8,7 +8,7 @@ Use it three ways:
 * Command line (no UI):
       blender -b Ship.blend --python Tools/Blender/gamespace_ship_export.py -- --out "//Export" [--validate-only] [--force]
 * Manifest check without Blender (before importing into Unreal):
-      python Tools/Blender/gamespace_ship_export.py --check-manifest ArtSource/Ships/Vanguard/Export/Vanguard_manifest.json
+      python Tools/Blender/gamespace_ship_export.py --check-manifest ArtSource/Ships/<Ship>/Export/<Ship>_manifest.json
 
 Conventions (details in Docs/Ships/ShipPipeline.md):
 
@@ -177,7 +177,7 @@ def validate(records, scene, limits=LIMITS):
     render = c["render"]
     ships = sorted({r["ship"] for r in render.values()})
     if not render:
-        issues.append(issue(ERROR, "No render mesh found: name the hull SM_Ship_<Ship>, e.g. SM_Ship_Vanguard"))
+        issues.append(issue(ERROR, "No render mesh found: name the hull SM_Ship_<Ship>, e.g. SM_Ship_Example"))
         return issues, c
     if len(ships) > 1:
         issues.append(issue(ERROR, "More than one ship in the file: %s. Keep one ship per .blend" % ", ".join(ships)))
@@ -466,7 +466,7 @@ def validate_manifest(manifest, base_dir=None, limits=LIMITS):
     if version != MANIFEST_VERSION:
         issues.append(issue(ERROR, "manifest_version is %r, this tool reads %d: re-export from Blender" % (version, MANIFEST_VERSION)))
 
-    ship_ok = need("ship", lambda v: isinstance(v, str) and re.match("^%s$" % NAME_PART, v), "a ship name like 'Vanguard'")
+    ship_ok = need("ship", lambda v: isinstance(v, str) and re.match("^%s$" % NAME_PART, v), "a ship name like 'Example'")
     ship = manifest.get("ship") if ship_ok else None
     main = "SM_Ship_%s" % ship if ship else None
 

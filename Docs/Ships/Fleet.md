@@ -9,8 +9,7 @@ specifikace podle `Docs/Ships/ShipSpecification_System.md`).
   RSI Ship Matrix šablony. Vzniká **před** stavbou, řídí, co má loď dělat.
 - **`<Jméno>_setup.json`** — skutečný funkční build config, co čte `import_ship.py`
   (`pawn`, `components`, `materials`, `decals`...). Vzniká **až při stavbě** v Blenderu/Unrealu,
-  řídí, jak je loď skutečně postavená. Vanguard má jen tenhle typ (vznikl dřív, než jsme měli
-  spec šablonu) — časem by mu měl přibýt i `Vanguard_spec.json` pro konzistenci.
+  řídí, jak je loď skutečně postavená.
 
 ## Výrobci (lore)
 
@@ -24,7 +23,7 @@ novou frakci pro každou loď:
 
 | Loď | Výrobce | Role | Velikost | Posádka | Stav |
 | --- | --- | --- | --- | --- | --- |
-| **Vanguard** | Kestrel Dynamics *(doplnit do specu)* | Interceptor | Snub | 1 | ✅ hotovo (exteriér, letový model, HUD) |
+| *nová malá loď* (jméno zatím není) | *(doplnit do specu)* | Multirole | Small | *(doplnit)* | 📐 2D návrh (nahrazuje první stíhačku, odstraněnou 24. 9. 2026) |
 | **Steadfast** | Halcyon Freightworks | Multi-crew Freight/Exploration | Medium | 3 | 🔶 rozjeto (exteriér hrubý tvar z Meshy, koncept interiéru) |
 | **Farsight** | Kestrel Dynamics | Long-range Scout/Exploration | Snub | 1 | 📋 naplánováno, nezačato |
 | **Delver** | Halcyon Freightworks | Mining/Industrial Utility | Small–Medium | 2 | 📋 naplánováno, nezačato |
@@ -33,9 +32,10 @@ novou frakci pro každou loď:
 
 Čtyři lodě, čtyři jasně odlišené role — žádná náhodná duplicita:
 
-- **Vanguard** — rychlý, obratný, bojový. Malý náklad, krátký dolet, jedna posádka.
+- **Nová malá multirole loď** — malá a obratná, víc rolí včetně boje; přesné role, náklad a posádku
+  určí 2D návrh a spec.
 - **Steadfast** — pomalý, odolný, velký náklad, víc posádky. Základna pro delší výpravy.
-- **Farsight** — rychlý jako Vanguard, ale stavěný na dolet/senzory místo boje. Slabě
+- **Farsight** — rychlý jako malá stíhačka, ale stavěný na dolet/senzory místo boje. Slabě
   vyzbrojený nebo bezbranný, dlouhý dolet, jedna posádka. Vhodný pro objevování nových
   planet/POI, ne pro boj.
 - **Delver** — pomalý jako Steadfast, ale menší a specializovaný na těžbu (těžební laser,
@@ -47,7 +47,7 @@ lodí zatím neplánovat, dokud tyhle čtyři nebudou hotové a otestované. Dr�
 
 ## Pořadí práce
 
-1. ✅ Vanguard — hotovo
+1. 📐 Nová malá multirole loď — 2D návrh (první stíhačka byla 24. 9. 2026 odstraněna)
 2. 🔶 Steadfast — v procesu (dokončit exteriér → interiér přes kitbash/procedurální detail)
 3. Farsight — až po Steadfastu
 4. Delver — poslední ze čtyř, protože těžba jako gameplay mechanika ještě není navržená
