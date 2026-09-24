@@ -485,9 +485,11 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
 - **Tmavá scéna s automatickou expozicí není tmavá.** Skoro černý tunel si oko vytáhne na sytě modrou.
   Když má něco zůstat tmavé, připíchni expozici (`AutoExposureMin/MaxBrightness` + `AutoExposureBias`
   přes `PostProcessSettings` kamery) a teprve pak lad' jas všeho svítícího – měřítko se posune ~6x.
-- **V Blenderu přes MCP nepoužívej operátory.** `bpy.ops.object.join` a spol. padají na
-  `poll() failed, context is incorrect`. Skládej geometrii přes `bmesh` a objekty vytvářej
-  `bpy.data.objects.new`. Na prohlédnutí malých dílů nestačí `get_viewport_screenshot` – renderuj
+- **Operátory přes MCP spouštěj přes `Tools/Blender/mcp/ops_context.py`** (`run_op`, `edit_mode`;
+  skill `blender-mcp`). Dřív padaly na `poll() failed, context is incorrect` kvůli chybějícímu
+  kontextu okna; helper dá `temp_override(window, area, region, …)`. Headless (`-b`) projekční
+  operátory (`knife_project`, `view3d.*`) tiše nic neudělají, proto je helper odmítne. bmesh zůstává
+  alternativou pro čistě geometrické operace. Na prohlédnutí malých dílů nestačí `get_viewport_screenshot` – renderuj
   kamerou do souboru a ten si přečti.
 - **Konzolové příkazy ve snímkovém běhu platí do konce běhu.** Druhá varianta zdědí nastavení první,
   takže „A/B“ porovnání vyjde falešně. Každý snímek musí začít návratem na výchozí hodnoty a první

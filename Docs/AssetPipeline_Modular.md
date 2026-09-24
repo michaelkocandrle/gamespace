@@ -101,8 +101,9 @@ aby se daly generovat kterýmkoliv nástrojem a pak porovnat se stejným měří
 
 ### Nástrahy z pilotu
 
-- `bpy.ops.object.join` (a operátory obecně) přes MCP padá na `poll() failed, context is incorrect`.
-  Geometrii skládej přímo přes `bmesh` a objekty vytvářej `bpy.data.objects.new` – bez operátorů.
+- Operátory (`object.join`, `modifier_apply`, `mesh.bevel`…) přes MCP spouštěj helperem
+  `Tools/Blender/mcp/ops_context.py` (od 24. 9. 2026; dřív padaly na `poll() failed`). Čistou
+  geometrii jde dál skládat i přes `bmesh` a `bpy.data.objects.new`.
 - `get_viewport_screenshot` je u dílů velikosti 10 cm k ničemu (v okně jsou to tři pixely a
   nastavení `region_3d` se na snímku neprojeví). Spolehlivé je **renderovat přes kameru do souboru**
   (Workbench, `bpy.ops.render.render(write_still=True)`) a ten soubor si přečíst.
