@@ -1,17 +1,29 @@
 {
+  "_comment": "Ship Matrix shape (robertsspaceindustries.com/ship-matrix fields). The flight numbers are the ones the game uses today; everything marked in _status as design is the 2D design of 24. 9. 2026 waiting for the author's approval. Layout: Design/Steadfast_layout.json, drawings: Design/*.png, text: Design/Steadfast_Design.md.",
+  "_status": "design_v2_draft",
   "identity": {
-    "model": "Steadfast",
+    "name": "Steadfast",
     "manufacturer": "Halcyon Freightworks",
-    "focus": "Multi-crew Freight / Exploration",
-    "size_class": "Medium",
-    "production_state": "ai_generated_v1"
+    "description": "Tough two-deck hauler for small crews on long runs to the edge of mapped space: a real home for three people on the upper deck, a 42 SCU hold on the lower deck, and enough fuel, sensors and self-repair to get back without a station.",
+    "production_status": "in-concept",
+    "size": "medium",
+    "type": "transport",
+    "focus": "Freight / Exploration"
   },
   "dimensions": {
     "length_m": 30.0,
     "beam_m": 22.0,
     "height_m": 9.5,
-    "mass_kg": null,
-    "cargo_capacity": null
+    "mass_kg": 185000,
+    "cargo_capacity_scu": 42,
+    "decks": 2,
+    "_note": "Beam includes the two engine nacelles; the pressure hull is 6.4 m wide."
+  },
+  "crew": {
+    "min_crew": 1,
+    "max_crew": 3,
+    "beds": 3,
+    "stations": ["pilot", "co-pilot / navigator", "sensors / comms / grapple", "engineer (engine room console)"]
   },
   "flight": {
     "scm_speed_ms": 140,
@@ -19,30 +31,39 @@
     "pitch_max_deg_s": 55,
     "yaw_max_deg_s": 40,
     "roll_max_deg_s": 75,
-    "acceleration": {
-      "main_ms2": null,
-      "retro_ms2": null,
-      "strafe_ms2": null,
-      "vertical_ms2": null
+    "acceleration_ms2": {
+      "main": 45,
+      "retro": 30,
+      "strafe": 25,
+      "up": 30,
+      "down": 25
     }
   },
-  "crew": {
-    "crew_size": 3
+  "components": {
+    "avionics": {
+      "radar": "1x S2 (fore technical room)",
+      "computer": "1x S2 (fore technical room)"
+    },
+    "propulsion": {
+      "fuel_tanks": "2x hydrogen, 1 050 units total (engine room, port + starboard)",
+      "quantum_drive": "1x S2 (engine room, on the axis at the aft wall)",
+      "quantum_fuel_tanks": "1x 4.5 SCU (under the engine room floor)"
+    },
+    "thrusters": {
+      "main": "2x TR4 in the side nacelles",
+      "maneuvering": "12x TR2 (4 nose, 4 per nacelle)"
+    },
+    "modular": {
+      "power_plant": "1x S2 reactor, through both decks",
+      "coolers": "2x S2 (engine room)",
+      "shield_generators": "2x S2 (fore technical room)",
+      "life_support": "1x S2 (engine room upper deck)"
+    }
   },
-  "propulsion": {
-    "main_fuel_capacity": null,
-    "afterburner_fuel_seconds": null,
-    "quantum_drive": null
-  },
-  "systems": {
-    "power_plant": null,
-    "cooler": null,
-    "shield_generator": null
-  },
-  "weaponry": {
-    "weapons": [],
-    "turrets": [],
-    "missiles": [],
-    "utility_items": ["cargo grapple arms", "docking collar"]
+  "weapons": {
+    "pilot": ["2x S3 in the nose"],
+    "turrets": ["1x remote turret on the dorsal spine, 2x S2, operated from the sensor station"],
+    "missiles": ["4x S2 in the nacelle racks"],
+    "utility": ["2x cargo grapple arms under the belly (sensor station)", "docking collar on the port side (airlock)"]
   }
 }

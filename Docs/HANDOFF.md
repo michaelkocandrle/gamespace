@@ -1212,6 +1212,11 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Výchozí stav už v konstruktoru (postava, která nezačne hru – editor, testy – je taky v první osobě).
     - Klávesnice u dveří jsou z interiéru pryč. Snímky `interior_walk` jsou teď z první osoby.
     - Test `test_character_l6.py`: první osoba výchozí, oči 1,6–1,7 m, přepnutí tam a zpět.
+75. **Steadfast – 2D návrh v2 ke schválení** (24. 9. 2026, krok 3 z bodu 73). Nic ve 3D, dokud ho autor neschválí.
+    - `ArtSource/Ships/Steadfast/Design/Steadfast_Design.md`: vize, parametry, uspořádání, pohyb posádky, designový jazyk a otevřené otázky.
+    - `Steadfast_layout.json`: jediný zdroj pravdy – místnosti, objekty s účelem, dveře; metry, x dopředu, y na levobok.
+    - Výkresy `Steadfast_deck_upper.png`, `Steadfast_deck_lower.png`, `Steadfast_cutaway.png` kreslí `Tools/Design/draw_ship_design.py <layout.json>` (Pillow, písmo Bahnschrift).
+    - `Steadfast_spec.json` je ve tvaru RSI Ship Matrix. Kód ho nečte; letové hodnoty se ladí jinde.
 
 ---
 

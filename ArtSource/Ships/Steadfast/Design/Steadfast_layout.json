@@ -1,0 +1,919 @@
+{
+ "_comment": "Steadfast deck layout, the single source for the 2D design drawings (Tools/Design/draw_deck_plans.py) and later for the 3D build. Ship coordinates in metres: x forward from the aft end of the hull (0) to the nose (30); the main engines sit in the two side nacelles (beam 22 m), so the aft wall only carries their feed lines, y to port (+) / starboard (-), z up from the lower deck floor. Every room and every object has a purpose; nothing is filler (author, 24. 9. 2026, HANDOFF point 73). Status: DRAFT for the author's approval.",
+ "decks": {
+  "lower": {
+   "floor_z": 0.0,
+   "clear_height": 3.0,
+   "outline": [
+    [
+     0.5,
+     -3.2
+    ],
+    [
+     23.5,
+     -3.2
+    ],
+    [
+     25.5,
+     -2.8
+    ],
+    [
+     27.0,
+     -1.8
+    ],
+    [
+     27.0,
+     1.8
+    ],
+    [
+     25.5,
+     2.8
+    ],
+    [
+     23.5,
+     3.2
+    ],
+    [
+     0.5,
+     3.2
+    ]
+   ]
+  },
+  "upper": {
+   "floor_z": 3.3,
+   "clear_height": 2.4,
+   "outline": [
+    [
+     2.5,
+     -3.2
+    ],
+    [
+     23.0,
+     -3.2
+    ],
+    [
+     26.0,
+     -2.8
+    ],
+    [
+     28.6,
+     -2.0
+    ],
+    [
+     29.8,
+     -0.9
+    ],
+    [
+     29.8,
+     0.9
+    ],
+    [
+     28.6,
+     2.0
+    ],
+    [
+     26.0,
+     2.8
+    ],
+    [
+     23.0,
+     3.2
+    ],
+    [
+     2.5,
+     3.2
+    ]
+   ]
+  }
+ },
+ "rooms": [
+  {
+   "id": "cockpit",
+   "deck": "upper",
+   "name": "Kokpit",
+   "rect": [
+    23.5,
+    29.8,
+    -3.0,
+    3.0
+   ],
+   "purpose": "Řízení lodi. Pilot vlevo, druhý pilot / navigátor vpravo, za nimi stanoviště senzorů a komunikace (třetí člen posádky). Prosklená kabina s výhledem dopředu, do stran i nahoru.",
+   "poly": [
+    [
+     23.5,
+     -3.0
+    ],
+    [
+     26.0,
+     -2.8
+    ],
+    [
+     28.6,
+     -2.0
+    ],
+    [
+     29.8,
+     -0.9
+    ],
+    [
+     29.8,
+     0.9
+    ],
+    [
+     28.6,
+     2.0
+    ],
+    [
+     26.0,
+     2.8
+    ],
+    [
+     23.5,
+     3.0
+    ]
+   ],
+   "label_at": [
+    25.0,
+    2.2
+   ]
+  },
+  {
+   "id": "bridge",
+   "deck": "upper",
+   "name": "Předsíň můstku",
+   "rect": [
+    20.5,
+    23.5,
+    -3.2,
+    3.2
+   ],
+   "purpose": "Vstup do kokpitu, schodiště na dolní palubu, skříňky se skafandry – odsud se jde ven i ke kontrolám."
+  },
+  {
+   "id": "corridor",
+   "deck": "upper",
+   "name": "Hlavní chodba",
+   "rect": [
+    9.0,
+    20.5,
+    -0.8,
+    0.8
+   ],
+   "purpose": "Páteř obytné paluby. Dveře do kajut, jídelny, koupelny, ošetřovny a zbrojnice; na konci tlakové dveře do strojovny."
+  },
+  {
+   "id": "captain",
+   "deck": "upper",
+   "name": "Kajuta kapitána",
+   "rect": [
+    16.5,
+    20.5,
+    0.8,
+    3.2
+   ],
+   "purpose": "Soukromí kapitána na dlouhých trasách: lůžko, pracovní stůl s terminálem lodi, osobní skříň, trezor na dokumenty zakázek."
+  },
+  {
+   "id": "crew",
+   "deck": "upper",
+   "name": "Kajuta posádky",
+   "rect": [
+    12.0,
+    16.5,
+    0.8,
+    3.2
+   ],
+   "purpose": "Dvě patrová lůžka pro zbytek posádky, dvě skříňky, sklápěcí stolek."
+  },
+  {
+   "id": "medbay",
+   "deck": "upper",
+   "name": "Ošetřovna",
+   "rect": [
+    9.0,
+    12.0,
+    0.8,
+    3.2
+   ],
+   "purpose": "První pomoc a stabilizace na trase: lékařské lůžko se skenerem, skříň s léky, nástěnný terminál."
+  },
+  {
+   "id": "galley",
+   "deck": "upper",
+   "name": "Kuchyňka a jídelna",
+   "rect": [
+    15.0,
+    20.5,
+    -3.2,
+    -0.8
+   ],
+   "purpose": "Jídlo a porady posádky: stůl pro čtyři s lavicí, kuchyňská linka (potravinový tiskárník, lednice, dřez, kávovar)."
+  },
+  {
+   "id": "head",
+   "deck": "upper",
+   "name": "Koupelna",
+   "rect": [
+    12.5,
+    15.0,
+    -3.2,
+    -0.8
+   ],
+   "purpose": "Záchod, umyvadlo, sprchový kout s recyklací vody."
+  },
+  {
+   "id": "armory",
+   "deck": "upper",
+   "name": "Zbrojnice a EVA",
+   "rect": [
+    9.0,
+    12.5,
+    -3.2,
+    -0.8
+   ],
+   "purpose": "Příprava na výstup a obranu: dva stojany na skafandry, stojan na zbraně, stěna s nářadím pro opravy trupu."
+  },
+  {
+   "id": "engineering",
+   "deck": "upper",
+   "name": "Strojovna – horní patro",
+   "rect": [
+    2.5,
+    9.0,
+    -3.2,
+    3.2
+   ],
+   "purpose": "Řízení a údržba systémů: pult inženýra s výhledem na reaktor, podpora života, rozvaděče; ochoz kolem reaktoru, žebřík dolů."
+  },
+  {
+   "id": "hold",
+   "deck": "lower",
+   "name": "Nákladový prostor",
+   "rect": [
+    7.0,
+    19.0,
+    -3.0,
+    3.0
+   ],
+   "purpose": "42 SCU nákladu (mřížka 7 × 3 pozic po 1,25 m, dvě vrstvy) u levé stěny, uličky 1,9 m podél pravé stěny pro chůzi a vozík. Jeřábová dráha pod stropem po celé délce, úvazné body v podlaze, rampa v břiše na zádi prostoru, ovládací panel u rampy."
+  },
+  {
+   "id": "airlock",
+   "deck": "lower",
+   "name": "Přechodová komora",
+   "rect": [
+    19.0,
+    21.5,
+    1.5,
+    3.2
+   ],
+   "purpose": "Výstup do vakua a spojení s jinou lodí nebo stanicí (dokovací límec na levém boku). Vnitřní a vnější dveře, panel tlakování."
+  },
+  {
+   "id": "fore_lower",
+   "deck": "lower",
+   "name": "Přední technická místnost",
+   "rect": [
+    19,
+    27,
+    -3.2,
+    3.2
+   ],
+   "purpose": "Schodiště nahoru, avionika (radar, počítač), dva generátory štítů a náhradní díly – přístupné k údržbě za letu.",
+   "poly": [
+    [
+     19,
+     -3.2
+    ],
+    [
+     23.5,
+     -3.2
+    ],
+    [
+     25.5,
+     -2.8
+    ],
+    [
+     27,
+     -1.8
+    ],
+    [
+     27,
+     1.8
+    ],
+    [
+     25.5,
+     2.8
+    ],
+    [
+     23.5,
+     3.2
+    ],
+    [
+     21.5,
+     3.2
+    ],
+    [
+     21.5,
+     1.5
+    ],
+    [
+     19,
+     1.5
+    ]
+   ],
+   "label_at": [
+    21.4,
+    0.9
+   ]
+  },
+  {
+   "id": "engine_room",
+   "deck": "lower",
+   "name": "Strojovna – dolní patro",
+   "rect": [
+    0.5,
+    7.0,
+    -3.2,
+    3.2
+   ],
+   "purpose": "Srdce lodi: reaktor přes obě patra, quantum drive, dvě nádrže vodíku, dva chladiče, přívody k hlavním motorům na zadní stěně."
+  }
+ ],
+ "objects": [
+  {
+   "room": "cockpit",
+   "name": "Pilotní sedadlo",
+   "rect": [
+    25.4,
+    26.3,
+    0.5,
+    1.3
+   ],
+   "purpose": "Pilot, s joystickem a plynem v područkách (Meshy PilotSeat)."
+  },
+  {
+   "room": "cockpit",
+   "name": "Sedadlo druhého pilota",
+   "rect": [
+    25.4,
+    26.3,
+    -1.3,
+    -0.5
+   ],
+   "purpose": "Navigátor / druhý pilot, stejné ovládání."
+  },
+  {
+   "room": "cockpit",
+   "name": "Přední pult",
+   "rect": [
+    27.0,
+    28.6,
+    -1.6,
+    1.6
+   ],
+   "purpose": "Obrazovky letu a systémů, holografický radar, řady přepínačů."
+  },
+  {
+   "room": "cockpit",
+   "name": "Stanoviště senzorů",
+   "rect": [
+    23.9,
+    24.9,
+    -0.6,
+    0.6
+   ],
+   "purpose": "Třetí člen: skenování, komunikace, řízení drapáků. Sedadlo čelem dopředu, pult do stran."
+  },
+  {
+   "room": "cockpit",
+   "name": "Stropní panel",
+   "rect": [
+    25.2,
+    26.6,
+    -0.5,
+    0.5
+   ],
+   "purpose": "Jističe systémů, světla, podvozek – nad hlavami pilotů.",
+   "overhead": true
+  },
+  {
+   "room": "bridge",
+   "name": "Schodiště dolů",
+   "rect": [
+    20.6,
+    23.4,
+    -3.1,
+    -1.9
+   ],
+   "purpose": "Spojení palub u přídě. Stoupá dozadu (3,3 m výšky na 2,8 m délky, lodní schodnice se zábradlím), nahoře výstup do středu předsíně."
+  },
+  {
+   "room": "bridge",
+   "name": "Skříňky se skafandry",
+   "rect": [
+    21.0,
+    23.3,
+    2.5,
+    3.1
+   ],
+   "purpose": "Tři skafandry posádky po ruce u výstupu i u kokpitu."
+  },
+  {
+   "room": "captain",
+   "name": "Lůžko",
+   "rect": [
+    18.4,
+    20.4,
+    2.2,
+    3.1
+   ],
+   "purpose": "Spaní."
+  },
+  {
+   "room": "captain",
+   "name": "Pracovní stůl s terminálem",
+   "rect": [
+    16.7,
+    18.0,
+    2.5,
+    3.1
+   ],
+   "purpose": "Zakázky, navigace, deník lodi."
+  },
+  {
+   "room": "crew",
+   "name": "Patrová lůžka",
+   "rect": [
+    13.8,
+    16.3,
+    2.2,
+    3.1
+   ],
+   "purpose": "Dvě lůžka nad sebou."
+  },
+  {
+   "room": "crew",
+   "name": "Skříňky",
+   "rect": [
+    12.2,
+    13.4,
+    2.6,
+    3.1
+   ],
+   "purpose": "Osobní věci dvou členů posádky."
+  },
+  {
+   "room": "medbay",
+   "name": "Lékařské lůžko se skenerem",
+   "rect": [
+    9.3,
+    11.3,
+    2.2,
+    3.1
+   ],
+   "purpose": "Ošetření a stabilizace."
+  },
+  {
+   "room": "medbay",
+   "name": "Skříň s léky",
+   "rect": [
+    9.2,
+    10.2,
+    1.0,
+    1.4
+   ],
+   "purpose": "Zásoby první pomoci."
+  },
+  {
+   "room": "galley",
+   "name": "Stůl pro čtyři",
+   "rect": [
+    17.5,
+    19.3,
+    -2.7,
+    -1.3
+   ],
+   "purpose": "Jídlo a porady."
+  },
+  {
+   "room": "galley",
+   "name": "Kuchyňská linka",
+   "rect": [
+    15.2,
+    17.0,
+    -3.1,
+    -2.5
+   ],
+   "purpose": "Tiskárna jídla, lednice, dřez, kávovar."
+  },
+  {
+   "room": "head",
+   "name": "Sprcha",
+   "rect": [
+    12.6,
+    13.6,
+    -3.1,
+    -2.1
+   ],
+   "purpose": "Sprcha s recyklací vody."
+  },
+  {
+   "room": "head",
+   "name": "Záchod a umyvadlo",
+   "rect": [
+    13.8,
+    14.9,
+    -3.1,
+    -2.4
+   ],
+   "purpose": "Vakuový záchod, umyvadlo se zrcadlem."
+  },
+  {
+   "room": "armory",
+   "name": "Stojany na skafandry",
+   "rect": [
+    9.2,
+    11.0,
+    -3.1,
+    -2.4
+   ],
+   "purpose": "EVA výstroj pro opravy trupu."
+  },
+  {
+   "room": "armory",
+   "name": "Stojan na zbraně a nářadí",
+   "rect": [
+    11.2,
+    12.4,
+    -3.1,
+    -2.6
+   ],
+   "purpose": "Osobní zbraně, svářečka, multitool."
+  },
+  {
+   "room": "engineering",
+   "name": "Reaktor (horní polovina) s ochozem",
+   "rect": [
+    4.0,
+    6.5,
+    -1.2,
+    1.2
+   ],
+   "purpose": "Reaktor prochází oběma palubami; nahoře ochoz se zábradlím a přístupovými panely."
+  },
+  {
+   "room": "engineering",
+   "name": "Pult inženýra",
+   "rect": [
+    7.4,
+    8.8,
+    -2.0,
+    -0.6
+   ],
+   "purpose": "Rozdělení energie, stav komponent, požární systém. Výhled na reaktor."
+  },
+  {
+   "room": "engineering",
+   "name": "Podpora života",
+   "rect": [
+    2.7,
+    3.9,
+    1.6,
+    3.1
+   ],
+   "purpose": "Vzduch, teplota, voda."
+  },
+  {
+   "room": "engineering",
+   "name": "Rozvaděče",
+   "rect": [
+    7.4,
+    8.8,
+    2.4,
+    3.1
+   ],
+   "purpose": "Jističe a přepojování okruhů."
+  },
+  {
+   "room": "engineering",
+   "name": "Žebřík dolů",
+   "rect": [
+    4.3,
+    5.1,
+    -3.0,
+    -2.3
+   ],
+   "purpose": "Do dolní strojovny."
+  },
+  {
+   "room": "hold",
+   "name": "Nákladová mřížka 42 SCU",
+   "rect": [
+    10.2,
+    18.95,
+    -0.9,
+    2.85
+   ],
+   "purpose": "7 × 3 pozic po 1,25 m, dvě vrstvy (výška 2,5 m)."
+  },
+  {
+   "room": "hold",
+   "name": "Rampa v břiše",
+   "rect": [
+    7.2,
+    10.0,
+    -1.6,
+    1.6
+   ],
+   "purpose": "Nakládání ze země, sklápí se dolů a dozadu."
+  },
+  {
+   "room": "hold",
+   "name": "Panel rampy a vážení nákladu",
+   "rect": [
+    7.3,
+    7.9,
+    -3.0,
+    -2.5
+   ],
+   "purpose": "Otevření rampy, seznam nákladu, hmotnost a těžiště."
+  },
+  {
+   "room": "hold",
+   "name": "Jeřábová dráha",
+   "rect": [
+    7.2,
+    18.8,
+    0.8,
+    1.1
+   ],
+   "purpose": "Kočka s kladkostrojem pod stropem po celé délce.",
+   "overhead": true
+  },
+  {
+   "room": "airlock",
+   "name": "Panel tlakování",
+   "rect": [
+    19.2,
+    19.6,
+    1.6,
+    1.9
+   ],
+   "purpose": "Cyklus komory, stav těsnění límce."
+  },
+  {
+   "room": "fore_lower",
+   "name": "Schodiště nahoru",
+   "rect": [
+    20.6,
+    23.4,
+    -3.1,
+    -1.9
+   ],
+   "purpose": "Dole začíná u přídě technické místnosti. Stoupá dozadu (3,3 m výšky na 2,8 m délky, lodní schodnice se zábradlím), nahoře výstup do středu předsíně."
+  },
+  {
+   "room": "fore_lower",
+   "name": "Stojany avioniky",
+   "rect": [
+    23.5,
+    25.8,
+    0.2,
+    1.3
+   ],
+   "purpose": "Radar a palubní počítač."
+  },
+  {
+   "room": "fore_lower",
+   "name": "Generátory štítů 2×",
+   "rect": [
+    23.5,
+    25.8,
+    -1.3,
+    -0.2
+   ],
+   "purpose": "Přístupné k výměně."
+  },
+  {
+   "room": "engine_room",
+   "name": "Žebřík nahoru",
+   "rect": [
+    4.3,
+    5.1,
+    -3.0,
+    -2.3
+   ],
+   "purpose": "Do horní strojovny, vedle reaktoru."
+  },
+  {
+   "room": "engine_room",
+   "name": "Reaktor (dolní polovina)",
+   "rect": [
+    4.0,
+    6.5,
+    -1.2,
+    1.2
+   ],
+   "purpose": "Tlakové pouzdro reaktoru, přívody chlazení."
+  },
+  {
+   "room": "engine_room",
+   "name": "Quantum drive",
+   "rect": [
+    1.0,
+    3.6,
+    -1.0,
+    1.0
+   ],
+   "purpose": "Pohon pro skoky; velký válec podél osy u zadní stěny."
+  },
+  {
+   "room": "engine_room",
+   "name": "Nádrž vodíku – levá",
+   "rect": [
+    1.0,
+    3.8,
+    2.2,
+    3.1
+   ],
+   "purpose": "Palivo hlavních motorů."
+  },
+  {
+   "room": "engine_room",
+   "name": "Nádrž vodíku – pravá",
+   "rect": [
+    1.0,
+    3.8,
+    -3.1,
+    -2.2
+   ],
+   "purpose": "Palivo hlavních motorů."
+  },
+  {
+   "room": "engine_room",
+   "name": "Chladič – levý",
+   "rect": [
+    6.2,
+    6.9,
+    0.8,
+    2.2
+   ],
+   "purpose": "Odvod tepla z reaktoru a pohonů; mezi chladiči průchod k nákladu."
+  },
+  {
+   "room": "engine_room",
+   "name": "Chladič – pravý",
+   "rect": [
+    6.2,
+    6.9,
+    -2.2,
+    -0.8
+   ],
+   "purpose": "Druhý okruh; loď doletí i s jedním."
+  },
+  {
+   "room": "fore_lower",
+   "name": "Regál s náhradními díly",
+   "rect": [
+    22.0,
+    23.4,
+    2.5,
+    3.1
+   ],
+   "purpose": "Pojistky, filtry, náhradní moduly – aby se dalo opravit bez stanice."
+  }
+ ],
+ "doors": [
+  {
+   "deck": "upper",
+   "at": [
+    23.5,
+    0.0
+   ],
+   "axis": "x",
+   "width": 1.3,
+   "name": "Dveře kokpitu"
+  },
+  {
+   "deck": "upper",
+   "at": [
+    20.5,
+    0.0
+   ],
+   "axis": "x",
+   "width": 1.6,
+   "name": "Předsíň – chodba (otevřeno)"
+  },
+  {
+   "deck": "upper",
+   "at": [
+    9.0,
+    0.0
+   ],
+   "axis": "x",
+   "width": 1.3,
+   "name": "Tlakové dveře strojovny"
+  },
+  {
+   "deck": "upper",
+   "at": [
+    18.5,
+    0.8
+   ],
+   "axis": "y",
+   "width": 1.0,
+   "name": "Kajuta kapitána"
+  },
+  {
+   "deck": "upper",
+   "at": [
+    14.2,
+    0.8
+   ],
+   "axis": "y",
+   "width": 1.0,
+   "name": "Kajuta posádky"
+  },
+  {
+   "deck": "upper",
+   "at": [
+    10.5,
+    0.8
+   ],
+   "axis": "y",
+   "width": 1.0,
+   "name": "Ošetřovna"
+  },
+  {
+   "deck": "upper",
+   "at": [
+    16.2,
+    -0.8
+   ],
+   "axis": "y",
+   "width": 1.3,
+   "name": "Jídelna"
+  },
+  {
+   "deck": "upper",
+   "at": [
+    13.8,
+    -0.8
+   ],
+   "axis": "y",
+   "width": 0.9,
+   "name": "Koupelna"
+  },
+  {
+   "deck": "upper",
+   "at": [
+    10.7,
+    -0.8
+   ],
+   "axis": "y",
+   "width": 1.0,
+   "name": "Zbrojnice"
+  },
+  {
+   "deck": "lower",
+   "at": [
+    7.0,
+    0.0
+   ],
+   "axis": "x",
+   "width": 1.3,
+   "name": "Náklad – strojovna"
+  },
+  {
+   "deck": "lower",
+   "at": [
+    19.0,
+    -1.2
+   ],
+   "axis": "x",
+   "width": 1.3,
+   "name": "Náklad – přední technická"
+  },
+  {
+   "deck": "lower",
+   "at": [
+    20.2,
+    1.5
+   ],
+   "axis": "y",
+   "width": 1.0,
+   "name": "Vnitřní dveře komory"
+  },
+  {
+   "deck": "lower",
+   "at": [
+    20.2,
+    3.2
+   ],
+   "axis": "y",
+   "width": 1.0,
+   "name": "Vnější dveře a dokovací límec"
+  }
+ ]
+}
