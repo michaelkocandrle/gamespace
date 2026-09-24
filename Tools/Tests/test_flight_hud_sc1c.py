@@ -259,7 +259,9 @@ try:
     check("switching to NAV: mode label already NAV", hud.debug_get_text("ModeText") == "NAV")
     run(ship, 2.0)
     show(hud, ship)
-    check("NAV: afterburner gauge dimmed, SCM only", ab.get_editor_property("dim") and hud.debug_get_text("AfterburnerLabel").endswith("SCM"),
+    # Since 21. 9. 2026 (74ba375, the author's playtest) the gauge shows quantum fuel in NAV instead of a
+    # dimmed "SCM only" afterburner.
+    check("NAV: the afterburner gauge shows QT FUEL", hud.debug_get_text("AfterburnerLabel") == "QT FUEL",
           hud.debug_get_text("AfterburnerLabel"))
 finally:
     eas.destroy_actor(ship)
