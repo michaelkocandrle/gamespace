@@ -350,6 +350,46 @@ MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend -
   `greeble_material`. Instance kitu se před převodem realizují, jinak se detaily neexportují.
 - **Materiály v setupu:** slot na zónu, master `hull` s barvou (lineární), sklo `glass`, emise `_Emissive`.
 
+## 3b3. Vrstvy detailu podle SC: decaly, trim sheet, mesh decaly v UE (autor 24. 9. 2026)
+
+Rozbor lodi ze SC (Argo MOLE): mesh není hustý. Detail dělají mesh decaly, vrstvené materiály (kolem 12),
+střední vrstva tvaru (desky s tloušťkou, zapuštěná místa, odhalená mechanika), zkosené hrany a světla.
+Pořadí prací: knihovna decalů → trim sheet → mesh decaly v UE → tvar → materiál → světla. Vše nejdřív jako
+pilot na jedné části.
+
+**Knihovna decalů a trim sheet** (`Tools/Blender/decal_library.py`, recept
+`ArtSource/Ships/Shared/Decals/decal_library.json`):
+```bash
+MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/decal_library.py -- ArtSource/Ships/Shared/Decals/decal_library.json
+```
+- Každá položka je skutečná geometrie v buňce mřížky 4 × 4 (buňka 0,5 m, atlas 2048 px, tedy ~1 mm/px):
+  deska stopy se zapuštěnými místy (boolean) a díly na ní (`box`, `cyl`, `hex`, `bar`, `bar_y`, `repeat`/`step`).
+- Ortografická kamera vyrenderuje průchody jako emisní přepsání materiálu do float EXR, takže hodnoty jsou přesné.
+  Výsledné mapy:
+  - `T_Decals_N` / `T_Trim_N`: normála OpenGL, v UE se převrací zelená;
+  - `_H`: výška, 0,5 = povrch, ±3 cm;
+  - `_AO`: okluze;
+  - `_BC`: sRGB barva, A = krytí barvy (jen `paint_color`);
+  - `_M`: R alfa, G drsnost, B kov.
+- `decal_library_index.json` obsahuje UV obdélník, rozměr v metrech a účel každé položky, u trimu V rozsah pruhu.
+  Novou položku stačí přidat do receptu a postavit znovu.
+- Trim sheet: pruhy dlaždicované po U každé 2 m (lem, žebrování, šrouby, lišta, pás s výstupky, stupeň, mřížka,
+  dvojitá spára).
+
+**Mesh decaly v UE 5.8** (ověřeno `Tools/Tests/probe_mesh_decals.py`):
+- Projekt má `r.DBuffer = 1`. Mastery `M_Ship_MeshDecal` a `M_Ship_MeshDecalPaint` jsou v doméně Deferred Decal,
+  translucent. Engine z připojených pinů odvodí, co decal zapisuje:
+  - `meshdecal` (normála + drsnost + kov) nechá lak trupu;
+  - `meshdecal_paint` přidá barvu (štítky, pruhy).
+  - Hull master přijímá barvu, normálu i drsnost (`MDR_COLOR_NORMAL_ROUGHNESS`).
+- DBuffer nemá kanál AO. AO decalu jde jen do barvy u `meshdecal_paint`, u ostatních ho nese normála a drsnost.
+- Nanite neumí materiál v doméně decal. Decaly jsou proto **vlastní díl bez Nanite** (`SM_Ship_<Loď>_Decals`,
+  `no_nanite_parts`), stejně jako sklo. Zobrazit se mají i na Nanite trupu (DBuffer se aplikuje v base passu),
+  pilot to musí potvrdit snímkem.
+- Proti z-fightingu: čtverce decalů 2 mm nad povrchem (`r.MeshDecals.DepthBias` je 0).
+- Textury v setupu: klíče `decal_normal`, `decal_m`, `decal_bc` (import nastaví normálovou mapu nebo masky).
+  Parametry `decal_normal_strength`, `decal_opacity`, `decal_roughness_scale`.
+
 ## 3c. Exteriér hard-surface (AssetPipeline_Modular „Exteriér: hard-surface“)
 
 - AI trup je jen **objemová reference**. Loď se staví po dílech z JSON receptů v

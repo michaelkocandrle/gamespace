@@ -33,8 +33,10 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 MEL = unreal.MaterialEditingLibrary
 SHARED = "/Game/Ships/Shared/Materials"
 MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glass": SHARED + "/M_Ship_Glass",
-           "screen": SHARED + "/M_Ship_Screen", "decal": SHARED + "/M_Ship_Decal"}
-TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap"}
+           "screen": SHARED + "/M_Ship_Screen", "decal": SHARED + "/M_Ship_Decal",
+           "meshdecal": SHARED + "/M_Ship_MeshDecal", "meshdecal_paint": SHARED + "/M_Ship_MeshDecalPaint"}
+TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap",
+                  "decal_normal": "DecalNormalMap", "decal_m": "DecalMMap", "decal_bc": "DecalColorMap"}
 
 
 def _asset_tools():
@@ -552,11 +554,11 @@ def import_texture(ship, key, source, never_stream=False):
     texture = unreal.EditorAssetLibrary.load_asset("%s/%s" % (folder, name))
     if texture is None:
         raise RuntimeError("could not import %s" % filename)
-    if key == "normal":
+    if key in ("normal", "decal_normal"):
         texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_NORMALMAP)
         texture.set_editor_property("srgb", False)
         texture.set_editor_property("flip_green_channel", True)
-    elif key in ("orm", "ao"):
+    elif key in ("orm", "ao", "decal_m"):
         # Values, not colour: no sRGB curve on the way in.
         texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_MASKS)
         texture.set_editor_property("srgb", False)
@@ -591,7 +593,49 @@ def build_masters():
     MEL.recompile_material(glass)
     unreal.EditorAssetLibrary.save_loaded_asset(glass, only_if_is_dirty=False)
     return {"hull": hull, "pbr": build_pbr_master(), "glass": glass, "screen": build_screen_master(),
-            "decal": build_decal_master()}
+            "decal": build_decal_master(), "meshdecal": build_mesh_decal_master(False),
+            "meshdecal_paint": build_mesh_decal_master(True)}
+
+
+def build_mesh_decal_master(paint):
+    """Mesh decals (Tools/Blender/decal_library.py atlas on quads a hair above the hull, their own non-Nanite
+    part): a static mesh with a Deferred Decal material, drawn into the DBuffer (r.DBuffer is on). The engine
+    derives what the decal writes from the connected pins, so there are two masters:
+      meshdecal        normal + roughness + metallic only - seams, grilles, bolts keep the hull's paint;
+      meshdecal_paint  also base colour (labels, stripes), darkened by the item's AO.
+    Textures: DecalNormalMap (tangent, OpenGL -> flip green on import), DecalMMap (R alpha = where the decal
+    applies, G roughness, B metallic), DecalColorMap (sRGB). DecalNormalStrength flattens the normal."""
+    m = _fresh_material(MASTERS["meshdecal_paint" if paint else "meshdecal"])
+    m.set_editor_property("material_domain", unreal.MaterialDomain.MD_DEFERRED_DECAL)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    white = "/Engine/EngineResources/WhiteSquareTexture"
+    nmap = _texture_param(m, "DecalNormalMap", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL,
+                          "/Engine/EngineMaterials/DefaultNormal", -900, 0)
+    flat = _node(m, unreal.MaterialExpressionConstant3Vector, -900, 200, constant=unreal.LinearColor(0.0, 0.0, 1.0, 1.0))
+    strength = _node(m, unreal.MaterialExpressionLinearInterpolate, -500, 100)
+    _link(flat, strength, "A")
+    _link(nmap, strength, "B")
+    _link(_scalar(m, "DecalNormalStrength", 1.0, -900, 300), strength, "Alpha")
+    _output(strength, unreal.MaterialProperty.MP_NORMAL)
+    mm = _texture_param(m, "DecalMMap", unreal.MaterialSamplerType.SAMPLERTYPE_MASKS, white, -900, 450)
+    rough = _node(m, unreal.MaterialExpressionMultiply, -500, 450)
+    if not MEL.connect_material_expressions(mm, "G", rough, "A"):
+        raise RuntimeError("decal M.G -> roughness")
+    _link(_scalar(m, "DecalRoughnessScale", 1.0, -900, 650), rough, "B")
+    _output(rough, unreal.MaterialProperty.MP_ROUGHNESS)
+    if not MEL.connect_material_property(mm, "B", unreal.MaterialProperty.MP_METALLIC):
+        raise RuntimeError("decal M.B -> metallic")
+    opacity = _node(m, unreal.MaterialExpressionMultiply, -500, 800)
+    if not MEL.connect_material_expressions(mm, "R", opacity, "A"):
+        raise RuntimeError("decal M.R -> opacity")
+    _link(_scalar(m, "DecalOpacity", 1.0, -900, 850), opacity, "B")
+    _output(opacity, unreal.MaterialProperty.MP_OPACITY)
+    if paint:
+        col = _texture_param(m, "DecalColorMap", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR, white, -900, 1000)
+        _output(col, unreal.MaterialProperty.MP_BASE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
+    return m
 
 
 def build_decal_master():
@@ -688,6 +732,8 @@ def build_instance(name, folder, spec, masters, ship=None):
             c = spec[key]
             MEL.set_material_instance_vector_parameter_value(mi, param, unreal.LinearColor(c[0], c[1], c[2], 1.0))
     for key, param in (("metallic", "Metallic"), ("roughness", "Roughness"), ("emissive_strength", "EmissiveStrength"), ("opacity", "Opacity"),
+                       ("decal_normal_strength", "DecalNormalStrength"), ("decal_opacity", "DecalOpacity"),
+                       ("decal_roughness_scale", "DecalRoughnessScale"),
                        ("roughness_scale", "RoughnessScale"), ("metallic_scale", "MetallicScale"),
                        ("detail_tile_cm", "DetailTileCm"), ("detail_normal_strength", "DetailNormalStrength"),
                        ("detail_grunge_tile_cm", "DetailGrungeTileCm"), ("detail_rough_variation", "DetailRoughVariation"),
