@@ -196,11 +196,17 @@ else:
         radius, half = 42.0, 96.0
         raw = ship.get_hull_clearance(unreal.Vector(*socket), radius, half)
         got = ship.get_hull_clearance(unreal.Vector(*candidates[0]), radius, half)
-        # The first fighter's socket sat 2 cm from a belly hull shape before ExitClearanceCm moved it out.
-        check("raw SOCKET_Exit spot is too close to the hull (the bug)", raw < clearance_needed, "%.0f cm" % raw)
-        check("exit moved sideways out of the hull, same place along it", abs(first[0] - sock[0]) < 1.0 and first[1] > sock[1] + 100.0,
-              "socket (%.0f, %.0f) -> (%.0f, %.0f)" % (sock[0], sock[1], first[0], first[1]))
-        check("exit spot clear of the hull by ExitClearanceCm", clearance_needed <= got < clearance_needed + 30.0, "%.0f cm" % got)
+        # The first fighter's socket sat 2 cm from a belly hull shape before ExitClearanceCm moved it out
+        # sideways. A socket already clear of the hull is used as it is.
+        if raw < clearance_needed:
+            check("SOCKET_Exit too close to the hull: moved sideways out, same place along it",
+                  abs(first[0] - sock[0]) < 1.0 and first[1] > sock[1] + 100.0,
+                  "socket (%.0f, %.0f) -> (%.0f, %.0f)" % (sock[0], sock[1], first[0], first[1]))
+            check("exit spot clear of the hull by ExitClearanceCm", clearance_needed <= got < clearance_needed + 30.0, "%.0f cm" % got)
+        else:
+            check("SOCKET_Exit already clear of the hull: used as it is", abs(first[0] - sock[0]) < 1.0 and abs(first[1] - sock[1]) < 1.0,
+                  "socket (%.0f, %.0f) -> (%.0f, %.0f)" % (sock[0], sock[1], first[0], first[1]))
+            check("exit spot clear of the hull by ExitClearanceCm", got >= clearance_needed, "%.0f cm (needs %.0f)" % (got, clearance_needed))
         # The pilot's eye is the one picked with Tools/Blender/cockpit_view_survey.py and written into the
         # model as SOCKET_Cockpit (ArtSource/Ships/<Ship>/<Ship>_ai_build.json): the setup file's camera
         # has to sit on that socket, on the centreline, in the front half of the hull and inside its height.

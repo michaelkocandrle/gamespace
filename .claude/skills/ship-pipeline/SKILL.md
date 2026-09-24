@@ -196,8 +196,13 @@ Postup pro novou loď (vše přes MCP a skripty, nic ručně; ověřeno na Wayfa
 6. Teprve pak multi-image to 3D (níže).
 
 Generování:
-- **Higgsfield** multi-image to 3D: Topology triangle, 200–300 tis. tris, **PBR maps zapnout** (jinak
-  zapečené světlo), rigging ne. GLB do `ArtSource/Ships/<Loď>/Higgsfield/` a **nikdy needitovat**.
+- **Higgsfield** multi-image to 3D (MCP `generate_3d`, model `multi_image_to_3d`, 30 kreditů, fronta ~25 min):
+  `medias` = job id schválených pohledů (bok, 3/4, shora, zepředu), `should_texture` + `enable_pbr` true,
+  `topology` triangle, `target_polycount` 300000, `symmetry_mode` on, `texture_prompt` s paletou.
+  GLB do `ArtSource/Ships/<Loď>/Higgsfield/` a **nikdy needitovat**. Textury pro recept:
+  `blender -b --python Tools/Blender/glb_textures.py -- <glb> <out_dir>` (base_color, normal, roughness,
+  metallic), v receptu `source_model` (GLB) a `textures`. Wayfarer: nos na −X → `rotate_z_deg` 180.
+  Kontrola hned po stažení: `render_ship_views.py` (textury, 6 úhlů) + `silhouette_compare.py` proti maskám výkresu.
 - **Meshy**: surový export (FBX + PBR textury) do `ArtSource/Ships/<Loď>/Meshy/<stažení>/`, needitovat.
   Díly skriptem: `python Tools/Assets/meshy_generate.py [--dry-run|--refine|--hi] [--spec X.json --out DIR]`,
   klíč jen z `MESHY_API_KEY`. `--hi` = `geometry_resolution 4k`, ~30k tris (25 kreditů, preview 20).
@@ -236,9 +241,17 @@ Pravidla čísel:
 - 4K na 14m loď ≈ 3 mm/px → detail zblízka dělá **detailní vrstva materiálu** `M_Ship_PBR`
   (`detail_*` v setupu, `Tools/Assets/generate_detail_textures.py`), ne větší textura.
 - Kolize: trup rozděl, kde se zužuje; každý motor, kabina a noha podvozku zvlášť.
-- Díry v trupu po vyříznutí podvozku se zacelí samy; pahýly nad řezem zůstávají jako úchyty.
+- Díry v trupu po vyříznutí podvozku se zacelí samy; pahýly nad řezem zůstávají jako úchyty. U AI meshe
+  s otevřenými hranami (Wayfarer) zacelování natáhlo obří plochy přes křídla a trvalo 10 min → u dílu
+  `"fill_holes": false`.
+- Visící díly (pootevřená rampa) oddělit jako vlastní díl (`parts.Ramp`), jinak test podvozku vidí trup pod břichem.
+- Patky na spodku kolizního boxu: kolizní region kolem noh až k patkám (vrcholy dílu Gear se počítají) →
+  `gear_extension_cm` 0.
+- Kolize: k-DOP bere extrémy ≥ 10 cm od sebe a při selhání kontroly konvexnosti zahodí konec nejkratší hrany
+  (sliver plošky s nepřesnou normálou).
 
-Kontrola po buildu: porovnej v Blenderu s originálem ze stejných úhlů (kabina zblízka, spodek, 3/4) –
+Kontrola po buildu: `MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_AI.blend --python Tools/Blender/render_ship_views.py -- --out DIR`
+(EEVEE, 6 úhlů, UCX skryté) a porovnej s originálem ze stejných úhlů (kabina zblízka, spodek, 3/4) –
 render přes kameru do souboru, ne `get_viewport_screenshot` (fotí před překreslením; vynuť
 `bpy.ops.wm.redraw_timer(type="DRAW_WIN_SWAP")`). Fleky na kovu = normály/UV; rozmazané = malé textury.
 
@@ -402,6 +415,11 @@ Masks, sRGB off. Rozměry mocnina dvou, trup 4096², malé díly 1–2K.
 .\Tools\Shots.ps1 -Preset landing
 ```
 Mimo UE: `python Tools/Assets/tests/test_import_ship_plan.py`, `python Tools/Blender/tests/test_ship_export_core.py`.
+Loď pod testem: `Tools/Tests/ship_under_test.py` (`SHIP`), úvodní obrazovka: `MENU_SHIP` v `build_main_menu.py`
+(po přidání dílu ji postav znovu). Kontroly kokpitu a free looku se bez dílu Interior a socketů Display_ přeskočí.
+Po každém kroku lodi doplň `dossier.json` (u modelu klíč `model`: `renders`, `shots`, `known`), ulož rendery do
+`ArtSource/Ships/<Loď>/Renders/` (i `silhouette_compare render` masky `model_*.png`), snímky do `Docs/Shots/<Loď>/`
+a znovu publikuj Ship Matrix (1b).
 Když autor najde vizuální chybu, přidej do testu kontrolu, která by ji chytila.
 
 ## 8. Checklist modelu

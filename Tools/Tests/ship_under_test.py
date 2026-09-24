@@ -22,7 +22,7 @@ import os
 import unreal
 
 # The ship under test, e.g. "Example". None: no modelled ship yet.
-SHIP = None
+SHIP = "Wayfarer"
 
 NO_SHIP = "no ship model yet - new ship in design"
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -91,9 +91,21 @@ def recipe():
     return _json(art_path("{ship}_ai_build.json"))
 
 
-def skip(log, what):
+def has_part(part):
+    """True when the ship's manifest has a mesh of that part (e.g. "Interior", "Gear")."""
+    m = manifest()
+    return bool(m) and any(v.get("part") == part for v in m["meshes"].values())
+
+
+def socket_names():
+    """Socket names of the ship's manifest (without the SOCKET_ prefix), empty without a ship."""
+    m = manifest()
+    return [str(s).replace("SOCKET_", "") for s in (m or {}).get("sockets", {})] if m else []
+
+
+def skip(log, what, why=None):
     """Log a SKIP line for a check that needs the modelled ship. Always returns False (so `if not sut.SHIP and sut.skip(...)`)."""
-    log("SKIP %s (%s)" % (what, NO_SHIP))
+    log("SKIP %s (%s)" % (what, why or NO_SHIP))
     return False
 
 

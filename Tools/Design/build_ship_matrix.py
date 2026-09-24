@@ -348,6 +348,35 @@ def dossier_html(s):
         parts.append(step(n, "Koncepty", "Jak má loď vypadat",
                           "<p>%s</p>" % esc(dz.get("concepts_note", "Koncepty z Higgsfieldu s vodicí siluetou z výkresu; každý pohled se měří a prohlíží.")) + '<div class="concepts">%s</div>' % figs + body))
 
+    model = dz.get("model")
+    if model:
+        n += 1
+        body = "<p>%s</p>" % esc(model.get("note", ""))
+        renders = "".join(fig(os.path.join(s["dir"], r["file"]), r["caption"]) for r in model.get("renders", []))
+        if renders:
+            body += '<div class="concepts">%s</div>' % renders
+        masks = {v: os.path.join(s["dir"], "Renders", "model_%s.png" % v) for v in sc.VIEWS}
+        if s["done"]["check"] and all(os.path.exists(m) for m in masks.values()):
+            rows, tiles = [], []
+            names = {"front": "Zepředu", "side": "Bok", "top": "Shora"}
+            for v in ("side", "front", "top"):
+                st, mm, rr = sc.compare_masks(sc.load_render_mask(masks[v]), sc.load_render_mask(s["masks"][v]), False)
+                rows.append(("%s: model proti výkresu" % names[v], "IoU %s" % dec(st["iou"]),
+                             "sedí" if st["iou"] >= 0.88 else "odchylka – viz poznámka"))
+                tiles.append(sc.diff_image(mm, rr))
+            sheet = Image.new("RGB", (sc.NORM * 3, sc.NORM), (18, 22, 30))
+            for i, t in enumerate(tiles):
+                sheet.paste(t, (i * sc.NORM, 0))
+            body += fig(sheet, "3D model proti výkresu (bok, zepředu, shora): šedá = shoda, červená = model má navíc, tyrkys = modelu chybí.", "wide")
+            body += ('<div class="table-wrap"><table><thead><tr><th>Měření</th><th>Výsledek</th><th>Hodnocení</th></tr></thead><tbody>%s</tbody></table></div>'
+                     % "".join("<tr><th>%s</th><td>%s</td><td>%s</td></tr>" % (esc(a), esc(b), esc(c)) for a, b, c in rows))
+        shots = "".join(fig(os.path.join(ROOT, r["file"]), r["caption"]) for r in model.get("shots", []))
+        if shots:
+            body += "<h3>Ve hře (zabalená hra, 1920 × 1080)</h3>" + '<div class="concepts">%s</div>' % shots
+        if model.get("known"):
+            body += '<h3>Známé nedostatky</h3><ul class="list">%s</ul>' % "".join("<li>%s</li>" % esc(k) for k in model["known"])
+        parts.append(step(n, "3D model", model.get("title", "Model ve hře"), body))
+
     if dz.get("decisions") or dz.get("questions"):
         n += 1
         if dz.get("decisions"):

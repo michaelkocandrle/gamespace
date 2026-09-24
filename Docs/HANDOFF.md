@@ -1279,6 +1279,25 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       `ship-pipeline` 1b).
     - Publikováno: Ship Matrix https://claude.ai/artifact/VvqHBqFf3xesWcBznpcmHU, dossier Wayfarer
       https://claude.ai/artifact/Busq7MdkvGSXMp7RsgP7Ga.
+84. **Wayfarer model v1 létá ve hře** (24. 9. 2026, autor: „ano pusť se do toho“). Postup kroku 3D v1:
+    - Higgsfield `multi_image_to_3d` ze čtyř schválených pohledů (30 kreditů, ~25 min fronty): 310 tis. trojúhelníků
+      s PBR v `ArtSource/Ships/Wayfarer/Higgsfield/` (surové, needitovat).
+    - Textury z GLB vybalí `Tools/Blender/glb_textures.py`. `build_ai_ship.py` čte GLB (`source_model`) a délku měří
+      až po otočení.
+    - Recept `Wayfarer_ai_build.json`: otočení o 180°, délka 21,5 m, díly Gear a Ramp (bez zacelování děr), 10 kolizí
+      včetně dvou až k patkám (`gear_extension_cm` 0), sockety, emise trysek gondol. Po buildu `bake_ship_ao.py`.
+    - Export bez chyb, `Wayfarer_setup.json` s letovými hodnotami ze specu a dočasným kokpitem, import jako
+      `BP_Ship_Wayfarer` (výchozí pawn), úvodní obrazovka s Wayfarerem.
+    - Loď pod testem je `ship_under_test.SHIP = "Wayfarer"`. Testy: 20/20 OK. Zobecněné testy: výstup, když socket
+      už stojí mimo trup; kokpit a free look se přeskočí bez interiéru a Display socketů; test podvozku počítá s posunem
+      trupu k pivotu.
+    - Silueta modelu proti výkresu: bok 0,91, shora 0,78, zepředu 0,59. AI dala gondoly k trupu (y ±2,46 místo 3,4 m)
+      a sklopila křídla dolů.
+    - Známé: zevnitř kokpitu tmavé střepy AI trupu, neprůhledné sklo, rampa visí pootevřená, v ship_views „space“ je
+      loď mimo záběr.
+    - Nové nástroje: `Tools/Blender/render_ship_views.py` (rendery s texturami ze 6 úhlů) a sekce „3D model“
+      v dossieru (`dossier.json` → `model`).
+    - Další krok: průchozí interiér podle layoutu, uvnitř létající lodi.
 
 ---
 

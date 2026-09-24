@@ -21,7 +21,7 @@ import unreal
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # The ship on the title screen, e.g. "Example"; None: no ship.
-MENU_SHIP = None
+MENU_SHIP = "Wayfarer"
 
 LEVEL = "/Game/Maps/MainMenu"
 SKY_MATERIAL = "/Game/Environments/Space/M_Starfield_Sky"

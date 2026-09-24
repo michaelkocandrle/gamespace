@@ -1,0 +1,34 @@
+{
+ "bbox_min": [
+  -10.749999046325684,
+  -6.82722806930542,
+  -2.699643611907959
+ ],
+ "bbox_max": [
+  10.75,
+  6.82722806930542,
+  2.7515642642974854
+ ],
+ "views": {
+  "front": "C:\\gamespace\\gamespace\\ArtSource\\Ships\\Wayfarer\\Renders\\model_front.png",
+  "side": "C:\\gamespace\\gamespace\\ArtSource\\Ships\\Wayfarer\\Renders\\model_side.png",
+  "top": "C:\\gamespace\\gamespace\\ArtSource\\Ships\\Wayfarer\\Renders\\model_top.png"
+ },
+ "frames": {
+  "front": [
+   0.0,
+   0.025960326194763184,
+   14.74681282043457
+  ],
+  "side": [
+   4.76837158203125e-07,
+   0.025960326194763184,
+   23.219999313354492
+  ],
+  "top": [
+   4.76837158203125e-07,
+   0.0,
+   23.219999313354492
+  ]
+ }
+}

@@ -1,0 +1,202 @@
+{
+ "_comment": "How Tools/Blender/build_ai_ship.py turns the Higgsfield multi-image GLB (Higgsfield/Wayfarer_multiview_v1.glb, from the approved concepts side_a / threequarter / top_v2a / front) into Wayfarer_AI.blend. Coordinates are Blender metres after orienting and scaling: +X nose, +Y port, +Z up. Model to layout: x_layout = x + 10.25, z_layout = z + 1.03 (layout: hull aft end x 0, deck floor z 0). Measured on the oriented model (24. 9. 2026): 21.5 x 13.65 x 5.45 m; fuselage z -1.63 .. 1.92 (3.55 m, as drawn), 3.8-4.0 m wide ahead of the wings; engine pods merged close to the fuselage (centres y +-2.46 instead of the drawing's 3.4) with nozzles at x -10.75 .. -9.9, a cluster of small nozzles between them at x -9.1; wings droop towards the tips; gear fused into the belly: nose leg x 4.8 .. 6.3 on the centreline, main legs x -5.8 .. -4.5 at y +-1.4 .. 1.9, pads at z -2.7; the rear ramp hangs half open to z -2.57. Silhouette against the drawing (silhouette_compare.py, bbox): side 0.91, top 0.78, front 0.59.",
+ "ship": "Wayfarer",
+ "source_model": "ArtSource/Ships/Wayfarer/Higgsfield/Wayfarer_multiview_v1.glb",
+ "textures": {
+  "base_color": "ArtSource/Ships/Wayfarer/Higgsfield/Wayfarer_multiview_v1_tex/base_color.png",
+  "normal": "ArtSource/Ships/Wayfarer/Higgsfield/Wayfarer_multiview_v1_tex/normal.png",
+  "roughness": "ArtSource/Ships/Wayfarer/Higgsfield/Wayfarer_multiview_v1_tex/roughness.png",
+  "metallic": "ArtSource/Ships/Wayfarer/Higgsfield/Wayfarer_multiview_v1_tex/metallic.png"
+ },
+ "out_blend": "ArtSource/Ships/Wayfarer/Wayfarer_AI.blend",
+ "orient": {
+  "_comment": "The GLB has the nose along -X.",
+  "rotate_z_deg": 180,
+  "length_m": 21.5
+ },
+ "parts": {
+  "Gear": {
+   "_comment": "Everything below the belly at the three legs; the stubs above the cut stay on the hull as mounts. fill_holes off: on this mesh the filler bridged the open wing and pod boundaries with huge flat faces.",
+   "fill_holes": false,
+   "regions": [
+    {
+     "x": [4.6, 6.5],
+     "y": [-0.5, 0.5],
+     "z": [-9, -1.95]
+    },
+    {
+     "x": [-6.0, -4.3],
+     "y": [1.25, 2.1],
+     "z": [-9, -1.95]
+    },
+    {
+     "x": [-6.0, -4.3],
+     "y": [-2.1, -1.25],
+     "z": [-9, -1.95]
+    }
+   ],
+   "target_tris": 14000
+  },
+  "Ramp": {
+   "_comment": "The rear ramp hangs half open under the aft belly in the AI model (x -9.9 .. -7.8, down to z -2.57). Its own part keeps the hull's belly clean above the gear (landing test) and is the piece the game can later swing open and shut.",
+   "regions": [
+    {
+     "x": [-10.3, -7.6],
+     "y": [-0.95, 0.95],
+     "z": [-9, -1.75]
+    }
+   ],
+   "fill_holes": false,
+   "target_tris": 8000
+  }
+ },
+ "decimate": {
+  "hull_target_tris": 300000,
+  "default_importance": 0.5,
+  "protect_factor": 1.0,
+  "importance": []
+ },
+ "rebake": {
+  "base_color": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_BC.png",
+  "orm": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_ORM.png",
+  "normal": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_N.png",
+  "size": 4096,
+  "orm_size": 2048,
+  "uv_margin": 0.002,
+  "uv_angle_deg": 66,
+  "cage_extrusion_m": 0.05,
+  "max_ray_m": 0.2
+ },
+ "collision": [
+  {
+   "name": "nose",
+   "box": {
+    "x": [4.0, 10.75],
+    "y": [-2.0, 2.0],
+    "z": [-1.95, 2.3]
+   }
+  },
+  {
+   "name": "forward body",
+   "box": {
+    "x": [-1.0, 4.0],
+    "y": [-2.05, 2.05],
+    "z": [-1.95, 2.3]
+   }
+  },
+  {
+   "name": "aft body and ramp",
+   "box": {
+    "x": [-10.4, -5.5],
+    "y": [-1.6, 1.6],
+    "z": [-2.6, 2.3]
+   }
+  },
+  {
+   "name": "mid body",
+   "box": {
+    "x": [-5.5, -1.0],
+    "y": [-1.6, 1.6],
+    "z": [-1.95, 2.3]
+   }
+  },
+  {
+   "name": "pod left with fin",
+   "box": {
+    "x": [-10.75, -5.0],
+    "y": [1.4, 3.6],
+    "z": [-1.3, 2.75]
+   }
+  },
+  {
+   "name": "pod right with fin",
+   "box": {
+    "x": [-10.75, -5.0],
+    "y": [-3.6, -1.4],
+    "z": [-1.3, 2.75]
+   }
+  },
+  {
+   "name": "wing left",
+   "box": {
+    "x": [-6.8, 1.0],
+    "y": [2.0, 6.9],
+    "z": [-2.3, 0.9]
+   }
+  },
+  {
+   "name": "wing right",
+   "box": {
+    "x": [-6.8, 1.0],
+    "y": [-6.9, -2.0],
+    "z": [-2.3, 0.9]
+   }
+  },
+  {
+   "name": "gear main legs down to the pads",
+   "box": {
+    "x": [-6.0, -4.3],
+    "y": [-2.1, 2.1],
+    "z": [-2.75, -1.55]
+   }
+  },
+  {
+   "name": "gear nose leg down to the pad",
+   "box": {
+    "x": [4.6, 6.5],
+    "y": [-0.5, 0.5],
+    "z": [-2.75, -1.55]
+   }
+  }
+ ],
+ "sockets": {
+  "Cockpit": {
+   "_comment": "Provisional pilot eye above the seat of the drawing (layout x 16.9, z 1.78 = seat floor 0.35 + 1.43); refined with the interior (step 4).",
+   "location": [6.65, 0.0, 0.75]
+  },
+  "CameraTarget": {
+   "location": [0.0, 0.0, 0.3]
+  },
+  "Exit": {
+   "_comment": "Behind the rear ramp on the ground, clear of the collision.",
+   "location": [-12.3, 0.0, -2.6]
+  },
+  "Engine_L": {
+   "location": [-10.6, 2.46, 0.0],
+   "rotate_z_deg": 180
+  },
+  "Engine_R": {
+   "location": [-10.6, -2.46, 0.0],
+   "rotate_z_deg": 180
+  },
+  "Gear_Nose": {
+   "bottom_of": "Gear",
+   "box": {
+    "x": [4.6, 6.5],
+    "y": [-0.5, 0.5]
+   }
+  },
+  "Gear_L": {
+   "bottom_of": "Gear",
+   "box": {
+    "x": [-6.0, -4.3],
+    "y": [1.25, 2.1]
+   }
+  },
+  "Gear_R": {
+   "bottom_of": "Gear",
+   "box": {
+    "x": [-6.0, -4.3],
+    "y": [-2.1, -1.25]
+   }
+  }
+ },
+ "emissive": {
+  "_comment": "Nozzle discs of the two pod engines glow with engine load (the small central cluster is left out: its disc caught the ramp surroundings).",
+  "x_max": -8.5,
+  "normal_x_max": -0.6,
+  "radius": 0.9,
+  "centres_yz": [[2.46, 0.0], [-2.46, 0.0]],
+  "colour": [1.0, 0.55, 0.25]
+ }
+}

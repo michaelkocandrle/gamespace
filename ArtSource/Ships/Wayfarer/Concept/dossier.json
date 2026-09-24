@@ -1,6 +1,6 @@
 {
  "_comment": "Input for Tools/Design/build_ship_matrix.py: status line, card image, concept captions, the concepts used as front/side/top check views (measured on every build) and the author's decisions.",
- "status": "Návrh v1 schválen autorem 24. 9. 2026 – další krok: 3D model",
+ "status": "Létá ve hře – verze 1: exteriér z Higgsfieldu, dočasný kokpit; další krok průchozí interiér",
  "concepts": [
   {
    "file": "side_a.png",
@@ -68,5 +68,56 @@
    "Před 3D opravit:",
    "rozpětí v konceptu shora je o 8 % větší než ve výkresu – ve 3D platí výkres; gondoly bez lopatek ventilátoru."
   ]
- ]
+ ],
+ "model": {
+  "title": "Verze 1: létá ve hře (24. 9. 2026)",
+  "note": "Higgsfield multi-image to 3D (Meshy) ze čtyř schválených pohledů (bok A, 3/4, shora, zepředu), 310 tis. trojúhelníků s PBR texturami. Recept Wayfarer_ai_build.json ho otočí, zmenší na 21,5 m, oddělí podvozek a rampu, přepeče textury 4K, postaví 10 konvexních kolizí a sockety; export a import do Unrealu jako BP_Ship_Wayfarer, výchozí loď hry. Model se od výkresu liší: gondoly jsou přilepené k trupu a křídla skloněná dolů (proto shora a zepředu nižší shoda). Interiér se staví podle výkresu v dalším kroku.",
+  "renders": [
+   {
+    "file": "Renders/Wayfarer_front34.png",
+    "caption": "Blender, po receptu: 3/4 zepředu."
+   },
+   {
+    "file": "Renders/Wayfarer_rear34.png",
+    "caption": "3/4 zezadu: gondoly s tryskami, mezi nimi rampa."
+   },
+   {
+    "file": "Renders/Wayfarer_side.png",
+    "caption": "Bok ze pravoboku."
+   }
+  ],
+  "shots": [
+   {
+    "file": "Docs/Shots/Wayfarer/01_front_left.jpg",
+    "caption": "Let nad Veyrou (chase kamera)."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/00_gear_down_side.jpg",
+    "caption": "Podvozek venku před přistáním."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/06_landed_side.jpg",
+    "caption": "Přistáno na patkách."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/09_below_gear_down.jpg",
+    "caption": "Zespodu s podvozkem."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/12_thrusters_lit.jpg",
+    "caption": "Svítící trysky ve vesmíru."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/00_cockpit_horizon.jpg",
+    "caption": "Z kokpitu: zatím dočasná palubní deska a sloupky."
+   }
+  ],
+  "known": [
+   "Gondoly jsou blíž k trupu (y ±2,46 m místo 3,4 m) a křídla skloněná dolů – odchylka AI modelu od výkresu.",
+   "Zevnitř kokpitu jsou vidět tmavé střepy vnitřních ploch AI trupu; zmizí s modelovaným interiérem.",
+   "Sklo kabiny je z AI textury neprůhledné; skutečné sklo přijde s interiérem.",
+   "Rampa visí pootevřená (tak ji AI nakreslila); je to samostatný díl, později se bude otevírat a zavírat.",
+   "Na snímku ship_views „space“ loď vypadla ze záběru (kamera presetu počítá s menší lodí)."
+  ]
+ }
 }

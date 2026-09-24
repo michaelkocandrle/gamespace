@@ -334,7 +334,10 @@ else:
     ship_cdo = unreal.get_default_object(sut.bp_class())
     mesh = unreal.EditorAssetLibrary.load_asset(sut.asset("Meshes/SM_Ship_{ship}"))
     manifest = sut.manifest()
-    box_bottom = -manifest["suggested_pawn_settings"]["HullCollision_BoxExtent_cm"][2]
+    # The box is centred on the actor; the hull mesh sits at Hull_RelativeLocation (the pivot shift to the
+    # collision centre), so in mesh space the box bottom is -extent - hull offset.
+    pawn_settings = manifest["suggested_pawn_settings"]
+    box_bottom = -pawn_settings["HullCollision_BoxExtent_cm"][2] - pawn_settings.get("Hull_RelativeLocation_cm", [0, 0, 0])[2]
     sockets = []
     for name in ship_cdo.get_editor_property("gear_socket_names"):
         # The FBX import drops the SOCKET_ prefix; the ship accepts either spelling.

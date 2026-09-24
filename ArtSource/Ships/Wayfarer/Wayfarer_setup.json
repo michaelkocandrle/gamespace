@@ -1,0 +1,81 @@
+{
+ "_comment": "Look and feel of BP_Ship_Wayfarer, applied by Tools/Assets/import_ship.py after the size-based values from the manifest (everything here wins). Flight numbers from Wayfarer_spec.json (SCM 225 m/s, accelerations main 70 / retro 45 / strafe 40 / up 45 / down 35 m/s2, pitch / yaw / roll 55 / 48 / 150 deg/s). First flyable version (24. 9. 2026): Higgsfield exterior, no modelled interior yet, so the placeholder cockpit is on.",
+ "pawn": {
+  "_comment_flight": "cm/s2 and cm/s; rotation deg/s.",
+  "thrust_acceleration": 7000.0,
+  "retro_acceleration": 4500.0,
+  "strafe_acceleration": 4000.0,
+  "lift_acceleration": 4500.0,
+  "down_acceleration": 3500.0,
+  "scm_max_speed": 22500.0,
+  "nav_max_speed": 100000.0,
+  "boost_maneuver_multiplier": 1.6,
+  "boost_rotation_multiplier": 1.4,
+  "afterburner_thrust_multiplier": 2.0,
+  "afterburner_speed_multiplier": 2.4,
+  "afterburner_duration_seconds": 8.0,
+  "afterburner_refill_seconds": 40.0,
+  "pitch_rate": 55.0,
+  "yaw_rate": 48.0,
+  "roll_rate": 150.0,
+  "angular_responsiveness": 4.0,
+  "pitch_acceleration": 200.0,
+  "yaw_acceleration": 160.0,
+  "roll_acceleration": 450.0,
+  "_comment_gear": "Modelled gear (SM_Ship_Wayfarer_Gear): two collision hulls reach down to the pads (z -2.70 m), so the root box ends at the soles and gear_extension_cm is 0; stowed, the legs rise 110 cm (longest leg below the belly at -1.63).",
+  "gear_extension_cm": 0.0,
+  "gear_stow_travel_cm": 110.0,
+  "gear_deploy_seconds": 2.0,
+  "precision_speed_fraction": 0.15,
+  "precision_turn_scale": 0.45,
+  "free_look_max_yaw_deg": 180.0,
+  "_comment_cockpit": "No interior yet (step 4 builds it from the layout): the placeholder cockpit keeps the HUD from floating in empty space.",
+  "placeholder_cockpit": true,
+  "cockpit_light_intensity_cd": 1.5,
+  "hide_hull_in_cockpit": false,
+  "cockpit_view_pitch_deg": 0.0
+ },
+ "components": {
+  "camera_boom": {
+   "_comment": "About 0.8 x the length, as the chase camera settled for the previous ship.",
+   "target_arm_length": 1750.0,
+   "socket_offset": [0.0, 0.0, 420.0],
+   "camera_lag_speed": 6.0,
+   "camera_lag_max_distance": 3000.0,
+   "probe_size": 40.0
+  },
+  "chase_camera": {"field_of_view": 80.0},
+  "cockpit_camera": {"field_of_view": 88.0}
+ },
+ "materials": {
+  "_comment": "One re-baked texture set (Tools/Blender/build_ai_ship.py) on the PBR master, plus the pod nozzle discs. The Higgsfield paint is already light (warm off-white), so no tint.",
+  "MI_Ship_Wayfarer_Hull": {
+   "master": "pbr",
+   "slots": ["M_Ship_Wayfarer_Hull"],
+   "textures": {
+    "base_color": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_BC.png",
+    "orm": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_ORM.png",
+    "normal": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_N.png",
+    "ao": "ArtSource/Ships/Wayfarer/Textures/T_Ship_Wayfarer_AO.png"
+   },
+   "cavity_strength": 0.5,
+   "ao_strength": 0.6,
+   "detail_tile_cm": 18.0,
+   "detail_normal_strength": 1.0,
+   "wear_amount": 0.2,
+   "scorch_amount": 0.4,
+   "scorch_start_cm": -800.0,
+   "scorch_end_cm": -1075.0,
+   "roughness_scale": 0.85
+  },
+  "MI_Ship_Wayfarer_Thruster": {
+   "master": "hull",
+   "slots": ["M_Ship_Wayfarer_Emissive"],
+   "base_color": [0.35, 0.2, 0.1],
+   "metallic": 0.0,
+   "roughness": 0.4,
+   "emissive_color": [1.0, 0.55, 0.25],
+   "emissive_strength": 15.0
+  }
+ }
+}

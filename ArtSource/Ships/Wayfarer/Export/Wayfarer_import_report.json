@@ -1,0 +1,88 @@
+{
+  "manifest": "C:\\gamespace\\gamespace\\ArtSource\\Ships\\Wayfarer\\Export\\Wayfarer_manifest.json",
+  "ship": "Wayfarer",
+  "meshes": {
+    "SM_Ship_Wayfarer": [
+      "socket CameraTarget scale (100, 100, 100) reset to 1",
+      "socket Cockpit scale (100, 100, 100) reset to 1",
+      "socket Engine_L scale (100, 100, 100) reset to 1",
+      "socket Engine_R scale (100, 100, 100) reset to 1",
+      "socket Exit scale (100, 100, 100) reset to 1",
+      "socket Gear_L scale (100, 100, 100) reset to 1",
+      "socket Gear_Nose scale (100, 100, 100) reset to 1",
+      "socket Gear_R scale (100, 100, 100) reset to 1"
+    ],
+    "SM_Ship_Wayfarer_Gear": [],
+    "SM_Ship_Wayfarer_Ramp": []
+  },
+  "materials": [
+    "2 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal"
+  ],
+  "blueprint": {
+    "path": "/Game/Ships/Wayfarer/Blueprints/BP_Ship_Wayfarer",
+    "applied": [
+      "hull_collision.box_extent = [1075.0, 682.7, 272.5]",
+      "hull.static_mesh = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer",
+      "hull.relative_scale3d = [1.0, 1.0, 1.0]",
+      "hull.relative_location = [0.0, 0.0, -2.5]",
+      "camera_boom.target_arm_length = 3870.0",
+      "camera_boom.socket_offset_z = 545.0",
+      "camera_boom.probe_size = 50.0",
+      "camera_boom.camera_lag_max_distance = 4300.0",
+      "pawn.landing_footprint_radius_cm = 683.0",
+      "pawn.landing_max_gap_cm = 180.0",
+      "pawn.ground_contact_tolerance_cm = 25.0",
+      "pawn.heat_shake_cm = 43.0",
+      "cockpit_camera.relative_location = [665.0, 0.0, 72.5]",
+      "pawn.thrust_acceleration = 7000.0",
+      "pawn.retro_acceleration = 4500.0",
+      "pawn.strafe_acceleration = 4000.0",
+      "pawn.lift_acceleration = 4500.0",
+      "pawn.down_acceleration = 3500.0",
+      "pawn.scm_max_speed = 22500.0",
+      "pawn.nav_max_speed = 100000.0",
+      "pawn.boost_maneuver_multiplier = 1.6",
+      "pawn.boost_rotation_multiplier = 1.4",
+      "pawn.afterburner_thrust_multiplier = 2.0",
+      "pawn.afterburner_speed_multiplier = 2.4",
+      "pawn.afterburner_duration_seconds = 8.0",
+      "pawn.afterburner_refill_seconds = 40.0",
+      "pawn.pitch_rate = 55.0",
+      "pawn.yaw_rate = 48.0",
+      "pawn.roll_rate = 150.0",
+      "pawn.angular_responsiveness = 4.0",
+      "pawn.pitch_acceleration = 200.0",
+      "pawn.yaw_acceleration = 160.0",
+      "pawn.roll_acceleration = 450.0",
+      "pawn.gear_extension_cm = 0.0",
+      "pawn.gear_stow_travel_cm = 110.0",
+      "pawn.gear_deploy_seconds = 2.0",
+      "pawn.precision_speed_fraction = 0.15",
+      "pawn.precision_turn_scale = 0.45",
+      "pawn.free_look_max_yaw_deg = 180.0",
+      "pawn.placeholder_cockpit = True",
+      "pawn.cockpit_light_intensity_cd = 1.5",
+      "pawn.hide_hull_in_cockpit = False",
+      "pawn.cockpit_view_pitch_deg = 0.0",
+      "camera_boom.target_arm_length = 1750.0",
+      "camera_boom.socket_offset = [0.0, 0.0, 420.0]",
+      "camera_boom.camera_lag_speed = 6.0",
+      "camera_boom.camera_lag_max_distance = 3000.0",
+      "camera_boom.probe_size = 40.0",
+      "chase_camera.field_of_view = 80.0",
+      "cockpit_camera.field_of_view = 88.0",
+      "component Gear = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Gear",
+      "component Ramp = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Ramp"
+    ]
+  },
+  "removed": [],
+  "planet": {
+    "collision_warmup_reach_m": 16.1,
+    "collision_min_radius_m": 107.0
+  },
+  "game_mode": {
+    "path": "/Game/Blueprints/BP_SpaceGameMode",
+    "default_pawn_class": "/Game/Ships/Wayfarer/Blueprints/BP_Ship_Wayfarer",
+    "level": "/Game/Maps/TestSpace"
+  }
+}

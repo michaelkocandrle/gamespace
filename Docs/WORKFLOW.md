@@ -758,6 +758,14 @@ snímku.
 - m) **Světlý trup na světle šedém pozadí: děravá maska, IoU koncepce shora jen 0,56.** Vyříznutí siluety podle
   mediánu okraje nerozliší lomenou bílou od šedé. Generuj na kontrastním pozadí (tmavé pro světlý trup),
   nebo měř verzi po `remove_background` (`*_cut.png`).
+- n) **Na renderu lodi velké šedé plochy přes křídla.** Renderovaly se kolizní obálky UCX. `render_ship_views.py`
+  je skrývá (`hide_render`); vlastní render skripty musí taky.
+- o) **Po vyříznutí dílu recept běžel 10 min a trup dostal obří ploché trojúhelníky.** `holes_fill` na AI meshi
+  s otevřenými hranami spojil okraje křídel a gondol. Díl s `"fill_holes": false`.
+- p) **UCX „Not convex“, i když je obálka konvexní.** Titěrné plošky (0,0003 m²) z téměř shodných extrémů mají
+  nepřesnou normálu. `kdop_hull` teď slučuje extrémy do 10 cm a zahazuje vrcholy nejkratších hran.
+- q) **Test podvozku: sockety 2,5 cm nad spodkem boxu.** Box je vycentrovaný na aktéra, trup posunutý k pivotu
+  (`Hull_RelativeLocation_cm`). V prostoru meshe je spodek boxu −extent − posun.
 
 ---
 

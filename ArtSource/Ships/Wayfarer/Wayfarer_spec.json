@@ -1,6 +1,6 @@
 {
-  "_comment": "Ship Matrix shape (robertsspaceindustries.com/ship-matrix fields). Every number is set against the reference set starcitizenreference/ship_matrix/small_multirole.json (8 flight-ready small multirole / starter ships, median in _reference). Dimensions are measured from the exterior drawing (Tools/Design/draw_ship_design.py prints SHIP_SHEETS) and must stay equal to it. Layout: Design/Wayfarer_layout.json, drawings: Design/*.png, text: Design/Wayfarer_Design.md. Status: 2D design v1 approved by the author on 24. 9. 2026 (all proposed defaults); next: the 3D model.",
-  "_status": "design_v1_approved",
+  "_comment": "Ship Matrix shape (robertsspaceindustries.com/ship-matrix fields). Every number is set against the reference set starcitizenreference/ship_matrix/small_multirole.json (8 flight-ready small multirole / starter ships, median in _reference). Dimensions are measured from the exterior drawing (Tools/Design/draw_ship_design.py prints SHIP_SHEETS) and must stay equal to it. Layout: Design/Wayfarer_layout.json, drawings: Design/*.png, text: Design/Wayfarer_Design.md. Status: 2D design v1 approved by the author on 24. 9. 2026 (all proposed defaults); Model v1 flies in the game since 24. 9. 2026 (Higgsfield exterior, placeholder cockpit); next: the walkable interior.",
+  "_status": "design_v1_approved, model_v1_flying",
   "_reference": {
     "set": "starcitizenreference/ship_matrix/small_multirole.json",
     "ships": ["Avenger Titan", "Mustang Alpha", "Aurora Mk I MR", "100i", "Cutter", "C8X Pisces Expedition", "Nomad", "Syulen"],
@@ -12,7 +12,7 @@
     "name": "Wayfarer",
     "manufacturer": "Halcyon Freightworks",
     "description": "A lone pilot's first real home among the stars: a single-seat ship you walk into up the rear ramp, with an 8 SCU hold, serviceable components along the corridor, a cabin with a bed and a washroom, and a glass cockpit. Enough guns to defend itself, enough range to wander.",
-    "production_status": "in-concept",
+    "production_status": "flight-ready",
     "size": "small",
     "type": "multi-role",
     "focus": "Starter / Light Freight"

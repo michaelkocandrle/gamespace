@@ -116,6 +116,8 @@ finally:
 # Needs the model's Display_ sockets, so only with a modelled ship (Tools/Tests/ship_under_test.py).
 if not sut.SHIP:
     sut.skip(log, "dashboard focus towards the Display_ sockets")
+elif not any(n.startswith("Display_") for n in sut.socket_names()):
+    sut.skip(log, "dashboard focus towards the Display_ sockets", "%s has no Display_ sockets yet (no modelled cockpit)" % sut.SHIP)
 else:
     ship = eas.spawn_actor_from_class(sut.bp_class(), unreal.Vector(0.0, 0.0, 80000.0))
     try:

@@ -5,7 +5,8 @@
 Builds the ship from the raw AI export every time (a Meshy / Higgsfield FBX with PBR textures), so
 the whole conversion is repeatable and reviewable as data. Steps, all driven by the config:
 
-  1. import the source FBX into an empty scene, join it, apply its transforms;
+  1. import the source (FBX, or a Higgsfield / Meshy GLB via "source_model"; unpack the GLB's textures
+     first with Tools/Blender/glb_textures.py) into an empty scene, join it, apply its transforms;
   2. orient and size: rotate about Z so the nose points along +X, scale to length_m;
   3. parts: faces inside region boxes move to SM_Ship_<Ship>_<Part> (e.g. the landing gear, which AI
      models fuse into the hull); the holes the cut leaves in the hull are filled;
@@ -97,8 +98,18 @@ def import_source(cfg, ship):
     scene = bpy.context.scene
     scene.unit_settings.system = "METRIC"
     scene.unit_settings.scale_length = 1.0
-    bpy.ops.import_scene.fbx(filepath=path(cfg["source_fbx"]))
+    source = cfg.get("source_model") or cfg["source_fbx"]
+    if source.lower().endswith((".glb", ".gltf")):
+        bpy.ops.import_scene.gltf(filepath=path(source))
+    else:
+        bpy.ops.import_scene.fbx(filepath=path(source))
     meshes = [o for o in bpy.data.objects if o.type == "MESH"]
+    for o in meshes:
+        # glTF puts meshes under empty nodes (the Y-up conversion lives there): keep the world transform
+        # before the empties go.
+        world = o.matrix_world.copy()
+        o.parent = None
+        o.matrix_world = world
     for o in list(bpy.data.objects):
         if o.type != "MESH":
             bpy.data.objects.remove(o)
@@ -111,19 +122,21 @@ def import_source(cfg, ship):
     hull = bpy.context.view_layer.objects.active
     hull.parent = None
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    orient = cfg["orient"]
+    # Rotate first, then measure: the length is the extent along +X after the rotation, whichever
+    # axis the source model had it on.
+    hull.data.transform(Matrix.Rotation(math.radians(orient.get("rotate_z_deg", 0.0)), 4, "Z"))
     lo, hi = bounds([hull])
     size = hi - lo
-    orient = cfg["orient"]
     scale = orient["length_m"] / size.x if "length_m" in orient else 1.0
     centre = (lo + hi) * 0.5
-    matrix = (Matrix.Rotation(math.radians(orient.get("rotate_z_deg", 0.0)), 4, "Z") @ Matrix.Scale(scale, 4)
-              @ Matrix.Translation(-Vector((centre.x, centre.y, 0.0))))
+    matrix = Matrix.Scale(scale, 4) @ Matrix.Translation(-Vector((centre.x, centre.y, 0.0)))
     hull.data.transform(matrix)
     hull.data.update()
     hull.name = hull.data.name = "SM_Ship_%s" % ship
     lo, hi = bounds([hull])
     log("source %s: %d triangles, oriented and scaled x%.3f to %s m, min %s max %s" % (
-        os.path.basename(cfg["source_fbx"]), tri_count(hull), scale, tuple(round(c, 2) for c in hi - lo),
+        os.path.basename(source), tri_count(hull), scale, tuple(round(c, 2) for c in hi - lo),
         tuple(round(c, 2) for c in lo), tuple(round(c, 2) for c in hi)))
     return hull
 
@@ -467,15 +480,32 @@ def kdop_hull(name, points):
     extremes = []
     for d in KDOP:
         best = max(points, key=lambda p: p.dot(d))
-        if all((best - e).length > 1e-4 for e in extremes):
+        # 10 cm apart at least: near-duplicate extremes (a box-like region has several directions
+        # hitting almost the same corner) left sliver faces (0.0003 m2) whose float normals failed the
+        # exporter's convexity check by a few millimetres. 10 cm is nothing for a ship's collision.
+        if all((best - e).length > 0.1 for e in extremes):
             extremes.append(best)
-    bm = bmesh.new()
-    for p in extremes:
-        bm.verts.new(p)
-    result = bmesh.ops.convex_hull(bm, input=bm.verts)
-    for v in result.get("geom_interior", []):
-        if isinstance(v, bmesh.types.BMVert):
+    for _ in range(12):
+        bm = bmesh.new()
+        for p in extremes:
+            bm.verts.new(p)
+        result = bmesh.ops.convex_hull(bm, input=bm.verts)
+        for v in result.get("geom_interior", []) + result.get("geom_unused", []):
+            if isinstance(v, bmesh.types.BMVert) and v.is_valid:
+                bm.verts.remove(v)
+        for v in [v for v in bm.verts if not v.link_faces]:
             bm.verts.remove(v)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        # The exporter's convexity check (every vertex behind every face plane, 1e-4 of the size) fails on
+        # sliver faces whose float normals tilt; drop one end of the shortest edge and hull again.
+        eps = max((max(v.co[i] for v in bm.verts) - min(v.co[i] for v in bm.verts)) for i in range(3)) * 1e-4
+        bad = any(f.normal.dot(v.co - f.calc_center_median()) > eps for f in bm.faces for v in bm.verts)
+        if not bad:
+            break
+        edge = min(bm.edges, key=lambda e: e.calc_length())
+        drop = edge.verts[0].co.copy()
+        extremes = [p for p in extremes if (p - drop).length > 1e-6]
+        bm.free()
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
     bm.free()

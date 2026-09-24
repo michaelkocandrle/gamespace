@@ -120,6 +120,10 @@ check("seat cushion under the pilot, out of the forward view",
 # 6) the ship's modelled interior (Tools/Tests/ship_under_test.py)
 if not sut.SHIP:
     sut.skip(log, "the modelled cockpit interior, the eye over its tub and behind its dashboard")
+elif not sut.has_part("Interior"):
+    # A ship flying before its interior is built (e.g. the Wayfarer's first version) keeps the placeholder.
+    check("%s has no modelled interior yet: placeholder cockpit on" % sut.SHIP, pawn.get_editor_property("placeholder_cockpit"))
+    sut.skip(log, "the modelled cockpit interior", "%s has no interior part yet" % sut.SHIP)
 else:
     manifest = sut.manifest()
     interior = manifest["meshes"].get("SM_Ship_%s_Interior" % sut.SHIP)
