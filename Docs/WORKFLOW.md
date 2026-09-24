@@ -1,5 +1,8 @@
 # Gamespace – pracovní postup a nástrahy
 
+> **Vstupním bodem je od 24. 9. 2026 `CLAUDE.md` v kořeni repozitáře** (krátký přehled, pravidla, příkazy) a skills v `.claude/skills/` (načítají se podle úkolu). Tento dokument nečti celý, hledej v něm grepem; zůstává jako historie a úplný seznam.
+
+
 Stav k **19. 9. 2026**. Doplňuje `Docs/HANDOFF.md`: HANDOFF říká **co** projekt je a v jakém je
 stavu, tento dokument **jak** se na něm pracuje krok za krokem a **na čem jsme se už spálili**.
 Nová session: nejdřív HANDOFF (hlavně kapitola 2, pravidla), potom tento dokument celý.

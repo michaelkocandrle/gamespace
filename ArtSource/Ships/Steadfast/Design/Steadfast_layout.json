@@ -1,5 +1,5 @@
 {
- "_comment": "Steadfast deck layout, the single source for the 2D design drawings (Tools/Design/draw_deck_plans.py) and later for the 3D build. Ship coordinates in metres: x forward from the aft end of the hull (0) to the nose (30); the main engines sit in the two side nacelles (beam 22 m), so the aft wall only carries their feed lines, y to port (+) / starboard (-), z up from the lower deck floor. Every room and every object has a purpose; nothing is filler (author, 24. 9. 2026, HANDOFF point 73). Status: DRAFT for the author's approval.",
+ "_comment": "Steadfast deck layout, the single source for the 2D design drawings (Tools/Design/draw_ship_design.py) and later for the 3D build. Ship coordinates in metres: x forward from the aft end of the hull (0) to the nose (30); the main engines sit in the two side nacelles (beam 22 m), so the aft wall only carries their feed lines, y to port (+) / starboard (-), z up from the lower deck floor. Every room and every object has a purpose; nothing is filler (author, 24. 9. 2026, HANDOFF point 73). Status: DRAFT for the author's approval.",
  "decks": {
   "lower": {
    "floor_z": 0.0,

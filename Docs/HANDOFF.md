@@ -1,5 +1,8 @@
 # Gamespace – handoff pro další session
 
+> **Vstupním bodem je od 24. 9. 2026 `CLAUDE.md` v kořeni repozitáře** (krátký přehled, pravidla, příkazy) a skills v `.claude/skills/` (načítají se podle úkolu). Tento dokument nečti celý, hledej v něm grepem; zůstává jako historie a úplný seznam.
+
+
 Stav k **19. 9. 2026**. Tento dokument je vstupní bod pro novou session (Claude Code) i pro autora
 projektu. Popisuje, co projekt je, jak se s autorem pracuje, kde je co v kódu, co je hotové, co je
 rozbité nebo neověřené a co následuje.
@@ -1216,7 +1219,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - `ArtSource/Ships/Steadfast/Design/Steadfast_Design.md`: vize, parametry, uspořádání, pohyb posádky, designový jazyk a otevřené otázky.
     - `Steadfast_layout.json`: jediný zdroj pravdy – místnosti, objekty s účelem, dveře; metry, x dopředu, y na levobok.
     - Výkresy `Steadfast_deck_upper.png`, `Steadfast_deck_lower.png`, `Steadfast_cutaway.png` kreslí `Tools/Design/draw_ship_design.py <layout.json>` (Pillow, písmo Bahnschrift).
-    - `Steadfast_spec.json` je ve tvaru RSI Ship Matrix. Kód ho nečte; letové hodnoty se ladí jinde.
+    - `ArtSource/Ships/Steadfast/Steadfast_spec.json` je ve tvaru RSI Ship Matrix. Kód ho nečte; letové hodnoty se ladí jinde.
 
 ---
 
