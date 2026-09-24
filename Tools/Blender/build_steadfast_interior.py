@@ -814,6 +814,78 @@ def console(room, lo, hi, top_tilt, body, button, white, dark, rows=3, keep_clea
             room.add("Button", box((x - 0.025, y - 0.025, z - 0.01), (x + 0.025, y + 0.025, z + 0.012)), mat)
 
 
+def toggle(room, x, y, z, mats, up=True):
+    """A toggle switch on a sloped top: a base plate, a guard either side, a lever."""
+    room.add("ToggleBase", box((x - 0.022, y - 0.016, z), (x + 0.022, y + 0.016, z + 0.008)), mats["dark"])
+    for side in (-1.0, 1.0):
+        room.add("ToggleGuard", box((x - 0.018, y + side * 0.016, z), (x + 0.018, y + side * 0.02, z + 0.025)), mats["pipe"])
+    tip = (x + (0.012 if up else -0.012), y, z + 0.035)
+    room.add("ToggleLever", cylinder((x, y, z + 0.008), tip, 0.004, segments=6), mats["white"])
+
+
+def knob(room, x, y, z, mats, r=0.018):
+    room.add("Knob", cylinder((x, y, z), (x, y, z + 0.022), r, segments=10), mats["dark"])
+    room.add("KnobCap", cylinder((x, y, z + 0.022), (x, y, z + 0.026), r * 0.8, segments=10), mats["pipe"])
+
+
+def front_console(room, mats, keep_clear):
+    """The console at the nose, in three panels with seams between them: a knee recess at the front,
+    a chamfered lip with a light line, vent slots, screen brows, and the top filled with toggles,
+    knobs, lit keys and indicators between the screens. Top line as before: 0.75 m at the pilot's
+    edge rising to 0.95 m at the nose (the screens and the radar sit on it)."""
+    dx0, dx1 = DASH_X
+    top = lambda x: 0.75 + 0.2 * (x - dx0) / (dx1 - dx0)
+    section = [(dx1, 0.0), (dx0 + 0.22, 0.0), (dx0 + 0.22, 0.34), (dx0 + 0.04, 0.46), (dx0, 0.5),
+               (dx0, 0.71), (dx0 + 0.035, top(dx0 + 0.035)), (dx1, top(dx1))]
+    panels = ((-1.1, -0.44), (-0.4, 0.4), (0.44, 1.1))
+    for y0, y1 in panels:
+        room.add("Console", prism(section, y0, y1), mats["dark"])
+        # the lip: a trim band along the pilot's edge, and a thin light line under it
+        room.add("ConsoleLip", box((dx0 - 0.012, y0 + 0.01, 0.66), (dx0 + 0.002, y1 - 0.01, 0.71)), mats["pipe"])
+        room.add("ConsoleLight", box((dx0 - 0.014, y0 + 0.03, 0.645), (dx0 - 0.004, y1 - 0.03, 0.655)), mats["strip"])
+        # vent slots on the front face below the lip
+        y = y0 + 0.08
+        while y < y1 - 0.08:
+            room.add("ConsoleVent", box((dx0 - 0.006, y - 0.012, 0.53), (dx0 + 0.002, y + 0.012, 0.62)), mats["pipe"])
+            y += 0.05
+    # seams: dark gaps between the panels, a raised spine in the middle for the radar
+    # (the console's own profile, a centimetre lower and set back, so the seam stays under the top)
+    seam = [(x + 0.02, z - 0.012) for x, z in section]
+    for y in (-0.42, 0.42):
+        room.add("ConsoleSeam", prism(seam, y - 0.02, y + 0.02), mats["pipe"])
+    room.add("RadarPlinth", cylinder((dx0 + 0.6, 0.0, top(dx0 + 0.6)), (dx0 + 0.6, 0.0, top(dx0 + 0.6) + 0.07), 0.2, segments=24),
+             mats["pipe"])
+    # a glowing rim only: the ring sits below the plinth's top, a hair wider, so its cap stays hidden
+    room.add("RadarRing", cylinder((dx0 + 0.6, 0.0, top(dx0 + 0.6) + 0.035), (dx0 + 0.6, 0.0, top(dx0 + 0.6) + 0.05), 0.205,
+                                   segments=24), mats["strip"])
+    # screen brows: a thin hood over the far edge of each screen bay
+    for y in SEATS_Y:
+        room.add("ScreenBrow", box((dx0 + 0.47, y - 0.3, top(dx0 + 0.47)), (dx0 + 0.53, y + 0.3, top(dx0 + 0.53) + 0.06)),
+                 mats["pipe"])
+    # the top: rows of controls wherever the screens and the radar leave room
+    def free(x, y):
+        if any(a <= x <= b and c <= y <= d for a, b, c, d in keep_clear):
+            return False
+        return (x - (dx0 + 0.6)) ** 2 + y ** 2 > 0.26 ** 2
+    for r, x in enumerate((dx0 + 0.1, dx0 + 0.22, dx0 + 0.62, dx0 + 0.78, dx0 + 0.95, dx0 + 1.1)):
+        z = top(x)
+        y = -1.05
+        k = 0
+        while y < 1.05:
+            if free(x, y):
+                kind = (r + k) % 5
+                if kind in (0, 1):
+                    toggle(room, x, y, z, mats, up=(k % 2 == 0))
+                elif kind == 2:
+                    knob(room, x, y, z, mats)
+                elif kind == 3:
+                    room.add("Key", box((x - 0.02, y - 0.02, z), (x + 0.02, y + 0.02, z + 0.012)), mats["button"])
+                else:
+                    room.add("Indicator", box((x - 0.008, y - 0.008, z), (x + 0.008, y + 0.008, z + 0.006)), mats["strip"])
+            y += 0.075
+            k += 1
+
+
 def build_cockpit(templates, mats):
     """The cockpit: a deck at the back with the door, the canopy over the front, a low console at
     the nose, MFDs on arms, two seats, side consoles and an overhead panel. Returns the room and
@@ -863,8 +935,7 @@ def build_cockpit(templates, mats):
     # The low console at the nose, following the taper, with a screen for each pilot.
     dx0, dx1 = DASH_X
     clear = [(dx0 + 0.1, dx0 + 0.5, y - 0.3, y + 0.3) for y in SEATS_Y]
-    console(room, (dx0, -1.1, 0.0), (dx1, 1.1, 0.95), 0.2, mats["dark"], mats["button"], mats["white"], mats["dark"],
-            rows=2, keep_clear=clear)
+    front_console(room, mats, clear)
     # The console's two screens, tipped back towards the pilots (the console top rises 0.2 m over 1.2 m).
     tilt = math.atan2(0.2, dx1 - dx0)
     face_up = mathutils.Vector((-math.sin(tilt), 0.0, math.cos(tilt)))

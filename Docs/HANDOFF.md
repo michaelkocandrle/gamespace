@@ -1179,6 +1179,12 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     0,027 → 0,035, na horní hraně SC (0,024–0,035). Díry: žádná nová.
     - Kabely jsou černé a šedé. Materiál s „light“ ve jméně import bere jako svítící pás – první verze měla
       oranžově svítící kabel.
+71. **Přední pult kokpitu Steadfastu** (24. 9. 2026, konec kroku 5). `front_console`: tři panely se spárami,
+    výřez pro kolena, zkosený lem se světelnou linkou, větrací štěrbiny, stříšky nad obrazovkami, podstavec
+    radaru se svítícím lemem a horní deska plná páček, knoflíků, podsvícených kláves a kontrolek (7 700
+    trojúhelníků celý kokpit). Horní linie pultu beze změny, obrazovky a radar sedí na stejném místě.
+    - **Autor k interiéru (24. 9. 2026), vstup do příštího hodnocení:** proti SC „pořád znatelně něco chybí“,
+      předměty v místnostech působí osaměle a některé jsou špatně umístěné.
 
 ---
 
