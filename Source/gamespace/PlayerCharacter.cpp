@@ -97,6 +97,18 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 	FollowCamera->SetFieldOfView(80.f);
+
+	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
+	FirstPersonCamera->SetRelativeLocation(FirstPersonEyeOffset);
+	FirstPersonCamera->SetUsingAbsoluteRotation(true);       // turned to the view each tick, like the boom
+	FirstPersonCamera->bUsePawnControlRotation = false;
+	FirstPersonCamera->SetFieldOfView(FirstPersonFov);
+	// First person from the start (BeginPlay repeats it through SetFirstPerson, but a character that
+	// never begins play - in the editor, in tests - must already be in it).
+	FollowCamera->SetAutoActivate(false);
+	FirstPersonCamera->SetAutoActivate(true);
+	Movement->bOrientRotationToMovement = false;
 }
 
 void APlayerCharacter::BeginPlay()
@@ -104,6 +116,10 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->JumpZVelocity = JumpVelocity;
+
+	FirstPersonCamera->SetRelativeLocation(FirstPersonEyeOffset);
+	FirstPersonCamera->SetFieldOfView(FirstPersonFov);
+	SetFirstPerson(bFirstPerson);
 
 	// Gravity before the first movement tick, or the character starts falling along world -Z.
 	GravityFrame = GetActorQuat();
@@ -220,13 +236,49 @@ void APlayerCharacter::FaceDirection(const FVector& Forward)
 	UpdateView();
 }
 
+void APlayerCharacter::SetFirstPerson(bool bOn)
+{
+	bFirstPerson = bOn;
+	FirstPersonCamera->SetActive(bOn);
+	FollowCamera->SetActive(!bOn);
+	// In first person the body faces where you look (you see it turn under you looking down); in
+	// third person it turns towards where it walks.
+	GetCharacterMovement()->bOrientRotationToMovement = !bOn;
+	if (USkeletalMeshComponent* Body = GetMesh())
+	{
+		// The head would fill the view from inside; the rest of the body stays, and so do its shadows.
+		if (bOn)
+		{
+			Body->HideBoneByName(TEXT("head"), EPhysBodyOp::PBO_None);
+		}
+		else
+		{
+			Body->UnHideBoneByName(TEXT("head"));
+		}
+	}
+	const float Limit = bOn ? FirstPersonPitchLimit : 0.f;
+	LookPitch = bOn ? FMath::Clamp(LookPitch, -Limit, Limit) : FMath::Clamp(LookPitch, MinViewPitch, MaxViewPitch);
+}
+
+void APlayerCharacter::HandleToggleView(const FInputActionValue& /*Value*/)
+{
+	SetFirstPerson(!bFirstPerson);
+}
+
 void APlayerCharacter::UpdateView()
 {
-	CameraBoom->SetWorldRotation(GravityFrame * FRotator(LookPitch, LookYaw, 0.f).Quaternion());
+	const FQuat View = GravityFrame * FRotator(LookPitch, LookYaw, 0.f).Quaternion();
+	CameraBoom->SetWorldRotation(View);
+	FirstPersonCamera->SetWorldRotation(View);
+	if (bFirstPerson)
+	{
+		// The body turns with the view's yaw, upright in the local gravity.
+		SetActorRotation(GravityFrame * FRotator(0.f, LookYaw, 0.f).Quaternion());
+	}
 	if (AController* PawnController = GetController())
 	{
 		// Only for systems that read it (audio listener, AI perception); nothing here steers by it.
-		PawnController->SetControlRotation(CameraBoom->GetComponentRotation());
+		PawnController->SetControlRotation(View.Rotator());
 	}
 }
 
@@ -337,6 +389,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		Input->BindAction(SprintAction, ETriggerEvent::Triggered, this, &APlayerCharacter::HandleSprint);
 		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::HandleSprintReleased);
 		Input->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::HandleInteract);
+		ToggleViewAction = NewObject<UInputAction>(this, TEXT("IA_ToggleView_Runtime"));
+		ToggleViewAction->ValueType = EInputActionValueType::Boolean;
+		ViewMappingContext = NewObject<UInputMappingContext>(this, TEXT("IMC_CharacterView_Runtime"));
+		ViewMappingContext->MapKey(ToggleViewAction, EKeys::V);
+		Input->BindAction(ToggleViewAction, ETriggerEvent::Started, this, &APlayerCharacter::HandleToggleView);
 	}
 
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -344,6 +401,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		? ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()) : nullptr)
 	{
 		Subsystem->AddMappingContext(CharacterMappingContext, 0);
+		if (ViewMappingContext)
+		{
+			Subsystem->AddMappingContext(ViewMappingContext, 1);
+		}
 	}
 }
 
@@ -356,6 +417,10 @@ void APlayerCharacter::UnPossessed()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->RemoveMappingContext(CharacterMappingContext);
+			if (ViewMappingContext)
+			{
+				Subsystem->RemoveMappingContext(ViewMappingContext);
+			}
 		}
 	}
 	MoveInput = FVector2D::ZeroVector;
@@ -377,7 +442,9 @@ void APlayerCharacter::HandleLook(const FInputActionValue& Value)
 {
 	const FVector2D Delta = Value.Get<FVector2D>() * (LookSensitivity * USpaceUserSettings::GetMouseSensitivityScale());
 	LookYaw = FRotator::NormalizeAxis(LookYaw + float(Delta.X));
-	LookPitch = FMath::Clamp(LookPitch + float(Delta.Y) * (bInvertPitch ? -1.f : 1.f), MinViewPitch, MaxViewPitch);
+	const float Low = bFirstPerson ? -FirstPersonPitchLimit : MinViewPitch;
+	const float High = bFirstPerson ? FirstPersonPitchLimit : MaxViewPitch;
+	LookPitch = FMath::Clamp(LookPitch + float(Delta.Y) * (bInvertPitch ? -1.f : 1.f), Low, High);
 }
 
 void APlayerCharacter::HandleJump(const FInputActionValue& /*Value*/)

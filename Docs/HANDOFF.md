@@ -1196,6 +1196,22 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Výsledek (`-Preset cockpit`, 1080p): nad planetou 0,10–0,19, ve vesmíru 0,05.
     - Nedělal jsem tlačítka PWR/WPN/THR/SHLD/COOL a QTM/RADR/PROX/HIT/MISL: v SC ovládají systémy (energie,
       zbraně, štíty), které hra zatím nemá – přijdou se SC-6.
+73. **Autorovo hodnocení interiéru a nový směr** (24. 9. 2026). Předměty v lodi nepůsobí, že na loď patří
+    a mají využití; klávesnice u dveří (`Prop_AccessPoint`) je no-go (velká, svítivá, levná), přední pult
+    Steadfastu „jako z levné low poly hry“, stěny kitu pořád low poly. Co sedí: nápisy (decaly), osvětlení
+    lištami, hologramy (ladit), sedadla z Meshy. **Nový postup pro každou loď:** nejdřív detailní návrh ve 2D
+    – technický list podle RSI Ship Matrix a popsaný řez a půdorysy, kde má každá místnost a každý předmět
+    účel (vzory `Docs/UI/reference_tvorba_lodi/`) – a do 3D až po autorově schválení, bez kompromisů a bez
+    stylizace podle jednoho dvou obrázků. **Pořadí (autor):** 1 první osoba, 2 usedání do pilotního křesla
+    (animace z Mixamo), 3 2D návrh Steadfastu, 4 stavba Steadfastu podle něj.
+74. **První osoba** (24. 9. 2026, krok 1 z bodu 73). Výchozí a v lodích jediný pohled hráče; třetí osoba
+    zůstává na testy – **V** přepíná (`APlayerCharacter::SetFirstPerson`).
+    - `FirstPersonCamera` na kapsli v očích (165 cm nad chodidly, 14 cm před obličejem), FOV 90°, pohled
+      nahoru a dolů ±80°. Tělo se otáčí s pohledem (v první osobě `bOrientRotationToMovement` vypnuté),
+      hlava je skrytá (`HideBoneByName("head")`), zbytek těla i stíny zůstávají – při pohledu dolů je vidět.
+    - Výchozí stav už v konstruktoru (postava, která nezačne hru – editor, testy – je taky v první osobě).
+    - Klávesnice u dveří jsou z interiéru pryč. Snímky `interior_walk` jsou teď z první osoby.
+    - Test `test_character_l6.py`: první osoba výchozí, oči 1,6–1,7 m, přepnutí tam a zpět.
 
 ---
 
@@ -1301,7 +1317,7 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
 | Přiblížení na displeje (držet) | Z / prostřední tlačítko myši |
 | Vystoupit (jen když LANDED) | F |
 
-**Postava:** WASD, myš, Space skok, Shift sprint, F nastoupit.
+**Postava:** WASD, myš, Space skok, Shift sprint, F nastoupit, **V první / třetí osoba** (výchozí první).
 
 **Globální:** Escape (F10) menu a pauza, H HUD (kompaktní / plný / skrytý), **I** interiér Steadfastu
 (tam a zpátky; totéž tlačítko v menu pauzy).

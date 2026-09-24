@@ -69,6 +69,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Player")
 	bool IsInArtificialGravity() const { return bInGravityVolume; }
 
+	/**
+	 * First person: the camera in the character's eyes, the body turned with the view and visible
+	 * looking down, its head hidden. The default and, in ships, the only view for the player (author,
+	 * 24. 9. 2026, Star Citizen style); third person stays for testing, V switches.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Player|Camera")
+	void SetFirstPerson(bool bOn);
+
+	UFUNCTION(BlueprintPure, Category = "Player|Camera")
+	bool IsFirstPerson() const { return bFirstPerson; }
+
 	/** Turns the view (and so the walking direction) to yaw degrees in the gravity frame. */
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void SetLookYaw(float Yaw) { LookYaw = FRotator::NormalizeAxis(Yaw); }
@@ -123,6 +134,20 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Components")
 	TObjectPtr<UCameraComponent> FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Components")
+	TObjectPtr<UCameraComponent> FirstPersonCamera;
+
+	/** Eyes relative to the capsule's centre, cm: 165 cm above the feet, a little in front of the face. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	FVector FirstPersonEyeOffset = FVector(14.f, 0.f, 69.f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera", meta = (ClampMin = "60.0", ClampMax = "120.0"))
+	float FirstPersonFov = 90.f;
+
+	/** How far up and down you can look in first person (third person keeps MinViewPitch / MaxViewPitch). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera", meta = (ClampMin = "0.0", ClampMax = "89.0"))
+	float FirstPersonPitchLimit = 80.f;
 
 	// --- Input ---------------------------------------------------------------------------------
 
@@ -209,6 +234,7 @@ private:
 	void HandleSprintReleased(const FInputActionValue& Value);
 	void HandleInteract(const FInputActionValue& Value);
 	void HandleToggleHud(const FInputActionValue& Value);
+	void HandleToggleView(const FInputActionValue& Value);
 
 	void UpdateGravity();
 	void UpdateView();
@@ -216,6 +242,14 @@ private:
 	FCelestialEnvironment Environment;
 	bool bHasEnvironment = false;
 	bool bInGravityVolume = false;
+
+	bool bFirstPerson = true;
+
+	/** V: first / third person. Made at run time, like the controller's global keys. */
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> ToggleViewAction;
+	UPROPERTY(Transient)
+	TObjectPtr<UInputMappingContext> ViewMappingContext;
 
 	FVector2D DebugWalkInput = FVector2D::ZeroVector;
 	float DebugWalkSeconds = 0.f;

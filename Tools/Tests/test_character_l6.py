@@ -163,6 +163,17 @@ try:
         out = character.debug_sample_animation(speed, falling, ground is not None, (ground or (0, 0))[0], (ground or (0, 0))[1], seconds)
         return dict(zip(BONES, [v3(v) for v in out])) if len(out) >= len(BONES) else None
 
+    # First person (24. 9. 2026): the default, eyes 1.65 m above the feet, V toggles third person.
+    fp_camera = character.get_editor_property("first_person_camera")
+    follow = character.get_editor_property("follow_camera")
+    check("first person is the default", character.is_first_person() and fp_camera.is_active() and not follow.is_active())
+    eye = fp_camera.get_editor_property("relative_location")
+    check("first-person eyes 1.6-1.7 m above the feet", 160.0 <= eye.z + 96.0 <= 170.0, "%.0f cm" % (eye.z + 96.0))
+    character.set_first_person(False)
+    check("third person on request (testing)", not character.is_first_person() and follow.is_active() and not fp_camera.is_active())
+    character.set_first_person(True)
+    check("and back to first person", character.is_first_person() and fp_camera.is_active())
+
     idle = sample()
     check("pose evaluates", idle is not None and all(abs(c) < 1e5 for p in idle.values() for c in p),
           "no anim instance" if idle is None else "")

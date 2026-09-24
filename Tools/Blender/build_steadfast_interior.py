@@ -154,7 +154,6 @@ PARTS = {
     "lamp": "Props/Prop_Light_Wide",
     "door": "Platforms/Door_DarkMetal",
     "vent": "Props/Prop_Vent_Big",
-    "terminal": "Props/Prop_AccessPoint",
     "computer": "Props/Prop_Computer",
     "core": "Columns/Column_Hollow",
     "pipes": "Columns/Column_Pipes",
@@ -644,7 +643,6 @@ def build_bay(shell, templates, room_mats):
         wall(room, templates["wall"], (xs[0], -DOOR_HALF), (xs[1], -DOOR_HALF), (0.0, 1.0))
         wall(room, templates["wall"], (xs[0], DOOR_HALF), (xs[1], DOOR_HALF), (0.0, -1.0))
         ceiling(room, templates["ceiling"], xs, (-DOOR_HALF, DOOR_HALF))
-    room.place(templates["terminal"], (BAY_X[0] + 0.25, 1.6, 1.35), yaw=0.0)
     doorway(room, templates, (BAY_X[1], 0.0), (1.0, 0.0), room_mats)
     doorway(room, templates, (BAY_X[0], 0.0), (-1.0, 0.0), room_mats)
     hull(room, room_mats["dark"])
@@ -668,7 +666,6 @@ def build_corridor(templates, room_mats):
     ceiling_strips(room, CORRIDOR_X, CORRIDOR_Y, room_mats["strip"], skip_x_walls=True)
     for y in (CORRIDOR_Y[0] + 0.03, CORRIDOR_Y[1] - 0.03):             # low guide lines by the floor
         strip(room, (CORRIDOR_X[0] + 0.1, y, 0.06), (CORRIDOR_X[1] - 0.3, y, 0.06), room_mats["strip"], size=(0.02, 0.03))
-    room.place(templates["terminal"], (16.0, CORRIDOR_Y[1] - 0.25, 1.35), yaw=-math.pi / 2.0)
     room.place(templates["vent"], (12.0, 0.0, HEIGHT - 0.04), roll=math.pi)
     xs = (CORRIDOR_X[0] + 0.25, CORRIDOR_X[1] - 0.35)
     for y, r in ((-0.72, 0.05), (0.72, 0.035)):
