@@ -86,7 +86,9 @@ def main():
         for name, spec in sorted(plan["materials"].items()):
             mi = unreal.EditorAssetLibrary.load_asset("%s/%s" % (folder, name))
             parent = mi.get_editor_property("parent") if mi else None
-            want_parent = {"hull": "M_Ship_Hull", "pbr": "M_Ship_PBR", "glass": "M_Ship_Glass", "screen": "M_Ship_Screen"}[spec["master"]]
+            want_parent = {"hull": "M_Ship_Hull", "pbr": "M_Ship_PBR", "glass": "M_Ship_Glass", "screen": "M_Ship_Screen",
+                           "layered": "M_Ship_Layered", "meshdecal": "M_Ship_MeshDecal",
+                           "meshdecal_paint": "M_Ship_MeshDecalPaint", "decal": "M_Ship_Decal"}[spec["master"]]
             check("%s parent %s" % (name, want_parent), parent is not None and parent.get_name() == want_parent,
                   parent.get_name() if parent else "missing")
             for key, param in (("base_color", "BaseColorMap"), ("orm", "ORMMap"), ("normal", "NormalMap")):

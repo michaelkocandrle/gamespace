@@ -413,6 +413,30 @@ MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/decal_libra
 - Rychlý náhled bez UE: Eevee render herního `.blend` s atlasy na slotech Decal / DecalPaint / Trim /
   TrimPaint. Normal-only čtverce v něm vypadají světlejší, protože Eevee neumí „ponechat barvu trupu“.
 
+**Vrstva tvaru** (`Tools/Blender/hs_detail.py`, blok `detail`, volá `hs_build_ship.py` po zónách):
+- `hull_plates`: oblast (`x`, `z` / `abs_y`, `normal_z`, `centre`) se rozřízne rovinami hranic, zkopíruje, dostane
+  Solidify ven (`t`) a zkosení. `secondary` znamená sekundární lak.
+- `hull_recesses`: inset + stěny + tmavé dno a výplň (`louvers` nebo `pipes`). Trubky v žlabu na hřebeni sahají
+  k povrchu, jinak klesne silueta.
+- `pod`: `plates` (úhly: 0 ven, 90 nahoru; pozor na ploutev na hřbetu), `bay` (panel i substruktura pryč, uzavřená
+  vana s potrubím, aktuátorem a objímkami), `pipe_run`. Levá strana se staví a zrcadlí.
+- Po každé změně `silhouette_compare.py` proti maskám výkresu; hodnoty nesmí klesnout.
+
+**Vrstvený materiál** (`M_Ship_Layered`, klíč `layered`; masky peče `Tools/Blender/hs_layers.py`, blok `layers`):
+- Vertex colour: R = AO (24 kosinových paprsků, 0,5 m), G = 1 − konvexní hrana (jen vrcholy s ploškami do
+  `edge_max_face_m2`), B = 1 − sekundární lak (atribut plošky `paint2` z `hs_detail.py`), A = míra vrstev
+  (`region_x` = pilot).
+- Instance nastavují libovolný parametr: `vectors` / `scalars` v setupu (PrimaryColor, SecondaryColor,
+  BareMetalColor, DirtColor, EdgeWear, DirtAmount, GrungeAmount, …).
+
+**Světla** (`Tools/Blender/hs_lights.py`, blok `lights`):
+- `lenses`: tmavé pouzdro a emisní čočka paprskem na povrch, `mirror_color` (červená vlevo, zelená vpravo),
+  volitelně `light` (point nebo spot s `aim`).
+- `strips`: pás po gondole, `r` = pevný poloměr, například dno šachty.
+- `points`: samotná světla.
+- Skutečná světla: scéna → `Export/<Loď>_lights.json` → `import_ship.py` → komponenty `Light_*` bez stínů.
+- Ladění podle snímků: polohové světlo 3 cd (křídlo je 30 cm od něj), čočky mají emisi 25 až 30.
+
 **Detail ve hře zblízka:** preset `Tools/Shots/pilot_views.json` používá volnou kameru v prostoru lodi
 (`camera_local` / `look_local` v metrech; X dopředu, Y doprava, Z nahoru; up vektor bere z lodi).
 Převod ze souřadnic layoutu: x − offset_x, −y, z − offset_z.

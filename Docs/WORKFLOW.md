@@ -781,6 +781,25 @@ snímku.
   kolísá. Testovat jen proti spodní hraně a trup předtím rozříznout podél čáry (`cut_polyline`).
 - x) **Detaily kitu ve hře chybí.** `new_from_object` zahodí instance z geometry nodes. Do instanceru přidat
   Realize Instances (`hs_assemble_ship.py` to dělá).
+- y) **Díl kitu (poklop) na střeše stojí šikmo.** Jediný paprsek trefil stěnu panelové drážky. `place_greebles`
+  bere průměr normál 7 paprsků přes stopu dílu; díly nedávat na spáru.
+- z) **Deska vybraná podle středů plošek má schodovité okraje.** Plošky trupu na hraně oblasti prošly jen zčásti.
+  `hs_detail._cut_region` plošky nejdřív rozřízne rovinami hranic oblasti (`bisect_plane`).
+- aa) **Žlab na hřebeni střechy snížil siluetu z boku.** Trubky v něm musí sahat až k povrchu. Silueta se měří po
+  každé změně tvaru (`silhouette_compare.py`, nesmí klesnout).
+- ab) **Decal nebo pás visí ve vzduchu přes hranu střechy.** Bod mřížky minul povrch nebo skočil na jinou plochu.
+  `hs_decals.py` takový decal vynechá a vypíše, pás rozdělí na souvislé běhy.
+- ac) **Tmavé mřížky mají na tmavém krytu světlý rámeček.** Mip bleed přímé alfy: v menších mipech se průhledná
+  (světlá) barva mísí do okraje. V atlasu rozšířit barvu do průhledných texelů (`dilate_colour`).
+- ad) **Vertex colour opotřebení zalije celou plochu.** Hodnota ve vrcholu se interpoluje přes každou plošku, které
+  se dotýká. Hranu značit jen u vrcholů obklopených malými ploškami (prostřední řada zkosení).
+- ae) **Vertex colours se neimportují, i když je FBX má.** Legacy FBX reimport existujícího assetu bere volbu
+  z uložených import dat assetu (IGNORE). `import_ship.py` ji nastaví i tam. `has_vertex_colors()` u Nanite meshe
+  v commandletu vrací False, ověřuje se volba importu, nebo snímek.
+- af) **Pravá gondola má spáry jinde než levá.** Rotační díl pro pravou stranu dostal stejnou fázi panelů. Fáze
+  pro zrcadlo je `(180 − fáze) mod rozteč`.
+- ag) **Volná kamera snímku je „nakloněná“.** Nad kulatou planetou není osa Z světa „nahoru“ lodi. Kamera
+  v prostoru lodi (`camera_local`) bere up vektor lodi.
 
 ---
 

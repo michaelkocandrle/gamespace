@@ -70,8 +70,8 @@
   ]
  ],
  "model": {
-  "title": "Exteriér v2: přesně podle výkresu (24. 9. 2026)",
-  "note": "AI model (verze 1 a 1.1) měl roztavenou geometrii a lak to nespravil (autor: „geometrie je mimo, tohle není dost dobré“). Exteriér v2 staví Tools/Blender/hs_build_ship.py přímo z obrysů schváleného výkresu: trup jako loft (v každém řezu tvar čela natažený na šířku shora a výšku z boku), ostatní díly jako průnik vytažených obrysů, gondoly rotačně podle poloměrů z výkresu se sáním a tryskou. Navrch skutečné panelové drážky, rám kabiny se zapuštěným sklem, řezy přesně podle čar pro oranžový pruh a tmavý nos, účelové detaily (servisní poklopy komponent, větrání chladičů, plnicí hrdlo, senzor). hs_assemble_ship.py z toho udělá herní meshe, kolize a sockety. Žádná AI geometrie ani AI textura. Stavba odhalila chybu ve výkresu (ploutev shora byla užší, než je vykloněná) – opraveno ve výkresu.",
+  "title": "Exteriér v2 + pilot vrstev detailu (24. 9. 2026)",
+  "note": "AI model (verze 1 a 1.1) měl roztavenou geometrii a lak to nespravil (autor: „geometrie je mimo, tohle není dost dobré“). Exteriér v2 staví Tools/Blender/hs_build_ship.py přímo z obrysů schváleného výkresu: trup jako loft (v každém řezu tvar čela natažený na šířku shora a výšku z boku), ostatní díly jako průnik vytažených obrysů, gondoly rotačně podle poloměrů z výkresu se sáním a tryskou. Navrch skutečné panelové drážky, rám kabiny se zapuštěným sklem, řezy přesně podle čar pro oranžový pruh a tmavý nos, účelové detaily (servisní poklopy komponent, větrání chladičů, plnicí hrdlo, senzor). hs_assemble_ship.py z toho udělá herní meshe, kolize a sockety. Žádná AI geometrie ani AI textura. Stavba odhalila chybu ve výkresu (ploutev shora byla užší, než je vykloněná) – opraveno ve výkresu. Pilot vrstev detailu podle SC na gondolách a zádi: knihovna mesh decalů a trim sheet, střední vrstva tvaru (desky s tloušťkou a stupni, otevřená šachta s potrubím a aktuátorem, zapuštěné mřížky), vrstvený materiál (dva laky, AO a špína, opotřebení hran, grunge) a světla (polohová, obrysová, reflektory, světlo v šachtě). Silueta proti výkresu se nezhoršila (bok 0,9786, shora 0,9898, zepředu 0,915). Zbytek lodi čeká na schválení pilotu.",
   "renders": [
    {
     "file": "Renders/Wayfarer_front34.png",
@@ -88,6 +88,22 @@
   ],
   "shots": [
    {
+    "file": "Docs/Shots/Wayfarer/pilot_rear_left.jpg",
+    "caption": "Pilot detailu: záď a gondola, desky, šachta, decaly, dvoubarevný lak."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/pilot_pod_close.jpg",
+    "caption": "Otevřená servisní šachta gondoly se světlem, poklop, víčko plnění, madla."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/pilot_rear.jpg",
+    "caption": "Záď: obrys rampy, výstražné štítky, žaluzie, zadní a obrysová světla."
+   },
+   {
+    "file": "Docs/Shots/Wayfarer/pilot_dusk.jpg",
+    "caption": "Soumrak: polohové světlo, světlo v šachtě, reflektor."
+   },
+   {
     "file": "Docs/Shots/Wayfarer/v2_close_three_quarter.jpg",
     "caption": "Zblízka ve hře: čisté hrany, drážky, poklopy."
    },
@@ -98,23 +114,12 @@
    {
     "file": "Docs/Shots/Wayfarer/v2_below_gear_down.jpg",
     "caption": "Zespodu s podvozkem."
-   },
-   {
-    "file": "Docs/Shots/Wayfarer/v2_rear.jpg",
-    "caption": "Zezadu z chase kamery."
-   },
-   {
-    "file": "Docs/Shots/Wayfarer/v2_thrusters_lit.jpg",
-    "caption": "Trysky ve vesmíru."
-   },
-   {
-    "file": "Docs/Shots/Wayfarer/v2_landed_side.jpg",
-    "caption": "Přistáno."
    }
   ],
   "known": [
-   "Detail je zatím střídmý: křídla a ploutve jsou rovné desky, podvozek jsou hranoly, materiál je jednobarevný lak bez jemné struktury.",
-   "Velký poklop na střeše nad kajutou trčí šikmo – opravit orientaci.",
+   "Pilot vrstev detailu je jen na gondolách a zádi; zbytek lodi je čistá v2 do schválení pilotu.",
+   "Střední hustota je pod úrovní SC: velké plochy gondol mezi deskami, chybí textové decaly (registrace, výrobce).",
+   "Křídla a ploutve jsou rovné desky, podvozek jsou hranoly (další krok po pilotu).",
    "Kokpit je zevnitř prázdný (dočasná palubní deska), sklo je poloprůhledné do prázdna – přijde s interiérem.",
    "Rampa zatím není samostatný díl (je součástí trupu)."
   ]

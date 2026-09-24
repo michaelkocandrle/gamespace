@@ -1341,6 +1341,41 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Stavba odhalila chybu ve výkresu: ploutev byla shora užší (y 3,55), než je zepředu vykloněná (3,95). Opraveno.
     - Zbývá detail: křídla a ploutve jsou rovné desky, podvozek jsou hranoly, lak je bez jemné struktury, velký poklop
       na střeše trčí šikmo, sklo je do prázdna, rampa není samostatný díl.
+87. **Wayfarer: pilot vrstev detailu podle SC na gondolách a zádi** (24. 9. 2026). Autor chtěl stavět na přesném
+    základu a jít po rozboru SC (Argo MOLE): decaly, trim, vrstvy tvaru, materiál, světla. Siluetu nesměl pilot
+    zhoršit. Každý krok je samostatný commit, skill `ship-pipeline` 3b3. Pilot pokrývá gondoly a záď (x 0 až 6,9 m),
+    zbytek lodi je záměrně čistý kvůli srovnání.
+    - Krok 1, knihovna decalů: `Tools/Blender/decal_library.py` + `ArtSource/Ships/Shared/Decals/decal_library.json`,
+      16 položek a atlasy N/H/AO/BC/M.
+    - Krok 2, trim sheet: 8 pásů.
+    - Krok 3, mesh decaly v UE 5.8: DBuffer, mastery `M_Ship_MeshDecal` a `M_Ship_MeshDecalPaint`, vlastní díl bez
+      Nanite. Ve hře ověřeno, že se kreslí i na Nanite trupu.
+    - Krok 4, vrstvy tvaru: `Tools/Blender/hs_detail.py`.
+      - Trup: desky s tloušťkou (ořez rovinami), stupňovitý kryt zádi, skluznice na břiše, zapuštěné mřížky a žlab
+        s potrubím.
+      - Gondoly: pancéřové sektory se stupni, otevřená šachta s potrubím a aktuátorem, vnější potrubí s objímkami.
+      - Střešní poklop leží rovně: normála je průměr 7 paprsků a poklop se posunul ze spáry.
+      - Pravá gondola má zrcadlenou fázi panelů.
+    - Rozmístění decalů a trimu: `Tools/Blender/hs_decals.py` (87 decalů a 38 pásů). Decal přes hranu se vynechá,
+      pás se na nespojitosti rozdělí.
+    - Krok 5, materiál: `M_Ship_Layered`.
+      - Dva laky podle masky, AO se špínou, opotřebení hran a grunge.
+      - Vše z vertex colour, které peče `Tools/Blender/hs_layers.py` (AO paprsky, konvexní hrany jen na malých
+        ploškách, sekundární lak, míra vrstev).
+    - Krok 6, světla: `Tools/Blender/hs_lights.py`.
+      - Polohová světla (červená a zelená), bílé zadní, jantarová obrysová.
+      - Reflektory na ramenou, světlo v šachtě, světelné pásy.
+      - Skutečná světla jdou přes `Export/<Loď>_lights.json` do komponent blueprintu.
+    - Snímky: volná kamera v prostoru lodi (`camera_local` / `look_local`) a preset `pilot_views` včetně soumraku.
+      Srovnání Meshy / čistá v2 / pilot ze stejných úhlů: https://claude.ai/artifact/PjCuewmYjX94QG41id7TNC
+    - Silueta: bok 0,9786 (dřív 0,9781), shora 0,9898 (0,9881), zepředu 0,915 (0,911). Všech 22 testů prošlo.
+    - Otevřené:
+      - střední hustota je pořád pod SC (prázdné plochy gondol, chybí textové decaly);
+      - opotřebení hran je jen na zkoseních;
+      - záď v základu fasetovaná;
+      - křídla a ploutve ploché;
+      - noc netestovaná (jen soumrak).
+    - Celou loď přestavím až po schválení pilotu autorem.
 
 ---
 
