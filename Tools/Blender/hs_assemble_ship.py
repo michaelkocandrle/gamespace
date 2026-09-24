@@ -68,6 +68,14 @@ def main(argv):
             bpy.data.meshes.remove(old)
     for o in kit_objs:
         bpy.data.objects.remove(o)
+    # panel identity for the layered material (hs_layers.panel_ids): a hash of the source object per face
+    import zlib
+    for o in meshes:
+        a = o.data.attributes.get("part_obj") or o.data.attributes.new("part_obj", "INT", "FACE")
+        h = zlib.crc32(o.name.split(".")[0].encode()) & 0x7FFFFFFF
+        a.data.foreach_set("value", [h] * len(o.data.polygons))
+        if o.name == "SM_Ship_%s_Hull" % ship:
+            recipe["_hull_obj_hash"] = h
     # every mesh needs a real material in every slot: kit greebles take "greeble_material", anything else
     # without one takes "default_material" (both slot names from the recipe's materials)
     def mat(key):
@@ -146,6 +154,10 @@ def main(argv):
         bpy.ops.uv.select_all(action="SELECT")
         bpy.ops.uv.pack_islands(rotate=True, margin_method="ADD", margin=0.001)
         bpy.ops.object.mode_set(mode="OBJECT")
+    # 4b) panel ids in UV channel 1 (after the unwrap, which works on the first UV map)
+    if recipe.get("layers"):
+        import hs_layers
+        hs_layers.panel_ids(out[""], recipe, off)
     # 5) collision and sockets, from layout coordinates
     hull = out[""]
     parts = {k: v for k, v in out.items() if k}

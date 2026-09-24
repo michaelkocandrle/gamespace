@@ -173,9 +173,14 @@ def loft(name, side_poly, top_poly, front_poly, step, ring, seams=None):
                     y, z = y - d.x * depth, z - d.y * depth
             row.append(bm.verts.new((x, y, z)))
         rows.append(row)
-    for r0, r1 in zip(rows, rows[1:]):
+    seal = bm.faces.layers.int.new("seal")
+    seam_rows = {k for k, (x, is_seam) in enumerate(stations) if is_seam}
+    for ri, (r0, r1) in enumerate(zip(rows, rows[1:])):
         for i in range(ring):
-            bm.faces.new((r0[i], r0[(i + 1) % ring], r1[(i + 1) % ring], r1[i]))
+            f = bm.faces.new((r0[i], r0[(i + 1) % ring], r1[(i + 1) % ring], r1[i]))
+            # the groove walls of a seam are the rubber seal between two panels
+            if ri in seam_rows or ri + 1 in seam_rows or i in groove_idx or (i + 1) % ring in groove_idx:
+                f[seal] = 1
     bm.faces.new(rows[0][::-1])
     bm.faces.new(rows[-1])
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
@@ -436,6 +441,15 @@ def main(argv):
             c.objects.unlink(ob)
         coll.objects.link(ob)
         ob.data.materials.append(mats[cfg.get("material", "paint")])
+        sa = ob.data.attributes.get("seal")
+        if sa is not None and "seal" in mats:
+            # rubber seals in the seam grooves (SC: dark gaskets between the plates)
+            ob.data.materials.append(mats["seal"])
+            vals = [0] * len(ob.data.polygons)
+            sa.data.foreach_get("value", vals)
+            for poly, v in zip(ob.data.polygons, vals):
+                if v:
+                    poly.material_index = 1
         made[part] = ob
         report[part] = {"object": name, "faces": len(ob.data.polygons), "views": sorted(vs)}
     if recipe.get("wings"):
@@ -458,6 +472,11 @@ def main(argv):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import hs_gear
         report["gear"] = hs_gear.build(recipe, made, coll, mats, recipe.get("detail", {}).get("bevel", {"angle_deg": 30, "width": 0.006, "segments": 2}), ship)
+    if recipe.get("functional"):
+        # RCS thrusters, antennas, sensor domes, gun mounts, hinges, connectors (Tools/Blender/hs_functional.py)
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hs_functional
+        report["functional"] = hs_functional.apply(recipe, made, coll, mats, recipe.get("detail", {}).get("bevel", {"angle_deg": 30, "width": 0.006, "segments": 2}))
     hz = recipe["parts"].get("hull", {}).get("zones", [])
     if hz and "hull" in made:
         hull = made["hull"]

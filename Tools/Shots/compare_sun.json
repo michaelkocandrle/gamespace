@@ -1,0 +1,216 @@
+{
+ "_comment": "Before / after comparison, sun light (space.SunDir -39 45): the angles of ship_views, hull_views and pilot_views. Run -Width 1920 -Height 1080.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 4.0,
+   "console": [
+    "space.SunDir -39 45",
+    "stat unit"
+   ]
+  },
+  {
+   "name": "left",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "chase_yaw": 90,
+   "chase_pitch": -5,
+   "settle": 1.5
+  },
+  {
+   "name": "rear_left",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "chase_yaw": 45,
+   "chase_pitch": -12,
+   "settle": 1.5
+  },
+  {
+   "name": "rear",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5
+  },
+  {
+   "name": "below_gear_down",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "chase_yaw": 150,
+   "chase_pitch": 35,
+   "settle": 1.5
+  },
+  {
+   "name": "close_three_quarter",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "chase_yaw": 150,
+   "chase_pitch": -18,
+   "chase_zoom": 0.6,
+   "settle": 1.5
+  },
+  {
+   "name": "front_left",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "chase_yaw": 135,
+   "chase_pitch": -12,
+   "settle": 1.5
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "name": "front34",
+   "camera_local": [
+    15.75,
+    -8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "name": "nose_close",
+   "camera_local": [
+    10.75,
+    -3.5,
+    0.8
+   ],
+   "look_local": [
+    8.25,
+    -0.8,
+    0.1
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "name": "wing_top",
+   "camera_local": [
+    -6.25,
+    -9,
+    3.8
+   ],
+   "look_local": [
+    -2.75,
+    -4.5,
+    -0.4
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "name": "fin",
+   "camera_local": [
+    -12.75,
+    -6.5,
+    3.0
+   ],
+   "look_local": [
+    -8.45,
+    -3.6,
+    1.8
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.5,
+   "fov": 50,
+   "name": "gear_main",
+   "camera_local": [
+    -3.85,
+    -4.3,
+    -2.2
+   ],
+   "look_local": [
+    -5.05,
+    -2.25,
+    -2.3
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 60,
+   "name": "pilot_pod_close",
+   "camera_local": [
+    -5.45,
+    -6.2,
+    1.4
+   ],
+   "look_local": [
+    -7.45,
+    -3.6,
+    0.3
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 60,
+   "name": "pilot_rear",
+   "camera_local": [
+    -16.25,
+    -0.0,
+    2.3
+   ],
+   "look_local": [
+    -7.25,
+    -0.0,
+    0.3
+   ]
+  }
+ ]
+}

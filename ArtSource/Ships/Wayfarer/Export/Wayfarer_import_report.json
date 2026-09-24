@@ -17,12 +17,13 @@
     "SM_Ship_Wayfarer_Gear": []
   },
   "materials": [
-    "18 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_MeshDecalAO, /Game/Ships/Shared/Materials/M_Ship_Layered"
+    "9 decal materials: HazardExhaust_L, HazardExhaust_R, HazardRamp, Logo_L, Logo_R, Name_L, Name_R, Reg_L, Reg_R",
+    "19 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_MeshDecalAO, /Game/Ships/Shared/Materials/M_Ship_Layered"
   ],
   "blueprint": {
     "path": "/Game/Ships/Wayfarer/Blueprints/BP_Ship_Wayfarer",
     "applied": [
-      "hull_collision.box_extent = [1075.9, 733.0, 280.0]",
+      "hull_collision.box_extent = [1075.9, 735.5, 280.0]",
       "hull.static_mesh = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer",
       "hull.relative_scale3d = [1.0, 1.0, 1.0]",
       "hull.relative_location = [0.89, 0.0, 0.0]",
@@ -30,7 +31,7 @@
       "camera_boom.socket_offset_z = 560.0",
       "camera_boom.probe_size = 50.0",
       "camera_boom.camera_lag_max_distance = 4304.0",
-      "pawn.landing_footprint_radius_cm = 733.0",
+      "pawn.landing_footprint_radius_cm = 736.0",
       "pawn.landing_max_gap_cm = 185.0",
       "pawn.ground_contact_tolerance_cm = 25.0",
       "pawn.heat_shake_cm = 43.0",
@@ -75,6 +76,15 @@
       "component Canopy = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Canopy",
       "component Decals = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Decals",
       "component Gear = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Gear",
+      "decal Decal_Name_L = D_Big_Wayfarer at [5.0, -250.0, 65.0]",
+      "decal Decal_Reg_L = D_Big_Registration at [605.0, -210.0, -40.0]",
+      "decal Decal_Logo_L = D_Big_Logo at [-635.0, -250.0, 30.0]",
+      "decal Decal_HazardExhaust_L = D_Big_Hazard_Exhaust at [-1015.0, -440.0, 0.0]",
+      "decal Decal_Name_R = D_Big_Wayfarer at [5.0, 250.0, 65.0]",
+      "decal Decal_Reg_R = D_Big_Registration at [605.0, 210.0, -40.0]",
+      "decal Decal_Logo_R = D_Big_Logo at [-635.0, 250.0, 30.0]",
+      "decal Decal_HazardExhaust_R = D_Big_Hazard_Exhaust at [-1015.0, 440.0, 0.0]",
+      "decal Decal_HazardRamp = D_Big_Hazard_Ramp at [-1060.0, -0.0, -125.0]",
       "light Light_nav_L (point, 3 cd) at [-524.6, -431.3, 0.1]",
       "light Light_nav_R (point, 3 cd) at [-524.6, 431.3, 0.1]",
       "light Light_flood_L (spot, 150 cd) at [-365.1, -190.7, 141.3]",

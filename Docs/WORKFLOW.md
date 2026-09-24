@@ -824,6 +824,15 @@ snímku.
   a `space.Sky Intensity 0.03`. Obloha levelu přesto zůstává světlá (skybox nesleduje slunce).
 - as) **Chromová náběžná hrana ploutve je flekatá.** Leštěný kov 0,28 odráží šum Lumenu. Náběžné hrany tmavým
   materiálem.
+- at) **`MaterialProperty.MP_CUSTOM_DATA0` neexistuje** (clear coat z Pythonu). Materiál s `use_material_attributes`
+  a uzlem MakeMaterialAttributes (piny ClearCoat, ClearCoatRoughness).
+- au) **Livrej B a C vypadaly jako zebra.** Zóny livreje sdílely barvu se sekundárním lakem desek. Vlastní
+  `LiveryColor`.
+- av) **Pryžová těsnění jako hrubá černá mřížka.** Při laku 0,7 a těsnění 0,1 je poměr 7×, na snímku černá. Těsnění 0,28.
+- aw) **Sklo na kopuli v hlavním Nanite meshi.** Průsvitný materiál Nanite nekreslí. Funkční díly jen neprůhlednými
+  materiály.
+- ax) **Nové funkční díly ubraly siluetu** (anténa 0,6 m, objímky zbraní). Trysky zapustit, antény ≤ 0,3 m,
+  objímky ≤ 1,15 × hlaveň.
 
 ---
 

@@ -1414,6 +1414,18 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Celkem 800 decalů (trup 345, gondoly 109 / 117, křídla 94 / 96, ploutve 19 / 20) a kolem 650 m pásů.
     - Silueta: bok 0,9787, shora 0,9892, zepředu 0,915.
     - FPS 1080p perf_pilot: čistá v2 88 / 85 / 82, celá loď 82 / 79 / 74.
+90. **Wayfarer: „feel“ SC – hodnotová stavba, lesk, velké značení, funkční díly** (24. 9. 2026 v noci).
+    - Rozbor referencí (tabulka ve skillu ship-pipeline): největší rozdíl je poměr tmavé/světlé plochy a lesklý
+      lak, ne počet decalů.
+    - Livrej ve vrstveném materiálu: analytické zóny, 3 varianty (A grafitové sedlo, B dělená, C klín a tmavá
+      záď) k výběru autorem. Výchozí je A.
+    - Clear coat (lesk s odrazy), variace po panelu (tón, drsnost, kovové a karbonové panely, UV1), těsnění ve
+      spárách.
+    - Velké promítané decaly: WAYFARER, HF-0417, logo Halcyon Freightworks, výstražné zóny EXHAUST a RAMP
+      (`generate_big_decals.py`).
+    - `hs_functional.py`: 26 bloků RCS, 2 lopatkové antény, bičová anténa, 2 senzorové kopule, 4 přípojky,
+      6 závěsů klapek, objímky zbraní.
+    - Silueta: bok 0,9781, shora 0,9898, zepředu 0,917.
 
 ---
 

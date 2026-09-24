@@ -239,7 +239,7 @@ def main():
     if plan["decals"]:
         names = {d["name"] for d in plan["decals"]}
         check("the ship carries markings on both flanks",
-              {"Registration_L", "Registration_R"} <= names, ", ".join(sorted(names)))
+              any(n.endswith("_L") and n[:-2] + "_R" in names for n in names), ", ".join(sorted(names)))
 
     # --- level ---------------------------------------------------------------------------------
     les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)

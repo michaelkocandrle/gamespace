@@ -456,6 +456,32 @@ MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/decal_libra
   (`DecalFadeStartCm` / `EndCm`); díl Decals se přestane kreslit v 95 m. Menu (24 m), chase kamera a přistání
   jsou v plném rozsahu (preset `decal_fade`).
 
+**„Feel“ SC: rozbor referencí** (Docs/UI screenshoty Titan, Guardian, Hornet, Cutlass, Spirit; ship matrix Pisces,
+100i, Mustang, Aurora; porovnáno se stejných vzdáleností, 24. 9. 2026):
+
+| Kategorie | SC má | Wayfarer měl (před) | Chybělo / co jsme udělali |
+| --- | --- | --- | --- |
+| Hodnotová stavba (zdálky) | 30–60 % plochy tmavé: grafitové zóny, tmavý podvozek mezi bílými deskami; loď se čte i jako silueta dvou tónů | ~95 % bílé, tmavý jen nos a záď | **nejdůležitější** – livrej (analytické zóny, 3 varianty) |
+| Povrch (zblízka) | lesklý lak s clear coatem, odráží oblohu a okolí; sousední desky se liší tónem a leskem | matný lak, všechny desky stejné | clear coat 1 / 0,05; variace po panelu (UV1), 8 % kovových a 5 % karbonových panelů |
+| Spáry | tmavé pryžové/stínové spáry 0,5–1 cm, rámují každý panel | světlé drážky splývaly s lakem | těsnění v drážkách (materiál Seal) |
+| Velké značení | jméno / registrace přes část boku, logo výrobce, velké výstražné zóny u trysek a rampy (1 až 4 m) | jen malé nápisy (≤ 0,6 m) | promítané decaly WAYFARER, HF-0417, logo Halcyon, EXHAUST / RAMP |
+| Manévrovací trysky | 12–30 bloků na malé lodi, na přídi, bocích, zádi, spodku i hřbetu | žádné | 26 bloků RCS (`hs_functional.py`) |
+| Antény, senzory | 2–5 na loď (lopatka, bič, kopule) | 1 senzorový kit | 2 lopatky, bič, 2 kopule |
+| Mechanika zvenku | závěsy klapek, písty, objímky zbraní, přípojky | kryty klapek, holé hlavně | závěsy, objímky zbraní, přípojky |
+| Malé decaly | 0,5–2 / m² na klidných plochách, 5–10 / m² u servisních míst | ~0,8 / m² | beze změny (hustota už odpovídá) |
+| Světla | pozice, obrys, reflektory, pásy; často modrobílé emisní lišty | pozice, obrys, reflektor, šachta | (další krok: emisní lišty podél trupu) |
+| Siluetové vrstvy | hluboké převisy, negativní prostor mezi deskami | hladký loft s deskami 2–3 cm | (omezeno výkresem; siluetu nesmíme měnit) |
+
+Závěr: rozdíl ve „feelu“ dělá hlavně **hodnotová stavba a lesk**, až potom počet detailů. Livrej a clear coat
+mají největší efekt ze všech vzdáleností.
+
+**Livrej a lak** (`M_Ship_Layered`, setup Paint): zóny v prostoru lodi (cm) – `TopZ/TopSlope` sedlo, `BotZ/BotSlope`
+spodek, `TailX`, `NoseX`, pruh `StripeZ/StripeSlope/StripeW/StripeX0/X1` v `AccentColor`, zóny v `LiveryColor`;
+`LiveryAmount` 1 jen v primárním laku. Varianty v `_livery_variants` setupu; přepnutí za běhu
+`space.ShipMat <param> <hodnota>` (presety `livery_sun` / `livery_dusk`). Variace panelů: UV1 z
+`hs_layers.panel_ids` (trup po polích spár, ostatní díly po objektech), `PanelTone`, `PanelRough`, `MetalShare`,
+`CarbonShare`. Clear coat přes MakeMaterialAttributes (Python enum nemá piny CustomData).
+
 **Křídla a ploutve** (`Tools/Blender/hs_wings.py`, blok `wings`): desku z obrysů přestaví na tvarovaný profil
 uvnitř ní.
 - Řezy po rozpětí mají přesný interval tětivy (bisekce paprskem), takže obrys výkresu zůstane.

@@ -656,10 +656,43 @@ return float4(g, ao, dirt, wear);
 
 # The colour and surface nodes read the masks from the one mask node (M = g, ao, dirt, wear): the grunge
 # texture is sampled once per pixel (six taps), not twice (24. 9. 2026).
+# Livery: analytic zones in the ship's own space (cm), crisp at any distance, one set of scalars per
+# variant - top saddle (z above TopZ + TopSlope*x), lower zone (z below BotZ + BotSlope*x), tail block
+# (x below TailX), nose block (x above NoseX) in the secondary colour; an accent stripe along
+# StripeZ + StripeSlope*x, StripeW wide, between StripeX0 and StripeX1. LiveryAmount 0 turns it off (every
+# slot but the primary paint).
+_LIVERY = """
+float3 lp = LocalPos;
+float zone = 0.0;
+zone = max(zone, step(TopZ + TopSlope * lp.x, lp.z));
+zone = max(zone, step(lp.z, BotZ + BotSlope * lp.x));
+zone = max(zone, step(lp.x, TailX));
+zone = max(zone, step(NoseX, lp.x));
+float sz = StripeZ + StripeSlope * lp.x;
+float stripe = step(abs(lp.z - sz), StripeW * 0.5) * step(StripeX0, lp.x) * step(lp.x, StripeX1);
+"""
+
+# Panel variation: UV1 carries a per-panel random pair (hs_layers.panel_ids): r.x shifts the paint's tone
+# and roughness a little, r.y picks a panel class - bare metal (below MetalShare) or carbon (below
+# MetalShare + CarbonShare), the rest paint. SC hulls: neighbouring plates never match exactly.
+_PANEL = """
+float2 r = PanelId;
+float isMetal = step(r.y, MetalShare) * step(0.001, r.y);
+float isCarbon = step(MetalShare, r.y) * step(r.y, MetalShare + CarbonShare);
+float3 cw = frac(LocalPos / 1.2);
+float twill = step(0.5, frac((cw.x + cw.y + cw.z) * 3.0 + step(0.5, frac(cw.x * 6.0)) * 0.5));
+"""
+
 _LAYER_COLOUR = """
 float g = M.x; float ao = M.y; float dirt = M.z; float wear = M.w;
 float p2 = 1.0 - VC.b;
+""" + _LIVERY + _PANEL + """
 float3 paint = lerp(Primary, Secondary, p2);
+paint = lerp(paint, LiveryColor, zone * LiveryAmount);
+paint = lerp(paint, Accent, stripe * LiveryAmount * (1.0 - zone * 0.0));
+paint *= 1.0 + (r.x - 0.5) * PanelTone * Amount;
+paint = lerp(paint, MetalPanel, isMetal * Amount * LiveryAmount);
+paint = lerp(paint, lerp(float3(0.018, 0.019, 0.021), float3(0.04, 0.042, 0.046), twill), isCarbon * Amount * LiveryAmount);
 paint *= lerp(1.0, 0.8 + 0.4 * g, GrungeAmount * Amount);
 paint *= lerp(1.0, ao, CavityStrength);
 paint = lerp(paint, DirtColor, dirt);
@@ -670,12 +703,16 @@ return paint;
 _LAYER_SURFACE = """
 float g = M.x; float ao = M.y; float dirt = M.z; float wear = M.w;
 float p2 = 1.0 - VC.b;
-float rough = lerp(PrimaryRough, SecondaryRough, p2);
+""" + _LIVERY + _PANEL + """
+float rough = lerp(PrimaryRough, SecondaryRough, max(p2, zone * LiveryAmount));
+rough += (r.x - 0.5) * PanelRough * Amount;
+rough = lerp(rough, 0.3, isMetal * Amount * LiveryAmount);
+rough = lerp(rough, 0.22 + twill * 0.1, isCarbon * Amount * LiveryAmount);
 rough = saturate(rough + (g - 0.5) * RoughVariation * Amount);
 rough = lerp(rough, 0.85, dirt);
 rough = lerp(rough, BareRough, wear);
-float metal = lerp(PaintMetal, 1.0, wear);
-return float3(rough, metal, lerp(1.0, ao, AOStrength));
+float metal = lerp(PaintMetal, 1.0, max(wear, isMetal * Amount * LiveryAmount));
+return float3(saturate(rough), metal, lerp(1.0, ao, AOStrength));
 """
 
 
@@ -711,7 +748,16 @@ def build_layered_master():
         "RoughVariation": _scalar(m, "RoughVariation", 0.2, -1700, 2050),
         "AOStrength": _scalar(m, "AOStrength", 0.8, -1700, 2150),
         "WearThreshold": _scalar(m, "WearThreshold", 0.45, -1700, 2250),
+        "Accent": _vector(m, "AccentColor", (0.72, 0.17, 0.02), -1900, 650),
+        "MetalPanel": _vector(m, "MetalPanelColor", (0.6, 0.6, 0.62), -1900, 800),
+        "LiveryColor": _vector(m, "LiveryColor", (0.05, 0.053, 0.058), -1900, 950),
     }
+    for i, (pname, default) in enumerate((("LiveryAmount", 0.0), ("TopZ", 9999.0), ("TopSlope", 0.0), ("BotZ", -9999.0),
+                                          ("BotSlope", 0.0), ("TailX", -9999.0), ("NoseX", 9999.0), ("StripeZ", 0.0),
+                                          ("StripeSlope", 0.0), ("StripeW", 0.0), ("StripeX0", -9999.0), ("StripeX1", 9999.0),
+                                          ("PanelTone", 0.06), ("PanelRough", 0.1), ("MetalShare", 0.0), ("CarbonShare", 0.0))):
+        params[pname] = _scalar(m, pname, default, -2100, 650 + i * 100)
+    panel_uv = _node(m, unreal.MaterialExpressionTextureCoordinate, -1900, 2400, coordinate_index=1)
     mask_in = ["VC", "Amount", "LocalPos", "TexG", "Tile", "DirtAmount", "EdgeWear", "WearThreshold"]
     masks = _custom(m, "Layered_masks", _LAYER_MASK_NODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4, mask_in, -1250, 300)
     if not MEL.connect_material_expressions(vc, "", masks, "VC"):
@@ -723,8 +769,12 @@ def build_layered_master():
     _link(tile, masks, "Tile")
     for name in mask_in[5:]:
         _link(params[name], masks, name)
-    colour_in = ["M", "VC", "Amount", "Primary", "Secondary", "BareMetal", "DirtColor", "GrungeAmount", "CavityStrength"]
-    surface_in = ["M", "VC", "Amount", "PrimaryRough", "SecondaryRough", "PaintMetal", "BareRough", "AOStrength", "RoughVariation"]
+    livery_in = ["LocalPos", "PanelId", "LiveryAmount", "TopZ", "TopSlope", "BotZ", "BotSlope", "TailX", "NoseX", "StripeZ",
+                 "StripeSlope", "StripeW", "StripeX0", "StripeX1", "MetalShare", "CarbonShare"]
+    colour_in = ["M", "VC", "Amount", "Primary", "Secondary", "BareMetal", "DirtColor", "GrungeAmount", "CavityStrength",
+                 "Accent", "MetalPanel", "PanelTone", "LiveryColor"] + livery_in
+    surface_in = ["M", "VC", "Amount", "PrimaryRough", "SecondaryRough", "PaintMetal", "BareRough", "AOStrength", "RoughVariation",
+                  "PanelRough"] + livery_in
     nodes = {}
     for key, code, names, y in (("colour", _LAYER_COLOUR, colour_in, 0), ("surface", _LAYER_SURFACE, surface_in, 700)):
         node = _custom(m, "Layered_" + key, code, unreal.CustomMaterialOutputType.CMOT_FLOAT3, names, -900, y)
@@ -734,19 +784,32 @@ def build_layered_master():
         if not MEL.connect_material_expressions(vc, "A", node, "Amount"):
             raise RuntimeError("vertex colour A -> " + key)
         for name in names[3:]:
-            _link(params[name], node, name)
+            if name == "LocalPos":
+                _link(local_position, node, name)
+            elif name == "PanelId":
+                _link(panel_uv, node, name)
+            else:
+                _link(params[name], node, name)
         nodes[key] = node
-    _output(nodes["colour"], unreal.MaterialProperty.MP_BASE_COLOR)
+    # everything through one Make Material Attributes node: the Python enum has no clear-coat pins
+    mk = _node(m, unreal.MaterialExpressionMakeMaterialAttributes, -300, 600)
+    m.set_editor_property("use_material_attributes", True)
+    _link(nodes["colour"], mk, "BaseColor")
     for i, (channel, prop) in enumerate((("r", unreal.MaterialProperty.MP_ROUGHNESS), ("g", unreal.MaterialProperty.MP_METALLIC),
                                          ("b", unreal.MaterialProperty.MP_AMBIENT_OCCLUSION))):
         mask = _node(m, unreal.MaterialExpressionComponentMask, -600, 700 + i * 120,
                      r=channel == "r", g=channel == "g", b=channel == "b", a=False)
         _link(nodes["surface"], mask, "")
-        _output(mask, prop)
+        _link(mask, mk, {"r": "Roughness", "g": "Metallic", "b": "AmbientOcclusion"}[channel])
     emissive = _node(m, unreal.MaterialExpressionMultiply, -600, 1200)
     _link(_vector(m, "EmissiveColor", (0.0, 0.0, 0.0), -900, 1200), emissive, "A")
     _link(_scalar(m, "EmissiveStrength", 0.0, -900, 1350), emissive, "B")
-    _output(emissive, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    _link(emissive, mk, "EmissiveColor")
+    # Origin-like finish: a clear coat over the paint that mirrors the environment (ClearCoat 0 = off)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_CLEAR_COAT)
+    _link(_scalar(m, "ClearCoat", 0.0, -900, 1500), mk, "ClearCoat")
+    _link(_scalar(m, "ClearCoatRoughness", 0.06, -900, 1600), mk, "ClearCoatRoughness")
+    _output(mk, unreal.MaterialProperty.MP_MATERIAL_ATTRIBUTES)
     MEL.recompile_material(m)
     unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
     return m

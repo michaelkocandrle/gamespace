@@ -58,7 +58,7 @@
  "materials": {
   "_comment": "Hard-surface exterior: one slot per paint zone, flat colours on the hull master (linear), the panel grooves, bevels and kit greebles carry the detail. Glass is the translucent master.",
   "MI_Ship_Wayfarer_Paint": {
-   "_comment": "Layered paint, clean Origin-like look (author 24. 9. 2026): warm white primary, cool grey secondary on the armour, fine roughness variation, wear only on the most exposed edges, hardly any dirt.",
+   "_comment": "Layered paint with an Origin-like clear coat (author 24. 9. 2026): livery A (graphite saddle, orange stripe), panel variation (tone, roughness, 8 % bare-metal and 5 % carbon panels, UV1 panel ids), clear coat 1 / 0.05.",
    "master": "layered",
    "slots": [
     "M_Ship_Wayfarer_Paint"
@@ -70,9 +70,9 @@
      0.65
     ],
     "SecondaryColor": [
-     0.26,
-     0.265,
-     0.275
+     0.42,
+     0.43,
+     0.45
     ],
     "BareMetalColor": [
      0.72,
@@ -83,6 +83,21 @@
      0.09,
      0.08,
      0.07
+    ],
+    "AccentColor": [
+     0.72,
+     0.17,
+     0.02
+    ],
+    "MetalPanelColor": [
+     0.62,
+     0.62,
+     0.64
+    ],
+    "LiveryColor": [
+     0.05,
+     0.053,
+     0.058
     ]
    },
    "scalars": {
@@ -95,9 +110,27 @@
     "AOStrength": 0.8,
     "RoughVariation": 0.28,
     "BareMetalRoughness": 0.28,
-    "PrimaryRoughness": 0.32,
-    "SecondaryRoughness": 0.4,
-    "PaintMetallic": 0.0
+    "PrimaryRoughness": 0.3,
+    "SecondaryRoughness": 0.34,
+    "PaintMetallic": 0.0,
+    "TopZ": 115.0,
+    "TopSlope": 0.0,
+    "BotZ": -9999.0,
+    "BotSlope": 0.0,
+    "TailX": -9999.0,
+    "NoseX": 9999.0,
+    "StripeZ": 100.0,
+    "StripeSlope": 0.0,
+    "StripeW": 9.0,
+    "StripeX0": -625.0,
+    "StripeX1": 775.0,
+    "LiveryAmount": 1.0,
+    "PanelTone": 0.07,
+    "PanelRough": 0.12,
+    "MetalShare": 0.08,
+    "CarbonShare": 0.05,
+    "ClearCoat": 1.0,
+    "ClearCoatRoughness": 0.05
    }
   },
   "MI_Ship_Wayfarer_Dark": {
@@ -139,7 +172,9 @@
     "BareMetalRoughness": 0.28,
     "PrimaryRoughness": 0.45,
     "SecondaryRoughness": 0.5,
-    "PaintMetallic": 0.2
+    "PaintMetallic": 0.2,
+    "ClearCoat": 0.6,
+    "ClearCoatRoughness": 0.08
    }
   },
   "MI_Ship_Wayfarer_Accent": {
@@ -181,7 +216,9 @@
     "BareMetalRoughness": 0.28,
     "PrimaryRoughness": 0.35,
     "SecondaryRoughness": 0.4,
-    "PaintMetallic": 0.0
+    "PaintMetallic": 0.0,
+    "ClearCoat": 1.0,
+    "ClearCoatRoughness": 0.08
    }
   },
   "MI_Ship_Wayfarer_Metal": {
@@ -479,10 +516,303 @@
     "SecondaryRoughness": 0.55,
     "PaintMetallic": 0.5
    }
+  },
+  "MI_Ship_Wayfarer_Seal": {
+   "_comment": "rubber seals in the seam grooves: darker than the paint, not black (black drew a heavy grid)",
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_Seal"
+   ],
+   "base_color": [
+    0.28,
+    0.285,
+    0.3
+   ],
+   "metallic": 0.0,
+   "roughness": 0.55
   }
  },
  "no_nanite_parts": [
   "Decals"
  ],
- "_comment_no_nanite": "Decals: mesh decals (Tools/Blender/hs_decals.py) use Deferred Decal materials, which Nanite cannot draw (skill ship-pipeline 3b3)."
+ "_comment_no_nanite": "Decals: mesh decals (Tools/Blender/hs_decals.py) use Deferred Decal materials, which Nanite cannot draw (skill ship-pipeline 3b3).",
+ "_livery_variants": {
+  "A": {
+   "_name": "Grafitové sedlo",
+   "TopZ": 115.0,
+   "TopSlope": 0.0,
+   "BotZ": -9999.0,
+   "BotSlope": 0.0,
+   "TailX": -9999.0,
+   "NoseX": 9999.0,
+   "StripeZ": 100.0,
+   "StripeSlope": 0.0,
+   "StripeW": 9.0,
+   "StripeX0": -625.0,
+   "StripeX1": 775.0
+  },
+  "B": {
+   "_name": "Dělená",
+   "TopZ": 9999.0,
+   "TopSlope": 0.0,
+   "BotZ": -30.0,
+   "BotSlope": 0.04,
+   "TailX": -9999.0,
+   "NoseX": 9999.0,
+   "StripeZ": -22.0,
+   "StripeSlope": 0.04,
+   "StripeW": 10.0,
+   "StripeX0": -1100.0,
+   "StripeX1": 1100.0
+  },
+  "C": {
+   "_name": "Klín a tmavá záď",
+   "TopZ": 9999.0,
+   "TopSlope": 0.0,
+   "BotZ": -60.0,
+   "BotSlope": 0.1,
+   "TailX": -725.0,
+   "NoseX": 9999.0,
+   "StripeZ": -48.0,
+   "StripeSlope": 0.1,
+   "StripeW": 10.0,
+   "StripeX0": -600.0,
+   "StripeX1": 1100.0
+  }
+ },
+ "decals": [
+  {
+   "name": "Name_L",
+   "texture": "D_Big_Wayfarer",
+   "location": [
+    5.0,
+    -250.0,
+    65.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    90.0
+   ],
+   "size": [
+    60.0,
+    24.0,
+    190.0
+   ],
+   "opacity": 0.95,
+   "flip_u": 1.0,
+   "tint": [
+    0.06,
+    0.064,
+    0.07
+   ]
+  },
+  {
+   "name": "Reg_L",
+   "texture": "D_Big_Registration",
+   "location": [
+    605.0,
+    -210.0,
+    -40.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    90.0
+   ],
+   "size": [
+    60.0,
+    18.0,
+    70.0
+   ],
+   "opacity": 0.95,
+   "flip_u": 1.0,
+   "tint": [
+    0.06,
+    0.064,
+    0.07
+   ]
+  },
+  {
+   "name": "Logo_L",
+   "texture": "D_Big_Logo",
+   "location": [
+    -635.0,
+    -250.0,
+    30.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    90.0
+   ],
+   "size": [
+    60.0,
+    30.0,
+    60.0
+   ],
+   "opacity": 0.9,
+   "flip_u": 1.0,
+   "tint": [
+    0.06,
+    0.064,
+    0.07
+   ]
+  },
+  {
+   "name": "HazardExhaust_L",
+   "texture": "D_Big_Hazard_Exhaust",
+   "location": [
+    -1015.0,
+    -440.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    90.0
+   ],
+   "size": [
+    40.0,
+    12.0,
+    46.0
+   ],
+   "opacity": 0.95,
+   "flip_u": 1.0,
+   "tint": [
+    0.72,
+    0.17,
+    0.02
+   ]
+  },
+  {
+   "name": "Name_R",
+   "texture": "D_Big_Wayfarer",
+   "location": [
+    5.0,
+    250.0,
+    65.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    -90.0
+   ],
+   "size": [
+    60.0,
+    24.0,
+    190.0
+   ],
+   "opacity": 0.95,
+   "flip_u": 1.0,
+   "tint": [
+    0.06,
+    0.064,
+    0.07
+   ]
+  },
+  {
+   "name": "Reg_R",
+   "texture": "D_Big_Registration",
+   "location": [
+    605.0,
+    210.0,
+    -40.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    -90.0
+   ],
+   "size": [
+    60.0,
+    18.0,
+    70.0
+   ],
+   "opacity": 0.95,
+   "flip_u": 1.0,
+   "tint": [
+    0.06,
+    0.064,
+    0.07
+   ]
+  },
+  {
+   "name": "Logo_R",
+   "texture": "D_Big_Logo",
+   "location": [
+    -635.0,
+    250.0,
+    30.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    -90.0
+   ],
+   "size": [
+    60.0,
+    30.0,
+    60.0
+   ],
+   "opacity": 0.9,
+   "flip_u": 1.0,
+   "tint": [
+    0.06,
+    0.064,
+    0.07
+   ]
+  },
+  {
+   "name": "HazardExhaust_R",
+   "texture": "D_Big_Hazard_Exhaust",
+   "location": [
+    -1015.0,
+    440.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    -90.0
+   ],
+   "size": [
+    40.0,
+    12.0,
+    46.0
+   ],
+   "opacity": 0.95,
+   "flip_u": 1.0,
+   "tint": [
+    0.72,
+    0.17,
+    0.02
+   ]
+  },
+  {
+   "name": "HazardRamp",
+   "texture": "D_Big_Hazard_Ramp",
+   "location": [
+    -1060.0,
+    -0.0,
+    -125.0
+   ],
+   "rotation": [
+    0.0,
+    180.0,
+    0.0
+   ],
+   "size": [
+    40.0,
+    110.0,
+    14.0
+   ],
+   "opacity": 0.95,
+   "tint": [
+    0.78,
+    0.58,
+    0.06
+   ]
+  }
+ ]
 }
