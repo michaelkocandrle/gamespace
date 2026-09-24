@@ -52,14 +52,20 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 342504,
-      "verts": 180681,
+      "tris": 374256,
+      "verts": 197145,
       "materials": [
-        "M_Ship_Wayfarer_Dark",
+        "M_Ship_Wayfarer_LightAmber",
         "M_Ship_Wayfarer_Paint",
         "M_Ship_Wayfarer_Accent",
+        "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Metal",
-        "M_Ship_Wayfarer_Emissive"
+        "M_Ship_Wayfarer_Emissive",
+        "M_Ship_Wayfarer_LightRed",
+        "M_Ship_Wayfarer_LightGreen",
+        "M_Ship_Wayfarer_LightWhite",
+        "M_Ship_Wayfarer_LightStrip",
+        "M_Ship_Wayfarer_LightWarm"
       ],
       "uv_layers": 1,
       "bounds_m": [
@@ -100,8 +106,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 7064,
-      "verts": 6362,
+      "tris": 7976,
+      "verts": 7178,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalPaint",

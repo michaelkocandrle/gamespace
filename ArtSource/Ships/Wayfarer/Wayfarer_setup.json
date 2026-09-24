@@ -306,6 +306,121 @@
    },
    "decal_normal_strength": 1.0,
    "decal_opacity": 1.0
+  },
+  "MI_Ship_Wayfarer_LightRed": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_LightRed"
+   ],
+   "base_color": [
+    0.05,
+    0.05,
+    0.05
+   ],
+   "metallic": 0.0,
+   "roughness": 0.2,
+   "emissive_color": [
+    1.0,
+    0.05,
+    0.02
+   ],
+   "emissive_strength": 25,
+   "_comment": "Light lenses and strips (Tools/Blender/hs_lights.py, step 6): emissive on the hull master; the real lights come from Export/Wayfarer_lights.json."
+  },
+  "MI_Ship_Wayfarer_LightGreen": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_LightGreen"
+   ],
+   "base_color": [
+    0.05,
+    0.05,
+    0.05
+   ],
+   "metallic": 0.0,
+   "roughness": 0.2,
+   "emissive_color": [
+    0.05,
+    1.0,
+    0.25
+   ],
+   "emissive_strength": 25
+  },
+  "MI_Ship_Wayfarer_LightWhite": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_LightWhite"
+   ],
+   "base_color": [
+    0.05,
+    0.05,
+    0.05
+   ],
+   "metallic": 0.0,
+   "roughness": 0.2,
+   "emissive_color": [
+    1.0,
+    0.95,
+    0.88
+   ],
+   "emissive_strength": 25
+  },
+  "MI_Ship_Wayfarer_LightAmber": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_LightAmber"
+   ],
+   "base_color": [
+    0.05,
+    0.05,
+    0.05
+   ],
+   "metallic": 0.0,
+   "roughness": 0.2,
+   "emissive_color": [
+    1.0,
+    0.42,
+    0.05
+   ],
+   "emissive_strength": 30
+  },
+  "MI_Ship_Wayfarer_LightStrip": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_LightStrip"
+   ],
+   "base_color": [
+    0.05,
+    0.05,
+    0.05
+   ],
+   "metallic": 0.0,
+   "roughness": 0.2,
+   "emissive_color": [
+    0.65,
+    0.85,
+    1.0
+   ],
+   "emissive_strength": 30
+  },
+  "MI_Ship_Wayfarer_LightWarm": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_LightWarm"
+   ],
+   "base_color": [
+    0.05,
+    0.05,
+    0.05
+   ],
+   "metallic": 0.0,
+   "roughness": 0.2,
+   "emissive_color": [
+    1.0,
+    0.68,
+    0.38
+   ],
+   "emissive_strength": 25
   }
  },
  "no_nanite_parts": [

@@ -42,6 +42,7 @@ Static Mesh Editor if a part runs without Nanite.
 
 import glob
 import json
+import math
 import os
 import sys
 
@@ -174,12 +175,23 @@ def build_plan(manifest, manifest_dir, setup=None):
         "materials": {k: v for k, v in (setup.get("materials") or {}).items() if not k.startswith("_")},
         "extra_components": extra_components,
         "decals": [d for d in (setup.get("decals") or []) if not str(d.get("name", "")).startswith("_")],
+        "lights": load_lights(manifest_dir, ship),
         "planet_settings": [("collision_warmup_reach_m", s["Planet_CollisionWarmupReachM"]),
                             ("collision_min_radius_m", s["Planet_CollisionMinRadiusM"])],
         "game_mode": GAME_MODE_PATH,
         "expected_ship_size_cm": size,
         "skipped_lods": [e["fbx"] for e in manifest["files"] if manifest["meshes"][e["objects"][0]]["lod"] > 0],
     }
+
+
+def load_lights(manifest_dir, ship):
+    """Real lights written next to the manifest by Tools/Blender/hs_assemble_ship.py (<Ship>_lights.json,
+    from the recipe's lights, Tools/Blender/hs_lights.py); none for a ship without them."""
+    path = os.path.join(manifest_dir, "%s_lights.json" % ship)
+    if not os.path.isfile(path):
+        return []
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh).get("lights", [])
 
 
 def format_plan(plan):
@@ -454,6 +466,8 @@ def apply_pawn_settings(plan, report):
         applied.append(add_mesh_component(blueprint, extra))
     for decal in plan["decals"]:
         applied.append(add_decal_component(blueprint, plan, decal))
+    for light in plan["lights"]:
+        applied.append(add_light_component(blueprint, light))
 
     unreal.EditorAssetLibrary.save_loaded_asset(blueprint, only_if_is_dirty=False)
     report["blueprint"] = {"path": plan["blueprint"], "applied": applied}
@@ -553,13 +567,69 @@ def add_decal_component(blueprint, plan, decal):
         return "MANUAL STEP: add a Decal component %r under Hull with %s (automatic add failed: %s)" % (name, material, error)
 
 
+def add_light_component(blueprint, light):
+    """A ship light (position light, floodlight, bay light) as a Point or Spot light under Hull, in mesh
+    space. No shadows: they are small detail lights, and a shadowed light per fitting would cost the
+    frame. A spot points along its component's X, so the rotation turns X onto "direction_ue"."""
+    name = "Light_" + light["name"]
+    cls = unreal.SpotLightComponent if light.get("type") == "spot" else unreal.PointLightComponent
+    try:
+        subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
+        library = unreal.SubobjectDataBlueprintFunctionLibrary
+        handles = subsystem.k2_gather_subobject_data_for_blueprint(blueprint)
+        parent = handles[0]
+        existing = None
+        for handle in handles:
+            obj = library.get_object(library.get_data(handle))
+            if obj is None:
+                continue
+            if obj.get_name().replace("_GEN_VARIABLE", "") == "Hull":
+                parent = handle
+            if obj.get_name().replace("_GEN_VARIABLE", "") == name:
+                existing = obj
+        if existing is not None and not isinstance(existing, cls):
+            subsystem.delete_subobjects(handles[0], [h for h in handles if library.get_object(library.get_data(h)) == existing], blueprint)
+            existing = None
+        if existing is None:
+            params = unreal.AddNewSubobjectParams()  # struct constructors take no keyword arguments
+            params.set_editor_property("parent_handle", parent)
+            params.set_editor_property("new_class", cls)
+            params.set_editor_property("blueprint_context", blueprint)
+            handle, fail_reason = subsystem.add_new_subobject(params)
+            if not library.is_handle_valid(handle):
+                raise RuntimeError(str(fail_reason))
+            subsystem.rename_subobject(handle, unreal.Text(name))
+            existing = library.get_object(library.get_data(handle))
+        existing.set_editor_property("relative_location", vec(light["location_ue_cm"]))
+        d = light["direction_ue"]
+        yaw = math.degrees(math.atan2(d[1], d[0]))
+        pitch = math.degrees(math.atan2(d[2], math.hypot(d[0], d[1])))
+        # Keyword arguments on purpose: unreal.Rotator's positional order is roll, pitch, yaw.
+        existing.set_editor_property("relative_rotation", unreal.Rotator(roll=0.0, pitch=pitch, yaw=yaw))
+        existing.set_editor_property("intensity_units", unreal.LightUnits.CANDELAS)
+        existing.set_editor_property("intensity", float(light["intensity_cd"]))
+        c = light["color"]
+        existing.set_editor_property("light_color", unreal.Color(r=int(c[0] * 255), g=int(c[1] * 255), b=int(c[2] * 255), a=255))
+        existing.set_editor_property("attenuation_radius", float(light["radius_m"]) * 100.0)
+        existing.set_editor_property("cast_shadows", False)
+        existing.set_editor_property("source_radius", 2.0)
+        if cls is unreal.SpotLightComponent:
+            existing.set_editor_property("outer_cone_angle", float(light.get("cone_deg", 40.0)) / 2.0)
+            existing.set_editor_property("inner_cone_angle", float(light.get("cone_deg", 40.0)) / 4.0)
+        unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
+        return "light %s (%s, %s cd) at %s" % (name, light.get("type", "point"), light["intensity_cd"], light["location_ue_cm"])
+    except Exception as error:
+        return "MANUAL STEP: add a light %r under Hull (automatic add failed: %s)" % (name, error)
+
+
 def remove_stale(plan, blueprint, report):
     """After a model change: drops what the new manifest and setup no longer have - extra mesh
     components on the Blueprint (a canopy part the new model lacks), and this ship's meshes and
     material instances that nothing references any more. Script-made assets only; git keeps them."""
     root = "/Game/Ships/%s" % plan["ship"]
     keep_components = ({e["component"] for e in plan["extra_components"]}
-                       | {"Decal_" + d["name"] for d in plan["decals"]} | {"Hull"})
+                       | {"Decal_" + d["name"] for d in plan["decals"]}
+                       | {"Light_" + l["name"] for l in plan["lights"]} | {"Hull"})
     removed = []
     try:
         subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
@@ -567,10 +637,17 @@ def remove_stale(plan, blueprint, report):
         handles = subsystem.k2_gather_subobject_data_for_blueprint(blueprint)
         for handle in handles:
             obj = library.get_object(library.get_data(handle))
-            if not isinstance(obj, (unreal.StaticMeshComponent, unreal.DecalComponent)):
+            if not isinstance(obj, (unreal.StaticMeshComponent, unreal.DecalComponent, unreal.LocalLightComponent)):
                 continue
             name = obj.get_name().replace("_GEN_VARIABLE", "")
             if name in keep_components:
+                continue
+            if isinstance(obj, unreal.LocalLightComponent):
+                # only the ship lights this script adds; the pawn's own (cockpit, quantum glow) stay
+                if not name.startswith("Light_"):
+                    continue
+                subsystem.delete_subobjects(handles[0], [handle], blueprint)
+                removed.append("component " + name)
                 continue
             if isinstance(obj, unreal.DecalComponent):
                 # A marking the setup no longer lists.

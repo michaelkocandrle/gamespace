@@ -1,5 +1,5 @@
 {
- "_comment": "Close views of the detail pilot (engine pods and the aft hull, skill ship-pipeline 3b3) from a free camera in the ship's own space (camera_local / look_local, metres, X forward, Y right, Z up). The same cameras as the Blender previews (layout coordinates minus the assemble offset, y mirrored). Run: Tools/Shots.ps1 -Preset pilot_views -Width 1920 -Height 1080",
+ "_comment": "Close views of the detail pilot (engine pods and the aft hull, skill ship-pipeline 3b3) from a free camera in the ship's own space (camera_local / look_local, metres, X forward, Y right, Z up). The same cameras as the Blender previews (layout coordinates minus the assemble offset, y mirrored). Run: Tools/Shots.ps1 -Preset pilot_views -Width 1920 -Height 1080 The last two are at night (sun dimmed, exposure pinned) for the lights.",
  "shots": [
   {
    "altitude_m": 3000,
@@ -114,6 +114,52 @@
     -0.0,
     0.3
    ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "fov": 60,
+   "name": "pilot_rear_left_night",
+   "camera_local": [
+    -14.75,
+    -8.5,
+    4.3
+   ],
+   "look_local": [
+    -7.65,
+    -2.8,
+    0.3
+   ],
+   "console": [
+    "space.Sun Intensity 0.02"
+   ],
+   "exposure": 3.0
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "fov": 60,
+   "name": "pilot_pod_close_night",
+   "camera_local": [
+    -5.45,
+    -6.2,
+    1.4
+   ],
+   "look_local": [
+    -7.45,
+    -3.6,
+    0.3
+   ],
+   "console": [
+    "space.Sun Intensity 0.02"
+   ],
+   "exposure": 3.0
   }
  ]
 }

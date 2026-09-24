@@ -479,6 +479,13 @@ def main(argv):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import hs_detail
         report["detail"] = hs_detail.apply(recipe, made, coll, mats, ship)
+    if recipe.get("lights"):
+        # light fittings and emissive strips (Tools/Blender/hs_lights.py); the real lights go to the scene
+        # property hs_lights for hs_assemble_ship.py
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hs_lights
+        report["lights"] = hs_lights.apply(recipe, made, coll, lambda key: mats[key],
+                                           recipe.get("detail", {}).get("bevel", {"angle_deg": 30, "width": 0.006, "segments": 2}))
     if recipe["parts"].get("hull", {}).get("greebles") and "hull" in made:
         report["hull_greebles"] = place_greebles(made["hull"], recipe["parts"]["hull"]["greebles"], coll, recipe.get("kit_bevel", {"angle_deg": 30, "width": 0.004, "segments": 2}))
     if "canopy" in views and "hull" in made:

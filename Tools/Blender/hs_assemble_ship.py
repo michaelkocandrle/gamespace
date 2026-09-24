@@ -108,6 +108,19 @@ def main(argv):
         ob.data.transform(Matrix.Translation(Vector(off)) @ ob.matrix_world)
         ob.matrix_world = Matrix()
         out[suffix] = ob
+    # 3c) real lights from hs_lights.py (scene property, layout coordinates) -> Export/<Ship>_lights.json in
+    #     Unreal mesh space (cm, y mirrored) for import_ship.py
+    lights = json.loads(bpy.context.scene.get("hs_lights", "[]"))
+    if lights:
+        for l in lights:
+            p = [l["location"][i] + off[i] for i in range(3)]
+            l["location_ue_cm"] = [round(p[0] * 100, 1), round(-p[1] * 100, 1), round(p[2] * 100, 1)]
+            l["direction_ue"] = [l["direction"][0], -l["direction"][1], l["direction"][2]]
+        lights_path = os.path.join(os.path.dirname(path(cfg["out_blend"])), "Export", "%s_lights.json" % ship)
+        os.makedirs(os.path.dirname(lights_path), exist_ok=True)
+        with open(lights_path, "w", encoding="utf-8") as fh:
+            json.dump({"_comment": "Written by Tools/Blender/hs_assemble_ship.py from the recipe's lights (hs_lights.py); read by Tools/Assets/import_ship.py.",
+                       "lights": lights}, fh, indent=1)
     # 3a) vertex-colour masks for the layered material (Tools/Blender/hs_layers.py): AO, edges,
     #     secondary paint, layer amount
     layer_report = {}

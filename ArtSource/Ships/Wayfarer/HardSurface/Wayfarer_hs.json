@@ -510,6 +510,48 @@
    "roughness": 0.4,
    "metallic": 0.0,
    "emit": [1.0, 0.55, 0.25]
+  },
+  "light_red": {
+   "slot": "LightRed",
+   "colour": [0.05, 0.05, 0.05],
+   "roughness": 0.2,
+   "metallic": 0.0,
+   "emit": [1.0, 0.05, 0.02]
+  },
+  "light_green": {
+   "slot": "LightGreen",
+   "colour": [0.05, 0.05, 0.05],
+   "roughness": 0.2,
+   "metallic": 0.0,
+   "emit": [0.05, 1.0, 0.25]
+  },
+  "light_white": {
+   "slot": "LightWhite",
+   "colour": [0.05, 0.05, 0.05],
+   "roughness": 0.2,
+   "metallic": 0.0,
+   "emit": [1.0, 0.95, 0.88]
+  },
+  "light_amber": {
+   "slot": "LightAmber",
+   "colour": [0.05, 0.05, 0.05],
+   "roughness": 0.2,
+   "metallic": 0.0,
+   "emit": [1.0, 0.42, 0.05]
+  },
+  "light_strip": {
+   "slot": "LightStrip",
+   "colour": [0.05, 0.05, 0.05],
+   "roughness": 0.2,
+   "metallic": 0.0,
+   "emit": [0.65, 0.85, 1.0]
+  },
+  "light_warm": {
+   "slot": "LightWarm",
+   "colour": [0.05, 0.05, 0.05],
+   "roughness": 0.2,
+   "metallic": 0.0,
+   "emit": [1.0, 0.68, 0.38]
   }
  },
  "bevel": {
@@ -1041,6 +1083,42 @@
     "on": "side",
     "x": 6.4,
     "z": 0.9
+   },
+   {
+    "item": "warning_label",
+    "on": "ray",
+    "at": [-1.0, 1.45, 0.25],
+    "dir": [1, 0, 0],
+    "rot": 90,
+    "_what": "hazard plates either side of the rear ramp"
+   },
+   {
+    "item": "handle",
+    "on": "ray",
+    "at": [-1.0, 1.4, 0.85],
+    "dir": [1, 0, 0],
+    "rot": 90
+   },
+   {
+    "item": "access_panel",
+    "on": "ray",
+    "at": [-1.0, 1.85, 0.9],
+    "dir": [1, 0, 0],
+    "_what": "ramp hydraulics access"
+   },
+   {
+    "item": "louvers",
+    "on": "ray",
+    "at": [-1.0, 0.5, 1.1],
+    "dir": [1, 0, 0],
+    "_what": "hold air exchange in the ramp"
+   },
+   {
+    "item": "bolt_row",
+    "on": "ray",
+    "at": [-1.0, 0.55, 0.02],
+    "dir": [1, 0, 0],
+    "_what": "ramp hinge bolts"
    }
   ],
   "trim": [
@@ -1082,6 +1160,19 @@
     "on": "bottom_cross",
     "x": 3.14,
     "y": [-1.5, 1.5]
+   },
+   {
+    "strip": "seam_double",
+    "on": "ray_line",
+    "points": [
+     [-1.0, -1.15, -0.12],
+     [-1.0, -1.15, 1.35],
+     [-1.0, 1.15, 1.35],
+     [-1.0, 1.15, -0.12]
+    ],
+    "dir": [1, 0, 0],
+    "mirror": false,
+    "_what": "outline of the rear ramp"
    }
   ]
  },
@@ -1090,6 +1181,101 @@
   "region_x": [-1.0, 6.9],
   "ao_rays": 24,
   "ao_distance_m": 0.5,
-  "edge": [0.28, 0.45], "edge_max_face_m2": 0.004
+  "edge": [0.28, 0.45],
+  "edge_max_face_m2": 0.004
+ },
+ "lights": {
+  "_comment": "Light fittings, emissive strips and real lights (Tools/Blender/hs_lights.py, skill ship-pipeline 3b3). PILOT: pods and aft hull. Position lights red port / green starboard on the pod noses, white tail light on the aft cap, amber outline markers, a floodlight on each shoulder washing the forward pod armour, a warm light in each open bay.",
+  "lenses": [
+   {
+    "name": "nav",
+    "on": "pod",
+    "x": 5.0,
+    "deg": 0,
+    "size": [0.1, 0.035, 0.014],
+    "color": "red",
+    "mirror_color": "green",
+    "light": {
+     "type": "point",
+     "intensity_cd": 3,
+     "radius_m": 1.0
+    },
+    "_what": "position lights on the light_housing decal",
+    "_why": "the wing is 30 cm away: 25 cd and then 10 cd still left a red pool on it in daylight (24. 9. 2026)"
+   },
+   {
+    "name": "tail",
+    "on": "top",
+    "x": 0.3,
+    "y": 0.0,
+    "size": [0.08, 0.06, 0.014],
+    "color": "white",
+    "mirror": false,
+    "light": {
+     "type": "point",
+     "intensity_cd": 8,
+     "radius_m": 1.5
+    },
+    "_why": "20 cd burnt a hot spot into the dark aft cap right under it (24. 9. 2026)"
+   },
+   {
+    "name": "marker_pod",
+    "on": "pod",
+    "x": 0.0,
+    "deg": -90,
+    "size": [0.06, 0.03, 0.012],
+    "color": "amber",
+    "_what": "outline marker under each aft cowl"
+   },
+   {
+    "name": "marker_hull",
+    "on": "ray",
+    "at": [0.4, 2.0, 2.45],
+    "dir": [0, -0.6, -0.8],
+    "size": [0.06, 0.03, 0.012],
+    "color": "amber",
+    "_what": "outline marker on the aft cap corners"
+   },
+   {
+    "name": "flood",
+    "on": "ray",
+    "at": [6.6, 1.9, 2.6],
+    "dir": [0, -0.7, -0.7],
+    "size": [0.12, 0.06, 0.02],
+    "color": "white",
+    "light": {
+     "type": "spot",
+     "intensity_cd": 150,
+     "radius_m": 6.0,
+     "cone_deg": 35,
+     "aim": [4.8, 3.4, 1.9]
+    },
+    "_what": "floodlight washing the forward pod armour"
+   }
+  ],
+  "strips": [
+   {
+    "name": "pod_run",
+    "x": [1.0, 4.3],
+    "deg": -44,
+    "width": 0.016,
+    "color": "strip",
+    "_what": "running light strip under the lower strake"
+   },
+   {
+    "name": "bay_glow",
+    "x": [2.2, 3.1],
+    "deg": 40,
+    "r": 0.806,
+    "width": 0.012,
+    "color": "warm",
+    "light": {
+     "type": "point",
+     "intensity_cd": 10,
+     "radius_m": 0.7
+    },
+    "_what": "work light on the bay floor"
+   }
+  ]
  }
 }

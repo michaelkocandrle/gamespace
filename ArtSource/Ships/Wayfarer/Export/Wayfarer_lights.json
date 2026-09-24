@@ -1,0 +1,224 @@
+{
+ "_comment": "Written by Tools/Blender/hs_assemble_ship.py from the recipe's lights (hs_lights.py); read by Tools/Assets/import_ship.py.",
+ "lights": [
+  {
+   "name": "nav_L",
+   "type": "point",
+   "color": [
+    1.0,
+    0.05,
+    0.02
+   ],
+   "intensity_cd": 3,
+   "radius_m": 1.0,
+   "location": [
+    5.0044,
+    4.313,
+    1.2009
+   ],
+   "direction": [
+    0.0994,
+    0.9948,
+    0.0207
+   ],
+   "location_ue_cm": [
+    -524.6,
+    -431.3,
+    0.1
+   ],
+   "direction_ue": [
+    0.0994,
+    -0.9948,
+    0.0207
+   ]
+  },
+  {
+   "name": "nav_R",
+   "type": "point",
+   "color": [
+    0.05,
+    1.0,
+    0.25
+   ],
+   "intensity_cd": 3,
+   "radius_m": 1.0,
+   "location": [
+    5.0044,
+    -4.313,
+    1.2009
+   ],
+   "direction": [
+    0.0994,
+    -0.9948,
+    0.0207
+   ],
+   "location_ue_cm": [
+    -524.6,
+    431.3,
+    0.1
+   ],
+   "direction_ue": [
+    0.0994,
+    0.9948,
+    0.0207
+   ]
+  },
+  {
+   "name": "tail",
+   "type": "point",
+   "color": [
+    1.0,
+    0.95,
+    0.88
+   ],
+   "intensity_cd": 8,
+   "radius_m": 1.5,
+   "location": [
+    0.2606,
+    0.0,
+    2.4868
+   ],
+   "direction": [
+    -0.8944,
+    0.0,
+    0.4472
+   ],
+   "location_ue_cm": [
+    -998.9,
+    -0.0,
+    128.7
+   ],
+   "direction_ue": [
+    -0.8944,
+    -0.0,
+    0.4472
+   ]
+  },
+  {
+   "name": "flood_L",
+   "type": "spot",
+   "color": [
+    1.0,
+    0.95,
+    0.88
+   ],
+   "intensity_cd": 150,
+   "radius_m": 6.0,
+   "location": [
+    6.5995,
+    1.9072,
+    2.6126
+   ],
+   "direction": [
+    -0.7362,
+    0.6107,
+    -0.2915
+   ],
+   "cone_deg": 35,
+   "location_ue_cm": [
+    -365.1,
+    -190.7,
+    141.3
+   ],
+   "direction_ue": [
+    -0.7362,
+    -0.6107,
+    -0.2915
+   ]
+  },
+  {
+   "name": "flood_R",
+   "type": "spot",
+   "color": [
+    1.0,
+    0.95,
+    0.88
+   ],
+   "intensity_cd": 150,
+   "radius_m": 6.0,
+   "location": [
+    6.5995,
+    -1.9072,
+    2.6126
+   ],
+   "direction": [
+    -0.7362,
+    -0.6107,
+    -0.2915
+   ],
+   "cone_deg": 35,
+   "location_ue_cm": [
+    -365.1,
+    190.7,
+    141.3
+   ],
+   "direction_ue": [
+    -0.7362,
+    0.6107,
+    -0.2915
+   ]
+  },
+  {
+   "name": "bay_glow_L",
+   "type": "point",
+   "color": [
+    1.0,
+    0.68,
+    0.38
+   ],
+   "intensity_cd": 10,
+   "radius_m": 0.7,
+   "location": [
+    2.6765,
+    4.0557,
+    1.7502
+   ],
+   "direction": [
+    0.0,
+    0.766,
+    0.6428
+   ],
+   "location_ue_cm": [
+    -757.4,
+    -405.6,
+    55.0
+   ],
+   "direction_ue": [
+    0.0,
+    -0.766,
+    0.6428
+   ]
+  },
+  {
+   "name": "bay_glow_R",
+   "type": "point",
+   "color": [
+    1.0,
+    0.68,
+    0.38
+   ],
+   "intensity_cd": 10,
+   "radius_m": 0.7,
+   "location": [
+    2.6765,
+    -4.0557,
+    1.7502
+   ],
+   "direction": [
+    0.0,
+    -0.766,
+    0.6428
+   ],
+   "location_ue_cm": [
+    -757.4,
+    405.6,
+    55.0
+   ],
+   "direction_ue": [
+    0.0,
+    0.766,
+    0.6428
+   ]
+  }
+ ]
+}

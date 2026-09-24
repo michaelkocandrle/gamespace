@@ -8,7 +8,7 @@ size. This module puts them on the ship from the recipe's "decals" block, in LAY
           true) repeats it on the starboard side. "along" repeats it: {"step": m, "count": n} along x.
   trim    ribbons of a trim strip ("strip"): "pod_ring" (a band around a pod at x over a range of
           angles), "top_cross" (across the roof or belly at x from y0 to y1, rays from above / below),
-          "pod_line" (along a pod at an angle from x0 to x1).
+          "pod_line" (along a pod at an angle from x0 to x1), "ray_line" (layout "points" cast along "dir").
 
 Every decal and ribbon is a grid of quads laid onto the ship: each vertex is ray-cast back onto the hull
 along the surface normal and lifted "offset_m" (2 mm) off it, so the quad follows curvature without
@@ -33,7 +33,11 @@ def _frame(n, rot_deg=0.0):
     """In-surface axes of a decal that reads right from outside: x runs along the ship and appears to the
     right of a viewer looking at the surface (aft on port-facing surfaces, forward elsewhere), y = n x x
     (so x, y, n are right-handed and the atlas is not mirrored), then turned by rot_deg about n."""
-    ref = Vector((-1, 0, 0)) if n.y > 0.3 else Vector((1, 0, 0))
+    if abs(n.x) > 0.7:
+        # the ship's front or back face: x across the ship, to the viewer's right
+        ref = Vector((0, 1 if n.x > 0 else -1, 0))
+    else:
+        ref = Vector((-1, 0, 0)) if n.y > 0.3 else Vector((1, 0, 0))
     x = ref - n * n.dot(ref)
     if x.length < 1e-4:
         x = n.orthogonal()
@@ -167,6 +171,15 @@ class Placer:
             for k in range(n_seg + 1):
                 pts.append(self.ray({"on": "top" if spec["on"] == "top_cross" else "bottom", "x": spec["x"],
                                      "y": y0 + (y1 - y0) * k / n_seg}, 1))
+        elif spec["on"] == "ray_line":
+            # a polyline of layout points, each sample cast along "dir" (e.g. the outline of the rear ramp)
+            poly = [Vector(p) for p in spec["points"]]
+            d = Vector(spec["dir"]).normalized()
+            for a, b in zip(poly, poly[1:]):
+                n_seg = max(1, int((b - a).length / grid_m))
+                for k in range(n_seg):
+                    pts.append((a + (b - a) * (k / n_seg) - d * 2.0, d))
+            pts.append((poly[-1] - d * 2.0, d))
         else:
             raise ValueError(spec["on"])
         # the path breaks where the hull is not continuous under it (a jump or a bend over 35 deg, e.g.
