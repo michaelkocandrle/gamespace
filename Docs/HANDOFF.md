@@ -1169,6 +1169,16 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       podlaze před průchody, výstrahy ve strojovně.
     - Natočení na stěně: decal promítá podél své +X a atlas na stěně leží na boku – potřebuje roll +90°
       (−90° ho obrátí vzhůru nohama). Podlaha pitch −90°.
+70. **Rozvody: potrubí, kabely, rošt** (24. 9. 2026, krok 5). Stavitel má pomůcky `cylinder`, `pipe_run`
+    (trubka s objímkami a závěsy ke stropu každý metr), `cable` / `cable_bundle` (tři kabely prověšené po
+    parabole mezi sponami) a `grating` (rošt nad tmavou šachtou):
+    - chodba: dvě trubky pod stropem, svazek kabelů podél stěny, rošt uprostřed podlahy;
+    - nákladový prostor: dvojice trubek podél obou stěn pod stropem;
+    - strojovna: silné přívody od jádra ke stěnám, trubky podél stěn a svisle v rozích, svazky kabelů.
+    Chodba má +8 000 trojúhelníků, strojovna +8 800; FPS ve 1080p beze změny (70–73). Jemný detail chodby
+    0,027 → 0,035, na horní hraně SC (0,024–0,035). Díry: žádná nová.
+    - Kabely jsou černé a šedé. Materiál s „light“ ve jméně import bere jako svítící pás – první verze měla
+      oranžově svítící kabel.
 
 ---
 

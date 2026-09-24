@@ -523,6 +523,78 @@ def ceiling_strips(room, xs, ys, mat, skip_x_walls=False):
                     strip(room, (x, y0, z), (x, y1, z), mat)
 
 
+# --- services: pipes, cables, grating (HANDOFF point 70) -------------------------------------------
+# The SC corridors and engine rooms carry their services in the open: pipe runs on brackets under
+# the ceiling, sagging cable bundles, grating over the floor ducts. It is most of the fine detail
+# the rooms lacked against the references.
+
+def cylinder(a, b, radius, segments=12):
+    """A capped cylinder from a to b (bmesh, world metres)."""
+    a, b = mathutils.Vector(a), mathutils.Vector(b)
+    axis = b - a
+    bm = bmesh.new()
+    bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=segments,
+                          radius1=radius, radius2=radius, depth=axis.length)
+    rotation = mathutils.Vector((0.0, 0.0, 1.0)).rotation_difference(axis.normalized()).to_matrix()
+    bmesh.ops.rotate(bm, verts=bm.verts, cent=(0.0, 0.0, 0.0), matrix=rotation)
+    bmesh.ops.translate(bm, vec=(a + b) / 2.0, verts=bm.verts)
+    return bm
+
+
+def pipe_run(room, a, b, radius, mats, bracket_every=1.0, hang_to=None):
+    """A straight pipe with collars and brackets every metre; `hang_to` = the height of the ceiling
+    the brackets hang from (none on a wall run)."""
+    a, b = mathutils.Vector(a), mathutils.Vector(b)
+    room.add("Pipe", cylinder(a, b, radius), mats["pipe"])
+    length = (b - a).length
+    count = max(1, int(length / bracket_every))
+    for i in range(count + 1):
+        p = a + (b - a) * (i / count)
+        d = (b - a).normalized() * 0.03
+        room.add("PipeCollar", cylinder(p - d, p + d, radius * 1.25), mats["dark"])
+        if hang_to is not None:
+            room.add("PipeHanger", box((p.x - 0.015, p.y - 0.015, p.z), (p.x + 0.015, p.y + 0.015, hang_to)), mats["dark"])
+
+
+def cable(room, a, b, radius, sag, mat, pieces=10):
+    """A cable hanging between two points: a chain of short cylinders on a parabola."""
+    a, b = mathutils.Vector(a), mathutils.Vector(b)
+    points = []
+    for i in range(pieces + 1):
+        t = i / pieces
+        p = a.lerp(b, t)
+        p.z -= sag * 4.0 * t * (1.0 - t)
+        points.append(p)
+    for p, q in zip(points, points[1:]):
+        room.add("Cable", cylinder(p, q, radius, segments=8), mat)
+
+
+def cable_bundle(room, xs, y, z, spacing, mats, sag=0.07, span=1.2):
+    """Three cables side by side, clipped to the wall every `span` metres."""
+    count = max(1, int((xs[1] - xs[0]) / span))
+    step = (xs[1] - xs[0]) / count
+    # Plain black and grey: a cable material named with "light" in it was taken for a light strip and
+    # glowed orange (the import maps materials by name).
+    colours = (mats["dark"], mats["pipe"], mats["dark"])
+    for i in range(count):
+        x0, x1 = xs[0] + i * step, xs[0] + (i + 1) * step
+        for k, mat in enumerate(colours):
+            dz = -k * 0.035
+            cable(room, (x0, y, z + dz), (x1, y, z + dz), 0.014, sag + k * 0.01, mat)
+        room.add("CableClip", box((x0 - 0.02, y - spacing, z - 0.1), (x0 + 0.02, y + spacing, z + 0.02)), mats["pipe"])
+
+
+def grating(room, xs, ys, mats, bar=0.012, pitch=0.045):
+    """A floor grating over a duct: a dark pit plate, a frame and cross bars on top."""
+    room.add("GrateBed", box((xs[0], ys[0], 0.0), (xs[1], ys[1], 0.004)), mats["dark"])
+    room.add("GrateFrame", box((xs[0], ys[0], 0.0), (xs[1], ys[0] + 0.03, 0.014)), mats["pipe"])
+    room.add("GrateFrame", box((xs[0], ys[1] - 0.03, 0.0), (xs[1], ys[1], 0.014)), mats["pipe"])
+    x = xs[0] + 0.03
+    while x < xs[1] - 0.03:
+        room.add("GrateBar", box((x - bar / 2.0, ys[0] + 0.03, 0.004), (x + bar / 2.0, ys[1] - 0.03, 0.014)), mats["pipe"])
+        x += pitch
+
+
 def hull(room, mat):
     """A dark closed box round the engine room, the bay and the corridor, facing in. Where two wall
     panels only meet edge to edge, the raster leaves pixel cracks; through them the planet
@@ -577,6 +649,10 @@ def build_bay(shell, templates, room_mats):
     doorway(room, templates, (BAY_X[0], 0.0), (-1.0, 0.0), room_mats)
     hull(room, room_mats["dark"])
     ceiling_strips(room, BAY_X, BAY_Y, room_mats["strip"])
+    for y in (BAY_Y[0] + 0.25, BAY_Y[1] - 0.25):
+        pipe_run(room, (BAY_X[0] + 0.3, y, HEIGHT - 0.2), (BAY_X[1] - 0.3, y, HEIGHT - 0.2), 0.06, room_mats, hang_to=HEIGHT)
+        pipe_run(room, (BAY_X[0] + 0.3, y * 0.95, HEIGHT - 0.33), (BAY_X[1] - 0.3, y * 0.95, HEIGHT - 0.33), 0.035,
+                 room_mats, bracket_every=2.0)
     room.accents = list(BAY_ACCENTS)
     return room
 
@@ -594,6 +670,11 @@ def build_corridor(templates, room_mats):
         strip(room, (CORRIDOR_X[0] + 0.1, y, 0.06), (CORRIDOR_X[1] - 0.3, y, 0.06), room_mats["strip"], size=(0.02, 0.03))
     room.place(templates["terminal"], (16.0, CORRIDOR_Y[1] - 0.25, 1.35), yaw=-math.pi / 2.0)
     room.place(templates["vent"], (12.0, 0.0, HEIGHT - 0.04), roll=math.pi)
+    xs = (CORRIDOR_X[0] + 0.25, CORRIDOR_X[1] - 0.35)
+    for y, r in ((-0.72, 0.05), (0.72, 0.035)):
+        pipe_run(room, (xs[0], y, HEIGHT - 0.18), (xs[1], y, HEIGHT - 0.18), r, room_mats, hang_to=HEIGHT)
+    cable_bundle(room, xs, CORRIDOR_Y[1] - 0.06, HEIGHT - 0.32, 0.04, room_mats)
+    grating(room, (CORRIDOR_X[0] + 0.4, CORRIDOR_X[1] - 0.6), (-0.3, 0.3), room_mats)
     room.accents = list(CORRIDOR_ACCENTS)
     return room
 
@@ -619,6 +700,14 @@ def build_engine_room(templates, room_mats):
         room.place(templates["pipe_holder"], (core_x, y, 0.47), yaw=yaw)
     room.place(templates["computer"], (x1 - 0.55, -1.6, 0.8), yaw=-math.pi / 2.0)
     ceiling_strips(room, ENGINE_X, ENGINE_Y, room_mats["strip"])
+    # Heavy feeds from the core out under the ceiling, down the side walls; cable bundles above the racks.
+    for y in (-0.45, 0.45):
+        pipe_run(room, (core_x + 0.55, y, HEIGHT - 0.22), (x1 - 0.4, y, HEIGHT - 0.22), 0.08, room_mats, hang_to=HEIGHT)
+        pipe_run(room, (core_x - 0.55, y, HEIGHT - 0.22), (x0 + 0.3, y, HEIGHT - 0.22), 0.08, room_mats, hang_to=HEIGHT)
+    for y in (y0 + 0.2, y1 - 0.2):
+        pipe_run(room, (x0 + 0.4, y, HEIGHT - 0.25), (x1 - 0.4, y, HEIGHT - 0.25), 0.06, room_mats, hang_to=HEIGHT)
+        pipe_run(room, (x0 + 0.5, y, 0.2), (x0 + 0.5, y, HEIGHT - 0.25), 0.06, room_mats, bracket_every=0.7)
+        cable_bundle(room, (x0 + 0.6, x1 - 0.5), y - (0.08 if y > 0 else -0.08), 1.65, 0.05, room_mats, sag=0.1)
     for cx in (x0 + 0.03, x1 - 0.03):                                   # upright strips in the corners
         for cy in (y0 + 0.03, y1 - 0.03):
             strip(room, (cx, cy, 0.2), (cx, cy, HEIGHT - 0.2), room_mats["strip"], size=(0.03, 0.03))
@@ -881,7 +970,7 @@ def main():
     }
     mats = dict(own, body=shell_materials["MI_Trim_02"], dark=shell_materials["M_Black"],
                 cushion=shell_materials["MI_PaddedWall"], trim=shell_materials["MI_Trim_01"],
-                frame=shell_materials["M_Black"])      # the reference's canopy beams are near black
+                frame=shell_materials["M_Black"], pipe=shell_materials["MI_Trim_02"])      # the reference's canopy beams are near black
 
     mats["holo"] = {page: material("M_Holo_" + page, emission=(0.3, 0.6, 1.0))
                     for page in ("Power", "Status", "Comms", "Scan", "DashLeft", "DashRight", "Radar")}
