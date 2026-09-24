@@ -275,6 +275,8 @@ def import_fbx(mesh, convert_scene_unit=False):
         ("bake_pivot_in_vertex", False, False),
         ("normal_import_method", unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS, False),
         ("reorder_material_to_fbx_order", True, False),
+        # the layered material's masks live in the vertex colours (Tools/Blender/hs_layers.py)
+        ("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE, False),
     ):
         try:
             data.set_editor_property(prop, value)
@@ -283,6 +285,17 @@ def import_fbx(mesh, convert_scene_unit=False):
                 raise ImportFailed("FbxStaticMeshImportData.%s: %s" % (prop, error))
             log("warning: FbxStaticMeshImportData.%s not set (%s); checked after import" % (prop, error))
     ui.set_editor_property("static_mesh_import_data", data)
+
+    # Reimporting over an existing mesh, the legacy FBX importer keeps that asset's own import data for
+    # some options whatever the task says (vertex colours stayed IGNORE, 24. 9. 2026): set them there too.
+    if unreal.EditorAssetLibrary.does_asset_exist(mesh["asset_path"]):
+        existing = unreal.EditorAssetLibrary.load_asset(mesh["asset_path"])
+        old_data = existing.get_editor_property("asset_import_data") if isinstance(existing, unreal.StaticMesh) else None
+        if old_data is not None:
+            try:
+                old_data.set_editor_property("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE)
+            except Exception as error:
+                log("warning: existing import data not updated (%s)" % error)
 
     task = unreal.AssetImportTask()
     task.set_editor_property("filename", mesh["fbx"])

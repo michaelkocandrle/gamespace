@@ -34,7 +34,8 @@ MEL = unreal.MaterialEditingLibrary
 SHARED = "/Game/Ships/Shared/Materials"
 MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glass": SHARED + "/M_Ship_Glass",
            "screen": SHARED + "/M_Ship_Screen", "decal": SHARED + "/M_Ship_Decal",
-           "meshdecal": SHARED + "/M_Ship_MeshDecal", "meshdecal_paint": SHARED + "/M_Ship_MeshDecalPaint"}
+           "meshdecal": SHARED + "/M_Ship_MeshDecal", "meshdecal_paint": SHARED + "/M_Ship_MeshDecalPaint",
+           "layered": SHARED + "/M_Ship_Layered"}
 TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap",
                   "decal_normal": "DecalNormalMap", "decal_m": "DecalMMap", "decal_bc": "DecalColorMap"}
 
@@ -594,7 +595,111 @@ def build_masters():
     unreal.EditorAssetLibrary.save_loaded_asset(glass, only_if_is_dirty=False)
     return {"hull": hull, "pbr": build_pbr_master(), "glass": glass, "screen": build_screen_master(),
             "decal": build_decal_master(), "meshdecal": build_mesh_decal_master(False),
-            "meshdecal_paint": build_mesh_decal_master(True)}
+            "meshdecal_paint": build_mesh_decal_master(True), "layered": build_layered_master()}
+
+
+# Masks of the layered master, shared by its two Custom nodes. VC is the mesh's vertex colour from
+# Tools/Blender/hs_layers.py: R ambient occlusion, G 1 - convex edge, B 1 - secondary paint; Amount (A)
+# scales the layering (the pilot region has 1, the rest 0; a mesh without vertex colours reads white:
+# no AO, no edge, primary paint, full grunge). Grunge: the shared blotch texture, triplanar in the ship's
+# own space at two scales.
+_LAYER_MASKS = _TRIPLANAR + """
+float g1 = w.x * Texture2DSample(TexG, TexGSampler, p.yz).r + w.y * Texture2DSample(TexG, TexGSampler, p.zx).r
+         + w.z * Texture2DSample(TexG, TexGSampler, p.xy).r;
+float3 q = p * 3.7;
+float g2 = w.x * Texture2DSample(TexG, TexGSampler, q.yz).r + w.y * Texture2DSample(TexG, TexGSampler, q.zx).r
+         + w.z * Texture2DSample(TexG, TexGSampler, q.xy).r;
+float g = saturate(g1 * 0.65 + g2 * 0.35);
+float ao = lerp(1.0, VC.r, Amount);
+float edge = (1.0 - VC.g) * Amount;
+float p2 = 1.0 - VC.b;
+float dirt = saturate((1.0 - ao) * 1.8) * saturate(0.3 + g) * DirtAmount * Amount;
+float wear = saturate(edge * (0.55 + 1.2 * g)) * EdgeWear;
+"""
+
+_LAYER_COLOUR = _LAYER_MASKS + """
+float3 paint = lerp(Primary, Secondary, p2);
+paint *= lerp(1.0, 0.8 + 0.4 * g, GrungeAmount * Amount);
+paint *= lerp(1.0, ao, CavityStrength);
+paint = lerp(paint, DirtColor, dirt);
+paint = lerp(paint, BareMetal, wear);
+return paint;
+"""
+
+_LAYER_SURFACE = _LAYER_MASKS + """
+float rough = lerp(PrimaryRough, SecondaryRough, p2);
+rough = saturate(rough + (g - 0.5) * RoughVariation * Amount);
+rough = lerp(rough, 0.85, dirt);
+rough = lerp(rough, BareRough, wear);
+float metal = lerp(PaintMetal, 1.0, wear);
+return float3(rough, metal, lerp(1.0, ao, AOStrength));
+"""
+
+
+def build_layered_master():
+    """Layered hull paint (step 5 of the SC detail plan, skill ship-pipeline 3b3): primary and secondary
+    paint by mask, cavity darkening and dirt from the baked AO, edge wear to bare metal on convex edges
+    broken up by grunge, grunge over the paint, all from vertex colours (hs_layers.py) and one tiling
+    texture, no per-ship UV textures. Parameters (colours linear): PrimaryColor, SecondaryColor,
+    BareMetalColor, DirtColor, PrimaryRoughness, SecondaryRoughness, PaintMetallic, BareMetalRoughness,
+    EdgeWear, DirtAmount, GrungeAmount, GrungeTileCm, RoughVariation, CavityStrength, AOStrength,
+    EmissiveColor, EmissiveStrength."""
+    m = _fresh_material(MASTERS["layered"])
+    m.set_editor_property("used_with_nanite", True)
+    grunge_tex = import_shared_texture("T_Ship_Detail_Grunge")
+    vc = _node(m, unreal.MaterialExpressionVertexColor, -1700, 0)
+    local_position = _node(m, unreal.MaterialExpressionLocalPosition, -1700, 200)
+    tex = _node(m, unreal.MaterialExpressionTextureObjectParameter, -1700, 350, parameter_name="GrungeMap",
+                sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_MASKS, texture=grunge_tex)
+    tile = _scalar(m, "GrungeTileCm", 180.0, -1700, 500)
+    params = {
+        "Primary": _vector(m, "PrimaryColor", (0.6, 0.57, 0.5), -1700, 650),
+        "Secondary": _vector(m, "SecondaryColor", (0.45, 0.44, 0.41), -1700, 800),
+        "BareMetal": _vector(m, "BareMetalColor", (0.55, 0.55, 0.57), -1700, 950),
+        "DirtColor": _vector(m, "DirtColor", (0.09, 0.08, 0.07), -1700, 1100),
+        "GrungeAmount": _scalar(m, "GrungeAmount", 0.5, -1700, 1250),
+        "DirtAmount": _scalar(m, "DirtAmount", 0.6, -1700, 1350),
+        "EdgeWear": _scalar(m, "EdgeWear", 0.8, -1700, 1450),
+        "CavityStrength": _scalar(m, "CavityStrength", 0.5, -1700, 1550),
+        "PrimaryRough": _scalar(m, "PrimaryRoughness", 0.42, -1700, 1650),
+        "SecondaryRough": _scalar(m, "SecondaryRoughness", 0.5, -1700, 1750),
+        "PaintMetal": _scalar(m, "PaintMetallic", 0.0, -1700, 1850),
+        "BareRough": _scalar(m, "BareMetalRoughness", 0.3, -1700, 1950),
+        "RoughVariation": _scalar(m, "RoughVariation", 0.2, -1700, 2050),
+        "AOStrength": _scalar(m, "AOStrength", 0.8, -1700, 2150),
+    }
+    common = ["VC", "Amount", "LocalPos", "TexG", "Tile"]
+    colour_in = common + ["Primary", "Secondary", "BareMetal", "DirtColor", "GrungeAmount", "DirtAmount", "EdgeWear",
+                          "CavityStrength"]
+    surface_in = common + ["PrimaryRough", "SecondaryRough", "PaintMetal", "BareRough", "EdgeWear", "DirtAmount",
+                           "AOStrength", "RoughVariation"]
+    nodes = {}
+    for key, code, names, y in (("colour", _LAYER_COLOUR, colour_in, 0), ("surface", _LAYER_SURFACE, surface_in, 700)):
+        node = _custom(m, "Layered_" + key, code, unreal.CustomMaterialOutputType.CMOT_FLOAT3, names, -1000, y)
+        if not MEL.connect_material_expressions(vc, "", node, "VC"):
+            raise RuntimeError("vertex colour -> " + key)
+        if not MEL.connect_material_expressions(vc, "A", node, "Amount"):
+            raise RuntimeError("vertex colour A -> " + key)
+        _link(local_position, node, "LocalPos")
+        _link(tex, node, "TexG")
+        _link(tile, node, "Tile")
+        for name in names[len(common):]:
+            _link(params[name], node, name)
+        nodes[key] = node
+    _output(nodes["colour"], unreal.MaterialProperty.MP_BASE_COLOR)
+    for i, (channel, prop) in enumerate((("r", unreal.MaterialProperty.MP_ROUGHNESS), ("g", unreal.MaterialProperty.MP_METALLIC),
+                                         ("b", unreal.MaterialProperty.MP_AMBIENT_OCCLUSION))):
+        mask = _node(m, unreal.MaterialExpressionComponentMask, -600, 700 + i * 120,
+                     r=channel == "r", g=channel == "g", b=channel == "b", a=False)
+        _link(nodes["surface"], mask, "")
+        _output(mask, prop)
+    emissive = _node(m, unreal.MaterialExpressionMultiply, -600, 1200)
+    _link(_vector(m, "EmissiveColor", (0.0, 0.0, 0.0), -900, 1200), emissive, "A")
+    _link(_scalar(m, "EmissiveStrength", 0.0, -900, 1350), emissive, "B")
+    _output(emissive, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
+    return m
 
 
 def build_mesh_decal_master(paint):
@@ -758,6 +863,11 @@ def build_instance(name, folder, spec, masters, ship=None):
         if key in spec:
             c = spec[key]
             MEL.set_material_instance_vector_parameter_value(mi, param, unreal.LinearColor(c[0], c[1], c[2], 1.0))
+    # any parameter by its name (the layered master has many): "vectors" {name: [r, g, b]}, "scalars" {name: v}
+    for name, c in (spec.get("vectors") or {}).items():
+        MEL.set_material_instance_vector_parameter_value(mi, name, unreal.LinearColor(c[0], c[1], c[2], 1.0))
+    for name, v in (spec.get("scalars") or {}).items():
+        MEL.set_material_instance_scalar_parameter_value(mi, name, float(v))
     for key, source in (spec.get("textures") or {}).items():
         MEL.set_material_instance_texture_parameter_value(mi, TEXTURE_PARAMS[key], import_texture(ship, key, source, spec.get("never_stream", False)))
     MEL.update_material_instance(mi)

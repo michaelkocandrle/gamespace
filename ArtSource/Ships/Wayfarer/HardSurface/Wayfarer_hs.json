@@ -1084,5 +1084,12 @@
     "y": [-1.5, 1.5]
    }
   ]
+ },
+ "layers": {
+  "_comment": "Vertex-colour masks for M_Ship_Layered (Tools/Blender/hs_layers.py). PILOT: the layering applies only in region_x (layout x, pods and aft hull); elsewhere A = 0 keeps the clean look for comparison.",
+  "region_x": [-1.0, 6.9],
+  "ao_rays": 24,
+  "ao_distance_m": 0.5,
+  "edge": [0.28, 0.45], "edge_max_face_m2": 0.004
  }
 }

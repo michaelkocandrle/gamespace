@@ -7,6 +7,7 @@ Driven by the recipe's "assemble" block:
   2. parts are joined into the export meshes: "groups" maps a part suffix ("" = the main mesh
      SM_Ship_<Ship>, "Canopy", "Gear", ...) to the objects that go in (the rest goes to the main mesh);
   3. everything moves by "offset" (layout coordinates -> ship coordinates centred on the origin);
+  3a. vertex-colour masks for the layered material (Tools/Blender/hs_layers.py, recipe "layers");
   3b. mesh decals and trim strips (Tools/Blender/hs_decals.py, recipe "decals") as the "Decals" part;
   4. a UV map per mesh (smart project) for the engine (not for the decals: they carry atlas UVs);
   5. convex collision hulls (k-DOP, Tools/Blender/build_ai_ship.py) from "collision" boxes and sockets from
@@ -107,6 +108,12 @@ def main(argv):
         ob.data.transform(Matrix.Translation(Vector(off)) @ ob.matrix_world)
         ob.matrix_world = Matrix()
         out[suffix] = ob
+    # 3a) vertex-colour masks for the layered material (Tools/Blender/hs_layers.py): AO, edges,
+    #     secondary paint, layer amount
+    layer_report = {}
+    if recipe.get("layers"):
+        import hs_layers
+        layer_report = hs_layers.bake(out[""], recipe["layers"], off)
     # 3b) mesh decals and trim strips laid onto the finished hull (Tools/Blender/hs_decals.py): their own
     #     part with atlas UVs, no unwrap, no collision, not Nanite (setup no_nanite_parts)
     import hs_decals
@@ -145,7 +152,7 @@ def main(argv):
     hi = [round(max(p[i] for p in pts), 3) for i in range(3)]
     bpy.ops.wm.save_as_mainfile(filepath=path(cfg["out_blend"]))
     print("HSASSEMBLE " + json.dumps({"out": cfg["out_blend"], "meshes": {o.name: len(o.data.polygons) for o in out.values()},
-                                       "decals": decal_report,
+                                       "decals": decal_report, "layers": layer_report,
                                        "bounds": [lo, hi]}))
 
 

@@ -17,7 +17,7 @@
     "SM_Ship_Wayfarer_Gear": []
   },
   "materials": [
-    "10 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint"
+    "10 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_Layered"
   ],
   "blueprint": {
     "path": "/Game/Ships/Wayfarer/Blueprints/BP_Ship_Wayfarer",
