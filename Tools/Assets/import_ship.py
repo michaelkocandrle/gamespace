@@ -561,7 +561,12 @@ def add_decal_component(blueprint, plan, decal):
         # Keyword arguments on purpose: unreal.Rotator's positional order is roll, pitch, yaw.
         pitch, yaw, roll = (list(decal.get("rotation", [0.0, 0.0, 0.0])) + [0.0, 0.0, 0.0])[:3]
         existing.set_editor_property("relative_rotation", unreal.Rotator(roll=roll, pitch=pitch, yaw=yaw))
-        existing.set_editor_property("decal_size", vec(decal["size"]))
+        size = list(decal["size"])
+        if decal["name"].startswith("Int_"):
+            # interior walls are thin: a deeper box projects through the wall and shows the marking mirrored on its
+            # other side (COCKPIT / ENGINEERING read backwards from the cockpit, author 25. 9. 2026)
+            size[0] = min(size[0], float(decal.get("max_depth_cm", 4.0)))
+        existing.set_editor_property("decal_size", vec(size))
         existing.set_editor_property("sort_order", int(decal.get("sort_order", 0)))
         existing.set_editor_property("fade_screen_size", float(decal.get("fade_screen_size", 0.0005)))
         unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)

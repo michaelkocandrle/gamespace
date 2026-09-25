@@ -876,6 +876,24 @@ snímku.
   hrany a některé plochy měly obrácenou orientaci. Normály ke středu kokpitu + `set_sharp_from_angle(25°)`.
 - bl) **Oranžová linka přeškrtla horní okraj displejů.** Linka 3 cm pod hranou desky vedla i přes pole MFD, kde je
   nad sklem jen 2 cm. Na polích displejů linku vynechat.
+- bm) **Tenké proužky oblohy podél okrajů skla a ve spárách interiéru.** Příčiny byly tři:
+  - pásek ostění byl solidifikovaný a `hp.finish()` ho spojil do nemanifoldního pruhu s přepočtenými normálami;
+  - plochy obložení se otáčely „ke středu kokpitu“, což na strmých plochách u skla selhalo;
+  - trup má na střeše střídavě obrácené normály.
+
+  Oprava:
+  - ostění postav oboustranně jako samostatné plochy bez spojování;
+  - plochu obložení otoč, když trup leží blíž ve směru normály než proti ní;
+  - zbytek interiéru dostal tmavý vnitřní plášť 5 cm pod trupem (`Int_HullSkin`);
+  - oblasti obložení a pláště vybírej podle vrcholů, ne podle středů ploch, a nech je překrývat.
+
+  Hledání: `GEOCHECK_DEBUG=1` přidá k masce děr i render s náhodnou barvou po objektech. Paprsek přes bílý pixel ukáže, co zasáhne (rub = obrácená plocha).
+- bn) **Díl „trčí z trupu“, i když výška sedí na ose.** Trup se ke stranám snižuje. Výška stropu nebo parapetu
+  změřená jen na ose (y = 0) nebo v jedné výšce pustí rohy ven. Měř přes celou šířku dílu a v horní i dolní výšce;
+  parapet konči u obložení (3 cm pod trupem), ne za ním.
+- bo) **Kontrola geometrie před každým předáním:** `python Tools/Tests/test_ship_geometry.py` (Blender headless na
+  `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
+  Musí projít (autor 25. 9. 2026).
 
 
 ---

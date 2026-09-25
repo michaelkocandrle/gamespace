@@ -185,7 +185,7 @@ def _tilt(side, W, z, deg):
     return Matrix.Translation(p) @ Matrix.Rotation(math.radians(deg) * (1 if side > 0 else -1), 4, "X") @ Matrix.Translation(-p)
 
 
-def shell(kit, g, box, obox, room, spec, H, W, lights_out, doors_x=()):
+def shell(kit, g, box, obox, room, spec, H, W, lights_out, doors_x=(), hull_top=None):
     """One room's structure along x from room x0 to x1 between the walls at y = +-W: floor plates, walls,
     chamfered top pieces with a light cove, a ceiling with a services run, portals on the module lines.
     g/box/obox are hs_interior's procedural helpers (portals and coves are exact geometry, not kit)."""
@@ -232,7 +232,14 @@ def shell(kit, g, box, obox, room, spec, H, W, lights_out, doors_x=()):
             yc = -W + (j + 0.5) * 2 * W / ny
             kit.place(kc["floor"][j % len(kc["floor"])], Matrix.Translation((xc, yc, z0)) @ Matrix.Diagonal((length / 4.0, 2 * W / ny / 4.0, 1.0, 1.0)))
         # ceiling panel between the coves, facing down
-        kit.place(kc["ceiling"], Matrix.Translation((xc, 0.0, H)) @ Matrix.Diagonal((length / 4.0, 2 * W / 4.0, -1.0, 1.0)))
+        # (the hull comes down towards the ramp: the ceiling plate of a module stays under it)
+        hz = H
+        if hull_top is not None:
+            # (across its width too: the hull's roof curves down to the sides)
+            hz = min([H] + [hull_top(x0 + (i + t / 6.0) * length, yy) - 0.07 for t in range(7) for yy in (-Wc, 0.0, Wc)])
+        # (1 cm short of the module lines - the portals cover the joint; at the ramp the plate's edge sat on
+        # the closed ramp's top face)
+        kit.place(kc["ceiling"], Matrix.Translation((xc, 0.0, hz)) @ Matrix.Diagonal(((length - 0.02) / 4.0, 2 * Wc / 4.0, -1.0, 1.0)))
         # a down light in a housing in the middle of every module: pools of light on the floor, dark between
         # (a recessed square fitting: dark housing, a lens flush with its face; the kit's lamps are wall lamps)
         box(g["int_dark"], (xc - 0.2, -0.2, H - 0.05), (xc + 0.2, 0.2, H - 0.005))
@@ -259,7 +266,7 @@ def shell(kit, g, box, obox, room, spec, H, W, lights_out, doors_x=()):
             obox(g["int_trim"], pivot + d * s + nrm * (0.22 * s + pd / 2), d, nrm, (2.0 * s + 0.04, pw, pd))
             # a small orange tag at eye height on the portal's face (the section number goes next to it)
             fa, fb = sorted((face - side * pd, face - side * (pd + 0.005)))
-            box(g["accent"], (xa + 0.02, fa, z0 + 1.5), (xb - 0.02, fb, z0 + 1.58))
+            box(g["accent"], (xa + 0.02, fa, z0 + 1.2), (xb - 0.02, fb, z0 + 1.28))   # on the wall portal, under the chamfer
         box(g["int_trim"], (xa, -Wc, H - pd - 0.03), (xb, Wc, H - 0.005))
     # floor guide lights along both walls (cool, like the reference's orientation strips)
     for side in (1, -1):
@@ -276,7 +283,7 @@ def shell(kit, g, box, obox, room, spec, H, W, lights_out, doors_x=()):
     k = 0
     x = x0 + 0.3
     while x < x1 - 0.1:
-        box(g["int_dark"], (x - 0.02, ys[-1] - 0.05, H - 0.2), (x + 0.02, ys[0] + 0.05, H - 0.03))
+        box(g["int_dark"], (x - 0.02, ys[-1] - 0.05, H - 0.2), (x + 0.02, ys[0] + 0.05, H + 0.005))   # hung from the ceiling
         if k % 3 == 1:
             for y, r, key in zip(ys, rs, ("accent", "int_glow", "int_dark")):
                 _pipe(g[key], (x + 0.08, y, H - 0.09 - r), (x + 0.16, y, H - 0.09 - r), r + 0.004)

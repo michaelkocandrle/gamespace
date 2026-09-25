@@ -133,10 +133,18 @@ def build(objs, ship, coll, spec, root, mats, eye):
         along = Vector(gb.get("along", (0, 0, 1)))
         along = (along - n * along.dot(n)).normalized()
         L = gb.get("length", 0.3)
+        hit = hit + n * gb.get("standoff_m", 0.0)
         p0, p1 = hit - along * L / 2, hit + along * L / 2
+        side = n.cross(along).normalized()
         for p in (p0, p1):
             _tube(bars, p, p + n * 0.05, 0.012)
             _tube(bars, p - n * 0.002, p + n * 0.006, 0.022)
+            # a mounting plate with four screws under each stand-off (the bar hung unanchored)
+            _plate(bars, p + n * 0.003, along, side, n, 0.07, 0.05, 0.006)
+            for du in (-0.025, 0.025):
+                for dv in (-0.017, 0.017):
+                    q = p + along * du + side * dv + n * 0.006
+                    _tube(bars, q, q + n * 0.004, 0.005, 8)
         _tube(bars, p0 + n * 0.05 - along * 0.012, p1 + n * 0.05 + along * 0.012, 0.013)
         _tube(grips, p0 + n * 0.05 + along * 0.06, p1 + n * 0.05 - along * 0.06, 0.016)
     for bm, key, nm in ((bars, "int_trim", "GrabBars"), (grips, "accent", "GrabGrips")):
@@ -152,6 +160,15 @@ def build(objs, ship, coll, spec, root, mats, eye):
     bpy.data.meshes.remove(target.data)
     report.update({"skipped": pl.skipped, "faces": len(me.polygons)})
     return out, report
+
+
+def _plate(bm, c, x, y, n, w, h, t):
+    res = bmesh.ops.create_cube(bm, size=1.0)
+    bmesh.ops.scale(bm, vec=(w, h, t), verts=res["verts"])
+    from mathutils import Matrix
+    m = Matrix((x, y, n)).transposed().to_4x4()
+    m.translation = c
+    bmesh.ops.transform(bm, matrix=m, verts=res["verts"])
 
 
 def _tube(bm, a, b, r, seg=10):

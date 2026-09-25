@@ -369,8 +369,8 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
     tops = []
     for i in range(len(seq) - 1):
         (b0, t0), (b1, t1) = seq[i], seq[i + 1]
-        f0 = Vector((t0.x - eye.x, t0.y - eye.y, 0)).normalized()
-        f1 = Vector((t1.x - eye.x, t1.y - eye.y, 0)).normalized()
+        # straight forward: fanned out radially the shelf's ends ran into the cockpit walls
+        f0 = f1 = Vector((1.0, 0.0, 0.0))
         tops.append([t0, t1, t1 + f1 * 0.3 + Vector((0, 0, -0.04)), t0 + f0 * 0.3 + Vector((0, 0, -0.04))])   # sloping away: the shelf stays out of the view
     for f in _quad_faces(tmp, tops, eye):
         if f.normal.z < 0:
@@ -413,7 +413,7 @@ def wing_panels(g, eye, spec):
                 rr_slab(g["int_console"], p, r, u, n, 0.02, 0.03, 0.004, 0.004, 2)
                 tube(g["int_trim"], p, p + n * 0.02 + u * 0.006, 0.004, 6)
                 rr_slab(g["int_glow" if j % 2 else "accent"], p - u * 0.03, r, u, n, 0.01, 0.004, 0.0015, 0.002, 2)
-            tube(g["int_trim"], c + n * 0.041 + r * 0.075 - u * 0.03, c + n * 0.062 + r * 0.075 - u * 0.03, 0.013, 14)
+            tube(g["int_trim"], c + n * 0.034 + r * 0.075 - u * 0.03, c + n * 0.062 + r * 0.075 - u * 0.03, 0.013, 14)
 
 
 def underdash(g, eye, spec, zfloor, lights_out):
@@ -421,7 +421,8 @@ def underdash(g, eye, spec, zfloor, lights_out):
     blue footwell lights. Returns the footwell back wall box (hs_interior gives it a kit trim texture)."""
     zb = spec.get("fascia_bottom_z", 0.97)
     xw = spec.get("footwell_back_x", 18.62)
-    for y in (-0.62, -0.3, 0.3, 0.62):
+    anchors = (-0.45, 0.0, 0.45)          # where the cable runs are held (their sag is zero there)
+    for y in (-0.75, -0.45, 0.45, 0.75):
         a, b = Vector((xw - 0.02, y, zfloor)), Vector((spec["pod_x"] + 0.05, y, zb - 0.01))
         d = b - a
         res = bmesh.ops.create_cube(g["int_trim"], size=1.0)
@@ -437,15 +438,22 @@ def underdash(g, eye, spec, zfloor, lights_out):
             pts.append(Vector((xw - 0.08 - k * 0.03, -0.9 + 1.8 * t, zb - 0.07 - dz - sag)))
         for a, b in zip(pts, pts[1:]):
             tube(g[key], a, b, r, 8)
-    for y in (-0.62, -0.3, 0.3, 0.62):
-        tube(g["int_trim"], Vector((xw - 0.18, y, zb - 0.08)), Vector((xw - 0.02, y, zb - 0.08)), 0.012, 8)
+    for y in anchors:
+        # a clamp bar across all three runs, bolted to the footwell wall
+        tube(g["int_trim"], Vector((xw - 0.2, y, zb - 0.07)), Vector((xw + 0.01, y, zb - 0.07)), 0.012, 8)
+        tube(g["int_trim"], Vector((xw - 0.2, y, zb - 0.07)), Vector((xw - 0.2, y, zb - 0.13)), 0.008, 6)
+        # the bracket plate every run passes through
+        res = bmesh.ops.create_cube(g["int_trim"], size=1.0)
+        bmesh.ops.scale(g["int_trim"], vec=(0.2, 0.03, 0.1), verts=res["verts"])
+        bmesh.ops.translate(g["int_trim"], vec=(xw - 0.1, y, zb - 0.1), verts=res["verts"])
     for y in (-0.2, 0.2):
         c = Vector((18.05, y, zfloor + 0.12))
         r, u, n = Vector((0, -1, 0)), Vector((0.45, 0, 0.89)).normalized(), Vector((-0.89, 0, 0.45)).normalized()
         rr_slab(g["int_console"], c, r, u, n, 0.11, 0.2, 0.02, 0.03)
         for j in range(4):
             rr_slab(g["int_trim"], c + n * 0.002 + u * (-0.06 + j * 0.04), r, u, n, 0.08, 0.008, 0.003, 0.004, 2)
-        tube(g["int_trim"], c - n * 0.03 - u * 0.1, Vector((18.3, y, zfloor)), 0.015, 10)
+        tube(g["int_trim"], c - n * 0.015 - u * 0.06, Vector((18.3, y, zfloor)), 0.015, 10)
+        tube(g["int_trim"], Vector((18.26, y, zfloor)), Vector((18.34, y, zfloor + 0.03)), 0.03, 12)   # floor pivot
     for y0, y1 in ((-0.9, -0.2), (0.2, 0.9)):
         tube(g["int_glow"], Vector((spec["pod_x"] - 0.02, y0, zb - 0.02)), Vector((spec["pod_x"] - 0.02, y1, zb - 0.02)), 0.004, 6)
     lights_out.append({"at": [18.3, 0.0, zfloor + 0.35], "cd": spec.get("footwell_cd", 2.5)})

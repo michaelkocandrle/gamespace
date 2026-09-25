@@ -145,7 +145,7 @@ def bulkhead(g, x, y0, y1, z0, z1, door, facing):
 
 
 def floor_tiles(g, x0, x1, y0, y1, z, tile=0.6, holes=()):
-    box(g["int_dark"], (x0, y0, z - 0.06), (x1, y1, z - 0.02))
+    box(g["int_dark"], (x0 - 0.05, y0 - 0.06, z - 0.06), (x1 + 0.05, y1 + 0.06, z - 0.02))   # under the walls: no gap
     nx, ny = max(1, int(round((x1 - x0) / tile))), max(1, int(round((y1 - y0) / tile)))
     for i in range(nx):
         for j in range(ny):
@@ -195,6 +195,7 @@ def hatch(g, r, z):
 
 def obj_hydraulics(g, r, zr):
     x0, x1, y0, y1 = r
+    zr = (zr[0], min(zr[1], 1.42))        # the upper mount on the wall under the chamfer (it hung in the air)
     for k in (0.3, 0.7):
         x = x0 + (x1 - x0) * k
         yc = (y0 + y1) / 2
@@ -239,7 +240,7 @@ def obj_reactor(g, r, zr):
         box(g["int_trim"], (x - 0.015, face - 0.03, zr[0] + 0.1), (x + 0.015, face, zr[1] - 0.1))
     for zz in (zr[0] + 0.1, zr[1] - 0.12):
         box(g["int_trim"], (x0, face - 0.04, zz), (x1, face, zz + 0.04))
-    box(g["accent"], (x0 + 0.1, face - 0.045, zr[1] - 0.25), (x0 + 0.5, face - 0.04, zr[1] - 0.2))
+    box(g["accent"], (x0 + 0.1, face - 0.045, zr[1] - 0.115), (x0 + 0.5, face - 0.04, zr[1] - 0.085))   # on the top rail
 
 
 def obj_cooler(g, r, zr):
@@ -317,7 +318,22 @@ def obj_bunk(g, r, zr):
 
 def obj_console(g, r, zr, z0):
     x0, x1, y0, y1 = r
-    tbox(g, "int_dark", "kit_trim02", (x0, y0, z0), (x1, y1, zr[1] - 0.1), 1.0)
+    top = zr[1] - 0.1
+    if COCKPIT.get("style") in ("pods", "wrap"):
+        # the outer edge stood 2-3 cm into the hull where the tub narrows (geometry check, 25. 9. 2026)
+        if y1 > 0:
+            y1 -= 0.04
+        else:
+            y0 += 0.04
+    tbox(g, "int_dark", "kit_trim02", (x0, y0, z0), (x1, y1, top), 1.0)
+    if COCKPIT.get("style") in ("pods", "wrap"):
+        # a top plate inside the body with a satin rim (the old tilted plate overhung the console; its glow
+        # rectangle was a placeholder and its knobs bare cylinders - control modules come from hs_cockpit)
+        box(g["int_console"], (x0 + 0.03, y0 + 0.03, top), (x1 - 0.03, y1 - 0.03, top + 0.012))
+        for xa, xb, ya, yb in ((x0 + 0.02, x1 - 0.02, y0 + 0.02, y0 + 0.03), (x0 + 0.02, x1 - 0.02, y1 - 0.03, y1 - 0.02),
+                               (x0 + 0.02, x0 + 0.03, y0 + 0.02, y1 - 0.02), (x1 - 0.03, x1 - 0.02, y0 + 0.02, y1 - 0.02)):
+            box(g["int_trim"], (xa, ya, top), (xb, yb, top + 0.016))
+        return
     inner = y1 if y1 < 0 else y0
     outer = y0 if y1 < 0 else y1
     c = Vector(((x0 + x1) / 2, (inner * 0.4 + outer * 0.6), zr[1] - 0.05))
@@ -394,6 +410,50 @@ def dashboard(g, r, zr, z0, ship, screen_bm, sockets, eye):
 
 # ------------------------------------------------------------------------------------------ main
 
+def _hull_top(hull):
+    """The hull's inside height at x on the centre line (a ray up from the cabin)."""
+    from mathutils.bvhtree import BVHTree
+    hb = bmesh.new()
+    hb.from_mesh(hull.data)
+    hb.transform(hull.matrix_world)
+    tree = BVHTree.FromBMesh(hb)
+    hb.free()
+
+    def top(x, y=0.0):
+        hit = tree.ray_cast(Vector((x, y, 1.2)), Vector((0, 0, 1)), 5.0)[0]
+        return hit.z if hit is not None else 9.0
+    return top
+
+
+def _gable(bm, hull, x, z0):
+    """Closes a cross wall from its top (z0) up to the hull's section at x, facing +x: over the cockpit's rear
+    wall the view met the cabin roof's culled inside (geometry check, 25. 9. 2026). A fan of rays in the
+    y-z plane finds the section; the panel stops 1.5 cm inside it."""
+    from mathutils.bvhtree import BVHTree
+    hb = bmesh.new()
+    hb.from_mesh(hull.data)
+    hb.transform(hull.matrix_world)
+    tree = BVHTree.FromBMesh(hb)
+    hb.free()
+    c = Vector((x, 0.0, z0))
+    ring = []
+    for i in range(31):
+        a = math.radians(6.0 * i)
+        d = Vector((0.0, round(math.cos(a), 6), round(math.sin(a), 6)))
+        hit = tree.ray_cast(c, d, 5.0)[0]
+        if hit is None:
+            return
+        ring.append(c + d * max((hit - c).length - 0.015, 0.0))
+    vs = [bm.verts.new(c)] + [bm.verts.new(p) for p in ring]
+    new = []
+    for i in range(1, len(vs) - 1):
+        # counter-clockwise seen from +x: the face looks into the cockpit
+        new.append(bm.faces.new((vs[0], vs[i], vs[i + 1])))
+    ext = bmesh.ops.extrude_face_region(bm, geom=new)
+    bmesh.ops.translate(bm, vec=(-0.02, 0.0, 0.0), verts=[e for e in ext["geom"] if isinstance(e, bmesh.types.BMVert)])
+    bmesh.ops.recalc_face_normals(bm, faces=list(set(new) | {e for e in ext["geom"] if isinstance(e, bmesh.types.BMFace)}))
+
+
 def build(recipe, layout, coll, mats, ship, hull):
     spec = recipe["interior"]
     H = spec.get("height_m", 2.3)
@@ -422,7 +482,7 @@ def build(recipe, layout, coll, mats, ship, hull):
         y0i, y1i = y0 + inset, y1 - inset
         if rid in kit_rooms:
             # the SC-like structure from the modular kit (hs_interior_kit.py)
-            report["kit"][rid] = hs_interior_kit.shell(kit, g, box, obox, r, spec, H, y1i, lights_out, door_xs)
+            report["kit"][rid] = hs_interior_kit.shell(kit, g, box, obox, r, spec, H, y1i, lights_out, door_xs, _hull_top(hull))
             report["rooms"].append(rid)
             continue
         floor_tiles(g, x0, x1, y0i, y1i, z0)
@@ -455,6 +515,13 @@ def build(recipe, layout, coll, mats, ship, hull):
                     hs_interior_kit.clad_bulkhead(kit, x - 0.005, -1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, 0.0, H)
                 if abs(rx0 - x) < 0.01:
                     hs_interior_kit.clad_bulkhead(kit, x + 0.045, 1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, 0.0, H)
+            if abs(x - rooms["cockpit"]["rect"][0]) < 0.01:
+                # the cockpit's rear wall: kit panels over the plain bulkhead and a satin beam where it meets the
+                # frame lining (a large dark plane under the rear window, author 25. 9. 2026)
+                zc_ = rooms["cockpit"].get("floor_z", 0.0)
+                hs_interior_kit.clad_bulkhead(kit, x + 0.045, 1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, zc_, H)
+                box(g["int_trim"], (x + 0.04, y0i, H - 0.06), (x + 0.12, y1i, H))
+                _gable(g["int_panel"], hull, x + 0.04, H)
     # cockpit: floor, step, tub walls to the sill, rear wall, liner above the sill
     ck = rooms["cockpit"]
     zc = ck["floor_z"]
@@ -469,7 +536,26 @@ def build(recipe, layout, coll, mats, ship, hull):
     bmesh.ops.translate(fb, vec=(0, 0, -0.03), verts=[v for v in ext["geom"] if isinstance(v, bmesh.types.BMVert)])
     box(g["int_dark"], (15.2, -1.0, 0.0), (15.5, 1.0, zc))                    # step up
     box(g["int_trim"], (15.47, -1.0, zc - 0.02), (15.5, 1.0, zc))
-    for a, b in zip(poly, poly[1:]):
+    # the tub follows the plan's outline, but the hull is narrower than the plan in places at sill height: clamp
+    # every corner inside the hull (a sill trim ran through the wall there, author 25. 9. 2026)
+    from mathutils.bvhtree import BVHTree
+    hb = bmesh.new()
+    hb.from_mesh(hull.data)
+    hb.transform(hull.matrix_world)
+    htree = BVHTree.FromBMesh(hb)
+    hb.free()
+
+    def inside_hull(pt, z):
+        x, y = pt
+        if abs(y) < 0.3:
+            return pt
+        sgn = 1 if y > 0 else -1
+        hit = htree.ray_cast(Vector((x, 0.0, z)), Vector((0.0, sgn, 0.0)), 5.0)[0]
+        if hit is not None and abs(y) > abs(hit.y) - 0.07:
+            return (x, sgn * (abs(hit.y) - 0.07))
+        return pt
+    tub = [inside_hull(p, sill - 0.01) for p in poly]
+    for a, b in zip(tub, tub[1:]):
         pa, pb = Vector((a[0], a[1], 0)), Vector((b[0], b[1], 0))
         d = pb - pa
         length = d.length
@@ -483,6 +569,25 @@ def build(recipe, layout, coll, mats, ship, hull):
         else:
             obox(g["int_wall"], (c.x, c.y, (zc + sill) / 2), d, (0, 0, 1), (length, 0.04, sill - zc))
         obox(g["int_trim"], (c.x, c.y, sill), d, (0, 0, 1), (length, 0.08, 0.03))
+        # the sill shelf from the tub out to the hull (the tub is clamped inside the hull: the view slipped
+        # through the gap between its top and the frame lining)
+        caps = []
+        for p_ in (pa, pb):
+            sgn = 1 if p_.y > 0 else -1
+            # the hull narrows upwards: the nearest of the shelf's bottom and top heights, 1.5 cm inside it
+            hits = [htree.ray_cast(Vector((p_.x, 0.0, z_)), Vector((0.0, sgn, 0.0)), 5.0)[0] for z_ in (sill - 0.02, sill + 0.005)]
+            hy = min(abs(h.y) for h in hits) if all(h is not None for h in hits) else None
+            # (to the frame lining 3 cm inside the hull, not behind it)
+            caps.append(Vector((p_.x, sgn * (hy - 0.035), sill)) if hy is not None and abs(p_.y) > 0.3 else None)
+        if all(caps) and (pa.y > 0) == (pb.y > 0):
+            q = [Vector((pa.x, pa.y, sill)), Vector((pb.x, pb.y, sill)), caps[1], caps[0]]
+            fb2 = g["int_console"]
+            vs = [fb2.verts.new(v) for v in q] + [fb2.verts.new(v - Vector((0, 0, 0.02))) for v in q]
+            for idx in ((0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)):
+                try:
+                    fb2.faces.new([vs[i] for i in idx])
+                except ValueError:
+                    pass
         if COCKPIT.get("style") in ("pods", "wrap"):
             # the orange line along the sill (concept A: the accent runs round the cockpit at console height)
             obox(g["accent"], (c.x, c.y, sill - 0.035), d, (0, 0, 1), (length, 0.086, 0.012))
@@ -556,13 +661,40 @@ def build(recipe, layout, coll, mats, ship, hull):
     src = bmesh.new()
     src.from_mesh(hull.data)
     vmap = {}
+    hull_src = {}
+    # the rest of the interior gets a dark inner skin 5 cm inside the hull: every gap between the rooms'
+    # pieces (ceiling edges, wall joints, over the cockpit's rear wall) showed the sky through the hull's
+    # culled inside (geometry check, 25. 9. 2026)
+    db = bmesh.new()
+    dmap = {}
     for f in src.faces:
         c = f.calc_center_median()
-        if 15.2 <= c.x <= 19.6 and c.z > sill - 0.05 and abs(c.y) < 2.2:
+        # (faces reaching into the cockpit belong to its lining - by vertices, not centres: large hull faces
+        # left slits at the sill and the rear corner)
+        # (overlapping the cockpit lining's region by a face: at the boundary one hull face fell in neither)
+        in_ck = min(v.co.x for v in f.verts) >= 15.2 and max(v.co.z for v in f.verts) > sill - 0.05
+        if 1.0 <= c.x and not in_ck and c.z > -0.1 and abs(c.y) < 2.4:
+            vs = []
+            for v in f.verts:
+                if v.index not in dmap:
+                    dmap[v.index] = db.verts.new(v.co - v.normal * 0.05)
+                vs.append(dmap[v.index])
+            try:
+                db.faces.new(vs[::-1])
+            except ValueError:
+                pass
+    for f in src.faces:
+        c = f.calc_center_median()
+        # the whole nose too: beyond x 19.6 the pilot looked through the dash dip at the hull's culled inside -
+        # the terrain showed through what looked like a lower window (geometry check, 25. 9. 2026)
+        # and the roof just aft of the cockpit's rear wall: over the 2.3 m wall the view met the cabin roof's
+        # culled inside
+        if max(v.co.x for v in f.verts) >= 15.2 and max(v.co.z for v in f.verts) > sill - 0.05 and abs(c.y) < 2.4:
             vs = []
             for v in f.verts:
                 if v.index not in vmap:
                     vmap[v.index] = lb.verts.new(v.co - v.normal * 0.03)
+                    hull_src[vmap[v.index]] = v.co.copy()
                 vs.append(vmap[v.index])
             try:
                 nf = lb.faces.new(vs[::-1])
@@ -571,23 +703,63 @@ def build(recipe, layout, coll, mats, ship, hull):
     src.free()
     # a metal rim along every edge where the liner meets the glass: the frame reads as built structure
     lb.edges.ensure_lookup_table()
+    # rims and pinstripes only where the liner meets the glass - not where it merely ends at the cut region's
+    # limits (a grey line hung across the window seen from the nose, author 25. 9. 2026)
+    cano = bpy.data.objects.get("SM_Ship_%s_Canopy" % ship)
+    ctree = None
+    if cano is not None:
+        from mathutils.bvhtree import BVHTree
+        cb = bmesh.new()
+        cb.from_mesh(cano.data)
+        cb.transform(cano.matrix_world)
+        ctree = BVHTree.FromBMesh(cb)
+        cb.free()
+
+    def at_glass(a, b):
+        if ctree is None:
+            return True
+        for t in (0.25, 0.5, 0.75):
+            loc, _, _, dist = ctree.find_nearest(a.lerp(b, t))
+            if loc is None or dist > 0.07:
+                return False
+        return True
+    from mathutils.bvhtree import BVHTree as _BVH
+    lb.faces.ensure_lookup_table()
+    for f in lb.faces:
+        f.normal_update()
+    ltree = _BVH.FromBMesh(lb)
+
+    def on_liner(p, lift):
+        # the lining is curved: a point offset in a straight line leaves it - put it back on the surface
+        loc, nrm, idx, dist = ltree.find_nearest(p)
+        if loc is None:
+            return p
+        n_ = lb.faces[idx].normal
+        return loc + n_ * lift
+    lb.verts.ensure_lookup_table()
+    hull_pt = {v: hull_src.get(v, v.co) for v in lb.verts}     # keyed by vertex: new bmesh verts have index -1
+    reveal = []
     rim = bmesh.new()
     stripe = bmesh.new()
     inset = COCKPIT.get("pinstripe_inset_m", 0.07)
     for e in lb.edges:
         if len(e.link_faces) == 1 and (e.verts[0].co - e.verts[1].co).length > 0.01:
+            # the window reveal: a band from the lining's edge out to the hull, closing the 3 cm gap the view
+            # slipped through beside the glass - along every open edge (hairlines of sky along the frame where
+            # an edge sat just over at_glass's 7 cm, geometry check 25. 9. 2026)
+            ha, hb_ = hull_pt[e.verts[0]], hull_pt[e.verts[1]]
+            reveal.append((e.verts[0].co.copy(), e.verts[1].co.copy(), hb_ + (hb_ - e.verts[1].co) * 0.1, ha + (ha - e.verts[0].co) * 0.1))
+        if len(e.link_faces) == 1 and (e.verts[0].co - e.verts[1].co).length > 0.01 and at_glass(e.verts[0].co, e.verts[1].co):
             f = e.link_faces[0]
             f.normal_update()
-            off = f.normal * 0.012
-            _rim(rim, e.verts[0].co + off, e.verts[1].co + off, 0.012)
+            _rim(rim, on_liner(e.verts[0].co, 0.014), on_liner(e.verts[1].co, 0.014), 0.01)
             if COCKPIT.get("style") in ("pods", "wrap"):
                 # an orange pinstripe running parallel to the glass edge on the frame (concept A)
                 a, b = e.verts[0].co, e.verts[1].co
                 along = (b - a).normalized()
                 inward = f.calc_center_median() - (a + b) / 2
                 inward = (inward - along * inward.dot(along) - f.normal * inward.dot(f.normal)).normalized()
-                o = inward * inset + f.normal * 0.004
-                _rim(stripe, a + o, b + o, 0.0035)
+                _rim(stripe, on_liner(a + inward * inset, 0.004), on_liner(b + inward * inset, 0.004), 0.0035)
     if COCKPIT.get("style") in ("pods", "wrap"):
         # panel seams across the frame lining: cuts at fixed stations, a dark groove along each cut
         cut = lb.copy()
@@ -595,9 +767,25 @@ def build(recipe, layout, coll, mats, ship, hull):
             res = bmesh.ops.bisect_plane(cut, geom=cut.verts[:] + cut.edges[:] + cut.faces[:], plane_co=(x, 0, 0), plane_no=(1, 0, 0))
             for el in res["geom_cut"]:
                 if isinstance(el, bmesh.types.BMEdge) and el.link_faces:
-                    nrm = el.link_faces[0].normal
-                    _rim(rim, el.verts[0].co + nrm * 0.003, el.verts[1].co + nrm * 0.003, 0.004)
+                    _rim(rim, on_liner(el.verts[0].co, 0.004), on_liner(el.verts[1].co, 0.004), 0.004)
         cut.free()
+    if reveal:
+        # both sides as separate faces, no merge or normal recalculation: solidified bands merged by
+        # hp.finish() into a non-manifold strip, normals recalculated outwards, the view passed through
+        rb = bmesh.new()
+        for q in reveal:
+            for vs in (q, q[::-1]):
+                try:
+                    rb.faces.new([rb.verts.new(p) for p in vs])
+                except ValueError:
+                    pass
+        me_r = bpy.data.meshes.new("SM_Ship_%s_Int_Reveal" % ship)
+        rb.to_mesh(me_r)
+        rb.free()
+        ob = bpy.data.objects.new(me_r.name, me_r)
+        coll.objects.link(ob)
+        ob.data.materials.append(mats["int_trim"])
+        objs.append(ob)
     if stripe.verts:
         ob = hp.finish(stripe, "SM_Ship_%s_Int_LinerStripe" % ship, coll, {"angle_deg": 40, "width": 0, "segments": 1})
         ob.data.materials.append(mats["accent"])
@@ -613,10 +801,35 @@ def build(recipe, layout, coll, mats, ship, hull):
         ob = bpy.data.objects.new(me.name, me)
         coll.objects.link(ob)
         me.materials.append(mats["int_frame" if COCKPIT.get("style") in ("pods", "wrap") else "int_wall"])
-        centre = Vector((17.0, 0.0, 1.3))
+        # each face looks away from the hull 3 cm behind it (facing the cockpit's centre point failed on the
+        # frame's steep faces beside the glass: hairlines of sky there, geometry check 25. 9. 2026)
+        from mathutils.bvhtree import BVHTree
+        hb = bmesh.new()
+        hb.from_mesh(hull.data)
+        hb.transform(hull.matrix_world)
+        htree = BVHTree.FromBMesh(hb)
+        hb.free()
+        def _faces_hull(c, n, reach):
+            # the hull is behind a lining face: nearer along the normal than against it (a hull flange or
+            # trim strip a few cm in front must not flip it)
+            fw = htree.ray_cast(c + n * 0.002, n, reach)
+            bw = htree.ray_cast(c - n * 0.002, -n, reach)
+            return fw[0] is not None and (bw[0] is None or fw[3] < bw[3])
         for p in me.polygons:
-            if p.normal.dot(centre - Vector(p.center)) < 0:
+            if _faces_hull(Vector(p.center), p.normal.copy(), 0.08):
                 p.flip()
+        if db.faces:
+            me_d = bpy.data.meshes.new("SM_Ship_%s_Int_HullSkin" % ship)
+            db.to_mesh(me_d)
+            for p in me_d.polygons:
+                if _faces_hull(Vector(p.center), p.normal.copy(), 0.12):
+                    p.flip()
+            me_d.update()
+            ob_d = bpy.data.objects.new(me_d.name, me_d)
+            coll.objects.link(ob_d)
+            me_d.materials.append(mats["int_dark"])
+            objs.append(ob_d)
+        db.free()
         me.update()
         me.shade_smooth()
         # the hull's facets meet at sharp creases: smooth normals across them streaked the walls (25. 9. 2026)
@@ -649,7 +862,7 @@ def cockpit_detail(g, layout, zc, sill):
     right = next(o for n, o in objs.items() if "Pravá konzole" in n)
     left = next(o for n, o in objs.items() if "Levá konzole" in n)
     seat_o = next(o for n, o in objs.items() if "křeslo" in n)
-    ztop = right["z"][1] - 0.1 + 0.03
+    ztop = right["z"][1] - 0.1 + 0.012          # on the console's top plate
     # flight stick on the right console: boot, shaft, grip with a hat switch and a trigger
     x, y = right["rect"][0] + 0.8, right["rect"][3] - 0.14
     cyl(g["int_dark"], (x, y, ztop), (x, y, ztop + 0.05), 0.055, 16)
@@ -675,17 +888,8 @@ def cockpit_detail(g, layout, zc, sill):
     for yy in (-0.2, 0.2):
         box(g["int_trim"], (x0 - 0.25, yy - 0.025, zc), (x1 + 0.1, yy + 0.025, zc + 0.03))
     box(g["int_dark"], (x0 + 0.15, -0.22, zc + 0.03), (x1 - 0.15, 0.22, zc + 0.16))
-    # switch panels on the sills behind the consoles
-    for s_ in (1, -1):
-        c = Vector((15.9, s_ * 1.45, sill + 0.03))
-        tilt = Vector((0, -s_ * 0.6, 1))
-        obox(g["int_dark"], c, (1, 0, 0), tilt, (0.5, 0.24, 0.04))
-        nrm = tilt.normalized()
-        for k in range(6):
-            p = c + Vector((-0.2 + k * 0.08, 0, 0)) + nrm * 0.02
-            cyl(g["int_trim"], p, p + nrm * 0.035, 0.006, 6)
-            box(g["int_glow" if k % 3 == 0 else "accent" if k == 4 else "int_dark"], p + Vector((-0.012, -0.012, 0)) + nrm * -0.001 - Vector((0, 0, 0.04)),
-                p + Vector((0.012, 0.012, 0.004)) - Vector((0, 0, 0.04)))
+    # (the sill switch panels are gone: the tub is clamped inside the hull now and they hung beside it; the
+    # control modules on the side consoles replace them)
     # frame wash: two dim spots at the foot of the front pillars grazing up the canopy frame's lining, so the
     # frame and its metal rims read as structure instead of black bars (the lamps themselves stay out of view)
     wash = COCKPIT.get("frame_wash_cd", 4.0)

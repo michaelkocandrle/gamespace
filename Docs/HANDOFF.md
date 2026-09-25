@@ -1487,6 +1487,16 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Měření 1080p: pilotní pohled průměr 0,22 den / 0,19 noc; FPS 65 den / 78 noc.
     - Testy: horní hrana displejů nově ≥ 8° pod okem (HUD končí ~5°), rám kabiny „natřený, ne černý“ (0,15–0,7),
       přiblížení na displeje do 66°.
+94. **Wayfarer kokpit k úrovni SC – krok 0 a 1** (25. 9. 2026). Autorovo zadání v 8 krocích, každý krok má vlastní commit.
+    - Krok 0: tabulka SC/naše/chybí a měření pohledu (`Tools/Blender/eye_view_metrics.py`): ven 24,5 % (SC 62 %),
+      horní hrana desky 39,8 % (SC 35 %), nejširší sloupek 42,1 % (SC 0,7 %).
+    - Krok 1: `Tools/Blender/check_ship_geometry.py` + `Tools/Tests/test_ship_geometry.py` prochází. Hlídá zrcadlené decaly, plovoucí díly, průniky, placeholdery a díry. Opravy:
+      - nad zadní stěnou kokpitu štít až k trupu;
+      - tmavý vnitřní plášť trupu v celém interiéru;
+      - oboustranné ostění skla, orientace obložení podle trupu;
+      - parapet a boční konzole uvnitř obložení;
+      - strop kabiny pod trupem přes celou šířku;
+      - křídlo desky zasunuté dovnitř.
 
 ---
 

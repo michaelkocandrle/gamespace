@@ -196,6 +196,15 @@ p99 0,56–0,88, **B/R 0,72–1,05** (teplé), detail 0,024–0,035. Dosaženo: 
 B/R 0,70–0,77, p99 0,72–0,96. Blikání < 0,1 % pixelů. Interiér ~70 FPS ve 1080p (epická, TSR 75 %).
 Snímky porovnávej listem vedle sebe (PIL ve scratchpadu) proti `ArtSource/Reference/Mood/sc_cockpit_*.webp`.
 
+## Kontrola geometrie (Wayfarer a další lodě z hs pipeline)
+
+Před každým předáním: `python Tools/Tests/test_ship_geometry.py` (Blender headless, ~15 s, `GEOTEST SUMMARY … PASS`).
+Kontrolu dělá `Tools/Blender/check_ship_geometry.py`: zrcadlené decaly (mesh i promítané), plovoucí díly, průniky
+za obložení/ven z trupu, placeholder materiály, díry z oka a z kamer presetu `<loď>_interior.json`. Výstup je v
+`Saved/GeoCheck/` (`geocheck.json`, masky `holes_*.png`; s `GEOCHECK_DEBUG=1` i barevný render po objektech).
+Výjimky pro plovoucí díly: recept `checks.floating_exempt`. Díry se zavírají tmavým pláštěm `Int_HullSkin` (5 cm
+pod trupem) a obložením kokpitu; nástrahy WORKFLOW 9 bm–bo.
+
 ## Nástrahy (příznak → příčina → oprava)
 
 - **Šedá šachovnice v zabalené hře** (v editoru OK) → `M_KitTrim` se nezkompiloval: chybí usage
