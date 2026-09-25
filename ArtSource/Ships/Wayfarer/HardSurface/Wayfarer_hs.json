@@ -656,6 +656,27 @@
    "roughness": 0.35,
    "metallic": 0.1
   },
+  "int_led_o": {
+   "slot": "IntLedOrange",
+   "colour": [0.9, 0.35, 0.05],
+   "roughness": 0.3,
+   "metallic": 0.0,
+   "emit": [1.0, 0.38, 0.06]
+  },
+  "int_led_w": {
+   "slot": "IntLedWhite",
+   "colour": [0.9, 0.9, 0.88],
+   "roughness": 0.3,
+   "metallic": 0.0,
+   "emit": [1.0, 0.95, 0.88]
+  },
+  "int_led_blink": {
+   "slot": "IntLedBlink",
+   "colour": [0.9, 0.35, 0.05],
+   "roughness": 0.3,
+   "metallic": 0.0,
+   "emit": [1.0, 0.38, 0.06]
+  },
   "int_screen_back": {
    "slot": "IntScreenBack",
    "colour": [0.02, 0.022, 0.026],
@@ -2551,36 +2572,6 @@
      "item": "label_o2",
      "from": [16.05, 0.0, 1.42],
      "dir": [0, 1, 0]
-    },
-    {
-     "item": "ck_gear",
-     "from": [17.15, 0.93, 2.4],
-     "dir": [0, 0, -1]
-    },
-    {
-     "item": "ck_lights",
-     "from": [16.65, 0.93, 2.4],
-     "dir": [0, 0, -1]
-    },
-    {
-     "item": "ck_qt",
-     "from": [17.15, -0.93, 2.4],
-     "dir": [0, 0, -1]
-    },
-    {
-     "item": "ck_cool",
-     "from": [16.65, -0.93, 2.4],
-     "dir": [0, 0, -1]
-    },
-    {
-     "item": "ck_pwr",
-     "from": [16.9, -0.93, 2.4],
-     "dir": [0, 0, -1]
-    },
-    {
-     "item": "ck_scan",
-     "from": [16.9, 0.93, 2.4],
-     "dir": [0, 0, -1]
     },
     {
      "item": "tri_warning",

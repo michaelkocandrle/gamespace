@@ -85,6 +85,135 @@ def tube(bm, a, b, r, seg=8):
     bmesh.ops.transform(bm, matrix=m, verts=res["verts"])
 
 
+# ------------------------------------------------------------------------------------------ control modules
+# Author 25. 9. 2026 (step 4): no round dots - real controls in modules with a housing, screws and a label on every
+# control. Each module is a housing (graphite, satin rim, four screws) with a dark face; the controls sit on a grid.
+# Labels are mesh decals from the library (ck_*), placed by hs_interior_decals from LABELS.
+LABELS = []          # {"item", "at": point on the face, "n": face normal, "scale"} - reset by hs_interior.build
+
+
+def _frame_tilt(right, up, n, deg):
+    """The frame turned about its right axis (the face tips towards up)."""
+    a = math.radians(deg)
+    n2 = (n * math.cos(a) + up * math.sin(a)).normalized()
+    up2 = (up * math.cos(a) - n * math.sin(a)).normalized()
+    return right, up2, n2
+
+
+def _led(g, p, right, up, n, key):
+    rr_slab(g["int_dark"], p + n * 0.002, right, up, n, 0.011, 0.007, 0.0015, 0.003, 2)          # bezel
+    rr_slab(g[key], p + n * 0.0028, right, up, n, 0.007, 0.0035, 0.001, 0.001, 2)                  # lens
+
+
+def _toggle_guarded(g, p, right, up, n, guard_key):
+    tube(g["int_trim"], p, p + n * 0.004, 0.0075, 16)                                               # boss
+    tip = p + n * 0.024 + up * 0.009
+    tube(g["int_trim"], p + n * 0.004, tip, 0.0022, 8)                                              # lever
+    d = (tip - p).normalized()
+    tube(g["int_trim"], tip - d * 0.004, tip + d * 0.002, 0.0038, 10)
+    for su in (-1, 1):                                                                              # guard cheeks
+        rr_slab(g[guard_key], p + right * (su * 0.0125) + n * 0.013, n, up, right * su, 0.026, 0.028, 0.002, 0.0025, 2)
+    r2, u2, n2 = _frame_tilt(right, up, n, -55.0)                                                  # the cover, flipped up
+    hinge = p + up * 0.014 + n * 0.004
+    rr_slab(g[guard_key], hinge + u2 * 0.014 + n2 * 0.002, r2, u2, n2, 0.027, 0.028, 0.003, 0.002, 2)
+    tube(g["int_trim"], hinge - right * 0.015, hinge + right * 0.015, 0.0025, 8)                  # hinge pin
+
+
+def _rotary(g, p, right, up, n):
+    tube(g["int_dark"], p, p + n * 0.003, 0.016, 24)                                                # skirt
+    for k in range(5):                                                                             # detent ticks
+        a = math.radians(-60 + 30 * k)
+        q = p + n * 0.0032 + (up * math.cos(a) + right * math.sin(a)) * 0.0185
+        rr_slab(g["int_glow"], q, right, up, n, 0.0012, 0.0012, 0.0005, 0.0006, 1)
+    tube(g["int_trim"], p + n * 0.003, p + n * 0.019, 0.0105, 24)                                   # knob
+    for k in range(16):                                                                            # knurling
+        a = 2 * math.pi * k / 16
+        d = up * math.cos(a) + right * math.sin(a)
+        tube(g["int_dark"], p + n * 0.006 + d * 0.0104, p + n * 0.018 + d * 0.0104, 0.0012, 4)
+    rr_slab(g["int_glow"], p + n * 0.0195 + up * 0.005, right, up, n, 0.0016, 0.009, 0.0006, 0.0008, 1)   # pointer
+
+
+def _rocker(g, p, right, up, n):
+    rr_slab(g["int_dark"], p + n * 0.004, right, up, n, 0.017, 0.026, 0.002, 0.004, 2)              # housing
+    for sv, deg in ((1, 12.0), (-1, -12.0)):
+        r2, u2, n2 = _frame_tilt(right, up, n, deg)
+        rr_slab(g["int_trim"], p + n * (0.007 if sv > 0 else 0.005) + up * (sv * 0.0058), r2, u2, n2, 0.013, 0.0105, 0.0015, 0.003, 2)
+    rr_slab(g["int_glow"], p + n * 0.0086 + up * 0.0085, right, up, n, 0.008, 0.0016, 0.0006, 0.0006, 1)   # "on" bar
+
+
+def _button(g, p, right, up, n, key):
+    rr_ring(g["int_trim"], p + n * 0.004, right, up, n, 0.019, 0.019, 0.003, 0.002, 0.004, 3)       # bezel
+    rr_slab(g["int_dark"], p + n * 0.0055, right, up, n, 0.0145, 0.0145, 0.0025, 0.0045, 3)          # cap, 14.5 mm
+    rr_slab(g[key], p + n * 0.0058, right, up, n, 0.009, 0.0022, 0.0008, 0.0008, 1)                 # backlit legend bar
+
+
+def _encoder(g, p, right, up, n):
+    tube(g["int_dark"], p, p + n * 0.002, 0.012, 20)
+    for k in range(9):                                                                             # LED arc
+        a = math.radians(-120 + 30 * k)
+        q = p + n * 0.0022 + (up * math.cos(a) + right * math.sin(a)) * 0.0105
+        rr_slab(g["int_glow" if k < 6 else "int_dark"], q, right, up, n, 0.0014, 0.0014, 0.0005, 0.0005, 1)
+    tube(g["int_trim"], p + n * 0.002, p + n * 0.014, 0.0075, 20)
+    tube(g["int_dark"], p + n * 0.014, p + n * 0.0155, 0.0065, 20)
+    rr_slab(g["int_glow"], p + n * 0.0157 + up * 0.004, right, up, n, 0.0014, 0.0014, 0.0005, 0.0005, 1)
+
+
+def seat(tree, c, right, up, n, w, h, clearance=0.002):
+    """c moved along n so a w x h plate there stands clear of the surface in `tree` everywhere under it (a
+    module set on a bulged or bent fascia sank into it at one side and its labels found the fascia's back)."""
+    if tree is None:
+        return c
+    top = None
+    for su in (-0.5, 0.0, 0.5):
+        for sv in (-0.5, 0.0, 0.5):
+            q = c + right * (su * w) + up * (sv * h)
+            hit = tree.ray_cast(q + n * 0.1, -n, 0.3)[0]
+            if hit is not None:
+                d = (hit - c).dot(n)
+                top = d if top is None else max(top, d)
+    return c + n * (max(top, 0.0) + clearance) if top is not None else c
+
+
+def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
+    """A module at c (face centre, facing n): housing w x h, rows of (kind, label item or None) top to bottom,
+    spread evenly. Every control with a label gets a ck_* decal under it (LABELS). tree: the surface it is set
+    on (seat())."""
+    c = seat(tree, c, right, up, n, w, h)
+    rr_slab(g["int_console"], c, right, up, n, w, h, 0.006, 0.03)
+    rr_ring(g["int_trim"], c + n * 0.0015, right, up, n, w, h, 0.006, 0.004, 0.003, 4)
+    rr_slab(g["int_dark"], c + n * 0.0012, right, up, n, w - 0.012, h - 0.012, 0.003, 0.002, 3)
+    for su in (-1, 1):
+        for sv in (-1, 1):
+            q = c + right * (su * (w / 2 - 0.0045)) + up * (sv * (h / 2 - 0.0045))
+            tube(g["int_trim"], q, q + n * 0.0035, 0.0022, 10)
+            rr_slab(g["int_dark"], q + n * 0.0036, right, up, n, 0.0032, 0.0007, 0.0002, 0.0004, 1)   # slot
+    face = c + n * 0.0014
+    usable_h = h - 0.018
+    cell = usable_h / len(rows)
+    for i, row in enumerate(rows):
+        v = usable_h / 2 - cell * (i + 0.5)
+        for j, (kind, label) in enumerate(row):
+            u = -(w - 0.016) / 2 + (w - 0.016) * (j + 0.5) / len(row)
+            lift = 0.0055 if label else 0.0
+            p = face + right * u + up * (v + lift)
+            if kind in ("guarded", "guarded_red"):
+                _toggle_guarded(g, p, right, up, n, "int_red" if kind == "guarded_red" else "accent")
+            elif kind == "rotary":
+                _rotary(g, p, right, up, n)
+            elif kind == "rocker":
+                _rocker(g, p, right, up, n)
+            elif kind == "button":
+                _button(g, p, right, up, n, "int_glow")
+            elif kind == "encoder":
+                _encoder(g, p, right, up, n)
+            elif kind in ("led_w", "led_o", "led_blink"):
+                _led(g, p, right, up, n, {"led_w": "int_led_w", "led_o": "int_led_o", "led_blink": "int_led_blink"}[kind])
+            if label:
+                LABELS.append({"item": label, "at": list(face + right * u + up * (v + lift - cell / 2 + 0.0058)),
+                               "n": list(n), "x": list(right), "y": list(up), "scale": label_scale,
+                               "max_w": (w - 0.016) / len(row) - 0.004})
+
+
 def glass_panel(g, screen_bm, sockets, name, c, right, up, n, w, h, proud):
     """A display as a glass panel standing proud of its mount (author 25. 9. 2026, step 3): a dark back plate
     closes the recess at c, the glass floats `proud` in front on four stand-offs, a thin satin technical frame
@@ -348,12 +477,15 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
         _quad_faces(tmp, quads, eye)
         cols.append((side, "pod_outer", P(uo, vb), P(uo, vt)))
         cols.append((side, "pod_inner", P(ui, vb), P(ui, vt)))
-        # the outer strip: status lights and a knob; the key row under the screen
-        s0 = c + right * ((hw + (pw / 2 - hw) / 2) * (-side)) + n * 0.004
-        for k, key in enumerate(("int_glow", "accent", "int_glow")):
-            rr_slab(g[key], s0 + up * (0.09 - k * 0.045), right, up, n, 0.016, 0.016, 0.008, 0.004, 3)
-        tube(g["int_trim"], s0 - up * 0.07, s0 - up * 0.07 + n * 0.022, 0.017, 18)
-        tube(g["accent"], s0 - up * 0.07 + n * 0.022, s0 - up * 0.07 + n * 0.026, 0.006, 12)
+        # the outer strip: a control module (status LEDs, a rotary selector, two backlit keys); the key row under
+        # the screen
+        # (1 cm in from the strip's outer edge: the fascia bends back there and its far side crossed the module)
+        s0 = c + right * ((hw + (pw / 2 - hw) / 2 - 0.01) * (-side)) + n * 0.004
+        rows = ([[("led_w", None), ("led_blink", None)], [("rotary", "ck_pwr")], [("button", "ck_eng")], [("button", "ck_shld")]]
+                if side > 0 else
+                [[("led_o", None), ("led_w", None)], [("rotary", "ck_scan")], [("button", "ck_qt")], [("button", "ck_comms")]])
+        from mathutils.bvhtree import BVHTree
+        control_module(g, s0, right, up, n, pw / 2 - hw - 0.03, sh + 0.04, rows, tree=BVHTree.FromBMesh(tmp))
         kc = c - up * (hh + below * 0.5) + n * 0.004
         for k in range(7):
             p = kc + right * (-0.15 + k * 0.05)
@@ -412,8 +544,8 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
 
 
 def wing_panels(g, eye, spec):
-    """Switch panels on the wings of the dash, between the side consoles and the MFDs: a recessed plate in a
-    satin rim, toggles, a rotary knob, indicator lights."""
+    """Control modules on the wings of the dash, between the side consoles and the MFDs: left GEAR (guarded),
+    LIGHTS, COOL; right MASTER ARM (red guard), WPN, NAV; status LEDs over them."""
     zb = spec.get("fascia_bottom_z", 0.97)
     tilt = math.tan(math.radians(spec.get("fascia_tilt_deg", 22.0)))
     for side in (1, -1):
@@ -421,15 +553,23 @@ def wing_panels(g, eye, spec):
             zc = (zb + zt) / 2
             f = Vector((x - eye[0], side * y - eye[1], 0)).normalized()
             c = Vector((x + 0.1, side * (y - 0.1), zc)) + f * tilt * (zc - zb)
-            r, u, n = oriented(eye, c)
-            rr_slab(g["int_dark"], c + n * 0.035, r, u, n, 0.2, 0.13, 0.02, 0.01)
-            rr_ring(g["int_trim"], c + n * 0.04, r, u, n, 0.21, 0.14, 0.022, 0.008, 0.008)
-            for j in range(4):
-                p = c + n * 0.041 + r * (-0.07 + j * 0.035) + u * 0.02
-                rr_slab(g["int_console"], p, r, u, n, 0.02, 0.03, 0.004, 0.004, 2)
-                tube(g["int_trim"], p, p + n * 0.02 + u * 0.006, 0.004, 6)
-                rr_slab(g["int_glow" if j % 2 else "accent"], p - u * 0.03, r, u, n, 0.01, 0.004, 0.0015, 0.002, 2)
-            tube(g["int_trim"], c + n * 0.034 + r * 0.075 - u * 0.03, c + n * 0.062 + r * 0.075 - u * 0.03, 0.013, 14)
+            # on the wing's own face (a panel squared to the eye stood half inside the sloped fascia): the face
+            # the eye's ray meets, its normal, "right" level along it
+            from mathutils.bvhtree import BVHTree
+            tree = BVHTree.FromBMesh(g["int_console"])
+            e = Vector(eye)
+            hit, nrm, _, _ = tree.ray_cast(e, (c - e).normalized(), 3.0)
+            if hit is not None:
+                n = nrm if nrm.dot(e - hit) > 0 else -nrm
+                r = Vector((0, 0, 1)).cross(n).normalized()
+                u = n.cross(r).normalized()
+                c = hit - n * 0.035
+            else:
+                r, u, n = oriented(eye, c)
+            rows = ([[("led_o", None), ("led_w", None), ("led_blink", None)], [("guarded", "ck_gear"), ("rocker", "ck_lights"), ("button", "ck_cool")]]
+                    if side > 0 else
+                    [[("led_blink", None), ("led_o", None), ("led_w", None)], [("guarded_red", "ck_masterarm"), ("encoder", "ck_wpn"), ("button", "ck_nav")]])
+            control_module(g, c + n * 0.035, r, u, n, 0.185, 0.125, rows, tree=tree)
 
 
 def underdash(g, eye, spec, zfloor, lights_out):

@@ -18,6 +18,8 @@ Masters (rebuilt on every run, like the scene materials):
                                                (UCockpitDisplayComponent); in the editor it is black
     /Game/Ships/Shared/Materials/M_Ship_ScreenBack opaque with pixel animation: the plate behind a display's
                                                clear glass (BaseColor, Metallic, Roughness)
+    /Game/Ships/Shared/Materials/M_Ship_Blink  opaque: a slowly blinking LED (EmissiveColor x EmissiveStrength
+                                               pulsing BlinkMin..1 at BlinkHz)
     /Game/Ships/Shared/Materials/M_Ship_Glass  translucent, two-sided, surface forward shading:
                                                BaseColor, Opacity, Roughness
 
@@ -40,7 +42,8 @@ MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glas
            "screen": SHARED + "/M_Ship_Screen", "decal": SHARED + "/M_Ship_Decal",
            "meshdecal": SHARED + "/M_Ship_MeshDecal", "meshdecal_paint": SHARED + "/M_Ship_MeshDecalPaint",
            "meshdecal_ao": SHARED + "/M_Ship_MeshDecalAO",
-           "layered": SHARED + "/M_Ship_Layered", "screenback": SHARED + "/M_Ship_ScreenBack"}
+           "layered": SHARED + "/M_Ship_Layered", "screenback": SHARED + "/M_Ship_ScreenBack",
+           "blink": SHARED + "/M_Ship_Blink"}
 TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap",
                   "decal_normal": "DecalNormalMap", "decal_m": "DecalMMap", "decal_bc": "DecalColorMap",
                   "decal_ao": "DecalAOMap"}
@@ -654,6 +657,37 @@ def build_masters():
     MEL.recompile_material(back)
     unreal.EditorAssetLibrary.save_loaded_asset(back, only_if_is_dirty=False)
 
+    # a slowly blinking indicator LED (cockpit control modules, step 4): the hull's parameters, the emission
+    # pulsing between BlinkMin and 1 at BlinkHz (a soft sine, not a hard flash)
+    blink = _fresh_material(MASTERS["blink"])
+    _output(_vector(blink, "BaseColor", (0.3, 0.3, 0.3), -900, 0), unreal.MaterialProperty.MP_BASE_COLOR)
+    _output(_scalar(blink, "Metallic", 0.0, -900, 150), unreal.MaterialProperty.MP_METALLIC)
+    _output(_scalar(blink, "Roughness", 0.3, -900, 250), unreal.MaterialProperty.MP_ROUGHNESS)
+    phase = _node(blink, unreal.MaterialExpressionMultiply, -1100, 700)
+    _link(_node(blink, unreal.MaterialExpressionTime, -1300, 650), phase, "A")
+    _link(_scalar(blink, "BlinkHz", 0.6, -1300, 780), phase, "B")
+    wave = _node(blink, unreal.MaterialExpressionSine, -950, 700, period=1.0)
+    _link(phase, wave, "")
+    half = _node(blink, unreal.MaterialExpressionMultiply, -800, 700)
+    _link(wave, half, "A")
+    _link(_node(blink, unreal.MaterialExpressionConstant, -950, 800, r=0.5), half, "B")
+    pulse = _node(blink, unreal.MaterialExpressionAdd, -650, 700)
+    _link(half, pulse, "A")
+    _link(_node(blink, unreal.MaterialExpressionConstant, -800, 800, r=0.5), pulse, "B")
+    level = _node(blink, unreal.MaterialExpressionLinearInterpolate, -500, 650)
+    _link(_scalar(blink, "BlinkMin", 0.08, -700, 600), level, "A")
+    _link(_node(blink, unreal.MaterialExpressionConstant, -700, 650, r=1.0), level, "B")
+    _link(pulse, level, "Alpha")
+    colour = _node(blink, unreal.MaterialExpressionMultiply, -500, 400)
+    _link(_vector(blink, "EmissiveColor", (1.0, 0.38, 0.06), -900, 400), colour, "A")
+    _link(_scalar(blink, "EmissiveStrength", 6.0, -900, 550), colour, "B")
+    emissive = _node(blink, unreal.MaterialExpressionMultiply, -300, 500)
+    _link(colour, emissive, "A")
+    _link(level, emissive, "B")
+    _output(emissive, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(blink)
+    unreal.EditorAssetLibrary.save_loaded_asset(blink, only_if_is_dirty=False)
+
     glass = _fresh_material(MASTERS["glass"])
     glass.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
     glass.set_editor_property("two_sided", True)
@@ -667,7 +701,7 @@ def build_masters():
     return {"hull": hull, "pbr": build_pbr_master(), "glass": glass, "screen": build_screen_master(),
             "decal": build_decal_master(), "meshdecal": build_mesh_decal_master(False),
             "meshdecal_paint": build_mesh_decal_master(True), "meshdecal_ao": build_mesh_decal_ao_master(),
-            "layered": build_layered_master(), "screenback": back}
+            "layered": build_layered_master(), "screenback": back, "blink": blink}
 
 
 def build_mesh_decal_ao_master():
@@ -1066,7 +1100,8 @@ def build_instance(name, folder, spec, masters, ship=None):
                        ("panel_tile_cm", "PanelTileCm"), ("panel_strength", "PanelStrength"),
                        ("panel_seam_darken", "PanelSeamDarken"), ("panel_seam_rough", "PanelSeamRough"),
                        ("scorch_amount", "ScorchAmount"), ("scorch_start_cm", "ScorchStartCm"),
-                       ("scorch_end_cm", "ScorchEndCm"), ("scorch_rough", "ScorchRough")):
+                       ("scorch_end_cm", "ScorchEndCm"), ("scorch_rough", "ScorchRough"),
+                       ("blink_hz", "BlinkHz"), ("blink_min", "BlinkMin")):
         if key in spec:
             MEL.set_material_instance_scalar_parameter_value(mi, param, float(spec[key]))
     for key, param in (("base_color_tint", "BaseColorTint"), ("wear_color", "WearColor"), ("scorch_color", "ScorchColor")):

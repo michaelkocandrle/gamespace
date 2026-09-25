@@ -205,6 +205,15 @@ za obložení/ven z trupu, placeholder materiály, díry z oka a z kamer presetu
 Výjimky pro plovoucí díly: recept `checks.floating_exempt`. Díry se zavírají tmavým pláštěm `Int_HullSkin` (5 cm
 pod trupem) a obložením kokpitu; nástrahy WORKFLOW 9 bm–bo.
 
+## Ovládací moduly kokpitu (hs pipeline)
+
+`hs_cockpit.control_module(g, c, right, up, n, w, h, rows, tree=)` staví pouzdro se šrouby a ovladači v řádcích.
+- Druhy ovladačů: `guarded`, `guarded_red`, `rotary`, `rocker`, `button`, `encoder`, `led_w`, `led_o`, `led_blink`.
+- Štítky: položky `ck_*` z knihovny decalů jdou do `hs_cockpit.LABELS` a klade je `hs_interior_decals` (rámeček modulu, dosah 2 cm, šířka ≤ buňka).
+- `tree` = plocha, na kterou se modul usadí (`seat`).
+- Nový štítek: položka `ck_*` v `ArtSource/Ships/Shared/Decals/decal_library.json` a přestavba atlasu `decal_library.py` (~9 min).
+- Neumístěné štítky vypisuje stavba jako `INTDECALS {"labels_failed": …}`.
+
 ## Nástrahy (příznak → příčina → oprava)
 
 - **Šedá šachovnice v zabalené hře** (v editoru OK) → `M_KitTrim` se nezkompiloval: chybí usage

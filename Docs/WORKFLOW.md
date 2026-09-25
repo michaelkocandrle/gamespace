@@ -893,6 +893,11 @@ snímku.
   parapet konči u obložení (3 cm pod trupem), ne za ním.
 - bp) **Málo výhledu z kokpitu, i když je sklo velké.** Spodní hrana skla ležela 1–1,3 m nad okem pilota a pilot koukal do obložení. Nejdřív změř výšku oka proti pásu skla (`eye_view_metrics.py`, případně rozmítnutí výšky oka). Oko patří do pásu skla: zvedni kokpit, exteriér nech. Díly exteriéru, které leží na skle (trysky RCS), jsou zevnitř velké tmavé bloky.
 - bq) **Posunutá tmavá kopie textu na displeji, jen ve dne.** Vypadala jako duch TSR nebo odraz. Byl to stín: maskovaný materiál displeje vrhá stín podle masky a slunce kreslí písmena na desku za sklem. Komponenta displejů má `cast_shadow` false. Rozliš podle svícení: jen ve dne = stín, i v noci = TSR nebo odraz.
+- br) **Štítek ovladače chybí (`INTDECALS labels_failed … edge`).** Placer klade decal jen na rovnou přední plochu. Příčiny:
+  - modul zapadl do vyboulené nebo zalomené fascie → `hs_cockpit.seat()` ho postaví nad nejvyšší bod pod obrysem;
+  - na vodorovné desce Placer natočil štítek podle světa přes ovladač → štítky modulu nesou rámeček modulu (`frame`);
+  - paprsky `lay` z 12 cm trefily jinou geometrii nebo rub → štítky kladou z 2 cm a rubové plochy se přeskakují;
+  - dlouhé slovo (QUANTUM) přesahuje buňku → měřítko se zmenší na `max_w`.
 - bo) **Kontrola geometrie před každým předáním:** `python Tools/Tests/test_ship_geometry.py` (Blender headless na
   `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
   Musí projít (autor 25. 9. 2026).

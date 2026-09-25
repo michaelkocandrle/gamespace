@@ -129,6 +129,11 @@ class Placer:
 
     def lay(self, p, n, reach=0.12):
         hit, hn = self.cast(p - self.off + n * reach, -n)
+        for _ in range(3):
+            # through back faces: the game culls them (a cockpit fascia's far side crossed a control module)
+            if hit is None or hn.dot(n) > -0.2:
+                break
+            hit, hn = self.cast(hit - self.off - n * 0.0005, -n)
         if hit is None or (hit - p).length > reach * 1.5:
             return None, None
         return hit + hn * self.offset, hn
@@ -141,7 +146,7 @@ class Placer:
             row = []
             for i in range(nx + 1):
                 s, t = i / nx, j / ny
-                q, qn = self.lay(centre + x * ((s - 0.5) * w) + y * ((t - 0.5) * h), n)
+                q, qn = self.lay(centre + x * ((s - 0.5) * w) + y * ((t - 0.5) * h), n, getattr(self, "reach", 0.12))
                 if q is None or qn.dot(n) < math.cos(math.radians(30)):
                     return None
                 row.append((q, qn, s, t))

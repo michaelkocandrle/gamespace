@@ -1517,6 +1517,13 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       - `Screens` bez stínu.
 
       Čitelné ve dne i v noci (zabalená hra). Rozložení plátna, `ScreenRect` i test beze změny.
+    - Krok 4: kulaté tečky pryč, místo nich ovládací moduly (`hs_cockpit.control_module`):
+      - pouzdro, lem, 4 šrouby, tmavá čelní deska;
+      - ovladače: krytý přepínač (MASTER ARM s červeným krytem), vroubkovaný volič se stupnicí, kolébka, podsvícené tlačítko 14,5 mm, enkodér s LED obloukem;
+      - LED oranžové a bílé, některé pomalu blikají (`M_Ship_Blink`, 0,6 Hz);
+      - štítek u každého ovladače: PWR, ENG, SHLD, SCAN, QT, COMMS, GEAR, LIGHTS, COOL, MASTER ARM, WPN, NAV, LOCK. Knihovna decalů má nově `ck_eng` a `ck_lock`.
+
+      Moduly jsou na pásech vedle MFD, na křídlech desky a na levé konzoli.
 
 ---
 

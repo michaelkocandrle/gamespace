@@ -4297,6 +4297,72 @@
     ]
    },
    {
+    "name": "ck_eng",
+    "type": "info",
+    "footprint": [
+     0.056,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'ENG'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "ENG",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_lock",
+    "type": "info",
+    "footprint": [
+     0.068,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'LOCK'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "LOCK",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
     "name": "ck_flight",
     "type": "info",
     "footprint": [

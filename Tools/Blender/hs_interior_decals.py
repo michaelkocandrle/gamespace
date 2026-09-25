@@ -42,7 +42,7 @@ def _target(objs):
     return bpy.data.objects.new(me.name, me)
 
 
-def cockpit_items(spec, eye):
+def cockpit_items(spec, eye, root=None):
     """Labels at the cockpit's control groups, aimed from the pilot's eye (the cockpit recipe's geometry)."""
     ck = spec.get("_cockpit", {})
     out = []
@@ -61,15 +61,18 @@ def cockpit_items(spec, eye):
         # small panel number on the outer strip
         s = c + right * (-side) * (ck["screen_w"] / 2 + ck["side_margin"] * 0.5) + up * 0.13
         out.append({"item": "panel_C21" if side > 0 else "panel_C22", "from": list(e), "to": list(s), "scale": 0.7})
-    for side, labels in ((1, ("ck_nav", "ck_comms")), (-1, ("ck_shld", "ck_wpn"))):
-        x, y, zt = ck["wing"][1]
-        zb = ck.get("fascia_bottom_z", 0.97)
-        zc = (zb + zt) / 2
-        for k, lab in enumerate(labels):
-            p = Vector((x + 0.1, side * (y - 0.1), zc + 0.095)) + Vector((0, -side * 0.05 * (k * 2 - 1), 0))
-            out.append({"item": lab, "from": list(e), "to": list(p), "scale": 0.8})
+    # a label under every control of the control modules (hs_cockpit.control_module), shot at its face
+    import hs_cockpit
+    index = json.load(open(os.path.join(root, spec["index"]), encoding="utf-8")) if root and spec.get("index") else None
+    for lab in hs_cockpit.LABELS:
+        at, n = Vector(lab["at"]), Vector(lab["n"])
+        scale = lab["scale"]
+        if index and lab["item"] in index["decals"]:
+            # a long word (QUANTUM) shrinks to its control's cell
+            scale = min(scale, lab.get("max_w", 1.0) / index["decals"][lab["item"]]["size_m"][0])
+        out.append({"item": lab["item"], "from": list(at + n * 0.03), "dir": list(-n), "scale": scale, "label": True,
+                    "frame": (lab["x"], lab["y"])})
     x, y, zt = ck["wing"][1]
-    out.append({"item": "ck_masterarm", "from": list(e), "to": [x + 0.12, -(y - 0.12), (ck.get("fascia_bottom_z", 0.97) + zt) / 2 - 0.1]})
     out.append({"item": "ck_maker_plate", "from": list(e), "to": [x + 0.05, y - 0.02, ck.get("fascia_bottom_z", 0.97) + 0.03], "scale": 0.8})
     return out
 
@@ -81,16 +84,30 @@ def build(objs, ship, coll, spec, root, mats, eye):
                           index, (0.0, 0.0, 0.0), (99.0, 99.0))
     report = {"items": 0, "scatter": 0}
 
+    failed = []
+
     def shoot(it):
         o = Vector(it["from"])
         d = (Vector(it["to"]) - o) if "to" in it else Vector(it["dir"])
         hit, n = pl.cast(o, d.normalized())
         if hit is None:
             pl.skipped["miss"] += 1
+            if it.get("label"):
+                failed.append((it["item"], "miss", [round(v, 3) for v in o]))
             return None
-        return pl.place_at(it["item"], hit, n, it.get("rot", 0.0), it.get("scale", 1.0), "interior", True)
+        before = dict(pl.skipped)
+        # a control's label lies on its module's face between the controls: lay it from just above the face
+        # (from 12 cm the rays met the controls and the glare shield - every module label failed, 25. 9. 2026)
+        pl.reach = 0.02 if it.get("label") else 0.12
+        # a module's label runs along the module (its own frame), not by the surface's world orientation
+        frame = (Vector(it["frame"][0]), Vector(it["frame"][1])) if "frame" in it else None
+        fr = pl.place_at(it["item"], hit, n, it.get("rot", 0.0), it.get("scale", 1.0), "interior", not it.get("label"), frame)
+        pl.reach = 0.12
+        if fr is None and it.get("label"):
+            failed.append((it["item"], [k for k in pl.skipped if pl.skipped[k] != before.get(k)], [round(v, 3) for v in hit]))
+        return fr
 
-    for it in cockpit_items(spec, eye) + spec.get("items", []):
+    for it in cockpit_items(spec, eye, root) + spec.get("items", []):
         if shoot(it):
             report["items"] += 1
     for sc in spec.get("scatter", []):
@@ -158,7 +175,8 @@ def build(objs, ship, coll, spec, root, mats, eye):
             out.append(o2)
         bm.free()
     bpy.data.meshes.remove(target.data)
-    report.update({"skipped": pl.skipped, "faces": len(me.polygons)})
+    report.update({"skipped": pl.skipped, "faces": len(me.polygons), "labels_failed": failed})
+    print("INTDECALS " + json.dumps({"labels_failed": failed}))
     return out, report
 
 

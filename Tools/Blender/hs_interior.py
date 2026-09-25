@@ -333,6 +333,11 @@ def obj_console(g, r, zr, z0):
         for xa, xb, ya, yb in ((x0 + 0.02, x1 - 0.02, y0 + 0.02, y0 + 0.03), (x0 + 0.02, x1 - 0.02, y1 - 0.03, y1 - 0.02),
                                (x0 + 0.02, x0 + 0.03, y0 + 0.02, y1 - 0.02), (x1 - 0.03, x1 - 0.02, y0 + 0.02, y1 - 0.02)):
             box(g["int_trim"], (xa, ya, top), (xb, yb, top + 0.016))
+        if y0 > 0:
+            # the left console's module aft of the throttle: the canopy LOCK rocker and two status LEDs
+            import hs_cockpit
+            hs_cockpit.control_module(g, Vector((x0 + 0.32, (y0 + y1) / 2 + 0.05, top + 0.016)), Vector((0, -1, 0)), Vector((1, 0, 0)),
+                                      Vector((0, 0, 1)), 0.13, 0.1, [[("led_o", None), ("led_blink", None)], [("rocker", "ck_lock")]])
         return
     inner = y1 if y1 < 0 else y0
     outer = y0 if y1 < 0 else y1
@@ -518,6 +523,8 @@ def build(recipe, layout, coll, mats, ship, hull):
     inset = spec.get("wall_inset_m", 0.05)
     g = B()
     lights_out.clear()
+    import hs_cockpit
+    hs_cockpit.LABELS.clear()
     rooms = {r["id"]: r for r in layout["rooms"]}
     doors = layout["doors"]
     report = {"rooms": [], "objects": 0}

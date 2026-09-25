@@ -828,6 +828,41 @@
    ],
    "emissive_strength": 8
   },
+  "MI_Ship_Wayfarer_IntLedOrange": {
+   "_comment": "status LEDs of the cockpit control modules (step 4)",
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_IntLedOrange"
+   ],
+   "base_color": [0.3, 0.12, 0.03],
+   "metallic": 0.0,
+   "roughness": 0.3,
+   "emissive_color": [1.0, 0.38, 0.06],
+   "emissive_strength": 6
+  },
+  "MI_Ship_Wayfarer_IntLedWhite": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_IntLedWhite"
+   ],
+   "base_color": [0.3, 0.3, 0.3],
+   "metallic": 0.0,
+   "roughness": 0.3,
+   "emissive_color": [1.0, 0.95, 0.88],
+   "emissive_strength": 5
+  },
+  "MI_Ship_Wayfarer_IntLedBlink": {
+   "_comment": "the slowly blinking LEDs (M_Ship_Blink, 0.6 Hz)",
+   "master": "blink",
+   "slots": [
+    "M_Ship_Wayfarer_IntLedBlink"
+   ],
+   "base_color": [0.3, 0.12, 0.03],
+   "emissive_color": [1.0, 0.38, 0.06],
+   "emissive_strength": 6,
+   "blink_hz": 0.6,
+   "blink_min": 0.08
+  },
   "MI_Ship_Wayfarer_IntScreenBack": {
    "_comment": "the plate behind each display's clear glass: matte, pixel animation like the page (M_Ship_ScreenBack)",
    "master": "screenback",
