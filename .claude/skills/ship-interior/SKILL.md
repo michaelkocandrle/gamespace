@@ -205,6 +205,14 @@ za obložení/ven z trupu, placeholder materiály, díry z oka a z kamer presetu
 Výjimky pro plovoucí díly: recept `checks.floating_exempt`. Díry se zavírají tmavým pláštěm `Int_HullSkin` (5 cm
 pod trupem) a obložením kokpitu; nástrahy WORKFLOW 9 bm–bo.
 
+## Vizuální kritik před předáním (autor 25. 9. 2026)
+
+Každé předání interiéru nebo kokpitu projde podagentem `visual-critic` (postup a checklisty
+`interior` / `cockpit`: skill `ship-pipeline` 7b). Listy skládá `Tools/Review/make_compare_sheet.py`
+(pohled z oka a zezadu, zblízka ovladače; den, noc, vesmír). Kritik dostane jen `brief.md` a listy.
+Nejvýš 3 kola, každá výtka s reakcí, recenze v `Docs/Reviews/`. Kontrola geometrie
+(`test_ship_geometry.py`) se dělá navíc, ne místo kritika.
+
 ## Ovládací moduly kokpitu (hs pipeline)
 
 `hs_cockpit.control_module(g, c, right, up, n, w, h, rows, tree=)` staví pouzdro se šrouby a ovladači v řádcích.

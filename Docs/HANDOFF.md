@@ -1545,6 +1545,14 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       - úvodní obrazovka skrývá díl `Hologram` (`build_main_menu.py`, `test_menu_settings`);
       - nový preset `cockpit_details` (HOTAS, hologram ve dne i v noci), `cockpit_daynight` má i vesmír a detaily modulů.
       - Hlavní reference `starcitizenreference/cockpit_reference_holo.png` ve složce chybí; srovnáno s mediánem pěti dodaných.
+95. **Nezávislý vizuální kritik** (25. 9. 2026, zadání autora). Podagent `.claude/agents/visual-critic.md`:
+    - jen čtení (Read, Glob, Grep), model Fable 5.1, effort max;
+    - role přísného art directora, povinný formát: verdikt, skóre v 8 kategoriích, ≥ 5 rozdílů se závažností.
+    - Listy skládá `Tools/Review/make_compare_sheet.py <review.json>` (reference vlevo, výsledek vpravo, `brief.md` s checklistem ze skillu `ship-pipeline` 7b).
+    - Kalibrace na pěti zkritizovaných verzích (`Docs/Reviews/calibration.md`):
+      - kolo 1 bez checklistu našlo výtky u 4 z 5; u černé kabiny přehlédlo tlustý rám, polici a výhled;
+      - po pravidle o pohledu pilota kolo 2 našlo i ty.
+    - První recenze aktuální kabiny: `Docs/Reviews/2026-09-25_wayfarer_cockpit.md`, FAIL, 13 výtek (11 platí, 2 zčásti), zatím neopravené. Postup je v CLAUDE.md (5b), skillech `ship-pipeline` 7b a `ship-interior`.
 
 ---
 

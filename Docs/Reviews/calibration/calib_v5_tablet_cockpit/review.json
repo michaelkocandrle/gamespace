@@ -1,0 +1,67 @@
+{
+ "goal": "Kokpit malé jednomístné lodi, pohled pilota z oka (FOV 88°) a záběry kabiny zezadu a z boku.",
+ "style": "Star Citizen: moderní futuristická kabina, zabudované displeje, fyzické ovladače, hologram lodi; úroveň zpracování SC.",
+ "pairs": [
+  {
+   "title": "Pohled pilota",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/cockpit_reference_2.png",
+    "starcitizenreference/cockpit_reference_4.png"
+   ],
+   "ref_label": "SC kokpity",
+   "ours": "Saved/Shots/20260925_111836_cockpit_daynight/01_pilot_view_day.png",
+   "ours_label": "ve hře, oko pilota"
+  },
+  {
+   "title": "Kabina z boku",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/cockpit_reference_1.png",
+    "starcitizenreference/cockpit_reference_5.png"
+   ],
+   "ref_label": "SC kokpity",
+   "ours": "Saved/Shots/20260925_122015_cockpit_daynight/02_cockpit_right_day.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Kabina zezadu na dveře",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/Screenshot 2026-09-25 021701.png",
+    "starcitizenreference/Screenshot 2026-09-25 021107.png"
+   ],
+   "ref_label": "SC kabiny zezadu",
+   "ours": "Saved/Shots/20260925_122015_cockpit_daynight/04_cockpit_back_day.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Kajuta dozadu, dveře do kokpitu",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/Screenshot 2026-09-25 021554.png",
+    "starcitizenreference/Screenshot 2026-09-25 021635.png"
+   ],
+   "ref_label": "SC chodby a dveře",
+   "ours": "Saved/Shots/20260925_121035_wayfarer_interior/05_cabin_back.png",
+   "ours_label": "ve hře, 1. osoba"
+  },
+  {
+   "title": "Pohled pilota v noci",
+   "distance": "mid",
+   "light": "night",
+   "ref": "starcitizenreference/cockpit_reference_3.png",
+   "ref_label": "SC kokpit v noci",
+   "ours": "Saved/Shots/20260925_122015_cockpit_daynight/05_pilot_view_night.png",
+   "ours_label": "ve hře"
+  }
+ ],
+ "topic": "calib_v5_tablet_cockpit",
+ "date": "2026-09-25",
+ "checklist": null,
+ "out": "Docs/Reviews/calibration/calib_v5_tablet_cockpit"
+}

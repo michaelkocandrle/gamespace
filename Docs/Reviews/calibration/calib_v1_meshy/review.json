@@ -1,0 +1,61 @@
+{
+ "goal": "Exteriér malé jednomístné multirole lodi (Wayfarer, cca 21 m). Loď hráče, na kterou se kouká z chase kamery i zblízka při přistání.",
+ "style": "Star Citizen, čistý styl ve smyslu lodí Origin Jumpworks, krémový lak s oranžovými akcenty; úroveň zpracování SC.",
+ "pairs": [
+  {
+   "title": "Tři čtvrtě zepředu",
+   "distance": "mid",
+   "light": "space",
+   "ref": "ArtSource/Ships/Wayfarer/Concept/hero_pad.png",
+   "ref_label": "koncept ve stylu SC",
+   "ours": "Docs/Reviews/calibration/calib_v1_meshy/source/author_1.webp",
+   "ours_label": "ve hře, chase kamera"
+  },
+  {
+   "title": "Z boku",
+   "distance": "mid",
+   "light": "space",
+   "ref": "ArtSource/Ships/Wayfarer/Concept/side_a.png",
+   "ref_label": "koncept ve stylu SC",
+   "ours": "Docs/Reviews/calibration/calib_v1_meshy/source/author_2.webp",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Zezadu",
+   "distance": "mid",
+   "light": "space",
+   "ref": "ArtSource/Ships/Wayfarer/Concept/threequarter.png",
+   "ref_label": "koncept ve stylu SC",
+   "ours": "Docs/Reviews/calibration/calib_v1_meshy/source/author_3.webp",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Shora a zespodu",
+   "distance": "close",
+   "light": "space",
+   "ref": "ArtSource/Ships/Wayfarer/Concept/hero_pad.png",
+   "ref_label": "koncept ve stylu SC",
+   "ours": [
+    "Docs/Reviews/calibration/calib_v1_meshy/source/author_4.webp",
+    "Docs/Reviews/calibration/calib_v1_meshy/source/author_5.webp"
+   ],
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Zepředu / zezadu zblízka",
+   "distance": "close",
+   "light": "space",
+   "ref": "ArtSource/Ships/Wayfarer/Concept/threequarter.png",
+   "ref_label": "koncept ve stylu SC",
+   "ours": [
+    "Docs/Reviews/calibration/calib_v1_meshy/source/author_6.webp",
+    "Docs/Reviews/calibration/calib_v1_meshy/source/author_7.webp"
+   ],
+   "ours_label": "ve hře"
+  }
+ ],
+ "topic": "calib_v1_meshy",
+ "date": "2026-09-25",
+ "checklist": null,
+ "out": "Docs/Reviews/calibration/calib_v1_meshy"
+}

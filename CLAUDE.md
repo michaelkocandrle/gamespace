@@ -28,6 +28,15 @@ Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**. Projekt je v `C:\gamespace\g
 4. **Headless testy**, kterých se změna týká; po větší změně všechny.
 5. **Package + Shots.** Každý snímek si **sám prohlédni** (Read na PNG). Autorovi nikdy nepředávej nic, co jsi neviděl.
    - **Žádné spouštění editoru ani PIE kvůli kontrole.** Ověřuje se přes zabalenou hru.
+5b. **Vizuální kritik (každé předání vizuální práce, autor 25. 9. 2026).** Podagent `visual-critic`
+   (`.claude/agents/`, jen čtení, nejsilnější model) porovná výsledek s referencí. Postup: skill `ship-pipeline` 7b.
+   - Listy `python Tools/Review/make_compare_sheet.py <review.json>`: reference vlevo, výsledek vpravo; zblízka, střední, zdálky; den, noc, vesmír.
+   - Kritik dostane **jen** `brief.md` a listy: žádný postup, dobu práce, záměry ani vlastní názor.
+   - FAIL → oprav body „musí se opravit“ a znovu, nejvýš 3 kola, pak předej i s otevřenými body.
+   - Žádnou výtku tiše nevynechat: u každé opraveno / neopraveno a proč; nesouhlas zdůvodni.
+   - Recenze do `Docs/Reviews/<datum>_<téma>.md` (listy, výstup kritika, reakce na každý bod).
+   - Kritik doplňuje automatické kontroly (`test_ship_geometry.py`, testy UE), nenahrazuje je.
+   - Co autor vytkne a kritik přehlédl, doplň do zadání kritika a do `Docs/Reviews/calibration.md`.
 6. **Dokumentace:**
    - bod do `Docs/HANDOFF.md` kap. 5;
    - nová nástraha do `Docs/WORKFLOW.md` kap. 9;
@@ -39,7 +48,8 @@ Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**. Projekt je v `C:\gamespace\g
    - že je hra v `C:\gamespace\Builds\Gamespace\Windows\gamespace.exe`;
    - přesný testovací scénář (klávesy, kam jít);
    - co musí posoudit jen autor;
-   - rizika.
+   - rizika;
+   - u vizuální práce: verdikt a skóre posledního kola kritika, počet kol, výtky s reakcí a odkaz na recenzi.
 
 **Iterace vzhledu vs. předání** (autor, 24. 9. 2026):
 - Při iteraci vzhledu (modelování, decaly, materiály, světla) se po každé změně **nebalí** a nepouští celá sada testů:

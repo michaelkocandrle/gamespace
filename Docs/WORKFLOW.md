@@ -903,6 +903,7 @@ snímku.
   - assemble všechny modifikátory aplikuje a Bevel na hustém meshi s degenerovanými plochami vyrobí smetí.
 
   Hologram proto nese modifikátor Decimate: `finish()` ho vynechá a assemble decimaci aplikuje. Mesh z cizích dílů ber vyhodnocený (`evaluated_get().to_mesh()`), protože greeble jsou bodová mračna s instancerem. Nepoužívej `meshes.new_from_object` s následným mazáním.
+- bt) **Nový podagent „not found“ (`Agent type 'visual-critic' not found`).** Claude Code sleduje jen složky agentů, které existovaly při startu session. První soubor v nové `.claude/agents/` se proto načte až po restartu. Do té doby spouštěj read-only agenta (Explore) s doslovným textem zadání a zapiš to do recenze.
 - bo) **Kontrola geometrie před každým předáním:** `python Tools/Tests/test_ship_geometry.py` (Blender headless na
   `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
   Musí projít (autor 25. 9. 2026).

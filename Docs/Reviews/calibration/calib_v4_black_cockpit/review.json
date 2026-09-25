@@ -1,0 +1,46 @@
+{
+ "goal": "Kokpit malé jednomístné lodi, pohled pilota z oka (FOV 88°) a záběry kabiny zezadu a z boku.",
+ "style": "Star Citizen: moderní futuristická kabina, zabudované displeje, fyzické ovladače, hologram lodi; úroveň zpracování SC.",
+ "pairs": [
+  {
+   "title": "Pohled pilota",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/cockpit_reference_2.png",
+    "starcitizenreference/cockpit_reference_4.png"
+   ],
+   "ref_label": "SC kokpity",
+   "ours": "Saved/Shots/20260925_032901_wayfarer_interior/13_pilot_view.png",
+   "ours_label": "ve hře, oko pilota"
+  },
+  {
+   "title": "Kabina z boku",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/cockpit_reference_1.png",
+    "starcitizenreference/cockpit_reference_5.png"
+   ],
+   "ref_label": "SC kokpity",
+   "ours": "Saved/Shots/20260925_032901_wayfarer_interior/11_cockpit_right.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Kabina zezadu",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/Screenshot 2026-09-25 021701.png",
+    "starcitizenreference/Screenshot 2026-09-25 021107.png"
+   ],
+   "ref_label": "SC kabiny zezadu",
+   "ours": "Saved/Shots/20260925_032901_wayfarer_interior/06_cockpit_back.png",
+   "ours_label": "ve hře"
+  }
+ ],
+ "topic": "calib_v4_black_cockpit",
+ "date": "2026-09-25",
+ "checklist": null,
+ "out": "Docs/Reviews/calibration/calib_v4_black_cockpit"
+}

@@ -690,6 +690,77 @@ Po každém kroku lodi doplň `dossier.json` (u modelu klíč `model`: `renders`
 a znovu publikuj Ship Matrix (1b).
 Když autor najde vizuální chybu, přidej do testu kontrolu, která by ji chytila.
 
+## 7b. Vizuální kritik před každým předáním (autor 25. 9. 2026)
+
+Nezávislý podagent `visual-critic` (`.claude/agents/visual-critic.md`, jen čtení, model Fable 5.1, effort
+max) porovná výsledek s referencí dřív, než ho uvidí autor. Doplňuje automatické kontroly
+(`test_ship_geometry.py`, testy UE), nenahrazuje je: musí proběhnout obojí.
+
+Postup:
+1. Srovnávací listy: `review.json` (téma, cíl, styl, sekce checklistu, dvojice reference / výsledek)
+   → `python Tools/Review/make_compare_sheet.py <review.json>` → `Docs/Reviews/<datum>_<téma>/`
+   (listy + `brief.md`). Záběry zblízka, ze střední vzdálenosti (chase nebo z oka) a zdálky; den,
+   noc a vesmír, kde to dává smysl.
+2. Spusť kritika. Dostane **jen** `brief.md` a listy. Žádný popis postupu, doby práce, záměrů ani
+   vlastní názor na výsledek. Prompt: „Přečti <složka>/brief.md a všechny listy v něm a vyhodnoť
+   je podle svého zadání.“
+3. FAIL → oprav body „musí se opravit“, nové snímky, nové listy, kritik znovu. Nejvýš 3 kola, pak
+   předej i s otevřenými body.
+4. Žádnou výtku tiše nevynechat. U každé: opraveno / neopraveno a proč. Nesouhlas je v pořádku,
+   ale zdůvodněný.
+5. Recenze do `Docs/Reviews/<datum>_<téma>.md`: odkaz na listy, výstup kritika z každého kola,
+   reakce na každý bod.
+6. V reportu autorovi: verdikt a skóre posledního kola, počet kol, výtky s reakcí, odkaz na recenzi.
+7. Když autor vytkne něco, co kritik přehlédl, doplň to do zadání kritika nebo do checklistu níže
+   a zapiš do `Docs/Reviews/calibration.md`.
+
+Kalibrace na historii (pět verzí, které autor zkritizoval): `Docs/Reviews/calibration.md`.
+
+<!-- critic-checklist:exterior -->
+- Povrch: rovné panely a čisté, zkosené hrany, které chytají světlo. Žádné měkké, zvlněné nebo
+  rozeklané plochy.
+- Tvar vrstvený z dílů s tloušťkou (desky nad rámem, zapuštěná místa, odhalená mechanika, trubky,
+  stupně). Hierarchie velký / střední / malý detail, zvlášť střední vrstva.
+- Detail je skutečný tvar nebo mesh decal s hloubkou, ne jen čáry na hladkém povrchu.
+- Materiály: primární a sekundární lak, holý kov, guma, tmavé mechanické díly; variace drsnosti.
+  Opotřebení jen na exponovaných hranách.
+- Decaly: čísla panelů, šablonové nápisy, výstražné pruhy, šipky, nýty. Shlukované, čitelné, nikdy
+  zrcadlené.
+- Světla lodi: poziční světla, osvětlené šachty, emisivní prvky dávají měřítko; nic přepáleného.
+- Silueta odpovídá výkresu / konceptu; nic netrčí šikmo, nic nevisí.
+<!-- /critic-checklist -->
+
+<!-- critic-checklist:interior -->
+- Tvar prostoru vychází z trupu: zalomené a zkosené stěny, nízký konstrukční strop, průřez spíš
+  lichoběžník / osmiúhelník. Pravoúhlá místnost s rovnými stěnami je chyba.
+- Vrstvy: žebra, kabelové žlaby a trubky pod stropem, panely s hloubkou a přesahy, madla, skříňky
+  se západkami, mřížky v podlaze, přípojky. Detail shlukovaný kolem funkčních míst.
+- Každý předmět má účel; žádné výplňové rekvizity, žádné krabicové pulty.
+- Materiály: čalounění, guma, broušený i lakovaný kov, akcenty palety; tmavá teplá architektura,
+  studené UI. Béžová / jednolitá / plastová plocha je chyba.
+- Decaly: označení místností a sekcí, nouzové značky, popisky ovladačů; čitelné, nezrcadlené.
+- Světlo: kontrast, svítidla v pouzdrech, kužely, tmavá místa, akcenty. Ploché rovnoměrné světlo
+  ze stropu je chyba, stejně jako přepálená skvrna.
+- Geometrie: žádné díry do prázdna, průniky stěnou, plovoucí díly, lišty mimo místo.
+<!-- /critic-checklist -->
+
+<!-- critic-checklist:cockpit -->
+- Z oka pilota: kolik je vidět ven, jak tlustý je rám skla, jestli výhled neblokuje hmota (rám,
+  police, deska). Nic nesmí stát v ose pohledu.
+- Palubní deska: tvarovaná, nízko, s hloubkou. Displeje zabudované do desky nebo jako skleněné
+  panely na držácích, ne samostatné desky položené na stole.
+- Fyzické ovladače: skutečné typy (kryté přepínače, otočné voliče, kolébky, podsvícená tlačítka),
+  každý s popiskem. Holé válce, kulaté tečky nebo prázdné desky jsou placeholdery.
+- Materiály: tmavý grafit kolem displejů, světlé jen akcenty; polstrování, kov, guma. Tvary nesmí
+  zmizet v černé.
+- Světlo: displeje a hologram svítí na okolí, ostrůvky světla, žádné přepálené skvrny; tvary čitelné
+  ve dne i v noci.
+- Čitelnost HUD a displejů má přednost před vším ostatním; žádné zdvojení nebo rozmazání.
+- Zadní pohled (dveře, stěna, okna): text nezrcadlený, stěny s detailem, čisté spoje stěny a skla,
+  žádné čáry přes okno.
+- HOTAS, sedadlo a hologram: detailní, ukotvené, žádné díly ve vzduchu.
+<!-- /critic-checklist -->
+
 ## 8. Checklist modelu
 
 - [ ] 2D návrh schválený autorem; spec v Ship Matrix tvaru

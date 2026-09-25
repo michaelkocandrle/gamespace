@@ -1,0 +1,58 @@
+{
+ "goal": "Interiér malé lodi (nákladový prostor, technická chodba, kajuta), pohled hráče z první osoby (oko 1,65 m).",
+ "style": "Star Citizen: teplá tmavá architektura, světelné lišty, studené hologramové UI; úroveň zpracování SC.",
+ "pairs": [
+  {
+   "title": "Nákladový prostor",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/Screenshot 2026-09-25 021422.png",
+    "starcitizenreference/Screenshot 2026-09-25 021316.png"
+   ],
+   "ref_label": "SC interiéry",
+   "ours": "Saved/Shots/20260925_015641_wayfarer_interior/01_hold.png",
+   "ours_label": "ve hře, 1. osoba"
+  },
+  {
+   "title": "Kajuta",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/Screenshot 2026-09-25 021456.png",
+    "starcitizenreference/Screenshot 2026-09-25 021331.png"
+   ],
+   "ref_label": "SC interiéry",
+   "ours": "Saved/Shots/20260925_015641_wayfarer_interior/04_cabin.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Kajuta dozadu",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/Screenshot 2026-09-25 021554.png",
+    "starcitizenreference/Screenshot 2026-09-25 021635.png"
+   ],
+   "ref_label": "SC chodby",
+   "ours": "Saved/Shots/20260925_015641_wayfarer_interior/05_cabin_back.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Technická chodba",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/Screenshot 2026-09-25 021554.png",
+    "starcitizenreference/Screenshot 2026-09-25 021406.png"
+   ],
+   "ref_label": "SC chodby",
+   "ours": "Saved/Shots/20260925_015641_wayfarer_interior/03_tech.png",
+   "ours_label": "ve hře"
+  }
+ ],
+ "topic": "calib_v3_interior",
+ "date": "2026-09-25",
+ "checklist": null,
+ "out": "Docs/Reviews/calibration/calib_v3_interior"
+}

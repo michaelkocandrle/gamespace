@@ -1,0 +1,46 @@
+{
+ "goal": "Exteriér malé jednomístné multirole lodi (Wayfarer, cca 21 m). Loď hráče, na kterou se kouká z chase kamery i zblízka při přistání.",
+ "style": "Star Citizen, čistý styl ve smyslu lodí Origin Jumpworks, krémový lak s oranžovými akcenty; úroveň zpracování SC.",
+ "pairs": [
+  {
+   "title": "Tři čtvrtě zblízka",
+   "distance": "close",
+   "light": "day",
+   "ref": "ArtSource/Ships/Wayfarer/Concept/hero_pad.png",
+   "ref_label": "koncept ve stylu SC",
+   "ours": "Docs/Shots/Wayfarer/v2_close_three_quarter.jpg",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Z boku",
+   "distance": "mid",
+   "light": "day",
+   "ref": "ArtSource/Ships/Wayfarer/Concept/side_a.png",
+   "ref_label": "koncept ve stylu SC",
+   "ours": "Docs/Shots/Wayfarer/v2_left.jpg",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Zezadu",
+   "distance": "mid",
+   "light": "day",
+   "ref": "ArtSource/Ships/Wayfarer/Concept/threequarter.png",
+   "ref_label": "koncept ve stylu SC",
+   "ours": "Docs/Shots/Wayfarer/v2_rear.jpg",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Na zemi z boku",
+   "distance": "far",
+   "light": "day",
+   "ref": "ArtSource/Ships/Wayfarer/Concept/hero_pad.png",
+   "ref_label": "koncept ve stylu SC",
+   "ours": "Docs/Shots/Wayfarer/v2_landed_side.jpg",
+   "ours_label": "ve hře"
+  }
+ ],
+ "topic": "calib_v2_clean",
+ "date": "2026-09-25",
+ "checklist": null,
+ "out": "Docs/Reviews/calibration/calib_v2_clean"
+}
