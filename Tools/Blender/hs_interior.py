@@ -171,6 +171,16 @@ def ceiling(g, x0, x1, y0, y1, z, lights):
 
 
 lights_out = []
+KIT = None          # the modular kit while build() runs (hs_interior_kit.Kit), for textured procedural parts
+
+
+def tbox(g, key, kit_key, lo, hi, tile=0.9):
+    """A box in a kit trim material when the kit is on, else in the flat interior material."""
+    if KIT is not None:
+        import hs_interior_kit
+        hs_interior_kit.kit_box(KIT, kit_key, lo, hi, tile)
+    else:
+        box(g[key], lo, hi)
 
 
 # ------------------------------------------------------------------------------------------ objects
@@ -306,7 +316,7 @@ def obj_bunk(g, r, zr):
 
 def obj_console(g, r, zr, z0):
     x0, x1, y0, y1 = r
-    box(g["int_dark"], (x0, y0, z0), (x1, y1, zr[1] - 0.1))
+    tbox(g, "int_dark", "kit_trim02", (x0, y0, z0), (x1, y1, zr[1] - 0.1), 1.0)
     inner = y1 if y1 < 0 else y0
     outer = y0 if y1 < 0 else y1
     c = Vector(((x0 + x1) / 2, (inner * 0.4 + outer * 0.6), zr[1] - 0.05))
@@ -322,14 +332,15 @@ def obj_console(g, r, zr, z0):
 def dashboard(g, r, zr, z0, ship, screen_bm, sockets, eye):
     """The instrument panel: a sloped fascia facing the pilot's eye with the game's four screens."""
     x0, x1, y0, y1 = r
-    box(g["int_dark"], (x0 + 0.2, y0, z0), (x1, y1, zr[0]))                   # lower body
+    tbox(g, "int_dark", "kit_trim01", (x0 + 0.2, y0, z0), (x1, y1, zr[0]))   # lower body (kit panel trim)
     top = zr[1]
     fascia_c = Vector((x0 + 0.25, 0.0, (zr[0] + top) / 2))
     to_eye = (Vector(eye) - fascia_c).normalized()
     n = Vector((to_eye.x, 0, to_eye.z)).normalized()
     up = Vector((0, 0, 1)) - n * n.z
     up.normalize()
-    obox(g["int_trim"], fascia_c - n * 0.03, (0, 1, 0), n, (y1 - y0, top - zr[0] + 0.1, 0.05))
+    # dark fascia: the screens are the brightest thing on the panel (readability first)
+    obox(g["int_dark"], fascia_c - n * 0.03, (0, 1, 0), n, (y1 - y0, top - zr[0] + 0.1, 0.05))
     box(g["int_dark"], (x0 + 0.25, y0, top), (x1, y1, top + 0.04))            # glare shield
     right = Vector((0, -1, 0))                                                # pilot faces +x: right = -y
     # 7 cm over the fascia's middle: from the eye the screens span ~15..29 deg down, whole inside the
@@ -340,7 +351,7 @@ def dashboard(g, r, zr, z0, ship, screen_bm, sockets, eye):
     for name, (u, v, w, h) in screens.items():
         c = fascia_c + right * u + up * v + n * 0.002
         # bezel
-        obox(g["int_dark"], c - n * 0.001, right, n, (w + 0.04, h + 0.04, 0.012))
+        obox(g["int_trim"], c - n * 0.001, right, n, (w + 0.04, h + 0.04, 0.012))
         cs = [c + right * (-w / 2) + up * (-h / 2), c + right * (w / 2) + up * (-h / 2),
               c + right * (w / 2) + up * (h / 2), c + right * (-w / 2) + up * (h / 2)]
         cs = [p + n * 0.007 for p in cs]
@@ -355,6 +366,19 @@ def dashboard(g, r, zr, z0, ship, screen_bm, sockets, eye):
         if f.normal.dot(n) < 0:
             f.normal_flip()
         sockets[name] = c + n * 0.03
+    # soft keys under the side screens and a toggle row over them (real buttons around the displays, as in
+    # the reference cockpits; small and dim, so the screens stay the brightest thing on the panel)
+    for u0 in (-0.33, 0.33):
+        for k in range(6):
+            c = fascia_c + right * (u0 - 0.125 + k * 0.05) + up * (-0.105) + n * 0.004
+            obox(g["int_dark"], c, right, n, (0.034, 0.026, 0.012))
+            obox(g["int_glow" if k in (0, 3) else "int_trim"], c + n * 0.007, right, n, (0.026, 0.018, 0.004))
+    for k in range(12):
+        c = fascia_c + right * (-0.44 + k * 0.08) + up * 0.245 + n * 0.004
+        obox(g["int_dark"], c, right, n, (0.03, 0.03, 0.01))
+        cyl(g["int_trim"], c, c + n * 0.03 + up * 0.008, 0.005, 6)
+        if k % 4 == 1:
+            obox(g["accent"], c + up * -0.022 + n * 0.006, right, n, (0.012, 0.006, 0.003))
 
 
 # ------------------------------------------------------------------------------------------ main
@@ -368,12 +392,27 @@ def build(recipe, layout, coll, mats, ship, hull):
     rooms = {r["id"]: r for r in layout["rooms"]}
     doors = layout["doors"]
     report = {"rooms": [], "objects": 0}
+    kit_rooms = (spec.get("kit") or {}).get("rooms", [])
+    kit = None
+    global KIT
+    KIT = None
+    if kit_rooms:
+        import hs_interior_kit
+        kit = KIT = hs_interior_kit.Kit()
+        hs_interior_kit.preview_materials(mats)
+        report["kit"] = {}
+    door_xs = [d["at"][0] for d in doors if d["axis"] == "x"]
     for rid, r in rooms.items():
         x0, x1, y0, y1 = r["rect"]
         z0 = r.get("floor_z", 0.0)
         if rid == "cockpit":
             continue
         y0i, y1i = y0 + inset, y1 - inset
+        if rid in kit_rooms:
+            # the SC-like structure from the modular kit (hs_interior_kit.py)
+            report["kit"][rid] = hs_interior_kit.shell(kit, g, box, obox, r, spec, H, y1i, lights_out, door_xs)
+            report["rooms"].append(rid)
+            continue
         floor_tiles(g, x0, x1, y0i, y1i, z0)
         ceiling(g, x0, x1, y0i, y1i, H, spec["lights"].get("per_room", 2))
         panel_wall(g, x0, x1, y1i, z0, H, -1)
@@ -395,6 +434,15 @@ def build(recipe, layout, coll, mats, ship, hull):
             box(g["accent"], (x + 0.03, -1.3, 2.1), (x + 0.05, 1.3, 2.16))
             continue
         bulkhead(g, x, y0i, y1i, 0.0, H, (d["at"][1], d["width"]) if d else None, 1)
+        if kit is not None:
+            # kit panels on the faces that look into kit rooms
+            ks = next(iter(report["kit"].values()))["scale"]
+            for rid in kit_rooms:
+                rx0, rx1 = rooms[rid]["rect"][0], rooms[rid]["rect"][1]
+                if abs(rx1 - x) < 0.01:
+                    hs_interior_kit.clad_bulkhead(kit, x - 0.005, -1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, 0.0, H)
+                if abs(rx0 - x) < 0.01:
+                    hs_interior_kit.clad_bulkhead(kit, x + 0.045, 1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, 0.0, H)
     # cockpit: floor, step, tub walls to the sill, rear wall, liner above the sill
     ck = rooms["cockpit"]
     zc = ck["floor_z"]
@@ -413,7 +461,11 @@ def build(recipe, layout, coll, mats, ship, hull):
         if nrm.dot(Vector((17.3, 0, 0)) - pa) < 0:
             nrm = -nrm
         c = (pa + pb) / 2 + nrm * 0.03
-        obox(g["int_wall"], (c.x, c.y, (zc + sill) / 2), d, (0, 0, 1), (length, 0.04, sill - zc))
+        if kit is not None:
+            # quilted charcoal padding on the tub (the reference's cockpit side walls)
+            hs_interior_kit.kit_obox(kit, "kit_padded_grey", (c.x, c.y, (zc + sill) / 2), d, (0, 0, 1), (length, 0.04, sill - zc), 0.5)
+        else:
+            obox(g["int_wall"], (c.x, c.y, (zc + sill) / 2), d, (0, 0, 1), (length, 0.04, sill - zc))
         obox(g["int_trim"], (c.x, c.y, sill), d, (0, 0, 1), (length, 0.08, 0.03))
     report["cockpit"] = True
     # every layout object by its name
@@ -456,7 +508,13 @@ def build(recipe, layout, coll, mats, ship, hull):
         else:
             continue
         report["objects"] += 1
+    if kit is not None:
+        hs_interior_kit.fittings(kit, g, box, spec, lights_out)
+        cockpit_detail(g, layout, zc, sill)
     objs = []
+    if kit is not None:
+        objs += kit.objects(ship, coll, mats)
+        report["kit"]["pieces"] = kit.used
     bevel = {"angle_deg": 30, "width": 0.004, "segments": 2}
     for key, bm in g.bm.items():
         if not bm.verts:
@@ -492,6 +550,19 @@ def build(recipe, layout, coll, mats, ship, hull):
             except ValueError:
                 pass
     src.free()
+    # a metal rim along every edge where the liner meets the glass: the frame reads as built structure
+    lb.edges.ensure_lookup_table()
+    rim = bmesh.new()
+    for e in lb.edges:
+        if len(e.link_faces) == 1 and (e.verts[0].co - e.verts[1].co).length > 0.01:
+            f = e.link_faces[0]
+            f.normal_update()
+            off = f.normal * 0.012
+            _rim(rim, e.verts[0].co + off, e.verts[1].co + off, 0.012)
+    if rim.verts:
+        ob = hp.finish(rim, "SM_Ship_%s_Int_LinerRim" % ship, coll, {"angle_deg": 40, "width": 0, "segments": 1})
+        ob.data.materials.append(mats["int_trim"])
+        objs.append(ob)
     if lb.faces:
         me = bpy.data.meshes.new("SM_Ship_%s_Int_Liner" % ship)
         lb.to_mesh(me)
@@ -504,6 +575,71 @@ def build(recipe, layout, coll, mats, ship, hull):
         objs.append(ob)
     report["lights"] = len(lights_out)
     return objs, sockets, list(lights_out), report
+
+
+def _rim(bm, a, b, r):
+    d = b - a
+    res = bmesh.ops.create_cone(bm, cap_ends=True, segments=8, radius1=r, radius2=r, depth=d.length + r)
+    m = Vector((0, 0, 1)).rotation_difference(d.normalized()).to_matrix().to_4x4()
+    m.translation = (a + b) / 2
+    bmesh.ops.transform(bm, matrix=m, verts=res["verts"])
+
+
+def cockpit_detail(g, layout, zc, sill):
+    """Controls and structure around the pilot (SC cockpits: HOTAS on the side consoles, switch panels on the
+    sills, seat rails, console edge lights, footwell light). Readability of the HUD and the displays first:
+    nothing bright above the dashboard line."""
+    objs = {o["name"]: o for o in layout["objects"] if o["room"] == "cockpit"}
+    right = next(o for n, o in objs.items() if "Pravá konzole" in n)
+    left = next(o for n, o in objs.items() if "Levá konzole" in n)
+    seat_o = next(o for n, o in objs.items() if "křeslo" in n)
+    ztop = right["z"][1] - 0.1 + 0.03
+    # flight stick on the right console: boot, shaft, grip with a hat switch and a trigger
+    x, y = right["rect"][0] + 0.8, right["rect"][3] - 0.14
+    cyl(g["int_dark"], (x, y, ztop), (x, y, ztop + 0.05), 0.055, 16)
+    cyl(g["int_trim"], (x, y, ztop + 0.05), (x, y, ztop + 0.2), 0.012, 10)
+    obox(g["int_leather"], (x, y, ztop + 0.26), (1, 0, 0.25), (0, 0, 1), (0.05, 0.045, 0.13))
+    cyl(g["int_dark"], (x + 0.005, y, ztop + 0.325), (x + 0.005, y, ztop + 0.34), 0.012, 8)
+    box(g["accent"], (x + 0.022, y - 0.008, ztop + 0.25), (x + 0.03, y + 0.008, ztop + 0.28))
+    # throttle on the left console: a slot, the lever and its handle with thumb buttons
+    x, y = left["rect"][0] + 0.7, left["rect"][2] + 0.14
+    box(g["int_dark"], (x - 0.16, y - 0.025, ztop), (x + 0.12, y + 0.025, ztop + 0.012))
+    box(g["int_trim"], (x - 0.012, y - 0.01, ztop), (x + 0.012, y + 0.01, ztop + 0.12))
+    box(g["int_leather"], (x - 0.04, y - 0.035, ztop + 0.11), (x + 0.04, y + 0.035, ztop + 0.19))
+    for k in range(3):
+        box(g["int_glow" if k == 0 else "int_dark"], (x - 0.02 + k * 0.018, y + 0.035, ztop + 0.16), (x - 0.008 + k * 0.018, y + 0.04, ztop + 0.172))
+    # console edge lights facing the pilot (dim, below the dashboard line)
+    for o in (left, right):
+        x0, x1, y0, y1 = o["rect"]
+        inner = y0 if y0 > 0 else y1
+        s_ = 1 if y0 > 0 else -1
+        box(g["int_glow"], (x0 + 0.05, inner - s_ * 0.002, ztop - 0.06), (x1 - 0.05, inner + s_ * 0.0, ztop - 0.05))
+    # seat rails and pedestal
+    x0, x1, y0, y1 = seat_o["rect"]
+    for yy in (-0.2, 0.2):
+        box(g["int_trim"], (x0 - 0.25, yy - 0.025, zc), (x1 + 0.1, yy + 0.025, zc + 0.03))
+    box(g["int_dark"], (x0 + 0.15, -0.22, zc + 0.03), (x1 - 0.15, 0.22, zc + 0.16))
+    # switch panels on the sills behind the consoles
+    for s_ in (1, -1):
+        c = Vector((15.9, s_ * 1.45, sill + 0.03))
+        tilt = Vector((0, -s_ * 0.6, 1))
+        obox(g["int_dark"], c, (1, 0, 0), tilt, (0.5, 0.24, 0.04))
+        nrm = tilt.normalized()
+        for k in range(6):
+            p = c + Vector((-0.2 + k * 0.08, 0, 0)) + nrm * 0.02
+            cyl(g["int_trim"], p, p + nrm * 0.035, 0.006, 6)
+            box(g["int_glow" if k % 3 == 0 else "accent" if k == 4 else "int_dark"], p + Vector((-0.012, -0.012, 0)) + nrm * -0.001 - Vector((0, 0, 0.04)),
+                p + Vector((0.012, 0.012, 0.004)) - Vector((0, 0, 0.04)))
+    # frame wash: two dim spots at the foot of the front pillars grazing up the canopy frame's lining, so the
+    # frame and its metal rims read as structure instead of black bars (the lamps themselves stay out of view)
+    for s_ in (1, -1):
+        lights_out.append({"at": [17.7, s_ * 1.05, sill + 0.05], "cd": 4.0, "type": "spot", "cone_deg": 90.0,
+                           "direction": [0.25, s_ * 0.35, 0.9]})
+    # a dim fill over the pilot's shoulders (seat, consoles, the rear of the tub)
+    lights_out.append({"at": [16.2, 0.0, 2.0], "cd": 3.0, "warm": True})
+    # footwell light (warm, small): the pilot's legs and the tub read in the dark
+    for s_ in (1, -1):
+        lights_out.append({"at": [17.6, s_ * 0.55, zc + 0.12], "cd": 2.0, "warm": True})
 
 
 def seat(coll, mats, spec, r, zr):

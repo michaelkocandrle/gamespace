@@ -620,6 +620,54 @@
    "roughness": 0.3,
    "metallic": 0.0,
    "emit": [0.35, 0.7, 1.0]
+  },
+  "kit_trim01": {
+   "slot": "KitTrim01",
+   "colour": [0.186, 0.18, 0.17099999999999999],
+   "roughness": 0.5,
+   "metallic": 0.4
+  },
+  "kit_trim02": {
+   "slot": "KitTrim02",
+   "colour": [0.15, 0.147, 0.141],
+   "roughness": 0.5,
+   "metallic": 0.4
+  },
+  "kit_trim02b": {
+   "slot": "KitTrim02B",
+   "colour": [0.126, 0.12299999999999998, 0.12],
+   "roughness": 0.5,
+   "metallic": 0.4
+  },
+  "kit_trim03": {
+   "slot": "KitTrim03",
+   "colour": [0.108, 0.105, 0.10200000000000001],
+   "roughness": 0.5,
+   "metallic": 0.4
+  },
+  "kit_cables": {
+   "slot": "KitCables",
+   "colour": [0.3, 0.3, 0.3],
+   "roughness": 0.5,
+   "metallic": 0.4
+  },
+  "kit_padded": {
+   "slot": "KitPadded",
+   "colour": [0.27, 0.27, 0.27],
+   "roughness": 0.5,
+   "metallic": 0.4
+  },
+  "int_red": {
+   "slot": "IntRed",
+   "colour": [0.45, 0.03, 0.02],
+   "roughness": 0.35,
+   "metallic": 0.1
+  },
+  "kit_padded_grey": {
+   "slot": "KitPaddedGrey",
+   "colour": [0.1, 0.1, 0.1],
+   "roughness": 0.7,
+   "metallic": 0.0
   }
  },
  "bevel": {
@@ -2382,6 +2430,98 @@
    "glb": "ArtSource/Ships/Steadfast/Kitbash/Meshy/PilotSeat.glb",
    "width_m": 0.75,
    "yaw_deg": 90
+  },
+  "kit": {
+   "_comment": "SC-like structure from the Quaternius MegaKit (Tools/Blender/hs_interior_kit.py): chamfered profile, portals, cable tray, services, light coves and down lights. Pilot on the corridor from the ramp to the cabin (hold + technical corridor), 25. 9. 2026.",
+   "rooms": [
+    "hold",
+    "tech"
+   ],
+   "chamfer_deg": 35.0,
+   "cove_m": 0.12,
+   "spot_cd": 60.0,
+   "spot_cone_deg": 80.0,
+   "portal_w": 0.14,
+   "portal_d": 0.1,
+   "floor": [
+    "Platform_DarkPlates",
+    "Platform_Metal2"
+   ],
+   "ceiling": "Platform_DarkPlates",
+   "walls": {
+    "default": {
+     "port": [
+      [
+       "WallAstra_Straight_Flat",
+       "TopCables_Straight"
+      ],
+      [
+       "WallBand_Straight",
+       "TopCables_Straight"
+      ]
+     ],
+     "starboard": [
+      [
+       "WallBand_Straight",
+       "TopCables_Straight"
+      ],
+      [
+       "WallAstra_Straight_Flat",
+       "TopCables_Straight"
+      ]
+     ]
+    }
+   },
+   "fittings": [
+    {
+     "type": "extinguisher",
+     "at": [7.95, 1.84]
+    },
+    {
+     "type": "handrail",
+     "x": [2.95, 7.6],
+     "y": 1.84,
+     "z": 1.0
+    },
+    {
+     "type": "vent",
+     "x": [2.2, 4.0, 5.8],
+     "y": -1.84,
+     "z": 0.2
+    },
+    {
+     "type": "vent",
+     "x": [3.7, 5.5],
+     "y": 1.84,
+     "z": 0.2
+    },
+    {
+     "type": "junction",
+     "at": [7.45, 1.84],
+     "z": 1.25
+    },
+    {
+     "type": "junction",
+     "at": [1.9, -1.84],
+     "z": 1.3
+    },
+    {
+     "type": "junction",
+     "at": [2.4, -1.84],
+     "z": 1.3,
+     "small": true
+    },
+    {
+     "type": "conduit",
+     "x": [2.8, 6.4],
+     "y": 1.84
+    },
+    {
+     "type": "conduit",
+     "x": [4.6],
+     "y": -1.84
+    }
+   ]
   }
  }
 }

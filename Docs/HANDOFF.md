@@ -1447,6 +1447,28 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       `test_free_look` klid −5..0°, menu bez `Screens`). Setup má znovu `cockpit_displays` (5 Hz, 8 cd).
     - Ještě chybí: chůze po přistání (rampa, posuvné dveře, gravitace, vstup postavy) a usednutí do křesla.
 
+92. **Wayfarer interiér v2 – pilot chodby a kokpitu podle SC** (25. 9. 2026). Autor v1 odmítl („prázdný byt
+    nebo kancelář“); zastavena práce na celém interiéru, pilot jen na chodbě od rampy ke kajutě (nákladový
+    prostor + technická chodba) a na kokpitu.
+    - Rozbor 21 referenčních snímků interiérů SC (`starcitizenreference/Screenshot 2026-09-25 02*.png`), tabulka
+      „SC má / my máme / chybí“ ve skillu ship-pipeline.
+    - `Tools/Blender/hs_interior_kit.py`: díly kitu Quaternius (CC0) s vlastními UV v partu `InteriorKit` (bez
+      rozbalení UV, bez Nanite a kolize). Zkosený profil (stěna 3 kit m, horní díl skloněný o 35°), portály na
+      každém modulu 1,8 m, stropní trámy, kabelové žlaby, trubky s objímkami, světelné rýhy, zapuštěná svítidla
+      s reflektory, modré orientační lišty, tmavý plášť za kitem. Přepážky obložené kitem (`clad_bulkhead`).
+      Výbava s účelem: hasicí přístroj, madlo, skříňky se západkami, chráničky kabelů, mřížky (`fittings`).
+    - Textury kitu přetónované `Tools/Assets/tone_kit_textures.py` (červená → oranžová Halcyonu, čalounění
+      i v antracitu) do `ArtSource/Ships/Shared/Kit/`, v UE na `M_Ship_PBR` (vzorkuje podle UV v prostoru lodi).
+    - Decaly interiéru `Tools/Assets/generate_interior_decals.py` (čísla sekcí, místnosti, EXIT, CAUTION, štítky
+      komponent, pruh uličky), promítané jako `Int_*` v setupu.
+    - Kokpit: čalouněná vana, spodek desky a boky konzolí z trim textur, tmavé čelo kolem displejů, tlačítka
+      a přepínače u MFD, řídicí páka a plyn, lišty a podstavec sedadla, spínací panely na parapetu, kovové lemy
+      podél skel, akcentová a nožní světla.
+    - Náhled v Blenderu ze stejných pozic jako snímky: `Tools/Blender/hs_interior_preview.py`. Nové záběry
+      `hold_aisle`, `tech_inside`, `tech_door`, `labels`, `cockpit_right`, `cockpit_left`.
+    - Měření 1080p: průměr 0,09–0,21 (SC 0,13–0,23), FPS 61–63 v chodbě, 68 v pilotním pohledu.
+    - Čeká na schválení autorem; kajuta a předměty z v1 (mřížka, reaktor, chladiče, štíty) až potom.
+
 ---
 
 ## 6. Mapa kódu a obsahu

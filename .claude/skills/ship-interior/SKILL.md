@@ -19,6 +19,17 @@ skripty jsou pracovní pipeline a zdroj ověřených postupů, ne cílový vzhle
   `Display_*`, světla do `Wayfarer_lights.json`. Materiály `MI_Ship_Wayfarer_Int*` jsou na vrstveném masteru.
 - Snímky `Tools/Shots/wayfarer_interior.json` (`camera_local` / `look_local` v prostoru lodi, m).
 - Cíl jasu jako výše (průměr 0,13–0,23, B/R 0,72–1,05). Bodovky 20 cd na 2,3 m vysokou místnost.
+- **v2 (pilot chodby a kokpitu, 25. 9. 2026): kit jako nosná vrstva** (`Tools/Blender/hs_interior_kit.py`,
+  recept `interior.kit`): `rooms` (které místnosti), `walls` (dvojice stěna + horní díl na modul, levobok a
+  pravobok), `floor`, `ceiling`, `chamfer_deg`, `cove_m`, `spot_cd`, `cove_cd`, `portal_w/d`, `fittings`
+  (extinguisher, handrail, vent, junction, conduit). Měřítko kitu se počítá z výšky: stěna 3 + skloněný
+  horní díl 2 kit m končí rýhu pod stropem (0,47 u 2,3 m). Kit se čte přímo ze zipu.
+- Procedurální díly v kit materiálu: `kit_box` / `kit_obox` (kubické UV), `tbox` v hs_interior.
+- Materiály kitu: `kit_trim01/02/02b/03`, `kit_cables`, `kit_padded(_grey)` → MI na `M_Ship_PBR` s texturami
+  z `ArtSource/Ships/Shared/Kit/` (`tone_kit_textures.py`), tón přes `base_color_tint`.
+- Decaly interiéru: `generate_interior_decals.py` → `D_Int_*`, v setupu `Int_*` (rotace viz WORKFLOW 9.6 be).
+- Iterace: `hs_interior_preview.py` (Eevee ze stejných kamer, `world=`, `light=`, `exposure=`); Eevee bez GI
+  stěny podsvítí jinak než Lumen, konečné posouzení jen ze zabalené hry.
 
 ## Pravidla autora (závazná)
 

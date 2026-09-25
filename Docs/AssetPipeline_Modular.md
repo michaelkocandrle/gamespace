@@ -258,6 +258,14 @@ nemá rovné panely. Bevel ani vážené normály na něm nic nezmění a na úr
   - díl ještě nešel do Unrealu.
 - **Loď byla 24. 9. 2026 celá odstraněna;** postup platí pro další lodě.
 
+## Wayfarer v2: kit jako struktura interiéru (25. 9. 2026)
+
+Interiér Wayfareru v1 z procedurálních boxů autor odmítl. Pilot v2 staví chodbu z kitu Quaternius:
+`Tools/Blender/hs_interior_kit.py` vkládá díly s jejich UV do lodního receptu (part `InteriorKit`), trim
+textury jsou přetónované `Tools/Assets/tone_kit_textures.py` a v UE běží na `M_Ship_PBR` (vzorkuje v prostoru
+lodi, na letící lodi se nic neposouvá, na rozdíl od světového triplanaru `M_KitTrim` Steadfastu). Procedurálně
+jen přesné díly (portály, trubky, skříňky, ovladače v kokpitu), značení jako decaly.
+
 ## Kde brát hotové díly interiéru (průzkum 23. 9. 2026)
 
 Průzkum volně dostupných zdrojů pro třetí cestu („koupený/stažený base“), seřazeno podle toho,

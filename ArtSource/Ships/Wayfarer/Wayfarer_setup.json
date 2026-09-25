@@ -833,12 +833,179 @@
     "M_Ship_Wayfarer_Screens"
    ],
    "emissive_strength": 2.9
+  },
+  "MI_Ship_Wayfarer_KitTrim01": {
+   "_comment": "Quaternius MegaKit trim sheet (CC0), toned by Tools/Assets/tone_kit_textures.py; the tint sets this panel family's tone",
+   "master": "pbr",
+   "slots": [
+    "M_Ship_Wayfarer_KitTrim01"
+   ],
+   "textures": {
+    "base_color": "ArtSource/Ships/Shared/Kit/T_Kit_Trim01_BC.png",
+    "orm": "ArtSource/Ships/Shared/Kit/T_Kit_Trim01_ORM.png",
+    "normal": "ArtSource/Ships/Shared/Kit/T_Kit_Trim01_N.png"
+   },
+   "base_color_tint": [
+    0.62,
+    0.6,
+    0.57
+   ],
+   "panel_strength": 0.0,
+   "detail_normal_strength": 0.25,
+   "wear_amount": 0.1,
+   "roughness_scale": 1.0,
+   "metallic_scale": 1.0
+  },
+  "MI_Ship_Wayfarer_KitTrim02": {
+   "_comment": "Quaternius MegaKit trim sheet (CC0), toned by Tools/Assets/tone_kit_textures.py; the tint sets this panel family's tone",
+   "master": "pbr",
+   "slots": [
+    "M_Ship_Wayfarer_KitTrim02"
+   ],
+   "textures": {
+    "base_color": "ArtSource/Ships/Shared/Kit/T_Kit_Trim02_BC.png",
+    "orm": "ArtSource/Ships/Shared/Kit/T_Kit_Trim02_ORM.png",
+    "normal": "ArtSource/Ships/Shared/Kit/T_Kit_Trim02_N.png"
+   },
+   "base_color_tint": [
+    0.5,
+    0.49,
+    0.47
+   ],
+   "panel_strength": 0.0,
+   "detail_normal_strength": 0.25,
+   "wear_amount": 0.1,
+   "roughness_scale": 1.0,
+   "metallic_scale": 1.0
+  },
+  "MI_Ship_Wayfarer_KitTrim02B": {
+   "_comment": "Quaternius MegaKit trim sheet (CC0), toned by Tools/Assets/tone_kit_textures.py; the tint sets this panel family's tone",
+   "master": "pbr",
+   "slots": [
+    "M_Ship_Wayfarer_KitTrim02B"
+   ],
+   "textures": {
+    "base_color": "ArtSource/Ships/Shared/Kit/T_Kit_Trim02B_BC.png",
+    "orm": "ArtSource/Ships/Shared/Kit/T_Kit_Trim02B_ORM.png",
+    "normal": "ArtSource/Ships/Shared/Kit/T_Kit_Trim02B_N.png"
+   },
+   "base_color_tint": [
+    0.42,
+    0.41,
+    0.4
+   ],
+   "panel_strength": 0.0,
+   "detail_normal_strength": 0.25,
+   "wear_amount": 0.1,
+   "roughness_scale": 1.0,
+   "metallic_scale": 1.0
+  },
+  "MI_Ship_Wayfarer_KitTrim03": {
+   "_comment": "Quaternius MegaKit trim sheet (CC0), toned by Tools/Assets/tone_kit_textures.py; the tint sets this panel family's tone",
+   "master": "pbr",
+   "slots": [
+    "M_Ship_Wayfarer_KitTrim03"
+   ],
+   "textures": {
+    "base_color": "ArtSource/Ships/Shared/Kit/T_Kit_Trim03_BC.png",
+    "orm": "ArtSource/Ships/Shared/Kit/T_Kit_Trim03_ORM.png",
+    "normal": "ArtSource/Ships/Shared/Kit/T_Kit_Trim03_N.png"
+   },
+   "base_color_tint": [
+    0.36,
+    0.35,
+    0.34
+   ],
+   "panel_strength": 0.0,
+   "detail_normal_strength": 0.25,
+   "wear_amount": 0.1,
+   "roughness_scale": 1.0,
+   "metallic_scale": 1.0
+  },
+  "MI_Ship_Wayfarer_KitCables": {
+   "_comment": "Quaternius MegaKit trim sheet (CC0), toned by Tools/Assets/tone_kit_textures.py; the tint sets this panel family's tone",
+   "master": "pbr",
+   "slots": [
+    "M_Ship_Wayfarer_KitCables"
+   ],
+   "textures": {
+    "base_color": "ArtSource/Ships/Shared/Kit/T_Kit_Cables_BC.png",
+    "orm": "ArtSource/Ships/Shared/Kit/T_Kit_Cables_ORM.png",
+    "normal": "ArtSource/Ships/Shared/Kit/T_Kit_Cables_N.png"
+   },
+   "base_color_tint": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "panel_strength": 0.0,
+   "detail_normal_strength": 0.25,
+   "wear_amount": 0.1,
+   "roughness_scale": 1.0,
+   "metallic_scale": 1.0
+  },
+  "MI_Ship_Wayfarer_KitPadded": {
+   "_comment": "Quaternius MegaKit trim sheet (CC0), toned by Tools/Assets/tone_kit_textures.py; the tint sets this panel family's tone",
+   "master": "pbr",
+   "slots": [
+    "M_Ship_Wayfarer_KitPadded"
+   ],
+   "textures": {
+    "base_color": "ArtSource/Ships/Shared/Kit/T_Kit_Padded_BC.png",
+    "orm": "ArtSource/Ships/Shared/Kit/T_Kit_Padded_ORM.png",
+    "normal": "ArtSource/Ships/Shared/Kit/T_Kit_Padded_N.png"
+   },
+   "base_color_tint": [
+    0.9,
+    0.9,
+    0.9
+   ],
+   "panel_strength": 0.0,
+   "detail_normal_strength": 0.25,
+   "wear_amount": 0.1,
+   "roughness_scale": 1.0,
+   "metallic_scale": 1.0
+  },
+  "MI_Ship_Wayfarer_IntRed": {
+   "_comment": "fire extinguisher red",
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_IntRed"
+   ],
+   "base_color": [
+    0.45,
+    0.03,
+    0.02
+   ],
+   "metallic": 0.1,
+   "roughness": 0.35
+  },
+  "MI_Ship_Wayfarer_KitPaddedGrey": {
+   "_comment": "charcoal quilted padding (cockpit tub), Quaternius MegaKit texture desaturated",
+   "master": "pbr",
+   "slots": [
+    "M_Ship_Wayfarer_KitPaddedGrey"
+   ],
+   "textures": {
+    "base_color": "ArtSource/Ships/Shared/Kit/T_Kit_PaddedGrey_BC.png",
+    "orm": "ArtSource/Ships/Shared/Kit/T_Kit_PaddedGrey_ORM.png",
+    "normal": "ArtSource/Ships/Shared/Kit/T_Kit_PaddedGrey_N.png"
+   },
+   "base_color_tint": [
+    0.7,
+    0.7,
+    0.7
+   ],
+   "panel_strength": 0.0,
+   "detail_normal_strength": 0.1,
+   "wear_amount": 0.0
   }
  },
  "no_nanite_parts": [
   "Decals",
   "Interior",
-  "Screens"
+  "Screens",
+  "InteriorKit"
  ],
  "_comment_no_nanite": "Decals: mesh decals (Tools/Blender/hs_decals.py) use Deferred Decal materials, which Nanite cannot draw (skill ship-pipeline 3b3).",
  "_livery_variants": {
@@ -1116,6 +1283,414 @@
    "tint": [
     0.78,
     0.58,
+    0.06
+   ]
+  },
+  {
+   "name": "Int_Sec02",
+   "texture": "D_Int_Section_02",
+   "location": [
+    -715.0,
+    -180.0,
+    -8.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    90.0
+   ],
+   "size": [
+    12.0,
+    12.0,
+    12.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ]
+  },
+  {
+   "name": "Int_Sec03",
+   "texture": "D_Int_Section_03",
+   "location": [
+    -535.0,
+    -180.0,
+    -8.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    90.0
+   ],
+   "size": [
+    12.0,
+    12.0,
+    12.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ]
+  },
+  {
+   "name": "Int_Sec04",
+   "texture": "D_Int_Section_04",
+   "location": [
+    -355.0,
+    -180.0,
+    -8.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    90.0
+   ],
+   "size": [
+    12.0,
+    12.0,
+    12.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ]
+  },
+  {
+   "name": "Int_Hold",
+   "texture": "D_Int_Hold",
+   "location": [
+    -565.0,
+    180.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    90.0
+   ],
+   "size": [
+    12.0,
+    7.5,
+    30.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_u": 1.0
+  },
+  {
+   "name": "Int_Grid",
+   "texture": "D_Int_Grid",
+   "location": [
+    -290.0,
+    180.0,
+    -25.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    90.0
+   ],
+   "size": [
+    12.0,
+    7.0,
+    14.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_u": 1.0
+  },
+  {
+   "name": "Int_Lane",
+   "texture": "D_Int_Lane",
+   "location": [
+    -565.0,
+    -125.0,
+    -120.0
+   ],
+   "rotation": [
+    90.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    12.0,
+    18.0,
+    300.0
+   ],
+   "opacity": 0.8,
+   "tint": [
+    0.8,
+    0.6,
+    0.05
+   ],
+   "flip_u": 1.0
+  },
+  {
+   "name": "Int_RampHazard",
+   "texture": "D_Big_Hazard_Ramp",
+   "location": [
+    -900.0,
+    -0.0,
+    -120.0
+   ],
+   "rotation": [
+    90.0,
+    90.0,
+    0.0
+   ],
+   "size": [
+    12.0,
+    22.0,
+    90.0
+   ],
+   "opacity": 0.85,
+   "tint": [
+    0.78,
+    0.58,
+    0.06
+   ]
+  },
+  {
+   "name": "Int_Engineering",
+   "texture": "D_Int_Engineering",
+   "location": [
+    -206.0,
+    -5.0,
+    40.0
+   ],
+   "rotation": [
+    0.0,
+    180.0,
+    -90.0
+   ],
+   "size": [
+    10.0,
+    10.0,
+    40.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_v": 1.0
+  },
+  {
+   "name": "Int_Exit",
+   "texture": "D_Int_Exit",
+   "location": [
+    -917.0,
+    -0.0,
+    75.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -90.0
+   ],
+   "size": [
+    12.0,
+    15.0,
+    30.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.1,
+    0.75,
+    0.3
+   ],
+   "flip_v": 1.0
+  },
+  {
+   "name": "Int_CautionLoad",
+   "texture": "D_Int_Caution_Load",
+   "location": [
+    -917.0,
+    75.0,
+    25.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -90.0
+   ],
+   "size": [
+    12.0,
+    8.0,
+    16.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.85,
+    0.55,
+    0.05
+   ],
+   "flip_v": 1.0
+  },
+  {
+   "name": "Int_Reactor",
+   "texture": "D_Int_Reactor",
+   "location": [
+    -130.0,
+    -103.0,
+    35.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    90.0
+   ],
+   "size": [
+    8.0,
+    9.0,
+    18.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ]
+  },
+  {
+   "name": "Int_Voltage",
+   "texture": "D_Int_Caution_Voltage",
+   "location": [
+    -130.0,
+    -103.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    90.0
+   ],
+   "size": [
+    8.0,
+    8.0,
+    16.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.85,
+    0.55,
+    0.05
+   ]
+  },
+  {
+   "name": "Int_Shield",
+   "texture": "D_Int_Shield",
+   "location": [
+    -135.0,
+    112.0,
+    30.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    90.0
+   ],
+   "size": [
+    15.0,
+    8.0,
+    16.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_u": 1.0
+  },
+  {
+   "name": "Int_Cooler",
+   "texture": "D_Int_Cooler",
+   "location": [
+    -30.0,
+    -113.0,
+    5.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    90.0
+   ],
+   "size": [
+    8.0,
+    7.0,
+    14.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ]
+  },
+  {
+   "name": "Int_Cockpit",
+   "texture": "D_Int_Cockpit",
+   "location": [
+    14.0,
+    100.0,
+    40.0
+   ],
+   "rotation": [
+    0.0,
+    180.0,
+    -90.0
+   ],
+   "size": [
+    10.0,
+    9.0,
+    36.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_v": 1.0
+  },
+  {
+   "name": "Int_Fire",
+   "texture": "D_Int_Fire",
+   "location": [
+    -230.0,
+    -180.0,
+    2.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    90.0
+   ],
+   "size": [
+    12.0,
+    6.0,
+    12.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.75,
+    0.1,
     0.06
    ]
   }

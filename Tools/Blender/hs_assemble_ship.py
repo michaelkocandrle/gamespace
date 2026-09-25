@@ -98,6 +98,9 @@ def main(argv):
     for o in meshes:
         if "_Int_" in o.name:
             assign[o.name] = "Screens" if o.name.endswith("_Int_Screens") else "Interior"
+        elif "_IntKit_" in o.name:
+            # modular kit pieces (hs_interior_kit.py): their trim-sheet UVs are the look, no unwrap
+            assign[o.name] = "InteriorKit"
     groups = {}
     for o in meshes:
         if not o.data.polygons:
@@ -148,7 +151,7 @@ def main(argv):
         out["Decals"] = decals
     # 4) UVs
     for key, ob in out.items():
-        if key in ("Decals", "Screens"):
+        if key in ("Decals", "Screens", "InteriorKit"):
             continue
         bpy.ops.object.select_all(action="DESELECT")
         ob.select_set(True)
@@ -167,7 +170,7 @@ def main(argv):
     hull = out[""]
     parts = {k: v for k, v in out.items() if k}
     regions = [{"name": c["name"], "box": shift_box(c["box"], off)} for c in cfg["collision"]]
-    ai.build_collision(ship, [o for k, o in out.items() if k not in ("Canopy", "Decals", "Interior", "Screens")], regions)
+    ai.build_collision(ship, [o for k, o in out.items() if k not in ("Canopy", "Decals", "Interior", "Screens", "InteriorKit")], regions)
     sockets = {}
     for name, loc in json.loads(bpy.context.scene.get("hs_display_sockets", "{}")).items():
         cfg["sockets"]["Display_" + name] = {"location": loc}

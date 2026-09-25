@@ -547,9 +547,10 @@ def main(argv):
             made["int_" + ob.name] = ob
         bpy.context.scene["hs_display_sockets"] = json.dumps({k: list(v) for k, v in isockets.items()})
         ispec = recipe["interior"]["lights"]
-        extra = [{"name": "int_%d" % i, "type": "point", "color": ispec["warm_color"] if l.get("warm") else ispec["color"],
+        extra = [{"name": "int_%d" % i, "type": l.get("type", "point"), "color": ispec["warm_color"] if l.get("warm") else ispec["color"],
                   "intensity_cd": l.get("cd", ispec["intensity_cd"]), "radius_m": ispec["radius_m"],
-                  "location": l["at"], "direction": [0, 0, -1]} for i, l in enumerate(ilights)]
+                  "location": l["at"], "direction": l.get("direction", [0, 0, -1]), "cone_deg": l.get("cone_deg", 40.0)}
+                 for i, l in enumerate(ilights)]
         bpy.context.scene["hs_lights"] = json.dumps(json.loads(bpy.context.scene.get("hs_lights", "[]")) + extra)
     for part, ob in made.items():
         if ob.modifiers:

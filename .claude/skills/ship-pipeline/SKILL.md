@@ -475,6 +475,25 @@ MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/decal_libra
 Závěr: rozdíl ve „feelu“ dělá hlavně **hodnotová stavba a lesk**, až potom počet detailů. Livrej a clear coat
 mají největší efekt ze všech vzdáleností.
 
+**„Feel“ SC uvnitř: rozbor referencí interiérů** (21 autorových snímků `starcitizenreference/Screenshot
+2026-09-25 02*.png`: Argo, MISC, RSI, Origin, Drake, Crusader, obytné moduly i chodby; 25. 9. 2026). Autor
+na jejich kvalitu míří. Wayfarer v1 (hs_interior.py, boxy z půdorysu) autor odmítl: „prázdný byt nebo kancelář“.
+
+| Kategorie | SC má | Wayfarer v1 měl | Chybí / co s tím |
+| --- | --- | --- | --- |
+| Tvar prostoru | průřez lichoběžník nebo osmiúhelník, zkosené horní rohy, strop 2,1–2,4 m, portály (rámy) každých 1–2 m lámou délku | pravoúhlý box 3,8 × 2,3 m, rovný strop | zkosení nahoře, portál na každém modulu kitu |
+| Konstrukce | odhalená žebra a nosníky, příhradový strop (Drake), kabelové svazky ve žlabech (žluté u MISC), potrubí s objímkami, vzduchotechnika | tenká žebra zapuštěná ve stěně | stropní žlab s kabely a trubkami, žebra přes celý profil |
+| Vrstvy stěny | 3 roviny: nosná konstrukce, panely s přesahem 2–8 cm, výbava na panelech; panely 0,6–1,2 m, dělené spárou | jedna rovina, velké plochy | díly kitu (trim sheet s normálovou mapou), přesahy, lišty |
+| Vybavení | skříňky se západkami, madla, hasicí přístroj, výdejník, obrazovka na rameni, lavice s čalouněním, žebřík; **ve shlucích** u dveří, konzolí, lůžka, techniky, mezi nimi klid | kvádry předmětů z půdorysu | výbava podle funkce místa, shluky, klidné plochy mezi |
+| Materiály | lakovaný kov ve 2–3 tónech, holý kov na hranách, prošívané čalounění (Argo, Drake), gumová a děrovaná protiskluzová podlaha, karbon (RSI), barevný akcent výrobce (Argo oranž, RSI modrá, Drake žlutá) | jednolité plochy jednoho materiálu | trim textury kitu přetónované do palety, oranžový akcent Halcyonu, guma, čalounění |
+| Decaly | velká čísla sekcí a dveří (01, 02), logo výrobce na stěně, výstražné pruhy u prahů a rampy, šipky, štítky CAUTION, čáry na podlaze | žádné | promítané decaly interiéru: místnosti, sekce, nouzové značky, šipky, pruhy |
+| Světlo | kontrast: svítidla v pouzdrech (lišty ve zkosení, kruhová stropní), kužele a tmavé kouty, akcentová a orientační světla u podlahy, displeje a kontrolky; teplé 3000–4000 K proti studeným displejům | rovnoměrně svítící strop, bodovky bez pouzder | světla v pouzdrech kitu, směrová, tmavá místa mezi nimi, akcent u podlahy |
+| Hustota detailu | 3 úrovně: velké (portály, panely), střední (skříňky, madla, ventilace 0,2–0,5 m), malé (šrouby, kontrolky, štítky 1–5 cm) | jen velké | všechny tři úrovně, malé hlavně u funkčních míst |
+
+Závěr: interiér SC stojí na **konstrukci a vrstvách** (profil, portály, žlaby, panely s hloubkou) a
+**kontrastním světle**. Předměty jsou až třetí vrstva. Postup: modulární kit (Quaternius, CC0) jako nosná
+vrstva, procedurální přesný detail a decaly navíc (`Docs/AssetPipeline_Modular.md`).
+
 **Livrej a lak** (`M_Ship_Layered`, setup Paint): zóny v prostoru lodi (cm) – `TopZ/TopSlope` sedlo, `BotZ/BotSlope`
 spodek, `TailX`, `NoseX`, pruh `StripeZ/StripeSlope/StripeW/StripeX0/X1` v `AccentColor`, zóny v `LiveryColor`;
 `LiveryAmount` 1 jen v primárním laku. Varianty v `_livery_variants` setupu; přepnutí za běhu

@@ -842,6 +842,28 @@ snímku.
 - ba) **Testy kokpitu padaly po přidání interiéru.** Kontroly předpokládaly Vanguard: part `Interior` jen
   s kokpitem, 4 motory, slot `CanopyFrame`. Měřit vůči partu `Screens`, počet motorů brát z manifestu
   (`SOCKET_Engine*`), `Display_` sockety hledat na všech meshích lodi.
+- bb) **Interiér z procedurálních boxů vypadá jako „prázdný byt nebo kancelář“** (autor o Wayfareru v1).
+  Příčina: stavěl jsem místnosti rovnou z půdorysu stejným postupem jako trup (`hs_*`, boxy) a
+  `Docs/AssetPipeline_Modular.md` jsem nepřečetl. Postup pro interiéry v něm je: modulární kit (Quaternius,
+  CC0) jako nosná konstrukce, procedurální přesný detail navíc. Ze skillu ship-interior jsem si vzal jen
+  „kit Quaternius je dočasný, low-poly stěny jsou vidět“ a kit jsem vyřadil úplně. Z exteriéru jsem nepřenesl
+  nic: vrstvy, decaly ani variaci panelů. Řešení: před interiérem přečíst AssetPipeline_Modular.md a udělat
+  rozbor referencí interiéru; kit jako strukturu a trim textury, procedurálně jen přesné díly, decaly
+  interiéru a světlo s kontrastem (`hs_interior_kit.py`).
+- bc) **Díly kitu mezi sebou prosvítaly oblohou.** Trup zevnitř UE nekreslí a mezery mezi díly kitu šly až
+  ven. Za kit dát uzavřený tmavý plášť (stěny a strop, `shell()`).
+- bd) **Stěny z kitu v UE černé**, i když v Eevee byly vidět. Reflektory svítily jen kolmo dolů a světelná rýha
+  je pro Lumen malá. Do každé rýhy přidat bodové světlo (12 cd), stěny pak čtou.
+- be) **Decaly v interiéru zrcadlené nebo vzhůru nohama.** Decal promítá podél −X a text se orientuje podle
+  roll. Ověřené rotace `[pitch, yaw, roll]`: pravobok (vnitřní stěna čelem k +Y UE) `[0,-90,90]` + `flip_u`,
+  levobok `[0,90,90]` bez flipu, přepážka čelem dozadu `[0,180,-90]` + `flip_v`, čelem dopředu `[0,0,-90]` +
+  `flip_v`, podlaha `[90,0,0]` (U podél lodi). Velikost u stěn `[hloubka, půl výšky, půl šířky]`.
+- bf) **Díly kitu ztratily vzhled po assemble.** Assemble dělá smart UV unwrap všem partům; trim sheet potřebuje
+  původní UV. Kit a jeho procedurální díly s kubickým UV jdou do partu `InteriorKit`, který se nerozbaluje
+  (jméno objektu `_IntKit_`).
+- bg) **Kit objekty spojené joinem mají rozbitá UV**, když se UV vrstva nejmenuje stejně. Nové bmeshe v kit
+  materiálu musí mít vrstvu `UVMap` (jako glTF import), `hs_interior_kit._uv_layer`.
+
 
 ---
 
