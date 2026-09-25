@@ -34,7 +34,9 @@ def main():
     if "eye" in opts:
         # the pilot's eye: SOCKET_Cockpit of the recipe (layout metres), level view along +x, FOV 88 (the game's
         # cockpit camera); eye=<x,y,z> overrides the position
-        ex, ey, ez = [float(v) for v in opts["eye"].split(",")] if opts["eye"] not in ("1", "") else (16.95, 0.0, 1.65)
+        so = bpy.data.objects.get("SOCKET_Cockpit")
+        dflt = tuple(so.matrix_world.translation) if so is not None else (16.95, 0.0, 2.45)
+        ex, ey, ez = [float(v) for v in opts["eye"].split(",")] if opts["eye"] not in ("1", "") else dflt
         shots = [{"name": "eye", "fov": 88, "camera_local": [ex - OFF.x, -ey, ez - OFF.z], "look_local": [ex + 5.0 - OFF.x, -ey, ez - OFF.z]}]
     sc = bpy.context.scene
     engines = [e.identifier for e in bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items]

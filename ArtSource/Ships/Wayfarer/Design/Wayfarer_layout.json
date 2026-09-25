@@ -44,7 +44,7 @@
    "id": "cockpit",
    "zone": "command",
    "deck": "main",
-   "floor_z": 0.35,
+   "floor_z": 1.15,
    "name": "Kokpit",
    "rect": [15.2, 19.4, -1.6, 1.6],
    "purpose": "Jedno pilotní křeslo uprostřed, usedá se zezadu. Podlaha o schod výš (0,35 m), prosklená kabina s výhledem dopředu, do stran a nahoru.",
@@ -158,28 +158,28 @@
    "room": "cockpit",
    "name": "Pilotní křeslo",
    "rect": [16.55, 17.35, -0.4, 0.4],
-   "z": [0.35, 1.6],
+   "z": [1.15, 2.4],
    "purpose": "Usedá se zezadu z kajuty (animace usednutí), páky HOSAS v loketních opěrkách."
   },
   {
    "room": "cockpit",
    "name": "Levá konzole",
    "rect": [16.3, 17.5, 0.6, 1.25],
-   "z": [0.35, 1.05],
+   "z": [1.15, 1.85],
    "purpose": "Fyzické přepínače: podvozek, světla, rampa, kabina, motory."
   },
   {
    "room": "cockpit",
    "name": "Pravá konzole",
    "rect": [16.3, 17.5, -1.25, -0.6],
-   "z": [0.35, 1.05],
+   "z": [1.15, 1.85],
    "purpose": "Energie, štíty, chlazení, kvantový pohon."
   },
   {
    "room": "cockpit",
    "name": "Přístrojová deska",
    "rect": [17.75, 18.7, -0.95, 0.95],
-   "z": [0.9, 1.45],
+   "z": [1.65, 2.2],
    "purpose": "Tři MFD (stav lodi, radar, cíl) a projektor HUD na skle."
   },
   {
@@ -451,26 +451,32 @@
     "pts": [[15.2, 0.0], [15.2, 0.35], [19.2, 0.35]]
    }
   ],
-  "labels": [[
+  "labels": [
+   [
     "náklad 8 SCU",
     5.4,
     1.9
-   ], [
+   ],
+   [
     "technická\nchodba",
     9.3,
     1.75
-   ], [
+   ],
+   [
     "kajuta",
     12.8,
     2.0
-   ], [
+   ],
+   [
     "kokpit",
     16.2,
     2.55
-   ], [
+   ],
+   [
     "pod podlahou (čárkovaně): kvantový pohon, palivo, podpora života, avionika",
     11.0,
     -1.05
-   ]]
+   ]
+  ]
  }
 }

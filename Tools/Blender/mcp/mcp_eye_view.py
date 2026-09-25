@@ -31,6 +31,15 @@ def eye_of(ship):
     setup = json.load(open(os.path.join(REPO, "ArtSource", "Ships", ship, "%s_setup.json" % ship), encoding="utf-8"))
     sockets = manifest["sockets"]
     eye = sockets["SOCKET_Cockpit"]["location_m"]
+    try:
+        # inside Blender on the assembled ship: the socket of the open file wins (the manifest is written by the
+        # export, which may lag behind a rebuild)
+        import bpy
+        so = bpy.data.objects.get("SOCKET_Cockpit")
+        if so is not None:
+            eye = list(so.matrix_world.translation)
+    except ImportError:
+        pass
     fov = setup.get("components", {}).get("cockpit_camera", {}).get("field_of_view", 88.0)
     pitch = setup.get("pawn", {}).get("cockpit_view_pitch_deg", 0.0)
     return eye, fov, pitch

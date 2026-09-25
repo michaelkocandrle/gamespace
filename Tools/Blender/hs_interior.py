@@ -425,7 +425,48 @@ def _hull_top(hull):
     return top
 
 
-def _gable(bm, hull, x, z0):
+def stairs(g, fb, floor_faces, zc, x0=15.24, half_w=0.5, rise_max=0.195, tread=0.18):
+    """Steep ship's stairs from the cabin's deck up to the raised cockpit floor (zc), through the rear wall's door
+    (the cockpit sits 1.15 m up so the pilot's eye is in the canopy's glass band, step 2 of the author's view
+    targets 25. 9. 2026). Solid blocks with a satin tread plate and a lit nosing on each step, closed side walls
+    under the floor's ledges, a handrail on both sides. The floor slab is cut open over the flight."""
+    n = int(math.ceil(zc / rise_max))
+    rise = zc / n
+    x_top = x0 + (n - 1) * tread
+    # open the floor over the flight: cut at the top riser and the flight's sides, drop what lies over it
+    geom = list({v for f in floor_faces for v in f.verts}) + list({e for f in floor_faces for e in f.edges}) + list(floor_faces)
+    for co, no in (((x_top, 0, 0), (1, 0, 0)), ((0, half_w, 0), (0, 1, 0)), ((0, -half_w, 0), (0, 1, 0))):
+        geom = list(dict.fromkeys(el for el in geom if el.is_valid))
+        r = bmesh.ops.bisect_plane(fb, geom=geom, dist=1e-5, plane_co=co, plane_no=no)
+        geom = geom + r["geom"]
+    drop = [f for f in {el for el in geom if isinstance(el, bmesh.types.BMFace) and el.is_valid}
+            if f.calc_center_median().x < x_top and abs(f.calc_center_median().y) < half_w]
+    bmesh.ops.delete(fb, geom=drop, context="FACES")
+    for i in range(n):
+        xa, xb = x0 + i * tread, x0 + (i + 1) * tread
+        zt = (i + 1) * rise
+        if i == n - 1:
+            # the top riser: the floor slab's edge, closed down to the deck
+            box(g["int_dark"], (x_top, -half_w, 0.0), (x_top + 0.04, half_w, zc - 0.03))
+            break
+        box(g["int_dark"], (xa, -half_w, 0.0), (xb, half_w, zt - 0.02))
+        box(g["int_trim"], (xa, -half_w + 0.01, zt - 0.02), (xb, half_w - 0.01, zt))            # tread plate
+        box(g["int_glow"], (xa - 0.004, -half_w + 0.06, zt - 0.016), (xa, half_w - 0.06, zt - 0.006))   # lit nosing
+        box(g["accent"], (xa, -half_w + 0.01, zt), (xa + 0.035, half_w - 0.01, zt + 0.002))       # hazard edge
+    for sd in (1, -1):
+        # side walls under the floor's ledges, and the handrail on posts along the pitch
+        ya, yb = sorted((sd * half_w, sd * (half_w + 0.03)))
+        box(g["int_panel"], (x0, ya, 0.0), (x_top + 0.04, yb, zc))
+        yr = sd * (half_w - 0.05)
+        p0 = Vector((x0 + 0.05, yr, rise + 0.9))
+        p1 = Vector((x_top + 0.1, yr, zc + 0.9))
+        cyl(g["int_trim"], p0, p1, 0.02, 12)
+        for q in (p0, p1, p0.lerp(p1, 0.5)):
+            base = Vector((q.x, sd * (half_w + 0.015), q.z - 0.2))
+            cyl(g["int_trim"], base, Vector((q.x, yr, q.z)), 0.012, 8)
+
+
+def _gable(bm, hull, x, z0, g=None):
     """Closes a cross wall from its top (z0) up to the hull's section at x, facing +x: over the cockpit's rear
     wall the view met the cabin roof's culled inside (geometry check, 25. 9. 2026). A fan of rays in the
     y-z plane finds the section; the panel stops 1.5 cm inside it."""
@@ -452,6 +493,23 @@ def _gable(bm, hull, x, z0):
     ext = bmesh.ops.extrude_face_region(bm, geom=new)
     bmesh.ops.translate(bm, vec=(-0.02, 0.0, 0.0), verts=[e for e in ext["geom"] if isinstance(e, bmesh.types.BMVert)])
     bmesh.ops.recalc_face_normals(bm, faces=list(set(new) | {e for e in ext["geom"] if isinstance(e, bmesh.types.BMFace)}))
+    if g is None:
+        return
+    # structure on it, not a bare plane (a plain dark rear wall, author 25. 9. 2026): satin ribs up to the hull,
+    # a beam across, a dark recess between the middle ribs
+    for yy in (-1.25, -0.65, 0.0, 0.65, 1.25):
+        hit = tree.ray_cast(Vector((x, yy, z0)), Vector((0.0, 0.0, 1.0)), 5.0)[0]
+        if hit is None or hit.z - z0 < 0.12:
+            continue
+        box(g["int_trim"], (x, yy - 0.03, z0), (x + 0.035, yy + 0.03, hit.z - 0.07))
+    hb_ = tree.ray_cast(Vector((x, 0.0, z0)), Vector((0.0, 0.0, 1.0)), 5.0)[0]
+    if hb_ is not None and hb_.z - z0 > 0.5:
+        zb = z0 + 0.35
+        wy = [tree.ray_cast(Vector((x, 0.0, zb)), Vector((0.0, sd, 0.0)), 5.0)[0] for sd in (1, -1)]
+        if all(wy):
+            box(g["int_trim"], (x, -abs(wy[1].y) + 0.03, zb - 0.04), (x + 0.045, abs(wy[0].y) - 0.03, zb + 0.04))
+            box(g["accent"], (x + 0.045, -abs(wy[1].y) + 0.05, zb - 0.006), (x + 0.048, abs(wy[0].y) - 0.05, zb + 0.006))
+        box(g["int_dark"], (x + 0.001, -0.6, z0 + 0.06), (x + 0.012, 0.6, zb - 0.07))
 
 
 def build(recipe, layout, coll, mats, ship, hull):
@@ -518,10 +576,10 @@ def build(recipe, layout, coll, mats, ship, hull):
             if abs(x - rooms["cockpit"]["rect"][0]) < 0.01:
                 # the cockpit's rear wall: kit panels over the plain bulkhead and a satin beam where it meets the
                 # frame lining (a large dark plane under the rear window, author 25. 9. 2026)
-                zc_ = rooms["cockpit"].get("floor_z", 0.0)
-                hs_interior_kit.clad_bulkhead(kit, x + 0.045, 1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, zc_, H)
+                # (from the deck: the cockpit floor is raised and the stairs show the wall down to it)
+                hs_interior_kit.clad_bulkhead(kit, x + 0.045, 1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, 0.0, H)
                 box(g["int_trim"], (x + 0.04, y0i, H - 0.06), (x + 0.12, y1i, H))
-                _gable(g["int_panel"], hull, x + 0.04, H)
+                _gable(g["int_panel"], hull, x + 0.04, H, g)
     # cockpit: floor, step, tub walls to the sill, rear wall, liner above the sill
     ck = rooms["cockpit"]
     zc = ck["floor_z"]
@@ -534,8 +592,7 @@ def build(recipe, layout, coll, mats, ship, hull):
     # culled, the pilot's feet stood over the terrain seen through the hull (25. 9. 2026)
     ext = bmesh.ops.extrude_face_region(fb, geom=res["faces"])
     bmesh.ops.translate(fb, vec=(0, 0, -0.03), verts=[v for v in ext["geom"] if isinstance(v, bmesh.types.BMVert)])
-    box(g["int_dark"], (15.2, -1.0, 0.0), (15.5, 1.0, zc))                    # step up
-    box(g["int_trim"], (15.47, -1.0, zc - 0.02), (15.5, 1.0, zc))
+    stairs(g, fb, res["faces"] + [e for e in ext["geom"] if isinstance(e, bmesh.types.BMFace)], zc)
     # the tub follows the plan's outline, but the hull is narrower than the plan in places at sill height: clamp
     # every corner inside the hull (a sill trim ran through the wall there, author 25. 9. 2026)
     from mathutils.bvhtree import BVHTree
@@ -899,10 +956,10 @@ def cockpit_detail(g, layout, zc, sill):
         if COCKPIT.get("style") in ("pods", "wrap"):
             # from the shoulders behind the pilot, up and forward onto the frame and the canopy arches: the
             # painted frame reads as a form by day and by night (concept A)
-            lights_out.append({"at": [16.1, s_ * 0.55, 2.0], "cd": wash * 0.45, "type": "spot", "cone_deg": 120.0,
+            lights_out.append({"at": [16.1, s_ * 0.55, zc + 1.65], "cd": wash * 0.45, "type": "spot", "cone_deg": 120.0,
                                "direction": [0.85, s_ * 0.25, 0.45], "warm": True})
     # a dim fill over the pilot's shoulders (seat, consoles, the rear of the tub)
-    lights_out.append({"at": [16.3, 0.0, 1.85], "cd": 1.6, "warm": True, "source_radius_cm": 30.0})
+    lights_out.append({"at": [16.3, 0.0, zc + 1.5], "cd": 1.6, "warm": True, "source_radius_cm": 30.0})
     # footwell light (warm, small): the pilot's legs and the tub read in the dark
     for s_ in (1, -1):
         lights_out.append({"at": [17.6, s_ * 0.55, zc + 0.12], "cd": 2.0, "warm": True})

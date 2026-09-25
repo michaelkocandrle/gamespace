@@ -12,16 +12,7 @@
    "seams": {
     "_comment": "Panel breaks at the bulkheads of the layout (hold / tech corridor / cabin / cockpit) and two lines along each side.",
     "x": [1.4, 3.0, 4.3, 5.6, 6.9, 8.2, 9.3, 10.4, 11.6, 12.8, 14.0, 15.2, 16.7, 18.2, 19.4],
-    "around": [
-     [1, 0.12],
-     [-1, 0.12],
-     [1, 0.28],
-     [-1, 0.28],
-     [1, 0.55],
-     [-1, 0.55],
-     [1, 0.8],
-     [-1, 0.8]
-    ],
+    "around": [[1, 0.12], [-1, 0.12], [1, 0.28], [-1, 0.28], [1, 0.55], [-1, 0.55], [1, 0.8], [-1, 0.8]],
     "width": 0.03,
     "depth": 0.02
    },
@@ -289,23 +280,7 @@
      "width": 0.008,
      "segments": 2
     },
-    "profile": [
-     [-0.5, 0.75],
-     [-0.3, 0.84],
-     [0.0, 0.9],
-     [0.3, 0.95],
-     [0.6, 0.95],
-     [0.6, 0.98],
-     [0.9, 0.98],
-     [0.9, 0.95],
-     [4.4, 0.92],
-     [4.4, 0.95],
-     [4.7, 0.95],
-     [4.7, 0.9],
-     [5.2, 0.85],
-     [5.55, 0.66],
-     [5.9, 0.42]
-    ],
+    "profile": [[-0.5, 0.75], [-0.3, 0.84], [0.0, 0.9], [0.3, 0.95], [0.6, 0.95], [0.6, 0.98], [0.9, 0.98], [0.9, 0.95], [4.4, 0.92], [4.4, 0.95], [4.7, 0.95], [4.7, 0.9], [5.2, 0.85], [5.55, 0.66], [5.9, 0.42]],
     "sections": [
      {
       "name": "AftCowl",
@@ -467,10 +442,10 @@
   }
  },
  "canopy_frame": {
-  "_comment": "Struts across the canopy and a spine along its top stay hull; the glass sits 15 mm below them.",
-  "struts_x": [16.3, 17.6, 18.8],
-  "strut_width": 0.09,
-  "spine_width": 0.1,
+  "_comment": "Struts across the canopy stay hull; the glass sits 15 mm below them. No spine along the top and no strut at x 18.8 (they crossed the pilot's line of sight ahead - the strut lay on the horizon; step 2 view targets 25. 9. 2026); struts 6 cm.",
+  "struts_x": [16.3, 17.6],
+  "strut_width": 0.06,
+  "spine_width": 0.0,
   "recess": 0.015
  },
  "materials": {
@@ -793,8 +768,8 @@
   ],
   "sockets": {
    "Cockpit": {
-    "_comment": "Pilot's eye above the seat of the drawing (seat x 16.55 .. 17.35, cockpit floor 0.35 + seated eye 1.3).",
-    "location": [16.95, 0.0, 1.65]
+    "_comment": "Pilot's eye above the seat of the drawing (seat x 16.55 .. 17.35, cockpit floor 1.15 + seated eye 1.3).",
+    "location": [16.95, 0.0, 2.45]
    },
    "CameraTarget": {
     "location": [10.0, 0.0, 1.2]
@@ -1082,10 +1057,7 @@
     "x": [2.1, 3.2],
     "deg": [0, 45],
     "depth": 0.1,
-    "pipes": [
-     [0.26, 0.03],
-     [0.76, 0.034]
-    ],
+    "pipes": [[0.26, 0.03], [0.76, 0.034]],
     "actuator": {
      "x": [2.25, 3.05],
      "at": 0.51,
@@ -1117,9 +1089,7 @@
       "r": 0.006
      }
     ],
-    "accent_pipes": [
-     [0.62, 0.016]
-    ],
+    "accent_pipes": [[0.62, 0.016]],
     "valve": {
      "x": 0.3,
      "at": 0.62,
@@ -1130,10 +1100,7 @@
    "pipe_run": {
     "_what": "fuel and coolant lines from the hull to the engine",
     "x": [1.0, 4.3],
-    "pipes": [
-     [146, 0.024],
-     [156, 0.018]
-    ],
+    "pipes": [[146, 0.024], [156, 0.018]],
     "standoff": 0.035,
     "clamps": 5
    }
@@ -1528,12 +1495,7 @@
    {
     "strip": "seam_double",
     "on": "ray_line",
-    "points": [
-     [-1.0, -1.15, -0.12],
-     [-1.0, -1.15, 1.35],
-     [-1.0, 1.15, 1.35],
-     [-1.0, 1.15, -0.12]
-    ],
+    "points": [[-1.0, -1.15, -0.12], [-1.0, -1.15, 1.35], [-1.0, 1.15, 1.35], [-1.0, 1.15, -0.12]],
     "dir": [1, 0, 0],
     "mirror": false,
     "_what": "outline of the rear ramp"
@@ -1543,9 +1505,7 @@
   "rules": {
    "_comment": "Rules (Tools/Blender/hs_decals.py): regenerate everything; seed above fixes the scatter. Dense round engines, the bay, the intake and the ramp; calm on the big surfaces.",
    "panel_marks": {
-    "blocked_deg": [
-     [52, 100]
-    ],
+    "blocked_deg": [[52, 100]],
     "hull": [
      {
       "on": "side",
@@ -1854,13 +1814,8 @@
    },
    "pod_gaps": {
     "strip": "seam_rivets",
-    "blocked_deg": [
-     [52, 100]
-    ],
-    "ring_ranges": [
-     [-60, 48],
-     [102, 300]
-    ],
+    "blocked_deg": [[52, 100]],
+    "ring_ranges": [[-60, 48], [102, 300]],
     "avoid": [
      {
       "x": [2.02, 3.28],
@@ -2068,9 +2023,7 @@
     ],
     "pod": {
      "chance": 0.55,
-     "blocked_deg": [
-      [52, 100]
-     ],
+     "blocked_deg": [[52, 100]],
      "avoid": [
       {
        "x": [2.02, 3.28],
@@ -2289,8 +2242,9 @@
    {
     "kind": "rcs",
     "on": "top",
-    "x": 18.4,
-    "y": 0.35
+    "x": 20.35,
+    "y": 0.3,
+    "_why": "was at x 18.4 - on the canopy's glass, two dark blocks in the pilot's view (step 2, 25. 9. 2026); on the nose ahead of the glass"
    },
    {
     "kind": "rcs",
@@ -2430,7 +2384,7 @@
   "_comment": "The interior from the approved deck plan v1 (Tools/Blender/hs_interior.py): rooms, bulkheads with open doorways, every layout object, cockpit with the game's four screens. Walking inside and the sliding doors / ramp come next.",
   "height_m": 2.3,
   "wall_inset_m": 0.05,
-  "sill_z": 1.05,
+  "sill_z": 1.85,
   "lights": {
    "per_room": 3,
    "intensity_cd": 20,
@@ -2540,33 +2494,31 @@
    "style": "wrap",
    "pod_x": 18.02,
    "pod_y": 0.4,
-   "pod_z": 1.353,
+   "pod_z": 2.103,
    "screen_w": 0.32,
    "side_margin": 0.13,
    "top_margin": 0.018,
    "radius": 0.07,
    "outer_bias": 0.03,
-   "cowl_z": 1.0,
+   "cowl_z": 1.75,
    "cowl_x": [17.72, 18.75],
    "cowl_half_width": 0.95,
    "ped_x": 18.2,
-   "ped_top": 1.36,
+   "ped_top": 2.11,
    "centre_w": 0.09,
    "pinstripe_inset_m": 0.07,
    "seam_x": [16.0, 16.8, 17.6, 18.4],
    "pod_bulge": 0.03,
    "frame_wash_cd": 12.0,
    "fascia_tilt_deg": 22.0,
-   "fascia_bottom_z": 0.97,
+   "fascia_bottom_z": 1.72,
    "pod_below_m": 0.1,
-   "wing": [
-    [17.3, 1.09, 1.06],
-    [17.62, 0.98, 1.22]
-   ],
+   "wing": [[17.3, 1.09, 1.81], [17.62, 0.98, 1.97]],
    "centre_x": 18.28,
-   "centre_top_z": 1.3,
+   "centre_top_z": 2.05,
    "footwell_back_x": 18.62,
-   "footwell_cd": 2.5
+   "footwell_cd": 2.5,
+   "_raise": "Cockpit raised 0.8 m (floor 0.35 -> 1.15, eye 1.65 -> 2.45, author's step 2 view targets 25. 9. 2026): the canopy's glass starts 1 m over the old eye; raised, the pilot sits in the glass band and the exterior stays as drawn. Stairs from the cabin (hs_interior.py)."
   },
   "decals": {
    "_comment": "Interior mesh decals from the exterior's library (Tools/Blender/hs_interior_decals.py): labels at every cockpit control group, service detail on every wall. Author 25. 9. 2026: don't spare decals.",
@@ -2576,84 +2528,84 @@
    "items": [
     {
      "item": "ck_eject",
-     "from": [16.9, 0.0, 0.75],
+     "from": [16.9, 0.0, 1.55],
      "dir": [0, 1, 0]
     },
     {
      "item": "ck_canopy",
-     "from": [16.95, 0.0, 1.65],
-     "to": [17.55, 1.3, 1.35]
+     "from": [16.95, 0.0, 2.45],
+     "to": [17.55, 1.3, 2.15]
     },
     {
      "item": "ck_emerg_o2",
-     "from": [16.05, 0.0, 0.75],
+     "from": [16.05, 0.0, 1.55],
      "dir": [0, 1, 0]
     },
     {
      "item": "label_o2",
-     "from": [16.05, 0.0, 0.62],
+     "from": [16.05, 0.0, 1.42],
      "dir": [0, 1, 0]
     },
     {
      "item": "ck_gear",
-     "from": [17.15, 0.93, 1.6],
+     "from": [17.15, 0.93, 2.4],
      "dir": [0, 0, -1]
     },
     {
      "item": "ck_lights",
-     "from": [16.65, 0.93, 1.6],
+     "from": [16.65, 0.93, 2.4],
      "dir": [0, 0, -1]
     },
     {
      "item": "ck_qt",
-     "from": [17.15, -0.93, 1.6],
+     "from": [17.15, -0.93, 2.4],
      "dir": [0, 0, -1]
     },
     {
      "item": "ck_cool",
-     "from": [16.65, -0.93, 1.6],
+     "from": [16.65, -0.93, 2.4],
      "dir": [0, 0, -1]
     },
     {
      "item": "ck_pwr",
-     "from": [16.9, -0.93, 1.6],
+     "from": [16.9, -0.93, 2.4],
      "dir": [0, 0, -1]
     },
     {
      "item": "ck_scan",
-     "from": [16.9, 0.93, 1.6],
+     "from": [16.9, 0.93, 2.4],
      "dir": [0, 0, -1]
     },
     {
      "item": "tri_warning",
-     "from": [18.1, 0.0, 0.62],
+     "from": [18.1, 0.0, 1.42],
      "dir": [1, 0, 0]
     },
     {
      "item": "st_service",
-     "from": [18.1, 0.45, 0.45],
+     "from": [18.1, 0.45, 1.25],
      "dir": [1, 0, 0]
     },
     {
      "item": "hazard_stripe",
-     "from": [15.62, 0.45, 1.0],
+     "from": [15.62, 0.45, 1.8],
      "dir": [0, 0, -1],
      "rot": 90
     },
     {
      "item": "hazard_stripe",
-     "from": [15.62, -0.45, 1.0],
+     "from": [15.62, -0.45, 1.8],
      "dir": [0, 0, -1],
      "rot": 90
     },
     {
      "item": "stencil_nostep",
-     "from": [18.45, 0.45, 2.1],
+     "from": [18.45, 0.45, 2.9],
      "dir": [0, 0, -1]
     },
     {
      "item": "stencil_nostep",
-     "from": [18.45, -0.45, 2.1],
+     "from": [18.45, -0.45, 2.9],
      "dir": [0, 0, -1]
     }
    ],
@@ -2686,7 +2638,7 @@
      ],
      "weights": [3, 3, 2, 3, 3, 3, 2, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
      "x": [15.4, 18.4],
-     "z": [1.12, 2.0],
+     "z": [1.92, 2.8],
      "from_y": 0.0,
      "dir_z": 0.25,
      "step": 0.26,
@@ -2706,7 +2658,7 @@
       "red_dot"
      ],
      "x": [15.4, 17.4],
-     "z": [0.45, 0.95],
+     "z": [1.25, 1.75],
      "from_y": 0.0,
      "step": 0.24,
      "prob": 0.5,
@@ -2758,15 +2710,15 @@
    ],
    "grab_bars": [
     {
-     "from": [16.95, 0.0, 1.65],
-     "at": [17.35, 1.25, 1.45],
+     "from": [16.95, 0.0, 2.45],
+     "at": [17.35, 1.25, 2.25],
      "along": [0.3, 0, 1],
      "length": 0.26,
      "standoff_m": 0.015
     },
     {
-     "from": [16.95, 0.0, 1.65],
-     "at": [17.35, -1.25, 1.45],
+     "from": [16.95, 0.0, 2.45],
+     "at": [17.35, -1.25, 2.25],
      "along": [0.3, 0, 1],
      "length": 0.26,
      "standoff_m": 0.015

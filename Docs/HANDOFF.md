@@ -1497,6 +1497,19 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       - parapet a boční konzole uvnitř obložení;
       - strop kabiny pod trupem přes celou šířku;
       - křídlo desky zasunuté dovnitř.
+    - Krok 2, výhled (SC medián → před → po):
+      - ven 62 → 24,5 → 60,8 %;
+      - deska 35 → 39,8 → 35,3 %;
+      - sloupek 0,7 → 42,1 → 2,3 %;
+      - pásmo ±15° čisté.
+
+      Úpravy:
+      - kokpit o 0,8 m výš (podlaha 1,15, oko 2,45), 6 schodů z kabiny s podsvícenými nášlapy a zábradlím;
+      - štít nad zadní stěnou se žebry;
+      - bez páteře a přední vzpěry skla;
+      - horní RCS na nosu.
+
+      Silueta beze změny, layout a výkresy přegenerované.
 
 ---
 

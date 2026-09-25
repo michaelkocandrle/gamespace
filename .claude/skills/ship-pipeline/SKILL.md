@@ -511,12 +511,20 @@ v repozitáři není; náhradou autorových 5 snímků kokpitů SC `starcitizenr
 
 Změřeno (1920×1080, `Tools/Blender/eye_view_metrics.py`, reference odečtené z mřížky):
 
-| Veličina | Ref 1 | Ref 2 | Ref 3 | Ref 4 | Ref 5 | **Medián (cíl ±15 %)** | Wayfarer před |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Výhled ven (% plochy) | 62 | 51 | 75 | 62 | 45 | **62 (53–71)** | 24,5 |
-| Horní hrana desky (% od spodu) | 38 | 47 | 23 | 35 | 28 | **35 (30–40)** | 39,8 |
-| Nejširší sloupek v poli (% šířky) | 0,4 | 0,7 | 0,5 | 2 | 3,5 | **0,7** (≤ 2 přijatelné) | 42,1 (plné boční stěny) |
-| Sloupek v pásu ±15° | ne | ne | ne | ne | ne | **ne** | ne |
+| Veličina | Ref 1 | Ref 2 | Ref 3 | Ref 4 | Ref 5 | **Medián (cíl ±15 %)** | Wayfarer před | Wayfarer po kroku 2 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Výhled ven (% plochy) | 62 | 51 | 75 | 62 | 45 | **62 (53–71)** | 24,5 | 60,8 |
+| Horní hrana desky (% od spodu) | 38 | 47 | 23 | 35 | 28 | **35 (30–40)** | 39,8 | 35,3 |
+| Nejširší sloupek v poli (% šířky) | 0,4 | 0,7 | 0,5 | 2 | 3,5 | **0,7** (≤ 2 přijatelné) | 42,1 (plné boční stěny) | 2,3 |
+| Sloupek v pásu ±15° | ne | ne | ne | ne | ne | **ne** | ne | ne |
+
+Krok 2 (25. 9. 2026): sklo začínalo 1–1,3 m nad okem, takže víc skla nepomohlo. **Oko musí sedět v pásu skla.**
+Kokpit se proto zvedl o 0,8 m: podlaha 1,15, oko 2,45, schody z kabiny. Dál:
+- zrušená podélná páteř a přední vzpěra (ležela v horizontu), vzpěry 6 cm;
+- horní trysky RCS ze skla na nos;
+- deska o 5 cm níž.
+
+Exteriér a silueta zůstaly stejné. Měření `eye_view_metrics.py` čte oko ze `SOCKET_Cockpit` otevřeného blendu.
 
 **Livrej a lak** (`M_Ship_Layered`, setup Paint): zóny v prostoru lodi (cm) – `TopZ/TopSlope` sedlo, `BotZ/BotSlope`
 spodek, `TailX`, `NoseX`, pruh `StripeZ/StripeSlope/StripeW/StripeX0/X1` v `AccentColor`, zóny v `LiveryColor`;
