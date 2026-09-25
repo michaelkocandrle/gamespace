@@ -34,8 +34,10 @@ WORKFLOW 1.1 (video reference), 3.1b (Scenario MCP), 9.3 x/z/v (nástrahy AI obs
    (`ArtSource/Ships/<Loď>/Design/`, `<Loď>_layout.json`). Klávesnice u dveří (`Prop_AccessPoint`)
    a procedurální „krabicové“ pulty jsou no-go. Nová loď: nejdřív 2D návrh + spec ve tvaru RSI Ship
    Matrix, 3D až po autorově schválení (HANDOFF bod 73, 75).
-8. Cizí materiál s klauzulí „nesmí do AI“ (Stencil Painted Decal Pack) **nikdy neposílej do
-   Meshy/Scenario/Higgsfield**. Totéž platí pro snímky z cizích videí.
+8. Cizí materiál s klauzulí „nesmí do AI“ (Stencil Painted Decal Pack, modely Vattalus z Fab/CGTrader)
+   **nikdy neposílej do Meshy/Scenario/Higgsfield**. **Snímky ze Star Citizenu** (autorovy screenshoty,
+   `starcitizenreference/`) **do AI generátorů jako stylovou referenci posílat smíš** – autor 25. 9. 2026:
+   „samozřejmě že se smí posílat snímky ze SC do AI generátoru“. Výstup nesmí nést jména a loga SC (pravidlo 6).
 
 ## Art direction: styl SC (platí od 23. 9. 2026)
 
@@ -217,4 +219,4 @@ python Tools/Assets/meshy_generate.py --spec ArtSource/Ships/Steadfast/Kitbash/m
 - Postup: projít listy → zajímavé časy v plném rozlišení / výřez HUD → poznatky **vlastními slovy**
   s časy jako odkazy do `starcitizenreference/<Téma>_VideoNotes.md`.
 - Video a snímky jsou cizí záznam: jen v `ArtSource/Reference/Video/` (v `.gitignore`), nikdy do
-  commitu, nikdy jako vstup do AI generátorů.
+  commitu. Jako stylová reference pro AI koncepty poslat smíš (pravidlo 8).

@@ -19,3 +19,14 @@ v3 modern utilitarian: medium grey and graphite panels with perforated inserts, 
    strips, thin blue-white LED strips along the frame and dashboard edge.
 v4 freight-company multirole: warm neutral mid-grey metal, dark graphite structure, charcoal quilted padding, orange stripes and
    orange-lit switch caps, glare shield with a warm light strip under its lip, 3500K accents and cool screen glow.
+
+--- Round 2, 25. 9. 2026 (author: SC screenshots may go to AI; "modern, no old-looking built-in displays, no straight frame,
+really futuristic"). Inputs: IMAGE 1 = eye_clay_displays.png (camera, canopy openings, central bar), IMAGE 2(+3) = the
+author's SC cockpit screenshots as style (not in git). Same model and settings.
+cockpit_sc_v1 (A, dark pods): refs 1 + 4 - low sculpted consoles, two tilted MFDs in rounded bezel pods, central holographic
+   radar pedestal, button banks, thin tapered curved frame, dark navy-graphite and gunmetal, cool blue and warm white accents.
+cockpit_sc_v2 (B, light fighter): ref 2 - long glare-shield sweep, tilted MFD pods, holo radar, VTOL/GEAR switch strips, warm
+   light-grey and beige composite, graphite accents.
+cockpit_sc_v3 (C, white luxury): ref 3 - flowing white/pearl consoles, flush displays with holo panels above, slim spine.
+cockpit_sc_v4 (D, angular military): ref 5 - faceted consoles, chamfered MFD housings, holo panels in the top corners,
+   graphite and dark steel, blue-violet glow, orange accents.
