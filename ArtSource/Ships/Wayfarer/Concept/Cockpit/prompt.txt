@@ -1,0 +1,21 @@
+Wayfarer cockpit concepts, 25. 9. 2026. Higgsfield MCP, model nano_banana_pro (the job reports nano_banana_2), 2k, 16:9,
+image-to-image. Structural input: eye_clay_displays.png (our own clay render from the pilot's eye,
+Tools/Blender/mcp/mcp_eye_view.py --headless: SOCKET_Cockpit 6.7/0/0.45 m, FOV 88). No SC screenshots were sent (asset-sources rule 8).
+
+Common part of every prompt:
+Restyle this 3D clay render into a photorealistic, highly detailed game-art concept of the interior of a small single-seat
+spaceship cockpit, seen from the pilot's eye. Keep EXACTLY the same camera, perspective and field of view, the same canopy
+window openings and frame layout (central vertical bar, arched top frame, side pillars), the same dashboard outline and height,
+and the same positions and sizes of the three display screens (the pale blue rectangles stay displays showing cool blue flight
+instrument UI). The canopy frame is slim, made of painted metal with bevels, seams, bolts and an inner trim lip, never a black
+mass. [style] ... enough interior light that every shape reads clearly, bright daylight sky outside through the glass. No text,
+no logos, no people, no hands.
+
+v1 clean premium: warm light-grey and mid-grey painted panels, charcoal leather quilted padding, backlit buttons and toggles
+   around the displays, thin orange accent strips, soft warm cabin light plus cool screen glow.
+v2 rugged industrial: exposed structural ribs and bolted frame members, gunmetal and medium grey with worn edges, padded vinyl,
+   yellow-orange warning trim, chunky toggles, amber work lights.
+v3 modern utilitarian: medium grey and graphite panels with perforated inserts, quilted dark-grey upholstery, backlit button
+   strips, thin blue-white LED strips along the frame and dashboard edge.
+v4 freight-company multirole: warm neutral mid-grey metal, dark graphite structure, charcoal quilted padding, orange stripes and
+   orange-lit switch caps, glare shield with a warm light strip under its lip, 3500K accents and cool screen glow.

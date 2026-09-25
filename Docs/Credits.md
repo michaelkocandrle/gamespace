@@ -26,6 +26,7 @@ CC-BY model.
 | PBR materiály PaintedMetal004, PaintedMetal013, MetalPlates006, Leather033A, Rubber004 (CC0) | [ambientCG](https://ambientcg.com) | povrchy interiéru Steadfastu (`ArtSource/Textures/ambientCG/`) |
 | Pilotní sedadlo, boční konzole, skříň s přístroji (vygenerováno) | [Meshy AI](https://www.meshy.ai), placený plán autora (výstup patří autorovi) | kokpit a strojovna Steadfastu (`ArtSource/Ships/Steadfast/Kitbash/Meshy/`) |
 | Atlas šablonových nápisů a značek (vygenerováno, GPT Image 2.5) | [Scenario](https://www.scenario.com), placený plán autora | decaly interiéru Steadfastu (`ArtSource/Ships/Steadfast/Interior/Decals/`) |
+| 4 koncepty kokpitu Wayfareru (vygenerováno, Nano Banana, z našeho clay renderu) | [Higgsfield](https://higgsfield.ai), placený plán autora | jen předloha designu, ne ve hře (`ArtSource/Ships/Wayfarer/Concept/Cockpit/`) |
 
 ## Fonty a zvuky
 

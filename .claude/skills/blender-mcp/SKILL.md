@@ -91,7 +91,7 @@ headless renderů. Server na `localhost:9876` spouští libovolný Python ve sc�
 | Skript | Co dělá |
 | --- | --- |
 | `mcp_socket.py` | `send(type, params)`; CLI `python mcp_socket.py execute_code '{"code": "..."}'` |
-| `mcp_eye_view.py out.png` | kamera `EyeCam` v oku (poloha je ve skriptu, uprav pro danou loď; FOV 88°), backface culling jako v UE, screenshot |
+| `mcp_eye_view.py out.png [--headless --displays on\|off --look clay\|material --ship X]` | kamera `EyeCam` v oku podle `SOCKET_Cockpit` z manifestu a FOV/sklonu ze setupu (= kamera kokpitu ve hře), backface culling jako v UE; živě přes MCP screenshot, `--headless` clay render `<Loď>_HS_Game.blend` 1920×1080 bez živého Blenderu (předloha pro koncepty) |
 | `mcp_grid.py <Loď> out.png` | měřicí mřížka na rovině displeje (1 cm žlutá, 5 cm červená, osy zelené) |
 | `mcp_measure_openings.py <Loď>` | paprsky z oka: najde otvor v rámečku a vypíše rohy (u, v) |
 | `mcp_corners.py <Loď> '<json>' out.png` | posune plochy displejů na zadané rohy a vyfotí pohled z oka |
