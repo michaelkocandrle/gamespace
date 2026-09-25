@@ -927,20 +927,10 @@ def cockpit_detail(g, layout, zc, sill):
     left = next(o for n, o in objs.items() if "Levá konzole" in n)
     seat_o = next(o for n, o in objs.items() if "křeslo" in n)
     ztop = right["z"][1] - 0.1 + 0.012          # on the console's top plate
-    # flight stick on the right console: boot, shaft, grip with a hat switch and a trigger
-    x, y = right["rect"][0] + 0.8, right["rect"][3] - 0.14
-    cyl(g["int_dark"], (x, y, ztop), (x, y, ztop + 0.05), 0.055, 16)
-    cyl(g["int_trim"], (x, y, ztop + 0.05), (x, y, ztop + 0.2), 0.012, 10)
-    obox(g["int_leather"], (x, y, ztop + 0.26), (1, 0, 0.25), (0, 0, 1), (0.05, 0.045, 0.13))
-    cyl(g["int_dark"], (x + 0.005, y, ztop + 0.325), (x + 0.005, y, ztop + 0.34), 0.012, 8)
-    box(g["accent"], (x + 0.022, y - 0.008, ztop + 0.25), (x + 0.03, y + 0.008, ztop + 0.28))
-    # throttle on the left console: a slot, the lever and its handle with thumb buttons
-    x, y = left["rect"][0] + 0.7, left["rect"][2] + 0.14
-    box(g["int_dark"], (x - 0.16, y - 0.025, ztop), (x + 0.12, y + 0.025, ztop + 0.012))
-    box(g["int_trim"], (x - 0.012, y - 0.01, ztop), (x + 0.012, y + 0.01, ztop + 0.12))
-    box(g["int_leather"], (x - 0.04, y - 0.035, ztop + 0.11), (x + 0.04, y + 0.035, ztop + 0.19))
-    for k in range(3):
-        box(g["int_glow" if k == 0 else "int_dark"], (x - 0.02 + k * 0.018, y + 0.035, ztop + 0.16), (x - 0.008 + k * 0.018, y + 0.04, ztop + 0.172))
+    # HOTAS: the stick on the right console, the throttle on the left, where the forearms rest (hs_cockpit)
+    import hs_cockpit
+    hs_cockpit.hotas_stick(g, Vector((right["rect"][0] + 0.8, right["rect"][3] - 0.16, ztop + 0.004)))
+    hs_cockpit.hotas_throttle(g, Vector((left["rect"][0] + 0.7, left["rect"][2] + 0.14, ztop + 0.004)))
     # console edge lights facing the pilot (dim, below the dashboard line)
     for o in (left, right):
         x0, x1, y0, y1 = o["rect"]

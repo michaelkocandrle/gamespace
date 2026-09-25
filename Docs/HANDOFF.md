@@ -1524,6 +1524,10 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       - štítek u každého ovladače: PWR, ENG, SHLD, SCAN, QT, COMMS, GEAR, LIGHTS, COOL, MASTER ARM, WPN, NAV, LOCK. Knihovna decalů má nově `ck_eng` a `ck_lock`.
 
       Moduly jsou na pásech vedle MFD, na křídlech desky a na levé konzoli.
+    - Krok 5: HOTAS (`hs_cockpit.hotas_stick` / `hotas_throttle`) místo kvádrů:
+      - páka vpravo: základna se šrouby, límec, gumová manžeta, hřídel, rukojeť skloněná o 12° s prohlubněmi, spoušť, 2 kloboučky, červený pickle, 2 podsvícená boční tlačítka, malíčková páčka;
+      - plyn vlevo: vodítko s kartáčem a značkami zarážek, páka, rukojeť natočená o 15° k pilotovi s kloboučkem, 2 tlačítky a knoflíkem pod ukazovák;
+      - štítky FLIGHT a ENG. Oba ovladače jsou tam, kde leží předloktí.
 
 ---
 

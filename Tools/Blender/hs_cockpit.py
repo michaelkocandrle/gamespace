@@ -214,6 +214,137 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
                                "max_w": (w - 0.016) / len(row) - 0.004})
 
 
+# ------------------------------------------------------------------------------------------ HOTAS
+# Author 25. 9. 2026 (step 5): a HOTAS-style stick and throttle on the side consoles - grip, trigger, hats and
+# buttons, a rubber boot over the mechanism, where the pilot's hands rest (forearms on the consoles).
+
+def _ring(c, fwd, side, up_, d, w, r, seg=5, groove=0.0):
+    """A rounded-rectangle ring around c in the plane (fwd, side), depth d along fwd, width w along side;
+    groove pushes the front face in (finger grooves)."""
+    pts = []
+    for u, v in rr_outline(d, w, r, seg):
+        if groove and u > d / 2 - r - 1e-6:
+            u -= groove
+        pts.append(c + fwd * u + side * v)
+    return pts
+
+
+def _boot(g, base, top_r=0.018, bottom_r=0.05, h=0.07, folds=4):
+    rings = []
+    levels = folds * 2 + 1
+    for k in range(levels + 1):
+        t = k / levels
+        rr = bottom_r + (top_r - bottom_r) * t + (0.004 if k % 2 else 0.0)
+        z = base.z + h * t
+        rings.append([Vector((base.x + rr * math.cos(2 * math.pi * i / 24), base.y + rr * math.sin(2 * math.pi * i / 24), z)) for i in range(24)])
+    loft(g["int_leather"], rings)
+
+
+def _base_plate(g, c, w, d, label=None):
+    """A satin-rimmed graphite plate with four screws on a console top (horizontal), label at its aft edge."""
+    right, up, n = Vector((0, -1, 0)), Vector((1, 0, 0)), Vector((0, 0, 1))
+    rr_slab(g["int_console"], c, right, up, n, w, d, 0.01, 0.02)
+    rr_ring(g["int_trim"], c + n * 0.0015, right, up, n, w, d, 0.01, 0.004, 0.003, 4)
+    for su in (-1, 1):
+        for sv in (-1, 1):
+            q = c + right * (su * (w / 2 - 0.007)) + up * (sv * (d / 2 - 0.007))
+            tube(g["int_trim"], q, q + n * 0.0035, 0.0025, 10)
+    if label:
+        LABELS.append({"item": label, "at": list(c + up * (-d / 2 + 0.011) + n * 0.0002), "n": list(n), "x": list(right),
+                       "y": list(up), "scale": 0.45, "max_w": w - 0.03})
+
+
+def hotas_stick(g, base):
+    """The flight stick at base (console top): plate, collar, boot, shaft, grip leaning forward 12 deg with
+    finger grooves, trigger, two hats, a red pickle button, two side buttons and a pinky lever."""
+    _base_plate(g, base, 0.13, 0.13, "ck_flight")
+    tube(g["int_trim"], base, base + Vector((0, 0, 0.008)), 0.056, 32)                            # collar
+    _boot(g, base + Vector((0, 0, 0.008)))
+    shaft0 = base + Vector((0, 0, 0.07))
+    tube(g["int_trim"], shaft0, shaft0 + Vector((0, 0, 0.04)), 0.011, 16)
+    lean = math.radians(12.0)
+    ax = Vector((math.sin(lean), 0.0, math.cos(lean)))
+    fwd = Vector((math.cos(lean), 0.0, -math.sin(lean)))
+    side = Vector((0.0, 1.0, 0.0))
+    g0 = shaft0 + Vector((0, 0, 0.035))
+    L = 0.13
+    rings = []
+    for k in range(9):
+        t = k / 8
+        d = 0.042 + 0.01 * math.sin(math.pi * min(t / 0.8, 1.0))
+        w = 0.035 + 0.006 * math.sin(math.pi * min(t / 0.8, 1.0))
+        groove = 0.0035 * abs(math.sin(3 * math.pi * t)) if t < 0.72 else 0.0
+        rings.append(_ring(g0 + ax * (L * t), fwd, side, ax, d, w, 0.014, 5, groove))
+    loft(g["int_leather"], rings)
+    top = g0 + ax * L
+    # the head: a dark slanted cap with the hats and the pickle
+    rr_slab(g["int_dark"], top + ax * 0.004, side * -1, fwd, ax, 0.034, 0.046, 0.012, 0.006, 4)
+    for off, rr in ((-0.01, 0.0065), (0.012, 0.0055)):
+        c = top + ax * 0.004 + fwd * off
+        tube(g["int_trim"], c, c + ax * 0.008, rr, 14)                                             # hat base
+        for dv in (fwd, side):
+            tube(g["int_trim"], c + ax * 0.008 - dv * 0.004, c + ax * 0.008 + dv * 0.004, 0.0016, 6)   # 4-way cross
+    c = top + ax * 0.002 + side * 0.012 + fwd * 0.004
+    tube(g["int_red"], c, c + ax * 0.007 + side * 0.003, 0.005, 12)                                # pickle
+    # trigger: a curved blade in front, under the head
+    for k in range(4):
+        t0, t1 = 0.62 + k * 0.05, 0.62 + (k + 1) * 0.05
+        a = g0 + ax * (L * t0) + fwd * (0.03 + 0.004 * math.sin(math.pi * k / 3))
+        b_ = g0 + ax * (L * t1) + fwd * (0.03 + 0.004 * math.sin(math.pi * (k + 1) / 3))
+        tube(g["int_trim"], a, b_, 0.0045, 8)
+    # side buttons (backlit caps) on the thumb side (inboard, towards the pilot: +y for the right-hand stick)
+    for t in (0.78, 0.9):
+        c = g0 + ax * (L * t) + side * 0.021 - fwd * 0.004
+        tube(g["int_dark"], c, c + side * 0.004, 0.0055, 12)
+        tube(g["int_glow"], c + side * 0.004, c + side * 0.0048, 0.0035, 12)
+    # pinky lever at the foot of the grip
+    a = g0 + ax * 0.018 + fwd * 0.026
+    tube(g["int_trim"], a, a + fwd * 0.018 - ax * 0.006, 0.004, 8)
+
+
+def hotas_throttle(g, base):
+    """The throttle at base (console top, the lever at 30 % forward): a housing with the slot, brush strips
+    and detent marks, the lever and a handle turned in towards the pilot with a thumb hat and backlit
+    buttons."""
+    right, up, n = Vector((0, -1, 0)), Vector((1, 0, 0)), Vector((0, 0, 1))
+    _base_plate(g, base, 0.085, 0.32, "ck_eng")
+    rr_slab(g["int_dark"], base + n * 0.0016, right, up, n, 0.016, 0.24, 0.004, 0.02, 3)           # slot
+    for sd in (-1, 1):                                                                             # brush strips
+        rr_slab(g["int_fabric"], base + n * 0.0018 + right * (sd * 0.0065), right, up, n, 0.004, 0.24, 0.001, 0.003, 1)
+    for k in range(6):                                                                             # detents
+        q = base + n * 0.0017 + up * (-0.11 + k * 0.044) + right * 0.019
+        rr_slab(g["accent" if k == 0 else "int_glow"], q, right, up, n, 0.012, 0.0022, 0.0005, 0.0008, 1)
+    lever0 = base + up * (-0.11 + 0.3 * 0.22) + n * 0.002
+    top = lever0 + Vector((-0.012, 0.0, 0.1))
+    tube(g["int_trim"], lever0, top, 0.009, 14)
+    # handle: turned 15 deg in towards the pilot (-y: the left console is at +y), leaning back a little
+    turn = math.radians(15.0)
+    fwd = Vector((math.cos(turn), -math.sin(turn), 0.0))
+    side = Vector((math.sin(turn), math.cos(turn), 0.0))
+    ax = Vector((-0.12, 0.0, 1.0)).normalized()
+    rings = []
+    for k in range(7):
+        t = k / 6
+        d = 0.065 + 0.008 * math.sin(math.pi * t)
+        w = 0.05 + 0.012 * math.sin(math.pi * min(t / 0.85, 1.0))
+        rings.append(_ring(top + ax * (0.085 * t - 0.01), fwd, side, ax, d, w, 0.016, 5))
+    loft(g["int_leather"], rings)
+    head = top + ax * 0.075
+    rr_slab(g["int_dark"], head + ax * 0.004, side * -1, fwd, ax, 0.054, 0.066, 0.014, 0.006, 4)   # cap
+    # thumb hat and two backlit buttons on the inboard face (towards the pilot: -side)
+    face = head - side * 0.03 - ax * 0.02
+    tube(g["int_trim"], face, face - side * 0.008, 0.0065, 14)
+    for dv in (fwd, ax):
+        tube(g["int_trim"], face - side * 0.008 - dv * 0.004, face - side * 0.008 + dv * 0.004, 0.0016, 6)
+    for k, off in enumerate((-0.018, 0.018)):
+        c = face + fwd * off
+        tube(g["int_dark"], c, c - side * 0.004, 0.0055, 12)
+        tube(g["int_glow" if k == 0 else "accent"], c - side * 0.004, c - side * 0.0048, 0.0035, 12)
+    # index-finger slew nub at the front
+    c = head + fwd * 0.036 - ax * 0.015
+    tube(g["int_trim"], c, c + fwd * 0.006, 0.0045, 10)
+
+
 def glass_panel(g, screen_bm, sockets, name, c, right, up, n, w, h, proud):
     """A display as a glass panel standing proud of its mount (author 25. 9. 2026, step 3): a dark back plate
     closes the recess at c, the glass floats `proud` in front on four stand-offs, a thin satin technical frame
