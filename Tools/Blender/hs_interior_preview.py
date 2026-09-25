@@ -31,6 +31,11 @@ def main():
     opts = dict(a.split("=", 1) for a in args[2:] if "=" in a)       # exposure=<EV> world=<strength> light=<gain>
     os.makedirs(out, exist_ok=True)
     shots = [s for s in json.load(open(preset, encoding="utf-8"))["shots"] if "camera_local" in s and (not names or s["name"] in names)]
+    if "eye" in opts:
+        # the pilot's eye: SOCKET_Cockpit of the recipe (layout metres), level view along +x, FOV 88 (the game's
+        # cockpit camera); eye=<x,y,z> overrides the position
+        ex, ey, ez = [float(v) for v in opts["eye"].split(",")] if opts["eye"] not in ("1", "") else (16.95, 0.0, 1.65)
+        shots = [{"name": "eye", "fov": 88, "camera_local": [ex - OFF.x, -ey, ez - OFF.z], "look_local": [ex + 5.0 - OFF.x, -ey, ez - OFF.z]}]
     sc = bpy.context.scene
     engines = [e.identifier for e in bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items]
     sc.render.engine = "BLENDER_EEVEE_NEXT" if "BLENDER_EEVEE_NEXT" in engines else "BLENDER_EEVEE"
@@ -44,6 +49,10 @@ def main():
     for o in list(bpy.data.objects):
         if o.type in ("LIGHT", "CAMERA"):
             bpy.data.objects.remove(o)
+    for o in bpy.data.objects:
+        # canopy glass renders as a dark sheet in Eevee (in the game it is clear): hide it
+        if o.type == "MESH" and (o.name.endswith("_Canopy") or any(sl.material and "Glass" in sl.material.name for sl in o.material_slots)):
+            o.hide_render = True
     for l in json.loads(sc.get("hs_lights", "[]")):
         if not l["name"].startswith("int_"):
             continue

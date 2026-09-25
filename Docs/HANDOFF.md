@@ -1469,6 +1469,25 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Měření 1080p: průměr 0,09–0,21 (SC 0,13–0,23), FPS 61–63 v chodbě, 68 v pilotním pohledu.
     - Čeká na schválení autorem; kajuta a předměty z v1 (mřížka, reaktor, chladiče, štíty) až potom.
 
+93. **Wayfarer: kokpit podle schváleného konceptu A** (25. 9. 2026). Postup jako u exteriéru: render z oka →
+    koncepty → výběr autorem → stavba → srovnání z oka.
+    - `Tools/Blender/mcp/mcp_eye_view.py`: oko a FOV z manifestu a setupu (= kamera kokpitu), `--headless` clay render.
+    - Koncepty Higgsfield (image-to-image z renderu z oka, styl podle autorových snímků SC); vybrán A, přebarvený
+      na barvy lodi (`Concept/Cockpit/cockpit_target_space.png`, `_day.png`).
+    - `Tools/Blender/hs_cockpit.py` (styl `wrap`): tvarovaná deska kolem pilota napojená na boční konzole,
+      zapuštěné MFD s rámečkem a světelnou linkou, řady tlačítek, spínací panely na křídlech, snížený střed
+      s holografickým radarem a centrálními displeji, štít nad deskou mimo zorné pole HUD; pod deskou žebra,
+      kabely, obložená zadní stěna, pedály, modrá světla.
+    - Rám skla: krémový lak lodi (`IntFrame`), oranžové linky souběžné s hranami skla, spáry panelů, kovové lemy,
+      madla na sloupcích; normály obložení srovnané, ostré hrany podle úhlu.
+    - `Tools/Blender/hs_interior_decals.py`: mesh decaly z knihovny exteriéru v interiéru (štítky u skupin ovladačů,
+      EJECT, CANOPY, MASTER ARM, EMERG O2, výrobní štítek; rozptyl panelů, nýtů, mřížek a nápisů po stěnách kokpitu
+      i chodby). Knihovna rozšířena o 17 kokpitových položek (`ck_*`).
+    - Expozice kokpitu −0,7 → −0,2 EV, emise displejů 2,9 → 2,05 (stejný jas displejů), světla na rám.
+    - Měření 1080p: pilotní pohled průměr 0,22 den / 0,19 noc; FPS 65 den / 78 noc.
+    - Testy: horní hrana displejů nově ≥ 8° pod okem (HUD končí ~5°), rám kabiny „natřený, ne černý“ (0,15–0,7),
+      přiblížení na displeje do 66°.
+
 ---
 
 ## 6. Mapa kódu a obsahu

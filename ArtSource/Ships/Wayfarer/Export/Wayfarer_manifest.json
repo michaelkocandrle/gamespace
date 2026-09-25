@@ -58,6 +58,12 @@
       ]
     },
     {
+      "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
+      "objects": [
+        "SM_Ship_Wayfarer_InteriorDecals"
+      ]
+    },
+    {
       "fbx": "SM_Ship_Wayfarer_InteriorKit.fbx",
       "objects": [
         "SM_Ship_Wayfarer_InteriorKit"
@@ -130,8 +136,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 51788,
-      "verts": 55914,
+      "tris": 51698,
+      "verts": 55896,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -181,8 +187,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 139270,
-      "verts": 90467,
+      "tris": 215275,
+      "verts": 130660,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntLeather",
@@ -194,19 +200,45 @@
         "M_Ship_Wayfarer_IntPanel",
         "M_Ship_Wayfarer_IntWall",
         "M_Ship_Wayfarer_IntFabric",
-        "M_Ship_Wayfarer_IntRed"
+        "M_Ship_Wayfarer_IntConsole",
+        "M_Ship_Wayfarer_IntRed",
+        "M_Ship_Wayfarer_IntFrame"
       ],
       "uv_layers": 1,
       "bounds_m": [
         [
           -9.319999694824219,
-          -2.0886588096618652,
+          -2.1115686893463135,
           -1.2599999904632568
         ],
         [
-          9.356607437133789,
-          2.088627576828003,
+          9.378965377807617,
+          2.1115596294403076,
           2.0709731578826904
+        ]
+      ]
+    },
+    "SM_Ship_Wayfarer_InteriorDecals": {
+      "lod": 0,
+      "part": "InteriorDecals",
+      "tris": 2186,
+      "verts": 2139,
+      "materials": [
+        "M_Ship_Wayfarer_Decal",
+        "M_Ship_Wayfarer_DecalAO",
+        "M_Ship_Wayfarer_DecalPaint"
+      ],
+      "uv_layers": 1,
+      "bounds_m": [
+        [
+          -8.753512382507324,
+          -2.041429281234741,
+          -1.092400074005127
+        ],
+        [
+          8.367300033569336,
+          2.0711658000946045,
+          1.2913777828216553
         ]
       ]
     },
@@ -248,14 +280,14 @@
       "uv_layers": 1,
       "bounds_m": [
         [
-          7.712947845458984,
-          -0.4750000238418579,
-          -0.08506810665130615
+          7.699108123779297,
+          -0.568983793258667,
+          0.012472033500671387
         ],
         [
-          7.827323913574219,
-          0.4750000238418579,
-          0.16776442527770996
+          7.877155303955078,
+          0.568983793258667,
+          0.28346264362335205
         ]
       ]
     }
@@ -325,7 +357,7 @@
         [
           -4.251672267913818,
           4.405613422393799,
-          1.0493535995483398
+          1.049353837966919
         ]
       ]
     },
@@ -479,53 +511,53 @@
     "SOCKET_Display_centre_bottom": {
       "parent": "SM_Ship_Wayfarer",
       "location_m": [
-        7.71672,
-        0.0,
-        -0.02092
+        7.81664,
+        -0.055,
+        0.09559
       ],
       "location_ue_cm": [
-        771.67,
-        -0.0,
-        -2.09
+        781.66,
+        5.5,
+        9.56
       ]
     },
     "SOCKET_Display_centre_top": {
       "parent": "SM_Ship_Wayfarer",
       "location_m": [
-        7.77855,
-        0.0,
-        0.11574
+        7.81664,
+        0.055,
+        0.09559
       ],
       "location_ue_cm": [
-        777.86,
-        -0.0,
-        11.57
+        781.66,
+        -5.5,
+        9.56
       ]
     },
     "SOCKET_Display_left": {
       "parent": "SM_Ship_Wayfarer",
       "location_m": [
-        7.7497,
-        0.33,
-        0.05197
+        7.76093,
+        0.39661,
+        0.15552
       ],
       "location_ue_cm": [
-        774.97,
-        -33.0,
-        5.2
+        776.09,
+        -39.66,
+        15.55
       ]
     },
     "SOCKET_Display_right": {
       "parent": "SM_Ship_Wayfarer",
       "location_m": [
-        7.7497,
-        -0.33,
-        0.05197
+        7.76093,
+        -0.39661,
+        0.15552
       ],
       "location_ue_cm": [
-        774.97,
-        33.0,
-        5.2
+        776.09,
+        39.66,
+        15.55
       ]
     },
     "SOCKET_Engine_L": {

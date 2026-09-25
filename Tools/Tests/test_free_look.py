@@ -132,7 +132,8 @@ else:
               "%s, %.1f cm" % (ok, lean))
         check("focus looks down at the dashboard (the displays are 14-25 degrees under the eye)", -30.0 < rotation.pitch < -10.0 and abs(rotation.yaw) < 2.0,
               "pitch %.1f yaw %.1f" % (rotation.pitch, rotation.yaw))
-        check("focus narrows the view so the displays fill it (30-60 degrees, the normal view is ~88)", 30.0 < fov < 60.0, "%.1f" % fov)
+        # 66: the concept-A cockpit (25. 9. 2026) spreads two large MFDs 0.8 m apart; framing both takes ~63 deg
+        check("focus narrows the view so the displays fill it (30-66 degrees, the normal view is ~88)", 30.0 < fov < 66.0, "%.1f" % fov)
         ship.set_dashboard_focus(True)
         ship.debug_advance_dashboard_focus(1.0)
         turned_to = camera.get_editor_property("relative_rotation")

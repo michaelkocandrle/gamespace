@@ -549,7 +549,8 @@ def main(argv):
         ispec = recipe["interior"]["lights"]
         extra = [{"name": "int_%d" % i, "type": l.get("type", "point"), "color": ispec["warm_color"] if l.get("warm") else ispec["color"],
                   "intensity_cd": l.get("cd", ispec["intensity_cd"]), "radius_m": ispec["radius_m"],
-                  "location": l["at"], "direction": l.get("direction", [0, 0, -1]), "cone_deg": l.get("cone_deg", 40.0)}
+                  "location": l["at"], "direction": l.get("direction", [0, 0, -1]), "cone_deg": l.get("cone_deg", 40.0),
+                  "source_radius_cm": l.get("source_radius_cm", 2.0)}
                  for i, l in enumerate(ilights)]
         bpy.context.scene["hs_lights"] = json.dumps(json.loads(bpy.context.scene.get("hs_lights", "[]")) + extra)
     for part, ob in made.items():

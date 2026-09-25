@@ -864,6 +864,19 @@ snímku.
 - bg) **Kit objekty spojené joinem mají rozbitá UV**, když se UV vrstva nejmenuje stejně. Nové bmeshe v kit
   materiálu musí mít vrstvu `UVMap` (jako glTF import), `hs_interior_kit._uv_layer`.
 
+- bh) **Pod nohama pilota prosvítal terén.** Podlaha kokpitu byla jedna plocha, `finish()` přepočítá normály
+  a samotnou plochu otočil dolů (UE ji nekreslí). Podlahu stavět jako uzavřenou desku (`extrude_face_region`).
+  Totéž platí pro každou otevřenou plochu v bmeshi, který jde přes `recalc_face_normals`: deska kokpitu se
+  proto dělá `solidify`.
+- bi) **Moduly MFD seděly nízko a byly uříznuté.** Vlastní pravidlo testu „displeje ≥ 12° pod okem“ bylo přísnější
+  než HUD (končí ~5° pod okem). Hranice podle skutečného HUD: 8°.
+- bj) **Rám kabiny tmavý proti obloze i přes světlý lak.** Expozice kokpitu −0,7 EV (z Vanguardu) a slabé světlo na
+  rámu. −0,2 EV, emise displejů o 2^0,5 níž, bodová světla na rám z ramen a od sloupků.
+- bk) **Pruhované stínování obložení kabiny.** Obložení kopíruje fasety trupu s hladkými normálami přes ostré
+  hrany a některé plochy měly obrácenou orientaci. Normály ke středu kokpitu + `set_sharp_from_angle(25°)`.
+- bl) **Oranžová linka přeškrtla horní okraj displejů.** Linka 3 cm pod hranou desky vedla i přes pole MFD, kde je
+  nad sklem jen 2 cm. Na polích displejů linku vynechat.
+
 
 ---
 

@@ -31,9 +31,11 @@
   "free_look_max_yaw_deg": 180.0,
   "_comment_cockpit": "The interior (hs_interior.py) replaces the placeholder cockpit: seat, consoles and the dashboard with the four screens (24. 9. 2026).",
   "placeholder_cockpit": false,
-  "cockpit_light_intensity_cd": 1.5,
+  "cockpit_light_intensity_cd": 4.0,
   "hide_hull_in_cockpit": false,
-  "cockpit_view_pitch_deg": 0.0
+  "cockpit_view_pitch_deg": 0.0,
+  "cockpit_exposure_bias": -0.2,
+  "_comment_exposure": "Concept A (25. 9. 2026): the painted cockpit must read as a form by day and by night, so the cockpit view is 0.5 EV brighter than the Vanguard's -0.7; the screens' emissive strength drops by the same 2^0.5 (2.9 -> 2.05) so they keep their brightness."
  },
  "components": {
   "camera_boom": {
@@ -832,7 +834,7 @@
    "slots": [
     "M_Ship_Wayfarer_Screens"
    ],
-   "emissive_strength": 2.9
+   "emissive_strength": 2.05
   },
   "MI_Ship_Wayfarer_KitTrim01": {
    "_comment": "Quaternius MegaKit trim sheet (CC0), toned by Tools/Assets/tone_kit_textures.py; the tint sets this panel family's tone",
@@ -999,13 +1001,90 @@
    "panel_strength": 0.0,
    "detail_normal_strength": 0.1,
    "wear_amount": 0.0
+  },
+  "MI_Ship_Wayfarer_IntFrame": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.6,
+     0.54,
+     0.46
+    ],
+    "SecondaryColor": [
+     0.6,
+     0.54,
+     0.46
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.5,
+    "SecondaryRoughness": 0.5,
+    "PaintMetallic": 0.1,
+    "GrungeAmount": 0.15,
+    "EdgeWear": 0.0,
+    "DirtAmount": 0.0,
+    "ClearCoat": 0.25,
+    "ClearCoatRoughness": 0.25
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntFrame"
+   ],
+   "_comment": "cockpit frame lining in the hull's warm off-white paint (concept A in the Wayfarer's colours); satin, not glossy: a strong clear coat mirrored every cockpit lamp as a hot spot on the walls (author 25. 9. 2026)"
+  },
+  "MI_Ship_Wayfarer_IntConsole": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.05,
+     0.045,
+     0.042
+    ],
+    "SecondaryColor": [
+     0.05,
+     0.045,
+     0.042
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.45,
+    "SecondaryRoughness": 0.45,
+    "PaintMetallic": 0.2,
+    "GrungeAmount": 0.1,
+    "EdgeWear": 0.0,
+    "DirtAmount": 0.0
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntConsole"
+   ],
+   "_comment": "warm graphite of the cockpit pods, cowl and pedestal (the exterior's saddle colour)"
   }
  },
  "no_nanite_parts": [
   "Decals",
   "Interior",
   "Screens",
-  "InteriorKit"
+  "InteriorKit",
+  "InteriorDecals"
  ],
  "_comment_no_nanite": "Decals: mesh decals (Tools/Blender/hs_decals.py) use Deferred Decal materials, which Nanite cannot draw (skill ship-pipeline 3b3).",
  "_livery_variants": {

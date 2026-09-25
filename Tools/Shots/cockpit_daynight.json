@@ -1,0 +1,121 @@
+{
+ "_comment": "Wayfarer cockpit (concept A) by day and by night, auto exposure as the pilot sees it; the day shots share their positions with wayfarer_interior (before/after). Night last: console commands stay for later shots. Run -Width 1920 -Height 1080.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 4.0,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "name": "pilot_view_day",
+   "camera": "cockpit",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 1,
+   "gear": false,
+   "settle": 2.0
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "cockpit_right_day",
+   "camera_local": [
+    5.9,
+    -0.85,
+    0.6
+   ],
+   "look_local": [
+    8.05,
+    0.55,
+    -0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "cockpit_left_day",
+   "camera_local": [
+    5.9,
+    0.85,
+    0.6
+   ],
+   "look_local": [
+    8.05,
+    -0.55,
+    -0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "cockpit_back_day",
+   "camera_local": [
+    8.05,
+    -0.6,
+    0.3
+   ],
+   "look_local": [
+    5.25,
+    0.6,
+    -0.2
+   ]
+  },
+  {
+   "name": "pilot_view_night",
+   "camera": "cockpit",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 1,
+   "gear": false,
+   "settle": 3.0,
+   "console": [
+    "space.SunDir 25 45",
+    "space.Sun Intensity 0.0",
+    "space.Sky Intensity 0.03"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "fov": 90,
+   "name": "cockpit_right_night",
+   "camera_local": [
+    5.9,
+    -0.85,
+    0.6
+   ],
+   "look_local": [
+    8.05,
+    0.55,
+    -0.2
+   ],
+   "console": [
+    "space.SunDir 25 45",
+    "space.Sun Intensity 0.0",
+    "space.Sky Intensity 0.03"
+   ]
+  }
+ ]
+}

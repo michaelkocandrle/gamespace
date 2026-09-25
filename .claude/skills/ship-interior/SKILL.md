@@ -30,6 +30,12 @@ skripty jsou pracovní pipeline a zdroj ověřených postupů, ne cílový vzhle
 - Decaly interiéru: `generate_interior_decals.py` → `D_Int_*`, v setupu `Int_*` (rotace viz WORKFLOW 9.6 be).
 - Iterace: `hs_interior_preview.py` (Eevee ze stejných kamer, `world=`, `light=`, `exposure=`); Eevee bez GI
   stěny podsvítí jinak než Lumen, konečné posouzení jen ze zabalené hry.
+- **Kokpit Wayfareru (koncept A, 25. 9. 2026):** recept `interior.cockpit` (`style: wrap`, `pod_x/y/z`,
+  `screen_w`, `side_margin`, `top_margin`, `wing`, `centre_x`, `centre_top_z`, `fascia_*`, `seam_x`,
+  `pinstripe_inset_m`, `frame_wash_cd`) → `Tools/Blender/hs_cockpit.py` (`build_wrap`: deska, křídla, sloupek
+  s radarem, pod deskou). Náhled z oka: `hs_interior_preview.py ... eye=1`. Cíl: `Concept/Cockpit/cockpit_target_*.png`.
+- **Decaly interiéru jako mesh decaly:** `interior.decals` → `hs_interior_decals.py` (Placer z `hs_decals`,
+  položky knihovny, `items` paprskem, `scatter` mřížkou paprsků ke stěnám, `grab_bars`), part `InteriorDecals`.
 
 ## Pravidla autora (závazná)
 

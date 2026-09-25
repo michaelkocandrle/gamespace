@@ -155,8 +155,10 @@ else:
         fov = ship.get_editor_property("cockpit_camera").get_editor_property("field_of_view")
         half_v = math.degrees(math.atan(math.tan(math.radians(fov / 2.0)) * 9.0 / 16.0))
         top, bottom = [math.degrees(math.atan2(ez - z, sx - ex)) for z in (sz1, sz0)]
-        check("screens under the HUD, whole in the level view (top >= 12 deg down, bottom inside the 16:9 frame)",
-              top >= 12.0 and bottom <= half_v - 0.5, "%.1f..%.1f deg, half view %.1f" % (top, bottom, half_v))
+        # 8 deg: the HUD's lowest row (speed, boost, AB) ends ~5 deg under the eye; concept A (author 25. 9. 2026)
+        # puts the MFD pods right under it, as the SC cockpits do
+        check("screens under the HUD, whole in the level view (top >= 8 deg down, bottom inside the 16:9 frame)",
+              top >= 8.0 and bottom <= half_v - 0.5, "%.1f..%.1f deg, half view %.1f" % (top, bottom, half_v))
         # The Vanguard sat 1.5 m back; the Wayfarer's approved deck plan (v1) puts the fascia ~1 m ahead.
         check("pilot back from the dashboard (>= 0.9 m, in reach, not in the face)", sx - ex >= 90.0, "%.0f cm" % (sx - ex))
     finally:

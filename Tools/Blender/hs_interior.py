@@ -172,6 +172,7 @@ def ceiling(g, x0, x1, y0, y1, z, lights):
 
 lights_out = []
 KIT = None          # the modular kit while build() runs (hs_interior_kit.Kit), for textured procedural parts
+COCKPIT = {}        # recipe interior.cockpit while build() runs
 
 
 def tbox(g, key, kit_key, lo, hi, tile=0.9):
@@ -330,7 +331,17 @@ def obj_console(g, r, zr, z0):
 
 
 def dashboard(g, r, zr, z0, ship, screen_bm, sockets, eye):
-    """The instrument panel: a sloped fascia facing the pilot's eye with the game's four screens."""
+    """The instrument panel: a sloped fascia facing the pilot's eye with the game's four screens, or the
+    concept-A pods (hs_cockpit.py) when recipe interior.cockpit.style is "pods"."""
+    if COCKPIT.get("style") == "wrap":
+        import hs_cockpit
+        back = hs_cockpit.build_wrap(g, screen_bm, sockets, eye, COCKPIT, z0, lights_out)
+        tbox(g, "int_dark", "kit_trim01", back[0], back[1], 0.8)      # footwell back wall, panel trim
+        return
+    if COCKPIT.get("style") == "pods":
+        import hs_cockpit
+        hs_cockpit.build(g, screen_bm, sockets, eye, COCKPIT, z0)
+        return
     x0, x1, y0, y1 = r
     tbox(g, "int_dark", "kit_trim01", (x0 + 0.2, y0, z0), (x1, y1, zr[0]))   # lower body (kit panel trim)
     top = zr[1]
@@ -394,8 +405,9 @@ def build(recipe, layout, coll, mats, ship, hull):
     report = {"rooms": [], "objects": 0}
     kit_rooms = (spec.get("kit") or {}).get("rooms", [])
     kit = None
-    global KIT
+    global KIT, COCKPIT
     KIT = None
+    COCKPIT = spec.get("cockpit", {})
     if kit_rooms:
         import hs_interior_kit
         kit = KIT = hs_interior_kit.Kit()
@@ -450,7 +462,11 @@ def build(recipe, layout, coll, mats, ship, hull):
     sill = spec.get("sill_z", 1.05)
     fb = g["int_floor"]
     top = [fb.verts.new((p[0], p[1], zc)) for p in poly]
-    bmesh.ops.contextual_create(fb, geom=top)
+    res = bmesh.ops.contextual_create(fb, geom=top)
+    # a closed slab, not a single face: finish() recalculates normals, and a lone face came out facing down -
+    # culled, the pilot's feet stood over the terrain seen through the hull (25. 9. 2026)
+    ext = bmesh.ops.extrude_face_region(fb, geom=res["faces"])
+    bmesh.ops.translate(fb, vec=(0, 0, -0.03), verts=[v for v in ext["geom"] if isinstance(v, bmesh.types.BMVert)])
     box(g["int_dark"], (15.2, -1.0, 0.0), (15.5, 1.0, zc))                    # step up
     box(g["int_trim"], (15.47, -1.0, zc - 0.02), (15.5, 1.0, zc))
     for a, b in zip(poly, poly[1:]):
@@ -467,6 +483,9 @@ def build(recipe, layout, coll, mats, ship, hull):
         else:
             obox(g["int_wall"], (c.x, c.y, (zc + sill) / 2), d, (0, 0, 1), (length, 0.04, sill - zc))
         obox(g["int_trim"], (c.x, c.y, sill), d, (0, 0, 1), (length, 0.08, 0.03))
+        if COCKPIT.get("style") in ("pods", "wrap"):
+            # the orange line along the sill (concept A: the accent runs round the cockpit at console height)
+            obox(g["accent"], (c.x, c.y, sill - 0.035), d, (0, 0, 1), (length, 0.086, 0.012))
     report["cockpit"] = True
     # every layout object by its name
     eye = recipe["assemble"]["sockets"]["Cockpit"]["location"]
@@ -553,12 +572,36 @@ def build(recipe, layout, coll, mats, ship, hull):
     # a metal rim along every edge where the liner meets the glass: the frame reads as built structure
     lb.edges.ensure_lookup_table()
     rim = bmesh.new()
+    stripe = bmesh.new()
+    inset = COCKPIT.get("pinstripe_inset_m", 0.07)
     for e in lb.edges:
         if len(e.link_faces) == 1 and (e.verts[0].co - e.verts[1].co).length > 0.01:
             f = e.link_faces[0]
             f.normal_update()
             off = f.normal * 0.012
             _rim(rim, e.verts[0].co + off, e.verts[1].co + off, 0.012)
+            if COCKPIT.get("style") in ("pods", "wrap"):
+                # an orange pinstripe running parallel to the glass edge on the frame (concept A)
+                a, b = e.verts[0].co, e.verts[1].co
+                along = (b - a).normalized()
+                inward = f.calc_center_median() - (a + b) / 2
+                inward = (inward - along * inward.dot(along) - f.normal * inward.dot(f.normal)).normalized()
+                o = inward * inset + f.normal * 0.004
+                _rim(stripe, a + o, b + o, 0.0035)
+    if COCKPIT.get("style") in ("pods", "wrap"):
+        # panel seams across the frame lining: cuts at fixed stations, a dark groove along each cut
+        cut = lb.copy()
+        for x in COCKPIT.get("seam_x", []):
+            res = bmesh.ops.bisect_plane(cut, geom=cut.verts[:] + cut.edges[:] + cut.faces[:], plane_co=(x, 0, 0), plane_no=(1, 0, 0))
+            for el in res["geom_cut"]:
+                if isinstance(el, bmesh.types.BMEdge) and el.link_faces:
+                    nrm = el.link_faces[0].normal
+                    _rim(rim, el.verts[0].co + nrm * 0.003, el.verts[1].co + nrm * 0.003, 0.004)
+        cut.free()
+    if stripe.verts:
+        ob = hp.finish(stripe, "SM_Ship_%s_Int_LinerStripe" % ship, coll, {"angle_deg": 40, "width": 0, "segments": 1})
+        ob.data.materials.append(mats["accent"])
+        objs.append(ob)
     if rim.verts:
         ob = hp.finish(rim, "SM_Ship_%s_Int_LinerRim" % ship, coll, {"angle_deg": 40, "width": 0, "segments": 1})
         ob.data.materials.append(mats["int_trim"])
@@ -569,10 +612,23 @@ def build(recipe, layout, coll, mats, ship, hull):
         lb.free()
         ob = bpy.data.objects.new(me.name, me)
         coll.objects.link(ob)
-        me.materials.append(mats["int_wall"])
+        me.materials.append(mats["int_frame" if COCKPIT.get("style") in ("pods", "wrap") else "int_wall"])
+        centre = Vector((17.0, 0.0, 1.3))
         for p in me.polygons:
-            p.use_smooth = True
+            if p.normal.dot(centre - Vector(p.center)) < 0:
+                p.flip()
+        me.update()
+        me.shade_smooth()
+        # the hull's facets meet at sharp creases: smooth normals across them streaked the walls (25. 9. 2026)
+        me.set_sharp_from_angle(angle=math.radians(COCKPIT.get("liner_sharp_deg", 25.0)))
         objs.append(ob)
+    if spec.get("decals"):
+        # mesh decals and grab bars laid onto everything built so far (hs_interior_decals.py)
+        import hs_interior_decals
+        dspec = dict(spec["decals"])
+        dspec["_cockpit"] = COCKPIT
+        dobjs, report["decals"] = hs_interior_decals.build(objs, ship, coll, dspec, ROOT, mats, eye)
+        objs += dobjs
     report["lights"] = len(lights_out)
     return objs, sockets, list(lights_out), report
 
@@ -632,11 +688,17 @@ def cockpit_detail(g, layout, zc, sill):
                 p + Vector((0.012, 0.012, 0.004)) - Vector((0, 0, 0.04)))
     # frame wash: two dim spots at the foot of the front pillars grazing up the canopy frame's lining, so the
     # frame and its metal rims read as structure instead of black bars (the lamps themselves stay out of view)
+    wash = COCKPIT.get("frame_wash_cd", 4.0)
     for s_ in (1, -1):
-        lights_out.append({"at": [17.7, s_ * 1.05, sill + 0.05], "cd": 4.0, "type": "spot", "cone_deg": 90.0,
+        lights_out.append({"at": [17.7, s_ * 1.05, sill + 0.05], "cd": wash, "type": "spot", "cone_deg": 90.0,
                            "direction": [0.25, s_ * 0.35, 0.9]})
+        if COCKPIT.get("style") in ("pods", "wrap"):
+            # from the shoulders behind the pilot, up and forward onto the frame and the canopy arches: the
+            # painted frame reads as a form by day and by night (concept A)
+            lights_out.append({"at": [16.1, s_ * 0.55, 2.0], "cd": wash * 0.45, "type": "spot", "cone_deg": 120.0,
+                               "direction": [0.85, s_ * 0.25, 0.45], "warm": True})
     # a dim fill over the pilot's shoulders (seat, consoles, the rear of the tub)
-    lights_out.append({"at": [16.2, 0.0, 2.0], "cd": 3.0, "warm": True})
+    lights_out.append({"at": [16.3, 0.0, 1.85], "cd": 1.6, "warm": True, "source_radius_cm": 30.0})
     # footwell light (warm, small): the pilot's legs and the tub read in the dark
     for s_ in (1, -1):
         lights_out.append({"at": [17.6, s_ * 0.55, zc + 0.12], "cd": 2.0, "warm": True})

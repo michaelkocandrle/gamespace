@@ -265,11 +265,17 @@ else:
             # slot IntWall) - a hull seen from inside is culled
             int_mesh = unreal.EditorAssetLibrary.load_asset(sut.asset("Meshes/SM_Ship_{ship}_Interior"))
             int_slots = [str(m.get_editor_property("material_slot_name")) for m in int_mesh.get_editor_property("static_materials")]
-            check("inside of the canopy frame lined by the interior (slot IntWall)", "M_Ship_%s_IntWall" % sut.SHIP in int_slots, ", ".join(int_slots))
-            frame = unreal.EditorAssetLibrary.load_asset(sut.asset("Materials/MI_Ship_{ship}_IntWall"))
+            lining = "IntFrame" if "M_Ship_%s_IntFrame" % sut.SHIP in int_slots else "IntWall"
+            check("inside of the canopy frame lined by the interior (slot IntFrame or IntWall)", "M_Ship_%s_%s" % (sut.SHIP, lining) in int_slots, ", ".join(int_slots))
+            frame = unreal.EditorAssetLibrary.load_asset(sut.asset("Materials/MI_Ship_{ship}_" + lining))
             param = "PrimaryColor"
         base = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(frame, param) if frame else None
-        check("canopy frame's inside is dark (below 0.1)", base is not None and max(base.r, base.g, base.b) < 0.1, str(base))
+        if "M_Ship_%s_CanopyFrame" % sut.SHIP not in hull_slots and lining == "IntFrame":
+            # concept A (author 25. 9. 2026): the frame is painted in the hull's off-white, "not a black mass",
+            # yet not so bright that it glares against the displays
+            check("canopy frame lining painted, not black and not glaring (0.15..0.7)", base is not None and 0.15 <= max(base.r, base.g, base.b) <= 0.7, str(base))
+        else:
+            check("canopy frame's inside is dark (below 0.1)", base is not None and max(base.r, base.g, base.b) < 0.1, str(base))
     finally:
         eas.destroy_actor(ship_bp)
 

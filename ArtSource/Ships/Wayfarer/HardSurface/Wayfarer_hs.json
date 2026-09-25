@@ -668,6 +668,18 @@
    "colour": [0.1, 0.1, 0.1],
    "roughness": 0.7,
    "metallic": 0.0
+  },
+  "int_console": {
+   "slot": "IntConsole",
+   "colour": [0.05, 0.045, 0.042],
+   "roughness": 0.45,
+   "metallic": 0.2
+  },
+  "int_frame": {
+   "slot": "IntFrame",
+   "colour": [0.52, 0.47, 0.4],
+   "roughness": 0.35,
+   "metallic": 0.1
   }
  },
  "bevel": {
@@ -2520,6 +2532,242 @@
      "type": "conduit",
      "x": [4.6],
      "y": -1.84
+    }
+   ]
+  },
+  "cockpit": {
+   "_comment": "Concept A in the Wayfarer's colours (ArtSource/Ships/Wayfarer/Concept/Cockpit/cockpit_target_*.png, author 25. 9. 2026): MFD pods, holographic radar pedestal, low cowl, cream frame lining with orange pinstripes and panel seams (Tools/Blender/hs_cockpit.py).",
+   "style": "wrap",
+   "pod_x": 18.02,
+   "pod_y": 0.4,
+   "pod_z": 1.353,
+   "screen_w": 0.32,
+   "side_margin": 0.13,
+   "top_margin": 0.018,
+   "radius": 0.07,
+   "outer_bias": 0.03,
+   "cowl_z": 1.0,
+   "cowl_x": [17.72, 18.75],
+   "cowl_half_width": 0.95,
+   "ped_x": 18.2,
+   "ped_top": 1.36,
+   "centre_w": 0.09,
+   "pinstripe_inset_m": 0.07,
+   "seam_x": [16.0, 16.8, 17.6, 18.4],
+   "pod_bulge": 0.03,
+   "frame_wash_cd": 12.0,
+   "fascia_tilt_deg": 22.0,
+   "fascia_bottom_z": 0.97,
+   "pod_below_m": 0.1,
+   "wing": [
+    [17.3, 1.13, 1.06],
+    [17.62, 0.98, 1.22]
+   ],
+   "centre_x": 18.28,
+   "centre_top_z": 1.3,
+   "footwell_back_x": 18.62,
+   "footwell_cd": 2.5
+  },
+  "decals": {
+   "_comment": "Interior mesh decals from the exterior's library (Tools/Blender/hs_interior_decals.py): labels at every cockpit control group, service detail on every wall. Author 25. 9. 2026: don't spare decals.",
+   "index": "ArtSource/Ships/Shared/Decals/decal_library_index.json",
+   "offset_m": 0.0015,
+   "grid_m": 0.05,
+   "items": [
+    {
+     "item": "ck_eject",
+     "from": [16.9, 0.0, 0.75],
+     "dir": [0, 1, 0]
+    },
+    {
+     "item": "ck_canopy",
+     "from": [16.95, 0.0, 1.65],
+     "to": [17.55, 1.3, 1.35]
+    },
+    {
+     "item": "ck_emerg_o2",
+     "from": [16.05, 0.0, 0.75],
+     "dir": [0, 1, 0]
+    },
+    {
+     "item": "label_o2",
+     "from": [16.05, 0.0, 0.62],
+     "dir": [0, 1, 0]
+    },
+    {
+     "item": "ck_gear",
+     "from": [17.15, 0.93, 1.6],
+     "dir": [0, 0, -1]
+    },
+    {
+     "item": "ck_lights",
+     "from": [16.65, 0.93, 1.6],
+     "dir": [0, 0, -1]
+    },
+    {
+     "item": "ck_qt",
+     "from": [17.15, -0.93, 1.6],
+     "dir": [0, 0, -1]
+    },
+    {
+     "item": "ck_cool",
+     "from": [16.65, -0.93, 1.6],
+     "dir": [0, 0, -1]
+    },
+    {
+     "item": "ck_pwr",
+     "from": [16.9, -0.93, 1.6],
+     "dir": [0, 0, -1]
+    },
+    {
+     "item": "ck_scan",
+     "from": [16.9, 0.93, 1.6],
+     "dir": [0, 0, -1]
+    },
+    {
+     "item": "tri_warning",
+     "from": [18.1, 0.0, 0.62],
+     "dir": [1, 0, 0]
+    },
+    {
+     "item": "st_service",
+     "from": [18.1, 0.45, 0.45],
+     "dir": [1, 0, 0]
+    },
+    {
+     "item": "hazard_stripe",
+     "from": [15.62, 0.45, 1.0],
+     "dir": [0, 0, -1],
+     "rot": 90
+    },
+    {
+     "item": "hazard_stripe",
+     "from": [15.62, -0.45, 1.0],
+     "dir": [0, 0, -1],
+     "rot": 90
+    },
+    {
+     "item": "stencil_nostep",
+     "from": [18.45, 0.45, 2.1],
+     "dir": [0, 0, -1]
+    },
+    {
+     "item": "stencil_nostep",
+     "from": [18.45, -0.45, 2.1],
+     "dir": [0, 0, -1]
+    }
+   ],
+   "scatter": [
+    {
+     "items": [
+      "recessed_panel",
+      "access_panel",
+      "hatch_small",
+      "vent_small",
+      "bolt_row_4",
+      "rivet_row_8",
+      "rivet_double_8",
+      "seam_straight",
+      "socket",
+      "light_housing",
+      "corner_mark",
+      "panel_A12",
+      "panel_B07",
+      "panel_E11",
+      "panel_H19",
+      "st_inspect",
+      "st_service",
+      "st_torque",
+      "tri_warning",
+      "red_marker",
+      "hazard_subtle",
+      "label_power",
+      "label_o2"
+     ],
+     "weights": [3, 3, 2, 3, 3, 3, 2, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+     "x": [15.4, 18.4],
+     "z": [1.12, 2.0],
+     "from_y": 0.0,
+     "dir_z": 0.25,
+     "step": 0.26,
+     "prob": 0.62,
+     "seed": 11
+    },
+    {
+     "items": [
+      "vent_small",
+      "socket_round",
+      "label_power",
+      "st_extpwr",
+      "panel_D05",
+      "bolt_row_4",
+      "cable_run",
+      "corner_mark",
+      "red_dot"
+     ],
+     "x": [15.4, 17.4],
+     "z": [0.45, 0.95],
+     "from_y": 0.0,
+     "step": 0.24,
+     "prob": 0.5,
+     "seed": 12
+    },
+    {
+     "items": [
+      "panel_A14",
+      "panel_B03",
+      "panel_F02",
+      "panel_G08",
+      "st_nopaint",
+      "st_gnd",
+      "st_vent",
+      "st_hfcl",
+      "red_marker",
+      "corner_mark",
+      "rivet_row_8",
+      "bolt_row_4",
+      "socket",
+      "label_coolant",
+      "label_hydraulic",
+      "tri_warning",
+      "hazard_subtle"
+     ],
+     "x": [1.3, 10.2],
+     "z": [0.25, 1.3],
+     "from_y": 0.0,
+     "step": 0.38,
+     "prob": 0.4,
+     "seed": 13
+    },
+    {
+     "items": [
+      "rivet_row_16",
+      "st_vent",
+      "light_housing",
+      "cable_run",
+      "st_inspect"
+     ],
+     "x": [1.3, 10.2],
+     "z": [1.5, 2.0],
+     "from_y": 0.0,
+     "dir_z": 0.6,
+     "step": 0.45,
+     "prob": 0.35,
+     "seed": 14
+    }
+   ],
+   "grab_bars": [
+    {
+     "from": [16.95, 0.0, 1.65],
+     "at": [17.35, 1.25, 1.45],
+     "along": [0.3, 0, 1],
+     "length": 0.32
+    },
+    {
+     "from": [16.95, 0.0, 1.65],
+     "at": [17.35, -1.25, 1.45],
+     "along": [0.3, 0, 1],
+     "length": 0.32
     }
    ]
   }

@@ -615,7 +615,8 @@ def add_light_component(blueprint, light):
         existing.set_editor_property("light_color", unreal.Color(r=int(c[0] * 255), g=int(c[1] * 255), b=int(c[2] * 255), a=255))
         existing.set_editor_property("attenuation_radius", float(light["radius_m"]) * 100.0)
         existing.set_editor_property("cast_shadows", False)
-        existing.set_editor_property("source_radius", 2.0)
+        # a larger source softens a lamp close to a wall (no hard hot spot); 2 cm is a small fitting
+        existing.set_editor_property("source_radius", float(light.get("source_radius_cm", 2.0)))
         if cls is unreal.SpotLightComponent:
             existing.set_editor_property("outer_cone_angle", float(light.get("cone_deg", 40.0)) / 2.0)
             existing.set_editor_property("inner_cone_angle", float(light.get("cone_deg", 40.0)) / 4.0)
