@@ -1,0 +1,63 @@
+{
+ "_comment": "Wayfarer cockpit details (steps 5-6, 25. 9. 2026): HOTAS stick and throttle, the ship hologram. Run: Tools/Shots.ps1 -Preset cockpit_details -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0
+  },
+  {
+   "name": "hotas_stick",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 45,
+   "camera_local": [6.55, 0.55, 0.95],
+   "look_local": [6.95, 0.76, 0.65]
+  },
+  {
+   "name": "hotas_throttle",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 45,
+   "camera_local": [6.45, -0.45, 0.95],
+   "look_local": [6.8, -0.74, 0.62]
+  },
+  {
+   "name": "hologram",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 35,
+   "camera_local": [7.35, -0.35, 1.3],
+   "look_local": [7.85, -0.56, 1.12]
+  },
+  {
+   "name": "hologram_night",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "fov": 35,
+   "camera_local": [7.35, -0.35, 1.3],
+   "look_local": [7.85, -0.56, 1.12],
+   "console": [
+    "space.SunDir 25 45",
+    "space.Sun Intensity 0.0",
+    "space.Sky Intensity 0.03"
+   ]
+  }
+ ]
+}

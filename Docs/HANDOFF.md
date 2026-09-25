@@ -1540,6 +1540,11 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       - displeje a hologram svítí na okolí.
 
       Měření 1080p: pohled doprava průměr 0,23, B/R 0,87, detail 0,029 (v cílech SC); vesmír 0,04. FPS den 73, noc 86, vesmír 92.
+    - Krok 8, předání:
+      - `test_ship_geometry` PASS a 20/20 testů UE;
+      - úvodní obrazovka skrývá díl `Hologram` (`build_main_menu.py`, `test_menu_settings`);
+      - nový preset `cockpit_details` (HOTAS, hologram ve dne i v noci), `cockpit_daynight` má i vesmír a detaily modulů.
+      - Hlavní reference `starcitizenreference/cockpit_reference_holo.png` ve složce chybí; srovnáno s mediánem pěti dodaných.
 
 ---
 
