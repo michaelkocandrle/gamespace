@@ -142,8 +142,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 51776,
-      "verts": 55890,
+      "tris": 51744,
+      "verts": 55876,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -193,22 +193,22 @@
     "SM_Ship_Wayfarer_Hologram": {
       "lod": 0,
       "part": "Hologram",
-      "tris": 51156,
-      "verts": 27712,
+      "tris": 51219,
+      "verts": 27744,
       "materials": [
         "M_Ship_Wayfarer_Holo"
       ],
       "uv_layers": 1,
       "bounds_m": [
         [
-          7.769495010375977,
-          0.5048899054527283,
-          1.1076648235321045
+          7.769472122192383,
+          0.505159318447113,
+          1.087512731552124
         ],
         [
           7.926252365112305,
-          0.615166187286377,
-          1.144660472869873
+          0.6149395108222961,
+          1.1246604919433594
         ]
       ]
     },
@@ -234,6 +234,7 @@
         "M_Ship_Wayfarer_IntScreenBack",
         "M_Ship_Wayfarer_IntLedWhite",
         "M_Ship_Wayfarer_IntRed",
+        "M_Ship_Wayfarer_IntCream",
         "M_Ship_Wayfarer_IntFrame"
       ],
       "uv_layers": 1,
@@ -253,8 +254,8 @@
     "SM_Ship_Wayfarer_InteriorDecals": {
       "lod": 0,
       "part": "InteriorDecals",
-      "tris": 1700,
-      "verts": 1757,
+      "tris": 2450,
+      "verts": 2471,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -264,13 +265,13 @@
       "bounds_m": [
         [
           -8.753512382507324,
-          -1.8585000038146973,
+          -2.027472972869873,
           -1.092400074005127
         ],
         [
           8.367300033569336,
-          1.9786136150360107,
-          1.8552632331848145
+          2.020479679107666,
+          1.8924384117126465
         ]
       ]
     },

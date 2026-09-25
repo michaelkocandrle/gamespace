@@ -1533,6 +1533,13 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       - `M_Ship_Holo`: aditivní modrý, fresnel, rolující řádky, jemné blikání a chvění, pomalá rotace jednou za 30 s (WPO kolem `HoloPivot`, import ho nastaví ze středu obálky meshe);
       - poškození připravené (`DamageColor`, `DamageAmount`, vertex R), zatím statické;
       - vlastní díl `Hologram` (bez Nanite, kolize a stínu), modré světlo 1,5 cd. Test hlídá master, stín a pivot.
+    - Krok 7, materiály a světlo:
+      - obložení kabiny teplý tmavý grafit 0,11 místo krému; krém jen jako akcent na ostění oken (`IntCream`);
+      - hustší decaly na stěnách kokpitu;
+      - světlo oka 4 → 2,5 cd, světla na rám 12 → 4 cd, ostrůvky světla nad konzolemi (spot 3 cd);
+      - displeje a hologram svítí na okolí.
+
+      Měření 1080p: pohled doprava průměr 0,23, B/R 0,87, detail 0,029 (v cílech SC); vesmír 0,04. FPS den 73, noc 86, vesmír 92.
 
 ---
 

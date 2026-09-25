@@ -652,7 +652,7 @@
   },
   "int_frame": {
    "slot": "IntFrame",
-   "colour": [0.52, 0.47, 0.4],
+   "colour": [0.11, 0.104, 0.098],
    "roughness": 0.35,
    "metallic": 0.1
   },
@@ -683,6 +683,12 @@
    "roughness": 0.5,
    "metallic": 0.0,
    "emit": [0.2, 0.55, 1.0]
+  },
+  "int_cream": {
+   "slot": "IntCream",
+   "colour": [0.6, 0.54, 0.46],
+   "roughness": 0.4,
+   "metallic": 0.1
   },
   "int_screen_back": {
    "slot": "IntScreenBack",
@@ -2543,7 +2549,7 @@
    "pinstripe_inset_m": 0.07,
    "seam_x": [16.0, 16.8, 17.6, 18.4],
    "pod_bulge": 0.03,
-   "frame_wash_cd": 12.0,
+   "frame_wash_cd": 4.0,
    "fascia_tilt_deg": 22.0,
    "fascia_bottom_z": 1.72,
    "pod_below_m": 0.1,
@@ -2558,7 +2564,8 @@
    },
    "footwell_back_x": 18.62,
    "footwell_cd": 2.5,
-   "_raise": "Cockpit raised 0.8 m (floor 0.35 -> 1.15, eye 1.65 -> 2.45, author's step 2 view targets 25. 9. 2026): the canopy's glass starts 1 m over the old eye; raised, the pilot sits in the glass band and the exterior stays as drawn. Stairs from the cabin (hs_interior.py)."
+   "_raise": "Cockpit raised 0.8 m (floor 0.35 -> 1.15, eye 1.65 -> 2.45, author's step 2 view targets 25. 9. 2026): the canopy's glass starts 1 m over the old eye; raised, the pilot sits in the glass band and the exterior stays as drawn. Stairs from the cabin (hs_interior.py).",
+   "console_pool_cd": 3.0
   },
   "decals": {
    "_comment": "Interior mesh decals from the exterior's library (Tools/Blender/hs_interior_decals.py): labels at every cockpit control group, service detail on every wall. Author 25. 9. 2026: don't spare decals.",
@@ -2651,8 +2658,8 @@
      "z": [1.92, 2.8],
      "from_y": 0.0,
      "dir_z": 0.25,
-     "step": 0.26,
-     "prob": 0.62,
+     "step": 0.208,
+     "prob": 0.82,
      "seed": 11
     },
     {
@@ -2670,8 +2677,8 @@
      "x": [15.4, 17.4],
      "z": [1.25, 1.75],
      "from_y": 0.0,
-     "step": 0.24,
-     "prob": 0.5,
+     "step": 0.192,
+     "prob": 0.7,
      "seed": 12
     },
     {

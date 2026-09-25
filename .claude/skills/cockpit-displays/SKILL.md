@@ -125,6 +125,7 @@ Podrobná historie: HANDOFF body 23–33, 32b, 72; postup WORKFLOW kap. 7, nást
 - Ladění: pole snímku `cockpit_light` [key, fill], `display_light`, `interior_tint`; v kódu
   `ASpaceshipPawn::DebugSetCockpitLighting(Key, Fill, Display, InteriorTint)`. Preset `cockpit_light`.
 - Interiér kokpitu `base_color_tint` 0,6 (tmavý jako v SC). Hodnoty trupu (`space.ShipMat`) interiér nedědí.
+- **Wayfarer po kroku 7 (25. 9. 2026):** obložení tmavý grafit, krém jen na ostění, `cockpit_light_intensity_cd` 2,5, `frame_wash_cd` 4, ostrůvky nad konzolemi (`console_pool_cd` 3). Hologram lodi (`M_Ship_Holo`) nad levým MFD.
 - **Wayfarer (koncept A, 25. 9. 2026):** setup `pawn.cockpit_exposure_bias` **−0,2 EV** a emise displejů **2,05**
   (= 2,9 / 2^0,5): natřený kokpit musí číst ve dne i v noci. Displeje v desce `hs_cockpit.py` (styl `wrap`).
 - **Expozice:** kokpitová kamera má vlastní `ASpaceshipPawn::CockpitExposureBias` = **−0,7 EV** (výchozí C++) (ve skoku

@@ -106,6 +106,18 @@
     "space.Sun Intensity 0.0",
     "space.Sky Intensity 0.03"
    ]
+  },
+  {
+   "name": "pilot_view_space",
+   "camera": "cockpit",
+   "altitude_m": 60000,
+   "facing": "horizon",
+   "hud": 1,
+   "gear": false,
+   "settle": 3.0,
+   "console": [
+    "space.KitReset"
+   ]
   }
  ]
 }

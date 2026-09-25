@@ -285,9 +285,9 @@ else:
             param = "PrimaryColor"
         base = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(frame, param) if frame else None
         if "M_Ship_%s_CanopyFrame" % sut.SHIP not in hull_slots and lining == "IntFrame":
-            # concept A (author 25. 9. 2026): the frame is painted in the hull's off-white, "not a black mass",
-            # yet not so bright that it glares against the displays
-            check("canopy frame lining painted, not black and not glaring (0.15..0.7)", base is not None and 0.15 <= max(base.r, base.g, base.b) <= 0.7, str(base))
+            # author 25. 9. 2026, step 7: dark graphite around the displays, cream only as an accent - painted
+            # graphite, not a black mass (the earlier rule: off-white 0.15..0.7)
+            check("canopy frame lining dark graphite, not black (0.08..0.2)", base is not None and 0.08 <= max(base.r, base.g, base.b) <= 0.2, str(base))
         else:
             check("canopy frame's inside is dark (below 0.1)", base is not None and max(base.r, base.g, base.b) < 0.1, str(base))
     finally:

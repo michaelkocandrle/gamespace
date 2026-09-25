@@ -855,7 +855,8 @@ def build(recipe, layout, coll, mats, ship, hull):
         rb.free()
         ob = bpy.data.objects.new(me_r.name, me_r)
         coll.objects.link(ob)
-        ob.data.materials.append(mats["int_trim"])
+        # the cream accent round the windows on the dark graphite frame (author 25. 9. 2026, step 7)
+        ob.data.materials.append(mats["int_cream" if "int_cream" in mats else "int_trim"])
         objs.append(ob)
     if stripe.verts:
         ob = hp.finish(stripe, "SM_Ship_%s_Int_LinerStripe" % ship, coll, {"angle_deg": 40, "width": 0, "segments": 1})
@@ -983,6 +984,11 @@ def cockpit_detail(g, layout, zc, sill):
             lights_out.append({"at": [16.1, s_ * 0.55, zc + 1.65], "cd": wash * 0.45, "type": "spot", "cone_deg": 120.0,
                                "direction": [0.85, s_ * 0.25, 0.45], "warm": True})
     # a dim fill over the pilot's shoulders (seat, consoles, the rear of the tub)
+    # islands of light: a narrow pool on each side console (the hands, the modules), dark between (step 7)
+    for o in (left, right):
+        x0, x1, y0, y1 = o["rect"]
+        lights_out.append({"at": [(x0 + x1) / 2, (y0 + y1) / 2, ztop + 0.75], "cd": COCKPIT.get("console_pool_cd", 3.0), "type": "spot",
+                           "cone_deg": 45.0, "direction": [0.0, 0.0, -1.0], "warm": True, "source_radius_cm": 4.0})
     lights_out.append({"at": [16.3, 0.0, zc + 1.5], "cd": 1.6, "warm": True, "source_radius_cm": 30.0})
     # footwell light (warm, small): the pilot's legs and the tub read in the dark
     for s_ in (1, -1):
