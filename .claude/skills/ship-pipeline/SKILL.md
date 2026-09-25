@@ -494,6 +494,30 @@ Závěr: interiér SC stojí na **konstrukci a vrstvách** (profil, portály, ž
 **kontrastním světle**. Předměty jsou až třetí vrstva. Postup: modulární kit (Quaternius, CC0) jako nosná
 vrstva, procedurální přesný detail a decaly navíc (`Docs/AssetPipeline_Modular.md`).
 
+**Kabina (kokpit) SC: rozbor a cílová čísla** (25. 9. 2026). Hlavní reference `cockpit_reference_holo.png`
+v repozitáři není; náhradou autorových 5 snímků kokpitů SC `starcitizenreference/cockpit_reference_1..5.png`
+(1, 2, 4 lehká stíhačka ve vesmíru / ve dne / v noci, 3 luxusní kabina, 5 těžký rám). Cíl = medián.
+
+| Kategorie | SC má | Wayfarer má (po konceptu A) | Chybí |
+| --- | --- | --- | --- |
+| Displeje | tenké skleněné panely, průhledné, svítí jen obsah, tenký technický rám s podsvíceným okrajem, na držácích; často jeden široký panel pod linií pohledu (3, 5) | dva MFD v tlustých chromových rámečcích, neprůhledné tmavé pozadí | sklo, průhlednost, edge light, držáky, široký centrální panel |
+| Fyzické ovladače | moduly (pods) s pouzdrem, rámem, šrouby a štítkem; páčky s kryty, voliče s drážkováním, kolébky, řady podsvícených tlačítek (12–18 mm), popisky u všeho | kulaté tečky a holé válce, pár kláves | skutečné tvary se zkosením, moduly, popisky |
+| Kontrolky | desítky LED v řadách, oranžové a bílé, některé blikají | pár emisivních teček | řady LED, blikání |
+| Palubní deska | nízká (horní hrana 23–47 % výšky obrazu od spodu, medián 35 %), mělká, dva moduly po stranách a střed otevřený dolů | horní hrana 39,8 % | mírně snížit a zúžit |
+| Rám skla | skoro bezrámová kabina (1–4): jen tenký rám nahoře (0,4–0,7 % šířky), nic v pásu ±15° kolem pohledu; těžký rám (5) má sloupky 3,5 % | středový kříž nahoře, plné boční stěny, výhled 24,5 % | tenký rám, bez kříže, větší skla (cíl výhledu medián 62 %, rozsah 45–75 %) |
+| Hologram lodi | vlastní loď jako modrý aditivní hologram vlevo nahoře (1, 2, 3) mimo pohled | drátěné kroužky radaru | hologram z meshe lodi |
+| Světlo | tmavá kabina, světlo hlavně z displejů, hologramů a kontrolek, tlumené akcenty | světlá krémová kabina, výplňová světla | tmavší základ, ostrůvky světla |
+| Barvy materiálů | tmavý grafit / gunmetal kolem displejů, světlé jen akcenty (3 bílá luxusní výjimka) | krémový rám kolem displejů | tmavé kolem displejů, krém jako akcent |
+
+Změřeno (1920×1080, `Tools/Blender/eye_view_metrics.py`, reference odečtené z mřížky):
+
+| Veličina | Ref 1 | Ref 2 | Ref 3 | Ref 4 | Ref 5 | **Medián (cíl ±15 %)** | Wayfarer před |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Výhled ven (% plochy) | 62 | 51 | 75 | 62 | 45 | **62 (53–71)** | 24,5 |
+| Horní hrana desky (% od spodu) | 38 | 47 | 23 | 35 | 28 | **35 (30–40)** | 39,8 |
+| Nejširší sloupek v poli (% šířky) | 0,4 | 0,7 | 0,5 | 2 | 3,5 | **0,7** (≤ 2 přijatelné) | 42,1 (plné boční stěny) |
+| Sloupek v pásu ±15° | ne | ne | ne | ne | ne | **ne** | ne |
+
 **Livrej a lak** (`M_Ship_Layered`, setup Paint): zóny v prostoru lodi (cm) – `TopZ/TopSlope` sedlo, `BotZ/BotSlope`
 spodek, `TailX`, `NoseX`, pruh `StripeZ/StripeSlope/StripeW/StripeX0/X1` v `AccentColor`, zóny v `LiveryColor`;
 `LiveryAmount` 1 jen v primárním laku. Varianty v `_livery_variants` setupu; přepnutí za běhu
