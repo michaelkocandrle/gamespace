@@ -863,6 +863,22 @@
    "blink_hz": 0.6,
    "blink_min": 0.08
   },
+  "MI_Ship_Wayfarer_Holo": {
+   "_comment": "the cockpit's ship hologram (M_Ship_Holo); HoloPivot is set by import_ship.py from the Hologram mesh's bounds",
+   "master": "holo",
+   "slots": [
+    "M_Ship_Wayfarer_Holo"
+   ],
+   "vectors": {
+    "HoloColor": [0.2, 0.55, 1.0]
+   },
+   "scalars": {
+    "HoloStrength": 1.1,
+    "RimStrength": 1.2,
+    "BaseGlow": 0.12,
+    "HoloTurnsPerSecond": 0.0333
+   }
+  },
   "MI_Ship_Wayfarer_IntScreenBack": {
    "_comment": "the plate behind each display's clear glass: matte, pixel animation like the page (M_Ship_ScreenBack)",
    "master": "screenback",
@@ -1129,7 +1145,8 @@
   "Interior",
   "Screens",
   "InteriorKit",
-  "InteriorDecals"
+  "InteriorDecals",
+  "Hologram"
  ],
  "_comment_no_nanite": "Decals: mesh decals (Tools/Blender/hs_decals.py) use Deferred Decal materials, which Nanite cannot draw (skill ship-pipeline 3b3).",
  "_livery_variants": {

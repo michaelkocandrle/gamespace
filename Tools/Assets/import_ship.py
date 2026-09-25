@@ -514,6 +514,10 @@ def add_mesh_component(blueprint, extra):
             # the decal materials fade out between 60 and 90 m (ship_materials._decal_fade); drawing stops
             # just past that, so there is no pop
             existing.set_editor_property("ld_max_draw_distance", 9500.0)
+        if extra["component"] == "Hologram":
+            # additive light, no surface: no shadow, no distance field
+            existing.set_editor_property("cast_shadow", False)
+            existing.set_editor_property("affect_distance_field_lighting", False)
         if extra["component"] == "Screens":
             # the displays are glass panels (masked): with shadows the sun drew the page's letters as a dark,
             # shifted copy on the plate behind the clear glass (25. 9. 2026)
@@ -752,6 +756,15 @@ def main(argv):
         import ship_materials
         report["materials"] = ship_materials.apply(
         plan["ship"], {"materials": plan["materials"], "decals": plan["decals"]}, imported)
+        # the hologram turns about its own centre: HoloPivot (mesh space, cm) from the imported mesh's bounds
+        holo_mesh = unreal.EditorAssetLibrary.load_asset("/Game/Ships/%s/Meshes/SM_Ship_%s_Hologram" % (plan["ship"], plan["ship"]))
+        holo_mi = unreal.EditorAssetLibrary.load_asset("/Game/Ships/%s/Materials/MI_Ship_%s_Holo" % (plan["ship"], plan["ship"]))
+        if holo_mesh is not None and holo_mi is not None:
+            o = holo_mesh.get_bounds().origin
+            unreal.MaterialEditingLibrary.set_material_instance_vector_parameter_value(holo_mi, "HoloPivot", unreal.LinearColor(o.x, o.y, o.z, 1.0))
+            unreal.MaterialEditingLibrary.update_material_instance(holo_mi)
+            unreal.EditorAssetLibrary.save_loaded_asset(holo_mi, only_if_is_dirty=False)
+            report["hologram_pivot_cm"] = [round(o.x, 1), round(o.y, 1), round(o.z, 1)]
     blueprint = apply_pawn_settings(plan, report)
     remove_stale(plan, blueprint, report)
     apply_level_settings(plan, blueprint, env_flag("GAMESPACE_SHIP_APPLY_PLANET", True),

@@ -214,6 +214,82 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
                                "max_w": (w - 0.016) / len(row) - 0.004})
 
 
+# ------------------------------------------------------------------------------------------ hologram
+# Author 25. 9. 2026 (step 6): the ship's hologram from the Wayfarer's own mesh - additive blue, fresnel, scan
+# lines, a slight jitter, slowly turning (M_Ship_Holo: the turn and the jitter are World Position Offset about
+# the mesh's centre, which import_ship.py sets as HoloPivot from the imported mesh's bounds). Off the line of
+# sight: over the left MFD. Damage colours are prepared in the material (DamageColor x DamageAmount x vertex
+# colour R), static for now.
+
+def build_hologram(g, coll, mat, ship, exterior, centre, length=0.16, max_tris=8000):
+    """A decimated copy of the exterior objects, `length` long, centred on `centre`, on an emitter; returns the
+    object SM_Ship_<Ship>_Hologram (its own part, hs_assemble_ship.py)."""
+    import bpy
+    bm = bmesh.new()
+    # evaluated meshes (the greebles are instanced on point clouds by modifiers: their raw meshes are loose
+    # points with instancing attributes - they came through the assemble as garbage vertices, 25. 9. 2026)
+    bpy.context.view_layer.update()
+    dg = bpy.context.evaluated_depsgraph_get()
+    for ob in exterior:
+        ev = ob.evaluated_get(dg)
+        me = ev.to_mesh()
+        if me is not None and len(me.polygons):
+            tmp = bmesh.new()
+            tmp.from_mesh(me)
+            tmp.transform(ob.matrix_world)
+            tm = bpy.data.meshes.new("_holo_part")
+            tmp.to_mesh(tm)
+            tmp.free()
+            # positions and faces only
+            bm.from_mesh(tm)
+            bpy.data.meshes.remove(tm)
+        ev.to_mesh_clear()
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    for dom in (bm.verts.layers, bm.edges.layers, bm.faces.layers):
+        for kind in ("int", "float", "float_vector", "float_color", "color", "string", "bool"):
+            coll_ = getattr(dom, kind, None)
+            if coll_ is None:
+                continue
+            for layer in list(coll_.values()):
+                coll_.remove(layer)
+    if not bm.faces:
+        bm.free()
+        return None
+    xs = [v.co.x for v in bm.verts]
+    ys = [v.co.y for v in bm.verts]
+    zs = [v.co.z for v in bm.verts]
+    mid = Vector(((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2, (min(zs) + max(zs)) / 2))
+    k = length / max(max(xs) - min(xs), 1e-6)
+    for v in bm.verts:
+        v.co = centre + (v.co - mid) * k
+    me = bpy.data.meshes.new("SM_Ship_%s_Hologram" % ship)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(me.name, me)
+    coll.objects.link(ob)
+    # decimated by a modifier the assemble applies (hs_assemble_ship applies every modifier); a modifier also
+    # keeps hs_build_ship.finish() off it - its Bevel on this dense mesh made garbage vertices (25. 9. 2026)
+    tris = sum(len(p.vertices) - 2 for p in me.polygons)
+    mod = ob.modifiers.new("Decimate", "DECIMATE")
+    mod.ratio = min(1.0, max_tris / max(tris, 1))
+    ob.data.materials.clear()
+    ob.data.materials.append(mat)
+    if not ob.data.uv_layers:
+        # (no texture, but the exporter wants a UV map: a planar one from above)
+        uv = ob.data.uv_layers.new(name="UVMap")
+        for loop in ob.data.loops:
+            co = ob.data.vertices[loop.vertex_index].co
+            uv.data[loop.index].uv = ((co.x - centre.x) / length + 0.5, (co.y - centre.y) / length + 0.5)
+    # the emitter under it: a satin disc with a glowing lens, on the surface below
+    base = centre - Vector((0, 0, 0.065))
+    tube(g["int_trim"], base, base + Vector((0, 0, 0.012)), 0.034, 32)
+    tube(g["int_glow"], base + Vector((0, 0, 0.012)), base + Vector((0, 0, 0.0145)), 0.024, 32)
+    for a in range(3):
+        d = Vector((math.cos(a * 2 * math.pi / 3), math.sin(a * 2 * math.pi / 3), 0))
+        tube(g["int_trim"], base + d * 0.03, base + d * 0.03 + Vector((0, 0, 0.02)), 0.0025, 6)
+    return ob
+
+
 # ------------------------------------------------------------------------------------------ HOTAS
 # Author 25. 9. 2026 (step 5): a HOTAS-style stick and throttle on the side consoles - grip, trigger, hats and
 # buttons, a rubber boot over the mechanism, where the pilot's hands rest (forearms on the consoles).
@@ -489,16 +565,11 @@ def pedestal(g, screen_bm, sockets, eye, spec):
     for name, du, h in (("centre_top", -0.055, spec["centre_w"] * 259.0 / 210.0), ("centre_bottom", 0.055, spec["centre_w"] * 231.0 / 210.0)):
         c = hc + hr * du + hn * 0.006
         glass_panel(g, screen_bm, sockets, name, c, hr, hu, hn, spec["centre_w"], h, 0.015)
-    # holographic radar: emitter ring and glowing lens on top, three light rings and four ticks over it
+    # (the wire "holographic radar" that stood here is gone: the ship hologram replaces it, off the line of
+    # sight - build_hologram; a satin cap closes the pedestal's top)
     e = Vector((x0 - 0.02, 0.0, ztop))
-    tube(g["int_trim"], e, e + Vector((0, 0, 0.022)), 0.075, 32)
-    tube(g["int_glow"], e + Vector((0, 0, 0.022)), e + Vector((0, 0, 0.026)), 0.055, 32)
-    up = Vector((0, 0, 1))
-    for dz, R in ((0.05, 0.085), (0.08, 0.07), (0.10, 0.042)):
-        rr_ring(g["int_glow"], e + up * dz, Vector((0, -1, 0)), Vector((1, 0, 0)), up, 2 * R, 2 * R, R - 1e-4, 0.0045, 0.003, 8)
-    for a in range(4):
-        d = Vector((math.cos(a * math.pi / 2 + 0.4), math.sin(a * math.pi / 2 + 0.4), 0))
-        tube(g["int_glow"], e + up * 0.045 + d * 0.08, e + up * 0.09 + d * 0.06, 0.0022, 5)
+    tube(g["int_trim"], e, e + Vector((0, 0, 0.012)), 0.07, 32)
+    tube(g["int_dark"], e + Vector((0, 0, 0.012)), e + Vector((0, 0, 0.015)), 0.055, 32)
 
 
 def cowl(g, spec, zfloor):

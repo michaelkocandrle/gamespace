@@ -699,6 +699,13 @@ def build(recipe, layout, coll, mats, ship, hull):
     if kit is not None:
         hs_interior_kit.fittings(kit, g, box, spec, lights_out)
         cockpit_detail(g, layout, zc, sill)
+    holo_centre = None
+    if COCKPIT.get("hologram") and "int_console" in g.bm:
+        # (here, while the dash's bmesh still exists - finish() frees it)
+        from mathutils.bvhtree import BVHTree
+        at = Vector(COCKPIT["hologram"]["at"])
+        hit = BVHTree.FromBMesh(g["int_console"]).ray_cast(at + Vector((0, 0, 0.4)), Vector((0, 0, -1)), 1.0)[0]
+        holo_centre = Vector((at.x, at.y, (hit.z if hit is not None else at.z) + 0.065))
     objs = []
     if kit is not None:
         objs += kit.objects(ship, coll, mats)
@@ -906,6 +913,26 @@ def build(recipe, layout, coll, mats, ship, hull):
         dspec["_cockpit"] = COCKPIT
         dobjs, report["decals"] = hs_interior_decals.build(objs, ship, coll, dspec, ROOT, mats, eye)
         objs += dobjs
+    if holo_centre is not None and "holo" in mats:
+        # the ship hologram over the left MFD (hs_cockpit.build_hologram): on the pod's top, found by a ray down
+        import hs_cockpit
+        from mathutils.bvhtree import BVHTree
+        hg = COCKPIT["hologram"]
+        centre = holo_centre
+        exterior = [o for o in coll.objects if o.type == "MESH" and "_Int" not in o.name and not o.name.endswith(("_Canopy", "_Hologram"))
+                    and "Gear" not in o.name and not o.name.startswith(("UCX_", "SOCKET_"))]
+        emit = B()
+        ho = hs_cockpit.build_hologram(emit, coll, mats["holo"], ship, exterior, centre, hg.get("length_m", 0.16))
+        for key, bm in emit.bm.items():
+            if bm.verts:
+                eo = hp.finish(bm, "SM_Ship_%s_Int_HoloEmitter_%s" % (ship, key), coll, {"angle_deg": 30, "width": 0.002, "segments": 1})
+                eo.data.materials.append(mats[key])
+                objs.append(eo)
+        if ho is not None:
+            objs.append(ho)
+            # the hologram lights its surroundings a little (step 7): a cool point light, no shadow
+            lights_out.append({"at": list(centre), "cd": hg.get("light_cd", 1.5), "color": [0.35, 0.65, 1.0], "type": "point"})
+            report["hologram"] = {"centre": [round(v, 3) for v in centre], "tris": sum(len(p.vertices) - 2 for p in ho.data.polygons)}
     report["lights"] = len(lights_out)
     return objs, sockets, list(lights_out), report
 

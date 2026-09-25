@@ -898,6 +898,11 @@ snímku.
   - na vodorovné desce Placer natočil štítek podle světa přes ovladač → štítky modulu nesou rámeček modulu (`frame`);
   - paprsky `lay` z 12 cm trefily jinou geometrii nebo rub → štítky kladou z 2 cm a rubové plochy se přeskakují;
   - dlouhé slovo (QUANTUM) přesahuje buňku → měřítko se zmenší na `max_w`.
+- bs) **Nový objekt v interiéru má v herním blendu nesmyslné vrcholy (loď „6·10¹² m“ v exportu).** Příčiny:
+  - `hs_build_ship.finish()` přidá Bevel a WeightedNormal každému objektu bez modifikátoru;
+  - assemble všechny modifikátory aplikuje a Bevel na hustém meshi s degenerovanými plochami vyrobí smetí.
+
+  Hologram proto nese modifikátor Decimate: `finish()` ho vynechá a assemble decimaci aplikuje. Mesh z cizích dílů ber vyhodnocený (`evaluated_get().to_mesh()`), protože greeble jsou bodová mračna s instancerem. Nepoužívej `meshes.new_from_object` s následným mazáním.
 - bo) **Kontrola geometrie před každým předáním:** `python Tools/Tests/test_ship_geometry.py` (Blender headless na
   `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
   Musí projít (autor 25. 9. 2026).

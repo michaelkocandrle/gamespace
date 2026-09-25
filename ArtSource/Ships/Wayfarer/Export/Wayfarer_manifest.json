@@ -52,6 +52,12 @@
       ]
     },
     {
+      "fbx": "SM_Ship_Wayfarer_Hologram.fbx",
+      "objects": [
+        "SM_Ship_Wayfarer_Hologram"
+      ]
+    },
+    {
       "fbx": "SM_Ship_Wayfarer_Interior.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Interior"
@@ -80,8 +86,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 613241,
-      "verts": 454128,
+      "tris": 613247,
+      "verts": 454131,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -136,8 +142,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 51796,
-      "verts": 55946,
+      "tris": 51776,
+      "verts": 55890,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -184,11 +190,33 @@
         ]
       ]
     },
+    "SM_Ship_Wayfarer_Hologram": {
+      "lod": 0,
+      "part": "Hologram",
+      "tris": 51156,
+      "verts": 27712,
+      "materials": [
+        "M_Ship_Wayfarer_Holo"
+      ],
+      "uv_layers": 1,
+      "bounds_m": [
+        [
+          7.769495010375977,
+          0.5048899054527283,
+          1.1076648235321045
+        ],
+        [
+          7.926252365112305,
+          0.615166187286377,
+          1.144660472869873
+        ]
+      ]
+    },
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 383749,
-      "verts": 217328,
+      "tris": 394289,
+      "verts": 222666,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntLeather",
@@ -225,8 +253,8 @@
     "SM_Ship_Wayfarer_InteriorDecals": {
       "lod": 0,
       "part": "InteriorDecals",
-      "tris": 1696,
-      "verts": 1749,
+      "tris": 1700,
+      "verts": 1757,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -361,7 +389,7 @@
         [
           -4.251672267913818,
           4.405613422393799,
-          1.0493535995483398
+          1.049353837966919
         ]
       ]
     },

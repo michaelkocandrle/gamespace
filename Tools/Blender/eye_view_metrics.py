@@ -40,7 +40,7 @@ def main():
     cam.rotation_euler = (math.radians(90 + pitch), 0, math.radians(-90))
     sc.camera = cam
     for o in bpy.data.objects:
-        if o.type == "MESH" and (o.name.endswith("_Canopy") or o.name.startswith(("UCX_", "SOCKET_"))):
+        if o.type == "MESH" and (o.name.endswith(("_Canopy", "_Hologram")) or o.name.startswith(("UCX_", "SOCKET_"))):
             o.hide_render = True
         if o.type == "EMPTY":
             o.hide_render = True

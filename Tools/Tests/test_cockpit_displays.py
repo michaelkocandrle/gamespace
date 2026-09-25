@@ -243,6 +243,17 @@ else:
         if found is not None and screen_part == "Screens":
             check("the glass displays cast no shadow (the sun drew the letters on the plate behind)",
                   not found.get_editor_property("cast_shadow"))
+        if sut.has_part("Hologram"):
+            # the ship hologram (step 6): additive M_Ship_Holo, no shadow, turning about its own centre
+            holo = next((c for c in ship_bp.get_components_by_class(unreal.StaticMeshComponent) if c.get_name() == "Hologram"), None)
+            hm = holo.get_material(0) if holo else None
+            hp = hm.get_editor_property("parent") if isinstance(hm, unreal.MaterialInstance) else None
+            check("hologram: additive M_Ship_Holo, no shadow", hp is not None and hp.get_name() == "M_Ship_Holo"
+                  and hp.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_ADDITIVE and not holo.get_editor_property("cast_shadow"),
+                  "%s / %s" % (hm and hm.get_name(), hp and hp.get_name()))
+            pv = unreal.MaterialEditingLibrary.get_material_instance_vector_parameter_value(hm, "HoloPivot") if hm else None
+            check("hologram pivot set from the mesh (not the ship's origin)", pv is not None and abs(pv.r) + abs(pv.g) + abs(pv.b) > 10.0,
+                  str(pv))
         # the display lights look for Display_ sockets on any of the ship's meshes
         sockets = [str(n) for c in ship_bp.get_components_by_class(unreal.StaticMeshComponent) for n in c.get_all_socket_names()]
         check("a Display_ socket in front of each screen (their glow)", sorted(n for n in sockets if n.startswith("Display_"))

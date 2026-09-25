@@ -677,6 +677,13 @@
    "metallic": 0.0,
    "emit": [1.0, 0.38, 0.06]
   },
+  "holo": {
+   "slot": "Holo",
+   "colour": [0.2, 0.55, 1.0],
+   "roughness": 0.5,
+   "metallic": 0.0,
+   "emit": [0.2, 0.55, 1.0]
+  },
   "int_screen_back": {
    "slot": "IntScreenBack",
    "colour": [0.02, 0.022, 0.026],
@@ -2543,6 +2550,12 @@
    "wing": [[17.3, 1.09, 1.81], [17.62, 0.98, 1.97]],
    "centre_x": 18.28,
    "centre_top_z": 2.05,
+   "hologram": {
+    "_comment": "the ship hologram (step 6): over the left MFD, off the line of sight; at = x, y and a z above the pod's top (a ray down finds it)",
+    "at": [18.1, 0.56, 2.3],
+    "length_m": 0.16,
+    "light_cd": 1.5
+   },
    "footwell_back_x": 18.62,
    "footwell_cd": 2.5,
    "_raise": "Cockpit raised 0.8 m (floor 0.35 -> 1.15, eye 1.65 -> 2.45, author's step 2 view targets 25. 9. 2026): the canopy's glass starts 1 m over the old eye; raised, the pilot sits in the glass band and the exterior stays as drawn. Stairs from the cabin (hs_interior.py)."

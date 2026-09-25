@@ -20,6 +20,8 @@ Masters (rebuilt on every run, like the scene materials):
                                                clear glass (BaseColor, Metallic, Roughness)
     /Game/Ships/Shared/Materials/M_Ship_Blink  opaque: a slowly blinking LED (EmissiveColor x EmissiveStrength
                                                pulsing BlinkMin..1 at BlinkHz)
+    /Game/Ships/Shared/Materials/M_Ship_Holo   additive, unlit: the cockpit's ship hologram (turns about
+                                               HoloPivot by World Position Offset, scan lines, damage colour)
     /Game/Ships/Shared/Materials/M_Ship_Glass  translucent, two-sided, surface forward shading:
                                                BaseColor, Opacity, Roughness
 
@@ -43,7 +45,7 @@ MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glas
            "meshdecal": SHARED + "/M_Ship_MeshDecal", "meshdecal_paint": SHARED + "/M_Ship_MeshDecalPaint",
            "meshdecal_ao": SHARED + "/M_Ship_MeshDecalAO",
            "layered": SHARED + "/M_Ship_Layered", "screenback": SHARED + "/M_Ship_ScreenBack",
-           "blink": SHARED + "/M_Ship_Blink"}
+           "blink": SHARED + "/M_Ship_Blink", "holo": SHARED + "/M_Ship_Holo"}
 TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap",
                   "decal_normal": "DecalNormalMap", "decal_m": "DecalMMap", "decal_bc": "DecalColorMap",
                   "decal_ao": "DecalAOMap"}
@@ -599,6 +601,127 @@ def build_screen_master():
     return screen
 
 
+def build_holo_master():
+    """The cockpit's ship hologram (step 6): additive, unlit, two-sided. Emission = HoloColor x HoloStrength x
+    (a base plus a fresnel rim) x scan lines rolling up in world z x a faint flicker; damage colour prepared
+    (lerp to DamageColor by DamageAmount x vertex colour R - static 0 for now). World Position Offset turns the
+    mesh slowly about the vertical through HoloPivot (mesh space, cm - import_ship.py sets it from the imported
+    mesh's bounds) and jitters it a little."""
+    m = _fresh_material(MASTERS["holo"])
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
+    m.set_editor_property("two_sided", True)
+    m.set_editor_property("enable_responsive_aa", True)
+    time = _node(m, unreal.MaterialExpressionTime, -2200, 1200)
+    # --- turn about the pivot: RotateAboutAxis(axis, angle 0..1, pivot, position)
+    pivot_local = _vector(m, "HoloPivot", (0.0, 0.0, 0.0), -2200, 1500)
+    pivot = _node(m, unreal.MaterialExpressionTransformPosition, -1900, 1500)
+    pivot.set_editor_property("transform_source_type", unreal.MaterialPositionTransformSource.TRANSFORMPOSSOURCE_LOCAL)
+    pivot.set_editor_property("transform_type", unreal.MaterialPositionTransformSource.TRANSFORMPOSSOURCE_WORLD)
+    MEL.connect_material_expressions(pivot_local, "", pivot, "")
+    axis = _node(m, unreal.MaterialExpressionTransform, -1900, 1650)
+    axis.set_editor_property("transform_source_type", unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_LOCAL)
+    axis.set_editor_property("transform_type", unreal.MaterialVectorCoordTransform.TRANSFORM_WORLD)
+    MEL.connect_material_expressions(_node(m, unreal.MaterialExpressionConstant3Vector, -2200, 1650,
+                                           constant=unreal.LinearColor(0.0, 0.0, 1.0, 1.0)), "", axis, "")
+    axis_n = _node(m, unreal.MaterialExpressionNormalize, -1700, 1650)
+    MEL.connect_material_expressions(axis, "", axis_n, "")
+    turns = _node(m, unreal.MaterialExpressionMultiply, -1900, 1350)
+    _link(time, turns, "A")
+    _link(_scalar(m, "HoloTurnsPerSecond", 1.0 / 30.0, -2200, 1350), turns, "B")
+    angle = _node(m, unreal.MaterialExpressionFrac, -1700, 1350)
+    MEL.connect_material_expressions(turns, "", angle, "")
+    pos = _node(m, unreal.MaterialExpressionWorldPosition, -1900, 1800)
+    pos.set_editor_property("world_position_shader_offset", unreal.WorldPositionIncludedOffsets.WPT_EXCLUDE_ALL_SHADER_OFFSETS)
+    rot = _node(m, unreal.MaterialExpressionRotateAboutAxis, -1400, 1500)
+    MEL.connect_material_expressions(axis_n, "", rot, "NormalizedRotationAxis")
+    MEL.connect_material_expressions(angle, "", rot, "RotationAngle")
+    MEL.connect_material_expressions(pivot, "", rot, "PivotPoint")
+    MEL.connect_material_expressions(pos, "", rot, "Position")
+    # --- jitter: a tiny shake along the axis, two beating sines
+    j1 = _node(m, unreal.MaterialExpressionSine, -1700, 1950, period=0.23)
+    MEL.connect_material_expressions(time, "", j1, "")
+    j2 = _node(m, unreal.MaterialExpressionSine, -1700, 2050, period=1.7)
+    MEL.connect_material_expressions(time, "", j2, "")
+    jj = _node(m, unreal.MaterialExpressionMultiply, -1550, 2000)
+    _link(j1, jj, "A")
+    _link(j2, jj, "B")
+    jamp = _node(m, unreal.MaterialExpressionMultiply, -1400, 2000)
+    _link(jj, jamp, "A")
+    _link(_scalar(m, "JitterCm", 0.05, -1550, 2150), jamp, "B")
+    jvec = _node(m, unreal.MaterialExpressionMultiply, -1250, 1900)
+    _link(axis_n, jvec, "A")
+    _link(jamp, jvec, "B")
+    wpo = _node(m, unreal.MaterialExpressionAdd, -1100, 1600)
+    _link(rot, wpo, "A")
+    _link(jvec, wpo, "B")
+    _output(wpo, unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
+    # --- colour: base + fresnel rim, scan lines, flicker, damage
+    fres = _node(m, unreal.MaterialExpressionFresnel, -1700, 300, exponent=2.5, base_reflect_fraction=0.0)
+    rim = _node(m, unreal.MaterialExpressionMultiply, -1500, 300)
+    _link(fres, rim, "A")
+    _link(_scalar(m, "RimStrength", 1.4, -1700, 450), rim, "B")
+    shade = _node(m, unreal.MaterialExpressionAdd, -1300, 300)
+    _link(rim, shade, "A")
+    _link(_scalar(m, "BaseGlow", 0.22, -1500, 450), shade, "B")
+    wz = _node(m, unreal.MaterialExpressionComponentMask, -1700, 700, r=False, g=False, b=True, a=False)
+    MEL.connect_material_expressions(_node(m, unreal.MaterialExpressionWorldPosition, -1900, 700), "", wz, "")
+    lines = _node(m, unreal.MaterialExpressionDivide, -1500, 700)
+    _link(wz, lines, "A")
+    _link(_scalar(m, "ScanCm", 0.35, -1700, 820), lines, "B")
+    roll = _node(m, unreal.MaterialExpressionMultiply, -1500, 900)
+    _link(time, roll, "A")
+    _link(_scalar(m, "ScanSpeed", 1.5, -1700, 950), roll, "B")
+    phase = _node(m, unreal.MaterialExpressionAdd, -1300, 750)
+    _link(lines, phase, "A")
+    _link(roll, phase, "B")
+    wave = _node(m, unreal.MaterialExpressionSine, -1150, 750, period=1.0)
+    MEL.connect_material_expressions(phase, "", wave, "")
+    sw = _node(m, unreal.MaterialExpressionMultiply, -1000, 750)
+    _link(wave, sw, "A")
+    _link(_scalar(m, "ScanDepth", 0.25, -1150, 870), sw, "B")
+    scan = _node(m, unreal.MaterialExpressionSubtract, -850, 750)
+    _link(_node(m, unreal.MaterialExpressionConstant, -1000, 650, r=1.0), scan, "A")
+    _link(sw, scan, "B")
+    f1 = _node(m, unreal.MaterialExpressionSine, -1150, 1050, period=0.061)
+    MEL.connect_material_expressions(time, "", f1, "")
+    f2 = _node(m, unreal.MaterialExpressionSine, -1150, 1150, period=0.37)
+    MEL.connect_material_expressions(time, "", f2, "")
+    ff = _node(m, unreal.MaterialExpressionMultiply, -1000, 1100)
+    _link(f1, ff, "A")
+    _link(f2, ff, "B")
+    fa = _node(m, unreal.MaterialExpressionMultiply, -850, 1100)
+    _link(ff, fa, "A")
+    _link(_scalar(m, "Flicker", 0.06, -1000, 1220), fa, "B")
+    flick = _node(m, unreal.MaterialExpressionAdd, -700, 1100)
+    _link(_node(m, unreal.MaterialExpressionConstant, -850, 1000, r=1.0), flick, "A")
+    _link(fa, flick, "B")
+    vc = _node(m, unreal.MaterialExpressionVertexColor, -1500, 0)
+    dmg = _node(m, unreal.MaterialExpressionMultiply, -1300, 0)
+    MEL.connect_material_expressions(vc, "R", dmg, "A")
+    _link(_scalar(m, "DamageAmount", 0.0, -1500, 100), dmg, "B")
+    colour = _node(m, unreal.MaterialExpressionLinearInterpolate, -1100, 0)
+    _link(_vector(m, "HoloColor", (0.2, 0.55, 1.0), -1300, -150), colour, "A")
+    _link(_vector(m, "DamageColor", (1.0, 0.25, 0.05), -1300, 150), colour, "B")
+    _link(dmg, colour, "Alpha")
+    c1 = _node(m, unreal.MaterialExpressionMultiply, -900, 100)
+    _link(colour, c1, "A")
+    _link(_scalar(m, "HoloStrength", 3.0, -1100, 200), c1, "B")
+    c2 = _node(m, unreal.MaterialExpressionMultiply, -700, 250)
+    _link(c1, c2, "A")
+    _link(shade, c2, "B")
+    c3 = _node(m, unreal.MaterialExpressionMultiply, -550, 450)
+    _link(c2, c3, "A")
+    _link(scan, c3, "B")
+    c4 = _node(m, unreal.MaterialExpressionMultiply, -400, 600)
+    _link(c3, c4, "A")
+    _link(flick, c4, "B")
+    _output(c4, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
+    return m
+
+
 def import_texture(ship, key, source, never_stream=False):
     """A PNG from the repository as /Game/Ships/<Ship>/Textures/T_..., set up for its role. never_stream:
     always at full resolution (a cockpit, which is always right in front of the camera)."""
@@ -701,7 +824,7 @@ def build_masters():
     return {"hull": hull, "pbr": build_pbr_master(), "glass": glass, "screen": build_screen_master(),
             "decal": build_decal_master(), "meshdecal": build_mesh_decal_master(False),
             "meshdecal_paint": build_mesh_decal_master(True), "meshdecal_ao": build_mesh_decal_ao_master(),
-            "layered": build_layered_master(), "screenback": back, "blink": blink}
+            "layered": build_layered_master(), "screenback": back, "blink": blink, "holo": build_holo_master()}
 
 
 def build_mesh_decal_ao_master():

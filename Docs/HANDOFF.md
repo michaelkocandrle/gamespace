@@ -1528,6 +1528,11 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       - páka vpravo: základna se šrouby, límec, gumová manžeta, hřídel, rukojeť skloněná o 12° s prohlubněmi, spoušť, 2 kloboučky, červený pickle, 2 podsvícená boční tlačítka, malíčková páčka;
       - plyn vlevo: vodítko s kartáčem a značkami zarážek, páka, rukojeť natočená o 15° k pilotovi s kloboučkem, 2 tlačítky a knoflíkem pod ukazovák;
       - štítky FLIGHT a ENG. Oba ovladače jsou tam, kde leží předloktí.
+    - Krok 6: hologram lodi místo drátěného projektoru:
+      - mesh z vyhodnocených exteriérových dílů Wayfareru, 16 cm, nad levým MFD (mimo osu pohledu), na emitoru;
+      - `M_Ship_Holo`: aditivní modrý, fresnel, rolující řádky, jemné blikání a chvění, pomalá rotace jednou za 30 s (WPO kolem `HoloPivot`, import ho nastaví ze středu obálky meshe);
+      - poškození připravené (`DamageColor`, `DamageAmount`, vertex R), zatím statické;
+      - vlastní díl `Hologram` (bez Nanite, kolize a stínu), modré světlo 1,5 cd. Test hlídá master, stín a pivot.
 
 ---
 
