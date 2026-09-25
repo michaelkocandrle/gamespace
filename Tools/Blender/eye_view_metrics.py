@@ -9,7 +9,8 @@ Unreal. Prints EYEVIEW {...}:
   dash_top_pct     height of the dash's top edge in the frame, % from the bottom (median over the middle 60 %
                    of the width: the first outside pixel going up each column)
   widest_pillar_pct  widest run of ship between two outside areas along rows in the upper 60 % of the frame, % of
-                   the width (frame members, pillars; runs touching the frame's edge are not pillars)
+                   the width, where the ship also continues upwards from the run for 8 % of the frame height
+                   (frame members, pillars; runs touching the frame's edge and notches in the sill line are not)
   pillar_in_15deg  whether any ship pixel crosses the level line of sight within +-15 deg of straight ahead
 Targets from the SC references: ship-pipeline skill, cockpit table (author 25. 9. 2026).
 """
@@ -81,7 +82,11 @@ def main():
                 x0 = x
                 while x < W and not row[x]:
                     x += 1
-                if x0 > 0 and x < W:
+                # a pillar is a vertical member: the ship continues upwards from the run's middle for at least
+                # 8 % of the frame (a notch in the sill line between two patches of sky is not a pillar)
+                mid = (x0 + x) // 2
+                up = outside[max(0, y - int(H * 0.08)):y, mid]
+                if x0 > 0 and x < W and not up.any():
                     widest = max(widest, x - x0)
             else:
                 x += 1

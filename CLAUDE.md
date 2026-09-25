@@ -34,6 +34,7 @@ Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**. Projekt je v `C:\gamespace\g
    - Kritik dostane **jen** `brief.md` a listy: žádný postup, dobu práce, záměry ani vlastní názor.
    - FAIL → oprav body „musí se opravit“ a znovu, nejvýš 3 kola, pak předej i s otevřenými body.
    - Žádnou výtku tiše nevynechat: u každé opraveno / neopraveno a proč; nesouhlas zdůvodni.
+   - Neplatnou výtku dolož výřezem ze snímku, výřezy ulož k recenzi (`<téma>/evidence/`).
    - Recenze do `Docs/Reviews/<datum>_<téma>.md` (listy, výstup kritika, reakce na každý bod).
    - Kritik doplňuje automatické kontroly (`test_ship_geometry.py`, testy UE), nenahrazuje je.
    - Co autor vytkne a kritik přehlédl, doplň do zadání kritika a do `Docs/Reviews/calibration.md`.

@@ -684,6 +684,19 @@
    "metallic": 0.0,
    "emit": [0.2, 0.55, 1.0]
   },
+  "int_accent_glow": {
+   "slot": "IntAccentGlow",
+   "colour": [0.72, 0.17, 0.02],
+   "roughness": 0.45,
+   "metallic": 0.0,
+   "emit": [1.0, 0.3, 0.05]
+  },
+  "int_rubber": {
+   "slot": "IntRubber",
+   "colour": [0.03, 0.03, 0.032],
+   "roughness": 0.9,
+   "metallic": 0.0
+  },
   "int_cream": {
    "slot": "IntCream",
    "colour": [0.6, 0.54, 0.46],
@@ -2559,13 +2572,14 @@
    "hologram": {
     "_comment": "the ship hologram (step 6): over the left MFD, off the line of sight; at = x, y and a z above the pod's top (a ray down finds it)",
     "at": [18.1, 0.56, 2.3],
-    "length_m": 0.16,
+    "length_m": 0.2,
     "light_cd": 1.5
    },
    "footwell_back_x": 18.62,
    "footwell_cd": 2.5,
    "_raise": "Cockpit raised 0.8 m (floor 0.35 -> 1.15, eye 1.65 -> 2.45, author's step 2 view targets 25. 9. 2026): the canopy's glass starts 1 m over the old eye; raised, the pilot sits in the glass band and the exterior stays as drawn. Stairs from the cabin (hs_interior.py).",
-   "console_pool_cd": 3.0
+   "console_pool_cd": 6.0,
+   "_centre_w": "9 cm: at 11 cm the centre screens' outer edges went behind the MFD pods' inner edges from the eye (critic, 25. 9. 2026)"
   },
   "decals": {
    "_comment": "Interior mesh decals from the exterior's library (Tools/Blender/hs_interior_decals.py): labels at every cockpit control group, service detail on every wall. Author 25. 9. 2026: don't spare decals.",
@@ -2723,6 +2737,77 @@
      "step": 0.45,
      "prob": 0.35,
      "seed": 14
+    },
+    {
+     "_what": "dash faces and wings: panels, vents, bolts, stencils (critic 25. 9.: empty dash surfaces)",
+     "axis": "x",
+     "items": [
+      "recessed_panel",
+      "vent_small",
+      "bolt_row_4",
+      "rivet_row_8",
+      "panel_A12",
+      "panel_E11",
+      "st_service",
+      "st_inspect",
+      "corner_mark",
+      "label_power"
+     ],
+     "weights": [3, 2, 3, 2, 1, 1, 1, 1, 2, 1],
+     "x": [-1.0, 1.0],
+     "z": [1.72, 2.18],
+     "from_x": 17.25,
+     "sides": [1],
+     "dir_z": -0.25,
+     "step": 0.1,
+     "prob": 0.55,
+     "seed": 21
+    },
+    {
+     "_what": "cockpit rear wall and its gable: access panels, vents, stencils",
+     "axis": "x",
+     "items": [
+      "access_panel",
+      "recessed_panel",
+      "vent_small",
+      "hatch_small",
+      "bolt_row_4",
+      "st_service",
+      "panel_B07",
+      "panel_H19",
+      "corner_mark",
+      "tri_warning"
+     ],
+     "weights": [3, 3, 2, 2, 2, 1, 1, 1, 2, 1],
+     "x": [-1.6, 1.6],
+     "z": [1.3, 3.0],
+     "from_x": 16.4,
+     "sides": [-1],
+     "dir_z": 0.0,
+     "step": 0.22,
+     "prob": 0.6,
+     "seed": 22
+    },
+    {
+     "_what": "the glare shield and dash top from above: panel seams, vents, bolts, stencils (critic: flat empty dash)",
+     "axis": "z",
+     "items": [
+      "recessed_panel",
+      "vent_small",
+      "bolt_row_4",
+      "rivet_row_8",
+      "seam_straight",
+      "panel_E11",
+      "st_service",
+      "corner_mark"
+     ],
+     "weights": [3, 2, 3, 2, 3, 1, 1, 2],
+     "x": [17.7, 18.7],
+     "y": [-1.0, 1.0],
+     "from_z": 2.6,
+     "step": 0.1,
+     "prob": 0.6,
+     "seed": 23
     }
    ],
    "grab_bars": [

@@ -27,10 +27,10 @@
   },
   "materials": [
     "24 decal materials: HazardExhaust_L, HazardExhaust_R, HazardRamp, Int_CautionLoad, Int_Cockpit, Int_Cooler, Int_Engineering, Int_Exit, Int_Fire, Int_Grid, Int_Hold, Int_Lane, Int_RampHazard, Int_Reactor, Int_Sec02, Int_Sec03, Int_Sec04, Int_Voltage, Logo_L, Logo_R, Name_L, Name_R, Reg_L, Reg_R",
-    "45 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_MeshDecalAO, /Game/Ships/Shared/Materials/M_Ship_Layered, /Game/Ships/Shared/Materials/M_Ship_ScreenBack, /Game/Ships/Shared/Materials/M_Ship_Blink, /Game/Ships/Shared/Materials/M_Ship_Holo"
+    "47 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_MeshDecalAO, /Game/Ships/Shared/Materials/M_Ship_Layered, /Game/Ships/Shared/Materials/M_Ship_ScreenBack, /Game/Ships/Shared/Materials/M_Ship_Blink, /Game/Ships/Shared/Materials/M_Ship_Holo"
   ],
   "hologram_pivot_cm": [
-    784.8,
+    784.7,
     -56.0,
     110.6
   ],
@@ -88,7 +88,7 @@
       "camera_boom.probe_size = 40.0",
       "chase_camera.field_of_view = 80.0",
       "cockpit_camera.field_of_view = 88.0",
-      "cockpit_displays.display_light_intensity_cd = 8.0",
+      "cockpit_displays.display_light_intensity_cd = 12.0",
       "cockpit_displays.state_rate_hz = 5.0",
       "component Canopy = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Canopy",
       "component Decals = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer_Decals",
@@ -150,17 +150,19 @@
       "light Light_int_19 (point, 20 cd) at [255.0, -144.0, 100.0]",
       "light Light_int_20 (point, 20 cd) at [415.0, -144.0, 100.0]",
       "light Light_int_21 (point, 6 cd) at [350.0, -155.0, 5.0]",
-      "light Light_int_22 (point, 2.5 cd) at [805.0, -0.0, 30.0]",
-      "light Light_int_23 (spot, 4.0 cd) at [745.0, -105.0, 70.0]",
-      "light Light_int_24 (spot, 1.8 cd) at [585.0, -55.0, 160.0]",
-      "light Light_int_25 (spot, 4.0 cd) at [745.0, 105.0, 70.0]",
-      "light Light_int_26 (spot, 1.8 cd) at [585.0, 55.0, 160.0]",
-      "light Light_int_27 (spot, 3.0 cd) at [665.0, -92.5, 131.2]",
-      "light Light_int_28 (spot, 3.0 cd) at [665.0, 92.5, 131.2]",
-      "light Light_int_29 (point, 1.6 cd) at [605.0, -0.0, 145.0]",
-      "light Light_int_30 (point, 2.0 cd) at [735.0, -55.0, 7.0]",
-      "light Light_int_31 (point, 2.0 cd) at [735.0, 55.0, 7.0]",
-      "light Light_int_32 (point, 1.5 cd) at [785.0, -56.0, 110.7]"
+      "light Light_int_22 (point, 3.0 cd) at [757.0, -40.0, 88.3]",
+      "light Light_int_23 (point, 3.0 cd) at [757.0, 40.0, 88.3]",
+      "light Light_int_24 (point, 2.5 cd) at [805.0, -0.0, 30.0]",
+      "light Light_int_25 (spot, 4.0 cd) at [745.0, -105.0, 70.0]",
+      "light Light_int_26 (spot, 1.8 cd) at [585.0, -55.0, 160.0]",
+      "light Light_int_27 (spot, 4.0 cd) at [745.0, 105.0, 70.0]",
+      "light Light_int_28 (spot, 1.8 cd) at [585.0, 55.0, 160.0]",
+      "light Light_int_29 (spot, 6.0 cd) at [665.0, -92.5, 131.2]",
+      "light Light_int_30 (spot, 6.0 cd) at [665.0, 92.5, 131.2]",
+      "light Light_int_31 (point, 1.6 cd) at [605.0, -0.0, 145.0]",
+      "light Light_int_32 (point, 2.0 cd) at [735.0, -55.0, 7.0]",
+      "light Light_int_33 (point, 2.0 cd) at [735.0, 55.0, 7.0]",
+      "light Light_int_34 (point, 1.5 cd) at [785.0, -56.0, 110.7]"
     ]
   },
   "removed": [],

@@ -631,6 +631,8 @@ def add_light_component(blueprint, light):
         existing.set_editor_property("cast_shadows", False)
         # a larger source softens a lamp close to a wall (no hard hot spot); 2 cm is a small fitting
         existing.set_editor_property("source_radius", float(light.get("source_radius_cm", 2.0)))
+        # interior lamps highlight the glossy canopy glass as white dots: their specular is turned down
+        existing.set_editor_property("specular_scale", float(light.get("specular", 1.0)))
         if cls is unreal.SpotLightComponent:
             existing.set_editor_property("outer_cone_angle", float(light.get("cone_deg", 40.0)) / 2.0)
             existing.set_editor_property("inner_cone_angle", float(light.get("cone_deg", 40.0)) / 4.0)

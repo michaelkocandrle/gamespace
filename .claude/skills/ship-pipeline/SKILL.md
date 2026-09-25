@@ -710,6 +710,11 @@ Postup:
    ale zdůvodněný.
 5. Recenze do `Docs/Reviews/<datum>_<téma>.md`: odkaz na listy, výstup kritika z každého kola,
    reakce na každý bod.
+6. Výtku, kterou označíš jako neplatnou, dolož výřezem ze snímku (PIL: výřez, zvětšení, popisek
+   nahoře s číslem kola a bodu). Výřezy do `Docs/Reviews/<datum>_<téma>/evidence/` (autor 25. 9. 2026).
+7. Cena: kritik ~3–4 min na kolo (kokpit v2: 190 s, 177 s, 214 s), listy ~1 min. Dražší jsou opravy
+   a nové balení mezi koly (~12 min). Kritik občas přehlédne malý detail na vlastním listu (throttle,
+   popisky), proto se každá výtka ověřuje na snímku v plném rozlišení.
 6. V reportu autorovi: verdikt a skóre posledního kola, počet kol, výtky s reakcí, odkaz na recenzi.
 7. Když autor vytkne něco, co kritik přehlédl, doplň to do zadání kritika nebo do checklistu níže
    a zapiš do `Docs/Reviews/calibration.md`.

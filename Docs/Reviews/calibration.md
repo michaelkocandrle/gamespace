@@ -66,3 +66,8 @@ Pozorované slabiny (sledovat):
 ## Průběžné doplňky
 Když autor po předání vytkne něco, co kritik přehlédl, zapíše se to sem (datum, co, jak se upravilo
 zadání nebo checklist).
+
+- 25. 9. 2026, kokpit v2 kolo 3: kritik tvrdil „throttle chybí“, i když páka byla na jeho listu 07,
+  a nepopsaná tlačítka, i když popisky ENG/SHLD byly pod nimi. Jde o chyby čtení malých detailů, ne
+  o slepé místo zadání, takže zadání beze změny. Obrana je ověřování každé výtky výřezem
+  (`Docs/Reviews/2026-09-25_wayfarer_cockpit_v2/evidence/`).

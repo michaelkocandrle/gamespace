@@ -30,7 +30,7 @@ import hs_decals
 def _target(objs):
     bm = bmesh.new()
     for ob in objs:
-        if ob.type != "MESH" or not ob.data.polygons:
+        if ob.type != "MESH" or not ob.data.polygons or ob.name.endswith(("_Screens", "_Hologram")):
             continue
         me = ob.data.copy()
         me.transform(ob.matrix_world)
@@ -87,6 +87,10 @@ def build(objs, ship, coll, spec, root, mats, eye):
     failed = []
 
     def shoot(it):
+        if it["item"] not in index["decals"]:
+            # not in the library's index (a new label before the atlas was rebuilt): reported, not fatal
+            failed.append((it["item"], "not in the decal index", []))
+            return None
         o = Vector(it["from"])
         d = (Vector(it["to"]) - o) if "to" in it else Vector(it["dir"])
         hit, n = pl.cast(o, d.normalized())
@@ -114,7 +118,7 @@ def build(objs, ship, coll, spec, root, mats, eye):
         rng = random.Random(sc.get("seed", 3))
         names, weights = sc["items"], sc.get("weights") or [1] * len(sc["items"])
         x0, x1 = sc["x"]
-        z0, z1 = sc["z"]
+        z0, z1 = sc["z"] if "z" in sc else sc["y"]
         step = sc.get("step", 0.3)
         nx, nz = max(1, int((x1 - x0) / step)), max(1, int((z1 - z0) / step))
         for side in sc.get("sides", [1, -1]):
@@ -124,8 +128,19 @@ def build(objs, ship, coll, spec, root, mats, eye):
                         continue
                     x = x0 + (x1 - x0) * i / nx + rng.uniform(-0.4, 0.4) * step
                     z = z0 + (z1 - z0) * j / nz + rng.uniform(-0.4, 0.4) * step
-                    it = {"item": rng.choices(names, weights)[0], "from": [x, sc.get("from_y", 0.0), z],
-                          "dir": [0.0, side, sc.get("dir_z", 0.0)], "rot": rng.choice(sc.get("rots", [0.0]))}
+                    if sc.get("axis") == "z":
+                        # a grid over x and y ("y" range), rays straight down from from_z (desk and dash tops)
+                        y0_, y1_ = sc["y"]
+                        yy = y0_ + (y1_ - y0_) * j / nz + rng.uniform(-0.4, 0.4) * step
+                        it = {"item": rng.choices(names, weights)[0], "from": [x, yy, sc.get("from_z", 3.0)],
+                              "dir": [0.0, 0.0, -1.0], "rot": rng.choice(sc.get("rots", [0.0, 90.0]))}
+                    elif sc.get("axis") == "x":
+                        # a grid over y (the "x" range read as y) and z, rays along x (dash faces, rear walls)
+                        it = {"item": rng.choices(names, weights)[0], "from": [sc.get("from_x", 0.0), x, z],
+                              "dir": [side, 0.0, sc.get("dir_z", 0.0)], "rot": rng.choice(sc.get("rots", [0.0]))}
+                    else:
+                        it = {"item": rng.choices(names, weights)[0], "from": [x, sc.get("from_y", 0.0), z],
+                              "dir": [0.0, side, sc.get("dir_z", 0.0)], "rot": rng.choice(sc.get("rots", [0.0]))}
                     if shoot(it):
                         report["scatter"] += 1
     out = []

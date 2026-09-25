@@ -333,11 +333,18 @@ def obj_console(g, r, zr, z0):
         for xa, xb, ya, yb in ((x0 + 0.02, x1 - 0.02, y0 + 0.02, y0 + 0.03), (x0 + 0.02, x1 - 0.02, y1 - 0.03, y1 - 0.02),
                                (x0 + 0.02, x0 + 0.03, y0 + 0.02, y1 - 0.02), (x1 - 0.03, x1 - 0.02, y0 + 0.02, y1 - 0.02)):
             box(g["int_trim"], (xa, ya, top), (xb, yb, top + 0.016))
+        # seams across the top plate and bolts round it (the plate was an empty board - critic, 25. 9. 2026)
+        for f in (0.33, 0.66):
+            xs = x0 + (x1 - x0) * f
+            box(g["int_dark"], (xs - 0.002, y0 + 0.035, top + 0.012), (xs + 0.002, y1 - 0.035, top + 0.0135))
+        for f in (0.08, 0.3, 0.5, 0.7, 0.92):
+            for yy in (y0 + 0.045, y1 - 0.045):
+                cyl(g["int_trim"], (x0 + (x1 - x0) * f, yy, top + 0.012), (x0 + (x1 - x0) * f, yy, top + 0.016), 0.004, 6)
         if y0 > 0:
             # the left console's module aft of the throttle: the canopy LOCK rocker and two status LEDs
             import hs_cockpit
             hs_cockpit.control_module(g, Vector((x0 + 0.32, (y0 + y1) / 2 + 0.05, top + 0.016)), Vector((0, -1, 0)), Vector((1, 0, 0)),
-                                      Vector((0, 0, 1)), 0.13, 0.1, [[("led_o", None), ("led_blink", None)], [("rocker", "ck_lock")]])
+                                      Vector((0, 0, 1)), 0.15, 0.11, [[("led_o", None), ("led_w", None), ("led_blink", None)], [("rocker", "ck_lock"), ("guarded", "ck_canopy")]])
         return
     inner = y1 if y1 < 0 else y0
     outer = y0 if y1 < 0 else y1
@@ -467,8 +474,12 @@ def stairs(g, fb, floor_faces, zc, x0=15.24, half_w=0.5, rise_max=0.195, tread=0
         p1 = Vector((x_top + 0.1, yr, zc + 0.9))
         cyl(g["int_trim"], p0, p1, 0.02, 12)
         for q in (p0, p1, p0.lerp(p1, 0.5)):
-            base = Vector((q.x, sd * (half_w + 0.015), q.z - 0.2))
-            cyl(g["int_trim"], base, Vector((q.x, yr, q.z)), 0.012, 8)
+            # vertical posts down to the tread (or the cockpit floor) under them, with a foot flange: the upper
+            # posts used to end on the side wall above its top - hanging in the air (critic, 25. 9. 2026)
+            i = int((q.x - x0) / tread)
+            zt = zc if i >= n - 1 else (i + 1) * rise
+            cyl(g["int_trim"], Vector((q.x, yr, zt)), q, 0.012, 8)
+            cyl(g["int_trim"], Vector((q.x, yr, zt)), Vector((q.x, yr, zt + 0.006)), 0.03, 12)
 
 
 def _gable(bm, hull, x, z0, g=None):
@@ -517,7 +528,12 @@ def _gable(bm, hull, x, z0, g=None):
         box(g["int_dark"], (x + 0.001, -0.6, z0 + 0.06), (x + 0.012, 0.6, zb - 0.07))
 
 
+MATS = {}
+
+
 def build(recipe, layout, coll, mats, ship, hull):
+    MATS.clear()
+    MATS.update(mats)
     spec = recipe["interior"]
     H = spec.get("height_m", 2.3)
     inset = spec.get("wall_inset_m", 0.05)
@@ -627,11 +643,15 @@ def build(recipe, layout, coll, mats, ship, hull):
         if nrm.dot(Vector((17.3, 0, 0)) - pa) < 0:
             nrm = -nrm
         c = (pa + pb) / 2 + nrm * 0.03
-        if kit is not None:
+        if kit is not None and not COCKPIT.get("style") == "wrap":
             # quilted charcoal padding on the tub (the reference's cockpit side walls)
             hs_interior_kit.kit_obox(kit, "kit_padded_grey", (c.x, c.y, (zc + sill) / 2), d, (0, 0, 1), (length, 0.04, sill - zc), 0.5)
         else:
-            obox(g["int_wall"], (c.x, c.y, (zc + sill) / 2), d, (0, 0, 1), (length, 0.04, sill - zc))
+            # graphite panels with a horizontal seam and a satin kick strip (the kit's quilted padding read as
+            # scaffolding through the canopy glass - critic, 25. 9. 2026)
+            obox(g["int_console"], (c.x, c.y, (zc + sill) / 2), d, (0, 0, 1), (length, 0.04, sill - zc))
+            obox(g["int_dark"], (c.x + nrm.x * 0.021, c.y + nrm.y * 0.021, zc + (sill - zc) * 0.55), d, (0, 0, 1), (length, 0.003, 0.008))
+            obox(g["int_trim"], (c.x + nrm.x * 0.022, c.y + nrm.y * 0.022, zc + 0.06), d, (0, 0, 1), (length, 0.006, 0.1))
         obox(g["int_trim"], (c.x, c.y, sill), d, (0, 0, 1), (length, 0.08, 0.03))
         # the sill shelf from the tub out to the hull (the tub is clamped inside the hull: the view slipped
         # through the gap between its top and the frame lining)
@@ -654,7 +674,7 @@ def build(recipe, layout, coll, mats, ship, hull):
                     pass
         if COCKPIT.get("style") in ("pods", "wrap"):
             # the orange line along the sill (concept A: the accent runs round the cockpit at console height)
-            obox(g["accent"], (c.x, c.y, sill - 0.035), d, (0, 0, 1), (length, 0.086, 0.012))
+            obox(g["int_accent_glow" if "int_accent_glow" in MATS else "accent"], (c.x, c.y, sill - 0.035), d, (0, 0, 1), (length, 0.086, 0.012))
     report["cockpit"] = True
     # every layout object by its name
     eye = recipe["assemble"]["sockets"]["Cockpit"]["location"]
@@ -692,7 +712,12 @@ def build(recipe, layout, coll, mats, ship, hull):
         elif "Přístrojová" in name:
             dashboard(g, (x0, x1, y0, y1), zr, zc, ship, screen_bm, sockets, eye)
         elif "křeslo" in name:
-            seat(coll, mats, spec, (x0, x1, y0, y1), zr)
+            if COCKPIT.get("style") == "wrap":
+                # procedural, like the exterior: no AI geometry in the ship (author, 25. 9. 2026)
+                import hs_cockpit
+                hs_cockpit.pilot_seat(g, (x0, x1, y0, y1), zr)
+            else:
+                seat(coll, mats, spec, (x0, x1, y0, y1), zr)
         else:
             continue
         report["objects"] += 1
@@ -860,12 +885,45 @@ def build(recipe, layout, coll, mats, ship, hull):
         objs.append(ob)
     if stripe.verts:
         ob = hp.finish(stripe, "SM_Ship_%s_Int_LinerStripe" % ship, coll, {"angle_deg": 40, "width": 0, "segments": 1})
-        ob.data.materials.append(mats["accent"])
+        # faintly lit: the frame's lines still read at night and in space (critic, 25. 9. 2026)
+        ob.data.materials.append(mats.get("int_accent_glow", mats["accent"]))
         objs.append(ob)
     if rim.verts:
         ob = hp.finish(rim, "SM_Ship_%s_Int_LinerRim" % ship, coll, {"angle_deg": 40, "width": 0, "segments": 1})
-        ob.data.materials.append(mats["int_trim"])
+        # graphite, not satin metal: through the glass the metal rims read as chrome tubes (critic, 25. 9. 2026)
+        ob.data.materials.append(mats["int_console"] if COCKPIT.get("style") == "wrap" else mats["int_trim"])
         objs.append(ob)
+    if COCKPIT.get("style") == "wrap" and COCKPIT.get("liner_ribs", True):
+        # structural ribs across the frame lining at the panel stations: the lining's layer like the corridor's
+        # portals (step 7 of the author's cockpit brief) - a graphite band standing proud of the lining
+        ribs = bmesh.new()
+        cut = lb.copy()
+        for x in COCKPIT.get("seam_x", []):
+            res = bmesh.ops.bisect_plane(cut, geom=cut.verts[:] + cut.edges[:] + cut.faces[:], plane_co=(x, 0, 0), plane_no=(1, 0, 0))
+            for el in res["geom_cut"]:
+                if isinstance(el, bmesh.types.BMEdge) and el.link_faces:
+                    a_, b_ = el.verts[0].co.copy(), el.verts[1].co.copy()
+                    if (b_ - a_).length < 1e-4:
+                        continue
+                    na, nb = on_liner(a_, 0.0) - a_, on_liner(b_, 0.0) - b_
+                    fa = el.link_faces[0]
+                    fa.normal_update()
+                    nrm_ = fa.normal.copy()
+                    if nrm_.dot(Vector((17.0, 0.0, 2.2)) - a_) < 0:
+                        nrm_ = -nrm_
+                    q = [a_ + Vector((-0.03, 0, 0)), b_ + Vector((-0.03, 0, 0)), b_ + Vector((0.03, 0, 0)), a_ + Vector((0.03, 0, 0))]
+                    vs0 = [ribs.verts.new(v + nrm_ * 0.004) for v in q]
+                    vs1 = [ribs.verts.new(v + nrm_ * 0.026) for v in q]
+                    for idx in ((0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)):
+                        try:
+                            ribs.faces.new([(vs0 + vs1)[i] for i in idx])
+                        except ValueError:
+                            pass
+        cut.free()
+        if ribs.verts:
+            ob = hp.finish(ribs, "SM_Ship_%s_Int_LinerRibs" % ship, coll, {"angle_deg": 40, "width": 0.002, "segments": 1})
+            ob.data.materials.append(mats["int_console"])
+            objs.append(ob)
     if lb.faces:
         me = bpy.data.meshes.new("SM_Ship_%s_Int_Liner" % ship)
         lb.to_mesh(me)
@@ -965,6 +1023,13 @@ def cockpit_detail(g, layout, zc, sill):
         inner = y0 if y0 > 0 else y1
         s_ = 1 if y0 > 0 else -1
         box(g["int_glow"], (x0 + 0.05, inner - s_ * 0.002, ztop - 0.06), (x1 - 0.05, inner + s_ * 0.0, ztop - 0.05))
+    # tread strips on the cockpit floor between the stairs and the footwell (a plain slab - critic 25. 9.)
+    k = 0
+    xx = 16.2
+    while xx < 18.55:
+        box(g["int_trim"], (xx, -0.85, zc + 0.0005), (xx + 0.018, 0.85, zc + 0.003))
+        xx += 0.09
+        k += 1
     # seat rails and pedestal
     x0, x1, y0, y1 = seat_o["rect"]
     for yy in (-0.2, 0.2):

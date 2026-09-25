@@ -1,5 +1,5 @@
 {
- "_comment": "Wayfarer cockpit details (steps 5-6, 25. 9. 2026): HOTAS stick and throttle, the ship hologram. Run: Tools/Shots.ps1 -Preset cockpit_details -Width 1920 -Height 1080",
+ "_comment": "Wayfarer cockpit details (steps 5-6, 25. 9. 2026): HOTAS stick and throttle, the ship hologram; stat gpu for the translucency / hologram cost. Run: Tools/Shots.ps1 -Preset cockpit_details -Width 1920 -Height 1080",
  "shots": [
   {
    "name": "warmup",
@@ -31,6 +31,32 @@
    "fov": 45,
    "camera_local": [6.45, -0.45, 0.95],
    "look_local": [6.8, -0.74, 0.62]
+  },
+  {
+   "name": "perf_gpu_pilot",
+   "camera": "cockpit",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 1,
+   "gear": false,
+   "settle": 4.0,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "perf_gpu_pilot_space",
+   "camera": "cockpit",
+   "altitude_m": 60000,
+   "facing": "horizon",
+   "hud": 1,
+   "gear": false,
+   "settle": 4.0,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat gpu"
+   ]
   },
   {
    "name": "hologram",

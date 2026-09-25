@@ -179,6 +179,8 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
     spread evenly. Every control with a label gets a ck_* decal under it (LABELS). tree: the surface it is set
     on (seat())."""
     c = seat(tree, c, right, up, n, w, h)
+    # a dark gap round the housing: the module reads as set into the dash (it looked laid on it - critic, 25. 9.)
+    rr_ring(g["int_dark"], c - n * 0.0005, right, up, n, w + 0.012, h + 0.012, 0.01, 0.0065, 0.03, 4)
     rr_slab(g["int_console"], c, right, up, n, w, h, 0.006, 0.03)
     rr_ring(g["int_trim"], c + n * 0.0015, right, up, n, w, h, 0.006, 0.004, 0.003, 4)
     rr_slab(g["int_dark"], c + n * 0.0012, right, up, n, w - 0.012, h - 0.012, 0.003, 0.002, 3)
@@ -221,7 +223,7 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
 # sight: over the left MFD. Damage colours are prepared in the material (DamageColor x DamageAmount x vertex
 # colour R), static for now.
 
-def build_hologram(g, coll, mat, ship, exterior, centre, length=0.16, max_tris=8000):
+def build_hologram(g, coll, mat, ship, exterior, centre, length=0.16, max_tris=24000):
     """A decimated copy of the exterior objects, `length` long, centred on `centre`, on an emitter; returns the
     object SM_Ship_<Ship>_Hologram (its own part, hs_assemble_ship.py)."""
     import bpy
@@ -272,6 +274,10 @@ def build_hologram(g, coll, mat, ship, exterior, centre, length=0.16, max_tris=8
     tris = sum(len(p.vertices) - 2 for p in me.polygons)
     mod = ob.modifiers.new("Decimate", "DECIMATE")
     mod.ratio = min(1.0, max_tris / max(tris, 1))
+    # smooth: the fresnel rim follows the hull's curves, not triangle facets (a "tangle of triangles" by day -
+    # critic, 25. 9. 2026)
+    for poly in ob.data.polygons:
+        poly.use_smooth = True
     ob.data.materials.clear()
     ob.data.materials.append(mat)
     if not ob.data.uv_layers:
@@ -280,14 +286,82 @@ def build_hologram(g, coll, mat, ship, exterior, centre, length=0.16, max_tris=8
         for loop in ob.data.loops:
             co = ob.data.vertices[loop.vertex_index].co
             uv.data[loop.index].uv = ((co.x - centre.x) / length + 0.5, (co.y - centre.y) / length + 0.5)
-    # the emitter under it: a satin disc with a glowing lens, on the surface below
+    # the emitter under it: a graphite ring, a dark lens with a thin cool rim (a glowing white disc read as a
+    # foreign lamp on the dash - critic, 25. 9. 2026)
     base = centre - Vector((0, 0, 0.065))
-    tube(g["int_trim"], base, base + Vector((0, 0, 0.012)), 0.034, 32)
-    tube(g["int_glow"], base + Vector((0, 0, 0.012)), base + Vector((0, 0, 0.0145)), 0.024, 32)
+    tube(g["int_console"], base, base + Vector((0, 0, 0.012)), 0.034, 32)
+    tube(g["int_glow"], base + Vector((0, 0, 0.012)), base + Vector((0, 0, 0.013)), 0.026, 32)
+    tube(g["int_dark"], base + Vector((0, 0, 0.012)), base + Vector((0, 0, 0.0145)), 0.0235, 32)
     for a in range(3):
         d = Vector((math.cos(a * 2 * math.pi / 3), math.sin(a * 2 * math.pi / 3), 0))
         tube(g["int_trim"], base + d * 0.03, base + d * 0.03 + Vector((0, 0, 0.02)), 0.0025, 6)
     return ob
+
+
+# ------------------------------------------------------------------------------------------ pilot seat
+# Author 25. 9. 2026: the Meshy seat goes, procedural like the exterior. A graphite shell on the pedestal, padded
+# pan and back with side bolsters and quilting seams, a headrest, a five-point harness in the Halcyon orange.
+
+def pilot_seat(g, rect, zr):
+    x0, x1, y0, y1 = rect
+    z0 = zr[0]
+    cx, cy = (x0 + x1) / 2 + 0.05, (y0 + y1) / 2
+    right = Vector((0, -1, 0))
+    fwd, upz = Vector((1, 0, 0)), Vector((0, 0, 1))
+    # column from the pedestal to the pan, a swivel ring
+    tube(g["int_trim"], Vector((cx, cy, z0 + 0.16)), Vector((cx, cy, z0 + 0.3)), 0.06, 20)
+    tube(g["int_dark"], Vector((cx, cy, z0 + 0.3)), Vector((cx, cy, z0 + 0.33)), 0.11, 24)
+    # pan: shell, two padded segments (a flat board read as a plank - segments with round edges read as padding)
+    pan = Vector((cx + 0.02, cy, z0 + 0.45))
+    rr_slab(g["int_console"], pan - upz * 0.07, right, fwd, upz, 0.56, 0.52, 0.05, 0.06, 4)
+    for v, h in ((-0.12, 0.22), (0.12, 0.23)):
+        rr_slab(g["int_leather"], pan + fwd * v, right, fwd, upz, 0.42, h, 0.028, 0.075, 5)
+        rr_slab(g["int_dark"], pan + fwd * v + upz * 0.001, right, fwd, upz, 0.38, 0.004, 0.001, 0.002, 1)   # stitch
+    # side bolsters on the pan, turned in towards the pilot
+    for sd in (-1, 1):
+        side_n = (upz * math.cos(math.radians(25)) - right * sd * math.sin(math.radians(25))).normalized()
+        r2 = (right - side_n * right.dot(side_n)).normalized()
+        rr_slab(g["int_leather"], pan + right * (sd * 0.245) + upz * 0.05, r2, fwd, side_n, 0.075, 0.46, 0.035, 0.1, 5)
+    # back: tilted 12 degrees, a shell behind, four padded segments, bolsters turned in
+    t = math.radians(12.0)
+    n = Vector((math.cos(t), 0, math.sin(t)))
+    up = Vector((-math.sin(t), 0, math.cos(t)))
+    back = Vector((cx - 0.21, cy, z0 + 0.9))
+    rr_slab(g["int_console"], back - n * 0.09, right, up, n, 0.58, 0.92, 0.07, 0.05, 5)
+    for v, h in ((-0.3, 0.17), (-0.11, 0.18), (0.08, 0.18), (0.27, 0.17)):
+        # upholstered panels, not pillows (round pads read as a toy - critic, 25. 9. 2026)
+        rr_slab(g["int_leather"], back + up * v, right, up, n, 0.4, h, 0.028, 0.085, 5)
+        rr_slab(g["int_dark"], back + up * v + n * 0.001, right, up, n, 0.36, 0.004, 0.001, 0.002, 1)   # stitch
+    for sd in (-1, 1):
+        side_n = (n * math.cos(math.radians(28)) - right * sd * math.sin(math.radians(28))).normalized()
+        r2 = (right - side_n * right.dot(side_n)).normalized()
+        rr_slab(g["int_leather"], back + right * (sd * 0.25) + n * 0.03, r2, up, side_n, 0.085, 0.74, 0.04, 0.14, 5)
+    # headrest on two posts, two pads
+    head = back + up * 0.54
+    for sd in (-1, 1):
+        tube(g["int_trim"], back + up * 0.4 + right * (sd * 0.08) - n * 0.03, head - up * 0.08 + right * (sd * 0.08) - n * 0.03, 0.009, 8)
+    rr_slab(g["int_console"], head - n * 0.03, right, up, n, 0.32, 0.21, 0.07, 0.06, 5)
+    for v in (-0.045, 0.045):
+        rr_slab(g["int_leather"], head + up * v, right, up, n, 0.27, 0.08, 0.035, 0.05, 5)
+    # harness: two shoulder straps with adjusters down the back, a lap belt on the pan, a round buckle
+    for sd in (-1, 1):
+        # the shoulder strap runs from the shell's top edge (over it, into the harness slot) down to the pan
+        rr_slab(g["accent"], back + up * 0.02 + right * (sd * 0.1) + n * 0.003, right, up, n, 0.04, 0.86, 0.004, 0.004, 2)
+        rr_slab(g["accent"], back + up * 0.46 + right * (sd * 0.1) - n * 0.04, right, n, -up, 0.04, 0.1, 0.004, 0.004, 2)
+        rr_slab(g["int_dark"], back + up * 0.455 + right * (sd * 0.1) - n * 0.06, right, n, -up, 0.055, 0.02, 0.003, 0.01, 2)  # slot
+        rr_slab(g["accent"], pan + right * (sd * 0.07) - fwd * 0.05 + upz * 0.003, right, fwd, upz,
+                0.04, 0.3, 0.004, 0.004, 2)
+        rr_slab(g["int_trim"], back + up * 0.34 + right * (sd * 0.1) + n * 0.006, right, up, n, 0.05, 0.035, 0.005, 0.006, 2)
+        rr_slab(g["int_trim"], back - up * 0.12 + right * (sd * 0.1) + n * 0.006, right, up, n, 0.046, 0.022, 0.004, 0.005, 2)
+        rr_slab(g["accent"], pan + right * (sd * 0.12) + fwd * 0.1 + upz * 0.003, right, fwd, upz, 0.18, 0.04, 0.004, 0.004, 2)
+    tube(g["int_trim"], pan + fwd * 0.1 + upz * 0.003, pan + fwd * 0.1 + upz * 0.018, 0.035, 20)
+    tube(g["accent"], pan + fwd * 0.1 + upz * 0.018, pan + fwd * 0.1 + upz * 0.021, 0.018, 16)
+    # side frame: two satin bars from the pan shell to the back shell, a lever under the pan
+    for sd in (-1, 1):
+        a_ = pan - upz * 0.05 + right * (sd * 0.28) - fwd * 0.2
+        b_ = back - n * 0.08 + right * (sd * 0.28) - up * 0.2
+        tube(g["int_trim"], a_, b_, 0.014, 10)
+    tube(g["int_trim"], pan - upz * 0.09 + fwd * 0.2 + right * 0.2, pan - upz * 0.09 + fwd * 0.3 + right * 0.24, 0.007, 8)
 
 
 # ------------------------------------------------------------------------------------------ HOTAS
@@ -351,7 +425,7 @@ def hotas_stick(g, base):
         w = 0.035 + 0.006 * math.sin(math.pi * min(t / 0.8, 1.0))
         groove = 0.0035 * abs(math.sin(3 * math.pi * t)) if t < 0.72 else 0.0
         rings.append(_ring(g0 + ax * (L * t), fwd, side, ax, d, w, 0.014, 5, groove))
-    loft(g["int_leather"], rings)
+    loft(g["int_rubber"], rings)
     top = g0 + ax * L
     # the head: a dark slanted cap with the hats and the pickle
     rr_slab(g["int_dark"], top + ax * 0.004, side * -1, fwd, ax, 0.034, 0.046, 0.012, 0.006, 4)
@@ -392,7 +466,8 @@ def hotas_throttle(g, base):
         rr_slab(g["accent" if k == 0 else "int_glow"], q, right, up, n, 0.012, 0.0022, 0.0005, 0.0008, 1)
     lever0 = base + up * (-0.11 + 0.3 * 0.22) + n * 0.002
     top = lever0 + Vector((-0.012, 0.0, 0.1))
-    tube(g["int_trim"], lever0, top, 0.009, 14)
+    tube(g["int_trim"], lever0, top, 0.014, 16)
+    tube(g["int_rubber"], lever0, lever0 + Vector((0, 0, 0.025)), 0.022, 16)                       # boot over the slot
     # handle: turned 15 deg in towards the pilot (-y: the left console is at +y), leaning back a little
     turn = math.radians(15.0)
     fwd = Vector((math.cos(turn), -math.sin(turn), 0.0))
@@ -404,7 +479,7 @@ def hotas_throttle(g, base):
         d = 0.065 + 0.008 * math.sin(math.pi * t)
         w = 0.05 + 0.012 * math.sin(math.pi * min(t / 0.85, 1.0))
         rings.append(_ring(top + ax * (0.085 * t - 0.01), fwd, side, ax, d, w, 0.016, 5))
-    loft(g["int_leather"], rings)
+    loft(g["int_rubber"], rings)
     head = top + ax * 0.075
     rr_slab(g["int_dark"], head + ax * 0.004, side * -1, fwd, ax, 0.054, 0.066, 0.014, 0.006, 4)   # cap
     # thumb hat and two backlit buttons on the inboard face (towards the pilot: -side)
@@ -421,7 +496,7 @@ def hotas_throttle(g, base):
     tube(g["int_trim"], c, c + fwd * 0.006, 0.0045, 10)
 
 
-def glass_panel(g, screen_bm, sockets, name, c, right, up, n, w, h, proud):
+def glass_panel(g, screen_bm, sockets, name, c, right, up, n, w, h, proud, visor=True):
     """A display as a glass panel standing proud of its mount (author 25. 9. 2026, step 3): a dark back plate
     closes the recess at c, the glass floats `proud` in front on four stand-offs, a thin satin technical frame
     (7 mm) holds its edge with a cool edge light, small clamps at the corners. The glass is the Screens part
@@ -430,13 +505,20 @@ def glass_panel(g, screen_bm, sockets, name, c, right, up, n, w, h, proud):
     rr_slab(g["int_screen_back"], c - n * 0.03, right, up, n, w + 0.03, h + 0.03, 0.018, 0.008)
     p = c + n * proud
     screen(screen_bm, sockets, name, p, right, up, n, w, h)
-    rr_ring(g["int_trim"], p + n * 0.004, right, up, n, w + 0.016, h + 0.016, 0.01, 0.0075, 0.01)
+    # graphite, not satin: a metal frame with corner clamps read as a monitor standing on a table (critic)
+    rr_ring(g["int_console"], p + n * 0.004, right, up, n, w + 0.016, h + 0.016, 0.01, 0.0075, 0.01)
     rr_ring(g["int_glow"], p + n * 0.0045, right, up, n, w + 0.004, h + 0.004, 0.005, 0.0018, 0.002)
+    # a visor over the glass joins it to the dash's top edge; a cool light line under it lights the desk at night
+    # (not on the centre screens: seen from the eye above them it covered their titles - 25. 9. 2026)
+    if visor:
+        r2, u2, n2 = _frame_tilt(right, up, n, 70.0)
+        rr_slab(g["int_console"], p + up * (h / 2 + 0.018) + n * 0.02, r2, u2, n2, w + 0.05, 0.05, 0.01, 0.012, 3)
+    rr_slab(g["int_glow"], p - up * (h / 2 + 0.016) + n * 0.002, right, up, n, w * 0.8, 0.003, 0.001, 0.002, 1)
     for su in (-1, 1):
         for sv in (-1, 1):
             q = p + right * (su * (w / 2 + 0.004)) + up * (sv * (h / 2 + 0.004))
             tube(g["int_trim"], q - n * (proud + 0.03), q - n * 0.006, 0.005, 8)
-            rr_slab(g["int_dark"], q + n * 0.006 - right * su * 0.006 - up * sv * 0.006, right, up, n, 0.022, 0.022, 0.004, 0.012, 2)
+            rr_slab(g["int_dark"], q + n * 0.006 - right * su * 0.004 - up * sv * 0.004, right, up, n, 0.014, 0.014, 0.003, 0.01, 2)
 
 
 def oriented(eye, c):
@@ -558,18 +640,19 @@ def pedestal(g, screen_bm, sockets, eye, spec):
         for a, b in zip(pts, pts[1:]):
             tube(g["accent"], a, b, 0.0035, 6)
     # the head's sloped face with the centre screens side by side
-    hc = Vector((x0 - 0.1, 0.0, ztop - 0.075))
+    # 13 cm aft of ped_x: at 10 cm the column's top front rim sat 2 cm nearer the eye than the screens' top edge
+    # and cut their titles off (ray cast from the eye, 25. 9. 2026)
+    hc = Vector((x0 - 0.13, 0.0, ztop - 0.075))
     hr, hu, hn = oriented(eye, hc)
-    rr_slab(g["int_console"], hc - hn * 0.01, hr, hu, hn, 0.27, 0.16, 0.04, 0.06)
-    rr_ring(g["int_trim"], hc + hn * 0.004, hr, hu, hn, 0.27, 0.16, 0.04, 0.012, 0.01)
-    for name, du, h in (("centre_top", -0.055, spec["centre_w"] * 259.0 / 210.0), ("centre_bottom", 0.055, spec["centre_w"] * 231.0 / 210.0)):
+    cw = spec["centre_w"]
+    rr_slab(g["int_console"], hc - hn * 0.01, hr, hu, hn, 2 * cw + 0.09, cw * 1.35 + 0.04, 0.04, 0.06)
+    rr_ring(g["int_trim"], hc + hn * 0.004, hr, hu, hn, 2 * cw + 0.09, cw * 1.35 + 0.04, 0.04, 0.012, 0.01)
+    for name, du, h in (("centre_top", -(cw / 2 + 0.012), cw * 259.0 / 210.0), ("centre_bottom", cw / 2 + 0.012, cw * 231.0 / 210.0)):
         c = hc + hr * du + hn * 0.006
-        glass_panel(g, screen_bm, sockets, name, c, hr, hu, hn, spec["centre_w"], h, 0.015)
+        glass_panel(g, screen_bm, sockets, name, c, hr, hu, hn, spec["centre_w"], h, 0.015, visor=False)
     # (the wire "holographic radar" that stood here is gone: the ship hologram replaces it, off the line of
     # sight - build_hologram; a satin cap closes the pedestal's top)
-    e = Vector((x0 - 0.02, 0.0, ztop))
-    tube(g["int_trim"], e, e + Vector((0, 0, 0.012)), 0.07, 32)
-    tube(g["int_dark"], e + Vector((0, 0, 0.012)), e + Vector((0, 0, 0.015)), 0.055, 32)
+    # (no cap on top: it covered the top edge of the centre screens from the eye - critic, 25. 9. 2026)
 
 
 def cowl(g, spec, zfloor):
@@ -683,9 +766,11 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
         # the screen
         # (1 cm in from the strip's outer edge: the fascia bends back there and its far side crossed the module)
         s0 = c + right * ((hw + (pw / 2 - hw) / 2 - 0.01) * (-side)) + n * 0.004
-        rows = ([[("led_w", None), ("led_blink", None)], [("rotary", "ck_pwr")], [("button", "ck_eng")], [("button", "ck_shld")]]
+        rows = ([[("led_w", None), ("led_o", None), ("led_blink", None)], [("rotary", "ck_pwr")], [("button", "ck_eng"), ("button", "ck_shld")],
+                 [("rocker", "ck_hyd"), ("rocker", "ck_o2")]]
                 if side > 0 else
-                [[("led_o", None), ("led_w", None)], [("rotary", "ck_scan")], [("button", "ck_qt")], [("button", "ck_comms")]])
+                [[("led_o", None), ("led_w", None), ("led_blink", None)], [("rotary", "ck_scan")], [("button", "ck_qt"), ("button", "ck_comms")],
+                 [("rocker", "ck_esp"), ("rocker", "ck_ifcs")]])
         from mathutils.bvhtree import BVHTree
         control_module(g, s0, right, up, n, pw / 2 - hw - 0.03, sh + 0.04, rows, tree=BVHTree.FromBMesh(tmp))
         kc = c - up * (hh + below * 0.5) + n * 0.004
@@ -732,6 +817,17 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
     g["int_console"].from_mesh(mesh)
     bpy.data.meshes.remove(mesh)
     tmp.free()
+    # panel breaks across the glare shield every ~25 cm and a row of bolts along its back edge (critic: empty
+    # dash top - the reference has seams, bolts and layers on every surface)
+    for (b0, t0), (b1, t1) in zip(seq, seq[1:]):
+        span = (t1 - t0).length
+        k = max(1, int(span / 0.25))
+        for j in range(1, k + 1):
+            q = t0.lerp(t1, j / (k + 1))
+            tube(g["int_dark"], q + Vector((0.004, 0, 0.004)), q + Vector((0.26, 0, -0.03)), 0.0025, 4)
+        for j in range(k * 2 + 1):
+            q = t0.lerp(t1, (j + 0.5) / (k * 2 + 1)) + Vector((0.24, 0, -0.028))
+            tube(g["int_trim"], q, q + Vector((0, 0, 0.004)), 0.004, 6)
     # the satin edge along the glare shield, the orange pinstripe under it, a satin lip along the bottom
     for i in range(len(seq) - 1):
         (b0, t0), (b1, t1) = seq[i], seq[i + 1]
@@ -740,7 +836,7 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
         tube(g["int_trim"], t0, t1, 0.011, 10)
         if i not in (pod_l, pod_r):
             # (not across the MFD panels: there the strip above the glass is too narrow, the line cut the screens)
-            tube(g["accent"], t0 + Vector((0, 0, -0.03)), t1 + Vector((0, 0, -0.03)), 0.0035, 6)
+            tube(g["int_accent_glow"], t0 + Vector((0, 0, -0.03)), t1 + Vector((0, 0, -0.03)), 0.0035, 6)
         tube(g["int_trim"], b0 + Vector((0, 0, 0.004)), b1 + Vector((0, 0, 0.004)), 0.01, 10)
     return seq
 
@@ -768,10 +864,12 @@ def wing_panels(g, eye, spec):
                 c = hit - n * 0.035
             else:
                 r, u, n = oriented(eye, c)
-            rows = ([[("led_o", None), ("led_w", None), ("led_blink", None)], [("guarded", "ck_gear"), ("rocker", "ck_lights"), ("button", "ck_cool")]]
+            rows = ([[("guarded", "ck_gear"), ("guarded", "ck_vtol"), ("rocker", "ck_lights"), ("rocker", "ck_extlt")],
+                     [("led_o", None), ("button", "ck_cool"), ("button", "ck_boost"), ("button", "ck_decpl"), ("led_blink", None)]]
                     if side > 0 else
-                    [[("led_blink", None), ("led_o", None), ("led_w", None)], [("guarded_red", "ck_masterarm"), ("encoder", "ck_wpn"), ("button", "ck_nav")]])
-            control_module(g, c + n * 0.035, r, u, n, 0.185, 0.125, rows, tree=tree)
+                    [[("guarded_red", "ck_masterarm"), ("encoder", "ck_wpn"), ("rotary", "ck_nav"), ("rocker", "ck_rcs")],
+                     [("led_blink", None), ("button", "ck_aux"), ("led_o", None), ("led_w", None)]])
+            control_module(g, c + n * 0.035, r, u, n, 0.2, 0.15, rows, tree=tree)
 
 
 def underdash(g, eye, spec, zfloor, lights_out):
@@ -810,8 +908,20 @@ def underdash(g, eye, spec, zfloor, lights_out):
         rr_slab(g["int_console"], c, r, u, n, 0.11, 0.2, 0.02, 0.03)
         for j in range(4):
             rr_slab(g["int_trim"], c + n * 0.002 + u * (-0.06 + j * 0.04), r, u, n, 0.08, 0.008, 0.003, 0.004, 2)
-        tube(g["int_trim"], c - n * 0.015 - u * 0.06, Vector((18.3, y, zfloor)), 0.015, 10)
-        tube(g["int_trim"], Vector((18.26, y, zfloor)), Vector((18.34, y, zfloor + 0.03)), 0.03, 12)   # floor pivot
+        # the mechanism, visible (the pedals looked loose - critic, 25. 9. 2026): a base plate on the floor, a heel
+        # hinge on two brackets, a push rod from the pedal's back to a damper on the footwell wall
+        heel = c - u * 0.1 - n * 0.012
+        box_c = Vector((heel.x + 0.06, y, zfloor + 0.006))
+        rr_slab(g["int_console"], box_c + Vector((0, 0, 0.006)), Vector((0, -1, 0)), Vector((1, 0, 0)), Vector((0, 0, 1)), 0.15, 0.3, 0.015, 0.012, 3)
+        tube(g["int_trim"], heel + Vector((0, -0.07, 0)), heel + Vector((0, 0.07, 0)), 0.012, 12)          # hinge pin
+        for sd in (-1, 1):
+            rr_slab(g["int_trim"], heel + Vector((0, sd * 0.06, 0)), Vector((1, 0, 0)), Vector((0, 0, 1)), Vector((0, sd, 0)),
+                    0.05, 0.045, 0.008, 0.01, 2)                                                            # hinge bracket
+        rod0 = c - n * 0.02 + u * 0.03
+        rod1 = Vector((xw - 0.01, y, rod0.z + 0.04))
+        tube(g["int_trim"], rod0, rod0.lerp(rod1, 0.55), 0.009, 10)
+        tube(g["int_dark"], rod0.lerp(rod1, 0.5), rod1, 0.016, 12)                                        # damper
+        tube(g["int_trim"], rod1 - Vector((0.01, 0, 0)), rod1 + Vector((0.01, 0, 0)), 0.03, 12)            # wall mount
     for y0, y1 in ((-0.9, -0.2), (0.2, 0.9)):
         tube(g["int_glow"], Vector((spec["pod_x"] - 0.02, y0, zb - 0.02)), Vector((spec["pod_x"] - 0.02, y1, zb - 0.02)), 0.004, 6)
     lights_out.append({"at": [18.3, 0.0, zfloor + 0.35], "cd": spec.get("footwell_cd", 2.5)})
@@ -820,6 +930,12 @@ def underdash(g, eye, spec, zfloor, lights_out):
 
 def build_wrap(g, screen_bm, sockets, eye, spec, zfloor, lights_out):
     dash(g, screen_bm, sockets, eye, spec, zfloor)
+    for side in (1, -1):
+        # the displays light the desk and the pod faces round them (cool, small, no shadow)
+        # (20 cm in front of the screen at its height: 12 cm under it the light sat on the knee panel and burnt
+        # two blue spots at the bottom of the pilot's view)
+        lights_out.append({"at": [spec["pod_x"] - 0.2, side * spec["pod_y"], spec["pod_z"] - 0.02], "cd": spec.get("desk_light_cd", 3.0),
+                           "type": "point", "color": [0.45, 0.7, 1.0], "source_radius_cm": 8.0})
     wing_panels(g, eye, spec)
     pedestal(g, screen_bm, sockets, eye, spec)
     return underdash(g, eye, spec, zfloor, lights_out)

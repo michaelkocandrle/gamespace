@@ -904,6 +904,17 @@ snímku.
 
   Hologram proto nese modifikátor Decimate: `finish()` ho vynechá a assemble decimaci aplikuje. Mesh z cizích dílů ber vyhodnocený (`evaluated_get().to_mesh()`), protože greeble jsou bodová mračna s instancerem. Nepoužívej `meshes.new_from_object` s následným mazáním.
 - bt) **Nový podagent „not found“ (`Agent type 'visual-critic' not found`).** Claude Code sleduje jen složky agentů, které existovaly při startu session. První soubor v nové `.claude/agents/` se proto načte až po restartu. Do té doby spouštěj read-only agenta (Explore) s doslovným textem zadání a zapiš to do recenze.
+- bu) **V noci je obloha pořád světlá, i když slunce zapadlo.** Namalovaný gradient `ASkyDome` na slunce nereagoval, jen `SkyBrightness` z prostředí. Oprava v `SkyDome.cpp`: jas × `Lerp(NightSkyFloor 0,02, 1, Day)`, kde `Day` = `SmoothStep(-0,12, 0,08, výška slunce)` × poměr intenzity slunce k výchozí.
+- bv) **Metrika „nejširší sloupek“ hlásila 2,3 %, i když na obraze žádný sloupek nebyl.** Počítala i zářez v linii parapetu. `eye_view_metrics.py` teď bere jen svislé členy: sloupek je tmavý běh, nad kterým loď pokračuje aspoň 8 % výšky obrazu.
+- bw) **Nadpisy středových displejů useknuté z oka pilota.** Tři různé příčiny, každou našel teprve ray cast z oka na horní hranu skla:
+  - při šířce 11 cm zašly vnější hrany za vnitřní hrany MFD podů (zpět na 9 cm);
+  - clona nad sklem (`glass_panel`, `visor`) předsahovala k oku;
+  - horní přední hrana těla sloupku ležela o 2 cm blíž k oku než horní hrana skla (hlava posunuta na `ped_x − 0,13`).
+
+  Když je text na displeji v zabalené hře useknutý, nejdřív vylouči texturu (odsazení stránky v `SpaceFlightHud.cpp`), pak střílej paprsky z `SOCKET_Cockpit` na body skla (0,7–0,99 výšky) a vypiš zasažený objekt, materiál a normálu.
+- bx) **`stat gpu` se v zabalené hře neukáže.** Chce `r.GPUStatsEnabled 1` před `stat gpu`. `space.KitReset` nevrací slunce, proto měření výkonu patří před noční snímek.
+- by) **`import_ship.py` hlásí „manifest has errors“, i když kontrola manifestu prošla.** Relativní `GAMESPACE_SHIP_MANIFEST` se v commandletu vyhodnotí vůči `Engine\Binaries\Win64`. Dávej vždy absolutní cestu.
+- bz) **Modré skvrny u spodního okraje pohledu pilota.** Bodová světla desky (světlo displejů na okolí) seděla 12 cm pod MFD u kolenního panelu a vypálila hot spot. Světlo displeje patří před sklo ve výšce jeho středu (~20 cm), ne k nejbližšímu povrchu.
 - bo) **Kontrola geometrie před každým předáním:** `python Tools/Tests/test_ship_geometry.py` (Blender headless na
   `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
   Musí projít (autor 25. 9. 2026).

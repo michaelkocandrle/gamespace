@@ -56,6 +56,7 @@ void ASkyDome::BeginPlay()
 	for (TActorIterator<ADirectionalLight> It(GetWorld()); It; ++It)
 	{
 		Sun = *It;
+		SunBaseIntensity = It->GetLightComponent()->Intensity;
 		break;
 	}
 	if (SkyMaterial)
@@ -98,10 +99,19 @@ void ASkyDome::Tick(float DeltaSeconds)
 		}
 		if (Amount > 0.f)
 		{
+			// Day or night where the camera is: the sun's height over the local horizon and whether it is
+			// on at all. The painted sky follows it (the real atmosphere already does, being lit by the sun).
+			float Day = 1.f;
+			if (const ADirectionalLight* Light = Sun.Get())
+			{
+				const float Height = FVector::DotProduct(-Light->GetActorForwardVector(), Environment.Up);
+				const float On = SunBaseIntensity > 0.f ? FMath::Clamp(Light->GetLightComponent()->Intensity / SunBaseIntensity, 0.f, 1.f) : 1.f;
+				Day = FMath::SmoothStep(-0.12f, 0.08f, Height) * On;
+			}
 			SkyMaterial->SetVectorParameterValue(TEXT("PlanetUp"), FLinearColor(FVector3f(Environment.Up)));
 			SkyMaterial->SetVectorParameterValue(TEXT("SkyZenithColor"), Environment.SkyZenithColor);
 			SkyMaterial->SetVectorParameterValue(TEXT("SkyHorizonColor"), Environment.SkyHorizonColor);
-			SkyMaterial->SetScalarParameterValue(TEXT("SkyBrightness"), Environment.SkyBrightness);
+			SkyMaterial->SetScalarParameterValue(TEXT("SkyBrightness"), Environment.SkyBrightness * FMath::Lerp(NightSkyFloor, 1.f, Day));
 		}
 	}
 }

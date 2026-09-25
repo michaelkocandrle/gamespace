@@ -213,6 +213,18 @@ Každé předání interiéru nebo kokpitu projde podagentem `visual-critic` (po
 Nejvýš 3 kola, každá výtka s reakcí, recenze v `Docs/Reviews/`. Kontrola geometrie
 (`test_ship_geometry.py`) se dělá navíc, ne místo kritika.
 
+## Pilotní sedadlo, rozptyl decalů, světla (hs pipeline, kokpit v2)
+
+- Sedadlo je procedurální `hs_cockpit.pilot_seat` (Meshy vyřazené jako AI geometrie, autor 25. 9. 2026): skořepina,
+  polstrované panely se švy (poloměr hran 2,8 cm; kulaté polštáře působí jako hračka), boční vedení, opěrka hlavy
+  na sloupcích, popruhy přes horní hranu do štěrbin a do přezky.
+- Rozptyl decalů `interior.decals.scatter`: `axis: "x"` = mřížka y×z, paprsky podél x od `from_x` (čela, stěny);
+  `axis: "z"` = mřížka x×y (rozsah `y`), paprsky dolů od `from_z` (desky shora).
+- Vnitřní světla nesou `specular` (výchozí 0,25): plný specular dělal na lesklém skle kanopy bílé body.
+- Světlo displeje na okolí patří před sklo ve výšce jeho středu, ne k nejbližšímu povrchu (hot spot, WORKFLOW bz).
+- Výtka „text na displeji useknutý z oka“: nejdřív odsazení stránky v C++, pak ray cast z `SOCKET_Cockpit` na body
+  skla a výpis zasaženého objektu (WORKFLOW bw).
+
 ## Ovládací moduly kokpitu (hs pipeline)
 
 `hs_cockpit.control_module(g, c, right, up, n, w, h, rows, tree=)` staví pouzdro se šrouby a ovladači v řádcích.

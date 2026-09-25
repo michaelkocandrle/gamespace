@@ -58,7 +58,7 @@
   },
   "cockpit_displays": {
    "_comment": "The displays' glow on the cockpit around them (rect lights at the Display_* sockets, UCockpitDisplayComponent). state_rate_hz 5: the figures change five times a second, so temporal AA (TSR) settles on each number and it reads sharp (the Vanguard's finding, 19. 9. 2026).",
-   "display_light_intensity_cd": 8.0,
+   "display_light_intensity_cd": 12.0,
    "state_rate_hz": 5.0
   }
  },
@@ -282,7 +282,7 @@
     0.035
    ],
    "opacity": 0.55,
-   "roughness": 0.03
+   "roughness": 0.08
   },
   "MI_Ship_Wayfarer_Thruster": {
    "master": "hull",
@@ -870,12 +870,13 @@
     "M_Ship_Wayfarer_Holo"
    ],
    "vectors": {
-    "HoloColor": [0.2, 0.55, 1.0]
+    "HoloColor": [0.05, 0.38, 1.0]
    },
    "scalars": {
-    "HoloStrength": 1.1,
-    "RimStrength": 1.2,
-    "BaseGlow": 0.12,
+    "HoloStrength": 0.9,
+    "RimStrength": 2.4,
+    "BaseGlow": 0.02,
+    "ScanDepth": 0.45,
     "HoloTurnsPerSecond": 0.0333
    }
   },
@@ -897,6 +898,28 @@
     "PaintMetallic": 0.1,
     "GrungeAmount": 0.1
    }
+  },
+  "MI_Ship_Wayfarer_IntAccentGlow": {
+   "_comment": "the orange pinstripes, faintly lit: the frame reads at night and in space (critic, 25. 9. 2026)",
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_IntAccentGlow"
+   ],
+   "base_color": [0.72, 0.17, 0.02],
+   "metallic": 0.0,
+   "roughness": 0.45,
+   "emissive_color": [1.0, 0.3, 0.05],
+   "emissive_strength": 1.5
+  },
+  "MI_Ship_Wayfarer_IntRubber": {
+   "_comment": "HOTAS grips: matte rubber",
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_IntRubber"
+   ],
+   "base_color": [0.03, 0.03, 0.032],
+   "metallic": 0.0,
+   "roughness": 0.9
   },
   "MI_Ship_Wayfarer_IntScreenBack": {
    "_comment": "the plate behind each display's clear glass: matte, pixel animation like the page (M_Ship_ScreenBack)",

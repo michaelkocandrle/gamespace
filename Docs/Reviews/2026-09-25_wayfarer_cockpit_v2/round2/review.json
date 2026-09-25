@@ -1,0 +1,119 @@
+{
+ "topic": "wayfarer_cockpit_v2",
+ "date": "2026-09-25",
+ "goal": "Kokpit malé jednomístné lodi (Wayfarer): pohled pilota z oka (FOV 88°) ve dne, v noci a ve vesmíru, kabina z boku a zezadu na dveře, detaily ovladačů, HOTAS a hologramu lodi, kabina zvenku přes sklo.",
+ "style": "Star Citizen: moderní futuristická kabina, displeje jako skleněné panely, fyzické ovladače s popisky, hologram lodi, tmavý grafit s krémovými akcenty lodi a oranžovými linkami; úroveň zpracování SC.",
+ "checklist": "cockpit",
+ "out": "Docs/Reviews/2026-09-25_wayfarer_cockpit_v2/round2",
+ "notes": [
+  "Text vpravo nahoře (FPS, stat unit) je měřicí overlay, ne součást výsledku.",
+  "Hlavní reference (pohled z kabiny s hologramem) v projektu chybí; reference jsou jiné kokpity SC."
+ ],
+ "pairs": [
+  {
+   "title": "Pohled pilota, den",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/cockpit_reference_2.png",
+    "starcitizenreference/cockpit_reference_4.png"
+   ],
+   "ref_label": "SC kokpity",
+   "ours": "Saved/Shots/20260925_192755_cockpit_daynight/01_pilot_view_day.png",
+   "ours_label": "ve hře, oko pilota, 1080p"
+  },
+  {
+   "title": "Pohled pilota, noc",
+   "distance": "mid",
+   "light": "night",
+   "ref": "starcitizenreference/cockpit_reference_3.png",
+   "ref_label": "SC kokpit v noci",
+   "ours": "Saved/Shots/20260925_192755_cockpit_daynight/07_pilot_view_night.png",
+   "ours_label": "ve hře, oko pilota"
+  },
+  {
+   "title": "Pohled pilota, vesmír",
+   "distance": "mid",
+   "light": "space",
+   "ref": "starcitizenreference/cockpit_reference_1.png",
+   "ref_label": "SC kokpit ve vesmíru",
+   "ours": "Saved/Shots/20260925_192755_cockpit_daynight/09_pilot_view_space.png",
+   "ours_label": "ve hře, 60 km"
+  },
+  {
+   "title": "Kabina z boku",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/cockpit_reference_5.png",
+    "starcitizenreference/Screenshot 2026-09-25 021701.png"
+   ],
+   "ref_label": "SC kokpity",
+   "ours": "Saved/Shots/20260925_192755_cockpit_daynight/02_cockpit_right_day.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Kabina zezadu na dveře",
+   "distance": "mid",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/Screenshot 2026-09-25 021701.png",
+    "starcitizenreference/Screenshot 2026-09-25 021107.png"
+   ],
+   "ref_label": "SC kabiny zezadu",
+   "ours": "Saved/Shots/20260925_192755_cockpit_daynight/04_cockpit_back_day.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Ovládací moduly zblízka",
+   "distance": "close",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/cockpit_reference_4.png",
+    "starcitizenreference/cockpit_reference_5.png"
+   ],
+   "ref_label": "SC ovladače",
+   "ours": [
+    "Saved/Shots/20260925_192755_cockpit_daynight/05_module_pod_day.png",
+    "Saved/Shots/20260925_192755_cockpit_daynight/06_module_wing_day.png"
+   ],
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "HOTAS zblízka",
+   "distance": "close",
+   "light": "day",
+   "ref": "starcitizenreference/cockpit_reference_5.png",
+   "ref_label": "SC kokpit",
+   "ours": [
+    "Saved/Shots/20260925_192834_cockpit_details/01_hotas_stick.png",
+    "Saved/Shots/20260925_192834_cockpit_details/02_hotas_throttle.png"
+   ],
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Hologram lodi",
+   "distance": "close",
+   "light": "day",
+   "ref": [
+    "starcitizenreference/cockpit_reference_1.png",
+    "starcitizenreference/cockpit_reference_2.png"
+   ],
+   "ref_label": "SC hologram lodi",
+   "ours": [
+    "Saved/Shots/20260925_192834_cockpit_details/05_hologram.png",
+    "Saved/Shots/20260925_192834_cockpit_details/06_hologram_night.png"
+   ],
+   "ours_label": "ve hře, den / noc"
+  },
+  {
+   "title": "Kabina zvenku přes sklo",
+   "distance": "far",
+   "light": "day",
+   "ref": "ArtSource/Ships/Wayfarer/Concept/hero_pad.png",
+   "ref_label": "koncept lodi ve stylu SC",
+   "ours": "Saved/Shots/20260925_192904_wayfarer_interior/14_canopy_outside.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

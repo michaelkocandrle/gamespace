@@ -1043,9 +1043,9 @@
   },
   "red_dot": {
    "uv": [
-    0.21,
+    0.6475000000000002,
     0.23099999999999987,
-    0.219,
+    0.6565000000000001,
     0.23999999999999988
    ],
    "size_m": [
@@ -1581,11 +1581,201 @@
     "switch_label"
    ]
   },
-  "ck_flight": {
+  "ck_vtol": {
    "uv": [
     0.092,
     0.22799999999999987,
-    0.13799999999999998,
+    0.127,
+    0.23999999999999988
+   ],
+   "size_m": [
+    0.07,
+    0.024
+   ],
+   "purpose": "cockpit switch label 'VTOL'",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "cockpit",
+    "switch_label"
+   ]
+  },
+  "ck_rcs": {
+   "uv": [
+    0.137,
+    0.22799999999999987,
+    0.16575,
+    0.23999999999999988
+   ],
+   "size_m": [
+    0.05750000000000001,
+    0.024
+   ],
+   "purpose": "cockpit switch label 'RCS'",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "cockpit",
+    "switch_label"
+   ]
+  },
+  "ck_decpl": {
+   "uv": [
+    0.17575000000000002,
+    0.22799999999999987,
+    0.21700000000000003,
+    0.23999999999999988
+   ],
+   "size_m": [
+    0.0825,
+    0.024
+   ],
+   "purpose": "cockpit switch label 'DECPL'",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "cockpit",
+    "switch_label"
+   ]
+  },
+  "ck_esp": {
+   "uv": [
+    0.22700000000000004,
+    0.22799999999999987,
+    0.25575000000000003,
+    0.23999999999999988
+   ],
+   "size_m": [
+    0.05750000000000001,
+    0.024
+   ],
+   "purpose": "cockpit switch label 'ESP'",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "cockpit",
+    "switch_label"
+   ]
+  },
+  "ck_ifcs": {
+   "uv": [
+    0.26575000000000004,
+    0.22799999999999987,
+    0.3007500000000001,
+    0.23999999999999988
+   ],
+   "size_m": [
+    0.07,
+    0.024
+   ],
+   "purpose": "cockpit switch label 'IFCS'",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "cockpit",
+    "switch_label"
+   ]
+  },
+  "ck_boost": {
+   "uv": [
+    0.31075,
+    0.22799999999999987,
+    0.35200000000000004,
+    0.23999999999999988
+   ],
+   "size_m": [
+    0.0825,
+    0.024
+   ],
+   "purpose": "cockpit switch label 'BOOST'",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "cockpit",
+    "switch_label"
+   ]
+  },
+  "ck_aux": {
+   "uv": [
+    0.36200000000000004,
+    0.22799999999999987,
+    0.3907500000000001,
+    0.23999999999999988
+   ],
+   "size_m": [
+    0.05750000000000001,
+    0.024
+   ],
+   "purpose": "cockpit switch label 'AUX'",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "cockpit",
+    "switch_label"
+   ]
+  },
+  "ck_hyd": {
+   "uv": [
+    0.40075000000000005,
+    0.22799999999999987,
+    0.4295000000000001,
+    0.23999999999999988
+   ],
+   "size_m": [
+    0.05750000000000001,
+    0.024
+   ],
+   "purpose": "cockpit switch label 'HYD'",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "cockpit",
+    "switch_label"
+   ]
+  },
+  "ck_o2": {
+   "uv": [
+    0.43950000000000006,
+    0.22799999999999987,
+    0.462,
+    0.23999999999999988
+   ],
+   "size_m": [
+    0.045,
+    0.024
+   ],
+   "purpose": "cockpit switch label 'O2'",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "cockpit",
+    "switch_label"
+   ]
+  },
+  "ck_extlt": {
+   "uv": [
+    0.4720000000000001,
+    0.22799999999999987,
+    0.5195000000000001,
+    0.23999999999999988
+   ],
+   "size_m": [
+    0.09500000000000001,
+    0.024
+   ],
+   "purpose": "cockpit switch label 'EXT LT'",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "cockpit",
+    "switch_label"
+   ]
+  },
+  "ck_flight": {
+   "uv": [
+    0.5295000000000001,
+    0.22799999999999987,
+    0.5755000000000001,
     0.23999999999999988
    ],
    "size_m": [
@@ -1602,9 +1792,9 @@
   },
   "ck_sys": {
    "uv": [
-    0.148,
+    0.5855000000000001,
     0.22799999999999987,
-    0.19999999999999998,
+    0.6375000000000002,
     0.23999999999999988
    ],
    "size_m": [

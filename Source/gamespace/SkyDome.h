@@ -66,6 +66,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "0.0"))
 	float SunScale = 1.f;
 
+	/** The painted sky's brightness at night (sun below the horizon or switched off), as a share of the
+	 *  day's. The painted gradient ignored the sun and a night sky stayed day-bright (critic, 25. 9. 2026). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float NightSkyFloor = 0.02f;
+
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> SkyMaterial;
@@ -74,4 +79,5 @@ private:
 	float NebulaBase = -1.f;
 	float SunDiscBase = -1.f;
 	float SunGlowBase = -1.f;
+	float SunBaseIntensity = -1.f;
 };

@@ -1554,6 +1554,17 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       - po pravidle o pohledu pilota kolo 2 našlo i ty.
     - První recenze aktuální kabiny: `Docs/Reviews/2026-09-25_wayfarer_cockpit.md`, FAIL, 13 výtek (11 platí, 2 zčásti), zatím neopravené. Postup je v CLAUDE.md (5b), skillech `ship-pipeline` 7b a `ship-interior`.
 
+96. **Kokpit Wayfareru v2** (25. 9. 2026, plán schválený autorem, doplňky: splnit i staré zadání kabiny, sedadlo bez AI geometrie, neplatné výtky kritika dokládat výřezem, hlásit cenu kritika).
+    - Sedadlo z Meshy vyřazené, nové procedurální `hs_cockpit.pilot_seat` (panely se švy, boční vedení, popruhy do štěrbin a přezky).
+    - Ovládací moduly: vroubkované voliče se stupnicí, hranatá podsvícená tlačítka, kolébky, kryté přepínače, enkodéry, LED; 10 nových štítků `ck_*`.
+    - MFD: grafitový rám, clona, linka pod sklem; hlava středového sloupku posunutá k oku, takže nadpisy středových displejů jsou celé (WORKFLOW bw).
+    - Noc: `ASkyDome` tmavne se sluncem (`NightSkyFloor`), světla displejů na desku, specular vnitřních světel 0,25 (bílé body na skle).
+    - Hologram: vyhodnocené meshe + Decimate (WORKFLOW bs), hlubší modrá, tmavá čočka projektoru; průsvitnost + hologram ≈ 0,24 ms GPU.
+    - Detail: spáry a šrouby desky a konzolí, lišty podlahy, žebra obložení, rozptyl decalů osy x a z; pedály s táhlem a tlumičem; madlo schodů na svislých sloupcích.
+    - Metriky z oka: ven 60,8 %, deska 35,3 %, nejširší sloupek 0,0 % (metrika jen svislých členů, WORKFLOW bv). FPS den 72, noc 86, vesmír 91.
+    - Kritik: 3 kola (190 s, 177 s, 214 s), všechna FAIL; poslední skóre 6/5/5/6/5/7/6/6. Recenze `Docs/Reviews/2026-09-25_wayfarer_cockpit_v2.md`, důkazy ve složce `evidence/`.
+    - Otevřené: noc (rect light, fill), hologram bez vnitřních ploch, druhá vrstva detailu a zrno materiálů, popisky LED, loketní opěrky; rozhodnutí autora o MFD podech, odrazu skla a měřítku kanopy.
+
 ---
 
 ## 6. Mapa kódu a obsahu

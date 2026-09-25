@@ -4363,6 +4363,336 @@
     ]
    },
    {
+    "name": "ck_vtol",
+    "type": "info",
+    "footprint": [
+     0.07,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'VTOL'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "VTOL",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_rcs",
+    "type": "info",
+    "footprint": [
+     0.05750000000000001,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'RCS'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "RCS",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_decpl",
+    "type": "info",
+    "footprint": [
+     0.0825,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'DECPL'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "DECPL",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_esp",
+    "type": "info",
+    "footprint": [
+     0.05750000000000001,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'ESP'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "ESP",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_ifcs",
+    "type": "info",
+    "footprint": [
+     0.07,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'IFCS'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "IFCS",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_boost",
+    "type": "info",
+    "footprint": [
+     0.0825,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'BOOST'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "BOOST",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_aux",
+    "type": "info",
+    "footprint": [
+     0.05750000000000001,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'AUX'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "AUX",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_hyd",
+    "type": "info",
+    "footprint": [
+     0.05750000000000001,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'HYD'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "HYD",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_o2",
+    "type": "info",
+    "footprint": [
+     0.045,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'O2'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "O2",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_extlt",
+    "type": "info",
+    "footprint": [
+     0.09500000000000001,
+     0.024
+    ],
+    "purpose": "cockpit switch label 'EXT LT'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "EXT LT",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
     "name": "ck_flight",
     "type": "info",
     "footprint": [

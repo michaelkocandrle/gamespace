@@ -211,6 +211,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -835.0,
     -126.1,
@@ -244,6 +245,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -835.0,
     126.1,
@@ -277,6 +279,7 @@
    ],
    "cone_deg": 80.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -835.0,
     -0.0,
@@ -310,6 +313,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -655.0,
     -126.1,
@@ -343,6 +347,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -655.0,
     126.1,
@@ -376,6 +381,7 @@
    ],
    "cone_deg": 80.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -655.0,
     -0.0,
@@ -409,6 +415,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -475.0,
     -126.1,
@@ -442,6 +449,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -475.0,
     126.1,
@@ -475,6 +483,7 @@
    ],
    "cone_deg": 80.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -475.0,
     -0.0,
@@ -508,6 +517,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -295.0,
     -126.1,
@@ -541,6 +551,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -295.0,
     126.1,
@@ -574,6 +585,7 @@
    ],
    "cone_deg": 80.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -295.0,
     -0.0,
@@ -607,6 +619,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -95.0,
     -126.1,
@@ -640,6 +653,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -95.0,
     126.1,
@@ -673,6 +687,7 @@
    ],
    "cone_deg": 80.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     -95.0,
     -0.0,
@@ -706,6 +721,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     95.0,
     144.0,
@@ -739,6 +755,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     255.0,
     144.0,
@@ -772,6 +789,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     415.0,
     144.0,
@@ -805,6 +823,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     95.0,
     -144.0,
@@ -838,6 +857,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     255.0,
     -144.0,
@@ -871,6 +891,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     415.0,
     -144.0,
@@ -904,6 +925,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     350.0,
     -155.0,
@@ -917,6 +939,74 @@
   },
   {
    "name": "int_22",
+   "type": "point",
+   "color": [
+    0.45,
+    0.7,
+    1.0
+   ],
+   "intensity_cd": 3.0,
+   "radius_m": 5.0,
+   "location": [
+    17.82,
+    0.4,
+    2.083
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 8.0,
+   "specular": 0.25,
+   "location_ue_cm": [
+    757.0,
+    -40.0,
+    88.3
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_23",
+   "type": "point",
+   "color": [
+    0.45,
+    0.7,
+    1.0
+   ],
+   "intensity_cd": 3.0,
+   "radius_m": 5.0,
+   "location": [
+    17.82,
+    -0.4,
+    2.083
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 8.0,
+   "specular": 0.25,
+   "location_ue_cm": [
+    757.0,
+    40.0,
+    88.3
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "int_24",
    "type": "point",
    "color": [
     1.0,
@@ -937,6 +1027,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     805.0,
     -0.0,
@@ -949,7 +1040,7 @@
    ]
   },
   {
-   "name": "int_23",
+   "name": "int_25",
    "type": "spot",
    "color": [
     1.0,
@@ -970,6 +1061,7 @@
    ],
    "cone_deg": 90.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     745.0,
     -105.0,
@@ -982,7 +1074,7 @@
    ]
   },
   {
-   "name": "int_24",
+   "name": "int_26",
    "type": "spot",
    "color": [
     1.0,
@@ -1003,6 +1095,7 @@
    ],
    "cone_deg": 120.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     585.0,
     -55.0,
@@ -1015,7 +1108,7 @@
    ]
   },
   {
-   "name": "int_25",
+   "name": "int_27",
    "type": "spot",
    "color": [
     1.0,
@@ -1036,6 +1129,7 @@
    ],
    "cone_deg": 90.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     745.0,
     105.0,
@@ -1048,7 +1142,7 @@
    ]
   },
   {
-   "name": "int_26",
+   "name": "int_28",
    "type": "spot",
    "color": [
     1.0,
@@ -1069,6 +1163,7 @@
    ],
    "cone_deg": 120.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     585.0,
     55.0,
@@ -1081,14 +1176,14 @@
    ]
   },
   {
-   "name": "int_27",
+   "name": "int_29",
    "type": "spot",
    "color": [
     1.0,
     0.72,
     0.45
    ],
-   "intensity_cd": 3.0,
+   "intensity_cd": 6.0,
    "radius_m": 5.0,
    "location": [
     16.9,
@@ -1102,6 +1197,7 @@
    ],
    "cone_deg": 45.0,
    "source_radius_cm": 4.0,
+   "specular": 0.25,
    "location_ue_cm": [
     665.0,
     -92.5,
@@ -1114,14 +1210,14 @@
    ]
   },
   {
-   "name": "int_28",
+   "name": "int_30",
    "type": "spot",
    "color": [
     1.0,
     0.72,
     0.45
    ],
-   "intensity_cd": 3.0,
+   "intensity_cd": 6.0,
    "radius_m": 5.0,
    "location": [
     16.9,
@@ -1135,6 +1231,7 @@
    ],
    "cone_deg": 45.0,
    "source_radius_cm": 4.0,
+   "specular": 0.25,
    "location_ue_cm": [
     665.0,
     92.5,
@@ -1147,7 +1244,7 @@
    ]
   },
   {
-   "name": "int_29",
+   "name": "int_31",
    "type": "point",
    "color": [
     1.0,
@@ -1168,6 +1265,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 30.0,
+   "specular": 0.25,
    "location_ue_cm": [
     605.0,
     -0.0,
@@ -1180,7 +1278,7 @@
    ]
   },
   {
-   "name": "int_30",
+   "name": "int_32",
    "type": "point",
    "color": [
     1.0,
@@ -1201,6 +1299,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     735.0,
     -55.0,
@@ -1213,7 +1312,7 @@
    ]
   },
   {
-   "name": "int_31",
+   "name": "int_33",
    "type": "point",
    "color": [
     1.0,
@@ -1234,6 +1333,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     735.0,
     55.0,
@@ -1246,7 +1346,7 @@
    ]
   },
   {
-   "name": "int_32",
+   "name": "int_34",
    "type": "point",
    "color": [
     0.35,
@@ -1267,6 +1367,7 @@
    ],
    "cone_deg": 40.0,
    "source_radius_cm": 2.0,
+   "specular": 0.25,
    "location_ue_cm": [
     785.0,
     -56.0,
