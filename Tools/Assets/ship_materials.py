@@ -9,11 +9,15 @@ Masters (rebuilt on every run, like the scene materials):
     /Game/Ships/Shared/Materials/M_Ship_PBR    opaque, Nanite: textures BaseColorMap, ORMMap (G roughness,
                                                B metallic) and NormalMap, with BaseColorTint,
                                                RoughnessScale, MetallicScale (AI models, one texture set)
-    /Game/Ships/Shared/Materials/M_Ship_Screen opaque, unlit, pixel animation: a cockpit display - ScreenTexture x
-                                               EmissiveStrength, nothing else (lit glass reflected the sky
-                                               and the cockpit light and washed the instruments out). The game sets
+    /Game/Ships/Shared/Materials/M_Ship_Screen masked, unlit, pixel animation: a cockpit display as a glass
+                                               panel - ScreenTexture x EmissiveStrength with faint scan lines,
+                                               lit pixels opaque, the empty glass dithered see-through
+                                               (GlassOpacity), a cool fresnel sheen; not lit (lit glass
+                                               reflected the sky and washed the instruments out). The game sets
                                                ScreenTexture to a render target it draws its displays into
                                                (UCockpitDisplayComponent); in the editor it is black
+    /Game/Ships/Shared/Materials/M_Ship_ScreenBack opaque with pixel animation: the plate behind a display's
+                                               clear glass (BaseColor, Metallic, Roughness)
     /Game/Ships/Shared/Materials/M_Ship_Glass  translucent, two-sided, surface forward shading:
                                                BaseColor, Opacity, Roughness
 
@@ -36,7 +40,7 @@ MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glas
            "screen": SHARED + "/M_Ship_Screen", "decal": SHARED + "/M_Ship_Decal",
            "meshdecal": SHARED + "/M_Ship_MeshDecal", "meshdecal_paint": SHARED + "/M_Ship_MeshDecalPaint",
            "meshdecal_ao": SHARED + "/M_Ship_MeshDecalAO",
-           "layered": SHARED + "/M_Ship_Layered"}
+           "layered": SHARED + "/M_Ship_Layered", "screenback": SHARED + "/M_Ship_ScreenBack"}
 TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap",
                   "decal_normal": "DecalNormalMap", "decal_m": "DecalMMap", "decal_bc": "DecalColorMap",
                   "decal_ao": "DecalAOMap"}
@@ -515,23 +519,77 @@ def _add_cavity_and_wear(pbr, tint, metal, grunge, panel_groove=None, scorch=Non
 def build_screen_master():
     screen = _fresh_material(MASTERS["screen"])
     screen.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
-    # Opaque, with pixel animation so temporal AA (TSR) keeps less history on the changing texture.
-    # Tried and dropped (19. 9. 2026, Tools/Shots/display_sharpness.json): translucent with responsive
-    # AA (rows doubled under camera shake: no motion vectors), the same with "Output Depth and Velocity"
-    # (numbers still blended), and translucency after motion blur, past TSR (blurred and doubled even
-    # standing still). What keeps changing numbers sharp is the display itself: its figures change 12
-    # times a second (UCockpitDisplayComponent::StateRateHz), so TSR settles between them.
+    # A glass panel (author 25. 9. 2026, step 3): the content opaque and sharp, the empty glass see-through -
+    # MASKED with a temporal dither for the glass, not translucent. Translucent screens were tried on
+    # 19. 9. 2026 (Tools/Shots/display_sharpness.json) and dropped: no depth and no motion vectors, TSR doubled
+    # the rows under camera shake, "after motion blur" blurred them standing still. Masked writes depth and
+    # velocity like any opaque surface; TSR resolves the dither into a smoked glass. Pixel animation kept:
+    # TSR keeps less history on the changing texture. The figures change 5 times a second
+    # (UCockpitDisplayComponent::StateRateHz), so TSR settles between them.
     screen.set_editor_property("has_pixel_animation", True)
-    screen.set_editor_property("blend_mode", unreal.BlendMode.BLEND_OPAQUE)
+    screen.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED)
+    screen.set_editor_property("opacity_mask_clip_value", 0.5)
     screen.set_editor_property("translucency_pass", unreal.MaterialTranslucencyPass.MTP_BEFORE_DOF)
     screen.set_editor_property("enable_responsive_aa", False)
     screen.set_editor_property("output_translucent_velocity", False)
     screen.set_editor_property("used_with_nanite", True)
     image = _texture_param(screen, "ScreenTexture", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR,
-                           "/Engine/EngineResources/Black", -900, 300)
-    emissive = _node(screen, unreal.MaterialExpressionMultiply, -400, 300)
-    MEL.connect_material_expressions(image, "RGB", emissive, "A")
-    _link(_scalar(screen, "EmissiveStrength", 3.0, -900, 500), emissive, "B")
+                           "/Engine/EngineResources/Black", -1600, 300)
+    # content = the display's lit pixels (text, lines, symbols); the widget's dark glass stays below the threshold
+    lum = _node(screen, unreal.MaterialExpressionDotProduct, -1300, 600)
+    MEL.connect_material_expressions(image, "RGB", lum, "A")
+    _link(_node(screen, unreal.MaterialExpressionConstant3Vector, -1500, 700, constant=unreal.LinearColor(0.3, 0.59, 0.11, 1.0)), lum, "B")
+    over = _node(screen, unreal.MaterialExpressionSubtract, -1100, 600)
+    _link(lum, over, "A")
+    _link(_scalar(screen, "GlassThreshold", 0.07, -1300, 800), over, "B")
+    content = _node(screen, unreal.MaterialExpressionMultiply, -900, 600)
+    _link(over, content, "A")
+    _link(_scalar(screen, "ContentRamp", 20.0, -1100, 800), content, "B")
+    content_c = _node(screen, unreal.MaterialExpressionSaturate, -750, 600)
+    _link(content, content_c, "")
+    # the glass: dithered by blue noise at GlassOpacity (0 = clear, 1 = solid dark glass; DitherTemporalAA is
+    # not exposed to Python) - opaque where GlassOpacity is above the noise, 0.5 is the clip value. Default 0:
+    # clear glass over the display's dark back plate reads best (a dark shifted copy of the page seen at first
+    # was the sun's shadow of the letters - the Screens component casts no shadow, import_ship.py).
+    above = _node(screen, unreal.MaterialExpressionSubtract, -800, 850)
+    _link(_scalar(screen, "GlassOpacity", 0.0, -1000, 850), above, "A")
+    _link(_node(screen, unreal.MaterialExpressionScalarBlueNoise, -1000, 950), above, "B")
+    dither = _node(screen, unreal.MaterialExpressionAdd, -650, 850)
+    _link(above, dither, "A")
+    _link(_node(screen, unreal.MaterialExpressionConstant, -800, 950, r=0.5), dither, "B")
+    mask = _node(screen, unreal.MaterialExpressionMax, -550, 700)
+    _link(content_c, mask, "A")
+    _link(dither, mask, "B")
+    _output(mask, unreal.MaterialProperty.MP_OPACITY_MASK)
+    # emissive: the image, faint scan lines across it, a cool fresnel sheen on the glass
+    uv = _node(screen, unreal.MaterialExpressionTextureCoordinate, -1600, 0)
+    v = _node(screen, unreal.MaterialExpressionComponentMask, -1400, 0, r=False, g=True, b=False, a=False)
+    _link(uv, v, "")
+    rows = _node(screen, unreal.MaterialExpressionMultiply, -1200, 0)
+    _link(v, rows, "A")
+    _link(_scalar(screen, "ScanRows", 380.0, -1400, 120), rows, "B")
+    wave = _node(screen, unreal.MaterialExpressionSine, -1000, 0, period=1.0)
+    _link(rows, wave, "")
+    depth = _scalar(screen, "ScanDepth", 0.06, -1000, 120)
+    scan = _node(screen, unreal.MaterialExpressionMultiply, -850, 0)
+    _link(wave, scan, "A")
+    _link(depth, scan, "B")
+    scan1 = _node(screen, unreal.MaterialExpressionSubtract, -700, 0)
+    _link(_node(screen, unreal.MaterialExpressionConstant, -850, -80, r=1.0), scan1, "A")
+    _link(scan, scan1, "B")
+    lit = _node(screen, unreal.MaterialExpressionMultiply, -500, 300)
+    MEL.connect_material_expressions(image, "RGB", lit, "A")
+    _link(_scalar(screen, "EmissiveStrength", 3.0, -700, 400), lit, "B")
+    lit_scan = _node(screen, unreal.MaterialExpressionMultiply, -350, 200)
+    _link(lit, lit_scan, "A")
+    _link(scan1, lit_scan, "B")
+    fres = _node(screen, unreal.MaterialExpressionFresnel, -700, 1000, exponent=4.0, base_reflect_fraction=0.04)
+    sheen = _node(screen, unreal.MaterialExpressionMultiply, -500, 1000)
+    _link(fres, sheen, "A")
+    _link(_vector(screen, "SheenColor", (0.03, 0.06, 0.1), -700, 1150), sheen, "B")
+    emissive = _node(screen, unreal.MaterialExpressionAdd, -200, 400)
+    _link(lit_scan, emissive, "A")
+    _link(sheen, emissive, "B")
     _output(emissive, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
     MEL.recompile_material(screen)
     unreal.EditorAssetLibrary.save_loaded_asset(screen, only_if_is_dirty=False)
@@ -585,6 +643,17 @@ def build_masters():
     MEL.recompile_material(hull)
     unreal.EditorAssetLibrary.save_loaded_asset(hull, only_if_is_dirty=False)
 
+    # the plate behind a display's clear glass: the hull's parameters plus pixel animation - seen through the
+    # clipped glass it takes over the page's pixels as they change, so TSR keeps as little history there as on
+    # the page itself
+    back = _fresh_material(MASTERS["screenback"])
+    back.set_editor_property("has_pixel_animation", True)
+    _output(_vector(back, "BaseColor", (0.02, 0.022, 0.026), -600, 0), unreal.MaterialProperty.MP_BASE_COLOR)
+    _output(_scalar(back, "Metallic", 0.0, -600, 150), unreal.MaterialProperty.MP_METALLIC)
+    _output(_scalar(back, "Roughness", 0.9, -600, 250), unreal.MaterialProperty.MP_ROUGHNESS)
+    MEL.recompile_material(back)
+    unreal.EditorAssetLibrary.save_loaded_asset(back, only_if_is_dirty=False)
+
     glass = _fresh_material(MASTERS["glass"])
     glass.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
     glass.set_editor_property("two_sided", True)
@@ -598,7 +667,7 @@ def build_masters():
     return {"hull": hull, "pbr": build_pbr_master(), "glass": glass, "screen": build_screen_master(),
             "decal": build_decal_master(), "meshdecal": build_mesh_decal_master(False),
             "meshdecal_paint": build_mesh_decal_master(True), "meshdecal_ao": build_mesh_decal_ao_master(),
-            "layered": build_layered_master()}
+            "layered": build_layered_master(), "screenback": back}
 
 
 def build_mesh_decal_ao_master():

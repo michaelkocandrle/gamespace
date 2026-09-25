@@ -892,6 +892,7 @@ snímku.
   změřená jen na ose (y = 0) nebo v jedné výšce pustí rohy ven. Měř přes celou šířku dílu a v horní i dolní výšce;
   parapet konči u obložení (3 cm pod trupem), ne za ním.
 - bp) **Málo výhledu z kokpitu, i když je sklo velké.** Spodní hrana skla ležela 1–1,3 m nad okem pilota a pilot koukal do obložení. Nejdřív změř výšku oka proti pásu skla (`eye_view_metrics.py`, případně rozmítnutí výšky oka). Oko patří do pásu skla: zvedni kokpit, exteriér nech. Díly exteriéru, které leží na skle (trysky RCS), jsou zevnitř velké tmavé bloky.
+- bq) **Posunutá tmavá kopie textu na displeji, jen ve dne.** Vypadala jako duch TSR nebo odraz. Byl to stín: maskovaný materiál displeje vrhá stín podle masky a slunce kreslí písmena na desku za sklem. Komponenta displejů má `cast_shadow` false. Rozliš podle svícení: jen ve dne = stín, i v noci = TSR nebo odraz.
 - bo) **Kontrola geometrie před každým předáním:** `python Tools/Tests/test_ship_geometry.py` (Blender headless na
   `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
   Musí projít (autor 25. 9. 2026).

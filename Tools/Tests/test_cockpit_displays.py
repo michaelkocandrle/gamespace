@@ -214,8 +214,8 @@ finally:
 master = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Screen")
 check("display master is unlit (no sky reflections over the instruments)",
       master is not None and master.get_editor_property("shading_model") == unreal.MaterialShadingModel.MSM_UNLIT)
-check("display master opaque with pixel animation (the variants past or around temporal AA were worse)",
-      master.get_editor_property("has_pixel_animation") and master.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_OPAQUE)
+check("display master masked glass with pixel animation (writes depth and velocity for TSR; translucent variants doubled)",
+      master.get_editor_property("has_pixel_animation") and master.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_MASKED)
 
 # --- The ship's display slot and material (Tools/Tests/ship_under_test.py) -----------------------------
 if not sut.SHIP:
@@ -240,6 +240,9 @@ else:
         parent = material.get_editor_property("parent") if isinstance(material, unreal.MaterialInstance) else None
         check("display slot has MI_Ship_<Ship>_Screens on M_Ship_Screen", material is not None and material.get_name() == "MI_Ship_%s_Screens" % sut.SHIP
               and parent is not None and parent.get_name() == "M_Ship_Screen", "%s / %s" % (material and material.get_name(), parent and parent.get_name()))
+        if found is not None and screen_part == "Screens":
+            check("the glass displays cast no shadow (the sun drew the letters on the plate behind)",
+                  not found.get_editor_property("cast_shadow"))
         # the display lights look for Display_ sockets on any of the ship's meshes
         sockets = [str(n) for c in ship_bp.get_components_by_class(unreal.StaticMeshComponent) for n in c.get_all_socket_names()]
         check("a Display_ socket in front of each screen (their glow)", sorted(n for n in sockets if n.startswith("Display_"))

@@ -85,6 +85,24 @@ def tube(bm, a, b, r, seg=8):
     bmesh.ops.transform(bm, matrix=m, verts=res["verts"])
 
 
+def glass_panel(g, screen_bm, sockets, name, c, right, up, n, w, h, proud):
+    """A display as a glass panel standing proud of its mount (author 25. 9. 2026, step 3): a dark back plate
+    closes the recess at c, the glass floats `proud` in front on four stand-offs, a thin satin technical frame
+    (7 mm) holds its edge with a cool edge light, small clamps at the corners. The glass is the Screens part
+    (M_Ship_Screen: lit content opaque, the empty glass dithered see-through - the back plate shows)."""
+    # its own material (M_Ship_ScreenBack: matte, pixel animation like the page seen over it)
+    rr_slab(g["int_screen_back"], c - n * 0.03, right, up, n, w + 0.03, h + 0.03, 0.018, 0.008)
+    p = c + n * proud
+    screen(screen_bm, sockets, name, p, right, up, n, w, h)
+    rr_ring(g["int_trim"], p + n * 0.004, right, up, n, w + 0.016, h + 0.016, 0.01, 0.0075, 0.01)
+    rr_ring(g["int_glow"], p + n * 0.0045, right, up, n, w + 0.004, h + 0.004, 0.005, 0.0018, 0.002)
+    for su in (-1, 1):
+        for sv in (-1, 1):
+            q = p + right * (su * (w / 2 + 0.004)) + up * (sv * (h / 2 + 0.004))
+            tube(g["int_trim"], q - n * (proud + 0.03), q - n * 0.006, 0.005, 8)
+            rr_slab(g["int_dark"], q + n * 0.006 - right * su * 0.006 - up * sv * 0.006, right, up, n, 0.022, 0.022, 0.004, 0.012, 2)
+
+
 def oriented(eye, c):
     """Right / up / normal of a panel at c that faces the eye (pilot looks along +x, right = -y)."""
     n = (Vector(eye) - Vector(c)).normalized()
@@ -210,8 +228,7 @@ def pedestal(g, screen_bm, sockets, eye, spec):
     rr_ring(g["int_trim"], hc + hn * 0.004, hr, hu, hn, 0.27, 0.16, 0.04, 0.012, 0.01)
     for name, du, h in (("centre_top", -0.055, spec["centre_w"] * 259.0 / 210.0), ("centre_bottom", 0.055, spec["centre_w"] * 231.0 / 210.0)):
         c = hc + hr * du + hn * 0.006
-        rr_ring(g["int_dark"], c, hr, hu, hn, spec["centre_w"] + 0.016, h + 0.016, 0.01, 0.009, 0.004)
-        screen(screen_bm, sockets, name, c - hn * 0.001, hr, hu, hn, spec["centre_w"], h)
+        glass_panel(g, screen_bm, sockets, name, c, hr, hu, hn, spec["centre_w"], h, 0.015)
     # holographic radar: emitter ring and glowing lens on top, three light rings and four ticks over it
     e = Vector((x0 - 0.02, 0.0, ztop))
     tube(g["int_trim"], e, e + Vector((0, 0, 0.022)), 0.075, 32)
@@ -316,8 +333,7 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
         # screen in its recess, a satin bezel and a thin cool light line round the glass
         rr_ring(g["int_dark"], c, right, up, n, sw + 0.03, sh + 0.03, 0.018, 0.015, 0.035)
         rr_ring(g["int_trim"], c + n * 0.006, right, up, n, sw + 0.05, sh + 0.05, 0.03, 0.014, 0.012)
-        rr_ring(g["int_glow"], c + n * 0.0065, right, up, n, sw + 0.022, sh + 0.022, 0.016, 0.003, 0.003)
-        screen(screen_bm, sockets, "left" if side > 0 else "right", c - n * 0.02, right, up, n, sw, sh)
+        glass_panel(g, screen_bm, sockets, "left" if side > 0 else "right", c, right, up, n, sw, sh, 0.02)
         hw, hh = (sw + 0.05) / 2, (sh + 0.05) / 2
         P = lambda u, v, c=c, right=right, up=up: c + right * u + up * v
         uo, ui = (pw / 2) * (-side), (pw / 2) * side

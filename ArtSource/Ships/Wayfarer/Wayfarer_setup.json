@@ -828,8 +828,18 @@
    ],
    "emissive_strength": 8
   },
+  "MI_Ship_Wayfarer_IntScreenBack": {
+   "_comment": "the plate behind each display's clear glass: matte, pixel animation like the page (M_Ship_ScreenBack)",
+   "master": "screenback",
+   "slots": [
+    "M_Ship_Wayfarer_IntScreenBack"
+   ],
+   "base_color": [0.02, 0.022, 0.026],
+   "metallic": 0.0,
+   "roughness": 0.9
+  },
   "MI_Ship_Wayfarer_Screens": {
-   "_comment": "cockpit displays: unlit, the game's render target (UCockpitDisplayComponent); 2.9 as the Vanguard (cockpit -0.7 EV)",
+   "_comment": "cockpit displays as glass panels: unlit, masked (lit content opaque, empty glass clear), the game's render target (UCockpitDisplayComponent)",
    "master": "screen",
    "slots": [
     "M_Ship_Wayfarer_Screens"

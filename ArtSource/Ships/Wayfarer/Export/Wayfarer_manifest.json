@@ -80,8 +80,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 614318,
-      "verts": 454799,
+      "tris": 613153,
+      "verts": 454084,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -114,8 +114,8 @@
     "SM_Ship_Wayfarer_Canopy": {
       "lod": 0,
       "part": "Canopy",
-      "tris": 4254,
-      "verts": 2425,
+      "tris": 4283,
+      "verts": 2315,
       "materials": [
         "M_Ship_Wayfarer_Glass"
       ],
@@ -123,12 +123,12 @@
       "bounds_m": [
         [
           5.150796890258789,
-          -1.2870655059814453,
-          0.5588111877441406
+          -1.2877434492111206,
+          0.5373823642730713
         ],
         [
-          9.60855484008789,
-          1.287068247795105,
+          9.641887664794922,
+          1.287745475769043,
           2.085254430770874
         ]
       ]
@@ -136,8 +136,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 51698,
-      "verts": 55896,
+      "tris": 51792,
+      "verts": 55912,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -187,8 +187,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 215275,
-      "verts": 130660,
+      "tris": 352119,
+      "verts": 201256,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntLeather",
@@ -199,8 +199,9 @@
         "M_Ship_Wayfarer_IntFloor",
         "M_Ship_Wayfarer_IntPanel",
         "M_Ship_Wayfarer_IntWall",
-        "M_Ship_Wayfarer_IntFabric",
         "M_Ship_Wayfarer_IntConsole",
+        "M_Ship_Wayfarer_IntFabric",
+        "M_Ship_Wayfarer_IntScreenBack",
         "M_Ship_Wayfarer_IntRed",
         "M_Ship_Wayfarer_IntFrame"
       ],
@@ -208,21 +209,21 @@
       "bounds_m": [
         [
           -9.319999694824219,
-          -2.1115686893463135,
-          -1.2599999904632568
+          -2.3059496879577637,
+          -1.3209490776062012
         ],
         [
-          9.378965377807617,
-          2.1115596294403076,
-          2.0709731578826904
+          10.709115982055664,
+          2.3057940006256104,
+          2.0607762336730957
         ]
       ]
     },
     "SM_Ship_Wayfarer_InteriorDecals": {
       "lod": 0,
       "part": "InteriorDecals",
-      "tris": 2186,
-      "verts": 2139,
+      "tris": 1672,
+      "verts": 1721,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -232,21 +233,21 @@
       "bounds_m": [
         [
           -8.753512382507324,
-          -2.041429281234741,
+          -1.8585000038146973,
           -1.092400074005127
         ],
         [
           8.367300033569336,
-          2.0711658000946045,
-          1.2913777828216553
+          1.9786136150360107,
+          1.8552632331848145
         ]
       ]
     },
     "SM_Ship_Wayfarer_InteriorKit": {
       "lod": 0,
       "part": "InteriorKit",
-      "tris": 20574,
-      "verts": 17141,
+      "tris": 20602,
+      "verts": 17187,
       "materials": [
         "M_Ship_Wayfarer_IntDark",
         "M_Ship_Wayfarer_KitTrim03",
@@ -280,14 +281,14 @@
       "uv_layers": 1,
       "bounds_m": [
         [
-          7.699108123779297,
-          -0.568983793258667,
-          0.012472033500671387
+          7.657934188842773,
+          -0.5574178695678711,
+          0.7748570442199707
         ],
         [
-          7.877155303955078,
-          0.568983793258667,
-          0.28346264362335205
+          7.849086761474609,
+          0.5574178695678711,
+          1.042768955230713
         ]
       ]
     }
@@ -306,7 +307,7 @@
         [
           10.75,
           2.1094555854797363,
-          2.0999999046325684
+          2.057812213897705
         ]
       ]
     },
@@ -398,7 +399,7 @@
     "UCX_SM_Ship_Wayfarer_06": {
       "kind": "UCX",
       "mesh": "SM_Ship_Wayfarer",
-      "verts": 15,
+      "verts": 14,
       "bounds_m": [
         [
           -9.949999809265137,
@@ -500,64 +501,64 @@
       "location_m": [
         6.7,
         0.0,
-        0.45
+        1.25
       ],
       "location_ue_cm": [
         670.0,
         -0.0,
-        45.0
+        125.0
       ]
     },
     "SOCKET_Display_centre_bottom": {
       "parent": "SM_Ship_Wayfarer",
       "location_m": [
-        7.81664,
+        7.80203,
         -0.055,
-        0.09559
+        0.85231
       ],
       "location_ue_cm": [
-        781.66,
+        780.2,
         5.5,
-        9.56
+        85.23
       ]
     },
     "SOCKET_Display_centre_top": {
       "parent": "SM_Ship_Wayfarer",
       "location_m": [
-        7.81664,
+        7.80203,
         0.055,
-        0.09559
+        0.85231
       ],
       "location_ue_cm": [
-        781.66,
+        780.2,
         -5.5,
-        9.56
+        85.23
       ]
     },
     "SOCKET_Display_left": {
       "parent": "SM_Ship_Wayfarer",
       "location_m": [
-        7.76093,
-        0.39661,
-        0.15552
+        7.72519,
+        0.38325,
+        0.91753
       ],
       "location_ue_cm": [
-        776.09,
-        -39.66,
-        15.55
+        772.52,
+        -38.32,
+        91.75
       ]
     },
     "SOCKET_Display_right": {
       "parent": "SM_Ship_Wayfarer",
       "location_m": [
-        7.76093,
-        -0.39661,
-        0.15552
+        7.72519,
+        -0.38325,
+        0.91753
       ],
       "location_ue_cm": [
-        776.09,
-        39.66,
-        15.55
+        772.52,
+        38.32,
+        91.75
       ]
     },
     "SOCKET_Engine_L": {
@@ -696,7 +697,7 @@
     "CockpitCamera_location_ue_cm": [
       670.89,
       0.0,
-      45.0
+      125.0
     ],
     "LandingFootprintRadiusCm": 736.0,
     "LandingMaxGapCm": 185.0,

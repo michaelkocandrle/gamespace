@@ -514,6 +514,11 @@ def add_mesh_component(blueprint, extra):
             # the decal materials fade out between 60 and 90 m (ship_materials._decal_fade); drawing stops
             # just past that, so there is no pop
             existing.set_editor_property("ld_max_draw_distance", 9500.0)
+        if extra["component"] == "Screens":
+            # the displays are glass panels (masked): with shadows the sun drew the page's letters as a dark,
+            # shifted copy on the plate behind the clear glass (25. 9. 2026)
+            existing.set_editor_property("cast_shadow", False)
+            existing.set_editor_property("affect_distance_field_lighting", False)
         unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
         return "component %s = %s" % (extra["component"], extra["mesh"])
     except Exception as error:

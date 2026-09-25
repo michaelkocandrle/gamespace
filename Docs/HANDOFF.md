@@ -1510,6 +1510,13 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       - horní RCS na nosu.
 
       Silueta beze změny, layout a výkresy přegenerované.
+    - Krok 3: displeje jsou skleněné panely:
+      - `M_Ship_Screen` masked: obsah neprůhledný, sklo čiré, řádky, fresnel;
+      - panel na stojkách 2 cm před deskou, rámeček 7 mm, světelná hrana;
+      - matná zadní deska `M_Ship_ScreenBack`;
+      - `Screens` bez stínu.
+
+      Čitelné ve dne i v noci (zabalená hra). Rozložení plátna, `ScreenRect` i test beze změny.
 
 ---
 

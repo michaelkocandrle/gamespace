@@ -655,6 +655,12 @@
    "colour": [0.52, 0.47, 0.4],
    "roughness": 0.35,
    "metallic": 0.1
+  },
+  "int_screen_back": {
+   "slot": "IntScreenBack",
+   "colour": [0.02, 0.022, 0.026],
+   "roughness": 0.9,
+   "metallic": 0.0
   }
  },
  "bevel": {

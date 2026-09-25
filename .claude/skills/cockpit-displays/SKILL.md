@@ -31,7 +31,13 @@ Podrobná historie: HANDOFF body 23–33, 32b, 72; postup WORKFLOW kap. 7, nást
 
 - `UCockpitDisplayComponent` kreslí widget `USpaceCockpitDisplays` přes `FWidgetRenderer` do **render
   targetu**, ten jde jako `ScreenTexture` do MID slotu `*_Screens` (`MI_Ship_<Loď>_Screens`, unlit,
-  opaque, pixel animation). V editoru jsou obrazovky černé – obsah vznikne až za běhu.
+  **masked**, pixel animation). V editoru jsou obrazovky černé – obsah vznikne až za běhu.
+- **Skleněné panely (Wayfarer, 25. 9. 2026):** `M_Ship_Screen` odděluje obsah od skla prahem jasu (`GlassThreshold` 0,07, `ContentRamp` 20). Svítící pixely jsou neprůhledné, prázdné sklo průhledné (`GlassOpacity` 0 = čiré, >0 = dither blue noise). Dál má jemné řádky (`ScanRows` 380 rad ≈ 60 řádků, `ScanDepth` 0,06) a fresnelův lesk (`SheenColor`).
+  - Panel stojí 2 cm (střed 1,5 cm) před deskou na čtyřech stojkách, s rámečkem 7 mm a světelnou hranou (`hs_cockpit.glass_panel`).
+  - Za sklem je matná deska `IntScreenBack` (master `M_Ship_ScreenBack`, pixel animation).
+  - **Průsvitný materiál ne:** 19. 9. zdvojoval řádky, protože nemá hloubku ani velocity. Masked hloubku i velocity zapisuje a řazení s kabinou neřeší.
+  - **Komponenta `Screens` nevrhá stín** (`import_ship.py`, hlídá test). Maskovaný materiál vrhá stín podle masky a slunce kreslilo písmena jako tmavou posunutou kopii na desku za sklem. Vypadalo to jako duch TSR nebo odraz.
+  - Zvažovaný jeden široký střední panel (plátno 1330 × 490) nezaveden: dvojice MFD drží rozpočet písma a střed patří hologramu (krok 6).
 - `USpaceCockpitDisplays` je podtřída `USpaceFlightHud`: **stejné názvy widgetů a stejné `ApplyState`**.
   Nový údaj tedy obvykle = stav v `FSpaceFlightHudState` (make_state) + widget v `BuildTree`.
 - **Plátno 1330 × 490 px:** vlevo FLIGHT 0–560, vpravo STATUS 560–1120, střední sloupek 1120–1330
