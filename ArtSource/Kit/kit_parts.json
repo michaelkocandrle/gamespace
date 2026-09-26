@@ -1,0 +1,87 @@
+{
+ "_comment": "Interior kit parts, first version (step 3 of the author's kit brief, 26. 9. 2026). One entry per part family; 'variants' are letters A..C, 'sizes' module lengths (m) and 'sections' the kit sections it exists for (kit_rules.json). Batches are built and approved in order (step 4); 'status': planned | built | approved. Names follow kit_rules naming: SM_Kit_<Category>_<Part><size dm><section>_<Variant>. Human-readable list: .claude/skills/ship-interior/SKILL.md, 'Interiérový kit: seznam dílů'.",
+ "batches": [
+  {"n": 1, "title": "Stěnové moduly a materiály kitu", "families": ["Wall_Plain", "Wall_Grille", "Wall_Locker", "Wall_Pipes", "Wall_Hatch", "Wall_Display", "Mat_Master", "Mat_Trim"]},
+  {"n": 2, "title": "Rohy, přechody, portály, strop", "families": ["Corner_Inner", "Corner_Outer", "Wall_Transition", "Wall_End", "Wall_Narrow", "Portal_Ring", "Ceiling_Tray", "Ceiling_Panel"]},
+  {"n": 3, "title": "Podlaha, schody, rampa", "families": ["Floor_Plate", "Floor_Grille", "Floor_Hatch", "Stair_Flight", "Stair_Ramp"]},
+  {"n": 4, "title": "Zárubně, dveře, přepážky", "families": ["Door_Sliding", "Door_Frame", "Bulkhead_Plain", "Bulkhead_Door"]},
+  {"n": 5, "title": "Konzole, palubní deska, skleněné panely", "families": ["Console_Standing", "Console_Wall", "Console_Corner", "Dash_Band", "Glass_Panel"]},
+  {"n": 6, "title": "Výbava a nábytek", "families": ["Fitting_Handrail", "Fitting_Railing", "Fitting_Ladder", "Fitting_Extinguisher", "Fitting_Medkit", "Fitting_Sign", "Furniture_Locker", "Furniture_Box", "Furniture_Bunk", "Furniture_Seat"]},
+  {"n": 7, "title": "Infrastruktura (parametrická)", "families": ["Pipe_Run", "Cable_Run", "Duct_Run"]},
+  {"n": 8, "title": "Pouzdra svítidel", "families": ["Light_Linear", "Light_Spot", "Light_Emergency", "Light_Indicator"]}
+ ],
+ "families": {
+  "Wall_Plain": {"category": "Wall", "part": "Plain", "sizes": [0.3, 0.6, 1.2], "sections": ["N", "W", "T"], "variants": {
+    "A": "kick panel 0.1-0.5 + main panel to the break, slope panel; data label, bolt rows",
+    "B": "main panel split into two (vertical shadow gap at mid-length), a raised doubler plate on one half",
+    "C": "main panel with a horizontal groove band and a service stencil; slope panel with a vent slot row"}, "status": "planned"},
+  "Wall_Grille": {"category": "Wall", "part": "Grille", "sizes": [0.6, 1.2], "sections": ["N", "W", "T"], "variants": {
+    "A": "louvred grille in the lower main panel over a dark plenum",
+    "B": "tall narrow grille at one end, full vertical height",
+    "C": "return-air grille in the slope panel"}, "status": "planned"},
+  "Wall_Locker": {"category": "Wall", "part": "Locker", "sizes": [0.6, 1.2], "sections": ["W", "T"], "sections_N_depth_max": 0.15, "variants": {
+    "A": "tall locker 0.5 x 1.1, proud 0.2, orange handle, hinges, label",
+    "B": "two stacked lockers 0.5 x 0.5",
+    "C": "low wide stowage box 1.0 x 0.4"}, "status": "planned"},
+  "Wall_Pipes": {"category": "Wall", "part": "Pipes", "sizes": [1.2], "sections": ["N", "W", "T"], "variants": {
+    "A": "two pipes 60 mm low on stand-off brackets, flow bands",
+    "B": "three pipes high under the break with clamps",
+    "C": "one 100 mm pipe and a cable bundle in a tray"}, "status": "planned", "_note": "pipes end flush on the module ends at grid heights, so neighbours continue them"},
+  "Wall_Hatch": {"category": "Wall", "part": "Hatch", "sizes": [0.6, 1.2], "sections": ["N", "W", "T"], "variants": {
+    "A": "square access hatch 0.45, four quarter-turn fasteners, pull recess",
+    "B": "tall hatch 0.35 x 0.9 with an orange T-handle",
+    "C": "double hatch with a system stencil"}, "status": "planned"},
+  "Wall_Display": {"category": "Wall", "part": "Display", "sizes": [0.3, 0.6], "sections": ["N", "W", "T"], "variants": {
+    "A": "status display 0.45 x 0.28 in a bezel, three labelled keys, LEDs",
+    "B": "small status panel with two labelled LEDs and a rocker",
+    "C": "narrow vertical system gauge"}, "status": "planned", "_note": "no door keypads (author's rule)"},
+  "Mat_Master": {"category": "Material", "part": "Master", "variants": {"A": "MI_Kit_<Maker>_<Role> on the shared masters: layered (grain in world space, per-panel variation), hull (glows, rubber, seal), PBR (trim), screen, glass; decal instances"}, "status": "planned"},
+  "Mat_Trim": {"category": "Material", "part": "Trim", "variants": {"A": "procedural trim sheet 4096 x 2048 at 1024 px/m: rail with bolts, bolted flange, ribbed rubber, perforated plate, hazard stripes, anti-slip, stitched seam, label band, edge bevel with groove, vent slots"}, "status": "planned"},
+
+  "Corner_Inner": {"category": "Corner", "part": "Inner", "sections": ["N", "W", "T"], "variants": {"A": "90 deg inner corner with a vertical structural post", "B": "45 deg chamfered inner corner"}, "status": "planned"},
+  "Corner_Outer": {"category": "Corner", "part": "Outer", "sections": ["N", "W", "T"], "variants": {"A": "90 deg outer corner with a bumper edge"}, "status": "planned"},
+  "Wall_Transition": {"category": "Wall", "part": "Transition", "sizes": [0.6], "sections": ["N-W"], "variants": {"A": "section change N to W over 0.6 m"}, "status": "planned"},
+  "Wall_End": {"category": "Wall", "part": "End", "sections": ["N", "W", "T"], "variants": {"A": "corridor end wall with the full profile", "B": "end wall with a window slot"}, "status": "planned"},
+  "Wall_Narrow": {"category": "Wall", "part": "Narrow", "sections": ["W-S"], "variants": {"A": "narrowing into a service crawlway"}, "status": "planned"},
+  "Portal_Ring": {"category": "Portal", "part": "Ring", "sizes": [0.3], "sections": ["N", "W", "S", "T"], "variants": {"A": "structural frame with a lit inner ring", "B": "frame with a hazard band and a section number plate", "C": "heavy frame with pipes passing through"}, "status": "planned"},
+  "Ceiling_Tray": {"category": "Ceiling", "part": "Tray", "sizes": [0.6, 1.2], "sections": ["N", "W", "T"], "variants": {"A": "open cable tray with bundles", "B": "tray with a duct and a pipe"}, "status": "planned"},
+  "Ceiling_Panel": {"category": "Ceiling", "part": "Panel", "sizes": [0.6, 1.2], "sections": ["N", "W", "T"], "variants": {"A": "ceiling panels with a round down-light housing", "B": "panels with a vent diffuser", "C": "panels with a linear light"}, "status": "planned"},
+
+  "Floor_Plate": {"category": "Floor", "part": "Plate", "sizes": [0.6, 1.2], "sections": ["N", "W", "S", "T"], "variants": {"A": "plates with edge strips and anti-slip fields", "B": "plates with a centre walkway line and hazard edges"}, "status": "planned"},
+  "Floor_Grille": {"category": "Floor", "part": "Grille", "sizes": [0.6, 1.2], "sections": ["N", "W", "T"], "variants": {"A": "grating over a dark service channel with pipes"}, "status": "planned"},
+  "Floor_Hatch": {"category": "Floor", "part": "Hatch", "sizes": [0.6], "sections": ["N", "W", "T"], "variants": {"A": "floor hatch with a flush ring handle"}, "status": "planned"},
+  "Stair_Flight": {"category": "Stair", "part": "Flight", "sections": ["N", "S"], "variants": {"A": "ship's stair, lit nosings, side rails (parametric rise)"}, "status": "planned"},
+  "Stair_Ramp": {"category": "Stair", "part": "Ramp", "variants": {"A": "boarding ramp inner surface with anti-slip and hazard edges"}, "status": "planned"},
+
+  "Door_Sliding": {"category": "Door", "part": "Sliding", "sections": ["N", "W"], "variants": {"A": "single sliding door, animatable leaf, lit frame", "B": "double sliding door"}, "status": "planned"},
+  "Door_Frame": {"category": "Door", "part": "Frame", "sections": ["N", "W", "S"], "variants": {"A": "door frame with a status light strip and number plate"}, "status": "planned"},
+  "Bulkhead_Plain": {"category": "Bulkhead", "part": "Plain", "sections": ["N", "W", "T"], "variants": {"A": "full bulkhead with structure"}, "status": "planned"},
+  "Bulkhead_Door": {"category": "Bulkhead", "part": "Door", "sections": ["N", "W", "T"], "variants": {"A": "bulkhead with a door opening and hazard frame"}, "status": "planned"},
+
+  "Console_Standing": {"category": "Console", "part": "Standing", "variants": {"A": "standing console with a display band and control modules", "B": "engineering console"}, "status": "planned"},
+  "Console_Wall": {"category": "Console", "part": "Wall", "variants": {"A": "wall console with a fold-down shelf"}, "status": "planned"},
+  "Console_Corner": {"category": "Console", "part": "Corner", "variants": {"A": "corner console"}, "status": "planned"},
+  "Dash_Band": {"category": "Dash", "part": "Band", "variants": {"A": "cockpit dash with the display band set below the line of sight, glass panels with lit edges, the approved control modules (rotaries, rockers, guarded switches, labelled keys and LEDs) around it (author 26. 9. 2026)"}, "status": "planned"},
+  "Glass_Panel": {"category": "Glass", "part": "Panel", "variants": {"A": "holographic glass panel 0.2", "B": "0.32", "C": "0.5"}, "status": "planned"},
+
+  "Fitting_Handrail": {"category": "Fitting", "part": "Handrail", "sizes": [0.6, 1.2], "variants": {"A": "wall handrail with brackets"}, "status": "planned"},
+  "Fitting_Railing": {"category": "Fitting", "part": "Railing", "sizes": [1.2], "variants": {"A": "floor railing"}, "status": "planned"},
+  "Fitting_Ladder": {"category": "Fitting", "part": "Ladder", "variants": {"A": "wall ladder (parametric height)"}, "status": "planned"},
+  "Fitting_Extinguisher": {"category": "Fitting", "part": "Extinguisher", "variants": {"A": "extinguisher in a wall bracket with a sign"}, "status": "planned"},
+  "Fitting_Medkit": {"category": "Fitting", "part": "Medkit", "variants": {"A": "first-aid box"}, "status": "planned"},
+  "Fitting_Sign": {"category": "Fitting", "part": "Sign", "variants": {"A": "section / room sign plate", "B": "exit and hazard sign"}, "status": "planned"},
+  "Furniture_Locker": {"category": "Furniture", "part": "Locker", "variants": {"A": "free-standing locker bank"}, "status": "planned"},
+  "Furniture_Box": {"category": "Furniture", "part": "Box", "variants": {"A": "stowage box", "B": "equipment case"}, "status": "planned"},
+  "Furniture_Bunk": {"category": "Furniture", "part": "Bunk", "variants": {"A": "bunk with padding and a reading light"}, "status": "planned"},
+  "Furniture_Seat": {"category": "Furniture", "part": "Seat", "variants": {"A": "pilot seat (the approved procedural seat)", "B": "crew seat"}, "status": "planned"},
+
+  "Pipe_Run": {"category": "Pipe", "part": "Run", "parametric": ["length", "diameter"], "variants": {"A": "straight", "B": "bend", "C": "T-piece; valves and flanges as attachments"}, "status": "planned"},
+  "Cable_Run": {"category": "Cable", "part": "Run", "parametric": ["length", "count"], "variants": {"A": "cable bundle with ties", "B": "cable tray"}, "status": "planned"},
+  "Duct_Run": {"category": "Duct", "part": "Run", "parametric": ["length", "size"], "variants": {"A": "rectangular duct", "B": "round duct with a grille"}, "status": "planned"},
+
+  "Light_Linear": {"category": "Light", "part": "Linear", "sizes": [0.6, 1.2], "variants": {"A": "linear housing with a diffuser (warm / cool)"}, "status": "planned"},
+  "Light_Spot": {"category": "Light", "part": "Spot", "variants": {"A": "round down-light housing"}, "status": "planned"},
+  "Light_Emergency": {"category": "Light", "part": "Emergency", "variants": {"A": "red emergency light"}, "status": "planned"},
+  "Light_Indicator": {"category": "Light", "part": "Indicator", "variants": {"A": "status indicator (emissive only, no light)"}, "status": "planned"}
+ }
+}

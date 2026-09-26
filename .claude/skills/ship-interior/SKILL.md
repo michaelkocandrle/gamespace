@@ -458,6 +458,36 @@ Strojově čitelně je vše v `ArtSource/Kit/kit_rules.json`. Čtou ho stavební
   - stíny MegaLights chtějí přesnou geometrii;
   - interiér letí s kamerou (WORKFLOW 9.2 a).
 
+## Interiérový kit: seznam dílů (krok 3, 26. 9. 2026)
+
+Strojově čitelně je seznam v `ArtSource/Kit/kit_parts.json`: rodiny dílů, varianty, délky modulů, průřezy,
+dávka a stav (planned / built / approved). Seznam odpovídá zadání autora: 47 rodin, 78 variant před násobením
+délkami a průřezy. Stavba po dávkách, další dávka až po schválení předchozí:
+
+1. **Stěnové moduly a materiály kitu:**
+   - plný, s mřížkou, se skříňkou, s průchodem trubek, se servisním poklopem, s displejem (každý A–C);
+   - master a instance podle výrobce, trim sheet.
+2. **Rohy, přechody, portály, strop:**
+   - vnitřní a vnější roh, přechod N–W, konec chodby, zúžení do průlezu;
+   - portál se svítícím prstencem;
+   - stropní žlab, stropní panely se světlem a ventilací.
+3. **Podlaha, schody, rampa:** desky s lištami, rošty, poklopy, schody, rampa.
+4. **Zárubně, dveře, přepážky:** posuvné dveře s animovatelným křídlem.
+5. **Konzole, deska, sklo:**
+   - konzole stojící, nástěnná a rohová;
+   - palubní deska s displejovým pásem zapuštěným pod linií pohledu a ovládacími moduly z kokpitu v2;
+   - skleněné panely 0,2 / 0,32 / 0,5 m.
+6. **Výbava a nábytek:**
+   - madla, zábradlí, žebříky, hasicí přístroj, lékárnička, cedule;
+   - skříňky, boxy, lůžko, sedadla (procedurální sedadlo z kokpitu v2).
+7. **Infrastruktura:** trubky, kabely, vzduchotechnika, parametricky podle délky a průměru.
+8. **Pouzdra svítidel:** liniové, bodové, nouzové, kontrolky (jen emise) s přednastavenými světly.
+
+Pravidla pro všechny díly:
+- materiál, decaly, světla a sockety podle designového jazyka, žádné holé šedé díly;
+- průřez N: výbava nejvýš 0,15 m od líce;
+- zákaz klávesnic u dveří platí i pro displejové moduly.
+
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 
 Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.
