@@ -211,8 +211,11 @@ python Tools/Assets/meshy_generate.py --spec ArtSource/Ships/Steadfast/Kitbash/m
 - Každá nová funkce/vzhled začíná referenčním videem (když URL chybí, řekni si o ni autorovi,
   nebo použij existující poznámky):
   ```
-  python Tools/Reference/fetch_video.py <url> <název> [--every 2] [--from 3:40 --to 5:10]
+  python Tools/Reference/fetch_video.py <url> <název> [--every 2] [--from 3:40 --to 5:10] [--subs]
   ```
+  `--subs` stáhne anglické automatické titulky a zapíše `transcript.txt` (řádek po ~10 s s časem). U rozborů je
+  obsah hlavně v komentáři. Po několika dotazech za sebou YouTube odpoví 429 nebo ověřením bota; cookies
+  z prohlížeče nepoužívat, zbydou snímky.
   yt-dlp (`pip install yt-dlp`) stáhne nejlepší kvalitu do 4K, vypíše skutečné rozlišení (ffprobe –
   YouTube někdy potichu pošle nižší), nařeže snímky `tHH_MM_SS.jpg` a složí přehledové listy 4×3.
   Potřebuje ffmpeg/ffprobe na PATH. Opakované spuštění stahování přeskočí.

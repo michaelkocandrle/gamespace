@@ -225,6 +225,22 @@ Nejvýš 3 kola, každá výtka s reakcí, recenze v `Docs/Reviews/`. Kontrola g
 - Výtka „text na displeji useknutý z oka“: nejdřív odsazení stránky v C++, pak ray cast z `SOCKET_Cockpit` na body
   skla a výpis zasaženého objektu (WORKFLOW bw).
 
+## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
+
+Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.
+- **Světla:** C2 má ~790 světel, můstek 74, nákladový prostor 160. To je zhruba 1 světlo na m², světlo u
+  každého svítidla, lišty i prstence rámů. U nás 35 na celou loď.
+  - Cíl: každé svítidlo a svítící lišta své světlo s krátkým dosahem a bez stínu, stíny jen 2–3 hlavní.
+  - Akcent u podlahy a pod deskou.
+  - Měřit `stat gpu`.
+- **Decaly v interiéru:** husté u dveří (značky, čáry, kroužky), na podlaze čáry, pruhy u prahů a nápisy sekcí.
+  Na podlaze nákladového prostoru C2 zabírají decaly přes polovinu plochy. Dlouhé čáry dělá natažený kus atlasu.
+- **Panely ovladačů:** tištěné zaoblené rámečky skupin s názvem v přerušené horní hraně, oblouky stupnic,
+  popisek pod každým ovladačem. Knoflíky jsou jednoduché, jedno velké podsvícené tlačítko, emisní nápisy.
+- **Materiály:** plochý lak s variací lesku (skvrny se ukážou v odlesku), žádné otřené hrany. Švy sedadla
+  jsou decaly nebo trim sheet.
+- Horní plocha desky C2 je velká a čistá: hustotu soustřeď do shluků u funkčních míst.
+
 ## Sklo kanopy a hologram (26. 9. 2026)
 
 - Odraz skla podle kamery: `MPC_ShipView.InsideView` (1 = kamera hráče v obálce partů `Interior*` lodi, jinak 0)

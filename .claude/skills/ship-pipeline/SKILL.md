@@ -456,6 +456,16 @@ MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/decal_libra
   (`DecalFadeStartCm` / `EndCm`); díl Decals se přestane kreslit v 95 m. Menu (24 m), chase kamera a přistání
   jsou v plném rozsahu (preset `decal_fade`).
 
+**Rozbor lodí SC v Blenderu** (Markom3D: C2 Hercules exteriér a kokpit, Argo MOLE; poznatky s časy
+`starcitizenreference/ShipDetailing_VideoNotes.md`, 26. 9. 2026):
+- Trup bez decalů je skoro hladký, panelové linky jsou pásy decalů (to děláme). Žaluzie, logo, velká čísla a
+  výstrahy na MOLE jsou decaly na rovném laku.
+- **Velké karty špíny** 1–4 m se stékajícími šmouhami nad motory, přes křídla a svislé plochy. U nás chybí,
+  špína je jen procedurální v materiálu.
+- **Lak bez opotřebení hran.** Špinavý dojem dělá drsnost (dlaždicová textura šmouh a škrábanců), ne barva ani
+  otřené hrany. Náš `EdgeWear` 0,8 je proti SC příliš.
+- Natažené úseky atlasu: dlouhé čáry z jednoho malého kusu textury.
+
 **„Feel“ SC: rozbor referencí** (Docs/UI screenshoty Titan, Guardian, Hornet, Cutlass, Spirit; ship matrix Pisces,
 100i, Mustang, Aurora; porovnáno se stejných vzdáleností, 24. 9. 2026):
 

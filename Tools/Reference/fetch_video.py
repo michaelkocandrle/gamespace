@@ -1,6 +1,6 @@
 """Reference video from YouTube -> frames to look at (21. 9. 2026).
 
-    python Tools/Reference/fetch_video.py <url> <name> [--every 2] [--from 0:30 --to 5:00]
+    python Tools/Reference/fetch_video.py <url> <name> [--every 2] [--from 0:30 --to 5:00] [--subs]
 
 1. Downloads the best video stream up to 2160p (plus audio, merged to mp4) with yt-dlp into
    ArtSource/Reference/Video/<name>/ and prints the resolution that actually came down (ffprobe),
@@ -8,6 +8,9 @@
 2. Cuts one frame every --every seconds (full resolution, JPEG quality 2) into frames/.
 3. Tiles them into contact sheets (4x3, 640 px per frame) in sheets/, so a whole video can be
    scanned in a few pictures and the interesting timestamps opened at full size.
+4. --subs: the English auto captions (subs.en.vtt) and transcript.txt, one line per ~10 s with its start time -
+   a breakdown video's content is mostly in what the author says (26. 9. 2026). YouTube answers a few
+   caption requests in a row with 429 or a bot check; then the frames are all there is (no browser cookies).
 
 The video and the frames are someone else's footage: kept locally for reference only, never
 committed (ArtSource/Reference/Video/ is in .gitignore). Needs yt-dlp (pip install yt-dlp) and
@@ -18,6 +21,7 @@ import argparse
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -40,6 +44,31 @@ def probe(path):
     return stream["width"], stream["height"], float(num) / float(den), stream["codec_name"], float(data["format"]["duration"])
 
 
+def transcript(vtt, out):
+    """YouTube auto-caption VTT -> one line per ~10 s with its start time; the rolling repeats removed."""
+    text = open(vtt, encoding="utf-8").read()
+    lines, last = [], ""
+    for h, m, s, body in re.findall(r"(\d\d):(\d\d):(\d\d)\.\d+ --> [^\n]*\n(.*?)(?:\n\n|\Z)", text, re.S):
+        body = [re.sub(r"<[^>]+>", "", line).strip() for line in body.split("\n")]
+        body = [line for line in body if line]
+        if body and body[-1] != last:
+            last = body[-1]
+            lines.append((int(h) * 3600 + int(m) * 60 + int(s), last))
+    merged, start, chunk = [], None, []
+    for t, line in lines:
+        start = t if start is None else start
+        chunk.append(line)
+        if t - start >= 10:
+            merged.append((start, " ".join(chunk)))
+            start, chunk = None, []
+    if chunk:
+        merged.append((start, " ".join(chunk)))
+    with open(out, "w", encoding="utf-8") as f:
+        for t, line in merged:
+            f.write("%d:%02d  %s\n" % (t // 60, t % 60, line))
+    return len(merged)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("url")
@@ -47,6 +76,7 @@ def main():
     parser.add_argument("--every", type=float, default=2.0, help="seconds between frames")
     parser.add_argument("--from", dest="start", default=None, help="start time for frames, e.g. 0:30")
     parser.add_argument("--to", dest="end", default=None, help="end time for frames, e.g. 5:00")
+    parser.add_argument("--subs", action="store_true", help="English auto captions -> transcript.txt")
     args = parser.parse_args()
 
     folder = os.path.join(ROOT, args.name)
@@ -55,6 +85,15 @@ def main():
     if not os.path.exists(video):
         run([sys.executable, "-m", "yt_dlp", "-f", "bv*[height<=2160]+ba/b[height<=2160]/bv*+ba/b",
              "--merge-output-format", "mp4", "-o", video, "--no-playlist", args.url])
+    if args.subs:
+        vtt = os.path.join(folder, "subs.en.vtt")
+        if not os.path.exists(vtt):
+            subprocess.run([sys.executable, "-m", "yt_dlp", "--skip-download", "--write-auto-subs", "--write-subs",
+                            "--sub-langs", "en", "--sub-format", "vtt", "-o", os.path.join(folder, "subs"), args.url])
+        if os.path.exists(vtt):
+            print("TRANSCRIPT %d lines in %s" % (transcript(vtt, os.path.join(folder, "transcript.txt")), folder))
+        else:
+            print("TRANSCRIPT none (YouTube refused the captions - look at the frames)")
     width, height, fps, codec, duration = probe(video)
     print("DOWNLOADED %dx%d, %.2f fps, %s, %.0f s, %.0f MB" % (
         width, height, fps, codec, duration, os.path.getsize(video) / 1e6))
