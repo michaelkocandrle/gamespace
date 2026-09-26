@@ -225,6 +225,125 @@ Nejvýš 3 kola, každá výtka s reakcí, recenze v `Docs/Reviews/`. Kontrola g
 - Výtka „text na displeji useknutý z oka“: nejdřív odsazení stránky v C++, pak ray cast z `SOCKET_Cockpit` na body
   skla a výpis zasaženého objektu (WORKFLOW bw).
 
+## Interiérový kit: designový jazyk (návrh ke schválení autorem, 26. 9. 2026)
+
+Vlastní modulární kit pro interiéry Wayfareru, Steadfastu a dalších lodí (zadání autora 26. 9. 2026: kroky
+1–7, každý díl jednou vyladit a schválit, pak opakovat). Úroveň a přístup SC, design vlastní, bez kopií dílů.
+Quaternius už nosná vrstva není. **Do schválení tohoto oddílu se nic nestaví.**
+
+Podklady:
+- moodboard `ArtSource/Reference/Mood/kit_moodboard.jpg` (lokálně, obsahuje snímek z cizího videa);
+- reference `starcitizenreference/Screenshot 2026-09-25 0213*.png` a `ShipDetailing_VideoNotes.md`;
+- schválená chodba a kokpit v2, exteriér Wayfareru (recept `Wayfarer_hs.json`).
+
+### 1. Tvarosloví
+- **Průřez chodby: lichoběžník s osmiúhelníkovým stropem.**
+  - Svislá stěna do výšky 1,3 m.
+  - Nad ní zkosení 35° dovnitř, jako dnešní chodba Wayfareru (`kit.chamfer_deg`). Končí u stropu ve vybrání
+    se světelnou lištou (`cove_m` 0,12).
+  - Plochý strop, uprostřed kabelový žlab.
+  - U podlahy sokl 0,10 m se zkosením 45° a modrou lištou.
+- **Zalomená stěna:** panel se v horní třetině láme o 10–15° dovnitř. Dlouhá stěna tak není jedna rovina.
+- **Rytmus:**
+  - portál (rám) po 1,2 m: dva stěnové moduly 0,6 m, nebo jeden modul 1,2 m;
+  - rám je o 8–12 cm hlubší než panely, šířka lícové plochy 14 cm (`portal_w`), na vnitřní hraně svítící
+    prstenec.
+- **Panelové poměry:** 1 : 2 a 2 : 3 (0,6 × 1,2, 0,6 × 0,9, 0,4 × 0,6). Zakázané jsou čtverce přes 0,8 m a
+  souvislé plochy přes 1,2 m bez spáry.
+- **Tři vrstvy, vždy nad sebou:**
+  1. konstrukce (žebra, nosníky, příhrady 60–120 mm hluboké);
+  2. panely předsazené 20–40 mm před konstrukcí se stínovou spárou kolem;
+  3. výbava na panelech (skříňky, displeje, madla, trubky 5–30 cm).
+
+  Panel vždy přesahuje díl pod sebou. Díly se nepotkávají v jedné rovině (blikání, WORKFLOW 9.3 p).
+- **Úhly:** hlavní zkosení 35°, vedlejší 45°. Rohy panelů zaoblené nebo sražené, žádná ostrá pravoúhlá hrana
+  delší než 2 cm.
+
+### 2. Velikosti
+| Prvek | Hodnota |
+|---|---|
+| Zkosení velkých dílů (> 1 m: žebra, portály, desky) | 12–20 mm, 2 segmenty |
+| Zkosení středních dílů (0,2–1 m: skříňky, konzole, poklopy) | 6–10 mm |
+| Zkosení malých dílů (< 0,2 m: ovladače, západky, šrouby) | 2–4 mm |
+| Trup exteriéru, pro srovnání | 25 mm |
+| Nosná žebra a rámy | 60–120 mm |
+| Stěnové panely | 20–30 mm |
+| Kryty a poklopy | 10–15 mm |
+| Lišty a obruby | 5–8 mm |
+| Stínová spára mezi panely (tmavý materiál) | šířka 6–10 mm, hloubka 10–20 mm |
+| Dělicí drážka v panelu | šířka 3–4 mm, hloubka 2–3 mm |
+| Větrací štěrbiny | 8 mm, rozteč 20 mm |
+| Šrouby | Ø 8–12 mm, v řadách po 60–100 mm |
+| Výška stropu | chodba 2,3 m, kajuta 2,3–2,4 m, servisní průlez 1,9 m |
+
+### 3. Hierarchie detailu a shlukování
+- **Velký:** portály, žebra, stěnové moduly, žlaby, desky. Určuje rytmus prostoru po 1,2 m.
+- **Střední (0,2–0,6 m):** skříňky, displeje, konzole, trubky, mřížky, poklopy, madla, svítidla.
+- **Malý (1–5 cm):** šrouby, štítky, kontrolky, západky, kabelové vývodky, popisky.
+- **Shluky:** 60–70 % středního a malého detailu leží do ~1 m od funkčního místa. Funkční místa: dveře,
+  konzole, lůžko, technika, žebřík, hasicí přístroj. Mezi shluky jsou klidné panely jen se spárou, jedním
+  štítkem a zrnem materiálu. Rytmus klid – shluk – klid; nikdy rovnoměrný detail po celé stěně.
+- Každý panel nad 0,5 m má aspoň spáru nebo jeden decal, jako na exteriéru. Klidná plocha nesmí být holá,
+  kritik holé plochy vytýká.
+
+### 4. Paleta a materiály
+Barvy jsou lineární, sdílený master kitu s variací po panelech a zrnem v lesku.
+
+| Materiál | Kde | Hodnoty |
+|---|---|---|
+| **Grafit** (lakovaný kov) | architektura: panely, konzole, desky | 0,05–0,07; drsnost 0,45–0,55; zrno 45 cm; `RoughVariation` 0,35 |
+| **Gunmetal** (broušený/satinový kov) | konstrukce, rámy, madla, zábradlí, podlahové lišty | 0,33/0,33/0,34; metallic 1; drsnost 0,30–0,40 |
+| **Krémová** (akcent) | lemy dveří, lůžko, výstupky, obložení rámu skla | nejvýš 10–15 % plochy prostoru |
+| **Oranžová Halcyon Freightworks** (signální) | madla, záchytné body, výstražné pruhy, linky, poklopy | 0,85/0,34/0,06; nejvýš 3–5 % plochy |
+| Guma | stupně, protiskluzové pásy, madla, soklové lišty | tmavá, drsnost 0,8–0,9 |
+| Látka, kůže | sedadla, lůžka, polstry | švy z trim sheetu |
+| Plast | kryty elektroniky, displejové rámy | drsnost 0,5 |
+| Karbon | jen luxusní výbava (jiný výrobce) | – |
+| Studené UI | displeje, hologramy, modré lišty u podlahy | modrá 0,45/0,72/1,0 |
+
+- Variace mezi panely jako na exteriéru: tón ±7 %, drsnost ±0,12, 8 % panelů kovových.
+- Opotřebení jen v drsnosti, bez otřených hran (rozbor SC).
+- **Výrobce jako parametr:** instance palety podle výrobce.
+  - Halcyon Freightworks: grafit, krémová, oranžová.
+  - Kestrel Dynamics: návrh světlý šedobílý lak, tmavé gunmetal rámy, modrý akcent. Ke schválení s kitem.
+
+### 5. Decaly a trim sheet
+- **Hustota jako na podlaze a dveřích C2:**
+  - dveře a rámy: číslo sekce, značky, čáry, kroužky, štítek otevírání;
+  - podlaha: čáry podél stěn, pruhy u prahů, nápisy sekcí, protiskluzová pole. V nákladovém prostoru decaly
+    zabírají až 50 % podlahy.
+- **Typy:** strukturní (normála, drsnost, AO: spáry, šrouby, mřížky, poklopy) a informační (barva: nápisy,
+  čísla, výstrahy), jak je dnes v knihovně. Dlouhé čáry jsou natažený úsek atlasu.
+- **Ovládací panely:**
+  - tištěný zaoblený rámeček skupiny s názvem v přerušené horní hraně;
+  - oblouky stupnic kolem voličů, popisek pod každým ovladačem, emisní verze štítků;
+  - jedno velké podsvícené tlačítko hlavní funkce.
+- **Trim sheet kitu** (vlastní, procedurální, 4096 px, 512 px/m):
+  - obruby panelů, stínové spáry, řady šroubů, švy čalounění, rámečky, lemy, protiskluzové pruhy;
+  - díly kitu mapují hrany a lišty na trim sheet a velké plochy na sdílený master (triplanární zrno).
+- **Písmo:** Rajdhani a Share Tech Mono. Servisní nápisy 2 cm, orientační 8–15 cm, čísla sekcí 25–40 cm.
+
+### 6. Světla
+Podle rozboru C2 a měření `Docs/Reviews/2026-09-26_interior_lighting_variants.md`.
+- **Každé svítidlo, lišta a linka má své světlo:** dosah 1,5–2 m, specular 0,2, bez klasických stínů. Světlo
+  je vždy v pouzdře: liniové ve zkosení a v soklu, bodové v kruhovém stropním pouzdře, nikdy holá žárovka.
+- **Hustota:**
+  - obytné prostory a chodby 1,2–1,8 světla na m²;
+  - kokpit 2–3 na m²;
+  - velké nákladové prostory 0,5–1 na m².
+
+  Kontrolky, LED a obruby tlačítek jsou jen emisivní.
+- **Barevný nádech:**
+  - pracovní světla teplá bílá 4000–5200 K;
+  - orientační lišty u podlahy studená modrá;
+  - akcenty slabě oranžové;
+  - nouzová světla červená.
+
+  Kontrast: kužele ze stropních pouzder, tmavé kouty a mezery mezi ostrůvky světla.
+- **Stíny:** návrh je MegaLights s ray-traced stíny, zapnuté jen s kamerou uvnitř lodi (+1,8 až +2,2 ms).
+  Záložní režim bez stínů (+1,2 až +1,5 ms). Klasické stíny pro desítky světel nejdou (+47 až +113 ms).
+- **Jemná objemová mlha:** nízká hustota, jen aby byly vidět kužele. Cena se změří v pilotu chodby.
+
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 
 Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.
