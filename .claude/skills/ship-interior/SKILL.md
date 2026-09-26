@@ -344,6 +344,91 @@ Podle rozboru C2 a měření `Docs/Reviews/2026-09-26_interior_lighting_variants
   Záložní režim bez stínů (+1,2 až +1,5 ms). Klasické stíny pro desítky světel nejdou (+47 až +113 ms).
 - **Jemná objemová mlha:** nízká hustota, jen aby byly vidět kužele. Cena se změří v pilotu chodby.
 
+## Interiérový kit: mřížka a technická pravidla (krok 2, 26. 9. 2026)
+
+Strojově čitelně je vše v `ArtSource/Kit/kit_rules.json`. Čtou ho stavební skripty dílů (krok 4), kontroly kitu
+(krok 5) a manifest (krok 6), takže čísla se mění jen tam. Výkres průřezů, rytmu a pivotů
+`Docs/Kit/kit_sections.png` kreslí z pravidel `python Tools/Kit/draw_kit_sections.py`.
+
+- **Mřížka:**
+  - půdorys 0,3 m, moduly 0,3 / 0,6 / 0,9 / 1,2 m;
+  - portál 0,3 m a stěny 0,9 m dávají rozteč 1,2 m;
+  - svisle 0,1 m;
+  - výplně 0,1 a 0,2 m jen tam, kde trup vnutí šířku mimo mřížku (Wayfarer: nákladový prostor 3,8 m = 3,6 +
+    2 × 0,1);
+  - díly se skládají bez mezer: každý modul nese na svých okrajích polovinu stínové spáry (4 mm) nad tmavým
+    těsněním, takže spoj nikde neprosvítá.
+- **Standardní průřezy** (světlá šířka mezi líci panelů u podlahy / strop):
+
+| Průřez | Šířka | Strop | Svislá stěna do | Sklon 3:4 | Strop mezi vybráními | Portál před líc |
+|---|---|---|---|---|---|---|
+| S servisní průlez | 0,9 | 2,1 | 1,9 | 0,2 (odsazení 0,15) | 0,6 | 0 (lícuje) |
+| N úzká chodba | 1,2 | 2,3 | 1,7 | 0,4 (0,3) | 0,6 | 0,08 |
+| W široká chodba, místnost | 2,4 | 2,3 | 1,3 | 0,8 (0,6) | 1,2 | 0,10 |
+| T vysoká místnost, náklad | podle místnosti | 2,7 | 1,7 | 0,8 (0,6) | podle místnosti | 0,10 |
+
+- **Profil stěny:**
+  - sokl do 0,1 m se zkosením 45° a lištou u podlahy;
+  - svislá část;
+  - sklon 3 : 4 (36,9°, návrhových „~35°“ na mřížce);
+  - vybrání 0,12 m se světelnou lištou;
+  - strop s kabelovým žlabem.
+- **Zóny od líce panelu** (líc = hranice místnosti z layoutu):
+  - konstrukce za lícem do 0,2 m, pak obložení trupu;
+  - panel 20–30 mm, předsazený 20–40 mm;
+  - podlahová deska 50 mm nad konstrukcí 0,15 m;
+  - strop s konstrukcí 0,25 m.
+- **Průchodnost:** kapsle postavy má poloměr 0,42 m a výšku 1,92 m (`PlayerCharacter.cpp`). Světlá šířka všude
+  i v portálu ≥ 0,9 m, světlá výška ≥ 2,0 m. Proto portály v průlezu S nevystupují.
+- **Pivoty** (+X dopředu, +Y vlevo, +Z nahoru, měřítko 1, aplikované transformace):
+  - průběžné díly (podlaha, strop, portál, trubky, kabely, vzduchotechnika, schody): začátek modulu na ose
+    průřezu, z = 0, +X po směru chodby;
+  - stěny, dveře, přepážky: dolní roh na lícové rovině, líc míří na +X, šířka po +Y (0 až W);
+  - rohy: vnitřní roh průsečíku lícových rovin;
+  - výbava, konzole, deska, sklo, světla: střed montážní plochy, čelo na +X.
+- **Sockety:**
+  - `SOCKET_Snap_Start/End/Left/Right/Top/Bottom`, vždy na mřížce;
+  - `SOCKET_Light_n`: X = směr světla, parametry (typ, role teplá/studená/signální/nouzová, cd, dosah, kužel,
+    stín MegaLights) v manifestu kitu;
+  - `SOCKET_Decal_n`: X = normála, Y = nahoru decalu; tagy číslo sekce, výstraha, štítek, šipka, servis;
+  - `SOCKET_Mount_n`: úchyt výbavy.
+- **Jména:**
+  - `SM_Kit_<Kategorie>_<Díl><velikost v dm><průřez>_<Varianta>`, např. `SM_Kit_Wall_Grille06W_B`. Kategorie:
+    Wall, Corner, Portal, Ceiling, Floor, Stair, Door, Bulkhead, Console, Dash, Glass, Fitting, Furniture,
+    Pipe, Cable, Duct, Light.
+  - `MI_Kit_<Výrobce>_<Role>`, `T_Kit_<Jméno>_<BC|N|ORM|M|H|E>`.
+  - Sloty materiálů dílu se jmenují podle role: `Kit_Primary` (grafit), `Kit_Structure` (gunmetal),
+    `Kit_Accent`, `Kit_Signal`, `Kit_Rubber`, `Kit_Fabric`, `Kit_Plastic`, `Kit_Trim`, `Kit_Seal`,
+    `Kit_GlowWarm`, `Kit_GlowCool`, `Kit_GlowSignal`, `Kit_Screen`, `Kit_Glass`.
+- **Paleta podle výrobce:** loď v setupu zvolí `kit_maker` (Halcyon / Kestrel) a import přiřadí sloty rolí
+  k `MI_Kit_<Výrobce>_<Role>`. Barvy rolí jsou v `kit_rules.json` (`palettes`). Kit tak slouží více lodím bez
+  kopií dílů.
+- **Hustota texelů:**
+  - trim sheet 512 px/m (±25 %) pro hrany, lemy, spáry a obruby;
+  - velké plochy triplanárně ve světě 1024 px/m, bez UV;
+  - decaly 2048 px/m;
+  - zrno 45 cm.
+- **Rozpočty trojúhelníků** (LOD0, bez Nanite). Dnešní interiér Wayfareru má ~300 tisíc trojúhelníků na
+  67 m² (~4,5 tisíce na m²).
+  - stěna 5 000 na metr, roh 4 000, portál 8 000, strop 3 500 na metr, podlaha 1 500 na metr;
+  - schod 600, dveře 10 000, přepážka 8 000;
+  - konzole 15 000, palubní deska 60 000, sklo 500;
+  - drobná výbava 3 000, nábytek 15 000;
+  - trubky 500 na metr, kabely 1 000 na metr, vzduchotechnika 800 na metr, pouzdro světla 600;
+  - místnost nejvýš 10 000 na m², interiér lodi nejvýš 1 milion;
+  - LOD1 (50 %, velikost na obrazovce 0,25) jen pro konzole, nábytek a výbavu.
+- **Kolize:** jednoduché UCX boxy po modulech, nikdy complex-as-simple.
+  - stěna, podlaha, strop: jeden box každý;
+  - portál: boxy vystupujícího rámu;
+  - schody: šikmý box;
+  - dveře: rám a pohyblivý box křídla;
+  - konzole: jeden box, nábytek 1–3 boxy;
+  - drobná výbava bez kolize, pokud se po ní nešplhá.
+- **Nanite:** interiér zůstává bez Nanite, znovu ověřeno 26. 9. 2026 (`Docs/Reviews/2026-09-26_kit_nanite_check.md`):
+  - s Nanite zmizely tenké díly (rámy, moduly, obruby);
+  - stíny MegaLights chtějí přesnou geometrii;
+  - interiér letí s kamerou (WORKFLOW 9.2 a).
+
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 
 Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.

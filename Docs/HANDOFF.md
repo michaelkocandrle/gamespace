@@ -1571,7 +1571,9 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
       - `EdgeWear` 0,15, variace lesku clear coatu, zrno interiéru 45 cm;
       - audit zdrojů.
     - Světla interiéru (`Docs/Reviews/2026-09-26_interior_lighting_variants.md`): na m² jsme na úrovni C2 nebo nad ní (kokpit 2,8, náklad 1,75/m²). Varianty změřené přes `Tools/Shots/light_variants.json` a příkazy `SpaceShipLightTuning.cpp`: klasické stíny +47 až +113 ms; MegaLights se stíny ze všech světel +1,8 až +2,2 ms (pevná cena, roste málo s počtem); emise přes Lumen místnost nerozsvítí. Návrh (ke schválení): MegaLights s kamerou uvnitř, záloha bez stínů.
-    - Interiérový kit (zadání autora 26. 9. 2026, kroky 1–7): krok 1 designový jazyk zapsán ve skillu `ship-interior` (moodboard `ArtSource/Reference/Mood/kit_moodboard.jpg`), čeká na schválení; nic se nestaví.
+    - Interiérový kit (zadání autora 26. 9. 2026, kroky 1–7):
+      - krok 1: designový jazyk ve skillu `ship-interior` (moodboard `ArtSource/Reference/Mood/kit_moodboard.jpg`); autor pokračuje krokem 2;
+      - krok 2: mřížka a technická pravidla v `ArtSource/Kit/kit_rules.json` a ve skillu. Obsahuje mřížku 0,3/0,1 m, průřezy S/N/W/T, pivoty, sockety, jména, palety podle výrobce, texely, rozpočty, kolize a Nanite vypnuté (znovu ověřeno). Výkres `Docs/Kit/kit_sections.png`.
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 
