@@ -38,7 +38,8 @@ import bpy
 from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
 
-SLOTS = ("Decal", "DecalAO", "DecalPaint", "Trim", "TrimAO")
+SLOTS = ("Decal", "DecalAO", "DecalPaint", "Trim", "TrimAO", "DecalGrime")
+GRIME_CELLS = {"streaks": 0, "soot": 1, "smear": 2, "rim": 3}   # Tools/Assets/generate_grime_textures.py, 2 x 2
 POD_Y = 2.38          # |y| beyond this a hit is on a pod (the hull's half width is 2.30)
 
 
@@ -84,11 +85,15 @@ class Placer:
         self.pod = pod_axis
         self.bm = bmesh.new()
         self.uv = self.bm.loops.layers.uv.new("UVMap")
+        # vertex colour for the grime cards' soft edges; made before any vertex (a new layer invalidates the
+        # Python references to the vertices already there)
+        self.col = self.bm.verts.layers.float_color.new("Col")
         self.placed = []                  # (centre, radius, x, y, w, h) for the overlap test
         self.frames = []                  # (item, frame) of every placed decal, for the companion rules
         self.log = []                     # (rule, item, part)
         self.ribbons = []                 # (rule, strip, part, metres)
         self.skipped = {"edge": 0, "overlap": 0, "miss": 0}
+        self.grime = []                   # (kind, part, faces) of every grime card
 
     # ------------------------------------------------------------------ rays
     def ray(self, spec, side):
@@ -215,6 +220,85 @@ class Placer:
             return None
         return self.place_at(spec["item"], hit, n, spec.get("rot", 0.0), spec.get("scale", 1.0), rule,
                              spec.get("check_overlap", True))
+
+    # ------------------------------------------------------------------ grime cards
+    def card(self, spec, side):
+        """A large grime card (recipe decals.grime, 26. 9. 2026): found by the same rays as an item, then a grid
+        of `size` m cast onto the surface along its normal - it follows the curve of a pod or a wing root and
+        drops the cells whose corners miss. `up` (ship space, y mirrored with the side) is where the dirt comes
+        from: the top edge of the texture cell lies that way (air flow: towards the nose on a top surface;
+        gravity: up on a side; exhaust soot: towards the nozzle)."""
+        origin, d = self.ray(spec, side)
+        hit, n = self.cast(origin, d)
+        if hit is None:
+            self.skipped["miss"] += 1
+            return 0
+        hit -= self.off
+        up = Vector(spec["up"])
+        up.y *= side
+        y = up - n * up.dot(n)
+        if y.length < 1e-3:
+            return 0
+        y.normalize()
+        x = y.cross(n).normalized()
+        w, h = spec["size"]
+        # 8 cm cells: flat 15 cm cells sagged ~5 mm under a pod's curve (r 0.6 m) - more than the lift - and the
+        # depth test cut a staircase out of the card (26. 9. 2026)
+        step = spec.get("step_m", 0.08)
+        nx, ny = max(2, int(math.ceil(w / step))), max(2, int(math.ceil(h / step)))
+        reach = spec.get("reach_m", 0.5)
+        k = GRIME_CELLS[spec.get("kind", "streaks")]
+        u0, v_top = (k % 2) * 0.5, 1.0 - (k // 2) * 0.5
+        rows = []
+        for j in range(ny + 1):
+            row = []
+            for i in range(nx + 1):
+                s_, t = i / nx, j / ny
+                p = hit + x * ((s_ - 0.5) * w) + y * ((0.5 - t) * h)
+                q, qn = self.cast(p + n * reach, -n)
+                if q is not None and ((q - self.off) - p).length < 2.0 * reach and qn.dot(n) > 0.2:
+                    # (q is in the assembled ship's space, like every vertex of the Decals mesh)
+                    row.append(self.bm.verts.new(q + qn * (self.offset + 0.002)))
+                else:
+                    row.append(None)
+                row[-1] = (row[-1], s_, t)
+            rows.append(row)
+        slot = SLOTS.index("DecalGrime")
+        # soft edges where cells were dropped (off a pod's end, over a step): a vertex next to a missing one gets
+        # alpha 0 in the vertex colour, the grime master multiplies its opacity by it - a dropped cell cut the
+        # card's texture off along a staircase (26. 9. 2026)
+        col = self.col
+        for j in range(ny + 1):
+            for i in range(nx + 1):
+                v = rows[j][i][0]
+                if v is None:
+                    continue
+                edge = any(rows[jj][ii][0] is None
+                           for jj in range(max(0, j - 1), min(ny, j + 1) + 1) for ii in range(max(0, i - 1), min(nx, i + 1) + 1))
+                v[col] = (1.0, 1.0, 1.0, 0.0 if edge else 1.0)
+        faces = 0
+        for j in range(ny):
+            for i in range(nx):
+                quad = [rows[j][i], rows[j][i + 1], rows[j + 1][i + 1], rows[j + 1][i]]
+                if any(v is None for v, _, _ in quad):
+                    continue
+                f = self.bm.faces.new([v for v, _, _ in quad])
+                f.material_index = slot
+                f.smooth = True
+                for loop, (_, s_, t) in zip(f.loops, quad):
+                    loop[self.uv].uv = (u0 + 0.5 * s_, v_top - 0.5 * t)
+                f.normal_update()   # a new face's normal is zero until updated (WORKFLOW 9.3 s)
+                if f.normal.dot(n) < 0:
+                    f.normal_flip()
+                faces += 1
+        # loose verts of dropped cells
+        for row in rows:
+            for v, _, _ in row:
+                if v is not None and not v.link_faces:
+                    self.bm.verts.remove(v)
+        if faces:
+            self.grime.append((spec.get("kind", "streaks"), self.part_of(hit + self.off), faces))
+        return faces
 
     # ------------------------------------------------------------------ ribbons
     def ribbon(self, spec, side, rule="trim"):
@@ -651,6 +735,10 @@ def build(recipe, target, ship, off, root):
     for tr in spec.get("trim", []):
         for side in ((1, -1) if tr.get("mirror", True) and tr["on"].startswith("pod") else (1,)):
             pl.ribbon(tr, side, "trim")
+    # grime cards last: they lie over everything (colour and roughness only)
+    for gc in spec.get("grime", []):
+        for side in ((1, -1) if gc.get("mirror", True) else (1,)):
+            pl.card(gc, side)
     name = "SM_Ship_%s_Decals" % ship
     me = bpy.data.meshes.new(name)
     pl.bm.to_mesh(me)
@@ -673,5 +761,6 @@ def build(recipe, target, ship, off, root):
         s[1] += length
     report = {"decals": len(pl.log), "by_part": by_part, "by_rule": by_rule, "by_type": by_type,
               "strip_runs": {k: {"runs": v[0], "metres": round(v[1], 1)} for k, v in strips.items()},
-              "skipped": pl.skipped, "faces": len(me.polygons)}
+              "skipped": pl.skipped, "faces": len(me.polygons),
+              "grime": {"cards": len(pl.grime), "by_kind": {k: sum(1 for g in pl.grime if g[0] == k) for k in GRIME_CELLS}}}
     return ob, report

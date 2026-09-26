@@ -2088,7 +2088,102 @@
    "greeble_companions": {
     "_comment": "labels, markers, chevrons and stencils beside the hull's kit greebles"
    }
-  }
+  },
+  "grime": [
+   {
+    "_what": "grime cards (from the SC breakdown, 26. 9. 2026: planes of streaky dirt over the engines and wings). size [w, h], h along 'up' = where the dirt comes from; mirrored",
+    "on": "pod",
+    "x": 0.25,
+    "deg": 90,
+    "size": [1.3, 1.5],
+    "kind": "soot",
+    "up": [-1, 0, 0]
+   },
+   {
+    "on": "pod",
+    "x": 0.25,
+    "deg": 10,
+    "size": [1.2, 1.5],
+    "kind": "soot",
+    "up": [-1, 0, 0]
+   },
+   {
+    "on": "pod",
+    "x": 0.25,
+    "deg": -115,
+    "size": [1.2, 1.4],
+    "kind": "soot",
+    "up": [-1, 0, 0]
+   },
+   {
+    "_what": "fins: rain streaks down both faces",
+    "on": "ray",
+    "at": [2.0, 5.0, 3.3],
+    "dir": [0, -1, 0],
+    "size": [1.5, 1.3],
+    "kind": "streaks",
+    "up": [0, 0, 1]
+   },
+   {
+    "on": "ray",
+    "at": [2.0, 0.5, 3.4],
+    "dir": [0, 1, 0],
+    "size": [1.5, 1.3],
+    "kind": "streaks",
+    "up": [0, 0, 1]
+   },
+   {
+    "_what": "wings: air-flow streaks trailing back from the leading edge, a smear at the root",
+    "on": "top",
+    "x": 7.2,
+    "y": 3.9,
+    "size": [1.8, 2.6],
+    "kind": "streaks",
+    "up": [1, 0, 0]
+   },
+   {
+    "on": "top",
+    "x": 5.2,
+    "y": 2.9,
+    "size": [1.2, 1.6],
+    "kind": "smear",
+    "up": [1, 0, 0]
+   },
+   {
+    "_what": "hull: streaks under the side vents, a smear over the hold roof, dirt round the main gear",
+    "on": "side",
+    "x": 4.9,
+    "z": 2.35,
+    "size": [1.1, 1.1],
+    "kind": "streaks",
+    "up": [0, 0, 1]
+   },
+   {
+    "on": "top",
+    "x": 1.8,
+    "y": 1.1,
+    "size": [1.6, 2.2],
+    "kind": "smear",
+    "up": [1, 0, 0]
+   },
+   {
+    "on": "bottom",
+    "x": 5.0,
+    "y": 0.9,
+    "size": [1.3, 1.4],
+    "kind": "rim",
+    "up": [1, 0, 0]
+   },
+   {
+    "_what": "pod intakes: a smear over the front",
+    "on": "pod",
+    "x": 5.3,
+    "deg": 35,
+    "size": [1.0, 0.9],
+    "kind": "smear",
+    "up": [1, 0, 0]
+   }
+  ]
  },
  "layers": {
   "_comment": "Vertex-colour masks for M_Ship_Layered (Tools/Blender/hs_layers.py). Whole ship (region_x covers the hull).",
@@ -2826,6 +2921,29 @@
      "standoff_m": 0.015
     }
    ]
+  },
+  "fixture_lights": {
+   "_comment": "a light for every strip and lamp (hs_fixture_lights.py; SC breakdown 26. 9. 2026: the C2 has ~790 lights, ~1 per m2)",
+   "seg_m": 0.9,
+   "push_m": 0.12,
+   "radius_m": 1.6,
+   "min_len_m": 0.25,
+   "max_lights": 140,
+   "materials": {
+    "int_light": {
+     "color": [1.0, 0.82, 0.62],
+     "cd_per_m": 1.6
+    },
+    "int_glow": {
+     "color": [0.45, 0.72, 1.0],
+     "cd_per_m": 0.6
+    },
+    "int_accent_glow": {
+     "color": [1.0, 0.35, 0.08],
+     "cd_per_m": 0.35,
+     "min_len_m": 0.4
+    }
+   }
   }
  }
 }

@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/AudioComponent.h"
 #include "Components/PointLightComponent.h"
+#include "Components/LocalLightComponent.h"
 #include "HAL/IConsoleManager.h"
 #include "CockpitDisplayComponent.h"
 #include "Components/BoxComponent.h"
@@ -454,6 +455,15 @@ void ASpaceshipPawn::UpdateViewCollection()
 	if (!bInteriorBoundsReady)
 	{
 		bInteriorBoundsReady = true;
+		TArray<ULocalLightComponent*> Lights;
+		GetComponents<ULocalLightComponent>(Lights);
+		for (ULocalLightComponent* Light : Lights)
+		{
+			if (Light->GetName().StartsWith(TEXT("Light_fix_")))
+			{
+				FixtureLights.Add(Light);
+			}
+		}
 		TArray<UStaticMeshComponent*> Meshes;
 		GetComponents<UStaticMeshComponent>(Meshes);
 		for (const UStaticMeshComponent* Mesh : Meshes)
@@ -470,14 +480,32 @@ void ASpaceshipPawn::UpdateViewCollection()
 	{
 		return;
 	}
+	// Through this pawn's own cameras: inside only in the cockpit view (the chase camera can hang inside the
+	// interior's box above the hull). Through anything else (the walking character, a shot's free camera): the
+	// camera inside the interior parts' box.
 	bool bInside;
-	if (InteriorBoundsLocal.IsValid)
+	if (Camera->GetViewTarget() == this)
 	{
-		bInside = InteriorBoundsLocal.IsInside(GetActorTransform().InverseTransformPosition(Camera->GetCameraLocation()));
+		bInside = bCockpitView;
 	}
 	else
 	{
-		bInside = bCockpitView && Camera->GetViewTarget() == this;
+		bInside = InteriorBoundsLocal.IsValid
+			&& InteriorBoundsLocal.IsInside(GetActorTransform().InverseTransformPosition(Camera->GetCameraLocation()));
+	}
+	// The fixture lights (a light for every strip and lamp, hs_fixture_lights.py) only while the camera is inside:
+	// without shadows they light the hull through its walls, and from outside their volumes cover the whole ship
+	// on screen (~3 ms on the target GPU in a close chase view)
+	if (bInside != bFixtureLightsOn)
+	{
+		bFixtureLightsOn = bInside;
+		for (ULocalLightComponent* Light : FixtureLights)
+		{
+			if (Light)
+			{
+				Light->SetVisibility(bInside);
+			}
+		}
 	}
 	// One collection for the whole world: the ship the camera is in wins the frame, the others only clear
 	// it when no ship has claimed it yet this frame.

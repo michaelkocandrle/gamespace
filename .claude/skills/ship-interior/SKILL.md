@@ -240,6 +240,12 @@ Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.
 - **Materiály:** plochý lak s variací lesku (skvrny se ukážou v odlesku), žádné otřené hrany. Švy sedadla
   jsou decaly nebo trim sheet.
 - Horní plocha desky C2 je velká a čistá: hustotu soustřeď do shluků u funkčních míst.
+- **Zavedeno: světla u svítidel** (`Tools/Blender/hs_fixture_lights.py`, recept `interior.fixture_lights`):
+  - každý ostrov svítícího materiálu dostane světla po 0,9 m (dosah 1,6 m, bez stínu), odsazená na otevřenou stranu;
+  - jména `fix_N`, pawn je zapíná jen s kamerou uvnitř (WORKFLOW cf);
+  - Wayfarer 88 světel, kokpit +1,1 ms GPU.
+- Zrno interiéru: `GrungeTileCm` 45 a `RoughVariation` 0,35 na vrstveném masteru. Velikost skvrn trupu
+  (180 cm) na plochách kokpitu nebyla vidět.
 
 ## Sklo kanopy a hologram (26. 9. 2026)
 

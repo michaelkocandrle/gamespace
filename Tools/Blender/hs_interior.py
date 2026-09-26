@@ -994,6 +994,10 @@ def build(recipe, layout, coll, mats, ship, hull):
             # the hologram lights its surroundings a little (step 7): a cool point light, no shadow
             lights_out.append({"at": list(centre), "cd": hg.get("light_cd", 1.5), "color": [0.35, 0.65, 1.0], "type": "point"})
             report["hologram"] = {"centre": [round(v, 3) for v in centre], "tris": sum(len(p.vertices) - 2 for p in ho.data.polygons)}
+    if spec.get("fixture_lights"):
+        # a light for every strip and lamp (SC breakdown, 26. 9. 2026: ~1 light per m2, short reach, no shadow)
+        import hs_fixture_lights
+        report["fixture_lights"] = hs_fixture_lights.fixture_lights(objs, mats, spec["fixture_lights"], lights_out)
     report["lights"] = len(lights_out)
     return objs, sockets, list(lights_out), report
 

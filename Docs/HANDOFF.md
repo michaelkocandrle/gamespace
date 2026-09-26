@@ -1565,6 +1565,11 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Kritik: 3 kola (190 s, 177 s, 214 s), všechna FAIL; poslední skóre 6/5/5/6/5/7/6/6. Recenze `Docs/Reviews/2026-09-25_wayfarer_cockpit_v2.md`, důkazy ve složce `evidence/`.
     - Otevřené: noc (rect light, fill), hologram bez vnitřních ploch, druhá vrstva detailu a zrno materiálů, popisky LED, loketní opěrky.
     - Levné otevřené body zavřené 26. 9. 2026 bez kritika, jen snímky před/po (`Docs/Reviews/2026-09-26_wayfarer_cockpit_cheap_fixes.md`): zadní kamera vedle sedadla, denní pohled pilota ve 300 m, hologram z vnější obálky lodi (voxely + Taubin), loketní opěrky, popisky všech LED, odraz skla podle kamery (`MPC_ShipView`, sklo nově i v pohledu pilota, +0,58 ms GPU).
+    - Rozbor videí SC (Markom3D, `starcitizenreference/ShipDetailing_VideoNotes.md`) a úkoly z něj (`Docs/Reviews/2026-09-26_sc_breakdown_tasks.md`):
+      - 88 světel u svítidel (`hs_fixture_lights.py`, jen s kamerou uvnitř, kokpit +1,1 ms);
+      - 22 karet špíny (`decals.grime`, procedurální atlas);
+      - `EdgeWear` 0,15, variace lesku clear coatu, zrno interiéru 45 cm;
+      - audit zdrojů.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 
 ---

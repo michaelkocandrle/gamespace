@@ -927,6 +927,9 @@ snímku.
   - funguje Taubin (střídavě 0,5 a −0,53).
 
   Hloubka skenovacích linek na hladké obálce kreslí vlnité vrstevnice, proto ScanDepth 0,12.
+- cd) **Karta špíny na gondole vystřihla schody.** Ploché buňky 15 cm se na zakřivení (r 0,6 m) propadly ~5 mm pod povrch, víc než odsazení decalu, a depth test je uprostřed zahodil. Buňky 8 cm (průhyb 1,3 mm). Obecně: mesh decal na křivce musí mít buňku menší než √(8 · r · odsazení).
+- ce) **`ReferenceError: BMesh data of type BMVert has been removed` po přidání vrstvy.** Nová custom-data vrstva v bmeshi (`verts.layers.float_color.new`) zneplatní Python reference na už existující vrcholy. Vrstvu vytvoř před prvním vrcholem (v `Placer.__init__`).
+- cf) **Světla interiéru bez stínů svítí přes trup ven a zvenku stojí až 12 ms.** Světla u svítidel (`fix_*`) proto pawn zapíná, jen když je kamera uvnitř (`UpdateViewCollection`). Test „uvnitř“: přes kamery pawnu jen kokpit (chase kamera visí v obálce interiéru nad trupem), přes jinou kameru obálka partů `Interior*`. Jedno FPS ze snímku po teleportu může být výkyv streamování: ověř `stat gpu`, než začneš optimalizovat.
 - bo) **Kontrola geometrie před každým předáním:** `python Tools/Tests/test_ship_geometry.py` (Blender headless na
   `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
   Musí projít (autor 25. 9. 2026).

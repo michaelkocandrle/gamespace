@@ -465,6 +465,11 @@ MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/decal_libra
 - **Lak bez opotřebení hran.** Špinavý dojem dělá drsnost (dlaždicová textura šmouh a škrábanců), ne barva ani
   otřené hrany. Náš `EdgeWear` 0,8 je proti SC příliš.
 - Natažené úseky atlasu: dlouhé čáry z jednoho malého kusu textury.
+- **Zavedeno (26. 9. 2026):**
+  - karty špíny `decals.grime` (`Placer.card`, atlas `generate_grime_textures.py`, master `meshdecal_grime`,
+    buňka 8 cm, měkký okraj přes vertex colour, `up` = odkud špína jde);
+  - `EdgeWear` 0,15 a `ClearCoatRoughVariation` 0,12;
+  - recenze `Docs/Reviews/2026-09-26_sc_breakdown_tasks.md`.
 
 **„Feel“ SC: rozbor referencí** (Docs/UI screenshoty Titan, Guardian, Hornet, Cutlass, Spirit; ship matrix Pisces,
 100i, Mustang, Aurora; porovnáno se stejných vzdáleností, 24. 9. 2026):

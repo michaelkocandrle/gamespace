@@ -113,7 +113,7 @@
     "GrungeTileCm": 160.0,
     "GrungeAmount": 0.15,
     "DirtAmount": 0.15,
-    "EdgeWear": 0.8,
+    "EdgeWear": 0.15,
     "WearThreshold": 0.45,
     "CavityStrength": 0.3,
     "AOStrength": 0.8,
@@ -139,8 +139,10 @@
     "MetalShare": 0.08,
     "CarbonShare": 0.05,
     "ClearCoat": 1.0,
-    "ClearCoatRoughness": 0.05
-   }
+    "ClearCoatRoughness": 0.05,
+    "ClearCoatRoughVariation": 0.12
+   },
+   "_wear": "EdgeWear 0.15 (was 0.8) and the grunge in the clear coat's roughness: SC paint has no worn edges, the dirt shows in the gloss (starcitizenreference/ShipDetailing_VideoNotes.md, 26. 9. 2026)"
   },
   "MI_Ship_Wayfarer_Dark": {
    "master": "layered",
@@ -323,6 +325,18 @@
    },
    "decal_normal_strength": 1.0,
    "decal_opacity": 1.0
+  },
+  "MI_Ship_Wayfarer_DecalGrime": {
+   "_comment": "large grime cards (hs_decals rule grime, Tools/Assets/generate_grime_textures.py): colour and roughness, no normal",
+   "master": "meshdecal_grime",
+   "slots": [
+    "M_Ship_Wayfarer_DecalGrime"
+   ],
+   "textures": {
+    "decal_bc": "ArtSource/Ships/Shared/Decals/Grime/T_Grime_BC.png",
+    "decal_m": "ArtSource/Ships/Shared/Decals/Grime/T_Grime_M.png"
+   },
+   "decal_opacity": 0.8
   },
   "MI_Ship_Wayfarer_DecalPaint": {
    "_comment": "info and wear decals (stencils, labels, stripes, handles, drips): their own colour",
@@ -576,11 +590,14 @@
     "PaintMetallic": 0.4,
     "GrungeAmount": 0.25,
     "EdgeWear": 0.0,
-    "DirtAmount": 0.0
+    "DirtAmount": 0.0,
+    "GrungeTileCm": 45.0,
+    "RoughVariation": 0.35
    },
    "slots": [
     "M_Ship_Wayfarer_IntWall"
-   ]
+   ],
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
   },
   "MI_Ship_Wayfarer_IntPanel": {
    "master": "layered",
@@ -612,11 +629,14 @@
     "PaintMetallic": 0.1,
     "GrungeAmount": 0.25,
     "EdgeWear": 0.0,
-    "DirtAmount": 0.0
+    "DirtAmount": 0.0,
+    "GrungeTileCm": 45.0,
+    "RoughVariation": 0.35
    },
    "slots": [
     "M_Ship_Wayfarer_IntPanel"
-   ]
+   ],
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
   },
   "MI_Ship_Wayfarer_IntFloor": {
    "master": "layered",
@@ -648,11 +668,14 @@
     "PaintMetallic": 0.5,
     "GrungeAmount": 0.25,
     "EdgeWear": 0.0,
-    "DirtAmount": 0.0
+    "DirtAmount": 0.0,
+    "GrungeTileCm": 45.0,
+    "RoughVariation": 0.35
    },
    "slots": [
     "M_Ship_Wayfarer_IntFloor"
-   ]
+   ],
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
   },
   "MI_Ship_Wayfarer_IntTrim": {
    "master": "layered",
@@ -684,11 +707,14 @@
     "PaintMetallic": 0.8,
     "GrungeAmount": 0.25,
     "EdgeWear": 0.0,
-    "DirtAmount": 0.0
+    "DirtAmount": 0.0,
+    "GrungeTileCm": 45.0,
+    "RoughVariation": 0.35
    },
    "slots": [
     "M_Ship_Wayfarer_IntTrim"
-   ]
+   ],
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
   },
   "MI_Ship_Wayfarer_IntDark": {
    "master": "layered",
@@ -720,11 +746,14 @@
     "PaintMetallic": 0.3,
     "GrungeAmount": 0.25,
     "EdgeWear": 0.0,
-    "DirtAmount": 0.0
+    "DirtAmount": 0.0,
+    "GrungeTileCm": 45.0,
+    "RoughVariation": 0.35
    },
    "slots": [
     "M_Ship_Wayfarer_IntDark"
-   ]
+   ],
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
   },
   "MI_Ship_Wayfarer_IntFabric": {
    "master": "layered",
@@ -842,10 +871,18 @@
    "slots": [
     "M_Ship_Wayfarer_IntLedOrange"
    ],
-   "base_color": [0.3, 0.12, 0.03],
+   "base_color": [
+    0.3,
+    0.12,
+    0.03
+   ],
    "metallic": 0.0,
    "roughness": 0.3,
-   "emissive_color": [1.0, 0.38, 0.06],
+   "emissive_color": [
+    1.0,
+    0.38,
+    0.06
+   ],
    "emissive_strength": 6
   },
   "MI_Ship_Wayfarer_IntLedWhite": {
@@ -853,10 +890,18 @@
    "slots": [
     "M_Ship_Wayfarer_IntLedWhite"
    ],
-   "base_color": [0.3, 0.3, 0.3],
+   "base_color": [
+    0.3,
+    0.3,
+    0.3
+   ],
    "metallic": 0.0,
    "roughness": 0.3,
-   "emissive_color": [1.0, 0.95, 0.88],
+   "emissive_color": [
+    1.0,
+    0.95,
+    0.88
+   ],
    "emissive_strength": 5
   },
   "MI_Ship_Wayfarer_IntLedBlink": {
@@ -865,8 +910,16 @@
    "slots": [
     "M_Ship_Wayfarer_IntLedBlink"
    ],
-   "base_color": [0.3, 0.12, 0.03],
-   "emissive_color": [1.0, 0.38, 0.06],
+   "base_color": [
+    0.3,
+    0.12,
+    0.03
+   ],
+   "emissive_color": [
+    1.0,
+    0.38,
+    0.06
+   ],
    "emissive_strength": 6,
    "blink_hz": 0.6,
    "blink_min": 0.08
@@ -878,7 +931,11 @@
     "M_Ship_Wayfarer_Holo"
    ],
    "vectors": {
-    "HoloColor": [0.05, 0.38, 1.0]
+    "HoloColor": [
+     0.05,
+     0.38,
+     1.0
+    ]
    },
    "scalars": {
     "HoloStrength": 0.9,
@@ -895,17 +952,36 @@
     "M_Ship_Wayfarer_IntCream"
    ],
    "vectors": {
-    "PrimaryColor": [0.6, 0.54, 0.46],
-    "SecondaryColor": [0.6, 0.54, 0.46],
-    "BareMetalColor": [0.55, 0.55, 0.57],
-    "DirtColor": [0.04, 0.04, 0.04]
+    "PrimaryColor": [
+     0.6,
+     0.54,
+     0.46
+    ],
+    "SecondaryColor": [
+     0.6,
+     0.54,
+     0.46
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
    },
    "scalars": {
     "PrimaryRoughness": 0.4,
     "SecondaryRoughness": 0.4,
     "PaintMetallic": 0.1,
-    "GrungeAmount": 0.1
-   }
+    "GrungeAmount": 0.1,
+    "GrungeTileCm": 45.0,
+    "RoughVariation": 0.35
+   },
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
   },
   "MI_Ship_Wayfarer_IntAccentGlow": {
    "_comment": "the orange pinstripes, faintly lit: the frame reads at night and in space (critic, 25. 9. 2026)",
@@ -913,10 +989,18 @@
    "slots": [
     "M_Ship_Wayfarer_IntAccentGlow"
    ],
-   "base_color": [0.72, 0.17, 0.02],
+   "base_color": [
+    0.72,
+    0.17,
+    0.02
+   ],
    "metallic": 0.0,
    "roughness": 0.45,
-   "emissive_color": [1.0, 0.3, 0.05],
+   "emissive_color": [
+    1.0,
+    0.3,
+    0.05
+   ],
    "emissive_strength": 1.5
   },
   "MI_Ship_Wayfarer_IntRubber": {
@@ -925,7 +1009,11 @@
    "slots": [
     "M_Ship_Wayfarer_IntRubber"
    ],
-   "base_color": [0.03, 0.03, 0.032],
+   "base_color": [
+    0.03,
+    0.03,
+    0.032
+   ],
    "metallic": 0.0,
    "roughness": 0.9
   },
@@ -935,7 +1023,11 @@
    "slots": [
     "M_Ship_Wayfarer_IntScreenBack"
    ],
-   "base_color": [0.02, 0.022, 0.026],
+   "base_color": [
+    0.02,
+    0.022,
+    0.026
+   ],
    "metallic": 0.0,
    "roughness": 0.9
   },
@@ -1114,7 +1206,7 @@
    "wear_amount": 0.0
   },
   "MI_Ship_Wayfarer_IntFrame": {
-   "_comment": "canopy frame lining: warm dark graphite (author 25. 9. 2026, step 7: dark graphite around the displays, cream only as an accent - the window reveals, MI_Ship_Wayfarer_IntCream)",
+   "_comment": "cockpit frame lining in the hull's warm off-white paint (concept A in the Wayfarer's colours); satin, not glossy: a strong clear coat mirrored every cockpit lamp as a hot spot on the walls (author 25. 9. 2026)",
    "master": "layered",
    "vectors": {
     "PrimaryColor": [
@@ -1146,12 +1238,14 @@
     "EdgeWear": 0.0,
     "DirtAmount": 0.0,
     "ClearCoat": 0.25,
-    "ClearCoatRoughness": 0.25
+    "ClearCoatRoughness": 0.25,
+    "GrungeTileCm": 45.0,
+    "RoughVariation": 0.35
    },
    "slots": [
     "M_Ship_Wayfarer_IntFrame"
    ],
-   "_comment": "cockpit frame lining in the hull's warm off-white paint (concept A in the Wayfarer's colours); satin, not glossy: a strong clear coat mirrored every cockpit lamp as a hot spot on the walls (author 25. 9. 2026)"
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
   },
   "MI_Ship_Wayfarer_IntConsole": {
    "master": "layered",
@@ -1183,12 +1277,15 @@
     "PaintMetallic": 0.2,
     "GrungeAmount": 0.1,
     "EdgeWear": 0.0,
-    "DirtAmount": 0.0
+    "DirtAmount": 0.0,
+    "GrungeTileCm": 45.0,
+    "RoughVariation": 0.35
    },
    "slots": [
     "M_Ship_Wayfarer_IntConsole"
    ],
-   "_comment": "warm graphite of the cockpit pods, cowl and pedestal (the exterior's saddle colour)"
+   "_comment": "warm graphite of the cockpit pods, cowl and pedestal (the exterior's saddle colour)",
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
   }
  },
  "no_nanite_parts": [

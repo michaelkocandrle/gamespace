@@ -547,8 +547,10 @@ def main(argv):
             made["int_" + ob.name] = ob
         bpy.context.scene["hs_display_sockets"] = json.dumps({k: list(v) for k, v in isockets.items()})
         ispec = recipe["interior"]["lights"]
-        extra = [{"name": "int_%d" % i, "type": l.get("type", "point"), "color": l.get("color") or (ispec["warm_color"] if l.get("warm") else ispec["color"]),
-                  "intensity_cd": l.get("cd", ispec["intensity_cd"]), "radius_m": ispec["radius_m"],
+        # fixture lights (hs_fixture_lights) are named fix_N: the pawn switches them off while the camera is outside
+        # the ship (ASpaceshipPawn::UpdateViewCollection) - without shadows they light the hull through its walls
+        extra = [{"name": ("fix_%d" if l.get("_fixture") else "int_%d") % i, "type": l.get("type", "point"), "color": l.get("color") or (ispec["warm_color"] if l.get("warm") else ispec["color"]),
+                  "intensity_cd": l.get("cd", ispec["intensity_cd"]), "radius_m": l.get("radius_m", ispec["radius_m"]),
                   "location": l["at"], "direction": l.get("direction", [0, 0, -1]), "cone_deg": l.get("cone_deg", 40.0),
                   "source_radius_cm": l.get("source_radius_cm", 2.0), "specular": l.get("specular", ispec.get("specular", 0.25))}
                  for i, l in enumerate(ilights)]

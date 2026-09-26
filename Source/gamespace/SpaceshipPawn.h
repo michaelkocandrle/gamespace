@@ -11,6 +11,7 @@ class UAudioComponent;
 class UBoxComponent;
 class UCameraComponent;
 class UMaterialParameterCollection;
+class ULocalLightComponent;
 class UPointLightComponent;
 class UCockpitDisplayComponent;
 class UInputAction;
@@ -2196,4 +2197,8 @@ private:
 	FBox InteriorBoundsLocal = FBox(ForceInit);
 	bool bInteriorBoundsReady = false;
 	float InsideView = 0.f;
+	/** The Light_fix_* components (hs_fixture_lights.py), on only while the camera is inside the ship. */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<ULocalLightComponent>> FixtureLights;
+	bool bFixtureLightsOn = true;
 };

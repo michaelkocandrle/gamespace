@@ -142,26 +142,27 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 51736,
-      "verts": 55874,
+      "tris": 66362,
+      "verts": 64043,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
         "M_Ship_Wayfarer_DecalPaint",
         "M_Ship_Wayfarer_Trim",
-        "M_Ship_Wayfarer_TrimAO"
+        "M_Ship_Wayfarer_TrimAO",
+        "M_Ship_Wayfarer_DecalGrime"
       ],
       "uv_layers": 1,
       "bounds_m": [
         [
-          -10.713469505310059,
+          -10.731590270996094,
           -7.3327956199646,
-          -1.8332000970840454
+          -1.8339999914169312
         ],
         [
           9.70612907409668,
           7.332275390625,
-          2.8011176586151123
+          2.80289626121521
         ]
       ]
     },
@@ -215,8 +216,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 431061,
-      "verts": 224050,
+      "tris": 431041,
+      "verts": 224046,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -682,18 +683,18 @@
     [
       10.75,
       7.355200290679932,
-      2.8011176586151123
+      2.80289626121521
     ]
   ],
   "render_size_m": [
     21.5178,
     14.7104,
-    5.6011
+    5.6029
   ],
   "expected_ue_size_cm": [
     2151.8,
     1471.0,
-    560.1
+    560.3
   ],
   "collision_bounds_m": [
     [

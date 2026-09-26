@@ -47,7 +47,7 @@ SHARED = "/Game/Ships/Shared/Materials"
 MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glass": SHARED + "/M_Ship_Glass",
            "screen": SHARED + "/M_Ship_Screen", "decal": SHARED + "/M_Ship_Decal",
            "meshdecal": SHARED + "/M_Ship_MeshDecal", "meshdecal_paint": SHARED + "/M_Ship_MeshDecalPaint",
-           "meshdecal_ao": SHARED + "/M_Ship_MeshDecalAO",
+           "meshdecal_ao": SHARED + "/M_Ship_MeshDecalAO", "meshdecal_grime": SHARED + "/M_Ship_MeshDecalGrime",
            "layered": SHARED + "/M_Ship_Layered", "screenback": SHARED + "/M_Ship_ScreenBack",
            "blink": SHARED + "/M_Ship_Blink", "holo": SHARED + "/M_Ship_Holo"}
 TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap",
@@ -860,6 +860,7 @@ def build_masters():
     return {"hull": hull, "pbr": build_pbr_master(), "glass": glass, "screen": build_screen_master(),
             "decal": build_decal_master(), "meshdecal": build_mesh_decal_master(False),
             "meshdecal_paint": build_mesh_decal_master(True), "meshdecal_ao": build_mesh_decal_ao_master(),
+            "meshdecal_grime": build_mesh_decal_grime_master(),
             "layered": build_layered_master(), "screenback": back, "blink": blink, "holo": build_holo_master()}
 
 
@@ -1070,7 +1071,14 @@ def build_layered_master():
     # Origin-like finish: a clear coat over the paint that mirrors the environment (ClearCoat 0 = off)
     m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_CLEAR_COAT)
     _link(_scalar(m, "ClearCoat", 0.0, -900, 1500), mk, "ClearCoat")
-    _link(_scalar(m, "ClearCoatRoughness", 0.06, -900, 1600), mk, "ClearCoatRoughness")
+    # the clear coat's gloss varies with the grunge and dies in the dirt (SC breakdown, 26. 9. 2026: the smudges
+    # show in the reflections; a constant clear-coat roughness mirrored the sky the same everywhere)
+    ccr = _custom(m, "ClearCoatRough", "return saturate(Base + (M.x - 0.5) * Var + M.z * 0.5);",
+                  unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["M", "Base", "Var"], -600, 1600)
+    _link(masks, ccr, "M")
+    _link(_scalar(m, "ClearCoatRoughness", 0.06, -900, 1600), ccr, "Base")
+    _link(_scalar(m, "ClearCoatRoughVariation", 0.0, -900, 1700), ccr, "Var")
+    _link(ccr, mk, "ClearCoatRoughness")
     _output(mk, unreal.MaterialProperty.MP_MATERIAL_ATTRIBUTES)
     MEL.recompile_material(m)
     unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
@@ -1148,6 +1156,43 @@ def build_mesh_decal_master(paint):
         if not MEL.connect_material_expressions(col, "A", own, "B"):
             raise RuntimeError("decal BC.A -> opacity")
         opacity = own
+    _output(_decal_fade(m, opacity), unreal.MaterialProperty.MP_OPACITY)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
+    return m
+
+
+def build_mesh_decal_grime_master():
+    """Large grime cards (hs_decals rule "grime", Tools/Assets/generate_grime_textures.py; from the SC breakdown,
+    26. 9. 2026): colour and roughness only - no normal pin, so the hull's panel detail and the structural decals
+    under a card stay as they are. DecalColorMap (sRGB grime colour, alpha = coverage), DecalMMap (R = applies,
+    G roughness), opacity = alpha x R x DecalOpacity, faded with distance like the other mesh decals."""
+    m = _fresh_material(MASTERS["meshdecal_grime"])
+    m.set_editor_property("material_domain", unreal.MaterialDomain.MD_DEFERRED_DECAL)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
+    white = "/Engine/EngineResources/WhiteSquareTexture"
+    col = _texture_param(m, "DecalColorMap", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR, white, -900, 0)
+    _output(col, unreal.MaterialProperty.MP_BASE_COLOR)
+    mm = _texture_param(m, "DecalMMap", unreal.MaterialSamplerType.SAMPLERTYPE_MASKS, white, -900, 300)
+    rough = _node(m, unreal.MaterialExpressionMultiply, -500, 300)
+    if not MEL.connect_material_expressions(mm, "G", rough, "A"):
+        raise RuntimeError("grime M.G -> roughness")
+    _link(_scalar(m, "DecalRoughnessScale", 1.0, -900, 500), rough, "B")
+    _output(rough, unreal.MaterialProperty.MP_ROUGHNESS)
+    cover = _node(m, unreal.MaterialExpressionMultiply, -500, 650)
+    if not MEL.connect_material_expressions(col, "A", cover, "A"):
+        raise RuntimeError("grime BC.A -> opacity")
+    if not MEL.connect_material_expressions(mm, "R", cover, "B"):
+        raise RuntimeError("grime M.R -> opacity")
+    # x vertex colour alpha: 0 along the edges where hs_decals dropped cells off the surface
+    vc = _node(m, unreal.MaterialExpressionVertexColor, -900, 950)
+    soft = _node(m, unreal.MaterialExpressionMultiply, -500, 850)
+    _link(cover, soft, "A")
+    if not MEL.connect_material_expressions(vc, "A", soft, "B"):
+        raise RuntimeError("grime VC.A -> opacity")
+    opacity = _node(m, unreal.MaterialExpressionMultiply, -350, 700)
+    _link(soft, opacity, "A")
+    _link(_scalar(m, "DecalOpacity", 0.5, -900, 800), opacity, "B")
     _output(_decal_fade(m, opacity), unreal.MaterialProperty.MP_OPACITY)
     MEL.recompile_material(m)
     unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
