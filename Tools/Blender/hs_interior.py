@@ -341,10 +341,11 @@ def obj_console(g, r, zr, z0):
             for yy in (y0 + 0.045, y1 - 0.045):
                 cyl(g["int_trim"], (x0 + (x1 - x0) * f, yy, top + 0.012), (x0 + (x1 - x0) * f, yy, top + 0.016), 0.004, 6)
         if y0 > 0:
-            # the left console's module aft of the throttle: the canopy LOCK rocker and two status LEDs
+            # the left console's module aft of the throttle: the canopy LOCK rocker and three labelled status LEDs
+            # (18 cm: at 15 the outer LED's label crossed the housing's rim)
             import hs_cockpit
             hs_cockpit.control_module(g, Vector((x0 + 0.32, (y0 + y1) / 2 + 0.05, top + 0.016)), Vector((0, -1, 0)), Vector((1, 0, 0)),
-                                      Vector((0, 0, 1)), 0.15, 0.11, [[("led_o", None), ("led_w", None), ("led_blink", None)], [("rocker", "ck_lock"), ("guarded", "ck_canopy")]])
+                                      Vector((0, 0, 1)), 0.18, 0.11, [[("led_o", "ck_seal"), ("led_w", "ck_press"), ("led_blink", "ck_warn")], [("rocker", "ck_lock"), ("guarded", "ck_canopy")]])
         return
     inner = y1 if y1 < 0 else y0
     outer = y0 if y1 < 0 else y1
@@ -978,7 +979,8 @@ def build(recipe, layout, coll, mats, ship, hull):
         from mathutils.bvhtree import BVHTree
         hg = COCKPIT["hologram"]
         centre = holo_centre
-        exterior = [o for o in coll.objects if o.type == "MESH" and "_Int" not in o.name and not o.name.endswith(("_Canopy", "_Hologram"))
+        # (the canopy belongs to the envelope: without it the voxel flood ran into the cockpit through its frame)
+        exterior = [o for o in coll.objects if o.type == "MESH" and "_Int" not in o.name and not o.name.endswith("_Hologram")
                     and "Gear" not in o.name and not o.name.startswith(("UCX_", "SOCKET_"))]
         emit = B()
         ho = hs_cockpit.build_hologram(emit, coll, mats["holo"], ship, exterior, centre, hg.get("length_m", 0.16))

@@ -4693,6 +4693,435 @@
     ]
    },
    {
+    "name": "ck_main",
+    "type": "info",
+    "footprint": [
+     0.07,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'MAIN'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "MAIN",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_batt",
+    "type": "info",
+    "footprint": [
+     0.07,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'BATT'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "BATT",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_fault",
+    "type": "info",
+    "footprint": [
+     0.0825,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'FAULT'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "FAULT",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_link",
+    "type": "info",
+    "footprint": [
+     0.07,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'LINK'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "LINK",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_trk",
+    "type": "info",
+    "footprint": [
+     0.05750000000000001,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'TRK'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "TRK",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_warn",
+    "type": "info",
+    "footprint": [
+     0.07,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'WARN'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "WARN",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_seal",
+    "type": "info",
+    "footprint": [
+     0.07,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'SEAL'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "SEAL",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_press",
+    "type": "info",
+    "footprint": [
+     0.0825,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'PRESS'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "PRESS",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_alarm",
+    "type": "info",
+    "footprint": [
+     0.0825,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'ALARM'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "ALARM",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_temp",
+    "type": "info",
+    "footprint": [
+     0.07,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'TEMP'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "TEMP",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_armed",
+    "type": "info",
+    "footprint": [
+     0.0825,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'ARMED'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "ARMED",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_heat",
+    "type": "info",
+    "footprint": [
+     0.07,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'HEAT'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "HEAT",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
+    "name": "ck_ready",
+    "type": "info",
+    "footprint": [
+     0.0825,
+     0.024
+    ],
+    "purpose": "cockpit status LED label 'READY'",
+    "tags": [
+     "cockpit",
+     "switch_label"
+    ],
+    "parts": [
+     {
+      "kind": "text",
+      "body": "READY",
+      "size": 0.016,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "z": 0.001,
+      "rot": 0,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ]
+     }
+    ]
+   },
+   {
     "name": "ck_flight",
     "type": "info",
     "footprint": [

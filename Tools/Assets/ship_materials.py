@@ -22,8 +22,12 @@ Masters (rebuilt on every run, like the scene materials):
                                                pulsing BlinkMin..1 at BlinkHz)
     /Game/Ships/Shared/Materials/M_Ship_Holo   additive, unlit: the cockpit's ship hologram (turns about
                                                HoloPivot by World Position Offset, scan lines, damage colour)
-    /Game/Ships/Shared/Materials/M_Ship_Glass  translucent, two-sided, surface forward shading:
-                                               BaseColor, Opacity, Roughness
+    /Game/Ships/Shared/Materials/M_Ship_Glass  translucent, two-sided, surface translucency volume:
+                                               BaseColor, Opacity / Roughness / Specular seen from outside,
+                                               OpacityInside / RoughnessInside / SpecularInside from inside
+                                               (blended by MPC_ShipView.InsideView)
+    /Game/Ships/Shared/Materials/MPC_ShipView  InsideView: 1 while the player's camera is inside a ship's
+                                               interior (ASpaceshipPawn::UpdateViewCollection)
 
 Instances go to /Game/Ships/<Ship>/Materials/MI_... and are assigned to mesh slots by slot name
 (the Blender material name), optionally only on the meshes an entry lists. A "pbr" entry names its
@@ -90,6 +94,24 @@ def _vector(material, name, default, x, y):
 
 def _scalar(material, name, default, x, y):
     return _node(material, unreal.MaterialExpressionScalarParameter, x, y, parameter_name=name, default_value=default)
+
+
+def _view_collection():
+    """MPC_ShipView with the scalar InsideView (default 0 = outside). An existing parameter is kept: its id is what
+    the materials reference."""
+    path = SHARED + "/MPC_ShipView"
+    mpc = unreal.EditorAssetLibrary.load_asset(path) if unreal.EditorAssetLibrary.does_asset_exist(path) else None
+    if mpc is None:
+        mpc = unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+            "MPC_ShipView", SHARED, unreal.MaterialParameterCollection, unreal.MaterialParameterCollectionFactoryNew())
+    params = list(mpc.get_editor_property("scalar_parameters"))
+    if not any(str(p.get_editor_property("parameter_name")) == "InsideView" for p in params):
+        p = unreal.CollectionScalarParameter()
+        p.set_editor_property("parameter_name", "InsideView")
+        p.set_editor_property("default_value", 0.0)
+        mpc.set_editor_property("scalar_parameters", params + [p])
+        unreal.EditorAssetLibrary.save_loaded_asset(mpc, only_if_is_dirty=False)
+    return mpc
 
 
 def _texture_param(material, name, sampler, default_path, x, y):
@@ -602,7 +624,7 @@ def build_screen_master():
 
 
 def build_holo_master():
-    """The cockpit's ship hologram (step 6): additive, unlit, two-sided. Emission = HoloColor x HoloStrength x
+    """The cockpit's ship hologram (step 6): additive, unlit, one-sided. Emission = HoloColor x HoloStrength x
     (a base plus a fresnel rim) x scan lines rolling up in world z x a faint flicker; damage colour prepared
     (lerp to DamageColor by DamageAmount x vertex colour R - static 0 for now). World Position Offset turns the
     mesh slowly about the vertical through HoloPivot (mesh space, cm - import_ship.py sets it from the imported
@@ -610,7 +632,9 @@ def build_holo_master():
     m = _fresh_material(MASTERS["holo"])
     m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
     m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
-    m.set_editor_property("two_sided", True)
+    # one-sided: the mesh is the hull's closed outer envelope (hs_cockpit._envelope); its far side added through
+    # the near one blurred the shape (critic, 25. 9. 2026)
+    m.set_editor_property("two_sided", False)
     m.set_editor_property("enable_responsive_aa", True)
     time = _node(m, unreal.MaterialExpressionTime, -2200, 1200)
     # --- turn about the pivot: RotateAboutAxis(axis, angle 0..1, pivot, position)
@@ -814,11 +838,23 @@ def build_masters():
     glass = _fresh_material(MASTERS["glass"])
     glass.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
     glass.set_editor_property("two_sided", True)
-    glass.set_editor_property("translucency_lighting_mode", unreal.TranslucencyLightingMode.TLM_SURFACE_PER_PIXEL_LIGHTING)
+    # Surface TranslucencyVolume: the reflection environment and Lumen reflections, diffuse from the lighting volume.
+    # Forward shading (per-pixel, every local light) cost 1.1 ms once the canopy filled the pilot's view (26. 9. 2026)
+    glass.set_editor_property("translucency_lighting_mode", unreal.TranslucencyLightingMode.TLM_SURFACE)
     _output(_vector(glass, "BaseColor", (0.25, 0.35, 0.4), -600, 0), unreal.MaterialProperty.MP_BASE_COLOR)
-    _output(_scalar(glass, "Opacity", 0.2, -600, 150), unreal.MaterialProperty.MP_OPACITY)
-    _output(_scalar(glass, "Roughness", 0.03, -600, 250), unreal.MaterialProperty.MP_ROUGHNESS)
-    _output(_node(glass, unreal.MaterialExpressionConstant, -600, 350, r=1.0), unreal.MaterialProperty.MP_SPECULAR)
+    # a weak reflection seen from the cockpit, a strong one from the chase camera and outside (author 26. 9. 2026):
+    # each value has an outside and an inside parameter, MPC_ShipView.InsideView picks between them
+    inside = _node(glass, unreal.MaterialExpressionCollectionParameter, -900, 600,
+                   collection=_view_collection(), parameter_name="InsideView")
+    for i, (name, default, name_in, default_in, prop) in enumerate((
+            ("Opacity", 0.2, "OpacityInside", 0.2, unreal.MaterialProperty.MP_OPACITY),
+            ("Roughness", 0.03, "RoughnessInside", 0.08, unreal.MaterialProperty.MP_ROUGHNESS),
+            ("Specular", 1.0, "SpecularInside", 0.5, unreal.MaterialProperty.MP_SPECULAR))):
+        blend = _node(glass, unreal.MaterialExpressionLinearInterpolate, -350, 150 + i * 200)
+        _link(_scalar(glass, name, default, -600, 150 + i * 200), blend, "A")
+        _link(_scalar(glass, name_in, default_in, -600, 230 + i * 200), blend, "B")
+        _link(inside, blend, "Alpha")
+        _output(blend, prop)
     MEL.recompile_material(glass)
     unreal.EditorAssetLibrary.save_loaded_asset(glass, only_if_is_dirty=False)
     return {"hull": hull, "pbr": build_pbr_master(), "glass": glass, "screen": build_screen_master(),

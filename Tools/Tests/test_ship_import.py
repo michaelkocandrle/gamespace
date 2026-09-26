@@ -111,6 +111,18 @@ def main():
                 check("%s glows" % name, abs(got - spec["emissive_strength"]) < 1e-3 and got > 1.0, "%.1f" % got)
         glass = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Glass")
         check("M_Ship_Glass is translucent", glass is not None and glass.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_TRANSLUCENT)
+        # the canopy reflects by where the camera is (26. 9. 2026): MPC_ShipView.InsideView blends outside / inside
+        # values; Surface TranslucencyVolume lighting (forward shading cost 1.1 ms with the canopy filling the view)
+        mpc = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/MPC_ShipView")
+        names = [str(p.get_editor_property("parameter_name")) for p in mpc.get_editor_property("scalar_parameters")] if mpc else []
+        check("MPC_ShipView carries InsideView", "InsideView" in names, ", ".join(names))
+        if glass is not None:
+            glass_params = [str(n) for n in MEL.get_scalar_parameter_names(glass)]
+            check("M_Ship_Glass has outside and inside values",
+                  all(n in glass_params for n in ("Opacity", "OpacityInside", "Roughness", "RoughnessInside", "Specular", "SpecularInside")),
+                  ", ".join(glass_params))
+            check("M_Ship_Glass lit by the translucency volume, not per-pixel forward shading",
+                  glass.get_editor_property("translucency_lighting_mode") == unreal.TranslucencyLightingMode.TLM_SURFACE)
         for master in ("M_Ship_Hull", "M_Ship_PBR"):
             asset = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/" + master)
             check("%s used with Nanite" % master, asset is not None and asset.get_editor_property("used_with_nanite"))

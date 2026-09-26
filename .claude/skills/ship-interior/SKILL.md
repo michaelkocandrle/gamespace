@@ -225,10 +225,23 @@ Nejvýš 3 kola, každá výtka s reakcí, recenze v `Docs/Reviews/`. Kontrola g
 - Výtka „text na displeji useknutý z oka“: nejdřív odsazení stránky v C++, pak ray cast z `SOCKET_Cockpit` na body
   skla a výpis zasaženého objektu (WORKFLOW bw).
 
+## Sklo kanopy a hologram (26. 9. 2026)
+
+- Odraz skla podle kamery: `MPC_ShipView.InsideView` (1 = kamera hráče v obálce partů `Interior*` lodi, jinak 0)
+  nastavuje `ASpaceshipPawn::UpdateViewCollection`. `M_Ship_Glass` míchá `Opacity/Roughness/Specular` (zvenku) a
+  `…Inside`. Wayfarer: zvenku 0,7 / 0,03 / 1, zevnitř 0,15 / 0,06 / 0,5.
+  - Uvnitř se navíc vypíná `r.Lumen.TranslucencyReflections.FrontLayer.Enable`.
+  - Sklo je Surface TranslucencyVolume.
+  - Loď s interiérem musí mít `pawn.hide_canopy_in_cockpit: false` (WORKFLOW ca–cb).
+- Hologram lodi je vnější obálka: `hs_cockpit._envelope(bm, voxels=160, smooth=30)`, kanopa patří do obálky (jinak
+  flood fill vteče do kabiny). Materiál `M_Ship_Holo` je jednostranný (WORKFLOW cc).
+
 ## Ovládací moduly kokpitu (hs pipeline)
 
 `hs_cockpit.control_module(g, c, right, up, n, w, h, rows, tree=)` staví pouzdro se šrouby a ovladači v řádcích.
 - Druhy ovladačů: `guarded`, `guarded_red`, `rotary`, `rocker`, `button`, `encoder`, `led_w`, `led_o`, `led_blink`.
+- Každý ovladač včetně LED má štítek (nepopsaná LED působí jako placeholder). Štítek u okraje modulu padá na
+  `edge`, když modul nemá dost místa: rozšiř modul (konzole 18 cm pro tři LED).
 - Štítky: položky `ck_*` z knihovny decalů jdou do `hs_cockpit.LABELS` a klade je `hs_interior_decals` (rámeček modulu, dosah 2 cm, šířka ≤ buňka).
 - `tree` = plocha, na kterou se modul usadí (`seat`).
 - Nový štítek: položka `ck_*` v `ArtSource/Ships/Shared/Decals/decal_library.json` a přestavba atlasu `decal_library.py` (~9 min).

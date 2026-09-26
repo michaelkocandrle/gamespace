@@ -705,7 +705,10 @@ Postup:
    vlastní názor na výsledek. Prompt: „Přečti <složka>/brief.md a všechny listy v něm a vyhodnoť
    je podle svého zadání.“
 3. FAIL → oprav body „musí se opravit“, nové snímky, nové listy, kritik znovu. Nejvýš 3 kola, pak
-   předej i s otevřenými body.
+   předej i s otevřenými body. Opravy po posledním kole ověř jedním kolem jen na opravené body (listy
+   jen s nimi, brief „ověř tyto body“); do limitu se nepočítá (autor 26. 9. 2026).
+   Když se skóre přes kola hýbe jen o bod, lokální opravy nestačí: hierarchii detailu, materiály
+   a světlo drží systémové věci (kit, rozmístění světel, decaly špíny, variace drsnosti).
 4. Žádnou výtku tiše nevynechat. U každé: opraveno / neopraveno a proč. Nesouhlas je v pořádku,
    ale zdůvodněný.
 5. Recenze do `Docs/Reviews/<datum>_<téma>.md`: odkaz na listy, výstup kritika z každého kola,

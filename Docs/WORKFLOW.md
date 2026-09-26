@@ -915,6 +915,18 @@ snímku.
 - bx) **`stat gpu` se v zabalené hře neukáže.** Chce `r.GPUStatsEnabled 1` před `stat gpu`. `space.KitReset` nevrací slunce, proto měření výkonu patří před noční snímek.
 - by) **`import_ship.py` hlásí „manifest has errors“, i když kontrola manifestu prošla.** Relativní `GAMESPACE_SHIP_MANIFEST` se v commandletu vyhodnotí vůči `Engine\Binaries\Win64`. Dávej vždy absolutní cestu.
 - bz) **Modré skvrny u spodního okraje pohledu pilota.** Bodová světla desky (světlo displejů na okolí) seděla 12 cm pod MFD u kolenního panelu a vypálila hot spot. Světlo displeje patří před sklo ve výšce jeho středu (~20 cm), ne k nejbližšímu povrchu.
+- ca) **Pilot nevidí sklo kanopy, i když lodi s interiérem svítí odlesky na skle ve snímcích z volné kamery.** `ASpaceshipPawn::bHideCanopyInCockpit` je výchozí `true` (pro lodě bez interiéru, kde skořepina sedí 13 cm od oka). Loď s interiérem ho vypíná v setupu (`pawn.hide_canopy_in_cockpit: false`).
+- cb) **Sklo přes celý pohled pilota stálo 3 ms GPU (73 → 57 FPS).** Ostrý odraz Lumenu na průsvitných plochách (`r.Lumen.TranslucencyReflections.FrontLayer.Enable`) +1,9 ms, osvětlení Surface ForwardShading všemi světly kabiny +1,1 ms. Oprava:
+  - `UpdateViewCollection` vypíná `FrontLayer`, když je kamera uvnitř lodi;
+  - `M_Ship_Glass` je Surface TranslucencyVolume.
+
+  Výsledek +0,58 ms. Průsvitný materiál, který může zaplnit obrazovku, vždy změř `stat gpu` (WORKFLOW bx).
+- cc) **Hologram jako „rozmazaná modrá hmota“.** Decimovaná kopie celého exteriéru nesla všechny vnitřní plochy (rub trupu, spodky greeble), aditivní materiál je sečetl přes sebe. Hologram je teď vnější obálka z voxelů (`hs_cockpit._envelope`). Nástrahy:
+  - `bmesh.ops.smooth_laplacian_vert(preserve_volume=True)` voxelové schody nevyhladil;
+  - prosté průměrování (`smooth_vert` 0,5) smrsklo ploutev;
+  - funguje Taubin (střídavě 0,5 a −0,53).
+
+  Hloubka skenovacích linek na hladké obálce kreslí vlnité vrstevnice, proto ScanDepth 0,12.
 - bo) **Kontrola geometrie před každým předáním:** `python Tools/Tests/test_ship_geometry.py` (Blender headless na
   `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
   Musí projít (autor 25. 9. 2026).

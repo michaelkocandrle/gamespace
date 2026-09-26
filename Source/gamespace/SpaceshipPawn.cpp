@@ -29,6 +29,9 @@
 #include "InputTriggers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialParameterCollection.h"
+#include "Kismet/KismetMaterialLibrary.h"
+#include "Camera/PlayerCameraManager.h"
 #include "PhysicsEngine/BodySetup.h"
 #include "Sound/SoundBase.h"
 #include "CelestialBody.h"
@@ -360,6 +363,9 @@ void ASpaceshipPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Cooked with the glass material that reads it (ship_materials.py builds both).
+	ViewCollection = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/Ships/Shared/Materials/MPC_ShipView.MPC_ShipView"));
+
 	ChaseCameraBaseLocation = ChaseCamera->GetRelativeLocation();
 	CockpitCameraBaseLocation = CockpitCamera->GetRelativeLocation();
 	HullSparks->SetHull(Hull);
@@ -437,6 +443,69 @@ void ASpaceshipPawn::SnapCameraToShip()
 	// real one. Two ticks, because the arm may update before or after this pawn in a frame.
 	CameraBoom->bEnableCameraLag = false;
 	CameraSnapTicks = 2;
+}
+
+void ASpaceshipPawn::UpdateViewCollection()
+{
+	if (!ViewCollection)
+	{
+		return;
+	}
+	if (!bInteriorBoundsReady)
+	{
+		bInteriorBoundsReady = true;
+		TArray<UStaticMeshComponent*> Meshes;
+		GetComponents<UStaticMeshComponent>(Meshes);
+		for (const UStaticMeshComponent* Mesh : Meshes)
+		{
+			if (Mesh->GetStaticMesh() && Mesh->GetName().StartsWith(TEXT("Interior")))
+			{
+				const FTransform ToActor = Mesh->GetComponentTransform().GetRelativeTransform(GetActorTransform());
+				InteriorBoundsLocal += Mesh->GetStaticMesh()->GetBoundingBox().TransformBy(ToActor);
+			}
+		}
+	}
+	const APlayerCameraManager* Camera = UGameplayStatics::GetPlayerCameraManager(this, 0);
+	if (!Camera)
+	{
+		return;
+	}
+	bool bInside;
+	if (InteriorBoundsLocal.IsValid)
+	{
+		bInside = InteriorBoundsLocal.IsInside(GetActorTransform().InverseTransformPosition(Camera->GetCameraLocation()));
+	}
+	else
+	{
+		bInside = bCockpitView && Camera->GetViewTarget() == this;
+	}
+	// One collection for the whole world: the ship the camera is in wins the frame, the others only clear
+	// it when no ship has claimed it yet this frame.
+	static uint64 ClaimedFrame = 0;
+	if (bInside)
+	{
+		ClaimedFrame = GFrameCounter;
+	}
+	else if (ClaimedFrame == GFrameCounter)
+	{
+		InsideView = 0.f;
+		return;
+	}
+	InsideView = bInside ? 1.f : 0.f;
+	UKismetMaterialLibrary::SetScalarParameterValue(this, ViewCollection, TEXT("InsideView"), InsideView);
+	// Seen from inside, the canopy fills the whole view: Lumen's sharp front-layer reflections on it cost ~1.9 ms
+	// on the target GPU (RTX 2060, 1080p). Inside the cheap radiance-cache reflection is enough (the "weak"
+	// reflection); outside the glass covers a small part of the screen and gets the sharp one.
+	static int32 LastFrontLayer = -1;
+	const int32 FrontLayer = bInside ? 0 : 1;
+	if (FrontLayer != LastFrontLayer)
+	{
+		LastFrontLayer = FrontLayer;
+		if (IConsoleVariable* Var = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Lumen.TranslucencyReflections.FrontLayer.Enable")))
+		{
+			Var->Set(FrontLayer, ECVF_SetByCode);
+		}
+	}
 }
 
 void ASpaceshipPawn::DebugConfigureCockpit(const FVector& EyeLocation, bool bHideHull, bool bHideCanopy)
@@ -1857,6 +1926,7 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 	UpdateEngineAudio(DeltaSeconds);
 	UpdateShipLights(DeltaSeconds);
 	UpdateSpaceDust(DeltaSeconds);
+	UpdateViewCollection();
 
 	if (CameraSnapTicks > 0 && --CameraSnapTicks == 0)
 	{

@@ -30,9 +30,9 @@
     "47 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_MeshDecalAO, /Game/Ships/Shared/Materials/M_Ship_Layered, /Game/Ships/Shared/Materials/M_Ship_ScreenBack, /Game/Ships/Shared/Materials/M_Ship_Blink, /Game/Ships/Shared/Materials/M_Ship_Holo"
   ],
   "hologram_pivot_cm": [
-    784.7,
+    785.0,
     -56.0,
-    110.6
+    110.7
   ],
   "blueprint": {
     "path": "/Game/Ships/Wayfarer/Blueprints/BP_Ship_Wayfarer",
@@ -79,6 +79,7 @@
       "pawn.placeholder_cockpit = False",
       "pawn.cockpit_light_intensity_cd = 2.5",
       "pawn.hide_hull_in_cockpit = False",
+      "pawn.hide_canopy_in_cockpit = False",
       "pawn.cockpit_view_pitch_deg = 0.0",
       "pawn.cockpit_exposure_bias = -0.2",
       "camera_boom.target_arm_length = 1750.0",

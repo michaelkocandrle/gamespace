@@ -223,9 +223,98 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
 # sight: over the left MFD. Damage colours are prepared in the material (DamageColor x DamageAmount x vertex
 # colour R), static for now.
 
-def build_hologram(g, coll, mat, ship, exterior, centre, length=0.16, max_tris=24000):
-    """A decimated copy of the exterior objects, `length` long, centred on `centre`, on an emitter; returns the
-    object SM_Ship_<Ship>_Hologram (its own part, hs_assemble_ship.py)."""
+def _envelope(bm, voxels, smooth=30):
+    """The outer envelope of the triangles in bm as a new closed bmesh (26. 9. 2026): a decimated copy of the
+    whole exterior kept every inner face (hull backs, greeble undersides), and the additive hologram showed them
+    all through each other - "a blurred blue mass" (critic). Voxels `voxels` along x: a voxel is surface when a
+    triangle passes within 0.87 voxel of its centre (a 6-tight wall), the walls grow one voxel to seal seams,
+    empty space floods in from the grid's border, everything the flood did not reach is solid (the hull's
+    inside fills up), the solid shrinks back one voxel, and its boundary faces are the envelope."""
+    import numpy as np
+    from mathutils.bvhtree import BVHTree
+    tree = BVHTree.FromBMesh(bm)
+    lo = Vector((min(v.co.x for v in bm.verts), min(v.co.y for v in bm.verts), min(v.co.z for v in bm.verts)))
+    hi = Vector((max(v.co.x for v in bm.verts), max(v.co.y for v in bm.verts), max(v.co.z for v in bm.verts)))
+    vox = (hi.x - lo.x) / voxels
+    pad = 3
+    o = lo - Vector((pad, pad, pad)) * vox
+    n = [int(math.ceil((hi[a] - lo[a]) / vox)) + 2 * pad + 1 for a in range(3)]
+    surf = np.zeros(n, dtype=bool)
+    thr = 0.87 * vox
+    near = tree.find_nearest
+    for i in range(n[0]):
+        x = o.x + i * vox
+        for j in range(n[1]):
+            y = o.y + j * vox
+            row = surf[i, j]
+            for k in range(n[2]):
+                if near(Vector((x, y, o.z + k * vox)), thr)[0] is not None:
+                    row[k] = True
+
+    def grow(a):
+        b = a.copy()
+        b[1:] |= a[:-1]; b[:-1] |= a[1:]
+        b[:, 1:] |= a[:, :-1]; b[:, :-1] |= a[:, 1:]
+        b[:, :, 1:] |= a[:, :, :-1]; b[:, :, :-1] |= a[:, :, 1:]
+        return b
+
+    wall = grow(surf)
+    out = np.zeros(n, dtype=bool)
+    out[0], out[-1], out[:, 0], out[:, -1], out[:, :, 0], out[:, :, -1] = True, True, True, True, True, True
+    out &= ~wall
+    while True:
+        nxt = grow(out) & ~wall
+        if nxt.sum() == out.sum():
+            break
+        out = nxt
+    solid = ~out
+    # shrink back the voxel the walls grew by (a voxel stays when all six neighbours are solid)
+    sh = solid.copy()
+    sh[1:] &= solid[:-1]; sh[:-1] &= solid[1:]
+    sh[:, 1:] &= solid[:, :-1]; sh[:, :-1] &= solid[:, 1:]
+    sh[:, :, 1:] &= solid[:, :, :-1]; sh[:, :, :-1] &= solid[:, :, 1:]
+    solid = sh
+    env = bmesh.new()
+    verts = {}
+
+    def vert(i, j, k):
+        key = (i, j, k)
+        v = verts.get(key)
+        if v is None:
+            v = verts[key] = env.verts.new(o + Vector((i - 0.5, j - 0.5, k - 0.5)) * vox)
+        return v
+
+    pads = np.pad(solid, 1)
+    for axis in range(3):
+        a = np.moveaxis(pads, axis, 0)
+        diff = a[1:].astype(np.int8) - a[:-1].astype(np.int8)     # +1: empty -> solid, -1: solid -> empty
+        for sign in (1, -1):
+            for idx in zip(*np.nonzero(diff == sign)):
+                # the face lies between cells idx[0]-1 and idx[0] along the axis (padded index = cell + 1)
+                c = [int(idx[0]), int(idx[1]) - 1, int(idx[2]) - 1]
+                if axis == 0:
+                    pts = [(c[0], c[1], c[2]), (c[0], c[1] + 1, c[2]), (c[0], c[1] + 1, c[2] + 1), (c[0], c[1], c[2] + 1)]
+                elif axis == 1:
+                    pts = [(c[1], c[0], c[2]), (c[1], c[0], c[2] + 1), (c[1] + 1, c[0], c[2] + 1), (c[1] + 1, c[0], c[2])]
+                else:
+                    pts = [(c[1], c[2], c[0]), (c[1] + 1, c[2], c[0]), (c[1] + 1, c[2] + 1, c[0]), (c[1], c[2] + 1, c[0])]
+                vs = [vert(*q) for q in pts]
+                # sign +1: solid on the far side, the face looks back along -axis
+                env.faces.new(vs if sign < 0 else vs[::-1])
+    env.normal_update()
+    # the staircase smoothed into a surface by Taubin steps (shrink 0.5, grow 0.53): plain averaging shrank the
+    # tail fin away, the Laplacian operator with preserve_volume left the steps as they were
+    for _ in range(smooth):
+        for f in (0.5, -0.53):
+            bmesh.ops.smooth_vert(env, verts=env.verts, factor=f, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+    bmesh.ops.triangulate(env, faces=env.faces)
+    env.normal_update()
+    return env
+
+
+def build_hologram(g, coll, mat, ship, exterior, centre, length=0.16, max_tris=24000, voxels=160):
+    """The outer envelope of the exterior objects (_envelope), `length` long, centred on `centre`, decimated, on an
+    emitter; returns the object SM_Ship_<Ship>_Hologram (its own part, hs_assemble_ship.py)."""
     import bpy
     bm = bmesh.new()
     # evaluated meshes (the greebles are instanced on point clouds by modifiers: their raw meshes are loose
@@ -257,6 +346,9 @@ def build_hologram(g, coll, mat, ship, exterior, centre, length=0.16, max_tris=2
     if not bm.faces:
         bm.free()
         return None
+    env = _envelope(bm, voxels)
+    bm.free()
+    bm = env
     xs = [v.co.x for v in bm.verts]
     ys = [v.co.y for v in bm.verts]
     zs = [v.co.z for v in bm.verts]
@@ -362,6 +454,17 @@ def pilot_seat(g, rect, zr):
         b_ = back - n * 0.08 + right * (sd * 0.28) - up * 0.2
         tube(g["int_trim"], a_, b_, 0.014, 10)
     tube(g["int_trim"], pan - upz * 0.09 + fwd * 0.2 + right * 0.2, pan - upz * 0.09 + fwd * 0.3 + right * 0.24, 0.007, 8)
+    # armrests (author 26. 9. 2026): a padded arm on a graphite shell each side, hinged at the back on an arm
+    # from the side frame (they fold up for getting in); 23 cm clear of the consoles
+    for sd in (-1, 1):
+        top = pan + right * (sd * 0.335) + fwd * 0.03 + upz * 0.22
+        rr_slab(g["int_console"], top - upz * 0.028, right, fwd, upz, 0.08, 0.34, 0.02, 0.022, 4)
+        rr_slab(g["int_leather"], top, right, fwd, upz, 0.07, 0.32, 0.022, 0.028, 4)
+        rr_slab(g["int_dark"], top + upz * 0.0005, right, fwd, upz, 0.004, 0.27, 0.001, 0.001, 1)   # stitch
+        hinge = top - upz * 0.05 - fwd * 0.15
+        tube(g["int_trim"], hinge - right * 0.03, hinge + right * 0.03, 0.013, 12)
+        tube(g["int_trim"], pan - upz * 0.05 + right * (sd * 0.3) - fwd * 0.2, hinge, 0.012, 10)
+        tube(g["int_trim"], hinge, top - upz * 0.03 - fwd * 0.1, 0.01, 8)
 
 
 # ------------------------------------------------------------------------------------------ HOTAS
@@ -766,10 +869,11 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
         # the screen
         # (1 cm in from the strip's outer edge: the fascia bends back there and its far side crossed the module)
         s0 = c + right * ((hw + (pw / 2 - hw) / 2 - 0.01) * (-side)) + n * 0.004
-        rows = ([[("led_w", None), ("led_o", None), ("led_blink", None)], [("rotary", "ck_pwr")], [("button", "ck_eng"), ("button", "ck_shld")],
+        # every status LED has its label (unlabelled lamps read as placeholders - critic, 25. 9. 2026)
+        rows = ([[("led_w", "ck_main"), ("led_o", "ck_batt"), ("led_blink", "ck_fault")], [("rotary", "ck_pwr")], [("button", "ck_eng"), ("button", "ck_shld")],
                  [("rocker", "ck_hyd"), ("rocker", "ck_o2")]]
                 if side > 0 else
-                [[("led_o", None), ("led_w", None), ("led_blink", None)], [("rotary", "ck_scan")], [("button", "ck_qt"), ("button", "ck_comms")],
+                [[("led_o", "ck_link"), ("led_w", "ck_trk"), ("led_blink", "ck_warn")], [("rotary", "ck_scan")], [("button", "ck_qt"), ("button", "ck_comms")],
                  [("rocker", "ck_esp"), ("rocker", "ck_ifcs")]])
         from mathutils.bvhtree import BVHTree
         control_module(g, s0, right, up, n, pw / 2 - hw - 0.03, sh + 0.04, rows, tree=BVHTree.FromBMesh(tmp))
@@ -865,10 +969,10 @@ def wing_panels(g, eye, spec):
             else:
                 r, u, n = oriented(eye, c)
             rows = ([[("guarded", "ck_gear"), ("guarded", "ck_vtol"), ("rocker", "ck_lights"), ("rocker", "ck_extlt")],
-                     [("led_o", None), ("button", "ck_cool"), ("button", "ck_boost"), ("button", "ck_decpl"), ("led_blink", None)]]
+                     [("led_o", "ck_temp"), ("button", "ck_cool"), ("button", "ck_boost"), ("button", "ck_decpl"), ("led_blink", "ck_warn")]]
                     if side > 0 else
                     [[("guarded_red", "ck_masterarm"), ("encoder", "ck_wpn"), ("rotary", "ck_nav"), ("rocker", "ck_rcs")],
-                     [("led_blink", None), ("button", "ck_aux"), ("led_o", None), ("led_w", None)]])
+                     [("led_blink", "ck_armed"), ("button", "ck_aux"), ("led_o", "ck_heat"), ("led_w", "ck_ready")]])
             control_module(g, c + n * 0.035, r, u, n, 0.2, 0.15, rows, tree=tree)
 
 

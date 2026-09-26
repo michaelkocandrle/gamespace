@@ -33,6 +33,7 @@ Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**. Projekt je v `C:\gamespace\g
    - Listy `python Tools/Review/make_compare_sheet.py <review.json>`: reference vlevo, výsledek vpravo; zblízka, střední, zdálky; den, noc, vesmír.
    - Kritik dostane **jen** `brief.md` a listy: žádný postup, dobu práce, záměry ani vlastní názor.
    - FAIL → oprav body „musí se opravit“ a znovu, nejvýš 3 kola, pak předej i s otevřenými body.
+   - Když po posledním kole ještě opravuješ, spusť na opravené body jedno ověřovací kolo jen na ně (nepočítá se do limitu 3 kol, autor 26. 9. 2026).
    - Žádnou výtku tiše nevynechat: u každé opraveno / neopraveno a proč; nesouhlas zdůvodni.
    - Neplatnou výtku dolož výřezem ze snímku, výřezy ulož k recenzi (`<téma>/evidence/`).
    - Recenze do `Docs/Reviews/<datum>_<téma>.md` (listy, výstup kritika, reakce na každý bod).

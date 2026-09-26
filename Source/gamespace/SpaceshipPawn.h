@@ -10,6 +10,7 @@
 class UAudioComponent;
 class UBoxComponent;
 class UCameraComponent;
+class UMaterialParameterCollection;
 class UPointLightComponent;
 class UCockpitDisplayComponent;
 class UInputAction;
@@ -413,6 +414,10 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	void DebugConfigureCockpit(const FVector& EyeLocation, bool bHideHull, bool bHideCanopy);
+
+	/** MPC_ShipView.InsideView as this ship last set it: 1 = the player's camera is inside its interior. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Debug")
+	float DebugGetInsideView() const { return InsideView; }
 
 	/** Shots / tuning: cockpit key and fill light, display glow (candela) and a multiplier on the interior's
 	 * base colour. Negative leaves that one as it is. */
@@ -1987,6 +1992,12 @@ private:
 	void StepFlight(float DeltaSeconds);
 	void UpdateCameraEffects(float DeltaSeconds);
 	void UpdateSpaceDust(float DeltaSeconds);
+	/**
+	 * Glass reflection by where the camera is (author 26. 9. 2026): MPC_ShipView.InsideView = 1 while the
+	 * player's camera is inside this ship's interior (the "Interior*" parts' bounds, or the cockpit camera
+	 * of a ship without one): the canopy reflects weakly; 0 in the chase camera and outside: strongly.
+	 */
+	void UpdateViewCollection();
 	void SetupShipLights();
 	void UpdateShipLights(float DeltaSeconds);
 	void SetupAudioLayers();
@@ -2178,4 +2189,11 @@ private:
 
 	/** Ticks left with camera lag switched off after SnapCameraToShip. */
 	int32 CameraSnapTicks = 0;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialParameterCollection> ViewCollection;
+	/** The interior parts' bounds in actor space (cm); invalid when the ship has none. */
+	FBox InteriorBoundsLocal = FBox(ForceInit);
+	bool bInteriorBoundsReady = false;
+	float InsideView = 0.f;
 };

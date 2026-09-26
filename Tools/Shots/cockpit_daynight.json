@@ -16,11 +16,12 @@
   {
    "name": "pilot_view_day",
    "camera": "cockpit",
-   "altitude_m": 3000,
+   "altitude_m": 300,
    "facing": "horizon",
    "hud": 1,
    "gear": false,
-   "settle": 2.0
+   "settle": 2.0,
+   "_altitude": "300 m: at 3 km the ground in view lay 15+ km away and the whole window was haze (critic, 25. 9. 2026)"
   },
   {
    "altitude_m": 3000,
@@ -52,8 +53,9 @@
    "settle": 2.0,
    "fov": 90,
    "name": "cockpit_back_day",
-   "camera_local": [7.35, -0.3, 1.3],
-   "look_local": [4.25, 0.5, 0.3]
+   "camera_local": [6.7, -0.72, 1.35],
+   "look_local": [4.6, 0.1, -0.2],
+   "_camera": "beside the seat, down the stairs to the cabin door (behind the seat the seat hid the door - critic, 25. 9. 2026)"
   },
   {
    "altitude_m": 3000,
