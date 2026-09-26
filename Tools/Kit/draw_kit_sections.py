@@ -106,15 +106,17 @@ def main():
     # plan: portal rhythm along a W corridor
     g = RULES["grid"]
     px0, py0 = 120, 900
-    d.text((px0, py0 - 70), "Půdorys chodby W: portál 0,3 + stěny 0,9 = rozteč %.1f m; moduly %s m, výplně %s m" % (
-        g["portal_pitch"], ", ".join("%.1f" % v for v in g["module_lengths"]), ", ".join("%.1f" % v for v in g["filler_lengths"])), font=F, fill=TXT)
-    L = 4.8
+    d.text((px0, py0 - 70), "Půdorys chodby W: rozteč portálů %s m (střídání); moduly %s m, výplně %s m" % (
+        " / ".join("%.1f" % v for v in g["portal_pitch"]), ", ".join("%.1f" % v for v in g["module_lengths"]),
+        ", ".join("%.1f" % v for v in g["filler_lengths"])), font=F, fill=TXT)
+    L = 6.0
     wd = S["W"]["width"]
     for k in range(int(L / g["plan"]) + 1):
         X = px0 + k * g["plan"] * PX
         d.line([(X, py0 - 20), (X, py0 + wd * PX + 20)], fill=GRID2)
     d.rectangle([px0, py0, px0 + L * PX, py0 + wd * PX], outline=WALL, width=3)
-    seq = [("P", 0.3), ("0.6", 0.6), ("0.3", 0.3), ("P", 0.3), ("0.9", 0.9), ("P", 0.3), ("1.2", 1.2), ("0.9", 0.9)]
+    # rhythm 1.2 / 2.4 / 1.2: portal + 0.9 | portal + 1.2 + 0.9 | portal + 0.6 + 0.3 | portal
+    seq = [("P", 0.3), ("0.9", 0.9), ("P", 0.3), ("1.2", 1.2), ("0.9", 0.9), ("P", 0.3), ("0.6", 0.6), ("0.3", 0.3), ("P", 0.3), ("1.2", 1.2)]
     xx = 0.0
     for name, ln in seq:
         X0, X1 = px0 + xx * PX, px0 + (xx + ln) * PX

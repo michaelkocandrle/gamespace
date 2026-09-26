@@ -352,7 +352,8 @@ Strojově čitelně je vše v `ArtSource/Kit/kit_rules.json`. Čtou ho stavební
 
 - **Mřížka:**
   - půdorys 0,3 m, moduly 0,3 / 0,6 / 0,9 / 1,2 m;
-  - portál 0,3 m a stěny 0,9 m dávají rozteč 1,2 m;
+  - rozteč portálů 1,2 m (portál 0,3 + stěny 0,9) nebo 2,4 m (portál 0,3 + stěny 2,1). Obě smí střídat, aby rytmus
+    chodby nebyl jednotvárný (autor 26. 9. 2026);
   - svisle 0,1 m;
   - výplně 0,1 a 0,2 m jen tam, kde trup vnutí šířku mimo mřížku (Wayfarer: nákladový prostor 3,8 m = 3,6 +
     2 × 0,1);
@@ -380,6 +381,32 @@ Strojově čitelně je vše v `ArtSource/Kit/kit_rules.json`. Čtou ho stavební
   - strop s konstrukcí 0,25 m.
 - **Průchodnost:** kapsle postavy má poloměr 0,42 m a výšku 1,92 m (`PlayerCharacter.cpp`). Světlá šířka všude
   i v portálu ≥ 0,9 m, světlá výška ≥ 2,0 m. Proto portály v průlezu S nevystupují.
+  - Ověření v celé výšce kapsle po 1 cm (hlava a ramena, kde se stěna sklání): `python Tools/Kit/check_kit_clearance.py`.
+  - Nejmenší boční rezerva je všude ve výšce boků (0,42 m, kde je kapsle nejširší). Ve výšce ramen a hlavy je
+    rezerva větší, protože se kapsle zužuje rychleji než stěna.
+
+| Průřez | Mezi portály: bok / hlava | V portálu: bok / hlava |
+|---|---|---|
+| S | 0,03 / 0,18 m | 0,03 / 0,18 m |
+| N | 0,18 / 0,38 m | 0,10 / 0,30 m |
+| W | 0,53 / 0,38 m | 0,43 / 0,28 m |
+| T (3,6 m) | 1,38 / 0,78 m | 1,28 / 0,68 m |
+
+  - **Výbava v chodbě N** smí vystoupit nejvýš 0,15 m od líce, pokud je jen na jedné straně (světlá šířka musí
+    zůstat 0,9 m); na obou stranách nejvýš 0,15 m dohromady. Skříňky 0,2 m hluboké jen v průřezech W a T.
+  - **Kamera třetí osoby** (klávesa V pěšky): rameno 3,8 m, posun (0; 0,55; 0,65) m, sonda 0,12 m, kolize zapnutá.
+    V chodbě N skončí 2,75 m za postavou při vodorovném pohledu, 1,3 m při pohledu 30° dolů (narazí na sklon
+    stropu). Nikdy nevleze do hlavy a zůstane v profilu. Kolize kitu proto musí blokovat kanál Camera. Ve hře se
+    ověří v pilotu chodby, dnešní interiér Wayfareru kolizi nemá.
+- **Kit v trupu Wayfareru** (`Tools/Kit/hull_fit_sections.py`, řezy po 0,1 m, obálka = líc + konstrukce 0,2 m
+  + podlaha 0,2 m + strop 0,25 m, 5 cm od trupu, silueta se nemění; výkres `Docs/Kit/hull_fit_wayfarer.png`):
+  - N a W se vejdou do nákladu, techniky i kajuty (rezerva 0,09–0,35 m, nejtěsněji u rampy x = 1,1 m).
+  - Místnost na celou šířku layoutu (3,8 m) se se zónou konstrukce 0,2 m nevejde. Nejširší místnost na mřížce:
+    náklad 3,0 m, technika 3,3 m, kajuta 3,0 m.
+  - Pro náklad je to otázka návrhu: 8 SCU ve 2 řadách a ulička 1,25 m potřebují 3,75 m. Rozhodne se v pilotu
+    (tenčí konstrukce 0,1 m jen v nákladu, jiné uspořádání SCU).
+  - Kokpit je nízký prostor pod kanopou (podlaha 1,15 m, nad ní ~1,7 m do trupu). Průřezy chodeb v něm neplatí;
+    dostane vlastní díly (deska s displejovým pásem, rám skla) v kroku 7.2.
 - **Pivoty** (+X dopředu, +Y vlevo, +Z nahoru, měřítko 1, aplikované transformace):
   - průběžné díly (podlaha, strop, portál, trubky, kabely, vzduchotechnika, schody): začátek modulu na ose
     průřezu, z = 0, +X po směru chodby;
@@ -404,7 +431,9 @@ Strojově čitelně je vše v `ArtSource/Kit/kit_rules.json`. Čtou ho stavební
   k `MI_Kit_<Výrobce>_<Role>`. Barvy rolí jsou v `kit_rules.json` (`palettes`). Kit tak slouží více lodím bez
   kopií dílů.
 - **Hustota texelů:**
-  - trim sheet 512 px/m (±25 %) pro hrany, lemy, spáry a obruby;
+  - trim sheet 1024 px/m (±25 %) pro hrany, lemy, spáry a obruby (autor 26. 9. 2026: 512 byl zblízka měkký). List
+    4096 × 2048: pruhy se opakují po 4 m, výšky pruhů celkem 2 m. Paměť 16,8 MB, s mipmapami 22,4 MB (BC1 barva,
+    BC5 normála, BC1 ORM), jeden list pro všechny lodě. Hra teď využívá ~3,2 z 5 GB VRAM;
   - velké plochy triplanárně ve světě 1024 px/m, bez UV;
   - decaly 2048 px/m;
   - zrno 45 cm.
