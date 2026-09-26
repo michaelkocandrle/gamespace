@@ -496,14 +496,16 @@ void ASpaceshipPawn::UpdateViewCollection()
 	// The fixture lights (a light for every strip and lamp, hs_fixture_lights.py) only while the camera is inside:
 	// without shadows they light the hull through its walls, and from outside their volumes cover the whole ship
 	// on screen (~3 ms on the target GPU in a close chase view)
-	if (bInside != bFixtureLightsOn)
+	const bool bWantFixtures = FixtureLightMode < 0 ? bInside : FixtureLightMode > 0;
+	if (bWantFixtures != bFixtureLightsOn || bFixtureLightsDirty)
 	{
-		bFixtureLightsOn = bInside;
+		bFixtureLightsOn = bWantFixtures;
+		bFixtureLightsDirty = false;
 		for (ULocalLightComponent* Light : FixtureLights)
 		{
 			if (Light)
 			{
-				Light->SetVisibility(bInside);
+				Light->SetVisibility(bWantFixtures);
 			}
 		}
 	}

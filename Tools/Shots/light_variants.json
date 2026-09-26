@@ -1,0 +1,357 @@
+{
+ "_comment": "Interior lighting variants (author 26. 9. 2026: light density near the C2 at <= ~2 ms): each variant in the hold aisle and from the pilot's eye, stat unit + stat gpu. Console: space.FixLights / ShipLightShadows / ShipLightRadius / IntEmissive (SpaceShipLightTuning.cpp), r.MegaLights.EnableForProject. Run -Width 1920 -Height 1080.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 4.0,
+   "console": [
+    "r.GPUStatsEnabled 1"
+   ]
+  },
+  {
+   "name": "chodba_a_bez_svitidel",
+   "_what": "room lights only (41, before the fixture lights)",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "fov": 90,
+   "camera_local": [
+    -8.9,
+    -1.2,
+    0.45
+   ],
+   "look_local": [
+    -2.25,
+    -1.0,
+    0.15
+   ],
+   "console": [
+    "space.FixLights -1",
+    "space.ShipLightShadows 0",
+    "space.ShipLightRadius 1",
+    "space.IntEmissive 1",
+    "r.MegaLights.EnableForProject 0",
+    "space.FixLights 0",
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "kokpit_a_bez_svitidel",
+   "_what": "room lights only (41, before the fixture lights)",
+   "camera": "cockpit",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "chodba_b_svitidla",
+   "_what": "fixture lights, no shadows, 1.6 m reach (current)",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "fov": 90,
+   "camera_local": [
+    -8.9,
+    -1.2,
+    0.45
+   ],
+   "look_local": [
+    -2.25,
+    -1.0,
+    0.15
+   ],
+   "console": [
+    "space.FixLights -1",
+    "space.ShipLightShadows 0",
+    "space.ShipLightRadius 1",
+    "space.IntEmissive 1",
+    "r.MegaLights.EnableForProject 0",
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "kokpit_b_svitidla",
+   "_what": "fixture lights, no shadows, 1.6 m reach (current)",
+   "camera": "cockpit",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "chodba_c_svitidla_stiny",
+   "_what": "fixture and room lights with shadows (virtual shadow maps)",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "fov": 90,
+   "camera_local": [
+    -8.9,
+    -1.2,
+    0.45
+   ],
+   "look_local": [
+    -2.25,
+    -1.0,
+    0.15
+   ],
+   "console": [
+    "space.FixLights -1",
+    "space.ShipLightShadows 0",
+    "space.ShipLightRadius 1",
+    "space.IntEmissive 1",
+    "r.MegaLights.EnableForProject 0",
+    "space.ShipLightShadows 1",
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "kokpit_c_svitidla_stiny",
+   "_what": "fixture and room lights with shadows (virtual shadow maps)",
+   "camera": "cockpit",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "chodba_d_mega",
+   "_what": "MegaLights, no shadows",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "fov": 90,
+   "camera_local": [
+    -8.9,
+    -1.2,
+    0.45
+   ],
+   "look_local": [
+    -2.25,
+    -1.0,
+    0.15
+   ],
+   "console": [
+    "space.FixLights -1",
+    "space.ShipLightShadows 0",
+    "space.ShipLightRadius 1",
+    "space.IntEmissive 1",
+    "r.MegaLights.EnableForProject 0",
+    "r.MegaLights.EnableForProject 1",
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "kokpit_d_mega",
+   "_what": "MegaLights, no shadows",
+   "camera": "cockpit",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "chodba_e_mega_stiny",
+   "_what": "MegaLights, every interior light with ray-traced shadows",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "fov": 90,
+   "camera_local": [
+    -8.9,
+    -1.2,
+    0.45
+   ],
+   "look_local": [
+    -2.25,
+    -1.0,
+    0.15
+   ],
+   "console": [
+    "space.FixLights -1",
+    "space.ShipLightShadows 0",
+    "space.ShipLightRadius 1",
+    "space.IntEmissive 1",
+    "r.MegaLights.EnableForProject 0",
+    "r.MegaLights.EnableForProject 1",
+    "space.ShipLightShadows 1",
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "kokpit_e_mega_stiny",
+   "_what": "MegaLights, every interior light with ray-traced shadows",
+   "camera": "cockpit",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "chodba_f_emise",
+   "_what": "no fixture lights, emissive x4 lighting the room through Lumen",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "fov": 90,
+   "camera_local": [
+    -8.9,
+    -1.2,
+    0.45
+   ],
+   "look_local": [
+    -2.25,
+    -1.0,
+    0.15
+   ],
+   "console": [
+    "space.FixLights -1",
+    "space.ShipLightShadows 0",
+    "space.ShipLightRadius 1",
+    "space.IntEmissive 1",
+    "r.MegaLights.EnableForProject 0",
+    "space.FixLights 0",
+    "space.IntEmissive 4",
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "kokpit_f_emise",
+   "_what": "no fixture lights, emissive x4 lighting the room through Lumen",
+   "camera": "cockpit",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "chodba_g_dosah2",
+   "_what": "fixture lights with double reach (3.2 m)",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "fov": 90,
+   "camera_local": [
+    -8.9,
+    -1.2,
+    0.45
+   ],
+   "look_local": [
+    -2.25,
+    -1.0,
+    0.15
+   ],
+   "console": [
+    "space.FixLights -1",
+    "space.ShipLightShadows 0",
+    "space.ShipLightRadius 1",
+    "space.IntEmissive 1",
+    "r.MegaLights.EnableForProject 0",
+    "space.ShipLightRadius 2 fix",
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "kokpit_g_dosah2",
+   "_what": "fixture lights with double reach (3.2 m)",
+   "camera": "cockpit",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "reset",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 1.0,
+   "console": [
+    "space.FixLights -1",
+    "space.ShipLightShadows 0",
+    "space.ShipLightRadius 1",
+    "space.IntEmissive 1",
+    "r.MegaLights.EnableForProject 0",
+    "stat none"
+   ]
+  }
+ ]
+}

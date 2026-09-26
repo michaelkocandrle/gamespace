@@ -420,6 +420,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Debug")
 	float DebugGetInsideView() const { return InsideView; }
 
+	/** Fixture lights (Light_fix_*): -1 automatic (on only with the camera inside), 0 forced off, 1 forced on. */
+	void DebugSetFixtureLightMode(int32 Mode) { FixtureLightMode = Mode; bFixtureLightsDirty = true; }
+
 	/** Shots / tuning: cockpit key and fill light, display glow (candela) and a multiplier on the interior's
 	 * base colour. Negative leaves that one as it is. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
@@ -2201,4 +2204,6 @@ private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<ULocalLightComponent>> FixtureLights;
 	bool bFixtureLightsOn = true;
+	int32 FixtureLightMode = -1;
+	bool bFixtureLightsDirty = false;
 };
