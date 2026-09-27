@@ -240,6 +240,14 @@ def jobs(batch, sections, budget):
             yield dict(name=kit_walls.part_name(kind, L, "N", var), part=(lambda k=kind, l=L, v=var, sd=seed: kit_walls.build_part(k, l, "N", v, sd)),
                        category="Wall", family="Wall_" + kind, kind=kind, length=L, section="N", variant=var, batch=1,
                        budget=int(budget.get("Wall_base", 0) + budget["Wall_per_m"] * L), render=False, views=None)
+    elif batch == "batch3":
+        import kit_batch3
+        for cat, part, size, sec, var in kit_batch3.BATCH3:
+            seed += 7
+            yield dict(name=kit_batch3.part_name(cat, part, size, sec, var),
+                       part=(lambda c=cat, pa=part, sz=size, s=sec, v=var, sd=seed: kit_batch3.build_part(c, pa, sz, s, v, sd)),
+                       category=cat, family="%s_%s" % (cat, part), kind=part, length=size, section=sec, variant=var, batch=3,
+                       budget=kit_batch3.budget(cat, part, size), render=True, views=kit_batch3.VIEWS[(cat, part)])
     else:
         raise SystemExit("unknown batch %s" % batch)
 

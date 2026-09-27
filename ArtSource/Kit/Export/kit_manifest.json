@@ -4228,6 +4228,1064 @@
     "front": "Saved/KitCatalog/SM_Kit_Portal_Ring03N_B_front.png",
     "34": "Saved/KitCatalog/SM_Kit_Portal_Ring03N_B_34.png"
    }
+  },
+  "SM_Kit_Floor_Plate12W_A": {
+   "category": "Floor",
+   "family": "Floor_Plate",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "A",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Plate12W_A.fbx",
+   "dims_m": [
+    1.2,
+    2.6,
+    0.065
+   ],
+   "expected_size_cm": [
+    120.0,
+    260.0,
+    6.5
+   ],
+   "tris": 876,
+   "tris_decals": 0,
+   "tri_budget": 1800,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Trim",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 432,
+    "secondary": 192,
+    "floor": 1704
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Plate12W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Plate12W_A_34.png"
+   }
+  },
+  "SM_Kit_Floor_Plate06W_A": {
+   "category": "Floor",
+   "family": "Floor_Plate",
+   "section": "W",
+   "length_m": 0.6,
+   "variant": "A",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Plate06W_A.fbx",
+   "dims_m": [
+    0.6,
+    2.6,
+    0.065
+   ],
+   "expected_size_cm": [
+    60.0,
+    260.0,
+    6.5
+   ],
+   "tris": 796,
+   "tris_decals": 0,
+   "tri_budget": 900,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Trim",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 432,
+    "secondary": 192,
+    "floor": 1560
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Plate06W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Plate06W_A_34.png"
+   }
+  },
+  "SM_Kit_Floor_Plate12W_B": {
+   "category": "Floor",
+   "family": "Floor_Plate",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "B",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Plate12W_B.fbx",
+   "dims_m": [
+    1.2,
+    2.6,
+    0.065
+   ],
+   "expected_size_cm": [
+    120.0,
+    260.0,
+    6.5
+   ],
+   "tris": 888,
+   "tris_decals": 0,
+   "tri_budget": 1800,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Trim",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 432,
+    "secondary": 192,
+    "floor": 1728
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Plate12W_B_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Plate12W_B_34.png"
+   }
+  },
+  "SM_Kit_Floor_Plate06W_B": {
+   "category": "Floor",
+   "family": "Floor_Plate",
+   "section": "W",
+   "length_m": 0.6,
+   "variant": "B",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Plate06W_B.fbx",
+   "dims_m": [
+    0.6,
+    2.6,
+    0.065
+   ],
+   "expected_size_cm": [
+    60.0,
+    260.0,
+    6.5
+   ],
+   "tris": 808,
+   "tris_decals": 0,
+   "tri_budget": 900,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Trim",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 432,
+    "secondary": 192,
+    "floor": 1584
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Plate06W_B_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Plate06W_B_34.png"
+   }
+  },
+  "SM_Kit_Floor_Grille12W_A": {
+   "category": "Floor",
+   "family": "Floor_Grille",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "A",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Grille12W_A.fbx",
+   "dims_m": [
+    1.2,
+    2.6,
+    0.215
+   ],
+   "expected_size_cm": [
+    120.0,
+    260.0,
+    21.5
+   ],
+   "tris": 1472,
+   "tris_decals": 0,
+   "tri_budget": 3240,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowCool"
+   ],
+   "sockets": {
+    "SOCKET_Light_Channel_0": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      -4.5
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 2.16,
+      "width_cm": 110.0,
+      "height_cm": 3.0,
+      "radius_m": 0.6,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "along_ue": [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 864,
+    "secondary": 240,
+    "floor": 2976
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Grille12W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Grille12W_A_34.png"
+   }
+  },
+  "SM_Kit_Floor_Grille06W_A": {
+   "category": "Floor",
+   "family": "Floor_Grille",
+   "section": "W",
+   "length_m": 0.6,
+   "variant": "A",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Grille06W_A.fbx",
+   "dims_m": [
+    0.6,
+    2.6,
+    0.215
+   ],
+   "expected_size_cm": [
+    60.0,
+    260.0,
+    21.5
+   ],
+   "tris": 1280,
+   "tris_decals": 0,
+   "tri_budget": 1620,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowCool"
+   ],
+   "sockets": {
+    "SOCKET_Light_Channel_0": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      -4.5
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 1.08,
+      "width_cm": 50.0,
+      "height_cm": 3.0,
+      "radius_m": 0.6,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "along_ue": [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 792,
+    "secondary": 240,
+    "floor": 2600
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Grille06W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Grille06W_A_34.png"
+   }
+  },
+  "SM_Kit_Floor_Hatch06W_A": {
+   "category": "Floor",
+   "family": "Floor_Hatch",
+   "section": "W",
+   "length_m": 0.6,
+   "variant": "A",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Hatch06W_A.fbx",
+   "dims_m": [
+    0.6,
+    2.6,
+    0.066
+   ],
+   "expected_size_cm": [
+    60.0,
+    260.0,
+    6.6
+   ],
+   "tris": 1460,
+   "tris_decals": 0,
+   "tri_budget": 1620,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1152,
+    "secondary": 384,
+    "floor": 2904
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Hatch06W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Hatch06W_A_34.png"
+   }
+  },
+  "SM_Kit_Floor_Plate12N_A": {
+   "category": "Floor",
+   "family": "Floor_Plate",
+   "section": "N",
+   "length_m": 1.2,
+   "variant": "A",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Plate12N_A.fbx",
+   "dims_m": [
+    1.2,
+    1.4,
+    0.065
+   ],
+   "expected_size_cm": [
+    120.0,
+    140.0,
+    6.5
+   ],
+   "tris": 692,
+   "tris_decals": 0,
+   "tri_budget": 1800,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Trim",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 360,
+    "secondary": 96,
+    "floor": 1344
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Plate12N_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Plate12N_A_34.png"
+   }
+  },
+  "SM_Kit_Floor_Plate12N_B": {
+   "category": "Floor",
+   "family": "Floor_Plate",
+   "section": "N",
+   "length_m": 1.2,
+   "variant": "B",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Plate12N_B.fbx",
+   "dims_m": [
+    1.2,
+    1.4,
+    0.065
+   ],
+   "expected_size_cm": [
+    120.0,
+    140.0,
+    6.5
+   ],
+   "tris": 716,
+   "tris_decals": 0,
+   "tri_budget": 1800,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Trim",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 360,
+    "secondary": 96,
+    "floor": 1392
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Plate12N_B_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Plate12N_B_34.png"
+   }
+  },
+  "SM_Kit_Floor_Plate03N_A": {
+   "category": "Floor",
+   "family": "Floor_Plate",
+   "section": "N",
+   "length_m": 0.3,
+   "variant": "A",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Plate03N_A.fbx",
+   "dims_m": [
+    0.3,
+    1.4,
+    0.065
+   ],
+   "expected_size_cm": [
+    30.0,
+    140.0,
+    6.5
+   ],
+   "tris": 572,
+   "tris_decals": 0,
+   "tri_budget": 900,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Trim",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 360,
+    "secondary": 96,
+    "floor": 1128
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Plate03N_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Plate03N_A_34.png"
+   }
+  },
+  "SM_Kit_Floor_Grille12N_A": {
+   "category": "Floor",
+   "family": "Floor_Grille",
+   "section": "N",
+   "length_m": 1.2,
+   "variant": "A",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Grille12N_A.fbx",
+   "dims_m": [
+    1.2,
+    1.4,
+    0.215
+   ],
+   "expected_size_cm": [
+    120.0,
+    140.0,
+    21.5
+   ],
+   "tris": 1328,
+   "tris_decals": 0,
+   "tri_budget": 3240,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowCool"
+   ],
+   "sockets": {
+    "SOCKET_Light_Channel_0": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      -4.5
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 2.16,
+      "width_cm": 110.0,
+      "height_cm": 3.0,
+      "radius_m": 0.6,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "along_ue": [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 864,
+    "secondary": 240,
+    "floor": 2688
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Grille12N_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Grille12N_A_34.png"
+   }
+  },
+  "SM_Kit_Floor_Hatch06N_A": {
+   "category": "Floor",
+   "family": "Floor_Hatch",
+   "section": "N",
+   "length_m": 0.6,
+   "variant": "A",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Hatch06N_A.fbx",
+   "dims_m": [
+    0.6,
+    1.4,
+    0.066
+   ],
+   "expected_size_cm": [
+    60.0,
+    140.0,
+    6.6
+   ],
+   "tris": 1460,
+   "tris_decals": 0,
+   "tri_budget": 1620,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1152,
+    "secondary": 384,
+    "floor": 2904
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Hatch06N_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Hatch06N_A_34.png"
+   }
+  },
+  "SM_Kit_Stair_Flight08N_A": {
+   "category": "Stair",
+   "family": "Stair_Flight",
+   "section": "N",
+   "length_m": 0.8,
+   "variant": "A",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Stair_Flight08N_A.fbx",
+   "dims_m": [
+    1.68,
+    1.22,
+    1.735
+   ],
+   "expected_size_cm": [
+    168.0,
+    122.0,
+    173.5
+   ],
+   "tris": 3880,
+   "tris_decals": 0,
+   "tri_budget": 4400,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Signal",
+    "Kit_Trim",
+    "Kit_GlowCool"
+   ],
+   "sockets": {
+    "SOCKET_Light_Step_0": {
+     "location_ue_cm": [
+      -2.9,
+      -0.0,
+      17.8
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 0.08,
+      "width_cm": 100.0,
+      "height_cm": 1.2,
+      "radius_m": 0.45,
+      "dir_ue": [
+       -0.6,
+       -0.0,
+       -0.8
+      ],
+      "along_ue": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Light_Step_1": {
+     "location_ue_cm": [
+      22.1,
+      -0.0,
+      37.8
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 0.08,
+      "width_cm": 100.0,
+      "height_cm": 1.2,
+      "radius_m": 0.45,
+      "dir_ue": [
+       -0.6,
+       -0.0,
+       -0.8
+      ],
+      "along_ue": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Light_Step_2": {
+     "location_ue_cm": [
+      47.1,
+      -0.0,
+      57.8
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 0.08,
+      "width_cm": 100.0,
+      "height_cm": 1.2,
+      "radius_m": 0.45,
+      "dir_ue": [
+       -0.6,
+       -0.0,
+       -0.8
+      ],
+      "along_ue": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Light_Step_3": {
+     "location_ue_cm": [
+      72.1,
+      -0.0,
+      77.8
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 0.08,
+      "width_cm": 100.0,
+      "height_cm": 1.2,
+      "radius_m": 0.45,
+      "dir_ue": [
+       -0.6,
+       -0.0,
+       -0.8
+      ],
+      "along_ue": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      100.0,
+      -0.0,
+      80.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 2268,
+    "secondary": 480,
+    "floor": 2820
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Stair_Flight08N_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Stair_Flight08N_A_34.png"
+   }
+  },
+  "SM_Kit_Stair_Ramp29W_A": {
+   "category": "Stair",
+   "family": "Stair_Ramp",
+   "section": "W",
+   "length_m": 2.9,
+   "variant": "A",
+   "batch": 3,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Stair_Ramp29W_A.fbx",
+   "dims_m": [
+    2.943,
+    2.4,
+    0.89
+   ],
+   "expected_size_cm": [
+    294.3,
+    240.0,
+    89.0
+   ],
+   "tris": 1722,
+   "tris_decals": 0,
+   "tri_budget": 8700,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      290.0,
+      -0.0,
+      80.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1224,
+    "secondary": 288,
+    "floor": 2524
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Stair_Ramp29W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Stair_Ramp29W_A_34.png"
+   }
   }
  }
 }

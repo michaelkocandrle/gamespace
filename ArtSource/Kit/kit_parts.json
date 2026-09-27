@@ -371,7 +371,7 @@
     "A": "plates with edge strips and anti-slip fields",
     "B": "plates with a centre walkway line and hazard edges"
    },
-   "status": "planned"
+   "status": "built (batch 3, 27. 9. 2026), awaiting approval"
   },
   "Floor_Grille": {
    "category": "Floor",
@@ -388,7 +388,7 @@
    "variants": {
     "A": "grating over a dark service channel with pipes"
    },
-   "status": "planned"
+   "status": "built (batch 3, 27. 9. 2026), awaiting approval"
   },
   "Floor_Hatch": {
    "category": "Floor",
@@ -404,7 +404,7 @@
    "variants": {
     "A": "floor hatch with a flush ring handle"
    },
-   "status": "planned"
+   "status": "built (batch 3, 27. 9. 2026), awaiting approval"
   },
   "Stair_Flight": {
    "category": "Stair",
@@ -416,7 +416,7 @@
    "variants": {
     "A": "ship's stair, lit nosings, side rails (parametric rise)"
    },
-   "status": "planned"
+   "status": "built (batch 3, 27. 9. 2026), awaiting approval"
   },
   "Stair_Ramp": {
    "category": "Stair",
@@ -424,7 +424,7 @@
    "variants": {
     "A": "boarding ramp inner surface with anti-slip and hazard edges"
    },
-   "status": "planned"
+   "status": "built (batch 3, 27. 9. 2026), awaiting approval"
   },
   "Door_Sliding": {
    "category": "Door",

@@ -676,6 +676,43 @@ dávek (díl, rozpočet, pohledy renderů); `--only <jména>` postaví vybrané 
     světla přidávat s měřením. Profil: `Docs/Reviews/2026-09-27_interior_perf_profile.md`.
   - **Zúžení do průlezu:** zadní deska rozdělená kolem otvoru, pás u podlahy průlezu (WORKFLOW dc).
 
+## Interiérový kit, dávka 3: podlahy, poklop, schodiště, rampa (27. 9. 2026)
+
+`Tools/Kit/kit_batch3.py`, stavba `kit_build.py -- batch3` (`ArtSource/Kit/Kit_Batch3.blend`), katalog
+`python Tools/Kit/kit_catalog.py 3`.
+- **Pivot „run“:** začátek modulu na ose chodby ve výšce podlahy, pochozí plocha z = 0. Deska je široká jako průřez
+  plus 0,1 m na každou stranu pod vybrání soklu.
+- **Deska:**
+  - tmavý podklad pod vším (spáry nekoukají do prázdna);
+  - lemy u stěn se šrouby;
+  - chodník uprostřed (ve W dvě desky);
+  - A: protiskluzové pásy 8 cm po 11 cm (`antislip_tread`, slzičkový plech 25 mm);
+  - B: středová čára (Signal, 2,4 cm) a krémové čáry okrajů chodníku, bez šraf podél stěn.
+- **Mřížka:**
+  - kanál 20 cm s dnem v barvě konstrukce;
+  - trubka chladiva (Accent) se signálními pásky, vodní vedení, svazek kabelů, podpěry po 0,6 m;
+  - světlo `Light_Channel_0` 1,8 cd/m;
+  - ploché pruty 6 mm po 4,5 cm, příčky po 0,3 m, zvýšený rám.
+- **Poklop:**
+  - rám v primární barvě s gumovým těsněním;
+  - kapsa s madlem a dnem, dvě čtvrtotáčkové západky, panty s kloubem, šrouby.
+- **Schodiště (`Stair_Flight`, velikost = výška):**
+  - stupně 0,2 × 0,25 m;
+  - nos stupně v barvě konstrukce se světelným páskem a slabým světlem `Light_Step_i`;
+  - uzavřené schodnice se šrouby;
+  - madlo v oranžové výrobce s objímkami v ohybech, sloupky s patkami a konzolami;
+  - výstražný lem na horní hraně;
+  - kolize jako rampa (38,7°), chůze ověřena `space.Walk`.
+- **Rampa (`Stair_Ramp`, velikost = vodorovná délka, výška 0,8 m):** tři desky s protiskluzovými pásy, příčná žebra
+  s gumou, žluté výstražné okraje, obrubníky, odvodňovací mřížka u paty.
+- **Trim kitu má vlastní master `M_Kit_Trim`** (WORKFLOW dd), ne `M_Ship_PBR`. Kovové pruhy mají drsnost ≥ 0,5 (de).
+- **Ukázka:**
+  - chodby na podlahách z kitu;
+  - hala se schodištěm a rampou na x 14–20 m, start `KitShowroomStairsSpawn`, U: ukázka → přístavba → hala → zpět;
+  - run parts mohou mít výšku `(x, y, z)`;
+  - provizorní boxy `prov_boxes`.
+- **Kritik dávky 3:** 41 → 44 → 44, FAIL. Otevřené body: kanál pod mřížkou, madlo poklopu, materiál kitu, světlo.
+
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 
 Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.

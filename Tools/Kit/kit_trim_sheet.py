@@ -82,7 +82,7 @@ class Strip:
         if col is not None:
             self.col[inside] = col
         self.metal[inside] = 1.0
-        self.rough[inside] = 0.35
+        self.rough[inside] = 0.52         # rough enough without Lumen reflections (see main)
 
 
 def perlin_like(shape, scale_px, seed):
@@ -140,19 +140,28 @@ def build():
     s.fill(GRAPHITE, 0.5, 0.0)
     band = np.mod((s.u + s.v * s.rows / PPM) / 0.04, 2.0) < 1.0
     wear = perlin_like(s.h.shape, 24, 3) > 0.82
-    s.col[band & ~wear] = ORANGE
+    # the decal library's hazard yellow (hazard_stripe, linear): the trim's orange bands on the ramp and the stair did not
+    # match the yellow decal bands on walls and portals (critic, kit batch 3)
+    s.col[band & ~wear] = np.array([0.77, 0.57, 0.06])
     s.rough[band] = 0.42
     s.edge_bevel(2)
     strips.append(s)
     # diamond tread plate
     s = Strip("antislip_tread", 80)
-    s.fill(GUNMETAL * 0.7, 0.45, 1.0)
+    # worn tread plate, rough enough for interiors without Lumen reflections (below ~0.45 bare metal has nothing to
+    # reflect there and renders black - 27. 9. 2026)
+    # (mostly painted: dark bare metal renders near black in a dim interior without sharp reflections - the lanes did)
+    # darker than the floor plates, the lugs lighter where boots wear them: at 0.85 gunmetal the lanes read as painted
+    # crossing stripes (27. 9. 2026)
+    s.fill(GUNMETAL * 0.38, 0.62, 0.3)
     a = np.mod(s.u / 0.025, 1.0) - 0.5
     b = np.mod(s.v * s.rows / PPM / 0.025, 1.0) - 0.5
     alt = (np.floor(s.u / 0.025) + np.floor(s.v * s.rows / PPM / 0.025)) % 2
     dx, dy = np.where(alt > 0, a + b, a - b), np.where(alt > 0, a - b, a + b)
     lug = (np.abs(dx) < 0.12) & (np.abs(dy) < 0.36)
     s.h += lug * 0.0012
+    s.rough[lug] = 0.54                      # the lugs worn a little smoother
+    s.col[lug] = GUNMETAL * 0.62
     s.edge_bevel(3)
     strips.append(s)
     # stitched seam: leather with a double stitch line
@@ -206,9 +215,9 @@ def build():
     strips.append(s)
     # kick plate: brushed gunmetal, bolt rows near both edges
     s = Strip("kickplate", 100)
-    s.fill(GUNMETAL * 0.85, 0.4, 1.0)
+    s.fill(GUNMETAL * 0.85, 0.58, 0.5)       # brushed, rough and half metal (see antislip_tread)
     brush = perlin_like((s.rows, W), 2, 11)
-    s.rough += (brush - 0.5) * 0.08
+    s.rough += (brush - 0.5) * 0.06
     s.h += (brush - 0.5) * 0.00005
     s.edge_bevel(3)
     s.bolts(120, 7, 0.16, col=GUNMETAL)
@@ -232,6 +241,13 @@ def build():
 def main():
     os.makedirs(OUT, exist_ok=True)
     strips = build()
+    # interiors run without Lumen reflections (author, 27. 9. 2026): metal below roughness 0.5 has nothing to reflect
+    # and renders black - no strip may have it
+    for st in strips:
+        bad = (st.metal > 0.5) & (st.rough < 0.5)
+        if bad.any():
+            raise SystemExit("trim strip %s: %d texels of metal under roughness 0.5 (black without reflections)"
+                             % (st.name, int(bad.sum())))
     h = np.zeros((H, W), np.float32)
     col = np.zeros((H, W, 3), np.float32) + GRAPHITE
     rough = np.full((H, W), 0.5, np.float32)

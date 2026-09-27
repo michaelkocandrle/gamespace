@@ -35,6 +35,7 @@ KIT_ORIGIN = unreal.Vector(0.0, -50000.0, 0.0)
 TAG = "KitShowroom"
 SPAWN_TAG = "KitShowroomSpawn"          # space.Showroom / U walks the player here (SpacePlayerController)
 ANNEX_SPAWN_TAG = "KitShowroomAnnexSpawn"   # U again from the showroom (or space.Showroom annex): the annex
+STAIRS_SPAWN_TAG = "KitShowroomStairsSpawn" # U from the annex (or space.Showroom stairs): the stair bay (batch 3)
 GRAVITY_CMS2 = 981.0
 # every kit light x1.8 (author 27. 9. 2026): under MegaLights' ray-traced shadows the lights stopped leaking through the
 # geometry and the corridor's mean fell from 0.20 to 0.13; x1.8 puts it in the middle of the SC range (kit_brightness)
@@ -90,6 +91,20 @@ SHOWROOM = {
         ((10.8, 5.4), (0, -1), ["Wall_Transition06W_A"]),
         ((10.8, 5.4), (0, 1), ["Portal_Ring03N_B"]),         # the heavy bulkhead frame at the narrow end
         ((10.8, 5.7), (0, 1), ["Ceiling_Panel12N_A", "Ceiling_Panel12N_A"]),
+        # floors (batch 3) instead of the provisional planes: plates, gratings over the service channel, hatches
+        ((0.0, 0.0), (1, 0), ["Floor_Plate12W_A", "Floor_Plate12W_B", "Floor_Grille12W_A", "Floor_Plate06W_A", "Floor_Hatch06W_A",
+                              "Floor_Plate12W_A", "Floor_Plate12W_B", "Floor_Grille06W_A", "Floor_Plate06W_B", "Floor_Plate12W_A",
+                              "Floor_Plate12W_A"]),
+        ((9.6, 0.0), (1, 0), ["Floor_Plate12W_A", "Floor_Plate12W_A"]),
+        ((10.8, 1.2), (0, 1), ["Floor_Plate12W_B", "Floor_Grille12W_A", "Floor_Plate12W_A", "Floor_Plate06W_A"]),
+        ((10.8, 5.4), (0, 1), ["Floor_Plate03N_A", "Floor_Grille12N_A", "Floor_Plate12N_B"]),
+        ((2.4, -4.8), (1, 0), ["Floor_Plate12W_A", "Floor_Hatch06W_A", "Floor_Plate06W_B", "Floor_Plate12W_A", "Floor_Plate12W_A"]),
+        ((6.0, -6.0), (0, -1), ["Floor_Grille12W_A", "Floor_Plate12W_B"]),
+        # the stair bay (batch 3): a provisional hall with a 0.8 m deck, the ship's stair and the boarding ramp up to it
+        ((16.5, -1.8), (1, 0), ["Stair_Flight08N_A"]),
+        ((14.6, 1.2), (1, 0), ["Stair_Ramp29W_A"]),
+        ((17.5, -1.8, 0.8), (1, 0), ["Floor_Plate12W_A", "Floor_Plate12W_B"]),
+        ((17.5, 1.2, 0.8), (1, 0), ["Floor_Plate12W_B", "Floor_Plate12W_A"]),
         ((2.4, -4.8), (1, 0), ["Ceiling_Panel12W_C", "Ceiling_Panel12W_A"]),
         ((6.0, -6.0), (0, -1), ["Ceiling_Panel12W_B", "Ceiling_Panel12W_A"]),   # the down-light by the crawlway
     ],
@@ -105,15 +120,22 @@ SHOWROOM = {
     ],
     # provisional until the kit has them: the junction's and the transition's ceiling, the floor (batch 3)
     "prov_ceiling": [(9.6, 12.0, -1.2, 1.2), (9.6, 12.0, 4.8, 5.4), (4.8, 7.2, -6.0, -3.6)],
-    "prov_floor": [(-0.2, 12.2, -1.35, 1.35), (9.45, 12.15, 1.2, 4.95), (10.05, 11.55, 4.8, 8.25),
-                   (2.2, 7.35, -6.15, -3.45), (4.65, 7.35, -8.55, -6.0)],
+    # the corridors have kit floors now (batch 3); the stair bay keeps a provisional floor
+    "prov_floor": [(14.0, 20.0, -3.0, 3.0)],
+    # the stair bay's provisional hall: walls, ceiling and the deck (x0, x1, y0, y1, z0, z1)
+    "prov_boxes": [(13.9, 14.0, -3.1, 3.1, 0.0, 3.4), (20.0, 20.1, -3.1, 3.1, 0.0, 3.4), (13.9, 20.1, -3.1, -3.0, 0.0, 3.4),
+                   (13.9, 20.1, 3.0, 3.1, 0.0, 3.4), (13.9, 20.1, -3.1, 3.1, 3.4, 3.5), (17.5, 20.0, -3.0, 3.0, 0.0, 0.79)],
     # ((x, y), cd[, cone]); the second junction spot lights the inner corner (its walls sat at a mean of 0.09 under
     # the one in the middle) from the open ceiling - over the slopes' tops (0.6 m in from the walls) it was shadowed
     "prov_spots": [((10.8, 0.0), 30.0), ((11.1, -0.3), 24.0, 120.0), ((10.8, 5.1), 12.0),
-                   ((6.0, -4.8), 30.0), ((6.3, -4.5), 24.0, 120.0)],
-    "gravity": (-0.3, 12.3, -9.3, 8.3),
+                   ((6.0, -4.8), 30.0), ((6.3, -4.5), 24.0, 120.0),
+                   # the stair bay's hall (provisional, 3.4 m high): 100 cd - at 40 its mean was 0.07
+                   ((15.3, -1.8), 100.0, 110.0, 3.35), ((15.3, 1.5), 100.0, 110.0, 3.35), ((18.8, -1.8), 100.0, 110.0, 3.35),
+                   ((18.8, 1.5), 100.0, 110.0, 3.35)],
+    "gravity": (-0.3, 20.3, -9.3, 8.3),
     "spawn": ((0.7, 0.0), 0.0),
     "spawn_annex": ((3.1, -4.8), 0.0),
+    "spawn_stairs": ((15.0, -1.8), 0.0),             # in front of the stair: space.Walk 1 0 3 climbs it
     # the half-open window of End24W_B looks out at a star field: a card behind the wall whose material looks the
     # stars up by the view direction (a window onto infinity, no parallax); in a ship the real outside
     "window_stars": ((-1.3, 0.0, 1.0), (3.0, 2.2)),
@@ -148,6 +170,46 @@ def import_texture(path, kind):
     return t
 
 
+TRIM_MASTER = "/Game/Kit/Materials/M_Kit_Trim"
+
+
+def build_trim_master():
+    """The kit's trim sheet master: base colour x tint, ORM (roughness, metallic), the normal map, nothing else. The
+    ship hull master (M_Ship_PBR) it used before adds hull-only layers - a triplanar micro normal, panel seams, soot -
+    and on faces lying exactly flat it rendered black whatever its parameters (anti-slip lanes, hazard strips, the
+    ceiling vent; the same faces in the layered master lit fine - 27. 9. 2026)."""
+    sm = ship_materials
+    m = sm._fresh_material(TRIM_MASTER)
+    col = sm._texture_param(m, "BaseColorMap", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR,
+                            "/Engine/EngineResources/WhiteSquareTexture", -700, 0)
+    tint = sm._node(m, unreal.MaterialExpressionMultiply, -350, 0)
+    if not MEL.connect_material_expressions(col, "RGB", tint, "A"):
+        raise RuntimeError("trim: colour -> tint")
+    sm._link(sm._vector(m, "BaseColorTint", (1.0, 1.0, 1.0), -700, 200), tint, "B")
+    sm._output(tint, unreal.MaterialProperty.MP_BASE_COLOR)
+    orm = sm._texture_param(m, "ORMMap", unreal.MaterialSamplerType.SAMPLERTYPE_MASKS,
+                            "/Engine/EngineResources/WhiteSquareTexture", -700, 350)
+    for i, (ch, prop, par) in enumerate((("G", unreal.MaterialProperty.MP_ROUGHNESS, "RoughnessScale"),
+                                         ("B", unreal.MaterialProperty.MP_METALLIC, "MetallicScale"))):
+        mul = sm._node(m, unreal.MaterialExpressionMultiply, -350, 350 + i * 120)
+        if not MEL.connect_material_expressions(orm, ch, mul, "A"):
+            raise RuntimeError("trim: ORM %s" % ch)
+        sm._link(sm._scalar(m, par, 1.0, -700, 550 + i * 100), mul, "B")
+        sm._output(mul, prop)
+    ao = sm._node(m, unreal.MaterialExpressionLinearInterpolate, -350, 600, const_a=1.0)
+    if not MEL.connect_material_expressions(orm, "R", ao, "B"):
+        raise RuntimeError("trim: ORM R")
+    sm._link(sm._scalar(m, "AOStrength", 0.6, -700, 750), ao, "Alpha")
+    sm._output(ao, unreal.MaterialProperty.MP_AMBIENT_OCCLUSION)
+    nrm = sm._texture_param(m, "NormalMap", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL,
+                            "/Engine/EngineMaterials/DefaultNormal", -700, 850)
+    if not MEL.connect_material_property(nrm, "RGB", unreal.MaterialProperty.MP_NORMAL):
+        raise RuntimeError("trim: normal")
+    MEL.recompile_material(m)
+    EAL.save_loaded_asset(m, only_if_is_dirty=False)
+    return m
+
+
 def build_materials():
     masters = ship_materials.build_masters()
     pal = RULES["palettes"][MAKER]
@@ -157,7 +219,7 @@ def build_materials():
                 "vectors": {"PrimaryColor": colour, "SecondaryColor": secondary or [c * 0.72 for c in colour],
                             "BareMetalColor": [0.5, 0.5, 0.52], "DirtColor": [0.05, 0.045, 0.04]},
                 "scalars": {"PrimaryRoughness": rough, "SecondaryRoughness": rough + 0.06, "PaintMetallic": metal,
-                            "EdgeWear": wear, "WearThreshold": 0.45, "GrungeAmount": grunge, "GrungeTileCm": 45.0, "RoughVariation": vary, "DirtAmount": dirt,
+                            "EdgeWear": wear, "WearThreshold": 0.45, "BareMetalRoughness": 0.52, "GrungeAmount": grunge, "GrungeTileCm": 45.0, "RoughVariation": vary, "DirtAmount": dirt,
                             "CavityStrength": 0.0, "AOStrength": 0.0, "PanelTone": 0.08, "PanelRough": 0.12, "MetalShare": 0.03,
                             "CarbonShare": 0.0, "LiveryAmount": 0.0, "ClearCoat": 0.0}}
 
@@ -177,7 +239,9 @@ def build_materials():
         # the frames vanished into the gaps
         # edge wear on the chamfers only (kit_geo: Col.G = 0 on bevel faces), like the Wayfarer interior (0.3-0.8);
         # "no worn edges, one roughness" read as plastic (critic round 3)
-        "Kit_Structure": layered([c * 0.8 for c in pal["Kit_Structure"]], 0.36, 0.4, grunge=0.25, vary=0.3, dirt=0.3, wear=0.5),
+        # roughness 0.46 and worn bare metal 0.52 (layered()): interiors run without Lumen reflections, and metal under ~0.45
+        # has nothing to reflect there - the tread plates rendered black (27. 9. 2026)
+        "Kit_Structure": layered([c * 0.8 for c in pal["Kit_Structure"]], 0.46, 0.4, grunge=0.25, vary=0.3, dirt=0.3, wear=0.5),
         # the provisional floor plane (batch 3 brings the floor): rough, not a mirror for the plinth lights
         "Kit_ProvFloor": layered([0.07, 0.068, 0.065], 0.7, 0.2, grunge=0.5, vary=0.3, dirt=0.3),
         # cream paint at 70 % of the palette value: at 0.7 linear the pipes read as "white glossy pipes" (critic)
@@ -201,8 +265,7 @@ def build_materials():
     # the trim sheet carries its own grooves and bolts: the PBR master's hull detail normal (30 cm tile) under the
     # grazing wash light drew grass-like streaks on the rails, its hull panel lines dark bars across them - both
     # off (critic finding "noise band over the window", batch 2; checked with space.Kit on the packaged game)
-    trim = ship_materials.build_instance("MI_Kit_%s_Trim" % MAKER, MATS, {"master": "pbr", "detail_normal_strength": 0.0,
-                                                                      "panel_strength": 0.0, "panel_seam_darken": 0.0}, masters)
+    trim = ship_materials.build_instance("MI_Kit_%s_Trim" % MAKER, MATS, {"master": "trim"}, dict(masters, trim=build_trim_master()))
     for param, fn, kind in (("BaseColorMap", "T_Kit_Trim_BC.png", "color"), ("ORMMap", "T_Kit_Trim_ORM.png", "masks"),
                             ("NormalMap", "T_Kit_Trim_N.png", "normal")):
         MEL.set_material_instance_texture_parameter_value(trim, param, import_texture(os.path.join(tex, fn), kind))
@@ -233,6 +296,14 @@ def import_parts(mis, report):
             raise import_ship.ImportFailed("%s imported at %s cm, manifest %s (%s)" % (name, import_ship.mesh_size_cm(sm), mesh["expected_size_cm"], verdict))
         sm = import_ship.ensure_fbx_slots(sm, mesh, report)
         import_ship.check_and_fix_mesh(sm, mesh, report)
+        # the FBX's normals and tangents as they are: with the build's own recompute (on in these assets) the engine
+        # smoothed every thin box across its edges (the export writes face smoothing, no sharp edges) and the flat
+        # faces of the normal-mapped trim came out black - anti-slip lanes, hazard strips, the vent (27. 9. 2026)
+        bs = unreal.EditorStaticMeshLibrary.get_lod_build_settings(sm, 0)
+        if bs.get_editor_property("recompute_normals") or bs.get_editor_property("recompute_tangents"):
+            bs.set_editor_property("recompute_normals", False)
+            bs.set_editor_property("recompute_tangents", False)
+            unreal.EditorStaticMeshLibrary.set_lod_build_settings(sm, 0, bs)
         body = sm.get_editor_property("body_setup")
         body.set_editor_property("collision_trace_flag", unreal.CollisionTraceFlag.CTF_USE_SIMPLE_AS_COMPLEX)
         for i, slot in enumerate(sm.get_editor_property("static_materials")):
@@ -446,8 +517,9 @@ def build_showroom(meshes, mis, report):
     for i, (a, d, parts) in enumerate(L["run_parts"]):
         yaw = math.degrees(math.atan2(d[1], d[0]))
         cum = 0.0
+        z = a[2] if len(a) > 2 else 0.0              # the stair bay's deck
         for m in parts:
-            place_part(actors, meshes, m, unreal.Vector((a[0] + d[0] * cum) * 100.0, (a[1] + d[1] * cum) * 100.0, 0.0), yaw,
+            place_part(actors, meshes, m, unreal.Vector((a[0] + d[0] * cum) * 100.0, (a[1] + d[1] * cum) * 100.0, z * 100.0), yaw,
                        "Kit_line%d_%s" % (i, m), counts)
             cum += meshes["SM_Kit_" + m][1]["length_m"]
     for m, pos, yaw in L["placed"]:
@@ -468,17 +540,22 @@ def build_showroom(meshes, mis, report):
                      unreal.Vector((gx1 - gx0) + 4.0, (gy1 - gy0) + 4.0, 5.0))
     # the box encloses the showroom: without this the walking player would spawn inside its collision
     box.static_mesh_component.set_collision_profile_name("NoCollision")
+    for k, (x0, x1, y0, y1, z0, z1) in enumerate(L["prov_boxes"]):
+        spawn_mesh(actors, cube, _v(((x0 + x1) / 2, (y0 + y1) / 2), (z0 + z1) / 2), 0.0, "KitProvisional_Box_%d" % k,
+                   mis["Kit_ProvFloor"], unreal.Vector(x1 - x0, y1 - y0, z1 - z0))
     for k, spot in enumerate(L["prov_spots"]):
-        light(actors, _v(spot[0], C - 0.05), "work", spot[1], 3.8, "KitProvisional_Down_%d" % k, spot=True,
-              cone=spot[2] if len(spot) > 2 else 90.0)
+        light(actors, _v(spot[0], spot[3] if len(spot) > 3 else C - 0.05), "work", spot[1], 3.8 if len(spot) < 4 else 4.5,
+              "KitProvisional_Down_%d" % k, spot=True, cone=spot[2] if len(spot) > 2 else 90.0)
     # walkable (author, 27. 9. 2026): gravity over the whole sample and the start the player is put at
     gravity = actors.spawn_actor_from_class(unreal.SpaceGravityVolume, _v(((gx0 + gx1) / 2, (gy0 + gy1) / 2), C * 0.5),
                                             unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
     gravity.set_actor_label("KitShowroom_Gravity")
     gravity.set_editor_property("gravity_cm_s2", GRAVITY_CMS2)
-    gravity.get_editor_property("volume").set_box_extent(unreal.Vector((gx1 - gx0) * 50.0, (gy1 - gy0) * 50.0, C * 50.0 + 20.0))
+    # 4 m tall: the stair bay's deck is 0.8 m up
+    gravity.get_editor_property("volume").set_box_extent(unreal.Vector((gx1 - gx0) * 50.0, (gy1 - gy0) * 50.0, 200.0))
     gravity.set_editor_property("tags", [unreal.Name(TAG)])
-    for key, label, tag in (("spawn", "KitShowroom_Spawn", SPAWN_TAG), ("spawn_annex", "KitShowroom_AnnexSpawn", ANNEX_SPAWN_TAG)):
+    for key, label, tag in (("spawn", "KitShowroom_Spawn", SPAWN_TAG), ("spawn_annex", "KitShowroom_AnnexSpawn", ANNEX_SPAWN_TAG),
+                            ("spawn_stairs", "KitShowroom_StairsSpawn", STAIRS_SPAWN_TAG)):
         (sx, sy), syaw = L[key]
         spawn = actors.spawn_actor_from_class(unreal.TargetPoint, _v((sx, sy), 0.05), unreal.Rotator(roll=0.0, pitch=0.0, yaw=syaw))
         spawn.set_actor_label(label)

@@ -113,6 +113,16 @@ spawn = [a for a in actors if unreal.Name(C["SPAWN_TAG"]) in list(a.tags)]
 check("one start of the walk (%s)" % C["SPAWN_TAG"], len(spawn) == 1)
 annex = [a for a in actors if unreal.Name(C["ANNEX_SPAWN_TAG"]) in list(a.tags)]
 check("one start of the annex (%s, U from the showroom)" % C["ANNEX_SPAWN_TAG"], len(annex) == 1)
+stairs = [a for a in actors if unreal.Name(C["STAIRS_SPAWN_TAG"]) in list(a.tags)]
+check("one start of the stair bay (%s, U from the annex)" % C["STAIRS_SPAWN_TAG"], len(stairs) == 1)
+if gravity and stairs:
+    check("the stair bay's start lies inside the gravity volume",
+          gravity[0].contains_point(stairs[0].get_actor_location() + unreal.Vector(0.0, 0.0, 100.0)))
+# batch 3: the corridors stand on kit floors, no provisional floor plane left in them
+floors = [m for m in modules if m.static_mesh_component.static_mesh.get_name().startswith("SM_Kit_Floor_")]
+prov = [a for a in room if a.get_actor_label().startswith("KitProvisional_Floor_")]
+check("kit floors in the corridors (%d modules), one provisional floor (the stair bay)" % len(floors),
+      len(floors) >= 20 and len(prov) == 1, "%d provisional" % len(prov))
 if gravity and spawn:
     start = spawn[0].get_actor_location() + unreal.Vector(0.0, 0.0, 100.0)
     check("the start and every part lie inside the gravity volume",

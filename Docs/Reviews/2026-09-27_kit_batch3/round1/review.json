@@ -1,0 +1,98 @@
+{
+ "topic": "kit_batch3",
+ "date": "2026-09-27",
+ "goal": "Interiérový kit lodi, dávka 3: podlahové desky (A s protiskluzovými pásy, B se středovou čárou a výstražnými okraji), mřížka nad servisním kanálem s potrubím, poklop v podlaze, lodní schodiště s osvětlenými hranami schodů a zábradlím a vnitřní plocha nástupní rampy. Složeno se stěnami, rámy a stropem z dávek 1–2. Pohled z první osoby (oko 1,65 m).",
+ "style": "Star Citizen: průmyslový interiér lodi, podlaha z tmavých desek s protiskluzovými plochami a spárami, mřížky nad kanály se službami, výstražné značení jen u hran, kde se vystupuje, osvětlené hrany schodů; teplý grafit, světlejší lakovaná konstrukce, oranžová signální barva výrobce; úroveň zpracování SC.",
+ "checklist": "interior",
+ "out": "Docs/Reviews/2026-09-27_kit_batch3/round1",
+ "notes": [
+  "Text vpravo nahoře (FPS) je měřicí overlay, ne součást výsledku.",
+  "Rozměry jsou pevné z pravidel kitu: chodba W 2,4 m, chodba N 1,2 m, schod 20 cm vysoký a 25 cm hluboký, plošina 0,8 m, rampa 15°.",
+  "Hodnotí se hlavně díly dávky 3 (podlahy, mřížka, poklop, schodiště, rampa). Stěny, rámy a strop jsou z dávek 1–2 (schválené).",
+  "Provizorní je hala u schodiště a rampy: hladké tmavé stěny, strop, podlaha a blok plošiny (přijdou s místnostmi lodi).",
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt."
+ ],
+ "pairs": [
+  {
+   "title": "Chodba z kitu: podlaha z desek, mřížek a poklopů, pohled podél",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
+   "ref_label": "SC chodba (Drake)",
+   "ours": "Saved/Shots/20260927_170103_kit_showroom3/03_b_corridor_floor.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Mřížka nad servisním kanálem zblízka",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC podlaha s mřížkou",
+   "ours": "Saved/Shots/20260927_170103_kit_showroom3/04_c_grille_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Poklop v podlaze zblízka",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC podlahové desky",
+   "ours": "Saved/Shots/20260927_170103_kit_showroom3/05_d_hatch_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Deska B: středová čára, výstražné okraje, protiskluzové pásy",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021447.png",
+   "ref_label": "SC podlaha se značením",
+   "ours": "Saved/Shots/20260927_170103_kit_showroom3/06_e_plate_b_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Podlaha úzké chodby N",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
+   "ref_label": "SC úzká chodba",
+   "ours": "Saved/Shots/20260927_170103_kit_showroom3/07_f_n_stub_floor.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Lodní schodiště zepředu",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021225.png",
+   "ref_label": "SC schody v lodi",
+   "ours": "Saved/Shots/20260927_170103_kit_showroom3/09_h_stair_front.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Lodní schodiště z boku",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC interiér se žebříkem",
+   "ours": "Saved/Shots/20260927_170103_kit_showroom3/10_i_stair_side.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Nástupní rampa zespodu",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC podlaha s výstražnými okraji",
+   "ours": "Saved/Shots/20260927_170103_kit_showroom3/11_j_ramp_bottom.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Hala se schodištěm a rampou, přehled",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021456.png",
+   "ref_label": "SC místnost",
+   "ours": "Saved/Shots/20260927_170103_kit_showroom3/08_g_bay_overall.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

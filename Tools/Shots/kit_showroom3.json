@@ -1,0 +1,282 @@
+{
+ "_comment": "Kit batch 3 (27. 9. 2026): the corridors on kit floors (plates, gratings over the service channel, hatches) and the stair bay (ship's stair and boarding ramp up to a provisional 0.8 m deck). a: the character walks up the stair (log: WALK end at ...). Interior lighting as walked (space.InteriorLighting 1). Run: Tools/Shots.ps1 -Preset kit_showroom3 -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 6.0,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none",
+    "space.Showroom stairs"
+   ]
+  },
+  {
+   "name": "a_walk_up_stair",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 4.0,
+   "console": [
+    "space.Walk 1 0 3"
+   ]
+  },
+  {
+   "name": "a2_walked_out",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 1.0,
+   "console": [
+    "space.Showroom stairs",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "name": "b_corridor_floor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    6.0,
+    -500.0,
+    0.0
+   ],
+   "fov": 75
+  },
+  {
+   "name": "c_grille_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    2.0,
+    -500.55,
+    1.45
+   ],
+   "camera_look_at": [
+    3.0,
+    -500.0,
+    0.0
+   ],
+   "fov": 60
+  },
+  {
+   "name": "d_hatch_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.8,
+    -500.6,
+    1.5
+   ],
+   "camera_look_at": [
+    4.5,
+    -500.0,
+    0.0
+   ],
+   "fov": 60
+  },
+  {
+   "name": "e_plate_b_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    5.6,
+    -500.8,
+    1.5
+   ],
+   "camera_look_at": [
+    6.6,
+    -500.2,
+    0.0
+   ],
+   "fov": 60
+  },
+  {
+   "name": "f_n_stub_floor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    10.8,
+    -495.2,
+    1.6
+   ],
+   "camera_look_at": [
+    10.8,
+    -492.2,
+    0.0
+   ],
+   "fov": 70
+  },
+  {
+   "name": "g_bay_overall",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    14.3,
+    -502.6,
+    2.2
+   ],
+   "camera_look_at": [
+    18.5,
+    -499.5,
+    0.6
+   ],
+   "fov": 80
+  },
+  {
+   "name": "h_stair_front",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    15.1,
+    -501.8,
+    1.55
+   ],
+   "camera_look_at": [
+    17.0,
+    -501.8,
+    0.6
+   ],
+   "fov": 70
+  },
+  {
+   "name": "i_stair_side",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    16.9,
+    -499.9,
+    1.4
+   ],
+   "camera_look_at": [
+    17.0,
+    -501.9,
+    0.5
+   ],
+   "fov": 70
+  },
+  {
+   "name": "j_ramp_bottom",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    14.2,
+    -498.8,
+    1.6
+   ],
+   "camera_look_at": [
+    17.5,
+    -498.8,
+    0.6
+   ],
+   "fov": 75
+  },
+  {
+   "name": "k_ramp_from_deck",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    19.2,
+    -498.8,
+    2.45
+   ],
+   "camera_look_at": [
+    15.0,
+    -498.8,
+    0.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "l_stair_from_deck",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    19.0,
+    -501.8,
+    2.45
+   ],
+   "camera_look_at": [
+    16.3,
+    -501.8,
+    0.2
+   ],
+   "fov": 75
+  },
+  {
+   "name": "m_perf_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "n_perf_bay",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    14.3,
+    -502.6,
+    2.2
+   ],
+   "camera_look_at": [
+    18.5,
+    -499.5,
+    0.6
+   ],
+   "fov": 80
+  },
+  {
+   "name": "z_reset",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.5,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "space.InteriorLighting 0"
+   ]
+  }
+ ]
+}

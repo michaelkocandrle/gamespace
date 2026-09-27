@@ -1624,6 +1624,16 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
           - v průlezu je pás u podlahy; zadní deska zúžení a pravý horní panel koncových stěn zakrývaly otvor průlezu
             (opraveno);
           - rámy zůstávají.
+      - krok 4, dávka 3 (podlahové desky A/B, mřížka nad kanálem, poklop, lodní schodiště, nástupní rampa; 14 dílů):
+        `Tools/Kit/kit_batch3.py`, `kit_build.py -- batch3`, katalog `Docs/Kit/catalog_batch3.png`. Chodby ukázky
+        a přístavby stojí na podlahách z kitu. Hala se schodištěm a rampou je třetí zastávka U (`space.Showroom stairs`),
+        preset `kit_showroom3`, recenze `Docs/Reviews/2026-09-27_kit_batch3.md`.
+        - Kritik: 3 kola + ověření, 41 → 44 → 44 (poslední 6/5/5/4/4/6/7/7, FAIL); ověření: čáry okrajů a barva pruhů
+          vyřešeny, kanál pod mřížkou a poklop částečně.
+        - Chyba: trim kitu na masteru trupu `M_Ship_PBR` byl na přesně vodorovných plochách černý (i vyústění vzduchu
+          z dávky 2). Nový jednoduchý master `M_Kit_Trim` (WORKFLOW dd). Kovové pruhy trimu bez odrazů černé, generátor
+          teď kov pod drsností 0,5 odmítne (de).
+        - Výkon: chodba 16,6 ms na snímek (60 FPS), hala 13,8 ms.
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

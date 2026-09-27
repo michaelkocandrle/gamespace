@@ -1,0 +1,54 @@
+{
+ "topic": "kit_batch3",
+ "date": "2026-09-27",
+ "goal": "Interiérový kit lodi, dávka 3: podlahové desky (A s protiskluzovými pásy, B se středovou čárou a čarami okrajů chodníku), mřížka nad servisním kanálem s potrubím, poklop v podlaze, lodní schodiště s osvětlenými hranami schodů a zábradlím a vnitřní plocha nástupní rampy. Složeno se stěnami, rámy a stropem z dávek 1–2. Pohled z první osoby (oko 1,65 m).",
+ "style": "Star Citizen: průmyslový interiér lodi, podlaha z tmavých desek s protiskluzovými plochami a spárami, mřížky nad kanály se službami, výstražné značení jen u hran, kde se vystupuje, osvětlené hrany schodů; teplý grafit, světlejší lakovaná konstrukce, oranžová signální barva výrobce; úroveň zpracování SC.",
+ "checklist": "interior",
+ "out": "Docs/Reviews/2026-09-27_kit_batch3/verify",
+ "notes": [
+  "Text vpravo nahoře (FPS) je měřicí overlay, ne součást výsledku.",
+  "Rozměry jsou pevné z pravidel kitu: chodba W 2,4 m, chodba N 1,2 m, schod 20 cm vysoký a 25 cm hluboký, plošina 0,8 m, rampa 15°.",
+  "Hodnotí se hlavně díly dávky 3 (podlahy, mřížka, poklop, schodiště, rampa). Stěny, rámy a strop jsou z dávek 1–2 (schválené).",
+  "Provizorní je hala u schodiště a rampy: hladké tmavé stěny, strop, podlaha a blok plošiny (přijdou s místnostmi lodi).",
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt.",
+  "Ověřovací kolo: hodnotí se jen tyto body – obsah a světlo kanálu pod mřížkou (list mřížky), kování a madlo poklopu (list poklopu), čitelnost čar okrajů chodníku na desce B (list desky B) a sjednocená barva výstražných pruhů (list rampy). Ostatní se nehodnotí."
+ ],
+ "pairs": [
+  {
+   "title": "Mřížka nad servisním kanálem zblízka",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC podlaha s mřížkou",
+   "ours": "Saved/Shots/20260927_175025_kit_showroom3/04_c_grille_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Poklop v podlaze zblízka",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC podlahové desky",
+   "ours": "Saved/Shots/20260927_175025_kit_showroom3/05_d_hatch_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Deska B: středová čára, čáry okrajů chodníku, protiskluzové pásy",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021447.png",
+   "ref_label": "SC podlaha se značením",
+   "ours": "Saved/Shots/20260927_175025_kit_showroom3/06_e_plate_b_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Nástupní rampa zespodu",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC podlaha s výstražnými okraji",
+   "ours": "Saved/Shots/20260927_175025_kit_showroom3/11_j_ramp_bottom.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

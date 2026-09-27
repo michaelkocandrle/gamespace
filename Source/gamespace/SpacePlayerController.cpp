@@ -339,6 +339,7 @@ namespace
 	const FName InteriorSpawnTag(TEXT("SpaceInteriorSpawn"));
 	const FName ShowroomSpawnTag(TEXT("KitShowroomSpawn"));
 	const FName ShowroomAnnexSpawnTag(TEXT("KitShowroomAnnexSpawn"));
+	const FName ShowroomStairsSpawnTag(TEXT("KitShowroomStairsSpawn"));
 
 	// MegaLights variant C (author, 27. 9. 2026): interiors are lit through MegaLights with the fixtures' ray-traced
 	// shadows (the kit showroom's lights cast shadows in the level); the view from the ship and the planet keep
@@ -444,21 +445,32 @@ void ASpacePlayerController::HandleShowroomKey(const FInputActionValue& /*Value*
 {
 	if (!IsMenuOpen() && !IsTitleScreen())
 	{
-		// U walks a round: the showroom, then its annex (the catalogue-only kit parts), then back where the
-		// player came from (author, 27. 9. 2026)
-		const bool bInShowroom = bWalkingInterior && WalkingSpawnTag == ShowroomSpawnTag;
-		if (bInShowroom && GetWorld() && FindInteriorSpawn(GetWorld(), ShowroomAnnexSpawnTag))
+		// U walks a round: the showroom, its annex (the catalogue-only kit parts), the stair bay (batch 3), then
+		// back where the player came from (author, 27. 9. 2026)
+		static const FName Round[] = {ShowroomSpawnTag, ShowroomAnnexSpawnTag, ShowroomStairsSpawnTag};
+		int32 Stop = INDEX_NONE;
+		for (int32 i = 0; bWalkingInterior && i < UE_ARRAY_COUNT(Round); ++i)
 		{
-			ToggleInteriorAt(ShowroomAnnexSpawnTag);
+			if (WalkingSpawnTag == Round[i])
+			{
+				Stop = i;
+			}
 		}
-		else if (bWalkingInterior && WalkingSpawnTag == ShowroomAnnexSpawnTag)
-		{
-			ToggleInteriorAt(ShowroomAnnexSpawnTag);
-		}
-		else
+		if (Stop == INDEX_NONE)
 		{
 			ToggleInteriorAt(ShowroomSpawnTag);
+			return;
 		}
+		// the next stop the level has, or back when this was the last one
+		for (int32 Next = Stop + 1; Next < UE_ARRAY_COUNT(Round); ++Next)
+		{
+			if (GetWorld() && FindInteriorSpawn(GetWorld(), Round[Next]))
+			{
+				ToggleInteriorAt(Round[Next]);
+				return;
+			}
+		}
+		ToggleInteriorAt(Round[Stop]);
 	}
 }
 

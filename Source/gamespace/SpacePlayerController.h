@@ -74,8 +74,8 @@ public:
 	/**
 	 * The same for any walkable place: onto the actor tagged SpawnTag, or back when already walking there. Walking
 	 * one interior and asked for another, the player is taken across and the way back stays the original ship.
-	 * The interior kit showroom in TestSpace is KitShowroomSpawn, its annex KitShowroomAnnexSpawn: U in the game walks
-	 * showroom -> annex -> back, space.Showroom [annex] in the console.
+	 * The interior kit showroom in TestSpace is KitShowroomSpawn, its annex KitShowroomAnnexSpawn, the stair bay
+	 * KitShowroomStairsSpawn: U in the game walks showroom -> annex -> stair bay -> back, space.Showroom [annex|stairs].
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Interior")
 	bool ToggleInteriorAt(FName SpawnTag);
