@@ -1,0 +1,260 @@
+"""Builds a batch of interior kit parts in Blender (step 4 of the kit brief, 26. 9. 2026).
+
+    blender -b --factory-startup --python Tools/Kit/kit_build.py -- walls [--sections W,N] [--no-render]
+
+For each part: parametric geometry (kit_walls.py), mesh decals from the decal library laid onto it
+(hs_decals.Placer, slots Kit_Decal / Kit_DecalAO / Kit_DecalPaint), UCX collision and SOCKET_ empties. Output:
+  ArtSource/Kit/Kit_Walls.blend                 every part at the origin, one collection each
+  ArtSource/Kit/Export/SM_Kit_*.fbx              one per part (metres -> centimetres, +X stays +X, +Y -> -Y)
+  ArtSource/Kit/Export/kit_manifest.json         parts: category, family, size, variant, tris vs budget,
+                                                 materials, sockets (UE cm) with light parameters, collision
+  Saved/KitCatalog/<part>_front.png / _34.png    neutral studio renders for the catalog sheet (kit_catalog.py)
+Prints KITBUILD {...}.
+"""
+import json
+import math
+import os
+import sys
+
+import bpy
+from mathutils import Vector
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "Blender"))
+import kit_geo  # noqa: E402
+import kit_walls  # noqa: E402
+
+ROOT = kit_geo.ROOT
+EXPORT = os.path.join(ROOT, "ArtSource", "Kit", "Export")
+RENDERS = os.path.join(ROOT, "Saved", "KitCatalog")
+FBX = dict(use_selection=True, object_types={"MESH", "EMPTY"}, use_mesh_modifiers=True, mesh_smooth_type="FACE",
+           use_tspace=True, use_triangles=True, use_custom_props=False, apply_unit_scale=True,
+           apply_scale_options="FBX_SCALE_NONE", global_scale=1.0, axis_forward="-Z", axis_up="Y",
+           bake_space_transform=False, add_leaf_bones=False, bake_anim=False, path_mode="AUTO", embed_textures=False)
+
+
+def decals(ob, part):
+    """Lays the part's decal shots onto it; returns the decal object (joined into ob by the caller)."""
+    import hs_decals
+    index = json.load(open(os.path.join(ROOT, "ArtSource", "Ships", "Shared", "Decals", "decal_library_index.json"), encoding="utf-8"))
+    pl = hs_decals.Placer(ob, {"offset_m": 0.0012, "grid_m": 0.06}, index, (0.0, 0.0, 0.0), (99.0, 99.0))
+    placed, failed = 0, []
+    for it in part.decal_items:
+        if it["item"] not in index["decals"]:
+            failed.append((it["item"], "not in index"))
+            continue
+        o = Vector(it["from"])
+        d = (Vector(it["to"]) - o).normalized()
+        hit, n = pl.cast(o, d)
+        if hit is None:
+            failed.append((it["item"], "miss"))
+            continue
+        pl.reach = 0.02 if it.get("label") else 0.06
+        fr = it.get("frame")
+        fr = (Vector(fr[0]), Vector(fr[1])) if fr else None
+        if pl.place_at(it["item"], hit, n, it.get("rot", 0.0), it.get("scale", 1.0), "kit", not it.get("label"), fr):
+            placed += 1
+        else:
+            failed.append((it["item"], "edge/overlap"))
+    if not pl.bm.faces:
+        pl.bm.free()
+        return None, placed, failed
+    me = bpy.data.meshes.new(ob.name + "_decals")
+    pl.bm.to_mesh(me)
+    pl.bm.free()
+    for slot in ("Kit_Decal", "Kit_DecalAO", "Kit_DecalPaint"):
+        me.materials.append(bpy.data.materials[slot])
+    dob = bpy.data.objects.new(me.name, me)
+    ob.users_collection[0].objects.link(dob)
+    return dob, placed, failed
+
+
+def join(ob, other):
+    """Appends other's mesh (same frame) to ob's, mapping its material slots onto ob's (no operators: the
+    background context has no reliable selection)."""
+    import bmesh
+    me = ob.data
+    names = [m.name for m in me.materials]
+    remap = []
+    for m in other.data.materials:
+        if m.name not in names:
+            me.materials.append(m)
+            names.append(m.name)
+        remap.append(names.index(m.name))
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    n0 = len(bm.faces)
+    bm.from_mesh(other.data)
+    bm.faces.ensure_lookup_table()
+    for f in bm.faces[n0:]:
+        f.material_index = remap[f.material_index] if f.material_index < len(remap) else 0
+    bm.to_mesh(me)
+    bm.free()
+    bpy.data.objects.remove(other)
+
+
+def drop_unused_slots(ob):
+    """The FBX exporter leaves out material slots no face uses (a module without structural decals) - so does
+    the manifest, or the importer's slot check fails."""
+    me = ob.data
+    used = sorted({p.material_index for p in me.polygons})
+    mats = [me.materials[i] for i in used]
+    remap = {old: new for new, old in enumerate(used)}
+    idx = [remap[p.material_index] for p in me.polygons]
+    me.materials.clear()
+    for m in mats:
+        me.materials.append(m)
+    me.polygons.foreach_set("material_index", idx)
+    me.update()
+
+
+def tris(ob, slots=None):
+    me = ob.data
+    names = [m.name for m in me.materials]
+    return sum(len(p.vertices) - 2 for p in me.polygons if slots is None or names[p.material_index] in slots)
+
+
+def export(ob):
+    bpy.context.view_layer.update()
+    for o in bpy.context.scene.objects:
+        if o is not None:
+            o.select_set(False)
+    ob.select_set(True)
+    for c in ob.children:
+        c.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    path = os.path.join(EXPORT, ob.name + ".fbx")
+    bpy.ops.export_scene.fbx(filepath=path, **FBX)
+    return path
+
+
+def render_setup():
+    sc = bpy.context.scene
+    engines = [e.identifier for e in bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items]
+    sc.render.engine = "BLENDER_EEVEE_NEXT" if "BLENDER_EEVEE_NEXT" in engines else "BLENDER_EEVEE"
+    sc.render.resolution_x, sc.render.resolution_y = 900, 900
+    sc.view_settings.view_transform = "AgX"
+    sc.view_settings.exposure = 0.6
+    w = bpy.data.worlds.new("kit_studio")
+    sc.world = w
+    w.use_nodes = True
+    bg = next(n for n in w.node_tree.nodes if n.type == "BACKGROUND")
+    bg.inputs[0].default_value = (0.32, 0.33, 0.35, 1.0)
+    bg.inputs[1].default_value = 0.6
+    # key, fill, rim: the same neutral light for every part
+    for name, rot, energy in (("key", (math.radians(50), 0, math.radians(35)), 3.5), ("fill", (math.radians(70), 0, math.radians(-60)), 1.2),
+                              ("rim", (math.radians(110), 0, math.radians(160)), 1.5)):
+        ld = bpy.data.lights.new(name, "SUN")
+        ld.energy = energy
+        lo = bpy.data.objects.new(name, ld)
+        lo.rotation_euler = rot
+        sc.collection.objects.link(lo)
+    cd = bpy.data.cameras.new("cat_cam")
+    cd.lens = 60
+    cam = bpy.data.objects.new("cat_cam", cd)
+    sc.collection.objects.link(cam)
+    sc.camera = cam
+    return cam
+
+
+def render(ob, cam):
+    os.makedirs(RENDERS, exist_ok=True)
+    for o in bpy.context.scene.objects:
+        if o.type == "MESH":
+            o.hide_render = o is not ob
+    bb = [ob.matrix_world @ Vector(c) for c in ob.bound_box]
+    lo = Vector((min(v.x for v in bb), min(v.y for v in bb), min(v.z for v in bb)))
+    hi = Vector((max(v.x for v in bb), max(v.y for v in bb), max(v.z for v in bb)))
+    c = (lo + hi) / 2
+    r = (hi - lo).length / 2
+    dist = r / math.tan(math.radians(17)) * 1.05
+    out = {}
+    for tag, d in (("front", Vector((1, 0, 0.12))), ("34", Vector((1, -0.9, 0.35)))):
+        d.normalize()
+        cam.location = c + d * dist
+        cam.rotation_euler = (-d).to_track_quat("-Z", "Y").to_euler()
+        path = os.path.join(RENDERS, "%s_%s.png" % (ob.name, tag))
+        bpy.context.scene.render.filepath = path
+        bpy.ops.render.render(write_still=True)
+        out[tag] = path
+    return out
+
+
+def main():
+    args = sys.argv[sys.argv.index("--") + 1:]
+    batch = args[0]
+    sections = ["W"]
+    if "--sections" in args:
+        sections = args[args.index("--sections") + 1].split(",")
+    do_render = "--no-render" not in args
+    for o in list(bpy.data.objects):
+        bpy.data.objects.remove(o)
+    mats = kit_geo.materials()
+    os.makedirs(EXPORT, exist_ok=True)
+    budget = kit_geo.RULES["tri_budget"]
+    manifest_path = os.path.join(EXPORT, "kit_manifest.json")
+    manifest = json.load(open(manifest_path, encoding="utf-8")) if os.path.exists(manifest_path) else {"parts": {}}
+    cam = render_setup() if do_render else None
+    report = {"parts": 0, "over_budget": [], "decals_failed": {}}
+    if batch != "walls":
+        raise SystemExit("unknown batch %s" % batch)
+    seed = 11
+    for sec in sections:
+        for kind, L, var in kit_walls.BATCH1:
+            if kind == "Locker" and sec == "N" and L > 0.9:
+                continue
+            seed += 7
+            part = kit_walls.build_part(kind, L, sec, var, seed)
+            coll = bpy.data.collections.new(part.name)
+            bpy.context.scene.collection.children.link(coll)
+            ob = part.build(coll, mats)
+            dob, placed, failed = decals(ob, part)
+            if dob is not None:
+                join(ob, dob)
+            drop_unused_slots(ob)
+            if failed:
+                report["decals_failed"][ob.name] = failed
+            geo = tris(ob, [r for r in kit_geo.ROLES])
+            limit = int(budget.get("Wall_base", 0) + budget["Wall_per_m"] * L)
+            if geo > limit:
+                report["over_budget"].append((ob.name, geo, limit))
+            bad = [c.name for c in ob.children if c.name.startswith("SOCKET_") and "." in c.name]
+            if bad:
+                raise SystemExit("%s: socket names clash with an earlier part: %s" % (ob.name, bad))
+            path = export(ob)
+            sockets = {}
+            for c in ob.children:
+                if c.name.startswith("SOCKET_"):
+                    t = c.matrix_world.translation
+                    sockets[c.name] = {"location_ue_cm": [round(t.x * 100, 2), round(-t.y * 100, 2), round(t.z * 100, 2)],
+                                       "params": json.loads(c.get("params", "{}"))}
+            # object names are global in a .blend: rename this part's sockets now it is exported, or the next
+            # part's SOCKET_Light_Cove_0 becomes SOCKET_Light_Cove_0.001 (and Unreal keeps the suffix)
+            for c in ob.children:
+                if c.name.startswith("SOCKET_"):
+                    c.name = "%s__%s" % (c.name, ob.name)
+            dims = [round(d, 3) for d in ob.dimensions]
+            manifest["parts"][ob.name] = {
+                "category": "Wall", "family": "Wall_" + kind, "section": sec, "length_m": L, "variant": var, "batch": 1,
+                "fbx": os.path.relpath(path, ROOT).replace("\\", "/"), "dims_m": dims,
+                "expected_size_cm": [round(ob.dimensions.x * 100, 1), round(ob.dimensions.y * 100, 1), round(ob.dimensions.z * 100, 1)],
+                "tris": geo, "tris_decals": tris(ob) - geo, "tri_budget": limit,
+                "materials": [m.name for m in ob.data.materials], "sockets": sockets,
+                "collision_hulls": sum(1 for c in ob.children if c.name.startswith("UCX_")),
+                "decals": placed, "status": "built"}
+            if do_render and sec == sections[0]:
+                manifest["parts"][ob.name]["renders"] = {k: os.path.relpath(v, ROOT).replace("\\", "/") for k, v in render(ob, cam).items()}
+            # every part stays at the origin in its collection; hide it so the next one renders alone
+            coll.hide_render = True
+            report["parts"] += 1
+    json.dump(manifest, open(manifest_path, "w", encoding="utf-8"), indent=1)
+    out = os.path.join(ROOT, "ArtSource", "Kit", "Kit_Walls.blend")
+    for c in bpy.data.collections:
+        c.hide_render = False
+    bpy.ops.wm.save_as_mainfile(filepath=out)
+    print("KITBUILD " + json.dumps(report))
+
+
+if __name__ == "__main__":
+    main()

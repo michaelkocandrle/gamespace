@@ -1,0 +1,204 @@
+{
+ "_comment": "Interior kit showroom (batch 1: wall modules), TestSpace at (0, -500, 0) m: a section-W corridor 8.4 m long along +X, walls at y -498.8 (left) and -501.2 (right). Floor, ceiling, end walls and down-lights are provisional. Auto exposure as in the game. Run: Tools/Shots.ps1 -Preset kit_showroom -Package -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "name": "a_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80
+  },
+  {
+   "name": "b_corridor_back",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    7.8,
+    -500.2,
+    1.65
+   ],
+   "camera_look_at": [
+    0.5,
+    -499.9,
+    1.1
+   ],
+   "fov": 80
+  },
+  {
+   "name": "c_left_34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.6,
+    -500.9,
+    1.55
+   ],
+   "camera_look_at": [
+    1.6,
+    -498.9,
+    1.0
+   ],
+   "fov": 70
+  },
+  {
+   "name": "d_right_34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    1.0,
+    -499.1,
+    1.55
+   ],
+   "camera_look_at": [
+    3.5,
+    -501.2,
+    1.0
+   ],
+   "fov": 70
+  },
+  {
+   "name": "e_display_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    1.5,
+    -499.8,
+    1.25
+   ],
+   "camera_look_at": [
+    1.5,
+    -498.8,
+    1.0
+   ],
+   "fov": 55
+  },
+  {
+   "name": "f_pipes_hatch",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.2,
+    -500.0,
+    0.95
+   ],
+   "camera_look_at": [
+    3.9,
+    -498.8,
+    0.55
+   ],
+   "fov": 60
+  },
+  {
+   "name": "g_cove_up",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    4.0,
+    -500.6,
+    1.4
+   ],
+   "camera_look_at": [
+    4.5,
+    -498.9,
+    2.25
+   ],
+   "fov": 70
+  },
+  {
+   "name": "h_plinth",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    5.5,
+    -500.3,
+    0.55
+   ],
+   "camera_look_at": [
+    6.6,
+    -498.8,
+    0.08
+   ],
+   "fov": 65
+  },
+  {
+   "name": "i_perf_gpu",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "j_reset",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.5,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "stat none"
+   ]
+  }
+ ]
+}

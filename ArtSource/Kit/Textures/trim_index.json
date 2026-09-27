@@ -1,0 +1,165 @@
+{
+ "size_px": [
+  4096,
+  2048
+ ],
+ "px_per_m": 1024,
+ "strips": {
+  "rail_bolted": {
+   "rows": [
+    4,
+    55
+   ],
+   "height_m": 0.05,
+   "v_blender": [
+    0.973145,
+    0.998047
+   ],
+   "u_repeat_m": 4.0
+  },
+  "flange_bolted": {
+   "rows": [
+    59,
+    90
+   ],
+   "height_m": 0.03,
+   "v_blender": [
+    0.956055,
+    0.971191
+   ],
+   "u_repeat_m": 4.0
+  },
+  "rubber_ribbed": {
+   "rows": [
+    94,
+    155
+   ],
+   "height_m": 0.06,
+   "v_blender": [
+    0.924316,
+    0.954102
+   ],
+   "u_repeat_m": 4.0
+  },
+  "perforated": {
+   "rows": [
+    159,
+    261
+   ],
+   "height_m": 0.1,
+   "v_blender": [
+    0.872559,
+    0.922363
+   ],
+   "u_repeat_m": 4.0
+  },
+  "hazard": {
+   "rows": [
+    265,
+    326
+   ],
+   "height_m": 0.06,
+   "v_blender": [
+    0.84082,
+    0.870605
+   ],
+   "u_repeat_m": 4.0
+  },
+  "antislip_tread": {
+   "rows": [
+    330,
+    412
+   ],
+   "height_m": 0.08,
+   "v_blender": [
+    0.798828,
+    0.838867
+   ],
+   "u_repeat_m": 4.0
+  },
+  "seam_stitched": {
+   "rows": [
+    416,
+    457
+   ],
+   "height_m": 0.04,
+   "v_blender": [
+    0.776855,
+    0.796875
+   ],
+   "u_repeat_m": 4.0
+  },
+  "label_band": {
+   "rows": [
+    461,
+    492
+   ],
+   "height_m": 0.03,
+   "v_blender": [
+    0.759766,
+    0.774902
+   ],
+   "u_repeat_m": 4.0
+  },
+  "edge_groove": {
+   "rows": [
+    496,
+    537
+   ],
+   "height_m": 0.04,
+   "v_blender": [
+    0.737793,
+    0.757812
+   ],
+   "u_repeat_m": 4.0
+  },
+  "vent_slots": {
+   "rows": [
+    541,
+    623
+   ],
+   "height_m": 0.08,
+   "v_blender": [
+    0.695801,
+    0.73584
+   ],
+   "u_repeat_m": 4.0
+  },
+  "kickplate": {
+   "rows": [
+    627,
+    729
+   ],
+   "height_m": 0.1,
+   "v_blender": [
+    0.644043,
+    0.693848
+   ],
+   "u_repeat_m": 4.0
+  },
+  "rib_face": {
+   "rows": [
+    733,
+    764
+   ],
+   "height_m": 0.03,
+   "v_blender": [
+    0.626953,
+    0.64209
+   ],
+   "u_repeat_m": 4.0
+  },
+  "gasket": {
+   "rows": [
+    768,
+    788
+   ],
+   "height_m": 0.02,
+   "v_blender": [
+    0.615234,
+    0.625
+   ],
+   "u_repeat_m": 4.0
+  }
+ }
+}

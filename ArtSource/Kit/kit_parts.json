@@ -14,27 +14,27 @@
   "Wall_Plain": {"category": "Wall", "part": "Plain", "sizes": [0.3, 0.6, 1.2], "sections": ["N", "W", "T"], "variants": {
     "A": "kick panel 0.1-0.5 + main panel to the break, slope panel; data label, bolt rows",
     "B": "main panel split into two (vertical shadow gap at mid-length), a raised doubler plate on one half",
-    "C": "main panel with a horizontal groove band and a service stencil; slope panel with a vent slot row"}, "status": "planned"},
+    "C": "main panel with a horizontal groove band and a service stencil; slope panel with a vent slot row"}, "status": "built W (batch 1), awaiting approval"},
   "Wall_Grille": {"category": "Wall", "part": "Grille", "sizes": [0.6, 1.2], "sections": ["N", "W", "T"], "variants": {
     "A": "louvred grille in the lower main panel over a dark plenum",
     "B": "tall narrow grille at one end, full vertical height",
-    "C": "return-air grille in the slope panel"}, "status": "planned"},
+    "C": "return-air grille in the slope panel"}, "status": "built W (batch 1), awaiting approval"},
   "Wall_Locker": {"category": "Wall", "part": "Locker", "sizes": [0.6, 1.2], "sections": ["W", "T"], "sections_N_depth_max": 0.15, "variants": {
-    "A": "tall locker 0.5 x 1.1, proud 0.2, orange handle, hinges, label",
-    "B": "two stacked lockers 0.5 x 0.5",
-    "C": "low wide stowage box 1.0 x 0.4"}, "status": "planned"},
+    "A": "tall locker 0.46 x 1.1, proud 0.2, recessed door in a frame ring, U handle, hinges, vent slots, label",
+    "B": "two stacked lockers 0.46 x 0.47: lever latch above, U handle and key lock below",
+    "C": "low wide stowage box 1.0 x 0.4 with over-centre latches and side handles"}, "status": "built W (batch 1), awaiting approval"},
   "Wall_Pipes": {"category": "Wall", "part": "Pipes", "sizes": [1.2], "sections": ["N", "W", "T"], "variants": {
-    "A": "two pipes 60 mm low on stand-off brackets, flow bands",
+    "A": "two pipes 52 mm under the rail on stand-off brackets, a gate valve with a hand wheel",
     "B": "three pipes high under the break with clamps",
-    "C": "one 100 mm pipe and a cable bundle in a tray"}, "status": "planned", "_note": "pipes end flush on the module ends at grid heights, so neighbours continue them"},
+    "C": "one 90 mm main sunk in a framed wall channel at waist height, clamps, a perforated cover"}, "status": "built W (batch 1), awaiting approval", "_note": "each run leaves the wall and returns into it 0.2 m inside the module (bend + wall sleeve); runs across modules are the Pipe_Run bridges of batch 7. Low pipes in the walking zone and flush module-end flanges were rejected by the critic (27. 9. 2026)"},
   "Wall_Hatch": {"category": "Wall", "part": "Hatch", "sizes": [0.6, 1.2], "sections": ["N", "W", "T"], "variants": {
-    "A": "square access hatch 0.45, four quarter-turn fasteners, pull recess",
+    "A": "square access hatch 0.38 x 0.42 in a raised frame with a gasket, four quarter-turn fasteners, hinges, pull recess",
     "B": "tall hatch 0.35 x 0.9 with an orange T-handle",
-    "C": "double hatch with a system stencil"}, "status": "planned"},
+    "C": "double hatch with a system stencil"}, "status": "built W (batch 1), awaiting approval"},
   "Wall_Display": {"category": "Wall", "part": "Display", "sizes": [0.3, 0.6], "sections": ["N", "W", "T"], "variants": {
-    "A": "status display 0.45 x 0.28 in a bezel, three labelled keys, LEDs",
+    "A": "status display 0.4 x 0.26 in a bezel behind cover glass, three keys in wells, LEDs",
     "B": "small status panel with two labelled LEDs and a rocker",
-    "C": "narrow vertical system gauge"}, "status": "planned", "_note": "no door keypads (author's rule)"},
+    "C": "narrow vertical system gauge"}, "status": "built W (batch 1), awaiting approval", "_note": "no door keypads (author's rule)"},
   "Mat_Master": {"category": "Material", "part": "Master", "variants": {"A": "MI_Kit_<Maker>_<Role> on the shared masters: layered (grain in world space, per-panel variation), hull (glows, rubber, seal), PBR (trim), screen, glass; decal instances"}, "status": "planned"},
   "Mat_Trim": {"category": "Material", "part": "Trim", "variants": {"A": "procedural trim sheet 4096 x 2048 at 1024 px/m: rail with bolts, bolted flange, ribbed rubber, perforated plate, hazard stripes, anti-slip, stitched seam, label band, edge bevel with groove, vent slots"}, "status": "planned"},
 

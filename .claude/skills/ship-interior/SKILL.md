@@ -488,6 +488,89 @@ Pravidla pro všechny díly:
 - průřez N: výbava nejvýš 0,15 m od líce;
 - zákaz klávesnic u dveří platí i pro displejové moduly.
 
+## Interiérový kit: stavba dílů a ukázka v enginu (krok 4, dávka 1, 27. 9. 2026)
+
+Pipeline (vše skriptem, rychlá smyčka bez balení, dokud se ladí tvar v Blenderu):
+```bash
+python Tools/Kit/kit_trim_sheet.py          # trim sheet 4096x2048 @ 1024 px/m -> ArtSource/Kit/Textures (+ trim_index.json)
+python Tools/Kit/kit_screens.py             # atlas obrazovek displejů (T_Kit_Screens.png, M_Ship_Screen)
+MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b --factory-startup     --python Tools/Kit/kit_build.py -- walls [--sections W,N] [--no-render]
+python Tools/Kit/kit_catalog.py 1           # katalogový list Docs/Kit/catalog_batch1.png
+```
+```powershell
+.\Tools\run_editor_python.ps1 Tools\Assets\import_kit.py           # /Game/Kit + ukázková chodba v TestSpace
+.\Tools\Shots.ps1 -Preset kit_showroom -Package -Width 1920 -Height 1080
+```
+- **Soubory:**
+  - `Tools/Kit/kit_geo.py`: třída `Part`. Geometrie po rolích materiálů, zkosené boxy a desky, lisovaný panel
+    (`inset`), trubky, UV (trim pruhy podle lokálních os, atlas obrazovek, metry), UV1 = náhodné ID panelu,
+    barva vrcholů `Col` pro vrstvený master, UCX a SOCKET_.
+  - `Tools/Kit/kit_walls.py`: stěnové moduly (plášť + 6 typů × A–C).
+  - `Tools/Kit/kit_build.py`: stavba, decaly přes `hs_decals.Placer`, export FBX, manifest, rendery.
+- **Výstupy:**
+  - `ArtSource/Kit/Kit_Walls.blend`;
+  - `ArtSource/Kit/Export/SM_Kit_*.fbx`;
+  - `kit_manifest.json` (rozměry, trojúhelníky proti rozpočtu, materiály, sockety v UE cm s parametry světel, kolize);
+  - rendery `Saved/KitCatalog/`.
+- **Plášť stěny** (každý modul):
+  - tmavá výplň za panely (vidět ve spárách);
+  - zapuštěný sokl s modrou lištou a gumovou hranou;
+  - spodní panel v sekundárním tónu s kartáčovaným kopacím plechem;
+  - lisovaný hlavní panel;
+  - oranžová signální linka ve žlábku pod šroubovanou madlovou lištou (trim `rail_bolted`);
+  - sklon ze dvou lisovaných panelů se šroubovanou přírubou;
+  - vybrání s okrajem, římsou, čelem a teplou lištou;
+  - poloviční kryty spojů na koncích modulu (sousedé z nich složí jeden kryt);
+  - konstrukční rám na každém spoji (`Wall.ribs`): polovina 6,5 cm na každém konci modulu, dohromady 13 cm s plochým
+    lícem 9 cm, 8,5 cm před panely, zkosení k panelům, čisté koleno mezi svislou částí a sklonem, šrouby po 0,3 m.
+    (Dvě zaoblené poloviny po 3 cm četl kritik jako „svislé trubky“ a spoje jako „tenké spáry“.) Výbava musí
+    nechat 6,5 cm u konců modulu volné (skříňky 0,46 m, displej 0,4 m, poklop A 0,38 m);
+  - otevřený kabelový žlab pod vybráním (deska 4 cm od sklonu na žebírkách, lem, 3 černé kabely a krémový);
+  - hlavní panel rozdělený v 0,86 m (`Wall.split`), horní deska 12 mm vpředu (stínová spára, přesah); vlastní
+    `main_split` to vypne (skříňky, Plain B/C, kanál trubek);
+  - na horním sklonu dva kabelové kanály na příchytkách, do rámů přes objímky;
+  - konzole vybrání nad každým spojem (schová konce lišt; samostatné koncovky četl kritik jako „schody“);
+  - rámy bez zkosení: zkosení 5 mm rozdělí hrany profilu pod 40° a hladké stínování udělá z rámu kulatý sloup;
+  - lišty jako svítidla: kovový profil s lemy, koncovky a difuzor (u podlahy, nahoře ve vybrání i pod hranou vybrání);
+  - světla: jedno lineární (rect) světlo na lištu a modul (`Wall.strip_light`, socket `type="rect"` s `width_cm`,
+    `height_cm`, `dir_ue`): sokl studené 0,25 cd/m, dosah 0,7 m; vybrání nahoru teplé 0,8 cd/m, 1,1 m; pod hranou
+    vybrání dolů-ven teplé 1,1 cd/m, 2,4 m (osvětluje sklon a protější stěnu). Body po 0,6 m pálily skvrny;
+  - `Snap_Start/End`, dvě UCX (stěna, sklon s vybráním).
+- **Výbava podle kola 1 kritika (27. 9. 2026):**
+  - skříňky mají korpus s ohybem hran, zvýšený rám, dveře 12 mm v rámu přes tmavou spáru, panty, větrací štěrbiny;
+    stohované se liší (páka západky vs. zapuštěné madlo a zámek), bedna má rychlouzávěry a boční madla;
+  - poklop má zvýšený rám, 4 rychlouzávěry Ø 28 mm, panty, výstražný pás jen nad rámem;
+  - trubky vycházejí ze stěny a vracejí se do ní obloukem s průchodkou uvnitř modulu, nikdy nekončí
+    na hranici modulu (trasy přes víc modulů = mosty v dávce 7);
+  - displej má krycí sklo a klávesy v tmavých jamkách;
+  - štítky: šablony a čísla panelů se v modulu neopakují (`Wall.stencil`, `Wall.panel_id`), štítek leží celý na okraji
+    prolisu nebo celý v prohlubni (WORKFLOW cm); jen obecné servisní šablony (SERVICE ACCESS, INSPECT, DO NOT PAINT),
+    nikdy štítek hardwaru, který na stěně není (GND POINT, EXT PWR). Otevřené: i obecné se opakují na sousedech,
+    mají patřit k hardwaru;
+  - oděr hran: `kit_geo` dává barvě rohů G = 0 plochám z bevelu (`Part.edge_faces`), master pak ošoupe jen zkosení
+    (EdgeWear lak 0,3, konstrukce 0,5). Maska po vrcholech nejde: skoro každý vrchol dílu leží na hraně;
+  - gumové těsnění 6 mm uvnitř rámu poklopů a mřížek (`_gasket`).
+- **UE (`Tools/Assets/import_kit.py`):**
+  - Díly jdou do `/Game/Kit/Meshes` přes funkce `import_ship` (FBX, velikost, sloty, kolize, sockety), bez Nanite, kolize simple-as-complex.
+  - Staré meshe se před importem mažou (reimport držel staré sockety).
+  - `MI_Kit_Halcyon_<Role>` v `/Game/Kit/Materials` na masterech lodí:
+    - layered pro Primary, Structure a Accent: Primary 0,1/0,095/0,088, **PaintMetallic 0,1** (lak je dielektrikum,
+      při 0,45 ztratil půl difuzního světla a stěny zčernaly), grunge 0,3, variace drsnosti 0,28, špína 0,35 (vertex R
+      klesá u podlahy ve spodních 0,5 m); Structure 80 % palety (0,26), metallic 0,4, drsnost 0,36 (čistý kov 1,0
+      zrcadlil tmavou místnost a rám zmizel); Accent 70 % palety, drsnost 0,56; Signal 80 % palety, drsnost 0,5;
+      bez oděru hran (SC lak ho nemá); teplá světla (255, 228, 200), `Kit_GlowWarm` 1/0,9/0,78 (B/R 0,58 → 0,72);
+    - hull pro Signal, Rubber, Seal, Plastic a svítivé materiály;
+    - pbr pro Trim;
+    - screen pro displeje;
+    - decaly zatím přes instance Wayfareru (sdílený atlas).
+  - **Ukázka:** `TestSpace` na (0, −500, 0) m, chodba W 8,4 m, světlo u každého socketu, tmavý box proti slunci.
+    Podlaha, strop, konce a stropní světla jsou provizorní (drsný `MI_Kit_Halcyon_ProvFloor`, bodovky 45 cd / 90° na
+    0,22/0,5/0,78 délky, výplň 8 cd 80 cm pod stropem, WORKFLOW cn). Tag `KitShowroom`, přestavuje se při každém běhu.
+- **Výkon ukázky:** GPU 16,3 ms ve 1080p (~61 FPS), z toho `Lights` 3,9 ms (60 lineárních světel + displej + 6
+  provizorních). Body místo lineárních světel stály 2,7 ms, ale pálily skvrny a stěny nechaly černé.
+- **Měření vzhledu** (`measure_look.py`, auto expozice): chodba průměr 0,21, p90 0,35, B/R 0,71, detail 0,025 = v rozsahu
+  SC. Kolo 2 (lak metallic 0,45, body, úzké bodovky) mělo 0,14 / 0,27 / 0,58 / 0,024 a stěny 0,06–0,10.
+
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 
 Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.

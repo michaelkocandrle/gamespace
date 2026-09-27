@@ -1,0 +1,88 @@
+{
+ "topic": "kit_batch1_walls",
+ "date": "2026-09-27",
+ "goal": "Interiérový kit lodi, dávka 1: stěnové moduly (plný, s mřížkou, se skříňkou, s trubkami, se servisním poklopem, s displejem) složené do chodby široké 2,4 m. Pohled z první osoby (oko 1,65 m) podél chodby, stěny ve 3/4 pohledu a detaily zblízka.",
+ "style": "Star Citizen: průmyslový interiér lodi, tři vrstvy (konstrukce, panely s přesahem, výbava), lichoběžníkový průřez se zkosením, teplý grafit, oranžová signální barva výrobce jen na madlech a linkách, světelné lišty ve vybrání u stropu a u podlahy, studené UI displejů; úroveň zpracování SC.",
+ "checklist": "interior",
+ "out": "Docs/Reviews/2026-09-27_kit_batch1_walls/round3",
+ "notes": [
+  "Text vpravo nahoře (FPS, stat unit) je měřicí overlay, ne součást výsledku.",
+  "Rozměry chodby jsou pevné z pravidel kitu (změřeno): šířka 2,4 m, svislá stěna do 1,3 m, zkosení do 2,1 m, strop 2,3 m; kamera ve výšce oka 1,65 m, zorné pole 90°.",
+  "Hodnotí se stěnové moduly. Podlaha, strop, koncové stěny chodby a světla ve stropě jsou provizorní (přijdou v dalších dávkách kitu: portály, strop se svítidly, podlaha s lištami).",
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt."
+ ],
+ "pairs": [
+  {
+   "title": "Chodba z kitu, pohled podél",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
+   "ref_label": "SC chodba (Drake)",
+   "ours": "Saved/Shots/20260927_013541_kit_showroom/01_a_corridor.png",
+   "ours_label": "ve hře, oko 1,65 m"
+  },
+  {
+   "title": "Chodba, opačný směr",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC interiér (MISC)",
+   "ours": "Saved/Shots/20260927_013541_kit_showroom/02_b_corridor_back.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Stěna ve 3/4 pohledu: skříňka, displej, trubky",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC stěna: tři vrstvy",
+   "ours": "Saved/Shots/20260927_013541_kit_showroom/03_c_left_34.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Protější stěna: mřížka, skříňky, poklopy",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC infrastruktura",
+   "ours": "Saved/Shots/20260927_013541_kit_showroom/04_d_right_34.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Nástěnný displej zblízka",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 020931.png",
+   "ref_label": "SC nástěnný displej",
+   "ours": "Saved/Shots/20260927_013541_kit_showroom/05_e_display_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Mřížka, poklop a trubky zblízka",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021447.png",
+   "ref_label": "SC detail stěny",
+   "ours": "Saved/Shots/20260927_013541_kit_showroom/06_f_pipes_hatch.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Horní vybrání se světelnou lištou",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
+   "ref_label": "SC chodba",
+   "ours": "Saved/Shots/20260927_013541_kit_showroom/07_g_cove_up.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Sokl se světlem u podlahy",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC podlaha a sokl",
+   "ours": "Saved/Shots/20260927_013541_kit_showroom/08_h_plinth.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

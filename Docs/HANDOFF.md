@@ -1574,6 +1574,16 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
     - Interiérový kit (zadání autora 26. 9. 2026, kroky 1–7):
       - krok 1: designový jazyk ve skillu `ship-interior` (moodboard `ArtSource/Reference/Mood/kit_moodboard.jpg`); autor pokračuje krokem 2;
       - krok 2: mřížka a technická pravidla v `ArtSource/Kit/kit_rules.json` a ve skillu. Obsahuje mřížku 0,3/0,1 m, průřezy S/N/W/T, pivoty, sockety, jména, palety podle výrobce, texely, rozpočty, kolize a Nanite vypnuté (znovu ověřeno). Výkres `Docs/Kit/kit_sections.png`.
+      - úpravy kroku 2 (autor 26. 9.): trim sheet 1024 px/m, průchodnost kapsle a kamery 3P ověřena, řez trupem `Docs/Kit/hull_fit_wayfarer.png` (N i W se vejdou, místnosti nejvýš 3,0–3,3 m), rozteč portálů 1,2 i 2,4 m;
+      - krok 3: seznam dílů `ArtSource/Kit/kit_parts.json` (47 rodin, 8 dávek);
+      - krok 4, dávka 1 (stěnové moduly, 20 dílů): `Tools/Kit/kit_build.py` → FBX a manifest, `Tools/Assets/import_kit.py` → `/Game/Kit` a ukázková chodba v `TestSpace` (0, −500, 0) m, preset `kit_showroom`, katalog `Docs/Kit/catalog_batch1.png`; recenze `Docs/Reviews/2026-09-27_kit_batch1_walls.md`.
+        - Kritik: 3 kola + ověření, skóre 39 → 40 → 51 (poslední kolo 7/5/5/6/6/7/7/8, FAIL), ověření „částečně“.
+        - Rozhodl systémový zásah po kole 2: lak jako dielektrikum, rám 13 cm z lakovaného kovu, lineární světla u lišt,
+          trubky z pochozí zóny. Jas chodby teď 0,21, B/R 0,72, detail 0,026 (rozsah SC).
+        - Výkon ukázky: GPU 17,0 ms (~59 FPS), `Lights` 3,9 ms.
+        - Otevřené body: plné svislé panely, opakování vedení na sklonu, detailní normálová mapa, štítky jen k hardwaru;
+          stropní světla a značení přijdou v dávkách 2 a 6.
+        - Čeká na schválení autorem, dávka 2 až po něm.
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

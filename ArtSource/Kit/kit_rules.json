@@ -52,7 +52,8 @@
  },
  "palettes": {
   "_comment": "Linear colours per slot role; a ship picks one with 'kit_maker' in its setup (MI_Kit_<Maker>_<Role>). Kestrel Dynamics is a proposal.",
-  "Halcyon": {"Kit_Primary": [0.06, 0.06, 0.065], "Kit_Structure": [0.33, 0.33, 0.34], "Kit_Accent": [0.7, 0.66, 0.58], "Kit_Signal": [0.85, 0.34, 0.06], "Kit_GlowWarm": [1.0, 0.82, 0.62], "Kit_GlowCool": [0.45, 0.72, 1.0], "Kit_GlowSignal": [1.0, 0.35, 0.08]},
+  "_Halcyon": "Kit_Primary calibrated to the approved Wayfarer corridor (walls 0.085, panels 0.13, a little metal sheen): 0.06 with no metal read black in the showroom (27. 9. 2026). Kit_GlowWarm 1/0.9/0.78 (was 1/0.82/0.62: the showroom measured B/R 0.58, SC 0.72-1.05)",
+  "Halcyon": {"Kit_Primary": [0.1, 0.095, 0.088], "Kit_Structure": [0.33, 0.33, 0.34], "Kit_Accent": [0.7, 0.66, 0.58], "Kit_Signal": [0.85, 0.34, 0.06], "Kit_GlowWarm": [1.0, 0.9, 0.78], "Kit_GlowCool": [0.45, 0.72, 1.0], "Kit_GlowSignal": [1.0, 0.35, 0.08]},
   "Kestrel": {"Kit_Primary": [0.55, 0.56, 0.58], "Kit_Structure": [0.12, 0.12, 0.13], "Kit_Accent": [0.06, 0.06, 0.065], "Kit_Signal": [0.05, 0.35, 0.9], "Kit_GlowWarm": [1.0, 0.92, 0.84], "Kit_GlowCool": [0.6, 0.8, 1.0], "Kit_GlowSignal": [0.2, 0.55, 1.0]}
  },
  "texel_density": {
@@ -67,7 +68,9 @@
  },
  "tri_budget": {
   "_comment": "LOD0 triangles, non-Nanite. Per-metre entries scale with the part's length.",
-  "Wall_per_m": 5000,
+  "Wall_base": 1800,
+  "Wall_per_m": 4000,
+  "_Wall": "base + per metre: the shell (plinth, rail, cove, joint covers, pressed panels) costs ~1500 whatever the length, so a 0.3 m filler needs the base (26. 9. 2026)",
   "Corner": 4000,
   "Portal": 8000,
   "Ceiling_per_m": 3500,
