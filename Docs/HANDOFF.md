@@ -1615,6 +1615,15 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
           - profil výkonu a návrh úspor (`Docs/Reviews/2026-09-27_interior_perf_profile.md`): C má 17,5–18,1 ms
             GPU (~52–57 FPS); vypnutí odrazů Lumenu v interiéru ušetří 2,3–2,8 ms a splní cíl 60 FPS. Čeká na autora.
         - Volba rámů (`frames_choice.png`) zůstala nevyplněná, rámy beze změny.
+        - Rozhodnutí autora k výkonu a jasu (27. 9. odpoledne):
+          - snížené odrazy Lumenu (drsnost ≤ 0,3, ½ rozlišení) ušetří jen ~1 ms, proto jsou odrazy v interiéru vypnuté;
+          - světla kitu ×1,8, jas chodby 0,19 (střed SC);
+          - výkon 60/62 FPS v chodbě a na křižovatce;
+          - Steadfast s MegaLights 14,2–14,6 ms GPU;
+          - předehřátí MegaLights na startu levelu srazí záškub při prvním vstupu ze 75/53 ms na 23/24–42 ms;
+          - v průlezu je pás u podlahy; zadní deska zúžení a pravý horní panel koncových stěn zakrývaly otvor průlezu
+            (opraveno);
+          - rámy zůstávají.
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

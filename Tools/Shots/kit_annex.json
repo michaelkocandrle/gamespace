@@ -24,7 +24,8 @@
    "hud": 0,
    "settle": 1.0,
    "console": [
-    "space.Showroom annex"
+    "space.Showroom annex",
+    "space.InteriorLighting 1"
    ]
   },
   {
@@ -128,6 +129,26 @@
     1.1
    ],
    "fov": 70
+  },
+  {
+   "name": "z_reset",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.5,
+   "camera_location": [
+    3.0,
+    -504.8,
+    1.65
+   ],
+   "camera_look_at": [
+    7.2,
+    -504.6,
+    1.3
+   ],
+   "fov": 75,
+   "console": [
+    "space.InteriorLighting 0"
+   ]
   }
  ]
 }

@@ -1,0 +1,50 @@
+{
+ "_comment": "MegaLights' first-use hitch when the player walks into an interior (author 27. 9. 2026): walk into the showroom and the Steadfast from the ship; the game log's 'INTERIOR ENTRY ... longest frame' lines are the result. Run with the prewarm (default) and with -GameArgs -NoMegaLightsPrewarm. Run: Tools/Shots.ps1 -Preset kit_entry_hitch",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 8.0,
+   "console": [
+    "stat none"
+   ]
+  },
+  {
+   "name": "showroom",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 4.0,
+   "console": [
+    "space.Showroom"
+   ]
+  },
+  {
+   "name": "back",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 2.0,
+   "console": [
+    "space.Showroom"
+   ]
+  },
+  {
+   "name": "steadfast",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 4.0,
+   "console": [
+    "space.Interior"
+   ]
+  },
+  {
+   "name": "back2",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 1.0,
+   "console": [
+    "space.Interior"
+   ]
+  }
+ ]
+}

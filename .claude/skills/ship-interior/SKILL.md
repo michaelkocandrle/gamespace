@@ -666,10 +666,15 @@ dávek (díl, rozpočet, pohledy renderů); `--only <jména>` postaví vybrané 
     interiéru a 0 při návratu. Všechna světla ukázky mají `cast_shadows` v levelu (stíny se nepřepínají za běhu:
     první zapnutí dělalo záškub 140 ms). Snímky s volnou kamerou musí MegaLights zapnout samy
     (`kit_showroom2.json` v rozcvičení).
-  - **Výkon (C, 1080p, TSR 75 %):** chodba 18,1 ms GPU, křižovatka 18,0 ms (~52–57 FPS). Profil a návrh:
-    `Docs/Reviews/2026-09-27_interior_perf_profile.md`. Odrazy Lumenu stojí 2,3–2,8 ms (jejich vypnutí je hlavní
-    návrh), stíny 1,1 ms, rozlišení 67 % ušetří 1,6–2,5 ms. Postproces, průsvitnost, práh drsnosti a sběr sond
-    nic nedají. Návrh čeká na autora; nová světla přidávat až po něm.
+  - **Osvětlení interiéru (rozhodnutí autora 27. 9.):** při chůzi interiérem MegaLights C a vypnuté odrazy
+    Lumenu (snížené odrazy ušetřily jen ~1 ms). Stav nastavuje `ASpacePlayerController::ApplyInteriorLighting`,
+    pro snímky s volnou kamerou `space.InteriorLighting 1|0`. Předehřátí na prvních 30 snímků levelu
+    (`-NoMegaLightsPrewarm` ho vypne pro měření). Po vstupu log `INTERIOR ENTRY … longest frame` (`kit_entry_hitch.json`).
+  - **Jas:** `import_kit.KIT_LIGHT_SCALE` 1,8 (chodba 0,19). `space.KitLight <skupina> IntensityScale x` násobí hodnoty
+    levelu za běhu.
+  - **Výkon (1080p, TSR 75 %):** chodba 16,6 ms na snímek (60 FPS), křižovatka 16,1 ms (62 FPS), bez rezervy. Další
+    světla přidávat s měřením. Profil: `Docs/Reviews/2026-09-27_interior_perf_profile.md`.
+  - **Zúžení do průlezu:** zadní deska rozdělená kolem otvoru, pás u podlahy průlezu (WORKFLOW dc).
 
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 

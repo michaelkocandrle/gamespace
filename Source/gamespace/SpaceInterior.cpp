@@ -158,6 +158,16 @@ namespace
 				: TEXT("nothing to do (no interior in this level, or no ship to go back to)"));
 		}));
 
+	FAutoConsoleCommandWithWorldAndArgs InteriorLightingCommand(
+		TEXT("space.InteriorLighting"),
+		TEXT("space.InteriorLighting 0|1: the lighting of a walked interior (MegaLights on, Lumen reflections off) or the ship's, as walking in and out sets it - for shots with the free camera."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			const bool bInterior = Args.Num() == 0 || Args[0] != TEXT("0");
+			ASpacePlayerController::ApplyInteriorLighting(bInterior);
+			UE_LOG(LogSpaceInterior, Display, TEXT("space.InteriorLighting %d"), bInterior ? 1 : 0);
+		}));
+
 	FAutoConsoleCommandWithWorldAndArgs ShowroomCommand(
 		TEXT("space.Showroom"),
 		TEXT("space.Showroom [annex]: walk the interior kit showroom in TestSpace, or its annex with the catalogue-only parts (from the ship or another interior, or back). U in the game walks showroom -> annex -> back."),

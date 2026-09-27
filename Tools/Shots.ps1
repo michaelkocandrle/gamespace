@@ -38,7 +38,9 @@ param(
     [switch]$Last,
     [int]$Width = 1600,
     [int]$Height = 900,
-    [int]$TimeoutSeconds = 180
+    [int]$TimeoutSeconds = 180,
+    # extra command-line switches for the game, e.g. -GameArgs "-NoMegaLightsPrewarm"
+    [string[]]$GameArgs = @()
 )
 
 $ErrorActionPreference = "Stop"
@@ -87,7 +89,7 @@ $outDir = Join-Path $shotsRoot "${stamp}_$Preset"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
 $gameArgs = @("/Game/Maps/TestSpace", "-windowed", "-ResX=$Width", "-ResY=$Height", "-nosplash", "-unattended",
-              "-ShotList=`"$listPath`"", "-ShotOut=`"$outDir`"")
+              "-ShotList=`"$listPath`"", "-ShotOut=`"$outDir`"") + $GameArgs
 Write-Host "Shooting $Preset ($((Get-Content $listPath | ConvertFrom-Json).shots.Count) shots) into $outDir"
 $process = Start-Process -FilePath $exe -ArgumentList $gameArgs -PassThru
 if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {

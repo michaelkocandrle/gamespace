@@ -216,6 +216,22 @@ namespace
 				UE_LOG(LogTemp, Display, TEXT("space.KitLight Work|Accent|All|Showroom <Property> <Value...>"));
 				return;
 			}
+			if (Args[1].Equals(TEXT("IntensityScale"), ESearchCase::IgnoreCase))
+			{
+				// A factor on what the level has (not on the current value), so a preset can try 1.2, 1.5, 1.8
+				// one after another - the kit showroom's brightness under MegaLights shadows (27. 9. 2026)
+				const float Scale = FCString::Atof(*Args[2]);
+				int32 Scaled = 0;
+				for (ULocalLightComponent* Light : InteriorLights(World, Args[0]))
+				{
+					Remember(Light);
+					Light->Intensity = SavedLights.FindChecked(TWeakObjectPtr<ULightComponentBase>(Light)).Intensity * Scale;
+					Light->MarkRenderStateDirty();
+					++Scaled;
+				}
+				UE_LOG(LogTemp, Display, TEXT("space.KitLight %s IntensityScale %.2f on %d lights"), *Args[0], Scale, Scaled);
+				return;
+			}
 			// Looked up on each light's own class: the work lights are spots (OuterConeAngle), the
 			// accent lights plain point lights.
 			FString Name;

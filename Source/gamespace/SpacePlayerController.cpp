@@ -11,6 +11,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "HAL/IConsoleManager.h"
+#include "Misc/App.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "InputMappingContext.h"
@@ -156,6 +159,7 @@ void ASpacePlayerController::BeginPlay()
 	{
 		SetInputMode(FInputModeGameOnly());
 		SetShowMouseCursor(false);
+		StartPrewarm();
 	}
 }
 
@@ -172,6 +176,7 @@ void ASpacePlayerController::PlayerTick(float DeltaTime)
 	{
 		UpdateTitleCamera(DeltaTime);
 	}
+	TickEntryWatch();
 }
 
 void ASpacePlayerController::UpdateTitleCamera(float DeltaTime)
@@ -338,11 +343,22 @@ namespace
 	// MegaLights variant C (author, 27. 9. 2026): interiors are lit through MegaLights with the fixtures' ray-traced
 	// shadows (the kit showroom's lights cast shadows in the level); the view from the ship and the planet keep
 	// today's lighting until MegaLights is measured there
+	// Lumen reflections are off in interiors (author, 27. 9. 2026): 2.3-2.8 ms of the 60 FPS budget for no visible
+	// difference on the matt kit paint; traced only up to roughness 0.3 at half resolution they still cost ~1.5 ms
+	// and missed the target (Docs/Reviews/2026-09-27_interior_perf_profile.md)
+	/** space.InteriorLighting asked for the interior lighting (shots with the free camera): the prewarm's end keeps it. */
+	bool bInteriorLightingRequested = false;
+
 	void SetInteriorLighting(bool bInterior)
 	{
-		if (IConsoleVariable* MegaLights = IConsoleManager::Get().FindConsoleVariable(TEXT("r.MegaLights.EnableForProject")))
+		IConsoleManager& Console = IConsoleManager::Get();
+		if (IConsoleVariable* MegaLights = Console.FindConsoleVariable(TEXT("r.MegaLights.EnableForProject")))
 		{
 			MegaLights->Set(bInterior ? 1 : 0, ECVF_SetByCode);
+		}
+		if (IConsoleVariable* Reflections = Console.FindConsoleVariable(TEXT("r.Lumen.Reflections.Allow")))
+		{
+			Reflections->Set(bInterior ? 0 : 1, ECVF_SetByCode);
 		}
 	}
 
@@ -356,6 +372,58 @@ namespace
 			}
 		}
 		return nullptr;
+	}
+}
+
+void ASpacePlayerController::ApplyInteriorLighting(bool bInterior)
+{
+	bInteriorLightingRequested = bInterior;
+	SetInteriorLighting(bInterior);
+}
+
+void ASpacePlayerController::StartPrewarm()
+{
+	// MegaLights' first frames stalled the game once (~140 ms: its shaders and the ray-traced shadow pipelines
+	// made on first use). The level's first frames are a load anyway: MegaLights on for them, off again before
+	// play unless the player is walking an interior (author, 27. 9. 2026). -NoMegaLightsPrewarm measures without.
+	UWorld* World = GetWorld();
+	if (!World || FParse::Param(FCommandLine::Get(), TEXT("NoMegaLightsPrewarm"))
+		|| (!FindInteriorSpawn(World) && !FindInteriorSpawn(World, ShowroomSpawnTag)))
+	{
+		return;
+	}
+	SetInteriorLighting(true);
+	PrewarmFramesLeft = 30;
+	UE_LOG(LogSpacePlayer, Log, TEXT("%s: MegaLights prewarm for %d frames"), *GetName(), PrewarmFramesLeft);
+}
+
+void ASpacePlayerController::WatchEntry()
+{
+	EntryFramesLeft = 120;
+	EntryFramesSeen = 0;
+	EntryMaxFrameMs = 0.f;
+}
+
+void ASpacePlayerController::TickEntryWatch()
+{
+	if (PrewarmFramesLeft > 0 && --PrewarmFramesLeft == 0)
+	{
+		// back to what is wanted now: an interior walked or asked for by space.InteriorLighting keeps its lighting
+		// (the shots' warm-up command came before the prewarm ended and was switched off - 25 ms frames)
+		SetInteriorLighting(bWalkingInterior || bInteriorLightingRequested);
+		UE_LOG(LogSpacePlayer, Log, TEXT("%s: MegaLights prewarm done"), *GetName());
+	}
+	if (EntryFramesLeft <= 0)
+	{
+		return;
+	}
+	EntryMaxFrameMs = FMath::Max(EntryMaxFrameMs, float(FApp::GetDeltaTime() * 1000.0));
+	++EntryFramesSeen;
+	if (--EntryFramesLeft == 0)
+	{
+		// the numbers a hitch check reads from the log (shots: kit_entry_hitch.json)
+		UE_LOG(LogSpacePlayer, Display, TEXT("INTERIOR ENTRY %s: longest frame %.1f ms in the first %d frames"),
+			*WalkingSpawnTag.ToString(), EntryMaxFrameMs, EntryFramesSeen);
 	}
 }
 
@@ -450,6 +518,7 @@ bool ASpacePlayerController::ToggleInteriorAt(FName SpawnTag)
 		bWalkingInterior = true;
 		WalkingSpawnTag = SpawnTag;
 		SetInteriorLighting(true);
+		WatchEntry();
 		return true;
 	}
 	const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Current);
@@ -475,6 +544,7 @@ bool ASpacePlayerController::ToggleInteriorAt(FName SpawnTag)
 	bWalkingInterior = true;
 	WalkingSpawnTag = SpawnTag;
 	SetInteriorLighting(true);
+	WatchEntry();
 	UE_LOG(LogSpacePlayer, Log, TEXT("%s: walking %s from %s (MegaLights on)"), *GetName(), *SpawnTag.ToString(), *Start.GetLocation().ToString());
 	return true;
 }

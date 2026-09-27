@@ -1,0 +1,207 @@
+{
+ "_comment": "The Steadfast interior (TestSpace 0 500 0 m) with MegaLights (author 27. 9. 2026): walked in and out once (space.Interior, the C++ path), then stat unit + stat gpu with MegaLights on and off in the bay, engine room and corridor. Run: Tools/Shots.ps1 -Preset steadfast_megalights -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 6.0,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none",
+    "space.Interior"
+   ]
+  },
+  {
+   "name": "walked_in",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 3.0
+  },
+  {
+   "name": "walked_out",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 1.0,
+   "console": [
+    "space.Interior",
+    "r.MegaLights.EnableForProject 1"
+   ]
+  },
+  {
+   "name": "ml_bay",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "r.MegaLights.EnableForProject 1",
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "ml_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 75
+  },
+  {
+   "name": "ml_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 75
+  },
+  {
+   "name": "ml_look_bay",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "stat none"
+   ]
+  },
+  {
+   "name": "noml_bay",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "r.MegaLights.EnableForProject 0",
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "noml_engine",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    -1.4,
+    502.4,
+    1.9
+   ],
+   "camera_look_at": [
+    -5,
+    499.2,
+    0.8
+   ],
+   "fov": 75
+  },
+  {
+   "name": "noml_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    9.3,
+    499.6,
+    1.6
+   ],
+   "camera_look_at": [
+    17,
+    500.2,
+    1.0
+   ],
+   "fov": 75
+  },
+  {
+   "name": "noml_look_bay",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "stat none"
+   ]
+  },
+  {
+   "name": "z_reset",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.5,
+   "camera_location": [
+    0.4,
+    500,
+    1.65
+   ],
+   "camera_look_at": [
+    8,
+    500,
+    1.2
+   ],
+   "fov": 75,
+   "console": [
+    "stat none",
+    "r.MegaLights.EnableForProject 0"
+   ]
+  }
+ ]
+}

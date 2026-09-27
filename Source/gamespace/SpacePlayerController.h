@@ -80,6 +80,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Interior")
 	bool ToggleInteriorAt(FName SpawnTag);
 
+	/** The interior lighting state (MegaLights on, Lumen reflections off) or the ship's; walking in and out sets it, and
+	 * space.InteriorLighting 0|1 for shots taken with the free camera. */
+	static void ApplyInteriorLighting(bool bInterior);
+
 	UFUNCTION(BlueprintPure, Category = "Interior")
 	bool IsWalkingInterior() const { return bWalkingInterior; }
 
@@ -125,6 +129,15 @@ private:
 	bool bWalkingInterior = false;
 	/** The spawn tag of the place being walked (SpaceInteriorSpawn, KitShowroomSpawn). */
 	FName WalkingSpawnTag;
+	/** The longest frame in the first frames after walking in (MegaLights' first-use hitch), logged once. */
+	int32 EntryFramesLeft = 0;
+	int32 EntryFramesSeen = 0;
+	float EntryMaxFrameMs = 0.f;
+	/** MegaLights on for the first frames of the level, so its first use is not the moment the player walks in. */
+	int32 PrewarmFramesLeft = 0;
+	void StartPrewarm();
+	void WatchEntry();
+	void TickEntryWatch();
 
 	UPROPERTY(Transient)
 	TObjectPtr<USoundBase> UiHoverSound;

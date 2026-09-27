@@ -444,13 +444,15 @@ def _outline(sec):
     return [(0, 0), (W, 0), (W, vt), (W - xt, top), (W - xt + 0.14, top), (W - xt + 0.14, C), (xt - 0.14, C), (xt - 0.14, top), (xt, top), (0, vt)]
 
 
-def _end_base(p, sec, spans, back_x=-0.07, hole=None):
+def _end_base(p, sec, spans, back_x=-0.07, hole=None, backing=True):
     """What every end wall has: the dark backing, the plinth (recess, housed cool strip, one linear light) and the
     kick panel over `spans` (y ranges), the rail with its signal line at the break. hole (y0, y1, z0, z1): an
     opening in the backing under the break (a window that looks out)."""
     W, vt = sec.width, sec.vt
     back = frame((back_x, 0, 0), (0, 1, 0), (0, 0, 1), (1, 0, 0))
-    if hole:
+    if not backing:
+        pass
+    elif hole:
         y0, y1, z0, z1 = hole
         outline = _outline(sec)
         for poly in ([(0, 0), (W, 0), (W, z0), (0, z0)], [(0, z0), (y0, z0), (y0, z1), (0, z1)],
@@ -478,6 +480,11 @@ def _upper_side(p, sec, y_in, left):
     W, vt, top, xt, C = sec.width, sec.vt, sec.top, sec.xt, sec.ceiling
     z0 = vt + 0.03
     ys = (z0 - vt) * 0.75 + 0.01
+    if not left:
+        # y_in is where the right panel starts (0..W): built as a left one from the mirrored edge. Taken as it was,
+        # the right panel ran from W - y_in across the middle: over the crawlway's opening and doubled on the end
+        # walls' middle panel (27. 9. 2026)
+        y_in = W - y_in
     pts = [(ys, z0), (y_in, z0), (y_in, C), (xt - 0.14, C), (xt - 0.14, top), (xt, top)]
     if not left:
         pts = [(W - y, z) for (y, z) in reversed(pts)]
@@ -564,7 +571,17 @@ def narrow(sec, var, name, seed):
     W, vt, top, xt, C = sec.width, sec.vt, sec.top, sec.xt, sec.ceiling
     o0, o1 = (W - S.width) / 2, (W + S.width) / 2
     f = 0.06
-    _end_base(p, sec, [(0.0, o0 - f), (o1 + f, W)])
+    _end_base(p, sec, [(0.0, o0 - f), (o1 + f, W)], backing=False)
+    # the dark backing round the crawlway's opening, not over it: a full backing 7 cm behind the face hid the whole
+    # crawlway stub - the opening read as a black rectangle (27. 9. 2026). Left and right bands of the outline and
+    # the piece above the opening
+    back = frame((-0.07, 0, 0), (0, 1, 0), (0, 0, 1), (1, 0, 0))
+    ow = _outline(sec)
+    left = [(0.0, 0.0), (o0, 0.0), (o0, C), (xt - 0.14, C), (xt - 0.14, top), (xt, top), (0.0, vt)]
+    right = [(W - y, z) for (y, z) in reversed(left)]
+    above = [(o0, S.vt), (o0 + S.xt, S.ceiling), (o1 - S.xt, S.ceiling), (o1, S.vt), (o1, C), (o0, C)]
+    for poly in (left, right, above):
+        p.poly_prism("Kit_Seal", poly, back, 0.01, panel=False)
     for (u0, u1) in ((G, o0 - f - G), (o1 + f + G, W - G)):
         pressed(p, FACE, u0, u1, 0.5 + GAP / 2, vt - 0.055)
     _upper_side(p, sec, o0 - f - G, True)
@@ -594,6 +611,15 @@ def narrow(sec, var, name, seed):
     p.slab("Kit_Trim", frame((-d, 0, 0.0), (1, 0, 0), (0, 1, 0), (0, 0, 1)), 0.05, d - 0.05, o0 + 0.1, o1 - 0.1, 0.004, proud=0.002,
            trim="antislip_tread", panel=False)
     p.box("Kit_Seal", (-d - 0.01, o0, 0.0), (-d, o1, S.ceiling), panel=False)
+    # a housed cool strip at the floor along both crawlway walls and across its dark end, like the corridor's plinth
+    # strips (author 27. 9.: the lower half of the crawlway read as a black rectangle)
+    for (y, s) in ((o0, 1), (o1, -1)):
+        ya, yb = sorted((y, y + s * 0.035))
+        p.box("Kit_Structure", (-d + 0.01, ya, 0.0), (-0.01, yb, 0.075), bevel=0.003, segments=1, panel=False)
+        yc, yd = sorted((y + s * 0.035, y + s * 0.041))
+        p.box("Kit_GlowCool", (-d + 0.02, yc, 0.03), (-0.02, yd, 0.052), panel=False)
+    p.box("Kit_Structure", (-d, o0 + 0.035, 0.0), (-d + 0.035, o1 - 0.035, 0.075), bevel=0.003, segments=1, panel=False)
+    p.box("Kit_GlowCool", (-d + 0.035, o0 + 0.05, 0.03), (-d + 0.041, o1 - 0.05, 0.052), panel=False)
     # 1.2 cd: at 0.25 the crawlway read as a black rectangle under MegaLights with shadows (27. 9. 2026)
     strip_light_along(p, "Light_Crawl_0", (-0.26, W / 2, S.ceiling - 0.01), (0, 0, -1), (1, 0, 0), 0.36, 0.04, "cool", 1.2, 1.2)
     # collision: the wall either side of the opening, the head, the crawlway walls

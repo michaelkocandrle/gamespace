@@ -44,6 +44,39 @@ další světla. Předvolba v zadání nebyla vyplněná. Měřeno ve výchozím
 4. **Nepomáhá:** vypnutí motion bluru, bloomu a DOF, omezení průsvitnosti, hrubší sběr sond, nižší práh drsnosti
    odrazů.
 
+## Rozhodnutí autora a výsledek (27. 9. 2026, odpoledne)
+
+Autor: nejdřív změřit sníženou `MaxRoughnessToTrace` (matný lak se netrasuje, sklo a lesklý kov ano) s odrazy
+v polovičním rozlišení a porovnat s úplným vypnutím. Když cíl splní, použít ji, jinak odrazy v interiéru vypnout.
+Preset `kit_perf_refl.json`, dvě kola ve střídavém pořadí, čas průchodu z `stat gpu`:
+
+| Odrazy | Průchod LumenReflections (chodba / křižovatka) | GPU celkem, průměr dvou kol |
+|---|---|---|
+| plné | 2,51–2,62 / 2,31–2,41 ms | 17,7 / 17,4 ms |
+| snížené (drsnost ≤ 0,3, ½ rozlišení) | 1,56–1,63 / 1,47–1,49 ms | 16,9 / 16,4 ms |
+| vypnuté | 0 | ~15,2 / ~14,9 ms (z průchodu, celky v šumu) |
+
+- Obraz (chodba, sklo okna, lišta u rámu B) je ve všech třech variantách prakticky stejný.
+- Snížená varianta ušetří ~1 ms a chodba zůstane na ~16,9 ms GPU. Cíl tedy nesplní, **odrazy jsou v interiéru
+  vypnuté.** `SpacePlayerController` je vypíná spolu se zapnutím MegaLights a při návratu do lodi je zapne.
+- **Jas:** všechna světla kitu ×1,8 (`import_kit.KIT_LIGHT_SCALE`). Chodba má průměr 0,19, pohled k oknu 0,18
+  (střed rozsahu SC), p90 0,35–0,36.
+- **Výkon ve finálním buildu** (odrazy vypnuté, MegaLights C, jas ×1,8): chodba 16,6 ms na snímek (GPU 16,0),
+  60 FPS; křižovatka 16,1 ms (GPU 15,4), 62 FPS. Na cíli, bez rezervy.
+- **Steadfast** (`steadfast_megalights.json`, odrazy zapnuté): s MegaLights 14,2–14,6 ms GPU, bez nich 14,3–15,7 ms.
+  MegaLights tam šetří 0,2–1,0 ms (stínové mapy pracovních světel), obraz je stejný. S vypnutými odrazy v interiéru
+  ubude dalších 0,6–1,0 ms.
+- **Záškub při prvním vstupu** (`kit_entry_hitch.json`, nejdelší snímek z prvních 120 po vstupu):
+
+  | | ukázka | Steadfast |
+  |---|---|---|
+  | bez předehřátí (`-NoMegaLightsPrewarm`) | 74,5 ms | 52,5 ms |
+  | s předehřátím | 23,0 ms | 24,3–41,7 ms |
+
+  Předehřátí: `StartPrewarm` zapne osvětlení interiéru na prvních 30 snímků levelu (to je stejně načítání) a pak
+  vrátí stav, který je žádaný (chůze interiérem nebo `space.InteriorLighting 1`). Steadfast má vlastní materiály,
+  které se v pohledu z lodi při předehřátí nevykreslí, proto u něj zbývá až ~40 ms.
+
 Vedlejší zjištění: s RT stíny je ukázka tmavší. Průměrný jas chodby klesl z 0,20 na 0,13, p90 z 0,42 na 0,25
 (spodní hrana rozsahu SC). Světla už neprosvítají geometrií. Jestli má být interiér světlejší, přidá se
 intenzita svítidlům; to výkon s MegaLights skoro nemění.

@@ -36,6 +36,9 @@ TAG = "KitShowroom"
 SPAWN_TAG = "KitShowroomSpawn"          # space.Showroom / U walks the player here (SpacePlayerController)
 ANNEX_SPAWN_TAG = "KitShowroomAnnexSpawn"   # U again from the showroom (or space.Showroom annex): the annex
 GRAVITY_CMS2 = 981.0
+# every kit light x1.8 (author 27. 9. 2026): under MegaLights' ray-traced shadows the lights stopped leaking through the
+# geometry and the corridor's mean fell from 0.20 to 0.13; x1.8 puts it in the middle of the SC range (kit_brightness)
+KIT_LIGHT_SCALE = 1.8
 MAKER = "Halcyon"
 EAL, MEL = unreal.EditorAssetLibrary, unreal.MaterialEditingLibrary
 DECAL_MIS = {"Kit_Decal": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_Decal",
@@ -265,7 +268,7 @@ def rect_light(actors, loc, role, cd, radius_m, label, forward, along, width_cm,
     c = a.rect_light_component
     c.set_editor_property("mobility", unreal.ComponentMobility.MOVABLE)
     c.set_editor_property("intensity_units", unreal.LightUnits.CANDELAS)
-    c.set_editor_property("intensity", float(cd))
+    c.set_editor_property("intensity", float(cd) * KIT_LIGHT_SCALE)
     c.set_editor_property("attenuation_radius", float(radius_m) * 100.0)
     # MegaLights variant C (author, 27. 9. 2026): every kit light casts its ray-traced shadow; MegaLights is on while
     # walking an interior (SpacePlayerController), shots of the showroom set r.MegaLights.EnableForProject 1
@@ -288,7 +291,7 @@ def light(actors, loc, role, cd, radius_m, label, spot=False, cone=80.0, source_
     c = a.spot_light_component if spot else a.point_light_component
     c.set_editor_property("mobility", unreal.ComponentMobility.MOVABLE)
     c.set_editor_property("intensity_units", unreal.LightUnits.CANDELAS)
-    c.set_editor_property("intensity", float(cd))
+    c.set_editor_property("intensity", float(cd) * KIT_LIGHT_SCALE)
     c.set_editor_property("attenuation_radius", float(radius_m) * 100.0)
     c.set_editor_property("cast_shadows", True)             # MegaLights variant C, as rect_light
     c.set_editor_property("source_radius", float(source_cm) if source_cm else (1.0 if not spot else 4.0))
