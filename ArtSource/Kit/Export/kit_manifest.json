@@ -3201,7 +3201,7 @@
     240.0,
     230.0
    ],
-   "tris": 4364,
+   "tris": 4388,
    "tris_decals": 0,
    "tri_budget": 11400,
    "materials": [
@@ -3318,10 +3318,10 @@
      "params": {
       "type": "rect",
       "role": "cool",
-      "cd": 0.25,
+      "cd": 1.2,
       "width_cm": 36.0,
       "height_cm": 4.0,
-      "radius_m": 1.0,
+      "radius_m": 1.2,
       "dir_ue": [
        0.0,
        -0.0,
@@ -4131,6 +4131,102 @@
    "renders": {
     "front": "Saved/KitCatalog/SM_Kit_Portal_Ring03N_A_front.png",
     "34": "Saved/KitCatalog/SM_Kit_Portal_Ring03N_A_34.png"
+   }
+  },
+  "SM_Kit_Portal_Ring03N_B": {
+   "category": "Portal",
+   "family": "Portal_Ring",
+   "section": "N",
+   "length_m": 0.3,
+   "variant": "B",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Portal_Ring03N_B.fbx",
+   "dims_m": [
+    0.32,
+    1.6,
+    2.55
+   ],
+   "expected_size_cm": [
+    32.0,
+    160.0,
+    255.0
+   ],
+   "tris": 1856,
+   "tris_decals": 32,
+   "tri_budget": 8000,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Plastic",
+    "Kit_GlowWarm",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {
+    "SOCKET_Decal_Section": {
+     "location_ue_cm": [
+      15.0,
+      -49.1,
+      106.0
+     ],
+     "params": {
+      "tag": "section_number"
+     }
+    },
+    "SOCKET_Light_Ring_0": {
+     "location_ue_cm": [
+      15.0,
+      -0.0,
+      218.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 1.0,
+      "width_cm": 14.0,
+      "height_cm": 2.4,
+      "radius_m": 2.4,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 5,
+   "decals": 2,
+   "decal_items": [
+    "panel_C21",
+    "hazard_stripe"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1452,
+    "secondary": 0,
+    "floor": 936
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Portal_Ring03N_B_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Portal_Ring03N_B_34.png"
    }
   }
  }

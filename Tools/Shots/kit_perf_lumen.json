@@ -1,0 +1,504 @@
+{
+ "_comment": "Cheaper Lumen for the 60 FPS interior target (author 27. 9. 2026), MegaLights variant C: reflections traced only up to a roughness, at half resolution, a coarser screen-probe gather; the look (corridor, the glossy rail close) and the steady stat unit per variant. Run: Tools/Shots.ps1 -Preset kit_perf_lumen -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 8.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none",
+    "r.MegaLights.EnableForProject 1"
+   ]
+  },
+  {
+   "name": "base_look_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat none"
+   ]
+  },
+  {
+   "name": "base_look_rail",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.5,
+    -499.45,
+    1.55
+   ],
+   "camera_look_at": [
+    4.65,
+    -501.1,
+    0.95
+   ],
+   "fov": 62
+  },
+  {
+   "name": "base_perf_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "name": "base_perf_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "rough030_look_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "r.Lumen.Reflections.MaxRoughnessToTrace 0.3"
+   ]
+  },
+  {
+   "name": "rough030_look_rail",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.5,
+    -499.45,
+    1.55
+   ],
+   "camera_look_at": [
+    4.65,
+    -501.1,
+    0.95
+   ],
+   "fov": 62
+  },
+  {
+   "name": "rough030_perf_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "name": "rough030_perf_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "rough020_look_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "r.Lumen.Reflections.MaxRoughnessToTrace 0.2"
+   ]
+  },
+  {
+   "name": "rough020_look_rail",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.5,
+    -499.45,
+    1.55
+   ],
+   "camera_look_at": [
+    4.65,
+    -501.1,
+    0.95
+   ],
+   "fov": 62
+  },
+  {
+   "name": "rough020_perf_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "name": "rough020_perf_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "down2_look_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "r.Lumen.Reflections.MaxRoughnessToTrace -1",
+    "r.Lumen.Reflections.DownsampleFactor 2"
+   ]
+  },
+  {
+   "name": "down2_look_rail",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.5,
+    -499.45,
+    1.55
+   ],
+   "camera_look_at": [
+    4.65,
+    -501.1,
+    0.95
+   ],
+   "fov": 62
+  },
+  {
+   "name": "down2_perf_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "name": "down2_perf_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "probe32_look_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "r.Lumen.Reflections.DownsampleFactor 1",
+    "r.Lumen.ScreenProbeGather.DownsampleFactor 32"
+   ]
+  },
+  {
+   "name": "probe32_look_rail",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.5,
+    -499.45,
+    1.55
+   ],
+   "camera_look_at": [
+    4.65,
+    -501.1,
+    0.95
+   ],
+   "fov": 62
+  },
+  {
+   "name": "probe32_perf_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "name": "probe32_perf_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "combo_look_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "r.Lumen.ScreenProbeGather.DownsampleFactor 16",
+    "r.Lumen.Reflections.MaxRoughnessToTrace 0.3",
+    "r.Lumen.Reflections.DownsampleFactor 2"
+   ]
+  },
+  {
+   "name": "combo_look_rail",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.5,
+    -499.45,
+    1.55
+   ],
+   "camera_look_at": [
+    4.65,
+    -501.1,
+    0.95
+   ],
+   "fov": 62
+  },
+  {
+   "name": "combo_perf_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat unit"
+   ]
+  },
+  {
+   "name": "combo_perf_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "z_reset",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.5,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "r.Lumen.Reflections.MaxRoughnessToTrace -1",
+    "r.Lumen.Reflections.DownsampleFactor 1",
+    "r.Lumen.ScreenProbeGather.DownsampleFactor 16",
+    "r.MegaLights.EnableForProject 0"
+   ]
+  }
+ ]
+}

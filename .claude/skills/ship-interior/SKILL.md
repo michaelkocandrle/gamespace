@@ -650,7 +650,26 @@ dávek (díl, rozpočet, pohledy renderů); `--only <jména>` postaví vybrané 
 - **Ladění za běhu bez balení:** `space.Kit <Param> <hodnota> <část jména MI>` a `space.KitLight Showroom …` na
   zabalené hře (presety `kit_rail_noise.json`, `kit_glow_strength.json`); teprve výsledek zapsat do `import_kit.py`.
 - **Kritik dávky 2:** 37 → 41 → 44, FAIL; otevřené: okno, kužely/stíny (MegaLights), přechod W→N, materiál kitu,
-  displeje a značení. Recenze `Docs/Reviews/2026-09-27_kit_batch2.md`.
+  displeje a značení. Recenze `Docs/Reviews/2026-09-27_kit_batch2.md`. Autor dávku schválil 27. 9.
+- **Po schválení (27. 9.):**
+  - **Přístavba ukázky:** uzavřené L jižně od chodby (y −3,6…−8,4). End24W_A → 2,4 m W → zatáčka se zkoseným
+    vnitřním rohem B (7,2/−3,6) a vnějším rohem (4,8/−6,0) → 2,4 m ramene → zúžení do průlezu. Vlastní start
+    `KitShowroomAnnexSpawn`: klávesa U vede ukázka → přístavba → zpět, `space.Showroom annex`. Preset `kit_annex.json`.
+  - **Okno End24W_B:** roleta napůl vytažená (4 ze 7 lamel, spodní lišta, vodicí lišty po stranách), zadní deska
+    s otvorem (`_end_base(hole=)`), ostění až k desce. V ukázce je za oknem karta `KitShowroom_WindowStars`
+    s `M_Kit_WindowStars`. HLSL hvězd, mlhovin a Mléčné dráhy je z `build_space_scene.py` (čteno přes `ast`, ten
+    skript při importu spouští `main()`). Materiál hledá hvězdy podle směru pohledu, takže karta 1,3 m za zdí
+    působí jako nekonečno bez paralaxy. Materiál oblohy samotný se nepoužil, protože je `is_sky`.
+  - **`Portal_Ring03N_B`:** těžký rám na změně W→N. Rám hluboký 26 cm, stupňovitý límec na obou lících, prstenec
+    z A, výstražný pás na hlavici ze strany W, průchod 1,0 m.
+  - **MegaLights C:** `SpacePlayerController` nastaví `r.MegaLights.EnableForProject` 1 při vstupu do libovolného
+    interiéru a 0 při návratu. Všechna světla ukázky mají `cast_shadows` v levelu (stíny se nepřepínají za běhu:
+    první zapnutí dělalo záškub 140 ms). Snímky s volnou kamerou musí MegaLights zapnout samy
+    (`kit_showroom2.json` v rozcvičení).
+  - **Výkon (C, 1080p, TSR 75 %):** chodba 18,1 ms GPU, křižovatka 18,0 ms (~52–57 FPS). Profil a návrh:
+    `Docs/Reviews/2026-09-27_interior_perf_profile.md`. Odrazy Lumenu stojí 2,3–2,8 ms (jejich vypnutí je hlavní
+    návrh), stíny 1,1 ms, rozlišení 67 % ušetří 1,6–2,5 ms. Postproces, průsvitnost, práh drsnosti a sběr sond
+    nic nedají. Návrh čeká na autora; nová světla přidávat až po něm.
 
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 

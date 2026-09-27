@@ -34,6 +34,7 @@ MAP = "/Game/Maps/TestSpace"
 KIT_ORIGIN = unreal.Vector(0.0, -50000.0, 0.0)
 TAG = "KitShowroom"
 SPAWN_TAG = "KitShowroomSpawn"          # space.Showroom / U walks the player here (SpacePlayerController)
+ANNEX_SPAWN_TAG = "KitShowroomAnnexSpawn"   # U again from the showroom (or space.Showroom annex): the annex
 GRAVITY_CMS2 = 981.0
 MAKER = "Halcyon"
 EAL, MEL = unreal.EditorAssetLibrary, unreal.MaterialEditingLibrary
@@ -62,6 +63,15 @@ SHOWROOM = {
         ((9.6, 1.2), (9.6, 4.8), (1, 0), ["Wall_Plain12W_A", "Wall_Locker06W_A", "Wall_Display06W_A", "Wall_Plain12W_C"]),
         ((10.2, 5.7), (10.2, 8.1), (1, 0), ["Wall_Plain12N_A", "Wall_Plain12N_C"]),
         ((11.4, 5.7), (11.4, 8.1), (-1, 0), ["Wall_Plain12N_C", "Wall_Plain12N_A"]),
+        # the annex (author 27. 9.: the catalogue-only parts in the game): a closed L south of the corridor - End24W_A,
+        # 2.4 m of W, a turn with the chamfered inner corner B, 2.4 m of leg and the narrowing into a crawlway.
+        # Its own start (U from the showroom); not visible from the showroom's measured views
+        ((2.4, -3.6), (7.2, -3.6), (0, -1), ["Wall_Plain12W_A", "Wall_Grille06W_A", "Wall_Plain06W_A", "Wall_Locker12W_C",
+                                             "Wall_Plain12W_B"]),
+        ((7.2, -3.6), (7.2, -8.4), (-1, 0), ["Wall_Plain12W_C", "Wall_Pipes12W_A", "Wall_Plain12W_A", "Wall_Hatch06W_B",
+                                             "Wall_Plain06W_A"]),
+        ((2.4, -6.0), (4.8, -6.0), (0, 1), ["Wall_Hatch12W_C", "Wall_Plain12W_B"]),
+        ((4.8, -6.0), (4.8, -8.4), (1, 0), ["Wall_Display06W_B", "Wall_Plain06W_A", "Wall_Plain12W_C"]),
     ],
     "run_parts": [
         ((2.1, 0.0), (1, 0), ["Portal_Ring03W_A"]),
@@ -75,23 +85,35 @@ SHOWROOM = {
         ((7.2, 0.0), (1, 0), ["Ceiling_Tray12W_B", "Ceiling_Panel12W_A"]),
         ((10.8, 1.2), (0, 1), ["Ceiling_Panel12W_C", "Ceiling_Panel12W_B", "Ceiling_Panel12W_A"]),
         ((10.8, 5.4), (0, -1), ["Wall_Transition06W_A"]),
-        ((10.8, 5.4), (0, 1), ["Portal_Ring03N_A"]),         # a bulkhead frame at the narrow end
+        ((10.8, 5.4), (0, 1), ["Portal_Ring03N_B"]),         # the heavy bulkhead frame at the narrow end
         ((10.8, 5.7), (0, 1), ["Ceiling_Panel12N_A", "Ceiling_Panel12N_A"]),
+        ((2.4, -4.8), (1, 0), ["Ceiling_Panel12W_C", "Ceiling_Panel12W_A"]),
+        ((6.0, -6.0), (0, -1), ["Ceiling_Panel12W_B", "Ceiling_Panel12W_A"]),   # the down-light by the crawlway
     ],
     "placed": [
         ("Wall_End24W_B", (0.0, 1.2), 0.0),
         ("Wall_End12N_A", (11.4, 8.1), -90.0),
         ("Corner_Inner00W_A", (12.0, -1.2), 180.0),
         ("Corner_Outer00W_A", (9.6, 1.2), 0.0),
+        ("Wall_End24W_A", (2.4, -3.6), 0.0),
+        ("Wall_Narrow24W_A", (4.8, -8.4), 90.0),
+        ("Corner_Inner00W_B", (7.2, -3.6), -90.0),
+        ("Corner_Outer00W_A", (4.8, -6.0), 90.0),
     ],
     # provisional until the kit has them: the junction's and the transition's ceiling, the floor (batch 3)
-    "prov_ceiling": [(9.6, 12.0, -1.2, 1.2), (9.6, 12.0, 4.8, 5.4)],
-    "prov_floor": [(-0.2, 12.2, -1.35, 1.35), (9.45, 12.15, 1.2, 4.95), (10.05, 11.55, 4.8, 8.25)],
+    "prov_ceiling": [(9.6, 12.0, -1.2, 1.2), (9.6, 12.0, 4.8, 5.4), (4.8, 7.2, -6.0, -3.6)],
+    "prov_floor": [(-0.2, 12.2, -1.35, 1.35), (9.45, 12.15, 1.2, 4.95), (10.05, 11.55, 4.8, 8.25),
+                   (2.2, 7.35, -6.15, -3.45), (4.65, 7.35, -8.55, -6.0)],
     # ((x, y), cd[, cone]); the second junction spot lights the inner corner (its walls sat at a mean of 0.09 under
     # the one in the middle) from the open ceiling - over the slopes' tops (0.6 m in from the walls) it was shadowed
-    "prov_spots": [((10.8, 0.0), 30.0), ((11.1, -0.3), 24.0, 120.0), ((10.8, 5.1), 12.0)],
-    "gravity": (-0.3, 12.3, -1.5, 8.3),
+    "prov_spots": [((10.8, 0.0), 30.0), ((11.1, -0.3), 24.0, 120.0), ((10.8, 5.1), 12.0),
+                   ((6.0, -4.8), 30.0), ((6.3, -4.5), 24.0, 120.0)],
+    "gravity": (-0.3, 12.3, -9.3, 8.3),
     "spawn": ((0.7, 0.0), 0.0),
+    "spawn_annex": ((3.1, -4.8), 0.0),
+    # the half-open window of End24W_B looks out at a star field: a card behind the wall whose material looks the
+    # stars up by the view direction (a window onto infinity, no parallax); in a ship the real outside
+    "window_stars": ((-1.3, 0.0, 1.0), (3.0, 2.2)),
 }
 
 
@@ -245,7 +267,9 @@ def rect_light(actors, loc, role, cd, radius_m, label, forward, along, width_cm,
     c.set_editor_property("intensity_units", unreal.LightUnits.CANDELAS)
     c.set_editor_property("intensity", float(cd))
     c.set_editor_property("attenuation_radius", float(radius_m) * 100.0)
-    c.set_editor_property("cast_shadows", False)
+    # MegaLights variant C (author, 27. 9. 2026): every kit light casts its ray-traced shadow; MegaLights is on while
+    # walking an interior (SpacePlayerController), shots of the showroom set r.MegaLights.EnableForProject 1
+    c.set_editor_property("cast_shadows", True)
     c.set_editor_property("source_width", float(width_cm))
     c.set_editor_property("source_height", float(height_cm))
     c.set_editor_property("barn_door_angle", 70.0)
@@ -266,7 +290,7 @@ def light(actors, loc, role, cd, radius_m, label, spot=False, cone=80.0, source_
     c.set_editor_property("intensity_units", unreal.LightUnits.CANDELAS)
     c.set_editor_property("intensity", float(cd))
     c.set_editor_property("attenuation_radius", float(radius_m) * 100.0)
-    c.set_editor_property("cast_shadows", spot)
+    c.set_editor_property("cast_shadows", True)             # MegaLights variant C, as rect_light
     c.set_editor_property("source_radius", float(source_cm) if source_cm else (1.0 if not spot else 4.0))
     c.set_editor_property("specular_scale", 0.2 if not spot else 0.6)
     col = LIGHT_COLOURS[role]
@@ -329,6 +353,62 @@ def place_part(actors, meshes, short, pos_cm, yaw, label, counts):
             light(actors, at, prm.get("role", "warm"), prm.get("cd", 1.0), prm.get("radius_m", 1.6), lab,
                   source_cm=prm.get("source_radius_cm"))
         counts["lights"] += 1
+
+
+STARS_MATERIAL = "/Game/Kit/Materials/M_Kit_WindowStars"
+
+
+def build_window_stars():
+    """An unlit opaque star field looked up by the view direction, from the space sky's own HLSL (stars, nebulae,
+    the Milky Way glow): on a card behind a window it reads as the sky at infinity. Not the sky material itself:
+    that one is a sky-pass material (is_sky). build_space_scene runs its main() on import: its constants by ast."""
+    import ast
+    src = open(os.path.join(REPO, "Tools", "Assets", "build_space_scene.py"), encoding="utf-8").read()
+    const = {}
+    for node in ast.parse(src).body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            try:
+                const[node.targets[0].id] = ast.literal_eval(node.value)
+            except ValueError:
+                pass
+    sm = ship_materials
+    m = sm._fresh_material(STARS_MATERIAL)
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("two_sided", True)
+    view = sm._node(m, unreal.MaterialExpressionCameraVectorWS, -1100, 0)
+    d = sm._node(m, unreal.MaterialExpressionMultiply, -900, 0, const_b=-1.0)   # from the eye, not to it
+    sm._link(view, d, "A")
+    stars = sm._custom(m, "Stars", const["STAR_HLSL"], unreal.CustomMaterialOutputType.CMOT_FLOAT3,
+                       ["Dir", "Density", "Brightness", "Time", "Twinkle"], -600, 0)
+    sm._link(d, stars, "Dir")
+    sm._link(sm._scalar(m, "StarDensity", const["STAR_DENSITY"], -900, 200), stars, "Density")
+    sm._link(sm._scalar(m, "StarBrightness", const["STAR_BRIGHTNESS"], -900, 320), stars, "Brightness")
+    sm._link(sm._node(m, unreal.MaterialExpressionTime, -900, 440), stars, "Time")
+    sm._link(sm._scalar(m, "Twinkle", 0.0, -900, 540), stars, "Twinkle")
+    nebula = sm._custom(m, "Nebulae", const["NOISE_STRUCT"] + const["NEBULA_HLSL"], unreal.CustomMaterialOutputType.CMOT_FLOAT3,
+                        ["Dir", "Brightness"], -600, 700)
+    sm._link(d, nebula, "Dir")
+    sm._link(sm._scalar(m, "NebulaBrightness", const["NEBULA_BRIGHTNESS"], -900, 750), nebula, "Brightness")
+    glow = sm._node(m, unreal.MaterialExpressionTextureSampleParameterCube, -600, 400, parameter_name="MilkyWayGlow",
+                    texture=EAL.load_asset(const["GLOW_TEXTURE"]))
+    sm._link(d, glow, "UVs")
+    glow_scaled = sm._node(m, unreal.MaterialExpressionMultiply, -350, 400)
+    if not MEL.connect_material_expressions(glow, "RGB", glow_scaled, "A"):
+        raise RuntimeError("window stars: glow cube -> multiply")
+    sm._link(sm._scalar(m, "GlowBrightness", const["GLOW_BRIGHTNESS"], -600, 600), glow_scaled, "B")
+    a = sm._node(m, unreal.MaterialExpressionAdd, -250, 0)
+    sm._link(stars, a, "A")
+    sm._link(glow_scaled, a, "B")
+    b = sm._node(m, unreal.MaterialExpressionAdd, -150, 0)
+    sm._link(a, b, "A")
+    sm._link(nebula, b, "B")
+    out = sm._node(m, unreal.MaterialExpressionMultiply, -50, 0)
+    sm._link(b, out, "A")
+    sm._link(sm._scalar(m, "WindowExposure", 1.0, -250, 200), out, "B")
+    sm._output(out, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    EAL.save_loaded_asset(m, only_if_is_dirty=False)
+    return m
 
 
 def build_showroom(meshes, mis, report):
@@ -395,10 +475,17 @@ def build_showroom(meshes, mis, report):
     gravity.set_editor_property("gravity_cm_s2", GRAVITY_CMS2)
     gravity.get_editor_property("volume").set_box_extent(unreal.Vector((gx1 - gx0) * 50.0, (gy1 - gy0) * 50.0, C * 50.0 + 20.0))
     gravity.set_editor_property("tags", [unreal.Name(TAG)])
-    (sx, sy), syaw = L["spawn"]
-    spawn = actors.spawn_actor_from_class(unreal.TargetPoint, _v((sx, sy), 0.05), unreal.Rotator(roll=0.0, pitch=0.0, yaw=syaw))
-    spawn.set_actor_label("KitShowroom_Spawn")
-    spawn.set_editor_property("tags", [unreal.Name(TAG), unreal.Name(SPAWN_TAG)])
+    for key, label, tag in (("spawn", "KitShowroom_Spawn", SPAWN_TAG), ("spawn_annex", "KitShowroom_AnnexSpawn", ANNEX_SPAWN_TAG)):
+        (sx, sy), syaw = L[key]
+        spawn = actors.spawn_actor_from_class(unreal.TargetPoint, _v((sx, sy), 0.05), unreal.Rotator(roll=0.0, pitch=0.0, yaw=syaw))
+        spawn.set_actor_label(label)
+        spawn.set_editor_property("tags", [unreal.Name(TAG), unreal.Name(tag)])
+    (wx, wy, wz), (ww, wh) = L["window_stars"]
+    stars = spawn_mesh(actors, plane, _v((wx, wy), wz), 0.0, "KitShowroom_WindowStars", build_window_stars(),
+                       unreal.Vector(wh, ww, 1.0))
+    stars.set_actor_rotation(unreal.Rotator(roll=0.0, pitch=-90.0, yaw=0.0), False)   # the plane's +Z to +X
+    stars.static_mesh_component.set_collision_profile_name("NoCollision")
+    stars.static_mesh_component.set_editor_property("cast_shadow", False)
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).save_current_level()
     report["showroom"] = {"parts": counts["parts"], "lights": counts["lights"]}
 

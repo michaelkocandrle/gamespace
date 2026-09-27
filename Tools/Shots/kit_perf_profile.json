@@ -1,0 +1,356 @@
+{
+ "_comment": "Interior performance profile with MegaLights variant C (author 27. 9. 2026: 60 FPS target on the RTX 2060 at 1080p): steady stat gpu (6 s) in the corridor and the junction, each variant switching one thing off (shadows, Lumen reflections, Lumen GI, translucency, 67 % resolution, post, MegaLights). Run: Tools/Shots.ps1 -Preset kit_perf_profile -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 8.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none",
+    "r.MegaLights.EnableForProject 1",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "base_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80
+  },
+  {
+   "name": "base_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "noshadow_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitLight Showroom CastShadows 0"
+   ]
+  },
+  {
+   "name": "noshadow_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "nolumenrefl_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitLight Showroom CastShadows 1",
+    "r.Lumen.Reflections.Allow 0"
+   ]
+  },
+  {
+   "name": "nolumenrefl_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "nolumengi_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "r.Lumen.Reflections.Allow 1",
+    "r.DynamicGlobalIlluminationMethod 0"
+   ]
+  },
+  {
+   "name": "nolumengi_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "notransl_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "r.DynamicGlobalIlluminationMethod 1",
+    "ShowFlag.Translucency 0"
+   ]
+  },
+  {
+   "name": "notransl_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "sp67_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "ShowFlag.Translucency 1",
+    "r.ScreenPercentage 67"
+   ]
+  },
+  {
+   "name": "sp67_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "nopost_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "r.ScreenPercentage 75",
+    "r.MotionBlurQuality 0",
+    "r.BloomQuality 0",
+    "r.DepthOfFieldQuality 0"
+   ]
+  },
+  {
+   "name": "nopost_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "megaoff_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "r.MotionBlurQuality 4",
+    "r.BloomQuality 5",
+    "r.DepthOfFieldQuality 2",
+    "r.MegaLights.EnableForProject 0",
+    "space.KitLight Showroom CastShadows 0"
+   ]
+  },
+  {
+   "name": "megaoff_junc",
+   "camera": "free",
+   "hud": 0,
+   "settle": 6.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80
+  },
+  {
+   "name": "z_reset",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.5,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "space.KitReset",
+    "r.MegaLights.EnableForProject 0",
+    "space.KitLight Showroom CastShadows 1"
+   ]
+  }
+ ]
+}

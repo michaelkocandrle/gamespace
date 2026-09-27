@@ -111,10 +111,26 @@ check("one gravity volume, %s cm/s2" % C["GRAVITY_CMS2"], len(gravity) == 1
       and abs(gravity[0].get_editor_property("gravity_cm_s2") - C["GRAVITY_CMS2"]) < 0.5)
 spawn = [a for a in actors if unreal.Name(C["SPAWN_TAG"]) in list(a.tags)]
 check("one start of the walk (%s)" % C["SPAWN_TAG"], len(spawn) == 1)
+annex = [a for a in actors if unreal.Name(C["ANNEX_SPAWN_TAG"]) in list(a.tags)]
+check("one start of the annex (%s, U from the showroom)" % C["ANNEX_SPAWN_TAG"], len(annex) == 1)
 if gravity and spawn:
     start = spawn[0].get_actor_location() + unreal.Vector(0.0, 0.0, 100.0)
     check("the start and every part lie inside the gravity volume",
           gravity[0].contains_point(start) and all(gravity[0].contains_point(m.get_actor_location() + unreal.Vector(0, 0, 50.0)) for m in modules))
+if gravity and annex:
+    check("the annex start lies inside the gravity volume",
+          gravity[0].contains_point(annex[0].get_actor_location() + unreal.Vector(0.0, 0.0, 100.0)))
+# MegaLights variant C (author, 27. 9. 2026): every kit light casts its (ray-traced) shadow
+lights = [a for a in room if isinstance(a, (unreal.RectLight, unreal.SpotLight, unreal.PointLight))]
+unshadowed = [a.get_actor_label() for a in lights if not a.get_component_by_class(unreal.LocalLightComponent).get_editor_property("cast_shadows")]
+check("every showroom light casts shadows (%d lights)" % len(lights), lights and not unshadowed, ", ".join(unshadowed[:5]))
+# the half-open window looks out at a star field card behind the end wall, without collision
+stars = [a for a in room if a.get_actor_label() == "KitShowroom_WindowStars"]
+mat = stars[0].static_mesh_component.get_material(0) if stars else None
+check("a star field behind the window (%s), no collision" % C["STARS_MATERIAL"], len(stars) == 1 and mat is not None
+      and mat.get_path_name().startswith(C["STARS_MATERIAL"])
+      and str(stars[0].static_mesh_component.get_collision_profile_name()) == "NoCollision",
+      mat.get_path_name() if mat else "none")
 box = [a for a in room if a.get_actor_label() == "KitProvisional_SunBox"]
 check("the sun box has no collision (the player walks inside it)", len(box) == 1
       and str(box[0].static_mesh_component.get_collision_profile_name()) == "NoCollision",

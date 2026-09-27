@@ -1604,6 +1604,17 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
         - Výkon ukázky: chodba GPU 17,6 ms (52 FPS), křižovatka 16,7 ms (57 FPS).
         - Otevřené body: okno koncové stěny (v ukázce není exteriér), kužely a stíny (rozhodnutí o MegaLights),
           přechod W→N (těžší rám portálu N, funkční shluk), materiál kitu, displeje a značení (dávky 1 a 6).
+        - Autor dávku 2 schválil (27. 9.). Hotovo před dávkou 3:
+          - oprava `hs_decals` ověřená na Wayfareru přestavbou: jediná změna je dosud neviditelná stékající špína
+            na zádi (`Docs/Reviews/2026-09-27_hs_decals_wayfarer_check.md`);
+          - přístavba ukázky s díly z katalogu (End24W_A, zkosený vnitřní roh B, zúžení do průlezu), klávesa U
+            vede ukázka → přístavba → zpět, `space.Showroom annex`;
+          - okno koncové stěny s napůl vytaženou roletou, za ním v ukázce hvězdné pole (materiál podle směru pohledu);
+          - těžký rám portálu N (`Portal_Ring03N_B`) na přechodu W→N;
+          - MegaLights varianta C: zapíná se při vstupu do interiéru, světla ukázky mají RT stíny;
+          - profil výkonu a návrh úspor (`Docs/Reviews/2026-09-27_interior_perf_profile.md`): C má 17,5–18,1 ms
+            GPU (~52–57 FPS); vypnutí odrazů Lumenu v interiéru ušetří 2,3–2,8 ms a splní cíl 60 FPS. Čeká na autora.
+        - Volba rámů (`frames_choice.png`) zůstala nevyplněná, rámy beze změny.
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

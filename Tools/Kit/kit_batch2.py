@@ -162,16 +162,24 @@ def portal(sec, var, name, seed):
     L = 0.3
     h, C = sec.half, sec.ceiling
     outer = [(-(h + 0.2), 0.0), (-(h + 0.2), C + 0.25), (h + 0.2, C + 0.25), (h + 0.2, 0.0)]
+    # N B: the heavy bulkhead frame where a W corridor narrows into N (author 27. 9.: "the section change must be
+    # the heaviest frame, not the lightest" - critic): 26 cm deep, stepped collars on both faces, the lit ring
+    # of A, a hazard band on the header; the clear width stays passable (1.0 m)
+    heavy = sec.key == "N" and var == "B"
 
     def prism(role, d, x0, x1, bevel=0.0):
         m = frame((x1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 0, 0))
         p.poly_prism(role, sec.inner(d) + outer, m, x1 - x0, bevel=bevel, segments=1, panel=False)
 
     prism("Kit_Primary", 0.035, G, L - G)
-    d2 = sec.protrusion + (0.03 if var == "C" else 0.0)
-    x0, x1 = (0.03, 0.27) if var == "C" else (0.06, 0.24)
+    d2 = sec.protrusion + (0.03 if var == "C" else 0.02 if heavy else 0.0)
+    x0, x1 = (0.03, 0.27) if var == "C" else (0.02, 0.28) if heavy else (0.06, 0.24)
     # the frame proper, its edges chamfered (they carry the edge wear)
-    prism("Kit_Structure", d2, x0, x1, bevel=0.01)
+    prism("Kit_Structure", d2, x0, x1, bevel=0.014 if heavy else 0.01)
+    if heavy:
+        # a stepped collar on each face: the frame reads in layers from both corridors
+        prism("Kit_Structure", d2 - 0.035, x0 - 0.016, x0, bevel=0.006)
+        prism("Kit_Structure", d2 - 0.035, x1, x1 + 0.016, bevel=0.006)
     arch = sec.inner(d2)
     room = (0.0, C * 0.5)
     xc0 = (x0 + x1) / 2
@@ -224,7 +232,7 @@ def portal(sec, var, name, seed):
     number = {"A": "panel_F02", "B": "panel_G08", "C": "panel_H19"}[var] if sec.key == "W" else "panel_C21"
     label(p, number, (xc, h - d2 - lift, (zp0 + zp1) / 2), (0, -1, 0), (1, 0, 0), (0, 0, 1), min(1.6, (fw - 0.012) / 0.14))
     p.socket("Decal_Section", (xc, h - d2 - lift - 0.001, (zp0 + zp1) / 2), x=(0, -1, 0), z=(0, 0, 1), tag="section_number")
-    if var == "A":
+    if var == "A" or heavy:
         # the lit ring over the slopes and the head only (no strip down the legs - critic): a diffuser set 7 mm
         # down in a channel between two lips, a cap at each end, one linear light under the head
         segs = list(zip(arch[:-1], arch[1:]))[1:-1]
@@ -238,6 +246,9 @@ def portal(sec, var, name, seed):
                 p.slab("Kit_Structure", m, u, u + 0.03, -0.026, 0.026, 0.014, BEV_SMALL, segments=1, proud=0.011, panel=False)
         p2 = arch[2]
         strip_light(p, "Light_Ring_0", (xc, 0.0, C - d2 - 0.02), (0, 0, -1), 2 * p2[0] - 0.06, 0.024, "warm", 1.0, 2.4)
+        if heavy:
+            # the hazard band across the header, on the W-side collar (its visible band under the ceiling line)
+            label(p, "hazard_stripe", (x0 - 0.016, 0.0, C - (d2 - 0.035) / 2), (-1, 0, 0), (0, -1, 0), (0, 0, 1), 0.85)
     elif var == "B":
         # a hatched hazard band up both legs, 0.3-0.9 m, 7 cm wide, under the number plate
         for sgn in (1, -1):
@@ -433,12 +444,20 @@ def _outline(sec):
     return [(0, 0), (W, 0), (W, vt), (W - xt, top), (W - xt + 0.14, top), (W - xt + 0.14, C), (xt - 0.14, C), (xt - 0.14, top), (xt, top), (0, vt)]
 
 
-def _end_base(p, sec, spans, back_x=-0.07):
+def _end_base(p, sec, spans, back_x=-0.07, hole=None):
     """What every end wall has: the dark backing, the plinth (recess, housed cool strip, one linear light) and the
-    kick panel over `spans` (y ranges), the rail with its signal line at the break."""
+    kick panel over `spans` (y ranges), the rail with its signal line at the break. hole (y0, y1, z0, z1): an
+    opening in the backing under the break (a window that looks out)."""
     W, vt = sec.width, sec.vt
     back = frame((back_x, 0, 0), (0, 1, 0), (0, 0, 1), (1, 0, 0))
-    p.poly_prism("Kit_Seal", _outline(sec), back, 0.01, panel=False)
+    if hole:
+        y0, y1, z0, z1 = hole
+        outline = _outline(sec)
+        for poly in ([(0, 0), (W, 0), (W, z0), (0, z0)], [(0, z0), (y0, z0), (y0, z1), (0, z1)],
+                     [(y1, z0), (W, z0), (W, z1), (y1, z1)], [(0, z1), (W, z1)] + outline[2:]):
+            p.poly_prism("Kit_Seal", poly, back, 0.01, panel=False)
+    else:
+        p.poly_prism("Kit_Seal", _outline(sec), back, 0.01, panel=False)
     for k, (a, b) in enumerate(spans):
         p.slab("Kit_Seal", PLINTH, a, b, 0, 0.1414, 0.012, panel=False)
         f0, f1 = a + G + 0.004, b - G - 0.004
@@ -473,13 +492,15 @@ def end_wall(sec, var, name, seed):
     rng = random.Random(seed)
     W, vt, top, xt, C = sec.width, sec.vt, sec.top, sec.xt, sec.ceiling
     b1, b2 = W / 3, 2 * W / 3
-    # with a window the dark backing goes behind the shutter (at 7 cm it hid the reveal's back and the shutter)
-    _end_base(p, sec, [(0.0, b1), (b1, b2), (b2, W)], back_x=-0.2 if var == "B" else -0.07)
     rib = 0.03
     bays = [(G, b1 - rib), (b1 + rib, b2 - rib), (b2 + rib, W - G)]
     window = None
     if var == "B":
         window = (b1 + 0.1, b2 - 0.1, 0.8, 1.14)          # under the rail at the break
+    # with a window the dark backing goes behind the shutter (at 7 cm it hid the reveal's back and the shutter), and
+    # it is open behind the window: the shutter is half raised and the lower half looks out
+    hole = (window[0] - 0.02, window[1] + 0.02, window[2] - 0.02, window[3] + 0.02) if window else None
+    _end_base(p, sec, [(0.0, b1), (b1, b2), (b2, W)], back_x=-0.2 if var == "B" else -0.07, hole=hole)
     for k, (u0, u1) in enumerate(bays):
         if k == 1 and window:
             frame_hole(p, "Kit_Primary", FACE, u0, u1, 0.5 + GAP / 2, vt - 0.055, window)
@@ -505,17 +526,24 @@ def end_wall(sec, var, name, seed):
         gasket(p, FACE, window)
         p.slab("Kit_Glass", FACE, h0, h1, v0, v1, 0.004, proud=-0.012, panel=False)
         d = 0.14
-        p.box("Kit_Primary", (-d, h0 - 0.02, v1), (0.0, h1 + 0.02, v1 + 0.02), panel=False)
-        p.box("Kit_Structure", (-d, h0 - 0.02, v0 - 0.02), (0.0, h1 + 0.02, v0), bevel=BEV_SMALL, segments=1, panel=False)
+        # the reveal runs back to the backing (-0.2): no gap round the opening to look into
+        p.box("Kit_Primary", (-0.2, h0 - 0.02, v1), (0.0, h1 + 0.02, v1 + 0.02), panel=False)
+        p.box("Kit_Structure", (-0.2, h0 - 0.02, v0 - 0.02), (0.0, h1 + 0.02, v0), bevel=BEV_SMALL, segments=1, panel=False)
         for (a0, a1) in ((h0 - 0.02, h0), (h1, h1 + 0.02)):
-            p.box("Kit_Primary", (-d, a0, v0), (0.0, a1, v1), panel=False)
-        n = 7
-        for k in range(n):
+            p.box("Kit_Primary", (-0.2, a0, v0), (0.0, a1, v1), panel=False)
+        # the armoured shutter half raised (author 27. 9.): four of seven dark slats down from the head and a heavier
+        # bottom rail, the lower part open - in a ship it shows the real outside, in the showroom a star field
+        n, n_down = 7, 4
+        for k in range(n - n_down, n):
             z0 = v0 + (v1 - v0) * k / n
             z1 = v0 + (v1 - v0) * (k + 1) / n - 0.005
             # dark armoured slats: in the light paint under a warm light they read as a glowing box (critic r2)
             p.box("Kit_Primary", (-d - 0.012, h0, z0), (-d, h1, z1), bevel=0.002, segments=1)
-        p.box("Kit_Seal", (-d - 0.03, h0, v0), (-d - 0.012, h1, v1), panel=False)
+        zb = v0 + (v1 - v0) * (n - n_down) / n
+        p.box("Kit_Structure", (-d - 0.016, h0, zb - 0.014), (-d + 0.004, h1, zb + 0.004), bevel=0.003, segments=1)
+        for yy in (h0 + 0.03, h1 - 0.03):
+            # guide channels at the sides the slats run in
+            p.box("Kit_Structure", (-d - 0.02, yy - 0.008, v0), (-d + 0.004, yy + 0.008, v1), bevel=0.002, segments=1, panel=False)
         # a strip light in the reveal's head lights the shutter (without it the window stayed black)
         p.box("Kit_GlowWarm", (-d + 0.02, h0 + 0.02, v1 - 0.006), (-0.03, h1 - 0.02, v1), panel=False)
         strip_light_along(p, "Light_Window_0", (-d / 2, (h0 + h1) / 2, v1 - 0.012), (-0.5, 0, -0.866), (0, 1, 0), h1 - h0 - 0.04, 0.02,
@@ -566,7 +594,8 @@ def narrow(sec, var, name, seed):
     p.slab("Kit_Trim", frame((-d, 0, 0.0), (1, 0, 0), (0, 1, 0), (0, 0, 1)), 0.05, d - 0.05, o0 + 0.1, o1 - 0.1, 0.004, proud=0.002,
            trim="antislip_tread", panel=False)
     p.box("Kit_Seal", (-d - 0.01, o0, 0.0), (-d, o1, S.ceiling), panel=False)
-    strip_light_along(p, "Light_Crawl_0", (-0.26, W / 2, S.ceiling - 0.01), (0, 0, -1), (1, 0, 0), 0.36, 0.04, "cool", 0.25, 1.0)
+    # 1.2 cd: at 0.25 the crawlway read as a black rectangle under MegaLights with shadows (27. 9. 2026)
+    strip_light_along(p, "Light_Crawl_0", (-0.26, W / 2, S.ceiling - 0.01), (0, 0, -1), (1, 0, 0), 0.36, 0.04, "cool", 1.2, 1.2)
     # collision: the wall either side of the opening, the head, the crawlway walls
     p.collision_box((-0.2, 0, 0), (0, o0 - f, C))
     p.collision_box((-0.2, o1 + f, 0), (0, W, C))
@@ -769,7 +798,7 @@ CORNER_VIEW = ((1, 1, 0.3), (1, 0.35, 0.45))
 
 BATCH2 = [
     ("Portal", "Ring", 0.3, "W", "A"), ("Portal", "Ring", 0.3, "W", "B"), ("Portal", "Ring", 0.3, "W", "C"),
-    ("Portal", "Ring", 0.3, "N", "A"),
+    ("Portal", "Ring", 0.3, "N", "A"), ("Portal", "Ring", 0.3, "N", "B"),
     ("Ceiling", "Panel", 1.2, "W", "A"), ("Ceiling", "Panel", 0.6, "W", "A"), ("Ceiling", "Panel", 0.3, "W", "A"),
     ("Ceiling", "Panel", 1.2, "W", "B"), ("Ceiling", "Panel", 1.2, "W", "C"),
     ("Ceiling", "Tray", 1.2, "W", "A"), ("Ceiling", "Tray", 0.6, "W", "A"), ("Ceiling", "Tray", 1.2, "W", "B"),

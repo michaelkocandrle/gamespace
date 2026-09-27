@@ -333,6 +333,18 @@ namespace
 {
 	const FName InteriorSpawnTag(TEXT("SpaceInteriorSpawn"));
 	const FName ShowroomSpawnTag(TEXT("KitShowroomSpawn"));
+	const FName ShowroomAnnexSpawnTag(TEXT("KitShowroomAnnexSpawn"));
+
+	// MegaLights variant C (author, 27. 9. 2026): interiors are lit through MegaLights with the fixtures' ray-traced
+	// shadows (the kit showroom's lights cast shadows in the level); the view from the ship and the planet keep
+	// today's lighting until MegaLights is measured there
+	void SetInteriorLighting(bool bInterior)
+	{
+		if (IConsoleVariable* MegaLights = IConsoleManager::Get().FindConsoleVariable(TEXT("r.MegaLights.EnableForProject")))
+		{
+			MegaLights->Set(bInterior ? 1 : 0, ECVF_SetByCode);
+		}
+	}
 
 	AActor* FindInteriorSpawn(UWorld* World, FName Tag = InteriorSpawnTag)
 	{
@@ -364,7 +376,21 @@ void ASpacePlayerController::HandleShowroomKey(const FInputActionValue& /*Value*
 {
 	if (!IsMenuOpen() && !IsTitleScreen())
 	{
-		ToggleInteriorAt(ShowroomSpawnTag);
+		// U walks a round: the showroom, then its annex (the catalogue-only kit parts), then back where the
+		// player came from (author, 27. 9. 2026)
+		const bool bInShowroom = bWalkingInterior && WalkingSpawnTag == ShowroomSpawnTag;
+		if (bInShowroom && GetWorld() && FindInteriorSpawn(GetWorld(), ShowroomAnnexSpawnTag))
+		{
+			ToggleInteriorAt(ShowroomAnnexSpawnTag);
+		}
+		else if (bWalkingInterior && WalkingSpawnTag == ShowroomAnnexSpawnTag)
+		{
+			ToggleInteriorAt(ShowroomAnnexSpawnTag);
+		}
+		else
+		{
+			ToggleInteriorAt(ShowroomSpawnTag);
+		}
 	}
 }
 
@@ -400,6 +426,7 @@ bool ASpacePlayerController::ToggleInteriorAt(FName SpawnTag)
 		}
 		bWalkingInterior = false;
 		ReturnShip = nullptr;
+		SetInteriorLighting(false);
 		return true;
 	}
 
@@ -422,6 +449,7 @@ bool ASpacePlayerController::ToggleInteriorAt(FName SpawnTag)
 		Walker->FaceDirection(Spawn->GetActorForwardVector());
 		bWalkingInterior = true;
 		WalkingSpawnTag = SpawnTag;
+		SetInteriorLighting(true);
 		return true;
 	}
 	const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Current);
@@ -446,6 +474,7 @@ bool ASpacePlayerController::ToggleInteriorAt(FName SpawnTag)
 	}
 	bWalkingInterior = true;
 	WalkingSpawnTag = SpawnTag;
-	UE_LOG(LogSpacePlayer, Log, TEXT("%s: walking %s from %s"), *GetName(), *SpawnTag.ToString(), *Start.GetLocation().ToString());
+	SetInteriorLighting(true);
+	UE_LOG(LogSpacePlayer, Log, TEXT("%s: walking %s from %s (MegaLights on)"), *GetName(), *SpawnTag.ToString(), *Start.GetLocation().ToString());
 	return true;
 }

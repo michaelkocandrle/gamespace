@@ -242,7 +242,7 @@
     "A": "90 deg inner corner with a vertical structural post",
     "B": "45 deg chamfered inner corner"
    },
-   "status": "built W (batch 2), awaiting approval"
+   "status": "built W (batch 2), approved by the author 27. 9. 2026"
   },
   "Corner_Outer": {
    "category": "Corner",
@@ -255,7 +255,7 @@
    "variants": {
     "A": "90 deg outer corner with a bumper edge"
    },
-   "status": "built W (batch 2), awaiting approval"
+   "status": "built W (batch 2), approved by the author 27. 9. 2026"
   },
   "Wall_Transition": {
    "category": "Wall",
@@ -269,7 +269,7 @@
    "variants": {
     "A": "section change N to W over 0.6 m"
    },
-   "status": "built W (batch 2), awaiting approval"
+   "status": "built W (batch 2), approved by the author 27. 9. 2026"
   },
   "Wall_End": {
    "category": "Wall",
@@ -283,7 +283,7 @@
     "A": "corridor end wall with the full profile",
     "B": "end wall with a window slot"
    },
-   "status": "built W (batch 2, End and Panel also N), awaiting approval"
+   "status": "built W (batch 2, End and Panel also N), approved by the author 27. 9. 2026"
   },
   "Wall_Narrow": {
    "category": "Wall",
@@ -294,7 +294,7 @@
    "variants": {
     "A": "narrowing into a service crawlway"
    },
-   "status": "built W (batch 2), awaiting approval"
+   "status": "built W (batch 2), approved by the author 27. 9. 2026"
   },
   "Portal_Ring": {
    "category": "Portal",
@@ -313,7 +313,7 @@
     "B": "frame with a hazard band and a section number plate",
     "C": "heavy frame with pipes passing through"
    },
-   "status": "built W (batch 2), awaiting approval"
+   "status": "built W (batch 2), approved by the author 27. 9. 2026; N B (heavy bulkhead frame at a W->N change) added 27. 9."
   },
   "Ceiling_Tray": {
    "category": "Ceiling",
@@ -331,7 +331,7 @@
     "A": "open cable tray with bundles",
     "B": "tray with a duct and a pipe"
    },
-   "status": "built W (batch 2), awaiting approval"
+   "status": "built W (batch 2), approved by the author 27. 9. 2026"
   },
   "Ceiling_Panel": {
    "category": "Ceiling",
@@ -351,7 +351,7 @@
     "B": "panels with a vent diffuser",
     "C": "panels with a linear light"
    },
-   "status": "built W (batch 2, End and Panel also N), awaiting approval",
+   "status": "built W (batch 2, End and Panel also N), approved by the author 27. 9. 2026",
    "_note": "0.3 m = a plain filler (a 2.1 m bay between portals is 1.2 + 0.6 + 0.3)"
   },
   "Floor_Plate": {
