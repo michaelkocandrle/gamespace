@@ -74,12 +74,17 @@ void ASpacePlayerController::SetupInputComponent()
 	InteriorAction = NewObject<UInputAction>(this, TEXT("IA_Interior_Runtime"));
 	InteriorAction->ValueType = EInputActionValueType::Boolean;
 	GlobalContext->MapKey(InteriorAction, EKeys::I);
+	// U ("ukazka"): walk the interior kit showroom in TestSpace (author, 27. 9. 2026)
+	ShowroomAction = NewObject<UInputAction>(this, TEXT("IA_Showroom_Runtime"));
+	ShowroomAction->ValueType = EInputActionValueType::Boolean;
+	GlobalContext->MapKey(ShowroomAction, EKeys::U);
 
 	if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(InputComponent))
 	{
 		Input->BindAction(MenuAction, ETriggerEvent::Started, this, &ASpacePlayerController::HandleMenuKey);
 		Input->BindAction(HudAction, ETriggerEvent::Started, this, &ASpacePlayerController::HandleToggleHud);
 		Input->BindAction(InteriorAction, ETriggerEvent::Started, this, &ASpacePlayerController::HandleInteriorKey);
+		Input->BindAction(ShowroomAction, ETriggerEvent::Started, this, &ASpacePlayerController::HandleShowroomKey);
 	}
 	else
 	{
@@ -327,12 +332,13 @@ void ASpacePlayerController::PreviewVolumes(float MasterVolume, float EffectsVol
 namespace
 {
 	const FName InteriorSpawnTag(TEXT("SpaceInteriorSpawn"));
+	const FName ShowroomSpawnTag(TEXT("KitShowroomSpawn"));
 
-	AActor* FindInteriorSpawn(UWorld* World)
+	AActor* FindInteriorSpawn(UWorld* World, FName Tag = InteriorSpawnTag)
 	{
 		for (TActorIterator<AActor> It(World); It; ++It)
 		{
-			if (It->ActorHasTag(InteriorSpawnTag))
+			if (It->ActorHasTag(Tag))
 			{
 				return *It;
 			}
@@ -354,7 +360,20 @@ void ASpacePlayerController::HandleInteriorKey(const FInputActionValue& /*Value*
 	}
 }
 
+void ASpacePlayerController::HandleShowroomKey(const FInputActionValue& /*Value*/)
+{
+	if (!IsMenuOpen() && !IsTitleScreen())
+	{
+		ToggleInteriorAt(ShowroomSpawnTag);
+	}
+}
+
 bool ASpacePlayerController::ToggleInterior()
+{
+	return ToggleInteriorAt(InteriorSpawnTag);
+}
+
+bool ASpacePlayerController::ToggleInteriorAt(FName SpawnTag)
 {
 	UWorld* World = GetWorld();
 	APawn* Current = GetPawn();
@@ -363,7 +382,7 @@ bool ASpacePlayerController::ToggleInterior()
 		return false;
 	}
 
-	if (bWalkingInterior)
+	if (bWalkingInterior && WalkingSpawnTag == SpawnTag)
 	{
 		// Back: into the ship that was being flown, or to where the player stood.
 		if (APawn* Ship = ReturnShip.Get())
@@ -384,7 +403,7 @@ bool ASpacePlayerController::ToggleInterior()
 		return true;
 	}
 
-	AActor* Spawn = FindInteriorSpawn(World);
+	AActor* Spawn = FindInteriorSpawn(World, SpawnTag);
 	if (!Spawn || !Current)
 	{
 		return false;
@@ -392,12 +411,17 @@ bool ASpacePlayerController::ToggleInterior()
 	const FTransform Start(Spawn->GetActorRotation(), Spawn->GetActorLocation() + Spawn->GetActorUpVector() * 100.0);
 	if (APlayerCharacter* Walker = Cast<APlayerCharacter>(Current))
 	{
-		// Already on foot somewhere else: take the same character across.
-		ReturnShip = nullptr;
-		ReturnTransform = Walker->GetActorTransform();
+		// Already on foot somewhere else: take the same character across. From another interior the way back
+		// stays what it was (the ship, or the first spot on foot).
+		if (!bWalkingInterior)
+		{
+			ReturnShip = nullptr;
+			ReturnTransform = Walker->GetActorTransform();
+		}
 		Walker->SetActorTransform(Start, false, nullptr, ETeleportType::TeleportPhysics);
 		Walker->FaceDirection(Spawn->GetActorForwardVector());
 		bWalkingInterior = true;
+		WalkingSpawnTag = SpawnTag;
 		return true;
 	}
 	const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Current);
@@ -421,6 +445,7 @@ bool ASpacePlayerController::ToggleInterior()
 		OnFoot->FaceDirection(Spawn->GetActorForwardVector());
 	}
 	bWalkingInterior = true;
-	UE_LOG(LogSpacePlayer, Log, TEXT("%s: walking the interior from %s"), *GetName(), *Start.GetLocation().ToString());
+	WalkingSpawnTag = SpawnTag;
+	UE_LOG(LogSpacePlayer, Log, TEXT("%s: walking %s from %s"), *GetName(), *SpawnTag.ToString(), *Start.GetLocation().ToString());
 	return true;
 }

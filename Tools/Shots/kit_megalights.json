@@ -1,0 +1,376 @@
+{
+ "_comment": "MegaLights on the interior kit showroom (TestSpace, 0 -500 0 m) against the current deferred lights, author 27. 9. 2026: a = MegaLights off (today), b = MegaLights on with the shadowless lights as they are, c = MegaLights on and every showroom light casting ray-traced shadows (space.KitLight Showroom CastShadows 1). Each variant: the corridor, two close-ups for noise (display, plinth) and a stat gpu shot. d = the same in motion from the player's eye while walking (space.Showroom + space.Walk), for temporal noise and ghosting. e = the frames a clear step darker in a warm grey, 0.17/0.16/0.145 against 0.26 today (space.KitColor; 0.21 was eaten by the auto exposure), the author's open choice. Run: Tools/Shots.ps1 -Preset kit_megalights -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none",
+    "r.MegaLights.EnableForProject 0",
+    "space.KitLight Showroom CastShadows 0"
+   ]
+  },
+  {
+   "name": "a_off_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80
+  },
+  {
+   "name": "a_off_display",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    1.5,
+    -499.8,
+    1.25
+   ],
+   "camera_look_at": [
+    1.5,
+    -498.8,
+    1.0
+   ],
+   "fov": 55
+  },
+  {
+   "name": "a_off_plinth",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    5.5,
+    -500.3,
+    0.55
+   ],
+   "camera_look_at": [
+    6.6,
+    -498.8,
+    0.08
+   ],
+   "fov": 65
+  },
+  {
+   "name": "a_off_perf",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "b_ml_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 4.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "r.MegaLights.EnableForProject 1"
+   ]
+  },
+  {
+   "name": "b_ml_display",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    1.5,
+    -499.8,
+    1.25
+   ],
+   "camera_look_at": [
+    1.5,
+    -498.8,
+    1.0
+   ],
+   "fov": 55
+  },
+  {
+   "name": "b_ml_plinth",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    5.5,
+    -500.3,
+    0.55
+   ],
+   "camera_look_at": [
+    6.6,
+    -498.8,
+    0.08
+   ],
+   "fov": 65
+  },
+  {
+   "name": "b_ml_perf",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "c_mlsh_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 4.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "space.KitLight Showroom CastShadows 1"
+   ]
+  },
+  {
+   "name": "c_mlsh_display",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    1.5,
+    -499.8,
+    1.25
+   ],
+   "camera_look_at": [
+    1.5,
+    -498.8,
+    1.0
+   ],
+   "fov": 55
+  },
+  {
+   "name": "c_mlsh_plinth",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    5.5,
+    -500.3,
+    0.55
+   ],
+   "camera_look_at": [
+    6.6,
+    -498.8,
+    0.08
+   ],
+   "fov": 65
+  },
+  {
+   "name": "c_mlsh_left34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    3.6,
+    -500.9,
+    1.55
+   ],
+   "camera_look_at": [
+    1.6,
+    -498.9,
+    1.0
+   ],
+   "fov": 70
+  },
+  {
+   "name": "c_mlsh_perf",
+   "camera": "free",
+   "hud": 0,
+   "settle": 3.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "d_walk_mlsh",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 1.8,
+   "console": [
+    "stat none",
+    "space.Showroom",
+    "space.Walk 1 0 5 0"
+   ]
+  },
+  {
+   "name": "d_walk_off",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 1.8,
+   "console": [
+    "r.MegaLights.EnableForProject 0",
+    "space.KitLight Showroom CastShadows 0",
+    "space.Showroom",
+    "space.Showroom",
+    "space.Walk 1 0 5 0"
+   ]
+  },
+  {
+   "name": "e_frames_warm_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.5,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitColor PrimaryColor 0.17 0.16 0.145 Structure"
+   ]
+  },
+  {
+   "name": "e_frames_warm_left34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.6,
+    -500.9,
+    1.55
+   ],
+   "camera_look_at": [
+    1.6,
+    -498.9,
+    1.0
+   ],
+   "fov": 70
+  },
+  {
+   "name": "e_frames_now_left34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.6,
+    -500.9,
+    1.55
+   ],
+   "camera_look_at": [
+    1.6,
+    -498.9,
+    1.0
+   ],
+   "fov": 70,
+   "console": [
+    "space.KitReset"
+   ]
+  },
+  {
+   "name": "z_reset",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.5,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset",
+    "r.MegaLights.EnableForProject 0",
+    "space.KitLight Showroom CastShadows 0",
+    "stat none"
+   ]
+  }
+ ]
+}

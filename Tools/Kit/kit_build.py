@@ -31,7 +31,8 @@ RENDERS = os.path.join(ROOT, "Saved", "KitCatalog")
 FBX = dict(use_selection=True, object_types={"MESH", "EMPTY"}, use_mesh_modifiers=True, mesh_smooth_type="FACE",
            use_tspace=True, use_triangles=True, use_custom_props=False, apply_unit_scale=True,
            apply_scale_options="FBX_SCALE_NONE", global_scale=1.0, axis_forward="-Z", axis_up="Y",
-           bake_space_transform=False, add_leaf_bones=False, bake_anim=False, path_mode="AUTO", embed_textures=False)
+           bake_space_transform=False, add_leaf_bones=False, bake_anim=False, path_mode="AUTO", embed_textures=False,
+           colors_type="LINEAR", prioritize_active_color=True)   # Col carries masks, not a colour: no sRGB curve
 
 
 def decals(ob, part):
@@ -39,7 +40,7 @@ def decals(ob, part):
     import hs_decals
     index = json.load(open(os.path.join(ROOT, "ArtSource", "Ships", "Shared", "Decals", "decal_library_index.json"), encoding="utf-8"))
     pl = hs_decals.Placer(ob, {"offset_m": 0.0012, "grid_m": 0.06}, index, (0.0, 0.0, 0.0), (99.0, 99.0))
-    placed, failed = 0, []
+    placed, failed = [], []
     for it in part.decal_items:
         if it["item"] not in index["decals"]:
             failed.append((it["item"], "not in index"))
@@ -54,7 +55,7 @@ def decals(ob, part):
         fr = it.get("frame")
         fr = (Vector(fr[0]), Vector(fr[1])) if fr else None
         if pl.place_at(it["item"], hit, n, it.get("rot", 0.0), it.get("scale", 1.0), "kit", not it.get("label"), fr):
-            placed += 1
+            placed.append(it["item"])
         else:
             failed.append((it["item"], "edge/overlap"))
     if not pl.bm.faces:
@@ -70,11 +71,37 @@ def decals(ob, part):
     return dob, placed, failed
 
 
+def to_corner_colour(me, name="Col"):
+    """A point-domain colour attribute as a face-corner one of the same name. The part's masks are per corner
+    (kit_geo), the decal cards' per point (hs_decals): joined as they were, the point layer won the name and the
+    part's masks were lost - all white, which Unreal drops on import (27. 9. 2026)."""
+    src = me.color_attributes.get(name)
+    if src is None or src.domain == "CORNER":
+        return
+    vals = [tuple(d.color) for d in src.data]
+    me.color_attributes.remove(src)
+    dst = me.color_attributes.new(name, "FLOAT_COLOR", "CORNER")
+    for loop in me.loops:
+        dst.data[loop.index].color = vals[loop.vertex_index]
+
+
+def colour_masks(ob, name="Col"):
+    """How many face corners carry the edge mask (G) and the secondary tone (B): zero means the masks are gone."""
+    a = ob.data.color_attributes.get(name)
+    if a is None:
+        return {"domain": None, "edge": 0, "secondary": 0, "floor": 0}
+    edge = sum(1 for d in a.data if d.color[1] < 0.5)
+    sec = sum(1 for d in a.data if d.color[2] < 0.5)
+    floor = sum(1 for d in a.data if d.color[0] < 0.95)
+    return {"domain": a.domain, "edge": edge, "secondary": sec, "floor": floor}
+
+
 def join(ob, other):
     """Appends other's mesh (same frame) to ob's, mapping its material slots onto ob's (no operators: the
     background context has no reliable selection)."""
     import bmesh
     me = ob.data
+    to_corner_colour(other.data)
     names = [m.name for m in me.materials]
     remap = []
     for m in other.data.materials:
@@ -213,6 +240,9 @@ def main():
             if dob is not None:
                 join(ob, dob)
             drop_unused_slots(ob)
+            masks = colour_masks(ob)
+            if masks["domain"] != "CORNER" or masks["edge"] == 0 or masks["floor"] == 0:
+                raise SystemExit("%s: the colour masks did not survive (%s) - Unreal drops an all-white Col" % (ob.name, masks))
             if failed:
                 report["decals_failed"][ob.name] = failed
             geo = tris(ob, [r for r in kit_geo.ROLES])
@@ -242,7 +272,10 @@ def main():
                 "tris": geo, "tris_decals": tris(ob) - geo, "tri_budget": limit,
                 "materials": [m.name for m in ob.data.materials], "sockets": sockets,
                 "collision_hulls": sum(1 for c in ob.children if c.name.startswith("UCX_")),
-                "decals": placed, "status": "built"}
+                "decals": len(placed), "decal_items": placed,
+                # the labels that name a system or a service point: layout rule, never the same on neighbours
+                "service_labels": sorted({d for d in placed if d.startswith(("st_", "label_"))}),
+                "colour_masks": masks, "status": "built"}
             if do_render and sec == sections[0]:
                 manifest["parts"][ob.name]["renders"] = {k: os.path.relpath(v, ROOT).replace("\\", "/") for k, v in render(ob, cam).items()}
             # every part stays at the origin in its collection; hide it so the next one renders alone

@@ -67,9 +67,9 @@ Samotný průchod MegaLights: chodba 2,43 → 2,65 ms, kokpit 1,92 → 2,04 ms. 
   +1,7 ms navíc). Stíny nemají, takže světlo prosvítá díly.
 - **MegaLights** mají skoro pevnou cenu (průchod ~2 ms). Světla nahradí téměř zadarmo a stíny ze všech světel
   přidají jen ~0,6 ms. Nad ~2× současné hustoty vycházejí levněji než klasická světla. Omezení v UE 5.8:
-  - funkce je označená jako **experimentální**;
+  - funkce je označená jako **experimentální**; *oprava 27. 9.: v UE 5.8 je oficiálně Production Ready, text „Experimental“ v tooltipu enginu je zastaralý*;
   - potřebuje hardwarový ray tracing (RTX 2060 ho má, projekt má `r.RayTracing` zapnutý);
-  - nepodporuje směrová světla (slunce zůstává klasicky);
+  - směrová světla jsou ve výchozím stavu vypnutá (`r.MegaLights.DirectionalLights` 0), slunce zůstává klasicky;
   - kvalita stínů závisí na BVH, interiér bez Nanite je v pořádku;
   - stochastické vzorkování může v pohybu šumět. Snímky jsou statické, pohyb se musí ověřit ve hře.
   - V průměrech se objevily výkyvy (maxima až 20 ms), zřejmě při přepnutí za běhu. Trvale zapnuté by je mít
@@ -91,3 +91,34 @@ Samotný průchod MegaLights: chodba 2,43 → 2,65 ms, kokpit 1,92 → 2,04 ms. 
    Změřím to v pilotu chodby z kitu, spolu s jemnou objemovou mlhou (MegaLights umí i objem).
 
 Listy: `2026-09-26_interior_lighting_variants/` (vzhled a, b, e, f na chodbě a v kokpitu; výřezy `stat gpu`).
+
+## Doplněk 27. 9. 2026: MegaLights na ukázkové chodbě interiérového kitu
+
+Zadání autora: vyzkoušet MegaLights na ukázkové chodbě kitu (67 světel: 60 lineárních rect světel lišt, displej,
+6 provizorních), srovnat FPS a obraz se současným stavem, ověřit stav a omezení v UE 5.8.
+
+Preset `Tools/Shots/kit_megalights.json` (obraz, detaily, chůze) a `kit_megalights_perf.json` (ustálené `stat gpu`
+po 8 s), 1920×1080, TSR 75 %, RTX 2060. List: `Docs/Kit/megalights_compare.png`.
+
+| Varianta | GPU | Lights | MegaLights | VRAM |
+|---|---|---|---|---|
+| A) dnes, odložené stínování, světla bez stínů | 15,81 ms | 3,41 ms | – | 3,06 GB |
+| B) MegaLights, světla bez stínů | 15,91 ms (+0,1) | 0,58 ms | 2,91 ms | 3,14 GB |
+| C) MegaLights, ray-traced stíny ze všech 67 světel | 16,85 ms (+1,0) | 0,58 ms | 3,74 ms | 3,15 GB |
+
+- **Obraz:** B je od A skoro k nerozeznání. C přidá kontaktní stíny pod bednou, trubkami a rámy, chodba má víc
+  hloubky. Na statických detailech (displej, sokl) šum není vidět. Snímky za chůze (`space.Showroom` +
+  `space.Walk`) ovládá pohybová neostrost, zjevný šum ani ghosting na nich nejsou. Pohyb v živé hře musí
+  posoudit autor (`r.MegaLights.EnableForProject 1` v konzoli, `space.KitLight Showroom CastShadows 1`).
+- **Záškub:** první zapnutí stínů za běhu dalo jeden snímek 140 ms (průměr 19,6 ms v prvním měření). Zapínat při
+  načtení nebo při vstupu do interiéru, ne uprostřed hry.
+- **Stav v UE 5.8** (rešerše, zdroje v enginu a v dokumentaci Epicu):
+  - Production Ready (5.5 experimental, 5.7 beta);
+  - přepíná se `r.MegaLights.EnableForProject`, čte se každý snímek a jde nastavit i v zabalené hře.
+    `r.MegaLights.Allow` a `r.MegaLights.Enable` z dokumentace v 5.8 neexistují, skutečné je `r.MegaLights.Allowed`;
+  - potřebuje HW ray tracing a SM6: RTX 2060 má DXR 1.1, projekt má `r.RayTracing` zapnutý;
+  - světla bez stínů jdou přes MegaLights také (stochasticky, přes denoiser, jen bez paprsku);
+  - na úrovni stínů Epic: 4 vzorky na pixel ve 2×2 podvzorkování, akumulace až 12 snímků;
+  - nepodporuje vodu, mraky ani heterogenní objemy.
+- **Doporučení:** C v interiérech (ray-traced stíny ze světel svítidel za +1,0 ms na ukázce), zapnuté při vstupu
+  do interiéru. Ve výhledu z kokpitu a na planetě zůstane dnešní stav, dokud se tam MegaLights nezměří.

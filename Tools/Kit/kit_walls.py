@@ -11,6 +11,8 @@ plus the recessed plinth with its cool floor strip, a thin orange signal line un
 top of the slope with its warm strip - each strip carries SOCKET_Light_* every 0.6 m (a light per fixture).
 """
 import math
+import random
+import zlib
 
 from mathutils import Vector
 
@@ -96,16 +98,7 @@ class Wall:
             a = self.world(self.SLOPE, 0.0, vv, zz)
             b = self.world(self.SLOPE, L, vv, zz)
             p.tube(role, a, b, rr, 10, caps=False)
-        # two cable conduits across the upper slope panel on clips, in and out of the frames through collars
-        # (the upper slope was "an empty board with a 3 cm label" - critic round 3)
-        vc = 0.45 * sl + 0.12
-        for vv in (vc, vc + 0.04):
-            p.tube("Kit_Rubber", self.world(self.SLOPE, 0.0, vv, 0.016), self.world(self.SLOPE, L, vv, 0.016), 0.011, 10, caps=False)
-            for uu in (self.RIB_W, L - self.RIB_W):
-                d = 1 if uu < L / 2 else -1
-                p.tube("Kit_Structure", self.world(self.SLOPE, uu, vv, 0.016), self.world(self.SLOPE, uu + d * 0.012, vv, 0.016), 0.016, 10)
-        for uu in ([L / 2] if L < 0.9 else [0.3, L / 2, L - 0.3]):
-            p.slab("Kit_Structure", self.SLOPE, uu - 0.012, uu + 0.012, vc - 0.022, vc + 0.062, 0.03, BEV_SMALL, segments=1, proud=0.03, panel=False)
+        self.conduits()
         # the signal line in the groove under the rail, then the stringer rail at the break (trim: bolted rail)
         p.slab("Kit_Signal", self.VERT, 0, L, self.vt - 0.049, self.vt - 0.043, 0.01, proud=-0.006, panel=False)
         p.slab("Kit_Trim", self.VERT, 0, L, self.vt - 0.025, self.vt + 0.025, 0.045, BEV_SMALL, proud=0.014, trim="rail_bolted", panel=False)
@@ -174,6 +167,62 @@ class Wall:
                 a = self.world(self.SLOPE, yb, vb, o)
                 p.tube("Kit_Structure", a, a + normal * 0.005, 0.0065, 6)
 
+    def conduits(self):
+        """Cable conduits across the upper slope panel (the upper slope was "an empty board with a 3 cm label" -
+        critic round 3). One pattern per part, seeded by its name, so a run of modules has no grid of identical
+        conduits and clips (author, 27. 9. 2026): none, one, a pair, or a pair where one conduit dives into the
+        panel through a grommet; one to three clips at free positions, a saddle or a strap."""
+        p, L, sl = self.p, self.L, self.slope_len
+        rng = random.Random(zlib.crc32(p.name.encode()))
+        pattern = rng.choices(["none", "single", "pair", "drop"], [0.2, 0.25, 0.35, 0.2])[0]
+        if L < 0.5 and pattern == "drop":
+            pattern = "single"
+        if pattern == "none":
+            return
+        vc = 0.45 * sl + 0.12 + rng.uniform(-0.025, 0.025)
+        rows = [vc] if pattern == "single" else [vc, vc + rng.uniform(0.034, 0.05)]
+        z, lo, hi = 0.016, self.RIB_W, L - self.RIB_W
+        dive = None
+        if pattern == "drop":
+            # the second conduit comes in at one end and goes into the panel somewhere along the module
+            side = rng.choice([0, 1])
+            dive = (side, rng.uniform(0.3, 0.7) * L)
+        for k, vv in enumerate(rows):
+            a, b = 0.0, L
+            if dive and k == 1:
+                side, ud = dive
+                a, b = (0.0, ud) if side == 0 else (ud, L)
+                d = 1 if side == 0 else -1
+                # a short bend into the panel and a grommet round the hole
+                p.tube("Kit_Rubber", self.world(self.SLOPE, ud, vv, z), self.world(self.SLOPE, ud + d * 0.025, vv, -0.01), 0.011, 10, caps=False)
+                g = self.world(self.SLOPE, ud + d * 0.025, vv, 0.0)
+                n = Vector((0.8, 0.0, -0.6))
+                p.tube("Kit_Structure", g - n * 0.002, g + n * 0.005, 0.019, 12)
+            p.tube("Kit_Rubber", self.world(self.SLOPE, a, vv, z), self.world(self.SLOPE, b, vv, z), 0.011, 10, caps=False)
+            for uu, dd in ((lo, 1), (hi, -1)):
+                if a <= uu <= b:
+                    p.tube("Kit_Structure", self.world(self.SLOPE, uu, vv, z), self.world(self.SLOPE, uu + dd * 0.012, vv, z), 0.016, 10)
+        # clips at free positions, at least 0.18 m apart, clear of the frames and the dive
+        n_clips = rng.randint(1, 3) if L >= 1.0 else rng.randint(0, 2) if L >= 0.5 else rng.randint(0, 1)
+        spots = []
+        for _ in range(40):
+            if len(spots) >= n_clips:
+                break
+            u = rng.uniform(lo + 0.06, hi - 0.06)
+            if all(abs(u - q) > 0.18 for q in spots) and not (dive and abs(u - dive[1]) < 0.08):
+                spots.append(u)
+        v0, v1 = rows[0] - 0.022, rows[-1] + 0.022
+        for u in spots:
+            if rng.random() < 0.5:
+                # a saddle over all the conduits
+                p.slab("Kit_Structure", self.SLOPE, u - 0.012, u + 0.012, v0, v1, 0.03, BEV_SMALL, segments=1, proud=0.03, panel=False)
+            else:
+                # a strap and its two screws
+                p.slab("Kit_Structure", self.SLOPE, u - 0.005, u + 0.005, v0 + 0.004, v1 - 0.004, 0.029, proud=0.029, panel=False)
+                for vv in (v0 - 0.006, v1 + 0.006):
+                    c = self.world(self.SLOPE, u, vv, 0.0)
+                    p.tube("Kit_Structure", c, c + Vector((0.8, 0.0, -0.6)) * 0.004, 0.005, 6)
+
     def strip_light(self, name, c, direction, width, height, role, cd, radius_m=2.6):
         """A linear fixture's light: a rect light facing `direction` (part coords), `width` along the module."""
         d = Vector(direction).normalized()
@@ -217,8 +266,11 @@ class Wall:
         y = (m.to_3x3() @ Vector((0, 1, 0))).normalized()
         self.p.decal(item, at + n * 0.08, at - n * 0.02, rot=rot, scale=scale, frame_xy=[list(x), list(y)], label=label)
 
-    # only generic service stencils: GND POINT / EXT PWR named hardware the wall does not have (critic round 3)
-    STENCILS = ["st_service", "st_inspect", "st_nopaint"]
+    # Service labels sit only at the hardware they name (a hatch, a grille, a bolted doubler, a pipe run); a plain
+    # wall carries none. GND POINT / EXT PWR / DO NOT PAINT on bare panels were filler (critic round 3, author
+    # 27. 9. 2026). The layout rule - never the same service label on neighbouring modules - is checked where
+    # the modules are placed (import_kit.check_layout_labels). Panel numbers are part numbers: the same part
+    # carries the same number.
     PANEL_IDS = ["panel_A12", "panel_A14", "panel_B03", "panel_B07", "panel_C21", "panel_C22", "panel_D05", "panel_E11",
                  "panel_F02", "panel_G08", "panel_H19"]
 
@@ -229,13 +281,10 @@ class Wall:
         used.add(pick)
         return pick
 
-    def stencil(self, rng):
-        return self._unused(rng, self.STENCILS)
-
     def panel_id(self, rng):
         return self._unused(rng, self.PANEL_IDS)
 
-    def shell_decals(self, rng, main=True, kick_u=None):
+    def shell_decals(self, rng, main=True):
         """Decals of the shell. A decal has to lie wholly on a pressed panel's border or wholly in its recess: one
         across the recess chamfer, over the rib or under the cove lip is skipped by the placer."""
         L = self.L
@@ -246,8 +295,6 @@ class Wall:
             if L >= 0.6:
                 self.label("rivet_row_8", self.VERT, L * 0.4, self.main[1] - 0.02, 0.8)
                 self.label("rivet_row_8", self.VERT, L * 0.5, (self.split + GAP / 2 + 0.02) if self.split_default else self.main[0] + 0.02, 0.8)
-        if kick_u is not False:
-            self.label(self.stencil(rng), self.VERT, kick_u if kick_u is not None else (0.2 if L >= 0.6 else L / 2), self.kick[1] - 0.06, 0.8)
         if L >= 1.2:
             self.label("rivet_row_8", self.SLOPE, L * 0.5, self.slope_len - 0.1, 0.8)
 
@@ -275,7 +322,6 @@ def plain(w, var, rng):
                 w.p.tube("Kit_Structure", a, a + Vector((0.006, 0, 0)), 0.007, 12)
         # a bolted doubler carries its torque stencil, not a saturated warning sticker (critic, 27. 9. 2026)
         w.label("st_torque", w.VERT, (u0 + u1) / 2, v1 - 0.06, 0.8)
-        w._used = w.__dict__.get("_used", set()) | {"st_torque"}
         w.shell_decals(rng)
     else:  # C: a bolted flange band across the main panel, a vent slot row in the slope panel
         band0, band1 = 0.86, 0.89
@@ -283,8 +329,7 @@ def plain(w, var, rng):
                 slope_cut=[(G, L - G, 0.045, 0.28), (G, L - G, 0.36, w.slope_len - 0.04)])
         w.p.slab("Kit_Trim", w.VERT, 0, L, band0, band1, 0.03, BEV_SMALL, proud=0.006, trim="flange_bolted", panel=False)
         w.p.slab("Kit_Trim", w.SLOPE, G, L - G, 0.28 + GAP / 2, 0.36 - GAP / 2, 0.02, BEV_SMALL, proud=-0.004, trim="vent_slots", panel=False)
-        w.label("st_vent", w.SLOPE, 0.15, 0.4, 0.8)
-        w.shell_decals(rng)
+        w.shell_decals(rng)             # the vent slot row needs no label (a grille module carries VENT)
 
 
 def grille(w, var, rng):
@@ -303,8 +348,9 @@ def grille(w, var, rng):
         w.frame_hole("Kit_Primary", w.VERT, G, L - G, w.kick[0], w.kick[1], (hole[0], hole[1], w.kick[0] - 0.01, w.kick[1] + 0.01), secondary=True)
         w.frame_hole("Kit_Primary", w.VERT, G, L - G, w.main[0], w.main[1], (hole[0], hole[1], w.main[0] - 0.01, hole[3]))
         _louvres(w, w.VERT, hole)
-        w.label("st_vent", w.VERT, 0.62 if L > 0.8 else 0.4, w.main[0] + 0.07, 0.8)
-        w.shell_decals(rng, main=False, kick_u=0.75 if L > 0.8 else False)
+        # right beside the louvre, at mid height ("VENT - KEEP CLEAR far from the grille" - verification round)
+        w.label("st_vent", w.VERT, hole[1] + 0.12, (hole[2] + hole[3]) / 2, 0.8)
+        w.shell_decals(rng, main=False)
     else:  # C: return-air grille (perforated) in the slope panel
         sl = w.slope_len
         hole = (0.1, L - 0.1, 0.16, min(sl - 0.12, 0.5))
@@ -426,10 +472,9 @@ def locker(w, var, rng):
                 for vb in (vc - 0.06, vc + 0.06):
                     p.box("Kit_Structure", (depth * 0.35, min(ue, ue + side * 0.022), vb - 0.01), (depth * 0.65, max(ue, ue + side * 0.022), vb + 0.01), panel=False)
                 p.tube("Kit_Structure", (depth * 0.5, ue + side * 0.018, vc - 0.07), (depth * 0.5, ue + side * 0.018, vc + 0.07), 0.008, 10)
-        w.label(w.stencil(rng), door, (du0 + du1) / 2, dv1 - 0.15 if kind != "box" else dv1 - 0.03, 0.75)
         w.label(w.panel_id(rng), door, du0 + 0.08, dv0 + 0.05 if kind == "box" else dv0 + 0.16, 0.7)
         p.collision_box((0, u0, v0), (depth, u1, v1))
-    w.shell_decals(rng, main=False, kick_u=False)
+    w.shell_decals(rng, main=False)
 
 
 def _hand_wheel(p, c, rad, n=12):
@@ -603,9 +648,11 @@ def hatch(w, var, rng):
             p.box("Kit_Signal", (c.x - 0.002, c.y - 0.045, c.z - 0.013), (c.x + 0.0015, c.y + 0.045, c.z - 0.009), panel=False)
         # what is behind it as a small label on the cover, the hazard band along the frame's top edge (not a
         # warning sticker in the middle of a blank panel)
-        w.label(["label_power", "label_hydraulic"][i % 2] if var == "C" else w.stencil(rng), w.VERT, (hu0 + hu1) / 2, hv1 - 0.1, 0.75)
+        # what the hatch gives access to: a service panel (A), an inspection hatch (B), the systems behind (C)
+        w.label(["label_power", "label_hydraulic"][i % 2] if var == "C" else {"A": "st_service", "B": "st_inspect"}[var],
+                w.VERT, (hu0 + hu1) / 2, hv1 - 0.1, 0.75)
         w.label("hazard_subtle", w.VERT, (hu0 + hu1) / 2, hv1 + 0.07, min(1.0, (hu1 - hu0 + 0.056) / 0.36))
-    w.shell_decals(rng, main=False, kick_u=False if var == "B" else None)
+    w.shell_decals(rng, main=False)
 
 
 def display(w, var, rng):

@@ -158,6 +158,18 @@ namespace
 				: TEXT("nothing to do (no interior in this level, or no ship to go back to)"));
 		}));
 
+	FAutoConsoleCommandWithWorldAndArgs ShowroomCommand(
+		TEXT("space.Showroom"),
+		TEXT("space.Showroom: walk the interior kit showroom in TestSpace (from the ship or another interior, or back). The same as U in the game."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			ASpacePlayerController* Controller = World ? Cast<ASpacePlayerController>(World->GetFirstPlayerController()) : nullptr;
+			const bool bDone = Controller && Controller->ToggleInteriorAt(TEXT("KitShowroomSpawn"));
+			UE_LOG(LogSpaceInterior, Display, TEXT("space.Showroom: %s"), bDone
+				? (Controller->IsWalkingInterior() ? TEXT("walking the kit showroom") : TEXT("back"))
+				: TEXT("nothing to do (no kit showroom in this level)"));
+		}));
+
 	/**
 	 * space.Walk <forward> <right> <seconds> [yaw]: the character walks as if the keys were held
 	 * (forward/right -1..1), optionally facing yaw degrees first (relative to the gravity frame).

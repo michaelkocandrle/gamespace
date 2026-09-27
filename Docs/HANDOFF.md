@@ -1583,7 +1583,17 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
         - Výkon ukázky: GPU 17,0 ms (~59 FPS), `Lights` 3,9 ms.
         - Otevřené body: plné svislé panely, opakování vedení na sklonu, detailní normálová mapa, štítky jen k hardwaru;
           stropní světla a značení přijdou v dávkách 2 a 6.
-        - Čeká na schválení autorem, dávka 2 až po něm.
+        - Autor dávku 1 schválil (27. 9.). Opravy před dávkou 2:
+          - servisní štítky jen u hardwaru a nikdy stejné na sousedech v layoutu (kontrola v importu i v testu);
+          - vedení na sklonu s vlastním vzorem pro každý díl;
+          - barvy vrcholů (oděr, špína) se do UE dosud nepřenášely, opraveno (WORKFLOW cq, cr);
+          - ukázka je průchozí: klávesa U / `space.Showroom`;
+          - test `test_kit_showroom.py`.
+        - MegaLights na ukázce: bez stínů +0,1 ms, s RT stíny ze všech 67 světel +1,0 ms, kontaktní stíny, v UE 5.8
+          Production Ready. Doporučeno C v interiérech (studie světel 26. 9., doplněk). Srovnání rámů
+          `Docs/Kit/frames_choice.png` čeká na autora, rámy zatím beze změny. Paleta Kestrel se rozhodne u první
+          lodi Kestrel Dynamics. Mikroškrábance, oděr a jednolité panely patří do kroku „materiál kitu“, značení sekcí
+          do dávky 6.
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

@@ -528,7 +528,9 @@ python Tools/Kit/kit_catalog.py 1           # katalogový list Docs/Kit/catalog_
   - otevřený kabelový žlab pod vybráním (deska 4 cm od sklonu na žebírkách, lem, 3 černé kabely a krémový);
   - hlavní panel rozdělený v 0,86 m (`Wall.split`), horní deska 12 mm vpředu (stínová spára, přesah); vlastní
     `main_split` to vypne (skříňky, Plain B/C, kanál trubek);
-  - na horním sklonu dva kabelové kanály na příchytkách, do rámů přes objímky;
+  - na horním sklonu kabelové kanály (`Wall.conduits`): vzor podle jména dílu (žádný 20 %, jeden, dvojice, dvojice se
+    zanořením do panelu přes průchodku), 1–3 příchytky na volných místech (třmen nebo pásek). Stejné kanály na každém
+    modulu dělaly rastr (ověřovací kolo);
   - konzole vybrání nad každým spojem (schová konce lišt; samostatné koncovky četl kritik jako „schody“);
   - rámy bez zkosení: zkosení 5 mm rozdělí hrany profilu pod 40° a hladké stínování udělá z rámu kulatý sloup;
   - lišty jako svítidla: kovový profil s lemy, koncovky a difuzor (u podlahy, nahoře ve vybrání i pod hranou vybrání);
@@ -543,12 +545,17 @@ python Tools/Kit/kit_catalog.py 1           # katalogový list Docs/Kit/catalog_
   - trubky vycházejí ze stěny a vracejí se do ní obloukem s průchodkou uvnitř modulu, nikdy nekončí
     na hranici modulu (trasy přes víc modulů = mosty v dávce 7);
   - displej má krycí sklo a klávesy v tmavých jamkách;
-  - štítky: šablony a čísla panelů se v modulu neopakují (`Wall.stencil`, `Wall.panel_id`), štítek leží celý na okraji
-    prolisu nebo celý v prohlubni (WORKFLOW cm); jen obecné servisní šablony (SERVICE ACCESS, INSPECT, DO NOT PAINT),
-    nikdy štítek hardwaru, který na stěně není (GND POINT, EXT PWR). Otevřené: i obecné se opakují na sousedech,
-    mají patřit k hardwaru;
+  - štítky (`kit_rules.decal_rules`): servisní štítek (`st_*`, `label_*`) jen u hardwaru, který pojmenovává (poklop A
+    SERVICE ACCESS, poklop B INSPECT, poklop C systémy, mřížka VENT hned u mřížky, dublovací plech TORQUE, trubky
+    svůj systém); plná stěna nenese žádný. Nikdy stejný štítek na sousedních modulech layoutu: kontroluje
+    `import_kit.check_layout_labels` (import spadne) a `test_kit_showroom.py`; manifest má `service_labels` dílu.
+    Čísla panelů jsou čísla dílu (stejný díl = stejné číslo). Štítek leží celý na okraji prolisu nebo celý
+    v prohlubni (WORKFLOW cm);
   - oděr hran: `kit_geo` dává barvě rohů G = 0 plochám z bevelu (`Part.edge_faces`), master pak ošoupe jen zkosení
-    (EdgeWear lak 0,3, konstrukce 0,5). Maska po vrcholech nejde: skoro každý vrchol dílu leží na hraně;
+    (EdgeWear lak 0,3, konstrukce 0,5). Maska po vrcholech nejde: skoro každý vrchol dílu leží na hraně.
+    Barva `Col` je v doméně rohů; `kit_build.join()` převede bodovou `Col` decalů taky na rohy
+    (`to_corner_colour`), jinak by masky dílu přepsala a UE by bílou barvu zahodil (WORKFLOW cq). Export
+    `colors_type="LINEAR"`. `kit_build` spadne, když masky nepřežijí (`colour_masks` v manifestu);
   - gumové těsnění 6 mm uvnitř rámu poklopů a mřížek (`_gasket`).
 - **UE (`Tools/Assets/import_kit.py`):**
   - Díly jdou do `/Game/Kit/Meshes` přes funkce `import_ship` (FBX, velikost, sloty, kolize, sockety), bez Nanite, kolize simple-as-complex.
@@ -566,8 +573,18 @@ python Tools/Kit/kit_catalog.py 1           # katalogový list Docs/Kit/catalog_
   - **Ukázka:** `TestSpace` na (0, −500, 0) m, chodba W 8,4 m, světlo u každého socketu, tmavý box proti slunci.
     Podlaha, strop, konce a stropní světla jsou provizorní (drsný `MI_Kit_Halcyon_ProvFloor`, bodovky 45 cd / 90° na
     0,22/0,5/0,78 délky, výplň 8 cd 80 cm pod stropem, WORKFLOW cn). Tag `KitShowroom`, přestavuje se při každém běhu.
-- **Výkon ukázky:** GPU 16,3 ms ve 1080p (~61 FPS), z toho `Lights` 3,9 ms (60 lineárních světel + displej + 6
-  provizorních). Body místo lineárních světel stály 2,7 ms, ale pálily skvrny a stěny nechaly černé.
+- **Výkon ukázky:** GPU 15,8–17 ms ve 1080p (~59–63 FPS), z toho `Lights` 3,4–3,9 ms (60 lineárních světel + displej
+  + 6 provizorních). Body místo lineárních světel stály 2,7 ms, ale pálily skvrny a stěny nechaly černé.
+- **Procházení ukázky:** klávesa **U** nebo `space.Showroom` (`ASpacePlayerController::ToggleInteriorAt`, tag
+  `KitShowroomSpawn`), zpět stejně. Import staví gravitační objem (tag `KitShowroom`) a startovní bod; tmavý box
+  proti slunci je bez kolize (hráč by v něm uvízl).
+- **Ladění ukázky za běhu:** `space.KitLight Showroom <Vlastnost> <hodnota>` (i rect světla, např. `CastShadows 1`),
+  `space.KitColor PrimaryColor r g b Structure` (materiály ukázky), `space.KitReset`.
+- **MegaLights** (`kit_megalights.json`, `kit_megalights_perf.json`, list `Docs/Kit/megalights_compare.png`): bez stínů
+  +0,1 ms a stejný obraz, s ray-traced stíny ze všech 67 světel +1,0 ms a kontaktní stíny. VRAM +0,1 GB. První
+  zapnutí stínů za běhu dá záškub 140 ms. Rozhodnutí autora čeká (doplněk ve studii světel 26. 9.).
+- **Test:** `Tools/Tests/test_kit_showroom.py` (barvy vrcholů přes export z UE, štítky sousedů, gravitace, start,
+  kolize boxu).
 - **Měření vzhledu** (`measure_look.py`, auto expozice): chodba průměr 0,21, p90 0,35, B/R 0,71, detail 0,025 = v rozsahu
   SC. Kolo 2 (lak metallic 0,45, body, úzké bodovky) mělo 0,14 / 0,27 / 0,58 / 0,024 a stěny 0,06–0,10.
 

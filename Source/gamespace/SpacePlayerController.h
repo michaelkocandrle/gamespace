@@ -71,6 +71,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Interior")
 	bool ToggleInterior();
 
+	/**
+	 * The same for any walkable place: onto the actor tagged SpawnTag, or back when already walking there. Walking
+	 * one interior and asked for another, the player is taken across and the way back stays the original ship.
+	 * The interior kit showroom in TestSpace is KitShowroomSpawn: U in the game, space.Showroom in the console.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Interior")
+	bool ToggleInteriorAt(FName SpawnTag);
+
 	UFUNCTION(BlueprintPure, Category = "Interior")
 	bool IsWalkingInterior() const { return bWalkingInterior; }
 
@@ -91,6 +99,7 @@ private:
 	void HandleMenuKey(const FInputActionValue& Value);
 	void HandleToggleHud(const FInputActionValue& Value);
 	void HandleInteriorKey(const FInputActionValue& Value);
+	void HandleShowroomKey(const FInputActionValue& Value);
 	void ShowMenu(bool bTitleScreen);
 	void HideMenu();
 	void UpdateTitleCamera(float DeltaTime);
@@ -106,11 +115,15 @@ private:
 	TObjectPtr<UInputAction> HudAction;
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> InteriorAction;
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> ShowroomAction;
 
 	/** Where ToggleInterior goes back to: the ship that was being flown, or a place on foot. */
 	TWeakObjectPtr<APawn> ReturnShip;
 	FTransform ReturnTransform;
 	bool bWalkingInterior = false;
+	/** The spawn tag of the place being walked (SpaceInteriorSpawn, KitShowroomSpawn). */
+	FName WalkingSpawnTag;
 
 	UPROPERTY(Transient)
 	TObjectPtr<USoundBase> UiHoverSound;

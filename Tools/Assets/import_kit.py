@@ -33,6 +33,8 @@ DEST, MATS, TEX = "/Game/Kit/Meshes", "/Game/Kit/Materials", "/Game/Kit/Textures
 MAP = "/Game/Maps/TestSpace"
 KIT_ORIGIN = unreal.Vector(0.0, -50000.0, 0.0)
 TAG = "KitShowroom"
+SPAWN_TAG = "KitShowroomSpawn"          # space.Showroom / U walks the player here (SpacePlayerController)
+GRAVITY_CMS2 = 981.0
 MAKER = "Halcyon"
 EAL, MEL = unreal.EditorAssetLibrary, unreal.MaterialEditingLibrary
 DECAL_MIS = {"Kit_Decal": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_Decal",
@@ -225,6 +227,20 @@ def light(actors, loc, role, cd, radius_m, label, spot=False, cone=80.0, source_
     return a
 
 
+def check_layout_labels(parts):
+    """The layout rule for decals (author, 27. 9. 2026): a service label (st_*, label_*) only at its hardware -
+    kit_walls - and never the same one on neighbouring modules of a run. parts: {"left": [part dicts in order], ...}."""
+    clashes = []
+    for side, seq in parts.items():
+        for (na, a), (nb, b) in zip(seq, seq[1:]):
+            same = set(a.get("service_labels", [])) & set(b.get("service_labels", []))
+            if same:
+                clashes.append("%s: %s next to %s share %s" % (side, na, nb, sorted(same)))
+    if clashes:
+        raise import_ship.ImportFailed("neighbouring modules repeat a service label: " + "; ".join(clashes))
+    return sum(len(seq) - 1 for seq in parts.values())
+
+
 def build_showroom(meshes, mis, report):
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level(MAP)
     actors = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
@@ -233,6 +249,8 @@ def build_showroom(meshes, mis, report):
             actors.destroy_actor(a)
     sec = RULES["sections"]["W"]
     half = sec["width"] / 2 * 100.0
+    report["label_pairs_checked"] = check_layout_labels(
+        {side: [(short, meshes["SM_Kit_Wall_" + short][1]) for short in seq] for side, seq in CORRIDOR.items()})
     placed, lights = 0, 0
     length = {}
     for side, seq in CORRIDOR.items():
@@ -284,8 +302,20 @@ def build_showroom(meshes, mis, report):
         e = spawn_mesh(actors, plane, KIT_ORIGIN + unreal.Vector(xe, 0, sec["ceiling"] * 50.0), 0.0, "KitProvisional_End",
                        mis["Kit_ProvFloor"], unreal.Vector(sec["ceiling"] * 1.0, sec["width"] * 1.0 + 0.3, 1.0))
         e.set_actor_rotation(unreal.Rotator(roll=0.0, pitch=-90.0, yaw=yaw), False)
-    spawn_mesh(actors, cube, KIT_ORIGIN + unreal.Vector(L / 2, 0, 100.0), 0.0, "KitProvisional_SunBox", mis["Kit_Seal"],
-               unreal.Vector(L / 100.0 + 4.0, 6.0, 5.0))
+    box = spawn_mesh(actors, cube, KIT_ORIGIN + unreal.Vector(L / 2, 0, 100.0), 0.0, "KitProvisional_SunBox", mis["Kit_Seal"],
+                     unreal.Vector(L / 100.0 + 4.0, 6.0, 5.0))
+    # the box encloses the corridor: without this the walking player would spawn inside its collision
+    box.static_mesh_component.set_collision_profile_name("NoCollision")
+    # walkable (author, 27. 9. 2026): gravity over the corridor and the start the player is put at
+    gravity = actors.spawn_actor_from_class(unreal.SpaceGravityVolume, KIT_ORIGIN + unreal.Vector(L / 2, 0, sec["ceiling"] * 50.0),
+                                            unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
+    gravity.set_actor_label("KitShowroom_Gravity")
+    gravity.set_editor_property("gravity_cm_s2", GRAVITY_CMS2)
+    gravity.get_editor_property("volume").set_box_extent(unreal.Vector(L / 2 + 30.0, half + 30.0, sec["ceiling"] * 50.0 + 20.0))
+    gravity.set_editor_property("tags", [unreal.Name(TAG)])
+    spawn = actors.spawn_actor_from_class(unreal.TargetPoint, KIT_ORIGIN + unreal.Vector(70.0, 0, 5.0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
+    spawn.set_actor_label("KitShowroom_Spawn")
+    spawn.set_editor_property("tags", [unreal.Name(TAG), unreal.Name(SPAWN_TAG)])
     # provisional ceiling lights (the kit's ceiling panels with light housings, batch 2, replace them): at the
     # approved Wayfarer corridor's 60 cd spots / 20 cd room lights they burnt a band into the ceiling and a patch
     # onto the end wall and flattened the walls (critic, 27. 9. 2026) - half that, narrower spots, dark between

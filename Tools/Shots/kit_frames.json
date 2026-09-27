@@ -1,0 +1,117 @@
+{
+ "_comment": "The author's open choice for the kit frames (27. 9. 2026): today's light painted metal (0.26) against a warm grey a clear step darker (0.17/0.16/0.145), same views, auto exposure. Run: Tools/Shots.ps1 -Preset kit_frames -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 4.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "space.KitReset"
+   ]
+  },
+  {
+   "name": "a_now_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80
+  },
+  {
+   "name": "a_now_left34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.6,
+    -500.9,
+    1.55
+   ],
+   "camera_look_at": [
+    1.6,
+    -498.9,
+    1.0
+   ],
+   "fov": 70
+  },
+  {
+   "name": "b_warm_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.5,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitColor PrimaryColor 0.17 0.16 0.145 Structure"
+   ]
+  },
+  {
+   "name": "b_warm_left34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.6,
+    -500.9,
+    1.55
+   ],
+   "camera_look_at": [
+    1.6,
+    -498.9,
+    1.0
+   ],
+   "fov": 70
+  },
+  {
+   "name": "z_reset",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.5,
+   "camera_location": [
+    0.6,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    8.0,
+    -500.3,
+    1.2
+   ],
+   "fov": 80,
+   "console": [
+    "space.KitReset"
+   ]
+  }
+ ]
+}

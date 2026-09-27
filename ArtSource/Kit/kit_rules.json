@@ -91,6 +91,7 @@
   "ship_interior": 1000000
  },
  "lod": {"_comment": "Walls, floors, ceilings, portals: LOD0 only. Consoles, furniture, fittings: automatic LOD1 at 50 % from screen size 0.25.", "lod1_categories": ["Console", "Furniture", "Fitting"], "lod1_ratio": 0.5, "lod1_screen_size": 0.25},
+ "decal_rules": {"service_labels": "st_* / label_* only at the hardware they name (a hatch, a grille, a bolted doubler, a pipe run); a plain wall carries none", "neighbours": "never the same service label on neighbouring modules of a layout (import_kit.check_layout_labels, test_kit_showroom.py)", "panel_numbers": "part numbers: the same part carries the same number", "placement": "wholly on a pressed panel border or wholly in its recess (hs_decals skips a decal across a chamfer, a frame or under the cove lip)"},
  "collision": {
   "_comment": "Simple UCX boxes per module, never complex-as-simple. Character capsule radius 0.42 m, height 1.92 m (PlayerCharacter.cpp): the clear width anywhere, portals included, must stay >= 0.9 m and the clear height >= 2.0 m.",
   "Wall": "one box: face plane to the structure depth, full height",

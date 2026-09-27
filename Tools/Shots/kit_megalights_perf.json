@@ -1,0 +1,15 @@
+{
+ "_comment": "Steady-state GPU cost of MegaLights on the kit showroom (kit_megalights.json measured one frame hitch of 140 ms right after switching shadows on): each variant settles 8 s before stat gpu. Run: Tools/Shots.ps1 -Preset kit_megalights_perf -Width 1920 -Height 1080",
+ "shots": [
+  {"name": "warmup", "camera": "free", "hud": 0, "settle": 5.0, "camera_location": [0.6, -500.0, 1.65], "camera_look_at": [8.0, -500.3, 1.2], "fov": 80,
+   "console": ["r.GPUStatsEnabled 1", "stat none", "r.MegaLights.EnableForProject 0", "space.KitLight Showroom CastShadows 0"]},
+  {"name": "a_off_perf", "camera": "free", "hud": 0, "settle": 8.0, "camera_location": [0.6, -500.0, 1.65], "camera_look_at": [8.0, -500.3, 1.2], "fov": 80,
+   "console": ["stat none", "stat unit", "stat gpu"]},
+  {"name": "b_ml_perf", "camera": "free", "hud": 0, "settle": 8.0, "camera_location": [0.6, -500.0, 1.65], "camera_look_at": [8.0, -500.3, 1.2], "fov": 80,
+   "console": ["stat none", "r.MegaLights.EnableForProject 1", "stat unit", "stat gpu"]},
+  {"name": "c_mlsh_perf", "camera": "free", "hud": 0, "settle": 8.0, "camera_location": [0.6, -500.0, 1.65], "camera_look_at": [8.0, -500.3, 1.2], "fov": 80,
+   "console": ["stat none", "space.KitLight Showroom CastShadows 1", "stat unit", "stat gpu"]},
+  {"name": "z_reset", "camera": "free", "hud": 0, "settle": 0.5, "camera_location": [0.6, -500.0, 1.65], "camera_look_at": [8.0, -500.3, 1.2], "fov": 80,
+   "console": ["r.MegaLights.EnableForProject 0", "space.KitLight Showroom CastShadows 0", "stat none"]}
+ ]
+}

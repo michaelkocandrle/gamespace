@@ -1,0 +1,119 @@
+"""Checks the interior kit as Tools/Kit/kit_build.py and Tools/Assets/import_kit.py leave it, in a fresh editor
+process (first kit checks; step 5 of the kit brief adds the geometry checks).
+
+    .\\Tools\\run_editor_python.ps1 Tools\\Tests\\test_kit_showroom.py
+
+Prints "KITTEST PASS" / "KITTEST FAIL" lines; a failure is also logged as an error, so the run reports FAILED.
+Never saves.
+
+What it guards (27. 9. 2026):
+- every kit mesh has vertex colours: the layered master's edge-wear and dirt masks (kit_geo, face-corner Col).
+  They were lost once in kit_build.join() and came out all white, which Unreal drops on import;
+- the layout rule for decals: never the same service label (st_*, label_*) on neighbouring modules of the
+  showroom corridor (import_kit.CORRIDOR, the labels from kit_manifest.json);
+- the showroom is walkable: a gravity volume over it, the start U / space.Showroom puts the player at, the
+  dark sun box around it without collision.
+"""
+
+import ast
+import json
+import os
+import tempfile
+
+import unreal
+
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+SCRIPT = os.path.join(REPO, "Tools", "Assets", "import_kit.py")
+MANIFEST = os.path.join(REPO, "ArtSource", "Kit", "Export", "kit_manifest.json")
+MAP = "/Game/Maps/TestSpace"
+
+failures = []
+
+
+def log(msg):
+    unreal.log("KITTEST " + msg)
+
+
+def check(name, ok, detail=""):
+    log(("PASS " if ok else "FAIL ") + name + ("  (" + detail + ")" if detail else ""))
+    if not ok:
+        failures.append(name)
+        unreal.log_error("KITTEST FAIL " + name)
+
+
+# the constants of import_kit.py, read without running it
+tree = ast.parse(open(SCRIPT, encoding="utf-8").read())
+C = {}
+for node in tree.body:
+    if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+        try:
+            C[node.targets[0].id] = ast.literal_eval(node.value)
+        except ValueError:
+            pass
+parts = json.load(open(MANIFEST, encoding="utf-8"))["parts"]
+EXPORT_DIR = os.path.join(tempfile.gettempdir(), "kittest_export")
+os.makedirs(EXPORT_DIR, exist_ok=True)
+
+
+def exported_colours(sm):
+    fn = os.path.join(EXPORT_DIR, sm.get_name() + ".fbx")
+    task = unreal.AssetExportTask()
+    task.set_editor_property("object", sm)
+    task.set_editor_property("filename", fn)
+    task.set_editor_property("automated", True)
+    task.set_editor_property("prompt", False)
+    task.set_editor_property("replace_identical", True)
+    task.set_editor_property("exporter", unreal.StaticMeshExporterFBX())
+    if not unreal.Exporter.run_asset_export_task(task) or not os.path.exists(fn):
+        return False
+    with open(fn, "rb") as f:
+        return f.read().count(b"LayerElementColor") > 0
+
+# ---------------------------------------------------------------- meshes: vertex colours
+for name, part in sorted(parts.items()):
+    sm = unreal.EditorAssetLibrary.load_asset("/Game/Kit/Meshes/" + name)
+    check("%s imported" % name, sm is not None)
+    if sm is None:
+        continue
+    masks = part.get("colour_masks", {})
+    check("%s: colour masks exported (edge %s, floor %s corners)" % (name, masks.get("edge"), masks.get("floor")),
+          masks.get("domain") == "CORNER" and masks.get("edge", 0) > 0 and masks.get("floor", 0) > 0)
+    # has_vertex_colors() answers False in this commandlet even for the Wayfarer hull, whose masks work: export
+    # the mesh back to FBX instead - Unreal writes a colour layer only when the mesh has colours (27. 9. 2026)
+    check("%s: vertex colours in Unreal" % name, exported_colours(sm))
+
+# ---------------------------------------------------------------- the layout rule for service labels
+corridor = C.get("CORRIDOR", {})
+check("the showroom layout is readable from import_kit.py", bool(corridor))
+for side, seq in corridor.items():
+    for a, b in zip(seq, seq[1:]):
+        la = set(parts.get("SM_Kit_Wall_" + a, {}).get("service_labels", []))
+        lb = set(parts.get("SM_Kit_Wall_" + b, {}).get("service_labels", []))
+        check("%s: %s | %s share no service label" % (side, a, b), not (la & lb), ", ".join(sorted(la & lb)))
+
+# ---------------------------------------------------------------- the showroom in the level
+unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level(MAP)
+actors = unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors()
+tag = unreal.Name(C["TAG"])
+room = [a for a in actors if tag in list(a.tags)]
+modules = [a for a in room if isinstance(a, unreal.StaticMeshActor) and a.static_mesh_component.static_mesh
+           and a.static_mesh_component.static_mesh.get_name().startswith("SM_Kit_")]
+check("every corridor module placed (%d)" % sum(len(s) for s in corridor.values()),
+      len(modules) == sum(len(s) for s in corridor.values()), "%d" % len(modules))
+rects = [a for a in room if isinstance(a, unreal.RectLight)]
+check("linear lights along the strips (%d)" % len(rects), len(rects) >= 3 * len(modules))
+gravity = [a for a in room if isinstance(a, unreal.SpaceGravityVolume)]
+check("one gravity volume, %s cm/s2" % C["GRAVITY_CMS2"], len(gravity) == 1
+      and abs(gravity[0].get_editor_property("gravity_cm_s2") - C["GRAVITY_CMS2"]) < 0.5)
+spawn = [a for a in actors if unreal.Name(C["SPAWN_TAG"]) in list(a.tags)]
+check("one start of the walk (%s)" % C["SPAWN_TAG"], len(spawn) == 1)
+if gravity and spawn:
+    start = spawn[0].get_actor_location() + unreal.Vector(0.0, 0.0, 100.0)
+    check("the start and every module lie inside the gravity volume",
+          gravity[0].contains_point(start) and all(gravity[0].contains_point(m.get_actor_location() + unreal.Vector(0, 0, 50.0)) for m in modules))
+box = [a for a in room if a.get_actor_label() == "KitProvisional_SunBox"]
+check("the sun box has no collision (the player walks inside it)", len(box) == 1
+      and str(box[0].static_mesh_component.get_collision_profile_name()) == "NoCollision",
+      box and str(box[0].static_mesh_component.get_collision_profile_name()))
+
+log("SUMMARY %s (%d failures)" % ("PASS" if not failures else "FAIL", len(failures)))

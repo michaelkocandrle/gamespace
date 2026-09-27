@@ -11,6 +11,8 @@
  *   space.KitColor Gunmetal .45 .52 .62 Trim   the same for a colour
  *   space.KitLight Work Temperature 7000    a property of the interior lights (Work, Accent or All);
  *   space.KitLight All UseTemperature 1     Intensity (lm), LightColor, AttenuationRadius, OuterConeAngle...
+ *   space.KitLight Showroom CastShadows 1   the interior kit showroom's lights too (point, spot and rect;
+ *                                           tag KitShowroom) - the MegaLights comparison (27. 9. 2026)
  *   space.KitReset                          everything above, and the sun and sky light, back to what
  *                                           the level has
  *
@@ -21,6 +23,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/DirectionalLightComponent.h"
+#include "Components/LocalLightComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SkyLightComponent.h"
 #include "Components/SpotLightComponent.h"
@@ -39,6 +42,7 @@ namespace
 	const FName InteriorTag(TEXT("SpaceInterior"));
 	const FName WorkLightTag(TEXT("SpaceInteriorLight_Work"));
 	const FName AccentLightTag(TEXT("SpaceInteriorLight_Accent"));
+	const FName ShowroomTag(TEXT("KitShowroom"));
 
 	/** What the level had before any of these commands touched it, for space.KitReset. */
 	struct FLightDefaults
@@ -104,18 +108,21 @@ namespace
 	}
 
 	/** The interior lights of one group ("Work", "Accent", "All"). */
-	TArray<UPointLightComponent*> InteriorLights(UWorld* World, const FString& Group)
+	TArray<ULocalLightComponent*> InteriorLights(UWorld* World, const FString& Group)
 	{
 		const bool bAll = Group.Equals(TEXT("All"), ESearchCase::IgnoreCase);
 		const bool bWork = Group.Equals(TEXT("Work"), ESearchCase::IgnoreCase);
-		TArray<UPointLightComponent*> Lights;
+		const bool bShowroom = Group.Equals(TEXT("Showroom"), ESearchCase::IgnoreCase);
+		TArray<ULocalLightComponent*> Lights;
 		for (TActorIterator<AActor> It(World); It; ++It)
 		{
 			const bool bIsWork = It->ActorHasTag(WorkLightTag);
 			const bool bIsAccent = It->ActorHasTag(AccentLightTag);
-			if ((bAll && (bIsWork || bIsAccent)) || (bWork && bIsWork) || (!bAll && !bWork && bIsAccent))
+			const bool bIsShowroom = It->ActorHasTag(ShowroomTag);
+			if (bShowroom ? bIsShowroom : ((bAll && (bIsWork || bIsAccent)) || (bWork && bIsWork) || (!bAll && !bWork && bIsAccent)))
 			{
-				if (UPointLightComponent* Light = It->FindComponentByClass<UPointLightComponent>())
+				// local lights: the kit's strips are rect lights, not point lights
+				if (ULocalLightComponent* Light = It->FindComponentByClass<ULocalLightComponent>())
 				{
 					Lights.Add(Light);
 				}
@@ -134,7 +141,8 @@ namespace
 		TArray<UMaterialInstanceDynamic*> Materials;
 		for (TActorIterator<AStaticMeshActor> It(World); It; ++It)
 		{
-			if (!It->ActorHasTag(InteriorTag))
+			// the kit showroom too: space.KitColor PrimaryColor .21 .2 .185 Structure recolours its frames
+			if (!It->ActorHasTag(InteriorTag) && !It->ActorHasTag(ShowroomTag))
 			{
 				continue;
 			}
@@ -200,12 +208,12 @@ namespace
 
 	FAutoConsoleCommandWithWorldAndArgs KitLightCommand(
 		TEXT("space.KitLight"),
-		TEXT("space.KitLight Work|Accent|All <Property> <Value...>: a property of the interior's lights (Intensity, Temperature, UseTemperature, LightColor R G B, AttenuationRadius). Not saved."),
+		TEXT("space.KitLight Work|Accent|All|Showroom <Property> <Value...>: a property of the interior's lights (Intensity, Temperature, UseTemperature, LightColor R G B, AttenuationRadius, CastShadows). Not saved."),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
 		{
 			if (Args.Num() < 3)
 			{
-				UE_LOG(LogTemp, Display, TEXT("space.KitLight Work|Accent|All <Property> <Value...>"));
+				UE_LOG(LogTemp, Display, TEXT("space.KitLight Work|Accent|All|Showroom <Property> <Value...>"));
 				return;
 			}
 			// Looked up on each light's own class: the work lights are spots (OuterConeAngle), the
@@ -213,7 +221,7 @@ namespace
 			FString Name;
 			FString Text;
 			int32 Count = 0;
-			for (UPointLightComponent* Light : InteriorLights(World, Args[0]))
+			for (ULocalLightComponent* Light : InteriorLights(World, Args[0]))
 			{
 				FProperty* Property = nullptr;
 				for (TFieldIterator<FProperty> It(Light->GetClass()); It; ++It)
@@ -279,7 +287,7 @@ namespace
 			{
 				Remember(It->GetComponentByClass<USkyLightComponent>());
 			}
-			for (UPointLightComponent* Light : InteriorLights(World, TEXT("All")))
+			for (ULocalLightComponent* Light : InteriorLights(World, TEXT("All")))
 			{
 				Remember(Light);
 			}

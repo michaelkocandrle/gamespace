@@ -183,7 +183,8 @@ for door in doors:
     width = leaf.get_bounding_box().max.y - leaf.get_bounding_box().min.y if leaf else 0.0
     check("%s: closed, the leaves meet in the middle" % door.get_actor_label(), abs(spread - width) < 2.0,
           "spread %.1f, leaf %.1f cm" % (spread, width))
-gravity = [a for a in actors if isinstance(a, unreal.SpaceGravityVolume)]
+# (the interior kit showroom in the same level has its own, tagged KitShowroom - test_kit_showroom.py)
+gravity = [a for a in actors if isinstance(a, unreal.SpaceGravityVolume) and unreal.Name("KitShowroom") not in list(a.tags)]
 check("one gravity volume, %s cm/s2" % C["GRAVITY_CMS2"], len(gravity) == 1
       and abs(gravity[0].get_editor_property("gravity_cm_s2") - C["GRAVITY_CMS2"]) < 0.5)
 spawn = tagged(C["SPAWN_TAG"])
