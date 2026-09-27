@@ -187,6 +187,11 @@ class Placer:
         """One decal at a surface point; returns its frame (centre, x, y, w, h, n) or None."""
         item = self.index["decals"][name]
         x, y = frame if frame else _frame(n, rot, (hit - self.off).y)
+        if x.cross(y).dot(n) < 0:
+            # a mirrored frame (a rule's own axes on the ship's other side): the item would read mirrored - and with
+            # the face turned by the normal (grid) it does; x turned back makes it read right (Wayfarer streak_drip,
+            # check_ship_geometry mirrored_decals, 27. 9. 2026)
+            x = -x
         w, h = (v * scale for v in item["size_m"])
         rad = 0.5 * math.hypot(w, h)
         if check_overlap:
