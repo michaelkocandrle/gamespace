@@ -23,6 +23,12 @@
 .PARAMETER Package
     Runs Tools\Package.ps1 first (needed after any C++ or content change).
 
+.PARAMETER PlayerSettings
+    Shoot with the player's own GameUserSettings.ini. By default the pictures and timings are taken at the game's
+    default quality (epic, global illumination high, TSR 75 %: USpaceUserSettings, the author's measuring
+    standard of 27. 9. 2026): the player's file is set aside
+    for the run and put back afterwards, whatever quality was last chosen in the menu.
+
 .EXAMPLE
     .\Tools\Shots.ps1 -Preset cockpit
 .EXAMPLE
@@ -39,6 +45,7 @@ param(
     [int]$Width = 1600,
     [int]$Height = 900,
     [int]$TimeoutSeconds = 180,
+    [switch]$PlayerSettings,
     # extra command-line switches for the game, e.g. -GameArgs "-NoMegaLightsPrewarm"
     [string[]]$GameArgs = @()
 )
@@ -91,10 +98,36 @@ New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 $gameArgs = @("/Game/Maps/TestSpace", "-windowed", "-ResX=$Width", "-ResY=$Height", "-nosplash", "-unattended",
               "-ShotList=`"$listPath`"", "-ShotOut=`"$outDir`"") + $GameArgs
 Write-Host "Shooting $Preset ($((Get-Content $listPath | ConvertFrom-Json).shots.Count) shots) into $outDir"
-$process = Start-Process -FilePath $exe -ArgumentList $gameArgs -PassThru
-if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
-    Write-Host "The game did not quit within $TimeoutSeconds s; stopping it." -ForegroundColor Yellow
-    try { $process.Kill() } catch {}
+# The menu's quality (sg.*) is saved in the build's GameUserSettings.ini; a player's "medium" made one set of kit
+# timings 5 ms faster than the next (27. 9. 2026). Measure at the default quality unless -PlayerSettings.
+$settings = Join-Path (Split-Path $exe) "gamespace\Saved\Config\Windows\GameUserSettings.ini"
+$setAside = "$settings.player"
+if (-not $PlayerSettings -and (Test-Path $settings)) {
+    Copy-Item $settings $setAside -Force
+    # the game's own default (USpaceUserSettings): epic at 75 %, global illumination capped at high (2)
+    $groups = "[ScalabilityGroups]`r`nsg.ResolutionQuality=75`r`nsg.GlobalIlluminationQuality=2`r`n" + ((@("ViewDistance",
+        "AntiAliasing", "Shadow", "Reflection", "PostProcess", "Texture", "Effects", "Foliage", "Shading", "Landscape") |
+        ForEach-Object { "sg.${_}Quality=3" }) -join "`r`n") + "`r`n"
+    # every section but [ScalabilityGroups] kept as it is; the groups at the default (epic) after the leading
+    # ;METADATA comment
+    $head = New-Object System.Collections.Generic.List[string]
+    $kept = New-Object System.Collections.Generic.List[string]
+    $inGroups = $false
+    foreach ($line in [IO.File]::ReadAllLines($setAside)) {
+        if ($kept.Count -eq 0 -and $line.StartsWith(";")) { $head.Add($line); continue }
+        if ($line.StartsWith("[")) { $inGroups = ($line.Trim() -eq "[ScalabilityGroups]") }
+        if (-not $inGroups) { $kept.Add($line) }
+    }
+    [IO.File]::WriteAllLines($settings, @($head) + @($groups.TrimEnd() -split "`r`n") + @("") + @($kept))
+}
+try {
+    $process = Start-Process -FilePath $exe -ArgumentList $gameArgs -PassThru
+    if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+        Write-Host "The game did not quit within $TimeoutSeconds s; stopping it." -ForegroundColor Yellow
+        try { $process.Kill() } catch {}
+    }
+} finally {
+    if (Test-Path $setAside) { Move-Item $setAside $settings -Force }
 }
 
 $pictures = Get-ChildItem $outDir -Filter *.png | Sort-Object Name

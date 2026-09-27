@@ -2,6 +2,9 @@
 
     python Tools/Tests/test_ship_geometry.py [Ship]
 
+Also runs by itself as the last step of every ship rebuild (Tools/Blender/hs_assemble_ship.py calls run(); a failure
+fails the rebuild - author 27. 9. 2026).
+
 Runs Tools/Blender/check_ship_geometry.py on ArtSource/Ships/<Ship>/<Ship>_HS_Game.blend (the assembled ship the
 game imports) and fails on any of:
   - mirrored decals (mesh decals with a flipped UV frame, projected decals seen from behind)
@@ -38,7 +41,12 @@ def main():
     if not ship:
         print("GEOTEST SKIP no ship model yet")
         return 0
-    blend = os.path.join(REPO, "ArtSource", "Ships", ship, "%s_HS_Game.blend" % ship)
+    return run(ship)
+
+
+def run(ship, blend=None, blender=None):
+    """Checks <Ship>_HS_Game.blend (or blend), prints the GEOTEST lines, returns 0 on PASS, 1 on FAIL."""
+    blend = blend or os.path.join(REPO, "ArtSource", "Ships", ship, "%s_HS_Game.blend" % ship)
     if not os.path.isfile(blend):
         print("GEOTEST FAIL missing %s" % blend)
         return 1
@@ -46,12 +54,13 @@ def main():
     report = os.path.join(out, "geocheck.json")
     if os.path.isfile(report):
         os.remove(report)
-    run = subprocess.run([BLENDER, "-b", blend, "--python", os.path.join(REPO, "Tools", "Blender", "check_ship_geometry.py"),
-                          "--", ship, out], capture_output=True, text=True, encoding="utf-8", errors="replace")
+    check = subprocess.run([blender or BLENDER, "-b", blend, "--python",
+                            os.path.join(REPO, "Tools", "Blender", "check_ship_geometry.py"), "--", ship, out],
+                           capture_output=True, text=True, encoding="utf-8", errors="replace")
     if not os.path.isfile(report):
-        print(run.stdout[-3000:])
-        print(run.stderr[-3000:])
-        print("GEOTEST FAIL the check wrote no report (exit %d)" % run.returncode)
+        print(check.stdout[-3000:])
+        print(check.stderr[-3000:])
+        print("GEOTEST FAIL the check wrote no report (exit %d)" % check.returncode)
         return 1
     r = json.load(open(report, encoding="utf-8"))
     failed = []

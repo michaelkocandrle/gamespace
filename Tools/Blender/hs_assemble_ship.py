@@ -12,7 +12,9 @@ Driven by the recipe's "assemble" block:
   4. a UV map per mesh (smart project) for the engine (not for the decals: they carry atlas UVs);
   5. convex collision hulls (k-DOP, Tools/Blender/build_ai_ship.py) from "collision" boxes and sockets from
      "sockets" - both given in LAYOUT coordinates, like the drawing;
-  6. saves "out_blend". Prints HSASSEMBLE {...}.
+  6. saves "out_blend". Prints HSASSEMBLE {...};
+  7. runs the ship geometry test on the saved file (Tools/Tests/test_ship_geometry.py, GEOTEST lines) as the
+     rebuild's last step - Blender exits with 1 when it fails (author 27. 9. 2026).
 """
 import json
 import math
@@ -195,6 +197,12 @@ def main(argv):
     print("HSASSEMBLE " + json.dumps({"out": cfg["out_blend"], "meshes": {o.name: len(o.data.polygons) for o in out.values()},
                                        "decals": decal_report, "layers": layer_report,
                                        "bounds": [lo, hi]}))
+    sys.path.insert(0, os.path.join(ROOT, "Tools", "Tests"))
+    import test_ship_geometry  # noqa: E402
+    if test_ship_geometry.run(ship, path(cfg["out_blend"]), bpy.app.binary_path):
+        print("HSASSEMBLE GEOTEST FAIL - the rebuilt ship does not pass test_ship_geometry.py")
+        sys.stdout.flush()
+        os._exit(1)
 
 
 if __name__ == "__main__":

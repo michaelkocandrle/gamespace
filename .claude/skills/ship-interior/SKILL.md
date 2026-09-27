@@ -712,6 +712,42 @@ dávek (díl, rozpočet, pohledy renderů); `--only <jména>` postaví vybrané 
   - run parts mohou mít výšku `(x, y, z)`;
   - provizorní boxy `prov_boxes`.
 - **Kritik dávky 3:** 41 → 44 → 44, FAIL. Otevřené body: kanál pod mřížkou, madlo poklopu, materiál kitu, světlo.
+- **Po schválení (27. 9.):**
+  - trubka chladiva v tmavé primární barvě;
+  - světlo kanálu 0,6 cd/m z horní hrany boční stěny kanálu, šikmo dolů (nic neleží 5 cm pod pruhem);
+  - madlo poklopu: kapsa prořízlá ve víku, světlé dno, oranžová tyč na čepech;
+  - hrany schodů v roli `Kit_GlowNeutral` (neutrální bílá, emise 2,5) se světlem `neutral` 0,22 cd na stupeň pod sebou.
+
+## Interiérový kit: materiál (krok „materiál kitu“, 27. 9. 2026)
+
+Všechny vrstvené role kitu (`Kit_Primary`, `Kit_Structure`, `Kit_Accent`, `Kit_Signal`, `Kit_Rubber`) jedou na
+`M_Ship_Layered` se statickým přepínačem **`SurfaceDetail`**. Lodě ho mají vypnutý, jejich vzhled se nemění
+(hlídá `test_kit_showroom.py`). S přepínačem přibude:
+- **mikrotextura `T_Ship_Micro`** (`generate_detail_textures.py`: R broušení, G mikroškrábance, B jemný šum drsnosti)
+  na UV0 v metrech, `MicroTileCm` 60. `Brushed` (tón a drsnost v pruzích, konstrukce 0,7 na dlaždici 15 cm), `ScratchAmount` (škrábanec
+  = holý kov), `MicroRough`;
+- **detailní normála** trupu (`DetailNormalStrength` 0,05, `DetailTileCm` 25);
+- **variace po deskách:** `PanelShift` posune grunge podle UV1, `PanelDirtVar` některé desky ušpiní víc;
+- **oděr:** `FloorWear` (hrany u podlahy podle okluze), `TopWear` (plochy nahoru, madla a čára na podlaze).
+
+Společné hodnoty jsou v `import_kit.SURFACE` (`GrungeTileCm` 120: se 45 cm vypadal kit po opravě projekce jako
+tepaný plech), role si je přepíšou v `layered(..., **detail)`.
+Role (27.–28. 9.):
+- lak: drsnost 0,42, grunge 80 cm (±0,2), šedý prach 0,15 ve spárách a u soklu;
+- konstrukce: ×0,75 palety, kov 0,5 (kov 0,7 bez odrazů Lumenu ztratil difuzní světlo a splynul s panely);
+- oranžová: práškový lak 0,5, `TopWear` 1,0, grunge 30 cm;
+- guma 0,05 / 0,75.
+Světla kitu ×2,0 a emise difuzorů 3,5. Kritik po třech kolech: materiály 4/10, jemná variace se z 1,6 m nečte a zesílená
+se čte jako skvrny. Další systémový krok jsou karty špíny podél spár a soklu.
+
+Geometrie (`kit_geo`):
+- **špína ve spárách:** čelní plocha každého panelu primárního laku a konstrukce, který má aspoň 15 cm, dostane
+  vnitřní lem 4 cm; obvod a boky mají okluzi 0,35 → master tam dá špínu rozbitou grungem;
+- **u soklu:** okluze klesá k podlaze jen na svislých plochách, nejvíc v pásu 12 cm, podlahy samy zůstávají čisté;
+- **UV0 podél prvku:** u krabic vede U po nejdelší ose (`member`), u trubek po ose (`tube`), broušení tak jde podél
+  nosníku či sloupku.
+Měření: preset `kit_material` (jas `b_*`, detaily `c_*`/`d_*`, výkon `p_*`), recenze
+`Docs/Reviews/2026-09-27_kit_material.md`.
 
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 
@@ -758,6 +794,10 @@ Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.
 - Neumístěné štítky vypisuje stavba jako `INTDECALS {"labels_failed": …}`.
 
 ## Nástrahy (příznak → příčina → oprava)
+
+- **Černé přesně vodorovné plochy s `M_Ship_PBR`, triplanár jinde špatně promítnutý** → `(float3x3)` přetypování
+  struktury `FDFMatrix`/`FDFInverseMatrix`; používej `DFToFloat3x3(...)`. Normálová mapa v Custom node je BC5 bez
+  modrého kanálu, z dopočítat. Hlídá `test_material_hlsl.py`. (W dg, dh)
 
 - **Šedá šachovnice v zabalené hře** (v editoru OK) → `M_KitTrim` se nezkompiloval: chybí usage
   flag (`used_with_nanite`, `used_with_static_mesh`, `used_with_instanced_static_meshes`) nebo

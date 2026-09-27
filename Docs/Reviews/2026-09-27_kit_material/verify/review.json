@@ -1,0 +1,60 @@
+{
+ "topic": "kit_material_verify",
+ "date": "2026-09-28",
+ "goal": "Ověřovací kolo kroku „materiál kitu“ interiérového kitu lodi. Posuď jen tyto tři body z předchozí recenze, nic jiného: (1) svítidla stropního pole byla čistě bílé přepálené obdélníky bez kresby; (2) konstrukce (žebra, rámy) měla stejný tón jako výplňové panely, hierarchie konstrukce / výplň nečetla; (3) špína ležela uprostřed desek, spáry a pata stěny byly čisté. U každého bodu napiš: vyřešeno / zčásti / nevyřešeno a proč, s místem na listu.",
+ "style": "Star Citizen: průmyslový interiér lodi; tmavý teplý grafit panelů, světlejší konstrukce, svítidla s čitelným difuzorem, špína a prach ve spárách a u soklu, lakované plochy jinak téměř čisté.",
+ "checklist": null,
+ "out": "Docs/Reviews/2026-09-27_kit_material/verify",
+ "notes": [
+  "Text vpravo nahoře (FPS) je měřicí overlay, ne součást výsledku.",
+  "Hodnotí se jen tři body výše; tvary, rozmístění a ostatní materiály nejsou předmětem tohoto kola.",
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt."
+ ],
+ "pairs": [
+  {
+   "title": "Bod 1 – svítidla stropního pole u portálu (nemají být přepálené bílé plochy)",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC infrastruktura",
+   "ours": "Saved/Shots/20260928_003957_kit_material/06_c_d_portal_c_pipes.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Bod 2 – konstrukce (žebra, rámy) proti výplňovým panelům, pohled podél chodby",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
+   "ref_label": "SC chodba (Drake)",
+   "ours": "Saved/Shots/20260928_003957_kit_material/04_c_a_corridor.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Bod 2 – konstrukce proti panelům, rameno k úzké chodbě",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
+   "ref_label": "SC úzká chodba",
+   "ours": "Saved/Shots/20260928_003957_kit_material/08_c_h_leg_to_n_stub.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Bod 3 – špína ve spárách a u soklu, ne uprostřed desek",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC stěna a sokl",
+   "ours": "Saved/Shots/20260928_003957_kit_material/11_c_plinth_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Bod 3 – desky u poklopu: spáry, rám, plocha desek",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC podlahové desky",
+   "ours": "Saved/Shots/20260928_003957_kit_material/14_d_d_hatch_close.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

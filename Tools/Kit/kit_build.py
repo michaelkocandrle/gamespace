@@ -94,11 +94,15 @@ def colour_masks(ob, name="Col"):
     """How many face corners carry the edge mask (G) and the secondary tone (B): zero means the masks are gone."""
     a = ob.data.color_attributes.get(name)
     if a is None:
-        return {"domain": None, "edge": 0, "secondary": 0, "floor": 0}
+        return {"domain": None, "edge": 0, "secondary": 0, "floor": 0, "seam": 0}
     edge = sum(1 for d in a.data if d.color[1] < 0.5)
     sec = sum(1 for d in a.data if d.color[2] < 0.5)
     floor = sum(1 for d in a.data if d.color[0] < 0.95)
-    return {"domain": a.domain, "edge": edge, "secondary": sec, "floor": floor}
+    # occlusion on faces looking up: only the seam dirt puts it there (kit_geo SEAM_*)
+    seam = 0
+    if a.domain == "CORNER":
+        seam = sum(1 for p in ob.data.polygons if p.normal.z > 0.9 for li in p.loop_indices if a.data[li].color[0] < 0.95)
+    return {"domain": a.domain, "edge": edge, "secondary": sec, "floor": floor, "seam": seam}
 
 
 def join(ob, other):

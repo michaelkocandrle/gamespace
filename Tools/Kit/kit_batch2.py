@@ -266,6 +266,12 @@ def portal(sec, var, name, seed):
             xa, xb = sorted((xf, xf + dd * 0.018))
             p.box("Kit_Structure", (xa, yd0 - 0.022, zd0 - 0.022), (xb, yd1 + 0.022, zd1 + 0.022), bevel=0.003, segments=1)
             p.tube("Kit_Structure", (xf, yp, zp), (xf + dd * 0.018, yp, zp), rp + 0.02, 18)
+            # rubber grommets where the pipe and the duct leave the flanges (critic, material round 1)
+            p.tube("Kit_Rubber", (xf + dd * 0.018, yp, zp), (xf + dd * 0.028, yp, zp), rp + 0.007, 18)
+            xr0, xr1 = sorted((xf + dd * 0.018, xf + dd * 0.026))
+            for (b0, b1, c0, c1) in ((yd0 - 0.008, yd1 + 0.008, zd0 - 0.008, zd0), (yd0 - 0.008, yd1 + 0.008, zd1, zd1 + 0.008),
+                                     (yd0 - 0.008, yd0, zd0, zd1), (yd1, yd1 + 0.008, zd0, zd1)):
+                p.box("Kit_Rubber", (xr0, b0, c0), (xr1, b1, c1), panel=False)
             for k in range(6):
                 t = 2 * math.pi * k / 6
                 c = (xf + dd * 0.018, yp + (rp + 0.013) * math.cos(t), zp + (rp + 0.013) * math.sin(t))

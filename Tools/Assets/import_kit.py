@@ -38,8 +38,9 @@ ANNEX_SPAWN_TAG = "KitShowroomAnnexSpawn"   # U again from the showroom (or spac
 STAIRS_SPAWN_TAG = "KitShowroomStairsSpawn" # U from the annex (or space.Showroom stairs): the stair bay (batch 3)
 GRAVITY_CMS2 = 981.0
 # every kit light x1.8 (author 27. 9. 2026): under MegaLights' ray-traced shadows the lights stopped leaking through the
-# geometry and the corridor's mean fell from 0.20 to 0.13; x1.8 puts it in the middle of the SC range (kit_brightness)
-KIT_LIGHT_SCALE = 1.8
+# geometry and the corridor's mean fell from 0.20 to 0.13; x1.8 puts it in the middle of the SC range (kit_brightness).
+# x2.0 after the kit material step: the more metallic structure and the dirt took the mean from 0.19 to 0.16
+KIT_LIGHT_SCALE = 2.0
 MAKER = "Halcyon"
 EAL, MEL = unreal.EditorAssetLibrary, unreal.MaterialEditingLibrary
 DECAL_MIS = {"Kit_Decal": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_Decal",
@@ -210,18 +211,31 @@ def build_trim_master():
     return m
 
 
+# the layered master's surface detail on every kit role (kit material step, 27. 9. 2026): broad grunge (the 45 cm
+# tile read as hammered metal once the projection was fixed - WORKFLOW dg), fine roughness noise and grain at close
+# range, a few scratches, per-plate variation of grunge and dirt (floor plate variants)
+SURFACE = {"GrungeTileCm": 120.0, "MicroTileCm": 60.0, "MicroRough": 0.12, "ScratchAmount": 0.08, "Brushed": 0.0,
+           "DetailTileCm": 25.0, "DetailNormalStrength": 0.05, "PanelShift": 1.0, "PanelDirtVar": 0.6, "FloorWear": 0.0,
+           "TopWear": 0.0}
+
+
 def build_materials():
     masters = ship_materials.build_masters()
     pal = RULES["palettes"][MAKER]
 
-    def layered(colour, rough, metal=0.0, secondary=None, grunge=0.3, vary=0.35, dirt=0.05, wear=0.0):
-        return {"master": "layered",
+    def layered(colour, rough, metal=0.0, secondary=None, grunge=0.3, vary=0.25, dirt=0.05, wear=0.0, dirt_colour=None,
+                **detail):
+        """The layered master with its surface detail on (SURFACE, then the role's own values in `detail`)."""
+        scalars = {"PrimaryRoughness": rough, "SecondaryRoughness": rough + 0.06, "PaintMetallic": metal,
+                   "EdgeWear": wear, "WearThreshold": 0.45, "BareMetalRoughness": 0.52, "GrungeAmount": grunge,
+                   "RoughVariation": vary, "DirtAmount": dirt, "CavityStrength": 0.0, "AOStrength": 0.0, "PanelTone": 0.1,
+                   "PanelRough": 0.12, "MetalShare": 0.03, "CarbonShare": 0.0, "LiveryAmount": 0.0, "ClearCoat": 0.0}
+        scalars.update(SURFACE)
+        scalars.update(detail)
+        return {"master": "layered", "switches": {"SurfaceDetail": True},
                 "vectors": {"PrimaryColor": colour, "SecondaryColor": secondary or [c * 0.72 for c in colour],
-                            "BareMetalColor": [0.5, 0.5, 0.52], "DirtColor": [0.05, 0.045, 0.04]},
-                "scalars": {"PrimaryRoughness": rough, "SecondaryRoughness": rough + 0.06, "PaintMetallic": metal,
-                            "EdgeWear": wear, "WearThreshold": 0.45, "BareMetalRoughness": 0.52, "GrungeAmount": grunge, "GrungeTileCm": 45.0, "RoughVariation": vary, "DirtAmount": dirt,
-                            "CavityStrength": 0.0, "AOStrength": 0.0, "PanelTone": 0.08, "PanelRough": 0.12, "MetalShare": 0.03,
-                            "CarbonShare": 0.0, "LiveryAmount": 0.0, "ClearCoat": 0.0}}
+                            "BareMetalColor": [0.5, 0.5, 0.52], "DirtColor": dirt_colour or [0.05, 0.045, 0.04]},
+                "scalars": scalars}
 
     def plain(colour, rough, metal=0.0, emit=None, strength=0.0):
         s = {"master": "hull", "base_color": colour, "roughness": rough, "metallic": metal}
@@ -233,28 +247,51 @@ def build_materials():
         # painted panels are paint - a dielectric: at PaintMetallic 0.45 they lost almost half their diffuse light
         # and the walls went black (round 2, 27. 9. 2026); grime and dirt by the floor, fine grain kept low (it
         # sparkled like sandpaper). No worn edges: SC paint has none (Docs/Reviews/2026-09-26_sc_breakdown_tasks.md)
-        "Kit_Primary": layered(pal["Kit_Primary"], 0.5, 0.1, secondary=[c * 0.72 for c in pal["Kit_Primary"]],
-                               grunge=0.3, vary=0.35, dirt=0.35, wear=0.3),
+        # kit material step (27. 9. 2026): dirt in the seams and at the plinth (kit_geo occlusion), per-plate grunge
+        # and dirt (PanelShift, PanelDirtVar), boots on the low edges (FloorWear)
+        # critic round 1: the gloss has to change across a panel (80 cm blotches, 0.4), the chamfers worn, the seams
+        # dirty enough to read from the eye
+        # round 2: dark dirt did not read on the dark paint - grey dust does (the seams, the plinth); the paint a
+        # little glossier, so its gloss variation shows
+        # round 3: the grunge's darkening read as dirt in the middle of the plates - halved; the dust in the seams lighter
+        "Kit_Primary": layered(pal["Kit_Primary"], 0.42, 0.1, secondary=[c * 0.72 for c in pal["Kit_Primary"]],
+                               grunge=0.15, vary=0.4, dirt=0.9, wear=0.5, dirt_colour=[0.15, 0.14, 0.12], FloorWear=0.6,
+                               GrungeTileCm=80.0, MicroRough=0.18, ScratchAmount=0.15, WearThreshold=0.35),
         # the structure layer as the palette's lighter painted metal: pure metal (1.0) mirrored the dark room and
         # the frames vanished into the gaps
         # edge wear on the chamfers only (kit_geo: Col.G = 0 on bevel faces), like the Wayfarer interior (0.3-0.8);
         # "no worn edges, one roughness" read as plastic (critic round 3)
         # roughness 0.46 and worn bare metal 0.52 (layered()): interiors run without Lumen reflections, and metal under ~0.45
         # has nothing to reflect there - the tread plates rendered black (27. 9. 2026)
-        "Kit_Structure": layered([c * 0.8 for c in pal["Kit_Structure"]], 0.46, 0.4, grunge=0.25, vary=0.3, dirt=0.3, wear=0.5),
+        # brushed metal (author 27. 9. 2026): streaks in tone and roughness along the member, scratches, worn low edges
+        # (stair nosings, kick strips); metal 0.5 needs roughness >= 0.5 without Lumen reflections (WORKFLOW de)
+        # x0.75, metal 0.5: at x0.8 / 0.5 the lit beams burnt out to near white (critic round 1), at x0.62 / 0.6 and
+        # x0.72 / 0.7 they merged with the panels (rounds 2-3: metal without reflections loses its diffuse light); the
+        # brushing at a 15 cm tile, millimetre lines, not centimetre stripes
+        "Kit_Structure": layered([c * 0.75 for c in pal["Kit_Structure"]], 0.5, 0.5, grunge=0.25, dirt=0.5, wear=0.5,
+                                 Brushed=0.7, ScratchAmount=0.25, FloorWear=0.7, MicroRough=0.1, MicroTileCm=15.0),
         # the provisional floor plane (batch 3 brings the floor): rough, not a mirror for the plinth lights
         "Kit_ProvFloor": layered([0.07, 0.068, 0.065], 0.7, 0.2, grunge=0.5, vary=0.3, dirt=0.3),
         # cream paint at 70 % of the palette value: at 0.7 linear the pipes read as "white glossy pipes" (critic)
-        "Kit_Accent": layered([c * 0.7 for c in pal["Kit_Accent"]], 0.56, grunge=0.45, dirt=0.3, wear=0.3),
-        "Kit_Signal": plain([c * 0.8 for c in pal["Kit_Signal"]], 0.5),        # paint, not a glow (critic round 2)
-        "Kit_Rubber": plain([0.018, 0.018, 0.02], 0.86),
+        "Kit_Accent": layered([c * 0.7 for c in pal["Kit_Accent"]], 0.56, grunge=0.45, dirt=0.35, wear=0.3, ScratchAmount=0.1),
+        # paint, not a glow (critic round 2); the rails and grips worn on top where the hands go (TopWear), a few
+        # scratches (author 27. 9. 2026)
+        # powder coat 0.5; a finer grunge (30 cm) so the hands' wear shows every few decimetres along a rail (round 2)
+        "Kit_Signal": layered([c * 0.7 for c in pal["Kit_Signal"]], 0.5, 0.0, grunge=0.2, dirt=0.25, wear=0.6, TopWear=1.0,
+                              ScratchAmount=0.25, GrungeTileCm=30.0),
+        # rubber with a breakup and grey dust in it, not a flat black (author 27. 9. 2026)
+        "Kit_Rubber": layered([0.05, 0.05, 0.052], 0.75, 0.0, grunge=0.4, vary=0.15, dirt=0.6, dirt_colour=[0.09, 0.085, 0.08],
+                              MicroRough=0.08, ScratchAmount=0.0, DetailNormalStrength=0.0, PanelShift=0.0),
         "Kit_Fabric": plain([0.03, 0.03, 0.032], 0.9),
         "Kit_Plastic": plain([0.035, 0.035, 0.038], 0.5),
         "Kit_Seal": plain([0.012, 0.012, 0.013], 0.7),
-        # 7, not 14: the fixture diffusers and the ring clipped to white plates (critic r2); 4 still read 0.88
-        "Kit_GlowWarm": plain([0.08, 0.08, 0.08], 0.3, emit=pal["Kit_GlowWarm"], strength=7.0),
+        # 7, not 14: the fixture diffusers and the ring clipped to white plates (critic r2); 3.5 after the material
+        # step's round 3 ("burnt-out white rectangles") - the lights themselves are separate actors, unchanged
+        "Kit_GlowWarm": plain([0.08, 0.08, 0.08], 0.3, emit=pal["Kit_GlowWarm"], strength=3.5),
         "Kit_GlowCool": plain([0.04, 0.04, 0.05], 0.3, emit=pal["Kit_GlowCool"], strength=4.0),   # the plinth, quieter
         "Kit_GlowSignal": plain([0.08, 0.04, 0.02], 0.3, emit=pal["Kit_GlowSignal"], strength=4.0),
+        # the stair nosings: a quiet neutral white (GlowCool made "blue treads", critic r2; author 27. 9. 2026)
+        "Kit_GlowNeutral": plain([0.06, 0.06, 0.06], 0.3, emit=pal["Kit_GlowNeutral"], strength=2.5),
         # opacity 0.2: at 0.4 the dark glass swallowed a lit shutter behind it (the end wall's window read black)
         "Kit_Glass": {"master": "glass", "base_color": [0.02, 0.03, 0.035], "opacity": 0.2, "roughness": 0.05},
     }
@@ -329,7 +366,8 @@ def spawn_mesh(actors, sm, loc, yaw, label, material=None, scale=None):
     return a
 
 
-LIGHT_COLOURS = {"warm": (255, 228, 200), "cool": (115, 184, 255), "work": (255, 236, 214), "signal": (255, 90, 20)}
+LIGHT_COLOURS = {"warm": (255, 228, 200), "cool": (115, 184, 255), "work": (255, 236, 214), "signal": (255, 90, 20),
+                 "neutral": (255, 245, 234)}
 
 
 def rect_light(actors, loc, role, cd, radius_m, label, forward, along, width_cm, height_cm):

@@ -1040,6 +1040,7 @@
    "emissive_strength": 2.05
   },
   "MI_Ship_Wayfarer_KitTrim01": {
+   "_detail": "detail_normal_strength 0.06 on the interior kit (was 0.25): the PBR master read the BC5 detail normal with z = -1 until 27. 9. 2026, so the detail never showed; working, 0.25 read as hammered metal (WORKFLOW dg)",
    "_comment": "Quaternius MegaKit trim sheet (CC0), toned by Tools/Assets/tone_kit_textures.py; the tint sets this panel family's tone",
    "master": "pbr",
    "slots": [
@@ -1056,7 +1057,7 @@
     0.57
    ],
    "panel_strength": 0.0,
-   "detail_normal_strength": 0.25,
+   "detail_normal_strength": 0.06,
    "wear_amount": 0.1,
    "roughness_scale": 1.0,
    "metallic_scale": 1.0
@@ -1078,7 +1079,7 @@
     0.47
    ],
    "panel_strength": 0.0,
-   "detail_normal_strength": 0.25,
+   "detail_normal_strength": 0.06,
    "wear_amount": 0.1,
    "roughness_scale": 1.0,
    "metallic_scale": 1.0
@@ -1100,7 +1101,7 @@
     0.4
    ],
    "panel_strength": 0.0,
-   "detail_normal_strength": 0.25,
+   "detail_normal_strength": 0.06,
    "wear_amount": 0.1,
    "roughness_scale": 1.0,
    "metallic_scale": 1.0
@@ -1122,7 +1123,7 @@
     0.34
    ],
    "panel_strength": 0.0,
-   "detail_normal_strength": 0.25,
+   "detail_normal_strength": 0.06,
    "wear_amount": 0.1,
    "roughness_scale": 1.0,
    "metallic_scale": 1.0
@@ -1144,7 +1145,7 @@
     1.0
    ],
    "panel_strength": 0.0,
-   "detail_normal_strength": 0.25,
+   "detail_normal_strength": 0.06,
    "wear_amount": 0.1,
    "roughness_scale": 1.0,
    "metallic_scale": 1.0
@@ -1166,7 +1167,7 @@
     0.9
    ],
    "panel_strength": 0.0,
-   "detail_normal_strength": 0.25,
+   "detail_normal_strength": 0.06,
    "wear_amount": 0.1,
    "roughness_scale": 1.0,
    "metallic_scale": 1.0
@@ -1202,7 +1203,7 @@
     0.7
    ],
    "panel_strength": 0.0,
-   "detail_normal_strength": 0.1,
+   "detail_normal_strength": 0.03,
    "wear_amount": 0.0
   },
   "MI_Ship_Wayfarer_IntFrame": {

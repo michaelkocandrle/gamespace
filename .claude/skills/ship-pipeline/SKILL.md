@@ -710,6 +710,8 @@ Když autor najde vizuální chybu, přidej do testu kontrolu, která by ji chyt
 Nezávislý podagent `visual-critic` (`.claude/agents/visual-critic.md`, jen čtení, model Fable 5.1, effort
 max) porovná výsledek s referencí dřív, než ho uvidí autor. Doplňuje automatické kontroly
 (`test_ship_geometry.py`, testy UE), nenahrazuje je: musí proběhnout obojí.
+`test_ship_geometry.py` běží sám jako poslední krok `hs_assemble_ship.py` (autor 27. 9. 2026); při FAIL přestavba skončí
+kódem 1 (`HSASSEMBLE GEOTEST FAIL`).
 
 Postup:
 1. Srovnávací listy: `review.json` (téma, cíl, styl, sekce checklistu, dvojice reference / výsledek)

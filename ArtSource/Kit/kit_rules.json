@@ -48,13 +48,13 @@
   "_mesh_example": "SM_Kit_Wall_Grille06W_B = wall module, grille, 0.6 m, section W, variant B (size in decimetres)",
   "material_instance": "^MI_Kit_(Halcyon|Kestrel)_[A-Z][A-Za-z]+$",
   "texture": "^T_Kit_[A-Z][A-Za-z0-9]+_(BC|N|ORM|M|H|E)$",
-  "slot_roles": ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber", "Kit_Fabric", "Kit_Plastic", "Kit_Trim", "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_Screen", "Kit_Glass"]
+  "slot_roles": ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber", "Kit_Fabric", "Kit_Plastic", "Kit_Trim", "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_GlowNeutral", "Kit_Screen", "Kit_Glass"]
  },
  "palettes": {
   "_comment": "Linear colours per slot role; a ship picks one with 'kit_maker' in its setup (MI_Kit_<Maker>_<Role>). Kestrel Dynamics is a proposal.",
   "_Halcyon": "Kit_Primary calibrated to the approved Wayfarer corridor (walls 0.085, panels 0.13, a little metal sheen): 0.06 with no metal read black in the showroom (27. 9. 2026). Kit_GlowWarm 1/0.9/0.78 (was 1/0.82/0.62: the showroom measured B/R 0.58, SC 0.72-1.05)",
-  "Halcyon": {"Kit_Primary": [0.1, 0.095, 0.088], "Kit_Structure": [0.33, 0.33, 0.34], "Kit_Accent": [0.7, 0.66, 0.58], "Kit_Signal": [0.85, 0.34, 0.06], "Kit_GlowWarm": [1.0, 0.9, 0.78], "Kit_GlowCool": [0.45, 0.72, 1.0], "Kit_GlowSignal": [1.0, 0.35, 0.08]},
-  "Kestrel": {"Kit_Primary": [0.55, 0.56, 0.58], "Kit_Structure": [0.12, 0.12, 0.13], "Kit_Accent": [0.06, 0.06, 0.065], "Kit_Signal": [0.05, 0.35, 0.9], "Kit_GlowWarm": [1.0, 0.92, 0.84], "Kit_GlowCool": [0.6, 0.8, 1.0], "Kit_GlowSignal": [0.2, 0.55, 1.0]}
+  "Halcyon": {"Kit_Primary": [0.1, 0.095, 0.088], "Kit_Structure": [0.33, 0.33, 0.34], "Kit_Accent": [0.7, 0.66, 0.58], "Kit_Signal": [0.85, 0.34, 0.06], "Kit_GlowWarm": [1.0, 0.9, 0.78], "Kit_GlowCool": [0.45, 0.72, 1.0], "Kit_GlowSignal": [1.0, 0.35, 0.08], "Kit_GlowNeutral": [1.0, 0.96, 0.9]},
+  "Kestrel": {"Kit_Primary": [0.55, 0.56, 0.58], "Kit_Structure": [0.12, 0.12, 0.13], "Kit_Accent": [0.06, 0.06, 0.065], "Kit_Signal": [0.05, 0.35, 0.9], "Kit_GlowWarm": [1.0, 0.92, 0.84], "Kit_GlowCool": [0.6, 0.8, 1.0], "Kit_GlowSignal": [0.2, 0.55, 1.0], "Kit_GlowNeutral": [1.0, 0.97, 0.94]}
  },
  "texel_density": {
   "_comment": "px per metre. Trim-mapped geometry (edges, lips, seams, trims) on the kit trim sheet; big surfaces tile triplanar in world space (no UVs to keep even); decals from the decal library.",

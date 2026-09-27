@@ -33,6 +33,10 @@ a body 35, 42, 64, 65, 72.
 # -TimeoutSeconds 180 je výchozí; u dlouhých scénářů (flicker_check 33 snímků) zvednout
 ```
 
+Snímky a časy se berou ve **výchozí kvalitě hry** (epická, GI vysoká, TSR 75 %; `USpaceUserSettings`), i když si autor
+v menu přepnul grafiku: `Shots.ps1` jeho `GameUserSettings.ini` na dobu běhu odloží a pak vrátí; `-PlayerSettings`
+snímá s jeho nastavením (WORKFLOW dj).
+
 - Výstup: `Saved\Shots\<yyyyMMdd_HHmmss>_<preset>\NN_<name>.png` (NN = pořadí). `Saved\` není v gitu.
 - Konec výpisu `RESULT: OK - N picture(s)`; bez snímků `RESULT: FAILED` → `Saved\Logs\gamespace.log`, hledej `SHOTS`.
 - `WARNING: ... changed after the last package` = snímky ukazují starý build → `-Package`.

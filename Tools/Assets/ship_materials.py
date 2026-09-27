@@ -119,8 +119,10 @@ def _texture_param(material, name, sampler, default_path, x, y):
                  sampler_type=sampler, texture=unreal.load_asset(default_path))
 
 
-def build_pbr_master():
-    pbr = _fresh_material(MASTERS["pbr"])
+def build_pbr_master(path=None, skip=(), panel_code=None):
+    """skip: parts left out ("detail_normal", "panel", "grunge", "scorch") - for bisecting a render fault on variants
+    (Tools/Assets/probe_pbr_flat.py); the master itself is built whole."""
+    pbr = _fresh_material(path or MASTERS["pbr"])
     pbr.set_editor_property("used_with_nanite", True)
     color = _texture_param(pbr, "BaseColorMap", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR,
                            "/Engine/EngineResources/WhiteSquareTexture", -900, 0)
@@ -143,16 +145,16 @@ def build_pbr_master():
     # Metallic goes out through the cavity and wear layer too.
     normal = _texture_param(pbr, "NormalMap", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL,
                             "/Engine/EngineMaterials/DefaultNormal", -900, 800)
-    panel_offset, panel_groove = _add_panel_layer(pbr)
-    scorch = _add_scorch_mask(pbr)
-    grunge = _add_detail_layer(pbr, normal, rough, panel_offset, panel_groove, scorch)
+    panel_offset, panel_groove = _add_panel_layer(pbr, panel_code) if "panel" not in skip else (None, None)
+    scorch = _add_scorch_mask(pbr) if "scorch" not in skip else None
+    grunge = _add_detail_layer(pbr, normal, rough, panel_offset, panel_groove, scorch, skip)
     _add_cavity_and_wear(pbr, tint, metal, grunge, panel_groove, scorch)
     MEL.recompile_material(pbr)
     unreal.EditorAssetLibrary.save_loaded_asset(pbr, only_if_is_dirty=False)
     return pbr
 
 
-DETAIL_TEXTURES = {"T_Ship_Detail_N": "normal", "T_Ship_Detail_Grunge": "orm", "T_Ship_Panels": "orm"}
+DETAIL_TEXTURES = {"T_Ship_Detail_N": "normal", "T_Ship_Detail_Grunge": "orm", "T_Ship_Panels": "orm", "T_Ship_Micro": "orm"}
 SHARED_TEXTURES = "/Game/Ships/Shared/Textures"
 SHARED_DECALS = "/Game/Ships/Shared/Decals"
 
@@ -160,18 +162,43 @@ SHARED_DECALS = "/Game/Ships/Shared/Decals"
 # the ship moves (world-space projection would). Each plane's sample is put back into local space through
 # that plane's axes, and what the node returns is only the difference from the flat surface, so the graph
 # can add it to the baked normal in tangent space.
+# The primitive's LocalToWorld / WorldToLocal are FDFMatrix / FDFInverseMatrix structs ({float4x4 M; float3
+# translation}), not matrices. A (float3x3) cast of the struct itself flattens it and takes its first nine
+# floats in memory order; for an unrotated mesh that left the third row zero, so a face with the normal
+# (0, 0, 1) became a zero vector, normalize() made it NaN and the surface rendered black. The clamp on the
+# normal output hid the NaN there, the groove and grunge outputs carried it (WORKFLOW dg, 27. 9. 2026).
+# DFToFloat3x3 is the engine's own way to the rotation and scale block. Normals go world -> local with
+# the transpose of LocalToWorld (correct for non-uniform scale too), and a degenerate transform falls back
+# to the up axis instead of reaching normalize() with a zero vector.
 _TRIPLANAR = """
-float3x3 WorldToLocal = (float3x3)GetPrimitiveData(Parameters).WorldToLocal;
+float3x3 LocalToWorld = DFToFloat3x3(GetPrimitiveData(Parameters).LocalToWorld);
+float3x3 WorldToLocal = DFToFloat3x3(GetPrimitiveData(Parameters).WorldToLocal);
 float3 p = LocalPos / max(Tile, 1.0);
-float3 n = normalize(mul(Parameters.TangentToWorld[2], WorldToLocal));
+float3 nl = mul(LocalToWorld, Parameters.TangentToWorld[2]);
+float nl2 = dot(nl, nl);
+float3 n = nl2 > 1e-12 ? nl * rsqrt(max(nl2, 1e-12)) : float3(0.0, 0.0, 1.0);
 float3 w = pow(abs(n), 4);
 w /= (w.x + w.y + w.z + 0.0001);
 """
 
+# Local -> world for the normals the triplanar nodes built (the inverse transpose: WorldToLocal from the
+# left), each one normalised on its own so the mesh's scale neither shrinks nor inflates the difference,
+# then into tangent space. BENT and FLAT are the node's variable names.
+def _to_tangent(bent, flat):
+    return """
+float3 bw = mul(WorldToLocal, %s);
+float3 fw = mul(WorldToLocal, %s);
+float3 offset = bw * rsqrt(max(dot(bw, bw), 1e-12)) - fw * rsqrt(max(dot(fw, fw), 1e-12));
+float3 tangent = float3(dot(offset, Parameters.TangentToWorld[0]), dot(offset, Parameters.TangentToWorld[1]),
+                        dot(offset, Parameters.TangentToWorld[2]));
+""" % (bent, flat)
+
+# The detail normal map is compressed as a normal map (BC5): a raw sample has no blue channel (it reads 0,
+# which made z = -1 and bent the detail into the surface), so z is rebuilt from RG as in the panel node.
 _DETAIL_NORMAL_CODE = _TRIPLANAR + """
-float3 sx = Texture2DSample(TexN, TexNSampler, p.yz).rgb * 2.0 - 1.0;
-float3 sy = Texture2DSample(TexN, TexNSampler, p.zx).rgb * 2.0 - 1.0;
-float3 sz = Texture2DSample(TexN, TexNSampler, p.xy).rgb * 2.0 - 1.0;
+float3 sx = float3(Texture2DSample(TexN, TexNSampler, p.yz).rg * 2.0 - 1.0, 0.0); sx.z = sqrt(saturate(1.0 - dot(sx.xy, sx.xy)));
+float3 sy = float3(Texture2DSample(TexN, TexNSampler, p.zx).rg * 2.0 - 1.0, 0.0); sy.z = sqrt(saturate(1.0 - dot(sy.xy, sy.xy)));
+float3 sz = float3(Texture2DSample(TexN, TexNSampler, p.xy).rg * 2.0 - 1.0, 0.0); sz.z = sqrt(saturate(1.0 - dot(sz.xy, sz.xy)));
 float3 ax = float3(1.0, 0.0, 0.0) * (n.x < 0.0 ? -1.0 : 1.0);
 float3 ay = float3(0.0, 1.0, 0.0) * (n.y < 0.0 ? -1.0 : 1.0);
 float3 az = float3(0.0, 0.0, 1.0) * (n.z < 0.0 ? -1.0 : 1.0);
@@ -180,10 +207,7 @@ float3 ny = normalize(float3(0.0, 0.0, 1.0) * sy.x + float3(1.0, 0.0, 0.0) * sy.
 float3 nz = normalize(float3(1.0, 0.0, 0.0) * sz.x + float3(0.0, 1.0, 0.0) * sz.y + az * sz.z);
 float3 detail = normalize(w.x * nx + w.y * ny + w.z * nz);
 float3 flat = normalize(w.x * ax + w.y * ay + w.z * az + 0.0001);
-// The difference, back in tangent space, so the graph can add it to the baked normal map.
-float3 offset = mul(detail - flat, (float3x3)GetPrimitiveData(Parameters).LocalToWorld);
-float3 tangent = float3(dot(offset, Parameters.TangentToWorld[0]), dot(offset, Parameters.TangentToWorld[1]),
-                        dot(offset, Parameters.TangentToWorld[2]));
+""" + _to_tangent("detail", "flat") + """
 return clamp(tangent, -1.0, 1.0);
 """
 
@@ -212,15 +236,13 @@ float3 ny = normalize(float3(0.0, 0.0, 1.0) * ty.x + float3(1.0, 0.0, 0.0) * ty.
 float3 nz = normalize(float3(1.0, 0.0, 0.0) * tz.x + float3(0.0, 1.0, 0.0) * tz.y + az * tz.z);
 float3 seam = normalize(w.x * nx + w.y * ny + w.z * nz);
 float3 flat = normalize(w.x * ax + w.y * ay + w.z * az + 0.0001);
-float3 offset = mul(seam - flat, (float3x3)GetPrimitiveData(Parameters).LocalToWorld);
-float3 tangent = float3(dot(offset, Parameters.TangentToWorld[0]), dot(offset, Parameters.TangentToWorld[1]),
-                        dot(offset, Parameters.TangentToWorld[2]));
+""" + _to_tangent("seam", "flat") + """
 float groove = w.x * sx.b + w.y * sy.b + w.z * sz.b;
 return float4(clamp(tangent, -1.0, 1.0), groove);
 """
 
 
-def _add_panel_layer(pbr):
+def _add_panel_layer(pbr, code=None):
     """Plating: a tiling sheet of seams projected in the ship's own space (Tools/Assets/generate_panel_lines.py).
 
     The ship's UV atlas is thousands of tiny islands, so a seam drawn into it would break at every
@@ -233,7 +255,7 @@ def _add_panel_layer(pbr):
         return None, None
     sheet = _node(pbr, unreal.MaterialExpressionTextureObjectParameter, -1700, 2100, parameter_name="PanelMap",
                   sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_MASKS, texture=texture)
-    panel = _custom(pbr, "PanelSeams", _PANEL_CODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4,
+    panel = _custom(pbr, "PanelSeams", code or _PANEL_CODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4,
                     ["TexP", "LocalPos", "Tile"], -1300, 2100)
     _link(sheet, panel, "TexP")
     _link(_node(pbr, unreal.MaterialExpressionLocalPosition, -1700, 2000), panel, "LocalPos")
@@ -362,12 +384,12 @@ def _add_scorch_mask(pbr):
     return amount
 
 
-def _add_detail_layer(pbr, normal, rough, panel_offset=None, panel_groove=None, scorch=None):
+def _add_detail_layer(pbr, normal, rough, panel_offset=None, panel_groove=None, scorch=None, skip=()):
     """The micro surface the AI paint has no room for: a tiling normal and a roughness breakup, projected
     in the ship's own space, added on top of the baked maps. Parameters: DetailTileCm (how many centimetres
     one tile covers), DetailNormalStrength, DetailGrungeTileCm, DetailRoughVariation; 0 strength turns it off."""
     textures = {name: import_shared_texture(name) for name in ("T_Ship_Detail_N", "T_Ship_Detail_Grunge")}
-    if not all(textures.values()):
+    if not all(textures.values()) or ("detail_normal" in skip and "grunge" in skip):
         # No generated micro detail in the repository: the master keeps its baked maps, plus the panel
         # seams if those are there.
         if panel_offset is None:
@@ -390,18 +412,23 @@ def _add_detail_layer(pbr, normal, rough, panel_offset=None, panel_groove=None, 
     local_position = _node(pbr, unreal.MaterialExpressionLocalPosition, -1700, 800)
 
     # --- Normal: the detail's deviation from the flat surface, added to the baked normal ---------------
-    detail = _custom(pbr, "DetailNormal", _DETAIL_NORMAL_CODE, unreal.CustomMaterialOutputType.CMOT_FLOAT3,
-                     ["TexN", "LocalPos", "Tile"], -1300, 1000)
-    _link(tex_normal, detail, "TexN")
-    _link(local_position, detail, "LocalPos")
-    _link(_scalar(pbr, "DetailTileCm", 30.0, -1700, 1400), detail, "Tile")
-    scaled = _node(pbr, unreal.MaterialExpressionMultiply, -800, 1000)
-    _link(detail, scaled, "A")
-    _link(_scalar(pbr, "DetailNormalStrength", 0.7, -1700, 1500), scaled, "B")
-    combined = _node(pbr, unreal.MaterialExpressionAdd, -600, 900)
-    if not MEL.connect_material_expressions(normal, "RGB", combined, "A"):
-        raise RuntimeError("normal map -> detail add")
-    _link(scaled, combined, "B")
+    if "detail_normal" in skip:
+        combined = _node(pbr, unreal.MaterialExpressionAdd, -600, 900, const_b=0.0)
+        if not MEL.connect_material_expressions(normal, "RGB", combined, "A"):
+            raise RuntimeError("normal map -> add")
+    else:
+        detail = _custom(pbr, "DetailNormal", _DETAIL_NORMAL_CODE, unreal.CustomMaterialOutputType.CMOT_FLOAT3,
+                         ["TexN", "LocalPos", "Tile"], -1300, 1000)
+        _link(tex_normal, detail, "TexN")
+        _link(local_position, detail, "LocalPos")
+        _link(_scalar(pbr, "DetailTileCm", 30.0, -1700, 1400), detail, "Tile")
+        scaled = _node(pbr, unreal.MaterialExpressionMultiply, -800, 1000)
+        _link(detail, scaled, "A")
+        _link(_scalar(pbr, "DetailNormalStrength", 0.7, -1700, 1500), scaled, "B")
+        combined = _node(pbr, unreal.MaterialExpressionAdd, -600, 900)
+        if not MEL.connect_material_expressions(normal, "RGB", combined, "A"):
+            raise RuntimeError("normal map -> detail add")
+        _link(scaled, combined, "B")
     if panel_offset is not None:
         with_panels = _node(pbr, unreal.MaterialExpressionAdd, -500, 900)
         _link(combined, with_panels, "A")
@@ -411,6 +438,9 @@ def _add_detail_layer(pbr, normal, rough, panel_offset=None, panel_groove=None, 
     _link(combined, final_normal, "")
     _output(final_normal, unreal.MaterialProperty.MP_NORMAL)
 
+    if "grunge" in skip:
+        _output(rough, unreal.MaterialProperty.MP_ROUGHNESS)
+        return None
     # --- Roughness: the blotches lift and lower it a little, so the paint is not uniformly polished -----
     grunge = _custom(pbr, "DetailGrunge", _DETAIL_GRUNGE_CODE, unreal.CustomMaterialOutputType.CMOT_FLOAT1,
                      ["TexG", "LocalPos", "Tile"], -1300, 1300)
@@ -917,6 +947,40 @@ _LAYER_MASK_NODE = _LAYER_MASKS + """
 return float4(g, ao, dirt, wear);
 """
 
+# Surface detail of the layered master (kit material step, 27. 9. 2026), behind the static switch SurfaceDetail: the
+# ships that leave it off (the Wayfarer) compile without it. The masks as above, plus
+#  - PanelShift moves the grunge per panel (UV1 random pair) and PanelDirtVar makes some panels dirtier than others:
+#    plates of one kind stop sharing one stamp (floor plate variants);
+#  - FloorWear: edge wear where the occlusion falls towards the floor (boots, trolleys); TopWear: faces looking up
+#    worn through in the grunge's pattern (hands on a rail, feet on a line).
+_LAYER_MASK_DETAIL_NODE = _TRIPLANAR + """
+float3 pp = p + float3(PanelId.x * 7.31, PanelId.y * 3.17, (PanelId.x + PanelId.y) * 5.03) * PanelShift;
+float g1 = w.x * Texture2DSample(TexG, TexGSampler, pp.yz).r + w.y * Texture2DSample(TexG, TexGSampler, pp.zx).r
+         + w.z * Texture2DSample(TexG, TexGSampler, pp.xy).r;
+float3 q = pp * 3.7;
+float g2 = w.x * Texture2DSample(TexG, TexGSampler, q.yz).r + w.y * Texture2DSample(TexG, TexGSampler, q.zx).r
+         + w.z * Texture2DSample(TexG, TexGSampler, q.xy).r;
+float g = saturate(g1 * 0.65 + g2 * 0.35);
+float ao = lerp(1.0, VC.r, Amount);
+float edge = (1.0 - VC.g) * Amount;
+float dirt = saturate((1.0 - ao) * 1.8) * saturate(0.3 + g) * DirtAmount * Amount;
+dirt *= lerp(1.0, 0.3 + 1.4 * PanelId.x, PanelDirtVar);
+float wear = saturate((edge * (0.5 + 1.0 * g) - WearThreshold) * 3.0) * EdgeWear;
+float low = saturate((1.0 - VC.r) * 2.5);
+wear = max(wear, saturate((edge * (0.4 + g) - 0.3) * 3.0) * low * FloorWear);
+float top = saturate((n.z - 0.6) * 4.0);
+wear = max(wear, saturate((top * (0.35 + g) - 0.55) * 3.0) * TopWear);
+return float4(g, ao, saturate(dirt), saturate(wear));
+"""
+
+# T_Ship_Micro (generate_detail_textures.py) on UV0 in metres: R brushing, G micro-scratches, B fine roughness noise.
+# The kit's UV0 runs along each member (kit_geo: U on a box's longest axis, along a tube), so the brushing follows the
+# member; one tap, not three. A mesh whose UV0 is an atlas (the ships' hulls) gets it squeezed - they leave
+# SurfaceDetail off.
+_LAYER_MICRO_NODE = """
+return float4(Texture2DSample(TexM, TexMSampler, UV / max(Tile * 0.01, 0.01)).rgb, 0.0);
+"""
+
 # The colour and surface nodes read the masks from the one mask node (M = g, ao, dirt, wear): the grunge
 # texture is sampled once per pixel (six taps), not twice (24. 9. 2026).
 # Livery: analytic zones in the ship's own space (cm), crisp at any distance, one set of scalars per
@@ -956,6 +1020,8 @@ paint = lerp(paint, Accent, stripe * LiveryAmount * (1.0 - zone * 0.0));
 paint *= 1.0 + (r.x - 0.5) * PanelTone * Amount;
 paint = lerp(paint, MetalPanel, isMetal * Amount * LiveryAmount);
 paint = lerp(paint, lerp(float3(0.018, 0.019, 0.021), float3(0.04, 0.042, 0.046), twill), isCarbon * Amount * LiveryAmount);
+paint *= 1.0 + (D.x - 0.5) * Brushed * 0.35;
+paint = lerp(paint, BareMetal, saturate(D.y * ScratchAmount));
 paint *= lerp(1.0, 0.8 + 0.4 * g, GrungeAmount * Amount);
 paint *= lerp(1.0, ao, CavityStrength);
 paint = lerp(paint, DirtColor, dirt);
@@ -972,11 +1038,21 @@ rough += (r.x - 0.5) * PanelRough * Amount;
 rough = lerp(rough, 0.3, isMetal * Amount * LiveryAmount);
 rough = lerp(rough, 0.22 + twill * 0.1, isCarbon * Amount * LiveryAmount);
 rough = saturate(rough + (g - 0.5) * RoughVariation * Amount);
+rough += (D.z - 0.5) * MicroRough + (D.x - 0.5) * Brushed * 0.3;
+rough = lerp(rough, BareRough, saturate(D.y * ScratchAmount));
 rough = lerp(rough, 0.85, dirt);
 rough = lerp(rough, BareRough, wear);
-float metal = lerp(PaintMetal, 1.0, max(wear, isMetal * Amount * LiveryAmount));
+float metal = lerp(PaintMetal, 1.0, max(max(wear, isMetal * Amount * LiveryAmount), saturate(D.y * ScratchAmount)));
 return float3(saturate(rough), metal, lerp(1.0, ao, AOStrength));
 """
+
+
+def _surface_switch(m, on, off, x, y):
+    """The static switch SurfaceDetail (default off): `on` when an instance turns it on, `off` otherwise."""
+    sw = _node(m, unreal.MaterialExpressionStaticSwitchParameter, x, y, parameter_name="SurfaceDetail", default_value=False)
+    _link(on, sw, "True")
+    _link(off, sw, "False")
+    return sw
 
 
 def build_layered_master():
@@ -1021,23 +1097,41 @@ def build_layered_master():
                                           ("PanelTone", 0.06), ("PanelRough", 0.1), ("MetalShare", 0.0), ("CarbonShare", 0.0))):
         params[pname] = _scalar(m, pname, default, -2100, 650 + i * 100)
     panel_uv = _node(m, unreal.MaterialExpressionTextureCoordinate, -1900, 2400, coordinate_index=1)
+    for i, pname in enumerate(("Brushed", "ScratchAmount", "MicroRough", "PanelShift", "PanelDirtVar", "FloorWear", "TopWear")):
+        params[pname] = _scalar(m, pname, 0.0, -2300, 650 + i * 100)
     mask_in = ["VC", "Amount", "LocalPos", "TexG", "Tile", "DirtAmount", "EdgeWear", "WearThreshold"]
-    masks = _custom(m, "Layered_masks", _LAYER_MASK_NODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4, mask_in, -1250, 300)
-    if not MEL.connect_material_expressions(vc, "", masks, "VC"):
-        raise RuntimeError("vertex colour -> masks")
-    if not MEL.connect_material_expressions(vc, "A", masks, "Amount"):
-        raise RuntimeError("vertex colour A -> masks")
-    _link(local_position, masks, "LocalPos")
-    _link(tex, masks, "TexG")
-    _link(tile, masks, "Tile")
-    for name in mask_in[5:]:
-        _link(params[name], masks, name)
+    detail_in = mask_in + ["PanelId", "PanelShift", "PanelDirtVar", "FloorWear", "TopWear"]
+    plain_masks = _custom(m, "Layered_masks", _LAYER_MASK_NODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4, mask_in,
+                          -1250, 300)
+    detail_masks = _custom(m, "Layered_masks_detail", _LAYER_MASK_DETAIL_NODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4,
+                           detail_in, -1250, 100)
+    for node, names in ((plain_masks, mask_in), (detail_masks, detail_in)):
+        if not MEL.connect_material_expressions(vc, "", node, "VC"):
+            raise RuntimeError("vertex colour -> masks")
+        if not MEL.connect_material_expressions(vc, "A", node, "Amount"):
+            raise RuntimeError("vertex colour A -> masks")
+        _link(local_position, node, "LocalPos")
+        _link(tex, node, "TexG")
+        _link(tile, node, "Tile")
+        for name in names[5:]:
+            _link(panel_uv if name == "PanelId" else params[name], node, name)
+    masks = _surface_switch(m, detail_masks, plain_masks, -1000, 200)
+    micro_tex = _node(m, unreal.MaterialExpressionTextureObjectParameter, -1700, -300, parameter_name="MicroMap",
+                      sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_MASKS, texture=import_shared_texture("T_Ship_Micro"))
+    micro = _custom(m, "Layered_micro", _LAYER_MICRO_NODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4,
+                    ["TexM", "UV", "Tile"], -1250, -300)
+    _link(micro_tex, micro, "TexM")
+    _link(_node(m, unreal.MaterialExpressionTextureCoordinate, -1500, -250, coordinate_index=0), micro, "UV")
+    _link(_scalar(m, "MicroTileCm", 60.0, -1700, -150), micro, "Tile")
+    neutral = _node(m, unreal.MaterialExpressionConstant4Vector, -1250, -150,
+                    constant=unreal.LinearColor(0.5, 0.0, 0.5, 0.0))
+    micro_masks = _surface_switch(m, micro, neutral, -1000, -250)
     livery_in = ["LocalPos", "PanelId", "LiveryAmount", "TopZ", "TopSlope", "BotZ", "BotSlope", "TailX", "NoseX", "StripeZ",
                  "StripeSlope", "StripeW", "StripeX0", "StripeX1", "MetalShare", "CarbonShare"]
     colour_in = ["M", "VC", "Amount", "Primary", "Secondary", "BareMetal", "DirtColor", "GrungeAmount", "CavityStrength",
-                 "Accent", "MetalPanel", "PanelTone", "LiveryColor"] + livery_in
+                 "Accent", "MetalPanel", "PanelTone", "LiveryColor", "D", "Brushed", "ScratchAmount"] + livery_in
     surface_in = ["M", "VC", "Amount", "PrimaryRough", "SecondaryRough", "PaintMetal", "BareRough", "AOStrength", "RoughVariation",
-                  "PanelRough"] + livery_in
+                  "PanelRough", "D", "Brushed", "ScratchAmount", "MicroRough"] + livery_in
     nodes = {}
     for key, code, names, y in (("colour", _LAYER_COLOUR, colour_in, 0), ("surface", _LAYER_SURFACE, surface_in, 700)):
         node = _custom(m, "Layered_" + key, code, unreal.CustomMaterialOutputType.CMOT_FLOAT3, names, -900, y)
@@ -1051,6 +1145,8 @@ def build_layered_master():
                 _link(local_position, node, name)
             elif name == "PanelId":
                 _link(panel_uv, node, name)
+            elif name == "D":
+                _link(micro_masks, node, name)
             else:
                 _link(params[name], node, name)
         nodes[key] = node
@@ -1068,6 +1164,25 @@ def build_layered_master():
     _link(_vector(m, "EmissiveColor", (0.0, 0.0, 0.0), -900, 1200), emissive, "A")
     _link(_scalar(m, "EmissiveStrength", 0.0, -900, 1350), emissive, "B")
     _link(emissive, mk, "EmissiveColor")
+    # the rolled-metal grain and scratches of the hull detail normal, only with SurfaceDetail (flat otherwise)
+    tex_n = _node(m, unreal.MaterialExpressionTextureObjectParameter, -1700, 1900, parameter_name="DetailNormalMap",
+                  sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL, texture=import_shared_texture("T_Ship_Detail_N"))
+    detail = _custom(m, "Layered_detail_normal", _DETAIL_NORMAL_CODE, unreal.CustomMaterialOutputType.CMOT_FLOAT3,
+                     ["TexN", "LocalPos", "Tile"], -1250, 1900)
+    _link(tex_n, detail, "TexN")
+    _link(local_position, detail, "LocalPos")
+    _link(_scalar(m, "DetailTileCm", 30.0, -1700, 2050), detail, "Tile")
+    bent = _node(m, unreal.MaterialExpressionMultiply, -1000, 1900)
+    _link(detail, bent, "A")
+    _link(_scalar(m, "DetailNormalStrength", 0.0, -1700, 2150), bent, "B")
+    up = _node(m, unreal.MaterialExpressionConstant3Vector, -1000, 2050, constant=unreal.LinearColor(0.0, 0.0, 1.0, 0.0))
+    add = _node(m, unreal.MaterialExpressionAdd, -850, 1900)
+    _link(bent, add, "A")
+    _link(up, add, "B")
+    bent_normal = _node(m, unreal.MaterialExpressionNormalize, -700, 1900)
+    _link(add, bent_normal, "")
+    flat = _node(m, unreal.MaterialExpressionConstant3Vector, -700, 2050, constant=unreal.LinearColor(0.0, 0.0, 1.0, 0.0))
+    _link(_surface_switch(m, bent_normal, flat, -500, 1950), mk, "Normal")
     # Origin-like finish: a clear coat over the paint that mirrors the environment (ClearCoat 0 = off)
     m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_CLEAR_COAT)
     _link(_scalar(m, "ClearCoat", 0.0, -900, 1500), mk, "ClearCoat")
@@ -1317,6 +1432,8 @@ def build_instance(name, folder, spec, masters, ship=None):
         MEL.set_material_instance_vector_parameter_value(mi, name, unreal.LinearColor(c[0], c[1], c[2], 1.0))
     for name, v in (spec.get("scalars") or {}).items():
         MEL.set_material_instance_scalar_parameter_value(mi, name, float(v))
+    for name, v in (spec.get("switches") or {}).items():
+        MEL.set_material_instance_static_switch_parameter_value(mi, name, bool(v))
     for key, source in (spec.get("textures") or {}).items():
         MEL.set_material_instance_texture_parameter_value(mi, TEXTURE_PARAMS[key], import_texture(ship, key, source, spec.get("never_stream", False)))
     MEL.update_material_instance(mi)

@@ -1634,6 +1634,34 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
           z dávky 2). Nový jednoduchý master `M_Kit_Trim` (WORKFLOW dd). Kovové pruhy trimu bez odrazů černé, generátor
           teď kov pod drsností 0,5 odmítne (de).
         - Výkon: chodba 16,6 ms na snímek (60 FPS), hala 13,8 ms.
+        - Autor dávku 3 schválil (27. 9.). Hotovo po schválení:
+          - **master trupu `M_Ship_PBR` opravený u kořene** (WORKFLOW dg, dh). Černé vodorovné plochy dělalo `(float3x3)`
+            přetypování struktury `FDFMatrix` (nulový vektor → NaN), ne vektorový součin. Detailní normála (BC5) se
+            četla bez modrého kanálu.
+            - Ověřeno deskami `Tools/Assets/probe_pbr_flat.py` (preset `probe_pbr_flat`), hlídá `test_material_hlsl.py`.
+            - Wayfarer: trup zvenku beze změny. Detailní normála kitových dílů interiéru snížena 0,25 → 0,06, jinak
+              tepaný vzhled. Šikmá stěna nákladového prostoru přišla o lesk (grunge se promítá, jak byl navržen, WORKFLOW di).
+          - `test_ship_geometry.py` běží sám jako poslední krok `hs_assemble_ship.py` (při FAIL přestavba skončí kódem 1);
+          - kanál pod mřížkou: trubka chladiva tmavá, světlo 0,6 cd/m z hrany stěny kanálu;
+          - madlo poklopu: prořízlá kapsa, světlé dno, oranžová tyč na čepech;
+          - hrany schodů: nová role `Kit_GlowNeutral` a světlo `neutral` 0,22 cd na stupeň pod sebou.
+      - krok „materiál kitu“ (27.–28. 9.), recenze `Docs/Reviews/2026-09-27_kit_material.md`, preset `kit_material`:
+        - `M_Ship_Layered` se statickým přepínačem `SurfaceDetail` (lodě vypnuto):
+          - mikrotextura `T_Ship_Micro` na UV0 (broušení, mikroškrábance, jemný šum drsnosti);
+          - detailní normála;
+          - variace po deskách;
+          - oděr u podlahy a na madlech.
+        - `kit_geo`:
+          - lem panelů s prachem ve spárách, prach u soklu jen na svislých plochách;
+          - UV0 podél prvku (krabice, hranoly, trubky).
+        - Díly: těsnění poklopu 8 mm, gumové lůžko mřížky, průchodky v portálu C.
+        - Světla kitu ×2,0 (jas chodby 0,20 jako před krokem), emise difuzorů 3,5.
+        - Kritik: 3 kola + ověření, 43 → 46 → 45, FAIL (materiály 4 ve všech kolech); ověření zčásti. Otevřené:
+          - špína ve spárách se nečte;
+          - konstrukce v hloubce chodby splývá s panely;
+          - bílé jádro svítidel.
+        - Výkon beze změny: chodba 16,2 / 16,9 ms (GPU / snímek), křižovatka 15,5 / 16,4 ms, hala 13,0 / 14,1 ms.
+        - `Shots.ps1` snímá ve výchozí kvalitě hry, i když si autor v menu přepne grafiku (WORKFLOW dj).
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

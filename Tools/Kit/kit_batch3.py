@@ -132,7 +132,9 @@ def floor_grille(sec, var, L, name, seed):
     # services: a coolant pipe, a smaller water line, a cable bundle; supports every 0.6 m
     rng_off = (zlib.crc32(name.encode()) % 7) * 0.01
     zc = -depth + 0.07                             # the coolant line's axis
-    p.tube("Kit_Accent", (0.0, -0.1 * cw / 0.3, zc), (L, -0.1 * cw / 0.3, zc), 0.035, 16, caps=False)
+    # the coolant line in the dark primary: in the cream accent under the channel light it read as a glowing tube
+    # (critic r3, author 27. 9. 2026); the signal bands at the supports say what it is
+    p.tube("Kit_Primary", (0.0, -0.1 * cw / 0.3, zc), (L, -0.1 * cw / 0.3, zc), 0.035, 16, caps=False)
     p.tube("Kit_Structure", (0.0, 0.1 * cw / 0.3, zc - 0.02), (L, 0.1 * cw / 0.3, zc - 0.02), 0.024, 12, caps=False)
     for k, (dy, r) in enumerate(((0.19, 0.012), (0.215, 0.011), (0.2, 0.01))):
         y = dy * cw / 0.3
@@ -158,10 +160,17 @@ def floor_grille(sec, var, L, name, seed):
         p.box("Kit_Structure", (x - 0.005, -cw, -0.03), (x + 0.005, cw, -0.014), panel=False)
     for (a0, a1, b0, b1) in ((0.0, L, -cw - 0.03, -cw), (0.0, L, cw, cw + 0.03), (0.0, 0.02, -cw, cw), (L - 0.02, L, -cw, cw)):
         p.box("Kit_Structure", (a0, b0, -0.03), (a1, b1, 0.004), bevel=0.003, segments=1, panel=False)
+    # the grating lies on a rubber seat along the frame's inner lip (critic, material round 1: "in bare metal")
+    for (a0, a1, b0, b1) in ((0.02, L - 0.02, -cw, -cw + 0.007), (0.02, L - 0.02, cw - 0.007, cw), (0.02, 0.027, -cw, cw),
+                             (L - 0.027, L - 0.02, -cw, cw)):
+        p.box("Kit_Rubber", (a0, b0, -0.006), (a1, b1, 0.001), panel=False)
     # the services lit from inside: a cool linear light along the channel under the grating (the channel read as a void)
-    # 1.8 cd per metre: at 5 the cream coolant line burnt out to a white stripe (critic r3)
-    kit_batch2.strip_light_along(p, "Light_Channel_0", (L / 2, 0.0, -0.045), (0, 0, -1), (1, 0, 0), L - 0.1, 0.03, "work",
-                                 1.8 * L, 0.6)
+    # 0.6 cd per metre from the lip of one channel wall, aimed down across the channel: at 5 the cream coolant line burnt
+    # out to a white stripe (critic r3), at 1.8 it still glowed, and whatever lay 5 cm under a strip over the middle
+    # (the dark coolant line, then the cable bundle) read as a lit stripe (author 27. 9. 2026: dim, the channel's
+    # readability is tuned when a ship is built)
+    kit_batch2.strip_light_along(p, "Light_Channel_0", (L / 2, cw - 0.015, -0.04), (0, -0.6, -0.8), (1, 0, 0), L - 0.1, 0.03,
+                                 "work", 0.6 * L, 0.6)
     _collision(p, L, hw)
     p.socket("Snap_Start", (0, 0, 0), x=(-1, 0, 0), z=(0, 0, 1))
     p.socket("Snap_End", (L, 0, 0), x=(1, 0, 0), z=(0, 0, 1))
@@ -191,26 +200,36 @@ def floor_hatch(sec, var, L, name, seed):
     for (a0, a1, b0, b1) in ((x0 - 0.03, x1 + 0.03, y0 - 0.03, y0), (x0 - 0.03, x1 + 0.03, y1, y1 + 0.03),
                              (x0 - 0.03, x0, y0, y1), (x1, x1 + 0.03, y0, y1)):
         p.box("Kit_Primary", (a0, b0, -PLATE), (a1, b1, 0.003), bevel=0.003, segments=1, panel=False)
-    for (a0, a1, b0, b1) in ((x0, x1, y0, y0 + 0.004), (x0, x1, y1 - 0.004, y1), (x0, x0 + 0.004, y0, y1), (x1 - 0.004, x1, y0, y1)):
-        p.box("Kit_Rubber", (a0, b0, -0.012), (a1, b1, -0.0015), panel=False)
+    # the seal: 8 mm of rubber flush with the lid, not a dark line (critic, material round 1)
+    for (a0, a1, b0, b1) in ((x0, x1, y0, y0 + 0.008), (x0, x1, y1 - 0.008, y1), (x0, x0 + 0.008, y0, y1), (x1 - 0.008, x1, y0, y1)):
+        p.box("Kit_Rubber", (a0, b0, -0.012), (a1, b1, -0.001), panel=False)
     for (x, y) in ((x0 - 0.015, y0 - 0.015), (x1 + 0.015, y0 - 0.015), (x0 - 0.015, y1 + 0.015), (x1 + 0.015, y1 + 0.015)):
         p.tube("Kit_Structure", (x, y, 0.003), (x, y, 0.0045), 0.006, 6)
     # the lid, 2 mm down in the frame with a dark gap round it
     p.box("Kit_Seal", (x0, y0, -0.03), (x1, y1, -0.025), panel=False)
-    p.box("Kit_Primary", (x0 + 0.004, y0 + 0.004, -PLATE), (x1 - 0.004, y1 - 0.004, -0.002), bevel=0.003, segments=1)
-    _lanes(p, x0 + 0.02, x1 - 0.02, y0 + 0.04, y1 - 0.04, z=-0.002)
-    # the recessed lift handle at the front (-X) edge: a pocket with a lit-from-above lip and a flat bar across it
-    px = x0 + 0.055
-    p.box("Kit_Seal", (px - 0.03, -0.06, -0.018), (px + 0.03, 0.06, -0.0015), panel=False)
-    # the pocket's floor in the structure paint: without it the handle read as a black cut into nothing (critic r3)
-    p.box("Kit_Structure", (px - 0.028, -0.058, -0.017), (px + 0.028, 0.058, -0.0145), panel=False)
-    p.box("Kit_Structure", (px - 0.03, -0.062, -0.0035), (px + 0.03, -0.056, -0.0015), panel=False)
-    p.box("Kit_Structure", (px - 0.03, 0.056, -0.0035), (px + 0.03, 0.062, -0.0015), panel=False)
-    p.box("Kit_Structure", (px - 0.006, -0.056, -0.012), (px + 0.006, 0.056, -0.004), bevel=0.002, segments=1, panel=False)
+    x0, x1, y0, y1 = x0 + 0.004, x1 - 0.004, y0 + 0.004, y1 - 0.004        # the lid inside the wider seal
+    # the lift handle at the front (-X) edge: a pocket cut through the lid's top (the lid is four plates round it) with
+    # a lighter floor and a grip bar across it in the signal orange of every handrail - a black pocket with a bar in
+    # the structure paint read as a dark cut, not a handle (critic r3, author 27. 9. 2026: contrasting grip)
+    px, pw, ph = x0 + 0.06, 0.036, 0.07             # pocket centre, half length (x), half width (y)
+    lx0, lx1, ly0, ly1 = x0 + 0.004, x1 - 0.004, y0 + 0.004, y1 - 0.004
+    for (a0, a1, b0, b1) in ((lx0, px - pw, ly0, ly1), (px + pw, lx1, ly0, ly1), (px - pw, px + pw, ly0, -ph),
+                             (px - pw, px + pw, ph, ly1)):
+        p.box("Kit_Primary", (a0, b0, -PLATE), (a1, b1, -0.002), panel=False)
+    _lanes(p, px + pw + 0.015, x1 - 0.02, y0 + 0.04, y1 - 0.04, z=-0.002)
+    for (a0, a1, b0, b1) in ((px - pw, px + pw, -ph, -ph + 0.003), (px - pw, px + pw, ph - 0.003, ph),
+                             (px - pw, px - pw + 0.003, -ph, ph), (px + pw - 0.003, px + pw, -ph, ph)):
+        p.box("Kit_Primary", (a0, b0, -0.024), (a1, b1, -0.002), panel=False, secondary=True)
+    p.box("Kit_Structure", (px - pw, -ph, -0.026), (px + pw, ph, -0.022), panel=False)
+    # the grip: a round bar across the pocket on two pivot lugs, its top 3 mm under the lid so it takes no kick
+    p.tube("Kit_Signal", (px, -ph + 0.012, -0.012), (px, ph - 0.012, -0.012), 0.0075, 16)
+    for yy in (-ph + 0.003, ph - 0.013):
+        p.box("Kit_Structure", (px - 0.009, yy, -0.022), (px + 0.009, yy + 0.01, -0.006), bevel=0.002, segments=1,
+              panel=False)
     # two quarter-turn latches either side of the handle and two hinges with knuckles at the back (+X) edge
-    for yy in (y0 + 0.06, y1 - 0.06):
-        p.tube("Kit_Structure", (px, yy, -0.004), (px, yy, -0.0015), 0.014, 12)
-        p.box("Kit_Seal", (px - 0.011, yy - 0.0015, -0.0016), (px + 0.011, yy + 0.0015, -0.001), panel=False)
+    for yy in (y0 + 0.045, y1 - 0.045):
+        p.tube("Kit_Structure", (px, yy, -0.004), (px, yy, -0.0015), 0.013, 12)
+        p.box("Kit_Seal", (px - 0.01, yy - 0.0015, -0.0016), (px + 0.01, yy + 0.0015, -0.001), panel=False)
     for yy in (y0 + 0.09, y1 - 0.09):
         # the hinge leaf in the dark primary (in the light structure paint it read as a blank label - critic r3)
         p.box("Kit_Primary", (x1 - 0.05, yy - 0.03, -0.004), (x1 - 0.004, yy + 0.03, -0.0012), bevel=0.002, segments=1,
@@ -247,10 +266,13 @@ def stair_flight(sec, var, rise_total, name, seed):
         # the nosing: a structure-painted lip, a lit strip set into its face (the step edge reads in the dark)
         p.box("Kit_Structure", (xa - NOSING, -hw, z - 0.04), (xa - NOSING + 0.035, hw, z + 0.002), bevel=0.003, segments=1,
               panel=False)
-        p.box("Kit_GlowCool", (xa - NOSING - 0.002, -hw + 0.04, z - 0.028), (xa - NOSING, hw - 0.04, z - 0.016), panel=False)
-        # the strip lights the step below it (critic r1: the lit edges did nothing to the treads)
+        # a quiet neutral white, not the cool plinth blue ("blue treads", critic r2; author 27. 9. 2026)
+        p.box("Kit_GlowNeutral", (xa - NOSING - 0.002, -hw + 0.04, z - 0.028), (xa - NOSING, hw - 0.04, z - 0.016),
+              panel=False)
+        # the strip lights the step below it (critic r1 and r3: the lit edges did nothing to the treads; 0.08 cd was
+        # invisible)
         kit_batch2.strip_light_along(p, "Light_Step_%d" % i, (xa - NOSING - 0.004, 0.0, z - 0.022), (-0.6, 0, -0.8), (0, 1, 0),
-                                     2 * hw - 0.1, 0.012, "work", 0.08, 0.45)
+                                     2 * hw - 0.1, 0.012, "neutral", 0.22, 0.5)
         # the riser, set back
         p.box("Kit_Primary", (xa - 0.01, -hw, z - RISE), (xa, hw, z - 0.04), panel=False, secondary=True)
     # stringers: a sloped beam either side from the floor to the top

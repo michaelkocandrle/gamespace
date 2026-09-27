@@ -1,0 +1,107 @@
+{
+ "topic": "kit_material",
+ "date": "2026-09-27",
+ "goal": "Interiérový kit lodi, krok „materiál kitu“: povrch hotových dílů (stěny, rámy, strop, podlahy, mřížka, poklop, schodiště). Hodnotí se materiály: variace drsnosti, broušený kov na konstrukci, gumová těsnění, špína ve spárách a u soklu, jemné mikroškrábance, lehký oděr na madlech a u podlahy, varianty podlahových desek. Tvary a světla jsou z dávek 1–3 (schválené). Pohled z první osoby (oko 1,65 m).",
+ "style": "Star Citizen: průmyslový interiér lodi; lakované panely téměř čisté, špína a oděr jen tam, kam patří (spáry, sokl, hrany u podlahy, madla), lesk se mění po ploše, konstrukce z broušeného i lakovaného kovu, gumová těsnění; teplý grafit, světlejší konstrukce, oranžová signální barva výrobce; úroveň zpracování SC.",
+ "checklist": "interior",
+ "out": "Docs/Reviews/2026-09-27_kit_material/round3",
+ "notes": [
+  "Text vpravo nahoře (FPS) je měřicí overlay, ne součást výsledku.",
+  "Hodnotí se hlavně materiály a povrch. Tvary dílů, rozmístění a světla jsou z dávek 1–3 (schválené autorem).",
+  "Provizorní je hala u schodiště: hladké tmavé stěny, strop a blok plošiny (přijdou s místnostmi lodi).",
+  "Značení na podlaze a stěnách (nápisy, nouzové značky) přijde s dávkou 6.",
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt."
+ ],
+ "pairs": [
+  {
+   "title": "Chodba z kitu, pohled podél: stěny, podlaha, konstrukce",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
+   "ref_label": "SC chodba (Drake)",
+   "ours": "Saved/Shots/20260927_205537_kit_material/04_c_a_corridor.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Stěny a konstrukce zblízka: panely, spáry, sokl",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC stěna a sokl",
+   "ours": "Saved/Shots/20260927_205537_kit_material/07_c_f_inner_corner.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Sokl a pata stěny zblízka: kopací lišta, desky u stěny, spáry",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC stěna a sokl",
+   "ours": "Saved/Shots/20260927_205537_kit_material/11_c_plinth_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Portál s potrubím zblízka: lakovaný a broušený kov, guma",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC infrastruktura",
+   "ours": "Saved/Shots/20260927_205537_kit_material/06_c_d_portal_c_pipes.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Podlaha chodby: varianty desek, špína ve spárách",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC podlahové desky",
+   "ours": "Saved/Shots/20260927_205537_kit_material/12_d_b_corridor_floor.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Deska B zblízka: středová čára, protiskluz, spáry",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021447.png",
+   "ref_label": "SC podlaha se značením",
+   "ours": "Saved/Shots/20260927_205537_kit_material/15_d_e_plate_b_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Mřížka nad kanálem a okolní desky zblízka",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC podlaha s mřížkou",
+   "ours": "Saved/Shots/20260927_205537_kit_material/13_d_c_grille_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Poklop v podlaze zblízka: rám, těsnění, madlo",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC podlahové desky",
+   "ours": "Saved/Shots/20260927_205537_kit_material/14_d_d_hatch_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Lodní schodiště zepředu: nášlapy, hrany, madla",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021225.png",
+   "ref_label": "SC schody v lodi",
+   "ours": "Saved/Shots/20260927_205537_kit_material/17_d_h_stair_front.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Úzká chodba N / průlez: materiál ve stínu",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
+   "ref_label": "SC úzká chodba",
+   "ours": "Saved/Shots/20260927_205537_kit_material/08_c_h_leg_to_n_stub.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

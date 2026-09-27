@@ -7,6 +7,9 @@ Writes (1024 x 1024, seamless, overwritten every run - they are generated, not h
 
     ArtSource/Ships/Shared/Textures/T_Ship_Detail_N.png       normal map: rolled-metal grain and scratches
     ArtSource/Ships/Shared/Textures/T_Ship_Detail_Grunge.png  grey blotches: roughness breakup, 1 m across
+    ArtSource/Ships/Shared/Textures/T_Ship_Micro.png          masks for the layered master's surface detail:
+                                                             R brushing streaks along U, G micro-scratches,
+                                                             B fine roughness noise (kit material step, 27. 9. 2026)
 
 The ship master M_Ship_PBR projects them on the hull in the ship's own space (triplanar, ~30 cm across),
 so the detail holds up from any distance and does not swim when the ship moves. An AI model's own paint
@@ -107,6 +110,33 @@ def main():
     Image.fromarray((grunge * 255.0).clip(0, 255).astype(np.uint8), "L").save(grunge_path)
 
     print("detail textures: %s, %s" % (normal_path, grunge_path))
+    print("micro masks: %s" % micro_masks(np.random.default_rng(20260927)))
+
+
+def streaks(size, rng):
+    """Brushing: thin lines along U (image x) - every row its own value, drifting slowly along the row, a few deeper
+    grooves - seamless both ways."""
+    rows = rng.random(size)
+    rows = 0.6 * rows + 0.4 * np.roll(rows, 1) * 0.5 + 0.4 * np.roll(rows, -1) * 0.5
+    drift = tiling_noise(size, 4, rng, octaves=2)              # the stroke gets lighter and darker along its length
+    lines = rows[:, None] * (0.75 + 0.5 * drift)
+    grooves = np.zeros(size)
+    grooves[rng.choice(size, size // 24, replace=False)] = 0.5 + 0.5 * rng.random(size // 24)
+    lines = lines - 0.35 * grooves[:, None] * (0.6 + 0.8 * tiling_noise(size, 6, rng))
+    return (lines - lines.min()) / (lines.max() - lines.min())
+
+
+def micro_masks(rng):
+    """T_Ship_Micro: R brushing, G micro-scratches (0 = none), B fine roughness noise, all around 0.5 but G."""
+    brushed = streaks(SIZE, rng)
+    marks = scratches(SIZE, 700, rng)
+    marks = np.clip(0.6 * marks + 0.4 * blur(marks, 1), 0.0, 1.0)
+    fine = tiling_noise(SIZE, 48, rng, octaves=3, gain=0.6)
+    fine = (fine - fine.min()) / (fine.max() - fine.min())
+    image = np.stack([brushed, marks / max(marks.max(), 1e-6), fine], axis=-1)
+    path = os.path.join(OUT, "T_Ship_Micro.png")
+    Image.fromarray((image * 255.0).clip(0, 255).astype(np.uint8), "RGB").save(path)
+    return path
 
 
 if __name__ == "__main__":

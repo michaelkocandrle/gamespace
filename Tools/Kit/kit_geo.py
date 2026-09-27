@@ -2,10 +2,13 @@
 
 A Part collects geometry per material role (the slot names of kit_rules.json naming.slot_roles), then becomes
 one Blender object with those slots, UV0 (trim-sheet strips for Kit_Trim, metres box-projected elsewhere),
-UV1 = a per-panel random pair (the layered master's panel variation), the face-corner colour 'Col' the layered
-master reads (R occlusion, falling towards the floor; G 1 - edge: 0 on the faces a bevel made, so the edge wear sits
-on the chamfers only - these parts have almost no vertex off an edge, a per-vertex edge mask would wear whole faces;
-B 1 primary / 0 secondary; A layering amount 1), UCX collision objects and
+UV0 in metres runs along the member on boxes (U on the box's longest axis) and tubes (U along the axis): the layered
+master's brushing follows it (kit material step, 27. 9. 2026). UV1 = a per-panel random pair (the layered master's panel variation), the face-corner colour 'Col' the layered
+master reads (R occlusion: on vertical faces falling towards the floor and the plinth, and low round the rim and on
+the sides of every larger panel, so the master's dirt sits in the seams - the panel's front face gets an inner ring
+SEAM_W wide for that; G 1 - edge: 0 on the faces a bevel made, so the edge wear sits on the chamfers only - these parts
+have almost no vertex off an edge, a per-vertex edge mask would wear whole faces; B 1 primary / 0 secondary; A
+layering amount 1), UCX collision objects and
 SOCKET_ empties. All coordinates in metres in the part's own frame (kit_rules pivots).
 """
 import json
@@ -18,11 +21,15 @@ import bpy
 from mathutils import Matrix, Vector
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# dirt in the seams (kit material step, 27. 9. 2026): panels in these roles at least SEAM_MIN across get the ring
+SEAM_ROLES = ("Kit_Primary", "Kit_Structure")
+SEAM_W, SEAM_MIN, SEAM_OCC = 0.04, 0.15, 0.2
 RULES = json.load(open(os.path.join(ROOT, "ArtSource", "Kit", "kit_rules.json"), encoding="utf-8"))
 TRIM = json.load(open(os.path.join(ROOT, "ArtSource", "Kit", "Textures", "trim_index.json"), encoding="utf-8"))
 
 ROLES = ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber", "Kit_Fabric", "Kit_Plastic", "Kit_Trim",
-         "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_Screen", "Kit_Glass"]
+         "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_GlowNeutral", "Kit_Screen",
+         "Kit_Glass"]
 
 
 def frame(origin, ax, ay, az):
@@ -46,11 +53,14 @@ class Part:
         self.sockets = []                        # (name, location, x axis, z axis, params)
         self.decal_items = []                    # shots for hs_decals.Placer
         self.edge_faces = set()                  # faces a bevel made: the edge-wear mask (Col.G = 0)
+        self.seam_box = {}                       # face -> (lo, hi) of its panel in local coords: the seam dirt
 
     # ------------------------------------------------------------------ primitives
-    def box(self, role, lo, hi, bevel=0.0, segments=2, m=None, trim=None, panel=True, secondary=False, atlas=None, inset=None):
+    def box(self, role, lo, hi, bevel=0.0, segments=2, m=None, trim=None, panel=True, secondary=False, atlas=None, inset=None,
+            seam=None):
         """An axis-aligned box lo..hi in local coords (then m), bevelled edges. trim: strip name on Kit_Trim; the
-        strip runs along the box's longest axis. Returns the new faces."""
+        strip runs along the box's longest axis. seam: dirt round the front (+z) face's rim and on the sides (default:
+        panels in SEAM_ROLES at least SEAM_MIN across). Returns the new faces."""
         bm = self.bm[role]
         lo, hi = Vector(lo), Vector(hi)
         size = hi - lo
@@ -64,17 +74,31 @@ class Part:
             tmp.faces.ensure_lookup_table()
             front = max(tmp.faces, key=lambda f: f.calc_center_median().z)
             bmesh.ops.inset_region(tmp, faces=[front], thickness=border, depth=-depth, use_even_offset=True)
+        if seam is None:
+            seam = (role in SEAM_ROLES and panel and not trim and not atlas and not inset
+                    and min(size.x, size.y) >= SEAM_MIN)
+        if seam:
+            # a flat inner ring on the front face: its outer vertices carry the seam dirt, the inner ones none
+            tmp.faces.ensure_lookup_table()
+            front = max(tmp.faces, key=lambda f: f.calc_center_median().z)
+            bmesh.ops.inset_region(tmp, faces=[front], thickness=SEAM_W, depth=0.0, use_even_offset=True)
         edge = set()
         if bevel > 0:
             w = min(bevel, 0.45 * min(size), (inset[0] * 0.4) if inset else 1.0)
-            res = bmesh.ops.bevel(tmp, geom=list(tmp.edges), offset=w, offset_type="OFFSET", segments=segments, profile=0.5,
+            # with a seam ring only the real corners: a bevel on its flat edges made chamfer faces lying in the plane,
+            # worn like an edge (the other boxes keep beveling every edge - their decals are placed on that shape)
+            geom = [e for e in tmp.edges if len(e.link_faces) != 2 or e.calc_face_angle(0.0) > 0.3] if seam else list(tmp.edges)
+            res = bmesh.ops.bevel(tmp, geom=geom, offset=w, offset_type="OFFSET", segments=segments, profile=0.5,
                                   affect="EDGES", clamp_overlap=True)
             edge = set(res["faces"])
         local = [(v.co.copy()) for v in tmp.verts]
         if m is not None:
             tmp.transform(m)
         faces = self._merge(bm, tmp, local, edge)
-        mode = ("trim", trim, lo, hi) if trim else ("atlas", atlas, lo, hi) if atlas else ("box",)
+        if seam:
+            for f in faces:
+                self.seam_box[f] = (lo.copy(), hi.copy())
+        mode = ("trim", trim, lo, hi) if trim else ("atlas", atlas, lo, hi) if atlas else ("member", lo, hi)
         self.meta[role].append((faces, mode, self._panel_id(panel), secondary))
         return faces
 
@@ -99,7 +123,7 @@ class Part:
         faces = self._merge(bm, tmp, local)
         for f in faces:
             f.smooth = True
-        self.meta[role].append((faces, ("box",), self._panel_id(panel), False))
+        self.meta[role].append((faces, ("tube",), self._panel_id(panel), False))
         return faces
 
     def quads(self, role, polys, toward, panel=True, secondary=False):
@@ -117,7 +141,7 @@ class Part:
             tmp.faces.new([tmp.verts.new(q) for q in pts])
         local = [v.co.copy() for v in tmp.verts]
         faces = self._merge(bm, tmp, local)
-        self.meta[role].append((faces, ("box",), self._panel_id(panel), secondary))
+        self.meta[role].append((faces, ("member",) + _bounds(local), self._panel_id(panel), secondary))
         return faces
 
     def poly_prism(self, role, pts2d, m, depth, bevel=0.0, panel=True, segments=2):
@@ -141,7 +165,8 @@ class Part:
         local = [v.co.copy() for v in tmp.verts]
         tmp.transform(m)
         faces = self._merge(bm, tmp, local, edge)
-        self.meta[role].append((faces, ("box",), self._panel_id(panel), False))
+        # U along the prism's longest extent: a corner post is a prism, its brushing runs up it (critic, material r2)
+        self.meta[role].append((faces, ("member",) + _bounds(local), self._panel_id(panel), False))
         return faces
 
     def _merge(self, bm, tmp, local, edge=()):
@@ -224,11 +249,17 @@ class Part:
                 for l_src, l_dst in zip(f.loops, nf.loops):
                     p = l_src.vert.co
                     lc = l_src.vert[loc]
-                    l_dst[uv0].uv = self._uv(mode, p, lc, ln if mode[0] != "box" else n)
+                    l_dst[uv0].uv = self._uv(mode, p, lc, ln if mode[0] not in ("box", "tube") else n)
                     l_dst[uv1].uv = pid
-                    # occlusion falls off towards the floor (the master's dirt rises there: one clean tone on
-                    # everything - critic, 27. 9. 2026)
-                    occ = 1.0 - 0.4 * min(1.0, max(0.0, 1.0 - p.z / 0.5))
+                    # occlusion falls off towards the floor on vertical faces, most at the plinth (the master's
+                    # dirt rises there: one clean tone on everything - critic, 27. 9. 2026); floors themselves stay
+                    # clean but for their seams
+                    occ = 1.0
+                    if abs(n.z) < 0.7:
+                        occ -= 0.4 * min(1.0, max(0.0, 1.0 - p.z / 0.5)) + 0.2 * min(1.0, max(0.0, 1.0 - p.z / 0.12))
+                    sb = self.seam_box.get(f)
+                    if sb is not None and min(lc.x - sb[0].x, sb[1].x - lc.x, lc.y - sb[0].y, sb[1].y - lc.y) < SEAM_W * 0.5:
+                        occ *= SEAM_OCC
                     l_dst[col] = (occ, 0.0 if f in self.edge_faces else 1.0, 0.0 if secondary else 1.0, 1.0)
         out.normal_update()
         out.to_mesh(me)
@@ -282,6 +313,16 @@ class Part:
             t = (lc[across] - lo[across]) / max(1e-6, size[across])
             v0, v1 = s["v_blender"]
             return (lc[along] / s["u_repeat_m"], v0 + (v1 - v0) * (1.0 - t))
+        if mode[0] == "member":
+            # U along the box's longest axis in its own frame, V along the face's other in-plane axis
+            _, lo, hi = mode
+            size = hi - lo
+            nl = max(range(3), key=lambda a: abs(n[a])) if n.length > 0 else 2
+            axes = [a for a in sorted(range(3), key=lambda a: -size[a]) if a != nl]
+            return (lc[axes[0]], lc[axes[1]])
+        if mode[0] == "tube":
+            # the cone's own frame: its axis is local z
+            return (lc.z, lc.x + lc.y)
         if mode[0] == "atlas":
             _, (au0, av0, au1, av1), lo, hi = mode
             size = hi - lo
@@ -295,6 +336,12 @@ class Part:
         if a == 1:
             return (p.x, p.z)
         return (p.x, p.y)
+
+
+def _bounds(points):
+    lo = Vector((min(p.x for p in points), min(p.y for p in points), min(p.z for p in points)))
+    hi = Vector((max(p.x for p in points), max(p.y for p in points), max(p.z for p in points)))
+    return lo, hi
 
 
 def materials():
@@ -314,6 +361,7 @@ def materials():
         "Kit_GlowWarm": ([0.1, 0.1, 0.1], 0.3, 0.0, (pal["Kit_GlowWarm"], 14.0)),
         "Kit_GlowCool": ([0.05, 0.05, 0.06], 0.3, 0.0, (pal["Kit_GlowCool"], 8.0)),
         "Kit_GlowSignal": ([0.1, 0.05, 0.02], 0.3, 0.0, (pal["Kit_GlowSignal"], 4.0)),
+        "Kit_GlowNeutral": ([0.08, 0.08, 0.08], 0.3, 0.0, (pal["Kit_GlowNeutral"], 4.0)),
         "Kit_Screen": ([0.01, 0.01, 0.015], 0.2, 0.0, ([0.35, 0.6, 1.0], 3.0)),
         "Kit_Glass": ([0.02, 0.03, 0.035], 0.05, 0.0, None),
         "Kit_Decal": ([0.2, 0.2, 0.2], 0.5, 0.0, None),

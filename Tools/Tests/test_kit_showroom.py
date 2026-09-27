@@ -11,6 +11,8 @@ What it guards (27. 9. 2026):
   They were lost once in kit_build.join() and came out all white, which Unreal drops on import;
 - the layout rule for decals: never the same service label (st_*, label_*) on neighbouring modules of a wall
   run of the sample (import_kit.SHOWROOM, the labels from kit_manifest.json);
+- the kit material step: seam dirt on the floor plates, the layered master's surface detail switched on for every
+  kit instance and off for the ships';
 - the showroom is walkable: a gravity volume over it, the start U / space.Showroom puts the player at, the
   dark sun box around it without collision.
 """
@@ -82,6 +84,28 @@ for name, part in sorted(parts.items()):
     # has_vertex_colors() answers False in this commandlet even for the Wayfarer hull, whose masks work: export
     # the mesh back to FBX instead - Unreal writes a colour layer only when the mesh has colours (27. 9. 2026)
     check("%s: vertex colours in Unreal" % name, exported_colours(sm))
+    if name.startswith("SM_Kit_Floor_Plate"):
+        # the kit material step: dirt round every plate (kit_geo seam ring)
+        check("%s: seam dirt on the plates (%s corners)" % (name, masks.get("seam")), masks.get("seam", 0) > 0)
+
+# ---------------------------------------------------------------- materials: the layered master's surface detail
+MEL = unreal.MaterialEditingLibrary
+kit_layered = [a for a in unreal.EditorAssetLibrary.list_assets("/Game/Kit/Materials", recursive=False, include_folder=False)
+               if a.split(".")[-1].startswith("MI_Kit_")]
+for path in sorted(kit_layered):
+    mi = unreal.EditorAssetLibrary.load_asset(path)
+    parent = mi.get_editor_property("parent") if isinstance(mi, unreal.MaterialInstanceConstant) else None
+    if parent is None or parent.get_name() != "M_Ship_Layered":
+        continue
+    # the roles may override SURFACE (the paint 80 cm, the signal orange 30 cm): a sane grunge tile, the switch on
+    tile = MEL.get_material_instance_scalar_parameter_value(mi, "GrungeTileCm")
+    check("%s: surface detail on (SurfaceDetail, GrungeTileCm %.0f)" % (mi.get_name(), tile),
+          MEL.get_material_instance_static_switch_parameter_value(mi, "SurfaceDetail") and 20.0 <= tile <= 200.0)
+# the ships keep the master's default: the switch off (the Wayfarer's look does not change with the kit's)
+for path in unreal.EditorAssetLibrary.list_assets("/Game/Ships/Wayfarer/Materials", recursive=False, include_folder=False):
+    mi = unreal.EditorAssetLibrary.load_asset(path)
+    if isinstance(mi, unreal.MaterialInstanceConstant) and mi.get_editor_property("parent")             and mi.get_editor_property("parent").get_name() == "M_Ship_Layered":
+        check("%s: surface detail off" % mi.get_name(), not MEL.get_material_instance_static_switch_parameter_value(mi, "SurfaceDetail"))
 
 # ---------------------------------------------------------------- the layout rule for service labels
 runs = C.get("SHOWROOM", {}).get("wall_runs", [])
