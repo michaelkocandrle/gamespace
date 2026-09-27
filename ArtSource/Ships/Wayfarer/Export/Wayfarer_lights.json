@@ -1390,8 +1390,8 @@
    "intensity_cd": 1.312,
    "radius_m": 1.6,
    "location": [
-    3.29,
-    -1.2774,
+    1.49,
+    1.2774,
     2.239
    ],
    "direction": [
@@ -1403,8 +1403,8 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    -696.0,
-    127.7,
+    -876.0,
+    -127.7,
     103.9
    ],
    "direction_ue": [
@@ -1424,8 +1424,8 @@
    "intensity_cd": 1.312,
    "radius_m": 1.6,
    "location": [
-    4.11,
-    -1.2774,
+    2.31,
+    1.2774,
     2.239
    ],
    "direction": [
@@ -1437,8 +1437,8 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    -614.0,
-    127.7,
+    -794.0,
+    -127.7,
     103.9
    ],
    "direction_ue": [
@@ -1455,12 +1455,12 @@
     0.82,
     0.62
    ],
-   "intensity_cd": 0.518,
+   "intensity_cd": 1.312,
    "radius_m": 1.6,
    "location": [
-    3.7,
-    -0.0,
-    2.12
+    1.49,
+    -1.2774,
+    2.239
    ],
    "direction": [
     0,
@@ -1471,9 +1471,9 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    -655.0,
-    -0.0,
-    92.0
+    -876.0,
+    127.7,
+    103.9
    ],
    "direction_ue": [
     0,
@@ -1492,8 +1492,8 @@
    "intensity_cd": 1.312,
    "radius_m": 1.6,
    "location": [
-    5.09,
-    1.2774,
+    2.31,
+    -1.2774,
     2.239
    ],
    "direction": [
@@ -1505,8 +1505,8 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    -516.0,
-    -127.7,
+    -794.0,
+    127.7,
     103.9
    ],
    "direction_ue": [
@@ -1517,1060 +1517,6 @@
   },
   {
    "name": "fix_39",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.312,
-   "radius_m": 1.6,
-   "location": [
-    5.91,
-    1.2774,
-    2.239
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -434.0,
-    -127.7,
-    103.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_40",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.312,
-   "radius_m": 1.6,
-   "location": [
-    5.09,
-    -1.2774,
-    2.249
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -516.0,
-    127.7,
-    104.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_41",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.312,
-   "radius_m": 1.6,
-   "location": [
-    5.91,
-    -1.2774,
-    2.249
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -434.0,
-    127.7,
-    104.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_42",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 0.518,
-   "radius_m": 1.6,
-   "location": [
-    5.5,
-    -0.0,
-    2.12
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -475.0,
-    -0.0,
-    92.0
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_43",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.312,
-   "radius_m": 1.6,
-   "location": [
-    6.89,
-    1.2774,
-    2.239
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -336.0,
-    -127.7,
-    103.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_44",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.312,
-   "radius_m": 1.6,
-   "location": [
-    7.71,
-    1.2774,
-    2.239
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -254.0,
-    -127.7,
-    103.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_45",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.312,
-   "radius_m": 1.6,
-   "location": [
-    6.89,
-    -1.2774,
-    2.249
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -336.0,
-    127.7,
-    104.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_46",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.312,
-   "radius_m": 1.6,
-   "location": [
-    7.71,
-    -1.2774,
-    2.249
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -254.0,
-    127.7,
-    104.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_47",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 0.518,
-   "radius_m": 1.6,
-   "location": [
-    7.3,
-    -0.0,
-    2.12
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -295.0,
-    -0.0,
-    92.0
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_48",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.632,
-   "radius_m": 1.6,
-   "location": [
-    8.79,
-    1.2774,
-    2.239
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -146.0,
-    -127.7,
-    103.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_49",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.632,
-   "radius_m": 1.6,
-   "location": [
-    9.81,
-    1.2774,
-    2.239
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -44.0,
-    -127.7,
-    103.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_50",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.632,
-   "radius_m": 1.6,
-   "location": [
-    8.79,
-    -1.2774,
-    2.239
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -146.0,
-    127.7,
-    103.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_51",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.632,
-   "radius_m": 1.6,
-   "location": [
-    9.81,
-    -1.2774,
-    2.239
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -44.0,
-    127.7,
-    103.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_52",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 0.518,
-   "radius_m": 1.6,
-   "location": [
-    9.3,
-    -0.0,
-    2.12
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -95.0,
-    -0.0,
-    92.0
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_53",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.504,
-   "radius_m": 1.6,
-   "location": [
-    10.92,
-    -1.44,
-    2.175
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    67.0,
-    144.0,
-    97.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_54",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.504,
-   "radius_m": 1.6,
-   "location": [
-    11.86,
-    -1.44,
-    2.175
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    161.0,
-    144.0,
-    97.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_55",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.504,
-   "radius_m": 1.6,
-   "location": [
-    12.8,
-    -1.44,
-    2.175
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    255.0,
-    144.0,
-    97.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_56",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.504,
-   "radius_m": 1.6,
-   "location": [
-    13.74,
-    -1.44,
-    2.175
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    349.0,
-    144.0,
-    97.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_57",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.504,
-   "radius_m": 1.6,
-   "location": [
-    14.68,
-    -1.44,
-    2.175
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    443.0,
-    144.0,
-    97.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_58",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.504,
-   "radius_m": 1.6,
-   "location": [
-    10.92,
-    1.44,
-    2.175
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    67.0,
-    -144.0,
-    97.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_59",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.504,
-   "radius_m": 1.6,
-   "location": [
-    11.86,
-    1.44,
-    2.175
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    161.0,
-    -144.0,
-    97.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_60",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.504,
-   "radius_m": 1.6,
-   "location": [
-    12.8,
-    1.44,
-    2.175
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    255.0,
-    -144.0,
-    97.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_61",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.504,
-   "radius_m": 1.6,
-   "location": [
-    13.74,
-    1.44,
-    2.175
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    349.0,
-    -144.0,
-    97.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_62",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.504,
-   "radius_m": 1.6,
-   "location": [
-    14.68,
-    1.44,
-    2.175
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    443.0,
-    -144.0,
-    97.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_63",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 0.8,
-   "radius_m": 1.6,
-   "location": [
-    13.75,
-    -1.525,
-    1.565
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    350.0,
-    152.5,
-    36.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_64",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.52,
-   "radius_m": 1.6,
-   "location": [
-    13.275,
-    1.53,
-    1.225
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    302.5,
-    -153.0,
-    2.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_65",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.52,
-   "radius_m": 1.6,
-   "location": [
-    14.225,
-    1.53,
-    1.225
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    397.5,
-    -153.0,
-    2.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_66",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.312,
-   "radius_m": 1.6,
-   "location": [
-    1.49,
-    1.2774,
-    2.239
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -876.0,
-    -127.7,
-    103.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_67",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.312,
-   "radius_m": 1.6,
-   "location": [
-    2.31,
-    1.2774,
-    2.239
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -794.0,
-    -127.7,
-    103.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_68",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.312,
-   "radius_m": 1.6,
-   "location": [
-    1.49,
-    -1.2774,
-    2.239
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -876.0,
-    127.7,
-    103.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_69",
-   "type": "point",
-   "color": [
-    1.0,
-    0.82,
-    0.62
-   ],
-   "intensity_cd": 1.312,
-   "radius_m": 1.6,
-   "location": [
-    2.31,
-    -1.2774,
-    2.239
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -794.0,
-    127.7,
-    103.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_70",
    "type": "point",
    "color": [
     1.0,
@@ -2604,7 +1550,7 @@
    ]
   },
   {
-   "name": "fix_71",
+   "name": "fix_40",
    "type": "point",
    "color": [
     1.0,
@@ -2638,7 +1584,7 @@
    ]
   },
   {
-   "name": "fix_72",
+   "name": "fix_41",
    "type": "point",
    "color": [
     1.0,
@@ -2672,143 +1618,1061 @@
    ]
   },
   {
+   "name": "fix_42",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.312,
+   "radius_m": 1.6,
+   "location": [
+    3.29,
+    -1.2774,
+    2.239
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -696.0,
+    127.7,
+    103.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_43",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.312,
+   "radius_m": 1.6,
+   "location": [
+    4.11,
+    -1.2774,
+    2.239
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -614.0,
+    127.7,
+    103.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_44",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 0.518,
+   "radius_m": 1.6,
+   "location": [
+    3.7,
+    -0.0,
+    2.12
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -655.0,
+    -0.0,
+    92.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_45",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.312,
+   "radius_m": 1.6,
+   "location": [
+    5.09,
+    1.2774,
+    2.239
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -516.0,
+    -127.7,
+    103.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_46",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.312,
+   "radius_m": 1.6,
+   "location": [
+    5.91,
+    1.2774,
+    2.239
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -434.0,
+    -127.7,
+    103.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_47",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.312,
+   "radius_m": 1.6,
+   "location": [
+    5.09,
+    -1.2774,
+    2.249
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -516.0,
+    127.7,
+    104.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_48",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.312,
+   "radius_m": 1.6,
+   "location": [
+    5.91,
+    -1.2774,
+    2.249
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -434.0,
+    127.7,
+    104.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_49",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 0.518,
+   "radius_m": 1.6,
+   "location": [
+    5.5,
+    -0.0,
+    2.12
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -475.0,
+    -0.0,
+    92.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_50",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.312,
+   "radius_m": 1.6,
+   "location": [
+    6.89,
+    1.2774,
+    2.239
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -336.0,
+    -127.7,
+    103.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_51",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.312,
+   "radius_m": 1.6,
+   "location": [
+    7.71,
+    1.2774,
+    2.239
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -254.0,
+    -127.7,
+    103.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_52",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.312,
+   "radius_m": 1.6,
+   "location": [
+    6.89,
+    -1.2774,
+    2.249
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -336.0,
+    127.7,
+    104.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_53",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.312,
+   "radius_m": 1.6,
+   "location": [
+    7.71,
+    -1.2774,
+    2.249
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -254.0,
+    127.7,
+    104.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_54",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 0.518,
+   "radius_m": 1.6,
+   "location": [
+    7.3,
+    -0.0,
+    2.12
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -295.0,
+    -0.0,
+    92.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_55",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.632,
+   "radius_m": 1.6,
+   "location": [
+    8.79,
+    1.2774,
+    2.239
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -146.0,
+    -127.7,
+    103.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_56",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.632,
+   "radius_m": 1.6,
+   "location": [
+    9.81,
+    1.2774,
+    2.239
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -44.0,
+    -127.7,
+    103.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_57",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.632,
+   "radius_m": 1.6,
+   "location": [
+    8.79,
+    -1.2774,
+    2.239
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -146.0,
+    127.7,
+    103.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_58",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.632,
+   "radius_m": 1.6,
+   "location": [
+    9.81,
+    -1.2774,
+    2.239
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -44.0,
+    127.7,
+    103.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_59",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 0.518,
+   "radius_m": 1.6,
+   "location": [
+    9.3,
+    -0.0,
+    2.12
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -95.0,
+    -0.0,
+    92.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_60",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.504,
+   "radius_m": 1.6,
+   "location": [
+    10.92,
+    -1.44,
+    2.175
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    67.0,
+    144.0,
+    97.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_61",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.504,
+   "radius_m": 1.6,
+   "location": [
+    11.86,
+    -1.44,
+    2.175
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    161.0,
+    144.0,
+    97.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_62",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.504,
+   "radius_m": 1.6,
+   "location": [
+    12.8,
+    -1.44,
+    2.175
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    255.0,
+    144.0,
+    97.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_63",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.504,
+   "radius_m": 1.6,
+   "location": [
+    13.74,
+    -1.44,
+    2.175
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    349.0,
+    144.0,
+    97.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_64",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.504,
+   "radius_m": 1.6,
+   "location": [
+    14.68,
+    -1.44,
+    2.175
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    443.0,
+    144.0,
+    97.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_65",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.504,
+   "radius_m": 1.6,
+   "location": [
+    10.92,
+    1.44,
+    2.175
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    67.0,
+    -144.0,
+    97.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_66",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.504,
+   "radius_m": 1.6,
+   "location": [
+    11.86,
+    1.44,
+    2.175
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    161.0,
+    -144.0,
+    97.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_67",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.504,
+   "radius_m": 1.6,
+   "location": [
+    12.8,
+    1.44,
+    2.175
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    255.0,
+    -144.0,
+    97.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_68",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.504,
+   "radius_m": 1.6,
+   "location": [
+    13.74,
+    1.44,
+    2.175
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    349.0,
+    -144.0,
+    97.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_69",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.504,
+   "radius_m": 1.6,
+   "location": [
+    14.68,
+    1.44,
+    2.175
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    443.0,
+    -144.0,
+    97.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_70",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 0.8,
+   "radius_m": 1.6,
+   "location": [
+    13.75,
+    -1.525,
+    1.565
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    350.0,
+    152.5,
+    36.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_71",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.52,
+   "radius_m": 1.6,
+   "location": [
+    13.275,
+    1.53,
+    1.225
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    302.5,
+    -153.0,
+    2.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_72",
+   "type": "point",
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.52,
+   "radius_m": 1.6,
+   "location": [
+    14.225,
+    1.53,
+    1.225
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    397.5,
+    -153.0,
+    2.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
    "name": "fix_73",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.42,
-   "radius_m": 1.6,
-   "location": [
-    18.0845,
-    -0.55,
-    1.7852
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    783.4,
-    55.0,
-    58.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_74",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.42,
-   "radius_m": 1.6,
-   "location": [
-    18.0845,
-    0.55,
-    1.7852
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    783.4,
-    -55.0,
-    58.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_75",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.66,
-   "radius_m": 1.6,
-   "location": [
-    16.9,
-    -0.719,
-    1.707
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    665.0,
-    71.9,
-    50.7
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_76",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.66,
-   "radius_m": 1.6,
-   "location": [
-    16.9,
-    0.719,
-    1.707
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    665.0,
-    -71.9,
-    50.7
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_77",
    "type": "point",
    "color": [
     0.45,
@@ -2832,6 +2696,142 @@
    "specular": 0.2,
    "location_ue_cm": [
     -866.9,
+    -179.6,
+    -115.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_74",
+   "type": "point",
+   "color": [
+    0.45,
+    0.72,
+    1.0
+   ],
+   "intensity_cd": 0.518,
+   "radius_m": 1.6,
+   "location": [
+    2.4437,
+    1.796,
+    0.05
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -780.6,
+    -179.6,
+    -115.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_75",
+   "type": "point",
+   "color": [
+    0.45,
+    0.72,
+    1.0
+   ],
+   "intensity_cd": 0.518,
+   "radius_m": 1.6,
+   "location": [
+    3.3062,
+    1.796,
+    0.05
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -694.4,
+    -179.6,
+    -115.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_76",
+   "type": "point",
+   "color": [
+    0.45,
+    0.72,
+    1.0
+   ],
+   "intensity_cd": 0.518,
+   "radius_m": 1.6,
+   "location": [
+    4.1687,
+    1.796,
+    0.05
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -608.1,
+    -179.6,
+    -115.0
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_77",
+   "type": "point",
+   "color": [
+    0.45,
+    0.72,
+    1.0
+   ],
+   "intensity_cd": 0.518,
+   "radius_m": 1.6,
+   "location": [
+    5.0312,
+    1.796,
+    0.05
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -521.9,
     -179.6,
     -115.0
    ],
@@ -2852,142 +2852,6 @@
    "intensity_cd": 0.518,
    "radius_m": 1.6,
    "location": [
-    2.4437,
-    1.796,
-    0.05
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -780.6,
-    -179.6,
-    -115.0
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_79",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.518,
-   "radius_m": 1.6,
-   "location": [
-    3.3062,
-    1.796,
-    0.05
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -694.4,
-    -179.6,
-    -115.0
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_80",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.518,
-   "radius_m": 1.6,
-   "location": [
-    4.1687,
-    1.796,
-    0.05
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -608.1,
-    -179.6,
-    -115.0
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_81",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.518,
-   "radius_m": 1.6,
-   "location": [
-    5.0312,
-    1.796,
-    0.05
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    -521.9,
-    -179.6,
-    -115.0
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_82",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.518,
-   "radius_m": 1.6,
-   "location": [
     5.8938,
     1.796,
     0.05
@@ -3012,7 +2876,7 @@
    ]
   },
   {
-   "name": "fix_83",
+   "name": "fix_79",
    "type": "point",
    "color": [
     0.45,
@@ -3046,7 +2910,7 @@
    ]
   },
   {
-   "name": "fix_84",
+   "name": "fix_80",
    "type": "point",
    "color": [
     0.45,
@@ -3080,7 +2944,7 @@
    ]
   },
   {
-   "name": "fix_85",
+   "name": "fix_81",
    "type": "point",
    "color": [
     0.45,
@@ -3114,7 +2978,7 @@
    ]
   },
   {
-   "name": "fix_86",
+   "name": "fix_82",
    "type": "point",
    "color": [
     0.45,
@@ -3148,7 +3012,7 @@
    ]
   },
   {
-   "name": "fix_87",
+   "name": "fix_83",
    "type": "point",
    "color": [
     0.45,
@@ -3182,7 +3046,7 @@
    ]
   },
   {
-   "name": "fix_88",
+   "name": "fix_84",
    "type": "point",
    "color": [
     0.45,
@@ -3216,7 +3080,7 @@
    ]
   },
   {
-   "name": "fix_89",
+   "name": "fix_85",
    "type": "point",
    "color": [
     0.45,
@@ -3250,7 +3114,7 @@
    ]
   },
   {
-   "name": "fix_90",
+   "name": "fix_86",
    "type": "point",
    "color": [
     0.45,
@@ -3284,7 +3148,7 @@
    ]
   },
   {
-   "name": "fix_91",
+   "name": "fix_87",
    "type": "point",
    "color": [
     0.45,
@@ -3318,7 +3182,7 @@
    ]
   },
   {
-   "name": "fix_92",
+   "name": "fix_88",
    "type": "point",
    "color": [
     0.45,
@@ -3352,7 +3216,7 @@
    ]
   },
   {
-   "name": "fix_93",
+   "name": "fix_89",
    "type": "point",
    "color": [
     0.45,
@@ -3386,7 +3250,7 @@
    ]
   },
   {
-   "name": "fix_94",
+   "name": "fix_90",
    "type": "point",
    "color": [
     0.45,
@@ -3420,7 +3284,7 @@
    ]
   },
   {
-   "name": "fix_95",
+   "name": "fix_91",
    "type": "point",
    "color": [
     0.45,
@@ -3454,7 +3318,7 @@
    ]
   },
   {
-   "name": "fix_96",
+   "name": "fix_92",
    "type": "point",
    "color": [
     0.45,
@@ -3488,7 +3352,7 @@
    ]
   },
   {
-   "name": "fix_97",
+   "name": "fix_93",
    "type": "point",
    "color": [
     0.45,
@@ -3522,7 +3386,7 @@
    ]
   },
   {
-   "name": "fix_98",
+   "name": "fix_94",
    "type": "point",
    "color": [
     0.45,
@@ -3556,7 +3420,7 @@
    ]
   },
   {
-   "name": "fix_99",
+   "name": "fix_95",
    "type": "point",
    "color": [
     0.45,
@@ -3590,7 +3454,7 @@
    ]
   },
   {
-   "name": "fix_100",
+   "name": "fix_96",
    "type": "point",
    "color": [
     0.45,
@@ -3624,7 +3488,7 @@
    ]
   },
   {
-   "name": "fix_101",
+   "name": "fix_97",
    "type": "point",
    "color": [
     0.45,
@@ -3658,7 +3522,7 @@
    ]
   },
   {
-   "name": "fix_102",
+   "name": "fix_98",
    "type": "point",
    "color": [
     0.45,
@@ -3692,7 +3556,7 @@
    ]
   },
   {
-   "name": "fix_103",
+   "name": "fix_99",
    "type": "point",
    "color": [
     0.45,
@@ -3726,7 +3590,7 @@
    ]
   },
   {
-   "name": "fix_104",
+   "name": "fix_100",
    "type": "point",
    "color": [
     0.45,
@@ -3760,7 +3624,7 @@
    ]
   },
   {
-   "name": "fix_105",
+   "name": "fix_101",
    "type": "point",
    "color": [
     0.45,
@@ -3794,7 +3658,7 @@
    ]
   },
   {
-   "name": "fix_106",
+   "name": "fix_102",
    "type": "point",
    "color": [
     0.45,
@@ -3828,7 +3692,7 @@
    ]
   },
   {
-   "name": "fix_107",
+   "name": "fix_103",
    "type": "point",
    "color": [
     0.45,
@@ -3862,7 +3726,7 @@
    ]
   },
   {
-   "name": "fix_108",
+   "name": "fix_104",
    "type": "point",
    "color": [
     0.45,
@@ -3888,6 +3752,142 @@
     764.1,
     35.2,
     94.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_105",
+   "type": "point",
+   "color": [
+    0.45,
+    0.72,
+    1.0
+   ],
+   "intensity_cd": 0.42,
+   "radius_m": 1.6,
+   "location": [
+    18.0845,
+    -0.55,
+    1.7852
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    783.4,
+    55.0,
+    58.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_106",
+   "type": "point",
+   "color": [
+    0.45,
+    0.72,
+    1.0
+   ],
+   "intensity_cd": 0.42,
+   "radius_m": 1.6,
+   "location": [
+    18.0845,
+    0.55,
+    1.7852
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    783.4,
+    -55.0,
+    58.5
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_107",
+   "type": "point",
+   "color": [
+    0.45,
+    0.72,
+    1.0
+   ],
+   "intensity_cd": 0.66,
+   "radius_m": 1.6,
+   "location": [
+    16.9,
+    -0.719,
+    1.707
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    665.0,
+    71.9,
+    50.7
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_108",
+   "type": "point",
+   "color": [
+    0.45,
+    0.72,
+    1.0
+   ],
+   "intensity_cd": 0.66,
+   "radius_m": 1.6,
+   "location": [
+    16.9,
+    0.719,
+    1.707
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    665.0,
+    -71.9,
+    50.7
    ],
    "direction_ue": [
     0,
@@ -3937,6 +3937,74 @@
     0.35,
     0.08
    ],
+   "intensity_cd": 0.141,
+   "radius_m": 1.6,
+   "location": [
+    17.4937,
+    -1.0955,
+    1.8613
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    724.4,
+    109.5,
+    66.1
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_111",
+   "type": "point",
+   "color": [
+    1.0,
+    0.35,
+    0.08
+   ],
+   "intensity_cd": 0.193,
+   "radius_m": 1.6,
+   "location": [
+    17.8326,
+    -0.8755,
+    2.0687
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    758.3,
+    87.5,
+    86.9
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_112",
+   "type": "point",
+   "color": [
+    1.0,
+    0.35,
+    0.08
+   ],
    "intensity_cd": 0.458,
    "radius_m": 1.6,
    "location": [
@@ -3964,7 +4032,7 @@
    ]
   },
   {
-   "name": "fix_111",
+   "name": "fix_113",
    "type": "point",
    "color": [
     1.0,
@@ -3998,7 +4066,7 @@
    ]
   },
   {
-   "name": "fix_112",
+   "name": "fix_114",
    "type": "point",
    "color": [
     1.0,
@@ -4032,7 +4100,7 @@
    ]
   },
   {
-   "name": "fix_113",
+   "name": "fix_115",
    "type": "point",
    "color": [
     1.0,
@@ -4066,7 +4134,7 @@
    ]
   },
   {
-   "name": "fix_114",
+   "name": "fix_116",
    "type": "point",
    "color": [
     1.0,
@@ -4100,7 +4168,7 @@
    ]
   },
   {
-   "name": "fix_115",
+   "name": "fix_117",
    "type": "point",
    "color": [
     1.0,
@@ -4134,7 +4202,7 @@
    ]
   },
   {
-   "name": "fix_116",
+   "name": "fix_118",
    "type": "point",
    "color": [
     1.0,
@@ -4168,7 +4236,7 @@
    ]
   },
   {
-   "name": "fix_117",
+   "name": "fix_119",
    "type": "point",
    "color": [
     1.0,
@@ -4202,7 +4270,7 @@
    ]
   },
   {
-   "name": "fix_118",
+   "name": "fix_120",
    "type": "point",
    "color": [
     1.0,
@@ -4236,41 +4304,7 @@
    ]
   },
   {
-   "name": "fix_119",
-   "type": "point",
-   "color": [
-    1.0,
-    0.35,
-    0.08
-   ],
-   "intensity_cd": 0.141,
-   "radius_m": 1.6,
-   "location": [
-    17.4937,
-    -1.0955,
-    1.8613
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    724.4,
-    109.5,
-    66.1
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_120",
+   "name": "fix_121",
    "type": "point",
    "color": [
     1.0,
@@ -4296,40 +4330,6 @@
     724.7,
     -108.3,
     64.9
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_121",
-   "type": "point",
-   "color": [
-    1.0,
-    0.35,
-    0.08
-   ],
-   "intensity_cd": 0.193,
-   "radius_m": 1.6,
-   "location": [
-    17.8325,
-    -0.8753,
-    2.0685
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    758.2,
-    87.5,
-    86.8
    ],
    "direction_ue": [
     0,
