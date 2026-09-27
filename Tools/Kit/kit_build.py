@@ -54,6 +54,11 @@ def decals(ob, part):
         pl.reach = 0.02 if it.get("label") else 0.06
         fr = it.get("frame")
         fr = (Vector(fr[0]), Vector(fr[1])) if fr else None
+        if fr and fr[0].cross(fr[1]).dot(n) < 0:
+            # x cross y must be the surface normal, or the item reads mirrored (and before the face-normal fix in
+            # hs_decals.grid it was laid with its back to the viewer: portal B's left hazard band, 27. 9. 2026)
+            failed.append((it["item"], "mirrored frame"))
+            continue
         if pl.place_at(it["item"], hit, n, it.get("rot", 0.0), it.get("scale", 1.0), "kit", not it.get("label"), fr):
             placed.append(it["item"])
         else:
@@ -185,7 +190,7 @@ def render_setup():
     return cam
 
 
-def render(ob, cam):
+def render(ob, cam, views=((1, 0, 0.12), (1, -0.9, 0.35))):
     os.makedirs(RENDERS, exist_ok=True)
     for o in bpy.context.scene.objects:
         if o.type == "MESH":
@@ -197,7 +202,7 @@ def render(ob, cam):
     r = (hi - lo).length / 2
     dist = r / math.tan(math.radians(17)) * 1.05
     out = {}
-    for tag, d in (("front", Vector((1, 0, 0.12))), ("34", Vector((1, -0.9, 0.35)))):
+    for tag, d in (("front", Vector(views[0])), ("34", Vector(views[1]))):
         d.normalize()
         cam.location = c + d * dist
         cam.rotation_euler = (-d).to_track_quat("-Z", "Y").to_euler()
@@ -206,6 +211,37 @@ def render(ob, cam):
         bpy.ops.render.render(write_still=True)
         out[tag] = path
     return out
+
+
+def jobs(batch, sections, budget):
+    """What a batch builds: dicts with the part builder and its manifest facts."""
+    seed = 11
+    if batch == "walls":
+        for sec in sections:
+            for kind, L, var in kit_walls.BATCH1:
+                if kind == "Locker" and sec == "N" and L > 0.9:
+                    continue
+                seed += 7
+                yield dict(name=kit_walls.part_name(kind, L, sec, var), part=(lambda k=kind, l=L, s=sec, v=var, sd=seed: kit_walls.build_part(k, l, s, v, sd)),
+                           category="Wall", family="Wall_" + kind, kind=kind, length=L, section=sec, variant=var, batch=1,
+                           budget=int(budget.get("Wall_base", 0) + budget["Wall_per_m"] * L), render=(sec == sections[0]),
+                           views=((1, 0, 0.12), (1, -0.9, 0.35)))
+    elif batch == "batch2":
+        import kit_batch2
+        for cat, part, size, sec, var in kit_batch2.BATCH2:
+            seed += 7
+            yield dict(name=kit_batch2.part_name(cat, part, size, sec, var),
+                       part=(lambda c=cat, pa=part, sz=size, s=sec, v=var, sd=seed: kit_batch2.build_part(c, pa, sz, s, v, sd)),
+                       category=cat, family="%s_%s" % (cat, part), kind=part, length=size, section=sec, variant=var, batch=2,
+                       budget=kit_batch2.budget(cat, part, size), render=True, views=kit_batch2.VIEWS[(cat, part)])
+        # the sample's narrow stub walls (batch 1 families in section N, not rendered)
+        for kind, L, var in (("Plain", 1.2, "A"), ("Plain", 1.2, "C")):
+            seed += 7
+            yield dict(name=kit_walls.part_name(kind, L, "N", var), part=(lambda k=kind, l=L, v=var, sd=seed: kit_walls.build_part(k, l, "N", v, sd)),
+                       category="Wall", family="Wall_" + kind, kind=kind, length=L, section="N", variant=var, batch=1,
+                       budget=int(budget.get("Wall_base", 0) + budget["Wall_per_m"] * L), render=False, views=None)
+    else:
+        raise SystemExit("unknown batch %s" % batch)
 
 
 def main():
@@ -224,15 +260,12 @@ def main():
     manifest = json.load(open(manifest_path, encoding="utf-8")) if os.path.exists(manifest_path) else {"parts": {}}
     cam = render_setup() if do_render else None
     report = {"parts": 0, "over_budget": [], "decals_failed": {}}
-    if batch != "walls":
-        raise SystemExit("unknown batch %s" % batch)
-    seed = 11
-    for sec in sections:
-        for kind, L, var in kit_walls.BATCH1:
-            if kind == "Locker" and sec == "N" and L > 0.9:
-                continue
-            seed += 7
-            part = kit_walls.build_part(kind, L, sec, var, seed)
+    only = set(args[args.index("--only") + 1].split(",")) if "--only" in args else None
+    for job in jobs(batch, sections, budget):
+        if only and job["name"] not in only:
+            continue
+        if True:
+            part, L, sec, kind, var = job["part"](), job["length"], job["section"], job["kind"], job["variant"]
             coll = bpy.data.collections.new(part.name)
             bpy.context.scene.collection.children.link(coll)
             ob = part.build(coll, mats)
@@ -241,12 +274,12 @@ def main():
                 join(ob, dob)
             drop_unused_slots(ob)
             masks = colour_masks(ob)
-            if masks["domain"] != "CORNER" or masks["edge"] == 0 or masks["floor"] == 0:
+            if masks["domain"] != "CORNER" or masks["edge"] + masks["floor"] + masks["secondary"] == 0:
                 raise SystemExit("%s: the colour masks did not survive (%s) - Unreal drops an all-white Col" % (ob.name, masks))
             if failed:
                 report["decals_failed"][ob.name] = failed
             geo = tris(ob, [r for r in kit_geo.ROLES])
-            limit = int(budget.get("Wall_base", 0) + budget["Wall_per_m"] * L)
+            limit = job["budget"]
             if geo > limit:
                 report["over_budget"].append((ob.name, geo, limit))
             bad = [c.name for c in ob.children if c.name.startswith("SOCKET_") and "." in c.name]
@@ -266,7 +299,7 @@ def main():
                     c.name = "%s__%s" % (c.name, ob.name)
             dims = [round(d, 3) for d in ob.dimensions]
             manifest["parts"][ob.name] = {
-                "category": "Wall", "family": "Wall_" + kind, "section": sec, "length_m": L, "variant": var, "batch": 1,
+                "category": job["category"], "family": job["family"], "section": sec, "length_m": L, "variant": var, "batch": job["batch"],
                 "fbx": os.path.relpath(path, ROOT).replace("\\", "/"), "dims_m": dims,
                 "expected_size_cm": [round(ob.dimensions.x * 100, 1), round(ob.dimensions.y * 100, 1), round(ob.dimensions.z * 100, 1)],
                 "tris": geo, "tris_decals": tris(ob) - geo, "tri_budget": limit,
@@ -276,13 +309,13 @@ def main():
                 # the labels that name a system or a service point: layout rule, never the same on neighbours
                 "service_labels": sorted({d for d in placed if d.startswith(("st_", "label_"))}),
                 "colour_masks": masks, "status": "built"}
-            if do_render and sec == sections[0]:
-                manifest["parts"][ob.name]["renders"] = {k: os.path.relpath(v, ROOT).replace("\\", "/") for k, v in render(ob, cam).items()}
+            if do_render and job["render"]:
+                manifest["parts"][ob.name]["renders"] = {k: os.path.relpath(v, ROOT).replace("\\", "/") for k, v in render(ob, cam, job["views"]).items()}
             # every part stays at the origin in its collection; hide it so the next one renders alone
             coll.hide_render = True
             report["parts"] += 1
     json.dump(manifest, open(manifest_path, "w", encoding="utf-8"), indent=1)
-    out = os.path.join(ROOT, "ArtSource", "Kit", "Kit_Walls.blend")
+    out = os.path.join(ROOT, "ArtSource", "Kit", {"walls": "Kit_Walls.blend"}.get(batch, "Kit_%s.blend" % batch.capitalize()))
     for c in bpy.data.collections:
         c.hide_render = False
     bpy.ops.wm.save_as_mainfile(filepath=out)

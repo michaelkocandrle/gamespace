@@ -1,0 +1,14 @@
+LOOK 01_a_corridor            mean 0.12 p10 0.02 p50 0.08 p90 0.26 p99 0.91 | sat 0.31 B/R 0.73 | detail 0.0350
+LOOK 02_b_back_to_window      mean 0.13 p10 0.02 p50 0.08 p90 0.28 p99 0.74 | sat 0.33 B/R 0.71 | detail 0.0286
+LOOK 03_c_portal_b            mean 0.17 p10 0.05 p50 0.15 p90 0.33 p99 0.47 | sat 0.32 B/R 0.71 | detail 0.0193
+LOOK 04_d_portal_c_pipes      mean 0.13 p10 0.02 p50 0.12 p90 0.27 p99 0.37 | sat 0.33 B/R 0.69 | detail 0.0116
+LOOK 05_e_ceiling_up          mean 0.12 p10 0.01 p50 0.07 p90 0.30 p99 0.96 | sat 0.35 B/R 0.70 | detail 0.0280
+LOOK 06_f_inner_corner        mean 0.09 p10 0.01 p50 0.05 p90 0.19 p99 0.64 | sat 0.38 B/R 0.67 | detail 0.0240
+LOOK 07_g_outer_corner        mean 0.14 p10 0.01 p50 0.09 p90 0.33 p99 0.76 | sat 0.32 B/R 0.72 | detail 0.0291
+LOOK 08_h_leg_to_n_stub       mean 0.20 p10 0.04 p50 0.16 p90 0.41 p99 0.83 | sat 0.30 B/R 0.75 | detail 0.0322
+LOOK 09_i_transition_back     mean 0.16 p10 0.04 p50 0.16 p90 0.27 p99 0.50 | sat 0.34 B/R 0.68 | detail 0.0197
+LOOK 10_j_end_window          mean 0.07 p10 0.02 p50 0.06 p90 0.15 p99 0.28 | sat 0.44 B/R 0.59 | detail 0.0085
+LOOK 11_k_downlight           mean 0.19 p10 0.03 p50 0.10 p90 0.39 p99 0.97 | sat 0.37 B/R 0.67 | detail 0.0158
+LOOK 12_l_perf_corridor       mean 0.14 p10 0.02 p50 0.10 p90 0.27 p99 0.83 | sat 0.27 B/R 0.78 | detail 0.0424
+LOOK 13_m_perf_junction       mean 0.15 p10 0.01 p50 0.13 p90 0.32 p99 0.68 | sat 0.28 B/R 0.77 | detail 0.0334
+LOOK 14_z_reset               mean 0.13 p10 0.02 p50 0.08 p90 0.26 p99 0.91 | sat 0.30 B/R 0.74 | detail 0.0353

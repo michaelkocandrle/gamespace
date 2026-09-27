@@ -1,0 +1,277 @@
+{
+ "_comment": "Interior kit sample, batches 1 + 2 (TestSpace, showroom origin 0 -500 0 m; y below is -500 + the showroom's y): the W corridor with portals at a 2.4 m pitch and its ceiling from the end wall with a window, the L-turn with the inner and the outer corner, the leg to the N transition and stub. Provisional: the junction's and the transition's ceiling, the floor. Run: Tools/Shots.ps1 -Preset kit_showroom2 -Package -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.0,
+    1.4
+   ],
+   "fov": 80,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none"
+   ]
+  },
+  {
+   "name": "a_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80
+  },
+  {
+   "name": "b_back_to_window",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    9.0,
+    -500.2,
+    1.65
+   ],
+   "camera_look_at": [
+    0.0,
+    -499.9,
+    1.3
+   ],
+   "fov": 80
+  },
+  {
+   "name": "c_portal_b",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.5,
+    -499.45,
+    1.55
+   ],
+   "camera_look_at": [
+    4.65,
+    -501.1,
+    0.95
+   ],
+   "fov": 62
+  },
+  {
+   "name": "d_portal_c_pipes",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    6.15,
+    -500.25,
+    1.5
+   ],
+   "camera_look_at": [
+    7.05,
+    -500.1,
+    2.3
+   ],
+   "fov": 70
+  },
+  {
+   "name": "e_ceiling_up",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    2.9,
+    -500.0,
+    1.5
+   ],
+   "camera_look_at": [
+    4.3,
+    -500.0,
+    2.35
+   ],
+   "fov": 80
+  },
+  {
+   "name": "f_inner_corner",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    9.8,
+    -499.1,
+    1.6
+   ],
+   "camera_look_at": [
+    12.0,
+    -501.2,
+    1.35
+   ],
+   "fov": 75
+  },
+  {
+   "name": "g_outer_corner",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    11.7,
+    -500.7,
+    1.55
+   ],
+   "camera_look_at": [
+    9.6,
+    -498.8,
+    1.55
+   ],
+   "fov": 75
+  },
+  {
+   "name": "h_leg_to_n_stub",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    10.8,
+    -499.0,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -492.1,
+    1.4
+   ],
+   "fov": 75
+  },
+  {
+   "name": "i_transition_back",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    10.8,
+    -492.3,
+    1.6
+   ],
+   "camera_look_at": [
+    10.8,
+    -496.2,
+    1.25
+   ],
+   "fov": 80
+  },
+  {
+   "name": "j_end_window",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    1.4,
+    -500.0,
+    1.4
+   ],
+   "camera_look_at": [
+    0.0,
+    -499.95,
+    1.2
+   ],
+   "fov": 60
+  },
+  {
+   "name": "k_downlight",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    5.1,
+    -500.35,
+    1.2
+   ],
+   "camera_look_at": [
+    5.45,
+    -500.0,
+    2.3
+   ],
+   "fov": 70
+  },
+  {
+   "name": "l_perf_corridor",
+   "camera": "free",
+   "hud": 0,
+   "settle": 4.0,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "m_perf_junction",
+   "camera": "free",
+   "hud": 0,
+   "settle": 4.0,
+   "camera_location": [
+    10.3,
+    -500.6,
+    1.65
+   ],
+   "camera_look_at": [
+    10.8,
+    -494.0,
+    1.4
+   ],
+   "fov": 80,
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "z_reset",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.5,
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.0,
+    1.4
+   ],
+   "fov": 80,
+   "console": [
+    "stat none"
+   ]
+  }
+ ]
+}

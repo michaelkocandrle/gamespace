@@ -177,6 +177,9 @@ class Placer:
                 f.smooth = True
                 for loop, (_, s, t) in zip(f.loops, quad):
                     loop[self.uv].uv = (u0 + (u1 - u0) * s, v0 + (v1 - v0) * t)
+                # a new face's normal is zero until updated (WORKFLOW 9.3 s): without it a card laid in a
+                # mirrored frame kept its back to the viewer and was culled (kit hazard band, 27. 9. 2026)
+                f.normal_update()
                 if f.normal.dot(n) < 0:
                     f.normal_flip()
 

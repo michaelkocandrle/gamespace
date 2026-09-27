@@ -1,0 +1,207 @@
+{
+ "_comment": "Kit batch 2 round 2 (critic: clipped white fixtures): the warm glow surfaces (strips, ring, fixture diffusers) at emissive 14 (today) / 7 / 4 - only the visible surface, the rect lights stay. Run: Tools/Shots.ps1 -Preset kit_glow_strength -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 5.0,
+   "console": [
+    "stat none"
+   ]
+  },
+  {
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "name": "e14_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "console": [
+    "space.Kit EmissiveStrength 14 GlowWarm"
+   ]
+  },
+  {
+   "camera_location": [
+    2.9,
+    -500.0,
+    1.5
+   ],
+   "camera_look_at": [
+    4.3,
+    -500.0,
+    2.35
+   ],
+   "fov": 80,
+   "name": "e14_ceil",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0
+  },
+  {
+   "camera_location": [
+    6.15,
+    -500.25,
+    1.5
+   ],
+   "camera_look_at": [
+    7.05,
+    -500.1,
+    2.3
+   ],
+   "fov": 70,
+   "name": "e14_pipes",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0
+  },
+  {
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "name": "e07_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "console": [
+    "space.Kit EmissiveStrength 7 GlowWarm"
+   ]
+  },
+  {
+   "camera_location": [
+    2.9,
+    -500.0,
+    1.5
+   ],
+   "camera_look_at": [
+    4.3,
+    -500.0,
+    2.35
+   ],
+   "fov": 80,
+   "name": "e07_ceil",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0
+  },
+  {
+   "camera_location": [
+    6.15,
+    -500.25,
+    1.5
+   ],
+   "camera_look_at": [
+    7.05,
+    -500.1,
+    2.3
+   ],
+   "fov": 70,
+   "name": "e07_pipes",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0
+  },
+  {
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "name": "e04_corr",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "console": [
+    "space.Kit EmissiveStrength 4 GlowWarm"
+   ]
+  },
+  {
+   "camera_location": [
+    2.9,
+    -500.0,
+    1.5
+   ],
+   "camera_look_at": [
+    4.3,
+    -500.0,
+    2.35
+   ],
+   "fov": 80,
+   "name": "e04_ceil",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0
+  },
+  {
+   "camera_location": [
+    6.15,
+    -500.25,
+    1.5
+   ],
+   "camera_look_at": [
+    7.05,
+    -500.1,
+    2.3
+   ],
+   "fov": 70,
+   "name": "e04_pipes",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0
+  },
+  {
+   "camera_location": [
+    0.7,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    9.0,
+    -500.15,
+    1.35
+   ],
+   "fov": 80,
+   "name": "z_reset",
+   "camera": "free",
+   "hud": 0,
+   "settle": 0.5,
+   "console": [
+    "space.KitReset"
+   ]
+  }
+ ]
+}

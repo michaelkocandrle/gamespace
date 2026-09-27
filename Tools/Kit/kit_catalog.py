@@ -29,7 +29,8 @@ def main():
     grid_rows = (n + cols - 1) // cols
     img = Image.new("RGB", (cols * cell_w + 20, grid_rows * cell_h + 90), (26, 27, 30))
     d = ImageDraw.Draw(img)
-    d.text((20, 18), "Interiérový kit – dávka %d: stěnové moduly (průřez W), %d dílů, stejné neutrální světlo, 3/4 pohled a zepředu" % (batch, n),
+    titles = {1: "stěnové moduly (průřez W)", 2: "portály, strop, koncové stěny, rohy, přechod"}
+    d.text((20, 18), "Interiérový kit – dávka %d: %s, %d dílů, stejné neutrální světlo, dva pohledy" % (batch, titles.get(batch, ""), n),
            font=FT, fill=(235, 235, 235))
     for i, (name, p) in enumerate(rows):
         x = 10 + (i % cols) * cell_w
@@ -41,8 +42,8 @@ def main():
                 img.paste(im, (x + k * (cw + 4), y))
         dims = p["dims_m"]
         d.text((x + 4, y + ch + 6), name.replace("SM_Kit_", ""), font=F, fill=(255, 200, 110))
-        d.text((x + 4, y + ch + 34), "%.1f m × hloubka %.2f × výška %.1f m   |   %d tris / %d   |   decaly %d   |   světla %d" % (
-            p["length_m"], dims[0], dims[2], p["tris"], p["tri_budget"], p.get("decals", 0),
+        d.text((x + 4, y + ch + 34), "%.2f × %.2f × %.2f m   |   %d tris / %d   |   decaly %d   |   světla %d" % (
+            dims[0], dims[1], dims[2], p["tris"], p["tri_budget"], p.get("decals", 0),
             sum(1 for s in p["sockets"] if s.startswith("SOCKET_Light"))), font=FS, fill=(210, 210, 210))
         d.text((x + 4, y + ch + 58), "kolize %d UCX, sockety %d" % (p["collision_hulls"], len(p["sockets"])), font=FS, fill=(150, 150, 150))
     os.makedirs(os.path.dirname(out), exist_ok=True)

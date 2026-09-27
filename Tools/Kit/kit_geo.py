@@ -102,6 +102,24 @@ class Part:
         self.meta[role].append((faces, ("box",), self._panel_id(panel), False))
         return faces
 
+    def quads(self, role, polys, toward, panel=True, secondary=False):
+        """Single-sided faces from point lists in part coords (lofted and angled surfaces: the transition, the hip
+        of an outer corner). Each face is turned to face the point `toward` (a point in the room)."""
+        bm = self.bm[role]
+        tmp = bmesh.new()
+        t = Vector(toward)
+        for poly in polys:
+            pts = [Vector(q) for q in poly]
+            c = sum(pts, Vector()) / len(pts)
+            nrm = (pts[1] - pts[0]).cross(pts[2] - pts[0])
+            if nrm.dot(t - c) < 0:
+                pts.reverse()
+            tmp.faces.new([tmp.verts.new(q) for q in pts])
+        local = [v.co.copy() for v in tmp.verts]
+        faces = self._merge(bm, tmp, local)
+        self.meta[role].append((faces, ("box",), self._panel_id(panel), secondary))
+        return faces
+
     def poly_prism(self, role, pts2d, m, depth, bevel=0.0, panel=True, segments=2):
         """A prism from a 2D polygon (local x, y) extruded along local -z by depth, front at z = 0, then m."""
         bm = self.bm[role]

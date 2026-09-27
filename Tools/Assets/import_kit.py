@@ -40,12 +40,58 @@ EAL, MEL = unreal.EditorAssetLibrary, unreal.MaterialEditingLibrary
 DECAL_MIS = {"Kit_Decal": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_Decal",
              "Kit_DecalAO": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalAO",
              "Kit_DecalPaint": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalPaint"}
-# the composed corridor: part names (section W) from x = 0 along +X; left = +Y wall, right = -Y wall
-CORRIDOR = {
-    "left": ["Plain12W_A", "Display06W_A", "Locker06W_A", "Pipes12W_A", "Hatch06W_A", "Grille06W_A", "Plain12W_C",
-             "Locker12W_C", "Display06W_B", "Plain03W_A", "Display03W_C"],
-    "right": ["Pipes12W_B", "Grille12W_B", "Plain06W_A", "Locker06W_B", "Hatch12W_C", "Plain12W_B", "Grille12W_C",
-              "Hatch06W_B", "Plain06W_A"],
+# The composed sample (batches 1 and 2, 27. 9. 2026), in metres from KIT_ORIGIN, Unreal axes (+X along the main
+# corridor, +Y to its left). A W corridor from an end wall with a window (x = 0) with portals at a 2.4 m pitch and
+# its ceiling; an L-turn at x = 9.6..12 (the outer corner on the left, the inner corner at the far right); the leg
+# along +Y to a transition into an N stub and its end wall.
+#   wall_runs: (start, end, face normal, modules from start to end) - wall modules, W unless named N
+#   run_parts: (start, direction, parts one after another) - portals, ceiling, the transition
+#   placed:    (part, position, yaw deg) - end walls and corners, placed by their own pivot
+SHOWROOM = {
+    "wall_runs": [
+        ((0.0, 1.2), (2.1, 1.2), (0, -1), ["Wall_Plain12W_A", "Wall_Display06W_A", "Wall_Plain03W_A"]),
+        ((2.4, 1.2), (4.5, 1.2), (0, -1), ["Wall_Locker06W_A", "Wall_Pipes12W_A", "Wall_Display03W_C"]),
+        ((4.8, 1.2), (6.9, 1.2), (0, -1), ["Wall_Hatch06W_A", "Wall_Grille06W_A", "Wall_Plain06W_A", "Wall_Plain03W_A"]),
+        ((7.2, 1.2), (9.6, 1.2), (0, -1), ["Wall_Plain12W_C", "Wall_Locker06W_B", "Wall_Plain06W_A"]),
+        ((0.0, -1.2), (2.1, -1.2), (0, 1), ["Wall_Pipes12W_B", "Wall_Hatch06W_B", "Wall_Plain03W_A"]),
+        ((2.4, -1.2), (4.5, -1.2), (0, 1), ["Wall_Grille12W_B", "Wall_Plain06W_A", "Wall_Plain03W_A"]),
+        ((4.8, -1.2), (6.9, -1.2), (0, 1), ["Wall_Hatch12W_C", "Wall_Display06W_B", "Wall_Plain03W_A"]),
+        ((7.2, -1.2), (12.0, -1.2), (0, 1), ["Wall_Locker12W_C", "Wall_Plain12W_B", "Wall_Grille12W_C", "Wall_Plain12W_A"]),
+        ((12.0, -1.2), (12.0, 4.8), (-1, 0), ["Wall_Plain12W_C", "Wall_Pipes12W_C", "Wall_Plain12W_B", "Wall_Hatch06W_A",
+                                              "Wall_Plain06W_A", "Wall_Plain12W_A"]),
+        ((9.6, 1.2), (9.6, 4.8), (1, 0), ["Wall_Plain12W_A", "Wall_Locker06W_A", "Wall_Display06W_A", "Wall_Plain12W_C"]),
+        ((10.2, 5.7), (10.2, 8.1), (1, 0), ["Wall_Plain12N_A", "Wall_Plain12N_C"]),
+        ((11.4, 5.7), (11.4, 8.1), (-1, 0), ["Wall_Plain12N_C", "Wall_Plain12N_A"]),
+    ],
+    "run_parts": [
+        ((2.1, 0.0), (1, 0), ["Portal_Ring03W_A"]),
+        ((4.5, 0.0), (1, 0), ["Portal_Ring03W_B"]),
+        ((6.9, 0.0), (1, 0), ["Portal_Ring03W_C"]),
+        # light sources at most ~1.8 m apart: down-lights (Panel A), linear lights (C), the lit portal (A)
+        ((0.0, 0.0), (1, 0), ["Ceiling_Panel03W_A", "Ceiling_Panel12W_A", "Ceiling_Tray06W_A"]),
+        ((2.4, 0.0), (1, 0), ["Ceiling_Panel06W_A", "Ceiling_Tray12W_A", "Ceiling_Panel03W_A"]),
+        # portal C carries tray B's duct and pipe through its head: tray B on both sides of it
+        ((4.8, 0.0), (1, 0), ["Ceiling_Panel03W_A", "Ceiling_Panel06W_A", "Ceiling_Tray12W_B"]),
+        ((7.2, 0.0), (1, 0), ["Ceiling_Tray12W_B", "Ceiling_Panel12W_A"]),
+        ((10.8, 1.2), (0, 1), ["Ceiling_Panel12W_C", "Ceiling_Panel12W_B", "Ceiling_Panel12W_A"]),
+        ((10.8, 5.4), (0, -1), ["Wall_Transition06W_A"]),
+        ((10.8, 5.4), (0, 1), ["Portal_Ring03N_A"]),         # a bulkhead frame at the narrow end
+        ((10.8, 5.7), (0, 1), ["Ceiling_Panel12N_A", "Ceiling_Panel12N_A"]),
+    ],
+    "placed": [
+        ("Wall_End24W_B", (0.0, 1.2), 0.0),
+        ("Wall_End12N_A", (11.4, 8.1), -90.0),
+        ("Corner_Inner00W_A", (12.0, -1.2), 180.0),
+        ("Corner_Outer00W_A", (9.6, 1.2), 0.0),
+    ],
+    # provisional until the kit has them: the junction's and the transition's ceiling, the floor (batch 3)
+    "prov_ceiling": [(9.6, 12.0, -1.2, 1.2), (9.6, 12.0, 4.8, 5.4)],
+    "prov_floor": [(-0.2, 12.2, -1.35, 1.35), (9.45, 12.15, 1.2, 4.95), (10.05, 11.55, 4.8, 8.25)],
+    # ((x, y), cd[, cone]); the second junction spot lights the inner corner (its walls sat at a mean of 0.09 under
+    # the one in the middle) from the open ceiling - over the slopes' tops (0.6 m in from the walls) it was shadowed
+    "prov_spots": [((10.8, 0.0), 30.0), ((11.1, -0.3), 24.0, 120.0), ((10.8, 5.1), 12.0)],
+    "gravity": (-0.3, 12.3, -1.5, 8.3),
+    "spawn": ((0.7, 0.0), 0.0),
 }
 
 
@@ -116,16 +162,22 @@ def build_materials():
         "Kit_Fabric": plain([0.03, 0.03, 0.032], 0.9),
         "Kit_Plastic": plain([0.035, 0.035, 0.038], 0.5),
         "Kit_Seal": plain([0.012, 0.012, 0.013], 0.7),
-        "Kit_GlowWarm": plain([0.08, 0.08, 0.08], 0.3, emit=pal["Kit_GlowWarm"], strength=14.0),
+        # 7, not 14: the fixture diffusers and the ring clipped to white plates (critic r2); 4 still read 0.88
+        "Kit_GlowWarm": plain([0.08, 0.08, 0.08], 0.3, emit=pal["Kit_GlowWarm"], strength=7.0),
         "Kit_GlowCool": plain([0.04, 0.04, 0.05], 0.3, emit=pal["Kit_GlowCool"], strength=4.0),   # the plinth, quieter
         "Kit_GlowSignal": plain([0.08, 0.04, 0.02], 0.3, emit=pal["Kit_GlowSignal"], strength=4.0),
-        "Kit_Glass": {"master": "glass", "base_color": [0.02, 0.03, 0.035], "opacity": 0.4, "roughness": 0.05},
+        # opacity 0.2: at 0.4 the dark glass swallowed a lit shutter behind it (the end wall's window read black)
+        "Kit_Glass": {"master": "glass", "base_color": [0.02, 0.03, 0.035], "opacity": 0.2, "roughness": 0.05},
     }
     mis = {}
     for role, spec in specs.items():
         mis[role] = ship_materials.build_instance("MI_Kit_%s_%s" % (MAKER, role.split("_", 1)[1]), MATS, spec, masters)
     tex = os.path.join(REPO, "ArtSource", "Kit", "Textures")
-    trim = ship_materials.build_instance("MI_Kit_%s_Trim" % MAKER, MATS, {"master": "pbr"}, masters)
+    # the trim sheet carries its own grooves and bolts: the PBR master's hull detail normal (30 cm tile) under the
+    # grazing wash light drew grass-like streaks on the rails, its hull panel lines dark bars across them - both
+    # off (critic finding "noise band over the window", batch 2; checked with space.Kit on the packaged game)
+    trim = ship_materials.build_instance("MI_Kit_%s_Trim" % MAKER, MATS, {"master": "pbr", "detail_normal_strength": 0.0,
+                                                                      "panel_strength": 0.0, "panel_seam_darken": 0.0}, masters)
     for param, fn, kind in (("BaseColorMap", "T_Kit_Trim_BC.png", "color"), ("ORMMap", "T_Kit_Trim_ORM.png", "masks"),
                             ("NormalMap", "T_Kit_Trim_N.png", "normal")):
         MEL.set_material_instance_texture_parameter_value(trim, param, import_texture(os.path.join(tex, fn), kind))
@@ -241,93 +293,114 @@ def check_layout_labels(parts):
     return sum(len(seq) - 1 for seq in parts.values())
 
 
+def _v(xy, z=0.0):
+    return KIT_ORIGIN + unreal.Vector(xy[0] * 100.0, xy[1] * 100.0, z * 100.0)
+
+
+def _rot(yaw, x, y):
+    ca, sa = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+    return x * ca - y * sa, x * sa + y * ca
+
+
+def place_part(actors, meshes, short, pos_cm, yaw, label, counts):
+    """One kit part at a world position (cm, relative to KIT_ORIGIN) and yaw, with the lights of its sockets."""
+    sm, part = meshes["SM_Kit_" + short]
+    spawn_mesh(actors, sm, KIT_ORIGIN + pos_cm, yaw, label)
+    counts["parts"] += 1
+    for sname, sock in part["sockets"].items():
+        prm = sock.get("params") or {}
+        if not sname.startswith("SOCKET_Light"):
+            continue
+        lx, ly, lz = sock["location_ue_cm"]
+        wx, wy = _rot(yaw, lx, ly)
+        at = KIT_ORIGIN + pos_cm + unreal.Vector(wx, wy, lz)
+        lab = "KitLight_%s_%d" % (short, counts["lights"])
+        if prm.get("type") == "rect":
+            dx, dy, dz = prm["dir_ue"]
+            fx, fy = _rot(yaw, dx, dy)
+            ax, ay, az = prm.get("along_ue", (0.0, -1.0, 0.0))    # default: the part's +Y (Unreal -Y)
+            gx, gy = _rot(yaw, ax, ay)
+            rect_light(actors, at, prm.get("role", "warm"), prm["cd"], prm.get("radius_m", 2.0), lab, unreal.Vector(fx, fy, dz),
+                       unreal.Vector(gx, gy, az), prm["width_cm"], prm["height_cm"])
+        elif prm.get("type") == "spot":
+            light(actors, at, prm.get("role", "work"), prm["cd"], prm.get("radius_m", 3.8), lab, spot=True,
+                  cone=prm.get("cone_deg", 90.0), source_cm=prm.get("source_radius_cm"))
+        else:
+            light(actors, at, prm.get("role", "warm"), prm.get("cd", 1.0), prm.get("radius_m", 1.6), lab,
+                  source_cm=prm.get("source_radius_cm"))
+        counts["lights"] += 1
+
+
 def build_showroom(meshes, mis, report):
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level(MAP)
     actors = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
     for a in actors.get_all_level_actors():
         if unreal.Name(TAG) in a.get_editor_property("tags"):
             actors.destroy_actor(a)
-    sec = RULES["sections"]["W"]
-    half = sec["width"] / 2 * 100.0
+    L = SHOWROOM
     report["label_pairs_checked"] = check_layout_labels(
-        {side: [(short, meshes["SM_Kit_Wall_" + short][1]) for short in seq] for side, seq in CORRIDOR.items()})
-    placed, lights = 0, 0
-    length = {}
-    for side, seq in CORRIDOR.items():
-        x = 0.0
-        for short in seq:
-            name = "SM_Kit_Wall_" + short
-            sm, part = meshes[name]
-            L = part["length_m"] * 100.0
-            if side == "left":
-                # face +X -> -Y, length (-Y in UE) -> -X: the pivot sits at the module's +X end
-                loc, yaw = unreal.Vector(x + L, half, 0.0), -90.0
-            else:
-                # face +X -> +Y, length -> +X: the pivot at the module's -X end
-                loc, yaw = unreal.Vector(x, -half, 0.0), 90.0
-            spawn_mesh(actors, sm, KIT_ORIGIN + loc, yaw, "Kit_%s_%02d_%s" % (side, placed, short))
-            placed += 1
-            ca, sa = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
-            for sname, sock in part["sockets"].items():
-                prm = sock.get("params") or {}
-                if not sname.startswith("SOCKET_Light"):
-                    continue
-                lx, ly, lz = sock["location_ue_cm"]
-                w = unreal.Vector(lx * ca - ly * sa, lx * sa + ly * ca, lz)
-                if prm.get("type") == "rect":
-                    dx, dy, dz = prm["dir_ue"]
-                    fwd = unreal.Vector(dx * ca - dy * sa, dx * sa + dy * ca, dz)
-                    along = unreal.Vector(sa, -ca, 0.0)        # the part's +Y (UE -Y) after the actor's yaw
-                    rect_light(actors, KIT_ORIGIN + loc + w, prm.get("role", "warm"), prm["cd"], prm.get("radius_m", 2.0),
-                               "KitLight_%s_%d" % (short, lights), fwd, along, prm["width_cm"], prm["height_cm"])
-                else:
-                    light(actors, KIT_ORIGIN + loc + w, prm.get("role", "warm"), prm.get("cd", 1.0), prm.get("radius_m", 1.6),
-                          "KitLight_%s_%d" % (short, lights), source_cm=prm.get("source_radius_cm"))
-                lights += 1
-            x += L
-        length[side] = x
-    L = max(length.values())
-    # provisional shell (floor / ceiling / ends: batches 2-3) and a dark box against the sun
+        {"run%d" % i: [(m, meshes["SM_Kit_" + m][1]) for m in run[3]] for i, run in enumerate(L["wall_runs"])})
+    counts = {"parts": 0, "lights": 0}
+    # wall runs: a wall module's pivot is its start on the face plane, it faces +X and runs along its local -Y (the
+    # Blender +Y); a run facing n turns the module by yaw = atan2(n) and the module then runs along (sin, -cos)
+    for i, (a, b, n, mods) in enumerate(L["wall_runs"]):
+        yaw = math.degrees(math.atan2(n[1], n[0]))
+        nat = (math.sin(math.radians(yaw)), -math.cos(math.radians(yaw)))
+        ln = math.hypot(b[0] - a[0], b[1] - a[1])
+        d = ((b[0] - a[0]) / ln, (b[1] - a[1]) / ln)
+        same = nat[0] * d[0] + nat[1] * d[1] > 0
+        total = sum(meshes["SM_Kit_" + m][1]["length_m"] for m in mods)
+        if abs(total - ln) > 0.01:
+            raise import_ship.ImportFailed("wall run %d: modules %.2f m for a run of %.2f m" % (i, total, ln))
+        cum = 0.0
+        for m in mods:
+            lm = meshes["SM_Kit_" + m][1]["length_m"]
+            t = cum if same else cum + lm
+            place_part(actors, meshes, m, unreal.Vector((a[0] + d[0] * t) * 100.0, (a[1] + d[1] * t) * 100.0, 0.0), yaw,
+                       "Kit_run%d_%s" % (i, m), counts)
+            cum += lm
+    # run parts: +X along the run from the pivot
+    for i, (a, d, parts) in enumerate(L["run_parts"]):
+        yaw = math.degrees(math.atan2(d[1], d[0]))
+        cum = 0.0
+        for m in parts:
+            place_part(actors, meshes, m, unreal.Vector((a[0] + d[0] * cum) * 100.0, (a[1] + d[1] * cum) * 100.0, 0.0), yaw,
+                       "Kit_line%d_%s" % (i, m), counts)
+            cum += meshes["SM_Kit_" + m][1]["length_m"]
+    for m, pos, yaw in L["placed"]:
+        place_part(actors, meshes, m, unreal.Vector(pos[0] * 100.0, pos[1] * 100.0, 0.0), yaw, "Kit_" + m, counts)
+    # provisional: ceiling and floor planes, a dark box against the sun, spots where the kit has no ceiling yet
     plane = EAL.load_asset("/Engine/BasicShapes/Plane")
     cube = EAL.load_asset("/Engine/BasicShapes/Cube")
-    x_top = 0.75 * sec["slope_rise"] * 100.0
-    ceil_w = sec["width"] * 100.0 - 2 * (x_top - 14.0)
-    spawn_mesh(actors, plane, KIT_ORIGIN + unreal.Vector(L / 2, 0, 0.0), 0.0, "KitProvisional_Floor", mis["Kit_ProvFloor"],
-               unreal.Vector(L / 100.0, (sec["width"] * 100.0 + 30.0) / 100.0, 1.0))
-    # (a metallic provisional ceiling mirrored the provisional lights as a burnt cross: all provisional planes rough)
-    c = spawn_mesh(actors, plane, KIT_ORIGIN + unreal.Vector(L / 2, 0, sec["ceiling"] * 100.0), 0.0, "KitProvisional_Ceiling",
-                   mis["Kit_ProvFloor"], unreal.Vector(L / 100.0, ceil_w / 100.0, 1.0))
-    c.set_actor_rotation(unreal.Rotator(roll=180.0, pitch=0.0, yaw=0.0), False)
-    for xe, yaw in ((0.0, 0.0), (L, 180.0)):
-        e = spawn_mesh(actors, plane, KIT_ORIGIN + unreal.Vector(xe, 0, sec["ceiling"] * 50.0), 0.0, "KitProvisional_End",
-                       mis["Kit_ProvFloor"], unreal.Vector(sec["ceiling"] * 1.0, sec["width"] * 1.0 + 0.3, 1.0))
-        e.set_actor_rotation(unreal.Rotator(roll=0.0, pitch=-90.0, yaw=yaw), False)
-    box = spawn_mesh(actors, cube, KIT_ORIGIN + unreal.Vector(L / 2, 0, 100.0), 0.0, "KitProvisional_SunBox", mis["Kit_Seal"],
-                     unreal.Vector(L / 100.0 + 4.0, 6.0, 5.0))
-    # the box encloses the corridor: without this the walking player would spawn inside its collision
+    C = RULES["sections"]["W"]["ceiling"]
+    for k, (x0, x1, y0, y1) in enumerate(L["prov_ceiling"]):
+        c = spawn_mesh(actors, plane, _v(((x0 + x1) / 2, (y0 + y1) / 2), C + 0.002), 0.0, "KitProvisional_Ceiling_%d" % k,
+                       mis["Kit_ProvFloor"], unreal.Vector(x1 - x0, y1 - y0, 1.0))
+        c.set_actor_rotation(unreal.Rotator(roll=180.0, pitch=0.0, yaw=0.0), False)
+    for k, (x0, x1, y0, y1) in enumerate(L["prov_floor"]):
+        spawn_mesh(actors, plane, _v(((x0 + x1) / 2, (y0 + y1) / 2), 0.0), 0.0, "KitProvisional_Floor_%d" % k,
+                   mis["Kit_ProvFloor"], unreal.Vector(x1 - x0, y1 - y0, 1.0))
+    gx0, gx1, gy0, gy1 = L["gravity"]
+    box = spawn_mesh(actors, cube, _v(((gx0 + gx1) / 2, (gy0 + gy1) / 2), 1.0), 0.0, "KitProvisional_SunBox", mis["Kit_Seal"],
+                     unreal.Vector((gx1 - gx0) + 4.0, (gy1 - gy0) + 4.0, 5.0))
+    # the box encloses the showroom: without this the walking player would spawn inside its collision
     box.static_mesh_component.set_collision_profile_name("NoCollision")
-    # walkable (author, 27. 9. 2026): gravity over the corridor and the start the player is put at
-    gravity = actors.spawn_actor_from_class(unreal.SpaceGravityVolume, KIT_ORIGIN + unreal.Vector(L / 2, 0, sec["ceiling"] * 50.0),
+    for k, spot in enumerate(L["prov_spots"]):
+        light(actors, _v(spot[0], C - 0.05), "work", spot[1], 3.8, "KitProvisional_Down_%d" % k, spot=True,
+              cone=spot[2] if len(spot) > 2 else 90.0)
+    # walkable (author, 27. 9. 2026): gravity over the whole sample and the start the player is put at
+    gravity = actors.spawn_actor_from_class(unreal.SpaceGravityVolume, _v(((gx0 + gx1) / 2, (gy0 + gy1) / 2), C * 0.5),
                                             unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
     gravity.set_actor_label("KitShowroom_Gravity")
     gravity.set_editor_property("gravity_cm_s2", GRAVITY_CMS2)
-    gravity.get_editor_property("volume").set_box_extent(unreal.Vector(L / 2 + 30.0, half + 30.0, sec["ceiling"] * 50.0 + 20.0))
+    gravity.get_editor_property("volume").set_box_extent(unreal.Vector((gx1 - gx0) * 50.0, (gy1 - gy0) * 50.0, C * 50.0 + 20.0))
     gravity.set_editor_property("tags", [unreal.Name(TAG)])
-    spawn = actors.spawn_actor_from_class(unreal.TargetPoint, KIT_ORIGIN + unreal.Vector(70.0, 0, 5.0), unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
+    (sx, sy), syaw = L["spawn"]
+    spawn = actors.spawn_actor_from_class(unreal.TargetPoint, _v((sx, sy), 0.05), unreal.Rotator(roll=0.0, pitch=0.0, yaw=syaw))
     spawn.set_actor_label("KitShowroom_Spawn")
     spawn.set_editor_property("tags", [unreal.Name(TAG), unreal.Name(SPAWN_TAG)])
-    # provisional ceiling lights (the kit's ceiling panels with light housings, batch 2, replace them): at the
-    # approved Wayfarer corridor's 60 cd spots / 20 cd room lights they burnt a band into the ceiling and a patch
-    # onto the end wall and flattened the walls (critic, 27. 9. 2026) - half that, narrower spots, dark between
-    # (round 2: at 30 cd / 60 deg the walls under 1.3 m got no light - "a black wall"): 45 cd / 90 deg, away from
-    # the ends so the end walls get no patch
-    for k, xx in enumerate((L * 0.22, L * 0.5, L * 0.78)):
-        light(actors, KIT_ORIGIN + unreal.Vector(xx, 0, sec["ceiling"] * 100.0 - 5.0), "work", 45.0, 3.8, "KitProvisional_Down_%d" % k,
-              spot=True, cone=90.0)
-        # the fill 80 cm under the ceiling: 30 cm under it, it burnt a hot spot into the plane right above
-        light(actors, KIT_ORIGIN + unreal.Vector(xx, 0, sec["ceiling"] * 100.0 - 80.0), "work", 8.0, 4.0, "KitProvisional_Room_%d" % k)
     unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).save_current_level()
-    report["showroom"] = {"modules": placed, "lights": lights, "length_m": L / 100.0}
+    report["showroom"] = {"parts": counts["parts"], "lights": counts["lights"]}
 
 
 def clear_old():

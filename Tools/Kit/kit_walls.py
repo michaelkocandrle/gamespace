@@ -66,10 +66,9 @@ class Wall:
         for (c0, c1) in ((f0, f0 + 0.012), (f1 - 0.012, f1)):
             p.slab("Kit_Structure", self.PLINTH, c0, c1, 0.034, 0.084, 0.012, proud=0.014, panel=False)
         p.box("Kit_Rubber", (-0.1, 0, 0), (-0.085, L, 0.012), bevel=0.003, panel=False)
-        # one linear (rect) light along the diffuser: a chain of point lights burnt hot spots into the floor
-        # (critic round 1); dim - the floor band only, the walls are lit from above
-        c = self.world(self.PLINTH, L / 2, 0.059, 0.02)
-        self.strip_light("Light_Floor_0", c, (SQ, 0, -SQ), f1 - f0 - 0.03, 0.026, "cool", 0.25 * L, radius_m=0.7)
+        # no light of its own: a linear light per module here cost ~1 ms over a composed sample (41 modules) for a
+        # floor band the eye hardly reads - the diffuser glows (batch 2 sample, 27. 9. 2026; with MegaLights the
+        # socket can come back)
         # panels (pressed: a border and a recessed centre, the depth layer of the design language)
         if not skip_kick:
             p.slab("Kit_Primary", self.VERT, G, L - G, self.kick[0], self.kick[1], PT, BEV_MID, secondary=True)
@@ -131,7 +130,7 @@ class Wall:
         # linear lights: up into the ceiling, and down-out from under the lip washing the slope and the far side
         # (the walls below 1.3 m got no light at all - critic round 2)
         self.strip_light("Light_Cove_0", (xt - 0.0675, L / 2, zt + 0.02), (0, 0, 1), L - 2 * G - 0.03, 0.025, "warm", 0.8 * L, radius_m=1.1)
-        self.strip_light("Light_Wash_0", (xt - 0.013, L / 2, zt - 0.075), (0.5, 0, -0.866), L - 2 * G - 0.03, 0.018, "warm", 1.1 * L, radius_m=2.4)
+        self.strip_light("Light_Wash_0", (xt - 0.013, L / 2, zt - 0.075), (0.5, 0, -0.866), L - 2 * G - 0.03, 0.018, "warm", 1.1 * L, radius_m=2.0)
         # collision: the wall to the structure depth, the slope and cove as one hull
         sd = kit_geo.RULES["zones"]["structure_depth"]
         p.collision_box((-sd, 0, 0), (0, L, self.vt))
@@ -289,9 +288,8 @@ class Wall:
         across the recess chamfer, over the rib or under the cove lip is skipped by the placer."""
         L = self.L
         if main:
-            # the panel number in the recess under the top border, rivet rows on the borders
-            # (on a 0.3 m module the top of the panel belongs to the ID plate / the gauge: the number goes low)
-            self.label(self.panel_id(rng), self.VERT, L - 0.12, self.main[1] - 0.08 if L >= 0.6 else self.main[0] + 0.12, 0.75)
+            # rivet rows on the borders; no panel number: the numbers belong to the frames, one system, readable
+            # ("four codes on two metres, the same code on neighbours" - critic, batch 2 round 1)
             if L >= 0.6:
                 self.label("rivet_row_8", self.VERT, L * 0.4, self.main[1] - 0.02, 0.8)
                 self.label("rivet_row_8", self.VERT, L * 0.5, (self.split + GAP / 2 + 0.02) if self.split_default else self.main[0] + 0.02, 0.8)
@@ -307,7 +305,7 @@ def plain(w, var, rng):
         w.shell()
         # a raised ID plate on the main panel
         w.p.slab("Kit_Structure", w.VERT, 0.09, 0.23, w.main[1] - 0.12, w.main[1] - 0.07, 0.01, BEV_SMALL, proud=0.016, panel=False)
-        w.label("panel_E16", w.VERT, 0.16, w.main[1] - 0.095, 0.7)
+        w.label("maker", w.VERT, 0.16, w.main[1] - 0.095, 0.22)          # the maker's plate
         w.shell_decals(rng)
     elif var == "B":
         mid = L / 2
@@ -472,7 +470,6 @@ def locker(w, var, rng):
                 for vb in (vc - 0.06, vc + 0.06):
                     p.box("Kit_Structure", (depth * 0.35, min(ue, ue + side * 0.022), vb - 0.01), (depth * 0.65, max(ue, ue + side * 0.022), vb + 0.01), panel=False)
                 p.tube("Kit_Structure", (depth * 0.5, ue + side * 0.018, vc - 0.07), (depth * 0.5, ue + side * 0.018, vc + 0.07), 0.008, 10)
-        w.label(w.panel_id(rng), door, du0 + 0.08, dv0 + 0.05 if kind == "box" else dv0 + 0.16, 0.7)
         p.collision_box((0, u0, v0), (depth, u1, v1))
     w.shell_decals(rng, main=False)
 

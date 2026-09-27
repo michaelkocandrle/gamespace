@@ -9,8 +9,8 @@ Never saves.
 What it guards (27. 9. 2026):
 - every kit mesh has vertex colours: the layered master's edge-wear and dirt masks (kit_geo, face-corner Col).
   They were lost once in kit_build.join() and came out all white, which Unreal drops on import;
-- the layout rule for decals: never the same service label (st_*, label_*) on neighbouring modules of the
-  showroom corridor (import_kit.CORRIDOR, the labels from kit_manifest.json);
+- the layout rule for decals: never the same service label (st_*, label_*) on neighbouring modules of a wall
+  run of the sample (import_kit.SHOWROOM, the labels from kit_manifest.json);
 - the showroom is walkable: a gravity volume over it, the start U / space.Showroom puts the player at, the
   dark sun box around it without collision.
 """
@@ -76,20 +76,21 @@ for name, part in sorted(parts.items()):
     if sm is None:
         continue
     masks = part.get("colour_masks", {})
-    check("%s: colour masks exported (edge %s, floor %s corners)" % (name, masks.get("edge"), masks.get("floor")),
-          masks.get("domain") == "CORNER" and masks.get("edge", 0) > 0 and masks.get("floor", 0) > 0)
+    # not all white: a ceiling part has nothing by the floor, a lofted part no chamfer (kit_build applies the same)
+    check("%s: colour masks exported (edge %s, floor %s, secondary %s corners)" % (name, masks.get("edge"), masks.get("floor"), masks.get("secondary")),
+          masks.get("domain") == "CORNER" and masks.get("edge", 0) + masks.get("floor", 0) + masks.get("secondary", 0) > 0)
     # has_vertex_colors() answers False in this commandlet even for the Wayfarer hull, whose masks work: export
     # the mesh back to FBX instead - Unreal writes a colour layer only when the mesh has colours (27. 9. 2026)
     check("%s: vertex colours in Unreal" % name, exported_colours(sm))
 
 # ---------------------------------------------------------------- the layout rule for service labels
-corridor = C.get("CORRIDOR", {})
-check("the showroom layout is readable from import_kit.py", bool(corridor))
-for side, seq in corridor.items():
-    for a, b in zip(seq, seq[1:]):
-        la = set(parts.get("SM_Kit_Wall_" + a, {}).get("service_labels", []))
-        lb = set(parts.get("SM_Kit_Wall_" + b, {}).get("service_labels", []))
-        check("%s: %s | %s share no service label" % (side, a, b), not (la & lb), ", ".join(sorted(la & lb)))
+runs = C.get("SHOWROOM", {}).get("wall_runs", [])
+check("the showroom layout is readable from import_kit.py", bool(runs))
+for i, (a0, b0, n, mods) in enumerate(runs):
+    for a, b in zip(mods, mods[1:]):
+        la = set(parts.get("SM_Kit_" + a, {}).get("service_labels", []))
+        lb = set(parts.get("SM_Kit_" + b, {}).get("service_labels", []))
+        check("run %d: %s | %s share no service label" % (i, a, b), not (la & lb), ", ".join(sorted(la & lb)))
 
 # ---------------------------------------------------------------- the showroom in the level
 unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level(MAP)
@@ -98,10 +99,13 @@ tag = unreal.Name(C["TAG"])
 room = [a for a in actors if tag in list(a.tags)]
 modules = [a for a in room if isinstance(a, unreal.StaticMeshActor) and a.static_mesh_component.static_mesh
            and a.static_mesh_component.static_mesh.get_name().startswith("SM_Kit_")]
-check("every corridor module placed (%d)" % sum(len(s) for s in corridor.values()),
-      len(modules) == sum(len(s) for s in corridor.values()), "%d" % len(modules))
+L = C["SHOWROOM"]
+expected = sum(len(r[3]) for r in L["wall_runs"]) + sum(len(r[2]) for r in L["run_parts"]) + len(L["placed"])
+check("every part of the sample placed (%d)" % expected, len(modules) == expected, "%d" % len(modules))
+walls = [a for a in modules if a.static_mesh_component.static_mesh.get_name().startswith("SM_Kit_Wall_")]
 rects = [a for a in room if isinstance(a, unreal.RectLight)]
-check("linear lights along the strips (%d)" % len(rects), len(rects) >= 3 * len(modules))
+# two per wall module: the cove up and the wash under the lip (the plinth's went, 27. 9. 2026)
+check("linear lights along the strips (%d)" % len(rects), len(rects) >= 2 * sum(len(r[3]) for r in L["wall_runs"]))
 gravity = [a for a in room if isinstance(a, unreal.SpaceGravityVolume)]
 check("one gravity volume, %s cm/s2" % C["GRAVITY_CMS2"], len(gravity) == 1
       and abs(gravity[0].get_editor_property("gravity_cm_s2") - C["GRAVITY_CMS2"]) < 0.5)
@@ -109,7 +113,7 @@ spawn = [a for a in actors if unreal.Name(C["SPAWN_TAG"]) in list(a.tags)]
 check("one start of the walk (%s)" % C["SPAWN_TAG"], len(spawn) == 1)
 if gravity and spawn:
     start = spawn[0].get_actor_location() + unreal.Vector(0.0, 0.0, 100.0)
-    check("the start and every module lie inside the gravity volume",
+    check("the start and every part lie inside the gravity volume",
           gravity[0].contains_point(start) and all(gravity[0].contains_point(m.get_actor_location() + unreal.Vector(0, 0, 50.0)) for m in modules))
 box = [a for a in room if a.get_actor_label() == "KitProvisional_SunBox"]
 check("the sun box has no collision (the player walks inside it)", len(box) == 1

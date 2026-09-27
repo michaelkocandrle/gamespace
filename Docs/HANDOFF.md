@@ -1594,6 +1594,16 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
           `Docs/Kit/frames_choice.png` čeká na autora, rámy zatím beze změny. Paleta Kestrel se rozhodne u první
           lodi Kestrel Dynamics. Mikroškrábance, oděr a jednolité panely patří do kroku „materiál kitu“, značení sekcí
           do dávky 6.
+      - krok 4, dávka 2 (portály A/B/C, stropní panely a otevřená pole, koncové stěny, zúžení W→S, přechod N→W,
+        vnitřní a vnější roh; 21 dílů + 2 stěny N): `Tools/Kit/kit_batch2.py`, `kit_build.py -- batch2`, katalog
+        `Docs/Kit/catalog_batch2.png`. Ukázka rozšířená o zatáčku do L, rameno, přechod a pahýl N (65 dílů, 99 světel,
+        klávesa U), preset `kit_showroom2`; recenze `Docs/Reviews/2026-09-27_kit_batch2.md`.
+        - Kritik: 3 kola + ověření přechodu, skóre 37 → 41 → 44 (poslední kolo 7/5/5/6/4/5/5/7, FAIL), ověření FAIL.
+        - Opravené chyby mimo kritika: decaly v zrcadleném rámci ležely rubem (`hs_decals.grid`, WORKFLOW ct),
+          „tráva“ na lištách z detailní normály trupu na trimu kitu (WORKFLOW cu).
+        - Výkon ukázky: chodba GPU 17,6 ms (52 FPS), křižovatka 16,7 ms (57 FPS).
+        - Otevřené body: okno koncové stěny (v ukázce není exteriér), kužely a stíny (rozhodnutí o MegaLights),
+          přechod W→N (těžší rám portálu N, funkční shluk), materiál kitu, displeje a značení (dávky 1 a 6).
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

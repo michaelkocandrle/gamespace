@@ -19,7 +19,7 @@
     230.0
    ],
    "tris": 2916,
-   "tris_decals": 80,
+   "tris_decals": 78,
    "tri_budget": 6600,
    "materials": [
     "Kit_Primary",
@@ -57,27 +57,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -60.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.3,
-      "width_cm": 115.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -90,285 +69,7 @@
       "cd": 1.32,
       "width_cm": 115.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
-      "dir_ue": [
-       0.5,
-       -0.0,
-       -0.866
-      ],
-      "megalights_shadow": true
-     }
-    },
-    "SOCKET_Snap_End": {
-     "location_ue_cm": [
-      0.0,
-      -120.0,
-      0.0
-     ],
-     "params": {}
-    },
-    "SOCKET_Snap_Start": {
-     "location_ue_cm": [
-      0.0,
-      -0.0,
-      0.0
-     ],
-     "params": {}
-    }
-   },
-   "collision_hulls": 2,
-   "decals": 5,
-   "decal_items": [
-    "panel_E16",
-    "panel_B03",
-    "rivet_row_8",
-    "rivet_row_8",
-    "rivet_row_8"
-   ],
-   "service_labels": [],
-   "colour_masks": {
-    "domain": "CORNER",
-    "edge": 3752,
-    "secondary": 240,
-    "floor": 942
-   },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Plain12W_A_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Plain12W_A_34.png"
-   }
-  },
-  "SM_Kit_Wall_Plain12W_B": {
-   "category": "Wall",
-   "family": "Wall_Plain",
-   "section": "W",
-   "length_m": 1.2,
-   "variant": "B",
-   "batch": 1,
-   "fbx": "ArtSource/Kit/Export/SM_Kit_Wall_Plain12W_B.fbx",
-   "dims_m": [
-    0.722,
-    1.2,
-    2.3
-   ],
-   "expected_size_cm": [
-    72.2,
-    120.0,
-    230.0
-   ],
-   "tris": 3100,
-   "tris_decals": 82,
-   "tri_budget": 6600,
-   "materials": [
-    "Kit_Primary",
-    "Kit_Structure",
-    "Kit_Accent",
-    "Kit_Signal",
-    "Kit_Rubber",
-    "Kit_Trim",
-    "Kit_Seal",
-    "Kit_GlowWarm",
-    "Kit_GlowCool",
-    "Kit_Decal",
-    "Kit_DecalAO",
-    "Kit_DecalPaint"
-   ],
-   "sockets": {
-    "SOCKET_Light_Cove_0": {
-     "location_ue_cm": [
-      53.25,
-      -60.0,
-      212.0
-     ],
-     "params": {
-      "type": "rect",
-      "role": "warm",
-      "cd": 0.96,
-      "width_cm": 115.8,
-      "height_cm": 2.5,
-      "radius_m": 1.1,
-      "dir_ue": [
-       0.0,
-       -0.0,
-       1.0
-      ],
-      "megalights_shadow": true
-     }
-    },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -60.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.3,
-      "width_cm": 115.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
-    "SOCKET_Light_Wash_0": {
-     "location_ue_cm": [
-      58.7,
-      -60.0,
-      202.5
-     ],
-     "params": {
-      "type": "rect",
-      "role": "warm",
-      "cd": 1.32,
-      "width_cm": 115.8,
-      "height_cm": 1.8,
-      "radius_m": 2.4,
-      "dir_ue": [
-       0.5,
-       -0.0,
-       -0.866
-      ],
-      "megalights_shadow": true
-     }
-    },
-    "SOCKET_Snap_End": {
-     "location_ue_cm": [
-      0.0,
-      -120.0,
-      0.0
-     ],
-     "params": {}
-    },
-    "SOCKET_Snap_Start": {
-     "location_ue_cm": [
-      0.0,
-      -0.0,
-      0.0
-     ],
-     "params": {}
-    }
-   },
-   "collision_hulls": 2,
-   "decals": 5,
-   "decal_items": [
-    "st_torque",
-    "panel_D05",
-    "rivet_row_8",
-    "rivet_row_8",
-    "rivet_row_8"
-   ],
-   "service_labels": [
-    "st_torque"
-   ],
-   "colour_masks": {
-    "domain": "CORNER",
-    "edge": 3824,
-    "secondary": 456,
-    "floor": 942
-   },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Plain12W_B_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Plain12W_B_34.png"
-   }
-  },
-  "SM_Kit_Wall_Plain12W_C": {
-   "category": "Wall",
-   "family": "Wall_Plain",
-   "section": "W",
-   "length_m": 1.2,
-   "variant": "C",
-   "batch": 1,
-   "fbx": "ArtSource/Kit/Export/SM_Kit_Wall_Plain12W_C.fbx",
-   "dims_m": [
-    0.722,
-    1.2,
-    2.3
-   ],
-   "expected_size_cm": [
-    72.2,
-    120.0,
-    230.0
-   ],
-   "tris": 2668,
-   "tris_decals": 76,
-   "tri_budget": 6600,
-   "materials": [
-    "Kit_Primary",
-    "Kit_Structure",
-    "Kit_Accent",
-    "Kit_Signal",
-    "Kit_Rubber",
-    "Kit_Trim",
-    "Kit_Seal",
-    "Kit_GlowWarm",
-    "Kit_GlowCool",
-    "Kit_Decal",
-    "Kit_DecalAO",
-    "Kit_DecalPaint"
-   ],
-   "sockets": {
-    "SOCKET_Light_Cove_0": {
-     "location_ue_cm": [
-      53.25,
-      -60.0,
-      212.0
-     ],
-     "params": {
-      "type": "rect",
-      "role": "warm",
-      "cd": 0.96,
-      "width_cm": 115.8,
-      "height_cm": 2.5,
-      "radius_m": 1.1,
-      "dir_ue": [
-       0.0,
-       -0.0,
-       1.0
-      ],
-      "megalights_shadow": true
-     }
-    },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -60.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.3,
-      "width_cm": 115.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
-    "SOCKET_Light_Wash_0": {
-     "location_ue_cm": [
-      58.7,
-      -60.0,
-      202.5
-     ],
-     "params": {
-      "type": "rect",
-      "role": "warm",
-      "cd": 1.32,
-      "width_cm": 115.8,
-      "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -397,7 +98,7 @@
    "collision_hulls": 2,
    "decals": 4,
    "decal_items": [
-    "panel_A14",
+    "maker",
     "rivet_row_8",
     "rivet_row_8",
     "rivet_row_8"
@@ -409,11 +110,231 @@
     "secondary": 240,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Plain12W_C_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Plain12W_C_34.png"
-   }
+   "status": "built"
+  },
+  "SM_Kit_Wall_Plain12W_B": {
+   "category": "Wall",
+   "family": "Wall_Plain",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "B",
+   "batch": 1,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Wall_Plain12W_B.fbx",
+   "dims_m": [
+    0.722,
+    1.2,
+    2.3
+   ],
+   "expected_size_cm": [
+    72.2,
+    120.0,
+    230.0
+   ],
+   "tris": 3100,
+   "tris_decals": 78,
+   "tri_budget": 6600,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowWarm",
+    "Kit_GlowCool",
+    "Kit_Decal",
+    "Kit_DecalAO",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {
+    "SOCKET_Light_Cove_0": {
+     "location_ue_cm": [
+      53.25,
+      -60.0,
+      212.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 0.96,
+      "width_cm": 115.8,
+      "height_cm": 2.5,
+      "radius_m": 1.1,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Light_Wash_0": {
+     "location_ue_cm": [
+      58.7,
+      -60.0,
+      202.5
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 1.32,
+      "width_cm": 115.8,
+      "height_cm": 1.8,
+      "radius_m": 2.0,
+      "dir_ue": [
+       0.5,
+       -0.0,
+       -0.866
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      0.0,
+      -120.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 2,
+   "decals": 4,
+   "decal_items": [
+    "st_torque",
+    "rivet_row_8",
+    "rivet_row_8",
+    "rivet_row_8"
+   ],
+   "service_labels": [
+    "st_torque"
+   ],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 3824,
+    "secondary": 456,
+    "floor": 942
+   },
+   "status": "built"
+  },
+  "SM_Kit_Wall_Plain12W_C": {
+   "category": "Wall",
+   "family": "Wall_Plain",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "C",
+   "batch": 1,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Wall_Plain12W_C.fbx",
+   "dims_m": [
+    0.722,
+    1.2,
+    2.3
+   ],
+   "expected_size_cm": [
+    72.2,
+    120.0,
+    230.0
+   ],
+   "tris": 2668,
+   "tris_decals": 72,
+   "tri_budget": 6600,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowWarm",
+    "Kit_GlowCool",
+    "Kit_Decal",
+    "Kit_DecalAO"
+   ],
+   "sockets": {
+    "SOCKET_Light_Cove_0": {
+     "location_ue_cm": [
+      53.25,
+      -60.0,
+      212.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 0.96,
+      "width_cm": 115.8,
+      "height_cm": 2.5,
+      "radius_m": 1.1,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Light_Wash_0": {
+     "location_ue_cm": [
+      58.7,
+      -60.0,
+      202.5
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 1.32,
+      "width_cm": 115.8,
+      "height_cm": 1.8,
+      "radius_m": 2.0,
+      "dir_ue": [
+       0.5,
+       -0.0,
+       -0.866
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      0.0,
+      -120.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 2,
+   "decals": 3,
+   "decal_items": [
+    "rivet_row_8",
+    "rivet_row_8",
+    "rivet_row_8"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 3752,
+    "secondary": 240,
+    "floor": 942
+   },
+   "status": "built"
   },
   "SM_Kit_Wall_Plain06W_A": {
    "category": "Wall",
@@ -434,7 +355,7 @@
     230.0
    ],
    "tris": 2840,
-   "tris_decals": 56,
+   "tris_decals": 54,
    "tri_budget": 4200,
    "materials": [
     "Kit_Primary",
@@ -472,27 +393,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -30.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.15,
-      "width_cm": 55.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -505,7 +405,7 @@
       "cd": 0.66,
       "width_cm": 55.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -532,10 +432,9 @@
     }
    },
    "collision_hulls": 2,
-   "decals": 4,
+   "decals": 3,
    "decal_items": [
-    "panel_E16",
-    "panel_B07",
+    "maker",
     "rivet_row_8",
     "rivet_row_8"
    ],
@@ -546,11 +445,7 @@
     "secondary": 240,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Plain06W_A_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Plain06W_A_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Plain03W_A": {
    "category": "Wall",
@@ -571,7 +466,7 @@
     230.0
    ],
    "tris": 2744,
-   "tris_decals": 8,
+   "tris_decals": 6,
    "tri_budget": 3000,
    "materials": [
     "Kit_Primary",
@@ -607,27 +502,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -15.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.075,
-      "width_cm": 25.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -640,7 +514,7 @@
       "cd": 0.33,
       "width_cm": 25.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -667,10 +541,9 @@
     }
    },
    "collision_hulls": 2,
-   "decals": 2,
+   "decals": 1,
    "decal_items": [
-    "panel_E16",
-    "panel_A14"
+    "maker"
    ],
    "service_labels": [],
    "colour_masks": {
@@ -679,11 +552,7 @@
     "secondary": 240,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Plain03W_A_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Plain03W_A_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Grille06W_A": {
    "category": "Wall",
@@ -740,27 +609,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -30.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.15,
-      "width_cm": 55.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -773,7 +621,7 @@
       "cd": 0.66,
       "width_cm": 55.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -813,11 +661,7 @@
     "secondary": 240,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Grille06W_A_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Grille06W_A_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Grille12W_B": {
    "category": "Wall",
@@ -876,27 +720,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -60.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.3,
-      "width_cm": 115.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -909,7 +732,7 @@
       "cd": 1.32,
       "width_cm": 115.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -950,11 +773,7 @@
     "secondary": 456,
     "floor": 1554
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Grille12W_B_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Grille12W_B_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Grille12W_C": {
    "category": "Wall",
@@ -975,7 +794,7 @@
     230.0
    ],
    "tris": 3176,
-   "tris_decals": 84,
+   "tris_decals": 80,
    "tri_budget": 6600,
    "materials": [
     "Kit_Primary",
@@ -1013,27 +832,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -60.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.3,
-      "width_cm": 115.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -1046,7 +844,7 @@
       "cd": 1.32,
       "width_cm": 115.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -1073,10 +871,9 @@
     }
    },
    "collision_hulls": 2,
-   "decals": 5,
+   "decals": 4,
    "decal_items": [
     "st_vent",
-    "panel_A14",
     "rivet_row_8",
     "rivet_row_8",
     "rivet_row_8"
@@ -1090,11 +887,7 @@
     "secondary": 240,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Grille12W_C_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Grille12W_C_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Locker06W_A": {
    "category": "Wall",
@@ -1115,7 +908,7 @@
     230.0
    ],
    "tris": 2980,
-   "tris_decals": 4,
+   "tris_decals": 0,
    "tri_budget": 4200,
    "materials": [
     "Kit_Primary",
@@ -1127,8 +920,7 @@
     "Kit_Trim",
     "Kit_Seal",
     "Kit_GlowWarm",
-    "Kit_GlowCool",
-    "Kit_DecalPaint"
+    "Kit_GlowCool"
    ],
    "sockets": {
     "SOCKET_Light_Cove_0": {
@@ -1152,27 +944,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -30.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.15,
-      "width_cm": 55.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -1185,7 +956,7 @@
       "cd": 0.66,
       "width_cm": 55.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -1212,10 +983,8 @@
     }
    },
    "collision_hulls": 3,
-   "decals": 1,
-   "decal_items": [
-    "panel_G08"
-   ],
+   "decals": 0,
+   "decal_items": [],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
@@ -1223,11 +992,7 @@
     "secondary": 720,
     "floor": 1398
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Locker06W_A_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Locker06W_A_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Locker06W_B": {
    "category": "Wall",
@@ -1248,7 +1013,7 @@
     230.0
    ],
    "tris": 3476,
-   "tris_decals": 8,
+   "tris_decals": 0,
    "tri_budget": 4200,
    "materials": [
     "Kit_Primary",
@@ -1259,8 +1024,7 @@
     "Kit_Trim",
     "Kit_Seal",
     "Kit_GlowWarm",
-    "Kit_GlowCool",
-    "Kit_DecalPaint"
+    "Kit_GlowCool"
    ],
    "sockets": {
     "SOCKET_Light_Cove_0": {
@@ -1284,27 +1048,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -30.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.15,
-      "width_cm": 55.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -1317,7 +1060,7 @@
       "cd": 0.66,
       "width_cm": 55.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -1344,11 +1087,8 @@
     }
    },
    "collision_hulls": 4,
-   "decals": 2,
-   "decal_items": [
-    "panel_F02",
-    "panel_E11"
-   ],
+   "decals": 0,
+   "decal_items": [],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
@@ -1356,11 +1096,7 @@
     "secondary": 1200,
     "floor": 1446
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Locker06W_B_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Locker06W_B_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Locker12W_C": {
    "category": "Wall",
@@ -1381,7 +1117,7 @@
     230.0
    ],
    "tris": 3796,
-   "tris_decals": 28,
+   "tris_decals": 24,
    "tri_budget": 6600,
    "materials": [
     "Kit_Primary",
@@ -1394,8 +1130,7 @@
     "Kit_GlowWarm",
     "Kit_GlowCool",
     "Kit_Decal",
-    "Kit_DecalAO",
-    "Kit_DecalPaint"
+    "Kit_DecalAO"
    ],
    "sockets": {
     "SOCKET_Light_Cove_0": {
@@ -1419,27 +1154,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -60.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.3,
-      "width_cm": 115.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -1452,7 +1166,7 @@
       "cd": 1.32,
       "width_cm": 115.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -1479,9 +1193,8 @@
     }
    },
    "collision_hulls": 3,
-   "decals": 2,
+   "decals": 1,
    "decal_items": [
-    "panel_D05",
     "rivet_row_8"
    ],
    "service_labels": [],
@@ -1491,11 +1204,7 @@
     "secondary": 720,
     "floor": 2286
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Locker12W_C_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Locker12W_C_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Pipes12W_A": {
    "category": "Wall",
@@ -1554,27 +1263,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -60.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.3,
-      "width_cm": 115.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -1587,7 +1275,7 @@
       "cd": 1.32,
       "width_cm": 115.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -1629,11 +1317,7 @@
     "secondary": 240,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Pipes12W_A_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Pipes12W_A_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Pipes12W_B": {
    "category": "Wall",
@@ -1692,27 +1376,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -60.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.3,
-      "width_cm": 115.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -1725,7 +1388,7 @@
       "cd": 1.32,
       "width_cm": 115.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -1768,11 +1431,7 @@
     "secondary": 240,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Pipes12W_B_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Pipes12W_B_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Pipes12W_C": {
    "category": "Wall",
@@ -1832,27 +1491,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -60.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.3,
-      "width_cm": 115.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -1865,7 +1503,7 @@
       "cd": 1.32,
       "width_cm": 115.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -1906,11 +1544,7 @@
     "secondary": 240,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Pipes12W_C_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Pipes12W_C_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Hatch06W_A": {
    "category": "Wall",
@@ -1967,27 +1601,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -30.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.15,
-      "width_cm": 55.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -2000,7 +1613,7 @@
       "cd": 0.66,
       "width_cm": 55.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -2041,11 +1654,7 @@
     "secondary": 456,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Hatch06W_A_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Hatch06W_A_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Hatch06W_B": {
    "category": "Wall",
@@ -2102,27 +1711,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -30.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.15,
-      "width_cm": 55.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -2135,7 +1723,7 @@
       "cd": 0.66,
       "width_cm": 55.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -2176,11 +1764,7 @@
     "secondary": 672,
     "floor": 1746
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Hatch06W_B_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Hatch06W_B_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Hatch12W_C": {
    "category": "Wall",
@@ -2239,27 +1823,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -60.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.3,
-      "width_cm": 115.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -2272,7 +1835,7 @@
       "cd": 1.32,
       "width_cm": 115.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -2317,11 +1880,7 @@
     "secondary": 672,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Hatch12W_C_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Hatch12W_C_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Display06W_A": {
    "category": "Wall",
@@ -2384,27 +1943,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -30.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.15,
-      "width_cm": 55.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Screen_0": {
      "location_ue_cm": [
       25.0,
@@ -2431,7 +1969,7 @@
       "cd": 0.66,
       "width_cm": 55.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -2473,11 +2011,7 @@
     "secondary": 240,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Display06W_A_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Display06W_A_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Display06W_B": {
    "category": "Wall",
@@ -2498,7 +2032,7 @@
     230.0
    ],
    "tris": 2984,
-   "tris_decals": 58,
+   "tris_decals": 54,
    "tri_budget": 4200,
    "materials": [
     "Kit_Primary",
@@ -2540,27 +2074,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -30.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.15,
-      "width_cm": 55.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -2573,7 +2086,7 @@
       "cd": 0.66,
       "width_cm": 55.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -2600,12 +2113,11 @@
     }
    },
    "collision_hulls": 3,
-   "decals": 6,
+   "decals": 5,
    "decal_items": [
     "ck_ready",
     "ck_fault",
     "ck_lights",
-    "panel_E11",
     "rivet_row_8",
     "rivet_row_8"
    ],
@@ -2616,11 +2128,7 @@
     "secondary": 240,
     "floor": 942
    },
-   "status": "built",
-   "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Display06W_B_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Display06W_B_34.png"
-   }
+   "status": "built"
   },
   "SM_Kit_Wall_Display03W_C": {
    "category": "Wall",
@@ -2641,7 +2149,7 @@
     230.0
    ],
    "tris": 2584,
-   "tris_decals": 6,
+   "tris_decals": 2,
    "tri_budget": 3000,
    "materials": [
     "Kit_Primary",
@@ -2680,27 +2188,6 @@
       "megalights_shadow": true
      }
     },
-    "SOCKET_Light_Floor_0": {
-     "location_ue_cm": [
-      -4.41,
-      -15.0,
-      2.76
-     ],
-     "params": {
-      "type": "rect",
-      "role": "cool",
-      "cd": 0.075,
-      "width_cm": 25.0,
-      "height_cm": 2.6,
-      "radius_m": 0.7,
-      "dir_ue": [
-       0.7071,
-       -0.0,
-       -0.7071
-      ],
-      "megalights_shadow": true
-     }
-    },
     "SOCKET_Light_Wash_0": {
      "location_ue_cm": [
       58.7,
@@ -2713,7 +2200,7 @@
       "cd": 0.33,
       "width_cm": 25.8,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.0,
       "dir_ue": [
        0.5,
        -0.0,
@@ -2740,10 +2227,9 @@
     }
    },
    "collision_hulls": 3,
-   "decals": 2,
+   "decals": 1,
    "decal_items": [
-    "ck_pwr",
-    "panel_D05"
+    "ck_pwr"
    ],
    "service_labels": [],
    "colour_masks": {
@@ -2752,10 +2238,1899 @@
     "secondary": 240,
     "floor": 942
    },
+   "status": "built"
+  },
+  "SM_Kit_Portal_Ring03W_A": {
+   "category": "Portal",
+   "family": "Portal_Ring",
+   "section": "W",
+   "length_m": 0.3,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Portal_Ring03W_A.fbx",
+   "dims_m": [
+    0.288,
+    2.8,
+    2.55
+   ],
+   "expected_size_cm": [
+    28.8,
+    280.0,
+    255.0
+   ],
+   "tris": 1584,
+   "tris_decals": 6,
+   "tri_budget": 8000,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Plastic",
+    "Kit_GlowWarm",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {
+    "SOCKET_Decal_Section": {
+     "location_ue_cm": [
+      15.0,
+      -109.1,
+      106.0
+     ],
+     "params": {
+      "tag": "section_number"
+     }
+    },
+    "SOCKET_Light_Ring_0": {
+     "location_ue_cm": [
+      15.0,
+      -0.0,
+      218.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 1.0,
+      "width_cm": 74.0,
+      "height_cm": 2.4,
+      "radius_m": 2.4,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 5,
+   "decals": 1,
+   "decal_items": [
+    "panel_F02"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1092,
+    "secondary": 0,
+    "floor": 744
+   },
    "status": "built",
    "renders": {
-    "front": "Saved/KitCatalog/SM_Kit_Wall_Display03W_C_front.png",
-    "34": "Saved/KitCatalog/SM_Kit_Wall_Display03W_C_34.png"
+    "front": "Saved/KitCatalog/SM_Kit_Portal_Ring03W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Portal_Ring03W_A_34.png"
+   }
+  },
+  "SM_Kit_Portal_Ring03W_B": {
+   "category": "Portal",
+   "family": "Portal_Ring",
+   "section": "W",
+   "length_m": 0.3,
+   "variant": "B",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Portal_Ring03W_B.fbx",
+   "dims_m": [
+    0.288,
+    2.8,
+    2.55
+   ],
+   "expected_size_cm": [
+    28.8,
+    280.0,
+    255.0
+   ],
+   "tris": 1196,
+   "tris_decals": 86,
+   "tri_budget": 8000,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Plastic",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {
+    "SOCKET_Decal_Section": {
+     "location_ue_cm": [
+      15.0,
+      -109.1,
+      106.0
+     ],
+     "params": {
+      "tag": "section_number"
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 5,
+   "decals": 3,
+   "decal_items": [
+    "panel_G08",
+    "hazard_stripe",
+    "hazard_stripe"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 516,
+    "secondary": 0,
+    "floor": 744
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Portal_Ring03W_B_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Portal_Ring03W_B_34.png"
+   }
+  },
+  "SM_Kit_Portal_Ring03W_C": {
+   "category": "Portal",
+   "family": "Portal_Ring",
+   "section": "W",
+   "length_m": 0.3,
+   "variant": "C",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Portal_Ring03W_C.fbx",
+   "dims_m": [
+    0.3,
+    2.8,
+    2.55
+   ],
+   "expected_size_cm": [
+    30.0,
+    280.0,
+    255.0
+   ],
+   "tris": 1856,
+   "tris_decals": 16,
+   "tri_budget": 8000,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Plastic",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {
+    "SOCKET_Decal_Section": {
+     "location_ue_cm": [
+      15.0,
+      -104.1,
+      106.0
+     ],
+     "params": {
+      "tag": "section_number"
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 5,
+   "decals": 1,
+   "decal_items": [
+    "panel_H19"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 912,
+    "secondary": 0,
+    "floor": 840
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Portal_Ring03W_C_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Portal_Ring03W_C_34.png"
+   }
+  },
+  "SM_Kit_Ceiling_Panel12W_A": {
+   "category": "Ceiling",
+   "family": "Ceiling_Panel",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Ceiling_Panel12W_A.fbx",
+   "dims_m": [
+    1.2,
+    1.49,
+    0.12
+   ],
+   "expected_size_cm": [
+    120.0,
+    149.0,
+    12.0
+   ],
+   "tris": 1356,
+   "tris_decals": 0,
+   "tri_budget": 4200,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Seal",
+    "Kit_GlowWarm"
+   ],
+   "sockets": {
+    "SOCKET_Light_Down_0": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      225.0
+     ],
+     "params": {
+      "type": "spot",
+      "role": "work",
+      "cd": 35.0,
+      "cone_deg": 100.0,
+      "radius_m": 3.6,
+      "source_radius_cm": 6.0,
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 2176,
+    "secondary": 0,
+    "floor": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Ceiling_Panel12W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Ceiling_Panel12W_A_34.png"
+   }
+  },
+  "SM_Kit_Ceiling_Panel06W_A": {
+   "category": "Ceiling",
+   "family": "Ceiling_Panel",
+   "section": "W",
+   "length_m": 0.6,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Ceiling_Panel06W_A.fbx",
+   "dims_m": [
+    0.6,
+    1.49,
+    0.12
+   ],
+   "expected_size_cm": [
+    60.0,
+    149.0,
+    12.0
+   ],
+   "tris": 1356,
+   "tris_decals": 0,
+   "tri_budget": 2100,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Seal",
+    "Kit_GlowWarm"
+   ],
+   "sockets": {
+    "SOCKET_Light_Down_0": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      225.0
+     ],
+     "params": {
+      "type": "spot",
+      "role": "work",
+      "cd": 22.0,
+      "cone_deg": 100.0,
+      "radius_m": 3.6,
+      "source_radius_cm": 6.0,
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 2176,
+    "secondary": 0,
+    "floor": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Ceiling_Panel06W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Ceiling_Panel06W_A_34.png"
+   }
+  },
+  "SM_Kit_Ceiling_Panel03W_A": {
+   "category": "Ceiling",
+   "family": "Ceiling_Panel",
+   "section": "W",
+   "length_m": 0.3,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Ceiling_Panel03W_A.fbx",
+   "dims_m": [
+    0.3,
+    1.49,
+    0.12
+   ],
+   "expected_size_cm": [
+    30.0,
+    149.0,
+    12.0
+   ],
+   "tris": 576,
+   "tris_decals": 0,
+   "tri_budget": 1500,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 960,
+    "secondary": 0,
+    "floor": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Ceiling_Panel03W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Ceiling_Panel03W_A_34.png"
+   }
+  },
+  "SM_Kit_Ceiling_Panel12W_B": {
+   "category": "Ceiling",
+   "family": "Ceiling_Panel",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "B",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Ceiling_Panel12W_B.fbx",
+   "dims_m": [
+    1.2,
+    1.49,
+    0.12
+   ],
+   "expected_size_cm": [
+    120.0,
+    149.0,
+    12.0
+   ],
+   "tris": 1488,
+   "tris_decals": 0,
+   "tri_budget": 4200,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Rubber",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 2176,
+    "secondary": 0,
+    "floor": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Ceiling_Panel12W_B_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Ceiling_Panel12W_B_34.png"
+   }
+  },
+  "SM_Kit_Ceiling_Panel12W_C": {
+   "category": "Ceiling",
+   "family": "Ceiling_Panel",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "C",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Ceiling_Panel12W_C.fbx",
+   "dims_m": [
+    1.2,
+    1.49,
+    0.12
+   ],
+   "expected_size_cm": [
+    120.0,
+    149.0,
+    12.0
+   ],
+   "tris": 1440,
+   "tris_decals": 0,
+   "tri_budget": 4200,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Seal",
+    "Kit_GlowWarm"
+   ],
+   "sockets": {
+    "SOCKET_Light_Linear_0": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      228.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 38.4,
+      "width_cm": 96.0,
+      "height_cm": 5.0,
+      "radius_m": 3.6,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "along_ue": [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 2176,
+    "secondary": 0,
+    "floor": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Ceiling_Panel12W_C_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Ceiling_Panel12W_C_34.png"
+   }
+  },
+  "SM_Kit_Ceiling_Tray12W_A": {
+   "category": "Ceiling",
+   "family": "Ceiling_Tray",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Ceiling_Tray12W_A.fbx",
+   "dims_m": [
+    1.2,
+    1.51,
+    0.274
+   ],
+   "expected_size_cm": [
+    120.0,
+    151.0,
+    27.4
+   ],
+   "tris": 740,
+   "tris_decals": 0,
+   "tri_budget": 4200,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_GlowWarm",
+    "Kit_GlowCool"
+   ],
+   "sockets": {
+    "SOCKET_Light_Linear_0": {
+     "location_ue_cm": [
+      60.0,
+      -45.0,
+      225.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 20.8,
+      "width_cm": 76.0,
+      "height_cm": 5.0,
+      "radius_m": 3.4,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "along_ue": [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 360,
+    "secondary": 0,
+    "floor": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Ceiling_Tray12W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Ceiling_Tray12W_A_34.png"
+   }
+  },
+  "SM_Kit_Ceiling_Tray06W_A": {
+   "category": "Ceiling",
+   "family": "Ceiling_Tray",
+   "section": "W",
+   "length_m": 0.6,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Ceiling_Tray06W_A.fbx",
+   "dims_m": [
+    0.6,
+    1.51,
+    0.274
+   ],
+   "expected_size_cm": [
+    60.0,
+    151.0,
+    27.4
+   ],
+   "tris": 544,
+   "tris_decals": 0,
+   "tri_budget": 2100,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_GlowWarm",
+    "Kit_GlowCool"
+   ],
+   "sockets": {
+    "SOCKET_Light_Linear_0": {
+     "location_ue_cm": [
+      30.0,
+      -45.0,
+      225.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 10.4,
+      "width_cm": 36.0,
+      "height_cm": 5.0,
+      "radius_m": 3.4,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "along_ue": [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 288,
+    "secondary": 0,
+    "floor": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Ceiling_Tray06W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Ceiling_Tray06W_A_34.png"
+   }
+  },
+  "SM_Kit_Ceiling_Tray12W_B": {
+   "category": "Ceiling",
+   "family": "Ceiling_Tray",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "B",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Ceiling_Tray12W_B.fbx",
+   "dims_m": [
+    1.2,
+    1.51,
+    0.28
+   ],
+   "expected_size_cm": [
+    120.0,
+    151.0,
+    28.0
+   ],
+   "tris": 932,
+   "tris_decals": 16,
+   "tri_budget": 4200,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_GlowWarm",
+    "Kit_GlowCool",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {
+    "SOCKET_Light_Linear_0": {
+     "location_ue_cm": [
+      60.0,
+      -45.0,
+      225.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 20.8,
+      "width_cm": 76.0,
+      "height_cm": 5.0,
+      "radius_m": 3.4,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "along_ue": [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 1,
+   "decal_items": [
+    "label_coolant"
+   ],
+   "service_labels": [
+    "label_coolant"
+   ],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 576,
+    "secondary": 0,
+    "floor": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Ceiling_Tray12W_B_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Ceiling_Tray12W_B_34.png"
+   }
+  },
+  "SM_Kit_Wall_End24W_A": {
+   "category": "Wall",
+   "family": "Wall_End",
+   "section": "W",
+   "length_m": 2.4,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Wall_End24W_A.fbx",
+   "dims_m": [
+    0.158,
+    2.4,
+    2.3
+   ],
+   "expected_size_cm": [
+    15.8,
+    240.0,
+    230.0
+   ],
+   "tris": 2764,
+   "tris_decals": 0,
+   "tri_budget": 11400,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowCool"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      0.0,
+      -240.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 4088,
+    "secondary": 648,
+    "floor": 2592
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Wall_End24W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Wall_End24W_A_34.png"
+   }
+  },
+  "SM_Kit_Wall_End24W_B": {
+   "category": "Wall",
+   "family": "Wall_End",
+   "section": "W",
+   "length_m": 2.4,
+   "variant": "B",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Wall_End24W_B.fbx",
+   "dims_m": [
+    0.26,
+    2.4,
+    2.3
+   ],
+   "expected_size_cm": [
+    26.0,
+    240.0,
+    230.0
+   ],
+   "tris": 4364,
+   "tris_decals": 0,
+   "tri_budget": 11400,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowWarm",
+    "Kit_GlowCool",
+    "Kit_GlowSignal",
+    "Kit_Glass"
+   ],
+   "sockets": {
+    "SOCKET_Light_Window_0": {
+     "location_ue_cm": [
+      -7.0,
+      -120.0,
+      112.8
+     ],
+     "params": {
+      "type": "rect",
+      "role": "work",
+      "cd": 1.4,
+      "width_cm": 56.0,
+      "height_cm": 2.0,
+      "radius_m": 0.6,
+      "dir_ue": [
+       -0.5,
+       -0.0,
+       -0.866
+      ],
+      "along_ue": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      0.0,
+      -240.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 6648,
+    "secondary": 648,
+    "floor": 2592
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Wall_End24W_B_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Wall_End24W_B_34.png"
+   }
+  },
+  "SM_Kit_Wall_Narrow24W_A": {
+   "category": "Wall",
+   "family": "Wall_Narrow",
+   "section": "W",
+   "length_m": 2.4,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Wall_Narrow24W_A.fbx",
+   "dims_m": [
+    0.64,
+    2.4,
+    2.32
+   ],
+   "expected_size_cm": [
+    64.0,
+    240.0,
+    232.0
+   ],
+   "tris": 2036,
+   "tris_decals": 24,
+   "tri_budget": 11400,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Plastic",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowCool",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {
+    "SOCKET_Light_Crawl_0": {
+     "location_ue_cm": [
+      -26.0,
+      -120.0,
+      209.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "cool",
+      "cd": 0.25,
+      "width_cm": 36.0,
+      "height_cm": 4.0,
+      "radius_m": 1.0,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "along_ue": [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      0.0,
+      -240.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 5,
+   "decals": 2,
+   "decal_items": [
+    "hazard_stripe",
+    "st_service"
+   ],
+   "service_labels": [
+    "st_service"
+   ],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 3016,
+    "secondary": 432,
+    "floor": 1848
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Wall_Narrow24W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Wall_Narrow24W_A_34.png"
+   }
+  },
+  "SM_Kit_Wall_Transition06W_A": {
+   "category": "Wall",
+   "family": "Wall_Transition",
+   "section": "W",
+   "length_m": 0.6,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Wall_Transition06W_A.fbx",
+   "dims_m": [
+    1.11,
+    2.541,
+    2.3
+   ],
+   "expected_size_cm": [
+    111.0,
+    254.1,
+    230.0
+   ],
+   "tris": 372,
+   "tris_decals": 0,
+   "tri_budget": 6600,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Signal",
+    "Kit_Seal",
+    "Kit_GlowWarm",
+    "Kit_GlowCool"
+   ],
+   "sockets": {
+    "SOCKET_Light_Cove_0": {
+     "location_ue_cm": [
+      56.87,
+      -63.13,
+      212.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 0.6,
+      "width_cm": 75.0,
+      "height_cm": 2.5,
+      "radius_m": 1.1,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      "along_ue": [
+       0.8194,
+       -0.5732,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Light_Cove_1": {
+     "location_ue_cm": [
+      56.87,
+      63.13,
+      212.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 0.6,
+      "width_cm": 75.0,
+      "height_cm": 2.5,
+      "radius_m": 1.1,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      "along_ue": [
+       0.8194,
+       0.5732,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 2,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 0,
+    "secondary": 16,
+    "floor": 156
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Wall_Transition06W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Wall_Transition06W_A_34.png"
+   }
+  },
+  "SM_Kit_Corner_Inner00W_A": {
+   "category": "Corner",
+   "family": "Corner_Inner",
+   "section": "W",
+   "length_m": 0.0,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Corner_Inner00W_A.fbx",
+   "dims_m": [
+    0.702,
+    0.702,
+    2.15
+   ],
+   "expected_size_cm": [
+    70.2,
+    70.2,
+    215.0
+   ],
+   "tris": 472,
+   "tris_decals": 0,
+   "tri_budget": 4000,
+   "materials": [
+    "Kit_Structure",
+    "Kit_Rubber"
+   ],
+   "sockets": {
+    "SOCKET_Snap_A": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_B": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 588,
+    "secondary": 0,
+    "floor": 360
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Corner_Inner00W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Corner_Inner00W_A_34.png"
+   }
+  },
+  "SM_Kit_Corner_Inner00W_B": {
+   "category": "Corner",
+   "family": "Corner_Inner",
+   "section": "W",
+   "length_m": 0.0,
+   "variant": "B",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Corner_Inner00W_B.fbx",
+   "dims_m": [
+    0.724,
+    0.724,
+    2.15
+   ],
+   "expected_size_cm": [
+    72.4,
+    72.4,
+    215.0
+   ],
+   "tris": 520,
+   "tris_decals": 0,
+   "tri_budget": 4000,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowCool"
+   ],
+   "sockets": {
+    "SOCKET_Snap_A": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_B": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 848,
+    "secondary": 216,
+    "floor": 168
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Corner_Inner00W_B_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Corner_Inner00W_B_34.png"
+   }
+  },
+  "SM_Kit_Corner_Outer00W_A": {
+   "category": "Corner",
+   "family": "Corner_Outer",
+   "section": "W",
+   "length_m": 0.0,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Corner_Outer00W_A.fbx",
+   "dims_m": [
+    0.687,
+    0.687,
+    2.3
+   ],
+   "expected_size_cm": [
+    68.7,
+    68.7,
+    230.0
+   ],
+   "tris": 720,
+   "tris_decals": 28,
+   "tri_budget": 4000,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Rubber",
+    "Kit_Seal",
+    "Kit_GlowWarm",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {
+    "SOCKET_Snap_A": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_B": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 2,
+   "decal_items": [
+    "hazard_stripe",
+    "hazard_stripe"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1080,
+    "secondary": 48,
+    "floor": 240
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Corner_Outer00W_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Corner_Outer00W_A_34.png"
+   }
+  },
+  "SM_Kit_Wall_End12N_A": {
+   "category": "Wall",
+   "family": "Wall_End",
+   "section": "N",
+   "length_m": 1.2,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Wall_End12N_A.fbx",
+   "dims_m": [
+    0.158,
+    1.2,
+    2.3
+   ],
+   "expected_size_cm": [
+    15.8,
+    120.0,
+    230.0
+   ],
+   "tris": 2764,
+   "tris_decals": 0,
+   "tri_budget": 6600,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowCool"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      0.0,
+      -120.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 4088,
+    "secondary": 648,
+    "floor": 2592
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Wall_End12N_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Wall_End12N_A_34.png"
+   }
+  },
+  "SM_Kit_Ceiling_Panel12N_A": {
+   "category": "Ceiling",
+   "family": "Ceiling_Panel",
+   "section": "N",
+   "length_m": 1.2,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Ceiling_Panel12N_A.fbx",
+   "dims_m": [
+    1.2,
+    0.89,
+    0.12
+   ],
+   "expected_size_cm": [
+    120.0,
+    89.0,
+    12.0
+   ],
+   "tris": 1212,
+   "tris_decals": 0,
+   "tri_budget": 4200,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Seal",
+    "Kit_GlowWarm"
+   ],
+   "sockets": {
+    "SOCKET_Light_Down_0": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      225.0
+     ],
+     "params": {
+      "type": "spot",
+      "role": "work",
+      "cd": 35.0,
+      "cone_deg": 100.0,
+      "radius_m": 3.6,
+      "source_radius_cm": 6.0,
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1920,
+    "secondary": 0,
+    "floor": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Ceiling_Panel12N_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Ceiling_Panel12N_A_34.png"
+   }
+  },
+  "SM_Kit_Wall_Plain12N_A": {
+   "category": "Wall",
+   "family": "Wall_Plain",
+   "section": "N",
+   "length_m": 1.2,
+   "variant": "A",
+   "batch": 1,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Wall_Plain12N_A.fbx",
+   "dims_m": [
+    0.422,
+    1.2,
+    2.3
+   ],
+   "expected_size_cm": [
+    42.2,
+    120.0,
+    230.0
+   ],
+   "tris": 2820,
+   "tris_decals": 78,
+   "tri_budget": 6600,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowWarm",
+    "Kit_GlowCool",
+    "Kit_Decal",
+    "Kit_DecalAO",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {
+    "SOCKET_Light_Cove_0": {
+     "location_ue_cm": [
+      23.25,
+      -60.0,
+      212.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 0.96,
+      "width_cm": 115.8,
+      "height_cm": 2.5,
+      "radius_m": 1.1,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Light_Wash_0": {
+     "location_ue_cm": [
+      28.7,
+      -60.0,
+      202.5
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 1.32,
+      "width_cm": 115.8,
+      "height_cm": 1.8,
+      "radius_m": 2.0,
+      "dir_ue": [
+       0.5,
+       -0.0,
+       -0.866
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      0.0,
+      -120.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 2,
+   "decals": 4,
+   "decal_items": [
+    "maker",
+    "rivet_row_8",
+    "rivet_row_8",
+    "rivet_row_8"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 3840,
+    "secondary": 240,
+    "floor": 942
+   },
+   "status": "built"
+  },
+  "SM_Kit_Wall_Plain12N_C": {
+   "category": "Wall",
+   "family": "Wall_Plain",
+   "section": "N",
+   "length_m": 1.2,
+   "variant": "C",
+   "batch": 1,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Wall_Plain12N_C.fbx",
+   "dims_m": [
+    0.422,
+    1.2,
+    2.3
+   ],
+   "expected_size_cm": [
+    42.2,
+    120.0,
+    230.0
+   ],
+   "tris": 2876,
+   "tris_decals": 72,
+   "tri_budget": 6600,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowWarm",
+    "Kit_GlowCool",
+    "Kit_Decal",
+    "Kit_DecalAO"
+   ],
+   "sockets": {
+    "SOCKET_Light_Cove_0": {
+     "location_ue_cm": [
+      23.25,
+      -60.0,
+      212.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 0.96,
+      "width_cm": 115.8,
+      "height_cm": 2.5,
+      "radius_m": 1.1,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Light_Wash_0": {
+     "location_ue_cm": [
+      28.7,
+      -60.0,
+      202.5
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 1.32,
+      "width_cm": 115.8,
+      "height_cm": 1.8,
+      "radius_m": 2.0,
+      "dir_ue": [
+       0.5,
+       -0.0,
+       -0.866
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      0.0,
+      -120.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 2,
+   "decals": 3,
+   "decal_items": [
+    "rivet_row_8",
+    "rivet_row_8",
+    "rivet_row_8"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 3696,
+    "secondary": 240,
+    "floor": 942
+   },
+   "status": "built"
+  },
+  "SM_Kit_Portal_Ring03N_A": {
+   "category": "Portal",
+   "family": "Portal_Ring",
+   "section": "N",
+   "length_m": 0.3,
+   "variant": "A",
+   "batch": 2,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Portal_Ring03N_A.fbx",
+   "dims_m": [
+    0.288,
+    1.6,
+    2.55
+   ],
+   "expected_size_cm": [
+    28.8,
+    160.0,
+    255.0
+   ],
+   "tris": 1624,
+   "tris_decals": 6,
+   "tri_budget": 8000,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Plastic",
+    "Kit_GlowWarm",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {
+    "SOCKET_Decal_Section": {
+     "location_ue_cm": [
+      15.0,
+      -51.1,
+      106.0
+     ],
+     "params": {
+      "tag": "section_number"
+     }
+    },
+    "SOCKET_Light_Ring_0": {
+     "location_ue_cm": [
+      15.0,
+      -0.0,
+      220.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 1.0,
+      "width_cm": 16.0,
+      "height_cm": 2.4,
+      "radius_m": 2.4,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 5,
+   "decals": 1,
+   "decal_items": [
+    "panel_C21"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1092,
+    "secondary": 0,
+    "floor": 744
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Portal_Ring03N_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Portal_Ring03N_A_34.png"
    }
   }
  }

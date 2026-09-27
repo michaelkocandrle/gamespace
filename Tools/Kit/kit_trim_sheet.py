@@ -102,10 +102,12 @@ def build():
     strips = []
     # rail: satin gunmetal bar, two grooves, bolts every 80 mm
     s = Strip("rail_bolted", 50)
-    s.fill(GUNMETAL, 0.34, 1.0)
+    # rougher, softer grooves, less metal: as bare metal at 0.34 (and still at 0.5) the rail carried noisy Lumen
+    # reflections that read as sparkle (critic, batch 2)
+    s.fill(GUNMETAL, 0.66, 0.6)
     s.edge_bevel(3)
     for vg in (0.18, 0.82):
-        s.h -= (np.abs(s.v - vg) < 0.02) * 0.0008
+        s.h -= np.clip(1.0 - np.abs(s.v - vg) / 0.045, 0.0, 1.0) * 0.0005
     s.bolts(80, 7, 0.5, col=GUNMETAL * 0.8)
     strips.append(s)
     # bolted flange, graphite paint

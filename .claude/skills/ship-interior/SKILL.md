@@ -588,6 +588,70 @@ python Tools/Kit/kit_catalog.py 1           # katalogový list Docs/Kit/catalog_
 - **Měření vzhledu** (`measure_look.py`, auto expozice): chodba průměr 0,21, p90 0,35, B/R 0,71, detail 0,025 = v rozsahu
   SC. Kolo 2 (lak metallic 0,45, body, úzké bodovky) mělo 0,14 / 0,27 / 0,58 / 0,024 a stěny 0,06–0,10.
 
+## Interiérový kit, dávka 2: portály, strop, koncové stěny, rohy, přechod (27. 9. 2026)
+
+`Tools/Kit/kit_batch2.py`, stavba `kit_build.py -- batch2` (výstup `ArtSource/Kit/Kit_Batch2.blend`, katalog
+`python Tools/Kit/kit_catalog.py 2` → `Docs/Kit/catalog_batch2.png`). `kit_build.jobs()` drží seznam úloh všech
+dávek (díl, rozpočet, pohledy renderů); `--only <jména>` postaví vybrané díly.
+
+- **Pivoty:** portál, strop a přechod na ose chodby na začátku modulu (+X podél chodby); koncová stěna a zúžení
+  jako stěna (líc +X, šířka podél +Y); roh v bodě, kde se potkají roviny líců.
+- **`Section`:** rozměry průřezu z `kit_rules`, `inner(d)` = vnitřní obrys odsazený o d (noha, sklon 3:4, strop;
+  vybrání leží uvnitř odsazené čáry sklonu). `ceil_half` = polovina stropu mezi čely vybrání + 2 cm.
+- **Portál (0,3 m):**
+  - tmavý límec 3,5 cm od stěn přes celou hloubku;
+  - rám vystupuje o `portal_protrusion`, zkosené hrany (nesou oděr), šrouby na obou lících, styčníky
+    v kolenech, patky se šrouby;
+  - každý rám nese jedno číslo na levé noze (tmavá destička 0,98–1,14 m, svislé čelo nohy končí u zlomu 1,27 m;
+    F02/G08/H19, v N C21) a socket `SOCKET_Decal_Section` pro číslování přes rozvržení (dávka 6);
+  - A: světelný prstenec jen přes zkosení a hlavu, difuzor v drážce mezi lemy s krytkami, lineární světlo pod hlavou;
+  - B: šrafovaný výstražný pás 0,3–0,9 m na obou nohách;
+  - C: těžší rám s vnitřním žebrem, hlavou prochází kanál a trubka stropního pole B (příruby se šrouby na obou lících).
+  Vnější obdélník (0,2 m do stěny, 0,25 m nad strop) je skrytý, na katalogu vypadá jako deska.
+- **Strop:**
+  - panely: tmavá výplň, tři lisované pásy, poloviční příčné nosníky na koncích (rytmus rámů přes strop).
+    A = zapuštěná čtvercová bodovka (lem, tmavá šachta, čočka, dvě lamely; spot 35 cd, 0,6 m 22 cd, 0,3 m je výplň),
+    B = vyústění vzduchu jako mřížka z lamel (perforovaná plocha zdálky četla jako černá díra), C = zapuštěné lineární
+    svítidlo s příčnými lamelami po 8 cm;
+  - otevřené pole: dno 20 cm nad stropem v tmavé primární barvě (ne černé), příčné nosníky, studený servisní pásek,
+    zavěšené lineární svítidlo s lemy a lamelami; A = žlab se svazky kabelů, B = kanál a potrubí s barevným kódem;
+  - teplé svítící plochy (`Kit_GlowWarm`) mají emisi 7: při 14 byly difuzory ořezaná bílá deska, čitelnost dělají
+    lamely, ne nižší emise;
+  - světla ve stropě nejvýš ~1,8 m od sebe, jinak vzniknou tmavá místa.
+- **Koncová stěna:** obrys průřezu včetně vybrání, tři pole mezi rámy až ke stropu, sokl, kopací panel a lišta
+  pokračují ze stěn, hlavový nosník. B má okno pod lištou: rám ve dvou stupních s těsněním, sklo, ostění 14 cm,
+  za ním zavřená roleta z tmavých lamel, v nadpraží tlumené neutrální světlo, stavová LED; tmavá zadní deska 20 cm
+  za lícem (v 7 cm zakryla ostění). Výhled ven v ukázce není (kritik ho chce, otevřené pro autora).
+  Zúžení W→S = koncová stěna s obrysem průlezu S, rámem, výstražným pásem, SERVICE ACCESS a 0,6 m průlezu.
+- **Přechod N→W (0,6 m):** obě stěny rozevřené pod 45° v půdorysu, profil lofovaný mezi průřezy (`Part.quads`),
+  lišta sleduje klesající zlom, lem a pás vybrání ve stálé výšce 2,1 m, šroubované žebro uprostřed každé šikmé stěny.
+  Kritik chce víc (těžký rám portálu N, funkční shluk, sloupek na zlomu) – otevřené.
+- **Rohy:**
+  - vnitřní roh nepotřebuje poloviny stěn: dva stěnové moduly začínající v rohu se svými sklony protnou do
+    úžlabí samy (viditelný je nižší sklon). Díl jen zakryje spoj: A sloupek se zkosenou hranou do místnosti, patkou
+    a gumovým chráničem 0,15–1,0 m + nosník v úžlabí + konzole vybrání, B zkosený panel 45° pod zlomem;
+  - vnější roh vyplní kvadrant nad zlomem: dvě trojúhelníkové plochy v rovinách sklonů (nároží), nárazník
+    přes svislou hranu, gumový nárazník 0,15–1,05 m s výstražným šrafováním na obou čelech, hřebenový nosník,
+    vybrání otočené kolem rohu.
+- **Decaly dílů:** `label(p, item, bod, normála, xdir, ydir)` – `xdir × ydir` musí být normála plochy, jinak
+  `KITBUILD` hlásí „mirrored frame“ (dřív decal tiše ležel rubem, WORKFLOW ct).
+- **Trim kitu** (`MI_Kit_*_Trim` na `M_Ship_PBR`): detailní normála a panelové spáry trupu vypnuté (WORKFLOW cu).
+- **Ukázka:** `import_kit.SHOWROOM`:
+  - `wall_runs` (start, konec, normála, moduly), `run_parts`, `placed`;
+  - `place_part` otáčí sockety světel s dílem;
+  - stěnový modul má yaw = atan2(normála) a běží podél (sin, −cos) svého yaw;
+  - import spadne, když délky modulů nesedí na běh.
+  Chodba W 0–9,6 m s portály A/B/C po 2,4 m, zatáčka do L (vnější roh 9,6/1,2, vnitřní 12/−1,2), rameno,
+  přechod, pahýl N a koncová stěna N. Provizorní je podlaha a strop nad křižovatkou a přechodem.
+  Preset `kit_showroom2.json`.
+- **Světla ukázky:** soklová lineární světla zrušená (41 modulů = ~1 ms, podlahu skoro nerozsvítí; s MegaLights se
+  mohou vrátit). Provizorní bodovky `prov_spots` = `((x, y), cd[, kužel])`, jen v otevřené části stropu (nad hranou
+  zkosení se stíní, WORKFLOW cv). 99 světel, chodba GPU 17,6 ms (52 FPS), křižovatka 16,7 ms (57 FPS).
+- **Ladění za běhu bez balení:** `space.Kit <Param> <hodnota> <část jména MI>` a `space.KitLight Showroom …` na
+  zabalené hře (presety `kit_rail_noise.json`, `kit_glow_strength.json`); teprve výsledek zapsat do `import_kit.py`.
+- **Kritik dávky 2:** 37 → 41 → 44, FAIL; otevřené: okno, kužely/stíny (MegaLights), přechod W→N, materiál kitu,
+  displeje a značení. Recenze `Docs/Reviews/2026-09-27_kit_batch2.md`.
+
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 
 Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.
