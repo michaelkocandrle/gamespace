@@ -5186,6 +5186,348 @@
       ]
      }
     ]
+   },
+   {
+    "name": "plate_reactor",
+    "type": "info",
+    "footprint": [
+     0.26,
+     0.09
+    ],
+    "purpose": "component bay plate: power plant",
+    "tags": [
+     "label",
+     "component"
+    ],
+    "append": "kit batch 4",
+    "parts": [
+     {
+      "kind": "box",
+      "at": [
+       0,
+       0
+      ],
+      "size": [
+       0.26,
+       0.09
+      ],
+      "h": 0.001,
+      "color": [
+       0.06,
+       0.062,
+       0.068
+      ]
+     },
+     {
+      "kind": "text",
+      "body": "REACTOR  S1",
+      "size": 0.036,
+      "at": [
+       0,
+       0.012
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [
+       0.82,
+       0.82,
+       0.8
+      ]
+     },
+     {
+      "kind": "text",
+      "body": "ISOLATE BEFORE SERVICE",
+      "size": 0.018,
+      "at": [
+       0,
+       -0.026
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [
+       0.78,
+       0.58,
+       0.06
+      ]
+     }
+    ]
+   },
+   {
+    "name": "plate_cooler",
+    "type": "info",
+    "footprint": [
+     0.26,
+     0.09
+    ],
+    "purpose": "component bay plate: cooler",
+    "tags": [
+     "label",
+     "component"
+    ],
+    "append": "kit batch 4",
+    "parts": [
+     {
+      "kind": "box",
+      "at": [
+       0,
+       0
+      ],
+      "size": [
+       0.26,
+       0.09
+      ],
+      "h": 0.001,
+      "color": [
+       0.06,
+       0.062,
+       0.068
+      ]
+     },
+     {
+      "kind": "text",
+      "body": "COOLER  S1",
+      "size": 0.036,
+      "at": [
+       0,
+       0.012
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [
+       0.82,
+       0.82,
+       0.8
+      ]
+     },
+     {
+      "kind": "text",
+      "body": "COOLANT LOOP A",
+      "size": 0.018,
+      "at": [
+       0,
+       -0.026
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [
+       0.78,
+       0.58,
+       0.06
+      ]
+     }
+    ]
+   },
+   {
+    "name": "plate_shield",
+    "type": "info",
+    "footprint": [
+     0.26,
+     0.09
+    ],
+    "purpose": "component bay plate: shield generator",
+    "tags": [
+     "label",
+     "component"
+    ],
+    "append": "kit batch 4",
+    "parts": [
+     {
+      "kind": "box",
+      "at": [
+       0,
+       0
+      ],
+      "size": [
+       0.26,
+       0.09
+      ],
+      "h": 0.001,
+      "color": [
+       0.06,
+       0.062,
+       0.068
+      ]
+     },
+     {
+      "kind": "text",
+      "body": "SHIELD GEN  S1",
+      "size": 0.036,
+      "at": [
+       0,
+       0.012
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [
+       0.82,
+       0.82,
+       0.8
+      ]
+     },
+     {
+      "kind": "text",
+      "body": "HOT SWAP  2 MIN",
+      "size": 0.018,
+      "at": [
+       0,
+       -0.026
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.001,
+      "color": [
+       0.78,
+       0.58,
+       0.06
+      ]
+     }
+    ]
+   },
+   {
+    "name": "warn_hv",
+    "type": "info",
+    "footprint": [
+     0.2,
+     0.045
+    ],
+    "purpose": "warning plate 'HIGH VOLTAGE 1.2 kV' (yellow, dark letters)",
+    "tags": [
+     "warning",
+     "component"
+    ],
+    "append": "kit batch 4",
+    "parts": [
+     {
+      "kind": "box",
+      "at": [
+       0,
+       0
+      ],
+      "size": [
+       0.2,
+       0.045
+      ],
+      "h": 0.001,
+      "color": [
+       0.78,
+       0.58,
+       0.06
+      ]
+     },
+     {
+      "kind": "box",
+      "at": [
+       0,
+       0
+      ],
+      "size": [
+       0.19,
+       0.035
+      ],
+      "h": 0.0004,
+      "z": 0.001,
+      "color": [
+       0.72,
+       0.53,
+       0.05
+      ]
+     },
+     {
+      "kind": "text",
+      "body": "HIGH VOLTAGE  1.2 kV",
+      "size": 0.019,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0014,
+      "color": [
+       0.04,
+       0.04,
+       0.045
+      ]
+     }
+    ]
+   },
+   {
+    "name": "maker_veyra",
+    "type": "info",
+    "footprint": [
+     0.16,
+     0.035
+    ],
+    "purpose": "component maker's mark 'VEYRA SYSTEMS' (dark, on a light casing)",
+    "tags": [
+     "stencil",
+     "component"
+    ],
+    "append": "kit batch 4",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "VEYRA SYSTEMS",
+      "size": 0.026,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "rot": 0,
+      "z": 0.0,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ]
+     }
+    ]
+   },
+   {
+    "name": "st_rails",
+    "type": "info",
+    "footprint": [
+     0.2,
+     0.03
+    ],
+    "purpose": "small service stencil 'PULL OUT ON RAILS' (2 cm letters)",
+    "tags": [
+     "small_stencil"
+    ],
+    "append": "kit batch 4",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "PULL OUT ON RAILS",
+      "size": 0.02,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.42,
+       0.42,
+       0.43
+      ],
+      "rot": 0
+     }
+    ]
    }
   ]
  },

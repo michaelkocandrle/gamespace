@@ -810,6 +810,28 @@ Recenze `Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md`.
   zapne stín stínovaným `Light_fix_*`; v letu je vypne (WORKFLOW dr, ds).
 - Nákladový prostor: `Tools/Kit/hold_fit.py` (kontejnery a ulička proti trupu s tenkým obložením).
 
+### Výklenky komponent (dávka 4, 28. 9. 2026)
+
+`Tools/Kit/kit_batch4.py`, stavba `kit_build.py -- batch4` (`ArtSource/Kit/Kit_Batch4.blend`), katalog
+`python Tools/Kit/kit_catalog.py 4`, detailní rendery z výšky očí `Tools/Kit/render_kit_closeup.py`, snímky
+`kit_bays.json` (přístavba ukázky) a `wayfarer_kit_corridor.json` (`tech_reactor`, `tech_shield`).
+Reference: `starcitizenreference/ComponentBays_VideoNotes.md` (SC ukazuje komponentu celou, výklenek s otevřenými
+dveřmi, kolébka se žlutými úchyty, pruh na parapetu).
+- Výklenek = stěnový modul (`Wall`) s otvorem přes sokl i hlavní panel (`_bay_shell`): těžký rám s těsněním,
+  obložená nika `BAY_DEPTH` (0,55 / 0,45 m) až za konstrukci stěny, žebra na zadní stěně, `backing_hole` v tmavém
+  podkladu pláště, parapet v kovu konstrukce, špína na hraně parapetu.
+- A reaktor: otevřené posuvné dveře (kolejnice pod hlavou, hrana křídla v kapse), kolébka s oranžovými úchyty nahoře
+  i dole, kolejnice na výstražném pruhu, krémový plášť s rádiusy 3 cm, stavová obrazovka `reactor`, nosná madla,
+  žebra nahoře, kabely a HV vedení do hlavy, chladivo do boku, svislé přípojky v levé mezeře.
+- B chladič: žebrovaný blok před čelem pláště (žebra 3 mm po 12 mm na tmavé desce), výdech z vrchu ohnutý do zadní
+  stěny (směr kořen křídla), úchyty, spojky chladiva, obrazovka `cooler`.
+- C generátor štítů: poklop bez zkosení kolem okénka + zkosený lem, 4 západky, panty, madlo, sání dole, okénko se
+  sklem a září emitoru (`Kit_GlowCool`) posunutou pod střed kvůli paralaxe (WORKFLOW dx), obrazovka `shield`.
+- Štítky `plate_reactor/cooler/shield`, `warn_hv`, `maker_veyra`, `st_rails` jsou v knihovně decalů s `append`
+  (WORKFLOW dt); obrazovky komponent v `kit_screens.py` (oblasti `reactor`, `cooler`, `shield`).
+- Světlo výklenku `SOCKET_Light_Bay_0` (rect, neutrální, bez stínu v lodi), socket `SOCKET_Component` (slot, velikost)
+  pro budoucí komponenty jako samostatné předměty. Rozpočet: stěna + `Fitting` (3 000).
+
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 
 Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.

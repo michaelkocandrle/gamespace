@@ -1,0 +1,161 @@
+{
+ "_comment": "The kit's component bays (batch 4, 28. 9. 2026) in the showroom annex: the power plant (A) and the cooler (B) on the north wall (y -3.6 from the showroom origin), the shield generator (C) on the south wall (y -6.0). Eye 1.65 m, interior lighting (MegaLights) as walked. Run: Tools/Shots.ps1 -Preset kit_bays -Editor -Width 1920 -Height 1080",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 6.0,
+   "console": [
+    "stat none",
+    "space.Showroom annex"
+   ]
+  },
+  {
+   "name": "a2_walked_out",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 1.0,
+   "console": [
+    "space.Showroom annex",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "name": "a_reactor_eye",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    4.2,
+    -504.95,
+    1.65
+   ],
+   "camera_look_at": [
+    4.2,
+    -503.6,
+    0.62
+   ],
+   "fov": 75
+  },
+  {
+   "name": "a_reactor_34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.0,
+    -505.2,
+    1.6
+   ],
+   "camera_look_at": [
+    4.3,
+    -503.6,
+    0.6
+   ],
+   "fov": 75
+  },
+  {
+   "name": "a_reactor_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    4.35,
+    -504.35,
+    1.25
+   ],
+   "camera_look_at": [
+    4.4,
+    -503.6,
+    0.62
+   ],
+   "fov": 60
+  },
+  {
+   "name": "b_cooler_eye",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    5.1,
+    -504.95,
+    1.65
+   ],
+   "camera_look_at": [
+    5.1,
+    -503.6,
+    0.6
+   ],
+   "fov": 75
+  },
+  {
+   "name": "b_cooler_34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    6.2,
+    -505.2,
+    1.6
+   ],
+   "camera_look_at": [
+    5.1,
+    -503.6,
+    0.6
+   ],
+   "fov": 75
+  },
+  {
+   "name": "c_shield_eye",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    3.0,
+    -504.65,
+    1.65
+   ],
+   "camera_look_at": [
+    3.0,
+    -506.0,
+    0.62
+   ],
+   "fov": 75
+  },
+  {
+   "name": "c_shield_34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    4.2,
+    -504.5,
+    1.6
+   ],
+   "camera_look_at": [
+    3.0,
+    -506.0,
+    0.6
+   ],
+   "fov": 75
+  },
+  {
+   "name": "d_annex_overview",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    6.9,
+    -505.3,
+    1.65
+   ],
+   "camera_look_at": [
+    3.0,
+    -504.6,
+    0.85
+   ],
+   "fov": 80
+  }
+ ]
+}

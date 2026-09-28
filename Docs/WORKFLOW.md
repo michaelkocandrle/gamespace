@@ -995,6 +995,27 @@ snímku.
   CastShadows False` (14,8 ms místo 18,5) a pak interiér bez vrhání stínu (16,7 ms, obraz stejný) to prokázaly.
   Oprava: v režimu osvětlení interiéru pawn lodi vypne `CastShadow` interiérových meshů (trup místnosti zastíní) a
   díly kitu jsou ve světelném kanálu 1 (slunce jen 0). Měření začínej `stat gpu` a sondami, ne úpravou světel.
+- dt) **Nová položka knihovny decalů posune UV všech starých.** `decal_library.py` balí položky do polic podle výšky;
+  jedna nová zařazená mezi staré posunula všechny za ní a hotové lodě a díly kitu (UV decalů zapečené v meshi) by
+  ukazovaly cizí nápisy. Nové položky mají v receptu `"append"` a balí se až za staré. Po přestavbě atlasu porovnej UV
+  starých položek v `decal_library_index.json` a pixely jejich obdélníků (dávka 4: 0 změn UV, 3 pixely zaokrouhlením).
+  Atlas do UE dostane `import_ship.py` (textury `/Game/Ships/Wayfarer/Textures/T_Decals_*`).
+- du) **První běh `Shots.ps1 -Editor` po reimportu velké textury ukázal rozmazané nápisy.** Atlas 4096 px se v nezabalené
+  hře teprve kompiloval do DDC a snímky dostaly nízké mipy; druhý běh byl ostrý. Po reimportu textur ber první běh
+  jako rozehřátí a rozmazaný detail ověř druhým během, než začneš hledat chybu v UV.
+- dv) **Detail uvnitř plného kvádru není vidět.** Žebra chladiče ležela uvnitř plného kvádru „dutiny“ a pak za čelem
+  plného pláště komponenty; na renderu byla černá nebo krémová plocha. Vybrání je jen zadní deska (a boky), ne kvádr,
+  a detail za čelem pláště potřebuje otvor v plášti nebo musí stát před ním (chladič: žebrovaný blok před čelem).
+- dw) **Paprsek štítku z 8 cm trefil mříž dveří před komponentou.** `Wall.label` střílí decal z 8 cm před plochou;
+  na čele komponenty za mříží dveří zasáhl tyč. Štítky na komponentách v nikách: `_casing_label` z 3 cm a `label=True`
+  (dosah 2 cm).
+- dx) **Věc za okénkem je z výšky očí vidět níž, než leží.** Emitor 13 cm za průhledem na jeho středu ukazoval jen
+  horní okraj prstence (oko 1,65 m, 1,3 m od stěny, okénko ve 0,75 m). Posun ≈ hloubka × (oko − okénko) / vzdálenost;
+  věc za okénkem posuň o tolik níž nebo blíž ke sklu.
+- dy) **Obnovený nápis v setupu byl zrcadlený.** Instance `MI_Ship_<Loď>_Decal_<jméno>` nese `DecalFlipU`, ale
+  `build_decal_instances` ho nastaví jen, když ho položka setupu má. Staré instance měly převrácení uložené z dřívějška;
+  po smazání a obnovení (nápisy technické chodby Wayfareru, `legacy_room`) vznikly s výchozí 0 a text byl zrcadlený.
+  Položka setupu musí mít `flip_u` / `flip_v` vždy výslovně. Test geometrie to nechytí (hlídá jen mesh decaly).
 - ds) **Stínovaná obdélníková světla bez MegaLights jsou drahá.** Dvě stínovaná světla kitu v chodbě bez MegaLights
   (osvětlení jako v letu): stínové mapy 7,3 ms a světla 5,5 ms (26 ms celkem). V lodi mají stín jen v režimu interiéru
   (MegaLights je trasuje), v letu ne; počet světel pod MegaLights cenu skoro nemění (8 i 12 světel: 3,5 ms).

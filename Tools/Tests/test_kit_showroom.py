@@ -88,6 +88,16 @@ for name, part in sorted(parts.items()):
         # dirt where it builds up, as grime cards (author 28. 9. 2026): the walls' plinth, the floors' seams and walls
         grime = [d for d in part.get("decal_items", []) if d.startswith("grime_")]
         check("%s: grime cards (%d)" % (name, len(grime)), len(grime) > 0)
+    if name.startswith("SM_Kit_Wall_ComponentBay"):
+        # batch 4: the component in its bay - its slot socket (for when components become items), the plate that
+        # names it above the opening, and the open bays' light (unshadowed: only the ships' main lights cast shadows)
+        # (StaticMesh.sockets is protected in Python: find_socket)
+        check("%s: component socket" % name, sm.find_socket("Component") is not None)
+        check("%s: the component's plate" % name, any(d.startswith("plate_") for d in part.get("decal_items", [])),
+              ", ".join(part.get("decal_items", [])))
+        if not name.endswith("_C"):
+            bay = [k for k in part.get("sockets", {}) if k.startswith("SOCKET_Light_Bay")]
+            check("%s: a bay light, not shadowed in ships" % name, len(bay) == 1 and not bay[0].startswith(("SOCKET_Light_Linear",)))
 
 # ---------------------------------------------------------------- materials: the layered master's surface detail
 MEL = unreal.MaterialEditingLibrary

@@ -466,6 +466,10 @@ def _end_base(p, sec, spans, back_x=-0.07, hole=None, backing=True):
             p.poly_prism("Kit_Seal", poly, back, 0.01, panel=False)
     else:
         p.poly_prism("Kit_Seal", _outline(sec), back, 0.01, panel=False)
+    # the floor under the plinth's undercut (0.1 m behind the face): a side wall stands on the floor plate's 0.1 m
+    # overhang, an end wall stands where a floor run starts - from a standing eye the undercut showed the sky through
+    # (critic, batch 4 round 1, 28. 9. 2026)
+    p.box("Kit_Structure", (-0.11, 0.0, -0.04), (0.0, W, 0.0), panel=False)
     for k, (a, b) in enumerate(spans):
         p.slab("Kit_Seal", PLINTH, a, b, 0, 0.1414, 0.012, panel=False)
         f0, f1 = a + G + 0.004, b - G - 0.004

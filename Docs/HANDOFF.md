@@ -1715,6 +1715,21 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
           - C++: v režimu osvětlení interiéru pawn lodi vyřadí interiérové meshe ze stínů slunce a stínovaná světla
             kitu vrhají stín jen tehdy. Chodba z kitu 18,98 → 16,51 ms GPU, současná chodba 17,49 → 15,12 ms.
           - špína uzavřená s variantou ×7, vyšlapaná linie a ohmatání madel v backlogu za dávkou 4.
+        - Dávka 4, první část (28. 9. 2026 večer): výklenky komponent `Wall_ComponentBay12W_A` (reaktor),
+          `06W_B` (chladič), `12W_C` (generátor štítů), `Tools/Kit/kit_batch4.py`, recenze
+          `Docs/Reviews/2026-09-28_kit_bays.md`, reference `starcitizenreference/ComponentBays_VideoNotes.md`:
+          - reaktor a chladič ukázané celé za otevřenými dveřmi v kapse, kolébka s oranžovými úchyty, kolejnice,
+            průzor jádra, obrazovky komponent; generátor za poklopem s okénkem na zářící emitor;
+          - štítky REACTOR / COOLER / SHIELD GEN S1, HIGH VOLTAGE, VEYRA SYSTEMS, PULL OUT ON RAILS v knihovně decalů
+            (položky s `append`, UV starých položek beze změny); obrazovky komponent v `kit_screens.py`;
+          - v přístavbě ukázky (U, U) a v receptu Wayfareru na místech komponent z layoutu; přepínač chodby z kitu
+            dál vypnutý (autor: do konce dávky 4);
+          - oprava díry: koncové stěny ukázky mají pás podlahy pod soklem (skrz podřezání byla vidět obloha);
+          - kritik 3 kola + ověřovací: FAIL, poslední tvar 6, detail 4, materiály 5, decaly 7, světlo 4, čitelnost 7,
+            geometrie 6, soulad 6; detail a světlo drží stěny, strop a světla chodby (vrstvení stěn, svítidla);
+          - výkon chodby z kitu s výklenky (zabalená hra): 17,48 ms GPU v režimu interiéru (před 16,51).
+          - oprava: tři obnovené nápisy staré technické chodby (REACTOR, CAUTION, COOLER) byly od minulého commitu
+            zrcadlené – v setupu chybělo `flip_u` (WORKFLOW dy).
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

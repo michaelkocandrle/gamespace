@@ -454,8 +454,12 @@ def has_color(item):
 
 def pack(items, sheet_m, pad):
     """Shelf packing of the items' footprints onto a square sheet (metres, y up). Returns the centre of each
-    item; fails loudly if the sheet is too small (then raise px_per_m's sheet or split the library)."""
-    order = sorted(items, key=lambda it: -it["footprint"][1])
+    item; fails loudly if the sheet is too small (then raise px_per_m's sheet or split the library).
+    Items with "append" are packed after all the others, in the shelves under them: every built mesh carries the
+    atlas UVs of its decals, and one new item sorted in among the old ones moved every item after it (the kit's
+    component labels, batch 4, 28. 9. 2026)."""
+    order = sorted([it for it in items if not it.get("append")], key=lambda it: -it["footprint"][1])
+    order += sorted([it for it in items if it.get("append")], key=lambda it: -it["footprint"][1])
     x, y_top, row_h, centres = pad, sheet_m - pad, 0.0, {}
     for it in order:
         w, h = it["footprint"]

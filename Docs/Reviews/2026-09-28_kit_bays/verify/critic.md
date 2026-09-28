@@ -1,0 +1,19 @@
+# Ověřovací kolo
+
+| Bod | Verdikt (opraveno / částečně / neopraveno) | Kde a proč (list, oblast, jedna až dvě věty) |
+|---|---|---|
+| 1 vnitřek nik | částečně | List 02 a 04: boční ostění nik je vidět (šedé panely, světelné pásy), u chladiče je vidět stub výdechu s oranžovým límcem nad žebrovaným jádrem. Strop niky nad komponentou (list 02, obě niky nad horní hranou komponenty; list 04 pás nad reaktorem i chladičem) je ale pořád černá plocha bez struktury a výdech chladiče v ní mizí, místo aby byl vidět, kam vede. |
+| 2 členění čela reaktoru | opraveno | List 01: čelo má vodorovnou spáru s řadou šroubů, stavovou obrazovku PP-S1, štítek VEYRA SYSTEMS, dvě madla, rohové svorky a zapuštěný blok vlevo nahoře; vpravo na boku tmavý kruhový prvek čte jako přípojku. Není to hladká krabice. |
+| 6 čitelnost výměny | částečně | List 01: madla a štítek jsou jednoznačné, oranžové rohové svorky u soklu a nahoře čtou jako aretace. Kolejnice s dorazy ale vidět nejsou – komponenta sedí na prahu s výstražným pruhem, žádná vodicí lišta nevybíhá k otvoru, takže směr a mechanika vytažení se z obrazu nedá odečíst; svorky u soklu se dají číst i jako pouhé úvazy. |
+| 7 průzor jádra | částečně | List 01, vlevo nahoře na reaktoru: prvek má tmavý vystouplý rámeček a za ním oranžový svit, ale výplň tvoří šedá vodorovná žebra / cívka v předním plánu, bez skla (žádný odlesk) a bez rozpoznatelného tvaru jádra. Čte se jako žaluziový výdech nebo topná spirála, ne jako okno na jádro. |
+| 8 servisní štítek na poklopu | částečně | List 03: pod průzorem je drobný text „INSPECT 500 H“ tmavou barvou na béžovém plechu, bez štítkové destičky. Zblízka jde přečíst, ale kontrast je nízký a z běžné vzdálenosti (list 02/04 měřítko) by zmizel; vedlejší „TORQUE 42 Nm“ na stěně je na tom stejně. |
+| 10 vrstvy poklopu | částečně | List 03: lem s šrouby, zapuštěné čelo (stínová linka nahoře a vlevo uvnitř rámu), vystouplý rámeček průzoru, spodní mřížka a obrazovka SG-S1 – vrstvení je. Čtyři rohové „západky“ jsou ale velikosti šroubu s pouhým zářezem; nečtou se jako čtvrtotáčkové západky se značkou, ale jako další šrouby. |
+| 12 světelné pásy v ostění | částečně | List 04: pásy po obou stranách reaktorové niky s náznakem tmavého lemu čtou jako svítidla. List 02: pravý pás v obou nikách je přepálený na čistě bílou s tvrdými hranami a bez viditelného pouzdra nebo difuzoru, takže z 3/4 pohledu pořád může působit jako emisivní plocha přilepená na ostění. |
+
+## Co zbývá u neopravených / částečných bodů
+- **1 vnitřek nik (list 02, 04):** strop niky nad komponentou dát viditelný (panel, žebro nebo průchodka) a potrubí výdechu chladiče protáhnout do stropu tak, aby bylo vidět, že vede k trupu; dnes končí ve tmě.
+- **6 čitelnost výměny (list 01):** doplnit dvojici vodicích lišt na podlaze niky, které vybíhají až k prahu a mají na konci dorazy; svorky u soklu odlišit od lišt (jiný tvar/materiál), aby bylo jasné, co je aretace a po čem se komponenta vytahuje.
+- **7 průzor jádra (list 01):** dát rámečku skleněnou výplň s odleskem a za ní tvar jádra (válec/koule) se svitem; žebra buď úplně vynechat, nebo je posunout za sklo jako součást jádra – teď jsou v předním plánu a čtou se jako mřížka.
+- **8 servisní štítek (list 03):** udělat z textu skutečný štítek: tmavá destička se světlým textem (jako „SHIELD GEN S1“ nad otvorem) nebo světlý štítek s tmavým textem, výrazně větší, aby byl čitelný i z listu 02/04.
+- **10 vrstvy poklopu (list 03):** rohové západky zvětšit na velikost skutečných čtvrtotáčkových západek s výřezem a ryskou/šipkou polohy (otevřeno/zavřeno), případně je barevně odlišit od šroubů lemu.
+- **12 světelné pásy (list 02):** pás zapustit do kanálu s viditelným lemem a difuzním krytem a snížit intenzitu, aby nebyl přepálený na bílo; potom bude čitelný jako svítidlo v pouzdru i z 3/4 pohledu.

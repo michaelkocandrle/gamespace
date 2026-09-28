@@ -29,7 +29,8 @@ def main():
     grid_rows = (n + cols - 1) // cols
     img = Image.new("RGB", (cols * cell_w + 20, grid_rows * cell_h + 90), (26, 27, 30))
     d = ImageDraw.Draw(img)
-    titles = {1: "stěnové moduly (průřez W)", 2: "portály, strop, koncové stěny, rohy, přechod", 3: "podlahy, poklop, schodiště, rampa"}
+    titles = {1: "stěnové moduly (průřez W)", 2: "portály, strop, koncové stěny, rohy, přechod", 3: "podlahy, poklop, schodiště, rampa",
+              4: "výklenky komponent (reaktor, chladič, generátor štítů)"}
     d.text((20, 18), "Interiérový kit – dávka %d: %s, %d dílů, stejné neutrální světlo, dva pohledy" % (batch, titles.get(batch, ""), n),
            font=FT, fill=(235, 235, 235))
     for i, (name, p) in enumerate(rows):

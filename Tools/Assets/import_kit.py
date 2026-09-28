@@ -84,12 +84,14 @@ SHOWROOM = {
         ((11.4, 5.7), (11.4, 8.1), (-1, 0), ["Wall_Plain12N_C", "Wall_Plain12N_A"]),
         # the annex (author 27. 9.: the catalogue-only parts in the game): a closed L south of the corridor - End24W_A,
         # 2.4 m of W, a turn with the chamfered inner corner B, 2.4 m of leg and the narrowing into a crawlway.
-        # Its own start (U from the showroom); not visible from the showroom's measured views
-        ((2.4, -3.6), (7.2, -3.6), (0, -1), ["Wall_Plain12W_A", "Wall_Grille06W_A", "Wall_Plain06W_A", "Wall_Locker12W_C",
-                                             "Wall_Plain12W_B"]),
+        # Its own start (U from the showroom); not visible from the showroom's measured views.
+        # The component bays (batch 4, 28. 9. 2026): the power plant and the cooler on its north wall, the shield
+        # generator on the south wall (their niches go 0.55 m behind the walls, clear of the corridor)
+        ((2.4, -3.6), (7.2, -3.6), (0, -1), ["Wall_Plain12W_A", "Wall_ComponentBay12W_A", "Wall_ComponentBay06W_B",
+                                             "Wall_Locker12W_C", "Wall_Plain06W_A"]),
         ((7.2, -3.6), (7.2, -8.4), (-1, 0), ["Wall_Plain12W_C", "Wall_Pipes12W_A", "Wall_Plain12W_A", "Wall_Hatch06W_B",
                                              "Wall_Plain06W_A"]),
-        ((2.4, -6.0), (4.8, -6.0), (0, 1), ["Wall_Hatch12W_C", "Wall_Plain12W_B"]),
+        ((2.4, -6.0), (4.8, -6.0), (0, 1), ["Wall_ComponentBay12W_C", "Wall_Plain12W_B"]),
         ((4.8, -6.0), (4.8, -8.4), (1, 0), ["Wall_Display06W_B", "Wall_Plain06W_A", "Wall_Plain12W_C"]),
     ],
     "run_parts": [

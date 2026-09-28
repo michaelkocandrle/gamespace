@@ -1,0 +1,60 @@
+{
+ "date": "2026-09-28",
+ "goal": "Výklenky komponent v modulárním interiérovém kitu lodi (stěnový modul s nikou skrz konstrukci stěny k trupu a komponentou v ní): A výklenek reaktoru (otevřené posuvné dveře zasunuté ve stěně, komponenta na kolejnicích v kolébce s úchyty, stavová obrazovka, kabely a chladivo), B výklenek chladiče (žebrované jádro, výdechové potrubí k trupu), C výklenek generátoru štítů (zavřený poklop se čtvrtotáčkovými západkami a průhledem na zářící emitor). Každý má štítek komponenty nad otvorem. Hodnotí se čitelnost a identita komponent (co to je a jak se vyměňuje), hloubka, detail, materiály a světlo. Pohled z první osoby (oko 1,65 m). Na snímcích je jednak ukázka kitu, jednak technická chodba malé lodi, kam výklenky patří.",
+ "style": "STYLOVÝ ZÁMĚR (autor): „udržovaná pracovní loď“ – panely téměř čisté, špína jen ve spárách, u soklu, kolem poklopů a mřížek. NEPOŽADUJ víc špíny, než je tento záměr. Styl Star Citizen: tmavý teplý grafit, světlejší konstrukce, oranžová signální barva výrobce, svítidla v pouzdrech, teplé světlo architektury, studené UI. Komponenty jsou světlé (krémový lak) proti tmavé nice jako bílé komponenty v SC.",
+ "checklist": "interior",
+ "notes": [
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt.",
+  "Dveře ostatních místností a přepážky kitu přijdou v další části dávky; v chodbě lodi jsou zatím dřívější přepážky.",
+  "Text vpravo nahoře (FPS), pokud je vidět, je měřicí overlay."
+ ],
+ "topic": "kit_bays",
+ "out": "Docs/Reviews/2026-09-28_kit_bays/round1",
+ "pairs": [
+  {
+   "title": "Výklenek reaktoru zblízka (ukázka kitu)",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021456.png",
+   "ref_label": "SC komponenty ve stěně (MISC)",
+   "ours": "Saved/Shots/20260928_211305_kit_bays/04_a_reactor_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Reaktor a chladič vedle sebe (ukázka kitu, 3/4)",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021456.png",
+   "ref_label": "SC komponenty ve stěně (MISC)",
+   "ours": "Saved/Shots/20260928_211305_kit_bays/06_b_cooler_34.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Výklenek generátoru štítů s poklopem (ukázka kitu)",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
+   "ref_label": "SC úzká místnost s poklopem",
+   "ours": "Saved/Shots/20260928_211305_kit_bays/07_c_shield_eye.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Technická chodba lodi: levá stěna, reaktor a chladič",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC infrastruktura",
+   "ours": "Saved/Shots/20260928_211406_wayfarer_kit_corridor/04_tech_reactor.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Technická chodba lodi: pravá stěna, chladič a generátor štítů",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
+   "ref_label": "SC chodba (Drake)",
+   "ours": "Saved/Shots/20260928_211406_wayfarer_kit_corridor/05_tech_shield.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

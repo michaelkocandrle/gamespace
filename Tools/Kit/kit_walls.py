@@ -54,10 +54,17 @@ class Wall:
     # (the dark backing's face is RECESS_BACK behind the panel face; the recess behind an opening - a grille, a
     # hatch - is a dark block from its face back to it, not a 1 cm plate: the plate hung in the wall touching nothing,
     # with a slit round it into the wall - the ship's geometry check, Wayfarer pilot corridor, 28. 9. 2026)
-    def shell(self, skip_main=False, skip_kick=False, skip_slope=False, main_split=None, slope_cut=None):
+    def shell(self, skip_main=False, skip_kick=False, skip_slope=False, main_split=None, slope_cut=None, backing_hole=None):
         p, L = self.p, self.L
-        # structure: dark backing behind everything, seen through the gaps
-        p.slab("Kit_Seal", self.VERT, 0, L, 0.1, self.vt, 0.01, proud=-RECESS_BACK, panel=False)
+        # structure: dark backing behind everything, seen through the gaps; a component bay's niche goes through it
+        # (backing_hole = (u0, u1, v0, v1), batch 4)
+        if backing_hole:
+            hu0, hu1, hv0, hv1 = backing_hole
+            for (a0, a1, b0, b1) in ((0, hu0, 0.1, self.vt), (hu1, L, 0.1, self.vt), (hu0, hu1, 0.1, hv0), (hu0, hu1, hv1, self.vt)):
+                if a1 - a0 > 0.001 and b1 - b0 > 0.001:
+                    p.slab("Kit_Seal", self.VERT, a0, a1, b0, b1, 0.01, proud=-RECESS_BACK, panel=False)
+        else:
+            p.slab("Kit_Seal", self.VERT, 0, L, 0.1, self.vt, 0.01, proud=-RECESS_BACK, panel=False)
         p.slab("Kit_Seal", self.SLOPE, 0, L, 0, self.slope_len, 0.01, proud=-RECESS_BACK, panel=False)
         # recessed plinth: a dark chamfer with the cool floor strip, a rubber kick edge at the floor
         p.slab("Kit_Seal", self.PLINTH, 0, L, 0, 0.1414, 0.012, panel=False)

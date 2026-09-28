@@ -1,5 +1,5 @@
 {
- "_comment": "Wayfarer pilot corridor from the interior kit (kit brief step 7.1, 28. 9. 2026): the technical corridor (layout x 8.2-10.34) from the same positions before (the procedural / Quaternius interior) and after (kit modules as BP components, kit_rooms.py). Interior lighting as walked (space.InteriorLighting 1); perf_tech measures stat unit / stat gpu. Positions in layout metres converted to camera_local (x - 10.25, -y, z - 1.2). Run -Width 1920 -Height 1080. perf_tech_classic: the same view without the walked-interior lighting (no MegaLights, as flown). hold_to_door: from the hold's aisle to the door into the corridor (where it opens, the author 28. 9.).",
+ "_comment": "Wayfarer pilot corridor from the interior kit (kit brief step 7.1, 28. 9. 2026): the technical corridor (layout x 8.2-10.34) from the same positions before (the procedural / Quaternius interior) and after (kit modules as BP components, kit_rooms.py). Interior lighting as walked (space.InteriorLighting 1); perf_tech measures stat unit / stat gpu. Positions in layout metres converted to camera_local (x - 10.25, -y, z - 1.2). Run -Width 1920 -Height 1080. perf_tech_classic: the same view without the walked-interior lighting (no MegaLights, as flown). hold_to_door: from the hold's aisle to the door into the corridor (where it opens, the author 28. 9.). tech_shield (batch 4): the starboard wall, the shield generator's bay and the right cooler.",
  "shots": [
   {
    "name": "warmup",
@@ -88,6 +88,25 @@
    "look_local": [
     -1.05,
     -1.2,
+    -0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "tech_shield",
+   "camera_local": [
+    -0.85,
+    -0.6,
+    0.45
+   ],
+   "look_local": [
+    -1.05,
+    1.2,
     -0.2
    ]
   },

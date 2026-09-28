@@ -2055,6 +2055,119 @@
     "cockpit",
     "switch_label"
    ]
+  },
+  "plate_reactor": {
+   "uv": [
+    0.29450000000000004,
+    0.17299999999999988,
+    0.42450000000000004,
+    0.21799999999999986
+   ],
+   "size_m": [
+    0.26,
+    0.09
+   ],
+   "purpose": "component bay plate: power plant",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "label",
+    "component"
+   ]
+  },
+  "plate_cooler": {
+   "uv": [
+    0.43450000000000005,
+    0.17299999999999988,
+    0.5645,
+    0.21799999999999986
+   ],
+   "size_m": [
+    0.26,
+    0.09
+   ],
+   "purpose": "component bay plate: cooler",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "label",
+    "component"
+   ]
+  },
+  "plate_shield": {
+   "uv": [
+    0.5745,
+    0.17299999999999988,
+    0.7044999999999999,
+    0.21799999999999986
+   ],
+   "size_m": [
+    0.26,
+    0.09
+   ],
+   "purpose": "component bay plate: shield generator",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "label",
+    "component"
+   ]
+  },
+  "warn_hv": {
+   "uv": [
+    0.7145,
+    0.19549999999999984,
+    0.8145000000000001,
+    0.21799999999999986
+   ],
+   "size_m": [
+    0.2,
+    0.045
+   ],
+   "purpose": "warning plate 'HIGH VOLTAGE 1.2 kV' (yellow, dark letters)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "warning",
+    "component"
+   ]
+  },
+  "maker_veyra": {
+   "uv": [
+    0.8245,
+    0.20049999999999985,
+    0.9045000000000001,
+    0.21799999999999986
+   ],
+   "size_m": [
+    0.16,
+    0.035
+   ],
+   "purpose": "component maker's mark 'VEYRA SYSTEMS' (dark, on a light casing)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "stencil",
+    "component"
+   ]
+  },
+  "st_rails": {
+   "uv": [
+    0.010000000000000002,
+    0.14799999999999985,
+    0.11000000000000001,
+    0.16299999999999987
+   ],
+   "size_m": [
+    0.2,
+    0.03
+   ],
+   "purpose": "small service stencil 'PULL OUT ON RAILS' (2 cm letters)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "small_stencil"
+   ]
   }
  },
  "trim": {

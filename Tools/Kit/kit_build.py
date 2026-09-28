@@ -264,6 +264,14 @@ def jobs(batch, sections, budget):
                        part=(lambda c=cat, pa=part, sz=size, s=sec, v=var, sd=seed: kit_batch3.build_part(c, pa, sz, s, v, sd)),
                        category=cat, family="%s_%s" % (cat, part), kind=part, length=size, section=sec, variant=var, batch=3,
                        budget=kit_batch3.budget(cat, part, size), render=True, views=kit_batch3.VIEWS[(cat, part)])
+    elif batch == "batch4":
+        import kit_batch4
+        for cat, part, size, sec, var in kit_batch4.BATCH4:
+            seed += 7
+            yield dict(name=kit_batch4.part_name(cat, part, size, sec, var),
+                       part=(lambda c=cat, pa=part, sz=size, s=sec, v=var, sd=seed: kit_batch4.build_part(c, pa, sz, s, v, sd)),
+                       category=cat, family="%s_%s" % (cat, part), kind=part, length=size, section=sec, variant=var, batch=4,
+                       budget=kit_batch4.budget(cat, part, size), render=True, views=kit_batch4.VIEWS[(cat, part)])
     else:
         raise SystemExit("unknown batch %s" % batch)
 
