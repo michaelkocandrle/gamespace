@@ -801,6 +801,14 @@ Recenze `Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md`.
 - Snímky ze stejných pozic před a po: preset `wayfarer_kit_corridor` (pozice v metrech layoutu převedené na
   `camera_local`).
 - Chybějící díly zapisuj do `ArtSource/Kit/kit_parts.json` jako `pilot_needs` u rodiny, nové rodiny do dávky.
+- **Přepínač** `interior.kit_modules.enabled` (Wayfarer: vypnuto do dávky 4): vypnuté místnosti staví `hs_interior`
+  po staru, nápisy ze setupu s `legacy_room` platí jen pro ně (`kit_layout.active_rooms`, `decal_active`). Po změně
+  přestavět loď a importovat.
+- **Světla v lodi (autor 28. 9.):** stín jen hlavní světla (`SHADOWED_SOCKETS`, lineární ve žlabech), ostatní
+  kontaktní stíny 0,05, prosvětlení stěn ×0,5 (`SOCKET_SCALE`). Díly kitu ve světelném kanálu 1, světla v 0 a 1.
+  Pawn lodi v režimu osvětlení interiéru vyřadí `Interior`/`InteriorKit`/`InteriorDecals` ze stínů slunce a
+  zapne stín stínovaným `Light_fix_*`; v letu je vypne (WORKFLOW dr, ds).
+- Nákladový prostor: `Tools/Kit/hold_fit.py` (kontejnery a ulička proti trupu s tenkým obložením).
 
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 

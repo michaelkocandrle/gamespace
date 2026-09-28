@@ -46,6 +46,9 @@ bez okna editoru a bez PIE. Nastavení čte z `Saved\Config\WindowsEditor\GameUs
 - Proti zabalené hře: střední rozdíl 0,004–0,006, pixely nad 10/255 do 0,15 %.
 - Hra se balí jednou na konci kroku (`-Package` nebo `Package.ps1`) pro finální snímky a měření výkonu:
   čísla GPU z `-Editor` jsou editorová.
+- Výkon interiéru: nejdřív `stat gpu` a sondy přes konzoli ve scénáři (`space.Sun CastShadows False`,
+  `r.MegaLights.NumSamplesPerPixel 2`, …) v kopii presetu (`-List <json>`), teprve pak úpravy. Stínové mapy slunce
+  v interiéru lodi byly 3,2–3,8 ms (WORKFLOW dr).
 - A/B materiálu bez reimportu: `space.Kit <Param> <hodnota> <část jména MI>` a `space.KitColor`
   i na herce ukázky kitu (tag `KitShowroom`), např. `space.Kit DecalOpacity 0 DecalGrime` (preset `kit_grime_ab`).
 

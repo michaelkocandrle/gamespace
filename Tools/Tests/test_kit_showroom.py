@@ -183,8 +183,6 @@ for ship in sorted(os.listdir(SHIPS)):
     if not mods:
         continue
     want = sum(len(r[3]) for r in mods.get("wall_runs", [])) + sum(len(r[2]) for r in mods.get("run_parts", []))
-    old_kit = set(((recipe["interior"].get("kit") or {}).get("rooms", [])))
-    check("%s: kit rooms are not also built from the old kit" % ship, not (old_kit & set(mods["rooms"])), str(old_kit & set(mods["rooms"])))
     bp = unreal.EditorAssetLibrary.load_asset("/Game/Ships/%s/Blueprints/BP_Ship_%s" % (ship, ship))
     sub = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
     lib = unreal.SubobjectDataBlueprintFunctionLibrary
@@ -192,6 +190,11 @@ for ship in sorted(os.listdir(SHIPS)):
     named = [(o.get_name().replace("_GEN_VARIABLE", ""), o) for o in objs if o is not None]
     kit_meshes = [o for n, o in named if n.startswith("InteriorMod_")]
     kit_lights = [o for n, o in named if n.startswith("Light_fix_kit_")]
+    if not mods.get("enabled", True):
+        # the author's switch (28. 9. 2026): off, the rooms keep the ship's own interior and no kit part is in the ship
+        check("%s: kit rooms switched off - no kit parts or lights in the Blueprint" % ship,
+              not kit_meshes and not kit_lights, "%d parts, %d lights" % (len(kit_meshes), len(kit_lights)))
+        continue
     check("%s: %d kit parts in the Blueprint (recipe %d)" % (ship, len(kit_meshes), want), len(kit_meshes) == want)
     check("%s: every kit part is a kit mesh without collision" % ship, kit_meshes and all(
         o.get_editor_property("static_mesh") is not None
@@ -199,9 +202,16 @@ for ship in sorted(os.listdir(SHIPS)):
         and str(o.get_collision_profile_name()) == "NoCollision" for o in kit_meshes))
     check("%s: the kit parts' light sockets are Light_fix_kit_* lights (%d)" % (ship, len(kit_lights)),
           len(kit_lights) >= len(kit_meshes) // 2 and all(isinstance(o, unreal.LocalLightComponent) for o in kit_lights))
-    # without shadows, as the ship's fixture lights: shadowed they cost ~10-24 ms in the ship's views (no MegaLights)
-    check("%s: the kit rooms' lights cast no shadows" % ship,
-          kit_lights and not any(o.get_editor_property("cast_shadows") for o in kit_lights))
+    # shadows only on the main lights (the trays' linear lights): all of them shadowed cost ~10-24 ms in the ship's
+    # views (no MegaLights); parts on lighting channel 1 only (not the sun's)
+    names = [(o.get_name().replace("_GEN_VARIABLE", ""), o) for o in kit_lights]
+    shadowed = sorted(n for n, o in names if o.get_editor_property("cast_shadows"))
+    check("%s: only the main (Linear) kit lights cast shadows" % ship,
+          shadowed and all(n.endswith("_Linear") for n in shadowed)
+          and all(o.get_editor_property("cast_shadows") for n, o in names if n.endswith("_Linear")), ", ".join(shadowed))
+    check("%s: kit parts off the sun's lighting channel 0" % ship, all(
+        not o.get_editor_property("lighting_channels").get_editor_property("channel0")
+        and o.get_editor_property("lighting_channels").get_editor_property("channel1") for o in kit_meshes))
     layout = json.load(open(os.path.join(SHIPS, ship, "Design", "%s_layout.json" % ship), encoding="utf-8"))
     rooms = {r["id"]: r["rect"] for r in layout["rooms"]}
     off = recipe["assemble"]["offset"]

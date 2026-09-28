@@ -1,6 +1,6 @@
 {
  "_comment": "Input for Tools/Design/build_ship_matrix.py: status line, card image, concept captions, the concepts used as front/side/top check views (measured on every build) and the author's decisions.",
- "status": "Létá ve hře – exteriér v2 podle výkresu; interiér: technická chodba z interiérového kitu (pilot, 28. 9. 2026), další dávky kitu podle pilotu",
+ "status": "Létá ve hře – exteriér v2 podle výkresu; interiér: technická chodba z kitu postavená a ověřená (pilot 28. 9.), zatím vypnutá do dávky 4 kitu (výklenky komponent)",
  "concepts": [
   {
    "file": "side_a.png",
@@ -67,6 +67,14 @@
   [
    "Před 3D opravit:",
    "rozpětí v konceptu shora je o 8 % větší než ve výkresu – ve 3D platí výkres; gondoly bez lopatek ventilátoru."
+  ],
+  [
+   "Pilotní chodba z kitu (28. 9.):",
+   "dveře z nákladového prostoru na y 0,5 a přepážka ke kajutě o 6 cm dozadu – schváleno. Chodba z kitu zatím za přepínačem (vypnutá) do dávky 4 s výklenky komponent."
+  ],
+  [
+   "Nákladový prostor z kitu (28. 9.):",
+   "tenké obložení podél trupu; ve výšce kontejnerů 4,10 m, tedy 8 SCU a ulička 1,55 m."
   ]
  ],
  "model": {
@@ -119,7 +127,6 @@
   ]
  },
  "questions": [
-  "Pilotní chodba z kitu (28. 9.): dveře z nákladového prostoru do technické chodby posunuty z y 1,2 na y 0,5 – ve schváleném plánu ústily přímo na bok reaktoru. A přepážka ke kajutě o 6 cm dozadu (mřížka kitu). Schvaluješ?",
-  "Nákladový prostor z kitu: 8 SCU (2,5 m) + ulička 1,25 m potřebují 3,75 m, W místnost kitu se do trupu vejde nejvýš 3,0 m. Tenké obložení podél trupu (nový díl), nebo 6 SCU / užší ulička?"
+  "Nákladový prostor: dveře do technické chodby ústí do uličky jen z 0,35 m, zbytek proti konci nákladové mřížky. Návrh: při stavbě s tenkým obložením ulička 0,5–2,05 m a mřížka o 0,3 m dozadu (x 2,6–7,6), aby před dveřmi bylo 0,6 m volné plochy. Souhlasíš?"
  ]
 }

@@ -1,5 +1,5 @@
 {
- "_comment": "Wayfarer pilot corridor from the interior kit (kit brief step 7.1, 28. 9. 2026): the technical corridor (layout x 8.2-10.34) from the same positions before (the procedural / Quaternius interior) and after (kit modules as BP components, kit_rooms.py). Interior lighting as walked (space.InteriorLighting 1); perf_tech measures stat unit / stat gpu. Positions in layout metres converted to camera_local (x - 10.25, -y, z - 1.2). Run -Width 1920 -Height 1080.",
+ "_comment": "Wayfarer pilot corridor from the interior kit (kit brief step 7.1, 28. 9. 2026): the technical corridor (layout x 8.2-10.34) from the same positions before (the procedural / Quaternius interior) and after (kit modules as BP components, kit_rooms.py). Interior lighting as walked (space.InteriorLighting 1); perf_tech measures stat unit / stat gpu. Positions in layout metres converted to camera_local (x - 10.25, -y, z - 1.2). Run -Width 1920 -Height 1080. perf_tech_classic: the same view without the walked-interior lighting (no MegaLights, as flown). hold_to_door: from the hold's aisle to the door into the corridor (where it opens, the author 28. 9.).",
  "shots": [
   {
    "name": "warmup",
@@ -96,6 +96,25 @@
    "facing": "horizon",
    "hud": 0,
    "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "hold_to_door",
+   "camera_local": [
+    -4.65,
+    -1.35,
+    0.45
+   ],
+   "look_local": [
+    -2.05,
+    -0.45,
+    -0.35
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
    "settle": 6.0,
    "fov": 90,
    "name": "perf_tech",
@@ -110,6 +129,31 @@
     0.2
    ],
    "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 6.0,
+   "fov": 90,
+   "name": "perf_tech_classic",
+   "camera_local": [
+    -1.63,
+    -0.0,
+    0.45
+   ],
+   "look_local": [
+    0.09,
+    -0.0,
+    0.2
+   ],
+   "console": [
+    "space.InteriorLighting 0",
     "stat none",
     "stat unit",
     "stat gpu"

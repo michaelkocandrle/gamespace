@@ -15,6 +15,21 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 MANIFEST = os.path.join(ROOT, "ArtSource", "Kit", "Export", "kit_manifest.json")
 
 
+def active_rooms(recipe):
+    """The rooms built from the kit now: interior.kit_modules.rooms while the block is enabled (default on). Off, those
+    rooms keep the ship's own interior - the author's switch (28. 9. 2026): the kit corridor stays off until batch 4
+    brings the component bays; the procedural corridor shows its reactor and coolers, the kit's grilles do not."""
+    mods = (recipe.get("interior") or {}).get("kit_modules") or {}
+    return list(mods.get("rooms", [])) if mods.get("enabled", True) else []
+
+
+def decal_active(decal, recipe):
+    """A setup decal with "legacy_room" marks that room's own interior (a label on its reactor): out while the room is
+    a kit room."""
+    room = decal.get("legacy_room")
+    return not room or room not in active_rooms(recipe)
+
+
 def manifest_parts():
     return json.load(open(MANIFEST, encoding="utf-8"))["parts"]
 

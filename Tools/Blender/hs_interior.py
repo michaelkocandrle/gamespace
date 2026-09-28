@@ -545,11 +545,12 @@ def build(recipe, layout, coll, mats, ship, hull):
     rooms = {r["id"]: r for r in layout["rooms"]}
     doors = layout["doors"]
     report = {"rooms": [], "objects": 0}
-    kit_rooms = (spec.get("kit") or {}).get("rooms", [])
     # rooms from the interior kit (ArtSource/Kit): their parts come in Unreal as components of the ship
-    # (Tools/Assets/kit_rooms.py); here only the bulkheads and the stand-ins for the parts the kit lacks
+    # (Tools/Assets/kit_rooms.py); here only the bulkheads and the stand-ins for the parts the kit lacks. Switched off
+    # (kit_modules.enabled false) the rooms keep their own interior (Tools/Kit/kit_layout.active_rooms)
     mods = spec.get("kit_modules") or {}
-    mod_rooms = mods.get("rooms", [])
+    mod_rooms = mods.get("rooms", []) if mods.get("enabled", True) else []
+    kit_rooms = [r for r in (spec.get("kit") or {}).get("rooms", []) if r not in mod_rooms]
     kit = None
     global KIT, COCKPIT
     KIT = None

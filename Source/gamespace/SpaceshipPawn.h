@@ -2206,4 +2206,14 @@ private:
 	bool bFixtureLightsOn = true;
 	int32 FixtureLightMode = -1;
 	bool bFixtureLightsDirty = false;
+	/** The interior meshes (Interior, InteriorKit, InteriorDecals): out of the sun's shadows while the interior
+	 * lighting is on. The hull still shadows the rooms; non-Nanite, they cost ~2 ms of the sun's virtual shadow maps
+	 * in a corridor view (28. 9. 2026). The kit rooms' parts (InteriorMod_*) are off the sun's lighting channel. */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UStaticMeshComponent>> InteriorShadowMeshes;
+	/** The fixture lights imported with shadows (a kit room's main lights, kit_rooms.py): shadowed only under the
+	 * interior lighting (MegaLights traces them); flown, their shadow maps cost ~4-5 ms (28. 9. 2026). */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<ULocalLightComponent>> ShadowedFixtureLights;
+	int32 InteriorShadowState = -1;
 };

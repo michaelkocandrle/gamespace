@@ -174,7 +174,8 @@ def build_plan(manifest, manifest_dir, setup=None):
         "pawn_settings": pawn,
         "materials": {k: v for k, v in (setup.get("materials") or {}).items() if not k.startswith("_")},
         "extra_components": extra_components,
-        "decals": [d for d in (setup.get("decals") or []) if not str(d.get("name", "")).startswith("_")],
+        "decals": [d for d in (setup.get("decals") or []) if not str(d.get("name", "")).startswith("_")
+                   and legacy_decal_active(ship, d)],
         "lights": load_lights(manifest_dir, ship),
         "planet_settings": [("collision_warmup_reach_m", s["Planet_CollisionWarmupReachM"]),
                             ("collision_min_radius_m", s["Planet_CollisionMinRadiusM"])],
@@ -473,6 +474,20 @@ def apply_pawn_settings(plan, report):
     report["blueprint"] = {"path": plan["blueprint"], "applied": applied}
     log("updated %s" % plan["blueprint"])
     return blueprint
+
+
+def legacy_decal_active(ship, decal):
+    """A setup decal marked "legacy_room" labels that room's own interior: skipped while the room is built from the
+    kit (Tools/Kit/kit_layout.decal_active, the recipe's interior.kit_modules switch)."""
+    if not decal.get("legacy_room"):
+        return True
+    repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    path = os.path.join(repo, "ArtSource", "Ships", ship, "HardSurface", "%s_hs.json" % ship)
+    if not os.path.exists(path):
+        return True
+    sys.path.insert(0, os.path.join(repo, "Tools", "Kit"))
+    import kit_layout
+    return kit_layout.decal_active(decal, json.load(open(path, encoding="utf-8")))
 
 
 def add_mesh_component(blueprint, extra):

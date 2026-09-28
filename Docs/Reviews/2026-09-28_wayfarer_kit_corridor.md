@@ -114,3 +114,44 @@ Po opravách 9 a 10 a cedulí žádné další kolo (zadání 7.1: jedno kolo). 
 - `Wall_HullLiner` (nová, dávka 4, **otázka pro autora**): nákladový prostor potřebuje 8 SCU (2,5 m) + uličku
   1,25 m = 3,75 m, ale W místnost se tam vejde nejvýš 3,0 m. Buď tenké obložení podél trupu, nebo 6 SCU / užší ulička.
 - Mimo díly: chození po lodi (kolize kitu v lodi, gravitace, vstup), dveře s křídly.
+
+## Rozhodnutí autora a práce po nich (28. 9. 2026 večer)
+
+**Vodorovné čáry v řezu trupem:** nejde o geometrii v chodbě. Každá stanice se kreslí do panelu ±2,46 m,
+křídla sahají do y ±7,3 m a bez ořezu se jejich řez (s pody a šachtami podvozku) kreslil přes interiér sousedních
+panelů. V datech řezu na x 9,85 není uvnitř chodby (|y| < 1,15 m, výška 0,3–2,0 m) ani jedna úsečka trupu, stěny trupu
+jsou na y ±2,3 m. Oba výkresy mají ořez (`clip_y`) a jsou překreslené. Autor měl ale pravdu, že test „průnik“ tohle
+nehlídal (jen díly interiéru mimo trup): nová kontrola `hull_in_rooms` hledá exteriér (trup, kanopa, podvozek)
+ve volném prostoru každé místnosti kromě kokpitu. Wayfarer: 0; negativní test (místnosti záměrně za trupem) ji chytí.
+
+**Nákladový prostor 8 SCU:** s tenkým obložením se vejde (viz dokument lodi, `Docs/Kit/hold_fit_wayfarer.png`).
+
+**Layout:** posun dveří a přepážky schválen, zapsáno v layoutu, dokumentu lodi a dossieru. Snímek ze strany
+nákladového prostoru (`hold_to_door`): dveře se s uličkou kryjí jen 0,35 m – návrh úpravy čeká na autora.
+
+**Přepínač:** `interior.kit_modules.enabled` (recept lodi) je vypnutý: technická chodba je zase ze starého kitu
+s reaktorem a chladiči (jejich projektované nápisy mají `legacy_room: "tech"`), `kit_rooms.py` nechá loď bez dílů
+kitu. Zapnutí = `true`, přestavba lodi a import. Pravidlo v `Tools/Kit/kit_layout.active_rooms`.
+
+**Cedule ENGINEERING:** nalevo od dveří, pod sklonem stěny, celá ve vstupním pohledu.
+
+**Světlo a výkon chodby z kitu:**
+- stíny jen hlavní světla (lineární ve žlabech), ostatní bez stínů s kontaktními stíny 0,05;
+- prosvětlení stěn na poloviční sílu;
+- díly kitu ve světelném kanálu 1 (slunce do chodby uvnitř trupu nedosvítí), světla kitu v kanálech 0 a 1;
+- **hlavní úspora – C++:** stínové mapy slunce stály 3,2–3,8 ms, i když uvnitř trupu slunce nic nevidí. Kreslily se do
+  nich interiérové meshe lodi (bez Nanite). V režimu osvětlení interiéru (MegaLights) je pawn lodi vyřadí ze stínů
+  slunce (trup místnosti zastíní dál) a stínovaná světla kitu vrhají stín jen tehdy; v letu je všechno jako dřív.
+
+| Zabalená hra, GPU | před | po |
+|---|---|---|
+| chodba z kitu, režim interiéru | 18,98 ms | **16,51 ms** |
+| chodba z kitu, osvětlení jako v letu | 26,3 ms (všechna světla se stíny) | 19,7 ms |
+| současná chodba, režim interiéru | 17,49 ms | **15,12 ms** |
+| současná chodba, osvětlení jako v letu | – | 19,1 ms |
+| pohledy do interiéru v letu (náklad, dveře, kajuta) | 18,0–18,7 ms (ráno) | 18,8–19,5 ms |
+| kokpit | – | 16,1 ms (59–61 FPS) |
+
+Cíl „chodba pod 16,6 ms“ je v režimu interiéru splněný těsně (16,51). Další páka, kterou jsem nezapnul: MegaLights
+se 2 vzorky na pixel (−0,6 až −0,7 ms, víc šumu). Stěny chodby z kitu pod sklonem jsou se stínovanými stropními
+světly tmavé (jas 0,08): přímé světlo tam přes převis nedosvítí – řeší svítidla v pouzdrech (dávka 8).

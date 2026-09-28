@@ -104,6 +104,27 @@ def measure():
     print("HULLFITKIT data", data)
 
 
+def clip_y(a, b, lim):
+    """The segment a-b (y, z) cut to |y| <= lim, or None: a panel shows only its own cut. Unclipped, the wings
+    (to y +-7.3 m), their pods and gear bays ran into the neighbouring panels and read as geometry across the
+    rooms (the author's question, 28. 9. 2026)."""
+    (ya, za), (yb, zb) = a, b
+    if (ya > lim and yb > lim) or (ya < -lim and yb < -lim):
+        return None
+    def at(y):
+        t = (y - ya) / (yb - ya)
+        return (y, za + (zb - za) * t)
+    if ya > lim:
+        a = at(lim)
+    elif ya < -lim:
+        a = at(-lim)
+    if yb > lim:
+        b = at(lim)
+    elif yb < -lim:
+        b = at(-lim)
+    return a, b
+
+
 def draw(data_path):
     from PIL import Image, ImageDraw, ImageFont
     data = json.load(open(data_path, encoding="utf-8"))
@@ -125,12 +146,12 @@ def draw(data_path):
             d.line([P(g * 0.25, -0.6), P(g * 0.25, 3.4)], fill=(38, 40, 46))
         for g in range(-2, 14):
             d.line([P(-2.0, g * 0.25), P(2.0, g * 0.25)], fill=(38, 40, 46))
-        for a, b in c["interior"]:
-            d.line([P(*a), P(*b)], fill=(95, 98, 106), width=1)
-        for a, b in c["kit"]:
-            d.line([P(*a), P(*b)], fill=(240, 140, 40), width=2)
-        for a, b in c["hull"]:
-            d.line([P(*a), P(*b)], fill=(240, 240, 240), width=3)
+        lim = (cw / 2 - 4) / PX
+        for key, col, wd in (("interior", (95, 98, 106), 1), ("kit", (240, 140, 40), 2), ("hull", (240, 240, 240), 3)):
+            for a, b in c[key]:
+                s = clip_y(a, b, lim)
+                if s:
+                    d.line([P(*s[0]), P(*s[1])], fill=col, width=wd)
         ok = c["min_gap_m"] is not None and c["min_gap_m"] >= 0.0
         d.text((ox - cw // 2 + 10, 80), "Stanice x = %.2f m" % c["x"], font=FB, fill=(240, 240, 240))
         d.text((ox - cw // 2 + 10, 108), "nejmenší mezera kit – trup: %+.3f m" % c["min_gap_m"], font=F,

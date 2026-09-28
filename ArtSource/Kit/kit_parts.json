@@ -726,9 +726,13 @@
    "variants": {
     "A": "a thin wall (structure 0.1 m or less) that follows a hull's inside, for rooms wider than the W profile: cargo holds, cabins"
    },
-   "status": "planned (question for the author)",
+   "status": "planned, batch 4 (author 28. 9. 2026: a thin liner along the hull; 8 SCU plus a 1.55 m aisle fit - hold_fit.py)",
    "pilot_needs": "the Wayfarer's hold needs 8 SCU (2.5 m) plus a 1.25 m aisle = 3.75 m, but the widest W-profile room the hull takes there is 3.0 m (hull_fit_wayfarer.png): with the kit's 0.2 m wall structure the hold cannot be built from W walls as designed - a thin hull liner, or 6 SCU / a narrower aisle (author's decision). Wayfarer pilot corridor 28. 9. 2026 (Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md)"
   }
  },
- "_pilot": "Wayfarer pilot corridor (kit brief step 7.1, 28. 9. 2026): the parts it lacked are noted per family as 'pilot_needs' and the new families Wall_ComponentBay and Wall_HullLiner are in batch 4."
+ "_pilot": "Wayfarer pilot corridor (kit brief step 7.1, 28. 9. 2026): the parts it lacked are noted per family as 'pilot_needs' and the new families Wall_ComponentBay and Wall_HullLiner are in batch 4.",
+ "backlog_after_batch4": [
+  "the walked line: a directional atlas cell (a band along the walkway, not the smear cell's blotches) - grime step",
+  "grip wear on handrails and grips (lighter bare metal where the hands go) - grime step"
+ ]
 }

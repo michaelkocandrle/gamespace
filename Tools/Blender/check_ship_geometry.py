@@ -9,6 +9,8 @@ Prints GEOCHECK {...} (and writes <out_dir>/geocheck.json and the hole masks). A
   floating            interior parts (connected pieces) that touch nothing within TOL_TOUCH; lights and holograms
                       are exempt by material, known intentional ones by name in the recipe (checks.floating_exempt)
   penetrating         cockpit parts reaching behind the frame lining or outside the hull by more than TOL_PEN
+  hull_in_rooms       exterior geometry (hull, canopy, gear: a wing root, a spar, a pod) inside a room's clear space -
+                      between its walls, deck to ceiling (the kit rooms: between the W panels); the cockpit excepted
   placeholders        slots without a material or with Blender's default; large plain faces are listed (warning)
   holes               ship-less pixels (the world) seen from the player's positions with every surface opaque -
                       the eye and the interior shot cameras of Tools/Shots/<ship>_interior.json
@@ -87,9 +89,12 @@ def mirrored_mesh_decals(ship):
 
 def mirrored_projected(ship, tree):
     setup = json.load(open(os.path.join(ROOT, "ArtSource", "Ships", ship, "%s_setup.json" % ship), encoding="utf-8"))
+    recipe = json.load(open(os.path.join(ROOT, "ArtSource", "Ships", ship, "HardSurface", "%s_hs.json" % ship), encoding="utf-8"))
+    sys.path.insert(0, os.path.join(ROOT, "Tools", "Kit"))
+    import kit_layout
     bad = []
     for d in setup.get("decals", []):
-        if not d["name"].startswith("Int_"):
+        if not d["name"].startswith("Int_") or not kit_layout.decal_active(d, recipe):
             continue
         loc = Vector((d["location"][0] / 100, -d["location"][1] / 100, d["location"][2] / 100))
         pitch, yaw = math.radians(d["rotation"][0]), math.radians(d["rotation"][1])
@@ -146,10 +151,10 @@ def add_kit_rooms(ship, recipe):
     there, so without them every view into a kit room was a hole. The holes, the floating parts and the hull are
     then checked with the real parts. Never saved (this process does not write the blend)."""
     mods = (recipe.get("interior") or {}).get("kit_modules")
-    if not mods:
-        return None
     sys.path.insert(0, os.path.join(ROOT, "Tools", "Kit"))
     import kit_layout
+    if not mods or not kit_layout.active_rooms(recipe):
+        return None
     placed = kit_layout.layout_parts(mods, kit_layout.manifest_parts())
     want = {"SM_Kit_" + m for m, _, _ in placed}
     src = {}
@@ -202,6 +207,63 @@ def add_kit_rooms(ship, recipe):
         bpy.data.objects.remove(ob)
     bpy.data.collections.remove(tmp_coll)
     return {"parts": len(placed), "faces": len(me.polygons)}
+
+
+def hull_in_rooms(ship, recipe):
+    """Exterior geometry inside the rooms' clear space (the author's question, 28. 9. 2026): 'penetrating' only
+    catches interior parts reaching out through the hull, not a wing root, spar or pod reaching into a room. Every
+    room of the layout but the cockpit (its own lining and canopy frame) gets a clear box - between its walls
+    (wall_inset_m, 5 cm in from them), deck to ceiling; a kit room the W corridor between the wall panels - and the
+    exterior parts (hull, canopy, gear) must not overlap it. Only the rooms' length along x is taken whole."""
+    layout = json.load(open(os.path.join(ROOT, "ArtSource", "Ships", ship, "Design", "%s_layout.json" % ship), encoding="utf-8"))
+    spec = recipe.get("interior") or {}
+    H, inset = spec.get("height_m", 2.3), spec.get("wall_inset_m", 0.05)
+    sys.path.insert(0, os.path.join(ROOT, "Tools", "Kit"))
+    import kit_layout
+    mods = kit_layout.active_rooms(recipe)
+    off = recipe["assemble"]["offset"]
+    ext = bmesh.new()
+    for suffix in ("", "_Canopy", "_Gear"):
+        ob = obj(ship, suffix)
+        if ob is None:
+            continue
+        me = bpy.data.meshes.new("_ext")
+        tb = world_bm(ob)
+        tb.to_mesh(me)
+        tb.free()
+        ext.from_mesh(me)
+        bpy.data.meshes.remove(me)
+    ext.faces.ensure_lookup_table()
+    ext_tree = BVHTree.FromBMesh(ext)
+    out = []
+    m = 0.05
+    for room in layout["rooms"]:
+        if room["id"] == "cockpit":
+            continue
+        x0, x1, y0, y1 = room["rect"]
+        fz = room.get("floor_z", layout["decks"][room.get("deck", "main")]["floor_z"])
+        if room["id"] in mods:
+            y0, y1 = -1.2, 1.2                      # the W section's panel faces
+        else:
+            y0, y1 = y0 + inset, y1 - inset
+        lo = Vector((x0 + m + off[0], y0 + m + off[1], fz + m + off[2]))
+        hi = Vector((x1 - m + off[0], y1 - m + off[1], fz + H - m + off[2]))
+        box = bmesh.new()
+        res = bmesh.ops.create_cube(box, size=1.0)
+        bmesh.ops.scale(box, vec=hi - lo, verts=res["verts"])
+        bmesh.ops.translate(box, vec=(lo + hi) / 2, verts=res["verts"])
+        box_tree = BVHTree.FromBMesh(box)
+        box.free()
+        hits = ext_tree.overlap(box_tree)
+        # faces wholly inside the box do not intersect its skin: test the exterior's vertices too
+        inside = [v.co for v in ext.verts if lo.x < v.co.x < hi.x and lo.y < v.co.y < hi.y and lo.z < v.co.z < hi.z]
+        if hits or inside:
+            pts = [ext.faces[a].calc_center_median() for a, b in hits[:1]] or inside[:1]
+            p = pts[0]
+            out.append({"room": room["id"], "faces": len({a for a, b in hits}), "verts_inside": len(inside),
+                        "at_layout": [round(p.x - off[0], 2), round(p.y - off[1], 2), round(p.z - off[2], 2)]})
+    ext.free()
+    return out
 
 
 def floating_and_penetrating(ship, exempt_names):
@@ -428,12 +490,15 @@ def main():
         "mirrored_decals": mirrored_mesh_decals(ship) + mirrored_projected(ship, tree),
         "floating": floating,
         "penetrating": penetrating,
+        "hull_in_rooms": hull_in_rooms(ship, recipe),
     }
     report["placeholders"], report["warnings"] = placeholders(ship)
     report["holes"] = holes(ship, out_dir)
-    report["pass"] = not any(report[k] for k in ("mirrored_decals", "floating", "penetrating", "placeholders", "holes"))
+    report["pass"] = not any(report[k] for k in ("mirrored_decals", "floating", "penetrating", "hull_in_rooms", "placeholders",
+                                                 "holes"))
     report["kit_rooms"] = kit_rooms
-    report["counts"] = {k: len(report[k]) for k in ("mirrored_decals", "floating", "penetrating", "placeholders", "holes", "warnings")}
+    report["counts"] = {k: len(report[k]) for k in ("mirrored_decals", "floating", "penetrating", "hull_in_rooms", "placeholders",
+                                                    "holes", "warnings")}
     json.dump(report, open(os.path.join(out_dir, "geocheck.json"), "w", encoding="utf-8"), indent=1)
     print("GEOCHECK " + json.dumps({"pass": report["pass"], "counts": report["counts"], "json": os.path.join(out_dir, "geocheck.json")}))
 

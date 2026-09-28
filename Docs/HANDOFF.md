@@ -1704,6 +1704,17 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
           - cedule;
           - schody 1,15 m a rampa 22°.
         - Otázka pro autora: nákladový prostor (8 SCU + ulička 3,75 m) se do W místnosti 3,0 m nevejde.
+        - Rozhodnutí autora téhož večera a práce po nich (recenze, oddíl „Rozhodnutí autora…“):
+          - posun dveří a přepážky schválen (layout, dokument lodi, dossier);
+          - nákladový prostor: tenké obložení podél trupu, ve výšce kontejnerů 4,10 m, tedy 8 SCU a ulička 1,55 m
+            (`Tools/Kit/hold_fit.py`, `Docs/Kit/hold_fit_wayfarer.png`);
+          - čáry přes interiér v řezu trupem byla křídla sousedních panelů bez ořezu (opraveno); nová kontrola testu
+            geometrie `hull_in_rooms` (exteriér ve volném prostoru místností);
+          - chodba z kitu za přepínačem `interior.kit_modules.enabled`, výchozí vypnutá do dávky 4;
+          - světla chodby z kitu: stíny jen hlavní (lineární), kontaktní stíny, díly kitu ve světelném kanálu 1;
+          - C++: v režimu osvětlení interiéru pawn lodi vyřadí interiérové meshe ze stínů slunce a stínovaná světla
+            kitu vrhají stín jen tehdy. Chodba z kitu 18,98 → 16,51 ms GPU, současná chodba 17,49 → 15,12 ms.
+          - špína uzavřená s variantou ×7, vyšlapaná linie a ohmatání madel v backlogu za dávkou 4.
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

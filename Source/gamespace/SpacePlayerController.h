@@ -84,6 +84,10 @@ public:
 	 * space.InteriorLighting 0|1 for shots taken with the free camera. */
 	static void ApplyInteriorLighting(bool bInterior);
 
+	/** Whether the interior lighting state is on now (walking an interior, the prewarm or space.InteriorLighting 1):
+	 * ships read it to take their interior meshes out of the sun's shadows (ASpaceshipPawn::UpdateViewCollection). */
+	static bool IsInteriorLightingOn();
+
 	UFUNCTION(BlueprintPure, Category = "Interior")
 	bool IsWalkingInterior() const { return bWalkingInterior; }
 

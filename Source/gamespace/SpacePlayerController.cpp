@@ -349,9 +349,12 @@ namespace
 	// and missed the target (Docs/Reviews/2026-09-27_interior_perf_profile.md)
 	/** space.InteriorLighting asked for the interior lighting (shots with the free camera): the prewarm's end keeps it. */
 	bool bInteriorLightingRequested = false;
+	/** What SetInteriorLighting set last (ships read it through ASpacePlayerController::IsInteriorLightingOn). */
+	bool bInteriorLightingOn = false;
 
 	void SetInteriorLighting(bool bInterior)
 	{
+		bInteriorLightingOn = bInterior;
 		IConsoleManager& Console = IConsoleManager::Get();
 		if (IConsoleVariable* MegaLights = Console.FindConsoleVariable(TEXT("r.MegaLights.EnableForProject")))
 		{
@@ -374,6 +377,11 @@ namespace
 		}
 		return nullptr;
 	}
+}
+
+bool ASpacePlayerController::IsInteriorLightingOn()
+{
+	return bInteriorLightingOn;
 }
 
 void ASpacePlayerController::ApplyInteriorLighting(bool bInterior)

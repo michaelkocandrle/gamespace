@@ -63,7 +63,7 @@ Od zádě k přídi (x v metrech od zádě):
 - Nástup: ze země po rampě → uličkou podél nákladu → technická chodba → kajuta → schod → za křeslo
   → animace usednutí. Celá cesta je rovná, bez slepých uliček.
 - Šířky: dveře 1,0–1,1 m, ulička 1,25 m (kapsle postavy má průměr 0,84 m).
-- Pilotní chodba z kitu (28. 9. 2026, čeká na schválení): dveře z nákladového prostoru posunuty z y 1,2 na y 0,5 (šířka 1,0 m), protože ústily přímo na bok reaktoru. Přepážka ke kajutě o 6 cm dozadu kvůli mřížce kitu. Recenze `Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md`.
+- Pilotní chodba z kitu (28. 9. 2026, schváleno autorem týž den): dveře z nákladového prostoru posunuty z y 1,2 na y 0,5 (šířka 1,0 m), protože ústily přímo na bok reaktoru. Přepážka ke kajutě o 6 cm dozadu kvůli mřížce kitu. Recenze `Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md`.
 - Výstup ze sedadla zpět za křeslo; z lodi jen rampou (zatím bez nouzového výstupu kabinou).
 
 ## 4. Designový jazyk
@@ -109,3 +109,13 @@ Původní otázky:
    či místo na zbraně?
 5. **Nouzový výstup** otevřením kabiny, nebo jen rampa?
 6. **Zbraně:** 2× S3 + rakety stačí, nebo přidat bradovou zbraň S2 pod nos?
+
+### Nákladový prostor z kitu (rozhodnutí autora 28. 9. 2026)
+
+- Tenké obložení podél trupu (odhalená žebra trupu jsou v pořádku), ne stěny W: ty nechávají nejvýš 3,0 m.
+- Výpočet ve výšce kontejnerů (`Tools/Kit/hold_fit.py`, `Docs/Kit/hold_fit_wayfarer.png`): s obložením 0,15 m
+  (mezera 5 cm a obložení se žebry 10 cm) je v celé délce mřížky (x 2,9–7,9) 4,10 m. Potřeba je 3,80 m
+  (2 × 1,25 m, 5 cm vůle, ulička 1,25 m), takže **8 SCU zůstává** a ulička vychází 1,55 m, volná do 2 m.
+- Dveře do technické chodby (y 0–1,0) se s dnešní uličkou (y 0,65–1,9) kryjí jen 0,35 m, zbytek je proti konci
+  mřížky (0,3 m před přepážkou). Návrh pro stavbu: ulička 0,5–2,05 m a mřížka o 0,3 m dozadu (x 2,6–7,6), aby
+  před dveřmi bylo 0,6 m volné plochy – čeká na autora.

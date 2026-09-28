@@ -142,8 +142,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 66382,
-      "verts": 64079,
+      "tris": 66414,
+      "verts": 64083,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -216,8 +216,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 421315,
-      "verts": 219125,
+      "tris": 430937,
+      "verts": 224001,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -257,8 +257,8 @@
     "SM_Ship_Wayfarer_InteriorDecals": {
       "lod": 0,
       "part": "InteriorDecals",
-      "tris": 5610,
-      "verts": 4997,
+      "tris": 5864,
+      "verts": 5269,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -281,8 +281,8 @@
     "SM_Ship_Wayfarer_InteriorKit": {
       "lod": 0,
       "part": "InteriorKit",
-      "tris": 16126,
-      "verts": 13836,
+      "tris": 19870,
+      "verts": 16835,
       "materials": [
         "M_Ship_Wayfarer_IntDark",
         "M_Ship_Wayfarer_KitTrim03",

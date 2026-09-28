@@ -41,6 +41,7 @@
 #include "SpaceSpeedTunnelComponent.h"
 #include "SpaceHullSparksComponent.h"
 #include "Components/DirectionalLightComponent.h"
+#include "SpacePlayerController.h"
 #include "Components/SkyLightComponent.h"
 #include "Engine/DirectionalLight.h"
 #include "Engine/SkyLight.h"
@@ -462,6 +463,10 @@ void ASpaceshipPawn::UpdateViewCollection()
 			if (Light->GetName().StartsWith(TEXT("Light_fix_")))
 			{
 				FixtureLights.Add(Light);
+				if (Light->CastShadows)
+				{
+					ShadowedFixtureLights.Add(Light);
+				}
 			}
 		}
 		TArray<UStaticMeshComponent*> Meshes;
@@ -472,6 +477,11 @@ void ASpaceshipPawn::UpdateViewCollection()
 			{
 				const FTransform ToActor = Mesh->GetComponentTransform().GetRelativeTransform(GetActorTransform());
 				InteriorBoundsLocal += Mesh->GetStaticMesh()->GetBoundingBox().TransformBy(ToActor);
+				const FString Name = Mesh->GetName();
+				if (Name == TEXT("Interior") || Name == TEXT("InteriorKit") || Name == TEXT("InteriorDecals"))
+				{
+					InteriorShadowMeshes.Add(const_cast<UStaticMeshComponent*>(Mesh));
+				}
 			}
 		}
 	}
@@ -497,6 +507,27 @@ void ASpaceshipPawn::UpdateViewCollection()
 	// without shadows they light the hull through its walls, and from outside their volumes cover the whole ship
 	// on screen (~3 ms on the target GPU in a close chase view)
 	const bool bWantFixtures = FixtureLightMode < 0 ? bInside : FixtureLightMode > 0;
+	// The interior lighting (MegaLights, walked interiors): the interior meshes out of the sun's shadows - the hull
+	// shadows the rooms anyway, and flown the cockpit keeps its interior's sun shadows
+	const int32 ShadowState = ASpacePlayerController::IsInteriorLightingOn() ? 1 : 0;
+	if (ShadowState != InteriorShadowState)
+	{
+		InteriorShadowState = ShadowState;
+		for (UStaticMeshComponent* Mesh : InteriorShadowMeshes)
+		{
+			if (Mesh)
+			{
+				Mesh->SetCastShadow(ShadowState == 0);
+			}
+		}
+		for (ULocalLightComponent* Light : ShadowedFixtureLights)
+		{
+			if (Light)
+			{
+				Light->SetCastShadows(ShadowState == 1);
+			}
+		}
+	}
 	if (bWantFixtures != bFixtureLightsOn || bFixtureLightsDirty)
 	{
 		bFixtureLightsOn = bWantFixtures;

@@ -986,6 +986,18 @@ snímku.
   ústily na bok reaktoru (y 1,05–1,85 od x 8,35), takže volných zbylo 0,4 m. Odhalila to až pilotní chodba z kitu.
   Při návrhu kontroluj u každých dveří volný průchod do hloubky 0,5 m za nimi. Každá ruční úprava layoutu dostane
   klíč `_kit` s důvodem.
+- dq) **Řez trupem kreslil cizí křídla přes interiér.** Každá stanice má panel ±2,5 m, křídla sahají do ±7,3 m;
+  bez ořezu se kreslila do sousedních panelů a vypadala jako nosník přes chodbu. Kreslení řezů ořezává (`clip_y`).
+  Před závěrem „geometrie v místnosti“ ověř data řezu, ne obrázek. Test průniku hlídá jen díly interiéru mimo trup;
+  trup uvnitř místností hlídá `hull_in_rooms` (negativní test: místnosti rozšířené za trup musí selhat).
+- dr) **Stínové mapy slunce v interiéru lodi stály 3,2–3,8 ms.** Uvnitř trupu slunce nic nevidí, ale virtuální
+  stínové mapy kreslily interiérové meshe (bez Nanite) do stránek pro každý viditelný pixel. Sonda `space.Sun
+  CastShadows False` (14,8 ms místo 18,5) a pak interiér bez vrhání stínu (16,7 ms, obraz stejný) to prokázaly.
+  Oprava: v režimu osvětlení interiéru pawn lodi vypne `CastShadow` interiérových meshů (trup místnosti zastíní) a
+  díly kitu jsou ve světelném kanálu 1 (slunce jen 0). Měření začínej `stat gpu` a sondami, ne úpravou světel.
+- ds) **Stínovaná obdélníková světla bez MegaLights jsou drahá.** Dvě stínovaná světla kitu v chodbě bez MegaLights
+  (osvětlení jako v letu): stínové mapy 7,3 ms a světla 5,5 ms (26 ms celkem). V lodi mají stín jen v režimu interiéru
+  (MegaLights je trasuje), v letu ne; počet světel pod MegaLights cenu skoro nemění (8 i 12 světel: 3,5 ms).
 - bo) **Kontrola geometrie před každým předáním:** od 27. 9. 2026 ji spouští sám `hs_assemble_ship.py` jako poslední krok každé přestavby lodi (při FAIL skončí Blender kódem 1, řádek `HSASSEMBLE GEOTEST FAIL`); ručně `python Tools/Tests/test_ship_geometry.py` (Blender headless na
   `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
   Musí projít (autor 25. 9. 2026).

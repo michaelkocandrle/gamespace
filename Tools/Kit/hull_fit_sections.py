@@ -172,6 +172,27 @@ def main():
     print("HULLFIT data", data, "- draw it: python Tools/Kit/hull_fit_sections.py --draw", data)
 
 
+def clip_y(a, b, lim):
+    """The segment a-b (y, z) cut to |y| <= lim, or None: a panel shows only its own cut. Unclipped, the wings
+    (to y +-7.3 m), their pods and gear bays ran into the neighbouring panels and read as geometry across the
+    rooms (the author's question, 28. 9. 2026)."""
+    (ya, za), (yb, zb) = a, b
+    if (ya > lim and yb > lim) or (ya < -lim and yb < -lim):
+        return None
+    def at(y):
+        t = (y - ya) / (yb - ya)
+        return (y, za + (zb - za) * t)
+    if ya > lim:
+        a = at(lim)
+    elif ya < -lim:
+        a = at(-lim)
+    if yb > lim:
+        b = at(lim)
+    elif yb < -lim:
+        b = at(-lim)
+    return a, b
+
+
 def draw(data_path):
     from PIL import Image, ImageDraw, ImageFont
     data = json.load(open(data_path, encoding="utf-8"))
@@ -194,8 +215,11 @@ def draw(data_path):
             d.line([P(g * 0.5, -1.2), P(g * 0.5, 4.3)], fill=(40, 42, 48))
         for g in range(-2, 9):
             d.line([P(-3, g * 0.5), P(3, g * 0.5)], fill=(40, 42, 48))
+        lim = (cw / 2 - 4) / PX
         for a, b in segs:
-            d.line([P(*a), P(*b)], fill=(235, 235, 235), width=3)
+            s = clip_y(a, b, lim)
+            if s:
+                d.line([P(*s[0]), P(*s[1])], fill=(235, 235, 235), width=3)
         x0, x1, y0, y1 = room["rect"]
         d.rectangle([P(y0, fz + 2.3)[0], P(y0, fz + 2.3)[1], P(y1, fz)[0], P(y1, fz)[1]], outline=(120, 124, 132), width=2)
         for key, col in (("N", (235, 120, 40)), ("W", (90, 170, 255))):

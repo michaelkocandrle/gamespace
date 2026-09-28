@@ -52,8 +52,10 @@ GRIME_OPACITY = 1.0
 # the dirt as a matte grey dust, lighter than the paint (~0.2 linear on the kit's 0.07-0.1 graphite). A darker band
 # (x0.4, even pure black) changed almost nothing on the dark graphite - an A/B with the cards off measured it
 # (Tools/Shots/kit_grime_ab.json) - and critic rounds 1-3 read the seams as clean. The atlas is a warm brown
-# (58, 52, 45 sRGB): the tint evens it to a warm grey, a flat x5 read as rust under the grille (28. 9. 2026)
-GRIME_TINT = (5.0, 5.9, 7.1)
+# (58, 52, 45 sRGB): the tint evens it to a warm grey, a flat x5 read as rust under the grille (28. 9. 2026).
+# x7 (the stronger variant) by the author's choice when the step closed (28. 9. 2026): the grime is not tuned further,
+# the look is in the shapes and materials under it
+GRIME_TINT = (7.0, 8.3, 9.9)
 # the walked line: polish - a lighter tone and a smoother finish than the paint (the grime's 0.78 x 0.45 = 0.35)
 # (a neutral grey: the atlas is a warm brown, x3.5 flat read as an orange glow on the anti-slip lanes)
 # x5.5 on the same evening (x3.4-4.2 read as nothing, like the dark dirt: tint variants kit_grime_tint.json)

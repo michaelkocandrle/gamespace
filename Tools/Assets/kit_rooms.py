@@ -44,6 +44,26 @@ KIT_LIGHT_SCALE, LIGHT_COLOURS = _import_kit_constants()
 # the showroom's x2.0 makes up for the ray-traced shadows it lights with; unshadowed in a ship (see _light) the same
 # lights took the Wayfarer's corridor to a mean of 0.32 (SC 0.13-0.23): x1.1 there (28. 9. 2026)
 SHIP_LIGHT_SCALE = 1.1
+# the author's light plan for a ship's kit room (28. 9. 2026): only the main lights cast shadows (the ceiling trays'
+# linear lights: the dominant sources), the rest none but contact shadows. The walls' wash lights at half strength:
+# without them the walls under the slope went black (0.08), at full strength the corridor was flat and over the SC
+# brightness; their count does not change MegaLights' cost (8 or 12 lights: 3.5 ms)
+SHADOWED_SOCKETS = ("SOCKET_Light_Linear",)
+SKIPPED_SOCKETS = ()
+SOCKET_SCALE = {"SOCKET_Light_Wash": 0.5}
+CONTACT_SHADOW = 0.05       # screen fraction
+# kit parts on lighting channel 1 only, their lights on 0 and 1: the sun (channel 0) never reaches a room inside the
+# hull, and a receiver it cannot light needs no virtual shadow map pages - the sun's shadow depths were 3.3-3.8 ms of a
+# corridor view (28. 9. 2026)
+MESH_CHANNELS = (False, True, False)
+LIGHT_CHANNELS = (True, True, False)
+
+
+def _channels(values):
+    ch = unreal.LightingChannels()
+    for i, v in enumerate(values):
+        ch.set_editor_property("channel%d" % i, v)
+    return ch
 
 
 def recipes():
@@ -93,15 +113,18 @@ class Components:
         return self.lib.get_object(self.lib.get_data(handle))
 
 
-def _light(c, role, cd, radius_m, source_cm, spot_cone=None):
+def _light(c, role, cd, radius_m, source_cm, spot_cone=None, shadow=False):
     c.set_editor_property("mobility", unreal.ComponentMobility.MOVABLE)
     c.set_editor_property("intensity_units", unreal.LightUnits.CANDELAS)
     c.set_editor_property("intensity", float(cd) * SHIP_LIGHT_SCALE)
     c.set_editor_property("attenuation_radius", float(radius_m) * 100.0)
-    # no shadows, as the ship's other fixture lights (hs_fixture_lights): the ship is flown without MegaLights, and
-    # 11 shadowed lights took the Wayfarer's interior views from 18 to 27-42 ms GPU (1676 draws instead of 673,
-    # 28. 9. 2026); the showroom's lights keep theirs (walked, MegaLights on)
-    c.set_editor_property("cast_shadows", False)
+    # shadows only for the main lights: the ship is flown without MegaLights, and 11 shadowed lights took the
+    # Wayfarer's interior views from 18 to 27-42 ms GPU (1676 draws instead of 673, 28. 9. 2026); the others get
+    # contact shadows. The showroom's lights keep theirs (walked, MegaLights on)
+    c.set_editor_property("cast_shadows", bool(shadow))
+    if not shadow:
+        c.set_editor_property("contact_shadow_length", CONTACT_SHADOW)
+    c.set_editor_property("lighting_channels", _channels(LIGHT_CHANNELS))
     col = LIGHT_COLOURS[role]
     c.set_editor_property("light_color", unreal.Color(r=col[0], g=col[1], b=col[2], a=255))
     if source_cm is not None:
@@ -121,6 +144,12 @@ def build_ship(ship, recipe, report):
         raise RuntimeError("no Blueprint " + bp_path)
     comps = Components(bp)
     removed = comps.remove_old()
+    if not kit_layout.active_rooms(recipe):
+        # switched off (kit_modules.enabled false): the rooms keep the ship's own interior (hs_interior)
+        unreal.BlueprintEditorLibrary.compile_blueprint(bp)
+        unreal.EditorAssetLibrary.save_loaded_asset(bp, only_if_is_dirty=False)
+        report[ship] = {"rooms": [], "enabled": False, "parts": 0, "lights": 0, "removed": removed}
+        return
 
     def hull_cm(x, y_ue, z):
         # layout metres, y already in Unreal's sense -> Hull space (the game blend's space in cm)
@@ -137,16 +166,21 @@ def build_ship(ship, recipe, report):
         c.set_editor_property("relative_location", hull_cm(x, y, z))
         c.set_editor_property("relative_rotation", unreal.Rotator(roll=0.0, pitch=0.0, yaw=yaw))
         c.set_collision_profile_name("NoCollision")
+        c.set_editor_property("lighting_channels", _channels(MESH_CHANNELS))
         n_parts += 1
         base = hull_cm(x, y, z)
         for sname, sock in sorted(parts[name]["sockets"].items()):
-            if not sname.startswith("SOCKET_Light"):
+            if not sname.startswith("SOCKET_Light") or sname.startswith(SKIPPED_SOCKETS):
                 continue
+            shadow = sname.startswith(SHADOWED_SOCKETS)
             prm = sock.get("params") or {}
+            k_cd = next((v for kk, v in SOCKET_SCALE.items() if sname.startswith(kk)), 1.0)
+            prm = dict(prm, cd=prm.get("cd", 1.0) * k_cd)
             lx, ly, lz = sock["location_ue_cm"]
             wx, wy = kit_layout.rotate(yaw, lx, ly)
             at = base + unreal.Vector(wx, wy, lz)
-            lname = "%s%02d" % (LIGHT_PREFIX, n_lights)
+            # (the socket's kind in the name: Light_fix_kit_03_Linear)
+            lname = "%s%02d_%s" % (LIGHT_PREFIX, n_lights, sname.split("__")[0][len("SOCKET_Light_"):].split("_")[0])
             if prm.get("type") == "rect":
                 lc = comps.add(unreal.RectLightComponent, lname)
                 dx, dy, dz = prm["dir_ue"]
@@ -154,7 +188,7 @@ def build_ship(ship, recipe, report):
                 ax, ay, az = prm.get("along_ue", (0.0, -1.0, 0.0))
                 gx, gy = kit_layout.rotate(yaw, ax, ay)
                 rot = unreal.MathLibrary.make_rot_from_xy(unreal.Vector(fx, fy, dz), unreal.Vector(gx, gy, az))
-                _light(lc, prm.get("role", "warm"), prm["cd"], prm.get("radius_m", 2.0), None)
+                _light(lc, prm.get("role", "warm"), prm["cd"], prm.get("radius_m", 2.0), None, shadow=shadow)
                 lc.set_editor_property("source_width", float(prm["width_cm"]))
                 lc.set_editor_property("source_height", float(prm["height_cm"]))
                 lc.set_editor_property("barn_door_angle", 70.0)
@@ -164,12 +198,13 @@ def build_ship(ship, recipe, report):
                 lc = comps.add(unreal.SpotLightComponent, lname)
                 rot = unreal.Rotator(roll=0.0, pitch=-90.0, yaw=0.0)
                 _light(lc, prm.get("role", "work"), prm["cd"], prm.get("radius_m", 3.8), prm.get("source_radius_cm", 4.0),
-                       spot_cone=prm.get("cone_deg", 90.0))
+                       spot_cone=prm.get("cone_deg", 90.0), shadow=shadow)
                 lc.set_editor_property("specular_scale", 0.6)
             else:
                 lc = comps.add(unreal.PointLightComponent, lname)
                 rot = unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0)
-                _light(lc, prm.get("role", "warm"), prm.get("cd", 1.0), prm.get("radius_m", 1.6), prm.get("source_radius_cm", 1.0))
+                _light(lc, prm.get("role", "warm"), prm.get("cd", 1.0), prm.get("radius_m", 1.6), prm.get("source_radius_cm", 1.0),
+                       shadow=shadow)
                 lc.set_editor_property("specular_scale", 0.2)
             lc.set_editor_property("relative_location", at)
             lc.set_editor_property("relative_rotation", rot)
