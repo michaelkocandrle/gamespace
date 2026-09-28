@@ -29,7 +29,8 @@
    "zone": "engineering",
    "deck": "main",
    "name": "Technická chodba",
-   "rect": [8.2, 10.4, -1.9, 1.9],
+   "rect": [8.2, 10.34, -1.9, 1.9],
+   "_kit": "28. 9. 2026 (pilotní chodba z kitu): přepážka ke kajutě o 6 cm dozadu (10,40 → 10,34), aby 2,1 m mezi přepážkami sedělo na mřížku kitu 0,3 m (portál 0,3 + stěny 1,8); exteriér beze změny",
    "purpose": "Průchod z nákladu do kajuty, po stranách přístupné komponenty jako v SC: reaktor a chladič vlevo, generátor štítů a chladič vpravo. Každou jde vyjmout a vyměnit."
   },
   {
@@ -37,7 +38,7 @@
    "zone": "crew",
    "deck": "main",
    "name": "Kajuta",
-   "rect": [10.4, 15.2, -1.9, 1.9],
+   "rect": [10.34, 15.2, -1.9, 1.9],
    "purpose": "Domov pilota na dlouhých letech: lůžko (odhlášení ze hry), skříň na skafandr a zbraň, hygienická buňka, výdejník jídla a vody."
   },
   {
@@ -201,14 +202,15 @@
   },
   {
    "deck": "main",
-   "at": [8.2, 1.2],
+   "at": [8.2, 0.5],
    "axis": "x",
-   "width": 1.1,
+   "width": 1.0,
+   "_kit": "28. 9. 2026: z y 1,2 na 0,5 - dveře ústily přímo na bok reaktoru (y 1,05-1,85 od x 8,35), volných zbývalo 0,4 m; teď uvnitř průchodu mezi komponentami (-1,1..1,05) a průřezu W kitu (±1,2)",
    "name": "Náklad → technická chodba"
   },
   {
    "deck": "main",
-   "at": [10.4, 0.1],
+   "at": [10.34, 0.1],
    "axis": "x",
    "width": 1.0,
    "name": "Technická chodba → kajuta"

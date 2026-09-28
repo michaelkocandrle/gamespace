@@ -1,6 +1,6 @@
 {
  "_comment": "Input for Tools/Design/build_ship_matrix.py: status line, card image, concept captions, the concepts used as front/side/top check views (measured on every build) and the author's decisions.",
- "status": "Létá ve hře – exteriér v2 postavený přesně podle výkresu; další krok detail a materiály, pak interiér",
+ "status": "Létá ve hře – exteriér v2 podle výkresu; interiér: technická chodba z interiérového kitu (pilot, 28. 9. 2026), další dávky kitu podle pilotu",
  "concepts": [
   {
    "file": "side_a.png",
@@ -117,5 +117,9 @@
    "Kokpit je zevnitř prázdný (dočasná palubní deska), sklo je poloprůhledné do prázdna – přijde s interiérem.",
    "Rampa zatím není samostatný pohyblivý díl; podvozek nemá dvířka šachet."
   ]
- }
+ },
+ "questions": [
+  "Pilotní chodba z kitu (28. 9.): dveře z nákladového prostoru do technické chodby posunuty z y 1,2 na y 0,5 – ve schváleném plánu ústily přímo na bok reaktoru. A přepážka ke kajutě o 6 cm dozadu (mřížka kitu). Schvaluješ?",
+  "Nákladový prostor z kitu: 8 SCU (2,5 m) + ulička 1,25 m potřebují 3,75 m, W místnost kitu se do trupu vejde nejvýš 3,0 m. Tenké obložení podél trupu (nový díl), nebo 6 SCU / užší ulička?"
+ ]
 }

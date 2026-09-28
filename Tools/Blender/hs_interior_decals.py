@@ -92,6 +92,9 @@ def build(objs, ship, coll, spec, root, mats, eye):
             failed.append((it["item"], "not in the decal index", []))
             return None
         o = Vector(it["from"])
+        if any(a <= o.x <= b for a, b in spec.get("_exclude_x", [])):
+            pl.skipped["kit_room"] = pl.skipped.get("kit_room", 0) + 1
+            return None
         d = (Vector(it["to"]) - o) if "to" in it else Vector(it["dir"])
         hit, n = pl.cast(o, d.normalized())
         if hit is None:

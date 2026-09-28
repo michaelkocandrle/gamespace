@@ -1759,7 +1759,7 @@
    "texture": "D_Int_Engineering",
    "location": [
     -206.5,
-    -5.0,
+    -140.0,
     40.0
    ],
    "rotation": [
@@ -1769,8 +1769,8 @@
    ],
    "size": [
     3.0,
-    10.0,
-    40.0
+    7.5,
+    30.0
    ],
    "opacity": 0.9,
    "tint": [
@@ -1833,87 +1833,12 @@
    "flip_v": 1.0
   },
   {
-   "name": "Int_Reactor",
-   "texture": "D_Int_Reactor",
-   "location": [
-    -130.0,
-    -104.5,
-    35.0
-   ],
-   "rotation": [
-    0.0,
-    90.0,
-    90.0
-   ],
-   "size": [
-    1.5,
-    9.0,
-    18.0
-   ],
-   "opacity": 0.9,
-   "tint": [
-    0.8,
-    0.78,
-    0.72
-   ]
-  },
-  {
-   "name": "Int_Voltage",
-   "texture": "D_Int_Caution_Voltage",
-   "location": [
-    -130.0,
-    -104.5,
-    0.0
-   ],
-   "rotation": [
-    0.0,
-    90.0,
-    90.0
-   ],
-   "size": [
-    1.5,
-    8.0,
-    16.0
-   ],
-   "opacity": 0.9,
-   "tint": [
-    0.85,
-    0.55,
-    0.05
-   ]
-  },
-  {
-   "name": "Int_Cooler",
-   "texture": "D_Int_Cooler",
-   "location": [
-    -30.0,
-    -114.5,
-    5.0
-   ],
-   "rotation": [
-    0.0,
-    90.0,
-    90.0
-   ],
-   "size": [
-    1.5,
-    7.0,
-    14.0
-   ],
-   "opacity": 0.9,
-   "tint": [
-    0.8,
-    0.78,
-    0.72
-   ]
-  },
-  {
    "name": "Int_Cockpit",
    "texture": "D_Int_Cockpit",
    "location": [
-    13.5,
-    100.0,
-    40.0
+    7.5,
+    78.0,
+    15.0
    ],
    "rotation": [
     0.0,
@@ -1922,8 +1847,8 @@
    ],
    "size": [
     3.0,
-    9.0,
-    36.0
+    7.3,
+    26.0
    ],
    "opacity": 0.9,
    "tint": [

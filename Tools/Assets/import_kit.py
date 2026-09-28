@@ -12,6 +12,7 @@
    section-W corridor composed of the batch's wall modules, a light at every light socket, closed in a dark
    box against the sun. Floor, ceiling, end walls and the three down-lights are provisional (batches 2 and 3).
    Everything carries the tag KitShowroom and is rebuilt on every run.
+4. The ships' kit rooms (kit_rooms.py: the parts as components of BP_Ship_<Ship>) after the showroom.
 Prints KITIMPORT {...}.
 """
 import json
@@ -664,8 +665,11 @@ def main():
     mis = build_materials()
     meshes = import_parts(mis, report)
     build_showroom(meshes, mis, report)
+    # the ships' kit rooms (kit_rooms.py) use the parts just imported
+    import kit_rooms
+    rooms = kit_rooms.build_all()
     print("KITIMPORT " + json.dumps({"parts": len(meshes), "notes": {k: v for k, v in report.items() if k != "showroom"},
-                                     "showroom": report.get("showroom")}))
+                                     "showroom": report.get("showroom"), "ship_rooms": rooms}))
 
 
 main()

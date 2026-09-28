@@ -775,6 +775,33 @@ Stylový záměr autora: **„udržovaná pracovní loď“**. Panely a plochy d
   `SHIP_SLOTS`), tint (5,5; 6,4; 7,8), drsnost 0,35. Buňka smear je beztvará; směrový pás potřebuje vlastní buňku (otevřené).
 - Svítidla: rámeček 6 mm kolem difuzoru (`BEZEL_ROLES`), emise `Kit_GlowWarm` 1,1.
 
+### Místnosti lodi z kitu (pilotní chodba Wayfareru, 28. 9. 2026)
+
+Recenze `Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md`.
+- Recept lodi `interior.kit_modules` (`<Loď>_hs.json`) popisuje místnosti v metrech layoutu (x dopředu, y na levobok,
+  z od paluby) stejně jako `import_kit.SHOWROOM`:
+  - `rooms`;
+  - `wall_runs` (začátek, konec, normála líce, moduly);
+  - `run_parts` (portály, stropy, podlahy);
+  - `stand_in_floor` (náhrada chybějící desky 0,3 m).
+- `hs_interior` v místnosti z kitu postaví jen přepážky, tmavou vrstvu nad stropem a náhrady. Objekty layoutu a decaly
+  interiéru tam přeskočí.
+- UE: `Tools/Assets/kit_rooms.py` vloží díly do `BP_Ship_<Loď>` pod Hull:
+  - komponenty `InteriorMod_NN_<díl>` bez kolize;
+  - světla ze socketů `Light_fix_kit_NN`, která pawn zapíná s kamerou uvnitř jako ostatní svítidla. Jsou **bez stínů**
+    a se zesílením `SHIP_LIGHT_SCALE` ×1,1: loď se létá bez MegaLights a 11 světel se stíny stálo 10–24 ms
+    (1676 draw callů). Showroom má ×2,0 a stíny.
+- `kit_rooms.py` volá `import_kit.py` i `import_ship.py`. `remove_stale` světla `Light_fix_kit_*` nechává.
+- Sdílená matematika rozmístění je `Tools/Kit/kit_layout.py`: ship space = layout + `assemble.offset`, y v UE
+  zrcadlené, yaw v Blenderu opačně.
+- Test geometrie lodi díly kitu dosadí sám (`add_kit_rooms`): díry, plovoucí díly a průnik trupem se kontrolují
+  i s nimi.
+- Řez trupem se skutečnými díly: `Tools/Kit/hull_fit_kit_rooms.py` (Blender, pak `--draw`) →
+  `Docs/Kit/hull_fit_<loď>_kit_rooms.png`. Wayfarer: nejmenší mezera 0,29 m (portál), jinak 0,52 m.
+- Snímky ze stejných pozic před a po: preset `wayfarer_kit_corridor` (pozice v metrech layoutu převedené na
+  `camera_local`).
+- Chybějící díly zapisuj do `ArtSource/Kit/kit_parts.json` jako `pilot_needs` u rodiny, nové rodiny do dávky.
+
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 
 Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.

@@ -663,8 +663,9 @@ def remove_stale(plan, blueprint, report):
             if name in keep_components:
                 continue
             if isinstance(obj, unreal.LocalLightComponent):
-                # only the ship lights this script adds; the pawn's own (cockpit, quantum glow) stay
-                if not name.startswith("Light_"):
+                # only the ship lights this script adds; the pawn's own (cockpit, quantum glow) and the kit rooms'
+                # (kit_rooms.py, Light_fix_kit_*) stay
+                if not name.startswith("Light_") or name.startswith("Light_fix_kit_"):
                     continue
                 subsystem.delete_subobjects(handles[0], [handle], blueprint)
                 removed.append("component " + name)
@@ -769,6 +770,12 @@ def main(argv):
             report["hologram_pivot_cm"] = [round(o.x, 1), round(o.y, 1), round(o.z, 1)]
     blueprint = apply_pawn_settings(plan, report)
     remove_stale(plan, blueprint, report)
+    # rooms from the interior kit (kit_rooms.py, recipe interior.kit_modules): rebuilt on the new Blueprint
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import kit_rooms
+    for kit_ship, recipe in kit_rooms.recipes():
+        if kit_ship == plan["ship"]:
+            kit_rooms.build_ship(kit_ship, recipe, report.setdefault("kit_rooms", {}))
     apply_level_settings(plan, blueprint, env_flag("GAMESPACE_SHIP_APPLY_PLANET", True),
                          env_flag("GAMESPACE_SHIP_SET_GAME_MODE", True), report)
 

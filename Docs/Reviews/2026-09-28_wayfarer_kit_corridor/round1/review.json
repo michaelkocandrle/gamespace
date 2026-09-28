@@ -1,0 +1,52 @@
+{
+ "topic": "wayfarer_kit_corridor",
+ "date": "2026-09-28",
+ "goal": "Technická chodba malé jednomístné lodi (2,1 m dlouhá, průchod mezi nákladovým prostorem a kajutou) postavená z modulárního interiérového kitu přímo uvnitř trupu lodi. Po stranách jsou přístupné komponenty lodi: vlevo reaktor za mřížkou a chladič, vpravo generátor štítů za poklopem a chladič. Hodnotí se, jak kit funguje ve skutečné lodi: proporce průchodu, napojení na okolní prostory a dveře, čitelnost komponent, světlo a materiály. Pohled z první osoby (oko 1,65 m).",
+ "style": "STYLOVÝ ZÁMĚR (autor): „udržovaná pracovní loď“ – panely téměř čisté, špína jen ve spárách, u soklu, kolem poklopů a mřížek. NEPOŽADUJ víc špíny, než je tento záměr. Styl Star Citizen: tmavý teplý grafit, světlejší konstrukce, oranžová signální barva výrobce, svítidla v pouzdrech, teplé světlo architektury.",
+ "checklist": "interior",
+ "out": "Docs/Reviews/2026-09-28_wayfarer_kit_corridor/round1",
+ "notes": [
+  "Přepážky s dveřními otvory na obou koncích chodby a místnosti za nimi (nákladový prostor, kajuta) jsou zatím z dřívějšího interiéru; dveře a přepážky kitu přijdou v další dávce. Hodnoť chodbu, napojení na ně uveď jako rozdíl.",
+  "Dveřní otvory jsou zatím bez křídel (posuvné dveře přijdou s chozením po lodi).",
+  "Text vpravo nahoře (FPS) je měřicí overlay, ne součást výsledku.",
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt."
+ ],
+ "pairs": [
+  {
+   "title": "Technická chodba lodi, pohled dopředu ke kajutě",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
+   "ref_label": "SC chodba (Drake)",
+   "ours": "Saved/Shots/20260928_164015_wayfarer_kit_corridor/01_tech_fwd.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Pohled dozadu: portál a přepážka s dveřmi do nákladového prostoru",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
+   "ref_label": "SC úzká místnost s poklopem",
+   "ours": "Saved/Shots/20260928_164015_wayfarer_kit_corridor/02_tech_aft.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Vstup z nákladového prostoru do technické chodby",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC infrastruktura",
+   "ours": "Saved/Shots/20260928_164015_wayfarer_kit_corridor/03_tech_from_hold.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Levá stěna: reaktor za mřížkou a chladič",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021456.png",
+   "ref_label": "SC komponenty ve stěně",
+   "ours": "Saved/Shots/20260928_164015_wayfarer_kit_corridor/04_tech_reactor.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

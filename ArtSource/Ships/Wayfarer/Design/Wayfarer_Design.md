@@ -51,9 +51,9 @@ Od zádě k přídi (x v metrech od zádě):
 2. **Nákladový prostor** (x 1–8,2): mřížka 4 × 2 SCU u pravoboku, podél levoboku volná ulička
    1,25 m. U rampy hydraulika a držák ručního tažného paprsku. Pod podlahou kvantový pohon a nádrž
    kvantového paliva.
-3. **Technická chodba** (x 8,2–10,4): po stranách přístupné komponenty jako v SC, mezi nimi 2,1 m
+3. **Technická chodba** (x 8,2–10,34; do 28. 9. 10,4): po stranách přístupné komponenty jako v SC, mezi nimi 2,1 m
    průchodu. Vlevo reaktor a chladič, vpravo generátor štítů a chladič.
-4. **Kajuta** (x 10,4–15,2): lůžko u levoboku (pod ním podpora života), vpravo skříň na skafandr
+4. **Kajuta** (x 10,34–15,2): lůžko u levoboku (pod ním podpora života), vpravo skříň na skafandr
    a zbraň, hygienická buňka a výdejník jídla a vody.
 5. **Kokpit** (x 15,2–19,4, podlaha o schod výš): křeslo uprostřed, levá a pravá konzole
    s fyzickými přepínači, přístrojová deska se třemi MFD a HUD. Pod podlahou avionika.
@@ -63,6 +63,7 @@ Od zádě k přídi (x v metrech od zádě):
 - Nástup: ze země po rampě → uličkou podél nákladu → technická chodba → kajuta → schod → za křeslo
   → animace usednutí. Celá cesta je rovná, bez slepých uliček.
 - Šířky: dveře 1,0–1,1 m, ulička 1,25 m (kapsle postavy má průměr 0,84 m).
+- Pilotní chodba z kitu (28. 9. 2026, čeká na schválení): dveře z nákladového prostoru posunuty z y 1,2 na y 0,5 (šířka 1,0 m), protože ústily přímo na bok reaktoru. Přepážka ke kajutě o 6 cm dozadu kvůli mřížce kitu. Recenze `Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md`.
 - Výstup ze sedadla zpět za křeslo; z lodi jen rampou (zatím bez nouzového výstupu kabinou).
 
 ## 4. Designový jazyk

@@ -382,9 +382,14 @@ def dossier_html(s):
         if dz.get("decisions"):
             lis = "".join("<li><b>%s</b> %s</li>" % (esc(q), esc(a)) for q, a in dz["decisions"])
             parts.append(step(n, "Rozhodnutí autora", dz.get("decided", "Schváleno"), '<ul class="list">%s</ul>' % lis))
-        else:
+        if dz.get("questions"):
+            # (an approved ship can have new open questions too: a later step changes its plan - 28. 9. 2026)
+            if dz.get("decisions"):
+                n += 1
             lis = "".join("<li>%s</li>" % esc(q) for q in dz["questions"])
-            parts.append(step(n, "Na autorovi", "Otázky ke schválení", "<p>Dokud návrh není schválený, nic se nestaví ve 3D.</p><ol class=\"q\">%s</ol>" % lis))
+            note = ("<p>Otevřené otázky k pozdějším krokům.</p>" if dz.get("decisions")
+                    else "<p>Dokud návrh není schválený, nic se nestaví ve 3D.</p>")
+            parts.append(step(n, "Na autorovi", "Otázky ke schválení", note + "<ol class=\"q\">%s</ol>" % lis))
 
     meta = "".join("<span>%s <b>%s</b></span>" % (a, esc(b)) for a, b in (
         ("délka", fmt(s["L"], "m")), ("šířka", fmt(s["B"], "m")), ("výška", fmt(s["H"], "m")),

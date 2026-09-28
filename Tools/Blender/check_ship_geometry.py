@@ -12,6 +12,8 @@ Prints GEOCHECK {...} (and writes <out_dir>/geocheck.json and the hole masks). A
   placeholders        slots without a material or with Blender's default; large plain faces are listed (warning)
   holes               ship-less pixels (the world) seen from the player's positions with every surface opaque -
                       the eye and the interior shot cameras of Tools/Shots/<ship>_interior.json
+The kit rooms' parts (recipe interior.kit_modules, placed in Unreal by Tools/Assets/kit_rooms.py) are put into the
+ship first (add_kit_rooms), so the checks see them as the game does.
 Meaning of pass: every list empty (warnings do not fail).
 """
 import json
@@ -22,7 +24,7 @@ import sys
 import bmesh
 import bpy
 import numpy as np
-from mathutils import Euler, Vector
+from mathutils import Euler, Matrix, Vector
 from mathutils.bvhtree import BVHTree
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "mcp"))
@@ -138,8 +140,72 @@ def islands(bm):
     return out
 
 
+def add_kit_rooms(ship, recipe):
+    """The kit rooms' parts (recipe interior.kit_modules) as one mesh SM_Ship_<Ship>_InteriorKitMod, placed as
+    Tools/Assets/kit_rooms.py places them in Unreal (Tools/Kit/kit_layout.py): the blend has only the bulkheads
+    there, so without them every view into a kit room was a hole. The holes, the floating parts and the hull are
+    then checked with the real parts. Never saved (this process does not write the blend)."""
+    mods = (recipe.get("interior") or {}).get("kit_modules")
+    if not mods:
+        return None
+    sys.path.insert(0, os.path.join(ROOT, "Tools", "Kit"))
+    import kit_layout
+    placed = kit_layout.layout_parts(mods, kit_layout.manifest_parts())
+    want = {"SM_Kit_" + m for m, _, _ in placed}
+    src = {}
+    for path in kit_layout.kit_blends():
+        with bpy.data.libraries.load(path, link=False) as (data_from, data_to):
+            names = [n for n in data_from.objects if n in want and n not in src]
+            data_to.objects = list(names)       # (a copy: the load swaps the list's names for the objects)
+        for n, ob in zip(names, data_to.objects):      # (loaded in the order asked for)
+            if ob is not None:
+                src[n] = ob
+    missing = sorted(want - set(src))
+    if missing:
+        raise RuntimeError("kit parts not in ArtSource/Kit/*.blend: %s" % missing)
+    tmp_coll = bpy.data.collections.new("_kit_parts")
+    bpy.context.scene.collection.children.link(tmp_coll)
+    for ob in src.values():
+        tmp_coll.objects.link(ob)
+    dg = bpy.context.evaluated_depsgraph_get()
+    off = recipe["assemble"]["offset"]
+    combined, mat_names = bmesh.new(), []
+    for m, (x, y_ue, z), yaw in placed:
+        ob = src["SM_Kit_" + m]
+        ev = ob.evaluated_get(dg)
+        tmp = bmesh.new()
+        tmp.from_mesh(ev.to_mesh())
+        # Unreal (y mirrored, yaw about +Z) -> the game blend: y back to Blender's sense, the turn the other way
+        tmp.transform(Matrix.Translation((x + off[0], -y_ue + off[1], z + off[2])) @ Matrix.Rotation(math.radians(-yaw), 4, "Z"))
+        remap = []
+        for mt in ob.data.materials:
+            n = mt.name if mt else ""
+            if n not in mat_names:
+                mat_names.append(n)
+            remap.append(mat_names.index(n))
+        for f in tmp.faces:
+            f.material_index = remap[f.material_index] if f.material_index < len(remap) else 0
+        me = bpy.data.meshes.new("_kit_tmp")
+        tmp.to_mesh(me)
+        tmp.free()
+        ev.to_mesh_clear()
+        combined.from_mesh(me)
+        bpy.data.meshes.remove(me)
+    me = bpy.data.meshes.new("SM_Ship_%s_InteriorKitMod" % ship)
+    combined.to_mesh(me)
+    combined.free()
+    for n in mat_names:
+        me.materials.append(bpy.data.materials.get(n))
+    kob = bpy.data.objects.new(me.name, me)
+    bpy.context.scene.collection.objects.link(kob)
+    for ob in list(src.values()):
+        bpy.data.objects.remove(ob)
+    bpy.data.collections.remove(tmp_coll)
+    return {"parts": len(placed), "faces": len(me.polygons)}
+
+
 def floating_and_penetrating(ship, exempt_names):
-    parts = [o for o in (obj(ship, "_Interior"), obj(ship, "_InteriorKit")) if o is not None]
+    parts = [o for o in (obj(ship, "_Interior"), obj(ship, "_InteriorKit"), obj(ship, "_InteriorKitMod")) if o is not None]
     hull = obj(ship, "")
     all_bm = bmesh.new()
     owner = []                    # per face of all_bm: (object index, island id) or ("hull", -1)
@@ -356,6 +422,7 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
     recipe = json.load(open(os.path.join(ROOT, "ArtSource", "Ships", ship, "HardSurface", "%s_hs.json" % ship), encoding="utf-8"))
     exempt = recipe.get("checks", {}).get("floating_exempt", [])
+    kit_rooms = add_kit_rooms(ship, recipe)
     floating, penetrating, tree = floating_and_penetrating(ship, exempt)
     report = {
         "mirrored_decals": mirrored_mesh_decals(ship) + mirrored_projected(ship, tree),
@@ -365,9 +432,11 @@ def main():
     report["placeholders"], report["warnings"] = placeholders(ship)
     report["holes"] = holes(ship, out_dir)
     report["pass"] = not any(report[k] for k in ("mirrored_decals", "floating", "penetrating", "placeholders", "holes"))
+    report["kit_rooms"] = kit_rooms
     report["counts"] = {k: len(report[k]) for k in ("mirrored_decals", "floating", "penetrating", "placeholders", "holes", "warnings")}
     json.dump(report, open(os.path.join(out_dir, "geocheck.json"), "w", encoding="utf-8"), indent=1)
     print("GEOCHECK " + json.dumps({"pass": report["pass"], "counts": report["counts"], "json": os.path.join(out_dir, "geocheck.json")}))
 
 
-main()
+if __name__ == "__main__":       # (blender --python runs it as __main__; hull_fit_kit_rooms imports it)
+    main()

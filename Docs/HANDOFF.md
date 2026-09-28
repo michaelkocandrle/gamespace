@@ -1679,6 +1679,31 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
           - ohmatání madel;
           - lišty stropu po segmentech.
         - Výkon beze změny: chodba 16,2 / 16,9 ms, křižovatka 15,5 / 16,2 ms, hala 13,0 / 14,2 ms; jas chodby 0,19.
+      - krok 7.1, pilotní chodba Wayfareru z kitu (28. 9.), recenze `Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md`:
+        - Průřezy v trupu: obálky `Docs/Kit/hull_fit_wayfarer.png` (přepočteno, beze změny). Nově řez se skutečnými díly
+          `Docs/Kit/hull_fit_wayfarer_kit_rooms.png` (`Tools/Kit/hull_fit_kit_rooms.py`): nejmenší mezera k trupu 0,29 m,
+          exteriér beze změny.
+        - Technická chodba (x 8,2–10,34) z 9 dílů kitu:
+          - recept `interior.kit_modules`;
+          - `hs_interior` staví jen přepážky a náhrady;
+          - `Tools/Assets/kit_rooms.py` dává díly do `BP_Ship_Wayfarer` jako komponenty `InteriorMod_*`, světla
+            `Light_fix_kit_*` bez stínů;
+          - sdílená matematika `Tools/Kit/kit_layout.py`.
+        - Test geometrie lodi díly kitu dosadí sám. Odhalil visící tmavé výklenky za mřížkami kitu (opraveno,
+          `RECESS_BACK`).
+        - Layout: dveře z nákladového prostoru y 1,2 → 0,5, protože ústily na reaktor. Přepážka ke kajutě 10,40 → 10,34.
+          Výkresy překreslené, čeká na schválení.
+        - Jas chodby 0,14 → 0,20–0,26, detail 0,017 → 0,025–0,034.
+        - Výkon: chodba 17,5 → 19,0 ms GPU, interiér +1 ms, kokpit 16,0 ms. Se stíny světel kitu to bylo 27–42 ms.
+        - Kritik (1 kolo podle zadání): FAIL 43. Body „musí“ jsou chybějící díly (výklenky komponent, vrstvy stěn,
+          svítidla v pouzdrech). Rošt, žlaby a cedule opraveny.
+        - Chybějící díly v `ArtSource/Kit/kit_parts.json` (`pilot_needs`):
+          - nové rodiny `Wall_ComponentBay` a `Wall_HullLiner` v dávce 4;
+          - `Bulkhead_Door` mimo osu;
+          - deska 0,3 m W;
+          - cedule;
+          - schody 1,15 m a rampa 22°.
+        - Otázka pro autora: nákladový prostor (8 SCU + ulička 3,75 m) se do W místnosti 3,0 m nevejde.
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

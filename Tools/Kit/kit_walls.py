@@ -22,6 +22,7 @@ from kit_geo import frame
 G = 0.006                     # half shadow gap (each module carries half at its ends)
 GAP = 0.012                   # gap between panels (8 mm read as a hairline - critic, 27. 9. 2026)
 PT = 0.025                    # panel thickness
+RECESS_BACK = 0.07            # the dark backing's face behind the panel face (shell)
 BEV_BIG, BEV_MID, BEV_SMALL = 0.012, 0.007, 0.003
 SQ = math.sqrt(0.5)
 
@@ -50,11 +51,14 @@ class Wall:
         self.split_default = True
 
     # ------------------------------------------------------------------ shell
+    # (the dark backing's face is RECESS_BACK behind the panel face; the recess behind an opening - a grille, a
+    # hatch - is a dark block from its face back to it, not a 1 cm plate: the plate hung in the wall touching nothing,
+    # with a slit round it into the wall - the ship's geometry check, Wayfarer pilot corridor, 28. 9. 2026)
     def shell(self, skip_main=False, skip_kick=False, skip_slope=False, main_split=None, slope_cut=None):
         p, L = self.p, self.L
         # structure: dark backing behind everything, seen through the gaps
-        p.slab("Kit_Seal", self.VERT, 0, L, 0.1, self.vt, 0.01, proud=-0.07, panel=False)
-        p.slab("Kit_Seal", self.SLOPE, 0, L, 0, self.slope_len, 0.01, proud=-0.07, panel=False)
+        p.slab("Kit_Seal", self.VERT, 0, L, 0.1, self.vt, 0.01, proud=-RECESS_BACK, panel=False)
+        p.slab("Kit_Seal", self.SLOPE, 0, L, 0, self.slope_len, 0.01, proud=-RECESS_BACK, panel=False)
         # recessed plinth: a dark chamfer with the cool floor strip, a rubber kick edge at the floor
         p.slab("Kit_Seal", self.PLINTH, 0, L, 0, 0.1414, 0.012, panel=False)
         # the floor strip as a fixture: a metal channel with two lips, end caps and a diffuser set in it ("bare neon
@@ -369,7 +373,7 @@ def grille(w, var, rng):
         hole = (0.1, L - 0.1, 0.16, min(sl - 0.12, 0.5))
         w.shell(skip_slope=True)
         w.frame_hole("Kit_Primary", w.SLOPE, G, L - G, 0.045, sl - 0.04, hole)
-        p.slab("Kit_Seal", w.SLOPE, hole[0], hole[1], hole[2], hole[3], 0.01, proud=-0.045, panel=False)
+        p.slab("Kit_Seal", w.SLOPE, hole[0], hole[1], hole[2], hole[3], RECESS_BACK - 0.045, proud=-0.045, panel=False)
         p.slab("Kit_Trim", w.SLOPE, hole[0] + 0.01, hole[1] - 0.01, hole[2] + 0.01, hole[3] - 0.01, 0.006, proud=-0.012, trim="perforated", panel=False)
         _frame_ring(w, w.SLOPE, hole)
         w.label("st_vent", w.SLOPE, hole[0] + 0.15, 0.1, 0.8)           # under the grille: the conduits run above it
@@ -394,7 +398,7 @@ def _gasket(w, m, hole, t=0.006):
 def _louvres(w, m, hole, pitch=0.028):
     hu0, hu1, hv0, hv1 = hole
     p = w.p
-    p.slab("Kit_Seal", m, hu0, hu1, hv0, hv1, 0.01, proud=-0.05, panel=False)
+    p.slab("Kit_Seal", m, hu0, hu1, hv0, hv1, RECESS_BACK - 0.05, proud=-0.05, panel=False)
     _frame_ring(w, m, hole)
     _gasket(w, m, hole)
     n = int((hv1 - hv0) / pitch)
@@ -637,7 +641,7 @@ def hatch(w, var, rng):
         # (a flat panel with a sticker, no frame, hinges or latches - critic, 27. 9. 2026)
         # a raised frame ring, the cover 6 mm into the opening over a dark recess, four big quarter-turn fasteners,
         # two hinge barrels on the left
-        p.slab("Kit_Seal", w.VERT, hu0, hu1, hv0, hv1, 0.01, proud=-0.035, panel=False)
+        p.slab("Kit_Seal", w.VERT, hu0, hu1, hv0, hv1, RECESS_BACK - 0.035, proud=-0.035, panel=False)
         _frame_ring(w, w.VERT, (hu0, hu1, hv0, hv1), t=0.028, proud=0.012)
         _gasket(w, w.VERT, (hu0, hu1, hv0, hv1))
         # the cover 16 mm under the frame face ("flush with the wall, cannot tell it opens" - critic round 2)

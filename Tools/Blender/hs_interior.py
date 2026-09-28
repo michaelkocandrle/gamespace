@@ -546,6 +546,10 @@ def build(recipe, layout, coll, mats, ship, hull):
     doors = layout["doors"]
     report = {"rooms": [], "objects": 0}
     kit_rooms = (spec.get("kit") or {}).get("rooms", [])
+    # rooms from the interior kit (ArtSource/Kit): their parts come in Unreal as components of the ship
+    # (Tools/Assets/kit_rooms.py); here only the bulkheads and the stand-ins for the parts the kit lacks
+    mods = spec.get("kit_modules") or {}
+    mod_rooms = mods.get("rooms", [])
     kit = None
     global KIT, COCKPIT
     KIT = None
@@ -562,6 +566,16 @@ def build(recipe, layout, coll, mats, ship, hull):
         if rid == "cockpit":
             continue
         y0i, y1i = y0 + inset, y1 - inset
+        if rid in mod_rooms:
+            # the ceiling's dark backing as every room has it (ceiling()): the neighbours' backings rest on it (the
+            # cabin's hung free without it - geometry check); above the kit's ceiling, never seen
+            box(g["int_dark"], (x0, y0i, H + 0.04), (x1, y1i, H + 0.06))
+            for xa, xb in mods.get("stand_in_floor", []):
+                if x0 <= xa < xb <= x1:
+                    floor_tiles(g, xa, xb, -1.3, 1.3, z0, tile=xb - xa)
+            report.setdefault("kit_modules", []).append(rid)
+            report["rooms"].append(rid)
+            continue
         if rid in kit_rooms:
             # the SC-like structure from the modular kit (hs_interior_kit.py)
             report["kit"][rid] = hs_interior_kit.shell(kit, g, box, obox, r, spec, H, y1i, lights_out, door_xs, _hull_top(hull))
@@ -685,6 +699,10 @@ def build(recipe, layout, coll, mats, ship, hull):
         x0, x1, y0, y1 = o["rect"]
         zr = o.get("z", [0.0, 1.0])
         name = o["name"]
+        if o.get("room") in mod_rooms:
+            # the kit's walls stand for them (the reactor behind a grille, the shield generator behind a hatch)
+            report["objects_in_kit_rooms"] = report.get("objects_in_kit_rooms", 0) + 1
+            continue
         if o.get("below"):
             z = rooms[o["room"]].get("floor_z", 0.0)
             hatch(g, (x0, x1, y0, y1), z + 0.001)
@@ -971,6 +989,8 @@ def build(recipe, layout, coll, mats, ship, hull):
         import hs_interior_decals
         dspec = dict(spec["decals"])
         dspec["_cockpit"] = COCKPIT
+        # nothing is built in the kit rooms here: a ray there would lay its decal on the dark skin behind the kit
+        dspec["_exclude_x"] = [rooms[r]["rect"][:2] for r in mod_rooms]
         dobjs, report["decals"] = hs_interior_decals.build(objs, ship, coll, dspec, ROOT, mats, eye)
         objs += dobjs
     if holo_centre is not None and "holo" in mats:

@@ -1,0 +1,132 @@
+{
+ "_comment": "Wayfarer pilot corridor from the interior kit (kit brief step 7.1, 28. 9. 2026): the technical corridor (layout x 8.2-10.34) from the same positions before (the procedural / Quaternius interior) and after (kit modules as BP components, kit_rooms.py). Interior lighting as walked (space.InteriorLighting 1); perf_tech measures stat unit / stat gpu. Positions in layout metres converted to camera_local (x - 10.25, -y, z - 1.2). Run -Width 1920 -Height 1080.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 4.0,
+   "console": [
+    "stat none",
+    "r.GPUStatsEnabled 1",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "tech_fwd",
+   "camera_local": [
+    -1.63,
+    -0.0,
+    0.45
+   ],
+   "look_local": [
+    0.09,
+    -0.0,
+    0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "tech_aft",
+   "camera_local": [
+    -0.05,
+    0.3,
+    0.45
+   ],
+   "look_local": [
+    -2.05,
+    -0.3,
+    0.1
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "tech_from_hold",
+   "camera_local": [
+    -3.35,
+    -1.0,
+    0.45
+   ],
+   "look_local": [
+    -1.65,
+    -0.4,
+    0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "fov": 90,
+   "name": "tech_reactor",
+   "camera_local": [
+    -0.85,
+    0.6,
+    0.45
+   ],
+   "look_local": [
+    -1.05,
+    -1.2,
+    -0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 6.0,
+   "fov": 90,
+   "name": "perf_tech",
+   "camera_local": [
+    -1.63,
+    -0.0,
+    0.45
+   ],
+   "look_local": [
+    0.09,
+    -0.0,
+    0.2
+   ],
+   "console": [
+    "stat none",
+    "stat unit",
+    "stat gpu"
+   ]
+  },
+  {
+   "name": "z_reset",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 1.0,
+   "console": [
+    "stat none",
+    "space.InteriorLighting 0"
+   ]
+  }
+ ]
+}

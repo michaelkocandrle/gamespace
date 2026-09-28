@@ -42,12 +42,14 @@
   },
   {
    "n": 4,
-   "title": "Zárubně, dveře, přepážky",
+   "title": "Zárubně, dveře, přepážky, výklenky komponent, obložení trupu",
    "families": [
     "Door_Sliding",
     "Door_Frame",
     "Bulkhead_Plain",
-    "Bulkhead_Door"
+    "Bulkhead_Door",
+    "Wall_ComponentBay",
+    "Wall_HullLiner"
    ]
   },
   {
@@ -371,7 +373,8 @@
     "A": "plates with edge strips and anti-slip fields",
     "B": "plates with a centre walkway line and hazard edges"
    },
-   "status": "approved (batch 3, author 27. 9. 2026)"
+   "status": "approved (batch 3, author 27. 9. 2026)",
+   "pilot_needs": "0.3 m for W (and N/S/T): a corridor of 2.1 m between bulkheads (portal 0.3 + walls 1.8) cannot be floored with 0.6/1.2 plates - the pilot has a procedural stand-in under the aft portal. Wayfarer pilot corridor 28. 9. 2026 (Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md)"
   },
   "Floor_Grille": {
    "category": "Floor",
@@ -416,7 +419,8 @@
    "variants": {
     "A": "ship's stair, lit nosings, side rails (parametric rise)"
    },
-   "status": "approved (batch 3, author 27. 9. 2026)"
+   "status": "approved (batch 3, author 27. 9. 2026)",
+   "pilot_needs": "a 1.15 m rise for the Wayfarer's raised cockpit floor (the built flight is 0.8 m). Wayfarer pilot corridor 28. 9. 2026 (Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md)"
   },
   "Stair_Ramp": {
    "category": "Stair",
@@ -424,7 +428,8 @@
    "variants": {
     "A": "boarding ramp inner surface with anti-slip and hazard edges"
    },
-   "status": "approved (batch 3, author 27. 9. 2026)"
+   "status": "approved (batch 3, author 27. 9. 2026)",
+   "pilot_needs": "the Wayfarer's ramp: 22 deg, 1.6 m (the built ramp is 2.9 m long). Wayfarer pilot corridor 28. 9. 2026 (Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md)"
   },
   "Door_Sliding": {
    "category": "Door",
@@ -476,7 +481,8 @@
    "variants": {
     "A": "bulkhead with a door opening and hazard frame"
    },
-   "status": "planned"
+   "status": "planned",
+   "pilot_needs": "the door opening off the centre line (its centre a parameter across the section's clear width: the Wayfarer's hold door sits at y 0.5 of a W corridor), a face that meets the kit walls' plinth, slope and cove where they end against it, and fits inside a portal ring; replaces the ships' procedural bulkheads with their doorways. Wayfarer pilot corridor 28. 9. 2026 (Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md)"
   },
   "Console_Standing": {
    "category": "Console",
@@ -575,7 +581,8 @@
     "A": "section / room sign plate",
     "B": "exit and hazard sign"
    },
-   "status": "planned"
+   "status": "planned",
+   "pilot_needs": "room and direction signs on the kit wall's vertical band (below 1.3 m in W, where the slope starts): the cockpit sign on the old bulkhead had to shrink to fit beside the kit wall. Wayfarer pilot corridor 28. 9. 2026 (Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md) Chevrons for both sides of a door: the Wayfarer's cabin door sits off the centre line, so its sign only fits on the far side and its chevrons point away from the door (critic, pilot round 1)."
   },
   "Furniture_Locker": {
    "category": "Furniture",
@@ -686,6 +693,42 @@
     "A": "status indicator (emissive only, no light)"
    },
    "status": "planned"
+  },
+  "Wall_ComponentBay": {
+   "category": "Wall",
+   "part": "ComponentBay",
+   "sizes": [
+    0.6,
+    1.2
+   ],
+   "sections": [
+    "N",
+    "W"
+   ],
+   "variants": {
+    "A": "power plant bay: a recessed niche through the wall structure to the hull liner, a heavy grille door on hinges, pull-out rails, the component inside, REACTOR S1 / HIGH VOLTAGE labels, a bay light",
+    "B": "cooler bay: an exhaust grille over a finned core, a duct stub towards the wing root, COOLER S1 label",
+    "C": "shield generator bay: a hatch with quarter-turn latches over a boxed generator, SHIELD GEN S1 label"
+   },
+   "status": "planned (missing in the pilot)",
+   "pilot_needs": "the Wayfarer's technical corridor has its S1 components in the walls (layout objects): the pilot stands in generic grille and hatch walls ('VENT - KEEP CLEAR'), and the components lost their identity. Depth: the wall structure (0.2 m) plus the hull margin, ~0.5 m in the Wayfarer's corridor (hull_fit_wayfarer_kit_rooms.png). Wayfarer pilot corridor 28. 9. 2026 (Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md)"
+  },
+  "Wall_HullLiner": {
+   "category": "Wall",
+   "part": "HullLiner",
+   "sizes": [
+    0.6,
+    1.2
+   ],
+   "sections": [
+    "T"
+   ],
+   "variants": {
+    "A": "a thin wall (structure 0.1 m or less) that follows a hull's inside, for rooms wider than the W profile: cargo holds, cabins"
+   },
+   "status": "planned (question for the author)",
+   "pilot_needs": "the Wayfarer's hold needs 8 SCU (2.5 m) plus a 1.25 m aisle = 3.75 m, but the widest W-profile room the hull takes there is 3.0 m (hull_fit_wayfarer.png): with the kit's 0.2 m wall structure the hold cannot be built from W walls as designed - a thin hull liner, or 6 SCU / a narrower aisle (author's decision). Wayfarer pilot corridor 28. 9. 2026 (Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md)"
   }
- }
+ },
+ "_pilot": "Wayfarer pilot corridor (kit brief step 7.1, 28. 9. 2026): the parts it lacked are noted per family as 'pilot_needs' and the new families Wall_ComponentBay and Wall_HullLiner are in batch 4."
 }

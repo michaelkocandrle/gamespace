@@ -973,6 +973,19 @@ snímku.
   špínou to nevadilo, se světlým prachem karta 0,3–0,35 m udělala opar uprostřed desky a nejhustší pás ležel pod lištou
   stěny. Viditelný pás ≈ 35 % hloubky: 0,18 m u stěny, 0,1 m ve spárách. Zdrojová hrana karty (`up`) patří do
   viditelného rohu.
+- dn) **`bpy.data.libraries.load` přepíše seznam jmen objekty.** `data_to.objects = names` a po načtení je v `names`
+  místo jmen načtený objekt, takže slovník podle jmen zůstal prázdný („kit parts not in ArtSource/Kit/*.blend“).
+  Předávej kopii: `data_to.objects = list(names)` (28. 9. 2026).
+- do) **Místnost z kitu v lodi:** blend lodi má v místnosti jen přepážky a náhrady, díly kitu vkládá až UE
+  (`kit_rooms.py`, komponenty `InteriorMod_*`, světla `Light_fix_kit_*`). Test geometrie proto díly sám dosadí
+  (`check_ship_geometry.add_kit_rooms`, sdílená matematika `Tools/Kit/kit_layout.py`), jinak hlásí díry v celé
+  místnosti. Když místnost přijde o strop, sousední tmavá vrstva nad stropem visí volně: místnost z kitu si ji nechává.
+  Tmavé výklenky za otvory dílů kitu musí sahat až k zadní stěně modulu (`RECESS_BACK`), jinak visí ve stěně
+  a kolem je škvíra.
+- dp) **Schválený půdorys měl dveře přímo proti objektu.** Dveře z nákladového prostoru Wayfareru (y 0,65–1,75)
+  ústily na bok reaktoru (y 1,05–1,85 od x 8,35), takže volných zbylo 0,4 m. Odhalila to až pilotní chodba z kitu.
+  Při návrhu kontroluj u každých dveří volný průchod do hloubky 0,5 m za nimi. Každá ruční úprava layoutu dostane
+  klíč `_kit` s důvodem.
 - bo) **Kontrola geometrie před každým předáním:** od 27. 9. 2026 ji spouští sám `hs_assemble_ship.py` jako poslední krok každé přestavby lodi (při FAIL skončí Blender kódem 1, řádek `HSASSEMBLE GEOTEST FAIL`); ručně `python Tools/Tests/test_ship_geometry.py` (Blender headless na
   `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
   Musí projít (autor 25. 9. 2026).

@@ -2545,11 +2545,28 @@
    "width_m": 0.75,
    "yaw_deg": 90
   },
-  "kit": {
-   "_comment": "SC-like structure from the Quaternius MegaKit (Tools/Blender/hs_interior_kit.py): chamfered profile, portals, cable tray, services, light coves and down lights. Pilot on the corridor from the ramp to the cabin (hold + technical corridor), 25. 9. 2026.",
+  "kit_modules": {
+   "_comment": "Rooms from the interior kit (ArtSource/Kit, kit brief step 7.1, 28. 9. 2026): hs_interior builds only their bulkheads and the stand-ins; Tools/Assets/kit_rooms.py puts the kit parts into BP_Ship_<Ship> as components (InteriorMod_*, lights Light_fix_kit_*). Layout (design) metres: x forward, y to port, z from the deck; wall runs (start, end, face normal, modules), run parts (start, direction, parts one after another), as import_kit.SHOWROOM but in design axes.",
    "rooms": [
-    "hold",
     "tech"
+   ],
+   "_tech": "Technical corridor 8.24-10.34 (bulkhead faces): the aft portal frames the door from the hold, 1.8 m of walls - reactor behind the grille and the left cooler to port, the shield generator's hatch and the right cooler to starboard (layout objects). No W floor plate of 0.3 m yet: a stand-in strip under the portal.",
+   "_tech_r1": "Critic round 1: cable trays along the whole ceiling (no flat panel), the grating over the service channel in front of the coolers.",
+   "stand_in_floor": [[8.24, 8.54]],
+   "wall_runs": [
+    [[8.54, 1.2], [10.34, 1.2], [0, -1], ["Wall_Grille12W_B", "Wall_Grille06W_A"]],
+    [[8.54, -1.2], [10.34, -1.2], [0, 1], ["Wall_Hatch12W_C", "Wall_Grille06W_A"]]
+   ],
+   "run_parts": [
+    [[8.24, 0.0], [1, 0], ["Portal_Ring03W_A"]],
+    [[8.54, 0.0], [1, 0], ["Ceiling_Tray12W_A", "Ceiling_Tray06W_A"]],
+    [[8.54, 0.0], [1, 0], ["Floor_Plate12W_A", "Floor_Grille06W_A"]]
+   ]
+  },
+  "kit": {
+   "_comment": "SC-like structure from the Quaternius MegaKit (Tools/Blender/hs_interior_kit.py): chamfered profile, portals, cable tray, services, light coves and down lights. Pilot on the corridor from the ramp to the cabin (hold + technical corridor), 25. 9. 2026; the technical corridor moved to the interior kit (kit_modules) on 28. 9.",
+   "rooms": [
+    "hold"
    ],
    "chamfer_deg": 35.0,
    "cove_m": 0.12,

@@ -171,4 +171,45 @@ check("the sun box has no collision (the player walks inside it)", len(box) == 1
       and str(box[0].static_mesh_component.get_collision_profile_name()) == "NoCollision",
       box and str(box[0].static_mesh_component.get_collision_profile_name()))
 
+# the ships' kit rooms (kit_rooms.py, kit brief step 7.1, 28. 9. 2026): the recipe's parts as components of the
+# ship's Blueprint, no collision, lights with the fixture prefix (the pawn switches them), inside their rooms
+SHIPS = os.path.join(REPO, "ArtSource", "Ships")
+for ship in sorted(os.listdir(SHIPS)):
+    rpath = os.path.join(SHIPS, ship, "HardSurface", "%s_hs.json" % ship)
+    if not os.path.exists(rpath):
+        continue
+    recipe = json.load(open(rpath, encoding="utf-8"))
+    mods = (recipe.get("interior") or {}).get("kit_modules")
+    if not mods:
+        continue
+    want = sum(len(r[3]) for r in mods.get("wall_runs", [])) + sum(len(r[2]) for r in mods.get("run_parts", []))
+    old_kit = set(((recipe["interior"].get("kit") or {}).get("rooms", [])))
+    check("%s: kit rooms are not also built from the old kit" % ship, not (old_kit & set(mods["rooms"])), str(old_kit & set(mods["rooms"])))
+    bp = unreal.EditorAssetLibrary.load_asset("/Game/Ships/%s/Blueprints/BP_Ship_%s" % (ship, ship))
+    sub = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
+    lib = unreal.SubobjectDataBlueprintFunctionLibrary
+    objs = [lib.get_object(lib.get_data(h)) for h in sub.k2_gather_subobject_data_for_blueprint(bp)]
+    named = [(o.get_name().replace("_GEN_VARIABLE", ""), o) for o in objs if o is not None]
+    kit_meshes = [o for n, o in named if n.startswith("InteriorMod_")]
+    kit_lights = [o for n, o in named if n.startswith("Light_fix_kit_")]
+    check("%s: %d kit parts in the Blueprint (recipe %d)" % (ship, len(kit_meshes), want), len(kit_meshes) == want)
+    check("%s: every kit part is a kit mesh without collision" % ship, kit_meshes and all(
+        o.get_editor_property("static_mesh") is not None
+        and o.get_editor_property("static_mesh").get_path_name().startswith("/Game/Kit/Meshes/")
+        and str(o.get_collision_profile_name()) == "NoCollision" for o in kit_meshes))
+    check("%s: the kit parts' light sockets are Light_fix_kit_* lights (%d)" % (ship, len(kit_lights)),
+          len(kit_lights) >= len(kit_meshes) // 2 and all(isinstance(o, unreal.LocalLightComponent) for o in kit_lights))
+    # without shadows, as the ship's fixture lights: shadowed they cost ~10-24 ms in the ship's views (no MegaLights)
+    check("%s: the kit rooms' lights cast no shadows" % ship,
+          kit_lights and not any(o.get_editor_property("cast_shadows") for o in kit_lights))
+    layout = json.load(open(os.path.join(SHIPS, ship, "Design", "%s_layout.json" % ship), encoding="utf-8"))
+    rooms = {r["id"]: r["rect"] for r in layout["rooms"]}
+    off = recipe["assemble"]["offset"]
+    outside = []
+    for o in kit_meshes:
+        x = o.get_editor_property("relative_location").x / 100.0 - off[0]
+        if not any(rooms[r][0] - 0.01 <= x <= rooms[r][1] + 0.01 for r in mods["rooms"]):
+            outside.append("%s at x %.2f" % (o.get_name(), x))
+    check("%s: every kit part's pivot lies in a kit room of the layout" % ship, not outside, ", ".join(outside[:4]))
+
 log("SUMMARY %s (%d failures)" % ("PASS" if not failures else "FAIL", len(failures)))
