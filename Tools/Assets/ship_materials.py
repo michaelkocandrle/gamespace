@@ -952,7 +952,7 @@ return float4(g, ao, dirt, wear);
 #  - PanelShift moves the grunge per panel (UV1 random pair) and PanelDirtVar makes some panels dirtier than others:
 #    plates of one kind stop sharing one stamp (floor plate variants);
 #  - FloorWear: edge wear where the occlusion falls towards the floor (boots, trolleys); TopWear: faces looking up
-#    worn through in the grunge's pattern (hands on a rail, feet on a line).
+#    worn through in the grunge's pattern at hand height (from 0.2-0.5 m above the part's floor: the rails).
 _LAYER_MASK_DETAIL_NODE = _TRIPLANAR + """
 float3 pp = p + float3(PanelId.x * 7.31, PanelId.y * 3.17, (PanelId.x + PanelId.y) * 5.03) * PanelShift;
 float g1 = w.x * Texture2DSample(TexG, TexGSampler, pp.yz).r + w.y * Texture2DSample(TexG, TexGSampler, pp.zx).r
@@ -968,8 +968,9 @@ dirt *= lerp(1.0, 0.3 + 1.4 * PanelId.x, PanelDirtVar);
 float wear = saturate((edge * (0.5 + 1.0 * g) - WearThreshold) * 3.0) * EdgeWear;
 float low = saturate((1.0 - VC.r) * 2.5);
 wear = max(wear, saturate((edge * (0.4 + g) - 0.3) * 3.0) * low * FloorWear);
-float top = saturate((n.z - 0.6) * 4.0);
-wear = max(wear, saturate((top * (0.35 + g) - 0.55) * 3.0) * TopWear);
+// (hand height only: a floor line in the same signal paint read as orange blotches - LocalPos in cm above the part's floor)
+float top = saturate((n.z - 0.6) * 4.0) * saturate((LocalPos.z - 20.0) / 30.0);
+wear = max(wear, saturate((top * (0.35 + g) - 0.55) * 1.6) * TopWear);   // soft edges: worn through, not patched
 return float4(g, ao, saturate(dirt), saturate(wear));
 """
 
@@ -1281,13 +1282,18 @@ def build_mesh_decal_grime_master():
     """Large grime cards (hs_decals rule "grime", Tools/Assets/generate_grime_textures.py; from the SC breakdown,
     26. 9. 2026): colour and roughness only - no normal pin, so the hull's panel detail and the structural decals
     under a card stay as they are. DecalColorMap (sRGB grime colour, alpha = coverage), DecalMMap (R = applies,
-    G roughness), opacity = alpha x R x DecalOpacity, faded with distance like the other mesh decals."""
+    G roughness), opacity = alpha x R x DecalOpacity, faded with distance like the other mesh decals. DecalTint scales
+    the atlas's dark warm grey (default 1: the hulls; the kit's dark graphite takes a lighter dust, 28. 9. 2026)."""
     m = _fresh_material(MASTERS["meshdecal_grime"])
     m.set_editor_property("material_domain", unreal.MaterialDomain.MD_DEFERRED_DECAL)
     m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
     white = "/Engine/EngineResources/WhiteSquareTexture"
     col = _texture_param(m, "DecalColorMap", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR, white, -900, 0)
-    _output(col, unreal.MaterialProperty.MP_BASE_COLOR)
+    tinted = _node(m, unreal.MaterialExpressionMultiply, -500, 0)
+    if not MEL.connect_material_expressions(col, "RGB", tinted, "A"):
+        raise RuntimeError("grime colour -> tint")
+    _link(_vector(m, "DecalTint", (1.0, 1.0, 1.0), -900, 150), tinted, "B")
+    _output(tinted, unreal.MaterialProperty.MP_BASE_COLOR)
     mm = _texture_param(m, "DecalMMap", unreal.MaterialSamplerType.SAMPLERTYPE_MASKS, white, -900, 300)
     rough = _node(m, unreal.MaterialExpressionMultiply, -500, 300)
     if not MEL.connect_material_expressions(mm, "G", rough, "A"):

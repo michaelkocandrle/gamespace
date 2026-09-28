@@ -38,7 +38,8 @@ import bpy
 from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
 
-SLOTS = ("Decal", "DecalAO", "DecalPaint", "Trim", "TrimAO", "DecalGrime")
+SLOTS = ("Decal", "DecalAO", "DecalPaint", "Trim", "TrimAO", "DecalGrime", "DecalWear")
+SHIP_SLOTS = SLOTS[:6]          # the ships' decal meshes; DecalWear is the interior kit's walked line only
 GRIME_CELLS = {"streaks": 0, "soot": 1, "smear": 2, "rim": 3}   # Tools/Assets/generate_grime_textures.py, 2 x 2
 POD_Y = 2.38          # |y| beyond this a hit is on a pod (the hull's half width is 2.30)
 
@@ -241,21 +242,25 @@ class Placer:
         if hit is None:
             self.skipped["miss"] += 1
             return 0
-        hit -= self.off
         up = Vector(spec["up"])
         up.y *= side
+        return self.card_at(hit - self.off, n, up, spec["size"], spec.get("kind", "streaks"), spec.get("step_m", 0.08),
+                            spec.get("reach_m", 0.5))
+
+    def card_at(self, hit, n, up, size, kind="streaks", step=0.08, reach=0.5, alpha=1.0, slot_name="DecalGrime"):
+        """One grime card at a surface point (hit in the ship's own space, n its normal): `up` is where the dirt
+        comes from, size (w, h) m across and along it. alpha scales the card's opacity through the vertex colour
+        (the kit's walked line is fainter than the dirt in a seam). Returns the faces laid."""
         y = up - n * up.dot(n)
         if y.length < 1e-3:
             return 0
         y.normalize()
         x = y.cross(n).normalized()
-        w, h = spec["size"]
+        w, h = size
         # 8 cm cells: flat 15 cm cells sagged ~5 mm under a pod's curve (r 0.6 m) - more than the lift - and the
         # depth test cut a staircase out of the card (26. 9. 2026)
-        step = spec.get("step_m", 0.08)
         nx, ny = max(2, int(math.ceil(w / step))), max(2, int(math.ceil(h / step)))
-        reach = spec.get("reach_m", 0.5)
-        k = GRIME_CELLS[spec.get("kind", "streaks")]
+        k = GRIME_CELLS[kind]
         u0, v_top = (k % 2) * 0.5, 1.0 - (k // 2) * 0.5
         rows = []
         for j in range(ny + 1):
@@ -271,7 +276,7 @@ class Placer:
                     row.append(None)
                 row[-1] = (row[-1], s_, t)
             rows.append(row)
-        slot = SLOTS.index("DecalGrime")
+        slot = SLOTS.index(slot_name)
         # soft edges where cells were dropped (off a pod's end, over a step): a vertex next to a missing one gets
         # alpha 0 in the vertex colour, the grime master multiplies its opacity by it - a dropped cell cut the
         # card's texture off along a staircase (26. 9. 2026)
@@ -283,7 +288,7 @@ class Placer:
                     continue
                 edge = any(rows[jj][ii][0] is None
                            for jj in range(max(0, j - 1), min(ny, j + 1) + 1) for ii in range(max(0, i - 1), min(nx, i + 1) + 1))
-                v[col] = (1.0, 1.0, 1.0, 0.0 if edge else 1.0)
+                v[col] = (1.0, 1.0, 1.0, 0.0 if edge else alpha)
         faces = 0
         for j in range(ny):
             for i in range(nx):
@@ -305,7 +310,7 @@ class Placer:
                 if v is not None and not v.link_faces:
                     self.bm.verts.remove(v)
         if faces:
-            self.grime.append((spec.get("kind", "streaks"), self.part_of(hit + self.off), faces))
+            self.grime.append((kind, self.part_of(hit + self.off), faces))
         return faces
 
     # ------------------------------------------------------------------ ribbons
@@ -751,7 +756,7 @@ def build(recipe, target, ship, off, root):
     me = bpy.data.meshes.new(name)
     pl.bm.to_mesh(me)
     pl.bm.free()
-    for slot in SLOTS:
+    for slot in SHIP_SLOTS:
         m = bpy.data.materials.get("M_Ship_%s_%s" % (ship, slot)) or bpy.data.materials.new("M_Ship_%s_%s" % (ship, slot))
         me.materials.append(m)
     ob = bpy.data.objects.new(name, me)

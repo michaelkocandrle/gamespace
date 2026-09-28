@@ -24,6 +24,7 @@ a body 35, 42, 64, 65, 72.
 ## Tools/Shots.ps1
 
 ```powershell
+.\Tools\Shots.ps1 -Preset kit_material -Editor       # rychlá smyčka bez balení: nezabalený projekt (~2 min)
 .\Tools\Shots.ps1 -Preset cockpit                     # vyfotí existující balíček (~20–60 s)
 .\Tools\Shots.ps1 -Preset cockpit -Package            # nejdřív Tools\Package.ps1 (~5 min); nutné po změně C++ nebo Content
 .\Tools\Shots.ps1 -Preset sc_look -Width 1920 -Height 1080
@@ -36,6 +37,17 @@ a body 35, 42, 64, 65, 72.
 Snímky a časy se berou ve **výchozí kvalitě hry** (epická, GI vysoká, TSR 75 %; `USpaceUserSettings`), i když si autor
 v menu přepnul grafiku: `Shots.ps1` jeho `GameUserSettings.ini` na dobu běhu odloží a pak vrátí; `-PlayerSettings`
 snímá s jeho nastavením (WORKFLOW dj).
+
+**Rychlá smyčka `-Editor` (autor 28. 9. 2026):** během kroku (materiály, decaly, světla, kola kritika) se nebalí.
+`-Editor` spustí `UnrealEditor.exe <uproject> /Game/Maps/TestSpace -game`: nezabalený projekt jako samostatná hra,
+bez okna editoru a bez PIE. Nastavení čte z `Saved\Config\WindowsEditor\GameUserSettings.ini`.
+- Snímkovač drží každý snímek, dokud běží překlad shaderů nebo assetů (`GShaderCompilingManager` +
+  `FAssetCompilingManager`), limit 900 s, v logu `SHOTS waiting for N shader/asset job(s)`.
+- Proti zabalené hře: střední rozdíl 0,004–0,006, pixely nad 10/255 do 0,15 %.
+- Hra se balí jednou na konci kroku (`-Package` nebo `Package.ps1`) pro finální snímky a měření výkonu:
+  čísla GPU z `-Editor` jsou editorová.
+- A/B materiálu bez reimportu: `space.Kit <Param> <hodnota> <část jména MI>` a `space.KitColor`
+  i na herce ukázky kitu (tag `KitShowroom`), např. `space.Kit DecalOpacity 0 DecalGrime` (preset `kit_grime_ab`).
 
 - Výstup: `Saved\Shots\<yyyyMMdd_HHmmss>_<preset>\NN_<name>.png` (NN = pořadí). `Saved\` není v gitu.
 - Konec výpisu `RESULT: OK - N picture(s)`; bez snímků `RESULT: FAILED` → `Saved\Logs\gamespace.log`, hledej `SHOTS`.

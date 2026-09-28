@@ -11,7 +11,7 @@ What it guards (27. 9. 2026):
   They were lost once in kit_build.join() and came out all white, which Unreal drops on import;
 - the layout rule for decals: never the same service label (st_*, label_*) on neighbouring modules of a wall
   run of the sample (import_kit.SHOWROOM, the labels from kit_manifest.json);
-- the kit material step: seam dirt on the floor plates, the layered master's surface detail switched on for every
+- the kit material step: grime cards on the floor plates, hatches and plain walls, the layered master's surface detail switched on for every
   kit instance and off for the ships';
 - the showroom is walkable: a gravity volume over it, the start U / space.Showroom puts the player at, the
   dark sun box around it without collision.
@@ -84,9 +84,10 @@ for name, part in sorted(parts.items()):
     # has_vertex_colors() answers False in this commandlet even for the Wayfarer hull, whose masks work: export
     # the mesh back to FBX instead - Unreal writes a colour layer only when the mesh has colours (27. 9. 2026)
     check("%s: vertex colours in Unreal" % name, exported_colours(sm))
-    if name.startswith("SM_Kit_Floor_Plate"):
-        # the kit material step: dirt round every plate (kit_geo seam ring)
-        check("%s: seam dirt on the plates (%s corners)" % (name, masks.get("seam")), masks.get("seam", 0) > 0)
+    if name.startswith(("SM_Kit_Floor_Plate", "SM_Kit_Wall_Plain", "SM_Kit_Floor_Hatch")):
+        # dirt where it builds up, as grime cards (author 28. 9. 2026): the walls' plinth, the floors' seams and walls
+        grime = [d for d in part.get("decal_items", []) if d.startswith("grime_")]
+        check("%s: grime cards (%d)" % (name, len(grime)), len(grime) > 0)
 
 # ---------------------------------------------------------------- materials: the layered master's surface detail
 MEL = unreal.MaterialEditingLibrary

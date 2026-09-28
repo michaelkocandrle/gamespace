@@ -23,6 +23,13 @@
 .PARAMETER Package
     Runs Tools\Package.ps1 first (needed after any C++ or content change).
 
+.PARAMETER Editor
+    The quick loop without packaging (author 28. 9. 2026): runs the project uncooked (UnrealEditor.exe <uproject>
+    -game) with the same shot list. The shot runner holds every picture until shaders and assets have finished
+    compiling, so new materials are not caught as the default material; the first run after a material change
+    compiles for a while (the log says "SHOTS waiting for ..."). For critic rounds on materials and details; the
+    game is packaged once at the end of a step.
+
 .PARAMETER PlayerSettings
     Shoot with the player's own GameUserSettings.ini. By default the pictures and timings are taken at the game's
     default quality (epic, global illumination high, TSR 75 %: USpaceUserSettings, the author's measuring
@@ -46,6 +53,7 @@ param(
     [int]$Height = 900,
     [int]$TimeoutSeconds = 180,
     [switch]$PlayerSettings,
+    [switch]$Editor,
     # extra command-line switches for the game, e.g. -GameArgs "-NoMegaLightsPrewarm"
     [string[]]$GameArgs = @()
 )
@@ -79,28 +87,37 @@ if ($Package) {
     if ($LASTEXITCODE -ne 0) { Write-Error "Packaging failed; not taking screenshots." }
 }
 
-$exe = Join-Path (Split-Path $projectDir) "Builds\Gamespace\Windows\gamespace.exe"
-if (-not (Test-Path $exe)) {
-    Write-Error "No packaged game at $exe. Run .\Tools\Package.ps1 (or .\Tools\Shots.ps1 -Package)."
-}
-# The pictures are of the packaged build, so warn when it is older than the source or the content.
-$packagedAt = (Get-Item $exe).LastWriteTime
-$newer = Get-ChildItem (Join-Path $projectDir "Content"), (Join-Path $projectDir "Source") -Recurse -File -ErrorAction SilentlyContinue |
-    Where-Object LastWriteTime -gt $packagedAt | Select-Object -First 1
-if ($newer) {
-    Write-Host "WARNING: $($newer.Name) changed after the last package; these pictures show the old build. Use -Package." -ForegroundColor Yellow
+if ($Editor) {
+    $exe = "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe"
+    $settings = Join-Path $projectDir "Saved\Config\WindowsEditor\GameUserSettings.ini"
+    $TimeoutSeconds = [Math]::Max($TimeoutSeconds, 1200)     # the first run after a change compiles shaders
+} else {
+    $exe = Join-Path (Split-Path $projectDir) "Builds\Gamespace\Windows\gamespace.exe"
+    if (-not (Test-Path $exe)) {
+        Write-Error "No packaged game at $exe. Run .\Tools\Package.ps1 (or .\Tools\Shots.ps1 -Package)."
+    }
+    $settings = Join-Path (Split-Path $exe) "gamespace\Saved\Config\Windows\GameUserSettings.ini"
+    # The pictures are of the packaged build, so warn when it is older than the source or the content.
+    $packagedAt = (Get-Item $exe).LastWriteTime
+    $newer = Get-ChildItem (Join-Path $projectDir "Content"), (Join-Path $projectDir "Source") -Recurse -File -ErrorAction SilentlyContinue |
+        Where-Object LastWriteTime -gt $packagedAt | Select-Object -First 1
+    if ($newer) {
+        Write-Host "WARNING: $($newer.Name) changed after the last package; these pictures show the old build. Use -Package or -Editor." -ForegroundColor Yellow
+    }
 }
 
 $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $outDir = Join-Path $shotsRoot "${stamp}_$Preset"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
-$gameArgs = @("/Game/Maps/TestSpace", "-windowed", "-ResX=$Width", "-ResY=$Height", "-nosplash", "-unattended",
+$gameArgs = @()
+if ($Editor) { $gameArgs = @("`"$(Join-Path $projectDir 'gamespace.uproject')`"") }
+$gameArgs += @("/Game/Maps/TestSpace", "-windowed", "-ResX=$Width", "-ResY=$Height", "-nosplash", "-unattended",
               "-ShotList=`"$listPath`"", "-ShotOut=`"$outDir`"") + $GameArgs
+if ($Editor) { $gameArgs = @($gameArgs[0], $gameArgs[1], "-game") + $gameArgs[2..($gameArgs.Count - 1)] }
 Write-Host "Shooting $Preset ($((Get-Content $listPath | ConvertFrom-Json).shots.Count) shots) into $outDir"
 # The menu's quality (sg.*) is saved in the build's GameUserSettings.ini; a player's "medium" made one set of kit
 # timings 5 ms faster than the next (27. 9. 2026). Measure at the default quality unless -PlayerSettings.
-$settings = Join-Path (Split-Path $exe) "gamespace\Saved\Config\Windows\GameUserSettings.ini"
 $setAside = "$settings.player"
 if (-not $PlayerSettings -and (Test-Path $settings)) {
     Copy-Item $settings $setAside -Force

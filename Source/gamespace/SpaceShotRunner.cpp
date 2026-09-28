@@ -21,6 +21,8 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "AssetCompilingManager.h"
+#include "ShaderCompiler.h"
 #include "SpaceshipPawn.h"
 #include "UnrealClient.h"
 
@@ -30,6 +32,8 @@ namespace SpaceShotRunnerLocal
 {
 	/** Seconds to wait for a requested screenshot to appear before moving on. */
 	constexpr float FileTimeout = 5.f;
+	/** At most this long in total for shader compilation in an uncooked run, then the pictures go ahead. */
+	constexpr float CompileTimeout = 900.f;
 
 	ACelestialBody* FindBody(const UWorld* World, const FVector& Near)
 	{
@@ -506,6 +510,23 @@ void USpaceShotRunner::Tick(float DeltaTime)
 	Ship->DebugSetMouseStick(Shots[ShotIndex].Stick);
 	if (Timer >= Shots[ShotIndex].Settle)
 	{
+		// An uncooked run (Tools/Shots.ps1 -Editor) compiles shaders while it plays, and a picture taken meanwhile
+		// shows the default material on every new one (28. 9. 2026). Hold the picture until nothing compiles, then
+		// let it settle one more second. A packaged game has nothing to compile.
+		const int32 Compiling = (GShaderCompilingManager ? GShaderCompilingManager->GetNumRemainingJobs() : 0)
+			+ FAssetCompilingManager::Get().GetNumRemainingAssets();
+		if (Compiling > 0 && CompileWait < SpaceShotRunnerLocal::CompileTimeout)
+		{
+			CompileWait += DeltaTime;
+			CompileLogTimer += DeltaTime;
+			if (CompileLogTimer >= 5.f)
+			{
+				UE_LOG(LogSpaceShots, Display, TEXT("SHOTS waiting for %d shader/asset job(s) (%.0f s)"), Compiling, CompileWait);
+				CompileLogTimer = 0.f;
+			}
+			Timer = FMath::Max(0.001f, Shots[ShotIndex].Settle - 1.f);
+			return;
+		}
 		PendingFile = FPaths::Combine(OutputDirectory, FString::Printf(TEXT("%02d_%s.png"), ShotIndex, *Shots[ShotIndex].Name));
 		FScreenshotRequest::RequestScreenshot(PendingFile, true, false);
 		bWaitingForFile = true;

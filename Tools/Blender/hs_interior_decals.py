@@ -148,7 +148,7 @@ def build(objs, ship, coll, spec, root, mats, eye):
     me = bpy.data.meshes.new(name)
     pl.bm.to_mesh(me)
     pl.bm.free()
-    for slot in hs_decals.SLOTS:
+    for slot in hs_decals.SHIP_SLOTS:
         m = bpy.data.materials.get("M_Ship_%s_%s" % (ship, slot)) or bpy.data.materials.new("M_Ship_%s_%s" % (ship, slot))
         me.materials.append(m)
     ob = bpy.data.objects.new(name, me)

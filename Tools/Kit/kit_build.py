@@ -63,13 +63,25 @@ def decals(ob, part):
             placed.append(it["item"])
         else:
             failed.append((it["item"], "edge/overlap"))
+    # grime cards (kit_geo Part.grime): a ray along -normal from 5 cm out finds the surface, the card follows it
+    for g in part.grime_cards:
+        n0 = Vector(g["normal"]).normalized()
+        hit, n = pl.cast(Vector(g["at"]) + n0 * 0.05, -n0)
+        if hit is None or n.dot(n0) < 0.7:
+            failed.append(("grime_" + g["kind"], "miss"))
+            continue
+        if pl.card_at(hit, n, Vector(g["up"]), g["size"], g["kind"], 0.08, 0.06, g["alpha"],
+                      "DecalWear" if g.get("wear") else "DecalGrime"):
+            placed.append("grime_" + g["kind"])
+        else:
+            failed.append(("grime_" + g["kind"], "no faces"))
     if not pl.bm.faces:
         pl.bm.free()
         return None, placed, failed
     me = bpy.data.meshes.new(ob.name + "_decals")
     pl.bm.to_mesh(me)
     pl.bm.free()
-    for slot in ("Kit_Decal", "Kit_DecalAO", "Kit_DecalPaint"):
+    for slot in ("Kit_Decal", "Kit_DecalAO", "Kit_DecalPaint", "Kit_Decal", "Kit_DecalAO", "Kit_DecalGrime", "Kit_DecalWear"):
         me.materials.append(bpy.data.materials[slot])
     dob = bpy.data.objects.new(me.name, me)
     ob.users_collection[0].objects.link(dob)

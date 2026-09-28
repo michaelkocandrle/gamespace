@@ -1,0 +1,79 @@
+{
+ "topic": "kit_grime",
+ "date": "2026-09-28",
+ "goal": "Ověřovací kolo kroku „špína“ interiérového kitu lodi. Posuď jen těchto šest bodů z předchozí recenze, nic jiného: (1) špína ve spárách podlahy a podél soklu nebyla čitelná; (2) vyšlapaná linie uprostřed podlahy chyběla; (3) kolem rámu poklopu a u madla nebyla žádná špína; (4) stékání pod větrací mřížkou bylo na hranici viditelnosti a lamely mřížky byly béžové; (5) rám mřížky nad kanálem byl bez špíny; (6) nášlapy schodů bez nánosu vzadu, madla lesklá jako plast. U každého bodu napiš: vyřešeno / zčásti / nevyřešeno a proč, s místem na listu.",
+ "style": "STYLOVÝ ZÁMĚR (autor): „udržovaná pracovní loď“. Panely a plochy desek jsou téměř čisté – žádné plošné skvrny uprostřed desek. Špína je jen tam, kde by skutečně vznikla: ve spárách, podél soklu, kolem poklopů a madel, vyšlapaná linie uprostřed podlahy, stékání pod mřížkami. NEPOŽADUJ víc špíny nebo opotřebení, než je tento záměr; hodnoť, jestli je špína na správných místech, čitelná a přirozená. Na tmavém grafitu se nános projevuje jako matný šedý prach (světlejší než lak), vyšlapaná linie jako hladší, světlejší pás. Styl Star Citizen: tmavý teplý grafit, světlejší konstrukce, oranžová signální barva výrobce.",
+ "checklist": "interior",
+ "out": "Docs/Reviews/2026-09-28_kit_grime/verify",
+ "notes": [
+  "Hodnotí se jen šest bodů výše; tvary, světla, rozmístění a ostatní materiály nejsou předmětem tohoto kola.",
+  "Text vpravo nahoře (FPS) je měřicí overlay, ne součást výsledku.",
+  "Kanál pod podlahovou mřížkou je záměrně tmavý (rozhodnutí autora).",
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt."
+ ],
+ "pairs": [
+  {
+   "title": "Bod 1 – sokl a pata stěny: špína u soklu a v podélných spárách",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC stěna a sokl",
+   "ours": "Saved/Shots/20260928_105109_kit_material/11_c_plinth_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Bod 1 – deska zblízka: spáry mezi deskami, plochy desek čisté",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021447.png",
+   "ref_label": "SC podlaha se značením",
+   "ours": "Saved/Shots/20260928_105109_kit_material/16_d_e_plate_b_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Bod 2 – podlaha chodby: vyšlapaná linie uprostřed",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC podlahové desky",
+   "ours": "Saved/Shots/20260928_105109_kit_material/13_d_b_corridor_floor.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Bod 3 – poklop: špína kolem rámu, stopa u madla",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC podlahové desky",
+   "ours": "Saved/Shots/20260928_105109_kit_material/15_d_d_hatch_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Bod 4 – větrací mřížka: stékání pod mřížkou, lamely",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC detail stěny",
+   "ours": "Saved/Shots/20260928_105109_kit_material/12_c_wall_grille.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Bod 5 – mřížka nad kanálem: špína podél rámu",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC podlaha s mřížkou",
+   "ours": "Saved/Shots/20260928_105109_kit_material/14_d_c_grille_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Bod 6 – schodiště: zadní část nášlapů, madla",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021225.png",
+   "ref_label": "SC schody v lodi",
+   "ours": "Saved/Shots/20260928_105109_kit_material/18_d_h_stair_front.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

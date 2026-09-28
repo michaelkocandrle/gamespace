@@ -145,4 +145,7 @@ private:
 	bool bWaitingForFile = false;
 	FString PendingFile;
 	int32 ManualShotCount = 0;
+	/** Seconds spent holding pictures back while shaders and assets were still compiling (uncooked runs). */
+	float CompileWait = 0.f;
+	float CompileLogTimer = 0.f;
 };

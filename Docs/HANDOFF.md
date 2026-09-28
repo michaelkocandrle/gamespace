@@ -1662,6 +1662,23 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
           - bílé jádro svítidel.
         - Výkon beze změny: chodba 16,2 / 16,9 ms (GPU / snímek), křižovatka 15,5 / 16,4 ms, hala 13,0 / 14,1 ms.
         - `Shots.ps1` snímá ve výchozí kvalitě hry, i když si autor v menu přepne grafiku (WORKFLOW dj).
+      - krok „špína“ (28. 9.), recenze `Docs/Reviews/2026-09-28_kit_grime.md`:
+        - Záměr autora „udržovaná pracovní loď“: panely téměř čisté, karty špíny jen ve spárách, podél soklu, kolem
+          poklopů a madel, vyšlapaná linie, stékání pod mřížkami.
+          - Karty deklaruje díl (`Part.grime`), pokládá je `kit_build` přes `hs_decals.card_at`.
+          - Instance `MI_Kit_Halcyon_DecalGrime` a nový slot `DecalWear` (7. slot kitu, lodě mají dál 6).
+        - Zjištění: tmavá špína na tmavém grafitu není vidět ani čistě černá (A/B `kit_grime_ab.json`, WORKFLOW dl).
+          Nános je proto světlejší matný prach ×5. Karty jsou mělké (0,18 / 0,1 m), jinak doběh dělá opar (dm).
+        - Svítidla s rámečkem 6 mm, jádro p99 0,70. Lamely mřížky v laku panelu. Madla drsnost 0,6.
+        - Rychlá smyčka `Shots.ps1 -Editor`: kola kritika bez balení, snímkovač čeká na shadery. Proti zabalené hře
+          rozdíl na úrovni šumu. CLAUDE.md krok 5 a 5b.
+        - Kritik: 3 kola + ověření, FAIL, 48 → 52 → 47; ověření 0/6 vyřešeno, 2 zčásti. Poslední úpravu (mělké
+          karty) viděl jen Claude. Otevřené:
+          - síla prachu (×5, nebo silnější ×7) je volba autora;
+          - vyšlapaná linie potřebuje směrovou buňku atlasu;
+          - ohmatání madel;
+          - lišty stropu po segmentech.
+        - Výkon beze změny: chodba 16,2 / 16,9 ms, křižovatka 15,5 / 16,2 ms, hala 13,0 / 14,2 ms; jas chodby 0,19.
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

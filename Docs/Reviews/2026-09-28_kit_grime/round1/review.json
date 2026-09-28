@@ -1,0 +1,98 @@
+{
+ "topic": "kit_grime",
+ "date": "2026-09-28",
+ "goal": "Interiérový kit lodi, krok „špína“: kde a jak se na dílech usazuje špína (karty špíny), a svítidla stropu. Hodnotí se: špína ve spárách podlahy a stěn, podél soklu, kolem poklopů a madel, vyšlapaná linie uprostřed podlahy, stékání pod větracími mřížkami, rámeček svítidel a jádro difuzoru. Tvary, materiály panelů a světla jsou ze schválených dávek. Pohled z první osoby (oko 1,65 m).",
+ "style": "STYLOVÝ ZÁMĚR (autor): „udržovaná pracovní loď“. Panely a plochy desek jsou téměř čisté – žádné plošné skvrny uprostřed desek. Špína je jen tam, kde by skutečně vznikla: ve spárách, podél soklu, kolem poklopů a madel, vyšlapaná linie uprostřed podlahy, stékání pod mřížkami. NEPOŽADUJ víc špíny nebo opotřebení, než je tento záměr; hodnoť, jestli je špína na správných místech, čitelná a přirozená. Styl Star Citizen: tmavý teplý grafit, světlejší konstrukce, oranžová signální barva výrobce, svítidla v pouzdrech.",
+ "checklist": "interior",
+ "out": "Docs/Reviews/2026-09-28_kit_grime/round1",
+ "notes": [
+  "Text vpravo nahoře (FPS) je měřicí overlay, ne součást výsledku.",
+  "Čisté plochy panelů a desek jsou záměr, ne chyba (viz stylový záměr).",
+  "Kanál pod podlahovou mřížkou je záměrně tmavý (rozhodnutí autora, doladí se při stavbě lodi).",
+  "Protiskluzové pásy, značení a nápisy jsou mimo tento krok.",
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt."
+ ],
+ "pairs": [
+  {
+   "title": "Chodba z kitu, pohled podél: podlaha, stěny, sokl",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
+   "ref_label": "SC chodba (Drake)",
+   "ours": "Saved/Shots/20260928_094226_kit_material/04_c_a_corridor.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Sokl a pata stěny: špína u soklu a v podélných spárách podlahy",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC stěna a sokl",
+   "ours": "Saved/Shots/20260928_094226_kit_material/11_c_plinth_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Větrací mřížka ve stěně: stékání pod mřížkou",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC detail stěny",
+   "ours": "Saved/Shots/20260928_094226_kit_material/12_c_wall_grille.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Podlaha chodby: spáry mezi deskami, vyšlapaná linie uprostřed",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC podlahové desky",
+   "ours": "Saved/Shots/20260928_094226_kit_material/13_d_b_corridor_floor.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Deska B zblízka: plochy desek čisté, špína jen ve spárách",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021447.png",
+   "ref_label": "SC podlaha se značením",
+   "ours": "Saved/Shots/20260928_094226_kit_material/16_d_e_plate_b_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Poklop v podlaze: špína kolem rámu a u madla",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC podlahové desky",
+   "ours": "Saved/Shots/20260928_094226_kit_material/15_d_d_hatch_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Mřížka nad kanálem: špína podél rámu",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC podlaha s mřížkou",
+   "ours": "Saved/Shots/20260928_094226_kit_material/14_d_c_grille_close.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Lodní schodiště zepředu: špína v zadní části nášlapů, oděr madel",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021225.png",
+   "ref_label": "SC schody v lodi",
+   "ours": "Saved/Shots/20260928_094226_kit_material/18_d_h_stair_front.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Stropní pole u portálu: svítidla s rámečkem, jádro ne čistě bílé",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC infrastruktura",
+   "ours": "Saved/Shots/20260928_094226_kit_material/06_c_d_portal_c_pipes.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

@@ -749,6 +749,32 @@ Geometrie (`kit_geo`):
 Měření: preset `kit_material` (jas `b_*`, detaily `c_*`/`d_*`, výkon `p_*`), recenze
 `Docs/Reviews/2026-09-27_kit_material.md`.
 
+### Špína kartami (krok „špína“, 28. 9. 2026, recenze `Docs/Reviews/2026-09-28_kit_grime.md`)
+
+Stylový záměr autora: **„udržovaná pracovní loď“**. Panely a plochy desek téměř čisté, špína jen tam, kde vzniká:
+- ve spárách;
+- podél soklu;
+- kolem poklopů a madel;
+- vyšlapaná linie uprostřed podlahy;
+- stékání pod mřížkami.
+
+Žádné skvrny uprostřed desek. Záměr patří do briefu kritika („NEPOŽADUJ víc špíny“).
+- Díl deklaruje kartu `Part.grime(kind, at, normal, up, size, alpha, wear=False)`. `kit_build.decals` najde
+  povrch paprskem a položí kartu přes `hs_decals.Placer.card_at`. `up` míří ke zdroji špíny (hrana, spára).
+- Buňky atlasu 2×2 (`generate_grime_textures.py`) a jejich pokrytí po hloubce karty:
+  - `soot`: hustý jen nahoře, 0,68 ve 2 %, 0,35 ve 20 %, 0,16 ve 30 %, 0 v 50 %; na pásy u hran;
+  - `rim`: 1cm pás a kapky, na malé kartě zmizí vedle spáry;
+  - `streaks`: řídké stružky 0,1–0,15;
+  - `smear`: skvrnitý 0,1–0,37, čte se jako skvrna.
+- **Na tmavém grafitu musí být špína světlejší matný prach, ne tmavá vrstva.** Ani čistě černá karta jas
+  desky (hlavně odlesk) skoro nezmění (A/B `kit_grime_ab.json`). `MI_Kit_Halcyon_DecalGrime` má tint
+  (5,0; 5,9; 7,1), teplá šedá; plné ×5 na hnědém atlasu působilo jako rez.
+- Viditelný pás je zhruba 35 % hloubky karty, protože světlý prach ukáže i doběh buňky soot. Hloubky: stěna/sokl
+  0,18 m, spáry, rámy a nášlapy 0,1 m. Karty 0,3 m dělaly opar uprostřed desky.
+- Vyšlapaná linie a stopa u madla: `MI_Kit_Halcyon_DecalWear` (slot `DecalWear`, 7. slot kitu; lodě mají 6,
+  `SHIP_SLOTS`), tint (5,5; 6,4; 7,8), drsnost 0,35. Buňka smear je beztvará; směrový pás potřebuje vlastní buňku (otevřené).
+- Svítidla: rámeček 6 mm kolem difuzoru (`BEZEL_ROLES`), emise `Kit_GlowWarm` 1,1.
+
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 
 Podrobně s časy: `starcitizenreference/ShipDetailing_VideoNotes.md`.

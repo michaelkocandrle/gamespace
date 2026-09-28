@@ -46,6 +46,17 @@ EAL, MEL = unreal.EditorAssetLibrary, unreal.MaterialEditingLibrary
 DECAL_MIS = {"Kit_Decal": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_Decal",
              "Kit_DecalAO": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalAO",
              "Kit_DecalPaint": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalPaint"}
+GRIME_PARENT = "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalGrime"
+GRIME_OPACITY = 1.0
+# the dirt as a matte grey dust, lighter than the paint (~0.2 linear on the kit's 0.07-0.1 graphite). A darker band
+# (x0.4, even pure black) changed almost nothing on the dark graphite - an A/B with the cards off measured it
+# (Tools/Shots/kit_grime_ab.json) - and critic rounds 1-3 read the seams as clean. The atlas is a warm brown
+# (58, 52, 45 sRGB): the tint evens it to a warm grey, a flat x5 read as rust under the grille (28. 9. 2026)
+GRIME_TINT = (5.0, 5.9, 7.1)
+# the walked line: polish - a lighter tone and a smoother finish than the paint (the grime's 0.78 x 0.45 = 0.35)
+# (a neutral grey: the atlas is a warm brown, x3.5 flat read as an orange glow on the anti-slip lanes)
+# x5.5 on the same evening (x3.4-4.2 read as nothing, like the dark dirt: tint variants kit_grime_tint.json)
+WEAR_TINT, WEAR_ROUGHNESS, WEAR_OPACITY = (5.5, 6.4, 7.8), 0.35, 1.0
 # The composed sample (batches 1 and 2, 27. 9. 2026), in metres from KIT_ORIGIN, Unreal axes (+X along the main
 # corridor, +Y to its left). A W corridor from an end wall with a window (x = 0) with portals at a 2.4 m pitch and
 # its ceiling; an L-turn at x = 9.6..12 (the outer corner on the left, the inner corner at the far right); the leg
@@ -251,12 +262,13 @@ def build_materials():
         # and dirt (PanelShift, PanelDirtVar), boots on the low edges (FloorWear)
         # critic round 1: the gloss has to change across a panel (80 cm blotches, 0.4), the chamfers worn, the seams
         # dirty enough to read from the eye
-        # round 2: dark dirt did not read on the dark paint - grey dust does (the seams, the plinth); the paint a
-        # little glossier, so its gloss variation shows
-        # round 3: the grunge's darkening read as dirt in the middle of the plates - halved; the dust in the seams lighter
+        # "a maintained working ship" (author 28. 9. 2026): the paint nearly clean - no grunge blotches, only a faint
+        # gloss variation over metre-sized areas, a few scratches, worn chamfers; the dirt is grime cards in the seams,
+        # along the plinth, round hatches and grips, the walked line (kit_geo Part.grime). Blotches in the middle of the
+        # plates read as stains (critic rounds 2-3).
         "Kit_Primary": layered(pal["Kit_Primary"], 0.42, 0.1, secondary=[c * 0.72 for c in pal["Kit_Primary"]],
-                               grunge=0.15, vary=0.4, dirt=0.9, wear=0.5, dirt_colour=[0.15, 0.14, 0.12], FloorWear=0.6,
-                               GrungeTileCm=80.0, MicroRough=0.18, ScratchAmount=0.15, WearThreshold=0.35),
+                               grunge=0.0, vary=0.12, dirt=0.3, wear=0.5, FloorWear=0.6, GrungeTileCm=160.0, MicroRough=0.1,
+                               ScratchAmount=0.06, WearThreshold=0.35, PanelDirtVar=0.0),
         # the structure layer as the palette's lighter painted metal: pure metal (1.0) mirrored the dark room and
         # the frames vanished into the gaps
         # edge wear on the chamfers only (kit_geo: Col.G = 0 on bevel faces), like the Wayfarer interior (0.3-0.8);
@@ -277,7 +289,8 @@ def build_materials():
         # paint, not a glow (critic round 2); the rails and grips worn on top where the hands go (TopWear), a few
         # scratches (author 27. 9. 2026)
         # powder coat 0.5; a finer grunge (30 cm) so the hands' wear shows every few decimetres along a rail (round 2)
-        "Kit_Signal": layered([c * 0.7 for c in pal["Kit_Signal"]], 0.5, 0.0, grunge=0.2, dirt=0.25, wear=0.6, TopWear=1.0,
+        # 0.6: at 0.5 the rails read as glossy plastic (critic, grime step round 3)
+        "Kit_Signal": layered([c * 0.7 for c in pal["Kit_Signal"]], 0.6, 0.0, grunge=0.2, dirt=0.25, wear=0.6, TopWear=1.0,
                               ScratchAmount=0.25, GrungeTileCm=30.0),
         # rubber with a breakup and grey dust in it, not a flat black (author 27. 9. 2026)
         "Kit_Rubber": layered([0.05, 0.05, 0.052], 0.75, 0.0, grunge=0.4, vary=0.15, dirt=0.6, dirt_colour=[0.09, 0.085, 0.08],
@@ -286,12 +299,13 @@ def build_materials():
         "Kit_Plastic": plain([0.035, 0.035, 0.038], 0.5),
         "Kit_Seal": plain([0.012, 0.012, 0.013], 0.7),
         # 7, not 14: the fixture diffusers and the ring clipped to white plates (critic r2); 3.5 after the material
-        # step's round 3 ("burnt-out white rectangles") - the lights themselves are separate actors, unchanged
-        "Kit_GlowWarm": plain([0.08, 0.08, 0.08], 0.3, emit=pal["Kit_GlowWarm"], strength=3.5),
+        # step's round 3 ("burnt-out white rectangles"), 2.2 with the bezels (author 28. 9. 2026: "the core not pure
+        # white") - the lights themselves are separate actors, unchanged
+        "Kit_GlowWarm": plain([0.08, 0.08, 0.08], 0.3, emit=pal["Kit_GlowWarm"], strength=1.1),
         "Kit_GlowCool": plain([0.04, 0.04, 0.05], 0.3, emit=pal["Kit_GlowCool"], strength=4.0),   # the plinth, quieter
         "Kit_GlowSignal": plain([0.08, 0.04, 0.02], 0.3, emit=pal["Kit_GlowSignal"], strength=4.0),
         # the stair nosings: a quiet neutral white (GlowCool made "blue treads", critic r2; author 27. 9. 2026)
-        "Kit_GlowNeutral": plain([0.06, 0.06, 0.06], 0.3, emit=pal["Kit_GlowNeutral"], strength=2.5),
+        "Kit_GlowNeutral": plain([0.06, 0.06, 0.06], 0.3, emit=pal["Kit_GlowNeutral"], strength=1.5),
         # opacity 0.2: at 0.4 the dark glass swallowed a lit shutter behind it (the end wall's window read black)
         "Kit_Glass": {"master": "glass", "base_color": [0.02, 0.03, 0.035], "opacity": 0.2, "roughness": 0.05},
     }
@@ -316,6 +330,29 @@ def build_materials():
     mis["Kit_Screen"] = screen
     for role, path in DECAL_MIS.items():
         mis[role] = EAL.load_asset(path)
+    # grime cards (kit_geo Part.grime): the ship grime material (atlas, colour, roughness) as the parent, the kit's
+    # own opacity; the card's vertex alpha scales it again (the walked line)
+    grime = "MI_Kit_%s_DecalGrime" % MAKER
+    path = "%s/%s" % (MATS, grime)
+    mi = EAL.load_asset(path) if EAL.does_asset_exist(path) else unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+        grime, MATS, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+    MEL.set_material_instance_parent(mi, EAL.load_asset(GRIME_PARENT))
+    MEL.set_material_instance_scalar_parameter_value(mi, "DecalOpacity", GRIME_OPACITY)
+    MEL.set_material_instance_vector_parameter_value(mi, "DecalTint", unreal.LinearColor(*GRIME_TINT, 1.0))
+    MEL.update_material_instance(mi)
+    EAL.save_loaded_asset(mi, only_if_is_dirty=False)
+    mis["Kit_DecalGrime"] = mi
+    wear = "MI_Kit_%s_DecalWear" % MAKER
+    path = "%s/%s" % (MATS, wear)
+    wi = EAL.load_asset(path) if EAL.does_asset_exist(path) else unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+        wear, MATS, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+    MEL.set_material_instance_parent(wi, EAL.load_asset(GRIME_PARENT))
+    MEL.set_material_instance_scalar_parameter_value(wi, "DecalOpacity", WEAR_OPACITY)
+    MEL.set_material_instance_scalar_parameter_value(wi, "DecalRoughnessScale", WEAR_ROUGHNESS)
+    MEL.set_material_instance_vector_parameter_value(wi, "DecalTint", unreal.LinearColor(*WEAR_TINT, 1.0))
+    MEL.update_material_instance(wi)
+    EAL.save_loaded_asset(wi, only_if_is_dirty=False)
+    mis["Kit_DecalWear"] = wi
     return mis
 
 

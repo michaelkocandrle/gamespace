@@ -453,6 +453,9 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   a spouštěj je. Pozor i na `\U` v cestách uvnitř normálních Python řetězců (unicode escape), používej
   `r"..."`.
 - d) **Blender z Git Bash** mění cesty `/c/...` a `//Export`. Vždy `MSYS_NO_PATHCONV=1`.
+- d2) **Nástroj Bash v relaci Claude Code slučuje dvojité zpětné lomítko na jedno** v příkazech a heredocích.
+  Regex v `Shots.ps1` se tak rozbil (a Python pak hlásí `SyntaxWarning: invalid escape sequence`). Patche se zpětnými
+  lomítky piš nástrojem Write do souboru a spouštěj ho, nebo použij Edit (28. 9. 2026).
 - e) **winget nainstaluje nástroj, ale PATH ho nevidí** do restartu terminálu. Používej plnou cestu.
 - f) **Blender MCP:**
   - addon se našel až po `addon_refresh`;
@@ -961,6 +964,15 @@ snímku.
 - di) **Oprava sdíleného masteru mění vzhled všech lodí, i když parametry zůstanou.** Po opravě dg/dh se změnil interiér Wayfareru (šikmá stěna nákladového prostoru přišla o lesk, stěny technické místnosti tepaný vzhled), trup zvenku ne. Postup: snímky „před“ ze starého buildu (`hull_decals`, `wayfarer_interior`), oprava, snímky „po“, rozdíl po snímcích (průměrná odchylka, podíl změněných pixelů). Když rozdíl působí jinak než šum, najdi instanci (kterým masterem jede) a dolaď její parametry v `<Loď>_setup.json`. Ladění bez nového importu meshů: `Tools/Assets/apply_ship_materials.py` (`GAMESPACE_MATS` omezí instance, jinak se znovu uloží všechny). Pozor, import kitu (`import_kit.py`) přestaví sdílené mastery a znovu uloží i meshe Wayfareru: před commitem je vrať, pokud se loď neimportovala.
 - dj) **Snímky braly kvalitu grafiky z autorova menu.** Autor si 27. 9. večer přepnul grafiku na „střední“. `GameUserSettings.ini` zabaleného buildu (`Builds\Gamespace\Windows\gamespace\Saved\Config\Windows`) pak platil i pro `Shots.ps1`. Jedna sada měření vyšla o 5 ms rychlejší (VRAM 2,24 místo 3,11 GB) a kritik hodnotil snímky ve střední kvalitě. Poznáš to v logu hry: druhá sada `Set CVar` hned na startu (např. `r.MegaLights.NumSamplesPerPixel:2`). `Shots.ps1` teď autorův soubor na dobu běhu odloží, nastaví výchozí kvalitu hry (`USpaceUserSettings`: epická, GI vysoká, TSR 75 %) a po běhu ho vrátí; `-PlayerSettings` snímá s autorovým nastavením. Autorův soubor se nikdy nepřepisuje natrvalo.
 - dk) **Přerušený `import_kit.py` nechá level bez ukázky.** Konec relace uprostřed importu smazal herce ukázky z `TestSpace` a tři meshe kitu. Snímky pak ukázaly terén planety místo chodby. Balení přitom prošlo, protože klíčové assety existovaly. Odhalí to `test_kit_showroom.py` (0 dílů, chybějící meshe). Oprava: import pustit znovu celý. Po každém importu kitu pusť test kitu dřív, než se balí.
+- dl) **Tmavá špína na tmavém laku není vidět.** Tři kola kritik hlásil „špína ve spárách se nečte“, i když karty
+  ležely celé (vrcholy s plnou alfou). A/B `Tools/Shots/kit_grime_ab.json` (`space.Kit DecalOpacity 0 DecalGrime`,
+  `space.KitColor DecalTint 0 0 0 DecalGrime`) ukázal, že ani čistě černý odstín jas grafitu (albedo 0,07–0,1)
+  skoro nezmění: desku dělá hlavně odlesk. Řešení: nános jako světlejší matný prach (tint ×5 na atlasu). Nejdřív
+  A/B vypnuto/černá/bílá, pak ladit sílu; nezvětšovat karty naslepo.
+- dm) **Světlý prach ukáže doběh karty jako opar.** Buňka `soot` má ve 30 % hloubky ještě 0,16 krytí. S tmavou
+  špínou to nevadilo, se světlým prachem karta 0,3–0,35 m udělala opar uprostřed desky a nejhustší pás ležel pod lištou
+  stěny. Viditelný pás ≈ 35 % hloubky: 0,18 m u stěny, 0,1 m ve spárách. Zdrojová hrana karty (`up`) patří do
+  viditelného rohu.
 - bo) **Kontrola geometrie před každým předáním:** od 27. 9. 2026 ji spouští sám `hs_assemble_ship.py` jako poslední krok každé přestavby lodi (při FAIL skončí Blender kódem 1, řádek `HSASSEMBLE GEOTEST FAIL`); ručně `python Tools/Tests/test_ship_geometry.py` (Blender headless na
   `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
   Musí projít (autor 25. 9. 2026).

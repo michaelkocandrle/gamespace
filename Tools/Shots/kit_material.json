@@ -211,6 +211,23 @@
    "fov": 60
   },
   {
+   "name": "c_wall_grille",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    5.7,
+    -499.85,
+    1.15
+   ],
+   "camera_look_at": [
+    5.7,
+    -498.8,
+    0.62
+   ],
+   "fov": 65
+  },
+  {
    "name": "d_b_corridor_floor",
    "camera": "free",
    "hud": 0,

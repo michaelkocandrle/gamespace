@@ -26,10 +26,18 @@ Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**. Projekt je v `C:\gamespace\g
 2. **Malé kroky.** Každý je hotový, otestovaný a commitnutý.
 3. **Build** editoru po změně C++ (editor musí být zavřený).
 4. **Headless testy**, kterých se změna týká; po větší změně všechny.
-5. **Package + Shots.** Každý snímek si **sám prohlédni** (Read na PNG). Autorovi nikdy nepředávej nic, co jsi neviděl.
-   - **Žádné spouštění editoru ani PIE kvůli kontrole.** Ověřuje se přes zabalenou hru.
+5. **Snímky.** Každý snímek si **sám prohlédni** (Read na PNG). Autorovi nikdy nepředávej nic, co jsi neviděl.
+   - **Během kroku rychlá smyčka bez balení** (autor 28. 9. 2026): `.\Tools\Shots.ps1 -Preset <x> -Editor`. Spustí
+     nezabalený projekt jako samostatnou hru z editorových binárek (bez okna editoru a bez PIE). Snímkovač počká,
+     až se dopřeloží shadery. Proti zabalené hře ověřeno: shoda na úrovni šumu, běh ~2 min.
+   - **Hra se balí jen na konci kroku:** `.\Tools\Shots.ps1 -Preset <x> -Package` pro finální snímky a předání.
+   - Žádné spouštění editoru s UI ani PIE kvůli kontrole.
 5b. **Vizuální kritik (každé předání vizuální práce, autor 25. 9. 2026).** Podagent `visual-critic`
    (`.claude/agents/`, jen čtení, nejsilnější model) porovná výsledek s referencí. Postup: skill `ship-pipeline` 7b.
+   - Kola kritika u materiálů a detailů se dělají se snímky z rychlé smyčky (`-Editor`) nebo s rendery z Blenderu,
+     ne s balením hry (autor 28. 9. 2026).
+   - Stylový záměr kroku (např. „udržovaná pracovní loď: panely téměř čisté, špína jen tam, kde vzniká“) patří do
+     briefu kritika, aby nechtěl víc, než je záměr.
    - Listy `python Tools/Review/make_compare_sheet.py <review.json>`: reference vlevo, výsledek vpravo; zblízka, střední, zdálky; den, noc, vesmír.
    - Kritik dostane **jen** `brief.md` a listy: žádný postup, dobu práce, záměry ani vlastní názor.
    - FAIL → oprav body „musí se opravit“ a znovu, nejvýš 3 kola, pak předej i s otevřenými body.
@@ -55,7 +63,7 @@ Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**. Projekt je v `C:\gamespace\g
 
 **Iterace vzhledu vs. předání** (autor, 24. 9. 2026):
 - Při iteraci vzhledu (modelování, decaly, materiály, světla) se po každé změně **nebalí** a nepouští celá sada testů:
-  - kontrola přes render v Blenderu (Eevee náhled s atlasy), případně snímky z už zabaleného buildu;
+  - kontrola přes render v Blenderu (Eevee náhled s atlasy) nebo `Shots.ps1 -Editor` (nezabalený projekt, bez balení);
   - jen testy, kterých se změna přímo týká (např. `test_ship_import.py`).
 - **Před předáním autorovi:** jednou celá sada testů, zabalení hry a finální snímky.
 - Změny C++ a herní logiky dál plným postupem (build, testy, balení, snímky).
@@ -78,7 +86,13 @@ Headless Python v UE a testy. Spouštěj **nástrojem PowerShell**; přes bash s
 .\Tools\run_editor_python.ps1 Tools\Tests\test_interior.py
 ```
 
-Balení a snímky (~5 min balení):
+Snímky během kroku, bez balení (~2 min, nezabalený projekt):
+
+```powershell
+.\Tools\Shots.ps1 -Preset <preset> -Editor -Width 1920 -Height 1080
+```
+
+Balení a finální snímky na konci kroku (~5 min balení):
 
 ```powershell
 .\Tools\Package.ps1

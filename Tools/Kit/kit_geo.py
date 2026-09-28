@@ -21,9 +21,15 @@ import bpy
 from mathutils import Matrix, Vector
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# dirt in the seams (kit material step, 27. 9. 2026): panels in these roles at least SEAM_MIN across get the ring
-SEAM_ROLES = ("Kit_Primary", "Kit_Structure")
+# dirt in the seams (kit material step, 27. 9. 2026): panels in these roles at least SEAM_MIN across get the ring.
+# Off since 28. 9.: the ring only lit the plates' rims; the dirt is grime cards now (Part.grime, "a maintained working
+# ship": seams, plinth, round hatches and grips, the walked line, streaks under grilles - author 28. 9. 2026)
+SEAM_ROLES = ()
 SEAM_W, SEAM_MIN, SEAM_OCC = 0.04, 0.15, 0.2
+# a fixture's diffuser gets a dark bezel inside its outline, a little proud (author 28. 9. 2026: "give the fixtures a
+# frame"); inside the outline, so it cannot run into the recess a diffuser sits in
+BEZEL_ROLES = ("Kit_GlowWarm",)
+BEZEL_W, BEZEL_PROUD = 0.006, 0.0015
 RULES = json.load(open(os.path.join(ROOT, "ArtSource", "Kit", "kit_rules.json"), encoding="utf-8"))
 TRIM = json.load(open(os.path.join(ROOT, "ArtSource", "Kit", "Textures", "trim_index.json"), encoding="utf-8"))
 
@@ -54,6 +60,7 @@ class Part:
         self.decal_items = []                    # shots for hs_decals.Placer
         self.edge_faces = set()                  # faces a bevel made: the edge-wear mask (Col.G = 0)
         self.seam_box = {}                       # face -> (lo, hi) of its panel in local coords: the seam dirt
+        self.grime_cards = []                    # grime cards for kit_build (hs_decals.Placer.card_at)
 
     # ------------------------------------------------------------------ primitives
     def box(self, role, lo, hi, bevel=0.0, segments=2, m=None, trim=None, panel=True, secondary=False, atlas=None, inset=None,
@@ -98,6 +105,8 @@ class Part:
         if seam:
             for f in faces:
                 self.seam_box[f] = (lo.copy(), hi.copy())
+        if role in BEZEL_ROLES and min(sorted(size)[1:]) > 3 * BEZEL_W:
+            self._bezel(lo, hi, m)
         mode = ("trim", trim, lo, hi) if trim else ("atlas", atlas, lo, hi) if atlas else ("member", lo, hi)
         self.meta[role].append((faces, mode, self._panel_id(panel), secondary))
         return faces
@@ -204,6 +213,28 @@ class Part:
 
     def socket(self, name, loc, x=(1, 0, 0), z=(0, 0, 1), **params):
         self.sockets.append((name, Vector(loc), Vector(x), Vector(z), params))
+
+    def _bezel(self, lo, hi, m):
+        """A dark frame round a thin diffuser box: a ring BEZEL_W wide inside its outline on both big faces, BEZEL_PROUD
+        proud of them (the visible one is whichever faces the room)."""
+        size = hi - lo
+        t = min(range(3), key=lambda a: size[a])
+        a, b = [k for k in range(3) if k != t]
+        for zc, zo in ((lo[t], -1), (hi[t], 1)):
+            z0, z1 = sorted((zc, zc + zo * BEZEL_PROUD))
+            for (a0, a1, b0, b1) in ((lo[a], hi[a], lo[b], lo[b] + BEZEL_W), (lo[a], hi[a], hi[b] - BEZEL_W, hi[b]),
+                                     (lo[a], lo[a] + BEZEL_W, lo[b], hi[b]), (hi[a] - BEZEL_W, hi[a], lo[b], hi[b])):
+                p0, p1 = Vector((0, 0, 0)), Vector((0, 0, 0))
+                p0[t], p1[t], p0[a], p1[a], p0[b], p1[b] = z0, z1, a0, a1, b0, b1
+                self.box("Kit_Plastic", tuple(p0), tuple(p1), m=m, panel=False)
+
+    def grime(self, kind, at, normal, up, size, alpha=1.0, wear=False):
+        """A grime card on this part's surface at `at` (part coords): found by a ray along -normal, `up` is where the
+        dirt comes from (the atlas cell's source edge), size (w, h) m across and along it. kinds: streaks, soot,
+        smear, rim (Tools/Assets/generate_grime_textures.py). wear: the polish material instead of the dirt (lighter,
+        smoother - the walked line)."""
+        self.grime_cards.append({"kind": kind, "at": list(at), "normal": list(normal), "up": list(up),
+                                 "size": list(size), "alpha": alpha, "wear": wear})
 
     def decal(self, item, frm, to, rot=0.0, scale=1.0, frame_xy=None, label=False):
         self.decal_items.append({"item": item, "from": list(frm), "to": list(to), "rot": rot, "scale": scale,
@@ -367,6 +398,8 @@ def materials():
         "Kit_Decal": ([0.2, 0.2, 0.2], 0.5, 0.0, None),
         "Kit_DecalAO": ([0.0, 0.0, 0.0], 0.5, 0.0, None),
         "Kit_DecalPaint": ([0.6, 0.6, 0.6], 0.5, 0.0, None),
+        "Kit_DecalGrime": ([0.04, 0.036, 0.03], 0.8, 0.0, None),
+        "Kit_DecalWear": ([0.14, 0.13, 0.12], 0.35, 0.0, None),
     }
     tex = os.path.join(ROOT, "ArtSource", "Kit", "Textures")
     out = {}
@@ -399,7 +432,7 @@ def materials():
             nt.links.new(oimg.outputs["Color"], sep.inputs["Color"])
             nt.links.new(sep.outputs["Green"], bsdf.inputs["Roughness"])
             nt.links.new(sep.outputs["Blue"], bsdf.inputs["Metallic"])
-        if name in ("Kit_Decal", "Kit_DecalAO", "Kit_DecalPaint"):
+        if name in ("Kit_Decal", "Kit_DecalAO", "Kit_DecalPaint", "Kit_DecalGrime", "Kit_DecalWear"):
             _decal_nodes(m, name)
         m.diffuse_color = (c[0] ** 0.45, c[1] ** 0.45, c[2] ** 0.45, 1.0)
         out[name] = m
@@ -427,6 +460,19 @@ def _decal_nodes(m, name):
         if noncolor:
             t.image.colorspace_settings.name = "Non-Color"
         return t
+    if name in ("Kit_DecalGrime", "Kit_DecalWear"):
+        # the grime atlas's colour, coverage = its alpha x the card's vertex alpha (soft edges, the walked line)
+        bc = img(os.path.join("Grime", "T_Grime_BC.png"), noncolor=False)
+        vc = nt.nodes.new("ShaderNodeVertexColor")
+        vc.layer_name = "Col"
+        cov = nt.nodes.new("ShaderNodeMath")
+        cov.operation = "MULTIPLY"
+        nt.links.new(bc.outputs["Alpha"], cov.inputs[0])
+        nt.links.new(vc.outputs["Alpha"], cov.inputs[1])
+        nt.links.new(cov.outputs[0], mix.inputs["Fac"])
+        nt.links.new(bc.outputs["Color"], bsdf.inputs["Base Color"])
+        bsdf.inputs["Roughness"].default_value = 0.8
+        return
     mm = img("T_Decals_M.png")
     sep = nt.nodes.new("ShaderNodeSeparateColor")
     nt.links.new(mm.outputs["Color"], sep.inputs["Color"])

@@ -69,6 +69,29 @@ def _lanes(p, x0, x1, y0, y1, pitch=LANE_P, z=0.0):
         p.box("Kit_Trim", (x0 + 0.03, ya, z - 0.001), (x1 - 0.03, ya + LANE_W, z + 0.0015), panel=False, trim="antislip_tread")
 
 
+def _floor_grime(p, L, walk, edge, walked=True, walk_seams=True):
+    """Dirt where it builds up on a floor module (author 28. 9. 2026, "a maintained working ship"; the soot cell - a band
+    fading away from its source edge - not the rim cell, whose 1 cm band vanished beside the gap; the soot cell is dense
+    over the top 10-20 % only, so a card 0.2-0.28 m deep for a 3-5 cm band): along both walls,
+    in the seams between the walkway and the side plates, in the seam at the module's start (one card per seam), and a
+    faint walked line down the middle of the walkway. The plates themselves stay clean.
+    Card depths: the dust is lighter than the dark paint, so even the soot cell's thin tail (0.16 at 30 % of the card)
+    shows - a 0.3-0.35 m card read as a haze across the middle of the plate. The visible band is ~35 % of the depth:
+    0.18 m at the wall (6 cm), 0.1 m in a seam (3-4 cm; critic, grime verification round, 28. 9. 2026)."""
+    for s in (1, -1):
+        p.grime("soot", (L / 2, s * (edge - 0.09), 0.0), (0, 0, 1), (0, s, 0), (L - 0.04, 0.18), 1.0)
+        if walk_seams:
+            p.grime("soot", (L / 2, s * (walk - 0.05), 0.0), (0, 0, 1), (0, s, 0), (L - 0.04, 0.1), 1.0)
+    p.grime("soot", (0.05, 0.0, 0.0), (0, 0, 1), (-1, 0, 0), (2 * edge - 0.06, 0.1), 1.0)
+    if walked:
+        # the walked line: a band of polish down the walkway, lighter and smoother than the paint (the wear material,
+        # the smear cell stretched along the run) - critic round 1: "a smoothed, slightly lighter band, 60-80 cm"
+        # two cards turned against each other: the smear cell's blotches overlap into a continuous band (critic r2:
+        # "a soft band independent of the seams")
+        for up in ((1, 0, 0), (-1, 0, 0)):
+            p.grime("smear", (L / 2, 0.0, 0.0), (0, 0, 1), up, (min(0.75, 2 * walk - 0.1), L - 0.02), 0.7, wear=True)
+
+
 def _collision(p, L, hw):
     p.collision_box((0.0, -hw, -0.06), (L, hw, 0.0))
 
@@ -102,6 +125,7 @@ def floor_plate(sec, var, L, name, seed):
             p.box("Kit_Accent", (0.02, y0, -0.001), (L - 0.02, y1, 0.0008), panel=False)
         _lanes(p, 0.0, L, -walk + 0.06, -0.05)
         _lanes(p, 0.0, L, 0.05, walk - 0.06)
+    _floor_grime(p, L, walk, edge)
     _collision(p, L, hw)
     p.socket("Snap_Start", (0, 0, 0), x=(-1, 0, 0), z=(0, 0, 1))
     p.socket("Snap_End", (L, 0, 0), x=(1, 0, 0), z=(0, 0, 1))
@@ -171,6 +195,9 @@ def floor_grille(sec, var, L, name, seed):
     # readability is tuned when a ship is built)
     kit_batch2.strip_light_along(p, "Light_Channel_0", (L / 2, cw - 0.015, -0.04), (0, -0.6, -0.8), (1, 0, 0), L - 0.1, 0.03,
                                  "work", 0.6 * L, 0.6)
+    _floor_grime(p, L, walk, edge, walked=False, walk_seams=False)
+    for s in (1, -1):
+        p.grime("soot", (L / 2, s * (cw + 0.03 + 0.05), 0.0), (0, 0, 1), (0, -s, 0), (L - 0.04, 0.1), 1.0)
     _collision(p, L, hw)
     p.socket("Snap_Start", (0, 0, 0), x=(-1, 0, 0), z=(0, 0, 1))
     p.socket("Snap_End", (L, 0, 0), x=(1, 0, 0), z=(0, 0, 1))
@@ -238,6 +265,16 @@ def floor_hatch(sec, var, L, name, seed):
     # the lid's countersunk bolts
     for (bx, by) in ((x0 + 0.02, y0 + 0.02), (x1 - 0.02, y0 + 0.02), (x0 + 0.02, y1 - 0.02), (x1 - 0.02, y1 - 0.02)):
         p.tube("Kit_Structure", (bx, by, -0.002), (bx, by, -0.0008), 0.005, 6)
+    # dirt collected against the frame on the plates round it, and round the grip where the hands go
+    fx0, fx1, fy0, fy1 = x0 - 0.034, x1 + 0.034, y0 - 0.034, y1 + 0.034
+    for (at, up, size) in ((((fx0 + fx1) / 2, fy0 - 0.05, 0.0), (0, 1, 0), (fx1 - fx0, 0.1)),
+                           (((fx0 + fx1) / 2, fy1 + 0.05, 0.0), (0, -1, 0), (fx1 - fx0, 0.1))):
+        # (the frame fills the module along x: the cards for those sides would lie on the neighbouring modules)
+        p.grime("soot", at, (0, 0, 1), up, size, 1.0)
+    # polish round the grip where hands and boots go (the wear material), dirt in the pocket's rim
+    # (0.5: at full strength the light polish read as a cloudy spot in the middle of the lid)
+    p.grime("smear", (px + pw + 0.06, 0.0, -0.002), (0, 0, 1), (-1, 0, 0), (2 * ph + 0.1, 0.14), 0.5, wear=True)
+    _floor_grime(p, L, walk, edge, walked=False, walk_seams=False)
     _collision(p, L, hw)
     p.socket("Snap_Start", (0, 0, 0), x=(-1, 0, 0), z=(0, 0, 1))
     p.socket("Snap_End", (L, 0, 0), x=(1, 0, 0), z=(0, 0, 1))
@@ -275,6 +312,9 @@ def stair_flight(sec, var, rise_total, name, seed):
                                      2 * hw - 0.1, 0.012, "neutral", 0.22, 0.5)
         # the riser, set back
         p.box("Kit_Primary", (xa - 0.01, -hw, z - RISE), (xa, hw, z - 0.04), panel=False, secondary=True)
+        # dirt kicked against the next riser at the back of the tread (not on the top one: the platform follows)
+        if i < n - 1:
+            p.grime("soot", (xb - 0.05, 0.0, z), (0, 0, 1), (1, 0, 0), (2 * hw - 0.08, 0.1), 1.0)
     # stringers: a sloped beam either side from the floor to the top
     for s in (1, -1):
         y0, y1 = sorted((s * hw, s * (hw + 0.045)))

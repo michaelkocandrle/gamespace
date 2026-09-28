@@ -66,6 +66,11 @@ class Wall:
         for (c0, c1) in ((f0, f0 + 0.012), (f1 - 0.012, f1)):
             p.slab("Kit_Structure", self.PLINTH, c0, c1, 0.034, 0.084, 0.012, proud=0.014, panel=False)
         p.box("Kit_Rubber", (-0.1, 0, 0), (-0.085, L, 0.012), bevel=0.003, panel=False)
+        # dirt along the foot of the wall: a rim card on the kick panel, its dirty edge at the floor ("a maintained
+        # working ship" - panels clean, dirt where it builds up; author 28. 9. 2026)
+        if not skip_kick:
+            # 0.18 m: the light dust's tail showed as a haze up a 0.35 m card (kit_batch3._floor_grime)
+            self.grime("soot", self.VERT, L / 2, self.kick[0] + 0.09, (0, -1), (L - 0.04, 0.18), 1.0)
         # no light of its own: a linear light per module here cost ~1 ms over a composed sample (41 modules) for a
         # floor band the eye hardly reads - the diffuser glows (batch 2 sample, 27. 9. 2026; with MegaLights the
         # socket can come back)
@@ -254,6 +259,12 @@ class Wall:
         if v1 - hv1 > 0.01:
             p.slab(role, m, max(u0, hu0), min(u1, hu1), hv1, v1, thick, bevel, secondary=secondary)
 
+    def grime(self, kind, m, u, v, up_uv, size, alpha=1.0):
+        """A grime card on the frame m at (u, v); up_uv the dirt's source direction in the frame (kit_geo Part.grime)."""
+        n = (m.to_3x3() @ Vector((0, 0, 1))).normalized()
+        up = (m.to_3x3() @ Vector((up_uv[0], up_uv[1], 0))).normalized()
+        self.p.grime(kind, self.world(m, u, v), n, up, size, alpha)
+
     def world(self, m, u, v, z=0.0):
         return m @ Vector((u, v, z))
 
@@ -339,6 +350,10 @@ def grille(w, var, rng):
         w.frame_hole("Kit_Primary", w.VERT, G, L - G, w.main[0], w.main[1], hole)
         _louvres(w, w.VERT, hole)
         w.label("st_vent", w.VERT, L / 2, hole[3] + 0.045, 0.8)
+        # streaks running down from the louvre (author 28. 9. 2026: "streaks under the grilles")
+        w.grime("streaks", w.VERT, L / 2, hole[2] - 0.035 - 0.12, (0, 1), (hole[1] - hole[0], 0.24), 1.0)
+        # the dirt the air leaves along the louvre's bottom edge, the drips start dark (critic r2)
+        w.grime("rim", w.VERT, L / 2, hole[2] - 0.03 - 0.1, (0, 1), (hole[1] - hole[0] + 0.02, 0.2), 1.0)
         w.shell_decals(rng, main=False)
     elif var == "B":
         hole = (0.1, 0.28, 0.16, w.main[1] - 0.06)
@@ -358,6 +373,7 @@ def grille(w, var, rng):
         p.slab("Kit_Trim", w.SLOPE, hole[0] + 0.01, hole[1] - 0.01, hole[2] + 0.01, hole[3] - 0.01, 0.006, proud=-0.012, trim="perforated", panel=False)
         _frame_ring(w, w.SLOPE, hole)
         w.label("st_vent", w.SLOPE, hole[0] + 0.15, 0.1, 0.8)           # under the grille: the conduits run above it
+        w.grime("streaks", w.SLOPE, L / 2 + 0.2, hole[2] - 0.075, (0, 1), (hole[1] - hole[0] - 0.4, 0.09), 0.9)
         w.shell_decals(rng)
 
 
@@ -390,7 +406,9 @@ def _louvres(w, m, hole, pitch=0.028):
         az = (m.to_3x3() @ Vector((0, math.sin(math.radians(35)), math.cos(math.radians(35))))).normalized()
         ax = (m.to_3x3() @ Vector((1, 0, 0))).normalized()
         sm = frame(c, ax, ay, az)
-        p.box("Kit_Structure", (hu0, -0.013, -0.0015), (hu1, 0.013, 0.0015), m=sm, panel=False)
+        # the slats in the panel's dark paint: in the light structure metal, tilted up at the lights, they read as
+        # beige plastic (critic rounds 2 and 3 of the grime step, 28. 9. 2026)
+        p.box("Kit_Primary", (hu0, -0.013, -0.0015), (hu1, 0.013, 0.0015), m=sm, panel=False)
 
 
 def _u_handle(p, x0, a, b, stand=0.03, r=0.008):
