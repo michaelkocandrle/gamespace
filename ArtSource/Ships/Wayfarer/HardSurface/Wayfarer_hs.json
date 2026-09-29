@@ -2556,8 +2556,8 @@
   },
   "kit_modules": {
    "_comment": "Rooms from the interior kit (ArtSource/Kit, kit brief step 7.1, 28. 9. 2026): hs_interior builds only their bulkheads and the stand-ins; Tools/Assets/kit_rooms.py puts the kit parts into BP_Ship_<Ship> as components (InteriorMod_*, lights Light_fix_kit_*). Layout (design) metres: x forward, y to port, z from the deck; wall runs (start, end, face normal, modules), run parts (start, direction, parts one after another), as import_kit.SHOWROOM but in design axes.",
-   "enabled": false,
-   "_enabled": "The author's switch (28. 9. 2026): off until batch 4 is done (the component bays are built, 28. 9. evening; the doors, bulkheads and hull liner are not). Earlier: off until batch 4 brings the component bays - the procedural corridor (interior.kit) shows its reactor and coolers, the kit's grilles do not. true: hs_interior leaves the room to the kit (kit_rooms.py); rebuild the ship and import it.",
+   "enabled": true,
+   "_enabled": "On since 29. 9. 2026 (the author: switch the kit corridor on, so walking the ship shows the kit parts that the cabin and the hold will be built from). Before: The author's switch (28. 9. 2026): off until batch 4 is done (the component bays are built, 28. 9. evening; the doors, bulkheads and hull liner are not). Earlier: off until batch 4 brings the component bays - the procedural corridor (interior.kit) shows its reactor and coolers, the kit's grilles do not. true: hs_interior leaves the room to the kit (kit_rooms.py); rebuild the ship and import it.",
    "rooms": [
     "tech"
    ],

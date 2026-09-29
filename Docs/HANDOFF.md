@@ -1764,7 +1764,10 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
           - Příkazy pro scénáře: `space.Interact` (co dělá F), `space.Where` (poloha v souřadnicích lodi, podlaha, čeho se
             kapsle dotýká), `space.FlatSpot [°] [km]` (přesune loď nad nejbližší rovinu – v místě snímků je svah 32°,
             loď tam nepřistane). Preset `wayfarer_walk.json`: přistání, celý okruh a zpět do křesla.
-          - Chodba z kitu zůstává vypnutá (čeká na autora); prochází se současná technická chodba.
+          - Chodba z kitu **zapnutá** 29. 9. 2026 večer (autor: ať se loď prochází už na dílech kitu, ze kterých vznikne
+            kajuta a nákladový prostor). Kontrola `walk_blocked` u ní hlásí varování `walk_tight`: dveře z nákladového
+            prostoru jsou mimo osu (y 0,5), portál chodby na ose - 12 cm od středu dveří chodec hlavou zavadí o zkosení
+            portálu (řeší `Bulkhead_Door` mimo osu z dávky 4). Blokovaný střed dveří je chyba, okraje jen varování.
     - Klávesa I vede jen do Steadfastu; Wayfarer se prochází od 29. 9. 2026 vstáním z křesla (F), viz výše.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

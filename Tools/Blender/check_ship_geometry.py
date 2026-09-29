@@ -401,7 +401,8 @@ def walk_blocked(ship, recipe):
     """The walker through every doorway of the layout (author 29. 9. 2026: a ship you can walk through). A sliver of
     the cockpit floor's edge hanging across the doorway and a wall over the stairs, 2 cm too low for the head, both
     stopped the character in the game while every other check passed. From 0.8 m before a door to 0.8 m past it,
-    along the door's axis at its centre and 12 cm to each side: the capsule rests on the highest floor under its
+    along the door's axis at its centre and 12 cm to each side (blocked at the centre fails; only to a side it is
+    a tight passage, a warning - the walker scrapes along it): the capsule rests on the highest floor under its
     footprint within a step's height (rays down, as Character Movement stands on step edges), and then must not
     come nearer than its radius to anything with its body - bottom sphere lifted clear of the edges it stands on,
     up to the top of the head. Interior parts only: in the game they alone block the walker (the hull does not)."""
@@ -419,14 +420,14 @@ def walk_blocked(ship, recipe):
     tree = BVHTree.FromBMesh(all_bm)
     all_bm.free()
     exempt = recipe.get("checks", {}).get("walk_exempt", [])
-    out = []
+    out, tight = [], []
     for door in layout["doors"]:
         ax = door["axis"]
         at = door["at"]
         if door.get("name") in exempt:
             continue                                   # built closed (the ramp, a sliding leaf): recipe checks.walk_exempt
         fz = layout["decks"][door.get("deck", "main")]["floor_z"]
-        for side in (-0.12, 0.0, 0.12):
+        for side in (0.0, -0.12, 0.12):
             feet = fz
             worst = None
             steps = 33
@@ -459,9 +460,14 @@ def walk_blocked(ship, recipe):
                                      "obstacle_at": [round(q.x, 3), round(q.y, 3), round(q.z, 3)], "overlap_m": round(gap, 3)}
                     z += 0.05
             if worst:
-                out.append(worst)
-                break
-    return out
+                worst["offset_m"] = side
+                if side == 0.0:
+                    out.append(worst)
+                    tight = [t for t in tight if t["door"] != worst["door"]]
+                    break
+                if not any(t["door"] == worst["door"] for t in tight):
+                    tight.append(worst)
+    return out, tight
 
 
 # ------------------------------------------------------------------------------------------ materials and holes
@@ -571,7 +577,8 @@ def main():
     }
     report["placeholders"], report["warnings"] = placeholders(ship)
     report["holes"] = holes(ship, out_dir)
-    report["walk_blocked"] = walk_blocked(ship, recipe)
+    report["walk_blocked"], tight = walk_blocked(ship, recipe)
+    report["warnings"] += [dict(t, walk_tight=True) for t in tight]
     report["pass"] = not any(report[k] for k in ("mirrored_decals", "floating", "penetrating", "hull_in_rooms", "placeholders",
                                                  "holes", "walk_blocked"))
     report["kit_rooms"] = kit_rooms
