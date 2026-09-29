@@ -71,7 +71,14 @@ def main():
         rooms, offset = [], None
         if os.path.isfile(layout_path) and os.path.isfile(recipe_path):
             rooms = json.load(open(layout_path, encoding="utf-8")).get("rooms", [])
-            offset = json.load(open(recipe_path, encoding="utf-8")).get("assemble", {}).get("offset")
+            recipe = json.load(open(recipe_path, encoding="utf-8"))
+            offset = recipe.get("assemble", {}).get("offset")
+            # a kit room as wide as its hull liner (kit_modules.width): the labels on the liner lie in it
+            mods = (recipe.get("interior") or {}).get("kit_modules") or {}
+            if mods.get("enabled", True):
+                widths = {r: w for r, w in (mods.get("width") or {}).items() if r in mods.get("rooms", [])}
+                rooms = [dict(r, rect=[r["rect"][0], r["rect"][1], -widths[r["id"]] / 2, widths[r["id"]] / 2]) if r["id"] in widths else r
+                         for r in rooms]
         for d in decals:
             name = "%s %s" % (ship, d["name"])
             X = x_axis(d.get("rotation", [0.0, 0.0, 0.0]))

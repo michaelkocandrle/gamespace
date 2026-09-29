@@ -2558,22 +2558,30 @@
    "_comment": "Rooms from the interior kit (ArtSource/Kit, kit brief step 7.1, 28. 9. 2026): hs_interior builds only their bulkheads and the stand-ins; Tools/Assets/kit_rooms.py puts the kit parts into BP_Ship_<Ship> as components (InteriorMod_*, lights Light_fix_kit_*). Layout (design) metres: x forward, y to port, z from the deck; wall runs (start, end, face normal, modules), run parts (start, direction, parts one after another), as import_kit.SHOWROOM but in design axes.",
    "enabled": true,
    "_enabled": "On since 29. 9. 2026 (the author: switch the kit corridor on, so walking the ship shows the kit parts that the cabin and the hold will be built from). Before: The author's switch (28. 9. 2026): off until batch 4 is done (the component bays are built, 28. 9. evening; the doors, bulkheads and hull liner are not). Earlier: off until batch 4 brings the component bays - the procedural corridor (interior.kit) shows its reactor and coolers, the kit's grilles do not. true: hs_interior leaves the room to the kit (kit_rooms.py); rebuild the ship and import it.",
-   "rooms": [
-    "tech"
-   ],
+   "rooms": ["tech", "hold"],
    "_tech": "Technical corridor 8.24-10.34 (bulkhead faces): the aft portal frames the door from the hold, 1.8 m of walls - reactor behind the grille and the left cooler to port, the shield generator's hatch and the right cooler to starboard (layout objects). No W floor plate of 0.3 m yet: a stand-in strip under the portal.",
   "_tech_batch4": "Batch 4 (28. 9. 2026): the component bays where the layout has the components - the power plant (Wall_ComponentBay12W_A) and the left cooler (06W_B) to port, the shield generator (12W_C) and the right cooler (06W_B) to starboard.",
-   "_tech_r1": "Critic round 1: cable trays along the whole ceiling (no flat panel), the grating over the service channel in front of the coolers.",
-   "stand_in_floor": [[8.24, 8.54]],
+   "_tech_bulkheads": "29. 9. 2026 (author walked the ship: the corridor ends were the bulkheads' flat faces): the aft portal became Bulkhead_Door03W_B - a 0.3 m bulkhead with the doorway 0.5 m to port through it (the hold's door), pivot at its starboard corner on the face plane (x 8.54); forward the thin face Bulkhead_Door00W_A 1 cm in front of the procedural bulkhead (10.34, the cabin is not a kit room yet), its door centred - the layout door moved from y 0.1 to 0.0.",
+  "_tech_r1": "Critic round 1: cable trays along the whole ceiling (no flat panel), the grating over the service channel in front of the coolers.",
+   "_hold_bulkhead": "The hold's face of the bulkhead to the corridor: Bulkhead_Door00L41_C, 1 cm in front of the procedural bulkhead (8.2), the door 0.5 m to port seen from the hold (variant C: to its right).",
+  "_hold": "29. 9. 2026 (author walked the ship: fix the walls, floor, ceiling): the hold from the kit's hull liner (Wall_HullLiner, section L, approved 28. 9.: a thin liner along the hull, 4.10 m at container height), liner face to face 4.1 m; the cargo side (starboard) with tie-down rails, the aisle side plain and service modules; ceiling panels L41 with a down-light and a linear light by turns from x 1.6 (over the ramp's first 0.6 m the hull closes in: the ramp frame's header beam, hs_interior). The floor, the cargo grid, the hatches and the ramp's hydraulics and the tractor beam holder stay the ship's own until the kit has a cargo floor (the grid's position waits for the author).",
+  "keep": {"hold": ["floor", "objects"]},
+  "width": {"hold": 4.1},
+  "stand_in_floor": [[8.24, 8.54]],
    "wall_runs": [
     [[8.54, 1.2], [10.34, 1.2], [0, -1], ["Wall_ComponentBay12W_A", "Wall_ComponentBay06W_B"]],
-    [[8.54, -1.2], [10.34, -1.2], [0, 1], ["Wall_ComponentBay12W_C", "Wall_ComponentBay06W_B"]]
-   ],
+    [[8.54, -1.2], [10.34, -1.2], [0, 1], ["Wall_ComponentBay12W_C", "Wall_ComponentBay06W_B"]],
+  [[1.0, 2.05], [8.2, 2.05], [0, -1], ["Wall_HullLiner12L_A", "Wall_HullLiner12L_B", "Wall_HullLiner12L_A", "Wall_HullLiner12L_A", "Wall_HullLiner12L_B", "Wall_HullLiner12L_A"]],
+  [[1.0, -2.05], [8.2, -2.05], [0, 1], ["Wall_HullLiner12L_A", "Wall_HullLiner12L_C", "Wall_HullLiner12L_C", "Wall_HullLiner12L_C", "Wall_HullLiner12L_C", "Wall_HullLiner12L_B"]]
+ ],
    "run_parts": [
-    [[8.24, 0.0], [1, 0], ["Portal_Ring03W_A"]],
+    [[8.54, -1.2], [1, 0], ["Bulkhead_Door03W_B"]],
+    [[10.33, 1.2], [-1, 0], ["Bulkhead_Door00W_A"]],
+    [[8.19, 2.05], [-1, 0], ["Bulkhead_Door00L41_C"]],
     [[8.54, 0.0], [1, 0], ["Ceiling_Tray12W_A", "Ceiling_Tray06W_A"]],
-    [[8.54, 0.0], [1, 0], ["Floor_Plate12W_A", "Floor_Grille06W_A"]]
-   ]
+    [[8.54, 0.0], [1, 0], ["Floor_Plate12W_A", "Floor_Grille06W_A"]],
+  [[1.6, 0.0], [1, 0], ["Ceiling_Panel12L41_C", "Ceiling_Panel12L41_A", "Ceiling_Panel12L41_C", "Ceiling_Panel12L41_A", "Ceiling_Panel12L41_C", "Ceiling_Panel06L41_A"]]
+ ]
   },
   "kit": {
    "_comment": "SC-like structure from the Quaternius MegaKit (Tools/Blender/hs_interior_kit.py): chamfered profile, portals, cable tray, services, light coves and down lights. Pilot on the corridor from the ramp to the cabin (hold + technical corridor), 25. 9. 2026; the technical corridor moved to the interior kit (kit_modules) on 28. 9.",
@@ -2619,7 +2627,9 @@
    "fittings": [
     {
      "type": "extinguisher",
-     "at": [7.95, 1.848]
+     "at": [7.95, 2.05],
+     "keep": true,
+     "_keep": "29. 9. 2026: the hold is a kit room; the extinguisher stays (the FIRE sign marks it), at the hull liner face"
     },
     {
      "type": "handrail",

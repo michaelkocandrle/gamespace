@@ -144,8 +144,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 66376,
-      "verts": 64050,
+      "tris": 66328,
+      "verts": 64026,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -218,17 +218,17 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 421019,
-      "verts": 218989,
+      "tris": 410925,
+      "verts": 213892,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
-        "M_Ship_Wayfarer_IntTrim",
-        "M_Ship_Wayfarer_IntLight",
-        "M_Ship_Wayfarer_IntGlow",
         "M_Ship_Wayfarer_IntFloor",
         "M_Ship_Wayfarer_IntPanel",
+        "M_Ship_Wayfarer_IntLight",
         "M_Ship_Wayfarer_IntWall",
+        "M_Ship_Wayfarer_IntTrim",
+        "M_Ship_Wayfarer_IntGlow",
         "M_Ship_Wayfarer_IntConsole",
         "M_Ship_Wayfarer_IntAccentGlow",
         "M_Ship_Wayfarer_IntFabric",
@@ -245,7 +245,7 @@
       "uv_layers": 1,
       "bounds_m": [
         [
-          -9.319999694824219,
+          -9.300000190734863,
           -2.3059496879577637,
           -1.3209490776062012
         ],
@@ -259,8 +259,8 @@
     "SM_Ship_Wayfarer_InteriorDecals": {
       "lod": 0,
       "part": "InteriorDecals",
-      "tris": 5616,
-      "verts": 5005,
+      "tris": 5364,
+      "verts": 4593,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -271,7 +271,7 @@
         [
           -9.218500137329102,
           -2.027472972869873,
-          -1.092400074005127
+          -0.04850006103515625
         ],
         [
           8.671916961669922,
@@ -283,25 +283,22 @@
     "SM_Ship_Wayfarer_InteriorKit": {
       "lod": 0,
       "part": "InteriorKit",
-      "tris": 16122,
-      "verts": 13830,
+      "tris": 348,
+      "verts": 208,
       "materials": [
-        "M_Ship_Wayfarer_IntDark",
-        "M_Ship_Wayfarer_KitTrim03",
-        "M_Ship_Wayfarer_KitCables",
-        "M_Ship_Wayfarer_KitTrim02",
-        "M_Ship_Wayfarer_KitTrim01"
+        "M_Ship_Wayfarer_KitTrim01",
+        "M_Ship_Wayfarer_KitTrim02"
       ],
       "uv_layers": 1,
       "bounds_m": [
         [
-          -9.250000953674316,
-          -1.944000005722046,
-          -1.2000001668930054
+          4.9010009765625,
+          -1.8500001430511475,
+          -1.2000000476837158
         ],
         [
           8.40999984741211,
-          1.944000005722046,
+          1.8499999046325684,
           1.1000001430511475
         ]
       ]

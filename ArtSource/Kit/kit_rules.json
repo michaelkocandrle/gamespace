@@ -16,6 +16,42 @@
   "N": {"name": "úzká chodba", "width": 1.2, "ceiling": 2.3, "vertical_to": 1.7, "slope_rise": 0.4, "cove_to": 2.3, "ceiling_width": 0.6, "portal_protrusion": 0.08},
   "W": {"name": "široká chodba / místnost", "width": 2.4, "ceiling": 2.3, "vertical_to": 1.3, "slope_rise": 0.8, "cove_to": 2.3, "ceiling_width": 1.2, "portal_protrusion": 0.1},
   "S": {"name": "servisní průlez", "width": 0.9, "ceiling": 2.1, "vertical_to": 1.9, "slope_rise": 0.2, "cove_to": 2.1, "ceiling_width": 0.6, "portal_protrusion": 0.0, "_portal": "flush: the character capsule is 0.84 m wide"},
+  "L": {
+   "name": "místnost s obložením trupu",
+   "_comment": "A thin hull liner for rooms wider than the W profile (Wall_HullLiner, 29. 9. 2026: cargo holds and cabins - the Wayfarer's hull leaves 3.8-4.2 m with a 0.15 m liner where W walls take 3.0 m). Vertical to 1.7 m (the rail at 1.3 m as the W walls: one line through the ship), a 3:4 chamfer to 2.2 m (0.375 m in - the hull's upper chamfer; the Wayfarer's hold near the ramp leaves no more), the cove to the ceiling; structure 0.1 m behind the panel face. Width per room: the ceilings and floors are built for it.",
+   "width": null,
+   "ceiling": 2.3,
+   "vertical_to": 1.7,
+   "slope_rise": 0.5,
+   "cove_to": 2.3,
+   "ceiling_width": null,
+   "portal_protrusion": 0.0,
+   "structure_depth": 0.1
+  },
+  "L41": {
+   "name": "obložení trupu 4,1 m (nákladový prostor Wayfareru)",
+   "_comment": "Section L at this room width: the liner walls are section L parts (width-free), the ceilings and floors are built for it.",
+   "width": 4.1,
+   "ceiling": 2.3,
+   "vertical_to": 1.7,
+   "slope_rise": 0.5,
+   "cove_to": 2.3,
+   "ceiling_width": null,
+   "portal_protrusion": 0.0,
+   "structure_depth": 0.1
+  },
+  "L38": {
+   "name": "obložení trupu 3,8 m (kajuta Wayfareru)",
+   "_comment": "Section L at this room width: the liner walls are section L parts (width-free), the ceilings and floors are built for it.",
+   "width": 3.8,
+   "ceiling": 2.3,
+   "vertical_to": 1.7,
+   "slope_rise": 0.5,
+   "cove_to": 2.3,
+   "ceiling_width": null,
+   "portal_protrusion": 0.0,
+   "structure_depth": 0.1
+  },
   "T": {"name": "vysoká místnost / nákladový prostor", "width": null, "ceiling": 2.7, "vertical_to": 1.7, "slope_rise": 0.8, "cove_to": 2.7, "ceiling_width": null, "portal_protrusion": 0.1}
  },
  "zones": {

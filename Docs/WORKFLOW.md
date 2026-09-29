@@ -1044,6 +1044,24 @@ snímku.
   `space.FlatSpot [max °] [km]` ji přesune nad nejbližší rovné místo (sklon pod stopou 1,5 m i 8 m), pak snímek s
   `altitude_m` 3,2 a `settle` 10 přistane. Pozor, konzolové příkazy snímku běží před umístěním lodi: loď tehdy ještě
   může mířit nosem kolmo k povrchu a tečné směry z nosu vyjdou nulové (všech 20 000 vzorků pak padlo do jednoho bodu).
+- ee) **Import kitu spadne na „kit part … not imported“.** `import_kit.py` importuje `import_ship` a ten při importu
+  modulu spustí celý import lodi, včetně místností z kitu. Díly nové dávky ale ještě nejsou naimportované.
+  `kit_rooms.py` proto chybějící díl jen ohlásí (`KITROOMS … skipped`) a na konci importu kitu staví místnosti znovu.
+  Varování z první stavby jsou v pořádku, z té poslední ne.
+- ef) **Zevnitř na stěně prosvítá zrcadlově logo z trupu.** Vnější nápis měl projekční hloubku ±60 cm. Obložení trupu je
+  jen 15 cm od trupu, takže ho box zasáhl. Vnější nápisy drž nejvýš ±30 cm: na trup dosáhnou, na obložení ne.
+- eg) **Obložení / strop kitu „prochází trupem“ u rampy.** Trup Wayfareru se nad 2 m zužuje a u rampy se nahoře zavírá.
+  Obdélník místnosti ze stropu 2,3 m tam nestačí. Před návrhem průřezu změř šířku trupu v několika výškách po celé délce
+  místnosti (skript na řezy jako `hold_fit.py`), ne jen v jednom místě. Kontrola `penetrating` vrhá paprsek k ose lodi
+  ve výšce oka a hlásí rohy, které jsou za trupem.
+- eh) **Projekční nápis „marks nothing“, i když podlaha je pod ním.** Kontrola vrhá jediný paprsek ze středu nápisu a
+  ten padl do 5mm spáry mezi dlaždicemi (x 4,6 = spára rastru 0,6 m od x 1,0). Nápis posuň mimo spáru. U podlahy
+  s deskami 3 cm dosáhne 4cm box na jejich spodní stranu („reads mirrored“), hloubku dej 2 cm.
+- ei) **Po převedení poslední místnosti na nový kit zmizelo i něco mimo ni.** Starý kit (`interior.kit`, Quaternius)
+  se v `hs_interior.py` vytvářel jen tehdy, když měl nějakou místnost. Pod stejnou podmínkou ale stavěl i zadní stěnu
+  kokpitu (štít nad stropem kajuty, nosník) a detaily kokpitu. Z kokpitu se pak koukalo do tmy nad stropem kajuty a
+  z manifestu zmizel `InteriorKit` (test menu a importu to hlásí jako „earlier model left“). Kit se teď staví vždy,
+  když ho recept má. Po takové změně projdi i sousední místnosti a snímek z výšky očí v kokpitu.
 - ds) **Stínovaná obdélníková světla bez MegaLights jsou drahá.** Dvě stínovaná světla kitu v chodbě bez MegaLights
   (osvětlení jako v letu): stínové mapy 7,3 ms a světla 5,5 ms (26 ms celkem). V lodi mají stín jen v režimu interiéru
   (MegaLights je trasuje), v letu ne; počet světel pod MegaLights cenu skoro nemění (8 i 12 světel: 3,5 ms).

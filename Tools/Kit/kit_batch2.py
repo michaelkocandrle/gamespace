@@ -300,7 +300,9 @@ def ceiling_panel(sec, var, L, name, seed):
     p = kit_geo.Part(name, seed)
     C, w = sec.ceiling, sec.ceil_half
     M = _ceiling_frame(sec)
-    p.slab("Kit_Seal", M, 0, L, -w, w, 0.01, proud=-0.07, panel=False)
+    # the dark backing: 7 cm up, 3 cm in a hull liner's room (the hull closes in over the Wayfarer's ramp)
+    back = 0.03 if sec.key.startswith("L") else 0.07
+    p.slab("Kit_Seal", M, 0, L, -w, w, 0.01, proud=-back, panel=False)
     side = min(0.3, w * 0.35)
     strips = [(-w, -w + side - GAP / 2), (-w + side + GAP / 2, w - side - GAP / 2), (w - side + GAP / 2, w)]
     hole = None

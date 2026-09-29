@@ -162,9 +162,15 @@ def build_ship(ship, recipe, report):
     n_parts = n_lights = 0
     for k, (m, (x, y, z), yaw) in enumerate(kit_layout.layout_parts(mods, parts)):
         name = "SM_Kit_" + m
-        sm = unreal.EditorAssetLibrary.load_asset("/Game/Kit/Meshes/" + name)
+        sm = None
+        if unreal.EditorAssetLibrary.does_asset_exist("/Game/Kit/Meshes/" + name):
+            sm = unreal.EditorAssetLibrary.load_asset("/Game/Kit/Meshes/" + name)
         if sm is None:
-            raise RuntimeError("kit part %s not imported (import_kit.py)" % name)
+            # a part built but not imported yet: import_kit.py imports import_ship (which builds the ship's kit rooms on
+            # import) before it imports the parts, then builds the rooms again - skip it here, loudly
+            unreal.log_warning("KITROOMS %s: kit part %s not imported yet (import_kit.py), skipped" % (ship, name))
+            report.setdefault("missing_parts", []).append(name)
+            continue
         c = comps.add(unreal.StaticMeshComponent, "%s%02d_%s" % (MESH_PREFIX, k, m))
         c.set_static_mesh(sm)
         c.set_editor_property("relative_location", hull_cm(x, y, z))

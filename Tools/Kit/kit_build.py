@@ -272,6 +272,30 @@ def jobs(batch, sections, budget):
                        part=(lambda c=cat, pa=part, sz=size, s=sec, v=var, sd=seed: kit_batch4.build_part(c, pa, sz, s, v, sd)),
                        category=cat, family="%s_%s" % (cat, part), kind=part, length=size, section=sec, variant=var, batch=4,
                        budget=kit_batch4.budget(cat, part, size), render=True, views=kit_batch4.VIEWS[(cat, part)])
+    elif batch == "liner":
+        import kit_liner
+        for kind, L, var in kit_liner.LINER:
+            seed += 7
+            yield dict(name=kit_liner.part_name(kind, L, var), part=(lambda k=kind, l=L, v=var, sd=seed: kit_liner.build_part(k, l, v, sd)),
+                       category="Wall", family="Wall_" + kind, kind=kind, length=L, section="L", variant=var, batch=4,
+                       budget=kit_liner.budget(L), render=True, views=kit_liner.VIEWS)
+        # the ceilings of the liner rooms (their width per room: sections L41 hold, L38 cabin)
+        import kit_batch2
+        for sec, size, var in (("L41", 1.2, "A"), ("L41", 1.2, "C"), ("L41", 0.6, "A")):
+            seed += 7
+            yield dict(name=kit_batch2.part_name("Ceiling", "Panel", size, sec, var),
+                       part=(lambda s=sec, z=size, v=var, sd=seed: kit_batch2.build_part("Ceiling", "Panel", z, s, v, sd)),
+                       category="Ceiling", family="Ceiling_Panel", kind="Panel", length=size, section=sec, variant=var, batch=4,
+                       budget=max(1500, int(kit_geo.RULES["tri_budget"]["Ceiling_per_m"] * size)), render=True,
+                       views=kit_batch2.VIEWS[("Ceiling", "Panel")])
+    elif batch == "batch4b":
+        import kit_batch4b
+        for cat, part, size, sec, var in kit_batch4b.BATCH4B:
+            seed += 7
+            yield dict(name=kit_batch4b.part_name(cat, part, size, sec, var),
+                       part=(lambda c=cat, pa=part, sz=size, s=sec, v=var, sd=seed: kit_batch4b.build_part(c, pa, sz, s, v, sd)),
+                       category=cat, family="%s_%s" % (cat, part), kind=part, length=size, section=sec, variant=var, batch=4,
+                       budget=kit_batch4b.budget(cat, part, size), render=True, views=kit_batch4b.VIEWS[(cat, part)])
     else:
         raise SystemExit("unknown batch %s" % batch)
 

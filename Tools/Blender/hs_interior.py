@@ -184,6 +184,14 @@ KIT = None          # the modular kit while build() runs (hs_interior_kit.Kit), 
 COCKPIT = {}        # recipe interior.cockpit while build() runs
 
 
+def _kit_scale(spec, H, z0=0.0):
+    """The modular kit's module scale for a room of height H (hs_interior_kit.shell's formula), when no kit room
+    measured it."""
+    kc = spec["kit"]
+    a = kc.get("chamfer_deg", 35.0)
+    return (H - z0 - kc.get("cove_m", 0.12)) / (3.0 + 2.0 * math.cos(math.radians(a)))
+
+
 def tbox(g, key, kit_key, lo, hi, tile=0.9):
     """A box in a kit trim material when the kit is on, else in the flat interior material."""
     if KIT is not None:
@@ -574,12 +582,20 @@ def build(recipe, layout, coll, mats, ship, hull):
     # (kit_modules.enabled false) the rooms keep their own interior (Tools/Kit/kit_layout.active_rooms)
     mods = spec.get("kit_modules") or {}
     mod_rooms = mods.get("rooms", []) if mods.get("enabled", True) else []
+    # a kit room may keep some of the ship's own interior until the kit has it (kit_modules.keep: "floor", "objects"),
+    # and may be wider than its layout rectangle (kit_modules.width: the hull liner's face to face, 29. 9. 2026) - the
+    # floor, the ramp's leaf and the bulkheads next to it reach that far
+    keep = mods.get("keep", {}) if mod_rooms else {}
+    kit_half = {rid: w / 2 for rid, w in (mods.get("width", {}) if mod_rooms else {}).items() if rid in mod_rooms}
     kit_rooms = [r for r in (spec.get("kit") or {}).get("rooms", []) if r not in mod_rooms]
     kit = None
     global KIT, COCKPIT
     KIT = None
     COCKPIT = spec.get("cockpit", {})
-    if kit_rooms:
+    # the modular kit (interior.kit) whenever the recipe has it: its rooms, and the cockpit's rear wall, its gable and
+    # details, which need it even when every one of its rooms went to the interior kit (29. 9. 2026: with the hold a
+    # kit room the cockpit lost its rear wall's gable - a black void over the cabin's ceiling)
+    if spec.get("kit"):
         import hs_interior_kit
         kit = KIT = hs_interior_kit.Kit()
         hs_interior_kit.preview_materials(mats)
@@ -598,6 +614,9 @@ def build(recipe, layout, coll, mats, ship, hull):
             for xa, xb in mods.get("stand_in_floor", []):
                 if x0 <= xa < xb <= x1:
                     floor_tiles(g, xa, xb, -1.3, 1.3, z0, tile=xb - xa)
+            if "floor" in keep.get(rid, []):
+                hw = kit_half.get(rid, y1i)
+                floor_tiles(g, x0, x1, -hw, hw, z0)
             report.setdefault("kit_modules", []).append(rid)
             report["rooms"].append(rid)
             continue
@@ -614,11 +633,39 @@ def build(recipe, layout, coll, mats, ship, hull):
     # cross walls with the layout's doors
     xs = sorted({r["rect"][0] for r in rooms.values()} | {r["rect"][1] for r in rooms.values() if r["id"] != "cockpit"})
     y0i, y1i = -1.9 + inset, 1.9 - inset
+    def wall_half(x):
+        """How far a cross wall at x reaches: to the widest kit room next to it (a hull liner's face), else the rooms'."""
+        wide = [kit_half[r["id"]] for r in rooms.values() if r["id"] in kit_half and (abs(r["rect"][0] - x) < 0.01 or abs(r["rect"][1] - x) < 0.01)]
+        return max(wide) + 0.06 if wide else y1i
     for x in xs:
         if x > 15.3:
             continue
         d = next((dd for dd in doors if dd["axis"] == "x" and abs(dd["at"][0] - x) < 0.01), None)
+        wh = wall_half(x)
+        if wh > y1i + 0.01:
+            # wings out to a hull liner's face, in the liner's outline (vertical, then its chamfer): a box to the
+            # ceiling would stand out of the hull where it narrows over the ramp
+            vt, rise = 1.7, 0.5
+            for sgn in (1, -1):
+                zk = vt + (wh - y1i) / 0.75
+                pts = [(y1i, 0.0), (wh, 0.0), (wh, vt), (y1i, min(zk, H))]
+                if zk > H:
+                    pts = [(y1i, 0.0), (wh, 0.0), (wh, vt), (wh - (H - vt) * 0.75, H), (y1i, H)]
+                bm = g["int_dark"]
+                vs = [bm.verts.new((x + dx, sgn * yy, zz)) for dx in (-0.05, 0.0) for (yy, zz) in pts]
+                n = len(pts)
+                f0 = bm.faces.new(vs[:n])
+                f1 = bm.faces.new(list(reversed(vs[n:])))
+                for i in range(n):
+                    j = (i + 1) % n
+                    bm.faces.new((vs[i], vs[j], vs[n + j], vs[n + i]))
         if abs(x - 1.0) < 0.01:
+            if wh > y1i + 0.01:
+                # a kit hold: the ramp's header beam over its first 0.6 m, where the hull closes in over the ramp and
+                # a kit ceiling does not fit (the ramp frame's housing), a hazard line along its lower edge
+                box(g["int_trim"], (x, -1.74, 2.12), (x + 0.6, 1.74, H + 0.02))
+                box(g["int_dark"], (x + 0.02, -1.7, 2.1), (x + 0.58, 1.7, 2.12))
+                box(g["accent"], (x + 0.58, -1.7, 2.1), (x + 0.6, 1.7, 2.14))
             # the ramp's inside: a closed leaf with ribs (the ramp opens with walking inside the ship)
             box(g["int_dark"], (x - 0.05, y0i, 0), (x, y1i, H))
             box(g["int_panel"], (x, -1.3, 0.02), (x + 0.03, 1.3, 2.1))
@@ -630,7 +677,7 @@ def build(recipe, layout, coll, mats, ship, hull):
         bulkhead(g, x, y0i, y1i, 0.0, H, (d["at"][1], d["width"]) if d else None, 1, full=full)
         if kit is not None:
             # kit panels on the faces that look into kit rooms
-            ks = next(iter(report["kit"].values()))["scale"]
+            ks = next((v["scale"] for v in report["kit"].values() if isinstance(v, dict) and "scale" in v), None) or _kit_scale(spec, H)
             for rid in kit_rooms:
                 rx0, rx1 = rooms[rid]["rect"][0], rooms[rid]["rect"][1]
                 if abs(rx1 - x) < 0.01:
@@ -730,7 +777,7 @@ def build(recipe, layout, coll, mats, ship, hull):
         x0, x1, y0, y1 = o["rect"]
         zr = o.get("z", [0.0, 1.0])
         name = o["name"]
-        if o.get("room") in mod_rooms:
+        if o.get("room") in mod_rooms and "objects" not in keep.get(o.get("room"), []):
             # the kit's walls stand for them (the reactor behind a grille, the shield generator behind a hatch)
             report["objects_in_kit_rooms"] = report.get("objects_in_kit_rooms", 0) + 1
             continue
@@ -772,7 +819,13 @@ def build(recipe, layout, coll, mats, ship, hull):
             continue
         report["objects"] += 1
     if kit is not None:
-        hs_interior_kit.fittings(kit, g, box, spec, lights_out)
+        # fittings in a room the interior kit took over stay out, unless marked "keep" (the fire extinguisher)
+        def in_mod_room(f):
+            xs = f.get("x") or [f["at"][0]] if f.get("x") or f.get("at") else []
+            xs = xs if isinstance(xs, list) else [xs]
+            return any(rooms[r]["rect"][0] <= x <= rooms[r]["rect"][1] for r in mod_rooms for x in xs)
+        fits = [f for f in spec["kit"].get("fittings", []) if f.get("keep") or not in_mod_room(f)]
+        hs_interior_kit.fittings(kit, g, box, dict(spec, kit=dict(spec["kit"], fittings=fits)), lights_out)
         cockpit_detail(g, layout, zc, sill)
     holo_centre = None
     if COCKPIT.get("hologram") and "int_console" in g.bm:

@@ -250,28 +250,42 @@ def hull_in_rooms(ship, recipe):
             continue
         x0, x1, y0, y1 = room["rect"]
         fz = room.get("floor_z", layout["decks"][room.get("deck", "main")]["floor_z"])
-        if room["id"] in mods:
-            y0, y1 = -1.2, 1.2                      # the W section's panel faces
+        widths = (spec.get("kit_modules") or {}).get("width") or {}
+        boxes = []
+        if room["id"] in mods and room["id"] in widths:
+            # a hull liner (section L): face to face up to the chamfer's foot, the chamfer's top line above it
+            hw = widths[room["id"]] / 2
+            sec = json.load(open(os.path.join(ROOT, "ArtSource", "Kit", "kit_rules.json"), encoding="utf-8"))["sections"]["L"]
+            vt, xt = sec["vertical_to"], 0.75 * sec["slope_rise"]
+            boxes = [(-hw, hw, 0.0, vt), (-hw + xt, hw - xt, vt, H)]
+        elif room["id"] in mods:
+            boxes = [(-1.2, 1.2, 0.0, H)]            # the W section's panel faces
         else:
-            y0, y1 = y0 + inset, y1 - inset
-        lo = Vector((x0 + m + off[0], y0 + m + off[1], fz + m + off[2]))
-        hi = Vector((x1 - m + off[0], y1 - m + off[1], fz + H - m + off[2]))
-        box = bmesh.new()
-        res = bmesh.ops.create_cube(box, size=1.0)
-        bmesh.ops.scale(box, vec=hi - lo, verts=res["verts"])
-        bmesh.ops.translate(box, vec=(lo + hi) / 2, verts=res["verts"])
-        box_tree = BVHTree.FromBMesh(box)
-        box.free()
-        hits = ext_tree.overlap(box_tree)
-        # faces wholly inside the box do not intersect its skin: test the exterior's vertices too
-        inside = [v.co for v in ext.verts if lo.x < v.co.x < hi.x and lo.y < v.co.y < hi.y and lo.z < v.co.z < hi.z]
-        if hits or inside:
-            pts = [ext.faces[a].calc_center_median() for a, b in hits[:1]] or inside[:1]
-            p = pts[0]
-            out.append({"room": room["id"], "faces": len({a for a, b in hits}), "verts_inside": len(inside),
-                        "at_layout": [round(p.x - off[0], 2), round(p.y - off[1], 2), round(p.z - off[2], 2)]})
+            boxes = [(y0 + inset, y1 - inset, 0.0, H)]
+        for (y0, y1, za, zb) in boxes:
+            _box_check(out, room, ext, ext_tree, off, x0, x1, y0, y1, fz + za, fz + zb, m)
     ext.free()
     return out
+
+
+def _box_check(out, room, ext, ext_tree, off, x0, x1, y0, y1, z0, z1, m):
+    """hull_in_rooms for one clear box of a room (layout metres)."""
+    lo = Vector((x0 + m + off[0], y0 + m + off[1], z0 + m + off[2]))
+    hi = Vector((x1 - m + off[0], y1 - m + off[1], z1 - m + off[2]))
+    box = bmesh.new()
+    res = bmesh.ops.create_cube(box, size=1.0)
+    bmesh.ops.scale(box, vec=hi - lo, verts=res["verts"])
+    bmesh.ops.translate(box, vec=(lo + hi) / 2, verts=res["verts"])
+    box_tree = BVHTree.FromBMesh(box)
+    box.free()
+    hits = ext_tree.overlap(box_tree)
+    # faces wholly inside the box do not intersect its skin: test the exterior's vertices too
+    inside = [v.co for v in ext.verts if lo.x < v.co.x < hi.x and lo.y < v.co.y < hi.y and lo.z < v.co.z < hi.z]
+    if hits or inside:
+        pts = [ext.faces[a].calc_center_median() for a, b in hits[:1]] or inside[:1]
+        p = pts[0]
+        out.append({"room": room["id"], "faces": len({a for a, b in hits}), "verts_inside": len(inside),
+                    "at_layout": [round(p.x - off[0], 2), round(p.y - off[1], 2), round(p.z - off[2], 2)]})
 
 
 def floating_and_penetrating(ship, exempt_names):
@@ -452,8 +466,8 @@ def walk_blocked(ship, recipe):
                 z = feet + WALK_R + 0.05
                 while z <= feet + WALK_H - WALK_R + 1e-6:
                     near = tree.find_nearest(Vector((c.x, c.y, z)) + off, WALK_R)
-                    if near[0] is not None and near[3] < WALK_R - 0.005:
-                        gap = WALK_R - near[3]
+                    if near[0] is not None and near[3] < WALK_R + 0.01:          # 1 cm of clearance: none stopped the game's walker
+                        gap = WALK_R + 0.01 - near[3]
                         if worst is None or gap > worst["overlap_m"]:
                             q = near[0] - off
                             worst = {"door": door.get("name", ""), "walker_at": [round(c.x, 2), round(c.y, 2), round(feet, 2)],

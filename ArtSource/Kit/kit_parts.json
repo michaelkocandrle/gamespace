@@ -481,7 +481,7 @@
    "variants": {
     "A": "bulkhead with a door opening and hazard frame"
    },
-   "status": "planned",
+   "status": "built 29. 9. 2026: Bulkhead_Door03W_A/_B (0.3 m, the doorway through it; B off the centre line by 0.5 m, its corner along the slope), Bulkhead_Door00W_A (the face only, before a procedural bulkhead) - Tools/Kit/kit_batch4b.py; in the Wayfarer's technical corridor",
    "pilot_needs": "the door opening off the centre line (its centre a parameter across the section's clear width: the Wayfarer's hold door sits at y 0.5 of a W corridor), a face that meets the kit walls' plinth, slope and cove where they end against it, and fits inside a portal ring; replaces the ships' procedural bulkheads with their doorways. Wayfarer pilot corridor 28. 9. 2026 (Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md)"
   },
   "Console_Standing": {
@@ -726,7 +726,7 @@
    "variants": {
     "A": "a thin wall (structure 0.1 m or less) that follows a hull's inside, for rooms wider than the W profile: cargo holds, cabins"
    },
-   "status": "planned, batch 4 (author 28. 9. 2026: a thin liner along the hull; 8 SCU plus a 1.55 m aisle fit - hold_fit.py)",
+   "status": "built 29. 9. 2026: section L (vertical to 1.7, a 3:4 chamfer to 2.2, the cove to 2.3, structure 0.1 m), Wall_HullLiner12L_A/_B/_C, 06L_A/_C - Tools/Kit/kit_liner.py; ceilings Ceiling_Panel12L41_A/_C, 06L41_A; the Wayfarer's hold",
    "pilot_needs": "the Wayfarer's hold needs 8 SCU (2.5 m) plus a 1.25 m aisle = 3.75 m, but the widest W-profile room the hull takes there is 3.0 m (hull_fit_wayfarer.png): with the kit's 0.2 m wall structure the hold cannot be built from W walls as designed - a thin hull liner, or 6 SCU / a narrower aisle (author's decision). Wayfarer pilot corridor 28. 9. 2026 (Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md)"
   }
  },

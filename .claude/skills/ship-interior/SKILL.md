@@ -169,6 +169,7 @@ parametry a jejich výchozí hodnoty podle konstant skriptu (čte je přes `ast`
 - Po každé přestavbě lodi: `test_ship_geometry.py <Loď>` s kontrolou `walk_blocked` (zavřené dveře v
   `checks.walk_exempt`), pak preset `wayfarer_walk` a kontrola logu (`space.Where`, `WALK end`, `sits down`).
 - Nástrahy: WORKFLOW eb (ploška bez tloušťky v průchodu), ec (hlava na schodech u dveří), ed (přistání ve scénáři).
+- Místnosti z kitu v lodi (`interior.kit_modules`): `rooms`, `wall_runs`, `run_parts`; `width` = šířka kit místnosti (obložení trupu, průřez L41/L38), `keep` = co zůstává lodní (`floor`, `objects`). Přepážky `Bulkhead_Door*` se kladou jako `run_parts` s pivotem v rohu na líci. Po změně: `kit_build.py -- <dávka>`, `import_kit.py`, stavba lodi, `import_ship.py`, `test_ship_geometry.py` (walk, hull_in_rooms, nápisy), preset `wayfarer_rooms` a `wayfarer_walk`. Nástrahy WORKFLOW ee–eh.
 
 ## Konzolové příkazy (zabalená hra i scénáře snímků, nic se neukládá)
 

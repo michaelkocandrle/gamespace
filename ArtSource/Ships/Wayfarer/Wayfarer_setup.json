@@ -1345,6 +1345,7 @@
  "decals": [
   {
    "name": "Name_L",
+   "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Wayfarer",
    "location": [
     5.0,
@@ -1357,7 +1358,7 @@
     90.0
    ],
    "size": [
-    60.0,
+    30.0,
     24.0,
     190.0
    ],
@@ -1371,6 +1372,7 @@
   },
   {
    "name": "Reg_L",
+   "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Registration",
    "location": [
     605.0,
@@ -1383,7 +1385,7 @@
     90.0
    ],
    "size": [
-    60.0,
+    30.0,
     18.0,
     70.0
    ],
@@ -1397,6 +1399,7 @@
   },
   {
    "name": "Logo_L",
+   "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Logo",
    "location": [
     -635.0,
@@ -1409,7 +1412,7 @@
     90.0
    ],
    "size": [
-    60.0,
+    30.0,
     30.0,
     60.0
    ],
@@ -1449,6 +1452,7 @@
   },
   {
    "name": "Name_R",
+   "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Wayfarer",
    "location": [
     5.0,
@@ -1461,7 +1465,7 @@
     -90.0
    ],
    "size": [
-    60.0,
+    30.0,
     24.0,
     190.0
    ],
@@ -1475,6 +1479,7 @@
   },
   {
    "name": "Reg_R",
+   "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Registration",
    "location": [
     605.0,
@@ -1487,7 +1492,7 @@
     -90.0
    ],
    "size": [
-    60.0,
+    30.0,
     18.0,
     70.0
    ],
@@ -1501,6 +1506,7 @@
   },
   {
    "name": "Logo_R",
+   "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Logo",
    "location": [
     -635.0,
@@ -1513,7 +1519,7 @@
     -90.0
    ],
    "size": [
-    60.0,
+    30.0,
     30.0,
     60.0
    ],
@@ -1579,11 +1585,12 @@
   },
   {
    "name": "Int_Sec02",
+   "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "flip_u": 1.0,
    "texture": "D_Int_Section_02",
    "location": [
-    -715.0,
-    -183.5,
+    -775.0,
+    -202.5,
     -8.0
    ],
    "rotation": [
@@ -1605,11 +1612,12 @@
   },
   {
    "name": "Int_Sec03",
+   "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "flip_u": 1.0,
    "texture": "D_Int_Section_03",
    "location": [
-    -535.0,
-    -183.5,
+    -505.0,
+    -202.5,
     -8.0
    ],
    "rotation": [
@@ -1631,11 +1639,12 @@
   },
   {
    "name": "Int_Sec04",
+   "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "flip_u": 1.0,
    "texture": "D_Int_Section_04",
    "location": [
-    -355.0,
-    -183.5,
+    -415.0,
+    -202.5,
     -8.0
    ],
    "rotation": [
@@ -1657,11 +1666,12 @@
   },
   {
    "name": "Int_Hold",
+   "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "texture": "D_Int_Hold",
    "location": [
-    -565.0,
-    183.5,
-    0.0
+    -505.0,
+    203.0,
+    30.0
    ],
    "rotation": [
     0.0,
@@ -1683,10 +1693,11 @@
   },
   {
    "name": "Int_Grid",
+   "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "texture": "D_Int_Grid",
    "location": [
-    -290.0,
-    183.5,
+    -245.0,
+    202.5,
     -25.0
    ],
    "rotation": [
@@ -1709,9 +1720,10 @@
   },
   {
    "name": "Int_Lane",
+   "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "texture": "D_Int_Lane",
    "location": [
-    -565.0,
+    -535.0,
     -125.0,
     -119.5
    ],
@@ -1748,7 +1760,7 @@
     0.0
    ],
    "size": [
-    4.0,
+    2.0,
     22.0,
     90.0
    ],
@@ -1761,11 +1773,12 @@
   },
   {
    "name": "Int_Engineering",
+   "_moved": "29. 9. 2026: onto the kit bulkhead face in the hold (Bulkhead_Door00L41_C at x 8.19), its main panel port of the door under the rail",
    "texture": "D_Int_Engineering",
    "location": [
-    -206.5,
+    -207.5,
     -133.0,
-    5.0
+    -8.0
    ],
    "rotation": [
     0.0,
@@ -1920,11 +1933,12 @@
   },
   {
    "name": "Int_Cockpit",
+   "_moved": "29. 9. 2026: onto the kit bulkhead face (Bulkhead_Door00W_A at x 10.33), the main panel port of the door under the rail: the arrow points at the door (to starboard of it the frame hid half the word and the arrow pointed away)",
    "texture": "D_Int_Cockpit",
    "location": [
-    7.5,
-    78.0,
-    15.0
+    6.5,
+    -87.0,
+    -20.0
    ],
    "rotation": [
     0.0,
@@ -1946,12 +1960,13 @@
   },
   {
    "name": "Int_Fire",
+   "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "flip_u": 1.0,
    "texture": "D_Int_Fire",
    "location": [
     -230.0,
-    -183.5,
-    2.0
+    -202.5,
+    -5.0
    ],
    "rotation": [
     0.0,

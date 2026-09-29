@@ -1768,6 +1768,33 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
             kajuta a nákladový prostor). Kontrola `walk_blocked` u ní hlásí varování `walk_tight`: dveře z nákladového
             prostoru jsou mimo osu (y 0,5), portál chodby na ose - 12 cm od středu dveří chodec hlavou zavadí o zkosení
             portálu (řeší `Bulkhead_Door` mimo osu z dávky 4). Blokovaný střed dveří je chyba, okraje jen varování.
+        - **Přestavba interiéru, krok A** (29. 9. 2026 večer, autor: „materiál lodi, stěny, podlaha, strop… pak nábytek“).
+          Audit všech místností z výšky očí (`Tools/Shots/wayfarer_rooms.json`): kajuta ploché stěny a nábytek z kvádrů,
+          nákladový prostor černý, všude plochý strop a jednobarevné materiály. Postup: interiér z kitu místnost po
+          místnosti, pak nábytek; optimalizace až na konci (autor).
+          - Přepážky s dveřmi `Bulkhead_Door` (`Tools/Kit/kit_batch4b.py`): 03W (0,3 m silná, průchod s kapsou posuvných
+            dveří, vodicí lištou a prahem, zadní deska) a 00W (jen čelo 3 cm před procedurální přepážkou), varianta B
+            dveře 0,5 m mimo osu se zkoseným rohem podle stěny; dvouvrstvá zárubeň, světlo v horním rámu a v průchodu,
+            stavové světlo (žádná klávesnice), žebra ke stropu, svod kabelů do rozvodné skříňky. V chodbě: vzadu 03W_B
+            místo portálu, vpředu 00W_A; přední dveře layoutu z y 0,1 na 0,0; nápis COCKPIT na čele kitu vlevo od dveří.
+          - Obložení trupu `Wall_HullLiner` (`Tools/Kit/kit_liner.py`, průřez L v `kit_rules.json`): svisle do 1,7 m,
+            zkosení 3:4 do 2,2 m, žlábek ke stropu 2,3 m, konstrukce 0,1 m; lišta v 1,3 m jako stěny W, obnažená žebra
+            trupu ve spojích (T profil), žlab na zkosení; A hladká, B rozvodná skříňka a poklop, C kolejnice na úvazky.
+            Průřezy L41 / L38 pro stropy a podlahy místností 4,1 / 3,8 m. Trup se nad 2 m zužuje (u rampy nejvíc) - proto
+            zkosení 0,375 m.
+          - Nákladový prostor z kitu (schválené obložení, 4,1 m): obložení obou stěn (pravobok nákladová kolejnice),
+            strop `Ceiling_Panel12L41` od x 1,6, nad rampou nosník rámu rampy (trup se tam zavírá); podlaha, mřížka,
+            poklopy, hydraulika a držák paprsku zůstávají lodní (`kit_modules.keep`, `kit_modules.width`), hydraulika a
+            držák o 0,15 m ke stěně; nápisy nákladového prostoru přesunuté na obložení. Posun mřížky čeká na autora.
+          - Vnější nápisy (logo, jméno, registrace) hluboké 30 cm místo 60: logo prosvítalo zrcadlově na obložení.
+          - Čelo přepážky v nákladovém prostoru z kitu (`Bulkhead_Door00L41_C`, lišta v 1,3 m jako obložení), nápis
+            ENGINEERING na něm; hasicí přístroj ze starého kitu zůstává (`fittings` s `keep`), ostatní jeho doplňky
+            v místnostech nového kitu vypnuté.
+          - Oprava: se starým kitem (Quaternius, `interior.kit`) bez místností zmizel i štít, nosník a obložení zadní
+            stěny kokpitu a detaily kokpitu (černá díra nad stropem kajuty z kokpitu) - kit se teď staví vždy, když ho
+            recept má (WORKFLOW ei).
+          - Kajuta: plán `Tools/Kit/cabin_plan.py` → `Docs/Kit/cabin_plan_wayfarer.png`, varianta A (stěny W, 3,0 m) a B
+            (obložení trupu, 3,8 m jako dnes, schválený layout beze změny) - doporučeno B, poslané autorovi.
     - Klávesa I vede jen do Steadfastu; Wayfarer se prochází od 29. 9. 2026 vstáním z křesla (F), viz výše.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 
