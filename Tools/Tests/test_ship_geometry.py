@@ -26,7 +26,7 @@ import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BLENDER = os.environ.get("BLENDER", r"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe")
-CATEGORIES = ("mirrored_decals", "floating", "penetrating", "hull_in_rooms", "placeholders", "holes")
+CATEGORIES = ("mirrored_decals", "floating", "penetrating", "hull_in_rooms", "placeholders", "holes", "walk_blocked")
 
 
 def ship_under_test():

@@ -1744,7 +1744,28 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
             (`Docs/Reviews/2026-09-28_kit_bays/compare_current_kit_sc_after_fixes.jpg`);
           - test orientace nápisů `Tools/Tests/test_decal_orientation.py` (setup) a kontrola `DecalFlipU/V` instancí
             v `test_ship_import.py`; našel další 4 nápisy se skrytým převrácením (sekce 02–04, FIRE), setup je teď výslovný.
-    - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
+        - **Průchozí Wayfarer** (29. 9. 2026, autor: „průchozí loď, ať vidím reálně, co tam máme“, optimalizace až na
+          konci). Pilot vstane z křesla a projde celou loď po vlastních nohou:
+          - F v přistálé lodi (nebo stojící, pod 1 m/s) = vstát za křeslem (socket trupu `SOCKET_WalkSeat`); u křesla
+            F = sednout; u rampy (`SOCKET_WalkRamp`, jen po přistání) F = ven vedle lodi; zvenku F = dovnitř po rampě.
+            Výzva „[F] …“ pod středem obrazovky v každém režimu HUD kromě vypnutého (`SpaceDebugHUD`, `InteractPrompt`).
+          - `ASpaceshipPawn::SetInteriorWalk`: trup přestane blokovat pěšáka, meshe místností (Interior, InteriorKit,
+            InteriorMod_*) dostanou kolizi po polygonech (import `CTF_USE_COMPLEX_AS_SIMPLE`, v letu vypnutá), s lodí
+            jede `ASpaceGravityVolume`; loď je kinematická a letí jen se svým kořenovým boxem, let to neovlivní.
+          - V lodi má postava štíhlejší kapsli 56 cm × 1,80 m (`SetShipCapsule`, oko dál 1,65 m nad podlahou); výchozí
+            84 cm × 1,92 m se na strmých schodech do kokpitu zasekla hlavou o stěnu nad dveřmi.
+          - Úpravy lodi kvůli chůzi: dveře do kokpitu až ke stropu kajuty (bez nadpraží, oranžová lišta po stranách),
+            střední žebro stěny nad nimi začíná až nad příčníkem, schodiště o 6 cm dál od stěny (15,24 → 15,30) s
+            podlahou v mezeře, pryč 3 cm vysoká ploška zadní hrany podlahy kokpitu, která visela přes celý průchod ve
+            výšce 1,12 m.
+          - Nová kontrola testu geometrie `walk_blocked`: kapsle chodce každými dveřmi layoutu, přes schody; zavřené
+            dveře (rampa, hygienická buňka) v receptu `checks.walk_exempt`. Ověřeno, že s kapslí 84 cm / 1,92 m nebo
+            1,95 m výškou selže u schodů.
+          - Příkazy pro scénáře: `space.Interact` (co dělá F), `space.Where` (poloha v souřadnicích lodi, podlaha, čeho se
+            kapsle dotýká), `space.FlatSpot [°] [km]` (přesune loď nad nejbližší rovinu – v místě snímků je svah 32°,
+            loď tam nepřistane). Preset `wayfarer_walk.json`: přistání, celý okruh a zpět do křesla.
+          - Chodba z kitu zůstává vypnutá (čeká na autora); prochází se současná technická chodba.
+    - Klávesa I vede jen do Steadfastu; Wayfarer se prochází od 29. 9. 2026 vstáním z křesla (F), viz výše.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 
 ---

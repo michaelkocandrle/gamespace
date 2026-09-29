@@ -156,12 +156,29 @@ parametry a jejich výchozí hodnoty podle konstant skriptu (čte je přes `ast`
 - Gravitace: `APlayerCharacter::UpdateGravity` se ptá `ASpaceGravityVolume` dřív než planety.
 - Další krok podle autora: usednutí do pilotního křesla s animací (Mixamo) a plynulý přechod do kamery kokpitu.
 
+## Průchozí loď uvnitř trupu (Wayfarer, od 29. 9. 2026)
+
+- Sockety trupu z receptu `assemble.sockets`: `WalkSeat` (za křeslem na podlaze kokpitu, `rotate_z_deg` 180 = čelem
+  dozadu) a `WalkRamp` (v nákladovém prostoru u rampy). Loď s oběma je průchozí (`HasWalkInterior`).
+- F v lodi: `LeaveSeat` (přistálá nebo pod 1 m/s) → jinak `ExitShip`. Pěšky v lodi: u křesla (170 cm od socketu
+  `Cockpit`) sednout, u rampy (220 cm) ven jen po přistání. Zvenku F u průchozí lodi = dovnitř po rampě.
+- `SetInteriorWalk(true)`: trup `ECC_Pawn` Ignore, meshe Interior / InteriorKit / InteriorMod_* QueryOnly a blokují
+  Pawn + Visibility (kolize po polygonech z importu), přidaný `ASpaceGravityVolume` přes jejich obálku, připnutý k lodi.
+  Osvětlení interiéru `ASpacePlayerController::SetShipInteriorLighting`.
+- Kapsle v lodi 56 cm × 1,80 m (`ShipCapsuleRadius/HalfHeight`, `SetShipCapsule`), mimo loď výchozí.
+- Po každé přestavbě lodi: `test_ship_geometry.py <Loď>` s kontrolou `walk_blocked` (zavřené dveře v
+  `checks.walk_exempt`), pak preset `wayfarer_walk` a kontrola logu (`space.Where`, `WALK end`, `sits down`).
+- Nástrahy: WORKFLOW eb (ploška bez tloušťky v průchodu), ec (hlava na schodech u dveří), ed (přistání ve scénáři).
+
 ## Konzolové příkazy (zabalená hra i scénáře snímků, nic se neukládá)
 
 | Příkaz | Co |
 | --- | --- |
 | `space.Interior` | do interiéru a zpět (= I) |
 | `space.Walk <vpřed> <vpravo> <s> [yaw]` | chůze jako držené klávesy; log `WALK end at …` |
+| `space.Interact` | co teď dělá F: vstát z křesla průchozí lodi, sednout, ven po rampě, dovnitř (log `space.Interact: …`) |
+| `space.Where` | chodec v lodi: poloha v souřadnicích lodi (cm), podlaha, čeho se kapsle dotýká, přistání lodi |
+| `space.FlatSpot [°] [km]` | loď nad nejbližší rovné místo (přistání pro scénáře chůze) |
 | `space.Door 1\|0\|-1` | všechny dveře otevřít / zavřít / automaticky |
 | `space.Kit <Param> <hodnota> [část jména mat.]` | skalár materiálů: `Lift`, `MetallicScale`, `RoughnessScale`, `RoughnessFloor`, `AccentStrength`, `WearAmount`, `WearEverywhere`, `GrimeAmount`, `FloorPlates`; filtr `MI_T_` = jen trim sheety |
 | `space.KitColor <Param> R G B [jméno]` | `Gunmetal`, `Accent` |
@@ -185,6 +202,7 @@ další snímky → varianty začínej `space.KitReset`.
 | --- | --- |
 | `steadfast_interior` | přehled všech místností, pevná expozice |
 | `interior_walk` | `space.Interior` + `space.Walk` z první osoby; kontrola kolizí v logu |
+| `wayfarer_walk` | průchozí Wayfarer: rovina, přistání, vstát (F), schody, kajuta, technická chodba, nákladový prostor, ven, dovnitř, zpět do křesla; `space.Where` po každém kroku |
 | `sc_look` | 1080p, auto expozice; `python Tools/Shots/measure_look.py <složka>` |
 | `sc_tune`, `interior_tune`, `ceiling_tune`, `accent_tune` | varianty barvy/světel přes `space.Kit*` |
 | `wear_check`, `wear_tune` | opotřebení zblízka / síla wear+grime |

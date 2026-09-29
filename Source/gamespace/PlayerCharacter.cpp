@@ -20,6 +20,7 @@
 #include "InputTriggers.h"
 #include "SpaceDebugHUD.h"
 #include "SpaceInterior.h"
+#include "SpacePlayerController.h"
 #include "SpaceshipPawn.h"
 #include "SpaceUserSettings.h"
 #include "UObject/ConstructorHelpers.h"
@@ -474,7 +475,14 @@ void APlayerCharacter::HandleToggleHud(const FInputActionValue& /*Value*/)
 
 void APlayerCharacter::HandleInteract(const FInputActionValue& /*Value*/)
 {
-	TryBoardShip();
+	if (InteriorShip.IsValid())
+	{
+		TryInteriorInteract();
+	}
+	else
+	{
+		TryBoardShip();
+	}
 }
 
 // -------------------------------------------------------------------------------------------
@@ -515,11 +523,90 @@ bool APlayerCharacter::TryBoardShip()
 	{
 		return false;
 	}
+	if (Ship->HasWalkInterior())
+	{
+		// a walkable ship: in up the ramp, into the hold (then to the seat on foot)
+		Ship->SetInteriorWalk(true);
+		const FTransform Ramp = Ship->GetWalkSocketTransform(TEXT("WalkRamp"));
+		SetActorLocation(Ramp.GetLocation() + Ship->GetActorUpVector() * 100.0, false, nullptr, ETeleportType::TeleportPhysics);
+		BoardInterior(Ship, Ramp.GetRotation().GetForwardVector());
+		UE_LOG(LogPlayerCharacter, Log, TEXT("%s walks into %s up the ramp"), *GetName(), *Ship->GetName());
+		return true;
+	}
 	UE_LOG(LogPlayerCharacter, Log, TEXT("%s boards %s (%.0f cm from the hull)"), *GetName(), *Ship->GetName(), Distance);
 	PlayerController->Possess(Ship);
 	Ship->OnBoarded();
 	Destroy();
 	return true;
+}
+
+void APlayerCharacter::BoardInterior(ASpaceshipPawn* Ship, const FVector& Forward)
+{
+	InteriorShip = Ship;
+	InteriorTransitionTime = GetGameTimeSinceCreation();
+	SetShipCapsule(true);
+	FaceDirection(Forward);
+	ASpacePlayerController::SetShipInteriorLighting(true);
+}
+
+void APlayerCharacter::SetShipCapsule(bool bInShip)
+{
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	const float Radius = bInShip ? ShipCapsuleRadius : PlayerCharacterDefaults::CapsuleRadius;
+	const float HalfHeight = bInShip ? ShipCapsuleHalfHeight : PlayerCharacterDefaults::CapsuleHalfHeight;
+	const float Drop = Capsule->GetUnscaledCapsuleHalfHeight() - HalfHeight;
+	if (FMath::IsNearlyZero(Drop) && FMath::IsNearlyEqual(Capsule->GetUnscaledCapsuleRadius(), Radius))
+	{
+		return;
+	}
+	Capsule->SetCapsuleSize(Radius, HalfHeight);
+	// the feet stay on the floor: the centre moves by the change of the half height
+	SetActorLocation(GetActorLocation() - Capsule->GetUpVector() * Drop, false, nullptr, ETeleportType::TeleportPhysics);
+	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -HalfHeight));
+	// the eye at the same height above the feet
+	FirstPersonCamera->SetRelativeLocation(FirstPersonEyeOffset + FVector(0.f, 0.f, PlayerCharacterDefaults::CapsuleHalfHeight - HalfHeight));
+}
+
+bool APlayerCharacter::TryInteriorInteract()
+{
+	ASpaceshipPawn* Ship = InteriorShip.Get();
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (!Ship || !PlayerController || GetGameTimeSinceCreation() - InteriorTransitionTime < BoardingCooldownSeconds)
+	{
+		return false;
+	}
+	if (Ship->IsNearSeat(GetActorLocation()))
+	{
+		// sit down and fly
+		UE_LOG(LogPlayerCharacter, Log, TEXT("%s sits down in %s"), *GetName(), *Ship->GetName());
+		InteriorShip = nullptr;
+		Ship->SetInteriorWalk(false);
+		ASpacePlayerController::SetShipInteriorLighting(false);
+		PlayerController->Possess(Ship);
+		Ship->OnBoarded();
+		Destroy();
+		return true;
+	}
+	if (Ship->IsNearRamp(GetActorLocation()))
+	{
+		if (!Ship->IsLanded())
+		{
+			UE_LOG(LogPlayerCharacter, Log, TEXT("%s: the ramp of %s stays shut in flight"), *GetName(), *Ship->GetName());
+			return false;
+		}
+		// out down the ramp, beside the ship (the old exit spot)
+		const FTransform Out = Ship->GetOutsideExitTransform();
+		InteriorShip = nullptr;
+		Ship->SetInteriorWalk(false);
+		ASpacePlayerController::SetShipInteriorLighting(false);
+		SetShipCapsule(false);
+		SetActorLocation(Out.GetLocation(), false, nullptr, ETeleportType::TeleportPhysics);
+		FaceDirection(Out.GetRotation().GetForwardVector());
+		InteriorTransitionTime = GetGameTimeSinceCreation();
+		UE_LOG(LogPlayerCharacter, Log, TEXT("%s steps out of %s down the ramp"), *GetName(), *Ship->GetName());
+		return true;
+	}
+	return false;
 }
 
 FFootIKState APlayerCharacter::GetFootIKState() const

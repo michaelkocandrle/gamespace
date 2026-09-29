@@ -82,6 +82,15 @@ def main():
                     unassigned.append("%s=%s" % (slot.get_editor_property("material_slot_name"), mat.get_name() if mat else None))
             check("%s every slot has a ship material instance" % m["name"], not unassigned, "; ".join(unassigned))
 
+    # --- walking the ship (29. 9. 2026): the rooms collide per polygon once someone walks inside ----------------------
+    for extra in plan["extra_components"]:
+        if extra["component"] in ("Interior", "InteriorKit"):
+            mesh = unreal.EditorAssetLibrary.load_asset(extra["mesh"])
+            body = mesh.get_editor_property("body_setup") if mesh else None
+            flag = body.get_editor_property("collision_trace_flag") if body else None
+            check("%s collides per polygon (ASpaceshipPawn::SetInteriorWalk)" % extra["component"],
+                  flag == unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE, str(flag))
+
     # --- materials -----------------------------------------------------------------------------
     if plan["materials"]:
         MEL = unreal.MaterialEditingLibrary

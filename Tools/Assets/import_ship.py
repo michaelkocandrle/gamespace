@@ -521,6 +521,15 @@ def add_mesh_component(blueprint, extra):
         # Attached under Hull, which already carries the offset.
         existing.set_editor_property("relative_location", unreal.Vector(0.0, 0.0, 0.0))
         existing.set_collision_profile_name("NoCollision")
+        if extra["component"] in ("Interior", "InteriorKit"):
+            # walkable (author 29. 9. 2026): the pawn turns the rooms' collision on while someone walks inside
+            # (ASpaceshipPawn::SetInteriorWalk); the character collides with the mesh itself, not a box round it.
+            # Per polygon for now - the look first, collision boxes with the optimisation at the end
+            mesh = unreal.EditorAssetLibrary.load_asset(extra["mesh"])
+            body = mesh.get_editor_property("body_setup") if mesh else None
+            if body:
+                body.set_editor_property("collision_trace_flag", unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
+                unreal.EditorAssetLibrary.save_loaded_asset(mesh, only_if_is_dirty=False)
         if extra["component"] == "Decals":
             # mesh decals (Deferred Decal materials) only paint the hull under them: no shadow, no
             # distance field of their own

@@ -1,0 +1,234 @@
+{
+ "_comment": "Walking the Wayfarer (author 29. 9. 2026: a ship you can walk through). Landed: up from the seat (space.Interact = F), down the stairs, aft through the cabin, the technical corridor and the hold to the ramp, out, a look at the ship, in up the ramp, forward again and up the stairs to the seat. The character's camera, the debug HUD on (MODE: ON BOARD with the F prompt). space.Where logs the position in the ship's frame (cm), the floor and what blocks ahead. Run -Editor, or -Package -Width 1920 -Height 1080.",
+ "shots": [
+  {
+   "name": "flat",
+   "camera": "chase",
+   "altitude_m": 40.0,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "console": [
+    "space.FlatSpot 5 8"
+   ]
+  },
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3.2,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 10.0,
+   "console": [
+    "stat none"
+   ]
+  },
+  {
+   "name": "a_stand_up",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Interact",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "a2_look_seat",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Walk 0 0 0.1 180"
+   ]
+  },
+  {
+   "name": "b_down_stairs",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.Walk 1 0 0.5 0",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "b2_look_back_up",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Walk 0 0 0.1 180",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "c_cabin",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.Walk 1 0 1.2 0",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "d_tech",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.Walk 1 0 0.9",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "e_tech_side",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Walk 0 1 0.2",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "f_hold",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.Walk 1 0 1.0",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "g_hold_aisle",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Walk 0 1 0.25",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "g2_to_ramp",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Walk 1 0 1.6",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "h_step_out",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Interact"
+   ]
+  },
+  {
+   "name": "i_look_ship",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.Walk 0 0 0.1 180"
+   ]
+  },
+  {
+   "name": "j_walk_in",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Interact",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "k_hold_fwd",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.Walk 1 0 1.0",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "k2_aisle",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Walk 0 1 0.24",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "l_tech_door",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.Walk 1 0 1.6",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "l2_centre",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Walk 0 1 0.2",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "m_cabin_fwd",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Walk 1 0 2.0",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "n_up_stairs",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Walk 1 0 1.9",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "o_sit",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Interact"
+   ]
+  },
+  {
+   "name": "z_reset",
+   "camera": "chase",
+   "hud": 0,
+   "settle": 1.0,
+   "console": [
+    "stat none"
+   ]
+  }
+ ]
+}

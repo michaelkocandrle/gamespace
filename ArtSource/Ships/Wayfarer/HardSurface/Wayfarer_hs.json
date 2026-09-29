@@ -831,6 +831,15 @@
     "_comment": "Behind the rear ramp, on the ground.",
     "location": [-2.4, 0.0, -1.55]
    },
+   "WalkSeat": {
+    "_comment": "Walking the ship (author 29. 9. 2026): the pilot stands up here, on the cockpit floor (1.15) between the stairs' top (x 16.20) and the seat (16.55), facing aft.",
+    "location": [16.25, 0.0, 1.15],
+    "rotate_z_deg": 180
+   },
+   "WalkRamp": {
+    "_comment": "Inside the rear ramp on the hold's aisle (port side): in from outside here, out down the ramp from here; facing forward.",
+    "location": [1.9, 1.1, 0.0]
+   },
    "Engine_L": {
     "location": [-0.45, 3.4, 1.2],
     "rotate_z_deg": 180
@@ -2966,5 +2975,9 @@
     }
    }
   }
+ },
+ "checks": {
+  "_comment": "Tools/Blender/check_ship_geometry.py: walk_exempt - doors of the layout the interior builds closed (the ramp until it opens, the hygiene cell's sliding leaf until doors slide), not walked through.",
+  "walk_exempt": ["Zadní rampa", "Hygienická buňka"]
  }
 }

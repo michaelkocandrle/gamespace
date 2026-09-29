@@ -24,6 +24,36 @@ namespace
 		TEXT("space.Hud"), 1,
 		TEXT("HUD: 0 off, 1 flight HUD only (default, as in Star Citizen), 2 plus the compact text readout, 3 plus the full one. H cycles it in game."));
 
+	/** What F does for this pawn right now, or empty: up from the seat, out of the ship, sit down, step outside, board. */
+	FString InteractPrompt(const APawn& Pawn)
+	{
+		if (const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(&Pawn))
+		{
+			return Ship->CanLeaveSeat() ? TEXT("[F]  Get up") : Ship->CanExit() ? TEXT("[F]  Exit ship") : TEXT("");
+		}
+		const APlayerCharacter* Character = Cast<APlayerCharacter>(&Pawn);
+		if (!Character)
+		{
+			return FString();
+		}
+		if (const ASpaceshipPawn* Inside = Character->GetInteriorShip())
+		{
+			const FVector At = Character->GetActorLocation();
+			if (Inside->IsNearSeat(At))
+			{
+				return TEXT("[F]  Sit down");
+			}
+			if (Inside->IsNearRamp(At))
+			{
+				return Inside->IsLanded() ? TEXT("[F]  Step outside") : TEXT("Ramp shut in flight - land first");
+			}
+			return FString();
+		}
+		double Distance = 0.0;
+		const ASpaceshipPawn* Ship = Character->FindBoardableShip(Distance);
+		return !Ship ? TEXT("") : Ship->HasWalkInterior() ? TEXT("[F]  Walk in") : TEXT("[F]  Board ship");
+	}
+
 	/** "TERRAIN" readout: quad-sphere LOD state of the first planet in the level. */
 	FString DescribeTerrain(const UWorld* World)
 	{
@@ -353,7 +383,24 @@ namespace
 		double ShipDistance = 0.0;
 		const ASpaceshipPawn* Ship = Character.FindBoardableShip(ShipDistance);
 		FString Mode = TEXT("ON FOOT");
-		if (Ship)
+		if (const ASpaceshipPawn* Inside = Character.GetInteriorShip())
+		{
+			// walking a ship's interior: what F does where the pilot stands
+			Mode = TEXT("ON BOARD");
+			if (Inside->IsNearSeat(Character.GetActorLocation()))
+			{
+				Mode += TEXT("   [F] sit down");
+			}
+			else if (Inside->IsNearRamp(Character.GetActorLocation()))
+			{
+				Mode += Inside->IsLanded() ? TEXT("   [F] step outside") : TEXT("   ramp shut in flight - land first");
+			}
+			else
+			{
+				Mode += TEXT("   seat: cockpit  |  out: rear ramp");
+			}
+		}
+		else if (Ship)
 		{
 			Mode += FString::Printf(TEXT("   [F] board ship (%.1f m)"), ShipDistance / 100.0);
 		}
@@ -539,5 +586,20 @@ void ASpaceDebugHUD::DrawHUD()
 		const float LabelY = Canvas->ClipY * 0.12f;
 		DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.45f), X - 14.f, LabelY - 6.f, Width + 28.f, Height + 12.f);
 		DrawText(Label, LabelColor, X, LabelY, Font, LabelScale);
+	}
+
+	// What F does here, under the view's centre in every HUD mode but off: walking a ship has no other way to
+	// tell where the seat and the ramp answer (the text panel with MODE is mode 2 and up)
+	const FString Prompt = Mode >= 1 ? InteractPrompt(*Pawn) : FString();
+	if (!Prompt.IsEmpty())
+	{
+		const float PromptScale = Scale * 1.7f;
+		float Width = 0.f;
+		float Height = 0.f;
+		GetTextSize(Prompt, Width, Height, Font, PromptScale);
+		const float X = (Canvas->ClipX - Width) * 0.5f;
+		const float PromptY = Canvas->ClipY * 0.6f;
+		DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.4f), X - 10.f * Scale, PromptY - 4.f * Scale, Width + 20.f * Scale, Height + 8.f * Scale);
+		DrawText(Prompt, FLinearColor(0.85f, 0.93f, 1.f), X, PromptY, Font, PromptScale);
 	}
 }

@@ -828,6 +828,40 @@ public:
 	/** Called by the pilot right after it possessed this ship again. */
 	void OnBoarded();
 
+	// --- Walking inside (author 29. 9. 2026: "a ship you can walk through") -----------------------
+
+	/** The hull mesh has the walk sockets (SOCKET_WalkSeat behind the pilot's seat, SOCKET_WalkRamp inside the
+	 * rear ramp): its interior can be walked. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	bool HasWalkInterior() const;
+
+	/** Walkable, flown by a player, landed or holding still (under 1 m/s): F stands the pilot up behind the seat. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	bool CanLeaveSeat() const;
+
+	/** Spawns PilotCharacterClass at SOCKET_WalkSeat inside the ship and possesses it. Returns the pilot, or null. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Walk")
+	APawn* LeaveSeat();
+
+	/** Someone walks inside (true) or nobody does (false): the interior meshes block pawns (per polygon), the
+	 * hull's own shape stops blocking them (the pilot stands inside it), a gravity volume rides along. The ship
+	 * is kinematic and moves by sweeping its root box only, so none of this touches its flight. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Walk")
+	void SetInteriorWalk(bool bWalking);
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	bool IsInteriorWalked() const { return bInteriorWalked; }
+
+	/** A walk socket in world space (WalkSeat, WalkRamp), or the actor's transform when the mesh lacks it. */
+	FTransform GetWalkSocketTransform(FName Socket) const;
+
+	/** Within reach of the pilot's seat (sit down) or of the ramp (step outside), for a pawn at Location. */
+	bool IsNearSeat(const FVector& Location) const;
+	bool IsNearRamp(const FVector& Location) const;
+
+	/** Where a pilot stepping out down the ramp stands (ComputeExitTransform). */
+	FTransform GetOutsideExitTransform() const { return ComputeExitTransform(); }
+
 	/**
 	 * Where the pilot appears: the first free spot of the hull mesh's "Exit" socket (SOCKET_Exit in
 	 * Blender, moved sideways until ExitClearanceCm clear of the hull's collision shapes), then
@@ -2220,4 +2254,9 @@ private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<ULocalLightComponent>> InteriorOnlyLights;
 	int32 InteriorShadowState = -1;
+	/** Someone walks inside (SetInteriorWalk). */
+	bool bInteriorWalked = false;
+	/** The gravity volume riding along while the interior is walked. */
+	UPROPERTY(Transient)
+	TObjectPtr<class ASpaceGravityVolume> WalkGravity;
 };

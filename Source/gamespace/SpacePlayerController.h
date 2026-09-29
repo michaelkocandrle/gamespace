@@ -88,6 +88,10 @@ public:
 	 * ships read it to take their interior meshes out of the sun's shadows (ASpaceshipPawn::UpdateViewCollection). */
 	static bool IsInteriorLightingOn();
 
+	/** The interior lighting (MegaLights, no Lumen reflections) for walking a ship's own interior (the pilot up
+	 * from the seat or in up the ramp, APlayerCharacter::BoardInterior) and off again when back in the seat or out. */
+	static void SetShipInteriorLighting(bool bOn);
+
 	UFUNCTION(BlueprintPure, Category = "Interior")
 	bool IsWalkingInterior() const { return bWalkingInterior; }
 

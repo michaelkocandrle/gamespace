@@ -14,6 +14,10 @@ Prints GEOCHECK {...} (and writes <out_dir>/geocheck.json and the hole masks). A
   placeholders        slots without a material or with Blender's default; large plain faces are listed (warning)
   holes               ship-less pixels (the world) seen from the player's positions with every surface opaque -
                       the eye and the interior shot cameras of Tools/Shots/<ship>_interior.json
+  walk_blocked        where the walker (the character's capsule inside a ship, WALK_R x WALK_H - PlayerCharacter
+                      ShipCapsuleRadius / 2 * ShipCapsuleHalfHeight) cannot pass a doorway of the layout, stepping
+                      over whatever floor, steps or stairs lie there; doors built closed are named in the recipe
+                      (checks.walk_exempt)
 The kit rooms' parts (recipe interior.kit_modules, placed in Unreal by Tools/Assets/kit_rooms.py) are put into the
 ship first (add_kit_rooms), so the checks see them as the game does.
 Meaning of pass: every list empty (warnings do not fail).
@@ -40,6 +44,10 @@ EXEMPT_FLOAT_MATS = ("IntGlow", "IntLight", "_Screens", "KitCables")   # emissiv
 FLAT_MATS = ("IntWall", "IntPanel", "IntDark", "IntFloor", "IntConsole")
 BIG_FACE_M2 = 0.4
 AXIS_Z = 0.45          # ship space: the pilot's eye height (the cabin's middle)
+WALK_R = 0.28          # the walker inside a ship (PlayerCharacter ShipCapsuleRadius, ShipCapsuleHalfHeight 0.90)
+WALK_H = 1.80
+WALK_STEP = 0.45       # Character Movement's MaxStepHeight
+WALK_HOVER = 0.024     # it floats this much over the floor (MAX_FLOOR_DIST)
 
 
 def obj(ship, suffix):
@@ -387,6 +395,75 @@ def floating_and_penetrating(ship, exempt_names):
     return floating, penetrating, tree
 
 
+# ------------------------------------------------------------------------------------------ walking
+
+def walk_blocked(ship, recipe):
+    """The walker through every doorway of the layout (author 29. 9. 2026: a ship you can walk through). A sliver of
+    the cockpit floor's edge hanging across the doorway and a wall over the stairs, 2 cm too low for the head, both
+    stopped the character in the game while every other check passed. From 0.8 m before a door to 0.8 m past it,
+    along the door's axis at its centre and 12 cm to each side: the capsule rests on the highest floor under its
+    footprint within a step's height (rays down, as Character Movement stands on step edges), and then must not
+    come nearer than its radius to anything with its body - bottom sphere lifted clear of the edges it stands on,
+    up to the top of the head. Interior parts only: in the game they alone block the walker (the hull does not)."""
+    layout = json.load(open(os.path.join(ROOT, "ArtSource", "Ships", ship, "Design", "%s_layout.json" % ship), encoding="utf-8"))
+    off = Vector(recipe["assemble"]["offset"])
+    parts = [o for o in (obj(ship, "_Interior"), obj(ship, "_InteriorKit"), obj(ship, "_InteriorKitMod")) if o is not None]
+    all_bm = bmesh.new()
+    for ob in parts:
+        bm = world_bm(ob)
+        me = bpy.data.meshes.new("_walk")
+        bm.to_mesh(me)
+        all_bm.from_mesh(me)
+        bpy.data.meshes.remove(me)
+        bm.free()
+    tree = BVHTree.FromBMesh(all_bm)
+    all_bm.free()
+    exempt = recipe.get("checks", {}).get("walk_exempt", [])
+    out = []
+    for door in layout["doors"]:
+        ax = door["axis"]
+        at = door["at"]
+        if door.get("name") in exempt:
+            continue                                   # built closed (the ramp, a sliding leaf): recipe checks.walk_exempt
+        fz = layout["decks"][door.get("deck", "main")]["floor_z"]
+        for side in (-0.12, 0.0, 0.12):
+            feet = fz
+            worst = None
+            steps = 33
+            for i in range(steps):
+                t = -0.8 + 1.6 * i / (steps - 1)
+                c = Vector((at[0] + t, at[1] + side, 0.0)) if ax == "x" else Vector((at[0] + side, at[1] + t, 0.0))
+                # the floor under the footprint, within a step up
+                rest = None
+                for k in range(-6, 7):
+                    d = WALK_R * k / 6.0
+                    for e in ((d, 0.0), (0.0, d)):
+                        o = Vector((c.x + e[0], c.y + e[1], feet + WALK_STEP + 0.01)) + off
+                        hit = tree.ray_cast(o, Vector((0.0, 0.0, -1.0)), WALK_STEP + 1.0)
+                        if hit[0] is None:
+                            continue
+                        z = hit[0].z - off.z + math.sqrt(max(WALK_R ** 2 - e[0] ** 2 - e[1] ** 2, 0.0)) - WALK_R
+                        rest = z if rest is None else max(rest, z)
+                if rest is None:
+                    continue                          # no floor within a step: a drop, the walker falls to it
+                feet = rest + WALK_HOVER
+                # the body from just over the bottom sphere to the top of the head
+                z = feet + WALK_R + 0.05
+                while z <= feet + WALK_H - WALK_R + 1e-6:
+                    near = tree.find_nearest(Vector((c.x, c.y, z)) + off, WALK_R)
+                    if near[0] is not None and near[3] < WALK_R - 0.005:
+                        gap = WALK_R - near[3]
+                        if worst is None or gap > worst["overlap_m"]:
+                            q = near[0] - off
+                            worst = {"door": door.get("name", ""), "walker_at": [round(c.x, 2), round(c.y, 2), round(feet, 2)],
+                                     "obstacle_at": [round(q.x, 3), round(q.y, 3), round(q.z, 3)], "overlap_m": round(gap, 3)}
+                    z += 0.05
+            if worst:
+                out.append(worst)
+                break
+    return out
+
+
 # ------------------------------------------------------------------------------------------ materials and holes
 
 def placeholders(ship):
@@ -494,11 +571,12 @@ def main():
     }
     report["placeholders"], report["warnings"] = placeholders(ship)
     report["holes"] = holes(ship, out_dir)
+    report["walk_blocked"] = walk_blocked(ship, recipe)
     report["pass"] = not any(report[k] for k in ("mirrored_decals", "floating", "penetrating", "hull_in_rooms", "placeholders",
-                                                 "holes"))
+                                                 "holes", "walk_blocked"))
     report["kit_rooms"] = kit_rooms
     report["counts"] = {k: len(report[k]) for k in ("mirrored_decals", "floating", "penetrating", "hull_in_rooms", "placeholders",
-                                                    "holes", "warnings")}
+                                                    "holes", "walk_blocked", "warnings")}
     json.dump(report, open(os.path.join(out_dir, "geocheck.json"), "w", encoding="utf-8"), indent=1)
     print("GEOCHECK " + json.dumps({"pass": report["pass"], "counts": report["counts"], "json": os.path.join(out_dir, "geocheck.json")}))
 

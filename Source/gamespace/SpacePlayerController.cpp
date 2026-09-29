@@ -393,6 +393,13 @@ bool ASpacePlayerController::IsInteriorLightingOn()
 	return bInteriorLightingOn;
 }
 
+void ASpacePlayerController::SetShipInteriorLighting(bool bOn)
+{
+	// the prewarm's end keeps it on while requested
+	bInteriorLightingRequested = bOn;
+	SetInteriorLighting(bOn);
+}
+
 void ASpacePlayerController::ApplyInteriorLighting(bool bInterior)
 {
 	bInteriorLightingRequested = bInterior;

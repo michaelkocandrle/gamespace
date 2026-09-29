@@ -935,7 +935,7 @@ snímku.
 - cf) **Světla interiéru bez stínů svítí přes trup ven a zvenku stojí až 12 ms.** Světla u svítidel (`fix_*`) proto pawn zapíná, jen když je kamera uvnitř (`UpdateViewCollection`). Test „uvnitř“: přes kamery pawnu jen kokpit (chase kamera visí v obálce interiéru nad trupem), přes jinou kameru obálka partů `Interior*`. Jedno FPS ze snímku po teleportu může být výkyv streamování: ověř `stat gpu`, než začneš optimalizovat.
 - cg) **Varianta „bez světel“ měla stejnou cenu jako „se světly“.** Ladicí příkaz překlápěl uložený stav (`bFixtureLightsOn = !bFixtureLightsOn`), aby vynutil přepnutí. Když se stav a požadavek shodly, nepřepnulo se nic. Vynucení dělej příznakem „dirty“, ne překlápěním stavu. Každou měřenou variantu ověř i vzhledem (světelné ostrůvky na snímku).
 - ch) **`stat gpu` ve snímcích chyběl, i když ho zapínal první snímek presetu.** Stav statistik mezi snímky není spolehlivý (`stat` přepíná). Měřicí snímek pošle `stat none`, `stat unit`, `stat gpu` (a jednou předem `r.GPUStatsEnabled 1`), viz `Tools/Shots/light_variants.json`.
-- ci) **Klávesa I vede do interiéru Steadfastu, ne Wayfareru.** `ToggleInterior` hledá herce s tagem `SpaceInteriorSpawn` (Steadfast v `TestSpace`). Interiér Wayfareru uvnitř trupu zatím projít nejde: díl Interior nemá kolizi a chybí vstup i gravitace v lodi. Přijde s pilotem chodby z kitu. Do té doby se interiér Wayfareru kontroluje jen ze snímků (`wayfarer_interior`, `cockpit_*`) a z kokpitu (C).
+- ci) **Klávesa I vede do interiéru Steadfastu, ne Wayfareru.** `ToggleInterior` hledá herce s tagem `SpaceInteriorSpawn` (Steadfast v `TestSpace`). Wayfarer se od 29. 9. 2026 prochází jinak: v přistálé lodi F = vstát z křesla (`ASpaceshipPawn::LeaveSeat`), preset `wayfarer_walk` (HANDOFF „Průchozí Wayfarer“, nástrahy eb–ed).
 - cj) **Sockety kitu v UE s příponami `.001`, `.019`.** Jména objektů jsou v jednom `.blend` globální: SOCKET_Light_Cove_0 druhého dílu Blender přejmenoval a UE příponu převzalo. `kit_build.py` po exportu dílu jeho sockety přejmenuje (`__<díl>`) a před exportem kontroluje, že v názvu tečka není. Starý mesh v UE je potřeba smazat, reimport ponechal staré sockety.
 - ck) **Import dílu padá na „material slots … manifest says …“.** FBX export vynechá sloty, které žádná plocha nepoužívá (díl bez strukturních decalů), ale manifest je vypsal. `kit_build.drop_unused_slots` sloty před exportem pročistí.
 - cl) **Kitová ukázka byla skoro černá.** Grafit s albedem 0,06 bez kovu a jen lišty ve vybrání (svítí do stropu) a u podlahy. Paleta se kalibruje podle schválené chodby (stěny 0,085, panely 0,13, metallic 0,1–0,4 → `Kit_Primary` 0,1/0,095/0,088, metallic 0,3). Ukázka potřebuje světla místnosti jako skutečný interiér (strop přijde v dávce 2, do té doby provizorní).
@@ -1027,6 +1027,23 @@ snímku.
   (průměr druhé poloviny ustálení); preset `wayfarer_perf.json` měří 3× interiér a 3× let, `python
   Tools/Shots/perf_log.py <log…>` spojí běhy a vypíše průměr a rozptyl. Rozptyl mezi běhy 0,2–0,8 ms, proto se cíl
   dokládá aspoň 3 běhy.
+- eb) **Chodec v lodi stojí a nejde dál, i když je před ním volno.** Snímky ukázaly stále stejné místo. Příčinou byla
+  3 cm vysoká svislá ploška: zadní hrana desky podlahy kokpitu. Po vyříznutí otvoru pro schody zůstala celá přes
+  průchod ve výšce 1,12 m a z dálky nebyla vidět. Test geometrie ani díry ji nenašly, protože kolize po polygonech
+  vidí i plochu bez tloušťky.
+  - Diagnóza: `space.Where` vypíše polohu v souřadnicích lodi a to, čeho se kapsle právě dotýká. Tah „ahead“ ukazuje
+    až další překážku. Zdroj pak najdi výpisem ploch meshe v objemu průchodu v Blenderu (sonda podle materiálu a
+    rozsahu).
+  - Hlídá to kontrola `walk_blocked` v `check_ship_geometry.py`: kapsle každými dveřmi layoutu i přes schody.
+- ec) **Výchozí kapsle postavy (84 cm × 1,92 m) neprojde strmými schody u dveří.** Schody Wayfareru (47°) začínají hned
+  za dveřmi do kokpitu. Kapsle na horních stupních sahá hlavou až k pólu nad dveřmi. Pomohla štíhlejší kapsle v lodi
+  (56 cm × 1,80 m, `APlayerCharacter::SetShipCapsule`), dveře až ke stropu, schody o 6 cm dál od stěny a žebro nad
+  dveřmi zkrácené. Rezervu počítej s „vznášením“ kapsle 2,4 cm nad podlahou a s tím, že na hraně schodu stojí výš,
+  než je střed stupně. Kontrola `walk_blocked` s kapslí o 15 cm vyšší selže; nová loď musí projít s rezervou.
+- ed) **Loď v místě snímků nepřistane (`TooSteep`).** Snímkovač staví loď nad svah 32°, přistání dovolí nejvýš 25°.
+  `space.FlatSpot [max °] [km]` ji přesune nad nejbližší rovné místo (sklon pod stopou 1,5 m i 8 m), pak snímek s
+  `altitude_m` 3,2 a `settle` 10 přistane. Pozor, konzolové příkazy snímku běží před umístěním lodi: loď tehdy ještě
+  může mířit nosem kolmo k povrchu a tečné směry z nosu vyjdou nulové (všech 20 000 vzorků pak padlo do jednoho bodu).
 - ds) **Stínovaná obdélníková světla bez MegaLights jsou drahá.** Dvě stínovaná světla kitu v chodbě bez MegaLights
   (osvětlení jako v letu): stínové mapy 7,3 ms a světla 5,5 ms (26 ms celkem). V lodi mají stín jen v režimu interiéru
   (MegaLights je trasuje), v letu ne; počet světel pod MegaLights cenu skoro nemění (8 i 12 světel: 3,5 ms).

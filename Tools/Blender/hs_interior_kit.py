@@ -374,9 +374,10 @@ def fittings(kit, g, box, spec, lights_out):
 
 
 
-def clad_bulkhead(kit, x, facing, y0, y1, door, s, z0, H):
+def clad_bulkhead(kit, x, facing, y0, y1, door, s, z0, H, full=False):
     """Kit panels on a cross wall's face at x (facing -1: the face looks aft, +1: forward): a wall band up to
-    the chamfer line, flat plates above it, a plate over the doorway. door: (y centre, width) or None."""
+    the chamfer line, flat plates above it, a plate over the doorway (none when the doorway is full height).
+    door: (y centre, width) or None."""
     yaw = 180.0 if facing < 0 else 0.0
     # the kit's wall line (x = -2 kit m) lands on the face: after the turn it sits at +2s (aft) or -2s (forward)
     tx = x - 2.0 * s if facing < 0 else x + 2.0 * s
@@ -394,7 +395,7 @@ def clad_bulkhead(kit, x, facing, y0, y1, door, s, z0, H):
     for ya, yb in spans:
         piece("WallBand_Straight", ya, yb, z0, zc, 3.0)
         piece("ShortWall_MetalPlates_Straight", ya, yb, zc, H, 1.0)
-    if door:
+    if door and not full:
         piece("ShortWall_MetalPlates_Straight", door[0] - door[1] / 2 - frame, door[0] + door[1] / 2 + frame, z0 + 2.15, H, 1.0)
 
 

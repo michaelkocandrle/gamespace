@@ -54,6 +54,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Player|Ship")
 	bool TryBoardShip();
 
+	/** Now walking inside Ship (its interior collision and gravity on, the interior lighting), facing Forward. */
+	void BoardInterior(ASpaceshipPawn* Ship, const FVector& Forward);
+
+	/** The ship whose interior this character walks, or null. */
+	UFUNCTION(BlueprintPure, Category = "Player|Ship")
+	ASpaceshipPawn* GetInteriorShip() const { return InteriorShip.Get(); }
+
+	/** Inside a ship: sits down (near the seat) or steps out down the ramp (near it, landed only). */
+	UFUNCTION(BlueprintCallable, Category = "Player|Ship")
+	bool TryInteriorInteract();
+
+	/** The slimmer capsule for a ship's tight interior (ShipCapsuleRadius x 2 * ShipCapsuleHalfHeight: the 84 cm
+	 * wide default caught its head on the cockpit door's header going down the steep stairs), or the default one.
+	 * The feet stay where they are, the body mesh and the eye move with them. */
+	void SetShipCapsule(bool bInShip);
+
 	UFUNCTION(BlueprintPure, Category = "Player")
 	bool IsSprinting() const { return bSprintHeld; }
 
@@ -223,7 +239,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "0.0", Units = "s"))
 	float BoardingCooldownSeconds = 0.75f;
 
+	/** The capsule inside a ship (SetShipCapsule): 56 cm wide, 1.80 m tall - a person, not the mannequin's margin. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "10.0", Units = "cm"))
+	float ShipCapsuleRadius = 28.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "40.0", Units = "cm"))
+	float ShipCapsuleHalfHeight = 90.f;
+
 private:
+	/** The ship whose interior this character walks (BoardInterior), or null. */
+	TWeakObjectPtr<ASpaceshipPawn> InteriorShip;
+	/** Game time of the last interior transition: one F press must not do two. */
+	double InteriorTransitionTime = -1.0;
 	void ResolveInputAssets();
 	void HandleMove(const FInputActionValue& Value);
 	void HandleMoveCompleted(const FInputActionValue& Value);

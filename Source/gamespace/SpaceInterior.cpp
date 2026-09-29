@@ -3,7 +3,10 @@
 #include "SpaceInterior.h"
 
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/OverlapResult.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -12,6 +15,7 @@
 #include "HAL/IConsoleManager.h"
 #include "PlayerCharacter.h"
 #include "SpacePlayerController.h"
+#include "SpaceshipPawn.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSpaceInterior, Log, All);
 
@@ -205,6 +209,86 @@ namespace
 				Character->SetLookYaw(FCString::Atof(*Args[3]));
 			}
 			Character->DebugWalk(FVector2D(FCString::Atof(*Args[1]), FCString::Atof(*Args[0])), FCString::Atof(*Args[2]));
+		}));
+
+	/** space.Interact: what F does now - up from the seat of a walkable ship (or out beside a landed one), sit down
+	 * or step out down the ramp inside it, board or walk in up the ramp from outside. For shots and tests. */
+	FAutoConsoleCommandWithWorldAndArgs InteractCommand(
+		TEXT("space.Interact"),
+		TEXT("space.Interact: what F does now (up from the seat, sit down, step outside, board)."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& /*Args*/, UWorld* World)
+		{
+			APlayerController* Controller = World ? World->GetFirstPlayerController() : nullptr;
+			APawn* Pawn = Controller ? Controller->GetPawn() : nullptr;
+			bool bDone = false;
+			if (ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Pawn))
+			{
+				bDone = Ship->LeaveSeat() != nullptr || Ship->ExitShip() != nullptr;
+			}
+			else if (APlayerCharacter* Character = Cast<APlayerCharacter>(Pawn))
+			{
+				bDone = Character->GetInteriorShip() ? Character->TryInteriorInteract() : Character->TryBoardShip();
+			}
+			APawn* Now = Controller ? Controller->GetPawn() : nullptr;
+			UE_LOG(LogSpaceInterior, Display, TEXT("space.Interact: %s, now %s at %s"), bDone ? TEXT("done") : TEXT("nothing to do"),
+				*GetNameSafe(Now), Now ? *Now->GetActorLocation().ToString() : TEXT("-"));
+		}));
+
+	FAutoConsoleCommandWithWorldAndArgs WhereCommand(
+		TEXT("space.Where"),
+		TEXT("space.Where: the walker inside a ship - position, gravity and view in the ship's frame (cm), the floor under it and what blocks 60 cm ahead."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& /*Args*/, UWorld* World)
+		{
+			APlayerController* Controller = World ? World->GetFirstPlayerController() : nullptr;
+			APlayerCharacter* Character = Controller ? Cast<APlayerCharacter>(Controller->GetPawn()) : nullptr;
+			ASpaceshipPawn* Ship = Character ? Character->GetInteriorShip() : nullptr;
+			if (!Ship)
+			{
+				UE_LOG(LogSpaceInterior, Display, TEXT("space.Where: not walking inside a ship"));
+				return;
+			}
+			const FTransform ShipT = Ship->GetActorTransform();
+			UCharacterMovementComponent* Movement = Character->GetCharacterMovement();
+			FVector Eye;
+			FRotator ViewRot;
+			Controller->GetPlayerViewPoint(Eye, ViewRot);
+			const FHitResult& Floor = Movement->CurrentFloor.HitResult;
+			// what stops a step ahead along the view, flattened onto the floor
+			const FVector Up = -Movement->GetGravityDirection();
+			const FVector Ahead = FVector::VectorPlaneProject(ViewRot.Vector(), Up).GetSafeNormal();
+			UCapsuleComponent* Capsule = Character->GetCapsuleComponent();
+			FCollisionQueryParams Params(TEXT("SpaceWhere"), false, Character);
+			FHitResult Block;
+			const FVector From = Character->GetActorLocation();
+			const bool bBlocked = World->SweepSingleByChannel(Block, From, From + Ahead * 60.0, Character->GetActorQuat(),
+				Capsule->GetCollisionObjectType(), Capsule->GetCollisionShape(), Params);
+			UE_LOG(LogSpaceInterior, Display,
+				TEXT("space.Where: at %s (ship cm), up %s, view %s, %s, gravity volume %s, ship %s, floor %s at %s, ahead %s at %s normal %s"),
+				*ShipT.InverseTransformPosition(From).ToString(), *ShipT.InverseTransformVectorNoScale(Up).ToString(),
+				*ShipT.InverseTransformVectorNoScale(ViewRot.Vector()).ToString(),
+				Movement->IsFalling() ? TEXT("falling") : TEXT("on the ground"),
+				ASpaceGravityVolume::FindAt(World, From) ? TEXT("yes") : TEXT("no"), Ship->IsLanded() ? TEXT("landed") : *FString::Printf(TEXT("in the air (%s)"), *UEnum::GetValueAsString(Ship->GetLandingBlocker())),
+				*GetNameSafe(Floor.GetComponent()), *ShipT.InverseTransformPosition(Floor.ImpactPoint).ToString(),
+				bBlocked ? *GetNameSafe(Block.GetComponent()) : TEXT("clear"),
+				*ShipT.InverseTransformPosition(Block.ImpactPoint).ToString(),
+				*ShipT.InverseTransformVectorNoScale(Block.ImpactNormal).ToString());
+			// what the capsule touches now (inflated 3 cm): the obstacle that holds it, where the sweep ahead only
+			// finds the next one
+			TArray<FOverlapResult> Overlaps;
+			World->OverlapMultiByChannel(Overlaps, From, Character->GetActorQuat(), Capsule->GetCollisionObjectType(),
+				FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius() + 3.f, Capsule->GetScaledCapsuleHalfHeight() + 3.f), Params);
+			for (const FOverlapResult& Overlap : Overlaps)
+			{
+				UPrimitiveComponent* Touched = Overlap.GetComponent();
+				FVector Closest = FVector::ZeroVector;
+				const float Distance = Touched ? Touched->GetClosestPointOnCollision(From, Closest) : -1.f;
+				UE_LOG(LogSpaceInterior, Display, TEXT("space.Where:   touches %s.%s, closest %s (ship cm), %.1f cm from the centre"),
+					*GetNameSafe(Touched ? Touched->GetOwner() : nullptr), *GetNameSafe(Touched),
+					*ShipT.InverseTransformPosition(Closest).ToString(), Distance);
+			}
+			UE_LOG(LogSpaceInterior, Display, TEXT("space.Where:   capsule r %.0f hh %.0f, blocking hit %s penetrating %d t %.3f"),
+				Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight(), bBlocked ? TEXT("yes") : TEXT("no"),
+				Block.bStartPenetrating ? 1 : 0, Block.Time);
 		}));
 
 	FAutoConsoleCommandWithWorldAndArgs DoorCommand(

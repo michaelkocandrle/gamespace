@@ -21,6 +21,7 @@
 #include "Engine/World.h"
 #include "PlayerCharacter.h"
 #include "SpaceDebugHUD.h"
+#include "SpaceInterior.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputAction.h"
@@ -1199,7 +1200,11 @@ void ASpaceshipPawn::HandleToggleHud(const FInputActionValue& /*Value*/)
 
 void ASpaceshipPawn::HandleInteract(const FInputActionValue& /*Value*/)
 {
-	ExitShip();
+	// a walkable ship: up from the seat into the cockpit; otherwise out beside the landed ship
+	if (!LeaveSeat())
+	{
+		ExitShip();
+	}
 }
 
 void ASpaceshipPawn::HandleFlightAssist(const FInputActionValue& /*Value*/)
@@ -1972,6 +1977,136 @@ void ASpaceshipPawn::OnBoarded()
 {
 	ClearPilotInput();
 	SnapCameraToShip();
+}
+
+namespace SpaceshipWalk
+{
+	const FName SeatSocket(TEXT("WalkSeat"));
+	const FName RampSocket(TEXT("WalkRamp"));
+	const FName PilotEyeSocket(TEXT("Cockpit"));
+	constexpr double SeatReachCm = 170.0;      // from the pilot's eye socket to the walker's middle
+	constexpr double RampReachCm = 220.0;
+	constexpr double HoldStillCmS = 100.0;
+}
+
+bool ASpaceshipPawn::HasWalkInterior() const
+{
+	return Hull && Hull->DoesSocketExist(SpaceshipWalk::SeatSocket) && Hull->DoesSocketExist(SpaceshipWalk::RampSocket);
+}
+
+bool ASpaceshipPawn::CanLeaveSeat() const
+{
+	return HasWalkInterior() && IsPlayerControlled() && PilotCharacterClass != nullptr
+		&& (IsLanded() || GetLinearVelocity().Size() < SpaceshipWalk::HoldStillCmS);
+}
+
+FTransform ASpaceshipPawn::GetWalkSocketTransform(FName Socket) const
+{
+	if (Hull && Hull->DoesSocketExist(Socket))
+	{
+		const FTransform T = Hull->GetSocketTransform(Socket, RTS_World);
+		return FTransform(T.GetRotation(), T.GetLocation());
+	}
+	return FTransform(GetActorRotation(), GetActorLocation());
+}
+
+bool ASpaceshipPawn::IsNearSeat(const FVector& Location) const
+{
+	return HasWalkInterior() && FVector::Dist(GetWalkSocketTransform(SpaceshipWalk::PilotEyeSocket).GetLocation(), Location) < SpaceshipWalk::SeatReachCm;
+}
+
+bool ASpaceshipPawn::IsNearRamp(const FVector& Location) const
+{
+	return HasWalkInterior() && FVector::Dist(GetWalkSocketTransform(SpaceshipWalk::RampSocket).GetLocation(), Location) < SpaceshipWalk::RampReachCm;
+}
+
+void ASpaceshipPawn::SetInteriorWalk(bool bWalking)
+{
+	if (bWalking == bInteriorWalked)
+	{
+		return;
+	}
+	bInteriorWalked = bWalking;
+	// the hull's own collision is a convex shell round the fuselage: a pilot inside it would be pushed out
+	if (Hull)
+	{
+		Hull->SetCollisionResponseToChannel(ECC_Pawn, bWalking ? ECR_Ignore : ECR_Block);
+	}
+	// the rooms: the procedural interior and its kit pieces per polygon, the kit rooms' parts by their boxes
+	TArray<UStaticMeshComponent*> Meshes;
+	GetComponents<UStaticMeshComponent>(Meshes);
+	FBox Rooms(ForceInit);
+	for (UStaticMeshComponent* Mesh : Meshes)
+	{
+		const FString Name = Mesh->GetName();
+		const bool bRoom = Name == TEXT("Interior") || Name == TEXT("InteriorKit") || Name.StartsWith(TEXT("InteriorMod_"));
+		if (!bRoom || !Mesh->GetStaticMesh())
+		{
+			continue;
+		}
+		if (bWalking)
+		{
+			Mesh->SetCollisionObjectType(ECC_WorldStatic);
+			Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+			Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+			Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+			Mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+		else
+		{
+			Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+		const FTransform ToActor = Mesh->GetComponentTransform().GetRelativeTransform(GetActorTransform());
+		Rooms += Mesh->GetStaticMesh()->GetBoundingBox().TransformBy(ToActor);
+	}
+	// gravity along the ship's floor, riding with it (landed or holding still in space)
+	if (bWalking && !WalkGravity && Rooms.IsValid && GetWorld())
+	{
+		FActorSpawnParameters Params;
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		Params.Owner = this;
+		const FVector Centre = GetActorTransform().TransformPosition(Rooms.GetCenter());
+		WalkGravity = GetWorld()->SpawnActor<ASpaceGravityVolume>(ASpaceGravityVolume::StaticClass(), Centre, GetActorRotation(), Params);
+		if (WalkGravity)
+		{
+			WalkGravity->Volume->SetBoxExtent(Rooms.GetExtent() + FVector(50.0));
+			WalkGravity->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+		}
+	}
+	else if (!bWalking && WalkGravity)
+	{
+		WalkGravity->Destroy();
+		WalkGravity = nullptr;
+	}
+	UE_LOG(LogSpaceship, Log, TEXT("%s: interior %s"), *GetName(), bWalking ? TEXT("walked (per-polygon collision, gravity)") : TEXT("closed"));
+}
+
+APawn* ASpaceshipPawn::LeaveSeat()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (!CanLeaveSeat() || !PlayerController)
+	{
+		return nullptr;
+	}
+	SetInteriorWalk(true);
+	const FTransform Seat = GetWalkSocketTransform(SpaceshipWalk::SeatSocket);
+	FActorSpawnParameters Params;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	const FTransform Start(Seat.GetRotation(), Seat.GetLocation() + GetActorUpVector() * 100.0);
+	APawn* Pilot = GetWorld()->SpawnActor<APawn>(PilotCharacterClass, Start, Params);
+	if (!Pilot)
+	{
+		SetInteriorWalk(false);
+		return nullptr;
+	}
+	ClearPilotInput();
+	PlayerController->Possess(Pilot);
+	if (APlayerCharacter* Character = Cast<APlayerCharacter>(Pilot))
+	{
+		Character->BoardInterior(this, Seat.GetRotation().GetForwardVector());
+	}
+	UE_LOG(LogSpaceship, Log, TEXT("%s: pilot up from the seat at %s"), *GetName(), *Start.GetLocation().ToString());
+	return Pilot;
 }
 
 void ASpaceshipPawn::HandleBoostCompleted(const FInputActionValue& /*Value*/)

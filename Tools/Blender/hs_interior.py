@@ -124,16 +124,25 @@ def _minus(span, holes):
     return parts
 
 
-def bulkhead(g, x, y0, y1, z0, z1, door, facing):
-    """A cross wall at x from y0 to y1 with an open doorway (door: [yc, width] or None), framed."""
-    dh = z0 + 2.05
+def bulkhead(g, x, y0, y1, z0, z1, door, facing, full=False):
+    """A cross wall at x from y0 to y1 with an open doorway (door: [yc, width] or None), framed. full: the doorway
+    runs up to the ceiling (z1) with no header - the cockpit's door at the foot of the steep stairs, where a
+    header at 2.05 m sat in the way of the head of anyone on the upper steps (walking the ship, 29. 9. 2026)."""
+    dh = z1 if full else z0 + 2.05
     t = 0.04
     xa, xb = sorted((x, x + facing * t))
     spans = [(y0, y1)] if not door else _minus((y0, y1), [(door[0] - door[1] / 2, door[0] + door[1] / 2)])
     for ya, yb in spans:
         box(g["int_wall"], (xa, ya, z0), (xb, yb, z0 + 1.1))
         box(g["int_panel"], (xa, ya, z0 + 1.11), (xb, yb, z1))
-    if door:
+    if door and full:
+        # posts to the ceiling, the orange marker down each post instead of over a header
+        ya, yb = door[0] - door[1] / 2, door[0] + door[1] / 2
+        for yy in (ya - 0.08, yb):
+            box(g["int_trim"], (xa - 0.05, yy, z0), (xb + 0.05, yy + 0.08, z1))
+        for yy in (ya - 0.08, yb + 0.08):
+            box(g["accent"], (xa - 0.052, yy - 0.004, 1.2), (xb + 0.052, yy + 0.004, z1 - 0.1))
+    elif door:
         ya, yb = door[0] - door[1] / 2, door[0] + door[1] / 2
         box(g["int_panel"], (xa, ya, dh), (xb, yb, z1))
         # frame: posts and header, proud of the wall, orange marker strip
@@ -438,11 +447,14 @@ def _hull_top(hull):
     return top
 
 
-def stairs(g, fb, floor_faces, zc, x0=15.24, half_w=0.5, rise_max=0.195, tread=0.18):
+def stairs(g, fb, floor_faces, zc, x0=15.30, half_w=0.5, rise_max=0.195, tread=0.18, wall=15.24):
     """Steep ship's stairs from the cabin's deck up to the raised cockpit floor (zc), through the rear wall's door
     (the cockpit sits 1.15 m up so the pilot's eye is in the canopy's glass band, step 2 of the author's view
     targets 25. 9. 2026). Solid blocks with a satin tread plate and a lit nosing on each step, closed side walls
-    under the floor's ledges, a handrail on both sides. The floor slab is cut open over the flight."""
+    under the floor's ledges, a handrail on both sides. The floor slab is cut open over the flight.
+    x0 = 15.30, 6 cm clear of the rear wall (15.24): walking the ship (29. 9. 2026) a 1.80 m walker going down
+    caught its head on the wall over the full-height doorway (2.30) - the flight at 15.24 left no margin. The
+    strip from the rear wall's face (wall) to the first riser is floored, the side walls start at the wall."""
     n = int(math.ceil(zc / rise_max))
     rise = zc / n
     x_top = x0 + (n - 1) * tread
@@ -455,6 +467,15 @@ def stairs(g, fb, floor_faces, zc, x0=15.24, half_w=0.5, rise_max=0.195, tread=0
     drop = [f for f in {el for el in geom if isinstance(el, bmesh.types.BMFace) and el.is_valid}
             if f.calc_center_median().x < x_top and abs(f.calc_center_median().y) < half_w]
     bmesh.ops.delete(fb, geom=drop, context="FACES")
+    # the slab's rear edge (x 15.2, 3 cm tall) stayed whole across the flight: a sliver hanging in the doorway at
+    # 1.12 m that stopped anyone walking down the stairs (walking the ship, 29. 9. 2026); along the rear wall
+    # it is hidden against the bulkhead, so it goes entirely
+    fb.normal_update()
+    rear = [f for f in fb.faces if abs(f.normal.x) > 0.9 and f.calc_center_median().x < x0
+            and zc - 0.05 < f.calc_center_median().z < zc + 0.01]
+    bmesh.ops.delete(fb, geom=rear, context="FACES")
+    if x0 > wall:
+        box(g["int_floor"], (wall, -half_w, -0.03), (x0, half_w, 0.0))
     for i in range(n):
         xa, xb = x0 + i * tread, x0 + (i + 1) * tread
         zt = (i + 1) * rise
@@ -469,7 +490,7 @@ def stairs(g, fb, floor_faces, zc, x0=15.24, half_w=0.5, rise_max=0.195, tread=0
     for sd in (1, -1):
         # side walls under the floor's ledges, and the handrail on posts along the pitch
         ya, yb = sorted((sd * half_w, sd * (half_w + 0.03)))
-        box(g["int_panel"], (x0, ya, 0.0), (x_top + 0.04, yb, zc))
+        box(g["int_panel"], (min(x0, wall), ya, 0.0), (x_top + 0.04, yb, zc))
         yr = sd * (half_w - 0.05)
         p0 = Vector((x0 + 0.05, yr, rise + 0.9))
         p1 = Vector((x_top + 0.1, yr, zc + 0.9))
@@ -483,7 +504,7 @@ def stairs(g, fb, floor_faces, zc, x0=15.24, half_w=0.5, rise_max=0.195, tread=0
             cyl(g["int_trim"], Vector((q.x, yr, zt)), Vector((q.x, yr, zt + 0.006)), 0.03, 12)
 
 
-def _gable(bm, hull, x, z0, g=None):
+def _gable(bm, hull, x, z0, g=None, door=None):
     """Closes a cross wall from its top (z0) up to the hull's section at x, facing +x: over the cockpit's rear
     wall the view met the cabin roof's culled inside (geometry check, 25. 9. 2026). A fan of rays in the
     y-z plane finds the section; the panel stops 1.5 cm inside it."""
@@ -518,7 +539,10 @@ def _gable(bm, hull, x, z0, g=None):
         hit = tree.ray_cast(Vector((x, yy, z0)), Vector((0.0, 0.0, 1.0)), 5.0)[0]
         if hit is None or hit.z - z0 < 0.12:
             continue
-        box(g["int_trim"], (x, yy - 0.03, z0), (x + 0.035, yy + 0.03, hit.z - 0.07))
+        # over a full-height doorway (door: y centre, width) a rib starts above the beam: at the wall's foot it
+        # was in the way of the head of anyone coming down the stairs
+        zr = z0 + 0.39 if door and abs(yy - door[0]) < door[1] / 2 + 0.05 else z0
+        box(g["int_trim"], (x, yy - 0.03, zr), (x + 0.035, yy + 0.03, hit.z - 0.07))
     hb_ = tree.ray_cast(Vector((x, 0.0, z0)), Vector((0.0, 0.0, 1.0)), 5.0)[0]
     if hb_ is not None and hb_.z - z0 > 0.5:
         zb = z0 + 0.35
@@ -602,23 +626,29 @@ def build(recipe, layout, coll, mats, ship, hull):
                 box(g["int_trim"], (x + 0.03, yy - 0.04, 0.05), (x + 0.07, yy + 0.04, 2.05))
             box(g["accent"], (x + 0.03, -1.3, 2.1), (x + 0.05, 1.3, 2.16))
             continue
-        bulkhead(g, x, y0i, y1i, 0.0, H, (d["at"][1], d["width"]) if d else None, 1)
+        full = d is not None and abs(x - rooms["cockpit"]["rect"][0]) < 0.01
+        bulkhead(g, x, y0i, y1i, 0.0, H, (d["at"][1], d["width"]) if d else None, 1, full=full)
         if kit is not None:
             # kit panels on the faces that look into kit rooms
             ks = next(iter(report["kit"].values()))["scale"]
             for rid in kit_rooms:
                 rx0, rx1 = rooms[rid]["rect"][0], rooms[rid]["rect"][1]
                 if abs(rx1 - x) < 0.01:
-                    hs_interior_kit.clad_bulkhead(kit, x - 0.005, -1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, 0.0, H)
+                    hs_interior_kit.clad_bulkhead(kit, x - 0.005, -1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, 0.0, H, full=full)
                 if abs(rx0 - x) < 0.01:
-                    hs_interior_kit.clad_bulkhead(kit, x + 0.045, 1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, 0.0, H)
+                    hs_interior_kit.clad_bulkhead(kit, x + 0.045, 1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, 0.0, H, full=full)
             if abs(x - rooms["cockpit"]["rect"][0]) < 0.01:
                 # the cockpit's rear wall: kit panels over the plain bulkhead and a satin beam where it meets the
                 # frame lining (a large dark plane under the rear window, author 25. 9. 2026)
                 # (from the deck: the cockpit floor is raised and the stairs show the wall down to it)
-                hs_interior_kit.clad_bulkhead(kit, x + 0.045, 1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, 0.0, H)
-                box(g["int_trim"], (x + 0.04, y0i, H - 0.06), (x + 0.12, y1i, H))
-                _gable(g["int_panel"], hull, x + 0.04, H, g)
+                hs_interior_kit.clad_bulkhead(kit, x + 0.045, 1, y0i, y1i, (d["at"][1], d["width"]) if d else None, ks, 0.0, H, full=full)
+                beam = [(y0i, y1i)]
+                if full:
+                    # stops at the doorway's posts: over the stairs it was the head's first obstacle
+                    beam = [(y0i, d["at"][1] - d["width"] / 2 - 0.08), (d["at"][1] + d["width"] / 2 + 0.08, y1i)]
+                for ya, yb in beam:
+                    box(g["int_trim"], (x + 0.04, ya, H - 0.06), (x + 0.12, yb, H))
+                _gable(g["int_panel"], hull, x + 0.04, H, g, (d["at"][1], d["width"]) if full else None)
     # cockpit: floor, step, tub walls to the sill, rear wall, liner above the sill
     ck = rooms["cockpit"]
     zc = ck["floor_z"]
@@ -1052,7 +1082,7 @@ def cockpit_detail(g, layout, zc, sill):
         box(g["int_glow"], (x0 + 0.05, inner - s_ * 0.002, ztop - 0.06), (x1 - 0.05, inner + s_ * 0.0, ztop - 0.05))
     # tread strips on the cockpit floor between the stairs and the footwell (a plain slab - critic 25. 9.)
     k = 0
-    xx = 16.2
+    xx = 16.25   # clear of the stairs' top edge (16.20)
     while xx < 18.55:
         box(g["int_trim"], (xx, -0.85, zc + 0.0005), (xx + 0.018, 0.85, zc + 0.003))
         xx += 0.09
