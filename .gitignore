@@ -104,3 +104,5 @@ ArtSource/Models/PolyHaven/
 
 # Stažené balíky třetích stran: v repozitáři je jen README a to, co z nich skutečně použijeme.
 ArtSource/ThirdParty/**/*.zip
+starcitizenreference/ship_matrix/**/*.jpg
+starcitizenreference/ship_matrix/**/*.png
