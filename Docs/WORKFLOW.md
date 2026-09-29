@@ -1062,6 +1062,19 @@ snímku.
   kokpitu (štít nad stropem kajuty, nosník) a detaily kokpitu. Z kokpitu se pak koukalo do tmy nad stropem kajuty a
   z manifestu zmizel `InteriorKit` (test menu a importu to hlásí jako „earlier model left“). Kit se teď staví vždy,
   když ho recept má. Po takové změně projdi i sousední místnosti a snímek z výšky očí v kokpitu.
+- ej) **Po `kit_build.py -- <dávka> --only <díly>` geometrická kontrola lodi hlásí „kit parts not in ArtSource/Kit/*.blend“.**
+  Stavba ukládá `.blend` dávky jen s díly, které právě postavila; `--only` tak z něj vyhodí všechny ostatní
+  (`check_ship_geometry.py` bere díly z těchto souborů). Po změně jednoho dílu stav celou dávku (je deterministická),
+  pak vrať FBX dílů, které se nezměnily (`git checkout -- ArtSource/Kit/Export/<díl>.fbx`, FBX nese čas vytvoření).
+- ek) **Široký strop z kitu je černý, i když žlábek u stěny svítí naplno.** Světlo žlábku leží 8 cm pod stropem a strop
+  zasáhne pod úhlem skoro rovnoběžně - střed stropu 3,6 m širokého nedosvítí žádnou silou (×2,5 jen přepálilo okraj
+  do bíla). Stropní svítidla přitom svítí jen dolů. Řešení: u každého svítidla stropu slabé bodové světlo 35 cm pod
+  stropem (`halo` v `kit_batch2.py`, socket `Light_Halo`, jen v interiéru): strop kolem svítidel čitelný, mezi nimi
+  tmavší. Kaluže na podlaze dá až úzký silný kužel (50°, 260 cd; 100° a 35 cd byly neviditelné).
+  Úzké kužely ale končí na podlaze a po ztlumení žlábku zčernají spodní půlky stěn (kritik: „černé plochy bez
+  tvaru“). Stěny potřebují vlastní světlo: bodovky v postranním pásu stropu skloněné ke stěně (`scallop`, kaluž ve
+  výšce lišty) a wash obložení mířený dolů po vlastní stěně (zkosí přes hrany panelů). Rect světlo s několika cd
+  na 1 m vzdálenosti dá jen jednotky luxů – wash 1 cd/m stěnu nerozsvítí, potřebuje ~5 cd/m.
 - ds) **Stínovaná obdélníková světla bez MegaLights jsou drahá.** Dvě stínovaná světla kitu v chodbě bez MegaLights
   (osvětlení jako v letu): stínové mapy 7,3 ms a světla 5,5 ms (26 ms celkem). V lodi mají stín jen v režimu interiéru
   (MegaLights je trasuje), v letu ne; počet světel pod MegaLights cenu skoro nemění (8 i 12 světel: 3,5 ms).

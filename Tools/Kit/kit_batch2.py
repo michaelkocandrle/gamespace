@@ -292,6 +292,28 @@ def _ceiling_frame(sec):
     return frame((0, 0, sec.ceiling), (1, 0, 0), (0, -1, 0), (0, 0, -1))
 
 
+def halo(p, at):
+    """The glow a fixture throws on the ceiling round it: a weak point light 35 cm under the ceiling line. A wide room's
+    ceiling (the hull liner's 3.6 m) got no light but the coves' grazing wash - "a black plane, fixtures without a
+    source" (critic of the Wayfarer's hold, 29. 9. 2026); its panels now read round every fixture, dark between. Neutral white:
+    the warm panels under warm light took the hold to B/R 0.66 (SC 0.72-1.05)."""
+    p.socket("Light_Halo_0", (at[0], at[1], at[2] - 0.35), x=(0, 0, 1), z=(1, 0, 0), type="point", role="neutral", cd=6.0,
+             radius_m=1.8, source_radius_cm=8.0, specular=0.0)
+
+
+def scallop(p, k, at, sgn):
+    """A wall washer in a wide ceiling's side strip: a small housed spot tilted 22 deg toward the wall, its pool on the
+    liner at rail height (critic of the Wayfarer's hold, round 3: "the lower 60 % of the walls black, no pools of
+    light on the walls" - the down-lights' cones end on the floor, the coves graze the ceiling)."""
+    x, y, C = at
+    d = (0.0, sgn * 0.376, -0.927)
+    p.box("Kit_Structure", (x - 0.05, y - 0.05, C - 0.032), (x + 0.05, y + 0.05, C + 0.002), bevel=0.004, segments=1, panel=False)
+    p.box("Kit_Seal", (x - 0.036, y - 0.036, C - 0.034), (x + 0.036, y + 0.036, C - 0.031), panel=False)
+    p.box("Kit_GlowWarm", (x - 0.02, y - 0.02 + sgn * 0.008, C - 0.036), (x + 0.02, y + 0.02 + sgn * 0.008, C - 0.033), panel=False)
+    p.socket("Light_Scallop_%d" % k, (x, y + sgn * 0.01, C - 0.045), x=d, z=(1, 0, 0), type="spot", role="work", cd=60.0,
+             cone_deg=70.0, radius_m=2.6, source_radius_cm=3.0, dir_ue=[0.0, -d[1], d[2]])
+
+
 def ceiling_panel(sec, var, L, name, seed):
     """Ceiling panels between the walls' cove fascias, 0.3 / 0.6 / 1.2 m of the run: a dark backing, three pressed
     strips across (side strips 0.3 m), half a transverse beam at each end (the frame rhythm carried over the
@@ -331,8 +353,17 @@ def ceiling_panel(sec, var, L, name, seed):
         for v in (-0.04, 0.04):
             p.box("Kit_Structure", (c[0] - 0.11, v - 0.004, C + 0.012), (c[0] + 0.11, v + 0.004, C + 0.05), panel=False)
         frame_ring(p, M, hole, t=0.03, proud=0.016)
+        wide = sec.key.startswith("L")
+        # a hull liner's wide room (29. 9. 2026, critic: flat light, no pools on the floor): a tight, strong cone,
+        # shadowed - a pool under every fixture, darker floor between them
+        # (round 2: "no cones on the floor" at 160 cd / 60 deg with the cove at full strength - 260 / 50, the cove down)
         p.socket("Light_Down_0", (c[0], c[1], C - 0.05), x=(0, 0, -1), z=(1, 0, 0), type="spot", role="work",
-                 cd=35.0 if L >= 1.0 else 22.0, cone_deg=100.0, radius_m=3.6, source_radius_cm=6.0, megalights_shadow=True)
+                 cd=(260.0 if wide else 35.0) if L >= 1.0 else (150.0 if wide else 22.0), cone_deg=50.0 if wide else 100.0,
+                 radius_m=4.5 if wide else 3.6, source_radius_cm=6.0, megalights_shadow=True)
+        if wide:
+            halo(p, (c[0], 0.0, C))
+            for k, sgn in enumerate((1, -1)):
+                scallop(p, k, (c[0], sgn * (w - 0.2), C), sgn)
     elif var == "B":
         # the diffuser: a framed opening, a linear bar grille over a dark plenum - the bars' sides catch the
         # corridor light from any angle (a perforated face read as a black hole seen from along the run)
@@ -359,10 +390,61 @@ def ceiling_panel(sec, var, L, name, seed):
             p.slab("Kit_Structure", M, u - 0.003, u + 0.003, -0.045, 0.045, 0.026, proud=-0.002, panel=False)
         frame_ring(p, M, hole, t=0.02, proud=0.014)
         strip_light_along(p, "Light_Linear_0", (L / 2, 0.0, C - 0.02), (0, 0, -1), (1, 0, 0), u1 - u0 - 0.04, 0.05, "work", 32.0 * L, 3.6)
+        if sec.key.startswith("L"):
+            halo(p, (L / 2, 0.0, C))
+    if sec.key.startswith("L"):
+        services(p, L, C)
     p.collision_box((0, -w, C), (L, w, C + 0.2))
     p.socket("Snap_Start", (0, 0, 0), x=(-1, 0, 0), z=(0, 0, 1))
     p.socket("Snap_End", (L, 0, 0), x=(1, 0, 0), z=(0, 0, 1))
     return p
+
+
+SVC_TRAY = (0.75, 1.05)         # the service run's cable tray across (part y), to one side of the fixtures
+SVC_PIPES = ((-0.86, 0.032), (-1.0, 0.022))     # the pipe pair: y, radius
+SVC_Z = 0.17                    # the run's strut channels this far under the ceiling line
+
+
+def services(p, L, C):
+    """A wide room's service run under the ceiling (critic of the Wayfarer's hold, round 2: "a smooth plane, no trays
+    or pipes - the layer the reference is built of"): an open ladder tray with bundles (black, a cream and an orange
+    one) to one side of the fixtures, a supply pipe pair with clamps to the other, both on strut channels hung on
+    threaded rods every 0.6 m - the stations line up across modules, the run is continuous. 17 cm under the 2.3 m
+    ceiling: 2.13 m clear."""
+    zs = C - SVC_Z
+    stations = [L * (i + 0.5) / max(1, int(round(L / 0.6))) for i in range(max(1, int(round(L / 0.6))))]
+    t0, t1 = SVC_TRAY
+    for u in stations:
+        for (a, b) in ((t0 - 0.05, t1 + 0.05), (SVC_PIPES[1][0] - 0.07, SVC_PIPES[0][0] + 0.07)):
+            # the strut channel across, its lips, the rods up into the ceiling panel at both ends
+            p.box("Kit_Structure", (u - 0.02, a, zs - 0.04), (u + 0.02, b, zs), bevel=0.002, segments=1, panel=False)
+            p.box("Kit_Seal", (u - 0.008, a + 0.01, zs - 0.041), (u + 0.008, b - 0.01, zs - 0.039), panel=False)
+            for y in (a + 0.02, b - 0.02):
+                p.tube("Kit_Structure", (u, y, zs - 0.002), (u, y, C + 0.012), 0.008, 8)
+                p.tube("Kit_Structure", (u, y, zs - 0.046), (u, y, zs - 0.038), 0.009, 6)
+        for (y, r) in SVC_PIPES:
+            # a clamp round each pipe, bolted to the channel
+            p.tube("Kit_Structure", (u - 0.012, y, zs + r), (u + 0.012, y, zs + r), r + 0.006, 14)
+    # the tray: a ladder tray - rungs every 15 cm between two side rails, the bundles on them (a plate tray showed the
+    # player only its dark underside)
+    n_r = max(1, int(round(L / 0.15)))
+    for k in range(n_r):
+        u = (k + 0.5) * L / n_r
+        p.box("Kit_Structure", (u - 0.012, t0, zs - 0.002), (u + 0.012, t1, zs + 0.004), panel=False)
+    for (a, b) in ((t0, t0 + 0.006), (t1 - 0.006, t1)):
+        p.box("Kit_Structure", (0.0, a, zs), (L, b, zs + 0.06), panel=False)
+    y = t0 + 0.022
+    for (r, role) in ((0.017, "Kit_Rubber"), (0.012, "Kit_Accent"), (0.02, "Kit_Rubber"), (0.013, "Kit_Signal"),
+                      (0.016, "Kit_Rubber"), (0.011, "Kit_Accent"), (0.018, "Kit_Rubber")):
+        if y + r > t1 - 0.01:
+            break
+        p.tube(role, (0.0, y + r, zs + 0.004 + r - 0.002), (L, y + r, zs + 0.004 + r - 0.002), r, 10)
+        y += 2 * r + 0.006
+    # the pipes on the channels, a colour band on the thinner one in each module
+    for (y, r) in SVC_PIPES:
+        p.tube("Kit_Primary" if r > 0.03 else "Kit_Structure", (0.0, y, zs + r - 0.002), (L, y, zs + r - 0.002), r, 14)
+    y, r = SVC_PIPES[1]
+    p.tube("Kit_Signal", (L / 2 - 0.05, y, zs + r - 0.002), (L / 2 + 0.05, y, zs + r - 0.002), r + 0.002, 14)
 
 
 def ceiling_tray(sec, var, L, name, seed):
@@ -399,7 +481,9 @@ def ceiling_tray(sec, var, L, name, seed):
     for u in hangs:
         if f0 < u < f1:
             p.tube("Kit_Structure", (u, yf, zf + 0.045), (u, yf, top), 0.006, 6)
-    strip_light_along(p, "Light_Linear_0", ((f0 + f1) / 2, yf, zf - 0.02), (0, 0, -1), (1, 0, 0), f1 - f0 - 0.04, 0.05, "work", 26.0 * (f1 - f0), 3.4)
+    # 34 cd/m, at least 14 (29. 9. 2026, critic of the Wayfarer's 1.8 m technical corridor: its floor lit mostly by the
+    # cockpit stairs' blue - the short module's 0.4 m strip gave 10 cd)
+    strip_light_along(p, "Light_Linear_0", ((f0 + f1) / 2, yf, zf - 0.02), (0, 0, -1), (1, 0, 0), f1 - f0 - 0.04, 0.05, "work", max(14.0, 34.0 * (f1 - f0)), 3.4)
     if var == "A":
         z0 = C - 0.05                           # the tray plate
         y0, y1 = -0.17, 0.17

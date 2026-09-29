@@ -111,7 +111,7 @@
       "decal Decal_HazardExhaust_R = D_Big_Hazard_Exhaust at [-1015.0, 440.0, 0.0]",
       "decal Decal_HazardRamp = D_Big_Hazard_Ramp at [-1060.0, -0.0, -125.0]",
       "decal Decal_Int_Sec02 = D_Int_Section_02 at [-775.0, -202.5, -8.0]",
-      "decal Decal_Int_Sec03 = D_Int_Section_03 at [-505.0, -202.5, -8.0]",
+      "decal Decal_Int_Sec03 = D_Int_Section_03 at [-532.0, -202.5, -8.0]",
       "decal Decal_Int_Sec04 = D_Int_Section_04 at [-415.0, -202.5, -8.0]",
       "decal Decal_Int_Hold = D_Int_Hold at [-505.0, 203.0, 30.0]",
       "decal Decal_Int_Grid = D_Int_Grid at [-245.0, 202.5, -25.0]",
@@ -120,7 +120,7 @@
       "decal Decal_Int_Engineering = D_Int_Engineering at [-207.5, -133.0, -8.0]",
       "decal Decal_Int_Exit = D_Int_Exit at [-920.5, -0.0, 75.0]",
       "decal Decal_Int_CautionLoad = D_Int_Caution_Load at [-920.5, 75.0, 25.0]",
-      "decal Decal_Int_Cockpit = D_Int_Cockpit at [6.5, -87.0, -20.0]",
+      "decal Decal_Int_Cockpit = D_Int_Cockpit at [6.5, -84.5, -20.0]",
       "decal Decal_Int_Fire = D_Int_Fire at [-230.0, -202.5, -5.0]",
       "light Light_nav_L (point, 3 cd) at [-524.6, -431.3, 0.1]",
       "light Light_nav_R (point, 3 cd) at [-524.6, 431.3, 0.1]",
@@ -190,11 +190,7 @@
       "light Light_fix_59 (point, 0.141 cd) at [724.7, -108.3, 64.9]"
     ]
   },
-  "removed": [
-    "asset /Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_Decal_Int_Cooler",
-    "asset /Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_Decal_Int_Reactor",
-    "asset /Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_Decal_Int_Voltage"
-  ],
+  "removed": [],
   "kit_rooms": {
     "Wayfarer": {
       "rooms": [
@@ -202,8 +198,8 @@
         "hold"
       ],
       "parts": 29,
-      "lights": 49,
-      "removed": 78
+      "lights": 62,
+      "removed": 91
     }
   },
   "planet": {

@@ -169,7 +169,12 @@ parametry a jejich výchozí hodnoty podle konstant skriptu (čte je přes `ast`
 - Po každé přestavbě lodi: `test_ship_geometry.py <Loď>` s kontrolou `walk_blocked` (zavřené dveře v
   `checks.walk_exempt`), pak preset `wayfarer_walk` a kontrola logu (`space.Where`, `WALK end`, `sits down`).
 - Nástrahy: WORKFLOW eb (ploška bez tloušťky v průchodu), ec (hlava na schodech u dveří), ed (přistání ve scénáři).
-- Místnosti z kitu v lodi (`interior.kit_modules`): `rooms`, `wall_runs`, `run_parts`; `width` = šířka kit místnosti (obložení trupu, průřez L41/L38), `keep` = co zůstává lodní (`floor`, `objects`). Přepážky `Bulkhead_Door*` se kladou jako `run_parts` s pivotem v rohu na líci. Po změně: `kit_build.py -- <dávka>`, `import_kit.py`, stavba lodi, `import_ship.py`, `test_ship_geometry.py` (walk, hull_in_rooms, nápisy), preset `wayfarer_rooms` a `wayfarer_walk`. Nástrahy WORKFLOW ee–eh.
+- Místnosti z kitu v lodi (`interior.kit_modules`): `rooms`, `wall_runs`, `run_parts`; `width` = šířka kit místnosti (obložení trupu, průřez L41/L38), `keep` = co zůstává lodní (`floor`, `objects`). Přepážky `Bulkhead_Door*` se kladou jako `run_parts` s pivotem v rohu na líci. Po změně: `kit_build.py -- <dávka>`, `import_kit.py`, stavba lodi, `import_ship.py`, `test_ship_geometry.py` (walk, hull_in_rooms, nápisy), preset `wayfarer_rooms` a `wayfarer_walk`. Nástrahy WORKFLOW ee–ek.
+- Světelný plán kit místnosti v lodi (`kit_rooms.py`): stín mají jen lineární světla stropu a bodovky stropních panelů
+  (`SHADOWED_SOCKETS`); bodovky, svatozáře stropu (`Light_Halo`), wash stěn a stavová světla jen v režimu interiéru
+  (`INTERIOR_ONLY_SOCKETS`, tag `InteriorOnly`, pod MegaLights). Široká místnost (průřezy L41/L38): bodovka 50°, 260 cd,
+  svatozář 6 cd neutrální (bez odlesku), bodovky na stěny 60 cd/70° skloněné 22°, žlábek 0,5 cd/m, wash dolů po stěně 5 cd/m. Změřeno 29. 9. 2026 v nákladovém prostoru:
+  průměr 0,23, B/R 0,72 (`measure_look.py` na `wayfarer_rooms`).
 
 ## Konzolové příkazy (zabalená hra i scénáře snímků, nic se neukládá)
 

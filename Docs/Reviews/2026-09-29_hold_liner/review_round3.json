@@ -1,0 +1,69 @@
+{
+ "date": "2026-09-29",
+ "goal": "Interiér malé lodi z modulárního kitu, z první osoby (oko 1,65 m): (1) nákladový prostor obložený tenkým obložením trupu – panely do lišty ve výšce 1,3 m, horní deska, zkosení s kabelovým žlabem, světelný žlábek u stropu, obnažená žebra trupu ve spojích modulů, na nákladové straně kolejnice na úvazky; strop z panelů se svítidly; (2) přepážky s dveřmi mezi místnostmi – vrstvená zárubeň, podsvícený horní rám, stavové světlo, žebra ke stropu, svod kabelů do rozvodné skříňky; silná přepážka má průchod s kapsou posuvných dveří. Hodnotí se stěny, přepážky, strop, světlo a materiály.",
+ "style": "STYLOVÝ ZÁMĚR (autor): „udržovaná pracovní loď“ – panely téměř čisté, špína jen ve spárách, u soklu a kolem poklopů. NEPOŽADUJ víc špíny. Styl Star Citizen: tmavý teplý grafit, světlejší konstrukce, oranžová signální barva výrobce, svítidla v pouzdrech, teplé světlo architektury, studené UI.",
+ "checklist": "interior",
+ "notes": [
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt.",
+  "Podlaha nákladového prostoru, mřížka pro náklad, rampa (koncová stěna nákladového prostoru) a kajuta (vidět dveřmi) jsou zatím dřívější a přijdou v dalších krocích.",
+  "Text vpravo nahoře (FPS), pokud je vidět, je měřicí overlay."
+ ],
+ "topic": "hold_liner",
+ "out": "Docs/Reviews/2026-09-29_hold_liner/round3",
+ "pairs": [
+  {
+   "title": "Nákladový prostor, pohled dopředu k přepážce",
+   "distance": "far",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC infrastruktura",
+   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/09_hold_fwd.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Nákladový prostor, pohled dozadu k rampě",
+   "distance": "far",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
+   "ref_label": "SC chodba (Drake)",
+   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/10_hold_aft.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Nákladová stěna s kolejnicí na úvazky",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
+   "ref_label": "SC infrastruktura",
+   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/11_hold_cargo.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Strop nákladového prostoru",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC strop (MISC)",
+   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/12_hold_ceiling.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Silná přepážka s dveřmi (z technické chodby do nákladového prostoru)",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
+   "ref_label": "SC chodba s dveřmi (Drake)",
+   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/08_tech_aft.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Tenké čelo přepážky s dveřmi (z technické chodby ke kajutě)",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
+   "ref_label": "SC dveře v přepážce (RSI)",
+   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/07_tech_fwd.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

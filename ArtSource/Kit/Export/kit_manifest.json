@@ -3054,7 +3054,7 @@
      "params": {
       "type": "rect",
       "role": "work",
-      "cd": 20.8,
+      "cd": 27.2,
       "width_cm": 76.0,
       "height_cm": 5.0,
       "radius_m": 3.4,
@@ -3146,7 +3146,7 @@
      "params": {
       "type": "rect",
       "role": "work",
-      "cd": 10.4,
+      "cd": 14.0,
       "width_cm": 36.0,
       "height_cm": 5.0,
       "radius_m": 3.4,
@@ -3238,7 +3238,7 @@
      "params": {
       "type": "rect",
       "role": "work",
-      "cd": 20.8,
+      "cd": 27.2,
       "width_cm": 76.0,
       "height_cm": 5.0,
       "radius_m": 3.4,
@@ -6165,6 +6165,21 @@
       "megalights_shadow": true
      }
     },
+    "SOCKET_Light_Status_0": {
+     "location_ue_cm": [
+      6.0,
+      -101.0,
+      150.5
+     ],
+     "params": {
+      "type": "point",
+      "role": "signal",
+      "cd": 0.4,
+      "radius_m": 0.7,
+      "source_radius_cm": 2.5,
+      "interior_only": true
+     }
+    },
     "SOCKET_Snap_End": {
      "location_ue_cm": [
       0.0,
@@ -6263,6 +6278,21 @@
        0.0
       ],
       "megalights_shadow": true
+     }
+    },
+    "SOCKET_Light_Status_0": {
+     "location_ue_cm": [
+      6.0,
+      -51.0,
+      150.5
+     ],
+     "params": {
+      "type": "point",
+      "role": "signal",
+      "cd": 0.4,
+      "radius_m": 0.7,
+      "source_radius_cm": 2.5,
+      "interior_only": true
      }
     },
     "SOCKET_Snap_End": {
@@ -6389,6 +6419,21 @@
       "megalights_shadow": true
      }
     },
+    "SOCKET_Light_Status_0": {
+     "location_ue_cm": [
+      6.0,
+      -51.0,
+      150.5
+     ],
+     "params": {
+      "type": "point",
+      "role": "signal",
+      "cd": 0.4,
+      "radius_m": 0.7,
+      "source_radius_cm": 2.5,
+      "interior_only": true
+     }
+    },
     "SOCKET_Snap_End": {
      "location_ue_cm": [
       0.0,
@@ -6444,7 +6489,7 @@
     120.0,
     234.0
    ],
-   "tris": 3620,
+   "tris": 4248,
    "tris_decals": 96,
    "tri_budget": 6600,
    "materials": [
@@ -6471,10 +6516,10 @@
      "params": {
       "type": "rect",
       "role": "warm",
-      "cd": 0.96,
+      "cd": 0.6,
       "width_cm": 115.8,
       "height_cm": 2.5,
-      "radius_m": 1.4,
+      "radius_m": 1.8,
       "dir_ue": [
        0.0,
        -0.0,
@@ -6492,14 +6537,14 @@
      "params": {
       "type": "rect",
       "role": "warm",
-      "cd": 1.32,
-      "width_cm": 115.8,
+      "cd": 6.0,
+      "width_cm": 90.0,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.6,
       "dir_ue": [
-       0.5,
+       -0.27,
        -0.0,
-       -0.866
+       -0.9629
       ],
       "megalights_shadow": true
      }
@@ -6530,7 +6575,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 4504,
+    "edge": 4824,
     "secondary": 240,
     "floor": 776,
     "seam": 0
@@ -6559,7 +6604,7 @@
     120.0,
     234.0
    ],
-   "tris": 4112,
+   "tris": 4740,
    "tris_decals": 98,
    "tri_budget": 6600,
    "materials": [
@@ -6586,10 +6631,10 @@
      "params": {
       "type": "rect",
       "role": "warm",
-      "cd": 0.96,
+      "cd": 0.6,
       "width_cm": 115.8,
       "height_cm": 2.5,
-      "radius_m": 1.4,
+      "radius_m": 1.8,
       "dir_ue": [
        0.0,
        -0.0,
@@ -6607,14 +6652,14 @@
      "params": {
       "type": "rect",
       "role": "warm",
-      "cd": 1.32,
-      "width_cm": 115.8,
+      "cd": 6.0,
+      "width_cm": 90.0,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.6,
       "dir_ue": [
-       0.5,
+       -0.27,
        -0.0,
-       -0.866
+       -0.9629
       ],
       "megalights_shadow": true
      }
@@ -6649,7 +6694,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 4960,
+    "edge": 5280,
     "secondary": 456,
     "floor": 776,
     "seam": 0
@@ -6678,8 +6723,8 @@
     120.0,
     234.0
    ],
-   "tris": 4132,
-   "tris_decals": 96,
+   "tris": 6084,
+   "tris_decals": 102,
    "tri_budget": 6600,
    "materials": [
     "Kit_Primary",
@@ -6705,10 +6750,10 @@
      "params": {
       "type": "rect",
       "role": "warm",
-      "cd": 0.96,
+      "cd": 0.6,
       "width_cm": 115.8,
       "height_cm": 2.5,
-      "radius_m": 1.4,
+      "radius_m": 1.8,
       "dir_ue": [
        0.0,
        -0.0,
@@ -6726,14 +6771,14 @@
      "params": {
       "type": "rect",
       "role": "warm",
-      "cd": 1.32,
-      "width_cm": 115.8,
+      "cd": 6.0,
+      "width_cm": 90.0,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.6,
       "dir_ue": [
-       0.5,
+       -0.27,
        -0.0,
-       -0.866
+       -0.9629
       ],
       "megalights_shadow": true
      }
@@ -6756,17 +6801,21 @@
     }
    },
    "collision_hulls": 2,
-   "decals": 2,
+   "decals": 4,
    "decal_items": [
-    "warning_label",
+    "st_service",
+    "hazard_subtle",
+    "hazard_subtle",
     "grime_soot"
    ],
-   "service_labels": [],
+   "service_labels": [
+    "st_service"
+   ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 5200,
+    "edge": 5904,
     "secondary": 240,
-    "floor": 1424,
+    "floor": 2912,
     "seam": 0
    },
    "status": "built",
@@ -6793,7 +6842,7 @@
     60.0,
     234.0
    ],
-   "tris": 3512,
+   "tris": 3848,
    "tris_decals": 48,
    "tri_budget": 4200,
    "materials": [
@@ -6820,10 +6869,10 @@
      "params": {
       "type": "rect",
       "role": "warm",
-      "cd": 0.48,
+      "cd": 0.3,
       "width_cm": 55.8,
       "height_cm": 2.5,
-      "radius_m": 1.4,
+      "radius_m": 1.8,
       "dir_ue": [
        0.0,
        -0.0,
@@ -6841,14 +6890,14 @@
      "params": {
       "type": "rect",
       "role": "warm",
-      "cd": 0.66,
-      "width_cm": 55.8,
+      "cd": 3.0,
+      "width_cm": 30.0,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.6,
       "dir_ue": [
-       0.5,
+       -0.27,
        -0.0,
-       -0.866
+       -0.9629
       ],
       "megalights_shadow": true
      }
@@ -6908,8 +6957,8 @@
     60.0,
     234.0
    ],
-   "tris": 3936,
-   "tris_decals": 48,
+   "tris": 4772,
+   "tris_decals": 50,
    "tri_budget": 4200,
    "materials": [
     "Kit_Primary",
@@ -6935,10 +6984,10 @@
      "params": {
       "type": "rect",
       "role": "warm",
-      "cd": 0.48,
+      "cd": 0.3,
       "width_cm": 55.8,
       "height_cm": 2.5,
-      "radius_m": 1.4,
+      "radius_m": 1.8,
       "dir_ue": [
        0.0,
        -0.0,
@@ -6956,14 +7005,14 @@
      "params": {
       "type": "rect",
       "role": "warm",
-      "cd": 0.66,
-      "width_cm": 55.8,
+      "cd": 3.0,
+      "width_cm": 30.0,
       "height_cm": 1.8,
-      "radius_m": 2.4,
+      "radius_m": 2.6,
       "dir_ue": [
-       0.5,
+       -0.27,
        -0.0,
-       -0.866
+       -0.9629
       ],
       "megalights_shadow": true
      }
@@ -6986,17 +7035,18 @@
     }
    },
    "collision_hulls": 2,
-   "decals": 2,
+   "decals": 3,
    "decal_items": [
-    "warning_label",
+    "hazard_subtle",
+    "hazard_subtle",
     "grime_soot"
    ],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 4864,
+    "edge": 5056,
     "secondary": 240,
-    "floor": 1312,
+    "floor": 2128,
     "seam": 0
    },
    "status": "built",
@@ -7016,19 +7066,22 @@
    "dims_m": [
     1.2,
     3.64,
-    0.104
+    0.28
    ],
    "expected_size_cm": [
     120.0,
     364.0,
-    10.4
+    28.0
    ],
-   "tris": 1452,
+   "tris": 3124,
    "tris_decals": 0,
    "tri_budget": 4200,
    "materials": [
     "Kit_Primary",
     "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
     "Kit_Plastic",
     "Kit_Seal",
     "Kit_GlowWarm"
@@ -7043,11 +7096,66 @@
      "params": {
       "type": "spot",
       "role": "work",
-      "cd": 35.0,
-      "cone_deg": 100.0,
-      "radius_m": 3.6,
+      "cd": 260.0,
+      "cone_deg": 50.0,
+      "radius_m": 4.5,
       "source_radius_cm": 6.0,
       "megalights_shadow": true
+     }
+    },
+    "SOCKET_Light_Halo_0": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      195.0
+     ],
+     "params": {
+      "type": "point",
+      "role": "neutral",
+      "cd": 6.0,
+      "radius_m": 1.8,
+      "source_radius_cm": 8.0,
+      "specular": 0.0
+     }
+    },
+    "SOCKET_Light_Scallop_0": {
+     "location_ue_cm": [
+      60.0,
+      -163.0,
+      225.5
+     ],
+     "params": {
+      "type": "spot",
+      "role": "work",
+      "cd": 60.0,
+      "cone_deg": 70.0,
+      "radius_m": 2.6,
+      "source_radius_cm": 3.0,
+      "dir_ue": [
+       0.0,
+       -0.376,
+       -0.927
+      ]
+     }
+    },
+    "SOCKET_Light_Scallop_1": {
+     "location_ue_cm": [
+      60.0,
+      163.0,
+      225.5
+     ],
+     "params": {
+      "type": "spot",
+      "role": "work",
+      "cd": 60.0,
+      "cone_deg": 70.0,
+      "radius_m": 2.6,
+      "source_radius_cm": 3.0,
+      "dir_ue": [
+       0.0,
+       0.376,
+       -0.927
+      ]
      }
     },
     "SOCKET_Snap_End": {
@@ -7073,7 +7181,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 2176,
+    "edge": 2608,
     "secondary": 0,
     "floor": 0,
     "seam": 0
@@ -7095,24 +7203,42 @@
    "dims_m": [
     1.2,
     3.64,
-    0.091
+    0.267
    ],
    "expected_size_cm": [
     120.0,
     364.0,
-    9.1
+    26.7
    ],
-   "tris": 1536,
+   "tris": 2880,
    "tris_decals": 0,
    "tri_budget": 4200,
    "materials": [
     "Kit_Primary",
     "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
     "Kit_Plastic",
     "Kit_Seal",
     "Kit_GlowWarm"
    ],
    "sockets": {
+    "SOCKET_Light_Halo_0": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      195.0
+     ],
+     "params": {
+      "type": "point",
+      "role": "neutral",
+      "cd": 6.0,
+      "radius_m": 1.8,
+      "source_radius_cm": 8.0,
+      "specular": 0.0
+     }
+    },
     "SOCKET_Light_Linear_0": {
      "location_ue_cm": [
       60.0,
@@ -7162,7 +7288,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 2176,
+    "edge": 2464,
     "secondary": 0,
     "floor": 0,
     "seam": 0
@@ -7184,19 +7310,22 @@
    "dims_m": [
     0.6,
     3.64,
-    0.104
+    0.28
    ],
    "expected_size_cm": [
     60.0,
     364.0,
-    10.4
+    28.0
    ],
-   "tris": 1452,
+   "tris": 2668,
    "tris_decals": 0,
    "tri_budget": 2100,
    "materials": [
     "Kit_Primary",
     "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
     "Kit_Plastic",
     "Kit_Seal",
     "Kit_GlowWarm"
@@ -7211,11 +7340,66 @@
      "params": {
       "type": "spot",
       "role": "work",
-      "cd": 22.0,
-      "cone_deg": 100.0,
-      "radius_m": 3.6,
+      "cd": 150.0,
+      "cone_deg": 50.0,
+      "radius_m": 4.5,
       "source_radius_cm": 6.0,
       "megalights_shadow": true
+     }
+    },
+    "SOCKET_Light_Halo_0": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      195.0
+     ],
+     "params": {
+      "type": "point",
+      "role": "neutral",
+      "cd": 6.0,
+      "radius_m": 1.8,
+      "source_radius_cm": 8.0,
+      "specular": 0.0
+     }
+    },
+    "SOCKET_Light_Scallop_0": {
+     "location_ue_cm": [
+      30.0,
+      -163.0,
+      225.5
+     ],
+     "params": {
+      "type": "spot",
+      "role": "work",
+      "cd": 60.0,
+      "cone_deg": 70.0,
+      "radius_m": 2.6,
+      "source_radius_cm": 3.0,
+      "dir_ue": [
+       0.0,
+       -0.376,
+       -0.927
+      ]
+     }
+    },
+    "SOCKET_Light_Scallop_1": {
+     "location_ue_cm": [
+      30.0,
+      163.0,
+      225.5
+     ],
+     "params": {
+      "type": "spot",
+      "role": "work",
+      "cd": 60.0,
+      "cone_deg": 70.0,
+      "radius_m": 2.6,
+      "source_radius_cm": 3.0,
+      "dir_ue": [
+       0.0,
+       0.376,
+       -0.927
+      ]
      }
     },
     "SOCKET_Snap_End": {
@@ -7241,7 +7425,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 2176,
+    "edge": 2464,
     "secondary": 0,
     "floor": 0,
     "seam": 0
@@ -7312,6 +7496,21 @@
       "megalights_shadow": true
      }
     },
+    "SOCKET_Light_Status_0": {
+     "location_ue_cm": [
+      6.0,
+      -86.0,
+      150.5
+     ],
+     "params": {
+      "type": "point",
+      "role": "signal",
+      "cd": 0.4,
+      "radius_m": 0.7,
+      "source_radius_cm": 2.5,
+      "interior_only": true
+     }
+    },
     "SOCKET_Snap_End": {
      "location_ue_cm": [
       0.0,
@@ -7350,6 +7549,70 @@
    "renders": {
     "front": "Saved/KitCatalog/SM_Kit_Bulkhead_Door00L41_C_front.png",
     "34": "Saved/KitCatalog/SM_Kit_Bulkhead_Door00L41_C_34.png"
+   }
+  },
+  "SM_Kit_Ceiling_Panel06L41_B": {
+   "category": "Ceiling",
+   "family": "Ceiling_Panel",
+   "section": "L41",
+   "length_m": 0.6,
+   "variant": "B",
+   "batch": 4,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Ceiling_Panel06L41_B.fbx",
+   "dims_m": [
+    0.6,
+    3.64,
+    0.286
+   ],
+   "expected_size_cm": [
+    60.0,
+    364.0,
+    28.6
+   ],
+   "tris": 2376,
+   "tris_decals": 0,
+   "tri_budget": 2100,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
+    "Kit_Seal"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      60.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 2320,
+    "secondary": 0,
+    "floor": 0,
+    "seam": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Ceiling_Panel06L41_B_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Ceiling_Panel06L41_B_34.png"
    }
   }
  }

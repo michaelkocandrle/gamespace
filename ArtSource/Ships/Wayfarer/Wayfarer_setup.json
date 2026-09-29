@@ -1616,7 +1616,7 @@
    "flip_u": 1.0,
    "texture": "D_Int_Section_03",
    "location": [
-    -505.0,
+    -532.0,
     -202.5,
     -8.0
    ],
@@ -1933,11 +1933,11 @@
   },
   {
    "name": "Int_Cockpit",
-   "_moved": "29. 9. 2026: onto the kit bulkhead face (Bulkhead_Door00W_A at x 10.33), the main panel port of the door under the rail: the arrow points at the door (to starboard of it the frame hid half the word and the arrow pointed away)",
+   "_moved": "29. 9. 2026: onto the kit bulkhead face (Bulkhead_Door00W_A at x 10.33), the main panel port of the door under the rail: the arrow points at the door (to starboard of it the frame hid half the word and the arrow pointed away); 85 % and centred between the corridor wall's frame and the door jamb (critic round 1: seen along the corridor the frame cut it to OCKPIT, the arrow already touched the jamb)",
    "texture": "D_Int_Cockpit",
    "location": [
     6.5,
-    -87.0,
+    -84.5,
     -20.0
    ],
    "rotation": [
@@ -1947,8 +1947,8 @@
    ],
    "size": [
     3.0,
-    7.3,
-    26.0
+    6.2,
+    22.0
    ],
    "opacity": 0.9,
    "tint": [

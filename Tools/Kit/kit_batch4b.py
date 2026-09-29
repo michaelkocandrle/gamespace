@@ -287,9 +287,12 @@ def bulkhead_door(sec, var, depth, name, seed):
     sy = y0 - FW - CW - 0.09
     status = sy > 0.08
     if status:
-        p.box("Kit_Structure", (0.0, sy - 0.03, 1.38), (0.03, sy + 0.03, 1.56), bevel=0.004, segments=1, panel=False)
-        p.box("Kit_GlowSignal", (0.028, sy - 0.012, 1.49), (0.034, sy + 0.012, 1.53), panel=False)
-        p.box("Kit_Plastic", (0.028, sy - 0.012, 1.41), (0.033, sy + 0.012, 1.47), panel=False)
+        # 5 x 7 cm lens and a glow on the jamb (critic of the hold, 29. 9. 2026: "a tiny dot that says nothing")
+        p.box("Kit_Structure", (0.0, sy - 0.04, 1.34), (0.03, sy + 0.04, 1.58), bevel=0.004, segments=1, panel=False)
+        p.box("Kit_GlowSignal", (0.028, sy - 0.025, 1.47), (0.035, sy + 0.025, 1.54), panel=False)
+        p.box("Kit_Plastic", (0.028, sy - 0.025, 1.37), (0.034, sy + 0.025, 1.44), panel=False)
+        p.socket("Light_Status_0", (0.06, sy, 1.505), x=(1, 0, 0), z=(0, 0, 1), type="point", role="signal", cd=0.4,
+                 radius_m=0.7, source_radius_cm=2.5, interior_only=True)
     # ---------------------------------------------------------------- a cable drop into a junction box
     jy = fr + rib + 0.12 if fr + rib + 0.25 < W - 0.15 else fl - rib - 0.3
     if 0.12 < jy < W - 0.12 and _top_at(sec, jy) > 1.9:

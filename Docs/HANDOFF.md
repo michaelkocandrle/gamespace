@@ -1795,6 +1795,16 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
             recept má (WORKFLOW ei).
           - Kajuta: plán `Tools/Kit/cabin_plan.py` → `Docs/Kit/cabin_plan_wayfarer.png`, varianta A (stěny W, 3,0 m) a B
             (obložení trupu, 3,8 m jako dnes, schválený layout beze změny) - doporučeno B, poslané autorovi.
+          - Kola kritika (30. 9. 2026 v noci, `Docs/Reviews/2026-09-29_hold_liner.md`): 3 kola FAIL + ověřovací PASS
+            (7/7/7/7/7/8/7/8). Světelný plán široké místnosti: bodovky stropu 50° / 260 cd se stínem, svatozář u každého
+            svítidla (`halo`, strop čitelný), bodovky na stěny (`scallop`, skloněné 22°), wash obložení dolů po vlastní
+            stěně 5 cd/m, žlábek 0,5 cd/m; `kit_rooms.py` bere směr bodovky ze socketu (`dir_ue`). Pod stropem vrstva
+            služeb (`services`: žebříkový žlab s kabely, dvojice trubek, závěsy po 0,6 m). Obložení: šrouby v rozích desek,
+            dělená horní deska, modul C s L-trackem (otvory, D-oka, popruh), madlem a přípojkou napájení kontejnerů.
+            Materiály: konstrukce ×1,1 / kov 0,45 (kov 0,75 bez odrazů splynul s panely), panely s odstínem po deskách.
+            Nápis COCKPIT na 85 % mezi rámem a zárubní, stavové světlo dveří větší s vlastním světlem. Sklad: průměr
+            0,23, B/R 0,72; 57–66 FPS. Otevřená doporučení kritika v recenzi (čitelnost L-tracku zdálky, čelo přepážky
+            ze skladu, přepálené stavové světlo, rovnoměrný wash).
     - Klávesa I vede jen do Steadfastu; Wayfarer se prochází od 29. 9. 2026 vstáním z křesla (F), viz výše.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

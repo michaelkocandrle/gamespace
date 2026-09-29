@@ -47,12 +47,15 @@ SHIP_LIGHT_SCALE = 1.1
 INTERIOR_ONLY_TAG = "InteriorOnly"        # SpaceshipPawn: on only under the interior lighting
 # under the flight lighting (no MegaLights, every light paid in full) the kit corridor kept 1 ms over the old one:
 # the walls' wash and the floor channel light only when walked (author: flight lighting under 20 ms, 29. 9. 2026)
-INTERIOR_ONLY_SOCKETS = ("SOCKET_Light_Wash", "SOCKET_Light_Channel")
+INTERIOR_ONLY_SOCKETS = ("SOCKET_Light_Wash", "SOCKET_Light_Channel", "SOCKET_Light_Down", "SOCKET_Light_Halo",
+                         "SOCKET_Light_Scallop")
 # the author's light plan for a ship's kit room (28. 9. 2026): only the main lights cast shadows (the ceiling trays'
 # linear lights: the dominant sources), the rest none but contact shadows. The walls' wash lights at half strength:
 # without them the walls under the slope went black (0.08), at full strength the corridor was flat and over the SC
 # brightness; their count does not change MegaLights' cost (8 or 12 lights: 3.5 ms)
-SHADOWED_SOCKETS = ("SOCKET_Light_Linear",)
+# (29. 9. 2026, critic of the hold: "no pools on the floor, the frames cast no shadows") the ceiling panels' down-lights
+# too - interior only, under MegaLights
+SHADOWED_SOCKETS = ("SOCKET_Light_Linear", "SOCKET_Light_Down")
 SKIPPED_SOCKETS = ()
 SOCKET_SCALE = {"SOCKET_Light_Wash": 0.5}
 CONTACT_SHADOW = 0.05       # screen fraction
@@ -207,6 +210,11 @@ def build_ship(ship, recipe, report):
             elif prm.get("type") == "spot":
                 lc = comps.add(unreal.SpotLightComponent, lname)
                 rot = unreal.Rotator(roll=0.0, pitch=-90.0, yaw=0.0)
+                if "dir_ue" in prm:
+                    # a tilted spot (the wide ceilings' wall washers): its own direction, turned with the part
+                    dx, dy, dz = prm["dir_ue"]
+                    fx, fy = kit_layout.rotate(yaw, dx, dy)
+                    rot = unreal.MathLibrary.make_rot_from_x(unreal.Vector(fx, fy, dz))
                 _light(lc, prm.get("role", "work"), prm["cd"], prm.get("radius_m", 3.8), prm.get("source_radius_cm", 4.0),
                        spot_cone=prm.get("cone_deg", 90.0), shadow=shadow)
                 lc.set_editor_property("specular_scale", 0.6)
@@ -215,7 +223,8 @@ def build_ship(ship, recipe, report):
                 rot = unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0)
                 _light(lc, prm.get("role", "warm"), prm.get("cd", 1.0), prm.get("radius_m", 1.6), prm.get("source_radius_cm", 1.0),
                        shadow=shadow)
-                lc.set_editor_property("specular_scale", 0.2)
+                # the ceiling's halo lights none (critic of the hold, round 2: "a wide waxy highlight across the ceiling")
+                lc.set_editor_property("specular_scale", float(prm.get("specular", 0.2)))
             lc.set_editor_property("relative_location", at)
             lc.set_editor_property("relative_rotation", rot)
             # a light only for the walked interior (MegaLights): the pawn keeps it off under the flight lighting, where

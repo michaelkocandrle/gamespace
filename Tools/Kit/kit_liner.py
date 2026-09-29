@@ -14,7 +14,8 @@ joint, a flanged T section standing 8 cm off the panels floor to cove, a lighten
 bolted.
   A  plain: the maker's plate
   B  service: a cable drop from the tray into a junction box, a small access hatch with quarter-turn latches
-  C  cargo: a tie-down rail at 0.35 m with sliding anchor points (the hold's cargo side), a load plate
+  C  cargo: an L-track tie-down rail at 0.35 m, two anchors with D rings and hazard marks, a strap, a grab handle and a
+     power outlet for powered containers (the hold's cargo side)
 
 Frame: kit_rules wall pivot (origin at the bottom start on the face plane, face +X, length along +Y).
 
@@ -58,15 +59,20 @@ class Liner(Wall):
             p.slab("Kit_Primary", self.VERT, G, L - G, self.kick[0], self.kick[1], PT, BEV_MID, secondary=True)
             p.slab("Kit_Trim", self.VERT, G, L - G, self.kick[0], self.kick[0] + 0.1, 0.006, BEV_SMALL, proud=0.003,
                    trim="kickplate", panel=False)
-        # the main panel in two plates to the rail, the upper one 12 mm proud (as the W walls)
-        for pan in (main_split or [(G, L - G, self.main[0], self.split - GAP / 2, 0.0), (G, L - G, self.split + GAP / 2, self.main[1], 0.012)]):
+        # the main panel in two plates to the rail, the upper one 12 mm proud (as the W walls) and in two across a long
+        # module; every plate bolted at its corners (critic of the hold, round 2: "smooth plates, no rims or bolts")
+        upper_main = ([(G, L / 2 - GAP / 2, self.split + GAP / 2, self.main[1], 0.012), (L / 2 + GAP / 2, L - G, self.split + GAP / 2, self.main[1], 0.012)]
+                      if L >= 1.0 else [(G, L - G, self.split + GAP / 2, self.main[1], 0.012)])
+        for pan in (main_split or [(G, L - G, self.main[0], self.split - GAP / 2, 0.0)] + upper_main):
             self.pressed(self.VERT, *pan)
+            self.bolts(self.VERT, *pan)
         # the rail and its signal line at 1.3 m
         p.slab("Kit_Signal", self.VERT, 0, L, RAIL - 0.049, RAIL - 0.043, 0.01, proud=-0.006, panel=False)
         p.slab("Kit_Trim", self.VERT, 0, L, RAIL - 0.025, RAIL + 0.025, 0.045, BEV_SMALL, proud=0.014, trim="rail_bolted", panel=False)
         # the upper plate between the rail and the chamfer, set back a little
         for pan in (upper_split or [(G, L - G, self.upper[0], self.upper[1], -0.008)]):
             self.pressed(self.VERT, *pan)
+            self.bolts(self.VERT, *pan)
         # the chamfer: two pressed panels with a bolted flange between (as the W walls' slope)
         a = 0.45 * self.slope_len
         self.pressed(self.SLOPE, G, L - G, 0.045, a - 0.019)
@@ -86,13 +92,26 @@ class Liner(Wall):
         p.box("Kit_GlowWarm", (xt - 0.022, G + 0.012, zt - 0.0675), (xt - 0.004, L - G - 0.012, zt - 0.064), panel=False)
         for (c0, c1) in ((0.0, 0.03), (L - 0.03, L)):
             p.box("Kit_Structure", (xt - 0.042, c0, zt - 0.078), (xt + 0.014, c1, zt + 0.036), bevel=0.004, segments=1, panel=False)
-        self.strip_light("Light_Cove_0", (xt - 0.0675, L / 2, zt + 0.02), (0, 0, 1), L - 2 * G - 0.03, 0.025, "warm", 0.8 * L, radius_m=1.4)
-        self.strip_light("Light_Wash_0", (xt - 0.013, L / 2, zt - 0.075), (0.5, 0, -0.866), L - 2 * G - 0.03, 0.018, "warm", 1.1 * L, radius_m=2.4)
+        # the up-light: secondary to the ceiling's fixtures (critic of the hold: "1-2 EV under them"); 8 cm under the
+        # ceiling it grazes it and cannot light its middle at any strength (x2.5 only burnt the edge white) - the
+        # ceiling panels' halo lights do that
+        # (round 2: "the cove at 30-40 %, a line, darkness between the fixtures": 0.5 per metre)
+        self.strip_light("Light_Cove_0", (xt - 0.0675, L / 2, zt + 0.02), (0, 0, 1), L - 2 * G - 0.03, 0.025, "warm", 0.5 * L, radius_m=1.8)
+        # the wash down its own wall, not out into the room (round 3: "the lower walls black, no shape"): aimed at the
+        # wall's middle it grazes the panels - their bevels, bolts and the frames' flanges catch it
+        # (15 cm short of each frame: at full length its ends burnt the flanges' tops white)
+        self.strip_light("Light_Wash_0", (xt - 0.013, L / 2, zt - 0.075), (-0.27, 0, -0.963), max(0.2, L - 0.3), 0.018, "warm", 5.0 * L, radius_m=2.6)
         # collision: the thin wall, the chamfer and cove as one hull
         p.collision_box((-sd, 0, 0), (0, L, self.vt))
         p.collision_hull([(x, y, z) for y in (0, L) for x, z in ((-sd, self.vt), (0, self.vt), (xt, zt), (xt, self.ceiling), (-sd, self.ceiling))])
         p.socket("Snap_Start", (0, 0, 0), x=(0, -1, 0), z=(0, 0, 1))
         p.socket("Snap_End", (0, L, 0), x=(0, 1, 0), z=(0, 0, 1))
+
+    def bolts(self, m, u0, u1, v0, v1, proud=0.0):
+        """Four bolt heads in a plate's border, 2.2 cm in from its corners."""
+        for u in (u0 + 0.022, u1 - 0.022):
+            for v in (v0 + 0.022, v1 - 0.022):
+                self.p.tube("Kit_Structure", self.world(m, u, v, proud - 0.001), self.world(m, u, v, proud + 0.005), 0.008, 8)
 
     # half a flange per module end, standing 8 cm off; half a web 2 cm wide from the backing out: it overlaps the panels'
     # ends as the W walls' frames do (a 6 mm web left the upper plate hanging in the air - geometry check)
@@ -137,9 +156,29 @@ class Liner(Wall):
             p.slab("Kit_Structure", self.SLOPE, u - 0.02, u + 0.02, v0 - 0.02, v0 + 0.07, 0.034, BEV_SMALL, proud=0.034, panel=False)
         p.slab("Kit_Structure", self.SLOPE, 0, L, v0 - 0.02, v0 + 0.07, 0.006, BEV_SMALL, proud=0.04, panel=False)
         p.slab("Kit_Structure", self.SLOPE, 0, L, v0 - 0.02, v0, 0.065, BEV_SMALL, proud=0.105, panel=False)
-        for (vv, zz, rr, role) in ((v0 + 0.012, 0.051, 0.011, "Kit_Rubber"), (v0 + 0.036, 0.052, 0.012, "Kit_Rubber"),
-                                   (v0 + 0.059, 0.051, 0.011, "Kit_Rubber"), (v0 + 0.024, 0.067, 0.008, "Kit_Accent")):
+        # cables that read in the tray (critic: "an empty black groove"): a cream and an orange one among the black
+        for (vv, zz, rr, role) in ((v0 + 0.012, 0.051, 0.011, "Kit_Rubber"), (v0 + 0.036, 0.052, 0.012, "Kit_Accent"),
+                                   (v0 + 0.059, 0.051, 0.011, "Kit_Rubber"), (v0 + 0.024, 0.067, 0.009, "Kit_Signal")):
             p.tube(role, self.world(self.SLOPE, 0.0, vv, zz), self.world(self.SLOPE, L, vv, zz), rr, 10, caps=False)
+
+
+def cargo_fittings(w):
+    """A cargo module's fittings on its main panel (critic of the hold, round 2: "a handle, a connection"): a grab handle
+    beside the frame (a hand hold climbing onto the load, in low gravity) and a power outlet for powered containers,
+    its cap on a chain."""
+    L = w.L
+    hu = L - 0.13
+    for v in (w.split + 0.06, w.main[1] - 0.09):
+        w.p.tube("Kit_Structure", (0.012, hu, v), (0.06, hu, v), 0.009, 8)
+    w.p.tube("Kit_Signal", (0.06, hu, w.split + 0.05), (0.06, hu, w.main[1] - 0.08), 0.014, 10)
+    pu, pv = 0.34, 0.68
+    w.p.box("Kit_Structure", (0.0, pu - 0.07, pv - 0.09), (0.05, pu + 0.07, pv + 0.09), bevel=0.006, segments=2, panel=False)
+    w.p.tube("Kit_Seal", (0.049, pu, pv + 0.015), (0.056, pu, pv + 0.015), 0.036, 16)
+    w.p.tube("Kit_Structure", (0.049, pu, pv + 0.015), (0.06, pu, pv + 0.015), 0.042, 16, caps=False)
+    for dy in (-0.012, 0.012):
+        w.p.tube("Kit_Primary", (0.054, pu + dy, pv + 0.015), (0.058, pu + dy, pv + 0.015), 0.005, 6)
+    w.p.box("Kit_Signal", (0.05, pu - 0.05, pv - 0.075), (0.056, pu + 0.05, pv - 0.05), panel=False)
+    w.label("st_service", w.VERT, pu, pv + 0.12, 0.35, label=True)
 
 
 def liner_plain(w, var, rng):
@@ -171,19 +210,34 @@ def liner_plain(w, var, rng):
                 w.p.box("Kit_Accent", (c.x + 0.006, c.y - 0.012, c.z - 0.003), (c.x + 0.012, c.y + 0.012, c.z + 0.003), panel=False)
             w.label("st_inspect", w.VERT, (h0 + h1) / 2, v1 - 0.035, 0.6, label=True)
     else:
-        # C, cargo side: a tie-down rail at 0.35 m (a slotted track on stand-offs) with three sliding anchor points,
-        # a load plate on the main panel
+        # C, cargo side: the fittings on the main panel (a handle, a power outlet), then
+        if L >= 1.0:
+            cargo_fittings(w)
+        # an L-track: a flanged rail on stand-offs with round holes every 2.5 cm along its lip (critic: "a flat strip,
+        # not a rail"), two anchors with D rings, a cargo strap hanging from one; hazard marks only at the anchors
         zr = 0.35
-        w.p.slab("Kit_Structure", w.VERT, 0.03, L - 0.03, zr - 0.035, zr + 0.035, 0.035, BEV_SMALL, proud=0.06, panel=False)
-        w.p.slab("Kit_Seal", w.VERT, 0.035, L - 0.035, zr - 0.008, zr + 0.008, 0.01, proud=0.062, panel=False)
+        w.p.slab("Kit_Structure", w.VERT, 0.03, L - 0.03, zr - 0.04, zr + 0.04, 0.012, BEV_SMALL, proud=0.05, panel=False)
+        w.p.slab("Kit_Structure", w.VERT, 0.03, L - 0.03, zr + 0.012, zr + 0.04, 0.03, BEV_SMALL, proud=0.08, panel=False)
+        w.p.slab("Kit_Structure", w.VERT, 0.03, L - 0.03, zr - 0.04, zr - 0.012, 0.03, BEV_SMALL, proud=0.08, panel=False)
+        n = int((L - 0.08) / 0.025)
+        anchors = (L * 0.25, L * 0.7)
+        for k in range(n):
+            u = 0.04 + (k + 0.5) * (L - 0.08) / n
+            if all(abs(u - a) > 0.04 for a in anchors):   # none under an anchor's block (the 0.6 m module's budget)
+                w.p.tube("Kit_Seal", (0.079, u, zr + 0.026), (0.0815, u, zr + 0.026), 0.0055, 6)
         for u in w._stations(0.3):
-            w.p.box("Kit_Structure", (0.025, u - 0.02, zr - 0.03), (0.06, u + 0.02, zr + 0.03), bevel=0.002, segments=1, panel=False)
-        for u in (L * 0.2, L * 0.55, L * 0.85):
-            # an anchor: a sliding block on the track and a D ring
-            w.p.box("Kit_Accent", (0.06, u - 0.03, zr - 0.03), (0.085, u + 0.03, zr + 0.03), bevel=0.004, segments=1, panel=False)
-            w.p.tube("Kit_Structure", (0.09, u - 0.022, zr - 0.02), (0.09, u + 0.022, zr - 0.02), 0.006, 8)
-        w.p.slab("Kit_Structure", w.VERT, L * 0.36, L * 0.36 + 0.2, w.main[1] - 0.16, w.main[1] - 0.06, 0.008, BEV_SMALL, proud=0.014, panel=False)
-        w.label("warning_label", w.VERT, L * 0.36 + 0.1, w.main[1] - 0.11, 0.5, label=True)
+            w.p.box("Kit_Structure", (0.0, u - 0.02, zr - 0.035), (0.05, u + 0.02, zr + 0.035), bevel=0.002, segments=1, panel=False)
+        for k, u in enumerate(anchors):
+            w.p.box("Kit_Accent", (0.075, u - 0.035, zr - 0.035), (0.1, u + 0.035, zr + 0.035), bevel=0.004, segments=1, panel=False)
+            w.p.tube("Kit_Structure", (0.105, u - 0.025, zr - 0.03), (0.105, u + 0.025, zr - 0.03), 0.007, 10)
+            w.p.tube("Kit_Structure", (0.1, u - 0.025, zr - 0.03), (0.105, u - 0.025, zr - 0.03), 0.007, 8)
+            w.p.tube("Kit_Structure", (0.1, u + 0.025, zr - 0.03), (0.105, u + 0.025, zr - 0.03), 0.007, 8)
+            w.label("hazard_subtle", w.VERT, u, zr + 0.075, 0.3)
+            if k == 0:
+                # a strap hanging from the ring, its buckle, the loose end on the floor
+                w.p.box("Kit_Signal", (0.1, u - 0.022, 0.02), (0.106, u + 0.022, zr - 0.024), panel=False)
+                w.p.box("Kit_Structure", (0.098, u - 0.028, 0.17), (0.112, u + 0.028, 0.21), bevel=0.003, segments=1, panel=False)
+                w.p.box("Kit_Signal", (0.106, u - 0.022, 0.0), (0.2, u + 0.022, 0.006), panel=False)
 
 
 LINER = [("HullLiner", 1.2, "A"), ("HullLiner", 1.2, "B"), ("HullLiner", 1.2, "C"), ("HullLiner", 0.6, "A"), ("HullLiner", 0.6, "C")]

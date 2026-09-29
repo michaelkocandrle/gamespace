@@ -281,7 +281,7 @@ def jobs(batch, sections, budget):
                        budget=kit_liner.budget(L), render=True, views=kit_liner.VIEWS)
         # the ceilings of the liner rooms (their width per room: sections L41 hold, L38 cabin)
         import kit_batch2
-        for sec, size, var in (("L41", 1.2, "A"), ("L41", 1.2, "C"), ("L41", 0.6, "A")):
+        for sec, size, var in (("L41", 1.2, "A"), ("L41", 1.2, "C"), ("L41", 0.6, "A"), ("L41", 0.6, "B")):
             seed += 7
             yield dict(name=kit_batch2.part_name("Ceiling", "Panel", size, sec, var),
                        part=(lambda s=sec, z=size, v=var, sd=seed: kit_batch2.build_part("Ceiling", "Panel", z, s, v, sd)),

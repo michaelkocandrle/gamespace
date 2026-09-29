@@ -271,9 +271,12 @@ def build_materials():
         # gloss variation over metre-sized areas, a few scratches, worn chamfers; the dirt is grime cards in the seams,
         # along the plinth, round hatches and grips, the walked line (kit_geo Part.grime). Blotches in the middle of the
         # plates read as stains (critic rounds 2-3).
-        "Kit_Primary": layered(pal["Kit_Primary"], 0.42, 0.1, secondary=[c * 0.72 for c in pal["Kit_Primary"]],
+        # 0.5 (29. 9. 2026, critic of the hold: the chamfers mirrored the cove strip "as glossy plastic")
+        "Kit_Primary": layered(pal["Kit_Primary"], 0.5, 0.1, secondary=[c * 0.72 for c in pal["Kit_Primary"]],
                                grunge=0.0, vary=0.12, dirt=0.3, wear=0.5, FloorWear=0.6, GrungeTileCm=160.0, MicroRough=0.1,
-                               ScratchAmount=0.06, WearThreshold=0.35, PanelDirtVar=0.0),
+                               ScratchAmount=0.06, WearThreshold=0.35, PanelDirtVar=0.0,
+                               # tone and gloss per plate (round 3 of the hold: "every panel one tone, one roughness")
+                               PanelTone=0.22, PanelRough=0.2),
         # the structure layer as the palette's lighter painted metal: pure metal (1.0) mirrored the dark room and
         # the frames vanished into the gaps
         # edge wear on the chamfers only (kit_geo: Col.G = 0 on bevel faces), like the Wayfarer interior (0.3-0.8);
@@ -285,7 +288,12 @@ def build_materials():
         # x0.75, metal 0.5: at x0.8 / 0.5 the lit beams burnt out to near white (critic round 1), at x0.62 / 0.6 and
         # x0.72 / 0.7 they merged with the panels (rounds 2-3: metal without reflections loses its diffuse light); the
         # brushing at a 15 cm tile, millimetre lines, not centimetre stripes
-        "Kit_Structure": layered([c * 0.75 for c in pal["Kit_Structure"]], 0.5, 0.5, grunge=0.25, dirt=0.5, wear=0.5,
+        # x0.9 / 0.55 (29. 9. 2026, critic of the hold: the frames "only a shade lighter" than the panels - the style's
+        # two tones need two stops; the ship's lights now run x1.1 unshadowed, not the showroom's x2.0 that burnt x0.8)
+        # x1.1 / 0.48 / metal 0.45 (round 3 of the hold: at metal 0.75 / 0.42, tried after round 2's "only colour
+        # differs", the frames merged with the panels again - without reflections metal loses its diffuse light, as
+        # rounds 2-3 of the kit's material step found; lighter, half metal, brushed: two stops over the panels)
+        "Kit_Structure": layered([c * 1.1 for c in pal["Kit_Structure"]], 0.48, 0.45, grunge=0.25, dirt=0.5, wear=0.5,
                                  Brushed=0.7, ScratchAmount=0.25, FloorWear=0.7, MicroRough=0.1, MicroTileCm=15.0),
         # the provisional floor plane (batch 3 brings the floor): rough, not a mirror for the plinth lights
         "Kit_ProvFloor": layered([0.07, 0.068, 0.065], 0.7, 0.2, grunge=0.5, vary=0.3, dirt=0.3),
@@ -504,8 +512,13 @@ def place_part(actors, meshes, short, pos_cm, yaw, label, counts):
             rect_light(actors, at, prm.get("role", "warm"), prm["cd"], prm.get("radius_m", 2.0), lab, unreal.Vector(fx, fy, dz),
                        unreal.Vector(gx, gy, az), prm["width_cm"], prm["height_cm"])
         elif prm.get("type") == "spot":
-            light(actors, at, prm.get("role", "work"), prm["cd"], prm.get("radius_m", 3.8), lab, spot=True,
-                  cone=prm.get("cone_deg", 90.0), source_cm=prm.get("source_radius_cm"))
+            sa = light(actors, at, prm.get("role", "work"), prm["cd"], prm.get("radius_m", 3.8), lab, spot=True,
+                       cone=prm.get("cone_deg", 90.0), source_cm=prm.get("source_radius_cm"))
+            if "dir_ue" in prm and sa is not None:
+                # a tilted spot (the wide ceilings' wall washers)
+                dx, dy, dz = prm["dir_ue"]
+                fx, fy = _rot(yaw, dx, dy)
+                sa.set_actor_rotation(unreal.MathLibrary.make_rot_from_x(unreal.Vector(fx, fy, dz)), False)
         else:
             light(actors, at, prm.get("role", "warm"), prm.get("cd", 1.0), prm.get("radius_m", 1.6), lab,
                   source_cm=prm.get("source_radius_cm"))

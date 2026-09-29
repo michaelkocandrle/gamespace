@@ -53,6 +53,14 @@ for node in tree.body:
         except ValueError:
             pass
 parts = json.load(open(MANIFEST, encoding="utf-8"))["parts"]
+# kit_rooms.py's light plan (its constants, read the same way)
+ROOMS_C = {}
+for node in ast.parse(open(os.path.join(os.path.dirname(SCRIPT), "kit_rooms.py"), encoding="utf-8").read()).body:
+    if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+        try:
+            ROOMS_C[node.targets[0].id] = ast.literal_eval(node.value)
+        except ValueError:
+            pass
 EXPORT_DIR = os.path.join(tempfile.gettempdir(), "kittest_export")
 os.makedirs(EXPORT_DIR, exist_ok=True)
 
@@ -212,13 +220,19 @@ for ship in sorted(os.listdir(SHIPS)):
         and str(o.get_collision_profile_name()) == "NoCollision" for o in kit_meshes))
     check("%s: the kit parts' light sockets are Light_fix_kit_* lights (%d)" % (ship, len(kit_lights)),
           len(kit_lights) >= len(kit_meshes) // 2 and all(isinstance(o, unreal.LocalLightComponent) for o in kit_lights))
-    # shadows only on the main lights (the trays' linear lights): all of them shadowed cost ~10-24 ms in the ship's
-    # views (no MegaLights); parts on lighting channel 1 only (not the sun's)
+    # shadows only on the main lights (kit_rooms.SHADOWED_SOCKETS: the trays' and ceilings' linear lights, the wide
+    # ceilings' down-lights since 29. 9. 2026): all of them shadowed cost ~10-24 ms in the ship's views (no MegaLights);
+    # a shadowed light other than Linear only under the interior lighting (tag InteriorOnly); parts on lighting channel
+    # 1 only (not the sun's)
     names = [(o.get_name().replace("_GEN_VARIABLE", ""), o) for o in kit_lights]
+    main = tuple("_" + s[len("SOCKET_Light_"):] for s in ROOMS_C["SHADOWED_SOCKETS"])
     shadowed = sorted(n for n, o in names if o.get_editor_property("cast_shadows"))
-    check("%s: only the main (Linear) kit lights cast shadows" % ship,
-          shadowed and all(n.endswith("_Linear") for n in shadowed)
-          and all(o.get_editor_property("cast_shadows") for n, o in names if n.endswith("_Linear")), ", ".join(shadowed))
+    check("%s: only the main (%s) kit lights cast shadows" % (ship, "/".join(k[1:] for k in main)),
+          shadowed and all(n.endswith(main) for n in shadowed)
+          and all(o.get_editor_property("cast_shadows") for n, o in names if n.endswith(main)), ", ".join(shadowed))
+    check("%s: the shadowed kit lights other than Linear only in the walked interior (InteriorOnly)" % ship, all(
+        ROOMS_C["INTERIOR_ONLY_TAG"] in [str(t) for t in o.get_editor_property("component_tags")]
+        for n, o in names if n.endswith(main) and not n.endswith("_Linear")))
     check("%s: kit parts off the sun's lighting channel 0" % ship, all(
         not o.get_editor_property("lighting_channels").get_editor_property("channel0")
         and o.get_editor_property("lighting_channels").get_editor_property("channel1") for o in kit_meshes))
