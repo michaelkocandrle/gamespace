@@ -829,8 +829,14 @@ dveřmi, kolébka se žlutými úchyty, pruh na parapetu).
   sklem a září emitoru (`Kit_GlowCool`) posunutou pod střed kvůli paralaxe (WORKFLOW dx), obrazovka `shield`.
 - Štítky `plate_reactor/cooler/shield`, `warn_hv`, `maker_veyra`, `st_rails` jsou v knihovně decalů s `append`
   (WORKFLOW dt); obrazovky komponent v `kit_screens.py` (oblasti `reactor`, `cooler`, `shield`).
-- Světlo výklenku `SOCKET_Light_Bay_0` (rect, neutrální, bez stínu v lodi), socket `SOCKET_Component` (slot, velikost)
-  pro budoucí komponenty jako samostatné předměty. Rozpočet: stěna + `Fitting` (3 000).
+- Světlo výklenku `SOCKET_Light_Bay_0` (rect, neutrální, dosah 0,55 m, bez stínu v lodi), světlo emitoru (bod, 0,35 m),
+  socket `SOCKET_Component` (slot, velikost) pro budoucí komponenty jako samostatné předměty. Rozpočet: stěna +
+  `Fitting` (3 000).
+- Úpravy 29. 9. (autor): pásy v ostění a na zadní stěně niky v roli `Kit_GlowDim` (teplá, emise 0,35; `Kit_GlowWarm`
+  1,1 je pro lišty stěn a na malém svítidle zblízka přepaluje), západky poklopu s oranžovým křidélkem v tmavé misce,
+  destička pod servisním štítkem. Světla výklenků a emitoru mají `interior_only` (v letu nesvítí, WORKFLOW dz).
+- Výkon chodby Wayfareru z kitu s výklenky: 15,81 ms interiér / 19,49 ms let (zabalená hra, 3 × 3 měření,
+  `wayfarer_perf.json`); MegaLights v interiérech na 2 vzorcích na pixel.
 
 ## Poznatky z rozboru interiérů SC (Markom3D, 26. 9. 2026)
 

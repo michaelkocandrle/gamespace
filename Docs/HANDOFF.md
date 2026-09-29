@@ -1730,6 +1730,20 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
           - výkon chodby z kitu s výklenky (zabalená hra): 17,48 ms GPU v režimu interiéru (před 16,51).
           - oprava: tři obnovené nápisy staré technické chodby (REACTOR, CAUTION, COOLER) byly od minulého commitu
             zrcadlené – v setupu chybělo `flip_u` (WORKFLOW dy).
+        - Rozhodnutí autora 29. 9. 2026 a práce po nich (recenze `2026-09-28_kit_bays.md`, oddíl „29. 9.“):
+          - stav z minula znovu doložen (řez trupem, řez nákladovým prostorem, dveře a ENGINEERING); návrh posunu gridu
+            nakreslený `Tools/Kit/hold_grid_plan.py` → `Docs/Kit/hold_grid_plan_wayfarer.png` (čeká na autora);
+          - výklenky: pásy v ostění v tlumené roli `Kit_GlowDim` (emise 0,35), podsvícený pás na zadní stěně niky,
+            západky poklopu s oranžovým křidélkem v misce, destička pod INSPECT;
+          - výkon: světla výklenků dosah 0,55 m (emitor 0,35 m), MegaLights 2 vzorky na pixel v režimu interiéru
+            (`SetInteriorLighting`), světla výklenků, prosvětlení stěn a kanálu v podlaze jen v režimu interiéru (tag
+            `InteriorOnly` z `kit_rooms.py`, `ASpaceshipPawn::InteriorOnlyLights`). Chodba z kitu 15,81 ms interiér /
+            19,49 ms let (cíle 16,6 / 20), výchozí hra 15,19 / 19,15 ms, 3 běhy × 3 měření (`wayfarer_perf.json`,
+            snímkovač loguje `SHOTS perf`, souhrn `Tools/Shots/perf_log.py`);
+          - chodba z kitu zatím vypnutá: zapnutí potvrdí autor podle srovnání 4 pohledů
+            (`Docs/Reviews/2026-09-28_kit_bays/compare_current_kit_sc_after_fixes.jpg`);
+          - test orientace nápisů `Tools/Tests/test_decal_orientation.py` (setup) a kontrola `DecalFlipU/V` instancí
+            v `test_ship_import.py`; našel další 4 nápisy se skrytým převrácením (sekce 02–04, FIRE), setup je teď výslovný.
     - Klávesa I vede jen do Steadfastu, interiér Wayfareru zatím projít nejde (WORKFLOW ci). Přijde s pilotem chodby z kitu.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

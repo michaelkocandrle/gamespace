@@ -360,6 +360,15 @@ namespace
 		{
 			MegaLights->Set(bInterior ? 1 : 0, ECVF_SetByCode);
 		}
+		// 2 samples per pixel instead of 4 (author 29. 9. 2026): -0.6 ms in the Wayfarer's kit corridor (16.67 -> 16.05 ms
+		// GPU), a little more grain on dark slopes; MegaLights runs only in interiors, so it is set with it
+		if (bInterior)
+		{
+			if (IConsoleVariable* Samples = Console.FindConsoleVariable(TEXT("r.MegaLights.NumSamplesPerPixel")))
+			{
+				Samples->Set(2, ECVF_SetByCode);
+			}
+		}
 		if (IConsoleVariable* Reflections = Console.FindConsoleVariable(TEXT("r.Lumen.Reflections.Allow")))
 		{
 			Reflections->Set(bInterior ? 0 : 1, ECVF_SetByCode);

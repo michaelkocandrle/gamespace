@@ -1,0 +1,152 @@
+{
+ "_comment": "Repeated GPU measurements of the Wayfarer's technical corridor (author 29. 9. 2026: targets under 16.6 ms in the interior lighting and under 20 ms in the flight lighting, the default game measured several times for its spread): the perf_tech view of wayfarer_kit_corridor three times per lighting, no stat overlay; the shot runner logs 'SHOTS perf <name> gpu_ms=.. frame_ms=..' averaged over the second half of each settle. Run -Package -Width 1920 -Height 1080, then python Tools/Shots/perf_log.py.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 6.0,
+   "console": [
+    "stat none",
+    "r.GPUStatsEnabled 1",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 6.0,
+   "fov": 90,
+   "name": "interior_1",
+   "camera_local": [
+    -1.63,
+    -0.0,
+    0.45
+   ],
+   "look_local": [
+    0.09,
+    -0.0,
+    0.2
+   ],
+   "console": [
+    "stat none"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 6.0,
+   "fov": 90,
+   "name": "interior_2",
+   "camera_local": [
+    -1.63,
+    -0.0,
+    0.45
+   ],
+   "look_local": [
+    0.09,
+    -0.0,
+    0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 6.0,
+   "fov": 90,
+   "name": "interior_3",
+   "camera_local": [
+    -1.63,
+    -0.0,
+    0.45
+   ],
+   "look_local": [
+    0.09,
+    -0.0,
+    0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 6.0,
+   "fov": 90,
+   "name": "classic_1",
+   "camera_local": [
+    -1.63,
+    -0.0,
+    0.45
+   ],
+   "look_local": [
+    0.09,
+    -0.0,
+    0.2
+   ],
+   "console": [
+    "space.InteriorLighting 0"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 6.0,
+   "fov": 90,
+   "name": "classic_2",
+   "camera_local": [
+    -1.63,
+    -0.0,
+    0.45
+   ],
+   "look_local": [
+    0.09,
+    -0.0,
+    0.2
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 6.0,
+   "fov": 90,
+   "name": "classic_3",
+   "camera_local": [
+    -1.63,
+    -0.0,
+    0.45
+   ],
+   "look_local": [
+    0.09,
+    -0.0,
+    0.2
+   ]
+  },
+  {
+   "name": "z_reset",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 1.0,
+   "console": [
+    "stat none",
+    "space.InteriorLighting 0"
+   ]
+  }
+ ]
+}

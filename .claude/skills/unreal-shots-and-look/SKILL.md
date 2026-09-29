@@ -49,6 +49,10 @@ bez okna editoru a bez PIE. Nastavení čte z `Saved\Config\WindowsEditor\GameUs
 - Výkon interiéru: nejdřív `stat gpu` a sondy přes konzoli ve scénáři (`space.Sun CastShadows False`,
   `r.MegaLights.NumSamplesPerPixel 2`, …) v kopii presetu (`-List <json>`), teprve pak úpravy. Stínové mapy slunce
   v interiéru lodi byly 3,2–3,8 ms (WORKFLOW dr).
+- Opakovaná měření: snímkovač loguje `SHOTS perf <jméno> gpu_ms frame_ms` za druhou polovinu ustálení každého snímku;
+  preset `wayfarer_perf.json` (3× interiér, 3× let), `python Tools/Shots/perf_log.py <logy>` = průměr a rozptyl přes
+  běhy. Log zabalené hry: `C:/gamespace/Builds/Gamespace/Windows/gamespace/Saved/Logs/gamespace.log` (po každém běhu
+  zkopírovat, další běh ho přepíše). Cíl dokládat aspoň 3 běhy (rozptyl 0,2–0,8 ms, WORKFLOW ea).
 - A/B materiálu bez reimportu: `space.Kit <Param> <hodnota> <část jména MI>` a `space.KitColor`
   i na herce ukázky kitu (tag `KitShowroom`), např. `space.Kit DecalOpacity 0 DecalGrime` (preset `kit_grime_ab`).
 

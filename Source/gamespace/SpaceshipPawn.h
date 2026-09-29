@@ -2215,5 +2215,9 @@ private:
 	 * interior lighting (MegaLights traces them); flown, their shadow maps cost ~4-5 ms (28. 9. 2026). */
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<ULocalLightComponent>> ShadowedFixtureLights;
+	/** Fixture lights tagged InteriorOnly (kit_rooms.py: the component bays' lights): on only under the interior
+	 * lighting; flown, every unshadowed light costs its full screen area (~0.6 ms for a corridor's bays, 29. 9. 2026). */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<ULocalLightComponent>> InteriorOnlyLights;
 	int32 InteriorShadowState = -1;
 };

@@ -20,6 +20,9 @@ public class gamespace : ModuleRules
 
 		// The cockpit displays (UCockpitDisplayComponent) draw UMG into a render target.
 		PrivateDependencyModuleNames.Add("RenderCore");
+
+		// The shot runner logs the GPU frame time with each picture (RHIGetGPUFrameCycles, SHOTS perf).
+		PrivateDependencyModuleNames.Add("RHI");
 		
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");

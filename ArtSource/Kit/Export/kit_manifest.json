@@ -5629,7 +5629,7 @@
     120.0,
     230.0
    ],
-   "tris": 9496,
+   "tris": 9552,
    "tris_decals": 132,
    "tri_budget": 9600,
    "materials": [
@@ -5645,6 +5645,7 @@
     "Kit_GlowCool",
     "Kit_GlowSignal",
     "Kit_GlowNeutral",
+    "Kit_GlowDim",
     "Kit_Screen",
     "Kit_Glass",
     "Kit_Decal",
@@ -5676,13 +5677,14 @@
       "cd": 1.44,
       "width_cm": 87.6,
       "height_cm": 4.0,
-      "radius_m": 1.0,
+      "radius_m": 0.55,
       "dir_ue": [
        -0.4512,
        -0.0,
        -0.8924
       ],
-      "megalights_shadow": false
+      "megalights_shadow": false,
+      "interior_only": true
      }
     },
     "SOCKET_Light_Cove_0": {
@@ -5761,7 +5763,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 8536,
+    "edge": 8608,
     "secondary": 672,
     "floor": 3994,
     "seam": 0
@@ -5790,7 +5792,7 @@
     60.0,
     230.0
    ],
-   "tris": 7200,
+   "tris": 7120,
    "tris_decals": 48,
    "tri_budget": 7200,
    "materials": [
@@ -5805,6 +5807,7 @@
     "Kit_GlowWarm",
     "Kit_GlowCool",
     "Kit_GlowNeutral",
+    "Kit_GlowDim",
     "Kit_Screen",
     "Kit_Glass",
     "Kit_DecalPaint",
@@ -5834,13 +5837,14 @@
       "cd": 0.512,
       "width_cm": 29.6,
       "height_cm": 4.0,
-      "radius_m": 1.0,
+      "radius_m": 0.55,
       "dir_ue": [
        -0.4512,
        -0.0,
        -0.8924
       ],
-      "megalights_shadow": false
+      "megalights_shadow": false,
+      "interior_only": true
      }
     },
     "SOCKET_Light_Cove_0": {
@@ -5912,9 +5916,9 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 7504,
+    "edge": 7576,
     "secondary": 672,
-    "floor": 3328,
+    "floor": 3232,
     "seam": 0
    },
    "status": "built",
@@ -5941,7 +5945,7 @@
     120.0,
     230.0
    ],
-   "tris": 6680,
+   "tris": 6972,
    "tris_decals": 152,
    "tri_budget": 9600,
    "materials": [
@@ -5955,6 +5959,7 @@
     "Kit_Seal",
     "Kit_GlowWarm",
     "Kit_GlowCool",
+    "Kit_GlowDim",
     "Kit_Screen",
     "Kit_Glass",
     "Kit_Decal",
@@ -6005,8 +6010,9 @@
       "type": "point",
       "role": "cool",
       "cd": 0.25,
-      "radius_m": 0.6,
-      "megalights_shadow": false
+      "radius_m": 0.35,
+      "megalights_shadow": false,
+      "interior_only": true
      }
     },
     "SOCKET_Light_Wash_0": {
@@ -6061,9 +6067,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 7264,
+    "edge": 7816,
     "secondary": 1536,
-    "floor": 2328,
+    "floor": 2552,
     "seam": 0
    },
    "status": "built",

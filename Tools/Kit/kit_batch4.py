@@ -59,6 +59,11 @@ def _bay_shell(w, hole, depth):
     for yy in (u0 + 0.12, u1 - 0.12):
         p.box("Kit_Primary", (-depth, yy - 0.02, v0), (-depth + 0.03, yy + 0.02, v1), bevel=BEV_SMALL, segments=1, panel=False)
     p.box("Kit_Primary", (-depth, u0, v1 - 0.04), (-depth + 0.035, u1, v1), bevel=BEV_SMALL, segments=1, panel=False)
+    # a housed dim strip across the back wall under the head: the niche's back reads above the component (it read as
+    # a black void and the cooler's exhaust ran into the dark - verification round, author 29. 9. 2026)
+    zb0, zb1 = v1 - 0.075, v1 - 0.047
+    p.box("Kit_Primary", (-depth, u0 + 0.03, zb0), (-depth + 0.02, u1 - 0.03, zb1), bevel=0.002, segments=1, panel=False)
+    p.box("Kit_GlowDim", (-depth + 0.02, u0 + 0.042, zb0 + 0.007), (-depth + 0.023, u1 - 0.042, zb1 - 0.007), panel=False)
     # the heavy frame ring and its gasket
     _frame_ring(w, w.VERT, hole, t=0.035, proud=0.015)
     _gasket(w, w.VERT, hole)
@@ -76,8 +81,8 @@ def _bay_light(w, hole, depth):
     p.box("Kit_GlowNeutral", (-0.11, a0 + 0.012, v1 - 0.026), (-0.065, a1 - 0.012, v1 - 0.022), panel=False)
     d = Vector((-0.45, 0.0, -0.89)).normalized()
     w.p.socket("Light_Bay_0", (-0.0875, (u0 + u1) / 2, v1 - 0.03), x=tuple(d), z=(0, 1, 0), type="rect", role="neutral",
-               cd=round(1.6 * (a1 - a0), 3), width_cm=round((a1 - a0 - 0.024) * 100, 1), height_cm=4.0, radius_m=1.0,
-               dir_ue=[round(d.x, 4), round(-d.y, 4), round(d.z, 4)], megalights_shadow=False)
+               cd=round(1.6 * (a1 - a0), 3), width_cm=round((a1 - a0 - 0.024) * 100, 1), height_cm=4.0, radius_m=0.55,
+               dir_ue=[round(d.x, 4), round(-d.y, 4), round(d.z, 4)], megalights_shadow=False, interior_only=True)
 
 
 def _screen(p, x, u0, u1, v0, v1, region):
@@ -108,9 +113,9 @@ def _jamb_lights(w, hole):
     # (a 4 cm housing and a 2.6 cm diffuser read as "thin burnt lines, an artefact" - critic r3)
     for (a0, a1, g0, g1) in ((u0, u0 + 0.016, u0 + 0.016, u0 + 0.019), (u1 - 0.016, u1, u1 - 0.019, u1 - 0.016)):
         p.box("Kit_Primary", (-0.115, a0, v0 + 0.11), (-0.05, a1, v1 - 0.07), bevel=0.003, segments=1, panel=False)
-        # warm, with the fixtures' dark bezel (kit_geo BEZEL_ROLES): the neutral white burnt out to a flat white
-        # board (critic r2)
-        p.box("Kit_GlowWarm", (-0.102, g0, v0 + 0.13), (-0.063, g1, v1 - 0.09), panel=False)
+        # the dim warm glow with the fixtures' dark bezel (kit_geo BEZEL_ROLES): neutral white and then the walls'
+        # warm strip emission burnt out to flat white bars (critic r2, author 29. 9. 2026)
+        p.box("Kit_GlowDim", (-0.102, g0, v0 + 0.13), (-0.063, g1, v1 - 0.09), panel=False)
 
 
 def _sill_hazard(p, hole):
@@ -302,14 +307,14 @@ def cooler(w, rng):
         p.box("Kit_Structure", (cx0 + 0.02, yy - 0.03, v0), (cx1 - 0.01, yy + 0.03, cz0), bevel=0.003, segments=1, panel=False)
         _clamp_foot(p, cx1, yy, v0, cz0 + 0.045)
     p.box("Kit_Accent", (cx0, cy0, cz0), (cx1, cy1, cz1), bevel=0.025, segments=3)
-    # the core: a dark back plate, bright fins 3 mm thick every 13 mm standing 5 cm off it, a frame and a cross bar
+    # the core: a dark back plate, bright fins 3 mm thick every 14 mm standing 5 cm off it, a frame and a cross bar
     fy0, fy1, fz0, fz1 = cy0 + 0.035, cy1 - 0.035, cz0 + 0.07, 0.56
     cf = cx1 + 0.06
     p.box("Kit_Primary", (cx1 - 0.005, fy0, fz0), (cx1 + 0.004, fy1, fz1), panel=False)
     for (a0, a1, c0, c1) in ((fy0 - 0.018, fy0, fz0 - 0.018, fz1 + 0.018), (fy1, fy1 + 0.018, fz0 - 0.018, fz1 + 0.018),
                              (fy0, fy1, fz0 - 0.018, fz0), (fy0, fy1, fz1, fz1 + 0.018)):
         p.box("Kit_Structure", (cx1 - 0.005, a0, c0), (cf, a1, c1), bevel=0.003, segments=1, panel=False)
-    nf = int((fy1 - fy0) / 0.013)
+    nf = int((fy1 - fy0) / 0.014)
     for k in range(nf):
         yy = fy0 + (k + 0.5) * (fy1 - fy0) / nf
         p.box("Kit_Structure", (cx1 + 0.004, yy - 0.0015, fz0), (cf - 0.004, yy + 0.0015, fz1), panel=False)
@@ -326,11 +331,11 @@ def cooler(w, rng):
     for k, yy in enumerate((ym - 0.035, ym + 0.035)):
         zz = fz0 - 0.042
         xe = cx1 + 0.07
-        p.tube("Kit_Structure", (cx1, yy, zz), (cx1 + 0.03, yy, zz), 0.014, 12)
-        p.tube("Kit_Signal" if k == 0 else "Kit_Accent", (cx1 + 0.018, yy, zz), (cx1 + 0.03, yy, zz), 0.017, 12)
-        p.tube("Kit_Rubber", (cx1 + 0.03, yy, zz), (xe, yy, zz), 0.013, 10, caps=False)
-        p.tube("Kit_Rubber", (xe, yy, zz + 0.013), (xe, yy, v0 + 0.012), 0.013, 10, caps=False)
-        p.tube("Kit_Structure", (xe, yy, v0), (xe, yy, v0 + 0.018), 0.02, 12)
+        p.tube("Kit_Structure", (cx1, yy, zz), (cx1 + 0.03, yy, zz), 0.014, 8)
+        p.tube("Kit_Signal" if k == 0 else "Kit_Accent", (cx1 + 0.018, yy, zz), (cx1 + 0.03, yy, zz), 0.017, 8)
+        p.tube("Kit_Rubber", (cx1 + 0.03, yy, zz), (xe, yy, zz), 0.013, 8, caps=False)
+        p.tube("Kit_Rubber", (xe, yy, zz + 0.013), (xe, yy, v0 + 0.012), 0.013, 8, caps=False)
+        p.tube("Kit_Structure", (xe, yy, v0), (xe, yy, v0 + 0.018), 0.02, 8)
         p.box("Kit_Signal", (xe - 0.004, yy - 0.004, v0 + 0.006), (xe + 0.05, yy + 0.004, v0 + 0.014), bevel=0.002, segments=1, panel=False)
     # the cradle clamps on the top front edge
     for yy in (cy0 + 0.06, cy1 - 0.06):
@@ -419,10 +424,11 @@ def shield_generator(w, rng):
     for uu in (hu0 + 0.055, hu1 - 0.055):
         for vv in (hv0 + 0.055, hv1 - 0.055):
             a = w.world(w.VERT, uu, vv, HF)
-            p.tube("Kit_Plastic", a, a + Vector((0.005, 0, 0)), 0.034, 16)
-            p.tube("Kit_Structure", a, a + Vector((0.014, 0, 0)), 0.027, 16)
-            p.box("Kit_Seal", (a.x + 0.013, a.y - 0.02, a.z - 0.0035), (a.x + 0.0145, a.y + 0.02, a.z + 0.0035), panel=False)
-            p.box("Kit_Signal", (a.x + 0.004, a.y - 0.005, a.z + 0.029), (a.x + 0.008, a.y + 0.005, a.z + 0.042), panel=False)
+            # (disc latches with a slot read as screws - verification round; a wing to turn by hand does not)
+            p.tube("Kit_Seal", a + Vector((-0.002, 0, 0)), a + Vector((0.003, 0, 0)), 0.036, 16)
+            p.tube("Kit_Structure", a, a + Vector((0.009, 0, 0)), 0.026, 16)
+            p.box("Kit_Signal", (a.x + 0.009, a.y - 0.03, a.z - 0.007), (a.x + 0.024, a.y + 0.03, a.z + 0.007), bevel=0.003, segments=1, panel=False)
+            p.box("Kit_Signal", (a.x + 0.003, a.y - 0.004, a.z + 0.03), (a.x + 0.007, a.y + 0.004, a.z + 0.042), panel=False)
     for vv in (hv0 + 0.16, hv1 - 0.16):
         a = w.world(w.VERT, hu0 + 0.012, vv, 0.012)
         p.tube("Kit_Structure", a - Vector((0, 0, 0.05)), a + Vector((0, 0, 0.05)), 0.011, 12)
@@ -433,11 +439,15 @@ def shield_generator(w, rng):
            0.003, trim="vent_slots", panel=False)
     _screen(p, HF, wu1 + 0.07, wu1 + 0.17, 0.7, 0.8, "shield")
     _plate_above(w, "plate_shield", u0 + 0.2, hole)
-    w.label("st_inspect", w.VERT, (hu0 + hu1) / 2, hv0 + 0.24, 1.1)
+    # on a dark plate of its own (verification round: grey text on the bare metal did not read)
+    ic = (hu0 + hu1) / 2
+    p.slab("Kit_Plastic", w.VERT, ic - 0.12, ic + 0.12, hv0 + 0.215, hv0 + 0.265, 0.004, 0.0015, proud=HF + 0.003, panel=False)
+    p.decal("st_inspect", w.world(w.VERT, ic, hv0 + 0.24, HF + 0.04), w.world(w.VERT, ic, hv0 + 0.24, HF - 0.01), scale=1.1,
+            frame_xy=[[0, 1, 0], [0, 0, 1]], label=True)
     # the emitter's light behind the window: it lights the generator's face and the window's frame (critic r1: "a
     # painted ring that lights nothing")
     p.socket("Light_Emitter_0", (gx1 + 0.05, L / 2, ec.z), x=(1, 0, 0), z=(0, 0, 1), type="point", role="cool", cd=0.25,
-             radius_m=0.6, megalights_shadow=False)
+             radius_m=0.35, megalights_shadow=False, interior_only=True)
     # dirt along the hatch's bottom edge
     w.grime("soot", w.VERT, L / 2, hv0 + 0.05, (0, -1), (hu1 - hu0 - 0.1, 0.1), 0.6)
     p.socket("Component", ((gx0 + gx1) / 2, L / 2, v0), x=(1, 0, 0), z=(0, 0, 1), slot="shield_generator", size=1)

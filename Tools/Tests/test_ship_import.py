@@ -109,6 +109,18 @@ def main():
             if mi and "emissive_strength" in spec:
                 got = MEL.get_material_instance_scalar_parameter_value(mi, "EmissiveStrength")
                 check("%s glows" % name, abs(got - spec["emissive_strength"]) < 1e-3 and got > 1.0, "%.1f" % got)
+        # the markings' flips as the setup writes them: build_decal_instances sets DecalFlipU/V only when the setup has
+        # them, so an instance could keep an older flip the setup no longer states - the text read right until the
+        # instance was made anew and then backwards (REACTOR / COOLER, 28. 9. 2026; test_decal_orientation.py checks the
+        # setup itself)
+        for d in setup.get("decals") or []:
+            mi = unreal.EditorAssetLibrary.load_asset("%s/MI_Ship_%s_Decal_%s" % (folder, plan["ship"], d["name"]))
+            if mi is None:
+                continue
+            got = [MEL.get_material_instance_scalar_parameter_value(mi, p) for p in ("DecalFlipU", "DecalFlipV")]
+            want = [float(d.get("flip_u", 0.0)), float(d.get("flip_v", 0.0))]
+            check("decal %s flips as the setup says (U %.0f, V %.0f)" % (d["name"], want[0], want[1]),
+                  all(abs(a - b) < 1e-3 for a, b in zip(got, want)), "instance U %.0f, V %.0f" % tuple(got))
         glass = unreal.EditorAssetLibrary.load_asset("/Game/Ships/Shared/Materials/M_Ship_Glass")
         check("M_Ship_Glass is translucent", glass is not None and glass.get_editor_property("blend_mode") == unreal.BlendMode.BLEND_TRANSLUCENT)
         # the canopy reflects by where the camera is (26. 9. 2026): MPC_ShipView.InsideView blends outside / inside

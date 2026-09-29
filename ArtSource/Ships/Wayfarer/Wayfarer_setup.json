@@ -1553,6 +1553,7 @@
   },
   {
    "name": "HazardRamp",
+   "symmetric": true,
    "texture": "D_Big_Hazard_Ramp",
    "location": [
     -1060.0,
@@ -1578,6 +1579,7 @@
   },
   {
    "name": "Int_Sec02",
+   "flip_u": 1.0,
    "texture": "D_Int_Section_02",
    "location": [
     -715.0,
@@ -1603,6 +1605,7 @@
   },
   {
    "name": "Int_Sec03",
+   "flip_u": 1.0,
    "texture": "D_Int_Section_03",
    "location": [
     -535.0,
@@ -1628,6 +1631,7 @@
   },
   {
    "name": "Int_Sec04",
+   "flip_u": 1.0,
    "texture": "D_Int_Section_04",
    "location": [
     -355.0,
@@ -1731,6 +1735,7 @@
   },
   {
    "name": "Int_RampHazard",
+   "symmetric": true,
    "texture": "D_Big_Hazard_Ramp",
    "location": [
     -900.0,
@@ -1941,6 +1946,7 @@
   },
   {
    "name": "Int_Fire",
+   "flip_u": 1.0,
    "texture": "D_Int_Fire",
    "location": [
     -230.0,

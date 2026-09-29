@@ -28,13 +28,13 @@ SEAM_ROLES = ()
 SEAM_W, SEAM_MIN, SEAM_OCC = 0.04, 0.15, 0.2
 # a fixture's diffuser gets a dark bezel inside its outline, a little proud (author 28. 9. 2026: "give the fixtures a
 # frame"); inside the outline, so it cannot run into the recess a diffuser sits in
-BEZEL_ROLES = ("Kit_GlowWarm",)
+BEZEL_ROLES = ("Kit_GlowWarm", "Kit_GlowDim")
 BEZEL_W, BEZEL_PROUD = 0.006, 0.0015
 RULES = json.load(open(os.path.join(ROOT, "ArtSource", "Kit", "kit_rules.json"), encoding="utf-8"))
 TRIM = json.load(open(os.path.join(ROOT, "ArtSource", "Kit", "Textures", "trim_index.json"), encoding="utf-8"))
 
 ROLES = ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber", "Kit_Fabric", "Kit_Plastic", "Kit_Trim",
-         "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_GlowNeutral", "Kit_Screen",
+         "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_GlowNeutral", "Kit_GlowDim", "Kit_Screen",
          "Kit_Glass"]
 
 
@@ -393,6 +393,7 @@ def materials():
         "Kit_GlowCool": ([0.05, 0.05, 0.06], 0.3, 0.0, (pal["Kit_GlowCool"], 8.0)),
         "Kit_GlowSignal": ([0.1, 0.05, 0.02], 0.3, 0.0, (pal["Kit_GlowSignal"], 4.0)),
         "Kit_GlowNeutral": ([0.08, 0.08, 0.08], 0.3, 0.0, (pal["Kit_GlowNeutral"], 4.0)),
+        "Kit_GlowDim": ([0.08, 0.08, 0.08], 0.3, 0.0, (pal["Kit_GlowWarm"], 4.0)),
         "Kit_Screen": ([0.01, 0.01, 0.015], 0.2, 0.0, ([0.35, 0.6, 1.0], 3.0)),
         "Kit_Glass": ([0.02, 0.03, 0.035], 0.05, 0.0, None),
         "Kit_Decal": ([0.2, 0.2, 0.2], 0.5, 0.0, None),

@@ -148,4 +148,8 @@ private:
 	/** Seconds spent holding pictures back while shaders and assets were still compiling (uncooked runs). */
 	float CompileWait = 0.f;
 	float CompileLogTimer = 0.f;
+	/** GPU and frame time summed over the second half of a shot's settle, logged with the picture (SHOTS perf). */
+	double PerfGpuMs = 0.0;
+	double PerfFrameMs = 0.0;
+	int32 PerfFrames = 0;
 };

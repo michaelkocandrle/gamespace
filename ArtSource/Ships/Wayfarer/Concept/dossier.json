@@ -131,6 +131,7 @@
   ]
  },
  "questions": [
-  "Nákladový prostor: dveře do technické chodby ústí do uličky jen z 0,35 m, zbytek proti konci nákladové mřížky. Návrh: při stavbě s tenkým obložením ulička 0,5–2,05 m a mřížka o 0,3 m dozadu (x 2,6–7,6), aby před dveřmi bylo 0,6 m volné plochy. Souhlasíš?"
+  "Nákladový prostor: dveře do technické chodby ústí do uličky jen z 0,35 m, zbytek míří na konec nákladové mřížky 0,3 m před přepážkou (plná mřížka zúží průchod na 0,3 m). Návrh (půdorys Docs/Kit/hold_grid_plan_wayfarer.png): při stavbě s tenkým obložením ulička 0,5–2,05 m a mřížka o 0,3 m k rampě (x 2,6–7,6) – před dveřmi 0,6 m volné podlahy přes celou šířku dveří, poklop kvantového pohonu (x 1,4–2,6) zůstává volný. Souhlasíš?",
+  "Zapnout chodbu z kitu jako výchozí? Cíle výkonu splněny (15,81 / 19,49 ms), srovnání 4 pohledů v Docs/Reviews/2026-09-28_kit_bays/compare_current_kit_sc_after_fixes.jpg."
  ]
 }

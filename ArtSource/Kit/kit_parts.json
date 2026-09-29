@@ -710,7 +710,7 @@
     "B": "cooler bay: an exhaust grille over a finned core, a duct stub towards the wing root, COOLER S1 label",
     "C": "shield generator bay: a hatch with quarter-turn latches over a boxed generator, SHIELD GEN S1 label"
    },
-   "status": "built W 12A / 06B / 12C (batch 4, 28. 9. 2026): the power plant shown whole with the bay door open (SC reference ComponentBays_VideoNotes.md), the cooler's finned core and exhaust duct, the shield generator's hatch with an inspection window; plates REACTOR / COOLER / SHIELD GEN S1 and HIGH VOLTAGE in the decal library; in the Wayfarer's technical corridor and the showroom annex",
+   "status": "built W 12A / 06B / 12C (batch 4, 28. 9. 2026): the power plant shown whole with the bay door open (SC reference ComponentBays_VideoNotes.md), the cooler's finned core and exhaust duct, the shield generator's hatch with an inspection window; plates REACTOR / COOLER / SHIELD GEN S1 and HIGH VOLTAGE in the decal library; in the Wayfarer's technical corridor and the showroom annex; 29. 9.: dim jamb and back-wall strips (Kit_GlowDim), latch wings, the INSPECT plate, bay lights 0.55 m and interior-only",
    "pilot_needs": "the Wayfarer's technical corridor has its S1 components in the walls (layout objects): the pilot stands in generic grille and hatch walls ('VENT - KEEP CLEAR'), and the components lost their identity. Depth: the wall structure (0.2 m) plus the hull margin, ~0.5 m in the Wayfarer's corridor (hull_fit_wayfarer_kit_rooms.png). Wayfarer pilot corridor 28. 9. 2026 (Docs/Reviews/2026-09-28_wayfarer_kit_corridor.md)"
   },
   "Wall_HullLiner": {

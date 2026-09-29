@@ -22,6 +22,7 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "AssetCompilingManager.h"
+#include "RHI.h"
 #include "ShaderCompiler.h"
 #include "SpaceshipPawn.h"
 #include "UnrealClient.h"
@@ -502,8 +503,18 @@ void USpaceShotRunner::Tick(float DeltaTime)
 	if (Timer == 0.f)
 	{
 		ApplyShot(Shots[ShotIndex], *Ship);
+		PerfGpuMs = PerfFrameMs = 0.0;
+		PerfFrames = 0;
 	}
 	Timer += DeltaTime;
+	// Frame and GPU time over the second half of the settle, for repeated measurements without reading stat unit off
+	// the pictures (author 29. 9. 2026: "measure the default game several times")
+	if (Timer >= 0.5f * Shots[ShotIndex].Settle)
+	{
+		PerfGpuMs += FPlatformTime::ToMilliseconds(RHIGetGPUFrameCycles(0));
+		PerfFrameMs += 1000.0 * DeltaTime;
+		++PerfFrames;
+	}
 	// Keep held inputs alive while it settles (boost and the afterburner are "held" states).
 	Ship->SetBoostHeld(Shots[ShotIndex].bBoost);
 	Ship->SetAfterburnerHeld(Shots[ShotIndex].bAfterburner);
@@ -528,6 +539,11 @@ void USpaceShotRunner::Tick(float DeltaTime)
 			return;
 		}
 		PendingFile = FPaths::Combine(OutputDirectory, FString::Printf(TEXT("%02d_%s.png"), ShotIndex, *Shots[ShotIndex].Name));
+		if (PerfFrames > 0)
+		{
+			UE_LOG(LogSpaceShots, Display, TEXT("SHOTS perf %s gpu_ms=%.2f frame_ms=%.2f frames=%d"), *Shots[ShotIndex].Name,
+				PerfGpuMs / PerfFrames, PerfFrameMs / PerfFrames, PerfFrames);
+		}
 		FScreenshotRequest::RequestScreenshot(PendingFile, true, false);
 		bWaitingForFile = true;
 		Timer = 0.f;

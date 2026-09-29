@@ -311,6 +311,9 @@ def build_materials():
         "Kit_GlowSignal": plain([0.08, 0.04, 0.02], 0.3, emit=pal["Kit_GlowSignal"], strength=4.0),
         # the stair nosings: a quiet neutral white (GlowCool made "blue treads", critic r2; author 27. 9. 2026)
         "Kit_GlowNeutral": plain([0.06, 0.06, 0.06], 0.3, emit=pal["Kit_GlowNeutral"], strength=1.5),
+        # small fixtures seen from arm's length (the component bays' jamb strips and back-wall light): the warm glow at
+        # a third - at the walls' 1.1 they burnt out to white bars (author, critic, 29. 9. 2026)
+        "Kit_GlowDim": plain([0.06, 0.06, 0.06], 0.3, emit=pal["Kit_GlowWarm"], strength=0.35),
         # opacity 0.2: at 0.4 the dark glass swallowed a lit shutter behind it (the end wall's window read black)
         "Kit_Glass": {"master": "glass", "base_color": [0.02, 0.03, 0.035], "opacity": 0.2, "roughness": 0.05},
     }

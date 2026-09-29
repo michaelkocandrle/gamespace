@@ -1016,6 +1016,17 @@ snímku.
   `build_decal_instances` ho nastaví jen, když ho položka setupu má. Staré instance měly převrácení uložené z dřívějška;
   po smazání a obnovení (nápisy technické chodby Wayfareru, `legacy_room`) vznikly s výchozí 0 a text byl zrcadlený.
   Položka setupu musí mít `flip_u` / `flip_v` vždy výslovně. Test geometrie to nechytí (hlídá jen mesh decaly).
+  Hlídá `Tools/Tests/test_decal_orientation.py` (osa X nápisu k divákovi a právě jedno převrácení; symetrické pruhy
+  `"symmetric": true`) a `test_ship_import.py` (instance mají převrácení jako setup). Test našel další čtyři nápisy,
+  které četly správně jen díky starým instancím (sekce 02–04, FIRE SUPPRESSION).
+- dz) **V letovém osvětlení stojí každé světlo kitu plnou cenu.** Bez MegaLights se neosvětlená obdélníková světla
+  platí plochou na obrazovce; chodba z kitu byla v letu o 1 ms dražší než stará (20,35 proti 19,15 ms). Světla, která
+  v letu nejsou potřeba (výklenky, prosvětlení stěn, kanál v podlaze), nesou tag `InteriorOnly` (`kit_rooms.py`,
+  `INTERIOR_ONLY_SOCKETS` nebo parametr socketu `interior_only`) a pawn je zapne jen v režimu interiéru (19,49 ms).
+- ea) **Opakovaná měření výkonu bez čtení snímků.** Snímkovač zapisuje `SHOTS perf <jméno> gpu_ms=.. frame_ms=..`
+  (průměr druhé poloviny ustálení); preset `wayfarer_perf.json` měří 3× interiér a 3× let, `python
+  Tools/Shots/perf_log.py <log…>` spojí běhy a vypíše průměr a rozptyl. Rozptyl mezi běhy 0,2–0,8 ms, proto se cíl
+  dokládá aspoň 3 běhy.
 - ds) **Stínovaná obdélníková světla bez MegaLights jsou drahá.** Dvě stínovaná světla kitu v chodbě bez MegaLights
   (osvětlení jako v letu): stínové mapy 7,3 ms a světla 5,5 ms (26 ms celkem). V lodi mají stín jen v režimu interiéru
   (MegaLights je trasuje), v letu ne; počet světel pod MegaLights cenu skoro nemění (8 i 12 světel: 3,5 ms).

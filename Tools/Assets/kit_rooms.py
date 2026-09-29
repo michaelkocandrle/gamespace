@@ -44,6 +44,10 @@ KIT_LIGHT_SCALE, LIGHT_COLOURS = _import_kit_constants()
 # the showroom's x2.0 makes up for the ray-traced shadows it lights with; unshadowed in a ship (see _light) the same
 # lights took the Wayfarer's corridor to a mean of 0.32 (SC 0.13-0.23): x1.1 there (28. 9. 2026)
 SHIP_LIGHT_SCALE = 1.1
+INTERIOR_ONLY_TAG = "InteriorOnly"        # SpaceshipPawn: on only under the interior lighting
+# under the flight lighting (no MegaLights, every light paid in full) the kit corridor kept 1 ms over the old one:
+# the walls' wash and the floor channel light only when walked (author: flight lighting under 20 ms, 29. 9. 2026)
+INTERIOR_ONLY_SOCKETS = ("SOCKET_Light_Wash", "SOCKET_Light_Channel")
 # the author's light plan for a ship's kit room (28. 9. 2026): only the main lights cast shadows (the ceiling trays'
 # linear lights: the dominant sources), the rest none but contact shadows. The walls' wash lights at half strength:
 # without them the walls under the slope went black (0.08), at full strength the corridor was flat and over the SC
@@ -208,6 +212,10 @@ def build_ship(ship, recipe, report):
                 lc.set_editor_property("specular_scale", 0.2)
             lc.set_editor_property("relative_location", at)
             lc.set_editor_property("relative_rotation", rot)
+            # a light only for the walked interior (MegaLights): the pawn keeps it off under the flight lighting, where
+            # every unshadowed light is paid in full (the component bays' lights, 29. 9. 2026)
+            if prm.get("interior_only") or sname.startswith(INTERIOR_ONLY_SOCKETS):
+                lc.set_editor_property("component_tags", [unreal.Name(INTERIOR_ONLY_TAG)])
             n_lights += 1
     unreal.BlueprintEditorLibrary.compile_blueprint(bp)
     unreal.EditorAssetLibrary.save_loaded_asset(bp, only_if_is_dirty=False)

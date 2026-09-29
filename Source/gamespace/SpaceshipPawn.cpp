@@ -467,6 +467,10 @@ void ASpaceshipPawn::UpdateViewCollection()
 				{
 					ShadowedFixtureLights.Add(Light);
 				}
+				if (Light->ComponentHasTag(TEXT("InteriorOnly")))
+				{
+					InteriorOnlyLights.Add(Light);
+				}
 			}
 		}
 		TArray<UStaticMeshComponent*> Meshes;
@@ -513,6 +517,7 @@ void ASpaceshipPawn::UpdateViewCollection()
 	if (ShadowState != InteriorShadowState)
 	{
 		InteriorShadowState = ShadowState;
+		bFixtureLightsDirty = true;       // the interior-only lights follow the lighting mode
 		for (UStaticMeshComponent* Mesh : InteriorShadowMeshes)
 		{
 			if (Mesh)
@@ -536,7 +541,7 @@ void ASpaceshipPawn::UpdateViewCollection()
 		{
 			if (Light)
 			{
-				Light->SetVisibility(bWantFixtures);
+				Light->SetVisibility(bWantFixtures && (ShadowState == 1 || !InteriorOnlyLights.Contains(Light)));
 			}
 		}
 	}
