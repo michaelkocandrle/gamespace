@@ -8425,7 +8425,7 @@
     382.0,
     6.5
    ],
-   "tris": 1124,
+   "tris": 1076,
    "tris_decals": 1084,
    "tri_budget": 1800,
    "materials": [
@@ -8470,7 +8470,7 @@
     "domain": "CORNER",
     "edge": 576,
     "secondary": 192,
-    "floor": 1392,
+    "floor": 1328,
     "seam": 0
    },
    "status": "built",
@@ -8488,16 +8488,16 @@
    "batch": 6,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Furniture_Bunk21L_A.fbx",
    "dims_m": [
-    0.858,
+    0.878,
     2.1,
     1.72
    ],
    "expected_size_cm": [
-    85.8,
+    87.8,
     210.0,
     172.0
    ],
-   "tris": 2904,
+   "tris": 11294,
    "tris_decals": 104,
    "tri_budget": 15000,
    "materials": [
@@ -8510,7 +8510,6 @@
     "Kit_GlowWarm",
     "Kit_GlowCool",
     "Kit_GlowSignal",
-    "Kit_GlowDim",
     "Kit_Cushion",
     "Kit_DecalPaint",
     "Kit_DecalGrime"
@@ -8518,35 +8517,71 @@
    "sockets": {
     "SOCKET_Light_Berth_0": {
      "location_ue_cm": [
-      30.0,
-      -0.0,
-      120.0
+      24.0,
+      57.5,
+      124.0
      ],
      "params": {
-      "type": "point",
+      "type": "rect",
       "role": "warm",
-      "cd": 2.0,
+      "cd": 0.9,
       "radius_m": 1.4,
-      "source_radius_cm": 20.0
+      "width_cm": 62.6,
+      "height_cm": 6.0,
+      "dir_ue": [
+       0.0,
+       0.0,
+       -1.0
+      ],
+      "along_ue": [
+       0.0,
+       -1.0,
+       0.0
+      ]
+     }
+    },
+    "SOCKET_Light_Berth_1": {
+     "location_ue_cm": [
+      24.0,
+      -57.5,
+      124.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "warm",
+      "cd": 0.9,
+      "radius_m": 1.4,
+      "width_cm": 62.6,
+      "height_cm": 6.0,
+      "dir_ue": [
+       0.0,
+       0.0,
+       -1.0
+      ],
+      "along_ue": [
+       0.0,
+       -1.0,
+       0.0
+      ]
      }
     },
     "SOCKET_Light_Reading_0": {
      "location_ue_cm": [
-      22.0,
-      95.0,
-      110.0
+      25.62,
+      90.87,
+      107.65
      ],
      "params": {
       "type": "spot",
       "role": "warm",
-      "cd": 25.0,
-      "cone_deg": 60.0,
+      "cd": 15.0,
+      "cone_deg": 75.0,
       "radius_m": 1.8,
-      "source_radius_cm": 2.0,
+      "source_radius_cm": 2.5,
       "dir_ue": [
-       0.24806948006153107,
-       -0.6201736927032471,
-       -0.7442084550857544
+       0.11217404156923294,
+       -0.20565243065357208,
+       -0.9721749424934387
       ]
      }
     }
@@ -8562,9 +8597,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 4284,
+    "edge": 4056,
     "secondary": 0,
-    "floor": 1064,
+    "floor": 1736,
     "seam": 0
    },
    "status": "built",
@@ -8591,13 +8626,15 @@
     95.0,
     180.0
    ],
-   "tris": 1666,
-   "tris_decals": 44,
+   "tris": 3462,
+   "tris_decals": 46,
    "tri_budget": 15000,
    "materials": [
     "Kit_Primary",
     "Kit_Structure",
+    "Kit_Accent",
     "Kit_Signal",
+    "Kit_Rubber",
     "Kit_Plastic",
     "Kit_Seal",
     "Kit_GlowCool",
@@ -8606,10 +8643,32 @@
     "Kit_DecalPaint",
     "Kit_DecalGrime"
    ],
-   "sockets": {},
+   "sockets": {
+    "SOCKET_Light_Suit_0": {
+     "location_ue_cm": [
+      46.0,
+      17.5,
+      174.0
+     ],
+     "params": {
+      "type": "spot",
+      "role": "warm",
+      "cd": 3.0,
+      "cone_deg": 70.0,
+      "radius_m": 1.0,
+      "source_radius_cm": 3.0,
+      "dir_ue": [
+       -0.3786328136920929,
+       -0.0,
+       -0.9255470037460327
+      ]
+     }
+    }
+   },
    "collision_hulls": 1,
-   "decals": 2,
+   "decals": 3,
    "decal_items": [
+    "ck_lock",
     "st_inspect",
     "grime_soot"
    ],
@@ -8618,9 +8677,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 1716,
-    "secondary": 704,
-    "floor": 676,
+    "edge": 3204,
+    "secondary": 896,
+    "floor": 1012,
     "seam": 0
    },
    "status": "built",
@@ -8638,21 +8697,22 @@
    "batch": 6,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Furniture_Hygiene15L_A.fbx",
    "dims_m": [
-    1.023,
-    1.46,
+    1.061,
+    1.465,
     2.31
    ],
    "expected_size_cm": [
-    102.3,
-    146.0,
+    106.1,
+    146.5,
     231.0
    ],
-   "tris": 1534,
-   "tris_decals": 24,
+   "tris": 2414,
+   "tris_decals": 28,
    "tri_budget": 15000,
    "materials": [
     "Kit_Primary",
     "Kit_Structure",
+    "Kit_Signal",
     "Kit_Rubber",
     "Kit_Plastic",
     "Kit_Trim",
@@ -8664,19 +8724,21 @@
    ],
    "sockets": {},
    "collision_hulls": 1,
-   "decals": 2,
+   "decals": 3,
    "decal_items": [
+    "st_service",
     "st_vent",
     "grime_soot"
    ],
    "service_labels": [
+    "st_service",
     "st_vent"
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 1836,
-    "secondary": 160,
-    "floor": 488,
+    "edge": 2916,
+    "secondary": 768,
+    "floor": 708,
     "seam": 0
    },
    "status": "built",
@@ -8694,54 +8756,78 @@
    "batch": 6,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Furniture_Food16L_A.fbx",
    "dims_m": [
-    0.606,
+    0.683,
     1.6,
     1.65
    ],
    "expected_size_cm": [
-    60.6,
+    68.3,
     160.0,
     165.0
    ],
-   "tris": 2716,
-   "tris_decals": 0,
+   "tris": 5008,
+   "tris_decals": 40,
    "tri_budget": 15000,
    "materials": [
     "Kit_Primary",
     "Kit_Structure",
     "Kit_Accent",
+    "Kit_Signal",
+    "Kit_Rubber",
     "Kit_Plastic",
     "Kit_Seal",
     "Kit_GlowCool",
-    "Kit_GlowNeutral",
+    "Kit_GlowDim",
     "Kit_Screen",
-    "Kit_Cushion"
+    "Kit_Cushion",
+    "Kit_DecalPaint",
+    "Kit_DecalGrime"
    ],
    "sockets": {
     "SOCKET_Light_Bay_0": {
      "location_ue_cm": [
-      35.0,
+      28.0,
       -34.0,
-      147.0
+      145.5
      ],
      "params": {
       "type": "point",
-      "role": "neutral",
-      "cd": 1.5,
-      "radius_m": 0.8,
+      "role": "warm",
+      "cd": 0.6,
+      "radius_m": 0.6,
       "source_radius_cm": 3.0
+     }
+    },
+    "SOCKET_Light_Seat_0": {
+     "location_ue_cm": [
+      38.0,
+      13.0,
+      70.0
+     ],
+     "params": {
+      "type": "point",
+      "role": "warm",
+      "cd": 0.2,
+      "radius_m": 1.1,
+      "source_radius_cm": 10.0
      }
     }
    },
    "collision_hulls": 2,
-   "decals": 0,
-   "decal_items": [],
-   "service_labels": [],
+   "decals": 3,
+   "decal_items": [
+    "st_service",
+    "grime_smear",
+    "grime_streaks"
+   ],
+   "service_labels": [
+    "st_service"
+   ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 3600,
-    "secondary": 640,
-    "floor": 392,
+    "edge": 4188,
+    "secondary": 1056,
+    "floor": 430,
     "seam": 0
    },
    "status": "built",

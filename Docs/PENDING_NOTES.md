@@ -72,6 +72,27 @@ zmizí.
   zkosení (0,27–0,34 m od líce, od 1,99 m) a nosníky stropních rozvodů (od 2,09 m).
 - **Polštář opřený o lisovaný panel „plave“** (geometrický test, 30. 9. 2026). Střed lisovaného panelu je 6 mm
   zapuštěný a zaoblené hrany polštáře mezeru zvětší nad toleranci 6 mm. Řešení: polštář 7 mm do panelu.
+- **Kování na hlubokém lisovaném poli plave** (geometrický test „floating“, 30. 9. 2026). LED na okraji dvířek stála
+  1 cm nad plochou. Příčina: `kit_geo.box(inset=(okraj, hloubka))` je jeden `inset_region` s hloubkou, takže celý
+  okraj je šikmina: při 12 mm na 3,5 cm už není kde kování postavit. Řešení: trojice `inset=(okraj, hloubka, schod)`
+  dá plochý rám, strmý schod a rovné pole (`kit_furniture.DEEP = (0.035, 0.012, 0.006)`). Kování patří na rám nebo
+  na dno pole (`x - hloubka`), ne přes hranu.
+- **Čalounění z boxů s bevelem vypadá jako vinyl, i s normálou tkaniny** (kritik nábytku, kola 1–3, 30. 9. 2026).
+  Švy jako tmavé proužky na rovné ploše působí nakresleně. Řešení: polštář jako výšková plocha se sdílenými vrcholy
+  (`kit_geo.Part.mesh`, `kit_furniture.pad`): zaoblený okraj, vyboulené pole mezi švy, šev jako prohlubeň, důlek
+  s knoflíkem na křížení. `Part.quads` dělá každou plochu zvlášť, takže by byla hranatá. Matrace 2,1 m stojí
+  ~7,5 tis. trojúhelníků.
+- **Normála tkaniny na čalounění**: `python Tools/Kit/kit_fabric_normal.py` zapíše
+  `ArtSource/Kit/Textures/T_Kit_Fabric_N.png`, `import_kit.py` ji nastaví jako `DetailNormalMap` na
+  `MI_Kit_Halcyon_Cushion` (`DetailTileCm` 2). Ze vzdálenosti ji nevidíš, tvar polštáře rozhoduje víc.
+- **Karta špíny sedí před plochou** (30. 9. 2026). `Part.grime(at, normal)` hledá povrch paprskem proti normále
+  a položí kartu na první zásah. Když míří na tlačítko nebo rám 1–2 cm před panelem, karta visí ve vzduchu. Řešení:
+  `at` na místo, kde paprsek trefí panel samotný (mezi tlačítka a rám).
+- **Decal na lisovaném poli zmizí** (30. 9. 2026). Pole je 12 mm za čelem dveří. Decal s `max_depth_cm` 1,5 a
+  středem 5 mm před čelem na něj nedosáhne. Řešení: střed decalu na čelo, tj. ≤ 15 mm od dna pole, a pozor na zadní
+  stranu desky (20 mm). Popisek musí sedět celý uvnitř pole nebo celý na rámu.
+- **Kritik: agent `visual-critic` v této instalaci není typ agenta** (30. 9. 2026). Řešení: `general-purpose`
+  s modelem `fable` a promptem „přečti `.claude/agents/visual-critic.md` (text pod YAML), pak brief a listy“.
 
 ## Nástroje
 

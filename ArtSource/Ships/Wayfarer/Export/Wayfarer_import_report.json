@@ -22,9 +22,7 @@
     "SM_Ship_Wayfarer_Decals": [],
     "SM_Ship_Wayfarer_Gear": [],
     "SM_Ship_Wayfarer_Hologram": [],
-    "SM_Ship_Wayfarer_Interior": [
-      "deleted and imported fresh: old material slots ['M_Ship_Wayfarer_Accent', 'M_Ship_Wayfarer_IntDark', 'M_Ship_Wayfarer_IntFloor', 'M_Ship_Wayfarer_IntPanel', 'M_Ship_Wayfarer_IntLight', 'M_Ship_Wayfarer_IntWall', 'M_Ship_Wayfarer_IntTrim', 'M_Ship_Wayfarer_IntGlow', 'M_Ship_Wayfarer_IntConsole', 'M_Ship_Wayfarer_IntAccentGlow', 'M_Ship_Wayfarer_IntFabric', 'M_Ship_Wayfarer_IntLeather', 'M_Ship_Wayfarer_IntLedOrange', 'M_Ship_Wayfarer_IntLedWhite', 'M_Ship_Wayfarer_IntLedBlink', 'M_Ship_Wayfarer_IntScreenBack', 'M_Ship_Wayfarer_IntRed', 'M_Ship_Wayfarer_IntRubber', 'M_Ship_Wayfarer_IntCream', 'M_Ship_Wayfarer_IntFrame']"
-    ],
+    "SM_Ship_Wayfarer_Interior": [],
     "SM_Ship_Wayfarer_InteriorDecals": [],
     "SM_Ship_Wayfarer_InteriorKit": [],
     "SM_Ship_Wayfarer_Screens": []
@@ -127,12 +125,12 @@
       "decal Decal_Int_Quarters = D_Int_Quarters at [15.4, -125.0, 30.0]",
       "decal Decal_Int_CockpitStairs = D_Int_CockpitStairs at [493.6, -120.0, 30.0]",
       "decal Decal_Int_Sec05 = D_Int_Section_05 at [45.0, -187.5, -8.0]",
-      "decal Decal_Int_Sec06 = D_Int_Section_06 at [284.0, -187.5, -8.0]",
-      "decal Decal_Int_LifeSupport = D_Int_LifeSupport at [344.0, -187.5, -8.0]",
+      "decal Decal_Int_Sec06 = D_Int_Section_06 at [474.0, -187.5, -8.0]",
+      "decal Decal_Int_LifeSupport = D_Int_LifeSupport at [405.0, -97.5, -92.0]",
       "decal Decal_Int_StairHazard = D_Big_Hazard_Ramp at [483.0, -3.0, -119.5]",
-      "decal Decal_Int_Suit = D_Int_Suit at [49.5, 123.5, 35.0]",
+      "decal Decal_Int_Suit = D_Int_Suit at [66.5, 123.5, 35.0]",
       "decal Decal_Int_Hygiene = D_Int_Hygiene at [273.0, 79.5, 10.0]",
-      "decal Decal_Int_Galley = D_Int_Galley at [423.0, 134.5, 46.0]",
+      "decal Decal_Int_Galley = D_Int_Galley at [423.0, 135.0, 46.0]",
       "light Light_nav_L (point, 3 cd) at [-524.6, -431.3, 0.1]",
       "light Light_nav_R (point, 3 cd) at [-524.6, 431.3, 0.1]",
       "light Light_flood_L (spot, 150 cd) at [-365.1, -190.7, 141.3]",
@@ -189,8 +187,8 @@
         "cabin"
       ],
       "parts": 53,
-      "lights": 100,
-      "removed": 153
+      "lights": 103,
+      "removed": 156
     }
   },
   "planet": {

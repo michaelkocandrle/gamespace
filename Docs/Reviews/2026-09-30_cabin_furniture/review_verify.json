@@ -1,0 +1,80 @@
+{
+ "date": "2026-09-30",
+ "goal": "Nábytek kajuty malé pracovní lodi jako díly modulárního kitu, z první osoby (oko 1,65 m): lůžko ve výklenku (bočnice, čalouněná matrace ze tří dílů, polštář, deka, opěrky na stěně, dvě police se zábradlím, lampička na čtení s vypínačem, tlumené světlo pod policí), skříň na skafandr a zbraň (okénko do části na skafandr, zámek a oranžová páka u zbraní, šuplík na boty), hygienická buňka (posuvné dveře v rámu, displej obsazenosti, odsávací mřížka, potrubí ventilátoru do stropu) a výdejník jídla a vody (chlazená skříňka, zásuvka na příděly, pult, výdejní box vody s tryskou a mřížkou v krémovém panelu, displej s tlačítky, horní dvířka, pod ním sklopné sedátko). Podlaha kajuty z kitu (ulička s protiskluzovými pruhy, desky se šrouby, lemy u stěn). Hodnotí se nábytek (tvar, hierarchie detailu, materiály, čitelnost účelu), podlaha a jak nábytek sedí do místnosti.",
+ "style": "STYLOVÝ ZÁMĚR (autor): „udržovaná pracovní loď“ – panely téměř čisté, špína jen ve spárách, u soklu a kolem poklopů. NEPOŽADUJ víc špíny. Styl Star Citizen: tmavý teplý grafit, světlejší konstrukce, oranžová signální barva výrobce, svítidla v pouzdrech, teplé světlo architektury, studené UI. Kajuta je obytná: klidnější a tlumenější než nákladový prostor.",
+ "checklist": "interior",
+ "notes": [
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt.",
+  "Stěny (obložení trupu se zkosením a žebry), strop a světla místnosti schválil autor v minulém kroku; hodnoť je jen ve vztahu k nábytku.",
+  "Dveře hygienické buňky jsou zavřené; její vnitřek se nemodeluje.",
+  "Text vpravo nahoře (FPS), pokud je vidět, je měřicí overlay.",
+  "OVĚŘOVACÍ KOLO: posuď jen, zda jsou opravené tyto body z minulého kola; jiné nové výtky uveď jen jako doporučené. (1) Nábytek jako hladké krabice – dveře skříně, výdejníku a šuplík na boty s vnitřním polem zapuštěným 12 mm v plochém rámu, panty, západky, větrací štěrbiny (dveře skafandru, chlazená skříňka, šuplík), boční stěny hygienické buňky rozdělené spárami, se soklovou lištou a servisním poklopem. (2) Čalounění jako hladký vinyl – matrace, opěrky, polštář a sedátko jako měkké plochy s vyboulenými poli, švy jako prohlubně, knoflíky v důlcích, promáčknutý polštář. (3) Přepálená skvrna na polštáři a rovnoměrný pás světla ve výklenku – lampička slabší se širším kuželem, světlo pod policí ve dvou kratších pouzdrech. (4) Krémový panel výdejníku, pult a sedátko – panel ve třech polích se šrouby, otěr kolem tlačítek a pod výdejním boxem, pult vysunutý 10 cm s oblou gumovou hranou, sedátko se zadní deskou, závěsem a oranžovou pojistkou sklopení. (5) Dveře hygienické buňky jako jedna deska – tři pole s mezerami, šrafovaný pruh na hraně posuvu, horní vedení a práh s drážkou, světlo obsazenosti v pouzdru nad dveřmi. (6) Štítky – šablonové nápisy s čitelným druhým řádkem místo světlých štítků, popisky tlačítek výdejníku na spodním okraji displeje. (7) Obsah okénka skříně – skafandr s helmou, tmavým hledím a oranžovým krčním kroužkem pod bodovým světlem. (8) Police – konzoly do zadní desky, přepážky, silnější zábradlí na hranatých sloupcích. (9) Oranžová tyč na konci lůžka – oranžová hrana teď běží po celém profilu bočnice. (11) Podlaha – protiskluzové pruhy z tmavé žebrované gumy. (12) Tmavá plocha u pravého okraje listu 01 – bok buňky se servisním poklopem. (13) Sedátko proti lůžku – stejné čalounění jako lůžko, slabší světlo nad sedátkem."
+ ],
+ "topic": "cabin_furniture",
+ "out": "Docs/Reviews/2026-09-30_cabin_furniture/verify",
+ "pairs": [
+  {
+   "title": "Kajuta, pohled dopředu (lůžko vlevo, hygienická buňka vpravo)",
+   "distance": "far",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021316.png",
+   "ref_label": "SC kajuta s palandovým výklenkem a kuchyňkou",
+   "ours": "Saved/Shots/20260930_203904_wayfarer_cabin_furniture/01_cabin_fwd.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Kajuta, pohled dozadu (buňka a skříň vlevo, lůžko vpravo)",
+   "distance": "far",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC kajuta s palandami a skříňkami",
+   "ours": "Saved/Shots/20260930_203904_wayfarer_cabin_furniture/02_cabin_aft.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Lůžko ve výklenku s policemi",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021316.png",
+   "ref_label": "SC palandový výklenek",
+   "ours": "Saved/Shots/20260930_203904_wayfarer_cabin_furniture/03_berth.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Lampička, vypínač a police lůžka zblízka",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021316.png",
+   "ref_label": "SC palandový výklenek (lampička v rohu)",
+   "ours": "Saved/Shots/20260930_203904_wayfarer_cabin_furniture/04_berth_lamp.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Skříň na skafandr a zbraň",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC skříňky s oranžovými madly",
+   "ours": "Saved/Shots/20260930_203904_wayfarer_cabin_furniture/05_locker.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Hygienická buňka (posuvné dveře, displej, mřížka)",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
+   "ref_label": "SC dveře v přepážce (RSI)",
+   "ours": "Saved/Shots/20260930_203904_wayfarer_cabin_furniture/06_hygiene.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Výdejník jídla a vody se sklopným sedátkem",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021316.png",
+   "ref_label": "SC kuchyňka s výdejníkem (vpravo)",
+   "ours": "Saved/Shots/20260930_203904_wayfarer_cabin_furniture/07_galley.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

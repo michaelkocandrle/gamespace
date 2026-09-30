@@ -2071,7 +2071,7 @@
    "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); port liner over the bunk, the third module's aft half (x 13.09)",
    "texture": "D_Int_Section_06",
    "location": [
-    284.0,
+    474.0,
     -187.5,
     -8.0
    ],
@@ -2096,22 +2096,15 @@
   {
    "name": "Int_LifeSupport",
    "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); port liner over the bunk, the third module's forward half (x 13.69): the plant is under the bunk",
+   "_kit": "30. 9. 2026: on the berth's base beside its intake grille (Furniture_Bunk21L_A), 1.5 cm deep - the cabin's critic, round 2: \"a label on a bare wall\"", "max_depth_cm": 1.5,
    "texture": "D_Int_LifeSupport",
-   "location": [
-    344.0,
-    -187.5,
-    -8.0
-   ],
+   "location": [405.0, -97.5, -92.0],
    "rotation": [
     0.0,
     90.0,
     90.0
    ],
-   "size": [
-    3.0,
-    6.0,
-    12.0
-   ],
+   "size": [1.5, 7.5, 15.0],
    "opacity": 0.9,
    "tint": [
     0.8,
@@ -2154,7 +2147,7 @@
    "_kit": "30. 9. 2026: the suit locker's weapon door (Furniture_Locker10L_A), over its latch; 1.5 cm deep - the doors and panels are 2-3 cm thick",
    "texture": "D_Int_Suit",
    "location": [
-    49.5,
+    66.5,
     123.5,
     35.0
    ],
@@ -2163,11 +2156,7 @@
     -90.0,
     90.0
    ],
-   "size": [
-    1.5,
-    6.0,
-    12.0
-   ],
+   "size": [1.5, 5.0, 10.0],
    "opacity": 0.9,
    "tint": [
     0.8,
@@ -2179,7 +2168,7 @@
   },
   {
    "name": "Int_Hygiene",
-   "_kit": "30. 9. 2026: the hygiene cell's front panel left of its door (Furniture_Hygiene15L_A), under the grille; 1.5 cm deep - the doors and panels are 2-3 cm thick",
+   "_kit": "30. 9. 2026: the hygiene cell's front panel left of its door (Furniture_Hygiene15L_A), under the grille; 20 x 10 cm between the corner post and the door frame (28 cm ran onto the post - round 3); 1.5 cm deep - the doors and panels are 2-3 cm thick",
    "texture": "D_Int_Hygiene",
    "location": [
     273.0,
@@ -2191,11 +2180,7 @@
     -90.0,
     90.0
    ],
-   "size": [
-    1.5,
-    6.0,
-    12.0
-   ],
+   "size": [1.5, 5.0, 10.0],
    "opacity": 0.9,
    "tint": [
     0.8,
@@ -2207,11 +2192,11 @@
   },
   {
    "name": "Int_Galley",
-   "_kit": "30. 9. 2026: the galley unit's left stowage door (Furniture_Food16L_A); 1.5 cm deep - the doors and panels are 2-3 cm thick",
+   "_kit": "30. 9. 2026: the galley unit's left stowage door (Furniture_Food16L_A), in its recessed field (12 mm deep: the centre 12 mm in front of the field - round 3); 1.5 cm deep - the doors and panels are 2-3 cm thick",
    "texture": "D_Int_Galley",
    "location": [
     423.0,
-    134.5,
+    135.0,
     46.0
    ],
    "rotation": [
@@ -2219,11 +2204,7 @@
     -90.0,
     90.0
    ],
-   "size": [
-    1.5,
-    6.0,
-    12.0
-   ],
+   "size": [1.5, 5.0, 10.0],
    "opacity": 0.9,
    "tint": [
     0.8,

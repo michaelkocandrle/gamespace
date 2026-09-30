@@ -61,14 +61,16 @@ def _plate(p, x0, x1, y0, y1, secondary=True, bolts=True):
             p.tube("Kit_Structure", (x, y, 0.0), (x, y, 0.0012), 0.0055, 6)
 
 
-def _lanes(p, x0, x1, y0, y1, pitch=LANE_P, z=0.0):
-    """Anti-slip lanes along the run, 1.5 mm proud of the surface at height z, across y0..y1."""
-    n = max(1, int((y1 - y0 + (pitch - LANE_W)) / pitch))
-    span = n * pitch - (pitch - LANE_W)
+def _lanes(p, x0, x1, y0, y1, pitch=LANE_P, z=0.0, role="Kit_Trim", trim="antislip_tread", w=LANE_W):
+    """Anti-slip lanes along the run, 1.5 mm proud of the surface at height z, across y0..y1 (a trim strip - the tread
+    plate, the ribbed rubber - or plain strips in another role)."""
+    n = max(1, int((y1 - y0 + (pitch - w)) / pitch))
+    span = n * pitch - (pitch - w)
     start = (y0 + y1) / 2 - span / 2
     for k in range(n):
         ya = start + k * pitch
-        p.box("Kit_Trim", (x0 + 0.03, ya, z - 0.001), (x1 - 0.03, ya + LANE_W, z + 0.0015), panel=False, trim="antislip_tread")
+        p.box(role, (x0 + 0.03, ya, z - 0.001), (x1 - 0.03, ya + w, z + 0.0015), panel=False,
+              trim=trim if role == "Kit_Trim" else None)
 
 
 def _floor_grime(p, L, walk, edge, walked=True, walk_seams=True):
@@ -121,7 +123,14 @@ def floor_plate(sec, var, L, name, seed):
     for (y0, y1) in sides:
         _plate(p, 0.0, L, y0, y1, secondary=False)
     if var == "A":
-        _lanes(p, 0.0, L, -walk + 0.03, walk - 0.03)
+        # a hull liner room's walkway (section L, the Wayfarer's cabin): lanes 20 cm apart - at the corridor's 11 cm the
+        # walkway read as one light plate (the cabin's critic, round 1)
+        # ... and in dark rubber (round 2: "the lightest thing on the floor, a zebra crossing"), ribbed across and 6 cm
+        # wide (round 3: "smooth light lanes, no relief" - the plain rubber caught the light like paint)
+        if sec.key.startswith("L"):
+            _lanes(p, 0.0, L, -walk + 0.03, walk - 0.03, pitch=0.2, trim="rubber_ribbed", w=0.06)
+        else:
+            _lanes(p, 0.0, L, -walk + 0.03, walk - 0.03)
     else:
         # a centre line (paint, signal colour) and thin painted lines at the walkway's edges; no hazard hatching along
         # the walls - it read as a threshold at every door (critic r1: hatching only where one steps off)

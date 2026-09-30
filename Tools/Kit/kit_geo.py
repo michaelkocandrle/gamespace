@@ -77,11 +77,18 @@ class Part:
         for v in tmp.verts:
             v.co = Vector((lo.x + (v.co.x + 0.5) * size.x, lo.y + (v.co.y + 0.5) * size.y, lo.z + (v.co.z + 0.5) * size.z))
         if inset:
-            # a pressed panel: the front face (+z) inset by a border and pushed back - one mesh, no butt joints
-            border, depth = inset
+            # a pressed panel: the front face (+z) inset by a border and pushed back - one mesh, no butt joints. With a
+            # third value (border, depth, step): a flat border, then a steep step `step` wide down to the field (a
+            # door's recessed field - the plain inset sloped over the whole border, and fittings on it floated; the
+            # cabin furniture, 30. 9. 2026)
+            border, depth = inset[0], inset[1]
             tmp.faces.ensure_lookup_table()
             front = max(tmp.faces, key=lambda f: f.calc_center_median().z)
-            bmesh.ops.inset_region(tmp, faces=[front], thickness=border, depth=-depth, use_even_offset=True)
+            if len(inset) > 2:
+                bmesh.ops.inset_region(tmp, faces=[front], thickness=border, depth=0.0, use_even_offset=True)
+                bmesh.ops.inset_region(tmp, faces=[front], thickness=inset[2], depth=-depth, use_even_offset=True)
+            else:
+                bmesh.ops.inset_region(tmp, faces=[front], thickness=border, depth=-depth, use_even_offset=True)
         if seam is None:
             seam = (role in SEAM_ROLES and panel and not trim and not atlas and not inset
                     and min(size.x, size.y) >= SEAM_MIN)
@@ -92,7 +99,7 @@ class Part:
             bmesh.ops.inset_region(tmp, faces=[front], thickness=SEAM_W, depth=0.0, use_even_offset=True)
         edge = set()
         if bevel > 0:
-            w = min(bevel, 0.45 * min(size), (inset[0] * 0.4) if inset else 1.0)
+            w = min(bevel, 0.45 * min(size), (inset[-1] * 0.4) if inset and len(inset) > 2 else (inset[0] * 0.4) if inset else 1.0)
             # with a seam ring only the real corners: a bevel on its flat edges made chamfer faces lying in the plane,
             # worn like an edge (the other boxes keep beveling every edge - their decals are placed on that shape)
             geom = [e for e in tmp.edges if len(e.link_faces) != 2 or e.calc_face_angle(0.0) > 0.3] if seam else list(tmp.edges)
@@ -154,6 +161,21 @@ class Part:
         faces = self._merge(bm, tmp, local)
         self.meta[role].append((faces, ("member",) + _bounds(local), self._panel_id(panel), secondary))
         return faces
+
+    def mesh(self, role, verts, faces, panel=False):
+        """A surface from shared vertices (part coords) and faces (vertex index lists, counter-clockwise seen from
+        outside): soft shapes like a cushion's quilted top, shaded smooth across its faces."""
+        bm = self.bm[role]
+        tmp = bmesh.new()
+        vs = [tmp.verts.new(Vector(v)) for v in verts]
+        for f in faces:
+            tmp.faces.new([vs[i] for i in f])
+        local = [v.co.copy() for v in tmp.verts]
+        out = self._merge(bm, tmp, local)
+        for f in out:
+            f.smooth = True
+        self.meta[role].append((out, ("member",) + _bounds(local), self._panel_id(panel), False))
+        return out
 
     def poly_prism(self, role, pts2d, m, depth, bevel=0.0, panel=True, segments=2):
         """A prism from a 2D polygon (local x, y) extruded along local -z by depth, front at z = 0, then m."""
@@ -401,7 +423,7 @@ def materials():
         "Kit_GlowDim": ([0.08, 0.08, 0.08], 0.3, 0.0, (pal["Kit_GlowWarm"], 4.0)),
         "Kit_Screen": ([0.01, 0.01, 0.015], 0.2, 0.0, ([0.35, 0.6, 1.0], 3.0)),
         "Kit_Glass": ([0.02, 0.03, 0.035], 0.05, 0.0, None),
-        "Kit_Cushion": ([0.24, 0.23, 0.21], 0.88, 0.0, None),
+        "Kit_Cushion": ([0.12, 0.115, 0.095], 0.92, 0.0, None),
         "Kit_Decal": ([0.2, 0.2, 0.2], 0.5, 0.0, None),
         "Kit_DecalAO": ([0.0, 0.0, 0.0], 0.5, 0.0, None),
         "Kit_DecalPaint": ([0.6, 0.6, 0.6], 0.5, 0.0, None),

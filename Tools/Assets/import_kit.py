@@ -320,8 +320,11 @@ def build_materials():
         "Kit_Fabric": plain([0.03, 0.03, 0.032], 0.9),
         # upholstery (the cabin's furniture, 30. 9. 2026: the berth's mattress and rolls, the galley's seat): a warm
         # light grey fabric, matt, a fine grain for the weave - the reference berths' cream padding in the palette
-        "Kit_Cushion": layered([0.24, 0.23, 0.21], 0.86, 0.0, grunge=0.1, vary=0.1, dirt=0.1, MicroRough=0.05,
-                               ScratchAmount=0.0, DetailTileCm=6.0, DetailNormalStrength=0.2, PanelShift=0.0, PanelTone=0.03),
+        # 0.15 / 0.9, a 3 cm weave at 0.45 (the cabin's critic, round 1: "shiny cream vinyl, the lightest thing in the
+        # room")
+        # khaki grey, the woven detail normal (T_Kit_Fabric_N, set below) at a 2 cm tile (round 2: "still vinyl")
+        "Kit_Cushion": layered([0.12, 0.115, 0.095], 0.92, 0.0, grunge=0.1, vary=0.1, dirt=0.1, MicroRough=0.08,
+                               ScratchAmount=0.0, DetailTileCm=2.0, DetailNormalStrength=0.9, PanelShift=0.0, PanelTone=0.03),
         "Kit_Plastic": plain([0.035, 0.035, 0.038], 0.5),
         "Kit_Seal": plain([0.012, 0.012, 0.013], 0.7),
         # 7, not 14: the fixture diffusers and the ring clipped to white plates (critic r2); 3.5 after the material
@@ -343,6 +346,11 @@ def build_materials():
     for role, spec in specs.items():
         mis[role] = ship_materials.build_instance("MI_Kit_%s_%s" % (MAKER, role.split("_", 1)[1]), MATS, spec, masters)
     tex = os.path.join(REPO, "ArtSource", "Kit", "Textures")
+    # the upholstery's weave instead of the hull's rolled-metal grain (Tools/Kit/kit_fabric_normal.py)
+    MEL.set_material_instance_texture_parameter_value(mis["Kit_Cushion"], "DetailNormalMap",
+                                                      import_texture(os.path.join(tex, "T_Kit_Fabric_N.png"), "normal"))
+    MEL.update_material_instance(mis["Kit_Cushion"])
+    EAL.save_loaded_asset(mis["Kit_Cushion"], only_if_is_dirty=False)
     # the trim sheet carries its own grooves and bolts: the PBR master's hull detail normal (30 cm tile) under the
     # grazing wash light drew grass-like streaks on the rails, its hull panel lines dark bars across them - both
     # off (critic finding "noise band over the window", batch 2; checked with space.Kit on the packaged game)

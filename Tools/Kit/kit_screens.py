@@ -89,7 +89,15 @@ def main():
     component_page(d, 512, 768, "SG-S1", [("FIELD", "100 %", 1.0), ("REGEN", "12 /s", 0.55)], "BUBBLE UP")
     # the cabin's furniture (30. 9. 2026): the hygiene cell's door screen, the galley unit's screen
     component_page(d, 128, 512, "HYGIENE", [("WATER", "62 %", 0.62), ("WASTE", "18 %", 0.18)], "VACANT")
-    component_page(d, 768, 768, "GALLEY", [("WATER", "2.4 L", 0.7), ("CHILL", "4 C", 0.4)], "RATIONS 11")
+    component_page(d, 768, 768, "GALLEY", [("WATER", "2.4 L", 0.7), ("CHILL", "4 C", 0.4)], "")
+    # the soft-key labels over the unit's three buttons under the screen (kit_furniture.food: the buttons at 17.6, 50 and
+    # 82.4 % of its width; the cabin's critic, round 3: "buttons without labels")
+    key = font("ShareTechMono-Regular.ttf", 22)
+    d.line([(768 + 14, 768 + 208), (768 + 242, 768 + 208)], fill=DIM, width=2)
+    for fx, text in ((0.176, "WATER"), (0.5, "CHILL"), (0.824, "RATION")):
+        cx = 768 + fx * 256
+        d.text((cx, 768 + 228), text, font=key, fill=WHITE, anchor="mm")
+        d.polygon([(cx - 7, 768 + 244), (cx + 7, 768 + 244), (cx, 768 + 251)], fill=BLUE)
     os.makedirs(OUT, exist_ok=True)
     img.save(os.path.join(OUT, "T_Kit_Screens.png"))
     json.dump(REGIONS, open(os.path.join(OUT, "screens_index.json"), "w"), indent=1)

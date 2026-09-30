@@ -1,5 +1,5 @@
 {
- "_comment": "The Wayfarer's cabin with its kit furniture (30. 9. 2026): the room both ways, each piece from the walkway at eye level (1.65 m over the deck), the berth's lamp and shelves, the hygiene cell's roof from the cockpit stairs. Layout metres to camera_local (x - 10.25, -y, z - 1.2). Run -Editor or -Package -Width 1920 -Height 1080.",
+ "_comment": "The Wayfarer's cabin with its kit furniture (30. 9. 2026): the room both ways, each piece from the walkway at eye level (1.65 m over the deck), the berth's lamp and shelves, the hygiene cell's roof and duct from over the galley (evidence view, not an eye-level one: from the walkway the roof edge and the ceiling services' channels hide it). Layout metres to camera_local (x - 10.25, -y, z - 1.2). Run -Editor or -Package -Width 1920 -Height 1080.",
  "shots": [
   {
    "name": "warmup",
@@ -116,7 +116,7 @@
    "altitude_m": 3000,
    "facing": "horizon",
    "gear": true,
-   "fov": 80,
+   "fov": 95,
    "camera_local": [
     2.15,
     -0.85,
@@ -150,20 +150,20 @@
   {
    "hud": 0,
    "settle": 2.0,
-   "name": "from_stairs",
+   "name": "hygiene_roof",
    "altitude_m": 3000,
    "facing": "horizon",
    "gear": true,
-   "fov": 85,
+   "fov": 70,
    "camera_local": [
-    5.3,
-    -0.0,
-    1.15
+    4.05,
+    1.27,
+    1.0
    ],
    "look_local": [
-    2.55,
-    1.2,
-    0.2
+    2.15,
+    1.27,
+    0.97
    ]
   }
  ]

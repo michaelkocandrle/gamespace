@@ -93,6 +93,21 @@ def plate(title, lines):
     return im
 
 
+def stencil(title, sub):
+    """A stencil marking painted on a part: the name, a rule, one line under it at half the name's height (the cabin
+    furniture's critic, round 3: "light stickers, second lines unreadable" - the plate() look beside the room's
+    stencils)."""
+    im = Image.new("RGBA", (1024, 512), CLEAR)
+    d = ImageDraw.Draw(im)
+    size = 215
+    while d.textlength(title, font=font("Rajdhani-SemiBold.ttf", size)) > 944:
+        size -= 5
+    text_at(d, (40, 170), title, font("Rajdhani-SemiBold.ttf", size), "lm")
+    d.rectangle((40, 318, 984, 330), fill=W)
+    text_at(d, (40, 420), sub, font("ShareTechMono-Regular.ttf", 96), "lm")
+    return im
+
+
 def exit_sign():
     """Emergency exit: a running figure cut into a box and EXIT (tinted green)."""
     im = Image.new("RGBA", (1024, 512), CLEAR)
@@ -130,9 +145,9 @@ def main():
         "D_Int_CockpitStairs": label("COCKPIT", "FLIGHT DECK  ·  MIND THE STAIRS", arrow="right"),
         "D_Int_LifeSupport": plate("LIFE SUPPORT  S1", ["ACCESS UNDER BERTH", "AIR  ·  HEAT  ·  WATER"]),
         # the cabin's furniture from the kit (30. 9. 2026)
-        "D_Int_Suit": plate("SUIT  ·  ARMS", ["EVA SUIT  ·  HELMET", "SIDEARM  ·  LOCKED"]),
-        "D_Int_Hygiene": plate("HYGIENE", ["WC  ·  WASH", "VACUUM FLUSH"]),
-        "D_Int_Galley": plate("GALLEY", ["POTABLE WATER", "RATIONS  ·  CHILLED"]),
+        "D_Int_Suit": stencil("SUIT · ARMS", "EVA  ·  SIDEARM"),
+        "D_Int_Hygiene": stencil("HYGIENE", "WC  ·  WASH"),
+        "D_Int_Galley": stencil("GALLEY", "WATER  ·  RATIONS"),
     })
     for name, im in items.items():
         im.save(os.path.join(OUT, name + ".png"))
