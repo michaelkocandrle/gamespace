@@ -130,8 +130,9 @@
   {
    "room": "cabin",
    "name": "Hygienická buňka",
-   "rect": [11.65, 13.1, -1.8, -0.8],
+   "rect": [11.675, 13.125, -1.8, -0.8],
    "_liner": "30. 9. 2026: the cabin from the hull liner (face at 1.9): 5 cm in from its frames, under its chamfer (1.83 m at 1.8 m out) - the furniture step rebuilds it; its sides follow the liner back to its panels, a roof at 2.05 m",
+   "_kit": "30. 9. 2026: from the kit (Furniture_Hygiene15L_A), centred on its door at x 12.4",
    "z": [0.0, 2.05],
    "purpose": "Záchod a umyvadlo za posuvnými dveřmi – na vícedenní lety."
   },

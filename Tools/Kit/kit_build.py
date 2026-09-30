@@ -308,6 +308,14 @@ def jobs(batch, sections, budget):
                        part=(lambda c=cat, pa=part, sz=size, s=sec, v=var, sd=seed: kit_batch4b.build_part(c, pa, sz, s, v, sd)),
                        category=cat, family="%s_%s" % (cat, part), kind=part, length=size, section=sec, variant=var, batch=4,
                        budget=kit_batch4b.budget(cat, part, size), render=True, views=kit_batch4b.VIEWS[(cat, part)])
+    elif batch == "furniture":
+        import kit_furniture
+        for cat, part, size, sec, var in kit_furniture.FURNITURE:
+            seed += 7
+            yield dict(name=kit_furniture.part_name(cat, part, size, sec, var),
+                       part=(lambda c=cat, pa=part, sz=size, s=sec, v=var, sd=seed: kit_furniture.build_part(c, pa, sz, s, v, sd)),
+                       category=cat, family="%s_%s" % (cat, part), kind=part, length=size, section=sec, variant=var, batch=6,
+                       budget=kit_furniture.budget(cat, part, size), render=True, views=kit_furniture.VIEWS[(cat, part)])
     else:
         raise SystemExit("unknown batch %s" % batch)
 

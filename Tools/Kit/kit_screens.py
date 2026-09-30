@@ -6,6 +6,8 @@
   reactor  (0.5, 0.25, 0.75, 0.5)   power plant status (component bay A, batch 4)
   cooler   (0.75, 0.25, 1.0, 0.5)   cooler status (component bay B)
   shield   (0.5, 0.0, 0.75, 0.25)   shield generator status (component bay C)
+  hygiene  (0.125, 0.25, 0.375, 0.5)  the hygiene cell's occupancy and tanks (furniture, 30. 9. 2026)
+  galley   (0.75, 0.0, 1.0, 0.25)   the galley unit's water and chiller (furniture)
 The material is M_Ship_Screen (masked glass: pixels under GlassThreshold show the dark back plate).
 
     python Tools/Kit/kit_screens.py
@@ -20,7 +22,8 @@ OUT = os.path.join(ROOT, "ArtSource", "Kit", "Textures")
 FONTS = os.path.join(ROOT, "Content", "UI", "Fonts")
 BLUE, WHITE, ORANGE, DIM, BG = (115, 184, 255), (225, 235, 245), (255, 150, 40), (60, 95, 140), (4, 8, 14)
 REGIONS = {"status": (0.0, 0.5, 1.0, 1.0), "gauge": (0.0, 0.0, 0.125, 0.5), "panel": (0.125, 0.0, 0.5, 0.25),
-           "reactor": (0.5, 0.25, 0.75, 0.5), "cooler": (0.75, 0.25, 1.0, 0.5), "shield": (0.5, 0.0, 0.75, 0.25)}
+           "reactor": (0.5, 0.25, 0.75, 0.5), "cooler": (0.75, 0.25, 1.0, 0.5), "shield": (0.5, 0.0, 0.75, 0.25),
+           "hygiene": (0.125, 0.25, 0.375, 0.5), "galley": (0.75, 0.0, 1.0, 0.25)}
 
 
 def component_page(d, x0, y0, title, rows, state, warn=False):
@@ -84,6 +87,9 @@ def main():
     component_page(d, 512, 512, "PP-S1", [("OUT", "86 %", 0.86), ("TEMP", "412 K", 0.62)], "ONLINE", warn=True)
     component_page(d, 768, 512, "CL-S1", [("FLOW", "74 %", 0.74), ("DELTA", "38 K", 0.45)], "LOOP A OK")
     component_page(d, 512, 768, "SG-S1", [("FIELD", "100 %", 1.0), ("REGEN", "12 /s", 0.55)], "BUBBLE UP")
+    # the cabin's furniture (30. 9. 2026): the hygiene cell's door screen, the galley unit's screen
+    component_page(d, 128, 512, "HYGIENE", [("WATER", "62 %", 0.62), ("WASTE", "18 %", 0.18)], "VACANT")
+    component_page(d, 768, 768, "GALLEY", [("WATER", "2.4 L", 0.7), ("CHILL", "4 C", 0.4)], "RATIONS 11")
     os.makedirs(OUT, exist_ok=True)
     img.save(os.path.join(OUT, "T_Kit_Screens.png"))
     json.dump(REGIONS, open(os.path.join(OUT, "screens_index.json"), "w"), indent=1)

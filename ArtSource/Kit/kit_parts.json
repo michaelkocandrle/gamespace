@@ -76,8 +76,11 @@
     "Furniture_Locker",
     "Furniture_Box",
     "Furniture_Bunk",
+    "Furniture_Hygiene",
+    "Furniture_Food",
     "Furniture_Seat"
-   ]
+   ],
+   "_furniture": "30. 9. 2026 (author approved the Wayfarer's cabin): the cabin's four pieces ahead of the rest of the batch - Tools/Kit/kit_furniture.py, job 'furniture'"
   },
   {
    "n": 7,
@@ -587,10 +590,12 @@
   "Furniture_Locker": {
    "category": "Furniture",
    "part": "Locker",
+   "sizes": [0.95],
+   "sections": ["L"],
    "variants": {
-    "A": "free-standing locker bank"
+    "A": "suit and weapon locker 0.95 x 0.55 x 1.8: suit door with a window over the hanger rail and a dim light inside, a narrow weapon door with a lock cylinder and an orange lever latch, a boot drawer, vent slots, hinges, a status light, the recessed plinth"
    },
-   "status": "planned"
+   "status": "built L (30. 9. 2026)"
   },
   "Furniture_Box": {
    "category": "Furniture",
@@ -604,10 +609,32 @@
   "Furniture_Bunk": {
    "category": "Furniture",
    "part": "Bunk",
+   "sizes": [2.1],
+   "sections": ["L"],
    "variants": {
-    "A": "bunk with padding and a reading light"
+    "A": "berth alcove 2.1 x 0.85: cheeks to 1.72 m with orange edges, a mattress in three tufted cushions, pillow, blanket, padded back rolls, two shelves with retaining bars, a reading lamp with its switch, a dim strip under the lower shelf, the base with an air intake grille and the recessed plinth; the liner shows between the rolls and the shelves"
    },
-   "status": "planned"
+   "status": "built L (30. 9. 2026)"
+  },
+  "Furniture_Hygiene": {
+   "category": "Furniture",
+   "part": "Hygiene",
+   "sizes": [1.45],
+   "sections": ["L"],
+   "variants": {
+    "A": "hygiene cell 1.45 x 1.0 x 2.05: sides and roof following the liner's chamfer, a recessed sliding door in a proud frame (built closed), an occupancy screen, an extraction grille and the fan's duct to the ceiling, corner posts, kick plates"
+   },
+   "status": "built L (30. 9. 2026)"
+  },
+  "Furniture_Food": {
+   "category": "Furniture",
+   "part": "Food",
+   "sizes": [1.6],
+   "sections": ["L"],
+   "variants": {
+    "A": "galley unit 1.6 x 0.45 at 0.8-1.8 m: a chilled cabinet and a ration drawer, the counter, a water bay (nozzle, drip grille, bay light) in a cream fascia beside its screen and buttons, stowage doors; a fold-down seat on struts under it with a back cushion"
+   },
+   "status": "built L (30. 9. 2026)"
   },
   "Furniture_Seat": {
    "category": "Furniture",

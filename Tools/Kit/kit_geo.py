@@ -35,7 +35,7 @@ TRIM = json.load(open(os.path.join(ROOT, "ArtSource", "Kit", "Textures", "trim_i
 
 ROLES = ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber", "Kit_Fabric", "Kit_Plastic", "Kit_Trim",
          "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_GlowNeutral", "Kit_GlowDim", "Kit_Screen",
-         "Kit_Glass"]
+         "Kit_Glass", "Kit_Cushion"]
 
 
 def frame(origin, ax, ay, az):
@@ -401,6 +401,7 @@ def materials():
         "Kit_GlowDim": ([0.08, 0.08, 0.08], 0.3, 0.0, (pal["Kit_GlowWarm"], 4.0)),
         "Kit_Screen": ([0.01, 0.01, 0.015], 0.2, 0.0, ([0.35, 0.6, 1.0], 3.0)),
         "Kit_Glass": ([0.02, 0.03, 0.035], 0.05, 0.0, None),
+        "Kit_Cushion": ([0.24, 0.23, 0.21], 0.88, 0.0, None),
         "Kit_Decal": ([0.2, 0.2, 0.2], 0.5, 0.0, None),
         "Kit_DecalAO": ([0.0, 0.0, 0.0], 0.5, 0.0, None),
         "Kit_DecalPaint": ([0.6, 0.6, 0.6], 0.5, 0.0, None),

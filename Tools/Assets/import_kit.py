@@ -122,6 +122,12 @@ SHOWROOM = {
         ((14.6, 1.2), (1, 0), ["Stair_Ramp29W_A"]),
         ((17.5, -1.8, 0.8), (1, 0), ["Floor_Plate12W_A", "Floor_Plate12W_B"]),
         ((17.5, 1.2, 0.8), (1, 0), ["Floor_Plate12W_B", "Floor_Plate12W_A"]),
+        # the cabin's furniture (30. 9. 2026) on the stair bay's deck: made for a hull liner room (under its chamfer),
+        # it stands 0.1 m off the hall's plain walls as off a liner's face - three along the east wall, the berth north
+        ((19.9, -2.175, 0.8), (-1, 0), ["Furniture_Hygiene15L_A"]),
+        ((19.9, -0.6, 0.8), (-1, 0), ["Furniture_Food16L_A"]),
+        ((19.9, 0.725, 0.8), (-1, 0), ["Furniture_Locker10L_A"]),
+        ((18.65, 2.9, 0.8), (0, -1), ["Furniture_Bunk21L_A"]),
         ((2.4, -4.8), (1, 0), ["Ceiling_Panel12W_C", "Ceiling_Panel12W_A"]),
         ((6.0, -6.0), (0, -1), ["Ceiling_Panel12W_B", "Ceiling_Panel12W_A"]),   # the down-light by the crawlway
     ],
@@ -312,6 +318,10 @@ def build_materials():
         "Kit_Rubber": layered([0.05, 0.05, 0.052], 0.75, 0.0, grunge=0.4, vary=0.15, dirt=0.6, dirt_colour=[0.09, 0.085, 0.08],
                               MicroRough=0.08, ScratchAmount=0.0, DetailNormalStrength=0.0, PanelShift=0.0),
         "Kit_Fabric": plain([0.03, 0.03, 0.032], 0.9),
+        # upholstery (the cabin's furniture, 30. 9. 2026: the berth's mattress and rolls, the galley's seat): a warm
+        # light grey fabric, matt, a fine grain for the weave - the reference berths' cream padding in the palette
+        "Kit_Cushion": layered([0.24, 0.23, 0.21], 0.86, 0.0, grunge=0.1, vary=0.1, dirt=0.1, MicroRough=0.05,
+                               ScratchAmount=0.0, DetailTileCm=6.0, DetailNormalStrength=0.2, PanelShift=0.0, PanelTone=0.03),
         "Kit_Plastic": plain([0.035, 0.035, 0.038], 0.5),
         "Kit_Seal": plain([0.012, 0.012, 0.013], 0.7),
         # 7, not 14: the fixture diffusers and the ring clipped to white plates (critic r2); 3.5 after the material

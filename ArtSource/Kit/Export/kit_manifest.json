@@ -8478,6 +8478,277 @@
     "front": "Saved/KitCatalog/SM_Kit_Floor_Plate12L38_A_front.png",
     "34": "Saved/KitCatalog/SM_Kit_Floor_Plate12L38_A_34.png"
    }
+  },
+  "SM_Kit_Furniture_Bunk21L_A": {
+   "category": "Furniture",
+   "family": "Furniture_Bunk",
+   "section": "L",
+   "length_m": 2.1,
+   "variant": "A",
+   "batch": 6,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Furniture_Bunk21L_A.fbx",
+   "dims_m": [
+    0.858,
+    2.1,
+    1.72
+   ],
+   "expected_size_cm": [
+    85.8,
+    210.0,
+    172.0
+   ],
+   "tris": 2904,
+   "tris_decals": 104,
+   "tri_budget": 15000,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Signal",
+    "Kit_Fabric",
+    "Kit_Plastic",
+    "Kit_Seal",
+    "Kit_GlowWarm",
+    "Kit_GlowCool",
+    "Kit_GlowSignal",
+    "Kit_GlowDim",
+    "Kit_Cushion",
+    "Kit_DecalPaint",
+    "Kit_DecalGrime"
+   ],
+   "sockets": {
+    "SOCKET_Light_Berth_0": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      120.0
+     ],
+     "params": {
+      "type": "point",
+      "role": "warm",
+      "cd": 2.0,
+      "radius_m": 1.4,
+      "source_radius_cm": 20.0
+     }
+    },
+    "SOCKET_Light_Reading_0": {
+     "location_ue_cm": [
+      22.0,
+      95.0,
+      110.0
+     ],
+     "params": {
+      "type": "spot",
+      "role": "warm",
+      "cd": 25.0,
+      "cone_deg": 60.0,
+      "radius_m": 1.8,
+      "source_radius_cm": 2.0,
+      "dir_ue": [
+       0.24806948006153107,
+       -0.6201736927032471,
+       -0.7442084550857544
+      ]
+     }
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 2,
+   "decal_items": [
+    "st_service",
+    "grime_soot"
+   ],
+   "service_labels": [
+    "st_service"
+   ],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 4284,
+    "secondary": 0,
+    "floor": 1064,
+    "seam": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Furniture_Bunk21L_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Furniture_Bunk21L_A_34.png"
+   }
+  },
+  "SM_Kit_Furniture_Locker10L_A": {
+   "category": "Furniture",
+   "family": "Furniture_Locker",
+   "section": "L",
+   "length_m": 0.95,
+   "variant": "A",
+   "batch": 6,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Furniture_Locker10L_A.fbx",
+   "dims_m": [
+    0.609,
+    0.95,
+    1.8
+   ],
+   "expected_size_cm": [
+    60.9,
+    95.0,
+    180.0
+   ],
+   "tris": 1666,
+   "tris_decals": 44,
+   "tri_budget": 15000,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Signal",
+    "Kit_Plastic",
+    "Kit_Seal",
+    "Kit_GlowCool",
+    "Kit_GlowDim",
+    "Kit_Glass",
+    "Kit_DecalPaint",
+    "Kit_DecalGrime"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 2,
+   "decal_items": [
+    "st_inspect",
+    "grime_soot"
+   ],
+   "service_labels": [
+    "st_inspect"
+   ],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1716,
+    "secondary": 704,
+    "floor": 676,
+    "seam": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Furniture_Locker10L_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Furniture_Locker10L_A_34.png"
+   }
+  },
+  "SM_Kit_Furniture_Hygiene15L_A": {
+   "category": "Furniture",
+   "family": "Furniture_Hygiene",
+   "section": "L",
+   "length_m": 1.45,
+   "variant": "A",
+   "batch": 6,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Furniture_Hygiene15L_A.fbx",
+   "dims_m": [
+    1.023,
+    1.46,
+    2.31
+   ],
+   "expected_size_cm": [
+    102.3,
+    146.0,
+    231.0
+   ],
+   "tris": 1534,
+   "tris_decals": 24,
+   "tri_budget": 15000,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Rubber",
+    "Kit_Plastic",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_GlowCool",
+    "Kit_Screen",
+    "Kit_DecalPaint",
+    "Kit_DecalGrime"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 2,
+   "decal_items": [
+    "st_vent",
+    "grime_soot"
+   ],
+   "service_labels": [
+    "st_vent"
+   ],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1836,
+    "secondary": 160,
+    "floor": 488,
+    "seam": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Furniture_Hygiene15L_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Furniture_Hygiene15L_A_34.png"
+   }
+  },
+  "SM_Kit_Furniture_Food16L_A": {
+   "category": "Furniture",
+   "family": "Furniture_Food",
+   "section": "L",
+   "length_m": 1.6,
+   "variant": "A",
+   "batch": 6,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Furniture_Food16L_A.fbx",
+   "dims_m": [
+    0.606,
+    1.6,
+    1.65
+   ],
+   "expected_size_cm": [
+    60.6,
+    160.0,
+    165.0
+   ],
+   "tris": 2716,
+   "tris_decals": 0,
+   "tri_budget": 15000,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Accent",
+    "Kit_Plastic",
+    "Kit_Seal",
+    "Kit_GlowCool",
+    "Kit_GlowNeutral",
+    "Kit_Screen",
+    "Kit_Cushion"
+   ],
+   "sockets": {
+    "SOCKET_Light_Bay_0": {
+     "location_ue_cm": [
+      35.0,
+      -34.0,
+      147.0
+     ],
+     "params": {
+      "type": "point",
+      "role": "neutral",
+      "cd": 1.5,
+      "radius_m": 0.8,
+      "source_radius_cm": 3.0
+     }
+    }
+   },
+   "collision_hulls": 2,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 3600,
+    "secondary": 640,
+    "floor": 392,
+    "seam": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Furniture_Food16L_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Furniture_Food16L_A_34.png"
+   }
   }
  }
 }

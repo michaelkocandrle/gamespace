@@ -58,6 +58,21 @@ zmizí.
   Místnost přestane držet lodní podlahu odebráním `"floor"` z `kit_modules.keep`. Mezeru mezi přepážkou a prvním
   modulem zakryje `stand_in_floor`.
 
+- **Po přestavbě lodi se ve hře nic nezměnilo, stará geometrie zůstala** (30. 9. 2026). Kajuta měla novou kit
+  podlahu i starou lodní a obě blikaly přes sebe v zubatých skvrnách; výdejník měl před sebou starou krabici.
+  Příčina: `hs_assemble_ship.py` zapíše `<Loď>_HS_Game.blend`, ale FBX v `ArtSource/Ships/<Loď>/Export/` nepřepíše,
+  a `import_ship.py` tak importuje FBX z minulého exportu. Řešení: po assemble vždy
+  `blender -b <Loď>_HS_Game.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"`
+  (z `ArtSource/Ships/<Loď>`) a teprve potom `import_ship.py`. Kontrola: čas FBX v `Export/`.
+- **Nábytek u obložení trupu narazí do žeber na zkosení** (30. 9. 2026). Obnažená žebra obložení na každém spoji
+  modulů stojí 8 cm od panelů i nahoru po zkosení. Pod zkosením je proto volno jen po čáru o `FRAME_OUT / 0,6` níž
+  než rovina zkosení; 0,1 m od líce je to 1,68 m, ne 1,83 m. Geometrický test lodi to nevidí (díly kitu spojí do
+  jednoho meshe); `Tools/Kit/kit_clash.py -- <Loď> [prefix]` postaví díly kitu jako samostatné objekty a vypíše
+  dvojice, které se protínají (dno na podlaze a konzole v obložení jsou záměrné). Totéž pro kabelový žlab na
+  zkosení (0,27–0,34 m od líce, od 1,99 m) a nosníky stropních rozvodů (od 2,09 m).
+- **Polštář opřený o lisovaný panel „plave“** (geometrický test, 30. 9. 2026). Střed lisovaného panelu je 6 mm
+  zapuštěný a zaoblené hrany polštáře mezeru zvětší nad toleranci 6 mm. Řešení: polštář 7 mm do panelu.
+
 ## Nástroje
 
 - `space.Kit <Parametr> <hodnota> <část jména>` s filtrem jména mění i materiály dílů lodí, tedy kit místností,

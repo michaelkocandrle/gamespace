@@ -2148,6 +2148,90 @@
    "symmetric": true,
    "_max_depth": "30. 9. 2026: the cabin's floor from the kit - its plates are 2 cm thick, a 3 cm box reached their underside",
    "max_depth_cm": 1.5
+  },
+  {
+   "name": "Int_Suit",
+   "_kit": "30. 9. 2026: the suit locker's weapon door (Furniture_Locker10L_A), over its latch; 1.5 cm deep - the doors and panels are 2-3 cm thick",
+   "texture": "D_Int_Suit",
+   "location": [
+    49.5,
+    123.5,
+    35.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    90.0
+   ],
+   "size": [
+    1.5,
+    6.0,
+    12.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_u": 1.0,
+   "max_depth_cm": 1.5
+  },
+  {
+   "name": "Int_Hygiene",
+   "_kit": "30. 9. 2026: the hygiene cell's front panel left of its door (Furniture_Hygiene15L_A), under the grille; 1.5 cm deep - the doors and panels are 2-3 cm thick",
+   "texture": "D_Int_Hygiene",
+   "location": [
+    273.0,
+    79.5,
+    10.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    90.0
+   ],
+   "size": [
+    1.5,
+    6.0,
+    12.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_u": 1.0,
+   "max_depth_cm": 1.5
+  },
+  {
+   "name": "Int_Galley",
+   "_kit": "30. 9. 2026: the galley unit's left stowage door (Furniture_Food16L_A); 1.5 cm deep - the doors and panels are 2-3 cm thick",
+   "texture": "D_Int_Galley",
+   "location": [
+    423.0,
+    134.5,
+    46.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    90.0
+   ],
+   "size": [
+    1.5,
+    6.0,
+    12.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_u": 1.0,
+   "max_depth_cm": 1.5
   }
  ]
 }

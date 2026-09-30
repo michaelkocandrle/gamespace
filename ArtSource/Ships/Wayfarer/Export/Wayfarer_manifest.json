@@ -88,8 +88,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 613153,
-      "verts": 454084,
+      "tris": 613247,
+      "verts": 454131,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -144,8 +144,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 66448,
-      "verts": 64130,
+      "tris": 66404,
+      "verts": 64076,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -164,7 +164,7 @@
         [
           9.70612907409668,
           7.332275390625,
-          2.8028948307037354
+          2.80289626121521
         ]
       ]
     },
@@ -218,8 +218,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 406965,
-      "verts": 211842,
+      "tris": 404205,
+      "verts": 210432,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -230,8 +230,6 @@
         "M_Ship_Wayfarer_IntGlow",
         "M_Ship_Wayfarer_IntConsole",
         "M_Ship_Wayfarer_IntAccentGlow",
-        "M_Ship_Wayfarer_IntLight",
-        "M_Ship_Wayfarer_IntFabric",
         "M_Ship_Wayfarer_IntLeather",
         "M_Ship_Wayfarer_IntLedOrange",
         "M_Ship_Wayfarer_IntLedWhite",
@@ -239,6 +237,7 @@
         "M_Ship_Wayfarer_IntScreenBack",
         "M_Ship_Wayfarer_IntRed",
         "M_Ship_Wayfarer_IntRubber",
+        "M_Ship_Wayfarer_IntFabric",
         "M_Ship_Wayfarer_IntCream",
         "M_Ship_Wayfarer_IntFrame"
       ],
@@ -432,7 +431,7 @@
     "UCX_SM_Ship_Wayfarer_06": {
       "kind": "UCX",
       "mesh": "SM_Ship_Wayfarer",
-      "verts": 14,
+      "verts": 15,
       "bounds_m": [
         [
           -9.949999809265137,
@@ -708,7 +707,7 @@
     [
       10.75,
       7.355200290679932,
-      2.8028948307037354
+      2.80289626121521
     ]
   ],
   "render_size_m": [

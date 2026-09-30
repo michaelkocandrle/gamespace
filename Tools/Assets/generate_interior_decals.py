@@ -129,6 +129,10 @@ def main():
         "D_Int_Quarters": label("CREW QUARTERS", "BERTH  ·  HYGIENE  ·  GALLEY"),
         "D_Int_CockpitStairs": label("COCKPIT", "FLIGHT DECK  ·  MIND THE STAIRS", arrow="right"),
         "D_Int_LifeSupport": plate("LIFE SUPPORT  S1", ["ACCESS UNDER BERTH", "AIR  ·  HEAT  ·  WATER"]),
+        # the cabin's furniture from the kit (30. 9. 2026)
+        "D_Int_Suit": plate("SUIT  ·  ARMS", ["EVA SUIT  ·  HELMET", "SIDEARM  ·  LOCKED"]),
+        "D_Int_Hygiene": plate("HYGIENE", ["WC  ·  WASH", "VACUUM FLUSH"]),
+        "D_Int_Galley": plate("GALLEY", ["POTABLE WATER", "RATIONS  ·  CHILLED"]),
     })
     for name, im in items.items():
         im.save(os.path.join(OUT, name + ".png"))

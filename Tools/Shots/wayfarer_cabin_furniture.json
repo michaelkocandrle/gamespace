@@ -1,0 +1,170 @@
+{
+ "_comment": "The Wayfarer's cabin with its kit furniture (30. 9. 2026): the room both ways, each piece from the walkway at eye level (1.65 m over the deck), the berth's lamp and shelves, the hygiene cell's roof from the cockpit stairs. Layout metres to camera_local (x - 10.25, -y, z - 1.2). Run -Editor or -Package -Width 1920 -Height 1080.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 4.0,
+   "console": [
+    "stat none",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "hud": 0,
+   "settle": 2.0,
+   "name": "cabin_fwd",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "gear": true,
+   "fov": 90,
+   "camera_local": [
+    0.45,
+    0.3,
+    0.45
+   ],
+   "look_local": [
+    4.75,
+    -0.0,
+    0.1
+   ]
+  },
+  {
+   "hud": 0,
+   "settle": 2.0,
+   "name": "cabin_aft",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "gear": true,
+   "fov": 90,
+   "camera_local": [
+    4.55,
+    -0.3,
+    0.45
+   ],
+   "look_local": [
+    0.25,
+    -0.0,
+    0.05
+   ]
+  },
+  {
+   "hud": 0,
+   "settle": 2.0,
+   "name": "berth",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "gear": true,
+   "fov": 80,
+   "camera_local": [
+    3.3,
+    0.35,
+    0.35
+   ],
+   "look_local": [
+    3.5,
+    -1.5,
+    -0.4
+   ]
+  },
+  {
+   "hud": 0,
+   "settle": 2.0,
+   "name": "berth_lamp",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "gear": true,
+   "fov": 70,
+   "camera_local": [
+    3.0,
+    -0.45,
+    0.25
+   ],
+   "look_local": [
+    2.6,
+    -1.55,
+    -0.15
+   ]
+  },
+  {
+   "hud": 0,
+   "settle": 2.0,
+   "name": "locker",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "gear": true,
+   "fov": 75,
+   "camera_local": [
+    0.75,
+    -0.55,
+    0.4
+   ],
+   "look_local": [
+    0.75,
+    1.6,
+    -0.2
+   ]
+  },
+  {
+   "hud": 0,
+   "settle": 2.0,
+   "name": "hygiene",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "gear": true,
+   "fov": 80,
+   "camera_local": [
+    2.15,
+    -0.85,
+    0.4
+   ],
+   "look_local": [
+    2.15,
+    1.2,
+    -0.05
+   ]
+  },
+  {
+   "hud": 0,
+   "settle": 2.0,
+   "name": "galley",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "gear": true,
+   "fov": 75,
+   "camera_local": [
+    3.85,
+    -0.25,
+    0.35
+   ],
+   "look_local": [
+    3.85,
+    1.6,
+    -0.2
+   ]
+  },
+  {
+   "hud": 0,
+   "settle": 2.0,
+   "name": "from_stairs",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "gear": true,
+   "fov": 85,
+   "camera_local": [
+    5.3,
+    -0.0,
+    1.15
+   ],
+   "look_local": [
+    2.55,
+    1.2,
+    0.2
+   ]
+  }
+ ]
+}
