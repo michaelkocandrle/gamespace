@@ -209,7 +209,7 @@ namespace SpaceshipPawnDefaults
 	const TCHAR* const MfdRightActionPath = TEXT("/Game/Input/IA_MfdRight.IA_MfdRight");
 
 	/** 1 G in cm/s^2. */
-	constexpr double StandardGravityCmS2 = 980.665;
+	constexpr double StandardGravityCmS2 = FShipFlightModel::StandardGravityCmS2;
 	const TCHAR* const EngineLoopSoundPath = TEXT("/Game/Ships/Audio/SW_EngineLoop.SW_EngineLoop");
 	const TCHAR* const EngineHumSoundPath = TEXT("/Game/Ships/Audio/SW_EngineHum.SW_EngineHum");
 	const TCHAR* const BoostLoopSoundPath = TEXT("/Game/Ships/Audio/SW_BoostLoop.SW_BoostLoop");
@@ -1433,29 +1433,7 @@ void ASpaceshipPawn::SetComStab(bool bOn)
 
 FVector ASpaceshipPawn::LimitThrustForPilot(const FVector& LocalAcceleration, bool bLateralFirst) const
 {
-	using SpaceshipPawnDefaults::StandardGravityCmS2;
-	const double MaxTotal = FMath::Max(double(GSafeMaxG), 0.0) * StandardGravityCmS2;
-	const double MaxVertical = FMath::Min(double(GSafeMaxVerticalG) * StandardGravityCmS2, MaxTotal);
-	FVector Result = LocalAcceleration;
-	Result.Z = FMath::Clamp(Result.Z, -MaxVertical, MaxVertical);
-	if (Result.Size() <= MaxTotal)
-	{
-		return Result;
-	}
-	if (!bLateralFirst)
-	{
-		return Result.GetSafeNormal() * MaxTotal;
-	}
-	// Sideways and vertical first: they are what keeps the flight path on the nose.
-	const FVector Lateral(0.0, Result.Y, Result.Z);
-	const double LateralSize = Lateral.Size();
-	if (LateralSize >= MaxTotal)
-	{
-		return Lateral * (MaxTotal / LateralSize);
-	}
-	const double Remaining = FMath::Sqrt(MaxTotal * MaxTotal - LateralSize * LateralSize);
-	Result.X = FMath::Clamp(Result.X, -Remaining, Remaining);
-	return Result;
+	return FShipFlightModel::LimitThrustForPilot(LocalAcceleration, bLateralFirst, GSafeMaxG, GSafeMaxVerticalG);
 }
 
 float ASpaceshipPawn::GetQuantumCooling() const
@@ -2325,15 +2303,25 @@ namespace SpaceshipQuantum
 
 bool ASpaceshipPawn::SegmentHitsSphere(const FVector& Start, const FVector& End, const FVector& Centre, double Radius)
 {
-	const FVector Segment = End - Start;
-	const double LengthSq = Segment.SizeSquared();
-	const double T = LengthSq > 0.0 ? FMath::Clamp(FVector::DotProduct(Centre - Start, Segment) / LengthSq, 0.0, 1.0) : 0.0;
-	return FVector::DistSquared(Start + Segment * T, Centre) < Radius * Radius;
+	return FShipFlightModel::SegmentHitsSphere(Start, End, Centre, Radius);
+}
+
+FShipFlightModel::FQuantumDrive ASpaceshipPawn::GetQuantumDrive() const
+{
+	FShipFlightModel::FQuantumDrive Drive;
+	Drive.RampSeconds = QuantumRampSeconds;
+	Drive.AccelerationKmS2 = QuantumAccelerationKmS2;
+	Drive.MaxSpeedKmS = QuantumMaxSpeedKmS;
+	Drive.ExitSpeed = QuantumExitSpeed;
+	Drive.ArrivalRadii = QuantumArrivalRadii;
+	Drive.MinArrivalKm = QuantumMinArrivalKm;
+	Drive.FuelPer1000Km = QuantumFuelPer1000Km;
+	return Drive;
 }
 
 double ASpaceshipPawn::ComputeQuantumArrivalAltitude(double BodyRadiusCm) const
 {
-	return FMath::Max(double(QuantumArrivalRadii) * BodyRadiusCm, double(QuantumMinArrivalKm) * 100000.0);
+	return FShipFlightModel::QuantumArrivalAltitude(BodyRadiusCm, GetQuantumDrive());
 }
 
 double ASpaceshipPawn::ComputeQuantumSpeed(double RemainingCm, double CurrentSpeedCmS, float DeltaSeconds) const
@@ -2343,20 +2331,12 @@ double ASpaceshipPawn::ComputeQuantumSpeed(double RemainingCm, double CurrentSpe
 
 double ASpaceshipPawn::ComputeQuantumSpeedAt(double RemainingCm, double CurrentSpeedCmS, float DeltaSeconds, float SecondsIntoJump) const
 {
-	// Braking keeps the full rate (the arrival must be exact); speeding up eases in.
-	const double Ramp = QuantumRampSeconds > 0.f ? FMath::Max(0.03, double(FMath::SmoothStep(0.f, QuantumRampSeconds, SecondsIntoJump))) : 1.0;
-	const double Accel = double(QuantumAccelerationKmS2) * 100000.0;
-	const double Top = double(QuantumMaxSpeedKmS) * 100000.0;
-	const double Exit = QuantumExitSpeed;
-	// The speed from which braking at Accel arrives at Exit exactly at the arrival point.
-	const double Braking = FMath::Sqrt(Exit * Exit + 2.0 * Accel * FMath::Max(RemainingCm, 0.0));
-	const double Rising = FMath::Max(CurrentSpeedCmS, Exit) + Accel * Ramp * DeltaSeconds;
-	return FMath::Max(Exit, FMath::Min3(Top, Braking, Rising));
+	return FShipFlightModel::QuantumSpeedAt(RemainingCm, CurrentSpeedCmS, DeltaSeconds, SecondsIntoJump, GetQuantumDrive());
 }
 
 float ASpaceshipPawn::ComputeQuantumFuelUse(double DistanceCm) const
 {
-	return float(DistanceCm / 1.0e8) * QuantumFuelPer1000Km;
+	return FShipFlightModel::QuantumFuelUse(DistanceCm, GetQuantumDrive());
 }
 
 void ASpaceshipPawn::SetQuantumEngageHeld(bool bHeld)
@@ -2940,17 +2920,33 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 	}
 }
 
+FShipFlightModel::FDrag ASpaceshipPawn::GetDragTuning() const
+{
+	FShipFlightModel::FDrag Drag;
+	Drag.SpaceLinearDamping = SpaceLinearDamping;
+	Drag.LinearDamping = LinearDamping;
+	Drag.QuadraticDrag = QuadraticDrag;
+	Drag.GravityScale = GravityScale;
+	return Drag;
+}
+
 FVector ASpaceshipPawn::ComputeEnvironmentAcceleration(const FCelestialEnvironment& InEnvironment, const FVector& Velocity) const
 {
-	const double DragRate = SpaceLinearDamping + (LinearDamping + QuadraticDrag * Velocity.Size()) * InEnvironment.AtmosphereDensity;
-	return -Velocity * DragRate - InEnvironment.Up * (InEnvironment.GravityCmS2 * GravityScale);
+	return FShipFlightModel::EnvironmentAcceleration(InEnvironment, Velocity, GetDragTuning());
+}
+
+FShipFlightModel::FHeat ASpaceshipPawn::GetHeatTuning() const
+{
+	FShipFlightModel::FHeat HeatTuning;
+	HeatTuning.ReferenceSpeed = HeatReferenceSpeed;
+	HeatTuning.Onset = HeatOnset;
+	HeatTuning.Full = HeatFull;
+	return HeatTuning;
 }
 
 float ASpaceshipPawn::ComputeHeatTarget(float AtmosphereDensity, float SpeedCmS) const
 {
-	const double Relative = SpeedCmS / HeatReferenceSpeed;
-	const double Heating = AtmosphereDensity * Relative * Relative * Relative;
-	return float(FMath::Clamp((Heating - HeatOnset) / FMath::Max(double(HeatFull - HeatOnset), 0.01), 0.0, 1.0));
+	return FShipFlightModel::HeatTarget(AtmosphereDensity, SpeedCmS, GetHeatTuning());
 }
 
 void ASpaceshipPawn::UpdateEnvironment(float DeltaSeconds)
@@ -2964,86 +2960,34 @@ void ASpaceshipPawn::UpdateEnvironment(float DeltaSeconds)
 // Landing
 // -------------------------------------------------------------------------------------------
 
-namespace
+FShipFlightModel::FLandingLimits ASpaceshipPawn::GetLandingLimits() const
 {
-	float AngleBetweenDeg(const FVector& A, const FVector& B)
-	{
-		return float(FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(A.GetSafeNormal() | B.GetSafeNormal(), -1.0, 1.0))));
-	}
-
-	/** Keeps the heading, puts the ship's up on Normal. */
-	FQuat LevelOnSurface(const FQuat& Current, const FVector& Normal)
-	{
-		FVector Forward = FVector::VectorPlaneProject(Current.GetForwardVector(), Normal);
-		if (Forward.SizeSquared() < 1e-4)
-		{
-			// Nose pointing straight at the ground or the sky: keep the up vector's heading instead.
-			Forward = FVector::VectorPlaneProject(Current.GetUpVector(), Normal);
-		}
-		return FRotationMatrix::MakeFromXZ(Forward.GetSafeNormal(), Normal).ToQuat();
-	}
+	FShipFlightModel::FLandingLimits Limits;
+	Limits.MaxGapCm = LandingMaxGapCm;
+	Limits.MaxSlopeDeg = MaxLandingSlopeDeg;
+	Limits.MaxSpeed = LandingMaxSpeed;
+	Limits.MaxTiltDeg = LandingMaxTiltDeg;
+	return Limits;
 }
 
 ELandingBlocker ASpaceshipPawn::EvaluateTouchdown(float HullGap, float Speed, float TiltDeg, float SlopeDeg, bool bEngineInput, bool bGearDown) const
 {
-	// First, so the warning shows all the way down through the probe zone, not only at the ground.
-	if (!bGearDown)
-	{
-		return ELandingBlocker::GearUp;
-	}
-	if (HullGap < 0.f)
-	{
-		return ELandingBlocker::TooHigh;
-	}
-	return EvaluateLanding(FMath::Max(HullGap - GearExtensionCm, 0.f), Speed, TiltDeg, SlopeDeg, bEngineInput);
+	return FShipFlightModel::EvaluateTouchdown(HullGap, Speed, TiltDeg, SlopeDeg, bEngineInput, bGearDown, GearExtensionCm, GetLandingLimits());
 }
 
 ELandingBlocker ASpaceshipPawn::EvaluateLanding(float GroundGap, float Speed, float TiltDeg, float SlopeDeg, bool bEngineInput) const
 {
-	if (GroundGap < 0.f || GroundGap > LandingMaxGapCm)
-	{
-		return ELandingBlocker::TooHigh;
-	}
-	if (SlopeDeg > MaxLandingSlopeDeg)
-	{
-		return ELandingBlocker::TooSteep;
-	}
-	if (Speed > LandingMaxSpeed)
-	{
-		return ELandingBlocker::TooFast;
-	}
-	if (TiltDeg > LandingMaxTiltDeg)
-	{
-		return ELandingBlocker::Tilted;
-	}
-	if (bEngineInput)
-	{
-		return ELandingBlocker::EngineInput;
-	}
-	return ELandingBlocker::None;
+	return FShipFlightModel::EvaluateLanding(GroundGap, Speed, TiltDeg, SlopeDeg, bEngineInput, GetLandingLimits());
 }
 
 FVector ASpaceshipPawn::ApplyGroundFriction(const FVector& Velocity, const FVector& SurfaceNormal, const FVector& Up, float GravityCmS2, float DeltaSeconds) const
 {
-	// Coulomb friction: the tangential velocity loses at most mu x normal load per second. On a
-	// slope where mu >= tan(slope) that is more than gravity adds along it, so a resting ship
-	// stays at rest; on steeper ground the remainder makes it slide.
-	const double NormalLoad = GravityCmS2 * FMath::Max(0.0, SurfaceNormal | Up);
-	const FVector Tangential = FVector::VectorPlaneProject(Velocity, SurfaceNormal);
-	const double TangentialSpeed = Tangential.Size();
-	if (TangentialSpeed < UE_KINDA_SMALL_NUMBER)
-	{
-		return Velocity;
-	}
-	const double Remaining = FMath::Max(0.0, TangentialSpeed - GroundFriction * NormalLoad * DeltaSeconds);
-	return Velocity - Tangential * (1.0 - Remaining / TangentialSpeed);
+	return FShipFlightModel::ApplyGroundFriction(Velocity, SurfaceNormal, Up, GravityCmS2, DeltaSeconds, GroundFriction);
 }
 
 FRotator ASpaceshipPawn::ComputeLandedRotationStep(const FRotator& Current, const FVector& SurfaceNormal, float DeltaSeconds) const
 {
-	const FQuat From = Current.Quaternion();
-	const double Alpha = 1.0 - FMath::Exp(-LandingAlignRate * DeltaSeconds);
-	return FQuat::Slerp(From, LevelOnSurface(From, SurfaceNormal.GetSafeNormal()), Alpha).GetNormalized().Rotator();
+	return FShipFlightModel::LandedRotationStep(Current, SurfaceNormal, DeltaSeconds, LandingAlignRate);
 }
 
 bool ASpaceshipPawn::SweepHull(const FVector& Start, const FVector& End, const FQuat& Rotation, FHitResult& OutHit) const
@@ -3069,8 +3013,8 @@ void ASpaceshipPawn::UpdateLanding(float DeltaSeconds)
 		&& Body->GetSurfaceFrame(GetActorLocation(), LandingFootprintRadiusCm, SurfacePoint, GroundNormal))
 	{
 		bSurfaceValid = true;
-		GroundSlopeDeg = AngleBetweenDeg(GroundNormal, Environment.Up);
-		GroundTiltDeg = AngleBetweenDeg(GetActorUpVector(), GroundNormal);
+		GroundSlopeDeg = FShipFlightModel::AngleBetweenDeg(GroundNormal, Environment.Up);
+		GroundTiltDeg = FShipFlightModel::AngleBetweenDeg(GetActorUpVector(), GroundNormal);
 
 		// Straight down with the real hull shape: the gap is what the collision actually sees,
 		// wherever on the hull the first contact would be.
@@ -3152,7 +3096,7 @@ void ASpaceshipPawn::UpdateLandedMotion(float DeltaSeconds)
 
 	const double Alpha = 1.0 - FMath::Exp(-LandingAlignRate * DeltaSeconds);
 	const FQuat Current = GetActorQuat();
-	const FQuat Rotation = FQuat::Slerp(Current, LevelOnSurface(Current, GroundNormal), Alpha).GetNormalized();
+	const FQuat Rotation = FQuat::Slerp(Current, FShipFlightModel::LevelOnSurface(Current, GroundNormal), Alpha).GetNormalized();
 
 	// Leftover sliding along the ground dies out instead of stopping dead.
 	LinearVelocity = FVector::VectorPlaneProject(LinearVelocity, GroundNormal) * FMath::Exp(-LandedBrakeRate * DeltaSeconds);
@@ -3561,19 +3505,7 @@ void ASpaceshipPawn::UpdateVtol(float DeltaSeconds)
 
 FRotator ASpaceshipPawn::ComputeVtolLevelStep(const FVector& WorldUp, float DeltaSeconds) const
 {
-	if (VtolBlend <= 0.f || VtolLevelRate <= 0.f || WorldUp.IsNearlyZero())
-	{
-		return FRotator::ZeroRotator;
-	}
-	// Where the hull's own up points, seen from the hull: level means straight up its Z.
-	const FVector LocalUp = GetActorQuat().UnrotateVector(WorldUp.GetSafeNormal());
-	// Negated: a nose-up hull sees the world's up leaning towards its own nose, and levelling means
-	// turning the other way (checked against the measured step in test_vtol_sc2b.py).
-	const double PitchError = FMath::RadiansToDegrees(FMath::Atan2(-LocalUp.X, LocalUp.Z));
-	const double RollError = FMath::RadiansToDegrees(FMath::Atan2(LocalUp.Y, LocalUp.Z));
-	// The whole rate only once VTOL is fully in; half way in, half the authority.
-	const double Step = double(VtolLevelRate) * double(VtolBlend) * double(DeltaSeconds);
-	return FRotator(FMath::Clamp(PitchError, -Step, Step), 0.0, FMath::Clamp(RollError, -Step, Step));
+	return FShipFlightModel::VtolLevelStep(GetActorQuat(), WorldUp, DeltaSeconds, VtolBlend, VtolLevelRate);
 }
 
 void ASpaceshipPawn::HandleVtol(const FInputActionValue& Value)
@@ -3662,46 +3594,25 @@ void ASpaceshipPawn::UpdateGear(float DeltaSeconds)
 	PoseGearLegs();
 }
 
+FShipFlightModel::FGearShape ASpaceshipPawn::GetGearShape() const
+{
+	FShipFlightModel::FGearShape Gear;
+	Gear.ExtensionCm = GearExtensionCm;
+	Gear.FoldDeg = GearFoldDeg;
+	Gear.PadThicknessCm = GearPadThicknessCm;
+	Gear.StrutRadiusCm = GearStrutRadiusCm;
+	Gear.PadRadiusCm = GearPadRadiusCm;
+	return Gear;
+}
+
 TArray<FVector> ASpaceshipPawn::ComputeGearLegPose(float Deploy, bool bNose) const
 {
-	// First the leg swings down from under the hull (0 .. 60 % of the travel), then the piston
-	// extends to full length (40 .. 100 %): the two overlap, so it reads as one movement.
-	auto Ease = [](float X) { X = FMath::Clamp(X, 0.f, 1.f); return X * X * (3.f - 2.f * X); };
-	const float Swing = Ease(Deploy / 0.6f);
-	const float Extend = Ease((Deploy - 0.4f) / 0.6f);
-
-	// Pitch +90 turns straight down (-Z) into forward (+X): the nose leg folds forward, the main legs back.
-	const float Pitch = (bNose ? 1.f : -1.f) * GearFoldDeg * (1.f - Swing);
-
-	// Along the leg (pivot frame, Z up, the socket at 0, the pad's sole at -Reach). The sleeve starts
-	// inside the hull so no gap shows at the root, wherever the belly is above the socket.
-	const double Reach = GearExtensionCm * FMath::Lerp(0.55, 1.0, double(Extend));
-	const double Inside = 40.0;
-	const double SleeveLength = Inside + 0.45 * GearExtensionCm;
-	const double SleeveBottom = Inside - SleeveLength;
-	const double PadTop = -Reach + GearPadThicknessCm;
-	const double PistonTop = SleeveBottom + 10.0;
-	const double PistonLength = FMath::Max(PistonTop - PadTop, 1.0);
-	const double StrutDiameter = 2.0 * GearStrutRadiusCm / 100.0;
-	const double PistonDiameter = 0.65 * StrutDiameter;
-	const double PadDiameter = 2.0 * GearPadRadiusCm / 100.0;
-
-	// The engine cylinder is 100 cm across and 100 cm tall around its centre.
-	return {
-		FVector(Pitch, 0.0, 0.0),
-		FVector(0.0, 0.0, Inside - 0.5 * SleeveLength),
-		FVector(StrutDiameter, StrutDiameter, SleeveLength / 100.0),
-		FVector(0.0, 0.0, PadTop + 0.5 * PistonLength),
-		FVector(PistonDiameter, PistonDiameter, PistonLength / 100.0),
-		FVector(0.0, 0.0, -Reach + 0.5 * GearPadThicknessCm),
-		FVector(PadDiameter, PadDiameter, GearPadThicknessCm / 100.0),
-	};
+	return FShipFlightModel::GearLegPose(Deploy, bNose, GetGearShape());
 }
 
 float ASpaceshipPawn::ComputeGearStowOffsetCm(float Deploy) const
 {
-	const float X = FMath::Clamp(Deploy, 0.f, 1.f);
-	return GearStowTravelCm * (1.f - X * X * (3.f - 2.f * X));
+	return FShipFlightModel::GearStowOffsetCm(Deploy, GearStowTravelCm);
 }
 
 void ASpaceshipPawn::BuildGearLegs()

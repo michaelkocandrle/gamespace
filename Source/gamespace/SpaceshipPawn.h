@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "CelestialBody.h"
+#include "ShipFlightModel.h"
 #include "SpaceshipPawn.generated.h"
 
 class UAudioComponent;
@@ -2047,6 +2048,13 @@ private:
 	/** Fills in any unassigned input asset: first from /Game/Input, then procedurally. */
 	void ResolveInputAssets();
 	void BuildProceduralInputAssets();
+
+	/** This ship's tuning in the shape FShipFlightModel takes (the UPROPERTYs stay here). */
+	FShipFlightModel::FDrag GetDragTuning() const;
+	FShipFlightModel::FHeat GetHeatTuning() const;
+	FShipFlightModel::FLandingLimits GetLandingLimits() const;
+	FShipFlightModel::FGearShape GetGearShape() const;
+	FShipFlightModel::FQuantumDrive GetQuantumDrive() const;
 
 	void UpdateAngularMotion(float DeltaSeconds);
 	void UpdateLinearMotion(float DeltaSeconds);
