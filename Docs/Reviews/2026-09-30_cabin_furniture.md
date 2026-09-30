@@ -9,6 +9,8 @@ dávka 6, `Tools/Kit/kit_furniture.py`). Posuzuje se z první osoby (oko 1,65 m)
 - Listy a brief: `round1/`, `round2/`, `round3/`, `verify/`
 - Výstupy kritika: `round1/critic.md`, `round2/critic.md`, `round3/critic.md`, `verify/critic.md`
 - Důkazy: `2026-09-30_cabin_furniture/evidence/`
+- Finální snímky ze zabalené hry: `Saved/Shots/20260930_210830_wayfarer_cabin_furniture` (1920×1080, 60–65 FPS
+  v kajutě)
 
 ## Co nábytek dostal (konečný stav)
 
