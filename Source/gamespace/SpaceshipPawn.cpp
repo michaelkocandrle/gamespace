@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SpaceshipPawn.h"
+#include "SpaceshipLog.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/AudioComponent.h"
@@ -174,7 +175,7 @@ namespace
 		}));
 }
 
-DEFINE_LOG_CATEGORY_STATIC(LogSpaceship, Log, All);
+DEFINE_LOG_CATEGORY(LogSpaceship);
 
 namespace SpaceshipPawnDefaults
 {
@@ -340,7 +341,10 @@ ASpaceshipPawn::ASpaceshipPawn()
 	EngineAudio->bEnableLowPassFilter = true;
 	EngineAudio->LowPassFilterFrequency = EngineLowPassIdleHz;
 
-	SpaceDust = CreateDefaultSubobject<USpaceDustComponent>(TEXT("SpaceDust"));
+	// The ship's systems state: no transform and no tick of its own (the pawn's Tick drives it).
+	Systems = CreateDefaultSubobject<UShipSystemsComponent>(TEXT("ShipSystems"));
+
+	SpaceDust =CreateDefaultSubobject<USpaceDustComponent>(TEXT("SpaceDust"));
 	SpaceDust->SetupAttachment(HullCollision);
 	SpeedTunnel = CreateDefaultSubobject<USpaceSpeedTunnelComponent>(TEXT("SpeedTunnel"));
 	SpeedTunnel->SetupAttachment(HullCollision);
@@ -1412,7 +1416,7 @@ float ASpaceshipPawn::GetModeMaxSpeed() const
 	}
 	const float Scm = IsPrecisionActive() ? ScmMaxSpeed * PrecisionSpeedFraction : ScmMaxSpeed;
 	// VTOL is slower than SCM but never faster than precision mode, which is slower still.
-	return FMath::Lerp(Scm, FMath::Min(Scm, VtolMaxSpeed), VtolBlend);
+	return FMath::Lerp(Scm, FMath::Min(Scm, VtolMaxSpeed), Systems->GetVtolBlend());
 }
 
 float ASpaceshipPawn::GetSpeedLimit() const
@@ -2215,7 +2219,7 @@ void ASpaceshipPawn::UpdateAfterburner(float DeltaSeconds)
 	// can do something: W forward, no spacebrake, flying. VTOL refuses it too - the mains are down to a
 	// third and the ship is standing on its lift thrusters (SC-2b).
 	bAfterburnerActive = bAfterburnerHeld && ThrustInput > 0.f && !bSpaceBrakeHeld && !bAfterburnerLocked && AfterburnerFuel > 0.f
-		&& MasterMode == EMasterMode::SCM && !IsPrecisionActive() && !bVtolMode && QuantumState != EQuantumState::Traveling
+		&& MasterMode == EMasterMode::SCM && !IsPrecisionActive() && !Systems->IsVtolOn() && QuantumState != EQuantumState::Traveling
 		&& LandingState != ELandingState::Landed;
 
 	if (bAfterburnerActive)
@@ -2517,7 +2521,7 @@ void ASpaceshipPawn::BeginQuantumJump()
 	QuantumFuel = FMath::Max(0.f, QuantumFuel - ComputeQuantumFuelUse(QuantumTargetDistanceCm));
 	bBoostActive = false;
 	bAfterburnerActive = false;
-	bVtolMode = false;
+	Systems->ClearVtol();
 	// A lighter jolt than a drop-out: the jump now builds up (QuantumRampSeconds) rather than snapping.
 	CameraKick = 0.4f;
 	QuantumChargeAudio = nullptr;
@@ -2769,7 +2773,7 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		// strengthens the manoeuvring thrusters (retro included), the afterburner the main ones.
 		const double Maneuver = (MasterMode == EMasterMode::NAV ? NavManeuverScale : 1.0) * (bBoostActive ? BoostManeuverMultiplier : 1.0);
 		// VTOL (SC-2b): the thrust moves off the mains and onto the lift and lateral thrusters.
-		const double Vtol = double(VtolBlend);
+		const double Vtol = double(Systems->GetVtolBlend());
 		const double VtolMain = FMath::Lerp(1.0, double(VtolThrustFraction), Vtol);
 		const double VtolLift = FMath::Lerp(1.0, double(VtolLiftMultiplier), Vtol);
 		const double VtolStrafe = FMath::Lerp(1.0, double(VtolStrafeMultiplier), Vtol);
@@ -2796,10 +2800,10 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 				{
 					DesiredLocal *= SpeedLimit / DesiredLocal.Size();
 				}
-				if (VtolBlend > 0.f)
+				if (Systems->GetVtolBlend() > 0.f)
 				{
 					// In VTOL Space and Ctrl are a climb rate, not another way of reaching the top speed.
-					const double ClimbLimit = FMath::Lerp(SpeedLimit, double(VtolClimbSpeed) * SpeedLimiterFraction, double(VtolBlend));
+					const double ClimbLimit = FMath::Lerp(SpeedLimit, double(VtolClimbSpeed) * SpeedLimiterFraction, double(Systems->GetVtolBlend()));
 					DesiredLocal.Z = FMath::Clamp(DesiredLocal.Z, -ClimbLimit, ClimbLimit);
 				}
 				if (LiftInput < 0.f && bHasEnvironment)
@@ -3476,36 +3480,17 @@ void ASpaceshipPawn::SetPrecisionMode(bool bOn)
 
 void ASpaceshipPawn::SetVtol(bool bOn)
 {
-	if (bOn == bVtolMode)
-	{
-		return;
-	}
-	// NAV is for travel: asking for VTOL there does nothing, and switching to NAV drops it (UpdateVtol).
-	if (bOn && MasterMode != EMasterMode::SCM)
-	{
-		UE_LOG(LogSpaceship, Log, TEXT("%s: VTOL refused, SCM only"), *GetName());
-		return;
-	}
-	// SCM only, so never in a quantum jump (NAV).
-	bVtolMode = bOn;
-	UE_LOG(LogSpaceship, Log, TEXT("%s: VTOL %s"), *GetName(), bOn ? TEXT("on") : TEXT("off"));
+	Systems->SetVtol(bOn, MasterMode == EMasterMode::SCM);
 }
 
 void ASpaceshipPawn::UpdateVtol(float DeltaSeconds)
 {
-	if (bVtolMode && MasterMode != EMasterMode::SCM)
-	{
-		bVtolMode = false;
-		UE_LOG(LogSpaceship, Log, TEXT("%s: VTOL off (NAV)"), *GetName());
-	}
-	const float Target = bVtolMode ? 1.f : 0.f;
-	const float Step = DeltaSeconds / FMath::Max(VtolTransitionSeconds, 0.01f);
-	VtolBlend = FMath::Clamp(VtolBlend + FMath::Clamp(Target - VtolBlend, -Step, Step), 0.f, 1.f);
+	Systems->UpdateVtol(DeltaSeconds, MasterMode == EMasterMode::SCM, VtolTransitionSeconds);
 }
 
 FRotator ASpaceshipPawn::ComputeVtolLevelStep(const FVector& WorldUp, float DeltaSeconds) const
 {
-	return FShipFlightModel::VtolLevelStep(GetActorQuat(), WorldUp, DeltaSeconds, VtolBlend, VtolLevelRate);
+	return FShipFlightModel::VtolLevelStep(GetActorQuat(), WorldUp, DeltaSeconds, Systems->GetVtolBlend(), VtolLevelRate);
 }
 
 void ASpaceshipPawn::HandleVtol(const FInputActionValue& Value)

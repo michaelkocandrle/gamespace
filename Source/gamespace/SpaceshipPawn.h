@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "CelestialBody.h"
 #include "ShipFlightModel.h"
+#include "ShipSystemsComponent.h"
 #include "SpaceshipPawn.generated.h"
 
 class UAudioComponent;
@@ -743,15 +744,15 @@ public:
 	 * VtolTransitionSeconds, so nothing snaps - IsVtolOn is the switch, GetVtolBlend the amount.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|VTOL")
-	bool IsVtolOn() const { return bVtolMode; }
+	bool IsVtolOn() const { return Systems->IsVtolOn(); }
 
 	/** 0 fully on the mains .. 1 fully on the lift thrusters. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|VTOL")
-	float GetVtolBlend() const { return VtolBlend; }
+	float GetVtolBlend() const { return Systems->GetVtolBlend(); }
 
 	/** Switched on and in SCM: NAV is for travel and turns VTOL off. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|VTOL")
-	bool IsVtolActive() const { return bVtolMode && MasterMode == EMasterMode::SCM; }
+	bool IsVtolActive() const { return Systems->IsVtolOn() && MasterMode == EMasterMode::SCM; }
 
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|VTOL")
 	void SetVtol(bool bOn);
@@ -766,7 +767,7 @@ public:
 
 	/** G: VTOL on / off. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|VTOL")
-	void ToggleVtol() { SetVtol(!bVtolMode); }
+	void ToggleVtol() { SetVtol(!Systems->IsVtolOn()); }
 
 	/**
 	 * The touchdown rule with the gear: GearUp unless the gear is down and locked, otherwise
@@ -968,6 +969,10 @@ protected:
 	/** Engine loop. Started and stopped by UpdateEngineAudio, never auto-activated. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UAudioComponent> EngineAudio;
+
+	/** Systems state (VTOL so far; master mode, limiter, boost and afterburner follow). Tuning stays here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipSystemsComponent> Systems;
 
 	/** What the gear legs are built from (/Engine/BasicShapes/Cylinder): placeholder art until a modelled gear replaces it. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Gear")
@@ -2185,10 +2190,6 @@ private:
 	float GearDeploy = 0.f;
 	float GearMessageSeconds = 0.f;
 	bool bPrecisionMode = false;
-
-	/** VTOL switched on (G), and how far the thrust has moved to the lift thrusters, 0..1. */
-	bool bVtolMode = false;
-	float VtolBlend = 0.f;
 
 	/** One visible gear leg: pivot at the socket, a sleeve, a piston and a foot pad. */
 	struct FGearLeg
