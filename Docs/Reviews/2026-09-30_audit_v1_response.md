@@ -22,7 +22,7 @@ jsou v `Docs/ARCHITECTURE.md`.
 | P1: debug API v pawnu | Součást plánu rozdělení (`UShipDebugComponent`, pawn přeposílá jména pro testy). | návrh |
 | P2: AlwaysCook a pevné cesty assetů | Odloženo do růstu knihovny assetů (`ARCHITECTURE.md` kap. 4). | odloženo |
 | P2: dokumentace | `CURRENT.md`, `ARCHITECTURE.md`, hierarchie, HANDOFF archiv (viz níže). | hotovo |
-| P2: CI | GitHub Actions jen pro offline testy a compileall (`.github/workflows/offline-tests.yml`). | krok 6 |
+| P2: CI | GitHub Actions jen pro offline testy a compileall: `.github/workflows/offline-tests.yml` spouští `Tools/Test.ps1` (pwsh na Linuxu, bez LFS). Build UE ne (rozhodnutí autora). | hotovo, první běh po pushi |
 | 4.9 `SpaceUserSettings` (`const_cast`) | Zapsáno; opravit při nejbližší změně nastavení. | odloženo |
 
 Vedlejší nález: `compileall` hlásí `SyntaxWarning: invalid escape sequence '\T'` v docstringách šesti

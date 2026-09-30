@@ -1,0 +1,40 @@
+# Offline tests: compileall and the plain-Python tests, the same command as locally (Tools/Test.ps1 without -UE).
+# No Unreal build or Unreal tests here (audit v1 follow-up, 30. 9. 2026): those need the engine and the LFS content.
+name: Offline tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: offline-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # LFS content (.uasset, .png, .blend ...) is not needed: the offline tests read scripts and JSON only.
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Python packages
+        run: python -m pip install --disable-pip-version-check numpy pillow scipy
+
+      - name: Tools/Test.ps1 (compileall + offline tests)
+        shell: pwsh
+        run: ./Tools/Test.ps1
+
+      - name: Test logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: offline-test-logs
+          path: Saved/Tests/

@@ -30,7 +30,7 @@ Stav k **30. 9. 2026**.
 - **Flotila:** Ship Matrix a dossiery publikované (odkazy ve skillu `ship-pipeline` 1b); Delver a Farsight jen
   jako spec. Vanguard a první stíhačka odstraněny 24. 9.
 - **Nástroje:** `Tools/Test.ps1` (jednotný běh testů), `Tools/Build.ps1`, engine přes `GAMESPACE_UE_ROOT`
-  (`Tools/UERoot.ps1`).
+  (`Tools/UERoot.ps1`), GitHub Actions spouští při každém pushi offline testy (`.github/workflows/offline-tests.yml`).
 
 ## Čeká na rozhodnutí autora
 

@@ -3,7 +3,8 @@
     Runs the project's tests with one summary: the offline ones by default, the Blender and Unreal ones on request.
 
 .DESCRIPTION
-    Offline (plain Python, seconds; the same set runs in GitHub Actions, .github/workflows/offline-tests.yml):
+    Offline (plain Python, seconds; GitHub Actions runs the same command with pwsh on Linux,
+    .github/workflows/offline-tests.yml):
       - compileall of Tools/ and Content/Python/ (syntax of every script);
       - the unit tests in Tools/*/tests/ (ship export core, import plan, silhouette compare);
       - the static checks in Tools/Tests/ that need neither Unreal nor Blender (material HLSL, decal orientation).
@@ -34,7 +35,7 @@ param(
 $ErrorActionPreference = "Continue"
 if ($All) { $Blender = $true; $UE = $true }
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$logDir = Join-Path $repo ("Saved\Tests\{0:yyyyMMdd_HHmmss}" -f (Get-Date))
+$logDir = Join-Path $repo ("Saved/Tests/{0:yyyyMMdd_HHmmss}" -f (Get-Date))
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 $oldPrefix = $env:PYTHONPYCACHEPREFIX
 $oldSkip = $env:GAMESPACE_SKIP_BLENDER
@@ -96,21 +97,21 @@ try {
     Invoke-Python "offline" "compileall Tools Content/Python" @("-m", "compileall", "-q", "Tools", "Content/Python")
     $offline = @(Get-ChildItem (Join-Path $repo "Tools") -Recurse -Filter "test_*.py" |
         Where-Object { $_.Directory.Name -ceq "tests" }) +
-        @("test_material_hlsl.py", "test_decal_orientation.py" | ForEach-Object { Get-Item (Join-Path $repo "Tools\Tests\$_") })
+        @("test_material_hlsl.py", "test_decal_orientation.py" | ForEach-Object { Get-Item (Join-Path $repo "Tools/Tests/$_") })
     foreach ($file in $offline) {
         Invoke-Python "offline" $file.Name @($file.FullName)
     }
 
     if ($Blender) {
         Write-Host "Blender tests"
-        foreach ($file in Get-ChildItem (Join-Path $repo "Tools\Tests") -Filter "test_ship_geometry.py" | Where-Object Name -like $Filter) {
+        foreach ($file in Get-ChildItem (Join-Path $repo "Tools/Tests") -Filter "test_ship_geometry.py" | Where-Object Name -like $Filter) {
             Invoke-Python "blender" $file.Name @($file.FullName)
         }
     }
 
     if ($UE) {
         Write-Host "Unreal tests (one editor commandlet each)"
-        $ueTests = Get-ChildItem (Join-Path $repo "Tools\Tests") -Filter "test_*.py" |
+        $ueTests = Get-ChildItem (Join-Path $repo "Tools/Tests") -Filter "test_*.py" |
             Where-Object { $_.Name -like $Filter -and (Select-String -Path $_.FullName -Pattern '^import unreal' -Quiet) } |
             Sort-Object Name
         foreach ($file in $ueTests) {

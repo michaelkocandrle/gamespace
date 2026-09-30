@@ -248,7 +248,8 @@ Spouštěj **nástrojem PowerShell** (přes bash se rozbije `$PSScriptRoot`):
 ```
 
 Seznam testů, co pokrývají a loď pod testem (`Tools/Tests/ship_under_test.py`, `SHIP = "Wayfarer"`): skill
-`unreal-scripting` kap. 3.
+`unreal-scripting` kap. 3. Offline část (`Tools/Test.ps1` bez `-UE`) běží při každém pushi v GitHub Actions
+(`.github/workflows/offline-tests.yml`, Linux, pwsh); build UE a testy v UE tam nejsou.
 
 Test musí hlídat to, co autor viděl rozbité. Když se opraví vizuální chyba, přidej do testu
 kontrolu, která by ji zachytila (příklad: `no_nanite_parts` v `test_import_ship_plan.py`).

@@ -80,6 +80,8 @@ rozhodnutí = úprava tohoto souboru ve stejném commitu, s datem a důvodem.
 
 - **Testy:** headless UE testy (`Tools/Tests`, commandlet s Pythonem) a offline Python testy (`Tools/*/tests`,
   statické kontroly). Jeden příkaz `Tools/Test.ps1` s jednotným souhrnem.
+- **CI:** GitHub Actions spouští `Tools/Test.ps1` bez `-UE` (compileall a offline testy, Linux, bez LFS). Build UE
+  a testy v UE v CI nejsou: chtěly by Windows runner s enginem a LFS obsahem (audit v1, P1/P2; rozhodnutí autora).
 - **Vizuální ověření:** `USpaceShotRunner` podle JSON scénářů v zabalené hře nebo v rychlé smyčce `-Editor`;
   nezávislý vizuální kritik (skill `visual-review`). Kritik doplňuje automatické kontroly, nenahrazuje je.
 - **Cesta k enginu** je na jediném místě: `Tools/UERoot.ps1` (`GAMESPACE_UE_ROOT`, jinak výchozí instalace).
