@@ -6,6 +6,7 @@
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "SpaceCelestialRegistrySubsystem.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace DistantBodyDefaults
@@ -65,6 +66,24 @@ void ADistantBody::OnConstruction(const FTransform& Transform)
 	{
 		PlaceOnOrbit(0.0);
 	}
+}
+
+void ADistantBody::PostRegisterAllComponents()
+{
+	Super::PostRegisterAllComponents();
+	if (USpaceCelestialRegistrySubsystem* Registry = USpaceCelestialRegistrySubsystem::Get(GetWorld()))
+	{
+		Registry->Register(this);
+	}
+}
+
+void ADistantBody::PostUnregisterAllComponents()
+{
+	if (USpaceCelestialRegistrySubsystem* Registry = USpaceCelestialRegistrySubsystem::Get(GetWorld()))
+	{
+		Registry->Unregister(this);
+	}
+	Super::PostUnregisterAllComponents();
 }
 
 FVector ADistantBody::ComputeOrbitOffset(double TimeSeconds) const

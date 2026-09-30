@@ -43,6 +43,12 @@ rozhodnutí = úprava tohoto souboru ve stejném commitu, s datem a důvodem.
   „planeta, u které jsem“.
 - Registry místo průchodu světem (`TActorIterator`) se zavádějí jen pro dotazy volané často nebo z více lodí
   (audit v1, 4.2); jednorázové a ladicí příkazy procházejí svět dál.
+- **`USpaceCelestialRegistrySubsystem`** (30. 9. 2026): seznam těles světa (`ACelestialBody`, `ADistantBody`).
+  Tělesa se přihlašují s registrací komponent (spawn, level, streaming, editor), zničené vypadnou (slabé ukazatele).
+  Čtou z něj `FindNearest`, quantum (cíl, překážky) a radar. Ve světech bez subsystémů záložní průchod.
+- **Registr lodí a cílů** je jen návrh (`Docs/Reviews/2026-09-30_registry_design.md`): zavést, až bude víc lodí,
+  NPC, stanic nebo POI, nebo až profil ukáže radar či hledání lodě v rozpočtu snímku. Radar zatím prochází jen
+  pawny a static mesh herce.
 
 ## 4. Obsah a assety
 
@@ -86,7 +92,7 @@ Podrobná reakce bod po bodu: `Docs/Reviews/2026-09-30_audit_v1_response.md`.
 | Trackované `.pyc` | neplatí (v historii nikdy nebyly) |
 | Víc zdrojů pravdy v dokumentaci | přijato: hierarchie v `CLAUDE.md`, `CURRENT.md`, tento soubor, HANDOFF archiv |
 | Rozdělit `ASpaceshipPawn`, oddělit testovací API | přijato postupně, plán čeká na schválení |
-| Registry místo průchodů světem | přijato pro časté dotazy (tělesa, radar), obecný registr lodí a cílů zatím jen návrh |
+| Registry místo průchodů světem | přijato pro časté dotazy: `USpaceCelestialRegistrySubsystem` (tělesa, radar); obecný registr lodí a cílů zatím jen návrh |
 | Pevný časový krok letu | odloženo (kap. 2) |
 | Asset Manager, prostorové dotazy, síťová architektura | odloženo, až je vyvolá růst světa nebo multiplayer |
 | `SpaceUserSettings`: const metoda s migrací přes `const_cast` | zapsáno; opravit při nejbližší změně nastavení |

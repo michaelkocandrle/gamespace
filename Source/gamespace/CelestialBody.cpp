@@ -4,6 +4,7 @@
 
 #include "Components/StaticMeshComponent.h"
 #include "EngineUtils.h"
+#include "SpaceCelestialRegistrySubsystem.h"
 
 ACelestialBody::ACelestialBody()
 {
@@ -30,30 +31,60 @@ bool ACelestialBody::GetSurfaceFrame(const FVector& /*Location*/, double /*Footp
 	return false;
 }
 
+void ACelestialBody::PostRegisterAllComponents()
+{
+	Super::PostRegisterAllComponents();
+	if (USpaceCelestialRegistrySubsystem* Registry = USpaceCelestialRegistrySubsystem::Get(GetWorld()))
+	{
+		Registry->Register(this);
+	}
+}
+
+void ACelestialBody::PostUnregisterAllComponents()
+{
+	if (USpaceCelestialRegistrySubsystem* Registry = USpaceCelestialRegistrySubsystem::Get(GetWorld()))
+	{
+		Registry->Unregister(this);
+	}
+	Super::PostUnregisterAllComponents();
+}
+
 ACelestialBody* ACelestialBody::FindNearest(const UWorld* World, const FVector& Location, FCelestialEnvironment* OutEnvironment, bool* bOutHasEnvironment)
 {
 	ACelestialBody* Nearest = nullptr;
-	double NearestDistance = TNumericLimits<double>::Max();
-	// A handful of bodies at most, so a walk is cheaper than keeping a registry.
-	for (TActorIterator<ACelestialBody> It(World); It; ++It)
+	if (USpaceCelestialRegistrySubsystem* Registry = USpaceCelestialRegistrySubsystem::Get(World))
 	{
-		const double Distance = It->GetSurfaceDistance(Location);
-		if (Distance < NearestDistance)
+		// Every frame from the ship, the character, the sky and origin rebasing: the registry, not the world.
+		Nearest = Registry->FindNearestCelestialBody(Location);
+	}
+	else
+	{
+		// Worlds without subsystems (editor previews): a walk.
+		double NearestDistance = TNumericLimits<double>::Max();
+		for (TActorIterator<ACelestialBody> It(World); It; ++It)
 		{
-			NearestDistance = Distance;
-			Nearest = *It;
+			const double Distance = It->GetSurfaceDistance(Location);
+			if (Distance < NearestDistance)
+			{
+				NearestDistance = Distance;
+				Nearest = *It;
+			}
 		}
 	}
 
-	FCelestialEnvironment Environment;
-	const bool bHasEnvironment = Nearest && Nearest->SampleEnvironment(Location, Environment);
-	if (OutEnvironment)
+	if (OutEnvironment || bOutHasEnvironment)
 	{
-		*OutEnvironment = Environment;
-	}
-	if (bOutHasEnvironment)
-	{
-		*bOutHasEnvironment = bHasEnvironment;
+		// The terrain sample only for callers that asked for it (the debug HUD and rebasing only want the body).
+		FCelestialEnvironment Environment;
+		const bool bHasEnvironment = Nearest && Nearest->SampleEnvironment(Location, Environment);
+		if (OutEnvironment)
+		{
+			*OutEnvironment = Environment;
+		}
+		if (bOutHasEnvironment)
+		{
+			*bOutHasEnvironment = bHasEnvironment;
+		}
 	}
 	return Nearest;
 }

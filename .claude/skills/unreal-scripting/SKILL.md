@@ -84,6 +84,7 @@ Test selže na nenulovém exit kódu, tracebacku, řádku `SUMMARY … FAIL` a u
 | `test_interior.py` | starý interiér Steadfastu: usage flagy, výchozí textury samplerů, `M_KitTrim`, tagy, světla |
 | `test_scene_look.py` | uložená úroveň proti receptu (atmosféra, post process, lak) – chytá zapomenutý `build_space_scene.py` / `import_ship.py` |
 | `test_planet_l3.py`, `test_planet_rocks.py`, `test_character_l6.py`, `test_menu_settings.py` | planeta, kameny, postava, menu a nastavení |
+| `test_celestial_registry.py` | registr těles (`USpaceCelestialRegistrySubsystem`): tělesa TestSpace, spawn a zničení, radar |
 
 Testovaná loď je jmenovaná na **jednom místě**: `Tools/Tests/ship_under_test.py` (`SHIP = "Wayfarer"`).
 Bez modelované lodi (`SHIP = None`) vypíšou testy, které potřebují model (displeje a rám kokpitu, sockety

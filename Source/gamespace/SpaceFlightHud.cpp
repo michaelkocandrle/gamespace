@@ -36,6 +36,7 @@
 #include "Engine/StaticMeshActor.h"
 #include "EngineUtils.h"
 #include "PhysicsEngine/BodySetup.h"
+#include "SpaceCelestialRegistrySubsystem.h"
 #include "Stats/Stats.h"
 #include "Algo/StableSort.h"
 
@@ -2916,44 +2917,55 @@ TArray<FSpaceRadarContact> USpaceCockpitDisplays::MakeRadarContacts(const ASpace
 		Out.Label = Label;
 		return Out;
 	};
-	for (TActorIterator<AActor> It(Ship->GetWorld()); It; ++It)
+	const UWorld* World = Ship->GetWorld();
+	// Bodies: from the world's body registry (a walk only where there is none).
+	auto AddCelestial = [&](ACelestialBody& Body)
 	{
-		const AActor* Actor = *It;
-		if (Actor == Ship || Actor->IsHidden())
+		if (!Body.IsHidden())
 		{
-			continue;
+			Bodies.Add(Contact(Body.GetActorLocation(), FMath::Max(Body.GetSurfaceDistance(Origin), 0.0), true, Body.GetDisplayName().ToString()));
 		}
-		if (const ACelestialBody* Body = Cast<ACelestialBody>(Actor))
+	};
+	auto AddDistant = [&](ADistantBody& Distant)
+	{
+		if (!Distant.IsHidden())
 		{
-			Bodies.Add(Contact(Body->GetActorLocation(), FMath::Max(Body->GetSurfaceDistance(Origin), 0.0), true, Body->GetDisplayName().ToString()));
-			continue;
+			const double Surface = FVector::Dist(Origin, Distant.GetActorLocation()) - double(Distant.GetRadiusKm()) * 100000.0;
+			Bodies.Add(Contact(Distant.GetActorLocation(), FMath::Max(Surface, 0.0), true, Distant.GetDisplayName().ToString()));
 		}
-		if (const ADistantBody* Distant = Cast<ADistantBody>(Actor))
+	};
+	if (USpaceCelestialRegistrySubsystem* Registry = USpaceCelestialRegistrySubsystem::Get(World))
+	{
+		Registry->ForEachCelestialBody(AddCelestial);
+		Registry->ForEachDistantBody(AddDistant);
+	}
+	else
+	{
+		for (TActorIterator<ACelestialBody> It(World); It; ++It)
 		{
-			const double Surface = FVector::Dist(Origin, Distant->GetActorLocation()) - double(Distant->GetRadiusKm()) * 100000.0;
-			Bodies.Add(Contact(Distant->GetActorLocation(), FMath::Max(Surface, 0.0), true, Distant->GetDisplayName().ToString()));
-			continue;
+			AddCelestial(**It);
 		}
-		// Objects: other ships and characters, and meshes that can be hit (asteroids, stations, wrecks).
-		const AStaticMeshActor* MeshActor = Cast<AStaticMeshActor>(Actor);
-		const bool bObject = Actor->IsA<APawn>() || (MeshActor && MeshActor->GetStaticMeshComponent() && MeshActor->GetStaticMeshComponent()->GetStaticMesh()
-			&& MeshActor->GetActorEnableCollision() && MeshActor->GetStaticMeshComponent()->IsCollisionEnabled());
-		if (!bObject)
+		for (TActorIterator<ADistantBody> It(World); It; ++It)
 		{
-			continue;
+			AddDistant(**It);
 		}
+	}
+	// Objects: other ships and characters, and meshes that can be hit (asteroids, stations, wrecks). Only these two
+	// classes are walked, not every actor of the world (lights, volumes and the rest of the interiors).
+	auto AddObject = [&](const AActor& Actor, const AStaticMeshActor* MeshActor)
+	{
 		FVector Centre, Extent;
-		Actor->GetActorBounds(true, Centre, Extent);
+		Actor.GetActorBounds(true, Centre, Extent);
 		// Larger than the whole range (ground, a planet mesh): not a contact.
 		if (Extent.Size() > RangeCm)
 		{
-			continue;
+			return;
 		}
 		const double Distance = FVector::Dist(Origin, Centre);
 		if (Distance <= RangeCm)
 		{
 			// What it is, as far as the game knows: a ship, someone on foot, or the mesh's name (ROCK_A).
-			FString Label = Actor->IsA<ASpaceshipPawn>() ? TEXT("SHIP") : Actor->IsA<APawn>() ? TEXT("EVA") : FString();
+			FString Label = Actor.IsA<ASpaceshipPawn>() ? TEXT("SHIP") : Actor.IsA<APawn>() ? TEXT("EVA") : FString();
 			if (Label.IsEmpty() && MeshActor)
 			{
 				Label = MeshActor->GetStaticMeshComponent()->GetStaticMesh()->GetName();
@@ -2961,6 +2973,22 @@ TArray<FSpaceRadarContact> USpaceCockpitDisplays::MakeRadarContacts(const ASpace
 				Label = Label.Replace(TEXT("_"), TEXT(" ")).ToUpper();
 			}
 			Near.Add(Contact(Centre, Distance, false, Label));
+		}
+	};
+	for (TActorIterator<APawn> It(World); It; ++It)
+	{
+		if (*It != Ship && !It->IsHidden())
+		{
+			AddObject(**It, nullptr);
+		}
+	}
+	for (TActorIterator<AStaticMeshActor> It(World); It; ++It)
+	{
+		const AStaticMeshActor* MeshActor = *It;
+		if (!MeshActor->IsHidden() && MeshActor->GetStaticMeshComponent() && MeshActor->GetStaticMeshComponent()->GetStaticMesh()
+			&& MeshActor->GetActorEnableCollision() && MeshActor->GetStaticMeshComponent()->IsCollisionEnabled())
+		{
+			AddObject(*MeshActor, MeshActor);
 		}
 	}
 	Near.Sort([](const FSpaceRadarContact& A, const FSpaceRadarContact& B) { return A.DistanceM < B.DistanceM; });

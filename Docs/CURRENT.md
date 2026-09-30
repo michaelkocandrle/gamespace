@@ -64,8 +64,10 @@ Stav k **30. 9. 2026**.
 
 1. **Wayfarer, přestavba interiéru:** nábytek kajuty a nákladového prostoru z kitu (dávka 6), pak podlahy;
    otevřené body recenze kajuty.
-2. **Po auditu v1** (`Docs/Reviews/2026-09-30_audit_v1_response.md`): hlavní session zbuilduje a otestuje registr
-   těles (`USpaceCelestialRegistrySubsystem`); po schválení plánu postupně rozdělit `ASpaceshipPawn`.
+2. **Po auditu v1** (`Docs/Reviews/2026-09-30_audit_v1_response.md`): hlavní session po sloučení větve
+   `audit-v1-followup` zbuilduje a pustí testy v UE (`.\Tools\Test.ps1 -UE`, hlavně `test_celestial_registry`,
+   `test_cockpit_displays`, `test_quantum_sc4`, `test_planet_l3`, `test_character_l6`), zabalí a vyfotí
+   `cockpit` (radar); build ve worktree prošel. Po schválení plánu postupně rozdělit `ASpaceshipPawn`.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.).

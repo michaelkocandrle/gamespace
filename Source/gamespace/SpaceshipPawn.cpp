@@ -38,6 +38,7 @@
 #include "Sound/SoundBase.h"
 #include "CelestialBody.h"
 #include "DistantBody.h"
+#include "SpaceCelestialRegistrySubsystem.h"
 #include "SpaceDustComponent.h"
 #include "SpaceSpeedTunnelComponent.h"
 #include "SpaceHullSparksComponent.h"
@@ -2293,16 +2294,31 @@ namespace SpaceshipQuantum
 		{
 			return;
 		}
+		auto AddCelestial = [&Location, &OutBodies](ACelestialBody& Body)
+		{
+			const FVector Centre = Body.GetActorLocation();
+			const double Radius = FVector::Dist(Location, Centre) - Body.GetSurfaceDistance(Location);
+			OutBodies.Add({ &Body, Body.GetDisplayName().IsEmpty() ? FText::FromString(Body.GetName()) : Body.GetDisplayName(), Centre, FMath::Max(Radius, 1.0) });
+		};
+		auto AddDistant = [&OutBodies](ADistantBody& Body)
+		{
+			OutBodies.Add({ &Body, Body.GetDisplayName().IsEmpty() ? FText::FromString(Body.GetName()) : Body.GetDisplayName(),
+				Body.GetActorLocation(), double(Body.GetRadiusKm()) * 100000.0 });
+		};
+		// Twice a frame in NAV (target and obstruction): the world's body registry, not a walk of every actor.
+		if (USpaceCelestialRegistrySubsystem* Registry = USpaceCelestialRegistrySubsystem::Get(World))
+		{
+			Registry->ForEachCelestialBody(AddCelestial);
+			Registry->ForEachDistantBody(AddDistant);
+			return;
+		}
 		for (TActorIterator<ACelestialBody> It(World); It; ++It)
 		{
-			const FVector Centre = It->GetActorLocation();
-			const double Radius = FVector::Dist(Location, Centre) - It->GetSurfaceDistance(Location);
-			OutBodies.Add({ *It, It->GetDisplayName().IsEmpty() ? FText::FromString(It->GetName()) : It->GetDisplayName(), Centre, FMath::Max(Radius, 1.0) });
+			AddCelestial(**It);
 		}
 		for (TActorIterator<ADistantBody> It(World); It; ++It)
 		{
-			OutBodies.Add({ *It, It->GetDisplayName().IsEmpty() ? FText::FromString(It->GetName()) : It->GetDisplayName(),
-				It->GetActorLocation(), double(It->GetRadiusKm()) * 100000.0 });
+			AddDistant(**It);
 		}
 	}
 }
