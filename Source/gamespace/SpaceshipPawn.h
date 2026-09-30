@@ -7,6 +7,7 @@
 #include "CelestialBody.h"
 #include "ShipFlightModel.h"
 #include "ShipSystemsComponent.h"
+#include "ShipQuantumComponent.h"
 #include "SpaceshipPawn.generated.h"
 
 class UAudioComponent;
@@ -95,46 +96,6 @@ struct FShipGlowMaterial
 	TWeakObjectPtr<UMaterialInstanceDynamic> Material;
 	float BaseStrength = 0.f;
 	float Applied = -1.f;
-};
-
-/**
- * Quantum drive (SC-4), after Star Citizen's quantum travel (starcitizenreference/QuantumTravel_VideoNotes.md):
- * in NAV with a destination picked, the drive spools and calibrates on its own; holding the left mouse
- * button then jumps. It replaced the earlier cruise drive (J), which Star Citizen does not have.
- */
-UENUM(BlueprintType)
-enum class EQuantumState : uint8
-{
-	/** Nothing to do: SCM, no destination, or blocked (see EQuantumBlocker). */
-	Idle,
-	/** Spooling and calibrating: SPOOLING n% / CALIBRATING n% on the HUD. */
-	Charging,
-	/** Spooled, calibrated and nothing in the way: hold the left mouse button to jump. */
-	Ready,
-	/** In the jump: the ship cannot be steered and flies straight at the destination. */
-	Traveling,
-	/** Out of a jump: the drive cools for QuantumCooldownSeconds before the next one. */
-	Cooling
-};
-
-/** Why the quantum drive will not get ready (or why the last jump ended early). */
-UENUM(BlueprintType)
-enum class EQuantumBlocker : uint8
-{
-	None,
-	/** The drive only works in NAV (B). */
-	NeedsNav,
-	/** No destination in front of the nose. */
-	NoTarget,
-	/** The destination is closer than QuantumMinJumpKm. */
-	TooClose,
-	/** A body lies between the ship and the destination. */
-	Obstructed,
-	/** Not enough quantum fuel for the distance. */
-	NoFuel,
-	Landed,
-	/** The pilot left NAV mid-jump. */
-	Pilot
 };
 
 /**
@@ -390,11 +351,11 @@ public:
 
 	/** Tests: spool and calibration full at once (the ship still has to be pointed and unblocked). */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
-	void DebugFinishQuantumCharge() { QuantumSpool = 1.f; QuantumCalibration = 1.f; }
+	void DebugFinishQuantumCharge() { Quantum->FinishCharge(); }
 
 	/** Tests: set the quantum fuel, 0..1. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
-	void DebugSetQuantumFuel(float Fuel) { QuantumFuel = FMath::Clamp(Fuel, 0.f, 1.f); }
+	void DebugSetQuantumFuel(float Fuel) { Quantum->SetFuel(Fuel); }
 
 	/** Tests and screenshots: place the mouse virtual joystick cursor. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
@@ -425,19 +386,19 @@ public:
 	void DebugFinishMasterModeSwitch() { Systems->FinishMasterModeSwitch(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	EQuantumState GetQuantumState() const { return QuantumState; }
+	EQuantumState GetQuantumState() const { return Quantum->GetState(); }
 
 	/** Why the drive is not getting ready, or why the last jump ended early. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	EQuantumBlocker GetQuantumBlocker() const { return QuantumBlocker; }
+	EQuantumBlocker GetQuantumBlocker() const { return Quantum->GetBlocker(); }
 
 	/** Spool, 0..1: fills in NAV with a destination, whether or not the nose is on it. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	float GetQuantumSpool() const { return QuantumSpool; }
+	float GetQuantumSpool() const { return Quantum->GetSpool(); }
 
 	/** Calibration, 0..1: fills only while the nose is within QuantumAlignDeg of the destination. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	float GetQuantumCalibration() const { return QuantumCalibration; }
+	float GetQuantumCalibration() const { return Quantum->GetCalibration(); }
 
 	/** Cooling after a jump, 0..1 (1 = cool again). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
@@ -453,20 +414,20 @@ public:
 
 	/** Quantum fuel, 0..1. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	float GetQuantumFuel() const { return QuantumFuel; }
+	float GetQuantumFuel() const { return Quantum->GetFuel(); }
 
 	/** Destination: whether there is one, its name, where it is (its centre) and how far to where the jump would end, cm. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	bool HasQuantumTarget() const { return QuantumTarget.IsValid(); }
+	bool HasQuantumTarget() const { return Quantum->HasTarget(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	FText GetQuantumTargetName() const { return QuantumTargetName; }
+	FText GetQuantumTargetName() const { return Quantum->GetTargetName(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	FVector GetQuantumTargetLocation() const { return QuantumTargetCentre; }
+	FVector GetQuantumTargetLocation() const { return Quantum->GetTargetCentre(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	double GetQuantumTargetDistance() const { return QuantumTargetDistanceCm; }
+	double GetQuantumTargetDistance() const { return Quantum->GetTargetDistanceCm(); }
 
 	/**
 	 * 0..1: how much of the quantum look is showing (the tunnel, the view widening, the drone). Rises
@@ -963,6 +924,10 @@ protected:
 	/** Systems state: master mode, speed limiter, boost, afterburner and VTOL. Their tuning stays here. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UShipSystemsComponent> Systems;
+
+	/** Quantum drive state: destination, spool, calibration, the jump and its fuel. Its tuning stays here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipQuantumComponent> Quantum;
 
 	/** What the gear legs are built from (/Engine/BasicShapes/Cylinder): placeholder art until a modelled gear replaces it. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Gear")
@@ -2014,10 +1979,6 @@ private:
 	void UpdateMasterMode(float DeltaSeconds);
 	void UpdateBoost(float DeltaSeconds);
 	void UpdateQuantum(float DeltaSeconds);
-	/** Picks the destination in front of the nose and measures it (sets QuantumTarget* members). */
-	void UpdateQuantumTarget();
-	/** What stops the drive from getting ready now, for the current destination. */
-	EQuantumBlocker EvaluateQuantum() const;
 	void BeginQuantumJump();
 	void EndQuantumJump(EQuantumBlocker Reason);
 	/** One frame of a jump: straight at the arrival point, no steering, no thrusters. */
@@ -2050,6 +2011,7 @@ private:
 	FShipFlightModel::FLandingLimits GetLandingLimits() const;
 	FShipFlightModel::FGearShape GetGearShape() const;
 	FShipFlightModel::FQuantumDrive GetQuantumDrive() const;
+	FShipQuantumRules GetQuantumRules() const;
 
 	void UpdateAngularMotion(float DeltaSeconds);
 	void UpdateLinearMotion(float DeltaSeconds);
@@ -2099,25 +2061,6 @@ private:
 	bool bSpaceBrakeHeld = false;
 	float GForce = 0.f;
 	float SlipAngleDeg = 0.f;
-
-	EQuantumState QuantumState = EQuantumState::Idle;
-	EQuantumBlocker QuantumBlocker = EQuantumBlocker::NoTarget;
-	float QuantumSpool = 0.f;
-	float QuantumCalibration = 0.f;
-	float QuantumCooldownTimer = 0.f;
-	float QuantumEngageTimer = 0.f;
-	bool bQuantumEngageHeld = false;
-	float QuantumFuel = 1.f;
-	/** The destination: its actor, name, centre, radius, and the jump that would reach it. */
-	TWeakObjectPtr<AActor> QuantumTarget;
-	FText QuantumTargetName;
-	FVector QuantumTargetCentre = FVector::ZeroVector;
-	double QuantumTargetRadiusCm = 0.0;
-	double QuantumTargetDistanceCm = 0.0;
-	/** While traveling: the jump's length at the start, for progress and fuel. */
-	double QuantumJumpLengthCm = 0.0;
-	/** Seconds since the jump began, for the acceleration ramp. */
-	float QuantumTravelSeconds = 0.f;
 
 	/** Eased 0..1 blends driving camera, lights and sound. */
 	float BoostBlend = 0.f;
