@@ -714,6 +714,13 @@ snímku.
 - h) **Jméno herce (label) v zabalené hře neexistuje.** `set_actor_label` je jen editor; C++ v buildu
   herce podle něj nenajde. Co má hra najít (konzolové příkazy, logika), dostane **tag**
   (`set_editor_property("tags", [unreal.Name(...)])`) – tak to dělá `import_interior.py`.
+- i) **UE test hlásí všechny kontroly OK, a přesto ho `Test.ps1` označí FAIL (`exit 1`)** (30. 9. 2026). Příčina:
+  commandlet skončí kódem 1, když během běhu padne chyba enginu v logu (souhrn „Warning/Error Summary“ v logu
+  editoru), a `run_editor_python.ps1` jeho kód předá dál. Dvě časté chyby: `LevelEditorSubsystem.new_level("/Temp/X")`
+  mapu zároveň uloží do `Saved/X.umap`, takže další běh zaloguje „already an asset at the destination“; a
+  `EditorAssetLibrary.load_asset` na neexistující asset zaloguje „LoadAsset failed“. Řešení: prázdný svět jen
+  v paměti `unreal.EditorLoadingAndSavingUtils.new_blank_map(False)`; před načtením `does_asset_exist`.
+  Chybějící asset, kvůli kterému se kontroly nespustí, vypiš jako SKIP s důvodem, ne tiše.
 
 ### 9.6 Blender pipeline
 

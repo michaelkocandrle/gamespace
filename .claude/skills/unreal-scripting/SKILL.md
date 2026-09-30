@@ -142,6 +142,11 @@ Pravidla (commit, `git add` s výjimkou, podpis, push, zákaz force push) jsou j
 
 ## 6. Nástrahy (příznak → příčina → řešení)
 
+### Testy v UE (WORKFLOW 9.5 i)
+- **Test prošel, ale `Test.ps1` hlásí `exit 1`** → chyba enginu v logu commandletu (`Warning/Error Summary`) →
+  prázdný svět `unreal.EditorLoadingAndSavingUtils.new_blank_map(False)` místo `new_level("/Temp/X")` (ten mapu
+  uloží do `Saved/` a další běh selže), `does_asset_exist` před `load_asset`; chybějící asset jako SKIP s důvodem.
+
 ### Prostředí (WORKFLOW 9.1)
 - **Balení visí / starý exe** → soubor drží jiný proces (hru ukončí `Package.ps1` sám) → zkontroluj čas
   `gamespace.exe`, při zaseknutí napiš autorovi.
