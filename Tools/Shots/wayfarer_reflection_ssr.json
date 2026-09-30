@@ -1,0 +1,343 @@
+{
+ "_comment": "Screen space reflections alone in the Wayfarer's walked interior (author 30. 9. 2026: \"did you try SSR without Lumen?\"): today (Lumen reflections off, SSR as the project leaves it), the structure as metal 0.9 / 0.30, then r.ReflectionMethod 2 (screen space) with r.SSR.Quality 4 and MaxRoughness 0.8 on that metal and on today's 0.5 / 0.36. The warmup and the first SSR shot print the cvars to the log. Run -Editor -Width 1920 -Height 1080; SHOTS perf lines in the log.",
+ "shots": [
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 4.0,
+   "name": "warmup",
+   "camera": "chase",
+   "console": [
+    "stat none",
+    "space.InteriorLighting 1",
+    "r.ReflectionMethod",
+    "r.SSR.Quality",
+    "r.SSR.MaxRoughness",
+    "r.Lumen.Reflections.Allow"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "a_today_cabin_close",
+   "fov": 75,
+   "camera_local": [
+    1.05,
+    -0.9,
+    0.35
+   ],
+   "look_local": [
+    1.45,
+    -1.9,
+    -0.05
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "a_today_hold_close",
+   "fov": 75,
+   "camera_local": [
+    -5.15,
+    0.9,
+    0.2
+   ],
+   "look_local": [
+    -4.6,
+    2.05,
+    -0.35
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "a_today_tech_aft",
+   "fov": 90,
+   "camera_local": [
+    -0.05,
+    -0.1,
+    0.45
+   ],
+   "look_local": [
+    -2.05,
+    -0.5,
+    -0.1
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "a_today_hold_cargo",
+   "fov": 90,
+   "camera_local": [
+    -5.65,
+    -1.3,
+    0.45
+   ],
+   "look_local": [
+    -5.65,
+    1.9,
+    -0.3
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "b_metal_cabin_close",
+   "fov": 75,
+   "camera_local": [
+    1.05,
+    -0.9,
+    0.35
+   ],
+   "look_local": [
+    1.45,
+    -1.9,
+    -0.05
+   ],
+   "console": [
+    "space.Kit PaintMetallic 0.9 _Structure",
+    "space.Kit PrimaryRoughness 0.3 _Structure",
+    "space.Kit SecondaryRoughness 0.36 _Structure"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "b_metal_hold_close",
+   "fov": 75,
+   "camera_local": [
+    -5.15,
+    0.9,
+    0.2
+   ],
+   "look_local": [
+    -4.6,
+    2.05,
+    -0.35
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "b_metal_tech_aft",
+   "fov": 90,
+   "camera_local": [
+    -0.05,
+    -0.1,
+    0.45
+   ],
+   "look_local": [
+    -2.05,
+    -0.5,
+    -0.1
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "b_metal_hold_cargo",
+   "fov": 90,
+   "camera_local": [
+    -5.65,
+    -1.3,
+    0.45
+   ],
+   "look_local": [
+    -5.65,
+    1.9,
+    -0.3
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "e_metal_ssr_cabin_close",
+   "fov": 75,
+   "camera_local": [
+    1.05,
+    -0.9,
+    0.35
+   ],
+   "look_local": [
+    1.45,
+    -1.9,
+    -0.05
+   ],
+   "console": [
+    "r.ReflectionMethod 2",
+    "r.SSR.Quality 4",
+    "r.SSR.MaxRoughness 0.8",
+    "r.ReflectionMethod",
+    "r.SSR.Quality"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "e_metal_ssr_hold_close",
+   "fov": 75,
+   "camera_local": [
+    -5.15,
+    0.9,
+    0.2
+   ],
+   "look_local": [
+    -4.6,
+    2.05,
+    -0.35
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "e_metal_ssr_tech_aft",
+   "fov": 90,
+   "camera_local": [
+    -0.05,
+    -0.1,
+    0.45
+   ],
+   "look_local": [
+    -2.05,
+    -0.5,
+    -0.1
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "e_metal_ssr_hold_cargo",
+   "fov": 90,
+   "camera_local": [
+    -5.65,
+    -1.3,
+    0.45
+   ],
+   "look_local": [
+    -5.65,
+    1.9,
+    -0.3
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "f_today_ssr_cabin_close",
+   "fov": 75,
+   "camera_local": [
+    1.05,
+    -0.9,
+    0.35
+   ],
+   "look_local": [
+    1.45,
+    -1.9,
+    -0.05
+   ],
+   "console": [
+    "space.Kit PaintMetallic 0.5 _Structure",
+    "space.Kit PrimaryRoughness 0.36 _Structure",
+    "space.Kit SecondaryRoughness 0.42 _Structure"
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "f_today_ssr_hold_close",
+   "fov": 75,
+   "camera_local": [
+    -5.15,
+    0.9,
+    0.2
+   ],
+   "look_local": [
+    -4.6,
+    2.05,
+    -0.35
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "f_today_ssr_tech_aft",
+   "fov": 90,
+   "camera_local": [
+    -0.05,
+    -0.1,
+    0.45
+   ],
+   "look_local": [
+    -2.05,
+    -0.5,
+    -0.1
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 3.0,
+   "name": "f_today_ssr_hold_cargo",
+   "fov": 90,
+   "camera_local": [
+    -5.65,
+    -1.3,
+    0.45
+   ],
+   "look_local": [
+    -5.65,
+    1.9,
+    -0.3
+   ]
+  }
+ ]
+}

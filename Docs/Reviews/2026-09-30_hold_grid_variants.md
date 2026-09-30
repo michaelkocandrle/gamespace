@@ -56,3 +56,12 @@ Návrh z 28. 9. (mřížka i o 0,15 m k pravoboku, ulička 0,5–2,05 m) už nep
 
 Po rozhodnutí posunu mřížku v layoutu a šablonu, přestavím loď a projdu geometrický test a snímky nákladového
 prostoru.
+
+## Rozhodnutí (autor 30. 9. 2026): varianta B – provedeno
+
+- `Wayfarer_layout.json`: mřížka `rect` x 2,65–7,65 (dřív 2,9–7,9); šablona `Int_Grid` v setupu o 0,25 m dozadu
+  (x 7,55).
+- Loď přestavěná (`hs_build_ship`, `hs_assemble_ship`, export, `import_ship`), geometrický test PASS (včetně
+  `walk_blocked`), `test_ship_import` PASS.
+- Ve hře: `2026-09-30_hold_grid_variants/grid_B_in_game.jpg` (vlevo A, vpravo B; zabalená hra, preset
+  `wayfarer_rooms`, snímek 09).

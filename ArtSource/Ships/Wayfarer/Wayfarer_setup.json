@@ -1693,10 +1693,10 @@
   },
   {
    "name": "Int_Grid",
-   "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
+   "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames; 30. 9.: 0.25 m aft with the grid's end (variant B)",
    "texture": "D_Int_Grid",
    "location": [
-    -245.0,
+    -270.0,
     202.5,
     -25.0
    ],

@@ -88,8 +88,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 613247,
-      "verts": 454131,
+      "tris": 613241,
+      "verts": 454128,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -144,8 +144,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 66404,
-      "verts": 64076,
+      "tris": 66428,
+      "verts": 64112,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -164,7 +164,7 @@
         [
           9.70612907409668,
           7.332275390625,
-          2.80289626121521
+          2.8028957843780518
         ]
       ]
     },
@@ -218,8 +218,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 404205,
-      "verts": 210432,
+      "tris": 404215,
+      "verts": 210434,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -390,7 +390,7 @@
         [
           -4.251672267913818,
           4.405613422393799,
-          1.049353837966919
+          1.0493535995483398
         ]
       ]
     },
@@ -707,7 +707,7 @@
     [
       10.75,
       7.355200290679932,
-      2.80289626121521
+      2.8028957843780518
     ]
   ],
   "render_size_m": [

@@ -69,6 +69,31 @@ Měřeno v rychlé smyčce (`Shots.ps1 -Editor`, 1920×1080), GPU ms, průměr d
 - Přepnutí je malé: `SetInteriorLighting` nechá `r.Lumen.Reflections.Allow 1` s `MaxRoughnessToTrace 0.32`
   a `DownsampleFactor 2` a `import_kit.py` nastaví `Kit_Structure` na 0,9 / 0,30.
 
+## Doplněk: samotné SSR bez Lumenu (30. 9. 2026, dotaz autora)
+
+Autor se ptal, jestli jsem zkoušel jen odrazy v prostoru obrazovky. Varianta a) už SSR měla: v interiéru jsou
+odrazy Lumenu vypnuté (`r.Lumen.Reflections.Allow 0`) a běží SSR se `r.SSR.Quality 3` ze škálovatelnosti,
+`r.SSR.MaxRoughness` výchozí (−1, tedy podle kvality). Zvlášť jsem teď změřil čisté SSR (`r.ReflectionMethod 2`)
+v nejvyšší kvalitě (`r.SSR.Quality 4`) a do drsnosti 0,8. Preset `Tools/Shots/wayfarer_reflection_ssr.json`,
+snímky `Saved/Shots/20260930_222838_wayfarer_reflection_ssr`, listy `2026-09-30_interior_reflections/ssr_only.jpg`
+a `ssr_only_crop.jpg`.
+
+| Záběr (GPU ms) | a) dnes | b) kov 0,9 / 0,30 | e) kov + jen SSR | f) dnešní materiály + jen SSR |
+|---|---|---|---|---|
+| kajuta zblízka | 13,41 | 13,59 | 13,67 | 14,82 |
+| nákladový prostor zblízka | 13,72 | 13,85 | 13,99 | 15,35 |
+| strojovna k zádi | 15,11 | 15,16 | 15,31 | 16,79 |
+| nákladový prostor, celá stěna | 13,86 | 14,02 | 14,33 | 15,59 |
+
+- **Vzhled:** e) vypadá jako b) a f) jako a). Rámy se SSR nezačnou číst jako kov. SSR odráží jen to, co je právě
+  na obrazovce. V úzkých místnostech se rámy „dívají“ na protější stěnu nebo strop mimo záběr, kde SSR nic nemá,
+  a zbytek dopočítá hrubý odraz Lumenu jako dnes.
+- **Cena:** +0,1–0,5 ms (e proti b) až +1,4–1,7 ms (f proti a), protože do drsnosti 0,8 se trasuje skoro každý
+  lakovaný panel. Hodnoty u e) mohou být podhodnocené (první záběr po přepnutí metody měl zásek na kompilaci
+  shaderů), f) je ustálená cena.
+- **Závěr (rozhodnutí autora 30. 9. 2026):** SSR samo nepomáhá. Odrazy se odkládají na optimalizaci; jediná
+  varianta, která kov opravdu mění, je c) (odrazy Lumenu do drsnosti 0,32, +1,3 ms).
+
 ## Poznámky ke snímkům
 
 - Loď ve výšce 3 000 m se mezi snímky nepatrně posune, a tím i kamera (`camera_local`). Rozdíl dvou snímků

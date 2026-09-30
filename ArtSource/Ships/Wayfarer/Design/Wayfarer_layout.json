@@ -71,7 +71,8 @@
   {
    "room": "hold",
    "name": "Nákladová mřížka 8 SCU",
-   "rect": [2.9, 7.9, -1.85, 0.65],
+   "_grid": "Varianta B schválená autorem 30. 9. 2026: o 0,25 m dozadu, 0,55 m volné podlahy před dveřmi do technické chodby, poklop kvantového pohonu volný (Docs/Reviews/2026-09-30_hold_grid_variants.md)",
+   "rect": [2.65, 7.65, -1.85, 0.65],
    "z": [0.0, 1.25],
    "purpose": "4 × 2 pozice po 1,25 m s úchyty v podlaze, jedna vrstva. Na ní drží náklad magnetické zámky."
   },
