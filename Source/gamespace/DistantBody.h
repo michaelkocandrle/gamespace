@@ -29,6 +29,10 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	/** Joins and leaves the world's body registry (USpaceCelestialRegistrySubsystem) with the components. */
+	virtual void PostRegisterAllComponents() override;
+	virtual void PostUnregisterAllComponents() override;
+
 	/** Where the orbit puts the body at this game time, relative to the orbit centre, cm. For tests. */
 	UFUNCTION(BlueprintCallable, Category = "Distant Body")
 	FVector ComputeOrbitOffset(double TimeSeconds) const;

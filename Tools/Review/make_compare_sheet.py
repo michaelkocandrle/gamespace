@@ -10,7 +10,7 @@ review.json:
     "goal": "What it is meant to be (one or two sentences).",
     "style": "In which style (e.g. Star Citizen, clean Origin-like ship, warm dark architecture ...).",
     "checklist": "cockpit",                 # section of the critic checklist in the skill (see below); null = none
-    "skill": ".claude/skills/ship-pipeline/SKILL.md",   # optional, this by default
+    "skill": ".claude/skills/visual-review/SKILL.md",   # optional, this by default
     "out": "Docs/Reviews/2026-09-25_wayfarer_cockpit",  # optional
     "notes": ["Text vpravo nahoře (FPS, stat unit) je měřicí overlay, ne součást výsledku."],   # optional
     "pairs": [
@@ -113,7 +113,7 @@ def main():
         lines.append("- `%s` – %s (%s); reference: %s; výsledek: %s" % (os.path.join(out, name).replace("\\", "/"), p.get("title", ""), cond,
                                                                        p.get("ref_label", ""), p.get("ours_label", "")))
     if spec.get("checklist"):
-        lines += ["", "## Checklist", checklist(spec.get("skill", ".claude/skills/ship-pipeline/SKILL.md"), spec["checklist"]), ""]
+        lines += ["", "## Checklist", checklist(spec.get("skill", ".claude/skills/visual-review/SKILL.md"), spec["checklist"]), ""]
     open(os.path.join(out, "brief.md"), "w", encoding="utf-8").write("\n".join(lines))
     print("SHEETS " + json.dumps({"out": out, "sheets": [s[0] for s in sheets]}))
 

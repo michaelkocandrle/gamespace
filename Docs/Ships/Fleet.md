@@ -27,8 +27,8 @@ novou frakci pro každou loď:
 
 | Loď | Výrobce | Role | Velikost | Posádka | Stav |
 | --- | --- | --- | --- | --- | --- |
-| **Wayfarer** | Halcyon Freightworks | Starter / Light Freight (multirole) | Small | 1 | ✈️ létá ve hře (model v1 24. 9. 2026: exteriér z Higgsfieldu, dočasný kokpit), další krok interiér |
-| **Steadfast** | Halcyon Freightworks | Multi-crew Freight/Exploration | Medium | 3 | 🔶 rozjeto (exteriér hrubý tvar z Meshy, koncept interiéru) |
+| **Wayfarer** | Halcyon Freightworks | Starter / Light Freight (multirole) | Small | 1 | ✈️ létá ve hře: exteriér v2 z výkresu, kokpit v2, průchozí interiér z kitu (stav: `Docs/CURRENT.md`) |
+| **Steadfast** | Halcyon Freightworks | Multi-crew Freight/Exploration | Medium | 3 | 🔶 2D návrh v2 čeká na schválení; starý zkušební interiér v `TestSpace` |
 | **Farsight** | Kestrel Dynamics | Long-range Scout/Exploration | Snub | 1 | 📋 naplánováno, nezačato |
 | **Delver** | Halcyon Freightworks | Mining/Industrial Utility | Small–Medium | 2 | 📋 naplánováno, nezačato |
 
@@ -51,8 +51,8 @@ lodí zatím neplánovat, dokud tyhle čtyři nebudou hotové a otestované. Dr�
 
 ## Pořadí práce
 
-1. ✈️ Wayfarer — model v1 létá ve hře (24. 9. 2026); další krok průchozí interiér podle layoutu
-2. 🔶 Steadfast — v procesu (dokončit exteriér → interiér přes kitbash/procedurální detail)
+1. ✈️ Wayfarer — létá a je průchozí; přestavba interiéru z kitu pokračuje (`Docs/CURRENT.md`)
+2. 🔶 Steadfast — po schválení 2D návrhu v2 exteriér z výkresu a interiér z kitu
 3. Farsight — až po Steadfastu
 4. Delver — poslední ze čtyř, protože těžba jako gameplay mechanika ještě není navržená
    (viz `Gamespace_ReferenceLibrary_Plan.md`, téma 4 "Ekonomika, obchod a těžba" — tohle

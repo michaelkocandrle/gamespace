@@ -1,5 +1,5 @@
 {
- "_comment": "Interior kit technical rules (step 2 of the author's kit brief, 26. 9. 2026). Read by the part builders (step 4), the kit checks in test_ship_geometry (step 5) and the kit manifest (step 6). Metres, Blender axes (+X forward, +Y left, +Z up), scale 1. Human-readable version: .claude/skills/ship-interior/SKILL.md, 'Interiérový kit: mřížka a technická pravidla'.",
+ "_comment": "Interior kit technical rules (step 2 of the author's kit brief, 26. 9. 2026). Read by the part builders (step 4), the kit checks in test_ship_geometry (step 5) and the kit manifest (step 6). Metres, Blender axes (+X forward, +Y left, +Z up), scale 1. Human-readable version: .claude/skills/ship-interior/kit-design.md, 'Mřížka a technická pravidla'.",
  "units": "m",
  "grid": {
   "_comment": "Plan grid 0.3 m (module lengths 0.3 / 0.6 / 0.9 / 1.2, portal pitch 1.2 or 2.4); vertical grid 0.1 m. Fillers 0.1 / 0.2 only where a hull forces a width off the grid.",

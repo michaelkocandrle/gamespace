@@ -8,7 +8,7 @@ description: Where gamespace 3D assets, materials, decals and references come fr
 Podrobnosti: `Docs/AssetSources_Free.md` (průzkum zdrojů), `Docs/AssetPipeline_Modular.md`
 (kdy generovat vcelku, kdy po dílech; srovnání Meshy/Scenario/procedurálně), `Docs/Credits.md`,
 WORKFLOW 1.1 (video reference), 3.1b (Scenario MCP), 9.3 x/z/v (nástrahy AI obsahu),
-`Docs/Ships/ShipPipeline.md` kap. 2A/2B/4 (Higgsfield a AI model lodi).
+`Docs/Ships/ShipPipeline.md` (starší cesta s AI modelem lodi).
 
 ## Pravidla (od autora, platí vždy)
 
@@ -22,9 +22,9 @@ WORKFLOW 1.1 (video reference), 3.1b (Scenario MCP), 9.3 x/z/v (nástrahy AI obs
 3. **Každý použitý cizí nebo AI asset = řádek v `Docs/Credits.md`** (CC-BY do tabulky „Ve hře“
    s autorem a zdrojem; CC0 a AI výstupy do tabulky „CC0“ kvůli dohledatelnosti). Zapiš ve stejném
    commitu, kterým asset přibude.
-4. **AI po dílech, nikdy „vygeneruj všechno najednou“.** Jednoduchý tvar (trup, sedadlo, jeden
-   prop) vcelku; komplexní kompozici (kokpit, místnost s přístroji) rozlož: obálka z AI, přesný
-   technický detail procedurálně v Blenderu, složit přes Blender MCP (`AssetPipeline_Modular.md`).
+4. **AI po dílech, nikdy „vygeneruj všechno najednou“**, a **v lodích žádná AI geometrie** (trup z výkresu,
+   interiér z kitu a procedurálně; AI jen reference stylu). Mimo lodě jednoduchý tvar vcelku, komplexní
+   kompozici rozlož a přesný technický detail dělej procedurálně skriptem (`AssetPipeline_Modular.md`).
 5. **Klíče jen v `C:\gamespace\secrets\`** (`meshy.key`, `scenario.key`), nikdy v repu, logu,
    commitu ani v URL. MCP hlavičky leží v uživatelském `~/.claude.json`, ne v repu.
 6. **Žádná jména ze Star Citizenu** (stanice, lodě, firmy, loga) v obsahu ani ve výstupech –
@@ -42,10 +42,10 @@ WORKFLOW 1.1 (video reference), 3.1b (Scenario MCP), 9.3 x/z/v (nástrahy AI obs
 ## Art direction: styl SC (platí od 23. 9. 2026)
 
 - **Teplá/neutrální architektura osvětlená světelnými lištami, tmavý základ, studené hologramové UI.**
-  Nahrazuje starší „modrou ocel“ (gunmetal `0.35/0.42/0.55`, HANDOFF bod 59) – ta čísla jsou zastaralá.
-- Aktuální paleta interiéru (HANDOFF bod 65): neutrální tmavý kov **0,33/0,33/0,34**, pracovní
-  světla **5200 K**, svítidla a lišty teplá bílá (`MI_KitStrip`, emise 14). Oranžová akcentů
-  `0.85, 0.34, 0.06` (Halcyon Freightworks).
+  Nahrazuje starší „modrou ocel“ (gunmetal `0.35/0.42/0.55`) – ta čísla jsou zastaralá.
+- Paleta interiéru je paleta kitu podle výrobce: `ArtSource/Kit/kit_rules.json` (`palettes`), popis ve skillu
+  `ship-interior` (`kit-design.md` §4: grafit, gunmetal 0,33/0,33/0,34, krémová, oranžová Halcyon Freightworks
+  `0.85, 0.34, 0.06`); pracovní světla 4000–5200 K.
 - Cílová čísla proti SC (`python Tools/Shots/measure_look.py`, preset `sc_look`, 1920×1080):
   střední jas 0,08–0,26, p99 0,56–0,88, **B/R 0,72–1,05** (teplé), jemný detail 0,024–0,035.
 - Opotřebení skoro jen na hranách, lakované panely v SC jsou téměř čisté (`WearAmount` 0,2,
@@ -55,20 +55,22 @@ WORKFLOW 1.1 (video reference), 3.1b (Scenario MCP), 9.3 x/z/v (nástrahy AI obs
   nestylizovat podle jednoho dvou obrázků.
 - Postup u každého assetu: **zdarma zdroj → AI díl (Meshy/Scenario) → procedurálně**, pak změřit
   proti SC referenci (snímek přes Shots + `measure_look.py`), ne od oka.
-- Co u autora prošlo: decaly (šablonové nápisy), osvětlení lištami, hologramy, sedadla z Meshy.
-  Co ne: low-poly stěny kitu, procedurální přední pult, klávesnice u dveří.
+- Co u autora prošlo: decaly (šablonové nápisy), osvětlení lištami, hologramy. Co ne: low-poly stěny kitu
+  Quaternius, procedurální přední pult, klávesnice u dveří, **AI geometrie v lodi** (sedadlo z Meshy vyřazeno
+  25. 9. 2026, sedadlo je procedurální).
 
 ## Pořadí zdrojů podle typu věci
 
 | Potřebuju | Nejdřív | Pak |
 | --- | --- | --- |
 | PBR materiál (lak, plechy, rošt, kůže, guma) | ambientCG (CC0) | Poly Haven (CC0) |
-| Modulární stěny/chodby | Quaternius MegaKit (CC0, `ArtSource/ThirdParty/Quaternius/`) + `recolour_kit.py` | Infiltrator Demo (Fab, stahuje autor) |
-| Hero prop (sedadlo, skříň, boční panel) | Meshy text-to-3D `--refine` | Sketchfab CC-BY (stahuje autor) |
+| Modulární stěny/chodby lodi | vlastní interiérový kit (`Tools/Kit`, skill `ship-interior`) | – (Quaternius jen starý Steadfast) |
+| Výbava a nábytek lodi (sedadlo, skříň, konzole) | procedurálně (kit, `hs_cockpit`) | – AI geometrie v lodi ne |
+| Hero prop mimo loď (kulisa, stanice, POI) | Meshy text-to-3D `--refine` | Sketchfab CC-BY (stahuje autor) |
 | Malý přesný technický díl (tlačítko, rám, mřížka, kabel, trubka) | procedurálně v Blenderu (bmesh) | – AI tady selhává |
 | Nápisy, šablony, štítky, výstrahy | Scenario GPT Image (atlas v mřížce) nebo `Tools/Assets/generate_decals.py` | Yughues decals (CC-BY) |
 | Obsah obrazovek/HUD | `Tools/Assets/draw_holo_screens.py` (naše písma) | Scenario |
-| Trup lodi | Higgsfield multi-image nebo Meshy, pak `build_ai_ship.py` | – |
+| Trup lodi | stavba přesně z výkresu (`hs_build_ship`, skill `ship-pipeline` 3b2) | AI koncepty jen jako reference stylu |
 | Průmyslové fotoskeny (sudy, ventily) | Poly Haven modely (`fetch_polyhaven.py --models`) | – |
 
 ## Materiály: ambientCG a Poly Haven
@@ -166,7 +168,8 @@ python Tools/Assets/meshy_generate.py --spec ArtSource/Ships/Steadfast/Kitbash/m
   světlo), volitelně druhý běh quad ~30 tis. Rigging ne.
 - Surový GLB do `ArtSource/Ships/<Loď>/Higgsfield/` a **nikdy needitovat**. Koncepty + `prompt.txt` do `ArtSource/Ships/<Loď>/Concept/`
   (složka zatím neexistuje, vytvoř ji).
-- Dál `Tools/Blender/build_ai_ship.py` s receptem `<Loď>_ai_build.json` (WORKFLOW 2.1, ShipPipeline 2B).
+- Geometrie lodi z AI se od 24. 9. 2026 nepoužívá (stavba z výkresu); starší recept `build_ai_ship.py`:
+  `ship-pipeline/legacy-ai-model.md`. Koncepty z Higgsfieldu slouží jako reference stylu a do dossieru.
 - Licenci výstupů Higgsfieldu pro komerční použití ověř, než loď půjde do vydané hry; zapiš do Credits.
 - Higgsfield MCP (`claude mcp add --transport http higgsfield https://mcp.higgsfield.ai/mcp`) je zapojený
   (tarif plus, ~1000 kreditů; GPT Image 2.5 high 2k = 2,75 kr., Nano Banana Pro 2k = 2 kr.). Generování
@@ -176,9 +179,8 @@ python Tools/Assets/meshy_generate.py --spec ArtSource/Ships/Steadfast/Kitbash/m
 ## Hotové modely zdarma
 
 - **Quaternius** Modular Sci-Fi MegaKit (CC0, 190 modelů, `ArtSource/ThirdParty/Quaternius/README.md`):
-  akcent je jen v emisivní mapě → `Tools/Blender/recolour_kit.py` z ní dělá svítící pásy.
-  Pozor: `recolour_kit.py` tónuje do staré modré oceli – před dalším použitím sjednoť s paletou výše.
-  Kit je na blízký pohled hráče low-poly (HANDOFF 73).
+  jen starý interiér Steadfastu a zbytky starého kitu v receptu Wayfareru (`interior.kit`); nosná vrstva interiérů
+  je od 26. 9. 2026 vlastní kit. Na blízký pohled hráče je low-poly; `recolour_kit.py` tónuje do staré modré oceli.
 - **Sketchfab** (většinou CC-BY, stahování s účtem → stahuje autor): 71 kandidátů s licencí,
   autorem a počtem ploch v `ArtSource/Ships/Steadfast/Kitbash/free_asset_survey.json`. U každého
   zkontroluj odznak licence na stránce. Blender MCP má `search_sketchfab_models`.

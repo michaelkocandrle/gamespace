@@ -1,51 +1,31 @@
 # Gamespace – pracovní postup a nástrahy
 
-> **Vstupním bodem je od 24. 9. 2026 `CLAUDE.md` v kořeni repozitáře** (krátký přehled, pravidla, příkazy) a skills v `.claude/skills/` (načítají se podle úkolu). Tento dokument nečti celý, hledej v něm grepem; zůstává jako historie a úplný seznam.
-
-
-Stav k **19. 9. 2026**. Doplňuje `Docs/HANDOFF.md`: HANDOFF říká **co** projekt je a v jakém je
-stavu, tento dokument **jak** se na něm pracuje krok za krokem a **na čem jsme se už spálili**.
-Nová session: nejdřív HANDOFF (hlavně kapitola 2, pravidla), potom tento dokument celý.
+> **Místo v hierarchii (`CLAUDE.md`):** pod CLAUDE.md, `Docs/CURRENT.md` a skilly. Pravidla a brány kroku jsou
+> v `CLAUDE.md`, aktuální stav v `Docs/CURRENT.md`, postupy podle domény ve skillech. Tento dokument drží
+> podrobné postupy a hlavně **úplný seznam nástrah** (kap. 9). Nečti ho celý, hledej v něm grepem. Při rozporu
+> se skillem nebo CLAUDE.md platí vyšší a tady se to opraví.
 
 Obsah:
-1. Jeden krok práce od zadání po odpověď autorovi
-2. Loď z AI modelu: Blender → Unreal
+1. Jeden krok práce (odkaz na CLAUDE.md), reference z videa
+2. Loď z AI modelu: Blender → Unreal (starší cesta)
 3. Blender MCP: ladění v živém viewportu
 4. C++ build, Live Coding, unity build
-5. Headless testy
-6. Balení hry a snímky (Shots)
+5. Testy
+6. Balení hry a snímky (Shots), 6.1 ladění vzhledu za běhu
 7. Kokpit: displeje, HUD, světla (jak to je postavené a proč)
-8. Git a commit
+8. Git a commit (odkaz na CLAUDE.md)
 9. Nástrahy – úplný seznam
-10. Kam dál (priority)
+10. Kam dál (přesunuto do `Docs/CURRENT.md`)
+11. Vzhled scény: světlo, grade a rychlá smyčka
 
 ---
 
 ## 1. Jeden krok práce od zadání po odpověď autorovi
 
-1. **Přečti zadání a referenci.** Vizuální cíl je 1:1 Star Citizen
-   (`starcitizenreference/`, autorovy screenshoty). Autor chce přesnou kopii, ne přibližnou.
-   Odchylku, kterou nejde odstranit, pojmenuj v odpovědi.
-2. **Rozděl práci na malé kroky.** Každý krok má být hotový, otestovaný a commitnutý.
-3. **Změna** jde přes skript nebo kód. Nikdy ne klikáním v editoru. Úpravy assetů dělají Python
-   skripty v `Tools/Assets`, ladění lodi recepty JSON v `ArtSource/Ships/<Loď>/`.
-4. **Build** editoru (kapitola 4). Po změně C++ je vždy potřeba plný build, editor nesmí běžet.
-5. **Headless testy** (kapitola 5). Spusť ty, kterých se změna týká, a po větší změně všechny.
-6. **Zabalení a snímky:** `.\Tools\Shots.ps1 -Preset <x> -Package`. Každý snímek si **sám
-   prohlédni** (nástroj Read na PNG) a porovnej s referencí. Nečekej, že to autor udělá za tebe.
-7. **Commit a push** (kapitola 8).
-8. **Odpověď autorovi (česky).** Musí obsahovat:
-   - co se změnilo a proč;
-   - které testy prošly;
-   - které snímky jsi zkontroloval a co na nich je;
-   - že je zabalená hra připravená v `C:\gamespace\Builds\Gamespace\Windows\gamespace.exe`;
-   - **přesný testovací scénář** (klávesy, kam letět, na co se dívat);
-   - co musí posoudit jen autor (pocit, jas, čitelnost na jeho monitoru);
-   - jestli stačí Live Coding, nebo je nutný restart editoru;
-   - rizika.
-
-Autor hraje zabalenou hru z `C:\gamespace\Builds`. **Když hra běží, balení se zasekne nebo
-nakopíruje starý exe.** Hru nikdy neukončuj sám. Požádej autora, ať ji zavře.
+Brány jednoho kroku (reference, malé kroky, build, testy, snímky `-Editor` během kroku a `-Package` na konci,
+vizuální kritik, dokumentace, commit, odpověď autorovi) jsou jen v `CLAUDE.md`. Úpravy assetů dělají Python
+skripty v `Tools/Assets`, ladění lodi recepty JSON v `ArtSource/Ships/<Loď>/`. Neptej se, jestli autorovi běží
+hra: `Package.ps1` ji sám ukončí; po balení zkontroluj čas `gamespace.exe`.
 
 ---
 
@@ -60,6 +40,10 @@ zajímavé časy otevřít v plném rozlišení nebo vyříznout výřez HUD, po
 leží jen v `ArtSource/Reference/Video/` (v `.gitignore`).
 
 ## 2. Loď z AI modelu: Blender → Unreal
+
+> **Starší cesta.** Od 24. 9. 2026 se exteriér lodi staví přesně z výkresu (`hs_build_ship`, skill
+> `ship-pipeline` 3b2), AI slouží jen jako reference stylu. Kapitola platí pro údržbu starších receptů;
+> kapitola 2.2 (import do UE) platí dál.
 
 Podrobně je to v `Docs/Ships/ShipPipeline.md`. Tady je jen pořadí a místa, kde se chybuje.
 
@@ -90,7 +74,7 @@ provádí v tomto pořadí:
 10. `sockets` (Cockpit, Exit, Display_*, …)
 
 ```bash
-cd /c/gamespace/gamespace
+# z kořene repozitáře
 MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b --python Tools/Blender/build_ai_ship.py -- ArtSource/Ships/<Ship>/<Ship>_ai_build.json
 cd ArtSource/Ships/<Ship>
 MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b <Ship>.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
@@ -124,7 +108,7 @@ obdélníku odpovídá sklu.
 ### 2.2 .blend → Unreal
 
 ```powershell
-$env:GAMESPACE_SHIP_MANIFEST = "C:\gamespace\gamespace\ArtSource\Ships\<Ship>\Export\<Ship>_manifest.json"
+$env:GAMESPACE_SHIP_MANIFEST = (Resolve-Path "ArtSource\Ships\<Ship>\Export\<Ship>_manifest.json").Path
 .\Tools\run_editor_python.ps1 Tools\Assets\import_ship.py
 .\Tools\run_editor_python.ps1 Tools\Assets\build_main_menu.py
 ```
@@ -135,8 +119,7 @@ $env:GAMESPACE_SHIP_MANIFEST = "C:\gamespace\gamespace\ArtSource\Ships\<Ship>\Ex
 - `no_nanite_parts: ["Interior"]`: interiér **nesmí** mít Nanite (nástraha 9.2a).
 - Materiály staví `Tools/Assets/ship_materials.py`. Displeje používají master `M_Ship_Screen`
   (unlit, opaque, pixel animation, parametr `EmissiveStrength`).
-- `build_main_menu.py` po importu obnoví úvodní scénu s lodí; loď se zobrazí, až bude nastavená v
-  `MENU_SHIP` (teď žádná, kamera krouží kolem prázdného `MenuOrbitCenter`).
+- `build_main_menu.py` po importu obnoví úvodní scénu s lodí z `MENU_SHIP` (dnes `"Wayfarer"`).
 
 ---
 
@@ -197,7 +180,7 @@ Nástrahy (23. 9. 2026):
 1. Spusť Blender **s GUI** na pozadí. Socket na `localhost:9876` běží jen s GUI; v `-b` se addon jen
    zaregistruje.
    ```bash
-   cd /c/gamespace/gamespace && MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" ArtSource/Ships/<Ship>/<Ship>.blend
+   MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" ArtSource/Ships/<Ship>/<Ship>_HS_Game.blend   # z kořene repozitáře
    ```
 2. Buď MCP nástroje `blender` (`get_viewport_screenshot`, `execute_blender_code`…; mnoho jich
    vyžaduje argument `user_prompt`), nebo pomocné skripty v `Tools/Blender/mcp/`, které mluví přímo
@@ -241,7 +224,7 @@ Nástrahy (23. 9. 2026):
 ## 4. C++ build, Live Coding, unity build
 
 ```powershell
-& "C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" gamespaceEditor Win64 Development -Project="C:\gamespace\gamespace\gamespace.uproject" -WaitMutex -FromMsBuild
+.\Tools\Build.ps1      # Build.bat gamespaceEditor Win64 Development; engine z Tools/UERoot.ps1 (GAMESPACE_UE_ROOT)
 ```
 
 - **Editor musí být zavřený.** Headless skripty editor spouštějí a samy zavírají.
@@ -254,32 +237,19 @@ Nástrahy (23. 9. 2026):
 
 ---
 
-## 5. Headless testy
+## 5. Testy
 
 Spouštěj **nástrojem PowerShell** (přes bash se rozbije `$PSScriptRoot`):
 
 ```powershell
+.\Tools\Test.ps1                                          # offline testy + compileall, jednotný souhrn
+.\Tools\Test.ps1 -UE -Filter *cockpit*                    # + testy v UE podle masky; -All = všechno
 .\Tools\run_editor_python.ps1 Tools\Tests\test_cockpit_displays.py
 ```
 
-| Test | Pokrývá |
-| --- | --- |
-| `test_cockpit_displays.py` | displeje v kokpitu: slot, render target, velikost, světla, stav |
-| `test_cockpit_frame.py` | pozice oka, deska 7–13° pod horizontem, ≥ 1,2 m od oka |
-| `test_flight_hud_sc1c.py` | rozložení HUD podle SC, barvy, režimy space.Hud |
-| `test_ship_import.py` | import lodi, díly, sockety, materiály |
-| `test_landing_sc2.py`, `test_landing_l5.py` | podvozek, přistání |
-| `test_ifcs_sc1.py`, `test_boost_afterburner_sc1b.py`, `test_flight_modes.py`, `test_free_look.py` | let |
-| `test_character_l6.py`, `test_planet_l3.py`, `test_menu_settings.py` | postava, planeta, menu |
-| `test_interior.py` | interiér Steadfastu: usage flagy, výchozí textury samplerů, parametry `M_KitTrim`, tagy, světla |
-
-Testovaná loď je jmenovaná na jednom místě: `Tools/Tests/ship_under_test.py` (`SHIP = None`, dokud není
-importovaná nová loď). Testy, které potřebují model (displeje, rám kokpitu, sockety podvozku, import),
-do té doby vypíšou SKIP „no ship model yet"; letové testy běží na nativním `ASpaceshipPawn` (kvádr).
-
-Testy mimo UE (obyčejný Python):
-- `Tools/Assets/tests/test_import_ship_plan.py`;
-- `Tools/Blender/tests/test_ship_export_core.py`.
+Seznam testů, co pokrývají a loď pod testem (`Tools/Tests/ship_under_test.py`, `SHIP = "Wayfarer"`): skill
+`unreal-scripting` kap. 3. Offline část (`Tools/Test.ps1` bez `-UE`) běží při každém pushi v GitHub Actions
+(`.github/workflows/offline-tests.yml`, Linux, pwsh); build UE a testy v UE tam nejsou.
 
 Test musí hlídat to, co autor viděl rozbité. Když se opraví vizuální chyba, přidej do testu
 kontrolu, která by ji zachytila (příklad: `no_nanite_parts` v `test_import_ship_plan.py`).
@@ -289,12 +259,14 @@ kontrolu, která by ji zachytila (příklad: `no_nanite_parts` v `test_import_sh
 ## 6. Balení hry a snímky (Shots)
 
 ```powershell
-.\Tools\Package.ps1                              # ~5 min, kontroluje 12 klíčových assetů včetně písma
+.\Tools\Shots.ps1 -Preset cockpit -Editor        # během kroku: nezabalený projekt, čeká na shadery (~2 min)
+.\Tools\Package.ps1                              # na konci kroku, ~5 min, kontroluje 12 klíčových assetů včetně písma
 .\Tools\Shots.ps1 -Preset cockpit -Package       # zabalí a vyfotí
 .\Tools\Shots.ps1 -Preset cockpit -Keep          # snímky i do Docs\Shots\ (jdou do gitu)
 ```
 
-Presety (`Tools/Shots/*.json`):
+Presety (`Tools/Shots/*.json`; úplný seznam jsou soubory s `_comment`, tady starší a obecné; interiér Wayfareru
+a kit: skill `ship-interior`):
 
 | Preset | Obsah |
 | --- | --- |
@@ -342,11 +314,7 @@ Pole jednoho snímku:
 Kontrola: snímky si otevři, porovnej s referencí a z více snímků slož jeden list
 (PIL ve scratchpadu), aby šlo porovnat varianty vedle sebe.
 
-Hra během snímků krátce převezme popředí. Když autor zrovna hraje, nejdřív se domluv.
-
----
-
-## 7. Kokpit: displeje, HUD, světla
+Hra během snímků krátce převezme popředí okna.
 
 ### 6.1 Ladění vzhledu za běhu (šetří hodiny)
 
@@ -362,9 +330,13 @@ space.DashboardFocus 1                       # přiblížení na displeje
 space.MfdPage 1 2                            # stránky MFD
 ```
 
-Ve scénáři snímků je dej do pole `console` (platí i pro další snímky, viz nástraha 9.2h) – vzor je
+Ve scénáři snímků je dej do pole `console` (platí i pro další snímky, viz nástraha 9.6 cy) – vzor je
 `Tools/Shots/hull_tune.json`: jeden běh, šest variant vedle sebe. Příkaz dělá dynamické instance
 materiálu, takže **nic neukládá**: co vypadá dobře, přepiš do `<Loď>_setup.json` a jednou přeimportuj.
+
+---
+
+## 7. Kokpit: displeje, HUD, světla
 
 ### 7.1 Displeje (MFD)
 
@@ -423,19 +395,9 @@ materiálu, takže **nic neukládá**: co vypadá dobře, přepiš do `<Loď>_se
 
 ## 8. Git a commit
 
-- **Před commitem `git status`.**
-- **Nikdy nepřidávej** autorův soubor `Docs/UI/Screenshot 2026-09-21 150400.png`. Vždy:
-  ```bash
-  git add -A -- . ':!Docs/UI/Screenshot 2026-09-21 150400.png'
-  ```
-- Zprávy commitů jsou anglicky, krátký nadpis a konec:
-  `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
-- Každý krok se commitne a pushne (`git push origin main`).
-- Po větším kroku aktualizuj `Docs/HANDOFF.md`:
-  - kapitola 5, bod v seznamu hotového;
-  - kapitola 11, známé problémy;
-  - kapitola 13, commity.
-- Po změně systému aktualizuj i `README.md`.
+Pravidla gitu (`git status`, `git add` s výjimkou autorova souboru, podpis commitu, push, zákaz force push)
+jsou jen v `CLAUDE.md`. Po kroku uprav `Docs/CURRENT.md` (stav, známé problémy, další kroky), po změně systému
+i `README.md`. `Docs/HANDOFF.md` je od 30. 9. 2026 archiv a nedoplňuje se.
 
 ---
 
@@ -445,9 +407,9 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
 
 ### 9.1 Prostředí a nástroje
 
-- a) **Balení visí nebo zabalí starý exe.** Příčina: autor má spuštěnou hru z `Builds`, nebo zůstal
-  viset spadlý proces hry. Řešení: požádej autora, ať hru zavře. Proces sám neukončuj. Po zabalení
-  zkontroluj čas `gamespace.exe`.
+- a) **Balení visí nebo zabalí starý exe.** Příčina: spuštěná hra z `Builds` nebo zaseknutý proces drží
+  soubory. Řešení: `Package.ps1` od 22. 9. 2026 každý proces `gamespace` sám ukončí (i puštěnou hru), předem
+  se neptej. Po zabalení zkontroluj čas `gamespace.exe`; když se balení přesto zasekne, napiš autorovi.
 - b) **`run_editor_python.ps1` z bashe nefunguje** (`$PSScriptRoot`). Spouštěj nástrojem PowerShell.
 - c) **Bash heredoc a apostrofy.** Delší Python patch skripty piš nástrojem Write do scratchpadu
   a spouštěj je. Pozor i na `\U` v cestách uvnitř normálních Python řetězců (unicode escape), používej
@@ -556,7 +518,10 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   bereme jen ze šířky okna a práh je 0,099.
 - d) **`_fresh_material` znovu použije existující asset** a nechá mu staré vlastnosti (materiál
   zůstal translucent). Blend mode a další klíčové vlastnosti vždy nastav explicitně.
-- e) **Uncooked `-game`** kreslí nové materiály šedě. Vzhled posuzuj jen v zabalené hře (Shots).
+- e) **Nezabalený projekt (`-game`) kreslil nové materiály šedě**: shadery se ještě překládaly. Od 28. 9. 2026
+  snímkovač v rychlé smyčce `Shots.ps1 -Editor` drží každý snímek, dokud běží překlad shaderů a assetů
+  (`SHOTS waiting for …`); proti zabalené hře je rozdíl na úrovni šumu. Během kroku se proto vzhled posuzuje
+  z `-Editor`, finální snímky, předání a čísla výkonu ze zabalené hry. PIE ani okno editoru se nespouští.
 - f) RT nemá mipmapy. Na menším rozlišení než ~1600 px může písmo na displejích zrnit.
 - g) **Kreslení čar ve Slate je kvadratické s počtem dávek** (19. 9. 2026). Příznak: po přidání radaru
   a siluety lodi spadl kokpit z ~64 na ~31 FPS, herní vlákno +6 až 17 ms, GPU beze změny. Příčina
@@ -592,7 +557,7 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
 & C:\gamespace\Builds\Gamespace\Windows\gamespace.exe /Game/Maps/TestSpace -windowed -ResX=1600 -ResY=900 -nosplash -unattended `
   -ShotList="<scénář.json>" -ShotOut="<složka>" -trace=cpu,frame -statnamedevents -tracefile="<soubor>.utrace"
 # export statistik časovačů do CSV (čekat na konec procesu: Start-Process ... -PassThru, WaitForExit)
-& "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealInsights.exe" -OpenTraceFile="<soubor>.utrace" -NoUI -AutoQuit `
+& "$(.\Tools\UERoot.ps1)\Engine\Binaries\Win64\UnrealInsights.exe" -OpenTraceFile="<soubor>.utrace" -NoUI -AutoQuit `
   -ExecOnAnalysisCompleteCmd="TimingInsights.ExportTimerStatistics <soubor>.csv"
 ```
 
@@ -1093,49 +1058,10 @@ snímku.
 
 ---
 
-## 10. Kam dál (priority k 19. 9. 2026)
+## 10. Kam dál
 
-Menší kroky, podle pořadí:
-
-1. ~~Třetí displej ve středním sloupku~~ – hotovo 19. 9. 2026: RADAR nahoře, SELF STATUS dole
-   (HANDOFF kapitola 5, bod 31).
-2. ~~Přepínání stránek MFD~~ – hotovo 19. 9. 2026 (F1 / F2, HANDOFF kapitola 5, bod 32). Navazuje:
-   přepínání myší jako v SC (režim interakce, klik na tlačítko displeje) a stránky zbraní, štítů a
-   energie, až budou systémy.
-3. ~~Detail lodi zblízka~~ – hotovo 20. 9. 2026 (detailní vrstva materiálu, trup 1 mil. trojúhelníků,
-   HANDOFF bod 33). Navazuje: decaly a nápisy, lepší zdrojové modely z Meshy/Higgsfield.
-4. ~~Hrany trupu (zkosení, vážené normály)~~ – změřeno 20. 9. 2026 a **zahozeno**: trup z Meshy má
-   92 % hran pod 36° (organický sken, ne rovné panely), takže ostrejší úhel i 2mm bevel změnily jen 1 %
-   pixelů. Hrany budou dávat smysl až u modelů s rovnými panely.
-5. ~~Světlo a post scény~~ – hotovo 20. 9. 2026 (kapitola 11, HANDOFF bod 36).
-6. ~~Okluze a kavita na trupu~~ – hotovo 20. 9. 2026 (HANDOFF bod 38): v pečených texturách žádná
-   okluze nebyla, `Tools/Blender/bake_ship_ao.py` ji dopeče.
-7. ~~Nápisy a výstražné pruhy~~ – hotovo 20. 9. 2026 (HANDOFF bod 39): decaly ze seznamu v setupu lodi.
-   Navazuje: víc nápisů a další místa (zatím jich je sedm).
-8. ~~Panelové spáry~~ – hotovo 20. 9. 2026 (HANDOFF bod 40): dlaždicový list triplanárně v prostoru lodi.
-9. ~~První zóna materiálu~~ – hotovo 20. 9. 2026 (HANDOFF bod 41): spálený plech u trysek z polohy
-   v prostoru lodi. Navazuje: další zóny (gondoly proti trupu, břicho po vstupu do atmosféry)
-   a nakonec druhá sada UV, až bude třeba zóny kreslit ručně a ne odvozovat z tvaru.
-10. ~~Hra běžela na Medium~~ – hotovo 20. 9. 2026 (HANDOFF bod 42): výchozí předvolba je Cinematic
-    kromě global illumination, plus doostření po tonemapperu. **Než začneš hledat rozmazanost
-    v modelu nebo materiálu, změř nastavení** – dvakrát za den to bylo ono (rozlišení 50 %, pak Medium).
-11. **Odlesky a špína na skle canopy** (jemný fresnel, škrábance).
-12. **Silnější záře displejů na rámu** a okolní desce.
-13. Doladit zbývající „duchy“ čísel při afterburneru (9.2b).
-14. **ambientCG.com** (sesterská stránka k Poly Havenu, stejná CC0 licence, volné API bez
-    klíče, 2000+ materiálů) – zvážit `fetch_ambientcg.py` podle vzoru `fetch_polyhaven.py`
-    pro variaci materiálu trupu (viz plastic_diag/plastic_mat) a pro interiér (kůže sedadel,
-    guma, opotřebený kov na panelech). Nalezeno autorem 23. 9. 2026, zatím nezapojeno.
-
-Velké celky:
-- tělo pilota v sedadle;
-- lepší model kokpitu (sedadlo, boční stěny);
-- chybějící systémy SC HUD (palivo, zbraně, protiopatření);
-- ~~SC-2b VTOL a zpětná vazba při visení~~ – hotovo 20. 9. 2026 (HANDOFF bod 43). Další v letové
-  roadmapě je SC-3 (zbytek HUD a MFD) nebo SC-4 (quantum travel místo cruise).
-- SC-4 quantum drive je hotový (HANDOFF bod 47). Z videa zbývá: **mapa systému (F2)** s výběrem
-  cíle, **modré jiskry z hran trupu** ve skoku (zvenku), **modrá záře pod přídí** z kokpitu,
-  doplňování quantum paliva.
+Přesunuto do `Docs/CURRENT.md` (Další kroky). Původní seznam priorit k 19. 9. 2026:
+`Docs/Archive/workflow-kap10_2026-09-19.md`.
 
 ---
 

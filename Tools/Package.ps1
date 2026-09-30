@@ -22,7 +22,7 @@
 #>
 param(
     [string]$Project = (Join-Path $PSScriptRoot "..\gamespace.uproject"),
-    [string]$EngineDir = "C:\Program Files\Epic Games\UE_5.8",
+    [string]$EngineDir = (& (Join-Path $PSScriptRoot "UERoot.ps1")),
     [ValidateSet("Development", "Shipping")]
     [string]$Config = "Development",
     # Default: <folder above the project>\Builds\Gamespace, i.e. C:\gamespace\Builds\Gamespace

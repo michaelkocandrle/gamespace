@@ -102,8 +102,11 @@ class ImportPlanTest(unittest.TestCase):
         self.assertNotIn((None, "_comment"), settings)
         self.assertIn("MI_A", plan["materials"])
         self.assertIn("material MI_A (hull)", import_ship.format_plan(plan))
-        self.assertEqual(import_ship.setup_path("C:/art/Testship/Export", "Testship").replace("\\", "/"),
-                         "C:/art/Testship/Testship_setup.json")
+        # setup_path goes through os.path.abspath, so the path must be absolute on the OS running the test:
+        # "C:/art/..." is relative on Linux and got the working directory in front (audit v1, 30. 9. 2026).
+        root = os.path.abspath(os.sep)
+        self.assertEqual(import_ship.setup_path(os.path.join(root, "art", "Testship", "Export"), "Testship"),
+                         os.path.join(root, "art", "Testship", "Testship_setup.json"))
 
     def test_setup_covers_every_material_slot(self):
         # A synthetic ship folder laid out like ArtSource/Ships/<Ship>/: <Ship>_setup.json next to Export/.

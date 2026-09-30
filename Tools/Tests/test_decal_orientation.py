@@ -19,6 +19,7 @@ Prints DECALTEST PASS|FAIL lines and DECALTEST SUMMARY.
 import json
 import math
 import os
+import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SHIPS = os.path.join(REPO, "ArtSource", "Ships")
@@ -115,5 +116,7 @@ def main():
     return 1 if failures else 0
 
 
-if __name__ == "__main__" or __name__ == "test_decal_orientation":
-    main()
+if __name__ == "__main__":
+    sys.exit(main())  # the exit code is what Tools/Test.ps1 and CI read
+elif __name__ == "test_decal_orientation":
+    main()  # inside the editor's Python: no sys.exit

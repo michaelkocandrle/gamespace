@@ -194,23 +194,13 @@ namespace
 	/** "TARGET" readout for the nearest celestial body: name, surface distance, time to reach it. */
 	FString DescribeNearestBody(const UWorld* World, const FVector& ShipLocation, const FVector& Velocity)
 	{
-		const ACelestialBody* Nearest = nullptr;
-		double NearestDistance = TNumericLimits<double>::Max();
-		// A handful of bodies at most, so a per-frame walk is cheaper than keeping a registry.
-		for (TActorIterator<ACelestialBody> It(World); It; ++It)
-		{
-			const double Distance = It->GetSurfaceDistance(ShipLocation);
-			if (Distance < NearestDistance)
-			{
-				NearestDistance = Distance;
-				Nearest = *It;
-			}
-		}
-
+		// The same body the flight model uses (the world's body registry).
+		const ACelestialBody* Nearest = ACelestialBody::FindNearest(World, ShipLocation);
 		if (!Nearest)
 		{
 			return TEXT("none");
 		}
+		const double NearestDistance = Nearest->GetSurfaceDistance(ShipLocation);
 
 		// Only the part of the velocity pointing at the body closes the gap.
 		const FVector ToBody = (Nearest->GetActorLocation() - ShipLocation).GetSafeNormal();

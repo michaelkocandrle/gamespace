@@ -1,6 +1,11 @@
-# Gamespace – handoff pro další session
+# Gamespace – handoff pro další session (ARCHIV)
 
-> **Vstupním bodem je od 24. 9. 2026 `CLAUDE.md` v kořeni repozitáře** (krátký přehled, pravidla, příkazy) a skills v `.claude/skills/` (načítají se podle úkolu). Tento dokument nečti celý, hledej v něm grepem; zůstává jako historie a úplný seznam.
+> **ARCHIV od 30. 9. 2026 – není zdroj aktuálního stavu ani pravidel.** Hierarchie autority je v `CLAUDE.md`:
+> pravidla `CLAUDE.md`, aktuální stav, známé problémy a další kroky `Docs/CURRENT.md`, postupy skilly,
+> nástrahy `Docs/WORKFLOW.md` kap. 9, architektura `Docs/ARCHITECTURE.md`, evidence `Docs/Reviews/`.
+> Dokument se už nedoplňuje. Zůstává jako historie hotových bodů (kap. 5, body 1–96) a stav k 19.–30. 9. 2026:
+> kapitoly 1, 4, 6–13 popisují mimo jiné odstraněný Vanguard, starý postup balení při každé změně a pevnou
+> cestu k enginu. Hledej v něm grepem, nečti ho celý a nic z něj nepřebírej bez ověření v kódu.
 
 
 Stav k **19. 9. 2026**. Tento dokument je vstupní bod pro novou session (Claude Code) i pro autora

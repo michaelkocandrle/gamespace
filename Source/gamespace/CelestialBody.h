@@ -107,9 +107,14 @@ public:
 
 	/**
 	 * The body whose surface is nearest to Location, and whether it has an environment. Used by
-	 * everything that needs "the planet I'm near" without caring which one.
+	 * everything that needs "the planet I'm near" without caring which one. Asks the world's
+	 * USpaceCelestialRegistrySubsystem; walks the world only where there is none.
 	 */
 	static ACelestialBody* FindNearest(const UWorld* World, const FVector& Location, FCelestialEnvironment* OutEnvironment = nullptr, bool* bOutHasEnvironment = nullptr);
+
+	/** Joins and leaves the world's body registry with the components (spawn, load, streaming, editor). */
+	virtual void PostRegisterAllComponents() override;
+	virtual void PostUnregisterAllComponents() override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Celestial Body")
