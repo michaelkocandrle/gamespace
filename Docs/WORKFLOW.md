@@ -1075,6 +1075,14 @@ snímku.
   tvaru“). Stěny potřebují vlastní světlo: bodovky v postranním pásu stropu skloněné ke stěně (`scallop`, kaluž ve
   výšce lišty) a wash obložení mířený dolů po vlastní stěně (zkosí přes hrany panelů). Rect světlo s několika cd
   na 1 m vzdálenosti dá jen jednotky luxů – wash 1 cd/m stěnu nerozsvítí, potřebuje ~5 cd/m.
+- el) **Geometrická kontrola hlásí „penetrating“ na soklu obložení u podlahy, i když místnost prošla hull_in_rooms.**
+  Zapuštěný sokl obložení sahá 11 cm za líc (drážka, guma, výplň pod podlahou) a trup se u podlahy zužuje dřív než
+  ve výšce pasu – ve Wayfareru u přepážky kokpitu (x 15,2) je u podlahy jen 4,5 cm od líce k trupu. Kontrola hlásí
+  střed ostrůvku (střed modulu), ne místo průniku: změř trup vodorovnými paprsky po x a výškách 0–0,2 m. Řešení:
+  poslední modul `Wall_HullLiner06L_D` (plochý sokl, guma na líci, za lícem nejvýš 3 cm).
+- em) **Menší místnost je pod stejným světelným plánem přesvícená.** Kajuta 4,8 m pod světly skladu: p50 0,28 (SC
+  0,08–0,18), světlejší lodní podlaha. Světla místnosti ztlumí `kit_modules.light_scale` ([x0, x1, faktor, místnost],
+  `kit_rooms.py` násobí světla dílů podle polohy); kajuta 0,6.
 - ds) **Stínovaná obdélníková světla bez MegaLights jsou drahá.** Dvě stínovaná světla kitu v chodbě bez MegaLights
   (osvětlení jako v letu): stínové mapy 7,3 ms a světla 5,5 ms (26 ms celkem). V lodi mají stín jen v režimu interiéru
   (MegaLights je trasuje), v letu ne; počet světel pod MegaLights cenu skoro nemění (8 i 12 světel: 3,5 ms).

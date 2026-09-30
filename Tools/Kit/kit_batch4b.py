@@ -13,8 +13,11 @@ with a doorway through it:
   B        the door 0.5 m to the left (+Y) of it: the Wayfarer's door from the hold sits beside the cargo grid;
            its top right corner follows the wall's slope, framed like the rest
   C        the door 0.5 m to the right (-Y): the same door seen from the other room
-Sections W and L41 (the hull liner's hold, 29. 9. 2026: the rail at 1.3 m as its liner walls, the main and upper
-panels either side of it).
+  F        centred, open to the ceiling: the posts run up to the head beam, which stops at them - the Wayfarer's
+           cabin to the cockpit stairs, where a header at 2.05 m caught the head of anyone on the upper steps
+           (hs_interior bulkhead(full=True), 29. 9. 2026)
+Sections W, L41 (the hull liner's hold, 29. 9. 2026: the rail at 1.3 m as its liner walls, the main and upper
+panels either side of it) and L38 (the cabin, 30. 9. 2026).
 The door's clear opening is 1.0 x 2.05 m (hs_interior bulkhead: the doorways the ship builds behind it). Round it:
 two collars in layers, a warm strip in a housing over the head washing the frame and the threshold, a status light
 beside it (a light, no keypad - author), a frame to the ceiling on each side, a cable drop from the ceiling into
@@ -34,7 +37,7 @@ from kit_batch2 import (BEV_MID, BEV_SMALL, FACE, G, GAP, PT, Section, _end_base
 from kit_geo import frame
 
 DOOR_W, DOOR_H = 1.0, 2.05
-OFFSET = {"A": 0.0, "B": 0.5, "C": -0.5}
+OFFSET = {"A": 0.0, "B": 0.5, "C": -0.5, "F": 0.0}
 FW = 0.07                    # the inner door frame's width
 CW = 0.03                    # the outer collar's width
 CHAMFER = 0.12               # the opening's top corners (the octagonal language of the portals)
@@ -124,6 +127,11 @@ def opening(sec, var):
     where the section's slope comes closer than the frames, the corner follows the slope instead."""
     yc = sec.width / 2 + OFFSET[var]
     y0, y1 = yc - DOOR_W / 2, yc + DOOR_W / 2
+    if var == "F":
+        # open to the ceiling, its top corners chamfered as the other doors' (the cabin's critic, round 2: "a
+        # rectangular frame of another style"); the edge on the ceiling line gets no member
+        C = sec.ceiling
+        return [(y0, 0.0), (y1, 0.0), (y1, C - CHAMFER), (y1 - CHAMFER, C), (y0 + CHAMFER, C), (y0, C - CHAMFER)], (y0, y1)
     keep = FW + CW              # the collar meets the slope: a larger margin cost the walker's head its clearance
     pts = [(y0, 0.0), (y1, 0.0)]
     # the right edge: straight up until the slope's parallel keeps it `keep` inside the outline
@@ -184,14 +192,16 @@ def _corners(poly, ya, yb, ztop):
     return out
 
 
-def _members(p, pts, width, proud, depth, role, closed_bottom=False):
-    """Frame members along the opening's edges (not along the floor), `width` wide outside the edge, `proud` in
-    front of the face, `depth` deep."""
+def _members(p, pts, width, proud, depth, role, closed_bottom=False, ceiling=None):
+    """Frame members along the opening's edges (not along the floor, nor along the ceiling line when the opening
+    runs up to it), `width` wide outside the edge, `proud` in front of the face, `depth` deep."""
     centre = (sum(q[0] for q in pts) / len(pts), sum(q[1] for q in pts) / len(pts))
     n = len(pts)
     for i in range(n):
         a, b = pts[i], pts[(i + 1) % n]
         if not closed_bottom and abs(a[1]) < 1e-6 and abs(b[1]) < 1e-6:
+            continue
+        if ceiling is not None and min(a[1], b[1]) > ceiling - 0.05:
             continue
         m, ln = seg_frame_wall(a, b, centre)
         # local y points into the opening: the member lies outside it (-y); ends overlap a little at the mitres
@@ -201,10 +211,15 @@ def _members(p, pts, width, proud, depth, role, closed_bottom=False):
 def bulkhead_door(sec, var, depth, name, seed):
     p = kit_geo.Part(name, seed)
     W, vt, top, xt, C = sec.width, sec.vt, sec.top, sec.xt, sec.ceiling
+    full = var == "F"
+    door_h = C if full else DOOR_H
     hole, (y0, y1) = opening(sec, var)
     hole = _ccw(hole)
     frame_out = _grow(hole, FW)
     collar_out = _grow(hole, FW + CW)
+    if full:
+        # the frames stop at the ceiling line
+        frame_out, collar_out = ([(y, min(z, C)) for (y, z) in poly] for poly in (frame_out, collar_out))
     ol = outline(sec)
     back = max(depth, 0.03)
     rib = 0.03
@@ -221,7 +236,7 @@ def bulkhead_door(sec, var, depth, name, seed):
     # everything of the outline but the opening, at x = -back: the thin one is a dark plate a panel's depth behind
     # the face (the procedural bulkhead is 4 cm), the thick one the far face the next room's doorway frames
     bm = frame((-back, 0, 0), (0, 1, 0), (0, 0, 1), (1, 0, 0))
-    for poly in [_box_clip(ol, y1=y0), _box_clip(ol, y0=y1), _box_clip(ol, y0=y0, y1=y1, z0=DOOR_H)] + _corners(hole, y0, y1, DOOR_H):
+    for poly in [_box_clip(ol, y1=y0), _box_clip(ol, y0=y1), _box_clip(ol, y0=y0, y1=y1, z0=door_h)] + _corners(hole, y0, y1, door_h):
         if poly and abs(_area(poly)) > 1e-4:
             p.poly_prism("Kit_Seal", _ccw(poly), bm, 0.01, panel=False)
     # ---------------------------------------------------------------- panels on the face
@@ -248,7 +263,7 @@ def bulkhead_door(sec, var, depth, name, seed):
         tri = _in_section(tri, sec)
         if tri and abs(_area(tri)) > 0.002:
             p.poly_prism("Kit_Primary", _ccw(tri), FACE, PT * 0.8, panel=True)
-    if head - ctop > 0.004:
+    if head - ctop > 0.004 and not full:
         p.slab("Kit_Primary", FACE, fl, fr, ctop, head - GAP / 2, PT * 0.8, panel=False)
     # ---------------------------------------------------------------- frames to the ceiling beside the door
     for y in (fl - rib, fr + rib):
@@ -258,11 +273,14 @@ def bulkhead_door(sec, var, depth, name, seed):
             for z in (0.35, 0.8, 1.6, 2.0):
                 if z < ztop - 0.08:
                     p.tube("Kit_Structure", (0.045, y, z), (0.05, y, z), 0.0065, 6)
-    # the head beam under the ceiling across the cove fascias
-    p.slab("Kit_Structure", FACE, xt - 0.14, W - xt + 0.14, C - 0.07, C, 0.08, BEV_SMALL, segments=1, proud=0.035, panel=False)
+    # the head beam under the ceiling across the cove fascias (open to the ceiling: stopping at the frames)
+    for (ba, bb) in ([(xt - 0.14, fl), (fr, W - xt + 0.14)] if full else [(xt - 0.14, W - xt + 0.14)]):
+        p.slab("Kit_Structure", FACE, ba, bb, C - 0.07, C, 0.08, BEV_SMALL, segments=1, proud=0.035, panel=False)
     # ---------------------------------------------------------------- the door frame in two layers
-    _members(p, hole, FW, 0.045, 0.06, "Kit_Structure")
-    _members(p, frame_out, CW, 0.022, 0.035, "Kit_Primary")
+    _members(p, hole, FW, 0.045, 0.06, "Kit_Structure", ceiling=C if full else None)
+    # a rubber seal along the opening's edge, in front of the frame (round 2: "no seal, one material")
+    _members(p, hole, 0.012, 0.052, 0.02, "Kit_Rubber", ceiling=C if full else None)
+    _members(p, frame_out, CW, 0.022, 0.035, "Kit_Primary", ceiling=C if full else None)
     # hazard band on the frame's two legs (low) and a plate over the head
     label(p, "hazard_stripe", (0.045, y0 - FW / 2, 0.25), (1, 0, 0), (0, 0, 1), (0, -1, 0), 0.45)
     label(p, "hazard_stripe", (0.045, y1 + FW / 2, 0.25), (1, 0, 0), (0, 0, 1), (0, -1, 0), 0.45)
@@ -270,7 +288,7 @@ def bulkhead_door(sec, var, depth, name, seed):
     # (under a 2.3 m ceiling there is no room over the collar): a housing on the head member's front, its diffuser
     # facing down and out, washing the frame, the threshold and the floor in front of the door
     top = [q for q in hole if abs(q[1] - DOOR_H) < 1e-6]
-    if len(top) >= 2:
+    if len(top) >= 2 and not full:
         ha, hb = min(q[0] for q in top) + 0.04, max(q[0] for q in top) - 0.04
         if hb - ha > 0.2:
             hz = DOOR_H + 0.012
@@ -288,11 +306,17 @@ def bulkhead_door(sec, var, depth, name, seed):
     status = sy > 0.08
     if status:
         # 5 x 7 cm lens and a glow on the jamb (critic of the hold, 29. 9. 2026: "a tiny dot that says nothing")
+        # a 3 x 3 cm lens in a dark bezel, a weak glow (the cabin's critic: "a burnt-out orange block")
         p.box("Kit_Structure", (0.0, sy - 0.04, 1.34), (0.03, sy + 0.04, 1.58), bevel=0.004, segments=1, panel=False)
-        p.box("Kit_GlowSignal", (0.028, sy - 0.025, 1.47), (0.035, sy + 0.025, 1.54), panel=False)
+        p.box("Kit_Seal", (0.028, sy - 0.025, 1.47), (0.034, sy + 0.025, 1.54), panel=False)
+        p.box("Kit_GlowSignal", (0.032, sy - 0.015, 1.49), (0.037, sy + 0.015, 1.52), panel=False)
         p.box("Kit_Plastic", (0.028, sy - 0.025, 1.37), (0.034, sy + 0.025, 1.44), panel=False)
-        p.socket("Light_Status_0", (0.06, sy, 1.505), x=(1, 0, 0), z=(0, 0, 1), type="point", role="signal", cd=0.4,
-                 radius_m=0.7, source_radius_cm=2.5, interior_only=True)
+        p.socket("Light_Status_0", (0.06, sy, 1.505), x=(1, 0, 0), z=(0, 0, 1), type="point", role="signal", cd=0.15,
+                 radius_m=0.6, source_radius_cm=2.0, interior_only=True)
+        # a grab handle under it (low gravity, a hand at the door - the cabin's critic: "no handles")
+        for z in (0.9, 1.26):
+            p.tube("Kit_Structure", (0.0, sy, z), (0.055, sy, z), 0.009, 8)
+        p.tube("Kit_Signal", (0.055, sy, 0.89), (0.055, sy, 1.27), 0.014, 10)
     # ---------------------------------------------------------------- a cable drop into a junction box
     jy = fr + rib + 0.12 if fr + rib + 0.25 < W - 0.15 else fl - rib - 0.3
     if 0.12 < jy < W - 0.12 and _top_at(sec, jy) > 1.9:
@@ -314,7 +338,8 @@ def bulkhead_door(sec, var, depth, name, seed):
     lo_x = -back
     p.collision_box((lo_x, 0, 0), (0.0, max(0.02, y0), C))
     p.collision_box((lo_x, y1, 0), (0.0, W, C))
-    p.collision_box((lo_x, y0, DOOR_H), (0.0, y1, C))
+    if not full:
+        p.collision_box((lo_x, y0, DOOR_H), (0.0, y1, C))
     # the slope-cut corner of an offset door: a hull over the triangle between the opening and the side
     cut = sorted([q for q in hole if q[1] > 0.05 and y0 + 0.2 < q[0] <= y1 + 1e-6], key=lambda q: q[1])
     if len(cut) >= 2:
@@ -411,7 +436,7 @@ def _reveal(p, hole, depth):
 
 
 BATCH4B = [("Bulkhead", "Door", 0.3, "W", "B"), ("Bulkhead", "Door", 0.0, "W", "A"), ("Bulkhead", "Door", 0.3, "W", "A"),
-           ("Bulkhead", "Door", 0.0, "L41", "C")]
+           ("Bulkhead", "Door", 0.0, "L41", "C"), ("Bulkhead", "Door", 0.0, "L38", "A"), ("Bulkhead", "Door", 0.0, "L38", "F")]
 VIEWS = {("Bulkhead", "Door"): ((1, 0.0, 0.12), (1, -0.8, 0.3))}
 
 

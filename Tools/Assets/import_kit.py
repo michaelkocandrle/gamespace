@@ -272,7 +272,8 @@ def build_materials():
         # along the plinth, round hatches and grips, the walked line (kit_geo Part.grime). Blotches in the middle of the
         # plates read as stains (critic rounds 2-3).
         # 0.5 (29. 9. 2026, critic of the hold: the chamfers mirrored the cove strip "as glossy plastic")
-        "Kit_Primary": layered(pal["Kit_Primary"], 0.5, 0.1, secondary=[c * 0.72 for c in pal["Kit_Primary"]],
+        # 0.58 (the cabin's critic, round 3: panel and frame "the same response" - the paint matter, the metal smoother)
+        "Kit_Primary": layered(pal["Kit_Primary"], 0.58, 0.1, secondary=[c * 0.72 for c in pal["Kit_Primary"]],
                                grunge=0.0, vary=0.12, dirt=0.3, wear=0.5, FloorWear=0.6, GrungeTileCm=160.0, MicroRough=0.1,
                                ScratchAmount=0.06, WearThreshold=0.35, PanelDirtVar=0.0,
                                # tone and gloss per plate (round 3 of the hold: "every panel one tone, one roughness")
@@ -293,8 +294,10 @@ def build_materials():
         # x1.1 / 0.48 / metal 0.45 (round 3 of the hold: at metal 0.75 / 0.42, tried after round 2's "only colour
         # differs", the frames merged with the panels again - without reflections metal loses its diffuse light, as
         # rounds 2-3 of the kit's material step found; lighter, half metal, brushed: two stops over the panels)
-        "Kit_Structure": layered([c * 1.1 for c in pal["Kit_Structure"]], 0.48, 0.45, grunge=0.25, dirt=0.5, wear=0.5,
-                                 Brushed=0.7, ScratchAmount=0.25, FloorWear=0.7, MicroRough=0.1, MicroTileCm=15.0),
+        # x1.25 / 0.42 (the cabin's critic, round 2: "the frames nearly the panels' value" under the cabin's dimmer light)
+        # 0.36 / metal 0.5, brushing 0.9, worn edges 0.7 (round 3: "no bare metal, no worn edges")
+        "Kit_Structure": layered([c * 1.25 for c in pal["Kit_Structure"]], 0.36, 0.5, grunge=0.25, dirt=0.5, wear=0.7,
+                                 Brushed=0.9, ScratchAmount=0.3, FloorWear=0.7, MicroRough=0.1, MicroTileCm=15.0),
         # the provisional floor plane (batch 3 brings the floor): rough, not a mirror for the plinth lights
         "Kit_ProvFloor": layered([0.07, 0.068, 0.065], 0.7, 0.2, grunge=0.5, vary=0.3, dirt=0.3),
         # cream paint at 70 % of the palette value: at 0.7 linear the pipes read as "white glossy pipes" (critic)
@@ -316,7 +319,8 @@ def build_materials():
         # white") - the lights themselves are separate actors, unchanged
         "Kit_GlowWarm": plain([0.08, 0.08, 0.08], 0.3, emit=pal["Kit_GlowWarm"], strength=1.1),
         "Kit_GlowCool": plain([0.04, 0.04, 0.05], 0.3, emit=pal["Kit_GlowCool"], strength=4.0),   # the plinth, quieter
-        "Kit_GlowSignal": plain([0.08, 0.04, 0.02], 0.3, emit=pal["Kit_GlowSignal"], strength=4.0),
+        # 2.0 (30. 9. 2026, the cabin's critic: the door's status light "a burnt-out orange block")
+        "Kit_GlowSignal": plain([0.08, 0.04, 0.02], 0.3, emit=pal["Kit_GlowSignal"], strength=2.0),
         # the stair nosings: a quiet neutral white (GlowCool made "blue treads", critic r2; author 27. 9. 2026)
         "Kit_GlowNeutral": plain([0.06, 0.06, 0.06], 0.3, emit=pal["Kit_GlowNeutral"], strength=1.5),
         # small fixtures seen from arm's length (the component bays' jamb strips and back-wall light): the warm glow at

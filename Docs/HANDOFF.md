@@ -1805,6 +1805,16 @@ Od nejstaršího (vše je commitnuté a pushnuté na GitHub):
             Nápis COCKPIT na 85 % mezi rámem a zárubní, stavové světlo dveří větší s vlastním světlem. Sklad: průměr
             0,23, B/R 0,72; 57–66 FPS. Otevřená doporučení kritika v recenzi (čitelnost L-tracku zdálky, čelo přepážky
             ze skladu, přepálené stavové světlo, rovnoměrný wash).
+        - **Kajuta z kitu** (30. 9. 2026, autor vybral variantu B): obložení trupu na ±1,9 m (schválený půdorys),
+          čela `Bulkhead_Door00L38_A` (vzadu) a nová `_F` (vpředu, průchod až ke stropu nad schody, zkosené horní rohy),
+          poslední modul u kokpitu `Wall_HullLiner06L_D` s plochým soklem (trup je tam u podlahy 4,5 cm za lícem),
+          nové moduly `12L_E` (vzduchová zpátečka podpory života s krabicí, svodem a madlem) a `12L_S` (nástěnná
+          skříňka), strop L38 A-C-A-C. Široké stropy dostaly příčná žebra (pokračování žeber stěn), střed ve třech
+          deskách s odsazením, servisní poklop, tmavší grafit; bodovky na stěny 40°, kratší lineární svítidla, madlo
+          u všech dveří, gumové těsnění zárubní. Světla místnosti tlumí `kit_modules.light_scale` (kajuta 0,6).
+          Nápisy kajuty: CREW QUARTERS, COCKPIT se šipkou, 05, 06, LIFE SUPPORT S1, výstražný pruh u schodů.
+          Nábytek zůstává lodní (další krok), posunutý před žebra a pod zkosení. Kritik: 3 kola FAIL + ověřovací
+          FAIL jen na povrchové odezvě materiálů (7/7/6/7/7/7/7/7), `Docs/Reviews/2026-09-30_cabin_liner.md`.
     - Klávesa I vede jen do Steadfastu; Wayfarer se prochází od 29. 9. 2026 vstáním z křesla (F), viz výše.
     - Rozhodnutí autora (26. 9. 2026): displeje v kroku 4 (přestavba z kitu) zapustit do desky jako jeden pás pod linií pohledu s ovládacími moduly kolem, skleněný panel s podsvíceným okrajem zůstává, pody zmizí. Kanopa zůstává podle výkresu, autor ji otevře jako téma pro design v2. Odraz skla přepínaný podle kamery (MPC). Postup: levné body bez kritika → rozbor videí Markom3D → interiérový kit → kokpit z kitu a pak kritik.
 

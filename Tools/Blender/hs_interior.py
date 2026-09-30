@@ -296,18 +296,53 @@ def obj_locker(g, r, zr):
     box(g["int_glow"], (xm + 0.12, face, 1.5), (xm + 0.3, face + s * 0.006, 1.62))
 
 
-def obj_hygiene(g, r, zr):
+def prism_yz(bm, xa, xb, pts):
+    """A prism between xa and xb over the convex polygon pts [(y, z)], its faces turned outward."""
+    vs = [bm.verts.new((x, y, z)) for x in (xa, xb) for (y, z) in pts]
+    n = len(pts)
+    faces = [bm.faces.new(vs[:n]), bm.faces.new(vs[n:])]
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append(bm.faces.new((vs[i], vs[j], vs[n + j], vs[n + i])))
+    c = sum((v.co for v in vs), Vector()) / len(vs)
+    for f in faces:
+        f.normal_update()
+        if f.normal.dot(f.calc_center_median() - c) < 0:
+            f.normal_flip()
+
+
+LINER_VT, LINER_RUN = 1.7, 0.75       # the hull liner's section L: vertical to 1.7 m, the chamfer 0.75 in per metre up
+
+
+def obj_hygiene(g, r, zr, liner=None):
     x0, x1, y0, y1 = r
     t = 0.05
-    box(g["int_wall"], (x0, y0, 0), (x0 + t, y1, zr[1]))
-    box(g["int_wall"], (x1 - t, y0, 0), (x1, y1, zr[1]))
+    if liner:
+        # a hull liner room (30. 9. 2026): the sides run back to the liner's panels and follow its chamfer, a roof
+        # at the cell's height closes it under the chamfer (a box to the ceiling stood through the liner)
+        s = -1 if y1 < 0 else 1
+        yb = s * (liner - 0.012)
+        zt = zr[1]
+        yk = s * (liner - LINER_RUN * (zt - LINER_VT) - 0.02)
+        zk = LINER_VT + 0.012 / LINER_RUN
+        pts = [(y1, 0.0), (yb, 0.0), (yb, zk), (yk, zt), (y1, zt)]
+        if s < 0:
+            pts = list(reversed(pts))
+        for xa in (x0, x1 - t):
+            prism_yz(g["int_wall"], xa, xa + t, pts)
+        ya, yb2 = sorted((y1, yk))
+        box(g["int_panel"], (x0, ya, zt - 0.03), (x1, yb2, zt))
+    else:
+        box(g["int_wall"], (x0, y0, 0), (x0 + t, y1, zr[1]))
+        box(g["int_wall"], (x1 - t, y0, 0), (x1, y1, zr[1]))
     face = y1
     door = (x0 + x1) / 2
     for xa, xb in _minus((x0, x1), [(door - 0.4, door + 0.4)]):
         box(g["int_panel"], (xa, face - t, 0), (xb, face, zr[1]))
-    box(g["int_panel"], (door - 0.4, face - t, 2.05), (door + 0.4, face, zr[1]))
-    box(g["int_trim"], (door - 0.45, face, 2.05), (door + 0.45, face + 0.04, 2.13))
-    box(g["int_dark"], (door - 0.4, face - 0.03, 0.02), (door + 0.4, face - 0.025, 2.04))   # closed sliding leaf
+    dh = min(2.05, zr[1] - 0.1)            # the doorway's head: under a 2.05 m roof (hull liner room) 1.95
+    box(g["int_panel"], (door - 0.4, face - t, dh), (door + 0.4, face, zr[1]))
+    box(g["int_trim"], (door - 0.45, face, dh), (door + 0.45, face + 0.04, dh + 0.08))
+    box(g["int_dark"], (door - 0.4, face - 0.03, 0.02), (door + 0.4, face - 0.025, dh - 0.01))   # closed sliding leaf
     box(g["int_glow"], (door + 0.45, face, 1.2), (door + 0.5, face + 0.01, 1.35))
 
 
@@ -799,7 +834,7 @@ def build(recipe, layout, coll, mats, ship, hull):
         elif "Skříň" in name:
             obj_locker(g, (x0, x1, y0, y1), zr)
         elif "Hygienick" in name:
-            obj_hygiene(g, (x0, x1, y0, y1), zr)
+            obj_hygiene(g, (x0, x1, y0, y1), zr, kit_half.get(o.get("room")))
         elif "Výdejník" in name:
             obj_food(g, (x0, x1, y0, y1), zr)
         elif "Lůžko" in name:

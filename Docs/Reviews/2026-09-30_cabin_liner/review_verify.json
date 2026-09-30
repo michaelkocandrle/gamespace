@@ -1,0 +1,71 @@
+{
+ "date": "2026-09-30",
+ "goal": "Kajuta malé pracovní lodi z modulárního kitu, z první osoby (oko 1,65 m): obložení trupu (panely do lišty ve výšce 1,3 m, horní deska, zkosení s kabelovým žlabem, světelný žlábek u stropu, obnažená žebra trupu ve spojích modulů), strop z panelů se svítidly a vrstvou rozvodů (žebříkový žlab s kabely, dvojice trubek na závěsech), čela přepážek s dveřmi (vzadu dveře do technické chodby se stavovým světlem, vpředu průchod až ke stropu na schody do kokpitu). Kajuta je obytná: klidnější a tlumenější než nákladový prostor. Hodnotí se stěny, čela přepážek, strop, světlo a materiály.",
+ "style": "STYLOVÝ ZÁMĚR (autor): „udržovaná pracovní loď“ – panely téměř čisté, špína jen ve spárách, u soklu a kolem poklopů. NEPOŽADUJ víc špíny. Styl Star Citizen: tmavý teplý grafit, světlejší konstrukce, oranžová signální barva výrobce, svítidla v pouzdrech, teplé světlo architektury, studené UI.",
+ "checklist": "interior",
+ "notes": [
+  "Reference jsou interiéry různých lodí SC; ukazují cílovou úroveň a styl, ne stejný objekt.",
+  "NÁBYTEK JE DOČASNÝ: lůžko s policemi, skříň na skafandr, hygienická buňka a výdejník jídla jsou zatím jednoduché kvádry a přijdou v příštím kroku. Nehodnoť jejich tvar ani materiál, jen zda nekolidují se stěnami.",
+  "Podlaha je zatím dřívější a přijde v dalším kroku. Světelná lišta pod policí nad lůžkem patří dočasnému nábytku (čtecí světlo lůžka).",
+  "Text vpravo nahoře (FPS), pokud je vidět, je měřicí overlay.",
+  "OVĚŘOVACÍ KOLO: posuď jen, zda jsou opravené tyto body z minulého kola; jiné nové výtky uveď jen jako doporučené. (1) Prázdné stěny mezi žebry, servisní modul bez hloubky – vložené desky se stínovou spárou, nástěnná skříňka s rámem, těsněním, západkami a panty, u mřížky krabice s přípojkou a svodem, madlo podél lišty u dveří. (2) Jeden jednolitý matný materiál – rozdíl lakovaný panel / broušený kov konstrukce / guma, opotřebené hrany konstrukce. (3) Přepálené zdroje světla – skvrny na zkosení pod stropem, pás nad průchodem ke schodům (světlo z technické chodby za dveřmi je sousední místnost)."
+ ],
+ "topic": "cabin_liner",
+ "out": "Docs/Reviews/2026-09-30_cabin_liner/verify",
+ "pairs": [
+  {
+   "title": "Kajuta, pohled dopředu ke schodům do kokpitu",
+   "distance": "far",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021316.png",
+   "ref_label": "SC kajuta posádky (Drake)",
+   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/01_cabin_fwd.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Kajuta, pohled dozadu ke dveřím do technické chodby",
+   "distance": "far",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC kajuta s palandami",
+   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/02_cabin_aft.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Stěna nad lůžkem (obložení, servisní modul)",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
+   "ref_label": "SC kajuta s palandami",
+   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/03_cabin_left.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Strop kajuty",
+   "distance": "close",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
+   "ref_label": "SC strop (MISC)",
+   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/06_cabin_ceiling.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Průchod ke schodům do kokpitu (čelo přepážky otevřené ke stropu)",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
+   "ref_label": "SC dveře v přepážce (RSI)",
+   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/14_stairs_up.png",
+   "ours_label": "ve hře"
+  },
+  {
+   "title": "Pravá strana kajuty (za dočasným nábytkem obložení)",
+   "distance": "mid",
+   "light": "interior",
+   "ref": "starcitizenreference/Screenshot 2026-09-25 021435.png",
+   "ref_label": "SC obytná část (Drake)",
+   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/04_cabin_right.png",
+   "ours_label": "ve hře"
+  }
+ ]
+}

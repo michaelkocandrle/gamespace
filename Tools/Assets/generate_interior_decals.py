@@ -111,7 +111,7 @@ def exit_sign():
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    items = {"D_Int_Section_%s" % n: section(n) for n in ("01", "02", "03", "04", "05")}
+    items = {"D_Int_Section_%s" % n: section(n) for n in ("01", "02", "03", "04", "05", "06")}
     items.update({
         "D_Int_Hold": label("CARGO HOLD", "DECK A  ·  8 SCU  ·  MAG-LOCK GRID"),
         "D_Int_Engineering": label("ENGINEERING", "AUTHORISED CREW ONLY", arrow="right"),
@@ -125,6 +125,10 @@ def main():
         "D_Int_Shield": plate("SHIELD GEN  S1", ["FIELD EMITTER  ·  CLASS C", "HOT SWAP  ·  2 MIN"]),
         "D_Int_Cooler": plate("COOLER  S1", ["COOLANT LOOP A/B", "DO NOT OBSTRUCT VENTS"]),
         "D_Int_Grid": plate("CARGO GRID", ["8 SCU  ·  MAX 16 t", "LOCK BEFORE FLIGHT"]),
+        # the cabin (30. 9. 2026, its critic: "not one readable sign in the room")
+        "D_Int_Quarters": label("CREW QUARTERS", "BERTH  ·  HYGIENE  ·  GALLEY"),
+        "D_Int_CockpitStairs": label("COCKPIT", "FLIGHT DECK  ·  MIND THE STAIRS", arrow="right"),
+        "D_Int_LifeSupport": plate("LIFE SUPPORT  S1", ["ACCESS UNDER BERTH", "AIR  ·  HEAT  ·  WATER"]),
     })
     for name, im in items.items():
         im.save(os.path.join(OUT, name + ".png"))

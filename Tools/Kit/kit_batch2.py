@@ -297,8 +297,20 @@ def halo(p, at):
     ceiling (the hull liner's 3.6 m) got no light but the coves' grazing wash - "a black plane, fixtures without a
     source" (critic of the Wayfarer's hold, 29. 9. 2026); its panels now read round every fixture, dark between. Neutral white:
     the warm panels under warm light took the hold to B/R 0.66 (SC 0.72-1.05)."""
-    p.socket("Light_Halo_0", (at[0], at[1], at[2] - 0.35), x=(0, 0, 1), z=(1, 0, 0), type="point", role="neutral", cd=6.0,
+    # 3.5 cd (the cabin's critic: "the ceiling the brightest surface in the room")
+    p.socket("Light_Halo_0", (at[0], at[1], at[2] - 0.35), x=(0, 0, 1), z=(1, 0, 0), type="point", role="neutral", cd=3.5,
              radius_m=1.8, source_radius_cm=8.0, specular=0.0)
+
+
+def ceiling_hatch(p, M, r, C):
+    """A service hatch in a wide ceiling, to the services over it: a frame, the door 1 cm down, two quarter-turn
+    latches with orange levers (the cabin's critic, round 2: "add a service hatch with latches")."""
+    frame_ring(p, M, r, t=0.02, proud=0.016)
+    p.slab("Kit_Primary", M, r[0], r[1], r[2], r[3], 0.014, BEV_SMALL, proud=0.01, panel=False)
+    um = (r[0] + r[1]) / 2
+    for v in (r[2] + 0.05, r[3] - 0.05):
+        p.tube("Kit_Structure", (um, -v, C - 0.009), (um, -v, C - 0.02), 0.013, 12)
+        p.box("Kit_Signal", (um - 0.022, -v - 0.004, C - 0.026), (um + 0.022, -v + 0.004, C - 0.018), panel=False)
 
 
 def scallop(p, k, at, sgn):
@@ -306,12 +318,14 @@ def scallop(p, k, at, sgn):
     liner at rail height (critic of the Wayfarer's hold, round 3: "the lower 60 % of the walls black, no pools of
     light on the walls" - the down-lights' cones end on the floor, the coves graze the ceiling)."""
     x, y, C = at
-    d = (0.0, sgn * 0.376, -0.927)
+    # 27 deg to the wall from 0.4 m in, a 40 deg cone (critic of the cabin: 22 deg from 0.2 m burnt the chamfer's top
+    # white; round 3: a 60 deg cone still spilt two hot spots on it)
+    d = (0.0, sgn * 0.454, -0.891)
     p.box("Kit_Structure", (x - 0.05, y - 0.05, C - 0.032), (x + 0.05, y + 0.05, C + 0.002), bevel=0.004, segments=1, panel=False)
     p.box("Kit_Seal", (x - 0.036, y - 0.036, C - 0.034), (x + 0.036, y + 0.036, C - 0.031), panel=False)
     p.box("Kit_GlowWarm", (x - 0.02, y - 0.02 + sgn * 0.008, C - 0.036), (x + 0.02, y + 0.02 + sgn * 0.008, C - 0.033), panel=False)
-    p.socket("Light_Scallop_%d" % k, (x, y + sgn * 0.01, C - 0.045), x=d, z=(1, 0, 0), type="spot", role="work", cd=60.0,
-             cone_deg=70.0, radius_m=2.6, source_radius_cm=3.0, dir_ue=[0.0, -d[1], d[2]])
+    p.socket("Light_Scallop_%d" % k, (x, y + sgn * 0.01, C - 0.045), x=d, z=(1, 0, 0), type="spot", role="work", cd=55.0,
+             cone_deg=40.0, radius_m=2.8, source_radius_cm=3.0, dir_ue=[0.0, -d[1], d[2]])
 
 
 def ceiling_panel(sec, var, L, name, seed):
@@ -327,6 +341,15 @@ def ceiling_panel(sec, var, L, name, seed):
     p.slab("Kit_Seal", M, 0, L, -w, w, 0.01, proud=-back, panel=False)
     side = min(0.3, w * 0.35)
     strips = [(-w, -w + side - GAP / 2), (-w + side + GAP / 2, w - side - GAP / 2), (w - side + GAP / 2, w)]
+    wide = sec.key.startswith("L")
+    centre_k, set_up = 1, ()
+    if wide:
+        # a hull liner room's ceiling (3.2-3.6 m): the middle strip in three plates, the outer two set up 12 mm, all in
+        # the darker graphite (critic of the Wayfarer's cabin, round 2: "one smooth beige plane, seams barely visible")
+        c0, c1 = -w + side + GAP / 2, w - side - GAP / 2
+        t3 = (c1 - c0) / 3
+        strips = [strips[0], (c0, c0 + t3 - GAP / 2), (c0 + t3 + GAP / 2, c1 - t3 - GAP / 2), (c1 - t3 + GAP / 2, c1), strips[2]]
+        centre_k, set_up = 2, (1, 3)
     hole = None
     if var == "B":
         s = min(0.45, 2 * (w - side) - 0.12)
@@ -334,14 +357,30 @@ def ceiling_panel(sec, var, L, name, seed):
     elif var == "A" and L >= 0.5:
         hole = (L / 2 - 0.12, L / 2 + 0.12, -0.12, 0.12)
     elif var == "C":
-        hole = (0.1, L - 0.1, -0.055, 0.055)
+        # 0.25 m short of the ends in a wide room: at 0.1 m the linear light burnt the end rib white (the cabin's
+        # critic, round 3: "the bar over the passage burnt out")
+        e = 0.25 if wide else 0.1
+        hole = (e, L - e, -0.055, 0.055)
     for k, (v0, v1) in enumerate(strips):
-        if k == 1 and hole:
-            frame_hole(p, "Kit_Primary", M, G, L - G, v0, v1, hole)
+        if k == centre_k and hole:
+            frame_hole(p, "Kit_Primary", M, G, L - G, v0, v1, hole, secondary=wide)
+        elif k in set_up:
+            # set up 12 mm at full thickness: pressed() thins a set-back panel, and it lost the backing (floating)
+            p.slab("Kit_Primary", M, G, L - G, v0, v1, PT, BEV_MID, secondary=wide, inset=(0.04, 0.006), proud=-0.012)
         else:
-            pressed(p, M, G, L - G, v0, v1)
-    for (u0, u1) in ((0.0, 0.065), (L - 0.065, L)):
-        p.slab("Kit_Structure", M, u0, u1, -w, w, 0.045, proud=0.04, panel=False)
+            pressed(p, M, G, L - G, v0, v1, secondary=wide)
+    if sec.key.startswith("L"):
+        # a hull liner room: half a T rib at each end, the wall frames carried over the ceiling - web 2 cm, flange 9 cm,
+        # 8 cm deep (critic of the Wayfarer's cabin, round 1: "a flat plane without transverse ribs, the room reads as a
+        # tall rectangular corridor")
+        for (e, s_) in ((0.0, 1), (L, -1)):
+            a, b = sorted((e, e + s_ * 0.01))
+            fa, fb = sorted((e, e + s_ * 0.045))
+            p.slab("Kit_Structure", M, a, b, -w, w, 0.08, proud=0.08, panel=False)
+            p.slab("Kit_Structure", M, fa, fb, -w, w, 0.012, BEV_SMALL, segments=1, proud=0.08, panel=False)
+    else:
+        for (u0, u1) in ((0.0, 0.065), (L - 0.065, L)):
+            p.slab("Kit_Structure", M, u0, u1, -w, w, 0.045, proud=0.04, panel=False)
     if var == "A" and L >= 0.5:
         # a recessed square down-light: a trim frame, a dark reflector well 6 cm up, the lens at its top behind a
         # two-blade louvre ("flat household lamps" - critic)
@@ -349,11 +388,16 @@ def ceiling_panel(sec, var, L, name, seed):
         p.box("Kit_Seal", (c[0] - 0.12, -0.12, C + 0.058), (c[0] + 0.12, 0.12, C + 0.064), panel=False)
         for (a0, a1, b0, b1) in ((-0.12, -0.11, -0.12, 0.12), (0.11, 0.12, -0.12, 0.12), (-0.11, 0.11, -0.12, -0.11), (-0.11, 0.11, 0.11, 0.12)):
             p.box("Kit_Seal", (c[0] + a0, b0, C), (c[0] + a1, b1, C + 0.06), panel=False)
-        p.box("Kit_GlowWarm", (c[0] - 0.08, -0.08, C + 0.052), (c[0] + 0.08, 0.08, C + 0.058), panel=False)
-        for v in (-0.04, 0.04):
-            p.box("Kit_Structure", (c[0] - 0.11, v - 0.004, C + 0.012), (c[0] + 0.11, v + 0.004, C + 0.05), panel=False)
+        if sec.key.startswith("L"):
+            # the lens 3 cm up the well, no louvre (critic of the cabin: "dark from close by, reads as a vent"), a bright
+            # core in a dim ring - a diffuser, not a white square (round 2)
+            p.box("Kit_GlowDim", (c[0] - 0.08, -0.08, C + 0.031), (c[0] + 0.08, 0.08, C + 0.036), panel=False)
+            p.box("Kit_GlowWarm", (c[0] - 0.045, -0.045, C + 0.028), (c[0] + 0.045, 0.045, C + 0.031), panel=False)
+        else:
+            p.box("Kit_GlowWarm", (c[0] - 0.08, -0.08, C + 0.052), (c[0] + 0.08, 0.08, C + 0.058), panel=False)
+            for v in (-0.04, 0.04):
+                p.box("Kit_Structure", (c[0] - 0.11, v - 0.004, C + 0.012), (c[0] + 0.11, v + 0.004, C + 0.05), panel=False)
         frame_ring(p, M, hole, t=0.03, proud=0.016)
-        wide = sec.key.startswith("L")
         # a hull liner's wide room (29. 9. 2026, critic: flat light, no pools on the floor): a tight, strong cone,
         # shadowed - a pool under every fixture, darker floor between them
         # (round 2: "no cones on the floor" at 160 cd / 60 deg with the cove at full strength - 260 / 50, the cove down)
@@ -363,7 +407,9 @@ def ceiling_panel(sec, var, L, name, seed):
         if wide:
             halo(p, (c[0], 0.0, C))
             for k, sgn in enumerate((1, -1)):
-                scallop(p, k, (c[0], sgn * (w - 0.2), C), sgn)
+                scallop(p, k, (c[0], sgn * (w - 0.4), C), sgn)
+            if L >= 1.0:
+                ceiling_hatch(p, M, (0.16, L / 2 - 0.17, -0.2, 0.2), C)
     elif var == "B":
         # the diffuser: a framed opening, a linear bar grille over a dark plenum - the bars' sides catch the
         # corridor light from any angle (a perforated face read as a black hole seen from along the run)
@@ -383,13 +429,15 @@ def ceiling_panel(sec, var, L, name, seed):
         for (v0, v1) in ((-0.055, -0.045), (0.045, 0.055)):
             p.slab("Kit_Seal", M, u0, u1, v0, v1, 0.045, proud=0.0, panel=False)
         p.slab("Kit_GlowWarm", M, u0 + 0.01, u1 - 0.01, -0.038, 0.038, 0.004, proud=-0.03, panel=False)
-        # cross louvres in the channel every 8 cm: the diffuser reads as a fixture, not a white plate (critic r2)
-        n_l = int((u1 - u0 - 0.02) / 0.08)
+        # cross louvres in the channel every 8 cm: the diffuser reads as a fixture, not a white plate (critic r2); none in
+        # a hull liner room (the cabin's critic: "a grille that glows - a vent or a light?")
+        n_l = int((u1 - u0 - 0.02) / 0.08) if not wide else 0
         for k in range(1, n_l):
             u = u0 + 0.01 + k * (u1 - u0 - 0.02) / n_l
             p.slab("Kit_Structure", M, u - 0.003, u + 0.003, -0.045, 0.045, 0.026, proud=-0.002, panel=False)
         frame_ring(p, M, hole, t=0.02, proud=0.014)
-        strip_light_along(p, "Light_Linear_0", (L / 2, 0.0, C - 0.02), (0, 0, -1), (1, 0, 0), u1 - u0 - 0.04, 0.05, "work", 32.0 * L, 3.6)
+        strip_light_along(p, "Light_Linear_0", (L / 2, 0.0, C - 0.02), (0, 0, -1), (1, 0, 0), u1 - u0 - 0.04, 0.05, "work",
+                          (24.0 if wide else 32.0) * L, 3.6)
         if sec.key.startswith("L"):
             halo(p, (L / 2, 0.0, C))
     if sec.key.startswith("L"):
@@ -434,7 +482,7 @@ def services(p, L, C):
     for (a, b) in ((t0, t0 + 0.006), (t1 - 0.006, t1)):
         p.box("Kit_Structure", (0.0, a, zs), (L, b, zs + 0.06), panel=False)
     y = t0 + 0.022
-    for (r, role) in ((0.017, "Kit_Rubber"), (0.012, "Kit_Accent"), (0.02, "Kit_Rubber"), (0.013, "Kit_Signal"),
+    for (r, role) in ((0.017, "Kit_Rubber"), (0.012, "Kit_Accent"), (0.02, "Kit_Rubber"), (0.009, "Kit_Accent"),
                       (0.016, "Kit_Rubber"), (0.011, "Kit_Accent"), (0.018, "Kit_Rubber")):
         if y + r > t1 - 0.01:
             break

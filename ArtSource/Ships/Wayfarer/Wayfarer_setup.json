@@ -1984,6 +1984,168 @@
     0.1,
     0.06
    ]
+  },
+  {
+   "name": "Int_Quarters",
+   "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); on the aft bulkhead face (Bulkhead_Door00L38_A, face at 10.40) port of the door (starboard the hygiene cell hid it from the cabin), in the upper plate beside the junction box's cable drop; depth 2 cm (3 cm reached the face's back plate: mirrored there), 1.5 cm in front of the face plane: its upper plate is set back 8 mm, the plate's middle 6 mm more; brighter (round 2: 'dark on dark, unreadable from 3 m')",
+   "texture": "D_Int_Quarters",
+   "location": [
+    15.4,
+    -125.0,
+    30.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -90.0
+   ],
+   "size": [
+    2.0,
+    10.0,
+    40.0
+   ],
+   "opacity": 1.0,
+   "tint": [
+    0.95,
+    0.93,
+    0.88
+   ],
+   "flip_v": 1.0
+  },
+  {
+   "name": "Int_CockpitStairs",
+   "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); on the forward face (Bulkhead_Door00L38_F, face at 15.19) port of the stairs' opening, the arrow at it; depth 2 cm (3 cm reached the face's back plate), 0.5 cm in front of the face plane (the upper plate set back)",
+   "texture": "D_Int_CockpitStairs",
+   "location": [
+    493.6,
+    -120.0,
+    30.0
+   ],
+   "rotation": [
+    0.0,
+    180.0,
+    -90.0
+   ],
+   "size": [
+    2.0,
+    10.0,
+    40.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_v": 1.0
+  },
+  {
+   "name": "Int_Sec05",
+   "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); port liner, the upper main plate's aft half of the first module (x 10.7)",
+   "texture": "D_Int_Section_05",
+   "location": [
+    45.0,
+    -187.5,
+    -8.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    90.0
+   ],
+   "size": [
+    4.0,
+    12.0,
+    12.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_u": 1.0
+  },
+  {
+   "name": "Int_Sec06",
+   "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); port liner over the bunk, the third module's aft half (x 13.09)",
+   "texture": "D_Int_Section_06",
+   "location": [
+    284.0,
+    -187.5,
+    -8.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    90.0
+   ],
+   "size": [
+    4.0,
+    12.0,
+    12.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_u": 1.0
+  },
+  {
+   "name": "Int_LifeSupport",
+   "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); port liner over the bunk, the third module's forward half (x 13.69): the plant is under the bunk",
+   "texture": "D_Int_LifeSupport",
+   "location": [
+    344.0,
+    -187.5,
+    -8.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    90.0
+   ],
+   "size": [
+    3.0,
+    6.0,
+    12.0
+   ],
+   "opacity": 0.9,
+   "tint": [
+    0.8,
+    0.78,
+    0.72
+   ],
+   "flip_u": 1.0
+  },
+  {
+   "name": "Int_StairHazard",
+   "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); the floor before the cockpit stairs' opening (x 15.01-15.15); 3 cm off the centre line - a tile joint runs along it",
+   "texture": "D_Big_Hazard_Ramp",
+   "location": [
+    483.0,
+    -3.0,
+    -119.5
+   ],
+   "rotation": [
+    90.0,
+    90.0,
+    0.0
+   ],
+   "size": [
+    3.0,
+    7.0,
+    48.0
+   ],
+   "opacity": 0.85,
+   "tint": [
+    0.78,
+    0.58,
+    0.06
+   ],
+   "symmetric": true
   }
  ]
 }

@@ -274,14 +274,17 @@ def jobs(batch, sections, budget):
                        budget=kit_batch4.budget(cat, part, size), render=True, views=kit_batch4.VIEWS[(cat, part)])
     elif batch == "liner":
         import kit_liner
-        for kind, L, var in kit_liner.LINER:
-            seed += 7
+        seed0 = seed
+        for i, (kind, L, var) in enumerate(kit_liner.LINER):
+            seed = seed0 + 7 * (i + 1)
             yield dict(name=kit_liner.part_name(kind, L, var), part=(lambda k=kind, l=L, v=var, sd=seed: kit_liner.build_part(k, l, v, sd)),
                        category="Wall", family="Wall_" + kind, kind=kind, length=L, section="L", variant=var, batch=4,
                        budget=kit_liner.budget(L), render=True, views=kit_liner.VIEWS)
         # the ceilings of the liner rooms (their width per room: sections L41 hold, L38 cabin)
+        seed = seed0 + 7 * 5          # the ceilings' seeds as before the sixth liner part (D, 30. 9. 2026)
         import kit_batch2
-        for sec, size, var in (("L41", 1.2, "A"), ("L41", 1.2, "C"), ("L41", 0.6, "A"), ("L41", 0.6, "B")):
+        for sec, size, var in (("L41", 1.2, "A"), ("L41", 1.2, "C"), ("L41", 0.6, "A"), ("L41", 0.6, "B"),
+                               ("L38", 1.2, "A"), ("L38", 1.2, "C")):
             seed += 7
             yield dict(name=kit_batch2.part_name("Ceiling", "Panel", size, sec, var),
                        part=(lambda s=sec, z=size, v=var, sd=seed: kit_batch2.build_part("Ceiling", "Panel", z, s, v, sd)),

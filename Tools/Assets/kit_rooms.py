@@ -162,6 +162,18 @@ def build_ship(ship, recipe, report):
         # layout metres, y already in Unreal's sense -> Hull space (the game blend's space in cm)
         return unreal.Vector((x + off[0]) * 100.0, (y_ue - off[1]) * 100.0, (z + off[2]) * 100.0)
 
+    # light zones along the ship (kit_modules.light_scale [[x0, x1, factor, room]], layout metres): a room's own level
+    # (30. 9. 2026: the cabin, 4.8 m under the hold's lights, came out at p50 0.28 - SC 0.08-0.18)
+    zones = [z for z in mods.get("light_scale", []) if not isinstance(z, str)]
+
+    def zone_k(x_m, sname):
+        # [x0, x1, factor, room, {socket prefix: extra factor}]
+        z = next((z for z in zones if z[0] <= x_m <= z[1]), None)
+        if z is None:
+            return 1.0
+        extra = z[4] if len(z) > 4 else {}
+        return z[2] * next((v for k, v in extra.items() if sname.startswith(k)), 1.0)
+
     n_parts = n_lights = 0
     for k, (m, (x, y, z), yaw) in enumerate(kit_layout.layout_parts(mods, parts)):
         name = "SM_Kit_" + m
@@ -188,6 +200,7 @@ def build_ship(ship, recipe, report):
             shadow = sname.startswith(SHADOWED_SOCKETS)
             prm = sock.get("params") or {}
             k_cd = next((v for kk, v in SOCKET_SCALE.items() if sname.startswith(kk)), 1.0)
+            k_cd *= zone_k(x + kit_layout.rotate(yaw, *sock["location_ue_cm"][:2])[0] / 100.0, sname)
             prm = dict(prm, cd=prm.get("cd", 1.0) * k_cd)
             lx, ly, lz = sock["location_ue_cm"]
             wx, wy = kit_layout.rotate(yaw, lx, ly)

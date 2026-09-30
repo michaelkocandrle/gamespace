@@ -1,0 +1,50 @@
+# Verdikt: FAIL
+
+První dojem: Čistý, správně „namluvený“ modulární koridor s kitem (žlaby, trubky, lišta, decaly), ale zatím greybox s kitem – hladké stěny a strop, jeden materiál všude a přepálené světelné pásy; jako obytná kajuta z SC to nepůsobí.
+
+Nehodnoceno podle briefu: podlaha (dlaždice), tvar a materiál dočasného nábytku, modré obdélníky na něm; FPS overlay na listech není.
+
+| Kategorie | Skóre 1–10 | Proč (jedna věta) |
+|---|---|---|
+| Silueta a tvar | 6 | Zkosení horní části stěn (list 01/06) a osmiúhelníkový rám zadních dveří (list 02) sedí, ale přední přepážka i průchod do kokpitu jsou pravoúhlé a z hlavního pohledu (list 01) prostor čte jako hranatý dlouhý koridor. |
+| Hierarchie a hustota detailu | 4 | Každý modul stěny je jeden velký hladký panel s jedním číslem a jednou plochou destičkou, strop je téměř prázdná plocha; detail není shlukovaný kolem funkčních míst. |
+| Materiály | 5 | Všechno je jeden tmavý grafit se stejnou drsností, strop čte jako béžovo-hnědá plastová plocha; chybí kontrast světlejší broušené konstrukce vs. lakované panely, gumová těsnění, opotřebení hran. |
+| Decaly | 6 | 05/06, LIFE SUPPORT, COCKPIT >>> jsou čitelné a nezrcadlené, ale CREW QUARTERS je tmavý na tmavém, ovladače u dveří nemají popisky a v kajutě chybí nouzové značení. |
+| Světlo | 5 | Kontrast a teplá architektura jsou, ale lišta v 1,3 m je přepálená bílá čára, žlábek u stropu dělá tři přepálené skvrny na zkosení a stropní svítidla jsou tvrdé bílé čtverce bez pouzdra. |
+| Čitelnost (text, displeje, HUD) | 6 | Text ze střední vzdálenosti přečtu, CREW QUARTERS ze 3 m ne; v kajutě není žádný vestavěný displej (modré plochy patří dočasnému nábytku). |
+| Chyby geometrie | 7 | Žádné díry do prázdna ani viditelné průniky; nevysvětlený žebřík vedle schodů (list 05) a víko skříně těsně u trubek (list 06) k ověření. |
+| Soulad stylu mezi díly | 6 | Kit stěn, žlabů a trubek je vzájemně konzistentní, ale rám průchodu do kokpitu je jiný (světle stříbrný, hladký, pravoúhlý) a strop má jiný tón než stěny. |
+
+## Rozdíly proti referenci
+
+1. **Strop jako jednolitá plocha** – kde: list 04 pravá půlka, horní dvě třetiny obrazu; list 01 pravá půlka, strop mezi žlaby (střed horní čtvrtiny) – co je špatně: strop je jedna hladká hnědá plocha, spáry panelů jsou sotva vidět (jedna svislá a jedna vodorovná tenká linka), panely nemají hloubku ani přesahy, svítidlo je plochý bílý čtverec v tenkém rámečku; přesně „jednolitá/plastová plocha“ z checklistu, reference (list 04 vlevo) má strop členěný nosníky, pouzdry svítidel a rozvody – závažnost: musí se opravit – oprava: rozdělit na panely se spárou 5–10 mm a vzájemným odsazením 1–2 cm, mezi panely tmavší konstrukční rastr (žebra), svítidlo zapustit do pouzdra 3–5 cm hlubokého s difuzorem a rámem se šrouby, přidat jeden servisní poklop se západkami, barvu stropu posunout od béžové ke grafitu stěn.
+
+2. **Přepálené světelné pásy** – kde: list 03 pravá půlka, vodorovná lišta v 1,3 m (bílá čára přes celou šířku v polovině výšky obrazu) a žlábek u stropu (tři jasné skvrny nad zkosením vlevo, uprostřed a vpravo); list 01 pravá půlka, tatáž lišta na levé stěně – co je špatně: pásy jsou oříznuté do čisté bílé, bez viditelného tělesa a difuzoru; u stropu jsou jednotlivé bodové zdroje vidět jako „vlnky“ na zkosení místo souvislého žlábku – závažnost: musí se opravit – oprava: intenzitu lišty snížit o 2–3 EV, emisivní pás dát za matný difuzor v pouzdře s viditelnou hranou krytu; u stropu použít souvislý pásový zdroj / rect light, nebo bodové zdroje zahustit, aby se dosvit překrýval; stěna pod pásem má zůstat tmavší než pás.
+
+3. **Nízká hustota a hloubka detailu stěn, servisní modul bez hmoty** – kde: list 03 pravá půlka, všechny moduly mezi svislými sloupky; servisní modul = malá čtvercová destička nad lištou uprostřed a malý obdélník pod lištou; list 02 pravá půlka, pravá stěna – co je špatně: každý modul je jeden hladký panel s jedním číslem; servisní modul je plochá destička bez rámu, hloubky, západek a stavové LED; kabelový žlab na zkosení je prázdný tmavý pruh bez kabelů; reference (list 01/02 vlevo) shlukuje zapuštěné skříňky se západkami, hadice, hasicí přístroj, madla – závažnost: musí se opravit – oprava: servisní modul jako zapuštěná jednotka s rámem, 2 západkami, LED a popiskem; na modul 1–2 zapuštěné skříňky se západkami; madlo na liště; u mřížky přípojky/hadice; do žlabu na zkosení viditelné kabely s příchytkami po ~60 cm.
+
+4. **Materiály bez rozlišení** – kde: všechny listy pravá půlka; nejzřetelněji list 03 (sloupky vs. panely mají skoro stejnou hodnotu i drsnost) a list 02 (rám zadních dveří splývá se stěnou) – co je špatně: jeden tmavý grafit se stejnou drsností na panelech, sloupcích, liště i rámech dveří; žádný broušený kov vs. lak, žádné gumové těsnění, žádné opotřebení hran; „světlejší konstrukce“ z briefu se neděje – závažnost: musí se opravit – oprava: konstrukce (sloupky, žebra, rámy dveří, žlab) světlejší broušený kov s nižší drsností; panely tmavý lak s vyšší drsností; černý gumový pás kolem rámů dveří a ve spojích modulů; jemná maska opotřebení jen na hranách a rozích (panely nechat čisté, jak je záměr).
+
+5. **Průchod do kokpitu: pravoúhlý hladký rám cizího stylu** – kde: list 05 pravá půlka, svislé světle šedé sloupky rámu vlevo a vpravo od otvoru a horní nosník; list 01 pravá půlka, přední přepážka kolem otvoru – co je špatně: rám je pravoúhlý, bez zkosených rohů, bez vrstvení a těsnění, světle stříbrný a hladký, zatímco zbytek kitu je tmavý grafit; reference (list 05 vlevo) má tlustý vrstvený rám se zkosením a akcentním osvětlením; v hlavním pohledu tak prostor končí obdélníkem, což checklist označuje za chybu – závažnost: musí se opravit – oprava: zkosit horní rohy otvoru (osmiúhelník jako zadní dveře), rám ve dvou vrstvách (nosný + kryt) s gumovým těsněním, materiál sladit s konstrukcí kitu, nad otvorem stavové světlo v pouzdře, štítek COCKPIT na rám.
+
+6. **Nevysvětlený žebřík vedle schodů** – kde: list 05 pravá půlka, pravý okraj vpravo od rámu (svislý prvek s příčkami přes celou výšku obrazu) – co je špatně: vedle schodů s madly visí na stěně svislý žebřík bez cíle a bez funkce, vlevo nic takového není; působí jako zapomenutý díl kitu – závažnost: doporučeno – oprava: odstranit, nebo mu dát účel (svislý kabelový žlab s kabely navazující na stropní žlab, nebo přístupový žebřík k poklopu nad schody).
+
+7. **Označení sekce CREW QUARTERS nečitelné, ovladače bez popisků** – kde: list 02 pravá půlka, pravá stěna vedle dveřního rámu, horní část panelu; kontrolky/ovladače po obou stranách rámu dveří – co je špatně: tmavě šedý text na tmavém panelu, ze ~3 m nepřečtu; chybí číslo/pruh sekce po vzoru SC; oranžové prvky u dveří nemají popisek, takže nevím, co jsou – závažnost: doporučeno – oprava: světlý text (nebo na oranžovém pruhu) ve výšce očí u rámu, větší písmo, číslo sekce; u ovladačů malý popisek (OPEN / LOCK / stav).
+
+8. **Svítidla bez pouzdra a nejasný prvek na stropě** – kde: list 04 pravá půlka, čtvercové svítidlo nahoře uprostřed a mřížkovaný obdélník dole uprostřed; list 01 pravá půlka, stropní svítidla – co je špatně: svítidlo je plochý bílý čtverec s tenkým hladkým rámem, bez zapuštění, difuzoru a spojovacího materiálu; dolní mřížkovaný prvek nečtu – ventilace, nebo světlo? má lamely a zároveň svítí – závažnost: doporučeno – oprava: zapustit do pouzdra, difuzor s jemným gradientem k okraji, rám se šrouby; mřížku rozhodnout: buď tmavá neemisivní ventilace, nebo svítidlo v pouzdře.
+
+9. **Oranžová na každé příčce žlabu** – kde: list 01 pravá půlka, stropní žlab vlevo (od horního okraje k přepážce); list 04 pravá půlka, oba žlaby – co je špatně: každá příčka žlabu má oranžový pruh, takže žlab čte jako dekorativní proužkování, ne jako signální barva výrobce; oranžová tím ztrácí význam – závažnost: doporučeno – oprava: oranžovou z příček odstranit, nechat jen koncovky žlabu nebo jeden výstražný pruh u spojů; do žlabu položit viditelné svazky kabelů (tmavě šedé/černé, jeden oranžový).
+
+10. **Velké prázdné plochy u průchodů** – kde: list 05 pravá půlka, levá stěna vlevo od rámu (celá výška, jen chevrony a oranžové tlačítko); list 02 pravá půlka, čelo přepážky vlevo od dveří (z větší části za dočasným nábytkem) – co je špatně: čela přepážek jsou hladké tmavé desky; reference má u dveří žebra, madla, panel s ovládáním – závažnost: doporučeno – oprava: přidat svislé žebro/rám, madlo, stavový panel dveří v pouzdře.
+
+11. **Dočasná skříň těsně u trubek** – kde: list 06 pravá půlka, horní hrana vysoké tmavé skříně (světlejší víko) pod dvojicí trubek na závěsech – co je špatně: víko skříně sahá na úroveň trubek a závěsů; z tohoto pohledu nelze vyloučit průnik (hodnotím jen kolizi, ne nábytek) – závažnost: doporučeno – oprava: ověřit kolizi, případně skříň snížit nebo trubky posunout k ose stropu.
+
+## Checklist z briefu
+
+- **Tvar prostoru vychází z trupu:** ČÁSTEČNĚ – zkosení horní části stěn (list 01/06) a osmiúhelníkový rám zadních dveří (list 02) ano; přední přepážka a průchod do kokpitu pravoúhlé (listy 01, 05), z hlavního pohledu prostor čte jako hranatý koridor.
+- **Vrstvy:** ČÁSTEČNĚ – žebra, žlab a trubky ano; panely mají jen mělkou spáru; chybí madla, skříňky se západkami, přípojky; kabelový žlab na zkosení prázdný; detail není shlukovaný (list 03).
+- **Každý předmět má účel:** ČÁSTEČNĚ – žádné výplňové rekvizity; nevysvětlený žebřík (list 05) a nejasný mřížkovaný prvek na stropě (list 04). Nábytek nehodnocen.
+- **Materiály:** NESPLNĚNO – jednotný grafit, strop béžovo-hnědý, bez broušeného kovu / gumy / kontrastu lak vs. konstrukce (listy 03, 04).
+- **Decaly:** ČÁSTEČNĚ – čitelné, nezrcadlené (05, 06, LIFE SUPPORT, COCKPIT >>>); CREW QUARTERS nečitelný; ovladače bez popisků; nouzové značení jen v technické chodbě (list 02), v kajutě žádné.
+- **Světlo:** NESPLNĚNO – kontrast, teplá architektura a studené schody ano, ale přepálená lišta a skvrny žlábku (list 03), tvrdé bílé čtverce svítidel bez pouzdra (list 04).
+- **Geometrie:** SPLNĚNO S VÝHRADOU – žádné díry do prázdna, žádný zjevný průnik, žádné lišty mimo místo; ověřit skříň u trubek (list 06) a účel žebříku (list 05).

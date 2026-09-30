@@ -175,6 +175,11 @@ parametry a jejich výchozí hodnoty podle konstant skriptu (čte je přes `ast`
   (`INTERIOR_ONLY_SOCKETS`, tag `InteriorOnly`, pod MegaLights). Široká místnost (průřezy L41/L38): bodovka 50°, 260 cd,
   svatozář 6 cd neutrální (bez odlesku), bodovky na stěny 60 cd/70° skloněné 22°, žlábek 0,5 cd/m, wash dolů po stěně 5 cd/m. Změřeno 29. 9. 2026 v nákladovém prostoru:
   průměr 0,23, B/R 0,72 (`measure_look.py` na `wayfarer_rooms`).
+- Kajuta Wayfareru z kitu (30. 9. 2026, varianta B): obložení na ±1,9 m, čela `Bulkhead_Door00L38_A` (vzadu) a `_F`
+  (vpředu, průchod až ke stropu nad schody – nadpraží ve 2,05 m bralo hlavu), poslední modul u kokpitu `06L_D`
+  (plochý sokl: trup je tam u podlahy 4,5 cm za lícem, WORKFLOW el). Světla místnosti tlumí
+  `kit_modules.light_scale` (kajuta 0,6, WORKFLOW em). Nábytek zůstává lodní (`keep`), posunutý před žebra a pod
+  zkosení; hygienická buňka má boky podle profilu obložení (`obj_hygiene(liner=)`).
 
 ## Konzolové příkazy (zabalená hra i scénáře snímků, nic se neukládá)
 

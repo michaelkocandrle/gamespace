@@ -122,28 +122,32 @@
   {
    "room": "cabin",
    "name": "Skříň na skafandr a zbraň",
-   "rect": [10.55, 11.5, -1.85, -1.3],
-   "z": [0.0, 2.1],
+   "rect": [10.55, 11.5, -1.8, -1.25],
+   "_liner": "30. 9. 2026: the cabin from the hull liner (face at 1.9): 5 cm in from its frames, under its chamfer (1.83 m at 1.8 m out) - the furniture step rebuilds it",
+   "z": [0.0, 1.8],
    "purpose": "Tady se hráč převlékne (zbroj, helma) a uloží ruční zbraň. Hned u vstupu z technické chodby."
   },
   {
    "room": "cabin",
    "name": "Hygienická buňka",
-   "rect": [11.65, 13.1, -1.85, -0.8],
-   "z": [0.0, 2.3],
+   "rect": [11.65, 13.1, -1.8, -0.8],
+   "_liner": "30. 9. 2026: the cabin from the hull liner (face at 1.9): 5 cm in from its frames, under its chamfer (1.83 m at 1.8 m out) - the furniture step rebuilds it; its sides follow the liner back to its panels, a roof at 2.05 m",
+   "z": [0.0, 2.05],
    "purpose": "Záchod a umyvadlo za posuvnými dveřmi – na vícedenní lety."
   },
   {
    "room": "cabin",
    "name": "Výdejník jídla a vody",
-   "rect": [13.3, 14.9, -1.85, -1.4],
-   "z": [0.8, 1.9],
+   "rect": [13.3, 14.9, -1.8, -1.35],
+   "_liner": "30. 9. 2026: the cabin from the hull liner (face at 1.9): 5 cm in from its frames, under its chamfer (1.83 m at 1.8 m out) - the furniture step rebuilds it",
+   "z": [0.8, 1.8],
    "purpose": "Chlazená skříňka a výdej vody, pod ní sklopné sedátko."
   },
   {
    "room": "cabin",
    "name": "Lůžko",
-   "rect": [12.7, 14.8, 1.0, 1.85],
+   "rect": [12.7, 14.8, 0.95, 1.8],
+   "_liner": "30. 9. 2026: the cabin from the hull liner (face at 1.9): 5 cm in from its frames, under its chamfer (1.83 m at 1.8 m out) - the furniture step rebuilds it",
    "z": [0.0, 0.7],
    "purpose": "Spaní a odhlášení ze hry na lodi; nad ním úložné police."
   },
