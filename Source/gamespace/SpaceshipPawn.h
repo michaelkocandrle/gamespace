@@ -8,6 +8,7 @@
 #include "ShipFlightModel.h"
 #include "ShipSystemsComponent.h"
 #include "ShipQuantumComponent.h"
+#include "ShipLandingComponent.h"
 #include "SpaceshipPawn.generated.h"
 
 class UAudioComponent;
@@ -43,51 +44,6 @@ enum class ESpaceshipAxis : uint8
 	Lift,
 	/** +1 roll clockwise seen from the cockpit, -1 counter-clockwise. */
 	Roll
-};
-
-/** Touchdown state machine. */
-UENUM(BlueprintType)
-enum class ELandingState : uint8
-{
-	/** Normal flight physics. */
-	Flying,
-	/** All touchdown conditions hold; waiting out LandingConfirmSeconds. */
-	Settling,
-	/** Resting on the ground: aligned to the terrain, held in place, flight physics off. */
-	Landed
-};
-
-/** The first reason the ship cannot touch down right now. */
-UENUM(BlueprintType)
-enum class ELandingBlocker : uint8
-{
-	None,
-	/** No walkable body below within LandingProbeAltitudeM. */
-	NoSurface,
-	/** Hull more than LandingMaxGapCm above the ground. */
-	TooHigh,
-	/** Ground steeper than MaxLandingSlopeDeg. */
-	TooSteep,
-	/** Faster than LandingMaxSpeed. */
-	TooFast,
-	/** Hull tilted more than LandingMaxTiltDeg against the ground. */
-	Tilted,
-	/** Thrust or upward lift held at TakeoffInputThreshold or more. */
-	EngineInput,
-	/** Just took off; TakeoffCooldownSeconds not over. */
-	TakeoffCooldown,
-	/** Landing gear not fully down (N). The ship can rest on its belly but never counts as landed. */
-	GearUp
-};
-
-/** Landing gear (N). Moving between the ends takes GearDeploySeconds. */
-UENUM(BlueprintType)
-enum class EGearState : uint8
-{
-	Retracted,
-	Extending,
-	Deployed,
-	Retracting
 };
 
 /** A hull material slot whose EmissiveStrength the ship animates (thrusters, strobes). */
@@ -553,49 +509,49 @@ public:
 	float GetHeat() const { return Heat; }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	ELandingState GetLandingState() const { return LandingState; }
+	ELandingState GetLandingState() const { return Landing->GetState(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	bool IsLanded() const { return LandingState == ELandingState::Landed; }
+	bool IsLanded() const { return Landing->IsLanded(); }
 
 	/** Who gets out (and who walks the ship's interior). */
 	TSubclassOf<APawn> GetPilotCharacterClass() const { return PilotCharacterClass; }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	ELandingBlocker GetLandingBlocker() const { return LandingBlocker; }
+	ELandingBlocker GetLandingBlocker() const { return Landing->GetBlocker(); }
 
 	/** Settling progress towards Landed, 0..1. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	float GetLandingProgress() const { return FMath::Clamp(SettleSeconds / FMath::Max(LandingConfirmSeconds, 0.01f), 0.f, 1.f); }
+	float GetLandingProgress() const { return Landing->GetProgress(LandingConfirmSeconds); }
 
 	/** Whether the ground below was probed this frame (low enough over a walkable body). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	bool HasGroundInfo() const { return bSurfaceValid; }
+	bool HasGroundInfo() const { return Landing->HasGroundInfo(); }
 
 	/** Gap between hull and ground straight down, cm; negative when nothing is within the probe. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	float GetGroundGapCm() const { return GroundGapCm; }
+	float GetGroundGapCm() const { return Landing->GetGroundGapCm(); }
 
 	/** Terrain slope under the ship, degrees from level. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	float GetGroundSlopeDeg() const { return GroundSlopeDeg; }
+	float GetGroundSlopeDeg() const { return Landing->GetGroundSlopeDeg(); }
 
 	/** Angle between the ship's up and the terrain normal, degrees. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	float GetGroundTiltDeg() const { return GroundTiltDeg; }
+	float GetGroundTiltDeg() const { return Landing->GetGroundTiltDeg(); }
 
 	// --- Landing gear and precision mode (SC-2a) --------------------------------------------------
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
-	EGearState GetGearState() const { return GearState; }
+	EGearState GetGearState() const { return Landing->GetGearState(); }
 
 	/** Gear fully down and locked: the only state the ship can land in. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
-	bool IsGearDeployed() const { return GearState == EGearState::Deployed; }
+	bool IsGearDeployed() const { return Landing->IsGearDeployed(); }
 
 	/** How far out the gear is, 0 stowed .. 1 down and locked (linear in time). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
-	float GetGearDeploy() const { return GearDeploy; }
+	float GetGearDeploy() const { return Landing->GetGearDeploy(); }
 
 	/**
 	 * Lowers (true) or raises the gear; it moves over GearDeploySeconds and can reverse halfway.
@@ -611,7 +567,7 @@ public:
 
 	/** Seconds the "gear stays down while landed" refusal is still worth showing. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
-	float GetGearMessageSeconds() const { return GearMessageSeconds; }
+	float GetGearMessageSeconds() const { return Landing->GetGearMessageSeconds(); }
 
 	/** How far below the hull's collision box the gear reaches right now, cm (GearExtensionCm x deploy). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
@@ -673,18 +629,18 @@ public:
 
 	/** Precision mode switched on (gear, or P). In effect only in SCM, see IsPrecisionActive. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Precision")
-	bool IsPrecisionModeOn() const { return bPrecisionMode; }
+	bool IsPrecisionModeOn() const { return Landing->IsPrecisionModeOn(); }
 
 	/** Precision mode in effect: switched on and in SCM (NAV is for travel and ignores it). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Precision")
-	bool IsPrecisionActive() const { return bPrecisionMode && Systems->GetMasterMode() == EMasterMode::SCM; }
+	bool IsPrecisionActive() const { return Landing->IsPrecisionModeOn() && Systems->GetMasterMode() == EMasterMode::SCM; }
 
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Precision")
 	void SetPrecisionMode(bool bOn);
 
 	/** P: precision mode on / off by hand (the gear sets it too). */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Precision")
-	void TogglePrecisionMode() { SetPrecisionMode(!bPrecisionMode); }
+	void TogglePrecisionMode() { SetPrecisionMode(!Landing->IsPrecisionModeOn()); }
 
 	/**
 	 * VTOL (G), SC-2b. The ship stands on its manoeuvring thrusters instead of flying on its main
@@ -928,6 +884,10 @@ protected:
 	/** Quantum drive state: destination, spool, calibration, the jump and its fuel. Its tuning stays here. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UShipQuantumComponent> Quantum;
+
+	/** Landing state: touchdown, the ground below, the gear and precision mode. Its tuning stays here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipLandingComponent> Landing;
 
 	/** What the gear legs are built from (/Engine/BasicShapes/Cylinder): placeholder art until a modelled gear replaces it. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Gear")
@@ -2009,6 +1969,7 @@ private:
 	FShipFlightModel::FDrag GetDragTuning() const;
 	FShipFlightModel::FHeat GetHeatTuning() const;
 	FShipFlightModel::FLandingLimits GetLandingLimits() const;
+	FShipLandingRules GetLandingRules() const;
 	FShipFlightModel::FGearShape GetGearShape() const;
 	FShipFlightModel::FQuantumDrive GetQuantumDrive() const;
 	FShipQuantumRules GetQuantumRules() const;
@@ -2101,11 +2062,6 @@ private:
 	bool bHasEnvironment = false;
 	TWeakObjectPtr<ACelestialBody> NearestBody;
 
-	EGearState GearState = EGearState::Retracted;
-	float GearDeploy = 0.f;
-	float GearMessageSeconds = 0.f;
-	bool bPrecisionMode = false;
-
 	/** One visible gear leg: pivot at the socket, a sleeve, a piston and a foot pad. */
 	struct FGearLeg
 	{
@@ -2127,16 +2083,6 @@ private:
 	/** Deploy fraction the legs were last posed at (-1: never). */
 	float GearPosed = -1.f;
 
-	ELandingState LandingState = ELandingState::Flying;
-	ELandingBlocker LandingBlocker = ELandingBlocker::NoSurface;
-	float SettleSeconds = 0.f;
-	float TakeoffCooldown = 0.f;
-	bool bSurfaceValid = false;
-	bool bGroundContact = false;
-	float GroundGapCm = -1.f;
-	float GroundSlopeDeg = 0.f;
-	float GroundTiltDeg = 0.f;
-	FVector GroundNormal = FVector::UpVector;
 	float Heat = 0.f;
 	FVector ChaseCameraBaseLocation = FVector::ZeroVector;
 	FVector CockpitCameraBaseLocation = FVector::ZeroVector;

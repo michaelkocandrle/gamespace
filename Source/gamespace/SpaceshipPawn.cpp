@@ -344,6 +344,7 @@ ASpaceshipPawn::ASpaceshipPawn()
 	// The ship's systems state: no transform and no tick of its own (the pawn's Tick drives it).
 	Systems = CreateDefaultSubobject<UShipSystemsComponent>(TEXT("ShipSystems"));
 	Quantum = CreateDefaultSubobject<UShipQuantumComponent>(TEXT("ShipQuantum"));
+	Landing = CreateDefaultSubobject<UShipLandingComponent>(TEXT("ShipLanding"));
 
 	SpaceDust =CreateDefaultSubobject<USpaceDustComponent>(TEXT("SpaceDust"));
 	SpaceDust->SetupAttachment(HullCollision);
@@ -2108,7 +2109,7 @@ void ASpaceshipPawn::StepFlight(float DeltaSeconds)
 	UpdateQuantum(DeltaSeconds);
 	// Before steering: while held it takes the mouse movement for itself.
 	UpdateFreeLook(DeltaSeconds);
-	if (LandingState == ELandingState::Landed)
+	if (Landing->GetState() == ELandingState::Landed)
 	{
 		UpdateLandedMotion(DeltaSeconds);
 	}
@@ -2153,7 +2154,7 @@ FVector ASpaceshipPawn::DebugStepFlightInput(float DeltaSeconds, const FVector& 
 void ASpaceshipPawn::UpdateBoost(float DeltaSeconds)
 {
 	// Boost feeds the manoeuvring thrusters and rotation, so it burns energy whenever Shift is held.
-	const bool bAllowed = Quantum->GetState() != EQuantumState::Traveling && LandingState != ELandingState::Landed;
+	const bool bAllowed = Quantum->GetState() != EQuantumState::Traveling && Landing->GetState() != ELandingState::Landed;
 	const FShipReserve::FTuning Tuning{BoostDurationSeconds, BoostRechargeSeconds, BoostRechargeDelaySeconds, BoostUnlockFraction};
 	if (Systems->UpdateBoost(DeltaSeconds, bAllowed, Tuning))
 	{
@@ -2168,7 +2169,7 @@ void ASpaceshipPawn::UpdateAfterburner(float DeltaSeconds)
 	// third and the ship is standing on its lift thrusters (SC-2b).
 	const bool bAllowed = ThrustInput > 0.f && !bSpaceBrakeHeld && Systems->GetMasterMode() == EMasterMode::SCM
 		&& !IsPrecisionActive() && !Systems->IsVtolOn() && Quantum->GetState() != EQuantumState::Traveling
-		&& LandingState != ELandingState::Landed;
+		&& Landing->GetState() != ELandingState::Landed;
 	const FShipReserve::FTuning Tuning{AfterburnerDurationSeconds, AfterburnerRefillSeconds, AfterburnerRefillDelaySeconds,
 		AfterburnerUnlockFraction};
 	if (Systems->UpdateAfterburner(DeltaSeconds, bAllowed, Tuning, AfterburnerSpoolSeconds, AfterburnerFadeSeconds))
@@ -2245,7 +2246,7 @@ void ASpaceshipPawn::UpdateQuantum(float DeltaSeconds)
 	FShipQuantumContext Context;
 	Context.Location = GetActorLocation();
 	Context.Nose = GetActorForwardVector();
-	Context.bLanded = LandingState == ELandingState::Landed;
+	Context.bLanded = Landing->GetState() == ELandingState::Landed;
 	Context.bInNav = Systems->GetMasterMode() == EMasterMode::NAV && !Systems->IsMasterModeSwitching();
 	const UShipQuantumComponent::FFrame Frame = Quantum->Update(DeltaSeconds, Context, GetQuantumRules());
 	// Engage: the button held for QuantumEngageHoldSeconds while ready.
@@ -2531,7 +2532,7 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 			// Hovering over the ground with nothing held, hold a little less than gravity so the ship
 			// sinks onto its gear on its own.
 			double GravityHold = 1.0;
-			if (bSurfaceValid && GroundGapCm >= 0.f && GroundGapCm - GetGearGroundOffsetCm() < 400.f && ThrustInput == 0.f && LiftInput <= 0.f && !bSpaceBrakeHeld)
+			if (Landing->HasGroundInfo() && Landing->GetGroundGapCm() >= 0.f && Landing->GetGroundGapCm() - GetGearGroundOffsetCm() < 400.f && ThrustInput == 0.f && LiftInput <= 0.f && !bSpaceBrakeHeld)
 			{
 				GravityHold = 1.0 - LandingSettleGravityFraction;
 			}
@@ -2582,11 +2583,11 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		{
 			LinearVelocity -= Up * (Gravity * DeltaSeconds);
 		}
-		if (bGroundContact)
+		if (Landing->HasGroundContact())
 		{
 			// After gravity, so on a gentle slope friction cancels this frame's pull down the slope
 			// completely and the ship stands still instead of creeping.
-			LinearVelocity = ApplyGroundFriction(LinearVelocity, GroundNormal, Up, float(Gravity), DeltaSeconds);
+			LinearVelocity = ApplyGroundFriction(LinearVelocity, Landing->GetGroundNormal(), Up, float(Gravity), DeltaSeconds);
 		}
 
 		const double Speed = LinearVelocity.Size();
@@ -2686,6 +2687,16 @@ FShipFlightModel::FLandingLimits ASpaceshipPawn::GetLandingLimits() const
 	return Limits;
 }
 
+FShipLandingRules ASpaceshipPawn::GetLandingRules() const
+{
+	FShipLandingRules Rules;
+	Rules.Limits = GetLandingLimits();
+	Rules.GearExtensionCm = GearExtensionCm;
+	Rules.ConfirmSeconds = LandingConfirmSeconds;
+	Rules.TakeoffCooldownSeconds = TakeoffCooldownSeconds;
+	return Rules;
+}
+
 ELandingBlocker ASpaceshipPawn::EvaluateTouchdown(float HullGap, float Speed, float TiltDeg, float SlopeDeg, bool bEngineInput, bool bGearDown) const
 {
 	return FShipFlightModel::EvaluateTouchdown(HullGap, Speed, TiltDeg, SlopeDeg, bEngineInput, bGearDown, GearExtensionCm, GetLandingLimits());
@@ -2717,20 +2728,18 @@ bool ASpaceshipPawn::SweepHull(const FVector& Start, const FVector& End, const F
 
 void ASpaceshipPawn::UpdateLanding(float DeltaSeconds)
 {
-	TakeoffCooldown = FMath::Max(0.f, TakeoffCooldown - DeltaSeconds);
-	bSurfaceValid = false;
-	bGroundContact = false;
-	GroundGapCm = -1.f;
+	Landing->BeginFrame(DeltaSeconds);
+	FShipGroundProbe Probe = Landing->GetGround();
 
 	// Probe the ground only when it matters: low over a body with a walkable surface.
 	const ACelestialBody* Body = NearestBody.Get();
 	FVector SurfacePoint;
 	if (bHasEnvironment && Body && Environment.AltitudeAboveTerrainCm < LandingProbeAltitudeM * 100.0
-		&& Body->GetSurfaceFrame(GetActorLocation(), LandingFootprintRadiusCm, SurfacePoint, GroundNormal))
+		&& Body->GetSurfaceFrame(GetActorLocation(), LandingFootprintRadiusCm, SurfacePoint, Probe.Normal))
 	{
-		bSurfaceValid = true;
-		GroundSlopeDeg = FShipFlightModel::AngleBetweenDeg(GroundNormal, Environment.Up);
-		GroundTiltDeg = FShipFlightModel::AngleBetweenDeg(GetActorUpVector(), GroundNormal);
+		Probe.bValid = true;
+		Probe.SlopeDeg = FShipFlightModel::AngleBetweenDeg(Probe.Normal, Environment.Up);
+		Probe.TiltDeg = FShipFlightModel::AngleBetweenDeg(GetActorUpVector(), Probe.Normal);
 
 		// Straight down with the real hull shape: the gap is what the collision actually sees,
 		// wherever on the hull the first contact would be.
@@ -2739,63 +2748,42 @@ void ASpaceshipPawn::UpdateLanding(float DeltaSeconds)
 		FHitResult Hit;
 		if (SweepHull(Start, Start - Environment.Up * ProbeLength, GetActorQuat(), Hit))
 		{
-			GroundGapCm = Hit.bStartPenetrating ? 0.f : float(Hit.Distance);
+			Probe.GapCm = Hit.bStartPenetrating ? 0.f : float(Hit.Distance);
 		}
 		// Touching means the pads with the gear down, the belly without it.
-		bGroundContact = GroundGapCm >= 0.f && GroundGapCm - GetGearGroundOffsetCm() <= GroundContactToleranceCm;
+		Probe.bContact = Probe.GapCm >= 0.f && Probe.GapCm - GetGearGroundOffsetCm() <= GroundContactToleranceCm;
 	}
 
 	const bool bEngineInput = FMath::Abs(ThrustInput) >= TakeoffInputThreshold || LiftInput >= TakeoffInputThreshold
 		|| Quantum->GetState() == EQuantumState::Traveling;
 
-	if (LandingState == ELandingState::Landed)
+	switch (Landing->Update(DeltaSeconds, Probe, LinearVelocity.Size(), bEngineInput, GetLandingRules()))
 	{
-		LandingBlocker = ELandingBlocker::None;
-		if (bEngineInput || !bSurfaceValid)
-		{
-			ExitLanded();
-		}
-		return;
-	}
-
-	LandingBlocker = !bSurfaceValid ? ELandingBlocker::NoSurface
-		: TakeoffCooldown > 0.f ? ELandingBlocker::TakeoffCooldown
-		: EvaluateTouchdown(GroundGapCm, LinearVelocity.Size(), GroundTiltDeg, GroundSlopeDeg, bEngineInput, IsGearDeployed());
-
-	if (LandingBlocker == ELandingBlocker::None)
-	{
-		// Every condition has to hold without a break: a bounce restarts the window.
-		SettleSeconds += DeltaSeconds;
-		LandingState = ELandingState::Settling;
-		if (SettleSeconds >= LandingConfirmSeconds)
-		{
-			EnterLanded();
-		}
-	}
-	else
-	{
-		SettleSeconds = 0.f;
-		LandingState = ELandingState::Flying;
+	case UShipLandingComponent::EEvent::TouchedDown:
+		EnterLanded();
+		break;
+	case UShipLandingComponent::EEvent::TookOff:
+		ExitLanded();
+		break;
+	default:
+		break;
 	}
 }
 
 void ASpaceshipPawn::EnterLanded()
 {
-	LandingState = ELandingState::Landed;
-	SettleSeconds = LandingConfirmSeconds;
+	Landing->EnterLanded(GetLandingRules());
 	AngularVelocity = FVector::ZeroVector;
 	MouseStick = FVector2D::ZeroVector;
 	Systems->CutBoostAndAfterburner();
 	PlayOneShot(TouchdownSound, FMath::Clamp(LinearVelocity.Size() / FMath::Max(LandingMaxSpeed, 1.f), 0.4f, 1.f));
 	UE_LOG(LogSpaceship, Log, TEXT("%s landed: slope %.1f deg, tilt %.1f deg, gap %.0f cm"),
-		*GetName(), GroundSlopeDeg, GroundTiltDeg, GroundGapCm);
+		*GetName(), Landing->GetGroundSlopeDeg(), Landing->GetGroundTiltDeg(), Landing->GetGroundGapCm());
 }
 
 void ASpaceshipPawn::ExitLanded()
 {
-	LandingState = ELandingState::Flying;
-	SettleSeconds = 0.f;
-	TakeoffCooldown = TakeoffCooldownSeconds;
+	Landing->ExitLanded(GetLandingRules());
 	LinearVelocity = FVector::ZeroVector;
 	UE_LOG(LogSpaceship, Log, TEXT("%s took off"), *GetName());
 }
@@ -2809,6 +2797,7 @@ void ASpaceshipPawn::UpdateLandedMotion(float DeltaSeconds)
 	MouseStick = FVector2D::ZeroVector;
 	AngularVelocity = FVector::ZeroVector;
 
+	const FVector GroundNormal = Landing->GetGroundNormal();
 	const double Alpha = 1.0 - FMath::Exp(-LandingAlignRate * DeltaSeconds);
 	const FQuat Current = GetActorQuat();
 	const FQuat Rotation = FQuat::Slerp(Current, FShipFlightModel::LevelOnSurface(Current, GroundNormal), Alpha).GetNormalized();
@@ -3092,7 +3081,7 @@ void ASpaceshipPawn::UpdateShipLights(float DeltaSeconds)
 void ASpaceshipPawn::UpdateSpaceDust(float DeltaSeconds)
 {
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (!PlayerController || !PlayerController->PlayerCameraManager || LandingState == ELandingState::Landed)
+	if (!PlayerController || !PlayerController->PlayerCameraManager || Landing->GetState() == ELandingState::Landed)
 	{
 		SpaceDust->HideDust();
 		SpeedTunnel->HideTunnel();
@@ -3154,39 +3143,17 @@ void ASpaceshipPawn::UpdateSpaceDust(float DeltaSeconds)
 
 bool ASpaceshipPawn::SetGearDown(bool bDown)
 {
-	if (!bDown && LandingState == ELandingState::Landed)
-	{
-		// The ship stands on it. Take off first.
-		GearMessageSeconds = 3.f;
-		return false;
-	}
-	const bool bGoingDown = GearState == EGearState::Deployed || GearState == EGearState::Extending;
-	if (bDown == bGoingDown)
-	{
-		return true;
-	}
-	GearState = bDown ? EGearState::Extending : EGearState::Retracting;
-	GearMessageSeconds = 0.f;
-	// Star Citizen puts a ship with its gear down into landing mode; the pilot can still override it (P).
-	SetPrecisionMode(bDown);
-	UE_LOG(LogSpaceship, Log, TEXT("%s: gear %s"), *GetName(), bDown ? TEXT("down") : TEXT("up"));
-	return true;
+	return Landing->SetGearDown(bDown);
 }
 
 void ASpaceshipPawn::ToggleGear()
 {
-	const bool bGoingDown = GearState == EGearState::Deployed || GearState == EGearState::Extending;
-	SetGearDown(!bGoingDown);
+	SetGearDown(!Landing->IsGearGoingDown());
 }
 
 void ASpaceshipPawn::SetPrecisionMode(bool bOn)
 {
-	if (bOn == bPrecisionMode)
-	{
-		return;
-	}
-	bPrecisionMode = bOn;
-	UE_LOG(LogSpaceship, Log, TEXT("%s: precision mode %s"), *GetName(), bOn ? TEXT("on") : TEXT("off"));
+	Landing->SetPrecisionMode(bOn);
 }
 
 void ASpaceshipPawn::SetVtol(bool bOn)
@@ -3211,7 +3178,7 @@ void ASpaceshipPawn::HandleVtol(const FInputActionValue& Value)
 
 float ASpaceshipPawn::GetGearGroundOffsetCm() const
 {
-	return GearExtensionCm * GearDeploy;
+	return GearExtensionCm * Landing->GetGearDeploy();
 }
 
 void ASpaceshipPawn::DebugStepGear(float DeltaSeconds)
@@ -3221,13 +3188,11 @@ void ASpaceshipPawn::DebugStepGear(float DeltaSeconds)
 
 void ASpaceshipPawn::DebugSetGearInstant(bool bDown)
 {
-	if (!bDown && LandingState == ELandingState::Landed)
+	if (!bDown && Landing->IsLanded())
 	{
 		return;
 	}
-	SetPrecisionMode(bDown);
-	GearState = bDown ? EGearState::Deployed : EGearState::Retracted;
-	GearDeploy = bDown ? 1.f : 0.f;
+	Landing->SetGearInstant(bDown);
 	PoseGearLegs();
 }
 
@@ -3255,11 +3220,11 @@ void ASpaceshipPawn::DebugSetChaseView(float YawDeg, float PitchDeg, float Zoom)
 
 void ASpaceshipPawn::DebugForceLanded(bool bLanded)
 {
-	if (bLanded && LandingState != ELandingState::Landed)
+	if (bLanded && Landing->GetState() != ELandingState::Landed)
 	{
 		EnterLanded();
 	}
-	else if (!bLanded && LandingState == ELandingState::Landed)
+	else if (!bLanded && Landing->GetState() == ELandingState::Landed)
 	{
 		ExitLanded();
 	}
@@ -3267,25 +3232,10 @@ void ASpaceshipPawn::DebugForceLanded(bool bLanded)
 
 void ASpaceshipPawn::UpdateGear(float DeltaSeconds)
 {
-	GearMessageSeconds = FMath::Max(0.f, GearMessageSeconds - DeltaSeconds);
-	const float Step = DeltaSeconds / FMath::Max(GearDeploySeconds, 0.05f);
-	if (GearState == EGearState::Extending)
+	if (Landing->UpdateGear(DeltaSeconds, GearDeploySeconds))
 	{
-		GearDeploy = FMath::Min(1.f, GearDeploy + Step);
-		if (GearDeploy >= 1.f)
-		{
-			GearState = EGearState::Deployed;
-			// Locks down with a small jolt, felt in the camera.
-			CameraKick = FMath::Max(CameraKick, 0.15f);
-		}
-	}
-	else if (GearState == EGearState::Retracting)
-	{
-		GearDeploy = FMath::Max(0.f, GearDeploy - Step);
-		if (GearDeploy <= 0.f)
-		{
-			GearState = EGearState::Retracted;
-		}
+		// Locks down with a small jolt, felt in the camera.
+		CameraKick = FMath::Max(CameraKick, 0.15f);
 	}
 	PoseGearLegs();
 }
@@ -3404,6 +3354,7 @@ void ASpaceshipPawn::BuildGearLegs()
 
 void ASpaceshipPawn::PoseGearLegs()
 {
+	const float GearDeploy = Landing->GetGearDeploy();
 	if ((GearLegs.Num() == 0 && !ModelledGear.IsValid()) || GearPosed == GearDeploy)
 	{
 		return;
@@ -3443,13 +3394,13 @@ void ASpaceshipPawn::PoseGearLegs()
 void ASpaceshipPawn::ApplyGearSupport(float DeltaSeconds)
 {
 	const float Offset = GetGearGroundOffsetCm();
-	if (!bSurfaceValid || GroundGapCm < 0.f || Offset <= 1.f || DeltaSeconds <= 0.f)
+	if (!Landing->HasGroundInfo() || Landing->GetGroundGapCm() < 0.f || Offset <= 1.f || DeltaSeconds <= 0.f)
 	{
 		return;
 	}
 	const FVector Up = bHasEnvironment ? FVector(Environment.Up) : GetActorUpVector();
 	// Room between the pads and the ground; negative: the pads are in it.
-	const double Room = double(GroundGapCm) - Offset;
+	const double Room = double(Landing->GetGroundGapCm()) - Offset;
 	const double Vertical = LinearVelocity | Up;
 	if (Room < 0.0)
 	{
@@ -3457,7 +3408,7 @@ void ASpaceshipPawn::ApplyGearSupport(float DeltaSeconds)
 		// they extend, instead of sinking into the ground.
 		const double Lift = FMath::Min(-Room, 1.5 * GearExtensionCm / FMath::Max(GearDeploySeconds, 0.05f) * DeltaSeconds);
 		AddActorWorldOffset(Up * Lift, bSweepMovement);
-		GroundGapCm += float(Lift);
+		Landing->AddGroundGap(float(Lift));
 		if (Vertical < 0.0)
 		{
 			LinearVelocity -= Up * Vertical;

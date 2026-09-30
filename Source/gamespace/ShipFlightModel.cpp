@@ -3,7 +3,7 @@
 #include "ShipFlightModel.h"
 
 #include "CelestialBody.h"
-#include "SpaceshipPawn.h"
+#include "ShipLandingComponent.h"
 
 // The bodies moved here from ASpaceshipPawn unchanged (split step 1, 30. 9. 2026); member reads became arguments.
 
