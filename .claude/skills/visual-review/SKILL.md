@@ -18,10 +18,18 @@ nenahrazuje je: musí proběhnout obojí. `test_ship_geometry.py` běží sám j
    `python Tools/Review/make_compare_sheet.py <review.json>` → `Docs/Reviews/<datum>_<téma>/` (listy + `brief.md`).
    Reference vlevo, výsledek vpravo; zblízka, střední vzdálenost (chase nebo z oka) a zdálky; den, noc a vesmír,
    kde to dává smysl. U interiéru pohled z oka a zezadu, zblízka ovladače.
+2b. **Práh** (autor 30. 9. 2026), klíč `gate` v `review.json`, `make_compare_sheet.py` ho vepíše do briefu a kritik
+   podle něj rozhodne:
+   - `"step"` pro dílčí kroky (díly kitu, nábytek, jednotlivé místnosti): PASS = průměr kategorií aspoň 6,5, žádná
+     kategorie pod 6 a žádný bod „musí se opravit“;
+   - `"ship"` pro hotovou loď (výchozí, když `gate` chybí): PASS = všechny kategorie aspoň 7 a žádný bod „musí se
+     opravit“.
 3. **Stylový záměr kroku** (např. „udržovaná pracovní loď: panely téměř čisté, špína jen tam, kde vzniká“) patří
    do `goal`/`style` briefu, aby kritik nechtěl víc, než je záměr.
 4. **Spusť kritika.** Dostane **jen** `brief.md` a listy: žádný popis postupu, doby práce, záměrů ani vlastní názor.
    Prompt: „Přečti <složka>/brief.md a všechny listy v něm a vyhodnoť je podle svého zadání.“
+   Když typ agenta `visual-critic` v session chybí: agent `general-purpose` s modelem `fable` a promptem „přečti
+   `.claude/agents/visual-critic.md` (text pod YAML) a řiď se jím, pak brief a listy“ (30. 9. 2026).
 5. **FAIL** → oprav body „musí se opravit“, nové snímky, nové listy, kritik znovu. **Nejvýš 3 kola**, pak předej
    i s otevřenými body.
 6. **Ověřovací kolo:** když po posledním kole ještě opravuješ, spusť na opravené body jedno kolo jen na ně (listy jen

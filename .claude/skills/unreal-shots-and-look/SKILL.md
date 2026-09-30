@@ -55,6 +55,10 @@ bez okna editoru a bez PIE. Nastavení čte z `Saved\Config\WindowsEditor\GameUs
   zkopírovat, další běh ho přepíše). Cíl dokládat aspoň 3 běhy (rozptyl 0,2–0,8 ms, WORKFLOW ea).
 - A/B materiálu bez reimportu: `space.Kit <Param> <hodnota> <část jména MI>` a `space.KitColor`
   i na herce ukázky kitu (tag `KitShowroom`), např. `space.Kit DecalOpacity 0 DecalGrime` (preset `kit_grime_ab`).
+- S filtrem jména mění `space.Kit` i materiály dílů kitu v blueprintu lodi (`kit_rooms.py`), např.
+  `space.Kit PaintMetallic 0.9 _Structure`; bez filtru jen herce interiéru a ukázky kitu. Preset
+  `wayfarer_reflection_options` porovná dnešní odrazy, kov 0,9 bez odrazů a kov s odrazy Lumenu do drsnosti 0,32
+  (časy v řádcích `SHOTS perf` logu).
 
 - Výstup: `Saved\Shots\<yyyyMMdd_HHmmss>_<preset>\NN_<name>.png` (NN = pořadí). `Saved\` není v gitu.
 - Konec výpisu `RESULT: OK - N picture(s)`; bez snímků `RESULT: FAILED` → `Saved\Logs\gamespace.log`, hledej `SHOTS`.
@@ -221,6 +225,11 @@ je v sekundách, řaď podle `Excl`.
 - **Obraz měkký** → RenderRes nebo škálovací skupiny na Medium (HANDOFF 35, 42) → zkontroluj `stat unit`
   dřív, než začneš podezírat model nebo materiál.
 - Poly Haven `dimensions` jsou v mm.
+- **Reflection captures v interiéru nic nemění** → s Lumen GI UE 5.8 skládá lesk jen z Lumenova hrubého odrazu
+  a SSR, průchod s capture přeskočí → capture nepoužívat; runtime capture se v zabalené hře navíc bez „pumpy“
+  nedokončí a lightmap mixing je bez statického světla vynuluje. (WORKFLOW 9.2 j–l)
+- **`ShowFlag.ReflectionOverride` ve snímkovači nic nedělá** → odrazy diagnostikuj přes `space.Kit` (kov 0,9 /
+  drsnost 0,3 s filtrem jména). Snímky A/B porovnávej po výřezech: loď ve výšce se mezi snímky posune. (9.2 m, n)
 
 ## Presety (`Tools/Shots/*.json`)
 

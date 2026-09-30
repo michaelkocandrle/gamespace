@@ -289,7 +289,7 @@ def jobs(batch, sections, budget):
             yield dict(name=kit_batch2.part_name("Ceiling", "Panel", size, sec, var),
                        part=(lambda s=sec, z=size, v=var, sd=seed: kit_batch2.build_part("Ceiling", "Panel", z, s, v, sd)),
                        category="Ceiling", family="Ceiling_Panel", kind="Panel", length=size, section=sec, variant=var, batch=4,
-                       budget=max(1500, int(kit_geo.RULES["tri_budget"]["Ceiling_per_m"] * size)), render=True,
+                       budget=kit_batch2.budget("Ceiling", "Panel", size), render=True,
                        views=kit_batch2.VIEWS[("Ceiling", "Panel")])
         # the floors of the liner rooms (30. 9. 2026: the Wayfarer's cabin, its own tiles "a bathroom"), after the
         # ceilings so their seeds stay

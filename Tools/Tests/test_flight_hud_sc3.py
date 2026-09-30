@@ -40,8 +40,9 @@ def focal(fov_deg):
     return (DESIGN_WIDTH * 0.5) / math.tan(math.radians(fov_deg) * 0.5)
 
 
-les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
-les.new_level("/Temp/Sc3Test")
+# an empty world in memory only: new_level("/Temp/Sc3Test") also wrote Saved/Sc3Test.umap, and every later run logged
+# "There's already an asset at the destination" - an engine error, so the commandlet exited 1 (30. 9. 2026)
+unreal.EditorLoadingAndSavingUtils.new_blank_map(False)
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 ship = eas.spawn_actor_from_class(unreal.SpaceshipPawn, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
 

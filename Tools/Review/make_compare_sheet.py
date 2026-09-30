@@ -10,6 +10,9 @@ review.json:
     "goal": "What it is meant to be (one or two sentences).",
     "style": "In which style (e.g. Star Citizen, clean Origin-like ship, warm dark architecture ...).",
     "checklist": "cockpit",                 # section of the critic checklist in the skill (see below); null = none
+    "gate": "step",                         # PASS threshold in the brief: "step" (kit parts, furniture, one room:
+                                            # mean >= 6.5, none under 6) or "ship" (a finished ship: none under 7);
+                                            # "ship" by default (author 30. 9. 2026)
     "skill": ".claude/skills/visual-review/SKILL.md",   # optional, this by default
     "out": "Docs/Reviews/2026-09-25_wayfarer_cockpit",  # optional
     "notes": ["Text vpravo nahoře (FPS, stat unit) je měřicí overlay, ne součást výsledku."],   # optional
@@ -83,6 +86,13 @@ def checklist(skill, name):
     return m.group(1).strip()
 
 
+GATES = {
+    "step": "Dílčí krok (díly kitu, nábytek, jednotlivé místnosti): PASS, když průměr kategorií je aspoň 6,5, žádná"
+            " kategorie nemá méně než 6 a žádný bod není „musí se opravit“.",
+    "ship": "Hotová loď: PASS, když žádná kategorie nemá méně než 7 a žádný bod není „musí se opravit“.",
+}
+
+
 def main():
     spec = json.load(open(path(sys.argv[1]), encoding="utf-8"))
     date = spec.get("date") or datetime.date.today().isoformat()
@@ -112,6 +122,8 @@ def main():
     for name, p, cond in sheets:
         lines.append("- `%s` – %s (%s); reference: %s; výsledek: %s" % (os.path.join(out, name).replace("\\", "/"), p.get("title", ""), cond,
                                                                        p.get("ref_label", ""), p.get("ours_label", "")))
+    gate = spec.get("gate", "ship")
+    lines += ["", "## Práh", GATES[gate]]
     if spec.get("checklist"):
         lines += ["", "## Checklist", checklist(spec.get("skill", ".claude/skills/visual-review/SKILL.md"), spec["checklist"]), ""]
     open(os.path.join(out, "brief.md"), "w", encoding="utf-8").write("\n".join(lines))

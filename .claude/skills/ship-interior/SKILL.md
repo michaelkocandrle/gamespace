@@ -74,6 +74,23 @@ python Tools/Kit/kit_catalog.py <dávka>     # katalogový list Docs/Kit/catalog
   `prov_spots`, `prov_boxes`), tag `KitShowroom`, přestavuje se při každém importu; import spadne, když délky modulů
   nesedí na běh. Klávesa **U** / `space.Showroom [annex|stairs]` prochází ukázka → přístavba → hala → zpět.
 
+## Nábytek z kitu (dávka 6, `Tools/Kit/kit_furniture.py`, 30. 9. 2026)
+
+- `kit_build.py -- furniture`: lůžko `Furniture_Bunk21L_A`, skříň `Locker10L_A`, hygienická buňka `Hygiene15L_A`,
+  výdejník `Food16L_A`; rozpočet `tri_budget.Furniture` 15 000 (lůžko ~11 tis.). Recenze
+  `Docs/Reviews/2026-09-30_cabin_furniture.md`.
+- **Pivot „faced“:** na podlaze pod středem zadní hrany, čelo +X, šířka +Y. V lodi `run_parts`
+  `[[x, y], [dx, dy], [díl]]`: yaw podle směru, +Y dílu je směr otočený o +90°.
+- **U obložení trupu (průřez L):** zadní hrana `WALL_GAP` 0,1 m od líce, nic nad `top_at(x)` (zkosení minus žebra
+  8 cm, WORKFLOW 9.6 er); kontrola Blenderem headless `Tools/Kit/kit_clash.py -- <Loď> Furniture_`.
+- **Polštáře** jako výšková plocha `pad()` (`kit_geo.Part.mesh`, sdílené vrcholy): zaoblený okraj, vyboulená pole,
+  švy jako prohlubně, knoflíky (9.6 eu); normála tkaniny `Tools/Kit/kit_fabric_normal.py` → `T_Kit_Fabric_N`,
+  `import_kit.py` ji dá na `MI_Kit_Halcyon_Cushion`.
+- **Dveře a zásuvky** v poli zapuštěném za plochým rámem: `front_plate(..., press=DEEP)`, `DEEP = (0.035, 0.012, 0.006)`
+  (trojice `inset` v `kit_geo.box`, 9.6 et); kování na rám nebo na dno pole.
+- Popisky nábytku jsou šablonové nápisy (`generate_interior_decals.stencil`) v setupu lodi; na lisovaném poli střed
+  decalu na čelo (9.6 ew). Soft-key popisky tlačítek patří na stránku displeje (`kit_screens.py`).
+
 ## Místnosti z kitu v lodi
 
 - Recept `interior.kit_modules` v `<Loď>_hs.json` popisuje místnosti v metrech layoutu (x dopředu, y na levobok,
@@ -88,8 +105,8 @@ python Tools/Kit/kit_catalog.py <dávka>     # katalogový list Docs/Kit/catalog
 - UE: `Tools/Assets/kit_rooms.py` (volá `import_kit.py` i `import_ship.py`) vloží díly do `BP_Ship_<Loď>` pod Hull
   jako `InteriorMod_NN_<díl>` a světla ze socketů jako `Light_fix_kit_NN`. Sdílená matematika rozmístění
   `Tools/Kit/kit_layout.py`: ship space = layout + `assemble.offset`, y v UE zrcadlené, yaw v Blenderu opačně.
-- **Po změně:** `kit_build.py -- <dávka>` → `import_kit.py` → přestavba lodi (`hs_build_ship`, `hs_assemble_ship`) →
-  `import_ship.py` / `kit_rooms.py` → `test_ship_geometry.py <Loď>` (díry, plovoucí díly, `hull_in_rooms`,
+- **Po změně:** `kit_build.py -- <dávka>` → `import_kit.py` → přestavba lodi (`hs_build_ship`, `hs_assemble_ship`,
+  **`gamespace_ship_export.py`**, 9.6 eq) → `import_ship.py` / `kit_rooms.py` → `test_ship_geometry.py <Loď>` (díry, plovoucí díly, `hull_in_rooms`,
   `walk_blocked`, nápisy) → presety `wayfarer_rooms` a `wayfarer_walk`.
 - Řez trupem se skutečnými díly: `Tools/Kit/hull_fit_kit_rooms.py` (Blender, pak `--draw`) →
   `Docs/Kit/hull_fit_<loď>_kit_rooms.png`; nákladový prostor `Tools/Kit/hold_fit.py`; plán místnosti
@@ -235,3 +252,10 @@ Díry zavírá tmavý plášť `Int_HullSkin` a obložení (9.6 bm–bo).
   políčka se řežou výpočtem. (9.3 z)
 - **Příkazy scénáře drž idempotentní** (přepínač běžel dvakrát). (9.3 m)
 - Assety načítané podle cesty musí být v `DirectoriesToAlwaysCook` (`/Game/Environments`, `/Game/Kit` …). (9.3 b)
+- **Malý díl kitu drahý na trojúhelníky** → rámečky difuzorů na obou stranách, bevely se 2 segmenty, zaslepené
+  průběžné trubky → `bezel_face`, `segments=1`, `caps=False`. Rozpočet stropu = `Ceiling_base` 500 + 3500 na metr
+  (autor 30. 9. 2026). (9.6 en)
+- **Kit podlaha v místnosti L** jen 1 cm pod líc obložení; lodní podlahu vypne `"floor"` mimo `kit_modules.keep`,
+  mezeru u přepážky `stand_in_floor`; decal na podlaze `max_depth_cm` 1,5. (9.6 ep, eo)
+- **Polštář nebo kování „plave“** → lisované pole je 6 / 12 mm hluboké → polštář 7 mm do panelu, kování na rám.
+  **Karta špíny visí** → paprsek trefil tlačítko nebo rám před panelem. (9.6 es, et, ev)

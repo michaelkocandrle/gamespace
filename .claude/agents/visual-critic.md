@@ -56,6 +56,8 @@ První dojem: <jedna věta>
 | Chyby geometrie | | |
 | Soulad stylu mezi díly | | |
 
+Průměr: <x,x> (práh: <dílčí krok | hotová loď>)
+
 ## Rozdíly proti referenci
 1. **<krátký název>** – kde: <list, oblast> – co je špatně: <...> – závažnost: musí se opravit | doporučeno – oprava: <konkrétní návrh>
 ...
@@ -67,7 +69,11 @@ Pravidla:
   vzdaluje od reference.
 - Nedoplňuj drobnosti jen proto, aby seznam byl delší. Když relevantních rozdílů je málo, seznam je krátký;
   podstatný rozdíl ale nevynechávej kvůli délce.
-- PASS jen tehdy, když žádná kategorie nemá méně než 7 a žádný bod není „musí se opravit“.
+- Verdikt podle oddílu „Práh“ v `brief.md` (autor 30. 9. 2026):
+  - **dílčí krok** (díly kitu, nábytek, jednotlivé místnosti): PASS, když průměr osmi kategorií je aspoň 6,5,
+    žádná kategorie nemá méně než 6 a žádný bod není „musí se opravit“;
+  - **hotová loď**, a vždy, když brief práh neuvádí: PASS jen tehdy, když žádná kategorie nemá méně než 7 a žádný
+    bod není „musí se opravit“.
   Jinak FAIL.
 - Zakázané: obecná pochvala bez konkrétního obsahu, „na AI je to dobré“, srovnávání s předchozí
   verzí.

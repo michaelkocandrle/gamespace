@@ -550,6 +550,27 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   `settle` ≥ 2 s a srovnávej A/B ve **stejném balíčku** (konzolový přepínač v poli `console`), každou
   variantu v samostatném spuštění hry – průměry `stat` se jinak mezi snímky přelévají.
 
+- j) **Reflection captures v interiéru nic nedělají, obraz s nimi i bez nich je shodný** (30. 9. 2026).
+  Příčina: hra používá Lumen GI a UE 5.8 pak skládá lesk jen z Lumenova hrubého odrazu a SSR
+  (`DiffuseIndirectComposite.usf`, `bLumenReflectionInputIsSSR`); průchod s capture a oblohou
+  (`RenderDeferredReflectionsAndSkyLighting`) pohled s Lumen GI přeskočí. Řešení: capture nepoužívat, dokud interiér
+  běží s Lumen GI. Kov bez odrazů Lumenu zůstává kompromis (metallic ~0,5, drsnost ≥ 0,36).
+  Recenze `Docs/Reviews/2026-09-30_interior_reflections.md`.
+- k) **Runtime reflection capture se v zabalené hře nikdy nedokončí** (30. 9. 2026, platí jen bez Lumen GI).
+  Příčina: `UGameEngine::Tick` aktualizuje capture jen ve snímcích, kdy je v enginové frontě nějaká capture
+  (`HasReflectionCapturesToUpdate`). Runtime capture kreslí jednu stěnu krychle za snímek
+  (`r.ReflectionCapture.Runtime.Timeslice 1`) a před ní stínový snímek, `RefreshCapture()` jen nastaví příznak.
+  Řešení: ~8 snímků na capture volat každý snímek `MarkDirtyForRecaptureOrUpload()` („pumpa“). `bFastRender` funguje
+  jen s `r.ReflectionCapture.Runtime.Budget > 0`.
+- l) **Odraz capture a oblohy na drsném povrchu je nulový** (30. 9. 2026, bez statického světla a bez Lumen GI).
+  Příčina: „lightmap mixing“ násobí odraz poměrem `IndirectIrradiance / AverageBrightness` (`ComputeMixingWeight`)
+  a bez lightmap je `IndirectIrradiance` nula; od drsnosti 0,3 naplno. Řešení: `r.ReflectionEnvironmentLightmapMixing 0`.
+- m) **`ShowFlag.ReflectionOverride 1` se ve snímkovači neprojeví** (`Shots.ps1 -Editor`, 30. 9. 2026). Řešení: pro
+  diagnostiku odrazů dočasně materiál na kov, např. `space.Kit PaintMetallic 0.9 _Structure` a
+  `space.Kit PrimaryRoughness 0.3 _Structure`.
+- n) **Snímky A/B se liší hlavně na hranách** (30. 9. 2026). Příčina: loď ve výšce (`altitude_m`) se mezi snímky
+  nepatrně posune a s ní i `camera_local`. Řešení: porovnávat očima nebo po výřezech, ne průměrným rozdílem pixelů.
+
 ### Profilování zabalené hry (Unreal Insights bez GUI, k nástrahám 9.2g a 9.2h)
 
 ```powershell
@@ -1048,6 +1069,46 @@ snímku.
 - em) **Menší místnost je pod stejným světelným plánem přesvícená.** Kajuta 4,8 m pod světly skladu: p50 0,28 (SC
   0,08–0,18), světlejší lodní podlaha. Světla místnosti ztlumí `kit_modules.light_scale` ([x0, x1, faktor, místnost],
   `kit_rooms.py` násobí světla dílů podle polohy); kajuta 0,6.
+- en) **Malý díl kitu stojí nečekaně mnoho trojúhelníků** (30. 9. 2026). Difuzor 4×4 cm `Kit_Glow*` stojí 108
+  trojúhelníků (`_bezel` dává rámeček na obě velké strany), box s bevelem a 2 segmenty 108, s 1 segmentem 44, a
+  zaslepené konce průběžných trubek a kabelů. Řešení: `bezel_face=-1/1` u difuzoru, jehož druhá strana leží na dílu;
+  `segments=1` u bevelů ≤ 3 mm; `caps=False` u průběžných vedení; šrouby jako šestihran. Rozpad po voláních: obalit
+  `Part.box/slab/tube` a účtovat přírůstek volajícímu (`slab` volá `box`, vnořené řádky se počítají dvakrát).
+- eo) **Geometrický test hlásí u decalu na kit podlaze „box reaches the wall's other side“** (30. 9. 2026). Pruhy jsou
+  zapuštěné 1 mm do desky (paprsek ze středu decalu narazí na jejich spodní stěnu) a deska je silná jen 2 cm (box
+  decalu hluboký 3 cm dosáhne na její spodek). Řešení: `mirrored_projected` ignoruje odvrácené plochy do 8 mm za
+  povrchem; decal na podlaze `"max_depth_cm": 1.5`.
+- ep) **Kit podlaha v místnosti s obložením trupu (průřez L)** jde jen 1 cm pod líc obložení, ne 10 cm jako u stěn W:
+  obložení má ve výklenku soklu vlastní práh a u přepážky kokpitu Wayfareru je trup jen 4,5 cm za lícem. Místnost
+  přestane držet lodní podlahu odebráním `"floor"` z `kit_modules.keep`; mezeru mezi přepážkou a prvním modulem zakryje
+  `stand_in_floor` (30. 9. 2026).
+- eq) **Po přestavbě lodi se ve hře nic nezměnilo, stará geometrie zůstala** (30. 9. 2026). Kajuta měla kit podlahu
+  i starou lodní a obě blikaly přes sebe; výdejník měl před sebou starou krabici. Příčina: `hs_assemble_ship.py`
+  zapíše `<Loď>_HS_Game.blend`, ale FBX v `Export/` nepřepíše, takže `import_ship.py` importuje minulý export.
+  Řešení: po assemble vždy `gamespace_ship_export.py -- --out "//Export"` (z `ArtSource/Ships/<Loď>`), pak
+  `import_ship.py`. Kontrola: čas FBX v `Export/`.
+- er) **Nábytek u obložení trupu narazí do žeber na zkosení** (30. 9. 2026). Obnažená žebra stojí na každém spoji
+  modulů 8 cm od panelů i nahoru po zkosení, takže volno je jen po čáru o `FRAME_OUT / 0,6` níž než rovina zkosení
+  (0,1 m od líce 1,68 m, ne 1,83 m; `kit_furniture.top_at`). Geometrický test to nevidí (díly kitu spojí do jednoho
+  meshe): `Tools/Kit/kit_clash.py -- <Loď> [prefix]` postaví díly jako samostatné objekty a vypíše dvojice, které se
+  protínají (dno na podlaze a konzole v obložení jsou záměr). Totéž kabelový žlab na zkosení (0,27–0,34 m od líce,
+  od 1,99 m) a nosníky stropních rozvodů (od 2,09 m).
+- es) **Polštář opřený o lisovaný panel „plave“** (geometrický test, 30. 9. 2026). Střed lisovaného panelu je 6 mm
+  zapuštěný a zaoblené hrany polštáře mezeru zvětší nad toleranci 6 mm. Řešení: polštář 7 mm do panelu.
+- et) **Kování na hlubokém lisovaném poli plave** (geometrický test, 30. 9. 2026): LED na okraji dvířek stála 1 cm nad
+  plochou. Příčina: `kit_geo.box(inset=(okraj, hloubka))` je jeden `inset_region` s hloubkou, celý okraj je šikmina.
+  Řešení: trojice `inset=(okraj, hloubka, schod)` dá plochý rám, strmý schod a rovné pole
+  (`kit_furniture.DEEP = (0.035, 0.012, 0.006)`); kování na rám nebo na dno pole (`x - hloubka`), ne přes hranu.
+- eu) **Čalounění z boxů s bevelem vypadá jako vinyl, i s normálou tkaniny** (kritik nábytku, 30. 9. 2026). Švy jako
+  tmavé proužky na rovné ploše působí nakresleně. Řešení: polštář jako výšková plocha se sdílenými vrcholy
+  (`kit_geo.Part.mesh`, `kit_furniture.pad`): zaoblený okraj, vyboulená pole mezi švy, šev jako prohlubeň, důlek
+  s knoflíkem. `Part.quads` dělá každou plochu zvlášť (hranaté stínování). Matrace 2,1 m ~7,5 tis. trojúhelníků.
+- ev) **Karta špíny visí před plochou** (30. 9. 2026). `Part.grime(at, normal)` položí kartu na první zásah paprsku;
+  míří-li na tlačítko nebo rám 1–2 cm před panelem, karta visí ve vzduchu. Řešení: `at` na místo, kde paprsek trefí
+  panel samotný.
+- ew) **Decal na lisovaném poli zmizí** (30. 9. 2026). Pole je 12 mm za čelem dveří a decal s `max_depth_cm` 1,5 se
+  středem 5 mm před čelem na něj nedosáhne. Řešení: střed decalu na čelo (≤ 15 mm od dna pole, pozor na zadní stranu
+  desky); popisek celý uvnitř pole nebo celý na rámu.
 - ds) **Stínovaná obdélníková světla bez MegaLights jsou drahá.** Dvě stínovaná světla kitu v chodbě bez MegaLights
   (osvětlení jako v letu): stínové mapy 7,3 ms a světla 5,5 ms (26 ms celkem). V lodi mají stín jen v režimu interiéru
   (MegaLights je trasuje), v letu ne; počet světel pod MegaLights cenu skoro nemění (8 i 12 světel: 3,5 ms).

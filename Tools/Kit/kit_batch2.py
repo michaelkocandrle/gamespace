@@ -1016,7 +1016,7 @@ def budget(cat, part, size):
     if cat == "Portal":
         return b["Portal"]
     if cat == "Ceiling":
-        return max(1500, int(b["Ceiling_per_m"] * size))
+        return max(1500, int(b.get("Ceiling_base", 0) + b["Ceiling_per_m"] * size))
     if cat == "Corner":
         return b["Corner"]
     if part == "Transition":

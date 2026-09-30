@@ -454,6 +454,9 @@ python Tools/Assets/import_ship.py ArtSource/Ships/<Loď>/Export/<Loď>_manifest
   pawnu je v něm vycentrovaný.
 - Exportní nastavení je napevno ve skriptu (Face smoothing, Triangulate, Forward −Z, Up Y, …).
 - Staré FBX dílů, které nový model nemá, smaž z `Export/`.
+- **Po každém `hs_assemble_ship.py` export znovu**, i když se měnil jen interiér: assemble FBX nepřepíše a
+  `import_ship.py` by dovezl minulý export (stará podlaha a krabice přes nové díly, WORKFLOW 9.6 eq). Kontrola: čas
+  FBX v `Export/`.
 - Hodnoty pawnu z geometrie počítá jen `suggest_pawn_settings()` v exportéru → manifest
   `suggested_pawn_settings` → import. Nepřepočítávat ručně.
 

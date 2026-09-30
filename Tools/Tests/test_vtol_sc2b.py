@@ -56,8 +56,9 @@ def run(ship, seconds, lin=(0.0, 0.0, 0.0), rot=(0.0, 0.0, 0.0), boost=False):
     return v3(ship.get_linear_velocity())
 
 
-les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
-les.new_level("/Temp/VtolTest")
+# an empty world in memory only: new_level("/Temp/VtolTest") also wrote Saved/VtolTest.umap, and every later run logged
+# "There's already an asset at the destination" - an engine error, so the commandlet exited 1 (30. 9. 2026)
+unreal.EditorLoadingAndSavingUtils.new_blank_map(False)
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 
 

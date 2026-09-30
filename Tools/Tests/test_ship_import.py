@@ -33,6 +33,12 @@ def log(msg):
     unreal.log("SHIPTEST " + msg)
 
 
+def load_existing(path):
+    """The asset, or None without the engine error load_asset logs for a missing one (an engine error makes the
+    commandlet exit 1, which Tools/Test.ps1 counts as a failure - 30. 9. 2026)."""
+    return unreal.EditorAssetLibrary.load_asset(path) if unreal.EditorAssetLibrary.does_asset_exist(path) else None
+
+
 def check(name, ok, detail=""):
     log(("PASS " if ok else "FAIL ") + name + ("  (" + detail + ")" if detail else ""))
     if not ok:
@@ -123,7 +129,8 @@ def main():
         # instance was made anew and then backwards (REACTOR / COOLER, 28. 9. 2026; test_decal_orientation.py checks the
         # setup itself)
         for d in setup.get("decals") or []:
-            mi = unreal.EditorAssetLibrary.load_asset("%s/MI_Ship_%s_Decal_%s" % (folder, plan["ship"], d["name"]))
+            # (a legacy_room decal has no instance while its room is built from the kit)
+            mi = load_existing("%s/MI_Ship_%s_Decal_%s" % (folder, plan["ship"], d["name"]))
             if mi is None:
                 continue
             got = [MEL.get_material_instance_scalar_parameter_value(mi, p) for p in ("DecalFlipU", "DecalFlipV")]
@@ -162,7 +169,10 @@ def main():
             check("the AO map is masks, not sRGB",
                   ao_map.get_editor_property("compression_settings") == unreal.TextureCompressionSettings.TC_MASKS
                   and not ao_map.get_editor_property("srgb"))
-        hull_mi = unreal.EditorAssetLibrary.load_asset("/Game/Ships/%s/Materials/MI_Ship_%s_Hull" % (plan["ship"], plan["ship"]))
+        hull_mi = load_existing("/Game/Ships/%s/Materials/MI_Ship_%s_Hull" % (plan["ship"], plan["ship"]))
+        if hull_mi is None:
+            # the PBR hull of a v1 ship; a hull built from the drawing (hs) paints its zones on the layered master
+            log("SKIP the PBR hull's detail layer and AO (no MI_Ship_%s_Hull: the hull wears the layered paint zones)" % plan["ship"])
         if hull_mi:
             strength = MEL.get_material_instance_scalar_parameter_value(hull_mi, "DetailNormalStrength")
             tile = MEL.get_material_instance_scalar_parameter_value(hull_mi, "DetailTileCm")

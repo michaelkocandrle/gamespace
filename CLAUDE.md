@@ -45,7 +45,9 @@ až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
    - Hra se balí jen na konci kroku: `.\Tools\Shots.ps1 -Preset <x> -Package` pro finální snímky a předání.
    - Žádné spouštění editoru s UI ani PIE kvůli kontrole.
 6. **Vizuální kritik** u každého předání vizuální práce (autor 25. 9. 2026): skill `visual-review`. Nejvýš
-   3 kola; žádnou výtku tiše nevynechat; recenze do `Docs/Reviews/<datum>_<téma>.md`.
+   3 kola; žádnou výtku tiše nevynechat; recenze do `Docs/Reviews/<datum>_<téma>.md`. **Práh PASS** (autor
+   30. 9. 2026): dílčí krok (díly kitu, nábytek, jednotlivé místnosti) = průměr aspoň 6,5, žádná kategorie pod 6
+   a žádný bod „musí se opravit“ (`"gate": "step"`); hotová loď = všechny kategorie aspoň 7 (`"gate": "ship"`).
 7. **Iterace vzhledu vs. předání** (autor 24. 9. 2026): při ladění vzhledu se po každé změně nebalí a nepouští
    celá sada testů (Blender Eevee náhled nebo `-Editor`, jen dotčené testy). Před předáním jednou celá sada
    testů (`.\Tools\Test.ps1 -All`), balení a finální snímky. Změny C++ a herní logiky plným postupem.
@@ -81,9 +83,10 @@ Blender 5.2 headless z Git Bash **vždy** s `MSYS_NO_PATHCONV=1` (skill `blender
 
 ## Git
 
-- Před commitem `git status`. Commituj **vždy** takto; tahle cesta autora se nikdy necommituje:
-  `git add -A -- . ':!Docs/UI/Screenshot 2026-09-21 150400.png'`
-- Commit message je anglicky a končí řádkem `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
+- Před commitem `git status`. Commituj **vždy** takto; tyhle cesty autora se nikdy necommitují:
+  `git add -A -- . ':!Docs/UI/Screenshot 2026-09-21 150400.png' ':!ArtSource/Characters'`
+- Commit message je anglicky a končí řádkem s podpisem aktuálního modelu, dnes
+  `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - `git push origin main` po každém kroku (hlavní session). **Nikdy force push ani přepis historie**: autor má
   druhý klon v práci.
 
