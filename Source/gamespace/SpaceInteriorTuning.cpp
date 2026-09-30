@@ -8,6 +8,8 @@
  *   space.Kit Lift 0.8                      a scalar on every interior material (Lift, MetallicScale,
  *   space.Kit Lift 0.8 Trim                 RoughnessScale, RoughnessFloor, AccentStrength); an optional
  *                                           last word keeps it to materials whose name contains it
+ *   space.Kit PaintMetallic 0.9 Kit_Structure   with a name filter also the ships' own parts (the kit rooms
+ *                                           kit_rooms.py builds into the ship blueprint)
  *   space.KitColor Gunmetal .45 .52 .62 Trim   the same for a colour
  *   space.KitLight Work Temperature 7000    a property of the interior lights (Work, Accent or All);
  *   space.KitLight All UseTemperature 1     Intensity (lm), LightColor, AttenuationRadius, OuterConeAngle...
@@ -36,6 +38,7 @@
 #include "HAL/IConsoleManager.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/UnrealType.h"
+#include "SpaceshipPawn.h"
 
 namespace
 {
@@ -138,15 +141,29 @@ namespace
 	 */
 	TArray<UMaterialInstanceDynamic*> InteriorMaterials(UWorld* World, const FString& Filter)
 	{
-		TArray<UMaterialInstanceDynamic*> Materials;
+		TArray<UStaticMeshComponent*> Meshes;
 		for (TActorIterator<AStaticMeshActor> It(World); It; ++It)
 		{
 			// the kit showroom too: space.KitColor PrimaryColor .21 .2 .185 Structure recolours its frames
-			if (!It->ActorHasTag(InteriorTag) && !It->ActorHasTag(ShowroomTag))
+			if (It->ActorHasTag(InteriorTag) || It->ActorHasTag(ShowroomTag))
 			{
-				continue;
+				Meshes.Add(It->GetStaticMeshComponent());
 			}
-			UStaticMeshComponent* Mesh = It->GetStaticMeshComponent();
+		}
+		// the ships' kit rooms are components of the ship (30. 9. 2026); only with a filter, so a bare
+		// space.Kit does not turn every part of every ship into a dynamic instance
+		if (!Filter.IsEmpty())
+		{
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				TArray<UStaticMeshComponent*> ShipMeshes;
+				It->GetComponents<UStaticMeshComponent>(ShipMeshes);
+				Meshes.Append(ShipMeshes);
+			}
+		}
+		TArray<UMaterialInstanceDynamic*> Materials;
+		for (UStaticMeshComponent* Mesh : Meshes)
+		{
 			for (int32 Index = 0; Mesh && Index < Mesh->GetNumMaterials(); ++Index)
 			{
 				UMaterialInterface* Current = Mesh->GetMaterial(Index);
