@@ -1,0 +1,226 @@
+{
+ "date": "2026-09-30",
+ "topic": "wayfarer_exterior",
+ "checklist": "exterior",
+ "gate": "ship",
+ "out": "Docs/Reviews/2026-09-30_wayfarer_exterior/round1",
+ "goal": "Hotová malá multirole loď pro jednoho pilota, Halcyon Freightworks Wayfarer (21,5 × 14,7 × 5,6 m): dlouhý trup s tlakovým prostorem, vpředu vyvýšená prosklená kabina, krátká šípová křídla s nádržemi a zbraněmi na koncích, dvě motorové gondoly u kořene křídel s malou ploutví, zadní rampa. Hodnotí se jen EXTERIÉR tak, jak ho hráč vidí: z chase kamery za letu, zblízka při obcházení přistálé lodi a zdálky; ve dne, za soumraku a ve vesmíru. Musí obstát vedle lodí SC stejné třídy jako hotová loď ve hře.",
+ "style": "Star Citizen. Halcyon Freightworks je „pracovní“ značka: teplá lomená bílá a gunmetal, oranžové pruhy, servisní poklopy a šablonové nápisy, lehké opotřebení hran. Udržovaná pracovní loď, ne vrak. Vlastní tvar podle schváleného výkresu (list 1), ne kopie konkrétní lodi SC.",
+ "notes": [
+  "Reference jsou jiné lodi SC (ve hře nebo z Ship Matrix); ukazují laťku kvality a stylu, ne tvar. Tvar a proporce určuje schválený výkres na listu 1.",
+  "Nápis FREE LOOK nahoře uprostřed je štítek herní kamery, ne součást lodi.",
+  "Snímky ve výchozí kvalitě hry, 1920 × 1080, bez HUD. Den = světlo levelu 3 km nad planetou, soumrak = nízké slunce za lodí vpravo vzadu, vesmír = 60 km nad planetou.",
+  "Kokpit a interiér za sklem se tu nehodnotí (mají vlastní recenze); hodnotí se sklo a rám kabiny jako součást exteriéru."
+ ],
+ "pairs": [
+  {
+   "title": "Silueta proti schválenému výkresu",
+   "distance": "mid",
+   "light": "day",
+   "ref": "ArtSource/Ships/Wayfarer/Design/Wayfarer_exterior.png",
+   "ref_label": "schválený výkres exteriéru (tvar a proporce, ne vzhled)",
+   "ours": [
+    "Saved/Shots/20260930_232344_wayfarer_exterior_review/02_day_chase_front_left.png",
+    "Saved/Shots/20260930_232344_wayfarer_exterior_review/03_day_chase_rear_left.png",
+    "Saved/Shots/20260930_232344_wayfarer_exterior_review/09_day_close_rear.png",
+    "Saved/Shots/20260930_232344_wayfarer_exterior_review/27_space_default_sun_close_front34_right.png"
+   ],
+   "ours_label": "ve hře: přední 3/4, zadní 3/4, záď, pravobok"
+  },
+  {
+   "title": "Chase kamera zezadu (výchozí pohled hráče)",
+   "distance": "mid",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_pyro_planets/frames/t00_14_30.jpg",
+   "ref_label": "SC ve hře: Aegis Avenger, chase kamera nad horami",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/01_day_chase_rear.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Chase kamera, přední 3/4 zleva",
+   "distance": "mid",
+   "light": "day",
+   "ref": "starcitizenreference/ship_matrix/small_multirole/100i.jpg",
+   "ref_label": "SC Ship Matrix: Origin 100i v atmosféře",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/02_day_chase_front_left.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Chase kamera, zadní 3/4 zleva",
+   "distance": "mid",
+   "light": "day",
+   "ref": "starcitizenreference/ship_matrix/small_multirole/Avenger_Titan.jpg",
+   "ref_label": "SC Ship Matrix: Aegis Avenger Titan",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/03_day_chase_rear_left.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Příď a levobok zblízka",
+   "distance": "close",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_pyro_planets/frames/t00_05_00.jpg",
+   "ref_label": "SC ve hře: Aegis Avenger, příď a křídlo, zataženo",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/04_day_close_front34.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Detail boku za přídí",
+   "distance": "close",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_engineering_repair/frames/t00_07_20.jpg",
+   "ref_label": "SC ve hře: Anvil Carrack, panely trupu a šablonové nápisy",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/05_day_close_nose.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Křídlo a gondola motoru shora",
+   "distance": "close",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/markom_sc_models_look/frames/t00_01_52.jpg",
+   "ref_label": "SC ve hře: C2 Hercules, gondola motoru v hangáru",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/06_day_close_wing.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Gondola motoru s šachtou a ploutev",
+   "distance": "close",
+   "light": "day",
+   "ref": "starcitizenreference/ship_matrix/small_multirole/C8X_Pisces_Expedition.jpg",
+   "ref_label": "SC Ship Matrix: Anvil C8X Pisces, detail trupu",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/07_day_close_engine_fin.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Hlavní podvozek",
+   "distance": "close",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_pyro_planets/frames/t00_08_03.jpg",
+   "ref_label": "SC ve hře: Aegis Avenger přistálý, podvozek na slunci",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/08_day_close_gear.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Záď: rampa a trysky",
+   "distance": "close",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_engineering_repair/frames/t00_00_16.jpg",
+   "ref_label": "SC ve hře: malá loď zezadu, trysky a zadní světla",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/09_day_close_rear.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Přistálá loď z pohledu chodce",
+   "distance": "mid",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_pyro_planets/frames/t00_09_42.jpg",
+   "ref_label": "SC ve hře: Aegis Avenger přistálý, hráč pro měřítko",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/11_day_landed_walkup.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Loď zdálky nad planetou",
+   "distance": "far",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_engineering_repair/frames/t00_00_24.jpg",
+   "ref_label": "SC ve hře: malá loď nad městem, shora",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/10_day_far.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Chase proti nízkému slunci",
+   "distance": "mid",
+   "light": "soumrak",
+   "ref": "ArtSource/Reference/Video/sc_pyro_planets/frames/t00_05_54.jpg",
+   "ref_label": "SC ve hře: Aegis Avenger při západu slunce",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/12_dusk_chase_front_left.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Chase zezadu zprava, nízké slunce",
+   "distance": "mid",
+   "light": "soumrak",
+   "ref": "ArtSource/Reference/Video/sc_pyro_planets/frames/t00_11_06.jpg",
+   "ref_label": "SC ve hře: Drake Cutlass zezadu, slunce nízko",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/13_dusk_chase_rear_right.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Pravobok zblízka, nízké slunce",
+   "distance": "close",
+   "light": "soumrak",
+   "ref": "ArtSource/Reference/Video/sc_pyro_planets/frames/t00_02_57.jpg",
+   "ref_label": "SC ve hře: Aegis Avenger za soumraku, poziční a hranová světla",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/14_dusk_close_front34_right.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Gondola a ploutev zprava, soumrak",
+   "distance": "close",
+   "light": "soumrak",
+   "ref": "ArtSource/Reference/Video/sc_pyro_planets/frames/t00_03_54.jpg",
+   "ref_label": "SC ve hře: Aegis Avenger v noci, osvětlená rampa a světla",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/15_dusk_close_engine_right.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Loď zdálky za soumraku",
+   "distance": "far",
+   "light": "soumrak",
+   "ref": "starcitizenreference/ship_matrix/small_multirole/Aurora_Mk_I_MR.jpg",
+   "ref_label": "SC Ship Matrix: RSI Aurora MR v prašném soumraku",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/16_dusk_far.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Vesmír, chase přední 3/4 zprava, slunce z boku",
+   "distance": "mid",
+   "light": "space",
+   "ref": "ArtSource/Reference/Video/sc_pyro_planets/frames/t00_08_12.jpg",
+   "ref_label": "SC ve hře: Aegis Avenger ve vesmíru, slunce v záběru",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/26_space_default_sun_front_right.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Vesmír, chase zadní 3/4 zleva",
+   "distance": "mid",
+   "light": "space",
+   "ref": "starcitizenreference/ship_matrix/small_multirole/Nomad.jpg",
+   "ref_label": "SC Ship Matrix: Consolidated Outland Nomad nad planetou",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/25_space_default_sun_rear_left.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Vesmír, pravobok a příď zblízka",
+   "distance": "close",
+   "light": "space",
+   "ref": "ArtSource/Reference/Video/sc_quantum_travel_tutorial/frames/t00_07_52.jpg",
+   "ref_label": "SC ve hře: RSI Zeus nad atmosférou, na slunci",
+   "ours": "Saved/Shots/20260930_232344_wayfarer_exterior_review/27_space_default_sun_close_front34_right.png",
+   "ours_label": "ve hře, 1920×1080"
+  },
+  {
+   "title": "Vesmír, protisvětlo (strana odvrácená od slunce)",
+   "distance": "close",
+   "light": "space",
+   "ref": "ArtSource/Reference/Video/sc_pyro_planets/frames/t00_00_30.jpg",
+   "ref_label": "SC ve hře: Aegis Avenger ve vesmíru, slabé světlo",
+   "ours": [
+    "Saved/Shots/20260930_232344_wayfarer_exterior_review/20_space_close_front34.png",
+    "Saved/Shots/20260930_232344_wayfarer_exterior_review/18_space_chase_front_left.png"
+   ],
+   "ours_label": "ve hře: příď zblízka a chase, slunce nad a za lodí"
+  },
+  {
+   "title": "Vesmír zdálky a trysky na přídavný tah",
+   "distance": "far",
+   "light": "space",
+   "ref": "starcitizenreference/ship_matrix/small_multirole/Syulen.jpg",
+   "ref_label": "SC Ship Matrix: Gatac Syulen ve vesmíru, zapálené trysky",
+   "ours": [
+    "Saved/Shots/20260930_232344_wayfarer_exterior_review/29_space_default_sun_far_right.png",
+    "Saved/Shots/20260930_232344_wayfarer_exterior_review/24_space_thrusters_lit.png"
+   ],
+   "ours_label": "ve hře: zdálky zprava; zezadu s přídavným tahem"
+  }
+ ]
+}

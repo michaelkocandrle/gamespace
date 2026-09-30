@@ -586,6 +586,13 @@ CSV má sloupce `Name, Count, Incl, Excl, I.Avg…` v sekundách; seřaď podle 
 trace: pole `console` ve scénáři s `stat unit`, `stat Slate`, `stat SpaceCockpit` – statistiky jsou vidět ve
 snímku.
 
+- ex) **„Soumrak“ `space.SunDir -52 120` je dnes noc a strana lodi na slunci ve vesmíru se mění** (30. 9. 2026).
+  Nad Veyrou (3 km) rozhoduje o výšce slunce hlavně yaw: 45 a 315 den, 120–225 po západu. Soumrak s nízkým sluncem
+  za lodí vpravo vzadu je `-52 102` (slunce v záběru z chase `yaw 135`). V 60 km (`facing horizon`) svítí slunce
+  levelu `-39 45` na boky, jen když snímky jdou v pořadí presetu `wayfarer_exterior_review`; jiné pořadí dalo loď
+  ve stínu. Příčina neověřená (orientace lodi po předchozích snímcích). Řešení: světlo scény drž v presetu
+  a po změně pořadí snímků zkontroluj, že je loď ve vesmíru na slunci.
+
 ### 9.3 Obsah a cookování
 
 - a) **Písmo v buildu chybělo.** Špatná cesta ve `DirectoriesToAlwaysStageAsUFS`: je relativní

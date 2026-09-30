@@ -32,8 +32,9 @@ $utf8 = New-Object System.Text.UTF8Encoding($false)
 function Read-Lock {
     if (-not (Test-Path $lockFile)) { return $null }
     $info = @{}
+    # "key: value" as this script writes it, "key=value" as a session may write it by hand
     foreach ($line in [IO.File]::ReadAllLines($lockFile, $utf8)) {
-        if ($line -match '^(\w+):\s*(.*)$') { $info[$Matches[1]] = $Matches[2].Trim() }
+        if ($line -match '^\s*(\w+)\s*[:=]\s*(.*)$') { $info[$Matches[1]] = $Matches[2].Trim() }
     }
     $time = [DateTimeOffset]::MinValue
     if (-not [DateTimeOffset]::TryParse($info["time"], [Globalization.CultureInfo]::InvariantCulture,

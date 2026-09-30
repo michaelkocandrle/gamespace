@@ -4,8 +4,8 @@ Jediný zdroj **aktuálního** stavu (nad ním jen `CLAUDE.md`), **nejvýš 80 �
 kroku hotové přesuň do stavu a splněné kroky smaž; podrobnosti patří do commitu a recenze v `Docs/Reviews/`,
 historie do 30. 9. 2026 je v `Docs/HANDOFF.md` (archiv).
 
-Stav k **30. 9. 2026 večer**, `main` po `7452fe1`: větev auditu sloučená, `.\Tools\Test.ps1 -All` zelený
-(offline 6/6, Blender 1/1, UE 22/22), první běh CI zelený, hra zabalená.
+Stav k **30. 9. 2026 v noci**: hra a testy beze změny od `7452fe1` (`.\Tools\Test.ps1 -All` zelený, hra zabalená);
+potom jen pravidla paralelní práce, zámek těžkých zdrojů a recenze exteriéru Wayfareru bez oprav.
 
 ## Stav
 
@@ -25,15 +25,13 @@ Stav k **30. 9. 2026 večer**, `main` po `7452fe1`: větev auditu sloučená, `.
     varianta B; podlaha zatím lodní) a kajuta z obložení trupu s kit podlahou a nábytkem z kitu.
 - **Steadfast** (nákladní, Halcyon Freightworks): 2D návrh v2 čeká na schválení. Starý zkušební interiér stojí
   v `TestSpace` 500 m stranou (klávesa I), autor ho odmítl.
-- **Interiérový kit** (`ArtSource/Kit/kit_rules.json`, `kit_parts.json`): dávky 1–3 schválené, dávka 4 zčásti
-  (výklenky, přepážky `Bulkhead_Door`, obložení `Wall_HullLiner`, stropy a podlaha průřezu L), dávka 6 nábytek
-  kajuty. Ukázka v `TestSpace` (klávesa U). Strop 500 + 3500 trojúhelníků na metr (autor 30. 9.;
+- **Interiérový kit** (`ArtSource/Kit/kit_rules.json`, `kit_parts.json`): dávky 1–3 schválené, dávka 4 zčásti,
+  dávka 6 nábytek kajuty; ukázka v `TestSpace` (klávesa U). Strop 500 + 3500 trojúhelníků na metr (autor 30. 9.;
   `kit_manifest.json` ho převezme při příští stavbě dávky).
 - **Flotila:** Ship Matrix a dossiery publikované (odkazy ve skillu `ship-pipeline` 1b); Delver a Farsight jen
   jako spec.
-- **Nástroje:** `Tools/Test.ps1` (UE test selže i na chybě enginu v logu), `Tools/Build.ps1`, engine přes
-  `GAMESPACE_UE_ROOT`; CI pouští offline testy při každém pushi (stav přes veřejné API GitHubu, `gh` na stroji
-  není). Kritik má práh podle typu kroku (`"gate": "step"` / `"ship"`). Zámek těžkých zdrojů `Tools/HeavyLock.ps1`.
+- **Nástroje:** `Tools/Test.ps1`, `Tools/Build.ps1`, CI s offline testy při každém pushi (stav přes veřejné API
+  GitHubu), kritik s prahem `"gate": "step"` / `"ship"`, zámek těžkých zdrojů `Tools/HeavyLock.ps1`.
 
 ## Paralelní práce
 
@@ -43,6 +41,8 @@ Stav k **30. 9. 2026 večer**, `main` po `7452fe1`: větev auditu sloučená, `.
 
 ## Čeká na rozhodnutí autora
 
+- **Exteriér Wayfareru, co dál:** první recenze kritikem (`Docs/Reviews/2026-09-30_wayfarer_exterior.md`) FAIL
+  6/4/5/3/4/4/4/5 proti prahu hotové lodi; seznam problémů podle dopadu je v recenzi, nic se zatím neopravuje.
 - Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověřovacím kole FAIL 7/6/6/7/7/8/8/7; levné body
   opravené potom se snímky před a po).
 - Steadfast: schválení 2D návrhu v2 (`ArtSource/Ships/Steadfast/Design/Steadfast_Design.md`).
@@ -50,6 +50,7 @@ Stav k **30. 9. 2026 večer**, `main` po `7452fe1`: větev auditu sloučená, `.
 
 ## Známé problémy
 
+- Pravobok Wayfareru: nápisy WAYFARER a HF-0417 jsou zrcadlené (decaly `Name_R`, `Reg_R` ve `Wayfarer_setup.json`).
 - Interiér Wayfareru, otevřené body recenzí: kajuta (`2026-09-30_cabin_furniture.md`: panel a sedák výdejníku,
   žebrování gumových pruhů, čočka lampičky, potrubí ventilátoru buňky) a obložení (`2026-09-30_cabin_liner.md`:
   svítidlo A, třmeny a patky zábradlí, nouzové značení, rám kolem zadních dveří).
