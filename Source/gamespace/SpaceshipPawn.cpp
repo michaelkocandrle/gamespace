@@ -1195,7 +1195,7 @@ void ASpaceshipPawn::HandleToggleCamera(const FInputActionValue& /*Value*/)
 
 void ASpaceshipPawn::HandleBoost(const FInputActionValue& /*Value*/)
 {
-	bBoostHeld = true;
+	Systems->SetBoostHeld(true);
 }
 
 void ASpaceshipPawn::HandleToggleHud(const FInputActionValue& /*Value*/)
@@ -1258,12 +1258,12 @@ void ASpaceshipPawn::HandleGSafe(const FInputActionValue& /*Value*/)
 
 void ASpaceshipPawn::HandleAfterburner(const FInputActionValue& /*Value*/)
 {
-	bAfterburnerHeld = true;
+	Systems->SetAfterburnerHeld(true);
 }
 
 void ASpaceshipPawn::HandleAfterburnerCompleted(const FInputActionValue& /*Value*/)
 {
-	bAfterburnerHeld = false;
+	Systems->SetAfterburnerHeld(false);
 }
 
 void ASpaceshipPawn::HandleComStab(const FInputActionValue& /*Value*/)
@@ -1343,25 +1343,15 @@ void ASpaceshipPawn::SetSpaceBrake(bool bHeld)
 
 float ASpaceshipPawn::GetMasterModeSwitchProgress() const
 {
-	return bMasterModeSwitching ? FMath::Clamp(MasterModeTimer / FMath::Max(MasterModeSwitchSeconds, 0.01f), 0.f, 1.f) : 0.f;
+	return Systems->GetMasterModeSwitchProgress(MasterModeSwitchSeconds);
 }
 
 void ASpaceshipPawn::RequestMasterMode(EMasterMode Mode)
 {
-	if (Mode == MasterMode)
-	{
-		// Already there: cancels a switch the other way.
-		bMasterModeSwitching = false;
-		MasterModeTimer = 0.f;
-		return;
-	}
-	if (bMasterModeSwitching && Mode == PendingMasterMode)
+	if (!Systems->RequestMasterMode(Mode))
 	{
 		return;
 	}
-	PendingMasterMode = Mode;
-	bMasterModeSwitching = true;
-	MasterModeTimer = 0.f;
 	if (Mode == EMasterMode::SCM && QuantumState == EQuantumState::Traveling)
 	{
 		// The quantum drive belongs to NAV: leaving NAV drops out of the jump where the ship is.
@@ -1378,31 +1368,20 @@ void ASpaceshipPawn::ToggleMasterMode()
 
 void ASpaceshipPawn::UpdateMasterMode(float DeltaSeconds)
 {
-	if (!bMasterModeSwitching)
+	if (Systems->UpdateMasterMode(DeltaSeconds, MasterModeSwitchSeconds))
 	{
-		return;
-	}
-	MasterModeTimer += DeltaSeconds;
-	if (MasterModeTimer >= MasterModeSwitchSeconds)
-	{
-		MasterMode = PendingMasterMode;
-		bMasterModeSwitching = false;
-		MasterModeTimer = 0.f;
 		CameraKick = FMath::Max(CameraKick, 0.35f);
-		UE_LOG(LogSpaceship, Log, TEXT("%s: master mode %s"), *GetName(), MasterMode == EMasterMode::NAV ? TEXT("NAV") : TEXT("SCM"));
 	}
 }
 
 void ASpaceshipPawn::SetSpeedLimiter(float Fraction)
 {
-	SpeedLimiterFraction = FMath::Clamp(Fraction, FMath::Min(SpeedLimiterMin, 1.f), 1.f);
+	Systems->SetSpeedLimiter(Fraction, SpeedLimiterMin);
 }
 
 void ASpaceshipPawn::AdjustSpeedLimiter(float Notches)
 {
-	// Snapped to whole steps, so a few notches up and down land on round numbers again.
-	const float Steps = FMath::RoundToFloat(SpeedLimiterFraction / SpeedLimiterStep) + Notches;
-	SetSpeedLimiter(Steps * SpeedLimiterStep);
+	Systems->AdjustSpeedLimiter(Notches, SpeedLimiterStep, SpeedLimiterMin);
 }
 
 float ASpaceshipPawn::GetModeMaxSpeed() const
@@ -1410,7 +1389,7 @@ float ASpaceshipPawn::GetModeMaxSpeed() const
 	// Precision mode is a smaller SCM for the limiter and the gauge. The hard cap in UpdateLinearMotion
 	// stays at the full SCM speed: switched on at speed, the flight computer brakes down with the
 	// retro thrusters instead of the overspeed bleed (which would pull ~25 G from SCM speed).
-	if (MasterMode == EMasterMode::NAV)
+	if (Systems->GetMasterMode() == EMasterMode::NAV)
 	{
 		return NavMaxSpeed;
 	}
@@ -1422,7 +1401,7 @@ float ASpaceshipPawn::GetModeMaxSpeed() const
 float ASpaceshipPawn::GetSpeedLimit() const
 {
 	// The afterburner's raised limit scales with the limiter too: a half-open limiter gets half of it.
-	return GetModeMaxSpeed() * SpeedLimiterFraction * (1.f + (AfterburnerSpeedMultiplier - 1.f) * AfterburnerBlend);
+	return GetModeMaxSpeed() * Systems->GetSpeedLimiter() * (1.f + (AfterburnerSpeedMultiplier - 1.f) * Systems->GetAfterburnerBlend());
 }
 
 void ASpaceshipPawn::SetGSafe(bool bOn)
@@ -1703,8 +1682,8 @@ void ASpaceshipPawn::ClearPilotInput()
 	LookInput = FVector2D::ZeroVector;
 	MouseLookDelta = FVector2D::ZeroVector;
 	MouseStick = FVector2D::ZeroVector;
-	bBoostHeld = false;
-	bAfterburnerHeld = false;
+	Systems->SetBoostHeld(false);
+	Systems->SetAfterburnerHeld(false);
 	bSpaceBrakeHeld = false;
 }
 
@@ -2094,7 +2073,7 @@ APawn* ASpaceshipPawn::LeaveSeat()
 
 void ASpaceshipPawn::HandleBoostCompleted(const FInputActionValue& /*Value*/)
 {
-	bBoostHeld = false;
+	Systems->SetBoostHeld(false);
 }
 
 // -------------------------------------------------------------------------------------------
@@ -2151,7 +2130,7 @@ FVector ASpaceshipPawn::DebugStepFlight(float DeltaSeconds, float Thrust, float 
 	ThrustInput = Thrust;
 	StrafeInput = Strafe;
 	LiftInput = Lift;
-	bBoostHeld = bBoost;
+	Systems->SetBoostHeld(bBoost);
 	StepFlight(DeltaSeconds);
 	return LinearVelocity;
 }
@@ -2163,7 +2142,7 @@ FVector ASpaceshipPawn::DebugStepFlightInput(float DeltaSeconds, const FVector& 
 	LiftInput = float(LinearInput.Z);
 	RollInput = float(RotationInput.X);
 	LookInput = FVector2D(RotationInput.Z, RotationInput.Y);
-	bBoostHeld = bBoost;
+	Systems->SetBoostHeld(bBoost);
 	StepFlight(DeltaSeconds);
 	return LinearVelocity;
 }
@@ -2174,35 +2153,10 @@ FVector ASpaceshipPawn::DebugStepFlightInput(float DeltaSeconds, const FVector& 
 
 void ASpaceshipPawn::UpdateBoost(float DeltaSeconds)
 {
-	const bool bWasActive = bBoostActive;
-	if (bBoostLocked && BoostEnergy >= BoostUnlockFraction)
-	{
-		bBoostLocked = false;
-	}
 	// Boost feeds the manoeuvring thrusters and rotation, so it burns energy whenever Shift is held.
-	bBoostActive = bBoostHeld && !bBoostLocked && BoostEnergy > 0.f
-		&& QuantumState != EQuantumState::Traveling && LandingState != ELandingState::Landed;
-
-	if (bBoostActive)
-	{
-		BoostEnergy = FMath::Max(0.f, BoostEnergy - DeltaSeconds / BoostDurationSeconds);
-		BoostRechargeWait = BoostRechargeDelaySeconds;
-		if (BoostEnergy <= 0.f)
-		{
-			bBoostLocked = true;
-			bBoostActive = false;
-		}
-	}
-	else
-	{
-		BoostRechargeWait = FMath::Max(0.f, BoostRechargeWait - DeltaSeconds);
-		if (BoostRechargeWait <= 0.f)
-		{
-			BoostEnergy = FMath::Min(1.f, BoostEnergy + DeltaSeconds / BoostRechargeSeconds);
-		}
-	}
-
-	if (bBoostActive && !bWasActive)
+	const bool bAllowed = QuantumState != EQuantumState::Traveling && LandingState != ELandingState::Landed;
+	const FShipReserve::FTuning Tuning{BoostDurationSeconds, BoostRechargeSeconds, BoostRechargeDelaySeconds, BoostUnlockFraction};
+	if (Systems->UpdateBoost(DeltaSeconds, bAllowed, Tuning))
 	{
 		CameraKick = FMath::Max(CameraKick, 0.3f);
 	}
@@ -2210,44 +2164,15 @@ void ASpaceshipPawn::UpdateBoost(float DeltaSeconds)
 
 void ASpaceshipPawn::UpdateAfterburner(float DeltaSeconds)
 {
-	const bool bWasActive = bAfterburnerActive;
-	if (bAfterburnerLocked && AfterburnerFuel >= AfterburnerUnlockFraction)
-	{
-		bAfterburnerLocked = false;
-	}
 	// SCM only (NAV already flies at five times SCM speed and has the quantum drive), and only while it
 	// can do something: W forward, no spacebrake, flying. VTOL refuses it too - the mains are down to a
 	// third and the ship is standing on its lift thrusters (SC-2b).
-	bAfterburnerActive = bAfterburnerHeld && ThrustInput > 0.f && !bSpaceBrakeHeld && !bAfterburnerLocked && AfterburnerFuel > 0.f
-		&& MasterMode == EMasterMode::SCM && !IsPrecisionActive() && !Systems->IsVtolOn() && QuantumState != EQuantumState::Traveling
+	const bool bAllowed = ThrustInput > 0.f && !bSpaceBrakeHeld && Systems->GetMasterMode() == EMasterMode::SCM
+		&& !IsPrecisionActive() && !Systems->IsVtolOn() && QuantumState != EQuantumState::Traveling
 		&& LandingState != ELandingState::Landed;
-
-	if (bAfterburnerActive)
-	{
-		AfterburnerFuel = FMath::Max(0.f, AfterburnerFuel - DeltaSeconds / AfterburnerDurationSeconds);
-		AfterburnerRefillWait = AfterburnerRefillDelaySeconds;
-		if (AfterburnerFuel <= 0.f)
-		{
-			bAfterburnerLocked = true;
-			bAfterburnerActive = false;
-		}
-	}
-	else
-	{
-		AfterburnerRefillWait = FMath::Max(0.f, AfterburnerRefillWait - DeltaSeconds);
-		if (AfterburnerRefillWait <= 0.f)
-		{
-			AfterburnerFuel = FMath::Min(1.f, AfterburnerFuel + DeltaSeconds / AfterburnerRefillSeconds);
-		}
-	}
-
-	// The raised limit spools in quickly and fades out slowly, so running dry or letting go never
-	// yanks the ship back to SCM speed.
-	AfterburnerBlend = bAfterburnerActive
-		? FMath::Min(1.f, AfterburnerBlend + DeltaSeconds / AfterburnerSpoolSeconds)
-		: FMath::Max(0.f, AfterburnerBlend - DeltaSeconds / AfterburnerFadeSeconds);
-
-	if (bAfterburnerActive && !bWasActive)
+	const FShipReserve::FTuning Tuning{AfterburnerDurationSeconds, AfterburnerRefillSeconds, AfterburnerRefillDelaySeconds,
+		AfterburnerUnlockFraction};
+	if (Systems->UpdateAfterburner(DeltaSeconds, bAllowed, Tuning, AfterburnerSpoolSeconds, AfterburnerFadeSeconds))
 	{
 		CameraKick = FMath::Max(CameraKick, 1.f);
 		PlayOneShot(BoostStartSound);
@@ -2410,7 +2335,7 @@ EQuantumBlocker ASpaceshipPawn::EvaluateQuantum() const
 	{
 		return EQuantumBlocker::Landed;
 	}
-	if (MasterMode != EMasterMode::NAV || bMasterModeSwitching)
+	if (Systems->GetMasterMode() != EMasterMode::NAV || Systems->IsMasterModeSwitching())
 	{
 		return EQuantumBlocker::NeedsNav;
 	}
@@ -2519,8 +2444,7 @@ void ASpaceshipPawn::BeginQuantumJump()
 	QuantumJumpLengthCm = FMath::Max(QuantumTargetDistanceCm, 1.0);
 	QuantumTravelSeconds = 0.f;
 	QuantumFuel = FMath::Max(0.f, QuantumFuel - ComputeQuantumFuelUse(QuantumTargetDistanceCm));
-	bBoostActive = false;
-	bAfterburnerActive = false;
+	Systems->CutBoostAndAfterburner();
 	Systems->ClearVtol();
 	// A lighter jolt than a drop-out: the jump now builds up (QuantumRampSeconds) rather than snapping.
 	CameraKick = 0.4f;
@@ -2618,8 +2542,7 @@ bool ASpaceshipPawn::DebugEngageQuantum(const FString& TargetName, float TravelF
 		UE_LOG(LogSpaceship, Warning, TEXT("%s: no quantum destination '%s'"), *GetName(), *TargetName);
 		return false;
 	}
-	MasterMode = EMasterMode::NAV;
-	bMasterModeSwitching = false;
+	Systems->ForceMasterMode(EMasterMode::NAV);
 	QuantumTarget = Picked->Actor;
 	UpdateQuantumTarget();
 	const FVector Direction = (QuantumTargetCentre - GetActorLocation()).GetSafeNormal();
@@ -2684,13 +2607,13 @@ void ASpaceshipPawn::UpdateAngularMotion(float DeltaSeconds)
 	const float YawCommand = bFreeLookHeld ? 0.f : Command.X;
 	// NAV turns slower than SCM.
 	float RateScale = 1.f;
-	if (MasterMode == EMasterMode::NAV)
+	if (Systems->GetMasterMode() == EMasterMode::NAV)
 	{
 		RateScale *= NavTurnScale;
 	}
 	// Boost feeds the manoeuvring thrusters: faster turns, and faster to start and stop them.
 	// Precision mode turns gently, and starts and stops turns as gently.
-	const double RotationBoost = (bBoostActive ? BoostRotationMultiplier : 1.0) * (IsPrecisionActive() ? PrecisionTurnScale : 1.0);
+	const double RotationBoost = (Systems->IsBoostActive() ? BoostRotationMultiplier : 1.0) * (IsPrecisionActive() ? PrecisionTurnScale : 1.0);
 	RateScale *= float(RotationBoost);
 
 	FVector TargetRates(
@@ -2771,14 +2694,15 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 	{
 		// What each thruster direction can do. NAV keeps main and retro but halves manoeuvring; boost
 		// strengthens the manoeuvring thrusters (retro included), the afterburner the main ones.
-		const double Maneuver = (MasterMode == EMasterMode::NAV ? NavManeuverScale : 1.0) * (bBoostActive ? BoostManeuverMultiplier : 1.0);
+		const double Maneuver = (Systems->GetMasterMode() == EMasterMode::NAV ? NavManeuverScale : 1.0)
+			* (Systems->IsBoostActive() ? BoostManeuverMultiplier : 1.0);
 		// VTOL (SC-2b): the thrust moves off the mains and onto the lift and lateral thrusters.
 		const double Vtol = double(Systems->GetVtolBlend());
 		const double VtolMain = FMath::Lerp(1.0, double(VtolThrustFraction), Vtol);
 		const double VtolLift = FMath::Lerp(1.0, double(VtolLiftMultiplier), Vtol);
 		const double VtolStrafe = FMath::Lerp(1.0, double(VtolStrafeMultiplier), Vtol);
-		const double ForwardCap = ThrustAcceleration * (bAfterburnerActive ? AfterburnerThrustMultiplier : 1.0) * VtolMain;
-		const double RetroCap = RetroAcceleration * (bBoostActive ? BoostManeuverMultiplier : 1.0) * VtolMain;
+		const double ForwardCap = ThrustAcceleration * (Systems->IsAfterburnerActive() ? AfterburnerThrustMultiplier : 1.0) * VtolMain;
+		const double RetroCap = RetroAcceleration * (Systems->IsBoostActive() ? BoostManeuverMultiplier : 1.0) * VtolMain;
 		const double StrafeCap = StrafeAcceleration * Maneuver * VtolStrafe;
 		const double UpCap = LiftAcceleration * Maneuver * VtolLift;
 		const double DownCap = DownAcceleration * Maneuver * VtolLift;
@@ -2803,7 +2727,7 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 				if (Systems->GetVtolBlend() > 0.f)
 				{
 					// In VTOL Space and Ctrl are a climb rate, not another way of reaching the top speed.
-					const double ClimbLimit = FMath::Lerp(SpeedLimit, double(VtolClimbSpeed) * SpeedLimiterFraction, double(Systems->GetVtolBlend()));
+					const double ClimbLimit = FMath::Lerp(SpeedLimit, double(VtolClimbSpeed) * Systems->GetSpeedLimiter(), double(Systems->GetVtolBlend()));
 					DesiredLocal.Z = FMath::Clamp(DesiredLocal.Z, -ClimbLimit, ClimbLimit);
 				}
 				if (LiftInput < 0.f && bHasEnvironment)
@@ -2879,14 +2803,14 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 
 		const double Speed = LinearVelocity.Size();
 		{
-			const double ModeTop = MasterMode == EMasterMode::NAV ? NavMaxSpeed : ScmMaxSpeed;
-			const double SpeedCap = ModeTop * (1.0 + (AfterburnerSpeedMultiplier - 1.0) * AfterburnerBlend);
+			const double ModeTop = Systems->GetMasterMode() == EMasterMode::NAV ? NavMaxSpeed : ScmMaxSpeed;
+			const double SpeedCap = ModeTop * (1.0 + (AfterburnerSpeedMultiplier - 1.0) * Systems->GetAfterburnerBlend());
 			if (Speed > SpeedCap)
 			{
 				// Above the mode's top speed (afterburner fading, or leaving NAV for SCM): while the
 				// afterburner pushes this is an ordinary clamp, otherwise the excess bleeds off.
 				const double Excess = (Speed - SpeedCap) * FMath::Min(double(OverspeedDecay) * DeltaSeconds, 1.0);
-				const double Target = bAfterburnerActive ? SpeedCap : Speed - Excess;
+				const double Target = Systems->IsAfterburnerActive() ? SpeedCap : Speed - Excess;
 				LinearVelocity *= FMath::Max(Target, SpeedCap) / Speed;
 			}
 			else if (!bCoupled && Speed > SpeedLimit && Speed > SpeedBefore)
@@ -3073,8 +2997,7 @@ void ASpaceshipPawn::EnterLanded()
 	SettleSeconds = LandingConfirmSeconds;
 	AngularVelocity = FVector::ZeroVector;
 	MouseStick = FVector2D::ZeroVector;
-	bBoostActive = false;
-	bAfterburnerActive = false;
+	Systems->CutBoostAndAfterburner();
 	PlayOneShot(TouchdownSound, FMath::Clamp(LinearVelocity.Size() / FMath::Max(LandingMaxSpeed, 1.f), 0.4f, 1.f));
 	UE_LOG(LogSpaceship, Log, TEXT("%s landed: slope %.1f deg, tilt %.1f deg, gap %.0f cm"),
 		*GetName(), GroundSlopeDeg, GroundTiltDeg, GroundGapCm);
@@ -3126,11 +3049,11 @@ void ASpaceshipPawn::UpdateLandedMotion(float DeltaSeconds)
 
 void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
 {
-	BoostBlend = FMath::FInterpTo(BoostBlend, bBoostActive ? 1.f : 0.f, DeltaSeconds, 4.f);
+	BoostBlend = FMath::FInterpTo(BoostBlend, Systems->IsBoostActive() ? 1.f : 0.f, DeltaSeconds, 4.f);
 	// Asymmetric on purpose: the punch arrives at once, the view settles back slowly. Symmetric easing
 	// made lighting the afterburner feel soft, which is most of what "no kick" was about.
-	AfterburnerFeel = FMath::FInterpTo(AfterburnerFeel, bAfterburnerActive ? 1.f : 0.f, DeltaSeconds,
-		bAfterburnerActive ? 9.f : 2.5f);
+	AfterburnerFeel = FMath::FInterpTo(AfterburnerFeel, Systems->IsAfterburnerActive() ? 1.f : 0.f, DeltaSeconds,
+		Systems->IsAfterburnerActive() ? 9.f : 2.5f);
 	// The quantum look arrives in about a second and leaves faster; the last 5% of a jump fades it out.
 	// The jump's look follows its speed, so it builds up with the acceleration ramp instead of snapping
 	// on (the author, 22. 9. 2026); the last 5 % of the jump fades it out again.
@@ -3269,7 +3192,7 @@ void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
 	const float LeverLoad = QuantumState == EQuantumState::Traveling ? 0.35f
 		: bFlightAssist ? 0.35f * FMath::Clamp(float(LinearVelocity.Size()) / FMath::Max(GetModeMaxSpeed(), 1.f), 0.f, 1.f) : 0.f;
 	EngineLoad = FMath::FInterpTo(EngineLoad, bPiloted ? FMath::Max(EngineDemand, LeverLoad) : 0.f, DeltaSeconds, EngineSpoolRate);
-	EngineBoostBlend = FMath::FInterpTo(EngineBoostBlend, bPiloted && bAfterburnerActive ? 1.f : 0.f, DeltaSeconds, EngineSpoolRate);
+	EngineBoostBlend = FMath::FInterpTo(EngineBoostBlend, bPiloted && Systems->IsAfterburnerActive() ? 1.f : 0.f, DeltaSeconds, EngineSpoolRate);
 	HumBlend = FMath::FInterpTo(HumBlend, bPiloted ? 1.f : 0.f, DeltaSeconds, 1.5f);
 
 	const float Effects = USpaceUserSettings::GetEffectsVolume();
@@ -3480,12 +3403,12 @@ void ASpaceshipPawn::SetPrecisionMode(bool bOn)
 
 void ASpaceshipPawn::SetVtol(bool bOn)
 {
-	Systems->SetVtol(bOn, MasterMode == EMasterMode::SCM);
+	Systems->SetVtol(bOn);
 }
 
 void ASpaceshipPawn::UpdateVtol(float DeltaSeconds)
 {
-	Systems->UpdateVtol(DeltaSeconds, MasterMode == EMasterMode::SCM, VtolTransitionSeconds);
+	Systems->UpdateVtol(DeltaSeconds, VtolTransitionSeconds);
 }
 
 FRotator ASpaceshipPawn::ComputeVtolLevelStep(const FVector& WorldUp, float DeltaSeconds) const

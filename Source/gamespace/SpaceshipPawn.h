@@ -137,16 +137,6 @@ enum class EQuantumBlocker : uint8
 	Pilot
 };
 
-/** Star Citizen master modes: what the ship is set up for. B switches, taking MasterModeSwitchSeconds. */
-UENUM(BlueprintType)
-enum class EMasterMode : uint8
-{
-	/** Space Combat Maneuvering: combat speed, full manoeuvrability. */
-	SCM,
-	/** Navigation: much higher speed, reduced turning and manoeuvring thrust, quantum drive available. */
-	NAV
-};
-
 /**
  * Player-flown spaceship with 6 degrees of freedom: thrust / strafe / lift plus pitch / yaw / roll,
  * flown through an IFCS modelled on Star Citizen's.
@@ -246,14 +236,14 @@ public:
 
 	/** The master mode in force. While switching it is still the old one. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
-	EMasterMode GetMasterMode() const { return MasterMode; }
+	EMasterMode GetMasterMode() const { return Systems->GetMasterMode(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
-	bool IsMasterModeSwitching() const { return bMasterModeSwitching; }
+	bool IsMasterModeSwitching() const { return Systems->IsMasterModeSwitching(); }
 
 	/** The mode being switched to while IsMasterModeSwitching, else the current one. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
-	EMasterMode GetPendingMasterMode() const { return bMasterModeSwitching ? PendingMasterMode : MasterMode; }
+	EMasterMode GetPendingMasterMode() const { return Systems->GetPendingMasterMode(); }
 
 	/** Switching progress, 0..1; 0 when not switching. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
@@ -269,7 +259,7 @@ public:
 
 	/** Speed limiter as a fraction of the master mode's top speed, SpeedLimiterMin..1. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
-	float GetSpeedLimiter() const { return SpeedLimiterFraction; }
+	float GetSpeedLimiter() const { return Systems->GetSpeedLimiter(); }
 
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|IFCS")
 	void SetSpeedLimiter(float Fraction);
@@ -348,43 +338,43 @@ public:
 	void GetThrusterCapacity(FVector& OutPositive, FVector& OutNegative) const { OutPositive = ThrusterCapPositive; OutNegative = ThrusterCapNegative; }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
-	bool IsBoosting() const { return bBoostActive; }
+	bool IsBoosting() const { return Systems->IsBoostActive(); }
 
 	/** Boost energy, 0..1. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
-	float GetBoostEnergy() const { return BoostEnergy; }
+	float GetBoostEnergy() const { return Systems->GetBoostEnergy(); }
 
 	/** Boost ran dry and waits for BoostUnlockFraction of energy. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
-	bool IsBoostLocked() const { return bBoostLocked; }
+	bool IsBoostLocked() const { return Systems->IsBoostLocked(); }
 
 	/** G-Safe actually limiting right now: switched on (K) and not suspended by boost. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
-	bool IsGSafeActive() const { return bGSafe && !bBoostActive; }
+	bool IsGSafeActive() const { return bGSafe && !Systems->IsBoostActive(); }
 
 	/** Afterburner burning this frame (Tab held, W forward, SCM, fuel left). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
-	bool IsAfterburnerActive() const { return bAfterburnerActive; }
+	bool IsAfterburnerActive() const { return Systems->IsAfterburnerActive(); }
 
 	/** Afterburner fuel, 0..1. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
-	float GetAfterburnerFuel() const { return AfterburnerFuel; }
+	float GetAfterburnerFuel() const { return Systems->GetAfterburnerFuel(); }
 
 	/** The afterburner ran dry and waits for AfterburnerUnlockFraction of fuel. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
-	bool IsAfterburnerLocked() const { return bAfterburnerLocked; }
+	bool IsAfterburnerLocked() const { return Systems->IsAfterburnerLocked(); }
 
 	/** How much of the afterburner's raised speed limit is in force, 0..1 (spools in, fades out). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
-	float GetAfterburnerBlend() const { return AfterburnerBlend; }
+	float GetAfterburnerBlend() const { return Systems->GetAfterburnerBlend(); }
 
 	/** Afterburner held (Tab). Tests call it directly; the key does the same. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Afterburner")
-	void SetAfterburnerHeld(bool bHeld) { bAfterburnerHeld = bHeld; }
+	void SetAfterburnerHeld(bool bHeld) { Systems->SetAfterburnerHeld(bHeld); }
 
 	/** Boost held (Shift). For tests and the screenshot runner; the key does the same. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Boost")
-	void SetBoostHeld(bool bHeld) { bBoostHeld = bHeld; }
+	void SetBoostHeld(bool bHeld) { Systems->SetBoostHeld(bHeld); }
 
 	/** Tests and screenshots: put the ship at this velocity (world cm/s) without flying there. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
@@ -432,7 +422,7 @@ public:
 
 	/** Tests and screenshots: finish a master mode switch at once instead of waiting it out. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
-	void DebugFinishMasterModeSwitch() { if (bMasterModeSwitching) { MasterMode = PendingMasterMode; bMasterModeSwitching = false; MasterModeTimer = 0.f; } }
+	void DebugFinishMasterModeSwitch() { Systems->FinishMasterModeSwitch(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
 	EQuantumState GetQuantumState() const { return QuantumState; }
@@ -726,7 +716,7 @@ public:
 
 	/** Precision mode in effect: switched on and in SCM (NAV is for travel and ignores it). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Precision")
-	bool IsPrecisionActive() const { return bPrecisionMode && MasterMode == EMasterMode::SCM; }
+	bool IsPrecisionActive() const { return bPrecisionMode && Systems->GetMasterMode() == EMasterMode::SCM; }
 
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Precision")
 	void SetPrecisionMode(bool bOn);
@@ -752,7 +742,7 @@ public:
 
 	/** Switched on and in SCM: NAV is for travel and turns VTOL off. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|VTOL")
-	bool IsVtolActive() const { return Systems->IsVtolOn() && MasterMode == EMasterMode::SCM; }
+	bool IsVtolActive() const { return Systems->IsVtolOn() && Systems->GetMasterMode() == EMasterMode::SCM; }
 
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|VTOL")
 	void SetVtol(bool bOn);
@@ -970,7 +960,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UAudioComponent> EngineAudio;
 
-	/** Systems state (VTOL so far; master mode, limiter, boost and afterburner follow). Tuning stays here. */
+	/** Systems state: master mode, speed limiter, boost, afterburner and VTOL. Their tuning stays here. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UShipSystemsComponent> Systems;
 
@@ -2099,19 +2089,6 @@ private:
 	float EngineBoostBlend = 0.f;
 	float HumBlend = 0.f;
 
-	bool bBoostHeld = false;
-	bool bBoostActive = false;
-	bool bBoostLocked = false;
-	float BoostEnergy = 1.f;
-	float BoostRechargeWait = 0.f;
-
-	bool bAfterburnerHeld = false;
-	bool bAfterburnerActive = false;
-	bool bAfterburnerLocked = false;
-	float AfterburnerFuel = 1.f;
-	float AfterburnerRefillWait = 0.f;
-	float AfterburnerBlend = 0.f;
-
 	float EngineDemand = 0.f;
 
 	/** See GetThrusterAcceleration / GetThrusterCapacity. */
@@ -2120,11 +2097,6 @@ private:
 	FVector ThrusterCapNegative = FVector::ZeroVector;
 
 	bool bSpaceBrakeHeld = false;
-	EMasterMode MasterMode = EMasterMode::SCM;
-	EMasterMode PendingMasterMode = EMasterMode::SCM;
-	bool bMasterModeSwitching = false;
-	float MasterModeTimer = 0.f;
-	float SpeedLimiterFraction = 1.f;
 	float GForce = 0.f;
 	float SlipAngleDeg = 0.f;
 
