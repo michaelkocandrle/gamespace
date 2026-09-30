@@ -3,8 +3,8 @@
 ## Hierarchie autority (při rozporu platí vyšší)
 
 1. **`CLAUDE.md`** – pravidla spolupráce a brány workflow (tento soubor).
-2. **`Docs/CURRENT.md`** – aktuální stav, rozhodnutí autora, známé problémy, další kroky (hook SessionStart ho
-   vloží do každé nové session).
+2. **`Docs/CURRENT.md`** – aktuální stav, rozhodnutí autora, známé problémy, další kroky; nejvýš 80 řádků (hook
+   SessionStart ho vloží do každé nové session).
 3. **Skilly** (`.claude/skills/`) – postupy, příkazy a nástrahy podle domény.
 4. **`Docs/WORKFLOW.md`** – podrobný postup a úplný seznam nástrah (kap. 9).
 5. **`Docs/ARCHITECTURE.md`** – stabilní architektonická rozhodnutí.
@@ -51,7 +51,8 @@ až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
 7. **Iterace vzhledu vs. předání** (autor 24. 9. 2026): při ladění vzhledu se po každé změně nebalí a nepouští
    celá sada testů (Blender Eevee náhled nebo `-Editor`, jen dotčené testy). Před předáním jednou celá sada
    testů (`.\Tools\Test.ps1 -All`), balení a finální snímky. Změny C++ a herní logiky plným postupem.
-8. **Dokumentace:** stav do `Docs/CURRENT.md` (hotové, známé problémy, další kroky); nová nástraha do
+8. **Dokumentace:** stav do `Docs/CURRENT.md` (hotové, známé problémy, další kroky; **strop 80 řádků**, co se
+   nevejde, patří do recenze, skillu nebo archivu; autor 30. 9. 2026); nová nástraha do
    `Docs/WORKFLOW.md` kap. 9; trvalé know-how do příslušného skillu; architektonické rozhodnutí do
    `Docs/ARCHITECTURE.md`. Historie patří do commitu a recenze, ne do skillu.
 9. **Commit a push.**
@@ -60,11 +61,18 @@ až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
     posoudit jen autor; rizika; u vizuální práce verdikt a skóre posledního kola kritika, počet kol, výtky
     s reakcí a odkaz na recenzi; zhruba čas práce vs. čas testů, balení a snímků.
 
-## Paralelní práce (druhá session)
+## Paralelní práce a zámek (autor 30. 9. 2026)
 
-- Druhá session pracuje v **samostatném git worktree** na vlastní větvi, ne v hlavním checkoutu.
-- Bez Unreal editoru, balení hry, Blenderu a snímků. Co potřebuje těžký zdroj, zapíše a nechá hlavní session.
-- Každý krok commitne zvlášť. Slučování do `main` a push dělá **hlavní session**.
+- Druhá session pracuje v **samostatném git worktree** na vlastní větvi, ne v hlavním checkoutu, a každý krok
+  commitne zvlášť. **Slučuje jen hlavní session** (sloučení do `main` a push).
+- **Těžké zdroje** (Unreal editor, UE testy, balení, Blender, snímky) smí v jednu chvíli používat jen jedna
+  session. Hlídá je zámek `C:\gamespace-locks\heavy.lock` mimo repozitář: soubor se jménem session, úkolem a časem.
+  - Před použitím zámek vytvoř, po skončení ho smaž: `.\Tools\HeavyLock.ps1 take -Task "<úkol>"`, pak
+    `.\Tools\HeavyLock.ps1 release` (`status` ukáže, kdo ho drží). Skript vytvoří soubor atomicky.
+  - Když je obsazený, nečekej na něj: dělej práci bez těžkých zdrojů (kód, dokumentace, návrhy, offline testy)
+    a zkus to později.
+  - Zámek starší než **2 hodiny** je opuštěný; `take` ho převezme a vypíše, čí byl. Delší práci obnov dalším
+    `take` (stejná session jen přepíše úkol a čas).
 
 ## Příkazy (PowerShell; bash rozbije `$PSScriptRoot`)
 
@@ -75,6 +83,7 @@ až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
 .\Tools\Shots.ps1 -Preset <preset> -Editor -Width 1920 -Height 1080   # snímky během kroku (~2 min)
 .\Tools\Package.ps1                                 # balení na konci kroku (~5 min)
 .\Tools\Shots.ps1 -Preset <preset> -Package -Width 1920 -Height 1080
+.\Tools\HeavyLock.ps1 take -Task "<úkol>"           # zámek těžkých zdrojů; po práci release, stav status
 ```
 
 Presety jsou v `Tools/Shots/*.json`; snímky v `Saved/Shots/...`, s `-Keep` i v `Docs/Shots/`.
