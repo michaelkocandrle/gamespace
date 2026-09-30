@@ -33,6 +33,8 @@ rozhodnutí = úprava tohoto souboru ve stejném commitu, s datem a důvodem.
   scénář při 30 a 120 FPS dá jiné přistání nebo kolizi). Hra je zatím pro jednoho hráče, proto ne teď.
 - **Rozdělení `ASpaceshipPawn`** (~6 000 řádků): postupná extrakce komponent po jedné, každá se zelenými testy,
   žádný rewrite. Plán a pořadí: `Docs/Reviews/2026-09-30_spaceshippawn_split_plan.md` (čeká na schválení).
+  Pravidla: tuning UPROPERTY zůstávají na pawnu (override v BP a klíče setupu), stav jde do komponent, API pro
+  Python a jiné třídy zůstává na pawnu jako přeposílač, pořadí Ticku řídí pawn, komponenty bez vlastního ticku.
 - **Testovací API na pawnu** (`Debug*` UFUNCTION) je záměr: testy řídí let bez vstupu. Při rozdělení se přesune
   do vlastní komponenty, testy o pohodlí nepřijdou.
 

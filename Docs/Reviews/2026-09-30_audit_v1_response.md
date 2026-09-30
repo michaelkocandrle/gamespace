@@ -16,6 +16,14 @@ jsou v `Docs/ARCHITECTURE.md`.
 | P0: test `test_setup_file_overrides_manifest_in_order` padá na Linuxu | Platí. Test předával `C:/art/...`, na Linuxu relativní cestu, a `setup_path` volá `os.path.abspath`. Test teď staví absolutní cestu pro OS, na kterém běží (`os.path.abspath(os.sep)`). Ověřeno na Windows a v simulaci modelu cest POSIX (stará podoba dala `<cwd>/C:/art/...`). | hotovo |
 | P0/P1: pevná cesta k UE 5.8 | Platí. `Tools/UERoot.ps1` je jediné místo: `$env:GAMESPACE_UE_ROOT`, jinak `C:\Program Files\Epic Games\UE_5.8`. Berou ji `Package.ps1`, `Play.ps1`, `Shots.ps1`, `run_editor_python.ps1`, nový `Build.ps1` i `install_mannequin_pack.py` (čte řádek `$default`). | hotovo |
 | P0: jeden příkaz na testy | `Tools/Test.ps1`: offline (compileall + 5 testů bez UE a Blenderu) s jednotným souhrnem, `-Blender`, `-UE`, `-All`, `-Filter`. Při tom nalezeno: `run_editor_python.ps1` hlásil `RESULT: OK` i po `SUMMARY FAILED` (testy logují verdikt přes `unreal.log`) a `test_decal_orientation.py` vracel vždy exit 0. Obojí opraveno. | hotovo |
+| P1: `ASpaceshipPawn` ~6 240 řádků | Přijato postupně, žádný rewrite. Plán s pořadím, riziky a testy: `2026-09-30_spaceshippawn_split_plan.md` (čeká na schválení autorem; doporučený start `FShipFlightModel`, pak VTOL). | návrh |
+| P1: `TActorIterator` v runtime cestách | `USpaceCelestialRegistrySubsystem` pro tělesa (FindNearest, quantum, radar); radar prochází jen pawny a static meshe; obecný registr lodí a cílů navržen (`2026-09-30_registry_design.md`), nezaveden. | hotovo (UE testy čekají na hlavní session) |
+| P1: frame-driven let | Odloženo, zapsáno v `ARCHITECTURE.md` (hra pro jednoho hráče). | odloženo |
+| P1: debug API v pawnu | Součást plánu rozdělení (`UShipDebugComponent`, pawn přeposílá jména pro testy). | návrh |
+| P2: AlwaysCook a pevné cesty assetů | Odloženo do růstu knihovny assetů (`ARCHITECTURE.md` kap. 4). | odloženo |
+| P2: dokumentace | `CURRENT.md`, `ARCHITECTURE.md`, hierarchie, HANDOFF archiv (viz níže). | hotovo |
+| P2: CI | GitHub Actions jen pro offline testy a compileall (`.github/workflows/offline-tests.yml`). | krok 6 |
+| 4.9 `SpaceUserSettings` (`const_cast`) | Zapsáno; opravit při nejbližší změně nastavení. | odloženo |
 
 Vedlejší nález: `compileall` hlásí `SyntaxWarning: invalid escape sequence '\T'` v docstringách šesti
 skriptů v `Tools/Assets` (`.\Tools\run_editor_python.ps1 ...` v obyčejném `"""`). Dnes jen varování;
