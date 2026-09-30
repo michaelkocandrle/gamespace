@@ -93,6 +93,34 @@ Co kolo 3 ukázalo navíc (bez checklistu radil kritik proti pravidlům autora):
 Úprava: obojí je teď výslovně v checklistech `interior` a `cockpit` (skill `visual-review`), které ostré recenze
 dostávají. Zadání kritika kvůli tomu neměním: jde o pravidla projektu, ne o oko kritika.
 
+## Kontrola vaty na přijaté verzi (30. 9. 2026 večer)
+
+Kolo 3 mělo jen odmítnuté verze, takže neukázalo, jestli kritik u dobrého výsledku nedoplňuje drobnosti. Doplněna
+**přijatá verze A1: kajuta Wayfareru** (obložení trupu, varianta B; autor ji přijal a pokračoval nábytkem). Listy
+kola 3 z `2026-09-30_cabin_liner/`, brief toho kola (styl „udržovaná pracovní loď“, nábytek a podlaha dočasné) plus
+dnešní práh „dílčí krok“ a checklist `interior`; dnešní zadání kritika s prahy. Výstup
+`calibration/calib_a1_cabin_accepted/critic_round1.md`.
+
+| | Tehdy (zadání „nejméně 5“, bez prahu) | Teď |
+|---|---|---|
+| Verdikt | FAIL | **PASS** (průměr 6,6, nejnižší 6, žádné „musí“) |
+| Nálezů | 10 (3 musí, 7 dopor.) | 7 (0 musí, 7 dopor.) |
+
+Rozbor sedmi nálezů:
+- **Věcné a potvrzené recenzí nebo autorem (5):** plochá čela přepážek, strop bez hloubky a svítidla bez pouzder,
+  přepálené svítidlo nad průchodem (otevřený bod „svítidlo A“), jednolité materiály (otevřený bod „povrchová odezva
+  materiálů“), zábradlí schodů (otevřený bod „patky zábradlí“; chrom je nový postřeh).
+- **Špatné čtení (1):** „žebřík vedle průchodu“ je svod kabelů do rozvodné skříňky; stejně ho kritik četl v kole 2
+  recenze. Není to vata, ale výtka, která se ověřuje výřezem.
+- **Mimo rozsah briefu (1):** šedé prázdno za sklem kokpitu (kritik sám píše „mimo kajutu“); viditelné, ale
+  nepatří k hodnocené místnosti.
+- **Vata: žádná.** Žádný bod si nevymýšlí drobnost; dočasný nábytek a podlahu podle briefu nehodnotil, víc špíny
+  nechtěl.
+
+**Závěr:** u přijaté verze kritik nehledá vatu. Seznam je kratší, bez „musí se opravit“, a verdikt souhlasí
+s autorem. Obě strany kalibrace tedy drží: u odmítnutých verzí najde podstatné výtky (kolo 3), u přijaté
+nevymýšlí.
+
 ## Průběžné doplňky
 Když autor po předání vytkne něco, co kritik přehlédl, zapíše se to sem (datum, co, jak se upravilo
 zadání nebo checklist).
