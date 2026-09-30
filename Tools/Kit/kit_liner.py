@@ -106,11 +106,11 @@ class Liner(Wall):
         p.box("Kit_Structure", (xt - 0.125, 0, zt - 0.02), (xt - 0.02, L, zt), panel=False)
         p.box("Kit_Primary", (xt - 0.14, 0, zt), (xt - 0.125, L, self.ceiling), secondary=True)
         # the cove's strips dimmed (the cabin's critic: "the cove as strong as the fixtures - no hierarchy")
-        p.box("Kit_GlowDim", (xt - 0.08, G + 0.01, zt), (xt - 0.055, L - G - 0.01, zt + 0.006), panel=False)
+        p.box("Kit_GlowDim", (xt - 0.08, G + 0.01, zt), (xt - 0.055, L - G - 0.01, zt + 0.006), panel=False, bezel_face=1)
         for (a0, a1) in ((xt - 0.092, xt - 0.08), (xt - 0.055, xt - 0.043)):
             p.box("Kit_Structure", (a0, G, zt), (a1, L - G, zt + 0.018), panel=False)
         p.box("Kit_Structure", (xt - 0.034, G, zt - 0.066), (xt + 0.008, L - G, zt - 0.045), bevel=BEV_SMALL, segments=1, panel=False)
-        p.box("Kit_GlowDim", (xt - 0.022, G + 0.012, zt - 0.0675), (xt - 0.004, L - G - 0.012, zt - 0.064), panel=False)
+        p.box("Kit_GlowDim", (xt - 0.022, G + 0.012, zt - 0.0675), (xt - 0.004, L - G - 0.012, zt - 0.064), panel=False, bezel_face=-1)
         for (c0, c1) in ((0.0, 0.03), (L - 0.03, L)):
             p.box("Kit_Structure", (xt - 0.042, c0, zt - 0.078), (xt + 0.014, c1, zt + 0.036), bevel=0.004, segments=1, panel=False)
         # the up-light: secondary to the ceiling's fixtures (critic of the hold: "1-2 EV under them"); 8 cm under the
@@ -130,10 +130,11 @@ class Liner(Wall):
         p.socket("Snap_End", (0, L, 0), x=(0, 1, 0), z=(0, 0, 1))
 
     def bolts(self, m, u0, u1, v0, v1, proud=0.0):
-        """Four bolt heads in a plate's border, 2.2 cm in from its corners."""
+        """Four hex bolt heads in a plate's border, 2.2 cm in from its corners (six sides, not eight: the triangle budget,
+        30. 9. 2026)."""
         for u in (u0 + 0.022, u1 - 0.022):
             for v in (v0 + 0.022, v1 - 0.022):
-                self.p.tube("Kit_Structure", self.world(m, u, v, proud - 0.001), self.world(m, u, v, proud + 0.005), 0.008, 8)
+                self.p.tube("Kit_Structure", self.world(m, u, v, proud - 0.001), self.world(m, u, v, proud + 0.005), 0.008, 6)
 
     # half a flange per module end, standing 8 cm off; half a web 2 cm wide from the backing out: it overlaps the panels'
     # ends as the W walls' frames do (a 6 mm web left the upper plate hanging in the air - geometry check)
@@ -158,10 +159,11 @@ class Liner(Wall):
             p.slab("Kit_Structure", self.SLOPE, fa, fb, 0.0, self.slope_len, 0.012, BEV_SMALL, segments=1, proud=fo, panel=False)
             # lightening holes: dark discs on both faces of the web, above the rail
             for zc in (1.5,):
+                # 12 sides (16 before 30. 9. 2026): a 5 cm disc stays round to under a pixel at arm's length
                 c = Vector((0.04, y0 + s * wb / 2, zc))
-                p.tube("Kit_Seal", c - Vector((0, 0.0045, 0)), c + Vector((0, 0.0045, 0)), 0.022, 16)
-                p.tube("Kit_Structure", c - Vector((0, 0.005, 0)), c - Vector((0, 0.0045, 0)), 0.028, 16)
-                p.tube("Kit_Structure", c + Vector((0, 0.0045, 0)), c + Vector((0, 0.005, 0)), 0.028, 16)
+                p.tube("Kit_Seal", c - Vector((0, 0.0045, 0)), c + Vector((0, 0.0045, 0)), 0.022, 12)
+                p.tube("Kit_Structure", c - Vector((0, 0.005, 0)), c - Vector((0, 0.0045, 0)), 0.028, 12)
+                p.tube("Kit_Structure", c + Vector((0, 0.0045, 0)), c + Vector((0, 0.005, 0)), 0.028, 12)
             # bolts along the flange every 0.3 m
             yb_ = y0 + s * 0.022
             for zb in [0.25 + 0.3 * k for k in range(int((z_knee - 0.3) / 0.3) + 1)]:
@@ -174,11 +176,12 @@ class Liner(Wall):
         chamfer, a rim at its lower edge, three black cables and a cream one in it."""
         p, L = self.p, self.L
         v0 = self.slope_len - 0.2
+        # the 3 mm bevels in one segment, 2 m up the chamfer (the triangle budget, 30. 9. 2026)
         for u in self._stations(0.6):
-            p.slab("Kit_Structure", self.SLOPE, u - 0.02, u + 0.02, v0 - 0.02, v0 + 0.07, 0.034, BEV_SMALL, proud=0.034, panel=False)
-        p.slab("Kit_Structure", self.SLOPE, 0, L, v0 - 0.02, v0 + 0.07, 0.006, BEV_SMALL, proud=0.04, panel=False)
+            p.slab("Kit_Structure", self.SLOPE, u - 0.02, u + 0.02, v0 - 0.02, v0 + 0.07, 0.034, BEV_SMALL, segments=1, proud=0.034, panel=False)
+        p.slab("Kit_Structure", self.SLOPE, 0, L, v0 - 0.02, v0 + 0.07, 0.006, BEV_SMALL, segments=1, proud=0.04, panel=False)
         # the lip 6 cm off the chamfer, under the cables' tops (at 10.5 cm it hid them: "an empty dark strip")
-        p.slab("Kit_Structure", self.SLOPE, 0, L, v0 - 0.02, v0, 0.02, BEV_SMALL, proud=0.06, panel=False)
+        p.slab("Kit_Structure", self.SLOPE, 0, L, v0 - 0.02, v0, 0.02, BEV_SMALL, segments=1, proud=0.06, panel=False)
         # cables that read in the tray (critic: "an empty black groove"): a cream and an orange one among the black
         for (vv, zz, rr, role) in ((v0 + 0.012, 0.051, 0.011, "Kit_Rubber"), (v0 + 0.036, 0.052, 0.012, "Kit_Accent"),
                                    (v0 + 0.059, 0.051, 0.011, "Kit_Rubber"), (v0 + 0.024, 0.067, 0.009, "Kit_Signal")):
@@ -293,9 +296,10 @@ def liner_plain(w, var, rng):
         # an L-track: a flanged rail on stand-offs with round holes every 2.5 cm along its lip (critic: "a flat strip,
         # not a rail"), two anchors with D rings, a cargo strap hanging from one; hazard marks only at the anchors
         zr = 0.35
-        w.p.slab("Kit_Structure", w.VERT, 0.03, L - 0.03, zr - 0.04, zr + 0.04, 0.012, BEV_SMALL, proud=0.05, panel=False)
-        w.p.slab("Kit_Structure", w.VERT, 0.03, L - 0.03, zr + 0.012, zr + 0.04, 0.03, BEV_SMALL, proud=0.08, panel=False)
-        w.p.slab("Kit_Structure", w.VERT, 0.03, L - 0.03, zr - 0.04, zr - 0.012, 0.03, BEV_SMALL, proud=0.08, panel=False)
+        # the rail's 3 mm bevels in one segment (the 0.6 m module's triangle budget, 30. 9. 2026)
+        w.p.slab("Kit_Structure", w.VERT, 0.03, L - 0.03, zr - 0.04, zr + 0.04, 0.012, BEV_SMALL, segments=1, proud=0.05, panel=False)
+        w.p.slab("Kit_Structure", w.VERT, 0.03, L - 0.03, zr + 0.012, zr + 0.04, 0.03, BEV_SMALL, segments=1, proud=0.08, panel=False)
+        w.p.slab("Kit_Structure", w.VERT, 0.03, L - 0.03, zr - 0.04, zr - 0.012, 0.03, BEV_SMALL, segments=1, proud=0.08, panel=False)
         n = int((L - 0.08) / 0.025)
         anchors = (L * 0.25, L * 0.7)
         for k in range(n):

@@ -6489,7 +6489,7 @@
     120.0,
     234.0
    ],
-   "tris": 4248,
+   "tris": 3672,
    "tris_decals": 96,
    "tri_budget": 6600,
    "materials": [
@@ -6575,7 +6575,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 4824,
+    "edge": 4344,
     "secondary": 240,
     "floor": 776,
     "seam": 0
@@ -6604,7 +6604,7 @@
     120.0,
     234.0
    ],
-   "tris": 4740,
+   "tris": 4164,
    "tris_decals": 98,
    "tri_budget": 6600,
    "materials": [
@@ -6694,7 +6694,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 5280,
+    "edge": 4800,
     "secondary": 456,
     "floor": 776,
     "seam": 0
@@ -6723,7 +6723,7 @@
     120.0,
     234.0
    ],
-   "tris": 6084,
+   "tris": 5316,
    "tris_decals": 102,
    "tri_budget": 6600,
    "materials": [
@@ -6813,9 +6813,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 5904,
+    "edge": 5064,
     "secondary": 240,
-    "floor": 2912,
+    "floor": 2648,
     "seam": 0
    },
    "status": "built",
@@ -6842,7 +6842,7 @@
     60.0,
     234.0
    ],
-   "tris": 3848,
+   "tris": 3368,
    "tris_decals": 48,
    "tri_budget": 4200,
    "materials": [
@@ -6928,7 +6928,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 4312,
+    "edge": 3952,
     "secondary": 240,
     "floor": 776,
     "seam": 0
@@ -6957,7 +6957,7 @@
     60.0,
     234.0
    ],
-   "tris": 4772,
+   "tris": 4100,
    "tris_decals": 50,
    "tri_budget": 4200,
    "materials": [
@@ -7044,9 +7044,9 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 5056,
+    "edge": 4336,
     "secondary": 240,
-    "floor": 2128,
+    "floor": 1864,
     "seam": 0
    },
    "status": "built",
@@ -7073,7 +7073,7 @@
     364.0,
     28.0
    ],
-   "tris": 4308,
+   "tris": 3348,
    "tris_decals": 0,
    "tri_budget": 4200,
    "materials": [
@@ -7182,7 +7182,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 4352,
+    "edge": 3392,
     "secondary": 2304,
     "floor": 0,
     "seam": 0
@@ -7211,7 +7211,7 @@
     364.0,
     26.7
    ],
-   "tris": 3196,
+   "tris": 2684,
    "tris_decals": 0,
    "tri_budget": 4200,
    "materials": [
@@ -7289,7 +7289,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 3248,
+    "edge": 2768,
     "secondary": 2304,
     "floor": 0,
     "seam": 0
@@ -7318,7 +7318,7 @@
     364.0,
     28.0
    ],
-   "tris": 3200,
+   "tris": 2544,
    "tris_decals": 0,
    "tri_budget": 2100,
    "materials": [
@@ -7427,7 +7427,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 3248,
+    "edge": 2768,
     "secondary": 2304,
     "floor": 0,
     "seam": 0
@@ -7571,7 +7571,7 @@
     364.0,
     28.6
    ],
-   "tris": 2824,
+   "tris": 2360,
    "tris_decals": 0,
    "tri_budget": 2100,
    "materials": [
@@ -7606,7 +7606,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 3104,
+    "edge": 2624,
     "secondary": 2304,
     "floor": 0,
     "seam": 0
@@ -7838,7 +7838,7 @@
     334.0,
     28.0
    ],
-   "tris": 4308,
+   "tris": 3348,
    "tris_decals": 0,
    "tri_budget": 4200,
    "materials": [
@@ -7947,7 +7947,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 4352,
+    "edge": 3392,
     "secondary": 2304,
     "floor": 0,
     "seam": 0
@@ -7976,7 +7976,7 @@
     334.0,
     26.7
    ],
-   "tris": 3196,
+   "tris": 2684,
    "tris_decals": 0,
    "tri_budget": 4200,
    "materials": [
@@ -8054,7 +8054,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 3248,
+    "edge": 2768,
     "secondary": 2304,
     "floor": 0,
     "seam": 0
@@ -8083,7 +8083,7 @@
     60.0,
     230.0
    ],
-   "tris": 3604,
+   "tris": 3124,
    "tris_decals": 42,
    "tri_budget": 4200,
    "materials": [
@@ -8166,7 +8166,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 3976,
+    "edge": 3616,
     "secondary": 240,
     "floor": 624,
     "seam": 0
@@ -8195,7 +8195,7 @@
     120.0,
     234.0
    ],
-   "tris": 5088,
+   "tris": 4512,
    "tris_decals": 90,
    "tri_budget": 6600,
    "materials": [
@@ -8279,7 +8279,7 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 5808,
+    "edge": 5328,
     "secondary": 240,
     "floor": 776,
     "seam": 0
@@ -8308,7 +8308,7 @@
     120.0,
     234.0
    ],
-   "tris": 4856,
+   "tris": 4280,
    "tris_decals": 94,
    "tri_budget": 6600,
    "materials": [
@@ -8396,7 +8396,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 5544,
+    "edge": 5064,
     "secondary": 240,
     "floor": 776,
     "seam": 0

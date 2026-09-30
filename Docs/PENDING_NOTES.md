@@ -29,6 +29,21 @@ zmizí.
   snímky nepatrně posune a s ní i `camera_local`. Řešení: porovnávat očima nebo po výřezech, ne průměrným
   rozdílem pixelů.
 
+- **Malý díl kitu stojí nečekaně mnoho trojúhelníků** (30. 9. 2026). Příčiny:
+  - 4×4 cm difuzor `Kit_Glow*` stojí 108 trojúhelníků, protože `_bezel` dává tmavý rámeček na obě velké
+    strany (8 boxů);
+  - box s bevelem a 2 segmenty stojí 108 trojúhelníků, s 1 segmentem 44;
+  - zaslepené konce trubek a kabelů, které pokračují do dalšího modulu.
+
+  Řešení:
+  - `bezel_face=-1/1` u difuzoru, jehož druhá strana leží na dílu;
+  - `segments=1` u bevelů ≤ 3 mm (z očí jsou to ~2 px);
+  - `caps=False` u průběžných vedení;
+  - šrouby jako šestihran.
+
+  Rozpad trojúhelníků po voláních: obalit `kit_geo.Part.box/slab/tube` a účtovat přírůstek volajícímu
+  (pozor, `slab` volá `box`, takže vnořené řádky se počítají dvakrát).
+
 ## Nástroje
 
 - `space.Kit <Parametr> <hodnota> <část jména>` s filtrem jména mění i materiály dílů lodí, tedy kit místností,

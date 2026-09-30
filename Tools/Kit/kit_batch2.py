@@ -125,10 +125,10 @@ def frame_hole(p, role, m, u0, u1, v0, v1, hole, thick=PT, bevel=BEV_MID, second
         p.slab(role, m, max(u0, hu0), min(u1, hu1), hv1, v1, thick, bevel, secondary=secondary, proud=proud)
 
 
-def frame_ring(p, m, hole, t=0.025, proud=0.012, role="Kit_Structure"):
+def frame_ring(p, m, hole, t=0.025, proud=0.012, role="Kit_Structure", segments=2):
     hu0, hu1, hv0, hv1 = hole
     for (a0, a1, b0, b1) in ((hu0 - t, hu0, hv0 - t, hv1 + t), (hu1, hu1 + t, hv0 - t, hv1 + t), (hu0, hu1, hv0 - t, hv0), (hu0, hu1, hv1, hv1 + t)):
-        p.slab(role, m, a0, a1, b0, b1, 0.03, BEV_SMALL, proud=proud, panel=False)
+        p.slab(role, m, a0, a1, b0, b1, 0.03, BEV_SMALL, segments=segments, proud=proud, panel=False)
 
 
 def gasket(p, m, hole, t=0.006):
@@ -305,7 +305,7 @@ def halo(p, at):
 def ceiling_hatch(p, M, r, C):
     """A service hatch in a wide ceiling, to the services over it: a frame, the door 1 cm down, two quarter-turn
     latches with orange levers (the cabin's critic, round 2: "add a service hatch with latches")."""
-    frame_ring(p, M, r, t=0.02, proud=0.016)
+    frame_ring(p, M, r, t=0.02, proud=0.016, segments=1)
     p.slab("Kit_Primary", M, r[0], r[1], r[2], r[3], 0.014, BEV_SMALL, proud=0.01, panel=False)
     um = (r[0] + r[1]) / 2
     for v in (r[2] + 0.05, r[3] - 0.05):
@@ -323,7 +323,8 @@ def scallop(p, k, at, sgn):
     d = (0.0, sgn * 0.454, -0.891)
     p.box("Kit_Structure", (x - 0.05, y - 0.05, C - 0.032), (x + 0.05, y + 0.05, C + 0.002), bevel=0.004, segments=1, panel=False)
     p.box("Kit_Seal", (x - 0.036, y - 0.036, C - 0.034), (x + 0.036, y + 0.036, C - 0.031), panel=False)
-    p.box("Kit_GlowWarm", (x - 0.02, y - 0.02 + sgn * 0.008, C - 0.036), (x + 0.02, y + 0.02 + sgn * 0.008, C - 0.033), panel=False)
+    p.box("Kit_GlowWarm", (x - 0.02, y - 0.02 + sgn * 0.008, C - 0.036), (x + 0.02, y + 0.02 + sgn * 0.008, C - 0.033), panel=False,
+          bezel_face=-1)
     p.socket("Light_Scallop_%d" % k, (x, y + sgn * 0.01, C - 0.045), x=d, z=(1, 0, 0), type="spot", role="work", cd=55.0,
              cone_deg=40.0, radius_m=2.8, source_radius_cm=3.0, dir_ue=[0.0, -d[1], d[2]])
 
@@ -391,13 +392,15 @@ def ceiling_panel(sec, var, L, name, seed):
         if sec.key.startswith("L"):
             # the lens 3 cm up the well, no louvre (critic of the cabin: "dark from close by, reads as a vent"), a bright
             # core in a dim ring - a diffuser, not a white square (round 2)
-            p.box("Kit_GlowDim", (c[0] - 0.08, -0.08, C + 0.031), (c[0] + 0.08, 0.08, C + 0.036), panel=False)
-            p.box("Kit_GlowWarm", (c[0] - 0.045, -0.045, C + 0.028), (c[0] + 0.045, 0.045, C + 0.031), panel=False)
+            p.box("Kit_GlowDim", (c[0] - 0.08, -0.08, C + 0.031), (c[0] + 0.08, 0.08, C + 0.036), panel=False, bezel_face=-1)
+            p.box("Kit_GlowWarm", (c[0] - 0.045, -0.045, C + 0.028), (c[0] + 0.045, 0.045, C + 0.031), panel=False, bezel_face=-1)
         else:
             p.box("Kit_GlowWarm", (c[0] - 0.08, -0.08, C + 0.052), (c[0] + 0.08, 0.08, C + 0.058), panel=False)
             for v in (-0.04, 0.04):
                 p.box("Kit_Structure", (c[0] - 0.11, v - 0.004, C + 0.012), (c[0] + 0.11, v + 0.004, C + 0.05), panel=False)
-        frame_ring(p, M, hole, t=0.03, proud=0.016)
+        # the trim's 3 mm bevel in one segment in a wide room's ceiling (30. 9. 2026: the ceiling's triangle budget; a
+        # 3 mm round is two pixels from the floor)
+        frame_ring(p, M, hole, t=0.03, proud=0.016, segments=1 if wide else 2)
         # a hull liner's wide room (29. 9. 2026, critic: flat light, no pools on the floor): a tight, strong cone,
         # shadowed - a pool under every fixture, darker floor between them
         # (round 2: "no cones on the floor" at 160 cd / 60 deg with the cove at full strength - 260 / 50, the cove down)
@@ -420,7 +423,7 @@ def ceiling_panel(sec, var, L, name, seed):
             p.slab("Kit_Structure", M, u - 0.004, u + 0.004, hole[2] + 0.008, hole[3] - 0.008, 0.036, proud=-0.006, panel=False)
         for v in (-0.25 * (hole[3] - hole[2]), 0.25 * (hole[3] - hole[2])):
             p.slab("Kit_Structure", M, hole[0] + 0.01, hole[1] - 0.01, v - 0.004, v + 0.004, 0.012, proud=-0.03, panel=False)
-        frame_ring(p, M, hole, t=0.028, proud=0.014)
+        frame_ring(p, M, hole, t=0.028, proud=0.014, segments=1 if wide else 2)
         gasket(p, M, hole)
     elif var == "C":
         # a recessed linear fixture: the channel 4 cm up, a diffuser in it, a trim frame round the slot
@@ -435,7 +438,7 @@ def ceiling_panel(sec, var, L, name, seed):
         for k in range(1, n_l):
             u = u0 + 0.01 + k * (u1 - u0 - 0.02) / n_l
             p.slab("Kit_Structure", M, u - 0.003, u + 0.003, -0.045, 0.045, 0.026, proud=-0.002, panel=False)
-        frame_ring(p, M, hole, t=0.02, proud=0.014)
+        frame_ring(p, M, hole, t=0.02, proud=0.014, segments=1 if wide else 2)
         strip_light_along(p, "Light_Linear_0", (L / 2, 0.0, C - 0.02), (0, 0, -1), (1, 0, 0), u1 - u0 - 0.04, 0.05, "work",
                           (24.0 if wide else 32.0) * L, 3.6)
         if sec.key.startswith("L"):
@@ -458,7 +461,8 @@ def services(p, L, C):
     or pipes - the layer the reference is built of"): an open ladder tray with bundles (black, a cream and an orange
     one) to one side of the fixtures, a supply pipe pair with clamps to the other, both on strut channels hung on
     threaded rods every 0.6 m - the stations line up across modules, the run is continuous. 17 cm under the 2.3 m
-    ceiling: 2.13 m clear."""
+    ceiling: 2.13 m clear. The cables, pipes and rods have no end caps: the run carries on into the next module or the
+    end wall, a rod's ends sit in the ceiling and the channel (as the liner's tray cables; the triangle budget)."""
     zs = C - SVC_Z
     stations = [L * (i + 0.5) / max(1, int(round(L / 0.6))) for i in range(max(1, int(round(L / 0.6))))]
     t0, t1 = SVC_TRAY
@@ -468,7 +472,7 @@ def services(p, L, C):
             p.box("Kit_Structure", (u - 0.02, a, zs - 0.04), (u + 0.02, b, zs), bevel=0.002, segments=1, panel=False)
             p.box("Kit_Seal", (u - 0.008, a + 0.01, zs - 0.041), (u + 0.008, b - 0.01, zs - 0.039), panel=False)
             for y in (a + 0.02, b - 0.02):
-                p.tube("Kit_Structure", (u, y, zs - 0.002), (u, y, C + 0.012), 0.008, 8)
+                p.tube("Kit_Structure", (u, y, zs - 0.002), (u, y, C + 0.012), 0.008, 8, caps=False)
                 p.tube("Kit_Structure", (u, y, zs - 0.046), (u, y, zs - 0.038), 0.009, 6)
         for (y, r) in SVC_PIPES:
             # a clamp round each pipe, bolted to the channel
@@ -486,11 +490,11 @@ def services(p, L, C):
                       (0.016, "Kit_Rubber"), (0.011, "Kit_Accent"), (0.018, "Kit_Rubber")):
         if y + r > t1 - 0.01:
             break
-        p.tube(role, (0.0, y + r, zs + 0.004 + r - 0.002), (L, y + r, zs + 0.004 + r - 0.002), r, 10)
+        p.tube(role, (0.0, y + r, zs + 0.004 + r - 0.002), (L, y + r, zs + 0.004 + r - 0.002), r, 10, caps=False)
         y += 2 * r + 0.006
     # the pipes on the channels, a colour band on the thinner one in each module
     for (y, r) in SVC_PIPES:
-        p.tube("Kit_Primary" if r > 0.03 else "Kit_Structure", (0.0, y, zs + r - 0.002), (L, y, zs + r - 0.002), r, 14)
+        p.tube("Kit_Primary" if r > 0.03 else "Kit_Structure", (0.0, y, zs + r - 0.002), (L, y, zs + r - 0.002), r, 14, caps=False)
     y, r = SVC_PIPES[1]
     p.tube("Kit_Signal", (L / 2 - 0.05, y, zs + r - 0.002), (L / 2 + 0.05, y, zs + r - 0.002), r + 0.002, 14)
 

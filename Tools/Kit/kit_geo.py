@@ -64,10 +64,11 @@ class Part:
 
     # ------------------------------------------------------------------ primitives
     def box(self, role, lo, hi, bevel=0.0, segments=2, m=None, trim=None, panel=True, secondary=False, atlas=None, inset=None,
-            seam=None):
+            seam=None, bezel_face=0):
         """An axis-aligned box lo..hi in local coords (then m), bevelled edges. trim: strip name on Kit_Trim; the
         strip runs along the box's longest axis. seam: dirt round the front (+z) face's rim and on the sides (default:
-        panels in SEAM_ROLES at least SEAM_MIN across). Returns the new faces."""
+        panels in SEAM_ROLES at least SEAM_MIN across). bezel_face: a diffuser's bezel only on its low (-1) or high (1)
+        big face in local coords, where the other one is hidden (0: both). Returns the new faces."""
         bm = self.bm[role]
         lo, hi = Vector(lo), Vector(hi)
         size = hi - lo
@@ -106,16 +107,17 @@ class Part:
             for f in faces:
                 self.seam_box[f] = (lo.copy(), hi.copy())
         if role in BEZEL_ROLES and min(sorted(size)[1:]) > 3 * BEZEL_W:
-            self._bezel(lo, hi, m)
+            self._bezel(lo, hi, m, bezel_face)
         mode = ("trim", trim, lo, hi) if trim else ("atlas", atlas, lo, hi) if atlas else ("member", lo, hi)
         self.meta[role].append((faces, mode, self._panel_id(panel), secondary))
         return faces
 
     def slab(self, role, m, u0, u1, v0, v1, thick, bevel=0.0, segments=2, trim=None, panel=True, secondary=False, proud=0.0,
-             atlas=None, inset=None):
+             atlas=None, inset=None, bezel_face=0):
         """A plate in the frame m: u (local x) and v (local y) extents, front face at local z = proud, thickness
         behind it. atlas: (u0, v0, u1, v1) region of a texture the front face maps to (screens)."""
-        return self.box(role, (u0, v0, proud - thick), (u1, v1, proud), bevel, segments, m, trim, panel, secondary, atlas, inset)
+        return self.box(role, (u0, v0, proud - thick), (u1, v1, proud), bevel, segments, m, trim, panel, secondary, atlas, inset,
+                        bezel_face=bezel_face)
 
     def tube(self, role, a, b, r, seg=16, caps=True, panel=False):
         bm = self.bm[role]
@@ -214,13 +216,16 @@ class Part:
     def socket(self, name, loc, x=(1, 0, 0), z=(0, 0, 1), **params):
         self.sockets.append((name, Vector(loc), Vector(x), Vector(z), params))
 
-    def _bezel(self, lo, hi, m):
+    def _bezel(self, lo, hi, m, face=0):
         """A dark frame round a thin diffuser box: a ring BEZEL_W wide inside its outline on both big faces, BEZEL_PROUD
-        proud of them (the visible one is whichever faces the room)."""
+        proud of them (the visible one is whichever faces the room) - or only on `face` (-1 low, 1 high) where the
+        other lies against the part (48 triangles a diffuser, the ceiling's 30. 9. 2026 triangle budget)."""
         size = hi - lo
         t = min(range(3), key=lambda a: size[a])
         a, b = [k for k in range(3) if k != t]
         for zc, zo in ((lo[t], -1), (hi[t], 1)):
+            if face and zo != face:
+                continue
             z0, z1 = sorted((zc, zc + zo * BEZEL_PROUD))
             for (a0, a1, b0, b1) in ((lo[a], hi[a], lo[b], lo[b] + BEZEL_W), (lo[a], hi[a], hi[b] - BEZEL_W, hi[b]),
                                      (lo[a], lo[a] + BEZEL_W, lo[b], hi[b]), (hi[a] - BEZEL_W, hi[a], lo[b], hi[b])):
