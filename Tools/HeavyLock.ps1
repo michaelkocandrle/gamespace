@@ -1,94 +1,100 @@
 <#
 .SYNOPSIS
-    The lock on heavy resources shared by parallel sessions: Unreal editor, UE tests, packaging, Blender, screenshots.
+    The lock on the heavy resources that parallel sessions share: Unreal editor, UE tests, packaging, Blender, shots.
 
 .DESCRIPTION
-    One file outside the repository, C:\gamespace-locks\heavy.lock, holding the session name, the task and the time
-    (author 30. 9. 2026). Take it before using a heavy resource and release it right after; when it is taken, do the
-    work that needs no heavy resource and try again later. A lock older than 2 hours counts as abandoned and is
-    replaced. Acquire exits 0 when the lock is yours, 1 when another session holds it.
+    One file outside the repository, C:\gamespace-locks\heavy.lock, with the session name, the task and the time
+    (rules in CLAUDE.md, "Paralelní práce a zámek"). Take it before using a heavy resource and release it when done;
+    when another session holds it, do work that needs no heavy resource. A lock older than 2 hours is abandoned and
+    "take" takes it over. "take" by the session that already holds the lock refreshes its task and time.
+
+    Exit codes: take 0 = the lock is ours, 1 = held by another session; release 0 = released or free, 1 = not ours.
 
 .EXAMPLE
-    .\Tools\HeavyLock.ps1 -Acquire -Session "second session" -Task "UE tests after FShipFlightModel"
+    .\Tools\HeavyLock.ps1 status
 .EXAMPLE
-    .\Tools\HeavyLock.ps1 -Release -Session "second session"
+    .\Tools\HeavyLock.ps1 take -Task "Wayfarer exterior shots"
 .EXAMPLE
-    .\Tools\HeavyLock.ps1          # who holds it
+    .\Tools\HeavyLock.ps1 release
 #>
 param(
-    [switch]$Acquire,
-    [switch]$Release,
-    [string]$Session = "",
+    [Parameter(Position = 0)][ValidateSet("status", "take", "release")][string]$Action = "status",
     [string]$Task = "",
-    [string]$Path = "C:\gamespace-locks\heavy.lock",
-    [double]$StaleHours = 2
+    # the checkout folder by default: gamespace (main session) or the worktree's folder
+    [string]$Session = (Split-Path -Leaf (Resolve-Path (Join-Path $PSScriptRoot "..")).Path)
 )
 
-$ErrorActionPreference = "Stop"
+$lockDir = "C:\gamespace-locks"
+$lockFile = Join-Path $lockDir "heavy.lock"
+$staleHours = 2
+$utf8 = New-Object System.Text.UTF8Encoding($false)
 
 function Read-Lock {
-    if (-not (Test-Path $Path)) { return $null }
-    $info = @{ session = ""; task = ""; time = (Get-Item $Path).LastWriteTime }
-    foreach ($line in Get-Content $Path -ErrorAction SilentlyContinue) {
-        # "key=value" (this script) or "key: value" (written by hand)
-        if ($line -match '^\s*(session|task|time)\s*[:=]\s*(.*)$') { $info[$Matches[1]] = $Matches[2].Trim() }
+    if (-not (Test-Path $lockFile)) { return $null }
+    $info = @{}
+    # "key: value" as this script writes it, "key=value" as a session may write it by hand
+    foreach ($line in [IO.File]::ReadAllLines($lockFile, $utf8)) {
+        if ($line -match '^\s*(\w+)\s*[:=]\s*(.*)$') { $info[$Matches[1]] = $Matches[2].Trim() }
     }
-    $parsed = [datetime]::MinValue
-    if ($info.time -is [string] -and [datetime]::TryParse($info.time, [ref]$parsed)) { $info.time = $parsed }
-    $info.age = (Get-Date) - [datetime]$info.time
-    return $info
+    $time = [DateTimeOffset]::MinValue
+    if (-not [DateTimeOffset]::TryParse($info["time"], [Globalization.CultureInfo]::InvariantCulture,
+                                        [Globalization.DateTimeStyles]::None, [ref]$time)) {
+        $time = [DateTimeOffset](Get-Item $lockFile).LastWriteTime
+    }
+    [pscustomobject]@{ Session = $info["session"]; Task = $info["task"]; Time = $time
+                       AgeHours = ([DateTimeOffset]::Now - $time).TotalHours }
 }
 
-function Show([hashtable]$Lock) {
-    "{0} holds it since {1:yyyy-MM-dd HH:mm} ({2:N0} min): {3}" -f $Lock.session, $Lock.time, $Lock.age.TotalMinutes, $Lock.task
+function Show-Lock($lock) {
+    "{0}: '{1}' since {2:yyyy-MM-dd HH:mm} ({3:0.0} h)" -f $lock.Session, $lock.Task, $lock.Time.LocalDateTime, $lock.AgeHours
+}
+
+function Write-Lock([System.IO.FileMode]$Mode) {
+    $text = "session: $Session`r`ntask: $Task`r`ntime: {0}`r`n" -f [DateTimeOffset]::Now.ToString("o")
+    $bytes = $utf8.GetBytes($text)
+    # CreateNew fails when another session created the file in the meantime, so two sessions never both win.
+    $stream = [IO.File]::Open($lockFile, $Mode, [IO.FileAccess]::Write, [IO.FileShare]::None)
+    try { $stream.Write($bytes, 0, $bytes.Length) } finally { $stream.Dispose() }
 }
 
 $lock = Read-Lock
-
-if ($Acquire) {
-    if (-not $Session) { Write-Error "-Session is required." }
-    if ($lock) {
-        if ($lock.session -eq $Session) {
-            Remove-Item $Path -Force    # ours: renew the time and task below
-        } elseif ($lock.age.TotalHours -ge $StaleHours) {
-            Write-Host ("STALE lock replaced: " + (Show $lock))
-            Remove-Item $Path -Force
-        } else {
-            Write-Host ("BUSY: " + (Show $lock))
+switch ($Action) {
+    "status" {
+        if ($null -eq $lock) { "HEAVYLOCK FREE" }
+        elseif ($lock.AgeHours -ge $staleHours) { "HEAVYLOCK ABANDONED " + (Show-Lock $lock) }
+        else { "HEAVYLOCK HELD " + (Show-Lock $lock) }
+        exit 0
+    }
+    "take" {
+        if (-not $Task) { Write-Error "take needs -Task (what the heavy resource is for)"; exit 2 }
+        New-Item -ItemType Directory -Force -Path $lockDir | Out-Null
+        if ($null -ne $lock) {
+            if ($lock.Session -eq $Session) {
+                Write-Lock ([IO.FileMode]::Create)
+                "HEAVYLOCK TAKEN (refreshed) by $Session for '$Task'"
+                exit 0
+            }
+            if ($lock.AgeHours -lt $staleHours) {
+                "HEAVYLOCK BUSY " + (Show-Lock $lock) + " - do work without heavy resources and try later"
+                exit 1
+            }
+            "HEAVYLOCK taking over an abandoned lock: " + (Show-Lock $lock)
+            Remove-Item -Force $lockFile
+        }
+        try { Write-Lock ([IO.FileMode]::CreateNew) }
+        catch [System.IO.IOException] {
+            $other = Read-Lock
+            "HEAVYLOCK BUSY " + $(if ($other) { Show-Lock $other } else { "(taken a moment ago)" })
             exit 1
         }
+        "HEAVYLOCK TAKEN by $Session for '$Task'"
+        exit 0
     }
-    New-Item -ItemType Directory -Force -Path (Split-Path $Path) | Out-Null
-    try {
-        # CreateNew fails if another session created the file in the meantime.
-        $stream = [IO.File]::Open($Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write)
-        $writer = New-Object IO.StreamWriter($stream, (New-Object Text.UTF8Encoding($false)))
-        $writer.WriteLine("session=$Session")
-        $writer.WriteLine("task=$Task")
-        $writer.WriteLine("time=" + (Get-Date).ToString("s"))
-        $writer.Dispose()
-    } catch [System.IO.IOException] {
-        Write-Host ("BUSY: " + (Show (Read-Lock)))
-        exit 1
+    "release" {
+        if ($null -eq $lock) { "HEAVYLOCK FREE (nothing to release)"; exit 0 }
+        if ($lock.Session -ne $Session) { "HEAVYLOCK NOT OURS " + (Show-Lock $lock); exit 1 }
+        Remove-Item -Force $lockFile
+        "HEAVYLOCK RELEASED by $Session"
+        exit 0
     }
-    Write-Host "LOCKED by $Session`: $Task"
-    exit 0
-}
-
-if ($Release) {
-    if (-not $lock) { Write-Host "FREE (nothing to release)"; exit 0 }
-    if ($Session -and $lock.session -ne $Session) {
-        Write-Host ("NOT RELEASED, not ours: " + (Show $lock))
-        exit 1
-    }
-    Remove-Item $Path -Force
-    Write-Host "RELEASED"
-    exit 0
-}
-
-if ($lock) {
-    $stale = if ($lock.age.TotalHours -ge $StaleHours) { " (STALE)" } else { "" }
-    Write-Host ((Show $lock) + $stale)
-} else {
-    Write-Host "FREE"
 }

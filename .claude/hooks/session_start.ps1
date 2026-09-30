@@ -7,6 +7,11 @@ if (Test-Path $current) {
     "Current project state (Docs/CURRENT.md; order of authority in CLAUDE.md):"
     ""
     Get-Content -Raw -Encoding UTF8 $current
+    $lines = @(Get-Content -Encoding UTF8 $current).Count
+    if ($lines -gt 80) {
+        ""
+        "WARNING: Docs/CURRENT.md has $lines lines, the cap is 80 (CLAUDE.md); shorten it in this session."
+    }
 } else {
     "Docs/CURRENT.md is missing; see CLAUDE.md."
 }

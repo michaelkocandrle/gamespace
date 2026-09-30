@@ -73,9 +73,8 @@ Test selže na nenulovém exit kódu, tracebacku, řádku `SUMMARY … FAIL` a u
 (dřív jen po výjimce). Logy v `Saved/Tests/<čas>/`. Stav CI bez `gh` (na stroji není, repo je veřejné):
 `curl -s https://api.github.com/repos/michaelkocandrle/gamespace/actions/runs?per_page=3`.
 
-UE testy, balení, Blender a snímky jen pod zámkem těžkých zdrojů (paralelní sessions, autor 30. 9. 2026):
-`.\Tools\HeavyLock.ps1 -Acquire -Session <jméno> -Task <úkol>` před použitím, `-Release` hned po něm; obsazený zámek
-= dělej práci bez těžkých zdrojů a zkus to později; zámek starší než 2 h je opuštěný.
+UE testy, balení, Blender a snímky jen pod zámkem těžkých zdrojů (pravidla v `CLAUDE.md`, autor 30. 9. 2026):
+`.\Tools\HeavyLock.ps1 take -Task "<úkol>"` před použitím, `release` hned po něm, `status` ukáže, kdo ho drží.
 
 | Test (`Tools/Tests/`) | Pokrývá |
 | --- | --- |
