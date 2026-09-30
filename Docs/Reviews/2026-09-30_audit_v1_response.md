@@ -20,3 +20,14 @@ jsou v `Docs/ARCHITECTURE.md`.
 Vedlejší nález: `compileall` hlásí `SyntaxWarning: invalid escape sequence '\T'` v docstringách šesti
 skriptů v `Tools/Assets` (`.\Tools\run_editor_python.ps1 ...` v obyčejném `"""`). Dnes jen varování;
 v budoucím Pythonu chyba. Oprava je `r"""`, zatím neprovedena (mimo rozsah).
+
+## Audit vývojového systému s AI
+
+| Nález auditu | Reakce | Stav |
+| --- | --- | --- |
+| Víc zdrojů pravdy bez hierarchie | Hierarchie autority na začátku `CLAUDE.md`; `Docs/CURRENT.md` jako jediný aktuální stav (hook SessionStart), `Docs/ARCHITECTURE.md`, `Docs/HANDOFF.md` archiv. Rozpory a opravy: `2026-09-30_knowledge_audit.md`. | hotovo |
+| Skilly přerůstají roli (historie, jednorázové stavy) | Historie doslovně do `Docs/Archive/skills/`, stabilní reference do souborů vedle skillu (načtou se jen při potřebě). Těla skillů 2 942 → 1 921 řádků. | hotovo |
+| CLAUDE.md nezvětšovat | 158 → 111 řádků: pravidla, brány, hierarchie, index. | hotovo |
+| Kritik: „nejméně 5 rozdílů“ tlačí na drobnosti | viz krok 3 (kalibrace v `calibration.md`) | krok 3 |
+| Nevytvářet desítky mikro-skillů | Přibyl jediný skill `visual-review` (postup kritika byl třikrát). | – |
+

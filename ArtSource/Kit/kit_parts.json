@@ -1,5 +1,5 @@
 {
- "_comment": "Interior kit parts, first version (step 3 of the author's kit brief, 26. 9. 2026). One entry per part family; 'variants' are letters A..C, 'sizes' module lengths (m) and 'sections' the kit sections it exists for (kit_rules.json). Batches are built and approved in order (step 4); 'status': planned | built | approved. Names follow kit_rules naming: SM_Kit_<Category>_<Part><size dm><section>_<Variant>. Human-readable list: .claude/skills/ship-interior/SKILL.md, 'Interiérový kit: seznam dílů'.",
+ "_comment": "Interior kit parts, first version (step 3 of the author's kit brief, 26. 9. 2026). One entry per part family; 'variants' are letters A..C, 'sizes' module lengths (m) and 'sections' the kit sections it exists for (kit_rules.json). Batches are built and approved in order (step 4); 'status': planned | built | approved. Names follow kit_rules naming: SM_Kit_<Category>_<Part><size dm><section>_<Variant>. Human-readable list: .claude/skills/ship-interior/kit-design.md, 'Seznam dílů'.",
  "batches": [
   {
    "n": 1,

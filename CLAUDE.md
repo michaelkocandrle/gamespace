@@ -1,159 +1,111 @@
 # Gamespace – vstupní bod pro Claude Code
 
-Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**. Projekt je v `C:\gamespace\gamespace`, modul
-`gamespace`, repozitář `michaelkocandrle/gamespace`, větev `main`.
+## Hierarchie autority (při rozporu platí vyšší)
 
-- **Cíl:** let a interiéry 1:1 se Star Citizen. Hráč letí z vesmíru až na povrch planety, vystoupí a chodí po ní.
-- **Lodě:**
-  - Wayfarer (Halcyon Freightworks) je malá multirole pro jednoho pilota, nahrazuje odstraněný Vanguard.
-    Model v1 létá ve hře (exteriér z Higgsfieldu, dočasný kokpit), další krok interiér. Přehled flotily a dossiery: Ship Matrix
-    (`Tools/Design/build_ship_matrix.py`, skill `ship-pipeline` 1b);
-  - Steadfast (Halcyon Freightworks) je nákladní loď s interiérem. Její 2D návrh v2 čeká na schválení.
-- **Autor** není herní vývojář. Mluví česky a hraje zabalenou hru ve 1080p na RTX 2060 6 GB.
+1. **`CLAUDE.md`** – pravidla spolupráce a brány workflow (tento soubor).
+2. **`Docs/CURRENT.md`** – aktuální stav, rozhodnutí autora, známé problémy, další kroky (hook SessionStart ho
+   vloží do každé nové session).
+3. **Skilly** (`.claude/skills/`) – postupy, příkazy a nástrahy podle domény.
+4. **`Docs/WORKFLOW.md`** – podrobný postup a úplný seznam nástrah (kap. 9).
+5. **`Docs/ARCHITECTURE.md`** – stabilní architektonická rozhodnutí.
+6. **`Docs/Reviews/`** – evidence rozhodnutí a iterací.
+7. **`Docs/HANDOFF.md`** – archiv historie do 30. 9. 2026; nikdy ne zdroj aktuálního stavu.
 
-## Jazyk a komunikace
+Designová reference hry je `starcitizenreference/` (master reference). Rozpor nižšího dokumentu s vyšším oprav
+v nižším ve stejném kroku.
+
+## Projekt
+
+Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**, modul `gamespace`, repozitář `michaelkocandrle/gamespace`,
+větev `main`, hlavní checkout `C:\gamespace\gamespace`. Cíl: let a interiéry 1:1 se Star Citizen, z vesmíru
+až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
+**Autor** není herní vývojář. Mluví česky a hraje zabalenou hru ve 1080p na RTX 2060 6 GB.
+
+## Pravidla
 
 - Odpovídej **česky**. Kód, komentáře a commit messages piš **anglicky**.
-- Všechno se mění skriptem nebo kódem, nikdy klikáním v editoru. Když je potřeba akce autora
+- Všechno se mění skriptem nebo kódem, nikdy klikáním v editoru nebo v Blenderu. Když je potřeba akce autora
   (přihlášení, GUI, restart), zastav se a napiš mu přesný postup.
 - Neptej se, jestli autorovi běží hra. Prostě balíš; o běžící hře se zmiň, jen když se balení zasekne.
+- **Lodě a interiéry:** nejdřív detailní 2D návrh a spec, 3D až po schválení (skill `ship-pipeline`). Každý
+  objekt má účel; žádná výplň a žádné kompromisy.
+- Architekturu neměň jen proto, že existuje jiný vzor; jen z konkrétního technického důvodu nebo kvůli
+  měřitelnému přínosu (`Docs/ARCHITECTURE.md`).
+- API klíče jsou v `C:\gamespace\secrets\`. **Nikdy do repozitáře.**
 
-## Pracovní smyčka jednoho kroku
+## Brány workflow jednoho kroku
 
-1. **Zadání a reference.**
-   - Vizuální vzor je SC (`starcitizenreference/`, autorovy screenshoty).
-   - Odchylku, kterou nejde odstranit, pojmenuj.
+1. **Zadání a reference.** Vzor je SC (`starcitizenreference/`, autorovy screenshoty); odchylku, kterou nejde
+   odstranit, pojmenuj.
 2. **Malé kroky.** Každý je hotový, otestovaný a commitnutý.
-3. **Build** editoru po změně C++ (editor musí být zavřený).
-4. **Headless testy**, kterých se změna týká; po větší změně všechny.
+3. **Build** editoru po změně C++ (`.\Tools\Build.ps1`, editor zavřený).
+4. **Testy**, kterých se změna týká; po větší změně všechny (`.\Tools\Test.ps1`, s `-UE` i testy v UE).
 5. **Snímky.** Každý snímek si **sám prohlédni** (Read na PNG). Autorovi nikdy nepředávej nic, co jsi neviděl.
-   - **Během kroku rychlá smyčka bez balení** (autor 28. 9. 2026): `.\Tools\Shots.ps1 -Preset <x> -Editor`. Spustí
-     nezabalený projekt jako samostatnou hru z editorových binárek (bez okna editoru a bez PIE). Snímkovač počká,
-     až se dopřeloží shadery. Proti zabalené hře ověřeno: shoda na úrovni šumu, běh ~2 min.
-   - **Hra se balí jen na konci kroku:** `.\Tools\Shots.ps1 -Preset <x> -Package` pro finální snímky a předání.
+   - Během kroku rychlá smyčka bez balení: `.\Tools\Shots.ps1 -Preset <x> -Editor` (autor 28. 9. 2026).
+   - Hra se balí jen na konci kroku: `.\Tools\Shots.ps1 -Preset <x> -Package` pro finální snímky a předání.
    - Žádné spouštění editoru s UI ani PIE kvůli kontrole.
-5b. **Vizuální kritik (každé předání vizuální práce, autor 25. 9. 2026).** Podagent `visual-critic`
-   (`.claude/agents/`, jen čtení, nejsilnější model) porovná výsledek s referencí. Postup: skill `ship-pipeline` 7b.
-   - Kola kritika u materiálů a detailů se dělají se snímky z rychlé smyčky (`-Editor`) nebo s rendery z Blenderu,
-     ne s balením hry (autor 28. 9. 2026).
-   - Stylový záměr kroku (např. „udržovaná pracovní loď: panely téměř čisté, špína jen tam, kde vzniká“) patří do
-     briefu kritika, aby nechtěl víc, než je záměr.
-   - Listy `python Tools/Review/make_compare_sheet.py <review.json>`: reference vlevo, výsledek vpravo; zblízka, střední, zdálky; den, noc, vesmír.
-   - Kritik dostane **jen** `brief.md` a listy: žádný postup, dobu práce, záměry ani vlastní názor.
-   - FAIL → oprav body „musí se opravit“ a znovu, nejvýš 3 kola, pak předej i s otevřenými body.
-   - Když po posledním kole ještě opravuješ, spusť na opravené body jedno ověřovací kolo jen na ně (nepočítá se do limitu 3 kol, autor 26. 9. 2026).
-   - Žádnou výtku tiše nevynechat: u každé opraveno / neopraveno a proč; nesouhlas zdůvodni.
-   - Neplatnou výtku dolož výřezem ze snímku, výřezy ulož k recenzi (`<téma>/evidence/`).
-   - Recenze do `Docs/Reviews/<datum>_<téma>.md` (listy, výstup kritika, reakce na každý bod).
-   - Kritik doplňuje automatické kontroly (`test_ship_geometry.py`, testy UE), nenahrazuje je.
-   - Co autor vytkne a kritik přehlédl, doplň do zadání kritika a do `Docs/Reviews/calibration.md`.
-6. **Dokumentace:**
-   - bod do `Docs/HANDOFF.md` kap. 5;
-   - nová nástraha do `Docs/WORKFLOW.md` kap. 9;
-   - trvalé know-how i do příslušného skillu.
-7. **Commit a push.**
-8. **Odpověď autorovi česky:**
-   - co se změnilo a proč;
-   - testy a snímky, které jsi zkontroloval;
-   - že je hra v `C:\gamespace\Builds\Gamespace\Windows\gamespace.exe`;
-   - přesný testovací scénář (klávesy, kam jít);
-   - co musí posoudit jen autor;
-   - rizika;
-   - u vizuální práce: verdikt a skóre posledního kola kritika, počet kol, výtky s reakcí a odkaz na recenzi.
+6. **Vizuální kritik** u každého předání vizuální práce (autor 25. 9. 2026): skill `visual-review`. Nejvýš
+   3 kola; žádnou výtku tiše nevynechat; recenze do `Docs/Reviews/<datum>_<téma>.md`.
+7. **Iterace vzhledu vs. předání** (autor 24. 9. 2026): při ladění vzhledu se po každé změně nebalí a nepouští
+   celá sada testů (Blender Eevee náhled nebo `-Editor`, jen dotčené testy). Před předáním jednou celá sada
+   testů (`.\Tools\Test.ps1 -All`), balení a finální snímky. Změny C++ a herní logiky plným postupem.
+8. **Dokumentace:** stav do `Docs/CURRENT.md` (hotové, známé problémy, další kroky); nová nástraha do
+   `Docs/WORKFLOW.md` kap. 9; trvalé know-how do příslušného skillu; architektonické rozhodnutí do
+   `Docs/ARCHITECTURE.md`. Historie patří do commitu a recenze, ne do skillu.
+9. **Commit a push.**
+10. **Odpověď autorovi česky:** co se změnilo a proč; testy a snímky, které jsi zkontroloval; že je hra
+    v `C:\gamespace\Builds\Gamespace\Windows\gamespace.exe`; přesný testovací scénář (klávesy, kam jít); co musí
+    posoudit jen autor; rizika; u vizuální práce verdikt a skóre posledního kola kritika, počet kol, výtky
+    s reakcí a odkaz na recenzi; zhruba čas práce vs. čas testů, balení a snímků.
 
-**Iterace vzhledu vs. předání** (autor, 24. 9. 2026):
-- Při iteraci vzhledu (modelování, decaly, materiály, světla) se po každé změně **nebalí** a nepouští celá sada testů:
-  - kontrola přes render v Blenderu (Eevee náhled s atlasy) nebo `Shots.ps1 -Editor` (nezabalený projekt, bez balení);
-  - jen testy, kterých se změna přímo týká (např. `test_ship_import.py`).
-- **Před předáním autorovi:** jednou celá sada testů, zabalení hry a finální snímky.
-- Změny C++ a herní logiky dál plným postupem (build, testy, balení, snímky).
-- V odpovědi uveď zhruba čas práce vs. čas testů, balení a snímků.
+## Paralelní práce (druhá session)
 
-**Lodě a interiéry:** nejdřív detailní 2D návrh a až po schválení 3D (skill `ship-pipeline`).
-Každý objekt musí mít účel; žádná výplň a žádné kompromisy.
+- Druhá session pracuje v **samostatném git worktree** na vlastní větvi, ne v hlavním checkoutu.
+- Bez Unreal editoru, balení hry, Blenderu a snímků. Co potřebuje těžký zdroj, zapíše a nechá hlavní session.
+- Každý krok commitne zvlášť. Slučování do `main` a push dělá **hlavní session**.
 
-## Příkazy
-
-Build editoru (PowerShell; engine z `$env:GAMESPACE_UE_ROOT`, jinak `C:\Program Files\Epic Games\UE_5.8`, jediné místo je `Tools/UERoot.ps1`):
+## Příkazy (PowerShell; bash rozbije `$PSScriptRoot`)
 
 ```powershell
-.\Tools\Build.ps1
-```
-
-Testy a headless Python v UE. Spouštěj **nástrojem PowerShell**; přes bash se rozbije `$PSScriptRoot`.
-
-```powershell
-.\Tools\Test.ps1                 # offline testy + compileall, jednotný souhrn (-Blender, -UE, -All, -Filter *landing*)
+.\Tools\Build.ps1                                   # build editoru (engine: GAMESPACE_UE_ROOT, Tools/UERoot.ps1)
+.\Tools\Test.ps1                                    # offline testy + compileall; -UE, -Blender, -All, -Filter *x*
 .\Tools\run_editor_python.ps1 Tools\Tests\test_interior.py
-```
-
-Snímky během kroku, bez balení (~2 min, nezabalený projekt):
-
-```powershell
-.\Tools\Shots.ps1 -Preset <preset> -Editor -Width 1920 -Height 1080
-```
-
-Balení a finální snímky na konci kroku (~5 min balení):
-
-```powershell
-.\Tools\Package.ps1
+.\Tools\Shots.ps1 -Preset <preset> -Editor -Width 1920 -Height 1080   # snímky během kroku (~2 min)
+.\Tools\Package.ps1                                 # balení na konci kroku (~5 min)
 .\Tools\Shots.ps1 -Preset <preset> -Package -Width 1920 -Height 1080
 ```
 
-- Presety jsou v `Tools/Shots/*.json`.
-- Snímky se ukládají do `Saved/Shots/...`; s přepínačem `-Keep` i do `Docs/Shots/`.
-
-Blender 5.2 headless (z Git Bash **vždy** s `MSYS_NO_PATHCONV=1`, jinak se přepíšou cesty jako `//Export`):
-
-```bash
-MSYS_NO_PATHCONV=1 "/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b --python Tools/Blender/<skript>.py -- <argumenty>
-```
-
-2D návrh lodi (výkresy z layout JSON):
-
-```bash
-python Tools/Design/draw_ship_design.py ArtSource/Ships/<Loď>/Design/<Loď>_layout.json
-```
-
-## Klíčové cesty
-
-| Co | Kde |
-| --- | --- |
-| C++ | `Source/gamespace/` (SpaceshipPawn, PlayerCharacter, SpaceInterior, SpaceFlightHud, CockpitDisplayComponent, SpaceShotRunner…) |
-| UE Python skripty | `Tools/Assets/` (importy), `Tools/Tests/` (headless testy) |
-| Blender skripty | `Tools/Blender/` (recepty lodí, `build_steadfast_interior.py`) |
-| Snímky | `Tools/Shots.ps1`, `Tools/Shots/*.json`, `Tools/Shots/measure_*.py` |
-| Zdroje lodí | `ArtSource/Ships/<Loď>/` (`*_spec.json` ve tvaru Ship Matrix, `*_setup.json`, `Design/`) |
-| Reference SC | `starcitizenreference/` (master reference), `Docs/UI/` |
-| Zabalená hra | `C:\gamespace\Builds\Gamespace\Windows\gamespace.exe` |
-| API klíče (Meshy, Scenario) | `C:\gamespace\secrets\`. **Nikdy do repozitáře.** |
+Presety jsou v `Tools/Shots/*.json`; snímky v `Saved/Shots/...`, s `-Keep` i v `Docs/Shots/`.
+Blender 5.2 headless z Git Bash **vždy** s `MSYS_NO_PATHCONV=1` (skill `blender-mcp`); 2D návrh lodi
+`python Tools/Design/draw_ship_design.py ArtSource/Ships/<Loď>/Design/<Loď>_layout.json`.
 
 ## Git
 
 - Před commitem `git status`. Commituj **vždy** takto; tahle cesta autora se nikdy necommituje:
-
-  ```bash
-  git add -A -- . ':!Docs/UI/Screenshot 2026-09-21 150400.png'
-  ```
-
+  `git add -A -- . ':!Docs/UI/Screenshot 2026-09-21 150400.png'`
 - Commit message je anglicky a končí řádkem `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`.
-- `git push origin main` po každém kroku. **Nikdy force push ani přepis historie**: autor má druhý klon v práci.
+- `git push origin main` po každém kroku (hlavní session). **Nikdy force push ani přepis historie**: autor má
+  druhý klon v práci.
 
-## Skills (načítají se podle potřeby z `.claude/skills/`)
+## Skilly (načítají se podle úkolu)
 
 | Skill | Kdy |
 | --- | --- |
-| `ship-pipeline` | nová loď: 2D návrh → AI model → Blender recept → import do UE |
-| `ship-interior` | interiér lodi (Steadfast): builder, import, materiály, světla, dveře, gravitace, první osoba |
-| `blender-mcp` | Blender headless i živý přes MCP, operátory vs. bmesh, nástrahy Blenderu |
-| `unreal-scripting` | build, headless Python v UE, testy, balení a cook, nástrahy C++/UHT/Pythonu |
-| `unreal-shots-and-look` | snímky ze zabalené hry, měření vzhledu a výkonu, ladění za běhu, nástrahy vykreslování |
+| `ship-pipeline` | nová loď: Ship Matrix, 2D návrh, exteriér z výkresu (hs), decaly, export, import do UE |
+| `ship-interior` | interiér lodi: interiérový kit, místnosti z kitu v lodi, průchozí loď, světla, materiály |
+| `visual-review` | vizuální kritik: srovnávací listy, brief, kola, checklisty, kalibrace |
 | `cockpit-displays` | MFD, HUD, světla a expozice kokpitu |
-| `asset-sources` | Meshy, Scenario, Higgsfield, ambientCG, licence a Credits, reference z videa |
+| `unreal-scripting` | build, headless Python v UE, testy, balení a cook, nástrahy C++/UHT/Pythonu |
+| `unreal-shots-and-look` | snímky, měření vzhledu a výkonu, ladění za běhu, nástrahy vykreslování |
+| `blender-mcp` | Blender headless i živý přes MCP, operátory vs. bmesh, nástrahy Blenderu |
+| `asset-sources` | zdroje a licence assetů, Meshy, Scenario, Higgsfield, reference z videa |
 
-## Velké dokumenty (nečti celé, hledej grepem)
+## Dokumenty (velké nečti celé, hledej grepem)
 
-- `Docs/HANDOFF.md`: stav projektu, historie hotových bodů (kap. 5), známé problémy.
-- `Docs/WORKFLOW.md`: postupy a **úplný seznam nástrah** (kap. 9; formát příznak → příčina → řešení).
-- `README.md`: technický popis systémů (anglicky).
-- `Docs/Ships/ShipPipeline.md`: pipeline lodi v detailu.
+- `Docs/CURRENT.md` (stav), `Docs/ARCHITECTURE.md` (rozhodnutí), `Docs/WORKFLOW.md` (postup, kap. 9 nástrahy
+  ve formátu příznak → příčina → řešení), `README.md` (technický popis systémů, ovládání; anglicky).
+- `Docs/Ships/ShipPipeline.md` (pipeline lodi v detailu), `Docs/Reviews/` (recenze, `calibration.md`),
+  `Docs/Archive/` (historie přesunutá ze skillů), `Docs/HANDOFF.md` (archiv).
+- Kód `Source/gamespace/`; skripty `Tools/` (`Assets` importy v UE, `Tests`, `Blender`, `Kit`, `Design`,
+  `Review`, `Shots`); zdroje lodí `ArtSource/Ships/<Loď>/`; zabalená hra
+  `C:\gamespace\Builds\Gamespace\Windows\gamespace.exe`.

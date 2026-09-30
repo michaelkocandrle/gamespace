@@ -1,5 +1,9 @@
 # Loď: Higgsfield → Blender → Unreal
 
+> **Starší cesta (do 24. 9. 2026).** Exteriér lodi se dnes staví přesně z výkresu (`hs_build_ship`), AI jen jako
+> reference stylu; aktuální postup je skill `ship-pipeline`. Tento dokument zůstává kvůli pojmenování, exportu,
+> importu, socketům a checklistu modelu (kap. 1, K, L) a pro údržbu starších AI receptů.
+
 Postup pro první skutečnou loď místo placeholder krychle. Příklad jména lodi: **Example**
 (nahraď svým, vždy jedno slovo s velkým písmenem, bez mezer a podtržítek).
 
@@ -45,7 +49,7 @@ ArtSource/
 Content/Ships/
   Audio/                         (už existuje: SW_EngineLoop)
   Shared/
-    Materials/                   M_Ship_Master (master materiál), MF_* funkce
+    Materials/                   M_Ship_Hull, M_Ship_Layered, M_Ship_PBR, M_Ship_Glass, M_Ship_Screen, M_Ship_Decal… (mastery)
     Textures/                    sdílené detaily, decaly, trim sheety
   Example/
     Meshes/                      SM_Ship_Example, SM_Ship_Example_Canopy
@@ -564,5 +568,4 @@ Visibility). Z toho plyne pro model:
 - **Trysky**: emisivní materiál + později Niagara na `SOCKET_Engine_*`; zvuk
   `EngineAudio` přesunout na socket (dnes nespatializovaný, takže nevadí).
 - **Origin rebasing**: nic nového – loď je jeden actor, jeho komponenty se posouvají s ním.
-`.\Tools
-un_editor_python.ps1 Tools\Tests	est_ship_import.py`. Zjištění z prvního běhu:
+`.\Tools\run_editor_python.ps1 Tools\Tests\test_ship_import.py`. Zjištění z prvního běhu:

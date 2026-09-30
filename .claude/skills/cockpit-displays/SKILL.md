@@ -5,12 +5,10 @@ description: Cockpit MFD displays, flight HUD and cockpit lighting/exposure in t
 
 # Kokpit: displeje (MFD), letový HUD, světla a expozice
 
-Týká se letového kokpitu s **živými displeji** (kód je obecný; první stíhačka, na které vznikl, byla
-24. 9. 2026 odstraněna a nová loď je ve 2D návrhu, takže teď žádná loď živé displeje nemá). Kokpit
-Steadfastu má zatím jen **statické**
-hologramové obrazovky (`Tools/Assets/draw_holo_screens.py` → `ArtSource/Ships/Steadfast/Interior/Screens/`,
-mesh `CockpitScreens.glb`, materiál `M_KitHolo`, HANDOFF bod 66); živá data přijdou, až Steadfast poletí.
-Podrobná historie: HANDOFF body 23–33, 32b, 72; postup WORKFLOW kap. 7, nástrahy 9.2 a)–i), 9.3 a).
+Týká se letového kokpitu s **živými displeji** (kód je obecný pro každou loď; dnes je má Wayfarer: skleněné
+MFD a střední sloupek v kokpitu v2). Starý interiér Steadfastu má jen **statické** hologramové obrazovky
+(`Tools/Assets/draw_holo_screens.py`, `M_KitHolo`). Postup WORKFLOW kap. 7, nástrahy 9.2 a)–i), 9.3 a);
+historie v archivu `Docs/HANDOFF.md` (body 23–33, 72).
 
 ## Soubory
 
@@ -148,10 +146,11 @@ Testy vždy **nástrojem PowerShell** (bash rozbije `$PSScriptRoot`), commandlet
 .\Tools\run_editor_python.ps1 Tools\Tests\test_flight_hud_sc1c.py    # strom HUD, make_state/apply_state, space.Hud
 ```
 
-Vzhled jen v **zabalené** hře (uncooked `-game` kreslí nové materiály šedě, 9.2 e):
+Během kroku rychlá smyčka `-Editor` (čeká na shadery, 9.2 e), na konci kroku zabalená hra:
 
 ```powershell
-.\Tools\Shots.ps1 -Preset cockpit -Package      # zabalí (~5 min) a vyfotí
+.\Tools\Shots.ps1 -Preset cockpit -Editor       # během kroku (~2 min)
+.\Tools\Shots.ps1 -Preset cockpit -Package      # na konci kroku: zabalí (~5 min) a vyfotí
 .\Tools\Shots.ps1 -Preset mfd_pages             # levý MFD ~495–710 × 640–825, pravý ~893–1105 × 640–825 px
 .\Tools\Shots.ps1 -Preset cockpit_look -Width 1920 -Height 1080   # expozice; autor hraje 1080p
 ```
@@ -200,4 +199,4 @@ Další konzole: `space.CockpitPitch <°>` (sklon pohledu, setup `cockpit_view_p
 - Na displeje ani HUD nic nepředstírat: jen data, která hra opravdu má.
 - AI malované ciferníky nejdou přečíst – obsah obrazovek vždy kreslit (živě v RT, nebo skriptem).
 - Po vizuální opravě přidej do testu kontrolu, která by chybu zachytila.
-- Hotovo = test zelený + snímek zabalené hry zkontrolovaný proti referenci.
+- Hotovo = test zelený + snímek zkontrolovaný proti referenci (při předání ze zabalené hry).

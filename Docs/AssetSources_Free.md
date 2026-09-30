@@ -1,5 +1,8 @@
 # Zdroje zdarma dostupných assetů pro SC vzhled (průzkum 23. 9. 2026)
 
+> Průzkum k 23. 9. 2026. Od 25. 9. se v lodích nepoužívá AI geometrie (ani sedadla z Meshy) a interiéry stojí na
+> vlastním kitu; aktuální pravidla: skill `asset-sources`.
+
 Autor: žádné placené balíky; kvalitní zdarma assety ano (licence ověřit **před** stažením), Meshy AI
 a Scenario.com po jednotlivých dílech, ne „vygenerovat všechno najednou“. Povolené licence: CC0,
 CC-BY (s uvedením autora v `Docs/Credits.md`), bezplatné licence pro komerční použití. Zakázané:

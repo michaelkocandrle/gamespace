@@ -403,7 +403,8 @@ from `Tools/Assets/add_vtol_input.py`, and `space.Vtol 1|0` switches it from the
 | VTOL (SCM only) | `G`                     | -                    |
 | Dashboard focus | hold `Z` or the middle mouse button | -            |
 | MFD pages    | `F1` left, `F2` right (`Alt` + key: back; `[` `]` on a US keyboard) | - |
-| Get out      | `F` (only when LANDED)     | -                    |
+| Get up / get out | `F`: in a landed walkable ship (or below 1 m/s) stand up behind the seat; otherwise get out when LANDED. On foot in the ship: `F` at the seat sits down, at the ramp goes out (landed only); outside, `F` at a walkable ship goes in up the ramp | - |
+| Kit showroom / Steadfast interior | `U` / `I` (there and back) | - |
 | Free look    | hold right mouse button    | -                    |
 | HUD          | `H` (compact / full / off) | -                    |
 
@@ -526,11 +527,13 @@ placement, native pose evaluation, foot IK with forced ground, terrain vs collis
 
 ## Ship art pipeline
 
-The real ship replaces the placeholder cube through Higgsfield (AI 3D, GLB) -> Blender -> FBX ->
-Unreal. The step-by-step guide, folder layout (`ArtSource/Ships/<Ship>/` for source files,
-`Content/Ships/<Ship>/` for assets), naming (`SM_Ship_<Ship>`, `UCX_`, `SOCKET_`, `_LOD<n>`),
-model checklist and the pawn changes the switch needs are in
-[Docs/Ships/ShipPipeline.md](Docs/Ships/ShipPipeline.md).
+Since 24. 9. 2026 a ship's exterior is built exactly from its approved 2D drawing
+(`Tools/Blender/hs_build_ship.py` + `hs_assemble_ship.py`, recipe `ArtSource/Ships/<Ship>/HardSurface/<Ship>_hs.json`)
+-> Blender -> FBX -> Unreal; AI images (Higgsfield) are a style reference only. The current procedure is the
+`ship-pipeline` skill (`.claude/skills/ship-pipeline/SKILL.md`). [Docs/Ships/ShipPipeline.md](Docs/Ships/ShipPipeline.md)
+describes the older AI-model route (Higgsfield/Meshy GLB -> recipe), the folder layout
+(`ArtSource/Ships/<Ship>/` for source files, `Content/Ships/<Ship>/` for assets), naming (`SM_Ship_<Ship>`,
+`UCX_`, `SOCKET_`, `_LOD<n>`) and the model checklist.
 
 `Tools/Blender/gamespace_ship_export.py` is a Blender add-on (sidebar tab "Gamespace") and
 command-line script that validates a ship and exports one FBX per mesh plus a JSON manifest
@@ -544,10 +547,10 @@ files, checks them against the manifest and writes the manifest's suggested sett
 `BP_Ship_<Ship>`; run with plain Python it is a dry run that prints the plan
 (`python Tools/Assets/tests/test_import_ship_plan.py` tests that part). A fresh editor then checks the
 import with `Tools/Tests/test_ship_import.py`, for the ship named in `Tools/Tests/ship_under_test.py`
-(`SHIP = None` until the new ship is imported: the test prints SKIP "no ship model yet"). From Git Bash, run Blender with `MSYS_NO_PATHCONV=1`, or
+(`SHIP = "Wayfarer"`; with `SHIP = None` the tests that need a model print SKIP). From Git Bash, run Blender with `MSYS_NO_PATHCONV=1`, or
 `--out "//Export"` is rewritten to `/Export` (C:\Export).
 
-**AI models (Meshy, Higgsfield) -> game ship**: `Tools/Blender/build_ai_ship.py` rebuilds a ship from
+**AI models (Meshy, Higgsfield) -> game ship** (the older route, kept for existing recipes): `Tools/Blender/build_ai_ship.py` rebuilds a ship from
 the raw AI export, driven by `ArtSource/Ships/<Ship>/<Ship>_ai_build.json` (ShipPipeline.md, 2B):
 orient and scale, cut fused parts out by region boxes (e.g. landing skids -> `SM_Ship_<Ship>_Gear`),
 decimate with importance rules, **a fresh UV atlas and the source re-baked onto it** (base colour, ORM,
@@ -593,7 +596,10 @@ the plating around the nozzles is burnt and the viewer can tell which end is the
 `scorch_amount` defaults to 0 - the lengths are centimetres and mean nothing on a ship of another
 size, so each ship sets its own in `<Ship>_setup.json`.
 
-**Graphics quality.** New settings are Cinematic, not the engine's Medium. Of the eight scalability
+**Graphics quality.** New settings are epic at a 75 % render scale, upscaled by TSR
+(`USpaceUserSettings` settings version 4, measured 23. 9. 2026: 70 FPS in the ship's interior and 98 in flight at
+1920 x 1080 on an RTX 2060, against 49 / 70 at cinematic 100 %); cinematic stays a choice in the menu. Earlier
+(version 3) new settings were Cinematic, not the engine's Medium. Of the eight scalability
 groups only global illumination costs anything - at Cinematic it halves the frame rate and in these
 scenes, lit by a sun and a sky light, the pictures did not change - so it is capped
 (`USpaceUserSettings::MaxGlobalIlluminationQuality`) and the rest go all the way up, which costs
@@ -981,9 +987,12 @@ dynamic instance of `M_Starfield_Sky`. The material blends a horizon-to-zenith g
 stars; stars fade with the square of the remaining space. The sky gradient does not know where
 the sun is yet: the night side is blue too.
 
-**Checking visuals headlessly.** A standalone `-game` run of uncooked content renders newly
-created materials with the default material, even with their shaders compiled. Judge the look
-in PIE, not in `-game`.
+**Checking visuals headlessly.** A standalone `-game` run of uncooked content rendered newly
+created materials with the default material while their shaders were still compiling. Since
+28. 9. 2026 the shot runner holds every picture until shader and asset compilation has finished, so
+`Tools/Shots.ps1 -Editor` (uncooked, no editor window, no PIE) matches the packaged game to noise
+level and is the quick loop during a step; final pictures and performance numbers come from the
+packaged game. PIE and the editor window are not used for checks.
 
 ### Rebuilding the scene
 
@@ -1050,8 +1059,8 @@ the build.
 
 - **Title screen** `/Game/Maps/MainMenu` (built by `Tools/Assets/build_main_menu.py`, the game's
   `GameDefaultMap`; the editor still starts on TestSpace): Orun and Keth, a slowly drifting camera
-  (`MenuCamera` around the actor tagged `MenuOrbitCenter`), ambient music. No ship is shown until one
-  is set as `MENU_SHIP` in `build_main_menu.py`; until then the camera orbits the empty `MenuOrbitCenter`. HRÁT / NASTAVENÍ / KONEC. Game mode `ASpaceMenuGameMode`: no pawn.
+  (`MenuCamera` around the actor tagged `MenuOrbitCenter`), ambient music and the ship set as
+  `MENU_SHIP` in `build_main_menu.py` (the Wayfarer). HRÁT / NASTAVENÍ / KONEC. Game mode `ASpaceMenuGameMode`: no pawn.
 - **Pause menu**: Escape (F10 too; in PIE Escape stops the session, so use F10 there) pauses the
   game: POKRAČOVAT / NASTAVENÍ / HLAVNÍ MENU / UKONČIT HRU.
 - **Settings** (`USpaceUserSettings`, a `UGameUserSettings` subclass registered in
@@ -1077,11 +1086,13 @@ Headless: `Tools/Tests/test_menu_settings.py`.
 
 ## Screenshots for visual checks
 
-`Tools/Shots.ps1` runs the **packaged** game through a shot list and quits: cooked materials, no
-editor, and nobody has to play to see what a change looks like.
+`Tools/Shots.ps1` runs the **packaged** game (or, with `-Editor`, the uncooked project as a standalone
+game, waiting for shaders) through a shot list and quits: no editor window, and nobody has to play to
+see what a change looks like.
 
 ```powershell
-.\Tools\Shots.ps1 -Preset cockpit           # Tools/Shots/cockpit.json
+.\Tools\Shots.ps1 -Preset cockpit -Editor   # quick loop during a step, no packaging
+.\Tools\Shots.ps1 -Preset cockpit           # Tools/Shots/cockpit.json, the packaged game
 .\Tools\Shots.ps1 -Preset hud -Package      # package first (after any C++ or content change)
 .\Tools\Shots.ps1 -Last                     # paths of the newest set
 ```
@@ -1115,6 +1126,7 @@ frees the mouse.
 
 ## Handoff
 
-`Docs/HANDOFF.md` is the state of the project for a new session: collaboration rules, the master
-reference folder `starcitizenreference/`, code map, tests, known issues and the Star Citizen
-flight system roadmap.
+A new session starts at `CLAUDE.md` (rules and the order of authority of the documents). The current
+state, known issues and next steps are in `Docs/CURRENT.md`, stable architecture decisions in
+`Docs/ARCHITECTURE.md`. `Docs/HANDOFF.md` is the archive of the project's history up to 30. 9. 2026
+(collaboration rules, code map, tests and the Star Citizen flight roadmap as they were then).

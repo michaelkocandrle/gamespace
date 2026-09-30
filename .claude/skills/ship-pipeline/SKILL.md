@@ -1,16 +1,15 @@
 ---
 name: ship-pipeline
-description: How a ship goes from idea to Unreal in gamespace - Ship Matrix reference set (fetch_ship_matrix.py), the mandatory 2D design stage (ArtSource/Ships/<Ship>/Design, <Ship>_layout.json with exterior outlines, draw_ship_design.py, <Ship>_spec.json in RSI Ship Matrix shape, author approval), the design dossier and fleet Ship Matrix page (build_ship_matrix.py, published as an Artifact), concept views for Higgsfield/Meshy, the AI-model recipe (<Ship>_ai_build.json, build_ai_ship.py), Blender export (gamespace_ship_export.py, manifest) and Unreal import (import_ship.py, <Ship>_setup.json). Load when designing a new ship, generating or processing a ship model, touching sockets/UCX collision/pivot/LODs/ship materials/naming, or running the ship export/import scripts.
+description: How a ship goes from idea to Unreal in gamespace - Ship Matrix reference set (fetch_ship_matrix.py), the mandatory 2D design stage (ArtSource/Ships/<Ship>/Design, <Ship>_layout.json with exterior outlines, draw_ship_design.py, <Ship>_spec.json in RSI Ship Matrix shape, author approval), the design dossier and fleet Ship Matrix page (build_ship_matrix.py, published as an Artifact), consistent concept views via Higgsfield as style reference, the exterior built exactly from the drawing (hs_build_ship.py, hs_assemble_ship.py, <Ship>_hs.json), silhouette_compare.py, detail layers (decal library, mesh decals, livery, wings, gear, lights), Blender export (gamespace_ship_export.py, manifest) and Unreal import (import_ship.py, <Ship>_setup.json). Reference file legacy-ai-model.md covers the older AI-model recipe (build_ai_ship.py). Load when designing a new ship, building or changing a ship exterior, touching sockets/UCX collision/pivot/LODs/ship materials/naming/decals, or running the ship export/import scripts.
 ---
 
 # Loď: od nápadu do Unrealu
 
-Podrobný zdroj: `Docs/Ships/ShipPipeline.md` (kap. 0–5, hlavně 2A a 2B), `Docs/WORKFLOW.md` kap. 2
-a nástrahy 9.6, `Docs/AssetPipeline_Modular.md` (kdy generovat vcelku, kdy po dílech).
-Vzor celého návrhu (reference, spec, layout s exteriérem, koncepty, dossier): **`ArtSource/Ships/Wayfarer/`**
-(schválen 24. 9. 2026). Starší vzor jen interiéru: `ArtSource/Ships/Steadfast/Design/`.
+Vzor celého návrhu (reference, spec, layout s exteriérem, koncepty, dossier, hs recept): **`ArtSource/Ships/Wayfarer/`**.
 Autor není herní vývojář: **všechno skriptem / receptem**, nic ručním klikáním v Blenderu ani editoru.
-Kapitoly C–D, G–I v ShipPipeline popisují ruční kliky v Blenderu; dnes je dělá recept (2B).
+Interiér lodi: skill `ship-interior`; vizuální předání: skill `visual-review`. `Docs/Ships/ShipPipeline.md` popisuje
+starší AI cestu a ruční kroky (dnes je dělá recept); starší AI recept je v `legacy-ai-model.md` tohoto skillu.
+Historie měření a rozborů: `Docs/Archive/skills/ship-pipeline_2026-09-30.md`.
 
 Blender z Git Bash vždy s `MSYS_NO_PATHCONV=1` (jinak se `//Export` přepíše na `/Export`):
 ```bash
@@ -22,14 +21,15 @@ rozbije `$PSScriptRoot`.
 
 ## 0. Pořadí fází (nepřeskakovat)
 
-1. **Reference ze Ship Matrix** (1a) → **spec** → **2D návrh** (layout, výkresy, kontrola siluet) →
-   **koncepty** (2a) → **dossier + Ship Matrix** (1b) → schválení autorem.
+1. **Reference ze Ship Matrix** (1a) → **spec** → **2D návrh** (layout s exteriérem, výkresy, kontrola siluet) →
+   **koncepty** jako reference stylu (2a) → **dossier + Ship Matrix** (1b) → schválení autorem.
    **Dokud autor neschválí, nic se nestaví ve 3D.**
-2. AI model (Meshy / Higgsfield) nebo kitbash/stažený model; silueta modelu se měří proti maskám z výkresu.
-3. Recept `<Loď>_ai_build.json` → `build_ai_ship.py` → `<Loď>_Meshy.blend`.
-4. `gamespace_ship_export.py` → FBX + `<Loď>_manifest.json`.
-5. `import_ship.py` + `<Loď>_setup.json` → `BP_Ship_<Loď>`; pak `build_main_menu.py`.
-6. Testy + `Tools\Shots.ps1` (snímky si sám prohlédni).
+2. **Exteriér přesně z výkresu** (3b2): `hs_build_ship.py` → `hs_assemble_ship.py` → `<Loď>_HS_Game.blend`
+   (test geometrie běží na konci sám). AI geometrie lodi ne (od 24. 9. 2026); AI jen jako reference stylu.
+3. Vrstvy detailu (3b3): decaly, trim, livrej, křídla, podvozek, světla; silueta proti maskám výkresu (3b).
+4. `gamespace_ship_export.py` → FBX + `<Loď>_manifest.json` (5).
+5. `import_ship.py` + `<Loď>_setup.json` → `BP_Ship_<Loď>`; pak `build_main_menu.py` (6).
+6. Testy + snímky (7), vizuální kritik (skill `visual-review`), dossier a Ship Matrix znovu (1b).
 
 ## 1a. Reference ze Ship Matrix (první krok každé lodi)
 
@@ -72,8 +72,7 @@ JSON měň skriptem (Write do scratchpadu, pak Python); pole čísel drž na jed
 
 Specifikace je **o úroveň výš**: `ArtSource/Ships/<Loď>/<Loď>_spec.json` ve tvaru RSI Ship Matrix
 (`identity`, `dimensions`, `crew`, `flight`, `components`, `weapons`, `_status`). Kód ho nečte; není to
-totéž co `<Loď>_setup.json` (build config). Existují: `Steadfast_spec.json`, `Delver_spec.json`,
-`Farsight_spec.json`.
+totéž co `<Loď>_setup.json` (build config). Existují: `Wayfarer_spec.json`, `Steadfast_spec.json`, `Delver_spec.json`, `Farsight_spec.json`.
 
 Výkresy:
 ```bash
@@ -87,8 +86,8 @@ Pravidla návrhu (autor 24. 9. 2026):
   **klávesnice u dveří = no-go**, žádné krabicové procedurální pulty.
 - Vzor anotovaných řezů a půdorysů: `Docs/UI/reference_tvorba_lodi/*.jpg`.
 - Styl SC, ale vlastní („vibe, ne kopie“), nestylizovat podle jednoho dvou obrázků. Teplá architektura,
-  studené UI jen tam, kde se pracuje. Paleta: gunmetal `0.35, 0.42, 0.55` (se studeným světlem 7000 K),
-  oranžová `0.85, 0.34, 0.06` (AssetPipeline_Modular, sekce Paleta).
+  studené UI jen tam, kde se pracuje. Paleta interiéru podle výrobce: `ArtSource/Kit/kit_rules.json`
+  (`palettes`, skill `ship-interior`); oranžová Halcyon Freightworks `0.85, 0.34, 0.06`.
 - V lodích je hráč v první osobě → interiér navrhuj na průchod (okruh palub, žádné slepé uličky
   dvakrát, nástup ze země i ze stanice).
 - Ship Matrix pole: délka/šířka/výška, hmotnost, SCU, posádka a stanoviště, SCM/AB, pitch/yaw/roll,
@@ -119,56 +118,29 @@ python Tools/Design/build_ship_matrix.py --ship <Loď>    # jedna loď    -> Sav
   - dossier Wayfarer: https://claude.ai/artifact/Busq7MdkvGSXMp7RsgP7Ga
   Novou loď nebo nový krok vždy zapiš a Ship Matrix publikuj znovu; autorovi dej odkaz.
 
-## 2. Koncept → AI model (ShipPipeline 2A, 2B; AssetPipeline_Modular)
+## 2. Koncepty jako reference stylu
 
-Kdy co:
-- **Exteriér lodi** (jedna dominantní silueta) → generovat vcelku: hero obrázek → multi-view → Meshy
-  (nebo Higgsfield multi-image to 3D).
-- **Interiér / komplexní kompozice** (kokpit, pulty, přístroje) → **nikdy jedním promptem**. AI jen hrubá
-  obálka; funkční detail (tlačítka, přepínače, rámy displejů, panely) **procedurálně v Blenderu** (bmesh);
-  sesadit přes Blender MCP (WORKFLOW kap. 3).
-- Třetí rovnocenná cesta: stažený model s komerční licencí (Quaternius CC0 první; Sketchfab CC-BY →
-  autor do `Docs/Credits.md`). **Licenci zkontroluj před stažením**; „personal/non-commercial/editorial“ ne.
-- AI je dobrá na panelové díly, selhává na tenkých protáhlých (kabely, trubky, madla) → procedurálně.
-
-Koncept pro AI (2A): **2–4 konzistentní pohledy téže lodi: bok, zepředu, shora, 3/4.** Neutrální
-pozadí, rovnoměrné světlo, bez motion bluru a dramatických stínů, celá loď v záběru. Z jednoho obrázku si
-AI záda a spodek vymyslí. Postup a ověření viz 2a.
+- **Exteriér lodi se staví z výkresu**, koncepty z AI (Higgsfield) slouží jen jako reference stylu, barev a detailu
+  a jako obrázky do dossieru. Snímky ze SC do AI generátorů posílat smíš (skill `asset-sources`), výstup nesmí nést
+  jména a loga SC.
+- **Interiér a komplexní kompozice** (kokpit, pulty, přístroje) nikdy jedním promptem; funkční detail procedurálně.
+- Koncept: **2–4 konzistentní pohledy téže lodi: bok, zepředu, shora, 3/4.** Neutrální pozadí, rovnoměrné světlo,
+  bez motion bluru a dramatických stínů, celá loď v záběru.
 
 ## 2a. Konzistentní pohledy přes Higgsfield MCP (ověřeno 24. 9. 2026)
 
-Test na procedurálním modelu první stíhačky (17,58 × 12,96 × 4,36 m), aby šel každý pohled změřit proti
-skutečnému modelu. Testovací soubory, prompty a listy rozdílů byly smazány spolu s lodí (24. 9. 2026);
-historie je v gitu, commit `2919d8a`. Naměřené výsledky platí dál:
-
-| Varianta (IoU proti modelu) | bok | zepředu | shora | uzávěr | rozpětí/výška proti spec |
-| --- | --- | --- | --- | --- | --- |
-| GPT Image 2.5, jen hero obrázek | 0,79 | 0,29 | 0,65 | 24 % | −37 % / +4 % |
-| GPT Image 2.5, list 2 × 2 v jednom obrázku | 0,22 | 0,56 | 0,58 | 138 % | nepoužitelné |
-| Nano Banana Pro, jen hero (zepředu po `remove_background`) | 0,82 | 0,73 | 0,76 | 15 % | −4 % / +9 % |
-| GPT Image 2.5 + vodicí silueta | 0,89 | 0,54 | 0,92 | 17 % | −3 % / +5 % |
-| **Nano Banana Pro + vodicí silueta** | **0,97** | **0,90** | **0,98** | **0,3 %** | **0,1 % / 0,4 %** |
-
-Co z toho plyne:
-- **Bez vodítka si model domyslí půdorys** (GPT udělal křídla dopředu šípová a o třetinu kratší) a „zepředu“
-  kreslí seshora šikmo. Hezký obrázek neznamená správný tvar – vždy měř.
-- **List všech pohledů v jednom obrázku nepoužívej**: pohledy mají každý jiné měřítko, přetékají přes
-  buňky a půdorys neodpovídá boku.
-- **Vodicí silueta jako druhá reference** („The second image is the exact orthographic … silhouette of this
-  ship … must match exactly“) je hlavní páka. **Výchozí volba: Nano Banana Pro + vodítko** – siluetu
-  drží téměř přesně a přitom kreslí skutečný povrch a barvy z hero obrázku. U nové lodi vodítko vzniká
-  z našeho 2D návrhu (obrys paluby z `<Loď>_layout.json`, profil z řezu), ne z AI.
-- Pohled **zepředu je nejslabší** (tenká křídla = malý posun rozhodí IoU). Nano Banana v něm nakreslil
-  navíc dvě plovoucí špičky ploutví nad lodí – měření je jako odtržené skvrny zahodí, ale obrázek
-  do multi-image to 3D takhle nesmí → přegenerovat, nebo poslat jen bok + shora + 3/4.
-  **Každý pohled si před použitím prohlédni** (Read na PNG), číslo nestačí.
-- Modely někdy kreslí podlahu a stín i přes „no floor“ → před měřením `remove_background` (Higgsfield,
-  výstup s alfou, `extract_reference_mask` alfu použije).
-- **Světlý trup na světle šedém pozadí** rozbije vyříznutí siluety (díry, falešné IoU 0,56). Generuj na
-  pozadí kontrastním k trupu (světlý trup → „plain uniform dark charcoal background“), jinak `remove_background`.
-- Model rád „zjednoduší“ půdorys (Wayfarer: gondoly přilepené k trupu, rozpětí −20 %). Pomohla třetí
-  reference (pohled zepředu, kde gondoly stojí zvlášť) a slovní popis rozestupu; nebo prompt „Fill the dark
-  silhouette in the first image with the starship from the second image“ (vodítko jako první reference).
+Závěry z měření (tabulka a test: archiv skillu):
+- **Bez vodítka si model domyslí půdorys** a „zepředu“ kreslí seshora šikmo. Hezký obrázek neznamená správný tvar –
+  vždy měř.
+- **List všech pohledů v jednom obrázku nepoužívej**: pohledy mají každý jiné měřítko a půdorys neodpovídá boku.
+- **Vodicí silueta jako druhá reference** je hlavní páka. **Výchozí volba: Nano Banana Pro + vodítko** (IoU 0,90–0,98,
+  uzávěr 0,3 %). Vodítko vzniká z našeho 2D návrhu (obrys paluby z `<Loď>_layout.json`, profil z řezu), ne z AI.
+- Pohled **zepředu je nejslabší**; plovoucí špičky nebo díly navíc → přegenerovat. **Každý pohled si před použitím
+  prohlédni** (Read na PNG), číslo nestačí.
+- Podlahu a stín i přes „no floor“ → před měřením `remove_background`. **Světlý trup na světle šedém pozadí** rozbije
+  vyříznutí siluety → generuj na kontrastním pozadí.
+- Model rád „zjednoduší“ půdorys (Wayfarer: gondoly přilepené k trupu) → třetí reference (pohled zepředu) a slovní
+  popis rozestupu, nebo prompt „Fill the dark silhouette in the first image with the starship from the second image“.
 
 Postup pro novou loď (vše přes MCP a skripty, nic ručně; ověřeno na Wayfareru 24. 9. 2026):
 1. Vodítka z masek výkresu: `python Tools/Blender/silhouette_compare.py guide --mask side=Design/guides/<Loď>_mask_side.png
@@ -193,93 +165,7 @@ Postup pro novou loď (vše přes MCP a skripty, nic ručně; ověřeno na Wayfa
    (`closure_error_pct`); dál symetrie zepředu a shora a odchylka od rozměrů ze `_spec.json`.
    **Přijmout:** rozměry proti spec ≤ 5 %, symetrie ≥ 0,9, uzávěr ≤ 10 % (vyšší = jeden pohled má jinou
    výšku, obvykle zepředu → přegenerovat ten). Masky si prohlédni (`views_masks.png`).
-6. Teprve pak multi-image to 3D (níže).
-
-Generování:
-- **Higgsfield** multi-image to 3D (MCP `generate_3d`, model `multi_image_to_3d`, 30 kreditů, fronta ~25 min):
-  `medias` = job id schválených pohledů (bok, 3/4, shora, zepředu), `should_texture` + `enable_pbr` true,
-  `topology` triangle, `target_polycount` 300000, `symmetry_mode` on, `texture_prompt` s paletou.
-  GLB do `ArtSource/Ships/<Loď>/Higgsfield/` a **nikdy needitovat**. Textury pro recept:
-  `blender -b --python Tools/Blender/glb_textures.py -- <glb> <out_dir>` (base_color, normal, roughness,
-  metallic), v receptu `source_model` (GLB) a `textures`. Wayfarer: nos na −X → `rotate_z_deg` 180.
-  Kontrola hned po stažení: `render_ship_views.py` (textury, 6 úhlů) + `silhouette_compare.py` proti maskám výkresu.
-- **Meshy**: surový export (FBX + PBR textury) do `ArtSource/Ships/<Loď>/Meshy/<stažení>/`, needitovat.
-  Díly skriptem: `python Tools/Assets/meshy_generate.py [--dry-run|--refine|--hi] [--spec X.json --out DIR]`,
-  klíč jen z `MESHY_API_KEY`. `--hi` = `geometry_resolution 4k`, ~30k tris (25 kreditů, preview 20).
-- **Scenario** (`Tools/Assets/scenario_mcp.py`): Polygen retopologie (`model_tencent-smarttopology`,
-  113 CU, ~20 min, progress skáče 10 % → hotovo, sleduj `updatedAt`), UV, dělení na díly, textury.
-  Tripo 3.1 na šedém clay renderu selhal; UltraShape je za tarifem Pro.
-- Hyper3D Rodin přes Blender MCP: zkušební klíč vyčerpaný (`API_INSUFFICIENT_FUNDS`).
-
-## 3. Recept AI model → .blend (ShipPipeline 2B, WORKFLOW 2.1)
-
-Nic ručně: přestavbu popisuje `ArtSource/Ships/<Loď>/<Loď>_ai_build.json` (první
-recept zůstal jen v gitové historii) a `Tools/Blender/build_ai_ship.py` ji z originálu zopakuje (~3 min).
-Souřadnice v receptu: metry v Blenderu **po otočení**, +X příď, +Y levý bok, +Z nahoru.
-
-Klíče receptu: `ship`, `source_fbx`, `textures` (base_color, normal, roughness, metallic), `out_blend`,
-`orient` (`rotate_z_deg`, `length_m`), `parts` (např. `Gear.regions` – boxy pod úrovní břicha),
-`decimate` (cíl + `importance` pravidla, faktor držet ~1), `rebake` (4K BC a N, 2K ORM),
-`emissive` (středy trysek y,z, poloměr, x), `canopy_clear`, `canopy_frame`, `lining`,
-`collision` (boxy → konvexní `UCX_`, max 26 vrcholů), `sockets`, `interior` (`fit`, `displays`,
-`placement`).
-
-```bash
-cd /c/gamespace/gamespace
-# měření: prázdné parts/collision/sockets a --no-save vypíše rozměry po otočení
-MSYS_NO_PATHCONV=1 "$BL" -b --python Tools/Blender/build_ai_ship.py -- ArtSource/Ships/<Loď>/<Loď>_ai_build.json --no-save
-MSYS_NO_PATHCONV=1 "$BL" -b --python Tools/Blender/build_ai_ship.py -- ArtSource/Ships/<Loď>/<Loď>_ai_build.json
-# čistý lak místo špinavé AI barvy (blok "repaint" v receptu; čte *_BC_AI.png, píše mapy pro hru), ~1 min
-MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/<Loď>_AI.blend --python Tools/Blender/repaint_ship.py -- ArtSource/Ships/<Loď>/<Loď>_ai_build.json
-# okluze (R kanál ORM je emisní maska obrazovek, AO má vlastní mapu), ~30 s
-MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/<Loď>_Meshy.blend --python Tools/Blender/bake_ship_ao.py -- <Loď>
-```
-AO se v setupu přidá jako `"ao"` mezi textury (`cavity_strength`, `ao_strength`, maska `wear_amount`).
-
-**Kvalita povrchu AI lodi (Wayfarer 1.1, autor: „vypadá rozbitě a špinavě“):**
-- `"weld_m": 0.0005` v receptu: AI mesh bývá polévka rozpojených trojúhelníků. Bez svaření vznikne ostrůvek na
-  každý trojúhelník a atlas využije 0,4 % textury. Build vypisuje `UV atlas uses N %`; **cíl ≥ 40 %**.
-- Unwrap: `smart_project` s nulovým marginem a pak `pack_islands` ADD `uv_margin` (0,0005).
-- Barva: AI textura se nepoužívá přímo. `repaint_ship.py` dělá zóny laku podle bloku `repaint` (`zones` s barvou
-  sRGB, roughness a metallic; `glass_boxes`, `engine_boxes`, `accent_exclude_boxes`, `speck_area_m2`,
-  `detail_strength` 0,3). Rebake píše `T_Ship_<Loď>_BC_AI/ORM_AI`, repaint `T_Ship_<Loď>_BC/ORM`.
-- Materiál s vymodelovanými panely: `panel_strength` 0, `wear_amount` ≤ 0,05, `detail_rough_variation` ~0,04.
-- Kontrola: `render_ship_views.py --swap T_Ship_<Loď>_BC_AI.png=<nová BC>` a snímky `ship_views` ze hry, vždy
-  zblízka (`10_close_three_quarter`).
-
-Pravidla čísel:
-- Délka: malá stíhačka 12–16 m, Steadfast 30 m. AI modely chodí 1–2 m
-  a s náhodnou orientací (Meshy: příď −X).
-- Trup s Nanite může mít ~1 mil. tris (Nanite si vybere; cena = velikost FBX a čas pečení).
-- 4K na 14m loď ≈ 3 mm/px → detail zblízka dělá **detailní vrstva materiálu** `M_Ship_PBR`
-  (`detail_*` v setupu, `Tools/Assets/generate_detail_textures.py`), ne větší textura.
-- Kolize: trup rozděl, kde se zužuje; každý motor, kabina a noha podvozku zvlášť.
-- Díry v trupu po vyříznutí podvozku se zacelí samy; pahýly nad řezem zůstávají jako úchyty. U AI meshe
-  s otevřenými hranami (Wayfarer) zacelování natáhlo obří plochy přes křídla a trvalo 10 min → u dílu
-  `"fill_holes": false`.
-- Visící díly (pootevřená rampa) oddělit jako vlastní díl (`parts.Ramp`), jinak test podvozku vidí trup pod břichem.
-- Patky na spodku kolizního boxu: kolizní region kolem noh až k patkám (vrcholy dílu Gear se počítají) →
-  `gear_extension_cm` 0.
-- Kolize: k-DOP bere extrémy ≥ 10 cm od sebe a při selhání kontroly konvexnosti zahodí konec nejkratší hrany
-  (sliver plošky s nepřesnou normálou).
-
-Kontrola po buildu: `MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_AI.blend --python Tools/Blender/render_ship_views.py -- --out DIR`
-(EEVEE, 6 úhlů, UCX skryté) a porovnej s originálem ze stejných úhlů (kabina zblízka, spodek, 3/4) –
-render přes kameru do souboru, ne `get_viewport_screenshot` (fotí před překreslením; vynuť
-`bpy.ops.wm.redraw_timer(type="DRAW_WIN_SWAP")`). Fleky na kovu = normály/UV; rozmazané = malé textury.
-
-Kokpit a interiér (2B kroky 6 a 10):
-- `Tools/Blender/cockpit_view_survey.py -- X Y Z FOV` (UE cm) nebo `sweep:X0:X1:Z0:Z1`; počítá s tím,
-  že UE nekreslí odvrácené stěny.
-- `Tools/Blender/fit_ship_interior.py -- <recept>` na hotovém `<Loď>_Meshy.blend` vypíše usazení a oko →
-  `interior.placement`, `sockets.Cockpit`, oko do setupu (`components.cockpit_camera.relative_location`,
-  cm, **Y s opačným znaménkem**), postav znovu.
-- Rámování oka: `fit.dash_below_eye_deg` [7, 13], displeje ~15–24° pod okem, první stíhačka
-  měla `eye_behind_stick_m` 0,65. Oko navržené pro 16:9 a FOV 88°.
-- Displeje (`interior.displays.screens[]`): `centre`, `u`, `v`, `corners` TL/TR/BR/BL (otvory nejsou
-  obdélníky), `texture_rect` = `USpaceCockpitDisplays::ScreenRect` (plátno `texture_size` [1330, 490]),
-  `grow_m` 0,0045, `cut_depth_m` (malé 6 mm). Slot `M_Ship_<Loď>_Screens`, socket `Display_<jméno>`.
-  Podrobně WORKFLOW 2.1; hlídá `test_cockpit_displays.py`.
+6. Koncepty jdou do dossieru (`dossier.json`, `check_views`) a jako reference stylu pro stavbu z výkresu (3b2).
 
 ## 3b. Měřitelná shoda siluety (`Tools/Blender/silhouette_compare.py`)
 
@@ -291,12 +177,12 @@ B="/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 MSYS_NO_PATHCONV=1 "$B" -b Ship.blend --python Tools/Blender/silhouette_compare.py -- render \
     --collection HS_<Loď>_Nacelle_UL --out Saved/Silhouette/nacelle --prefix hs
 # reference jako výřez AI modelu (box + válec kolem osy, bez pylonu)
-MSYS_NO_PATHCONV=1 "$B" -b ArtSource/Ships/<Loď>/<Loď>_Meshy.blend --python Tools/Blender/silhouette_compare.py -- render \
+MSYS_NO_PATHCONV=1 "$B" -b ArtSource/Ships/<Loď>/<Loď>_AI.blend --python Tools/Blender/silhouette_compare.py -- render \
     --objects SM_Ship_<Loď> --crop-box=-6.8,3.0,0.4,0.35,6.0,3.4 --crop-cylinder=4.551,1.892,1.24 \
     --out Saved/Silhouette/nacelle --prefix meshy
 # 2) porovnání: render proti renderu (světové souřadnice) nebo proti konceptům (bbox)
 python Tools/Blender/silhouette_compare.py compare --model Saved/Silhouette/nacelle/hs --ref-model Saved/Silhouette/nacelle/meshy --out Saved/Silhouette/nacelle
-python Tools/Blender/silhouette_compare.py compare --model DIR/model --ref front=Concept/front.png --ref side=Concept/side.png --ref top=Concept/top.png --out DIR
+python Tools/Blender/silhouette_compare.py compare --model DIR/model --ref front=Concept/front.png --ref side=Concept/side_a.png --ref top=Concept/top.png --out DIR
 # 3) všechno najednou
 python Tools/Blender/silhouette_compare.py run --blend Ship.blend --collection X --ref side=... --out DIR
 ```
@@ -316,8 +202,8 @@ python Tools/Blender/silhouette_compare.py run --blend Ship.blend --collection X
 - **`views`** (konzistence konceptů mezi sebou, bez modelu) a **`guide`** (vodicí siluety pro obrázkový
   model) popisuje sekce 2a. Koncepty nad 1400 px se před vyříznutím zmenší; odtržené skvrny pod 2 %
   největšího kusu se zahodí.
-- **Test:** `python Tools/Blender/tests/test_silhouette_compare.py`, 20 kontrol včetně renderu
-  krychle v Blenderu.
+- **Test:** `python Tools/Blender/tests/test_silhouette_compare.py` (i v `Tools/Test.ps1`; render krychle
+  v Blenderu jen s `-Blender`).
 - **Cíle:** hard-surface díl proti AI objemu ≥ 0,88 na pohled. Nižší číslo znamená špatnou osu nebo
   poloměr, ne detail. Proti konceptu je cíl ≥ 0,9 a `aspect_model` do 3 % od `aspect_ref`.
 
@@ -456,90 +342,24 @@ MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/decal_libra
   (`DecalFadeStartCm` / `EndCm`); díl Decals se přestane kreslit v 95 m. Menu (24 m), chase kamera a přistání
   jsou v plném rozsahu (preset `decal_fade`).
 
-**Rozbor lodí SC v Blenderu** (Markom3D: C2 Hercules exteriér a kokpit, Argo MOLE; poznatky s časy
-`starcitizenreference/ShipDetailing_VideoNotes.md`, 26. 9. 2026):
-- Trup bez decalů je skoro hladký, panelové linky jsou pásy decalů (to děláme). Žaluzie, logo, velká čísla a
-  výstrahy na MOLE jsou decaly na rovném laku.
-- **Velké karty špíny** 1–4 m se stékajícími šmouhami nad motory, přes křídla a svislé plochy. U nás chybí,
-  špína je jen procedurální v materiálu.
-- **Lak bez opotřebení hran.** Špinavý dojem dělá drsnost (dlaždicová textura šmouh a škrábanců), ne barva ani
-  otřené hrany. Náš `EdgeWear` 0,8 je proti SC příliš.
-- Natažené úseky atlasu: dlouhé čáry z jednoho malého kusu textury.
-- **Zavedeno (26. 9. 2026):**
-  - karty špíny `decals.grime` (`Placer.card`, atlas `generate_grime_textures.py`, master `meshdecal_grime`,
-    buňka 8 cm, měkký okraj přes vertex colour, `up` = odkud špína jde);
-  - `EdgeWear` 0,15 a `ClearCoatRoughVariation` 0,12;
-  - recenze `Docs/Reviews/2026-09-26_sc_breakdown_tasks.md`.
 
-**„Feel“ SC: rozbor referencí** (Docs/UI screenshoty Titan, Guardian, Hornet, Cutlass, Spirit; ship matrix Pisces,
-100i, Mustang, Aurora; porovnáno se stejných vzdáleností, 24. 9. 2026):
+**Z rozborů lodí SC** (Markom3D, Pisces, 100i, Mustang, Titan; tabulky v archivu skillu):
+- Trup bez decalů je skoro hladký; panelové linky, žaluzie, logo a velká čísla jsou decaly na rovném laku.
+- Rozdíl ve „feelu“ dělá hlavně **hodnotová stavba a lesk** (30–60 % plochy tmavé, lesklý lak s clear coatem,
+  sousední desky se liší tónem a leskem), až potom počet detailů. Livrej a clear coat mají největší efekt.
+- Lak bez opotřebení hran; špinavý dojem dělá drsnost, ne barva. `EdgeWear` 0,15, `ClearCoatRoughVariation` 0,12.
+- **Karty špíny** `decals.grime` (`Placer.card`, atlas `generate_grime_textures.py`, master `meshdecal_grime`, buňka
+  8 cm, měkký okraj přes vertex colour, `up` = odkud špína jde) nad motory, přes křídla a svislé plochy.
 
-| Kategorie | SC má | Wayfarer měl (před) | Chybělo / co jsme udělali |
-| --- | --- | --- | --- |
-| Hodnotová stavba (zdálky) | 30–60 % plochy tmavé: grafitové zóny, tmavý podvozek mezi bílými deskami; loď se čte i jako silueta dvou tónů | ~95 % bílé, tmavý jen nos a záď | **nejdůležitější** – livrej (analytické zóny, 3 varianty) |
-| Povrch (zblízka) | lesklý lak s clear coatem, odráží oblohu a okolí; sousední desky se liší tónem a leskem | matný lak, všechny desky stejné | clear coat 1 / 0,05; variace po panelu (UV1), 8 % kovových a 5 % karbonových panelů |
-| Spáry | tmavé pryžové/stínové spáry 0,5–1 cm, rámují každý panel | světlé drážky splývaly s lakem | těsnění v drážkách (materiál Seal) |
-| Velké značení | jméno / registrace přes část boku, logo výrobce, velké výstražné zóny u trysek a rampy (1 až 4 m) | jen malé nápisy (≤ 0,6 m) | promítané decaly WAYFARER, HF-0417, logo Halcyon, EXHAUST / RAMP |
-| Manévrovací trysky | 12–30 bloků na malé lodi, na přídi, bocích, zádi, spodku i hřbetu | žádné | 26 bloků RCS (`hs_functional.py`) |
-| Antény, senzory | 2–5 na loď (lopatka, bič, kopule) | 1 senzorový kit | 2 lopatky, bič, 2 kopule |
-| Mechanika zvenku | závěsy klapek, písty, objímky zbraní, přípojky | kryty klapek, holé hlavně | závěsy, objímky zbraní, přípojky |
-| Malé decaly | 0,5–2 / m² na klidných plochách, 5–10 / m² u servisních míst | ~0,8 / m² | beze změny (hustota už odpovídá) |
-| Světla | pozice, obrys, reflektory, pásy; často modrobílé emisní lišty | pozice, obrys, reflektor, šachta | (další krok: emisní lišty podél trupu) |
-| Siluetové vrstvy | hluboké převisy, negativní prostor mezi deskami | hladký loft s deskami 2–3 cm | (omezeno výkresem; siluetu nesmíme měnit) |
+**Cílová čísla kokpitu z oka** (medián 5 referencí SC, 1920×1080, `Tools/Blender/eye_view_metrics.py`; oko musí sedět
+v pásu skla):
 
-Závěr: rozdíl ve „feelu“ dělá hlavně **hodnotová stavba a lesk**, až potom počet detailů. Livrej a clear coat
-mají největší efekt ze všech vzdáleností.
-
-**„Feel“ SC uvnitř: rozbor referencí interiérů** (21 autorových snímků `starcitizenreference/Screenshot
-2026-09-25 02*.png`: Argo, MISC, RSI, Origin, Drake, Crusader, obytné moduly i chodby; 25. 9. 2026). Autor
-na jejich kvalitu míří. Wayfarer v1 (hs_interior.py, boxy z půdorysu) autor odmítl: „prázdný byt nebo kancelář“.
-
-| Kategorie | SC má | Wayfarer v1 měl | Chybí / co s tím |
-| --- | --- | --- | --- |
-| Tvar prostoru | průřez lichoběžník nebo osmiúhelník, zkosené horní rohy, strop 2,1–2,4 m, portály (rámy) každých 1–2 m lámou délku | pravoúhlý box 3,8 × 2,3 m, rovný strop | zkosení nahoře, portál na každém modulu kitu |
-| Konstrukce | odhalená žebra a nosníky, příhradový strop (Drake), kabelové svazky ve žlabech (žluté u MISC), potrubí s objímkami, vzduchotechnika | tenká žebra zapuštěná ve stěně | stropní žlab s kabely a trubkami, žebra přes celý profil |
-| Vrstvy stěny | 3 roviny: nosná konstrukce, panely s přesahem 2–8 cm, výbava na panelech; panely 0,6–1,2 m, dělené spárou | jedna rovina, velké plochy | díly kitu (trim sheet s normálovou mapou), přesahy, lišty |
-| Vybavení | skříňky se západkami, madla, hasicí přístroj, výdejník, obrazovka na rameni, lavice s čalouněním, žebřík; **ve shlucích** u dveří, konzolí, lůžka, techniky, mezi nimi klid | kvádry předmětů z půdorysu | výbava podle funkce místa, shluky, klidné plochy mezi |
-| Materiály | lakovaný kov ve 2–3 tónech, holý kov na hranách, prošívané čalounění (Argo, Drake), gumová a děrovaná protiskluzová podlaha, karbon (RSI), barevný akcent výrobce (Argo oranž, RSI modrá, Drake žlutá) | jednolité plochy jednoho materiálu | trim textury kitu přetónované do palety, oranžový akcent Halcyonu, guma, čalounění |
-| Decaly | velká čísla sekcí a dveří (01, 02), logo výrobce na stěně, výstražné pruhy u prahů a rampy, šipky, štítky CAUTION, čáry na podlaze | žádné | promítané decaly interiéru: místnosti, sekce, nouzové značky, šipky, pruhy |
-| Světlo | kontrast: svítidla v pouzdrech (lišty ve zkosení, kruhová stropní), kužele a tmavé kouty, akcentová a orientační světla u podlahy, displeje a kontrolky; teplé 3000–4000 K proti studeným displejům | rovnoměrně svítící strop, bodovky bez pouzder | světla v pouzdrech kitu, směrová, tmavá místa mezi nimi, akcent u podlahy |
-| Hustota detailu | 3 úrovně: velké (portály, panely), střední (skříňky, madla, ventilace 0,2–0,5 m), malé (šrouby, kontrolky, štítky 1–5 cm) | jen velké | všechny tři úrovně, malé hlavně u funkčních míst |
-
-Závěr: interiér SC stojí na **konstrukci a vrstvách** (profil, portály, žlaby, panely s hloubkou) a
-**kontrastním světle**. Předměty jsou až třetí vrstva. Postup: modulární kit (Quaternius, CC0) jako nosná
-vrstva, procedurální přesný detail a decaly navíc (`Docs/AssetPipeline_Modular.md`).
-
-**Kabina (kokpit) SC: rozbor a cílová čísla** (25. 9. 2026). Hlavní reference `cockpit_reference_holo.png`
-v repozitáři není; náhradou autorových 5 snímků kokpitů SC `starcitizenreference/cockpit_reference_1..5.png`
-(1, 2, 4 lehká stíhačka ve vesmíru / ve dne / v noci, 3 luxusní kabina, 5 těžký rám). Cíl = medián.
-
-| Kategorie | SC má | Wayfarer má (po konceptu A) | Chybí |
-| --- | --- | --- | --- |
-| Displeje | tenké skleněné panely, průhledné, svítí jen obsah, tenký technický rám s podsvíceným okrajem, na držácích; často jeden široký panel pod linií pohledu (3, 5) | dva MFD v tlustých chromových rámečcích, neprůhledné tmavé pozadí | sklo, průhlednost, edge light, držáky, široký centrální panel |
-| Fyzické ovladače | moduly (pods) s pouzdrem, rámem, šrouby a štítkem; páčky s kryty, voliče s drážkováním, kolébky, řady podsvícených tlačítek (12–18 mm), popisky u všeho | kulaté tečky a holé válce, pár kláves | skutečné tvary se zkosením, moduly, popisky |
-| Kontrolky | desítky LED v řadách, oranžové a bílé, některé blikají | pár emisivních teček | řady LED, blikání |
-| Palubní deska | nízká (horní hrana 23–47 % výšky obrazu od spodu, medián 35 %), mělká, dva moduly po stranách a střed otevřený dolů | horní hrana 39,8 % | mírně snížit a zúžit |
-| Rám skla | skoro bezrámová kabina (1–4): jen tenký rám nahoře (0,4–0,7 % šířky), nic v pásu ±15° kolem pohledu; těžký rám (5) má sloupky 3,5 % | středový kříž nahoře, plné boční stěny, výhled 24,5 % | tenký rám, bez kříže, větší skla (cíl výhledu medián 62 %, rozsah 45–75 %) |
-| Hologram lodi | vlastní loď jako modrý aditivní hologram vlevo nahoře (1, 2, 3) mimo pohled | drátěné kroužky radaru | hologram z meshe lodi |
-| Světlo | tmavá kabina, světlo hlavně z displejů, hologramů a kontrolek, tlumené akcenty | světlá krémová kabina, výplňová světla | tmavší základ, ostrůvky světla |
-| Barvy materiálů | tmavý grafit / gunmetal kolem displejů, světlé jen akcenty (3 bílá luxusní výjimka) | krémový rám kolem displejů | tmavé kolem displejů, krém jako akcent |
-
-Změřeno (1920×1080, `Tools/Blender/eye_view_metrics.py`, reference odečtené z mřížky):
-
-| Veličina | Ref 1 | Ref 2 | Ref 3 | Ref 4 | Ref 5 | **Medián (cíl ±15 %)** | Wayfarer před | Wayfarer po kroku 2 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Výhled ven (% plochy) | 62 | 51 | 75 | 62 | 45 | **62 (53–71)** | 24,5 | 60,8 |
-| Horní hrana desky (% od spodu) | 38 | 47 | 23 | 35 | 28 | **35 (30–40)** | 39,8 | 35,3 |
-| Nejširší sloupek v poli (% šířky) | 0,4 | 0,7 | 0,5 | 2 | 3,5 | **0,7** (≤ 2 přijatelné) | 42,1 (plné boční stěny) | 2,3 |
-| Sloupek v pásu ±15° | ne | ne | ne | ne | ne | **ne** | ne | ne |
-
-Krok 2 (25. 9. 2026): sklo začínalo 1–1,3 m nad okem, takže víc skla nepomohlo. **Oko musí sedět v pásu skla.**
-Kokpit se proto zvedl o 0,8 m: podlaha 1,15, oko 2,45, schody z kabiny. Dál:
-- zrušená podélná páteř a přední vzpěra (ležela v horizontu), vzpěry 6 cm;
-- horní trysky RCS ze skla na nos;
-- deska o 5 cm níž.
-
-Exteriér a silueta zůstaly stejné. Měření `eye_view_metrics.py` čte oko ze `SOCKET_Cockpit` otevřeného blendu.
+| Veličina | Cíl |
+| --- | --- |
+| Výhled ven (% plochy) | 62 (53–71) |
+| Horní hrana desky (% výšky od spodu) | 35 (30–40) |
+| Nejširší sloupek v poli (% šířky) | 0,7 (≤ 2 přijatelné) |
+| Sloupek v pásu ±15° kolem pohledu | žádný |
 
 **Livrej a lak** (`M_Ship_Layered`, setup Paint): zóny v prostoru lodi (cm) – `TopZ/TopSlope` sedlo, `BotZ/BotSlope`
 spodek, `TailX`, `NoseX`, pruh `StripeZ/StripeSlope/StripeW/StripeX0/X1` v `AccentColor`, zóny v `LiveryColor`;
@@ -591,29 +411,6 @@ uvnitř ní.
 (`camera_local` / `look_local` v metrech; X dopředu, Y doprava, Z nahoru; up vektor bere z lodi).
 Převod ze souřadnic layoutu: x − offset_x, −y, z − offset_z.
 
-## 3c. Exteriér hard-surface (AssetPipeline_Modular „Exteriér: hard-surface“)
-
-- AI trup je jen **objemová reference**. Loď se staví po dílech z JSON receptů v
-  `ArtSource/Ships/<Loď>/HardSurface/`.
-- **Rotační díly** staví `Tools/Blender/hs_build_part.py`:
-  - panely se skutečnými spárami, prstence, sání a tryska;
-  - bevel s harden normals a weighted normals;
-  - kit `HS_Kit` a GN `HS_KitInstancer`.
-  ```bash
-  MSYS_NO_PATHCONV=1 "$B" -b --factory-startup --python Tools/Blender/hs_build_part.py -- ArtSource/Ships/<Loď>/HardSurface/nacelle.json
-  MSYS_NO_PATHCONV=1 "$B" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_Nacelle_HS.blend --python Tools/Blender/hs_render_views.py -- --collection HS_<Loď>_Nacelle_UL --out Saved/HardSurface/hs --prefix hs
-  ```
-- **Smyčka:**
-  1. změř osu a profil z masek AI objemu;
-  2. uprav recept;
-  3. build;
-  4. `silhouette_compare`;
-  5. `hs_render_views` a list vedle sebe s Meshy výřezem;
-  6. prohlédni detail zblízka.
-- **Pilot gondoly:** IoU 0,854 → 0,894 jen úpravou osy a poloměrů v receptu.
-  - Otevřené: ohnout velké díly kitu podle povrchu, pylon, UV a materiály, import do UE.
-  - Celou loď nepřestavovat bez rozhodnutí autora.
-
 ## 4. Pojmenování a sockety (ShipPipeline kap. 1)
 
 | Co | Vzor |
@@ -643,9 +440,9 @@ Interior, Kitbash; `.blend/.glb/.fbx/.png` přes Git LFS, `*.blend1` ignorované
 ## 5. Export z Blenderu (ShipPipeline K, L1)
 
 ```bash
-cd /c/gamespace/gamespace/ArtSource/Ships/<Loď>
-MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_Meshy.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export" --validate-only
-MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_Meshy.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
+cd ArtSource/Ships/<Loď>      # z kořene repozitáře (i ve worktree), kvůli //Export
+MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_HS_Game.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export" --validate-only
+MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_HS_Game.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
 # bez Blenderu i Unrealu:
 python Tools/Blender/gamespace_ship_export.py --check-manifest ArtSource/Ships/<Loď>/Export/<Loď>_manifest.json
 python Tools/Assets/import_ship.py ArtSource/Ships/<Loď>/Export/<Loď>_manifest.json   # jen vypíše plán
@@ -663,7 +460,7 @@ python Tools/Assets/import_ship.py ArtSource/Ships/<Loď>/Export/<Loď>_manifest
 ## 6. Import do Unrealu (ShipPipeline L2–L3, WORKFLOW 2.2)
 
 ```powershell
-$env:GAMESPACE_SHIP_MANIFEST = "C:\gamespace\gamespace\ArtSource\Ships\<Loď>\Export\<Loď>_manifest.json"
+$env:GAMESPACE_SHIP_MANIFEST = (Resolve-Path "ArtSource\Ships\<Loď>\Export\<Loď>_manifest.json").Path
 .\Tools\run_editor_python.ps1 Tools\Assets\import_ship.py
 .\Tools\run_editor_python.ps1 Tools\Assets\build_main_menu.py
 .\Tools\run_editor_python.ps1 Tools\Assets\import_ship.py   # uklidí, co držela úvodní obrazovka
@@ -690,101 +487,21 @@ Masks, sRGB off. Rozměry mocnina dvou, trup 4096², malé díly 1–2K.
 ## 7. Testy a snímky
 
 ```powershell
-.\Tools\run_editor_python.ps1 Tools\Tests\test_ship_import.py
+.\Tools\Test.ps1                                   # offline (plán importu, export core, decaly, HLSL)
+.\Tools\Test.ps1 -UE -Filter *ship_import*
 .\Tools\run_editor_python.ps1 Tools\Tests\test_cockpit_displays.py
 .\Tools\run_editor_python.ps1 Tools\Tests\test_cockpit_frame.py
-.\Tools\Shots.ps1 -Preset ship_views -Package
-.\Tools\Shots.ps1 -Preset cockpit
-.\Tools\Shots.ps1 -Preset landing
+python Tools/Tests/test_ship_geometry.py <Loď>     # Blender headless, běží i na konci hs_assemble_ship.py
+.\Tools\Shots.ps1 -Preset ship_views -Editor
+.\Tools\Shots.ps1 -Preset cockpit -Editor
 ```
-Mimo UE: `python Tools/Assets/tests/test_import_ship_plan.py`, `python Tools/Blender/tests/test_ship_export_core.py`.
-Loď pod testem: `Tools/Tests/ship_under_test.py` (`SHIP`), úvodní obrazovka: `MENU_SHIP` v `build_main_menu.py`
-(po přidání dílu ji postav znovu). Kontroly kokpitu a free looku se bez dílu Interior a socketů Display_ přeskočí.
+Loď pod testem: `Tools/Tests/ship_under_test.py` (`SHIP = "Wayfarer"`), úvodní obrazovka: `MENU_SHIP` v
+`build_main_menu.py` (po přidání dílu ji postav znovu). Kontroly kokpitu a free looku se bez dílu Interior a socketů
+Display_ přeskočí.
 Po každém kroku lodi doplň `dossier.json` (u modelu klíč `model`: `renders`, `shots`, `known`), ulož rendery do
 `ArtSource/Ships/<Loď>/Renders/` (i `silhouette_compare render` masky `model_*.png`), snímky do `Docs/Shots/<Loď>/`
-a znovu publikuj Ship Matrix (1b).
-Když autor najde vizuální chybu, přidej do testu kontrolu, která by ji chytila.
-
-## 7b. Vizuální kritik před každým předáním (autor 25. 9. 2026)
-
-Nezávislý podagent `visual-critic` (`.claude/agents/visual-critic.md`, jen čtení, model Fable 5.1, effort
-max) porovná výsledek s referencí dřív, než ho uvidí autor. Doplňuje automatické kontroly
-(`test_ship_geometry.py`, testy UE), nenahrazuje je: musí proběhnout obojí.
-`test_ship_geometry.py` běží sám jako poslední krok `hs_assemble_ship.py` (autor 27. 9. 2026); při FAIL přestavba skončí
-kódem 1 (`HSASSEMBLE GEOTEST FAIL`).
-
-Postup:
-1. Srovnávací listy: `review.json` (téma, cíl, styl, sekce checklistu, dvojice reference / výsledek)
-   → `python Tools/Review/make_compare_sheet.py <review.json>` → `Docs/Reviews/<datum>_<téma>/`
-   (listy + `brief.md`). Záběry zblízka, ze střední vzdálenosti (chase nebo z oka) a zdálky; den,
-   noc a vesmír, kde to dává smysl.
-2. Spusť kritika. Dostane **jen** `brief.md` a listy. Žádný popis postupu, doby práce, záměrů ani
-   vlastní názor na výsledek. Prompt: „Přečti <složka>/brief.md a všechny listy v něm a vyhodnoť
-   je podle svého zadání.“
-3. FAIL → oprav body „musí se opravit“, nové snímky, nové listy, kritik znovu. Nejvýš 3 kola, pak
-   předej i s otevřenými body. Opravy po posledním kole ověř jedním kolem jen na opravené body (listy
-   jen s nimi, brief „ověř tyto body“); do limitu se nepočítá (autor 26. 9. 2026).
-   Když se skóre přes kola hýbe jen o bod, lokální opravy nestačí: hierarchii detailu, materiály
-   a světlo drží systémové věci (kit, rozmístění světel, decaly špíny, variace drsnosti).
-4. Žádnou výtku tiše nevynechat. U každé: opraveno / neopraveno a proč. Nesouhlas je v pořádku,
-   ale zdůvodněný.
-5. Recenze do `Docs/Reviews/<datum>_<téma>.md`: odkaz na listy, výstup kritika z každého kola,
-   reakce na každý bod.
-6. Výtku, kterou označíš jako neplatnou, dolož výřezem ze snímku (PIL: výřez, zvětšení, popisek
-   nahoře s číslem kola a bodu). Výřezy do `Docs/Reviews/<datum>_<téma>/evidence/` (autor 25. 9. 2026).
-7. Cena: kritik ~3–4 min na kolo (kokpit v2: 190 s, 177 s, 214 s), listy ~1 min. Dražší jsou opravy
-   a nové balení mezi koly (~12 min). Kritik občas přehlédne malý detail na vlastním listu (throttle,
-   popisky), proto se každá výtka ověřuje na snímku v plném rozlišení.
-6. V reportu autorovi: verdikt a skóre posledního kola, počet kol, výtky s reakcí, odkaz na recenzi.
-7. Když autor vytkne něco, co kritik přehlédl, doplň to do zadání kritika nebo do checklistu níže
-   a zapiš do `Docs/Reviews/calibration.md`.
-
-Kalibrace na historii (pět verzí, které autor zkritizoval): `Docs/Reviews/calibration.md`.
-
-<!-- critic-checklist:exterior -->
-- Povrch: rovné panely a čisté, zkosené hrany, které chytají světlo. Žádné měkké, zvlněné nebo
-  rozeklané plochy.
-- Tvar vrstvený z dílů s tloušťkou (desky nad rámem, zapuštěná místa, odhalená mechanika, trubky,
-  stupně). Hierarchie velký / střední / malý detail, zvlášť střední vrstva.
-- Detail je skutečný tvar nebo mesh decal s hloubkou, ne jen čáry na hladkém povrchu.
-- Materiály: primární a sekundární lak, holý kov, guma, tmavé mechanické díly; variace drsnosti.
-  Opotřebení jen na exponovaných hranách.
-- Decaly: čísla panelů, šablonové nápisy, výstražné pruhy, šipky, nýty. Shlukované, čitelné, nikdy
-  zrcadlené.
-- Světla lodi: poziční světla, osvětlené šachty, emisivní prvky dávají měřítko; nic přepáleného.
-- Silueta odpovídá výkresu / konceptu; nic netrčí šikmo, nic nevisí.
-<!-- /critic-checklist -->
-
-<!-- critic-checklist:interior -->
-- Tvar prostoru vychází z trupu: zalomené a zkosené stěny, nízký konstrukční strop, průřez spíš
-  lichoběžník / osmiúhelník. Pravoúhlá místnost s rovnými stěnami je chyba.
-- Vrstvy: žebra, kabelové žlaby a trubky pod stropem, panely s hloubkou a přesahy, madla, skříňky
-  se západkami, mřížky v podlaze, přípojky. Detail shlukovaný kolem funkčních míst.
-- Každý předmět má účel; žádné výplňové rekvizity, žádné krabicové pulty.
-- Materiály: čalounění, guma, broušený i lakovaný kov, akcenty palety; tmavá teplá architektura,
-  studené UI. Béžová / jednolitá / plastová plocha je chyba.
-- Decaly: označení místností a sekcí, nouzové značky, popisky ovladačů; čitelné, nezrcadlené.
-- Světlo: kontrast, svítidla v pouzdrech, kužely, tmavá místa, akcenty. Ploché rovnoměrné světlo
-  ze stropu je chyba, stejně jako přepálená skvrna.
-- Geometrie: žádné díry do prázdna, průniky stěnou, plovoucí díly, lišty mimo místo.
-<!-- /critic-checklist -->
-
-<!-- critic-checklist:cockpit -->
-- Z oka pilota: kolik je vidět ven, jak tlustý je rám skla, jestli výhled neblokuje hmota (rám,
-  police, deska). Nic nesmí stát v ose pohledu.
-- Palubní deska: tvarovaná, nízko, s hloubkou. Displeje zabudované do desky nebo jako skleněné
-  panely na držácích, ne samostatné desky položené na stole.
-- Fyzické ovladače: skutečné typy (kryté přepínače, otočné voliče, kolébky, podsvícená tlačítka),
-  každý s popiskem. Holé válce, kulaté tečky nebo prázdné desky jsou placeholdery.
-- Materiály: tmavý grafit kolem displejů, světlé jen akcenty; polstrování, kov, guma. Tvary nesmí
-  zmizet v černé.
-- Světlo: displeje a hologram svítí na okolí, ostrůvky světla, žádné přepálené skvrny; tvary čitelné
-  ve dne i v noci.
-- Čitelnost HUD a displejů má přednost před vším ostatním; žádné zdvojení nebo rozmazání.
-- Zadní pohled (dveře, stěna, okna): text nezrcadlený, stěny s detailem, čisté spoje stěny a skla,
-  žádné čáry přes okno.
-- HOTAS, sedadlo a hologram: detailní, ukotvené, žádné díly ve vzduchu.
-<!-- /critic-checklist -->
+a znovu publikuj Ship Matrix (1b). Když autor najde vizuální chybu, přidej do testu kontrolu, která by ji chytila.
+Předání vizuální práce: skill `visual-review`.
 
 ## 8. Checklist modelu
 

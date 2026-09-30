@@ -5,21 +5,21 @@ description: Visual verification and look tuning of the packaged Unreal game - T
 
 # Snímky, vzhled scény a výkon (UE 5.8)
 
-Zdroj pravdy: `Docs/WORKFLOW.md` kap. 6 (Shots), 6.1 (ladění za běhu), 7.3, 9.2 (nástrahy
-vykreslování + Insights), 11 (vzhled scény); `Docs/HANDOFF.md` kapitola o snímcích (~ř. 1370)
-a body 35, 42, 64, 65, 72.
+Podrobnosti: `Docs/WORKFLOW.md` kap. 6 (Shots, ladění za běhu 6.1), 7.3, 9.2 (nástrahy vykreslování +
+Insights), 11 (vzhled scény). Presety interiéru Wayfareru a kitu: skill `ship-interior`.
 
 ## Základní pravidla
 
-- **Vzhled se posuzuje jen v zabalené hře** (`C:\gamespace\Builds\Gamespace\Windows\gamespace.exe`).
-  Uncooked `-game` kreslí nové materiály šedě; PIE/editor se nespouští.
+- **Během kroku rychlá smyčka `-Editor`** (nezabalený projekt, snímkovač čeká na shadery; shoda se zabalenou hrou
+  na úrovni šumu). **Na konci kroku zabalená hra** (`-Package`): finální snímky, předání a všechna čísla výkonu.
+  PIE ani okno editoru se nespouští.
 - **Každý snímek si sám prohlédni** (Read na PNG) a porovnej s referencí (`starcitizenreference/`,
   `Docs/UI/`, `ArtSource/Reference/Mood/`). Autorovi napiš, co na snímcích je, a odděl, co musí
   posoudit sám (pocit, plynulost, jas na jeho monitoru, čitelnost za pohybu).
 - Autor hraje **1920 × 1080 na RTX 2060 6 GB**. Výchozí `Shots.ps1` je 1600 × 900 → FPS o ~40 %
   lepší a písmo RT jinak ostré. Na výkon, jas a čitelnost vždy `-Width 1920 -Height 1080`.
-- Hra během snímků převezme popředí okna. Když hra běží, balení se zasekne / nakopíruje starý exe –
-  hru nikdy neukončuj sám, požádej autora. Předem se neptej, jestli běží: balení pusť a zkontroluj čas exe.
+- Hra během snímků převezme popředí okna. Předem se neptej, jestli autorovi běží hra: `Package.ps1` ji sám
+  ukončí; po balení zkontroluj čas exe.
 
 ## Tools/Shots.ps1
 
@@ -149,8 +149,8 @@ Kód: `Source/gamespace/SpacePostTuning.cpp`, `Source/gamespace/SpaceInteriorTun
 - Expozice: vesmír pevně EV100 3; `CockpitExposureBias` −0,7 EV (displeje jsou emisivní, kompenzace
   `emissive_strength` 2,9 v `<Ship>_setup.json`), `QuantumExposureBias` −0,8 (`SpaceshipPawn.h`).
   Kokpit key 1,5 / fill 0,8 (`cockpit_light` ve snímku).
-- Interiér podle SC: gunmetal 0,33/0,33/0,34, pracovní světla 5200 K, teplé světelné lišty
-  (`MI_KitStrip`, emise 14).
+- Interiér: paleta kitu podle výrobce v `ArtSource/Kit/kit_rules.json` (skill `ship-interior`); starý interiér
+  Steadfastu má gunmetal 0,33/0,33/0,34, pracovní světla 5200 K a lišty `MI_KitStrip`.
 - `r.Tonemapper.Sharpen=0.6` v `Config/DefaultEngine.ini` vrací hranu po TSR.
 - Lumen kvalita 2 (reflections, final gather) nic nepřidá a stojí ~1 FPS; GI je jediná drahá skupina.
 
@@ -253,4 +253,5 @@ je v sekundách, řaď podle `Excl`.
 | `interior_walk` | chůze postavy (`camera: pawn`, `space.Walk`), výsledek i v logu |
 
 Nový preset: zkopíruj nejbližší, napiš `_comment` (co, proč, `Run: Tools/Shots.ps1 -Preset <x> ...`)
-a první snímek udělej jako warmup. Přidej ho i do tabulky presetů ve WORKFLOW kap. 6.
+a první snímek udělej jako warmup. Úplný seznam jsou soubory `Tools/Shots/*.json` s `_comment`; tabulky ve skillech
+uvádějí jen ty, které se používají opakovaně.

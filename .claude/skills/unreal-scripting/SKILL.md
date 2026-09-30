@@ -1,6 +1,6 @@
 ---
 name: unreal-scripting
-description: Headless Unreal Engine 5.8 work on the gamespace project - C++ editor build (Build.bat gamespaceEditor), Live Coding vs. editor restart, unity-build differences of the game target, headless Python via Tools/run_editor_python.ps1, the test list (Tools/Tests/*.py plus plain-Python tests), Tools/Package.ps1 and cooking (DirectoriesToAlwaysCook, path-loaded assets), git/commit rules, and the known traps for environment, content/cooking, C++/UHT and Python in UE (unreal.Rotator order, StaticMeshEditorSubsystem None, set_collision_enabled not saved, material pin names, tags vs. labels). Load before building C++, running an editor Python script or test, packaging the game, or committing.
+description: Headless Unreal Engine 5.8 work on the gamespace project - C++ editor build (Tools/Build.ps1, engine path from Tools/UERoot.ps1 / GAMESPACE_UE_ROOT), Live Coding vs. editor restart, unity-build differences of the game target, headless Python via Tools/run_editor_python.ps1, the test runner Tools/Test.ps1 and the test list (Tools/Tests/*.py plus plain-Python tests), Tools/Package.ps1 and cooking (DirectoriesToAlwaysCook, path-loaded assets), and the known traps for environment, content/cooking, C++/UHT and Python in UE (unreal.Rotator order, StaticMeshEditorSubsystem None, set_collision_enabled not saved, material pin names, tags vs. labels). Load before building C++, running an editor Python script or test, packaging the game, or committing.
 ---
 
 # Unreal headless: build, Python, testy, balení, git
@@ -14,7 +14,7 @@ kroky s přesnými názvy. **Neměř a netestuj v PIE ani v okně editoru bez vy
 | Co | Kde |
 | --- | --- |
 | Engine | `$env:GAMESPACE_UE_ROOT`, jinak `C:\Program Files\Epic Games\UE_5.8`; jediné místo `Tools/UERoot.ps1` |
-| Projekt | `C:\gamespace\gamespace\gamespace.uproject` |
+| Projekt | `gamespace.uproject` v kořeni checkoutu (hlavní `C:\gamespace\gamespace`, případně worktree) |
 | C++ | `Source/gamespace/` (moduly v `gamespace.Build.cs`) |
 | Python knihovna pro skripty | `Content/Python/gamespace_assets.py` (na `sys.path`, `import gamespace_assets`) |
 | Skripty assetů | `Tools/Assets/*.py` (import_ship, import_interior, build_space_scene, add_*_input, ship_materials…) |
@@ -33,7 +33,7 @@ PowerShell, **editor musí být zavřený**:
 - **Live Coding** stačí jen na změny těl funkcí. Nové soubory, `UPROPERTY`, `UFUNCTION`, změny
   hlaviček = zavřít editor + plný build. **Autorovi to vždy napiš** (Live Coding / restart editoru).
 - **Herní target má jiné seskupení unity buildu než editor.** Chyba (kolize jmen) se může ukázat
-  až v `Package.ps1`. Viz 9.4a níže.
+  až v `Package.ps1` (WORKFLOW 9.4 a).
 - Nový modul v `gamespace.Build.cs` je povolený (Smart App Control je vypnutý). Když build spadne
   na Code Integrity (3077 / 0x800711C7), řekni to autorovi a **na bezpečnostních nastaveních
   Windows nic neměň**.
@@ -79,17 +79,17 @@ Test selže na nenulovém exit kódu, tracebacku, řádku `SUMMARY … FAIL` a u
 | `test_flight_hud_sc1c.py`, `test_flight_hud_sc3.py` | HUD, značka dráhy letu |
 | `test_cockpit_displays.py`, `test_cockpit_frame.py` | MFD, radar, self status, oko a deska kokpitu |
 | `test_quantum_sc4.py`, `test_speed_tunnel.py` | quantum drive, tunel skoku |
-| `test_ship_import.py` | import lodi z manifestu (volitelně `GAMESPACE_SHIP_MANIFEST`) |
-| `test_interior.py` | interiér Steadfastu: usage flagy, výchozí textury samplerů, `M_KitTrim`, tagy, světla |
+| `test_ship_import.py` | import lodi z manifestu (volitelně `GAMESPACE_SHIP_MANIFEST`), orientace decalů |
+| `test_kit_showroom.py` | kit: barvy vrcholů po exportu z UE, štítky sousedů, gravitace, start, kolize |
+| `test_interior.py` | starý interiér Steadfastu: usage flagy, výchozí textury samplerů, `M_KitTrim`, tagy, světla |
 | `test_scene_look.py` | uložená úroveň proti receptu (atmosféra, post process, lak) – chytá zapomenutý `build_space_scene.py` / `import_ship.py` |
 | `test_planet_l3.py`, `test_planet_rocks.py`, `test_character_l6.py`, `test_menu_settings.py` | planeta, kameny, postava, menu a nastavení |
 
-Testovaná loď je jmenovaná na **jednom místě**: `Tools/Tests/ship_under_test.py` (`SHIP = None`, dokud
-není importovaná nová loď; první stíhačka byla 24. 9. 2026 odstraněna). Testy, které potřebují model
-(displeje a rám kokpitu, sockety podvozku, import lodi), do té doby vypíšou SKIP „no ship model yet —
-new ship in design“; letové testy běží na nativním `ASpaceshipPawn` (kvádr místo trupu), který je i
-výchozím pawnem `BP_SpaceGameMode`. Úvodní obrazovka (`build_main_menu.py`) loď ukáže, až bude v
-`MENU_SHIP`.
+Testovaná loď je jmenovaná na **jednom místě**: `Tools/Tests/ship_under_test.py` (`SHIP = "Wayfarer"`).
+Bez modelované lodi (`SHIP = None`) vypíšou testy, které potřebují model (displeje a rám kokpitu, sockety
+podvozku, import lodi), SKIP a letové testy běží na nativním `ASpaceshipPawn`. `ship_under_test.check_setup_values`
+kontroluje hodnoty ze `<Loď>_setup.json` na CDO `BP_Ship_<Loď>`. Úvodní obrazovka ukazuje loď z `MENU_SHIP`
+v `build_main_menu.py`.
 
 Mimo UE (obyčejný `python <soubor>`, všechny spouští `Test.ps1`):
 - `Tools/Assets/tests/test_import_ship_plan.py`, `Tools/Blender/tests/test_ship_export_core.py`,
@@ -101,7 +101,7 @@ Headless **nejde** ověřit: vzhled (→ snímky `Tools\Shots.ps1`, skill unreal
 Slate menu, skutečné kolize (v commandletu traces/sweepy nezasáhnou).
 Pravidlo: když se opraví chyba, kterou autor viděl, přidej do testu kontrolu, která by ji chytila
 (příklad `no_nanite_parts` v `test_import_ship_plan.py`, usage flagy v `test_interior.py`).
-Úplný popis testů: HANDOFF kap. 8.
+Co přesně test kontroluje, říká jeho docstring a řádky `PASS`/`FAIL`.
 
 ## 4. Balení a cookování
 
@@ -110,11 +110,11 @@ Pravidlo: když se opraví chyba, kterou autor viděl, přidej do testu kontrolu
 .\Tools\Play.ps1        # spuštění; -Windowed -Width 1600 -Height 900 pro okno
 ```
 
-- Editor musí být zavřený. Autor hraje **zabalenou hru**, po změně C++ nebo obsahu vždy znovu balit.
-- Když autor hru hraje, balení visí nebo nakopíruje starý exe. **Po zabalení zkontroluj čas
-  `gamespace.exe`.** Neptej se předem, jestli hra běží – prostě balíš; ozvi se jen při zaseknutí.
-- `Package.ps1` sám ukončí proces `gamespace` (zaseknutý snímkový běh) a při „Failed reading oplog
-  from Zen“ restartuje `zenserver` a balí ještě jednou.
+- Editor musí být zavřený. Hra se balí **na konci kroku** (během kroku rychlá smyčka `Shots.ps1 -Editor`);
+  autor hraje zabalenou hru, takže předání je vždy se zabalenou hrou.
+- Neptej se předem, jestli hra běží – prostě balíš. `Package.ps1` sám ukončí každý proces `gamespace`
+  (zaseknutý snímkový běh i puštěnou hru) a při „Failed reading oplog from Zen“ restartuje `zenserver` a balí
+  ještě jednou. **Po zabalení zkontroluj čas `gamespace.exe`**; ozvi se autorovi jen při zaseknutí.
 - Selhání: `PACKAGE FAILED` → UAT log v `<engine>\Engine\Programs\AutomationTool\Saved\Logs` (cestu vypíše skript)
   a cook log `%APPDATA%\Unreal Engine\AutomationTool\Logs\...\Log.txt`.
 - Po buildu kontroluje `Manifest_UFSFiles_Win64.txt`: 12 klíčových assetů (mapy, zvuky, input,
@@ -130,30 +130,20 @@ Musí být ve složce z `Config/DefaultGame.ini`:
 
 Nový adresář načítaný podle cesty = přidat řádek **a** doplnit kontrolu do `$required` v `Package.ps1`.
 
-Uncooked `-game` (bez zabalení) kreslí nové materiály šedě – vzhled posuzuj jen v zabaleném buildu.
+Nezabalený projekt (`Shots.ps1 -Editor`, `Play.ps1 -Editor`) kreslí nové materiály šedě jen do doby, než se
+dopřeloží shadery; snímkovač na ně čeká (WORKFLOW 9.2 e). Finální snímky a měření výkonu ze zabalené hry.
 
 ## 5. Git
 
-- Každý hotový krok (i drobnost nebo dokumentace) **commit + push**: `git push origin main`
-  (https://github.com/michaelkocandrle/gamespace). Nic nenechávej jen lokálně.
-- **Před commitem `git status`** a kontrola, co jde dovnitř.
-- **Nikdy nepřidávej:**
-  - `Docs/UI/Screenshot 2026-09-21 150400.png`
-  ```bash
-  git add -A -- . ':!Docs/UI/Screenshot 2026-09-21 150400.png'
-  ```
-- **Nikdy force push**, žádné přepisování historie, žádné `--no-verify`.
-- Zpráva anglicky, krátký nadpis, na konci:
-  `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`
-- `.uasset`/`.umap` a zdrojová grafika jdou přes Git LFS (`.gitattributes`).
-- Po větším kroku aktualizuj `Docs/HANDOFF.md` (kap. 5 hotové, kap. 11 známé problémy,
-  kap. 13 commity); po změně systému i `README.md`.
+Pravidla (commit, `git add` s výjimkou, podpis, push, zákaz force push) jsou jen v `CLAUDE.md`. Navíc:
+- Nikdy `--no-verify`. `.uasset`/`.umap` a zdrojová grafika jdou přes Git LFS (`.gitattributes`).
+- Po kroku uprav `Docs/CURRENT.md`; po změně systému i `README.md`.
 
 ## 6. Nástrahy (příznak → příčina → řešení)
 
 ### Prostředí (WORKFLOW 9.1)
-- **Balení visí / starý exe** → běží hra z `Builds` nebo visí spadlý proces → autor ať hru zavře,
-  zkontroluj čas `gamespace.exe`.
+- **Balení visí / starý exe** → soubor drží jiný proces (hru ukončí `Package.ps1` sám) → zkontroluj čas
+  `gamespace.exe`, při zaseknutí napiš autorovi.
 - **`run_editor_python.ps1` z bashe nefunguje** → `$PSScriptRoot` → nástroj PowerShell.
 - **Bash heredoc rozbije Python** → apostrofy, `\U` v cestách → Write do scratchpadu, `r"..."`.
 - **Blender z Git Bash mění cesty** `/c/...`, `//Export` → vždy `MSYS_NO_PATHCONV=1`.
@@ -217,6 +207,4 @@ Uncooked `-game` (bez zabalení) kreslí nové materiály šedě – vzhled posu
 
 ## 7. Odpověď autorovi po kroku
 
-Co se změnilo a proč; které testy prošly; které snímky jsi sám prohlédl; že je build připravený
-v `C:\gamespace\Builds\Gamespace\Windows\gamespace.exe`; přesný testovací scénář (klávesy, kam letět);
-co posoudí jen autor; Live Coding vs. restart editoru; rizika. Podrobně WORKFLOW kap. 1.
+Obsah odpovědi určuje `CLAUDE.md` (brána 10); po změně C++ v editoru navíc Live Coding vs. restart editoru.

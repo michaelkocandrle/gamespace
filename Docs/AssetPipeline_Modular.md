@@ -1,5 +1,10 @@
 # Modulární AI asset pipeline: kdy generovat vcelku, kdy rozkládat na díly
 
+> **Stav 30. 9. 2026:** části o lodích jsou překonané. Trup lodi se staví přesně z výkresu (`hs_build_ship`, AI jen
+> reference stylu), nosnou vrstvou interiérů je vlastní kit (`Tools/Kit`, ne Quaternius) a paleta je v
+> `ArtSource/Kit/kit_rules.json`. Platí pravidlo níže pro assety mimo lodě. Aktuální postupy: skilly
+> `ship-pipeline`, `ship-interior`, `asset-sources`.
+
 Zjištěno a zapsáno 22. 9. 2026, po srovnání dvou výsledků: exteriér první stíhačky (Meshy;
 odstraněna 24. 9. 2026) dopadl dobře, interiér kokpitu ne, i po několika kolech opravování textur a osvětlení. Rozdíl
 není v úsilí ani v promptu — je v tom, **co přesně se po AI chtělo vygenerovat najednou**.
@@ -275,7 +280,7 @@ jak draho vyjde licence:
 | --- | --- | --- | --- |
 | **Quaternius** ([packs](https://quaternius.com/packs/)) | **CC0**, bez atribuce | modulární sci-fi interiéry: Modular Sci-Fi MegaKit (270+ dílů), Ultimate Modular Sci-Fi (46), Sci-Fi Essentials Kit | FBX/OBJ/glTF/Blend; stahuje se přes itch.io, přímý odkaz na webu není |
 | **Poly Haven** | CC0 | fotoskeny reálných věcí: sudy, bedny, nářadí, svěráky, ventily (521 modelů, z toho ~177 průmyslových) | **ne sci-fi**; dobré na nákladový prostor a dílnu Steadfastu, ne na kokpit. Už máme `fetch_polyhaven.py` |
-| **ambientCG** | CC0 | materiály, ne modely | zapsáno ve `WORKFLOW.md` bod 14 |
+| **ambientCG** | CC0 | materiály, ne modely | stahuje se přes API (skill `asset-sources`) |
 | **Sketchfab** | většinou **CC-BY** (CC0 u sci-fi prakticky nula) | panely, terminály, konzole, dveře, sedačky, bedny v rozumné hustotě (350–8 000 ploch) | **vyžaduje uvedení autora** → `Docs/Credits.md`; stahování chce přihlášení/token |
 | Fab, CGTrader, TurboSquid | placené i free s různými licencemi | kvalitní hotové kity | licenci číst kus po kuse |
 
