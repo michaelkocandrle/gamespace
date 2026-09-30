@@ -173,7 +173,7 @@ Kód: `Source/gamespace/SpacePostTuning.cpp`, `Source/gamespace/SpaceInteriorTun
 ```powershell
 & C:\gamespace\Builds\Gamespace\Windows\gamespace.exe /Game/Maps/TestSpace -windowed -ResX=1920 -ResY=1080 -nosplash -unattended `
   -ShotList="<scénář.json>" -ShotOut="<složka>" -trace=cpu,frame -statnamedevents -tracefile="<soubor>.utrace"
-& "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealInsights.exe" -OpenTraceFile="<soubor>.utrace" -NoUI -AutoQuit `
+& "$(.\Tools\UERoot.ps1)\Engine\Binaries\Win64\UnrealInsights.exe" -OpenTraceFile="<soubor>.utrace" -NoUI -AutoQuit `
   -ExecOnAnalysisCompleteCmd="TimingInsights.ExportTimerStatistics <soubor>.csv"
 ```
 

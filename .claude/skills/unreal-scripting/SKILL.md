@@ -13,7 +13,7 @@ kroky s přesnými názvy. **Neměř a netestuj v PIE ani v okně editoru bez vy
 
 | Co | Kde |
 | --- | --- |
-| Engine | `C:\Program Files\Epic Games\UE_5.8` |
+| Engine | `$env:GAMESPACE_UE_ROOT`, jinak `C:\Program Files\Epic Games\UE_5.8`; jediné místo `Tools/UERoot.ps1` |
 | Projekt | `C:\gamespace\gamespace\gamespace.uproject` |
 | C++ | `Source/gamespace/` (moduly v `gamespace.Build.cs`) |
 | Python knihovna pro skripty | `Content/Python/gamespace_assets.py` (na `sys.path`, `import gamespace_assets`) |
@@ -27,7 +27,7 @@ kroky s přesnými názvy. **Neměř a netestuj v PIE ani v okně editoru bez vy
 PowerShell, **editor musí být zavřený**:
 
 ```powershell
-& "C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" gamespaceEditor Win64 Development -Project="C:\gamespace\gamespace\gamespace.uproject" -WaitMutex -FromMsBuild
+.\Tools\Build.ps1      # Build.bat gamespaceEditor Win64 Development pro projekt vedle složky Tools
 ```
 
 - **Live Coding** stačí jen na změny těl funkcí. Nové soubory, `UPROPERTY`, `UFUNCTION`, změny
@@ -62,6 +62,16 @@ PowerShell, **editor musí být zavřený**:
 Spusť ty, kterých se změna týká; po větší změně všechny. Každý tiskne `SUMMARY OK/FAILED`
 (`test_planet_rocks.py` tiskne `ROCKTEST PASS/FAIL` + souhrn).
 
+```powershell
+.\Tools\Test.ps1                    # offline: compileall + testy bez UE a Blenderu (~20 s), totéž běží v CI
+.\Tools\Test.ps1 -UE -Filter *sc2*  # + testy UE podle masky (editor zavřený, C++ zbuildované)
+.\Tools\Test.ps1 -All               # offline + Blender + všechny testy UE (~30 min)
+```
+
+Test selže na nenulovém exit kódu, tracebacku, řádku `SUMMARY … FAIL` a u UE i na chybějícím `SUMMARY`
+(test nedoběhl). `run_editor_python.ps1` od 30. 9. 2026 hlásí `RESULT: FAILED` i po `SUMMARY FAILED`
+(dřív jen po výjimce). Logy v `Saved/Tests/<čas>/`.
+
 | Test (`Tools/Tests/`) | Pokrývá |
 | --- | --- |
 | `test_ifcs_sc1.py`, `test_boost_afterburner_sc1b.py`, `test_flight_modes.py`, `test_free_look.py` | let, IFCS, boost, afterburner, výstup, kolize lodi |
@@ -81,9 +91,11 @@ new ship in design“; letové testy běží na nativním `ASpaceshipPawn` (kvá
 výchozím pawnem `BP_SpaceGameMode`. Úvodní obrazovka (`build_main_menu.py`) loď ukáže, až bude v
 `MENU_SHIP`.
 
-Mimo UE (obyčejný `python <soubor>`):
-- `Tools/Assets/tests/test_import_ship_plan.py`
-- `Tools/Blender/tests/test_ship_export_core.py`
+Mimo UE (obyčejný `python <soubor>`, všechny spouští `Test.ps1`):
+- `Tools/Assets/tests/test_import_ship_plan.py`, `Tools/Blender/tests/test_ship_export_core.py`,
+  `Tools/Blender/tests/test_silhouette_compare.py` (render v Blenderu jen s `-Blender`)
+- `Tools/Tests/test_material_hlsl.py`, `Tools/Tests/test_decal_orientation.py`
+- `Tools/Tests/test_ship_geometry.py` (Blender headless, `Test.ps1 -Blender`)
 
 Headless **nejde** ověřit: vzhled (→ snímky `Tools\Shots.ps1`, skill unreal-shots-and-look), zvuk,
 Slate menu, skutečné kolize (v commandletu traces/sweepy nezasáhnou).
@@ -103,7 +115,7 @@ Pravidlo: když se opraví chyba, kterou autor viděl, přidej do testu kontrolu
   `gamespace.exe`.** Neptej se předem, jestli hra běží – prostě balíš; ozvi se jen při zaseknutí.
 - `Package.ps1` sám ukončí proces `gamespace` (zaseknutý snímkový běh) a při „Failed reading oplog
   from Zen“ restartuje `zenserver` a balí ještě jednou.
-- Selhání: `PACKAGE FAILED` → UAT log v `C:\Program Files\Epic Games\UE_5.8\Engine\Programs\AutomationTool\Saved\Logs`
+- Selhání: `PACKAGE FAILED` → UAT log v `<engine>\Engine\Programs\AutomationTool\Saved\Logs` (cestu vypíše skript)
   a cook log `%APPDATA%\Unreal Engine\AutomationTool\Logs\...\Log.txt`.
 - Po buildu kontroluje `Manifest_UFSFiles_Win64.txt`: 12 klíčových assetů (mapy, zvuky, input,
   `M_SpaceDust`, `BP_SpaceGameMode`, písma). Chybí-li, `PACKAGE INCOMPLETE`.

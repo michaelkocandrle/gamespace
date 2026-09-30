@@ -241,7 +241,7 @@ Nástrahy (23. 9. 2026):
 ## 4. C++ build, Live Coding, unity build
 
 ```powershell
-& "C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" gamespaceEditor Win64 Development -Project="C:\gamespace\gamespace\gamespace.uproject" -WaitMutex -FromMsBuild
+.\Tools\Build.ps1      # Build.bat gamespaceEditor Win64 Development; engine z Tools/UERoot.ps1 (GAMESPACE_UE_ROOT)
 ```
 
 - **Editor musí být zavřený.** Headless skripty editor spouštějí a samy zavírají.
@@ -592,7 +592,7 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
 & C:\gamespace\Builds\Gamespace\Windows\gamespace.exe /Game/Maps/TestSpace -windowed -ResX=1600 -ResY=900 -nosplash -unattended `
   -ShotList="<scénář.json>" -ShotOut="<složka>" -trace=cpu,frame -statnamedevents -tracefile="<soubor>.utrace"
 # export statistik časovačů do CSV (čekat na konec procesu: Start-Process ... -PassThru, WaitForExit)
-& "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealInsights.exe" -OpenTraceFile="<soubor>.utrace" -NoUI -AutoQuit `
+& "$(.\Tools\UERoot.ps1)\Engine\Binaries\Win64\UnrealInsights.exe" -OpenTraceFile="<soubor>.utrace" -NoUI -AutoQuit `
   -ExecOnAnalysisCompleteCmd="TimingInsights.ExportTimerStatistics <soubor>.csv"
 ```
 

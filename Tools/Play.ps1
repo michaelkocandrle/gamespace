@@ -33,7 +33,7 @@ param(
     [int]$Width = 0,
     [int]$Height = 0,
     [string]$Project = (Join-Path $PSScriptRoot "..\gamespace.uproject"),
-    [string]$EngineDir = "C:\Program Files\Epic Games\UE_5.8",
+    [string]$EngineDir = (& (Join-Path $PSScriptRoot "UERoot.ps1")),
     # Extra arguments for the game, e.g. '-ExecCmds="stat fps"'
     [string]$Extra = ""
 )

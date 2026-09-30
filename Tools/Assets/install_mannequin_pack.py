@@ -4,6 +4,8 @@ Plain Python, editor closed:
 
     python Tools/Assets/install_mannequin_pack.py [--engine "C:/Program Files/Epic Games/UE_5.8"]
 
+Without --engine: $env:GAMESPACE_UE_ROOT, else the default in Tools/UERoot.ps1 (the one place that names it).
+
 This is what the editor's "Add Feature or Content Pack > Characters" does for a template's
 shared resources: the files under Templates/TemplateResources/High/Characters/Content go to
 Content/Characters, which mounts them at /Game/Characters/Mannequins - the path the assets
@@ -12,6 +14,7 @@ reference each other by. Files that already exist are left alone; nothing is ren
 
 import argparse
 import os
+import re
 import shutil
 import sys
 
@@ -32,9 +35,17 @@ REQUIRED = [
 ]
 
 
+def default_engine():
+    """$env:GAMESPACE_UE_ROOT, else the $default line of Tools/UERoot.ps1 (what the PowerShell tools use)."""
+    if os.environ.get("GAMESPACE_UE_ROOT"):
+        return os.environ["GAMESPACE_UE_ROOT"]
+    with open(os.path.join(REPO, "Tools", "UERoot.ps1"), encoding="utf-8") as f:
+        return re.search(r'^\$default\s*=\s*"([^"]+)"', f.read(), re.M).group(1)
+
+
 def main(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--engine", default=r"C:\Program Files\Epic Games\UE_5.8")
+    parser.add_argument("--engine", default=default_engine())
     args = parser.parse_args(argv)
 
     source = os.path.join(args.engine, PACK)

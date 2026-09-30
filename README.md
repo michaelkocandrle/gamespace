@@ -1028,8 +1028,12 @@ was the first). If a build or editor start ever fails with Code Integrity event 
    pick up newly added source files):
 
    ```
-   "C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" gamespaceEditor Win64 Development -Project="C:\gamespace\gamespace\gamespace.uproject" -WaitMutex
+   .\Tools\Build.ps1
    ```
+
+   It runs `Build.bat gamespaceEditor Win64 Development` for the project next to `Tools/`. The engine
+   folder is `$env:GAMESPACE_UE_ROOT`, or `C:\Program Files\Epic Games\UE_5.8`; `Tools/UERoot.ps1` is
+   the one place that names it. `.\Tools\Test.ps1` runs the offline tests (`-UE` adds the Unreal ones).
 
 2. Open the project. It starts on `TestSpace`.
 3. Press Play. `W` to accelerate, mouse to steer, `Q` / `E` to roll.

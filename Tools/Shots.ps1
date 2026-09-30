@@ -88,7 +88,7 @@ if ($Package) {
 }
 
 if ($Editor) {
-    $exe = "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe"
+    $exe = Join-Path (& (Join-Path $PSScriptRoot "UERoot.ps1")) "Engine\Binaries\Win64\UnrealEditor.exe"
     $settings = Join-Path $projectDir "Saved\Config\WindowsEditor\GameUserSettings.ini"
     $TimeoutSeconds = [Math]::Max($TimeoutSeconds, 1200)     # the first run after a change compiles shaders
 } else {

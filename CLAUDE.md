@@ -74,15 +74,16 @@ Každý objekt musí mít účel; žádná výplň a žádné kompromisy.
 
 ## Příkazy
 
-Build editoru (PowerShell):
+Build editoru (PowerShell; engine z `$env:GAMESPACE_UE_ROOT`, jinak `C:\Program Files\Epic Games\UE_5.8`, jediné místo je `Tools/UERoot.ps1`):
 
 ```powershell
-& "C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" gamespaceEditor Win64 Development -Project="C:\gamespace\gamespace\gamespace.uproject" -WaitMutex -FromMsBuild
+.\Tools\Build.ps1
 ```
 
-Headless Python v UE a testy. Spouštěj **nástrojem PowerShell**; přes bash se rozbije `$PSScriptRoot`.
+Testy a headless Python v UE. Spouštěj **nástrojem PowerShell**; přes bash se rozbije `$PSScriptRoot`.
 
 ```powershell
+.\Tools\Test.ps1                 # offline testy + compileall, jednotný souhrn (-Blender, -UE, -All, -Filter *landing*)
 .\Tools\run_editor_python.ps1 Tools\Tests\test_interior.py
 ```
 

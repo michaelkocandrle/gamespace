@@ -21,7 +21,7 @@ param(
 
     [string]$Project = (Join-Path $PSScriptRoot "..\gamespace.uproject"),
 
-    [string]$EngineDir = "C:\Program Files\Epic Games\UE_5.8"
+    [string]$EngineDir = (& (Join-Path $PSScriptRoot "UERoot.ps1"))
 )
 
 $ErrorActionPreference = "Stop"
@@ -50,7 +50,8 @@ $pythonLines = Select-String -Path $log -Pattern "LogPython:" | Where-Object { $
 $pythonLines | ForEach-Object { $_.Line -replace "^\[[^\]]*\]\[[^\]]*\]", "" }
 Select-String -Path $log -Pattern "^Traceback|^\s+File |^\w+Error:" | ForEach-Object { $_.Line }
 
-$failed = Select-String -Path $log -Pattern "LogPython: Error|^Traceback" -Quiet
+# The tests log their verdict with unreal.log ("... SUMMARY FAILED"), which is no LogPython error.
+$failed = Select-String -Path $log -Pattern "LogPython: Error|^Traceback|LogPython: .*SUMMARY (FAIL|FAILED)\b" -Quiet
 Write-Host "Full log: $log"
 
 # No Python errors can also mean the script never started, e.g. when the editor aborts on a

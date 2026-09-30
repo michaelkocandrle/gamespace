@@ -3,7 +3,7 @@
     python Tools/Blender/tests/test_silhouette_compare.py
 
 Plain Python (numpy + Pillow). The last test renders Blender's default cube headless and is skipped
-when Blender 5.2 is not installed.
+when Blender 5.2 is not installed or GAMESPACE_SKIP_BLENDER is set (Tools/Test.ps1 without -Blender, CI).
 """
 import json
 import os
@@ -130,6 +130,9 @@ def test_guide(tmp):
 def test_blender_render(tmp):
     if not os.path.exists(sc.BLENDER):
         print("SKIP blender render (no Blender 5.2)")
+        return
+    if os.environ.get("GAMESPACE_SKIP_BLENDER"):
+        print("SKIP blender render (GAMESPACE_SKIP_BLENDER; Tools/Test.ps1 -Blender runs it)")
         return
     # Default cube (2 m): every view is a square.
     for view in sc.VIEWS:
