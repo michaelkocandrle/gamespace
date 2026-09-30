@@ -72,23 +72,23 @@ soubory `Tools/Shots/*.json` s `_comment` (tabulky ve skillech uvádějí jen op
 - Nepopsané presety (`kit_perf_*`, `night_views`, `compare_*` …): popisuje je jejich `_comment`.
 - `SyntaxWarning` v docstringách šesti skriptů `Tools/Assets` (zapsáno v `CURRENT.md`).
 
-## Kontext načítaný do session (řádky)
+## Kontext načítaný do session (řádky, stav po krocích 1–6)
 
 | Co | Před (44c26cc) | Po | Změna |
 | --- | --- | --- | --- |
 | `CLAUDE.md` (vždy) | 158 | 111 | −47 |
-| `Docs/CURRENT.md` (vždy, nově přes hook) | – | 71 | +71 |
-| **Vždy načtené celkem** | **158** | **182** | **+24** (místo dřívějšího čtení HANDOFF podle potřeby) |
+| `Docs/CURRENT.md` (vždy, nově přes hook) | – | 73 | +73 |
+| **Vždy načtené celkem** | **158** | **184** | **+26** (místo dřívějšího čtení HANDOFF podle potřeby) |
 | `ship-interior/SKILL.md` | 968 | 237 | −731 |
 | `ship-pipeline/SKILL.md` | 822 | 539 | −283 |
 | `blender-mcp/SKILL.md` | 258 | 162 | −96 |
 | `unreal-shots-and-look/SKILL.md` | 256 | 257 | +1 |
 | `asset-sources/SKILL.md` | 225 | 227 | +2 |
-| `unreal-scripting/SKILL.md` | 210 | 210 | 0 (test runner +, git a odpověď −) |
+| `unreal-scripting/SKILL.md` | 210 | 211 | +1 (test runner a registr +, git a odpověď −) |
 | `cockpit-displays/SKILL.md` | 203 | 202 | −1 |
-| `visual-review/SKILL.md` (nový) | – | 87 | +87 |
-| **Těla skillů celkem** (načtou se při použití skillu) | **2 942** | **1 921** | **−1 021 (−35 %)** |
-| **CLAUDE.md + skilly** | **3 100** | **2 032** | **−1 068 (−34 %)** |
+| `visual-review/SKILL.md` (nový) | – | 90 | +90 |
+| **Těla skillů celkem** (načtou se při použití skillu) | **2 942** | **1 925** | **−1 017 (−35 %)** |
+| **CLAUDE.md + skilly** | **3 100** | **2 036** | **−1 064 (−34 %)** |
 | Referenční soubory skillů (jen když úloha potřebuje) | – | 539 | `kit-design.md` 270, `legacy-ai-model.md` 117, `steadfast-legacy.md` 95, `blender-mcp/reference.md` 57 |
 
 Doslovně přesunuto do archivu: `Docs/Archive/skills/ship-interior_2026-09-30.md`, `ship-pipeline_2026-09-30.md`,
