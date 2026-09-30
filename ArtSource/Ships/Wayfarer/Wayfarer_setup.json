@@ -2145,7 +2145,9 @@
     0.58,
     0.06
    ],
-   "symmetric": true
+   "symmetric": true,
+   "_max_depth": "30. 9. 2026: the cabin's floor from the kit - its plates are 2 cm thick, a 3 cm box reached their underside",
+   "max_depth_cm": 1.5
   }
  ]
 }

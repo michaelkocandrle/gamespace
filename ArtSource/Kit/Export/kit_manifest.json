@@ -8406,6 +8406,78 @@
     "front": "Saved/KitCatalog/SM_Kit_Wall_HullLiner12L_S_front.png",
     "34": "Saved/KitCatalog/SM_Kit_Wall_HullLiner12L_S_34.png"
    }
+  },
+  "SM_Kit_Floor_Plate12L38_A": {
+   "category": "Floor",
+   "family": "Floor_Plate",
+   "section": "L38",
+   "length_m": 1.2,
+   "variant": "A",
+   "batch": 4,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Plate12L38_A.fbx",
+   "dims_m": [
+    1.2,
+    3.82,
+    0.065
+   ],
+   "expected_size_cm": [
+    120.0,
+    382.0,
+    6.5
+   ],
+   "tris": 1124,
+   "tris_decals": 1084,
+   "tri_budget": 1800,
+   "materials": [
+    "Kit_Primary",
+    "Kit_Structure",
+    "Kit_Trim",
+    "Kit_Seal",
+    "Kit_DecalGrime",
+    "Kit_DecalWear"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      120.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 7,
+   "decal_items": [
+    "grime_soot",
+    "grime_soot",
+    "grime_soot",
+    "grime_soot",
+    "grime_soot",
+    "grime_smear",
+    "grime_smear"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 576,
+    "secondary": 192,
+    "floor": 1392,
+    "seam": 0
+   },
+   "status": "built",
+   "renders": {
+    "front": "Saved/KitCatalog/SM_Kit_Floor_Plate12L38_A_front.png",
+    "34": "Saved/KitCatalog/SM_Kit_Floor_Plate12L38_A_34.png"
+   }
   }
  }
 }

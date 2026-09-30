@@ -44,6 +44,20 @@ zmizí.
   Rozpad trojúhelníků po voláních: obalit `kit_geo.Part.box/slab/tube` a účtovat přírůstek volajícímu
   (pozor, `slab` volá `box`, takže vnořené řádky se počítají dvakrát).
 
+- **Geometrický test hlásí u decalu na kit podlaze „box reaches the wall's other side“** (30. 9. 2026).
+  Příčiny:
+  - protiskluzové pruhy jsou zapuštěné 1 mm do desky, takže paprsek ze středu decalu narazí na jejich spodní
+    stěnu;
+  - kit deska je silná jen 2 cm, takže box decalu hluboký 3 cm dosáhne na její spodní stranu.
+
+  Řešení:
+  - `mirrored_projected` ignoruje odvrácené plochy do 8 mm za povrchem;
+  - decal na podlaze dostane `"max_depth_cm": 1.5`.
+- **Kit podlaha v místnosti s obložením trupu (průřez L)** jde jen 1 cm pod líc obložení, ne 10 cm jako u stěn W.
+  Obložení má ve výklenku soklu vlastní práh a u přepážky kokpitu Wayfareru je trup jen 4,5 cm za lícem.
+  Místnost přestane držet lodní podlahu odebráním `"floor"` z `kit_modules.keep`. Mezeru mezi přepážkou a prvním
+  modulem zakryje `stand_in_floor`.
+
 ## Nástroje
 
 - `space.Kit <Parametr> <hodnota> <část jména>` s filtrem jména mění i materiály dílů lodí, tedy kit místností,

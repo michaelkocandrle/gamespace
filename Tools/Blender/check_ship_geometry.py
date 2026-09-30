@@ -116,14 +116,16 @@ def mirrored_projected(ship, tree):
         if hit is None:
             bad.append({"decal": d["name"], "note": "marks nothing within its depth"})
             continue
-        travelled = dist
+        travelled = first = dist
         p = hit - x * 0.0005
         while travelled < half:
             h2, n2, i2, d2 = tree.ray_cast(p, -x, half - travelled)
             if h2 is None:
                 break
             travelled += d2
-            if n2.dot(x) < 0:
+            # a back face within 8 mm of the marked surface is a detail set into it (the kit floor's anti-slip lanes
+            # sit 1 mm into the plate, 30. 9. 2026), never a wall's other side
+            if n2.dot(x) < 0 and travelled - first > 0.008:
                 bad.append({"decal": d["name"], "note": "box reaches the wall's other side: reads mirrored there"})
                 break
             p = h2 - x * 0.0005

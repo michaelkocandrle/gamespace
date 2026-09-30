@@ -28,7 +28,9 @@ TOP = frame((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
 def _layout(sec):
     """Across the floor (y): the edge strip along each wall, the side plates and the centre walkway."""
     h = sec.half
-    hw = h + 0.1                                   # under the plinth recess
+    # under the W walls' plinth recess; a hull liner room (section L) only 1 cm under the liner's face - the liner has
+    # its own sill in the recess, and by the Wayfarer's cockpit bulkhead the hull is 4.5 cm behind the face (30. 9. 2026)
+    hw = h + (0.01 if sec.key.startswith("L") else 0.1)
     walk = min(0.6, h * 0.5)                       # centre walkway half width (W 0.6, N 0.3)
     edge = h - 0.06                                # the edge strip's inner edge
     return h, hw, walk, edge
@@ -99,7 +101,9 @@ def _collision(p, L, hw):
 # =============================================================================== floor plates
 def floor_plate(sec, var, L, name, seed):
     """A: the centre walkway in plates with anti-slip lanes, plain bolted side plates, the edge strips.
-    B: the same plates, a painted centre line and hazard strips where the side plates meet the edge strips."""
+    B: the same plates, a painted centre line and hazard strips where the side plates meet the edge strips.
+    A hull liner's wide room (section L, 3.8-4.1 m) has the side plates in two across: one 1.24 m plate read as the
+    "large smooth bathroom tiles" of the ship's own floor (author, the Wayfarer's cabin, 30. 9. 2026)."""
     p = kit_geo.Part(name, seed)
     h, hw, walk, edge = _layout(sec)
     _underlay(p, L, hw)
@@ -110,7 +114,11 @@ def floor_plate(sec, var, L, name, seed):
             _plate(p, 0.0, L, y0, y1)
     else:
         _plate(p, 0.0, L, -walk, walk)
-    for (y0, y1) in ((walk, edge), (-edge, -walk)):
+    sides = [(walk, edge), (-edge, -walk)]
+    if edge - walk > 0.8:
+        mid = (walk + edge) / 2
+        sides = [(walk, mid), (mid, edge), (-mid, -walk), (-edge, -mid)]
+    for (y0, y1) in sides:
         _plate(p, 0.0, L, y0, y1, secondary=False)
     if var == "A":
         _lanes(p, 0.0, L, -walk + 0.03, walk - 0.03)
