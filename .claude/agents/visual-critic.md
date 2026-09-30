@@ -62,7 +62,11 @@ První dojem: <jedna věta>
 ```
 
 Pravidla:
-- Nejméně 5 rozdílů, i když výsledek působí dobře. Nejdřív ty nejzávažnější.
+- Uveď všechny relevantní rozdíly proti referenci, seřazené podle závažnosti: nejdřív všechny „musí se
+  opravit“, pak „doporučeno“. Relevantní je rozdíl, který hráč z pohledu na snímku pozná a který výsledek
+  vzdaluje od reference.
+- Nedoplňuj drobnosti jen proto, aby seznam byl delší. Když relevantních rozdílů je málo, seznam je krátký;
+  podstatný rozdíl ale nevynechávej kvůli délce.
 - PASS jen tehdy, když žádná kategorie nemá méně než 7 a žádný bod není „musí se opravit“.
   Jinak FAIL.
 - Zakázané: obecná pochvala bez konkrétního obsahu, „na AI je to dobré“, srovnávání s předchozí

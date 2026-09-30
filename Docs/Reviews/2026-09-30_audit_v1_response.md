@@ -28,6 +28,6 @@ v budoucím Pythonu chyba. Oprava je `r"""`, zatím neprovedena (mimo rozsah).
 | Víc zdrojů pravdy bez hierarchie | Hierarchie autority na začátku `CLAUDE.md`; `Docs/CURRENT.md` jako jediný aktuální stav (hook SessionStart), `Docs/ARCHITECTURE.md`, `Docs/HANDOFF.md` archiv. Rozpory a opravy: `2026-09-30_knowledge_audit.md`. | hotovo |
 | Skilly přerůstají roli (historie, jednorázové stavy) | Historie doslovně do `Docs/Archive/skills/`, stabilní reference do souborů vedle skillu (načtou se jen při potřebě). Těla skillů 2 942 → 1 921 řádků. | hotovo |
 | CLAUDE.md nezvětšovat | 158 → 111 řádků: pravidla, brány, hierarchie, index. | hotovo |
-| Kritik: „nejméně 5 rozdílů“ tlačí na drobnosti | viz krok 3 (kalibrace v `calibration.md`) | krok 3 |
+| Kritik: „nejméně 5 rozdílů“ tlačí na drobnosti | Pravidlo nahrazeno „všechny relevantní nálezy podle závažnosti, bez doplňování drobností“; zákaz obecné chvály zůstal. Nová kalibrace na pěti historických verzích (`calibration.md`, kolo 3): podstatné výtky autora našel u všech pěti. Dva body checklistů doplněny (panel u dveří, data na displejích). | hotovo |
 | Nevytvářet desítky mikro-skillů | Přibyl jediný skill `visual-review` (postup kritika byl třikrát). | – |
 

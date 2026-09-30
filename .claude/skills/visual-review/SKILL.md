@@ -60,7 +60,8 @@ nenahrazuje je: musí proběhnout obojí. `test_ship_geometry.py` běží sám j
   lichoběžník / osmiúhelník. Pravoúhlá místnost s rovnými stěnami je chyba.
 - Vrstvy: žebra, kabelové žlaby a trubky pod stropem, panely s hloubkou a přesahy, madla, skříňky
   se západkami, mřížky v podlaze, přípojky. Detail shlukovaný kolem funkčních míst.
-- Každý předmět má účel; žádné výplňové rekvizity, žádné krabicové pulty.
+- Každý předmět má účel; žádné výplňové rekvizity, žádné krabicové pulty. U dveří žádná klávesnice ani ovládací
+  panel (záměr projektu); stav dveří ukazuje světlo a značení. Chybějící panel u dveří nevytýkej.
 - Materiály: čalounění, guma, broušený i lakovaný kov, akcenty palety; tmavá teplá architektura,
   studené UI. Béžová / jednolitá / plastová plocha je chyba.
 - Decaly: označení místností a sekcí, nouzové značky, popisky ovladačů; čitelné, nezrcadlené.
@@ -81,6 +82,8 @@ nenahrazuje je: musí proběhnout obojí. `test_ship_geometry.py` běží sám j
 - Světlo: displeje a hologram svítí na okolí, ostrůvky světla, žádné přepálené skvrny; tvary čitelné
   ve dne i v noci.
 - Čitelnost HUD a displejů má přednost před vším ostatním; žádné zdvojení nebo rozmazání.
+- Displeje ukazují jen data, která hra opravdu má (zbraně, štíty a energii zatím nemá); obsah, který chybí, protože
+  systém neexistuje, nevytýkej.
 - Zadní pohled (dveře, stěna, okna): text nezrcadlený, stěny s detailem, čisté spoje stěny a skla,
   žádné čáry přes okno.
 - HOTAS, sedadlo a hologram: detailní, ukotvené, žádné díly ve vzduchu.
