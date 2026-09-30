@@ -54,10 +54,11 @@ void USpaceUserSettings::LoadSettings(bool bForceReload)
 
 void USpaceUserSettings::MigrateSettings()
 {
-	if (SettingsVersion >= CurrentSettingsVersion)
+	if (bMigrating || SettingsVersion >= CurrentSettingsVersion)
 	{
 		return;
 	}
+	TGuardValue<bool> MigratingGuard(bMigrating, true);
 	// Version 2: the render scale. The engine had left it at 50 % here, so the whole game was drawn at half
 	// resolution and upscaled - ships, cockpit displays and the HUD stayed soft whatever else changed
 	// (20. 9. 2026). Scalability::SetQualityLevels is what puts it into the sg. console variables, which is

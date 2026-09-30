@@ -106,6 +106,13 @@ public:
 	UPROPERTY(Config)
 	int32 SettingsVersion = 0;
 
+	/**
+	 * Set while MigrateSettings runs. Applying the settings can reload them - UGameUserSettings::ValidateSettings
+	 * calls LoadSettings while the engine's own Version is missing, as with no GameUserSettings.ini yet - and
+	 * LoadSettings migrates, so without it a fresh install recursed until the stack overflowed (30. 9. 2026).
+	 */
+	bool bMigrating = false;
+
 	/** The preset the player picked, 0 low .. 4 cinematic. The scalability groups follow from it. */
 	UPROPERTY(Config, BlueprintReadOnly, Category = "Settings")
 	int32 GraphicsQualityLevel = DefaultQualityLevel;
