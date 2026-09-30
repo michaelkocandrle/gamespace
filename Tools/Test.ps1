@@ -7,7 +7,8 @@
     .github/workflows/offline-tests.yml):
       - compileall of Tools/ and Content/Python/ (syntax of every script);
       - the unit tests in Tools/*/tests/ (ship export core, import plan, silhouette compare);
-      - the static checks in Tools/Tests/ that need neither Unreal nor Blender (material HLSL, decal orientation).
+      - the static checks in Tools/Tests/ that need neither Unreal nor Blender (material HLSL, decal orientation,
+      the size limit of Docs/CURRENT.md).
     -Blender adds the checks that start Blender 5.2 headless (test_ship_geometry.py, the silhouette render).
     -UE adds every Unreal test in Tools/Tests/ (the files that import unreal), one editor commandlet each through
     Tools\run_editor_python.ps1: about a minute per test, the editor must be closed and the C++ built.
@@ -19,7 +20,7 @@
 .EXAMPLE
     .\Tools\Test.ps1
 .EXAMPLE
-    .\Tools\Test.ps1 -UE -Filter *landing*
+    .\Tools\Test.ps1 -UE -Filter *landing*,*vtol*
 .EXAMPLE
     .\Tools\Test.ps1 -All
 #>
@@ -27,8 +28,8 @@ param(
     [switch]$Blender,
     [switch]$UE,
     [switch]$All,
-    # wildcard on the file name for the Blender and Unreal tests, e.g. *quantum*
-    [string]$Filter = "*"
+    # wildcards on the file name for the Blender and Unreal tests, e.g. *quantum*,*landing*
+    [string[]]$Filter = @("*")
 )
 
 # Native tools write to stderr; with "Stop" Windows PowerShell would turn that into a terminating error.
@@ -43,6 +44,11 @@ $env:PYTHONPYCACHEPREFIX = Join-Path ([IO.Path]::GetTempPath()) "gamespace_pycac
 if (-not $Blender) { $env:GAMESPACE_SKIP_BLENDER = "1" }
 
 $results = New-Object System.Collections.Generic.List[object]
+
+function Test-Name([string]$Name) {
+    foreach ($pattern in $Filter) { if ($Name -like $pattern) { return $true } }
+    return $false
+}
 $runnerError = $null
 
 function Get-Counts([string[]]$Lines) {
@@ -97,14 +103,14 @@ try {
     Invoke-Python "offline" "compileall Tools Content/Python" @("-m", "compileall", "-q", "Tools", "Content/Python")
     $offline = @(Get-ChildItem (Join-Path $repo "Tools") -Recurse -Filter "test_*.py" |
         Where-Object { $_.Directory.Name -ceq "tests" }) +
-        @("test_material_hlsl.py", "test_decal_orientation.py" | ForEach-Object { Get-Item (Join-Path $repo "Tools/Tests/$_") })
+        @("test_material_hlsl.py", "test_decal_orientation.py", "test_docs_limits.py" | ForEach-Object { Get-Item (Join-Path $repo "Tools/Tests/$_") })
     foreach ($file in $offline) {
         Invoke-Python "offline" $file.Name @($file.FullName)
     }
 
     if ($Blender) {
         Write-Host "Blender tests"
-        foreach ($file in Get-ChildItem (Join-Path $repo "Tools/Tests") -Filter "test_ship_geometry.py" | Where-Object Name -like $Filter) {
+        foreach ($file in Get-ChildItem (Join-Path $repo "Tools/Tests") -Filter "test_ship_geometry.py" | Where-Object { Test-Name $_.Name }) {
             Invoke-Python "blender" $file.Name @($file.FullName)
         }
     }
@@ -112,7 +118,7 @@ try {
     if ($UE) {
         Write-Host "Unreal tests (one editor commandlet each)"
         $ueTests = Get-ChildItem (Join-Path $repo "Tools/Tests") -Filter "test_*.py" |
-            Where-Object { $_.Name -like $Filter -and (Select-String -Path $_.FullName -Pattern '^import unreal' -Quiet) } |
+            Where-Object { (Test-Name $_.Name) -and (Select-String -Path $_.FullName -Pattern '^import unreal' -Quiet) } |
             Sort-Object Name
         foreach ($file in $ueTests) {
             $sw = [Diagnostics.Stopwatch]::StartNew()

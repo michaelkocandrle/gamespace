@@ -30,7 +30,8 @@ function Read-Lock {
     if (-not (Test-Path $Path)) { return $null }
     $info = @{ session = ""; task = ""; time = (Get-Item $Path).LastWriteTime }
     foreach ($line in Get-Content $Path -ErrorAction SilentlyContinue) {
-        if ($line -match '^(session|task|time)=(.*)$') { $info[$Matches[1]] = $Matches[2] }
+        # "key=value" (this script) or "key: value" (written by hand)
+        if ($line -match '^\s*(session|task|time)\s*[:=]\s*(.*)$') { $info[$Matches[1]] = $Matches[2].Trim() }
     }
     $parsed = [datetime]::MinValue
     if ($info.time -is [string] -and [datetime]::TryParse($info.time, [ref]$parsed)) { $info.time = $parsed }
