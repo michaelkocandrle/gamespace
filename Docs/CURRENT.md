@@ -53,10 +53,9 @@ kitu, který po 3 kolech kritika skončil FAIL 6,4 (5,4 → 5,9 → 6,4; recenze
 - Interiér Wayfareru: otevřené body recenzí `2026-09-30_cabin_furniture.md` a `2026-09-30_cabin_liner.md`.
 - **Odrazy kovu odložené na optimalizaci** (autor 30. 9.): odrazy Lumenu do drsnosti 0,32 za +1,3 ms.
 - Kit: vyšlapaná linie potřebuje směrovou buňku atlasu špíny; ohmatání madel; lišty stropu po segmentech.
-- **Determinismus stavby, na později** (autor 1. 10.; WORKFLOW 9.6 ff): šum v trupu, decalech a interiéru (±40
-  trojúhelníků mezi běhy, 3 FBX při každé přestavbě), import pokaždé znovu uloží ~150 materiálů a textur.
-- Hřebenový terén (`RidgedOctaves`) vypnutý: kamera po přistání pod zemí, díry u okraje Veyry; kameny bez kolize.
-- Quantum tunel méně „mléčný“, TSR čáry podél jisker; displeje bez mipmap (pod ~1600 px písmo zrní), duchy čísel.
+- **Determinismus stavby na později** (WORKFLOW 9.6 ff): šum ±40 trojúhelníků, 3 FBX, import ukládá ~150 assetů.
+- Hřebenový terén vypnutý (kamera po přistání pod zemí); kameny bez kolize. Quantum tunel méně „mléčný“, TSR
+  čáry podél jisker; displeje bez mipmap (pod ~1600 px písmo zrní), duchy čísel.
 - Loď bez podvozku u země stojí na neviditelném kořenovém boxu (řeší se, až bude vadit). Zvuky jsou procedurální
   zástupci; jas oblohy je odhad; obloha v atmosféře nerozlišuje den a noc (soumrak a noc jen v presetu snímků).
 - Neověřeno autorem: časování quantum skoku, HUD SC-1c mimo 1080p, chůze Steadfastem; Shipping build nezkoušen; v PIE
@@ -65,7 +64,8 @@ kitu, který po 3 kolech kritika skončil FAIL 6,4 (5,4 → 5,9 → 6,4; recenze
 ## Další kroky
 
 1. **Wayfarer – pilot kitu, kroky b → e** (autor 1. 10.; každý krok vlastní session, pak CURRENT, Cleanup, `/clear`;
-   do hlavní session jen výřezy; recenze `2026-10-01_wayfarer_triangle_budget.md` a `…_kit_pilot.md`). Krok a hotový.
+   do hlavní session jen výřezy; recenze `2026-10-01_wayfarer_triangle_budget.md` a `…_kit_pilot.md`). Krok a hotový;
+   **krok b: zkouška hotová (RP10 + žebra), čeká souhlas autora s plnou přestavbou** (`decal_detail.scope` → `all`).
    **b)** decaly místo drobné geometrie: šrouby desek a rámu (`bolt_row_*`, nová položka „šroub rámu“ 250 mm),
    západky, poklopy XK-HATCH pod 0,4 m a mřížky pod 0,3 m jako decaly s výraznou normálou a AO, poklop bez díry do
    kanálu; ověřit výřezy z chase i zblízka (pak smí běžet paralelní session I-01–I-09 bez Unrealu / Blenderu).

@@ -2708,6 +2708,60 @@
    "tags": [
     "panel_number"
    ]
+  },
+  "bolt_kit": {
+   "uv": [
+    0.8216000000000003,
+    0.016899999999999887,
+    0.8466000000000002,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.05,
+    0.05
+   ],
+   "purpose": "exterior kit plate bolt (XK-PLATE, XK-DOUBLER, spine; triangle budget rule A): hex Ø 20 with a washer, taller than 'bolt' for a stronger normal and AO from the chase camera; own dark metal colour (info type, step b trial: as a structural decal it took the white plate colour and read weaker than the metal bolt geometry)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "bolts"
+   ]
+  },
+  "bolt_kit_frame": {
+   "uv": [
+    0.8566000000000004,
+    0.021899999999999885,
+    0.8766000000000004,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.04,
+    0.04
+   ],
+   "purpose": "exterior kit frame bolt ('šroub rámu': ribs and longerons, rows at 250 mm placed bolt by bolt from the data): hex Ø 18 with a washer; own dark metal colour (info type, step b trial: as a structural decal it took the white plate colour and read weaker than the metal bolt geometry)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "bolts"
+   ]
+  },
+  "latch_kit": {
+   "uv": [
+    0.8866000000000004,
+    0.021899999999999885,
+    0.9216000000000003,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.07,
+    0.04
+   ],
+   "purpose": "XK-HATCH latch 60 x 30 mm in a recess (the small hatch as a decal: hatch_small at scale 1.3 + two latches)",
+   "type": "structural",
+   "has_color": false,
+   "tags": [
+    "latch"
+   ]
   }
  },
  "trim": {

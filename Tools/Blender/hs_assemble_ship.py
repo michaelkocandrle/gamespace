@@ -38,6 +38,31 @@ def shift_box(box, off):
     return {k: [v[0] + off["xyz".index(k)], v[1] + off["xyz".index(k)]] for k, v in box.items()}
 
 
+def check_bounds(layout, obs, margin=1.5):
+    """Every part inside the ship's envelope (the layout's side and top outlines) plus a margin, checked before the
+    join (author 1. 10. 2026): a solidify on merged n-gons threw a detail plate's vertex 15-420 m out and only the
+    exporter's size check or the landing test caught it (WORKFLOW 9.6 fk). Raises - the build fails right here."""
+    ext = layout["exterior"]
+    xs = [p[0] for e in ext["side"] + ext["top"] if "poly" in e for p in e["poly"]]
+    zs = [p[1] for e in ext["side"] if "poly" in e for p in e["poly"]]
+    ys = [p[1] for e in ext["top"] if "poly" in e for p in e["poly"]]
+    lo = (min(xs) - margin, -max(abs(y) for y in ys) - margin, min(zs) - margin)
+    hi = (max(xs) + margin, max(abs(y) for y in ys) + margin, max(zs) + margin)
+    bad = []
+    for o in obs:
+        if "_Int" in o.name or "Hologram" in o.name:
+            continue
+        for v in o.data.vertices:
+            w = o.matrix_world @ v.co
+            if any(w[i] < lo[i] or w[i] > hi[i] for i in range(3)):
+                bad.append((o.name, [round(c, 2) for c in w]))
+                break
+    if bad:
+        print("HSASSEMBLE BOUNDS FAIL %s" % json.dumps(bad))
+        raise RuntimeError("parts outside the ship's envelope %s..%s: %s" % (lo, hi, bad))
+    print("HSASSEMBLE BOUNDS PASS (%d parts inside %s..%s)" % (len(obs), [round(c, 2) for c in lo], [round(c, 2) for c in hi]))
+
+
 def budget_report(recipe, ship, obs, cfg):
     """Triangles of the main exterior mesh per budget part (recipe "budget", author 1. 10. 2026): prints HSBUDGET
     and writes Export/<Ship>_budget.json next to the lights (Tools/Tests/test_triangle_budget.py compares it)."""
@@ -141,6 +166,7 @@ def main(argv):
             bpy.data.objects.remove(o)
             continue
         groups.setdefault(assign.get(o.name, ""), []).append(o)
+    check_bounds(layout, [o for obs in groups.values() for o in obs])
     if recipe.get("budget") and groups.get(""):
         budget_report(recipe, ship, groups[""], cfg)
     out = {}

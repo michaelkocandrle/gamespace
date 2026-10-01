@@ -137,7 +137,8 @@ def test_ship(ship):
         check("%s kit layout made from the current data" % ship, not stale,
               ("run python Tools/Design/exterior_kit_layout.py %s (changed: %s)" % (ship, ", ".join(stale))) if stale else "")
         built = {e.id for e in m.elements if e.cat == "panel" and e.status == "built"}
-        laid = {p["id"] for p in kit["plates"]}
+        # a small hatch rendered as mesh decals (recipe exterior_kit.decal_detail) is built as a decal with its ID
+        laid = {p["id"] for p in kit["plates"]} | {d["id"] for d in kit.get("decals", []) if d["id"] in built}
         check("%s kit layout builds the built plates" % ship, laid == built, diff(laid, built))
         unknown = sorted({p["id"] for p in kit["plates"] + kit["frame"] + kit["parts"]} - set(m.by_id))
         check("%s kit layout IDs are in the data" % ship, not unknown, ", ".join(unknown))

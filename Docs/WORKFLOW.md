@@ -1219,7 +1219,9 @@ snímku.
   `test_landing_sc2` (spodek trupu pod podvozkem). Řešení: `hs_build_part.planar_merge` (rozpuštění degenerovaných
   ploch, triangulace) a u desek detailu solidify bez rovnoměrné tloušťky. Sloučená velká plocha má málo vrcholů
   a AO pečené do vrcholů (`hs_layers`) se přes ni roztáhne: dno kanálu (slot Channel) se na plášti neslučuje
-  (`parts.hull.merge_keep_slots`). Kontrola po změně stavby: meze trupu v manifestu proti minulému exportu.
+  (`parts.hull.merge_keep_slots`). Příčina ulétlých desek: rovnoměrná tloušťka dělí posun vrcholu sinem úhlu mezi
+  sousedními plochami a na sloučených n-úhelnících s téměř nulovými úhly (protáhlé trojúhelníky po triangulaci) jde
+  dělitel k nule. Od 1. 10. hlídá meze dílů přímo `hs_assemble_ship` (`HSASSEMBLE BOUNDS FAIL`, chyba sestavení).
 
 
 ---

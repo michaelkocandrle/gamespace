@@ -4,7 +4,11 @@
  "out_blend": "ArtSource/Ships/Wayfarer/HardSurface/Wayfarer_HS.blend",
  "exterior_kit": {
   "_comment": "The exterior kit from the approved drawings E-01 to E-08 (author 1. 10. 2026): Tools/Blender/hs_exterior_kit.py builds what Tools/Design/exterior_kit_layout.py wrote from the drawing model. Region pilot: roof, shoulders, stern, pods.",
-  "layout": "ArtSource/Ships/Wayfarer/Design/Wayfarer_exterior_kit.json"
+  "layout": "ArtSource/Ships/Wayfarer/Design/Wayfarer_exterior_kit.json",
+  "decal_detail": {
+   "_comment": "Small detail as mesh decals instead of geometry (triangle budget rule A, author 1. 10. 2026): the bolts of these plates and frame pieces (bolt_kit / bolt_kit_frame at every bolt point of the data) and these small hatches (XK-HATCH: hatch_small at scale 1.3 with two latch_kit, no hole in the plate). Trial scope first (step b); 'all' for every kit element. The data and the drawings keep the bolts and hatches with their IDs.",
+   "scope": ["P-S-RP10", "P-S-RP10-H", "FR-RIB"]
+  }
  },
  "borrow": {},
  "parts": {
@@ -818,7 +822,7 @@
   "warn": 700000,
   "error": 1000000,
   "parts": [
-   {"name": "hull_loft", "max": 50000, "match": ["_Hull$"]},
+   {"name": "hull_loft", "max": 55000, "match": ["_Hull$"], "_max": "55 k (was 50 k; author 1. 10. 2026): the channel floor faces stay unmerged (parts.hull.merge_keep_slots) - merged, the occlusion baked into their few vertices spread over a large face and it went near black"},
    {"name": "kit_plates", "max": 80000, "match": ["_Kit_P-", "_Kit_F-VENT"]},
    {"name": "kit_frame", "max": 120000, "match": ["_Kit_FR-", "_Kit_F-RAMP-FRAME"]},
    {"name": "mid_layer", "max": 60000, "match": ["_Kit_Parts_", "_Kit_F-RAMP", "_Kit_Bolts", "_Kit_Latches"]},

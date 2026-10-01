@@ -145,3 +145,33 @@ v kroku d s tryskami; křídla a ploutve (`hs_wings`, plochy se neslučují) –
 Druhý ulétlý vrchol (spodek trupu −16 m) chytil až `test_landing_sc2`; desky detailu mají solidify bez rovnoměrné
 tloušťky (WORKFLOW 9.6 fk). Konečný stav: trup 409 426 trojúhelníků, meze trupu shodné s exportem před krokem a,
 testy offline 12/12, Blender 1/1, UE 22/22.
+
+## Úpravy po kroku a (autor 1. 10.)
+Rozpočet pláště 55 k (důvod v `budget` receptu: dno kanálu se nesjednocuje kvůli zapečenému stínu); gondoly zůstávají
+na krok d; `hs_assemble_ship.check_bounds` – díl mimo obálku lodi z layoutu + 1,5 m = chyba sestavení
+(`HSASSEMBLE BOUNDS FAIL`), WORKFLOW 9.6 fk doplněn o příčinu.
+
+## Krok b – zkouška (čeká na souhlas autora s plnou přestavbou)
+
+Rozsah zkoušky (`exterior_kit.decal_detail.scope`): šrouby desky P-S-RP10 a všech žeber FR-RIB, poklop P-S-RP10-H.
+Data a výkresy beze změny (ID zůstávají); `exterior_kit_layout.decal_detail` označí šrouby `bolts_as: decal`
+a poklop v rozsahu nestaví (deska bez díry, decal `hatch_small` × 1,3 = 340 × 260 mm + dvě `latch_kit`); stavba
+posílá šrouby jako decaly přes `hs_kit_decals` (stejné body jako geometrie, rovný čtverec bez kontroly hran).
+Mřížka pod 0,3 m: v pilotu žádná geometrická není (větrací skříně 460 mm jsou střední vrstva, mřížky G-VT 420 mm).
+
+Snímky (editor, preset `wayfarer_decal_trial`): před `shots:20261001_224641_wayfarer_decal_trial/`, po
+`shots:20261001_232004_wayfarer_decal_trial/`.
+- Šrouby desek: čtou **výrazněji** než geometrie (tmavá kovová hlava s podložkou; atlas `bolt_kit`, typ info s vlastní
+  barvou – jako čistě strukturní decal braly bílou barvu desky a četly slaběji, první zkouška).
+- Šrouby žeber: zhruba stejně jako geometrie (tmavé na tmavém rámu); z chase 2800 cm světlé tečky na žebrech zůstaly.
+- Poklop: místo tmavé díry jen tenká spára a obrysy západek – „okno“ zmizelo, ale poklop je slabý. Atlas je plný
+  (volno 0,36 × 0,08 m), vlastní položku poklopu 340 × 260 s hlubší spárou do něj nedám.
+- Zapečený stín: hustota vrcholů se nezměnila (decaly), plochy nezčernaly.
+- Čísla: decaly 862 → 1177 (zkouška: +307 šroubů, +3 poklop; zbytek pravidla atlasu), mesh decalů 61 276 → 61 974
+  trojúhelníků (~2,3 na šroub); trup 409 k → 401 k. Plný rozsah (1316 šroubů, 14 poklopů): odhad decaly ~2 200,
+  mesh decalů +3 k, trup ~360 k (šrouby −37 k, poklopy a západky −5 k).
+- Výkon (odhad, měřit až při optimalizaci): mesh decalů je jeden mesh bez Nanite, cena roste s plochou pokrytou
+  decaly, ne s počtem; šrouby pokrývají zlomek procenta obrazu → zanedbatelné (< 0,1 ms na RTX 2060).
+
+Nalezeno: pravidlo `companions` dávalo k decalům s tagem „hatch“ štítky a madla – na západkách zkoušky se objevily
+cizí štítky „REACTOR S1“; decaly kitu (`kit_*`) se z pravidla vyřazují, `latch_kit` má tag „latch“.

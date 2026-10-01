@@ -512,6 +512,7 @@ def apply(recipe, made, coll, mats, ship):
     tree = BVHTree.FromBMesh(tree_bm)
     bolts = bmesh.new()
     latches = bmesh.new()
+    kit_decals = []
 
     def ray(view, u, v, side=1):
         if view == "SB":
@@ -558,6 +559,19 @@ def apply(recipe, made, coll, mats, ship):
                     fx, fy = _frame(n)
                     _box(latches, hit + n * (e["t"] + lh / 2 - 0.002), fx, fy, n, (lx, ly, lh))
                     report["latches"] = report.get("latches", 0) + 1
+            if e.get("bolts_as") == "decal":
+                # the bolts as mesh decals at the same points (triangle budget rule A): hs_decals lays them from the
+                # scene's hs_kit_decals (layout coordinates), mirrored like the plate
+                for u, v in e.get("bolts", []):
+                    hit, n = ray(e["view"], u, v)
+                    if hit is None:
+                        continue
+                    at = hit + n * (e["t"] + 0.03)
+                    kit_decals.append({"id": e["id"], "item": e["bolt_item"], "on": "ray", "at": [round(c, 4) for c in at],
+                                       "dir": [round(-c, 4) for c in n], "mirror": bool(e.get("mirror")),
+                                       "check_overlap": False, "flat": True})
+                    report["bolt_decals"] = report.get("bolt_decals", 0) + (2 if e.get("mirror") else 1)
+                continue
             for u, v in e.get("bolts", []):
                 for side in ((1, -1) if e.get("mirror") else (1,)):
                     hit, n = ray(e["view"], u, v)
@@ -637,6 +651,7 @@ def apply(recipe, made, coll, mats, ship):
                 conduit(bms, p, ray)
             report["parts"] += 1
     bpy.context.scene["hs_lights"] = json.dumps(lights)
+    bpy.context.scene["hs_kit_decals"] = json.dumps(kit_decals)
     for key, bm in bms.items():
         if not bm.faces:
             bm.free()

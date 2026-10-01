@@ -310,7 +310,45 @@ def layout(m, region):
                           "pod_axis": [rev["axis"]["y"], rev["axis"]["z"]]})
     # the channel floor under the plates and the frame, darker than the frame (MZ-CHANNEL; critic round 1)
     skin = dict(reg["skin"], material="channel", id="P-HULL")
-    return {"plates": plates, "frame": frame, "parts": parts, "skin": skin, "decals": panel_numbers(m)}
+    out = {"plates": plates, "frame": frame, "parts": parts, "skin": skin, "decals": panel_numbers(m)}
+    decal_detail(m, out)
+    return out
+
+
+def decal_detail(m, out):
+    """Small detail as mesh decals (triangle budget rule A, author 1. 10. 2026; recipe exterior_kit.decal_detail.scope,
+    a list of IDs or "all"): the bolts of a plate or frame piece in scope are marked "bolts_as": "decal" (the builder
+    places bolt_kit / bolt_kit_frame decals at the same points instead of bolt geometry); a small hatch in scope is
+    not built - its plate keeps no hole and the hatch becomes decals (hatch_small at scale 1.3 + two latch_kit).
+    The data, the IDs and the drawings stay as they are; only the way it is rendered changes."""
+    scope = m.recipe.get("exterior_kit", {}).get("decal_detail", {}).get("scope", [])
+    if not scope:
+        return
+    inside = (lambda i: True) if scope == "all" else (lambda i: i in scope)
+    for ent in out["plates"] + out["frame"]:
+        if inside(ent["id"]) and ent.get("bolts"):
+            ent["bolts_as"] = "decal"
+            ent["bolt_item"] = "bolt_kit_frame" if ent["kit"] in ("XK-RIB", "XK-LONGERON") else "bolt_kit"
+    keep = []
+    for ent in out["plates"]:
+        e = m.by_id[ent["id"]]
+        if e.data.get("sub") != "hatch" or not inside(ent["id"]) or ent.get("suffix"):
+            keep.append(ent)
+            continue
+        g = e.geo["TOP"]["shape"]
+        x0, y0, x1, y1 = g.bounds
+        hx, hy = m.kit["XK-HATCH"]["size"]
+        out["decals"].append({"id": ent["id"], "item": "hatch_small", "on": "top", "x": round((x0 + x1) / 2, 4),
+                              "y": round((y0 + y1) / 2, 4), "scale": round(hx / 0.26, 3), "mirror": False,
+                              "check_overlap": False, "flat": True})
+        for lx, ly in ent.get("latches", []):
+            out["decals"].append({"id": ent["id"] + "-latch", "item": "latch_kit", "on": "top", "x": lx, "y": ly,
+                                  "mirror": False, "check_overlap": False, "flat": True})
+        # the parent plate keeps no hole where the hatch was cut out
+        parent = next(p for p in keep + out["plates"] if p["id"] == e.data["of"] and not p.get("suffix"))
+        pg = m.by_id[parent["id"]].geo["TOP"]["shape"]
+        parent["polys"] = rings(em.polys_only(pg.union(g.buffer(m.kit["XK-HATCH"]["gap"] + 0.002, join_style=2)).buffer(0)))
+    out["plates"] = keep
 
 
 def write(ship="Wayfarer", region="pilot"):

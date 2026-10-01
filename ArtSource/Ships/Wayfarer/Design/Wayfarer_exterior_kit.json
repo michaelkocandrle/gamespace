@@ -37,11 +37,11 @@
  },
  "digests": {
   "layout": "c10dc8f0b500",
-  "recipe": "e83861d9f206",
+  "recipe": "f1628d45ba03",
   "setup": "edd157c448e4",
   "spec": "d9597dfcd605",
   "design": "c08da5218170",
-  "library": "ff1d9bc3e7cf"
+  "library": "0fa80cd7349f"
  },
  "plates": [
   {
@@ -4018,26 +4018,7 @@
        -1.2123
       ]
      ],
-     [
-      [
-       [
-        12.662,
-        -0.848
-       ],
-       [
-        12.298,
-        -0.848
-       ],
-       [
-        12.298,
-        -1.132
-       ],
-       [
-        12.662,
-        -1.132
-       ]
-      ]
-     ]
+     []
     ]
    ],
    "bolts": [
@@ -4082,7 +4063,9 @@
      -0.38
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP10-D",
@@ -4146,59 +4129,6 @@
     ]
    ],
    "bolt_d": 0.016
-  },
-  {
-   "id": "P-S-RP10-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       12.65,
-       -1.12
-      ],
-      [
-       12.65,
-       -0.86
-      ],
-      [
-       12.31,
-       -0.86
-      ],
-      [
-       12.31,
-       -1.12
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     12.395,
-     -1.075
-    ],
-    [
-     12.565,
-     -1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
   },
   {
    "id": "P-S-RL11",
@@ -8044,7 +7974,9 @@
      ]
     ],
     "t": 0.027
-   }
+   },
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit_frame"
   },
   {
    "id": "FR-RIB",
@@ -9127,7 +9059,9 @@
      ]
     ],
     "t": 0.027
-   }
+   },
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit_frame"
   },
   {
    "id": "F-RAMP-FRAME",
@@ -10691,6 +10625,37 @@
    "glyphs": "RP12",
    "prefix": "pn_",
    "advance": 0.022
+  },
+  {
+   "id": "P-S-RP10-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 12.48,
+   "y": -0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP10-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 12.395,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP10-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 12.565,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
   }
  ]
 }

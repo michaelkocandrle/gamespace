@@ -6488,6 +6488,135 @@
       "rot": 0
      }
     ]
+   },
+   {
+    "name": "bolt_kit",
+    "type": "info",
+    "footprint": [
+     0.05,
+     0.05
+    ],
+    "append": "kit decals 1. 10. 2026",
+    "tags": [
+     "bolts"
+    ],
+    "purpose": "exterior kit plate bolt (XK-PLATE, XK-DOUBLER, spine; triangle budget rule A): hex Ø 20 with a washer, taller than 'bolt' for a stronger normal and AO from the chase camera; own dark metal colour (info type, step b trial: as a structural decal it took the white plate colour and read weaker than the metal bolt geometry)",
+    "parts": [
+     {
+      "kind": "cyl",
+      "at": [
+       0,
+       0
+      ],
+      "r": 0.017,
+      "h": 0.004,
+      "color": [
+       0.16,
+       0.165,
+       0.175
+      ]
+     },
+     {
+      "kind": "hex",
+      "at": [
+       0,
+       0
+      ],
+      "r": 0.011,
+      "h": 0.011,
+      "z": 0.004,
+      "color": [
+       0.3,
+       0.3,
+       0.32
+      ]
+     }
+    ]
+   },
+   {
+    "name": "bolt_kit_frame",
+    "type": "info",
+    "footprint": [
+     0.04,
+     0.04
+    ],
+    "append": "kit decals 1. 10. 2026",
+    "tags": [
+     "bolts"
+    ],
+    "purpose": "exterior kit frame bolt ('šroub rámu': ribs and longerons, rows at 250 mm placed bolt by bolt from the data): hex Ø 18 with a washer; own dark metal colour (info type, step b trial: as a structural decal it took the white plate colour and read weaker than the metal bolt geometry)",
+    "parts": [
+     {
+      "kind": "cyl",
+      "at": [
+       0,
+       0
+      ],
+      "r": 0.014,
+      "h": 0.004,
+      "color": [
+       0.16,
+       0.165,
+       0.175
+      ]
+     },
+     {
+      "kind": "hex",
+      "at": [
+       0,
+       0
+      ],
+      "r": 0.009,
+      "h": 0.01,
+      "z": 0.004,
+      "color": [
+       0.3,
+       0.3,
+       0.32
+      ]
+     }
+    ]
+   },
+   {
+    "name": "latch_kit",
+    "type": "structural",
+    "footprint": [
+     0.07,
+     0.04
+    ],
+    "append": "kit decals 1. 10. 2026",
+    "tags": [
+     "latch"
+    ],
+    "purpose": "XK-HATCH latch 60 x 30 mm in a recess (the small hatch as a decal: hatch_small at scale 1.3 + two latches)",
+    "recesses": [
+     {
+      "at": [
+       0,
+       0
+      ],
+      "size": [
+       0.064,
+       0.034
+      ],
+      "depth": 0.006
+     }
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [
+       0,
+       0
+      ],
+      "size": [
+       0.052,
+       0.024
+      ],
+      "h": 0.008,
+      "z": -0.006
+     }
+    ]
    }
   ]
  },
