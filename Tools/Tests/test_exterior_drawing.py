@@ -4,7 +4,7 @@ decal and light carries the ID it has in the data).
 
     python Tools/Tests/test_exterior_drawing.py      (plain Python + shapely; no matplotlib, no Blender, no Unreal)
 
-Per ship with Design/Drawings/<Ship>_E01_starboard.json (written by Tools/Design/draw_exterior_sheet.py):
+Per ship with Design/Drawings/<Ship>_E01_starboard.json and _E02_schedules.json (Tools/Design/draw_exterior_sheet.py):
   1. every element of the build data has an ID (Tools/Design/assign_exterior_ids.py --check), the IDs are unique;
   2. the sheet was drawn from the current data (the digests in its sidecar);
   3. view A draws exactly the model's plates, zones, recesses, frame and parts seen from starboard, view B exactly
@@ -59,8 +59,12 @@ def test_ship(ship):
         return
     check("%s model builds (unique ids, library items, cuts)" % ship, True, "%d elements" % len(m.elements))
 
-    side = json.load(open(os.path.join(base, "Design", "Drawings", "%s_E01_starboard.json" % ship), encoding="utf-8"))
-    stale = [k for k, v in m.digests.items() if side["digests"].get(k) != v]
+    drawings = os.path.join(base, "Design", "Drawings")
+    side = json.load(open(os.path.join(drawings, "%s_E01_starboard.json" % ship), encoding="utf-8"))
+    tables_path = os.path.join(drawings, "%s_E02_schedules.json" % ship)
+    check("%s E-02 (the tables) exists" % ship, os.path.isfile(tables_path))
+    tables = json.load(open(tables_path, encoding="utf-8")) if os.path.isfile(tables_path) else {"digests": {}, "schedules": {}}
+    stale = [k for k, v in m.digests.items() if side["digests"].get(k) != v or tables["digests"].get(k) != v]
     check("%s E-01 drawn from the current data" % ship, not stale,
           ("redraw: python Tools/Design/draw_exterior_sheet.py %s (changed: %s)" % (ship, ", ".join(stale))) if stale else "")
 
@@ -75,7 +79,10 @@ def test_ship(ship):
         labelled |= set(v)
     check("%s E-01 every drawn ID is labelled" % ship, drawn <= labelled, ", ".join(sorted(drawn - labelled)[:12]))
 
-    sch = side["schedules"]
+    sch = {}
+    for sc in (side.get("schedules", {}), tables["schedules"]):
+        for k, v in sc.items():
+            sch.setdefault(k, set()).update(v)
     lists = {
         "functional": {e.id for e in m.elements if e.cat in ("functional", "part") and not e.id.startswith("P-")},
         "greebles": {e.id for e in m.elements if e.cat == "greeble"},
@@ -83,7 +90,8 @@ def test_ship(ship):
         "kit": {e.id for e in m.elements if e.cat == "kit"},
         "materials": {e.id for e in m.elements if e.cat == "material"},
         "rules": {e.id for e in m.elements if e.cat == "rule"},
-        "decals": {e.id for e in m.elements if e.cat in ("decal", "trim") and e.sb},
+        "decals": {e.id for e in m.elements if e.cat in ("decal", "trim")},
+        "grime": {e.id for e in m.elements if e.cat == "grime"},
         "changes": {e.id for e in m.elements if e.status in ("change", "remove") and e.cat not in ("decal", "trim")},
     }
     for k, ids in lists.items():
@@ -91,7 +99,7 @@ def test_ship(ship):
 
     scheduled_built = [e for e in m.elements if e.src != "design" and (
         e.cat in ("functional", "greeble", "light", "rule") or (e.cat == "part" and not e.id.startswith("P-"))
-        or (e.cat in ("decal", "trim") and e.sb))]
+        or e.cat in ("decal", "trim", "grime"))]
     no_purpose = [e.id for e in scheduled_built if not (e.why or e.purpose)]
     check("%s every scheduled built element has a Czech purpose (design 'purpose')" % ship, not no_purpose,
           ", ".join(no_purpose[:12]))

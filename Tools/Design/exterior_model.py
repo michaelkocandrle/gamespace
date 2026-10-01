@@ -317,6 +317,7 @@ class Model:
             el.change = ch.get("set")
             el.why = ch.get("why", "")
         el.purpose = self.design.get("purpose", {}).get(el.id) or (el.what if el.src == "design" else "")
+        el.approved = el.id in set(self.design.get("approved", {}).get("ids", []))
         self.elements.append(el)
         self.by_id[el.id] = el
         return el

@@ -59,11 +59,11 @@ TITLE_MM = 5.0
 
 
 def setup_fonts():
-    for f in ("bahnschrift.ttf", "segoeui.ttf"):
+    for f in ("bahnschrift.ttf", "segoeui.ttf", "seguisym.ttf"):
         p = os.path.join(os.environ.get("WINDIR", "C:/Windows"), "Fonts", f)
         if os.path.exists(p):
             font_manager.fontManager.addfont(p)
-    matplotlib.rcParams.update({"font.family": [FONT, "Segoe UI"], "lines.scale_dashes": False, "hatch.linewidth": 0.35,
+    matplotlib.rcParams.update({"font.family": [FONT, "Segoe UI", "Segoe UI Symbol"], "lines.scale_dashes": False, "hatch.linewidth": 0.35,
                                 "pdf.fonttype": 42, "svg.fonttype": "none", "path.simplify": False})
 
 
@@ -121,7 +121,7 @@ class Sheet:
         """Text width in mm from the font's metrics (FreeType; a TextPath's extents took minutes for a sheet)."""
         prop = self._props.get(size)
         if prop is None:
-            prop = self._props[size] = FontProperties(family=[FONT, "Segoe UI"], size=size * PT)
+            prop = self._props[size] = FontProperties(family=[FONT, "Segoe UI", "Segoe UI Symbol"], size=size * PT)
         w, _, _ = TEXT2PATH.get_text_width_height_descent(s, prop, ismath=False)
         return w / PT
 
@@ -791,10 +791,49 @@ def metre_ticks(sh, fr):
     sh.line([(gx0, gy0), (gx1, gy0)], 0.25, GREY, ls="-.")
 
 
-def draw(ship="Wayfarer", dpi=200, out_dir=None):
+SHEETS = {"E-01": ("E01_starboard", "Exteriér – pravobok: desky, materiály, funkční prvky, světla, decaly"),
+          "E-02": ("E02_schedules", "Exteriér – tabulky: funkční prvky, poklopy, světla, decaly, kit, změny, kontrola dat")}
+
+
+def save_sheet(sh, m, d, sheet, dpi, out_dir, extra=None):
+    """PNG (and a vector PDF in Saved/Drawings) plus the sidecar: the IDs drawn and labelled per view and listed per
+    schedule, with the digests of the data the sheet was drawn from (Tools/Tests/test_exterior_drawing.py)."""
+    out_dir = out_dir or os.path.join(em.ROOT, "ArtSource", "Ships", m.ship, "Design", "Drawings")
+    os.makedirs(out_dir, exist_ok=True)
+    base = os.path.join(out_dir, "%s_%s" % (m.ship, SHEETS[sheet][0]))
+    pdf_dir = os.path.join(em.ROOT, "Saved", "Drawings")
+    os.makedirs(pdf_dir, exist_ok=True)
+    sidecar = {
+        "_comment": "Written by Tools/Design/draw_exterior_sheet.py: the IDs this sheet draws and labels per view and "
+                    "lists per schedule, with the digests of the data it was drawn from (Tools/Tests/test_exterior_drawing.py).",
+        "sheet": sheet, "ship": m.ship, "digests": m.digests,
+        "drawn": {k: sorted(v) for k, v in d.drawn.items()},
+        "labelled": {k: sorted(v) for k, v in d.labelled.items()},
+        "schedules": {k: sorted(v) for k, v in SCHEDULED.items()},
+    }
+    sidecar.update(extra or {})
+    with open(base + ".json", "w", encoding="utf-8") as f:
+        json.dump(sidecar, f, ensure_ascii=False, indent=1)
+    sh.save(base + ".png", dpi, os.path.join(pdf_dir, os.path.basename(base) + ".pdf"))
+    print("EXTSHEET %s wrote %s.png (%d dpi) and .json, PDF in Saved/Drawings" % (sheet, os.path.relpath(base, em.ROOT), dpi))
+    return base
+
+
+def draw(ship="Wayfarer", dpi=200, out_dir=None, sheets=None):
     setup_fonts()
-    SCHEDULED.clear()
     m = em.Model(ship)
+    out = []
+    for sheet, fn in (("E-01", draw_e01), ("E-02", draw_e02)):
+        if sheets and sheet not in sheets:
+            continue
+        SCHEDULED.clear()
+        out.append(fn(m, dpi, out_dir))
+    return out
+
+
+def draw_e01(m, dpi, out_dir):
+    """E-01: the starboard views A (plates, materials) and B (functional parts, lights, decals), detail A, the
+    legend, sections R1/R2, the chosen concept and the notes; the tables are on E-02 (author 1. 10. 2026)."""
     sh = Sheet()
     d = Drawer(sh, m)
     W, H = sh.w, sh.h
@@ -852,34 +891,58 @@ def draw(ship="Wayfarer", dpi=200, out_dir=None):
     detail_dims(sh, frD, m, Y0d)
     d.place_labels("D", reqsD, dx_left, W - 14, tiers_up=[Y1d + 7, Y1d + 15, Y1d + 23],
                    tiers_dn=[Y0d - 17, Y0d - 25, Y0d - 33], split_y=frD.P(0, POD_SPLIT)[1], bus_up=Y1d + 3.0, bus_dn=Y0d - 11.0)
-    # ---------------------------------------------------------------- legend, section, concept
-    yl = legend(sh, m, dx_left, 545)
-    section(sh, m, 1040.0, 545.0, "R1", "XK-PLATE", "U")
-    section(sh, m, 1040.0, 497.0, "R2", "XK-PLATE-H", "L")
-    concept_strip(sh, m, 1040.0, 449.0)
-    # ---------------------------------------------------------------- schedules, changes, title block
-    schedules(sh, d, m, x_left, 256.0)
-    yc = changes_box(sh, m, dx_left, min(yl, 384.0) - 2)
-    rules_table(sh, m, dx_left, yc - 3)
-    title_block(sh, m, dx_left, W)
-    out_dir = out_dir or os.path.join(em.ROOT, "ArtSource", "Ships", ship, "Design", "Drawings")
-    os.makedirs(out_dir, exist_ok=True)
-    base = os.path.join(out_dir, "%s_E01_starboard" % ship)
-    pdf_dir = os.path.join(em.ROOT, "Saved", "Drawings")
-    os.makedirs(pdf_dir, exist_ok=True)
-    sidecar = {
-        "_comment": "Written by Tools/Design/draw_exterior_sheet.py: the IDs this sheet draws and labels per view and "
-                    "lists per schedule, with the digests of the data it was drawn from (Tools/Tests/test_exterior_drawing.py).",
-        "sheet": "E-01", "ship": ship, "view": "SB", "digests": m.digests,
-        "drawn": {k: sorted(v) for k, v in d.drawn.items()},
-        "labelled": {k: sorted(v) for k, v in d.labelled.items()},
-        "schedules": {k: sorted(v) for k, v in SCHEDULED.items()},
-    }
-    with open(base + ".json", "w", encoding="utf-8") as f:
-        json.dump(sidecar, f, ensure_ascii=False, indent=1)
-    sh.save(base + ".png", dpi, os.path.join(pdf_dir, "%s_E01_starboard.pdf" % ship))
-    print("EXTSHEET wrote %s.png (%d dpi) and .json, PDF in Saved/Drawings" % (os.path.relpath(base, em.ROOT), dpi))
-    return base
+    # ---------------------------------------------------------------- legend, sections, concept, notes
+    legend(sh, m, x_left, 258)
+    section(sh, m, 440.0, 258.0, "R1", "XK-PLATE", "U")
+    section(sh, m, 440.0, 208.0, "R2", "XK-PLATE-H", "L")
+    concept_strip(sh, m, dx_left, 548.0, width=375.0)
+    notes(sh, m, dx_left, 400.0)
+    title_block(sh, m, dx_left, W, "E-01")
+    return save_sheet(sh, m, d, "E-01", dpi, out_dir)
+
+
+def draw_e02(m, dpi, out_dir):
+    """E-02: every schedule of the exterior - functional parts, greebles, lights, kit, decals, decal rules, the
+    changes to the built ship and the drawing model's data check."""
+    sh = Sheet()
+    d = Drawer(sh, m)
+    W, H = sh.w, sh.h
+    frame_and_zones(sh)
+    sh.t(34, 822, "TABULKY EXTERIÉRU – WAYFARER", TITLE_MM, weight="bold")
+    sh.t(34, 815.5, "Prvky všech pohledů (sloupec „pohled“: B bok, H hřbet, S spodek, Z záď, M mezera gondola–trup); "
+                   "výkresy pohledů na listech E-01 a dalších. ✓ = schváleno autorem %s." % m.design["approved"]["date"],
+         2.5, GREY)
+    schedules(sh, d, m, 34.0, 808.0)
+    yc = changes_box(sh, m, 800.0, 808.0)
+    rules_table(sh, m, 800.0, yc - 4)
+    title_block(sh, m, 800.0, W, "E-02")
+    return save_sheet(sh, m, d, "E-02", dpi, out_dir)
+
+
+def notes(sh, m, x, ytop):
+    """General notes and the list of the exterior sheets."""
+    sh.t(x, ytop - 3, "POZNÁMKY", 3.4, weight="bold")
+    lines = [
+        "1. Kreslí skript z dat stavby a dat návrhu (jeden zdroj dat); ID na výkresu = ID v datech.",
+        "2. Souřadnice v metrech: x od zádi, y k levoboku, z od paluby; tloušťky v mm.",
+        "3. Zrcadlené prvky mají jedno ID pro oba boky; ks v tabulkách = na celé lodi.",
+        "4. Stav: černě postaveno, modře návrh (+) a změna (Δ, stará poloha červeně čárkovaně), červeně odstranit (×).",
+        "5. Prvky gondoly a ploutve popisuje detail A; tabulky všech prvků jsou na listu E-02.",
+        "6. Po schválení výkresů se exteriérový kit a pilot staví z dat návrhu (Design/%s_exterior_design.json)." % m.ship,
+    ]
+    y = ytop - 9
+    for ln in lines:
+        for k, part in enumerate(wrap(sh, ln, 2.5, 372, 2)):
+            sh.t(x + (0 if k == 0 else 4), y, part, 2.5)
+            y -= 4.0
+    y -= 2
+    sh.t(x, y, "LISTY EXTERIÉRU", 3.0, weight="bold")
+    y -= 5
+    for code, (_, title) in SHEETS.items():
+        sh.t(x, y, code, 2.5, weight="bold")
+        sh.t(x + 14, y, title, 2.5)
+        y -= 4.0
+    return y
 
 
 POD_SPLIT = 1.35
@@ -1132,14 +1195,14 @@ def section(sh, m, x, ytop, name, kit_id, band):
     sh.t(cx - half * s, y0 - 11.5, txt + " (mm)", 2.3)
 
 
-def concept_strip(sh, m, x, ytop):
+def concept_strip(sh, m, x, ytop, width=135.0):
     """The author's chosen surface concept (design data "concept"): the images the panel layout follows."""
     from PIL import Image
     c = m.design["concept"]
     sh.t(x, ytop - 3, "Koncept %s (%s)" % (c["id"], c["decided"]), 2.8, weight="bold")
     files = c["files"]
     gap = 4.0
-    wimg = (135.0 - gap * (len(files) - 1)) / len(files)
+    wimg = (width - gap * (len(files) - 1)) / len(files)
     y1 = ytop - 6.5
     for i, f in enumerate(files):
         im = Image.open(os.path.join(em.ROOT, f)).convert("RGB")
@@ -1150,17 +1213,23 @@ def concept_strip(sh, m, x, ytop):
         sh.ax.imshow(im, extent=(x0, x0 + wimg, y1 - h, y1), zorder=5, interpolation="lanczos")
         sh.rect(x0, y1 - h, x0 + wimg, y1, ec=INK, lw=0.18, z=6)
         tag = os.path.basename(f).split("_")[1]
-        for k, ln in enumerate(wrap(sh, "%s: %s" % (tag, c["take_" + tag]), 1.9, wimg, 4)):
-            sh.t(x0, y1 - h - 3.2 - k * 2.5, ln, 1.9)
+        for k, ln in enumerate(wrap(sh, "%s: %s" % (tag, c["take_" + tag]), 2.3, wimg, 4)):
+            sh.t(x0, y1 - h - 3.6 - k * 3.1, ln, 2.3)
     sh.ax.set_xlim(0, sh.w)
     sh.ax.set_ylim(0, sh.h)
 
 
-def schedules(sh, d, m, x, ytop):
-    status = lambda e: STATUS_CZ[e.status]
+def stav(e):
+    """The status for a table, with a tick when the author approved the change (design data "approved")."""
+    return STATUS_CZ[e.status] + (" ✓" if getattr(e, "approved", False) else "")
 
-    def views(e):
-        return " ".join(VIEW_SHORT[v] for v in ("SB", "TOP", "BOT", "AFT", "PT") if v in e.views)
+
+def views(e):
+    return " ".join(VIEW_SHORT[v] for v in ("SB", "TOP", "BOT", "AFT", "PT") if v in e.views)
+
+
+def schedules(sh, d, m, x, ytop):
+    status = stav
 
     def note(e):
         return e.why or e.purpose or e.what
@@ -1215,11 +1284,12 @@ def schedules(sh, d, m, x, ytop):
     y3 = table(sh, x3, y3 - 4, "EXTERIÉROVÝ KIT (XK) – návrh", colsK,
                [([e.id, e.name, e.data.get("from", ""), e.what], STATUS_COL[e.status]) for e in K])
     SCHEDULED["kit"] = {e.id for e in K}
-    decal_schedule(sh, m, x3 + sum(c[1] for c in colsL) + 5, ytop)
+    y4 = decal_schedule(sh, m, x3 + sum(c[1] for c in colsL) + 5, ytop)
+    grime_schedule(sh, m, x3 + sum(c[1] for c in colsL) + 5, y4 - 4)
 
 
 def decal_schedule(sh, m, x, ytop):
-    D = [e for e in m.elements if e.cat in ("decal", "trim") and e.sb]
+    D = [e for e in m.elements if e.cat in ("decal", "trim")]
     cols = [("ID", 36, "left"), ("knihovna", 30, "left", 2), ("velikost", 19, "left"), ("umístění", 30, "left", 2),
             ("ks", 7, "right"), ("stav", 18, "left"), ("čte", 9, "left"), ("účel / poznámka", 47, "left", 5)]
 
@@ -1233,10 +1303,33 @@ def decal_schedule(sh, m, x, ytop):
         s = e.extra.get("size")
         return "%s×%s" % (em.fmt(s[0]), em.fmt(s[1])) if s else "pás"
 
-    rows = [([e.id, e.extra.get("item", e.name).replace("D_Big_", "velký "), size(e), e.where, e.qty, STATUS_CZ[e.status],
+    rows = [([e.id, e.extra.get("item", e.name).replace("D_Big_", "velký "), size(e), e.where, e.qty, stav(e),
               up(e), e.why or e.purpose or e.what], STATUS_COL[e.status]) for e in D]
     SCHEDULED["decals"] = {e.id for e in D}
-    return table(sh, x, ytop, "DECALY NA POHLEDU B (D) – „čte“: text stojí", cols, rows)
+    return table(sh, x, ytop, "DECALY (D) – všechny pohledy; „čte“: text stojí", cols, rows)
+
+
+def grime_schedule(sh, m, x, ytop):
+    G = [e for e in m.elements if e.cat == "grime"]
+    cols = [("ID", 30, "left"), ("druh", 18, "left"), ("kde", 38, "left", 2), ("velikost", 20, "left"), ("stav", 18, "left"),
+            ("účel", 72, "left", 2)]
+    surface = {"pod": "gondola", "top": "shora", "bottom": "zespodu", "side": "bok", "ray": "ploutev"}
+
+    def size(e):
+        s_ = e.data.get("size")
+        return "%s×%s" % (em.fmt(s_[0]), em.fmt(s_[1])) if s_ else ""
+
+    def where(e):
+        dd = e.data
+        if dd.get("on") == "pod":
+            return "gondola x %s, %s°" % (em.fmt(dd.get("x", 0)), em.fmt(dd.get("deg", 0)))
+        x = dd["x"] if "x" in dd else (dd.get("at") or [None])[0]
+        return "%s x %s" % (surface.get(dd.get("on"), dd.get("on", "")), em.fmt(x)) if x is not None else dd.get("on", "")
+
+    rows = [([e.id, e.data.get("kind", ""), where(e), size(e), stav(e), e.why or e.purpose or e.what], STATUS_COL[e.status])
+            for e in G]
+    SCHEDULED["grime"] = {e.id for e in G}
+    return table(sh, x, ytop, "ŠPÍNA (karty špíny, D-G)", cols, rows)
 
 
 def changes_box(sh, m, x, ytop):
@@ -1251,7 +1344,7 @@ def changes_box(sh, m, x, ytop):
             j += 1
         grp = ch[i:j + 1]
         if len(grp) > 2:
-            rows.append((["%s až %s" % (grp[0].id, grp[-1].id.split("-")[-1]), STATUS_CZ[e.status],
+            rows.append((["%s až %s" % (grp[0].id, grp[-1].id.split("-")[-1]), stav(e),
                           "%d× %s, %d bloků na lodi" % (len(grp), e.name, sum(g.qty for g in grp)), "spec 8× TR1 "
                           "(4 kolem přídě, 2 na gondolu): bloky navíc"], STATUS_COL[e.status]))
         else:
@@ -1259,7 +1352,7 @@ def changes_box(sh, m, x, ytop):
                 what = m.change_text(g) if g.status == "change" else "%s, %s" % (g.name, g.where)
                 if g.extra.get("replaced_by"):
                     what += " → " + ", ".join(g.extra["replaced_by"])
-                rows.append(([g.id, STATUS_CZ[g.status], what, g.why], STATUS_COL[g.status]))
+                rows.append(([g.id, stav(g), what, g.why], STATUS_COL[g.status]))
         i = j + 1
     y = table(sh, x, ytop, "ZMĚNY A ODSTRANĚNÍ POSTAVENÉHO (decaly v tabulce D)", cols, rows)
     SCHEDULED["changes"] = {e.id for e in ch}
@@ -1286,24 +1379,29 @@ def rules_table(sh, m, x, ytop):
     R = [e for e in m.elements if e.cat == "rule"]
     colsR = [("ID", 48, "left"), ("stav", 18, "left"), ("pravidlo", 300, "left", 2)]
     y = table(sh, x, ytop, "PRAVIDLA DECALŮ", colsR,
-              [([e.id, STATUS_CZ[e.status], e.why or e.purpose or e.what], STATUS_COL[e.status]) for e in R])
+              [([e.id, stav(e), e.why or e.purpose or e.what], STATUS_COL[e.status]) for e in R])
     SCHEDULED["rules"] = {e.id for e in R}
     return y
 
 
-def title_block(sh, m, x, W):
+SHEET_SCALE = {"E-01": "1:30, detail 1:20, řezy 1:5", "E-02": "tabulky"}
+
+
+def title_block(sh, m, x, W, sheet="E-01"):
     """Title block: ship and sheet, scale, sheet number, revision table, data digests and the approval fields."""
     x1 = W - 10
     y0, y1 = 10, 114
     sh.rect(x, y0, x1, y1, ec=INK, lw=0.5, z=50)
     sh.t(x + 3, y1 - 6, "GAMESPACE  ·  HALCYON FREIGHTWORKS", 2.5, GREY)
     sh.t(x + 3, y1 - 13, "WAYFARER – návrh exteriéru (dossier bod 3)", 4.8, weight="bold")
-    sh.t(x + 3, y1 - 20, "Exteriér – pravobok: desky, materiály, funkční prvky, světla, decaly", 3.2)
+    sh.t(x + 3, y1 - 20, SHEETS[sheet][1], 3.2)
     sh.t(x + 3, y1 - 25.5, "Koncept %s: %s" % (m.design["concept"]["id"], m.design["concept"]["name"]), 2.4)
     ya = y1 - 29
     sh.line([(x, ya), (x1, ya)], 0.25, z=50)
-    cells = [("List", "E-01 vzorový, 1 / 1"), ("Revize", m.design["revision"]), ("Měřítko", "1:30, detail 1:20, řez 1:5"),
-             ("Formát", "A0 na šířku"), ("Datum", "1. 10. 2026"), ("Stav", "NÁVRH KE SCHVÁLENÍ STYLU")]
+    codes = list(SHEETS)
+    cells = [("List", "%s, %d / %d" % (sheet, codes.index(sheet) + 1, len(codes))), ("Revize", m.design["revision"]),
+             ("Měřítko", SHEET_SCALE.get(sheet, "1:30")), ("Formát", "A0 na šířku"), ("Datum", "1. 10. 2026"),
+             ("Stav", "STYL SCHVÁLEN, OBSAH KE SCHVÁLENÍ")]
     cw = (x1 - x) / 3
     for i, (k, v) in enumerate(cells):
         cx = x + (i % 3) * cw
@@ -1316,7 +1414,7 @@ def title_block(sh, m, x, W):
     sh.line([(x, yb), (x1, yb)], 0.25, z=50)
     for i, (k, v) in enumerate((("Kreslil", "Claude (skript draw_exterior_sheet.py), 1. 10. 2026"),
                                 ("Kontroloval", "kritik technických výkresů, 1. 10. 2026"),
-                                ("Schválil", "autor – podpis / datum: ________________"))):
+                                ("Schválil", "autor: styl %s; obsah: ________" % m.design["approved"]["date"]))):
         cx = x + i * cw
         sh.t(cx + 2, yb - 3.8, k, 2.0, GREY)
         for j, ln in enumerate(wrap(sh, v, 2.3, cw - 4, 2)):
@@ -1326,7 +1424,8 @@ def title_block(sh, m, x, W):
     yr = yb - 14
     sh.line([(x, yr), (x1, yr)], 0.25, z=50)
     sh.t(x + 2, yr - 3.8, "Revize", 2.0, GREY)
-    sh.t(x + 2, yr - 8.2, "A  1. 10. 2026  první vydání: vzorový list ke schválení stylu", 2.4)
+    sh.t(x + 2, yr - 8.2, "A  1. 10. 2026  vzorový list E-01 ke schválení stylu", 2.4)
+    sh.t(x + 140, yr - 8.2, "B  1. 10. 2026  tabulky na list E-02; schválené změny (✓) vyznačené", 2.4)
     yd = yr - 11
     sh.line([(x, yd), (x1, yd)], 0.25, z=50)
     dg = m.digests
