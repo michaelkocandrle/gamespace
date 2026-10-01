@@ -8,7 +8,7 @@
       - compileall of Tools/ and Content/Python/ (syntax of every script);
       - the unit tests in Tools/*/tests/ (ship export core, import plan, silhouette compare);
       - the static checks in Tools/Tests/ that need neither Unreal nor Blender (material HLSL, decal orientation,
-      the size limit of Docs/CURRENT.md, exterior drawings vs data).
+      the size limit of Docs/CURRENT.md, exterior drawings vs data, the heavy-resource lock, the per-checkout build folder).
     -Blender adds the checks that start Blender 5.2 headless (test_ship_geometry.py, the silhouette render).
     -UE adds every Unreal test in Tools/Tests/ (the files that import unreal), one editor commandlet each through
     Tools\run_editor_python.ps1: about a minute per test, the editor must be closed and the C++ built.
@@ -35,6 +35,11 @@ param(
 # Native tools write to stderr; with "Stop" Windows PowerShell would turn that into a terminating error.
 $ErrorActionPreference = "Continue"
 if ($All) { $Blender = $true; $UE = $true }
+if ($Blender -or $UE) {
+    # keep the heavy-resource lock fresh while this runs (author 1. 10. 2026: heartbeat; nothing when this session
+    # does not hold the lock - Tools/HeavyLock.ps1 beat)
+    try { & (Join-Path $PSScriptRoot "HeavyLock.ps1") beat -OwnerPid $PID } catch { Write-Host "HEAVYLOCK heartbeat not started: $_" }
+}
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $logDir = Join-Path $repo ("Saved/Tests/{0:yyyyMMdd_HHmmss}" -f (Get-Date))
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
@@ -103,7 +108,8 @@ try {
     Invoke-Python "offline" "compileall Tools Content/Python" @("-m", "compileall", "-q", "Tools", "Content/Python")
     $offline = @(Get-ChildItem (Join-Path $repo "Tools") -Recurse -Filter "test_*.py" |
         Where-Object { $_.Directory.Name -ceq "tests" }) +
-        @("test_material_hlsl.py", "test_decal_orientation.py", "test_docs_limits.py", "test_exterior_drawing.py" |
+        @("test_material_hlsl.py", "test_decal_orientation.py", "test_docs_limits.py", "test_exterior_drawing.py",
+          "test_heavy_lock.py", "test_build_dir.py" |
           ForEach-Object { Get-Item (Join-Path $repo "Tools/Tests/$_") })
     foreach ($file in $offline) {
         Invoke-Python "offline" $file.Name @($file.FullName)

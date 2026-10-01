@@ -62,6 +62,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+# keep the heavy-resource lock fresh while this runs (author 1. 10. 2026: heartbeat; nothing when this session
+# does not hold the lock - Tools/HeavyLock.ps1 beat)
+try { & (Join-Path $PSScriptRoot "HeavyLock.ps1") beat -OwnerPid $PID } catch { Write-Host "HEAVYLOCK heartbeat not started: $_" }
 $projectDir = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $shotsRoot = & (Join-Path $PSScriptRoot "ShotsDir.ps1")
 

@@ -431,12 +431,20 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   v Development buildu (ten autor hraje) ladicí příkazy enginu (`DebugExecBindings` v `BaseInput.ini`:
   F1 drátový model, F2 unlit…); klávesu pro hru z nich uvolni řádkem `-DebugExecBindings=(…)` v
   `Config/DefaultInput.ini` (přesná kopie řádku z enginu), jako u F1/F2 pro stránky MFD.
+- h) **Druhá session čekala 8 h na zámek těžkých zdrojů** (1. 10. 2026). Příčina: session zámek vzala a skončila
+  bez `release`, zámek neměl ani obnovení, ani vypršení. Řešení: `Tools/HeavyLock.ps1` (heartbeat každých 5 min
+  skrytým hlídačem, 20 min bez obnovení = opuštěný, hooky `Stop`/`StopFailure`/`SessionEnd` volají `release-idle`;
+  pravidla v `CLAUDE.md`). Nástrahy při psaní: ve Windows PowerShell 5.1 je `$PSScriptRoot` ve výchozí hodnotě
+  parametru pod `-File` prázdný (počítej v těle skriptu); funkce, která něco vypíše do výstupu a vrátí `$false`,
+  vrací pole, a to je pravdivé (zprávy přes `Write-Host`); `--` v argumentech `-File` rozbije vázání parametrů
+  (příkaz předávej jako `-Exec "<příkaz>"`). Proces nástroje Bash/PowerShell v relaci žije jen po dobu volání:
+  hlídače neváž na něj, ale na proces skutečné operace (skripty volají `beat -OwnerPid $PID` samy).
 
 - fd) **Výkres z matplotlibu se kreslil 3 minuty** (1. 10. 2026): šířka textu přes `TextPath(...).get_extents()`
   počítá extrémy Bézierových křivek (164 s na list A0). Šířku ber z metrik písma
   `TextToPath().get_text_width_height_descent(s, prop, ismath=False)` (list za 16 s). Bahnschrift je jeden
   proměnný soubor, matplotlib z něj tučné nevybere: tučné = obrys `patheffects.withStroke`. Nemá znaky ↑ ✓ ✗ −
-  (U+2212): piš slova a spojovník.
+  (U+2212): `draw_exterior_sheet.py` má záložní písma Segoe UI a Segoe UI Symbol (✓, →); jinak piš slova.
 
 ### 9.2 Vykreslování (UE 5.8)
 

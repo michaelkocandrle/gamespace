@@ -67,13 +67,22 @@ až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
 - Druhá session pracuje v **samostatném git worktree** na vlastní větvi, ne v hlavním checkoutu, a každý krok
   commitne zvlášť. **Slučuje jen hlavní session** (sloučení do `main` a push).
 - **Těžké zdroje** (Unreal editor, UE testy, balení, Blender, snímky) smí v jednu chvíli používat jen jedna
-  session. Hlídá je zámek `C:\gamespace-locks\heavy.lock` mimo repozitář: soubor se jménem session, úkolem a časem.
-  - Před použitím zámek vytvoř, po skončení ho smaž: `.\Tools\HeavyLock.ps1 take -Task "<úkol>"`, pak
+  session. Hlídá je zámek `C:\gamespace-locks\heavy.lock` mimo repozitář: soubor se jménem session, úkolem, časem
+  převzetí a posledního obnovení a procesem běžící operace.
+  - Před použitím zámek vezmi, po skončení uvolni: `.\Tools\HeavyLock.ps1 take -Task "<úkol>"`, pak
     `.\Tools\HeavyLock.ps1 release` (`status` ukáže, kdo ho drží). Skript vytvoří soubor atomicky.
+  - **Heartbeat** (autor 1. 10. 2026; druhá session čekala 8 h na neuvolněný zámek): během dlouhé operace se zámek
+    obnovuje každých 5 minut. `Package.ps1`, `Shots.ps1`, `Build.ps1`, `run_editor_python.ps1` a `Test.ps1`
+    (`-UE`, `-Blender`, `-All`) to dělají samy (`beat`: skrytý hlídač obnovuje, dokud běží jejich proces). Jiný
+    dlouhý příkaz (Blender z Git Bash) pusť přes `.\Tools\HeavyLock.ps1 run -Task "<úkol>" -Exec "<příkaz>"`
+    (vezme, obnovuje, uvolní).
+  - Zámek **bez obnovení déle než 20 minut** je opuštěný; `take` ho převezme a vypíše, čí byl.
+  - **Hook na konci každé odpovědi** (`Stop`, `StopFailure` a `SessionEnd` v `.claude/settings.json`) uvolní zámek
+    své session (`release-idle`), pokud už neběží operace zapsaná v zámku; operace na pozadí ho drží dál. Mezi
+    odpověďmi session zámek nedrží, další odpověď si ho vezme znovu. Přerušení uživatelem hook nespustí, pak
+    zámek uvolní 20 minut bez obnovení.
   - Když je obsazený, nečekej na něj: dělej práci bez těžkých zdrojů (kód, dokumentace, návrhy, offline testy)
     a zkus to později.
-  - Zámek starší než **2 hodiny** je opuštěný; `take` ho převezme a vypíše, čí byl. Delší práci obnov dalším
-    `take` (stejná session jen přepíše úkol a čas).
 - **Každá session balí do své složky** (autor 1. 10. 2026; dřív si přepisovaly build): hlavní checkout do
   `C:\gamespace\Builds\Gamespace`, worktree `gamespace-<jméno>` do `C:\gamespace\Builds_<jméno>\Gamespace` (druhá
   session tedy `C:\gamespace\Builds_audit`). `Package.ps1`, `Shots.ps1` a `Play.ps1` cestu berou z
@@ -89,6 +98,7 @@ až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
 .\Tools\Package.ps1                                 # balení na konci kroku (~5 min)
 .\Tools\Shots.ps1 -Preset <preset> -Package -Width 1920 -Height 1080
 .\Tools\HeavyLock.ps1 take -Task "<úkol>"           # zámek těžkých zdrojů; po práci release, stav status
+.\Tools\HeavyLock.ps1 run -Task "<úkol>" -Exec "<příkaz>"   # dlouhý příkaz pod zámkem s heartbeatem
 .\Tools\Cleanup.ps1 [-DryRun]                       # úklid disku na konci kroku
 ```
 
