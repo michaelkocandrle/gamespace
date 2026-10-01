@@ -8,7 +8,8 @@
       - compileall of Tools/ and Content/Python/ (syntax of every script);
       - the unit tests in Tools/*/tests/ (ship export core, import plan, silhouette compare);
       - the static checks in Tools/Tests/ that need neither Unreal nor Blender (material HLSL, decal orientation,
-      the size limit of Docs/CURRENT.md, exterior drawings vs data, the heavy-resource lock, the per-checkout build folder).
+      the size limit of Docs/CURRENT.md, exterior and interior drawings vs data, the heavy-resource lock, the
+      per-checkout build folder).
     -Blender adds the checks that start Blender 5.2 headless (test_ship_geometry.py, the silhouette render).
     -UE adds every Unreal test in Tools/Tests/ (the files that import unreal), one editor commandlet each through
     Tools\run_editor_python.ps1: about a minute per test, the editor must be closed and the C++ built.
@@ -115,7 +116,7 @@ try {
     $offline = @(Get-ChildItem (Join-Path $repo "Tools") -Recurse -Filter "test_*.py" |
         Where-Object { $_.Directory.Name -ceq "tests" }) +
         @("test_material_hlsl.py", "test_decal_orientation.py", "test_docs_limits.py", "test_exterior_drawing.py",
-          "test_heavy_lock.py", "test_build_dir.py" |
+          "test_interior_drawing.py", "test_heavy_lock.py", "test_build_dir.py" |
           ForEach-Object { Get-Item (Join-Path $repo "Tools/Tests/$_") })
     foreach ($file in $offline) {
         Invoke-Python "offline" $file.Name @($file.FullName)
