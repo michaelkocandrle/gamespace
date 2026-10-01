@@ -1,7 +1,7 @@
 {
  "_comment": "The interior's design data for the drawings (dossier bod 4, author 1. 10. 2026; Tools/Design/interior_model.py, draw_interior_sheet.py). What is built stays in the build data with its IDs (Wayfarer_layout.json objects and doors, Wayfarer_hs.json interior.kit_modules.ids and interior.decals, Wayfarer_setup.json D-INT-*); this file holds the Czech purposes of the kit parts for the author, the door leaves (built or proposed), the components' access and replacement, and notes the data check prints. Status words: built = in the build data, proposed = drawn blue, not built yet.",
  "ship": "Wayfarer",
- "revision": "A",
+ "revision": "B",
  "date": "1. 10. 2026",
  "rooms": {
   "hold": "HLD",
@@ -66,14 +66,16 @@
    "side_cz": "po líci ze strany chodby",
    "t": 0.03,
    "h": 2.05,
-   "_h": "the doorway's clear height 2.05 m (Tools/Kit/kit_batch4b.py DOOR_H)"
+   "_h": "the doorway's clear height 2.05 m (Tools/Kit/kit_batch4b.py DOOR_H)",
+   "approved": "1. 10. 2026"
   },
   "DR-CAB-CPT": {
    "leaf": "none",
    "type": "otvor bez křídla",
    "motion": "otvor ke schodům až ke stropu",
    "operation": "",
-   "purpose": "Kokpit a kajuta jsou jeden prostor; pilot vstupuje ke křeslu zezadu po schodech."
+   "purpose": "Kokpit a kajuta jsou jeden prostor; pilot vstupuje ke křeslu zezadu po schodech.",
+   "approved": "1. 10. 2026"
   },
   "DR-CAB-HYG": {
    "leaf": "built",
@@ -117,21 +119,16 @@
    "replace": "jádro se vytáhne do chodby"
   },
   "CAB-M-LIFESUP": {
-   "bay": "pod lůžkem CAB-U-BUNK",
-   "access": "zvednutím matrace; sání v podstavci lůžka, zpětné sání v CAB-W-L1",
-   "replace": "shora po zvednutí roštu lůžka",
-   "built_as": "jednotka nepostavena (je jen v layoutu); ve hře sání v podstavci lůžka a zpětné sání v CAB-W-L1"
+   "bay": "pod podlahou, z většiny pod lůžkem CAB-U-BUNK (y 0,92 … 1,50), 0,25 m blíž k ose než v layoutu v1",
+   "access": "zvednutím matrace a odklopením desky podlahy v podstavci lůžka (návrh); sání v podstavci lůžka, zpětné sání v CAB-W-L1",
+   "replace": "shora otvorem v podlaze pod lůžkem po zvednutí matrace a roštu",
+   "built_as": "jednotka nepostavena (layout v2: posunutá dovnitř, aby se vešla do trupu); ve hře sání v podstavci lůžka a zpětné sání v CAB-W-L1"
   },
   "CPT-M-AVIONICS": {
    "bay": "pod podlahou kokpitu",
    "access": "odklopná deska před křeslem",
    "replace": "vytažením nahoru otvorem v podlaze"
   }
- },
- "height_notes": {
-  "CAB-U-BUNK": "díl má výklenek s policemi do 1,72 m, layout kreslí jen lůžko 0,7 m",
-  "CAB-U-GALLEY": "díl má pod sebou sklopné sedátko, layout kreslí jen skříňku z 0,8–1,8 m",
-  "CAB-U-HYGIENE": "střecha buňky pod zkosením obložení"
  },
  "ids": {
   "_comment": "The interior's IDs, bound to the build data (Tools/Design/assign_interior_ids.py): layout objects and doors by name, kit parts as [id, part] parallel to interior.kit_modules, interior decals as [item, id] parallel to interior.decals.items.",
@@ -250,8 +247,7 @@
   }
  },
  "review_notes": {
-  "DR-CAB-HYG": "kit (Furniture_Hygiene15L_A) kreslí výstražný pruh a madlo na zadní hraně křídla, ale těsnění u zadní zárubně – jedno z nich je opačně; výkres bere směr otevírání podle pruhu a madla (k přídi)",
-  "D-INT-SEC06": "komentář v setupu uvádí „nad lůžkem, x 13,09“, decal ale leží v x 14,99 na CAB-W-L5; výkres kreslí polohu z dat – rozhodne autor, kde má číslo úseku být"
+  "DR-CAB-HYG": "kit (Furniture_Hygiene15L_A) kreslí výstražný pruh a madlo na zadní hraně křídla, ale těsnění u zadní zárubně – jedno z nich je opačně; výkres bere směr otevírání podle pruhu a madla (k přídi)"
  },
  "decal_items": {
   "hazard_stripe": "výstražný pruh na hraně (rám dveří, práh)",
@@ -300,5 +296,9 @@
   "D-INT-SUIT": "šablona SUIT · ARMS na dvířkách se zbraní",
   "D-INT-HYGIENE": "šablona HYGIENE – WC · WASH vedle dveří buňky",
   "D-INT-GALLEY": "šablona GALLEY – WATER · RATIONS na dvířkách výdejníku"
+ },
+ "approved": {
+  "date": "1. 10. 2026",
+  "what": "styl listu I-04 (vzor pro I-01 až I-09), měřítko 1:20 na A0 s detaily 1:5 / 1:10, dveře DR-TEC-CAB (dvoukřídlé posuvné ze strany chodby) a DR-CAB-CPT (otvor bez dveří), kit platí před layoutem, číslo úseku 06 u přední přepážky"
  }
 }

@@ -33,11 +33,12 @@ laku); hlavní session staví exteriérový kit a pilota, druhá session výkres
 
 ## Paralelní práce
 
-- **Druhá session** (worktree `gamespace-audit`, větev `wayfarer-dossier-interior`): výkresy interiéru (dossier bod 4,
-  styl vzorového listu I-04 schválen autorem 1. 10.) a koncepty (bod 6). ID interiéru jsou v
-  `Design/Wayfarer_interior_design.json` (recept a layout je nenesou); model `Tools/Design/interior_model.py`, listy
-  `draw_interior_sheet.py`, test `test_interior_drawing.py`, skill `ship-pipeline` 1c. Moduly `exterior_*.py` mění jen
-  hlavní session; listy E-0x druhá session jen překreslí, když změní jejich data (autor 1. 10.), samostatným commitem.
+- **Druhá session** (worktree `gamespace-audit`, větev `wayfarer-dossier-interior`): výkresy interiéru (bod 4, styl
+  I-04 schválen 1. 10.) a koncepty (bod 6); ID interiéru v `Design/Wayfarer_interior_design.json`, model
+  `interior_model.py`, listy `draw_interior_sheet.py`, test `test_interior_drawing.py`, skill `ship-pipeline` 1c.
+  `exterior_*.py` mění jen hlavní session. **Datový commit druhé session** (autor 1. 10.: layout kajuty podle kitu,
+  podpora života posunutá, komentář D-INT-SEC06 v setupu; E-01–E-08 a paluba překreslené): při konfliktu v
+  `Drawings/Wayfarer_E0*` nebo `Design/*.png` vzít kteroukoli stranu a po sloučení překreslit (`draw_exterior_sheet.py`).
 - **Hlavní session:** exteriérový kit a pilot (hřbet, záď s gondolami), kritik s dílčím prahem.
 - Druhá session balí do `Builds_<jméno>` (`BuildDir.ps1`); slučuje hlavní session.
 

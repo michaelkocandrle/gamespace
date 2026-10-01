@@ -123,7 +123,8 @@
   {
    "room": "cabin",
    "name": "Skříň na skafandr a zbraň",
-   "rect": [10.72, 11.67, -1.8, -1.25],
+   "rect": [10.72, 11.67, -1.8, -1.191],
+   "_kit_size": "1. 10. 2026 (author: the kit is the built and approved reality): rect and z = the kit part Furniture_Locker10L_A as placed (kit_manifest dims_m, handles and overhangs included); was rect [10.72, 11.67, -1.8, -1.25], z [0.0, 1.8]",
    "_liner": "30. 9. 2026: the cabin from the hull liner (face at 1.9): 5 cm in from its frames, under its chamfer (1.83 m at 1.8 m out) - the furniture step rebuilds it",
    "z": [0.0, 1.8],
    "purpose": "Tady se hráč převlékne (zbroj, helma) a uloží ruční zbraň. Hned u vstupu z technické chodby."
@@ -131,32 +132,36 @@
   {
    "room": "cabin",
    "name": "Hygienická buňka",
-   "rect": [11.675, 13.125, -1.8, -0.8],
+   "rect": [11.668, 13.133, -1.8, -0.739],
+   "_kit_size": "1. 10. 2026 (author: the kit is the built and approved reality): rect and z = the kit part Furniture_Hygiene15L_A as placed (kit_manifest dims_m, handles and overhangs included); was rect [11.675, 13.125, -1.8, -0.8], z [0.0, 2.05]",
    "_liner": "30. 9. 2026: the cabin from the hull liner (face at 1.9): 5 cm in from its frames, under its chamfer (1.83 m at 1.8 m out) - the furniture step rebuilds it; its sides follow the liner back to its panels, a roof at 2.05 m",
    "_kit": "30. 9. 2026: from the kit (Furniture_Hygiene15L_A), centred on its door at x 12.4",
-   "z": [0.0, 2.05],
+   "z": [0.0, 2.31],
    "purpose": "Záchod a umyvadlo za posuvnými dveřmi – na vícedenní lety."
   },
   {
    "room": "cabin",
    "name": "Výdejník jídla a vody",
-   "rect": [13.3, 14.9, -1.8, -1.35],
+   "rect": [13.3, 14.9, -1.8, -1.117],
+   "_kit_size": "1. 10. 2026 (author: the kit is the built and approved reality): rect and z = the kit part Furniture_Food16L_A as placed (kit_manifest dims_m, handles and overhangs included); was rect [13.3, 14.9, -1.8, -1.35], z [0.8, 1.8]",
    "_liner": "30. 9. 2026: the cabin from the hull liner (face at 1.9): 5 cm in from its frames, under its chamfer (1.83 m at 1.8 m out) - the furniture step rebuilds it",
-   "z": [0.8, 1.8],
+   "z": [0.0, 1.65],
    "purpose": "Chlazená skříňka a výdej vody, pod ní sklopné sedátko."
   },
   {
    "room": "cabin",
    "name": "Lůžko",
-   "rect": [12.7, 14.8, 0.95, 1.8],
+   "rect": [12.7, 14.8, 0.922, 1.8],
+   "_kit_size": "1. 10. 2026 (author: the kit is the built and approved reality): rect and z = the kit part Furniture_Bunk21L_A as placed (kit_manifest dims_m, handles and overhangs included); was rect [12.7, 14.8, 0.95, 1.8], z [0.0, 0.7]",
    "_liner": "30. 9. 2026: the cabin from the hull liner (face at 1.9): 5 cm in from its frames, under its chamfer (1.83 m at 1.8 m out) - the furniture step rebuilds it",
-   "z": [0.0, 0.7],
+   "z": [0.0, 1.72],
    "purpose": "Spaní a odhlášení ze hry na lodi; nad ním úložné police."
   },
   {
    "room": "cabin",
    "name": "Podpora života S1",
-   "rect": [12.9, 14.5, 1.1, 1.75],
+   "rect": [12.9, 14.5, 0.85, 1.5],
+   "_moved": "1. 10. 2026 (author: move it inboard where the hull under the floor is deeper, partly under the bunk for the access by lifting the mattress): y 1.10-1.75 -> 0.85-1.50. The belly is flat at z -0.60 to y 1.4; at z -0.55 its chamfer is at y 1.65 aft of x 13.5 and 1.55 at x 14.0-14.5, so the box keeps 5 cm to the hull's skin; y 0.92-1.50 of its 0.65 m lie under the bunk (y 0.92-1.80)",
    "below": true,
    "z": [-0.55, -0.05],
    "purpose": "Pod lůžkem, přístup zvednutím matrace; vzduch a teplota pro celou loď."
