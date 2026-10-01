@@ -518,6 +518,12 @@ def main(argv):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import hs_detail
         report["detail"] = hs_detail.apply(recipe, made, coll, mats, ship)
+    if recipe.get("exterior_kit"):
+        # the exterior kit from the approved drawings (Tools/Blender/hs_exterior_kit.py): plates, frame, kit parts;
+        # before the lights, greebles and decals, so they land on the plates
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hs_exterior_kit
+        report["exterior_kit"] = hs_exterior_kit.apply(recipe, made, coll, mats, ship)
     if recipe.get("lights"):
         # light fittings and emissive strips (Tools/Blender/hs_lights.py); the real lights go to the scene
         # property hs_lights for hs_assemble_ship.py

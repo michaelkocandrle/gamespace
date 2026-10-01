@@ -601,11 +601,13 @@ trace: pole `console` ve scénáři s `stat unit`, `stat Slate`, `stat SpaceCock
 snímku.
 
 - ex) **„Soumrak“ `space.SunDir -52 120` je dnes noc a strana lodi na slunci ve vesmíru se mění** (30. 9. 2026).
-  Nad Veyrou (3 km) rozhoduje o výšce slunce hlavně yaw: 45 a 315 den, 120–225 po západu. Soumrak s nízkým sluncem
-  za lodí vpravo vzadu je `-52 102` (slunce v záběru z chase `yaw 135`). V 60 km (`facing horizon`) svítí slunce
-  levelu `-39 45` na boky, jen když snímky jdou v pořadí presetu `wayfarer_exterior_review`; jiné pořadí dalo loď
-  ve stínu. Příčina neověřená (orientace lodi po předchozích snímcích). Řešení: světlo scény drž v presetu
-  a po změně pořadí snímků zkontroluj, že je loď ve vesmíru na slunci.
+  **Příčina (1. 10. 2026):** `SpaceShotRunner` staví loď nad Veyru tam, kde stojí PlayerStart, a střed planety je
+  140 km ve směru +X. Lokální „nahoru“ lodi je tedy světové **−X**, dopředu světové −Z a doleva světové **−Y**
+  (ověřeno presetem `wayfarer_sun_calib`; první odhad +Y dal slunce na opačnou stranu); pitch a yaw `space.SunDir`
+  jsou světové. Výška slunce nad obzorem = asin(cos(pitch) · cos(yaw)): `-39 45` je 33° (den, slunce vlevo vzadu),
+  `-52 102` je −7° (pod obzorem, noc). Řešení: slunce e stupňů nad obzorem a a stupňů od přídě k levoboku je
+  `space.SunDir asin(cos e · cos a) atan2(cos e · sin a, sin e)`. Soumrak 6° zezadu zleva = `-44.7 81.5`, noc −10° =
+  `-44.1 104`, vesmír 30° zezadu zleva = `-37.8 50.8` (preset `wayfarer_kit_pilot`).
 - fa) **Denní trup působí ploše, i když jsou stíny ostré** (1. 10. 2026). Výchozí pohledy (chase zezadu, levobok zepředu)
   vidí stranu odvrácenou od slunce `-39 45`, kterou svítí jen obloha; osvětlený pravobok má kontrast jako SC. Stíny
   slunce ostřejší být nemůžou: scalability epic už dává `r.Shadow.Virtual.ResolutionLodBiasDirectional -1.5` a úhel
@@ -1190,6 +1192,12 @@ snímku.
   `settings_key()` píše množiny seřazené, stejně jako otisky v manifestech
   (`test_file_digest_ignores_the_string_hash_seed`). Skutečný šum stavby zůstává jen v trupu, decalech
   a interiéru (±40 trojúhelníků mezi běhy). Ověřené porovnáním staveb A/B1/B2/C (recept s klíči `id` a bez nich).
+- fg) **Přestavba „prošla“, ale export vynechal všechny FBX jako nezměněné** (1. 10. 2026, kit pilot kolo 2). Výjimka
+  v `--python` skriptu Blender neukončí chybou: `hs_assemble_ship.py` spadl v `kdop_hull` (po 12 pokusech o kolizi
+  bez tenkých stěn použil uvolněný bmesh; spustily to nové díly kitu na zádi), Blender skončil kódem 0, game blend
+  zůstal z minulé stavby a export ho správně poznal jako nezměněný. Řešení: Blender v dávce vždy s
+  `--python-exit-code 1` (výjimka pak vrátí 1) a po stavbě zkontroluj čas `<Loď>_HS_Game.blend`; `kdop_hull` po
+  vyčerpání pokusů použije kvádr oblasti.
 
 
 ---

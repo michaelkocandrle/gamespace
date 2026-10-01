@@ -35,7 +35,7 @@ FUNC_SIZE = {"rcs": (0.26, 0.17, 0.05), "blade": (0.2, 0.07, 0.16), "whip": (0.0
              "dome": (0.2, 0.2, 0.105), "connector": (0.12, 0.12, 0.04), "hinge": (0.12, 0.05, 0.06)}
 KIND_CZ = {"rcs": "blok RCS", "blade": "anténa (čepel)", "whip": "anténa (prut)", "dome": "senzorová kupole",
            "connector": "konektor", "hinge": "závěs klapky", "grille": "šachta s mřížkou", "piston": "hydraulický válec",
-           "frame": "rám rampy",
+           "frame": "rám rampy", "tread": "nášlapné lišty rampy", "hinge_ramp": "pant rampy",
            "hatch": "poklop", "hatch_large": "velký poklop", "vent": "větrací mřížka", "sensor": "senzor",
            "strip": "kryt kabelů", "strobe": "záblesk", "landing": "přistávací světlomet", "work": "pracovní světlo"}
 LIGHT_RGB = {"red": "#D32F2F", "green": "#2E9E44", "white": "#FFFFFF", "amber": "#F2A100", "strip": "#8FD3FF",
@@ -79,6 +79,18 @@ def span_at(poly, x):
             t = (x - x0) / (x1 - x0)
             vals.append(y0 + t * (y1 - y0))
     return (min(vals), max(vals)) if vals else None
+
+
+def bolt_columns(x0, x1, edge, pitch):
+    """Bolt columns of a plate from x0 to x1: inset by edge at both ends, evenly spaced at most pitch apart (kit pilot
+    critic round 1: a doubler's bolts sat to one side when they stepped by pitch from one end)."""
+    span = (x1 - edge) - (x0 + edge)
+    if span < -1e-9:
+        return []
+    n = int(math.ceil(span / pitch - 1e-6))
+    if n <= 0:
+        return [(x0 + x1) / 2]
+    return [x0 + edge + span * i / n for i in range(n + 1)]
 
 
 def largest(geom):
@@ -618,8 +630,9 @@ class Model:
         kind = it["kind"]
         s = it.get("size", 1.0)
         fx, fy, fh = FUNC_SIZE[kind]
-        if el.change and el.change.get("kit"):
-            k = self.kit[el.change["kit"]]
+        kit_id = (el.change or {}).get("kit") or it.get("kit")
+        if kit_id:
+            k = self.kit[kit_id]
             fx, fy, fh = k["size"]
             s = 1.0
             el.kit = k["id"]
@@ -761,7 +774,8 @@ class Model:
             kind = it["kind"]
             el = self.add(Element(it["id"], "functional", KIND_CZ[kind], it["status"], src="design", data=it,
                                   what=it["what"], kit=it.get("kit"),
-                                  material={"grille": "MZ-DARK", "piston": "MZ-METAL", "frame": "MZ-GUNMETAL"}.get(kind, "MZ-PAINT1")))
+                                  material={"grille": "MZ-DARK", "piston": "MZ-METAL", "frame": "MZ-GUNMETAL", "tread": "MZ-GUNMETAL",
+                                            "hinge_ramp": "MZ-METAL"}.get(kind, "MZ-PAINT1")))
             el.qty = 2 if it.get("mirror", True) else 1
             if it["on"] == "side":
                 el.where = "bok x %s–%s" % (fmt(it["x"][0]), fmt(it["x"][1]))
@@ -819,7 +833,9 @@ class Model:
                 for h in hw:
                     if h.sb["shape"].buffer(p["cut_margin"]).intersects(raw) and h.id not in p["cut"]:
                         h.extra.setdefault("cut_in", []).append(ident)
-                el = self.add(Element(ident, "panel", band["name"], p["status"], material=band["material"],
+                el = self.add(Element(ident, "panel", band["name"],
+                                      "built" if band["band"] in p.get("built_bands", []) else p["status"],
+                                      material=band["material"],
                                       kit=band["kit"], src="design", data={"band": band["band"], "bay": i, "x": [a, b]},
                                       what="deska %s, příčky x %s–%s" % (band["name"], fmt(a), fmt(b))))
                 el.qty = 2

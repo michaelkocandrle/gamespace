@@ -1,0 +1,42 @@
+# Verdikt: FAIL
+
+První dojem: Tvar je Wayfarer z konceptu, ale povrch působí jako čistý, nově vymodelovaný bílý kontejner s dlaždicovým hřbetem – hladký CG model, ne vrstvená pracovní loď ze Star Citizenu.
+
+| Kategorie | Skóre 1–10 | Proč (jedna věta) |
+|---|---|---|
+| Silueta a tvar | 7 | Z chase pohledů (listy 2, 3, 4) sedí rozvržení hřbetu, ramen, gondol, ploutví i zádi s výkresem a koncepty; nic netrčí šikmo. |
+| Hierarchie a hustota detailu | 5 | Hřbet je jedna vrstva stejně velkých desek v pravidelné mřížce, záď a gondoly jsou téměř holé – chybí střední vrstva detailu, kterou ukazují E-03 i koncepty B/C. |
+| Materiály | 5 | Lak je všude stejně matný a čistý, bez variace drsnosti, bez špíny v kanálech rámu a bez holého kovu; dvě symetrické desky na zádi mají rozdílný lesk. |
+| Decaly | 5 | Kromě nápisu WAYFARER jen rohové šrouby a pár miniaturních štítků; čísla panelů z výkresu, výstražné pruhy a šipky prakticky chybí. |
+| Světlo | 4 | Za dne čte tvar jen z úkosů hran; za soumraku (list 8) je loď černá silueta s jediným zeleným světlem, pracovní světlo a stroboskopy na ploutvích nesvítí. |
+| Čitelnost (text, displeje, HUD) | 6 | WAYFARER a HF-0417 jsou čitelné; „RAMP – STAND CLEAR“ a štítky desek jsou v 1080p příliš malé a šedé na bílé. |
+| Chyby geometrie | 6 | Žádné plovoucí díly ani průniky, ale písty rampy jsou dráty, „pracovní světlo“ je plochý bílý kosočtverec a trysky motorů čtou jako placeholder disky. |
+| Soulad stylu mezi díly | 5 | Hustě rastrovaný hřbet, prázdná bílá záď a hladká gondola s krabičkou RCS nepůsobí jako jeden kit. |
+
+Průměr: 5,4 (práh: dílčí krok – průměr aspoň 6,5, žádná kategorie pod 6, žádný bod „musí se opravit“)
+
+## Rozdíly proti referenci
+
+1. **Písty rampy jsou dráty, ne hydraulika** – kde: list 6, pravá půlka, po obou stranách dveří rampy (svislé tmavé tyče vlevo i vpravo od dveří, od horních držáků k dolní hraně) – co je špatně: tyče mají tloušťku pár pixelů, jednotný průřez, bez rozlišení válec/pístnice, bez držáků se šrouby, bez hadic; „odhalená hydraulika“ z konceptu C a ze SC čte jako tužkové čáry na bílé ploše – závažnost: musí se opravit – oprava: skutečné hydraulické válce (válec ~15–20 cm v průměru, chromová pístnice, vidlicové držáky se šrouby na rámu i dveřích, hadice), ve správném měřítku k 21,5m lodi.
+
+2. **Hřbet je jednotvárná dlažba** – kde: list 1, pravá půlka (oba pohledy), list 2 a 3, pravá půlka, celý hřbet; list 5, pravý pohled – co je špatně: všechny desky mají stejnou velikost a tvar v pravidelné mřížce se stejně širokým tmavým rámem; výkres E-03 (list 1 vlevo) ukazuje u páteře mřížky, vystouplé podpanely, poklopy a štítky, koncepty B/C různě velké panely a tmavší zapuštěné zóny; z chase kamery (list 2 vpravo) hřbet čte jako kachlíkovaná střecha – závažnost: musí se opravit – oprava: aspoň tři velikosti desek (velké R desky, střední servisní poklopy, malé), část polí u páteře nahradit zapuštěnými mřížkami a poklopy přesně podle E-03, šířku rámu odstupňovat (páteř široká, žebra úzká), vystouplé podpanely z výkresu udělat jako reliéf.
+
+3. **Rám mezi deskami nemá konstrukci** – kde: list 5, pravá půlka (oba pohledy), list 1, pravá půlka, všechny tmavé kanály mezi deskami – co je špatně: gunmetal rám je plochá tmavá výplň s jedním úkosem, bez profilu žebra, bez řad šroubů, bez hloubky; ve výkresu je šrafovaná konstrukce, u Carracku (list 5 vlevo) mají spáry vnitřní strukturu a špínu – závažnost: musí se opravit – oprava: rám jako skutečný kanál s viditelným profilem žebra (T/I), řada šroubů podél žebra, tmavší dno kanálu (AO + špína).
+
+4. **Záď je prázdná bílá krabice** – kde: list 6, pravá půlka, celá zadní stěna a dveře rampy uprostřed – co je špatně: velké ploché bílé plochy bez spár, stupňů a konstrukce; dveře mají jen drobnou ikonu větráku uprostřed a béžový pruh dole, který vypadá jako jiný materiál (lepenka); rám rampy je tenký plochý lem; proti SC zádi (list 6 vlevo) a zadnímu bloku konceptu C nulová mechanická hustota – závažnost: musí se opravit – oprava: dveře s žebry / protiskluzovými plechy a spárami, viditelný pant dole, rám s tloušťkou, rohovými styčníky a šrouby; béžový pruh nahradit tmavým pryžovým těsněním nebo tmavým prahem.
+
+5. **Světla kitu ve tmě nesvítí** – kde: list 8, pravá půlka, oba pohledy (ploutve na gondolách, záď, hřbet); list 9, pravá půlka – co je špatně: svítí jen zelený stroboskop na konci křídla; na ploutvích žádné světlo, pracovní světlo zádi je zhasnuté a nemá tělo lampy (na listu 6 je to plochý bílý kosočtverec nad rámem dveří), žádný emisivní prvek nedává měřítko; ve vesmíru z dálky nečte ani jedno světlo, Nomad (list 9 vlevo) má vidět poziční světla i z dálky – závažnost: musí se opravit – oprava: stroboskopy na ploutvích i koncích křídel s tělem lampy, emisivní čočkou a bloomem (červená/zelená/bílá), pracovní světlo zádi jako lampa s krytem, svítící teple bílou za soumraku i ve vesmíru.
+
+6. **Blok RCS je drobná hladká krabička** – kde: list 7, pravá půlka, pravý pohled, vrch gondoly u orange pásu – co je špatně: malá tmavá krabička se třemi krátkými válečky na hladkém bílém válci gondoly; bez montážní desky, bez hrdel trysek s hloubkou, bez očazení; brief i koncept C žádají „robustní bloky“ – závažnost: musí se opravit – oprava: blok jako čitelná jednotka (≥ 0,8 m), 4–5 trysek s vnitřním kuželem, montážní deska se šrouby, gunmetal s prstencem tepelného zabarvení, stejná jednotka na obou gondolách i na spodku.
+
+7. **Materiály bez variace a bez opotřebení** – kde: list 5, pravá půlka (rameno i hřbet), list 1, pravá půlka – co je špatně: primární i sekundární lak jednotně matný a sterilně čistý, žádná variace drsnosti, žádná špína ve dnech kanálů a za šrouby, žádné odření exponovaných úkosů; u Carracku (list 5 vlevo) jsou v drážkách stíny a špína a panely se tónově liší – závažnost: doporučeno – oprava: jemná maska drsnosti, špína ve dnech kanálů a kolem šroubů, lehké odření hran desek, holý kov na šroubech a pístnicích.
+
+8. **Decaly řídké a nečitelné** – kde: list 5, pravá půlka, desky hřbetu a ramena; list 6, pravá půlka, nápisy „RAMP – STAND CLEAR“ vlevo a vpravo nad dveřmi – co je špatně: jen rohové šrouby a pár miniaturních štítků; čísla panelů z E-03 nejsou vidět, výstražné pruhy jen jako malý žlutý proužek na bočních skříňkách zádi, šipky žádné; „RAMP – STAND CLEAR“ je světle šedý na bílé a v 1080p nečitelný; u Carracku (list 5 vlevo) jsou štítky shlukované u poklopů s číslem a popisem – závažnost: doporučeno – oprava: shluky decalů u poklopů (ID desky + popis), výstražné pruhy kolem rampy a bloků RCS, šipky u poklopů, řady nýtů podél spár; šablony tmavě šedé, výška písma ≥ 10 cm.
+
+9. **Nekonzistentní lesk dvou symetrických desek zádi** – kde: list 6, pravá půlka, dvě lichoběžníkové desky vlevo nahoře a vpravo nahoře na zadní stěně – co je špatně: levá je matně bílá, pravá má zrcadlový šedý přechod odrazu oblohy; symetrické díly čtou jako dva materiály – závažnost: doporučeno – oprava: zkontrolovat materiál a normály obou desek, aby reagovaly na světlo stejně.
+
+10. **Neidentifikované svítící žluté okno na gondole** – kde: list 7, pravá půlka, levý pohled dole uprostřed u boku gondoly a pravý pohled vpravo nahoře u trupu; totéž list 2 a 3 vpravo na vnitřní straně gondol – co je špatně: svítící žluté obdélníky na pohonné gondole čtou jako okno kabiny, nemají tělo lampy ani mřížku; v konceptu B je na tom místě tmavý servisní panel – závažnost: doporučeno – oprava: buď jasná lampa s krytem a čočkou, nebo větrací mřížka s teplým vnitřním světlem; jinak odstranit.
+
+11. **Trysky motorů jako krémové disky (mimo kit, ale dominují chase pohledu)** – kde: list 4, pravá půlka, obě gondoly uprostřed; list 6, pravá půlka, pravá gondola – co je špatně: vnitřek trysky je plochý béžový disk s tmavým bodem uprostřed, bez hloubky a bez záře; ve výchozím pohledu hráče jsou to dva největší jasné tvary na obrazu – závažnost: doporučeno (není součást pilotu kitu) – oprava: tmavý vnitřek trysky s žebry a emisivním jádrem v dalším kroku.
+
+12. **Soumrakový a vesmírný list neukazují kit** – kde: list 8, pravá půlka (není nízké slunce, jen tmavě modrá scéna); list 9, pravá půlka (loď má pár desítek pixelů, čte jako šedá krabice bez obrysového světla) – co je špatně: podmínky z briefu („nízké slunce“, „protisvětlo“) na snímcích nejsou, takže úkosy a vrstvení kitu v nízkém světle nejde posoudit – závažnost: doporučeno – oprava: soumrak s viditelným nízkým sluncem na hřbetu, vesmír tak, aby loď zabírala aspoň třetinu obrazu s obrysovým světlem za ní.

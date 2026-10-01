@@ -278,8 +278,8 @@ autor: „tohle není dost dobré“). Exteriér se proto staví přímo z obrys
 reference stylu.
 
 ```bash
-MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/hs_build_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
-MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend --python Tools/Blender/hs_assemble_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
+MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python-exit-code 1 --python Tools/Blender/hs_build_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
+MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend --python-exit-code 1 --python Tools/Blender/hs_assemble_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
 # pak gamespace_ship_export.py na <Loď>_HS_Game.blend a import_ship.py jako obvykle
 ```
 - **Výkres:** každý obrys v `exterior` má `part`, který ho spojuje přes pohledy. Díl chybějící v pohledu si ho může
@@ -299,6 +299,43 @@ MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend -
 - **Assemble:** `groups` (Canopy, Gear), `offset` (layout → střed), `collision` a `sockets` v souřadnicích layoutu,
   `greeble_material`. Instance kitu se před převodem realizují, jinak se detaily neexportují.
 - **Materiály v setupu:** slot na zónu, master `hull` s barvou (lineární), sklo `glass`, emise `_Emissive`.
+
+## 3b2b. Exteriérový kit ze schválených výkresů (autor 1. 10. 2026)
+
+Kit se staví z modelu výkresu, ne ručně: co je na výkresu, to je na lodi.
+```bash
+python Tools/Design/exterior_kit_layout.py <Loď> [--region pilot]   # -> Design/<Loď>_exterior_kit.json (generované)
+# recept: "exterior_kit": {"layout": "ArtSource/Ships/<Loď>/Design/<Loď>_exterior_kit.json"}; pak stavba jako v 3b2
+```
+- **Rozvrh** (`exterior_kit_layout.py`): desky a rám jako obrysy v rovině pohledu (SB x, z pro boční pásy, zrcadlené
+  na levobok; TOP x, y pro hřbet; AFT y, z pro zadní stěnu) s výřezy, tloušťkou z kitu (XK-PLATE 30 mm, XK-PLATE-H
+  40 mm, rám 15–20 mm), body šroubů a filtrem normál ploch; díly (XK-RCS, XK-STROBE, XK-LANDLIGHT, XK-PISTON) s polohou.
+  Oblast `pilot` = hřbet, ramena, záď, gondoly. Test výkresu hlídá, že rozvrh je z aktuálních dat a staví přesně
+  postavené pásy (`panels.built_bands`).
+- **Stavba** (`Tools/Blender/hs_exterior_kit.py`, z `hs_build_ship` po vrstvě detailu, před světly, greeblemi
+  a decaly): plochy trupu pod obrysem se přesně ořežou (bisect rovinami hran obrysu ve směru pohledu), zkopírují,
+  vytáhnou ven o tloušťku a zkosí; každá deska je vlastní objekt (vlastní tón panelu přes `part_obj` → UV1); plášť
+  pod deskami a rámem dostane slot `Channel` (dno kanálu: tmavší a hrubší než gunmetal rám, se špínou); záblesková
+  světla mají slot `Strobe` (hra ho bliká 0,06 s, mezi záblesky je tma), proto má pouzdro i stálé poziční světlo
+  (`PosWhite`, `LightRed`, `LightGreen`); pracovní světlo rampy přidá reflektor do `hs_lights`.
+- **Hierarchie povrchu** (kritik pilotu, kolo 1: „kachlíkovaná střecha“, „rám je plochá výplň“): rám má profil T
+  (kit `cap_w`/`cap_h` = stojina, `bolt_pitch` = řady šroubů po obou stranách stojiny; `profile()` v rozvrhu), páteř
+  je široká (XK-SPINE 280 mm proti žebrům 80 mm), na deskách hřbetu jsou přídavné panely XK-DOUBLER a malé poklopy
+  XK-HATCH v rovině desky se spárou (`panels.roof.sub`; `Views.roof_subs` je umístí 70 mm od hran a výřezů, posune
+  po poli, jinak vynechá; ID `P-S-R<strana><pole>-D / -H`). Šrouby desek se rozkládají rovnoměrně
+  (`em.bolt_columns`, stejně výkres i rozvrh).
+- **Záď z kitu:** rám rampy XK-RAMPFRAME (50 mm, šrouby, styčníky `ramp_gussets`), nášlapné lišty a pryžový práh
+  XK-TREAD na dveřích (stojí na desce P-B-07: tloušťka = deska + lišta), pant XK-HINGE, písty XK-PISTON s vidlicovými
+  držáky a hadicí (patka na stěně, hlava na čele rámu).
+- **Zrcadlové páry** (_L / _R) mají jednu identitu panelu (`hs_assemble_ship`): jinak mohla jedna kopie vyjít jako
+  holý kov a symetrické desky četly jako dva materiály.
+- **Uplatnění návrhu:** co kit postaví, se odebere z receptu (desky P-B, bloky RCS, které nahrazuje), změny se
+  zapíšou do receptu (`"kit"` u funkčního prvku, `"paint2"` u materiálu skříně ploutve, tmavý inkoust nápisů)
+  a z `changes` návrhu zmizí; postavené prvky návrhu mají `"status": "built"`. Funkční prvek s klíčem `"kit"`
+  `hs_functional` přeskočí.
+- **Náhled v Blenderu** (Eevee) ukáže decaly a karty špíny jako bílé plochy (bez textur a průhlednosti): klín
+  přes hřbet v náhledu není geometrie. Rozhoduje snímek z Unrealu.
+- Livery A (grafitové sedlo nad `TopZ`) je od 1. 10. 2026 vypnutá (`TopZ` 9999): hřbet v primárním laku.
 
 ## 3b3. Vrstvy detailu podle SC: decaly, trim sheet, mesh decaly v UE (autor 24. 9. 2026)
 
@@ -510,8 +547,8 @@ Interior, Kitbash; `.blend/.glb/.fbx/.png` přes Git LFS, `*.blend1` ignorované
 
 ```bash
 cd ArtSource/Ships/<Loď>      # z kořene repozitáře (i ve worktree), kvůli //Export
-MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_HS_Game.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export" --validate-only
-MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_HS_Game.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
+MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_HS_Game.blend --python-exit-code 1 --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export" --validate-only
+MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_HS_Game.blend --python-exit-code 1 --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
 # bez Blenderu i Unrealu:
 python Tools/Blender/gamespace_ship_export.py --check-manifest ArtSource/Ships/<Loď>/Export/<Loď>_manifest.json
 python Tools/Assets/import_ship.py ArtSource/Ships/<Loď>/Export/<Loď>_manifest.json   # jen vypíše plán

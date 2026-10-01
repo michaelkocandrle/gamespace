@@ -125,6 +125,8 @@ def apply(recipe, made, coll, mats, bevel):
     bms = {k: bmesh.new() for k in ("paint", "dark", "metal")}
     count = {}
     for g in spec.get("items", []):
+        if g.get("kit"):
+            continue            # a kit part (XK-*): Tools/Blender/hs_exterior_kit.py builds it
         g = dict(g, _bm=bms)
         for side in ((1, -1) if g.get("mirror", True) else (1,)):
             origin, d = hs_lights._ray(g, side, axis)

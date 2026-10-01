@@ -70,11 +70,14 @@ def main(argv):
             bpy.data.meshes.remove(old)
     for o in kit_objs:
         bpy.data.objects.remove(o)
-    # panel identity for the layered material (hs_layers.panel_ids): a hash of the source object per face
+    # panel identity for the layered material (hs_layers.panel_ids): a hash of the source object per face; the two
+    # copies of a mirrored part (_L / _R) share it, so a symmetric pair never reads as two materials (one of them a
+    # bare-metal panel: kit pilot critic round 1, the rear chamfer plates)
+    import re
     import zlib
     for o in meshes:
         a = o.data.attributes.get("part_obj") or o.data.attributes.new("part_obj", "INT", "FACE")
-        h = zlib.crc32(o.name.split(".")[0].encode()) & 0x7FFFFFFF
+        h = zlib.crc32(re.sub(r"_[LR]$", "", o.name.split(".")[0]).encode()) & 0x7FFFFFFF
         a.data.foreach_set("value", [h] * len(o.data.polygons))
         if o.name == "SM_Ship_%s_Hull" % ship:
             recipe["_hull_obj_hash"] = h

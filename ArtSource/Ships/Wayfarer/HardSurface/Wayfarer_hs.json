@@ -2,6 +2,10 @@
  "_comment": "Tools/Blender/hs_build_ship.py: the Wayfarer's exterior straight from the approved drawing (Design/Wayfarer_layout.json, exterior). Every part matches the drawing by construction (loft / intersection of the outlines, or revolved to the drawing's radii); on top: real panel grooves, a canopy frame, revolved pods with intake and nozzle (Tools/Blender/hs_build_part.py), cylindrical guns. Materials by part, no AI texture.",
  "layout": "ArtSource/Ships/Wayfarer/Design/Wayfarer_layout.json",
  "out_blend": "ArtSource/Ships/Wayfarer/HardSurface/Wayfarer_HS.blend",
+ "exterior_kit": {
+  "_comment": "The exterior kit from the approved drawings E-01 to E-08 (author 1. 10. 2026): Tools/Blender/hs_exterior_kit.py builds what Tools/Design/exterior_kit_layout.py wrote from the drawing model. Region pilot: roof, shoulders, stern, pods.",
+  "layout": "ArtSource/Ships/Wayfarer/Design/Wayfarer_exterior_kit.json"
+ },
  "borrow": {},
  "parts": {
   "hull": {
@@ -587,6 +591,43 @@
    "roughness": 0.8,
    "metallic": 0.0
   },
+  "gunmetal": {
+   "_comment": "the exterior kit's frame and the skin under its plates (concept B + C, MZ-GUNMETAL)",
+   "slot": "Gunmetal",
+   "colour": [0.16, 0.17, 0.19],
+   "roughness": 0.38,
+   "metallic": 0.6
+  },
+  "channel": {
+   "_comment": "the exterior kit's channel floor: the hull skin under the plates and the frame, darker and rougher than the frame (kit pilot critic round 1, 1. 10. 2026)",
+   "slot": "Channel",
+   "colour": [0.05, 0.052, 0.058],
+   "roughness": 0.6,
+   "metallic": 0.4
+  },
+  "pos_white": {
+   "_comment": "steady position lenses of the kit strobe housings (fin tips)",
+   "slot": "PosWhite",
+   "colour": [0.05, 0.05, 0.05],
+   "roughness": 0.2,
+   "metallic": 0.0,
+   "emit": [1.0, 0.97, 0.92]
+  },
+  "heat": {
+   "_comment": "heat-tinted bare metal: the RCS nozzle rims",
+   "slot": "HeatTint",
+   "colour": [0.36, 0.27, 0.22],
+   "roughness": 0.3,
+   "metallic": 1.0
+  },
+  "strobe": {
+   "_comment": "XK-STROBE lenses: the game flashes slots named Strobe (UShipPresentationComponent)",
+   "slot": "Strobe",
+   "colour": [0.05, 0.05, 0.05],
+   "roughness": 0.2,
+   "metallic": 0.0,
+   "emit": [1.0, 0.97, 0.92]
+  },
   "int_wall": {
    "slot": "IntWall",
    "colour": [0.085, 0.08, 0.074],
@@ -972,33 +1013,9 @@
     "t": 0.03,
     "material": "dark"
    },
-   {
-    "id": "P-B-02",
-    "_what": "shoulder armour ahead of the cooler grille",
-    "x": [3.1, 4.25],
-    "z": [2.36, 2.85],
-    "normal_z": [0.2, 0.95],
-    "t": 0.03,
-    "secondary": true
-   },
-   {
-    "id": "P-B-03",
-    "_what": "shoulder armour behind the wing root",
-    "x": [5.62, 6.8],
-    "z": [2.36, 2.85],
-    "normal_z": [0.2, 0.95],
-    "t": 0.03,
-    "secondary": true
-   },
-   {
-    "id": "P-B-04",
-    "_what": "spine plate over the aft tech corridor",
-    "x": [5.62, 6.8],
-    "abs_y": [0, 0.7],
-    "normal_z": [0.85, 1.01],
-    "centre": true,
-    "t": 0.025
-   },
+
+
+
    {
     "id": "P-B-05",
     "_what": "belly skid armour ahead of the main gear (takes the scrape on rough landings)",
@@ -1080,42 +1097,10 @@
     "t": 0.025,
     "_why": "primary paint: dark squares down the whole side made the hull patchy (24. 9. 2026)"
    },
-   {
-    "id": "P-B-14",
-    "_what": "shoulder armour over the reactor",
-    "x": [7.1, 8.1],
-    "z": [2.36, 2.9],
-    "normal_z": [0.2, 0.95],
-    "t": 0.03,
-    "secondary": true
-   },
-   {
-    "id": "P-B-15",
-    "_what": "shoulder armour over the cabin",
-    "x": [11.7, 12.7],
-    "z": [2.36, 2.95],
-    "normal_z": [0.2, 0.95],
-    "t": 0.03,
-    "secondary": true
-   },
-   {
-    "id": "P-B-16",
-    "_what": "spine plate over the reactor",
-    "x": [7.1, 8.1],
-    "abs_y": [0, 0.7],
-    "normal_z": [0.85, 1.01],
-    "centre": true,
-    "t": 0.025
-   },
-   {
-    "id": "P-B-17",
-    "_what": "spine plate over the cabin",
-    "x": [11.7, 12.7],
-    "abs_y": [0, 0.7],
-    "normal_z": [0.85, 1.01],
-    "centre": true,
-    "t": 0.025
-   },
+
+
+
+
    {
     "id": "P-B-18",
     "_what": "belly skid over the reactor",
@@ -1498,20 +1483,21 @@
    },
    {
     "id": "D-H-30",
-    "item": "warning_label",
+    "item": "hazard_stripe",
     "on": "ray",
-    "at": [-1.0, 1.25, 0.35],
+    "at": [-1.0, 1.36, 0.18],
     "dir": [1, 0, 0],
     "rot": 90,
-    "_what": "hazard plates either side of the rear ramp"
+    "_what": "hazard band beside the ramp frame, lower half (kit pilot critic round 1: was a hazard plate under the frame and the piston)"
    },
    {
-    "id": "D-H-31",
-    "item": "handle",
+    "id": "D-H-62",
+    "item": "hazard_stripe",
     "on": "ray",
-    "at": [-1.0, 1.25, 0.95],
+    "at": [-1.0, 1.36, 0.68],
     "dir": [1, 0, 0],
-    "rot": 90
+    "rot": 90,
+    "_what": "hazard band beside the ramp frame, upper half (y 1.36: at 1.335 the decal grid met the cylinder's hose and was skipped; top 0.93, under the armour plate P-B-08)"
    },
    {
     "id": "D-H-32",
@@ -1530,24 +1516,8 @@
     "_what": "hold air exchange in the ramp"
    },
    {
-    "id": "D-H-34",
-    "item": "bolt_row_4",
-    "on": "ray",
-    "at": [-1.0, 0.55, 0.02],
-    "dir": [1, 0, 0],
-    "_what": "ramp hinge bolts"
-   },
-   {
-    "id": "D-H-35",
-    "item": "edge_scuff",
-    "on": "ray",
-    "at": [-1.0, 0.55, -0.05],
-    "dir": [1, 0, 0],
-    "_what": "worn step on the ramp lip (the only wear by hand)"
-   },
-   {
     "id": "D-H-36",
-    "item": "xstl_nostep",
+    "item": "xst_nostep",
 
     "scale": 2.0,
     "on": "top",
@@ -1662,13 +1632,22 @@
    {"id": "D-H-51", "item": "xst_service", "scale": 1.5, "on": "pod", "x": 2.65, "deg": -12, "_what": "below the open component bay"},
    {"id": "D-H-52", "item": "xst_gear", "scale": 1.5, "on": "bottom", "x": 5.2, "y": 1.3, "_what": "main gear bay"},
    {"id": "D-H-53", "item": "xst_gear", "scale": 1.5, "on": "bottom", "x": 16.3, "y": 0.0, "rot": 90, "mirror": false, "_what": "nose gear bay"},
-   {"id": "D-H-54", "item": "xst_ramp", "scale": 1.5, "on": "ray", "at": [-1.0, 1.25, 1.5], "dir": [1, 0, 0], "_what": "above the ramp hazard plates"},
+   {
+    "id": "D-H-54",
+    "item": "xst_ramp",
+    "scale": 3.0,
+    "on": "ray",
+    "at": [-1.0, 0.0, 0.84],
+    "dir": [1, 0, 0],
+    "mirror": false,
+    "_what": "RAMP - STAND CLEAR across the ramp door, 10 cm letters (kit pilot critic round 1: 5 cm grey letters above the frame did not read at 1080p)"
+   },
    {"id": "D-H-55", "item": "xst_hyd", "scale": 1.5, "on": "side", "x": 1.9, "z": 0.72, "_what": "over the ramp hydraulics hatch"},
    {"id": "D-H-56", "item": "xst_qtfuel", "scale": 1.5, "on": "bottom", "x": 6.4, "y": 1.25, "_what": "beside the quantum fuel filler hatch"},
    {"id": "D-H-57", "item": "xst_gnd", "scale": 1.5, "on": "side", "x": 19.0, "z": 0.8, "_what": "nose ground point"},
    {"id": "D-H-58", "item": "xst_extpwr", "scale": 1.5, "on": "side", "x": 12.95, "z": 1.35, "_what": "external power socket by the cabin"},
    {"id": "D-H-59", "item": "xst_inspect", "scale": 1.5, "on": "side", "x": 8.9, "z": 1.5, "_what": "over the component access panel"},
-   {"id": "D-H-60", "item": "xstl_service", "scale": 1.5, "on": "top", "x": 13.4, "y": 0.62, "rot": 90, "_what": "beside the roof maintenance hatch (dark spine: light ink)"},
+   {"id": "D-H-60", "item": "xst_service", "scale": 1.5, "on": "top", "x": 13.4, "y": 0.62, "rot": 90, "_what": "beside the roof maintenance hatch (on the light roof plates: dark ink)"},
    {"id": "D-H-61", "item": "xstl_inspect", "scale": 1.5, "on": "top", "x": 16.9, "y": 0.95, "_what": "canopy frame service point (dark: light ink)"}
   ],
   "trim": [
@@ -2417,10 +2396,11 @@
     "color": "warm",
     "light": {
      "type": "point",
-     "intensity_cd": 10,
+     "intensity_cd": 4,
      "radius_m": 0.7
     },
-    "_what": "work light on the bay floor"
+    "_what": "work light on the bay floor",
+    "_why": "4 cd (was 10): from the chase camera the lit bay read as a cabin window on the pod (kit pilot critic round 1)"
    },
    {
     "id": "L-HULL-RUN-LOW",
@@ -2492,7 +2472,7 @@
    },
    "bevel_m": 0.003,
    "materials": {
-    "box": "paint",
+    "box": "paint2",
     "le": "dark",
     "flap": "paint",
     "core": "dark"
@@ -2568,13 +2548,7 @@
     "z": 1.3,
     "tilt": -30
    },
-   {
-    "id": "F-RCS-07",
-    "kind": "rcs",
-    "on": "top",
-    "x": 9.7,
-    "y": 1.2
-   },
+
    {
     "id": "F-RCS-08",
     "kind": "rcs",
@@ -2590,23 +2564,12 @@
     "z": 1.9,
     "tilt": 30
    },
-   {
-    "id": "F-RCS-10",
-    "kind": "rcs",
-    "on": "ray",
-    "at": [-1.0, 1.95, 1.85],
-    "dir": [1, 0, 0]
-   },
-   {
-    "id": "F-RCS-11",
-    "kind": "rcs",
-    "on": "ray",
-    "at": [-1.0, 1.8, 0.1],
-    "dir": [1, 0, 0]
-   },
+
+
    {
     "id": "F-RCS-12",
     "kind": "rcs",
+    "kit": "XK-RCS",
     "on": "pod",
     "x": 5.35,
     "deg": -90

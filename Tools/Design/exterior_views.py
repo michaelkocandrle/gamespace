@@ -81,6 +81,43 @@ def _rbox(cx, cy, w, h, deg=0.0):
     return affinity.rotate(g, deg, origin=(cx, cy)) if deg else g
 
 
+def ramp_gussets(it, k):
+    """Corner gussets of the ramp frame (XK-RAMPFRAME "gusset"): a plate on the wall at each top corner, under the
+    frame and out of it as a triangle. AFT (y, z) polygons."""
+    g = k.get("gusset")
+    if not g:
+        return []
+    (y0, y1), z1, w = it["y"], it["z"][1], it["w"]
+    right = Polygon([(y1 - w, z1), (y1 + g / 2, z1), (y1, z1 - g), (y1 - w, z1 - g)])
+    return [right, affinity.scale(right, -1.0, 1.0, origin=(0, 0))]
+
+
+def ramp_gusset_bolts(it, k):
+    """Three bolts in the exposed triangle of each gusset."""
+    g = k.get("gusset")
+    if not g:
+        return []
+    y1, z1 = it["y"][1], it["z"][1]
+    pts = [(y1 + g * 0.125, z1 - g * 0.125), (y1 + g * 0.125, z1 - g * 0.5), (y1 + g * 0.29, z1 - g * 0.125)]
+    return pts + [(-y, z) for y, z in pts]
+
+
+def tread_bars(it, k):
+    """Tread bars across the ramp door at the kit's pitch and the rubber threshold under them. AFT (y, z)."""
+    (y0, y1), (z0, z1) = it["y"], it["z"]
+    n = int(round((z1 - z0) / k["pitch"])) + 1
+    bars = [box(y0, z0 + i * k["pitch"] - k["w"] / 2, y1, z0 + i * k["pitch"] + k["w"] / 2) for i in range(n)]
+    t0, t1 = it["threshold_z"]
+    return bars + [box(y0, t0, y1, t1)]
+
+
+def hinge_knuckles(it, k):
+    """The ramp hinge's knuckles spread evenly along y, seen from behind. AFT (y, z)."""
+    (y0, y1), z, n, L, r = it["y"], it["z"], k["count"], k["knuckle"], k["d"] / 2
+    gap = (y1 - y0 - n * L) / (n - 1)
+    return [box(y0 + i * (L + gap), z - r, y0 + i * (L + gap) + L, z + r) for i in range(n)]
+
+
 class Views:
     def __init__(self, m):
         self.m = m
@@ -490,8 +527,8 @@ class Views:
             e = m.by_id[it["id"]]
             fx, fy, _ = FUNC_SIZE[it["kind"]]
             s = it.get("size", 1.0)
-            if e.change and e.change.get("kit"):
-                fx, fy, _ = m.kit[e.change["kit"]]["size"]
+            if (e.change or {}).get("kit") or it.get("kit"):
+                fx, fy, _ = m.kit[(e.change or {}).get("kit") or it["kit"]]["size"]
                 s = 1.0
             self.pod_item(e, it["x"], it["deg"], fx * s, fy * s, it.get("rot", 0.0))
         for it in m.recipe["lights"].get("lenses", []):
@@ -560,8 +597,8 @@ class Views:
             e = m.by_id[it["id"]]
             fx, fy, _ = FUNC_SIZE[it["kind"]]
             s = it.get("size", 1.0)
-            if e.change and e.change.get("kit"):
-                fx, fy, _ = m.kit[e.change["kit"]]["size"]
+            if (e.change or {}).get("kit") or it.get("kit"):
+                fx, fy, _ = m.kit[(e.change or {}).get("kit") or it["kit"]]["size"]
                 s = 1.0
             w, h = (fy * s, fx * s) if it.get("rot", 0) % 180 == 90 else (fx * s, fy * s)
             g = unary_union([box(it["x"] - w / 2, sd * it.get("y", 0) - h / 2, it["x"] + w / 2, sd * it.get("y", 0) + h / 2)
@@ -647,8 +684,8 @@ class Views:
             e = m.by_id[it["id"]]
             fx, fy, fh = FUNC_SIZE[it["kind"]]
             s_ = it.get("size", 1.0)
-            if e.change and e.change.get("kit"):
-                fx, fy, fh = m.kit[e.change["kit"]]["size"]
+            if (e.change or {}).get("kit") or it.get("kit"):
+                fx, fy, fh = m.kit[(e.change or {}).get("kit") or it["kit"]]["size"]
                 s_ = 1.0
             fx, fy, fh = fx * s_, fy * s_, fh * s_
             sides = (1, -1) if it.get("mirror", True) else (1,)
@@ -706,9 +743,83 @@ class Views:
                 out.append(e)
         return out
 
+    def _roof_side(self, el, shape, side):
+        """A roof plate's sloping edge in the side view of its side (a strip along the roof edge)."""
+        m = self.m
+        sidegeo = self.plan_to_side(shape, side)
+        if not sidegeo.is_empty and sidegeo.area > 0.002:
+            view = "SB" if side < 0 else "PORT"
+            a_ = sidegeo.representative_point()
+            el.geo[view] = {"shape": sidegeo, "kind": "area", "anchor": (a_.x, a_.y), "anchor_set": True,
+                            "solid": "hull", "depth": m.hw(a_.x), "hidden": False, "vis_frac": 1.0, "up": None,
+                            "ghost": None, "seams": None, "marks": None}
+            el.views.add(view)
+            if view == "SB":
+                el.sb = el.geo["SB"]
+
+    def roof_subs(self, shape, side, bay, xa, xb, roof, marks=()):
+        """Doubler panel and small hatch on a roof plate (panels.roof.sub; critic round 1 of the kit pilot: three
+        plate sizes). Odd bays: a long doubler strip by the spine, the hatch at the aft end; even bays: a square
+        doubler at the aft end, the hatch at the forward end. Each keeps the margin off the plate's edges and
+        cut-outs and the decals on the plate (marks: a decal must not straddle a hatch's gap or a doubler's edge) and
+        slides along the bay to clear them, or is left out. [(kind, plan rectangle)]."""
+        sub = roof["sub"]
+        mg = sub["margin"]
+        inner = shape.buffer(-mg, join_style=2)
+        y0 = roof["spine_gap"]
+        step = 0.02
+
+        def band(y):
+            a, b = side * (y0 + y[0]), side * (y0 + y[1])
+            return min(a, b), max(a, b)
+
+        def runs(ya, yb, avoid):
+            """Runs of x (from xa to xb) where the plate takes a cut across y ya..yb: [(x0, x1)]."""
+            out, start, x, last = [], None, xa + mg, None
+            while x <= xb - mg + 1e-9:
+                ln = LineString([(x, ya), (x, yb)])
+                ok = inner.contains(ln) and not any(o.intersects(ln) for o in avoid)
+                if ok and start is None:
+                    start = x
+                if not ok and start is not None:
+                    out.append((start, last))
+                    start = None
+                last = x
+                x += step
+            if start is not None:
+                out.append((start, last))
+            return out
+
+        def window(ya, yb, length, at, avoid):
+            fits = [r for r in runs(ya, yb, avoid) if r[1] - r[0] >= length - 1e-9]
+            if not fits:
+                return None
+            r = fits[0] if at == "aft" else fits[-1]
+            x0 = r[0] if at == "aft" else r[1] - length
+            return box(x0, ya, x0 + length, yb)
+
+        out = []
+        if bay % 2:
+            ya, yb = band(sub["doubler_odd"]["y"])
+            rs = runs(ya, yb, list(marks))
+            best = max(rs, key=lambda r: r[1] - r[0]) if rs else None
+            if best and best[1] - best[0] >= 0.4:
+                out.append(("doubler", box(best[0], ya, best[1], yb)))
+        else:
+            ya, yb = band(sub["doubler_even"]["y"])
+            g = window(ya, yb, sub["doubler_even"]["len"], "aft", list(marks))
+            if g is not None:
+                out.append(("doubler", g))
+        hx, hy = self.m.kit["XK-HATCH"]["size"]
+        ya, yb = band(sub["hatch_y"])
+        g = window(ya, yb, hx, "aft" if bay % 2 else "fwd", [o.buffer(mg) for _, o in out] + list(marks))
+        if g is not None:
+            out.append(("hatch", g))
+        return out
+
     def _roof(self):
-        """Roof plates P-S-RL / P-S-RP <bay>, the spine longeron and the ribs over the roof, in plan; the plates'
-        sloping edge also in the side views (a strip along the roof edge)."""
+        """Roof plates P-S-RL / P-S-RP <bay> with their doubler panels and hatches, the spine and the ribs over the
+        roof, in plan; the plates' sloping edge also in the side views (a strip along the roof edge)."""
         m = self.m
         des = m.design["panels"]
         roof = des.get("roof")
@@ -730,6 +841,9 @@ class Views:
         rib_w = m.kit["XK-RIB"]["w"] / 2
         stations = [des["ends"][0]] + m.seams + [des["ends"][1]]
         x0r, x1r = roof["x"]
+        # decals seen from above: the doubler panels and hatches keep 20 mm off them
+        marks = [e.geo["TOP"]["shape"].buffer(0.02) for e in m.elements
+                 if e.cat in ("decal", "trim") and e.geo.get("TOP") and e.status != "remove"]
         min_w = des.get("min_width_m", 0.0)
         from shapely.ops import polylabel
         for i in range(1, len(stations)):
@@ -749,7 +863,14 @@ class Views:
                 if 2 * shape.boundary.distance(polylabel(shape, 0.005)) < min_w:
                     continue
                 ident = "P-S-R%s%02d" % (tag, i)
-                el = m.add(Element(ident, "panel", roof["name"], des["status"], material=roof["material"], kit=roof["kit"],
+                status = "built" if roof["band"] in des.get("built_bands", []) else des["status"]
+                subs = self.roof_subs(shape, side, i, xa, xb, roof, marks) if roof.get("sub") else []
+                for kind, g in subs:
+                    if kind == "hatch":
+                        # the hatch sits flush in a hole of the plate: the gap shows the dark channel round it
+                        gap = m.kit["XK-HATCH"]["gap"]
+                        shape = em.largest(em.polys_only(shape.difference(g.buffer(gap, join_style=2)).buffer(0)))
+                el = m.add(Element(ident, "panel", roof["name"], status, material=roof["material"], kit=roof["kit"],
                                    src="design", data={"band": "R", "bay": i, "x": [a, b], "side": tag, "mirror": False},
                                    what="deska %s %s, příčky x %s–%s" % (roof["name"], "vlevo" if side > 0 else "vpravo",
                                                                          em.fmt(a), em.fmt(b))))
@@ -757,17 +878,23 @@ class Views:
                 el.geo = {}
                 el.vextra = {}
                 self.put(el, "TOP", shape, "area", "hull")
-                sidegeo = self.plan_to_side(shape, side)
-                if not sidegeo.is_empty and sidegeo.area > 0.002:
-                    view = "SB" if side < 0 else "PORT"
-                    a_ = sidegeo.representative_point()
-                    el.geo[view] = {"shape": sidegeo, "kind": "area", "anchor": (a_.x, a_.y), "anchor_set": True,
-                                    "solid": "hull", "depth": m.hw(a_.x), "hidden": False, "vis_frac": 1.0, "up": None,
-                                    "ghost": None, "seams": None, "marks": None}
-                    el.views.add(view)
-                    if view == "SB":
-                        el.sb = el.geo["SB"]
-        # the spine longeron and the ribs over the flat roof
+                if subs:
+                    el.extra["label_cut"] = unary_union([g for _, g in subs]).buffer(0.03)
+                self._roof_side(el, shape, side)
+                for kind, g in subs:
+                    kit_id = "XK-DOUBLER" if kind == "doubler" else "XK-HATCH"
+                    sid = "%s-%s" % (ident, "D" if kind == "doubler" else "H")
+                    sel = m.add(Element(sid, "panel", roof["name"], status, material=roof["material"], kit=kit_id,
+                                        src="design", data={"band": "R", "bay": i, "x": [a, b], "side": tag,
+                                                            "mirror": False, "sub": kind, "of": ident},
+                                        what=("přídavný panel na desce %s" if kind == "doubler" else
+                                              "malý poklop v desce %s") % ident))
+                    sel.qty, sel.where = 1, el.where
+                    sel.geo = {}
+                    sel.vextra = {}
+                    self.put(sel, "TOP", g, "area", "hull")
+                    self._roof_side(sel, g, side)
+        # the spine and the ribs over the flat roof
         spine = next((f for f in m.design["frame"] if f["kind"] == "spine"), None)
         if spine:
             e = m.by_id[spine["id"]]
@@ -834,8 +961,8 @@ class Views:
                 e = m.by_id[it["id"]]
                 fx, fy, _ = FUNC_SIZE[it["kind"]]
                 s = it.get("size", 1.0)
-                if e.change and e.change.get("kit"):
-                    fx, fy, _ = m.kit[e.change["kit"]]["size"]
+                if (e.change or {}).get("kit") or it.get("kit"):
+                    fx, fy, _ = m.kit[(e.change or {}).get("kit") or it["kit"]]["size"]
                     s = 1.0
                 g = unary_union([box(sd * it["at"][1] - fx * s / 2, it["at"][2] - fy * s / 2,
                                      sd * it["at"][1] + fx * s / 2, it["at"][2] + fy * s / 2) for sd in sides(it)])
@@ -893,10 +1020,18 @@ class Views:
             e = m.by_id[it["id"]]
             k = m.kit[it["kit"]]
             if it["kind"] == "frame":
-                # a U round the ramp opening: both sides and the top (the deck lip closes it at the bottom)
+                # a U round the ramp opening: both sides and the top (the deck lip closes it at the bottom), with the
+                # corner gussets on the wall outside its top corners
                 (y0, y1), (z0, z1), w = it["y"], it["z"], it["w"]
                 g = box(y0, z0, y1, z1).difference(box(y0 + w, z0 - 1.0, y1 - w, z1 - w))
+                g = unary_union([g] + ramp_gussets(it, k))
                 self.put(e, "AFT", g, "area", "hull", anchor=(y1 - w / 2, (z0 + z1) / 2))
+                continue
+            if it["kind"] == "tread":
+                self.put(e, "AFT", unary_union(tread_bars(it, k)), "area", "hull", anchor=(it["y"][1] - 0.1, it["z"][0]))
+                continue
+            if it["kind"] == "hinge_ramp":
+                self.put(e, "AFT", unary_union(hinge_knuckles(it, k)), "area", "hull", anchor=(it["y"][1] - 0.1, it["z"]))
                 continue
             w = k["size"][0] if "size" in k else k["d"]
             g = unary_union([box(sd * it["y"] - w / 2, it["z"][0], sd * it["y"] + w / 2, it["z"][1])

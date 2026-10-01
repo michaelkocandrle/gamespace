@@ -1,0 +1,20 @@
+{
+ "_comment": "Wayfarer exterior kit pilot (1. 10. 2026): the roof (plates R with doublers and hatches, the spine, T-profile ribs), the shoulders (plates S), the stern with the ramp frame, treads, hinge, cylinders and work light, the pods with XK-RCS and the fin and wing light housings - what the chase camera sees most. Day: the level's sun (-39 45: 33 deg up, behind the ship's left). The ship sits on the planet's -X side (PlayerStart, planet centre 140 km along +X): its up is world -X, forward world -Z, left world -Y (checked with the preset wayfarer_sun_calib, 1. 10. 2026); a sun e deg up and a deg from the bow towards port is space.SunDir asin(cos e cos a) atan2(cos e sin a, sin e). Dusk 6 deg behind-left = -44.7 81.5, night (-10 deg) = -44.1 104, space 30 deg behind-left = -37.8 50.8. The space shots come first, from the start in orbit: after the 3 km shots the ship carried a spin up to 60 km and turned under the ship-space camera while it settled (1. 10. 2026). Ship-local coordinates (Unreal, metres from the centre: x = layout x - 10.25, z = layout z - 1.2). Run: .\\Tools\\Shots.ps1 -Preset wayfarer_kit_pilot -Editor -Width 1920 -Height 1080 (or -Package)",
+ "shots": [
+  {"name": "warmup", "altitude_m": 60000, "facing": "horizon", "hud": 0, "gear": false, "settle": 4.0, "fov": 50, "camera_local": [-17.0, 5.0, 6.0], "look_local": [-1.5, 0.0, 0.8], "console": ["space.SunDir -37.8 50.8"]},
+  {"name": "space_rear_high", "altitude_m": 60000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0, "fov": 50, "camera_local": [-17.0, 5.0, 6.0], "look_local": [-1.5, 0.0, 0.8]},
+  {"name": "space_left", "altitude_m": 60000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0, "fov": 50, "camera_local": [-12.0, -10.0, 3.0], "look_local": [-1.0, 0.0, 0.8]},
+  {"name": "day_chase_rear", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 4.0, "console": ["space.SunDir -39 45"]},
+  {"name": "day_chase_rear_left", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": 45, "chase_pitch": -12, "settle": 1.5},
+  {"name": "day_chase_rear_right_high", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "chase_yaw": -35, "chase_pitch": -28, "settle": 1.5},
+  {"name": "day_close_roof_aft", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 55, "camera_local": [-13.5, -3.5, 5.5], "look_local": [-4.0, 0.0, 1.8]},
+  {"name": "day_close_roof_mid", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 55, "camera_local": [-2.0, -5.5, 5.2], "look_local": [0.5, 0.0, 1.9]},
+  {"name": "day_close_shoulder", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 55, "camera_local": [-3.0, -6.5, 2.6], "look_local": [-1.0, -2.0, 1.4]},
+  {"name": "day_close_stern_ramp", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 55, "camera_local": [-16.0, -2.5, 1.2], "look_local": [-10.4, 0.0, 0.2]},
+  {"name": "day_close_engine_fin", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 55, "camera_local": [-12.75, -6.5, 3.0], "look_local": [-8.45, -3.6, 1.8]},
+  {"name": "day_close_pod_top", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 50, "camera_local": [-2.5, -6.5, 3.4], "look_local": [-5.2, -3.4, 0.6]},
+  {"name": "dusk_rear", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 4.0, "fov": 60, "camera_local": [-24.0, 3.0, 5.0], "look_local": [-2.0, 0.0, 0.8], "console": ["space.SunDir -44.7 81.5"]},
+  {"name": "dusk_close_roof", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 55, "camera_local": [-12.0, 4.0, 5.5], "look_local": [-3.0, 0.0, 1.8]},
+  {"name": "night_stern_lights", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 4.0, "fov": 60, "camera_local": [-18.0, -3.0, 1.2], "look_local": [-10.4, 0.0, 0.5], "console": ["space.SunDir -44.1 104"]}
+ ]
+}

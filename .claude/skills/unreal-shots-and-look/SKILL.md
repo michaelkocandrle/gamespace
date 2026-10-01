@@ -118,7 +118,7 @@ přepiš do receptu (po restartu hry je vše zpět podle úrovně).
 | --- | --- |
 | `space.PostList <část>` / `space.Post <Nastavení> <hodnoty...>` | post process přes reflexi; barvy po složkách (`space.Post ColorGain 1 1 1.04 1`) |
 | `space.PostDump` | přepsané hodnoty jako řádky `POST_SETTINGS` pro `build_space_scene.py` |
-| `space.Sun <Vlastnost> <h>` / `space.SunDir <pitch> <yaw>` | směrové světlo (`Intensity`, `ContactShadowLength`, `LightSourceAngle`, `SpecularScale`) |
+| `space.Sun <Vlastnost> <h>` / `space.SunDir <pitch> <yaw>` | směrové světlo (`Intensity`, `ContactShadowLength`, `LightSourceAngle`, `SpecularScale`); pitch a yaw jsou světové a lokální „nahoru“ lodi nad Veyrou je světové −X: výšku a směr slunce přepočti (WORKFLOW 9 ex) |
 | `space.Sky <Vlastnost> <h>` / `space.LightList sun\|sky <část>` | sky light (`Intensity`, `CubemapResolution`) |
 | `space.ShipMat <Param> <h>` / `space.ShipMatColor <Param> r g b` | materiály lodi (`DetailNormalStrength`, `DetailTileCm`, `PanelStrength`, `BaseColorTint`…) |
 | `space.Kit <Param> <h> [filtr]` / `space.KitColor` | materiály interiéru (`Lift`, `MetallicScale`, `RoughnessFloor`, `Gunmetal`, `WearAmount`, `WearEverywhere`, `GrimeAmount`); filtr `MI_T_` = trim sheety |

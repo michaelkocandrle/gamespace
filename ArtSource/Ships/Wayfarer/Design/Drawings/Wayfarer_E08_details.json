@@ -4,10 +4,10 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "acc9f035d195",
-  "recipe": "00a16c39374f",
-  "setup": "a8d6d330c526",
+  "recipe": "d4e5451327c5",
+  "setup": "311951473339",
   "spec": "d9597dfcd605",
-  "design": "92bce59434a3",
+  "design": "f44d4c6bb241",
   "library": "0f3a67cf7c68"
  },
  "drawn": {
@@ -74,6 +74,7 @@
  },
  "schedules": {
   "materials": [
+   "MZ-CHANNEL",
    "MZ-DARK",
    "MZ-GLASS",
    "MZ-GUNMETAL",

@@ -3,8 +3,8 @@
 Jediný zdroj **aktuálního** stavu (nad ním jen `CLAUDE.md`), **nejvýš 80 řádků** (autor 30. 9. 2026). Hotové do stavu,
 splněné smaž; podrobnosti do commitu a recenzí (`Docs/Reviews/`), historie do 30. 9. v `Docs/HANDOFF.md` (archiv).
 
-Stav k **1. 10. 2026 večer**: výkresy exteriéru Wayfareru E-01 až E-08 schválené (revize C: hřbet R v primárním
-laku); hlavní session staví exteriérový kit a pilota, druhá session výkresy interiéru a koncepty.
+Stav k **1. 10. 2026 večer**: výkresy exteriéru Wayfareru E-01 až E-08 schválené (revize C); revize D (pilot kitu po
+kritikovi) čeká na schválení s pilotem. Pilot kitu postavený, kritik kolo 2 FAIL 5,9 (recenze 2026-10-01_wayfarer_kit_pilot).
 
 ## Stav
 
@@ -71,8 +71,8 @@ laku); hlavní session staví exteriérový kit a pilota, druhá session výkres
 
 ## Další kroky
 
-1. **Wayfarer:** exteriérový kit (díly XK-*) a pilot na hřbetu a zádi s gondolami podle výkresů E-01 až E-08,
-   kritik s dílčím prahem; pak kit na celou loď. Druhá session: body 4 a 6 dossieru (viz Paralelní práce).
+1. **Wayfarer:** kolo 3 kritika pilotu kitu (plán v recenzi `2026-10-01_wayfarer_kit_pilot.md`, kolo 2), pak testy,
+   balení, sloučení větve druhé session (0e7e4d4 + import_kit.py) a kit na celou loď. Druhá session: body 4 a 6.
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.

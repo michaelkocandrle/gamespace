@@ -514,7 +514,8 @@ def kdop_hull(name, points):
         # exporter's convexity check by a few millimetres. 10 cm is nothing for a ship's collision.
         if all((best - e).length > 0.1 for e in extremes):
             extremes.append(best)
-    for _ in range(12):
+    tries = 40
+    for attempt in range(tries):
         bm = bmesh.new()
         for p in extremes:
             bm.verts.new(p)
@@ -533,8 +534,19 @@ def kdop_hull(name, points):
             break
         edge = min(bm.edges, key=lambda e: e.calc_length())
         drop = edge.verts[0].co.copy()
-        extremes = [p for p in extremes if (p - drop).length > 1e-6]
         bm.free()
+        extremes = [p for p in extremes if (p - drop).length > 1e-6]
+        if attempt == tries - 1 or len(extremes) < 8:
+            # still slivers (1. 10. 2026: the exterior kit's ramp parts at the stern; after the last try the freed
+            # bmesh was used): the region's box, always convex
+            lo = [min(p[i] for p in points) for i in range(3)]
+            hi = [max(p[i] for p in points) for i in range(3)]
+            bm = bmesh.new()
+            res = bmesh.ops.create_cube(bm, size=1.0)
+            bmesh.ops.scale(bm, vec=[hi[i] - lo[i] for i in range(3)], verts=res["verts"])
+            bmesh.ops.translate(bm, vec=[(hi[i] + lo[i]) / 2 for i in range(3)], verts=res["verts"])
+            print("AISHIP collision %s: the hull kept sliver faces, the region's box instead" % name)
+            break
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
     bm.free()

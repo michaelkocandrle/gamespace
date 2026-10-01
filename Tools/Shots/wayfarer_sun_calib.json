@@ -1,0 +1,13 @@
+{
+ "_comment": "Sun direction check (1. 10. 2026): one camera behind-left-above the Wayfarer at 60 km and at 3 km, the sun turned through space.SunDir variants, to see which side each lights. Run: .\\Tools\\Shots.ps1 -Preset wayfarer_sun_calib -Editor -Width 1280 -Height 720",
+ "shots": [
+  {"name": "warmup", "altitude_m": 60000, "facing": "horizon", "hud": 0, "gear": false, "settle": 4.0, "fov": 60, "camera_local": [-18.0, -7.0, 7.0], "look_local": [-1.5, 0.0, 0.8], "console": ["space.SunDir -39 45"]},
+  {"name": "space_day_m39_45", "altitude_m": 60000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0, "fov": 60, "camera_local": [-18.0, -7.0, 7.0], "look_local": [-1.5, 0.0, 0.8]},
+  {"name": "space_A_18_m64", "altitude_m": 60000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0, "fov": 60, "camera_local": [-18.0, -7.0, 7.0], "look_local": [-1.5, 0.0, 0.8], "console": ["space.SunDir 18.1 -63.6"]},
+  {"name": "space_B_m38_m51", "altitude_m": 60000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0, "fov": 60, "camera_local": [-18.0, -7.0, 7.0], "look_local": [-1.5, 0.0, 0.8], "console": ["space.SunDir -37.7 -50.8"]},
+  {"name": "space_C_m52_85", "altitude_m": 60000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0, "fov": 60, "camera_local": [-18.0, -7.0, 7.0], "look_local": [-1.5, 0.0, 0.8], "console": ["space.SunDir -52 85"]},
+  {"name": "low_day_m39_45", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 3.0, "fov": 60, "camera_local": [-18.0, -7.0, 7.0], "look_local": [-1.5, 0.0, 0.8], "console": ["space.SunDir -39 45"]},
+  {"name": "low_B_m38_m51", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0, "fov": 60, "camera_local": [-18.0, -7.0, 7.0], "look_local": [-1.5, 0.0, 0.8], "console": ["space.SunDir -37.7 -50.8"]},
+  {"name": "low_dusk_44_m81", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0, "fov": 60, "camera_local": [-18.0, -7.0, 7.0], "look_local": [-1.5, 0.0, 0.8], "console": ["space.SunDir 44.7 -81.5"]}
+ ]
+}
