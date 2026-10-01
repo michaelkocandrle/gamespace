@@ -94,3 +94,26 @@ každého pohledu; mřížka tmavší plnou čarou.
    posuvné do kapsy přepážky k pravoboku (návrh, list nákladu).
 4. **Podpora života** pod lůžkem leží zčásti mimo trup – posunout do osy lodi, zmenšit, nebo jinam?
 5. Číslo úseku 06: nad lůžko (x 13,09, jak říká komentář), nebo nechat na CAB-W-L5?
+
+## Rozhodnutí autora (1. 10. 2026 večer) a co se podle nich změnilo
+
+1. **Styl I-04 schválen** jako vzor pro I-01 až I-09.
+2. **Měřítko 1:20 na A0** (vektorové PDF na zoom); kde se detail slévá, detaily 1:5 / 1:10 jako E-07 a E-08. Na I-04
+   přibyly detail A (římsa a zkosení obložení, řez 1:5: žlab, světla Cove a Wash se směrem, okraj stropu, kóty
+   z `kit_rules.json` L38) a detail B (dveře hygienické buňky, půdorys 1:5: směr otevírání, těsnění, kapsa, pruh, madlo).
+3. **Dveře:** DR-TEC-CAB dvoukřídlé posuvné na straně chodby a DR-CAB-CPT otvor bez dveří schválené (data návrhu
+   `approved`).
+4. **Podpora života** posunutá o 0,25 m k ose (layout v2: y 0,85 … 1,50): břicho je pod kajutou ploché v −0,60 až
+   do y ±1,4, ve výšce −0,55 je zkosení na y 1,65 (vzadu) a 1,55 (x 14,0–14,5), takže jednotka má 5 cm k plášti
+   a 0,58 m z 0,65 m šířky leží pod lůžkem (přístup zvednutím matrace a odklopením desky podlahy v podstavci,
+   návrh). Řez R1 je teď v x 13,70 skrz jednotku, lůžko a výdejník; layout v1 je v půdorysu i řezu červeně
+   čárkovaně se šipkou k nové poloze. Kontrola „komponenta mimo trup“ už nic nehlásí.
+5. **Číslo úseku 06** zůstává u přední přepážky; komentář v setupu opraven.
+6. **Kit platí před layoutem:** rect a z nábytku v layoutu převzaté z dílů kitu (s madly a přesahy). Datová změna je
+   samostatný commit (0e7e4d4) s překreslenými listy E-01 až E-08 (změnily se jen otisky dat), 2D palubou a řezem;
+   sloučení je domluvené v `CURRENT.md` a zprávou hlavní session.
+7. **Dveře hygienické buňky v kitu** (`kit_furniture.hygiene`): pruh a madlo na náběžné hraně vzadu byly správně,
+   těsnění bylo na straně kapsy; teď je na zadní (dorazové) zárubni a na přední je tmavé ústí kapsy. Přestavěná
+   dávka nábytku (`kit_build.py -- furniture` pod zámkem; `--only` by uložil `Kit_Furniture.blend` jen s jedním
+   dílem); změnil se jen díl buňky (+12 trojúhelníků), ostatní FBX mají stejnou geometrii a zůstaly. Do UE se díl
+   dostane importem `import_kit.py` po sloučení (hlavní session drží zámek kvůli pilotu exteriérového kitu).

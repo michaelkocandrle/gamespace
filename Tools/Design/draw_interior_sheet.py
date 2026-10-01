@@ -355,6 +355,7 @@ class RoomSheet:
             self.mark(view, ident)
             if e.cat in ("component", "object") and e.extra.get("rect"):
                 r = e.extra["rect"]
+                self.previous(vw, e, lambda rr, zz: (vw.P((rr[0], rr[2], 0)), vw.P((rr[1], rr[3], 0))))
                 P0, P1 = vw.P((r[0], r[2], 0)), vw.P((r[1], r[3], 0))
                 sh.rect(P0[0], P0[1], P1[0], P1[1], ec=STATUS_COL[e.status], lw=0.35, ls="--", z=25)
                 if e.extra.get("below"):
@@ -561,7 +562,7 @@ class RoomSheet:
     def section_mark(self, vw, W):
         sh = self.sh
         x = self.section_x
-        A, B = vw.P((x, -2.45, 0)), vw.P((x, 2.45, 0))
+        A, B = vw.P((x, -2.25, 0)), vw.P((x, 2.25, 0))      # inside the dimension chains (at y ±2.42 and ±2.57)
         sh.line([A, B], 0.35, INK, ls="-.", z=46)
         for P in (A, B):
             sh.ax.annotate("", xy=(P[0] + 6, P[1]), xytext=(P[0], P[1]), zorder=46, arrowprops=dict(
@@ -827,6 +828,7 @@ class RoomSheet:
         for e in m.in_room(self.rid, ("component",)):
             if e.extra.get("below") and e.extra.get("rect"):
                 r, z = e.extra["rect"], e.extra["z"]
+                self.previous(vw, e, lambda rr, zz: (vw.P((x, rr[2], zz[0])), vw.P((x, rr[3], zz[1]))))
                 A, B = vw.P((x, r[2], z[0])), vw.P((x, r[3], z[1]))
                 sh.rect(min(A[0], B[0]), min(A[1], B[1]), max(A[0], B[0]), max(A[1], B[1]), ec=STATUS_COL[e.status],
                         lw=0.35, ls="--", z=46)
@@ -872,6 +874,33 @@ class RoomSheet:
                           "konstrukce ani rozvody tu nejsou modelované%s." % (
                               im.fmt(top), im.fmt(bot), ("; v layoutu: " + ", ".join(below)) if below else ""))
 
+    def detail_view(self, view, title, scale, ox, oy, u, v, d, u0, u1, v0, v1, cut, clip):
+        """A detail window at 1:scale: the built parts cut by the plane, the window framed, the title over it."""
+        s = 1000.0 / scale
+        if u1 < u0:
+            u0, u1 = u1, u0
+        vw = md.View(u, v, d, ox, oy, s, u0, v0)
+        W = (ox, oy, ox + (u1 - u0) * s, oy + (v1 - v0) * s)
+        md.draw(self.sh.ax, vw, self.parts + self.ctx + [self.interior], self.cols, clip=clip, cut=cut, window=W)
+        md.draw(self.sh.ax, vw, [self.hull], self.cols, clip=clip, cut=cut, window=W, fill=False)
+        self.sh.rect(*W, ec=INK, lw=0.35, z=44)
+        self.sh.t(ox, W[3] + 21.0, title, 3.0, weight="bold")
+        self.sh.t(ox + self.sh.width(title, 3.0) + 6, W[3] + 21.0, "1 : %d" % scale, 3.0)
+        self.drawn.setdefault(view, set())
+        return vw, W
+
+    def detail_items(self, view, vw, items):
+        """Leader requests for a detail's items: (ID or #note, text, layout point); IDs count as drawn and labelled."""
+        reqs = []
+        for ident, text, pt in items:
+            X, Y = vw.P(pt)
+            if not ident.startswith("#"):
+                self.mark(view, ident)
+            e = self.el.get(ident)
+            col = STATUS_COL[e.status] if e is not None else GREY
+            reqs.append({"id": ident, "text": text, "anchor": (X, Y), "col": col, "z": Y, "hidden": False})
+        return reqs
+
     def component_fit(self):
         """Every under-floor component of the room against the hull: its layout box's corners (y, z) at both ends
         of it (x) must lie inside the hull's cut there; a corner outside goes to the data check."""
@@ -891,6 +920,26 @@ class RoomSheet:
                         "%s … %s" % (im.fmt(z[0]), im.fmt(z[1])))))
                     break
         return out
+
+    def previous(self, vw, e, corners):
+        """A moved element's previous position (design data components.<id>.previous): red dashed, a dashed blue
+        arrow from its middle to the new one - the exterior's convention for a change."""
+        prev = (self.m.design.get("components") or {}).get(e.id, {}).get("previous")
+        if not prev:
+            return
+        z = prev.get("z") or e.extra.get("z") or [0, 0]
+        A0, B0 = corners(prev["rect"], z)
+        A1, B1 = corners(e.extra["rect"], e.extra.get("z") or z)
+        self.sh.rect(min(A0[0], B0[0]), min(A0[1], B0[1]), max(A0[0], B0[0]), max(A0[1], B0[1]), ec=STATUS_COL["remove"],
+                     lw=0.3, ls="--", z=24.5)
+        c0 = ((A0[0] + B0[0]) / 2, (A0[1] + B0[1]) / 2)
+        c1 = ((A1[0] + B1[0]) / 2, (A1[1] + B1[1]) / 2)
+        if math.hypot(c1[0] - c0[0], c1[1] - c0[1]) > 1.0:
+            self.sh.ax.annotate("", xy=c1, xytext=c0, zorder=26, arrowprops=dict(
+                arrowstyle="-|>", lw=0.3 * PT, color=STATUS_COL["proposed"], mutation_scale=6, linestyle=(0, (2.5, 1.5)),
+                shrinkA=0, shrinkB=0))
+            self.sh.t(min(A0[0], B0[0]) + 0.8, min(A0[1], B0[1]) + 0.8, prev.get("label", "dřív"), 1.9, STATUS_COL["remove"],
+                      z=26, bg="white")
 
     def capsule(self, vw):
         """The walking character's capsule in the ship (APlayerCharacter::SetShipCapsule: 0.56 x 1.80 m) in the aisle
@@ -1023,7 +1072,8 @@ def draw_room_sheet(m, geo, sheet, rid, section_x, dpi, out_dir):
     # ------------------------------------------------ row 3: schedules, data check, title block
     y = schedules(rs, 34.0, 306.0)
     light_summary(rs, 530.0, 306.0)
-    check_box(rs, 800.0, 306.0)
+    check_box(rs, 800.0, 306.0, width=188.0)
+    details(rs)
     title_block(rs, 800.0, W_, sheet)
     return save(rs, sheet, dpi, out_dir)
 
@@ -1113,6 +1163,11 @@ def legend(rs, x, ytop):
     sh.ax.add_patch(FancyBboxPatch((x + 2.5, y - 1.2), 4, 4, boxstyle="round,pad=0,rounding_size=2", fc="#DFF1E1",
                                    ec="#2E7D32", lw=0.3 * PT))
     sh.t(x + 11, y, "kapsle postavy v lodi 0,56 × 1,80 m, oko 1,65 m", 2.1)
+    y -= 4.8
+    sh.line([(x, y + 0.8), (x + 4.5, y + 0.8)], 0.4, STATUS_COL["remove"], ls="--")
+    sh.ax.annotate("", xy=(x + 9, y + 0.8), xytext=(x + 4.6, y + 0.8), zorder=20, arrowprops=dict(
+        arrowstyle="-|>", lw=0.25 * PT, color=STATUS_COL["proposed"], mutation_scale=4, shrinkA=0, shrinkB=0))
+    sh.t(x + 11, y, "přesun: dřívější poloha červeně čárkovaně, šipka k nové (modře)", 2.1)
     y -= 4.8
     for st in ("built", "proposed"):
         sh.line([(x, y + 0.8), (x + 9, y + 0.8)], 0.5, STATUS_COL[st])
@@ -1341,7 +1396,94 @@ def key_plan(rs, x, ytop):
     return oy - 4.6 * s - 8
 
 
-def check_box(rs, x, ytop):
+# the hygiene cell's door in the part's frame (Tools/Kit/kit_furniture.hygiene: the front at x 1.0, the doorway
+# half width 0.4, the leaf's fields 12 mm proud, the hazard band 18-58 mm in from the +Y edge, the pull 80-140 mm)
+HYG_FRONT, HYG_DW = 1.0, 0.4
+
+
+def details(rs):
+    """Details where the 1:20 views run together (author 1. 10. 2026, as E-07 / E-08 for the exterior): A the hull
+    liner's top - chamfer, cable tray, cove and wash lights, ceiling edge - in section 1:5; B the hygiene cell's sliding
+    door in plan 1:5 (which way it opens, its seal and pocket). Labels above A only (the title block is under it)."""
+    m, sh, d = rs.m, rs.sh, rs.d
+    sec = m.rules["sections"]["L38"]
+    # ---- A: section through the starboard liner's plain 0.6 m module ahead of the galley, looking forward
+    wall = next((e for e in m.in_room(rs.rid, ("wall",)) if e.extra.get("side") == "R" and e.kit.endswith("06L_A")), None)
+    if wall is not None:
+        xa, xb = m.x_range(wall)
+        x = (xa + xb) / 2
+        face = wall.extra["placement"].ue_to_layout(0, 0, 0)[1]
+        top = sec["vertical_to"] + sec["slope_rise"]
+        vw, W = rs.detail_view("DET-A", "DETAIL A – ŘÍMSA A ZKOSENÍ OBLOŽENÍ, ŘEZ x %s K PŘÍDI" % im.fmt(x), 5, 1004.0, 118.0,
+                               (0, -1, 0), (0, 0, 1), (1, 0, 0), -(face + 0.55), -(face - 0.25), 1.62, 2.42,
+                               ((x, 0, 0), (1, 0, 0)), ((x - 0.01, -2.8, 1.0), (x + 0.4, 2.8, 2.6)))
+        items = [(wall.id, "%s (%s)" % (wall.id, wall.kit), (x, face + 0.01, 1.66))]
+        lights = [e for e in m.in_room(rs.rid, ("light",)) if e.extra.get("host") == wall.id]
+        for e in lights:
+            sock = e.id.split("/")[-1]
+            items.append((e.id, "%s – %s" % (sock, SOCKET_CZ.get(sock.split("_")[0], "")), (x, e.extra["pos"][1], e.extra["pos"][2])))
+        for e in lights:                    # the strips seen end on: a symbol with the aim of the light
+            X, Y = vw.P((x, e.extra["pos"][1], e.extra["pos"][2]))
+            rs.lamp(X, Y, e, None, tag=False, size=1.6)
+            dl = e.extra.get("dir")
+            if dl is not None:
+                du, dv = np.array(dl) @ vw.u, np.array(dl) @ vw.v
+                n = math.hypot(du, dv)
+                if n > 0.2:
+                    sh.ax.annotate("", xy=(X + du / n * 9, Y + dv / n * 9), xytext=(X + du / n * 2, Y + dv / n * 2), zorder=47,
+                                   arrowprops=dict(arrowstyle="-|>", lw=0.25 * PT, color=GREY, mutation_scale=5,
+                                                   shrinkA=0, shrinkB=0))
+        ceil = next((e for e in m.in_room(rs.rid, ("ceiling",)) if m.x_range(e)[0] <= x <= m.x_range(e)[1]), None)
+        if ceil is not None:
+            items.append((ceil.id, "%s (okraj stropu)" % ceil.id, (x, face + 0.5, sec["ceiling"])))
+        items.append(("#tray", "kabelový žlab na zkosení (součást %s)" % wall.id,
+                      (x, face + 0.7 * 0.75 * sec["slope_rise"], sec["vertical_to"] + 0.7 * sec["slope_rise"])))
+        reqs = rs.detail_items("DET-A", vw, items)
+        # the section's numbers from kit_rules.json sections.L38: the vertical wall, the chamfer, the cove, the ceiling
+        Xd = vw.P((x, face - 0.18, 0))[0]
+        zs = [sec["vertical_to"], top, sec["cove_to"]]
+        for za, zb in zip(zs, zs[1:]):
+            rs.dim((Xd, vw.P((x, 0, za))[1]), (Xd, vw.P((x, 0, zb))[1]), im.fmt(zb - za))
+        for z in zs:
+            Y = vw.P((x, 0, z))[1]
+            sh.line([(Xd - 1.2, Y), (Xd + 3.0, Y)], 0.2, INK, z=48)
+            sh.t(Xd + 3.6, Y + 0.6, "+" + im.fmt(z), 2.0, z=48, bg="white")
+        A = vw.P((x, face, top + 0.04))
+        B = vw.P((x, face + 0.75 * sec["slope_rise"], top + 0.04))
+        rs.dim(A, B, "%s zkosení" % im.fmt(0.75 * sec["slope_rise"], 3))
+        d.place_labels("DET-A", reqs, W[0] - 6, W[2] + 4, tiers_up=[W[3] + 8.0, W[3] + 14.0], tiers_dn=[W[1] - 6.0],
+                       split_y=W[1] - 200.0, bus_up=W[3] + 4.0, bus_dn=W[1] - 3.0, size=2.2)
+    # ---- B: the hygiene cell's door in plan at 1.0 m
+    hyg = next((e for e in m.in_room(rs.rid, ("furniture",)) if e.kit and "Hygiene" in e.kit), None)
+    door = next((e for e in m.elements if e.cat == "door" and e.extra["axis"] == "y" and rs.rid in (e.extra.get("rooms") or ())), None)
+    if hyg is not None and door is not None:
+        p = hyg.extra["placement"]
+        dx, dy = door.extra["at"]
+        vw, W = rs.detail_view("DET-B", "DETAIL B – DVEŘE HYGIENICKÉ BUŇKY, PŮDORYS V 1,00 m", 5, 542.0, 132.0,
+                               (1, 0, 0), (0, 1, 0), (0, 0, -1), dx - 0.6, dx + 0.6, dy - 0.2, dy + 0.18,
+                               ((0, 0, 1.0), (0, 0, -1)), ((dx - 0.8, dy - 0.6, -0.1), (dx + 0.8, dy + 0.5, 1.0)))
+
+        def P(bx, by):                      # the part's frame (Blender axes) to layout at the cut's height
+            return p.to_layout(bx, by, 1.0)
+        items = [(door.id, "%s – posuvné, otevírá se k přídi" % door.id, P(HYG_FRONT + 0.03, 0.0)),
+                 (hyg.id, "%s (%s)" % (hyg.id, hyg.kit), P(HYG_FRONT - 0.1, -0.5)),
+                 ("#seal", "těsnění na zárubni, kam křídlo dojede", P(HYG_FRONT - 0.001, HYG_DW - 0.003)),
+                 ("#pocket", "ústí kapsy: křídlo zajíždí do čelní stěny", P(HYG_FRONT - 0.02, -HYG_DW + 0.004)),
+                 ("#band", "výstražný pruh na náběžné hraně", P(HYG_FRONT + 0.006, HYG_DW - 0.038)),
+                 ("#pull", "madlo", P(HYG_FRONT + 0.006, HYG_DW - 0.11))]
+        reqs = rs.detail_items("DET-B", vw, items)
+        a, b = P(HYG_FRONT + 0.06, HYG_DW), P(HYG_FRONT + 0.06, -HYG_DW)
+        rs.chain(vw, "x", a[1], [a[0], b[0]])
+        tail = vw.P(P(HYG_FRONT + 0.12, HYG_DW - 0.06))
+        tip = vw.P(P(HYG_FRONT + 0.12, -HYG_DW + 0.06))
+        sh.ax.annotate("", xy=tip, xytext=tail, zorder=48, arrowprops=dict(arrowstyle="-|>", lw=0.45 * PT, color=INK,
+                                                                          mutation_scale=10, shrinkA=0, shrinkB=0))
+        sh.t((tip[0] + tail[0]) / 2, tip[1] + 1.2, "otevírání → příď", 2.2, ha="center", z=48, bg="white")
+        d.place_labels("DET-B", reqs, W[0] - 2, W[2] + 2, tiers_up=[W[3] + 8.0, W[3] + 14.0], tiers_dn=[W[1] - 8.0, W[1] - 14.0],
+                       split_y=vw.P(P(HYG_FRONT, 0.0))[1] + 0.5, bus_up=W[3] + 4.0, bus_dn=W[1] - 4.0, size=2.2)
+
+
+def check_box(rs, x, ytop, width=368.0):
     m, sh = rs.m, rs.sh
     sh.t(x, ytop - 3.4, "KONTROLA DAT (model výkresu proti datům stavby a layoutu)", 3.2, weight="bold")
     y = ytop - 9
@@ -1352,7 +1494,7 @@ def check_box(rs, x, ytop):
         if e.status == "proposed":
             extra.append((e.id, "%s: %s" % (e.name, e.extra.get("note"))))
     for ident, txt in items + extra:
-        for k, ln in enumerate(ds.wrap(sh, "%s: %s" % (ident, txt), 2.3, 368, 3)):
+        for k, ln in enumerate(ds.wrap(sh, "%s: %s" % (ident, txt), 2.3, width, 4)):
             sh.t(x + (0 if k == 0 else 3), y, ("• " if k == 0 else "") + ln, 2.3)
             y -= 3.7
     rs.checks = items + extra
@@ -1435,7 +1577,8 @@ def draw(ship="Wayfarer", dpi=200, out_dir=None, sheets=None):
         raise SystemExit("the FBX files are Git LFS pointers here (git lfs pull): the interior sheets draw the built meshes")
     geo = Geo(m)
     out = []
-    for sheet, (rid, sx) in (("I-04", ("cabin", 12.5)),):
+    # R1 through the life support's middle (its layout v2, author 1. 10. 2026), the berth and the galley unit
+    for sheet, (rid, sx) in (("I-04", ("cabin", 13.7)),):
         if sheets and sheet not in sheets:
             continue
         out.append(draw_room_sheet(m, geo, sheet, rid, sx, dpi, out_dir))

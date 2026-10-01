@@ -1205,6 +1205,12 @@ snímku.
   žádá překreslit 8 listů (~20 MB PNG v LFS) a v paralelní práci dělá binární konflikty. Řešení: ID interiéru jsou
   v `Design/<Loď>_interior_design.json` navázaná na data stavby klíčem, který test ověřuje, a otisky interiéru se
   počítají jen z interiérové části dat (`interior_model._digests`).
+- fj) **`kit_build.py -- <dávka> --only <díl>` uložil `Kit_<Dávka>.blend` jen s tím dílem** (1. 10. 2026, oprava dveří
+  hygienické buňky). Skript na konci ukládá celou scénu jako blend dávky, a `--only` staví jen vybrané díly, takže
+  z archivu zmizí ostatní (lůžko, skříň, výdejník; `kit_layout.kit_blends` a `kit_clash.py` hledají díly v blendech).
+  `--only` stačí na rychlou kontrolu; do commitu přestav celou dávku. FBX dílů, jejichž geometrie se nezměnila, se
+  liší jen časovým razítkem: porovnej je (`fbx_mesh.read`) a nezměněné vrať, ať v LFS nevznikají kopie. Jméno pro
+  `--only` je celé jméno meshe (`SM_Kit_Furniture_Hygiene15L_A`), krátké jméno nepostaví nic („parts": 0).
 
 
 ---

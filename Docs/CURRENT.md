@@ -34,8 +34,7 @@ laku); hlavní session staví exteriérový kit a pilota, druhá session výkres
 ## Paralelní práce
 
 - **Druhá session** (worktree `gamespace-audit`, větev `wayfarer-dossier-interior`): výkresy interiéru (bod 4, styl
-  I-04 schválen 1. 10.) a koncepty (bod 6); ID interiéru v `Design/Wayfarer_interior_design.json`, model
-  `interior_model.py`, listy `draw_interior_sheet.py`, test `test_interior_drawing.py`, skill `ship-pipeline` 1c.
+  I-04 schválen 1. 10.) a koncepty (bod 6); ID v `Design/Wayfarer_interior_design.json`, skill `ship-pipeline` 1c.
   `exterior_*.py` mění jen hlavní session. **Datový commit druhé session** (autor 1. 10.: layout kajuty podle kitu,
   podpora života posunutá, komentář D-INT-SEC06 v setupu; E-01–E-08 a paluba překreslené): při konfliktu v
   `Drawings/Wayfarer_E0*` nebo `Design/*.png` vzít kteroukoli stranu a po sloučení překreslit (`draw_exterior_sheet.py`).
@@ -44,6 +43,7 @@ laku); hlavní session staví exteriérový kit a pilota, druhá session výkres
 
 ## Čeká na rozhodnutí autora
 
+- Podpora života Wayfareru v2: posunutá k ose, z většiny pod lůžkem (list I-04, řez R1; po sloučení `import_kit.py`).
 - Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověření FAIL 7/6/6/7/7/8/8/7, levné body opravené).
 - Steadfast: schválení 2D návrhu v2 (`ArtSource/Ships/Steadfast/Design/Steadfast_Design.md`).
 - Kanopa Wayfareru jako téma designu v2 (autor ho otevře sám). Paleta Kestrel Dynamics: u první lodi Kestrelu.

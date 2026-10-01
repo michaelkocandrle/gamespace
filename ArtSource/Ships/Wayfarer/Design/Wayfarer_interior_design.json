@@ -82,7 +82,7 @@
    "type": "posuvné jednokřídlé",
    "kit": "Furniture_Hygiene15L_A",
    "slide_part": [0, -1],
-   "motion": "zasouvá se k přídi (náběžná hrana s výstražným pruhem a madlem je na zadní straně křídla)",
+   "motion": "zasouvá se k přídi do kapsy v čelní stěně buňky; náběžná hrana s výstražným pruhem a madlem je vzadu, těsnění na zadní zárubni, ústí kapsy na přední (kit opraven 1. 10. 2026)",
    "operation": "ručně za madlo; obsazeno ukazuje světlo nad dveřmi a obrazovka",
    "purpose": "Soukromí hygienické buňky."
   }
@@ -122,7 +122,12 @@
    "bay": "pod podlahou, z většiny pod lůžkem CAB-U-BUNK (y 0,92 … 1,50), 0,25 m blíž k ose než v layoutu v1",
    "access": "zvednutím matrace a odklopením desky podlahy v podstavci lůžka (návrh); sání v podstavci lůžka, zpětné sání v CAB-W-L1",
    "replace": "shora otvorem v podlaze pod lůžkem po zvednutí matrace a roštu",
-   "built_as": "jednotka nepostavena (layout v2: posunutá dovnitř, aby se vešla do trupu); ve hře sání v podstavci lůžka a zpětné sání v CAB-W-L1"
+   "built_as": "jednotka nepostavena (layout v2: posunutá dovnitř, aby se vešla do trupu); ve hře sání v podstavci lůžka a zpětné sání v CAB-W-L1",
+   "previous": {
+    "rect": [12.9, 14.5, 1.1, 1.75],
+    "z": [-0.55, -0.05],
+    "label": "layout v1 (zčásti mimo trup)"
+   }
   },
   "CPT-M-AVIONICS": {
    "bay": "pod podlahou kokpitu",
@@ -246,9 +251,7 @@
    "grab_bars": ["CPT-O-GRAB-01", "CPT-O-GRAB-02"]
   }
  },
- "review_notes": {
-  "DR-CAB-HYG": "kit (Furniture_Hygiene15L_A) kreslí výstražný pruh a madlo na zadní hraně křídla, ale těsnění u zadní zárubně – jedno z nich je opačně; výkres bere směr otevírání podle pruhu a madla (k přídi)"
- },
+ "review_notes": {},
  "decal_items": {
   "hazard_stripe": "výstražný pruh na hraně (rám dveří, práh)",
   "st_service": "malý šablonový nápis SERVICE ACCESS (servisní přístup)",
