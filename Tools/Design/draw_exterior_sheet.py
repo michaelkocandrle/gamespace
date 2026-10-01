@@ -201,6 +201,7 @@ class Drawer:
         self.sh, self.m = sheet, model
         self.drawn = {}
         self.labelled = {}
+        self.roof_side = {}
 
     # ------------------------------------------------------------------ helpers
     def matstyle(self, mid):
@@ -827,6 +828,11 @@ class Drawer:
         for e in self.m.elements:
             if e.cat != "panel" or not e.sb:
                 continue
+            if e.data.get("band") == "R" and self.m.view in ("SB", "PORT"):
+                # seen from the side only as a strip along the roof edge: named in a note, drawn on E-03
+                self.roof_side.setdefault(view, []).append(e.id)
+                self.labelled.setdefault(view, set()).add(e.id)
+                continue
             shp = em.polys_only(e.sb["shape"].intersection(self.vis("hull")))
             if shp.is_empty or shp.area < 0.02:
                 hidden.append(e.id)
@@ -853,6 +859,13 @@ class Drawer:
 # ---------------------------------------------------------------------- sheet furniture
 BIG_DECAL_CZ = {"D_Big_Wayfarer": "WAYFARER", "D_Big_Registration": "registrace", "D_Big_Logo": "logo Halcyon",
                 "D_Big_Hazard_Exhaust": "výstraha výfuku", "D_Big_Hazard_Ramp": "výstraha rampy"}
+
+
+def roof_note(ids):
+    """The roof plates seen from the side (a strip along the roof edge) named in one sentence."""
+    if not ids:
+        return ""
+    return "Desky hřbetu %s–%s (z boku jen pruh na hraně střechy) popisuje E-03." % (min(ids), max(ids))
 
 
 def parts_of(g):
@@ -1055,8 +1068,8 @@ def draw_e01(m, dpi, out_dir):
     detail_callout(sh, frA)
     d.place_labels("A", reqsA, x_left, x_hi, tiers_up=[797, 806.5], tiers_dn=[558, 549], split_y=zA + 1.4 * SCALE,
                    bus_up=789.0, bus_dn=564.5)
-    sh.t(x_left, 541, "Desky v poli za gondolou a ploutví, v tomto pohledu skryté: " + ", ".join(hiddenA) + ".",
-         2.5, STATUS_COL["proposed"])
+    sh.t(x_left, 541, "Desky v poli za gondolou a ploutví, v tomto pohledu skryté: " + ", ".join(hiddenA) + ". "
+         + roof_note(d.roof_side.get("A", [])), 2.5, STATUS_COL["proposed"])
     for i in hiddenA:
         d.labelled.setdefault("A", set()).add(i)
     # ---------------------------------------------------------------- view B
@@ -1294,6 +1307,14 @@ def legend(sh, m, x, ytop):
             b["name"], exact(b["v"][0]), exact(b["v"][1]), em.fmt(R1_X), em.fmt(m.z_of(R1_X, b["v"][0])),
             em.fmt(m.z_of(R1_X, b["v"][1]))), 2.3)
         sh.t(x + 150, y, "%s, %s" % (k["id"], b["material"]), 2.3, STATUS_COL["proposed"])
+        y -= 4.4
+    roof = m.design["panels"].get("roof")
+    if roof:
+        k = m.kit[roof["kit"]]
+        sh.t(x, y, roof["band"], 2.6, STATUS_COL["proposed"], weight="bold")
+        sh.t(x + 5, y, "%s: od osy (páteř ± %s) přes hranu střechy k v %s, x %s–%s; P-S-RL / RP <pole> vlevo / vpravo" % (
+            roof["name"], em.fmt(roof["spine_gap"]), exact(roof["v_edge"]), em.fmt(roof["x"][0]), em.fmt(roof["x"][1])), 2.3)
+        sh.t(x + 150, y, "%s, %s" % (k["id"], roof["material"]), 2.3, STATUS_COL["proposed"])
         y -= 4.4
     y -= 1.8
     sh.t(x, y, "Stav prvku", 2.8, weight="bold")
@@ -1603,7 +1624,7 @@ def title_block(sh, m, x, W, sheet="E-01"):
     codes = list(SHEETS)
     cells = [("List", "%s, %d / %d" % (sheet, codes.index(sheet) + 1, len(codes))), ("Revize", m.design["revision"]),
              ("Měřítko", SHEET_SCALE.get(sheet, "1:30")), ("Formát", "A0 na šířku"), ("Datum", "1. 10. 2026"),
-             ("Stav", "STYL SCHVÁLEN, OBSAH KE SCHVÁLENÍ")]
+             ("Stav", "SCHVÁLENO, REV. %s" % m.design["revision"])]
     cw = (x1 - x) / 3
     for i, (k, v) in enumerate(cells):
         cx = x + (i % 3) * cw
@@ -1616,7 +1637,8 @@ def title_block(sh, m, x, W, sheet="E-01"):
     sh.line([(x, yb), (x1, yb)], 0.25, z=50)
     for i, (k, v) in enumerate((("Kreslil", "Claude (skript draw_exterior_sheet.py), 1. 10. 2026"),
                                 ("Kontroloval", "kritik technických výkresů, 1. 10. 2026"),
-                                ("Schválil", "autor: styl %s; obsah: ________" % m.design["approved"]["date"]))):
+                                ("Schválil", "autor %s (E-01 až E-08, rám rampy); hřbet R podle jeho pokynu" %
+                                 m.design["approved"]["drawings"]["date"]))):
         cx = x + i * cw
         sh.t(cx + 2, yb - 3.8, k, 2.0, GREY)
         for j, ln in enumerate(wrap(sh, v, 2.3, cw - 4, 2)):
@@ -1626,9 +1648,9 @@ def title_block(sh, m, x, W, sheet="E-01"):
     yr = yb - 14
     sh.line([(x, yr), (x1, yr)], 0.25, z=50)
     sh.t(x + 2, yr - 3.8, "Revize", 2.0, GREY)
-    sh.t(x + 2, yr - 8.2, "A  1. 10. 2026  vzorový list E-01 ke schválení stylu", 2.4)
-    sh.t(x + 125, yr - 8.2, "B  tabulky na list E-02; schválené změny (✓)", 2.4)
-    sh.t(x + 250, yr - 8.2, "C  listy E-03 až E-08 (pohledy, detaily)", 2.4)
+    sh.t(x + 2, yr - 8.2, "A  1. 10. 2026  vzorový list E-01", 2.4)
+    sh.t(x + 85, yr - 8.2, "B  tabulky E-02, schválené změny (✓), listy E-03 až E-08", 2.4)
+    sh.t(x + 225, yr - 8.2, "C  schváleno; hřbet R v primárním laku, rám rampy", 2.4)
     yd = yr - 11
     sh.line([(x, yd), (x1, yd)], 0.25, z=50)
     dg = m.digests

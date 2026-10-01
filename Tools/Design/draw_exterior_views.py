@@ -139,9 +139,9 @@ def draw_e03(m, dpi, out_dir):
         "5. Ploutve kryjí gondolu, gondoly kryjí křídla; náběžné hrany tmavé, klapky obrysem (podíl tětivy z receptu).",
         "6. Záďový kryt Z-B-02 a deska P-B-01 jsou v datech „výška nad 2,2 m“ na zádi: střecha k zádi klesá (na zádi "
         "1,82 m), proto mají v půdorysu šikmou hranu po vrstevnici 2,2 m, ne obdélník.",
-        "7. Hřbet mezi zkoseními: schválená změna P-HULL (plášť gunmetal = rám B + C) ho dělá tmavým, desky jsou jen na "
-        "bocích a zkoseních; na střeše zůstávají postavené světlé pláty P-B-04/16/17 a žlab rozvodů R-B-02. K rozhodnutí "
-        "autora: nechat, desky i na hřbet, nebo hřbet v laku.",
+        "7. Hřbet (autor 1. 10. 2026: chase kamera vidí hlavně hřbet): desky R v primárním laku po obou stranách páteře "
+        "FR-SPINE, od páteře přes hranu střechy k podélníku FR-LONG-TOP, žebra rámu přes hřbet; gunmetal je jen rám a "
+        "břicho. Desky R nahrazují postavené pláty P-B-04/16/17; nápisy na nich tmavým inkoustem (D-H-36, D-H-60).",
         "8. Karty špíny se nekreslí (tabulka E-02).",
     ])
 
@@ -225,6 +225,7 @@ def draw_e06(m, dpi, out_dir):
         hiddenA, panel_reqs = d.panel_labels(frA, "PA")
         d.place_labels("PA", reqsA + panel_reqs + d.hidden_panel_reqs(frA, hiddenA), 34, 786, tiers_up=[797, 806.5],
                        tiers_dn=[558, 549], split_y=zA + 1.4 * S30, bus_up=789.0, bus_dn=564.5)
+        sh.t(34, 541, ds.roof_note(d.roof_side.get("PA", [])), 2.5, STATUS_COL["proposed"])
         ds.levels(sh, frA)
         zB = 486.0 - 3.81 * S30
         frB = Frame(OX, zB, S30, flip=True)

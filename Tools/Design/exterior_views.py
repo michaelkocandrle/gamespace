@@ -338,6 +338,7 @@ class Views:
         self._aft_items()
         self._end_profiles()
         self._design()
+        self._roof()
         self._port()
         for e in m.elements:
             for view, g in e.geo.items():
@@ -663,6 +664,152 @@ class Views:
                 g = unary_union([box(sd * y - fy / 2, z0, sd * y + fy / 2, z1) for sd in sides])
             self.put(e, view, g, "area", "hull")
 
+    # ------------------------------------------------------------------ the roof (author 1. 10. 2026)
+    def roof_edge_y(self, x, v):
+        """Half-width of the hull at section height v (on the upper shoulder) at station x."""
+        m = self.m
+        return m.hull_y(x, m.z_of(x, v))
+
+    def plan_to_side(self, g, side):
+        """Plan (x, y) geometry on the roof's sloping edge to the side view (x, z) of that side (-1 starboard,
+        +1 port): the part outboard of the flat roof, z where the hull's half-width is |y| (bisection)."""
+        m = self.m
+
+        def z_at(x, ay):
+            zb, zt = m.zspan(x)
+            lo, hi = m.z_of(x, V_UP), zt
+            for _ in range(32):
+                mid = (lo + hi) / 2
+                if m.hull_y(x, mid) > ay:
+                    lo = mid
+                else:
+                    hi = mid
+            return (lo + hi) / 2
+
+        flat = Polygon([(x, side * m.hw(x) * m.u_out(1.0) * (1.0 + 1e-3)) for x in [k * 0.25 for k in range(0, 86)]] +
+                       [(x, side * 10.0) for x in [21.25 - k * 0.25 for k in range(0, 86)]]).buffer(0)
+        part = em.polys_only(g.intersection(flat).buffer(0))
+        if part.is_empty:
+            return part
+        return em.polys_only(_apply(lambda x, y: (x, z_at(x, abs(y))), part).buffer(0))
+
+    def roof_hardware(self):
+        """Parts on the roof seen from above that a roof plate must clear (built or proposed, not removed)."""
+        out = []
+        for e in self.m.elements:
+            g = e.geo.get("TOP")
+            if not g or g["solid"] != "hull" or g["kind"] not in ("area", "profile") or e.status == "remove":
+                continue
+            if e.cat in ("greeble", "functional", "recess") or (e.cat == "light" and not e.extra.get("strip")):
+                if e.id in ("F-CANOPY-FRAME", "P-HULL"):
+                    continue
+                out.append(e)
+        return out
+
+    def _roof(self):
+        """Roof plates P-S-RL / P-S-RP <bay>, the spine longeron and the ribs over the roof, in plan; the plates'
+        sloping edge also in the side views (a strip along the roof edge)."""
+        m = self.m
+        des = m.design["panels"]
+        roof = des.get("roof")
+        if not roof:
+            return
+        Element = em.Element
+        margin = des["cut_margin"]
+        hull_plan = self.solids["TOP"]["hull"]["poly"]
+        seal = m.by_id["Z-SEAL-CANOPY"]
+        canopy = self.canopy["TOP"].buffer(seal.data["w"] + margin, join_style=2)
+        cut = [canopy]
+        for i in ("Z-B-02", "P-B-01", "Z-B-01"):
+            g = m.by_id[i].geo.get("TOP")
+            if g:
+                cut.append(g["shape"].buffer(margin, join_style=2))
+        hw_ = self.roof_hardware()
+        cut += [e.geo["TOP"]["shape"].buffer(margin, join_style=2) for e in hw_]
+        cut = unary_union(cut)
+        rib_w = m.kit["XK-RIB"]["w"] / 2
+        stations = [des["ends"][0]] + m.seams + [des["ends"][1]]
+        x0r, x1r = roof["x"]
+        min_w = des.get("min_width_m", 0.0)
+        from shapely.ops import polylabel
+        for i in range(1, len(stations)):
+            a, b = stations[i - 1], stations[i]
+            xa = max(a + (rib_w + des["gap"] if a in m.seams else des["gap"]), x0r)
+            xb = min(b - (rib_w + des["gap"] if b in m.seams else des["gap"]), x1r)
+            if xb - xa < 0.2:
+                continue
+            xs = [xa + (xb - xa) * k / 16 for k in range(17)]
+            for side, tag in ((1, "L"), (-1, "P")):
+                edge = [(x, side * self.roof_edge_y(x, roof["v_edge"])) for x in xs]
+                inner = [(x, side * roof["spine_gap"]) for x in reversed(xs)]
+                raw = Polygon(edge + inner).buffer(0).intersection(hull_plan)
+                shape = em.largest(em.polys_only(raw.difference(cut).buffer(0)))
+                if shape.is_empty or shape.area < des["min_area_m2"]:
+                    continue
+                if 2 * shape.boundary.distance(polylabel(shape, 0.005)) < min_w:
+                    continue
+                ident = "P-S-R%s%02d" % (tag, i)
+                el = m.add(Element(ident, "panel", roof["name"], des["status"], material=roof["material"], kit=roof["kit"],
+                                   src="design", data={"band": "R", "bay": i, "x": [a, b], "side": tag, "mirror": False},
+                                   what="deska %s %s, příčky x %s–%s" % (roof["name"], "vlevo" if side > 0 else "vpravo",
+                                                                         em.fmt(a), em.fmt(b))))
+                el.qty, el.where = 1, "x %s–%s, %s" % (em.fmt(a), em.fmt(b), "levá" if side > 0 else "pravá")
+                el.geo = {}
+                el.vextra = {}
+                self.put(el, "TOP", shape, "area", "hull")
+                sidegeo = self.plan_to_side(shape, side)
+                if not sidegeo.is_empty and sidegeo.area > 0.002:
+                    view = "SB" if side < 0 else "PORT"
+                    a_ = sidegeo.representative_point()
+                    el.geo[view] = {"shape": sidegeo, "kind": "area", "anchor": (a_.x, a_.y), "anchor_set": True,
+                                    "solid": "hull", "depth": m.hw(a_.x), "hidden": False, "vis_frac": 1.0, "up": None,
+                                    "ghost": None, "seams": None, "marks": None}
+                    el.views.add(view)
+                    if view == "SB":
+                        el.sb = el.geo["SB"]
+        # the spine longeron and the ribs over the flat roof
+        spine = next((f for f in m.design["frame"] if f["kind"] == "spine"), None)
+        if spine:
+            e = m.by_id[spine["id"]]
+            w = m.kit[spine["kit"]]["w"] / 2
+            g = box(spine["x"][0], -w, spine["x"][1], w).difference(cut).intersection(hull_plan)
+            self.put(e, "TOP", em.polys_only(g.buffer(0)), "area", "hull", anchor=(spine["x"][0] + 1.0, 0.0))
+        rib = next((f for f in m.design["frame"] if f["kind"] == "ribs" and f.get("roof")), None)
+        if rib:
+            e = m.by_id[rib["id"]]
+            parts = []
+            for x in m.seams:
+                if x0r <= x <= x1r:
+                    yr = self.roof_edge_y(x, 1.0)
+                    parts.append(box(x - rib_w, -yr, x + rib_w, yr))
+            g = unary_union(parts).difference(cut).intersection(hull_plan)
+            self.put(e, "TOP", em.polys_only(g.buffer(0)), "area", "hull")
+
+    def plan_conflicts(self):
+        """The roof seen from above: a part under a plate (the plate must cut it out), lettering on a plate of its
+        own tone. [(id, kind, text)]."""
+        m = self.m
+        out = []
+        plates = [e for e in m.elements if e.cat == "panel" and e.geo.get("TOP") and e.status != "remove"]
+        union = unary_union([e.geo["TOP"]["shape"] for e in plates]) if plates else Polygon()
+        for e in self.roof_hardware():
+            ov = e.geo["TOP"]["shape"].intersection(union).area
+            if ov > 1e-4:
+                out.append((e.id, "buried", "pod deskou bez výřezu (%.3f m²)" % ov))
+        for e in m.elements:
+            g = e.geo.get("TOP")
+            if not g or e.cat != "decal" or not e.extra.get("text") or not e.extra.get("ink") or e.status == "remove":
+                continue
+            item = (m.changes.get(e.id, {}).get("set") or {}).get("item", e.extra.get("item", ""))
+            ink = "light" if item.startswith("xstl") else ("dark" if item.startswith("xst") else e.extra["ink"])
+            for pl in plates:
+                ov = g["shape"].intersection(pl.geo["TOP"]["shape"]).area
+                if ov > 0.3 * g["shape"].area:
+                    lum = m.lum(pl.material)
+                    if (ink == "dark" and lum < 0.45) or (ink == "light" and lum > 0.6):
+                        out.append((e.id, "ink", "%s nápis na desce %s" % ("tmavý" if ink == "dark" else "světlý", pl.id)))
+        return out
+
     def _landing_plan(self, x, y, top):
         """The solid a ray from above (top) or below at plan (x, y) hits first."""
         p = Point(x, y if top else -y)
@@ -792,7 +939,7 @@ class Views:
         m = self.m
         for e in m.elements:
             sb = e.geo.get("SB")
-            if e.extra.get("setup") or not sb:
+            if e.extra.get("setup") or not sb or e.data.get("side") == "P":
                 continue
             g = dict(sb, ghost=e.extra.get("ghost"), seams=e.extra.get("seams"), up=e.extra.get("up"), marks=None)
             e.geo["PORT"] = g

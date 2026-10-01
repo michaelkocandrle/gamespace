@@ -1,7 +1,7 @@
 {
   "_comment": "Wayfarer exterior design data (dossier bod 3; author 1. 10. 2026: one source of data - the drawings and the ship are made from the same data). Built elements live in the build data (HardSurface/Wayfarer_hs.json, Wayfarer_setup.json) with their IDs; this file holds what is not built yet: 'proposed' elements (drawn blue), and 'changes' to built elements ('change' with the new values in 'set', 'remove' drawn red crossed). Read by Tools/Design/exterior_model.py (drawings, Tools/Tests/test_exterior_drawing.py) and later by the exterior kit builder. Layout coordinates: x from the aft end, y to port, z from the deck; pod angles 0 outboard, 90 top. Mirrored elements (the default) have one ID for both sides.",
   "ship": "Wayfarer",
-  "revision": "B",
+  "revision": "C",
   "concept": {
     "id": "CON-SURF-V3-BC",
     "name": "Povrch trupu v3: koncept B + C",
@@ -18,7 +18,11 @@
     "ids": ["F-RCS-01", "F-RCS-02", "F-RCS-03", "F-RCS-04", "F-RCS-05", "F-RCS-06", "F-RCS-07", "F-RCS-08", "F-RCS-09",
             "F-RCS-10", "F-RCS-11", "F-RCS-12", "F-RCS-13", "D-LOGO-L", "D-LOGO-R", "D-H-29", "D-H-55", "D-H-57", "D-H-58",
             "D-H-59", "F-CONN-01", "Z-B-03", "F-FIN", "F-GRILLE-01", "F-GRILLE-02", "G-VT-01", "G-VT-02", "G-VT-03",
-            "D-H-42", "L-STROBE-FIN", "L-STROBE-WING", "L-LANDING"]
+            "D-H-42", "L-STROBE-FIN", "L-STROBE-WING", "L-LANDING", "F-RAMP-FRAME"],
+    "drawings": {"sheets": "E-01 až E-08", "date": "1. 10. 2026",
+                 "_comment": "The author approved the exterior drawings E-01 to E-08 (content and style) and the ramp frame F-RAMP-FRAME; the kit and the pilot are built from them."},
+    "roof": {"date": "1. 10. 2026",
+             "what": "desky v primárním laku i na hřbetu, gunmetal jen na břiše: chase kamera vidí hlavně hřbet a tmavý by udělal tmavou loď během hraní"}
   },
   "materials": [
     {"id": "MZ-PAINT1", "name": "Lak primární", "recipe": "paint", "status": "built",
@@ -79,6 +83,9 @@
       {"band": "U", "name": "horní bok", "v": [0.525, 0.749], "kit": "XK-PLATE", "material": "MZ-PAINT1"},
       {"band": "S", "name": "rameno (horní zkosení)", "v": [0.791, 0.93], "kit": "XK-PLATE", "material": "MZ-PAINT2"}
     ],
+    "roof": {"band": "R", "name": "hřbet", "kit": "XK-PLATE", "material": "MZ-PAINT1", "v_edge": 0.9714, "spine_gap": 0.08,
+             "x": [3.0, 15.4],
+             "_comment": "Roof plates (author 1. 10. 2026: primary paint on the roof, gunmetal only on the belly): in every bay one plate each side of the centre line, from the spine (spine_gap: the spine longeron's half width + 40 mm) over the roof edge down to v_edge on the upper shoulder (40 mm above the top longeron FR-LONG-TOP). Drawn and built in plan (x, y); cut like the side plates (canopy seal, aft cap, recesses, hatches, every part on the roof). ID: P-S-RL<bay> (port), P-S-RP<bay> (starboard)."},
     "cut": ["Z-SEAL-CANOPY", "Z-B-01", "Z-B-02", "P-B-01", "R-B-01", "R-B-03", "G-HTL-01", "G-HT-01", "G-HT-02", "G-HT-03",
             "F-GRILLE-01", "F-GRILLE-02", "F-WING"],
     "_bands": "40 mm between a plate and a longeron (80 mm) as at the ribs: K top and L bottom 0.0103 of the section from the longeron's edge, U and S likewise (critic round 3)",
@@ -86,11 +93,16 @@
   },
   "frame": [
     {"id": "FR-RIB", "kind": "ribs", "kit": "XK-RIB", "material": "MZ-GUNMETAL", "status": "proposed",
-     "at": "seams", "v": [0.0, 0.93], "what": "žebra rámu na každé příčce trupu (B), přerušená u šachet a poklopů"},
+     "at": "seams", "v": [0.0, 1.0], "roof": true,
+     "what": "žebra rámu na každé příčce trupu (B) od kýlu přes hřbet, přerušená u šachet a poklopů"},
     {"id": "FR-LONG-LO", "kind": "longeron", "kit": "XK-LONGERON", "material": "MZ-GUNMETAL", "status": "proposed",
      "v": 0.18, "x": [0.0, 20.3], "what": "podélník na spodní hraně boku"},
     {"id": "FR-LONG-HI", "kind": "longeron", "kit": "XK-LONGERON", "material": "MZ-GUNMETAL", "status": "proposed",
-     "v": 0.77, "x": [3.0, 20.3], "what": "podélník na horní hraně boku"}
+     "v": 0.77, "x": [3.0, 20.3], "what": "podélník na horní hraně boku"},
+    {"id": "FR-LONG-TOP", "kind": "longeron", "kit": "XK-LONGERON", "material": "MZ-GUNMETAL", "status": "proposed",
+     "v": 0.9507, "x": [3.0, 20.3], "what": "podélník na horním zkosení mezi pásem S a deskami hřbetu R"},
+    {"id": "FR-SPINE", "kind": "spine", "kit": "XK-LONGERON", "material": "MZ-GUNMETAL", "status": "proposed",
+     "x": [3.0, 15.4], "what": "páteř hřbetu: podélník na ose mezi levými a pravými deskami R, přerušený u poklopů a antén"}
   ],
   "zones": [
     {"id": "Z-SEAL-CANOPY", "kind": "seal", "kit": "XK-SEAL", "material": "MZ-RUBBER", "status": "proposed",
@@ -277,6 +289,11 @@
     "D-HAZARDEXHAUST-R": "výstražný pruh výfuku na pravé gondole"
   },
   "changes": [
+    {"id": "P-B-04", "action": "remove", "why": "nahrazuje ho pás desek hřbetu R (autor 1. 10.: desky i na hřbetu)"},
+    {"id": "P-B-16", "action": "remove", "why": "nahrazuje ho pás desek hřbetu R"},
+    {"id": "P-B-17", "action": "remove", "why": "nahrazuje ho pás desek hřbetu R"},
+    {"id": "D-H-36", "action": "change", "set": {"item": "xst_nostep"}, "why": "leží na světlé desce hřbetu: tmavý inkoust"},
+    {"id": "D-H-60", "action": "change", "set": {"item": "xst_service"}, "why": "leží na světlé desce hřbetu: tmavý inkoust"},
     {"id": "D-LOGO-R", "action": "change", "set": {"location": [-270.0, 250.0, 65.0]},
      "why": "logo leželo na trupu za gondolou (z boku neviditelné); nově na horním boku v poli 06 před nápisem"},
     {"id": "D-LOGO-L", "action": "change", "set": {"location": [-270.0, -250.0, 65.0]},

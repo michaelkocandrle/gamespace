@@ -834,9 +834,14 @@ class Model:
             cut = unary_union([cut] + [e.sb["shape"].buffer(0.02, join_style=2) for e in self.hardware()
                                        if e.cat != "light"])
         for fr in self.design["frame"]:
-            el = self.add(Element(fr["id"], "frame", "žebra rámu" if fr["kind"] == "ribs" else "podélník", fr["status"],
-                                  material=fr["material"], kit=fr["kit"], src="design", data=fr, what=fr["what"]))
+            el = self.add(Element(fr["id"], "frame", {"ribs": "žebra rámu", "spine": "páteř hřbetu"}.get(fr["kind"], "podélník"),
+                                  fr["status"], material=fr["material"], kit=fr["kit"], src="design", data=fr,
+                                  what=fr["what"]))
             w = self.kit[fr["kit"]]["w"] / 2
+            if fr["kind"] == "spine":
+                # on the roof's centre line: drawn in plan (exterior_views), seen from the side only edge-on
+                el.qty, el.where = 1, "osa hřbetu x %s–%s" % (fmt(fr["x"][0]), fmt(fr["x"][1]))
+                continue
             if fr["kind"] == "ribs":
                 pieces = [self.hull_band(x - w, x + w, fr["v"][0], fr["v"][1]) for x in self.seams]
                 el.qty = 2 * len(self.seams)
