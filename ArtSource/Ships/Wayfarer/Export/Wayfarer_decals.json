@@ -1,0 +1,34 @@
+{
+ "decals": 2230,
+ "by_rule": {
+  "items": 99,
+  "panel_numbers": 138,
+  "kit_detail": 42,
+  "kit_bolts": 1316,
+  "panel_marks": 64,
+  "clusters": 128,
+  "greeble_companions": 21,
+  "companions": 39,
+  "coverage": 383
+ },
+ "by_type": {
+  "structural": 164,
+  "info": 2065,
+  "wear": 1
+ },
+ "skipped": {
+  "edge": 230,
+  "overlap": 167,
+  "miss": 48
+ },
+ "faces": 31702,
+ "kit": {
+  "bolts_wanted": 1316,
+  "bolts_placed": 1316,
+  "kit_decals": 42,
+  "companion_labels_near_kit": 1,
+  "companion_items_near_kit": [
+   "chevrons_port"
+  ]
+ }
+}

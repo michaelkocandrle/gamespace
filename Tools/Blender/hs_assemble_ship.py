@@ -38,6 +38,54 @@ def shift_box(box, off):
     return {k: [v[0] + off["xyz".index(k)], v[1] + off["xyz".index(k)]] for k, v in box.items()}
 
 
+def check_bounds(layout, obs, margin=1.5):
+    """Every part inside the ship's envelope (the layout's side and top outlines) plus a margin, checked before the
+    join (author 1. 10. 2026): a solidify on merged n-gons threw a detail plate's vertex 15-420 m out and only the
+    exporter's size check or the landing test caught it (WORKFLOW 9.6 fk). Raises - the build fails right here."""
+    ext = layout["exterior"]
+    xs = [p[0] for e in ext["side"] + ext["top"] if "poly" in e for p in e["poly"]]
+    zs = [p[1] for e in ext["side"] if "poly" in e for p in e["poly"]]
+    ys = [p[1] for e in ext["top"] if "poly" in e for p in e["poly"]]
+    lo = (min(xs) - margin, -max(abs(y) for y in ys) - margin, min(zs) - margin)
+    hi = (max(xs) + margin, max(abs(y) for y in ys) + margin, max(zs) + margin)
+    bad = []
+    for o in obs:
+        if "_Int" in o.name or "Hologram" in o.name:
+            continue
+        for v in o.data.vertices:
+            w = o.matrix_world @ v.co
+            if any(w[i] < lo[i] or w[i] > hi[i] for i in range(3)):
+                bad.append((o.name, [round(c, 2) for c in w]))
+                break
+    if bad:
+        print("HSASSEMBLE BOUNDS FAIL %s" % json.dumps(bad))
+        raise RuntimeError("parts outside the ship's envelope %s..%s: %s" % (lo, hi, bad))
+    print("HSASSEMBLE BOUNDS PASS (%d parts inside %s..%s)" % (len(obs), [round(c, 2) for c in lo], [round(c, 2) for c in hi]))
+
+
+def budget_report(recipe, ship, obs, cfg):
+    """Triangles of the main exterior mesh per budget part (recipe "budget", author 1. 10. 2026): prints HSBUDGET
+    and writes Export/<Ship>_budget.json next to the lights (Tools/Tests/test_triangle_budget.py compares it)."""
+    import re
+    spec = recipe["budget"]
+    parts = {p["name"]: {"max": p["max"], "tris": 0, "objects": 0} for p in spec["parts"]}
+    parts["other"] = {"max": None, "tris": 0, "objects": 0}
+    for o in obs:
+        t = sum(len(p.vertices) - 2 for p in o.data.polygons)
+        key = next((p["name"] for p in spec["parts"] if any(re.search(m, o.name) for m in p["match"])), "other")
+        parts[key]["tris"] += t
+        parts[key]["objects"] += 1
+    total = sum(v["tris"] for v in parts.values())
+    rep = {"ship": ship, "mesh": "SM_Ship_%s" % ship, "total": total, "budget": spec["total"], "warn": spec["warn"],
+           "error": spec["error"], "parts": parts}
+    out = os.path.join(os.path.dirname(path(cfg["out_blend"])), "Export", "%s_budget.json" % ship)
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump(rep, f, indent=1)
+    print("HSBUDGET " + json.dumps({"total": total, "parts": {k: v["tris"] for k, v in parts.items()}}))
+    return rep
+
+
 def main(argv):
     recipe = json.load(open(path(argv[0]), encoding="utf-8"))
     layout = json.load(open(path(recipe["layout"]), encoding="utf-8"))
@@ -70,11 +118,14 @@ def main(argv):
             bpy.data.meshes.remove(old)
     for o in kit_objs:
         bpy.data.objects.remove(o)
-    # panel identity for the layered material (hs_layers.panel_ids): a hash of the source object per face
+    # panel identity for the layered material (hs_layers.panel_ids): a hash of the source object per face; the two
+    # copies of a mirrored part (_L / _R) share it, so a symmetric pair never reads as two materials (one of them a
+    # bare-metal panel: kit pilot critic round 1, the rear chamfer plates)
+    import re
     import zlib
     for o in meshes:
         a = o.data.attributes.get("part_obj") or o.data.attributes.new("part_obj", "INT", "FACE")
-        h = zlib.crc32(o.name.split(".")[0].encode()) & 0x7FFFFFFF
+        h = zlib.crc32(re.sub(r"_[LR]$", "", o.name.split(".")[0]).encode()) & 0x7FFFFFFF
         a.data.foreach_set("value", [h] * len(o.data.polygons))
         if o.name == "SM_Ship_%s_Hull" % ship:
             recipe["_hull_obj_hash"] = h
@@ -115,6 +166,9 @@ def main(argv):
             bpy.data.objects.remove(o)
             continue
         groups.setdefault(assign.get(o.name, ""), []).append(o)
+    check_bounds(layout, [o for obs in groups.values() for o in obs])
+    if recipe.get("budget") and groups.get(""):
+        budget_report(recipe, ship, groups[""], cfg)
     out = {}
     for suffix, obs in groups.items():
         name = "SM_Ship_%s" % ship + ("_%s" % suffix if suffix else "")
@@ -155,6 +209,12 @@ def main(argv):
     #     part with atlas UVs, no unwrap, no collision, not Nanite (setup no_nanite_parts)
     import hs_decals
     decals, decal_report = hs_decals.build(recipe, out[""], ship, off, ROOT)
+    if decal_report:
+        # the decal counts and the kit checks for Tools/Tests/test_kit_decals.py
+        rep_path = os.path.join(os.path.dirname(path(cfg["out_blend"])), "Export", "%s_decals.json" % ship)
+        with open(rep_path, "w", encoding="utf-8") as f:
+            json.dump({k: decal_report[k] for k in ("decals", "by_rule", "by_type", "skipped", "faces", "kit")}, f, indent=1)
+        print("HSDECALS " + json.dumps({"decals": decal_report["decals"], "faces": decal_report["faces"], "kit": decal_report["kit"]}))
     if decals is not None:
         out["Decals"] = decals
     # 4) UVs

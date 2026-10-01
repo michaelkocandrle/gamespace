@@ -119,11 +119,12 @@ def resample(poly, n):
     return out
 
 
-def loft(name, side_poly, top_poly, front_poly, step, ring, seams=None):
+def loft(name, side_poly, top_poly, front_poly, step, ring, seams=None, covered=None):
     """Hull loft: the front outline, normalised to its bounding box, scaled at each station to the top
     view's half width and the side view's bottom / top. seams: real panel lines, grooves cut into the
     surface - rings at stations "x" and lines along the hull at section heights "around" ([side, v] with
-    side +1 port / -1 starboard and v 0 bottom .. 1 top), "width" and "depth" in metres."""
+    side +1 port / -1 starboard and v 0 bottom .. 1 top), "width" and "depth" in metres. covered(co, z_mid): a
+    point under the exterior kit's frame gets no groove (the rib covers it; triangle budget rule, 1. 10. 2026)."""
     seams = seams or {}
     depth, half = seams.get("depth", 0.0), seams.get("width", 0.02) / 2
     fp = ccw(front_poly)
@@ -166,7 +167,7 @@ def loft(name, side_poly, top_poly, front_poly, step, ring, seams=None):
         row = []
         for k, (u, v) in enumerate(template):
             y, z = u * hw, zb + v * (zt - zb)
-            if depth and (is_seam or k in groove_idx) and hw > 0.3:
+            if depth and (is_seam or k in groove_idx) and hw > 0.3 and not (covered and covered((x, y, z), (zb + zt) / 2)):
                 d = Vector((u * hw, (v - 0.5) * (zt - zb)))
                 if d.length > 1e-6:
                     d.normalize()
@@ -349,7 +350,18 @@ def material(name, colour, rough, metal, emit=None, alpha=None):
     return m
 
 
-def finish(ob, bevel):
+def finish(ob, bevel, dissolve=False, keep_slots=()):
+    if dissolve:
+        # coplanar faces merged before the bevel (triangle budget rule B1, author 1. 10. 2026): the loft is finely
+        # divided along its length even where it is flat
+        bm = bmesh.new()
+        bm.from_mesh(ob.data)
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hs_build_part
+        keep = {i for i, m in enumerate(ob.data.materials) if m and any(m.name.endswith("_" + k) for k in keep_slots)}
+        hs_build_part.planar_merge(bm, keep=keep)
+        bm.to_mesh(ob.data)
+        bm.free()
     ob.data.shade_smooth()
     ob.data.set_sharp_from_angle(angle=math.radians(bevel.get("sharp_deg", 35)))
     if bevel.get("width", 0) > 0:
@@ -428,8 +440,14 @@ def main(argv):
             report[part] = {"object": name, "cylinders": len(cfg["cylinders"])}
             continue
         if cfg.get("loft"):
+            covered = None
+            if recipe.get("exterior_kit"):
+                sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+                import hs_exterior_kit
+                covered = hs_exterior_kit.frame_cover(recipe["exterior_kit"]["layout"])
             ob = loft(name, ccw(polys_of(vs["side"], "side")[0]), polys_of(vs["top"], "top")[0],
-                      polys_of(vs["front"], "front")[0], cfg.get("step", 0.05), cfg.get("ring", 96), cfg.get("seams"))
+                      polys_of(vs["front"], "front")[0], cfg.get("step", 0.05), cfg.get("ring", 96), cfg.get("seams"),
+                      covered)
         else:
             if len(vs) < 2:
                 print("HSSHIP skip %s: only in %s" % (part, list(vs)))
@@ -518,6 +536,12 @@ def main(argv):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import hs_detail
         report["detail"] = hs_detail.apply(recipe, made, coll, mats, ship)
+    if recipe.get("exterior_kit"):
+        # the exterior kit from the approved drawings (Tools/Blender/hs_exterior_kit.py): plates, frame, kit parts;
+        # before the lights, greebles and decals, so they land on the plates
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hs_exterior_kit
+        report["exterior_kit"] = hs_exterior_kit.apply(recipe, made, coll, mats, ship)
     if recipe.get("lights"):
         # light fittings and emissive strips (Tools/Blender/hs_lights.py); the real lights go to the scene
         # property hs_lights for hs_assemble_ship.py
@@ -558,7 +582,10 @@ def main(argv):
     for part, ob in made.items():
         if ob.modifiers:
             continue   # revolved parts come finished from hs_build_part
-        finish(ob, recipe.get("bevel", {}) if part != "canopy" else {"sharp_deg": 60})
+        pcfg = recipe["parts"].get(part, {})
+        bevel = dict(recipe.get("bevel", {}), **({"segments": pcfg["bevel_segments"]} if "bevel_segments" in pcfg else {}))
+        finish(ob, bevel if part != "canopy" else {"sharp_deg": 60}, dissolve=bool(pcfg.get("loft")),
+               keep_slots=pcfg.get("merge_keep_slots", ()))
     out = path(recipe["out_blend"])
     os.makedirs(os.path.dirname(out), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=out)

@@ -20,15 +20,16 @@ Autor v Blenderu neklikává – všechno jde přes `blender -b --python …`. *
 - Delší Python piš nástrojem Write do scratchpadu a spouštěj soubor (heredoc + apostrofy se rozbijí);
   v cestách uvnitř Python řetězců `r"..."` (jinak `\U` = unicode escape).
 - Běžící GUI Blender **drží .blend** – před headless buildem, který ho ukládá, GUI zavři.
+- Výjimka v `--python` skriptu **nevrací chybový kód**: dávku pouštěj s `--python-exit-code 1` (WORKFLOW 9.6 fg).
 
 ```bash
 B="/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 # loď z výkresu (skill ship-pipeline 3b2), z kořene repozitáře
-MSYS_NO_PATHCONV=1 "$B" -b --factory-startup --python Tools/Blender/hs_build_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
-MSYS_NO_PATHCONV=1 "$B" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend --python Tools/Blender/hs_assemble_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
+MSYS_NO_PATHCONV=1 "$B" -b --factory-startup --python-exit-code 1 --python Tools/Blender/hs_build_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
+MSYS_NO_PATHCONV=1 "$B" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend --python-exit-code 1 --python Tools/Blender/hs_assemble_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
 # export FBX + manifest (z adresáře lodi kvůli //Export)
 cd ArtSource/Ships/<Loď>
-MSYS_NO_PATHCONV=1 "$B" -b <Loď>_HS_Game.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
+MSYS_NO_PATHCONV=1 "$B" -b <Loď>_HS_Game.blend --python-exit-code 1 --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
 ```
 
 Výstup exportu: `ArtSource/Ships/<Loď>/Export/<Loď>_manifest.json` + FBX na díl. Import do Unrealu je

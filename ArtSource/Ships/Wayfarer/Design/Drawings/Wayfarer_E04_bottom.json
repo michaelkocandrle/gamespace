@@ -4,11 +4,11 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "c10dc8f0b500",
-  "recipe": "00a16c39374f",
-  "setup": "106bef5f42f7",
+  "recipe": "7df4191b67e1",
+  "setup": "edd157c448e4",
   "spec": "d9597dfcd605",
-  "design": "92bce59434a3",
-  "library": "0f3a67cf7c68"
+  "design": "c08da5218170",
+  "library": "3ed0bfdbff37"
  },
  "drawn": {
   "BOT": [
@@ -40,6 +40,7 @@
    "F-HINGE-02",
    "F-HINGE-03",
    "F-MISSILE-S2",
+   "F-RCS-02",
    "F-RCS-04",
    "F-RCS-08",
    "F-RCS-12",
@@ -115,6 +116,7 @@
    "F-HINGE-02",
    "F-HINGE-03",
    "F-MISSILE-S2",
+   "F-RCS-02",
    "F-RCS-04",
    "F-RCS-08",
    "F-RCS-12",
@@ -162,6 +164,7 @@
  },
  "schedules": {
   "materials": [
+   "MZ-CHANNEL",
    "MZ-DARK",
    "MZ-GLASS",
    "MZ-GUNMETAL",

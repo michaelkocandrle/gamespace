@@ -239,9 +239,11 @@ def build(ob, spec, coll, mats, bevel, name):
         for key, bm in pieces:
             obn = hp.finish(bm, "%s_%d_%s" % (name, ci, key), coll, bevel)
             obn.modifiers["Bevel"].width = spec.get("bevel_m", 0.006)
-            obn.data.materials.append(mats[spec.get("materials", {}).get(key, "paint")])
+            mkey = spec.get("materials", {}).get(key, "paint")
+            # "paint2": the paint material with the secondary-paint mask (the fins' box, approved 1. 10. 2026)
+            obn.data.materials.append(mats["paint" if mkey == "paint2" else mkey])
             a = obn.data.attributes.new("paint2", "INT", "FACE")
-            a.data.foreach_set("value", [1 if key == "flap" else 0] * len(obn.data.polygons))
+            a.data.foreach_set("value", [1 if key == "flap" or mkey == "paint2" else 0] * len(obn.data.polygons))
             made.append(obn)
         comp.free()
     return made

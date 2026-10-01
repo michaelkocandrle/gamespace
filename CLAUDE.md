@@ -33,6 +33,20 @@ až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
   měřitelnému přínosu (`Docs/ARCHITECTURE.md`).
 - API klíče jsou v `C:\gamespace\secrets\`. **Nikdy do repozitáře.**
 
+## Úspora tokenů (autor 1. 10. 2026)
+
+Spotřebu dělá hlavně opakované načítání dlouhého kontextu (cache read), ne čtení a psaní.
+
+- **Krátké session.** Po každém dokončeném úkolu aktualizuj `Docs/CURRENT.md` a napiš autorovi, že je vhodná
+  chvíle na `/clear`. Další velký úkol ve stejné session nezačínej.
+- **Obrázky.** Celé výkresy A0, srovnávací listy ani sady snímků do hlavní session nenačítej. Kontroluj výřezy
+  a zmenšeniny (`Tools/Review/sheet_crops.py`); celé listy ať prohlédne podagent a vrátí jen text.
+- **Velké soubory** (generátory, datové JSON, logy) čti cíleně grepem a výřezy řádků. Výstupy testů a buildů
+  jen jako souhrn (počty, chyby).
+- **Kritik:** dílčí kola na Opus 5.5 s běžným úsilím, Fable 5.1 jen na finální recenzi hotové lodi. List podle
+  schváleného vzoru = jedno kolo.
+- Na konci každého úkolu orientačně uveď spotřebu.
+
 ## Brány workflow jednoho kroku
 
 1. **Zadání a reference.** Vzor je SC (`starcitizenreference/`, autorovy screenshoty); odchylku, kterou nejde

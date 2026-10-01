@@ -118,6 +118,21 @@ def shell(bm, pts, a0, a1, n, axis, thickness, full=False):
                 bm.faces.new([ra_o, rb_o, rb_i, ra_i])
 
 
+def planar_merge(bm, deg=1.0, keep=None):
+    """Coplanar faces merged before solidify and bevel (triangle budget rule B1, author 1. 10. 2026; never across
+    materials), then degenerate slivers dissolved and the n-gons triangulated: a solidify with even thickness on a
+    non-convex n-gon threw a detail plate 420 m out (first build with the rule)."""
+    verts, edges = bm.verts[:], bm.edges[:]
+    if keep:
+        # faces of these material indices stay as they are (vertex-baked occlusion needs their vertices)
+        verts = [v for v in verts if not any(f.material_index in keep for f in v.link_faces)]
+        edges = [e for e in edges if not any(f.material_index in keep for f in e.link_faces)]
+    bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(deg), verts=verts, edges=edges, delimit={"MATERIAL"})
+    bmesh.ops.dissolve_degenerate(bm, dist=1e-5, edges=bm.edges[:])
+    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4], quad_method="BEAUTY",
+                          ngon_method="BEAUTY")
+
+
 def finish(bm, name, coll, bevel, smooth=True):
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
@@ -157,7 +172,10 @@ def box(bm, cx, cy, cz, sx, sy, sz):
     bmesh.ops.translate(bm, vec=(cx, cy, cz), verts=res["verts"])
 
 
-def cyl(bm, cx, cy, cz, r, h, seg=12, axis="Z"):
+def cyl(bm, cx, cy, cz, r, h, seg=None, axis="Z"):
+    if seg is None:
+        # sides by the diameter (triangle budget rule B3): under 50 mm 8, up to 150 mm 12, above 16
+        seg = 8 if 2 * r < 0.05 else (12 if 2 * r <= 0.15 else 16)
     res = bmesh.ops.create_cone(bm, cap_ends=True, segments=seg, radius1=r, radius2=r, depth=h)
     if axis == "X":
         bmesh.ops.rotate(bm, verts=res["verts"], cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi / 2, 3, "Y"))

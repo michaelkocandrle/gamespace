@@ -337,14 +337,12 @@ class Drawer:
         x0, z0, x1, z1 = full.bounds
         pitch, edge, r = kit["bolt_pitch"], kit["bolt_edge"], kit["bolt_d"] / 2
         pts = []
-        x = x0 + edge
-        while x <= x1 - edge + 1e-6:
+        for x in em.bolt_columns(x0, x1, edge, pitch):
             cut = LineString([(x, z0 - 1), (x, z1 + 1)]).intersection(full)
             if not cut.is_empty:
                 b = cut.bounds
                 if b[3] - b[1] > 2 * edge + 0.05:
                     pts += [(x, b[1] + edge), (x, b[3] - edge)]
-            x += pitch
         for p in pts:
             if shp.contains(Point(p)):
                 X, Y = fr.P(*p)
@@ -837,6 +835,10 @@ class Drawer:
             if shp.is_empty or shp.area < 0.02:
                 hidden.append(e.id)
                 continue
+            if self.m.view == "TOP" and e.extra.get("label_cut") is not None:
+                # a roof plate's ID beside its doubler panel and hatch, not under them
+                rest = em.polys_only(shp.difference(e.extra["label_cut"]))
+                shp = rest if not rest.is_empty else shp
             part = em.largest(shp)
             w = (sh.width(e.id, size) + 1.2) / fr.s
             h = size * 1.3 / fr.s
@@ -1624,7 +1626,9 @@ def title_block(sh, m, x, W, sheet="E-01"):
     codes = list(SHEETS)
     cells = [("List", "%s, %d / %d" % (sheet, codes.index(sheet) + 1, len(codes))), ("Revize", m.design["revision"]),
              ("Měřítko", SHEET_SCALE.get(sheet, "1:30")), ("Formát", "A0 na šířku"), ("Datum", "1. 10. 2026"),
-             ("Stav", "SCHVÁLENO, REV. %s" % m.design["revision"])]
+             ("Stav", "SCHVÁLENO, REV. %s" % m.design["revision"]
+              if m.design.get("approved_revision", m.design["revision"]) == m.design["revision"]
+              else "REV. %s KE SCHVÁLENÍ (SCHVÁLENA %s)" % (m.design["revision"], m.design["approved_revision"]))]
     cw = (x1 - x) / 3
     for i, (k, v) in enumerate(cells):
         cx = x + (i % 3) * cw
@@ -1651,7 +1655,10 @@ def title_block(sh, m, x, W, sheet="E-01"):
     sh.t(x + 2, yr - 8.2, "A  1. 10. 2026  vzorový list E-01", 2.4)
     sh.t(x + 85, yr - 8.2, "B  tabulky E-02, schválené změny (✓), listy E-03 až E-08", 2.4)
     sh.t(x + 225, yr - 8.2, "C  schváleno; hřbet R v primárním laku, rám rampy", 2.4)
-    yd = yr - 11
+    if m.design["revision"] == "D":
+        sh.t(x + 2, yr - 11.6, "D  1. 10. 2026  pilot kitu po kritikovi: páteř a profily rámu, panely a poklopy hřbetu, "
+                               "rampa (lišty, práh, pant, styčníky), písty, RCS, pouzdra světel", 2.4)
+    yd = yr - (15 if m.design["revision"] == "D" else 11)
     sh.line([(x, yd), (x1, yd)], 0.25, z=50)
     dg = m.digests
     sh.t(x + 2, yd - 4.2, "Data (sha1): layout %s · hs %s · setup %s · návrh %s · spec %s · knihovna %s" % (

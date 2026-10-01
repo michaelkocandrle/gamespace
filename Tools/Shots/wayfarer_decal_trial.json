@@ -1,0 +1,9 @@
+{
+ "_comment": "Triangle budget step b trial (1. 10. 2026): the bolts of roof plate P-S-RP10 and of the ribs, and its small hatch, as mesh decals. Close on the port roof at x 11.7-12.7 (layout; ship-local x = layout x - 10.25, z = layout z - 1.2) and the default chase view. Run: Tools/Shots.ps1 -Preset wayfarer_decal_trial -Editor -Width 1920 -Height 1080",
+ "shots": [
+  {"name": "warmup", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 4.0, "fov": 40, "camera_local": [0.0, 3.6, 4.6], "look_local": [2.0, 0.8, 1.9], "console": ["space.SunDir -39 45"]},
+  {"name": "trial_close_rl10", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0, "fov": 40, "camera_local": [0.0, 3.6, 4.6], "look_local": [2.0, 0.8, 1.9]},
+  {"name": "trial_close_ribs", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 45, "camera_local": [3.0, 4.5, 3.8], "look_local": [1.8, 1.6, 1.9]},
+  {"name": "trial_chase_rear", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0}
+ ]
+}

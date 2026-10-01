@@ -128,6 +128,20 @@ def test_ship(ship):
     check("%s every material zone used exists" % ship, not bad_mat, ", ".join(bad_mat))
 
     check_views(ship, m, drawings)
+    kit_path = os.path.join(base, "Design", "%s_exterior_kit.json" % ship)
+    if os.path.isfile(kit_path):
+        # the kit layout the Blender kit step builds (Tools/Design/exterior_kit_layout.py) is made from these data,
+        # and it builds exactly the plates of the bands the design marks as built
+        kit = json.load(open(kit_path, encoding="utf-8"))
+        stale = [k for k, v in m.digests.items() if kit["digests"].get(k) != v]
+        check("%s kit layout made from the current data" % ship, not stale,
+              ("run python Tools/Design/exterior_kit_layout.py %s (changed: %s)" % (ship, ", ".join(stale))) if stale else "")
+        built = {e.id for e in m.elements if e.cat == "panel" and e.status == "built"}
+        # a small hatch rendered as mesh decals (recipe exterior_kit.decal_detail) is built as a decal with its ID
+        laid = {p["id"] for p in kit["plates"]} | {d["id"] for d in kit.get("decals", []) if d["id"] in built}
+        check("%s kit layout builds the built plates" % ship, laid == built, diff(laid, built))
+        unknown = sorted({p["id"] for p in kit["plates"] + kit["frame"] + kit["parts"]} - set(m.by_id))
+        check("%s kit layout IDs are in the data" % ship, not unknown, ", ".join(unknown))
     pc = m.views_model.plan_conflicts()
     check("%s roof from above: no part under a plate without a cut-out" % ship, not [c for c in pc if c[1] == "buried"],
           "; ".join("%s %s" % (i, t) for i, k, t in pc if k == "buried"))
@@ -156,7 +170,8 @@ VIEW_SHEETS = {
 # E-07 / E-08 details: the parts each must label (author's list: nose with the canopy, ramp with its pistons and
 # frame, main gear, gun mount; the pod from the side is E-01 detail A)
 DETAIL_KEYS = {"E07_details": {"DB": {"F-CANOPY-FRAME", "Z-SEAL-CANOPY", "Z-B-01", "F-GEAR-NOSE"},
-                               "DC": {"D-T-05", "F-RAMP-PISTON", "F-RAMP-FRAME", "L-RAMP", "P-B-07", "D-HAZARDRAMP"},
+                               "DC": {"D-T-05", "F-RAMP-PISTON", "F-RAMP-FRAME", "L-RAMP", "P-B-07", "F-RAMP-TREAD",
+                                      "F-RAMP-HINGE"},
                                "DF": {"F-POD-BAY", "F-FIN", "P-POD-BODY", "L-STROBE-FIN"}},
                "E08_details": {"DD": {"F-GEAR-MAIN"}, "DD-BOT": {"F-GEAR-MAIN", "D-H-27", "D-H-52"},
                                "DE": {"F-GUNMOUNT-01", "F-GUN-S3"}, "DE-A": {"F-GUNMOUNT-01", "F-GUN-S3", "F-WING"}}}

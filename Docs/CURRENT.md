@@ -3,8 +3,8 @@
 Jediný zdroj **aktuálního** stavu (nad ním jen `CLAUDE.md`), **nejvýš 80 řádků** (autor 30. 9. 2026). Hotové do stavu,
 splněné smaž; podrobnosti do commitu a recenzí (`Docs/Reviews/`), historie do 30. 9. v `Docs/HANDOFF.md` (archiv).
 
-Stav k **1. 10. 2026 večer**: výkresy exteriéru Wayfareru E-01 až E-08 schválené (revize C: hřbet R v primárním
-laku); hlavní session staví exteriérový kit a pilota, druhá session výkresy interiéru a koncepty.
+Stav k **1. 10. 2026 noc**: výkresy Wayfareru E-01 až E-08 schválené (revize C); revize D čeká na schválení s pilotem
+kitu, který po 3 kolech kritika skončil FAIL 6,4 (5,4 → 5,9 → 6,4; recenze 2026-10-01_wayfarer_kit_pilot).
 
 ## Stav
 
@@ -19,6 +19,9 @@ laku); hlavní session staví exteriérový kit a pilota, druhá session výkres
     decaly se šablonami jen u hardwaru, livrej, RCS, podvozek; kokpit v2 (skleněné MFD, hologram lodi, moduly);
   - povrch trupu v3 = **koncept B + C** (autor 1. 10.); data návrhu `Design/Wayfarer_exterior_design.json`, každý
     prvek stavby i návrhu má ID (`Tools/Design/assign_exterior_ids.py`), výkresy z modelu `exterior_model.py`;
+  - pilot kitu (hřbet, ramena, záď, gondoly): desky, rám T, páteř s kovovým hřebenem, rozvody v kanálu u páteře,
+    větrací skříně (hřbet pole 08/12, záď), čísla desek ze znaků `pn_*`; **rozpočet trojúhelníků** schválen (trup
+    ≤ 700 k, `budget` v receptu, `HSBUDGET`, test; skill `ship-pipeline` 3b2b): po kroku b 369 k (dřív 987 k);
   - chase kamera 2800 cm; level: slunce 11 lx, obloha 0,55; průchozí interiér (F vstát / sednout / ven / dovnitř);
   - interiér z kitu: technická chodba s výklenky komponent, přepážky s dveřmi, nákladový prostor (mřížka 8 SCU,
     varianta B; podlaha zatím lodní) a kajuta z obložení trupu s kit podlahou a nábytkem z kitu.
@@ -27,53 +30,49 @@ laku); hlavní session staví exteriérový kit a pilota, druhá session výkres
   ukázka v `TestSpace` (U). Strop 500 + 3500 trojúhelníků na metr (autor 30. 9.; převezme `kit_manifest.json`).
 - **Flotila:** Ship Matrix a dossiery publikované (skill `ship-pipeline` 1b); Delver a Farsight jen jako spec.
 - **Nástroje:** `Tools/Test.ps1`, `Tools/Build.ps1`, CI s offline testy při každém pushi (stav přes veřejné API
-  GitHubu), kritik s prahem `"gate": "step"` / `"ship"`, zámek těžkých zdrojů `Tools/HeavyLock.ps1` (heartbeat
-  5 min, 20 min bez obnovení = volný, hooky Stop/StopFailure/SessionEnd ho uvolní; `CLAUDE.md`), snímky
+  GitHubu), kritik s prahem `"gate": "step"` / `"ship"`, zámek `Tools/HeavyLock.ps1` (`CLAUDE.md`), snímky
   v `D:\gamespace-shots` (`shots:` v recenzích), `Tools/Cleanup.ps1` na konci kroku, Zen DDC v `D:\UnrealDDC`.
 
 ## Paralelní práce
 
 - **Druhá session** (worktree `gamespace-audit`, větev `wayfarer-dossier-interior`): výkresy interiéru (bod 4, styl
-  I-04 schválen 1. 10.) a koncepty (bod 6); ID v `Design/Wayfarer_interior_design.json`, skill `ship-pipeline` 1c.
-  `exterior_*.py` mění jen hlavní session. **Datový commit druhé session** (autor 1. 10.: layout kajuty podle kitu,
-  podpora života posunutá, komentář D-INT-SEC06 v setupu; E-01–E-08 a paluba překreslené): při konfliktu v
-  `Drawings/Wayfarer_E0*` nebo `Design/*.png` vzít kteroukoli stranu a po sloučení překreslit (`draw_exterior_sheet.py`).
-- **Hlavní session:** exteriérový kit a pilot (hřbet, záď s gondolami), kritik s dílčím prahem.
-- Druhá session balí do `Builds_<jméno>` (`BuildDir.ps1`); slučuje hlavní session.
+  I-04 schválen 1. 10.) a koncepty (bod 6); ID v `Design/Wayfarer_interior_design.json`, skill `ship-pipeline` 1c;
+  `exterior_*.py` mění jen hlavní session. 0e7e4d4 sloučen do main 1. 10.; 5894e97 (dveře hygieny, I-04 R1) jen ve
+  větvi. Rozsah 2. 10.: listy I-01 až I-03. Konflikt v `Drawings/*`: kterákoli strana, pak překreslit.
+- **Hlavní session:** exteriérový kit. Druhá session balí do `Builds_<jméno>`; slučuje hlavní session.
 
 ## Čeká na rozhodnutí autora
 
 - Podpora života Wayfareru v2: posunutá k ose, z většiny pod lůžkem (list I-04, řez R1; po sloučení `import_kit.py`).
 - Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověření FAIL 7/6/6/7/7/8/8/7, levné body opravené).
-- Steadfast: schválení 2D návrhu v2 (`ArtSource/Ships/Steadfast/Design/Steadfast_Design.md`).
-- Kanopa Wayfareru jako téma designu v2 (autor ho otevře sám). Paleta Kestrel Dynamics: u první lodi Kestrelu.
+- Steadfast: schválení 2D návrhu v2 (`Steadfast_Design.md`). Kanopa Wayfareru jako téma designu v2 (autor otevře
+  sám); paleta Kestrel Dynamics u první lodi Kestrelu.
 
 ## Známé problémy
 
-- Exteriér Wayfareru (kritik 30. 9. FAIL 4,4): detail, materiály, trysky, světla, záď, podvozek, křídla a zbraně
-  čekají na nový povrch trupu. Loď na svahu leží trupem v terénu (odblokované rozdělením pawnu).
+- Exteriér Wayfareru mimo pilot (podvozek, křídla, zbraně) čeká na kit celé lodi. Loď na svahu leží trupem v terénu.
 - `DebugEngageQuantum` po zadání cíle jménem znovu vybírá cíl podle nosu lodi (drobnost, autor 1. 10.).
-- Interiér Wayfareru, otevřené body recenzí: kajuta (`2026-09-30_cabin_furniture.md`: panel a sedák výdejníku,
-  žebrování gumových pruhů, čočka lampičky, potrubí ventilátoru buňky) a obložení (`2026-09-30_cabin_liner.md`:
-  svítidlo A, třmeny a patky zábradlí, nouzové značení, rám kolem zadních dveří).
+- Interiér Wayfareru: otevřené body recenzí `2026-09-30_cabin_furniture.md` a `2026-09-30_cabin_liner.md`.
 - **Odrazy kovu odložené na optimalizaci** (autor 30. 9.): odrazy Lumenu do drsnosti 0,32 za +1,3 ms.
 - Kit: vyšlapaná linie potřebuje směrovou buňku atlasu špíny; ohmatání madel; lišty stropu po segmentech.
-- **Determinismus stavby, na později** (autor 1. 10.): otisk souboru opraven (množina v nastavení exportu, WORKFLOW
-  9.6 ff), šum zůstává v trupu, decalech a interiéru (±40 trojúhelníků mezi běhy; 3 FBX při každé přestavbě) a import
-  pokaždé znovu uloží ~150 materiálů a textur. Klíče `id` v receptu a setupu stavbu nemění (ověřeno 1. 10.).
-- Hřebenový terén (`RidgedOctaves`) vypnutý: kamera po přistání pod zemí, díry u okraje Veyry; kameny bez kolize.
-- Quantum tunel: stěny méně „mléčné“ než reference; TSR kreslí tmavé čáry podél jisker, ohony bývají tečkované.
-- Displeje: render target bez mipmap (pod ~1600 px šířky písmo zrní); duchy čísel při afterburneru.
-- Loď bez podvozku u země stojí na neviditelném kořenovém boxu (končí u patek); řeší se, jen když to bude vadit.
-- Zvuky jsou procedurální zástupci; jas oblohy je odhad; obloha v atmosféře nerozlišuje den a noc.
-- Neověřeno autorem ve hře: časování quantum skoku, HUD SC-1c mimo 1080p, chůze interiérem Steadfastu. Shipping
-  build nikdy nezkoušen; v PIE Escape ukončí hru (menu je F10); debug HUD je anglicky.
-- `compileall` hlásí `SyntaxWarning: invalid escape sequence` v docstringách šesti skriptů `Tools/Assets`.
+- **Determinismus stavby na později** (WORKFLOW 9.6 ff): šum ±40 trojúhelníků, 3 FBX, import ukládá ~150 assetů.
+- Hřebenový terén vypnutý (kamera po přistání pod zemí); kameny bez kolize. Quantum tunel méně „mléčný“, TSR
+  čáry podél jisker; displeje bez mipmap (pod ~1600 px písmo zrní), duchy čísel.
+- Loď bez podvozku u země stojí na neviditelném kořenovém boxu (řeší se, až bude vadit). Zvuky jsou procedurální
+  zástupci; jas oblohy je odhad; obloha v atmosféře nerozlišuje den a noc (soumrak a noc jen v presetu snímků).
+- Neověřeno autorem: časování quantum skoku, HUD SC-1c mimo 1080p, chůze Steadfastem; Shipping build nezkoušen; v PIE
+  Escape ukončí hru (menu F10); debug HUD anglicky; `compileall` SyntaxWarning v šesti skriptech `Tools/Assets`.
 
 ## Další kroky
 
-1. **Wayfarer:** exteriérový kit (díly XK-*) a pilot na hřbetu a zádi s gondolami podle výkresů E-01 až E-08,
-   kritik s dílčím prahem; pak kit na celou loď. Druhá session: body 4 a 6 dossieru (viz Paralelní práce).
+1. **Wayfarer – pilot kitu, kroky c → e** (autor 1. 10.; každý krok vlastní session, pak CURRENT, Cleanup, `/clear`;
+   do hlavní session jen výřezy; recenze `2026-10-01_wayfarer_triangle_budget.md` a `…_kit_pilot.md`). Kroky a, b
+   hotové (trup 369 k; šrouby, západky a poklopy jako decaly; varianta 2 poklopů jen nabídnutá, rozhodne autor).
+   Paralelní session I-01–I-09 (bez Unrealu / Blenderu / balení) smí běžet. **c)** pásy S a AFT jako desky na rámu: sekundární lak světlejší a drsnější, na S panely, poklopy, čísla; záď na
+   desky na rámu; výřezy autorovi, **revize D výkresů neschválená, dokud ji autor neschválí**. **d)** trysky 2× (80 k):
+   kužel s hrdlem, středové těleso, žebra, táhla, prstence, emisivní jádro; přepracovat gondoly (140 k / 60 k).
+   Po c + d jedno ověřovací kolo kritika (Opus, `step`); pilot hotový až PASS. **e)** jen analýza: červené poziční
+   světlo, noc (proč se trup neztmaví). Pak teprve kit na celou loď; nic jiného nezačínat.
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.

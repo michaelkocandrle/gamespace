@@ -4,11 +4,11 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "c10dc8f0b500",
-  "recipe": "00a16c39374f",
-  "setup": "106bef5f42f7",
+  "recipe": "7df4191b67e1",
+  "setup": "edd157c448e4",
   "spec": "d9597dfcd605",
-  "design": "92bce59434a3",
-  "library": "0f3a67cf7c68"
+  "design": "c08da5218170",
+  "library": "3ed0bfdbff37"
  },
  "drawn": {
   "DB": [
@@ -38,22 +38,19 @@
    "Z-SEAL-CANOPY"
   ],
   "DC": [
-   "D-H-01",
    "D-H-30",
-   "D-H-31",
    "D-H-32",
    "D-H-33",
-   "D-H-34",
-   "D-H-35",
    "D-H-54",
-   "D-HAZARDRAMP",
+   "D-H-62",
    "D-T-05",
    "F-GEAR-MAIN",
    "F-GEAR-NOSE",
    "F-RAMP-FRAME",
+   "F-RAMP-HINGE",
    "F-RAMP-PISTON",
-   "F-RCS-10",
-   "F-RCS-11",
+   "F-RAMP-TREAD",
+   "F-VENT-AFT",
    "F-WING",
    "L-RAMP",
    "P-B-07",
@@ -132,22 +129,19 @@
    "Z-SEAL-CANOPY"
   ],
   "DC": [
-   "D-H-01",
    "D-H-30",
-   "D-H-31",
    "D-H-32",
    "D-H-33",
-   "D-H-34",
-   "D-H-35",
    "D-H-54",
-   "D-HAZARDRAMP",
+   "D-H-62",
    "D-T-05",
    "F-GEAR-MAIN",
    "F-GEAR-NOSE",
    "F-RAMP-FRAME",
+   "F-RAMP-HINGE",
    "F-RAMP-PISTON",
-   "F-RCS-10",
-   "F-RCS-11",
+   "F-RAMP-TREAD",
+   "F-VENT-AFT",
    "F-WING",
    "L-RAMP",
    "P-B-07",
@@ -200,6 +194,7 @@
  },
  "schedules": {
   "materials": [
+   "MZ-CHANNEL",
    "MZ-DARK",
    "MZ-GLASS",
    "MZ-GUNMETAL",

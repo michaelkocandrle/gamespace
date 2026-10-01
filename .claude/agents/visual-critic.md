@@ -2,7 +2,7 @@
 name: visual-critic
 description: Independent, strict visual critic for gamespace. Compares rendered/in-game results with reference images (compare sheets from Tools/Review/make_compare_sheet.py) and lists everything that does not match Star Citizen quality. Use before every handover of visual work to the author. Give it ONLY the brief file (goal, style, checklist) and the sheet images - never the work process, time spent, intentions or your own opinion.
 tools: Read, Glob, Grep
-model: fable
+model: opus
 effort: max
 color: red
 ---

@@ -303,8 +303,8 @@ autor: „tohle není dost dobré“). Exteriér se proto staví přímo z obrys
 reference stylu.
 
 ```bash
-MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/hs_build_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
-MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend --python Tools/Blender/hs_assemble_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
+MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python-exit-code 1 --python Tools/Blender/hs_build_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
+MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend --python-exit-code 1 --python Tools/Blender/hs_assemble_ship.py -- ArtSource/Ships/<Loď>/HardSurface/<Loď>_hs.json
 # pak gamespace_ship_export.py na <Loď>_HS_Game.blend a import_ship.py jako obvykle
 ```
 - **Výkres:** každý obrys v `exterior` má `part`, který ho spojuje přes pohledy. Díl chybějící v pohledu si ho může
@@ -324,6 +324,74 @@ MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend -
 - **Assemble:** `groups` (Canopy, Gear), `offset` (layout → střed), `collision` a `sockets` v souřadnicích layoutu,
   `greeble_material`. Instance kitu se před převodem realizují, jinak se detaily neexportují.
 - **Materiály v setupu:** slot na zónu, master `hull` s barvou (lineární), sklo `glass`, emise `_Emissive`.
+
+## 3b2b. Exteriérový kit ze schválených výkresů (autor 1. 10. 2026)
+
+Kit se staví z modelu výkresu, ne ručně: co je na výkresu, to je na lodi.
+```bash
+python Tools/Design/exterior_kit_layout.py <Loď> [--region pilot]   # -> Design/<Loď>_exterior_kit.json (generované)
+# recept: "exterior_kit": {"layout": "ArtSource/Ships/<Loď>/Design/<Loď>_exterior_kit.json"}; pak stavba jako v 3b2
+```
+- **Rozvrh** (`exterior_kit_layout.py`): desky a rám jako obrysy v rovině pohledu (SB x, z pro boční pásy, zrcadlené
+  na levobok; TOP x, y pro hřbet; AFT y, z pro zadní stěnu) s výřezy, tloušťkou z kitu (XK-PLATE 30 mm, XK-PLATE-H
+  40 mm, rám 15–20 mm), body šroubů a filtrem normál ploch; díly (XK-RCS, XK-STROBE, XK-LANDLIGHT, XK-PISTON) s polohou.
+  Oblast `pilot` = hřbet, ramena, záď, gondoly. Test výkresu hlídá, že rozvrh je z aktuálních dat a staví přesně
+  postavené pásy (`panels.built_bands`).
+- **Stavba** (`Tools/Blender/hs_exterior_kit.py`, z `hs_build_ship` po vrstvě detailu, před světly, greeblemi
+  a decaly): plochy trupu pod obrysem se přesně ořežou (bisect rovinami hran obrysu ve směru pohledu), zkopírují,
+  vytáhnou ven o tloušťku a zkosí; každá deska je vlastní objekt (vlastní tón panelu přes `part_obj` → UV1); plášť
+  pod deskami a rámem dostane slot `Channel` (dno kanálu: tmavší a hrubší než gunmetal rám, se špínou); záblesková
+  světla mají slot `Strobe` (hra ho bliká 0,06 s, mezi záblesky je tma), proto má pouzdro i stálé poziční světlo
+  (`PosWhite`, `LightRed`, `LightGreen`); pracovní světlo rampy přidá reflektor do `hs_lights`.
+- **Hierarchie povrchu** (kritik pilotu, kolo 1: „kachlíkovaná střecha“, „rám je plochá výplň“): rám má profil T
+  (kit `cap_w`/`cap_h` = stojina, `bolt_pitch` = řady šroubů po obou stranách stojiny; `profile()` v rozvrhu), páteř
+  je široká (XK-SPINE 280 mm proti žebrům 80 mm), na deskách hřbetu jsou přídavné panely XK-DOUBLER a malé poklopy
+  XK-HATCH v rovině desky se spárou (`panels.roof.sub`; `Views.roof_subs` je umístí 70 mm od hran a výřezů, posune
+  po poli, jinak vynechá; ID `P-S-R<strana><pole>-D / -H`). Šrouby desek se rozkládají rovnoměrně
+  (`em.bolt_columns`, stejně výkres i rozvrh).
+- **Střední vrstva** (kritik pilotu, kolo 2): rozvody XK-CONDUIT (`F-CONDUIT`, `on: roof`) leží v servisním kanálu
+  mezi páteří a deskami (`roof.spine_gap` 0,34 = půl páteře 0,14 + kanál 0,2 m): trubky podle `pipes` (y od osy,
+  Ø, materiál), spodek `lift` nad pláštěm (nad žebry), objímky po `clamp_pitch` mimo žebra, na koncích úseku do pláště
+  s přírubou; úseky = půdorys rozvodů minus výřezy (`exterior_views.conduit_runs`). Rozvody nevyřezávají desky ani
+  páteř (`roof_hardware` je vynechá). Větrací skříně XK-VENTBOX: na hřbetu místo čtvercového panelu v `sub.vent_bays`
+  (ID `-V`), na zádi `F-VENT-AFT` (`on: aft`); staví se jako tři desky (skříň s otvorem, tmavé dno, lamely;
+  `vent_entries` v rozvrhu). Hřeben páteře z holého kovu (`cap_material` v kitu → `cap.material` v rozvrhu).
+- **Čísla desek** (pravidlo D-R-PANEL-NUMBERS, `exterior_kit_layout.panel_numbers` → klíč `decals` rozvrhu →
+  `hs_decals.build` → `Placer.text`): text složený z jednoznakových položek `pn_<znak>` v jednom rámu (položka na
+  číslo se do atlasu 2 m nevešla: „decal sheet full“). Ramena: dolní zadní roh, paprsek šikmo dolů dovnitř (`ray`,
+  rameno je skloněné ~45°, `side` by decal zahodil na kontrole normály); hřbet: u zadní hrany mezi pásem panelů
+  a poklopů, posune se dopředu mimo výřezy, jinak vynechá.
+- **Rozpočet trojúhelníků trupu** (autor 1. 10. 2026, schváleno; `Docs/Reviews/2026-10-01_wayfarer_triangle_budget.md`):
+  trup `SM_Ship_<Loď>` ≤ 700 k (varování nad 700 k, chyba nad 1 M = limit exportéru); rozpočet po částech
+  v `<Loď>_hs.json` → `budget` (`parts`: jméno, `max`, regulární výrazy jmen zdrojových objektů, první shoda vyhrává,
+  zbytek `other` z rezervy). `hs_assemble_ship` vypíše `HSBUDGET` a zapíše `Export/<Loď>_budget.json`,
+  `Tools/Tests/test_triangle_budget.py` ho porovná. **Geometrie jen pro velkou a střední vrstvu** (plášť, desky, rám,
+  rozvody, skříně, RCS, hydraulika, trysky, podvozek, zbraně); **šrouby, západky, malé poklopy pod 0,4 m, mřížky
+  pod 0,3 m a panelové spáry jsou decaly** s normálou a AO z atlasu. Plochy zkopírované z trupu (desky, rám, desky
+  detailu) i loft trupu se před solidify a zkosením slučují v rovině (`dissolve_limit` 1°, odděleně podle materiálu;
+  `hs_exterior_kit.dissolve_planar`, `hs_build_ship.finish(dissolve=)`); zkosení 1 segment se zpevněnými normálami
+  (`harden_normals` + weighted normals), 2 segmenty jen u křivek viditelných z chase kamery (prstence gondol, ústí
+  trysek); válce podle průměru 8 / 12 / 16 stěn (pod 50 mm, do 150 mm, nad; `hs_exterior_kit.seg_for`,
+  `hs_build_part.cyl`). Spáry loftu pod rámem kitu se nestaví (`hs_exterior_kit.frame_cover` → `loft(covered=)`).
+  Hlavní žrout nebyly šrouby (4 %), ale modifikátory na hustých kopiích ploch trupu (rám 16 k → 176 k).
+- **Drobný detail kitu jako decaly** (recept `exterior_kit.decal_detail.scope`: seznam ID nebo `"all"`): rozvrh
+  označí šrouby `bolts_as: decal` (`bolt_kit`, `bolt_kit_frame` – typ info s vlastní kovovou barvou, strukturní brával
+  barvu desky) a poklop XK-HATCH nestaví (deska bez díry, `hatch_small` × 1,3 + dvě `latch_kit`); stavba předá body
+  šroubů přes `hs_kit_decals`, `hs_decals` je položí jako rovné čtverce (kontrola hran by je na 25mm pásnici zahodila).
+  Decaly kitu (`kit_*`) nedostávají doprovody pravidla „companions“; `kit_check` → `Export/<Loď>_decals.json`,
+  `test_kit_decals.py`. Data a výkresy beze změny; poklop jako decal se v testu výkresu počítá jako postavený.
+- **Záď z kitu:** rám rampy XK-RAMPFRAME (50 mm, šrouby, styčníky `ramp_gussets`), nášlapné lišty a pryžový práh
+  XK-TREAD na dveřích (stojí na desce P-B-07: tloušťka = deska + lišta), pant XK-HINGE, písty XK-PISTON s vidlicovými
+  držáky a hadicí (patka na stěně, hlava na čele rámu).
+- **Zrcadlové páry** (_L / _R) mají jednu identitu panelu (`hs_assemble_ship`): jinak mohla jedna kopie vyjít jako
+  holý kov a symetrické desky četly jako dva materiály.
+- **Uplatnění návrhu:** co kit postaví, se odebere z receptu (desky P-B, bloky RCS, které nahrazuje), změny se
+  zapíšou do receptu (`"kit"` u funkčního prvku, `"paint2"` u materiálu skříně ploutve, tmavý inkoust nápisů)
+  a z `changes` návrhu zmizí; postavené prvky návrhu mají `"status": "built"`. Funkční prvek s klíčem `"kit"`
+  `hs_functional` přeskočí.
+- **Náhled v Blenderu** (Eevee) ukáže decaly a karty špíny jako bílé plochy (bez textur a průhlednosti): klín
+  přes hřbet v náhledu není geometrie. Rozhoduje snímek z Unrealu.
+- Livery A (grafitové sedlo nad `TopZ`) je od 1. 10. 2026 vypnutá (`TopZ` 9999): hřbet v primárním laku.
 
 ## 3b3. Vrstvy detailu podle SC: decaly, trim sheet, mesh decaly v UE (autor 24. 9. 2026)
 
@@ -535,8 +603,8 @@ Interior, Kitbash; `.blend/.glb/.fbx/.png` přes Git LFS, `*.blend1` ignorované
 
 ```bash
 cd ArtSource/Ships/<Loď>      # z kořene repozitáře (i ve worktree), kvůli //Export
-MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_HS_Game.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export" --validate-only
-MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_HS_Game.blend --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
+MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_HS_Game.blend --python-exit-code 1 --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export" --validate-only
+MSYS_NO_PATHCONV=1 "$BL" -b <Loď>_HS_Game.blend --python-exit-code 1 --python ../../../Tools/Blender/gamespace_ship_export.py -- --out "//Export"
 # bez Blenderu i Unrealu:
 python Tools/Blender/gamespace_ship_export.py --check-manifest ArtSource/Ships/<Loď>/Export/<Loď>_manifest.json
 python Tools/Assets/import_ship.py ArtSource/Ships/<Loď>/Export/<Loď>_manifest.json   # jen vypíše plán

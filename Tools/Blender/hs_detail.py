@@ -205,6 +205,8 @@ def hull_plates(hull, specs, coll, mats, bevel):
                 continue
             keep = set(faces)
             bmesh.ops.delete(src, geom=[f for f in src.faces if f not in keep], context="FACES")
+            # coplanar faces merged before solidify and bevel (triangle budget rule B1, 1. 10. 2026)
+            hp.planar_merge(src)
             bm = src
             name = "SM_Ship_Detail_Plate_%d%s" % (i, "" if not side else ("_L" if side > 0 else "_R"))
             me = bpy.data.meshes.new(name)
@@ -217,7 +219,8 @@ def hull_plates(hull, specs, coll, mats, bevel):
                 poly.material_index = 0
             ob.data.shade_smooth()
             sol = ob.modifiers.new("Solidify", "SOLIDIFY")
-            sol.thickness, sol.offset, sol.use_even_offset = reg.get("t", 0.03), 1.0, True
+            # no even thickness: on the merged faces (triangle budget B1) it threw a long plate's vertex 15 m out
+            sol.thickness, sol.offset, sol.use_even_offset = reg.get("t", 0.03), 1.0, False
             hp.add_modifiers(ob, bevel, width=reg.get("bevel", 0.006))
             ob.data.materials.append(mats[reg.get("material", "paint")])
             tag_paint2(ob, 1 if reg.get("secondary") else 0)

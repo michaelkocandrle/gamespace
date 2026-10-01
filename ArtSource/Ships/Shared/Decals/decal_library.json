@@ -497,7 +497,7 @@
      0.26,
      0.2
     ],
-    "purpose": "small inspection hatch",
+    "purpose": "small inspection hatch; seam 6 mm wide and 10 mm deep, the panel 0.8 mm proud with roughness 0.62 (step b, author 1. 10. 2026: the kit hatch as a decal reads by its gloss from the chase camera)",
     "tags": [
      "hatch"
     ],
@@ -509,9 +509,9 @@
       ],
       "size": [
        0.24,
-       0.004
+       0.006
       ],
-      "depth": 0.004
+      "depth": 0.01
      },
      {
       "at": [
@@ -520,9 +520,9 @@
       ],
       "size": [
        0.24,
-       0.004
+       0.006
       ],
-      "depth": 0.004
+      "depth": 0.01
      },
      {
       "at": [
@@ -530,10 +530,10 @@
        0
       ],
       "size": [
-       0.004,
+       0.006,
        0.17
       ],
-      "depth": 0.004
+      "depth": 0.01
      },
      {
       "at": [
@@ -541,16 +541,31 @@
        0
       ],
       "size": [
-       0.004,
+       0.006,
        0.17
       ],
-      "depth": 0.004
+      "depth": 0.01
      }
     ],
     "corner_screws": {
      "inset": 0.022,
      "r": 0.005
-    }
+    },
+    "parts": [
+     {
+      "kind": "box",
+      "at": [
+       0,
+       0
+      ],
+      "size": [
+       0.228,
+       0.158
+      ],
+      "h": 0.0008,
+      "rough": 0.62
+     }
+    ]
    },
    {
     "name": "recessed_panel",
@@ -6038,6 +6053,588 @@
        0.075
       ],
       "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_R",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph 'R' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "R",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_L",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph 'L' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "L",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_P",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph 'P' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "P",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_S",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph 'S' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "S",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_0",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '0' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "0",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_1",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '1' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "1",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_2",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '2' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "2",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_3",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '3' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "3",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_4",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '4' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "4",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_5",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '5' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "5",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_6",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '6' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "6",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_7",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '7' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "7",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_8",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '8' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "8",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_9",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '9' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "9",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "bolt_kit",
+    "type": "info",
+    "footprint": [
+     0.05,
+     0.05
+    ],
+    "append": "kit decals 1. 10. 2026",
+    "tags": [
+     "bolts"
+    ],
+    "purpose": "exterior kit plate bolt (XK-PLATE, XK-DOUBLER, spine; triangle budget rule A): hex Ø 20 with a washer, taller than 'bolt' for a stronger normal and AO from the chase camera; own dark metal colour (info type, step b trial: as a structural decal it took the white plate colour and read weaker than the metal bolt geometry)",
+    "parts": [
+     {
+      "kind": "cyl",
+      "at": [
+       0,
+       0
+      ],
+      "r": 0.017,
+      "h": 0.004,
+      "color": [
+       0.16,
+       0.165,
+       0.175
+      ]
+     },
+     {
+      "kind": "hex",
+      "at": [
+       0,
+       0
+      ],
+      "r": 0.011,
+      "h": 0.011,
+      "z": 0.004,
+      "color": [
+       0.3,
+       0.3,
+       0.32
+      ]
+     }
+    ]
+   },
+   {
+    "name": "bolt_kit_frame",
+    "type": "info",
+    "footprint": [
+     0.04,
+     0.04
+    ],
+    "append": "kit decals 1. 10. 2026",
+    "tags": [
+     "bolts"
+    ],
+    "purpose": "exterior kit frame bolt ('šroub rámu': ribs and longerons, rows at 250 mm placed bolt by bolt from the data): hex Ø 18 with a washer; own dark metal colour (info type, step b trial: as a structural decal it took the white plate colour and read weaker than the metal bolt geometry)",
+    "parts": [
+     {
+      "kind": "cyl",
+      "at": [
+       0,
+       0
+      ],
+      "r": 0.014,
+      "h": 0.004,
+      "color": [
+       0.16,
+       0.165,
+       0.175
+      ]
+     },
+     {
+      "kind": "hex",
+      "at": [
+       0,
+       0
+      ],
+      "r": 0.009,
+      "h": 0.01,
+      "z": 0.004,
+      "color": [
+       0.3,
+       0.3,
+       0.32
+      ]
+     }
+    ]
+   },
+   {
+    "name": "latch_kit",
+    "type": "info",
+    "footprint": [
+     0.07,
+     0.04
+    ],
+    "append": "kit decals 1. 10. 2026",
+    "tags": [
+     "latch"
+    ],
+    "purpose": "XK-HATCH latch 60 x 30 mm in a recess (the small hatch as a decal: hatch_small at scale 1.3 + two latches); own dark colour (step b)",
+    "recesses": [
+     {
+      "at": [
+       0,
+       0
+      ],
+      "size": [
+       0.064,
+       0.034
+      ],
+      "depth": 0.006
+     }
+    ],
+    "parts": [
+     {
+      "kind": "box",
+      "at": [
+       0,
+       0
+      ],
+      "size": [
+       0.052,
+       0.024
+      ],
+      "h": 0.008,
+      "z": -0.006,
+      "color": [
+       0.045,
+       0.047,
+       0.052
+      ]
      }
     ]
    }

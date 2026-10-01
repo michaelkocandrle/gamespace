@@ -3,20 +3,20 @@
  "sheet": "I-04",
  "ship": "Wayfarer",
  "room": "cabin",
- "section_x": 13.7,
+ "section_x": 12.5,
  "digests": {
   "layout": "9ed16b60fbcc",
   "interior": "37c119fe0110",
   "setup": "bd0224ab21cc",
-  "lights": "f296ed8e09b3",
-  "design": "3a36da54f498",
-  "kit": "c8f141a12540",
+  "lights": "42d84eb0e486",
+  "design": "130558df41af",
+  "kit": "8bccd87d886c",
   "library": "c95a719c8c3e",
   "light_rules": "788f180917fd"
  },
  "geometry": {
-  "SM_Ship_Wayfarer.fbx": "de2ff54ffc3d",
-  "SM_Ship_Wayfarer_Interior.fbx": "9d51757db46e",
+  "SM_Ship_Wayfarer.fbx": "abd9bc5ba701",
+  "SM_Ship_Wayfarer_Interior.fbx": "f12fb389dfb4",
   "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
   "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",
   "SM_Kit_Bulkhead_Door00L41_C.fbx": "f9b4f693887f",
@@ -34,7 +34,7 @@
   "SM_Kit_Floor_Plate12W_A.fbx": "3c1c37e452a1",
   "SM_Kit_Furniture_Bunk21L_A.fbx": "2da233450b4e",
   "SM_Kit_Furniture_Food16L_A.fbx": "d53b0199e80a",
-  "SM_Kit_Furniture_Hygiene15L_A.fbx": "1465fff4e498",
+  "SM_Kit_Furniture_Hygiene15L_A.fbx": "1dc010870b4f",
   "SM_Kit_Furniture_Locker10L_A.fbx": "6dd14a4712d7",
   "SM_Kit_Wall_ComponentBay06W_B.fbx": "7e19b0b40b85",
   "SM_Kit_Wall_ComponentBay12W_A.fbx": "f3cdad016e5d",
@@ -129,7 +129,7 @@
    "CAB-B-F/st_service",
    "D-INT-COCKPITSTAIRS",
    "DR-CAB-CPT",
-   "L-FIX-15"
+   "L-FIX-17"
   ],
   "EL-R": [
    "CAB-U-GALLEY",
@@ -178,23 +178,12 @@
    "DR-TEC-CAB"
   ],
   "SEC": [
-   "CAB-C-3",
-   "CAB-FL-3",
+   "CAB-C-2",
+   "CAB-FL-2",
    "CAB-M-LIFESUP",
-   "CAB-U-BUNK",
-   "CAB-U-GALLEY",
-   "CAB-W-L3",
-   "CAB-W-R3"
-  ],
-  "DET-A": [
-   "CAB-C-4",
-   "CAB-W-R4",
-   "CAB-W-R4/Cove_0",
-   "CAB-W-R4/Wash_0"
-  ],
-  "DET-B": [
    "CAB-U-HYGIENE",
-   "DR-CAB-HYG"
+   "CAB-W-L2",
+   "CAB-W-R2"
   ]
  },
  "labelled": {
@@ -244,13 +233,12 @@
    "CAB-C-4/Linear_0"
   ],
   "SEC": [
-   "CAB-C-3",
-   "CAB-FL-3",
+   "CAB-C-2",
+   "CAB-FL-2",
    "CAB-M-LIFESUP",
-   "CAB-U-BUNK",
-   "CAB-U-GALLEY",
-   "CAB-W-L3",
-   "CAB-W-R3"
+   "CAB-U-HYGIENE",
+   "CAB-W-L2",
+   "CAB-W-R2"
   ],
   "EL-L": [
    "CAB-U-BUNK",
@@ -288,7 +276,7 @@
    "CAB-B-F/st_service",
    "D-INT-COCKPITSTAIRS",
    "DR-CAB-CPT",
-   "L-FIX-15"
+   "L-FIX-17"
   ],
   "EL-R": [
    "CAB-U-GALLEY",
@@ -335,16 +323,6 @@
    "CAB-B-A/st_service",
    "D-INT-QUARTERS",
    "DR-TEC-CAB"
-  ],
-  "DET-A": [
-   "CAB-C-4",
-   "CAB-W-R4",
-   "CAB-W-R4/Cove_0",
-   "CAB-W-R4/Wash_0"
-  ],
-  "DET-B": [
-   "CAB-U-HYGIENE",
-   "DR-CAB-HYG"
   ]
  },
  "schedules": {
@@ -422,7 +400,7 @@
    "CAB-W-R4/Wash_0",
    "CAB-W-R5/Cove_0",
    "CAB-W-R5/Wash_0",
-   "L-FIX-15"
+   "L-FIX-17"
   ],
   "decals": [
    "CAB-B-A/hazard_stripe",
@@ -499,6 +477,10 @@
   ]
  },
  "checks": [
+  [
+   "DR-CAB-HYG",
+   "kit (Furniture_Hygiene15L_A) kreslí výstražný pruh a madlo na zadní hraně křídla, ale těsnění u zadní zárubně – jedno z nich je opačně; výkres bere směr otevírání podle pruhu a madla (k přídi)"
+  ],
   [
    "CAB-M-LIFESUP",
    "Podpora života S1: jednotka nepostavena (layout v2: posunutá dovnitř, aby se vešla do trupu); ve hře sání v podstavci lůžka a zpětné sání v CAB-W-L1"

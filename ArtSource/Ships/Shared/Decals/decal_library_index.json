@@ -227,7 +227,7 @@
     0.26,
     0.2
    ],
-   "purpose": "small inspection hatch",
+   "purpose": "small inspection hatch; seam 6 mm wide and 10 mm deep, the panel 0.8 mm proud with roughness 0.62 (step b, author 1. 10. 2026: the kit hatch as a decal reads by its gloss from the chase camera)",
    "type": "structural",
    "has_color": false,
    "tags": [
@@ -2455,6 +2455,312 @@
    "has_color": true,
    "tags": [
     "ext_stencil"
+   ]
+  },
+  "pn_R": {
+   "uv": [
+    0.5136000000000001,
+    0.01889999999999989,
+    0.5256000000000001,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph 'R' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_L": {
+   "uv": [
+    0.5356000000000001,
+    0.01889999999999989,
+    0.5476000000000001,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph 'L' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_P": {
+   "uv": [
+    0.5576000000000001,
+    0.01889999999999989,
+    0.5696000000000001,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph 'P' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_S": {
+   "uv": [
+    0.5796000000000001,
+    0.01889999999999989,
+    0.5916000000000001,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph 'S' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_0": {
+   "uv": [
+    0.6016000000000001,
+    0.01889999999999989,
+    0.6136000000000001,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph '0' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_1": {
+   "uv": [
+    0.6236000000000002,
+    0.01889999999999989,
+    0.6356000000000002,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph '1' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_2": {
+   "uv": [
+    0.6456000000000002,
+    0.01889999999999989,
+    0.6576000000000002,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph '2' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_3": {
+   "uv": [
+    0.6676000000000002,
+    0.01889999999999989,
+    0.6796000000000002,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph '3' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_4": {
+   "uv": [
+    0.6896000000000002,
+    0.01889999999999989,
+    0.7016000000000002,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph '4' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_5": {
+   "uv": [
+    0.7116000000000002,
+    0.01889999999999989,
+    0.7236000000000002,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph '5' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_6": {
+   "uv": [
+    0.7336000000000003,
+    0.01889999999999989,
+    0.7456000000000003,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph '6' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_7": {
+   "uv": [
+    0.7556000000000003,
+    0.01889999999999989,
+    0.7676000000000003,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph '7' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_8": {
+   "uv": [
+    0.7776000000000003,
+    0.01889999999999989,
+    0.7896000000000003,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph '8' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_9": {
+   "uv": [
+    0.7996000000000003,
+    0.01889999999999989,
+    0.8116000000000003,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph '9' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "bolt_kit": {
+   "uv": [
+    0.8216000000000003,
+    0.016899999999999887,
+    0.8466000000000002,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.05,
+    0.05
+   ],
+   "purpose": "exterior kit plate bolt (XK-PLATE, XK-DOUBLER, spine; triangle budget rule A): hex Ø 20 with a washer, taller than 'bolt' for a stronger normal and AO from the chase camera; own dark metal colour (info type, step b trial: as a structural decal it took the white plate colour and read weaker than the metal bolt geometry)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "bolts"
+   ]
+  },
+  "bolt_kit_frame": {
+   "uv": [
+    0.8566000000000004,
+    0.021899999999999885,
+    0.8766000000000004,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.04,
+    0.04
+   ],
+   "purpose": "exterior kit frame bolt ('šroub rámu': ribs and longerons, rows at 250 mm placed bolt by bolt from the data): hex Ø 18 with a washer; own dark metal colour (info type, step b trial: as a structural decal it took the white plate colour and read weaker than the metal bolt geometry)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "bolts"
+   ]
+  },
+  "latch_kit": {
+   "uv": [
+    0.8866000000000004,
+    0.021899999999999885,
+    0.9216000000000003,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.07,
+    0.04
+   ],
+   "purpose": "XK-HATCH latch 60 x 30 mm in a recess (the small hatch as a decal: hatch_small at scale 1.3 + two latches); own dark colour (step b)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "latch"
    ]
   }
  },
