@@ -31,12 +31,21 @@ rozhodnutí = úprava tohoto souboru ve stejném commitu, s datem a důvodem.
   `DeltaSeconds` (frame-driven). Pevný krok (akumulátor, např. 120 Hz, interpolace prezentace) se zavede před
   multiplayerem, replay/determinismem, nebo když test ukáže výsledek závislý na snímkové frekvenci (stejný
   scénář při 30 a 120 FPS dá jiné přistání nebo kolizi). Hra je zatím pro jednoho hráče, proto ne teď.
-- **Rozdělení `ASpaceshipPawn`** (~6 000 řádků): postupná extrakce komponent po jedné, každá se zelenými testy,
-  žádný rewrite. Plán a pořadí: `Docs/Reviews/2026-09-30_spaceshippawn_split_plan.md` (čeká na schválení).
-  Pravidla: tuning UPROPERTY zůstávají na pawnu (override v BP a klíče setupu), stav jde do komponent, API pro
-  Python a jiné třídy zůstává na pawnu jako přeposílač, pořadí Ticku řídí pawn, komponenty bez vlastního ticku.
-- **Testovací API na pawnu** (`Debug*` UFUNCTION) je záměr: testy řídí let bez vstupu. Při rozdělení se přesune
-  do vlastní komponenty, testy o pohodlí nepřijdou.
+- **`ASpaceshipPawn` je rozdělený** (1. 10. 2026, `Docs/Reviews/2026-09-30_spaceshippawn_split_plan.md`, rozpis
+  souborů v `README.md` „Code layout“): čistá matematika ve `FShipFlightModel`, stav a pravidla v komponentách
+  `UShipSystemsComponent`, `UShipQuantumComponent`, `UShipLandingComponent`, `UShipPresentationComponent`,
+  `UShipBoardingComponent`, `UShipInputComponent`. Pravidla: tuning UPROPERTY zůstávají na pawnu (override v BP
+  a klíče setupu), stav jde do komponent, API pro Python a jiné třídy zůstává na pawnu jako přeposílač, pořadí
+  Ticku řídí pawn, komponenty bez vlastního ticku a bez BeginPlay. Nový systém lodi (energie, štíty, zbraně,
+  náklad) = nová komponenta podle stejných pravidel, ne další kód v pawnu.
+- Komponenty s malým vstupem dostávají tuning jako malé struktury (`FShipQuantumRules`, `FShipLandingRules`…);
+  prezentace, nástup a vstup čtou pawn přímo jako jeho `friend` (čtou desítky jeho hodnot a dílů). Kde je to
+  možné, dává se přednost strukturám.
+- **Jádro letu (IFCS: `UpdateAngularMotion`, `UpdateLinearMotion`, prostředí) zůstává v pawnu**: čte všechny
+  systémy, zapisuje rychlost a polohu lodi a je to, co pawn je. Komponenta by jen přesunula kód bez oddělení
+  (krok 10 plánu byl volitelný). Vrátit se k tomu s pevným časovým krokem nebo s druhým typem pohybu.
+- **Testovací API na pawnu** (`Debug*` UFUNCTION) je záměr: testy řídí let bez vstupu. Těla a konzolové příkazy
+  `space.*` jsou v `SpaceshipPawnDebug.cpp`, odděleně od běhového kódu; komponenta by byla jen sbírka přeposílačů.
 
 ## 3. Světové dotazy
 
@@ -95,9 +104,9 @@ Podrobná reakce bod po bodu: `Docs/Reviews/2026-09-30_audit_v1_response.md`.
 | Pevná cesta k UE, chybí jeden testovací příkaz, test závislý na OS | přijato, hotovo |
 | Trackované `.pyc` | neplatí (v historii nikdy nebyly) |
 | Víc zdrojů pravdy v dokumentaci | přijato: hierarchie v `CLAUDE.md`, `CURRENT.md`, tento soubor, HANDOFF archiv |
-| Rozdělit `ASpaceshipPawn`, oddělit testovací API | přijato postupně, plán čeká na schválení |
+| Rozdělit `ASpaceshipPawn`, oddělit testovací API | hotovo 1. 10. 2026 (kroky 1–9 plánu); jádro letu zůstává v pawnu (kap. 2) |
 | Registry místo průchodů světem | přijato pro časté dotazy: `USpaceCelestialRegistrySubsystem` (tělesa, radar); obecný registr lodí a cílů zatím jen návrh |
 | Pevný časový krok letu | odloženo (kap. 2) |
 | Asset Manager, prostorové dotazy, síťová architektura | odloženo, až je vyvolá růst světa nebo multiplayer |
-| `SpaceUserSettings`: const metoda s migrací přes `const_cast` | zapsáno; opravit při nejbližší změně nastavení |
+| `SpaceUserSettings`: const metoda s migrací přes `const_cast` | zapsáno; opravit při nejbližší změně nastavení. Rekurze migrace na čisté instalaci (bez `GameUserSettings.ini`) opravena 1. 10. 2026 |
 | CI | přijato jen offline testy a compileall; build UE v CI ne |

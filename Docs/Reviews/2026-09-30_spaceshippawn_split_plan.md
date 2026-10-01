@@ -1,4 +1,4 @@
-# Plán rozdělení `ASpaceshipPawn` (návrh ke schválení, 30. 9. 2026)
+# Plán rozdělení `ASpaceshipPawn` (schválen 30. 9., proveden 1. 10. 2026; průběh na konci)
 
 Podnět: technický audit v1, 4.1 a 4.8. Zadání autora: nejdřív jen návrh (pořadí kroků, rizika, které testy chrání
 který krok); po schválení postupně po jedné komponentě, každá se zelenými testy, začít tou s nejmenším rizikem.
@@ -77,6 +77,38 @@ a efekty kamery patří do prezentace. Pevný časový krok simulace se nedělá
 - Kroky 6 a 8 potřebují jeho ruční kontrolu ve hře (zvuk, světla, všechny klávesy), automatické testy je nepokryjí.
 - Tuning UPROPERTY zůstávají na pawnu; jejich přesun do komponent je samostatné rozhodnutí na později (mění setup
   a import).
+
+## Průběh (30. 9. – 1. 10. 2026, větev `pawn-split`)
+
+Schváleno autorem 30. 9. v tomto pořadí. Každý krok: build editoru i hry, celá sada `Tools\Test.ps1 -UE` (22 testů,
+1398 kontrol) zelená, dotčené snímky `-Editor` prohlédnuté, samostatný commit.
+
+| # | Commit | Výsledek |
+| --- | --- | --- |
+| – | `19085bf` | Oprava mimo plán: migrace nastavení se bez `GameUserSettings.ini` zacyklila (pád UE testů v novém worktree, hra na novém počítači). |
+| 1 | `fecd300` | `FShipFlightModel`: čistá matematika; výsledky bit po bitu stejné. `ComputeDashboardFocus` zůstal (čte sockety, není čistý). |
+| 2 | `c3798f3` | VTOL v `UShipSystemsComponent`, `LogSpaceship` ve sdílené hlavičce. |
+| 3 | `fa6795f` | Master mode, omezovač, boost, afterburner; boost a afterburner sdílejí `FShipReserve`. G-Safe a ComStab zůstaly (editovatelné přepínače). |
+| 4 | `b632529` | `UShipQuantumComponent`; snímky `quantum`. |
+| 5 | `01ed359` | `UShipLandingComponent` (přistání, země, podvozek, precision); sonda a viditelné nohy na pawnu; snímky `landing`, `vtol`. |
+| 6 | `74ad068` | `UShipPresentationComponent`; snímky `cockpit`, `quantum`, `ship`, `wayfarer_rooms`. |
+| 7 | `c66a424` | `UShipBoardingComponent`; snímky `wayfarer_walk` (vstát, ven, dovnitř, sednout). |
+| 8 | `5a833be` | `UShipInputComponent`; mrtvý `HandleToggleHud` pryč. |
+| 9 | `3277999` | `SpaceshipPawnDebug.cpp`: ladicí API a konzolové příkazy. |
+| 10 | – | Nedělá se: jádro letu zůstává v pawnu (`ARCHITECTURE.md` kap. 2). |
+
+Odchylky od plánu a proč:
+
+- **Pravidlo 5** (komponenty drží ukazatele na podobjekty): prezentace, nástup a vstup místo toho čtou pawn přímo
+  jako jeho `friend`. Čtou desítky jeho hodnot a dílů; struktury argumentů by byly delší než kód. Systémy, quantum
+  a přistání berou tuning jako malé struktury.
+- **Krok 9:** místo `UShipDebugComponent` samostatný soubor. Komponenta by byla 22 přeposílačů bez vlastního stavu.
+- **Krok 10:** let se nepřesouvá; komponenta by jen přenesla kód, který čte všechno a zapisuje polohu a rychlost.
+- Balení: jednou po kroku 9 do `C:\gamespace\Builds_audit\Gamespace` (autor 1. 10.: druhá session nebalí do
+  `Builds`); kroky 6 a 8 ověří autor ve hře.
+
+Výsledek: `SpaceshipPawn.cpp` 3 978 → 1 762 řádků, `SpaceshipPawn.h` 2 262 → 2 031 (hlavička nese tuning
+UPROPERTY a přeposílače, to je záměr). Chování beze změny podle testů a snímků.
 
 ## Mimo tento plán
 
