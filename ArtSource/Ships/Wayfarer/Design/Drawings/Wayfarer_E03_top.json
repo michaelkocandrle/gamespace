@@ -4,11 +4,11 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "c10dc8f0b500",
-  "recipe": "f1628d45ba03",
+  "recipe": "7df4191b67e1",
   "setup": "edd157c448e4",
   "spec": "d9597dfcd605",
   "design": "c08da5218170",
-  "library": "0fa80cd7349f"
+  "library": "3ed0bfdbff37"
  },
  "drawn": {
   "TOP": [

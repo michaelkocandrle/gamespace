@@ -21,7 +21,7 @@ kitu, který po 3 kolech kritika skončil FAIL 6,4 (5,4 → 5,9 → 6,4; recenze
     prvek stavby i návrhu má ID (`Tools/Design/assign_exterior_ids.py`), výkresy z modelu `exterior_model.py`;
   - pilot kitu (hřbet, ramena, záď, gondoly): desky, rám T, páteř s kovovým hřebenem, rozvody v kanálu u páteře,
     větrací skříně (hřbet pole 08/12, záď), čísla desek ze znaků `pn_*`; **rozpočet trojúhelníků** schválen (trup
-    ≤ 700 k, `budget` v receptu, `HSBUDGET`, test; skill `ship-pipeline` 3b2b): po kroku a 409 k (dřív 987 k);
+    ≤ 700 k, `budget` v receptu, `HSBUDGET`, test; skill `ship-pipeline` 3b2b): po kroku b 369 k (dřív 987 k);
   - chase kamera 2800 cm; level: slunce 11 lx, obloha 0,55; průchozí interiér (F vstát / sednout / ven / dovnitř);
   - interiér z kitu: technická chodba s výklenky komponent, přepážky s dveřmi, nákladový prostor (mřížka 8 SCU,
     varianta B; podlaha zatím lodní) a kajuta z obložení trupu s kit podlahou a nábytkem z kitu.
@@ -63,13 +63,10 @@ kitu, který po 3 kolech kritika skončil FAIL 6,4 (5,4 → 5,9 → 6,4; recenze
 
 ## Další kroky
 
-1. **Wayfarer – pilot kitu, kroky b → e** (autor 1. 10.; každý krok vlastní session, pak CURRENT, Cleanup, `/clear`;
-   do hlavní session jen výřezy; recenze `2026-10-01_wayfarer_triangle_budget.md` a `…_kit_pilot.md`). Krok a hotový;
-   **krok b: zkouška hotová (RP10 + žebra), čeká souhlas autora s plnou přestavbou** (`decal_detail.scope` → `all`).
-   **b)** decaly místo drobné geometrie: šrouby desek a rámu (`bolt_row_*`, nová položka „šroub rámu“ 250 mm),
-   západky, poklopy XK-HATCH pod 0,4 m a mřížky pod 0,3 m jako decaly s výraznou normálou a AO, poklop bez díry do
-   kanálu; ověřit výřezy z chase i zblízka (pak smí běžet paralelní session I-01–I-09 bez Unrealu / Blenderu).
-   **c)** pásy S a AFT jako desky na rámu: sekundární lak světlejší a drsnější, na S panely, poklopy, čísla; záď na
+1. **Wayfarer – pilot kitu, kroky c → e** (autor 1. 10.; každý krok vlastní session, pak CURRENT, Cleanup, `/clear`;
+   do hlavní session jen výřezy; recenze `2026-10-01_wayfarer_triangle_budget.md` a `…_kit_pilot.md`). Kroky a, b
+   hotové (trup 369 k; šrouby, západky a poklopy jako decaly; varianta 2 poklopů jen nabídnutá, rozhodne autor).
+   Paralelní session I-01–I-09 (bez Unrealu / Blenderu / balení) smí běžet. **c)** pásy S a AFT jako desky na rámu: sekundární lak světlejší a drsnější, na S panely, poklopy, čísla; záď na
    desky na rámu; výřezy autorovi, **revize D výkresů neschválená, dokud ji autor neschválí**. **d)** trysky 2× (80 k):
    kužel s hrdlem, středové těleso, žebra, táhla, prstence, emisivní jádro; přepracovat gondoly (140 k / 60 k).
    Po c + d jedno ověřovací kolo kritika (Opus, `step`); pilot hotový až PASS. **e)** jen analýza: červené poziční

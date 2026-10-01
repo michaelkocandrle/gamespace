@@ -34,7 +34,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "5204d385ea39b90af9e0dadc9f4506e30e93f8b1"
+      "geometry_hash": "a078b0a97acccaf5f7b63bb12afd3f8c23343656"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -48,7 +48,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "19c7cdb912e786c3ed5a215f1a268d6757ec48aa"
+      "geometry_hash": "eb476ae41dcbe76fd20e64790d906ae5347ecee1"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Gear.fbx",
@@ -62,14 +62,14 @@
       "objects": [
         "SM_Ship_Wayfarer_Hologram"
       ],
-      "geometry_hash": "ecbbc20755dc851f8bbf9e9f4448b0ce9b5e1bf0"
+      "geometry_hash": "d75410abaa18aeedbf7807a8dfaff5a20db9dbf7"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Interior.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "4c4f8890c379f31af84dc463dd5d225f78cb8e04"
+      "geometry_hash": "fc7330ee4683cfcce6015df92bbb956a34db4497"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
@@ -97,8 +97,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 400604,
-      "verts": 296885,
+      "tris": 369326,
+      "verts": 279176,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -158,8 +158,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 61974,
-      "verts": 60914,
+      "tris": 63404,
+      "verts": 64533,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -172,12 +172,12 @@
       "bounds_m": [
         [
           -10.731590270996094,
-          -7.33265495300293,
-          -1.8340001106262207
+          -7.3322248458862305,
+          -1.8339999914169312
         ],
         [
-          9.914730072021484,
-          7.332247734069824,
+          9.99750804901123,
+          7.333132743835449,
           2.139873743057251
         ]
       ]
@@ -232,8 +232,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 350585,
-      "verts": 183528,
+      "tris": 350577,
+      "verts": 183526,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",

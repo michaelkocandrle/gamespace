@@ -175,3 +175,44 @@ Snímky (editor, preset `wayfarer_decal_trial`): před `shots:20261001_224641_wa
 
 Nalezeno: pravidlo `companions` dávalo k decalům s tagem „hatch“ štítky a madla – na západkách zkoušky se objevily
 cizí štítky „REACTOR S1“; decaly kitu (`kit_*`) se z pravidla vyřazují, `latch_kit` má tag „latch“.
+
+## Krok b – plná přestavba (autor 2. 10.: varianta 1, poklop jako decal, atlas se nezvětšuje), hotovo 2. 10.
+
+`decal_detail.scope: "all"`: šrouby všech desek a rámu (1316), 14 poklopů XK-HATCH a 28 západek jako decaly. Posílení
+bez většího atlasu: západky `latch_kit` s vlastní tmavou barvou; `hatch_small` (sdílená položka, stejná stopa, UV se
+nehnou) spára 6 mm a hloubka 10 mm místo 4 / 4 mm a plocha poklopu 0,8 mm nad deskou s drsností 0,62 (čte leskem).
+
+| | Před krokem b | Po |
+|---|---:|---:|
+| trup (`HSBUDGET`) | 409 426 | 369 326 |
+| hull_loft / kit_plates / kit_frame | 52 268 / 13 918 / 22 500 | 52 258 / 11 910 / 22 500 |
+| mid_layer (šrouby, západky) | 72 956 | 34 876 |
+| pods / wings / lights / functional | 139 696 / 57 384 / 26 632 / 23 312 | beze změny |
+| decaly | 931 | 2 230 |
+| mesh decalů (trojúhelníky) | 61 974 | 63 404 (+1,4 k proti odhadu +3 k) |
+| šrouby položené | – | 1316 / 1316 |
+
+Výkon (odhad): mesh decalů bez Nanite, cena podle pokryté plochy; šrouby a poklopy < 0,1 ms na RTX 2060.
+
+Kontroly:
+- **Cizí štítky:** `hs_decals.kit_check` → `Export/Wayfarer_decals.json`, nový test `Tools/Tests/test_kit_decals.py`
+  (šrouby položené = požadované; žádný štítek, madlo ani červená značka pravidla „companions“ do 0,3 m od poklopu
+  nebo západky kitu): PASS. První verze hlásila držák „chevrons_port“ – patří k víčku plnicího hrdla D-H-41 (data),
+  které leží vedle poklopu; kontrola počítá jen to, co pravidlo věší na poklopy. Na výřezech hřbetu, ramene, zádě
+  a gondol žádné texty typu „REACTOR S1“ na prvcích kitu.
+- **Zapečený stín:** hustota vrcholů se decaly nemění; dno kanálu, okolí poklopů a sloučené desky beze změny.
+  Pro krok c: ztmavnutí hrozí jen při slučování ploch s AO ve vrcholech (pásy S a AFT) – slot Channel už je vyjmutý,
+  desky S / AFT po sloučení zkontrolovat výřezem stejně jako v kroku a.
+- **Zabalená hra** `shots:20261002_000711_wayfarer_kit_pilot/` proti `shots:20261001_223051_wayfarer_kit_pilot/`:
+  - šrouby desek a rámu čtou na plochách čitelněji (tmavá hlava s podložkou) a zmizely dlouhé stíny geometrických
+    šroubů na ramenou; při velmi šikmém pohledu (zadní část hřbetu) jsou slabší – decal nemá siluetu ani stín;
+  - poklopy zblízka čtou jako panel se spárou a tmavými západkami, bez tmavé díry; na šikmé hraně hřbetu jsou
+    slabé (jen obrys);
+  - z chase kamery je hřbet prakticky stejný jako před krokem b: poklopy kitu tam nebyly vidět ani dřív; hřbet
+    nese střední vrstva (panely, skříně, rozvody, páteř), nečte jako jednotvárná dlažba. Tmavé obdélníky, které
+    z dálky zůstávají, jsou větrací skříně, zapuštění a díly receptu, ne poklopy kitu → záložní plán (varianta 2)
+    nespouštím, jen ji nabízím.
+  - na dveřích rampy přibyl tmavý stékající šmouh vedle nápisu – náhodný doprovod pravidla „companions“ pod mřížkou
+    (posunulo se pořadí náhody), ne chyba kitu.
+- Varianta 2 (kdyby autor chtěl výraznější poklopy na šikmé hraně): 14 poklopů jako tenká deska 340 × 260 × 3 mm se
+  spárou v geometrii, bez díry v desce: po sloučení ploch ~40 trojúhelníků na poklop + západky ~30 → ~1 k celkem.

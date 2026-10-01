@@ -91,6 +91,7 @@ class Placer:
         self.col = self.bm.verts.layers.float_color.new("Col")
         self.placed = []                  # (centre, radius, x, y, w, h) for the overlap test
         self.frames = []                  # (item, frame) of every placed decal, for the companion rules
+        self.where = []                   # (rule, item, point) of every placed decal, for the kit checks
         self.log = []                     # (rule, item, part)
         self.ribbons = []                 # (rule, strip, part, metres)
         self.skipped = {"edge": 0, "overlap": 0, "miss": 0}
@@ -223,6 +224,7 @@ class Placer:
             self.grid(pts, n, item["uv"], 2, 0.0012)
         self.placed.append((hit, rad, x, y, w, h))
         fr = (hit, x, y, w, h, n)
+        self.where.append((rule, name, hit.copy()))
         if not rule.startswith("kit_"):
             # the kit's own decals (bolts, hatches, latches from the data) get no companions (labels, handles): those
             # are not in the data and the trial put reactor labels on the latches (triangle budget step b)
@@ -741,6 +743,21 @@ def rule_companions(pl, r, rng):
 
 # ---------------------------------------------------------------------------------------------- build
 
+def kit_check(pl):
+    """The kit's decals (author 1. 10. 2026): every bolt laid (wanted vs placed) and no companion label (REACTOR S1,
+    handles, markers) within 0.3 m of a kit hatch or latch - the companion rules gave the trial's latches foreign labels."""
+    kit = [p for r, _, p in pl.where if r == "kit_detail"]          # hatches and latches (bolts are everywhere)
+    # only what the rule hangs on a hatch (labels, handle, red marker); a cap's chevron bracket is its own (the fuel cap
+    # D-H-41 sits beside a kit hatch on the roof)
+    hatch_kids = {n for n, it in pl.index["decals"].items() if "label" in it.get("tags", [])} | {"handle", "red_marker"}
+    comp = [(n, p) for r, n, p in pl.where if r == "companions" and n in hatch_kids]
+    near = sorted({n for n, p in comp if any((p - k).length < 0.3 for k in kit)})
+    return {"bolts_wanted": getattr(pl, "kit_bolts_wanted", 0),
+            "bolts_placed": sum(1 for r, _, _ in pl.where if r == "kit_bolts"),
+            "kit_decals": len(kit), "companion_labels_near_kit": len([1 for n, p in comp if any((p - k).length < 0.3 for k in kit)]),
+            "companion_items_near_kit": near}
+
+
 def build(recipe, target, ship, off, root):
     """Returns the Decals object (ship coordinates) or None, and a report with the counts."""
     spec = recipe.get("decals")
@@ -773,7 +790,9 @@ def build(recipe, target, ship, off, root):
                 else:
                     pl.decal(it, side, "kit_detail")
         # the kit's bolts as decals (hs_exterior_kit, decal_detail scope): laid where the bolt geometry would stand
+        pl.kit_bolts_wanted = 0
         for it in json.loads(bpy.context.scene.get("hs_kit_decals", "[]")):
+            pl.kit_bolts_wanted += 2 if it.get("mirror", True) else 1
             for side in ((1, -1) if it.get("mirror", True) else (1,)):
                 pl.decal(it, side, "kit_bolts")
     if "panel_marks" in rules:
@@ -823,6 +842,6 @@ def build(recipe, target, ship, off, root):
         s[1] += length
     report = {"decals": len(pl.log), "by_part": by_part, "by_rule": by_rule, "by_type": by_type,
               "strip_runs": {k: {"runs": v[0], "metres": round(v[1], 1)} for k, v in strips.items()},
-              "skipped": pl.skipped, "faces": len(me.polygons),
+              "skipped": pl.skipped, "faces": len(me.polygons), "kit": kit_check(pl),
               "grime": {"cards": len(pl.grime), "by_kind": {k: sum(1 for g in pl.grime if g[0] == k) for k in GRIME_CELLS}}}
     return ob, report

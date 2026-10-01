@@ -497,7 +497,7 @@
      0.26,
      0.2
     ],
-    "purpose": "small inspection hatch",
+    "purpose": "small inspection hatch; seam 6 mm wide and 10 mm deep, the panel 0.8 mm proud with roughness 0.62 (step b, author 1. 10. 2026: the kit hatch as a decal reads by its gloss from the chase camera)",
     "tags": [
      "hatch"
     ],
@@ -509,9 +509,9 @@
       ],
       "size": [
        0.24,
-       0.004
+       0.006
       ],
-      "depth": 0.004
+      "depth": 0.01
      },
      {
       "at": [
@@ -520,9 +520,9 @@
       ],
       "size": [
        0.24,
-       0.004
+       0.006
       ],
-      "depth": 0.004
+      "depth": 0.01
      },
      {
       "at": [
@@ -530,10 +530,10 @@
        0
       ],
       "size": [
-       0.004,
+       0.006,
        0.17
       ],
-      "depth": 0.004
+      "depth": 0.01
      },
      {
       "at": [
@@ -541,16 +541,31 @@
        0
       ],
       "size": [
-       0.004,
+       0.006,
        0.17
       ],
-      "depth": 0.004
+      "depth": 0.01
      }
     ],
     "corner_screws": {
      "inset": 0.022,
      "r": 0.005
-    }
+    },
+    "parts": [
+     {
+      "kind": "box",
+      "at": [
+       0,
+       0
+      ],
+      "size": [
+       0.228,
+       0.158
+      ],
+      "h": 0.0008,
+      "rough": 0.62
+     }
+    ]
    },
    {
     "name": "recessed_panel",
@@ -6579,7 +6594,7 @@
    },
    {
     "name": "latch_kit",
-    "type": "structural",
+    "type": "info",
     "footprint": [
      0.07,
      0.04
@@ -6588,7 +6603,7 @@
     "tags": [
      "latch"
     ],
-    "purpose": "XK-HATCH latch 60 x 30 mm in a recess (the small hatch as a decal: hatch_small at scale 1.3 + two latches)",
+    "purpose": "XK-HATCH latch 60 x 30 mm in a recess (the small hatch as a decal: hatch_small at scale 1.3 + two latches); own dark colour (step b)",
     "recesses": [
      {
       "at": [
@@ -6614,7 +6629,12 @@
        0.024
       ],
       "h": 0.008,
-      "z": -0.006
+      "z": -0.006,
+      "color": [
+       0.045,
+       0.047,
+       0.052
+      ]
      }
     ]
    }

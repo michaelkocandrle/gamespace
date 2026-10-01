@@ -7,7 +7,7 @@
   "layout": "ArtSource/Ships/Wayfarer/Design/Wayfarer_exterior_kit.json",
   "decal_detail": {
    "_comment": "Small detail as mesh decals instead of geometry (triangle budget rule A, author 1. 10. 2026): the bolts of these plates and frame pieces (bolt_kit / bolt_kit_frame at every bolt point of the data) and these small hatches (XK-HATCH: hatch_small at scale 1.3 with two latch_kit, no hole in the plate). Trial scope first (step b); 'all' for every kit element. The data and the drawings keep the bolts and hatches with their IDs.",
-   "scope": ["P-S-RP10", "P-S-RP10-H", "FR-RIB"]
+   "scope": "all"
   }
  },
  "borrow": {},

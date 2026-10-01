@@ -37,11 +37,11 @@
  },
  "digests": {
   "layout": "c10dc8f0b500",
-  "recipe": "f1628d45ba03",
+  "recipe": "7df4191b67e1",
   "setup": "edd157c448e4",
   "spec": "d9597dfcd605",
   "design": "c08da5218170",
-  "library": "0fa80cd7349f"
+  "library": "3ed0bfdbff37"
  },
  "plates": [
   {
@@ -121,7 +121,9 @@
      2.6772
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-S05",
@@ -219,7 +221,9 @@
      2.7117
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-S06",
@@ -298,7 +302,9 @@
      2.729
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-S07",
@@ -369,7 +375,9 @@
      2.7436
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-S08",
@@ -440,7 +448,9 @@
      2.7582
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-S09",
@@ -519,7 +529,9 @@
      2.7742
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-S10",
@@ -598,7 +610,9 @@
      2.7901
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-S11",
@@ -685,7 +699,9 @@
      2.8293
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-S12",
@@ -768,7 +784,9 @@
      2.9226
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-S13",
@@ -867,7 +885,9 @@
      2.8828
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-S14",
@@ -970,7 +990,9 @@
      2.3457
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL03",
@@ -1028,26 +1050,7 @@
        0.34
       ]
      ],
-     [
-      [
-       [
-        3.522,
-        1.132
-       ],
-       [
-        3.158,
-        1.132
-       ],
-       [
-        3.158,
-        0.848
-       ],
-       [
-        3.522,
-        0.848
-       ]
-      ]
-     ]
+     []
     ]
    ],
    "bolts": [
@@ -1092,60 +1095,9 @@
      1.1723
     ]
    ],
-   "bolt_d": 0.02
-  },
-  {
-   "id": "P-S-RL03-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       3.51,
-       0.86
-      ],
-      [
-       3.51,
-       1.12
-      ],
-      [
-       3.17,
-       1.12
-      ],
-      [
-       3.17,
-       0.86
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     3.255,
-     1.075
-    ],
-    [
-     3.425,
-     1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP03",
@@ -1163,10 +1115,6 @@
     [
      [
       [
-       3.08,
-       -0.34
-      ],
-      [
        3.26,
        -0.34
       ],
@@ -1201,28 +1149,13 @@
       [
        3.08,
        -1.2123
+      ],
+      [
+       3.08,
+       -0.34
       ]
      ],
-     [
-      [
-       [
-        3.522,
-        -0.848
-       ],
-       [
-        3.158,
-        -0.848
-       ],
-       [
-        3.158,
-        -1.132
-       ],
-       [
-        3.522,
-        -1.132
-       ]
-      ]
-     ]
+     []
     ]
    ],
    "bolts": [
@@ -1267,60 +1200,9 @@
      -0.4
     ]
    ],
-   "bolt_d": 0.02
-  },
-  {
-   "id": "P-S-RP03-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       3.51,
-       -1.12
-      ],
-      [
-       3.51,
-       -0.86
-      ],
-      [
-       3.17,
-       -0.86
-      ],
-      [
-       3.17,
-       -1.12
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     3.255,
-     -1.075
-    ],
-    [
-     3.425,
-     -1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL04",
@@ -1378,26 +1260,7 @@
        0.975
       ]
      ],
-     [
-      [
-       [
-        5.462,
-        1.132
-       ],
-       [
-        5.098,
-        1.132
-       ],
-       [
-        5.098,
-        0.848
-       ],
-       [
-        5.462,
-        0.848
-       ]
-      ]
-     ]
+     []
     ]
    ],
    "bolts": [
@@ -1442,60 +1305,9 @@
      1.1723
     ]
    ],
-   "bolt_d": 0.02
-  },
-  {
-   "id": "P-S-RL04-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       5.45,
-       0.86
-      ],
-      [
-       5.45,
-       1.12
-      ],
-      [
-       5.11,
-       1.12
-      ],
-      [
-       5.11,
-       0.86
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     5.195,
-     1.075
-    ],
-    [
-     5.365,
-     1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP04",
@@ -1513,10 +1325,6 @@
     [
      [
       [
-       5.34,
-       -0.34
-      ],
-      [
        5.52,
        -0.34
       ],
@@ -1551,28 +1359,13 @@
       [
        5.34,
        -0.36
+      ],
+      [
+       5.34,
+       -0.34
       ]
      ],
-     [
-      [
-       [
-        5.462,
-        -0.848
-       ],
-       [
-        5.098,
-        -0.848
-       ],
-       [
-        5.098,
-        -1.132
-       ],
-       [
-        5.462,
-        -1.132
-       ]
-      ]
-     ]
+     []
     ]
    ],
    "bolts": [
@@ -1617,60 +1410,9 @@
      -0.38
     ]
    ],
-   "bolt_d": 0.02
-  },
-  {
-   "id": "P-S-RP04-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       5.45,
-       -1.12
-      ],
-      [
-       5.45,
-       -0.86
-      ],
-      [
-       5.11,
-       -0.86
-      ],
-      [
-       5.11,
-       -1.12
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     5.195,
-     -1.075
-    ],
-    [
-     5.365,
-     -1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL05",
@@ -1707,28 +1449,6 @@
      [
       [
        [
-        6.742,
-        1.132
-       ],
-       [
-        6.378,
-        1.132
-       ],
-       [
-        6.378,
-        0.848
-       ],
-       [
-        6.742,
-        0.848
-       ]
-      ],
-      [
-       [
-        6.315,
-        0.975
-       ],
-       [
         5.685,
         0.975
        ],
@@ -1739,6 +1459,10 @@
        [
         6.315,
         0.825
+       ],
+       [
+        6.315,
+        0.975
        ]
       ]
      ]
@@ -1786,7 +1510,9 @@
      1.1723
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL05-D",
@@ -1857,60 +1583,9 @@
      0.64
     ]
    ],
-   "bolt_d": 0.016
-  },
-  {
-   "id": "P-S-RL05-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       6.73,
-       0.86
-      ],
-      [
-       6.73,
-       1.12
-      ],
-      [
-       6.39,
-       1.12
-      ],
-      [
-       6.39,
-       0.86
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     6.475,
-     1.075
-    ],
-    [
-     6.645,
-     1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
+   "bolt_d": 0.016,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP05",
@@ -1947,28 +1622,6 @@
      [
       [
        [
-        6.742,
-        -0.848
-       ],
-       [
-        6.378,
-        -0.848
-       ],
-       [
-        6.378,
-        -1.132
-       ],
-       [
-        6.742,
-        -1.132
-       ]
-      ],
-      [
-       [
-        6.315,
-        -0.825
-       ],
-       [
         5.685,
         -0.825
        ],
@@ -1979,6 +1632,10 @@
        [
         6.315,
         -0.975
+       ],
+       [
+        6.315,
+        -0.825
        ]
       ]
      ]
@@ -2026,7 +1683,9 @@
      -0.38
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP05-D",
@@ -2097,60 +1756,9 @@
      -0.46
     ]
    ],
-   "bolt_d": 0.016
-  },
-  {
-   "id": "P-S-RP05-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       6.73,
-       -1.12
-      ],
-      [
-       6.73,
-       -0.86
-      ],
-      [
-       6.39,
-       -0.86
-      ],
-      [
-       6.39,
-       -1.12
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     6.475,
-     -1.075
-    ],
-    [
-     6.645,
-     -1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
+   "bolt_d": 0.016,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL06",
@@ -2266,7 +1874,9 @@
      1.1723
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP06",
@@ -2364,7 +1974,9 @@
      -0.38
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL07",
@@ -2406,26 +2018,7 @@
        0.34
       ]
      ],
-     [
-      [
-       [
-        8.722,
-        1.132
-       ],
-       [
-        8.358,
-        1.132
-       ],
-       [
-        8.358,
-        0.848
-       ],
-       [
-        8.722,
-        0.848
-       ]
-      ]
-     ]
+     []
     ]
    ],
    "bolts": [
@@ -2462,60 +2055,9 @@
      1.1723
     ]
    ],
-   "bolt_d": 0.02
-  },
-  {
-   "id": "P-S-RL07-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       8.71,
-       0.86
-      ],
-      [
-       8.71,
-       1.12
-      ],
-      [
-       8.37,
-       1.12
-      ],
-      [
-       8.37,
-       0.86
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     8.455,
-     1.075
-    ],
-    [
-     8.625,
-     1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP07",
@@ -2557,26 +2099,7 @@
        -1.2123
       ]
      ],
-     [
-      [
-       [
-        8.722,
-        -0.848
-       ],
-       [
-        8.358,
-        -0.848
-       ],
-       [
-        8.358,
-        -1.132
-       ],
-       [
-        8.722,
-        -1.132
-       ]
-      ]
-     ]
+     []
     ]
    ],
    "bolts": [
@@ -2613,60 +2136,9 @@
      -0.7
     ]
    ],
-   "bolt_d": 0.02
-  },
-  {
-   "id": "P-S-RP07-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       8.71,
-       -1.12
-      ],
-      [
-       8.71,
-       -0.86
-      ],
-      [
-       8.37,
-       -0.86
-      ],
-      [
-       8.37,
-       -1.12
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     8.455,
-     -1.075
-    ],
-    [
-     8.625,
-     -1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL08",
@@ -2700,26 +2172,7 @@
        0.34
       ]
      ],
-     [
-      [
-       [
-        9.882,
-        1.132
-       ],
-       [
-        9.518,
-        1.132
-       ],
-       [
-        9.518,
-        0.848
-       ],
-       [
-        9.882,
-        0.848
-       ]
-      ]
-     ]
+     []
     ]
    ],
    "bolts": [
@@ -2756,7 +2209,9 @@
      1.1723
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL08-V",
@@ -2997,59 +2452,6 @@
     ]
    ],
    "suffix": "Slats"
-  },
-  {
-   "id": "P-S-RL08-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       9.87,
-       0.86
-      ],
-      [
-       9.87,
-       1.12
-      ],
-      [
-       9.53,
-       1.12
-      ],
-      [
-       9.53,
-       0.86
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     9.615,
-     1.075
-    ],
-    [
-     9.785,
-     1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
   },
   {
    "id": "P-S-RP08",
@@ -3083,26 +2485,7 @@
        -1.2123
       ]
      ],
-     [
-      [
-       [
-        9.882,
-        -0.848
-       ],
-       [
-        9.518,
-        -0.848
-       ],
-       [
-        9.518,
-        -1.132
-       ],
-       [
-        9.882,
-        -1.132
-       ]
-      ]
-     ]
+     []
     ]
    ],
    "bolts": [
@@ -3139,7 +2522,9 @@
      -0.38
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP08-V",
@@ -3380,59 +2765,6 @@
     ]
    ],
    "suffix": "Slats"
-  },
-  {
-   "id": "P-S-RP08-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       9.87,
-       -1.12
-      ],
-      [
-       9.87,
-       -0.86
-      ],
-      [
-       9.53,
-       -0.86
-      ],
-      [
-       9.53,
-       -1.12
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     9.615,
-     -1.075
-    ],
-    [
-     9.785,
-     -1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
   },
   {
    "id": "P-S-RL09",
@@ -3530,7 +2862,9 @@
      1.1723
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL09-D",
@@ -3601,7 +2935,9 @@
      0.64
     ]
    ],
-   "bolt_d": 0.016
+   "bolt_d": 0.016,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP09",
@@ -3699,7 +3035,9 @@
      -0.38
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP09-D",
@@ -3770,7 +3108,9 @@
      -0.46
     ]
    ],
-   "bolt_d": 0.016
+   "bolt_d": 0.016,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL10",
@@ -3804,26 +3144,7 @@
        0.34
       ]
      ],
-     [
-      [
-       [
-        12.662,
-        1.132
-       ],
-       [
-        12.298,
-        1.132
-       ],
-       [
-        12.298,
-        0.848
-       ],
-       [
-        12.662,
-        0.848
-       ]
-      ]
-     ]
+     []
     ]
    ],
    "bolts": [
@@ -3868,7 +3189,9 @@
      1.1723
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL10-D",
@@ -3931,60 +3254,9 @@
      0.72
     ]
    ],
-   "bolt_d": 0.016
-  },
-  {
-   "id": "P-S-RL10-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       12.65,
-       0.86
-      ],
-      [
-       12.65,
-       1.12
-      ],
-      [
-       12.31,
-       1.12
-      ],
-      [
-       12.31,
-       0.86
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     12.395,
-     1.075
-    ],
-    [
-     12.565,
-     1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
+   "bolt_d": 0.016,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP10",
@@ -4128,7 +3400,9 @@
      -0.46
     ]
    ],
-   "bolt_d": 0.016
+   "bolt_d": 0.016,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL11",
@@ -4169,28 +3443,6 @@
      [
       [
        [
-        13.322,
-        1.132
-       ],
-       [
-        12.958,
-        1.132
-       ],
-       [
-        12.958,
-        0.848
-       ],
-       [
-        13.322,
-        0.848
-       ]
-      ],
-      [
-       [
-        13.21,
-        0.71
-       ],
-       [
         12.99,
         0.71
        ],
@@ -4201,6 +3453,10 @@
        [
         13.21,
         0.49
+       ],
+       [
+        13.21,
+        0.71
        ]
       ]
      ]
@@ -4248,60 +3504,9 @@
      1.1501
     ]
    ],
-   "bolt_d": 0.02
-  },
-  {
-   "id": "P-S-RL11-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       13.31,
-       0.86
-      ],
-      [
-       13.31,
-       1.12
-      ],
-      [
-       12.97,
-       1.12
-      ],
-      [
-       12.97,
-       0.86
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     13.055,
-     1.075
-    ],
-    [
-     13.225,
-     1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP11",
@@ -4339,26 +3544,7 @@
        -0.39
       ]
      ],
-     [
-      [
-       [
-        13.322,
-        -0.848
-       ],
-       [
-        12.958,
-        -0.848
-       ],
-       [
-        12.958,
-        -1.132
-       ],
-       [
-        13.322,
-        -1.132
-       ]
-      ]
-     ]
+     []
     ]
    ],
    "bolts": [
@@ -4403,60 +3589,9 @@
      -0.43
     ]
    ],
-   "bolt_d": 0.02
-  },
-  {
-   "id": "P-S-RP11-H",
-   "kit": "XK-HATCH",
-   "material": "paint",
-   "paint2": 0,
-   "view": "TOP",
-   "mirror": false,
-   "normal": {
-    "nz_min": 0.3
-   },
-   "t": 0.03,
-   "bevel": 0.003,
-   "polys": [
-    [
-     [
-      [
-       13.31,
-       -1.12
-      ],
-      [
-       13.31,
-       -0.86
-      ],
-      [
-       12.97,
-       -0.86
-      ],
-      [
-       12.97,
-       -1.12
-      ]
-     ],
-     []
-    ]
-   ],
-   "bolts": [],
-   "bolt_d": 0.0,
-   "latches": [
-    [
-     13.055,
-     -1.075
-    ],
-    [
-     13.225,
-     -1.075
-    ]
-   ],
-   "latch": [
-    0.06,
-    0.03,
-    0.006
-   ]
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL12",
@@ -4535,7 +3670,9 @@
      1.0798
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RL12-V",
@@ -4854,7 +3991,9 @@
      -0.38
     ]
    ],
-   "bolt_d": 0.02
+   "bolt_d": 0.02,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "P-S-RP12-V",
@@ -5602,7 +4741,9 @@
     ],
     "t": 0.045,
     "material": "metal"
-   }
+   },
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "FR-LONG-TOP",
@@ -6171,7 +5312,9 @@
      ]
     ],
     "t": 0.032
-   }
+   },
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit_frame"
   },
   {
    "id": "FR-LONG-HI",
@@ -6948,7 +6091,9 @@
      ]
     ],
     "t": 0.032
-   }
+   },
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit_frame"
   },
   {
    "id": "FR-RIB",
@@ -9260,7 +8405,9 @@
      0.035
     ]
    ],
-   "bolt_d": 0.016
+   "bolt_d": 0.016,
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "F-RAMP-FRAME",
@@ -9345,7 +8492,9 @@
     ]
    ],
    "bolt_d": 0.016,
-   "suffix": "Gussets"
+   "suffix": "Gussets",
+   "bolts_as": "decal",
+   "bolt_item": "bolt_kit"
   },
   {
    "id": "F-RAMP-TREAD",
@@ -10627,6 +9776,347 @@
    "advance": 0.022
   },
   {
+   "id": "P-S-RL03-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 3.34,
+   "y": 0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL03-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 3.255,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL03-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 3.425,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP03-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 3.34,
+   "y": -0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP03-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 3.255,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP03-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 3.425,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL04-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 5.28,
+   "y": 0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL04-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 5.195,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL04-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 5.365,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP04-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 5.28,
+   "y": -0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP04-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 5.195,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP04-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 5.365,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL05-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 6.56,
+   "y": 0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL05-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 6.475,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL05-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 6.645,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP05-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 6.56,
+   "y": -0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP05-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 6.475,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP05-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 6.645,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL07-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 8.54,
+   "y": 0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL07-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 8.455,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL07-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 8.625,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP07-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 8.54,
+   "y": -0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP07-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 8.455,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP07-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 8.625,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL08-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 9.7,
+   "y": 0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL08-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 9.615,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL08-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 9.785,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP08-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 9.7,
+   "y": -0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP08-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 9.615,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP08-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 9.785,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL10-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 12.48,
+   "y": 0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL10-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 12.395,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL10-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 12.565,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
    "id": "P-S-RP10-H",
    "item": "hatch_small",
    "on": "top",
@@ -10652,6 +10142,68 @@
    "item": "latch_kit",
    "on": "top",
    "x": 12.565,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL11-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 13.14,
+   "y": 0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL11-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 13.055,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RL11-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 13.225,
+   "y": 1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP11-H",
+   "item": "hatch_small",
+   "on": "top",
+   "x": 13.14,
+   "y": -0.99,
+   "scale": 1.308,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP11-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 13.055,
+   "y": -1.075,
+   "mirror": false,
+   "check_overlap": false,
+   "flat": true
+  },
+  {
+   "id": "P-S-RP11-H-latch",
+   "item": "latch_kit",
+   "on": "top",
+   "x": 13.225,
    "y": -1.075,
    "mirror": false,
    "check_overlap": false,

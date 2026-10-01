@@ -374,6 +374,12 @@ python Tools/Design/exterior_kit_layout.py <Loď> [--region pilot]   # -> Design
   trysek); válce podle průměru 8 / 12 / 16 stěn (pod 50 mm, do 150 mm, nad; `hs_exterior_kit.seg_for`,
   `hs_build_part.cyl`). Spáry loftu pod rámem kitu se nestaví (`hs_exterior_kit.frame_cover` → `loft(covered=)`).
   Hlavní žrout nebyly šrouby (4 %), ale modifikátory na hustých kopiích ploch trupu (rám 16 k → 176 k).
+- **Drobný detail kitu jako decaly** (recept `exterior_kit.decal_detail.scope`: seznam ID nebo `"all"`): rozvrh
+  označí šrouby `bolts_as: decal` (`bolt_kit`, `bolt_kit_frame` – typ info s vlastní kovovou barvou, strukturní brával
+  barvu desky) a poklop XK-HATCH nestaví (deska bez díry, `hatch_small` × 1,3 + dvě `latch_kit`); stavba předá body
+  šroubů přes `hs_kit_decals`, `hs_decals` je položí jako rovné čtverce (kontrola hran by je na 25mm pásnici zahodila).
+  Decaly kitu (`kit_*`) nedostávají doprovody pravidla „companions“; `kit_check` → `Export/<Loď>_decals.json`,
+  `test_kit_decals.py`. Data a výkresy beze změny; poklop jako decal se v testu výkresu počítá jako postavený.
 - **Záď z kitu:** rám rampy XK-RAMPFRAME (50 mm, šrouby, styčníky `ramp_gussets`), nášlapné lišty a pryžový práh
   XK-TREAD na dveřích (stojí na desce P-B-07: tloušťka = deska + lišta), pant XK-HINGE, písty XK-PISTON s vidlicovými
   držáky a hadicí (patka na stěně, hlava na čele rámu).
