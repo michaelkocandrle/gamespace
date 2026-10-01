@@ -713,6 +713,14 @@ snímku.
 - d) **UHT: parametr `UFUNCTION` se nesmí jmenovat jako vlastnost třídy.** Přejmenuj parametr.
 - e) Nativní třídy: CDO hodnoty se nekopírují do instancí, assety načítej v konstruktoru.
 - f) Pohyb pawnu sweepuje jen root komponentu (`HullCollision`).
+- g) **UE testy v novém worktree padají bez `SUMMARY`, v logu přetečení zásobníku v `MigrateSettings`.** Bez
+  `GameUserSettings.ini` chybí enginová `Version`, takže `ApplyNonResolutionSettings` → `ValidateSettings` →
+  `LoadSettings` a naše migrace se volaly dokola (stejně by dopadla hra na novém počítači). Opraveno pojistkou
+  `bMigrating` (1. 10. 2026). Kód, který v `LoadSettings` nebo migraci volá `Apply*Settings`, počítej s tím, že
+  se `LoadSettings` může vrátit zpátky do něj.
+- h) **Komponenta lodi bez `BeginPlay` a ticku.** Headless testy spawnují pawn bez `BeginPlay` a `Tick`, takže
+  logika v komponentách (`Ship*Component`) se volá z pawnu; `TickComponent` ani `BeginPlay` komponenty by
+  v testech neproběhly. Pravidla dělení pawnu: `Docs/ARCHITECTURE.md` kap. 2.
 
 ### 9.5 Python v UE
 

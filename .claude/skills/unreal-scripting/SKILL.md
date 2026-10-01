@@ -64,13 +64,17 @@ Spusť ty, kterých se změna týká; po větší změně všechny. Každý tisk
 
 ```powershell
 .\Tools\Test.ps1                    # offline: compileall + testy bez UE a Blenderu (~20 s), totéž běží v CI
-.\Tools\Test.ps1 -UE -Filter *sc2*  # + testy UE podle masky (editor zavřený, C++ zbuildované)
+.\Tools\Test.ps1 -UE -Filter *sc2*,*vtol*  # + testy UE podle masek (editor zavřený, C++ zbuildované)
 .\Tools\Test.ps1 -All               # offline + Blender + všechny testy UE (~30 min)
 ```
 
 Test selže na nenulovém exit kódu, tracebacku, řádku `SUMMARY … FAIL` a u UE i na chybějícím `SUMMARY`
 (test nedoběhl). `run_editor_python.ps1` od 30. 9. 2026 hlásí `RESULT: FAILED` i po `SUMMARY FAILED`
-(dřív jen po výjimce). Logy v `Saved/Tests/<čas>/`.
+(dřív jen po výjimce). Logy v `Saved/Tests/<čas>/`. Stav CI bez `gh` (na stroji není, repo je veřejné):
+`curl -s https://api.github.com/repos/michaelkocandrle/gamespace/actions/runs?per_page=3`.
+
+UE testy, balení, Blender a snímky jen pod zámkem těžkých zdrojů (pravidla v `CLAUDE.md`, autor 30. 9. 2026):
+`.\Tools\HeavyLock.ps1 take -Task "<úkol>"` před použitím, `release` hned po něm, `status` ukáže, kdo ho drží.
 
 | Test (`Tools/Tests/`) | Pokrývá |
 | --- | --- |
@@ -95,7 +99,8 @@ v `build_main_menu.py`.
 Mimo UE (obyčejný `python <soubor>`, všechny spouští `Test.ps1`):
 - `Tools/Assets/tests/test_import_ship_plan.py`, `Tools/Blender/tests/test_ship_export_core.py`,
   `Tools/Blender/tests/test_silhouette_compare.py` (render v Blenderu jen s `-Blender`)
-- `Tools/Tests/test_material_hlsl.py`, `Tools/Tests/test_decal_orientation.py`
+- `Tools/Tests/test_material_hlsl.py`, `Tools/Tests/test_decal_orientation.py`, `Tools/Tests/test_docs_limits.py`
+  (strop 80 řádků `Docs/CURRENT.md`)
 - `Tools/Tests/test_ship_geometry.py` (Blender headless, `Test.ps1 -Blender`)
 
 Headless **nejde** ověřit: vzhled (→ snímky `Tools\Shots.ps1`, skill unreal-shots-and-look), zvuk,

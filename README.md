@@ -47,6 +47,30 @@ git lfs install
 | `EngineAudio` | Thruster loop, not spatialised. Hum, boost and cruise layers are created at runtime next to it |
 | `SpaceDust`   | `USpaceDustComponent`: 400 specks in a 70 m box around the camera that stretch into streaks with speed |
 
+### Code layout
+
+`ASpaceshipPawn` holds the tuning (its UPROPERTYs, set from `<Ship>_setup.json`), the scene components above,
+the flight core (`UpdateAngularMotion`, `UpdateLinearMotion`, the environment) and the order of a frame:
+`Tick` runs `StepFlight` (environment, master mode, VTOL, gear, landing, boost, afterburner, quantum, free look,
+then motion) and then the presentation. The rest is split out (1. 10. 2026,
+`Docs/Reviews/2026-09-30_spaceshippawn_split_plan.md`):
+
+| File | What |
+| ---- | ---- |
+| `ShipFlightModel.h/.cpp` | `FShipFlightModel`: stateless maths - pilot G limit, environment acceleration, heat, touchdown rules, ground friction, levelling, gear pose, quantum speed, arrival and fuel |
+| `ShipSystemsComponent` | master mode and its switch, speed limiter, boost and afterburner (`FShipReserve`), VTOL |
+| `ShipQuantumComponent` | the quantum drive: destination, blockers, spool, calibration, the jump and its fuel |
+| `ShipLandingComponent` | the touchdown state machine, the ground as probed, landing gear, precision mode |
+| `ShipPresentationComponent` | camera effects, engine sound, thruster glow and strobes, dust / tunnel / sparks, the inside view |
+| `ShipBoardingComponent` | getting out, standing up from the seat, the walked interior and its gravity |
+| `ShipInputComponent` | Enhanced Input assets, bindings and key handlers |
+| `SpaceshipPawnDebug.cpp` | the `Debug*` test and shot API and the `space.*` console commands |
+
+The components have no tick and nothing in `BeginPlay` (the headless tests spawn the pawn without either); the
+pawn calls them in a fixed order. Every function Python, the HUD or another class calls is still on the pawn,
+as a forwarder where the logic moved. The first four take the pawn's tuning as small structs; presentation,
+boarding and input read the pawn directly (friends of `ASpaceshipPawn`), since they touch most of its parts.
+
 ### Flight model
 
 Motion is integrated by hand in `Tick` rather than simulated by Chaos, which keeps the feel

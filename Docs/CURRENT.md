@@ -32,9 +32,8 @@ meshů), každá session balí do své složky, hra z main zabalená v `C:\games
 
 ## Paralelní práce
 
-- **Druhá session rozděluje `ASpaceshipPawn`** ve worktree `C:\gamespace\gamespace-audit` podle
-  `Docs/Reviews/2026-09-30_spaceshippawn_split_plan.md`. Hlavní session do `SpaceshipPawn.h/.cpp` a souvisejících
-  souborů nesahá; větev sloučí a pustí `.\Tools\Test.ps1 -All`, až druhá session skončí. Balí do `Builds_audit`.
+- **Rozdělení `ASpaceshipPawn` je sloučené do main** (1. 10. 2026; kroky 1–9, průběh na konci
+  `Docs/Reviews/2026-09-30_spaceshippawn_split_plan.md`); autor hru z větve ručně otestoval.
 
 ## Čeká na rozhodnutí autora
 

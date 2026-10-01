@@ -5,6 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "CelestialBody.h"
+#include "ShipFlightModel.h"
+#include "ShipSystemsComponent.h"
+#include "ShipQuantumComponent.h"
+#include "ShipLandingComponent.h"
+#include "ShipPresentationComponent.h"
+#include "ShipBoardingComponent.h"
+#include "ShipInputComponent.h"
 #include "SpaceshipPawn.generated.h"
 
 class UAudioComponent;
@@ -40,109 +47,6 @@ enum class ESpaceshipAxis : uint8
 	Lift,
 	/** +1 roll clockwise seen from the cockpit, -1 counter-clockwise. */
 	Roll
-};
-
-/** Touchdown state machine. */
-UENUM(BlueprintType)
-enum class ELandingState : uint8
-{
-	/** Normal flight physics. */
-	Flying,
-	/** All touchdown conditions hold; waiting out LandingConfirmSeconds. */
-	Settling,
-	/** Resting on the ground: aligned to the terrain, held in place, flight physics off. */
-	Landed
-};
-
-/** The first reason the ship cannot touch down right now. */
-UENUM(BlueprintType)
-enum class ELandingBlocker : uint8
-{
-	None,
-	/** No walkable body below within LandingProbeAltitudeM. */
-	NoSurface,
-	/** Hull more than LandingMaxGapCm above the ground. */
-	TooHigh,
-	/** Ground steeper than MaxLandingSlopeDeg. */
-	TooSteep,
-	/** Faster than LandingMaxSpeed. */
-	TooFast,
-	/** Hull tilted more than LandingMaxTiltDeg against the ground. */
-	Tilted,
-	/** Thrust or upward lift held at TakeoffInputThreshold or more. */
-	EngineInput,
-	/** Just took off; TakeoffCooldownSeconds not over. */
-	TakeoffCooldown,
-	/** Landing gear not fully down (N). The ship can rest on its belly but never counts as landed. */
-	GearUp
-};
-
-/** Landing gear (N). Moving between the ends takes GearDeploySeconds. */
-UENUM(BlueprintType)
-enum class EGearState : uint8
-{
-	Retracted,
-	Extending,
-	Deployed,
-	Retracting
-};
-
-/** A hull material slot whose EmissiveStrength the ship animates (thrusters, strobes). */
-struct FShipGlowMaterial
-{
-	TWeakObjectPtr<UMaterialInstanceDynamic> Material;
-	float BaseStrength = 0.f;
-	float Applied = -1.f;
-};
-
-/**
- * Quantum drive (SC-4), after Star Citizen's quantum travel (starcitizenreference/QuantumTravel_VideoNotes.md):
- * in NAV with a destination picked, the drive spools and calibrates on its own; holding the left mouse
- * button then jumps. It replaced the earlier cruise drive (J), which Star Citizen does not have.
- */
-UENUM(BlueprintType)
-enum class EQuantumState : uint8
-{
-	/** Nothing to do: SCM, no destination, or blocked (see EQuantumBlocker). */
-	Idle,
-	/** Spooling and calibrating: SPOOLING n% / CALIBRATING n% on the HUD. */
-	Charging,
-	/** Spooled, calibrated and nothing in the way: hold the left mouse button to jump. */
-	Ready,
-	/** In the jump: the ship cannot be steered and flies straight at the destination. */
-	Traveling,
-	/** Out of a jump: the drive cools for QuantumCooldownSeconds before the next one. */
-	Cooling
-};
-
-/** Why the quantum drive will not get ready (or why the last jump ended early). */
-UENUM(BlueprintType)
-enum class EQuantumBlocker : uint8
-{
-	None,
-	/** The drive only works in NAV (B). */
-	NeedsNav,
-	/** No destination in front of the nose. */
-	NoTarget,
-	/** The destination is closer than QuantumMinJumpKm. */
-	TooClose,
-	/** A body lies between the ship and the destination. */
-	Obstructed,
-	/** Not enough quantum fuel for the distance. */
-	NoFuel,
-	Landed,
-	/** The pilot left NAV mid-jump. */
-	Pilot
-};
-
-/** Star Citizen master modes: what the ship is set up for. B switches, taking MasterModeSwitchSeconds. */
-UENUM(BlueprintType)
-enum class EMasterMode : uint8
-{
-	/** Space Combat Maneuvering: combat speed, full manoeuvrability. */
-	SCM,
-	/** Navigation: much higher speed, reduced turning and manoeuvring thrust, quantum drive available. */
-	NAV
 };
 
 /**
@@ -198,6 +102,11 @@ class GAMESPACE_API ASpaceshipPawn : public APawn
 {
 	GENERATED_BODY()
 
+	/** Read the pawn's tuning, parts and state directly (see their class comments). */
+	friend class UShipPresentationComponent;
+	friend class UShipBoardingComponent;
+	friend class UShipInputComponent;
+
 public:
 	ASpaceshipPawn();
 
@@ -244,14 +153,14 @@ public:
 
 	/** The master mode in force. While switching it is still the old one. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
-	EMasterMode GetMasterMode() const { return MasterMode; }
+	EMasterMode GetMasterMode() const { return Systems->GetMasterMode(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
-	bool IsMasterModeSwitching() const { return bMasterModeSwitching; }
+	bool IsMasterModeSwitching() const { return Systems->IsMasterModeSwitching(); }
 
 	/** The mode being switched to while IsMasterModeSwitching, else the current one. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
-	EMasterMode GetPendingMasterMode() const { return bMasterModeSwitching ? PendingMasterMode : MasterMode; }
+	EMasterMode GetPendingMasterMode() const { return Systems->GetPendingMasterMode(); }
 
 	/** Switching progress, 0..1; 0 when not switching. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
@@ -267,7 +176,7 @@ public:
 
 	/** Speed limiter as a fraction of the master mode's top speed, SpeedLimiterMin..1. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
-	float GetSpeedLimiter() const { return SpeedLimiterFraction; }
+	float GetSpeedLimiter() const { return Systems->GetSpeedLimiter(); }
 
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|IFCS")
 	void SetSpeedLimiter(float Fraction);
@@ -346,43 +255,43 @@ public:
 	void GetThrusterCapacity(FVector& OutPositive, FVector& OutNegative) const { OutPositive = ThrusterCapPositive; OutNegative = ThrusterCapNegative; }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
-	bool IsBoosting() const { return bBoostActive; }
+	bool IsBoosting() const { return Systems->IsBoostActive(); }
 
 	/** Boost energy, 0..1. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
-	float GetBoostEnergy() const { return BoostEnergy; }
+	float GetBoostEnergy() const { return Systems->GetBoostEnergy(); }
 
 	/** Boost ran dry and waits for BoostUnlockFraction of energy. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Boost")
-	bool IsBoostLocked() const { return bBoostLocked; }
+	bool IsBoostLocked() const { return Systems->IsBoostLocked(); }
 
 	/** G-Safe actually limiting right now: switched on (K) and not suspended by boost. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|IFCS")
-	bool IsGSafeActive() const { return bGSafe && !bBoostActive; }
+	bool IsGSafeActive() const { return bGSafe && !Systems->IsBoostActive(); }
 
 	/** Afterburner burning this frame (Tab held, W forward, SCM, fuel left). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
-	bool IsAfterburnerActive() const { return bAfterburnerActive; }
+	bool IsAfterburnerActive() const { return Systems->IsAfterburnerActive(); }
 
 	/** Afterburner fuel, 0..1. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
-	float GetAfterburnerFuel() const { return AfterburnerFuel; }
+	float GetAfterburnerFuel() const { return Systems->GetAfterburnerFuel(); }
 
 	/** The afterburner ran dry and waits for AfterburnerUnlockFraction of fuel. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
-	bool IsAfterburnerLocked() const { return bAfterburnerLocked; }
+	bool IsAfterburnerLocked() const { return Systems->IsAfterburnerLocked(); }
 
 	/** How much of the afterburner's raised speed limit is in force, 0..1 (spools in, fades out). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Afterburner")
-	float GetAfterburnerBlend() const { return AfterburnerBlend; }
+	float GetAfterburnerBlend() const { return Systems->GetAfterburnerBlend(); }
 
 	/** Afterburner held (Tab). Tests call it directly; the key does the same. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Afterburner")
-	void SetAfterburnerHeld(bool bHeld) { bAfterburnerHeld = bHeld; }
+	void SetAfterburnerHeld(bool bHeld) { Systems->SetAfterburnerHeld(bHeld); }
 
 	/** Boost held (Shift). For tests and the screenshot runner; the key does the same. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Boost")
-	void SetBoostHeld(bool bHeld) { bBoostHeld = bHeld; }
+	void SetBoostHeld(bool bHeld) { Systems->SetBoostHeld(bHeld); }
 
 	/** Tests and screenshots: put the ship at this velocity (world cm/s) without flying there. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
@@ -398,11 +307,11 @@ public:
 
 	/** Tests: spool and calibration full at once (the ship still has to be pointed and unblocked). */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
-	void DebugFinishQuantumCharge() { QuantumSpool = 1.f; QuantumCalibration = 1.f; }
+	void DebugFinishQuantumCharge() { Quantum->FinishCharge(); }
 
 	/** Tests: set the quantum fuel, 0..1. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
-	void DebugSetQuantumFuel(float Fuel) { QuantumFuel = FMath::Clamp(Fuel, 0.f, 1.f); }
+	void DebugSetQuantumFuel(float Fuel) { Quantum->SetFuel(Fuel); }
 
 	/** Tests and screenshots: place the mouse virtual joystick cursor. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
@@ -418,10 +327,10 @@ public:
 
 	/** MPC_ShipView.InsideView as this ship last set it: 1 = the player's camera is inside its interior. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Debug")
-	float DebugGetInsideView() const { return InsideView; }
+	float DebugGetInsideView() const { return Presentation->GetInsideView(); }
 
 	/** Fixture lights (Light_fix_*): -1 automatic (on only with the camera inside), 0 forced off, 1 forced on. */
-	void DebugSetFixtureLightMode(int32 Mode) { FixtureLightMode = Mode; bFixtureLightsDirty = true; }
+	void DebugSetFixtureLightMode(int32 Mode) { Presentation->SetFixtureLightMode(Mode); }
 
 	/** Shots / tuning: cockpit key and fill light, display glow (candela) and a multiplier on the interior's
 	 * base colour. Negative leaves that one as it is. */
@@ -430,22 +339,22 @@ public:
 
 	/** Tests and screenshots: finish a master mode switch at once instead of waiting it out. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
-	void DebugFinishMasterModeSwitch() { if (bMasterModeSwitching) { MasterMode = PendingMasterMode; bMasterModeSwitching = false; MasterModeTimer = 0.f; } }
+	void DebugFinishMasterModeSwitch() { Systems->FinishMasterModeSwitch(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	EQuantumState GetQuantumState() const { return QuantumState; }
+	EQuantumState GetQuantumState() const { return Quantum->GetState(); }
 
 	/** Why the drive is not getting ready, or why the last jump ended early. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	EQuantumBlocker GetQuantumBlocker() const { return QuantumBlocker; }
+	EQuantumBlocker GetQuantumBlocker() const { return Quantum->GetBlocker(); }
 
 	/** Spool, 0..1: fills in NAV with a destination, whether or not the nose is on it. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	float GetQuantumSpool() const { return QuantumSpool; }
+	float GetQuantumSpool() const { return Quantum->GetSpool(); }
 
 	/** Calibration, 0..1: fills only while the nose is within QuantumAlignDeg of the destination. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	float GetQuantumCalibration() const { return QuantumCalibration; }
+	float GetQuantumCalibration() const { return Quantum->GetCalibration(); }
 
 	/** Cooling after a jump, 0..1 (1 = cool again). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
@@ -461,27 +370,27 @@ public:
 
 	/** Quantum fuel, 0..1. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	float GetQuantumFuel() const { return QuantumFuel; }
+	float GetQuantumFuel() const { return Quantum->GetFuel(); }
 
 	/** Destination: whether there is one, its name, where it is (its centre) and how far to where the jump would end, cm. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	bool HasQuantumTarget() const { return QuantumTarget.IsValid(); }
+	bool HasQuantumTarget() const { return Quantum->HasTarget(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	FText GetQuantumTargetName() const { return QuantumTargetName; }
+	FText GetQuantumTargetName() const { return Quantum->GetTargetName(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	FVector GetQuantumTargetLocation() const { return QuantumTargetCentre; }
+	FVector GetQuantumTargetLocation() const { return Quantum->GetTargetCentre(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	double GetQuantumTargetDistance() const { return QuantumTargetDistanceCm; }
+	double GetQuantumTargetDistance() const { return Quantum->GetTargetDistanceCm(); }
 
 	/**
 	 * 0..1: how much of the quantum look is showing (the tunnel, the view widening, the drone). Rises
 	 * over the first second of a jump and falls over the last.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	float GetQuantumBlend() const { return QuantumBlend; }
+	float GetQuantumBlend() const { return Presentation->GetQuantumBlend(); }
 
 	/** Tests: hold (or let go of) the engage button, as the left mouse button does. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Quantum")
@@ -600,49 +509,49 @@ public:
 	float GetHeat() const { return Heat; }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	ELandingState GetLandingState() const { return LandingState; }
+	ELandingState GetLandingState() const { return Landing->GetState(); }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	bool IsLanded() const { return LandingState == ELandingState::Landed; }
+	bool IsLanded() const { return Landing->IsLanded(); }
 
 	/** Who gets out (and who walks the ship's interior). */
 	TSubclassOf<APawn> GetPilotCharacterClass() const { return PilotCharacterClass; }
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	ELandingBlocker GetLandingBlocker() const { return LandingBlocker; }
+	ELandingBlocker GetLandingBlocker() const { return Landing->GetBlocker(); }
 
 	/** Settling progress towards Landed, 0..1. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	float GetLandingProgress() const { return FMath::Clamp(SettleSeconds / FMath::Max(LandingConfirmSeconds, 0.01f), 0.f, 1.f); }
+	float GetLandingProgress() const { return Landing->GetProgress(LandingConfirmSeconds); }
 
 	/** Whether the ground below was probed this frame (low enough over a walkable body). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	bool HasGroundInfo() const { return bSurfaceValid; }
+	bool HasGroundInfo() const { return Landing->HasGroundInfo(); }
 
 	/** Gap between hull and ground straight down, cm; negative when nothing is within the probe. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	float GetGroundGapCm() const { return GroundGapCm; }
+	float GetGroundGapCm() const { return Landing->GetGroundGapCm(); }
 
 	/** Terrain slope under the ship, degrees from level. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	float GetGroundSlopeDeg() const { return GroundSlopeDeg; }
+	float GetGroundSlopeDeg() const { return Landing->GetGroundSlopeDeg(); }
 
 	/** Angle between the ship's up and the terrain normal, degrees. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
-	float GetGroundTiltDeg() const { return GroundTiltDeg; }
+	float GetGroundTiltDeg() const { return Landing->GetGroundTiltDeg(); }
 
 	// --- Landing gear and precision mode (SC-2a) --------------------------------------------------
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
-	EGearState GetGearState() const { return GearState; }
+	EGearState GetGearState() const { return Landing->GetGearState(); }
 
 	/** Gear fully down and locked: the only state the ship can land in. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
-	bool IsGearDeployed() const { return GearState == EGearState::Deployed; }
+	bool IsGearDeployed() const { return Landing->IsGearDeployed(); }
 
 	/** How far out the gear is, 0 stowed .. 1 down and locked (linear in time). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
-	float GetGearDeploy() const { return GearDeploy; }
+	float GetGearDeploy() const { return Landing->GetGearDeploy(); }
 
 	/**
 	 * Lowers (true) or raises the gear; it moves over GearDeploySeconds and can reverse halfway.
@@ -658,7 +567,7 @@ public:
 
 	/** Seconds the "gear stays down while landed" refusal is still worth showing. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
-	float GetGearMessageSeconds() const { return GearMessageSeconds; }
+	float GetGearMessageSeconds() const { return Landing->GetGearMessageSeconds(); }
 
 	/** How far below the hull's collision box the gear reaches right now, cm (GearExtensionCm x deploy). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Gear")
@@ -720,18 +629,18 @@ public:
 
 	/** Precision mode switched on (gear, or P). In effect only in SCM, see IsPrecisionActive. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Precision")
-	bool IsPrecisionModeOn() const { return bPrecisionMode; }
+	bool IsPrecisionModeOn() const { return Landing->IsPrecisionModeOn(); }
 
 	/** Precision mode in effect: switched on and in SCM (NAV is for travel and ignores it). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Precision")
-	bool IsPrecisionActive() const { return bPrecisionMode && MasterMode == EMasterMode::SCM; }
+	bool IsPrecisionActive() const { return Landing->IsPrecisionModeOn() && Systems->GetMasterMode() == EMasterMode::SCM; }
 
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Precision")
 	void SetPrecisionMode(bool bOn);
 
 	/** P: precision mode on / off by hand (the gear sets it too). */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Precision")
-	void TogglePrecisionMode() { SetPrecisionMode(!bPrecisionMode); }
+	void TogglePrecisionMode() { SetPrecisionMode(!Landing->IsPrecisionModeOn()); }
 
 	/**
 	 * VTOL (G), SC-2b. The ship stands on its manoeuvring thrusters instead of flying on its main
@@ -742,15 +651,15 @@ public:
 	 * VtolTransitionSeconds, so nothing snaps - IsVtolOn is the switch, GetVtolBlend the amount.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|VTOL")
-	bool IsVtolOn() const { return bVtolMode; }
+	bool IsVtolOn() const { return Systems->IsVtolOn(); }
 
 	/** 0 fully on the mains .. 1 fully on the lift thrusters. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|VTOL")
-	float GetVtolBlend() const { return VtolBlend; }
+	float GetVtolBlend() const { return Systems->GetVtolBlend(); }
 
 	/** Switched on and in SCM: NAV is for travel and turns VTOL off. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|VTOL")
-	bool IsVtolActive() const { return bVtolMode && MasterMode == EMasterMode::SCM; }
+	bool IsVtolActive() const { return Systems->IsVtolOn() && Systems->GetMasterMode() == EMasterMode::SCM; }
 
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|VTOL")
 	void SetVtol(bool bOn);
@@ -765,7 +674,7 @@ public:
 
 	/** G: VTOL on / off. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|VTOL")
-	void ToggleVtol() { SetVtol(!bVtolMode); }
+	void ToggleVtol() { SetVtol(!Systems->IsVtolOn()); }
 
 	/**
 	 * The touchdown rule with the gear: GearUp unless the gear is down and locked, otherwise
@@ -850,7 +759,7 @@ public:
 	void SetInteriorWalk(bool bWalking);
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
-	bool IsInteriorWalked() const { return bInteriorWalked; }
+	bool IsInteriorWalked() const { return Boarding->IsInteriorWalked(); }
 
 	/** A walk socket in world space (WalkSeat, WalkRamp), or the actor's transform when the mesh lacks it. */
 	FTransform GetWalkSocketTransform(FName Socket) const;
@@ -967,6 +876,30 @@ protected:
 	/** Engine loop. Started and stopped by UpdateEngineAudio, never auto-activated. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UAudioComponent> EngineAudio;
+
+	/** Systems state: master mode, speed limiter, boost, afterburner and VTOL. Their tuning stays here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipSystemsComponent> Systems;
+
+	/** Quantum drive state: destination, spool, calibration, the jump and its fuel. Its tuning stays here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipQuantumComponent> Quantum;
+
+	/** Landing state: touchdown, the ground below, the gear and precision mode. Its tuning stays here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipLandingComponent> Landing;
+
+	/** Presentation: camera effects, engine sound, ship lights, dust and the inside view. Its tuning stays here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipPresentationComponent> Presentation;
+
+	/** Getting out, walking in and boarding: exit spots, the walked interior, its gravity. Tuning stays here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipBoardingComponent> Boarding;
+
+	/** Enhanced Input: the bindings, the input assets and the key handlers. The actions stay here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipInputComponent> ShipInput;
 
 	/** What the gear legs are built from (/Engine/BasicShapes/Cylinder): placeholder art until a modelled gear replaces it. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Gear")
@@ -1156,10 +1089,6 @@ protected:
 	/** Digital, pressed: the right MFD's next page (F2, or ]; with Alt the previous one). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> MfdRightAction;
-
-	/** Maps keys the authored flight context lacks (F, V, J, X, B, K, L, N, P, right mouse button, wheel). */
-	UPROPERTY(Transient)
-	TObjectPtr<UInputMappingContext> InteractMappingContext;
 
 	/** Who gets out. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Exit")
@@ -1959,40 +1888,8 @@ protected:
 	FVector AngularVelocity = FVector::ZeroVector;
 
 private:
-	void HandleAxisTriggered(const FInputActionValue& Value, ESpaceshipAxis Axis);
-	void HandleAxisCompleted(const FInputActionValue& Value, ESpaceshipAxis Axis);
-	void HandleLook(const FInputActionValue& Value);
-	void HandleMouseLook(const FInputActionValue& Value);
-	void HandleToggleCamera(const FInputActionValue& Value);
-	void HandleBoost(const FInputActionValue& Value);
-	void HandleBoostCompleted(const FInputActionValue& Value);
-	void HandleInteract(const FInputActionValue& Value);
-	void HandleToggleHud(const FInputActionValue& Value);
-	void HandleFreeLookStarted(const FInputActionValue& Value);
-	void HandleFreeLookCompleted(const FInputActionValue& Value);
-	void HandleFlightAssist(const FInputActionValue& Value);
-	void HandleQuantumEngageStarted(const FInputActionValue& Value);
-	void HandleQuantumEngageCompleted(const FInputActionValue& Value);
-	void HandleAllStop(const FInputActionValue& Value);
-	void HandleAllStopCompleted(const FInputActionValue& Value);
-	void HandleCameraZoom(const FInputActionValue& Value);
-	void HandleMasterMode(const FInputActionValue& Value);
-	void HandleSpeedLimiter(const FInputActionValue& Value);
-	void HandleGSafe(const FInputActionValue& Value);
-	void HandleComStab(const FInputActionValue& Value);
-	void HandleAfterburner(const FInputActionValue& Value);
-	void HandleAfterburnerCompleted(const FInputActionValue& Value);
-	void HandleLandingGear(const FInputActionValue& Value);
-	void HandlePrecision(const FInputActionValue& Value);
-	void HandleVtol(const FInputActionValue& Value);
-	void HandleDashboardFocusStarted(const FInputActionValue& Value);
-	void HandleDashboardFocusCompleted(const FInputActionValue& Value);
 	/** The cockpit camera's turn: free look on top of the dashboard focus. */
 	void ApplyCockpitRotation();
-	void HandleMfdLeft(const FInputActionValue& Value);
-	void HandleMfdRight(const FInputActionValue& Value);
-	/** Pages an MFD (0 left, 1 right): forward, or back with Alt held. */
-	void CycleMfdPage(int32 Display);
 	/** Moves the gear towards its commanded end and poses the legs. */
 	void UpdateGear(float DeltaSeconds);
 
@@ -2009,8 +1906,6 @@ private:
 	/** Puts the cockpit key and fill lights at the eye + their offsets (BeginPlay, and when the eye moves). */
 	void PlaceCockpitLights();
 	void UpdateAfterburner(float DeltaSeconds);
-	/** Alt held on the controlling player's keyboard: the wheel zooms instead of setting the limiter. */
-	bool IsAltHeld() const;
 	void SetFreeLookHeld(bool bHeld);
 	void UpdateFreeLook(float DeltaSeconds);
 	void ClearPilotInput();
@@ -2018,39 +1913,25 @@ private:
 	void UpdateMasterMode(float DeltaSeconds);
 	void UpdateBoost(float DeltaSeconds);
 	void UpdateQuantum(float DeltaSeconds);
-	/** Picks the destination in front of the nose and measures it (sets QuantumTarget* members). */
-	void UpdateQuantumTarget();
-	/** What stops the drive from getting ready now, for the current destination. */
-	EQuantumBlocker EvaluateQuantum() const;
 	void BeginQuantumJump();
 	void EndQuantumJump(EQuantumBlocker Reason);
 	/** One frame of a jump: straight at the arrival point, no steering, no thrusters. */
 	void UpdateQuantumTravel(float DeltaSeconds);
 	/** Everything a flight frame does before the camera and sound: shared by Tick and DebugStepFlight. */
 	void StepFlight(float DeltaSeconds);
-	void UpdateCameraEffects(float DeltaSeconds);
-	void UpdateSpaceDust(float DeltaSeconds);
-	/**
-	 * Glass reflection by where the camera is (author 26. 9. 2026): MPC_ShipView.InsideView = 1 while the
-	 * player's camera is inside this ship's interior (the "Interior*" parts' bounds, or the cockpit camera
-	 * of a ship without one): the canopy reflects weakly; 0 in the chase camera and outside: strongly.
-	 */
-	void UpdateViewCollection();
-	void SetupShipLights();
-	void UpdateShipLights(float DeltaSeconds);
-	void SetupAudioLayers();
 	UAudioComponent* PlayOneShot(USoundBase* Sound, float VolumeScale = 1.f);
-	bool IsExitSpotFree(const FVector& Location, const FVector& Up, float CapsuleRadius, float CapsuleHalfHeight) const;
-	/** Start moved along Direction (flattened onto the ship's floor plane) until GetHullClearance reaches ExitClearanceCm. */
-	FVector PushClearOfHull(const FVector& Start, const FVector& Direction, float CapsuleRadius, float CapsuleHalfHeight) const;
 
-	/** Fills in any unassigned input asset: first from /Game/Input, then procedurally. */
-	void ResolveInputAssets();
-	void BuildProceduralInputAssets();
+	/** This ship's tuning in the shape FShipFlightModel takes (the UPROPERTYs stay here). */
+	FShipFlightModel::FDrag GetDragTuning() const;
+	FShipFlightModel::FHeat GetHeatTuning() const;
+	FShipFlightModel::FLandingLimits GetLandingLimits() const;
+	FShipLandingRules GetLandingRules() const;
+	FShipFlightModel::FGearShape GetGearShape() const;
+	FShipFlightModel::FQuantumDrive GetQuantumDrive() const;
+	FShipQuantumRules GetQuantumRules() const;
 
 	void UpdateAngularMotion(float DeltaSeconds);
 	void UpdateLinearMotion(float DeltaSeconds);
-	void UpdateEngineAudio(float DeltaSeconds);
 	void UpdateEnvironment(float DeltaSeconds);
 	void UpdateLanding(float DeltaSeconds);
 	void UpdateLandedMotion(float DeltaSeconds);
@@ -2081,24 +1962,6 @@ private:
 	/** What the cameras show, easing towards FreeLookTarget. */
 	FVector2D FreeLookAngles = FVector2D::ZeroVector;
 
-	/** Smoothed engine load and boost blend, each in [0, 1], driving the engine sound. */
-	float EngineLoad = 0.f;
-	float EngineBoostBlend = 0.f;
-	float HumBlend = 0.f;
-
-	bool bBoostHeld = false;
-	bool bBoostActive = false;
-	bool bBoostLocked = false;
-	float BoostEnergy = 1.f;
-	float BoostRechargeWait = 0.f;
-
-	bool bAfterburnerHeld = false;
-	bool bAfterburnerActive = false;
-	bool bAfterburnerLocked = false;
-	float AfterburnerFuel = 1.f;
-	float AfterburnerRefillWait = 0.f;
-	float AfterburnerBlend = 0.f;
-
 	float EngineDemand = 0.f;
 
 	/** See GetThrusterAcceleration / GetThrusterCapacity. */
@@ -2107,43 +1970,8 @@ private:
 	FVector ThrusterCapNegative = FVector::ZeroVector;
 
 	bool bSpaceBrakeHeld = false;
-	EMasterMode MasterMode = EMasterMode::SCM;
-	EMasterMode PendingMasterMode = EMasterMode::SCM;
-	bool bMasterModeSwitching = false;
-	float MasterModeTimer = 0.f;
-	float SpeedLimiterFraction = 1.f;
 	float GForce = 0.f;
 	float SlipAngleDeg = 0.f;
-
-	EQuantumState QuantumState = EQuantumState::Idle;
-	EQuantumBlocker QuantumBlocker = EQuantumBlocker::NoTarget;
-	float QuantumSpool = 0.f;
-	float QuantumCalibration = 0.f;
-	float QuantumCooldownTimer = 0.f;
-	float QuantumEngageTimer = 0.f;
-	bool bQuantumEngageHeld = false;
-	float QuantumFuel = 1.f;
-	/** The destination: its actor, name, centre, radius, and the jump that would reach it. */
-	TWeakObjectPtr<AActor> QuantumTarget;
-	FText QuantumTargetName;
-	FVector QuantumTargetCentre = FVector::ZeroVector;
-	double QuantumTargetRadiusCm = 0.0;
-	double QuantumTargetDistanceCm = 0.0;
-	/** While traveling: the jump's length at the start, for progress and fuel. */
-	double QuantumJumpLengthCm = 0.0;
-	/** Seconds since the jump began, for the acceleration ramp. */
-	float QuantumTravelSeconds = 0.f;
-
-	/** Eased 0..1 blends driving camera, lights and sound. */
-	float BoostBlend = 0.f;
-	float AfterburnerFeel = 0.f;
-	/** The level's sun and its own intensity, for QuantumSunScale. */
-	TWeakObjectPtr<class UDirectionalLightComponent> QuantumSun;
-	float QuantumSunBaseIntensity = -1.f;
-	TWeakObjectPtr<class USkyLightComponent> QuantumSky;
-	float QuantumSkyBaseIntensity = -1.f;
-	float QuantumBlend = 0.f;
-	float CameraKick = 0.f;
 
 	float CameraZoom = 1.f;
 	float CameraZoomTarget = 1.f;
@@ -2155,15 +1983,6 @@ private:
 	float BaseChaseFov = 90.f;
 	float BaseCockpitFov = 90.f;
 
-	TArray<FShipGlowMaterial> ThrusterMaterials;
-	TArray<FShipGlowMaterial> StrobeMaterials;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UAudioComponent> EngineHumAudio;
-	UPROPERTY(Transient)
-	TObjectPtr<UAudioComponent> BoostAudio;
-	UPROPERTY(Transient)
-	TObjectPtr<UAudioComponent> QuantumAudio;
 	UPROPERTY(Transient)
 	TObjectPtr<UAudioComponent> QuantumChargeAudio;
 
@@ -2172,15 +1991,6 @@ private:
 	FCelestialEnvironment Environment;
 	bool bHasEnvironment = false;
 	TWeakObjectPtr<ACelestialBody> NearestBody;
-
-	EGearState GearState = EGearState::Retracted;
-	float GearDeploy = 0.f;
-	float GearMessageSeconds = 0.f;
-	bool bPrecisionMode = false;
-
-	/** VTOL switched on (G), and how far the thrust has moved to the lift thrusters, 0..1. */
-	bool bVtolMode = false;
-	float VtolBlend = 0.f;
 
 	/** One visible gear leg: pivot at the socket, a sleeve, a piston and a foot pad. */
 	struct FGearLeg
@@ -2203,16 +2013,6 @@ private:
 	/** Deploy fraction the legs were last posed at (-1: never). */
 	float GearPosed = -1.f;
 
-	ELandingState LandingState = ELandingState::Flying;
-	ELandingBlocker LandingBlocker = ELandingBlocker::NoSurface;
-	float SettleSeconds = 0.f;
-	float TakeoffCooldown = 0.f;
-	bool bSurfaceValid = false;
-	bool bGroundContact = false;
-	float GroundGapCm = -1.f;
-	float GroundSlopeDeg = 0.f;
-	float GroundTiltDeg = 0.f;
-	FVector GroundNormal = FVector::UpVector;
 	float Heat = 0.f;
 	FVector ChaseCameraBaseLocation = FVector::ZeroVector;
 	FVector CockpitCameraBaseLocation = FVector::ZeroVector;
@@ -2228,35 +2028,4 @@ private:
 	/** Ticks left with camera lag switched off after SnapCameraToShip. */
 	int32 CameraSnapTicks = 0;
 
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialParameterCollection> ViewCollection;
-	/** The interior parts' bounds in actor space (cm); invalid when the ship has none. */
-	FBox InteriorBoundsLocal = FBox(ForceInit);
-	bool bInteriorBoundsReady = false;
-	float InsideView = 0.f;
-	/** The Light_fix_* components (hs_fixture_lights.py), on only while the camera is inside the ship. */
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<ULocalLightComponent>> FixtureLights;
-	bool bFixtureLightsOn = true;
-	int32 FixtureLightMode = -1;
-	bool bFixtureLightsDirty = false;
-	/** The interior meshes (Interior, InteriorKit, InteriorDecals): out of the sun's shadows while the interior
-	 * lighting is on. The hull still shadows the rooms; non-Nanite, they cost ~2 ms of the sun's virtual shadow maps
-	 * in a corridor view (28. 9. 2026). The kit rooms' parts (InteriorMod_*) are off the sun's lighting channel. */
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<UStaticMeshComponent>> InteriorShadowMeshes;
-	/** The fixture lights imported with shadows (a kit room's main lights, kit_rooms.py): shadowed only under the
-	 * interior lighting (MegaLights traces them); flown, their shadow maps cost ~4-5 ms (28. 9. 2026). */
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<ULocalLightComponent>> ShadowedFixtureLights;
-	/** Fixture lights tagged InteriorOnly (kit_rooms.py: the component bays' lights): on only under the interior
-	 * lighting; flown, every unshadowed light costs its full screen area (~0.6 ms for a corridor's bays, 29. 9. 2026). */
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<ULocalLightComponent>> InteriorOnlyLights;
-	int32 InteriorShadowState = -1;
-	/** Someone walks inside (SetInteriorWalk). */
-	bool bInteriorWalked = false;
-	/** The gravity volume riding along while the interior is walked. */
-	UPROPERTY(Transient)
-	TObjectPtr<class ASpaceGravityVolume> WalkGravity;
 };
