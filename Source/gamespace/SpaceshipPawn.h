@@ -10,6 +10,7 @@
 #include "ShipQuantumComponent.h"
 #include "ShipLandingComponent.h"
 #include "ShipPresentationComponent.h"
+#include "ShipBoardingComponent.h"
 #include "SpaceshipPawn.generated.h"
 
 class UAudioComponent;
@@ -100,8 +101,9 @@ class GAMESPACE_API ASpaceshipPawn : public APawn
 {
 	GENERATED_BODY()
 
-	/** Reads the look tuning, the cameras and the flight state directly (see UShipPresentationComponent). */
+	/** Read the pawn's tuning, parts and state directly (see their class comments). */
 	friend class UShipPresentationComponent;
+	friend class UShipBoardingComponent;
 
 public:
 	ASpaceshipPawn();
@@ -755,7 +757,7 @@ public:
 	void SetInteriorWalk(bool bWalking);
 
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
-	bool IsInteriorWalked() const { return bInteriorWalked; }
+	bool IsInteriorWalked() const { return Boarding->IsInteriorWalked(); }
 
 	/** A walk socket in world space (WalkSeat, WalkRamp), or the actor's transform when the mesh lacks it. */
 	FTransform GetWalkSocketTransform(FName Socket) const;
@@ -888,6 +890,10 @@ protected:
 	/** Presentation: camera effects, engine sound, ship lights, dust and the inside view. Its tuning stays here. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UShipPresentationComponent> Presentation;
+
+	/** Getting out, walking in and boarding: exit spots, the walked interior, its gravity. Tuning stays here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipBoardingComponent> Boarding;
 
 	/** What the gear legs are built from (/Engine/BasicShapes/Cylinder): placeholder art until a modelled gear replaces it. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Gear")
@@ -1946,9 +1952,6 @@ private:
 	/** Everything a flight frame does before the camera and sound: shared by Tick and DebugStepFlight. */
 	void StepFlight(float DeltaSeconds);
 	UAudioComponent* PlayOneShot(USoundBase* Sound, float VolumeScale = 1.f);
-	bool IsExitSpotFree(const FVector& Location, const FVector& Up, float CapsuleRadius, float CapsuleHalfHeight) const;
-	/** Start moved along Direction (flattened onto the ship's floor plane) until GetHullClearance reaches ExitClearanceCm. */
-	FVector PushClearOfHull(const FVector& Start, const FVector& Direction, float CapsuleRadius, float CapsuleHalfHeight) const;
 
 	/** Fills in any unassigned input asset: first from /Game/Input, then procedurally. */
 	void ResolveInputAssets();
@@ -2061,9 +2064,4 @@ private:
 	/** Ticks left with camera lag switched off after SnapCameraToShip. */
 	int32 CameraSnapTicks = 0;
 
-	/** Someone walks inside (SetInteriorWalk). */
-	bool bInteriorWalked = false;
-	/** The gravity volume riding along while the interior is walked. */
-	UPROPERTY(Transient)
-	TObjectPtr<class ASpaceGravityVolume> WalkGravity;
 };

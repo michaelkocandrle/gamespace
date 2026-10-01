@@ -335,6 +335,7 @@ ASpaceshipPawn::ASpaceshipPawn()
 	Quantum = CreateDefaultSubobject<UShipQuantumComponent>(TEXT("ShipQuantum"));
 	Landing = CreateDefaultSubobject<UShipLandingComponent>(TEXT("ShipLanding"));
 	Presentation = CreateDefaultSubobject<UShipPresentationComponent>(TEXT("ShipPresentation"));
+	Boarding = CreateDefaultSubobject<UShipBoardingComponent>(TEXT("ShipBoarding"));
 
 	SpaceDust =CreateDefaultSubobject<USpaceDustComponent>(TEXT("SpaceDust"));
 	SpaceDust->SetupAttachment(HullCollision);
@@ -1543,382 +1544,82 @@ void ASpaceshipPawn::ClearPilotInput()
 
 bool ASpaceshipPawn::CanExit() const
 {
-	return IsLanded() && IsPlayerControlled() && PilotCharacterClass != nullptr;
+	return Boarding->CanExit();
 }
 
 double ASpaceshipPawn::GetDistanceToHull(const FVector& Location) const
 {
-	const FVector Local = HullCollision->GetComponentTransform().InverseTransformPositionNoScale(Location);
-	const FVector Extent = HullCollision->GetScaledBoxExtent();
-	const FVector Outside(
-		FMath::Max(FMath::Abs(Local.X) - Extent.X, 0.0),
-		FMath::Max(FMath::Abs(Local.Y) - Extent.Y, 0.0),
-		FMath::Max(FMath::Abs(Local.Z) - Extent.Z, 0.0));
-	return Outside.Size();
+	return Boarding->GetDistanceToHull(Location);
 }
 
 FVector ASpaceshipPawn::ComputeSideExitLocation(const FVector& ShipLocation, const FRotator& ShipRotation, const FVector& HullExtent, float CapsuleRadius, float ClearanceCm)
 {
-	const FQuat Rotation = ShipRotation.Quaternion();
-	return ShipLocation + Rotation.GetRightVector() * (HullExtent.Y + CapsuleRadius + ClearanceCm);
+	return UShipBoardingComponent::ComputeSideExitLocation(ShipLocation, ShipRotation, HullExtent, CapsuleRadius, ClearanceCm);
 }
 
 TArray<FBox> ASpaceshipPawn::GetHullCollisionBoxes() const
 {
-	// Actor space, unscaled: the hull's collision shapes (UCX hulls and boxes from Blender) through
-	// the hull's relative transform; the mesh bounds when it has none; the root box without a mesh.
-	TArray<FBox> Boxes;
-	const FTransform HullToActor = Hull->GetRelativeTransform();
-	if (const UStaticMesh* Mesh = Hull->GetStaticMesh())
-	{
-		if (const UBodySetup* Body = Mesh->GetBodySetup())
-		{
-			for (const FKConvexElem& Convex : Body->AggGeom.ConvexElems)
-			{
-				Boxes.Add(Convex.ElemBox.TransformBy(Convex.GetTransform() * HullToActor));
-			}
-			for (const FKBoxElem& Box : Body->AggGeom.BoxElems)
-			{
-				const FVector Half(Box.X * 0.5, Box.Y * 0.5, Box.Z * 0.5);
-				Boxes.Add(FBox(-Half, Half).TransformBy(Box.GetTransform() * HullToActor));
-			}
-		}
-		if (Boxes.Num() == 0)
-		{
-			Boxes.Add(Mesh->GetBoundingBox().TransformBy(HullToActor));
-		}
-	}
-	if (Boxes.Num() == 0)
-	{
-		const FVector Extent = HullCollision->GetUnscaledBoxExtent();
-		Boxes.Add(FBox(-Extent, Extent));
-	}
-	return Boxes;
+	return Boarding->GetHullCollisionBoxes();
 }
 
 double ASpaceshipPawn::GetHullClearance(const FVector& Location, float CapsuleRadius, float CapsuleHalfHeight) const
 {
-	// A pilot standing where the landed ship stands: capsule bottom at the lowest point of the hull
-	// shapes (the gear), whatever height Location has. Only shapes within that height count, then
-	// the gap in the ship's floor plane. Pure geometry, so it also works where collision queries do
-	// not (commandlets) and does not depend on the physics scene being up to date.
-	const TArray<FBox> Boxes = GetHullCollisionBoxes();
-	double Floor = TNumericLimits<double>::Max();
-	for (const FBox& Box : Boxes)
-	{
-		Floor = FMath::Min(Floor, Box.Min.Z);
-	}
-	const double Top = Floor + 2.0 * CapsuleHalfHeight;
-	const FVector Local = GetActorTransform().InverseTransformPositionNoScale(Location);
-	double Clearance = TNumericLimits<double>::Max();
-	for (const FBox& Box : Boxes)
-	{
-		if (Box.Min.Z >= Top || Box.Max.Z <= Floor)
-		{
-			continue;  // above the pilot's head (or below the feet)
-		}
-		const double DX = FMath::Max3(Box.Min.X - Local.X, 0.0, Local.X - Box.Max.X);
-		const double DY = FMath::Max3(Box.Min.Y - Local.Y, 0.0, Local.Y - Box.Max.Y);
-		Clearance = FMath::Min(Clearance, FMath::Sqrt(DX * DX + DY * DY) - CapsuleRadius);
-	}
-	return Clearance;
-}
-
-FVector ASpaceshipPawn::PushClearOfHull(const FVector& Start, const FVector& Direction, float CapsuleRadius, float CapsuleHalfHeight) const
-{
-	const FVector Step = FVector::VectorPlaneProject(Direction, GetActorUpVector()).GetSafeNormal() * 20.0;
-	if (Step.IsNearlyZero())
-	{
-		return Start;
-	}
-	FVector Location = Start;
-	// Out in 20 cm steps until the capsule clears every hull shape by ExitClearanceCm (40 m at most).
-	for (int32 Index = 0; Index < 200 && GetHullClearance(Location, CapsuleRadius, CapsuleHalfHeight) < ExitClearanceCm; ++Index)
-	{
-		Location += Step;
-	}
-	return Location;
+	return Boarding->GetHullClearance(Location, CapsuleRadius, CapsuleHalfHeight);
 }
 
 TArray<FVector> ASpaceshipPawn::GetExitCandidates() const
 {
-	TArray<FVector> Candidates;
-	const ACharacter* PilotDefaults = Cast<ACharacter>(PilotCharacterClass ? PilotCharacterClass->GetDefaultObject() : nullptr);
-	const float CapsuleRadius = PilotDefaults ? PilotDefaults->GetSimpleCollisionRadius() : 42.f;
-	const float CapsuleHalfHeight = PilotDefaults ? PilotDefaults->GetSimpleCollisionHalfHeight() : 96.f;
-
-	// The Exit socket says which side and where along the hull; the pilot is then moved sideways
-	// until clear of the hull. The first fighter's socket sat 44 cm off the belly, under the edge of the
-	// fuselage, which put the pilot practically inside the ship.
-	static const FName ExitSockets[] = { FName(TEXT("Exit")), FName(TEXT("SOCKET_Exit")) };
-	if (const FName* Socket = Algo::FindByPredicate(ExitSockets, [this](const FName& Name) { return Hull->DoesSocketExist(Name); }))
-	{
-		const FVector SocketLocation = Hull->GetSocketLocation(*Socket);
-		const double Side = GetActorTransform().InverseTransformPositionNoScale(SocketLocation).Y;
-		const FVector Outward = GetActorRightVector() * (Side < 0.0 ? -1.0 : 1.0);
-		Candidates.Add(PushClearOfHull(SocketLocation, Outward, CapsuleRadius, CapsuleHalfHeight));
-	}
-
-	// Then around the hull: its mesh bounds where there is a mesh (wings included), else the box.
-	FVector Center = GetActorLocation();
-	FVector Extent = HullCollision->GetScaledBoxExtent();
-	if (const UStaticMesh* Mesh = Hull->GetStaticMesh())
-	{
-		const FBox LocalBox = Mesh->GetBoundingBox().TransformBy(Hull->GetRelativeTransform());
-		Center = GetActorTransform().TransformPosition(LocalBox.GetCenter());
-		Extent = LocalBox.GetExtent();
-	}
-	const FQuat Rotation = GetActorQuat();
-	const TPair<FVector, double> Directions[] = {
-		{ Rotation.GetRightVector(), Extent.Y },
-		{ -Rotation.GetRightVector(), Extent.Y },
-		{ -Rotation.GetForwardVector(), Extent.X },
-		{ Rotation.GetForwardVector(), Extent.X },
-	};
-	for (const double Extra : { 0.0, 300.0, 800.0 })
-	{
-		for (const TPair<FVector, double>& Direction : Directions)
-		{
-			Candidates.Add(PushClearOfHull(Center + Direction.Key * (Direction.Value + CapsuleRadius + ExitClearanceCm + Extra),
-				Direction.Key, CapsuleRadius, CapsuleHalfHeight));
-		}
-	}
-	return Candidates;
-}
-
-bool ASpaceshipPawn::IsExitSpotFree(const FVector& Location, const FVector& Up, float CapsuleRadius, float CapsuleHalfHeight) const
-{
-	const UWorld* World = GetWorld();
-	if (!World)
-	{
-		return true;
-	}
-	// A slightly smaller capsule lifted off the ground: uneven terrain under the feet must not
-	// count as blocked, a wall, rock or the hull must. The ship itself is deliberately not
-	// ignored; its hull mesh collision is exactly what the pilot must not appear inside.
-	const double Lift = 30.0;
-	const FCollisionShape Shape = FCollisionShape::MakeCapsule(FMath::Max(CapsuleRadius - 4.f, 10.f), FMath::Max(CapsuleHalfHeight - 10.f, 20.f));
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(SpaceshipExitSpot), false);
-	return !World->OverlapBlockingTestByChannel(Location + Up * Lift, FQuat::FindBetweenNormals(FVector::UpVector, Up),
-		ECC_Pawn, Shape, Params);
+	return Boarding->GetExitCandidates();
 }
 
 FTransform ASpaceshipPawn::ComputeExitTransform() const
 {
-	const FVector Up = bHasEnvironment ? Environment.Up : GetActorUpVector();
-	const ACharacter* PilotDefaults = Cast<ACharacter>(PilotCharacterClass ? PilotCharacterClass->GetDefaultObject() : nullptr);
-	const float CapsuleRadius = PilotDefaults ? PilotDefaults->GetSimpleCollisionRadius() : 42.f;
-	const float CapsuleHalfHeight = PilotDefaults ? PilotDefaults->GetSimpleCollisionHalfHeight() : 96.f;
-
-	// Facing the ship: the character's camera then sits on the far side, away from the hull, and
-	// shows the ship. Facing along the ship's heading put the camera boom into a wing, which
-	// pulled the camera in for a moment after getting out.
-	auto FacingFrom = [this, &Up](const FVector& Location)
-	{
-		FVector Flat = FVector::VectorPlaneProject(GetActorLocation() - Location, Up).GetSafeNormal();
-		if (Flat.IsNearlyZero())
-		{
-			Flat = FVector::VectorPlaneProject(GetActorForwardVector(), Up).GetSafeNormal();
-		}
-		if (Flat.IsNearlyZero())
-		{
-			Flat = FVector::VectorPlaneProject(GetActorUpVector(), Up).GetSafeNormal();
-		}
-		return FRotationMatrix::MakeFromXZ(Flat, Up).ToQuat();
-	};
-
-	auto OnGround = [&](FVector Location)
-	{
-		// Stand on the terrain there, not at the height of the ship's centre or a hatch in the air.
-		FVector SurfacePoint;
-		FVector SurfaceNormal;
-		if (const ACelestialBody* Body = NearestBody.Get())
-		{
-			if (Body->GetSurfaceFrame(Location, CapsuleRadius, SurfacePoint, SurfaceNormal))
-			{
-				const double AboveGround = (Location - SurfacePoint) | Up;
-				Location += Up * (CapsuleHalfHeight + 20.0 - AboveGround);
-			}
-		}
-		return Location;
-	};
-
-	const TArray<FVector> Candidates = GetExitCandidates();
-	for (const FVector& Candidate : Candidates)
-	{
-		const FVector Location = OnGround(Candidate);
-		if (IsExitSpotFree(Location, Up, CapsuleRadius, CapsuleHalfHeight))
-		{
-			return FTransform(FacingFrom(Location), Location);
-		}
-	}
-	// Nowhere free (boxed in): the farthest spot beside the ship, where at least the hull is not.
-	const FVector Fallback = Candidates.Num() > 0 ? Candidates.Last(3) : GetActorLocation() + GetActorRightVector() * 1000.0;
-	UE_LOG(LogSpaceship, Warning, TEXT("%s: no free exit spot among %d candidates; using %s"), *GetName(), Candidates.Num(), *Fallback.ToString());
-	const FVector FallbackLocation = OnGround(Fallback);
-	return FTransform(FacingFrom(FallbackLocation), FallbackLocation);
+	return Boarding->ComputeExitTransform();
 }
 
 APawn* ASpaceshipPawn::ExitShip()
 {
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (!CanExit() || !PlayerController)
-	{
-		return nullptr;
-	}
-
-	FActorSpawnParameters Params;
-	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	const FTransform ExitTransform = ComputeExitTransform();
-	APawn* Pilot = GetWorld()->SpawnActor<APawn>(PilotCharacterClass, ExitTransform, Params);
-	if (!Pilot)
-	{
-		UE_LOG(LogSpaceship, Warning, TEXT("%s: could not spawn %s at the exit"), *GetName(), *GetNameSafe(PilotCharacterClass));
-		return nullptr;
-	}
-	PlayerController->Possess(Pilot);
-	if (APlayerCharacter* Character = Cast<APlayerCharacter>(Pilot))
-	{
-		Character->FaceDirection(ExitTransform.GetRotation().GetForwardVector());
-	}
-	UE_LOG(LogSpaceship, Log, TEXT("%s: pilot out at %s"), *GetName(), *ExitTransform.GetLocation().ToString());
-	return Pilot;
+	return Boarding->ExitShip();
 }
 
 void ASpaceshipPawn::OnBoarded()
 {
-	ClearPilotInput();
-	SnapCameraToShip();
-}
-
-namespace SpaceshipWalk
-{
-	const FName SeatSocket(TEXT("WalkSeat"));
-	const FName RampSocket(TEXT("WalkRamp"));
-	const FName PilotEyeSocket(TEXT("Cockpit"));
-	constexpr double SeatReachCm = 170.0;      // from the pilot's eye socket to the walker's middle
-	constexpr double RampReachCm = 220.0;
-	constexpr double HoldStillCmS = 100.0;
+	Boarding->OnBoarded();
 }
 
 bool ASpaceshipPawn::HasWalkInterior() const
 {
-	return Hull && Hull->DoesSocketExist(SpaceshipWalk::SeatSocket) && Hull->DoesSocketExist(SpaceshipWalk::RampSocket);
+	return Boarding->HasWalkInterior();
 }
 
 bool ASpaceshipPawn::CanLeaveSeat() const
 {
-	return HasWalkInterior() && IsPlayerControlled() && PilotCharacterClass != nullptr
-		&& (IsLanded() || GetLinearVelocity().Size() < SpaceshipWalk::HoldStillCmS);
+	return Boarding->CanLeaveSeat();
 }
 
 FTransform ASpaceshipPawn::GetWalkSocketTransform(FName Socket) const
 {
-	if (Hull && Hull->DoesSocketExist(Socket))
-	{
-		const FTransform T = Hull->GetSocketTransform(Socket, RTS_World);
-		return FTransform(T.GetRotation(), T.GetLocation());
-	}
-	return FTransform(GetActorRotation(), GetActorLocation());
+	return Boarding->GetWalkSocketTransform(Socket);
 }
 
 bool ASpaceshipPawn::IsNearSeat(const FVector& Location) const
 {
-	return HasWalkInterior() && FVector::Dist(GetWalkSocketTransform(SpaceshipWalk::PilotEyeSocket).GetLocation(), Location) < SpaceshipWalk::SeatReachCm;
+	return Boarding->IsNearSeat(Location);
 }
 
 bool ASpaceshipPawn::IsNearRamp(const FVector& Location) const
 {
-	return HasWalkInterior() && FVector::Dist(GetWalkSocketTransform(SpaceshipWalk::RampSocket).GetLocation(), Location) < SpaceshipWalk::RampReachCm;
+	return Boarding->IsNearRamp(Location);
 }
 
 void ASpaceshipPawn::SetInteriorWalk(bool bWalking)
 {
-	if (bWalking == bInteriorWalked)
-	{
-		return;
-	}
-	bInteriorWalked = bWalking;
-	// the hull's own collision is a convex shell round the fuselage: a pilot inside it would be pushed out
-	if (Hull)
-	{
-		Hull->SetCollisionResponseToChannel(ECC_Pawn, bWalking ? ECR_Ignore : ECR_Block);
-	}
-	// the rooms: the procedural interior and its kit pieces per polygon, the kit rooms' parts by their boxes
-	TArray<UStaticMeshComponent*> Meshes;
-	GetComponents<UStaticMeshComponent>(Meshes);
-	FBox Rooms(ForceInit);
-	for (UStaticMeshComponent* Mesh : Meshes)
-	{
-		const FString Name = Mesh->GetName();
-		const bool bRoom = Name == TEXT("Interior") || Name == TEXT("InteriorKit") || Name.StartsWith(TEXT("InteriorMod_"));
-		if (!bRoom || !Mesh->GetStaticMesh())
-		{
-			continue;
-		}
-		if (bWalking)
-		{
-			Mesh->SetCollisionObjectType(ECC_WorldStatic);
-			Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
-			Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-			Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-			Mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		}
-		else
-		{
-			Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-		const FTransform ToActor = Mesh->GetComponentTransform().GetRelativeTransform(GetActorTransform());
-		Rooms += Mesh->GetStaticMesh()->GetBoundingBox().TransformBy(ToActor);
-	}
-	// gravity along the ship's floor, riding with it (landed or holding still in space)
-	if (bWalking && !WalkGravity && Rooms.IsValid && GetWorld())
-	{
-		FActorSpawnParameters Params;
-		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		Params.Owner = this;
-		const FVector Centre = GetActorTransform().TransformPosition(Rooms.GetCenter());
-		WalkGravity = GetWorld()->SpawnActor<ASpaceGravityVolume>(ASpaceGravityVolume::StaticClass(), Centre, GetActorRotation(), Params);
-		if (WalkGravity)
-		{
-			WalkGravity->Volume->SetBoxExtent(Rooms.GetExtent() + FVector(50.0));
-			WalkGravity->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-		}
-	}
-	else if (!bWalking && WalkGravity)
-	{
-		WalkGravity->Destroy();
-		WalkGravity = nullptr;
-	}
-	UE_LOG(LogSpaceship, Log, TEXT("%s: interior %s"), *GetName(), bWalking ? TEXT("walked (per-polygon collision, gravity)") : TEXT("closed"));
+	Boarding->SetInteriorWalk(bWalking);
 }
 
 APawn* ASpaceshipPawn::LeaveSeat()
 {
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (!CanLeaveSeat() || !PlayerController)
-	{
-		return nullptr;
-	}
-	SetInteriorWalk(true);
-	const FTransform Seat = GetWalkSocketTransform(SpaceshipWalk::SeatSocket);
-	FActorSpawnParameters Params;
-	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	const FTransform Start(Seat.GetRotation(), Seat.GetLocation() + GetActorUpVector() * 100.0);
-	APawn* Pilot = GetWorld()->SpawnActor<APawn>(PilotCharacterClass, Start, Params);
-	if (!Pilot)
-	{
-		SetInteriorWalk(false);
-		return nullptr;
-	}
-	ClearPilotInput();
-	PlayerController->Possess(Pilot);
-	if (APlayerCharacter* Character = Cast<APlayerCharacter>(Pilot))
-	{
-		Character->BoardInterior(this, Seat.GetRotation().GetForwardVector());
-	}
-	UE_LOG(LogSpaceship, Log, TEXT("%s: pilot up from the seat at %s"), *GetName(), *Start.GetLocation().ToString());
-	return Pilot;
+	return Boarding->LeaveSeat();
 }
 
 void ASpaceshipPawn::HandleBoostCompleted(const FInputActionValue& /*Value*/)
