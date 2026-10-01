@@ -5,6 +5,7 @@
  "borrow": {},
  "parts": {
   "hull": {
+   "id": "P-HULL",
    "loft": true,
    "step": 0.05,
    "ring": 96,
@@ -18,6 +19,7 @@
    },
    "zones": [
     {
+     "id": "Z-B-01",
      "name": "nose tip",
      "material": "dark",
      "cuts": [
@@ -31,6 +33,7 @@
      }
     },
     {
+     "id": "Z-B-02",
      "name": "aft cap",
      "material": "dark",
      "cuts": [
@@ -49,6 +52,7 @@
      }
     },
     {
+     "id": "Z-B-03",
      "name": "side stripe",
      "material": "accent",
      "cuts": [
@@ -78,6 +82,7 @@
    ],
    "greebles": [
     {
+     "id": "G-HTL-01",
      "_what": "component access panels of the technical corridor (reactor / shield)",
      "from": "side",
      "x": 8.9,
@@ -85,6 +90,7 @@
      "part": "hatch_large"
     },
     {
+     "id": "G-HT-01",
      "_what": "coolers access",
      "from": "side",
      "x": 9.9,
@@ -92,6 +98,7 @@
      "part": "hatch"
     },
     {
+     "id": "G-VT-01",
      "_what": "cooler exhausts at the wing roots",
      "from": "side",
      "x": 9.8,
@@ -99,12 +106,14 @@
      "part": "vent"
     },
     {
+     "id": "G-VT-02",
      "from": "side",
      "x": 10.25,
      "z": 1.9,
      "part": "vent"
     },
     {
+     "id": "G-VT-03",
      "_what": "life-support intake by the cabin",
      "from": "side",
      "x": 13.9,
@@ -112,6 +121,7 @@
      "part": "vent"
     },
     {
+     "id": "G-HT-02",
      "_what": "cabin service hatch (hygiene / water)",
      "from": "side",
      "x": 12.4,
@@ -119,6 +129,7 @@
      "part": "hatch"
     },
     {
+     "id": "G-HT-03",
      "_what": "ramp hydraulics service hatch",
      "from": "side",
      "x": 1.9,
@@ -126,6 +137,7 @@
      "part": "hatch"
     },
     {
+     "id": "G-SP-01",
      "_what": "hold cargo-grid lock servos",
      "from": "side",
      "x": 4.9,
@@ -133,12 +145,14 @@
      "part": "strip"
     },
     {
+     "id": "G-SP-02",
      "from": "side",
      "x": 6.2,
      "z": 0.3,
      "part": "strip"
     },
     {
+     "id": "G-SN-01",
      "_what": "navigation / position light housings",
      "from": "side",
      "x": 19.6,
@@ -146,12 +160,14 @@
      "part": "sensor"
     },
     {
+     "id": "G-SN-02",
      "from": "side",
      "x": 2.6,
      "z": 2.0,
      "part": "sensor"
     },
     {
+     "id": "G-HT-04",
      "_what": "quantum fuel filler on the belly",
      "from": "bottom",
      "x": 6.4,
@@ -159,6 +175,7 @@
      "part": "hatch"
     },
     {
+     "id": "G-HTL-02",
      "_what": "belly access to the quantum drive",
      "from": "bottom",
      "x": 2.0,
@@ -166,6 +183,7 @@
      "part": "hatch_large"
     },
     {
+     "id": "G-HT-05",
      "_what": "avionics bay hatch under the cockpit",
      "from": "bottom",
      "x": 18.4,
@@ -173,6 +191,7 @@
      "part": "hatch"
     },
     {
+     "id": "G-SN-03",
      "_what": "radar / sensor blister on the nose",
      "from": "top",
      "x": 19.4,
@@ -180,6 +199,7 @@
      "part": "sensor"
     },
     {
+     "id": "G-SN-04",
      "_what": "comms antenna base behind the canopy",
      "from": "top",
      "x": 14.6,
@@ -187,6 +207,7 @@
      "part": "sensor"
     },
     {
+     "id": "G-SP-03",
      "_what": "dorsal cable-run covers",
      "from": "top",
      "x": 4.2,
@@ -194,48 +215,56 @@
      "part": "strip"
     },
     {
+     "id": "G-SP-04",
      "from": "top",
      "x": 4.2,
      "y": -0.9,
      "part": "strip"
     },
     {
+     "id": "G-SP-05",
      "from": "top",
      "x": 6.0,
      "y": 0.9,
      "part": "strip"
     },
     {
+     "id": "G-SP-06",
      "from": "top",
      "x": 6.0,
      "y": -0.9,
      "part": "strip"
     },
     {
+     "id": "G-SP-07",
      "from": "top",
      "x": 7.6,
      "y": 0.9,
      "part": "strip"
     },
     {
+     "id": "G-SP-08",
      "from": "top",
      "x": 7.6,
      "y": -0.9,
      "part": "strip"
     },
     {
+     "id": "G-SP-09",
      "from": "top",
      "x": 11.0,
      "y": 0.9,
      "part": "strip"
     },
     {
+     "id": "G-SP-10",
      "from": "top",
      "x": 11.0,
      "y": -0.9,
      "part": "strip"
     },
     {
+     "id": "G-VT-04",
      "_what": "reactor heat vents on the spine",
      "from": "top",
      "x": 9.0,
@@ -243,12 +272,14 @@
      "part": "vent"
     },
     {
+     "id": "G-VT-05",
      "from": "top",
      "x": 9.0,
      "y": -0.5,
      "part": "vent"
     },
     {
+     "id": "G-HTL-03",
      "_what": "roof maintenance hatch over the cabin",
      "from": "top",
      "x": 13.4,
@@ -259,6 +290,7 @@
    ]
   },
   "pod": {
+   "id": "P-POD",
    "name": "Pod",
    "material": "paint",
    "materials": {
@@ -283,6 +315,7 @@
     "profile": [[-0.5, 0.75], [-0.3, 0.84], [0.0, 0.9], [0.3, 0.95], [0.6, 0.95], [0.6, 0.98], [0.9, 0.98], [0.9, 0.95], [4.4, 0.92], [4.4, 0.95], [4.7, 0.95], [4.7, 0.9], [5.2, 0.85], [5.55, 0.66], [5.9, 0.42]],
     "sections": [
      {
+      "id": "P-POD-AFTCOWL",
       "name": "AftCowl",
       "x": [-0.5, 0.6],
       "kind": "panels",
@@ -293,12 +326,14 @@
       "phase_deg": 15
      },
      {
+      "id": "P-POD-BAND",
       "name": "Band",
       "x": [0.6, 0.9],
       "kind": "ring",
       "wall": 0.06
      },
      {
+      "id": "P-POD-BODY",
       "name": "Body",
       "x": [0.9, 4.4],
       "kind": "panels",
@@ -309,12 +344,14 @@
       "phase_deg": 0
      },
      {
+      "id": "P-POD-FWDBAND",
       "name": "FwdBand",
       "x": [4.4, 4.7],
       "kind": "ring",
       "wall": 0.06
      },
      {
+      "id": "P-POD-NOSE",
       "name": "Nose",
       "x": [4.7, 5.9],
       "kind": "panels",
@@ -326,6 +363,7 @@
      }
     ],
     "intake": {
+     "id": "F-POD-INTAKE",
      "x_lip": 5.9,
      "depth": 0.6,
      "r_lip": 0.42,
@@ -336,6 +374,7 @@
      "ring_r": [0.3, 0.36]
     },
     "exhaust": {
+     "id": "F-POD-EXHAUST",
      "x_lip": -0.5,
      "depth": 0.5,
      "r_lip": 0.75,
@@ -345,24 +384,28 @@
     },
     "greebles": [
      {
+      "id": "G-POD-VT-01",
       "surface": "Body",
       "x": 1.6,
       "angle_deg": 90,
       "part": "vent"
      },
      {
+      "id": "G-POD-HT-01",
       "surface": "Body",
       "x": 3.2,
       "angle_deg": 90,
       "part": "hatch"
      },
      {
+      "id": "G-POD-SP-01",
       "surface": "Body",
       "x": 2.4,
       "angle_deg": 30,
       "part": "strip"
      },
      {
+      "id": "G-POD-SP-02",
       "surface": "Body",
       "x": 2.4,
       "angle_deg": 150,
@@ -372,6 +415,7 @@
    }
   },
   "nozzle": {
+   "id": "F-NOZZLE",
    "name": "NozzleGlow",
    "material": "nozzle",
    "cylinders": [
@@ -387,6 +431,7 @@
    ]
   },
   "gun": {
+   "id": "F-GUN-S3",
    "name": "Guns",
    "material": "dark",
    "cylinders": [
@@ -420,6 +465,7 @@
    "name": "Fins"
   },
   "missile_rack": {
+   "id": "F-MISSILE-S2",
    "name": "MissileRacks",
    "material": "dark"
   },
@@ -442,6 +488,7 @@
   }
  },
  "canopy_frame": {
+  "id": "F-CANOPY-FRAME",
   "_comment": "Struts across the canopy stay hull; the glass sits 15 mm below them. No spine along the top and no strut at x 18.8 (they crossed the pilot's line of sight ahead - the strut lay on the horizon; step 2 view targets 25. 9. 2026); struts 6 cm.",
   "struts_x": [16.3, 17.6],
   "strut_width": 0.06,
@@ -882,6 +929,7 @@
   },
   "hull_recesses": [
    {
+    "id": "R-B-01",
     "_what": "cooler intake grilles on the shoulders over the engine bay",
     "x": [4.45, 5.45],
     "z": [2.36, 2.85],
@@ -891,6 +939,7 @@
     "count": 7
    },
    {
+    "id": "R-B-02",
     "_what": "open spine trough with the coolant and power lines from the reactor to the engines",
     "x": [3.3, 5.3],
     "abs_y": [0, 0.32],
@@ -903,6 +952,7 @@
     "valve": true
    },
    {
+    "id": "R-B-03",
     "_what": "shadow channel along the side between the upper and lower plating: depth layering inside the drawing's outline, with cable runs in it",
     "x": [4.4, 16.6],
     "z": [1.26, 1.4],
@@ -914,6 +964,7 @@
   ],
   "hull_plates": [
    {
+    "id": "P-B-01",
     "_what": "aft armour cap over the engine room, a real step at the x 3.0 bulkhead",
     "x": [0.1, 2.9],
     "z": [2.26, 4.0],
@@ -922,6 +973,7 @@
     "material": "dark"
    },
    {
+    "id": "P-B-02",
     "_what": "shoulder armour ahead of the cooler grille",
     "x": [3.1, 4.25],
     "z": [2.36, 2.85],
@@ -930,6 +982,7 @@
     "secondary": true
    },
    {
+    "id": "P-B-03",
     "_what": "shoulder armour behind the wing root",
     "x": [5.62, 6.8],
     "z": [2.36, 2.85],
@@ -938,6 +991,7 @@
     "secondary": true
    },
    {
+    "id": "P-B-04",
     "_what": "spine plate over the aft tech corridor",
     "x": [5.62, 6.8],
     "abs_y": [0, 0.7],
@@ -946,6 +1000,7 @@
     "t": 0.025
    },
    {
+    "id": "P-B-05",
     "_what": "belly skid armour ahead of the main gear (takes the scrape on rough landings)",
     "x": [3.1, 4.25],
     "abs_y": [0, 1.6],
@@ -955,6 +1010,7 @@
     "material": "dark"
    },
    {
+    "id": "P-B-06",
     "_what": "belly skid armour behind the main gear, clear of the fuel filler",
     "x": [5.62, 6.8],
     "abs_y": [0, 0.55],
@@ -964,6 +1020,7 @@
     "material": "dark"
    },
    {
+    "id": "P-B-07",
     "_what": "rear ramp door: a raised leaf so the ramp reads as its own part",
     "x": [-0.2, 0.2],
     "abs_y": [0, 1.08],
@@ -973,6 +1030,7 @@
     "t": 0.02
    },
    {
+    "id": "P-B-08",
     "_what": "rear armour beside the ramp",
     "x": [-0.2, 0.2],
     "abs_y": [1.3, 2.1],
@@ -982,6 +1040,7 @@
     "secondary": true
    },
    {
+    "id": "P-B-09",
     "_what": "armour on the rear chamfer under the aft cap",
     "x": [-0.1, 0.6],
     "abs_y": [0.35, 1.95],
@@ -990,6 +1049,7 @@
     "t": 0.025
    },
    {
+    "id": "P-B-10",
     "_what": "upper side armour behind the wing root (secondary)",
     "x": [7.1, 8.1],
     "z": [1.35, 2.2],
@@ -997,6 +1057,7 @@
     "_why": "primary paint: dark squares down the whole side made the hull patchy (24. 9. 2026)"
    },
    {
+    "id": "P-B-11",
     "_what": "upper side armour over the tech corridor",
     "x": [10.5, 11.5],
     "z": [1.35, 2.2],
@@ -1004,6 +1065,7 @@
     "_why": "primary paint: dark squares down the whole side made the hull patchy (24. 9. 2026)"
    },
    {
+    "id": "P-B-12",
     "_what": "upper side armour behind the cockpit",
     "x": [14.1, 15.1],
     "z": [1.3, 2.2],
@@ -1011,6 +1073,7 @@
     "_why": "primary paint: dark squares down the whole side made the hull patchy (24. 9. 2026)"
    },
    {
+    "id": "P-B-13",
     "_what": "lower side armour ahead of the wing",
     "x": [13.0, 14.0],
     "z": [0.05, 0.95],
@@ -1018,6 +1081,7 @@
     "_why": "primary paint: dark squares down the whole side made the hull patchy (24. 9. 2026)"
    },
    {
+    "id": "P-B-14",
     "_what": "shoulder armour over the reactor",
     "x": [7.1, 8.1],
     "z": [2.36, 2.9],
@@ -1026,6 +1090,7 @@
     "secondary": true
    },
    {
+    "id": "P-B-15",
     "_what": "shoulder armour over the cabin",
     "x": [11.7, 12.7],
     "z": [2.36, 2.95],
@@ -1034,6 +1099,7 @@
     "secondary": true
    },
    {
+    "id": "P-B-16",
     "_what": "spine plate over the reactor",
     "x": [7.1, 8.1],
     "abs_y": [0, 0.7],
@@ -1042,6 +1108,7 @@
     "t": 0.025
    },
    {
+    "id": "P-B-17",
     "_what": "spine plate over the cabin",
     "x": [11.7, 12.7],
     "abs_y": [0, 0.7],
@@ -1050,6 +1117,7 @@
     "t": 0.025
    },
    {
+    "id": "P-B-18",
     "_what": "belly skid over the reactor",
     "x": [7.1, 8.1],
     "abs_y": [0, 1.4],
@@ -1059,6 +1127,7 @@
     "material": "dark"
    },
    {
+    "id": "P-B-19",
     "_what": "belly skid under the cabin",
     "x": [11.7, 12.7],
     "abs_y": [0, 1.2],
@@ -1072,6 +1141,7 @@
    "section": "Body",
    "plates": [
     {
+     "id": "P-POD-01",
      "_what": "outboard shoulder armour, aft row, with a step plate (the fin stands on the crown, 80..100 deg, so plates keep off it)",
      "x": [0.98, 1.98],
      "deg": [46, 78],
@@ -1082,6 +1152,7 @@
      }
     },
     {
+     "id": "P-POD-02",
      "_what": "outboard shoulder armour, forward row",
      "x": [3.32, 4.32],
      "deg": [46, 78],
@@ -1092,12 +1163,14 @@
      }
     },
     {
+     "id": "P-POD-03",
      "_what": "inboard shoulder armour, aft row",
      "x": [0.98, 1.98],
      "deg": [102, 136],
      "t": 0.03
     },
     {
+     "id": "P-POD-04",
      "_what": "inboard shoulder armour, forward row, with a step plate",
      "x": [3.32, 4.32],
      "deg": [102, 136],
@@ -1108,6 +1181,7 @@
      }
     },
     {
+     "id": "P-POD-05",
      "_what": "lower outboard strake along the whole body (guards the bay from below)",
      "x": [0.98, 4.32],
      "deg": [-38, -6],
@@ -1115,6 +1189,7 @@
     }
    ],
    "bay": {
+    "id": "F-POD-BAY",
     "_what": "open service bay: feed lines, gimbal actuator, junction boxes, cable bundle, coolant line (accent) with a valve; interior in its own material (BayInterior)",
     "x": [2.1, 3.2],
     "deg": [0, 45],
@@ -1160,6 +1235,7 @@
     }
    },
    "pipe_run": {
+    "id": "F-POD-PIPES",
     "_what": "fuel and coolant lines from the hull to the engine",
     "x": [1.0, 4.3],
     "pipes": [[146, 0.024], [156, 0.018]],
@@ -1175,6 +1251,7 @@
   "grid_m": 0.06,
   "items": [
    {
+    "id": "D-H-01",
     "item": "vent_grille",
     "on": "ray",
     "at": [-1.0, 1.66, 0.45],
@@ -1183,6 +1260,7 @@
     "_what": "hold air exchange grilles beside the ramp (decals: a recess cut into the loft's rear n-gon broke through, 24. 9. 2026)"
    },
    {
+    "id": "D-H-02",
     "item": "bolt_row_4",
     "on": "pod",
     "x": 1.25,
@@ -1194,6 +1272,7 @@
     "_what": "bolts along the lower edge of the aft outboard armour"
    },
    {
+    "id": "D-H-03",
     "item": "bolt_row_4",
     "on": "pod",
     "x": 3.59,
@@ -1204,12 +1283,14 @@
     }
    },
    {
+    "id": "D-H-04",
     "item": "bolt_row_4",
     "on": "pod",
     "x": 4.05,
     "deg": 75
    },
    {
+    "id": "D-H-05",
     "item": "hatch",
     "on": "pod",
     "x": 4.0,
@@ -1217,6 +1298,7 @@
     "_what": "inspection hatch on the forward armour"
    },
    {
+    "id": "D-H-06",
     "item": "handle",
     "on": "pod",
     "x": 1.98,
@@ -1225,6 +1307,7 @@
     "_what": "grab handles either side of the open bay"
    },
    {
+    "id": "D-H-07",
     "item": "handle",
     "on": "pod",
     "x": 3.32,
@@ -1232,12 +1315,14 @@
     "rot": 90
    },
    {
+    "id": "D-H-08",
     "item": "access_panel",
     "on": "pod",
     "x": 1.45,
     "deg": 22
    },
    {
+    "id": "D-H-09",
     "item": "fuel_cap",
     "on": "pod",
     "x": 3.85,
@@ -1245,6 +1330,7 @@
     "_what": "coolant filler"
    },
    {
+    "id": "D-H-10",
     "item": "hazard_subtle",
     "on": "pod",
     "x": 0.05,
@@ -1253,6 +1339,7 @@
     "_why": "SC: hazard marks on white paint are tone-on-tone grey; yellow only at the gear and the ramp"
    },
    {
+    "id": "D-H-11",
     "item": "louvers",
     "on": "pod",
     "x": 0.1,
@@ -1260,18 +1347,21 @@
     "_what": "aft cowl heat louvers"
    },
    {
+    "id": "D-H-12",
     "item": "slot_s",
     "on": "pod",
     "x": 1.48,
     "deg": 119
    },
    {
+    "id": "D-H-13",
     "item": "slot_s",
     "on": "pod",
     "x": 3.82,
     "deg": 119
    },
    {
+    "id": "D-H-14",
     "item": "cable_run",
     "on": "pod",
     "x": 2.65,
@@ -1279,18 +1369,21 @@
     "_what": "cable run between the inboard plates"
    },
    {
+    "id": "D-H-15",
     "item": "recessed_panel",
     "on": "pod",
     "x": 1.5,
     "deg": -60
    },
    {
+    "id": "D-H-16",
     "item": "recessed_panel",
     "on": "pod",
     "x": 3.8,
     "deg": -60
    },
    {
+    "id": "D-H-17",
     "item": "light_housing",
     "on": "pod",
     "x": 5.0,
@@ -1298,6 +1391,7 @@
     "_what": "position light housing (lit in step 6)"
    },
    {
+    "id": "D-H-18",
     "item": "bolt_row_4",
     "on": "pod",
     "x": 1.3,
@@ -1309,6 +1403,7 @@
     "_what": "bolts along the lower strake"
    },
    {
+    "id": "D-H-19",
     "item": "vent_grille",
     "on": "top",
     "x": 1.0,
@@ -1316,6 +1411,7 @@
     "_what": "engine room exhaust on the aft cap"
    },
    {
+    "id": "D-H-20",
     "item": "tri_warning",
     "on": "top",
     "x": 2.3,
@@ -1323,6 +1419,7 @@
     "_why": "SC: hazard marks on white paint are tone-on-tone grey; yellow only at the gear and the ramp"
    },
    {
+    "id": "D-H-21",
     "item": "bolt_row_4",
     "on": "ray",
     "at": [3.4, 1.85, 2.62],
@@ -1334,6 +1431,7 @@
     "_what": "shoulder armour bolts"
    },
    {
+    "id": "D-H-22",
     "item": "bolt_row_4",
     "on": "ray",
     "at": [5.9, 1.85, 2.62],
@@ -1344,12 +1442,14 @@
     }
    },
    {
+    "id": "D-H-23",
     "item": "hatch",
     "on": "top",
     "x": 3.75,
     "y": 0.62
    },
    {
+    "id": "D-H-24",
     "item": "access_panel",
     "on": "top",
     "x": 6.2,
@@ -1357,6 +1457,7 @@
     "mirror": false
    },
    {
+    "id": "D-H-25",
     "item": "bolt_row_4",
     "on": "top",
     "x": 5.9,
@@ -1367,12 +1468,14 @@
     }
    },
    {
+    "id": "D-H-26",
     "item": "access_panel",
     "on": "bottom",
     "x": 3.7,
     "y": 0.8
    },
    {
+    "id": "D-H-27",
     "item": "warning_label",
     "on": "bottom",
     "x": 5.2,
@@ -1380,18 +1483,21 @@
     "_what": "landing gear hazard"
    },
    {
+    "id": "D-H-28",
     "item": "vent_grille",
     "on": "side",
     "x": 6.4,
     "z": 1.6
    },
    {
+    "id": "D-H-29",
     "item": "slot_s",
     "on": "side",
     "x": 6.4,
     "z": 0.9
    },
    {
+    "id": "D-H-30",
     "item": "warning_label",
     "on": "ray",
     "at": [-1.0, 1.25, 0.35],
@@ -1400,6 +1506,7 @@
     "_what": "hazard plates either side of the rear ramp"
    },
    {
+    "id": "D-H-31",
     "item": "handle",
     "on": "ray",
     "at": [-1.0, 1.25, 0.95],
@@ -1407,6 +1514,7 @@
     "rot": 90
    },
    {
+    "id": "D-H-32",
     "item": "access_panel",
     "on": "ray",
     "at": [-1.0, 1.8, 1.15],
@@ -1414,6 +1522,7 @@
     "_what": "ramp hydraulics access"
    },
    {
+    "id": "D-H-33",
     "item": "louvers",
     "on": "ray",
     "at": [-1.0, 0.5, 1.1],
@@ -1421,6 +1530,7 @@
     "_what": "hold air exchange in the ramp"
    },
    {
+    "id": "D-H-34",
     "item": "bolt_row_4",
     "on": "ray",
     "at": [-1.0, 0.55, 0.02],
@@ -1428,6 +1538,7 @@
     "_what": "ramp hinge bolts"
    },
    {
+    "id": "D-H-35",
     "item": "edge_scuff",
     "on": "ray",
     "at": [-1.0, 0.55, -0.05],
@@ -1435,6 +1546,7 @@
     "_what": "worn step on the ramp lip (the only wear by hand)"
    },
    {
+    "id": "D-H-36",
     "item": "xstl_nostep",
 
     "scale": 2.0,
@@ -1445,6 +1557,7 @@
     "mirror": false
    },
    {
+    "id": "D-H-37",
     "item": "tri_warning",
     "on": "side",
     "x": 19.9,
@@ -1452,6 +1565,7 @@
     "_what": "sensor radiation warning on the nose"
    },
    {
+    "id": "D-H-38",
     "item": "hazard_subtle",
     "on": "bottom",
     "x": 17.0,
@@ -1460,18 +1574,21 @@
     "_what": "nose gear bay marking"
    },
    {
+    "id": "D-H-39",
     "item": "access_panel",
     "on": "bottom",
     "x": 14.5,
     "y": 0.7
    },
    {
+    "id": "D-H-40",
     "item": "hatch_small",
     "on": "side",
     "x": 16.2,
     "z": 0.55
    },
    {
+    "id": "D-H-41",
     "item": "fuel_cap",
     "on": "top",
     "x": 10.0,
@@ -1479,6 +1596,7 @@
     "_what": "coolant filler over the reactor"
    },
    {
+    "id": "D-H-42",
     "item": "vent_grille",
     "on": "side",
     "x": 8.75,
@@ -1486,6 +1604,7 @@
     "_what": "reactor cooler grille (decal: a recess next to the 9.3 seam read as a hole)"
    },
    {
+    "id": "D-H-43",
     "item": "vent_small",
     "on": "side",
     "x": 15.6,
@@ -1493,6 +1612,7 @@
     "_what": "life support intake behind the cockpit"
    },
    {
+    "id": "D-H-44",
     "item": "xst_nostep",
 
     "scale": 2.0,
@@ -1503,6 +1623,7 @@
     "_what": "NO STEP on the flap"
    },
    {
+    "id": "D-H-45",
     "item": "xst_nostep",
 
     "scale": 2.0,
@@ -1512,6 +1633,7 @@
     "rot": 90
    },
    {
+    "id": "D-H-46",
     "item": "hazard_subtle",
     "on": "top",
     "x": 10.4,
@@ -1519,6 +1641,7 @@
     "_what": "walkway limit at the wing root"
    },
    {
+    "id": "D-H-47",
     "item": "red_marker",
     "on": "top",
     "x": 6.4,
@@ -1526,6 +1649,7 @@
     "_what": "wing tip marker"
    },
    {
+    "id": "D-H-48",
     "item": "red_marker",
     "on": "side",
     "x": 1.9,
@@ -1533,22 +1657,23 @@
     "_what": "fin tip marker",
     "_change": "design v2.1 (1. 10. 2026): fins 1.3 m tall, tip at 3.3"
    },
-   {"item": "xst_exhaust", "scale": 1.5, "on": "pod", "x": 0.45, "deg": -40, "_what": "1. 10. 2026: service stencils only beside their hardware (exterior review 30. 9.: random scatter, unreadable): exhaust warning at the nozzle"},
-   {"item": "xst_intake", "scale": 1.5, "on": "pod", "x": 4.75, "deg": -10, "_what": "intake warning ahead of the pod intake"},
-   {"item": "xst_service", "scale": 1.5, "on": "pod", "x": 2.65, "deg": -12, "_what": "below the open component bay"},
-   {"item": "xst_gear", "scale": 1.5, "on": "bottom", "x": 5.2, "y": 1.3, "_what": "main gear bay"},
-   {"item": "xst_gear", "scale": 1.5, "on": "bottom", "x": 16.3, "y": 0.0, "rot": 90, "mirror": false, "_what": "nose gear bay"},
-   {"item": "xst_ramp", "scale": 1.5, "on": "ray", "at": [-1.0, 1.25, 1.5], "dir": [1, 0, 0], "_what": "above the ramp hazard plates"},
-   {"item": "xst_hyd", "scale": 1.5, "on": "side", "x": 1.9, "z": 0.72, "_what": "over the ramp hydraulics hatch"},
-   {"item": "xst_qtfuel", "scale": 1.5, "on": "bottom", "x": 6.4, "y": 1.25, "_what": "beside the quantum fuel filler hatch"},
-   {"item": "xst_gnd", "scale": 1.5, "on": "side", "x": 19.0, "z": 0.8, "_what": "nose ground point"},
-   {"item": "xst_extpwr", "scale": 1.5, "on": "side", "x": 12.95, "z": 1.35, "_what": "external power socket by the cabin"},
-   {"item": "xst_inspect", "scale": 1.5, "on": "side", "x": 8.9, "z": 1.5, "_what": "over the component access panel"},
-   {"item": "xstl_service", "scale": 1.5, "on": "top", "x": 13.4, "y": 0.62, "rot": 90, "_what": "beside the roof maintenance hatch (dark spine: light ink)"},
-   {"item": "xstl_inspect", "scale": 1.5, "on": "top", "x": 16.9, "y": 0.95, "_what": "canopy frame service point (dark: light ink)"}
+   {"id": "D-H-49", "item": "xst_exhaust", "scale": 1.5, "on": "pod", "x": 0.45, "deg": -40, "_what": "1. 10. 2026: service stencils only beside their hardware (exterior review 30. 9.: random scatter, unreadable): exhaust warning at the nozzle"},
+   {"id": "D-H-50", "item": "xst_intake", "scale": 1.5, "on": "pod", "x": 4.75, "deg": -10, "_what": "intake warning ahead of the pod intake"},
+   {"id": "D-H-51", "item": "xst_service", "scale": 1.5, "on": "pod", "x": 2.65, "deg": -12, "_what": "below the open component bay"},
+   {"id": "D-H-52", "item": "xst_gear", "scale": 1.5, "on": "bottom", "x": 5.2, "y": 1.3, "_what": "main gear bay"},
+   {"id": "D-H-53", "item": "xst_gear", "scale": 1.5, "on": "bottom", "x": 16.3, "y": 0.0, "rot": 90, "mirror": false, "_what": "nose gear bay"},
+   {"id": "D-H-54", "item": "xst_ramp", "scale": 1.5, "on": "ray", "at": [-1.0, 1.25, 1.5], "dir": [1, 0, 0], "_what": "above the ramp hazard plates"},
+   {"id": "D-H-55", "item": "xst_hyd", "scale": 1.5, "on": "side", "x": 1.9, "z": 0.72, "_what": "over the ramp hydraulics hatch"},
+   {"id": "D-H-56", "item": "xst_qtfuel", "scale": 1.5, "on": "bottom", "x": 6.4, "y": 1.25, "_what": "beside the quantum fuel filler hatch"},
+   {"id": "D-H-57", "item": "xst_gnd", "scale": 1.5, "on": "side", "x": 19.0, "z": 0.8, "_what": "nose ground point"},
+   {"id": "D-H-58", "item": "xst_extpwr", "scale": 1.5, "on": "side", "x": 12.95, "z": 1.35, "_what": "external power socket by the cabin"},
+   {"id": "D-H-59", "item": "xst_inspect", "scale": 1.5, "on": "side", "x": 8.9, "z": 1.5, "_what": "over the component access panel"},
+   {"id": "D-H-60", "item": "xstl_service", "scale": 1.5, "on": "top", "x": 13.4, "y": 0.62, "rot": 90, "_what": "beside the roof maintenance hatch (dark spine: light ink)"},
+   {"id": "D-H-61", "item": "xstl_inspect", "scale": 1.5, "on": "top", "x": 16.9, "y": 0.95, "_what": "canopy frame service point (dark: light ink)"}
   ],
   "trim": [
    {
+    "id": "D-T-01",
     "strip": "studs_band",
     "on": "pod_ring",
     "x": 0.75,
@@ -1556,18 +1681,21 @@
     "_what": "armour strap over the aft band (not under the fin)"
    },
    {
+    "id": "D-T-02",
     "strip": "bolt_row",
     "on": "pod_ring",
     "x": 4.55,
     "deg": [0, 360]
    },
    {
+    "id": "D-T-03",
     "strip": "ribbing",
     "on": "pod_ring",
     "x": 0.2,
     "deg": [200, 340]
    },
    {
+    "id": "D-T-04",
     "strip": "panel_lip",
     "on": "bottom_line",
     "a": [3.14, -1.5, 0],
@@ -1575,6 +1703,7 @@
     "mirror": false
    },
    {
+    "id": "D-T-05",
     "strip": "seam_double",
     "on": "ray_line",
     "points": [[-1.0, -1.15, -0.12], [-1.0, -1.15, 1.35], [-1.0, 1.15, 1.35], [-1.0, 1.15, -0.12]],
@@ -1587,6 +1716,7 @@
   "rules": {
    "_comment": "Rules (Tools/Blender/hs_decals.py): regenerate everything; seed above fixes the scatter. Dense round engines, the bay, the intake and the ramp; calm on the big surfaces.",
    "panel_marks": {
+    "id": "D-R-PANEL-MARKS",
     "blocked_deg": [[52, 100]],
     "hull": [
      {
@@ -1851,11 +1981,13 @@
     }
    ],
    "companions": {
+    "id": "D-R-COMPANIONS",
     "streak_chance": 0.25,
     "bracket_chance": 0.8,
     "marker_chance": 0.7
    },
    "hull_seams": {
+    "id": "D-R-HULL-SEAMS",
     "region_x": [-0.6, 20.3],
     "strip": "seam_rivets",
     "lines": [
@@ -1870,6 +2002,7 @@
     ]
    },
    "pod_gaps": {
+    "id": "D-R-POD-GAPS",
     "strip": "seam_rivets",
     "blocked_deg": [[52, 100]],
     "ring_ranges": [[-60, 48], [102, 300]],
@@ -1881,10 +2014,12 @@
     ]
    },
    "plate_edges": {
+    "id": "D-R-PLATE-EDGES",
     "strip": "rivet_line",
     "inset_m": 0.03
    },
    "coverage": {
+    "id": "D-R-COVERAGE",
     "_comment": "SC density target: at least one small decal on every panel over ~0.5 m (jittered grid, calm pool).",
     "areas": [
      {
@@ -2008,6 +2143,7 @@
     ]
    },
    "panel_lines": {
+    "id": "D-R-PANEL-LINES",
     "_comment": "Thin engraved panel lines with 45-degree jogs, per bay between the hull seams (SC: the main density).",
     "region_x": [0.0, 20.2],
     "side_bands": [
@@ -2058,10 +2194,12 @@
     }
    },
    "greeble_companions": {
+    "id": "D-R-GREEBLE-COMPANIONS",
     "_comment": "labels, markers, chevrons and stencils beside the hull's kit greebles", "vent_stencil": {"side": "xst_vent", "top": "xstl_vent", "bottom": "xst_vent"}, "vent_stencil_scale": 1.5}
   },
   "grime": [
    {
+    "id": "D-G-01",
     "_what": "grime cards (from the SC breakdown, 26. 9. 2026: planes of streaky dirt over the engines and wings). size [w, h], h along 'up' = where the dirt comes from; mirrored",
     "on": "pod",
     "x": 0.25,
@@ -2071,6 +2209,7 @@
     "up": [-1, 0, 0]
    },
    {
+    "id": "D-G-02",
     "on": "pod",
     "x": 0.25,
     "deg": 10,
@@ -2079,6 +2218,7 @@
     "up": [-1, 0, 0]
    },
    {
+    "id": "D-G-03",
     "on": "pod",
     "x": 0.25,
     "deg": -115,
@@ -2087,6 +2227,7 @@
     "up": [-1, 0, 0]
    },
    {
+    "id": "D-G-04",
     "_what": "fins: rain streaks down both faces",
     "on": "ray",
     "at": [
@@ -2112,6 +2253,7 @@
     "_change": "design v2.1 (1. 10. 2026): fins 1.3 m tall, tip at 3.3"
    },
    {
+    "id": "D-G-05",
     "on": "ray",
     "at": [2.0, 0.5, 3.4],
     "dir": [0, 1, 0],
@@ -2120,6 +2262,7 @@
     "up": [0, 0, 1]
    },
    {
+    "id": "D-G-06",
     "_what": "wings: air-flow streaks trailing back from the leading edge, a smear at the root",
     "on": "top",
     "x": 7.2,
@@ -2129,6 +2272,7 @@
     "up": [1, 0, 0]
    },
    {
+    "id": "D-G-07",
     "on": "top",
     "x": 5.2,
     "y": 2.9,
@@ -2137,6 +2281,7 @@
     "up": [1, 0, 0]
    },
    {
+    "id": "D-G-08",
     "_what": "hull: streaks under the side vents, a smear over the hold roof, dirt round the main gear",
     "on": "side",
     "x": 4.9,
@@ -2146,6 +2291,7 @@
     "up": [0, 0, 1]
    },
    {
+    "id": "D-G-09",
     "on": "top",
     "x": 1.8,
     "y": 1.1,
@@ -2154,6 +2300,7 @@
     "up": [1, 0, 0]
    },
    {
+    "id": "D-G-10",
     "on": "bottom",
     "x": 5.0,
     "y": 0.9,
@@ -2162,6 +2309,7 @@
     "up": [1, 0, 0]
    },
    {
+    "id": "D-G-11",
     "_what": "pod intakes: a smear over the front",
     "on": "pod",
     "x": 5.3,
@@ -2184,6 +2332,7 @@
   "_comment": "Light fittings, emissive strips and real lights (Tools/Blender/hs_lights.py, skill ship-pipeline 3b3). PILOT: pods and aft hull. Position lights red port / green starboard on the pod noses, white tail light on the aft cap, amber outline markers, a floodlight on each shoulder washing the forward pod armour, a warm light in each open bay.",
   "lenses": [
    {
+    "id": "L-NAV",
     "name": "nav",
     "on": "pod",
     "x": 5.0,
@@ -2200,6 +2349,7 @@
     "_why": "the wing is 30 cm away: 25 cd and then 10 cd still left a red pool on it in daylight (24. 9. 2026)"
    },
    {
+    "id": "L-TAIL",
     "name": "tail",
     "on": "top",
     "x": 0.3,
@@ -2210,6 +2360,7 @@
     "_why": "only the lens: even 3 cd a few cm above the glossy dark cap drew a white spot (24. 9. 2026)"
    },
    {
+    "id": "L-MARKER-POD",
     "name": "marker_pod",
     "on": "pod",
     "x": 0.0,
@@ -2219,6 +2370,7 @@
     "_what": "outline marker under each aft cowl"
    },
    {
+    "id": "L-MARKER-HULL",
     "name": "marker_hull",
     "on": "ray",
     "at": [0.4, 2.0, 2.45],
@@ -2228,6 +2380,7 @@
     "_what": "outline marker on the aft cap corners"
    },
    {
+    "id": "L-FLOOD",
     "name": "flood",
     "on": "ray",
     "at": [6.6, 1.9, 2.6],
@@ -2246,6 +2399,7 @@
   ],
   "strips": [
    {
+    "id": "L-POD-RUN",
     "name": "pod_run",
     "x": [1.0, 4.3],
     "deg": -44,
@@ -2254,6 +2408,7 @@
     "_what": "running light strip under the lower strake"
    },
    {
+    "id": "L-BAY-GLOW",
     "name": "bay_glow",
     "x": [2.2, 3.1],
     "deg": 40,
@@ -2268,6 +2423,7 @@
     "_what": "work light on the bay floor"
    },
    {
+    "id": "L-HULL-RUN-LOW",
     "name": "hull_run_low",
     "on": "side",
     "x": [7.2, 16.6],
@@ -2278,6 +2434,7 @@
     "step": 0.3
    },
    {
+    "id": "L-HULL-RUN-CANOPY",
     "name": "hull_run_canopy",
     "on": "side",
     "x": [15.4, 18.9],
@@ -2288,6 +2445,7 @@
     "step": 0.3
    },
    {
+    "id": "L-BELLY-RUN",
     "name": "belly_run",
     "on": "bottom",
     "x": [4.5, 15.5],
@@ -2302,6 +2460,7 @@
  "wings": {
   "_comment": "Shaped wings and fins inside the drawing's slabs (Tools/Blender/hs_wings.py): NACA section, leading-edge strip in the dark material (bare metal read as chrome with Lumen noise on the fins), flap / rudder cut out of the box in secondary paint, flap track fairings.",
   "wing": {
+   "id": "F-WING",
    "step": 0.08,
    "t_ratio": 1.0,
    "le": 0.08,
@@ -2322,6 +2481,7 @@
    "core": 0.92
   },
   "fin": {
+   "id": "F-FIN",
    "step": 0.06,
    "t_ratio": 1.0,
    "le": 0.1,
@@ -2343,6 +2503,7 @@
  "gear": {
   "_comment": "Real landing gear inside the drawing's gear envelopes (Tools/Blender/hs_gear.py): oleo strut, torque links, drag brace, hydraulic lines, leg door with a hazard band, ankle and foot pad.",
   "gear_main": {
+   "id": "F-GEAR-MAIN",
    "at": [5.2, 2.25, -0.6],
    "mirror": true,
    "strut": [0.4, 0.3, -0.6, -1.45],
@@ -2350,6 +2511,7 @@
    "door": "outboard"
   },
   "gear_nose": {
+   "id": "F-GEAR-NOSE",
    "at": [17.0, 0.0, -0.55],
    "mirror": false,
    "strut": [0.4, 0.3, -0.55, -1.45],
@@ -2361,6 +2523,7 @@
   "_comment": "Functional parts as geometry (Tools/Blender/hs_functional.py). RCS layout like the SC small ships: clusters at the nose, the tail and the pods, pairs along the sides, top and belly - 28 blocks.",
   "items": [
    {
+    "id": "F-RCS-01",
     "kind": "rcs",
     "on": "side",
     "x": 19.1,
@@ -2368,6 +2531,7 @@
     "rot": 90
    },
    {
+    "id": "F-RCS-02",
     "kind": "rcs",
     "on": "side",
     "x": 19.1,
@@ -2375,6 +2539,7 @@
     "rot": 90
    },
    {
+    "id": "F-RCS-03",
     "kind": "rcs",
     "on": "top",
     "x": 20.35,
@@ -2382,18 +2547,21 @@
     "_why": "was at x 18.4 - on the canopy's glass, two dark blocks in the pilot's view (step 2, 25. 9. 2026); on the nose ahead of the glass"
    },
    {
+    "id": "F-RCS-04",
     "kind": "rcs",
     "on": "bottom",
     "x": 18.6,
     "y": 0.35
    },
    {
+    "id": "F-RCS-05",
     "kind": "rcs",
     "on": "side",
     "x": 13.6,
     "z": 1.95
    },
    {
+    "id": "F-RCS-06",
     "kind": "rcs",
     "on": "side",
     "x": 9.9,
@@ -2401,18 +2569,21 @@
     "tilt": -30
    },
    {
+    "id": "F-RCS-07",
     "kind": "rcs",
     "on": "top",
     "x": 9.7,
     "y": 1.2
    },
    {
+    "id": "F-RCS-08",
     "kind": "rcs",
     "on": "bottom",
     "x": 9.2,
     "y": 1.3
    },
    {
+    "id": "F-RCS-09",
     "kind": "rcs",
     "on": "side",
     "x": 4.0,
@@ -2420,24 +2591,28 @@
     "tilt": 30
    },
    {
+    "id": "F-RCS-10",
     "kind": "rcs",
     "on": "ray",
     "at": [-1.0, 1.95, 1.85],
     "dir": [1, 0, 0]
    },
    {
+    "id": "F-RCS-11",
     "kind": "rcs",
     "on": "ray",
     "at": [-1.0, 1.8, 0.1],
     "dir": [1, 0, 0]
    },
    {
+    "id": "F-RCS-12",
     "kind": "rcs",
     "on": "pod",
     "x": 5.35,
     "deg": -90
    },
    {
+    "id": "F-BLADE-01",
     "kind": "blade",
     "on": "top",
     "x": 11.2,
@@ -2445,6 +2620,7 @@
     "mirror": false
    },
    {
+    "id": "F-BLADE-02",
     "kind": "blade",
     "on": "bottom",
     "x": 12.2,
@@ -2453,6 +2629,7 @@
     "size": 0.8
    },
    {
+    "id": "F-WHIP-01",
     "kind": "whip",
     "on": "top",
     "x": 7.4,
@@ -2460,6 +2637,7 @@
     "mirror": false
    },
    {
+    "id": "F-DOME-01",
     "kind": "dome",
     "on": "bottom",
     "x": 15.6,
@@ -2467,6 +2645,7 @@
     "mirror": false
    },
    {
+    "id": "F-DOME-02",
     "kind": "dome",
     "on": "top",
     "x": 13.1,
@@ -2475,30 +2654,35 @@
     "size": 0.7
    },
    {
+    "id": "F-CONN-01",
     "kind": "connector",
     "on": "side",
     "x": 6.6,
     "z": 0.55
    },
    {
+    "id": "F-CONN-02",
     "kind": "connector",
     "on": "bottom",
     "x": 10.6,
     "y": 0.9
    },
    {
+    "id": "F-HINGE-01",
     "kind": "hinge",
     "on": "bottom",
     "x": 6.2,
     "y": 3.6
    },
    {
+    "id": "F-HINGE-02",
     "kind": "hinge",
     "on": "bottom",
     "x": 5.5,
     "y": 5.2
    },
    {
+    "id": "F-HINGE-03",
     "kind": "hinge",
     "on": "bottom",
     "x": 4.9,
@@ -2507,6 +2691,7 @@
   ],
   "gun_mounts": [
    {
+    "id": "F-GUNMOUNT-01",
     "y": 7.15,
     "z": 0.75,
     "r": 0.18,

@@ -95,7 +95,7 @@ Kamera ani světlo nesahají do `SpaceshipPawn` (kamera je v setupu lodi, světl
 
 - `.\Tools\Test.ps1 -All`: offline 6/6 (147 kontrol, z toho 93 decalů), Blender 1/1 (test geometrie lodi), UE 22/22
   (1398 kontrol, `test_ship_import` 333). Po přestavbě i `hs_assemble_ship` GEOTEST PASS.
-- Balení 1,4 min; finální snímky ze zabalené hry: `Saved/Shots/20261001_014523_wayfarer_exterior_review` (31) a 3×
+- Balení 1,4 min; finální snímky ze zabalené hry: `shots:20261001_014523_wayfarer_exterior_review` (31) a 3×
   `wayfarer_cheap_fixes`. Všechny prohlédnuté; snímky před a po výše jsou z `-Editor` (shoda se zabalenou hrou).
 - Zbývá z recenze 30. 9.: trysky, záď a rampa, podvozek, křídla, zbraně, materiály a světla lodi, tedy systémové body
   pro nový povrch trupu (koncept A–D). Kolo kritika se nedělalo (zadání autora: levné opravy bez kritika).

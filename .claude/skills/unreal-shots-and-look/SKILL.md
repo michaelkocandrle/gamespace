@@ -60,7 +60,9 @@ bez okna editoru a bez PIE. Nastavení čte z `Saved\Config\WindowsEditor\GameUs
   `wayfarer_reflection_options` porovná dnešní odrazy, kov 0,9 bez odrazů a kov s odrazy Lumenu do drsnosti 0,32
   (časy v řádcích `SHOTS perf` logu).
 
-- Výstup: `Saved\Shots\<yyyyMMdd_HHmmss>_<preset>\NN_<name>.png` (NN = pořadí). `Saved\` není v gitu.
+- Výstup: `D:\gamespace-shots\<yyyyMMdd_HHmmss>_<preset>\NN_<name>.png` (NN = pořadí; `Tools/ShotsDir.ps1`, bez disku D
+  `Saved\Shots`; autor 1. 10. 2026). Mimo git. V `review.json` a recenzích se snímek píše `shots:<sada>/<soubor>`
+  (`Tools/shots_dir.py resolve`, umí i starý tvar `Saved/Shots/...`).
 - Konec výpisu `RESULT: OK - N picture(s)`; bez snímků `RESULT: FAILED` → `Saved\Logs\gamespace.log`, hledej `SHOTS`.
 - `WARNING: ... changed after the last package` = snímky ukazují starý build → `-Package`.
 - **Scénář JSON se čte z disku za běhu** – změna scénáře ani konzolových hodnot nepotřebuje balení.

@@ -18,7 +18,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
    "ref_label": "SC chodba (Drake)",
-   "ours": "Saved/Shots/20260928_164015_wayfarer_kit_corridor/01_tech_fwd.png",
+   "ours": "shots:20260928_164015_wayfarer_kit_corridor/01_tech_fwd.png",
    "ours_label": "ve hře"
   },
   {
@@ -27,7 +27,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
    "ref_label": "SC úzká místnost s poklopem",
-   "ours": "Saved/Shots/20260928_164015_wayfarer_kit_corridor/02_tech_aft.png",
+   "ours": "shots:20260928_164015_wayfarer_kit_corridor/02_tech_aft.png",
    "ours_label": "ve hře"
   },
   {
@@ -36,7 +36,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
    "ref_label": "SC infrastruktura",
-   "ours": "Saved/Shots/20260928_164015_wayfarer_kit_corridor/03_tech_from_hold.png",
+   "ours": "shots:20260928_164015_wayfarer_kit_corridor/03_tech_from_hold.png",
    "ours_label": "ve hře"
   },
   {
@@ -45,7 +45,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021456.png",
    "ref_label": "SC komponenty ve stěně",
-   "ours": "Saved/Shots/20260928_164015_wayfarer_kit_corridor/04_tech_reactor.png",
+   "ours": "shots:20260928_164015_wayfarer_kit_corridor/04_tech_reactor.png",
    "ours_label": "ve hře"
   }
  ]

@@ -19,7 +19,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
    "ref_label": "SC chodba (Drake)",
-   "ours": "Saved/Shots/20260927_171744_kit_showroom3/03_b_corridor_floor.png",
+   "ours": "shots:20260927_171744_kit_showroom3/03_b_corridor_floor.png",
    "ours_label": "ve hře"
   },
   {
@@ -28,7 +28,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
    "ref_label": "SC podlaha s mřížkou",
-   "ours": "Saved/Shots/20260927_171744_kit_showroom3/04_c_grille_close.png",
+   "ours": "shots:20260927_171744_kit_showroom3/04_c_grille_close.png",
    "ours_label": "ve hře"
   },
   {
@@ -37,7 +37,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
    "ref_label": "SC podlahové desky",
-   "ours": "Saved/Shots/20260927_171744_kit_showroom3/05_d_hatch_close.png",
+   "ours": "shots:20260927_171744_kit_showroom3/05_d_hatch_close.png",
    "ours_label": "ve hře"
   },
   {
@@ -46,7 +46,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021447.png",
    "ref_label": "SC podlaha se značením",
-   "ours": "Saved/Shots/20260927_171744_kit_showroom3/06_e_plate_b_close.png",
+   "ours": "shots:20260927_171744_kit_showroom3/06_e_plate_b_close.png",
    "ours_label": "ve hře"
   },
   {
@@ -55,7 +55,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
    "ref_label": "SC úzká chodba",
-   "ours": "Saved/Shots/20260927_171744_kit_showroom3/07_f_n_stub_floor.png",
+   "ours": "shots:20260927_171744_kit_showroom3/07_f_n_stub_floor.png",
    "ours_label": "ve hře"
   },
   {
@@ -64,7 +64,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021225.png",
    "ref_label": "SC schody v lodi",
-   "ours": "Saved/Shots/20260927_171744_kit_showroom3/09_h_stair_front.png",
+   "ours": "shots:20260927_171744_kit_showroom3/09_h_stair_front.png",
    "ours_label": "ve hře"
   },
   {
@@ -73,7 +73,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
    "ref_label": "SC interiér se žebříkem",
-   "ours": "Saved/Shots/20260927_171744_kit_showroom3/10_i_stair_side.png",
+   "ours": "shots:20260927_171744_kit_showroom3/10_i_stair_side.png",
    "ours_label": "ve hře"
   },
   {
@@ -82,7 +82,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
    "ref_label": "SC podlaha s výstražnými okraji",
-   "ours": "Saved/Shots/20260927_171744_kit_showroom3/11_j_ramp_bottom.png",
+   "ours": "shots:20260927_171744_kit_showroom3/11_j_ramp_bottom.png",
    "ours_label": "ve hře"
   },
   {
@@ -91,7 +91,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021456.png",
    "ref_label": "SC místnost",
-   "ours": "Saved/Shots/20260927_171744_kit_showroom3/08_g_bay_overall.png",
+   "ours": "shots:20260927_171744_kit_showroom3/08_g_bay_overall.png",
    "ours_label": "ve hře"
   }
  ]

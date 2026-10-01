@@ -8,7 +8,7 @@ seřazený podle dopadu. Jedno kolo, bez oprav a bez dalších kol.
 ## Podklady
 
 - Snímky: `.\Tools\Shots.ps1 -Preset wayfarer_exterior_review -Editor -Width 1920 -Height 1080`, sada
-  `Saved/Shots/20260930_232344_wayfarer_exterior_review` (31 snímků, mimo git; listy je obsahují).
+  `shots:20260930_232344_wayfarer_exterior_review` (31 snímků, mimo git; listy je obsahují).
 - Světlo: den = slunce levelu `space.SunDir -39 45` ve 3 km; soumrak `-52 102` (nízké slunce za lodí vpravo vzadu);
   vesmír 60 km nad Veyrou, nejdřív `-52 85` (protisvětlo), pak slunce levelu. Hledání soumraku a strany na slunci ve
   vesmíru stálo tři zkušební běhy (WORKFLOW 9.2 ex).

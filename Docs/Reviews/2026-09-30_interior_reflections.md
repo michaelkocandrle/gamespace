@@ -75,7 +75,7 @@ Autor se ptal, jestli jsem zkoušel jen odrazy v prostoru obrazovky. Varianta a)
 odrazy Lumenu vypnuté (`r.Lumen.Reflections.Allow 0`) a běží SSR se `r.SSR.Quality 3` ze škálovatelnosti,
 `r.SSR.MaxRoughness` výchozí (−1, tedy podle kvality). Zvlášť jsem teď změřil čisté SSR (`r.ReflectionMethod 2`)
 v nejvyšší kvalitě (`r.SSR.Quality 4`) a do drsnosti 0,8. Preset `Tools/Shots/wayfarer_reflection_ssr.json`,
-snímky `Saved/Shots/20260930_222838_wayfarer_reflection_ssr`, listy `2026-09-30_interior_reflections/ssr_only.jpg`
+snímky `shots:20260930_222838_wayfarer_reflection_ssr`, listy `2026-09-30_interior_reflections/ssr_only.jpg`
 a `ssr_only_crop.jpg`.
 
 | Záběr (GPU ms) | a) dnes | b) kov 0,9 / 0,30 | e) kov + jen SSR | f) dnešní materiály + jen SSR |

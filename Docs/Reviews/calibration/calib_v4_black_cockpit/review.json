@@ -11,7 +11,7 @@
     "starcitizenreference/cockpit_reference_4.png"
    ],
    "ref_label": "SC kokpity",
-   "ours": "Saved/Shots/20260925_032901_wayfarer_interior/13_pilot_view.png",
+   "ours": "shots:20260925_032901_wayfarer_interior/13_pilot_view.png",
    "ours_label": "ve hře, oko pilota"
   },
   {
@@ -23,7 +23,7 @@
     "starcitizenreference/cockpit_reference_5.png"
    ],
    "ref_label": "SC kokpity",
-   "ours": "Saved/Shots/20260925_032901_wayfarer_interior/11_cockpit_right.png",
+   "ours": "shots:20260925_032901_wayfarer_interior/11_cockpit_right.png",
    "ours_label": "ve hře"
   },
   {
@@ -35,7 +35,7 @@
     "starcitizenreference/Screenshot 2026-09-25 021107.png"
    ],
    "ref_label": "SC kabiny zezadu",
-   "ours": "Saved/Shots/20260925_032901_wayfarer_interior/06_cockpit_back.png",
+   "ours": "shots:20260925_032901_wayfarer_interior/06_cockpit_back.png",
    "ours_label": "ve hře"
   }
  ],

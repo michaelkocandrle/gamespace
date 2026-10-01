@@ -17,7 +17,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021456.png",
    "ref_label": "SC komponenty ve stěně (MISC)",
-   "ours": "Saved/Shots/20260928_215140_kit_bays/04_a_reactor_close.png",
+   "ours": "shots:20260928_215140_kit_bays/04_a_reactor_close.png",
    "ours_label": "ve hře"
   },
   {
@@ -26,7 +26,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021456.png",
    "ref_label": "SC komponenty ve stěně (MISC)",
-   "ours": "Saved/Shots/20260928_215140_kit_bays/06_b_cooler_34.png",
+   "ours": "shots:20260928_215140_kit_bays/06_b_cooler_34.png",
    "ours_label": "ve hře"
   },
   {
@@ -35,7 +35,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
    "ref_label": "SC úzká místnost s poklopem",
-   "ours": "Saved/Shots/20260928_215140_kit_bays/07_c_shield_eye.png",
+   "ours": "shots:20260928_215140_kit_bays/07_c_shield_eye.png",
    "ours_label": "ve hře"
   },
   {
@@ -44,7 +44,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
    "ref_label": "SC infrastruktura",
-   "ours": "Saved/Shots/20260928_215238_wayfarer_kit_corridor/04_tech_reactor.png",
+   "ours": "shots:20260928_215238_wayfarer_kit_corridor/04_tech_reactor.png",
    "ours_label": "ve hře"
   },
   {
@@ -53,7 +53,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
    "ref_label": "SC chodba (Drake)",
-   "ours": "Saved/Shots/20260928_215238_wayfarer_kit_corridor/05_tech_shield.png",
+   "ours": "shots:20260928_215238_wayfarer_kit_corridor/05_tech_shield.png",
    "ours_label": "ve hře"
   }
  ]

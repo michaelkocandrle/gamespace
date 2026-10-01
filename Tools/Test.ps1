@@ -7,7 +7,7 @@
     .github/workflows/offline-tests.yml):
       - compileall of Tools/ and Content/Python/ (syntax of every script);
       - the unit tests in Tools/*/tests/ (ship export core, import plan, silhouette compare);
-      - the static checks in Tools/Tests/ that need neither Unreal nor Blender (material HLSL, decal orientation).
+      - the static checks in Tools/Tests/ that need neither Unreal nor Blender (material HLSL, decal orientation, exterior drawings vs data).
     -Blender adds the checks that start Blender 5.2 headless (test_ship_geometry.py, the silhouette render).
     -UE adds every Unreal test in Tools/Tests/ (the files that import unreal), one editor commandlet each through
     Tools\run_editor_python.ps1: about a minute per test, the editor must be closed and the C++ built.
@@ -97,7 +97,7 @@ try {
     Invoke-Python "offline" "compileall Tools Content/Python" @("-m", "compileall", "-q", "Tools", "Content/Python")
     $offline = @(Get-ChildItem (Join-Path $repo "Tools") -Recurse -Filter "test_*.py" |
         Where-Object { $_.Directory.Name -ceq "tests" }) +
-        @("test_material_hlsl.py", "test_decal_orientation.py" | ForEach-Object { Get-Item (Join-Path $repo "Tools/Tests/$_") })
+        @("test_material_hlsl.py", "test_decal_orientation.py", "test_exterior_drawing.py" | ForEach-Object { Get-Item (Join-Path $repo "Tools/Tests/$_") })
     foreach ($file in $offline) {
         Invoke-Python "offline" $file.Name @($file.FullName)
     }

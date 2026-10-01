@@ -1097,7 +1097,9 @@ see what a change looks like.
 .\Tools\Shots.ps1 -Last                     # paths of the newest set
 ```
 
-Pictures land in `Saved/Shots/<stamp>_<preset>/NN_<name>.png` (not in git; `-Keep` also copies them
+Pictures land in `D:\gamespace-shots\<stamp>_<preset>\NN_<name>.png` (`Tools/ShotsDir.ps1`; `GAMESPACE_SHOTS_DIR`
+overrides it, without drive D it is `Saved/Shots`; files in git name a picture `shots:<set>/<file>`, resolved by
+`Tools/shots_dir.py`; not in git; `-Keep` also copies them
 to `Docs/Shots/` for the repository's visual history). Presets are `cockpit`, `hud`, `ship`,
 `landing`, `ship_views` (a model from every side) and others in `Tools/Shots/`. A shot list is JSON read from disk at runtime, so
 editing one needs no repackaging; a shot can set the camera, HUD mode, altitude, facing, speed, master

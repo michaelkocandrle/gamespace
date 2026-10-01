@@ -17,7 +17,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
    "ref_label": "SC infrastruktura",
-   "ours": "Saved/Shots/20260928_003957_kit_material/06_c_d_portal_c_pipes.png",
+   "ours": "shots:20260928_003957_kit_material/06_c_d_portal_c_pipes.png",
    "ours_label": "ve hře"
   },
   {
@@ -26,7 +26,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
    "ref_label": "SC chodba (Drake)",
-   "ours": "Saved/Shots/20260928_003957_kit_material/04_c_a_corridor.png",
+   "ours": "shots:20260928_003957_kit_material/04_c_a_corridor.png",
    "ours_label": "ve hře"
   },
   {
@@ -35,7 +35,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
    "ref_label": "SC úzká chodba",
-   "ours": "Saved/Shots/20260928_003957_kit_material/08_c_h_leg_to_n_stub.png",
+   "ours": "shots:20260928_003957_kit_material/08_c_h_leg_to_n_stub.png",
    "ours_label": "ve hře"
   },
   {
@@ -44,7 +44,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
    "ref_label": "SC stěna a sokl",
-   "ours": "Saved/Shots/20260928_003957_kit_material/11_c_plinth_close.png",
+   "ours": "shots:20260928_003957_kit_material/11_c_plinth_close.png",
    "ours_label": "ve hře"
   },
   {
@@ -53,7 +53,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
    "ref_label": "SC podlahové desky",
-   "ours": "Saved/Shots/20260928_003957_kit_material/14_d_d_hatch_close.png",
+   "ours": "shots:20260928_003957_kit_material/14_d_d_hatch_close.png",
    "ours_label": "ve hře"
   }
  ]

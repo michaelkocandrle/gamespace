@@ -128,4 +128,27 @@ Původní otázky:
   tětiva 0,8 m, sklon ven stejný (špička y 3,56–3,81). Plocha asi na polovinu. Celková výška lodi 5,6 → 4,9 m.
 - Výkres (`Wayfarer_layout.json`, `Wayfarer_exterior.png`), kolizní boxy, značka a karta špíny na ploutvi
   v receptu `Wayfarer_hs.json` a spec (`height_m`) upravené ve stejném kroku.
+- **Potvrzeno autorem 1. 10. 2026:** ploutve 1,3 m (výška lodi 4,9 m).
+
+### Povrch trupu v3: koncept B + C (rozhodnutí autora 1. 10. 2026)
+
+- Ze čtyř konceptů (`ArtSource/Ships/Wayfarer/Concept/surface_v3/`) autor vybral **kombinaci B a C**:
+  - z **B** (vrstvený utilitární): vystouplé sekundární desky přišroubované na tmavší konstrukční rám, žebra rámu
+    vidět mezi deskami, kabelové a potrubní rozvody po hřbetu, zapuštěné servisní šachty s mřížkami;
+  - z **C** (průmyslový tahoun): těžké překrývané pláty s řadami šroubů, odhalená hydraulika u rampy a šachet
+    podvozku, robustní bloky RCS, gunmetal spodek trupu, žlutočerné pruhy jen u servisních míst.
+- **Nepřebírat:** prvky mimo výkres (antény a kupole na hřbetu z D), překlepy v nápisech (IF-0417 z A).
+- Další krok: detailní výkresy exteriéru (dossier bod 3) ze stejných dat, ze kterých se loď staví; exteriérový kit
+  a pilot až podle schváleného výkresu.
+
+### Výkresy z dat: vzorový list E-01 (1. 10. 2026, čeká na schválení stylu)
+
+- `Design/Drawings/Wayfarer_E01_starboard.png` (A0, pravobok 1:30, detail gondoly 1:20, řezy deskou 1:5), data
+  návrhu `Design/Wayfarer_exterior_design.json`, recenze `Docs/Reviews/2026-10-01_wayfarer_drawing_e01.md`
+  (kritik 3 kola, poslední PASS 7,3).
+- Návrh na listu: plášť gunmetal s deskami P-S ve 4 pásech (K, L těžké pláty se šrouby; U, S desky na rámu), žebra
+  na příčkách a podélníky, šachty s mřížkou F-GRILLE-01/02, 8 RCS podle specifikace, oranžový pruh po celém boku,
+  ploutve v sekundárním laku, záblesky, přistávací a pracovní světlo, hydraulika rampy; přesunuté logo, konektor
+  a nápisy, které z boku dopadaly jinam.
+- Po schválení stylu: zbytek listů (6 pohledů, detaily, interiér, koncepty), pak kit a pilot z dat návrhu.
 

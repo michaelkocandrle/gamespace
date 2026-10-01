@@ -57,7 +57,7 @@ Zadání autora (28. 9., po kroku „špína“, místo dávky 4):
 
 List [`2026-09-28_wayfarer_kit_corridor/compare_before_kit_sc.jpg`](2026-09-28_wayfarer_kit_corridor/compare_before_kit_sc.jpg):
 současná chodba | chodba z kitu | reference SC (jiné lodě). Preset `wayfarer_kit_corridor`, před
-`Saved/Shots/20260928_114357_…`, po `Saved/Shots/20260928_171009_…` (zabalená hra).
+`shots:20260928_114357_…`, po `shots:20260928_171009_…` (zabalená hra).
 
 | Pohled | Jas před → po | Detail před → po | B/R po |
 |---|---|---|---|
@@ -84,7 +84,7 @@ protože loď se létá bez MegaLights a každé světlo kreslilo stínovou mapu
 
 ## Kolo kritika – FAIL, 6/4/5/6/5/6/6/5 = 43
 
-Výstup [round1/critic.md](2026-09-28_wayfarer_kit_corridor/round1/critic.md), snímky `Saved/Shots/20260928_164015_…`
+Výstup [round1/critic.md](2026-09-28_wayfarer_kit_corridor/round1/critic.md), snímky `shots:20260928_164015_…`
 (rychlá smyčka). Podle zadání 7.1 jedno kolo. Body „musí“ jsou chybějící díly kitu, ne chyby pilota.
 
 | # | Výtka | Závažnost | Reakce |

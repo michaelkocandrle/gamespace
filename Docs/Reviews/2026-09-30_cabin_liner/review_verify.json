@@ -19,7 +19,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021316.png",
    "ref_label": "SC kajuta posádky (Drake)",
-   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/01_cabin_fwd.png",
+   "ours": "shots:20260930_095314_wayfarer_rooms/01_cabin_fwd.png",
    "ours_label": "ve hře"
   },
   {
@@ -28,7 +28,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
    "ref_label": "SC kajuta s palandami",
-   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/02_cabin_aft.png",
+   "ours": "shots:20260930_095314_wayfarer_rooms/02_cabin_aft.png",
    "ours_label": "ve hře"
   },
   {
@@ -37,7 +37,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
    "ref_label": "SC kajuta s palandami",
-   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/03_cabin_left.png",
+   "ours": "shots:20260930_095314_wayfarer_rooms/03_cabin_left.png",
    "ours_label": "ve hře"
   },
   {
@@ -46,7 +46,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
    "ref_label": "SC strop (MISC)",
-   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/06_cabin_ceiling.png",
+   "ours": "shots:20260930_095314_wayfarer_rooms/06_cabin_ceiling.png",
    "ours_label": "ve hře"
   },
   {
@@ -55,7 +55,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
    "ref_label": "SC dveře v přepážce (RSI)",
-   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/14_stairs_up.png",
+   "ours": "shots:20260930_095314_wayfarer_rooms/14_stairs_up.png",
    "ours_label": "ve hře"
   },
   {
@@ -64,7 +64,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021435.png",
    "ref_label": "SC obytná část (Drake)",
-   "ours": "Saved/Shots/20260930_095314_wayfarer_rooms/04_cabin_right.png",
+   "ours": "shots:20260930_095314_wayfarer_rooms/04_cabin_right.png",
    "ours_label": "ve hře"
   }
  ]

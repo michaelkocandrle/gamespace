@@ -55,7 +55,8 @@ až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
    nevejde, patří do recenze, skillu nebo archivu; autor 30. 9. 2026); nová nástraha do
    `Docs/WORKFLOW.md` kap. 9; trvalé know-how do příslušného skillu; architektonické rozhodnutí do
    `Docs/ARCHITECTURE.md`. Historie patří do commitu a recenze, ne do skillu.
-9. **Commit a push.**
+9. **Commit a push**, pak `.\Tools\Cleanup.ps1` (autor 1. 10. 2026: staré snímky bez odkazu, staging, staré logy,
+   jen ověřený `git lfs prune`; varuje pod 30 GB volných na C).
 10. **Odpověď autorovi česky:** co se změnilo a proč; testy a snímky, které jsi zkontroloval; že je hra
     v `C:\gamespace\Builds\Gamespace\Windows\gamespace.exe`; přesný testovací scénář (klávesy, kam jít); co musí
     posoudit jen autor; rizika; u vizuální práce verdikt a skóre posledního kola kritika, počet kol, výtky
@@ -73,6 +74,10 @@ až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
     a zkus to později.
   - Zámek starší než **2 hodiny** je opuštěný; `take` ho převezme a vypíše, čí byl. Delší práci obnov dalším
     `take` (stejná session jen přepíše úkol a čas).
+- **Každá session balí do své složky** (autor 1. 10. 2026; dřív si přepisovaly build): hlavní checkout do
+  `C:\gamespace\Builds\Gamespace`, worktree `gamespace-<jméno>` do `C:\gamespace\Builds_<jméno>\Gamespace` (druhá
+  session tedy `C:\gamespace\Builds_audit`). `Package.ps1`, `Shots.ps1` a `Play.ps1` cestu berou z
+  `Tools/BuildDir.ps1`; do cizí složky nebalit ani z ní nefotit. Autor hraje build z `C:\gamespace\Builds`.
 
 ## Příkazy (PowerShell; bash rozbije `$PSScriptRoot`)
 
@@ -84,9 +89,11 @@ až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
 .\Tools\Package.ps1                                 # balení na konci kroku (~5 min)
 .\Tools\Shots.ps1 -Preset <preset> -Package -Width 1920 -Height 1080
 .\Tools\HeavyLock.ps1 take -Task "<úkol>"           # zámek těžkých zdrojů; po práci release, stav status
+.\Tools\Cleanup.ps1 [-DryRun]                       # úklid disku na konci kroku
 ```
 
-Presety jsou v `Tools/Shots/*.json`; snímky v `Saved/Shots/...`, s `-Keep` i v `Docs/Shots/`.
+Presety jsou v `Tools/Shots/*.json`; snímky v `D:\gamespace-shots\<sada>` (`Tools/ShotsDir.ps1`, mimo disk C), s `-Keep`
+i v `Docs/Shots/`. Soubory v gitu (recenze) odkazují snímek jako `shots:<sada>/<soubor>` (`Tools/shots_dir.py`).
 Blender 5.2 headless z Git Bash **vždy** s `MSYS_NO_PATHCONV=1` (skill `blender-mcp`); 2D návrh lodi
 `python Tools/Design/draw_ship_design.py ArtSource/Ships/<Loď>/Design/<Loď>_layout.json`.
 

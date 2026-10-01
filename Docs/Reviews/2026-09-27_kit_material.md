@@ -57,7 +57,7 @@ v `round1/`–`round3/`.
 
 ## Kolo 1 – FAIL, 7/5/4/5/5/6/6/5 = 43
 
-Výstup: [round1/critic.md](2026-09-27_kit_material/round1/critic.md), snímky `Saved/Shots/20260927_200039_kit_material`.
+Výstup: [round1/critic.md](2026-09-27_kit_material/round1/critic.md), snímky `shots:20260927_200039_kit_material`.
 
 1. **Broušený kov přepálený do bíla (musí) – opraveno.** Konstrukce ×0,8 → ×0,62, kov 0,5 → 0,6 (v kole 3 ×0,72 / 0,7, viz kolo 2 bod 3).
 2. **Bez variace drsnosti a škrábanců (musí) – opraveno.**
@@ -82,7 +82,7 @@ Výstup: [round1/critic.md](2026-09-27_kit_material/round1/critic.md), snímky `
 
 ## Kolo 2 – FAIL, 7/5/4/5/6/7/6/6 = 46
 
-Výstup: [round2/critic.md](2026-09-27_kit_material/round2/critic.md), snímky `Saved/Shots/20260927_201846_kit_material`.
+Výstup: [round2/critic.md](2026-09-27_kit_material/round2/critic.md), snímky `shots:20260927_201846_kit_material`.
 
 1. **Špína ve spárách a u soklu chybí (musí) – opraveno jinak.** Tmavá špína (0,05) na tmavém laku (0,07–0,10) nemá kontrast. Lak dostal šedý prach (0,13 / 0,12 / 0,105), který na grafitu čitelný je.
 2. **Broušení v centimetrovém měřítku a na lakovaných dílech (musí) – opraveno.**
@@ -107,7 +107,7 @@ Výstup: [round2/critic.md](2026-09-27_kit_material/round2/critic.md), snímky `
 
 ## Kolo 3 – FAIL, 7/5/4/5/5/6/7/6 = 45 (poslední počítané)
 
-Výstup: [round3/critic.md](2026-09-27_kit_material/round3/critic.md), snímky `Saved/Shots/20260927_205537_kit_material` (výchozí kvalita).
+Výstup: [round3/critic.md](2026-09-27_kit_material/round3/critic.md), snímky `shots:20260927_205537_kit_material` (výchozí kvalita).
 
 1. **Panely jednolitý lak bez variace (musí) – neopraveno, otevřený bod.**
    - Variace lesku je (grunge 80 cm, drsnost ±0,2), stejně tak škrábance a oděr zkosení. Na listu z 1,6 m se nečtou.
@@ -139,7 +139,7 @@ Výstup: [round3/critic.md](2026-09-27_kit_material/round3/critic.md), snímky `
 
 ## Ověřovací kolo (body 1, 2, 3 kola 3) – ZČÁSTI
 
-Výstup: [verify/critic.md](2026-09-27_kit_material/verify/critic.md), snímky `Saved/Shots/20260928_003957_kit_material`.
+Výstup: [verify/critic.md](2026-09-27_kit_material/verify/critic.md), snímky `shots:20260928_003957_kit_material`.
 
 - Svítidla zčásti, konstrukce zčásti, špína ve spárách nevyřešena. Podrobnosti v bodech kola 3 výše.
 

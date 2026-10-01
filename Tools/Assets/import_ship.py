@@ -138,6 +138,8 @@ def build_plan(manifest, manifest_dir, setup=None):
             "sockets": {sock_name: sock["location_ue_cm"] for sock_name, sock in manifest["sockets"].items()
                         if sock["parent"] == name},
             "expected_size_cm": [round((info["bounds_m"][1][i] - info["bounds_m"][0][i]) * 100.0, 1) for i in range(3)],
+            # the exporter's digest of the FBX's geometry (gamespace_ship_export.file_digest); None for old manifests
+            "geometry_hash": entry.get("geometry_hash"),
         })
     main = "SM_Ship_%s" % ship
     meshes.sort(key=lambda m: (m["name"] != main, m["name"]))
@@ -377,9 +379,33 @@ def check_and_fix_mesh(static_mesh, mesh, report):
         raise ImportFailed("%s is missing sockets %s" % (mesh["name"], missing))
 
 
-def import_all_meshes(plan, report):
+def reusable_meshes(meshes, previous_hashes, asset_exists, force=False):
+    """Names of the meshes not to import again (author 1. 10. 2026): the FBX has the geometry digest it had at the
+    last import (<Ship>_import_report.json "imported_hashes") and the asset is there. Re-importing an unchanged FBX
+    re-saved the mesh asset and put another copy of it into Git LFS."""
+    if force:
+        return set()
+    return {m["name"] for m in meshes
+            if m.get("geometry_hash") and previous_hashes.get(m["name"]) == m["geometry_hash"] and asset_exists(m["asset_path"])}
+
+
+def previous_import_hashes(manifest_path, ship):
+    path = os.path.join(os.path.dirname(manifest_path), "%s_import_report.json" % ship)
+    try:
+        return json.load(open(path, encoding="utf-8")).get("imported_hashes") or {}
+    except (OSError, ValueError):
+        return {}
+
+
+def import_all_meshes(plan, report, reuse=()):
     imported = {}
     for mesh in plan["meshes"]:
+        if mesh["name"] in reuse:
+            static_mesh = unreal.EditorAssetLibrary.load_asset(mesh["asset_path"])
+            if static_mesh is not None and sorted(slot_names(static_mesh)) == sorted(mesh["materials"]):
+                imported[mesh["name"]] = static_mesh
+                log("kept %s (geometry unchanged since the last import)" % mesh["asset_path"])
+                continue
         static_mesh = import_fbx(mesh)
         verdict = compare_size(mesh_size_cm(static_mesh), mesh["expected_size_cm"])
         if verdict == "unit":
@@ -777,7 +803,11 @@ def main(argv):
 
     report = {"manifest": manifest_path, "ship": plan["ship"], "meshes": {}}
     use_legacy_fbx_importer()
-    imported = import_all_meshes(plan, report["meshes"])
+    reuse = reusable_meshes(plan["meshes"], previous_import_hashes(manifest_path, plan["ship"]),
+                            unreal.EditorAssetLibrary.does_asset_exist, env_flag("GAMESPACE_SHIP_FORCE_IMPORT", False))
+    imported = import_all_meshes(plan, report["meshes"], reuse)
+    report["kept_unchanged"] = sorted(n for n in reuse if n in imported)
+    report["imported_hashes"] = {m["name"]: m["geometry_hash"] for m in plan["meshes"] if m.get("geometry_hash")}
     if plan["materials"]:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import ship_materials

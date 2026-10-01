@@ -432,6 +432,12 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   F1 drátový model, F2 unlit…); klávesu pro hru z nich uvolni řádkem `-DebugExecBindings=(…)` v
   `Config/DefaultInput.ini` (přesná kopie řádku z enginu), jako u F1/F2 pro stránky MFD.
 
+- fd) **Výkres z matplotlibu se kreslil 3 minuty** (1. 10. 2026): šířka textu přes `TextPath(...).get_extents()`
+  počítá extrémy Bézierových křivek (164 s na list A0). Šířku ber z metrik písma
+  `TextToPath().get_text_width_height_descent(s, prop, ismath=False)` (list za 16 s). Bahnschrift je jeden
+  proměnný soubor, matplotlib z něj tučné nevybere: tučné = obrys `patheffects.withStroke`. Nemá znaky ↑ ✓ ✗ −
+  (U+2212): piš slova a spojovník.
+
 ### 9.2 Vykreslování (UE 5.8)
 
 - **Materiál z Pythonu:** uzly `Transform` (world→local, local→tangent) daly v `M_Ship_PBR` nulový vektor a
@@ -733,6 +739,11 @@ snímku.
   `EditorAssetLibrary.load_asset` na neexistující asset zaloguje „LoadAsset failed“. Řešení: prázdný svět jen
   v paměti `unreal.EditorLoadingAndSavingUtils.new_blank_map(False)`; před načtením `does_asset_exist`.
   Chybějící asset, kvůli kterému se kontroly nespustí, vypiš jako SKIP s důvodem, ne tiše.
+- fc) **Import uložil znovu i meshe, které nepřeimportoval** (1. 10. 2026). `import_ship.py` meshe se stejným hashem
+  geometrie nechá (`kept`), ale `ship_materials.apply` jim nastavil materiály a uložil je s `only_if_is_dirty=False`:
+  stejná velikost, jiné bajty, nový objekt v LFS. Řešení: materiál slotu nastavit jen, když se liší cesta, a mesh
+  uložit jen po změně. Materiály, textury, Blueprint a mapa se zatím ukládají při každém importu znovu (~150
+  souborů se stejným obsahem): po ověřovacím importu je vrať `git checkout -- Content`, pokud se data nezměnila.
 
 ### 9.6 Blender pipeline
 
@@ -954,7 +965,9 @@ snímku.
 - ct) **Decal kitu se postavil, ale ve hře nebyl vidět (levý výstražný pás rámu B, štítek chladiva).** `hs_decals.grid` otáčel novou plochu decalu podle `f.normal`, která je do `normal_update()` nulová (9.3 s), takže se neotočila nikdy a směr líce určilo pořadí vrcholů z rámce. Rámec s `x × y = −n` (zrcadlený) dal plochu rubem k divákovi a UE ji ořízl. Oprava: `normal_update()` před kontrolou a `kit_build` zrcadlený rámec hlásí v `KITBUILD` jako chybu („mirrored frame“). Pravidlo pro `label(..., normal, xdir, ydir)`: `xdir × ydir` musí být normála plochy (na protějších stranách se znaménko `ydir` otočí). Na lodích `Placer.place_at` zrcadlený rámec srovná sám (otočí x), jinak by se decal po opravě normály četl zrcadlově (Wayfarer `streak_drip`, `mirrored_decals` v `test_ship_geometry.py`). Po každé změně v `hs_decals` pusť i `test_ship_geometry.py`.
 - cu) **Lišty kitu měly černou „trávu“ a tmavé svislé pruhy.** Trim kitu je na `M_Ship_PBR`, který přidává detailní normálu trupu (tile 30 cm, síla 0,7) a panelové spáry trupu. Pod světlem vybrání skoro souběžným s plochou dělala detailní normála vysokofrekvenční stíny, spáry pruhy přes lištu. Na `MI_Kit_*_Trim` jsou vypnuté (`detail_normal_strength`, `panel_strength`, `panel_seam_darken` 0). Příčinu jsem nejdřív hádal (zdrsnění kvůli Lumenu, nepomohlo); rychlejší je přepínat parametry za běhu `space.Kit <Param> <hodnota> <jméno MI>` na zabalené hře (preset `kit_rail_noise.json`, bez balení).
 - cv) **Provizorní světlo nad zatáčkou nic nerozsvítilo.** Stálo nad horní hranou zkosení (0,6 m od stěny v průřezu W), tedy v kapse vybrání, a stínilo se samo. Světla ukázky patří do otevřené části stropu mezi hranami zkosení (`prov_spots` bere i kužel: `((x, y), cd, kužel)`).
-- cw) **Dvě stavby lodi ze stejného receptu nejsou totožné.** `hs_build_ship.py` na Wayfareru dal trup 303 646 a pak 303 648 ploch, jiné pořadí jmen světel svítidel (`fix_*` v `Wayfarer_lights.json`) a jedno světlo posunuté o 0,2 mm. Rozdíl se pak propíše do decalů (paprsky padnou na jiné plochy). Dopad změny v kódu decalů proto měř na **stejném** `<Loď>_HS.blend`: `hs_assemble_ship` pusť dvakrát, se starou a novou verzí funkce (monkeypatch ve wrapperu, výstup mimo repo), a porovnej plochy podle polohy a normály (`Docs/Reviews/2026-09-27_hs_decals_wayfarer_check.md`).
+- cw) **Dvě stavby lodi ze stejného receptu nejsou totožné.** `hs_build_ship.py` na Wayfareru dal trup 303 646 a pak 303 648 ploch, jiné pořadí jmen světel svítidel (`fix_*` v `Wayfarer_lights.json`) a jedno světlo posunuté o 0,2 mm. Rozdíl se pak propíše do decalů (paprsky padnou na jiné plochy). Dopad změny v kódu decalů proto měř na **stejném** `<Loď>_HS.blend`: `hs_assemble_ship` pusť dvakrát, se starou a novou verzí funkce (monkeypatch ve wrapperu, výstup mimo repo), a porovnej plochy podle polohy a normály (`Docs/Reviews/2026-09-27_hs_decals_wayfarer_check.md`). Od 1. 10. 2026
+  exportér zapíše jen FBX se změněným otiskem geometrie a import přeskočí nezměněné meshe (skill `ship-pipeline` 5);
+  přestavba samotného trupu ale kvůli nedeterminismu pořád změní jeho otisk (oprava stavby čeká v CURRENT.md).
 - cx) **Volná kamera snímků viděla postavu hráče.** Po `space.Showroom` stojí postava na startu. Snímky s `"camera": "free"` pak mají v záběru její ramena nebo celou postavu. Preset, který ověřuje vstup (`"camera": "pawn"`), má postavu hned poslat zpět (`space.Showroom annex` znovu) a teprve pak fotit volnou kamerou (`kit_annex.json`).
 - cy) **Překryv `stat unit` / `stat gpu` zůstal na dalších snímcích.** Konzolové příkazy platí pro zbytek presetu. Snímek po měření výkonu musí mít `stat none`. Opačně: `stat gpu` zapnutý v rozcvičovacím snímku se do dalších snímků nemusí propsat. Seznam průchodů fotit se `stat none`, `stat unit`, `stat gpu` přímo v měřeném snímku (jako `l_perf_corridor`).
 - cz) **S MegaLights C (RT stíny) ukázka ztmavla.** Světla bez stínů prosvítala geometrií, se stíny už ne. Průměr chodby klesl z 0,20 na 0,13, p90 z 0,42 na 0,25. Po zapnutí stínů přeměř `measure_look.py` a jas případně doplň intenzitou svítidel; s MegaLights to výkon skoro nemění.
@@ -1143,6 +1156,17 @@ snímku.
 - bo) **Kontrola geometrie před každým předáním:** od 27. 9. 2026 ji spouští sám `hs_assemble_ship.py` jako poslední krok každé přestavby lodi (při FAIL skončí Blender kódem 1, řádek `HSASSEMBLE GEOTEST FAIL`); ručně `python Tools/Tests/test_ship_geometry.py` (Blender headless na
   `<Loď>_HS_Game.blend`, ~15 s): zrcadlené decaly, plovoucí díly, průniky, placeholdery, díry viditelné hráči.
   Musí projít (autor 25. 9. 2026).
+- fb) **Šablona „z boku“ dopadla metr od svého poklopu** (1. 10. 2026). Decaly, funkční díly a světla s `"on": "side"`
+  hledá paprsek z boku lodi proti celé lodi (`hs_decals`, `hs_functional`, `hs_lights`), takže trefí **nejbližší** díl:
+  HYDRAULICS (x 1,9, z 0,72) dopadl na gondolu, slot ve výšce 0,9 na zbraň, konektor na hranu křídla. Kit poklopy
+  (`greebles`) se kladou jen na trup, a tak jejich šablony skončily jinde než ony. Řešení: kam co dopadne, ukazuje
+  model výkresu (`Tools/Design/exterior_model.py`, `landing`; na listu E-01 „Kontrola dat“); prvek mezi gondolou
+  a trupem polož paprskem `"on": "ray"` z mezery (`at` mezi trupem a gondolou, `dir` k trupu).
+- fe) **Navržené desky by zakryly postavené prvky na plášti** (1. 10. 2026, kritik výkresu E-01 kolo 2). Desky
+  koncept B + C stojí 30–40 mm nad pláštěm; světelné pásy, kryty kabelů, konektor a čočka světlometu ležely v ploše
+  desek. Řešení v datech návrhu: `panels.cut_hardware` vyřízne v deskách místo pro každý díl na boku trupu
+  (okraj `cut_margin`), světelné pásy jdou na rám (`"on": "frame"`: podélník, těsnění kabiny). Hlídá to
+  `test_exterior_drawing.py` (žádný díl pod deskou bez výřezu, žádný nápis na podkladu stejného tónu).
 
 
 ---

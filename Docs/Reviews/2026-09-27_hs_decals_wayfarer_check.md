@@ -38,5 +38,5 @@ přestavět decaly exteriéru Wayfareru a porovnat snímky před a po.
 `test_ship_geometry.py` po přestavbě hlásil `mirrored_decals (21)`: je to právě ten `streak_drip`. Ležel v zrcadleném
 rámci (x × y proti normále), proto dřív mířil rubem dovnitř a test ho neviděl. Po opravě normály míří ven, ale
 textura se četla zrcadlově. `Placer.place_at` teď zrcadlený rámec srovná otočením osy x. Test prochází, decal je
-pod levou zadní mřížkou vidět a čte se správně (`Saved/Shots/20260927_181303_wayfarer_decal_fix`). Při dopoledním
+pod levou zadní mřížkou vidět a čte se správně (`shots:20260927_181303_wayfarer_decal_fix`). Při dopoledním
 commitu jsem geometrický test nespustil, proto chyba prošla (WORKFLOW ct doplněno).

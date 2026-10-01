@@ -33,55 +33,64 @@
         "SOCKET_Gear_R",
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
-      ]
+      ],
+      "geometry_hash": "76f783b17a54c00db4df4c9ded39fc9a3c8ac0aa"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Canopy"
-      ]
+      ],
+      "geometry_hash": "52b1ed85332e9c1aa4b9b58efa70290e7492b98b"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Decals.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Decals"
-      ]
+      ],
+      "geometry_hash": "4aa2b35cc56c7aa5c1a703018803786f517c411d"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Gear.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Gear"
-      ]
+      ],
+      "geometry_hash": "af7bab14b1e522049e6c11cdb5ebf00190772ab3"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Hologram.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Hologram"
-      ]
+      ],
+      "geometry_hash": "9db61d0df67c7c21eb5f1a7598f3ae9672e665cf"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Interior.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Interior"
-      ]
+      ],
+      "geometry_hash": "ab809d28f8b481ad491ef710911a4bdd2ddb9855"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
       "objects": [
         "SM_Ship_Wayfarer_InteriorDecals"
-      ]
+      ],
+      "geometry_hash": "20057635b495dfe7efabb8c5fb0d1baf8f6a1934"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorKit.fbx",
       "objects": [
         "SM_Ship_Wayfarer_InteriorKit"
-      ]
+      ],
+      "geometry_hash": "ff14505bad0902d3e03d784a75ff0f630a0db8ba"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Screens.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Screens"
-      ]
+      ],
+      "geometry_hash": "53e341a03dfc2e0bceb563bb9f55ac0c724e9ec6"
     }
   ],
   "meshes": {

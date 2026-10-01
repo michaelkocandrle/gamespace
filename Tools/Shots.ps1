@@ -4,14 +4,17 @@
     without anyone playing.
 
 .DESCRIPTION
-    Starts C:\gamespace\Builds\Gamespace\Windows\gamespace.exe in a window with a shot list
+    Starts the packaged game of this checkout (Tools\BuildDir.ps1: C:\gamespace\Builds\Gamespace\Windows\gamespace.exe
+    for the main checkout, Builds_<name> for a worktree) in a window with a shot list
     (Tools\Shots\<preset>.json). The game loads TestSpace, places the ship for every shot, waits for
     it to settle, saves a picture and quits by itself. The pictures land in
-    Saved\Shots\<yyyyMMdd_HHmmss>_<preset>\NN_<name>.png and the script prints their full paths.
+    <shots root>\<yyyyMMdd_HHmmss>_<preset>\NN_<name>.png and the script prints their full paths. The shots root is
+    D:\gamespace-shots (Tools\ShotsDir.ps1; GAMESPACE_SHOTS_DIR overrides it, without drive D it is Saved\Shots).
+    Files in git name a picture as "shots:<set>/<file>" (Tools\shots_dir.py resolves it).
 
     The game window takes the foreground for the few seconds it runs, so do not type meanwhile.
 
-    Saved\ is not in git. -Keep also copies the pictures to Docs\Shots\<preset>\<stamp>\, which is,
+    The pictures are not in git. -Keep also copies the pictures to Docs\Shots\<preset>\<stamp>\, which is,
     for keeping a visual change in the repository's history.
 
 .PARAMETER Preset
@@ -60,7 +63,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $projectDir = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$shotsRoot = Join-Path $projectDir "Saved\Shots"
+$shotsRoot = & (Join-Path $PSScriptRoot "ShotsDir.ps1")
 
 if ($Last) {
     $newest = Get-ChildItem $shotsRoot -Directory -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
@@ -92,7 +95,7 @@ if ($Editor) {
     $settings = Join-Path $projectDir "Saved\Config\WindowsEditor\GameUserSettings.ini"
     $TimeoutSeconds = [Math]::Max($TimeoutSeconds, 1200)     # the first run after a change compiles shaders
 } else {
-    $exe = Join-Path (Split-Path $projectDir) "Builds\Gamespace\Windows\gamespace.exe"
+    $exe = Join-Path (& (Join-Path $PSScriptRoot "BuildDir.ps1")) "Windows\gamespace.exe"
     if (-not (Test-Path $exe)) {
         Write-Error "No packaged game at $exe. Run .\Tools\Package.ps1 (or .\Tools\Shots.ps1 -Package)."
     }

@@ -92,6 +92,75 @@ def issue(level, message, obj=None):
     return {"level": level, "object": obj, "message": message}
 
 
+# --- geometry digest (author 1. 10. 2026): an FBX is written only when its geometry changed -------------------
+# Every rebuild used to rewrite all FBX files (and Unreal re-saved every mesh asset): ~250 MB into Git LFS each time,
+# even when only the decals changed. The digest is of what the FBX carries - positions (0.1 mm), UVs and corner
+# normals (1e-4), material per triangle, material slot names - and does not depend on the order of the
+# triangles or of a triangle's corners, so a mesh rebuilt in another order but the same shape keeps its digest.
+
+DIGEST_VERSION = "geo1"
+
+
+def geometry_digest(positions, tri_verts, tri_loops, tri_mats, loop_attrs, materials):
+    """positions: [[x, y, z]] per vertex (world, metres); tri_verts / tri_loops: [[a, b, c]] per triangle;
+    tri_mats: [slot] per triangle; loop_attrs: [[u, v, ..., nx, ny, nz]] per loop (all quantised to 1e-4);
+    materials: slot names. Returns a hex digest."""
+    import hashlib
+    h = hashlib.sha1()
+    h.update(("%s|%s|" % (DIGEST_VERSION, ",".join(materials))).encode("utf-8"))
+    try:
+        import numpy as np
+    except ImportError:
+        np = None
+    if np is not None and len(tri_verts):
+        pos = np.rint(np.asarray(positions, np.float64) * 1e4).astype(np.int64)
+        tv = np.asarray(tri_verts, np.int64).reshape(-1, 3)
+        tl = np.asarray(tri_loops, np.int64).reshape(-1, 3)
+        la = np.asarray(loop_attrs, np.float64)
+        la = np.rint(la * 1e4).astype(np.int64) if la.size else np.zeros((0, 0), np.int64)
+        corners = pos[tv]                                                 # (T, 3, 3)
+        if la.size:
+            corners = np.concatenate([corners, la[tl]], axis=2)           # (T, 3, 3 + k)
+        t, _, d = corners.shape
+        flat = corners.reshape(t * 3, d)
+        tri = np.repeat(np.arange(t), 3)
+        order = np.lexsort(tuple(flat[:, i] for i in reversed(range(d))) + (tri,))
+        rows = flat[order].reshape(t, 3 * d)
+        rows = np.concatenate([rows, np.asarray(tri_mats, np.int64).reshape(-1, 1)], axis=1)
+        rows = rows[np.lexsort(tuple(rows[:, i] for i in reversed(range(rows.shape[1]))))]
+        h.update(np.ascontiguousarray(rows).tobytes())
+        return h.hexdigest()
+    rows = []
+    for (a, b, c), (la_, lb, lc), m in zip(tri_verts, tri_loops, tri_mats):
+        cs = []
+        for vi, li in ((a, la_), (b, lb), (c, lc)):
+            p = tuple(int(round(x * 1e4)) for x in positions[vi])
+            q = tuple(int(round(x * 1e4)) for x in (loop_attrs[li] if loop_attrs else ()))
+            cs.append(p + q)
+        rows.append(tuple(x for corner in sorted(cs) for x in corner) + (int(m),))
+    for r in sorted(rows):
+        h.update(repr(r).encode("ascii"))
+    return h.hexdigest()
+
+
+def file_digest(records, settings=None):
+    """One FBX file's digest: its objects' names, mesh digests and (for sockets and collision) world placement,
+    plus the export settings. records: gather_records() entries of the file's objects."""
+    import hashlib
+    h = hashlib.sha1(("%s|%s" % (DIGEST_VERSION, sorted((settings or {}).items()))).encode("utf-8"))
+    for r in sorted(records, key=lambda r: r["name"]):
+        h.update(("%s|%s|%s|" % (r["name"], r.get("geometry_digest", ""),
+                                 [round(x, 4) for x in r.get("world_location", [])])).encode("utf-8"))
+    return h.hexdigest()
+
+
+def unchanged_files(plan, digests, old_manifest, existing):
+    """The FBX files of plan [(file, objects)] that need not be written: same digest as in the previous manifest
+    and the file still there. digests: {file: digest}; existing: set of file names on disk."""
+    old = {e.get("fbx"): e.get("geometry_hash") for e in (old_manifest or {}).get("files", [])}
+    return {f for f, _ in plan if f in existing and old.get(f) and old.get(f) == digests.get(f)}
+
+
 def bounds_union(boxes):
     boxes = [b for b in boxes if b]
     if not boxes:
@@ -716,7 +785,37 @@ def _convexity(obj, mesh):
     return True, (inward and not outward)
 
 
-def gather_records(context):
+def _mesh_digest(obj, mesh):
+    """geometry_digest() of an evaluated mesh in world space (numpy reads the arrays in one go)."""
+    import numpy as np
+    mesh.calc_loop_triangles()
+    co = np.empty(len(mesh.vertices) * 3, np.float64)
+    mesh.vertices.foreach_get("co", co)
+    mw = np.array(obj.matrix_world, np.float64)
+    co = co.reshape(-1, 3) @ mw[:3, :3].T + mw[:3, 3]
+    n = len(mesh.loop_triangles)
+    tv = np.empty(n * 3, np.int64)
+    tl = np.empty(n * 3, np.int64)
+    tm = np.empty(n, np.int64)
+    mesh.loop_triangles.foreach_get("vertices", tv)
+    mesh.loop_triangles.foreach_get("loops", tl)
+    mesh.loop_triangles.foreach_get("material_index", tm)
+    attrs = []
+    for layer in mesh.uv_layers:
+        uv = np.empty(len(mesh.loops) * 2, np.float64)
+        layer.data.foreach_get("uv", uv)
+        attrs.append(uv.reshape(-1, 2))
+    normals = getattr(mesh, "corner_normals", None)
+    if normals is not None and len(normals) == len(mesh.loops):
+        nv = np.empty(len(mesh.loops) * 3, np.float64)
+        normals.foreach_get("vector", nv)
+        attrs.append(nv.reshape(-1, 3))
+    loop_attrs = np.concatenate(attrs, axis=1) if attrs else np.zeros((len(mesh.loops), 0))
+    materials = [slot.material.name if slot.material else "" for slot in obj.material_slots]
+    return geometry_digest(co, tv.reshape(-1, 3), tl.reshape(-1, 3), tm, loop_attrs, materials)
+
+
+def gather_records(context, digests=False):
     depsgraph = context.evaluated_depsgraph_get()
     records = []
     for obj in context.scene.objects:
@@ -748,6 +847,8 @@ def gather_records(context):
                 bm.free()
                 if obj.name.startswith(("UCX_", "UBX_", "USP_", "UCP_")):
                     rec["convex"], rec["inside_out"] = _convexity(obj, mesh)
+                if digests:
+                    rec["geometry_digest"] = _mesh_digest(obj, mesh)
             finally:
                 eval_obj.to_mesh_clear()
         records.append(rec)
@@ -759,8 +860,8 @@ def scene_info(context):
     return {"unit_system": units.system, "scale_length": units.scale_length}
 
 
-def run_validation(context):
-    records = gather_records(context)
+def run_validation(context, digests=False):
+    records = gather_records(context, digests)
     issues, classified = validate(records, scene_info(context))
     return issues, classified, records
 
@@ -771,11 +872,14 @@ def _write_report(text):
     block.write(text + "\n")
 
 
-def export_ship(context, out_dir, force=False):
-    """Validates and writes the FBX files and manifest. Returns (ok, report text)."""
+def export_ship(context, out_dir, force=False, all_files=False, record_only=False):
+    """Validates and writes the FBX files and manifest. Returns (ok, report text). An FBX whose geometry digest is
+    the one in the previous manifest is not written again (all_files=True writes every file). record_only=True
+    writes no FBX, only the manifest with the digests: once, when the FBX files on disk are known to come from
+    this .blend (the first export after digests were introduced would otherwise rewrite them all)."""
     if context.object and context.object.mode != "OBJECT":
         bpy.ops.object.mode_set(mode="OBJECT")
-    issues, classified, _ = run_validation(context)
+    issues, classified, records = run_validation(context, digests=True)
     report = format_issues(issues)
     if any(i["level"] == ERROR for i in issues) and not force:
         return False, report + "\nExport cancelled: fix the errors (or use --force)."
@@ -783,12 +887,25 @@ def export_ship(context, out_dir, force=False):
     out_dir = bpy.path.abspath(out_dir)
     os.makedirs(out_dir, exist_ok=True)
     plan = plan_exports(classified)
+    by_name = {r["name"]: r for r in records}
+    digests = {f: file_digest([by_name[n] for n in names if n in by_name], FBX_EXPORT_SETTINGS) for f, names in plan}
+    old_manifest = None
+    for f in os.listdir(out_dir):
+        if f.endswith("_manifest.json"):
+            try:
+                old_manifest = json.load(open(os.path.join(out_dir, f), encoding="utf-8"))
+            except (OSError, ValueError):
+                old_manifest = None
+    skip = set() if all_files else unchanged_files(plan, digests, old_manifest, set(os.listdir(out_dir)))
+    if record_only:
+        skip = {f for f, _ in plan if os.path.exists(os.path.join(out_dir, f))}
+    plan_to_write = [(f, names) for f, names in plan if f not in skip]
     view_layer = context.view_layer
     selected = [o for o in context.scene.objects if o.select_get()]
     active = view_layer.objects.active
     written = []
     try:
-        for file_name, names in plan:
+        for file_name, names in plan_to_write:
             for o in context.scene.objects:
                 o.select_set(False)
             restore_hidden = []
@@ -812,6 +929,8 @@ def export_ship(context, out_dir, force=False):
         view_layer.objects.active = active
 
     manifest = build_manifest(classified, plan, bpy.data.filepath)
+    for entry in manifest["files"]:
+        entry["geometry_hash"] = digests.get(entry["fbx"])
     manifest_path = os.path.join(out_dir, "%s_manifest.json" % (manifest["ship"] or "ship"))
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
@@ -819,7 +938,10 @@ def export_ship(context, out_dir, force=False):
     # Read it back the way the Unreal import will: a manifest that does not pass here would
     # fail there, after the editor had to be closed for it.
     _, manifest_issues = load_and_validate_manifest(manifest_path)
-    report += "\nWrote:\n  " + "\n  ".join(written) + "\n\nManifest check:\n" + format_issues(manifest_issues)
+    report += "\nWrote:\n  " + "\n  ".join(written)
+    if skip:
+        report += "\nUnchanged geometry, not written (EXPORT SKIPPED): " + ", ".join(sorted(skip))
+    report += "\n\nManifest check:\n" + format_issues(manifest_issues)
     return not any(i["level"] == ERROR for i in manifest_issues), report
 
 
@@ -926,12 +1048,16 @@ def _main_cli(argv):
     parser.add_argument("--out", default="//Export")
     parser.add_argument("--validate-only", action="store_true")
     parser.add_argument("--force", action="store_true", help="export despite validation errors")
+    parser.add_argument("--all-files", action="store_true", help="write every FBX, even with unchanged geometry")
+    parser.add_argument("--record-hashes", action="store_true",
+                        help="write only the manifest with the geometry digests (FBX files on disk are from this .blend)")
     args = parser.parse_args(argv)
     if args.validate_only:
         issues, _, _ = run_validation(bpy.context)
         print(format_issues(issues))
         return 1 if any(i["level"] == ERROR for i in issues) else 0
-    ok, text = export_ship(bpy.context, args.out, force=args.force)
+    ok, text = export_ship(bpy.context, args.out, force=args.force, all_files=args.all_files,
+                           record_only=args.record_hashes)
     print(text)
     return 0 if ok else 1
 

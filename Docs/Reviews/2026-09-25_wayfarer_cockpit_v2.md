@@ -22,7 +22,7 @@ Pokaždé k tomu ~1 min skládání listů (`make_compare_sheet.py`) a čtení v
 Tři kola jsou vyčerpaná, předává se s otevřenými body níže. Po kole 3 jsem ještě opravil čtyři jasné chyby,
 které kritik ani autor nemuseli posuzovat (useknuté nadpisy středových displejů, plovoucí sloupek madla,
 modré skvrny od světel desky, svítící disk projektoru hologramu). Ověřené jsou jen mými snímky
-(`Saved/Shots/20260925_2017*`), kritik je už neviděl.
+(`shots:20260925_2017*`), kritik je už neviděl.
 
 ## Kolo 1 – reakce
 

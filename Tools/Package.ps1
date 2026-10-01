@@ -1,6 +1,7 @@
 <#
 .SYNOPSIS
-    Builds the standalone Windows game (cooked, Development) into C:\gamespace\Builds\Gamespace.
+    Builds the standalone Windows game (cooked, Development) into C:\gamespace\Builds\Gamespace (a worktree
+    gamespace-<name>: C:\gamespace\Builds_<name>\Gamespace, Tools\BuildDir.ps1).
 
 .DESCRIPTION
     The packaged game runs without the editor: full frame rate, real fullscreen, the same
@@ -25,14 +26,14 @@ param(
     [string]$EngineDir = (& (Join-Path $PSScriptRoot "UERoot.ps1")),
     [ValidateSet("Development", "Shipping")]
     [string]$Config = "Development",
-    # Default: <folder above the project>\Builds\Gamespace, i.e. C:\gamespace\Builds\Gamespace
+    # Default: Tools\BuildDir.ps1 - C:\gamespace\Builds\Gamespace, or Builds_<name> for a worktree gamespace-<name>
     [string]$OutputDir = ""
 )
 
 $ErrorActionPreference = "Stop"
 $Project = (Resolve-Path $Project).Path
 $projectDir = Split-Path $Project
-$archive = if ($OutputDir) { $OutputDir } else { Join-Path (Split-Path $projectDir) "Builds\Gamespace" }
+$archive = if ($OutputDir) { $OutputDir } else { & (Join-Path $PSScriptRoot "BuildDir.ps1") }
 $uat = Join-Path $EngineDir "Engine\Build\BatchFiles\RunUAT.bat"
 
 $projectName = [IO.Path]::GetFileName($Project)
@@ -95,5 +96,7 @@ if (Test-Path $manifest) {
     }
     Write-Host "Content check OK ($($required.Count) key assets present)"
 }
+# UAT's staging copy duplicates the archived game (1.3 GB); the next package stages again (author 1. 10. 2026).
+Remove-Item (Join-Path $projectDir "Saved\StagedBuilds") -Recurse -Force -ErrorAction SilentlyContinue
 Write-Host "PACKAGE OK ($minutes min): $exe"
 Write-Host "Start it with: .\Tools\Play.ps1"

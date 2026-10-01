@@ -23,8 +23,8 @@ toho, co přehlédl, a každá úprava je zapsaná tady.
 |---|---|---|---|
 | 1 Wayfarer z Meshy | autorovy snímky ze hry (24. 9.) | koncept Wayfareru ve stylu SC (Higgsfield) | „vypadá nekvalitně, jak kdyby byla rozbitá, špinavá“; „geometrie je mimo, lak s tím nesedí“ – roztavený povrch, rozeklané hrany |
 | 2 čistá verze v2 | `Docs/Shots/Wayfarer/v2_*` | týž koncept | „trubka s nakreslenými čarami“, chybí vrstvy, střední detail, materiály |
-| 3 první interiér | `Saved/Shots/20260925_015641_wayfarer_interior` | 8 snímků interiérů SC z `starcitizenreference/` | „prázdný byt nebo kancelář“, rovné stěny, béžové, ploché světlo |
-| 4 černá kabina | `Saved/Shots/20260925_032901_wayfarer_interior` | kokpity SC 1–5, kabiny zezadu | „hlavně černá: tlustý tmavý rám skla, černá police nad displeji, tmavé stěny bez tvaru, žijí jen displeje a HUD; zezadu hranaté bloky“, výhled |
+| 3 první interiér | `shots:20260925_015641_wayfarer_interior` | 8 snímků interiérů SC z `starcitizenreference/` | „prázdný byt nebo kancelář“, rovné stěny, béžové, ploché světlo |
+| 4 černá kabina | `shots:20260925_032901_wayfarer_interior` | kokpity SC 1–5, kabiny zezadu | „hlavně černá: tlustý tmavý rám skla, černá police nad displeji, tmavé stěny bez tvaru, žijí jen displeje a HUD; zezadu hranaté bloky“, výhled |
 | 5 kabina s tablety | `…111836_cockpit_daynight`, `…122015_cockpit_daynight`, `…121035_wayfarer_interior` | kokpity SC | displeje jako tablety na stole, kulaté „čudlíky“ po stranách, rozbitá geometrie, zrcadlené nápisy na dveřích |
 
 Snímky SC u exteriéru nejsou: reference je koncept lodi ve stylu SC (jiné snímky exteriérů SC

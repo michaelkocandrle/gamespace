@@ -18,7 +18,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
    "ref_label": "SC chodba (Drake)",
-   "ours": "Saved/Shots/20260927_013541_kit_showroom/01_a_corridor.png",
+   "ours": "shots:20260927_013541_kit_showroom/01_a_corridor.png",
    "ours_label": "ve hře, oko 1,65 m"
   },
   {
@@ -27,7 +27,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
    "ref_label": "SC interiér (MISC)",
-   "ours": "Saved/Shots/20260927_013541_kit_showroom/02_b_corridor_back.png",
+   "ours": "shots:20260927_013541_kit_showroom/02_b_corridor_back.png",
    "ours_label": "ve hře"
   },
   {
@@ -36,7 +36,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
    "ref_label": "SC stěna: tři vrstvy",
-   "ours": "Saved/Shots/20260927_013541_kit_showroom/03_c_left_34.png",
+   "ours": "shots:20260927_013541_kit_showroom/03_c_left_34.png",
    "ours_label": "ve hře"
   },
   {
@@ -45,7 +45,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
    "ref_label": "SC infrastruktura",
-   "ours": "Saved/Shots/20260927_013541_kit_showroom/04_d_right_34.png",
+   "ours": "shots:20260927_013541_kit_showroom/04_d_right_34.png",
    "ours_label": "ve hře"
   },
   {
@@ -54,7 +54,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 020931.png",
    "ref_label": "SC nástěnný displej",
-   "ours": "Saved/Shots/20260927_013541_kit_showroom/05_e_display_close.png",
+   "ours": "shots:20260927_013541_kit_showroom/05_e_display_close.png",
    "ours_label": "ve hře"
   },
   {
@@ -63,7 +63,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021447.png",
    "ref_label": "SC detail stěny",
-   "ours": "Saved/Shots/20260927_013541_kit_showroom/06_f_pipes_hatch.png",
+   "ours": "shots:20260927_013541_kit_showroom/06_f_pipes_hatch.png",
    "ours_label": "ve hře"
   },
   {
@@ -72,7 +72,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
    "ref_label": "SC chodba",
-   "ours": "Saved/Shots/20260927_013541_kit_showroom/07_g_cove_up.png",
+   "ours": "shots:20260927_013541_kit_showroom/07_g_cove_up.png",
    "ours_label": "ve hře"
   },
   {
@@ -81,7 +81,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
    "ref_label": "SC podlaha a sokl",
-   "ours": "Saved/Shots/20260927_013541_kit_showroom/08_h_plinth.png",
+   "ours": "shots:20260927_013541_kit_showroom/08_h_plinth.png",
    "ours_label": "ve hře"
   }
  ]

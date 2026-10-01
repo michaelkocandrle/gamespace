@@ -1460,6 +1460,7 @@ def apply(ship, setup, mesh_assets):
     instances = {name: build_instance(name, folder, spec, masters, ship) for name, spec in ordered}
     for mesh_name, mesh in mesh_assets.items():
         slots = mesh.get_editor_property("static_materials")
+        changed = False
         for index, slot in enumerate(slots):
             slot_name = str(slot.get_editor_property("material_slot_name"))
             chosen = None
@@ -1469,8 +1470,14 @@ def apply(ship, setup, mesh_assets):
             if chosen is None:
                 notes.append("%s slot %s has no material in the setup" % (mesh_name, slot_name))
                 continue
-            mesh.set_material(index, instances[chosen])
-        unreal.EditorAssetLibrary.save_loaded_asset(mesh, only_if_is_dirty=False)
+            current = slot.get_editor_property("material_interface")
+            if current is None or current.get_path_name() != instances[chosen].get_path_name():
+                mesh.set_material(index, instances[chosen])
+                changed = True
+        # a mesh kept from the last import (geometry unchanged) with the same materials is not saved again: a resave
+        # rewrites the package and git LFS stores a new copy of it (1. 10. 2026)
+        if changed:
+            unreal.EditorAssetLibrary.save_loaded_asset(mesh, only_if_is_dirty=False)
     decals = build_decal_instances(ship, setup, masters)
     if decals:
         notes.append("%d decal materials: %s" % (len(decals), ", ".join(sorted(decals))))

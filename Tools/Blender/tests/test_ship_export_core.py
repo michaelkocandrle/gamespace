@@ -276,5 +276,57 @@ class ManifestValidationTest(unittest.TestCase):
             self.assertIn("File not found", bad.stdout)
 
 
+class GeometryDigestTest(unittest.TestCase):
+    """An FBX is written only when its geometry changed (author 1. 10. 2026): the digest must not depend on the
+    order of triangles or corners, and must change with shape, UVs, normals or materials."""
+
+    def quad(self):
+        pos = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
+        tv = [[0, 1, 2], [0, 2, 3]]
+        tl = [[0, 1, 2], [3, 4, 5]]
+        la = [[0, 0, 0, 0, 1], [1, 0, 0, 0, 1], [1, 1, 0, 0, 1], [0, 0, 0, 0, 1], [1, 1, 0, 0, 1], [0, 1, 0, 0, 1]]
+        return pos, tv, tl, [0, 1], la, ["M_A", "M_B"]
+
+    def test_order_independent(self):
+        pos, tv, tl, tm, la, mats = self.quad()
+        a = gx.geometry_digest(pos, tv, tl, tm, la, mats)
+        # the same triangles in the other order, corners rotated, vertices renumbered
+        pos2 = [pos[3], pos[2], pos[1], pos[0]]
+        ren = {0: 3, 1: 2, 2: 1, 3: 0}
+        tv2 = [[ren[3], ren[0], ren[2]], [ren[1], ren[2], ren[0]]]
+        tl2 = [[5, 3, 4], [1, 2, 0]]
+        b = gx.geometry_digest(pos2, tv2, tl2, [1, 0], la, mats)
+        self.assertEqual(a, b)
+
+    def test_changes_with_shape_uv_and_material(self):
+        pos, tv, tl, tm, la, mats = self.quad()
+        base = gx.geometry_digest(pos, tv, tl, tm, la, mats)
+        moved = [p[:] for p in pos]
+        moved[2][2] = 0.001                                             # 1 mm
+        self.assertNotEqual(base, gx.geometry_digest(moved, tv, tl, tm, la, mats))
+        noise = [p[:] for p in pos]
+        noise[2][2] = 0.00001                                           # 0.01 mm: below the 0.1 mm grid
+        self.assertEqual(base, gx.geometry_digest(noise, tv, tl, tm, la, mats))
+        uv = [r[:] for r in la]
+        uv[2][0] = 0.5
+        self.assertNotEqual(base, gx.geometry_digest(pos, tv, tl, tm, uv, mats))
+        self.assertNotEqual(base, gx.geometry_digest(pos, tv, tl, [1, 1], la, mats))
+        self.assertNotEqual(base, gx.geometry_digest(pos, tv, tl, tm, la, ["M_A", "M_C"]))
+
+    def test_file_digest_and_unchanged_files(self):
+        recs = [{"name": "SM_Ship_X", "geometry_digest": "aa", "world_location": [0, 0, 0]},
+                {"name": "SOCKET_Cockpit", "world_location": [6.7, 0, 1.25]}]
+        d = gx.file_digest(recs, {"axis_forward": "-Z"})
+        self.assertEqual(d, gx.file_digest(list(reversed(recs)), {"axis_forward": "-Z"}))
+        moved = [recs[0], dict(recs[1], world_location=[6.8, 0, 1.25])]
+        self.assertNotEqual(d, gx.file_digest(moved, {"axis_forward": "-Z"}))
+        plan = [("SM_Ship_X.fbx", ["SM_Ship_X"]), ("SM_Ship_X_Decals.fbx", ["SM_Ship_X_Decals"])]
+        old = {"files": [{"fbx": "SM_Ship_X.fbx", "geometry_hash": d}, {"fbx": "SM_Ship_X_Decals.fbx", "geometry_hash": "old"}]}
+        new = {"SM_Ship_X.fbx": d, "SM_Ship_X_Decals.fbx": "new"}
+        self.assertEqual(gx.unchanged_files(plan, new, old, {"SM_Ship_X.fbx", "SM_Ship_X_Decals.fbx"}), {"SM_Ship_X.fbx"})
+        self.assertEqual(gx.unchanged_files(plan, new, old, {"SM_Ship_X_Decals.fbx"}), set())     # file gone
+        self.assertEqual(gx.unchanged_files(plan, new, None, {"SM_Ship_X.fbx"}), set())           # no manifest yet
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

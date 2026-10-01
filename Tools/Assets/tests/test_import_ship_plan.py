@@ -179,5 +179,27 @@ class ImportPlanTest(unittest.TestCase):
             self.assertIn("BP_Ship_Testship", ok.stdout)
 
 
+class ReuseUnchangedMeshesTest(unittest.TestCase):
+    """A mesh whose FBX has the digest of the last import and whose asset exists is not imported again."""
+
+    def test_reuse(self):
+        meshes = [{"name": "A", "asset_path": "/Game/A", "geometry_hash": "h1"},
+                  {"name": "B", "asset_path": "/Game/B", "geometry_hash": "h2"},
+                  {"name": "C", "asset_path": "/Game/C", "geometry_hash": None},
+                  {"name": "D", "asset_path": "/Game/D", "geometry_hash": "h4"}]
+        previous = {"A": "h1", "B": "old", "C": None, "D": "h4"}
+        exists = lambda p: p != "/Game/D"
+        self.assertEqual(import_ship.reusable_meshes(meshes, previous, exists), {"A"})
+        self.assertEqual(import_ship.reusable_meshes(meshes, previous, exists, force=True), set())
+        self.assertEqual(import_ship.reusable_meshes(meshes, {}, exists), set())
+
+    def test_plan_carries_the_digest(self):
+        manifest = json.loads(json.dumps(blender_tests.good_manifest()))
+        manifest["files"][0]["geometry_hash"] = "abc"
+        plan = import_ship.build_plan(manifest, "C:/art/Testship/Export")
+        by_fbx = {os.path.basename(m["fbx"]): m for m in plan["meshes"]}
+        self.assertEqual(by_fbx[manifest["files"][0]["fbx"]]["geometry_hash"], "abc")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

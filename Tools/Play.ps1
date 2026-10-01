@@ -66,7 +66,7 @@ if ($Editor) {
     $exe = Join-Path $EngineDir "Engine\Binaries\Win64\UnrealEditor.exe"
     $gameArgs = @("`"$Project`"", "/Game/Maps/TestSpace", "-game") + $gameArgs
 } else {
-    $exe = Join-Path (Split-Path $projectDir) "Builds\Gamespace\Windows\gamespace.exe"
+    $exe = Join-Path (& (Join-Path $PSScriptRoot "BuildDir.ps1")) "Windows\gamespace.exe"
     if (-not (Test-Path $exe)) {
         Write-Host "No packaged game at $exe."
         Write-Host "Build it once with .\Tools\Package.ps1 (editor closed), or start uncooked with .\Tools\Play.ps1 -Editor"

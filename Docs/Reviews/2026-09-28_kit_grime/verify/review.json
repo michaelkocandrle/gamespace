@@ -18,7 +18,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
    "ref_label": "SC stěna a sokl",
-   "ours": "Saved/Shots/20260928_105109_kit_material/11_c_plinth_close.png",
+   "ours": "shots:20260928_105109_kit_material/11_c_plinth_close.png",
    "ours_label": "ve hře"
   },
   {
@@ -27,7 +27,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021447.png",
    "ref_label": "SC podlaha se značením",
-   "ours": "Saved/Shots/20260928_105109_kit_material/16_d_e_plate_b_close.png",
+   "ours": "shots:20260928_105109_kit_material/16_d_e_plate_b_close.png",
    "ours_label": "ve hře"
   },
   {
@@ -36,7 +36,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
    "ref_label": "SC podlahové desky",
-   "ours": "Saved/Shots/20260928_105109_kit_material/13_d_b_corridor_floor.png",
+   "ours": "shots:20260928_105109_kit_material/13_d_b_corridor_floor.png",
    "ours_label": "ve hře"
   },
   {
@@ -45,7 +45,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
    "ref_label": "SC podlahové desky",
-   "ours": "Saved/Shots/20260928_105109_kit_material/15_d_d_hatch_close.png",
+   "ours": "shots:20260928_105109_kit_material/15_d_d_hatch_close.png",
    "ours_label": "ve hře"
   },
   {
@@ -54,7 +54,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
    "ref_label": "SC detail stěny",
-   "ours": "Saved/Shots/20260928_105109_kit_material/12_c_wall_grille.png",
+   "ours": "shots:20260928_105109_kit_material/12_c_wall_grille.png",
    "ours_label": "ve hře"
   },
   {
@@ -63,7 +63,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
    "ref_label": "SC podlaha s mřížkou",
-   "ours": "Saved/Shots/20260928_105109_kit_material/14_d_c_grille_close.png",
+   "ours": "shots:20260928_105109_kit_material/14_d_c_grille_close.png",
    "ours_label": "ve hře"
   },
   {
@@ -72,7 +72,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021225.png",
    "ref_label": "SC schody v lodi",
-   "ours": "Saved/Shots/20260928_105109_kit_material/18_d_h_stair_front.png",
+   "ours": "shots:20260928_105109_kit_material/18_d_h_stair_front.png",
    "ours_label": "ve hře"
   }
  ]

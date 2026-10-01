@@ -167,7 +167,7 @@ difuzní světlo a konstrukce splynula s panely. Tutéž lekci už jednou daly k
 ## Ověřovací kolo (jen body 1, 2, 3, 5 z kola 3) – PASS
 
 Skóre: silueta 7, detail 7, materiály 7, decaly 7, světlo 7, čitelnost 8, geometrie 7, soulad 8.
-Plný výstup: `verify/critic.md`. Snímky: `Saved/Shots/20260929_234719_wayfarer_rooms` (rychlá smyčka), zabalená hra
+Plný výstup: `verify/critic.md`. Snímky: `shots:20260929_234719_wayfarer_rooms` (rychlá smyčka), zabalená hra
 `20260929_235610_wayfarer_rooms` a procházka `20260929_235330_wayfarer_walk`.
 
 - Body 1 (stěny), 2 (panely a materiály) a 5 (závěsy žlabu) jsou opravené.

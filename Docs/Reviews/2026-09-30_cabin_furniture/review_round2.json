@@ -18,7 +18,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021316.png",
    "ref_label": "SC kajuta s palandovým výklenkem a kuchyňkou",
-   "ours": "Saved/Shots/20260930_190735_wayfarer_cabin_furniture/01_cabin_fwd.png",
+   "ours": "shots:20260930_190735_wayfarer_cabin_furniture/01_cabin_fwd.png",
    "ours_label": "ve hře"
   },
   {
@@ -27,7 +27,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
    "ref_label": "SC kajuta s palandami a skříňkami",
-   "ours": "Saved/Shots/20260930_190735_wayfarer_cabin_furniture/02_cabin_aft.png",
+   "ours": "shots:20260930_190735_wayfarer_cabin_furniture/02_cabin_aft.png",
    "ours_label": "ve hře"
   },
   {
@@ -36,7 +36,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021316.png",
    "ref_label": "SC palandový výklenek",
-   "ours": "Saved/Shots/20260930_190735_wayfarer_cabin_furniture/03_berth.png",
+   "ours": "shots:20260930_190735_wayfarer_cabin_furniture/03_berth.png",
    "ours_label": "ve hře"
   },
   {
@@ -45,7 +45,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021316.png",
    "ref_label": "SC palandový výklenek (lampička v rohu)",
-   "ours": "Saved/Shots/20260930_190735_wayfarer_cabin_furniture/04_berth_lamp.png",
+   "ours": "shots:20260930_190735_wayfarer_cabin_furniture/04_berth_lamp.png",
    "ours_label": "ve hře"
   },
   {
@@ -54,7 +54,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021331.png",
    "ref_label": "SC skříňky s oranžovými madly",
-   "ours": "Saved/Shots/20260930_190735_wayfarer_cabin_furniture/05_locker.png",
+   "ours": "shots:20260930_190735_wayfarer_cabin_furniture/05_locker.png",
    "ours_label": "ve hře"
   },
   {
@@ -63,7 +63,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
    "ref_label": "SC dveře v přepážce (RSI)",
-   "ours": "Saved/Shots/20260930_190735_wayfarer_cabin_furniture/06_hygiene.png",
+   "ours": "shots:20260930_190735_wayfarer_cabin_furniture/06_hygiene.png",
    "ours_label": "ve hře"
   },
   {
@@ -72,7 +72,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021316.png",
    "ref_label": "SC kuchyňka s výdejníkem (vpravo)",
-   "ours": "Saved/Shots/20260930_190735_wayfarer_cabin_furniture/07_galley.png",
+   "ours": "shots:20260930_190735_wayfarer_cabin_furniture/07_galley.png",
    "ours_label": "ve hře"
   }
  ]

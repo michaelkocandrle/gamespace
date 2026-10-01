@@ -19,7 +19,7 @@ review.json:
     "pairs": [
       {"title": "Pilot view", "distance": "mid", "light": "day",
        "ref": "starcitizenreference/cockpit_reference_2.png", "ref_label": "SC reference 2",
-       "ours": "Saved/Shots/.../01_pilot_view_day.png", "ours_label": "in-game, packaged, 1080p"}
+       "ours": "shots:<set>/01_pilot_view_day.png", "ours_label": "in-game, packaged, 1080p"}
     ]
   }
 distance: close | mid | far; light: day | night | space | studio. "ref" may be a list of images (tiled).
@@ -52,8 +52,12 @@ def font(size):
     return ImageFont.load_default()
 
 
+sys.path.insert(0, os.path.join(ROOT, "Tools"))
+import shots_dir  # noqa: E402  "shots:<set>/<file>" (and the old Saved/Shots/...) -> the shots root, D:/gamespace-shots
+
+
 def path(p):
-    return p if os.path.isabs(p) else os.path.join(ROOT, p)
+    return p if os.path.isabs(p) else shots_dir.resolve(p)
 
 
 def panel(src):

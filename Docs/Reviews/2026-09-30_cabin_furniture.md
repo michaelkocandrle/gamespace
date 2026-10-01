@@ -9,7 +9,7 @@ dávka 6, `Tools/Kit/kit_furniture.py`). Posuzuje se z první osoby (oko 1,65 m)
 - Listy a brief: `round1/`, `round2/`, `round3/`, `verify/`
 - Výstupy kritika: `round1/critic.md`, `round2/critic.md`, `round3/critic.md`, `verify/critic.md`
 - Důkazy: `2026-09-30_cabin_furniture/evidence/`
-- Finální snímky ze zabalené hry: `Saved/Shots/20260930_210830_wayfarer_cabin_furniture` (1920×1080, 60–65 FPS
+- Finální snímky ze zabalené hry: `shots:20260930_210830_wayfarer_cabin_furniture` (1920×1080, 60–65 FPS
   v kajutě)
 
 ## Co nábytek dostal (konečný stav)
@@ -199,7 +199,7 @@ Plný výstup: `round3/critic.md`.
 ## Ověřovací kolo (body 1–9, 11–13 z kola 3) – FAIL (body 2 a 5 částečně)
 
 Skóre: silueta 7, detail 6, materiály 6, decaly 7, světlo 7, čitelnost 8, geometrie 8, soulad 7.
-Plný výstup: `verify/critic.md`. Snímky `Saved/Shots/20260930_203904_wayfarer_cabin_furniture`.
+Plný výstup: `verify/critic.md`. Snímky `shots:20260930_203904_wayfarer_cabin_furniture`.
 
 - **Opravené:** 1 (vrstvení), 6 (štítky), 7 (skafandr), 9 (oranžová hrana), 12 (bok buňky).
 - **Částečně:** 2 (polštář hranatý, opěrky hladké), 3 (dvě svítidla nerozeznatelná, lampička viditelně nesvítí),
@@ -210,7 +210,7 @@ Plný výstup: `verify/critic.md`. Snímky `Saved/Shots/20260930_203904_wayfarer
 ### Po ověřovacím kole (levné body, jen snímky před/po, bez dalšího kola kritika)
 
 Porovnání: `after_verify/03_berth.jpg`, `05_locker.jpg`, `06_hygiene.jpg`, `07_galley.jpg` (vlevo ověřovací kolo,
-vpravo `Saved/Shots/20260930_205637_wayfarer_cabin_furniture`).
+vpravo `shots:20260930_205637_wayfarer_cabin_furniture`).
 
 - **Bod 2 – opraveno.** Opěrky mají vyboulená pole 2,2 cm, šev napříč s knoflíky, švy 8 mm hluboké. Polštář má
   promáčknutí 4 cm. Sedák výraznější vyboulení.

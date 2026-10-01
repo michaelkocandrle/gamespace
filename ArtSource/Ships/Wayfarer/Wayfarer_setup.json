@@ -1344,6 +1344,7 @@
  },
  "decals": [
   {
+   "id": "D-NAME-L",
    "name": "Name_L",
    "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Wayfarer",
@@ -1371,6 +1372,7 @@
    ]
   },
   {
+   "id": "D-REG-L",
    "name": "Reg_L",
    "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Registration",
@@ -1398,6 +1400,7 @@
    ]
   },
   {
+   "id": "D-LOGO-L",
    "name": "Logo_L",
    "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Logo",
@@ -1425,6 +1428,7 @@
    ]
   },
   {
+   "id": "D-HAZARDEXHAUST-L",
    "name": "HazardExhaust_L",
    "texture": "D_Big_Hazard_Exhaust",
    "location": [
@@ -1451,6 +1455,7 @@
    ]
   },
   {
+   "id": "D-NAME-R",
    "name": "Name_R",
    "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Wayfarer",
@@ -1479,6 +1484,7 @@
    "_upright": "1. 10. 2026: roll +90 (was -90): with -90 the starboard marking read upside down (exterior review 30. 9.)"
   },
   {
+   "id": "D-REG-R",
    "name": "Reg_R",
    "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Registration",
@@ -1507,6 +1513,7 @@
    "_upright": "1. 10. 2026: roll +90 (was -90): with -90 the starboard marking read upside down (exterior review 30. 9.)"
   },
   {
+   "id": "D-LOGO-R",
    "name": "Logo_R",
    "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Logo",
@@ -1535,6 +1542,7 @@
    "_upright": "1. 10. 2026: roll +90 (was -90): with -90 the starboard marking read upside down (exterior review 30. 9.)"
   },
   {
+   "id": "D-HAZARDEXHAUST-R",
    "name": "HazardExhaust_R",
    "texture": "D_Big_Hazard_Exhaust",
    "location": [
@@ -1562,6 +1570,7 @@
    "_upright": "1. 10. 2026: roll +90 (was -90): with -90 the starboard marking read upside down (exterior review 30. 9.)"
   },
   {
+   "id": "D-HAZARDRAMP",
    "name": "HazardRamp",
    "symmetric": true,
    "texture": "D_Big_Hazard_Ramp",
@@ -1588,6 +1597,7 @@
    ]
   },
   {
+   "id": "D-INT-SEC02",
    "name": "Int_Sec02",
    "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "flip_u": 1.0,
@@ -1615,6 +1625,7 @@
    ]
   },
   {
+   "id": "D-INT-SEC03",
    "name": "Int_Sec03",
    "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "flip_u": 1.0,
@@ -1642,6 +1653,7 @@
    ]
   },
   {
+   "id": "D-INT-SEC04",
    "name": "Int_Sec04",
    "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "flip_u": 1.0,
@@ -1669,6 +1681,7 @@
    ]
   },
   {
+   "id": "D-INT-HOLD",
    "name": "Int_Hold",
    "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "texture": "D_Int_Hold",
@@ -1696,6 +1709,7 @@
    "flip_u": 1.0
   },
   {
+   "id": "D-INT-GRID",
    "name": "Int_Grid",
    "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames; 30. 9.: 0.25 m aft with the grid's end (variant B)",
    "texture": "D_Int_Grid",
@@ -1723,6 +1737,7 @@
    "flip_u": 1.0
   },
   {
+   "id": "D-INT-LANE",
    "name": "Int_Lane",
    "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "texture": "D_Int_Lane",
@@ -1750,6 +1765,7 @@
    "flip_u": 1.0
   },
   {
+   "id": "D-INT-RAMPHAZARD",
    "name": "Int_RampHazard",
    "symmetric": true,
    "texture": "D_Big_Hazard_Ramp",
@@ -1776,6 +1792,7 @@
    ]
   },
   {
+   "id": "D-INT-ENGINEERING",
    "name": "Int_Engineering",
    "_moved": "29. 9. 2026: onto the kit bulkhead face in the hold (Bulkhead_Door00L41_C at x 8.19), its main panel port of the door under the rail",
    "texture": "D_Int_Engineering",
@@ -1803,6 +1820,7 @@
    "flip_v": 1.0
   },
   {
+   "id": "D-INT-EXIT",
    "name": "Int_Exit",
    "texture": "D_Int_Exit",
    "location": [
@@ -1829,6 +1847,7 @@
    "flip_v": 1.0
   },
   {
+   "id": "D-INT-CAUTIONLOAD",
    "name": "Int_CautionLoad",
    "texture": "D_Int_Caution_Load",
    "location": [
@@ -1855,6 +1874,7 @@
    "flip_v": 1.0
   },
   {
+   "id": "D-INT-REACTOR",
    "name": "Int_Reactor",
    "texture": "D_Int_Reactor",
    "location": [
@@ -1882,6 +1902,7 @@
    "legacy_room": "tech"
   },
   {
+   "id": "D-INT-VOLTAGE",
    "name": "Int_Voltage",
    "texture": "D_Int_Caution_Voltage",
    "location": [
@@ -1909,6 +1930,7 @@
    "legacy_room": "tech"
   },
   {
+   "id": "D-INT-COOLER",
    "name": "Int_Cooler",
    "texture": "D_Int_Cooler",
    "location": [
@@ -1936,6 +1958,7 @@
    "legacy_room": "tech"
   },
   {
+   "id": "D-INT-COCKPIT",
    "name": "Int_Cockpit",
    "_moved": "29. 9. 2026: onto the kit bulkhead face (Bulkhead_Door00W_A at x 10.33), the main panel port of the door under the rail: the arrow points at the door (to starboard of it the frame hid half the word and the arrow pointed away); 85 % and centred between the corridor wall's frame and the door jamb (critic round 1: seen along the corridor the frame cut it to OCKPIT, the arrow already touched the jamb)",
    "texture": "D_Int_Cockpit",
@@ -1963,6 +1986,7 @@
    "flip_v": 1.0
   },
   {
+   "id": "D-INT-FIRE",
    "name": "Int_Fire",
    "_liner": "29. 9. 2026: onto the hold's hull liner (face 0.2 m further out), clear of its hatches, plates and frames",
    "flip_u": 1.0,
@@ -1990,6 +2014,7 @@
    ]
   },
   {
+   "id": "D-INT-QUARTERS",
    "name": "Int_Quarters",
    "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); on the aft bulkhead face (Bulkhead_Door00L38_A, face at 10.40) port of the door (starboard the hygiene cell hid it from the cabin), in the upper plate beside the junction box's cable drop; depth 2 cm (3 cm reached the face's back plate: mirrored there), 1.5 cm in front of the face plane: its upper plate is set back 8 mm, the plate's middle 6 mm more; brighter (round 2: 'dark on dark, unreadable from 3 m')",
    "texture": "D_Int_Quarters",
@@ -2017,6 +2042,7 @@
    "flip_v": 1.0
   },
   {
+   "id": "D-INT-COCKPITSTAIRS",
    "name": "Int_CockpitStairs",
    "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); on the forward face (Bulkhead_Door00L38_F, face at 15.19) port of the stairs' opening, the arrow at it; depth 2 cm (3 cm reached the face's back plate), 0.5 cm in front of the face plane (the upper plate set back)",
    "texture": "D_Int_CockpitStairs",
@@ -2044,6 +2070,7 @@
    "flip_v": 1.0
   },
   {
+   "id": "D-INT-SEC05",
    "name": "Int_Sec05",
    "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); port liner, the upper main plate's aft half of the first module (x 10.7)",
    "texture": "D_Int_Section_05",
@@ -2071,6 +2098,7 @@
    "flip_u": 1.0
   },
   {
+   "id": "D-INT-SEC06",
    "name": "Int_Sec06",
    "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); port liner over the bunk, the third module's aft half (x 13.09)",
    "texture": "D_Int_Section_06",
@@ -2098,6 +2126,7 @@
    "flip_u": 1.0
   },
   {
+   "id": "D-INT-LIFESUPPORT",
    "name": "Int_LifeSupport",
    "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); port liner over the bunk, the third module's forward half (x 13.69): the plant is under the bunk",
    "_kit": "30. 9. 2026: on the berth's base beside its intake grille (Furniture_Bunk21L_A), 1.5 cm deep - the cabin's critic, round 2: \"a label on a bare wall\"",
@@ -2127,6 +2156,7 @@
    "flip_u": 1.0
   },
   {
+   "id": "D-INT-STAIRHAZARD",
    "name": "Int_StairHazard",
    "_cabin": "30. 9. 2026: the cabin's markings (its critic, round 1: not one readable sign in the room); the floor before the cockpit stairs' opening (x 15.01-15.15); 3 cm off the centre line - a tile joint runs along it",
    "texture": "D_Big_Hazard_Ramp",
@@ -2156,6 +2186,7 @@
    "max_depth_cm": 1.5
   },
   {
+   "id": "D-INT-SUIT",
    "name": "Int_Suit",
    "_kit": "30. 9. 2026: the suit locker's weapon door (Furniture_Locker10L_A), over its latch; 1.5 cm deep - the doors and panels are 2-3 cm thick",
    "texture": "D_Int_Suit",
@@ -2184,6 +2215,7 @@
    "max_depth_cm": 1.5
   },
   {
+   "id": "D-INT-HYGIENE",
    "name": "Int_Hygiene",
    "_kit": "30. 9. 2026: the hygiene cell's front panel left of its door (Furniture_Hygiene15L_A), under the grille; 20 x 10 cm between the corner post and the door frame (28 cm ran onto the post - round 3); 1.5 cm deep - the doors and panels are 2-3 cm thick",
    "texture": "D_Int_Hygiene",
@@ -2212,6 +2244,7 @@
    "max_depth_cm": 1.5
   },
   {
+   "id": "D-INT-GALLEY",
    "name": "Int_Galley",
    "_kit": "30. 9. 2026: the galley unit's left stowage door (Furniture_Food16L_A), in its recessed field (12 mm deep: the centre 12 mm in front of the field - round 3); 1.5 cm deep - the doors and panels are 2-3 cm thick",
    "texture": "D_Int_Galley",

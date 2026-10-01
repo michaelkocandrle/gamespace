@@ -1,6 +1,6 @@
 ---
 name: ship-pipeline
-description: How a ship goes from idea to Unreal in gamespace - Ship Matrix reference set (fetch_ship_matrix.py), the mandatory 2D design stage (ArtSource/Ships/<Ship>/Design, <Ship>_layout.json with exterior outlines, draw_ship_design.py, <Ship>_spec.json in RSI Ship Matrix shape, author approval), the design dossier and fleet Ship Matrix page (build_ship_matrix.py, published as an Artifact), consistent concept views via Higgsfield as style reference, the exterior built exactly from the drawing (hs_build_ship.py, hs_assemble_ship.py, <Ship>_hs.json), silhouette_compare.py, detail layers (decal library, mesh decals, livery, wings, gear, lights), Blender export (gamespace_ship_export.py, manifest) and Unreal import (import_ship.py, <Ship>_setup.json). Reference file legacy-ai-model.md covers the older AI-model recipe (build_ai_ship.py). Load when designing a new ship, building or changing a ship exterior, touching sockets/UCX collision/pivot/LODs/ship materials/naming/decals, or running the ship export/import scripts.
+description: How a ship goes from idea to Unreal in gamespace - Ship Matrix reference set (fetch_ship_matrix.py), the mandatory 2D design stage (ArtSource/Ships/<Ship>/Design, <Ship>_layout.json with exterior outlines, draw_ship_design.py, <Ship>_spec.json in RSI Ship Matrix shape, author approval), the design dossier and fleet Ship Matrix page (build_ship_matrix.py, published as an Artifact), technical drawings drawn from the build data with IDs (assign_exterior_ids.py, <Ship>_exterior_design.json, exterior_model.py, draw_exterior_sheet.py, test_exterior_drawing.py), consistent concept views via Higgsfield as style reference, the exterior built exactly from the drawing (hs_build_ship.py, hs_assemble_ship.py, <Ship>_hs.json), silhouette_compare.py, detail layers (decal library, mesh decals, livery, wings, gear, lights), Blender export (gamespace_ship_export.py, manifest) and Unreal import (import_ship.py, <Ship>_setup.json). Reference file legacy-ai-model.md covers the older AI-model recipe (build_ai_ship.py). Load when designing a new ship, building or changing a ship exterior, touching sockets/UCX collision/pivot/LODs/ship materials/naming/decals, or running the ship export/import scripts.
 ---
 
 # Loď: od nápadu do Unrealu
@@ -117,6 +117,27 @@ python Tools/Design/build_ship_matrix.py --ship <Loď>    # jedna loď    -> Sav
   - Ship Matrix: https://claude.ai/artifact/VvqHBqFf3xesWcBznpcmHU (`Saved/Dossier/ShipMatrix.html`)
   - dossier Wayfarer: https://claude.ai/artifact/Busq7MdkvGSXMp7RsgP7Ga
   Novou loď nebo nový krok vždy zapiš a Ship Matrix publikuj znovu; autorovi dej odkaz.
+
+## 1c. Technické výkresy z dat (dossier body 3, 4, 6; autor 1. 10. 2026)
+
+Jeden zdroj dat: výkres obsahuje jen to, co je v datech, a data jen to, co je ve výkresu; každý díl kitu,
+decal, světlo a funkční prvek nese ve výkresu stejné ID jako v datech.
+```bash
+python Tools/Design/assign_exterior_ids.py <Loď> [--check]   # doplní "id" do receptu a setupu (stávající nemění)
+python Tools/Design/exterior_model.py <Loď>                  # model výkresu: prvky, stavy, co je vidět z boku
+python Tools/Design/draw_exterior_sheet.py <Loď> [--dpi 200] # list E-01 pravobok A0 -> Design/Drawings/*.png + .json
+python Tools/Tests/test_exterior_drawing.py                  # výkres = data (i v Test.ps1 a CI)
+```
+- **Postavené** prvky jsou v datech stavby (`<Loď>_hs.json`, `<Loď>_setup.json`) s `"id"` (builder ho ignoruje);
+  **nepostavené** v `Design/<Loď>_exterior_design.json`: `proposed` prvky, `changes` (`change` s `set`, `remove`),
+  materiálové zóny `MZ-*` se šrafou, exteriérový kit `XK-*`, desky boků (pásy × pole mezi příčkami → `P-S-<pás><pole>`),
+  český účel postavených prvků `purpose` (v datech stavby je jen anglický `_what`; test hlídá, že žádný nechybí).
+  Exteriérový kit se pak staví z týchž dat návrhu.
+- Stavy na výkresu: postaveno černě, návrh modře (+), změna modře (Δ, stará poloha červeně čárkovaně), odstranit
+  červeně (×). Skryté za bližším dílem čárkovaně (model počítá viditelnost dílů z boku a hloubku z pohledu shora).
+- Model hlásí, kam prvek „z boku“ opravdu dopadne (nejbližší díl, WORKFLOW 9.6 fb), co je skryté, výřezy v deskách
+  a podklad nápisů – „Kontrola dat“ na listu; desky musí vyříznout místo pro díly na plášti (WORKFLOW 9.6 fe).
+- Vzorový list E-01 čeká na schválení stylu; další listy (6 pohledů, detaily 1:10–1:20, interiér, koncepty) až potom.
 
 ## 2. Koncepty jako reference stylu
 
@@ -462,6 +483,12 @@ python Tools/Assets/import_ship.py ArtSource/Ships/<Loď>/Export/<Loď>_manifest
 - **Po každém `hs_assemble_ship.py` export znovu**, i když se měnil jen interiér: assemble FBX nepřepíše a
   `import_ship.py` by dovezl minulý export (stará podlaha a krabice přes nové díly, WORKFLOW 9.6 eq). Kontrola: čas
   FBX v `Export/`.
+- **FBX jen při změně geometrie** (autor 1. 10. 2026; dřív každá přestavba ~250 MB do LFS): exportér spočítá otisk
+  souboru (pozice 0,1 mm, UV, normály rohů, materiály, sockety; nezávislý na pořadí trojúhelníků,
+  `geometry_digest`) a soubor se stejným otiskem jako v minulém manifestu (`files[].geometry_hash`) nezapíše
+  (`EXPORT SKIPPED` ve výpisu). `--all-files` zapíše vše, `--record-hashes` jen doplní otisky do manifestu
+  (FBX na disku jsou z tohoto `.blend`). Import přeskočí mesh se stejným otiskem jako při minulém importu
+  (`imported_hashes` v `<Loď>_import_report.json`, `kept_unchanged`); `GAMESPACE_SHIP_FORCE_IMPORT=1` importuje vše.
 - Hodnoty pawnu z geometrie počítá jen `suggest_pawn_settings()` v exportéru → manifest
   `suggested_pawn_settings` → import. Nepřepočítávat ručně.
 
@@ -473,7 +500,8 @@ $env:GAMESPACE_SHIP_MANIFEST = (Resolve-Path "ArtSource\Ships\<Loď>\Export\<Lo�
 .\Tools\run_editor_python.ps1 Tools\Assets\build_main_menu.py
 .\Tools\run_editor_python.ps1 Tools\Assets\import_ship.py   # uklidí, co držela úvodní obrazovka
 ```
-Proměnné: `GAMESPACE_SHIP_DRY_RUN=1`, `GAMESPACE_SHIP_APPLY_PLANET=0`, `GAMESPACE_SHIP_SET_GAME_MODE=0`.
+Proměnné: `GAMESPACE_SHIP_DRY_RUN=1`, `GAMESPACE_SHIP_APPLY_PLANET=0`, `GAMESPACE_SHIP_SET_GAME_MODE=0`,
+`GAMESPACE_SHIP_FORCE_IMPORT=1` (importovat i meshe s nezměněným otiskem).
 Import: kontrola manifestu → FBX (Nanite kromě skla a `no_nanite_parts`) → ověří velikost, osy, hully,
 sloty, sockety (měřítko 100 → 1) → `BP_Ship_<Loď>` → `<Loď>_import_report.json`. Při změně slotů smaže
 starý mesh a importuje načisto, uklidí osiřelé assety.

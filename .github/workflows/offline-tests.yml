@@ -26,7 +26,7 @@ jobs:
           python-version: "3.13"
 
       - name: Python packages
-        run: python -m pip install --disable-pip-version-check numpy pillow scipy
+        run: python -m pip install --disable-pip-version-check numpy pillow scipy shapely
 
       - name: Tools/Test.ps1 (compileall + offline tests)
         shell: pwsh

@@ -17,7 +17,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
    "ref_label": "SC infrastruktura",
-   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/09_hold_fwd.png",
+   "ours": "shots:20260929_232427_wayfarer_rooms/09_hold_fwd.png",
    "ours_label": "ve hře"
   },
   {
@@ -26,7 +26,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
    "ref_label": "SC chodba (Drake)",
-   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/10_hold_aft.png",
+   "ours": "shots:20260929_232427_wayfarer_rooms/10_hold_aft.png",
    "ours_label": "ve hře"
   },
   {
@@ -35,7 +35,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021422.png",
    "ref_label": "SC infrastruktura",
-   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/11_hold_cargo.png",
+   "ours": "shots:20260929_232427_wayfarer_rooms/11_hold_cargo.png",
    "ours_label": "ve hře"
   },
   {
@@ -44,7 +44,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021406.png",
    "ref_label": "SC strop (MISC)",
-   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/12_hold_ceiling.png",
+   "ours": "shots:20260929_232427_wayfarer_rooms/12_hold_ceiling.png",
    "ours_label": "ve hře"
   },
   {
@@ -53,7 +53,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021554.png",
    "ref_label": "SC chodba s dveřmi (Drake)",
-   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/08_tech_aft.png",
+   "ours": "shots:20260929_232427_wayfarer_rooms/08_tech_aft.png",
    "ours_label": "ve hře"
   },
   {
@@ -62,7 +62,7 @@
    "light": "interior",
    "ref": "starcitizenreference/Screenshot 2026-09-25 021635.png",
    "ref_label": "SC dveře v přepážce (RSI)",
-   "ours": "Saved/Shots/20260929_232427_wayfarer_rooms/07_tech_fwd.png",
+   "ours": "shots:20260929_232427_wayfarer_rooms/07_tech_fwd.png",
    "ours_label": "ve hře"
   }
  ]
