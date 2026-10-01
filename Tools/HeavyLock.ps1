@@ -140,7 +140,10 @@ function Start-Watcher([int]$owner) {
     if ($IsWindows -or $env:OS -eq "Windows_NT") {
         $p = Start-Process -FilePath $exe -ArgumentList $argv -WindowStyle Hidden -PassThru
     } else {
-        $p = Start-Process -FilePath $exe -ArgumentList $argv -PassThru
+        # off Windows the child would inherit the caller's stdout / stderr and keep a captured pipe open until the
+        # watcher ends (the CI runner's test hung on it): send its output elsewhere
+        $p = Start-Process -FilePath $exe -ArgumentList $argv -PassThru -RedirectStandardOutput "/dev/null" `
+            -RedirectStandardError ([IO.Path]::GetTempFileName())
     }
     return $p.Id
 }
