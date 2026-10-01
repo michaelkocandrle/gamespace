@@ -128,6 +128,11 @@ def test_ship(ship):
     check("%s every material zone used exists" % ship, not bad_mat, ", ".join(bad_mat))
 
     check_views(ship, m, drawings)
+    pc = m.views_model.plan_conflicts()
+    check("%s roof from above: no part under a plate without a cut-out" % ship, not [c for c in pc if c[1] == "buried"],
+          "; ".join("%s %s" % (i, t) for i, k, t in pc if k == "buried"))
+    check("%s roof from above: no lettering on a plate of its own tone" % ship, not [c for c in pc if c[1] == "ink"],
+          "; ".join("%s %s" % (i, t) for i, k, t in pc if k == "ink"))
 
     spec = m.spec_rcs()
     check("%s RCS blocks after the design = spec manoeuvring thrusters" % ship, spec is not None and m.rcs_blocks() == spec,

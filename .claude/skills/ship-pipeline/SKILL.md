@@ -153,7 +153,35 @@ python Tools/Tests/test_exterior_drawing.py                  # výkres = data (i
 - **Sklo kabiny z boku** je jen tam, kde je trup uvnitř obou obrysů kabiny (boční i horní, jako
   `hs_build_ship.split_canopy`): kde je trup širší než horní obrys, končí sklo výš na rameni (ověřeno na postavené
   kabině 1. 10. 2026; samotný boční obrys kreslil sklo o 35 cm níž).
-- **Interiér (bod 4)** kreslí postavené díly, ne obdélníky z layoutu:
+- Výkresy E-01 až E-08 autor schválil 1. 10. 2026 (revize C: hřbet R v primárním laku, rám rampy); kit a pilot
+  se staví podle nich.
+
+### Výkresy interiéru (bod 4) a koncepty (bod 6) – druhá session (1. 10. 2026)
+
+- **Styl listů** = schválené E-01 až E-08: A0 na šířku 1189 × 841 mm, PNG 200 dpi do `Design/Drawings/<Loď>_<list>.png`,
+  vektorové PDF do `Saved/Drawings/`, ke každému listu postranní JSON (ID nakreslená a popsaná po pohledech, tabulky,
+  otisky dat). Stavebnice v `Tools/Design/draw_exterior_sheet.py`: `Sheet` (písmo Bahnschrift se záložními Segoe UI
+  a Segoe UI Symbol), `Frame` (měřítko, výřez, `flip`), `Drawer` (`place_labels`: popisky v řadách nad a pod
+  pohledem se sběrnicí odkazů; `panel_labels`; stavové barvy `STATUS_COL` / `STATUS_MARK`), `frame_and_zones`,
+  `title_block`, `legend`, `table`, `wrap`, `dim_h` / `dim_v`; detaily a kóty v `draw_exterior_views.py`
+  (`detail_window`, `dim_chain`, `dim_vert`, `balloon_column`). Popisky česky, kód anglicky.
+- **Jeden zdroj dat a test:** výkres kreslí jen to, co je v datech, a každý prvek nese ID z dat. Vzor testu
+  `Tools/Tests/test_exterior_drawing.py` (otisky dat v JSON listu, nakreslené = model po pohledech, každé nakreslené
+  ID popsané, český účel u každého postaveného prvku, kontroly konfliktů). ID doplňuje `Tools/Design/assign_exterior_ids.py`
+  (`json_ids.py`) jen v exteriérových blocích receptu a setupu; ID interiéru jsou v datech návrhu interiéru (níže).
+- **Co z interiéru je v datech:** `Design/<Loď>_layout.json` – `decks` (výška podlahy, světlá výška, obrys),
+  `rooms` (id, název, obdélník nebo polygon, `purpose` česky), `objects` (místnost, obdélník, z, `below` pod podlahou,
+  `purpose` česky, poznámky `_kit`, `_liner`), `doors` (poloha, osa, šířka); recept `HardSurface/<Loď>_hs.json`
+  blok `interior` (`height_m`, `wall_inset_m`, `sill_z`, `lights` po místnostech, `seat`, `kit_modules` a `kit`
+  po místnostech, `cockpit`, `decals` s položkami a rozsevem, `fixture_lights`); stavitel `Tools/Blender/hs_interior.py`
+  (+ `hs_interior_kit.py`, `hs_interior_decals.py`, `hs_cockpit.py`, `hs_fixture_lights.py`); interiérový kit
+  `ArtSource/Kit/kit_rules.json` a `kit_parts.json` (rastr 0,3 m); světla po stavbě
+  `Export/<Loď>_lights.json` (int_*, fix_*); recenze interiéru `Docs/Reviews/2026-09-2*_kit_*`,
+  `2026-09-30_cabin_*.md`, `2026-09-30_hold_grid_variants.md`.
+- **Koncepty:** zvolený koncept povrchu `concept` v datech návrhu (B + C, obrázky `Concept/surface_v3/`, `prompt.txt`),
+  starší koncepty a ořezy `Concept/*.png`, siluety `Design/guides/<Loď>_mask_*.png` a `Tools/Blender/silhouette_compare.py`
+  (IoU); obrázky ze Ship Matrix do generátoru nikdy (skill `asset-sources`).
+- **Interiér (bod 4)** kreslí postavené díly, ne obdélníky z layoutu (styl I-04 schválen 1. 10.):
   ```bash
   python Tools/Design/assign_interior_ids.py <Loď> [--check]   # ID do Design/<Loď>_interior_design.json "ids"
   python Tools/Design/interior_model.py <Loď>                  # prvky po místnostech, kontrola dat
@@ -178,7 +206,6 @@ python Tools/Tests/test_exterior_drawing.py                  # výkres = data (i
     a zónami nad stropem a pod podlahou, klíčový plán, legenda, tabulky (díly kitu, účel dílů, nábytek / dveře /
     komponenty, světla po socketech, decaly), souhrn světel a výkon, kontrola dat (layout × díl, komponenta mimo
     trup, poznámky `review_notes`).
-- Další na řadě: koncepty (bod 6) ve stejném stylu; kit a pilot až podle schválených výkresů.
 
 ## 2. Koncepty jako reference stylu
 
