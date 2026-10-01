@@ -38,6 +38,29 @@ def shift_box(box, off):
     return {k: [v[0] + off["xyz".index(k)], v[1] + off["xyz".index(k)]] for k, v in box.items()}
 
 
+def budget_report(recipe, ship, obs, cfg):
+    """Triangles of the main exterior mesh per budget part (recipe "budget", author 1. 10. 2026): prints HSBUDGET
+    and writes Export/<Ship>_budget.json next to the lights (Tools/Tests/test_triangle_budget.py compares it)."""
+    import re
+    spec = recipe["budget"]
+    parts = {p["name"]: {"max": p["max"], "tris": 0, "objects": 0} for p in spec["parts"]}
+    parts["other"] = {"max": None, "tris": 0, "objects": 0}
+    for o in obs:
+        t = sum(len(p.vertices) - 2 for p in o.data.polygons)
+        key = next((p["name"] for p in spec["parts"] if any(re.search(m, o.name) for m in p["match"])), "other")
+        parts[key]["tris"] += t
+        parts[key]["objects"] += 1
+    total = sum(v["tris"] for v in parts.values())
+    rep = {"ship": ship, "mesh": "SM_Ship_%s" % ship, "total": total, "budget": spec["total"], "warn": spec["warn"],
+           "error": spec["error"], "parts": parts}
+    out = os.path.join(os.path.dirname(path(cfg["out_blend"])), "Export", "%s_budget.json" % ship)
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump(rep, f, indent=1)
+    print("HSBUDGET " + json.dumps({"total": total, "parts": {k: v["tris"] for k, v in parts.items()}}))
+    return rep
+
+
 def main(argv):
     recipe = json.load(open(path(argv[0]), encoding="utf-8"))
     layout = json.load(open(path(recipe["layout"]), encoding="utf-8"))
@@ -118,6 +141,8 @@ def main(argv):
             bpy.data.objects.remove(o)
             continue
         groups.setdefault(assign.get(o.name, ""), []).append(o)
+    if recipe.get("budget") and groups.get(""):
+        budget_report(recipe, ship, groups[""], cfg)
     out = {}
     for suffix, obs in groups.items():
         name = "SM_Ship_%s" % ship + ("_%s" % suffix if suffix else "")

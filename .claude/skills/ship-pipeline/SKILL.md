@@ -361,6 +361,19 @@ python Tools/Design/exterior_kit_layout.py <Loď> [--region pilot]   # -> Design
   číslo se do atlasu 2 m nevešla: „decal sheet full“). Ramena: dolní zadní roh, paprsek šikmo dolů dovnitř (`ray`,
   rameno je skloněné ~45°, `side` by decal zahodil na kontrole normály); hřbet: u zadní hrany mezi pásem panelů
   a poklopů, posune se dopředu mimo výřezy, jinak vynechá.
+- **Rozpočet trojúhelníků trupu** (autor 1. 10. 2026, schváleno; `Docs/Reviews/2026-10-01_wayfarer_triangle_budget.md`):
+  trup `SM_Ship_<Loď>` ≤ 700 k (varování nad 700 k, chyba nad 1 M = limit exportéru); rozpočet po částech
+  v `<Loď>_hs.json` → `budget` (`parts`: jméno, `max`, regulární výrazy jmen zdrojových objektů, první shoda vyhrává,
+  zbytek `other` z rezervy). `hs_assemble_ship` vypíše `HSBUDGET` a zapíše `Export/<Loď>_budget.json`,
+  `Tools/Tests/test_triangle_budget.py` ho porovná. **Geometrie jen pro velkou a střední vrstvu** (plášť, desky, rám,
+  rozvody, skříně, RCS, hydraulika, trysky, podvozek, zbraně); **šrouby, západky, malé poklopy pod 0,4 m, mřížky
+  pod 0,3 m a panelové spáry jsou decaly** s normálou a AO z atlasu. Plochy zkopírované z trupu (desky, rám, desky
+  detailu) i loft trupu se před solidify a zkosením slučují v rovině (`dissolve_limit` 1°, odděleně podle materiálu;
+  `hs_exterior_kit.dissolve_planar`, `hs_build_ship.finish(dissolve=)`); zkosení 1 segment se zpevněnými normálami
+  (`harden_normals` + weighted normals), 2 segmenty jen u křivek viditelných z chase kamery (prstence gondol, ústí
+  trysek); válce podle průměru 8 / 12 / 16 stěn (pod 50 mm, do 150 mm, nad; `hs_exterior_kit.seg_for`,
+  `hs_build_part.cyl`). Spáry loftu pod rámem kitu se nestaví (`hs_exterior_kit.frame_cover` → `loft(covered=)`).
+  Hlavní žrout nebyly šrouby (4 %), ale modifikátory na hustých kopiích ploch trupu (rám 16 k → 176 k).
 - **Záď z kitu:** rám rampy XK-RAMPFRAME (50 mm, šrouby, styčníky `ramp_gussets`), nášlapné lišty a pryžový práh
   XK-TREAD na dveřích (stojí na desce P-B-07: tloušťka = deska + lišta), pant XK-HINGE, písty XK-PISTON s vidlicovými
   držáky a hadicí (patka na stěně, hlava na čele rámu).

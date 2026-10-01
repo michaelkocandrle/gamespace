@@ -14,6 +14,8 @@
    "step": 0.05,
    "ring": 96,
    "name": "Hull",
+   "merge_keep_slots": ["Channel"],
+   "_merge_keep_slots": "faces of these material slots are not merged (triangle budget step a, 1. 10. 2026): the channel floor by the spine's aft end went near black once merged - few vertices carry the baked occlusion across a large face; 2 bevel segments did not help",
    "seams": {
     "_comment": "Panel breaks at the bulkheads of the layout (hold / tech corridor / cabin / cockpit) and two lines along each side.",
     "x": [1.4, 3.0, 4.3, 5.6, 6.9, 8.2, 9.3, 10.4, 11.6, 12.8, 14.0, 15.2, 16.7, 18.2, 19.4],
@@ -800,9 +802,32 @@
  },
  "bevel": {
   "width": 0.025,
-  "segments": 2,
+  "segments": 1,
   "angle_deg": 30,
-  "sharp_deg": 35
+  "sharp_deg": 35,
+  "_segments": "1 segment with hardened and weighted normals (triangle budget rule B2, author 1. 10. 2026; was 2); 2 segments only where a curve shows from the chase camera (the pods' rings: parts.pod.revolve.bevel)"
+ },
+ "kit_bevel": {
+  "angle_deg": 30,
+  "width": 0.004,
+  "segments": 1
+ },
+ "budget": {
+  "_comment": "Triangle budget of the main exterior mesh SM_Ship_<Ship> (author 1. 10. 2026, Docs/Reviews/2026-10-01_wayfarer_triangle_budget.md): hs_assemble_ship.py prints HSBUDGET per part and writes Export/<Ship>_budget.json, Tools/Tests/test_triangle_budget.py compares it (total over 'warn' = warning, over 'error' = failure, a part over its 'max' = warning). Parts match the source object names (regular expressions, first match wins); the rest is 'other' (from the reserve).",
+  "total": 700000,
+  "warn": 700000,
+  "error": 1000000,
+  "parts": [
+   {"name": "hull_loft", "max": 50000, "match": ["_Hull$"]},
+   {"name": "kit_plates", "max": 80000, "match": ["_Kit_P-", "_Kit_F-VENT"]},
+   {"name": "kit_frame", "max": 120000, "match": ["_Kit_FR-", "_Kit_F-RAMP-FRAME"]},
+   {"name": "mid_layer", "max": 60000, "match": ["_Kit_Parts_", "_Kit_F-RAMP", "_Kit_Bolts", "_Kit_Latches"]},
+   {"name": "nozzles", "max": 80000, "match": ["Nozzle"]},
+   {"name": "pods", "max": 60000, "match": ["[Pp]od"]},
+   {"name": "wings_fins_weapons", "max": 40000, "match": ["[Ww]ing", "[Ff]in", "Guns", "Missile"]},
+   {"name": "lights", "max": 30000, "match": ["Light"]},
+   {"name": "functional_detail", "max": 40000, "match": ["Detail", "Func", "HSKit", "Greeble", "RCS", "Antenna"]}
+  ]
  },
  "assemble": {
   "_comment": "Tools/Blender/hs_assemble_ship.py: game meshes, collision and sockets. Boxes and sockets in LAYOUT coordinates (x from the aft end, z from the deck); offset moves the ship so its bounding box is centred on the origin (x -0.5 .. 21 -> -10.75 .. 10.75, z -1.6 .. 4.0 -> -2.8 .. 2.8).",
@@ -966,7 +991,7 @@
   "bevel": {
    "angle_deg": 30,
    "width": 0.006,
-   "segments": 2
+   "segments": 1
   },
   "hull_recesses": [
    {

@@ -75,6 +75,39 @@ def in_polys(pt, polys):
     return any(inside(pt, outer) and not any(inside(pt, h) for h in holes) for outer, holes in polys)
 
 
+def frame_cover(layout_path):
+    """Predicate: is a hull point under the kit's frame (ribs, longerons, spine)? The loft then builds no seam groove
+    there - the frame covers it (triangle budget rule, author 1. 10. 2026). Side outlines (SB, mirrored) test (x, z),
+    plan outlines (TOP) test (x, y) of the upper half."""
+    try:
+        kit = json.load(open(_path(layout_path), encoding="utf-8"))
+    except OSError:
+        return None
+    side = [e["polys"] for e in kit.get("frame", []) if e["id"].startswith("FR-") and e["view"] == "SB"]
+    top = [e["polys"] for e in kit.get("frame", []) if e["id"].startswith("FR-") and e["view"] == "TOP"]
+    boxes = [(bbox2(p, 0.01), p) for p in side], [(bbox2(p, 0.01), p) for p in top]
+
+    def hit(pt, entries):
+        return any(b[0] <= pt[0] <= b[2] and b[1] <= pt[1] <= b[3] and in_polys(pt, p) for b, p in entries)
+
+    def covered(co, z_mid):
+        return hit((co[0], co[2]), boxes[0]) or (co[2] > z_mid and hit((co[0], co[1]), boxes[1]))
+    return covered
+
+
+def dissolve_planar(bm, deg=1.0):
+    """Merge coplanar faces (within deg, never across materials) before solidify and bevel: the kit's plates and
+    frame are copies of the finely divided hull and the modifiers multiplied every face (rule B1 of the triangle
+    budget, author 1. 10. 2026)."""
+    hp.planar_merge(bm, deg)
+
+
+def seg_for(r):
+    """Sides of a cylinder by its diameter (rule B3): under 50 mm 8, up to 150 mm 12, above 16."""
+    d = 2 * r
+    return 8 if d < 0.05 else (12 if d <= 0.15 else 16)
+
+
 def normal_ok(n, flt, slack=0.0):
     if "ny_max" in flt and n.y > flt["ny_max"] + slack:
         return False
@@ -185,7 +218,9 @@ def mirror_into(bm):
 
 
 def shell(name, bm, coll, material, t, bevel, paint2=0):
-    """The cut faces as a plate: solidified outwards by t, bevelled."""
+    """The cut faces as a plate: coplanar faces merged, solidified outwards by t, bevelled (1 segment, hardened
+    normals)."""
+    dissolve_planar(bm)
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
     bm.free()
@@ -197,7 +232,7 @@ def shell(name, bm, coll, material, t, bevel, paint2=0):
     ob.data.shade_smooth()
     sol = ob.modifiers.new("Solidify", "SOLIDIFY")
     sol.thickness, sol.offset, sol.use_even_offset, sol.use_rim = t, 1.0, True, True
-    hp.add_modifiers(ob, {"angle_deg": 30, "width": min(bevel, t * 0.35), "segments": 2}, width=min(bevel, t * 0.35))
+    hp.add_modifiers(ob, {"angle_deg": 30, "width": min(bevel, t * 0.35), "segments": 1}, width=min(bevel, t * 0.35))
     a = ob.data.attributes.get("paint2") or ob.data.attributes.new("paint2", "INT", "FACE")
     a.data.foreach_set("value", [paint2] * len(ob.data.polygons))
     return ob
@@ -212,7 +247,10 @@ def _box(bm, c, x, y, z, size):
     bmesh.ops.transform(bm, matrix=m, verts=res["verts"])
 
 
-def _cyl(bm, a, b, r, seg=16, r2=None):
+def _cyl(bm, a, b, r, seg=None, r2=None):
+    """A capped cylinder (or cone to r2); its sides by the diameter (seg_for) - seg is ignored, kept for the
+    callers' readability."""
+    seg = seg_for(max(r, r2 or 0.0))
     a, b = Vector(a), Vector(b)
     d = b - a
     res = bmesh.ops.create_cone(bm, cap_ends=True, segments=seg, radius1=r, radius2=r if r2 is None else r2, depth=d.length)
@@ -396,9 +434,10 @@ def hinge(bms, p):
     _cyl(bms["metal"], Vector((x, y0 - 0.02, z)), Vector((x, y1 + 0.02, z)), p["pin_d"] / 2, 10)
 
 
-def _tube(bm, pts, r, seg=12):
+def _tube(bm, pts, r, seg=None):
     """One continuous pipe through the points (rings turned to the local tangent, capped ends): far lighter than a
     capped cylinder per segment (the conduits' first build put the hull over the exporter's 1 M triangle limit)."""
+    seg = seg_for(r)
     rings = []
     for i, c in enumerate(pts):
         t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
@@ -603,7 +642,7 @@ def apply(recipe, made, coll, mats, ship):
             bm.free()
             continue
         ob = hp.finish(bm, "SM_Ship_%s_Kit_Parts_%s" % (ship, key.title().replace("_", "")), coll,
-                       {"angle_deg": 30, "width": 0.004, "segments": 2})
+                       {"angle_deg": 30, "width": 0.004, "segments": 1})
         ob.data.materials.append(mats[key])
     tree_bm.free()
     print("HSKIT " + json.dumps(report))

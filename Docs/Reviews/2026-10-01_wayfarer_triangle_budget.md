@@ -100,3 +100,48 @@ Podvozek, kabina, interiér, decaly a hologram jsou vlastní meshe se svými str
 - Šrouby jako decal ztratí siluetu z ostrého úhlu (SC to tak má; z chase kamery nerozlišitelné). Kritik v kole 1
   chtěl šrouby výraznější – decal musí mít silnou normálu a AO.
 - Malé poklopy jako decal: poklop už nebude díra s tmavou spárou do kanálu (méně „oken“, což pomůže i bodu 4).
+
+## Schváleno (autor 1. 10. 2026): A + B, pravidlo E. Krok a) – levná stavba (B1–B3), hotovo 1. 10. večer
+
+Pravidlo E je ve skillu `ship-pipeline` 3b2b; rozpočet v `Wayfarer_hs.json` → `budget`, `hs_assemble_ship` vypíše
+`HSBUDGET` a zapíše `Export/Wayfarer_budget.json`, `Tools/Tests/test_triangle_budget.py` ho porovná (v `Test.ps1`).
+
+| Část (`HSBUDGET`) | Rozpočet | Před | Po kroku a |
+|---|---:|---:|---:|
+| hull_loft | 50 000 | 210 937 | 52 256 (varování) |
+| kit_plates | 80 000 | 110 520 | 13 918 |
+| kit_frame | 120 000 | 190 384 | 22 500 |
+| mid_layer (vč. šroubů 37 k do kroku b) | 60 000 | 107 712 | 72 956 (varování) |
+| nozzles | 80 000 | 1 144 | 760 |
+| pods | 60 000 | 151 328 | 139 696 (varování) |
+| wings_fins_weapons | 40 000 | 70 568 | 57 388 (varování) |
+| lights | 30 000 | 65 320 | 26 632 |
+| functional_detail | 40 000 | 79 068 | 23 366 |
+| **celkem trup** | **700 000** | **986 981** | **409 472** |
+
+„Před“ = měření postaveného pilotu stejnými pravidly (export tehdy 991 k).
+
+Provedeno:
+- B1 slučování rovných ploch (`hs_build_part.planar_merge`: `dissolve_limit` 1° podle materiálu, rozpuštění
+  degenerovaných ploch, triangulace n-úhelníků) u loftu trupu (`finish(dissolve=)`), desek a rámu kitu (`shell`)
+  a desek detailu (`hull_plates`). První stavba bez úklidu degenerovaných ploch vymrštila desku detailu P-B o 420 m
+  (solidify s rovnoměrnou tloušťkou na nekonvexním n-úhelníku) – export to zastavil („Ship is 424.94 m across“).
+- B2 zkosení 1 segment se zpevněnými normálami (recept `bevel`, `detail.bevel`, `kit_bevel`, kit `shell` a díly);
+  2 segmenty zůstávají u revolvovaných gondol (prstence; `parts.pod.revolve.bevel`).
+- B3 válce podle průměru 8 / 12 / 16 stěn (`hs_exterior_kit.seg_for`, `_cyl`, `_tube`; `hs_build_part.cyl`).
+- Spáry loftu pod rámem kitu se nestaví (`hs_exterior_kit.frame_cover` → `loft(covered=)`).
+
+Ověření (snímky z editoru `shots:20261001_220106_wayfarer_kit_pilot/`, ze zabalené hry `shots:20261001_223051_wayfarer_kit_pilot/` proti `shots:20261001_211213_wayfarer_kit_pilot/`,
+výřezy hřbetu, ramene, zádě, gondoly, ploutve a noci): vzhled beze změny až na jednu plochu. **Zhoršená plocha:** dno
+kanálu na hřbetu u zadního konce páteře (x ≈ 3–5 m, kde je páteř přerušená) zčernalo. Příčina není zkosení (2 segmenty
+na plášti nepomohly), ale AO pečené do vrcholů (`hs_layers`): sloučená velká plocha má málo vrcholů a tma od
+sousedních dílů se roztáhne přes celou plochu. Řešení: plochy slotu Channel se na plášti neslučují
+(`parts.hull.merge_keep_slots`); plášť zůstává na 1 segmentu. Jinak bez stínovacích chyb; záď je dokonce čistší (zmizel
+světlý šmouh mezi deskami P-B-08 a P-B-09).
+
+Zbývá v rozpočtu: gondoly (revolve 64 segmentů a 2 segmenty zkosení po celé délce, ne jen na prstencích) – přepracovat
+v kroku d s tryskami; křídla a ploutve (`hs_wings`, plochy se neslučují) – při rozšíření kitu; šrouby v kroku b.
+
+Druhý ulétlý vrchol (spodek trupu −16 m) chytil až `test_landing_sc2`; desky detailu mají solidify bez rovnoměrné
+tloušťky (WORKFLOW 9.6 fk). Konečný stav: trup 409 426 trojúhelníků, meze trupu shodné s exportem před krokem a,
+testy offline 12/12, Blender 1/1, UE 22/22.

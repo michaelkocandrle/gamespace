@@ -1213,6 +1213,13 @@ snímku.
   žádá překreslit 8 listů (~20 MB PNG v LFS) a v paralelní práci dělá binární konflikty. Řešení: ID interiéru jsou
   v `Design/<Loď>_interior_design.json` navázaná na data stavby klíčem, který test ověřuje, a otisky interiéru se
   počítají jen z interiérové části dat (`interior_model._digests`).
+- fk) **Po sloučení rovných ploch uletěla deska o 15–420 m / dno kanálu zčernalo** (1. 10. 2026, rozpočet trojúhelníků
+  krok a). Solidify s `use_even_offset` na sloučených (nekonvexních, degenerovaných) n-úhelnících vymrštil vrchol
+  desky detailu P-B: export zastavil jen první případ („Ship is 424.94 m across“), druhý (−16 m) chytil až
+  `test_landing_sc2` (spodek trupu pod podvozkem). Řešení: `hs_build_part.planar_merge` (rozpuštění degenerovaných
+  ploch, triangulace) a u desek detailu solidify bez rovnoměrné tloušťky. Sloučená velká plocha má málo vrcholů
+  a AO pečené do vrcholů (`hs_layers`) se přes ni roztáhne: dno kanálu (slot Channel) se na plášti neslučuje
+  (`parts.hull.merge_keep_slots`). Kontrola po změně stavby: meze trupu v manifestu proti minulému exportu.
 
 
 ---

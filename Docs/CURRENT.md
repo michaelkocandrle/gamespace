@@ -20,7 +20,8 @@ kitu, který po 3 kolech kritika skončil FAIL 6,4 (5,4 → 5,9 → 6,4; recenze
   - povrch trupu v3 = **koncept B + C** (autor 1. 10.); data návrhu `Design/Wayfarer_exterior_design.json`, každý
     prvek stavby i návrhu má ID (`Tools/Design/assign_exterior_ids.py`), výkresy z modelu `exterior_model.py`;
   - pilot kitu (hřbet, ramena, záď, gondoly): desky, rám T, páteř s kovovým hřebenem, rozvody v kanálu u páteře,
-    větrací skříně (hřbet pole 08/12, záď), čísla desek ze znaků `pn_*`; trup 991 k trojúhelníků (limit 1 M);
+    větrací skříně (hřbet pole 08/12, záď), čísla desek ze znaků `pn_*`; **rozpočet trojúhelníků** schválen (trup
+    ≤ 700 k, `budget` v receptu, `HSBUDGET`, test; skill `ship-pipeline` 3b2b): po kroku a 409 k (dřív 987 k);
   - chase kamera 2800 cm; level: slunce 11 lx, obloha 0,55; průchozí interiér (F vstát / sednout / ven / dovnitř);
   - interiér z kitu: technická chodba s výklenky komponent, přepážky s dveřmi, nákladový prostor (mřížka 8 SCU,
     varianta B; podlaha zatím lodní) a kajuta z obložení trupu s kit podlahou a nábytkem z kitu.
@@ -42,38 +43,37 @@ kitu, který po 3 kolech kritika skončil FAIL 6,4 (5,4 → 5,9 → 6,4; recenze
 ## Čeká na rozhodnutí autora
 
 - Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověření FAIL 7/6/6/7/7/8/8/7, levné body opravené).
-- Steadfast: schválení 2D návrhu v2 (`ArtSource/Ships/Steadfast/Design/Steadfast_Design.md`).
-- Kanopa Wayfareru jako téma designu v2 (autor ho otevře sám). Paleta Kestrel Dynamics: u první lodi Kestrelu.
+- Steadfast: schválení 2D návrhu v2 (`Steadfast_Design.md`). Kanopa Wayfareru jako téma designu v2 (autor otevře
+  sám); paleta Kestrel Dynamics u první lodi Kestrelu.
 
 ## Známé problémy
 
-- Exteriér Wayfareru (kritik 30. 9. FAIL 4,4): detail, materiály, trysky, světla, záď, podvozek, křídla a zbraně
-  čekají na nový povrch trupu. Loď na svahu leží trupem v terénu (odblokované rozdělením pawnu).
+- Exteriér Wayfareru mimo pilot (podvozek, křídla, zbraně) čeká na kit celé lodi. Loď na svahu leží trupem v terénu.
 - `DebugEngageQuantum` po zadání cíle jménem znovu vybírá cíl podle nosu lodi (drobnost, autor 1. 10.).
-- Interiér Wayfareru, otevřené body recenzí: kajuta (`2026-09-30_cabin_furniture.md`: panel a sedák výdejníku,
-  žebrování gumových pruhů, čočka lampičky, potrubí ventilátoru buňky) a obložení (`2026-09-30_cabin_liner.md`:
-  svítidlo A, třmeny a patky zábradlí, nouzové značení, rám kolem zadních dveří).
+- Interiér Wayfareru: otevřené body recenzí `2026-09-30_cabin_furniture.md` a `2026-09-30_cabin_liner.md`.
 - **Odrazy kovu odložené na optimalizaci** (autor 30. 9.): odrazy Lumenu do drsnosti 0,32 za +1,3 ms.
 - Kit: vyšlapaná linie potřebuje směrovou buňku atlasu špíny; ohmatání madel; lišty stropu po segmentech.
-- **Determinismus stavby, na později** (autor 1. 10.): otisk souboru opraven (množina v nastavení exportu, WORKFLOW
-  9.6 ff), šum zůstává v trupu, decalech a interiéru (±40 trojúhelníků mezi běhy; 3 FBX při každé přestavbě) a import
-  pokaždé znovu uloží ~150 materiálů a textur. Klíče `id` v receptu a setupu stavbu nemění (ověřeno 1. 10.).
+- **Determinismus stavby, na později** (autor 1. 10.; WORKFLOW 9.6 ff): šum v trupu, decalech a interiéru (±40
+  trojúhelníků mezi běhy, 3 FBX při každé přestavbě), import pokaždé znovu uloží ~150 materiálů a textur.
 - Hřebenový terén (`RidgedOctaves`) vypnutý: kamera po přistání pod zemí, díry u okraje Veyry; kameny bez kolize.
-- Quantum tunel: stěny méně „mléčné“ než reference; TSR kreslí tmavé čáry podél jisker, ohony bývají tečkované.
-- Displeje: render target bez mipmap (pod ~1600 px šířky písmo zrní); duchy čísel při afterburneru.
+- Quantum tunel méně „mléčný“, TSR čáry podél jisker; displeje bez mipmap (pod ~1600 px písmo zrní), duchy čísel.
 - Loď bez podvozku u země stojí na neviditelném kořenovém boxu (řeší se, až bude vadit). Zvuky jsou procedurální
   zástupci; jas oblohy je odhad; obloha v atmosféře nerozlišuje den a noc (soumrak a noc jen v presetu snímků).
-- `compileall` hlásí `SyntaxWarning: invalid escape sequence` v docstringách šesti skriptů `Tools/Assets`.
-- Neověřeno autorem ve hře: časování quantum skoku, HUD SC-1c mimo 1080p, chůze interiérem Steadfastu. Shipping
-  build nikdy nezkoušen; v PIE Escape ukončí hru (menu je F10); debug HUD je anglicky.
+- Neověřeno autorem: časování quantum skoku, HUD SC-1c mimo 1080p, chůze Steadfastem; Shipping build nezkoušen; v PIE
+  Escape ukončí hru (menu F10); debug HUD anglicky; `compileall` SyntaxWarning v šesti skriptech `Tools/Assets`.
 
 ## Další kroky
 
-1. **Wayfarer – kit dál** (pilot FAIL 6,4 po 3 kolech, otevřené body v recenzi `2026-10-01_wayfarer_kit_pilot.md`,
-   kolo 3): **musí** desky ramen S nečíst jako okna (světlejší a drsnější sekundární lak, panely / poklopy na S) a
-   záď jako desky na rámu (pás AFT v rozvrhu); dále noc (trup se neztmaví ani s oblohou 0,03 – zjistit zdroj),
-   přepálené červené světlo, tmavé výřezy na hřbetu, karty špíny v kanálech; **trysky jako krémové disky** (vnitřek
-   s žebry a emisivním jádrem) v kroku gondol. Pak kit na celou loď. Druhá session: 4, 6.
+1. **Wayfarer – pilot kitu, kroky b → e** (autor 1. 10.; každý krok vlastní session, pak CURRENT, Cleanup, `/clear`;
+   do hlavní session jen výřezy; recenze `2026-10-01_wayfarer_triangle_budget.md` a `…_kit_pilot.md`). Krok a hotový.
+   **b)** decaly místo drobné geometrie: šrouby desek a rámu (`bolt_row_*`, nová položka „šroub rámu“ 250 mm),
+   západky, poklopy XK-HATCH pod 0,4 m a mřížky pod 0,3 m jako decaly s výraznou normálou a AO, poklop bez díry do
+   kanálu; ověřit výřezy z chase i zblízka (pak smí běžet paralelní session I-01–I-09 bez Unrealu / Blenderu).
+   **c)** pásy S a AFT jako desky na rámu: sekundární lak světlejší a drsnější, na S panely, poklopy, čísla; záď na
+   desky na rámu; výřezy autorovi, **revize D výkresů neschválená, dokud ji autor neschválí**. **d)** trysky 2× (80 k):
+   kužel s hrdlem, středové těleso, žebra, táhla, prstence, emisivní jádro; přepracovat gondoly (140 k / 60 k).
+   Po c + d jedno ověřovací kolo kritika (Opus, `step`); pilot hotový až PASS. **e)** jen analýza: červené poziční
+   světlo, noc (proč se trup neztmaví). Pak teprve kit na celou loď; nic jiného nezačínat.
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.
