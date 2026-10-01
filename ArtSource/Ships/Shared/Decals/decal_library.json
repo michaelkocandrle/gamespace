@@ -5528,6 +5528,518 @@
       "rot": 0
      }
     ]
+   },
+   {
+    "name": "xst_nostep",
+    "type": "info",
+    "footprint": [
+     0.3403,
+     0.0924
+    ],
+    "purpose": "exterior service stencil 'NO STEP' (7.0 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "NO STEP",
+      "size": 0.07,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xstl_nostep",
+    "type": "info",
+    "footprint": [
+     0.3403,
+     0.0924
+    ],
+    "purpose": "exterior service stencil 'NO STEP' (7.0 cm letters, light ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "NO STEP",
+      "size": 0.07,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xst_vent",
+    "type": "info",
+    "footprint": [
+     0.3993,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'VENT - KEEP CLEAR' (3.4 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "VENT - KEEP CLEAR",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xstl_vent",
+    "type": "info",
+    "footprint": [
+     0.3993,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'VENT - KEEP CLEAR' (3.4 cm letters, light ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "VENT - KEEP CLEAR",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xst_service",
+    "type": "info",
+    "footprint": [
+     0.3309,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'SERVICE ACCESS' (3.4 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "SERVICE ACCESS",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xstl_service",
+    "type": "info",
+    "footprint": [
+     0.3309,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'SERVICE ACCESS' (3.4 cm letters, light ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "SERVICE ACCESS",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xst_exhaust",
+    "type": "info",
+    "footprint": [
+     0.4676,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'DANGER - HOT EXHAUST' (3.4 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "DANGER - HOT EXHAUST",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xst_intake",
+    "type": "info",
+    "footprint": [
+     0.3537,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'DANGER - INTAKE' (3.4 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "DANGER - INTAKE",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xst_gear",
+    "type": "info",
+    "footprint": [
+     0.5132,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'LDG GEAR - STAND CLEAR' (3.4 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "LDG GEAR - STAND CLEAR",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xst_gnd",
+    "type": "info",
+    "footprint": [
+     0.217,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'GND POINT' (3.4 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "GND POINT",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xst_extpwr",
+    "type": "info",
+    "footprint": [
+     0.2626,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'EXT PWR 28V' (3.4 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "EXT PWR 28V",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xst_inspect",
+    "type": "info",
+    "footprint": [
+     0.3081,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'INSPECT 500 H' (3.4 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "INSPECT 500 H",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xstl_inspect",
+    "type": "info",
+    "footprint": [
+     0.3081,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'INSPECT 500 H' (3.4 cm letters, light ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "INSPECT 500 H",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.84,
+       0.84,
+       0.82
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xst_ramp",
+    "type": "info",
+    "footprint": [
+     0.422,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'RAMP - STAND CLEAR' (3.4 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "RAMP - STAND CLEAR",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xst_qtfuel",
+    "type": "info",
+    "footprint": [
+     0.2854,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'QT FUEL FILL' (3.4 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "QT FUEL FILL",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "xst_hyd",
+    "type": "info",
+    "footprint": [
+     0.2398,
+     0.0449
+    ],
+    "purpose": "exterior service stencil 'HYDRAULICS' (3.4 cm letters, dark ink) beside its hardware",
+    "tags": [
+     "ext_stencil"
+    ],
+    "append": "exterior stencils 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "HYDRAULICS",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "mono",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
    }
   ]
  },

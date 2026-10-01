@@ -2168,6 +2168,294 @@
    "tags": [
     "small_stencil"
    ]
+  },
+  "xst_nostep": {
+   "uv": [
+    0.12000000000000001,
+    0.11679999999999986,
+    0.29015,
+    0.16299999999999987
+   ],
+   "size_m": [
+    0.3403,
+    0.0924
+   ],
+   "purpose": "exterior service stencil 'NO STEP' (7.0 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xstl_nostep": {
+   "uv": [
+    0.30015000000000003,
+    0.11679999999999986,
+    0.47030000000000005,
+    0.16299999999999987
+   ],
+   "size_m": [
+    0.3403,
+    0.0924
+   ],
+   "purpose": "exterior service stencil 'NO STEP' (7.0 cm letters, light ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xst_vent": {
+   "uv": [
+    0.4803,
+    0.14054999999999984,
+    0.67995,
+    0.16299999999999987
+   ],
+   "size_m": [
+    0.3993,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'VENT - KEEP CLEAR' (3.4 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xstl_vent": {
+   "uv": [
+    0.6899500000000001,
+    0.14054999999999984,
+    0.8896000000000002,
+    0.16299999999999987
+   ],
+   "size_m": [
+    0.3993,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'VENT - KEEP CLEAR' (3.4 cm letters, light ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xst_service": {
+   "uv": [
+    0.009999999999999995,
+    0.08434999999999988,
+    0.17545,
+    0.10679999999999988
+   ],
+   "size_m": [
+    0.3309,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'SERVICE ACCESS' (3.4 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xstl_service": {
+   "uv": [
+    0.18545000000000006,
+    0.08434999999999988,
+    0.35090000000000005,
+    0.10679999999999988
+   ],
+   "size_m": [
+    0.3309,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'SERVICE ACCESS' (3.4 cm letters, light ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xst_exhaust": {
+   "uv": [
+    0.36090000000000005,
+    0.08434999999999988,
+    0.5947,
+    0.10679999999999988
+   ],
+   "size_m": [
+    0.4676,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'DANGER - HOT EXHAUST' (3.4 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xst_intake": {
+   "uv": [
+    0.6047,
+    0.08434999999999988,
+    0.78155,
+    0.10679999999999988
+   ],
+   "size_m": [
+    0.3537,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'DANGER - INTAKE' (3.4 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xst_gear": {
+   "uv": [
+    0.010000000000000009,
+    0.05189999999999989,
+    0.2666,
+    0.07434999999999989
+   ],
+   "size_m": [
+    0.5132,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'LDG GEAR - STAND CLEAR' (3.4 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xst_gnd": {
+   "uv": [
+    0.2766,
+    0.05189999999999989,
+    0.38510000000000005,
+    0.07434999999999989
+   ],
+   "size_m": [
+    0.217,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'GND POINT' (3.4 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xst_extpwr": {
+   "uv": [
+    0.3951,
+    0.05189999999999989,
+    0.5264,
+    0.07434999999999989
+   ],
+   "size_m": [
+    0.2626,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'EXT PWR 28V' (3.4 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xst_inspect": {
+   "uv": [
+    0.5364,
+    0.05189999999999989,
+    0.69045,
+    0.07434999999999989
+   ],
+   "size_m": [
+    0.3081,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'INSPECT 500 H' (3.4 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xstl_inspect": {
+   "uv": [
+    0.70045,
+    0.05189999999999989,
+    0.8545,
+    0.07434999999999989
+   ],
+   "size_m": [
+    0.3081,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'INSPECT 500 H' (3.4 cm letters, light ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xst_ramp": {
+   "uv": [
+    0.009999999999999995,
+    0.01944999999999989,
+    0.22099999999999997,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.422,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'RAMP - STAND CLEAR' (3.4 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xst_qtfuel": {
+   "uv": [
+    0.231,
+    0.01944999999999989,
+    0.37370000000000003,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.2854,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'QT FUEL FILL' (3.4 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
+  },
+  "xst_hyd": {
+   "uv": [
+    0.38370000000000004,
+    0.01944999999999989,
+    0.5036,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.2398,
+    0.0449
+   ],
+   "purpose": "exterior service stencil 'HYDRAULICS' (3.4 cm letters, dark ink) beside its hardware",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "ext_stencil"
+   ]
   }
  },
  "trim": {

@@ -12,6 +12,10 @@ Two rules per marking (import_ship.add_decal_component places them; M_Ship_Decal
      texture reads the right way round with exactly one of flip_u / flip_v set (U·V = -1: ENGINEERING, COCKPIT, EXIT,
      the hull names); none or both read mirrored (REACTOR / COOLER before the fix). A marking that reads the same
      mirrored (hazard stripes) says "symmetric": true.
+  3. Upright: a rotation can still turn the text upside down, which the mirror rule cannot see (the Wayfarer's
+     starboard WAYFARER, HF-0417, logo and exhaust warning, exterior review 30. 9. 2026). In M_Ship_Decal the text's
+     up is the component's -Y (+Y with flip_v); on a wall (X within 60 degrees of level) it must point up in ship
+     space. On a roof or floor any in-plane turn can be right, so those are not checked.
 The flips must be written in the setup: build_decal_instances sets DecalFlipU/V only when the setup has them, so a
 missing flip keeps whatever an older instance held - until the instance is made anew (test_ship_import compares).
 Prints DECALTEST PASS|FAIL lines and DECALTEST SUMMARY.
@@ -37,6 +41,15 @@ def x_axis(rotation):
     pitch, yaw = (list(rotation) + [0.0, 0.0, 0.0])[:2]
     p, y = math.radians(pitch), math.radians(yaw)
     return (math.cos(p) * math.cos(y), math.cos(p) * math.sin(y), math.sin(p))
+
+
+def y_axis(rotation):
+    """The component's Y in ship space (FRotationMatrix's second row), roll included."""
+    pitch, yaw, roll = (list(rotation) + [0.0, 0.0, 0.0])[:3]
+    p, y, r = math.radians(pitch), math.radians(yaw), math.radians(roll)
+    return (math.sin(r) * math.sin(p) * math.cos(y) - math.cos(r) * math.sin(y),
+            math.sin(r) * math.sin(p) * math.sin(y) + math.cos(r) * math.cos(y),
+            -math.sin(r) * math.cos(p))
 
 
 def flip_sign(spec, key):
@@ -111,6 +124,11 @@ def main():
             product = flip_sign(d, "flip_u") * flip_sign(d, "flip_v")
             check("%s: reads the right way round (one of flip_u / flip_v)" % name, product == -1,
                   "flip_u %s, flip_v %s" % (d.get("flip_u", "missing"), d.get("flip_v", "missing")))
+            # rule 3: upright on a wall
+            if abs(X[2]) < math.sin(math.radians(60.0)):
+                Y = y_axis(d.get("rotation", [0.0, 0.0, 0.0]))
+                up = tuple(-flip_sign(d, "flip_v") * c for c in Y)
+                check("%s: text upright on its wall" % name, up[2] > 0.5, "text up %.2f %.2f %.2f" % up)
     check("setups with markings checked (%d)" % ships, ships > 0)
     print("DECALTEST SUMMARY %s (%d failures)" % ("PASS" if not failures else "FAIL", len(failures)))
     return 1 if failures else 0
