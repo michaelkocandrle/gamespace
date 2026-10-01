@@ -1,0 +1,87 @@
+{
+ "_comment": "Written by Tools/Design/draw_exterior_sheet.py: the IDs this sheet draws and labels per view and lists per schedule, with the digests of the data it was drawn from (Tools/Tests/test_exterior_drawing.py).",
+ "sheet": "E-08",
+ "ship": "Wayfarer",
+ "digests": {
+  "layout": "acc9f035d195",
+  "recipe": "00a16c39374f",
+  "setup": "a8d6d330c526",
+  "spec": "d9597dfcd605",
+  "design": "af5b9ce8808d",
+  "library": "0f3a67cf7c68"
+ },
+ "drawn": {
+  "DD": [
+   "F-GEAR-MAIN"
+  ],
+  "DD-BOT": [
+   "D-H-27",
+   "D-H-52",
+   "D-T-02",
+   "F-GEAR-MAIN",
+   "F-WING",
+   "FR-LONG-LO",
+   "FR-RIB",
+   "L-BELLY-RUN",
+   "P-HULL",
+   "P-POD",
+   "P-POD-BODY",
+   "P-POD-FWDBAND",
+   "P-POD-NOSE"
+  ],
+  "DE": [
+   "D-H-47",
+   "F-GUN-S3",
+   "F-GUNMOUNT-01",
+   "F-WING"
+  ],
+  "DE-A": [
+   "F-GUN-S3",
+   "F-GUNMOUNT-01",
+   "F-WING"
+  ]
+ },
+ "labelled": {
+  "DD": [
+   "F-GEAR-MAIN"
+  ],
+  "DD-BOT": [
+   "D-H-27",
+   "D-H-52",
+   "D-T-02",
+   "F-GEAR-MAIN",
+   "F-WING",
+   "FR-LONG-LO",
+   "FR-RIB",
+   "L-BELLY-RUN",
+   "P-HULL",
+   "P-POD",
+   "P-POD-BODY",
+   "P-POD-FWDBAND",
+   "P-POD-NOSE"
+  ],
+  "DE": [
+   "D-H-47",
+   "F-GUN-S3",
+   "F-GUNMOUNT-01",
+   "F-WING"
+  ],
+  "DE-A": [
+   "F-GUN-S3",
+   "F-GUNMOUNT-01",
+   "F-WING"
+  ]
+ },
+ "schedules": {
+  "materials": [
+   "MZ-DARK",
+   "MZ-GLASS",
+   "MZ-GUNMETAL",
+   "MZ-METAL",
+   "MZ-ORANGE",
+   "MZ-PAINT1",
+   "MZ-PAINT2",
+   "MZ-RUBBER"
+  ]
+ }
+}

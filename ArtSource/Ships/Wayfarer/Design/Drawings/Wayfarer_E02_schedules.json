@@ -7,7 +7,7 @@
   "recipe": "00a16c39374f",
   "setup": "a8d6d330c526",
   "spec": "d9597dfcd605",
-  "design": "bd6c698590f7",
+  "design": "af5b9ce8808d",
   "library": "0f3a67cf7c68"
  },
  "drawn": {},
@@ -37,6 +37,7 @@
    "F-POD-EXHAUST",
    "F-POD-INTAKE",
    "F-POD-PIPES",
+   "F-RAMP-FRAME",
    "F-RAMP-PISTON",
    "F-RCS-01",
    "F-RCS-02",

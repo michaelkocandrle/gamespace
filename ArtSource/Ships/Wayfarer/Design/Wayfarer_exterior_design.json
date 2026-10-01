@@ -104,7 +104,10 @@
     {"id": "F-GRILLE-02", "kind": "grille", "kit": "XK-GRILLE", "on": "side", "x": [12.98, 13.82], "z": [1.62, 2.2], "status": "proposed",
      "what": "sání podpory života za kabinou (B)"},
     {"id": "F-RAMP-PISTON", "kind": "piston", "kit": "XK-PISTON", "on": "aft", "x": -0.12, "y": 1.18, "z": [-0.25, 1.25], "status": "proposed",
-     "what": "odhalená hydraulika rampy (C): válec na každé straně rampy"}
+     "what": "odhalená hydraulika rampy (C): válec na každé straně rampy"},
+    {"id": "F-RAMP-FRAME", "kind": "frame", "kit": "XK-LONGERON", "on": "aft", "y": [-1.27, 1.27], "z": [-0.12, 1.43], "w": 0.08,
+     "status": "proposed", "mirror": false,
+     "what": "rám otvoru rampy z profilu podélníku (B + C): obíhá spáru rampy D-T-05 po stranách a nahoře, nese závěsy a písty rampy"}
   ],
   "lights": [
     {"id": "L-STROBE-FIN", "kind": "strobe", "kit": "XK-STROBE", "on": "fin_tip", "x": 1.6, "z": 3.3, "color": "white", "status": "proposed",

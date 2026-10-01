@@ -15,7 +15,11 @@ Per ship with Design/Drawings/<Ship>_E01_starboard.json and _E02_schedules.json 
   7. every text decal on the starboard view reads upright; every library item exists;
   8. every built element in the schedules has a Czech purpose (design data "purpose") for the author;
   9. no part on the hull side lies under a proposed plate without a cut-out (plates are 30-40 mm proud), no
-     lettering sits on a background of its own tone (critic round 2, 1. 10. 2026).
+     lettering sits on a background of its own tone (critic round 2, 1. 10. 2026);
+ 10. the other views (E-03 from above, E-04 from below, E-05 from behind and ahead, E-06 port side; author
+     1. 10. 2026: the rest of dossier point 3) each draw exactly the elements the model has in that view
+     (exterior_views) and label every one; every view tag the model sets has geometry; the details of E-07 label
+     their key parts; the port side's lettering reads upright.
 Prints EXTDRAW PASS|FAIL lines and EXTDRAW SUMMARY.
 """
 import json
@@ -123,6 +127,8 @@ def test_ship(ship):
     bad_mat = [e.id for e in m.elements if e.material and e.material not in m.materials]
     check("%s every material zone used exists" % ship, not bad_mat, ", ".join(bad_mat))
 
+    check_views(ship, m, drawings)
+
     spec = m.spec_rcs()
     check("%s RCS blocks after the design = spec manoeuvring thrusters" % ship, spec is not None and m.rcs_blocks() == spec,
           "%d blocks, spec %s" % (m.rcs_blocks(), spec))
@@ -133,6 +139,61 @@ def test_ship(ship):
     down = [e.id for e in m.elements if e.cat == "decal" and e.sb and e.extra.get("text") and e.extra.get("up")
             and e.extra["up"][1] <= 0.5 and e.status != "remove"]
     check("%s text decals on the starboard view read upright" % ship, not down, ", ".join(down))
+
+
+# sheet: {view key in the sidecar: (model view, categories or None for all)}
+VIEW_SHEETS = {
+    "E03_top": {"TOP": ("TOP", None)},
+    "E04_bottom": {"BOT": ("BOT", None)},
+    "E05_ends": {"AFT": ("AFT", None), "FWD": ("FWD", None)},
+    "E06_port": {"PA": ("PORT", "A"), "PB": ("PORT", "B")},
+}
+# E-07 / E-08 details: the parts each must label (author's list: nose with the canopy, ramp with its pistons and
+# frame, main gear, gun mount; the pod from the side is E-01 detail A)
+DETAIL_KEYS = {"E07_details": {"DB": {"F-CANOPY-FRAME", "Z-SEAL-CANOPY", "Z-B-01", "F-GEAR-NOSE"},
+                               "DC": {"D-T-05", "F-RAMP-PISTON", "F-RAMP-FRAME", "L-RAMP", "P-B-07", "D-HAZARDRAMP"},
+                               "DF": {"F-POD-BAY", "F-FIN", "P-POD-BODY", "L-STROBE-FIN"}},
+               "E08_details": {"DD": {"F-GEAR-MAIN"}, "DD-BOT": {"F-GEAR-MAIN", "D-H-27", "D-H-52"},
+                               "DE": {"F-GUNMOUNT-01", "F-GUN-S3"}, "DE-A": {"F-GUNMOUNT-01", "F-GUN-S3", "F-WING"}}}
+
+
+def check_views(ship, m, drawings):
+    import exterior_model as em
+    check("%s every view tag has geometry in that view" % ship, not m.views_missing,
+          ", ".join("%s %s" % t for t in m.views_missing[:10]))
+    for name, views in VIEW_SHEETS.items():
+        path = os.path.join(drawings, "%s_%s.json" % (ship, name))
+        if not os.path.isfile(path):
+            check("%s %s exists" % (ship, name), False)
+            continue
+        side = json.load(open(path, encoding="utf-8"))
+        stale = [k for k, v in m.digests.items() if side["digests"].get(k) != v]
+        check("%s %s drawn from the current data" % (ship, name), not stale, ", ".join(stale))
+        for key, (view, cats) in views.items():
+            cs = em.SHEET_E01[cats] if cats else None
+            expected = {e.id for e in m.elements if e.geo.get(view) and (cs is None or e.cat in cs)}
+            drawn = set(side["drawn"].get(key, []))
+            check("%s %s view %s draws the model's %s view" % (ship, name, key, view), drawn == expected,
+                  diff(drawn, expected))
+            labelled = set(side["labelled"].get(key, []))
+            check("%s %s view %s labels every drawn ID" % (ship, name, key), drawn <= labelled,
+                  ", ".join(sorted(drawn - labelled)[:12]))
+    for name, keys in DETAIL_KEYS.items():
+        path = os.path.join(drawings, "%s_%s.json" % (ship, name))
+        if not os.path.isfile(path):
+            check("%s %s exists" % (ship, name), False)
+            continue
+        det = json.load(open(path, encoding="utf-8"))
+        stale = [k for k, v in m.digests.items() if det["digests"].get(k) != v]
+        check("%s %s drawn from the current data" % (ship, name), not stale, ", ".join(stale))
+        for key, must in keys.items():
+            lab = set(det["labelled"].get(key, []))
+            check("%s %s detail %s labels %s" % (ship, name, key, ", ".join(sorted(must))), must <= lab,
+                  "missing " + ", ".join(sorted(must - lab)))
+            check("%s %s detail %s labels what it draws" % (ship, name, key),
+                  set(det["drawn"].get(key, [])) <= lab, ", ".join(sorted(set(det["drawn"].get(key, [])) - lab)[:8]))
+    wrong = [i for i, ok in m.port_text_decals() if not ok]
+    check("%s port lettering reads upright" % ship, not wrong, ", ".join(wrong))
 
 
 def main():

@@ -7,7 +7,7 @@ legend, schedules, changes and the title block.
 
 Writes ArtSource/Ships/<Ship>/Design/Drawings/<Ship>_E01_starboard.png and .json (the IDs drawn and labelled per
 view and schedule, with the data digests; Tools/Tests/test_exterior_drawing.py compares it with the model) and a
-vector copy Saved/Drawings/<Ship>_E01_starboard.pdf.
+vector copy Saved/Drawings/<Ship>_E01_starboard.pdf. Sheets E-03 to E-07 (other views, details): draw_exterior_views.py.
 Status colours: built black, proposed blue (+), change blue (Δ, the built position red dashed), remove red (×).
 """
 import argparse
@@ -170,21 +170,27 @@ class Sheet:
 
 
 class Frame:
-    """Model metres (x, z) to paper millimetres; an optional window (model coordinates) clips everything."""
+    """Model metres (x, z) to paper millimetres; an optional window (model coordinates) clips everything. flip
+    mirrors the view left-right (the port side drawn from the starboard coordinates, exterior_views)."""
 
-    def __init__(self, ox, oy, s, win=None):
-        self.ox, self.oy, self.s, self.win = ox, oy, s, win
+    def __init__(self, ox, oy, s, win=None, flip=False):
+        self.ox, self.oy, self.s, self.win, self.flip = ox, oy, s, win, flip
         self.winbox = box(*win) if win else None
+        self.sx = -s if flip else s
 
     def P(self, x, z):
-        return (self.ox + x * self.s, self.oy + z * self.s)
+        return (self.ox + x * self.sx, self.oy + z * self.s)
+
+    def vec(self, u, w):
+        """A direction (reading up, a light's aim) on paper."""
+        return (-u if self.flip else u, w)
 
     def g(self, geom):
         if geom is None or geom.is_empty:
             return geom
         if self.winbox is not None:
             geom = geom.intersection(self.winbox)
-        return affine_transform(geom, [self.s, 0, 0, self.s, self.ox, self.oy])
+        return affine_transform(geom, [self.sx, 0, 0, self.s, self.ox, self.oy])
 
     def inside(self, x, z):
         return self.winbox is None or self.winbox.contains(Point(x, z))
@@ -214,7 +220,7 @@ class Drawer:
         self.drawn.setdefault(view, set()).add(el.id)
 
     # ------------------------------------------------------------------ view A: plates and materials
-    def view_materials(self, fr, view, label_ids=None):
+    def view_materials(self, fr, view, label_ids=None, label_pod_plates=False):
         m = self.m
         sh = self.sh
         reqs = []
@@ -267,6 +273,7 @@ class Drawer:
         for e in m.elements:
             if e.sb and e.cat == "plate" and e.status == "remove" and e.sb["solid"] == "hull":
                 sh.geom(fr.g(e.sb["shape"]), ec=STATUS_COL["remove"], lw=0.3, ls="--", z=8)
+                self.cross(fr, e.sb["shape"])
                 self.mark(view, e)
         # pod
         pod_vis = self.vis("pod")
@@ -320,7 +327,7 @@ class Drawer:
                 continue
             if e.cat == "panel":
                 continue
-            if e.cat == "plate" and e.sb["solid"] == "pod" and fr.winbox is None:
+            if e.cat == "plate" and e.sb["solid"] == "pod" and fr.winbox is None and not label_pod_plates:
                 continue                                    # pod armour: detail A
             reqs.append(self.req(fr, e))
         return reqs
@@ -428,11 +435,13 @@ class Drawer:
             sh.geom(fr.g(shp), ec=col, lw=0.35, ls="-." if not hidden else "--", z=6)
             return
         if e.cat == "decal":
-            fc = "none" if hidden else "#F3ECFA"
+            fc = "none" if hidden or e.status == "remove" else "#F3ECFA"
             clip = hidden or e.sb["kind"] != "area"
             sh.geom(fr.g(shp if clip else shp.intersection(solid_vis.buffer(0.01))), fc=fc, ec=col, lw=0.2, ls=ls, z=7)
             if e.extra.get("setup") and not hidden:
                 self.decal_text(fr, e)
+            for pt, up in e.extra.get("marks") or []:
+                self.reading_arrow(fr, pt, up, STATUS_COL[e.status])
             if e.status == "remove":
                 self.cross(fr, shp)
             return
@@ -441,23 +450,39 @@ class Drawer:
         fill, hatch, hc = self.matstyle(mat)
         fill = fill if lum(fill) > 0.55 else "#C8CCD1"
         g = shp if hidden or e.sb["kind"] != "area" else shp.intersection(solid_vis.buffer(0.01))
-        sh.geom(fr.g(g), fc="none" if hidden else fill, ec=col, lw=0.3, ls=ls, z=8 if e.cat == "functional" else 7)
+        removed = e.status == "remove"
+        sh.geom(fr.g(g), fc="none" if hidden or removed else fill, ec=col, lw=0.3, ls=ls,
+                z=(8 if e.cat == "functional" else 7) + (1.5 if removed else 0))
         if not hidden and e.sb["kind"] == "area" and e.sb.get("vis_frac", 1.0) < 0.97:
             sh.geom(fr.g(shp.difference(solid_vis)), ec=col, lw=0.2, ls="--", z=12)
-        self.glyph(fr, e, hidden)
+        if not removed:
+            self.glyph(fr, e, hidden)
         if e.status == "remove":
             self.cross(fr, shp)
 
     def cross(self, fr, shp):
-        x0, z0, x1, z1 = shp.bounds
-        for a, b in (((x0, z0), (x1, z1)), ((x0, z1), (x1, z0))):
-            if fr.inside(*a) and fr.inside(*b):
-                self.sh.line([fr.P(*a), fr.P(*b)], 0.3, STATUS_COL["remove"], z=13)
+        """A removed part: a small red cross in its upper left corner (the dashed outline shows the part), so a new
+        part in the same place does not read as removed (critic of the views, round 1)."""
+        for part in parts_of(shp):
+            x0, z0, x1, z1 = part.bounds
+            if not (fr.inside(x0, z0) and fr.inside(x1, z1)):
+                continue
+            g = fr.g(part)
+            X0, Y0, X1, Y1 = g.bounds
+            r = min(1.3, (X1 - X0) / 3, (Y1 - Y0) / 3)
+            cx, cy = X0 + r + 0.3, Y1 - r - 0.3
+            for a, b in (((cx - r, cy - r), (cx + r, cy + r)), ((cx - r, cy + r), (cx + r, cy - r))):
+                self.sh.line([a, b], 0.35, STATUS_COL["remove"], z=13)
 
     def glyph(self, fr, e, hidden):
+        """The kind's symbol in each copy of the part (a view from above shows both sides' copies)."""
+        for part in parts_of(e.sb["shape"]):
+            self.glyph_one(fr, e, hidden, part.bounds)
+
+    def glyph_one(self, fr, e, hidden, bounds):
         sh = self.sh
         col = STATUS_COL[e.status]
-        x0, z0, x1, z1 = e.sb["shape"].bounds
+        x0, z0, x1, z1 = bounds
         kind = e.data.get("kind") or e.data.get("part")
         if not fr.inside((x0 + x1) / 2, (z0 + z1) / 2):
             return
@@ -505,12 +530,14 @@ class Drawer:
                     self.lamp(X, Y + 1.8, c, col, e.extra["light"])
             return
         sh.geom(fr.g(shp), fc=c, ec=col, lw=0.25, z=10, ls="--" if hidden else "-")
-        a = e.sb["anchor"]
-        if fr.inside(*a):
-            X, Y = fr.P(*a)
-            self.lamp(X, Y, c, col, e.extra.get("light"), lens_only=not e.extra.get("light"))
+        pts = [e.sb["anchor"]] if e.sb["kind"] != "area" or len(parts_of(shp)) == 1 else \
+            [(p.centroid.x, p.centroid.y) for p in parts_of(shp)]
+        for a in pts:
+            if fr.inside(*a):
+                X, Y = fr.P(*a)
+                self.lamp(X, Y, c, col, e.extra.get("light"), lens_only=not e.extra.get("light"), fr=fr)
 
-    def lamp(self, X, Y, c, col, light, lens_only=False):
+    def lamp(self, X, Y, c, col, light, lens_only=False, fr=None):
         """Light symbol: a lens only = small open diamond; a point light = circle with a cross; a spot = circle and
         a cone; a flashing light = star."""
         sh = self.sh
@@ -533,6 +560,8 @@ class Drawer:
         if light.get("type") == "spot":
             d = light.get("cone_deg", 40)
             ang = -90 if light.get("aim_down_deg") else -150
+            if fr is not None and fr.flip:
+                ang = -180 - ang
             for s in (-1, 1):
                 a = math.radians(ang + s * d / 2)
                 sh.line([(X + r * math.cos(a), Y + r * math.sin(a)), (X + 3.6 * r * math.cos(a), Y + 3.6 * r * math.sin(a))],
@@ -544,22 +573,157 @@ class Drawer:
             return
         X0, Y0 = fr.P(x0, z0)
         X1, Y1 = fr.P(x1, z1)
-        up = e.extra.get("up", (0, 1))
-        s = e.extra["item"].replace("D_Big_", "")
-        if X1 - X0 > 12:
+        up = fr.vec(*e.extra.get("up", (0, 1)))
+        s = BIG_DECAL_CZ.get(e.extra["item"], e.extra["item"].replace("D_Big_", "").replace("_", " "))
+        if abs(X1 - X0) > 12:
             self.sh.t((X0 + X1) / 2, (Y0 + Y1) / 2, s, 1.6, STATUS_COL[e.status], ha="center", va="center", z=12)
         # the reading "up" of the marking (Tools/Tests/test_decal_orientation.py rule 3)
-        cx, cy = X1 - 1.8, (Y0 + Y1) / 2
+        cx, cy = max(X0, X1) - 1.8, (Y0 + Y1) / 2
         L = 1.6
         self.sh.ax.annotate("", xy=(cx + up[0] * L, cy + up[1] * L), xytext=(cx - up[0] * L, cy - up[1] * L), zorder=13,
                             arrowprops=dict(arrowstyle="-|>", lw=0.18 * PT, color=STATUS_COL[e.status], mutation_scale=3.5,
                                             shrinkA=0, shrinkB=0))
 
+    def reading_arrow(self, fr, pt, up, col):
+        """Which way a lettered marking reads (its up), at one copy."""
+        if not fr.inside(*pt):
+            return
+        cx, cy = fr.P(*pt)
+        u = fr.vec(*up)
+        L = 1.6
+        self.sh.ax.annotate("", xy=(cx + u[0] * L, cy + u[1] * L), xytext=(cx - u[0] * L, cy - u[1] * L), zorder=13,
+                            arrowprops=dict(arrowstyle="-|>", lw=0.18 * PT, color=col, mutation_scale=3.5,
+                                            shrinkA=0, shrinkB=0))
+
+    # ------------------------------------------------------------------ any view in one drawing (exterior_views)
+    def view_any(self, fr, view, label_filter=None):
+        """A view from above, below, behind or ahead (Model.use_view(view) first): the solids in their materials,
+        zones, plates, recesses, the proposed plates and frame, pod sections, then every part, light, decal and
+        trim of the view; returns the label requests (plates inside their outline: panel_labels)."""
+        m, sh = self.m, self.sh
+        reqs = []
+        part_of = {"hull": "P-HULL", "pod": "P-POD", "wing": "F-WING", "fin": "F-FIN", "gun": "F-GUN-S3",
+                   "missile_rack": "F-MISSILE-S2", "gear_main": "F-GEAR-MAIN", "gear_nose": "F-GEAR-NOSE"}
+        for name, s_ in m.solids.items():
+            el = m.by_id[part_of[name]]
+            if name.startswith("gear"):
+                # from below the extended leg shows its pad's rubber sole
+                self.fillmat(fr, s_["visible"], "MZ-RUBBER" if view.startswith("BOT") or view == "DD-BOT" else "MZ-METAL", z=2)
+            else:
+                self.fillmat(fr, s_["visible"], el.material or s_["material"], z=2)
+            if el.sb:
+                self.mark(view, el)
+        hull_vis = self.vis("hull")
+        self.fillmat(fr, m.canopy.intersection(hull_vis), "MZ-GLASS", z=3)
+        self.wing_parts(fr, view)
+        vm = m.views_model
+        if view == "AFT":
+            sh.geom(fr.g(vm.aft_wall), ec=GREY, lw=0.25, z=4)
+            sh.geom(fr.g(vm.ramp), ec=GREY, lw=0.2, ls="--", z=4)
+        for e in m.elements:
+            if not e.sb or e.cat not in ("zone", "recess", "plate") or e.status == "remove":
+                continue
+            solid_vis = self.vis(e.sb["solid"])
+            zo = 5.5 if e.extra.get("on_panels") else (3 if e.cat != "plate" else 4)
+            self.fillmat(fr, e.sb["shape"].intersection(solid_vis), e.material, z=zo,
+                         ec=STATUS_COL[e.status] if e.cat == "plate" else "none", lw=0.25)
+            self.mark(view, e)
+        for e in m.elements:
+            if e.sb and e.cat == "functional" and e.data.get("kind") == "grille":
+                self.fillmat(fr, e.sb["shape"].intersection(hull_vis), "MZ-DARK", z=3)
+        for e in m.elements:
+            if e.cat == "panel" and e.sb:
+                shp = e.sb["shape"].intersection(hull_vis)
+                self.mark(view, e)
+                if not shp.is_empty:
+                    self.fillmat(fr, shp, e.material, z=5, ec=STATUS_COL[e.status], lw=0.3)
+            elif e.cat == "frame" and e.sb:
+                sh.geom(fr.g(e.sb["shape"].intersection(hull_vis)), fc="#5E646B", ec=STATUS_COL[e.status], lw=0.18, z=6)
+                self.mark(view, e)
+        for e in m.elements:
+            if e.sb and e.cat == "plate" and e.status == "remove":
+                sh.geom(fr.g(e.sb["shape"]), ec=STATUS_COL["remove"], lw=0.3, ls="--", z=8)
+                self.cross(fr, e.sb["shape"])
+                self.mark(view, e)
+        pod_vis = self.vis("pod")
+        for e in m.elements:
+            if not e.sb or e.sb["solid"] != "pod":
+                continue
+            if e.cat == "section":
+                if e.data["kind"] == "ring":
+                    self.fillmat(fr, e.sb["shape"].intersection(pod_vis), e.material, z=3)
+                for ln in e.extra.get("seams") or []:
+                    sh.geom(fr.g(ln.intersection(pod_vis)), ec="#6B6B6B", lw=0.18, z=4)
+                self.mark(view, e)
+            elif e.cat == "plate":
+                self.fillmat(fr, e.sb["shape"].intersection(pod_vis), e.material, z=5, ec=STATUS_COL[e.status], lw=0.3)
+                self.mark(view, e)
+            elif e.id in ("F-POD-EXHAUST", "F-POD-INTAKE", "F-POD-BAY", "F-NOZZLE"):
+                self.fillmat(fr, e.sb["shape"].intersection(pod_vis), "MZ-METAL" if e.id == "F-NOZZLE" else e.material, z=4)
+                self.mark(view, e)
+        self.outlines(fr, lw=0.5)
+        order = {"trim": 3, "decal": 4, "greeble": 5, "functional": 6, "light": 8}
+        items = [e for e in m.elements if e.sb and e.cat in order]
+        items.sort(key=lambda e: (order[e.cat], e.sb["depth"]))
+        for e in items:
+            self.mark(view, e)
+            if e.id in ("F-POD-EXHAUST", "F-POD-INTAKE", "F-POD-BAY", "F-NOZZLE"):
+                continue
+            self.item(fr, e)
+        for e in m.elements:
+            if not e.sb or e.cat == "panel" or e.cat in ("material", "kit", "rule"):
+                continue
+            if label_filter is not None and not label_filter(e):
+                continue
+            reqs.append(self.req(fr, e))
+        return reqs
+
+    def wing_parts(self, fr, view):
+        """Leading edge (dark) and flap outline of the wings and fins seen from above or below: the chord fractions
+        of the recipe (wings.wing / wings.fin: le, flap span and chord) over the plan outline."""
+        if view not in ("TOP", "BOT"):
+            return
+        m = self.m
+        for name in ("wing", "fin"):
+            cfg = m.recipe["wings"][name]
+            poly = m.top[name]
+            ys = [p[1] for p in poly]
+            y0, y1 = min(ys), max(ys)
+            le_a, le_b, fa, fb = [], [], [], []
+            n = 24
+            for k in range(n + 1):
+                y = y0 + (y1 - y0) * k / n
+                yy = min(max(y, y0 + 1e-6), y1 - 1e-6)
+                xa, xb = em.span_at([(p[1], p[0]) for p in poly], yy)
+                c = xb - xa
+                le_a.append((xb - cfg["le"] * c, y))
+                le_b.append((xb, y))
+                f = (y - y0) / (y1 - y0) if name == "wing" else 0.5
+                if name == "wing" and cfg["flap"]["span"][0] <= f <= cfg["flap"]["span"][1]:
+                    fa.append((xa, y))
+                    fb.append((xa + (1 - cfg["flap"]["chord"]) * c, y))
+            for sgn in (1, -1):
+                def put(pts):
+                    g = Polygon([(x, sgn * y) for x, y in pts]).buffer(0)
+                    return m.views_model.paper(view, g)
+                vis = self.vis(name)
+                le = put(le_a + le_b[::-1])
+                self.fillmat(fr, le.intersection(vis), "MZ-DARK", z=3)
+                if fa:
+                    self.sh.geom(fr.g(put(fa + fb[::-1]).intersection(vis).boundary), ec="#4A4A4A", lw=0.18, z=4)
+
     # ------------------------------------------------------------------ labels
     def req(self, fr, e):
         a = e.sb["anchor"]
+        if fr.winbox is not None and not fr.winbox.contains(Point(a)):
+            # a detail window: point at the copy (or the part) inside the window
+            part = e.sb["shape"].intersection(fr.winbox.buffer(-0.01))
+            if not part.is_empty:
+                p_ = em.largest(em.polys_only(part)) if part.area > 0 else part
+                p_ = p_.representative_point() if not p_.is_empty else part.representative_point()
+                a = (p_.x, p_.y)
         x0, z0, x1, z1 = e.sb["shape"].bounds
-        if e.sb["kind"] == "area" and e.extra.get("setup") and x1 - x0 > 0.5:
+        if e.sb["kind"] == "area" and e.extra.get("setup") and x1 - x0 > 0.5 and not fr.flip:
             a = (x1 - 0.12, z1 - 0.03)
         elif e.sb["kind"] == "area" and e.status == "remove" and e.cat not in ("plate",):
             a = (x0 + 0.03, z1 - 0.03)
@@ -638,12 +802,22 @@ class Drawer:
             if bus is None:
                 sh.line([(lx, ly), (ax_, ay_)], 0.13, r["col"], z=35, ls=ls)
             else:
-                vx = max(ax_, last[up] + 0.9)           # parallel drops at least 0.9 mm apart
+                vx = max(ax_, last[up] + 1.5)           # parallel drops at least 1.5 mm apart
                 last[up] = vx
                 sh.line([(ax_, ay_), (vx, ay_), (vx, bus), (lx, ly)], 0.13, r["col"], z=35, ls=ls)
             sh.ax.add_patch(Circle((ax_, ay_), 0.5, fc=r["col"], ec="white", lw=0.1 * PT, zorder=36))
             for i in r["ids"]:
                 self.labelled.setdefault(view, set()).add(i)
+
+    def hidden_panel_reqs(self, fr, ids):
+        """Leader labels with a dotted leader for plates hidden in this view (behind a nearer body)."""
+        out = []
+        for i in ids:
+            e = self.m.by_id[i]
+            a = e.sb["shape"].representative_point()
+            out.append({"id": i, "text": i, "anchor": fr.P(a.x, a.y), "col": STATUS_COL[e.status], "z": a.y,
+                        "hidden": True})
+        return out
 
     def panel_labels(self, fr, view, size=PANEL_MM):
         """Each plate's ID inside its visible part where the text fits (pole of inaccessibility, then the
@@ -667,7 +841,7 @@ class Drawer:
                     break
             if spot is None:
                 a = part.representative_point()
-                reqs.append({"id": e.id, "text": e.id + " " + STATUS_MARK[e.status], "anchor": fr.P(a.x, a.y),
+                reqs.append({"id": e.id, "text": e.id, "anchor": fr.P(a.x, a.y),
                              "col": STATUS_COL[e.status], "z": a.y, "hidden": False})
                 continue
             X, Y = fr.P(spot.x, spot.y)
@@ -677,6 +851,19 @@ class Drawer:
 
 
 # ---------------------------------------------------------------------- sheet furniture
+BIG_DECAL_CZ = {"D_Big_Wayfarer": "WAYFARER", "D_Big_Registration": "registrace", "D_Big_Logo": "logo Halcyon",
+                "D_Big_Hazard_Exhaust": "výstraha výfuku", "D_Big_Hazard_Ramp": "výstraha rampy"}
+
+
+def parts_of(g):
+    """The polygons (or lines) of a geometry, one per copy."""
+    if g is None or g.is_empty:
+        return []
+    if hasattr(g, "geoms"):
+        return [p for p in g.geoms if not p.is_empty]
+    return [g]
+
+
 def wrap(sh, text, size, width, max_lines=1):
     """Text broken into at most max_lines lines of the width (mm); a cut-off end gets an ellipsis."""
     words = str(text).split()
@@ -750,7 +937,7 @@ COLOR_CZ = {"red": "červená", "green": "zelená", "white": "bílá", "amber": 
 LIGHT_TYPE_CZ = {"nav": "polohové", "tail": "koncové", "marker_pod": "obrysové", "marker_hull": "obrysové",
                  "flood": "světlomet", "pod_run": "obrysový pás", "bay_glow": "pracovní pás", "hull_run_low": "obrysový pás",
                  "hull_run_canopy": "obrysový pás", "belly_run": "obrysový pás"}
-VIEW_SHORT = {"SB": "B", "TOP": "H", "BOT": "S", "AFT": "Z", "PT": "M"}
+VIEW_SHORT = {"SB": "B", "PORT": "L", "TOP": "H", "BOT": "S", "AFT": "Z", "FWD": "Č", "GAP": "M"}
 
 
 def frame_and_zones(sh):
@@ -792,7 +979,13 @@ def metre_ticks(sh, fr):
 
 
 SHEETS = {"E-01": ("E01_starboard", "Exteriér – pravobok: desky, materiály, funkční prvky, světla, decaly"),
-          "E-02": ("E02_schedules", "Exteriér – tabulky: funkční prvky, poklopy, světla, decaly, kit, změny, kontrola dat")}
+          "E-02": ("E02_schedules", "Exteriér – tabulky: funkční prvky, poklopy, světla, decaly, kit, změny, kontrola dat"),
+          "E-03": ("E03_top", "Exteriér – shora: hřbet, zkosení, křídla, gondoly, světla, decaly"),
+          "E-04": ("E04_bottom", "Exteriér – zespodu: břicho, podvozek, raketnice, světla, decaly"),
+          "E-05": ("E05_ends", "Exteriér – zezadu a zepředu: zadní stěna s rampou, čelo, tryska a sání"),
+          "E-06": ("E06_port", "Exteriér – levobok: zrcadlo pravoboku a kontrola nápisů levé strany"),
+          "E-07": ("E07_details", "Exteriér – detaily: příď s kabinou, zadní stěna s rampou, gondola shora"),
+          "E-08": ("E08_details", "Exteriér – detaily: hlavní podvozek (části, kóty), koncový držák zbraně s řezem")}
 
 
 def save_sheet(sh, m, d, sheet, dpi, out_dir, extra=None):
@@ -820,14 +1013,18 @@ def save_sheet(sh, m, d, sheet, dpi, out_dir, extra=None):
 
 
 def draw(ship="Wayfarer", dpi=200, out_dir=None, sheets=None):
+    import draw_exterior_views as dv
     setup_fonts()
     m = em.Model(ship)
     out = []
-    for sheet, fn in (("E-01", draw_e01), ("E-02", draw_e02)):
+    for sheet, fn in (("E-01", draw_e01), ("E-02", draw_e02), ("E-03", dv.draw_e03), ("E-04", dv.draw_e04),
+                      ("E-05", dv.draw_e05), ("E-06", dv.draw_e06), ("E-07", dv.draw_e07), ("E-08", dv.draw_e08)):
         if sheets and sheet not in sheets:
             continue
         SCHEDULED.clear()
+        m.use_view("SB")
         out.append(fn(m, dpi, out_dir))
+    m.use_view("SB")
     return out
 
 
@@ -909,8 +1106,9 @@ def draw_e02(m, dpi, out_dir):
     W, H = sh.w, sh.h
     frame_and_zones(sh)
     sh.t(34, 822, "TABULKY EXTERIÉRU – WAYFARER", TITLE_MM, weight="bold")
-    sh.t(34, 815.5, "Prvky všech pohledů (sloupec „pohled“: B bok, H hřbet, S spodek, Z záď, M mezera gondola–trup); "
-                   "výkresy pohledů na listech E-01 a dalších. ✓ = schváleno autorem %s." % m.design["approved"]["date"],
+    sh.t(34, 815.5, "Prvky všech pohledů (sloupec „pohled“: B pravobok, L levobok, H shora, S zespodu, Z zezadu, "
+                   "Č zepředu, M mezera gondola–trup); výkresy pohledů na listech E-01 a E-03 až E-07. "
+                   "✓ = schváleno autorem %s." % m.design["approved"]["date"],
          2.5, GREY)
     schedules(sh, d, m, 34.0, 808.0)
     yc = changes_box(sh, m, 800.0, 808.0)
@@ -981,11 +1179,14 @@ def stations_and_dims(sh, fr, m):
 
 def levels(sh, fr):
     """Height levels left of the view: deck, ground (gear down) and the roof, metres from the deck."""
+    k = -1 if fr.flip else 1
     for z, name in ((0.0, "±0,00 paluba"), (-1.6, "-1,60 zem"), (3.3, "+3,30 střecha kabiny, špička ploutve")):
         X, Y = fr.P(-0.75, z)
-        sh.line([(X - 12, Y), (X + 1, Y)], 0.18, INK)
-        sh.ax.add_patch(MplPolygon([(X - 2, Y), (X - 3.2, Y + 1.6), (X - 0.8, Y + 1.6)], closed=True, fc=INK, ec="none", zorder=20))
-        sh.t(X - 12, Y + 0.8, name, 2.2, ha="left")
+        sh.line([(X - 12 * k, Y), (X + k, Y)], 0.18, INK)
+        # the level mark at the line's outer end, the text after it (the mark sat on the text, 1. 10. 2026)
+        sh.ax.add_patch(MplPolygon([(X - 11 * k, Y), (X - 12.2 * k, Y + 1.6), (X - 9.8 * k, Y + 1.6)], closed=True,
+                                   fc=INK, ec="none", zorder=20))
+        sh.t(X - 9 * k, Y + 0.8, name, 2.2, ha="left" if k > 0 else "right")
 
 
 def section_mark(sh, fr, m):
@@ -1225,7 +1426,7 @@ def stav(e):
 
 
 def views(e):
-    return " ".join(VIEW_SHORT[v] for v in ("SB", "TOP", "BOT", "AFT", "PT") if v in e.views)
+    return "".join(VIEW_SHORT[v] for v in ("SB", "PORT", "TOP", "BOT", "AFT", "FWD", "GAP") if v in e.views)
 
 
 def schedules(sh, d, m, x, ytop):
@@ -1384,7 +1585,8 @@ def rules_table(sh, m, x, ytop):
     return y
 
 
-SHEET_SCALE = {"E-01": "1:30, detail 1:20, řezy 1:5", "E-02": "tabulky"}
+SHEET_SCALE = {"E-01": "1:30, detail 1:20, řezy 1:5", "E-02": "tabulky", "E-03": "1:30", "E-04": "1:30",
+               "E-05": "1:20", "E-06": "1:30", "E-07": "1:20 a 1:10", "E-08": "1:10, řez 1:5"}
 
 
 def title_block(sh, m, x, W, sheet="E-01"):
@@ -1425,7 +1627,8 @@ def title_block(sh, m, x, W, sheet="E-01"):
     sh.line([(x, yr), (x1, yr)], 0.25, z=50)
     sh.t(x + 2, yr - 3.8, "Revize", 2.0, GREY)
     sh.t(x + 2, yr - 8.2, "A  1. 10. 2026  vzorový list E-01 ke schválení stylu", 2.4)
-    sh.t(x + 140, yr - 8.2, "B  1. 10. 2026  tabulky na list E-02; schválené změny (✓) vyznačené", 2.4)
+    sh.t(x + 125, yr - 8.2, "B  tabulky na list E-02; schválené změny (✓)", 2.4)
+    sh.t(x + 250, yr - 8.2, "C  listy E-03 až E-08 (pohledy, detaily)", 2.4)
     yd = yr - 11
     sh.line([(x, yd), (x1, yd)], 0.25, z=50)
     dg = m.digests
@@ -1441,8 +1644,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("ship", nargs="?", default="Wayfarer")
     ap.add_argument("--dpi", type=int, default=200)
+    ap.add_argument("--sheets", nargs="*", help="only these sheets, e.g. E-03 E-05")
     a = ap.parse_args(argv)
-    draw(a.ship, a.dpi)
+    draw(a.ship, a.dpi, sheets=a.sheets)
 
 
 if __name__ == "__main__":

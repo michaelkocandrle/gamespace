@@ -35,11 +35,13 @@ FUNC_SIZE = {"rcs": (0.26, 0.17, 0.05), "blade": (0.2, 0.07, 0.16), "whip": (0.0
              "dome": (0.2, 0.2, 0.105), "connector": (0.12, 0.12, 0.04), "hinge": (0.12, 0.05, 0.06)}
 KIND_CZ = {"rcs": "blok RCS", "blade": "anténa (čepel)", "whip": "anténa (prut)", "dome": "senzorová kupole",
            "connector": "konektor", "hinge": "závěs klapky", "grille": "šachta s mřížkou", "piston": "hydraulický válec",
+           "frame": "rám rampy",
            "hatch": "poklop", "hatch_large": "velký poklop", "vent": "větrací mřížka", "sensor": "senzor",
            "strip": "kryt kabelů", "strobe": "záblesk", "landing": "přistávací světlomet", "work": "pracovní světlo"}
 LIGHT_RGB = {"red": "#D32F2F", "green": "#2E9E44", "white": "#FFFFFF", "amber": "#F2A100", "strip": "#8FD3FF",
              "warm": "#FFB54D"}
-VIEW_NAMES = {"SB": "pravobok", "PT": "levobok", "TOP": "shora", "BOT": "zespodu", "FWD": "zepředu", "AFT": "zezadu"}
+VIEW_NAMES = {"SB": "pravobok", "PORT": "levobok", "TOP": "shora", "BOT": "zespodu", "FWD": "zepředu", "AFT": "zezadu",
+              "GAP": "mezera gondola–trup"}
 SOLID_ACC = {"hull": "trup", "pod": "gondolu", "fin": "ploutev", "wing": "křídlo", "gun": "zbraň",
              "missile_rack": "raketnici", "gear_main": "podvozek", "gear_nose": "podvozek"}
 SOLID_INS = {"hull": "trupem", "pod": "gondolou", "fin": "ploutví", "wing": "křídlem", "gun": "zbraní",
@@ -88,6 +90,14 @@ def largest(geom):
     return max(polys, key=lambda g: g.area) if polys else Polygon()
 
 
+def largest_line(geom):
+    """The longest line of a (multi)line geometry."""
+    if geom.geom_type == "LineString":
+        return geom
+    lines = [g for g in getattr(geom, "geoms", []) if g.geom_type == "LineString"]
+    return max(lines, key=lambda g: g.length) if lines else geom
+
+
 def polys_only(geom):
     if geom.is_empty:
         return Polygon()
@@ -115,6 +125,8 @@ class Element:
         self.where = kw.pop("where", "")
         self.extra = kw
         self.sb = None
+        self.geo = {}               # view -> geometry like sb (exterior_views); sb is the current view's
+        self.vextra = {}            # view -> the view's ghost, pod seams and reading direction
 
     def __repr__(self):
         return "<%s %s %s>" % (self.id, self.cat, self.status)
@@ -148,6 +160,24 @@ class Model:
         self._outlines()
         self._solids()
         self._build()
+        import exterior_views
+        exterior_views.add_views(self)
+        self.view = "SB"
+
+    def use_view(self, view):
+        """Make a view current (exterior_views): e.sb, e.extra ghost / seams / up, self.solids and self.canopy then
+        hold that view's geometry, so the drawing code draws any view as it draws the starboard one."""
+        for e in self.elements:
+            e.sb = e.geo.get(view)
+            vx = e.vextra.get(view, {})
+            for k in ("ghost", "seams", "up", "marks"):
+                if vx.get(k) is not None:
+                    e.extra[k] = vx[k]
+                else:
+                    e.extra.pop(k, None)
+        self.solids = self.view_solids[view]
+        self.canopy = self.view_canopy[view]
+        self.view = view
 
     # ------------------------------------------------------------------ geometry of the ship (layout data)
     def _outlines(self):
@@ -305,7 +335,42 @@ class Model:
                 if cover:
                     vis = vis.difference(o["poly"].intersection(unary_union(cover)))
             s["visible"] = polys_only(vis.buffer(0))
-        self.canopy = Polygon(self.side["canopy"]).buffer(0)
+        self.canopy = self._canopy_side()
+
+    def _canopy_side(self):
+        """The glass seen from starboard. hs_build_ship.split_canopy makes glass of the hull faces inside BOTH canopy
+        outlines (side and top): where the hull is wider than the top outline, the glass ends higher up the shoulder
+        than the side outline's lower edge - at the height where the hull's half-width equals the top outline's
+        (the plan view showed it, 1. 10. 2026: the side outline alone drew glass over painted hull aft of x 17.6)."""
+        side = Polygon(self.side["canopy"]).buffer(0)
+        top = [tuple(p) for p in self.top["canopy"]]
+        x0, _, x1, _ = side.bounds
+        n = 240
+        lower = []
+        for k in range(n + 1):
+            x = x0 + (x1 - x0) * k / n
+            sp = span_at(top, min(max(x, top[0][0] + 1e-6), max(p[0] for p in top) - 1e-6))
+            half = max(abs(sp[0]), abs(sp[1])) if sp else 0.0
+            zb, zt = self.zspan(x)
+            if self.hw(x) <= half + 1e-6:
+                z = zb
+            else:
+                lo, hi = zb, zt                     # hull_y falls with z on the shoulder: bisect hull_y = half
+                for _ in range(40):
+                    mid = (lo + hi) / 2
+                    if self.hull_y(x, mid) > half:
+                        lo = mid
+                    else:
+                        hi = mid
+                z = hi
+            lower.append((x, z))
+        above = Polygon(lower + [(x1, 10.0), (x0, 10.0)]).buffer(0)
+        return polys_only(side.intersection(above).buffer(0))
+
+    def canopy_lower(self, x):
+        """Lower edge of the glass seen from starboard at station x (None outside the canopy)."""
+        sp = span_at(list(largest(self.canopy).exterior.coords), x)
+        return sp[0] if sp else None
 
     # ------------------------------------------------------------------ elements
     def add(self, el):
@@ -427,7 +492,7 @@ class Model:
                 el.extra["on_panels"] = el.change.get("on") == "panels"
             shape, el.where = zone_shape(w)
             el.qty = 2 if "normal_abs_y_min" in w else 1
-            el.views |= {"SB", "PT"}
+            el.views |= {"SB", "PORT"}
             self.place(el, polys_only(shape), "area", "hull", anchor=None)
         for z in self.design.get("zones", []):
             el = self.add(Element(z["id"], "zone", "těsnění kabiny", z["status"], material=z["material"], kit=z["kit"],
@@ -519,7 +584,7 @@ class Model:
             shape = box(x - w / 2, min(zr, zr + s * max(height, 0.02)), x + w / 2, max(zr, zr + s * max(height, 0.02)))
             self.place(el, shape, "profile", "pod", depth=self.pod_axis[0] + 0.5, anchor=(x, zr + s * height / 2))
         else:
-            el.views.add("PT")      # faces inboard: seen only between the pod and the hull
+            el.views.add("GAP")     # faces inboard: seen only between the pod and the hull
 
     def _functional(self):
         f = self.recipe["functional"]
@@ -675,9 +740,9 @@ class Model:
         z = next(z for z in self.design["zones"] if z["id"] == frame_id)
         pts = []
         for x in xs:
-            sp = span_at([tuple(p) for p in self.side["canopy"]], x)
-            if sp:
-                pts.append((x, sp[0] - z["w"] / 2))
+            zl = self.canopy_lower(x)
+            if zl is not None:
+                pts.append((x, zl - z["w"] / 2))
         return LineString(pts), "na těsnění kabiny %s, x %s–%s" % (frame_id, fmt(pts[0][0]), fmt(pts[-1][0]))
 
     def _pod_patch(self, xr, dr, step=0.1):
@@ -696,7 +761,7 @@ class Model:
             kind = it["kind"]
             el = self.add(Element(it["id"], "functional", KIND_CZ[kind], it["status"], src="design", data=it,
                                   what=it["what"], kit=it.get("kit"),
-                                  material="MZ-DARK" if kind == "grille" else ("MZ-METAL" if kind == "piston" else "MZ-PAINT1")))
+                                  material={"grille": "MZ-DARK", "piston": "MZ-METAL", "frame": "MZ-GUNMETAL"}.get(kind, "MZ-PAINT1")))
             el.qty = 2 if it.get("mirror", True) else 1
             if it["on"] == "side":
                 el.where = "bok x %s–%s" % (fmt(it["x"][0]), fmt(it["x"][1]))
@@ -1053,7 +1118,7 @@ class Model:
                 self.place(el, shape, "area", solid, depth=depth if solid == "pod" else self.hull_y(loc[0], loc[2]),
                            anchor=(loc[0], loc[2]))
             else:
-                el.views.add("PT" if loc[1] > 0.5 else "AFT")
+                el.views.add("PORT" if loc[1] > 0.5 else "AFT")
 
     def change_text(self, el):
         """What a change does, built value → new value, for the changes schedule."""
@@ -1153,7 +1218,7 @@ class Model:
     def port_text_decals(self):
         """The port side's lettered setup markings and whether they read upright (the same rule as starboard)."""
         return [(e.id, e.extra["up"][1] > 0.5) for e in self.elements if e.cat == "decal" and e.extra.get("setup")
-                and e.extra.get("text") and "PT" in e.views]
+                and e.extra.get("text") and "PORT" in e.views]
 
     # ------------------------------------------------------------------ queries
     def in_view(self, view="SB", cats=None):

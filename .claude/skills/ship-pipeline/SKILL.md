@@ -125,7 +125,7 @@ decal, světlo a funkční prvek nese ve výkresu stejné ID jako v datech.
 ```bash
 python Tools/Design/assign_exterior_ids.py <Loď> [--check]   # doplní "id" do receptu a setupu (stávající nemění)
 python Tools/Design/exterior_model.py <Loď>                  # model výkresu: prvky, stavy, co je vidět z boku
-python Tools/Design/draw_exterior_sheet.py <Loď> [--dpi 200] # list E-01 pravobok A0 -> Design/Drawings/*.png + .json
+python Tools/Design/draw_exterior_sheet.py <Loď> [--dpi 200] [--sheets E-03 E-05]   # listy E-01..E-07 -> Design/Drawings
 python Tools/Tests/test_exterior_drawing.py                  # výkres = data (i v Test.ps1 a CI)
 ```
 - **Postavené** prvky jsou v datech stavby (`<Loď>_hs.json`, `<Loď>_setup.json`) s `"id"` (builder ho ignoruje);
@@ -137,7 +137,23 @@ python Tools/Tests/test_exterior_drawing.py                  # výkres = data (i
   červeně (×). Skryté za bližším dílem čárkovaně (model počítá viditelnost dílů z boku a hloubku z pohledu shora).
 - Model hlásí, kam prvek „z boku“ opravdu dopadne (nejbližší díl, WORKFLOW 9.6 fb), co je skryté, výřezy v deskách
   a podklad nápisů – „Kontrola dat“ na listu; desky musí vyříznout místo pro díly na plášti (WORKFLOW 9.6 fe).
-- Vzorový list E-01 čeká na schválení stylu; další listy (6 pohledů, detaily 1:10–1:20, interiér, koncepty) až potom.
+- **Listy exteriéru** (styl E-01 schválen 1. 10. 2026): E-01 pravobok (A desky a materiály, B prvky, detail A gondola),
+  E-02 tabulky, E-03 shora, E-04 zespodu, E-05 zezadu 1:20 a zepředu 1:30, E-06 levobok (A a B zrcadlově, kontrola
+  nápisů levé strany), E-07 detaily (příď s kabinou, rampa s rámem a písty, gondola shora), E-08 detaily (hlavní
+  podvozek s částmi podle `hs_gear.leg`, držák zbraně s řezem). Skladba listů E-03 až E-08:
+  `Tools/Design/draw_exterior_views.py`. Detail má přinést, co pohled 1:30 neumí (části, kóty, řez), jinak nepatří
+  na list (kritik pohledů 1. 10. 2026).
+- **Pohledy** počítá `Tools/Design/exterior_views.py` z týchž dat jako pravobok (`Element.geo[view]`;
+  `Model.use_view(view)` přepne `e.sb`, `m.solids`, `m.canopy`, takže kreslič kreslí každý pohled stejným kódem):
+  tělesa z horních a čelních obrysů layoutu s pořadím zakrývání (`ORDER`); prvky boku trupu, které leží na horním
+  nebo spodním zkosení, se do půdorysu promítnou přes poloviční šířku trupu v dané výšce; prvky z hřbetu a břicha
+  (x, y), z gondol (x, úhel), ze zadní stěny (paprsky podél x) a návrhu se kladou přímo z dat. Levobok se ukládá
+  v souřadnicích pravoboku a zrcadlí ho rám (`Frame(flip=True)`). Směr čtení nápisů na hřbetu a břiše podle
+  `hs_decals._frame` (od bližšího boku), šipka u každé kopie.
+- **Sklo kabiny z boku** je jen tam, kde je trup uvnitř obou obrysů kabiny (boční i horní, jako
+  `hs_build_ship.split_canopy`): kde je trup širší než horní obrys, končí sklo výš na rameni (ověřeno na postavené
+  kabině 1. 10. 2026; samotný boční obrys kreslil sklo o 35 cm níž).
+- Další na řadě: interiér (bod 4) a koncepty (bod 6) ve stejném stylu; kit a pilot až podle schválených výkresů.
 
 ## 2. Koncepty jako reference stylu
 
