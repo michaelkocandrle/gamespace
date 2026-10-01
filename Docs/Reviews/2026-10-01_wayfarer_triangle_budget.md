@@ -216,3 +216,15 @@ Kontroly:
     (posunulo se pořadí náhody), ne chyba kitu.
 - Varianta 2 (kdyby autor chtěl výraznější poklopy na šikmé hraně): 14 poklopů jako tenká deska 340 × 260 × 3 mm se
   spárou v geometrii, bez díry v desce: po sloučení ploch ~40 trojúhelníků na poklop + západky ~30 → ~1 k celkem.
+
+## Oprava po kroku b: seed náhodných decalů z ID prvku (autor 2. 10.), hotovo 2. 10.
+
+Šmouha vedle nápisu RAMP – STAND CLEAR: náhodná pravidla decalů (`clusters`, `companions`, `coverage`, `panel_lines`)
+losovala z jednoho sdíleného generátoru v pořadí stavby, takže šrouby a poklopy kitu jako decaly posunuly proud
+a přelosovaly decaly jinde. Teď má každé losování vlastní generátor ze `seed` + pravidla + klíče prvku
+(`hs_decals._rng`); jen pravidla náhodných decalů, stavba jinak beze změny. Oprava jednorázově přelosovala všechny
+náhodné decaly (šmouha pod pravou mřížkou dveří rampy je tam teď trvale – pravidlo `streak_chance` 0,35 na tu mřížku
+padlo; kdyby vadila, jedna výjimka v pravidle). Ověření: `test_kit_decals.py` porovná polohy náhodných decalů podle
+klíče s předchozí stavbou (`random_prev` v `Export/Wayfarer_decals.json`): 628 společných, 0 posunutých – po dvou
+přestavbách se stejnými daty i po přestavbě se změněným kitem (krok c). Tolerance 1 cm: šum sítě trupu (WORKFLOW 9.6 ff)
+posune zásah paprsku na břiše o 1–8 mm (stejný decal, stejné x/y). WORKFLOW 9.6 fl, ff doplněn.

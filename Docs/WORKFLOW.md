@@ -1196,6 +1196,9 @@ snímku.
   `settings_key()` píše množiny seřazené, stejně jako otisky v manifestech
   (`test_file_digest_ignores_the_string_hash_seed`). Skutečný šum stavby zůstává jen v trupu, decalech
   a interiéru (±40 trojúhelníků mezi běhy). Ověřené porovnáním staveb A/B1/B2/C (recept s klíči `id` a bez nich).
+  Vyřešeno 2. 10. 2026 (fl): náhodná pravidla decalů už nezávisí na pořadí stavby – změna kitu nebo jiného pravidla
+  nepřelosuje decaly jinde. Nevyřešeno: šum ±40 trojúhelníků trupu a interiéru (paprsky decalů pak mohou padnout
+  na jinou plochu – poloha se pohne o zlomek milimetru, ne decal na jiné místo), 3 FBX při každé přestavbě.
 - fg) **Přestavba „prošla“, ale export vynechal všechny FBX jako nezměněné** (1. 10. 2026, kit pilot kolo 2). Výjimka
   v `--python` skriptu Blender neukončí chybou: `hs_assemble_ship.py` spadl v `kdop_hull` (po 12 pokusech o kolizi
   bez tenkých stěn použil uvolněný bmesh; spustily to nové díly kitu na zádi), Blender skončil kódem 0, game blend
@@ -1222,6 +1225,17 @@ snímku.
   (`parts.hull.merge_keep_slots`). Příčina ulétlých desek: rovnoměrná tloušťka dělí posun vrcholu sinem úhlu mezi
   sousedními plochami a na sloučených n-úhelnících s téměř nulovými úhly (protáhlé trojúhelníky po triangulaci) jde
   dělitel k nule. Od 1. 10. hlídá meze dílů přímo `hs_assemble_ship` (`HSASSEMBLE BOUNDS FAIL`, chyba sestavení).
+- fl) **Po změně kitu se přesunula špína na dveřích rampy** (2. 10. 2026, krok b rozpočtu trojúhelníků). Vedle nápisu
+  RAMP – STAND CLEAR přibyla stékající šmouha, ačkoli se mřížky ani pravidlo nezměnily. Příčina: náhodná pravidla
+  decalů (`clusters`, `companions` – šmouhy pod mřížkami, štítky, `coverage`, `panel_lines`) brala čísla z jednoho
+  sdíleného generátoru v pořadí stavby. Šrouby a poklopy kitu jako decaly přidaly rámy a pokusy, proud se posunul
+  a každé další losování dopadlo jinak. Řešení: každé losování má vlastní generátor ze `seed` + pravidla + **klíče
+  prvku** (`hs_decals._rng`: shluk a číslo pokusu, rodičovský decal doprovodu podle polohy, buňka mřížky coverage,
+  pole panelové čáry), ne z pořadí. Stavba zapíše polohy náhodných decalů podle klíče do `Export/<Loď>_decals.json`
+  (`random`, s předchozí stavbou v `random_prev`) a `test_kit_decals.py` ověří, že stejný prvek leží po dvou
+  přestavbách za sebou na stejném místě (1 cm: šum sítě trupu z ff posune zásah paprsku o 1–8 mm, přelosovaný decal
+  skočí o decimetry nebo změní položku). Po změně `seed` nebo pravidel test přeskočí (otisk vstupů
+  `rules_hash`) – pak přestavět dvakrát. Oprava sama jednorázově přelosovala všechny náhodné decaly.
 
 
 ---

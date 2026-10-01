@@ -79,9 +79,9 @@
      0.65
     ],
     "SecondaryColor": [
-     0.42,
-     0.43,
-     0.45
+     0.53,
+     0.51,
+     0.47
     ],
     "BareMetalColor": [
      0.72,
@@ -120,7 +120,7 @@
     "RoughVariation": 0.45,
     "BareMetalRoughness": 0.28,
     "PrimaryRoughness": 0.3,
-    "SecondaryRoughness": 0.34,
+    "SecondaryRoughness": 0.55,
     "PaintMetallic": 0.0,
     "TopZ": 9999.0,
     "TopSlope": 0.0,
@@ -140,11 +140,13 @@
     "CarbonShare": 0.0,
     "ClearCoat": 1.0,
     "ClearCoatRoughness": 0.05,
-    "ClearCoatRoughVariation": 0.3
+    "ClearCoatRoughVariation": 0.3,
+    "SecondaryClearCoatRoughness": 0.38
    },
    "_wear": "EdgeWear 0.15 (was 0.8) and the grunge in the clear coat's roughness: SC paint has no worn edges, the dirt shows in the gloss (starcitizenreference/ShipDetailing_VideoNotes.md, 26. 9. 2026)",
    "_livery_roof": "1. 10. 2026: the graphite saddle of livery A off (TopZ 9999): the author wants the roof plates in the primary paint - the chase camera sees mostly the roof, a dark roof made a dark ship",
    "_panel_variation": "1. 10. 2026: PanelTone 0.1 (was 0.07), PanelRough 0.18 (was 0.12): the kit's plates read as one clean tile (kit pilot critic round 1)",
+   "_secondary": "2. 10. 2026 kit pilot step c (critic round 3: the shoulder plates S read as windows): secondary paint lighter and warmer (0.53 0.51 0.47, was a cool 0.42 0.43 0.45), SecondaryRoughness 0.55 (0.34) and its own duller clear coat SecondaryClearCoatRoughness 0.38 (the primary keeps 0.05) - it mirrored the sky",
    "_round3": "1. 10. 2026 kit pilot critic round 2: RoughVariation 0.45 (was 0.28), GrungeAmount 0.3 (0.15), ClearCoatRoughVariation 0.3 (0.12) - the dirt shows in the gloss; CarbonShare 0 (was 0.05): dark carbon plates read as holes in the roof"
   },
   "MI_Ship_Wayfarer_Dark": {

@@ -476,6 +476,7 @@ class Model:
         self._grilles_and_design_functional()
         self._lights()
         self._panels()
+        self._shoulder_conduits()
         self._zones_on_panels()
         self._frame()
         self._pod_sections()
@@ -810,7 +811,8 @@ class Model:
     def hardware(self):
         """Parts that sit on the hull's side skin (built or proposed, not removed): what a plate must clear."""
         return [e for e in self.elements if e.sb and e.sb["solid"] == "hull" and e.sb["kind"] == "area"
-                and e.status != "remove" and (e.cat == "greeble" or (e.cat == "functional" and e.id != "F-CANOPY-FRAME")
+                and e.status != "remove" and e.data.get("kind") != "conduit"
+                and (e.cat == "greeble" or (e.cat == "functional" and e.id != "F-CANOPY-FRAME")
                                               or (e.cat == "light" and not e.extra.get("strip")))]
 
     def _panels(self):
@@ -845,8 +847,110 @@ class Model:
                                       what="deska %s, příčky x %s–%s" % (band["name"], fmt(a), fmt(b))))
                 el.qty = 2
                 el.where = "x %s–%s" % (fmt(a), fmt(b))
+                subs = self.side_subs(shape, band, i) if band.get("sub") else []
+                for kind, g in subs:
+                    if kind == "hatch":
+                        # as on the roof: the hatch sits in a hole of the plate (the decal build fills it again)
+                        shape = largest(polys_only(shape.difference(g.buffer(self.kit["XK-HATCH"]["gap"],
+                                                                              join_style=2)).buffer(0)))
                 self.place(el, shape, "area", "hull", depth=self.hull_y(shape.representative_point().x,
                                                                         shape.representative_point().y))
+                for kind, g in subs:
+                    kit_id = {"doubler": "XK-DOUBLER", "hatch": "XK-HATCH"}[kind]
+                    sel = self.add(Element("%s-%s" % (ident, {"doubler": "D", "hatch": "H"}[kind]), "panel",
+                                           band["name"], el.status, material=band["material"], kit=kit_id,
+                                           src="design", data={"band": band["band"], "bay": i, "x": [a, b],
+                                                               "sub": kind, "of": ident},
+                                           what={"doubler": "přídavný panel na desce %s",
+                                                 "hatch": "malý poklop v desce %s"}[kind] % ident))
+                    sel.qty, sel.where = 2, el.where
+                    c = g.representative_point()
+                    self.place(sel, g, "area", "hull", depth=self.hull_y(c.x, c.y))
+
+    def side_subs(self, shape, band, bay):
+        """Doubler panel and small hatch on a side plate (panels.bands[].sub; kit pilot step c, 2. 10. 2026: the shoulder
+        plates like the roof's), in the side view (x, z) within the sub band of section heights v: even bays a square
+        doubler at the aft end and the hatch forward, odd bays the hatch at the aft end and a long doubler strip
+        forward. Each keeps the margin off the plate's edges and cut-outs and off the plate number's lower aft corner
+        (D-R-PANEL-NUMBERS), slides along the bay to clear them, or is left out. [(kind, outline)]."""
+        sub = band["sub"]
+        mg = sub["margin"]
+        v0, v1 = sub["v"]
+        inner = shape.buffer(-mg, join_style=2)
+        x0, z0, x1, z1 = shape.bounds
+        marks = []
+        # the rule's element is made later (_decals): read its data
+        d = next((r for r in self.design.get("decals", []) if r.get("id") == "D-R-PANEL-NUMBERS"), None)
+        if d is not None and band["band"] in d.get("bands", []):
+            marks.append(box(x0 - 0.01, z0 - 0.01, x0 + d["edge"] + 0.18, z0 + d["edge"] + d["size"] + 0.02))
+        step = 0.02
+
+        def strip(xa, xb):
+            pts_lo = [(x, self.z_of(x, v0)) for x in (xa, xb)]
+            pts_hi = [(x, self.z_of(x, v1)) for x in (xb, xa)]
+            return Polygon(pts_lo + pts_hi)
+
+        def runs(avoid):
+            out, start, x, last = [], None, x0 + mg, None
+            while x <= x1 - mg + 1e-9:
+                ln = LineString([(x, self.z_of(x, v0)), (x, self.z_of(x, v1))])
+                ok = inner.contains(ln) and not any(o.intersects(ln) for o in avoid)
+                if ok and start is None:
+                    start = x
+                if not ok and start is not None:
+                    out.append((start, last))
+                    start = None
+                last = x
+                x += step
+            if start is not None:
+                out.append((start, last))
+            return out
+
+        def window(length, at, avoid):
+            fits = [r for r in runs(avoid) if r[1] - r[0] >= length - 1e-9]
+            if not fits:
+                return None
+            r = fits[0] if at == "aft" else fits[-1]
+            xa = r[0] if at == "aft" else r[1] - length
+            return strip(xa, xa + length)
+
+        out = []
+        hx = self.kit["XK-HATCH"]["size"][0]
+        if bay % 2:
+            g = window(hx, "aft", marks)
+            if g is not None:
+                out.append(("hatch", g))
+            rs = runs(marks + [o.buffer(mg) for _, o in out])
+            best = max(rs, key=lambda r: r[1] - r[0]) if rs else None
+            if best and best[1] - best[0] >= sub["doubler_odd_min"]:
+                out.append(("doubler", strip(best[0], best[1])))
+        else:
+            g = window(sub["doubler_even_len"], "aft", marks)
+            if g is not None:
+                out.append(("doubler", g))
+            g = window(hx, "fwd", marks + [o.buffer(mg) for _, o in out])
+            if g is not None:
+                out.append(("hatch", g))
+        return out
+
+    def _shoulder_conduits(self):
+        """The conduits along the shoulder (F-CONDUIT-S, functional on: shoulder): each pipe a strip along its section
+        height v from x0 to x1 in the side view, over the S plates (not cut out of them: lifted over the plates and the
+        ribs on clamps)."""
+        for it in self.design.get("functional", []):
+            if it.get("kind") != "conduit" or it.get("on") != "shoulder":
+                continue
+            el = self.by_id[it["id"]]
+            strips = []
+            for p in it["pipes"]:
+                xs = [it["x"][0] + (it["x"][1] - it["x"][0]) * i / 40 for i in range(41)]
+                ln = LineString([(x, self.z_of(x, p["v"])) for x in xs])
+                strips.append(ln.buffer(p["d"] / 2, cap_style=2))
+            g = unary_union(strips)
+            el.qty, el.where = 2, "rameno x %s–%s" % (fmt(it["x"][0]), fmt(it["x"][1]))
+            xc = (it["x"][0] + it["x"][1]) / 2
+            self.place(el, g, "area", "hull", depth=self.hull_y(xc, self.z_of(xc, it["pipes"][0]["v"])),
+                       anchor=(xc, self.z_of(xc, it["pipes"][0]["v"])))
 
     def _frame(self):
         hull = self.solids["hull"]["poly"].buffer(-0.01)
@@ -859,6 +963,11 @@ class Model:
                                   fr["status"], material=fr["material"], kit=fr["kit"], src="design", data=fr,
                                   what=fr["what"]))
             w = self.kit[fr["kit"]]["w"] / 2
+            if fr["kind"] == "aft":
+                # the aft wall's frame: drawn and built in the aft view (exterior_views._aft)
+                el.qty, el.where = 1, "zadní stěna"
+                el.views.add("AFT")
+                continue
             if fr["kind"] == "spine":
                 # on the roof's centre line: drawn in plan (exterior_views), seen from the side only edge-on
                 el.qty, el.where = 1, "osa hřbetu x %s–%s" % (fmt(fr["x"][0]), fmt(fr["x"][1]))
@@ -1211,7 +1320,9 @@ class Model:
             if e.extra.get("cut_in"):
                 note(e, "cut", "výřez v desce %s" % ", ".join(sorted(set(e.extra["cut_in"]))))
             if e.sb["solid"] == "hull" and e.sb["kind"] == "area" and e.cat in ("greeble", "functional", "light") \
-                    and not e.extra.get("cut_in") and e.sb["shape"].intersection(plate_union).area > 1e-4:
+                    and not e.extra.get("cut_in") and e.data.get("kind") != "conduit" \
+                    and e.sb["shape"].intersection(plate_union).area > 1e-4:
+                # (a conduit runs over the plates on clamps: F-CONDUIT-S on the shoulder)
                 note(e, "buried", "leží pod deskou bez výřezu")
             if e.sb["solid"] == "hull" and e.sb["kind"] == "line" and e.sb["shape"].intersection(plate_union).length > 0.05:
                 note(e, "buried", "vede pod deskami (%.1f m)" % e.sb["shape"].intersection(plate_union).length)

@@ -2,7 +2,10 @@
 
 The library (Tools/Blender/decal_library.py) holds the atlases and an index of every item's UV rect, size,
 type and tags. This module puts them on the ship from the recipe's "decals" block, in LAYOUT coordinates.
-Placement is by RULES, so everything regenerates (a seed fixes the random parts):
+Placement is by RULES, so everything regenerates (a seed fixes the random parts). Every random draw comes from
+its own generator seeded by the seed and the KEY of the element it belongs to (the cluster and attempt, the parent
+decal of a companion, the grid cell of the coverage, the bay of a panel line; _rng), never from one shared stream:
+a kit change upstream once shifted the stream and re-rolled the dirt streak beside RAMP - STAND CLEAR (2. 10. 2026).
 
   rules.hull_seams      a rivet strip along every panel seam of the hull (rings at the seam stations, lines)
   rules.pod_gaps        ... along every panel gap of the pods (read from the pod recipe)
@@ -72,6 +75,26 @@ def _stable(*keys):
     return int(hashlib.md5("|".join(str(k) for k in keys).encode()).hexdigest()[:8], 16)
 
 
+def _key(*keys):
+    """An element key for a random draw: floats rounded to the millimetre so a rebuild gives the same string."""
+    return "|".join(("%.3f" % k) if isinstance(k, float) else str(k) for k in keys)
+
+
+def _rng(pl, rule, key):
+    """The random generator of one element (seed + rule + element key): the same draws on every rebuild, whatever
+    was placed before it."""
+    return random.Random(_stable(pl.seed, rule, key))
+
+
+def _note(pl, rule, key, item, fr=None, points=None):
+    """Remember where a random rule put what, by element key, for the rebuild check (test_kit_decals.py)."""
+    if fr is not None:
+        p = fr[0] - pl.off
+        pl.random[rule + ":" + key] = "%s %.3f %.3f %.3f" % (item, p.x, p.y, p.z)
+    elif points is not None:
+        pl.random[rule + ":" + key] = " ".join([item] + ["%.3f" % v for q in points for v in q])
+
+
 class Placer:
     def __init__(self, target, spec, index, off, pod_axis):
         bm = bmesh.new()
@@ -96,6 +119,8 @@ class Placer:
         self.ribbons = []                 # (rule, strip, part, metres)
         self.skipped = {"edge": 0, "overlap": 0, "miss": 0}
         self.grime = []                   # (kind, part, faces) of every grime card
+        self.seed = spec.get("seed", 7)
+        self.random = {}                  # "rule:element key" -> "item x y z" of the random rules (rebuild check)
 
     # ------------------------------------------------------------------ rays
     def ray(self, spec, side):
@@ -561,15 +586,18 @@ def rule_panel_marks(pl, r, recipe):
             pl.decal(dict(m, item=item), side, "panel_marks")
 
 
-def rule_clusters(pl, clusters, rng, avoid=()):
+def rule_clusters(pl, clusters, avoid=()):
     """Dense scatter of small items round service points (engines, the bay, the intake, the ramp); none
     inside the "avoid" boxes (x, deg) on the pods (the open bay)."""
     for c in clusters:
         pool = c["items"]
+        cid = c.get("id") or _key(c["on"], c.get("x", 0.0), c.get("y", 0.0), c.get("z", 0.0), c.get("deg", 0.0))
         for side in ((1, -1) if c.get("mirror", True) else (1,)):
             placed, tries = 0, 0
             while placed < c["count"] and tries < c["count"] * 15:
                 tries += 1
+                key = _key(cid, side, tries)
+                rng = _rng(pl, "clusters", key)
                 item = pool[rng.randrange(len(pool))]
                 rot = rng.choice(c.get("rots", [0, 0, 0, 90]))
                 if c["on"] == "pod":
@@ -584,11 +612,13 @@ def rule_clusters(pl, clusters, rng, avoid=()):
                             "z": c.get("z", 0.0) + jit[2], "rot": rot,
                             "at": [c.get("x", 0) + jit[0], c.get("y", 0.0) + jit[1], c.get("z", 0.0) + jit[2]],
                             "dir": c.get("dir", [1, 0, 0])}
-                if pl.decal(spec, side, "clusters"):
+                fr = pl.decal(spec, side, "clusters")
+                if fr:
                     placed += 1
+                    _note(pl, "clusters", key, item, fr)
 
 
-def rule_panel_lines(pl, r, recipe, rng):
+def rule_panel_lines(pl, r, recipe):
     """Thin engraved panel lines (SC: the main source of density, a line every 0.3-0.8 m, with 45-degree
     jogs). Hull sides and roof: per bay between the hull seam stations, "per_bay" polylines; pods: short
     lines inside the panels. All from the seed."""
@@ -599,8 +629,10 @@ def rule_panel_lines(pl, r, recipe, rng):
     for xa, xb in zip(stations, stations[1:]):
         if xb - xa < 0.5:
             continue
-        for band in r.get("side_bands", []):
+        for bi, band in enumerate(r.get("side_bands", [])):
             for k in range(band.get("per_bay", 2)):
+                key = _key("side", bi, xa, k)
+                rng = _rng(pl, "panel_lines", key)
                 z0 = rng.uniform(*band["z"])
                 z1 = min(max(z0 + rng.choice([-1, 1]) * rng.uniform(0.08, 0.25), band["z"][0]), band["z"][1])
                 xm = rng.uniform(xa + 0.2, max(xa + 0.25, xb - 0.2 - abs(z1 - z0)))
@@ -608,10 +640,14 @@ def rule_panel_lines(pl, r, recipe, rng):
                 pts = [[xa + 0.04, 0, z0], [xm, 0, z0], [xm + jog, 0, z1], [xb - 0.04, 0, z1]]
                 if rng.random() < 0.4:
                     pts = pts[:2] + [[xm, 0, z0 + rng.choice([-1, 1]) * rng.uniform(0.15, 0.35)]]
+                strip = rng.choice(strips)
                 for side in (1, -1):
-                    pl.ribbon({"strip": rng.choice(strips), "on": "side_line", "points": pts}, side, "panel_lines")
-        for band in r.get("top_bands", []):
+                    pl.ribbon({"strip": strip, "on": "side_line", "points": pts}, side, "panel_lines")
+                _note(pl, "panel_lines", key, strip, points=pts)
+        for bi, band in enumerate(r.get("top_bands", [])):
             for k in range(band.get("per_bay", 1)):
+                key = _key("top", bi, xa, k)
+                rng = _rng(pl, "panel_lines", key)
                 y0 = rng.uniform(*band["y"])
                 xm = rng.uniform(xa + 0.2, max(xa + 0.25, xb - 0.35))
                 dy = 0.12 * rng.choice([-1, 1])
@@ -619,6 +655,7 @@ def rule_panel_lines(pl, r, recipe, rng):
                 kind = band.get("on", "top_line")
                 for yy in ((1, -1) if band.get("mirror", True) else (1,)):
                     pl.ribbon({"strip": rng.choice(strips), "on": kind, "points": [[q[0], q[1] * yy, 0] for q in pts]}, 1, "panel_lines")
+                _note(pl, "panel_lines", key, kind, points=pts)
     pod = r.get("pod")
     if pod:
         avoid = pod.get("avoid", [])
@@ -631,6 +668,8 @@ def rule_panel_lines(pl, r, recipe, rng):
             for row in range(sec["rows"]):
                 ra, rb = xa + (xb - xa) * row / sec["rows"], xa + (xb - xa) * (row + 1) / sec["rows"]
                 for k in range(sec["around"]):
+                    key = _key("pod", name, row, k)
+                    rng = _rng(pl, "panel_lines", key)
                     if rng.random() > pod.get("chance", 0.6):
                         continue
                     deg = sec.get("phase_deg", 0.0) + (k + rng.uniform(0.3, 0.7)) * span
@@ -642,20 +681,24 @@ def rule_panel_lines(pl, r, recipe, rng):
                         continue
                     for side in (1, -1):
                         pl.ribbon({"strip": "panel_line", "on": "pod_line", "x": xs, "deg": deg}, side, "panel_lines")
+                    _note(pl, "panel_lines", key, "panel_line", points=[xs, [deg]])
 
 
-def rule_coverage(pl, r, rng):
+def rule_coverage(pl, r):
     """At least one small decal per ~0.5 m panel on the calm surfaces: a jittered grid over each listed
     area, an item from the pool at each point (skipped where something already sits)."""
     for a in r["areas"]:
         pool = a["items"]
         step = a.get("step", 0.55)
         dv = a.get("dv", step)
+        aid = a.get("id") or _key(a["on"], *a["u"], *a["v"])
         for side in ((1, -1) if a.get("mirror", True) else (1,)):
-            u = a["u"][0]
+            u, iu = a["u"][0], 0
             while u <= a["u"][1]:
-                v = a["v"][0]
+                v, iv = a["v"][0], 0
                 while v <= a["v"][1]:
+                    key = _key(aid, side, iu, iv)
+                    rng = _rng(pl, "coverage", key)
                     if rng.random() < a.get("chance", 0.7):
                         uu, vv = u + rng.uniform(-0.15, 0.15) * step, v + rng.uniform(-0.15, 0.15) * dv
                         item = pool[rng.randrange(len(pool))]
@@ -668,12 +711,14 @@ def rule_coverage(pl, r, rng):
                         else:
                             spec = {"item": item, "on": a["on"], "x": uu, "y": vv}
                         if spec:
-                            pl.decal(spec, side, "coverage")
+                            _note(pl, "coverage", key, item, pl.decal(spec, side, "coverage"))
                     v += dv
+                    iv += 1
                 u += step
+                iu += 1
 
 
-def rule_greeble_companions(pl, r, recipe, rng):
+def rule_greeble_companions(pl, r, recipe):
     """The kit greebles of the hull (hatches, vents, sensors, hs_build_ship place_greebles) get the same
     companions as decal hatches: a service label beside a hatch, a red marker, chevrons by a sensor,
     a small stencil by a vent."""
@@ -709,13 +754,18 @@ def rule_greeble_companions(pl, r, recipe, rng):
                     pl.decal(dict(spec, item=small[_stable(*key) % len(small)]), side, "greeble_companions")
 
 
-def rule_companions(pl, r, rng):
+def rule_companions(pl, r):
     """Next to every hatch: a service label above and a handle beside. Below grilles on side surfaces: a
     dirt streak, only now and then ("streak_chance": the clean look)."""
     labels = sorted(n for n, it in pl.index["decals"].items() if "label" in it.get("tags", []))
     for name, fr in list(pl.frames):
         tags = pl.index["decals"][name].get("tags", [])
         hit, x, y, w, h, n = fr
+        # one generator per parent decal, all three draws always made: the same choices on every rebuild
+        p = hit - pl.off
+        key = _key(name, round(p.x, 3), round(p.y, 3), round(p.z, 3))
+        rng = _rng(pl, "companions", key)
+        roll_bracket, roll_marker, roll_streak = rng.random(), rng.random(), rng.random()
         if "hatch" in tags:
             lab = labels[_stable(name, round(hit.x, 2), round(hit.y, 2), round(hit.z, 2)) % len(labels)]
             lh = pl.index["decals"][lab]["size_m"][1]
@@ -725,20 +775,21 @@ def rule_companions(pl, r, rng):
             q, qn = pl.lay(hit - x * (w / 2 + 0.06), n)
             if q is not None:
                 pl.place_at("handle", q, qn, rule="companions", frame=(-y, x), check_overlap=False)
-        if set(tags) & {"socket", "cap"} and rng.random() < r.get("bracket_chance", 0.8):
+        if set(tags) & {"socket", "cap"} and roll_bracket < r.get("bracket_chance", 0.8):
             pl.place_at("chevrons_port", hit + n * 0.0004, n, rule="companions", frame=(x, y), check_overlap=False)
-        if "hatch" in tags and rng.random() < r.get("marker_chance", 0.7):
+        if "hatch" in tags and roll_marker < r.get("marker_chance", 0.7):
             q, qn = pl.lay(hit + x * (w / 2 - 0.02) + y * (h / 2 + 0.02), n)
             if q is not None:
                 pl.place_at("red_marker", q, qn, rule="companions", frame=(x, y), check_overlap=False)
-        if "grille" in tags and abs(n.z) < 0.7 and rng.random() < r.get("streak_chance", 0.35):
+        if "grille" in tags and abs(n.z) < 0.7 and roll_streak < r.get("streak_chance", 0.35):
             st = "streak_drip" if w > 0.25 else "streak_short"
             sh = pl.index["decals"][st]["size_m"][1]
             down = Vector((0, 0, -1))
             down = (down - n * n.dot(down)).normalized()
             q, qn = pl.lay(hit + down * (h / 2 + sh / 2 - 0.01), n)
             if q is not None:
-                pl.place_at(st, q, qn, rule="companions", frame=(qn.cross(-down).normalized(), -down), check_overlap=False)
+                _note(pl, "companions", key, st,
+                      pl.place_at(st, q, qn, rule="companions", frame=(qn.cross(-down).normalized(), -down), check_overlap=False))
 
 
 # ---------------------------------------------------------------------------------------------- build
@@ -766,7 +817,6 @@ def build(recipe, target, ship, off, root):
     index = json.load(open(os.path.join(root, spec["index"]), encoding="utf-8"))
     rev = recipe["parts"]["pod"]["revolve"]["axis"]
     pl = Placer(target, spec, index, off, (rev["y"], rev["z"]))
-    rng = random.Random(spec.get("seed", 7))
     rules = spec.get("rules", {})
     # hero items first (they win the overlap test), then the rules
     for it in spec.get("items", []):
@@ -798,15 +848,15 @@ def build(recipe, target, ship, off, root):
     if "panel_marks" in rules:
         rule_panel_marks(pl, rules["panel_marks"], recipe)
     if "clusters" in rules:
-        rule_clusters(pl, rules["clusters"], rng, rules.get("pod_gaps", {}).get("avoid", []))
+        rule_clusters(pl, rules["clusters"], rules.get("pod_gaps", {}).get("avoid", []))
     if "greeble_companions" in rules:
-        rule_greeble_companions(pl, rules["greeble_companions"], recipe, rng)
+        rule_greeble_companions(pl, rules["greeble_companions"], recipe)
     if "companions" in rules:
-        rule_companions(pl, rules["companions"], rng)
+        rule_companions(pl, rules["companions"])
     if "coverage" in rules:
-        rule_coverage(pl, rules["coverage"], rng)
+        rule_coverage(pl, rules["coverage"])
     if "panel_lines" in rules:
-        rule_panel_lines(pl, rules["panel_lines"], recipe, rng)
+        rule_panel_lines(pl, rules["panel_lines"], recipe)
     if "hull_seams" in rules:
         rule_hull_seams(pl, rules["hull_seams"], recipe)
     if "pod_gaps" in rules:
@@ -843,5 +893,7 @@ def build(recipe, target, ship, off, root):
     report = {"decals": len(pl.log), "by_part": by_part, "by_rule": by_rule, "by_type": by_type,
               "strip_runs": {k: {"runs": v[0], "metres": round(v[1], 1)} for k, v in strips.items()},
               "skipped": pl.skipped, "faces": len(me.polygons), "kit": kit_check(pl),
+              # the random rules' placements by element key and a hash of their inputs (the rebuild check)
+              "random": {"rules_hash": _stable(pl.seed, json.dumps(rules, sort_keys=True)), "placed": pl.random},
               "grime": {"cards": len(pl.grime), "by_kind": {k: sum(1 for g in pl.grime if g[0] == k) for k in GRIME_CELLS}}}
     return ob, report

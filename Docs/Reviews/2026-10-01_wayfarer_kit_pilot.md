@@ -101,3 +101,33 @@ kategorie aspoň 6.
 
 Mimo výtky: trup s rozvody přešel limit exportéru 1 M trojúhelníků (1,03 M) – rozvody jsou souvislá trubka místo válce
 na segment, šrouby 8 stěn; trup 991 k. Trysky jako krémové disky (kolo 1, bod 11) zůstávají na krok gondol.
+
+## Krok c – pásy S a AFT jako desky na rámu (autor 2. 10., bez kritika), hotovo 2. 10.
+
+Výtky kola 3 č. 1 (desky S čtou jako okna) a č. 2 (záď bez vrstvení desek na rámu).
+- **Sekundární lak** (`Wayfarer_setup.json`): 0,53 0,51 0,47 (teplejší a světlejší než 0,42 0,43 0,45), drsnost
+  0,55 (0,34) a vlastní matnější clear coat `SecondaryClearCoatRoughness` 0,38 (nový parametr masteru
+  `M_Ship_Layered`, primární lak dál 0,05): zrcadlení oblohy dělalo z desek okna. Výkres: MZ-PAINT2 #C7C2B8.
+- **Desky S** (`panels.bands[S].sub`, `exterior_model.side_subs`): na každé desce přídavný panel XK-DOUBLER
+  a poklop XK-HATCH (jako decal `hatch_small` + 2 `latch_kit`, paprsek šikmo jako čísla desek), sudá pole čtvercový
+  panel vzadu a poklop vpředu, lichá poklop vzadu a pás panelu vpředu; mimo roh s číslem desky. 18 dílků na 11
+  deskách (S05 a S14 jen jeden / žádný – výřezy hardwaru). Čísla `pn_*` zůstala. **Rozvody F-CONDUIT-S**: trubka
+  Ø 60 gunmetal a kabelovod Ø 40 v horní části desek S na objímkách mimo žebra (`hs_exterior_kit.conduit_side`).
+- **Záď** (`panels.aft`, rám `FR-AFT`, `Views.aft_layout`): nosník nad rampou, příčky vedle rampy, sloupky nad
+  nosníkem (profil T), 7 desek P-S-A (vedle rampy dole a nahoře, nad nosníkem vnější a středová kolem světla),
+  větrací skříně P-S-AL03-V / AP03-V, šrouby jako decaly; dno kanálu tmavé jen na svislé stěně. Desky P-B-08/09
+  z receptu odebrány (kit je nahrazuje). Výstražné pruhy u rámu (D-H-30, D-H-62) desky obcházejí (`aft.clear`).
+  Zůstalo: rám rampy, písty, pant, lišty, nápis, výstražné pruhy, pracovní světlo (ověřeno na snímku).
+- **Karty špíny** (existující atlas, nic nového): `rim` pod podélníkem na deskách S (D-G-12–14) a pod nosníkem zádě
+  (D-G-15), `streaks` pod větracími skříněmi (D-G-16). **V kanálech ne:** atlas má jen čtvercové buňky vyblednuté
+  ke třem okrajům; na kanál 40–200 mm × metry chybí dlouhá úzká buňka (dlaždicová ve směru kanálu, špína u stěn
+  kanálu) – kandidát do příští dávky atlasu špíny spolu se směrovou buňkou vyšlapané linie.
+- **Zapečený stín:** po sloučení rovných ploch S a AFT nic nezčernalo. Vada nalezená na snímku z editoru: na zkosení
+  zádě měl plášť velké trojúhelníky a dno kanálu přiřazené podle středu plochy trčelo nad desky jako tmavé střepy –
+  dno kanálu je proto jen do z 1,56 (`aft.skin_z_max`); filtr normál desek zádě −0,2 (s −0,4 se horní desky
+  ořízly po trojúhelnících). Plochy se slučovat nepřestaly.
+- **HSBUDGET** před → po: trup 369 326 → 401 134 (kit_plates 11 910 → 18 626, kit_frame 22 500 → 25 628,
+  mid_layer 34 876 → 57 288 – rozvody S, hull_loft 52 258 → 52 276); decaly 2 230 → 2 475, karty špíny 22 → 30.
+- Výkresy E-01 až E-08 přegenerované (data se změnila; test „výkres = data“ PASS), I-04 překreslen kvůli pořadí světel
+  svítidel po přestavbě (9.6 cw). **Revize D zůstává neschválená** do posouzení autora.
+- Snímky: editor `shots:20261002_012447_wayfarer_kit_pilot/`, zabalená hra `shots:20261002_013605_wayfarer_kit_pilot/`, výřezy před/po v `2026-10-01_wayfarer_kit_pilot/stepc/`.

@@ -8,15 +8,15 @@
   "layout": "9ed16b60fbcc",
   "interior": "37c119fe0110",
   "setup": "bd0224ab21cc",
-  "lights": "42d84eb0e486",
+  "lights": "e1f4c837d91f",
   "design": "130558df41af",
   "kit": "8bccd87d886c",
   "library": "c95a719c8c3e",
   "light_rules": "788f180917fd"
  },
  "geometry": {
-  "SM_Ship_Wayfarer.fbx": "abd9bc5ba701",
-  "SM_Ship_Wayfarer_Interior.fbx": "f12fb389dfb4",
+  "SM_Ship_Wayfarer.fbx": "fb04d223eec4",
+  "SM_Ship_Wayfarer_Interior.fbx": "2c3a0739942d",
   "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
   "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",
   "SM_Kit_Bulkhead_Door00L41_C.fbx": "f9b4f693887f",
@@ -129,7 +129,7 @@
    "CAB-B-F/st_service",
    "D-INT-COCKPITSTAIRS",
    "DR-CAB-CPT",
-   "L-FIX-17"
+   "L-FIX-13"
   ],
   "EL-R": [
    "CAB-U-GALLEY",
@@ -276,7 +276,7 @@
    "CAB-B-F/st_service",
    "D-INT-COCKPITSTAIRS",
    "DR-CAB-CPT",
-   "L-FIX-17"
+   "L-FIX-13"
   ],
   "EL-R": [
    "CAB-U-GALLEY",
@@ -400,7 +400,7 @@
    "CAB-W-R4/Wash_0",
    "CAB-W-R5/Cove_0",
    "CAB-W-R5/Wash_0",
-   "L-FIX-17"
+   "L-FIX-13"
   ],
   "decals": [
    "CAB-B-A/hazard_stripe",

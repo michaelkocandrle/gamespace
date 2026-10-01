@@ -36,12 +36,14 @@ MAT = {"MZ-PAINT1": ("paint", 0), "MZ-PAINT2": ("paint", 1), "MZ-GUNMETAL": ("gu
        "MZ-METAL": ("metal", 0), "MZ-CHANNEL": ("channel", 0)}
 REGIONS = {
     "pilot": {
-        "bands": ["R", "S"],
+        "bands": ["R", "S", "A"],
         "frame": {"FR-SPINE": None, "FR-LONG-TOP": None, "FR-LONG-HI": None, "FR-RIB": 0.75},
         "parts": ["F-RAMP-FRAME", "F-RAMP-PISTON", "F-RAMP-TREAD", "F-RAMP-HINGE", "L-RAMP", "L-STROBE-FIN",
-                  "L-STROBE-WING", "F-RCS-12", "F-RCS-13", "F-CONDUIT", "F-VENT-AFT"],
+                  "L-STROBE-WING", "F-RCS-12", "F-RCS-13", "F-CONDUIT", "F-CONDUIT-S", "F-VENT-AFT"],
         "skin": {"x": [3.0, 15.4], "v_min": 0.759},
-        "_comment": "the roof, the shoulders, the stern and the pods: what the chase camera sees most (author 1. 10. 2026)",
+        "aft_skin": True,
+        "_comment": "the roof, the shoulders, the stern and the pods: what the chase camera sees most (author 1. 10. 2026); "
+                    "the aft wall as plates on a frame (band A, step c 2. 10. 2026)",
     },
 }
 
@@ -193,7 +195,7 @@ def layout(m, region):
     plates, frame, parts = [], [], []
     # plates: the roof in plan (each side its own outline), the side bands from starboard, mirrored
     for e in m.elements:
-        if e.cat != "panel" or e.data.get("band") not in reg["bands"]:
+        if e.cat != "panel" or e.data.get("band") not in reg["bands"] or e.data["band"] == "A":
             continue
         if e.data["band"] == "R":
             ent = plate_entry(e, "TOP", e.geo["TOP"]["shape"], e.kit, kit, False, {"nz_min": 0.3})
@@ -208,7 +210,28 @@ def layout(m, region):
                 ent["latch"] = kit[e.kit]["latch"]
             plates.append(ent)
         elif e.geo.get("SB"):
-            plates.append(plate_entry(e, "SB", e.geo["SB"]["shape"], e.kit, kit, True, {"ny_max": -0.2}))
+            ent = plate_entry(e, "SB", e.geo["SB"]["shape"], e.kit, kit, True, {"ny_max": -0.2})
+            if e.data.get("sub") == "hatch":
+                # two dark latches along the hatch's lower edge, a quarter of its length from each end (as on the roof)
+                x0, z0, x1, z1 = e.geo["SB"]["shape"].bounds
+                ent["latches"] = [[round(x0 + (x1 - x0) * f, 4), round(z0 + 0.045, 4)] for f in (0.25, 0.75)]
+                ent["latch"] = kit[e.kit]["latch"]
+            plates.append(ent)
+    # the aft wall (band A): plates on the frame FR-AFT with vent boxes, in the aft view (y, z; the layout's own
+    # coordinates - the drawing turns them to paper axes)
+    aft = m.design["panels"].get("aft")
+    if aft and aft["band"] in reg["bands"]:
+        lay = m.views_model.aft_layout()
+        for ident, tag, n, shp in lay["plates"]:
+            plates.append(plate_entry(m.by_id[ident], "AFT", shp, aft["kit"], kit, False, aft["normal"]))
+        for ident, g in lay["vents"]:
+            e = m.by_id[ident]
+            for ent in vent_entries(e, "AFT", g, kit[e.kit], aft["normal"], True):
+                plates.append(ent)
+        e = m.by_id[next(f["id"] for f in m.design["frame"] if f["kind"] == "aft")]
+        k = kit[e.kit]
+        frame.append(dict(dict(plate_entry(e, "AFT", lay["frame"], e.kit, kit, False, aft["normal"]), t=k["h"],
+                               bevel=0.003, bolts=[]), **profile(lay["frame"], k)))
     # the frame: from starboard (mirrored) where it is on the side and the shoulders, in plan over the flat roof
     upper = m.hull_band(0.0, 21.0, 0.0, 1.0)
     for ident, v_min in reg["frame"].items():
@@ -296,6 +319,19 @@ def layout(m, region):
             parts.append({"id": ident, "type": "conduit", "runs": runs, "lift": k["lift"], "clamp_pitch": k["clamp_pitch"],
                           "clamp_w": k["clamp_w"], "flange": k["flange"], "mirror": False,
                           "avoid_x": [round(x, 4) for x in m.seams], "avoid_w": kit["XK-RIB"]["w"] / 2 + 0.03})
+        elif ident == "F-CONDUIT-S":
+            # along the shoulder, over the S plates (side view x, z; mirrored): each pipe a polyline at its section
+            # height v, lifted off the skin along the surface normal
+            k = kit[d["kit"]]
+            runs = []
+            for p in d["pipes"]:
+                n = max(2, int((d["x"][1] - d["x"][0]) / 0.3) + 1)
+                xs = [d["x"][0] + (d["x"][1] - d["x"][0]) * i / (n - 1) for i in range(n)]
+                runs.append({"pts": [[round(x, 4), round(m.z_of(x, p["v"]), 4)] for x in xs], "d": p["d"],
+                             "material": MAT[p["material"]][0]})
+            parts.append({"id": ident, "type": "conduit", "view": "SB", "runs": runs, "lift": d["lift"],
+                          "clamp_pitch": k["clamp_pitch"], "clamp_w": k["clamp_w"], "flange": k["flange"], "mirror": True,
+                          "avoid_x": [round(x, 4) for x in m.seams], "avoid_w": kit["XK-RIB"]["w"] / 2 + 0.03})
         elif ident == "F-VENT-AFT":
             k = kit[d["kit"]]
             for sd in ((1, -1) if d.get("mirror", True) else (1,)):
@@ -310,6 +346,12 @@ def layout(m, region):
                           "pod_axis": [rev["axis"]["y"], rev["axis"]["z"]]})
     # the channel floor under the plates and the frame, darker than the frame (MZ-CHANNEL; critic round 1)
     skin = dict(reg["skin"], material="channel", id="P-HULL")
+    if reg.get("aft_skin") and aft:
+        # the aft wall between the plates, the frame and the ramp frame reads as the channel too (the white wall round
+        # the plates read as one white box); not inside the ramp frame (the door leaf P-B-07 and its seam)
+        fr = m.by_id["F-RAMP-FRAME"].data
+        skin["aft"] = {"outline": aft["outline"], "normal": aft["normal"], "x_max": 0.7, "z_max": aft.get("skin_z_max", 99.0),
+                       "exclude": [fr["y"][0], fr["z"][0] - 0.2, fr["y"][1], fr["z"][1]]}
     out = {"plates": plates, "frame": frame, "parts": parts, "skin": skin, "decals": panel_numbers(m)}
     decal_detail(m, out)
     return out
@@ -335,18 +377,29 @@ def decal_detail(m, out):
         if e.data.get("sub") != "hatch" or not inside(ent["id"]) or ent.get("suffix"):
             keep.append(ent)
             continue
-        g = e.geo["TOP"]["shape"]
+        view = ent["view"]
+        g = e.geo[view]["shape"]
         x0, y0, x1, y1 = g.bounds
         hx, hy = m.kit["XK-HATCH"]["size"]
-        out["decals"].append({"id": ent["id"], "item": "hatch_small", "on": "top", "x": round((x0 + x1) / 2, 4),
-                              "y": round((y0 + y1) / 2, 4), "scale": round(hx / 0.26, 3), "mirror": False,
-                              "check_overlap": False, "flat": True})
-        for lx, ly in ent.get("latches", []):
-            out["decals"].append({"id": ent["id"] + "-latch", "item": "latch_kit", "on": "top", "x": lx, "y": ly,
-                                  "mirror": False, "check_overlap": False, "flat": True})
+        if view == "TOP":
+            out["decals"].append({"id": ent["id"], "item": "hatch_small", "on": "top", "x": round((x0 + x1) / 2, 4),
+                                  "y": round((y0 + y1) / 2, 4), "scale": round(hx / 0.26, 3), "mirror": False,
+                                  "check_overlap": False, "flat": True})
+            for lx, ly in ent.get("latches", []):
+                out["decals"].append({"id": ent["id"] + "-latch", "item": "latch_kit", "on": "top", "x": lx, "y": ly,
+                                      "mirror": False, "check_overlap": False, "flat": True})
+        else:
+            # the shoulder (side view x, z, ~45 deg): a ray down and in like the plate numbers, both sides
+            def ray(x, z, **kw):
+                return dict({"on": "ray", "at": [round(x, 4), round(m.hull_y(x, z), 4), round(z, 4)],
+                             "dir": [0.0, -0.7071, -0.7071], "mirror": True, "check_overlap": False, "flat": True}, **kw)
+            out["decals"].append(ray((x0 + x1) / 2, (y0 + y1) / 2, id=ent["id"], item="hatch_small",
+                                     scale=round(hx / 0.26, 3)))
+            for lx, lz in ent.get("latches", []):
+                out["decals"].append(ray(lx, lz, id=ent["id"] + "-latch", item="latch_kit"))
         # the parent plate keeps no hole where the hatch was cut out
         parent = next(p for p in keep + out["plates"] if p["id"] == e.data["of"] and not p.get("suffix"))
-        pg = m.by_id[parent["id"]].geo["TOP"]["shape"]
+        pg = m.by_id[parent["id"]].geo[view]["shape"]
         parent["polys"] = rings(em.polys_only(pg.union(g.buffer(m.kit["XK-HATCH"]["gap"] + 0.002, join_style=2)).buffer(0)))
     out["plates"] = keep
 

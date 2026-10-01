@@ -356,6 +356,14 @@ python Tools/Design/exterior_kit_layout.py <Loď> [--region pilot]   # -> Design
   páteř (`roof_hardware` je vynechá). Větrací skříně XK-VENTBOX: na hřbetu místo čtvercového panelu v `sub.vent_bays`
   (ID `-V`), na zádi `F-VENT-AFT` (`on: aft`); staví se jako tři desky (skříň s otvorem, tmavé dno, lamely;
   `vent_entries` v rozvrhu). Hřeben páteře z holého kovu (`cap_material` v kitu → `cap.material` v rozvrhu).
+- **Rameno a záď jako desky na rámu** (krok c pilotu, 2. 10. 2026): boční pás může mít `sub` jako hřbet
+  (`exterior_model.side_subs`: pás výšek v sekce, panel + poklop, mimo roh s číslem desky; poklop na šikmém rameni
+  jako decal paprskem `ray` jako čísla); rozvody po rameni `on: shoulder` (`pipes` s výškou v, `lift` nad pláštěm přes
+  desky, `hs_exterior_kit.conduit_side`), rozvody desky nevyřezávají. Zadní stěna = `panels.aft` (obrys půlky stěny
+  v pohledu AFT, `cells`, `clear` – decaly, které desky obejdou) + rám `kind: aft` s `members` (`Views.aft_layout`);
+  dno kanálu na zádi jen na svislé stěně (`skin_z_max`: na zkosení jsou velké trojúhelníky a plocha přiřazená podle
+  středu trčí nad desky). Sekundární lak má vlastní clear coat (`SecondaryClearCoatRoughness` v `M_Ship_Layered`):
+  zrcadlící šedé desky četly jako okna.
 - **Čísla desek** (pravidlo D-R-PANEL-NUMBERS, `exterior_kit_layout.panel_numbers` → klíč `decals` rozvrhu →
   `hs_decals.build` → `Placer.text`): text složený z jednoznakových položek `pn_<znak>` v jednom rámu (položka na
   číslo se do atlasu 2 m nevešla: „decal sheet full“). Ramena: dolní zadní roh, paprsek šikmo dolů dovnitř (`ray`,

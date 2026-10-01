@@ -176,6 +176,9 @@ def draw_e05(m, dpi, out_dir):
         frA = Frame(Xc, 585.5, S20)
         view_title(sh, 34, 822, "ZEZADU – ZADNÍ STĚNA S RAMPOU, TRYSKY, ZÁĎ", "1 : 20")
         reqs = d.view_any(frA, "AFT")
+        # the aft wall's kit plates P-S-A (step c): their IDs inside them where they fit, else a leader
+        hiddenA, panel_reqs = d.panel_labels(frA, "AFT")
+        reqs = reqs + panel_reqs + d.hidden_panel_reqs(frA, hiddenA)
         d.place_labels("AFT", reqs, 34, 790, tiers_up=[789, 798.5, 808], tiers_dn=[488, 478.5], split_y=frA.P(0, 1.2)[1],
                        bus_up=782.0, bus_dn=496.0)
         y = frA.P(0, -1.6)[1]
@@ -193,7 +196,8 @@ def draw_e05(m, dpi, out_dir):
         sh.t(frF.P(7.35, 0)[0] + 2, frF.P(0, 3.6)[1], "levobok →", 2.5, GREY)
         y = side_notes(sh, m, 800, 808, "POZNÁMKY K POHLEDŮM", common(False) + [
             "3. Zezadu: pravobok vpravo; zadní stěna (řez trupu na zádi) šedým obrysem, rampa: spára D-T-05 čerchovaně, "
-            "kolem ní navržený rám F-RAMP-FRAME (gunmetal), písty F-RAMP-PISTON. Gondoly stojí před zádí, kryjí kořen "
+            "kolem ní navržený rám F-RAMP-FRAME (gunmetal), písty F-RAMP-PISTON; zbytek stěny desky P-S-A na rámu FR-AFT "
+            "(nosník nad rampou, příčky, sloupky) s větracími skříněmi -V. Gondoly stojí před zádí, kryjí kořen "
             "ploutví a křídel. Podrobně E-07 detail C.",
             "4. Zepředu: levobok vpravo; kabina se sklem, nos (Z-B-01) a sání gondol. Prvky boku a hřbetu jsou "
             "z čela vidět jen hranou: ty kreslí pravobok (E-01), levobok (E-06) a půdorysy (E-03, E-04).",

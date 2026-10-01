@@ -1,29 +1,29 @@
 {
  "ship": "Wayfarer",
  "mesh": "SM_Ship_Wayfarer",
- "total": 369326,
+ "total": 401134,
  "budget": 700000,
  "warn": 700000,
  "error": 1000000,
  "parts": {
   "hull_loft": {
    "max": 55000,
-   "tris": 52258,
+   "tris": 52276,
    "objects": 1
   },
   "kit_plates": {
    "max": 80000,
-   "tris": 11910,
-   "objects": 55
+   "tris": 18626,
+   "objects": 77
   },
   "kit_frame": {
    "max": 120000,
-   "tris": 22500,
-   "objects": 12
+   "tris": 25628,
+   "objects": 14
   },
   "mid_layer": {
    "max": 60000,
-   "tris": 34876,
+   "tris": 57288,
    "objects": 11
   },
   "nozzles": {
@@ -48,8 +48,8 @@
   },
   "functional_detail": {
    "max": 40000,
-   "tris": 23310,
-   "objects": 22
+   "tris": 22844,
+   "objects": 18
   },
   "other": {
    "max": null,
