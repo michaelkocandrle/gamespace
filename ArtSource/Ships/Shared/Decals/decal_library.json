@@ -6040,6 +6040,454 @@
       "rot": 0
      }
     ]
+   },
+   {
+    "name": "pn_R",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph 'R' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "R",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_L",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph 'L' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "L",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_P",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph 'P' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "P",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_S",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph 'S' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "S",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_0",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '0' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "0",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_1",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '1' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "1",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_2",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '2' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "2",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_3",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '3' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "3",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_4",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '4' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "4",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_5",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '5' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "5",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_6",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '6' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "6",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_7",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '7' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "7",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_8",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '8' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "8",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
+   },
+   {
+    "name": "pn_9",
+    "type": "info",
+    "footprint": [
+     0.024,
+     0.046
+    ],
+    "purpose": "plate number glyph '9' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+    "tags": [
+     "panel_number"
+    ],
+    "append": "plate numbers 1. 10. 2026",
+    "parts": [
+     {
+      "kind": "text",
+      "body": "9",
+      "size": 0.034,
+      "at": [
+       0,
+       0
+      ],
+      "font": "rajdhani",
+      "h": 0.0006,
+      "color": [
+       0.07,
+       0.07,
+       0.075
+      ],
+      "rot": 0
+     }
+    ]
    }
   ]
  },

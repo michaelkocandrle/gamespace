@@ -118,6 +118,26 @@ def hinge_knuckles(it, k):
     return [box(y0 + i * (L + gap), z - r, y0 + i * (L + gap) + L, z + r) for i in range(n)]
 
 
+def conduit_runs(m, it):
+    """The conduit's pipes (F-CONDUIT) as runs along x where the plan shows them: [(pipe, side, x0, x1)] (side +1
+    port, -1 starboard)."""
+    k = m.kit[it["kit"]]
+    g = m.by_id[it["id"]].geo.get("TOP")
+    out = []
+    if not g:
+        return out
+    for p in k["pipes"]:
+        for sd in (1, -1):
+            ln = LineString([(it["x"][0] - 1, sd * p["y"]), (it["x"][1] + 1, sd * p["y"])]).intersection(
+                g["shape"].buffer(1e-4))
+            for seg in getattr(ln, "geoms", [ln]):
+                if seg.is_empty or seg.length < 0.3:
+                    continue
+                xs = [c[0] for c in seg.coords]
+                out.append((p, sd, round(min(xs), 4), round(max(xs), 4)))
+    return out
+
+
 class Views:
     def __init__(self, m):
         self.m = m
@@ -738,7 +758,7 @@ class Views:
             if not g or g["solid"] != "hull" or g["kind"] not in ("area", "profile") or e.status == "remove":
                 continue
             if e.cat in ("greeble", "functional", "recess") or (e.cat == "light" and not e.extra.get("strip")):
-                if e.id in ("F-CANOPY-FRAME", "P-HULL"):
+                if e.id in ("F-CANOPY-FRAME", "P-HULL") or e.data.get("kind") == "conduit":
                     continue
                 out.append(e)
         return out
@@ -805,6 +825,12 @@ class Views:
             best = max(rs, key=lambda r: r[1] - r[0]) if rs else None
             if best and best[1] - best[0] >= 0.4:
                 out.append(("doubler", box(best[0], ya, best[1], yb)))
+        elif bay in sub.get("vent_bays", []):
+            # a vent box instead of the square doubler (critic round 2: the mid layer - vent housings on the roof)
+            ya, yb = band(sub["vent"]["y"])
+            g = window(ya, yb, sub["vent"]["len"], "aft", list(marks))
+            if g is not None:
+                out.append(("vent", g))
         else:
             ya, yb = band(sub["doubler_even"]["y"])
             g = window(ya, yb, sub["doubler_even"]["len"], "aft", list(marks))
@@ -882,13 +908,14 @@ class Views:
                     el.extra["label_cut"] = unary_union([g for _, g in subs]).buffer(0.03)
                 self._roof_side(el, shape, side)
                 for kind, g in subs:
-                    kit_id = "XK-DOUBLER" if kind == "doubler" else "XK-HATCH"
-                    sid = "%s-%s" % (ident, "D" if kind == "doubler" else "H")
-                    sel = m.add(Element(sid, "panel", roof["name"], status, material=roof["material"], kit=kit_id,
+                    kit_id = {"doubler": "XK-DOUBLER", "hatch": "XK-HATCH", "vent": "XK-VENTBOX"}[kind]
+                    sid = "%s-%s" % (ident, {"doubler": "D", "hatch": "H", "vent": "V"}[kind])
+                    sel = m.add(Element(sid, "panel", roof["name"], status,
+                                        material="MZ-GUNMETAL" if kind == "vent" else roof["material"], kit=kit_id,
                                         src="design", data={"band": "R", "bay": i, "x": [a, b], "side": tag,
                                                             "mirror": False, "sub": kind, "of": ident},
-                                        what=("přídavný panel na desce %s" if kind == "doubler" else
-                                              "malý poklop v desce %s") % ident))
+                                        what={"doubler": "přídavný panel na desce %s", "hatch": "malý poklop v desce %s",
+                                              "vent": "větrací skříň s lamelami na desce %s"}[kind] % ident))
                     sel.qty, sel.where = 1, el.where
                     sel.geo = {}
                     sel.vextra = {}
@@ -911,6 +938,17 @@ class Views:
                     parts.append(box(x - rib_w, -yr, x + rib_w, yr))
             g = unary_union(parts).difference(cut).intersection(hull_plan)
             self.put(e, "TOP", em.polys_only(g.buffer(0)), "area", "hull")
+        # the services along the spine (concept B, critic round 2): in the channel between the spine and the plates,
+        # broken where the spine is
+        for it in m.design.get("functional", []):
+            if it["kind"] != "conduit":
+                continue
+            k = m.kit[it["kit"]]
+            strips = [box(it["x"][0], sd * p["y"] - p["d"] / 2, it["x"][1], sd * p["y"] + p["d"] / 2)
+                      for p in k["pipes"] for sd in (1, -1)]
+            g = unary_union(strips).difference(cut).intersection(hull_plan)
+            self.put(m.by_id[it["id"]], "TOP", em.polys_only(g.buffer(0)), "area", "hull",
+                     anchor=(it["x"][0] + 2.0, k["pipes"][0]["y"]))
 
     def plan_conflicts(self):
         """The roof seen from above: a part under a plate (the plate must cut it out), lettering on a plate of its
@@ -1032,6 +1070,11 @@ class Views:
                 continue
             if it["kind"] == "hinge_ramp":
                 self.put(e, "AFT", unary_union(hinge_knuckles(it, k)), "area", "hull", anchor=(it["y"][1] - 0.1, it["z"]))
+                continue
+            if it["kind"] == "ventbox":
+                g = unary_union([box(sd * it["y"] - it["w"] / 2, it["z"][0], sd * it["y"] + it["w"] / 2, it["z"][1])
+                                 for sd in ((1, -1) if it.get("mirror", True) else (1,))])
+                self.put(e, "AFT", g, "area", "hull")
                 continue
             w = k["size"][0] if "size" in k else k["d"]
             g = unary_union([box(sd * it["y"] - w / 2, it["z"][0], sd * it["y"] + w / 2, it["z"][1])

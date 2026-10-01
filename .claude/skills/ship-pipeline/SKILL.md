@@ -349,6 +349,18 @@ python Tools/Design/exterior_kit_layout.py <Loď> [--region pilot]   # -> Design
   XK-HATCH v rovině desky se spárou (`panels.roof.sub`; `Views.roof_subs` je umístí 70 mm od hran a výřezů, posune
   po poli, jinak vynechá; ID `P-S-R<strana><pole>-D / -H`). Šrouby desek se rozkládají rovnoměrně
   (`em.bolt_columns`, stejně výkres i rozvrh).
+- **Střední vrstva** (kritik pilotu, kolo 2): rozvody XK-CONDUIT (`F-CONDUIT`, `on: roof`) leží v servisním kanálu
+  mezi páteří a deskami (`roof.spine_gap` 0,34 = půl páteře 0,14 + kanál 0,2 m): trubky podle `pipes` (y od osy,
+  Ø, materiál), spodek `lift` nad pláštěm (nad žebry), objímky po `clamp_pitch` mimo žebra, na koncích úseku do pláště
+  s přírubou; úseky = půdorys rozvodů minus výřezy (`exterior_views.conduit_runs`). Rozvody nevyřezávají desky ani
+  páteř (`roof_hardware` je vynechá). Větrací skříně XK-VENTBOX: na hřbetu místo čtvercového panelu v `sub.vent_bays`
+  (ID `-V`), na zádi `F-VENT-AFT` (`on: aft`); staví se jako tři desky (skříň s otvorem, tmavé dno, lamely;
+  `vent_entries` v rozvrhu). Hřeben páteře z holého kovu (`cap_material` v kitu → `cap.material` v rozvrhu).
+- **Čísla desek** (pravidlo D-R-PANEL-NUMBERS, `exterior_kit_layout.panel_numbers` → klíč `decals` rozvrhu →
+  `hs_decals.build` → `Placer.text`): text složený z jednoznakových položek `pn_<znak>` v jednom rámu (položka na
+  číslo se do atlasu 2 m nevešla: „decal sheet full“). Ramena: dolní zadní roh, paprsek šikmo dolů dovnitř (`ray`,
+  rameno je skloněné ~45°, `side` by decal zahodil na kontrole normály); hřbet: u zadní hrany mezi pásem panelů
+  a poklopů, posune se dopředu mimo výřezy, jinak vynechá.
 - **Záď z kitu:** rám rampy XK-RAMPFRAME (50 mm, šrouby, styčníky `ramp_gussets`), nášlapné lišty a pryžový práh
   XK-TREAD na dveřích (stojí na desce P-B-07: tloušťka = deska + lišta), pant XK-HINGE, písty XK-PISTON s vidlicovými
   držáky a hadicí (patka na stěně, hlava na čele rámu).

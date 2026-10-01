@@ -352,7 +352,7 @@ def piston(bms, base, top, kp, wall_x):
     bw, bh, bt = kp["bracket"]
     up = (top - base).normalized()
     b0, b1 = base + up * 0.07, base + (top - base) * 0.55
-    _cyl(bms["gunmetal"], b0, b1, d / 2, 20)
+    _cyl(bms["dark"], b0, b1, d / 2, 20)          # dark barrel against the chrome rod (critic round 2)
     for c in (b0, b1):
         _cyl(bms["metal"], c - up * 0.014, c + up * 0.014, d / 2 + 0.008, 20)
     _cyl(bms["metal"], b1 - up * 0.02, top - up * 0.06, rod_d / 2, 16)
@@ -394,6 +394,69 @@ def hinge(bms, p):
         for e in (a + 0.006, a + L - 0.006):
             _cyl(bms["gunmetal"], Vector((x, e - 0.006, z)), Vector((x, e + 0.006, z)), r + 0.006, 16)
     _cyl(bms["metal"], Vector((x, y0 - 0.02, z)), Vector((x, y1 + 0.02, z)), p["pin_d"] / 2, 10)
+
+
+def _tube(bm, pts, r, seg=12):
+    """One continuous pipe through the points (rings turned to the local tangent, capped ends): far lighter than a
+    capped cylinder per segment (the conduits' first build put the hull over the exporter's 1 M triangle limit)."""
+    rings = []
+    for i, c in enumerate(pts):
+        t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
+        ref = Vector((0, 0, 1)) if abs(t.z) < 0.9 else Vector((0, 1, 0))
+        u = (ref - t * t.dot(ref)).normalized()
+        v = t.cross(u)
+        rings.append([bm.verts.new(c + (u * math.cos(2 * math.pi * k / seg) + v * math.sin(2 * math.pi * k / seg)) * r)
+                      for k in range(seg)])
+    for a_, b_ in zip(rings, rings[1:]):
+        for k in range(seg):
+            bm.faces.new((a_[k], a_[(k + 1) % seg], b_[(k + 1) % seg], b_[k]))
+    bm.faces.new(list(reversed(rings[0])))
+    bm.faces.new(rings[-1])
+
+
+def conduit(bms, p, ray):
+    """XK-CONDUIT (critic round 2: services along the spine, concept B): pipes in the channel between the spine and
+    the roof plates, lift above the skin (over the ribs), following the roof; bare-metal band clamps with a foot every
+    clamp_pitch, kept off the ribs; at each end of a run the pipe turns down into the skin through a flange."""
+    seg = 12
+    for run in p["runs"]:
+        y, r = run["y"], run["d"] / 2
+        x0, x1 = run["x"]
+        n = max(2, int((x1 - x0) / 0.3) + 1)
+        pts, skin = [], []
+        for i in range(n):
+            x = x0 + (x1 - x0) * i / (n - 1)
+            hit, _ = ray("TOP", x, y)
+            if hit is None:
+                continue
+            skin.append(hit)
+            pts.append(Vector((x, y, hit.z + p["lift"] + r)))
+        if len(pts) < 2:
+            continue
+        mat = bms[run["material"]]
+        # the ends: down into the skin through a flange
+        ends = [(skin[0], pts[0], 1.0), (skin[-1], pts[-1], -1.0)]
+        path = ([Vector((pts[0].x + 0.02, y, skin[0].z - 0.01)), Vector((pts[0].x + 0.09, y, pts[0].z))] + pts[1:-1] +
+                [Vector((pts[-1].x - 0.09, y, pts[-1].z)), Vector((pts[-1].x - 0.02, y, skin[-1].z - 0.01))])
+        _tube(mat, [q for i, q in enumerate(path) if i == 0 or (q - path[i - 1]).length > 1e-4], r, seg)
+        for sk, pt, sgn in ends:
+            c = Vector((pt.x + sgn * 0.02, y, sk.z))
+            _cyl(bms["metal"], c - Vector((0, 0, 0.004)), c + Vector((0, 0, 0.012)), r + p["flange"], seg)
+        # band clamps with a foot, off the ribs
+        k = 1
+        while x0 + k * p["clamp_pitch"] < x1 - 0.15:
+            x = x0 + k * p["clamp_pitch"]
+            k += 1
+            if any(abs(x - a) < p["avoid_w"] for a in p["avoid_x"]):
+                x += p["avoid_w"] * 1.5
+            hit, _ = ray("TOP", x, y)
+            if hit is None:
+                continue
+            zc = hit.z + p["lift"] + r
+            w = p["clamp_w"]
+            _cyl(bms["metal"], Vector((x - w / 2, y, zc)), Vector((x + w / 2, y, zc)), r + 0.005, seg)
+            _box(bms["metal"], Vector((x, y, (hit.z + zc) / 2 - 0.004)), Vector((1, 0, 0)), Vector((0, 1, 0)),
+                 Vector((0, 0, 1)), (w, max(run["d"] * 0.7, 0.03), zc - hit.z + 0.008))
 
 
 # ------------------------------------------------------------------------------------------------ build
@@ -444,7 +507,7 @@ def apply(recipe, made, coll, mats, ship):
                     fill_grooves(cbm, e["view"], tree)
                     if e.get("mirror"):
                         mirror_into(cbm)
-                    shell(name + "_Web", cbm, coll, mats[e["material"]], cap["t"], 0.003)
+                    shell(name + "_Web", cbm, coll, mats[cap.get("material", e["material"])], cap["t"], 0.003)
                     report["webs"] = report.get("webs", 0) + 1
                 else:
                     print("HSKIT frame %s %s: no faces under the web" % (e["id"], e["view"]))
@@ -464,7 +527,8 @@ def apply(recipe, made, coll, mats, ship):
                     if side < 0:
                         hit, n = Vector((hit.x, -hit.y, hit.z)), Vector((n.x, -n.y, n.z))
                     r = max(e.get("bolt_d", 0.02), 0.012) / 2
-                    _cyl(bolts, hit + n * (e["t"] - 0.003), hit + n * (e["t"] + 0.006), r, 10, r * 0.8)
+                    # 8 sides: with the conduits the hull reached the exporter's 1 M triangle limit (round 3)
+                    _cyl(bolts, hit + n * (e["t"] - 0.003), hit + n * (e["t"] + 0.006), r, 8, r * 0.8)
                     report["bolts"] += 1
     if bolts.faces:
         ob = hp.finish(bolts, "SM_Ship_%s_Kit_Bolts" % ship, coll, {"angle_deg": 30, "width": 0.0, "segments": 1})
@@ -530,6 +594,8 @@ def apply(recipe, made, coll, mats, ship):
                 piston(bms, (p["x"], y, p["z"][0]), (p["x"], y, p["z"][1]), p, walls)
             elif p["type"] == "hinge":
                 hinge(bms, p)
+            elif p["type"] == "conduit":
+                conduit(bms, p, ray)
             report["parts"] += 1
     bpy.context.scene["hs_lights"] = json.dumps(lights)
     for key, bm in bms.items():

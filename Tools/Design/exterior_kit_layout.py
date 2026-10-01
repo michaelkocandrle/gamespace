@@ -11,7 +11,8 @@ was made from are in it and Tools/Tests/test_exterior_drawing.py checks them):
           wall; each with its cut-outs, thickness, bevel, bolt points, material, the faces it may take (normal
           filter) and whether it is mirrored to port
   frame   the same for the ribs, longerons and the spine (lower than the plates: the plates sit on the frame)
-  parts   placed kit parts (XK-RCS blocks, strobes, the ramp light, the ramp pistons)
+  parts   placed kit parts (XK-RCS blocks, strobes, the ramp light, the ramp pistons, the conduits along the spine)
+  decals  the plate numbers (rule D-R-PANEL-NUMBERS) as hs_decals texts (one-glyph library items pn_<glyph>)
   skin    where the hull skin under the plates turns gunmetal
 Regions: "pilot" = the roof (band R, spine, ribs over the roof), the shoulders (band S, longerons FR-LONG-HI and
 FR-LONG-TOP, the ribs above v 0.75), the stern (ramp frame, pistons, ramp light) and the pods (XK-RCS on the pods,
@@ -38,7 +39,7 @@ REGIONS = {
         "bands": ["R", "S"],
         "frame": {"FR-SPINE": None, "FR-LONG-TOP": None, "FR-LONG-HI": None, "FR-RIB": 0.75},
         "parts": ["F-RAMP-FRAME", "F-RAMP-PISTON", "F-RAMP-TREAD", "F-RAMP-HINGE", "L-RAMP", "L-STROBE-FIN",
-                  "L-STROBE-WING", "F-RCS-12", "F-RCS-13"],
+                  "L-STROBE-WING", "F-RCS-12", "F-RCS-13", "F-CONDUIT", "F-VENT-AFT"],
         "skin": {"x": [3.0, 15.4], "v_min": 0.759},
         "_comment": "the roof, the shoulders, the stern and the pods: what the chase camera sees most (author 1. 10. 2026)",
     },
@@ -83,6 +84,74 @@ def plate_entry(e, view, shape, kit, design_kit, mirror, normal):
             "bolts": bolt_points(shape, shape, k), "bolt_d": k.get("bolt_d", 0.0)}
 
 
+def vent_entries(e, view, g, k, normal, horizontal):
+    """XK-VENTBOX as three plates (critic round 2: the mid layer): the gunmetal housing with its rim (the outline with
+    the inner opening as a hole), the dark floor of the opening lower than the rim, gunmetal slats across it
+    (horizontal: slats along the first axis, stacked along the second - the aft wall; else across the first axis)."""
+    inner = g.buffer(-k["rim"], join_style=2)
+    base = dict(id=e.id, kit=e.kit, view=view, mirror=False, normal=normal, bolts=[], bolt_d=0.0, paint2=0)
+    out = [dict(base, material="gunmetal", t=k["t"], bevel=k["bevel"], polys=rings(g.difference(inner)))]
+    out.append(dict(base, material="dark", t=k["floor"], bevel=0.002, polys=rings(inner), suffix="Floor"))
+    x0, y0, x1, y1 = inner.bounds
+    bars, w, pitch = [], k["slat_w"], k["slat_pitch"]
+    span = (y1 - y0) if horizontal else (x1 - x0)
+    n = max(1, int((span - w) // pitch) + 1)
+    lead = (span - (n - 1) * pitch) / 2
+    for i in range(n):
+        c = (y0 if horizontal else x0) + lead + i * pitch
+        bars.append(box(x0, c - w / 2, x1, c + w / 2) if horizontal else box(c - w / 2, y0, c + w / 2, y1))
+    out.append(dict(base, material="gunmetal", t=k["slat_t"], bevel=0.002, polys=rings(unary_union(bars)),
+                    suffix="Slats"))
+    return out
+
+
+def panel_numbers(m):
+    """D-R-PANEL-NUMBERS on the built bands: the shoulder plates (side view) in their lower aft corner, the edge
+    distance in; the roof plates (plan) at their aft edge between the doubler and the hatch bands (the outer corner
+    lies on the roof edge's slope). hs_decals texts out of the one-glyph library items pn_<glyph>."""
+    rule = m.by_id.get("D-R-PANEL-NUMBERS")
+    if rule is None:
+        return []
+    d = rule.data
+    roof = m.design["panels"]["roof"]
+    sub = roof["sub"]
+    out = []
+    for e in m.elements:
+        if e.cat != "panel" or e.data.get("sub") or e.data.get("band") not in d.get("bands", []):
+            continue
+        num = e.id.split("-")[-1]
+        glyphs = dict(glyphs=num, prefix="pn_", advance=0.022)
+        if e.data["band"] == "R":
+            shp = e.geo["TOP"]["shape"]
+            x0, y0, x1, y1 = shp.bounds
+            side = 1 if e.data["side"] == "L" else -1
+            top = max(sub["doubler_odd"]["y"][1], sub["doubler_even"]["y"][1], sub["vent"]["y"][1])
+            yc = side * (roof["spine_gap"] + (top + sub["hatch_y"][0]) / 2)
+            # clear of the plate's cut-outs and its doubler / hatch / vent box: slide forward from the aft edge
+            busy = unary_union([o.geo["TOP"]["shape"] for o in m.elements
+                                if o.data.get("of") == e.id and o.geo.get("TOP")] or [Polygon()])
+            ok = shp.buffer(-0.02, join_style=2).difference(busy.buffer(0.02, join_style=2))
+            hw, hh = 0.06, d["size"] / 2 + 0.004
+            x = x0 + d["edge"] + hw
+            while x < x1 - hw and not ok.contains(box(x - hw, yc - hh, x + hw, yc + hh)):
+                x += 0.02
+            if x >= x1 - hw:
+                continue
+            out.append(dict({"id": "D-PN-%s" % num, "on": "top", "x": round(x, 4), "y": round(yc, 4), "mirror": False},
+                            **glyphs))
+        else:
+            shp = e.geo["SB"]["shape"]
+            x0, z0, x1, z1 = shp.bounds
+            xs = x0 + d["edge"] + 0.06
+            cut = LineString([(xs, z0 - 1), (xs, z1 + 1)]).intersection(shp)
+            zb = (cut.bounds[1] if not cut.is_empty else z0) + d["edge"] + d["size"] / 2
+            # the shoulder slopes ~45 deg: a ray down and in from above the plate (hs_decals 'ray', mirrored)
+            yh = m.hull_y(xs, zb)
+            out.append(dict({"id": "D-PN-%s" % num, "on": "ray", "at": [round(xs, 4), round(yh, 4), round(zb, 4)],
+                             "dir": [0.0, -0.7071, -0.7071], "mirror": True}, **glyphs))
+    return out
+
+
 def along(lines, pitch):
     """Points along lines (a ring or a line string, or several) every pitch, from half a pitch in."""
     pts = []
@@ -112,6 +181,9 @@ def profile(shp, k):
     out = {"bolts": [[round(a, 4), round(b, 4)] for a, b in pts], "bolt_d": k["bolt_d"]}
     if not web.is_empty:
         out["cap"] = {"polys": rings(web), "t": k["h"] + k["cap_h"]}
+        if k.get("cap_material"):
+            # the spine's crest in bare metal (critic round 2: lighter than the frame)
+            out["cap"]["material"] = MAT[k["cap_material"]][0]
     return out
 
 
@@ -125,6 +197,9 @@ def layout(m, region):
             continue
         if e.data["band"] == "R":
             ent = plate_entry(e, "TOP", e.geo["TOP"]["shape"], e.kit, kit, False, {"nz_min": 0.3})
+            if e.data.get("sub") == "vent":
+                plates += vent_entries(e, "TOP", e.geo["TOP"]["shape"], kit[e.kit], {"nz_min": 0.3}, False)
+                continue
             if e.data.get("sub") == "hatch":
                 # two dark latches towards the roof edge, a quarter of the hatch's length from each end
                 x0, y0, x1, y1 = e.geo["TOP"]["shape"].bounds
@@ -214,6 +289,20 @@ def layout(m, region):
                 nrm = [0.0, 1.0, 0.0]
             parts.append({"id": ident, "type": "strobe", "at": at, "normal": nrm, "size": k["size"], "mirror": True,
                           "position": d.get("position"), "mirror_position": d.get("mirror_position", d.get("position"))})
+        elif ident == "F-CONDUIT":
+            k = kit[d["kit"]]
+            runs = [{"y": round(sd * p["y"], 4), "d": p["d"], "material": MAT[p["material"]][0], "x": [x0, x1]}
+                    for p, sd, x0, x1 in ev.conduit_runs(m, d)]
+            parts.append({"id": ident, "type": "conduit", "runs": runs, "lift": k["lift"], "clamp_pitch": k["clamp_pitch"],
+                          "clamp_w": k["clamp_w"], "flange": k["flange"], "mirror": False,
+                          "avoid_x": [round(x, 4) for x in m.seams], "avoid_w": kit["XK-RIB"]["w"] / 2 + 0.03})
+        elif ident == "F-VENT-AFT":
+            k = kit[d["kit"]]
+            for sd in ((1, -1) if d.get("mirror", True) else (1,)):
+                g = box(sd * d["y"] - d["w"] / 2, d["z"][0], sd * d["y"] + d["w"] / 2, d["z"][1])
+                for ent in vent_entries(e, "AFT", g, k, {"nx_max": -0.5}, True):
+                    ent["suffix"] = ("%s_%s" % (ent.get("suffix", "Box"), "L" if sd > 0 else "R"))
+                    frame.append(ent)
         elif ident in ("F-RCS-12", "F-RCS-13"):
             k = kit["XK-RCS"]
             parts.append({"id": ident, "type": "rcs", "on": d["on"], "x": d["x"], "deg": d["deg"], "size": k["size"],
@@ -221,7 +310,7 @@ def layout(m, region):
                           "pod_axis": [rev["axis"]["y"], rev["axis"]["z"]]})
     # the channel floor under the plates and the frame, darker than the frame (MZ-CHANNEL; critic round 1)
     skin = dict(reg["skin"], material="channel", id="P-HULL")
-    return {"plates": plates, "frame": frame, "parts": parts, "skin": skin}
+    return {"plates": plates, "frame": frame, "parts": parts, "skin": skin, "decals": panel_numbers(m)}
 
 
 def write(ship="Wayfarer", region="pilot"):

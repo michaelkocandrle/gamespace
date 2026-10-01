@@ -67,3 +67,37 @@ D-R-PANEL-NUMBERS: nové položky `panel_RL03…` v `decal_library.json`, přest
 jak se atlas T_Decals_* dostane do UE – import ho nenašel); (6) soumrak teplé slunce (`space.Sun` barva) a noc
 s `space.Sky Intensity 0.03`, silnější pracovní světlo. Doporučené: lišty jen ve spodní polovině dveří, válec tmavý /
 pístnice kov, hadice se smyčkou, širší pruhy, hřeben páteře světlejší.
+
+Reakce na kolo 2 (provedeno 1. 10. 2026 večer, před kolem 3):
+
+| # | Výtka (závažnost) | Reakce |
+|---|---|---|
+| 1 | Hřbet čte jako dlaždice / okna (musí) | Opraveno: dno kanálu tmavě šedé (Channel 0,10 místo 0,05), zkosení desek XK-PLATE 4 mm (bylo 8), bez karbonových panelů (CarbonShare 0 – tmavé desky četly jako díry). |
+| 2 | Rám jako konstrukce (musí) | Opraveno: Gunmetal 0,24 (bylo 0,16), metallic 0,8, šrouby žeber a podélníků Ø 18 (12), páteře Ø 22 (16); hřeben páteře z holého kovu. |
+| 3 | Střední vrstva (musí) | Opraveno: rozvody XK-CONDUIT (F-CONDUIT) v servisním kanálu 200 mm mezi páteří a deskami (spine_gap 0,34) – trubka Ø 60 gunmetal a Ø 40 tmavá, 30 mm nad pláštěm, objímky po 0,5 m mimo žebra, konce do pláště s přírubou; větrací skříně XK-VENTBOX na hřbetu v polích 08 a 12 místo čtvercových panelů -D (pole 06 a 10 je nepojmou: výřezy antény a dílů); na zádi F-VENT-AFT místo decalu D-H-01; desky P-B-08/09 40 mm a zkosení 3 mm. Decaly D-H-23 (poklop) a D-H-25 (řada šroubů) na hřbetu odebrány – nahrazují je skutečné poklopy a šrouby kitu. Pruh panelů v lichých polích užší (y 0,07–0,35), aby se vešel vedle poklopů. |
+| 4 | Materiály (musí) | Opraveno: lak RoughVariation 0,45, GrungeAmount 0,3, ClearCoatRoughVariation 0,3; rám RoughVariation 0,35, Grunge 0,25. |
+| 5 | Čísla desek (musí) | Opraveno: cesta atlasu ověřena – `Wayfarer_setup.json` `textures` → `ship_materials.import_texture` → `/Game/Ships/Wayfarer/Textures/T_Decals_*` při každém `import_ship.py` (ne `/Game/Ships/Shared`, proto ho hledání nenašlo). Čísla podle pravidla D-R-PANEL-NUMBERS na deskách R a S (29 desek; RL05/RP05 vynechané, číslo by leželo ve výřezu): ramena v dolním zadním rohu, hřbet u zadní hrany mezi panely a poklopy. Položka na číslo se do atlasu nevešla, čísla se skládají ze 14 znaků `pn_*`. |
+| 6 | Soumrak a noc (musí) | Opraveno ve snímcích: soumrak s teplým sluncem (`space.Sun LightColor 255 160 95`), noc s oblohou `space.Sky Intensity 0.03` a nový noční snímek zezadu shora; pracovní světlo rampy 700 cd (bylo 300). Level sám den a noc nerozlišuje (známý problém). |
+| dop. | Lišty, válec, hadice, pruhy, hřeben | Válec tmavý, pístnice chrom; hřeben páteře kov. Lišty už jsou ve spodní polovině dveří (z 0,06–0,70). Smyčka hadice a širší pruhy nedělány (doporučené, mimo rozsah kola). |
+
+### Kolo 3 – FAIL, průměr 6,4 (poslední kolo; práh 6,5)
+
+Silueta 7, hierarchie 6, materiály 6, decaly 6, světlo 6, čitelnost 7, geometrie 7, soulad stylu 6.
+Výstup kritika: [round3/critic.md](2026-10-01_wayfarer_kit_pilot/round3/critic.md), snímky
+`shots:20261001_205521_wayfarer_kit_pilot/` (editor); ze zabalené hry `shots:20261001_211213_wayfarer_kit_pilot/` (stejný obraz). Kolo 2 → 3: +0,5, všechny
+kategorie aspoň 6.
+
+| # | Výtka (závažnost) | Reakce |
+|---|---|---|
+| 1 | Desky ramen S čtou jako okna (musí) | Otevřené: sekundární lak (šedý, lesklý) odráží oblohu. Další krok: světlejší teplejší šedá s vyšší drsností, na desky S panely / poklopy / čísla jako na hřbetu (pás S v kitu zatím bez `sub`). |
+| 2 | Záď bez vrstvení desek na rámu (musí) | Otevřené, systémové: kit zatím pokrývá jen rám rampy; zadní stěnu je třeba rozdělit na desky na rámu (pás AFT v rozvrhu jako R a S). Kritik píše, že rám nemá šrouby, styčníky a hadici – ty postavené jsou (kolo 1, bod 1 a 4); na snímcích ze vzdálenosti nečtou. |
+| 3 | Noc neukazuje světla lodi (doporučeno) | Otevřené: `space.Sky Intensity 0.03` trup neztmavil – trup svítí dál od atmosféry / Lumenu; pracovní světlo 700 cd nedělá na rampě skvrnu. Ověřit zdroj osvětlení v noci (`space.LightList`). |
+| 4 | Přepálené červené poziční světlo (doporučeno) | Otevřené: snížit bodové světlo u pouzdra XK-STROBE na křídle / gondole. |
+| 5 | Hřbet z dálky jako žebřík (doporučeno) | Otevřené: tmavé výřezy kolem poklopů a skříní; zvážit gunmetal místo dna kanálu ve výřezech. |
+| 6 | Málo šablon a výstrah (doporučeno) | Otevřené (koncept C: pruhy jen u servisních míst); rozšířit pruhy rampy. |
+| 7 | Lak bez variace a špíny (doporučeno) | Variace a špína zvýšené v tomto kole (RoughVariation 0,45, Grunge 0,3); kritik je nevidí – další krok: karty špíny v kanálech (grime). |
+| 8 | Rozvody nečitelné (doporučeno) | Zblízka čitelné (objímky z holého kovu); z dálky ne – zvážit světlejší trubku Ø 60. |
+| 9 | Černé tyče v rohu zádě (doporučeno) | Ověřit: pravděpodobně hadice pístu nebo anténa; při kitu zádě. |
+
+Mimo výtky: trup s rozvody přešel limit exportéru 1 M trojúhelníků (1,03 M) – rozvody jsou souvislá trubka místo válce
+na segment, šrouby 8 stěn; trup 991 k. Trysky jako krémové disky (kolo 1, bod 11) zůstávají na krok gondol.

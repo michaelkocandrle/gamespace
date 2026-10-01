@@ -4,11 +4,11 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "c10dc8f0b500",
-  "recipe": "d4e5451327c5",
-  "setup": "3bfdc564c7be",
+  "recipe": "b0166bb4bbba",
+  "setup": "edd157c448e4",
   "spec": "d9597dfcd605",
-  "design": "f44d4c6bb241",
-  "library": "0f3a67cf7c68"
+  "design": "c08da5218170",
+  "library": "ff1d9bc3e7cf"
  },
  "drawn": {},
  "labelled": {},
@@ -17,6 +17,7 @@
    "F-BLADE-01",
    "F-BLADE-02",
    "F-CANOPY-FRAME",
+   "F-CONDUIT",
    "F-CONN-01",
    "F-CONN-02",
    "F-DOME-01",
@@ -51,6 +52,7 @@
    "F-RCS-09",
    "F-RCS-12",
    "F-RCS-13",
+   "F-VENT-AFT",
    "F-WHIP-01",
    "F-WING"
   ],
@@ -104,6 +106,7 @@
    "L-TAIL"
   ],
   "kit": [
+   "XK-CONDUIT",
    "XK-DOUBLER",
    "XK-GRILLE",
    "XK-HATCH",
@@ -120,10 +123,10 @@
    "XK-SPINE",
    "XK-STROBE",
    "XK-TREAD",
+   "XK-VENTBOX",
    "XK-WORKLIGHT"
   ],
   "decals": [
-   "D-H-01",
    "D-H-02",
    "D-H-03",
    "D-H-04",
@@ -145,9 +148,7 @@
    "D-H-20",
    "D-H-21",
    "D-H-22",
-   "D-H-23",
    "D-H-24",
-   "D-H-25",
    "D-H-26",
    "D-H-27",
    "D-H-28",

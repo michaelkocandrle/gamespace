@@ -36,6 +36,7 @@ FUNC_SIZE = {"rcs": (0.26, 0.17, 0.05), "blade": (0.2, 0.07, 0.16), "whip": (0.0
 KIND_CZ = {"rcs": "blok RCS", "blade": "anténa (čepel)", "whip": "anténa (prut)", "dome": "senzorová kupole",
            "connector": "konektor", "hinge": "závěs klapky", "grille": "šachta s mřížkou", "piston": "hydraulický válec",
            "frame": "rám rampy", "tread": "nášlapné lišty rampy", "hinge_ramp": "pant rampy",
+           "conduit": "rozvody", "ventbox": "větrací skříň",
            "hatch": "poklop", "hatch_large": "velký poklop", "vent": "větrací mřížka", "sensor": "senzor",
            "strip": "kryt kabelů", "strobe": "záblesk", "landing": "přistávací světlomet", "work": "pracovní světlo"}
 LIGHT_RGB = {"red": "#D32F2F", "green": "#2E9E44", "white": "#FFFFFF", "amber": "#F2A100", "strip": "#8FD3FF",
@@ -775,7 +776,8 @@ class Model:
             el = self.add(Element(it["id"], "functional", KIND_CZ[kind], it["status"], src="design", data=it,
                                   what=it["what"], kit=it.get("kit"),
                                   material={"grille": "MZ-DARK", "piston": "MZ-METAL", "frame": "MZ-GUNMETAL", "tread": "MZ-GUNMETAL",
-                                            "hinge_ramp": "MZ-METAL"}.get(kind, "MZ-PAINT1")))
+                                            "hinge_ramp": "MZ-METAL", "conduit": "MZ-GUNMETAL",
+                                            "ventbox": "MZ-GUNMETAL"}.get(kind, "MZ-PAINT1")))
             el.qty = 2 if it.get("mirror", True) else 1
             if it["on"] == "side":
                 el.where = "bok x %s–%s" % (fmt(it["x"][0]), fmt(it["x"][1]))
@@ -789,6 +791,9 @@ class Model:
             elif it["on"] == "aft":
                 el.where = "zadní stěna u rampy"
                 el.views.add("AFT")
+            elif it["on"] == "roof":
+                el.where = "hřbet x %s–%s" % (fmt(it["x"][0]), fmt(it["x"][1]))
+                el.views.add("TOP")
 
     def _cuts(self, ids, margin):
         geoms = []

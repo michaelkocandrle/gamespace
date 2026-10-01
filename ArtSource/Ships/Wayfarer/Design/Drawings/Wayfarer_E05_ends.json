@@ -4,15 +4,14 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "c10dc8f0b500",
-  "recipe": "d4e5451327c5",
-  "setup": "3bfdc564c7be",
+  "recipe": "b0166bb4bbba",
+  "setup": "edd157c448e4",
   "spec": "d9597dfcd605",
-  "design": "f44d4c6bb241",
-  "library": "0f3a67cf7c68"
+  "design": "c08da5218170",
+  "library": "ff1d9bc3e7cf"
  },
  "drawn": {
   "AFT": [
-   "D-H-01",
    "D-H-30",
    "D-H-32",
    "D-H-33",
@@ -31,6 +30,7 @@
    "F-RAMP-HINGE",
    "F-RAMP-PISTON",
    "F-RAMP-TREAD",
+   "F-VENT-AFT",
    "F-WING",
    "L-RAMP",
    "L-STROBE-FIN",
@@ -66,7 +66,6 @@
  },
  "labelled": {
   "AFT": [
-   "D-H-01",
    "D-H-30",
    "D-H-32",
    "D-H-33",
@@ -85,6 +84,7 @@
    "F-RAMP-HINGE",
    "F-RAMP-PISTON",
    "F-RAMP-TREAD",
+   "F-VENT-AFT",
    "F-WING",
    "L-RAMP",
    "L-STROBE-FIN",
