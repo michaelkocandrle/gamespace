@@ -9,6 +9,7 @@
 #include "ShipSystemsComponent.h"
 #include "ShipQuantumComponent.h"
 #include "ShipLandingComponent.h"
+#include "ShipPresentationComponent.h"
 #include "SpaceshipPawn.generated.h"
 
 class UAudioComponent;
@@ -44,14 +45,6 @@ enum class ESpaceshipAxis : uint8
 	Lift,
 	/** +1 roll clockwise seen from the cockpit, -1 counter-clockwise. */
 	Roll
-};
-
-/** A hull material slot whose EmissiveStrength the ship animates (thrusters, strobes). */
-struct FShipGlowMaterial
-{
-	TWeakObjectPtr<UMaterialInstanceDynamic> Material;
-	float BaseStrength = 0.f;
-	float Applied = -1.f;
 };
 
 /**
@@ -106,6 +99,9 @@ UCLASS(Blueprintable)
 class GAMESPACE_API ASpaceshipPawn : public APawn
 {
 	GENERATED_BODY()
+
+	/** Reads the look tuning, the cameras and the flight state directly (see UShipPresentationComponent). */
+	friend class UShipPresentationComponent;
 
 public:
 	ASpaceshipPawn();
@@ -327,10 +323,10 @@ public:
 
 	/** MPC_ShipView.InsideView as this ship last set it: 1 = the player's camera is inside its interior. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Debug")
-	float DebugGetInsideView() const { return InsideView; }
+	float DebugGetInsideView() const { return Presentation->GetInsideView(); }
 
 	/** Fixture lights (Light_fix_*): -1 automatic (on only with the camera inside), 0 forced off, 1 forced on. */
-	void DebugSetFixtureLightMode(int32 Mode) { FixtureLightMode = Mode; bFixtureLightsDirty = true; }
+	void DebugSetFixtureLightMode(int32 Mode) { Presentation->SetFixtureLightMode(Mode); }
 
 	/** Shots / tuning: cockpit key and fill light, display glow (candela) and a multiplier on the interior's
 	 * base colour. Negative leaves that one as it is. */
@@ -390,7 +386,7 @@ public:
 	 * over the first second of a jump and falls over the last.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Quantum")
-	float GetQuantumBlend() const { return QuantumBlend; }
+	float GetQuantumBlend() const { return Presentation->GetQuantumBlend(); }
 
 	/** Tests: hold (or let go of) the engage button, as the left mouse button does. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Quantum")
@@ -888,6 +884,10 @@ protected:
 	/** Landing state: touchdown, the ground below, the gear and precision mode. Its tuning stays here. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UShipLandingComponent> Landing;
+
+	/** Presentation: camera effects, engine sound, ship lights, dust and the inside view. Its tuning stays here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipPresentationComponent> Presentation;
 
 	/** What the gear legs are built from (/Engine/BasicShapes/Cylinder): placeholder art until a modelled gear replaces it. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Gear")
@@ -1945,17 +1945,6 @@ private:
 	void UpdateQuantumTravel(float DeltaSeconds);
 	/** Everything a flight frame does before the camera and sound: shared by Tick and DebugStepFlight. */
 	void StepFlight(float DeltaSeconds);
-	void UpdateCameraEffects(float DeltaSeconds);
-	void UpdateSpaceDust(float DeltaSeconds);
-	/**
-	 * Glass reflection by where the camera is (author 26. 9. 2026): MPC_ShipView.InsideView = 1 while the
-	 * player's camera is inside this ship's interior (the "Interior*" parts' bounds, or the cockpit camera
-	 * of a ship without one): the canopy reflects weakly; 0 in the chase camera and outside: strongly.
-	 */
-	void UpdateViewCollection();
-	void SetupShipLights();
-	void UpdateShipLights(float DeltaSeconds);
-	void SetupAudioLayers();
 	UAudioComponent* PlayOneShot(USoundBase* Sound, float VolumeScale = 1.f);
 	bool IsExitSpotFree(const FVector& Location, const FVector& Up, float CapsuleRadius, float CapsuleHalfHeight) const;
 	/** Start moved along Direction (flattened onto the ship's floor plane) until GetHullClearance reaches ExitClearanceCm. */
@@ -1976,7 +1965,6 @@ private:
 
 	void UpdateAngularMotion(float DeltaSeconds);
 	void UpdateLinearMotion(float DeltaSeconds);
-	void UpdateEngineAudio(float DeltaSeconds);
 	void UpdateEnvironment(float DeltaSeconds);
 	void UpdateLanding(float DeltaSeconds);
 	void UpdateLandedMotion(float DeltaSeconds);
@@ -2007,11 +1995,6 @@ private:
 	/** What the cameras show, easing towards FreeLookTarget. */
 	FVector2D FreeLookAngles = FVector2D::ZeroVector;
 
-	/** Smoothed engine load and boost blend, each in [0, 1], driving the engine sound. */
-	float EngineLoad = 0.f;
-	float EngineBoostBlend = 0.f;
-	float HumBlend = 0.f;
-
 	float EngineDemand = 0.f;
 
 	/** See GetThrusterAcceleration / GetThrusterCapacity. */
@@ -2023,17 +2006,6 @@ private:
 	float GForce = 0.f;
 	float SlipAngleDeg = 0.f;
 
-	/** Eased 0..1 blends driving camera, lights and sound. */
-	float BoostBlend = 0.f;
-	float AfterburnerFeel = 0.f;
-	/** The level's sun and its own intensity, for QuantumSunScale. */
-	TWeakObjectPtr<class UDirectionalLightComponent> QuantumSun;
-	float QuantumSunBaseIntensity = -1.f;
-	TWeakObjectPtr<class USkyLightComponent> QuantumSky;
-	float QuantumSkyBaseIntensity = -1.f;
-	float QuantumBlend = 0.f;
-	float CameraKick = 0.f;
-
 	float CameraZoom = 1.f;
 	float CameraZoomTarget = 1.f;
 	/** Cockpit zoom, 0 normal field of view .. 1 CockpitZoomFov. */
@@ -2044,15 +2016,6 @@ private:
 	float BaseChaseFov = 90.f;
 	float BaseCockpitFov = 90.f;
 
-	TArray<FShipGlowMaterial> ThrusterMaterials;
-	TArray<FShipGlowMaterial> StrobeMaterials;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UAudioComponent> EngineHumAudio;
-	UPROPERTY(Transient)
-	TObjectPtr<UAudioComponent> BoostAudio;
-	UPROPERTY(Transient)
-	TObjectPtr<UAudioComponent> QuantumAudio;
 	UPROPERTY(Transient)
 	TObjectPtr<UAudioComponent> QuantumChargeAudio;
 
@@ -2098,32 +2061,6 @@ private:
 	/** Ticks left with camera lag switched off after SnapCameraToShip. */
 	int32 CameraSnapTicks = 0;
 
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialParameterCollection> ViewCollection;
-	/** The interior parts' bounds in actor space (cm); invalid when the ship has none. */
-	FBox InteriorBoundsLocal = FBox(ForceInit);
-	bool bInteriorBoundsReady = false;
-	float InsideView = 0.f;
-	/** The Light_fix_* components (hs_fixture_lights.py), on only while the camera is inside the ship. */
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<ULocalLightComponent>> FixtureLights;
-	bool bFixtureLightsOn = true;
-	int32 FixtureLightMode = -1;
-	bool bFixtureLightsDirty = false;
-	/** The interior meshes (Interior, InteriorKit, InteriorDecals): out of the sun's shadows while the interior
-	 * lighting is on. The hull still shadows the rooms; non-Nanite, they cost ~2 ms of the sun's virtual shadow maps
-	 * in a corridor view (28. 9. 2026). The kit rooms' parts (InteriorMod_*) are off the sun's lighting channel. */
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<UStaticMeshComponent>> InteriorShadowMeshes;
-	/** The fixture lights imported with shadows (a kit room's main lights, kit_rooms.py): shadowed only under the
-	 * interior lighting (MegaLights traces them); flown, their shadow maps cost ~4-5 ms (28. 9. 2026). */
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<ULocalLightComponent>> ShadowedFixtureLights;
-	/** Fixture lights tagged InteriorOnly (kit_rooms.py: the component bays' lights): on only under the interior
-	 * lighting; flown, every unshadowed light costs its full screen area (~0.6 ms for a corridor's bays, 29. 9. 2026). */
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<ULocalLightComponent>> InteriorOnlyLights;
-	int32 InteriorShadowState = -1;
 	/** Someone walks inside (SetInteriorWalk). */
 	bool bInteriorWalked = false;
 	/** The gravity volume riding along while the interior is walked. */

@@ -212,17 +212,6 @@ namespace SpaceshipPawnDefaults
 	/** 1 G in cm/s^2. */
 	constexpr double StandardGravityCmS2 = FShipFlightModel::StandardGravityCmS2;
 	const TCHAR* const EngineLoopSoundPath = TEXT("/Game/Ships/Audio/SW_EngineLoop.SW_EngineLoop");
-	const TCHAR* const EngineHumSoundPath = TEXT("/Game/Ships/Audio/SW_EngineHum.SW_EngineHum");
-	const TCHAR* const BoostLoopSoundPath = TEXT("/Game/Ships/Audio/SW_BoostLoop.SW_BoostLoop");
-	const TCHAR* const CruiseLoopSoundPath = TEXT("/Game/Ships/Audio/SW_CruiseLoop.SW_CruiseLoop");
-	const TCHAR* const BoostStartSoundPath = TEXT("/Game/Ships/Audio/SW_BoostStart.SW_BoostStart");
-	const TCHAR* const CruiseChargeSoundPath = TEXT("/Game/Ships/Audio/SW_CruiseCharge.SW_CruiseCharge");
-	const TCHAR* const CruiseEngageSoundPath = TEXT("/Game/Ships/Audio/SW_CruiseEngage.SW_CruiseEngage");
-	const TCHAR* const CruiseDropSoundPath = TEXT("/Game/Ships/Audio/SW_CruiseDrop.SW_CruiseDrop");
-	const TCHAR* const TouchdownSoundPath = TEXT("/Game/Ships/Audio/SW_Touchdown.SW_Touchdown");
-
-	/** The material parameter the ship animates on thruster and strobe slots (M_Ship_Hull). */
-	const FName EmissiveStrengthParameter(TEXT("EmissiveStrength"));
 
 	/** Quiet load: a missing asset is the normal case until the designer authors one. */
 	template <typename T>
@@ -345,6 +334,7 @@ ASpaceshipPawn::ASpaceshipPawn()
 	Systems = CreateDefaultSubobject<UShipSystemsComponent>(TEXT("ShipSystems"));
 	Quantum = CreateDefaultSubobject<UShipQuantumComponent>(TEXT("ShipQuantum"));
 	Landing = CreateDefaultSubobject<UShipLandingComponent>(TEXT("ShipLanding"));
+	Presentation = CreateDefaultSubobject<UShipPresentationComponent>(TEXT("ShipPresentation"));
 
 	SpaceDust =CreateDefaultSubobject<USpaceDustComponent>(TEXT("SpaceDust"));
 	SpaceDust->SetupAttachment(HullCollision);
@@ -373,8 +363,7 @@ void ASpaceshipPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Cooked with the glass material that reads it (ship_materials.py builds both).
-	ViewCollection = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/Ships/Shared/Materials/MPC_ShipView.MPC_ShipView"));
+	Presentation->LoadViewCollection();
 
 	ChaseCameraBaseLocation = ChaseCamera->GetRelativeLocation();
 	CockpitCameraBaseLocation = CockpitCamera->GetRelativeLocation();
@@ -385,19 +374,7 @@ void ASpaceshipPawn::BeginPlay()
 		const FBox Box = Hull->GetStaticMesh()->GetBoundingBox();
 		QuantumGlow->SetRelativeLocation(FVector(Box.Max.X + 150.0, 0.0, Box.GetCenter().Z - Box.GetExtent().Z * 0.3));
 	}
-	for (TActorIterator<ADirectionalLight> It(GetWorld()); It; ++It)
-	{
-		if (UDirectionalLightComponent* Light = Cast<UDirectionalLightComponent>(It->GetLightComponent()))
-		{
-			QuantumSun = Light;
-			break;
-		}
-	}
-	for (TActorIterator<ASkyLight> It(GetWorld()); It; ++It)
-	{
-		QuantumSky = It->GetLightComponent();
-		break;
-	}
+	Presentation->FindLevelLights();
 	BaseArmLength = CameraBoom->TargetArmLength;
 	BaseSocketOffset = CameraBoom->SocketOffset;
 	BaseChaseFov = ChaseCamera->FieldOfView;
@@ -416,8 +393,8 @@ void ASpaceshipPawn::BeginPlay()
 		UE_LOG(LogSpaceship, Warning, TEXT("%s has no engine sound: %s not found."),
 			*GetName(), SpaceshipPawnDefaults::EngineLoopSoundPath);
 	}
-	SetupAudioLayers();
-	SetupShipLights();
+	Presentation->SetupAudioLayers();
+	Presentation->SetupShipLights();
 	BuildGearLegs();
 	BuildPlaceholderCockpit();
 	PlaceCockpitLights();
@@ -453,133 +430,6 @@ void ASpaceshipPawn::SnapCameraToShip()
 	// real one. Two ticks, because the arm may update before or after this pawn in a frame.
 	CameraBoom->bEnableCameraLag = false;
 	CameraSnapTicks = 2;
-}
-
-void ASpaceshipPawn::UpdateViewCollection()
-{
-	if (!ViewCollection)
-	{
-		return;
-	}
-	if (!bInteriorBoundsReady)
-	{
-		bInteriorBoundsReady = true;
-		TArray<ULocalLightComponent*> Lights;
-		GetComponents<ULocalLightComponent>(Lights);
-		for (ULocalLightComponent* Light : Lights)
-		{
-			if (Light->GetName().StartsWith(TEXT("Light_fix_")))
-			{
-				FixtureLights.Add(Light);
-				if (Light->CastShadows)
-				{
-					ShadowedFixtureLights.Add(Light);
-				}
-				if (Light->ComponentHasTag(TEXT("InteriorOnly")))
-				{
-					InteriorOnlyLights.Add(Light);
-				}
-			}
-		}
-		TArray<UStaticMeshComponent*> Meshes;
-		GetComponents<UStaticMeshComponent>(Meshes);
-		for (const UStaticMeshComponent* Mesh : Meshes)
-		{
-			if (Mesh->GetStaticMesh() && Mesh->GetName().StartsWith(TEXT("Interior")))
-			{
-				const FTransform ToActor = Mesh->GetComponentTransform().GetRelativeTransform(GetActorTransform());
-				InteriorBoundsLocal += Mesh->GetStaticMesh()->GetBoundingBox().TransformBy(ToActor);
-				const FString Name = Mesh->GetName();
-				if (Name == TEXT("Interior") || Name == TEXT("InteriorKit") || Name == TEXT("InteriorDecals"))
-				{
-					InteriorShadowMeshes.Add(const_cast<UStaticMeshComponent*>(Mesh));
-				}
-			}
-		}
-	}
-	const APlayerCameraManager* Camera = UGameplayStatics::GetPlayerCameraManager(this, 0);
-	if (!Camera)
-	{
-		return;
-	}
-	// Through this pawn's own cameras: inside only in the cockpit view (the chase camera can hang inside the
-	// interior's box above the hull). Through anything else (the walking character, a shot's free camera): the
-	// camera inside the interior parts' box.
-	bool bInside;
-	if (Camera->GetViewTarget() == this)
-	{
-		bInside = bCockpitView;
-	}
-	else
-	{
-		bInside = InteriorBoundsLocal.IsValid
-			&& InteriorBoundsLocal.IsInside(GetActorTransform().InverseTransformPosition(Camera->GetCameraLocation()));
-	}
-	// The fixture lights (a light for every strip and lamp, hs_fixture_lights.py) only while the camera is inside:
-	// without shadows they light the hull through its walls, and from outside their volumes cover the whole ship
-	// on screen (~3 ms on the target GPU in a close chase view)
-	const bool bWantFixtures = FixtureLightMode < 0 ? bInside : FixtureLightMode > 0;
-	// The interior lighting (MegaLights, walked interiors): the interior meshes out of the sun's shadows - the hull
-	// shadows the rooms anyway, and flown the cockpit keeps its interior's sun shadows
-	const int32 ShadowState = ASpacePlayerController::IsInteriorLightingOn() ? 1 : 0;
-	if (ShadowState != InteriorShadowState)
-	{
-		InteriorShadowState = ShadowState;
-		bFixtureLightsDirty = true;       // the interior-only lights follow the lighting mode
-		for (UStaticMeshComponent* Mesh : InteriorShadowMeshes)
-		{
-			if (Mesh)
-			{
-				Mesh->SetCastShadow(ShadowState == 0);
-			}
-		}
-		for (ULocalLightComponent* Light : ShadowedFixtureLights)
-		{
-			if (Light)
-			{
-				Light->SetCastShadows(ShadowState == 1);
-			}
-		}
-	}
-	if (bWantFixtures != bFixtureLightsOn || bFixtureLightsDirty)
-	{
-		bFixtureLightsOn = bWantFixtures;
-		bFixtureLightsDirty = false;
-		for (ULocalLightComponent* Light : FixtureLights)
-		{
-			if (Light)
-			{
-				Light->SetVisibility(bWantFixtures && (ShadowState == 1 || !InteriorOnlyLights.Contains(Light)));
-			}
-		}
-	}
-	// One collection for the whole world: the ship the camera is in wins the frame, the others only clear
-	// it when no ship has claimed it yet this frame.
-	static uint64 ClaimedFrame = 0;
-	if (bInside)
-	{
-		ClaimedFrame = GFrameCounter;
-	}
-	else if (ClaimedFrame == GFrameCounter)
-	{
-		InsideView = 0.f;
-		return;
-	}
-	InsideView = bInside ? 1.f : 0.f;
-	UKismetMaterialLibrary::SetScalarParameterValue(this, ViewCollection, TEXT("InsideView"), InsideView);
-	// Seen from inside, the canopy fills the whole view: Lumen's sharp front-layer reflections on it cost ~1.9 ms
-	// on the target GPU (RTX 2060, 1080p). Inside the cheap radiance-cache reflection is enough (the "weak"
-	// reflection); outside the glass covers a small part of the screen and gets the sharp one.
-	static int32 LastFrontLayer = -1;
-	const int32 FrontLayer = bInside ? 0 : 1;
-	if (FrontLayer != LastFrontLayer)
-	{
-		LastFrontLayer = FrontLayer;
-		if (IConsoleVariable* Var = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Lumen.TranslucencyReflections.FrontLayer.Enable")))
-		{
-			Var->Set(FrontLayer, ECVF_SetByCode);
-		}
-	}
 }
 
 void ASpaceshipPawn::DebugConfigureCockpit(const FVector& EyeLocation, bool bHideHull, bool bHideCanopy)
@@ -1372,7 +1222,7 @@ void ASpaceshipPawn::UpdateMasterMode(float DeltaSeconds)
 {
 	if (Systems->UpdateMasterMode(DeltaSeconds, MasterModeSwitchSeconds))
 	{
-		CameraKick = FMath::Max(CameraKick, 0.35f);
+		Presentation->Kick(0.35f);
 	}
 }
 
@@ -2085,11 +1935,11 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	StepFlight(DeltaSeconds);
-	UpdateCameraEffects(DeltaSeconds);
-	UpdateEngineAudio(DeltaSeconds);
-	UpdateShipLights(DeltaSeconds);
-	UpdateSpaceDust(DeltaSeconds);
-	UpdateViewCollection();
+	Presentation->UpdateCameraEffects(DeltaSeconds);
+	Presentation->UpdateEngineAudio(DeltaSeconds);
+	Presentation->UpdateShipLights(DeltaSeconds);
+	Presentation->UpdateSpaceDust(DeltaSeconds);
+	Presentation->UpdateViewCollection();
 
 	if (CameraSnapTicks > 0 && --CameraSnapTicks == 0)
 	{
@@ -2158,7 +2008,7 @@ void ASpaceshipPawn::UpdateBoost(float DeltaSeconds)
 	const FShipReserve::FTuning Tuning{BoostDurationSeconds, BoostRechargeSeconds, BoostRechargeDelaySeconds, BoostUnlockFraction};
 	if (Systems->UpdateBoost(DeltaSeconds, bAllowed, Tuning))
 	{
-		CameraKick = FMath::Max(CameraKick, 0.3f);
+		Presentation->Kick(0.3f);
 	}
 }
 
@@ -2174,7 +2024,7 @@ void ASpaceshipPawn::UpdateAfterburner(float DeltaSeconds)
 		AfterburnerUnlockFraction};
 	if (Systems->UpdateAfterburner(DeltaSeconds, bAllowed, Tuning, AfterburnerSpoolSeconds, AfterburnerFadeSeconds))
 	{
-		CameraKick = FMath::Max(CameraKick, 1.f);
+		Presentation->Kick(1.f);
 		PlayOneShot(BoostStartSound);
 	}
 }
@@ -2266,7 +2116,7 @@ void ASpaceshipPawn::BeginQuantumJump()
 	Systems->CutBoostAndAfterburner();
 	Systems->ClearVtol();
 	// A lighter jolt than a drop-out: the jump now builds up (QuantumRampSeconds) rather than snapping.
-	CameraKick = 0.4f;
+	Presentation->SetKick(0.4f);
 	QuantumChargeAudio = nullptr;
 	PlayOneShot(QuantumEngageSound);
 	// The jump's burst of green light (the reference at 4:10).
@@ -2278,7 +2128,7 @@ void ASpaceshipPawn::BeginQuantumJump()
 void ASpaceshipPawn::EndQuantumJump(EQuantumBlocker Reason)
 {
 	Quantum->EndJump(Reason, GetQuantumRules());
-	CameraKick = 1.f;
+	Presentation->SetKick(1.f);
 	// Out at NAV speed at most; the overspeed bleed takes the rest.
 	const double Speed = LinearVelocity.Size();
 	if (Speed > QuantumExitSpeed)
@@ -2350,7 +2200,7 @@ bool ASpaceshipPawn::DebugEngageQuantum(const FString& TargetName, float TravelF
 	{
 		LinearVelocity = Direction * double(QuantumExitSpeed);
 	}
-	QuantumBlend = TravelFraction > 0.f ? 1.f : 0.f;
+	Presentation->SetQuantumBlend(TravelFraction > 0.f ? 1.f : 0.f);
 	return true;
 }
 
@@ -2824,128 +2674,9 @@ void ASpaceshipPawn::UpdateLandedMotion(float DeltaSeconds)
 	SetActorLocationAndRotation(Location, Rotation);
 }
 
-void ASpaceshipPawn::UpdateCameraEffects(float DeltaSeconds)
-{
-	BoostBlend = FMath::FInterpTo(BoostBlend, Systems->IsBoostActive() ? 1.f : 0.f, DeltaSeconds, 4.f);
-	// Asymmetric on purpose: the punch arrives at once, the view settles back slowly. Symmetric easing
-	// made lighting the afterburner feel soft, which is most of what "no kick" was about.
-	AfterburnerFeel = FMath::FInterpTo(AfterburnerFeel, Systems->IsAfterburnerActive() ? 1.f : 0.f, DeltaSeconds,
-		Systems->IsAfterburnerActive() ? 9.f : 2.5f);
-	// The quantum look arrives in about a second and leaves faster; the last 5% of a jump fades it out.
-	// The jump's look follows its speed, so it builds up with the acceleration ramp instead of snapping
-	// on (the author, 22. 9. 2026); the last 5 % of the jump fades it out again.
-	const float SpeedShare = float(LinearVelocity.Size() / FMath::Max(double(QuantumMaxSpeedKmS) * 100000.0 * QuantumLookFullSpeedShare, 1.0));
-	const float QuantumTarget01 = Quantum->GetState() == EQuantumState::Traveling
-		? FMath::SmoothStep(0.f, 1.f, FMath::Clamp(SpeedShare, 0.f, 1.f)) * FMath::Clamp((1.f - GetQuantumTravelProgress()) / 0.05f, 0.f, 1.f) : 0.f;
-	QuantumBlend = FMath::FInterpTo(QuantumBlend, QuantumTarget01, DeltaSeconds, QuantumTarget01 > QuantumBlend ? 4.f : 4.f);
-	CameraKick *= FMath::Exp(-5.f * DeltaSeconds);
-	// No camera lag in a quantum jump: even capped at 15 m it trails along the flight path, and
-	// looked at from the side (free look) that pushed the ship out of the frame (21. 9. 2026).
-	// The lag is not switched off any more, it is wound up: at the moment it went off, the boom
-	// snapped to its exact place and the ship jumped across the screen (the author, 22. 9. 2026).
-	// Switched off rather than capped at 0 would not do either: a CameraLagMaxDistance of 0 means no
-	// cap at all, and the camera was left kilometres behind.
-	if (CameraSnapTicks == 0)
-	{
-		const float Catching = FMath::Max(Quantum->GetState() == EQuantumState::Traveling ? 1.f : 0.f, QuantumBlend);
-		CameraBoom->bEnableCameraLag = true;
-		CameraBoom->CameraLagSpeed = FMath::Lerp(BaseCameraLagSpeed, QuantumCameraLagSpeed, FMath::SmoothStep(0.f, 1.f, Catching));
-	}
-
-	// Mouse wheel zoom, eased.
-	CameraZoom = FMath::FInterpTo(CameraZoom, CameraZoomTarget, DeltaSeconds, 8.f);
-	CockpitZoom = FMath::FInterpTo(CockpitZoom, CockpitZoomTarget, DeltaSeconds, 8.f);
-	if (BaseArmLength > 0.f)
-	{
-		CameraBoom->TargetArmLength = BaseArmLength * CameraZoom;
-		// The height above the ship grows slower than the distance, so a far camera does not end
-		// up looking steeply down on it.
-		CameraBoom->SocketOffset = BaseSocketOffset * FMath::Sqrt(CameraZoom);
-	}
-
-	// A jump is dark: the tunnel is nearly black with a bright point ahead, and letting the eye
-	// adapt to it washed the whole frame out to a flat navy blue (the author against the reference,
-	// 22. 9. 2026). So the exposure is pinned while the jump lasts.
-	for (UCameraComponent* Camera : { ToRawPtr(ChaseCamera), ToRawPtr(CockpitCamera) })
-	{
-		FPostProcessSettings& Post = Camera->PostProcessSettings;
-		Post.bOverride_AutoExposureMinBrightness = QuantumBlend > 0.001f;
-		Post.bOverride_AutoExposureMaxBrightness = QuantumBlend > 0.001f;
-		const float OwnBias = Camera == CockpitCamera ? CockpitExposureBias : 0.f;
-		Post.bOverride_AutoExposureBias = QuantumBlend > 0.001f || OwnBias != 0.f;
-		const float Pinned = FMath::Lerp(0.f, QuantumExposure, QuantumBlend);
-		Post.AutoExposureMinBrightness = FMath::Max(Pinned, 0.03f);
-		Post.AutoExposureMaxBrightness = FMath::Max(Pinned, 0.03f);
-		Post.AutoExposureBias = FMath::Lerp(OwnBias, QuantumExposureBias, QuantumBlend);
-	}
-
-	// Speed you can feel: the view widens with the afterburner and more in a quantum jump.
-	const float FovKick = AfterburnerFovKick * AfterburnerFeel + QuantumFovKick * QuantumBlend;
-	ChaseCamera->SetFieldOfView(BaseChaseFov + FovKick);
-	const float CockpitFov = FMath::Lerp(BaseCockpitFov, CockpitZoomFov, CockpitZoom) + 0.6f * FovKick * (1.f - CockpitZoom);
-	CockpitCamera->SetFieldOfView(FMath::Lerp(CockpitFov, DashboardFocusFov, DashboardFocusBlend));
-
-	// Smooth noise rather than random jumps: a rumble, not a flicker. Nothing moves when calm.
-	static const IConsoleVariable* ShakeScale = IConsoleManager::Get().RegisterConsoleVariable(TEXT("space.CameraShake"), 1.f,
-		TEXT("Camera shake multiplier (boost, afterburner, quantum, heat, kicks); 0 = none."), ECVF_Default);
-	const float Spool = Quantum->GetState() == EQuantumState::Ready ? GetQuantumEngageHold() : 0.f;
-	const float Amplitude = ShakeScale->GetFloat() * (HeatShakeCm * Heat * Heat + BoostShakeCm * BoostBlend + AfterburnerShakeCm * AfterburnerFeel
-		+ QuantumShakeCm * (Spool * Spool + 0.25f * QuantumBlend) + KickShakeCm * CameraKick);
-	const double Time = GetWorld()->GetTimeSeconds();
-	const FVector Shake = Amplitude < 0.01f
-		? FVector::ZeroVector
-		: FVector(
-			FMath::PerlinNoise1D(float(Time * 11.0 + 3.7)),
-			FMath::PerlinNoise1D(float(Time * 12.4 + 17.1)),
-			FMath::PerlinNoise1D(float(Time * 10.0 + 41.9))) * Amplitude;
-	ChaseCamera->SetRelativeLocation(ChaseCameraBaseLocation + Shake);
-	// Dashboard focus leans the head in; the shake stays, a little, on the way.
-	CockpitCamera->SetRelativeLocation(FMath::Lerp(CockpitCameraBaseLocation, DashboardFocusEye, DashboardFocusBlend) + Shake * 0.25 * (1.f - 0.6f * DashboardFocusBlend));
-}
-
 // -------------------------------------------------------------------------------------------
 // Sound
 // -------------------------------------------------------------------------------------------
-
-void ASpaceshipPawn::SetupAudioLayers()
-{
-	using namespace SpaceshipPawnDefaults;
-	auto Load = [](TObjectPtr<USoundBase>& Sound, const TCHAR* Path)
-	{
-		if (!Sound)
-		{
-			Sound = LoadOptional<USoundBase>(Path);
-		}
-	};
-	Load(EngineHumSound, EngineHumSoundPath);
-	Load(BoostLoopSound, BoostLoopSoundPath);
-	Load(QuantumLoopSound, CruiseLoopSoundPath);
-	Load(BoostStartSound, BoostStartSoundPath);
-	Load(QuantumChargeSound, CruiseChargeSoundPath);
-	Load(QuantumEngageSound, CruiseEngageSoundPath);
-	Load(QuantumExitSound, CruiseDropSoundPath);
-	Load(TouchdownSound, TouchdownSoundPath);
-
-	// Created at runtime rather than as default subobjects: nothing to configure per ship, and
-	// Blueprints made before these layers existed need no changes.
-	auto MakeLayer = [this](USoundBase* Sound, const TCHAR* Name) -> UAudioComponent*
-	{
-		if (!Sound)
-		{
-			return nullptr;
-		}
-		UAudioComponent* Layer = NewObject<UAudioComponent>(this, FName(Name));
-		Layer->SetupAttachment(HullCollision);
-		Layer->bAutoActivate = false;
-		Layer->bAllowSpatialization = false;
-		Layer->SetSound(Sound);
-		Layer->RegisterComponent();
-		return Layer;
-	};
-	EngineHumAudio = MakeLayer(EngineHumSound, TEXT("EngineHumAudio"));
-	BoostAudio = MakeLayer(BoostLoopSound, TEXT("BoostAudio"));
-	QuantumAudio = MakeLayer(QuantumLoopSound, TEXT("QuantumAudio"));
-}
 
 UAudioComponent* ASpaceshipPawn::PlayOneShot(USoundBase* Sound, float VolumeScale)
 {
@@ -2955,186 +2686,6 @@ UAudioComponent* ASpaceshipPawn::PlayOneShot(USoundBase* Sound, float VolumeScal
 		return nullptr;
 	}
 	return UGameplayStatics::SpawnSound2D(this, Sound, OneShotVolume * VolumeScale * USpaceUserSettings::GetEffectsVolume());
-}
-
-void ASpaceshipPawn::UpdateEngineAudio(float DeltaSeconds)
-{
-	const bool bPiloted = IsPlayerControlled();
-
-	// Eased rather than snapped, so the engines spool up and down instead of clicking. The load is
-	// what the thrusters really do: braking and holding altitude are heard too, a steady coast
-	// through empty space is quiet.
-	// Coupled, the engines also drone with speed (in a quantum jump: a steady drone), so steady flight is
-	// never silent.
-	const float LeverLoad = Quantum->GetState() == EQuantumState::Traveling ? 0.35f
-		: bFlightAssist ? 0.35f * FMath::Clamp(float(LinearVelocity.Size()) / FMath::Max(GetModeMaxSpeed(), 1.f), 0.f, 1.f) : 0.f;
-	EngineLoad = FMath::FInterpTo(EngineLoad, bPiloted ? FMath::Max(EngineDemand, LeverLoad) : 0.f, DeltaSeconds, EngineSpoolRate);
-	EngineBoostBlend = FMath::FInterpTo(EngineBoostBlend, bPiloted && Systems->IsAfterburnerActive() ? 1.f : 0.f, DeltaSeconds, EngineSpoolRate);
-	HumBlend = FMath::FInterpTo(HumBlend, bPiloted ? 1.f : 0.f, DeltaSeconds, 1.5f);
-
-	const float Effects = USpaceUserSettings::GetEffectsVolume();
-	auto Drive = [Effects](UAudioComponent* Layer, float Volume, float Pitch)
-	{
-		Volume *= Effects;
-		if (!Layer || !Layer->GetSound())
-		{
-			return;
-		}
-		// Below this the layer is inaudible anyway; stopping it frees the voice.
-		if (Volume < 0.004f)
-		{
-			if (Layer->IsPlaying())
-			{
-				Layer->Stop();
-			}
-			return;
-		}
-		if (!Layer->IsPlaying())
-		{
-			Layer->Play();
-		}
-		Layer->SetVolumeMultiplier(Volume);
-		Layer->SetPitchMultiplier(Pitch);
-	};
-
-	Drive(EngineHumAudio, EngineHumVolume * HumBlend * (0.85f + 0.3f * EngineLoad), 1.f + 0.04f * EngineLoad + 0.06f * QuantumBlend);
-
-	const float Load = FMath::Min(EngineLoad + 0.35f * EngineBoostBlend, 1.f);
-	Drive(EngineAudio, EngineVolume * Load,
-		FMath::Lerp(EngineMinPitch, EngineMaxPitch, EngineLoad) + EngineBoostPitch * EngineBoostBlend);
-	// Interpolated in log space, which is how cutoff frequencies are heard.
-	EngineAudio->SetLowPassFilterFrequency(FMath::Exp(FMath::Lerp(
-		FMath::Loge(EngineLowPassIdleHz), FMath::Loge(EngineLowPassFullHz), Load)));
-
-	Drive(BoostAudio, bPiloted ? BoostVolume * AfterburnerFeel : 0.f, 1.f + 0.06f * AfterburnerFeel);
-	const float QuantumSpeed = FMath::Clamp(float(LinearVelocity.Size() / (double(QuantumMaxSpeedKmS) * 100000.0)), 0.f, 1.f);
-	Drive(QuantumAudio, bPiloted ? QuantumVolume * QuantumBlend : 0.f, 0.9f + 0.25f * FMath::Sqrt(QuantumSpeed));
-}
-
-// -------------------------------------------------------------------------------------------
-// Lights and dust
-// -------------------------------------------------------------------------------------------
-
-void ASpaceshipPawn::SetupShipLights()
-{
-	ThrusterMaterials.Reset();
-	StrobeMaterials.Reset();
-	if (!Hull->GetStaticMesh())
-	{
-		return;
-	}
-	// By slot name, as named in Blender: M_Ship_<Ship>_Emissive for thrusters, _NavWhite strobes.
-	const TArray<FName> Slots = Hull->GetMaterialSlotNames();
-	for (int32 Index = 0; Index < Slots.Num(); ++Index)
-	{
-		const FString Name = Slots[Index].ToString();
-		const bool bThruster = Name.Contains(TEXT("Emissive")) || Name.Contains(TEXT("Thruster"));
-		const bool bStrobe = Name.Contains(TEXT("NavWhite")) || Name.Contains(TEXT("Strobe"));
-		if (!bThruster && !bStrobe)
-		{
-			continue;
-		}
-		UMaterialInstanceDynamic* Material = Hull->CreateDynamicMaterialInstance(Index);
-		const float Base = Material ? Material->K2_GetScalarParameterValue(SpaceshipPawnDefaults::EmissiveStrengthParameter) : 0.f;
-		if (Base <= 0.f)
-		{
-			continue;  // not an M_Ship_Hull glow material; nothing to animate
-		}
-		FShipGlowMaterial Glow;
-		Glow.Material = Material;
-		Glow.BaseStrength = Base;
-		(bThruster ? ThrusterMaterials : StrobeMaterials).Add(Glow);
-	}
-}
-
-void ASpaceshipPawn::UpdateShipLights(float DeltaSeconds)
-{
-	auto Apply = [](FShipGlowMaterial& Glow, float Strength)
-	{
-		UMaterialInstanceDynamic* Material = Glow.Material.Get();
-		// Only on a visible change: every parameter set re-uploads the material's uniforms.
-		if (Material && FMath::Abs(Strength - Glow.Applied) > 0.01f * FMath::Max(Glow.BaseStrength, 1.f))
-		{
-			Material->SetScalarParameterValue(SpaceshipPawnDefaults::EmissiveStrengthParameter, Strength);
-			Glow.Applied = Strength;
-		}
-	};
-
-	// The jump runs on a pinned, dark exposure, and at full glow the engines read as four headlights
-	// instead of the soft blue of the reference (the author, 22. 9. 2026).
-	const float Thrust = (ThrusterIdleGlow + (1.f - ThrusterIdleGlow) * EngineLoad + ThrusterAfterburnerGlow * AfterburnerFeel
-		+ 0.3f * BoostBlend + ThrusterQuantumGlow * QuantumBlend) * FMath::Lerp(1.f, QuantumThrusterScale, QuantumBlend);
-	for (FShipGlowMaterial& Glow : ThrusterMaterials)
-	{
-		Apply(Glow, Glow.BaseStrength * Thrust);
-	}
-
-	// A quick double flash, like aircraft anti-collision strobes.
-	const double Phase = FMath::Fmod(GetWorld()->GetTimeSeconds(), double(NavStrobePeriodSeconds));
-	const bool bFlash = Phase < 0.06 || (Phase > 0.16 && Phase < 0.22);
-	for (FShipGlowMaterial& Glow : StrobeMaterials)
-	{
-		Apply(Glow, Glow.BaseStrength * (bFlash ? 1.f : 0.03f));
-	}
-}
-
-void ASpaceshipPawn::UpdateSpaceDust(float DeltaSeconds)
-{
-	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (!PlayerController || !PlayerController->PlayerCameraManager || Landing->GetState() == ELandingState::Landed)
-	{
-		SpaceDust->HideDust();
-		SpeedTunnel->HideTunnel();
-		HullSparks->UpdateSparks(DeltaSeconds, 0.f, 0.f, GetActorLocation());
-		return;
-	}
-	// The camera manager still holds last frame's view (it updates after the pawn ticks). At 1.2 km/s
-	// that is 20 m behind, which put the dust's "nothing right at the lens" fade 20 m off and let a
-	// streak run through the lens as a white wedge (21. 9. 2026). The camera travels with the ship,
-	// so this frame's move is added.
-	const FVector View = PlayerController->PlayerCameraManager->GetCameraLocation() + LinearVelocity * DeltaSeconds;
-	// The dust only as a hint of motion in normal flight, and none in a jump (the tunnel is the look
-	// there); Star Citizen shows almost no speed lines outside quantum (the reference video, 21. 9. 2026).
-	SpaceDust->UpdateDust(View, LinearVelocity, 1.f - QuantumBlend);
-	SpeedTunnel->UpdateTunnel(View, LinearVelocity, DeltaSeconds, QuantumBlend);
-	HullSparks->UpdateSparks(DeltaSeconds, float(LinearVelocity.Size()), QuantumBlend, View);
-
-	// The jump's own light: sun down, blue glow at the nose (only the player's ship touches the sun).
-	QuantumGlow->SetIntensity(QuantumGlowCandela * QuantumBlend);
-	QuantumGlow->SetVisibility(QuantumBlend > 0.01f);
-	// The level's fill light goes down with it: inside the tunnel there is nothing to bounce off, and
-	// against the pinned exposure the ship came out white instead of a silhouette (the author, 22. 9. 2026).
-	if (USkyLightComponent* Sky = QuantumSky.Get())
-	{
-		if (QuantumBlend > 0.001f || QuantumSkyBaseIntensity >= 0.f)
-		{
-			if (QuantumSkyBaseIntensity < 0.f)
-			{
-				QuantumSkyBaseIntensity = Sky->Intensity;
-			}
-			Sky->SetIntensity(QuantumSkyBaseIntensity * FMath::Lerp(1.f, QuantumSkyScale, QuantumBlend));
-			if (QuantumBlend <= 0.001f)
-			{
-				QuantumSkyBaseIntensity = -1.f;
-			}
-		}
-	}
-	if (UDirectionalLightComponent* Sun = QuantumSun.Get())
-	{
-		if (QuantumBlend > 0.001f || QuantumSunBaseIntensity >= 0.f)
-		{
-			if (QuantumSunBaseIntensity < 0.f)
-			{
-				QuantumSunBaseIntensity = Sun->Intensity;
-			}
-			Sun->SetIntensity(QuantumSunBaseIntensity * FMath::Lerp(1.f, QuantumSunScale, QuantumBlend));
-			if (QuantumBlend <= 0.001f)
-			{
-				// Back to the level's own value; tuning (space.Sun) works again outside jumps.
-				QuantumSunBaseIntensity = -1.f;
-			}
-		}
-	}
 }
 
 // -------------------------------------------------------------------------------------------
@@ -3235,7 +2786,7 @@ void ASpaceshipPawn::UpdateGear(float DeltaSeconds)
 	if (Landing->UpdateGear(DeltaSeconds, GearDeploySeconds))
 	{
 		// Locks down with a small jolt, felt in the camera.
-		CameraKick = FMath::Max(CameraKick, 0.15f);
+		Presentation->Kick(0.15f);
 	}
 	PoseGearLegs();
 }
