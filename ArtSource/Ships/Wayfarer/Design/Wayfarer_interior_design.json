@@ -1,0 +1,304 @@
+{
+ "_comment": "The interior's design data for the drawings (dossier bod 4, author 1. 10. 2026; Tools/Design/interior_model.py, draw_interior_sheet.py). What is built stays in the build data with its IDs (Wayfarer_layout.json objects and doors, Wayfarer_hs.json interior.kit_modules.ids and interior.decals, Wayfarer_setup.json D-INT-*); this file holds the Czech purposes of the kit parts for the author, the door leaves (built or proposed), the components' access and replacement, and notes the data check prints. Status words: built = in the build data, proposed = drawn blue, not built yet.",
+ "ship": "Wayfarer",
+ "revision": "B",
+ "date": "1. 10. 2026",
+ "rooms": {
+  "hold": "HLD",
+  "tech": "TEC",
+  "cabin": "CAB",
+  "cockpit": "CPT"
+ },
+ "kit_purpose": {
+  "Wall_ComponentBay12W_A": "Výklenek reaktoru S1 ve stěně: těžká mřížová dvířka na pantech, reaktor na saních na výsuvných kolejnicích, stavová obrazovka, kabely a chlazení do výklenku, světlo výklenku.",
+  "Wall_ComponentBay06W_B": "Výklenek chladiče S1: žebrované jádro ve spodním výklenku, za mřížkou výfukový kanál nahoru ke kořeni křídla, světlo výklenku.",
+  "Wall_ComponentBay12W_C": "Výklenek generátoru štítů S1: poklop s rychlouzávěry a průhledem, prstenec emitoru svítí okénkem.",
+  "Bulkhead_Door03W_B": "Přepážka 0,3 m s dveřmi 0,5 m k levoboku (u nákladní mřížky): ostění s kapsou posuvného křídla, vodicí lišta v nadpraží, práh s drážkou; světlo nad dveřmi a stavové světlo, žádná klávesnice.",
+  "Bulkhead_Door00W_A": "Líc přepážky 3 cm (za ním přepážka lodi 4 cm), dveře na ose: rámy, světlo nad dveřmi, stavové světlo, kabelový svod do skříňky.",
+  "Bulkhead_Door00L41_C": "Líc přepážky 3 cm ze strany nákladu, dveře 0,5 m vpravo (při pohledu z nákladu): rámy, světlo nad dveřmi, stavové světlo.",
+  "Bulkhead_Door00L38_A": "Líc zadní přepážky kajuty 3 cm, dveře na ose; nápis KAJUTA vedle dveří.",
+  "Bulkhead_Door00L38_F": "Líc přední přepážky kajuty, otvor ke schodům do kokpitu až ke stropu: bez nadpraží, o které by si hráč na horních schodech udeřil hlavu.",
+  "Ceiling_Tray12W_A": "Otevřený kabelový žlab se svazky po celém stropě chodby (žádný hladký panel), lineární světlo ve žlabu se stínem.",
+  "Ceiling_Tray06W_A": "Kabelový žlab 0,6 m jako vedlejší, lineární světlo ve žlabu.",
+  "Floor_Plate12W_A": "Podlaha chodby: střední pochozí pás z desek s protiskluzem, šroubované boční desky, okrajové lišty.",
+  "Floor_Grille06W_A": "Rošt nad servisním kanálem před chladiči: dvě potrubí a kabelový svazek na podpěrách, tlumený studený pásek v kanálu.",
+  "Wall_HullLiner12L_A": "Obložení trupu, hladké: sokl s chladným páskem, kopací panel, hlavní panel ve dvou deskách po lištu 1,3 m, horní deska, zkosení ve dvou panelech, kabelový žlab, římsa s teplými pásky; odhalené žebro trupu na spoji; štítek výrobce.",
+  "Wall_HullLiner06L_A": "Obložení trupu 0,6 m, hladké (doplňuje běh na délku místnosti); štítek výrobce.",
+  "Wall_HullLiner12L_B": "Obložení trupu, servisní: kabelový svod ze žlabu do rozvodné skříňky, malý servisní poklop s rychlouzávěry.",
+  "Wall_HullLiner12L_C": "Obložení trupu, nákladní: kotevní lišta L-track ve 0,35 m, dvě oka s D-kroužky a výstražným značením, popruh, madlo a zásuvka pro napájené kontejnery.",
+  "Wall_HullLiner12L_E": "Obložení trupu, servisní: zpětné sání podpory života – mřížka s ventilátorem v dolní desce a jeho napájení.",
+  "Wall_HullLiner12L_S": "Obložení trupu s nástěnnou skříňkou nad lištou: dvoje dvířka s klikami na osobní věci.",
+  "Wall_HullLiner06L_D": "Obložení trupu se zarovnaným soklem a pryžovou lištou: u přepážky kokpitu je trup u podlahy jen 4,5 cm za lícem (zapuštěný sokl sahá 11 cm).",
+  "Ceiling_Panel12L41_A": "Stropní panel mezi římsami: tmavé pozadí, tři lisované pásy, půl příčného nosníku na každém konci; kruhové pracovní světlo dolů se stínem, svatozář, dvě bodovky na stěny.",
+  "Ceiling_Panel12L41_C": "Stropní panel s lineárním světlem v pouzdře podél lodi a svatozáří.",
+  "Ceiling_Panel06L41_B": "Stropní panel 0,6 m se čtvercovým vyústěním ventilace; nad rampou, kde se trup snižuje.",
+  "Ceiling_Panel12L38_A": "Stropní panel kajuty (průřez L38): kruhové pracovní světlo dolů se stínem, svatozář, dvě bodovky na stěny.",
+  "Ceiling_Panel12L38_C": "Stropní panel kajuty s lineárním světlem v pouzdře podél lodi a svatozáří.",
+  "Floor_Plate12L38_A": "Podlaha kajuty: střední pás s protiskluzem, boční desky ve dvou řadách (autor 30. 9.: ne velké hladké dlaždice „jako v koupelně“)."
+ },
+ "doors": {
+  "DR-RAMP": {
+   "leaf": "built",
+   "type": "rampa",
+   "motion": "sklápí se ven a dolů, závěs na zadní hraně podlahy (x 1,00), dole 22° k zemi",
+   "operation": "levá konzole pilota nebo mobiGlas; žádná klávesnice",
+   "purpose": "Nástup ze země a nakládka nákladu."
+  },
+  "DR-HLD-TEC": {
+   "leaf": "proposed",
+   "type": "posuvné jednokřídlé",
+   "slide": [0, -1],
+   "host": "TEC-B-A",
+   "motion": "zasouvá se k pravoboku do kapsy v přepážce 0,3 m (k levoboku zbývá jen 0,2 m stěny)",
+   "operation": "samo při přiblížení, stavové světlo u rámu; žádná klávesnice",
+   "purpose": "Odděluje náklad (dekomprese při otevřené rampě) od chodby s komponentami."
+  },
+  "DR-TEC-CAB": {
+   "leaf": "proposed",
+   "type": "posuvné dvoukřídlé",
+   "slide": [0, 0],
+   "host": "TEC-B-F",
+   "motion": "dvě křídla po 0,5 m do stran; jedou po líci přepážky ze strany chodby (TEC-B-F) do polohy y 0,50 … 1,00 a −1,00 … −0,50 (líc 3 cm a přepážka 4 cm kapsu neunesou; na každé straně je 0,7 m stěny)",
+   "operation": "samo při přiblížení, stavové světlo u rámu",
+   "purpose": "Odděluje obytnou kajutu od technické chodby (hluk, teplo).",
+   "open": [[0.5, 1.0], [-1.0, -0.5]],
+   "side": "aft",
+   "side_cz": "po líci ze strany chodby",
+   "t": 0.03,
+   "h": 2.05,
+   "_h": "the doorway's clear height 2.05 m (Tools/Kit/kit_batch4b.py DOOR_H)",
+   "approved": "1. 10. 2026"
+  },
+  "DR-CAB-CPT": {
+   "leaf": "none",
+   "type": "otvor bez křídla",
+   "motion": "otvor ke schodům až ke stropu",
+   "operation": "",
+   "purpose": "Kokpit a kajuta jsou jeden prostor; pilot vstupuje ke křeslu zezadu po schodech.",
+   "approved": "1. 10. 2026"
+  },
+  "DR-CAB-HYG": {
+   "leaf": "built",
+   "type": "posuvné jednokřídlé",
+   "kit": "Furniture_Hygiene15L_A",
+   "slide_part": [0, -1],
+   "motion": "zasouvá se k přídi (náběžná hrana s výstražným pruhem a madlem je na zadní straně křídla)",
+   "operation": "ručně za madlo; obsazeno ukazuje světlo nad dveřmi a obrazovka",
+   "purpose": "Soukromí hygienické buňky."
+  }
+ },
+ "components": {
+  "HLD-M-QDRIVE": {
+   "bay": "pod podlahou u rampy",
+   "access": "odklopná podlahová deska u rampy",
+   "replace": "vytažení nahoru otvorem v podlaze, ven po rampě"
+  },
+  "HLD-M-QFUEL": {
+   "bay": "pod podlahou uličky",
+   "access": "plnicí hrdlo zvenku na břiše; servis deskou v podlaze uličky",
+   "replace": "nádrž otvorem v podlaze uličky"
+  },
+  "TEC-M-POWER": {
+   "bay": "TEC-W-L1",
+   "access": "těžká mřížová dvířka na pantech",
+   "replace": "reaktor na saních vyjede po kolejnicích do chodby"
+  },
+  "TEC-M-COOLER-L": {
+   "bay": "TEC-W-L2",
+   "access": "spodní výklenek za mřížkou",
+   "replace": "jádro se vytáhne do chodby, kanál zůstává"
+  },
+  "TEC-M-SHIELD": {
+   "bay": "TEC-W-R1",
+   "access": "poklop s rychlouzávěry a průhledem",
+   "replace": "po otevření poklopu se generátor vyjme do chodby"
+  },
+  "TEC-M-COOLER-R": {
+   "bay": "TEC-W-R2",
+   "access": "spodní výklenek za mřížkou",
+   "replace": "jádro se vytáhne do chodby"
+  },
+  "CAB-M-LIFESUP": {
+   "bay": "pod podlahou, z většiny pod lůžkem CAB-U-BUNK (y 0,92 … 1,50), 0,25 m blíž k ose než v layoutu v1",
+   "access": "zvednutím matrace a odklopením desky podlahy v podstavci lůžka (návrh); sání v podstavci lůžka, zpětné sání v CAB-W-L1",
+   "replace": "shora otvorem v podlaze pod lůžkem po zvednutí matrace a roštu",
+   "built_as": "jednotka nepostavena (layout v2: posunutá dovnitř, aby se vešla do trupu); ve hře sání v podstavci lůžka a zpětné sání v CAB-W-L1"
+  },
+  "CPT-M-AVIONICS": {
+   "bay": "pod podlahou kokpitu",
+   "access": "odklopná deska před křeslem",
+   "replace": "vytažením nahoru otvorem v podlaze"
+  }
+ },
+ "ids": {
+  "_comment": "The interior's IDs, bound to the build data (Tools/Design/assign_interior_ids.py): layout objects and doors by name, kit parts as [id, part] parallel to interior.kit_modules, interior decals as [item, id] parallel to interior.decals.items.",
+  "objects": {
+   "Hydraulika rampy": "HLD-O-RAMPHYD",
+   "Ruční tažný paprsek": "HLD-O-TRACTOR",
+   "Nákladová mřížka 8 SCU": "HLD-O-GRID",
+   "Kvantový pohon S1": "HLD-M-QDRIVE",
+   "Nádrž kvantového paliva": "HLD-M-QFUEL",
+   "Reaktor S1": "TEC-M-POWER",
+   "Chladič S1 (levý)": "TEC-M-COOLER-L",
+   "Generátor štítů S1": "TEC-M-SHIELD",
+   "Chladič S1 (pravý)": "TEC-M-COOLER-R",
+   "Skříň na skafandr a zbraň": "CAB-U-LOCKER",
+   "Hygienická buňka": "CAB-U-HYGIENE",
+   "Výdejník jídla a vody": "CAB-U-GALLEY",
+   "Lůžko": "CAB-U-BUNK",
+   "Podpora života S1": "CAB-M-LIFESUP",
+   "Pilotní křeslo": "CPT-U-SEAT",
+   "Levá konzole": "CPT-O-CONSOLE-L",
+   "Pravá konzole": "CPT-O-CONSOLE-R",
+   "Přístrojová deska": "CPT-O-DASH",
+   "Avionika: radar a počítač S1": "CPT-M-AVIONICS"
+  },
+  "doors": {
+   "Zadní rampa": "DR-RAMP",
+   "Náklad → technická chodba": "DR-HLD-TEC",
+   "Technická chodba → kajuta": "DR-TEC-CAB",
+   "Kajuta → kokpit": "DR-CAB-CPT",
+   "Hygienická buňka": "DR-CAB-HYG"
+  },
+  "kit": {
+   "wall_runs": [
+    [["TEC-W-L1", "Wall_ComponentBay12W_A"], ["TEC-W-L2", "Wall_ComponentBay06W_B"]],
+    [["TEC-W-R1", "Wall_ComponentBay12W_C"], ["TEC-W-R2", "Wall_ComponentBay06W_B"]],
+    [
+     ["HLD-W-L1", "Wall_HullLiner12L_A"],
+     ["HLD-W-L2", "Wall_HullLiner12L_B"],
+     ["HLD-W-L3", "Wall_HullLiner12L_A"],
+     ["HLD-W-L4", "Wall_HullLiner12L_A"],
+     ["HLD-W-L5", "Wall_HullLiner12L_B"],
+     ["HLD-W-L6", "Wall_HullLiner12L_A"]
+    ],
+    [
+     ["HLD-W-R1", "Wall_HullLiner12L_A"],
+     ["HLD-W-R2", "Wall_HullLiner12L_C"],
+     ["HLD-W-R3", "Wall_HullLiner12L_B"],
+     ["HLD-W-R4", "Wall_HullLiner12L_C"],
+     ["HLD-W-R5", "Wall_HullLiner12L_A"],
+     ["HLD-W-R6", "Wall_HullLiner12L_C"]
+    ],
+    [
+     ["CAB-W-L1", "Wall_HullLiner12L_E"],
+     ["CAB-W-L2", "Wall_HullLiner12L_S"],
+     ["CAB-W-L3", "Wall_HullLiner12L_A"],
+     ["CAB-W-L4", "Wall_HullLiner06L_A"],
+     ["CAB-W-L5", "Wall_HullLiner06L_D"]
+    ],
+    [
+     ["CAB-W-R1", "Wall_HullLiner12L_A"],
+     ["CAB-W-R2", "Wall_HullLiner12L_A"],
+     ["CAB-W-R3", "Wall_HullLiner12L_A"],
+     ["CAB-W-R4", "Wall_HullLiner06L_A"],
+     ["CAB-W-R5", "Wall_HullLiner06L_D"]
+    ]
+   ],
+   "run_parts": [
+    [["TEC-B-A", "Bulkhead_Door03W_B"]],
+    [["TEC-B-F", "Bulkhead_Door00W_A"]],
+    [["CAB-B-A", "Bulkhead_Door00L38_A"]],
+    [["CAB-B-F", "Bulkhead_Door00L38_F"]],
+    [
+     ["CAB-C-1", "Ceiling_Panel12L38_A"],
+     ["CAB-C-2", "Ceiling_Panel12L38_C"],
+     ["CAB-C-3", "Ceiling_Panel12L38_A"],
+     ["CAB-C-4", "Ceiling_Panel12L38_C"]
+    ],
+    [
+     ["CAB-FL-1", "Floor_Plate12L38_A"],
+     ["CAB-FL-2", "Floor_Plate12L38_A"],
+     ["CAB-FL-3", "Floor_Plate12L38_A"],
+     ["CAB-FL-4", "Floor_Plate12L38_A"]
+    ],
+    [["CAB-U-LOCKER", "Furniture_Locker10L_A"]],
+    [["CAB-U-HYGIENE", "Furniture_Hygiene15L_A"]],
+    [["CAB-U-GALLEY", "Furniture_Food16L_A"]],
+    [["CAB-U-BUNK", "Furniture_Bunk21L_A"]],
+    [["HLD-B-F", "Bulkhead_Door00L41_C"]],
+    [["TEC-C-1", "Ceiling_Tray12W_A"], ["TEC-C-2", "Ceiling_Tray06W_A"]],
+    [["TEC-FL-1", "Floor_Plate12W_A"], ["TEC-FL-2", "Floor_Grille06W_A"]],
+    [
+     ["HLD-C-1", "Ceiling_Panel06L41_B"],
+     ["HLD-C-2", "Ceiling_Panel12L41_A"],
+     ["HLD-C-3", "Ceiling_Panel12L41_C"],
+     ["HLD-C-4", "Ceiling_Panel12L41_A"],
+     ["HLD-C-5", "Ceiling_Panel12L41_C"],
+     ["HLD-C-6", "Ceiling_Panel12L41_A"]
+    ]
+   ]
+  },
+  "decals": {
+   "items": [
+    ["ck_eject", "D-I-01"],
+    ["ck_canopy", "D-I-02"],
+    ["ck_emerg_o2", "D-I-03"],
+    ["label_o2", "D-I-04"],
+    ["tri_warning", "D-I-05"],
+    ["st_service", "D-I-06"],
+    ["hazard_stripe", "D-I-07"],
+    ["hazard_stripe", "D-I-08"],
+    ["stencil_nostep", "D-I-09"],
+    ["stencil_nostep", "D-I-10"]
+   ],
+   "scatter": ["D-I-R-SCATTER-01", "D-I-R-SCATTER-02", "D-I-R-SCATTER-03", "D-I-R-SCATTER-04", "D-I-R-SCATTER-05", "D-I-R-SCATTER-06", "D-I-R-SCATTER-07"],
+   "grab_bars": ["CPT-O-GRAB-01", "CPT-O-GRAB-02"]
+  }
+ },
+ "review_notes": {
+  "DR-CAB-HYG": "kit (Furniture_Hygiene15L_A) kreslí výstražný pruh a madlo na zadní hraně křídla, ale těsnění u zadní zárubně – jedno z nich je opačně; výkres bere směr otevírání podle pruhu a madla (k přídi)"
+ },
+ "decal_items": {
+  "hazard_stripe": "výstražný pruh na hraně (rám dveří, práh)",
+  "st_service": "malý šablonový nápis SERVICE ACCESS (servisní přístup)",
+  "st_inspect": "malý šablonový nápis INSPECT 500 H (kontrola po 500 h)",
+  "st_vent": "malý šablonový nápis VENT – KEEP CLEAR (větrání, nezakrývat)",
+  "st_rails": "šablonový nápis u kolejnic saní komponenty",
+  "ck_lock": "štítek LOCK u zámku dvířek na zbraň",
+  "maker": "štítek výrobce (Halcyon Freightworks)",
+  "maker_veyra": "štítek výrobce komponenty",
+  "plate_reactor": "štítek REACTOR S1 u výklenku",
+  "plate_cooler": "štítek COOLER S1 u výklenku",
+  "plate_shield": "štítek SHIELD GEN S1 u výklenku",
+  "warn_hv": "výstraha vysoké napětí",
+  "rivet_row_8": "řada nýtů",
+  "hazard_subtle": "jemné výstražné značení u kotevních ok",
+  "ck_eject": "štítek katapultáže",
+  "ck_canopy": "štítek ovládání kabiny",
+  "ck_emerg_o2": "štítek nouzového kyslíku",
+  "label_o2": "servisní štítek podpory života",
+  "tri_warning": "výstražný trojúhelník",
+  "stencil_nostep": "šablonový nápis NO STEP (nešlapat)"
+ },
+ "purposes": {
+  "D-INT-SEC02": "číslo úseku lodi 02 na obložení – orientace v lodi",
+  "D-INT-SEC03": "číslo úseku lodi 03 na obložení",
+  "D-INT-SEC04": "číslo úseku lodi 04 na obložení",
+  "D-INT-SEC05": "číslo úseku lodi 05 na obložení kajuty",
+  "D-INT-SEC06": "číslo úseku lodi 06 na obložení u přední přepážky (CAB-W-L5, 0,2 m za koncem lůžka)",
+  "D-INT-HOLD": "nápis CARGO HOLD – DECK A · 8 SCU · MAG-LOCK GRID",
+  "D-INT-GRID": "štítek CARGO GRID – 8 SCU · MAX 16 t · LOCK BEFORE FLIGHT",
+  "D-INT-LANE": "pruh volné uličky na podlaze nákladu",
+  "D-INT-RAMPHAZARD": "výstražný pruh na hraně rampy",
+  "D-INT-ENGINEERING": "nápis ENGINEERING – AUTHORISED CREW ONLY se šipkou",
+  "D-INT-EXIT": "nápis EXIT u rampy",
+  "D-INT-CAUTIONLOAD": "výstraha CAUTION – MOVING LOADS",
+  "D-INT-REACTOR": "štítek reaktoru staré procedurální chodby",
+  "D-INT-VOLTAGE": "výstraha napětí staré procedurální chodby",
+  "D-INT-COOLER": "štítek chladiče staré procedurální chodby",
+  "D-INT-COCKPIT": "nápis COCKPIT – CREW QUARTERS · FLIGHT DECK se šipkou",
+  "D-INT-FIRE": "štítek FIRE SUPPRESSION – hasicí přístroj CO2",
+  "D-INT-QUARTERS": "nápis CREW QUARTERS – BERTH · HYGIENE · GALLEY u vstupu do kajuty",
+  "D-INT-COCKPITSTAIRS": "nápis COCKPIT – FLIGHT DECK · MIND THE STAIRS se šipkou ke schodům",
+  "D-INT-LIFESUPPORT": "štítek LIFE SUPPORT S1 – ACCESS UNDER BERTH na podstavci lůžka",
+  "D-INT-STAIRHAZARD": "výstražný pruh na podlaze před schody do kokpitu",
+  "D-INT-SUIT": "šablona SUIT · ARMS na dvířkách se zbraní",
+  "D-INT-HYGIENE": "šablona HYGIENE – WC · WASH vedle dveří buňky",
+  "D-INT-GALLEY": "šablona GALLEY – WATER · RATIONS na dvířkách výdejníku"
+ },
+ "approved": {
+  "date": "1. 10. 2026",
+  "what": "styl listu I-04 (vzor pro I-01 až I-09), měřítko 1:20 na A0 s detaily 1:5 / 1:10, dveře DR-TEC-CAB (dvoukřídlé posuvné ze strany chodby) a DR-CAB-CPT (otvor bez dveří), kit platí před layoutem, číslo úseku 06 u přední přepážky"
+ }
+}
