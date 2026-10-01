@@ -90,9 +90,15 @@ function Add-Result([string]$Group, [string]$Name, [string[]]$Lines, [int]$Code,
     Write-Host ("{0,-4}  {1,-8} {2,-38} {3,5} ok {4,3} fail {5,3} skip {6,7:0.0} s  {7}" -f $status, $Group, $Name,
         $counts.Pass, $counts.Fail, $counts.Skip, $Seconds, ($reasons -join ", ")) -ForegroundColor $color
     if ($status -eq "FAIL") {
-        $Lines | Where-Object { $_ -match '(^|\s)([A-Z0-9]+TEST )?FAIL|^Traceback|Error:|^FAILED|RESULT: FAILED' } |
-            Select-Object -First 15 | ForEach-Object { Write-Host "        $_" }
+        $bad = @($Lines | Where-Object { $_ -match '(^|\s)([A-Z0-9]+TEST )?FAIL|^Traceback|Error:|^FAILED|RESULT: FAILED' } |
+            Select-Object -First 15)
+        $bad | ForEach-Object { Write-Host "        $_" }
         Write-Host "        log: $log"
+        if ($env:GITHUB_ACTIONS) {
+            # an annotation the public API serves without a login (job logs need admin rights; no gh here)
+            $msg = (@("$Name ($($reasons -join ', '))") + $bad + @($Lines | Select-Object -Last 8)) -join '%0A'
+            Write-Host "::error title=$Group $Name::$msg"
+        }
     }
 }
 
