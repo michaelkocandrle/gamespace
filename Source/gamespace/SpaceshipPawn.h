@@ -11,6 +11,7 @@
 #include "ShipLandingComponent.h"
 #include "ShipPresentationComponent.h"
 #include "ShipBoardingComponent.h"
+#include "ShipInputComponent.h"
 #include "SpaceshipPawn.generated.h"
 
 class UAudioComponent;
@@ -104,6 +105,7 @@ class GAMESPACE_API ASpaceshipPawn : public APawn
 	/** Read the pawn's tuning, parts and state directly (see their class comments). */
 	friend class UShipPresentationComponent;
 	friend class UShipBoardingComponent;
+	friend class UShipInputComponent;
 
 public:
 	ASpaceshipPawn();
@@ -895,6 +897,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UShipBoardingComponent> Boarding;
 
+	/** Enhanced Input: the bindings, the input assets and the key handlers. The actions stay here. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<UShipInputComponent> ShipInput;
+
 	/** What the gear legs are built from (/Engine/BasicShapes/Cylinder): placeholder art until a modelled gear replaces it. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Gear")
 	TObjectPtr<UStaticMesh> GearLegMesh;
@@ -1083,10 +1089,6 @@ protected:
 	/** Digital, pressed: the right MFD's next page (F2, or ]; with Alt the previous one). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Input")
 	TObjectPtr<UInputAction> MfdRightAction;
-
-	/** Maps keys the authored flight context lacks (F, V, J, X, B, K, L, N, P, right mouse button, wheel). */
-	UPROPERTY(Transient)
-	TObjectPtr<UInputMappingContext> InteractMappingContext;
 
 	/** Who gets out. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Exit")
@@ -1886,40 +1888,8 @@ protected:
 	FVector AngularVelocity = FVector::ZeroVector;
 
 private:
-	void HandleAxisTriggered(const FInputActionValue& Value, ESpaceshipAxis Axis);
-	void HandleAxisCompleted(const FInputActionValue& Value, ESpaceshipAxis Axis);
-	void HandleLook(const FInputActionValue& Value);
-	void HandleMouseLook(const FInputActionValue& Value);
-	void HandleToggleCamera(const FInputActionValue& Value);
-	void HandleBoost(const FInputActionValue& Value);
-	void HandleBoostCompleted(const FInputActionValue& Value);
-	void HandleInteract(const FInputActionValue& Value);
-	void HandleToggleHud(const FInputActionValue& Value);
-	void HandleFreeLookStarted(const FInputActionValue& Value);
-	void HandleFreeLookCompleted(const FInputActionValue& Value);
-	void HandleFlightAssist(const FInputActionValue& Value);
-	void HandleQuantumEngageStarted(const FInputActionValue& Value);
-	void HandleQuantumEngageCompleted(const FInputActionValue& Value);
-	void HandleAllStop(const FInputActionValue& Value);
-	void HandleAllStopCompleted(const FInputActionValue& Value);
-	void HandleCameraZoom(const FInputActionValue& Value);
-	void HandleMasterMode(const FInputActionValue& Value);
-	void HandleSpeedLimiter(const FInputActionValue& Value);
-	void HandleGSafe(const FInputActionValue& Value);
-	void HandleComStab(const FInputActionValue& Value);
-	void HandleAfterburner(const FInputActionValue& Value);
-	void HandleAfterburnerCompleted(const FInputActionValue& Value);
-	void HandleLandingGear(const FInputActionValue& Value);
-	void HandlePrecision(const FInputActionValue& Value);
-	void HandleVtol(const FInputActionValue& Value);
-	void HandleDashboardFocusStarted(const FInputActionValue& Value);
-	void HandleDashboardFocusCompleted(const FInputActionValue& Value);
 	/** The cockpit camera's turn: free look on top of the dashboard focus. */
 	void ApplyCockpitRotation();
-	void HandleMfdLeft(const FInputActionValue& Value);
-	void HandleMfdRight(const FInputActionValue& Value);
-	/** Pages an MFD (0 left, 1 right): forward, or back with Alt held. */
-	void CycleMfdPage(int32 Display);
 	/** Moves the gear towards its commanded end and poses the legs. */
 	void UpdateGear(float DeltaSeconds);
 
@@ -1936,8 +1906,6 @@ private:
 	/** Puts the cockpit key and fill lights at the eye + their offsets (BeginPlay, and when the eye moves). */
 	void PlaceCockpitLights();
 	void UpdateAfterburner(float DeltaSeconds);
-	/** Alt held on the controlling player's keyboard: the wheel zooms instead of setting the limiter. */
-	bool IsAltHeld() const;
 	void SetFreeLookHeld(bool bHeld);
 	void UpdateFreeLook(float DeltaSeconds);
 	void ClearPilotInput();
@@ -1952,10 +1920,6 @@ private:
 	/** Everything a flight frame does before the camera and sound: shared by Tick and DebugStepFlight. */
 	void StepFlight(float DeltaSeconds);
 	UAudioComponent* PlayOneShot(USoundBase* Sound, float VolumeScale = 1.f);
-
-	/** Fills in any unassigned input asset: first from /Game/Input, then procedurally. */
-	void ResolveInputAssets();
-	void BuildProceduralInputAssets();
 
 	/** This ship's tuning in the shape FShipFlightModel takes (the UPROPERTYs stay here). */
 	FShipFlightModel::FDrag GetDragTuning() const;
