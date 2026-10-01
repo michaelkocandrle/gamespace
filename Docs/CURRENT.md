@@ -3,8 +3,8 @@
 Jediný zdroj **aktuálního** stavu (nad ním jen `CLAUDE.md`), **nejvýš 80 řádků** (autor 30. 9. 2026). Hotové do stavu,
 splněné smaž; podrobnosti do commitu a recenzí (`Docs/Reviews/`), historie do 30. 9. v `Docs/HANDOFF.md` (archiv).
 
-Stav k **1. 10. 2026 večer**: rozdělený `ASpaceshipPawn` sloučený, zámek s heartbeatem a hooky, Zen DDC na D:
-(C: 132 GB volno), výkresy exteriéru Wayfareru E-01 až E-08 (bod 3 dossieru) ke schválení obsahu.
+Stav k **1. 10. 2026 večer**: výkresy exteriéru Wayfareru E-01 až E-08 schválené (revize C: hřbet R v primárním
+laku); hlavní session staví exteriérový kit a pilota, druhá session výkresy interiéru a koncepty.
 
 ## Stav
 
@@ -33,15 +33,16 @@ Stav k **1. 10. 2026 večer**: rozdělený `ASpaceshipPawn` sloučený, zámek s
 
 ## Paralelní práce
 
-- Rozdělení `ASpaceshipPawn` je v main (1. 10. 2026, `Docs/Reviews/2026-09-30_spaceshippawn_split_plan.md`);
-  worktree `gamespace-audit` smazaný. Nová druhá session: nový worktree, balí do `Builds_<jméno>` (`BuildDir.ps1`).
+- **Druhá session: výkresy interiéru (dossier bod 4) a koncepty (bod 6)** Wayfareru ve stylu schválených listů
+  E-01 až E-08. Předávka (styl listů, generátory, test „výkres = data“, co z interiéru je v datech, koncepty):
+  skill `ship-pipeline`, oddíl 1c „Výkresy interiéru … – předávka“. Interiér zatím nemá ID: nejdřív doplnit ID do
+  `layout.json` / bloku `interior` receptu, pak model a listy (nové soubory `Tools/Design/interior_*.py`, listy I-0x,
+  test `test_interior_drawing.py`). Moduly `exterior_*.py` a listy E-0x mění jen hlavní session (staví z nich kit).
+- **Hlavní session:** exteriérový kit a pilot (hřbet, záď s gondolami), kritik s dílčím prahem.
+- Druhá session pracuje ve vlastním worktree a balí do `Builds_<jméno>` (`BuildDir.ps1`); slučuje hlavní session.
 
 ## Čeká na rozhodnutí autora
 
-- **Obsah výkresů exteriéru E-01 až E-08** (`ArtSource/Ships/Wayfarer/Design/Drawings/`; styl schválen 1. 10.,
-  recenze `Docs/Reviews/2026-10-01_wayfarer_drawing_views.md`). Otázka z pohledu shora: schválená změna P-HULL na
-  gunmetal udělá celou střechu a břicho tmavé (desky jsou jen na bocích a zkoseních) – desky i na střechu?
-  Po schválení body 4 (interiér) a 6 (koncepty) dossieru, teprve pak exteriérový kit a pilot z dat návrhu.
 - Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověření FAIL 7/6/6/7/7/8/8/7, levné body opravené).
 - Steadfast: schválení 2D návrhu v2 (`ArtSource/Ships/Steadfast/Design/Steadfast_Design.md`).
 - Kanopa Wayfareru jako téma designu v2 (autor ho otevře sám). Paleta Kestrel Dynamics: u první lodi Kestrelu.
@@ -70,9 +71,8 @@ Stav k **1. 10. 2026 večer**: rozdělený `ASpaceshipPawn` sloučený, zámek s
 
 ## Další kroky
 
-1. **Wayfarer, dossier:** bod 4 interiér (půdorys v rastru kitu 0,3 m, rozvinuté stěny, stropy, řezy, decaly,
-   světla, tabulky, účel každého objektu) a bod 6 koncepty (zvolený s popisky, ostatní image-to-image z renderů
-   se siluetou IoU ≥ 0,88, interiéry, materiálová deska, detaily) ve stylu E-01; pak kit a pilot podle výkresů.
+1. **Wayfarer:** exteriérový kit (díly XK-*) a pilot na hřbetu a zádi s gondolami podle výkresů E-01 až E-08,
+   kritik s dílčím prahem; pak kit na celou loď. Druhá session: body 4 a 6 dossieru (viz Paralelní práce).
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.
