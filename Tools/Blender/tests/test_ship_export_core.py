@@ -327,6 +327,21 @@ class GeometryDigestTest(unittest.TestCase):
         self.assertEqual(gx.unchanged_files(plan, new, old, {"SM_Ship_X_Decals.fbx"}), set())     # file gone
         self.assertEqual(gx.unchanged_files(plan, new, None, {"SM_Ship_X.fbx"}), set())           # no manifest yet
 
+    def test_file_digest_ignores_the_string_hash_seed(self):
+        """object_types is a set of strings: its repr followed PYTHONHASHSEED, so one Blender run in two wrote other
+        digests for unchanged meshes (1. 10. 2026). The digest must be the same in every process, and the one the
+        manifests already hold (sets written sorted: {'EMPTY', 'MESH'})."""
+        import subprocess
+        code = ("import sys; sys.path.insert(0, %r); import gamespace_ship_export as gx; "
+                "print(gx.file_digest([{'name': 'SM_Ship_X', 'geometry_digest': 'aa', 'world_location': [0, 0, 0]}], "
+                "gx.FBX_EXPORT_SETTINGS))" % os.path.join(os.path.dirname(__file__), ".."))
+        seen = set()
+        for seed in ("0", "1", "2", "3", "7", "11"):
+            env = dict(os.environ, PYTHONHASHSEED=seed)
+            seen.add(subprocess.check_output([sys.executable, "-c", code], env=env).decode().strip())
+        self.assertEqual(len(seen), 1, seen)
+        self.assertIn("('object_types', {'EMPTY', 'MESH'})", str(gx.settings_key(gx.FBX_EXPORT_SETTINGS)))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=1)

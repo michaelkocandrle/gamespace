@@ -143,11 +143,28 @@ def geometry_digest(positions, tri_verts, tri_loops, tri_mats, loop_attrs, mater
     return h.hexdigest()
 
 
+class _SortedSet:
+    """A set written with its items sorted. repr() of a set of strings follows the per-process string hash
+    (PYTHONHASHSEED): FBX_EXPORT_SETTINGS' object_types made every file digest one of two values at random, so
+    unchanged meshes were exported again (1. 10. 2026). Sorted, it writes as the digests already in the manifests."""
+
+    def __init__(self, items):
+        self.items = sorted(items)
+
+    def __repr__(self):
+        return "{" + ", ".join(repr(x) for x in self.items) + "}"
+
+
+def settings_key(settings):
+    """The export settings as the digest writes them: sorted by name, sets with sorted items."""
+    return sorted((k, _SortedSet(v) if isinstance(v, (set, frozenset)) else v) for k, v in (settings or {}).items())
+
+
 def file_digest(records, settings=None):
     """One FBX file's digest: its objects' names, mesh digests and (for sockets and collision) world placement,
     plus the export settings. records: gather_records() entries of the file's objects."""
     import hashlib
-    h = hashlib.sha1(("%s|%s" % (DIGEST_VERSION, sorted((settings or {}).items()))).encode("utf-8"))
+    h = hashlib.sha1(("%s|%s" % (DIGEST_VERSION, settings_key(settings))).encode("utf-8"))
     for r in sorted(records, key=lambda r: r["name"]):
         h.update(("%s|%s|%s|" % (r["name"], r.get("geometry_digest", ""),
                                  [round(x, 4) for x in r.get("world_location", [])])).encode("utf-8"))

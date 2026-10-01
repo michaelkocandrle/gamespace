@@ -1183,6 +1183,13 @@ snímku.
   desek. Řešení v datech návrhu: `panels.cut_hardware` vyřízne v deskách místo pro každý díl na boku trupu
   (okraj `cut_margin`), světelné pásy jdou na rám (`"on": "frame"`: podélník, těsnění kabiny). Hlídá to
   `test_exterior_drawing.py` (žádný díl pod deskou bez výřezu, žádný nápis na podkladu stejného tónu).
+- ff) **Přestavba přepsala i FBX, jejichž geometrie se nezměnila** (1. 10. 2026). Kabina, podvozek, hologram,
+  obrazovky a kit měly ve dvou stavbách z týchž dat bit po bitu stejné meshe, ale jiný otisk souboru. Příčina:
+  otisk obsahoval `repr()` nastavení exportu a `object_types` je množina řetězců; její pořadí se řídí náhodným
+  hashem řetězců každého procesu (`PYTHONHASHSEED`), takže otisk vyšel náhodně jedním ze dvou způsobů. Řešení:
+  `settings_key()` píše množiny seřazené, stejně jako otisky v manifestech
+  (`test_file_digest_ignores_the_string_hash_seed`). Skutečný šum stavby zůstává jen v trupu, decalech
+  a interiéru (±40 trojúhelníků mezi běhy). Ověřené porovnáním staveb A/B1/B2/C (recept s klíči `id` a bez nich).
 
 
 ---
