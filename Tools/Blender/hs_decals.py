@@ -649,6 +649,9 @@ def rule_greeble_companions(pl, r, recipe, rng):
     a small stencil by a vent."""
     labels = sorted(n for n, it in pl.index["decals"].items() if "label" in it.get("tags", []))
     small = sorted(n for n, it in pl.index["decals"].items() if "small_stencil" in it.get("tags", []))
+    # "vent_stencil": {"side": item, "top": item, ...} - one readable stencil per surface (dark ink on the white
+    # sides, light on the dark spine) instead of a random small one (exterior review, 30. 9. 2026)
+    vent_stencil = r.get("vent_stencil") or {}
     for g in recipe["parts"]["hull"].get("greebles", []):
         kind = g["part"]
         size = {"hatch_large": (1.1, 0.7), "hatch": (0.62, 0.42), "vent": (0.42, 0.24), "sensor": (0.16, 0.1),
@@ -669,7 +672,11 @@ def rule_greeble_companions(pl, r, recipe, rng):
             elif kind == "sensor":
                 pl.decal(dict(spec, item="chevrons_port"), side, "greeble_companions")
             elif kind == "vent":
-                pl.decal(dict(spec, item=small[_stable(*key) % len(small)]), side, "greeble_companions")
+                item = vent_stencil.get(g["from"])
+                if item:
+                    pl.decal(dict(spec, item=item, scale=r.get("vent_stencil_scale", 1.0)), side, "greeble_companions")
+                else:
+                    pl.decal(dict(spec, item=small[_stable(*key) % len(small)]), side, "greeble_companions")
 
 
 def rule_companions(pl, r, rng):

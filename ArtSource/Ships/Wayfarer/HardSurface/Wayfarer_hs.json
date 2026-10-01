@@ -773,17 +773,17 @@
    {
     "name": "fin left",
     "box": {
-     "x": [0.2, 3.7],
-     "y": [3.2, 4.05],
-     "z": [2.0, 4.05]
+     "x": [0.3, 3.1],
+     "y": [3.2, 3.9],
+     "z": [2.0, 3.4]
     }
    },
    {
     "name": "fin right",
     "box": {
-     "x": [0.2, 3.7],
-     "y": [-4.05, -3.2],
-     "z": [2.0, 4.05]
+     "x": [0.3, 3.1],
+     "y": [-3.9, -3.2],
+     "z": [2.0, 3.4]
     }
    },
    {
@@ -1435,7 +1435,9 @@
     "_what": "worn step on the ramp lip (the only wear by hand)"
    },
    {
-    "item": "stencil_nostep",
+    "item": "xstl_nostep",
+
+    "scale": 2.0,
     "on": "top",
     "x": 15.0,
     "y": 0.0,
@@ -1491,7 +1493,9 @@
     "_what": "life support intake behind the cockpit"
    },
    {
-    "item": "stencil_nostep",
+    "item": "xst_nostep",
+
+    "scale": 2.0,
     "on": "top",
     "x": 9.0,
     "y": 5.0,
@@ -1499,7 +1503,9 @@
     "_what": "NO STEP on the flap"
    },
    {
-    "item": "stencil_nostep",
+    "item": "xst_nostep",
+
+    "scale": 2.0,
     "on": "top",
     "x": 6.0,
     "y": 6.0,
@@ -1522,10 +1528,24 @@
    {
     "item": "red_marker",
     "on": "side",
-    "x": 2.9,
-    "z": 3.95,
-    "_what": "fin tip marker"
-   }
+    "x": 1.9,
+    "z": 3.25,
+    "_what": "fin tip marker",
+    "_change": "design v2.1 (1. 10. 2026): fins 1.3 m tall, tip at 3.3"
+   },
+   {"item": "xst_exhaust", "scale": 1.5, "on": "pod", "x": 0.45, "deg": -40, "_what": "1. 10. 2026: service stencils only beside their hardware (exterior review 30. 9.: random scatter, unreadable): exhaust warning at the nozzle"},
+   {"item": "xst_intake", "scale": 1.5, "on": "pod", "x": 4.75, "deg": -10, "_what": "intake warning ahead of the pod intake"},
+   {"item": "xst_service", "scale": 1.5, "on": "pod", "x": 2.65, "deg": -12, "_what": "below the open component bay"},
+   {"item": "xst_gear", "scale": 1.5, "on": "bottom", "x": 5.2, "y": 1.3, "_what": "main gear bay"},
+   {"item": "xst_gear", "scale": 1.5, "on": "bottom", "x": 16.3, "y": 0.0, "rot": 90, "mirror": false, "_what": "nose gear bay"},
+   {"item": "xst_ramp", "scale": 1.5, "on": "ray", "at": [-1.0, 1.25, 1.5], "dir": [1, 0, 0], "_what": "above the ramp hazard plates"},
+   {"item": "xst_hyd", "scale": 1.5, "on": "side", "x": 1.9, "z": 0.72, "_what": "over the ramp hydraulics hatch"},
+   {"item": "xst_qtfuel", "scale": 1.5, "on": "bottom", "x": 6.4, "y": 1.25, "_what": "beside the quantum fuel filler hatch"},
+   {"item": "xst_gnd", "scale": 1.5, "on": "side", "x": 19.0, "z": 0.8, "_what": "nose ground point"},
+   {"item": "xst_extpwr", "scale": 1.5, "on": "side", "x": 12.95, "z": 1.35, "_what": "external power socket by the cabin"},
+   {"item": "xst_inspect", "scale": 1.5, "on": "side", "x": 8.9, "z": 1.5, "_what": "over the component access panel"},
+   {"item": "xstl_service", "scale": 1.5, "on": "top", "x": 13.4, "y": 0.62, "rot": 90, "_what": "beside the roof maintenance hatch (dark spine: light ink)"},
+   {"item": "xstl_inspect", "scale": 1.5, "on": "top", "x": 16.9, "y": 0.95, "_what": "canopy frame service point (dark: light ink)"}
   ],
   "trim": [
    {
@@ -1590,7 +1610,9 @@
       "y": 0.72
      },
      {
-      "item": "stencil_nostep",
+      "item": "xstl_nostep",
+
+      "scale": 2.0,
       "on": "top",
       "x": 6.0,
       "y": 0.0,
@@ -1657,11 +1679,7 @@
       "slot_s",
       "rivet_row_4",
       "stencil_thrust",
-      "red_dot",
-      "st_service",
-      "st_torque",
-      "st_inspect",
-      "st_hfcl"
+      "red_dot"
      ]
     },
     {
@@ -1683,11 +1701,7 @@
       "rivet_row_8",
       "vent_small",
       "lift_point",
-      "red_dot",
-      "st_service",
-      "st_torque",
-      "st_inspect",
-      "st_hfcl"
+      "red_dot"
      ]
     },
     {
@@ -1704,11 +1718,7 @@
       "slot_s",
       "rivet_row_4",
       "label_o2",
-      "red_dot",
-      "st_service",
-      "st_torque",
-      "st_inspect",
-      "st_hfcl"
+      "red_dot"
      ]
     },
     {
@@ -1723,11 +1733,7 @@
       "bolt",
       "rivet_row_4",
       "socket",
-      "red_dot",
-      "st_service",
-      "st_torque",
-      "st_inspect",
-      "st_hfcl"
+      "red_dot"
      ]
     },
     {
@@ -1743,9 +1749,7 @@
       "socket_round",
       "label_power",
       "rivet_row_4",
-      "red_dot",
-      "st_service",
-      "st_torque"
+      "red_dot"
      ]
     },
     {
@@ -1765,9 +1769,7 @@
       "lift_point",
       "arrow_access",
       "rivet_row_4",
-      "red_dot",
-      "st_service",
-      "st_torque"
+      "red_dot"
      ]
     },
     {
@@ -1784,9 +1786,7 @@
       "rivet_row_8",
       "hazard_stripe",
       "label_hydraulic",
-      "red_dot",
-      "st_service",
-      "st_torque"
+      "red_dot"
      ]
     },
     {
@@ -1799,10 +1799,8 @@
      "count": 6,
      "items": [
       "bolt",
-      "st_nopaint",
       "red_dot",
       "chevrons_port",
-      "st_inspect",
       "rivet_row_4"
      ]
     },
@@ -1817,7 +1815,6 @@
      "items": [
       "vent_small",
       "socket_round",
-      "st_gnd",
       "red_marker",
       "slot_s"
      ]
@@ -1832,7 +1829,6 @@
      "count": 6,
      "items": [
       "hazard_subtle",
-      "st_service",
       "bolt_row_4",
       "red_dot",
       "tri_warning"
@@ -1848,7 +1844,6 @@
      "count": 5,
      "items": [
       "label_o2",
-      "st_extpwr",
       "socket",
       "arrow_access",
       "red_marker"
@@ -1910,14 +1905,6 @@
        }
       ],
       "items": [
-       "st_nopaint",
-       "st_gnd",
-       "st_extpwr",
-       "st_vent",
-       "st_service",
-       "st_hfcl",
-       "st_torque",
-       "st_inspect",
        "red_dot",
        "corner_mark",
        "panel_A12",
@@ -1933,14 +1920,6 @@
       "dv": 0.5,
       "chance": 0.6,
       "items": [
-       "st_nopaint",
-       "st_gnd",
-       "st_extpwr",
-       "st_vent",
-       "st_service",
-       "st_hfcl",
-       "st_torque",
-       "st_inspect",
        "red_marker",
        "corner_mark",
        "rivet_row_4",
@@ -1956,17 +1935,8 @@
       "dv": 0.6,
       "chance": 0.5,
       "items": [
-       "st_nopaint",
-       "st_gnd",
-       "st_extpwr",
-       "st_vent",
-       "st_service",
-       "st_hfcl",
-       "st_torque",
-       "st_inspect",
        "corner_mark",
-       "red_dot",
-       "st_nopaint"
+       "red_dot"
       ]
      },
      {
@@ -1977,14 +1947,6 @@
       "dv": 0.6,
       "chance": 0.5,
       "items": [
-       "st_nopaint",
-       "st_gnd",
-       "st_extpwr",
-       "st_vent",
-       "st_service",
-       "st_hfcl",
-       "st_torque",
-       "st_inspect",
        "corner_mark",
        "hazard_subtle"
       ]
@@ -1998,13 +1960,11 @@
       "chance": 0.5,
       "_what": "wing top",
       "items": [
-       "st_nopaint",
        "corner_mark",
        "red_dot",
        "panel_E11",
        "panel_E16",
-       "hazard_subtle",
-       "st_inspect"
+       "hazard_subtle"
       ]
      },
      {
@@ -2016,31 +1976,34 @@
       "chance": 0.45,
       "_what": "wing underside",
       "items": [
-       "st_gnd",
        "corner_mark",
        "hatch_small",
-       "panel_F02",
-       "st_torque"
+       "panel_F02"
       ]
      },
      {
       "on": "side",
-      "u": [0.5, 3.4],
-      "v": [2.4, 3.9],
+      "u": [
+       0.6,
+       2.8
+      ],
+      "v": [
+       2.3,
+       3.2
+      ],
       "step": 0.45,
       "dv": 0.4,
       "chance": 0.8,
       "_what": "fins (outboard faces)",
       "items": [
-       "st_nopaint",
        "corner_mark",
        "red_marker",
        "panel_G08",
        "panel_H19",
-       "st_inspect",
        "hazard_subtle",
        "maker"
-      ]
+      ],
+      "_change": "design v2.1 (1. 10. 2026): fins 1.3 m tall, tip at 3.3"
      }
     ]
    },
@@ -2095,8 +2058,7 @@
     }
    },
    "greeble_companions": {
-    "_comment": "labels, markers, chevrons and stencils beside the hull's kit greebles"
-   }
+    "_comment": "labels, markers, chevrons and stencils beside the hull's kit greebles", "vent_stencil": {"side": "xst_vent", "top": "xstl_vent", "bottom": "xst_vent"}, "vent_stencil_scale": 1.5}
   },
   "grime": [
    {
@@ -2127,11 +2089,27 @@
    {
     "_what": "fins: rain streaks down both faces",
     "on": "ray",
-    "at": [2.0, 5.0, 3.3],
-    "dir": [0, -1, 0],
-    "size": [1.5, 1.3],
+    "at": [
+     1.7,
+     5.0,
+     2.7
+    ],
+    "dir": [
+     0,
+     -1,
+     0
+    ],
+    "size": [
+     1.2,
+     0.9
+    ],
     "kind": "streaks",
-    "up": [0, 0, 1]
+    "up": [
+     0,
+     0,
+     1
+    ],
+    "_change": "design v2.1 (1. 10. 2026): fins 1.3 m tall, tip at 3.3"
    },
    {
     "on": "ray",

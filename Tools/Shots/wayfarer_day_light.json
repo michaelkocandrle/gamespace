@@ -1,0 +1,392 @@
+{
+ "_comment": "day sun direction x the ship (sun 12, sky 0.45, angle 0.25, contact 0.12)",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 4.0
+  },
+  {
+   "name": "p39_y45_front34L",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    -8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "console": [
+    "space.SunDir -39 45",
+    "space.Sun Intensity 12",
+    "space.Sky Intensity 0.45",
+    "space.Sun LightSourceAngle 0.25",
+    "space.Sun ContactShadowLength 0.12"
+   ]
+  },
+  {
+   "name": "p39_y45_chase",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5
+  },
+  {
+   "name": "p39_y45_front34R",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ]
+  },
+  {
+   "name": "p39_y0_front34L",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    -8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "console": [
+    "space.SunDir -39 0",
+    "space.Sun Intensity 12",
+    "space.Sky Intensity 0.45",
+    "space.Sun LightSourceAngle 0.25",
+    "space.Sun ContactShadowLength 0.12"
+   ]
+  },
+  {
+   "name": "p39_y0_chase",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5
+  },
+  {
+   "name": "p39_y0_front34R",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ]
+  },
+  {
+   "name": "p39_y-45_front34L",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    -8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "console": [
+    "space.SunDir -39 -45",
+    "space.Sun Intensity 12",
+    "space.Sky Intensity 0.45",
+    "space.Sun LightSourceAngle 0.25",
+    "space.Sun ContactShadowLength 0.12"
+   ]
+  },
+  {
+   "name": "p39_y-45_chase",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5
+  },
+  {
+   "name": "p39_y-45_front34R",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ]
+  },
+  {
+   "name": "p20_y45_front34L",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    -8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "console": [
+    "space.SunDir -20 45",
+    "space.Sun Intensity 12",
+    "space.Sky Intensity 0.45",
+    "space.Sun LightSourceAngle 0.25",
+    "space.Sun ContactShadowLength 0.12"
+   ]
+  },
+  {
+   "name": "p20_y45_chase",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5
+  },
+  {
+   "name": "p20_y45_front34R",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ]
+  },
+  {
+   "name": "p60_y45_front34L",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    -8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "console": [
+    "space.SunDir -60 45",
+    "space.Sun Intensity 12",
+    "space.Sky Intensity 0.45",
+    "space.Sun LightSourceAngle 0.25",
+    "space.Sun ContactShadowLength 0.12"
+   ]
+  },
+  {
+   "name": "p60_y45_chase",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5
+  },
+  {
+   "name": "p60_y45_front34R",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ]
+  },
+  {
+   "name": "p39_y70_front34L",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    -8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "console": [
+    "space.SunDir -39 70",
+    "space.Sun Intensity 12",
+    "space.Sky Intensity 0.45",
+    "space.Sun LightSourceAngle 0.25",
+    "space.Sun ContactShadowLength 0.12"
+   ]
+  },
+  {
+   "name": "p39_y70_chase",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5
+  },
+  {
+   "name": "p39_y70_front34R",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ]
+  },
+  {
+   "name": "p25_y15_front34L",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    -8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "console": [
+    "space.SunDir -25 15",
+    "space.Sun Intensity 12",
+    "space.Sky Intensity 0.45",
+    "space.Sun LightSourceAngle 0.25",
+    "space.Sun ContactShadowLength 0.12"
+   ]
+  },
+  {
+   "name": "p25_y15_chase",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5
+  },
+  {
+   "name": "p25_y15_front34R",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ]
+  }
+ ]
+}

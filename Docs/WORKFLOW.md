@@ -592,6 +592,11 @@ snímku.
   levelu `-39 45` na boky, jen když snímky jdou v pořadí presetu `wayfarer_exterior_review`; jiné pořadí dalo loď
   ve stínu. Příčina neověřená (orientace lodi po předchozích snímcích). Řešení: světlo scény drž v presetu
   a po změně pořadí snímků zkontroluj, že je loď ve vesmíru na slunci.
+- fa) **Denní trup působí ploše, i když jsou stíny ostré** (1. 10. 2026). Výchozí pohledy (chase zezadu, levobok zepředu)
+  vidí stranu odvrácenou od slunce `-39 45`, kterou svítí jen obloha; osvětlený pravobok má kontrast jako SC. Stíny
+  slunce ostřejší být nemůžou: scalability epic už dává `r.Shadow.Virtual.ResolutionLodBiasDirectional -1.5` a úhel
+  zdroje pod 0,5° se na stínu křídla neprojeví. Poměr slunce a oblohy (11 / 0,55) pomůže jen o pár procent jasu;
+  zbytek je lak bez variace drsnosti (povrch trupu, ne světlo).
 
 ### 9.3 Obsah a cookování
 
@@ -1123,6 +1128,15 @@ snímku.
 - ew) **Decal na lisovaném poli zmizí** (30. 9. 2026). Pole je 12 mm za čelem dveří a decal s `max_depth_cm` 1,5 se
   středem 5 mm před čelem na něj nedosáhne. Řešení: střed decalu na čelo (≤ 15 mm od dna pole, pozor na zadní stranu
   desky); popisek celý uvnitř pole nebo celý na rámu.
+- ey) **Nápis na pravoboku vzhůru nohama, i když test decalů prošel** (recenze exteriéru 30. 9. 2026). WAYFARER, HF-0417,
+  logo a výstraha u trysky měly v `Wayfarer_setup.json` rotaci `[0, 90, -90]` místo `[0, 90, 90]`: text se četl
+  pozpátku a vzhůru nohama, což vypadá jako zrcadlení, ale je to otočení o 180°. Test hlídal jen zrcadlení (počet
+  flipů). Řešení: `test_decal_orientation.py` pravidlo 3, text na stěně musí mít „nahoru“ (−Y komponenty, s `flip_v`
+  +Y) nahoru v prostoru lodi. Pravobok = levobok s opačným yaw a **stejným** roll.
+- ez) **Druhá dávka nových položek atlasu by posunula první** (1. 10. 2026). `pack` řadil všechny položky s `append`
+  dohromady podle výšky, takže vyšší nová položka by předběhla `st_rails` z dávky kitu a posunula UV hotových meshů.
+  Řešení: `append` je název dávky a dávky se balí v pořadí prvního výskytu; po přestavbě porovnej `uv` starých
+  položek v `decal_library_index.json` (má být beze změny).
 - ds) **Stínovaná obdélníková světla bez MegaLights jsou drahá.** Dvě stínovaná světla kitu v chodbě bez MegaLights
   (osvětlení jako v letu): stínové mapy 7,3 ms a světla 5,5 ms (26 ms celkem). V lodi mají stín jen v režimu interiéru
   (MegaLights je trasuje), v letu ne; počet světel pod MegaLights cenu skoro nemění (8 i 12 světel: 3,5 ms).

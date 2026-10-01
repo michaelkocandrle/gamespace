@@ -258,7 +258,12 @@ MSYS_NO_PATHCONV=1 "$BL" -b --factory-startup --python Tools/Blender/decal_libra
   - `_BC`: sRGB barva, A = krytí barvy (jen `paint_color`);
   - `_M`: R alfa, G drsnost, B kov.
 - `decal_library_index.json` obsahuje UV obdélník, rozměr v metrech a účel každé položky, u trimu V rozsah pruhu.
-  Novou položku stačí přidat do receptu a postavit znovu.
+  Novou položku stačí přidat do receptu a postavit znovu. **Hotové meshe (loď, kit, interiér) nesou UV atlasu**:
+  nové položky vždy s `"append": "<název dávky>"`; `pack` balí dávky v pořadí prvního výskytu za všechno staré,
+  takže se žádná stará položka nepohne (ověř diffem indexu: `uv` starých položek beze změny).
+- Šablonové nápisy exteriéru (autor 1. 10. 2026): jen u hardwaru, který jmenují (tryska, sání, podvozek, poklop,
+  průduch), ne náhodně po ploše (`coverage` a `clusters` bez textu). Položky `xst_*` tmavé pro bílý lak, `xstl_*`
+  světlé pro tmavý hřbet, písmo 3,4 cm; průduchy dostávají nápis přes `greeble_companions.vent_stencil`.
 - Trim sheet: pruhy dlaždicované po U každé 2 m (lem, žebrování, šrouby, lišta, pás s výstupky, stupeň, mřížka,
   dvojitá spára).
 
@@ -482,7 +487,8 @@ starý mesh a importuje načisto, uklidí osiřelé assety.
   vektory `[x, y, z]`), `no_nanite_parts` (např. `["Interior"]`), `decals`.
 - Geometrie → přepočítat jen kameru, oko, `gear_stow_travel_cm` (nejdelší noha pod břichem),
   `gear_extension_cm` 0 když patky leží na spodku kolizního boxu. Letové hodnoty nesahat.
-- Chase kamera: manifest navrhuje ~1,8 × délka, v praxi ~0,8 × délka (SocketOffset.Z ~300–400).
+- Chase kamera: manifest navrhuje ~1,8 × délka, v praxi ~1,3 × délka (Wayfarer 2800 cm, SocketOffset.Z 520;
+  autor 1. 10. 2026). Při 0,8 × zabíraly ploutve a gondoly celý okraj obrazu, SC ukazuje celou loď na ~40 % šířky.
 
 Textury v UE: `_BC` sRGB on; `_N` Normalmap + **Flip Green on** (Blender/glTF = OpenGL); `_ORM` a `_AO`
 Masks, sRGB off. Rozměry mocnina dvou, trup 4096², malé díly 1–2K.

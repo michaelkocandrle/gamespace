@@ -1,0 +1,322 @@
+{
+ "_comment": "Wayfarer cheap fixes (1. 10. 2026): the exterior stencils beside their hardware, and the day light A/B - the old level values (sun 8, sky 0.7, angle 0.5, contact 0.08) set by console against the new ones (11, 0.55, 0.25, 0.12); SHOTS perf lines give the GPU time of each. Run: .\\Tools\\Shots.ps1 -Preset wayfarer_cheap_fixes -Width 1920 -Height 1080 (packaged) or -Editor",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 4.0,
+   "console": [
+    "space.SunDir -39 45",
+    "space.Sun Intensity 11",
+    "space.Sky Intensity 0.55",
+    "space.Sun LightSourceAngle 0.25",
+    "space.Sun ContactShadowLength 0.12"
+   ]
+  },
+  {
+   "name": "st_nose_gnd",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 50,
+   "camera_local": [
+    20.2,
+    -2.6,
+    0.2
+   ],
+   "look_local": [
+    19.2,
+    -0.9,
+    -0.1
+   ]
+  },
+  {
+   "name": "st_exhaust_pod",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 50,
+   "camera_local": [
+    -12.4,
+    -6.2,
+    0.4
+   ],
+   "look_local": [
+    -10.2,
+    -3.4,
+    0.0
+   ]
+  },
+  {
+   "name": "st_ramp_rear",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "camera_local": [
+    -15.0,
+    -1.5,
+    0.3
+   ],
+   "look_local": [
+    -10.6,
+    0.2,
+    0.2
+   ]
+  },
+  {
+   "name": "st_side_hatches",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 60,
+   "camera_local": [
+    1.0,
+    -5.6,
+    0.3
+   ],
+   "look_local": [
+    0.9,
+    -2.3,
+    0.1
+   ]
+  },
+  {
+   "name": "st_belly_gear",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.5,
+   "fov": 55,
+   "camera_local": [
+    -2.5,
+    -4.0,
+    -4.6
+   ],
+   "look_local": [
+    -3.6,
+    -1.0,
+    -2.6
+   ]
+  },
+  {
+   "name": "st_spine_top",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 55,
+   "camera_local": [
+    4.5,
+    -2.5,
+    5.2
+   ],
+   "look_local": [
+    3.2,
+    0.2,
+    2.4
+   ]
+  },
+  {
+   "name": "st_wing_nostep",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 1.5,
+   "fov": 50,
+   "camera_local": [
+    -4.0,
+    -8.5,
+    3.2
+   ],
+   "look_local": [
+    -2.0,
+    -4.8,
+    0.0
+   ]
+  },
+  {
+   "name": "light_old_front34L",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    -8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "console": [
+    "space.SunDir -39 45",
+    "space.Sun Intensity 8",
+    "space.Sky Intensity 0.7",
+    "space.Sun LightSourceAngle 0.5",
+    "space.Sun ContactShadowLength 0.08"
+   ]
+  },
+  {
+   "name": "light_old_front34R",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ]
+  },
+  {
+   "name": "light_old_wing",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "fov": 55,
+   "camera_local": [
+    -6.25,
+    -9,
+    3.8
+   ],
+   "look_local": [
+    -2.75,
+    -4.5,
+    -0.4
+   ]
+  },
+  {
+   "name": "light_old_chase_rear",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0
+  },
+  {
+   "name": "light_old_chase_fl",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "chase_yaw": 135,
+   "chase_pitch": -12
+  },
+  {
+   "name": "light_new_front34L",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    -8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "console": [
+    "space.SunDir -39 45",
+    "space.Sun Intensity 11",
+    "space.Sky Intensity 0.55",
+    "space.Sun LightSourceAngle 0.25",
+    "space.Sun ContactShadowLength 0.12"
+   ]
+  },
+  {
+   "name": "light_new_front34R",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ]
+  },
+  {
+   "name": "light_new_wing",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "fov": 55,
+   "camera_local": [
+    -6.25,
+    -9,
+    3.8
+   ],
+   "look_local": [
+    -2.75,
+    -4.5,
+    -0.4
+   ]
+  },
+  {
+   "name": "light_new_chase_rear",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0
+  },
+  {
+   "name": "light_new_chase_fl",
+   "camera": "chase",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "chase_yaw": 135,
+   "chase_pitch": -12
+  }
+ ]
+}

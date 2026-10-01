@@ -1,0 +1,24 @@
+Wayfarer exterior surface concepts v3 (1. 10. 2026), Higgsfield GPT Image 2.5, image-to-image from the in-game
+render input_current.jpg (two panels: front three-quarter left, rear three-quarter left). Style reference only:
+the ship is built from the approved drawing (no AI geometry), these concepts decide the hull surface design.
+
+Common part of every prompt:
+Redesign ONLY the hull surface of this spaceship; keep the exact silhouette, proportions, camera angles, the two
+panels and the background. Star Citizen quality in-game render, Halcyon Freightworks utility ship: warm off-white
+primary paint, gunmetal secondary, orange accent stripes, the name WAYFARER upright and readable. Add a clear
+large / medium / small detail hierarchy: a deliberate panel layout that follows the structure, raised armour
+plates with visible thickness and bevelled edges, recessed service hatches with dark floors, material zones
+(painted panels, bare metal on edges and exhaust collars, black rubber seals round hatches and the canopy,
+dark mechanical parts in recesses), and functional parts: small RCS thruster blocks, white outline lights and
+strobes on wing tips and fins, the rear ramp with a frame, hinges and hydraulic pistons, proper gun mounts with
+pylons and cooling fins. Stencils only beside the hardware they name. The tail fins on the engine pods are
+about half their present height. No text other than the name and small stencils.
+
+A  Clean aerospace: large smooth primary panels, crisp recessed seams, flush inset hatches, few raised plates,
+   bare-metal leading edges, subtle outline lights (Origin / Aegis feel, still a workhorse).
+B  Layered utility: raised secondary plates bolted over a darker structural frame whose ribs show between the
+   plates, cable conduits along the spine, recessed service bays with grilles (MISC / Anvil utility feel).
+C  Industrial workhorse: heavy overlapping armour plates with bolt rows, exposed hydraulics at the ramp and gear,
+   chunky RCS blocks, gunmetal lower hull, hazard stripes at service points (Drake / Argo feel, but clean).
+D  Rugged explorer: off-white panels over a gunmetal belly and spine, worn bare-metal edges, external tank
+   bulges on the wings, antennas and landing lights, visible gear bay doors (Anvil explorer feel).

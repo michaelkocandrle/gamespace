@@ -31,7 +31,7 @@ Referenční sada: 8 lodí ze Ship Matrix ve stavu *flight-ready*, třída malá
 | --- | --- | --- | --- | --- |
 | Délka | 21,5 m | 19,5 m | 16–25 m | o 2 m delší kvůli průchozímu interiéru |
 | Šířka | 14,7 m | 15,5 m | 8,75–28 m | krátká křídla, zbraně na koncích |
-| Výška | 5,6 m | 7,25 m | 4,5–16 m | nízká, s podvozkem venku |
+| Výška | 4,9 m | 7,25 m | 4,5–16 m | nízká, s podvozkem venku (5,6 m do změny ploutví 1. 10. 2026) |
 | Hmotnost | 52 t | 47 t | 25–216 t | |
 | Náklad | 8 SCU | 4 SCU | 2–24 SCU | jako Avenger Titan |
 | Posádka | 1 | 1 | 1 | jedno lůžko |
@@ -119,3 +119,13 @@ Původní otázky:
 - Dveře do technické chodby (y 0–1,0) se s dnešní uličkou (y 0,65–1,9) kryjí jen 0,35 m, zbytek je proti konci
   mřížky (0,3 m před přepážkou). Návrh pro stavbu: ulička 0,5–2,05 m a mřížka o 0,3 m dozadu (x 2,6–7,6), aby
   před dveřmi bylo 0,6 m volné plochy – čeká na autora.
+
+### Změna designu v2.1: menší ploutve (rozhodnutí autora 1. 10. 2026)
+
+- Recenze exteriéru (`Docs/Reviews/2026-09-30_wayfarer_exterior.md`) ukázala, že ploutve postavené přesně podle
+  výkresu (2,0 m vysoké, 0,7 m nad hřbetem) v chase kameře dominují zádi. Autor: zmenšit jako změnu designu.
+- Nově: ploutev 1,3 m vysoká (z 2,0 na gondole do 3,3 m, vršek v rovině hřbetu), základna 2,6 m místo 3,3 m, horní
+  tětiva 0,8 m, sklon ven stejný (špička y 3,56–3,81). Plocha asi na polovinu. Celková výška lodi 5,6 → 4,9 m.
+- Výkres (`Wayfarer_layout.json`, `Wayfarer_exterior.png`), kolizní boxy, značka a karta špíny na ploutvi
+  v receptu `Wayfarer_hs.json` a spec (`height_m`) upravené ve stejném kroku.
+

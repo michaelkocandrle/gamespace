@@ -34,9 +34,15 @@ EXPOSURE_EV100 = 3.0
 #     planet loses its terminator. 0.7 with lighter paint (the first fighter's <Ship>_setup.json) is the balance.
 #   SUN_CONTACT_SHADOW_M - small shadows in the panel gaps, in metres of screen ray.
 #   SUN_SOURCE_ANGLE_DEG - how wide the sun is, i.e. how soft the terminator is.
-SKY_LIGHT_INTENSITY = 0.7
-SUN_CONTACT_SHADOW_M = 0.08
-SUN_SOURCE_ANGLE_DEG = 0.5
+#   SUN_INTENSITY_LUX - the key (the level had the engine's 8 until 1. 10. 2026).
+# 1. 10. 2026 (the Wayfarer's exterior review: flat daylight, no highlights on the hull; variants in
+# Tools/Shots/wayfarer_day_light.json): sun 8 -> 11, sky 0.7 -> 0.55, angle 0.5 -> 0.25, contact 0.08 -> 0.12.
+# The sunlit side reads like SC (crisp shading, highlights), the shade side is darker but not black; 0.45 sky
+# was crisper still but brought back the dark shadow side in space.
+SKY_LIGHT_INTENSITY = 0.55
+SUN_INTENSITY_LUX = 11.0
+SUN_CONTACT_SHADOW_M = 0.12
+SUN_SOURCE_ANGLE_DEG = 0.25
 
 # The grade, in the unbound volume together with the exposure. Restrained on purpose: a little
 # contrast and saturation, a hint of blue in the highlights, film grain and a vignette for the
@@ -1537,9 +1543,10 @@ def build_level(sky_material, planet_mesh, planet_material, body_materials, rock
             sun = actor.get_component_by_class(unreal.DirectionalLightComponent)
             sun.set_editor_property("contact_shadow_length", SUN_CONTACT_SHADOW_M)
             sun.set_editor_property("light_source_angle", SUN_SOURCE_ANGLE_DEG)
+            sun.set_editor_property("intensity", SUN_INTENSITY_LUX)
             # Lights Veyra's atmosphere (and is dimmed and reddened through it on the ground).
             sun.set_editor_property("atmosphere_sun_light", True)
-            log("sun: contact shadows %.2f m, source angle %.2f deg" % (SUN_CONTACT_SHADOW_M, SUN_SOURCE_ANGLE_DEG))
+            log("sun: %.1f lux, contact shadows %.2f m, source angle %.2f deg" % (SUN_INTENSITY_LUX, SUN_CONTACT_SHADOW_M, SUN_SOURCE_ANGLE_DEG))
         if isinstance(actor, unreal.SkyLight):
             sky_light = actor.get_component_by_class(unreal.SkyLightComponent)
             # Stars exist below the horizon too; don't clamp the captured lower half to black.

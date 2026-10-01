@@ -457,9 +457,15 @@ def pack(items, sheet_m, pad):
     item; fails loudly if the sheet is too small (then raise px_per_m's sheet or split the library).
     Items with "append" are packed after all the others, in the shelves under them: every built mesh carries the
     atlas UVs of its decals, and one new item sorted in among the old ones moved every item after it (the kit's
-    component labels, batch 4, 28. 9. 2026)."""
+    component labels, batch 4, 28. 9. 2026). Each "append" value is a batch, packed in the order the batches first
+    appear in the list, so a later batch never moves an earlier one (the exterior stencils, 1. 10. 2026)."""
     order = sorted([it for it in items if not it.get("append")], key=lambda it: -it["footprint"][1])
-    order += sorted([it for it in items if it.get("append")], key=lambda it: -it["footprint"][1])
+    batches = []
+    for it in items:
+        if it.get("append") and it["append"] not in batches:
+            batches.append(it["append"])
+    for batch in batches:
+        order += sorted([it for it in items if it.get("append") == batch], key=lambda it: -it["footprint"][1])
     x, y_top, row_h, centres = pad, sheet_m - pad, 0.0, {}
     for it in order:
         w, h = it["footprint"]
