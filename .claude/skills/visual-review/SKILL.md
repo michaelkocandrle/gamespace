@@ -28,8 +28,10 @@ nenahrazuje je: musí proběhnout obojí. `test_ship_geometry.py` běží sám j
    do `goal`/`style` briefu, aby kritik nechtěl víc, než je záměr.
 4. **Spusť kritika.** Dostane **jen** `brief.md` a listy: žádný popis postupu, doby práce, záměrů ani vlastní názor.
    Prompt: „Přečti <složka>/brief.md a všechny listy v něm a vyhodnoť je podle svého zadání.“
-   Když typ agenta `visual-critic` v session chybí: agent `general-purpose` s modelem `fable` a promptem „přečti
+   Když typ agenta `visual-critic` v session chybí: agent `general-purpose` s promptem „přečti
    `.claude/agents/visual-critic.md` (text pod YAML) a řiď se jím, pak brief a listy“ (30. 9. 2026).
+   **Model** (autor 1. 10. 2026, úspora): dílčí kola `opus` (běžné úsilí), `fable` jen na finální recenzi hotové lodi
+   (`"gate": "ship"`, v Agent předej `model: fable`; výchozí agenta je opus). Vzorový list = jedno kolo.
 5. **FAIL** → oprav body „musí se opravit“, nové snímky, nové listy, kritik znovu. **Nejvýš 3 kola**, pak předej
    i s otevřenými body.
 6. **Ověřovací kolo:** když po posledním kole ještě opravuješ, spusť na opravené body jedno kolo jen na ně (listy jen

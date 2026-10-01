@@ -34,11 +34,9 @@ kritikovi) čeká na schválení s pilotem. Pilot kitu postavený, kritik kolo 2
 ## Paralelní práce
 
 - **Druhá session** (worktree `gamespace-audit`, větev `wayfarer-dossier-interior`): výkresy interiéru (bod 4, styl
-  I-04 schválen 1. 10.) a koncepty (bod 6); ID interiéru v `Design/Wayfarer_interior_design.json`, model
-  `interior_model.py`, listy `draw_interior_sheet.py`, test `test_interior_drawing.py`, skill `ship-pipeline` 1c.
-  `exterior_*.py` mění jen hlavní session. **Datový commit druhé session** (autor 1. 10.: layout kajuty podle kitu,
-  podpora života posunutá, komentář D-INT-SEC06 v setupu; E-01–E-08 a paluba překreslené): při konfliktu v
-  `Drawings/Wayfarer_E0*` nebo `Design/*.png` vzít kteroukoli stranu a po sloučení překreslit (`draw_exterior_sheet.py`).
+  I-04 schválen 1. 10.) a koncepty (bod 6); skill `ship-pipeline` 1c. `exterior_*.py` mění jen hlavní session.
+  **0e7e4d4 sloučen do main 1. 10.** (listy E-0x, kit layout a I-04 překreslené, `import_kit.py` OK); novější
+  5894e97 (dveře hygieny, I-04 R1) jen ve větvi. Konflikt v `Drawings/*`: kterákoli strana, pak překreslit.
 - **Hlavní session:** exteriérový kit a pilot (hřbet, záď s gondolami), kritik s dílčím prahem.
 - Druhá session balí do `Builds_<jméno>` (`BuildDir.ps1`); slučuje hlavní session.
 
@@ -72,8 +70,10 @@ kritikovi) čeká na schválení s pilotem. Pilot kitu postavený, kritik kolo 2
 
 ## Další kroky
 
-1. **Wayfarer:** kolo 3 kritika pilotu kitu (plán v recenzi `2026-10-01_wayfarer_kit_pilot.md`, kolo 2), pak testy,
-   balení, sloučení větve druhé session (0e7e4d4 + import_kit.py) a kit na celou loď. Druhá session: body 4 a 6.
+1. **Wayfarer – pilot kitu, kolo 3** (kolo 2 FAIL 5,9; plán v `Reviews/2026-10-01_wayfarer_kit_pilot.md`, nic z něj
+   zatím neuděláno): hřbet bez dlaždic (kanál tmavě šedý, zkosení 4 mm, CarbonShare 0), rám kovový a světlejší,
+   rozvody po páteři a větrací skříně, materiály (RoughVariation 0,45, Grunge 0,3), čísla desek z výkresu (decal
+   knihovna + cesta atlasu do UE), světlo soumraku a noci. Pak testy, balení, kit na celou loď. Druhá session: 4, 6.
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.
