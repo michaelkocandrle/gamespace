@@ -445,6 +445,10 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
   `TextToPath().get_text_width_height_descent(s, prop, ismath=False)` (list za 16 s). Bahnschrift je jeden
   proměnný soubor, matplotlib z něj tučné nevybere: tučné = obrys `patheffects.withStroke`. Nemá znaky ↑ ✓ ✗ −
   (U+2212): `draw_exterior_sheet.py` má záložní písma Segoe UI a Segoe UI Symbol (✓, →); jinak piš slova.
+- fi) **Český text v souboru po úpravě PowerShellem rozbitý** (1. 10. 2026). Windows PowerShell 5.1
+  `(Get-Content f -Raw) -replace ... | Set-Content` čte UTF-8 bez BOM jako ANSI a zapíše znaky dvakrát zakódované
+  (`lÃ­c`). Zdroják upravuj nástrojem Edit nebo pythonovým skriptem ze souboru; `python - @"..."@` v PowerShellu
+  visí (here-string je argument, python čeká na stdin). Oprava rozbitého souboru: zpětně zakódovat do cp1252.
 
 ### 9.2 Vykreslování (UE 5.8)
 
@@ -1190,6 +1194,17 @@ snímku.
   `settings_key()` píše množiny seřazené, stejně jako otisky v manifestech
   (`test_file_digest_ignores_the_string_hash_seed`). Skutečný šum stavby zůstává jen v trupu, decalech
   a interiéru (±40 trojúhelníků mezi běhy). Ověřené porovnáním staveb A/B1/B2/C (recept s klíči `id` a bez nich).
+- fg) **Řez trupem na výkresu interiéru neměl břicho** (1. 10. 2026, list I-04). Řez v x 12,50 vrátil jen střechu:
+  panely břicha mají švy přesně na stanici 12,50 a řez s přísným znaménkem (`d <= 0 < d`) vynechal každý trojúhelník,
+  který rovinu jen „ťukne“ vrcholem. Řešení v `mesh_draw._slice`: vrchol v rovině patří za řez (`d >= 0`), hrana se
+  bere při `da < 0 <= db`. Výšky trupu na ose interpoluj podél úseček řezu (koncové body dlouhého panelu leží až na
+  krajích). Taky: výběr trojúhelníků trupu podle středu v boxu kolem místnosti zahodil dlouhé panely břicha –
+  pro řez ber celý mesh.
+- fh) **ID interiéru v receptu by zneplatnila všechny listy exteriéru** (1. 10. 2026). Otisky dat na listech E-01–E-08
+  jsou otisky celých souborů (recept, layout, setup); jakýkoli zápis do nich (i klíč `"id"`, který stavba ignoruje)
+  žádá překreslit 8 listů (~20 MB PNG v LFS) a v paralelní práci dělá binární konflikty. Řešení: ID interiéru jsou
+  v `Design/<Loď>_interior_design.json` navázaná na data stavby klíčem, který test ověřuje, a otisky interiéru se
+  počítají jen z interiérové části dat (`interior_model._digests`).
 
 
 ---

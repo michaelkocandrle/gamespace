@@ -1,6 +1,6 @@
 ---
 name: ship-pipeline
-description: How a ship goes from idea to Unreal in gamespace - Ship Matrix reference set (fetch_ship_matrix.py), the mandatory 2D design stage (ArtSource/Ships/<Ship>/Design, <Ship>_layout.json with exterior outlines, draw_ship_design.py, <Ship>_spec.json in RSI Ship Matrix shape, author approval), the design dossier and fleet Ship Matrix page (build_ship_matrix.py, published as an Artifact), technical drawings drawn from the build data with IDs (assign_exterior_ids.py, <Ship>_exterior_design.json, exterior_model.py, draw_exterior_sheet.py, test_exterior_drawing.py), consistent concept views via Higgsfield as style reference, the exterior built exactly from the drawing (hs_build_ship.py, hs_assemble_ship.py, <Ship>_hs.json), silhouette_compare.py, detail layers (decal library, mesh decals, livery, wings, gear, lights), Blender export (gamespace_ship_export.py, manifest) and Unreal import (import_ship.py, <Ship>_setup.json). Reference file legacy-ai-model.md covers the older AI-model recipe (build_ai_ship.py). Load when designing a new ship, building or changing a ship exterior, touching sockets/UCX collision/pivot/LODs/ship materials/naming/decals, or running the ship export/import scripts.
+description: How a ship goes from idea to Unreal in gamespace - Ship Matrix reference set (fetch_ship_matrix.py), the mandatory 2D design stage (ArtSource/Ships/<Ship>/Design, <Ship>_layout.json with exterior outlines, draw_ship_design.py, <Ship>_spec.json in RSI Ship Matrix shape, author approval), the design dossier and fleet Ship Matrix page (build_ship_matrix.py, published as an Artifact), technical drawings drawn from the build data with IDs (assign_exterior_ids.py, <Ship>_exterior_design.json, exterior_model.py, draw_exterior_sheet.py, test_exterior_drawing.py; interior sheets from the built FBX: fbx_mesh.py, mesh_draw.py, interior_model.py, assign_interior_ids.py, <Ship>_interior_design.json, draw_interior_sheet.py, test_interior_drawing.py), consistent concept views via Higgsfield as style reference, the exterior built exactly from the drawing (hs_build_ship.py, hs_assemble_ship.py, <Ship>_hs.json), silhouette_compare.py, detail layers (decal library, mesh decals, livery, wings, gear, lights), Blender export (gamespace_ship_export.py, manifest) and Unreal import (import_ship.py, <Ship>_setup.json). Reference file legacy-ai-model.md covers the older AI-model recipe (build_ai_ship.py). Load when designing a new ship, building or changing a ship exterior, touching sockets/UCX collision/pivot/LODs/ship materials/naming/decals, or running the ship export/import scripts.
 ---
 
 # Loď: od nápadu do Unrealu
@@ -153,7 +153,32 @@ python Tools/Tests/test_exterior_drawing.py                  # výkres = data (i
 - **Sklo kabiny z boku** je jen tam, kde je trup uvnitř obou obrysů kabiny (boční i horní, jako
   `hs_build_ship.split_canopy`): kde je trup širší než horní obrys, končí sklo výš na rameni (ověřeno na postavené
   kabině 1. 10. 2026; samotný boční obrys kreslil sklo o 35 cm níž).
-- Další na řadě: interiér (bod 4) a koncepty (bod 6) ve stejném stylu; kit a pilot až podle schválených výkresů.
+- **Interiér (bod 4)** kreslí postavené díly, ne obdélníky z layoutu:
+  ```bash
+  python Tools/Design/assign_interior_ids.py <Loď> [--check]   # ID do Design/<Loď>_interior_design.json "ids"
+  python Tools/Design/interior_model.py <Loď>                  # prvky po místnostech, kontrola dat
+  python Tools/Design/draw_interior_sheet.py <Loď> [--sheets I-04]   # list místnosti -> Design/Drawings (~1 min)
+  python Tools/Tests/test_interior_drawing.py                  # výkres = data (i v Test.ps1 a CI, bez FBX)
+  ```
+  - Geometrie z FBX v LFS: `fbx_mesh.py` čte binární FBX v čistém Pythonu (meshe v prostoru Blenderu bez kořenové
+    konverze, materiál a UV po trojúhelnících, sockety), díly kitu se kladou jako v `kit_layout.layout_parts`,
+    interiér a trup lodi = ship space minus `assemble.offset`. `mesh_draw.py` kreslí pravoúhlé pohledy malířovým
+    algoritmem (výplň = odstín materiálu, hrany ohybů, obrysy) a řez rovinou (tlustá čára).
+  - **ID interiéru nejsou v receptu ani v layoutu**, ale v `Design/<Loď>_interior_design.json` `ids`, navázaná na
+    data stavby ověřitelným klíčem (jméno objektu / dveří, `[id, díl]` souběžně s `kit_modules`, `[položka, id]` u
+    decalů): zápis do receptu by zneplatnil otisky všech listů exteriéru (WORKFLOW 9.6 fh). Otisky interiéru
+    (`interior_model._digests`) berou jen interiérovou část každého souboru; FBX jen informativně (šum stavby).
+  - Schéma ID: `<MÍSTNOST>-W-<L|R><n>` stěny od zádi, `-B-<A|F>` přepážky, `-C-<n>` strop, `-FL-<n>` podlaha,
+    `-U-` nábytek (= ID objektu layoutu, který díl staví), `-M-` komponenta, `-O-` vybavení, `DR-<z>-<do>` dveře;
+    světlo a decal dílu = ID dílu + `/` + socket nebo položka knihovny. Kódy místností v `rooms` dat návrhu.
+  - Co který pohled listu místnosti kreslí, určuje `interior_model.sheet_views` (pravidlo pro kreslič i test).
+    Řez rovinou bere vrchol v rovině jako „za řezem“ (švy panelů trupu leží na stanicích, WORKFLOW 9.6 fg).
+  - List místnosti (vzor I-04 kajuta, 1:20): půdorys v řezu 1,2 m s mřížkou kitu 0,3 m (od začátku běhu stěn a od
+    osy), strop zespodu ve směru půdorysu, rozvinuté stěny 1–4 ze středu místnosti, příčný řez s kapslí 0,56 × 1,80
+    a zónami nad stropem a pod podlahou, klíčový plán, legenda, tabulky (díly kitu, účel dílů, nábytek / dveře /
+    komponenty, světla po socketech, decaly), souhrn světel a výkon, kontrola dat (layout × díl, komponenta mimo
+    trup, poznámky `review_notes`).
+- Další na řadě: koncepty (bod 6) ve stejném stylu; kit a pilot až podle schválených výkresů.
 
 ## 2. Koncepty jako reference stylu
 

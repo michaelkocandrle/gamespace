@@ -58,9 +58,15 @@
    "type": "posuvné dvoukřídlé",
    "slide": [0, 0],
    "host": "TEC-B-F",
-   "motion": "dvě křídla po 0,5 m do stran (na každé straně 0,7 m stěny, jedno křídlo 1,0 m by se nevešlo)",
+   "motion": "dvě křídla po 0,5 m do stran; jedou po líci přepážky ze strany chodby (TEC-B-F) do polohy y 0,50 … 1,00 a −1,00 … −0,50 (líc 3 cm a přepážka 4 cm kapsu neunesou; na každé straně je 0,7 m stěny)",
    "operation": "samo při přiblížení, stavové světlo u rámu",
-   "purpose": "Odděluje obytnou kajutu od technické chodby (hluk, teplo)."
+   "purpose": "Odděluje obytnou kajutu od technické chodby (hluk, teplo).",
+   "open": [[0.5, 1.0], [-1.0, -0.5]],
+   "side": "aft",
+   "side_cz": "po líci ze strany chodby",
+   "t": 0.03,
+   "h": 2.05,
+   "_h": "the doorway's clear height 2.05 m (Tools/Kit/kit_batch4b.py DOOR_H)"
   },
   "DR-CAB-CPT": {
    "leaf": "none",
@@ -244,7 +250,8 @@
   }
  },
  "review_notes": {
-  "DR-CAB-HYG": "kit (Furniture_Hygiene15L_A) kreslí výstražný pruh a madlo na zadní hraně křídla, ale těsnění u zadní zárubně – jedno z nich je opačně; výkres bere směr otevírání podle pruhu a madla (k přídi)"
+  "DR-CAB-HYG": "kit (Furniture_Hygiene15L_A) kreslí výstražný pruh a madlo na zadní hraně křídla, ale těsnění u zadní zárubně – jedno z nich je opačně; výkres bere směr otevírání podle pruhu a madla (k přídi)",
+  "D-INT-SEC06": "komentář v setupu uvádí „nad lůžkem, x 13,09“, decal ale leží v x 14,99 na CAB-W-L5; výkres kreslí polohu z dat – rozhodne autor, kde má číslo úseku být"
  },
  "decal_items": {
   "hazard_stripe": "výstražný pruh na hraně (rám dveří, práh)",
@@ -273,7 +280,7 @@
   "D-INT-SEC03": "číslo úseku lodi 03 na obložení",
   "D-INT-SEC04": "číslo úseku lodi 04 na obložení",
   "D-INT-SEC05": "číslo úseku lodi 05 na obložení kajuty",
-  "D-INT-SEC06": "číslo úseku lodi 06 na obložení nad lůžkem",
+  "D-INT-SEC06": "číslo úseku lodi 06 na obložení u přední přepážky (CAB-W-L5, 0,2 m za koncem lůžka)",
   "D-INT-HOLD": "nápis CARGO HOLD – DECK A · 8 SCU · MAG-LOCK GRID",
   "D-INT-GRID": "štítek CARGO GRID – 8 SCU · MAX 16 t · LOCK BEFORE FLIGHT",
   "D-INT-LANE": "pruh volné uličky na podlaze nákladu",

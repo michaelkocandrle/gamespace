@@ -87,11 +87,12 @@ def _normals(V, T):
 
 
 def draw(ax, view, parts, colours, clip=None, cut=None, z=5.0, light=(0.35, -0.45, 0.82), chunks=60,
-         cut_col="#1B1B1B", edge_col="#2B2B2B", skip_mats=(), window=None, cut_parts=None, fill=True):
+         cut_col="#1B1B1B", edge_col="#2B2B2B", skip_mats=(), window=None, cut_parts=None, fill=True, fade=None):
     """Draws the parts into ax. colours: material name -> RGB (0..1) or None to skip. clip: (lo, hi) xyz box in
     layout metres - only faces whose centre lies inside. cut: (point, normal) - faces beyond the plane (normal points
     away from the viewer) and the cut line through every part (or only the parts whose tag is in cut_parts).
     window: (x0, y0, x1, y1) paper mm - everything drawn is clipped to it. fill=False draws only the cut lines.
+    fade: tags of parts drawn lighter (furniture in front of the wall an elevation looks at).
     Returns the paper segments of the cut and the tags drawn."""
     from matplotlib.patches import Rectangle
     clip_patch = None
@@ -112,14 +113,15 @@ def draw(ax, view, parts, colours, clip=None, cut=None, z=5.0, light=(0.35, -0.4
             if clip_patch is not None:
                 lc.set_clip_path(clip_patch)
         return paper, set()
-    result = _draw(ax, view, parts, colours, clip, cut, z, light, chunks, cut_col, edge_col, skip_mats, added, cut_parts)
+    result = _draw(ax, view, parts, colours, clip, cut, z, light, chunks, cut_col, edge_col, skip_mats, added, cut_parts,
+                   fade or set())
     if clip_patch is not None:
         for c in added:
             c.set_clip_path(clip_patch)
     return result
 
 
-def _draw(ax, view, parts, colours, clip, cut, z, light, chunks, cut_col, edge_col, skip_mats, added, cut_parts):
+def _draw(ax, view, parts, colours, clip, cut, z, light, chunks, cut_col, edge_col, skip_mats, added, cut_parts, fade):
     def add(c):
         ax.add_collection(c)
         added.append(c)
@@ -159,10 +161,12 @@ def _draw(ax, view, parts, colours, clip, cut, z, light, chunks, cut_col, edge_c
         P2 = view.paper(V)
         dd = cen[idx] @ view.d
         shade = 0.78 + 0.22 * np.abs(n[idx] @ lt)
+        light_up = p.tag in fade
         for k, ti in enumerate(idx):
             c = colours[mats[ti]] if len(mats) else (0.85, 0.85, 0.85)
             polys.append(P2[T[ti]])
-            fills.append(tuple(min(1.0, ch * shade[k]) for ch in c))
+            f = tuple(min(1.0, ch * shade[k]) for ch in c)
+            fills.append(tuple(ch + (1.0 - ch) * 0.55 for ch in f) if light_up else f)
             depth.append(dd[k])
         # feature edges among the kept faces
         E, fa, fb = p.edges()

@@ -31,7 +31,8 @@ import mesh_draw as md  # noqa: E402
 from draw_exterior_sheet import GREY, INK, LIGHT, PT, STATUS_COL, STATUS_MARK, TITLE_MM  # noqa: E402
 
 S20 = 1000.0 / 20.0
-GRID_COL = "#6FA8DC"
+PLAN_MX, PLAN_HY = 0.32, 2.66          # plan window: margin along x, half height (room for the dimension chains)
+GRID_COL = "#3F7FBF"
 DECAL_FILL = (0.91, 0.86, 0.97)
 DECAL_EDGE = "#7B4FB0"
 LIGHT_FILL = {"warm": "#F2B35C", "cool": "#5AA9F0", "work": "#F7D27A", "neutral": "#E9DCC6", "signal": "#F06A2A"}
@@ -76,6 +77,18 @@ def colours(m):
     for n in ("Decal", "DecalAO", "DecalPaint", "Trim", "TrimAO", "DecalGrime"):
         out["M_Ship_%s_%s" % (m.ship, n)] = None
     out["M_Ship_%s_DecalPaint" % m.ship] = DECAL_FILL
+    return out
+
+
+def kit_constants(fn, names):
+    """Module-level constants of a kit builder (Tools/Kit/<fn>), read with ast: the builders import Blender."""
+    import ast
+    tree = ast.parse(open(os.path.join(im.ROOT, "Tools", "Kit", fn), encoding="utf-8").read())
+    out = {}
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) \
+                and node.targets[0].id in names:
+            out[node.targets[0].id] = ast.literal_eval(node.value)
     return out
 
 
@@ -177,6 +190,9 @@ class RoomSheet:
             for ident, v in geo.kit_decals(p).items():
                 self.decal_pos[ident] = v
         self.el = {e.id: e for e in m.elements}
+        cen = self.interior.verts[self.interior.tris].mean(axis=1)
+        inside = (cen[:, 0] > self.x0 - 0.3) & (cen[:, 0] < self.x1 + 0.3)
+        self.ship_mats = set(np.unique(self.interior.mats[inside]).tolist())
 
     # ------------------------------------------------------------------ small helpers
     def mark(self, view, ident):
@@ -184,6 +200,11 @@ class RoomSheet:
 
     def lab(self, view, ident):
         self.d.labelled.setdefault(view, set()).add(ident)
+
+    def boxed(self, x, y, text, size, col):
+        """Centred text on a white box wide enough to break the leaders that pass it (verification round of I-04)."""
+        self.sh.ax.text(x, y, text, fontsize=size * PT, color=col, ha="center", va="baseline", zorder=45,
+                        bbox=dict(boxstyle="square,pad=0.35", fc="white", ec="none"))
 
     def title(self, x, y, text, scale="1 : 20"):
         self.sh.t(x, y, text, TITLE_MM, weight="bold")
@@ -289,13 +310,13 @@ class RoomSheet:
         """A decal: the built quad (kit decals, from the FBX) or the projected box (setup) in violet, its
         reading direction for lettering."""
         if e.id in self.decal_pos:
+            # the decal's own faces are in the views (violet where nothing stands in front of them); over them only
+            # its frame, dashed - a decal behind a shelf shows as a frame (verification round of I-04)
             c, pts = self.decal_pos[e.id]
             P = vw.paper(pts)
-            for k in range(0, len(P), 3):
-                self.sh.ax.add_patch(MplPolygon(P[k:k + 3], closed=True, fc=hexrgb(DECAL_FILL), ec="none", zorder=20))
             x0, y0 = P.min(0)
             x1, y1 = P.max(0)
-            self.sh.rect(x0, y0, x1, y1, ec=DECAL_EDGE, lw=0.18, z=20.5)
+            self.sh.rect(x0 - 0.2, y0 - 0.2, x1 + 0.2, y1 + 0.2, ec=DECAL_EDGE, lw=0.18, ls="--", z=20.5)
             return vw.P(c)
         if e.extra.get("projected"):
             pos, n, hy, hz = self.m.decal_frame(e)
@@ -312,11 +333,11 @@ class RoomSheet:
         """The plan cut at 1.2 m above the deck, looking down; the kit grid over the floor."""
         m, sh = self.m, self.sh
         s = S20
-        u0, v0 = self.x0 - 0.16, -2.55
+        u0, v0 = self.x0 - PLAN_MX, -PLAN_HY
         vw = md.View((1, 0, 0), (0, 1, 0), (0, 0, -1), ox, oy, s, u0, v0)
-        W = (ox, oy, ox + (self.x1 + 0.16 - u0) * s, oy + 5.1 * s)
+        W = (ox, oy, ox + (self.x1 + PLAN_MX - u0) * s, oy + 2 * PLAN_HY * s)
         cut = ((0, 0, 1.2), (0, 0, -1))
-        clip = ((self.x0 - 0.3, -2.7, -0.4), (self.x1 + 0.3, 2.7, 1.2))
+        clip = ((self.x0 - 0.45, -2.8, -0.4), (self.x1 + 0.45, 2.8, 1.2))
         _, tags = md.draw(sh.ax, vw, self.parts + self.ctx + [self.interior], self.cols, clip=clip, cut=cut, window=W)
         md.draw(sh.ax, vw, [self.hull], self.cols, clip=clip, cut=cut, window=W, fill=False)
         sh.rect(*W, ec=INK, lw=0.25, z=44)
@@ -336,15 +357,102 @@ class RoomSheet:
                 r = e.extra["rect"]
                 P0, P1 = vw.P((r[0], r[2], 0)), vw.P((r[1], r[3], 0))
                 sh.rect(P0[0], P0[1], P1[0], P1[1], ec=STATUS_COL[e.status], lw=0.35, ls="--", z=25)
-                sh.t((P0[0] + P1[0]) / 2, (P0[1] + P1[1]) / 2, "pod podlahou" if e.extra.get("below") else "",
-                     1.8, STATUS_COL[e.status], ha="center", va="center", z=25.5)
+                if e.extra.get("below"):
+                    sh.t(min(P0[0], P1[0]) + 1.0, max(P0[1], P1[1]) - 3.0, "pod podlahou", 2.0, STATUS_COL[e.status],
+                         z=25.5, bg="white")
             if e.cat == "door":
                 self.door_plan(vw, e)
             reqs.append(self.req(view, ident, *vw.P(a), hidden=bool(e.extra.get("below"))))
         self.section_mark(vw, W)
         self.view_keys(vw)
         self.room_text(vw)
+        self.plan_dims(vw)
         return vw, W, reqs
+
+    # ------------------------------------------------------------------ dimensions
+    def dim(self, A, B, text, size=2.2, col=INK, z=48):
+        """One dimension between paper points A and B (horizontal or vertical): arrows, the value over it (left of a
+        vertical one, turned)."""
+        sh = self.sh
+        sh.ax.annotate("", xy=A, xytext=B, zorder=z, arrowprops=dict(arrowstyle="<|-|>", lw=0.16 * PT, color=col,
+                                                                      mutation_scale=3.2, shrinkA=0, shrinkB=0))
+        if abs(A[1] - B[1]) < 1e-6:
+            L = abs(B[0] - A[0])
+            w = sh.width(text, size)
+            X = (A[0] + B[0]) / 2 if w + 1.0 < L else max(A[0], B[0]) + 1.0 + w / 2
+            sh.t(X, A[1] + 0.6, text, size, col, ha="center", z=z, bg="white")
+        else:
+            L = abs(B[1] - A[1])
+            w = sh.width(text, size)
+            Y = (A[1] + B[1]) / 2 if w + 1.0 < L else max(A[1], B[1]) + 1.0 + w / 2
+            sh.t(A[0] - 0.6, Y, text, size, col, ha="right", va="center", rot=90, z=z, bg="white")
+
+    def chain(self, vw, axis, at, values, feature=None, label=None, size=2.2):
+        """A dimension chain in a view: along x (axis "x", the line at y = at) or y (at x = at) through the sorted
+        values, each piece dimensioned; thin extension lines from the feature coordinate (the other axis) to the line."""
+        sh = self.sh
+        vs = []
+        for v in sorted(values):                 # parts that touch (locker | hygiene cell: 7 mm apart) share a point
+            if not vs or v - vs[-1] > 0.015:
+                vs.append(v)
+        pts = [vw.P((v, at, 0)) if axis == "x" else vw.P((at, v, 0)) for v in vs]
+        for v, P in zip(vs, pts):
+            if feature is not None:
+                F = vw.P((v, feature, 0)) if axis == "x" else vw.P((feature, v, 0))
+                if axis == "x":
+                    sgn = 1 if P[1] > F[1] else -1
+                    sh.line([F, (P[0], P[1] + sgn * 1.2)], 0.1, GREY, z=47)
+                else:
+                    sgn = 1 if P[0] > F[0] else -1
+                    sh.line([F, (P[0] + sgn * 1.2, P[1])], 0.1, GREY, z=47)
+            if axis == "x":
+                sh.line([(P[0] - 0.8, P[1] - 0.8), (P[0] + 0.8, P[1] + 0.8)], 0.25, INK, z=48)
+            else:
+                sh.line([(P[0] - 0.8, P[1] - 0.8), (P[0] + 0.8, P[1] + 0.8)], 0.25, INK, z=48)
+        for (va, A), (vb, B) in zip(zip(vs, pts), zip(vs[1:], pts[1:])):
+            self.dim(A, B, im.fmt(vb - va), size)
+        if label:
+            P = pts[0]
+            if axis == "x":
+                sh.t(P[0] - 1.5, P[1] - 0.9, label, 2.0, GREY, ha="right", z=48, bg="white")
+            else:
+                sh.t(P[0] + 0.9, P[1] - 1.5, label, 2.0, GREY, ha="center", va="top", z=48, bg="white", rot=90)
+
+    def faces(self):
+        """The room's end faces (the bulkheads' faces) and the liner faces of its long walls, from the kit parts."""
+        ends = sorted(p.ue_to_layout(0, 0, 0)[0] for p in self.places if p.category == "Bulkhead")
+        sides = sorted({round(p.ue_to_layout(0, 0, 0)[1], 3) for p in self.places if p.category == "Wall"})
+        return ends, sides
+
+    def plan_dims(self, vw):
+        """Dimension chains round the plan: furniture along each long wall and the room's length between the
+        bulkhead faces (top: port, bottom: starboard); the room's width and the end doors at both ends."""
+        m = self.m
+        ends, sides = self.faces()
+        if len(ends) < 2 or len(sides) < 2:
+            return
+        yl, yr = sides[-1], sides[0]
+        for side, y_in, y_out, yf in (("L", 2.42, 2.57, yl), ("R", -2.42, -2.57, yr)):
+            xs = [ends[0], ends[-1]]
+            for e in m.in_room(self.rid, ("furniture",)):
+                if e.extra.get("placement") is not None and m.face_of(e) == side:
+                    xs += list(m.x_range(e))
+            self.chain(vw, "x", y_in, xs, feature=yf)
+            self.chain(vw, "x", y_out, ends, label="líc přepážek" if side == "L" else None)
+        for x_in, x_out, end in ((self.x0 - 0.12, self.x0 - 0.25, "A"), (self.x1 + 0.12, self.x1 + 0.25, "F")):
+            ys = [yr, yl]
+            for e in m.elements:
+                if e.cat == "door" and e.extra["axis"] == "x" and self.rid in (e.extra.get("rooms") or ()) \
+                        and m.door_face(e, self.rid) == end:
+                    ys += [e.extra["at"][1] - e.extra["width"] / 2, e.extra["at"][1] + e.extra["width"] / 2]
+            self.chain(vw, "y", x_in, ys)
+            self.chain(vw, "y", x_out, [yr, yl], label="líc obložení" if end == "A" else None)
+        # the doors in the long walls (the hygiene cell's): their width in front of them
+        for e in m.elements:
+            if e.cat == "door" and e.extra["axis"] == "y" and self.rid in (e.extra.get("rooms") or ()):
+                x, y = e.extra["at"]
+                yy = y + (0.1 if y < 0 else -0.1)
+                self.chain(vw, "x", yy, [x - e.extra["width"] / 2, x + e.extra["width"] / 2])
 
     def anchor_plan(self, e):
         p = e.extra.get("placement")
@@ -354,9 +462,10 @@ class RoomSheet:
                 x, y, _ = p.ue_to_layout(8.0, -L * 50.0, 0)
                 return (x, y, 0)
             if e.cat == "furniture":
-                dx = self.m.parts["SM_Kit_" + p.part]["dims_m"][0]
-                x, y, _ = p.ue_to_layout(dx * 50.0, 0, 0)
-                return (x, y, 0)
+                dx, dy, _ = self.m.parts["SM_Kit_" + p.part]["dims_m"]
+                pts = [p.ue_to_layout(dx * 55.0, b * dy * 100.0, 0) for b in (-0.5, 0.5)]
+                a, b = sorted(pts, key=lambda q: q[0])
+                return (a[0] + (b[0] - a[0]) * 0.28, a[1] + (b[1] - a[1]) * 0.28, 0)
             x, y, _ = p.ue_to_layout(L * 50.0, 0, 0)
             return (x, y + (0.35 if p.index % 2 else -0.35), 0)
         if e.cat == "door":
@@ -382,18 +491,19 @@ class RoomSheet:
         x = gx0
         while x <= gx1 + 1e-6:
             a, b = vw.P((x, -half, 0)), vw.P((x, half, 0))
-            self.sh.line([a, b], 0.25 if k % 4 == 0 else 0.1, GRID_COL, z=24, ls="-" if k % 4 == 0 else ":")
+            self.sh.line([a, b], 0.3 if k % 4 == 0 else 0.12, GRID_COL, z=24)
             if k % 4 == 0:
-                self.sh.t(a[0], W[1] + 1.2, "+%s" % im.fmt(x - gx0, 1), 1.8, GRID_COL, ha="center", z=45)
+                self.sh.t(a[0], W[1] + 1.2, "+%s" % im.fmt(x - gx0, 1), 2.0, GRID_COL, ha="center", z=45, bg="white")
             k += 1
             x = gx0 + k * g
         k = -int(half / g)
         while k * g <= half + 1e-6:
             y = k * g
             a, b = vw.P((gx0, y, 0)), vw.P((gx1, y, 0))
-            self.sh.line([a, b], 0.25 if k % 4 == 0 else 0.1, GRID_COL, z=24, ls="-" if k % 4 == 0 else ":")
+            self.sh.line([a, b], 0.3 if k % 4 == 0 else 0.12, GRID_COL, z=24)
             if k % 4 == 0:
-                self.sh.t(W[0] + 1.2, a[1] + 0.6, "%+.1f" % y if y else "osa", 1.8, GRID_COL, z=45)
+                self.sh.t(vw.P((gx0, 0, 0))[0] + 0.8, a[1] + 0.6, ("%+.1f" % y).replace(".", ",") if y else "osa", 2.0,
+                          GRID_COL, z=45, bg="white")
             k += 1
 
     def door_plan(self, vw, e):
@@ -415,6 +525,13 @@ class RoomSheet:
         A, B = vw.P(a), vw.P(b)
         if st == "proposed":
             sh.line([A, B], 0.9, col, z=27)
+            for (o0, o1) in lf.get("open") or []:
+                t = lf.get("t", 0.03)
+                sgn = -1 if lf.get("side") == "aft" else 1
+                xa, xb = sorted((x + sgn * 0.005, x + sgn * (0.005 + t)))
+                P0, P1 = vw.P((xa, o0, 0)), vw.P((xb, o1, 0))
+                sh.rect(min(P0[0], P1[0]) - 0.3, min(P0[1], P1[1]), max(P0[0], P1[0]) + 0.3, max(P0[1], P1[1]),
+                        ec=col, lw=0.3, ls="--", z=27.5)
         slide = lf.get("slide")
         if lf.get("slide_part") is not None and lf.get("kit"):
             p = next(p for p in self.places if p.part == lf["kit"])
@@ -473,9 +590,9 @@ class RoomSheet:
         port up) - the ceiling panels with their lights."""
         m, sh = self.m, self.sh
         s = S20
-        u0, v0 = self.x0 - 0.16, -2.55
+        u0, v0 = self.x0 - PLAN_MX, -PLAN_HY
         vw = md.View((1, 0, 0), (0, 1, 0), (0, 0, 1), ox, oy, s, u0, v0)
-        W = (ox, oy, ox + (self.x1 + 0.16 - u0) * s, oy + 5.1 * s)
+        W = (ox, oy, ox + (self.x1 + PLAN_MX - u0) * s, oy + 2 * PLAN_HY * s)
         cut = ((0, 0, 1.95), (0, 0, 1))
         clip = ((self.x0 - 0.3, -2.7, 1.95), (self.x1 + 0.3, 2.7, 3.2))
         _, tags = md.draw(sh.ax, vw, self.parts + self.ctx + [self.interior], self.cols, clip=clip, cut=cut, window=W)
@@ -501,8 +618,37 @@ class RoomSheet:
                 if a:
                     self.mark(view, ident)
                     reqs.append(self.req(view, ident, *a))
+        reqs += self.rcp_context(vw)
         self.room_text(vw)
         return vw, W, reqs
+
+    def rcp_context(self, vw):
+        """Labels for what the ceiling panels of a hull liner room carry besides their lights (kit_batch2.services:
+        the ladder tray and the pipe pair under the ceiling, the T ribs on the panel joints) and the walls' coves -
+        parts of the kit modules, labelled grey with the modules they belong to."""
+        out = []
+        ceil = [p for p in self.places if p.category == "Ceiling"
+                and self.m.parts["SM_Kit_" + p.part]["section"].startswith("L")]       # kit_batch2.services: L only
+        if not ceil:
+            return out
+        k = kit_constants("kit_batch2.py", ("SVC_TRAY", "SVC_PIPES", "SVC_Z"))
+        ids = ", ".join(sorted(p.tag for p in ceil))
+        p0 = sorted(ceil, key=lambda p: p.x)[0]
+        L0 = self.m.span(p0)
+        ty = (k["SVC_TRAY"][0] + k["SVC_TRAY"][1]) / 2
+        py = (k["SVC_PIPES"][0][0] + k["SVC_PIPES"][1][0]) / 2
+        for ident, text, pt in (("#tray", "kabelový žebřík pod stropem (součást %s)" % ids, (p0.x + L0 * 0.22, ty, 2.13)),
+                                ("#pipes", "dvojice potrubí s barevným pruhem (součást %s)" % ids, (p0.x + L0 * 0.62, py, 2.13)),
+                                ("#rib", "žebro (T profil) na spoji stropních panelů", (p0.x + L0, -0.3, 2.3))):
+            X, Y = vw.P(pt)
+            out.append({"id": ident, "text": text, "anchor": (X, Y), "col": GREY, "z": Y, "hidden": False})
+        cove = next((e for e in self.m.elements if e.room == self.rid and e.cat == "light" and e.id.endswith("/Cove_0")
+                     and self.m.face_of(e) == "L"), None)
+        if cove is not None:
+            X, Y = vw.P(cove.extra["pos"])
+            out.append({"id": "#cove", "text": "římsa obložení se světlem Cove (stěny W-L, W-R)", "anchor": (X, Y),
+                        "col": GREY, "z": Y, "hidden": False})
+        return out
 
     def elevation(self, face, ox, oy, view):
         """One wall seen from the middle of the room: cut along the room's centre line (the floor and ceiling in
@@ -525,7 +671,9 @@ class RoomSheet:
             cut, clip = ((cx, 0, 0), (-1, 0, 0)), ((self.x0 - 0.25, -2.6, -0.3), (cx, 2.6, 2.6))
         vw = md.View(u, (0, 0, 1), d, ox, oy, s, u0, -0.15)
         W = (ox, oy, ox + w * s, oy + 2.6 * s)
-        _, tags = md.draw(sh.ax, vw, self.parts + self.ctx + [self.interior], self.cols, clip=clip, cut=cut, window=W)
+        fade = {p.tag for p in self.places if p.category == "Furniture"} if face in ("F", "A") else None
+        _, tags = md.draw(sh.ax, vw, self.parts + self.ctx + [self.interior], self.cols, clip=clip, cut=cut, window=W,
+                          fade=fade)
         sh.rect(*W, ec=INK, lw=0.25, z=44)
         reqs = []
         # module IDs over the wall, joints ticked
@@ -542,8 +690,9 @@ class RoomSheet:
                 yb = W[3] + 1.2
                 for P in (A, B):
                     sh.line([(P[0], W[3]), (P[0], yb + 7.0)], 0.18, INK, z=45)
-                sh.t((A[0] + B[0]) / 2, yb + 3.6, ident, 2.4, STATUS_COL[e.status], ha="center", z=45)
-                sh.t((A[0] + B[0]) / 2, yb + 0.6, p.part.split("_", 1)[1], 1.7, GREY, ha="center", z=45)
+                # on white over the leaders that pass down to the wall (critic of I-04, round 1)
+                self.boxed((A[0] + B[0]) / 2, yb + 3.6, ident, 2.4, STATUS_COL[e.status])
+                self.boxed((A[0] + B[0]) / 2, yb + 0.6, p.part.split("_", 1)[1], 1.7, GREY)
                 self.lab(view, ident)
                 # the module's length under the wall
                 yd = W[1] - 4.0
@@ -573,14 +722,59 @@ class RoomSheet:
                 X, Y = vw.P((x, y, 1.0))
                 reqs.append(self.req(view, ident, X, Y))
         self.draw_lights(view, vw, [self.el[i] for i in sorted(self.views[view]) if self.el[i].cat == "light"], side=True)
-        self.levels(vw, W)
+        self.levels(vw, W, labels=face != "L")
+        reqs += self.leaves_elevation(vw, face, view)
+        if face in ("F", "A"):
+            # furniture standing in front of the end wall: named grey, so it does not read as part of the bulkhead
+            for e in m.in_room(self.rid, ("furniture",)):
+                xr = m.x_range(e)
+                p = e.extra.get("placement")
+                if p is None or not xr or not (xr[1] > cx if face == "F" else xr[0] < cx):
+                    continue
+                dims = m.parts["SM_Kit_" + p.part]["dims_m"]
+                x = min(max((xr[0] + xr[1]) / 2, cx + 0.05), self.x1) if face == "F" else max(min((xr[0] + xr[1]) / 2, cx - 0.05), self.x0)
+                yc = p.ue_to_layout(dims[0] * 50, 0, 0)[1]
+                X, Y = vw.P((x, yc, min(dims[2], 1.8) * 0.55))
+                reqs.append({"id": "#ctx-" + e.id, "text": "%s (před stěnou)" % e.id, "anchor": (X, Y), "col": GREY,
+                             "z": Y, "hidden": False})
         return vw, W, reqs
 
-    def levels(self, vw, W):
+    def leaves_elevation(self, vw, face, view):
+        """A proposed sliding leaf in an end-wall view: its open position dashed (behind the face when it runs on the
+        far side)."""
+        out = []
+        for e in self.m.elements:
+            if e.cat != "door" or e.extra["axis"] != "x" or self.rid not in (e.extra.get("rooms") or ()):
+                continue
+            if self.m.door_face(e, self.rid) != face:
+                continue
+            lf = e.extra.get("leaf") or {}
+            if lf.get("leaf") != "proposed":
+                continue
+            x = e.extra["at"][0]
+            h = lf.get("h", 2.05)
+            for (o0, o1) in lf.get("open") or []:
+                P0, P1 = vw.P((x, o0, 0.0)), vw.P((x, o1, h))
+                self.sh.rect(min(P0[0], P1[0]), min(P0[1], P1[1]), max(P0[0], P1[0]), max(P0[1], P1[1]),
+                             ec=STATUS_COL["proposed"], lw=0.3, ls="--", z=46)
+            if lf.get("open"):
+                P = vw.P((x, (lf["open"][0][0] + lf["open"][0][1]) / 2, h * 0.75))
+                n = len(lf["open"])
+                out.append({"id": "#leaf-" + e.id, "text": "%s %s + (návrh, %s)" % (
+                    e.id, "%d křídla" % n if n > 1 else "křídlo", lf.get("side_cz", "")),
+                            "anchor": P, "col": STATUS_COL["proposed"], "z": P[1], "hidden": True})
+        return out
+
+    def levels(self, vw, W, labels=False):
+        """Level ticks at the view's left edge; labels inside the view when the strip's own labels are far away."""
         sh = self.sh
-        for z, name in ((0.0, "±0,00"), (1.3, "+1,30 lišta"), (1.7, "+1,70 zkosení"), (2.3, "+2,30 strop")):
+        for z, name in ((0.0, "±0,00"), (1.3, "+1,30"), (1.7, "+1,70"), (2.3, "+2,30")):
             _, Y = vw.P((0, 0, z))
             sh.line([(W[0] - 1.5, Y), (W[0], Y)], 0.18, INK, z=45)
+            if labels:
+                sh.ax.add_patch(MplPolygon([(W[0] + 1.6, Y), (W[0] + 0.6, Y + 1.3), (W[0] + 2.6, Y + 1.3)], closed=True,
+                                           fc=INK, ec="none", zorder=46))
+                sh.t(W[0] + 3.2, Y + 0.5, name, 2.0, z=46, bg="white")
 
     def level_labels(self, x, vw):
         sh = self.sh
@@ -617,9 +811,9 @@ class RoomSheet:
                 Y = vw.P((0, 0, 0.9))[1]
                 X = vw.P((x, 1.93 if e.extra["side"] == "L" else -1.93, 0))[0]
             elif e.cat == "floor":
-                X, Y = vw.P((x, 0.6, -0.02))
+                X, Y = vw.P((x, -0.45, -0.02))
             elif e.cat == "ceiling":
-                X, Y = vw.P((x, 0.6, 2.3))
+                X, Y = vw.P((x, 0.75, 2.3))
             elif e.cat == "furniture":
                 dims = m.parts["SM_Kit_" + p.part]["dims_m"]
                 X, Y = vw.P((x, p.ue_to_layout(dims[0] * 60, 0, 0)[1], 1.5))
@@ -673,9 +867,10 @@ class RoomSheet:
             sh.t(P[0], P[1] + (1.2 if z > 1 else -3.6), name, 2.0, ha="center", z=48, bg="white")
         below = ["%s %s (%s)" % (e.id, e.name, im.STATUS_CZ[e.status]) for e in self.m.in_room(self.rid, ("component",))
                  if e.extra.get("below")]
-        self.zone_note = ("Řez R1: nad stropem (+2,30 … +%s) tmavá vrstva lodi nad kitem, kabelové trasy a světla stropu, "
-                          "nosná konstrukce trupu; pod podlahou (±0,00 … %s) konstrukce podlahy kitu a lodi%s." % (
-                              im.fmt(top), im.fmt(bot), ("; " + ", ".join(below)) if below else ""))
+        self.zone_note = ("Řez R1: nad stropem (+2,30 … +%s) tmavá vrstva lodi nad kitem a trup, pod stropem kabelový žebřík "
+                          "a potrubí stropních panelů; pod podlahou (±0,00 … %s) jen podlahová deska kitu (6,5 cm) a trup – "
+                          "konstrukce ani rozvody tu nejsou modelované%s." % (
+                              im.fmt(top), im.fmt(bot), ("; v layoutu: " + ", ".join(below)) if below else ""))
 
     def component_fit(self):
         """Every under-floor component of the room against the hull: its layout box's corners (y, z) at both ends
@@ -747,6 +942,28 @@ class RoomSheet:
         for z, name in ((0.0, "±0,00 paluba"), (2.3, "+2,30 strop")):
             _, Y = vw.P((0, 0, z))
             sh.t(W[0] + 1.5, Y + 0.8, name, 2.0, z=48, bg="white")
+        # the room between the liner faces (under the floor, where the section is empty) and the hull outside
+        ends, sides = self.faces()
+        if len(sides) >= 2:
+            yr, yl = sides[0], sides[-1]
+            A, B = vw.P((self.section_x, yl, -0.2)), vw.P((self.section_x, yr, -0.2))
+            for y_ in (yl, yr):
+                F = vw.P((self.section_x, y_, 0.0))
+                sh.line([F, (F[0], A[1] - 1.2)], 0.1, GREY, z=47)
+            self.dim(A, B, "%s mezi líci obložení" % im.fmt(yl - yr))
+        segs = md._slice(self.hull.verts, self.hull.tris, np.array((self.section_x, 0, 0.0)), np.array((1.0, 0, 0)))
+        pts = [p_ for a, b in segs for p_ in (a, b) if 0.0 <= p_[2] <= 2.6 and abs(p_[1]) < 3.0]
+        if pts:
+            ymax = max(p_[1] for p_ in pts)
+            ymin = min(p_[1] for p_ in pts)
+            zt = 3.38
+            A, B = vw.P((self.section_x, ymax, zt)), vw.P((self.section_x, ymin, zt))
+            for p_ in (max(pts, key=lambda q: q[1]), min(pts, key=lambda q: q[1])):
+                F = vw.P(p_)
+                sh.line([F, (F[0], A[1] + 1.2)], 0.1, GREY, z=47)
+            self.dim(A, B, "%s trup vně (bez křídel a gondol)" % im.fmt(ymax - ymin))
+        P = vw.P((self.section_x, -0.75, -0.42))
+        sh.t(P[0], P[1], "pod podlahou nemodelováno: jen trup", 2.0, GREY, ha="center", z=48, bg="white")
 
 
 def _inside_segs(p, segs):
@@ -767,16 +984,16 @@ def draw_room_sheet(m, geo, sheet, rid, section_x, dpi, out_dir):
     ds.frame_and_zones(sh)
     W_ = sh.w
     # ------------------------------------------------ row 1: plan, ceiling plan, section
-    yv = 541.0
+    yv = 535.0
     rs.title(34, 822, "PŮDORYS – ŘEZ VE VÝŠCE 1,20 m, MŘÍŽKA KITU 0,3 m")
-    vwP, WP, reqP = rs.plan(52.0, yv)
-    d.place_labels("PLAN", reqP, 34, WP[2] + 18, tiers_up=[803, 810.5], tiers_dn=[530, 522.5], split_y=vwP.P((0, 0, 0))[1],
-                   bus_up=799.0, bus_dn=535.0)
-    rs.title(355, 815.5 + 6.5, "STROP – POHLED ZESPODU (ZRCADLENĚ K PŮDORYSU)")
-    vwC, WC, reqC = rs.rcp(372.0, yv)
+    vwP, WP, reqP = rs.plan(50.0, yv)
+    d.place_labels("PLAN", reqP, 34, WP[2] + 14, tiers_up=[806, 813], tiers_dn=[524, 516.5], split_y=vwP.P((0, 0, 0))[1],
+                   bus_up=803.5, bus_dn=529.0)
+    rs.title(352, 822, "STROP – POHLED ZESPODU (ZRCADLENĚ K PŮDORYSU)")
+    vwC, WC, reqC = rs.rcp(362.0, yv)
     if reqC:
-        d.place_labels("RCP", reqC, 355, WC[2] + 10, tiers_up=[803, 810.5], tiers_dn=[530, 522.5], split_y=vwC.P((0, 0, 0))[1],
-                       bus_up=799.0, bus_dn=535.0)
+        d.place_labels("RCP", reqC, 350, WC[2] + 10, tiers_up=[806, 813], tiers_dn=[524, 516.5], split_y=vwC.P((0, 0, 0))[1],
+                       bus_up=803.5, bus_dn=529.0)
     rs.title(690, 822, "ŘEZ R1 – x %s, POHLED K PŘÍDI" % im.fmt(section_x))
     vwS, WS, reqS = rs.section(698.0, 552.0)
     d.place_labels("SEC", reqS, 690, WS[2] + 12, tiers_up=[803, 810.5], tiers_dn=[541, 533.5],
@@ -795,8 +1012,9 @@ def draw_room_sheet(m, geo, sheet, rid, section_x, dpi, out_dir):
         sh.ax.add_patch(Circle((W[0] + 4, W[3] + 13.5), 2.6, fc="white", ec=INK, lw=0.3 * PT, zorder=47))
         sh.t(W[0] + 4, W[3] + 13.5, str(num), 2.6, ha="center", va="center", weight="bold", z=47.5)
         sh.t(W[0] + 8, W[3] + 12.6, FACE_CZ[face], 2.6, weight="bold", z=47.5)
-        d.place_labels(view, reqs, W[0], W[2], tiers_up=[W[3] + 19.5, W[3] + 26.0], tiers_dn=[W[1] - 13.0, W[1] - 19.5],
-                       split_y=vw.P((0, 0, 1.15))[1], bus_up=W[3] + 16.0, bus_dn=W[1] - 9.0, size=2.3)
+        d.place_labels(view, reqs, W[0], W[2], tiers_up=[W[3] + 19.5, W[3] + 25.5, W[3] + 31.5],
+                       tiers_dn=[W[1] - 13.0, W[1] - 19.0], split_y=vw.P((0, 0, 1.15))[1], bus_up=W[3] + 16.0,
+                       bus_dn=W[1] - 9.0, size=2.3)
     rs.level_labels(30.0, vws[0][3])
     # ------------------------------------------------ legend, notes (right column)
     yl = legend(rs, 985.0, 822.0)
@@ -843,7 +1061,23 @@ def legend(rs, x, ytop):
         sh.geom(box(X, Y - 1.2, X + 9, Y + 2.6), fc=hexrgb(rs.cols[k]), ec=INK, lw=0.18, z=5)
         sh.t(X + 11, Y, txt, 2.1)
         i += 1
-    y -= ((i + 1) // 2) * 5.0 + 2.0
+    y -= ((i + 1) // 2) * 5.0 + 1.0
+    ship = {"IntDark": "tmavá vrstva lodi (vnitřní plášť, nad stropem)", "IntWall": "stěna lodi", "IntFloor": "podlaha lodi",
+            "IntPanel": "panel lodi", "IntTrim": "trim lodi", "Accent": "akcent lodi (oranžová)"}
+    j = 0
+    for k, txt in ship.items():
+        name = "M_Ship_%s_%s" % (rs.m.ship, k)
+        if rs.cols.get(name) is None or name not in rs.ship_mats:
+            continue
+        X = x + (j % 2) * 95
+        Y = y - (j // 2) * 5.0
+        sh.geom(box(X, Y - 1.2, X + 9, Y + 2.6), fc=hexrgb(rs.cols[name]), ec=INK, lw=0.18, z=5)
+        sh.t(X + 11, Y, txt, 2.1)
+        j += 1
+    y -= ((j + 1) // 2) * 5.0 + 1.0
+    sh.line([(x, y + 0.8), (x + 9, y + 0.8)], md.CUT_LW, INK)
+    sh.t(x + 11, y, "trup v řezu (z modelu lodi, výkresy exteriéru E-01 až E-08)", 2.1)
+    y -= 6.0
     sh.t(x, y, "Světla (barva symbolu = barva světla)", 2.8, weight="bold")
     y -= 5.6
     demo = [("spot", "work", "bodovka (kužel; v pohledu směr)"), ("point", "neutral", "bodové světlo"),
@@ -857,15 +1091,20 @@ def legend(rs, x, ytop):
     y -= 12.5
     e = im.Element("x", "light", None, "built", "", "", type="point", role="warm", colour=(1, 1, 1), shadow=True)
     rs.lamp(x + 4, y + 0.8, e, tag=False)
-    sh.t(x + 10, y, "▲ v rohu = vrhá stín (hlavní světla); „i“ = svítí jen při chůzi interiérem", 2.1)
+    sh.t(x + 10, y, "▲ v rohu = vrhá stín (hlavní světla); „i“ = jen při chůzi interiérem (MegaLights: světla a stíny paprskem)", 2.1)
     y -= 4.4
     sh.t(x, y, "Štítek u symbolu = socket dílu; ID světla = ID dílu + / + socket (např. CAB-C-1/Down_0).", 2.1, GREY)
+    y -= 3.8
+    sh.t(x, y, "cd = svítivost v kandelách (tabulka světel).", 2.1, GREY)
     y -= 6.0
     sh.t(x, y, "Ostatní", 2.8, weight="bold")
     y -= 5.4
     sh.ax.add_patch(MplPolygon([(x, y - 0.8), (x + 9, y - 0.8), (x + 9, y + 2.4), (x, y + 2.4)], closed=True,
                                fc=hexrgb(DECAL_FILL), ec=DECAL_EDGE, lw=0.2 * PT))
-    sh.t(x + 11, y, "decal dílu kitu (z modelu); čárkovaně = promítaný decal lodi (D-INT)", 2.1)
+    sh.t(x + 11, y, "decal: výplň = jeho viditelná část z modelu; čárkovaný rámeček = poloha (i za předmětem); D-INT = promítaný", 2.1)
+    y -= 4.8
+    sh.geom(box(x, y - 1.2, x + 9, y + 2.6), fc="#E4E4E4", ec="#9A9A9A", lw=0.18, z=5)
+    sh.t(x + 11, y, "světlejší = nábytek před čelní stěnou (pohledy 2 a 4)", 2.1)
     y -= 4.8
     sh.ax.annotate("", xy=(x + 9, y + 0.8), xytext=(x, y + 0.8), arrowprops=dict(arrowstyle="-|>", lw=0.3 * PT,
                                                                                   color=INK, mutation_scale=6))
@@ -933,8 +1172,17 @@ def schedules(rs, x, ytop):
     # furniture, doors, components
     F = [e for e in els if e.cat in ("furniture", "component", "object", "door")]
     F.sort(key=lambda e: ({"furniture": 0, "door": 1, "component": 2, "object": 3}[e.cat], e.id))
-    colsF = [("ID", 24, "left"), ("prvek", 30, "left", 2), ("stav", 18, "left", 2), ("díl / provedení", 38, "left", 2),
-             ("účel; u dveří pohyb a ovládání; u komponent výklenek, přístup a výměna", 170, "left", 5)]
+    colsF = [("ID", 24, "left"), ("prvek", 27, "left", 2), ("stav", 22, "left", 3), ("umístění (m)", 44, "left", 3),
+             ("díl / provedení", 33, "left", 2), ("účel; u dveří pohyb a ovládání; u komponent výklenek, přístup a výměna",
+                                                  130, "left", 6)]
+
+    def place(e):
+        p_ = e.extra.get("placement")
+        if p_ is not None:
+            fy = p_.dir_layout(1.0, 0.0)[1]
+            return "%s, na podlaze, čelem k %s" % (e.where.replace(" (střed zadní hrany)", ""),
+                                                    "levoboku" if fy > 0 else "pravoboku") + " (střed zadní hrany)"
+        return e.where
     rowsF = []
     for e in F:
         if e.cat == "door":
@@ -944,16 +1192,16 @@ def schedules(rs, x, ytop):
                                        (" Ovládání: " + lf["operation"] + ".") if lf.get("operation") else "")
             st = {"built": "postaveno", "proposed": "otvor postaven, křídlo návrh", "none": "otvor bez křídla"}.get(lf.get("leaf"), "")
             col = STATUS_COL["proposed"] if lf.get("leaf") == "proposed" else INK
-            rowsF.append(([e.id, e.name, st, what, txt], col))
+            rowsF.append(([e.id, e.name, st, place(e), what, txt], col))
         elif e.cat == "component":
             txt = "%s Výklenek: %s. Přístup: %s. Výměna: %s." % (e.purpose, e.extra.get("bay") or "–",
                                                                  e.extra.get("access") or "–", e.extra.get("replace") or "–")
             if e.extra.get("note"):
                 txt += " Stav: " + e.extra["note"] + "."
-            rowsF.append(([e.id, e.name, im.STATUS_CZ[e.status], "layout, pod podlahou" if e.extra.get("below") else "layout",
-                           txt], STATUS_COL[e.status]))
+            rowsF.append(([e.id, e.name, im.STATUS_CZ[e.status], place(e),
+                           "layout, pod podlahou" if e.extra.get("below") else "layout", txt], STATUS_COL[e.status]))
         else:
-            rowsF.append(([e.id, e.name, im.STATUS_CZ[e.status], e.kit or "loď", e.purpose], STATUS_COL[e.status]))
+            rowsF.append(([e.id, e.name, im.STATUS_CZ[e.status], place(e), e.kit or "loď", e.purpose], STATUS_COL[e.status]))
     y2 = ds.table(sh, x, min(y1, yp) - 4, "NÁBYTEK, DVEŘE, KOMPONENTY", colsF, rowsF, size=TS, rowh=RH)
     sched["furniture"] = {e.id for e in F}
     # lights grouped by socket and intensity
@@ -963,12 +1211,13 @@ def schedules(rs, x, ytop):
         sock = e.id.split("/")[-1] if "/" in e.id else e.id
         groups.setdefault((sock.split("_")[0], round(e.extra["cd"], 2), e.extra.get("role")), []).append(e)
     colsL = [("světla: ID dílu + socket", 70, "left", 3), ("ks", 7, "right"), ("typ", 31, "left"), ("barva", 26, "left"),
-             ("cd", 12, "right"), ("stín", 9, "left"), ("int.", 8, "left"), ("účel", 34, "left", 2)]
+             ("cd", 12, "right"), ("stín", 9, "left"), ("int.", 8, "left"), ("účel", 34, "left", 3)]
     rowsL = []
     for (sock, cd, role), es in sorted(groups.items(), key=lambda kv: (kv[0][0], -kv[0][1])):
         e0 = es[0]
-        hosts = sorted(e.id.split("/")[0] for e in es)
-        ident = ", ".join(hosts) + (" /" + e0.id.split("/")[-1] if "/" in e0.id else "")
+        hosts = sorted({e.id.split("/")[0] for e in es})
+        socks = sorted({e.id.split("/")[-1] for e in es if "/" in e.id})
+        ident = ", ".join(hosts) + ((" / " + ", ".join(socks)) if socks else "")
         rowsL.append(([ident, len(es), LIGHT_TYPE_CZ.get(e0.extra["type"], e0.extra["type"]) +
                        (" %d°" % e0.extra["cone"] if e0.extra.get("cone") else ""),
                        LIGHT_ROLE_CZ.get(role, "barva lodi"), ("%g" % cd).replace(".", ","),
@@ -980,7 +1229,7 @@ def schedules(rs, x, ytop):
     # decals: paint per element, grime counted per part
     D = [e for e in els if e.cat == "decal" and not e.extra.get("grime")]
     G = [e for e in els if e.cat == "decal" and e.extra.get("grime")]
-    colsD = [("ID", 46, "left"), ("knihovna / textura", 33, "left"), ("velikost", 17, "left"), ("účel / text", 101, "left", 2)]
+    colsD = [("ID", 46, "left"), ("knihovna / textura", 33, "left"), ("velikost", 17, "left"), ("účel / text", 101, "left", 5)]
 
     def size(e):
         s_ = e.extra.get("size")
@@ -999,6 +1248,22 @@ def schedules(rs, x, ytop):
     sched["decals"] = {e.id for e in D} | {e.id for e in G}
     rs.schedules = sched
     return min(y2, y4)
+
+
+def intensity_line(m, rid):
+    """How the game gets a light's candelas from the kit's (kit_rooms.py): the socket's own scale, the room's light zone
+    and the ship's scale - the formula the light table's values follow."""
+    R = m.light_rules
+    zones = [z for z in m.mods.get("light_scale", []) if not isinstance(z, str) and z[3] == rid]
+    parts = ["cd dílu"]
+    for k, v in sorted(R["SOCKET_SCALE"].items()):
+        parts.append("%s ×%s (kit_rooms)" % (k.replace("SOCKET_Light_", ""), im.fmt(v, 1)))
+    for z in zones:
+        parts.append("zóna místnosti ×%s" % im.fmt(z[2], 1))
+        for k, v in (z[4] if len(z) > 4 else {}).items():
+            parts.append("%s ×%s navíc" % (k.replace("SOCKET_Light_", ""), im.fmt(v, 1)))
+    parts.append("hra ×%s" % im.fmt(R["SHIP_LIGHT_SCALE"], 1))
+    return "Intenzita v tabulce = " + " × ".join(parts) + " (např. Wash 12L: 6 × 0,5 × 0,6 × 0,6 × 1,1 = 1,19 cd)."
 
 
 def light_summary(rs, x, ytop):
@@ -1020,7 +1285,9 @@ def light_summary(rs, x, ytop):
             len(shadow), ", ".join(sorted({e.id.split("/")[-1].split("_")[0] for e in shadow}))),
         "%d světel „i“ svítí jen při chůzi interiérem (MegaLights); za letu svítí %d (z nich %d se stínem)." % (
             len(inter), len(flight), len([e for e in flight if e.extra.get("shadow")])),
-        "Intenzita = cd dílu × zóna kajuty 0,6 (osvětlení stěn ×0,6 navíc) × 1,1 (hra); viz tabulka.",
+        intensity_line(m, rs.rid),
+        "cd = svítivost v kandelách; „i“ = MegaLights (stíny a světla počítané paprskem) – hra je zapíná jen při chůzi "
+        "interiérem, za letu se tato světla vypínají.",
         "Výkon (CLAUDE.md, ship-interior): interiér je pixel-bound, stíny lokálních světel jsou drahé – každé nové světlo "
         "se měří v zabalené hře 1080p; optimalizace až na konci (autor 29. 9.).",
     ]
@@ -1150,7 +1417,7 @@ def save(rs, sheet, dpi, out_dir):
         "sheet": sheet, "ship": m.ship, "room": rs.rid, "section_x": rs.section_x, "digests": m.digests,
         "geometry": m.geometry_digests(),
         "drawn": {k: sorted(v) for k, v in rs.drawn.items()},
-        "labelled": {k: sorted(v) for k, v in rs.d.labelled.items()},
+        "labelled": {k: sorted(i for i in v if not i.startswith("#")) for k, v in rs.d.labelled.items()},
         "schedules": {k: sorted(v) for k, v in rs.schedules.items()},
         "checks": [list(c) for c in rs.checks],
     }
