@@ -3,8 +3,8 @@
 Jediný zdroj **aktuálního** stavu (nad ním jen `CLAUDE.md`), **nejvýš 80 řádků** (autor 30. 9. 2026). Hotové do stavu,
 splněné smaž; podrobnosti do commitu a recenzí (`Docs/Reviews/`), historie do 30. 9. v `Docs/HANDOFF.md` (archiv).
 
-Stav k **2. 10. 2026 noc**: výkresy Wayfareru E-01 až E-08 schválené (revize C); revize D (s krokem c) čeká na schválení
-autorem; pilot kitu po 3 kolech kritika FAIL 6,4, kroky a–c hotové (recenze 2026-10-01_wayfarer_kit_pilot).
+Stav k **2. 10. 2026 večer**: výkresy Wayfareru E-01 až E-08 schválené v **revizi D** (autor 2. 10., včetně kroku c);
+pilot kitu po 3 kolech kritika FAIL 6,4, kroky a–c hotové a přijaté (recenze 2026-10-01_wayfarer_kit_pilot). Nový PC autora.
 
 ## Stav
 
@@ -68,9 +68,8 @@ autorem; pilot kitu po 3 kolech kritika FAIL 6,4, kroky a–c hotové (recenze 2
 
 1. **Wayfarer – pilot kitu, kroky d → e** (autor 1. 10.; každý krok vlastní session, pak CURRENT, Cleanup, `/clear`;
    do hlavní session jen výřezy; recenze `2026-10-01_wayfarer_triangle_budget.md` a `…_kit_pilot.md`). Kroky a–c
-   hotové (krok c 2. 10.: výřezy před/po v `Docs/Reviews/2026-10-01_wayfarer_kit_pilot/stepc/`). **Čeká na autora:**
-   posouzení výřezů kroku c a schválení / vrácení revize D výkresů (do té doby neschválená, výkresy překreslovat jen
-   při změně dat). **d) až po posouzení autorem:** trysky 2× (80 k): kužel s hrdlem, středové těleso, žebra, táhla,
+   hotové a přijaté autorem (krok c 2. 10., výřezy v `Docs/Reviews/2026-10-01_wayfarer_kit_pilot/stepc/`).
+   **d) další krok:** trysky 2× (80 k): kužel s hrdlem, středové těleso, žebra, táhla,
    prstence, emisivní jádro; přepracovat gondoly (140 k / 60 k). Po c + d jedno ověřovací kolo kritika (Opus,
    `step`); pilot hotový až PASS. **e)** jen analýza: červené poziční světlo, noc (proč se trup neztmaví). Pak teprve
    kit na celou loď; nic jiného nezačínat. Paralelní session I-01–I-09 (bez Unrealu / Blenderu / balení) smí běžet.

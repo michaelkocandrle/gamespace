@@ -131,3 +131,6 @@ Výtky kola 3 č. 1 (desky S čtou jako okna) a č. 2 (záď bez vrstvení desek
 - Výkresy E-01 až E-08 přegenerované (data se změnila; test „výkres = data“ PASS), I-04 překreslen kvůli pořadí světel
   svítidel po přestavbě (9.6 cw). **Revize D zůstává neschválená** do posouzení autora.
 - Snímky: editor `shots:20261002_012447_wayfarer_kit_pilot/`, zabalená hra `shots:20261002_013605_wayfarer_kit_pilot/`, výřezy před/po v `2026-10-01_wayfarer_kit_pilot/stepc/`.
+
+**Autor 2. 10. 2026:** výřezy kroku c přijal, revizi D výkresů E-01 až E-08 schválil (`approved_revision` D, razítko
+výkresů přegenerováno). Další krok d (trysky) a po něm ověřovací kolo kritika.

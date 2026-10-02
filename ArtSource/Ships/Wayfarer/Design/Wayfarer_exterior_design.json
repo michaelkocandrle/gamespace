@@ -2,7 +2,7 @@
   "_comment": "Wayfarer exterior design data (dossier bod 3; author 1. 10. 2026: one source of data - the drawings and the ship are made from the same data). Built elements live in the build data (HardSurface/Wayfarer_hs.json, Wayfarer_setup.json) with their IDs; this file holds what is not built yet: 'proposed' elements (drawn blue), and 'changes' to built elements ('change' with the new values in 'set', 'remove' drawn red crossed). Read by Tools/Design/exterior_model.py (drawings, Tools/Tests/test_exterior_drawing.py) and later by the exterior kit builder. Layout coordinates: x from the aft end, y to port, z from the deck; pod angles 0 outboard, 90 top. Mirrored elements (the default) have one ID for both sides.",
   "ship": "Wayfarer",
   "revision": "D",
-  "approved_revision": "C",
+  "approved_revision": "D",
   "_revision_D": "1. 10. 2026, kit pilot critic round 1 (FAIL 5.4): a wide spine with a crest, T-profile ribs and longerons with bolt rows, doubler panels and small hatches on the roof plates (three plate sizes), a darker channel floor, the ramp with tread bars, a rubber threshold, a hinge, a heavier frame with corner gussets, hydraulic cylinders with clevis brackets and hoses, a bigger RCS block, lamp bodies with position lenses and a work light; the author approves D with the pilot; 2. 10. 2026 kit pilot step c (critic round 3): the shoulder plates S with doubler panels, hatches and conduits F-CONDUIT-S, the secondary paint lighter, warmer and duller, the aft wall as plates P-S-A on the frame FR-AFT with vent boxes (replacing P-B-08 / P-B-09)",
   "concept": {
     "id": "CON-SURF-V3-BC",
@@ -27,7 +27,8 @@
               "what": "kit pilot built from the approved drawings: roof plates R, shoulder plates S, frame over the roof and the shoulders (FR-RIB above v 0.75), FR-LONG-HI, FR-LONG-TOP, FR-SPINE, the ramp frame and pistons, the ramp light, the fin and wing strobes, XK-RCS on the pods; the built plates and RCS they replace removed from the recipe"},
     "roof": {"date": "1. 10. 2026",
              "what": "desky v primárním laku i na hřbetu, gunmetal jen na břiše: chase kamera vidí hlavně hřbet a tmavý by udělal tmavou loď během hraní"},
-    "_round2": "Kit pilot critic round 1 (1. 10. 2026) changed the approved drawings to revision D (_revision_D); the author approves D with the pilot."
+    "_round2": "Kit pilot critic round 1 (1. 10. 2026) changed the approved drawings to revision D (_revision_D); the author approves D with the pilot.",
+    "revision_D": {"date": "2. 10. 2026", "what": "autor schválil revizi D výkresů E-01 až E-08 (včetně kroku c: desky ramene S s panely, poklopy a rozvody, záď jako desky na rámu FR-AFT) a přijal výřezy kroku c pilotu kitu"}
   },
   "materials": [
     {"id": "MZ-PAINT1", "name": "Lak primární", "recipe": "paint", "status": "built",
