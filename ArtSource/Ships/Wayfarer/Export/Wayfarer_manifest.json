@@ -34,7 +34,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "c0d01e2722737703c964758d0d7205da79f11584"
+      "geometry_hash": "e4b92a6f14ff46a623503526410a9ffd9a82766f"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -48,7 +48,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "f6b86a599f596a56c21ea48cab7442b5b94f70b4"
+      "geometry_hash": "909014898b3bb9d9fc280f2cd2fcf0be7f461c88"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Gear.fbx",
@@ -62,14 +62,14 @@
       "objects": [
         "SM_Ship_Wayfarer_Hologram"
       ],
-      "geometry_hash": "42ddc6e550083100d33a436a33ae770b9bef1f61"
+      "geometry_hash": "057a6466bce42af09449af13aa062471dddbc7e4"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Interior.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "74cc8c51efcc2c94c1b48c1c2ea31c52714164fe"
+      "geometry_hash": "bef764ba8d135cc91f026017b8a56fcbe04c6e99"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
@@ -97,19 +97,19 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 401134,
-      "verts": 275916,
+      "tris": 350398,
+      "verts": 250286,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
         "M_Ship_Wayfarer_Accent",
-        "M_Ship_Wayfarer_Metal",
-        "M_Ship_Wayfarer_Seal",
-        "M_Ship_Wayfarer_Channel",
-        "M_Ship_Wayfarer_Emissive",
-        "M_Ship_Wayfarer_BayInterior",
         "M_Ship_Wayfarer_Gunmetal",
         "M_Ship_Wayfarer_HeatTint",
+        "M_Ship_Wayfarer_Metal",
+        "M_Ship_Wayfarer_Emissive",
+        "M_Ship_Wayfarer_Seal",
+        "M_Ship_Wayfarer_Channel",
+        "M_Ship_Wayfarer_BayInterior",
         "M_Ship_Wayfarer_Strobe",
         "M_Ship_Wayfarer_PosWhite",
         "M_Ship_Wayfarer_LightRed",
@@ -122,7 +122,7 @@
       "uv_layers": 2,
       "bounds_m": [
         [
-          -10.767827987670898,
+          -10.777799606323242,
           -7.355200290679932,
           -1.927999496459961
         ],
@@ -158,8 +158,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 64996,
-      "verts": 66106,
+      "tris": 64902,
+      "verts": 65999,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -171,7 +171,7 @@
       "uv_layers": 1,
       "bounds_m": [
         [
-          -10.731590270996094,
+          -10.730973243713379,
           -7.331887722015381,
           -1.8339999914169312
         ],
@@ -210,7 +210,7 @@
     "SM_Ship_Wayfarer_Hologram": {
       "lod": 0,
       "part": "Hologram",
-      "tris": 23998,
+      "tris": 24000,
       "verts": 11966,
       "materials": [
         "M_Ship_Wayfarer_Holo"
@@ -218,14 +218,14 @@
       "uv_layers": 1,
       "bounds_m": [
         [
-          7.749998092651367,
-          0.4911230802536011,
-          1.087106704711914
+          7.750007629394531,
+          0.491157203912735,
+          1.0871057510375977
         ],
         [
           7.950000762939453,
-          0.6288579702377319,
-          1.1270384788513184
+          0.6288195252418518,
+          1.1270394325256348
         ]
       ]
     },
@@ -397,14 +397,14 @@
       "verts": 22,
       "bounds_m": [
         [
-          -10.767827987670898,
+          -10.777799606323242,
           2.3502068519592285,
-          -1.049630045890808
+          -1.0496281385421753
         ],
         [
           -4.251672267913818,
           4.405613422393799,
-          1.0496299266815186
+          1.049628496170044
         ]
       ]
     },
@@ -414,29 +414,29 @@
       "verts": 22,
       "bounds_m": [
         [
-          -10.767827987670898,
+          -10.777799606323242,
           -4.405613422393799,
-          -1.0496302843093872
+          -1.0496282577514648
         ],
         [
           -4.251672267913818,
           -2.3502068519592285,
-          1.0496299266815186
+          1.049628496170044
         ]
       ]
     },
     "UCX_SM_Ship_Wayfarer_05": {
       "kind": "UCX",
       "mesh": "SM_Ship_Wayfarer",
-      "verts": 12,
+      "verts": 13,
       "bounds_m": [
         [
           -9.949999809265137,
           3.2013895511627197,
-          0.8000001907348633
+          0.8000004291534424
         ],
         [
-          -7.150000095367432,
+          -7.250000476837158,
           3.898888111114502,
           2.177799940109253
         ]
@@ -450,10 +450,10 @@
         [
           -9.949999809265137,
           -3.898888111114502,
-          0.8000001907348633
+          0.8000011444091797
         ],
         [
-          -7.150000095367432,
+          -7.250000476837158,
           -3.2013895511627197,
           2.177799940109253
         ]
@@ -465,9 +465,9 @@
       "verts": 16,
       "bounds_m": [
         [
-          -7.849999904632568,
+          -7.828963279724121,
           2.304999828338623,
-          -0.6997522115707397
+          -0.6996719837188721
         ],
         [
           2.3500003814697266,
@@ -482,9 +482,9 @@
       "verts": 17,
       "bounds_m": [
         [
-          -7.849999904632568,
+          -7.828963279724121,
           -7.355200290679932,
-          -0.6997522115707397
+          -0.6996719837188721
         ],
         [
           2.3500003814697266,
@@ -714,7 +714,7 @@
   },
   "render_bounds_m": [
     [
-      -10.767827987670898,
+      -10.777799606323242,
       -7.355200290679932,
       -2.8000001907348633
     ],
@@ -725,18 +725,18 @@
     ]
   ],
   "render_size_m": [
-    21.5178,
+    21.5278,
     14.7104,
     4.9778
   ],
   "expected_ue_size_cm": [
-    2151.8,
+    2152.8,
     1471.0,
     497.8
   ],
   "collision_bounds_m": [
     [
-      -10.767827987670898,
+      -10.777799606323242,
       -7.355200290679932,
       -2.7960000038146973
     ],
@@ -748,33 +748,33 @@
   ],
   "suggested_pawn_settings": {
     "HullCollision_BoxExtent_cm": [
-      1075.9,
+      1076.4,
       735.5,
       248.7
     ],
     "HullCollision_center_offset_ue_cm": [
-      -0.89,
+      -1.39,
       -0.0,
       -30.91
     ],
     "Hull_RelativeLocation_cm": [
-      0.89,
+      1.39,
       0.0,
       30.91
     ],
-    "CameraBoom_TargetArmLength_cm": 3873.0,
+    "CameraBoom_TargetArmLength_cm": 3875.0,
     "CameraBoom_SocketOffset_Z_cm": 498.0,
     "CameraBoom_ProbeSize_cm": 50.0,
-    "CameraBoom_CameraLagMaxDistance_cm": 4304.0,
+    "CameraBoom_CameraLagMaxDistance_cm": 4306.0,
     "CockpitCamera_location_ue_cm": [
-      670.89,
+      671.39,
       0.0,
       155.91
     ],
     "LandingFootprintRadiusCm": 736.0,
     "LandingMaxGapCm": 164.0,
     "GroundContactToleranceCm": 24.9,
-    "HeatShakeCm": 43.0,
+    "HeatShakeCm": 43.1,
     "Planet_CollisionWarmupReachM": 16.1,
     "Planet_CollisionMinRadiusM": 108.0
   }

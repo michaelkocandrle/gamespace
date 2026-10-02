@@ -346,6 +346,7 @@
    }
   },
   "MI_Ship_Wayfarer_Thruster": {
+   "_comment": "main engine core (pod nozzle _NozzleCore, kit pilot step d): x ThrusterIdleGlow 0.3 at idle = deep orange, full throttle and boost toward white; was 1.0 0.55 0.25 x 8, a cream disc at idle (critic, kit pilot round 1)",
    "master": "hull",
    "slots": [
     "M_Ship_Wayfarer_Emissive"
@@ -359,10 +360,10 @@
    "roughness": 0.4,
    "emissive_color": [
     1.0,
-    0.55,
-    0.25
+    0.4,
+    0.12
    ],
-   "emissive_strength": 8.0
+   "emissive_strength": 5.0
   },
   "MI_Ship_Wayfarer_Decal": {
    "_comment": "structural mesh decals (seams, rivets, grilles, hatches): normal + roughness only, the hull keeps its paint",

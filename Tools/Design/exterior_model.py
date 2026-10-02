@@ -706,9 +706,24 @@ class Model:
                 el.material = self.mat(el.change["materials.box"])
             self.place(el, self.solids[solid]["poly"], "area", solid)
         nz = self.recipe["parts"]["nozzle"]
-        el = self.add(Element(nz["id"], "part", "žhnoucí dno trysky", src="recipe", data=nz, material="MZ-METAL"))
-        el.qty, el.where = 2, "dno výfuku gondoly"
+        nzb = self.recipe["parts"]["pod"]["revolve"]["exhaust"].get("nozzle")
+        el = self.add(Element(nz["id"], "part", "žhnoucí jádro trysky" if nzb else "žhnoucí dno trysky", src="recipe",
+                              data=nzb["core"] if nzb else nz, material="MZ-METAL"))
+        el.qty, el.where = 2, "za hrdlem trysky" if nzb else "dno výfuku gondoly"
         el.views.add("AFT")
+        if nzb:
+            # the nozzle's parts (kit pilot step d): one element each, drawn from behind (E-05) and in detail G
+            x_lip = self.recipe["parts"]["pod"]["revolve"]["exhaust"]["x_lip"]
+            for key, name, mat in (("collar", "límec trysky", "MZ-METAL"), ("rings", "prstence zvonu", "MZ-METAL"),
+                                   ("ribs", "žebra zvonu", "MZ-GUNMETAL"), ("throat", "prstenec hrdla", "MZ-METAL"),
+                                   ("plug", "středové těleso", "MZ-METAL"), ("struts", "táhla středového tělesa",
+                                                                              "MZ-GUNMETAL")):
+                part = nzb[key]
+                el = self.add(Element(part["id"], "functional", name, src="recipe", data=part, material=mat,
+                                      what=part.get("_what", "")))
+                el.qty = 2 * part.get("count", len(part.get("at", [])) or 1)
+                el.where = "tryska gondoly, x %s–%s" % (fmt(x_lip), fmt(x_lip + nzb["core"]["x"]))
+                el.views.add("AFT")
         cf = self.recipe["canopy_frame"]
         el = self.add(Element(cf["id"], "functional", "rám kabiny", src="recipe", data=cf, material="MZ-PAINT1",
                               what=cf.get("_comment", "")))

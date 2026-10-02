@@ -134,3 +134,36 @@ Výtky kola 3 č. 1 (desky S čtou jako okna) a č. 2 (záď bez vrstvení desek
 
 **Autor 2. 10. 2026:** výřezy kroku c přijal, revizi D výkresů E-01 až E-08 schválil (`approved_revision` D, razítko
 výkresů přegenerováno). Další krok d (trysky) a po něm ověřovací kolo kritika.
+
+
+## Krok d – trysky motorů a gondoly v rozpočtu (2. 10. 2026 večer)
+
+- **Tryska** (`hs_build_part.build_nozzle`, recept `parts.pod.revolve.exhaust.nozzle`, výkres E-05 detail G): zavalený
+  okraj s tepelně zabarveným límcem F-NOZZLE-COLLAR, zužující se zvon (gunmetal) s prstenci F-NOZZLE-RING a 12 žebry
+  F-NOZZLE-RIB, prstenec hrdla F-NOZZLE-THROAT, středové těleso s hrotem F-NOZZLE-PLUG na 4 táhlech F-NOZZLE-STRUT,
+  emisivní jádro F-NOZZLE za hrdlem (dřív disk `NozzleGlow`, `parts.nozzle.skip`). Jádro `MI_Ship_Wayfarer_Thruster`
+  sytější oranžová 1,0 / 0,4 / 0,12 × 5 (dřív 1,0 / 0,55 / 0,25 × 8 = krémový disk, kolo 1 bod 11).
+- **Gondoly v rozpočtu:** řady po 0,3 m (`refine`), panely 1 segment zkosení, spodní konstrukce 32 stěn, šachta s válci
+  podle průměru a kabely s kratšími oblouky. Gondoly 139,7 k → 59,3 k (strop 60 k), trysky 30,3 k (strop 80 k),
+  trup 401 k → 350 k trojúhelníků.
+- Svítidla interiéru: pořadí `fix_*` se po přestavbě měnilo (ID L-FIX na I-04), nově řazená (WORKFLOW 9.6 cw); I-04 překreslen.
+- Výkresy E-01 až E-08 překreslené jako **revize E** (čeká na schválení autorem).
+- Snímky: editor `shots:20261002_211807_wayfarer_nozzles/`, zabalená hra `shots:20261002_213900_wayfarer_nozzles/` a
+  `shots:20261002_214057_wayfarer_kit_pilot/`. Testy `Test.ps1 -All`: offline 13/13, Blender 1/1, UE 22/22.
+
+### Ověřovací kolo kritika po krocích c + d (kolo 4, Opus, práh `step`): **PASS, průměr 6,6**
+
+Silueta 7, hierarchie 7, materiály 6, decaly 6, světlo 6, čitelnost 7, geometrie 7, soulad stylu 7. Listy a výstup
+`2026-10-01_wayfarer_kit_pilot/round4/` (`critic.md`). Reference SC: video snímky nejsou na novém PC, levé půlky listů
+kola 3 vyříznuté do `refs/sc_*.jpg`. Všechny body „doporučeno“:
+
+| # | Výtka | Reakce |
+|---|---|---|
+| 1 | Jádro trysky na volnoběh bledé, ploché | Částečně: barva sytější (v editoru sytě oranžová); zabalená hra má vyšší expozici a jádro čte světleji. Radiální přechod a světlo na stěnu zvonu otevřené (materiál jádra). |
+| 2 | Tepelný límec nerozeznatelný | Otevřené: slot HeatTint je jen tmavší kov; přechod bronz → modrá → ocel patří do materiálu (kit celé lodi). |
+| 3 | Plošné světlo za soumraku a v noci | Otevřené, už v kroku e (analýza: proč se trup v noci neztmaví). |
+| 4 | Lak bez variace drsnosti a špíny | Otevřené: systémová věc materiálu laku, při kitu celé lodi. |
+| 5 | Hřbet jako „klaviatura“ (černé výřezy) | Otevřené: zesvětlit dno výřezů na úroveň gunmetal – rozhodnutí o vzhledu výkresu pro autora. |
+| 6 | Málo šablon na hřbetu a gondolách | Otevřené: shluky šablon u poklopů -H a RCS při kitu celé lodi. |
+
+**Pilot kitu je hotový (PASS).** Další krok e (jen analýza: červené poziční světlo, noc).

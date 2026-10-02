@@ -1,0 +1,15 @@
+{
+ "_comment": "Wayfarer kit pilot step d (2. 10. 2026): the main engine nozzles (collar, bell with rings and ribs, throat ring, centre body on tie rods, emissive core) and the reworked pods. Day sun and ship-local coordinates as in wayfarer_kit_pilot.json (x = layout x - 10.25, z = layout z - 1.2; the port pod's nozzle lip at x -10.75, y -3.4, z 0). Run: .\\Tools\\Shots.ps1 -Preset wayfarer_nozzles -Editor -Width 1920 -Height 1080 (or -Package)",
+ "shots": [
+  {"name": "warmup", "altitude_m": 60000, "facing": "horizon", "hud": 0, "gear": false, "settle": 4.0, "fov": 50, "camera_local": [-17.0, 5.0, 6.0], "look_local": [-1.5, 0.0, 0.8], "console": ["space.SunDir -37.8 50.8"]},
+  {"name": "space_rear_high", "altitude_m": 60000, "facing": "horizon", "hud": 0, "gear": false, "settle": 4.0, "fov": 50, "camera_local": [-17.0, 5.0, 6.0], "look_local": [-1.5, 0.0, 0.8]},
+  {"name": "day_chase_rear", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 4.0, "console": ["space.SunDir -39 45"]},
+  {"name": "day_chase_rear_boost", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 3.0, "speed_ms": 150, "boost": true},
+  {"name": "day_close_nozzle", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 45, "camera_local": [-13.6, -5.0, 0.9], "look_local": [-10.7, -3.4, 0.0]},
+  {"name": "day_nozzle_straight", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 40, "camera_local": [-14.5, -3.4, 0.25], "look_local": [-10.7, -3.4, 0.0]},
+  {"name": "day_close_engine_fin", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 55, "camera_local": [-12.75, -6.5, 3.0], "look_local": [-8.45, -3.6, 1.8]},
+  {"name": "day_close_pod_top", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 50, "camera_local": [-2.5, -6.5, 3.4], "look_local": [-5.2, -3.4, 0.6]},
+  {"name": "day_pod_side_low", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 1.5, "fov": 50, "camera_local": [-7.0, -9.0, -1.2], "look_local": [-7.5, -3.4, 0.0]},
+  {"name": "night_rear_high", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 4.0, "fov": 60, "camera_local": [-22.0, 6.0, 7.0], "look_local": [-2.0, 0.0, 0.8], "console": ["space.SunDir -44.1 104", "space.Sun LightColor 255 255 255", "space.Sky Intensity 0.03"]}
+ ]
+}

@@ -129,10 +129,12 @@ def fixture_lights(objs, mats, spec, lights_out):
                                  "specular": kv.get("specular", 0.2), "_fixture": key})
                 report[key] = report.get(key, 0) + k
         bm.free()
+    # a fixed order (strongest first, then by material and place): the objects come in no fixed order, and the
+    # lights' names (fix_<n>) and so the drawing IDs L-FIX-<n> followed it (2. 10. 2026, WORKFLOW 9.6 cw)
+    made.sort(key=lambda l: (-l["cd"], l["_fixture"], l["at"]))
     dropped = max(0, len(made) - max_lights)
     if dropped:
         # keep the strongest (longest runs) when over the budget
-        made.sort(key=lambda l: -l["cd"])
         made = made[:max_lights]
     lights_out.extend(made)
     return {"lights": len(made), "by_material": report, "dropped": dropped}

@@ -228,3 +228,8 @@ padlo; kdyby vadila, jedna výjimka v pravidle). Ověření: `test_kit_decals.py
 klíče s předchozí stavbou (`random_prev` v `Export/Wayfarer_decals.json`): 628 společných, 0 posunutých – po dvou
 přestavbách se stejnými daty i po přestavbě se změněným kitem (krok c). Tolerance 1 cm: šum sítě trupu (WORKFLOW 9.6 ff)
 posune zásah paprsku na břiše o 1–8 mm (stejný decal, stejné x/y). WORKFLOW 9.6 fl, ff doplněn.
+
+
+## Krok d (2. 10. 2026)
+Gondoly 139 696 → 59 320 (strop 60 k), trysky (nový `build_nozzle`) 30 304 (strop 80 k), trup 401 134 → 350 398.
+Podrobnosti v `2026-10-01_wayfarer_kit_pilot.md`, krok d.

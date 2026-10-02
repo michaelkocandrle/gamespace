@@ -19,6 +19,7 @@ from shapely.ops import unary_union
 
 import draw_exterior_sheet as ds
 import exterior_model as em
+import exterior_views as ev
 from draw_exterior_sheet import GREY, INK, PT, STATUS_COL, TITLE_MM, Drawer, Frame, Sheet
 
 S30 = 1000.0 / 30.0
@@ -163,6 +164,149 @@ def end_levels(sh, fr, x_paper):
         sh.t(x_paper - 2, Y + 0.8, name, 2.2)
 
 
+def nozzle_detail(sh, d, m, top):
+    """Detail G (E-05, kit pilot step d): the main engine nozzle as hs_build_part.build_nozzle builds it - a section
+    through the pod axis (aft left, 1:10) and the view from behind (1:10); parts, materials and dimensions."""
+    rev = m.recipe["parts"]["pod"]["revolve"]
+    ex = rev["exhaust"]
+    nz = ex.get("nozzle")
+    if not nz:
+        return top
+    x0 = ex["x_lip"]
+    X = lambda dx: x0 + dx  # noqa: E731
+    view_title(sh, 800, top, "DETAIL G – TRYSKA HLAVNÍHO MOTORU (ŘEZ OSOU GONDOLY, POHLED ZEZADU)", "1 : 10")
+    # ---- section: model (x, r) with r up; the pod's aft cowl as context
+    win = (x0 - 0.12, -1.0, x0 + 1.0, 1.0)
+    cy = top - 30 - 1.0 * S10
+    fs = Frame(812.0 - win[0] * S10, cy, S10, win)
+    S0, T0 = fs.P(win[0], win[1])
+    S1, T1 = fs.P(win[2], win[3])
+
+    def both(loop):
+        return unary_union([Polygon(loop).buffer(0), Polygon([(x, -r) for x, r in loop]).buffer(0)])
+
+    prof = [tuple(p) for p in rev["profile"] if x0 <= p[0] <= win[2] + 0.3]
+    cowl = Polygon(prof + [(x, r - 0.03) for x, r in prof[::-1]]).buffer(0)
+    cowl = unary_union([cowl, Polygon([(x, -r) for x, r in cowl.exterior.coords])])
+    sh.geom(fs.g(cowl), fc="#EEEBE4", ec=INK, lw=0.3, z=3)
+    sh.t(fs.P(x0 + 0.75, 0)[0], fs.P(0, 0.97)[1] - 4.0, "kryt gondoly (P-POD-AFTCOWL)", 2.2, GREY, ha="center", z=30)
+    wall = [(X(dx), r) for dx, r in nz["bell"]]
+    xc = X(nz["core"]["x"])
+    loop_bell = wall + [(xc, wall[-1][1] + nz.get("wall", 0.03)), (X(0.08), nz.get("back_r", ex["r_lip"] - 0.035))]
+    duct = [p for p in wall if p[0] >= X(0.04)]
+
+    def r_at(pts, x):
+        for (xa, ra), (xb, rb) in zip(pts, pts[1:]):
+            if xa <= x <= xb:
+                return ra + (rb - ra) * (x - xa) / (xb - xa)
+        return pts[-1][1]
+
+    parts = {}
+    parts["F-POD-EXHAUST"] = (both(loop_bell), "MZ-GUNMETAL")
+    rg = nz["rings"]
+    parts[rg["id"]] = (unary_union([both([(X(a), r_at(duct, X(a))), (X(a), r_at(duct, X(a)) - rg["proud"]),
+                                          (X(a) + rg["width"], r_at(duct, X(a) + rg["width"]) - rg["proud"]),
+                                          (X(a) + rg["width"], r_at(duct, X(a) + rg["width"]))]) for a in rg["at"]]),
+                       "MZ-METAL")
+    th = nz["throat"]
+    parts[th["id"]] = (both([(X(th["x"][0]), th["r"][1]), (X(th["x"][0]), th["r"][0]), (X(th["x"][1]), th["r"][0]),
+                             (X(th["x"][1]), th["r"][1])]), "MZ-METAL")
+    co = nz["collar"]
+    parts[co["id"]] = (both([(X(co["x"][0]), co["r"][0]), (X(co["x"][0]), co["r"][1]), (X(co["x"][1]), co["r"][1]),
+                             (X(co["x"][1]), co["r"][0])]), "MZ-METAL")
+    pl = [(X(dx), r) for dx, r in nz["plug"]["profile"]]
+    parts[nz["plug"]["id"]] = (Polygon(pl + [(x, -r) for x, r in pl[::-1]]).buffer(0), "MZ-METAL")
+    rc = wall[-1][1] + 0.004
+    parts["F-NOZZLE"] = (box(xc, -rc, xc + 0.01, rc), None)
+    for pid, (geo, mat) in parts.items():
+        if mat is None:
+            sh.geom(fs.g(geo), fc="#F2A050", ec=INK, lw=0.3, z=8)
+            continue
+        fill, hatch, hc = d.matstyle(mat)
+        sh.geom(fs.g(geo), fc=fill, ec=INK, lw=0.3, z=6, hatch="////" if pid != nz["plug"]["id"] else hatch,
+                hatch_col="#D0D0D0")
+    # ribs and tie rods lie off the cut: drawn beyond it, the ribs as their inner edge, the rods as seen at 45 deg
+    rb = nz["ribs"]
+    xs = [X(rb["x"][0])] + [x for x, _ in duct if X(rb["x"][0]) < x < X(rb["x"][1])] + [X(rb["x"][1])]
+    for sgn in (1, -1):
+        sh.line([fs.P(x, sgn * (r_at(duct, x) - rb["height"])) for x in xs], 0.2, INK, ls="--", z=7)
+    st = nz["struts"]
+    c45 = math.cos(math.radians(st["phase_deg"]))
+    r_plug_from = r_at(sorted(pl), X(st["from"]))
+    rods = unary_union([LineString([(X(st["from"]), sgn * r_plug_from * c45),
+                                    (X(st["to"]), sgn * r_at(duct, X(st["to"])) * c45)]).buffer(st["r"])
+                        for sgn in (1, -1)])
+    fill, hatch, hc = d.matstyle("MZ-GUNMETAL")
+    sh.geom(fs.g(rods), fc=fill, ec=INK, lw=0.25, z=7)
+    sh.line([fs.P(win[0], 0), fs.P(win[2], 0)], 0.15, INK, ls="-.", z=9)
+    sh.rect(S0, T0, S1, T1, ec=INK, lw=0.35, z=44)
+    sh.t(S0, T1 + 2.5, "řez osou gondoly (záď vlevo); žebra a táhla leží mimo řez – čárkovaně a v pohledu pod 45°",
+         2.3, GREY)
+    ds.dim_v(sh, S0 - 4, fs.P(0, ex["r_lip"])[1], fs.P(0, -ex["r_lip"])[1], "Ø %s okraj" % em.fmt(2 * ex["r_lip"]),
+             fs.P(x0, 0)[0], fs.P(x0, 0)[0])
+    ds.dim_h(sh, fs.P(x0, 0)[0], fs.P(xc, 0)[0], T0 - 6, "%s hloubka k jádru" % em.fmt(xc - x0),
+             fs.P(0, -ex["r_lip"])[1], fs.P(0, -wall[-1][1])[1])
+    if pl[-1][0] - x0 > 0.005:
+        ds.dim_h(sh, fs.P(x0, 0)[0], fs.P(pl[-1][0], 0)[0], T0 - 12, "hrot %s za okrajem" % em.fmt(pl[-1][0] - x0),
+                 fs.P(0, -ex["r_lip"])[1], fs.P(0, 0)[1])
+    else:
+        sh.t(fs.P(x0, 0)[0] - 1, fs.P(0, 0)[1] + 1.5, "hrot v rovině okraje", 2.2, ha="right", z=30, bg="white")
+    # ---- view from behind (port pod: outboard to the right as on the aft view)
+    fa = Frame(1080.0, cy, S10, (-0.86, -0.86, 0.86, 0.86))
+    A0, B0 = fa.P(-0.86, -0.86)
+    A1, B1 = fa.P(0.86, 0.86)
+    shapes = ev.nozzle_aft_shapes(ex, (0.0, 0.0))
+    order = ["F-POD-EXHAUST", co["id"], rg["id"], rb["id"], th["id"], "F-NOZZLE", st["id"], nz["plug"]["id"]]
+    for k, pid in enumerate(order):
+        if pid == "F-NOZZLE":
+            sh.geom(fa.g(shapes[pid]), fc="#F2A050", ec=INK, lw=0.25, z=8 + k * 0.1)
+        else:
+            fill, hatch, hc = d.matstyle(m.by_id[pid].material)
+            sh.geom(fa.g(shapes[pid]), fc=fill, ec=INK, lw=0.25, z=8 + k * 0.1, hatch=hatch, hatch_col=hc)
+    sh.rect(A0, B0, A1, B1, ec=INK, lw=0.35, z=44)
+    sh.t(A0, B1 + 2.5, "pohled zezadu (obě gondoly stejně)", 2.3, GREY)
+    ds.dim_h(sh, fa.P(-th["r"][0], 0)[0], fa.P(th["r"][0], 0)[0], B0 - 6, "Ø %s hrdlo" % em.fmt(2 * th["r"][0]),
+             fa.P(0, -th["r"][0])[1], fa.P(0, -th["r"][0])[1])
+    r_plug = max(r for _, r in nz["plug"]["profile"])
+    ds.dim_h(sh, fa.P(-r_plug, 0)[0], fa.P(r_plug, 0)[0], B0 - 12, "Ø %s středové těleso" % em.fmt(2 * r_plug),
+             fa.P(0, -r_plug)[1], fa.P(0, -r_plug)[1])
+    # labels: section (DG) and the view from behind (DG-B)
+    ids = ["F-POD-EXHAUST", co["id"], rg["id"], rb["id"], th["id"], "F-NOZZLE", st["id"], nz["plug"]["id"]]
+    for i in ids:
+        d.drawn.setdefault("DG", set()).add(i)
+    anchors = {"F-POD-EXHAUST": (X(0.3), r_at(duct, X(0.3)) + 0.01), co["id"]: (X(0.02), co["r"][1] - 0.01),
+               rg["id"]: (X(rg["at"][1]), r_at(duct, X(rg["at"][1])) - rg["proud"] / 2),
+               rb["id"]: (X(0.42), -(r_at(duct, X(0.42)) - rb["height"])),
+               th["id"]: (X(th["x"][0]) + 0.03, -(th["r"][0] + th["r"][1]) / 2),
+               "F-NOZZLE": (xc + 0.005, -0.35), st["id"]: (X((st["from"] + st["to"]) / 2), -0.3),
+               nz["plug"]["id"]: (X(0.3), 0.1)}
+    reqs = [{"id": i, "text": i, "anchor": fs.P(*anchors[i]), "col": INK, "z": 0, "hidden": False} for i in ids]
+    d.place_labels("DG", reqs, 800, 1060, tiers_up=[T1 + 12], tiers_dn=[T0 - 20, T0 - 26], split_y=fs.P(0, 0)[1],
+                   bus_up=T1 + 9, bus_dn=T0 - 17)
+    for i in ("F-POD-EXHAUST", rb["id"], "F-NOZZLE", st["id"], nz["plug"]["id"]):
+        d.drawn.setdefault("DG-B", set()).add(i)
+    ra = math.radians(rb["phase_deg"])
+    rr = (th["r"][1] + duct[0][1]) / 2
+    sa = math.radians(st["phase_deg"])
+    sr = (r_plug + r_at(duct, X(st["to"]))) / 2
+    b_anchor = {"F-POD-EXHAUST": (0.0, ex["r_lip"] - 0.03), rb["id"]: (rr * math.cos(ra), -rr * math.sin(ra)),
+                "F-NOZZLE": (0.0, -(th["r"][0] + r_plug) / 2), st["id"]: (sr * math.cos(sa), -sr * math.sin(sa)),
+                nz["plug"]["id"]: (0.05, 0.05)}
+    reqs = [{"id": i, "text": i, "anchor": fa.P(*b_anchor[i]), "col": INK, "z": 0, "hidden": False}
+            for i in b_anchor]
+    d.place_labels("DG-B", reqs, 1000, 1180, tiers_up=[B1 + 12], tiers_dn=[B0 - 20], split_y=fa.P(0, 0)[1],
+                   bus_up=B1 + 9, bus_dn=B0 - 17)
+    note_y = min(T0, B0) - 34
+    sh.t(812, note_y, "Tryska podle receptu parts.pod.revolve.exhaust.nozzle (hs_build_part.build_nozzle): zvon a žebra "
+                      "gunmetal, prstence, hrdlo, límec a středové těleso kov (límec a prstence tepelně zabarvené), jádro "
+                      "emisivní – ve hře svítí podle tahu.", 2.3)
+    sh.t(812, note_y - 4.5, "%d žeber %s × %s mm, %d táhla Ø %s mm se sklonem dozadu ven, prstence zvonu v hloubce %s m, "
+                            "hrdlo Ø %s, jádro v hloubce %s m." % (
+                                rb["count"], em.fmt(rb["thickness"] * 1000), em.fmt(rb["height"] * 1000), st["count"],
+                                em.fmt(st["r"] * 2000), ", ".join(em.fmt(a) for a in rg["at"]), em.fmt(2 * th["r"][0]),
+                                em.fmt(nz["core"]["x"])), 2.3)
+    return note_y - 8
+
 def draw_e05(m, dpi, out_dir):
     """E-05: from behind (aft wall with the ramp, its frame and pistons, nozzles, aft markings) and from ahead, both
     at 1:20."""
@@ -206,6 +350,7 @@ def draw_e05(m, dpi, out_dir):
         m.use_view("AFT")
         y = hidden_note(sh, m, d, "AFT", 800, y)
         sheet_list(sh, 800, y - 4)
+        nozzle_detail(sh, d, m, 560.0)
         ds.title_block(sh, m, 800, W, "E-05")
         return ds.save_sheet(sh, m, d, "E-05", dpi, out_dir)
     finally:

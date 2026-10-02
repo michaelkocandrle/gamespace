@@ -4,10 +4,10 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "c10dc8f0b500",
-  "recipe": "5833fe61472f",
-  "setup": "480a82c6918d",
+  "recipe": "dcf62768586c",
+  "setup": "8cf78e16e9c5",
   "spec": "d9597dfcd605",
-  "design": "e3443191de0d",
+  "design": "c5e455a0713b",
   "library": "3ed0bfdbff37"
  },
  "drawn": {
@@ -25,6 +25,12 @@
    "F-GUNMOUNT-01",
    "F-MISSILE-S2",
    "F-NOZZLE",
+   "F-NOZZLE-COLLAR",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-RING",
+   "F-NOZZLE-STRUT",
+   "F-NOZZLE-THROAT",
    "F-POD-EXHAUST",
    "F-RAMP-FRAME",
    "F-RAMP-HINGE",
@@ -70,6 +76,23 @@
    "P-POD",
    "Z-B-01",
    "Z-SEAL-CANOPY"
+  ],
+  "DG": [
+   "F-NOZZLE",
+   "F-NOZZLE-COLLAR",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-RING",
+   "F-NOZZLE-STRUT",
+   "F-NOZZLE-THROAT",
+   "F-POD-EXHAUST"
+  ],
+  "DG-B": [
+   "F-NOZZLE",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-STRUT",
+   "F-POD-EXHAUST"
   ]
  },
  "labelled": {
@@ -87,6 +110,12 @@
    "F-GUNMOUNT-01",
    "F-MISSILE-S2",
    "F-NOZZLE",
+   "F-NOZZLE-COLLAR",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-RING",
+   "F-NOZZLE-STRUT",
+   "F-NOZZLE-THROAT",
    "F-POD-EXHAUST",
    "F-RAMP-FRAME",
    "F-RAMP-HINGE",
@@ -132,6 +161,23 @@
    "P-POD",
    "Z-B-01",
    "Z-SEAL-CANOPY"
+  ],
+  "DG": [
+   "F-NOZZLE",
+   "F-NOZZLE-COLLAR",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-RING",
+   "F-NOZZLE-STRUT",
+   "F-NOZZLE-THROAT",
+   "F-POD-EXHAUST"
+  ],
+  "DG-B": [
+   "F-NOZZLE",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-STRUT",
+   "F-POD-EXHAUST"
   ]
  },
  "schedules": {

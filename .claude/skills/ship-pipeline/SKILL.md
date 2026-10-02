@@ -313,6 +313,9 @@ MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend -
   - `loft: true` (trup): řez = obrys zepředu natažený na šířku shora a výšku z boku;
   - ostatní díly: průnik vytažených obrysů (boolean EXACT);
   - `revolve`: recept `hs_build_part` (poloměry z boku výkresu), obě strany zrcadlově;
+    tryska motoru `exhaust.nozzle` → `hs_build_part.build_nozzle` (zvon, prstence, žebra, hrdlo, středové těleso na
+    táhlech, jádro `_NozzleCore` ve slotu Emissive = síla podle tahu); výkres E-05 detail G (`nozzle_detail`); gondola
+    v rozpočtu přes `refine` (řady), `panel_bevel_segments`, `sub_segments`;
   - `cylinders`: válce.
 - **Detail:**
   - `seams` na loftu jsou skutečné drážky (`x` stanice přepážek, `around` [strana, výška 0–1], `width`, `depth`);

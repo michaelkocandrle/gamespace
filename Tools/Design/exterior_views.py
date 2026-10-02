@@ -70,6 +70,43 @@ def _both_end(g):
     return unary_union([g, affinity.scale(g, -1.0, 1.0, origin=(0, 0))])
 
 
+def nozzle_aft_shapes(ex, centre):
+    """The main engine nozzle from behind (kit pilot step d), around centre (y, z): ID -> shape. The bell to the throat
+    ring, the core as the ring between the throat and the plug, ribs and tie rods as their outlines across the bell."""
+    nzb = ex["nozzle"]
+    c = Point(centre[0], centre[1])
+    th, pl = nzb["throat"], nzb["plug"]
+    r_plug = max(r for _, r in pl["profile"])
+    out = {ex["id"]: c.buffer(ex["r_lip"], 64).difference(c.buffer(th["r"][1], 64)),
+           nzb["collar"]["id"]: c.buffer(nzb["collar"]["r"][1], 64).difference(c.buffer(nzb["collar"]["r"][0], 64)),
+           th["id"]: c.buffer(th["r"][1], 64).difference(c.buffer(th["r"][0], 64)),
+           "F-NOZZLE": c.buffer(th["r"][0], 64).difference(c.buffer(r_plug, 64)),
+           pl["id"]: c.buffer(r_plug, 64)}
+    bell = [p for p in nzb["bell"] if p[0] >= 0.04]
+    rg = nzb["rings"]
+    r_ring = [min(r for dx, r in bell if dx <= a + 0.06) - rg["proud"] for a in rg["at"]]
+    out[rg["id"]] = unary_union([c.buffer(r + rg["proud"], 64).difference(c.buffer(r, 64)) for r in r_ring])
+    rb = nzb["ribs"]
+    ribs = []
+    r_out, r_in = bell[0][1], th["r"][1]
+    for k in range(rb["count"]):
+        a = math.radians(rb["phase_deg"]) + 2 * math.pi * k / rb["count"]
+        ca, sa = math.cos(a), math.sin(a)
+        n = (-sa * rb["thickness"] / 2, ca * rb["thickness"] / 2)
+        ribs.append(Polygon([(centre[0] + r * ca + s_ * n[0], centre[1] + r * sa + s_ * n[1])
+                             for r, s_ in ((r_in, -1), (r_out, -1), (r_out, 1), (r_in, 1))]))
+    out[rb["id"]] = unary_union(ribs).difference(c.buffer(r_in, 64))
+    st = nzb["struts"]
+    r_wall = min(r for dx, r in bell if dx <= st["to"] + 0.04)
+    rods = []
+    for k in range(st["count"]):
+        a = math.radians(st["phase_deg"]) + 2 * math.pi * k / st["count"]
+        rods.append(LineString([(centre[0] + r_plug * math.cos(a), centre[1] + r_plug * math.sin(a)),
+                                (centre[0] + r_wall * math.cos(a), centre[1] + r_wall * math.sin(a))]).buffer(st["r"]))
+    out[st["id"]] = unary_union(rods).difference(c.buffer(r_plug, 64))
+    return out
+
+
 def _rot(v, deg):
     c, s = math.cos(math.radians(deg)), math.sin(math.radians(deg))
     return (v[0] * c - v[1] * s, v[0] * s + v[1] * c)
@@ -441,9 +478,14 @@ class Views:
         pa = m.pod_axis
         ex, it = rev["exhaust"], rev["intake"]
         c = Point(pa[0], pa[1])
-        self.put(m.by_id[ex["id"]], "AFT", _both_end(c.buffer(ex["r_lip"], 64).difference(c.buffer(ex["r_duct"], 64))),
-                 "area", "pod")
-        self.put(m.by_id["F-NOZZLE"], "AFT", _both_end(c.buffer(ex["r_duct"], 64)), "area", "pod")
+        if ex.get("nozzle"):
+            # the nozzle from behind (kit pilot step d), both pods
+            for pid, shp in nozzle_aft_shapes(ex, pa).items():
+                self.put(m.by_id[pid], "AFT", _both_end(shp), "area", "pod")
+        else:
+            self.put(m.by_id[ex["id"]], "AFT", _both_end(c.buffer(ex["r_lip"], 64).difference(c.buffer(ex["r_duct"], 64))),
+                     "area", "pod")
+            self.put(m.by_id["F-NOZZLE"], "AFT", _both_end(c.buffer(ex["r_duct"], 64)), "area", "pod")
         self.put(m.by_id[it["id"]], "FWD", _both_end(c.buffer(it["r_lip"], 64)), "area", "pod")
         # canopy frame struts across the glass, from above
         cf = m.by_id["F-CANOPY-FRAME"]
