@@ -9,7 +9,7 @@
   "interior": "37c119fe0110",
   "setup": "de82013afd6a",
   "lights": "dc19a3d11ce6",
-  "design": "e523ba9bcb88",
+  "design": "0386482c0b74",
   "kit": "c8f141a12540",
   "library": "3bdd02712ff2",
   "light_rules": "788f180917fd"
@@ -340,19 +340,23 @@
   ],
   [
    "DR-TEC-CAB",
-   "navržené křídlo v otevřené poloze y 0,50 … 1,00 (výška 2,05) zasahuje od +1,57 do zkosení stěn (široká chodba / místnost: líc ±1,20, zkosení od +1,30, 3:4), v horní hraně o 0,36 m"
+   "křídlo y 0,50 … 1,00, výška 2,05, v datech strana (technická chodba): zkosení stěn (líc ±1,20, od +1,30) zasahuje od +1,57, v horní hraně o 0,36 m; díly na líci (rám, madlo, stavové světlo) vystupují až 68 mm – křídlo musí jet aspoň 78 mm od líce; na dráze jsou D-INT-COCKPIT, TEC-B-F/Status_0 – přesunout"
   ],
   [
    "DR-TEC-CAB",
-   "na dráze křídla y 0,50 … 1,00 jsou D-INT-COCKPIT, TEC-B-F/Status_0 – přesunout mimo dráhu"
+   "křídlo y −1,00 … −0,50, výška 2,05, v datech strana (technická chodba): zkosení stěn (líc ±1,20, od +1,30) zasahuje od +1,57, v horní hraně o 0,36 m; díly na líci (rám, madlo, stavové světlo) vystupují až 52 mm – křídlo musí jet aspoň 62 mm od líce"
   ],
   [
    "DR-TEC-CAB",
-   "navržené křídlo v otevřené poloze y −1,00 … −0,50 (výška 2,05) zasahuje od +1,57 do zkosení stěn (široká chodba / místnost: líc ±1,20, zkosení od +1,30, 3:4), v horní hraně o 0,36 m"
+   "křídlo y 0,50 … 1,00, výška 2,05, varianta strana (kajuta): díly na líci (rám, madlo, stavové světlo) vystupují až 80 mm – křídlo musí jet aspoň 90 mm od líce"
+  ],
+  [
+   "DR-TEC-CAB",
+   "křídlo y −1,00 … −0,50, výška 2,05, varianta strana (kajuta): díly na líci (rám, madlo, stavové světlo) vystupují až 68 mm – křídlo musí jet aspoň 78 mm od líce; na dráze jsou CAB-B-A/Status_0 – přesunout"
   ],
   [
    "#",
-   "Návrh k rozhodnutí autora: křídla na straně sousední místnosti, kde je obložení L s líci ±1,90 a zkosením od +1,70 (u y ±1,00 je tam místa dost), nebo užší křídla podle zkosení."
+   "K rozhodnutí autora: dvoukřídlé posuvné dveře 1,00 m se na straně chodby (průřez W) pod zkosení nevejdou (užší křídla by zúžila otvor pod 0,90 m pravidla kitu); na straně kajuty (obložení L, zkosení od +1,70) se vejdou, pokud pojedou odsazeně od dílů na líci a nápisy a světla na dráze se přesunou."
   ]
  ]
 }
