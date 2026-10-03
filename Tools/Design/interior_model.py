@@ -167,8 +167,10 @@ class Model:
         self._objects()
         self._doors()
         self._lights()
+        self._setup_lights()
         self._decals()
         self._fittings()
+        self._stairs()
         self.by_id = {}
         for e in self.elements:
             if e.id in self.by_id:
@@ -255,10 +257,14 @@ class Model:
             return set()
         r = e.extra.get("rect") or [e.extra["pos"][0]] * 2 + [e.extra["pos"][1]] * 2
         f = self.room_faces(rid)
+        near = 0.5
+        if "L" not in f:                         # a room the ship builds (no kit walls): its layout outline
+            ys = [q[1] for q in self.rooms[rid]["poly"]]
+            f["L"], f["R"], near = max(ys), min(ys), 0.6
         out = set()
-        if "L" in f and f["L"] - r[3] < 0.5:
+        if "L" in f and f["L"] - r[3] < near:
             out.add("L")
-        if "R" in f and r[2] - f["R"] < 0.5:
+        if "R" in f and r[2] - f["R"] < near:
             out.add("R")
         if r[0] - f["A"] < 0.5:
             out.add("A")
@@ -390,6 +396,7 @@ class Model:
             if o.get("below") and status == "built" and not c.get("built_as"):
                 built_note = "postaven poklop v podlaze nad ní (hs_interior.hatch, stejný obrys); jednotka pod podlahou se " \
                              "nemodeluje"
+                c = dict(c, state_cz="poklop postaven, jednotka nemodelována")
             if niche is not None:
                 # the component is built in its kit wall module's niche (Tools/Kit/kit_batch4.py, SOCKET_Component):
                 # the kit before the layout (author 1. 10. 2026) - the niche is the component's box, the layout's goes
@@ -402,7 +409,8 @@ class Model:
             self.elements.append(Element(ident, cat, rid, status, o["name"], o.get("purpose", ""), where=where,
                                          src=src, rect=rect, z=z, below=o.get("below", False), layout_rect=o["rect"],
                                          layout_z=o.get("z"), access=c.get("access", ""), replace=c.get("replace", ""),
-                                         bay=c.get("bay"), note=built_note, proposal=c.get("proposal")))
+                                         bay=c.get("bay"), note=built_note, proposal=c.get("proposal"),
+                                         state_cz=c.get("state_cz")))
 
     def _bay_niche(self, bay):
         """The niche of a component bay wall module (the kit part with SOCKET_Component) named by a component's bay:
@@ -517,6 +525,65 @@ class Model:
                 dir=tuple(L.get("direction") or (0, 0, -1)), shadow=False, interior_only=False,
                 colour=tuple(L["color"]), host=None))
 
+    def _setup_lights(self):
+        """The cockpit lights the game makes from the ship's setup, not from the meshes: the pilot's light
+        (ASpaceshipPawn::PlaceCockpitLights: the eye - the Cockpit socket - plus CockpitLightOffset, setup
+        cockpit_light_intensity_cd) and one rect light per screen (UCockpitDisplayComponent: at the hull's Display_*
+        sockets, display_light_intensity_cd x the screen's share of the display canvas, SpaceFlightHud.h). The C++
+        defaults are read from the headers, the sockets from the exported hull."""
+        src = os.path.join(ROOT, "Source", "gamespace")
+
+        def const(header, pattern, n=1):
+            t = open(os.path.join(src, header), encoding="utf-8").read()
+            mt = re.search(pattern, t)
+            return tuple(float(v) for v in mt.groups()) if n > 1 else float(mt.group(1))
+
+        fbx = self.ship_fbx("")
+        if not os.path.exists(fbx):
+            return
+        import fbx_mesh
+        nulls = fbx_mesh.read(fbx)["nulls"]
+
+        def lay(v):
+            return tuple(float(a) - float(b) for a, b in zip(v, self.offset))
+
+        eye = nulls.get("SOCKET_Cockpit")
+        cd = self.setup.get("pawn", {}).get("cockpit_light_intensity_cd", 0.0)
+        if cd > 0 and eye is not None:
+            o = const("SpaceshipPawn.h", r"CockpitLightOffset = FVector\(([-\d.]+), ([-\d.]+), ([-\d.]+)\)", 3)
+            col = const("SpaceshipPawn.h", r"CockpitLightColor = FLinearColor\(([\d.]+)f, ([\d.]+)f, ([\d.]+)f\)", 3)
+            reach = const("SpaceshipPawn.h", r"CockpitLightRadiusCm = ([\d.]+)f") / 100.0
+            x, y, z = (a + b / 100.0 for a, b in zip(lay(eye), o))
+            self.elements.append(Element(
+                "L-SET-PILOT", "light", self.room_at(x, y), "built", "SET",
+                "světlo pilota před obličejem nad deskou (nastavení lodi, bez stínu, dosah %s m)" % fmt(reach),
+                where="x %s, y %s, z %s" % (fmt(x), fmt(y), fmt(z)), src="setup pawn.cockpit_light_intensity_cd",
+                pos=(x, y, z), type="point", role=None, cd=cd, cone=None, radius=None, dir=None, shadow=False,
+                interior_only=False, colour=col, host=None, setup="pilot"))
+        disp = (self.setup.get("components", {}).get("cockpit_displays") or {}).get("display_light_intensity_cd", 0.0)
+        if disp > 0:
+            hud = "SpaceFlightHud.h"
+            dw, dh = const(hud, r"DisplayWidth = ([\d.]+)f"), const(hud, r"DisplayHeight = ([\d.]+)f")
+            cw, th = const(hud, r"CentreWidth = ([\d.]+)f"), const(hud, r"CentreTopHeight = ([\d.]+)f")
+            share = {"left": 1.0, "right": 1.0, "centre_top": cw / dw * th / dh, "centre_bottom": cw / dw * (dh - th) / dh}
+            col = const("CockpitDisplayComponent.h", r"DisplayLightColor = FLinearColor\(([\d.]+)f, ([\d.]+)f, ([\d.]+)f\)", 3)
+            size = const("CockpitDisplayComponent.h", r"DisplayLightSizeCm = FVector2D\(([\d.]+), ([\d.]+)\)", 2)
+            wide = {"left": 1.0, "right": 1.0, "centre_top": cw / dw, "centre_bottom": cw / dw}
+            for name, k in share.items():
+                v = nulls.get("SOCKET_Display_" + name)
+                if v is None:
+                    continue
+                x, y, z = lay(v)
+                d = tuple(a - b for a, b in zip(lay(eye), (x, y, z))) if eye is not None else (-1.0, 0.0, 0.0)
+                self.elements.append(Element(
+                    "L-SET-DISP-" + name.upper().replace("_", "-"), "light", self.room_at(x, y), "built", "SET",
+                    "záře obrazovky %s k oku pilota (nastavení lodi, %s × podíl plochy obrazovky %d %%, bez stínu)" % (
+                        name.replace("_", " "), fmt(disp), round(100 * k)),
+                    where="x %s, y %s, z %s" % (fmt(x), fmt(y), fmt(z)), src="setup cockpit_displays.display_light_intensity_cd",
+                    pos=(x, y, z), type="rect", role=None, cd=disp * k, cone=None, radius=None, dir=d, shadow=False,
+                    interior_only=False, colour=col, host=None, width_cm=size[0] * wide[name], along=(0.0, 1.0, 0.0),
+                    setup="display"))
+
     # ------------------------------------------------------------------ decals
     def _decals(self):
         for d in self.setup["decals"]:
@@ -544,13 +611,19 @@ class Model:
             self.elements.append(Element(
                 self._need_id(ident, "interior decal", it["item"]), "decal", rid, "built" if built else "remove", it["item"],
                 self.decal_purpose(it["item"]),
-                where="x %s, y %s, z %s" % (fmt(x), fmt(y), fmt(z)), src="interior.decals.items", pos=(x, y, z),
-                item=it["item"], size=tuple(lib.get("size_m", (0, 0))), ray=True))
+                where="x %s, y %s, z %s (paprsek)" % (fmt(x), fmt(y), fmt(z)), src="interior.decals.items", pos=(x, y, z),
+                item=it["item"], size=tuple(lib.get("size_m", (0, 0))), ray=True, dir=ray_dir(it)))
         for i, sc in enumerate(dec.get("scatter", [])):
             sid = (dids.get("scatter") or [])[i] if i < len(dids.get("scatter") or []) else None
-            self.elements.append(Element(self._need_id(sid, "decal scatter rule", str(i)), "decal", None, "built", "rozsev", "servisní detail rozsetý po stěnách "
-                                         "místností, které kit nestaví", src="interior.decals.scatter[%d]" % i,
-                                         item="scatter", rule=sc))
+            xs = sc.get("x") or [0, 0]
+            rid = self.room_at((xs[0] + xs[-1]) / 2, 0.0)
+            self.elements.append(Element(self._need_id(sid, "decal scatter rule", str(i)), "decal", rid,
+                                         "built" if rid not in self.kit_rooms else "remove", "rozsev",
+                                         "servisní detail rozsetý po stěnách místností, které kit nestaví (%d položek, krok %s m, "
+                                         "pravděpodobnost %d %%, x %s … %s, z %s … %s)" % (
+                                             len(sc.get("items", [])), fmt(sc.get("step", 0)), round(100 * sc.get("prob", 1)),
+                                             fmt(xs[0]), fmt(xs[-1]), fmt((sc.get("z") or [0, 0])[0]), fmt((sc.get("z") or [0, 0])[-1])),
+                                         src="interior.decals.scatter[%d]" % i, item="scatter", rule=sc))
         for i, gb in enumerate(dec.get("grab_bars", [])):
             gid = (dids.get("grab_bars") or [])[i] if i < len(dids.get("grab_bars") or []) else None
             x, y, z = gb["at"]
@@ -600,6 +673,23 @@ class Model:
                 z=[z0, z1], fitting=f["type"],
                 note="" if built else "vybavení lodi v místnosti, kterou staví kit: nestaví se"))
 
+    def _stairs(self):
+        """The stairs up to a raised room (the cockpit, Tools/Blender/hs_interior.stairs - its defaults read with ast,
+        the riser count from the room's floor): an object with its ID in ids.stairs."""
+        for rid, r in self.rooms.items():
+            fl = r.get("floor") or 0.0
+            if not fl:
+                continue
+            k = func_defaults(os.path.join(ROOT, "Tools", "Blender", "hs_interior.py"), "stairs")
+            n = int(math.ceil(fl / k["rise_max"]))
+            x1 = k["x0"] + (n - 1) * k["tread"] + 0.04
+            ident = self._need_id((self.ids.get("stairs") or {}).get(rid), "stairs", rid)
+            self.elements.append(Element(
+                ident, "object", rid, "built", "schody", self.design.get("stairs_purpose", {}).get(rid, ""),
+                where="x %s … %s, y ±%s, %d × %s / stupeň %s" % (fmt(k["x0"]), fmt(x1), fmt(k["half_w"]), n, fmt(fl / n, 3),
+                                                              fmt(k["tread"])),
+                src="hs_interior.stairs", rect=[k["x0"], x1, -k["half_w"], k["half_w"]], z=[0.0, fl], stairs=dict(k, n=n, rise=fl / n)))
+
     # ------------------------------------------------------------------ queries
     def in_room(self, rid, cats=None):
         return [e for e in self.elements if e.room == rid and (cats is None or e.cat in cats)]
@@ -642,6 +732,13 @@ class Model:
             if e.extra["axis"] == "y":
                 return "R" if e.extra["at"][1] < 0 else "L"
             return None                          # an end wall: A in the room ahead of it, F in the room behind
+        if e.cat == "decal" and e.extra.get("ray") and e.extra.get("dir"):
+            dx, dy, dz = e.extra["dir"]
+            if abs(dz) >= max(abs(dx), abs(dy)):
+                return "FLOOR" if dz < 0 else "CEIL"
+            if abs(dy) >= abs(dx):
+                return "L" if dy > 0 else "R"
+            return "F" if dx > 0 else "A"
         if e.cat == "decal" and e.extra.get("projected"):
             pos, n, _, _ = self.decal_frame(e)
             if abs(n[2]) > 0.7:
@@ -651,7 +748,10 @@ class Model:
                 return "A" if pos[0] < (r[0] + r[1]) / 2 else "F"
             return "L" if pos[1] > 0 else "R"
         if e.cat == "light":
-            if e.extra["pos"][2] >= 2.0:
+            fl = self.rooms[e.room].get("floor", 0.0) or 0.0
+            if e.extra["pos"][2] < fl - 0.1:
+                return "FLOOR"                   # under a raised floor: the stairs' nosing lights, seen in plan
+            if e.extra["pos"][2] >= fl + (2.0 if not fl else 1.3):      # a raised room: under its canopy
                 return "CEIL"
             x, y, _ = e.extra["pos"]
             r = self.rooms[e.room]["rect"]
@@ -684,7 +784,7 @@ class Model:
             return e.extra["rect"][0], e.extra["rect"][1]
         return None
 
-    def sheet_views(self, rid, section_x):
+    def sheet_views(self, rid, section_x, aft=False):
         """The IDs each view of a room's sheet draws and labels - the rule the drawing follows and the test checks:
         PLAN the kit parts, furniture, doors, components and objects, the floor's decals; RCP the ceiling and its
         lights; EL-L / EL-F / EL-R / EL-A the walls seen from the room (port, forward, starboard, aft) with what is
@@ -711,7 +811,8 @@ class Model:
             xr = self.x_range(e)
             if e.cat in ("wall", "floor", "ceiling", "furniture", "component", "object") and xr and                     xr[0] - 1e-6 <= section_x <= xr[1] + 1e-6:
                 views["SEC"].add(e.id)
-            if e.cat == "component" and e.extra.get("below") and xr and xr[1] >= section_x - 1e-6:
+            if e.cat == "component" and e.extra.get("below") and xr and \
+                    ((xr[0] <= section_x + 1e-6) if aft else (xr[1] >= section_x - 1e-6)):
                 views["SEC"].add(e.id)                      # what is under the floor ahead: dashed beyond the cut
         return views
 
@@ -744,12 +845,16 @@ class Model:
         checks: PLAN every kit part on the floor plan and in the walls (walls, bulkheads, floors), the furniture, doors,
         components and objects of every room; LSEC the longitudinal section at y = section_y looking to port: the
         ceilings and bulkheads it cuts, the port walls beyond it, the doors in the bulkheads it passes and the
-        furniture, components and objects that reach beyond it. Lights and decals are on their own sheets
-        (I-07, I-08) and the room sheets."""
-        views = {"PLAN": set(), "LSEC": set()}
+        furniture, components and objects that reach beyond it; DECALS (I-07) and LIGHTS (I-08) every decal and light
+        of the rooms (grime cards in the tables only)."""
+        views = {"PLAN": set(), "LSEC": set(), "DECALS": set(), "LIGHTS": set()}
         for e in self.elements:
             if e.room is None or e.status == "remove" or e.extra.get("grime"):
                 continue
+            if e.cat == "decal" and e.extra.get("item") != "scatter":
+                views["DECALS"].add(e.id)              # I-07: every sign and decal of a room, in plan by its host or place
+            if e.cat == "light":
+                views["LIGHTS"].add(e.id)              # I-08: every light of a room, in plan
             if e.cat in ("wall", "bulkhead", "floor", "furniture", "door", "component", "object"):
                 views["PLAN"].add(e.id)
             yr = self.y_range(e)
@@ -794,6 +899,21 @@ FITTING_CZ = {"extinguisher": "hasicí přístroj", "handrail": "madlo", "vent":
               "conduit": "kabelová chránička"}
 FITTING_DEPTH = {"extinguisher": 0.17, "handrail": 0.09, "vent": 0.03, "junction": 0.14, "conduit": 0.05}
 FITTING_Z = {"extinguisher": (0.5, 1.1), "vent": (0.12, 0.32)}
+
+
+def ray_dir(it):
+    """An interior decal's ray (interior.decals.items: "dir", or "to" from "from"), normalised."""
+    d = it.get("dir") or [b - a for a, b in zip(it["from"], it["to"])]
+    n = math.sqrt(sum(c * c for c in d)) or 1.0
+    return tuple(c / n for c in d)
+
+
+def func_defaults(path, name):
+    """The keyword defaults of a function in a script (ast: the Blender builders import bpy)."""
+    tree = ast.parse(open(path, encoding="utf-8").read())
+    fn = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == name)
+    args = fn.args.args[-len(fn.args.defaults):]
+    return {a.arg: ast.literal_eval(d) for a, d in zip(args, fn.args.defaults)}
 
 
 def _inside(p, poly):

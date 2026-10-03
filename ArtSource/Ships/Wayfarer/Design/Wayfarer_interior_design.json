@@ -145,7 +145,13 @@
   "CPT-M-AVIONICS": {
    "bay": "pod podlahou kokpitu",
    "access": "odklopná deska před křeslem",
-   "replace": "vytažením nahoru otvorem v podlaze"
+   "replace": "vytažením nahoru otvorem v podlaze",
+   "proposal": {
+    "rect": [18.8, 19.3, -0.45, 0.45],
+    "z": [0.15, 0.65],
+    "label": "návrh v2: o 0,35 m výš",
+    "why": "v1 má spodní hranu z −0,20 pod břichem (trup dole v x 18,81 na −0,09, v x 19,29 na +0,08); v2 z 0,15 … 0,65 je celá v trupu a do podlahy kokpitu (+1,15) zbývá 0,5 m"
+   }
   }
  },
  "ids": {
@@ -273,7 +279,10 @@
    ["junction", "HLD-O-JBOX-03"],
    ["conduit", "HLD-O-COND-01"],
    ["conduit", "HLD-O-COND-02"]
-  ]
+  ],
+  "stairs": {
+   "cockpit": "CPT-O-STAIRS"
+  }
  },
  "review_notes": {},
  "decal_items": {
@@ -334,5 +343,8 @@
   "vent": "větrací mřížka u podlahy (rozvod vzduchu podpory života)",
   "junction": "rozvodná skříňka energie a dat",
   "conduit": "kabelová chránička po stěně"
+ },
+ "stairs_purpose": {
+  "cockpit": "Jediný přístup do kokpitu z kajuty: strmé lodní schody k podlaze kokpitu +1,15 (po zvýšení kokpitu 25. 9.), madla po obou stranách, svítící náběžné hrany stupňů."
  }
 }

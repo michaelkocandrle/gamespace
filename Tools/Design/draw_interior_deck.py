@@ -84,6 +84,41 @@ class DeckSheet(dis.RoomSheet):
         self.cockpit_room = next(rid for rid, r in m.rooms.items() if r.get("floor", 0.0) > 0.0)
 
     # ------------------------------------------------------------------ plan
+    def base_plan(self, ox, oy, grid=True):
+        """The deck's geometry in plan: cut 1.2 m over each room's floor (the cockpit's floor is raised: its cut is 1.2 m
+        over it), the hull and canopy cut, the window; the kit grids (grid=True); returns the view, the window, the
+        kit parts drawn."""
+        m, sh = self.m, self.sh
+        s = S20
+        u0, v0 = self.x0 - 0.6, -PLAN_HY
+        vw = md.View((1, 0, 0), (0, 1, 0), (0, 0, -1), ox, oy, s, u0, v0)
+        W = (ox, oy, ox + (self.x1 + 0.35 - u0) * s, oy + 2 * PLAN_HY * s)
+        xc, zc = self.cockpit_x, self.cockpit_floor + 1.2
+        drawn = set()
+        for cut, clip in ((((0, 0, 1.2), (0, 0, -1)), ((u0, -2.8, -0.4), (xc, 2.8, 1.2))),
+                          (((0, 0, zc), (0, 0, -1)), ((xc, -2.8, -0.4), (self.x1 + 0.6, 2.8, zc)))):
+            _, tags = md.draw(sh.ax, vw, self.parts + [self.interior], self.cols, clip=clip, cut=cut, window=W)
+            drawn |= tags
+            md.draw(sh.ax, vw, [self.hull, self.canopy], self.cols, clip=clip, cut=cut, window=W, fill=False)
+        sh.rect(*W, ec=INK, lw=0.25, z=44)
+        self.WP = W
+        if grid:
+            self.grids(vw)
+        P = vw.P((xc, 0, 0))
+        sh.line([(P[0], W[1] + 1), (P[0], W[3] - 1)], 0.25, INK, ls=(0, (24, 5, 3, 5)), z=46)
+        for Y0, d_ in ((W[1] + 1, 1), (W[3] - 1, -1)):
+            sh.line([(P[0], Y0), (P[0], Y0 + d_ * 8)], 0.7, INK, z=46)
+        sh.t(P[0] + 1.0, W[3] - 6.5, "lomený řez: od x %s kokpit ve výšce +%s (1,20 nad jeho podlahou +%s)" % (
+            im.fmt(xc), im.fmt(zc), im.fmt(self.cockpit_floor)), 2.4, INK, z=46, bg="white")
+        self.layout_rooms(vw)
+        self.breaks(vw, W)
+        for rid, r in m.rooms.items():
+            pts = r["poly"]
+            cx = sum(q[0] for q in pts) / len(pts)
+            X, Y = vw.P((cx, 0.62, 0))
+            sh.t(X, Y, "%s  %s" % (r["code"], r["name"].upper()), 3.2, weight="bold", ha="center", z=46, bg="white")
+        return vw, W, drawn
+
     def plan(self, ox, oy, view="PLAN"):
         """The deck cut 1.2 m over each room's floor (the cockpit's floor is raised: its cut is 1.2 m over it), the kit
         grid of each kit room, the wall modules' IDs in strips along the port (top) and starboard (bottom) edges."""
@@ -131,6 +166,7 @@ class DeckSheet(dis.RoomSheet):
             if e.cat in ("component", "object") and e.extra.get("rect"):
                 r = e.extra["rect"]
                 self.previous(vw, e, lambda rr, zz: (vw.P((rr[0], rr[2], 0)), vw.P((rr[1], rr[3], 0))))
+                self.proposal(vw, e, lambda rr, zz: (vw.P((rr[0], rr[2], 0)), vw.P((rr[1], rr[3], 0))))
                 A, B = vw.P((r[0], r[2], 0)), vw.P((r[1], r[3], 0))
                 sh.rect(A[0], A[1], B[0], B[1], ec=STATUS_COL[e.status], lw=0.35, ls="--", z=25)
             if e.cat == "door":
@@ -149,7 +185,24 @@ class DeckSheet(dis.RoomSheet):
         self.section_line(vw, W)
         self.plan_chains(vw, W)
         self.cross_chains(vw)
+        self.aisle_chains(vw)
+        reqs += self.standin_reqs
         return vw, W, reqs
+
+    def aisle_chains(self, vw):
+        """Across a room at the middle of a layout object standing on the floor along a wall (the hold's cargo grid): the
+        wall faces and the object's edges - the aisle beside it."""
+        m = self.m
+        for rid, r in m.rooms.items():
+            walls = m.in_room(rid, ("wall",))
+            if not walls:
+                continue
+            fy = max(abs(e.extra["placement"].ue_to_layout(0, 0, 0)[1]) for e in walls)
+            for o in m.in_room(rid, ("object",)):
+                rr, z = o.extra.get("rect"), o.extra.get("z")
+                if not rr or not z or o.status == "remove" or o.extra.get("below") or z[0] > 0.1 or rr[1] - rr[0] < 2.0:
+                    continue
+                self.chain(vw, "y", (rr[0] + rr[1]) / 2 + 0.6, [-fy, rr[2], rr[3], fy])
 
     def layout_rooms(self, vw):
         """The layout's room outlines, thin dash-dot: where the built faces differ (the data check) it shows."""
@@ -179,9 +232,11 @@ class DeckSheet(dis.RoomSheet):
     def stand_ins(self, vw):
         """The stand-in floor strips under the portals (interior.kit_modules.stand_in_floor: the kit has no 0.3 m W
         floor plate yet)."""
+        self.standin_reqs = []
         for x0, x1 in self.m.mods.get("stand_in_floor") or []:
-            X, Y = vw.P(((x0 + x1) / 2, -0.95, 0))
-            self.sh.t(X, Y, "náhradní pás podlahy", 1.9, GREY, ha="center", rot=90, z=46, bg="white")
+            X, Y = vw.P(((x0 + x1) / 2, -1.6, 0))
+            self.standin_reqs.append({"id": "#standin%s" % x0, "text": "náhradní pás podlahy lodi (kit nemá desku 0,3 m)",
+                                      "anchor": (X, Y), "col": GREY, "z": Y, "hidden": False})
 
     def breaks(self, vw, W):
         """Break lines where the window cuts the hull (aft of the ramp's hinge, ahead of the cockpit) and where it goes
@@ -255,16 +310,16 @@ class DeckSheet(dis.RoomSheet):
                 A, B = vw.P((gx0, k * g, 0)), vw.P((gx1, k * g, 0))
                 self.sh.line([A, B], 0.35 if k % 4 == 0 else 0.08, dis.GRID_COL, z=24)
                 k += 1
-            O = vw.P((gx0, -half, 0))
+            O = vw.P((gx0, 0.0, 0))
             self.sh.ax.add_patch(Circle(O, 1.0, fc=dis.GRID_COL, ec="white", lw=0.15 * ds.PT, zorder=45))
-            self.sh.t(O[0] + 1.4, O[1] + 1.2, "0 mřížky %s" % r["code"], 2.1, dis.GRID_COL, z=45, bg="white")
+            self.sh.t(O[0] + 1.4, O[1] - 3.4, "0 mřížky %s" % r["code"], 2.1, dis.GRID_COL, z=45, bg="white")
             self.grid_rows.append((rid, gx0, gx1, half, len(walls)))
 
     def section_line(self, vw, W):
         sh = self.sh
         y = self.section_y
         A, B = vw.P((self.x0 - 0.45, y, 0)), vw.P((self.x1 + 0.2, y, 0))
-        sh.line([A, B], 0.25, INK, ls=(0, (24, 5, 3, 5)), z=46)
+        sh.line([A, B], 0.35, "#5A2D82", ls=(0, (10, 3, 2, 3)), z=46)
         for P, d_ in ((A, 1), (B, -1)):
             sh.line([P, (P[0] + d_ * 8, P[1])], 0.7, INK, z=46)
         for P in (A, B):
@@ -283,32 +338,6 @@ class DeckSheet(dis.RoomSheet):
         self.chain(vw, "x", PLAN_HY + 0.42, rooms, label="místnosti (layout)")
         self.chain(vw, "x", PLAN_HY + 0.64, [self.x0, self.x1], label="paluba")
         self.faces_x = faces
-
-    def clear_height(self, x, floor, band=0.3, xs=None):
-        """The clear height over a floor from every built mesh (kit parts, the ship's interior, the hull, the canopy and
-        its frame): the lowest face cut by the planes x = const (x, or each of xs) within band of the centre line,
-        0.6 m or more over the floor (round 2 of I-01: the canopy's ribs hang lower than its glass)."""
-        best = None
-        for xx in (xs or [x]):
-            for part in self.parts + [self.interior, self.hull, self.canopy]:
-                lo, hi = part.verts.min(0), part.verts.max(0)
-                if not (lo[0] - 0.01 <= xx <= hi[0] + 0.01):
-                    continue
-                for a, b in md._slice(part.verts, part.tris, np.array((xx, 0, 0.0)), np.array((1.0, 0, 0))):
-                    # the segment clipped to the band (a rib's underside crosses it from one side to the other)
-                    pts = [q for q in (a, b) if abs(q[1]) <= band]
-                    if abs(b[1] - a[1]) > 1e-9:
-                        for yb in (-band, band):
-                            t = (yb - a[1]) / (b[1] - a[1])
-                            if 0.0 < t < 1.0:
-                                pts.append(a + t * (b - a))
-                    for q in pts:
-                        if q[2] > floor + 0.6 and (best is None or q[2] < best[0]):
-                            best = (float(q[2]), xx, float(q[1]))
-        if best is None:
-            return None
-        self.clear_at = best
-        return best[0] - floor
 
     # ------------------------------------------------------------------ longitudinal section
     def lsec(self, ox, oy, view="LSEC"):
@@ -350,13 +379,15 @@ class DeckSheet(dis.RoomSheet):
                 X, Y = vw.P((e.extra["at"][0], y, 1.0))
             elif e.cat == "furniture":
                 xr = m.x_range(e)
-                X, Y = vw.P(((xr[0] + xr[1]) / 2, y, 1.1))
+                fl = m.rooms[e.room].get("floor", 0.0) or 0.0
+                X, Y = vw.P(((xr[0] + xr[1]) / 2, y, fl + (0.45 if fl else 1.1)))
             elif e.extra.get("rect"):
                 r, z = e.extra["rect"], e.extra.get("z") or (0.0, 0.0)
                 A, B = vw.P((r[0], y, z[0])), vw.P((r[1], y, z[1]))          # the layout's z are over the main deck
                 if e.cat == "component" or e.extra.get("below"):
                     sh.rect(min(A[0], B[0]), min(A[1], B[1]), max(A[0], B[0]), max(A[1], B[1]), ec=STATUS_COL[e.status],
                             lw=0.35, ls="--", z=46)
+                    self.proposal(vw, e, lambda rr, zz: (vw.P((rr[0], y, zz[0])), vw.P((rr[1], y, zz[1]))))
                 # the leader to what is seen: a box standing on a floor at its foot (the cargo grid's rails, the seat's
                 # cushion), one under the floor at its middle
                 za = (z[0] + z[1]) / 2 if e.extra.get("below") else (z[0] + 0.03 if z[0] < 0.05 else z[0] + min(0.45, (z[1] - z[0]) / 2))
@@ -392,7 +423,7 @@ class DeckSheet(dis.RoomSheet):
         segs = md._slice(self.hull.verts, self.hull.tris, np.array((0, y, 0.0)), np.array((0, 1.0, 0)))
         csegs = md._slice(self.canopy.verts, self.canopy.tris, np.array((0, y, 0.0)), np.array((0, 1.0, 0)))
         for rid, r in m.rooms.items():                     # the hull over and under each room's middle
-            cx = (r["rect"][0] + r["rect"][1]) / 2 + (0.6 if rid == "cockpit" else 0.0)
+            cx = (r["rect"][0] + r["rect"][1]) / 2 if not r.get("floor") else self.stairs["x_top"] + 0.2
             zs = [a[2] + (b[2] - a[2]) * (cx - a[0]) / (b[0] - a[0]) for a, b in segs + csegs
                   if (a[0] - cx) * (b[0] - cx) <= 0 and abs(b[0] - a[0]) > 1e-6]
             if r["kit"] and getattr(self, "clear", {}).get(rid) is None:
@@ -400,7 +431,7 @@ class DeckSheet(dis.RoomSheet):
                 self.clear[rid] = self.clear_height((r["rect"][0] + r["rect"][1]) / 2, r.get("floor", 0.0))
             ch = getattr(self, "clear", {}).get(rid) if r["kit"] else None
             if ch:                                       # the ceiling as built (the layout's clear height is 2.30)
-                X, Y = vw.P((cx - 0.9, y, r.get("floor", 0.0) + ch))
+                X, Y = vw.P((cx + 0.35, y, r.get("floor", 0.0) + ch))
                 sh.ax.add_patch(MplPolygon([(X, Y), (X - 1.0, Y - 1.6), (X + 1.0, Y - 1.6)], closed=True, fc=INK,
                                            ec="none", zorder=47))
                 sh.t(X + 1.6, Y - 3.4, "+%s strop" % im.fmt(r.get("floor", 0.0) + ch), 2.0, z=47, bg="white")
@@ -408,7 +439,8 @@ class DeckSheet(dis.RoomSheet):
                 X, Y = vw.P((cx, y, zz))
                 sh.ax.add_patch(MplPolygon([(X, Y), (X - 1.0, Y + 1.6 * (1 if zz > 1 else -1)),
                                             (X + 1.0, Y + 1.6 * (1 if zz > 1 else -1))], closed=True, fc=INK, ec="none", zorder=47))
-                sh.t(X + 1.6, Y + (1.0 if zz > 1 else -3.2), ("+" if zz > 0 else "") + im.fmt(zz), 2.0, z=47, bg="white")
+                sh.t(X + 1.6, Y + (1.0 if zz > 1 else -3.2), ("+" if zz > 0 else "") + im.fmt(zz) + (
+                    " vrch kabiny" if (zz > 1 and r.get("floor")) else (" trup" if zz > 1 else " břicho")), 2.0, z=47, bg="white")
         # the stairs: their rise and the cockpit's floor
         X = vw.P((st["x0"] - 0.12, y, 0))[0]
         self.dim((X, vw.P((0, 0, 0.0))[1]), (X, vw.P((0, 0, self.cockpit_floor))[1]),
@@ -511,8 +543,8 @@ def rooms_table(rs, x, ytop):
     m = rs.m
     cols = [("kód", 11, "left"), ("místnost", 29, "left"), ("zóna", 17, "left"), ("x od … do (layout)", 28, "left"),
             ("délka", 11, "right"), ("šířka", 11, "right"), ("plocha m²", 15, "right"), ("základ", 19, "left"),
-            ("sv. výška (geometrie)", 31, "right", 2), ("stavba", 22, "left"),
-            ("díly kitu: stěny / přepážky / strop / podlaha / nábytek", 52, "left", 2), ("účel (layout)", 302, "left", 2)]
+            ("sv. výška (geometrie)", 44, "right", 3), ("stavba", 22, "left"),
+            ("díly kitu: stěny / přepážky / strop / podlaha / nábytek", 52, "left", 2), ("účel (layout)", 289, "left", 2)]
     rows = []
     rs.clear = getattr(rs, "clear", {})
     flags = {rid for rid, r in m.rooms.items() if purpose_heights(r)}
@@ -600,7 +632,7 @@ def legend(rs, x, ytop):
              ((0.4, "--", STATUS_COL["remove"]), "dřívější poloha (přesun, šipka k nové)"),
              ((0.18, (0, (6, 1.5, 1, 1.5)), "#7A7A7A"), "obrys místnosti v layoutu"),
              ((0.35, ":", dis.GRID_COL), "mřížka kitu 0,3 m (plná po 1,2 m)"),
-             ((0.25, (0, (24, 5, 3, 5)), INK), "rovina řezu A, lom řezu u kokpitu (silné konce)"),
+             ((0.35, (0, (10, 3, 2, 3)), "#5A2D82"), "rovina řezu A (silné konce); lom řezu u kokpitu černě"),
              ((0.3, "-", "#2E7D32"), "zelená kóta: světlá výška, průchod (kapsle postavy)")]
     for (lw, ls, col), txt in items:
         sh.line([(x, y + 0.8), (x + 12, y + 0.8)], lw, col, ls=ls)
@@ -624,10 +656,12 @@ def notes(rs, x, ytop):
         "2. Souřadnice v metrech: x od zádi (závěs rampy x %s), y k levoboku, z od paluby; měřítko 1:20." % im.fmt(rs.x0),
         "3. Klíč ID: místnost (HLD náklad, TEC chodba, CAB kajuta, CPT kokpit) - druh - pořadí: W stěna (L levobok, "
         "R pravobok, od zádi), B přepážka (A zadní, F přední), C strop, FL podlaha, U nábytek, M komponenta, O objekt "
-        "lodi; DR dveře. Pod ID šedě díl kitu.",
+        "lodi; DR dveře. U ID šedě díl kitu (v horních pásech nad ID, v dolních pod ním).",
         "3a. ID stěn jsou v pásech podél půdorysu (levobok nahoře, pravobok dole), stropů a stěn levoboku nad a pod "
         "řezem A; ostatní na odkazech.",
-        "4. Mřížka kitu má v každé místnosti vlastní počátek (začátek běhu stěn), viz tabulka mřížky.",
+        "4. Mřížka kitu má v každé místnosti vlastní počátek v x (začátek běhu stěn), v y od osy lodi; líce obložení "
+        "±2,05 a ±1,90 leží mimo mřížku (průřez L). Běhy stěn končí 1 cm za lícem přepážky (líc kitu je 1 cm před "
+        "přepážkou lodi).",
         "5. Světla a decaly jsou na listech místností a na I-07, I-08.",
         "6. Kokpit staví loď (hs_cockpit), ne kit: jen geometrie, nábytek a komponenty z layoutu.",
     ]
@@ -656,7 +690,7 @@ def parts_table(rs, x, ytop):
     for e in m.elements:
         if e.kit and e.cat in ("wall", "bulkhead", "ceiling", "floor", "furniture"):
             parts.setdefault(e.kit, []).append(e)
-    cols = [("díl kitu", 34, "left"), ("ks", 5, "right"), ("ID", 32, "left", 4), ("účel", 74, "left", 5)]
+    cols = [("díl kitu", 34, "left"), ("ks", 5, "right"), ("ID", 32, "left", 8), ("účel", 74, "left", 5)]
     rows = [([k, len(v), ", ".join(sorted(e.id for e in v)),
               m.design["kit_purpose"].get(k) or (v[0].purpose if v[0].cat == "furniture" else "")], INK)
             for k, v in sorted(parts.items())]
@@ -683,13 +717,13 @@ def check_box(rs, x, ytop, width=140.0):
                 bays = [e for e in m.in_room(rid, ("component",)) if str(e.src).endswith("SOCKET_Component")]
                 out.append((m.room_code(rid), "%s: líce stěn y ±%s, obdélník layoutu ±%s (%+d mm na stranu)%s" % (
                     r["name"], im.fmt(fy), im.fmt(r["rect"][3]), round((fy - r["rect"][3]) * 1000),
-                    " – za stěnami výklenky komponent" if bays else " – layout podle kitu (hlavní session: otisky E-01 až E-08)"),
+                    " – za stěnami výklenky komponent" if bays else " – upravit layout podle kitu (layout čtou i výkresy exteriéru, opraví hlavní session)"),
                     "intent" if bays else "fix"))
         floor = r.get("floor", 0.0)
         said = purpose_heights(r)
         if said:
             if True:
-                out.append((m.room_code(rid), "účel v layoutu uvádí %s m, postavená podlaha je +%s (hs cockpit._raise) – "
+                out.append((m.room_code(rid), "účel v layoutu uvádí %s m, postavená podlaha je +%s (kokpit zvýšen 25. 9.) – "
                                               "opravit text v layoutu (hlavní session)" % (
                                                   ", ".join(im.fmt(v) for v in said), im.fmt(floor)), "fix"))
     faces = rs.faces_x
@@ -706,6 +740,13 @@ def check_box(rs, x, ytop, width=140.0):
         rs.rid = rid
         out += [(i, t, "author") for i, t in rs.component_fit()]
     rs.rid = None
+    for e in m.elements:                         # the proposed new positions (design data components.<id>.proposal)
+        pr = e.extra.get("proposal") if e.cat == "component" else None
+        if pr:
+            out.append((e.id, "%s: x %s … %s, y %s … %s, z %s … %s – %s" % (
+                pr.get("label", "návrh"), im.fmt(pr["rect"][0]), im.fmt(pr["rect"][1]), im.fmt(pr["rect"][2]),
+                im.fmt(pr["rect"][3]), im.fmt((pr.get("z") or e.extra["z"])[0]), im.fmt((pr.get("z") or e.extra["z"])[1]),
+                pr.get("why", "")), "author"))
     y = ytop - 9
     for ident, txt, verdict in out:
         head = "[%s] " % VERDICT[verdict] + ("" if ident == "#" else ident + ": ")

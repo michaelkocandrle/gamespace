@@ -151,6 +151,11 @@ def assign(ship, check=False):
         added.append(ident)
         lst.append([f["type"], ident])
     ids["fittings"] = lst
+    st = ids.setdefault("stairs", {})
+    for rid, r in m2.rooms.items():                  # the stairs up to a raised room: <ROOM>-O-STAIRS
+        if r.get("floor") and rid not in st:
+            st[rid] = "%s-O-STAIRS" % codes[rid]
+            added.append(st[rid])
     stale = m.stale_ids
     if not check and (added or stale):
         text = dump(design) + "\n"
