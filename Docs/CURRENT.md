@@ -38,9 +38,9 @@ kritik PASS 6,5 (práh step); noc opravena stínem planety. Nový PC autora.
 
 ## Paralelní práce
 
-- **Druhá session** (worktree `gamespace-audit`, větev `wayfarer-dossier-interior`): výkresy interiéru (bod 4, styl
-  I-04 schválen 1. 10.) a koncepty (bod 6); `exterior_*.py` mění jen hlavní session. 0e7e4d4 sloučen do main 1. 10.;
-  5894e97 (dveře hygieny, I-04 R1) jen ve větvi. Konflikt v `Drawings/*`: kterákoli strana, pak překreslit.
+- **Druhá session** (worktree `gamespace-audit`, větev `wayfarer-dossier-interior`): výkresy I-01–I-09 hotové, čekají
+  na autora; audit detailu proti SC s návrhem pravidla „detail, který platí“ (`2026-10-03_wayfarer_detail_audit.md`,
+  7 návrhů k rozhodnutí autora, mění recept exteriéru = hlavní session). `Drawings/*` při konfliktu překreslit.
 - **Hlavní session:** exteriérový kit. Druhá session balí do `Builds_<jméno>`; slučuje hlavní session.
 
 ## Čeká na rozhodnutí autora
