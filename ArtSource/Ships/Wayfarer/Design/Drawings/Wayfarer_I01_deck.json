@@ -9,16 +9,16 @@
   "layout": "9ed16b60fbcc",
   "interior": "37c119fe0110",
   "setup": "de82013afd6a",
-  "lights": "8d9f6fba4a59",
+  "lights": "dc19a3d11ce6",
   "design": "e523ba9bcb88",
   "kit": "c8f141a12540",
   "library": "3bdd02712ff2",
   "light_rules": "788f180917fd"
  },
  "geometry": {
-  "SM_Ship_Wayfarer.fbx": "abd9bc5ba701",
-  "SM_Ship_Wayfarer_Interior.fbx": "f12fb389dfb4",
-  "SM_Ship_Wayfarer_Canopy.fbx": "4bafaec943ea",
+  "SM_Ship_Wayfarer.fbx": "dd605b8e86d2",
+  "SM_Ship_Wayfarer_Interior.fbx": "70ea6a9dc475",
+  "SM_Ship_Wayfarer_Canopy.fbx": "50abe89a8300",
   "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
   "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",
   "SM_Kit_Bulkhead_Door00L41_C.fbx": "f9b4f693887f",
@@ -423,10 +423,6 @@
   [
    "TEC-M-COOLER-R",
    "Chladič S1 (pravý): v layoutu x 9,55 … 10,30, y −1,85 … −1,15, z 0,00 … 1,40; postavený výklenek v TEC-W-R2 x 9,83 … 10,25, y −1,78 … −1,20, z 0,16 … 1,02 (nejvíc 380 mm; kit platí, layout opravit)"
-  ],
-  [
-   "HLD-M-QFUEL",
-   "Nádrž kvantového paliva (postaveno) leží zčásti mimo trup: při x 5,41 roh y 1,70 z −0,55 (layout x 5,40 … 7,40, y 0,80 … 1,70, z −0,55 … −0,05)"
   ],
   [
    "CPT-M-AVIONICS",
