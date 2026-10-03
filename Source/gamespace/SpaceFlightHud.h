@@ -204,6 +204,24 @@ struct GAMESPACE_API FSpaceFlightHudState
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	FString QuantumStatus;
 
+	/**
+	 * Landing (SC-3, 4. 10. 2026), in a box above the heading tape, like SC's status lines: TOUCHDOWN 60%
+	 * while settling, LANDED for a few seconds after touchdown, and with the gear down low over the ground why
+	 * the ship will not touch down (SLOPE TOO STEEP, UNEVEN GROUND, TOO FAST, LEVEL THE SHIP). SC lands
+	 * physically and says none of this; our touchdown has rules, so the HUD names the one in the way. Empty
+	 * when there is nothing to say.
+	 */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	FString LandingStatus;
+
+	/** LandingStatus is a refusal (amber), not progress. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	bool bLandingWarning = false;
+
+	/** Touchdown progress for the landing box's bar, 0..1; -1 when it shows none. */
+	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
+	float LandingProgress = -1.f;
+
 	/** The two arcs round the middle: 0 hidden, 1 not ready (violet), 2 ready (green, with arrows), 3 cooling (red). */
 	UPROPERTY(BlueprintReadOnly, Category = "Flight HUD")
 	int32 QuantumArcs = 0;
@@ -549,6 +567,14 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
 	FLinearColor Accent = FLinearColor::Red;
 
+	/** Status box: its backing; transparent alpha: a dark shade of Color (the quantum drive's green box). */
+	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
+	FLinearColor Backing = FLinearColor::Transparent;
+
+	/** Status box: a progress bar along its bottom edge, 0..1; below 0 none. */
+	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
+	float Progress = -1.f;
+
 	/** Strafe: input; gyro: turn rate. -1..1, X right, Y up. */
 	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
 	FVector2D Value = FVector2D::ZeroVector;
@@ -846,6 +872,7 @@ protected:
 
 	/** The quantum drive's arcs, destination and status box (SC-4). */
 	void ApplyQuantum(const FSpaceFlightHudState& State);
+	void ApplyLanding(const FSpaceFlightHudState& State);
 
 	/** The state as this layout shows it (the cockpit displays steady their figures); the HUD shows it as is. */
 	virtual FSpaceFlightHudState SteadyState(const FSpaceFlightHudState& State) { return State; }

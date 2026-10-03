@@ -1277,6 +1277,10 @@ snímku.
 - ft) **Python v UE: bool UFUNCTION s výstupními parametry** nevrací `(ok, out1, …)`, ale jen výstupy, nebo `None`,
   když funkce vrátila false (`compute_tripod_rest`). `unreal.Rotator` nemá `rotate_vector`; otáčej přes
   `get_forward_vector` / `get_right_vector` / `get_up_vector`.
+- fu) **`fetch_video.py` spadl na `FileNotFoundError`** (4. 10. 2026, nový PC). Chyběly ffmpeg a ffprobe, yt-dlp je jen
+  jako modul (`python -m yt_dlp`, skript ho tak volá). Nainstalováno `winget install Gyan.FFmpeg`; aliasy ve
+  `WinGet\Links` Git Bash nenajde, přidej na PATH složku `...\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-*\bin`.
+  Snímky z cizího videa nejdou do gitu ani ve srovnávacích listech kritika (`.gitignore` u recenze).
 
 
 ---

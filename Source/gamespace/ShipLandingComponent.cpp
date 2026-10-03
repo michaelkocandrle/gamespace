@@ -30,6 +30,7 @@ UShipLandingComponent::EEvent UShipLandingComponent::Update(float DeltaSeconds, 
 	Ground = Probe;
 	if (State == ELandingState::Landed)
 	{
+		LandedSeconds += DeltaSeconds;
 		Blocker = ELandingBlocker::None;
 		return bEngineInput || !Ground.bValid ? EEvent::TookOff : EEvent::None;
 	}
@@ -73,6 +74,7 @@ void UShipLandingComponent::EnterLanded(const FShipLandingRules& Rules)
 {
 	State = ELandingState::Landed;
 	SettleSeconds = Rules.ConfirmSeconds;
+	LandedSeconds = 0.f;
 }
 
 void UShipLandingComponent::ExitLanded(const FShipLandingRules& Rules)

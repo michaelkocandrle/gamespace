@@ -807,6 +807,14 @@ both, which is also how the tests step the animation without Slate.
 and colours (`SpaceHudStyle`) are at the top of `SpaceFlightHud.cpp`.
 
 
+**Landing status (SC-3, 4. 10. 2026).** A dark box above the heading tape (where SC shows its status lines)
+says what the landing is doing: `TOUCHDOWN 60%` with a progress bar while settling, `LANDED` for 3 s after touchdown,
+and, with the gear down and the pads within 4 m of the ground, why the ship will not touch down in amber:
+`SLOPE TOO STEEP`, `UNEVEN GROUND` (the hull would touch), `TOO FAST`, `LEVEL THE SHIP`. SC itself shows none of this
+(it lands physically; `starcitizenreference/Landing_VideoNotes.md`); ours has touchdown rules, so the HUD names the one
+in the way. `FSpaceFlightHudState::LandingStatus`, `SpaceHudStyle::DescribeLanding`; pictures
+`Tools/Shots.ps1 -Preset landing_hud -Editor`.
+
 **Flight path marker (SC-3).** The HUD shows where the ship is actually going, not where its nose
 points - in Star Citizen that is what you fly by, and decoupled the two part company entirely. A
 ring with three stubs sits where the velocity lands on the screen, projected from the view's focal

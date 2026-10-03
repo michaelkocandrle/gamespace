@@ -346,6 +346,23 @@ try:
     state = unreal.SpaceFlightHud.make_state(ship, 1)
     check("precision: the speed gauge's full scale is the precision speed", abs(state.gauge_scale_cm_s - PREC) < 1.0,
           "%.1f m/s" % (state.gauge_scale_cm_s / 100))
+
+    # SC-3 landing status box (the ground-dependent refusals need terrain: landing_slope shots)
+    check("HUD has the landing status box", {"LandingStatusBox", "LandingStatus"} <= names)
+    state = unreal.SpaceFlightHud.make_state(ship, 1)
+    hud.apply_state(state)
+    check("flying with no ground below: no landing status", state.landing_status == "" and not hud.debug_is_shown("LandingStatus"),
+          state.landing_status)
+    ship.debug_set_gear_instant(True)
+    ship.debug_force_landed(True)
+    state = unreal.SpaceFlightHud.make_state(ship, 1)
+    hud.apply_state(state)
+    check("just landed: LANDED, not a warning, shown", state.landing_status == "LANDED" and not state.landing_warning
+          and hud.debug_is_shown("LandingStatus") and hud.debug_get_text("LandingStatus") == "LANDED", state.landing_status)
+    ship.debug_force_landed(False)
+    state = unreal.SpaceFlightHud.make_state(ship, 1)
+    hud.apply_state(state)
+    check("took off: the box goes away", state.landing_status == "" and not hud.debug_is_shown("LandingStatusBox"))
 finally:
     eas.destroy_actor(ship)
 

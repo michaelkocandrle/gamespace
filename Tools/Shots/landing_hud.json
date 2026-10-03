@@ -1,0 +1,11 @@
+{
+  "_comment": "SC-3 landing status box (4. 10. 2026) below the middle of the flight HUD: TOUCHDOWN while settling, LANDED for 3 s after touchdown, an amber refusal low over the ground with the gear down (here SLOPE TOO STEEP). Timings from the landing_slope runs: from 9 m with lift -0.6 the pads touch after ~0.7 s and the ship lands ~0.8 s later. Run: .\\Tools\\Shots.ps1 -Preset landing_hud -Editor",
+  "shots": [
+    {"name": "hud_touchdown_cockpit", "camera": "cockpit", "altitude_m": 9, "facing": "horizon", "hud": 1, "gear": true, "lift": -0.6, "settle": 1.0,
+     "console": ["space.SlopeSpot 8 14 0"]},
+    {"name": "hud_landed_cockpit", "camera": "cockpit", "altitude_m": 9, "facing": "horizon", "hud": 1, "gear": true, "lift": -0.6, "settle": 2.6},
+    {"name": "hud_too_steep_cockpit", "camera": "cockpit", "altitude_m": 12, "facing": "horizon", "hud": 1, "gear": true, "lift": -0.6, "settle": 4.0,
+     "console": ["space.SlopeSpot 28 35 0"]},
+    {"name": "hud_too_steep_chase", "camera": "chase", "altitude_m": -1, "facing": "horizon", "hud": 1, "chase_yaw": 30, "chase_pitch": -5, "settle": 0.5}
+  ]
+}

@@ -1,0 +1,18 @@
+{
+ "topic": "landing_hud",
+ "date": "2026-10-04",
+ "goal": "Stavový rámeček přistání na letovém HUD (nad páskou kurzu, kde má SC stavová hlášení): TOUCHDOWN xx % při dosedání, LANDED 3 s po přistání, jantarově důvod odmítnutí nízko nad zemí s vysunutým podvozkem (zde SLOPE TOO STEEP). Posuzuj jen tento rámeček a jeho soulad se zbytkem HUD; zbytek HUD a kokpitu je hotový a mimo rozsah.",
+ "style": "Star Citizen 4.x HUD: tenké světlé písmo, poloprůhledné prvky bez pevných panelů, hlášení v tmavém rámečku (jako stav quantum drivu nebo oznámení vpravo v referenci); varování jantarové/červené.",
+ "checklist": "cockpit",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-04_landing_hud",
+ "notes": ["SC při přistání na planetě žádný takový stav neukazuje (jen ikonu podvozku, R-ALT a VSI); rámeček je vědomá odchylka, protože naše přistání má pravidla (sklon, nerovný terén, rychlost) a hráč musí vědět, proč loď nepřistává.",
+           "Výzva [F] Get up nad rámečkem je stávající prvek, není předmětem recenze.",
+           "Reference jsou snímky ze SC videa (přistání v hangáru) s HUD blízko země a s oznámením v tmavém rámečku."],
+ "pairs": [
+  {"title": "Dosedání, pohled pilota", "distance": "mid", "light": "day", "ref": "ArtSource/Reference/Video/sc_landing_guide/frames/t00_02_21.jpg", "ref_label": "SC 4.x, těsně nad plošinou", "ours": "shots:20261004_012400_landing_hud/00_hud_touchdown_cockpit.png", "ours_label": "ve hře, TOUCHDOWN"},
+  {"title": "Přistáno, pohled pilota", "distance": "mid", "light": "day", "ref": "ArtSource/Reference/Video/sc_landing_guide/frames/t00_02_33.jpg", "ref_label": "SC 4.x, přistáno", "ours": "shots:20261004_012400_landing_hud/01_hud_landed_cockpit.png", "ours_label": "ve hře, LANDED"},
+  {"title": "Odmítnutí, pohled pilota", "distance": "mid", "light": "day", "ref": "ArtSource/Reference/Video/sc_landing_guide/frames/t00_02_09.jpg", "ref_label": "SC 4.x, oznámení v rámečku vpravo", "ours": "shots:20261004_012400_landing_hud/02_hud_too_steep_cockpit.png", "ours_label": "ve hře, SLOPE TOO STEEP (30° svah)"},
+  {"title": "Odmítnutí, pohled zvenku", "distance": "far", "light": "day", "ref": "ArtSource/Reference/Video/sc_landing_guide/frames/t00_00_12.jpg", "ref_label": "SC 4.x, stav quantum v rámečku", "ours": "shots:20261004_012400_landing_hud/03_hud_too_steep_chase.png", "ours_label": "ve hře, chase kamera"}
+ ]
+}

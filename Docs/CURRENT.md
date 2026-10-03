@@ -14,6 +14,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
   SC-3 značka dráhy letu, SC-4 quantum drive (cíl nosem, spool, kalibrace, tunel, příjezd). Ovládání: `README.md`.
   **Přistání na svahu** (3. 10.): loď stojí na třech patkách (rovina pod patkami, `TripodRest`), pohyb sweepuje vlastní
   kolizi trupu (UCX) místo kořenového boxu, `Obstructed` = trup by se dotkl terénu; `landing_slope`, README „On a slope“.
+  HUD: rámeček stavu přistání nad páskou kurzu (TOUCHDOWN, LANDED, jantarově důvod odmítnutí), `landing_hud`.
   Tělesa pro quantum, radar a `FindNearest` drží `USpaceCelestialRegistrySubsystem`.
 - **Postava:** první osoba (V pěšky = třetí jen pro testy); sférická gravitace planety i umělá v lodi.
 - **Wayfarer** (Halcyon Freightworks, malá multirole, 1 pilot) – jediná létající loď:
@@ -64,9 +65,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
   madel; lišty stropu po segmentech. Rozvody S na zadním konci (x 3–4) dělají ohyb přes pole bez desky.
 - **Determinismus stavby na později** (WORKFLOW 9.6 ff): šum ±40 trojúhelníků, 3 FBX, import ukládá ~150 assetů;
   náhodné decaly už na pořadí stavby nezávisí (9.6 fl, test v `test_kit_decals.py`).
-- Hřebenový terén vypnutý (kamera po přistání pod zemí); kameny bez kolize. Quantum tunel méně „mléčný“, TSR
+- Hřebenový terén vypnutý (kamera po přistání pod zemí); kameny bez kolize; zvuky procedurální, jas oblohy odhad. Quantum tunel méně „mléčný“, TSR
   čáry podél jisker; displeje bez mipmap (pod ~1600 px písmo zrní), duchy čísel.
-- Zvuky jsou procedurální zástupci; jas oblohy je odhad; obloha v atmosféře nerozlišuje den a noc.
 - Neověřeno autorem: časování quantum skoku, HUD SC-1c mimo 1080p, chůze Steadfastem; Shipping build nezkoušen; v PIE
   Escape ukončí hru (menu F10); debug HUD anglicky; `compileall` SyntaxWarning v šesti skriptech `Tools/Assets`.
 
@@ -75,6 +75,6 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 1. **Wayfarer revize G** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený do finální
    recenze. Další práce podle autora (3. 10.): let (HUD, mapa, palivo), interiér, Steadfast.
 2. **Přistání na svahu hotové** (3. 10.), čeká na vyzkoušení autorem; později odpružení nohou, mírnější klesání u země.
-3. **Let podle SC – DALŠÍ ÚKOL: zbytek HUD a MFD (SC-3)** (autor 4. 10. vybral), pak mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
+3. **SC-3:** přistávací HUD hotový (4. 10., rámeček stavu, kritik PASS 6,75); dál podle autora, pak mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).

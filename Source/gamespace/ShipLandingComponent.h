@@ -103,6 +103,9 @@ public:
 	bool IsLanded() const { return State == ELandingState::Landed; }
 	ELandingBlocker GetBlocker() const { return Blocker; }
 
+	/** Seconds since the ship touched down (0 while not landed). */
+	float GetSecondsLanded() const { return State == ELandingState::Landed ? LandedSeconds : 0.f; }
+
 	/** Settling progress towards Landed, 0..1. */
 	float GetProgress(float ConfirmSeconds) const { return FMath::Clamp(SettleSeconds / FMath::Max(ConfirmSeconds, 0.01f), 0.f, 1.f); }
 
@@ -170,6 +173,7 @@ private:
 	/** The blocker last written to the log while touching the ground. */
 	ELandingBlocker LoggedBlocker = ELandingBlocker::NoSurface;
 	float SettleSeconds = 0.f;
+	float LandedSeconds = 0.f;
 	float TakeoffCooldown = 0.f;
 	FShipGroundProbe Ground;
 

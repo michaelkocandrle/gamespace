@@ -69,6 +69,8 @@ namespace SpaceHudStyle
 	const FLinearColor Backing(0.01f, 0.03f, 0.05f, 0.55f);
 	/** Caution only (G-Safe suspended by boost), never a whole bar. */
 	const FLinearColor Amber(1.f, 0.78f, 0.25f, 0.95f);
+	/** A cleaner, more urgent amber for the landing refusal (#FFA500-ish): Amber on the dark box read olive. */
+	const FLinearColor LandingAmber(1.f, 0.62f, 0.05f, 1.f);
 	const FLinearColor Red(1.f, 0.33f, 0.24f, 0.95f);
 	/** The gyro's turn-rate line. */
 	const FLinearColor Orange(1.f, 0.55f, 0.25f, 0.95f);
@@ -454,6 +456,47 @@ namespace SpaceHudStyle
 		{
 			State.QuantumStatus = TEXT("ONLINE");
 		}
+	}
+
+	/** Seconds the LANDED notice stays after touchdown. */
+	constexpr float LandedNoticeSeconds = 3.f;
+	/** Pads within this of the ground (cm), the gear down: close enough that a refusal is worth saying. */
+	constexpr float LandingNoticeGapCm = 400.f;
+
+	void DescribeLanding(const ASpaceshipPawn& Ship, FSpaceFlightHudState& State)
+	{
+		State.LandingStatus.Reset();
+		State.bLandingWarning = false;
+		State.LandingProgress = -1.f;
+		const ELandingState Landing = Ship.GetLandingState();
+		if (Landing == ELandingState::Landed)
+		{
+			if (Ship.GetSecondsLanded() < LandedNoticeSeconds)
+			{
+				State.LandingStatus = TEXT("LANDED");
+			}
+			return;
+		}
+		if (Landing == ELandingState::Settling)
+		{
+			State.LandingProgress = Ship.GetLandingProgress();
+			State.LandingStatus = FString::Printf(TEXT("TOUCHDOWN %d%%"), FMath::FloorToInt(State.LandingProgress * 100.f));
+			return;
+		}
+		const float Gap = Ship.GetGroundGapCm();
+		if (!Ship.IsGearDeployed() || !Ship.HasGroundInfo() || Gap < 0.f || Gap - Ship.GetGearGroundOffsetCm() > LandingNoticeGapCm)
+		{
+			return;
+		}
+		switch (Ship.GetLandingBlocker())
+		{
+		case ELandingBlocker::TooSteep: State.LandingStatus = TEXT("SLOPE TOO STEEP"); break;
+		case ELandingBlocker::Obstructed: State.LandingStatus = TEXT("UNEVEN GROUND"); break;
+		case ELandingBlocker::TooFast: State.LandingStatus = TEXT("TOO FAST"); break;
+		case ELandingBlocker::Tilted: State.LandingStatus = TEXT("LEVEL THE SHIP"); break;
+		default: return;
+		}
+		State.bLandingWarning = true;
 	}
 
 	/**
@@ -997,12 +1040,21 @@ int32 USpaceHudSymbol::NativePaint(const FPaintArgs& Args, const FGeometry& Allo
 	}
 	case ESpaceHudSymbol::StatusBox:
 	{
+		// A dark backing in the box's own hue (the quantum drive's green gives the reference's dark green),
+		// unless the box brings its own.
+		const FLinearColor Fill = Backing.A > 0.f ? Backing : FLinearColor(Color.R * 0.12f, Color.G * 0.12f, Color.B * 0.12f, 0.55f);
 		TArray<FSlateGradientStop> Stops;
-		Stops.Add(FSlateGradientStop(FVector2f(0.f, 0.f), FLinearColor(0.02f, 0.12f, 0.04f, 0.55f)));
-		Stops.Add(FSlateGradientStop(FVector2f(0.f, Size.Y), FLinearColor(0.02f, 0.12f, 0.04f, 0.55f)));
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, 0.f), Fill));
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, Size.Y), Fill));
 		FSlateDrawElement::MakeGradient(OutDrawElements, LayerId, Paint, MoveTemp(Stops), Orient_Horizontal);
 		Draw({ FVector2f(3.f, 4.f), FVector2f(3.f, Size.Y - 4.f) }, Color, 2.f);
 		Draw({ FVector2f(Size.X - 3.f, 4.f), FVector2f(Size.X - 3.f, Size.Y - 4.f) }, Color, 2.f);
+		if (Progress >= 0.f)
+		{
+			const float Left = 9.f, Right = Size.X - 9.f, Y = Size.Y - 4.f;
+			Draw({ FVector2f(Left, Y), FVector2f(Right, Y) }, Color.CopyWithNewOpacity(0.25f), 2.f);
+			Draw({ FVector2f(Left, Y), FVector2f(FMath::Lerp(Left, Right, FMath::Clamp(Progress, 0.f, 1.f)), Y) }, Color, 2.f);
+		}
 		break;
 	}
 	case ESpaceHudSymbol::Plus:
@@ -1644,6 +1696,15 @@ void USpaceFlightHud::BuildTree()
 	Words(TEXT("QuantumTargetRange"), TEXT(""), 10.f, FVector2D(0.0, 33.0), FVector2D(0.5, 0.0), QuantumViolet);
 	Symbol(TEXT("QuantumStatusBox"), ESpaceHudSymbol::StatusBox, FVector2D(0.0, -284.0), FVector2D(220.0, 26.0), QuantumGreen);
 	Words(TEXT("QuantumStatus"), TEXT(""), 13.f, FVector2D(0.0, -284.0), FVector2D(0.5, 0.5), QuantumGreen);
+	// Landing (SC-3): above the heading tape, where SC puts its status lines, clear of the ship in the chase view and
+	// of the cockpit's dashboard; big enough to be the first thing read (critic 4. 10. 2026: 13 px got lost).
+	Symbol(TEXT("LandingStatusBox"), ESpaceHudSymbol::StatusBox, FVector2D(0.0, -168.0), FVector2D(300.0, 38.0), Instrument);
+	Words(TEXT("LandingStatus"), TEXT(""), 22.f, FVector2D(0.0, -169.0), FVector2D(0.5, 0.5), Instrument);
+	if (USpaceHudSymbol* LandingBox = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("LandingStatusBox"))))
+	{
+		// Dark and nearly opaque, so it reads over a bright sky or the white hull.
+		LandingBox->Backing = FLinearColor(0.01f, 0.02f, 0.03f, 0.72f);
+	}
 	VirtualJoystick = WidgetTree->ConstructWidget<USpaceHudVirtualJoystick>(USpaceHudVirtualJoystick::StaticClass(), TEXT("VirtualJoystick"));
 	USizeBox* JoystickBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("VirtualJoystickBox"));
 	JoystickBox->SetWidthOverride(220.f);
@@ -1807,6 +1868,7 @@ FSpaceFlightHudState USpaceFlightHud::MakeState(const ASpaceshipPawn* Ship, int3
 	State.Deadzone = Ship->GetVirtualJoystickDeadzone();
 
 	SpaceHudStyle::DescribeQuantum(*Ship, State);
+	SpaceHudStyle::DescribeLanding(*Ship, State);
 	State.SubModeLabel = Ship->GetQuantumState() == EQuantumState::Traveling ? TEXT("QUANTUM") : State.bVtolActive ? TEXT("VTOL")
 		: State.bPrecisionActive ? TEXT("PREC") : TEXT("FLIGHT");
 	State.GearLabel = State.bGearMoving ? TEXT("MOVING") : State.bGearDown ? TEXT("DOWN") : TEXT("UP");
@@ -1952,6 +2014,38 @@ void USpaceFlightHud::ApplyQuantum(const FSpaceFlightHudState& State)
 	}
 }
 
+void USpaceFlightHud::ApplyLanding(const FSpaceFlightHudState& State)
+{
+	using namespace SpaceHudStyle;
+	auto Show = [this](const FName Name, bool bShow)
+	{
+		UWidget* Widget = Parts.FindRef(Name);
+		if (!Widget)
+		{
+			Widget = Texts.FindRef(Name);
+		}
+		if (Widget)
+		{
+			Widget->SetVisibility(bShow ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		}
+	};
+	const bool bStatus = !State.LandingStatus.IsEmpty();
+	Show(TEXT("LandingStatusBox"), bStatus);
+	Show(TEXT("LandingStatus"), bStatus);
+	// Text and end bars in the state's colour on a dark backing: cyan progress, amber refusal.
+	const FLinearColor StatusColor = State.bLandingWarning ? LandingAmber : InstrumentBright;
+	if (USpaceHudSymbol* Box = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("LandingStatusBox"))))
+	{
+		Box->Color = StatusColor;
+		Box->Progress = State.LandingProgress;
+	}
+	if (UTextBlock* Text = Texts.FindRef(TEXT("LandingStatus")))
+	{
+		Text->SetText(FText::FromString(State.LandingStatus));
+		Text->SetColorAndOpacity(FSlateColor(StatusColor));
+	}
+}
+
 void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 {
 	using namespace SpaceHudStyle;
@@ -2044,6 +2138,7 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 		}
 	}
 	ApplyQuantum(State);
+	ApplyLanding(State);
 	if (USpaceHudSymbol* Shield = Cast<USpaceHudSymbol>(Parts.FindRef(TEXT("Shield"))))
 	{
 		Shield->Color = !State.bGSafeOn ? Faded(Label, 0.3f) : State.bGSafeActive ? Instrument : Amber;

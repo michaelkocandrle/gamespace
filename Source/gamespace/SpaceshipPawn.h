@@ -524,6 +524,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
 	float GetLandingProgress() const { return Landing->GetProgress(LandingConfirmSeconds); }
 
+	/** Seconds since touchdown, 0 while not landed (the HUD's LANDED notice). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
+	float GetSecondsLanded() const { return Landing->GetSecondsLanded(); }
+
 	/** Whether the ground below was probed this frame (low enough over a walkable body). */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Landing")
 	bool HasGroundInfo() const { return Landing->HasGroundInfo(); }

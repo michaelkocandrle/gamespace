@@ -106,3 +106,6 @@ ArtSource/Models/PolyHaven/
 ArtSource/ThirdParty/**/*.zip
 starcitizenreference/ship_matrix/**/*.jpg
 starcitizenreference/ship_matrix/**/*.png
+
+# review sheets built from downloaded reference video frames stay local (fetch_video.py footage rule)
+Docs/Reviews/2026-10-04_landing_hud/sheet_*.jpg
