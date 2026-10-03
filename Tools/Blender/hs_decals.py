@@ -276,14 +276,14 @@ class Placer:
             self.skipped["miss"] += 1
             return
         x, y = _frame(n, spec.get("rot", 0.0), (hit - self.off).y)
-        s, adv = spec["glyphs"], spec["advance"]
+        s, adv, k = spec["glyphs"], spec["advance"], spec.get("scale", 1.0)
         for i, ch in enumerate(s):
             p = hit + x * adv * (i - (len(s) - 1) / 2)
             h2, n2 = self.cast(p - self.off + n * 0.2, -n)
             if h2 is None:
                 self.skipped["miss"] += 1
                 continue
-            self.place_at(spec["prefix"] + ch, h2, n2, rule=rule, check_overlap=False, frame=(x, y))
+            self.place_at(spec["prefix"] + ch, h2, n2, scale=k, rule=rule, check_overlap=False, frame=(x, y))
 
     # ------------------------------------------------------------------ grime cards
     def card(self, spec, side):
@@ -716,6 +716,13 @@ def rule_coverage(pl, r):
                             spec = {"item": item, "on": "side", "x": uu, "z": vv}
                         else:
                             spec = {"item": item, "on": a["on"], "x": uu, "y": vv}
+                        # boxes {x, z} (side) / {x, y} (top, bottom) kept clear: the registration and the name are
+                        # laid in Unreal (setup decals), the overlap check here does not know them (a rivet row
+                        # turned the F of HF-0417 into an E, 3. 10. 2026)
+                        if spec and a["on"] != "pod" and any(
+                                av["x"][0] <= uu <= av["x"][1] and av.get("z", av.get("y"))[0] <= vv <= av.get("z", av.get("y"))[1]
+                                for av in a.get("avoid", [])):
+                            spec = None
                         if spec:
                             _note(pl, "coverage", key, item, pl.decal(spec, side, "coverage"))
                     v += dv

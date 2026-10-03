@@ -1340,7 +1340,9 @@ class Model:
             X = x_axis(d["rotation"])
             Y = y_axis(d["rotation"])
             Z = (X[1] * Y[2] - X[2] * Y[1], X[2] * Y[0] - X[0] * Y[2], X[0] * Y[1] - X[1] * Y[0])
-            sy, sz = d["size"][1] / 100.0, d["size"][2] / 100.0
+            # size is [depth, half width, half height] (UDecalComponent.DecalSize, import_ship.add_decal): the drawing
+            # drew the big markings at half their size until 3. 10. 2026 (the registration ran over a hatch's handle)
+            sy, sz = 2 * d["size"][1] / 100.0, 2 * d["size"][2] / 100.0
             up_sign = 1 if float(d.get("flip_v", 0.0)) >= 0.5 else -1
             up = (Y[0] * up_sign, Y[2] * up_sign)      # ship space x and z (Unreal x forward, z up)
             el.extra["up"] = up

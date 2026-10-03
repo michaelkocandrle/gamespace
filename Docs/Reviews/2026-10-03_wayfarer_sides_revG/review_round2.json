@@ -1,0 +1,60 @@
+{
+ "date": "2026-10-03",
+ "topic": "wayfarer_sides_revG",
+ "checklist": "exterior",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-03_wayfarer_sides_revG/round2",
+ "goal": "Exteriérový kit na CELÉ lodi Halcyon Freightworks Wayfarer (malá multirole, 21,5 m) podle technických výkresů revize G: bílé desky na všech bočních pásech (kýlový pás K na spodním zkosení, spodní bok L, horní bok U, rameno S v šedém laku, na přídi jedna velká deska před bloky RCS) přišroubované na gunmetal konstrukční rám; žebra rámu po celé výšce boku jen na hlavních přepážkách, jinde úzké spáry; mezi pásy L a U úzký tmavý kanál se světelným páskem. Nově střední vrstva na bocích: na většině desek přídavný panel a malý poklop, na kýlovém pásu jen na části desek a nepravidelně, pět gunmetal větracích skříní s lamelami rozmístěných nepravidelně, čísla panelů v rohu desek, shluky drobných šablon u RCS, u nákladu a kolem jména. Hodnotí se celá loď z chase kamery, zblízka, za soumraku a ve vesmíru.",
+ "style": "Star Citizen. Koncept povrchu B + C (schválený autorem): vrstvený utilitární povrch – desky přišroubované na tmavší konstrukční rám, mezi deskami vidět rám; průmyslový tahoun. Halcyon Freightworks: teplá lomená bílá, šedý sekundární lak, gunmetal rám, oranžové pruhy. Udržovaná pracovní loď, ne vrak. Tmavá špička přídě a tmavý záďový kryt jsou podle výkresu. Lak Star Citizenu nemá odřené hrany, špína je v lesku a v kanálech (rozhodnutí autora).",
+ "notes": [
+  "OVĚŘOVACÍ KOLO: ověř jen tyto body z minulého kola. (1) Střední vrstva se četla jako čáry – přídavné panely teď stojí 20 mm nad svou deskou se zkosením 10 mm, malé poklopy zůstávají decaly (pravidlo rozpočtu autora: detail pod 0,4 m jsou decaly). (2) Čísla panelů a shluky šablon – čísla teď 7 cm v rohu každé desky, shluky 8–9 položek u RCS, u nákladu a kolem jména. U každého bodu napiš: opraveno / částečně / neopraveno, a nové skóre kategorií.",
+  "Koncepty B a C jsou obrázky stylu (AI), ne přesný tvar; tvar určuje výkres.",
+  "Nápis FREE LOOK nahoře uprostřed je štítek herní kamery, ne součást lodi.",
+  "Snímky z editoru ve výchozí kvalitě hry, 1920 × 1080, bez HUD. Den = světlo levelu 3 km nad planetou; soumrak = nízké slunce zezadu zprava; vesmír se sluncem za lodí = protisvětlo (loď je záměrně tmavá silueta).",
+  "Pilot (hřbet, ramena, záď, gondoly, trysky) prošel samostatným kolem; tady jde o celek a boky."
+ ],
+ "pairs": [
+  {
+   "title": "Bok podle výkresu E-01",
+   "distance": "mid",
+   "light": "day",
+   "ref": "Docs/Reviews/2026-10-03_wayfarer_sides_revG/refs/e01_view_a_revG.jpg",
+   "ref_label": "výkres E-01 revize G pohled A: desky a zóny pravoboku",
+   "ours": [
+    "shots:20261003_224712_wayfarer_exterior_review/04_day_close_front34.png",
+    "shots:20261003_224712_wayfarer_exterior_review/02_day_chase_front_left.png"
+   ],
+   "ours_label": "ve hře (editor): zepředu šikmo zblízka a z chase kamery"
+  },
+  {
+   "title": "Styl povrchu: koncept B (vrstvený utilitární)",
+   "distance": "mid",
+   "light": "day",
+   "ref": "ArtSource/Ships/Wayfarer/Concept/surface_v3/concept_B_layered_utility.jpg",
+   "ref_label": "schválený koncept B (AI, styl)",
+   "ours": "shots:20261003_224712_wayfarer_exterior_review/04_day_close_front34.png",
+   "ours_label": "ve hře (editor), den"
+  },
+  {
+   "title": "Chase kamera zezadu (výchozí pohled hráče)",
+   "distance": "mid",
+   "light": "day",
+   "ref": "Docs/Reviews/2026-10-01_wayfarer_kit_pilot/refs/sc_avenger_chase.jpg",
+   "ref_label": "SC ve hře: Aegis Avenger, chase kamera",
+   "ours": "shots:20261003_224712_wayfarer_exterior_review/01_day_chase_rear.png",
+   "ours_label": "ve hře (editor)"
+  },
+  {
+   "title": "Boky K/L/U a příď zblízka",
+   "distance": "close",
+   "light": "day",
+   "ref": "Docs/Reviews/2026-10-01_wayfarer_kit_pilot/refs/sc_carrack_panels.jpg",
+   "ref_label": "SC ve hře: Anvil Carrack, panely trupu",
+   "ours": [
+    "Docs/Reviews/2026-10-03_wayfarer_sides_revG/refs/ours_sides_klu_v2.png",
+    "Docs/Reviews/2026-10-03_wayfarer_sides_revG/refs/ours_nose_close_v2.png"
+   ],
+   "ours_label": "ve hře (editor): výřez boku (pásy K, L, U, registrace) a příď zblízka"
+  }
+ ]
+}

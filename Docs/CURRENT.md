@@ -2,8 +2,8 @@
 
 Jediný zdroj **aktuálního** stavu pod `CLAUDE.md`, **nejvýš 80 řádků**; hotové do stavu, podrobnosti do recenzí a commitů.
 
-Stav k **3. 10. 2026**: Wayfarer postavený podle výkresů **revize F** (kritik PASS 6,5); revize G schválena s úpravami
-(krok 2 a 3 zadání 3. 10.); výkresy interiéru I-01–I-09 sloučené do main. **Cíl výkonu: 1440p / 60 fps s TSR nebo DLSS**
+Stav k **3. 10. 2026**: Wayfarer postavený podle výkresů **revize G** (kritik po ověřovacím kole PASS 6,5); povrch trupu
+je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **Cíl výkonu: 1440p / 60 fps s TSR nebo DLSS**
 (RTX 5070 Ti, `CLAUDE.md`; staré 20 ms na RTX 2060 neplatí); nic se neměří ani neoptimalizuje do konce.
 
 ## Stav
@@ -70,10 +70,9 @@ Stav k **3. 10. 2026**: Wayfarer postavený podle výkresů **revize F** (kritik
 
 ## Další kroky
 
-1. **Wayfarer – revize G s úpravami čeká na potvrzení** („G s úpravami potvrzeno“): pás K panel + poklop na 8/14 desek
-   (výběr a uspořádání podle ID), 5 větracích skříní K04, K09, L12, U13, L14, popisky desek mimo panely; HSBUDGET
-   453 565 → 459 621 (dočasná stavba; strop 700 k); znaky `pn_K/U/N` v atlasu decalů. Výřezy `2026-10-03_wayfarer_sides_revG/`
-   04–05. Pak krok 3: přestavba, snímky chase a zblízka, kritik step (Opus), srovnání se `starcitizenreference/`.
+1. **Wayfarer – revize G postavená** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený
+   do finální recenze hotové lodi; otevřená doporučení (tón panelů, nosná položka shluků, špína, RCS přídě) v recenzi.
+   Další práce podle autora (3. 10.): přistání na svahu, let (HUD, mapa, palivo), interiér, Steadfast.
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.

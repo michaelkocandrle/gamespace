@@ -141,7 +141,9 @@ def panel_numbers(m):
         if e.cat != "panel" or e.data.get("sub") or e.data.get("band") not in d.get("bands", []):
             continue
         num = e.id.split("-")[-1]
-        glyphs = dict(glyphs=num, prefix="pn_", advance=0.022)
+        # the glyph items are 3.4 cm letters; the rule's size scales them (revision G critic: 7 cm, readable at 3-5 m)
+        k = d["size"] / 0.034
+        glyphs = dict(glyphs=num, prefix="pn_", advance=round(0.022 * k, 4), scale=round(k, 3))
         if e.data["band"] == "R":
             shp = e.geo["TOP"]["shape"]
             x0, y0, x1, y1 = shp.bounds
@@ -212,12 +214,20 @@ def layout(m, region):
     reg = REGIONS[region]
     kit = m.kit
     plates, frame, parts = [], [], []
+
+    def rise(e, ent):
+        # a doubler panel stands kit "rise" above its own plate (revision G critic: on the 40 mm plates K, L, N the
+        # 42 mm doubler stood 2 mm proud and read as a drawn outline)
+        k = kit[e.kit]
+        if e.data.get("sub") == "doubler" and "rise" in k:
+            ent["t"] = round(kit[m.by_id[e.data["of"]].kit]["t"] + k["rise"], 4)
+        return ent
     # plates: the roof in plan (each side its own outline), the side bands from starboard, mirrored
     for e in m.elements:
         if e.cat != "panel" or e.data.get("band") not in reg["bands"] or e.data["band"] == "A":
             continue
         if e.data["band"] == "R":
-            ent = plate_entry(e, "TOP", e.geo["TOP"]["shape"], e.kit, kit, False, {"nz_min": 0.3})
+            ent = rise(e, plate_entry(e, "TOP", e.geo["TOP"]["shape"], e.kit, kit, False, {"nz_min": 0.3}))
             if e.data.get("sub") == "vent":
                 plates += vent_entries(e, "TOP", e.geo["TOP"]["shape"], kit[e.kit], {"nz_min": 0.3}, False)
                 continue
@@ -233,7 +243,7 @@ def layout(m, region):
                 # a vent box on a side plate (revision G: the side mid layer), slats upright, both sides
                 plates += vent_entries(e, "SB", e.geo["SB"]["shape"], kit[e.kit], {"ny_max": -0.2}, False, mirror=True)
                 continue
-            ent = plate_entry(e, "SB", e.geo["SB"]["shape"], e.kit, kit, True, {"ny_max": -0.2})
+            ent = rise(e, plate_entry(e, "SB", e.geo["SB"]["shape"], e.kit, kit, True, {"ny_max": -0.2}))
             if e.data.get("sub") == "hatch":
                 # two dark latches along the hatch's lower edge, a quarter of its length from each end (as on the roof)
                 x0, z0, x1, z1 = e.geo["SB"]["shape"].bounds

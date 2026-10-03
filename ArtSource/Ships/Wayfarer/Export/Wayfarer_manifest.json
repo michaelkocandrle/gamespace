@@ -34,7 +34,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "186749e3703d9a2409dca8ad325f7ce3a64d8057"
+      "geometry_hash": "6711214f2b8c208ff99b10998ac493ee001a059a"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -48,7 +48,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "c51bd91e9745ac222d32ac0217e4d9cf8e5bd996"
+      "geometry_hash": "0a1fe0c6fbca11477e0fcaec1895d209c5916cd0"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Gear.fbx",
@@ -62,14 +62,14 @@
       "objects": [
         "SM_Ship_Wayfarer_Hologram"
       ],
-      "geometry_hash": "91fc9b50d1aa205db90f2f84adf6cb120d92b8b5"
+      "geometry_hash": "e24bfbe22068c676085ad60ab6ccc403a8664e47"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Interior.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "e561297cd472e4eee4f3dc272e004c1b129a2b69"
+      "geometry_hash": "c96ea2cca1844b306fd626eaf85836d08c9927ac"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
@@ -97,8 +97,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 453569,
-      "verts": 302205,
+      "tris": 459471,
+      "verts": 305332,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -158,8 +158,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 52432,
-      "verts": 63676,
+      "tris": 52314,
+      "verts": 64347,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -220,7 +220,7 @@
         [
           7.750007629394531,
           0.4911559522151947,
-          1.0871057510375977
+          1.0871059894561768
         ],
         [
           7.950000762939453,
@@ -232,8 +232,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 349376,
-      "verts": 182907,
+      "tris": 349384,
+      "verts": 182909,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -347,12 +347,12 @@
       "bounds_m": [
         [
           4.950000762939453,
-          -2.1428351402282715,
+          -2.1939749717712402,
           -1.8944460153579712
         ],
         [
           10.75,
-          2.142836809158325,
+          2.1939451694488525,
           2.1332807540893555
         ]
       ]
@@ -360,16 +360,16 @@
     "UCX_SM_Ship_Wayfarer_01": {
       "kind": "UCX",
       "mesh": "SM_Ship_Wayfarer",
-      "verts": 21,
+      "verts": 23,
       "bounds_m": [
         [
           -2.0499954223632812,
-          -2.356750011444092,
+          -2.3600010871887207,
           -1.8400013446807861
         ],
         [
           4.949999809265137,
-          2.356750011444092,
+          2.3600010871887207,
           2.1132020950317383
         ]
       ]
@@ -394,7 +394,7 @@
     "UCX_SM_Ship_Wayfarer_03": {
       "kind": "UCX",
       "mesh": "SM_Ship_Wayfarer",
-      "verts": 22,
+      "verts": 23,
       "bounds_m": [
         [
           -10.777799606323242,
@@ -411,7 +411,7 @@
     "UCX_SM_Ship_Wayfarer_04": {
       "kind": "UCX",
       "mesh": "SM_Ship_Wayfarer",
-      "verts": 22,
+      "verts": 23,
       "bounds_m": [
         [
           -10.777799606323242,
@@ -433,7 +433,7 @@
         [
           -9.949999809265137,
           3.2013895511627197,
-          0.8000004291534424
+          0.8000001907348633
         ],
         [
           -7.250000476837158,

@@ -63,8 +63,9 @@
      "what": "těžký plát 40 mm, řada šroubů Ø 25 mm po 150 mm podél podélných hran", "t": 0.04, "bevel": 0.01,
      "bolt_pitch": 0.15, "bolt_d": 0.025, "bolt_edge": 0.05},
     {"id": "XK-DOUBLER", "name": "Přídavný panel", "from": "B", "status": "proposed",
-     "what": "servisní panel přišroubovaný na desku: 12 mm nad deskou (42 mm nad pláštěm), zkosení 4 mm, šrouby Ø 16 po 300 mm, 50 mm od hrany",
-     "t": 0.042, "bevel": 0.004, "bolt_pitch": 0.3, "bolt_d": 0.016, "bolt_edge": 0.05},
+     "what": "servisní panel přišroubovaný na desku: 20 mm nad svou deskou (rise; dřív 42 mm nad pláštěm, na 40mm deskách jen 2 mm), zkosení 10 mm, šrouby Ø 16 po 300 mm, 50 mm od hrany",
+     "t": 0.042, "rise": 0.02, "bevel": 0.01, "bolt_pitch": 0.3, "bolt_d": 0.016, "bolt_edge": 0.05,
+     "_rise": "revision G critic (3. 10. 2026, must fix): the doublers read as drawn outlines; the layout sets t = parent plate t + rise"},
     {"id": "XK-HATCH", "name": "Malý poklop", "from": "B", "status": "proposed",
      "what": "malý servisní poklop v desce: 340 × 260 mm, v rovině desky, spára 12 mm do tmavého kanálu, dvě tmavé západky 60 × 30 mm",
      "t": 0.03, "bevel": 0.003, "size": [0.34, 0.26], "gap": 0.012, "latch": [0.06, 0.03, 0.006]},
@@ -245,9 +246,9 @@
      "what": "pracovní světlo nad rampou: kulatá lampa s clonou, svítí stále (osvětluje rampu a nápis)"}
   ],
   "decals": [
-    {"id": "D-R-PANEL-NUMBERS", "kind": "rule", "status": "proposed", "library_new": "pn_<znak>", "bands": ["R", "S", "K", "L", "U", "N"], "_bands": "revision G (critic of the F sides, point 2): on the side bands K, L, U, N too",
-     "size": 0.034, "edge": 0.04,
-     "what": "číslo panelu (L07, U11 …) v dolním zadním rohu každé desky, 40 mm od hran, písmo 3,4 cm (C: číslované pláty); na hřbetu v zadním vnějším rohu; postavené na pásech R a S, od revize G i na bocích K, L, U, N (z jednoznakových položek pn_<znak> v knihovně decalů; položka na číslo se do atlasu nevešla)"}
+    {"id": "D-R-PANEL-NUMBERS", "kind": "rule", "status": "proposed", "library_new": "pn_<znak>", "bands": ["R", "S", "K", "L", "U", "N"], "_bands": "revision G (critic of the F sides, point 2): on the side bands K, L, U, N too", "_size": "revision G critic (must fix): 7 cm letters (was 3.4 cm, unreadable at 3-5 m); the 3.4 cm glyph items scaled",
+     "size": 0.07, "edge": 0.04,
+     "what": "číslo panelu (L07, U11 …) v dolním zadním rohu každé desky, 40 mm od hran, písmo 7 cm (C: číslované pláty; dřív 3,4 cm); na hřbetu v zadním vnějším rohu; postavené na pásech R a S, od revize G i na bocích K, L, U, N (z jednoznakových položek pn_<znak> v knihovně decalů; položka na číslo se do atlasu nevešla)"}
   ],
   "purpose": {
     "_comment": "Účel postavených prvků česky pro výkresy (v datech stavby je jen anglický _what nebo nic); klíč = ID.",
