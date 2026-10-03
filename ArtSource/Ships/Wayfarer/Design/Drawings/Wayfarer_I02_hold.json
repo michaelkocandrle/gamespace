@@ -9,7 +9,7 @@
   "interior": "37c119fe0110",
   "setup": "de82013afd6a",
   "lights": "dc19a3d11ce6",
-  "design": "e523ba9bcb88",
+  "design": "0386482c0b74",
   "kit": "c8f141a12540",
   "library": "3bdd02712ff2",
   "light_rules": "788f180917fd"
@@ -470,44 +470,56 @@
  },
  "checks": [
   [
+   "HLD-M-QFUEL",
+   "Nádrž kvantového paliva (postaveno) leží zčásti mimo trup: při x 5,41 roh y 1,70 z −0,55 (layout x 5,40 … 7,40, y 0,80 … 1,70, z −0,55 … −0,05)"
+  ],
+  [
    "DR-HLD-TEC",
-   "před DR-HLD-TEC zbývá mezi HLD-O-GRID (Nákladová mřížka 8 SCU) a lícem přepážky 0,54 m – kapsle postavy 0,56 m neprojde, je-li mřížka plná; s uličkou se dveře kryjí jen v y 0,65 … 1,00"
+   "cesta z uličky do DR-HLD-TEC vede šikmo mezi rohem HLD-O-GRID (Nákladová mřížka 8 SCU; x 7,65, y 0,65) a ostěním dveří (x 8,14 z postaveného dílu, y 1,00): 0,60 m – kapsle 0,56 m projde (rezerva 44 mm); podél přepážky před mřížkou zbývá 0,54 m (kapsle tudy neprojde)"
+  ],
+  [
+   "HLD",
+   "účel v layoutu uvádí uličku 1,25 m, postavená je 1,40 m (řez R1: mezi lícem obložení a obálkou mřížky) – navrhovaný text: „ulička 1,40 m“; opraví hlavní session (layout čtou i výkresy exteriéru)"
+  ],
+  [
+   "D-INT-GRID",
+   "decal x 7,55, z 0,95 je za obálkou HLD-O-GRID (Nákladová mřížka 8 SCU) – při plné mřížce zakrytý nákladem; posunout nad 1,25 m nebo za konec mřížky"
   ],
   [
    "HLD-W-L1/maker",
    "decal x 1,19, z 1,15 je za objektem HLD-O-TRACTOR (Ruční tažný paprsek) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
-   "HLD-W-R2/st_service",
-   "decal x 3,06, z 0,80 je za objektem HLD-O-GRID (Nákladová mřížka 8 SCU) – ve hře není vidět; přesunout nebo díl bez něj"
+   "HLD-W-R2/hazard_subtle#2",
+   "decal x 3,10, z 0,43 je za obálkou HLD-O-GRID (Nákladová mřížka 8 SCU) – při plné mřížce zakrytý nákladem; posunout nad 1,25 m nebo za konec mřížky"
   ],
   [
-   "HLD-W-R2/hazard_subtle#2",
-   "decal x 3,10, z 0,43 je za objektem HLD-O-GRID (Nákladová mřížka 8 SCU) – ve hře není vidět; přesunout nebo díl bez něj"
+   "HLD-W-R2/st_service",
+   "decal x 3,06, z 0,80 je za obálkou HLD-O-GRID (Nákladová mřížka 8 SCU) – při plné mřížce zakrytý nákladem; posunout nad 1,25 m nebo za konec mřížky"
   ],
   [
    "HLD-W-R3/st_inspect",
-   "decal x 3,77, z 1,12 je za objektem HLD-O-GRID (Nákladová mřížka 8 SCU) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "HLD-W-R4/st_service",
-   "decal x 5,46, z 0,80 je za objektem HLD-O-GRID (Nákladová mřížka 8 SCU) – ve hře není vidět; přesunout nebo díl bez něj"
+   "decal x 3,77, z 1,12 je za obálkou HLD-O-GRID (Nákladová mřížka 8 SCU) – při plné mřížce zakrytý nákladem; posunout nad 1,25 m nebo za konec mřížky"
   ],
   [
    "HLD-W-R4/hazard_subtle",
-   "decal x 4,96, z 0,43 je za objektem HLD-O-GRID (Nákladová mřížka 8 SCU) – ve hře není vidět; přesunout nebo díl bez něj"
+   "decal x 4,96, z 0,43 je za obálkou HLD-O-GRID (Nákladová mřížka 8 SCU) – při plné mřížce zakrytý nákladem; posunout nad 1,25 m nebo za konec mřížky"
   ],
   [
    "HLD-W-R4/hazard_subtle#2",
-   "decal x 5,50, z 0,43 je za objektem HLD-O-GRID (Nákladová mřížka 8 SCU) – ve hře není vidět; přesunout nebo díl bez něj"
+   "decal x 5,50, z 0,43 je za obálkou HLD-O-GRID (Nákladová mřížka 8 SCU) – při plné mřížce zakrytý nákladem; posunout nad 1,25 m nebo za konec mřížky"
+  ],
+  [
+   "HLD-W-R4/st_service",
+   "decal x 5,46, z 0,80 je za obálkou HLD-O-GRID (Nákladová mřížka 8 SCU) – při plné mřížce zakrytý nákladem; posunout nad 1,25 m nebo za konec mřížky"
   ],
   [
    "HLD-W-R5/maker",
-   "decal x 6,81, z 1,15 je za objektem HLD-O-GRID (Nákladová mřížka 8 SCU) – ve hře není vidět; přesunout nebo díl bez něj"
+   "decal x 6,81, z 1,15 je za obálkou HLD-O-GRID (Nákladová mřížka 8 SCU) – při plné mřížce zakrytý nákladem; posunout nad 1,25 m nebo za konec mřížky"
   ],
   [
    "HLD-W-R6/hazard_subtle",
-   "decal x 7,36, z 0,43 je za objektem HLD-O-GRID (Nákladová mřížka 8 SCU) – ve hře není vidět; přesunout nebo díl bez něj"
+   "decal x 7,36, z 0,43 je za obálkou HLD-O-GRID (Nákladová mřížka 8 SCU) – při plné mřížce zakrytý nákladem; posunout nad 1,25 m nebo za konec mřížky"
   ],
   [
    "HLD-M-QFUEL",
