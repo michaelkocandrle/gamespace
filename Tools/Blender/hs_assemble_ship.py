@@ -212,8 +212,14 @@ def main(argv):
     if decal_report:
         # the decal counts and the kit checks for Tools/Tests/test_kit_decals.py
         rep_path = os.path.join(os.path.dirname(path(cfg["out_blend"])), "Export", "%s_decals.json" % ship)
+        # the previous build's random placements stay beside the new ones: the test compares two rebuilds in a row
+        prev = None
+        if os.path.isfile(rep_path):
+            prev = json.load(open(rep_path, encoding="utf-8")).get("random")
+        rep = {k: decal_report[k] for k in ("decals", "by_rule", "by_type", "skipped", "faces", "kit")}
+        rep["random"], rep["random_prev"] = decal_report["random"], prev
         with open(rep_path, "w", encoding="utf-8") as f:
-            json.dump({k: decal_report[k] for k in ("decals", "by_rule", "by_type", "skipped", "faces", "kit")}, f, indent=1)
+            json.dump(rep, f, indent=1)
         print("HSDECALS " + json.dumps({"decals": decal_report["decals"], "faces": decal_report["faces"], "kit": decal_report["kit"]}))
     if decals is not None:
         out["Decals"] = decals

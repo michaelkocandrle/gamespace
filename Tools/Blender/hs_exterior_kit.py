@@ -458,6 +458,9 @@ def conduit(bms, p, ray):
     the roof plates, lift above the skin (over the ribs), following the roof; bare-metal band clamps with a foot every
     clamp_pitch, kept off the ribs; at each end of a run the pipe turns down into the skin through a flange."""
     seg = 12
+    if p.get("view") == "SB":
+        conduit_side(bms, p, ray, seg)
+        return
     for run in p["runs"]:
         y, r = run["y"], run["d"] / 2
         x0, x1 = run["x"]
@@ -496,6 +499,58 @@ def conduit(bms, p, ray):
             _cyl(bms["metal"], Vector((x - w / 2, y, zc)), Vector((x + w / 2, y, zc)), r + 0.005, seg)
             _box(bms["metal"], Vector((x, y, (hit.z + zc) / 2 - 0.004)), Vector((1, 0, 0)), Vector((0, 1, 0)),
                  Vector((0, 0, 1)), (w, max(run["d"] * 0.7, 0.03), zc - hit.z + 0.008))
+
+
+def conduit_side(bms, p, ray, seg):
+    """XK-CONDUIT along the shoulder (F-CONDUIT-S, kit pilot step c): each run a polyline in the side view (x, z),
+    the pipe's bottom lift off the skin along the surface normal (over the S plates and the ribs), both sides; clamps
+    with a foot every clamp_pitch off the ribs, the ends down into the plates through a flange."""
+    for side in (1, -1):
+        for run in p["runs"]:
+            r = run["d"] / 2
+            surf = []
+            for x, z in run["pts"]:
+                hit, n = ray("SB", x, z)
+                if hit is None:
+                    continue
+                if side > 0:
+                    hit, n = Vector((hit.x, -hit.y, hit.z)), Vector((n.x, -n.y, n.z))
+                surf.append((hit, n.normalized()))
+            if len(surf) < 2:
+                continue
+            pts = [h + n * (p["lift"] + r) for h, n in surf]
+            (h0, n0), (h1, n1) = surf[0], surf[-1]
+            path = ([h0 + n0 * 0.02 + Vector((0.02, 0, 0)), pts[0] + Vector((0.07, 0, 0))] + pts[1:-1] +
+                    [pts[-1] - Vector((0.07, 0, 0)), h1 + n1 * 0.02 - Vector((0.02, 0, 0))])
+            _tube(bms[run["material"]], [q for i, q in enumerate(path) if i == 0 or (q - path[i - 1]).length > 1e-4], r, seg)
+            for h, n, sgn in ((h0, n0, 1.0), (h1, n1, -1.0)):
+                c = h + Vector((sgn * 0.02, 0, 0))
+                _cyl(bms["metal"], c + n * 0.026, c + n * 0.042, r + p["flange"], seg)
+            x0, x1 = run["pts"][0][0], run["pts"][-1][0]
+            k = 1
+            while x0 + k * p["clamp_pitch"] < x1 - 0.15:
+                x = x0 + k * p["clamp_pitch"]
+                k += 1
+                if any(abs(x - a) < p["avoid_w"] for a in p["avoid_x"]):
+                    x += p["avoid_w"] * 1.5
+                # the run's z at x (linear between its points)
+                zs = run["pts"]
+                j = max(i for i in range(len(zs)) if zs[i][0] <= x or i == 0)
+                j = min(j, len(zs) - 2)
+                t = (x - zs[j][0]) / max(zs[j + 1][0] - zs[j][0], 1e-6)
+                hit, n = ray("SB", x, zs[j][1] + t * (zs[j + 1][1] - zs[j][1]))
+                if hit is None:
+                    continue
+                if side > 0:
+                    hit, n = Vector((hit.x, -hit.y, hit.z)), Vector((n.x, -n.y, n.z))
+                n = n.normalized()
+                c = hit + n * (p["lift"] + r)
+                w = p["clamp_w"]
+                _cyl(bms["metal"], c - Vector((w / 2, 0, 0)), c + Vector((w / 2, 0, 0)), r + 0.005, seg)
+                fx = Vector((1, 0, 0))
+                fy = n.cross(fx).normalized()
+                foot = p["lift"] + r
+                _box(bms["metal"], hit + n * (foot / 2), fx, fy, n, (w, max(run["d"] * 0.7, 0.03), foot + 0.008))
 
 
 # ------------------------------------------------------------------------------------------------ build
@@ -708,8 +763,32 @@ def skin(hull, sk, material, recipe):
         return (min(zs), max(zs)) if zs else (0.0, 1.0)
 
     count = 0
+    aft = sk.get("aft")
+    if aft:
+        # the aft wall round its plates and frame (kit pilot step c): faces facing aft inside the outline (port half,
+        # mirrored), not inside the ramp frame
+        half = [tuple(p) for p in aft["outline"]]
+        ey0, ez0, ey1, ez1 = aft["exclude"]
+        for poly in hull.data.polygons:
+            c = poly.center
+            if c.x > aft["x_max"] or c.z > aft.get("z_max", 99.0) or not normal_ok(poly.normal, aft["normal"]):
+                continue
+            if ey0 <= c.y <= ey1 and ez0 <= c.z <= ez1:
+                continue
+            if inside((abs(c.y), c.z), half):
+                poly.material_index = slot
+                count += 1
+    near = [([tuple(p) for p in ring], (min(p[0] for p in ring), min(p[1] for p in ring),
+                                        max(p[0] for p in ring), max(p[1] for p in ring)))
+            for ring in sk.get("near_side", [])]
     for poly in hull.data.polygons:
         c = poly.center
+        if near and abs(poly.normal.y) > 0.3:
+            # a side face (whole-ship kit): channel floor only round the plates and the frame (layout skin.near_side)
+            if any(b[0] <= c.x <= b[2] and b[1] <= c.z <= b[3] and inside((c.x, c.z), ring) for ring, b in near):
+                poly.material_index = slot
+                count += 1
+                continue
         if not (sk["x"][0] <= c.x <= sk["x"][1]):
             continue
         zb, zt = zspan(c.x)

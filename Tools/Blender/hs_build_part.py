@@ -342,17 +342,22 @@ def build_into(recipe, coll):
     profile = [tuple(p) for p in recipe["profile"]]
     surfaces = {}
 
+    # rows along the axis every `refine` metres (vertex density for the baked occlusion; the profile itself is
+    # a polyline, so the rows add no shape) and panel bevel segments: triangle budget, author 1. 10. 2026
+    step = recipe.get("refine", 0.1)
+    panel_bevel = dict(bevel, segments=recipe.get("panel_bevel_segments", bevel["segments"]))
+    n_sub = recipe.get("sub_segments", n)
     sub_bm = bmesh.new()
     for sec in recipe["sections"]:
         pts = section_points(profile, *sec["x"])
         surfaces[sec["name"]] = pts
         if sec["kind"] == "ring":
             bm = bmesh.new()
-            shell(bm, refine(pts), 0, 2 * math.pi, n, axis, sec["wall"], full=True)
+            shell(bm, refine(pts, step), 0, 2 * math.pi, n, axis, sec["wall"], full=True)
             finish(bm, "%s_%s" % (recipe["name"], sec["name"]), coll, bevel)
             continue
         # Panels: sector shells with a real gap, over a dark substructure ring.
-        pts_f = refine(pts)
+        pts_f = refine(pts, step)
         rows = sec["rows"]
         xs = [sec["x"][0] + (sec["x"][1] - sec["x"][0]) * k / rows for k in range(rows + 1)]
         phase = math.radians(sec.get("phase_deg", 0))
@@ -367,9 +372,9 @@ def build_into(recipe, coll):
                 bm = bmesh.new()
                 seg = max(2, int(round(n / sec["around"])))
                 shell(bm, row_pts, a0, a1, seg, axis, sec["thickness"])
-                finish(bm, "%s_%s_P%d_%d" % (recipe["name"], sec["name"], row, k), coll, bevel)
+                finish(bm, "%s_%s_P%d_%d" % (recipe["name"], sec["name"], row, k), coll, panel_bevel)
         under = [(x, r - sec["thickness"] - 0.004) for x, r in pts_f]
-        rows_s = surface_grid(sub_bm, under, 0, 2 * math.pi, n, axis, 0.0, full=True)
+        rows_s = surface_grid(sub_bm, under, 0, 2 * math.pi, n_sub, axis, 0.0, full=True)
         bridge(sub_bm, rows_s, True)
     finish(sub_bm, recipe["name"] + "_Substructure", coll, bevel)
 
@@ -404,15 +409,10 @@ def build_into(recipe, coll):
     shell(bm, [(x0 - d, rr[1]), (x0 - d + 0.08, rr[1])], 0, 2 * math.pi, n, axis, rr[1] - rr[0], full=True)
     finish(bm, recipe["name"] + "_IntakeRing", coll, bevel)
 
-    ex = recipe["exhaust"]
-    x0, d = ex["x_lip"], ex["depth"]
-    nozzle = [(x0, ex["r_lip"]), (x0 - 0.02, ex["r_lip"] - 0.03), (x0, ex["r_lip"] - 0.08),
-              (x0 + 0.06, ex["r_duct"] + 0.005), (x0 + d, ex["r_duct"]), (x0 + d, ex["cone_r"])]
-    cone = [(x0 + d, ex["cone_r"]), (ex["cone_tip"] + 0.08, ex["cone_r"] * 0.35), (ex["cone_tip"], 0.001)]
-    bm = bmesh.new()
-    bridge(bm, surface_grid(bm, nozzle, 0, 2 * math.pi, n, axis, 0.0, full=True), True)
-    bridge(bm, surface_grid(bm, cone, 0, 2 * math.pi, n, axis, 0.0, full=True), True)
-    finish(bm, recipe["name"] + "_Exhaust", coll, bevel)
+    if recipe["exhaust"].get("nozzle"):
+        build_nozzle(recipe, coll, axis, n, panel_bevel, bevel)
+    else:
+        build_exhaust_disc(recipe, coll, axis, n, bevel)
 
     kit = build_kit(bevel)
     instancer = build_instancer(kit)
@@ -432,6 +432,133 @@ def build_into(recipe, coll):
     if places:
         kit_points(recipe["name"] + "_Greebles", coll, places, instancer)
     return places
+
+
+def build_exhaust_disc(recipe, coll, axis, n, bevel):
+    """The first exhaust: a shallow collar and duct with a cone; the glow is a separate disc (parts.nozzle)."""
+    ex = recipe["exhaust"]
+    x0, d = ex["x_lip"], ex["depth"]
+    nozzle = [(x0, ex["r_lip"]), (x0 - 0.02, ex["r_lip"] - 0.03), (x0, ex["r_lip"] - 0.08),
+              (x0 + 0.06, ex["r_duct"] + 0.005), (x0 + d, ex["r_duct"]), (x0 + d, ex["cone_r"])]
+    cone = [(x0 + d, ex["cone_r"]), (ex["cone_tip"] + 0.08, ex["cone_r"] * 0.35), (ex["cone_tip"], 0.001)]
+    bm = bmesh.new()
+    bridge(bm, surface_grid(bm, nozzle, 0, 2 * math.pi, n, axis, 0.0, full=True), True)
+    bridge(bm, surface_grid(bm, cone, 0, 2 * math.pi, n, axis, 0.0, full=True), True)
+    finish(bm, recipe["name"] + "_Exhaust", coll, bevel)
+
+def revolve_closed(bm, loop, n, axis):
+    """A closed solid of revolution from a closed (x, r) loop."""
+    rows = surface_grid(bm, loop, 0, 2 * math.pi, n, axis, 0.0, full=True)
+    bridge(bm, rows + [rows[0]], True)
+
+
+def _ring_point(axis, x, a, r):
+    return Vector((x, axis[0] + r * math.cos(a), axis[1] + r * math.sin(a)))
+
+
+def rod(bm, p0, p1, r, seg=8):
+    """Closed cylinder from p0 to p1."""
+    d = p1 - p0
+    res = bmesh.ops.create_cone(bm, cap_ends=True, segments=seg, radius1=r, radius2=r, depth=d.length)
+    rot = Vector((0, 0, 1)).rotation_difference(d.normalized()).to_matrix()
+    bmesh.ops.rotate(bm, verts=res["verts"], cent=(0, 0, 0), matrix=rot)
+    bmesh.ops.translate(bm, vec=(p0 + p1) / 2, verts=res["verts"])
+
+
+def build_nozzle(recipe, coll, axis, n, bevel1, bevel2):
+    """Main engine nozzle (Wayfarer kit pilot step d, author 1. 10. 2026; SC main thrusters): a rolled collar lip
+    over a converging bell with raised rings and radial ribs, a throat ring, a centre body (plug) on tie rods and
+    the emissive core behind the throat - the glow reads as a ring around the plug, not a flat disc.
+    Recipe exhaust.nozzle: x relative to the lip (positive = into the pod), radii from the pod axis."""
+    ex = recipe["exhaust"]
+    nz = ex["nozzle"]
+    x0 = ex["x_lip"]
+    name = recipe["name"]
+
+    def X(dx):
+        return x0 + dx
+
+    # bell: the inner wall from the lip to the core plane, back along a wall `wall` thick to the outer lip
+    wall = [(X(dx), r) for dx, r in nz["bell"]]
+    xc = X(nz["core"]["x"])
+    t = nz.get("wall", 0.03)
+    inner = [p for p in wall if p[0] <= xc]
+    back = [(xc, inner[-1][1] + t), (X(0.08), nz.get("back_r", ex["r_lip"] - 0.035))]
+    bm = bmesh.new()
+    revolve_closed(bm, wall + back, n, axis)
+    finish(bm, name + "_NozzleBell", coll, bevel1)
+    duct = [p for p in wall if p[0] >= X(0.04)]   # the converging wall past the rolled lip (monotonic in x)
+
+    # raised rings on the bell wall, the throat ring and the outer collar (2 bevel segments: curves the chase
+    # camera sees)
+    bm = bmesh.new()
+    rg = nz["rings"]
+    for dx in rg["at"]:
+        xa, xb = X(dx), X(dx) + rg["width"]
+        ra, rb = radius_at(duct, xa), radius_at(duct, xb)
+        revolve_closed(bm, [(xa, ra + 0.004), (xa, ra - rg["proud"]), (xb, rb - rg["proud"]), (xb, rb + 0.004)], n, axis)
+    th = nz["throat"]
+    xa, xb = X(th["x"][0]), X(th["x"][1])
+    revolve_closed(bm, [(xa, th["r"][1] + 0.004), (xa, th["r"][0]), (xb, th["r"][0]), (xb, th["r"][1] + 0.004)], n, axis)
+    co = nz["collar"]
+    xa, xb = X(co["x"][0]), X(co["x"][1])
+    revolve_closed(bm, [(xa, co["r"][0]), (xa, co["r"][1]), (xb, co["r"][1]), (xb, co["r"][0])], n, axis)
+    finish(bm, name + "_NozzleRings", coll, bevel2)
+
+    # radial ribs along the bell wall
+    rb_ = nz["ribs"]
+    bm = bmesh.new()
+    xs = [X(rb_["x"][0])] + [x for x, _ in duct if X(rb_["x"][0]) < x < X(rb_["x"][1])] + [X(rb_["x"][1])]
+    for k in range(rb_["count"]):
+        a = math.radians(rb_.get("phase_deg", 0.0)) + 2 * math.pi * k / rb_["count"]
+        quads = []
+        for x in xs:
+            rw = radius_at(duct, x)
+            ri = rw - rb_["height"]
+            da_o, da_i = rb_["thickness"] / 2 / rw, rb_["thickness"] / 2 / ri
+            quads.append([bm.verts.new(_ring_point(axis, x, a - da_o, rw + 0.004)),
+                          bm.verts.new(_ring_point(axis, x, a + da_o, rw + 0.004)),
+                          bm.verts.new(_ring_point(axis, x, a + da_i, ri)),
+                          bm.verts.new(_ring_point(axis, x, a - da_i, ri))])
+        for qa, qb in zip(quads, quads[1:]):
+            for j in range(4):
+                bm.faces.new((qa[j], qa[(j + 1) % 4], qb[(j + 1) % 4], qb[j]))
+        bm.faces.new(quads[0][::-1])
+        bm.faces.new(quads[-1])
+    finish(bm, name + "_NozzleRibs", coll, bevel1)
+
+    # centre body (plug): a closed profile from its base on the core to the rounded tip
+    pl = nz["plug"]
+    prof = [(X(dx), r) for dx, r in pl["profile"]]
+    bm = bmesh.new()
+    # open ends at radius 0: each collapses to one vertex in finish (remove_doubles), so the solid closes itself
+    bridge(bm, surface_grid(bm, [(prof[0][0], 0.0)] + prof[:-1] + [(prof[-1][0], 0.0)], 0, 2 * math.pi, n, axis,
+                            0.0, full=True), True)
+    finish(bm, name + "_NozzlePlug", coll, bevel2)
+    prof_x = sorted(prof)
+
+    # tie rods from the plug to the bell wall, swept aft-outward, a clevis block on the wall
+    st = nz["struts"]
+    bm = bmesh.new()
+    for k in range(st["count"]):
+        a = math.radians(st.get("phase_deg", 0.0)) + 2 * math.pi * k / st["count"]
+        xa, xb = X(st["from"]), X(st["to"])
+        p0 = _ring_point(axis, xa, a, radius_at(prof_x, xa) - 0.01)
+        p1 = _ring_point(axis, xb, a, radius_at(duct, xb) + 0.01)
+        rod(bm, p0, p1, st["r"], st.get("segments", 8))
+        e = (p1 - Vector((xb, axis[0], axis[1]))).normalized()
+        res = bmesh.ops.create_cube(bm, size=1.0)
+        bmesh.ops.scale(bm, vec=(st["r"] * 3, st["r"] * 3, st["r"] * 4), verts=res["verts"])
+        bmesh.ops.rotate(bm, verts=res["verts"], cent=(0, 0, 0),
+                         matrix=Vector((0, 0, 1)).rotation_difference(e).to_matrix())
+        bmesh.ops.translate(bm, vec=_ring_point(axis, xb, a, radius_at(duct, xb) - st["r"]), verts=res["verts"])
+    finish(bm, name + "_NozzleStruts", coll, bevel1)
+
+    # emissive core: a thin disc across the duct at the core plane (the throttle drives its strength in game)
+    bm = bmesh.new()
+    rc = inner[-1][1] + 0.004
+    revolve_closed(bm, [(xc, 0.001), (xc, rc), (xc + 0.01, rc), (xc + 0.01, 0.001)], n, axis)
+    finish(bm, name + "_NozzleCore", coll, bevel1)
 
 
 if __name__ == "__main__":

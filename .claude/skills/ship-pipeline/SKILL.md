@@ -327,6 +327,9 @@ MSYS_NO_PATHCONV=1 "$BL" -b ArtSource/Ships/<Loď>/HardSurface/<Loď>_HS.blend -
   - `loft: true` (trup): řez = obrys zepředu natažený na šířku shora a výšku z boku;
   - ostatní díly: průnik vytažených obrysů (boolean EXACT);
   - `revolve`: recept `hs_build_part` (poloměry z boku výkresu), obě strany zrcadlově;
+    tryska motoru `exhaust.nozzle` → `hs_build_part.build_nozzle` (zvon, prstence, žebra, hrdlo, středové těleso na
+    táhlech, jádro `_NozzleCore` ve slotu Emissive = síla podle tahu); výkres E-05 detail G (`nozzle_detail`); gondola
+    v rozpočtu přes `refine` (řady), `panel_bevel_segments`, `sub_segments`;
   - `cylinders`: válce.
 - **Detail:**
   - `seams` na loftu jsou skutečné drážky (`x` stanice přepážek, `around` [strana, výška 0–1], `width`, `depth`);
@@ -349,7 +352,9 @@ python Tools/Design/exterior_kit_layout.py <Loď> [--region pilot]   # -> Design
 - **Rozvrh** (`exterior_kit_layout.py`): desky a rám jako obrysy v rovině pohledu (SB x, z pro boční pásy, zrcadlené
   na levobok; TOP x, y pro hřbet; AFT y, z pro zadní stěnu) s výřezy, tloušťkou z kitu (XK-PLATE 30 mm, XK-PLATE-H
   40 mm, rám 15–20 mm), body šroubů a filtrem normál ploch; díly (XK-RCS, XK-STROBE, XK-LANDLIGHT, XK-PISTON) s polohou.
-  Oblast `pilot` = hřbet, ramena, záď, gondoly. Test výkresu hlídá, že rozvrh je z aktuálních dat a staví přesně
+  Oblast `pilot` = hřbet, ramena, záď, gondoly; `ship` = celý trup (všechny pásy, celý rám; 3. 10. 2026). Dno kanálu na
+  bocích jen kolem desek a rámu (`skin_near_side` → `skin.near_side`), jinde lak. Pás může mít `merge` [[a, b]] (jedna
+  dlouhá deska, žebra ji obejdou: deska pod jménem lodi) a `sub.skip` (pole bez panelu a poklopu, např. pod registrací). Test výkresu hlídá, že rozvrh je z aktuálních dat a staví přesně
   postavené pásy (`panels.built_bands`).
 - **Stavba** (`Tools/Blender/hs_exterior_kit.py`, z `hs_build_ship` po vrstvě detailu, před světly, greeblemi
   a decaly): plochy trupu pod obrysem se přesně ořežou (bisect rovinami hran obrysu ve směru pohledu), zkopírují,
@@ -370,6 +375,14 @@ python Tools/Design/exterior_kit_layout.py <Loď> [--region pilot]   # -> Design
   páteř (`roof_hardware` je vynechá). Větrací skříně XK-VENTBOX: na hřbetu místo čtvercového panelu v `sub.vent_bays`
   (ID `-V`), na zádi `F-VENT-AFT` (`on: aft`); staví se jako tři desky (skříň s otvorem, tmavé dno, lamely;
   `vent_entries` v rozvrhu). Hřeben páteře z holého kovu (`cap_material` v kitu → `cap.material` v rozvrhu).
+- **Rameno a záď jako desky na rámu** (krok c pilotu, 2. 10. 2026): boční pás může mít `sub` jako hřbet
+  (`exterior_model.side_subs`: pás výšek v sekce, panel + poklop, mimo roh s číslem desky; poklop na šikmém rameni
+  jako decal paprskem `ray` jako čísla); rozvody po rameni `on: shoulder` (`pipes` s výškou v, `lift` nad pláštěm přes
+  desky, `hs_exterior_kit.conduit_side`), rozvody desky nevyřezávají. Zadní stěna = `panels.aft` (obrys půlky stěny
+  v pohledu AFT, `cells`, `clear` – decaly, které desky obejdou) + rám `kind: aft` s `members` (`Views.aft_layout`);
+  dno kanálu na zádi jen na svislé stěně (`skin_z_max`: na zkosení jsou velké trojúhelníky a plocha přiřazená podle
+  středu trčí nad desky). Sekundární lak má vlastní clear coat (`SecondaryClearCoatRoughness` v `M_Ship_Layered`):
+  zrcadlící šedé desky četly jako okna.
 - **Čísla desek** (pravidlo D-R-PANEL-NUMBERS, `exterior_kit_layout.panel_numbers` → klíč `decals` rozvrhu →
   `hs_decals.build` → `Placer.text`): text složený z jednoznakových položek `pn_<znak>` v jednom rámu (položka na
   číslo se do atlasu 2 m nevešla: „decal sheet full“). Ramena: dolní zadní roh, paprsek šikmo dolů dovnitř (`ray`,

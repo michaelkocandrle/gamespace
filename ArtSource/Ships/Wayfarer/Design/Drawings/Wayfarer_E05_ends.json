@@ -4,10 +4,10 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "c10dc8f0b500",
-  "recipe": "7df4191b67e1",
-  "setup": "edd157c448e4",
+  "recipe": "dda2f1855a70",
+  "setup": "e529ae9d527e",
   "spec": "d9597dfcd605",
-  "design": "c08da5218170",
+  "design": "a900f2766083",
   "library": "3ed0bfdbff37"
  },
  "drawn": {
@@ -25,6 +25,12 @@
    "F-GUNMOUNT-01",
    "F-MISSILE-S2",
    "F-NOZZLE",
+   "F-NOZZLE-COLLAR",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-RING",
+   "F-NOZZLE-STRUT",
+   "F-NOZZLE-THROAT",
    "F-POD-EXHAUST",
    "F-RAMP-FRAME",
    "F-RAMP-HINGE",
@@ -32,14 +38,22 @@
    "F-RAMP-TREAD",
    "F-VENT-AFT",
    "F-WING",
+   "FR-AFT",
    "L-RAMP",
    "L-STROBE-FIN",
    "L-STROBE-WING",
    "P-B-07",
-   "P-B-08",
-   "P-B-09",
    "P-HULL",
-   "P-POD"
+   "P-POD",
+   "P-S-AC04",
+   "P-S-AL01",
+   "P-S-AL02",
+   "P-S-AL03",
+   "P-S-AL03-V",
+   "P-S-AP01",
+   "P-S-AP02",
+   "P-S-AP03",
+   "P-S-AP03-V"
   ],
   "FWD": [
    "F-DOME-01",
@@ -62,6 +76,23 @@
    "P-POD",
    "Z-B-01",
    "Z-SEAL-CANOPY"
+  ],
+  "DG": [
+   "F-NOZZLE",
+   "F-NOZZLE-COLLAR",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-RING",
+   "F-NOZZLE-STRUT",
+   "F-NOZZLE-THROAT",
+   "F-POD-EXHAUST"
+  ],
+  "DG-B": [
+   "F-NOZZLE",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-STRUT",
+   "F-POD-EXHAUST"
   ]
  },
  "labelled": {
@@ -79,6 +110,12 @@
    "F-GUNMOUNT-01",
    "F-MISSILE-S2",
    "F-NOZZLE",
+   "F-NOZZLE-COLLAR",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-RING",
+   "F-NOZZLE-STRUT",
+   "F-NOZZLE-THROAT",
    "F-POD-EXHAUST",
    "F-RAMP-FRAME",
    "F-RAMP-HINGE",
@@ -86,14 +123,22 @@
    "F-RAMP-TREAD",
    "F-VENT-AFT",
    "F-WING",
+   "FR-AFT",
    "L-RAMP",
    "L-STROBE-FIN",
    "L-STROBE-WING",
    "P-B-07",
-   "P-B-08",
-   "P-B-09",
    "P-HULL",
-   "P-POD"
+   "P-POD",
+   "P-S-AC04",
+   "P-S-AL01",
+   "P-S-AL02",
+   "P-S-AL03",
+   "P-S-AL03-V",
+   "P-S-AP01",
+   "P-S-AP02",
+   "P-S-AP03",
+   "P-S-AP03-V"
   ],
   "FWD": [
    "F-DOME-01",
@@ -116,6 +161,23 @@
    "P-POD",
    "Z-B-01",
    "Z-SEAL-CANOPY"
+  ],
+  "DG": [
+   "F-NOZZLE",
+   "F-NOZZLE-COLLAR",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-RING",
+   "F-NOZZLE-STRUT",
+   "F-NOZZLE-THROAT",
+   "F-POD-EXHAUST"
+  ],
+  "DG-B": [
+   "F-NOZZLE",
+   "F-NOZZLE-PLUG",
+   "F-NOZZLE-RIB",
+   "F-NOZZLE-STRUT",
+   "F-POD-EXHAUST"
   ]
  },
  "schedules": {

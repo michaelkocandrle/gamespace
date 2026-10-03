@@ -4,10 +4,10 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "c10dc8f0b500",
-  "recipe": "7df4191b67e1",
-  "setup": "edd157c448e4",
+  "recipe": "dda2f1855a70",
+  "setup": "e529ae9d527e",
   "spec": "d9597dfcd605",
-  "design": "c08da5218170",
+  "design": "a900f2766083",
   "library": "3ed0bfdbff37"
  },
  "drawn": {
@@ -18,6 +18,7 @@
    "D-H-57",
    "D-REG-R",
    "F-CANOPY-FRAME",
+   "F-CONDUIT-S",
    "F-DOME-01",
    "F-GEAR-NOSE",
    "F-RCS-01",
@@ -52,10 +53,9 @@
    "F-RAMP-TREAD",
    "F-VENT-AFT",
    "F-WING",
+   "FR-AFT",
    "L-RAMP",
    "P-B-07",
-   "P-B-08",
-   "P-B-09",
    "P-HULL",
    "P-POD"
   ],
@@ -109,6 +109,7 @@
    "D-H-57",
    "D-REG-R",
    "F-CANOPY-FRAME",
+   "F-CONDUIT-S",
    "F-DOME-01",
    "F-GEAR-NOSE",
    "F-RCS-01",
@@ -143,10 +144,9 @@
    "F-RAMP-TREAD",
    "F-VENT-AFT",
    "F-WING",
+   "FR-AFT",
    "L-RAMP",
    "P-B-07",
-   "P-B-08",
-   "P-B-09",
    "P-HULL",
    "P-POD"
   ],

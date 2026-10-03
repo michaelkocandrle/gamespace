@@ -1189,11 +1189,17 @@ def build_layered_master():
     _link(_scalar(m, "ClearCoat", 0.0, -900, 1500), mk, "ClearCoat")
     # the clear coat's gloss varies with the grunge and dies in the dirt (SC breakdown, 26. 9. 2026: the smudges
     # show in the reflections; a constant clear-coat roughness mirrored the sky the same everywhere)
-    ccr = _custom(m, "ClearCoatRough", "return saturate(Base + (M.x - 0.5) * Var + M.z * 0.5);",
-                  unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["M", "Base", "Var"], -600, 1600)
+    # SecondaryClearCoatRoughness (>= 0): the secondary paint's own, duller clear coat - the same mirror-like coat on the
+    # grey shoulder plates read as windows (kit pilot critic round 3, 2. 10. 2026); below 0 the primary's is used
+    ccr = _custom(m, "ClearCoatRough", "float b = Sec < 0.0 ? Base : lerp(Base, Sec, saturate(1.0 - VC.b));\n"
+                  "return saturate(b + (M.x - 0.5) * Var + M.z * 0.5);",
+                  unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["M", "Base", "Var", "VC", "Sec"], -600, 1600)
     _link(masks, ccr, "M")
     _link(_scalar(m, "ClearCoatRoughness", 0.06, -900, 1600), ccr, "Base")
     _link(_scalar(m, "ClearCoatRoughVariation", 0.0, -900, 1700), ccr, "Var")
+    if not MEL.connect_material_expressions(vc, "", ccr, "VC"):
+        raise RuntimeError("vertex colour -> clear coat roughness")
+    _link(_scalar(m, "SecondaryClearCoatRoughness", -1.0, -900, 1800), ccr, "Sec")
     _link(ccr, mk, "ClearCoatRoughness")
     _output(mk, unreal.MaterialProperty.MP_MATERIAL_ATTRIBUTES)
     MEL.recompile_material(m)

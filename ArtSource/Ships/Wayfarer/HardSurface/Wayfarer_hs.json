@@ -3,7 +3,7 @@
  "layout": "ArtSource/Ships/Wayfarer/Design/Wayfarer_layout.json",
  "out_blend": "ArtSource/Ships/Wayfarer/HardSurface/Wayfarer_HS.blend",
  "exterior_kit": {
-  "_comment": "The exterior kit from the approved drawings E-01 to E-08 (author 1. 10. 2026): Tools/Blender/hs_exterior_kit.py builds what Tools/Design/exterior_kit_layout.py wrote from the drawing model. Region pilot: roof, shoulders, stern, pods.",
+  "_comment": "The exterior kit from the approved drawings E-01 to E-08 (author 1. 10. 2026): Tools/Blender/hs_exterior_kit.py builds what Tools/Design/exterior_kit_layout.py wrote from the drawing model. Region ship (whole hull, 3. 10. 2026; was pilot: roof, shoulders, stern, pods).",
   "layout": "ArtSource/Ships/Wayfarer/Design/Wayfarer_exterior_kit.json",
   "decal_detail": {
    "_comment": "Small detail as mesh decals instead of geometry (triangle budget rule A, author 1. 10. 2026): the bolts of these plates and frame pieces (bolt_kit / bolt_kit_frame at every bolt point of the data) and these small hatches (XK-HATCH: hatch_small at scale 1.3 with two latch_kit, no hole in the plate). Trial scope first (step b); 'all' for every kit element. The data and the drawings keep the bolts and hatches with their IDs.",
@@ -306,9 +306,14 @@
    "materials": {
     "_Band": "accent",
     "_FwdBand": "accent",
-    "_Exhaust": "metal",
     "_Intake": "dark",
-    "_Substructure": "dark"
+    "_Substructure": "dark",
+    "_NozzleBell": "gunmetal",
+    "_NozzleRings": "heat",
+    "_NozzleRibs": "gunmetal",
+    "_NozzlePlug": "metal",
+    "_NozzleStruts": "gunmetal",
+    "_NozzleCore": "nozzle"
    },
    "revolve": {
     "_comment": "Radii from the drawing's side outline of the pod (x -0.5 .. 5.9, centre z 1.2, r 0.95 in the middle).",
@@ -322,6 +327,10 @@
      "width": 0.008,
      "segments": 2
     },
+    "_budget": "Kit pilot step d (author 1. 10. 2026; both pods 60 k without the nozzles): rows every 0.3 m (the profile is a polyline, the rows only carry the baked occlusion), panels 1 bevel segment, rings 2 (curves the chase camera sees), substructure 32 sides (hidden under the panels, its chords stay inside them)",
+    "refine": 0.3,
+    "panel_bevel_segments": 1,
+    "sub_segments": 32,
     "profile": [[-0.5, 0.75], [-0.3, 0.84], [0.0, 0.9], [0.3, 0.95], [0.6, 0.95], [0.6, 0.98], [0.9, 0.98], [0.9, 0.95], [4.4, 0.92], [4.4, 0.95], [4.7, 0.95], [4.7, 0.9], [5.2, 0.85], [5.55, 0.66], [5.9, 0.42]],
     "sections": [
      {
@@ -386,11 +395,21 @@
     "exhaust": {
      "id": "F-POD-EXHAUST",
      "x_lip": -0.5,
-     "depth": 0.5,
      "r_lip": 0.75,
-     "r_duct": 0.62,
-     "cone_r": 0.28,
-     "cone_tip": -0.15
+     "r_duct": 0.665,
+     "nozzle": {
+      "_comment": "Main engine nozzle (kit pilot step d, author 1. 10. 2026; SC main thrusters): rolled lip, a converging bell with two raised rings and 12 radial ribs, a throat ring, a centre body on four tie rods, the emissive core behind the throat (the glow reads as a ring around the plug). x = metres into the pod from the lip, r = radius from the pod axis. Budget 40 k a nozzle.",
+      "bell": [[0.0, 0.75], [-0.022, 0.738], [-0.03, 0.71], [-0.022, 0.682], [0.0, 0.668], [0.04, 0.665], [0.07, 0.655], [0.14, 0.632], [0.22, 0.6], [0.3, 0.565], [0.38, 0.53], [0.46, 0.5], [0.52, 0.488], [0.62, 0.484]],
+      "wall": 0.03,
+      "back_r": 0.715,
+      "collar": {"id": "F-NOZZLE-COLLAR", "_what": "heat-tinted band round the lip", "x": [-0.012, 0.05], "r": [0.735, 0.765]},
+      "rings": {"id": "F-NOZZLE-RING", "_what": "raised stiffening rings inside the bell", "at": [0.16, 0.34], "width": 0.025, "proud": 0.012},
+      "ribs": {"id": "F-NOZZLE-RIB", "_what": "radial ribs along the bell wall", "count": 12, "phase_deg": 15, "x": [0.06, 0.5], "height": 0.045, "thickness": 0.028},
+      "throat": {"id": "F-NOZZLE-THROAT", "_what": "throat ring in front of the core", "x": [0.5, 0.56], "r": [0.43, 0.49]},
+      "plug": {"id": "F-NOZZLE-PLUG", "_what": "centre body with a groove and a pointed tip at the lip plane", "profile": [[0.62, 0.24], [0.44, 0.24], [0.43, 0.225], [0.4, 0.225], [0.39, 0.24], [0.3, 0.24], [0.24, 0.205], [0.16, 0.15], [0.09, 0.09], [0.04, 0.045], [0.012, 0.015], [0.0, 0.0]]},
+      "struts": {"id": "F-NOZZLE-STRUT", "_what": "tie rods holding the centre body, a clevis on the wall", "count": 4, "phase_deg": 45, "from": 0.36, "to": 0.22, "r": 0.02, "segments": 8},
+      "core": {"id": "F-NOZZLE", "x": 0.62}
+     }
     },
     "greebles": [
      {
@@ -428,17 +447,8 @@
    "id": "F-NOZZLE",
    "name": "NozzleGlow",
    "material": "nozzle",
-   "cylinders": [
-    {
-     "_comment": "glowing disc at the bottom of each pod's exhaust duct",
-     "x": [-0.03, 0.0],
-     "r": 0.6,
-     "y": 3.4,
-     "z": 1.2,
-     "mirror": true,
-     "segments": 48
-    }
-   ]
+   "skip": true,
+   "_skip": "since kit pilot step d the glowing core is built with the pod's nozzle (parts.pod.revolve.exhaust.nozzle.core, object _NozzleCore); this entry keeps the ID F-NOZZLE for the drawings"
   },
   "gun": {
    "id": "F-GUN-S3",
@@ -822,7 +832,7 @@
   "warn": 700000,
   "error": 1000000,
   "parts": [
-   {"name": "hull_loft", "max": 55000, "match": ["_Hull$"], "_max": "55 k (was 50 k; author 1. 10. 2026): the channel floor faces stay unmerged (parts.hull.merge_keep_slots) - merged, the occlusion baked into their few vertices spread over a large face and it went near black"},
+   {"name": "hull_loft", "max": 145000, "match": ["_Hull$"], "_max": "145 k from the reserve (whole-ship kit 3. 10. 2026; was 55 k with the pilot, 50 k before): the channel floor faces stay unmerged (parts.hull.merge_keep_slots) - merged, the occlusion baked into their few vertices spread over a large face and it went near black - and with the kit on the whole ship the whole skin is channel floor; removing the skin hidden under the plates is optimization work for the end (author 29. 9. 2026)"},
    {"name": "kit_plates", "max": 80000, "match": ["_Kit_P-", "_Kit_F-VENT"]},
    {"name": "kit_frame", "max": 120000, "match": ["_Kit_FR-", "_Kit_F-RAMP-FRAME"]},
    {"name": "mid_layer", "max": 60000, "match": ["_Kit_Parts_", "_Kit_F-RAMP", "_Kit_Bolts", "_Kit_Latches"]},
@@ -1074,29 +1084,6 @@
     "normal_x": [-1.01, -0.9],
     "centre": true,
     "t": 0.02
-   },
-   {
-    "id": "P-B-08",
-    "_what": "rear armour beside the ramp",
-    "x": [-0.2, 0.2],
-    "abs_y": [1.3, 2.1],
-    "z": [0.95, 1.35],
-    "normal_x": [-1.01, -0.9],
-    "t": 0.04,
-    "bevel": 0.003,
-    "_sharp": "kit pilot critic round 2: sharper and heavier (t 0.04, bevel 3 mm; was 0.025 / 6 mm) next to the kit's ramp frame",
-    "secondary": true
-   },
-   {
-    "id": "P-B-09",
-    "_what": "armour on the rear chamfer under the aft cap",
-    "x": [-0.1, 0.6],
-    "abs_y": [0.35, 1.95],
-    "z": [1.52, 2.12],
-    "normal_x": [-0.95, -0.45],
-    "t": 0.04,
-    "bevel": 0.003,
-    "_sharp": "kit pilot critic round 2: sharper and heavier (t 0.04, bevel 3 mm; was 0.025 / 6 mm) next to the kit's ramp frame"
    },
    {
     "id": "P-B-10",
@@ -1503,7 +1490,7 @@
     "at": [-1.0, 1.36, 0.68],
     "dir": [1, 0, 0],
     "rot": 90,
-    "_what": "hazard band beside the ramp frame, upper half (y 1.36: at 1.335 the decal grid met the cylinder's hose and was skipped; top 0.93, under the armour plate P-B-08)"
+    "_what": "hazard band beside the ramp frame, upper half (y 1.36: at 1.335 the decal grid met the cylinder's hose and was skipped; top 0.93; the aft wall's kit plates P-S-A keep clear of it, panels.aft.clear)"
    },
    {
     "id": "D-H-32",
@@ -1652,7 +1639,7 @@
    {"id": "D-H-56", "item": "xst_qtfuel", "scale": 1.5, "on": "bottom", "x": 6.4, "y": 1.25, "_what": "beside the quantum fuel filler hatch"},
    {"id": "D-H-57", "item": "xst_gnd", "scale": 1.5, "on": "side", "x": 19.0, "z": 0.8, "_what": "nose ground point"},
    {"id": "D-H-58", "item": "xst_extpwr", "scale": 1.5, "on": "side", "x": 12.95, "z": 1.35, "_what": "external power socket by the cabin"},
-   {"id": "D-H-59", "item": "xst_inspect", "scale": 1.5, "on": "side", "x": 8.9, "z": 1.5, "_what": "over the component access panel"},
+   {"id": "D-H-59", "item": "xst_inspect", "scale": 1.5, "on": "side", "x": 7.55, "z": 1.5, "_what": "over the component access panel", "_x": "3. 10. 2026: x 7.55 on the U plate 6.9-8.2 (at 8.9 it lay under the name WAYFARER on the merged name plate)"},
    {"id": "D-H-60", "item": "xst_service", "scale": 1.5, "on": "top", "x": 13.4, "y": 0.62, "rot": 90, "_what": "beside the roof maintenance hatch (on the light roof plates: dark ink)"},
    {"id": "D-H-61", "item": "xstl_inspect", "scale": 1.5, "on": "top", "x": 16.9, "y": 0.95, "_what": "canopy frame service point (dark: light ink)"}
   ],
@@ -2302,6 +2289,53 @@
     "size": [1.0, 0.9],
     "kind": "smear",
     "up": [1, 0, 0]
+   },
+   {
+    "id": "D-G-12",
+    "_what": "kit pilot step c (2. 10. 2026): dirt collected under the top longeron on the shoulder plates S (existing atlas cell 'rim'; the plates read clean)",
+    "on": "ray",
+    "at": [7.55, 1.8768, 2.5451],
+    "dir": [0, -0.7071, -0.7071],
+    "size": [0.9, 0.4],
+    "kind": "rim",
+    "up": [0, 0, 1]
+   },
+   {
+    "id": "D-G-13",
+    "on": "ray",
+    "at": [11.0, 1.8768, 2.5879],
+    "dir": [0, -0.7071, -0.7071],
+    "size": [0.9, 0.4],
+    "kind": "rim",
+    "up": [0, 0, 1]
+   },
+   {
+    "id": "D-G-14",
+    "on": "ray",
+    "at": [14.6, 1.777, 2.6969],
+    "dir": [0, -0.7071, -0.7071],
+    "size": [0.9, 0.4],
+    "kind": "rim",
+    "up": [0, 0, 1]
+   },
+   {
+    "id": "D-G-15",
+    "_what": "kit pilot step c: the aft wall plates - dirt collected under the beam FR-AFT beside the ramp (rim) and rain streaks under the vent boxes F-VENT-AFT (streaks)",
+    "on": "ray",
+    "at": [-1.0, 1.75, 1.2],
+    "dir": [1, 0, 0],
+    "size": [0.8, 0.45],
+    "kind": "rim",
+    "up": [0, 0, 1]
+   },
+   {
+    "id": "D-G-16",
+    "on": "ray",
+    "at": [-1.0, 1.66, 0.0],
+    "dir": [1, 0, 0],
+    "size": [0.5, 0.45],
+    "kind": "streaks",
+    "up": [0, 0, 1]
    }
   ]
  },
@@ -2327,11 +2361,11 @@
     "mirror_color": "green",
     "light": {
      "type": "point",
-     "intensity_cd": 3,
-     "radius_m": 1.0
+     "intensity_cd": 0.3,
+     "radius_m": 0.6
     },
     "_what": "position lights on the light_housing decal",
-    "_why": "the wing is 30 cm away: 25 cd and then 10 cd still left a red pool on it in daylight (24. 9. 2026)"
+    "_why": "the wing is 30 cm away: 25 cd and then 10 cd still left a red pool on it in daylight (24. 9. 2026); 3 cd still did (critic, kit pilot rounds 1 and 4): the scene runs on an 11 lx sun, so 0.3 cd and 0.6 m (step e, 2. 10. 2026)"
    },
    {
     "id": "L-TAIL",
@@ -2412,8 +2446,9 @@
     "id": "L-HULL-RUN-LOW",
     "name": "hull_run_low",
     "on": "side",
-    "x": [7.2, 16.6],
-    "z": 0.35,
+    "x": [5.0, 17.8],
+    "z": 1.18,
+    "_z": "3. 10. 2026: in the dark channel between bands L and U (z 0.94-1.50 along x 5-17.8); at z 0.35 under the whole-ship kit plates it showed only in the gaps as a dashed line (critic round 1)",
     "width": 0.014,
     "color": "strip",
     "_what": "running light along the lower side (SC: cool white emissive strips outline the hull at night)",
@@ -2423,8 +2458,9 @@
     "id": "L-HULL-RUN-CANOPY",
     "name": "hull_run_canopy",
     "on": "side",
-    "x": [15.4, 18.9],
-    "z": 1.62,
+    "x": [17.8, 18.9],
+    "z": 1.12,
+    "_z": "3. 10. 2026: the channel line carried on towards the nose (z 1.62 under the canopy is under kit plates now)",
     "width": 0.012,
     "color": "strip",
     "_what": "strip under the canopy line",

@@ -74,14 +74,14 @@
    ],
    "vectors": {
     "PrimaryColor": [
-     0.7,
-     0.69,
-     0.65
+     0.76,
+     0.73,
+     0.66
     ],
     "SecondaryColor": [
-     0.42,
-     0.43,
-     0.45
+     0.53,
+     0.51,
+     0.47
     ],
     "BareMetalColor": [
      0.72,
@@ -120,7 +120,7 @@
     "RoughVariation": 0.45,
     "BareMetalRoughness": 0.28,
     "PrimaryRoughness": 0.3,
-    "SecondaryRoughness": 0.34,
+    "SecondaryRoughness": 0.55,
     "PaintMetallic": 0.0,
     "TopZ": 9999.0,
     "TopSlope": 0.0,
@@ -140,12 +140,15 @@
     "CarbonShare": 0.0,
     "ClearCoat": 1.0,
     "ClearCoatRoughness": 0.05,
-    "ClearCoatRoughVariation": 0.3
+    "ClearCoatRoughVariation": 0.3,
+    "SecondaryClearCoatRoughness": 0.38
    },
    "_wear": "EdgeWear 0.15 (was 0.8) and the grunge in the clear coat's roughness: SC paint has no worn edges, the dirt shows in the gloss (starcitizenreference/ShipDetailing_VideoNotes.md, 26. 9. 2026)",
    "_livery_roof": "1. 10. 2026: the graphite saddle of livery A off (TopZ 9999): the author wants the roof plates in the primary paint - the chase camera sees mostly the roof, a dark roof made a dark ship",
    "_panel_variation": "1. 10. 2026: PanelTone 0.1 (was 0.07), PanelRough 0.18 (was 0.12): the kit's plates read as one clean tile (kit pilot critic round 1)",
-   "_round3": "1. 10. 2026 kit pilot critic round 2: RoughVariation 0.45 (was 0.28), GrungeAmount 0.3 (0.15), ClearCoatRoughVariation 0.3 (0.12) - the dirt shows in the gloss; CarbonShare 0 (was 0.05): dark carbon plates read as holes in the roof"
+   "_secondary": "2. 10. 2026 kit pilot step c (critic round 3: the shoulder plates S read as windows): secondary paint lighter and warmer (0.53 0.51 0.47, was a cool 0.42 0.43 0.45), SecondaryRoughness 0.55 (0.34) and its own duller clear coat SecondaryClearCoatRoughness 0.38 (the primary keeps 0.05) - it mirrored the sky",
+   "_round3": "1. 10. 2026 kit pilot critic round 2: RoughVariation 0.45 (was 0.28), GrungeAmount 0.3 (0.15), ClearCoatRoughVariation 0.3 (0.12) - the dirt shows in the gloss; CarbonShare 0 (was 0.05): dark carbon plates read as holes in the roof",
+   "_round_ship2": "whole-ship kit critic round 2 (3. 10. 2026): the side plates read cool grey - primary a step lighter and warmer (0.76 0.73 0.66; was 0.70 0.69 0.65)"
   },
   "MI_Ship_Wayfarer_Dark": {
    "master": "layered",
@@ -286,14 +289,14 @@
    ],
    "vectors": {
     "PrimaryColor": [
-     0.24,
-     0.25,
-     0.27
+     0.36,
+     0.37,
+     0.39
     ],
     "SecondaryColor": [
-     0.21,
-     0.22,
-     0.24
+     0.32,
+     0.33,
+     0.35
     ],
     "BareMetalColor": [
      0.55,
@@ -316,13 +319,14 @@
     "AOStrength": 0.8,
     "RoughVariation": 0.35,
     "BareMetalRoughness": 0.28,
-    "PrimaryRoughness": 0.38,
-    "SecondaryRoughness": 0.42,
-    "PaintMetallic": 0.8,
+    "PrimaryRoughness": 0.34,
+    "SecondaryRoughness": 0.4,
+    "PaintMetallic": 0.6,
     "ClearCoat": 0.3,
     "ClearCoatRoughness": 0.1
    },
-   "_round3": "kit pilot critic round 2: the frame one step lighter and metallic (0.24, metallic 0.8; was 0.16 / 0.6) so it reads as structure, not as a dark fill"
+   "_round3": "kit pilot critic round 2: the frame one step lighter and metallic (0.24, metallic 0.8; was 0.16 / 0.6) so it reads as structure, not as a dark fill",
+   "_round_ship1": "whole-ship kit critic round 1 (3. 10. 2026): frame and channel floor read as one black mass - frame lighter (0.36, metallic 0.6; was 0.24 / 0.8), the channel stays 0.1"
   },
   "MI_Ship_Wayfarer_Glass": {
    "master": "glass",
@@ -344,6 +348,7 @@
    }
   },
   "MI_Ship_Wayfarer_Thruster": {
+   "_comment": "main engine core (pod nozzle _NozzleCore, kit pilot step d): x ThrusterIdleGlow 0.3 at idle = deep orange, full throttle and boost toward white; was 1.0 0.55 0.25 x 8, a cream disc at idle (critic, kit pilot round 1)",
    "master": "hull",
    "slots": [
     "M_Ship_Wayfarer_Emissive"
@@ -357,10 +362,10 @@
    "roughness": 0.4,
    "emissive_color": [
     1.0,
-    0.55,
-    0.25
+    0.4,
+    0.12
    ],
-   "emissive_strength": 8.0
+   "emissive_strength": 5.0
   },
   "MI_Ship_Wayfarer_Decal": {
    "_comment": "structural mesh decals (seams, rivets, grilles, hatches): normal + roughness only, the hull keeps its paint",
@@ -1498,7 +1503,7 @@
    "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Wayfarer",
    "location": [
-    5.0,
+    55.0,
     -250.0,
     65.0
    ],
@@ -1518,7 +1523,8 @@
     0.06,
     0.064,
     0.07
-   ]
+   ],
+   "_plate": "3. 10. 2026: x 55 (layout 10.8) = the middle of the merged plate P-S-U07 (8.2-12.8, design panels.bands U merge); at 5 its aft end ran into the cut-out of a part at x 8.6"
   },
   {
    "id": "D-REG-L",
@@ -1526,7 +1532,7 @@
    "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Registration",
    "location": [
-    605.0,
+    570.0,
     -210.0,
     -40.0
    ],
@@ -1546,7 +1552,8 @@
     0.06,
     0.064,
     0.07
-   ]
+   ],
+   "_bay": "3. 10. 2026: x 570 (layout 15.95, local = layout - 10.25) = the middle of bay 15.2-16.7: at 605 a rib of the whole-ship kit crossed the number"
   },
   {
    "id": "D-LOGO-L",
@@ -1609,7 +1616,7 @@
    "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Wayfarer",
    "location": [
-    5.0,
+    55.0,
     250.0,
     65.0
    ],
@@ -1630,7 +1637,8 @@
     0.064,
     0.07
    ],
-   "_upright": "1. 10. 2026: roll +90 (was -90): with -90 the starboard marking read upside down (exterior review 30. 9.)"
+   "_upright": "1. 10. 2026: roll +90 (was -90): with -90 the starboard marking read upside down (exterior review 30. 9.)",
+   "_plate": "3. 10. 2026: x 55 (layout 10.8) = the middle of the merged plate P-S-U07 (8.2-12.8, design panels.bands U merge); at 5 its aft end ran into the cut-out of a part at x 8.6"
   },
   {
    "id": "D-REG-R",
@@ -1638,7 +1646,7 @@
    "_depth": "29. 9. 2026: 30 cm deep (was 60): the box reached the hold's hull liner 0.15 m inside the hull and the logo showed mirrored on it",
    "texture": "D_Big_Registration",
    "location": [
-    605.0,
+    570.0,
     210.0,
     -40.0
    ],
@@ -1659,7 +1667,8 @@
     0.064,
     0.07
    ],
-   "_upright": "1. 10. 2026: roll +90 (was -90): with -90 the starboard marking read upside down (exterior review 30. 9.)"
+   "_upright": "1. 10. 2026: roll +90 (was -90): with -90 the starboard marking read upside down (exterior review 30. 9.)",
+   "_bay": "3. 10. 2026: x 570 (layout 15.95, local = layout - 10.25) = the middle of bay 15.2-16.7: at 605 a rib of the whole-ship kit crossed the number"
   },
   {
    "id": "D-LOGO-R",

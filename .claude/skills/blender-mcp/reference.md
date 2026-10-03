@@ -27,6 +27,10 @@ Referenční část skillu `blender-mcp` (načti jen při obnově instalace nebo
 - **Instalace (hotovo, pro obnovu):**
   - Addon: `blender --command extension install-file -r user_default --enable mcp-1.0.3.zip`. Zip je z `https://projects.blender.org/lab/blender_mcp/releases`.
   - Pak v `-b` nastav `prefs.port = 9877`, `use_autostart = True` a `bpy.ops.wm.save_userpref()`.
+  - **Nový PC (2. 10. 2026):** první start serveru vypršel (`CONNECT_TIMEOUT`) a ručně spuštěný `uvx` hlásil
+    „No such file or directory: build\bdist.win-amd64\wheel\…\METADATA“: sestavení balíku z gitu v cache uv
+    přesáhlo 260 znaků cesty. Řešení bez změny systému: v `env` serveru `UV_CACHE_DIR=C:/uvc` (krátká cache)
+    a jednou ručně `uvx --from … blender-mcp --help`, ať je sestavený před startem Claude Code.
   - Server: `claude mcp add blender-lab -s local -e BLENDER_MCP_PORT=9877 -e "BLENDER_PATH=..." -- <uvx.exe> --from "git+...@v1.0.3#subdirectory=mcp" blender-mcp`.
 - **Pozor:** **neinstaluj oficiální server jako `uv tool install blender-mcp`.**
   - Obě implementace mají spustitelný soubor `blender-mcp`.

@@ -30,24 +30,24 @@ MIRROR_Y = Matrix.Scale(-1.0, 4, (0.0, 1.0, 0.0))
 # Small geometry helpers
 # --------------------------------------------------------------------------------------------
 
-def _fillet(pts, bend):
-    """Polyline -> smooth path: every inner corner replaced by a quadratic arc of size `bend`."""
+def _fillet(pts, bend, arc=6):
+    """Polyline -> smooth path: every inner corner replaced by a quadratic arc of size `bend` in `arc` steps."""
     pts = [Vector(p) for p in pts]
     out = [pts[0]]
     for a, p, b in zip(pts, pts[1:], pts[2:]):
         da, db = (a - p), (b - p)
         ra, rb = min(bend, da.length / 2), min(bend, db.length / 2)
         pa, pb = p + da.normalized() * ra, p + db.normalized() * rb
-        for k in range(7):
-            t = k / 6
+        for k in range(arc + 1):
+            t = k / arc
             out.append(pa * (1 - t) ** 2 + p * 2 * t * (1 - t) + pb * t * t)
     out.append(pts[-1])
     return out
 
 
-def tube(bm, pts, r, seg=12, bend=0.08):
+def tube(bm, pts, r, seg=12, bend=0.08, arc=6):
     """Closed pipe along a polyline (rounded bends, capped ends), frames by parallel transport."""
-    path = _fillet(pts, bend)
+    path = _fillet(pts, bend, arc)
     t0 = (path[1] - path[0]).normalized()
     nrm = t0.orthogonal().normalized()
     rings = []
@@ -325,8 +325,10 @@ def pod_detail(coll, pod_cfg, spec, mats, bevel, ship):
     axis = (rev["axis"]["y"], rev["axis"]["z"])
     profile = [tuple(p) for p in rev["profile"]]
     body = next(s for s in rev["sections"] if s["name"] == spec.get("section", "Body"))
-    pts = hp.refine(hp.section_points(profile, *body["x"]))
+    pts = hp.refine(hp.section_points(profile, *body["x"]), rev.get("refine", 0.1))
     th = body["thickness"]
+    def sides(r):   # cylinder sides by diameter (triangle budget rule B3, hs_exterior_kit.seg_for; kit pilot step d)
+        return 8 if 2 * r < 0.05 else (12 if 2 * r <= 0.15 else 16)
     report = {}
 
     def r_at(x):
@@ -394,15 +396,15 @@ def pod_detail(coll, pod_cfg, spec, mats, bevel, ship):
         for k, (fr, r) in enumerate(bay.get("pipes", [[0.25, 0.022], [0.5, 0.018], [0.72, 0.026]])):
             a = a0 + span * fr
             rr = r_sub((x0 + x1) / 2) - depth + r + 0.012
-            tube(mech, [_pod_frame(axis, x0 - 0.01, a, rr), _pod_frame(axis, x1 + 0.01, a, rr)], r, seg=14)
+            tube(mech, [_pod_frame(axis, x0 - 0.01, a, rr), _pod_frame(axis, x1 + 0.01, a, rr)], r, seg=sides(r))
         # actuator: cylinder with a rod, on brackets
         act = bay.get("actuator")
         if act:
             a = a0 + span * act["at"]
             rr = r_sub((x0 + x1) / 2) - depth + act["r"] + 0.03
             xa, xb = act["x"]
-            tube(mech, [_pod_frame(axis, xa, a, rr), _pod_frame(axis, xa + (xb - xa) * 0.6, a, rr)], act["r"], seg=16, bend=0.001)
-            tube(mech, [_pod_frame(axis, xa + (xb - xa) * 0.55, a, rr), _pod_frame(axis, xb, a, rr)], act["r"] * 0.4, seg=12, bend=0.001)
+            tube(mech, [_pod_frame(axis, xa, a, rr), _pod_frame(axis, xa + (xb - xa) * 0.6, a, rr)], act["r"], seg=sides(act["r"]), bend=0.001)
+            tube(mech, [_pod_frame(axis, xa + (xb - xa) * 0.55, a, rr), _pod_frame(axis, xb, a, rr)], act["r"] * 0.4, seg=sides(act["r"] * 0.4), bend=0.001)
             for xe in (xa, xb):
                 p = _pod_frame(axis, xe, a, rr - act["r"] - 0.012)
                 outward = (p - Vector((xe, axis[0], axis[1]))).normalized()
@@ -432,13 +434,13 @@ def pod_detail(coll, pod_cfg, spec, mats, bevel, ship):
                 for k in range(9):
                     xk = x0 - 0.01 + (x1 - x0 + 0.02) * k / 8
                     path.append(_pod_frame(axis, xk, a + math.sin(k * 0.9 + j) * 0.01, r0 + 0.006 * math.sin(k * 1.3 + j)))
-                tube(bits, path, cb.get("r", 0.007), seg=8, bend=0.05)
+                tube(bits, path, cb.get("r", 0.007), seg=6, bend=0.05, arc=2)
         for fr, r in bay.get("accent_pipes", []):
             a = a0 + span * fr
             rr = r_floor((x0 + x1) / 2) + r + 0.05
             xa, xb = x0 + 0.08, x1 - 0.08
             tube(accent, [_pod_frame(axis, x0 - 0.01, a, rr - 0.03), _pod_frame(axis, xa, a, rr),
-                          _pod_frame(axis, xb, a, rr), _pod_frame(axis, x1 + 0.01, a, rr - 0.03)], r, seg=14, bend=0.06)
+                          _pod_frame(axis, xb, a, rr), _pod_frame(axis, x1 + 0.01, a, rr - 0.03)], r, seg=sides(r), bend=0.06, arc=3)
         vw = bay.get("valve")
         if vw:
             xc, a = x0 + (x1 - x0) * vw["x"], a0 + span * vw["at"]
@@ -447,8 +449,8 @@ def pod_detail(coll, pod_cfg, spec, mats, bevel, ship):
             t1 = Vector((1, 0, 0))
             t2 = outward.cross(t1)
             ring = [c + (t1 * math.cos(k * math.pi / 8) + t2 * math.sin(k * math.pi / 8)) * vw["r"] for k in range(17)]
-            tube(accent, ring, 0.006, seg=8, bend=0.001)
-            tube(mech, [c - outward * vw["h"], c], 0.01, seg=10, bend=0.001)
+            tube(accent, ring, 0.006, seg=6, bend=0.001, arc=1)
+            tube(mech, [c - outward * vw["h"], c], 0.01, seg=8, bend=0.001)
         for b in (tub, mech, bits, accent):
             mirror_into(b)
         made.append(new_object("SM_Ship_Detail_PodBay", tub, coll, mats.get("bay", mats["dark"]), bevel, width=0.004))

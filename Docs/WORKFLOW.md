@@ -990,6 +990,14 @@ snímku.
 - cw) **Dvě stavby lodi ze stejného receptu nejsou totožné.** `hs_build_ship.py` na Wayfareru dal trup 303 646 a pak 303 648 ploch, jiné pořadí jmen světel svítidel (`fix_*` v `Wayfarer_lights.json`) a jedno světlo posunuté o 0,2 mm. Rozdíl se pak propíše do decalů (paprsky padnou na jiné plochy). Dopad změny v kódu decalů proto měř na **stejném** `<Loď>_HS.blend`: `hs_assemble_ship` pusť dvakrát, se starou a novou verzí funkce (monkeypatch ve wrapperu, výstup mimo repo), a porovnej plochy podle polohy a normály (`Docs/Reviews/2026-09-27_hs_decals_wayfarer_check.md`). Od 1. 10. 2026
   exportér zapíše jen FBX se změněným otiskem geometrie a import přeskočí nezměněné meshe (skill `ship-pipeline` 5);
   přestavba samotného trupu ale kvůli nedeterminismu pořád změní jeho otisk (oprava stavby čeká v CURRENT.md).
+  Pořadí světel svítidel opraveno 2. 10. 2026: `hs_fixture_lights` je řadí (síla, materiál, místo); dřív se po přestavbě
+  přečíslovala `fix_*` a s nimi ID `L-FIX-*` na listu I-04 (`test_interior_drawing` hlásil prvky jen ve výkresu / jen v datech).
+- fm) **Po pádu počítače byla loď ve hře černá krabice bez gondol** (3. 10. 2026). Modrá obrazovka MEMORY_MANAGEMENT
+  (nestabilní RAM s EXPO 6000; Windows Memory Diagnostic našel chyby, bez EXPO čistý) přerušila import a nechala
+  `SM_Ship_Wayfarer.uasset` a `_Decals.uasset` rozepsané; další import je nepřepsal (log: „Unable to load package … end of
+  package tag is not valid“). Řešení: poškozené `.uasset` vrátit z gitu (`git checkout --`), import s
+  `GAMESPACE_SHIP_FORCE_IMPORT=1`; kontrola všech balíčků = značka `C1 83 2A 9E` na začátku i konci souboru. Výstupy
+  z doby nestabilní paměti přestavět (Blender, export, C++, balení načisto bez `Saved/Cooked`).
 - cx) **Volná kamera snímků viděla postavu hráče.** Po `space.Showroom` stojí postava na startu. Snímky s `"camera": "free"` pak mají v záběru její ramena nebo celou postavu. Preset, který ověřuje vstup (`"camera": "pawn"`), má postavu hned poslat zpět (`space.Showroom annex` znovu) a teprve pak fotit volnou kamerou (`kit_annex.json`).
 - cy) **Překryv `stat unit` / `stat gpu` zůstal na dalších snímcích.** Konzolové příkazy platí pro zbytek presetu. Snímek po měření výkonu musí mít `stat none`. Opačně: `stat gpu` zapnutý v rozcvičovacím snímku se do dalších snímků nemusí propsat. Seznam průchodů fotit se `stat none`, `stat unit`, `stat gpu` přímo v měřeném snímku (jako `l_perf_corridor`).
 - cz) **S MegaLights C (RT stíny) ukázka ztmavla.** Světla bez stínů prosvítala geometrií, se stíny už ne. Průměr chodby klesl z 0,20 na 0,13, p90 z 0,42 na 0,25. Po zapnutí stínů přeměř `measure_look.py` a jas případně doplň intenzitou svítidel; s MegaLights to výkon skoro nemění.
@@ -1196,6 +1204,9 @@ snímku.
   `settings_key()` píše množiny seřazené, stejně jako otisky v manifestech
   (`test_file_digest_ignores_the_string_hash_seed`). Skutečný šum stavby zůstává jen v trupu, decalech
   a interiéru (±40 trojúhelníků mezi běhy). Ověřené porovnáním staveb A/B1/B2/C (recept s klíči `id` a bez nich).
+  Vyřešeno 2. 10. 2026 (fl): náhodná pravidla decalů už nezávisí na pořadí stavby – změna kitu nebo jiného pravidla
+  nepřelosuje decaly jinde. Nevyřešeno: šum ±40 trojúhelníků trupu a interiéru (paprsky decalů pak mohou padnout
+  na jinou plochu – poloha se pohne o zlomek milimetru, ne decal na jiné místo), 3 FBX při každé přestavbě.
 - fg) **Přestavba „prošla“, ale export vynechal všechny FBX jako nezměněné** (1. 10. 2026, kit pilot kolo 2). Výjimka
   v `--python` skriptu Blender neukončí chybou: `hs_assemble_ship.py` spadl v `kdop_hull` (po 12 pokusech o kolizi
   bez tenkých stěn použil uvolněný bmesh; spustily to nové díly kitu na zádi), Blender skončil kódem 0, game blend
@@ -1228,12 +1239,23 @@ snímku.
   (`parts.hull.merge_keep_slots`). Příčina ulétlých desek: rovnoměrná tloušťka dělí posun vrcholu sinem úhlu mezi
   sousedními plochami a na sloučených n-úhelnících s téměř nulovými úhly (protáhlé trojúhelníky po triangulaci) jde
   dělitel k nule. Od 1. 10. hlídá meze dílů přímo `hs_assemble_ship` (`HSASSEMBLE BOUNDS FAIL`, chyba sestavení).
-- fl) **Na výkresu nákladu chybělo šest nápisů a hasicí přístroj, světel bylo o dvě víc** (2. 10. 2026, kritik I-02).
+- fl) **Po změně kitu se přesunula špína na dveřích rampy** (2. 10. 2026, krok b rozpočtu trojúhelníků). Vedle nápisu
+  RAMP – STAND CLEAR přibyla stékající šmouha, ačkoli se mřížky ani pravidlo nezměnily. Příčina: náhodná pravidla
+  decalů (`clusters`, `companions` – šmouhy pod mřížkami, štítky, `coverage`, `panel_lines`) brala čísla z jednoho
+  sdíleného generátoru v pořadí stavby. Šrouby a poklopy kitu jako decaly přidaly rámy a pokusy, proud se posunul
+  a každé další losování dopadlo jinak. Řešení: každé losování má vlastní generátor ze `seed` + pravidla + **klíče
+  prvku** (`hs_decals._rng`: shluk a číslo pokusu, rodičovský decal doprovodu podle polohy, buňka mřížky coverage,
+  pole panelové čáry), ne z pořadí. Stavba zapíše polohy náhodných decalů podle klíče do `Export/<Loď>_decals.json`
+  (`random`, s předchozí stavbou v `random_prev`) a `test_kit_decals.py` ověří, že stejný prvek leží po dvou
+  přestavbách za sebou na stejném místě (1 cm: šum sítě trupu z ff posune zásah paprsku o 1–8 mm, přelosovaný decal
+  skočí o decimetry nebo změní položku). Po změně `seed` nebo pravidel test přeskočí (otisk vstupů
+  `rules_hash`) – pak přestavět dvakrát. Oprava sama jednorázově přelosovala všechny náhodné decaly.
+- fn) **Na výkresu nákladu chybělo šest nápisů a hasicí přístroj, světel bylo o dvě víc** (2. 10. 2026, kritik I-02).
   Model výkresu bral místnost bodu z obdélníku layoutu (y ±1,90), ale obložení nákladu z kitu je na ±2,05: nápisy na
   něm (y ±2,025) vypadly, a vnější reflektory gondol nad stropem (z 2,59) prošly filtrem výšky jako světla nákladu.
   Řešení: `interior_model._room_spaces` (místnost = obdélník rozšířený k lícům stěn kitu), světla exportu nad stropem
   kit místnosti jdou na exteriér; vybavení lodi z `interior.kit.fittings` má vlastní ID. Kit platí před layoutem.
-- fm) **Světlá výška pod žebrem kabiny vyšla víc, než je** (2. 10. 2026, I-01: 2,08 místo 2,05). Řez rovinou x vrací úsečky s konci na
+- fo) **Světlá výška pod žebrem kabiny vyšla víc, než je** (2. 10. 2026, I-01: 2,08 místo 2,05). Řez rovinou x vrací úsečky s konci na
   hranách trojúhelníků; spodní plocha žebra přes celou šířku dala úsečku s konci daleko mimo pás y ±0,3, takže filtr
   koncových bodů ji vynechal. Úsečky se před hledáním minima ořezávají na pás (`DeckSheet.clear_height`). Pozor i na
   odečet z výkresu: v podélném řezu se žebro kreslí níž, než je nad hlavou, protože jde dál k boku za rovinou řezu.

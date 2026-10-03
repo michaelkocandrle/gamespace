@@ -70,6 +70,43 @@ def _both_end(g):
     return unary_union([g, affinity.scale(g, -1.0, 1.0, origin=(0, 0))])
 
 
+def nozzle_aft_shapes(ex, centre):
+    """The main engine nozzle from behind (kit pilot step d), around centre (y, z): ID -> shape. The bell to the throat
+    ring, the core as the ring between the throat and the plug, ribs and tie rods as their outlines across the bell."""
+    nzb = ex["nozzle"]
+    c = Point(centre[0], centre[1])
+    th, pl = nzb["throat"], nzb["plug"]
+    r_plug = max(r for _, r in pl["profile"])
+    out = {ex["id"]: c.buffer(ex["r_lip"], 64).difference(c.buffer(th["r"][1], 64)),
+           nzb["collar"]["id"]: c.buffer(nzb["collar"]["r"][1], 64).difference(c.buffer(nzb["collar"]["r"][0], 64)),
+           th["id"]: c.buffer(th["r"][1], 64).difference(c.buffer(th["r"][0], 64)),
+           "F-NOZZLE": c.buffer(th["r"][0], 64).difference(c.buffer(r_plug, 64)),
+           pl["id"]: c.buffer(r_plug, 64)}
+    bell = [p for p in nzb["bell"] if p[0] >= 0.04]
+    rg = nzb["rings"]
+    r_ring = [min(r for dx, r in bell if dx <= a + 0.06) - rg["proud"] for a in rg["at"]]
+    out[rg["id"]] = unary_union([c.buffer(r + rg["proud"], 64).difference(c.buffer(r, 64)) for r in r_ring])
+    rb = nzb["ribs"]
+    ribs = []
+    r_out, r_in = bell[0][1], th["r"][1]
+    for k in range(rb["count"]):
+        a = math.radians(rb["phase_deg"]) + 2 * math.pi * k / rb["count"]
+        ca, sa = math.cos(a), math.sin(a)
+        n = (-sa * rb["thickness"] / 2, ca * rb["thickness"] / 2)
+        ribs.append(Polygon([(centre[0] + r * ca + s_ * n[0], centre[1] + r * sa + s_ * n[1])
+                             for r, s_ in ((r_in, -1), (r_out, -1), (r_out, 1), (r_in, 1))]))
+    out[rb["id"]] = unary_union(ribs).difference(c.buffer(r_in, 64))
+    st = nzb["struts"]
+    r_wall = min(r for dx, r in bell if dx <= st["to"] + 0.04)
+    rods = []
+    for k in range(st["count"]):
+        a = math.radians(st["phase_deg"]) + 2 * math.pi * k / st["count"]
+        rods.append(LineString([(centre[0] + r_plug * math.cos(a), centre[1] + r_plug * math.sin(a)),
+                                (centre[0] + r_wall * math.cos(a), centre[1] + r_wall * math.sin(a))]).buffer(st["r"]))
+    out[st["id"]] = unary_union(rods).difference(c.buffer(r_plug, 64))
+    return out
+
+
 def _rot(v, deg):
     c, s = math.cos(math.radians(deg)), math.sin(math.radians(deg))
     return (v[0] * c - v[1] * s, v[0] * s + v[1] * c)
@@ -396,6 +433,7 @@ class Views:
         self._end_profiles()
         self._design()
         self._roof()
+        self._aft()
         self._port()
         for e in m.elements:
             for view, g in e.geo.items():
@@ -440,9 +478,14 @@ class Views:
         pa = m.pod_axis
         ex, it = rev["exhaust"], rev["intake"]
         c = Point(pa[0], pa[1])
-        self.put(m.by_id[ex["id"]], "AFT", _both_end(c.buffer(ex["r_lip"], 64).difference(c.buffer(ex["r_duct"], 64))),
-                 "area", "pod")
-        self.put(m.by_id["F-NOZZLE"], "AFT", _both_end(c.buffer(ex["r_duct"], 64)), "area", "pod")
+        if ex.get("nozzle"):
+            # the nozzle from behind (kit pilot step d), both pods
+            for pid, shp in nozzle_aft_shapes(ex, pa).items():
+                self.put(m.by_id[pid], "AFT", _both_end(shp), "area", "pod")
+        else:
+            self.put(m.by_id[ex["id"]], "AFT", _both_end(c.buffer(ex["r_lip"], 64).difference(c.buffer(ex["r_duct"], 64))),
+                     "area", "pod")
+            self.put(m.by_id["F-NOZZLE"], "AFT", _both_end(c.buffer(ex["r_duct"], 64)), "area", "pod")
         self.put(m.by_id[it["id"]], "FWD", _both_end(c.buffer(it["r_lip"], 64)), "area", "pod")
         # canopy frame struts across the glass, from above
         cf = m.by_id["F-CANOPY-FRAME"]
@@ -949,6 +992,104 @@ class Views:
             g = unary_union(strips).difference(cut).intersection(hull_plan)
             self.put(m.by_id[it["id"]], "TOP", em.polys_only(g.buffer(0)), "area", "hull",
                      anchor=(it["x"][0] + 2.0, k["pipes"][0]["y"]))
+
+    def aft_parts(self):
+        """What the aft wall's plates and frame must clear (AFT view, built or proposed, not removed): the ramp frame
+        with its gussets, the pistons, the vent boxes, the ramp light, the hinge."""
+        m = self.m
+        out = []
+        for it in m.design.get("functional", []) + m.design.get("lights", []):
+            if it.get("on") != "aft":
+                continue
+            e = m.by_id[it["id"]]
+            g = e.geo.get("AFT")
+            if g is not None and e.status != "remove":
+                out.append(self.paper("AFT", g["shape"]))       # back from paper axes (the turn is its own inverse)
+        for ident in m.design["panels"].get("aft", {}).get("clear", []):
+            g = m.by_id[ident].geo.get("AFT")
+            if g is not None:
+                out.append(self.paper("AFT", g["shape"]))
+        return out
+
+    def aft_layout(self):
+        """The aft wall as plates on a frame (panels.aft, frame FR-AFT; kit pilot step c, 2. 10. 2026): the members as
+        strips of the kit's width, the plates as the cells inside the outline less the members (gap off them) and the
+        parts (cut_margin off them), vent boxes on the plates named in vent.plates. AFT coordinates (y, z), y >= 0 =
+        port. {"frame": shape, "plates": [(ident, side tag, n, shape)], "vents": [(ident, shape)]}."""
+        m = self.m
+        des = m.design["panels"]
+        aft = des["aft"]
+        fr = next(f for f in m.design["frame"] if f["kind"] == "aft")
+        w = m.kit[fr["kit"]]["w"]
+        half = Polygon(aft["outline"])
+        outline = unary_union([half, affinity.scale(half, -1.0, 1.0, origin=(0, 0))]).buffer(0)
+        members = []
+        for mb in fr["members"]:
+            for sd in ((1, -1) if mb.get("mirror") else (1,)):
+                if isinstance(mb["z"], list):
+                    members.append(box(sd * mb["y"] - w / 2, mb["z"][0], sd * mb["y"] + w / 2, mb["z"][1]))
+                else:
+                    y0, y1 = sorted((sd * mb["y"][0], sd * mb["y"][1]))
+                    members.append(box(y0, mb["z"] - w / 2, y1, mb["z"] + w / 2))
+        members = unary_union(members)
+        parts = unary_union(self.aft_parts()) if self.aft_parts() else Polygon()
+        frame = em.polys_only(members.intersection(outline.buffer(-0.02)).difference(parts.buffer(0.02, join_style=2))
+                              .buffer(0))
+        free = outline.buffer(-0.02, join_style=2).difference(members.buffer(aft["gap"], join_style=2)).difference(
+            parts.buffer(des["cut_margin"], join_style=2))
+        plates, vents = [], []
+        from shapely.ops import polylabel
+        for c in aft["cells"]:
+            for sd, tag in (((0, "C"),) if c.get("centre") else ((1, "L"), (-1, "P"))):
+                y0, y1 = c["y"] if sd >= 0 else (-c["y"][1], -c["y"][0])
+                shp = em.largest(em.polys_only(free.intersection(box(y0, c["z"][0], y1, c["z"][1])).buffer(0)))
+                if shp.is_empty or shp.area < des["min_area_m2"]:
+                    continue
+                if 2 * shp.boundary.distance(polylabel(shp, 0.005)) < des.get("min_width_m", 0.0):
+                    continue
+                ident = "P-S-A%s%02d" % (tag, c["n"])
+                v = aft.get("vent")
+                if v and c["n"] in v["plates"] and sd != 0:
+                    vb = box(sd * v["y"] - v["w"] / 2, 0, sd * v["y"] + v["w"] / 2, v["h"])
+                    # as high as it fits in the plate (the outline slopes down outboard): slide down from the top
+                    inner = shp.buffer(-0.07, join_style=2)
+                    z = shp.bounds[3]
+                    while z > shp.bounds[1] and not inner.contains(affinity.translate(vb, 0, z - v["h"])):
+                        z -= 0.02
+                    if z > shp.bounds[1]:
+                        vents.append((ident + "-V", affinity.translate(vb, 0, z - v["h"])))
+                plates.append((ident, tag, c["n"], shp))
+        return {"frame": frame, "plates": plates, "vents": vents}
+
+    def _aft(self):
+        """The aft wall's plates P-S-A<side><n>, their vent boxes (-V) and the frame FR-AFT in the aft view."""
+        m = self.m
+        aft = m.design["panels"].get("aft")
+        if not aft:
+            return
+        Element = em.Element
+        des = m.design["panels"]
+        lay = self.aft_layout()
+        status = "built" if aft["band"] in des.get("built_bands", []) else des["status"]
+        fr = m.by_id[next(f["id"] for f in m.design["frame"] if f["kind"] == "aft")]
+        fr.geo = {k: v for k, v in fr.geo.items() if k != "AFT"}
+        self.put(fr, "AFT", lay["frame"], "area", "hull")
+        for ident, tag, n, shp in lay["plates"]:
+            side = {"L": "vlevo", "P": "vpravo", "C": "uprostřed"}[tag]
+            el = m.add(Element(ident, "panel", aft["name"], status, material=aft["material"], kit=aft["kit"], src="design",
+                               data={"band": aft["band"], "bay": n, "side": tag, "mirror": False},
+                               what="deska %s %s, pole %d" % (aft["name"], side, n)))
+            el.qty, el.where = 1, "zadní stěna %s" % side
+            el.geo, el.vextra = {}, {}
+            self.put(el, "AFT", shp, "area", "hull")
+        for ident, g in lay["vents"]:
+            of = ident[:-2]
+            el = m.add(Element(ident, "panel", aft["name"], status, material="MZ-GUNMETAL", kit="XK-VENTBOX",
+                               src="design", data={"band": aft["band"], "sub": "vent", "of": of, "mirror": False},
+                               what="větrací skříň s lamelami na desce %s" % of))
+            el.qty, el.where = 1, "zadní stěna"
+            el.geo, el.vextra = {}, {}
+            self.put(el, "AFT", g, "area", "hull")
 
     def plan_conflicts(self):
         """The roof seen from above: a part under a plate (the plate must cut it out), lettering on a plate of its

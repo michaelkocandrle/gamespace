@@ -19,7 +19,8 @@ v nižším ve stejném kroku.
 Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**, modul `gamespace`, repozitář `michaelkocandrle/gamespace`,
 větev `main`, hlavní checkout `C:\gamespace\gamespace`. Cíl: let a interiéry 1:1 se Star Citizen, z vesmíru
 až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
-**Autor** není herní vývojář. Mluví česky a hraje zabalenou hru ve 1080p na RTX 2060 6 GB.
+**Autor** není herní vývojář. Mluví česky a hraje zabalenou hru; od 2. 10. 2026 nový PC: Ryzen 5 7600, Radeon RX 9070,
+32 GB, jediný disk C (staré měření výkonu z RTX 2060 neplatí).
 
 ## Pravidla
 
@@ -116,7 +117,8 @@ Spotřebu dělá hlavně opakované načítání dlouhého kontextu (cache read)
 .\Tools\Cleanup.ps1 [-DryRun]                       # úklid disku na konci kroku
 ```
 
-Presety jsou v `Tools/Shots/*.json`; snímky v `D:\gamespace-shots\<sada>` (`Tools/ShotsDir.ps1`, mimo disk C), s `-Keep`
+Presety jsou v `Tools/Shots/*.json`; snímky v `C:\gamespace-shots\<sada>` (proměnná `GAMESPACE_SHOTS_DIR`, `Tools/ShotsDir.ps1`; D: je na novém PC
+flashka), s `-Keep`
 i v `Docs/Shots/`. Soubory v gitu (recenze) odkazují snímek jako `shots:<sada>/<soubor>` (`Tools/shots_dir.py`).
 Blender 5.2 headless z Git Bash **vždy** s `MSYS_NO_PATHCONV=1` (skill `blender-mcp`); 2D návrh lodi
 `python Tools/Design/draw_ship_design.py ArtSource/Ships/<Loď>/Design/<Loď>_layout.json`.

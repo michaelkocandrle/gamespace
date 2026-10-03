@@ -1,0 +1,279 @@
+{
+ "_comment": "Wayfarer kit pilot step e (2. 10. 2026, analysis only): why the hull stays bright at night and the red position light. The same stern view at night with one light source switched off at a time (sun, sky light, Lumen GI, the ship's lights via Intensity 0 on point/spot lights is not available: compare with the sun and sky both off), plus the red light by day and by night. Console settings stay for the rest of the preset, so every shot sets all of them. Ship-local coordinates as in wayfarer_kit_pilot.json. Run: .\\Tools\\Shots.ps1 -Preset wayfarer_night_analysis -Editor -Width 1920 -Height 1080 The last three shots switch on the sun's per-pixel atmosphere transmittance (night, dusk, day).",
+ "shots": [
+  {
+   "name": "warmup",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 4.0,
+   "fov": 60,
+   "camera_local": [
+    -18.0,
+    -3.0,
+    1.2
+   ],
+   "look_local": [
+    -10.4,
+    0.0,
+    0.5
+   ],
+   "console": [
+    "space.SunDir -39 45"
+   ]
+  },
+  {
+   "name": "day_ref",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "camera_local": [
+    -18.0,
+    -3.0,
+    1.2
+   ],
+   "look_local": [
+    -10.4,
+    0.0,
+    0.5
+   ],
+   "console": [
+    "space.SunDir -39 45",
+    "space.Sun LightColor 255 255 255",
+    "space.Sun Intensity 11",
+    "space.Sky Intensity 0.55",
+    "r.Lumen.DiffuseIndirect.Allow 1"
+   ]
+  },
+  {
+   "name": "night_preset",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "camera_local": [
+    -18.0,
+    -3.0,
+    1.2
+   ],
+   "look_local": [
+    -10.4,
+    0.0,
+    0.5
+   ],
+   "console": [
+    "space.SunDir -44.1 104",
+    "space.Sun Intensity 11",
+    "space.Sky Intensity 0.03",
+    "r.Lumen.DiffuseIndirect.Allow 1"
+   ]
+  },
+  {
+   "name": "night_sun_off",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "camera_local": [
+    -18.0,
+    -3.0,
+    1.2
+   ],
+   "look_local": [
+    -10.4,
+    0.0,
+    0.5
+   ],
+   "console": [
+    "space.SunDir -44.1 104",
+    "space.Sun Intensity 0",
+    "space.Sky Intensity 0.03",
+    "r.Lumen.DiffuseIndirect.Allow 1"
+   ]
+  },
+  {
+   "name": "night_sun_sky_off",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "camera_local": [
+    -18.0,
+    -3.0,
+    1.2
+   ],
+   "look_local": [
+    -10.4,
+    0.0,
+    0.5
+   ],
+   "console": [
+    "space.SunDir -44.1 104",
+    "space.Sun Intensity 0",
+    "space.Sky Intensity 0",
+    "r.Lumen.DiffuseIndirect.Allow 1"
+   ]
+  },
+  {
+   "name": "night_all_off_no_gi",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "camera_local": [
+    -18.0,
+    -3.0,
+    1.2
+   ],
+   "look_local": [
+    -10.4,
+    0.0,
+    0.5
+   ],
+   "console": [
+    "space.SunDir -44.1 104",
+    "space.Sun Intensity 0",
+    "space.Sky Intensity 0",
+    "r.Lumen.DiffuseIndirect.Allow 0"
+   ]
+  },
+  {
+   "name": "night_red_light",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 55,
+   "camera_local": [
+    -12.75,
+    -6.5,
+    3.0
+   ],
+   "look_local": [
+    -8.45,
+    -3.6,
+    1.8
+   ],
+   "console": [
+    "space.SunDir -44.1 104",
+    "space.Sun Intensity 11",
+    "space.Sky Intensity 0.03",
+    "r.Lumen.DiffuseIndirect.Allow 1"
+   ]
+  },
+  {
+   "name": "day_red_light",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 50,
+   "camera_local": [
+    -2.5,
+    -6.5,
+    3.4
+   ],
+   "look_local": [
+    -5.2,
+    -3.4,
+    0.6
+   ],
+   "console": [
+    "space.SunDir -39 45",
+    "space.Sun Intensity 11",
+    "space.Sky Intensity 0.55",
+    "r.Lumen.DiffuseIndirect.Allow 1"
+   ]
+  },
+  {
+   "name": "night_perpixel_transmittance",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "camera_local": [
+    -18.0,
+    -3.0,
+    1.2
+   ],
+   "look_local": [
+    -10.4,
+    0.0,
+    0.5
+   ],
+   "console": [
+    "space.SunDir -44.1 104",
+    "space.Sun Intensity 11",
+    "space.Sky Intensity 0.03",
+    "r.Lumen.DiffuseIndirect.Allow 1",
+    "space.Sun bPerPixelAtmosphereTransmittance 1"
+   ]
+  },
+  {
+   "name": "dusk_perpixel_transmittance",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "camera_local": [
+    -18.0,
+    -3.0,
+    1.2
+   ],
+   "look_local": [
+    -10.4,
+    0.0,
+    0.5
+   ],
+   "console": [
+    "space.SunDir -44.7 81.5",
+    "space.Sun Intensity 11",
+    "space.Sky Intensity 0.55",
+    "space.Sun bPerPixelAtmosphereTransmittance 1"
+   ]
+  },
+  {
+   "name": "day_perpixel_transmittance",
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 3.0,
+   "fov": 60,
+   "camera_local": [
+    -18.0,
+    -3.0,
+    1.2
+   ],
+   "look_local": [
+    -10.4,
+    0.0,
+    0.5
+   ],
+   "console": [
+    "space.SunDir -39 45",
+    "space.Sun Intensity 11",
+    "space.Sky Intensity 0.55",
+    "space.Sun bPerPixelAtmosphereTransmittance 1"
+   ]
+  }
+ ]
+}
