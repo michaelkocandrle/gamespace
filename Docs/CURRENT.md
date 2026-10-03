@@ -39,7 +39,7 @@ výkresy v **revizi E** čekají na schválení (schválená D). Nový PC autora
 ## Paralelní práce
 
 - **Druhá session** (worktree `gamespace-audit`, větev `wayfarer-dossier-interior`): výkresy interiéru I-01–I-09 (styl
-  I-04, skill `ship-pipeline` 1c); I-01–I-03 hotové, recenze `2026-10-02_wayfarer_drawing_i0*`; konflikt `Drawings/*`: překreslit.
+  I-04, skill `ship-pipeline` 1c); I-01–I-09 hotové (kritik 5,3–6,8, „musí“ opravené), čekají na autora; `Drawings/*`: překreslit.
 - **Hlavní session:** exteriérový kit. Druhá session balí do `Builds_<jméno>`; slučuje hlavní session.
 
 ## Čeká na rozhodnutí autora
