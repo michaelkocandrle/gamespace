@@ -75,6 +75,6 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 1. **Wayfarer revize G** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený do finální
    recenze. Další práce podle autora (3. 10.): let (HUD, mapa, palivo), interiér, Steadfast.
 2. **Přistání na svahu hotové** (3. 10.), čeká na vyzkoušení autorem; později odpružení nohou, mírnější klesání u země.
-3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
+3. **Let podle SC – DALŠÍ ÚKOL: zbytek HUD a MFD (SC-3)** (autor 4. 10. vybral), pak mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).
