@@ -2361,11 +2361,11 @@
     "mirror_color": "green",
     "light": {
      "type": "point",
-     "intensity_cd": 3,
-     "radius_m": 1.0
+     "intensity_cd": 0.3,
+     "radius_m": 0.6
     },
     "_what": "position lights on the light_housing decal",
-    "_why": "the wing is 30 cm away: 25 cd and then 10 cd still left a red pool on it in daylight (24. 9. 2026)"
+    "_why": "the wing is 30 cm away: 25 cd and then 10 cd still left a red pool on it in daylight (24. 9. 2026); 3 cd still did (critic, kit pilot rounds 1 and 4): the scene runs on an 11 lx sun, so 0.3 cd and 0.6 m (step e, 2. 10. 2026)"
    },
    {
     "id": "L-TAIL",

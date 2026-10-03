@@ -7,6 +7,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/LightComponent.h"
 #include "Engine/CollisionProfile.h"
+#include "Components/DirectionalLightComponent.h"
 #include "Engine/DirectionalLight.h"
 #include "EngineUtils.h"
 #include "Engine/StaticMesh.h"
@@ -57,6 +58,7 @@ void ASkyDome::BeginPlay()
 	{
 		Sun = *It;
 		SunBaseIntensity = It->GetLightComponent()->Intensity;
+		SunRequestedIntensity = SunWrittenIntensity = SunBaseIntensity;
 		break;
 	}
 	if (SkyMaterial)
@@ -79,12 +81,14 @@ void ASkyDome::Tick(float DeltaSeconds)
 	const FVector CameraLocation = Camera->GetCameraLocation();
 	SetActorLocation(CameraLocation);
 
+	FCelestialEnvironment Environment;
+	bool bHasEnvironment = false;
+	ACelestialBody::FindNearest(GetWorld(), CameraLocation, &Environment, &bHasEnvironment);
+	const float Amount = bHasEnvironment ? Environment.SkyAmount : 0.f;
+	UpdateSunShadow(bHasEnvironment, Environment);
+
 	if (SkyMaterial)
 	{
-		FCelestialEnvironment Environment;
-		bool bHasEnvironment = false;
-		ACelestialBody::FindNearest(GetWorld(), CameraLocation, &Environment, &bHasEnvironment);
-		const float Amount = bHasEnvironment ? Environment.SkyAmount : 0.f;
 		SkyMaterial->SetScalarParameterValue(TEXT("AtmosphereAmount"), Amount);
 		SkyMaterial->SetScalarParameterValue(TEXT("Twinkle"), FMath::Lerp(SpaceTwinkle, AtmosphereTwinkle, Amount));
 		SkyMaterial->SetScalarParameterValue(TEXT("NebulaBrightness"), NebulaBase * NebulaScale);
@@ -105,7 +109,7 @@ void ASkyDome::Tick(float DeltaSeconds)
 			if (const ADirectionalLight* Light = Sun.Get())
 			{
 				const float Height = FVector::DotProduct(-Light->GetActorForwardVector(), Environment.Up);
-				const float On = SunBaseIntensity > 0.f ? FMath::Clamp(Light->GetLightComponent()->Intensity / SunBaseIntensity, 0.f, 1.f) : 1.f;
+				const float On = SunBaseIntensity > 0.f ? FMath::Clamp(SunRequestedIntensity / SunBaseIntensity, 0.f, 1.f) : 1.f;
 				Day = FMath::SmoothStep(-0.12f, 0.08f, Height) * On;
 			}
 			SkyMaterial->SetVectorParameterValue(TEXT("PlanetUp"), FLinearColor(FVector3f(Environment.Up)));
@@ -114,4 +118,36 @@ void ASkyDome::Tick(float DeltaSeconds)
 			SkyMaterial->SetScalarParameterValue(TEXT("SkyBrightness"), Environment.SkyBrightness * FMath::Lerp(NightSkyFloor, 1.f, Day));
 		}
 	}
+}
+
+void ASkyDome::UpdateSunShadow(bool bHasEnvironment, const FCelestialEnvironment& Environment)
+{
+	ADirectionalLight* const Light = Sun.Get();
+	if (!Light)
+	{
+		return;
+	}
+	UDirectionalLightComponent* const Component = Cast<UDirectionalLightComponent>(Light->GetLightComponent());
+	if (!Component)
+	{
+		return;
+	}
+	// Someone else set the intensity since the last frame (the level, space.Sun, quantum travel): that is the
+	// new request; the shadow only ever scales the request.
+	if (!FMath::IsNearlyEqual(Component->Intensity, SunWrittenIntensity, 1e-4f))
+	{
+		SunRequestedIntensity = Component->Intensity;
+	}
+	float Shadow = 1.f;
+	if (bHasEnvironment)
+	{
+		const float Height = FVector::DotProduct(-Light->GetActorForwardVector(), Environment.Up);
+		Shadow = FMath::SmoothStep(SunShadowZeroHeight, SunShadowFullHeight, Height);
+	}
+	const float Wanted = SunRequestedIntensity * Shadow;
+	if (!FMath::IsNearlyEqual(Component->Intensity, Wanted, 1e-4f))
+	{
+		Component->SetIntensity(Wanted);
+	}
+	SunWrittenIntensity = Wanted;
 }

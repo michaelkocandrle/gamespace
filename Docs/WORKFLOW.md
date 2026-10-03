@@ -992,6 +992,12 @@ snímku.
   přestavba samotného trupu ale kvůli nedeterminismu pořád změní jeho otisk (oprava stavby čeká v CURRENT.md).
   Pořadí světel svítidel opraveno 2. 10. 2026: `hs_fixture_lights` je řadí (síla, materiál, místo); dřív se po přestavbě
   přečíslovala `fix_*` a s nimi ID `L-FIX-*` na listu I-04 (`test_interior_drawing` hlásil prvky jen ve výkresu / jen v datech).
+- fm) **Po pádu počítače byla loď ve hře černá krabice bez gondol** (3. 10. 2026). Modrá obrazovka MEMORY_MANAGEMENT
+  (nestabilní RAM s EXPO 6000; Windows Memory Diagnostic našel chyby, bez EXPO čistý) přerušila import a nechala
+  `SM_Ship_Wayfarer.uasset` a `_Decals.uasset` rozepsané; další import je nepřepsal (log: „Unable to load package … end of
+  package tag is not valid“). Řešení: poškozené `.uasset` vrátit z gitu (`git checkout --`), import s
+  `GAMESPACE_SHIP_FORCE_IMPORT=1`; kontrola všech balíčků = značka `C1 83 2A 9E` na začátku i konci souboru. Výstupy
+  z doby nestabilní paměti přestavět (Blender, export, C++, balení načisto bez `Saved/Cooked`).
 - cx) **Volná kamera snímků viděla postavu hráče.** Po `space.Showroom` stojí postava na startu. Snímky s `"camera": "free"` pak mají v záběru její ramena nebo celou postavu. Preset, který ověřuje vstup (`"camera": "pawn"`), má postavu hned poslat zpět (`space.Showroom annex` znovu) a teprve pak fotit volnou kamerou (`kit_annex.json`).
 - cy) **Překryv `stat unit` / `stat gpu` zůstal na dalších snímcích.** Konzolové příkazy platí pro zbytek presetu. Snímek po měření výkonu musí mít `stat none`. Opačně: `stat gpu` zapnutý v rozcvičovacím snímku se do dalších snímků nemusí propsat. Seznam průchodů fotit se `stat none`, `stat unit`, `stat gpu` přímo v měřeném snímku (jako `l_perf_corridor`).
 - cz) **S MegaLights C (RT stíny) ukázka ztmavla.** Světla bez stínů prosvítala geometrií, se stíny už ne. Průměr chodby klesl z 0,20 na 0,13, p90 z 0,42 na 0,25. Po zapnutí stínů přeměř `measure_look.py` a jas případně doplň intenzitou svítidel; s MegaLights to výkon skoro nemění.

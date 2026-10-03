@@ -25,6 +25,8 @@ class UStaticMeshComponent;
  *
  * It also points the material's sun disc at the level's first directional light, and scales
  * star twinkle and nebula brightness (stronger twinkle in air, where real stars scintillate).
+ *
+ * Near a planet it fades the sun's light out below the camera's horizon (planet shadow).
  */
 UCLASS()
 class GAMESPACE_API ASkyDome : public AActor
@@ -71,7 +73,21 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float NightSkyFloor = 0.02f;
 
+	/** Planet shadow on the sun (author 2. 10. 2026, Docs/Reviews/2026-10-02_wayfarer_step_e_night.md): the sun's
+	 *  light fades out as it sinks below the horizon where the camera is - full at this height of the sun over
+	 *  the local horizon (sine of its elevation; 0.052 = 3 deg)... */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "-1.0", ClampMax = "1.0"))
+	float SunShadowFullHeight = 0.052f;
+
+	/** ...and gone at this one (-0.035 = 2 deg below). Without it the sun under the horizon lit a ship 3 km over
+	 *  Veyra at 89 % of the day: nothing occludes a directional light, and the atmosphere's own transmittance is
+	 *  taken at the planet's +Z top, not where the ship is. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "-1.0", ClampMax = "1.0"))
+	float SunShadowZeroHeight = -0.035f;
+
 private:
+	void UpdateSunShadow(bool bHasEnvironment, const struct FCelestialEnvironment& Environment);
+
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> SkyMaterial;
 
@@ -80,4 +96,8 @@ private:
 	float SunDiscBase = -1.f;
 	float SunGlowBase = -1.f;
 	float SunBaseIntensity = -1.f;
+	/** The intensity the rest of the game asks of the sun (level, space.Sun, quantum travel) before the planet
+	 *  shadow, and the shadowed value last written: a change from that one is a new request. */
+	float SunRequestedIntensity = -1.f;
+	float SunWrittenIntensity = -1.f;
 };

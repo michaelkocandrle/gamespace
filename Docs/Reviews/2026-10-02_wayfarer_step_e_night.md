@@ -61,3 +61,13 @@ nízkém osvětlení. Po opravě noci ověřit znovu. Pokud zůstane, patří k 
 ## Rozhodnutí autora
 - Stín planety v C++ (bod 1): ano / ne.
 - Navigační světla 10× slabší (bod 2): ano / ne.
+
+## Opraveno (autor 2. 10. 2026: „ano obojí“), ověřeno 3. 10. 2026
+
+- **Stín planety** (`ASkyDome::UpdateSunShadow`): síla slunce × smoothstep výšky slunce nad obzorem kamery
+  (`SunShadowZeroHeight` −0,035 = −2°, `SunShadowFullHeight` 0,052 = +3°); násobí jen „požadovanou“ sílu (level,
+  `space.Sun`, quantum), takže konzole i quantum dál fungují. Jas středu zádě: den 0,504 (beze změny), soumrak 0,524,
+  **noc 0,004** (dřív 0,451). V noci je trup tmavý a čtou se jen světla a jádra trysek.
+- **Navigační světla** 3 cd / 1 m → 0,3 cd / 0,6 m: ve dne jen čočka s malou září, bez červené skvrny na křídle.
+- Snímky `shots:20261003_020711_wayfarer_night_analysis/`, zabalená hra `shots:20261003_021620_wayfarer_kit_pilot/`.
+- Pracovní světlo bez kuželu na rampě a zrnitý šum Lumenu ve tmě zůstávají otevřené (kit celé lodi, optimalizace).

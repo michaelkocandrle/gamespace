@@ -3,7 +3,7 @@
 Jediný zdroj **aktuálního** stavu (nad ním jen `CLAUDE.md`), **nejvýš 80 řádků** (autor 30. 9. 2026). Hotové do stavu,
 splněné smaž; podrobnosti do commitu a recenzí (`Docs/Reviews/`), historie do 30. 9. v `Docs/HANDOFF.md` (archiv).
 
-Stav k **2. 10. 2026 večer**: pilot kitu Wayfareru **hotový** (krok d, kritik PASS 6,6) a krok e (analýza noci) hotový;
+Stav k **2. 10. 2026 večer**: pilot kitu Wayfareru **hotový** (krok d, kritik PASS 6,6); noc opravena stínem planety (3. 10.);
 výkresy v **revizi E** čekají na schválení (schválená D). Nový PC autora.
 
 ## Stav
@@ -46,8 +46,6 @@ výkresy v **revizi E** čekají na schválení (schválená D). Nový PC autora
 ## Čeká na rozhodnutí autora
 
 - **Revize E výkresů** E-01 až E-08 (krok d, detail G trysky na E-05): schválení.
-- Krok e (analýza noci, `Docs/Reviews/2026-10-02_wayfarer_step_e_night.md`): stín planety v C++ (slunce pod obzorem
-  svítí na loď 89 % denní silou) a navigační světla 10× slabší – ano / ne.
 - Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověření FAIL 7/6/6/7/7/8/8/7, levné body opravené).
 - Steadfast: schválení 2D návrhu v2 (`Steadfast_Design.md`). Kanopa Wayfareru jako téma designu v2 (autor otevře
   sám); paleta Kestrel Dynamics u první lodi Kestrelu.
@@ -57,6 +55,7 @@ výkresy v **revizi E** čekají na schválení (schválená D). Nový PC autora
 - Exteriér Wayfareru mimo pilot (podvozek, křídla, zbraně) čeká na kit celé lodi. Loď na svahu leží trupem v terénu.
 - `DebugEngageQuantum` po zadání cíle jménem znovu vybírá cíl podle nosu lodi (drobnost, autor 1. 10.).
 - Interiér Wayfareru: otevřené body recenzí `2026-09-30_cabin_furniture.md` a `2026-09-30_cabin_liner.md`.
+- PC autora: RAM s EXPO 6000 padala (BSOD, chyby v testu paměti); od 3. 10. běží na 4800 bez chyb (WORKFLOW 9.6 fm).
 - **Odrazy kovu odložené na optimalizaci** (autor 30. 9.): odrazy Lumenu do drsnosti 0,32 za +1,3 ms.
 - Kit: vyšlapaná linie potřebuje směrovou buňku atlasu špíny, špína v kanálech dlouhou úzkou buňku (krok c); ohmatání
   madel; lišty stropu po segmentech. Rozvody S na zadním konci (x 3–4) dělají ohyb přes pole bez desky.
@@ -71,7 +70,7 @@ výkresy v **revizi E** čekají na schválení (schválená D). Nový PC autora
 
 ## Další kroky
 
-1. **Wayfarer – kit na celou loď** až po rozhodnutích níže. Otevřené body kritika kola 4 (`…_kit_pilot.md`, krok d):
+1. **Wayfarer – kit na celou loď** (autor 2. 10.: rovnou po opravě noci). Otevřené body kritika kola 4 (`…_kit_pilot.md`, krok d):
    jádro trysky bledé v zabalené hře, tepelný límec, variace laku, černé výřezy hřbetu, šablony. Paralelní session
    I-01–I-09 (bez Unrealu / Blenderu / balení) smí běžet.
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.

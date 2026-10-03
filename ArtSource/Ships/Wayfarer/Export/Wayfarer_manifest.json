@@ -34,7 +34,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "e4b92a6f14ff46a623503526410a9ffd9a82766f"
+      "geometry_hash": "304269a118c333697544b1a4aa56abd1897bfdc1"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -48,7 +48,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "909014898b3bb9d9fc280f2cd2fcf0be7f461c88"
+      "geometry_hash": "c22011274225dd289c9f4768e7c2b956519afba2"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Gear.fbx",
@@ -69,7 +69,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "bef764ba8d135cc91f026017b8a56fcbe04c6e99"
+      "geometry_hash": "d5cf9e7e6c9b95fa857191a66a7a2642dadfaaeb"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
@@ -97,8 +97,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 350398,
-      "verts": 250286,
+      "tris": 350370,
+      "verts": 250272,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -158,8 +158,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 64902,
-      "verts": 65999,
+      "tris": 64910,
+      "verts": 66011,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -232,8 +232,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 350581,
-      "verts": 183528,
+      "tris": 350589,
+      "verts": 183530,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -433,7 +433,7 @@
         [
           -9.949999809265137,
           3.2013895511627197,
-          0.8000004291534424
+          0.8000011444091797
         ],
         [
           -7.250000476837158,
