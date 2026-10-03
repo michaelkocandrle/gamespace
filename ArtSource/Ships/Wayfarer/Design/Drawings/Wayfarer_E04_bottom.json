@@ -4,10 +4,10 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "c10dc8f0b500",
-  "recipe": "dda2f1855a70",
+  "recipe": "db0bc4847575",
   "setup": "e529ae9d527e",
   "spec": "d9597dfcd605",
-  "design": "a900f2766083",
+  "design": "d04a9abd689c",
   "library": "3ed0bfdbff37"
  },
  "drawn": {
@@ -82,7 +82,6 @@
    "P-S-K12",
    "P-S-K13",
    "P-S-K14",
-   "P-S-K15",
    "Z-B-01"
   ]
  },
@@ -158,7 +157,6 @@
    "P-S-K12",
    "P-S-K13",
    "P-S-K14",
-   "P-S-K15",
    "Z-B-01"
   ]
  },

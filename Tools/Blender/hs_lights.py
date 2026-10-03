@@ -74,6 +74,19 @@ def _ray(spec, side, pod_axis):
     raise ValueError(on)
 
 
+def _strip_z(st, x):
+    """Height of a side strip at x: "z" is one height or a polyline [[x, z], ...] (exterior_model.side_strip_pts)."""
+    z = st.get("z", 0.0)
+    if not isinstance(z, list):
+        return z
+    if x <= z[0][0]:
+        return z[0][1]
+    for (x0, z0), (x1, z1) in zip(z, z[1:]):
+        if x0 <= x <= x1 and x1 > x0:
+            return z0 + (x - x0) / (x1 - x0) * (z1 - z0)
+    return z[-1][1]
+
+
 def _frame(n):
     x = Vector((1, 0, 0)) - n * n.x
     if x.length < 1e-3:
@@ -151,7 +164,7 @@ def apply(recipe, made, coll, mats_factory, bevel):
                 else:
                     if st.get("on") in ("side", "bottom", "top"):
                         # hull strips: running lights along the side / belly (z or y fixed)
-                        origin, d = _ray({"on": st["on"], "x": xx, "z": st.get("z", 0.0), "y": st.get("y", 0.0)}, side, axis)
+                        origin, d = _ray({"on": st["on"], "x": xx, "z": _strip_z(st, xx), "y": st.get("y", 0.0)}, side, axis)
                     else:
                         origin, d = _ray({"on": "pod", "x": xx, "deg": st["deg"]}, side, axis)
                     hit, n, _, _ = tree.ray_cast(origin, d, 20.0)

@@ -1263,8 +1263,8 @@ def detail_dims(sh, fr, m, Y0d):
 
 
 POD_CY_DRAW = em.POD_CY
-R1_X = 11.6                            # station of the rib that section R1 cuts (upper side band)
-R2_X = 12.8                            # and section R2 (lower side band)
+R1_X = 15.2                            # station of the rib that section R1 cuts (upper side band): a main bulkhead,
+R2_X = 15.2                            # and section R2 (lower side band); revision F: full ribs only at the bulkheads
 
 
 def dim_h(sh, xa, xb, y, text, ya, yb):
@@ -1305,9 +1305,12 @@ def legend(sh, m, x, ytop):
     for b in m.panel_spec["bands"]:
         k = m.kit[b["kit"]]
         sh.t(x, y, b["band"], 2.6, STATUS_COL["proposed"], weight="bold")
-        sh.t(x + 5, y, "%s: v %s až %s výšky průřezu, na příčce %s z %s … %s" % (
-            b["name"], exact(b["v"][0]), exact(b["v"][1]), em.fmt(R1_X), em.fmt(m.z_of(R1_X, b["v"][0])),
-            em.fmt(m.z_of(R1_X, b["v"][1]))), 2.3)
+        bx = b.get("x", p_ends := m.panel_spec["ends"])
+        at = R1_X if bx[0] < R1_X < bx[1] else (bx[0] + bx[1]) / 2
+        sh.t(x + 5, y, "%s: v %s až %s výšky průřezu%s, na x %s z %s … %s" % (
+            b["name"], exact(b["v"][0]), exact(b["v"][1]),
+            "" if bx == p_ends else ", x %s–%s" % (em.fmt(bx[0]), em.fmt(bx[1])), em.fmt(at),
+            em.fmt(m.z_of(at, b["v"][0])), em.fmt(m.z_of(at, b["v"][1]))), 2.3)
         sh.t(x + 150, y, "%s, %s" % (k["id"], b["material"]), 2.3, STATUS_COL["proposed"])
         y -= 4.4
     roof = m.design["panels"].get("roof")
@@ -1655,10 +1658,15 @@ def title_block(sh, m, x, W, sheet="E-01"):
     sh.t(x + 2, yr - 8.2, "A  1. 10. 2026  vzorový list E-01", 2.4)
     sh.t(x + 85, yr - 8.2, "B  tabulky E-02, schválené změny (✓), listy E-03 až E-08", 2.4)
     sh.t(x + 225, yr - 8.2, "C  schváleno; hřbet R v primárním laku, rám rampy", 2.4)
-    if m.design["revision"] == "D":
-        sh.t(x + 2, yr - 11.6, "D  1. 10. 2026  pilot kitu po kritikovi: páteř a profily rámu, panely a poklopy hřbetu, "
-                               "rampa (lišty, práh, pant, styčníky), písty, RCS, pouzdra světel", 2.4)
-    yd = yr - (15 if m.design["revision"] == "D" else 11)
+    later = [("D", "1. 10. 2026  pilot kitu po kritikovi: páteř a profily rámu, panely a poklopy hřbetu, rampa (lišty, "
+                   "práh, pant, styčníky), písty, RCS, pouzdra světel; krok c: desky ramene S, záď z desek na rámu"),
+             ("E", "2. 10. 2026  trysky motorů (detail G na E-05), gondoly v rozpočtu trojúhelníků"),
+             ("F", "3. 10. 2026  boky po kritikovi kitu celé lodi: pás K v laku, užší kanál L/U, žebra po celé výšce "
+                   "jen na přepážkách, příď z větších desek (P-S-N15)")]
+    later = [r for r in later if r[0] <= m.design["revision"]]
+    for i, (rev, text) in enumerate(later):
+        sh.t(x + 2, yr - 11.6 - i * 3.4, "%s  %s" % (rev, text), 2.4)
+    yd = yr - (11 + 3.4 * len(later) + (0.6 if later else 0))
     sh.line([(x, yd), (x1, yd)], 0.25, z=50)
     dg = m.digests
     sh.t(x + 2, yd - 4.2, "Data (sha1): layout %s · hs %s · setup %s · návrh %s · spec %s · knihovna %s" % (

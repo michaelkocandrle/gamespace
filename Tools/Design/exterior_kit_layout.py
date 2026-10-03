@@ -46,7 +46,7 @@ REGIONS = {
                     "the aft wall as plates on a frame (band A, step c 2. 10. 2026)",
     },
     "ship": {
-        "bands": ["K", "L", "U", "S", "R", "A"],
+        "bands": ["K", "L", "U", "N", "S", "R", "A"],
         "frame": {"FR-SPINE": None, "FR-LONG-TOP": None, "FR-LONG-HI": None, "FR-LONG-LO": None, "FR-RIB": None},
         "parts": ["F-RAMP-FRAME", "F-RAMP-PISTON", "F-RAMP-TREAD", "F-RAMP-HINGE", "L-RAMP", "L-STROBE-FIN",
                   "L-STROBE-WING", "F-RCS-12", "F-RCS-13", "F-CONDUIT", "F-CONDUIT-S", "F-VENT-AFT"],
