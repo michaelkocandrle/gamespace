@@ -154,6 +154,12 @@ def test_ship(ship):
 
     lib = m.library["decals"]
     unknown = [e.id for e in m.elements if e.cat == "decal" and e.src == "recipe" and e.extra.get("item") not in lib]
+    # and every glyph of the kit layout's texts (plate numbers pn_<glyph>; pn_K was missing, 3. 10. 2026: the build
+    # stopped in hs_decals with a KeyError)
+    if os.path.isfile(kit_path):
+        for d in json.load(open(kit_path, encoding="utf-8")).get("decals", []):
+            items = [d.get("prefix", "") + g for g in d["glyphs"]] if "glyphs" in d else [d.get("item")]
+            unknown += ["%s (%s)" % (d["id"], i) for i in items if i and i not in lib]
     check("%s every decal item is in the library" % ship, not unknown, ", ".join(unknown))
     down = [e.id for e in m.elements if e.cat == "decal" and e.sb and e.extra.get("text") and e.extra.get("up")
             and e.extra["up"][1] <= 0.5 and e.status != "remove"]

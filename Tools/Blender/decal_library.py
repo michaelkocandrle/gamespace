@@ -63,6 +63,73 @@ def borrow(module):
             sys.path.append(site)
 
 
+class _PngImage:
+    """Pillow's Image.fromarray(...).save / np.array(Image.open(...)) for 8-bit PNGs, with numpy and zlib only: Blender
+    5.2.2 runs Python 3.13 and the system's Pillow is built for 3.12, so borrowing it fails (_imaging, 3. 10. 2026).
+    Writes filter 0 rows; reads back what it wrote (filter 0) and plain 8-bit L / RGB / RGBA files."""
+    TYPES = {"L": (0, 1), "RGB": (2, 3), "RGBA": (6, 4)}
+
+    def __init__(self, a):
+        self.a = a
+
+    @classmethod
+    def fromarray(cls, a, mode=None):
+        return cls(a)
+
+    def save(self, fn):
+        import struct
+        import zlib
+        import numpy as np
+        a = np.ascontiguousarray(self.a, dtype=np.uint8)
+        h, w = a.shape[:2]
+        ch = 1 if a.ndim == 2 else a.shape[2]
+        ctype = {1: 0, 3: 2, 4: 6}[ch]
+        raw = np.concatenate([np.zeros((h, 1), np.uint8), a.reshape(h, w * ch)], axis=1).tobytes()
+
+        def chunk(tag, data):
+            return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+        with open(fn, "wb") as f:
+            f.write(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, ctype, 0, 0, 0))
+                    + chunk(b"IDAT", zlib.compress(raw, 6)) + chunk(b"IEND", b""))
+
+    @classmethod
+    def open(cls, fn):
+        import struct
+        import zlib
+        import numpy as np
+        data = open(fn, "rb").read()
+        pos, idat, w = 8, b"", 0
+        while pos < len(data):
+            n, tag = struct.unpack(">I4s", data[pos:pos + 8])
+            body = data[pos + 8:pos + 8 + n]
+            if tag == b"IHDR":
+                w, h, depth, ctype = struct.unpack(">IIBB", body[:10])
+                ch = {0: 1, 2: 3, 6: 4}[ctype]
+                if depth != 8:
+                    raise ValueError("8-bit PNG only: %s" % fn)
+            elif tag == b"IDAT":
+                idat += body
+            pos += 12 + n
+        rows = np.frombuffer(zlib.decompress(idat), np.uint8).reshape(h, 1 + w * ch)
+        if rows[:, 0].any():
+            raise ValueError("filtered PNG rows (written by another tool): %s" % fn)
+        a = rows[:, 1:].reshape(h, w, ch) if ch > 1 else rows[:, 1:].reshape(h, w)
+        return cls(a)
+
+    def __array__(self, dtype=None, copy=None):
+        return self.a if dtype is None else self.a.astype(dtype)
+
+
+def pil_image():
+    """Pillow's Image module, or _PngImage when the borrowed Pillow does not load in Blender's Python."""
+    borrow("PIL")
+    try:
+        from PIL import Image
+        return Image
+    except ImportError:
+        return _PngImage
+
+
 # ----------------------------------------------------------------------------------- geometry
 
 def add_box(bm, c, s):
@@ -317,9 +384,8 @@ def render_passes(scene, mats, size_px, extent_m, centre, out_dir, prefix):
 def exr_to_png(files, out_dir, prefix, wear=()):
     """EXR passes -> 8-bit PNG maps with raw (linear) values: the data maps must not get an sRGB curve;
     only the colour map is sRGB."""
-    borrow("PIL")
     import numpy as np
-    from PIL import Image
+    Image = pil_image()
 
     def load(f):
         img = bpy.data.images.load(f)
@@ -396,9 +462,8 @@ def feature_alpha(m_r, n, hgt, keep):
 
 def refine(recipe_path):
     """Rewrites T_Decals_M / T_Trim_M alpha from the existing maps (feature_alpha) without rendering."""
-    borrow("PIL")
     import numpy as np
-    from PIL import Image
+    Image = pil_image()
     out_dir = os.path.dirname(path(recipe_path))
     index = json.load(open(os.path.join(out_dir, "decal_library_index.json"), encoding="utf-8"))
     for prefix in ("T_Decals", "T_Trim"):

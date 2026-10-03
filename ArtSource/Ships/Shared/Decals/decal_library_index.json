@@ -2709,11 +2709,65 @@
     "panel_number"
    ]
   },
-  "bolt_kit": {
+  "pn_K": {
    "uv": [
     0.8216000000000003,
+    0.01889999999999989,
+    0.8336000000000003,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph 'K' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_U": {
+   "uv": [
+    0.8436000000000003,
+    0.01889999999999989,
+    0.8556000000000004,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph 'U' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "pn_N": {
+   "uv": [
+    0.8656000000000004,
+    0.01889999999999989,
+    0.8776000000000004,
+    0.04189999999999989
+   ],
+   "size_m": [
+    0.024,
+    0.046
+   ],
+   "purpose": "plate number glyph 'N' (3.4 cm letters, dark ink): hs_decals lays a plate number out of these (rule D-R-PANEL-NUMBERS, exterior kit; one item per number did not fit the sheet)",
+   "type": "info",
+   "has_color": true,
+   "tags": [
+    "panel_number"
+   ]
+  },
+  "bolt_kit": {
+   "uv": [
+    0.8876000000000004,
     0.016899999999999887,
-    0.8466000000000002,
+    0.9126000000000003,
     0.04189999999999989
    ],
    "size_m": [
@@ -2729,9 +2783,9 @@
   },
   "bolt_kit_frame": {
    "uv": [
-    0.8566000000000004,
+    0.9226000000000004,
     0.021899999999999885,
-    0.8766000000000004,
+    0.9426000000000004,
     0.04189999999999989
    ],
    "size_m": [
@@ -2747,9 +2801,9 @@
   },
   "latch_kit": {
    "uv": [
-    0.8866000000000004,
+    0.9526000000000004,
     0.021899999999999885,
-    0.9216000000000003,
+    0.9876000000000004,
     0.04189999999999989
    ],
    "size_m": [

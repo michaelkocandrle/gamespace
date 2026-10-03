@@ -28,7 +28,7 @@ from matplotlib.patheffects import withStroke  # noqa: E402
 from matplotlib.textpath import TextToPath  # noqa: E402
 from shapely.affinity import affine_transform  # noqa: E402
 from shapely.geometry import LineString, MultiLineString, Point, Polygon, box  # noqa: E402
-from shapely.ops import polylabel  # noqa: E402
+from shapely.ops import polylabel, unary_union  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -855,6 +855,12 @@ class Drawer:
                 # a roof plate's ID beside its doubler panel and hatch, not under them
                 rest = em.polys_only(shp.difference(e.extra["label_cut"]))
                 shp = rest if not rest.is_empty else shp
+            elif not e.data.get("of"):
+                # a side plate's ID beside its doubler, hatch and vent box (revision G: "P-S-L14-V" ran into "S-L14")
+                subs = [o.sb["shape"] for o in self.m.elements if o.data.get("of") == e.id and o.sb]
+                if subs:
+                    rest = em.polys_only(shp.difference(unary_union(subs).buffer(0.03, join_style=2)))
+                    shp = rest if not rest.is_empty else shp
             part = em.largest(shp)
             w = (sh.width(e.id, size) + 1.2) / fr.s
             h = size * 1.3 / fr.s
@@ -1679,7 +1685,7 @@ def title_block(sh, m, x, W, sheet="E-01"):
              ("E", "2. 10. 2026  trysky motorů (detail G na E-05), gondoly v rozpočtu trojúhelníků"),
              ("F", "3. 10. 2026  boky po kritikovi kitu celé lodi: pás K v laku, užší kanál L/U, žebra po celé výšce "
                    "jen na přepážkách, příď z větších desek (P-S-N15)"),
-             ("G", "3. 10. 2026  střední vrstva boků: větrací skříně L14, U02, U12, panely a poklopy i na K a N, "
+             ("G", "3. 10. 2026  střední vrstva boků: 5 větracích skříní (K04, K09, L12, U13, L14), panely a poklopy i na N a na 60 % desek K, "
                    "čísla panelů na K, L, U, N")]
     later = [r for r in later if r[0] <= m.design["revision"]]
     for i, (rev, text) in enumerate(later):

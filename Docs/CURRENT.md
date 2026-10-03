@@ -70,10 +70,10 @@ Stav k **3. 10. 2026**: Wayfarer postavený podle výkresů **revize F** (kritik
 
 ## Další kroky
 
-1. **Wayfarer – revize G schválena s úpravami** (zadání 3. 10.): krok 2 = úpravy bez přestavby (kolize popisků na
-   přídi jen levně, pás K panel + poklop na ~60 % desek deterministicky podle ID, 5 větracích skříní na boku
-   nepravidelně, HSBUDGET před a po, výřez přídě F / G autorovi); krok 3 až po „G s úpravami potvrzeno“: přestavba,
-   snímky chase a zblízka, kritik step (Opus), srovnání se záběrem ze `starcitizenreference/`.
+1. **Wayfarer – revize G s úpravami čeká na potvrzení** („G s úpravami potvrzeno“): pás K panel + poklop na 8/14 desek
+   (výběr a uspořádání podle ID), 5 větracích skříní K04, K09, L12, U13, L14, popisky desek mimo panely; HSBUDGET
+   453 565 → 459 621 (dočasná stavba; strop 700 k); znaky `pn_K/U/N` v atlasu decalů. Výřezy `2026-10-03_wayfarer_sides_revG/`
+   04–05. Pak krok 3: přestavba, snímky chase a zblízka, kritik step (Opus), srovnání se `starcitizenreference/`.
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.

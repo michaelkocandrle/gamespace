@@ -932,13 +932,27 @@ class Model:
         """side_subs_at with the band's sub heights v; when nothing fits (a plate cut short, e.g. under the wing root),
         with sub.fallback_v (revision G, 3. 10. 2026: the L plates under the wing root were left bare)."""
         sub = band["sub"]
-        out = self.side_subs_at(shape, band, bay, sub["v"])
+        pattern = None
+        if "share" in sub or sub.get("irregular"):
+            # revision G (author 3. 10. 2026, keel band K): a panel and hatch only on ~share of the plates and an
+            # irregular layout, both chosen from the plate's ID (deterministic: the same plates every build)
+            def hsh(b):
+                return int(hashlib.md5(("P-S-%s%02d" % (band["band"], b)).encode()).hexdigest()[:8], 16)
+            h = hsh(bay)
+            if "share" in sub:
+                # the round(share * n) plates of the band with the lowest ID hash (a threshold on the hash gave 12 of 14)
+                bays = [self.bay_no(a) for a in self.band_stations(band)[:-1]]
+                if bay not in sorted(bays, key=hsh)[:round(sub["share"] * len(bays))]:
+                    return []
+            if sub.get("irregular"):
+                pattern = ((h >> 10) & 1, bool((h >> 11) & 1))
+        out = self.side_subs_at(shape, band, bay, sub["v"], pattern=pattern)
         if not out and sub.get("fallback_v"):
             # no vent box at the fallback height: a 0.2 m tall box read as a squashed slot (revision G sheet)
-            out = self.side_subs_at(shape, band, bay, sub["fallback_v"], vents=False)
+            out = self.side_subs_at(shape, band, bay, sub["fallback_v"], vents=False, pattern=pattern)
         return out
 
-    def side_subs_at(self, shape, band, bay, v, vents=True):
+    def side_subs_at(self, shape, band, bay, v, vents=True, pattern=None):
         """Doubler panel and small hatch on a side plate (panels.bands[].sub; kit pilot step c, 2. 10. 2026: the shoulder
         plates like the roof's), in the side view (x, z) within the sub band of section heights v: even bays a square
         doubler at the aft end and the hatch forward, odd bays the hatch at the aft end and a long doubler strip
@@ -987,6 +1001,9 @@ class Model:
 
         out = []
         hx = self.kit["XK-HATCH"]["size"][0]
+        # pattern (odd, flip): the layout chosen from the plate's ID instead of the bay's parity, mirrored along x
+        odd, flip = pattern if pattern else (bay % 2, False)
+        A, F = ("fwd", "aft") if flip else ("aft", "fwd")
         if vents and bay in sub.get("vent_bays", []):
             # a vent box at the aft end instead of the doubler, the hatch forward (revision G, critic of the sides:
             # the side plates lacked the mid layer; vent boxes as on the roof)
@@ -996,8 +1013,8 @@ class Model:
             g = window(hx, "fwd", marks + [o.buffer(mg) for _, o in out])
             if g is not None:
                 out.append(("hatch", g))
-        elif bay % 2:
-            g = window(hx, "aft", marks)
+        elif odd:
+            g = window(hx, A, marks)
             if g is not None:
                 out.append(("hatch", g))
             rs = runs(marks + [o.buffer(mg) for _, o in out])
@@ -1005,10 +1022,10 @@ class Model:
             if best and best[1] - best[0] >= sub["doubler_odd_min"]:
                 out.append(("doubler", strip(best[0], best[1])))
         else:
-            g = window(sub["doubler_even_len"], "aft", marks)
+            g = window(sub["doubler_even_len"], A, marks)
             if g is not None:
                 out.append(("doubler", g))
-            g = window(hx, "fwd", marks + [o.buffer(mg) for _, o in out])
+            g = window(hx, F, marks + [o.buffer(mg) for _, o in out])
             if g is not None:
                 out.append(("hatch", g))
         return out

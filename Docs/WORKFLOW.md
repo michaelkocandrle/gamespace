@@ -1259,6 +1259,12 @@ snímku.
   hranách trojúhelníků; spodní plocha žebra přes celou šířku dala úsečku s konci daleko mimo pás y ±0,3, takže filtr
   koncových bodů ji vynechal. Úsečky se před hledáním minima ořezávají na pás (`DeckSheet.clear_height`). Pozor i na
   odečet z výkresu: v podélném řezu se žebro kreslí níž, než je nad hlavou, protože jde dál k boku za rovinou řezu.
+- fp) **Knihovna decalů spadla na `ImportError: cannot import name '_imaging'`** (3. 10. 2026). Blender 5.2.2 má Python
+  3.13, systémový Pillow je pro 3.12 a `borrow("PIL")` ho přidá do cesty. `decal_library.py` pak PNG zapíše a čte
+  vlastní náhradou z numpy a zlib (`_PngImage`, `pil_image()`); výsledek je pixelově stejný (ověřeno na trim sheetu).
+- fq) **Stavba lodi spadla v `hs_decals` na `KeyError: 'pn_K'`** (3. 10. 2026, revize G). Čísla desek se skládají ze
+  znaků `pn_<znak>`, knihovna měla jen R, L, P, S a číslice. Nové znaky se přidávají jako nová dávka `append`
+  (stávající položky atlasu se neposunou); test výkresu teď hlídá i znaky čísel z rozvrhu kitu.
 
 
 ---
