@@ -3,8 +3,8 @@
 Jediný zdroj **aktuálního** stavu (nad ním jen `CLAUDE.md`), **nejvýš 80 řádků** (autor 30. 9. 2026). Hotové do stavu,
 splněné smaž; podrobnosti do commitu a recenzí (`Docs/Reviews/`), historie do 30. 9. v `Docs/HANDOFF.md` (archiv).
 
-Stav k **3. 10. 2026**: kit na celé lodi Wayfareru postavený (kritik FAIL 6,0, čeká na autora); noc opravena stínem planety;
-výkresy v **revizi F** (boky po kritikovi) čekají na schválení (schválená D). Nový PC autora.
+Stav k **3. 10. 2026**: Wayfarer přestavěný podle výkresů **revize F** (schválené autorem 3. 10.; boky po kritikovi kitu),
+kritik PASS 6,5 (práh step); noc opravena stínem planety. Nový PC autora.
 
 ## Stav
 
@@ -45,8 +45,6 @@ výkresy v **revizi F** (boky po kritikovi) čekají na schválení (schválená
 
 ## Čeká na rozhodnutí autora
 
-- **Revize F výkresů** E-01 až E-08 (E: tryska; F: 4 úpravy boků z 3. 10. – K v laku, úzký kanál L/U, plná žebra jen
-  na přepážkách, příď K14/L14/U14 + N15): schválení výřezů `Docs/Reviews/2026-10-03_wayfarer_sides_revF/`.
 - Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověření FAIL 7/6/6/7/7/8/8/7, levné body opravené).
 - Steadfast: schválení 2D návrhu v2 (`Steadfast_Design.md`). Kanopa Wayfareru jako téma designu v2 (autor otevře
   sám); paleta Kestrel Dynamics u první lodi Kestrelu.
@@ -71,9 +69,9 @@ výkresy v **revizi F** (boky po kritikovi) čekají na schválení (schválená
 
 ## Další kroky
 
-1. **Wayfarer – boky revize F** (3. 10.): data a výkresy hotové, čekají na schválení výřezů (výše). Po schválení
-   přestavět loď (`hs_build_ship`, export, import), snímky, kritik nové kolo (`Docs/Reviews/2026-10-03_wayfarer_ship_kit.md`
-   kolo 3 FAIL 6,0). Paralelní session I-01–I-09 (bez Unrealu / Blenderu / balení) smí běžet.
+1. **Wayfarer – boky revize F postavené** (3. 10., `Docs/Reviews/2026-10-03_wayfarer_sides_revF.md`, PASS 6,5): další krok
+   kitu podle doporučení – střední vrstva a čísla panelů na K/L/U/N, šablony, špína v kanálech, poziční světla, decal
+   přes F v HF-0417 (byl už dřív). Paralelní session I-01–I-09 (bez Unrealu / Blenderu / balení) smí běžet.
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.

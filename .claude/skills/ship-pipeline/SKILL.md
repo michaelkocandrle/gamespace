@@ -341,7 +341,10 @@ python Tools/Design/exterior_kit_layout.py <Loď> [--region pilot]   # -> Design
   Oblast `pilot` = hřbet, ramena, záď, gondoly; `ship` = celý trup (všechny pásy, celý rám; 3. 10. 2026). Dno kanálu na
   bocích jen kolem desek a rámu (`skin_near_side` → `skin.near_side`), jinde lak. Pás může mít `merge` [[a, b]] (jedna
   dlouhá deska, žebra ji obejdou: deska pod jménem lodi) a `sub.skip` (pole bez panelu a poklopu, např. pod registrací). Test výkresu hlídá, že rozvrh je z aktuálních dat a staví přesně
-  postavené pásy (`panels.built_bands`).
+  postavené pásy (`panels.built_bands`). Revize F (3. 10. 2026): žebro FR-RIB po celé výšce jen na příčkách `full`,
+  jinde jen `v_other` (desky tam mají spáru `panels.seam_gap`, `Model.rib_v`); pás může mít rozsah `x` (pás N přes
+  L+U na přídi, `Model.band_stations`); boční světelný pás smí mít `z` jako lomenou čáru `[[x, z], ...]`, aby šel
+  kanálem podle výšky průřezu v (`side_strip_pts`, `hs_lights._strip_z`).
 - **Stavba** (`Tools/Blender/hs_exterior_kit.py`, z `hs_build_ship` po vrstvě detailu, před světly, greeblemi
   a decaly): plochy trupu pod obrysem se přesně ořežou (bisect rovinami hran obrysu ve směru pohledu), zkopírují,
   vytáhnou ven o tloušťku a zkosí; každá deska je vlastní objekt (vlastní tón panelu přes `part_obj` → UV1); plášť
