@@ -1228,6 +1228,15 @@ snímku.
   (`parts.hull.merge_keep_slots`). Příčina ulétlých desek: rovnoměrná tloušťka dělí posun vrcholu sinem úhlu mezi
   sousedními plochami a na sloučených n-úhelnících s téměř nulovými úhly (protáhlé trojúhelníky po triangulaci) jde
   dělitel k nule. Od 1. 10. hlídá meze dílů přímo `hs_assemble_ship` (`HSASSEMBLE BOUNDS FAIL`, chyba sestavení).
+- fl) **Na výkresu nákladu chybělo šest nápisů a hasicí přístroj, světel bylo o dvě víc** (2. 10. 2026, kritik I-02).
+  Model výkresu bral místnost bodu z obdélníku layoutu (y ±1,90), ale obložení nákladu z kitu je na ±2,05: nápisy na
+  něm (y ±2,025) vypadly, a vnější reflektory gondol nad stropem (z 2,59) prošly filtrem výšky jako světla nákladu.
+  Řešení: `interior_model._room_spaces` (místnost = obdélník rozšířený k lícům stěn kitu), světla exportu nad stropem
+  kit místnosti jdou na exteriér; vybavení lodi z `interior.kit.fittings` má vlastní ID. Kit platí před layoutem.
+- fm) **Světlá výška pod žebrem kabiny vyšla víc, než je** (2. 10. 2026, I-01: 2,08 místo 2,05). Řez rovinou x vrací úsečky s konci na
+  hranách trojúhelníků; spodní plocha žebra přes celou šířku dala úsečku s konci daleko mimo pás y ±0,3, takže filtr
+  koncových bodů ji vynechal. Úsečky se před hledáním minima ořezávají na pás (`DeckSheet.clear_height`). Pozor i na
+  odečet z výkresu: v podélném řezu se žebro kreslí níž, než je nad hlavou, protože jde dál k boku za rovinou řezu.
 
 
 ---

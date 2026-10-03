@@ -14,6 +14,7 @@ build files the exterior drawings digest stay untouched (a recipe edit would mak
                                          <ROOM>-C-<n>, <ROOM>-FL-<n>, furniture = its layout object's ID)
   decals {items [[item, id]], scatter [id], grab_bars [id]}   interior.decals: D-I-nn, D-I-R-SCATTER-nn,
                                          <ROOM>-O-GRAB-nn
+  fittings [[type, id]]                  parallel to interior.kit.fittings: <ROOM>-O-<FIRE|RAIL|VENT|JBOX|COND>-nn
 IDs already given are never changed; a pair whose key no longer matches the build data (a module swapped) is
 replaced. <ROOM> is the room's code in "rooms". Lights and the kit parts' own decals take the ID of their part plus
 the socket or decal item (interior_model.py).
@@ -42,6 +43,9 @@ def dump(o, ind=0, width=118):
             return flat
         return "[\n" + ",\n".join(pad + dump(v, ind + 1, width) for v in o) + "\n" + " " * ind + "]"
     return json.dumps(o, ensure_ascii=False)
+
+
+FITTING_CODE = {"extinguisher": "FIRE", "handrail": "RAIL", "vent": "VENT", "junction": "JBOX", "conduit": "COND"}
 
 
 def _number(used, family):
@@ -130,6 +134,23 @@ def assign(ship, check=False):
             added.append(ident)
             lst.append(ident)
         dids[key] = lst[:len(dec.get(key, []))]
+    # the ship's fittings (interior.kit.fittings): [type, id] parallel to the list, <ROOM>-O-<TYPE>-nn
+    fits = (m2.recipe["interior"].get("kit") or {}).get("fittings", [])
+    old = ids.get("fittings") or []
+    lst = []
+    for i, f in enumerate(fits):
+        pair = old[i] if i < len(old) else None
+        if pair and pair[0] == f["type"]:
+            lst.append(pair)
+            continue
+        x = f["at"][0] if f.get("at") else f["x"][0]
+        yw = f["at"][1] if f.get("at") else f["y"]
+        code = codes.get(m2.room_at(x, yw - (0.1 if yw > 0 else -0.1)), "X")
+        ident = _number(used, "%s-O-%s-" % (code, FITTING_CODE.get(f["type"], f["type"][:4].upper())))
+        used.add(ident)
+        added.append(ident)
+        lst.append([f["type"], ident])
+    ids["fittings"] = lst
     stale = m.stale_ids
     if not check and (added or stale):
         text = dump(design) + "\n"

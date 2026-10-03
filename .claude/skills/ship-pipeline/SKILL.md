@@ -206,6 +206,20 @@ python Tools/Tests/test_exterior_drawing.py                  # výkres = data (i
     a zónami nad stropem a pod podlahou, klíčový plán, legenda, tabulky (díly kitu, účel dílů, nábytek / dveře /
     komponenty, světla po socketech, decaly), souhrn světel a výkon, kontrola dat (layout × díl, komponenta mimo
     trup, poznámky `review_notes`).
+  - **Listy I-01 až I-03** (2. 10. 2026): I-01 paluba `Tools/Design/draw_interior_deck.py` (půdorys celé lodi 1:20
+    s lomeným řezem u kokpitu, pásy ID stěn s dílem kitu, mřížka každé místnosti od vlastního počátku, podélný řez A,
+    tabulky místností, dveří, prvků, mřížky a dílů kitu; pohledy určuje `interior_model.deck_views`); I-02 náklad
+    `draw_long_room_sheet` (dlouhá místnost: 1/2 A0 pohledy, stěny ve dvou pásech, legenda a kontrola dat; 2/2 A1
+    tabulky; jeden sidecar se seznamem `pages`); I-03 chodba `draw_room_sheet` s užším rozvržením a detaily výklenků
+    1:10 (`bay_details`) ve druhé řadě.
+  - Model: místnost bodu = **postavený prostor** (obdélník layoutu rozšířený k lícům stěn kitu, `_room_spaces`);
+    komponenty ve stěnových modulech s `SOCKET_Component` mají polohu výklenku (`_bay_niche`, konstanty
+    `kit_batch4.py`), rozdíl proti layoutu jde do kontroly dat; vybavení lodi `interior.kit.fittings` má ID
+    `<MÍSTNOST>-O-<FIRE|RAIL|VENT|JBOX|COND>-nn` (`ids.fittings`, účely `fitting_purpose`); světla exportu nad stropem
+    kit místnosti patří exteriéru; návrh nové polohy komponenty `components.<id>.proposal` (modře se šipkou).
+  - Úrovně stěn, šířka ve výšce 1,80 a kolize navržených křídel se zkosením se počítají z profilu průřezu
+    (`kit_rules.json sections`, `RoomSheet.profile`); plocha pro hustotu světel z líců (`built_area`); velikost
+    decalu dílu z osazené geometrie.
 
 ## 2. Koncepty jako reference stylu
 

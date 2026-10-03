@@ -158,15 +158,17 @@ class Model:
             poly = r.get("poly") or [[r["rect"][0], r["rect"][2]], [r["rect"][1], r["rect"][2]],
                                      [r["rect"][1], r["rect"][3]], [r["rect"][0], r["rect"][3]]]
             self.rooms[r["id"]] = dict(r, poly=poly, code=self.codes[r["id"]], floor=r.get("floor_z", 0.0),
-                                       kit=r["id"] in self.kit_rooms)
+                                       kit=r["id"] in self.kit_rooms, poly_given=bool(r.get("poly")))
         self.elements = []
         self.checks = []                            # (id, Czech sentence) - the sheet's data check
         self.placements = self._placements()
+        self._room_spaces()
         self._kit_elements()
         self._objects()
         self._doors()
         self._lights()
         self._decals()
+        self._fittings()
         self.by_id = {}
         for e in self.elements:
             if e.id in self.by_id:
@@ -208,17 +210,61 @@ class Model:
         """The LFS object IDs of the meshes the sheets draw (information only: the ship's FBX change on every
         rebuild by a few triangles - Docs/CURRENT.md, build determinism)."""
         out = {}
-        files = [self.ship_fbx(s) for s in ("", "_Interior")] + sorted({self.kit_fbx(p.part) for p in self.placements})
+        files = [self.ship_fbx(s) for s in ("", "_Interior", "_Canopy")] + sorted({self.kit_fbx(p.part) for p in self.placements})
         for f in files:
             out[os.path.basename(f)] = lfs_oid(f)
         return out
 
     def room_at(self, x, y):
+        """The room at a point: its built space (_room_spaces) - a kit room reaches out to its walls' faces (the hold's
+        liner at ±2.05 while the layout's rectangle is ±1.90: its signs on the liner were lost, critic of I-02)."""
         best = None
         for rid, r in self.rooms.items():
-            if _inside((x, y), r["poly"]):
+            if _inside((x, y), r.get("space") or r["poly"]):
                 best = rid
         return best
+
+    def _room_spaces(self):
+        """Each kit room's space: its layout rectangle widened to its wall modules' faces plus 5 cm (what is on a face -
+        a decal, a fitting - belongs to the room in front of it)."""
+        for rid, r in self.rooms.items():
+            ys = [abs(p.ue_to_layout(0, 0, 0)[1]) for p in self.placements
+                  if p.category == "Wall" and self.placement_room(p) == rid]
+            if ys and r.get("rect") and not r.get("poly_given"):
+                x0, x1, y0, y1 = r["rect"]
+                hw = max(max(ys) + 0.05, y1, -y0)
+                r["space"] = [[x0, -hw], [x1, -hw], [x1, hw], [x0, hw]]
+            r["faces_y"] = max(ys) if ys else None
+
+    def room_faces(self, rid):
+        """{L, R: the long walls' face y; A, F: the room's end x (bulkhead faces, else the layout's ends)}."""
+        r = self.rooms[rid]
+        out = {"A": r["rect"][0], "F": r["rect"][1]}
+        if r.get("faces_y"):
+            out["L"], out["R"] = r["faces_y"], -r["faces_y"]
+        for p in self.placements:
+            if p.category == "Bulkhead" and self.placement_room(p) == rid:
+                x = p.ue_to_layout(0, 0, 0)[0]
+                out["A" if p.dir_layout(1.0, 0.0)[0] > 0 else "F"] = x
+        return out
+
+    def object_faces(self, e):
+        """The walls an object stands at (within 0.5 m of their face): its developed elevations show it."""
+        rid = e.room
+        if rid is None or not (e.extra.get("rect") or e.extra.get("pos")) or e.extra.get("below"):
+            return set()
+        r = e.extra.get("rect") or [e.extra["pos"][0]] * 2 + [e.extra["pos"][1]] * 2
+        f = self.room_faces(rid)
+        out = set()
+        if "L" in f and f["L"] - r[3] < 0.5:
+            out.add("L")
+        if "R" in f and r[2] - f["R"] < 0.5:
+            out.add("R")
+        if r[0] - f["A"] < 0.5:
+            out.add("A")
+        if f["F"] - r[1] < 0.5:
+            out.add("F")
+        return out
 
     def room_code(self, rid):
         return self.codes.get(rid, "?")
@@ -339,10 +385,50 @@ class Model:
             cat = "component" if ident.split("-")[1] == "M" else ("furniture" if ident.split("-")[1] == "U" else "object")
             c = comps.get(ident, {})
             built_note = c.get("built_as") or ("" if not kit_room else "ve schváleném layoutu, ve hře zatím nepostaveno")
-            self.elements.append(Element(ident, cat, rid, status, o["name"], o.get("purpose", ""), where=_rect_txt(o),
-                                         src="layout.objects", rect=o["rect"], z=o.get("z"), below=o.get("below", False),
-                                         access=c.get("access", ""), replace=c.get("replace", ""), bay=c.get("bay"),
-                                         note=built_note))
+            rect, z, where, src = o["rect"], o.get("z"), _rect_txt(o), "layout.objects"
+            niche = self._bay_niche(c.get("bay"))
+            if o.get("below") and status == "built" and not c.get("built_as"):
+                built_note = "postaven poklop v podlaze nad ní (hs_interior.hatch, stejný obrys); jednotka pod podlahou se " \
+                             "nemodeluje"
+            if niche is not None:
+                # the component is built in its kit wall module's niche (Tools/Kit/kit_batch4.py, SOCKET_Component):
+                # the kit before the layout (author 1. 10. 2026) - the niche is the component's box, the layout's goes
+                # to the data check
+                host, rect, z = niche
+                status, src = "built", "%s SOCKET_Component" % host.part
+                built_note = "postaveno ve výklenku stěnového modulu %s (%s)" % (host.tag, host.part)
+                where = _rect_txt({"rect": rect, "z": z})
+                self._check_niche(o, ident, rect, z, host)
+            self.elements.append(Element(ident, cat, rid, status, o["name"], o.get("purpose", ""), where=where,
+                                         src=src, rect=rect, z=z, below=o.get("below", False), layout_rect=o["rect"],
+                                         layout_z=o.get("z"), access=c.get("access", ""), replace=c.get("replace", ""),
+                                         bay=c.get("bay"), note=built_note, proposal=c.get("proposal")))
+
+    def _bay_niche(self, bay):
+        """The niche of a component bay wall module (the kit part with SOCKET_Component) named by a component's bay:
+        (placement, [x0, x1, y0, y1], [z0, z1]) in layout metres from kit_batch4's opening (BAY_HOLE in from both
+        ends, SILL … HEAD) and depth (BAY_DEPTH behind the face, the LINER plates), else None."""
+        p = next((q for q in self.placements if q.tag == bay), None)
+        if p is None or "SOCKET_Component" not in self.parts["SM_Kit_" + p.part].get("sockets", {}):
+            return None
+        k = bay_constants()
+        letter = p.part.rsplit("_", 1)[1]
+        L = self.span(p)
+        d = k["BAY_DEPTH"][letter] + k["LINER"]
+        m = BAY_HOLE[letter]
+        pts = [p.ue_to_layout(-a * 100.0, -u * 100.0, 0) for a in (0.0, d) for u in (m, L - m)]
+        xs, ys = [q[0] for q in pts], [q[1] for q in pts]
+        return p, [round(min(xs), 3), round(max(xs), 3), round(min(ys), 3), round(max(ys), 3)], [k["SILL"], k["HEAD"]]
+
+    def _check_niche(self, o, ident, rect, z, host):
+        r, oz = o["rect"], o.get("z") or [0, 0]
+        d = max(abs(a - b) for a, b in zip(r + list(oz), rect + list(z)))
+        if d > 0.015:
+            self.checks.append((ident, "%s: v layoutu x %s … %s, y %s … %s, z %s … %s; postavený výklenek v %s x %s … %s, "
+                                       "y %s … %s, z %s … %s (nejvíc %d mm; kit platí, layout opravit)" % (
+                                           o["name"], fmt(r[0]), fmt(r[1]), fmt(r[2]), fmt(r[3]), fmt(oz[0]), fmt(oz[1]),
+                                           host.tag, fmt(rect[0]), fmt(rect[1]), fmt(rect[2]), fmt(rect[3]), fmt(z[0]),
+                                           fmt(z[1]), round(d * 1000))))
 
     def _check_furniture(self, o, ident):
         p = next(p for p in self.placements if p.id == ident)
@@ -415,11 +501,12 @@ class Model:
                     interior_only=bool(prm.get("interior_only")) or sname.startswith(tuple(R["INTERIOR_ONLY_SOCKETS"])),
                     colour=tuple(c / 255.0 for c in R["LIGHT_COLOURS"].get(prm.get("role", "warm"), (255, 255, 255))),
                     host=p.tag))
+        ceiling = self.rules["sections"]["L41"].get("ceiling", 2.3) + 0.05 if "L41" in self.rules["sections"] else 2.35
         for L in self.lights_export:
             x, y, z = L["location"]
             rid = self.room_at(x, y)
-            if rid is None or not (-0.2 < z < 3.6):
-                continue                                     # exterior lights: the exterior drawings
+            if rid is None or not (-0.2 < z < 3.6) or (rid in self.kit_rooms and z > ceiling):
+                continue                 # exterior lights (over a kit room's ceiling: the floods on the pods): exterior sheets
             ident = "L-" + L["name"].upper().replace("_", "-")
             self.elements.append(Element(
                 ident, "light", rid, "built", L["name"].split("_")[0],
@@ -485,6 +572,33 @@ class Model:
                     "karta špíny" if item.startswith("grime") else self.decal_purpose(item), kit=p.part,
                     src="%s decal_items" % p.part, item=item, size=tuple(lib.get("size_m", (0, 0))), host=p.tag,
                     grime=item.startswith("grime")))
+
+    # ------------------------------------------------------------------ fittings
+    def _fittings(self):
+        """The ship's own equipment on the walls (recipe interior.kit.fittings, hs_interior_kit.fittings): built in a
+        room the kit does not build, or kept in one ("keep": the extinguisher by the hold's door); IDs in ids.fittings
+        as [type, id] parallel to the list, Czech purposes in the design data's fitting_purpose."""
+        fits = (self.recipe["interior"].get("kit") or {}).get("fittings", [])
+        fids = self.ids.get("fittings") or []
+        purp = self.design.get("fitting_purpose") or {}
+        for i, f in enumerate(fits):
+            pair = fids[i] if i < len(fids) else None
+            ident = self._need_id(pair[1] if pair and pair[0] == f["type"] else None, "fitting", f["type"])
+            x = f["at"][0] if f.get("at") else f["x"][0]
+            x1 = f["at"][0] if f.get("at") else f["x"][-1]
+            yw = f["at"][1] if f.get("at") else f["y"]
+            rid = self.room_at((x + x1) / 2, yw - (0.1 if yw > 0 else -0.1))
+            built = rid not in self.kit_rooms or f.get("keep")
+            side = 1 if yw > 0 else -1
+            depth = FITTING_DEPTH.get(f["type"], 0.1)
+            z0, z1 = FITTING_Z.get(f["type"], (f.get("z", 1.0) - 0.1, f.get("z", 1.0) + 0.1))
+            rect = [min(x, x1) - 0.1, max(x, x1) + 0.1] + sorted((yw, yw - side * depth))
+            self.elements.append(Element(
+                ident, "object", rid, "built" if built else "remove", FITTING_CZ.get(f["type"], f["type"]),
+                purp.get(f["type"], ""), where="x %s, líc y %s, z %s … %s" % (
+                    fmt((x + x1) / 2), fmt(yw), fmt(z0), fmt(z1)), src="interior.kit.fittings[%d]" % i, rect=rect,
+                z=[z0, z1], fitting=f["type"],
+                note="" if built else "vybavení lodi v místnosti, kterou staví kit: nestaví se"))
 
     # ------------------------------------------------------------------ queries
     def in_room(self, rid, cats=None):
@@ -574,8 +688,8 @@ class Model:
         """The IDs each view of a room's sheet draws and labels - the rule the drawing follows and the test checks:
         PLAN the kit parts, furniture, doors, components and objects, the floor's decals; RCP the ceiling and its
         lights; EL-L / EL-F / EL-R / EL-A the walls seen from the room (port, forward, starboard, aft) with what is
-        on them - furniture, doors, decals, lights; SEC what the cross section at section_x cuts. Grime cards are in
-        the schedules only."""
+        on them - furniture, doors, decals, lights; SEC what the cross section at section_x cuts (layout objects and
+        components as their boxes) and the under-floor components ahead of it. Grime cards are in the schedules only."""
         views = {k: set() for k in ("PLAN", "RCP", "EL-L", "EL-F", "EL-R", "EL-A", "SEC")}
         for e in self.elements:
             if not (e.room == rid or rid in (e.extra.get("rooms") or ())) or e.status == "remove" or e.extra.get("grime"):
@@ -587,15 +701,62 @@ class Model:
                 views["RCP"].add(e.id)
             if e.cat in ("wall", "bulkhead", "furniture", "door", "light", "decal") and face in ("L", "F", "R", "A"):
                 views["EL-" + face].add(e.id)
+            if e.cat == "object":
+                for f in self.object_faces(e):
+                    views["EL-" + f].add(e.id)
             if e.cat in ("light", "decal") and face == "CEIL":
                 views["RCP"].add(e.id)
             if e.cat in ("light", "decal") and face == "FLOOR":
                 views["PLAN"].add(e.id)
             xr = self.x_range(e)
-            if e.cat in ("wall", "floor", "ceiling", "furniture", "component") and xr and xr[0] - 1e-6 <= section_x <= xr[1] + 1e-6:
+            if e.cat in ("wall", "floor", "ceiling", "furniture", "component", "object") and xr and                     xr[0] - 1e-6 <= section_x <= xr[1] + 1e-6:
                 views["SEC"].add(e.id)
-            if e.cat == "component" and e.extra.get("below"):
-                views["SEC"].add(e.id)                      # what is under the floor: dashed beyond the cut
+            if e.cat == "component" and e.extra.get("below") and xr and xr[1] >= section_x - 1e-6:
+                views["SEC"].add(e.id)                      # what is under the floor ahead: dashed beyond the cut
+        return views
+
+    def y_range(self, e):
+        """The element's extent across the ship (layout y), or None."""
+        p = e.extra.get("placement")
+        if p is not None:
+            man = self.parts["SM_Kit_" + p.part]
+            if e.cat in ("wall", "bulkhead"):
+                pts = [p.ue_to_layout(a, b, 0) for a in (0.0, 15.0) for b in (0.0, -self.span(p) * 100.0)]
+            elif e.cat == "furniture":
+                dx, dy, _ = man["dims_m"]
+                pts = [p.ue_to_layout(a * 100.0, b * 100.0, 0) for a in (0.0, dx) for b in (-dy / 2, dy / 2)]
+            else:
+                hw = man["dims_m"][1] / 2
+                pts = [p.ue_to_layout(0, b * 100.0, 0) for b in (-hw, hw)]
+            ys = [q[1] for q in pts]
+            return min(ys), max(ys)
+        if e.cat == "door":
+            y, w = e.extra["at"][1], e.extra["width"]
+            return (y - w / 2, y + w / 2) if e.extra["axis"] == "x" else (y, y)
+        if e.extra.get("rect"):
+            return e.extra["rect"][2], e.extra["rect"][3]
+        if e.extra.get("pos"):
+            return e.extra["pos"][1], e.extra["pos"][1]
+        return None
+
+    def deck_views(self, section_y):
+        """The IDs each view of the deck sheet (I-01) draws and labels - the rule the drawing follows and the test
+        checks: PLAN every kit part on the floor plan and in the walls (walls, bulkheads, floors), the furniture, doors,
+        components and objects of every room; LSEC the longitudinal section at y = section_y looking to port: the
+        ceilings and bulkheads it cuts, the port walls beyond it, the doors in the bulkheads it passes and the
+        furniture, components and objects that reach beyond it. Lights and decals are on their own sheets
+        (I-07, I-08) and the room sheets."""
+        views = {"PLAN": set(), "LSEC": set()}
+        for e in self.elements:
+            if e.room is None or e.status == "remove" or e.extra.get("grime"):
+                continue
+            if e.cat in ("wall", "bulkhead", "floor", "furniture", "door", "component", "object"):
+                views["PLAN"].add(e.id)
+            yr = self.y_range(e)
+            if e.cat in ("ceiling", "bulkhead") or (e.cat == "wall" and e.extra.get("side") == "L") or \
+                    (e.cat == "door" and e.extra["axis"] == "x" and yr[0] <= section_y <= yr[1]) or \
+                    (e.cat in ("furniture", "component", "object") and yr and yr[1] > section_y):
+                views["LSEC"].add(e.id)
         return views
 
     def room_placements(self, rid):
@@ -609,6 +770,30 @@ class Model:
 
     def geometry_ready(self):
         return not is_lfs_pointer(self.ship_fbx("_Interior")) and not is_lfs_pointer(self.kit_fbx(self.placements[0].part))
+
+
+# the component bays' openings: in from both ends of the module (Tools/Kit/kit_batch4.py bay_power / bay_cooler / bay_shield:
+# hole = (0.1, L - 0.1, SILL, HEAD), the cooler's 0.09)
+BAY_HOLE = {"A": 0.1, "B": 0.09, "C": 0.1}
+_BAY_K = {}
+
+
+def bay_constants():
+    """BAY_DEPTH, LINER, SILL, HEAD of the kit's component bays (Tools/Kit/kit_batch4.py, read with ast: it imports
+    Blender)."""
+    if not _BAY_K:
+        tree = ast.parse(open(os.path.join(ROOT, "Tools", "Kit", "kit_batch4.py"), encoding="utf-8").read())
+        for node in tree.body:
+            if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)                     and node.targets[0].id in ("BAY_DEPTH", "LINER", "SILL", "HEAD"):
+                _BAY_K[node.targets[0].id] = ast.literal_eval(node.value)
+    return _BAY_K
+
+
+# the fittings' extent off the wall and their height (Tools/Blender/hs_interior_kit.fittings)
+FITTING_CZ = {"extinguisher": "hasicí přístroj", "handrail": "madlo", "vent": "větrací mřížka", "junction": "rozvodná skříňka",
+              "conduit": "kabelová chránička"}
+FITTING_DEPTH = {"extinguisher": 0.17, "handrail": 0.09, "vent": 0.03, "junction": 0.14, "conduit": 0.05}
+FITTING_Z = {"extinguisher": (0.5, 1.1), "vent": (0.12, 0.32)}
 
 
 def _inside(p, poly):
