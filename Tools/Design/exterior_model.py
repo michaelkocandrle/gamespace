@@ -903,7 +903,9 @@ class Model:
                 el.qty = 2
                 el.where = "x %s–%s" % (fmt(a), fmt(b))
                 sub = band.get("sub") or {}
-                skip = band.get("merge", []) + sub.get("skip", [])
+                # bays without a panel and hatch: sub.skip (the name and registration plates; revision G: a merged bay
+                # is no longer skipped by itself - the nose plates are merged too)
+                skip = sub.get("skip", [])
                 subs = self.side_subs(shape, band, i) if sub and not any(s0 <= a and b <= s1 for s0, s1 in skip) else []
                 for kind, g in subs:
                     if kind == "hatch":
@@ -913,18 +915,30 @@ class Model:
                 self.place(el, shape, "area", "hull", depth=self.hull_y(shape.representative_point().x,
                                                                         shape.representative_point().y))
                 for kind, g in subs:
-                    kit_id = {"doubler": "XK-DOUBLER", "hatch": "XK-HATCH"}[kind]
-                    sel = self.add(Element("%s-%s" % (ident, {"doubler": "D", "hatch": "H"}[kind]), "panel",
-                                           band["name"], el.status, material=band["material"], kit=kit_id,
+                    kit_id = {"doubler": "XK-DOUBLER", "hatch": "XK-HATCH", "vent": "XK-VENTBOX"}[kind]
+                    sel = self.add(Element("%s-%s" % (ident, {"doubler": "D", "hatch": "H", "vent": "V"}[kind]), "panel",
+                                           band["name"], el.status,
+                                           material="MZ-GUNMETAL" if kind == "vent" else band["material"], kit=kit_id,
                                            src="design", data={"band": band["band"], "bay": i, "x": [a, b],
                                                                "sub": kind, "of": ident},
                                            what={"doubler": "přídavný panel na desce %s",
-                                                 "hatch": "malý poklop v desce %s"}[kind] % ident))
+                                                 "hatch": "malý poklop v desce %s",
+                                                 "vent": "větrací skříň s lamelami na desce %s"}[kind] % ident))
                     sel.qty, sel.where = 2, el.where
                     c = g.representative_point()
                     self.place(sel, g, "area", "hull", depth=self.hull_y(c.x, c.y))
 
     def side_subs(self, shape, band, bay):
+        """side_subs_at with the band's sub heights v; when nothing fits (a plate cut short, e.g. under the wing root),
+        with sub.fallback_v (revision G, 3. 10. 2026: the L plates under the wing root were left bare)."""
+        sub = band["sub"]
+        out = self.side_subs_at(shape, band, bay, sub["v"])
+        if not out and sub.get("fallback_v"):
+            # no vent box at the fallback height: a 0.2 m tall box read as a squashed slot (revision G sheet)
+            out = self.side_subs_at(shape, band, bay, sub["fallback_v"], vents=False)
+        return out
+
+    def side_subs_at(self, shape, band, bay, v, vents=True):
         """Doubler panel and small hatch on a side plate (panels.bands[].sub; kit pilot step c, 2. 10. 2026: the shoulder
         plates like the roof's), in the side view (x, z) within the sub band of section heights v: even bays a square
         doubler at the aft end and the hatch forward, odd bays the hatch at the aft end and a long doubler strip
@@ -932,7 +946,7 @@ class Model:
         (D-R-PANEL-NUMBERS), slides along the bay to clear them, or is left out. [(kind, outline)]."""
         sub = band["sub"]
         mg = sub["margin"]
-        v0, v1 = sub["v"]
+        v0, v1 = v
         inner = shape.buffer(-mg, join_style=2)
         x0, z0, x1, z1 = shape.bounds
         marks = []
@@ -973,7 +987,16 @@ class Model:
 
         out = []
         hx = self.kit["XK-HATCH"]["size"][0]
-        if bay % 2:
+        if vents and bay in sub.get("vent_bays", []):
+            # a vent box at the aft end instead of the doubler, the hatch forward (revision G, critic of the sides:
+            # the side plates lacked the mid layer; vent boxes as on the roof)
+            g = window(sub["vent"]["len"], "aft", marks)
+            if g is not None:
+                out.append(("vent", g))
+            g = window(hx, "fwd", marks + [o.buffer(mg) for _, o in out])
+            if g is not None:
+                out.append(("hatch", g))
+        elif bay % 2:
             g = window(hx, "aft", marks)
             if g is not None:
                 out.append(("hatch", g))

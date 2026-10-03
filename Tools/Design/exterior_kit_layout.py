@@ -98,12 +98,12 @@ def plate_entry(e, view, shape, kit, design_kit, mirror, normal):
             "bolts": bolt_points(shape, shape, k), "bolt_d": k.get("bolt_d", 0.0)}
 
 
-def vent_entries(e, view, g, k, normal, horizontal):
+def vent_entries(e, view, g, k, normal, horizontal, mirror=False):
     """XK-VENTBOX as three plates (critic round 2: the mid layer): the gunmetal housing with its rim (the outline with
     the inner opening as a hole), the dark floor of the opening lower than the rim, gunmetal slats across it
     (horizontal: slats along the first axis, stacked along the second - the aft wall; else across the first axis)."""
     inner = g.buffer(-k["rim"], join_style=2)
-    base = dict(id=e.id, kit=e.kit, view=view, mirror=False, normal=normal, bolts=[], bolt_d=0.0, paint2=0)
+    base = dict(id=e.id, kit=e.kit, view=view, mirror=mirror, normal=normal, bolts=[], bolt_d=0.0, paint2=0)
     out = [dict(base, material="gunmetal", t=k["t"], bevel=k["bevel"], polys=rings(g.difference(inner)))]
     out.append(dict(base, material="dark", t=k["floor"], bevel=0.002, polys=rings(inner), suffix="Floor"))
     x0, y0, x1, y1 = inner.bounds
@@ -117,6 +117,13 @@ def vent_entries(e, view, g, k, normal, horizontal):
     out.append(dict(base, material="gunmetal", t=k["slat_t"], bevel=0.002, polys=rings(unary_union(bars)),
                     suffix="Slats"))
     return out
+
+
+def side_dir(band):
+    """Direction of a decal ray onto a side band (layout y > 0 side, mirrored): down and in on the shoulder S (~45 deg),
+    up and in on the keel chamfer K, straight in on the upright sides L, U, N (revision G, 3. 10. 2026: the shoulder's
+    ray on an upright side could hit the shoulder above first)."""
+    return {"S": [0.0, -0.7071, -0.7071], "K": [0.0, -0.7071, 0.7071]}.get(band, [0.0, -1.0, 0.0])
 
 
 def panel_numbers(m):
@@ -159,10 +166,10 @@ def panel_numbers(m):
             xs = x0 + d["edge"] + 0.06
             cut = LineString([(xs, z0 - 1), (xs, z1 + 1)]).intersection(shp)
             zb = (cut.bounds[1] if not cut.is_empty else z0) + d["edge"] + d["size"] / 2
-            # the shoulder slopes ~45 deg: a ray down and in from above the plate (hs_decals 'ray', mirrored)
+            # a ray onto the band's face (side_dir: the shoulder ~45 deg down and in; hs_decals 'ray', mirrored)
             yh = m.hull_y(xs, zb)
             out.append(dict({"id": "D-PN-%s" % num, "on": "ray", "at": [round(xs, 4), round(yh, 4), round(zb, 4)],
-                             "dir": [0.0, -0.7071, -0.7071], "mirror": True}, **glyphs))
+                             "dir": side_dir(e.data["band"]), "mirror": True}, **glyphs))
     return out
 
 
@@ -222,6 +229,10 @@ def layout(m, region):
                 ent["latch"] = kit[e.kit]["latch"]
             plates.append(ent)
         elif e.geo.get("SB"):
+            if e.data.get("sub") == "vent":
+                # a vent box on a side plate (revision G: the side mid layer), slats upright, both sides
+                plates += vent_entries(e, "SB", e.geo["SB"]["shape"], kit[e.kit], {"ny_max": -0.2}, False, mirror=True)
+                continue
             ent = plate_entry(e, "SB", e.geo["SB"]["shape"], e.kit, kit, True, {"ny_max": -0.2})
             if e.data.get("sub") == "hatch":
                 # two dark latches along the hatch's lower edge, a quarter of its length from each end (as on the roof)
@@ -410,10 +421,10 @@ def decal_detail(m, out):
                 out["decals"].append({"id": ent["id"] + "-latch", "item": "latch_kit", "on": "top", "x": lx, "y": ly,
                                       "mirror": False, "check_overlap": False, "flat": True})
         else:
-            # the shoulder (side view x, z, ~45 deg): a ray down and in like the plate numbers, both sides
+            # a side band (side view x, z): a ray onto the band's face like the plate numbers, both sides
             def ray(x, z, **kw):
                 return dict({"on": "ray", "at": [round(x, 4), round(m.hull_y(x, z), 4), round(z, 4)],
-                             "dir": [0.0, -0.7071, -0.7071], "mirror": True, "check_overlap": False, "flat": True}, **kw)
+                             "dir": side_dir(e.data["band"]), "mirror": True, "check_overlap": False, "flat": True}, **kw)
             out["decals"].append(ray((x0 + x1) / 2, (y0 + y1) / 2, id=ent["id"], item="hatch_small",
                                      scale=round(hx / 0.26, 3)))
             for lx, lz in ent.get("latches", []):

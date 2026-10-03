@@ -69,9 +69,10 @@ kritik PASS 6,5 (práh step); noc opravena stínem planety. Nový PC autora.
 
 ## Další kroky
 
-1. **Wayfarer – boky revize F postavené** (3. 10., `Docs/Reviews/2026-10-03_wayfarer_sides_revF.md`, PASS 6,5): další krok
-   kitu podle doporučení – střední vrstva a čísla panelů na K/L/U/N, šablony, špína v kanálech, poziční světla, decal
-   přes F v HF-0417 (byl už dřív). Paralelní session I-01–I-09 (bez Unrealu / Blenderu / balení) smí běžet.
+1. **Wayfarer – revize G výkresů čeká na schválení** (3. 10.; body 1 a 2 kritika boků F, PASS 6,5): větrací skříně
+   L14/U02/U12, panely a poklopy i pod křídlem a na K a N, čísla panelů na K/L/U/N; v receptu šablony u RCS a 3 dalších
+   míst, panelové linky mimo nápisy (čára přes F v HF-0417). Výřezy `Docs/Reviews/2026-10-03_wayfarer_sides_revG/`.
+   Po schválení přestavba, snímky, kritik (step). Paralelní session I-01–I-09 smí běžet.
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.

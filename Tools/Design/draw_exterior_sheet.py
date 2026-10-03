@@ -214,6 +214,20 @@ class Drawer:
         fill, hatch, hc = self.matstyle(mid)
         self.sh.geom(fr.g(geom), fc=fill, ec=ec, lw=lw, hatch=hatch, hatch_col=hc, z=z, ls=ls)
 
+    def vent_slats(self, fr, e):
+        """A side vent box (revision G, sub "vent"): the dark opening inside the rim and its upright slats."""
+        if e.data.get("sub") != "vent" or e.sb is None:
+            return
+        k = self.m.kit[e.kit]
+        inner = e.sb["shape"].buffer(-k["rim"], join_style=2)
+        self.sh.geom(fr.g(inner), fc="#3A3E44", ec=STATUS_COL[e.status], lw=0.18, z=5.2)
+        x0, z0, x1, z1 = inner.bounds
+        n = max(1, int((x1 - x0 - k["slat_w"]) // k["slat_pitch"]) + 1)
+        lead = (x1 - x0 - (n - 1) * k["slat_pitch"]) / 2
+        for i in range(n):
+            x = x0 + lead + i * k["slat_pitch"]
+            self.sh.geom(fr.g(LineString([(x, z0 - 1), (x, z1 + 1)]).intersection(inner)), ec="#8A9097", lw=0.25, z=5.4)
+
     def vis(self, solid):
         return self.m.solids[solid]["visible"]
 
@@ -261,6 +275,7 @@ class Drawer:
             if shp.is_empty:
                 continue
             self.fillmat(fr, shp, e.material, z=5, ec=STATUS_COL[e.status], lw=0.3)
+            self.vent_slats(fr, e)
             kit = m.kit[e.kit]
             if "bolt_pitch" in kit:
                 self.bolts(fr, e.sb["shape"], shp, kit)
@@ -636,6 +651,7 @@ class Drawer:
                 self.mark(view, e)
                 if not shp.is_empty:
                     self.fillmat(fr, shp, e.material, z=5, ec=STATUS_COL[e.status], lw=0.3)
+                    self.vent_slats(fr, e)
             elif e.cat == "frame" and e.sb:
                 sh.geom(fr.g(e.sb["shape"].intersection(hull_vis)), fc="#5E646B", ec=STATUS_COL[e.status], lw=0.18, z=6)
                 self.mark(view, e)
@@ -1662,7 +1678,9 @@ def title_block(sh, m, x, W, sheet="E-01"):
                    "práh, pant, styčníky), písty, RCS, pouzdra světel; krok c: desky ramene S, záď z desek na rámu"),
              ("E", "2. 10. 2026  trysky motorů (detail G na E-05), gondoly v rozpočtu trojúhelníků"),
              ("F", "3. 10. 2026  boky po kritikovi kitu celé lodi: pás K v laku, užší kanál L/U, žebra po celé výšce "
-                   "jen na přepážkách, příď z větších desek (P-S-N15)")]
+                   "jen na přepážkách, příď z větších desek (P-S-N15)"),
+             ("G", "3. 10. 2026  střední vrstva boků: větrací skříně L14, U02, U12, panely a poklopy i na K a N, "
+                   "čísla panelů na K, L, U, N")]
     later = [r for r in later if r[0] <= m.design["revision"]]
     for i, (rev, text) in enumerate(later):
         sh.t(x + 2, yr - 11.6 - i * 3.4, "%s  %s" % (rev, text), 2.4)
