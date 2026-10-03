@@ -83,9 +83,21 @@ void ASkyDome::Tick(float DeltaSeconds)
 
 	FCelestialEnvironment Environment;
 	bool bHasEnvironment = false;
-	ACelestialBody::FindNearest(GetWorld(), CameraLocation, &Environment, &bHasEnvironment);
+	const ACelestialBody* Body = ACelestialBody::FindNearest(GetWorld(), CameraLocation, &Environment, &bHasEnvironment);
 	const float Amount = bHasEnvironment ? Environment.SkyAmount : 0.f;
-	UpdateSunShadow(bHasEnvironment, Environment);
+	// The geometric horizon dips with altitude: its height (sine of the elevation) is -sqrt(1 - (R / D)^2), R the
+	// body's sea-level radius, D the distance from its centre - in orbit the planet hides far less of the sky.
+	float Horizon = 0.f;
+	if (bHasEnvironment && Body)
+	{
+		const double Distance = FVector::Distance(CameraLocation, Body->GetActorLocation());
+		const double Radius = Distance - Environment.AltitudeAboveSeaLevelCm;
+		if (Distance > 1.0 && Radius > 0.0)
+		{
+			Horizon = -float(FMath::Sqrt(FMath::Max(0.0, 1.0 - FMath::Square(Radius / Distance))));
+		}
+	}
+	UpdateSunShadow(bHasEnvironment, Environment, Horizon);
 
 	if (SkyMaterial)
 	{
@@ -120,7 +132,7 @@ void ASkyDome::Tick(float DeltaSeconds)
 	}
 }
 
-void ASkyDome::UpdateSunShadow(bool bHasEnvironment, const FCelestialEnvironment& Environment)
+void ASkyDome::UpdateSunShadow(bool bHasEnvironment, const FCelestialEnvironment& Environment, float Horizon)
 {
 	ADirectionalLight* const Light = Sun.Get();
 	if (!Light)
@@ -142,7 +154,7 @@ void ASkyDome::UpdateSunShadow(bool bHasEnvironment, const FCelestialEnvironment
 	if (bHasEnvironment)
 	{
 		const float Height = FVector::DotProduct(-Light->GetActorForwardVector(), Environment.Up);
-		Shadow = FMath::SmoothStep(SunShadowZeroHeight, SunShadowFullHeight, Height);
+		Shadow = FMath::SmoothStep(Horizon + SunShadowZeroHeight, Horizon + SunShadowFullHeight, Height);
 	}
 	const float Wanted = SunRequestedIntensity * Shadow;
 	if (!FMath::IsNearlyEqual(Component->Intensity, Wanted, 1e-4f))

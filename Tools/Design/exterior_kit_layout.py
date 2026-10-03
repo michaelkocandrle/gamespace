@@ -14,7 +14,7 @@ was made from are in it and Tools/Tests/test_exterior_drawing.py checks them):
   parts   placed kit parts (XK-RCS blocks, strobes, the ramp light, the ramp pistons, the conduits along the spine)
   decals  the plate numbers (rule D-R-PANEL-NUMBERS) as hs_decals texts (one-glyph library items pn_<glyph>)
   skin    where the hull skin under the plates turns gunmetal
-Regions: "pilot" = the roof (band R, spine, ribs over the roof), the shoulders (band S, longerons FR-LONG-HI and
+Regions: "ship" = the whole hull (every band, the full frame). "pilot" = the roof (band R, spine, ribs over the roof), the shoulders (band S, longerons FR-LONG-HI and
 FR-LONG-TOP, the ribs above v 0.75), the stern (ramp frame, pistons, ramp light) and the pods (XK-RCS on the pods,
 fin and wing strobes) - the part of the ship the chase camera sees most.
 """
@@ -44,6 +44,18 @@ REGIONS = {
         "aft_skin": True,
         "_comment": "the roof, the shoulders, the stern and the pods: what the chase camera sees most (author 1. 10. 2026); "
                     "the aft wall as plates on a frame (band A, step c 2. 10. 2026)",
+    },
+    "ship": {
+        "bands": ["K", "L", "U", "S", "R", "A"],
+        "frame": {"FR-SPINE": None, "FR-LONG-TOP": None, "FR-LONG-HI": None, "FR-LONG-LO": None, "FR-RIB": None},
+        "parts": ["F-RAMP-FRAME", "F-RAMP-PISTON", "F-RAMP-TREAD", "F-RAMP-HINGE", "L-RAMP", "L-STROBE-FIN",
+                  "L-STROBE-WING", "F-RCS-12", "F-RCS-13", "F-CONDUIT", "F-CONDUIT-S", "F-VENT-AFT"],
+        "skin": {"x": [3.0, 15.4], "v_min": 0.759},
+        "skin_near_side": 0.1,
+        "aft_skin": True,
+        "_comment": "the whole hull (author 2. 10. 2026: after the pilot the kit on the whole ship): every side band "
+                    "(keel K, lower side L, upper side U, shoulder S), the roof, the aft wall, the full frame (ribs over "
+                    "the whole height, the low longeron) and the channel skin over the whole hull",
     },
 }
 
@@ -346,6 +358,15 @@ def layout(m, region):
                           "pod_axis": [rev["axis"]["y"], rev["axis"]["z"]]})
     # the channel floor under the plates and the frame, darker than the frame (MZ-CHANNEL; critic round 1)
     skin = dict(reg["skin"], material="channel", id="P-HULL")
+    if reg.get("skin_near_side"):
+        # on the sides only round the plates and the frame (whole-ship kit critic round 1, 3. 10. 2026: the whole
+        # skin as channel floor read as a black hull with white patches): the side outlines of every side plate and
+        # frame piece, grown by the margin - elsewhere (the nose, the keel without plates) the paint stays
+        near = unary_union([e.geo["SB"]["shape"] for e in m.elements
+                            if e.geo.get("SB") and ((e.cat == "panel" and e.data.get("band") in reg["bands"]
+                                                     and e.data.get("band") not in ("R", "A"))
+                                                    or e.id in reg["frame"])])
+        skin["near_side"] = [r[0] for r in rings(near.buffer(reg["skin_near_side"], join_style=2), 0.01)]
     if reg.get("aft_skin") and aft:
         # the aft wall between the plates, the frame and the ramp frame reads as the channel too (the white wall round
         # the plates read as one white box); not inside the ramp frame (the door leaf P-B-07 and its seam)

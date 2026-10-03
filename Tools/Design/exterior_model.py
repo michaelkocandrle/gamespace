@@ -841,8 +841,13 @@ class Model:
         self.panel_spec = p
         rib_half = self.kit["XK-RIB"]["w"] / 2
         for band in p["bands"]:
-            for i in range(1, len(stations)):
-                a, b = stations[i - 1], stations[i]
+            # merged bays (band "merge": [[a, b]]): one long plate from station a to b, the ribs between stop at the
+            # band (whole-ship kit critic round 1, 3. 10. 2026: the name WAYFARER ran over three plates and two ribs)
+            inner = {s for s in self.seams for a, b in band.get("merge", []) if a < s < b}
+            st = [s for s in stations if s not in inner]
+            for j in range(1, len(st)):
+                a, b = st[j - 1], st[j]
+                i = stations.index(a) + 1
                 xa = a + (rib_half + p["gap"] if a in self.seams else p["gap"])
                 xb = b - (rib_half + p["gap"] if b in self.seams else p["gap"])
                 raw = self.hull_band(xa, xb, band["v"][0], band["v"][1]).intersection(hull.buffer(-0.02))
@@ -862,7 +867,9 @@ class Model:
                                       what="deska %s, příčky x %s–%s" % (band["name"], fmt(a), fmt(b))))
                 el.qty = 2
                 el.where = "x %s–%s" % (fmt(a), fmt(b))
-                subs = self.side_subs(shape, band, i) if band.get("sub") else []
+                sub = band.get("sub") or {}
+                skip = band.get("merge", []) + sub.get("skip", [])
+                subs = self.side_subs(shape, band, i) if sub and not any(s0 <= a and b <= s1 for s0, s1 in skip) else []
                 for kind, g in subs:
                     if kind == "hatch":
                         # as on the roof: the hatch sits in a hole of the plate (the decal build fills it again)
@@ -988,7 +995,13 @@ class Model:
                 el.qty, el.where = 1, "osa hřbetu x %s–%s" % (fmt(fr["x"][0]), fmt(fr["x"][1]))
                 continue
             if fr["kind"] == "ribs":
-                pieces = [self.hull_band(x - w, x + w, fr["v"][0], fr["v"][1]) for x in self.seams]
+                pieces = []
+                for x in self.seams:
+                    g = self.hull_band(x - w, x + w, fr["v"][0], fr["v"][1])
+                    for band in self.design["panels"]["bands"]:
+                        if any(a < x < b for a, b in band.get("merge", [])):
+                            g = g.difference(self.hull_band(x - w - 0.01, x + w + 0.01, band["v"][0], band["v"][1]))
+                    pieces.append(g)
                 el.qty = 2 * len(self.seams)
                 el.where = "na %d příčkách" % len(self.seams)
             else:

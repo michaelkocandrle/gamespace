@@ -778,8 +778,17 @@ def skin(hull, sk, material, recipe):
             if inside((abs(c.y), c.z), half):
                 poly.material_index = slot
                 count += 1
+    near = [([tuple(p) for p in ring], (min(p[0] for p in ring), min(p[1] for p in ring),
+                                        max(p[0] for p in ring), max(p[1] for p in ring)))
+            for ring in sk.get("near_side", [])]
     for poly in hull.data.polygons:
         c = poly.center
+        if near and abs(poly.normal.y) > 0.3:
+            # a side face (whole-ship kit): channel floor only round the plates and the frame (layout skin.near_side)
+            if any(b[0] <= c.x <= b[2] and b[1] <= c.z <= b[3] and inside((c.x, c.z), ring) for ring, b in near):
+                poly.material_index = slot
+                count += 1
+                continue
         if not (sk["x"][0] <= c.x <= sk["x"][1]):
             continue
         zb, zt = zspan(c.x)

@@ -113,10 +113,10 @@
   "panels": {
     "_comment": "Hull side plates (B + C): one plate in every frame bay of every band. Bays lie between the hull's seam stations (recipe parts.hull.seams.x) and the hull ends; band heights are section fractions v (0 keel .. 1 roof at that station, as the hull loft scales its section), so the bands follow the nose taper. Plates are cut by the canopy and its seal, the dark nose tip and aft cap, the recesses and the hatches named in 'cut'; a piece under min_area_m2 or narrower than min_width_m (a strip left round a grille) is left out and the frame shows there. ID: P-S-<band><bay>.",
     "status": "proposed",
-    "built_bands": ["R", "S", "A"],
-    "_built_bands": "bands built by the kit pilot (1. 10. 2026); the others stay proposed",
+    "built_bands": ["K", "L", "U", "S", "R", "A"],
+    "_built_bands": "bands built by the kit: the pilot R, S, A (1. 10. 2026), the whole ship K, L, U from 3. 10. 2026",
     "ends": [0.0, 21.0],
-    "gap": 0.04,
+    "gap": 0.025, "_gap": "25 mm between a plate and the frame (whole-ship kit critic rounds 1-2, 3. 10. 2026: the dark frame and channel outweighed the white plates; was 40 mm)",
     "cut_margin": 0.04,
     "min_area_m2": 0.12,
     "min_width_m": 0.25,
@@ -124,8 +124,8 @@
     "_cut_hardware": "every built or proposed part on the hull side (greebles, functional parts) also gets a cut-out in the plate with cut_margin: the plates are 30-40 mm proud and would bury it (critic round 2, 1. 10. 2026)",
     "bands": [
       {"band": "K", "name": "kýlový pás (spodní zkosení)", "v": [0.0, 0.159], "kit": "XK-PLATE-H", "material": "MZ-GUNMETAL"},
-      {"band": "L", "name": "spodní bok", "v": [0.201, 0.43], "kit": "XK-PLATE-H", "material": "MZ-PAINT1"},
-      {"band": "U", "name": "horní bok", "v": [0.525, 0.749], "kit": "XK-PLATE", "material": "MZ-PAINT1"},
+      {"sub": {"_comment": "Middle layer on the side plates like on the shoulder (whole-ship kit critic round 2, 3. 10. 2026: the sides were one flat plate with a bolt row): a doubler panel and a small hatch per plate, in the middle of band L; not on the merged name plate (merge) nor in the skip bays.", "margin": 0.06, "v": [0.26, 0.37], "doubler_even_len": 0.4, "doubler_odd_min": 0.32, "skip": [[15.2, 16.7]], "_skip": "the registration HF-0417 (setup D-REG-*) on the L plate 15.2-16.7"}, "band": "L", "name": "spodní bok", "v": [0.201, 0.43], "kit": "XK-PLATE-H", "material": "MZ-PAINT1"},
+      {"sub": {"_comment": "Middle layer on the side plates like on the shoulder (whole-ship kit critic round 2, 3. 10. 2026: the sides were one flat plate with a bolt row): a doubler panel and a small hatch per plate, in the middle of band U; not on the merged name plate (merge) nor in the skip bays.", "margin": 0.06, "v": [0.58, 0.69], "doubler_even_len": 0.4, "doubler_odd_min": 0.32}, "merge": [[8.2, 12.8]], "_merge": "one long plate under the name WAYFARER (x 8.9-12.7; whole-ship kit critic round 1, 3. 10. 2026)", "band": "U", "name": "horní bok", "v": [0.525, 0.749], "kit": "XK-PLATE", "material": "MZ-PAINT1"},
       {"band": "S", "name": "rameno (horní zkosení)", "v": [0.791, 0.93], "kit": "XK-PLATE", "material": "MZ-PAINT2",
        "sub": {"_comment": "Plates on the shoulder like on the roof (kit pilot step c, author 2. 10. 2026; critic round 3: the S plates read as windows): on every S plate a doubler panel (XK-DOUBLER) and a small hatch (XK-HATCH, built as a decal) below the conduits F-CONDUIT-S; even bays a square doubler at the aft end and the hatch forward, odd bays the hatch at the aft end and a long doubler strip forward. v = section height of the shoulder (as the band); each keeps 60 mm off the plate's edges and cut-outs and the plate number's corner, slides along the bay to clear them, or is left out. ID: P-S-S<bay>-D / -H.",
                "margin": 0.06, "v": [0.825, 0.888], "doubler_even_len": 0.4, "doubler_odd_min": 0.32}}
@@ -159,10 +159,10 @@
     "_wing": "the wing root (F-WING, z 0.55-0.95 on the hull side) is cut out of the plates and ribs: the plates of band L split, the frame shows round the root (critic round 3)"
   },
   "frame": [
-    {"id": "FR-RIB", "kind": "ribs", "kit": "XK-RIB", "material": "MZ-GUNMETAL", "status": "proposed",
+    {"id": "FR-RIB", "kind": "ribs", "kit": "XK-RIB", "material": "MZ-GUNMETAL", "status": "built",
      "at": "seams", "v": [0.0, 1.0], "roof": true,
      "what": "žebra rámu na každé příčce trupu (B) od kýlu přes hřbet, přerušená u šachet a poklopů"},
-    {"id": "FR-LONG-LO", "kind": "longeron", "kit": "XK-LONGERON", "material": "MZ-GUNMETAL", "status": "proposed",
+    {"id": "FR-LONG-LO", "kind": "longeron", "kit": "XK-LONGERON", "material": "MZ-GUNMETAL", "status": "built",
      "v": 0.18, "x": [0.0, 20.3], "what": "podélník na spodní hraně boku"},
     {"id": "FR-LONG-HI", "kind": "longeron", "kit": "XK-LONGERON", "material": "MZ-GUNMETAL", "status": "built",
      "v": 0.77, "x": [3.0, 20.3], "what": "podélník na horní hraně boku"},
@@ -415,8 +415,8 @@
      "why": "obrysový pás na spodním podélníku rámu: v pásu L by ho zakryly 40mm desky"},
     {"id": "L-HULL-RUN-CANOPY", "action": "change", "set": {"on": "frame", "frame": "Z-SEAL-CANOPY"},
      "why": "obrysový pás podél těsnění kabiny: v pásu U by ho zakryly desky; obrys kabiny svítí celý"},
-    {"id": "D-H-59", "action": "change", "set": {"item": "xstl_inspect"},
-     "why": "nápis INSPECT leží na tmavém rámu (deska U07 ustoupila šachtě F-GRILLE-01): světlý inkoust"},
+    {"id": "D-H-59", "action": "change", "set": {"item": "xst_inspect", "x": 7.55},
+     "why": "nápis INSPECT na bílé desce U06 (x 7,55; na x 8,9 ležel pod jménem WAYFARER na sloučené desce, 3. 10. 2026): tmavý inkoust"},
     {"id": "G-VT-01", "action": "remove", "why": "nahrazuje šachta F-GRILLE-01"},
     {"id": "G-VT-02", "action": "remove", "why": "nahrazuje šachta F-GRILLE-01; ležel pod nápisem WAYFARER"},
     {"id": "D-H-42", "action": "remove", "why": "nahrazuje šachta F-GRILLE-01"},

@@ -338,7 +338,9 @@ python Tools/Design/exterior_kit_layout.py <Loď> [--region pilot]   # -> Design
 - **Rozvrh** (`exterior_kit_layout.py`): desky a rám jako obrysy v rovině pohledu (SB x, z pro boční pásy, zrcadlené
   na levobok; TOP x, y pro hřbet; AFT y, z pro zadní stěnu) s výřezy, tloušťkou z kitu (XK-PLATE 30 mm, XK-PLATE-H
   40 mm, rám 15–20 mm), body šroubů a filtrem normál ploch; díly (XK-RCS, XK-STROBE, XK-LANDLIGHT, XK-PISTON) s polohou.
-  Oblast `pilot` = hřbet, ramena, záď, gondoly. Test výkresu hlídá, že rozvrh je z aktuálních dat a staví přesně
+  Oblast `pilot` = hřbet, ramena, záď, gondoly; `ship` = celý trup (všechny pásy, celý rám; 3. 10. 2026). Dno kanálu na
+  bocích jen kolem desek a rámu (`skin_near_side` → `skin.near_side`), jinde lak. Pás může mít `merge` [[a, b]] (jedna
+  dlouhá deska, žebra ji obejdou: deska pod jménem lodi) a `sub.skip` (pole bez panelu a poklopu, např. pod registrací). Test výkresu hlídá, že rozvrh je z aktuálních dat a staví přesně
   postavené pásy (`panels.built_bands`).
 - **Stavba** (`Tools/Blender/hs_exterior_kit.py`, z `hs_build_ship` po vrstvě detailu, před světly, greeblemi
   a decaly): plochy trupu pod obrysem se přesně ořežou (bisect rovinami hran obrysu ve směru pohledu), zkopírují,

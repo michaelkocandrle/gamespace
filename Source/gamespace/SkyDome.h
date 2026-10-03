@@ -75,18 +75,18 @@ protected:
 
 	/** Planet shadow on the sun (author 2. 10. 2026, Docs/Reviews/2026-10-02_wayfarer_step_e_night.md): the sun's
 	 *  light fades out as it sinks below the horizon where the camera is - full at this height of the sun over
-	 *  the local horizon (sine of its elevation; 0.052 = 3 deg)... */
+	 *  the geometric horizon (sine of its elevation over it; 0.026 = 1.5 deg; the horizon dips with altitude)... */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "-1.0", ClampMax = "1.0"))
-	float SunShadowFullHeight = 0.052f;
+	float SunShadowFullHeight = 0.026f;
 
-	/** ...and gone at this one (-0.035 = 2 deg below). Without it the sun under the horizon lit a ship 3 km over
+	/** ...and gone at this one (-0.017 = 1 deg below; 3 / -2 deg made a sunset at 2 deg half dark). Without it the sun under the horizon lit a ship 3 km over
 	 *  Veyra at 89 % of the day: nothing occludes a directional light, and the atmosphere's own transmittance is
 	 *  taken at the planet's +Z top, not where the ship is. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sky Dome", meta = (ClampMin = "-1.0", ClampMax = "1.0"))
-	float SunShadowZeroHeight = -0.035f;
+	float SunShadowZeroHeight = -0.017f;
 
 private:
-	void UpdateSunShadow(bool bHasEnvironment, const struct FCelestialEnvironment& Environment);
+	void UpdateSunShadow(bool bHasEnvironment, const struct FCelestialEnvironment& Environment, float Horizon);
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> SkyMaterial;

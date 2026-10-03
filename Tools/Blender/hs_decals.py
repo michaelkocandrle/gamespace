@@ -357,7 +357,10 @@ class Placer:
                     loop[self.uv].uv = (u0 + 0.5 * s_, v_top - 0.5 * t)
                 f.normal_update()   # a new face's normal is zero until updated (WORKFLOW 9.3 s)
                 if f.normal.dot(n) < 0:
-                    f.normal_flip()
+                    # a cell folded over a step (a plate edge, a ring): flipped it read mirrored (test_ship_geometry
+                    # mirrored_decals, whole-ship kit 3. 10. 2026) - drop it like a cell that missed
+                    self.bm.faces.remove(f)
+                    continue
                 faces += 1
         # loose verts of dropped cells
         for row in rows:
