@@ -1,0 +1,92 @@
+{
+ "_comment": "Written by Tools/Design/draw_interior_plans.py: the IDs this sheet draws and labels per view and lists per schedule, with the digests of the data it was drawn from (Tools/Tests/test_interior_drawing.py).",
+ "sheet": "I-09",
+ "ship": "Wayfarer",
+ "room": null,
+ "digests": {
+  "layout": "9ed16b60fbcc",
+  "interior": "37c119fe0110",
+  "setup": "de82013afd6a",
+  "lights": "dc19a3d11ce6",
+  "design": "0386482c0b74",
+  "kit": "c8f141a12540",
+  "library": "3bdd02712ff2",
+  "light_rules": "788f180917fd"
+ },
+ "geometry": {
+  "SM_Ship_Wayfarer.fbx": "dd605b8e86d2",
+  "SM_Ship_Wayfarer_Interior.fbx": "70ea6a9dc475",
+  "SM_Ship_Wayfarer_Canopy.fbx": "50abe89a8300",
+  "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
+  "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",
+  "SM_Kit_Bulkhead_Door00L41_C.fbx": "f9b4f693887f",
+  "SM_Kit_Bulkhead_Door00W_A.fbx": "55f8f83e0001",
+  "SM_Kit_Bulkhead_Door03W_B.fbx": "0f7e22a8da73",
+  "SM_Kit_Ceiling_Panel06L41_B.fbx": "c2b804214ae9",
+  "SM_Kit_Ceiling_Panel12L38_A.fbx": "63bfaf0f739f",
+  "SM_Kit_Ceiling_Panel12L38_C.fbx": "54440fb30f8c",
+  "SM_Kit_Ceiling_Panel12L41_A.fbx": "d5cde371a617",
+  "SM_Kit_Ceiling_Panel12L41_C.fbx": "be7369dda0e1",
+  "SM_Kit_Ceiling_Tray06W_A.fbx": "ec5273e6eadb",
+  "SM_Kit_Ceiling_Tray12W_A.fbx": "917dc4e8bfc5",
+  "SM_Kit_Floor_Grille06W_A.fbx": "eef9d9eebbf3",
+  "SM_Kit_Floor_Plate12L38_A.fbx": "da3843b4b56b",
+  "SM_Kit_Floor_Plate12W_A.fbx": "3c1c37e452a1",
+  "SM_Kit_Furniture_Bunk21L_A.fbx": "2da233450b4e",
+  "SM_Kit_Furniture_Food16L_A.fbx": "d53b0199e80a",
+  "SM_Kit_Furniture_Hygiene15L_A.fbx": "1465fff4e498",
+  "SM_Kit_Furniture_Locker10L_A.fbx": "6dd14a4712d7",
+  "SM_Kit_Wall_ComponentBay06W_B.fbx": "7e19b0b40b85",
+  "SM_Kit_Wall_ComponentBay12W_A.fbx": "f3cdad016e5d",
+  "SM_Kit_Wall_ComponentBay12W_C.fbx": "5ff06f593acf",
+  "SM_Kit_Wall_HullLiner06L_A.fbx": "d03d7dc4bd82",
+  "SM_Kit_Wall_HullLiner06L_D.fbx": "979c8698b706",
+  "SM_Kit_Wall_HullLiner12L_A.fbx": "437ae9c9309d",
+  "SM_Kit_Wall_HullLiner12L_B.fbx": "3d7ad312a0a0",
+  "SM_Kit_Wall_HullLiner12L_C.fbx": "8de727448a4b",
+  "SM_Kit_Wall_HullLiner12L_E.fbx": "7cefc2a60c6c",
+  "SM_Kit_Wall_HullLiner12L_S.fbx": "fe59bfb14dd4"
+ },
+ "drawn": {},
+ "labelled": {},
+ "schedules": {
+  "doors": [
+   "DR-CAB-CPT",
+   "DR-CAB-HYG",
+   "DR-HLD-TEC",
+   "DR-RAMP",
+   "DR-TEC-CAB"
+  ],
+  "furniture": [
+   "CAB-U-BUNK",
+   "CAB-U-GALLEY",
+   "CAB-U-HYGIENE",
+   "CAB-U-LOCKER",
+   "CPT-U-SEAT"
+  ],
+  "components": [
+   "CAB-M-LIFESUP",
+   "CPT-M-AVIONICS",
+   "HLD-M-QDRIVE",
+   "HLD-M-QFUEL",
+   "TEC-M-COOLER-L",
+   "TEC-M-COOLER-R",
+   "TEC-M-POWER",
+   "TEC-M-SHIELD"
+  ],
+  "objects": [
+   "CPT-O-CONSOLE-L",
+   "CPT-O-CONSOLE-R",
+   "CPT-O-DASH",
+   "CPT-O-GRAB-01",
+   "CPT-O-GRAB-02",
+   "CPT-O-STAIRS",
+   "HLD-O-FIRE-01",
+   "HLD-O-GRID",
+   "HLD-O-RAMPHYD",
+   "HLD-O-TRACTOR"
+  ]
+ },
+ "checks": [],
+ "registry": true
+}
