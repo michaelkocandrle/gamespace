@@ -230,83 +230,129 @@ namespace SpaceOrigin
 			TeleportTo(World, Pawn, Pawn->GetActorLocation() + Pawn->GetActorForwardVector() * Km * CmPerKm);
 		}));
 
+	/**
+	 * Moves the player's ship over the nearest ground whose slope (under the pads, 150 cm, and over the ship's length,
+	 * 800 cm) lies in [MinDeg, MaxDeg], at the same height over it and level; with a yaw, the nose that far right of
+	 * straight uphill. Rings of samples 100 m apart, nearest first. A slope (MinDeg > 0) must also be one plane:
+	 * the normals at 150, 800 and 1100 cm within 2 degrees of each other.
+	 */
+	void MoveShipToSlope(UWorld* World, const TCHAR* Command, double MinDeg, double MaxDeg, TOptional<double> YawFromUphillDeg, double SearchKm)
+	{
+		APawn* Pawn = PlayerPawn(World);
+		const ACelestialBody* Body = Pawn ? ACelestialBody::FindNearest(World, Pawn->GetActorLocation()) : nullptr;
+		if (!Body)
+		{
+			UE_LOG(LogSpaceOrigin, Warning, TEXT("%s: needs a player pawn near a body"), Command);
+			return;
+		}
+		const double SearchCm = SearchKm * CmPerKm;
+		const FVector Centre = Body->GetActorLocation();
+		const FVector Here = Pawn->GetActorLocation();
+		const double Radius = (Here - Centre).Size();
+		const FVector Up = (Here - Centre).GetSafeNormal();
+		const double Height = Body->GetSurfaceDistance(Here);
+		FVector T1 = FVector::VectorPlaneProject(Pawn->GetActorForwardVector(), Up).GetSafeNormal();
+		FVector T2 = FVector::CrossProduct(Up, T1);
+		if (T1.IsNearlyZero())
+		{
+			// the nose straight up or down (before a shot levels the ship): any two directions along the ground
+			Up.FindBestAxisVectors(T1, T2);
+		}
+		// rings of samples 100 m apart, nearest first; the flattest one seen if none is flat enough
+		constexpr double StepCm = 10000.0;
+		double BestSlope = 90.0, BestRing = 0.0;
+		int32 Samples = 0, Failed = 0;
+		FVector BestSurface = FVector::ZeroVector, BestUp = Up;
+		for (double Ring = 0.0; Ring <= SearchCm; Ring += StepCm)
+		{
+			const int32 Count = Ring <= 0.0 ? 1 : FMath::Max(6, int32(2.0 * PI * Ring / StepCm));
+			for (int32 I = 0; I < Count; ++I)
+			{
+				const double A = 2.0 * PI * I / Count;
+				const FVector Probe = Centre + ((Here + (T1 * FMath::Cos(A) + T2 * FMath::Sin(A)) * Ring) - Centre).GetSafeNormal() * Radius;
+				// flat under the landing probe's footprint (150 cm) and over the ship's length (800 cm)
+				FVector Surface, Normal, Wide;
+				const FVector ProbeUp = (Probe - Centre).GetSafeNormal();
+				++Samples;
+				if (!Body->GetSurfaceFrame(Probe, 800.0, Surface, Wide) || !Body->GetSurfaceFrame(Probe, 150.0, Surface, Normal))
+				{
+					++Failed;
+					continue;
+				}
+				auto SlopeOf = [&ProbeUp](const FVector& N) { return FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(FVector::DotProduct(N, ProbeUp), -1.0, 1.0))); };
+				const double Slope = FMath::Max(SlopeOf(Normal), SlopeOf(Wide));
+				const double Gentlest = FMath::Min(SlopeOf(Normal), SlopeOf(Wide));
+				if (Slope < BestSlope)
+				{
+					BestSlope = Slope;
+					BestRing = Ring;
+					BestSurface = Surface;
+					BestUp = ProbeUp;
+				}
+				if (Slope > MaxDeg || Gentlest < MinDeg)
+				{
+					continue;
+				}
+				if (MinDeg > 0.0)
+				{
+					// A slope, not a hollow or a ridge: one plane under the pads, over the ship's length and beyond
+					// its ends (11 m), so the shot shows the slope and not the terrain's bumps.
+					FVector Far, FarNormal;
+					if (!Body->GetSurfaceFrame(Probe, 1100.0, Far, FarNormal)
+						|| FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(FarNormal | Normal, -1.0, 1.0))) > 2.0
+						|| FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(Wide | Normal, -1.0, 1.0))) > 2.0)
+					{
+						continue;
+					}
+				}
+				FVector Forward = FVector::VectorPlaneProject(Pawn->GetActorForwardVector(), ProbeUp).GetSafeNormal();
+				Forward = Forward.IsNearlyZero() ? FVector::VectorPlaneProject(T1, ProbeUp).GetSafeNormal() : Forward;
+				const FVector Uphill = FVector::VectorPlaneProject(-Wide, ProbeUp).GetSafeNormal();
+				if (YawFromUphillDeg.IsSet() && !Uphill.IsNearlyZero())
+				{
+					// Turning right about up: the nose YawFromUphillDeg right of straight up the slope.
+					Forward = Uphill.RotateAngleAxis(YawFromUphillDeg.GetValue(), ProbeUp);
+				}
+				TeleportTo(World, Pawn, Surface + ProbeUp * Height);
+				Pawn->SetActorRotation(FRotationMatrix::MakeFromXZ(Forward, ProbeUp).ToQuat(), ETeleportType::TeleportPhysics);
+				UE_LOG(LogSpaceOrigin, Display, TEXT("%s: %.0f m away, slope %.1f-%.1f deg"), Command, Ring / 100.0, Gentlest, Slope);
+				return;
+			}
+		}
+		UE_LOG(LogSpaceOrigin, Warning, TEXT("%s: no slope of %.1f-%.1f deg within %.1f km, the flattest %.1f deg %.0f m away (%d samples, %d failed)"),
+			Command, MinDeg, MaxDeg, SearchCm / CmPerKm, BestSlope, BestRing / 100.0, Samples, Failed);
+		if (MinDeg <= 0.0 && BestSlope < 20.0)
+		{
+			FVector Forward = FVector::VectorPlaneProject(Pawn->GetActorForwardVector(), BestUp).GetSafeNormal();
+			Forward = Forward.IsNearlyZero() ? FVector::VectorPlaneProject(T1, BestUp).GetSafeNormal() : Forward;
+			TeleportTo(World, Pawn, BestSurface + BestUp * Height);
+			Pawn->SetActorRotation(FRotationMatrix::MakeFromXZ(Forward, BestUp).ToQuat(), ETeleportType::TeleportPhysics);
+		}
+	}
+
 	static FAutoConsoleCommandWithWorldAndArgs FlatSpotCommand(
 		TEXT("space.FlatSpot"),
 		TEXT("space.FlatSpot [max slope deg = 5] [search km = 3]: moves the player's ship over the nearest ground flatter than that, at the same height over it and level - for landing shots (walking the ship needs it landed)."),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
 		{
-			APawn* Pawn = PlayerPawn(World);
-			const ACelestialBody* Body = Pawn ? ACelestialBody::FindNearest(World, Pawn->GetActorLocation()) : nullptr;
-			if (!Body)
+			const double MaxDeg = Args.Num() > 0 ? FCString::Atod(*Args[0]) : 5.0;
+			const double SearchKm = Args.Num() > 1 ? FCString::Atod(*Args[1]) : 3.0;
+			MoveShipToSlope(World, TEXT("space.FlatSpot"), 0.0, MaxDeg, TOptional<double>(), SearchKm);
+		}));
+
+	static FAutoConsoleCommandWithWorldAndArgs SlopeSpotCommand(
+		TEXT("space.SlopeSpot"),
+		TEXT("space.SlopeSpot <min deg> <max deg> [yaw deg = 0] [search km = 3]: moves the player's ship over the nearest ground with a slope in that range (under the pads and over the ship's length), at the same height over it and level, the nose yaw degrees right of straight uphill - for landing-on-a-slope shots."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			if (Args.Num() < 2)
 			{
-				UE_LOG(LogSpaceOrigin, Warning, TEXT("space.FlatSpot: needs a player pawn near a body"));
+				UE_LOG(LogSpaceOrigin, Warning, TEXT("usage: space.SlopeSpot <min deg> <max deg> [yaw deg] [search km]"));
 				return;
 			}
-			const double MaxDeg = Args.Num() > 0 ? FCString::Atod(*Args[0]) : 5.0;
-			const double SearchCm = (Args.Num() > 1 ? FCString::Atod(*Args[1]) : 3.0) * CmPerKm;
-			const FVector Centre = Body->GetActorLocation();
-			const FVector Here = Pawn->GetActorLocation();
-			const double Radius = (Here - Centre).Size();
-			const FVector Up = (Here - Centre).GetSafeNormal();
-			const double Height = Body->GetSurfaceDistance(Here);
-			FVector T1 = FVector::VectorPlaneProject(Pawn->GetActorForwardVector(), Up).GetSafeNormal();
-			FVector T2 = FVector::CrossProduct(Up, T1);
-			if (T1.IsNearlyZero())
-			{
-				// the nose straight up or down (before a shot levels the ship): any two directions along the ground
-				Up.FindBestAxisVectors(T1, T2);
-			}
-			// rings of samples 100 m apart, nearest first; the flattest one seen if none is flat enough
-			constexpr double StepCm = 10000.0;
-			double BestSlope = 90.0, BestRing = 0.0;
-			int32 Samples = 0, Failed = 0;
-			FVector BestSurface = FVector::ZeroVector, BestUp = Up;
-			for (double Ring = 0.0; Ring <= SearchCm; Ring += StepCm)
-			{
-				const int32 Count = Ring <= 0.0 ? 1 : FMath::Max(6, int32(2.0 * PI * Ring / StepCm));
-				for (int32 I = 0; I < Count; ++I)
-				{
-					const double A = 2.0 * PI * I / Count;
-					const FVector Probe = Centre + ((Here + (T1 * FMath::Cos(A) + T2 * FMath::Sin(A)) * Ring) - Centre).GetSafeNormal() * Radius;
-					// flat under the landing probe's footprint (150 cm) and over the ship's length (800 cm)
-					FVector Surface, Normal, Wide;
-					const FVector ProbeUp = (Probe - Centre).GetSafeNormal();
-					++Samples;
-					if (!Body->GetSurfaceFrame(Probe, 800.0, Surface, Wide) || !Body->GetSurfaceFrame(Probe, 150.0, Surface, Normal))
-					{
-						++Failed;
-						continue;
-					}
-					auto SlopeOf = [&ProbeUp](const FVector& N) { return FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(FVector::DotProduct(N, ProbeUp), -1.0, 1.0))); };
-					const double Slope = FMath::Max(SlopeOf(Normal), SlopeOf(Wide));
-					if (Slope < BestSlope)
-					{
-						BestSlope = Slope;
-						BestRing = Ring;
-						BestSurface = Surface;
-						BestUp = ProbeUp;
-					}
-					if (Slope > MaxDeg)
-					{
-						continue;
-					}
-					FVector Forward = FVector::VectorPlaneProject(Pawn->GetActorForwardVector(), ProbeUp).GetSafeNormal();
-					Forward = Forward.IsNearlyZero() ? FVector::VectorPlaneProject(T1, ProbeUp).GetSafeNormal() : Forward;
-					TeleportTo(World, Pawn, Surface + ProbeUp * Height);
-					Pawn->SetActorRotation(FRotationMatrix::MakeFromXZ(Forward, ProbeUp).ToQuat(), ETeleportType::TeleportPhysics);
-					UE_LOG(LogSpaceOrigin, Display, TEXT("space.FlatSpot: %.0f m away, slope %.1f deg"), Ring / 100.0, Slope);
-					return;
-				}
-			}
-			UE_LOG(LogSpaceOrigin, Warning, TEXT("space.FlatSpot: nothing flatter than %.1f deg within %.1f km, the flattest %.1f deg %.0f m away (%d samples, %d failed)"),
-				MaxDeg, SearchCm / CmPerKm, BestSlope, BestRing / 100.0, Samples, Failed);
-			if (BestSlope < 20.0)
-			{
-				FVector Forward = FVector::VectorPlaneProject(Pawn->GetActorForwardVector(), BestUp).GetSafeNormal();
-				Forward = Forward.IsNearlyZero() ? FVector::VectorPlaneProject(T1, BestUp).GetSafeNormal() : Forward;
-				TeleportTo(World, Pawn, BestSurface + BestUp * Height);
-				Pawn->SetActorRotation(FRotationMatrix::MakeFromXZ(Forward, BestUp).ToQuat(), ETeleportType::TeleportPhysics);
-			}
+			const double Yaw = Args.Num() > 2 ? FCString::Atod(*Args[2]) : 0.0;
+			const double SearchKm = Args.Num() > 3 ? FCString::Atod(*Args[3]) : 3.0;
+			MoveShipToSlope(World, TEXT("space.SlopeSpot"), FCString::Atod(*Args[0]), FCString::Atod(*Args[1]), Yaw, SearchKm);
 		}));
 
 	static FAutoConsoleCommandWithWorldAndArgs TeleportAbsoluteCommand(

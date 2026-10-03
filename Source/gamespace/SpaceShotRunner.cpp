@@ -132,6 +132,7 @@ bool USpaceShotRunner::ParseShotList(const FString& Json, TArray<FSpaceShot>& Ou
 		if ((*Object)->TryGetBoolField(TEXT("gsafe"), bFlag)) { Shot.GSafe = bFlag ? 1 : 0; }
 		if ((*Object)->TryGetBoolField(TEXT("comstab"), bFlag)) { Shot.ComStab = bFlag ? 1 : 0; }
 		(*Object)->TryGetBoolField(TEXT("boost"), Shot.bBoost);
+		if ((*Object)->TryGetNumberField(TEXT("lift"), Number)) { Shot.Lift = float(Number); }
 		(*Object)->TryGetBoolField(TEXT("afterburner"), Shot.bAfterburner);
 		if ((*Object)->TryGetBoolField(TEXT("hide_hull"), bFlag)) { Shot.HideHull = bFlag ? 1 : 0; }
 		if ((*Object)->TryGetBoolField(TEXT("hide_canopy"), bFlag)) { Shot.HideCanopy = bFlag ? 1 : 0; }
@@ -517,6 +518,10 @@ void USpaceShotRunner::Tick(float DeltaTime)
 	}
 	// Keep held inputs alive while it settles (boost and the afterburner are "held" states).
 	Ship->SetBoostHeld(Shots[ShotIndex].bBoost);
+	if (Shots[ShotIndex].Lift != 0.f)
+	{
+		Ship->DebugSetLiftHeld(Shots[ShotIndex].Lift);
+	}
 	Ship->SetAfterburnerHeld(Shots[ShotIndex].bAfterburner);
 	Ship->DebugSetMouseStick(Shots[ShotIndex].Stick);
 	if (Timer >= Shots[ShotIndex].Settle)

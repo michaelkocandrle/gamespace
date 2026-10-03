@@ -1265,6 +1265,18 @@ snímku.
 - fq) **Stavba lodi spadla v `hs_decals` na `KeyError: 'pn_K'`** (3. 10. 2026, revize G). Čísla desek se skládají ze
   znaků `pn_<znak>`, knihovna měla jen R, L, P, S a číslice. Nové znaky se přidávají jako nová dávka `append`
   (stávající položky atlasu se neposunou); test výkresu teď hlídá i znaky čísel z rozvrhu kitu.
+- fr) **Loď na svahu stála na vzduchu nebo ležela trupem v terénu** (3. 10. 2026). Kořenový box Wayfareru je celá loď
+  (21,5 × 14,7 m) až dolů k patkám, takže na svahu jeho rohy narazily na zem dřív než patky nebo trup. Pohyb lodi
+  teď sweepuje vlastní kolizi trupu (UCX, `SweepHullParts` přes `ComponentSweepMulti`), přistání stojí na třech
+  patkách (`TripodRest`, paprsky pod sockety `Gear_*`). Komponentový dotaz bere odezvy té komponenty, proto trup
+  blokuje i `WorldStatic` a `WorldDynamic`; co se počítá, filtruje `BlocksShip` (jen to, co blokoval box: ne postavy,
+  jinak pilot v kokpitu „zablokoval“ přistání).
+- fs) **Přistání na rovném svahu odmítnuté jako `Obstructed`** (3. 10. 2026). Kontrola světlé výšky trupu počítala
+  i kolizní blok podvozku (UCX_09, 5,3 m široký kvádr v úrovni patek), který se každého hrbolku mezi patkami dotkne.
+  Tvary, které sahají do 50 cm nad patky, jsou podvozek a kontrola je vynechá (`HullClearOfGround`).
+- ft) **Python v UE: bool UFUNCTION s výstupními parametry** nevrací `(ok, out1, …)`, ale jen výstupy, nebo `None`,
+  když funkce vrátila false (`compute_tripod_rest`). `unreal.Rotator` nemá `rotate_vector`; otáčej přes
+  `get_forward_vector` / `get_right_vector` / `get_up_vector`.
 
 
 ---

@@ -1,0 +1,15 @@
+{
+  "_comment": "Landing on a slope (SC-2a, 3. 10. 2026): the ship comes down on its own (lift -0.6 held) over ground of a given slope and stands on its three pads. space.SlopeSpot <min> <max> <yaw> moves it over the nearest such ground, the nose yaw degrees right of straight uphill. The last pair is too steep: the ship must not land (TOO STEEP) and slides on its gear, the hull out of the ground. Run: .\\Tools\\Shots.ps1 -Preset landing_slope -Editor",
+  "shots": [
+    {"name": "slope15_uphill_side", "camera": "chase", "altitude_m": 9, "facing": "horizon", "hud": 2, "gear": true, "lift": -0.6, "chase_yaw": 90, "chase_pitch": 8, "chase_zoom": 0.8, "settle": 14.0,
+     "console": ["space.SlopeSpot 12 18 0"]},
+    {"name": "slope15_uphill_front", "camera": "chase", "altitude_m": -1, "facing": "horizon", "hud": 0, "chase_yaw": 160, "chase_pitch": 6, "chase_zoom": 0.8, "settle": 1.0},
+    {"name": "slope15_across_front", "camera": "chase", "altitude_m": 9, "facing": "horizon", "hud": 2, "gear": true, "lift": -0.6, "chase_yaw": 175, "chase_pitch": 6, "chase_zoom": 0.8, "settle": 14.0,
+     "console": ["space.SlopeSpot 12 18 90"]},
+    {"name": "slope22_diagonal_side", "camera": "chase", "altitude_m": 10, "facing": "horizon", "hud": 2, "gear": true, "lift": -0.6, "chase_yaw": 100, "chase_pitch": 8, "chase_zoom": 0.8, "settle": 14.0,
+     "console": ["space.SlopeSpot 18 24 45"]},
+    {"name": "slope22_diagonal_low", "camera": "chase", "altitude_m": -1, "facing": "horizon", "hud": 0, "chase_yaw": 60, "chase_pitch": 2, "chase_zoom": 0.6, "settle": 1.0},
+    {"name": "slope30_too_steep", "camera": "chase", "altitude_m": 12, "facing": "horizon", "hud": 2, "gear": true, "lift": -0.6, "chase_yaw": 90, "chase_pitch": 8, "chase_zoom": 0.8, "settle": 10.0,
+     "console": ["space.SlopeSpot 28 35 0"]}
+  ]
+}

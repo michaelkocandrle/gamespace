@@ -174,6 +174,7 @@ namespace
 		{
 		case ELandingBlocker::TooHigh: Reason = TEXT("too high"); break;
 		case ELandingBlocker::TooSteep: Reason = TEXT("TOO STEEP"); break;
+		case ELandingBlocker::Obstructed: Reason = TEXT("HULL ON GROUND - find even ground"); break;
 		case ELandingBlocker::TooFast: Reason = TEXT("too fast"); break;
 		case ELandingBlocker::Tilted: Reason = TEXT("level the ship"); break;
 		case ELandingBlocker::EngineInput:
@@ -186,7 +187,7 @@ namespace
 		default: break;
 		}
 		const ELandingBlocker Blocker = Ship.GetLandingBlocker();
-		OutColor = Blocker == ELandingBlocker::TooSteep || (Blocker == ELandingBlocker::GearUp && Ship.GetGearState() != EGearState::Extending)
+		OutColor = Blocker == ELandingBlocker::TooSteep || Blocker == ELandingBlocker::Obstructed || (Blocker == ELandingBlocker::GearUp && Ship.GetGearState() != EGearState::Extending)
 			? FLinearColor(1.f, 0.45f, 0.2f) : FLinearColor(0.8f, 0.8f, 0.8f);
 		return FString::Printf(TEXT("%s   %s"), *Measurements, Reason);
 	}

@@ -590,6 +590,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	void DebugSetGearInstant(bool bDown);
 
+	/** Tests and screenshots: hold the lift axis (+1 rise, -1 descend) as if the key were held. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugSetLiftHeld(float Lift) { LiftInput = FMath::Clamp(Lift, -1.f, 1.f); }
+
 	/** Tests: the landing state machine's bookkeeping, as if the ship had just touched down. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	void DebugForceLanded(bool bLanded);
@@ -683,6 +687,15 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Landing")
 	ELandingBlocker EvaluateTouchdown(float HullGap, float Speed, float TiltDeg, float SlopeDeg, bool bEngineInput, bool bGearDown) const;
+
+	/**
+	 * Standing on three pads (FShipFlightModel::TripodRest, one step): PadsLocal are the pads in actor space, Ground
+	 * the ground under each, RestHeightCm the pads' plane above the ground's. False when the ground points are in a
+	 * line or there are not three of each. For tests.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Landing")
+	static bool ComputeTripodRest(const FVector& Location, const FRotator& Rotation, const TArray<FVector>& PadsLocal,
+		const TArray<FVector>& Ground, float RestHeightCm, FVector& OutLocation, FRotator& OutRotation, FVector& OutNormal);
 
 	/**
 	 * The touchdown rule on its own: the first blocker for these measurements, or None. The state
@@ -1686,6 +1699,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "10.0"))
 	float LandingFootprintRadiusCm = 150.f;
 
+	/**
+	 * Touchdown needs this much room between the hull and the ground with the ship standing on its pads, cm: a rock
+	 * or a ridge under the hull refuses it (Obstructed).
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.0"))
+	float LandingHullClearanceCm = 15.f;
+
 	/** Thrust (either way) or upward lift at this input or more takes off, and blocks touchdown. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Landing", meta = (ClampMin = "0.05", ClampMax = "1.0"))
 	float TakeoffInputThreshold = 0.5f;
@@ -1940,11 +1960,48 @@ private:
 	/** Sweeps the hull from Start to End with Rotation, ignoring this ship. */
 	bool SweepHull(const FVector& Start, const FVector& End, const FQuat& Rotation, FHitResult& OutHit) const;
 
+	/**
+	 * Sweeps the hull mesh's own collision (the UCX hulls from Blender) from actor location Start to End, earliest
+	 * hit first; OutHit.Location is the actor location there. The root box spans the whole ship down to the pads,
+	 * so on a slope its corners met the ground long before the pads or the hull did (the ship stood on air). A
+	 * shape that starts inside something and moves out of it does not block. Without shapes, the root box.
+	 */
+	bool SweepHullParts(const FVector& Start, const FVector& End, const FQuat& Rotation, FHitResult& OutHit) const;
+	/**
+	 * Whether the hull, its gear aside (collision shapes reaching below GearTopLocalZ in actor space), stays out of
+	 * everything the ship collides with at this pose; OutWhat names what it would touch.
+	 */
+	bool HullClearOfGround(const FVector& Location, const FQuat& Rotation, double GearTopLocalZ, FString* OutWhat = nullptr) const;
+	/** Whether the ship's movement collides with this component (what the root box blocks: not characters). */
+	bool BlocksShip(const UPrimitiveComponent* Other) const;
+	/** Moves the ship by Delta, stopped by the first thing a hull shape meets (bSweepMovement), no rotation. */
+	void MoveHull(const FVector& Delta, FHitResult& OutHit);
+	/** The hull mesh has collision shapes to sweep (else the root box stands in). */
+	bool HasHullShapes() const;
+
+	/** The first three of GearSocketNames found on the hull, in actor space: where the gear meets the ground. */
+	bool FindGearPads(FVector (&OutPadsLocal)[3]) const;
+	/**
+	 * Straight down (against Up) from each pad of the ship at this pose: the ground point and the pad's height above
+	 * it, cm (negative: the pad is in the ground). Returns how many pads found ground.
+	 */
+	int32 TracePads(const FVector& Location, const FQuat& Rotation, const FVector (&PadsLocal)[3], const FVector& Up,
+		FVector (&OutGround)[3], float (&OutGap)[3]) const;
+	/** The pose standing on the three pads (FShipFlightModel::TripodRest, settled over a few passes). */
+	bool SolveTripodRest(const FVector (&PadsLocal)[3], const FVector& Up, FVector& OutLocation, FQuat& OutRotation, FVector& OutNormal) const;
+
 	float& AxisInput(ESpaceshipAxis Axis);
 
 	float ThrustInput = 0.f;
 	float StrafeInput = 0.f;
 	float LiftInput = 0.f;
+
+	/** This frame's pose standing on the gear pads, when UpdateLanding found one (gear down, ground under all three). */
+	bool bHasTripodRest = false;
+	FVector TripodRestLocation = FVector::ZeroVector;
+	FQuat TripodRestRotation = FQuat::Identity;
+	/** What the hull would touch on the pads, as last logged (empty while clear). */
+	FString LastObstruction;
 	float RollInput = 0.f;
 
 	/** Stick look, X yaw, Y pitch. Cleared every tick; a deflected stick re-fires Triggered. */

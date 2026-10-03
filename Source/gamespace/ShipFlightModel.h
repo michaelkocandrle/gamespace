@@ -90,6 +90,17 @@ struct GAMESPACE_API FShipFlightModel
 	/** Angle between two directions, degrees. */
 	static float AngleBetweenDeg(const FVector& A, const FVector& B);
 
+	/**
+	 * The pose of a ship standing on three gear pads (SC-2a, landing on a slope): its up on the plane through the
+	 * three ground points, heading kept, and moved along that plane's normal only, so the pads' plane lies
+	 * RestHeightCm above the ground's (the gear's reach below its sockets; 0 when the sockets are the pads' soles).
+	 * PadsLocal are the pads in actor space. One step: the ground points come from straight below the pads of the
+	 * current pose, so call it again with the ground under the new pose to settle it. False when the three ground
+	 * points are (nearly) in a line.
+	 */
+	static bool TripodRest(const FVector& Location, const FQuat& Current, const FVector (&PadsLocal)[3], const FVector (&Ground)[3],
+		double RestHeightCm, FVector& OutLocation, FQuat& OutRotation, FVector& OutNormal);
+
 	// --- Gear ----------------------------------------------------------------------------------------------------
 
 	struct FGearShape

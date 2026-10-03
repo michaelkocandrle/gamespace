@@ -119,6 +119,44 @@ try:
     check("L5 rule unchanged for the old callers", ship.evaluate_landing(0.5 * P["landing_max_gap_cm"], 0.0, 0.0, 0.0, False) == B.NONE)
 
     # -----------------------------------------------------------------------------------
+    # 1b) Standing on three pads on a slope (TripodRest)
+    # -----------------------------------------------------------------------------------
+    pads = [unreal.Vector(675.0, 0.0, -250.0), unreal.Vector(-505.0, -225.0, -250.0), unreal.Vector(-505.0, 225.0, -250.0)]
+    slope = math.radians(20.0)
+    normal = (-math.sin(slope), 0.0, math.cos(slope))  # rising towards +X (nose uphill)
+
+    def ground_under(x, y, z0=-900.0):
+        # the plane z = z0 + x tan(slope), straight below (x, y)
+        return unreal.Vector(x, y, z0 + x * math.tan(slope))
+
+    start = unreal.Vector(30.0, -12.0, 0.0)
+    ground = [ground_under(start.x + p.x, start.y + p.y) for p in pads]
+    # a bool UFUNCTION with out parameters comes back as the outs, or None when it returned false
+    result = unreal.SpaceshipPawn.compute_tripod_rest(start, unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0), pads, ground, 1.0)
+    ok = result is not None
+    loc, rot, n = result if ok else (None, None, None)
+    up = v3(rot.get_up_vector())
+    check("tripod: the ship's up on the ground's normal (20 deg slope, nose uphill)",
+          ok and abs(sum(a * b for a, b in zip(up, normal)) - 1.0) < 1e-4, "up %s" % (up,))
+    check("tripod: nose still pointing the same way (uphill), pitched up 20 deg", ok and abs(rot.pitch - 20.0) < 0.05 and abs(rot.yaw) < 0.05,
+          "pitch %.2f yaw %.2f" % (rot.pitch, rot.yaw))
+    heights = []
+    if ok:
+        f, r, u = v3(rot.get_forward_vector()), v3(rot.get_right_vector()), v3(rot.get_up_vector())
+        for p in pads:
+            world = tuple(lo + p.x * fa + p.y * ra + p.z * ua for lo, fa, ra, ua in zip(v3(loc), f, r, u))
+            heights.append(sum((a - b) * c for a, b, c in zip(world, v3(ground[0]), normal)))
+    check("tripod: every pad 1 cm above the slope (the rest height)", ok and all(abs(hh - 1.0) < 0.05 for hh in heights),
+          ", ".join("%.3f" % hh for hh in heights))
+    moved = v3(loc - start)
+    along = sum(a * b for a, b in zip(moved, normal))
+    check("tripod: moved only along the normal, not along the slope",
+          ok and length(tuple(m - along * c for m, c in zip(moved, normal))) < 0.05, "%s" % (moved,))
+    line = [unreal.Vector(0.0, 0.0, 0.0), unreal.Vector(100.0, 0.0, 0.0), unreal.Vector(300.0, 0.0, 0.0)]
+    check("tripod: ground points in a line give no pose",
+          unreal.SpaceshipPawn.compute_tripod_rest(start, unreal.Rotator(), pads, line, 1.0) is None)
+
+    # -----------------------------------------------------------------------------------
     # 2) Gear state machine
     # -----------------------------------------------------------------------------------
     S = unreal.GearState
@@ -380,5 +418,8 @@ known = {"name", "camera", "hud", "altitude_m", "facing", "speed_ms", "mode", "l
          "precision", "chase_yaw", "chase_pitch", "chase_zoom", "_comment"}
 unknown = sorted({k for s in shots for k in s} - known)
 check("landing shot list uses only fields the runner reads", not unknown and len(shots) >= 5, str(unknown))
+slope_shots = json.load(open(os.path.join(REPO, "Tools", "Shots", "landing_slope.json"), encoding="utf-8"))["shots"]
+unknown = sorted({k for s in slope_shots for k in s} - known - {"lift", "console"})
+check("slope landing shot list uses only fields the runner reads", not unknown and len(slope_shots) >= 4, str(unknown))
 
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

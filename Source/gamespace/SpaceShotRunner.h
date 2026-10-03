@@ -60,6 +60,8 @@ struct FSpaceShot
 	int32 GSafe = -1;
 	int32 ComStab = -1;
 	bool bBoost = false;
+	/** The lift axis held while it settles (-1 descend .. +1 rise), 0 leaves it alone: landing shots that come down on their own. */
+	float Lift = 0.f;
 	bool bAfterburner = false;
 	/** Mouse virtual joystick cursor, -1..1. */
 	FVector2D Stick = FVector2D::ZeroVector;

@@ -12,6 +12,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 - **Let podle SC** (master reference `starcitizenreference/`): SC-1a IFCS (coupled/decoupled, SCM/NAV, omezovač,
   G-Safe, ComStab, VJoy), SC-1b boost a afterburner, SC-1c letový HUD, SC-2a podvozek a precision, SC-2b VTOL,
   SC-3 značka dráhy letu, SC-4 quantum drive (cíl nosem, spool, kalibrace, tunel, příjezd). Ovládání: `README.md`.
+  **Přistání na svahu** (3. 10.): loď stojí na třech patkách (rovina pod patkami, `TripodRest`), pohyb sweepuje vlastní
+  kolizi trupu (UCX) místo kořenového boxu, `Obstructed` = trup by se dotkl terénu; `landing_slope`, README „On a slope“.
   Tělesa pro quantum, radar a `FindNearest` drží `USpaceCelestialRegistrySubsystem`.
 - **Postava:** první osoba (V pěšky = třetí jen pro testy); sférická gravitace planety i umělá v lodi.
 - **Wayfarer** (Halcyon Freightworks, malá multirole, 1 pilot) – jediná létající loď:
@@ -53,7 +55,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Známé problémy
 
-- Podvozek, křídla a zbraně Wayfareru zatím bez kitu. Loď na svahu leží trupem v terénu.
+- Podvozek, křídla a zbraně Wayfareru bez kitu; nohy bez odpružení (jeden mesh). Klesání (C) u země dopadá ~10 m/s.
+  Snímek 11 `wayfarer_exterior_review` staví loď do svahu 32° (trup v terénu), chce `space.FlatSpot`.
 - `DebugEngageQuantum` po zadání cíle jménem znovu vybírá cíl podle nosu lodi (drobnost, autor 1. 10.).
 - Interiér Wayfareru: otevřené body recenzí `2026-09-30_cabin_furniture.md` a `2026-09-30_cabin_liner.md`.
 - **Odrazy kovu odložené na optimalizaci** (autor 30. 9.): odrazy Lumenu do drsnosti 0,32 za +1,3 ms.
@@ -63,18 +66,15 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
   náhodné decaly už na pořadí stavby nezávisí (9.6 fl, test v `test_kit_decals.py`).
 - Hřebenový terén vypnutý (kamera po přistání pod zemí); kameny bez kolize. Quantum tunel méně „mléčný“, TSR
   čáry podél jisker; displeje bez mipmap (pod ~1600 px písmo zrní), duchy čísel.
-- Loď bez podvozku u země stojí na neviditelném kořenovém boxu (řeší se, až bude vadit). Zvuky jsou procedurální
-  zástupci; jas oblohy je odhad; obloha v atmosféře nerozlišuje den a noc (soumrak a noc jen v presetu snímků).
+- Zvuky jsou procedurální zástupci; jas oblohy je odhad; obloha v atmosféře nerozlišuje den a noc.
 - Neověřeno autorem: časování quantum skoku, HUD SC-1c mimo 1080p, chůze Steadfastem; Shipping build nezkoušen; v PIE
   Escape ukončí hru (menu F10); debug HUD anglicky; `compileall` SyntaxWarning v šesti skriptech `Tools/Assets`.
 
 ## Další kroky
 
-1. **Wayfarer – revize G postavená** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený
-   do finální recenze hotové lodi; otevřená doporučení (tón panelů, nosná položka shluků, špína, RCS přídě) v recenzi.
-   Další práce podle autora (3. 10.): přistání na svahu, let (HUD, mapa, palivo), interiér, Steadfast.
-2. **Loď na svahu – DALŠÍ ÚKOL** (autor 3. 10.: „ano pokračuj“): loď na svahu leží trupem v terénu; přistání v
-   `SpaceshipPawn` (odblokované), podle SC (`starcitizenreference/StarCitizen_FlightSystem_Reference.md`, SC-2a podvozek).
+1. **Wayfarer revize G** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený do finální
+   recenze. Další práce podle autora (3. 10.): let (HUD, mapa, palivo), interiér, Steadfast.
+2. **Přistání na svahu hotové** (3. 10.), čeká na vyzkoušení autorem; později odpružení nohou, mírnější klesání u země.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).

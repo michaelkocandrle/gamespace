@@ -21,6 +21,7 @@ void UShipLandingComponent::BeginFrame(float DeltaSeconds)
 	Ground.bValid = false;
 	Ground.bContact = false;
 	Ground.GapCm = -1.f;
+	Ground.bHullClear = true;
 }
 
 UShipLandingComponent::EEvent UShipLandingComponent::Update(float DeltaSeconds, const FShipGroundProbe& Probe, float Speed,
@@ -37,6 +38,18 @@ UShipLandingComponent::EEvent UShipLandingComponent::Update(float DeltaSeconds, 
 		: TakeoffCooldown > 0.f ? ELandingBlocker::TakeoffCooldown
 		: FShipFlightModel::EvaluateTouchdown(Ground.GapCm, Speed, Ground.TiltDeg, Ground.SlopeDeg, bEngineInput,
 			IsGearDeployed(), Rules.GearExtensionCm, Rules.Limits);
+	if (Blocker == ELandingBlocker::None && !Ground.bHullClear)
+	{
+		Blocker = ELandingBlocker::Obstructed;
+	}
+	// Why a ship at the ground does not land, once per change (landing shots and tests read it from the log).
+	if (Blocker != LoggedBlocker && Ground.bContact)
+	{
+		LoggedBlocker = Blocker;
+		UE_LOG(LogSpaceship, Log, TEXT("%s: on the ground, touchdown %s (gap %.0f cm, slope %.1f deg, tilt %.1f deg, speed %.0f cm/s)"),
+			*ShipName(), Blocker == ELandingBlocker::None ? TEXT("possible") : *UEnum::GetDisplayValueAsText(Blocker).ToString(),
+			Ground.GapCm, Ground.SlopeDeg, Ground.TiltDeg, Speed);
+	}
 
 	if (Blocker == ELandingBlocker::None)
 	{

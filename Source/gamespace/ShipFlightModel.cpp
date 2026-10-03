@@ -121,6 +121,32 @@ FQuat FShipFlightModel::LevelOnSurface(const FQuat& Current, const FVector& Norm
 	return FRotationMatrix::MakeFromXZ(Forward.GetSafeNormal(), Normal).ToQuat();
 }
 
+bool FShipFlightModel::TripodRest(const FVector& Location, const FQuat& Current, const FVector (&PadsLocal)[3], const FVector (&Ground)[3],
+	double RestHeightCm, FVector& OutLocation, FQuat& OutRotation, FVector& OutNormal)
+{
+	FVector Normal = FVector::CrossProduct(Ground[1] - Ground[0], Ground[2] - Ground[0]);
+	// Pads 3 m apart give a cross product of ~90 000 cm2; under 100 cm2 the points are in a line.
+	if (Normal.SizeSquared() < 1e4)
+	{
+		return false;
+	}
+	Normal.Normalize();
+	if ((Normal | Current.GetUpVector()) < 0.0)
+	{
+		Normal = -Normal;
+	}
+	OutNormal = Normal;
+	OutRotation = LevelOnSurface(Current, Normal);
+	FVector PadsCentre = FVector::ZeroVector;
+	for (const FVector& Pad : PadsLocal)
+	{
+		PadsCentre += OutRotation.RotateVector(Pad) / 3.0;
+	}
+	const FVector GroundCentre = (Ground[0] + Ground[1] + Ground[2]) / 3.0;
+	OutLocation = Location + Normal * (((GroundCentre - (Location + PadsCentre)) | Normal) + RestHeightCm);
+	return true;
+}
+
 float FShipFlightModel::AngleBetweenDeg(const FVector& A, const FVector& B)
 {
 	return float(FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(A.GetSafeNormal() | B.GetSafeNormal(), -1.0, 1.0))));

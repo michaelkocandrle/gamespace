@@ -39,7 +39,9 @@ enum class ELandingBlocker : uint8
 	/** Just took off; TakeoffCooldownSeconds not over. */
 	TakeoffCooldown,
 	/** Landing gear not fully down (N). The ship can rest on its belly but never counts as landed. */
-	GearUp
+	GearUp,
+	/** Standing on its three pads here, the hull would touch the ground (a rock or a ridge under it). */
+	Obstructed
 };
 
 /** Landing gear (N). Moving between the ends takes GearDeploySeconds. */
@@ -73,6 +75,8 @@ struct FShipGroundProbe
 	float GapCm = -1.f;
 	/** The pads with the gear down, the belly without it, within the contact tolerance. */
 	bool bContact = false;
+	/** False when the hull, standing on the pads where the ground is now, would touch the ground. */
+	bool bHullClear = true;
 };
 
 /**
@@ -163,6 +167,8 @@ private:
 
 	ELandingState State = ELandingState::Flying;
 	ELandingBlocker Blocker = ELandingBlocker::NoSurface;
+	/** The blocker last written to the log while touching the ground. */
+	ELandingBlocker LoggedBlocker = ELandingBlocker::NoSurface;
 	float SettleSeconds = 0.f;
 	float TakeoffCooldown = 0.f;
 	FShipGroundProbe Ground;

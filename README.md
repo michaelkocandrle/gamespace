@@ -329,7 +329,8 @@ canopy mesh bounds (inside its footprint, upper half, well forward of its middle
 
 Low over a planet (below `LandingProbeAltitudeM`, 30 m) the ship probes the ground every frame:
 a sweep of the hull straight down gives the gap, and `ACelestialBody::GetSurfaceFrame` the
-terrain normal averaged over `LandingFootprintRadiusCm` (1.5 m).
+terrain normal averaged over `LandingFootprintRadiusCm` (1.5 m). With the gear down the pads do it
+instead (below, "On a slope").
 
 - **Touchdown** (`Settling`): gap <= 60 cm, slope <= `MaxLandingSlopeDeg` (25), speed <= 3 m/s,
   hull tilted <= 30 degrees against the terrain, no thrust and no upward lift. All of it must
@@ -343,6 +344,20 @@ terrain normal averaged over `LandingFootprintRadiusCm` (1.5 m).
   Coulomb friction `GroundFriction` 0.5 against the gravity pressing the ship down, so it stands
   still on slopes up to ~26.5 degrees and slides on steeper ones.
 - Steeper than 25 degrees: touchdown is refused (HUD `TOO STEEP`); the ship slides.
+- **Friction load** is everything pressing the ship into the ground, thrusters included (never less than its
+  weight): holding descend on a slope presses it in harder instead of sliding it downhill.
+
+**On a slope (3. 10. 2026).** With the gear down and three `Gear_*` sockets on the hull (the pads' soles, or
+where the placeholder legs hang), the probe traces straight down under each pad: the gap is the lowest pad's,
+and `FShipFlightModel::TripodRest` puts the ship on the plane through the three ground points (heading kept,
+moved along the normal only, settled over three passes). That plane gives the slope and tilt, and landed the
+ship eases into exactly that pose, so it stands on its legs whatever the terrain does under each. Touchdown is
+refused as `Obstructed` (HUD `HULL ON GROUND - find even ground`) when, in that pose, the hull's collision boxes
+apart from the gear's would come within `LandingHullClearanceCm` (15 cm) of the ground: a ridge under the belly,
+a hollow under the nose. Moving, the ship sweeps its own collision (the UCX hulls), not the root box, which spans
+the whole ship down to the pads. The log says why a ship at the ground does not land (`on the ground, touchdown
+...`). Pictures: `Tools/Shots.ps1 -Preset landing_slope -Editor`; `space.SlopeSpot <min> <max> [yaw]` moves the
+ship over a planar slope in that range, the nose `yaw` degrees right of uphill.
 
 Headless: `Tools/Tests/test_landing_l5.py`. Under a 1.5 m footprint Veyra's slope has a median
 of 15 degrees; 87 % of the surface is landable, 4.5 % is steeper than 30 degrees.

@@ -19,6 +19,7 @@
 #include "Engine/LocalPlayer.h"
 #include "Engine/StaticMesh.h"
 #include "Algo/Find.h"
+#include "Engine/OverlapResult.h"
 #include "Engine/World.h"
 #include "PlayerCharacter.h"
 #include "SpaceDebugHUD.h"
@@ -95,14 +96,17 @@ ASpaceshipPawn::ASpaceshipPawn()
 
 	Hull = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Hull"));
 	Hull->SetupAttachment(HullCollision);
-	// Query only, and only for pawns, cameras and visibility traces. Moving the ship sweeps the
-	// root alone and ignores the ship's own components, so this never affects its flight.
+	// Query only: pawns, cameras and visibility traces stop on it, and the ship's own movement sweeps its shapes
+	// against the world (SweepHullParts; a component query takes the component's responses, hence the world
+	// channels). It has no physics body of its own, so nothing else changes.
 	Hull->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Hull->SetCollisionObjectType(ECC_WorldDynamic);
 	Hull->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Hull->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	Hull->SetCollisionResponseToChannel(ECC_Camera, ECR_Block);
 	Hull->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	Hull->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+	Hull->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
 	Hull->SetCanEverAffectNavigation(false);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaceholderCube(TEXT("/Engine/BasicShapes/Cube.Cube"));
@@ -1149,8 +1153,14 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		if (Landing->HasGroundContact())
 		{
 			// After gravity, so on a gentle slope friction cancels this frame's pull down the slope
-			// completely and the ship stands still instead of creeping.
-			LinearVelocity = ApplyGroundFriction(LinearVelocity, Landing->GetGroundNormal(), Up, float(Gravity), DeltaSeconds);
+			// completely and the ship stands still instead of creeping. The load is everything pressing the
+			// ship into the ground, thrusters included: holding descend on a slope pressed it in and, with
+			// gravity alone as the load, slid it downhill for as long as the key was held.
+			const FVector GroundNormal = Landing->GetGroundNormal();
+			const FVector Pressing = Rotation.RotateVector(LocalAcceleration) - (bHasEnvironment ? Up * Gravity : FVector::ZeroVector);
+			// Never less than the ship's weight, as before: the flight computer's hover thrust takes most of it.
+			const float Load = float(FMath::Max(-(Pressing | GroundNormal), Gravity * FMath::Max(0.0, GroundNormal | Up)));
+			LinearVelocity = ApplyGroundFriction(LinearVelocity, GroundNormal, GroundNormal, Load, DeltaSeconds);
 		}
 
 		const double Speed = LinearVelocity.Size();
@@ -1183,7 +1193,7 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 
 	const FVector Delta = LinearVelocity * DeltaSeconds;
 	FHitResult Hit;
-	AddActorWorldOffset(Delta, bSweepMovement, &Hit);
+	MoveHull(Delta, Hit);
 
 	if (Hit.bBlockingHit)
 	{
@@ -1195,7 +1205,8 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		const FVector Slide = FVector::VectorPlaneProject(Delta * (1.f - Hit.Time), Hit.Normal);
 		if (!Slide.IsNearlyZero())
 		{
-			AddActorWorldOffset(Slide, true);
+			FHitResult SlideHit;
+			MoveHull(Slide, SlideHit);
 		}
 	}
 }
@@ -1265,6 +1276,24 @@ ELandingBlocker ASpaceshipPawn::EvaluateTouchdown(float HullGap, float Speed, fl
 	return FShipFlightModel::EvaluateTouchdown(HullGap, Speed, TiltDeg, SlopeDeg, bEngineInput, bGearDown, GearExtensionCm, GetLandingLimits());
 }
 
+bool ASpaceshipPawn::ComputeTripodRest(const FVector& Location, const FRotator& Rotation, const TArray<FVector>& PadsLocal,
+	const TArray<FVector>& Ground, float RestHeightCm, FVector& OutLocation, FRotator& OutRotation, FVector& OutNormal)
+{
+	if (PadsLocal.Num() != 3 || Ground.Num() != 3)
+	{
+		return false;
+	}
+	const FVector Pads[3] = { PadsLocal[0], PadsLocal[1], PadsLocal[2] };
+	const FVector Points[3] = { Ground[0], Ground[1], Ground[2] };
+	FQuat Rest;
+	if (!FShipFlightModel::TripodRest(Location, Rotation.Quaternion(), Pads, Points, RestHeightCm, OutLocation, Rest, OutNormal))
+	{
+		return false;
+	}
+	OutRotation = Rest.Rotator();
+	return true;
+}
+
 ELandingBlocker ASpaceshipPawn::EvaluateLanding(float GroundGap, float Speed, float TiltDeg, float SlopeDeg, bool bEngineInput) const
 {
 	return FShipFlightModel::EvaluateLanding(GroundGap, Speed, TiltDeg, SlopeDeg, bEngineInput, GetLandingLimits());
@@ -1289,10 +1318,178 @@ bool ASpaceshipPawn::SweepHull(const FVector& Start, const FVector& End, const F
 		HullCollision->GetCollisionShape(), Params, Responses);
 }
 
+bool ASpaceshipPawn::HasHullShapes() const
+{
+	const UBodySetup* Body = Hull && Hull->GetStaticMesh() ? Hull->GetStaticMesh()->GetBodySetup() : nullptr;
+	return Body && Body->AggGeom.GetElementCount() > 0 && Hull->IsCollisionEnabled();
+}
+
+bool ASpaceshipPawn::SweepHullParts(const FVector& Start, const FVector& End, const FQuat& Rotation, FHitResult& OutHit) const
+{
+	if (!HasHullShapes())
+	{
+		return SweepHull(Start, End, Rotation, OutHit);
+	}
+	// The hull component's own collision (the UCX hulls from Blender) at the actor pose Start .. End.
+	const FTransform AtStart = Hull->GetRelativeTransform() * FTransform(Rotation, Start);
+	const FVector Offset = AtStart.GetLocation() - Start;
+	TArray<FHitResult> Hits;
+	FComponentQueryParams Params(SCENE_QUERY_STAT(SpaceshipHullParts), this);
+	GetWorld()->ComponentSweepMulti(Hits, Hull, Start + Offset, End + Offset, AtStart.GetRotation(), Params);
+	const FVector Delta = End - Start;
+	bool bHit = false;
+	for (const FHitResult& Hit : Hits)
+	{
+		if (!Hit.bBlockingHit || !BlocksShip(Hit.GetComponent()))
+		{
+			continue;
+		}
+		// Already inside and on the way out (taking off from a pose the pads hold, a spawn in the ground): let it go.
+		if (Hit.bStartPenetrating && (Delta | Hit.Normal) > 0.0)
+		{
+			continue;
+		}
+		if (!bHit || Hit.Time < OutHit.Time)
+		{
+			OutHit = Hit;
+			OutHit.Location = Hit.Location - Offset;
+			bHit = true;
+		}
+	}
+	return bHit;
+}
+
+bool ASpaceshipPawn::BlocksShip(const UPrimitiveComponent* Other) const
+{
+	// What the root box blocks, and nothing else: the hull mesh also blocks pawns (characters walk on it), but the
+	// pilot sitting inside it, or anyone standing next to it, must not stop the ship or its landing.
+	return Other && HullCollision->GetCollisionResponseToChannel(Other->GetCollisionObjectType()) == ECR_Block;
+}
+
+bool ASpaceshipPawn::HullClearOfGround(const FVector& Location, const FQuat& Rotation, double GearTopLocalZ, FString* OutWhat) const
+{
+	// Each of the hull's collision shapes as its box in the ship's frame (GetHullCollisionBoxes), except the gear's:
+	// those reaching below GearTopLocalZ are the legs and pads, which stand on the ground by design (the Wayfarer's
+	// main gear block is 5.3 m wide at the pads' soles and dipped into any bump between them).
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(SpaceshipHullClearance), false, this);
+	FCollisionResponseParams Responses;
+	HullCollision->InitSweepCollisionParams(Params, Responses);
+	const ECollisionChannel Channel = HullCollision->GetCollisionObjectType();
+	TArray<FOverlapResult> Overlaps;
+	for (const FBox& Part : GetHullCollisionBoxes())
+	{
+		if (Part.Min.Z < GearTopLocalZ)
+		{
+			continue;
+		}
+		Overlaps.Reset();
+		GetWorld()->OverlapMultiByChannel(Overlaps, Location + Rotation.RotateVector(Part.GetCenter()), Rotation, Channel,
+			FCollisionShape::MakeBox(Part.GetExtent()), Params, Responses);
+		for (const FOverlapResult& Overlap : Overlaps)
+		{
+			if (Overlap.bBlockingHit && BlocksShip(Overlap.GetComponent()))
+			{
+				if (OutWhat)
+				{
+					*OutWhat = GetNameSafe(Overlap.GetActor()) + TEXT(".") + GetNameSafe(Overlap.GetComponent());
+				}
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+void ASpaceshipPawn::MoveHull(const FVector& Delta, FHitResult& OutHit)
+{
+	OutHit = FHitResult();
+	const FVector Start = GetActorLocation();
+	if (!bSweepMovement || !SweepHullParts(Start, Start + Delta, GetActorQuat(), OutHit))
+	{
+		SetActorLocation(Start + Delta);
+		return;
+	}
+	// Stop a hair short of the contact, as a component sweep does, so the next sweep does not start inside.
+	const double Length = Delta.Size();
+	const double Time = Length > UE_KINDA_SMALL_NUMBER ? FMath::Max(0.0, double(OutHit.Time) - 0.1 / Length) : 0.0;
+	SetActorLocation(Start + Delta * Time);
+}
+
+bool ASpaceshipPawn::FindGearPads(FVector (&OutPadsLocal)[3]) const
+{
+	int32 Found = 0;
+	for (const FName& Wanted : GearSocketNames)
+	{
+		// As written, else with / without the SOCKET_ prefix that the FBX import drops (as BuildGearLegs).
+		const FString Plain = Wanted.ToString();
+		const FName Candidates[] = { Wanted, FName(*(TEXT("SOCKET_") + Plain)), FName(*Plain.Replace(TEXT("SOCKET_"), TEXT(""))) };
+		const FName* Socket = Algo::FindByPredicate(Candidates, [this](const FName& Name) { return Hull->DoesSocketExist(Name); });
+		if (Socket)
+		{
+			OutPadsLocal[Found++] = Hull->GetSocketTransform(*Socket, RTS_Actor).GetLocation();
+			if (Found == 3)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+int32 ASpaceshipPawn::TracePads(const FVector& Location, const FQuat& Rotation, const FVector (&PadsLocal)[3], const FVector& Up,
+	FVector (&OutGround)[3], float (&OutGap)[3]) const
+{
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(SpaceshipPadProbe), false, this);
+	FCollisionResponseParams Responses;
+	HullCollision->InitSweepCollisionParams(Params, Responses);
+	const ECollisionChannel Channel = HullCollision->GetCollisionObjectType();
+	// From above the pad, so a pad already in the ground still finds it.
+	constexpr double Above = 300.0;
+	const double Below = FMath::Max(LandingMaxGapCm, GroundContactToleranceCm) + GearExtensionCm + 200.0;
+	int32 Hits = 0;
+	for (int32 I = 0; I < 3; ++I)
+	{
+		const FVector Pad = Location + Rotation.RotateVector(PadsLocal[I]);
+		FHitResult Hit;
+		if (GetWorld()->LineTraceSingleByChannel(Hit, Pad + Up * Above, Pad - Up * Below, Channel, Params, Responses) && !Hit.bStartPenetrating)
+		{
+			OutGround[I] = Hit.ImpactPoint;
+			OutGap[I] = float(Hit.Distance - Above);
+			++Hits;
+		}
+		else
+		{
+			OutGap[I] = -1.f;
+		}
+	}
+	return Hits;
+}
+
+bool ASpaceshipPawn::SolveTripodRest(const FVector (&PadsLocal)[3], const FVector& Up, FVector& OutLocation, FQuat& OutRotation, FVector& OutNormal) const
+{
+	// The ground straight under the pads moves as the ship tilts onto it; three passes settle it to well under a
+	// centimetre on Veyra's 2 m collision cells.
+	OutLocation = GetActorLocation();
+	OutRotation = GetActorQuat();
+	const double RestHeight = 1.0 + GetGearGroundOffsetCm();
+	for (int32 Pass = 0; Pass < 3; ++Pass)
+	{
+		FVector Ground[3];
+		float Gap[3];
+		if (TracePads(OutLocation, OutRotation, PadsLocal, Up, Ground, Gap) < 3
+			|| !FShipFlightModel::TripodRest(OutLocation, OutRotation, PadsLocal, Ground, RestHeight, OutLocation, OutRotation, OutNormal))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 void ASpaceshipPawn::UpdateLanding(float DeltaSeconds)
 {
 	Landing->BeginFrame(DeltaSeconds);
 	FShipGroundProbe Probe = Landing->GetGround();
+	bHasTripodRest = false;
 
 	// Probe the ground only when it matters: low over a body with a walkable surface.
 	const ACelestialBody* Body = NearestBody.Get();
@@ -1301,18 +1498,50 @@ void ASpaceshipPawn::UpdateLanding(float DeltaSeconds)
 		&& Body->GetSurfaceFrame(GetActorLocation(), LandingFootprintRadiusCm, SurfacePoint, Probe.Normal))
 	{
 		Probe.bValid = true;
-		Probe.SlopeDeg = FShipFlightModel::AngleBetweenDeg(Probe.Normal, Environment.Up);
-		Probe.TiltDeg = FShipFlightModel::AngleBetweenDeg(GetActorUpVector(), Probe.Normal);
-
-		// Straight down with the real hull shape: the gap is what the collision actually sees,
-		// wherever on the hull the first contact would be.
-		const FVector Start = GetActorLocation();
-		const double ProbeLength = FMath::Max(LandingMaxGapCm, GroundContactToleranceCm) + GearExtensionCm + 200.0;
-		FHitResult Hit;
-		if (SweepHull(Start, Start - Environment.Up * ProbeLength, GetActorQuat(), Hit))
+		const FVector Up = Environment.Up;
+		bool bOnPads = false;
+		FVector PadsLocal[3];
+		if (Landing->IsGearGoingDown() && FindGearPads(PadsLocal))
 		{
-			Probe.GapCm = Hit.bStartPenetrating ? 0.f : float(Hit.Distance);
+			// The gear down: the ground straight under each pad (the gap is the lowest pad's), and the pose standing
+			// on all three, which gives the slope and whether the hull would clear the ground there.
+			FVector Ground[3];
+			float Gap[3];
+			if (TracePads(GetActorLocation(), GetActorQuat(), PadsLocal, Up, Ground, Gap) == 3)
+			{
+				bOnPads = true;
+				Probe.GapCm = FMath::Max(FMath::Min3(Gap[0], Gap[1], Gap[2]), 0.f);
+				FVector Normal;
+				bHasTripodRest = SolveTripodRest(PadsLocal, Up, TripodRestLocation, TripodRestRotation, Normal);
+				if (bHasTripodRest)
+				{
+					Probe.Normal = Normal;
+					// Shapes reaching to within 50 cm of the pads' soles are the gear itself.
+					const double GearTop = FMath::Min3(PadsLocal[0].Z, PadsLocal[1].Z, PadsLocal[2].Z) - GetGearGroundOffsetCm() + 50.0;
+					FString What;
+					Probe.bHullClear = HullClearOfGround(TripodRestLocation + Normal * LandingHullClearanceCm, TripodRestRotation, GearTop, &What);
+					if (!Probe.bHullClear && What != LastObstruction)
+					{
+						UE_LOG(LogSpaceship, Log, TEXT("%s: standing on the pads here, the hull would touch %s"), *GetName(), *What);
+					}
+					LastObstruction = Probe.bHullClear ? FString() : What;
+				}
+			}
 		}
+		if (!bOnPads)
+		{
+			// Straight down with the real hull shapes: the gap is what the collision actually sees,
+			// wherever on the hull the first contact would be.
+			const FVector Start = GetActorLocation();
+			const double ProbeLength = FMath::Max(LandingMaxGapCm, GroundContactToleranceCm) + GearExtensionCm + 200.0;
+			FHitResult Hit;
+			if (SweepHullParts(Start, Start - Up * ProbeLength, GetActorQuat(), Hit))
+			{
+				Probe.GapCm = Hit.bStartPenetrating ? 0.f : float(Hit.Distance);
+			}
+		}
+		Probe.SlopeDeg = FShipFlightModel::AngleBetweenDeg(Probe.Normal, Up);
+		Probe.TiltDeg = FShipFlightModel::AngleBetweenDeg(GetActorUpVector(), Probe.Normal);
 		// Touching means the pads with the gear down, the belly without it.
 		Probe.bContact = Probe.GapCm >= 0.f && Probe.GapCm - GetGearGroundOffsetCm() <= GroundContactToleranceCm;
 	}
@@ -1371,7 +1600,17 @@ void ASpaceshipPawn::UpdateLandedMotion(float DeltaSeconds)
 	{
 		LinearVelocity = FVector::ZeroVector;
 	}
-	FVector Location = GetActorLocation() + LinearVelocity * DeltaSeconds;
+	const FVector Drift = LinearVelocity * DeltaSeconds;
+	FVector Location = GetActorLocation() + Drift;
+
+	if (bHasTripodRest)
+	{
+		// Standing on the three pads: ease into the pose where each one is on the ground (UpdateLanding solved it
+		// this frame), whatever the slope does under each leg. No sweep - the pads hold the ship, not its shapes.
+		SetActorLocationAndRotation(FMath::Lerp(Location, TripodRestLocation + Drift, Alpha),
+			FQuat::Slerp(Current, TripodRestRotation, Alpha).GetNormalized());
+		return;
+	}
 
 	// Where the hull, in its new rotation, rests on the collision: sweep it down onto the ground
 	// from a metre above, and ease towards that. Keeps the ship sitting on the terrain as it
@@ -1379,7 +1618,7 @@ void ASpaceshipPawn::UpdateLandedMotion(float DeltaSeconds)
 	// With the gear down the hull rests GearExtensionCm up, on the pads.
 	const double RestHeight = 1.0 + GetGearGroundOffsetCm();
 	FHitResult Hit;
-	if (SweepHull(Location + GroundNormal * 100.0, Location - GroundNormal * (300.0 + RestHeight), Rotation, Hit) && !Hit.bStartPenetrating)
+	if (SweepHullParts(Location + GroundNormal * 100.0, Location - GroundNormal * (300.0 + RestHeight), Rotation, Hit) && !Hit.bStartPenetrating)
 	{
 		Location = FMath::Lerp(Location, Hit.Location + GroundNormal * RestHeight, Alpha);
 	}
@@ -1617,7 +1856,8 @@ void ASpaceshipPawn::ApplyGearSupport(float DeltaSeconds)
 		// The gear came down under a ship resting on its belly: the legs push it up, about as fast as
 		// they extend, instead of sinking into the ground.
 		const double Lift = FMath::Min(-Room, 1.5 * GearExtensionCm / FMath::Max(GearDeploySeconds, 0.05f) * DeltaSeconds);
-		AddActorWorldOffset(Up * Lift, bSweepMovement);
+		FHitResult LiftHit;
+		MoveHull(Up * Lift, LiftHit);
 		Landing->AddGroundGap(float(Lift));
 		if (Vertical < 0.0)
 		{
