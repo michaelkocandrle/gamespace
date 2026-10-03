@@ -3,8 +3,8 @@
 Jediný zdroj **aktuálního** stavu (nad ním jen `CLAUDE.md`), **nejvýš 80 řádků** (autor 30. 9. 2026). Hotové do stavu,
 splněné smaž; podrobnosti do commitu a recenzí (`Docs/Reviews/`), historie do 30. 9. v `Docs/HANDOFF.md` (archiv).
 
-Stav k **3. 10. 2026**: kit na celé lodi Wayfareru postavený (kritik FAIL 6,0, čeká na autora); noc opravena stínem planety;
-výkresy v **revizi E** čekají na schválení (schválená D). Nový PC autora.
+Stav k **3. 10. 2026**: Wayfarer přestavěný podle výkresů **revize F** (schválené autorem 3. 10.; boky po kritikovi kitu),
+kritik PASS 6,5 (práh step); noc opravena stínem planety. Nový PC autora.
 
 ## Stav
 
@@ -38,14 +38,13 @@ výkresy v **revizi E** čekají na schválení (schválená D). Nový PC autora
 
 ## Paralelní práce
 
-- **Druhá session** (worktree `gamespace-audit`, větev `wayfarer-dossier-interior`): výkresy interiéru I-01–I-09 (styl
-  I-04, skill `ship-pipeline` 1c); I-01–I-09 hotové (kritik 5,3–6,8, „musí“ opravené), čekají na autora; `Drawings/*`: překreslit.
+- **Druhá session** (worktree `gamespace-audit`, větev `wayfarer-dossier-interior`): výkresy interiéru (bod 4, styl
+  I-04 schválen 1. 10.) a koncepty (bod 6); `exterior_*.py` mění jen hlavní session. 0e7e4d4 sloučen do main 1. 10.;
+  5894e97 (dveře hygieny, I-04 R1) jen ve větvi. Konflikt v `Drawings/*`: kterákoli strana, pak překreslit.
 - **Hlavní session:** exteriérový kit. Druhá session balí do `Builds_<jméno>`; slučuje hlavní session.
 
 ## Čeká na rozhodnutí autora
 
-- **Revize E výkresů** E-01 až E-08 (krok d, detail G trysky na E-05): schválení.
-- Podpora života Wayfareru v2: posunutá k ose, z většiny pod lůžkem (list I-04, řez R1; po sloučení `import_kit.py`).
 - Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověření FAIL 7/6/6/7/7/8/8/7, levné body opravené).
 - Steadfast: schválení 2D návrhu v2 (`Steadfast_Design.md`). Kanopa Wayfareru jako téma designu v2 (autor otevře
   sám); paleta Kestrel Dynamics u první lodi Kestrelu.
@@ -70,10 +69,10 @@ výkresy v **revizi E** čekají na schválení (schválená D). Nový PC autora
 
 ## Další kroky
 
-1. **Wayfarer – kit na celé lodi postavený** (3. 10., `Docs/Reviews/2026-10-03_wayfarer_ship_kit.md`): kritik 3 kola
-   FAIL 6,0 – boky a příď tmavší než výkres a koncept B (systémové: pás K gunmetal, široký kanál L/U, žebra na všech
-   příčkách, rozřezaná příď). Čeká na rozhodnutí autora o úpravě dat výkresu (možnosti v recenzi), pak další kolo.
-   Paralelní session I-01–I-09 (bez Unrealu / Blenderu / balení) smí běžet.
+1. **Wayfarer – revize G výkresů čeká na schválení** (3. 10.; body 1 a 2 kritika boků F, PASS 6,5): větrací skříně
+   L14/U02/U12, panely a poklopy i pod křídlem a na K a N, čísla panelů na K/L/U/N; v receptu šablony u RCS a 3 dalších
+   míst, panelové linky mimo nápisy (čára přes F v HF-0417). Výřezy `Docs/Reviews/2026-10-03_wayfarer_sides_revG/`.
+   Po schválení přestavba, snímky, kritik (step). Paralelní session I-01–I-09 smí běžet.
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.

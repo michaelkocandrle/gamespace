@@ -214,6 +214,20 @@ class Drawer:
         fill, hatch, hc = self.matstyle(mid)
         self.sh.geom(fr.g(geom), fc=fill, ec=ec, lw=lw, hatch=hatch, hatch_col=hc, z=z, ls=ls)
 
+    def vent_slats(self, fr, e):
+        """A side vent box (revision G, sub "vent"): the dark opening inside the rim and its upright slats."""
+        if e.data.get("sub") != "vent" or e.sb is None:
+            return
+        k = self.m.kit[e.kit]
+        inner = e.sb["shape"].buffer(-k["rim"], join_style=2)
+        self.sh.geom(fr.g(inner), fc="#3A3E44", ec=STATUS_COL[e.status], lw=0.18, z=5.2)
+        x0, z0, x1, z1 = inner.bounds
+        n = max(1, int((x1 - x0 - k["slat_w"]) // k["slat_pitch"]) + 1)
+        lead = (x1 - x0 - (n - 1) * k["slat_pitch"]) / 2
+        for i in range(n):
+            x = x0 + lead + i * k["slat_pitch"]
+            self.sh.geom(fr.g(LineString([(x, z0 - 1), (x, z1 + 1)]).intersection(inner)), ec="#8A9097", lw=0.25, z=5.4)
+
     def vis(self, solid):
         return self.m.solids[solid]["visible"]
 
@@ -261,6 +275,7 @@ class Drawer:
             if shp.is_empty:
                 continue
             self.fillmat(fr, shp, e.material, z=5, ec=STATUS_COL[e.status], lw=0.3)
+            self.vent_slats(fr, e)
             kit = m.kit[e.kit]
             if "bolt_pitch" in kit:
                 self.bolts(fr, e.sb["shape"], shp, kit)
@@ -636,6 +651,7 @@ class Drawer:
                 self.mark(view, e)
                 if not shp.is_empty:
                     self.fillmat(fr, shp, e.material, z=5, ec=STATUS_COL[e.status], lw=0.3)
+                    self.vent_slats(fr, e)
             elif e.cat == "frame" and e.sb:
                 sh.geom(fr.g(e.sb["shape"].intersection(hull_vis)), fc="#5E646B", ec=STATUS_COL[e.status], lw=0.18, z=6)
                 self.mark(view, e)
@@ -1263,8 +1279,8 @@ def detail_dims(sh, fr, m, Y0d):
 
 
 POD_CY_DRAW = em.POD_CY
-R1_X = 11.6                            # station of the rib that section R1 cuts (upper side band)
-R2_X = 12.8                            # and section R2 (lower side band)
+R1_X = 15.2                            # station of the rib that section R1 cuts (upper side band): a main bulkhead,
+R2_X = 15.2                            # and section R2 (lower side band); revision F: full ribs only at the bulkheads
 
 
 def dim_h(sh, xa, xb, y, text, ya, yb):
@@ -1305,9 +1321,12 @@ def legend(sh, m, x, ytop):
     for b in m.panel_spec["bands"]:
         k = m.kit[b["kit"]]
         sh.t(x, y, b["band"], 2.6, STATUS_COL["proposed"], weight="bold")
-        sh.t(x + 5, y, "%s: v %s až %s výšky průřezu, na příčce %s z %s … %s" % (
-            b["name"], exact(b["v"][0]), exact(b["v"][1]), em.fmt(R1_X), em.fmt(m.z_of(R1_X, b["v"][0])),
-            em.fmt(m.z_of(R1_X, b["v"][1]))), 2.3)
+        bx = b.get("x", p_ends := m.panel_spec["ends"])
+        at = R1_X if bx[0] < R1_X < bx[1] else (bx[0] + bx[1]) / 2
+        sh.t(x + 5, y, "%s: v %s až %s výšky průřezu%s, na x %s z %s … %s" % (
+            b["name"], exact(b["v"][0]), exact(b["v"][1]),
+            "" if bx == p_ends else ", x %s–%s" % (em.fmt(bx[0]), em.fmt(bx[1])), em.fmt(at),
+            em.fmt(m.z_of(at, b["v"][0])), em.fmt(m.z_of(at, b["v"][1]))), 2.3)
         sh.t(x + 150, y, "%s, %s" % (k["id"], b["material"]), 2.3, STATUS_COL["proposed"])
         y -= 4.4
     roof = m.design["panels"].get("roof")
@@ -1655,10 +1674,17 @@ def title_block(sh, m, x, W, sheet="E-01"):
     sh.t(x + 2, yr - 8.2, "A  1. 10. 2026  vzorový list E-01", 2.4)
     sh.t(x + 85, yr - 8.2, "B  tabulky E-02, schválené změny (✓), listy E-03 až E-08", 2.4)
     sh.t(x + 225, yr - 8.2, "C  schváleno; hřbet R v primárním laku, rám rampy", 2.4)
-    if m.design["revision"] == "D":
-        sh.t(x + 2, yr - 11.6, "D  1. 10. 2026  pilot kitu po kritikovi: páteř a profily rámu, panely a poklopy hřbetu, "
-                               "rampa (lišty, práh, pant, styčníky), písty, RCS, pouzdra světel", 2.4)
-    yd = yr - (15 if m.design["revision"] == "D" else 11)
+    later = [("D", "1. 10. 2026  pilot kitu po kritikovi: páteř a profily rámu, panely a poklopy hřbetu, rampa (lišty, "
+                   "práh, pant, styčníky), písty, RCS, pouzdra světel; krok c: desky ramene S, záď z desek na rámu"),
+             ("E", "2. 10. 2026  trysky motorů (detail G na E-05), gondoly v rozpočtu trojúhelníků"),
+             ("F", "3. 10. 2026  boky po kritikovi kitu celé lodi: pás K v laku, užší kanál L/U, žebra po celé výšce "
+                   "jen na přepážkách, příď z větších desek (P-S-N15)"),
+             ("G", "3. 10. 2026  střední vrstva boků: větrací skříně L14, U02, U12, panely a poklopy i na K a N, "
+                   "čísla panelů na K, L, U, N")]
+    later = [r for r in later if r[0] <= m.design["revision"]]
+    for i, (rev, text) in enumerate(later):
+        sh.t(x + 2, yr - 11.6 - i * 3.4, "%s  %s" % (rev, text), 2.4)
+    yd = yr - (11 + 3.4 * len(later) + (0.6 if later else 0))
     sh.line([(x, yd), (x1, yd)], 0.25, z=50)
     dg = m.digests
     sh.t(x + 2, yd - 4.2, "Data (sha1): layout %s · hs %s · setup %s · návrh %s · spec %s · knihovna %s" % (

@@ -633,6 +633,9 @@ def rule_panel_lines(pl, r, recipe):
         if xb - xa < 0.5:
             continue
         for bi, band in enumerate(r.get("side_bands", [])):
+            # "skip_x": bays the lines keep off (the name and registration plates: a line ran through the F of HF-0417)
+            if any(a < xb and xa < b for a, b in band.get("skip_x", [])):
+                continue
             for k in range(band.get("per_bay", 2)):
                 key = _key("side", bi, xa, k)
                 rng = _rng(pl, "panel_lines", key)

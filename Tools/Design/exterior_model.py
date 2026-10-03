@@ -262,6 +262,34 @@ class Model:
     def pod_depth(self, x, deg):
         return self.pod_axis[0] + self.pod_r(x) * math.cos(math.radians(deg))
 
+    def rib_v(self, x):
+        """Section heights (v0, v1) the frame rib FR-RIB covers at seam station x: the whole height at the main
+        bulkheads ("full"), elsewhere only the shoulder ("v_other"; author 3. 10. 2026, whole-ship kit critic: ribs
+        on all 15 stations made the sides read dark)."""
+        fr = next((f for f in self.design["frame"] if f["kind"] == "ribs"), None)
+        if fr is None or x not in self.seams:
+            return None
+        full = fr.get("full")
+        return tuple(fr["v"]) if full is None or x in full else tuple(fr["v_other"])
+
+    def rib_in_band(self, x, v0, v1):
+        """True when the rib at station x crosses the band v0..v1 (the plates there keep off the rib)."""
+        r = self.rib_v(x)
+        return r is not None and r[0] < v1 and r[1] > v0
+
+    def band_stations(self, band):
+        """Stations that bound a side band's plates: the band's x range (default the hull ends) and the seams in it,
+        without the seams inside its merged bays."""
+        p = self.design["panels"]
+        x0, x1 = band.get("x", p["ends"])
+        inner = {s for s in self.seams for a, b in band.get("merge", []) if a < s < b}
+        return [x0] + [s for s in self.seams if x0 < s < x1 and s not in inner] + [x1]
+
+    def bay_no(self, x):
+        """Bay number of the bay that starts at x (counted between the hull ends and all seams, as the IDs)."""
+        p = self.design["panels"]
+        return sum(1 for s in [p["ends"][0]] + self.seams if s <= x + 1e-9)
+
     def hull_band(self, x0, x1, v0, v1, step=0.1):
         xs = {x0, x1}
         xs |= {p[0] for p in self.hull_side if x0 < p[0] < x1}
@@ -837,19 +865,26 @@ class Model:
         hw = self.hardware() if p.get("cut_hardware") else []
         if hw:
             cut = unary_union([cut] + [e.sb["shape"].buffer(p["cut_margin"], join_style=2) for e in hw])
-        stations = [p["ends"][0]] + self.seams + [p["ends"][1]]
         self.panel_spec = p
         rib_half = self.kit["XK-RIB"]["w"] / 2
+
+        def off(x, band):
+            # beside a rib: half the rib + gap; at a seam without a rib in this band (author 3. 10. 2026: full ribs only
+            # at the main bulkheads) the plates meet at a plain seam; at the band's own x limit or the hull end: gap
+            if self.rib_in_band(x, band["v"][0], band["v"][1]):
+                return rib_half + p["gap"]
+            return p.get("seam_gap", p["gap"]) if x in self.seams else p["gap"]
+
         for band in p["bands"]:
             # merged bays (band "merge": [[a, b]]): one long plate from station a to b, the ribs between stop at the
-            # band (whole-ship kit critic round 1, 3. 10. 2026: the name WAYFARER ran over three plates and two ribs)
-            inner = {s for s in self.seams for a, b in band.get("merge", []) if a < s < b}
-            st = [s for s in stations if s not in inner]
+            # band (whole-ship kit critic round 1, 3. 10. 2026: the name WAYFARER ran over three plates and two ribs);
+            # a band's "x" limits it along the hull (the nose plate N across bands L and U, 3. 10. 2026)
+            st = self.band_stations(band)
             for j in range(1, len(st)):
                 a, b = st[j - 1], st[j]
-                i = stations.index(a) + 1
-                xa = a + (rib_half + p["gap"] if a in self.seams else p["gap"])
-                xb = b - (rib_half + p["gap"] if b in self.seams else p["gap"])
+                i = self.bay_no(a)
+                xa = a + off(a, band)
+                xb = b - off(b, band)
                 raw = self.hull_band(xa, xb, band["v"][0], band["v"][1]).intersection(hull.buffer(-0.02))
                 shape = largest(polys_only(raw.difference(cut)))
                 if shape.is_empty or shape.area < p["min_area_m2"]:
@@ -868,7 +903,9 @@ class Model:
                 el.qty = 2
                 el.where = "x %s–%s" % (fmt(a), fmt(b))
                 sub = band.get("sub") or {}
-                skip = band.get("merge", []) + sub.get("skip", [])
+                # bays without a panel and hatch: sub.skip (the name and registration plates; revision G: a merged bay
+                # is no longer skipped by itself - the nose plates are merged too)
+                skip = sub.get("skip", [])
                 subs = self.side_subs(shape, band, i) if sub and not any(s0 <= a and b <= s1 for s0, s1 in skip) else []
                 for kind, g in subs:
                     if kind == "hatch":
@@ -878,18 +915,30 @@ class Model:
                 self.place(el, shape, "area", "hull", depth=self.hull_y(shape.representative_point().x,
                                                                         shape.representative_point().y))
                 for kind, g in subs:
-                    kit_id = {"doubler": "XK-DOUBLER", "hatch": "XK-HATCH"}[kind]
-                    sel = self.add(Element("%s-%s" % (ident, {"doubler": "D", "hatch": "H"}[kind]), "panel",
-                                           band["name"], el.status, material=band["material"], kit=kit_id,
+                    kit_id = {"doubler": "XK-DOUBLER", "hatch": "XK-HATCH", "vent": "XK-VENTBOX"}[kind]
+                    sel = self.add(Element("%s-%s" % (ident, {"doubler": "D", "hatch": "H", "vent": "V"}[kind]), "panel",
+                                           band["name"], el.status,
+                                           material="MZ-GUNMETAL" if kind == "vent" else band["material"], kit=kit_id,
                                            src="design", data={"band": band["band"], "bay": i, "x": [a, b],
                                                                "sub": kind, "of": ident},
                                            what={"doubler": "přídavný panel na desce %s",
-                                                 "hatch": "malý poklop v desce %s"}[kind] % ident))
+                                                 "hatch": "malý poklop v desce %s",
+                                                 "vent": "větrací skříň s lamelami na desce %s"}[kind] % ident))
                     sel.qty, sel.where = 2, el.where
                     c = g.representative_point()
                     self.place(sel, g, "area", "hull", depth=self.hull_y(c.x, c.y))
 
     def side_subs(self, shape, band, bay):
+        """side_subs_at with the band's sub heights v; when nothing fits (a plate cut short, e.g. under the wing root),
+        with sub.fallback_v (revision G, 3. 10. 2026: the L plates under the wing root were left bare)."""
+        sub = band["sub"]
+        out = self.side_subs_at(shape, band, bay, sub["v"])
+        if not out and sub.get("fallback_v"):
+            # no vent box at the fallback height: a 0.2 m tall box read as a squashed slot (revision G sheet)
+            out = self.side_subs_at(shape, band, bay, sub["fallback_v"], vents=False)
+        return out
+
+    def side_subs_at(self, shape, band, bay, v, vents=True):
         """Doubler panel and small hatch on a side plate (panels.bands[].sub; kit pilot step c, 2. 10. 2026: the shoulder
         plates like the roof's), in the side view (x, z) within the sub band of section heights v: even bays a square
         doubler at the aft end and the hatch forward, odd bays the hatch at the aft end and a long doubler strip
@@ -897,7 +946,7 @@ class Model:
         (D-R-PANEL-NUMBERS), slides along the bay to clear them, or is left out. [(kind, outline)]."""
         sub = band["sub"]
         mg = sub["margin"]
-        v0, v1 = sub["v"]
+        v0, v1 = v
         inner = shape.buffer(-mg, join_style=2)
         x0, z0, x1, z1 = shape.bounds
         marks = []
@@ -938,7 +987,16 @@ class Model:
 
         out = []
         hx = self.kit["XK-HATCH"]["size"][0]
-        if bay % 2:
+        if vents and bay in sub.get("vent_bays", []):
+            # a vent box at the aft end instead of the doubler, the hatch forward (revision G, critic of the sides:
+            # the side plates lacked the mid layer; vent boxes as on the roof)
+            g = window(sub["vent"]["len"], "aft", marks)
+            if g is not None:
+                out.append(("vent", g))
+            g = window(hx, "fwd", marks + [o.buffer(mg) for _, o in out])
+            if g is not None:
+                out.append(("hatch", g))
+        elif bay % 2:
             g = window(hx, "aft", marks)
             if g is not None:
                 out.append(("hatch", g))
@@ -997,13 +1055,15 @@ class Model:
             if fr["kind"] == "ribs":
                 pieces = []
                 for x in self.seams:
-                    g = self.hull_band(x - w, x + w, fr["v"][0], fr["v"][1])
+                    g = self.hull_band(x - w, x + w, *self.rib_v(x))
                     for band in self.design["panels"]["bands"]:
                         if any(a < x < b for a, b in band.get("merge", [])):
                             g = g.difference(self.hull_band(x - w - 0.01, x + w + 0.01, band["v"][0], band["v"][1]))
                     pieces.append(g)
                 el.qty = 2 * len(self.seams)
-                el.where = "na %d příčkách" % len(self.seams)
+                full = [x for x in self.seams if self.rib_v(x) == tuple(fr["v"])]
+                el.where = "na %d příčkách, po celé výšce na %d přepážkách (x %s)" % (
+                    len(self.seams), len(full), ", ".join(fmt(x) for x in full))
             else:
                 xs = []
                 x = fr["x"][0]
@@ -1018,7 +1078,7 @@ class Model:
             shape = polys_only(unary_union(pieces).intersection(hull).difference(cut))
             anchor = None
             if fr["kind"] == "ribs":
-                x = min(self.seams, key=lambda s: abs(s - 12.8))
+                x = min((s for s in self.seams if self.rib_v(s) == tuple(fr["v"])), key=lambda s: abs(s - 12.8))
                 anchor = (x, self.z_of(x, 0.3))
             self.place(el, shape, "area", "hull", depth=self.hw(10.0), anchor=anchor)
 
@@ -1104,16 +1164,21 @@ class Model:
                 dep = self.pod_axis[0] + (r if r else 0.95) * math.cos(math.radians(it["deg"]))
                 self.place(el, LineString(pts), "line", "pod", depth=dep)
             elif on == "side":
-                line = LineString([(it["x"][0], it["z"]), (it["x"][1], it["z"])])
-                mid = ((it["x"][0] + it["x"][1]) / 2, it["z"])
+                # z: one height, or a polyline [[x, z], ...] (the strip in the L/U channel follows the bands' taper)
+                pts = side_strip_pts(it)
+                line = LineString(pts)
+                p_ = line.interpolate(0.5, normalized=True)
+                mid = (p_.x, p_.y)
+                zs = "%s" % fmt(it["z"]) if not isinstance(it["z"], list) else "%s–%s" % (
+                    fmt(min(z for _, z in pts)), fmt(max(z for _, z in pts)))
                 if el.change and el.change.get("on") == "frame":
                     el.extra["ghost"] = line
-                    el.extra["ghost_where"] = "bok x %s–%s z %s" % (fmt(it["x"][0]), fmt(it["x"][1]), fmt(it["z"]))
+                    el.extra["ghost_where"] = "bok x %s–%s z %s" % (fmt(it["x"][0]), fmt(it["x"][1]), zs)
                     line, el.where = self.frame_line(el.change["frame"], it["x"])
                     p = line.interpolate(0.5, normalized=True)
                     mid = (p.x, p.y)
                 else:
-                    el.where = "bok x %s–%s z %s" % (fmt(it["x"][0]), fmt(it["x"][1]), fmt(it["z"]))
+                    el.where = "bok x %s–%s z %s" % (fmt(it["x"][0]), fmt(it["x"][1]), zs)
                 self.place(el, line, "line", "hull", depth=self.hull_y(*mid), anchor=mid)
             else:
                 el.where = "břicho x %s–%s" % (fmt(it["x"][0]), fmt(it["x"][1]))
@@ -1410,6 +1475,14 @@ class Model:
             return None
         m = re.match(r"\s*(\d+)\s*[x×]", find(self.spec) or "")
         return int(m.group(1)) if m else None
+
+
+def side_strip_pts(it):
+    """Side-view points (x, z) of a hull side light strip: "z" is one height over "x", or a polyline [[x, z], ...]
+    (hs_lights interpolates it the same way)."""
+    if isinstance(it["z"], list):
+        return [(float(x), float(z)) for x, z in it["z"]]
+    return [(it["x"][0], it["z"]), (it["x"][1], it["z"])]
 
 
 def x_axis(rotation):

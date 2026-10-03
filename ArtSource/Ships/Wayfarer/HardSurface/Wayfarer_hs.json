@@ -1950,6 +1950,68 @@
       "arrow_access",
       "red_marker"
      ]
+    },
+    {
+     "_what": "revision G (critic of the F sides, point 2): stencils round the nose RCS block",
+     "on": "side",
+     "x": 18.45,
+     "dx": 0.25,
+     "z": 1.05,
+     "dz": 0.35,
+     "count": 5,
+     "items": [
+      "tri_warning",
+      "st_service",
+      "arrow_access",
+      "warn_hv",
+      "red_marker"
+     ]
+    },
+    {
+     "_what": "revision G: hold side service point aft (plates L02 / U02)",
+     "on": "side",
+     "x": 2.3,
+     "dx": 0.5,
+     "z": 1.15,
+     "dz": 0.3,
+     "count": 5,
+     "items": [
+      "st_service",
+      "handle",
+      "label_hydraulic",
+      "arrow_access",
+      "access_panel"
+     ]
+    },
+    {
+     "_what": "revision G: upper side forward of the name (plates U12 / U13)",
+     "on": "side",
+     "x": 14.8,
+     "dx": 0.5,
+     "z": 1.95,
+     "dz": 0.15,
+     "count": 4,
+     "items": [
+      "st_inspect",
+      "warning_label",
+      "red_marker",
+      "handle"
+     ]
+    },
+    {
+     "_what": "revision G: lower side below the name (plates L10 / L11)",
+     "on": "side",
+     "x": 12.6,
+     "dx": 0.6,
+     "z": 0.4,
+     "dz": 0.15,
+     "count": 4,
+     "items": [
+      "st_torque",
+      "label_power",
+      "socket",
+      "arrow_access"
+     ]
     }
    ],
    "companions": {
@@ -2121,17 +2183,21 @@
     "side_bands": [
      {
       "z": [0.2, 1.0],
-      "per_bay": 1
+      "per_bay": 1,
+      "skip_x": [[15.2, 16.7]]
      },
      {
       "z": [1.3, 1.7],
-      "per_bay": 1
+      "per_bay": 1,
+      "skip_x": [[8.2, 12.8]]
      },
      {
       "z": [1.78, 2.15],
-      "per_bay": 1
+      "per_bay": 1,
+      "skip_x": [[8.2, 12.8]]
      }
     ],
+    "_skip_x": "revision G (critic of the F sides, point 5): no engraved line across the registration HF-0417 (L 15.2-16.7; one ran through its F) nor the name WAYFARER (U 8.2-12.8)",
     "top_bands": [
      {
       "y": [0.4, 1.7],
@@ -2447,8 +2513,8 @@
     "name": "hull_run_low",
     "on": "side",
     "x": [5.0, 17.8],
-    "z": 1.18,
-    "_z": "3. 10. 2026: in the dark channel between bands L and U (z 0.94-1.50 along x 5-17.8); at z 0.35 under the whole-ship kit plates it showed only in the gaps as a dashed line (critic round 1)",
+    "z": [[5.0, 1.229], [5.6, 1.233], [6.9, 1.243], [8.2, 1.252], [9.3, 1.26], [10.4, 1.268], [11.6, 1.277], [12.8, 1.286], [13.5, 1.291], [14.0, 1.311], [14.5, 1.332], [15.2, 1.394], [16.0, 1.466], [16.7, 1.445], [17.6, 1.417], [17.8, 1.372]],
+    "_z": "revision F, 3. 10. 2026: a polyline along the middle of the narrowed channel between bands L and U (section height v 0.511, design panels.bands; the channel is ~0.10 m since L ends at v 0.497); was z 1.18 in the old 0.35 m channel, and at z 0.35 under the whole-ship kit plates it showed only in the gaps as a dashed line (critic round 1)",
     "width": 0.014,
     "color": "strip",
     "_what": "running light along the lower side (SC: cool white emissive strips outline the hull at night)",
@@ -2458,9 +2524,9 @@
     "id": "L-HULL-RUN-CANOPY",
     "name": "hull_run_canopy",
     "on": "side",
-    "x": [17.8, 18.9],
-    "z": 1.12,
-    "_z": "3. 10. 2026: the channel line carried on towards the nose (z 1.62 under the canopy is under kit plates now)",
+    "x": [17.8, 18.75],
+    "z": [[17.8, 1.372], [18.2, 1.283], [18.5, 1.216], [18.75, 1.193]],
+    "_z": "revision F, 3. 10. 2026: the channel line carried on along the middle of the narrowed L/U channel (v 0.511) to the plates' end before the RCS block (x 18.81); at the old z 1.12 it lay on plate L14 (editor shots); before that z 1.62 under the canopy went under kit plates",
     "width": 0.012,
     "color": "strip",
     "_what": "strip under the canopy line",
