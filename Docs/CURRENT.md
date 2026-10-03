@@ -73,7 +73,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 1. **Wayfarer – revize G postavená** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený
    do finální recenze hotové lodi; otevřená doporučení (tón panelů, nosná položka shluků, špína, RCS přídě) v recenzi.
    Další práce podle autora (3. 10.): přistání na svahu, let (HUD, mapa, palivo), interiér, Steadfast.
-2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
+2. **Loď na svahu – DALŠÍ ÚKOL** (autor 3. 10.: „ano pokračuj“): loď na svahu leží trupem v terénu; přistání v
+   `SpaceshipPawn` (odblokované), podle SC (`starcitizenreference/StarCitizen_FlightSystem_Reference.md`, SC-2a podvozek).
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).
