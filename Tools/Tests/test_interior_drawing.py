@@ -11,7 +11,9 @@ Per ship with Design/<Ship>_interior_design.json (Tools/Design/interior_model.py
      (built, proposed or none), every decal item used a Czech purpose; furniture from the kit builds a layout object;
   3. each room sheet (sidecar <Ship>_I*.json) was drawn from the current data (the digests of the interior's data);
   4. each view of a room sheet draws exactly the elements the model puts in it (interior_model.sheet_views) and
-     labels every one; the schedules list every element of the room.
+     labels every one; the schedules list every element of the room;
+  5. the deck sheet (I-01, interior_model.deck_views) likewise, its tables list every room, door, piece of furniture,
+     component and object; the sections sheet (I-06) draws in each section what the room sheet's section would.
 Prints INTDRAW PASS|FAIL lines and INTDRAW SUMMARY.
 """
 import glob
@@ -82,8 +84,27 @@ def test_ship(ship):
         name = side["sheet"]
         stale_d = [k for k, v in m.digests.items() if side["digests"].get(k) != v]
         check("%s %s drawn from the current data" % (ship, name), not stale_d,
-              ("redraw: python Tools/Design/draw_interior_sheet.py %s --sheets %s (changed: %s)" % (ship, name, ", ".join(stale_d)))
+              (("redraw: python Tools/Design/draw_interior_deck.py %s (changed: %s)" % (ship, ", ".join(stale_d))) if side.get("deck") else
+               "redraw: python Tools/Design/draw_interior_sheet.py %s --sheets %s (changed: %s)" % (ship, name, ", ".join(stale_d)))
               if stale_d else "")
+        if side.get("deck"):
+            test_deck_sheet(m, ship, name, side)
+            continue
+        if side.get("registry"):              # I-09: every door, piece of furniture, component and object listed
+            sch = side["schedules"]
+            for key, cat in (("doors", "door"), ("furniture", "furniture"), ("components", "component"), ("objects", "object")):
+                want = {e.id for e in m.elements if e.cat == cat and (cat == "door" or (e.room and e.status != "remove"))}
+                check("%s %s lists every %s" % (ship, name, cat), set(sch.get(key, [])) == want, diff(sch.get(key, []), want))
+            continue
+        if side.get("sections"):
+            for view, rid, x, aft in side["sections"]:
+                expected = m.sheet_views(rid, x, aft=aft)["SEC"]
+                drawn = set(side["drawn"].get(view, []))
+                check("%s %s section %s draws the model's elements" % (ship, name, view), drawn == expected, diff(drawn, expected))
+                lab = set(side["labelled"].get(view, []))
+                check("%s %s section %s labels everything it draws" % (ship, name, view), drawn <= lab,
+                      ", ".join(sorted(drawn - lab)[:10]))
+            continue
         if not side.get("room"):
             continue
         views = m.sheet_views(side["room"], side["section_x"])
@@ -98,6 +119,30 @@ def test_ship(ship):
         listed = set().union(*[set(v) for v in side["schedules"].values()]) if side["schedules"] else set()
         check("%s %s schedules list every element of the room" % (ship, name), els <= listed,
               ", ".join(sorted(els - listed)[:10]))
+
+
+def test_deck_sheet(m, ship, name, side):
+    """The deck sheet (I-01): each view draws exactly what interior_model.deck_views puts in it and labels it all; the
+    tables list every room, every door and every piece of furniture, component and object the plan shows."""
+    views = {k: v for k, v in m.deck_views(side.get("section_y", 0.3)).items() if k in side.get("deck_views", ["PLAN", "LSEC"])}
+    for view, expected in views.items():
+        drawn = set(side["drawn"].get(view, []))
+        check("%s %s view %s draws the model's elements" % (ship, name, view), drawn == expected, diff(drawn, expected))
+        lab = set(side["labelled"].get(view, []))
+        check("%s %s view %s labels everything it draws" % (ship, name, view), drawn <= lab, ", ".join(sorted(drawn - lab)[:10]))
+    sch = side["schedules"]
+    if "PLAN" not in views:                       # I-07 / I-08: the plan of decals or lights, their tables
+        for view in views:
+            listed = set(sch.get(view.lower(), []))
+            check("%s %s tables list every element of %s" % (ship, name, view), views[view] <= listed,
+                  ", ".join(sorted(views[view] - listed)[:10]))
+        return
+    check("%s %s lists every room" % (ship, name), set(sch.get("rooms", [])) == set(m.rooms), diff(sch.get("rooms", []), m.rooms))
+    doors = {e.id for e in m.elements if e.cat == "door"}
+    check("%s %s lists every door" % (ship, name), set(sch.get("doors", [])) == doors, diff(sch.get("doors", []), doors))
+    items = {i for i in views["PLAN"] if m.by_id[i].cat in ("furniture", "component", "object")}
+    check("%s %s lists the plan's furniture, components and objects" % (ship, name), set(sch.get("items", [])) == items,
+          diff(sch.get("items", []), items))
 
 
 def main():

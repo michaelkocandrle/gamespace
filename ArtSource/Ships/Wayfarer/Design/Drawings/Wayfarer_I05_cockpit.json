@@ -1,0 +1,337 @@
+{
+ "_comment": "Written by Tools/Design/draw_interior_sheet.py: the IDs this sheet draws and labels per view and lists per schedule, with the digests of the data it was drawn from (Tools/Tests/test_interior_drawing.py).",
+ "sheet": "I-05",
+ "ship": "Wayfarer",
+ "room": "cockpit",
+ "section_x": 16.4,
+ "digests": {
+  "layout": "9ed16b60fbcc",
+  "interior": "37c119fe0110",
+  "setup": "de82013afd6a",
+  "lights": "dc19a3d11ce6",
+  "design": "0386482c0b74",
+  "kit": "c8f141a12540",
+  "library": "3bdd02712ff2",
+  "light_rules": "788f180917fd"
+ },
+ "geometry": {
+  "SM_Ship_Wayfarer.fbx": "71e64743a0a5",
+  "SM_Ship_Wayfarer_Interior.fbx": "68ea3ca70413",
+  "SM_Ship_Wayfarer_Canopy.fbx": "50abe89a8300",
+  "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
+  "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",
+  "SM_Kit_Bulkhead_Door00L41_C.fbx": "f9b4f693887f",
+  "SM_Kit_Bulkhead_Door00W_A.fbx": "55f8f83e0001",
+  "SM_Kit_Bulkhead_Door03W_B.fbx": "0f7e22a8da73",
+  "SM_Kit_Ceiling_Panel06L41_B.fbx": "c2b804214ae9",
+  "SM_Kit_Ceiling_Panel12L38_A.fbx": "63bfaf0f739f",
+  "SM_Kit_Ceiling_Panel12L38_C.fbx": "54440fb30f8c",
+  "SM_Kit_Ceiling_Panel12L41_A.fbx": "d5cde371a617",
+  "SM_Kit_Ceiling_Panel12L41_C.fbx": "be7369dda0e1",
+  "SM_Kit_Ceiling_Tray06W_A.fbx": "ec5273e6eadb",
+  "SM_Kit_Ceiling_Tray12W_A.fbx": "917dc4e8bfc5",
+  "SM_Kit_Floor_Grille06W_A.fbx": "eef9d9eebbf3",
+  "SM_Kit_Floor_Plate12L38_A.fbx": "da3843b4b56b",
+  "SM_Kit_Floor_Plate12W_A.fbx": "3c1c37e452a1",
+  "SM_Kit_Furniture_Bunk21L_A.fbx": "2da233450b4e",
+  "SM_Kit_Furniture_Food16L_A.fbx": "d53b0199e80a",
+  "SM_Kit_Furniture_Hygiene15L_A.fbx": "1465fff4e498",
+  "SM_Kit_Furniture_Locker10L_A.fbx": "6dd14a4712d7",
+  "SM_Kit_Wall_ComponentBay06W_B.fbx": "7e19b0b40b85",
+  "SM_Kit_Wall_ComponentBay12W_A.fbx": "f3cdad016e5d",
+  "SM_Kit_Wall_ComponentBay12W_C.fbx": "5ff06f593acf",
+  "SM_Kit_Wall_HullLiner06L_A.fbx": "d03d7dc4bd82",
+  "SM_Kit_Wall_HullLiner06L_D.fbx": "979c8698b706",
+  "SM_Kit_Wall_HullLiner12L_A.fbx": "437ae9c9309d",
+  "SM_Kit_Wall_HullLiner12L_B.fbx": "3d7ad312a0a0",
+  "SM_Kit_Wall_HullLiner12L_C.fbx": "8de727448a4b",
+  "SM_Kit_Wall_HullLiner12L_E.fbx": "7cefc2a60c6c",
+  "SM_Kit_Wall_HullLiner12L_S.fbx": "fe59bfb14dd4"
+ },
+ "drawn": {
+  "PLAN": [
+   "CPT-M-AVIONICS",
+   "CPT-O-CONSOLE-L",
+   "CPT-O-CONSOLE-R",
+   "CPT-O-DASH",
+   "CPT-O-GRAB-01",
+   "CPT-O-GRAB-02",
+   "CPT-O-STAIRS",
+   "CPT-U-SEAT",
+   "D-I-07",
+   "D-I-08",
+   "D-I-09",
+   "D-I-10",
+   "DR-CAB-CPT",
+   "L-FIX-16",
+   "L-FIX-17",
+   "L-FIX-18",
+   "L-FIX-19"
+  ],
+  "RCP": [
+   "L-INT-4",
+   "L-INT-6",
+   "L-INT-7",
+   "L-INT-8",
+   "L-INT-9",
+   "L-SET-PILOT"
+  ],
+  "EL-L": [
+   "CPT-O-CONSOLE-L",
+   "CPT-O-GRAB-01",
+   "D-I-01",
+   "D-I-02",
+   "D-I-03",
+   "D-I-04",
+   "L-FIX-14",
+   "L-FIX-21",
+   "L-FIX-23",
+   "L-FIX-25",
+   "L-FIX-27",
+   "L-FIX-32",
+   "L-FIX-34",
+   "L-FIX-36",
+   "L-FIX-38",
+   "L-INT-0",
+   "L-INT-10",
+   "L-INT-12",
+   "L-INT-3",
+   "L-SET-DISP-LEFT"
+  ],
+  "EL-F": [
+   "D-I-05",
+   "D-I-06",
+   "L-FIX-28",
+   "L-FIX-29",
+   "L-FIX-30",
+   "L-INT-2",
+   "L-SET-DISP-CENTRE-BOTTOM",
+   "L-SET-DISP-CENTRE-TOP"
+  ],
+  "EL-R": [
+   "CPT-O-CONSOLE-R",
+   "CPT-O-GRAB-02",
+   "L-FIX-13",
+   "L-FIX-20",
+   "L-FIX-22",
+   "L-FIX-24",
+   "L-FIX-26",
+   "L-FIX-31",
+   "L-FIX-33",
+   "L-FIX-35",
+   "L-FIX-37",
+   "L-INT-1",
+   "L-INT-11",
+   "L-INT-5",
+   "L-SET-DISP-RIGHT"
+  ],
+  "EL-A": [
+   "CPT-O-STAIRS",
+   "DR-CAB-CPT"
+  ],
+  "SEC": [
+   "CPT-M-AVIONICS",
+   "CPT-O-CONSOLE-L",
+   "CPT-O-CONSOLE-R"
+  ]
+ },
+ "labelled": {
+  "PLAN": [
+   "CPT-M-AVIONICS",
+   "CPT-O-CONSOLE-L",
+   "CPT-O-CONSOLE-R",
+   "CPT-O-DASH",
+   "CPT-O-GRAB-01",
+   "CPT-O-GRAB-02",
+   "CPT-O-STAIRS",
+   "CPT-U-SEAT",
+   "D-I-07",
+   "D-I-08",
+   "D-I-09",
+   "D-I-10",
+   "DR-CAB-CPT",
+   "L-FIX-16",
+   "L-FIX-17",
+   "L-FIX-18",
+   "L-FIX-19"
+  ],
+  "RCP": [
+   "L-INT-4",
+   "L-INT-6",
+   "L-INT-7",
+   "L-INT-8",
+   "L-INT-9",
+   "L-SET-PILOT"
+  ],
+  "SEC": [
+   "CPT-M-AVIONICS",
+   "CPT-O-CONSOLE-L",
+   "CPT-O-CONSOLE-R"
+  ],
+  "EL-L": [
+   "CPT-O-CONSOLE-L",
+   "CPT-O-GRAB-01",
+   "D-I-01",
+   "D-I-02",
+   "D-I-03",
+   "D-I-04",
+   "L-FIX-14",
+   "L-FIX-21",
+   "L-FIX-23",
+   "L-FIX-25",
+   "L-FIX-27",
+   "L-FIX-32",
+   "L-FIX-34",
+   "L-FIX-36",
+   "L-FIX-38",
+   "L-INT-0",
+   "L-INT-10",
+   "L-INT-12",
+   "L-INT-3",
+   "L-SET-DISP-LEFT"
+  ],
+  "EL-F": [
+   "D-I-05",
+   "D-I-06",
+   "L-FIX-28",
+   "L-FIX-29",
+   "L-FIX-30",
+   "L-INT-2",
+   "L-SET-DISP-CENTRE-BOTTOM",
+   "L-SET-DISP-CENTRE-TOP"
+  ],
+  "EL-R": [
+   "CPT-O-CONSOLE-R",
+   "CPT-O-GRAB-02",
+   "L-FIX-13",
+   "L-FIX-20",
+   "L-FIX-22",
+   "L-FIX-24",
+   "L-FIX-26",
+   "L-FIX-31",
+   "L-FIX-33",
+   "L-FIX-35",
+   "L-FIX-37",
+   "L-INT-1",
+   "L-INT-11",
+   "L-INT-5",
+   "L-SET-DISP-RIGHT"
+  ],
+  "EL-A": [
+   "CPT-O-STAIRS",
+   "DR-CAB-CPT"
+  ]
+ },
+ "schedules": {
+  "kit": [],
+  "furniture": [
+   "CPT-M-AVIONICS",
+   "CPT-O-CONSOLE-L",
+   "CPT-O-CONSOLE-R",
+   "CPT-O-DASH",
+   "CPT-O-GRAB-01",
+   "CPT-O-GRAB-02",
+   "CPT-O-STAIRS",
+   "CPT-U-SEAT",
+   "DR-CAB-CPT"
+  ],
+  "lights": [
+   "L-FIX-13",
+   "L-FIX-14",
+   "L-FIX-16",
+   "L-FIX-17",
+   "L-FIX-18",
+   "L-FIX-19",
+   "L-FIX-20",
+   "L-FIX-21",
+   "L-FIX-22",
+   "L-FIX-23",
+   "L-FIX-24",
+   "L-FIX-25",
+   "L-FIX-26",
+   "L-FIX-27",
+   "L-FIX-28",
+   "L-FIX-29",
+   "L-FIX-30",
+   "L-FIX-31",
+   "L-FIX-32",
+   "L-FIX-33",
+   "L-FIX-34",
+   "L-FIX-35",
+   "L-FIX-36",
+   "L-FIX-37",
+   "L-FIX-38",
+   "L-INT-0",
+   "L-INT-1",
+   "L-INT-10",
+   "L-INT-11",
+   "L-INT-12",
+   "L-INT-2",
+   "L-INT-3",
+   "L-INT-4",
+   "L-INT-5",
+   "L-INT-6",
+   "L-INT-7",
+   "L-INT-8",
+   "L-INT-9",
+   "L-SET-DISP-CENTRE-BOTTOM",
+   "L-SET-DISP-CENTRE-TOP",
+   "L-SET-DISP-LEFT",
+   "L-SET-DISP-RIGHT",
+   "L-SET-PILOT"
+  ],
+  "decals": [
+   "D-I-01",
+   "D-I-02",
+   "D-I-03",
+   "D-I-04",
+   "D-I-05",
+   "D-I-06",
+   "D-I-07",
+   "D-I-08",
+   "D-I-09",
+   "D-I-10",
+   "D-I-R-SCATTER-01",
+   "D-I-R-SCATTER-02",
+   "D-I-R-SCATTER-07"
+  ]
+ },
+ "checks": [
+  [
+   "CPT-M-AVIONICS",
+   "Avionika: radar a počítač S1 (postaveno) leží zčásti mimo trup: při x 18,81 roh y −0,45 z −0,20, y 0,45 z −0,20 (layout x 18,80 … 19,30, y −0,45 … 0,45, z −0,20 … 0,30)"
+  ],
+  [
+   "DR-CAB-CPT",
+   "cesta z uličky do DR-CAB-CPT vede šikmo mezi rohem CPT-O-STAIRS (schody; x 15,30, y −0,50) a ostěním dveří (x 15,20 z postaveného dílu, y −0,50): 0,10 m – kapsle 0,56 m neprojde, je-li mřížka plná; podél přepážky před mřížkou zbývá 0,10 m (kapsle tudy neprojde)"
+  ],
+  [
+   "CPT",
+   "plošina mezi horním stupněm a křeslem má 0,31 m (kapsle 0,56 m): postava stojí na horním stupni a usedá zezadu – ověřit ve hře"
+  ],
+  [
+   "CPT-M-AVIONICS",
+   "poklop (x 18,80 … 19,30) leží za koncovou stěnou prostoru pro nohy (x 18,62) pod přístrojovou deskou – z kokpitu nepřístupný; návrh: servisní panel v čele prostoru pro nohy (x 18,62), výměna dopředu"
+  ],
+  [
+   "CPT",
+   "účel v layoutu uvádí 0,35 m, postavená podlaha je +1,15 – opravit text v layoutu (hlavní session: otisky E-01 až E-08)"
+  ],
+  [
+   "D-I-01",
+   "decal x 16,90, z 1,55 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "D-I-09",
+   "decal x 18,45, z 1,67 je za objektem CPT-O-DASH (Přístrojová deska) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "D-I-10",
+   "decal x 18,45, z 1,67 je za objektem CPT-O-DASH (Přístrojová deska) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-M-AVIONICS",
+   "návrh v2: o 0,35 m výš (čeká na autora): 18,80 … 19,30, y −0,45 … 0,45 – v1 má spodní hranu z −0,20 pod břichem (trup dole v x 18,81 na −0,09, v x 19,29 na +0,08); v2 z 0,15 … 0,65 je celá v trupu a do podlahy kokpitu (+1,15) zbývá 0,5 m"
+  ]
+ ]
+}

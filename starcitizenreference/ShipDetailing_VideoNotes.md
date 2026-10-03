@@ -130,7 +130,7 @@ matný grafit bez mikrostruktury“).
 ~74 na ~80 m², tedy ~1 světlo na m²) by u kokpitu Wayfareru (~8 m²) dala 8–10 světel jen na kabinu a na celou
 loď ~60–90.
 **Převzít:** světlo u každého svítidla a každé svítící lišty: krátký dosah, bez stínů (stíny jen 2–3 hlavní),
-akcent u podlahy a pod deskou, světla displejů. Měřit na RTX 2060: interiér je vázaný na pixely, levná světla
+akcent u podlahy a pod deskou, světla displejů. Měřit na autorově PC (cíl 1440p / 60 fps, CLAUDE.md): interiér je vázaný na pixely, levná světla
 bez stínů s malým dosahem by měla stát málo. Ověřit `stat gpu`.
 
 ## 7. Kokpit C2 (pro krok 4, přestavbu z kitu)

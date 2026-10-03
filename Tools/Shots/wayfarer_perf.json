@@ -1,5 +1,5 @@
 {
- "_comment": "Repeated GPU measurements of the Wayfarer's technical corridor (author 29. 9. 2026: targets under 16.6 ms in the interior lighting and under 20 ms in the flight lighting, the default game measured several times for its spread): the perf_tech view of wayfarer_kit_corridor three times per lighting, no stat overlay; the shot runner logs 'SHOTS perf <name> gpu_ms=.. frame_ms=..' averaged over the second half of each settle. Run -Package -Width 1920 -Height 1080, then python Tools/Shots/perf_log.py.",
+ "_comment": "Repeated GPU measurements of the Wayfarer's technical corridor (author 29. 9. 2026 on the RTX 2060 at 1080p: under 16.6 ms in the interior lighting and under 20 ms in the flight lighting - no longer valid; the target since 3. 10. 2026 is 1440p / 60 fps with TSR or DLSS on an RTX 5070 Ti, measured at the final optimisation; the default game measured several times for its spread): the perf_tech view of wayfarer_kit_corridor three times per lighting, no stat overlay; the shot runner logs 'SHOTS perf <name> gpu_ms=.. frame_ms=..' averaged over the second half of each settle. Run -Package -Width 1920 -Height 1080, then python Tools/Shots/perf_log.py.",
  "shots": [
   {
    "name": "warmup",

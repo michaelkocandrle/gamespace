@@ -1,10 +1,10 @@
 # Aktuální stav projektu
 
-Jediný zdroj **aktuálního** stavu (nad ním jen `CLAUDE.md`), **nejvýš 80 řádků** (autor 30. 9. 2026). Hotové do stavu,
-splněné smaž; podrobnosti do commitu a recenzí (`Docs/Reviews/`), historie do 30. 9. v `Docs/HANDOFF.md` (archiv).
+Jediný zdroj **aktuálního** stavu pod `CLAUDE.md`, **nejvýš 80 řádků**; hotové do stavu, podrobnosti do recenzí a commitů.
 
-Stav k **3. 10. 2026**: Wayfarer přestavěný podle výkresů **revize F** (schválené autorem 3. 10.; boky po kritikovi kitu),
-kritik PASS 6,5 (práh step); noc opravena stínem planety. Nový PC autora.
+Stav k **3. 10. 2026**: Wayfarer postavený podle výkresů **revize F** (kritik PASS 6,5); revize G schválena s úpravami
+(krok 2 a 3 zadání 3. 10.); výkresy interiéru I-01–I-09 sloučené do main. **Cíl výkonu: 1440p / 60 fps s TSR nebo DLSS**
+(RTX 5070 Ti, `CLAUDE.md`; staré 20 ms na RTX 2060 neplatí); nic se neměří ani neoptimalizuje do konce.
 
 ## Stav
 
@@ -27,34 +27,35 @@ kritik PASS 6,5 (práh step); noc opravena stínem planety. Nový PC autora.
     oranžové jádro podle tahu), gondoly 140 k → 59 k;
   - chase kamera 2800 cm; level: slunce 11 lx, obloha 0,55; průchozí interiér (F vstát / sednout / ven / dovnitř);
   - interiér z kitu: technická chodba s výklenky komponent, přepážky s dveřmi, nákladový prostor (mřížka 8 SCU,
-    varianta B; podlaha zatím lodní) a kajuta z obložení trupu s kit podlahou a nábytkem z kitu.
+    varianta B; podlaha zatím lodní) a kajuta z obložení trupu s kit podlahou a nábytkem z kitu;
+  - výkresy interiéru (`draw_interior_sheet.py`, `_deck.py`, `_plans.py`): **I-01 až I-04 schváleny jako vzor**, I-05 až
+    I-09 jsou generovaná dokumentace bez dalších kol kritika (I-05 kokpit se kontroluje až u kokpitu z kitu).
 - **Steadfast** (nákladní): 2D návrh v2 čeká na schválení; starý odmítnutý interiér v `TestSpace` (klávesa I).
 - **Interiérový kit** (`ArtSource/Kit/kit_rules.json`, `kit_parts.json`): dávky 1–3, 4 zčásti, 6 (nábytek kajuty);
   ukázka v `TestSpace` (U). Strop 500 + 3500 trojúhelníků na metr (autor 30. 9.; převezme `kit_manifest.json`).
 - **Flotila:** Ship Matrix a dossiery publikované (skill `ship-pipeline` 1b); Delver a Farsight jen jako spec.
-- **Nástroje:** `Tools/Test.ps1`, `Tools/Build.ps1`, CI s offline testy při každém pushi (stav přes veřejné API
-  GitHubu), kritik s prahem `"gate": "step"` / `"ship"`, zámek `Tools/HeavyLock.ps1` (`CLAUDE.md`), snímky
-  v `D:\gamespace-shots` (`shots:` v recenzích), `Tools/Cleanup.ps1` na konci kroku, Zen DDC v `D:\UnrealDDC`.
+- **Nástroje:** `Test.ps1`, `Build.ps1`, CI s offline testy (stav přes veřejné API GitHubu), kritik s prahem `step` /
+  `ship`, zámek `HeavyLock.ps1`, snímky v `C:\gamespace-shots` (`shots:` v recenzích), `Cleanup.ps1` na konci kroku.
 
 ## Paralelní práce
 
-- **Druhá session** (worktree `gamespace-audit`, větev `wayfarer-dossier-interior`): výkresy interiéru (bod 4, styl
-  I-04 schválen 1. 10.) a koncepty (bod 6); `exterior_*.py` mění jen hlavní session. 0e7e4d4 sloučen do main 1. 10.;
-  5894e97 (dveře hygieny, I-04 R1) jen ve větvi. Konflikt v `Drawings/*`: kterákoli strana, pak překreslit.
-- **Hlavní session:** exteriérový kit. Druhá session balí do `Builds_<jméno>`; slučuje hlavní session.
+- Větev `wayfarer-dossier-interior` (682ed1f) sloučená do main 3. 10. (výkresy I-01–I-09, oprava dveří hygieny v kitu:
+  FBX v repozitáři, do UE se dostane `import_kit.py` při příští přestavbě). Druhá session teď nic nemá.
 
 ## Čeká na rozhodnutí autora
 
+- Podpora života Wayfareru v2: posunutá k ose, z většiny pod lůžkem (list I-04, řez R1; po sloučení `import_kit.py`).
+- **Na kokpit z kitu** (mimo rozsah 3. 10.): ~40 štítků ovladačů kokpitu v datech, hustota světel kokpitu 3,9/m²
+  proti pravidlu 2–3, texty layoutu (ulička 1,25 vs 1,40; „0,35 m“), dveře DR-TEC-CAB do kajuty s odsazením 78–90 mm
+  a přesun položek na stěně.
 - Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověření FAIL 7/6/6/7/7/8/8/7, levné body opravené).
-- Steadfast: schválení 2D návrhu v2 (`Steadfast_Design.md`). Kanopa Wayfareru jako téma designu v2 (autor otevře
-  sám); paleta Kestrel Dynamics u první lodi Kestrelu.
+- Steadfast: schválení 2D návrhu v2 (`Steadfast_Design.md`); kanopa Wayfareru (téma v2), paleta Kestrel Dynamics.
 
 ## Známé problémy
 
-- Exteriér Wayfareru mimo pilot (podvozek, křídla, zbraně) čeká na kit celé lodi. Loď na svahu leží trupem v terénu.
+- Podvozek, křídla a zbraně Wayfareru zatím bez kitu. Loď na svahu leží trupem v terénu.
 - `DebugEngageQuantum` po zadání cíle jménem znovu vybírá cíl podle nosu lodi (drobnost, autor 1. 10.).
 - Interiér Wayfareru: otevřené body recenzí `2026-09-30_cabin_furniture.md` a `2026-09-30_cabin_liner.md`.
-- PC autora: RAM s EXPO 6000 padala (BSOD, chyby v testu paměti); od 3. 10. běží na 4800 bez chyb (WORKFLOW 9.6 fm).
 - **Odrazy kovu odložené na optimalizaci** (autor 30. 9.): odrazy Lumenu do drsnosti 0,32 za +1,3 ms.
 - Kit: vyšlapaná linie potřebuje směrovou buňku atlasu špíny, špína v kanálech dlouhou úzkou buňku (krok c); ohmatání
   madel; lišty stropu po segmentech. Rozvody S na zadním konci (x 3–4) dělají ohyb přes pole bez desky.
@@ -69,10 +70,10 @@ kritik PASS 6,5 (práh step); noc opravena stínem planety. Nový PC autora.
 
 ## Další kroky
 
-1. **Wayfarer – revize G výkresů čeká na schválení** (3. 10.; body 1 a 2 kritika boků F, PASS 6,5): větrací skříně
-   L14/U02/U12, panely a poklopy i pod křídlem a na K a N, čísla panelů na K/L/U/N; v receptu šablony u RCS a 3 dalších
-   míst, panelové linky mimo nápisy (čára přes F v HF-0417). Výřezy `Docs/Reviews/2026-10-03_wayfarer_sides_revG/`.
-   Po schválení přestavba, snímky, kritik (step). Paralelní session I-01–I-09 smí běžet.
+1. **Wayfarer – revize G schválena s úpravami** (zadání 3. 10.): krok 2 = úpravy bez přestavby (kolize popisků na
+   přídi jen levně, pás K panel + poklop na ~60 % desek deterministicky podle ID, 5 větracích skříní na boku
+   nepravidelně, HSBUDGET před a po, výřez přídě F / G autorovi); krok 3 až po „G s úpravami potvrzeno“: přestavba,
+   snímky chase a zblízka, kritik step (Opus), srovnání se záběrem ze `starcitizenreference/`.
 2. **Loď na svahu:** přistání v `SpaceshipPawn` (odblokované); interiér: podlaha nákladu z kitu, body recenzí.
 3. **Let podle SC:** zbytek HUD a MFD (SC-3), mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
    systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.

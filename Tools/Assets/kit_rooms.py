@@ -46,7 +46,8 @@ KIT_LIGHT_SCALE, LIGHT_COLOURS = _import_kit_constants()
 SHIP_LIGHT_SCALE = 1.1
 INTERIOR_ONLY_TAG = "InteriorOnly"        # SpaceshipPawn: on only under the interior lighting
 # under the flight lighting (no MegaLights, every light paid in full) the kit corridor kept 1 ms over the old one:
-# the walls' wash and the floor channel light only when walked (author: flight lighting under 20 ms, 29. 9. 2026)
+# the walls' wash and the floor channel light only when walked (author 29. 9. 2026, then 20 ms on the RTX 2060; the
+# target since 3. 10. 2026 is 1440p / 60 fps with TSR or DLSS on an RTX 5070 Ti - re-measured at the final optimisation)
 INTERIOR_ONLY_SOCKETS = ("SOCKET_Light_Wash", "SOCKET_Light_Channel", "SOCKET_Light_Down", "SOCKET_Light_Halo",
                          "SOCKET_Light_Scallop")
 # the author's light plan for a ship's kit room (28. 9. 2026): only the main lights cast shadows (the ceiling trays'

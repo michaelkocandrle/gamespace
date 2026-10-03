@@ -19,8 +19,9 @@ v nižším ve stejném kroku.
 Sci-fi vesmírná hra v **Unreal Engine 5.8, C++**, modul `gamespace`, repozitář `michaelkocandrle/gamespace`,
 větev `main`, hlavní checkout `C:\gamespace\gamespace`. Cíl: let a interiéry 1:1 se Star Citizen, z vesmíru
 až na povrch planety a pěšky po ní. Lodě a stav: `Docs/CURRENT.md`.
-**Autor** není herní vývojář. Mluví česky a hraje zabalenou hru; od 2. 10. 2026 nový PC: Ryzen 5 7600, Radeon RX 9070,
-32 GB, jediný disk C (staré měření výkonu z RTX 2060 neplatí).
+**Autor** není herní vývojář. Mluví česky a hraje zabalenou hru; od 2. 10. 2026 nový PC: Ryzen 5 7600, RTX 5070 Ti 16 GB,
+32 GB, jediný disk C. **Cíl výkonu** (autor 3. 10. 2026): **1440p / 60 fps s TSR nebo DLSS** (staré 20 ms GPU na RTX 2060
+v 1080p neplatí). Nic se teď neměří ani neoptimalizuje; optimalizace až na konci.
 
 ## Pravidla
 

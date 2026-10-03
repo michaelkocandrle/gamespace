@@ -1,5 +1,5 @@
 {
- "_comment": "Interior performance profile with MegaLights variant C (author 27. 9. 2026: 60 FPS target on the RTX 2060 at 1080p): steady stat gpu (6 s) in the corridor and the junction, each variant switching one thing off (shadows, Lumen reflections, Lumen GI, translucency, 67 % resolution, post, MegaLights). Run: Tools/Shots.ps1 -Preset kit_perf_profile -Width 1920 -Height 1080",
+ "_comment": "Interior performance profile with MegaLights variant C (author 27. 9. 2026: then 60 FPS on the RTX 2060 at 1080p; the target since 3. 10. 2026 is 1440p / 60 fps with TSR or DLSS on an RTX 5070 Ti): steady stat gpu (6 s) in the corridor and the junction, each variant switching one thing off (shadows, Lumen reflections, Lumen GI, translucency, 67 % resolution, post, MegaLights). Run: Tools/Shots.ps1 -Preset kit_perf_profile -Width 1920 -Height 1080",
  "shots": [
   {
    "name": "warmup",

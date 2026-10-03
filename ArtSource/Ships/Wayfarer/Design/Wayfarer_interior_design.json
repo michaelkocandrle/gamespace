@@ -10,12 +10,12 @@
   "cockpit": "CPT"
  },
  "kit_purpose": {
-  "Wall_ComponentBay12W_A": "Výklenek reaktoru S1 ve stěně: těžká mřížová dvířka na pantech, reaktor na saních na výsuvných kolejnicích, stavová obrazovka, kabely a chlazení do výklenku, světlo výklenku.",
-  "Wall_ComponentBay06W_B": "Výklenek chladiče S1: žebrované jádro ve spodním výklenku, za mřížkou výfukový kanál nahoru ke kořeni křídla, světlo výklenku.",
+  "Wall_ComponentBay12W_A": "Výklenek reaktoru S1 ve stěně: posuvné křídlo výklenku, ve hře otevřené v kapse u levé líce (hrana s oranžovým pruhem a madlem), reaktor na saních na výsuvných kolejnicích, stavová obrazovka, kabely a chlazení do výklenku, světlo výklenku.",
+  "Wall_ComponentBay06W_B": "Výklenek chladiče S1: žebrované jádro ve spodním výklenku s otevřeným posuvným křídlem, výfukový kanál za stěnou nahoru ke kořeni křídla, světlo výklenku.",
   "Wall_ComponentBay12W_C": "Výklenek generátoru štítů S1: poklop s rychlouzávěry a průhledem, prstenec emitoru svítí okénkem.",
   "Bulkhead_Door03W_B": "Přepážka 0,3 m s dveřmi 0,5 m k levoboku (u nákladní mřížky): ostění s kapsou posuvného křídla, vodicí lišta v nadpraží, práh s drážkou; světlo nad dveřmi a stavové světlo, žádná klávesnice.",
   "Bulkhead_Door00W_A": "Líc přepážky 3 cm (za ním přepážka lodi 4 cm), dveře na ose: rámy, světlo nad dveřmi, stavové světlo, kabelový svod do skříňky.",
-  "Bulkhead_Door00L41_C": "Líc přepážky 3 cm ze strany nákladu, dveře 0,5 m vpravo (při pohledu z nákladu): rámy, světlo nad dveřmi, stavové světlo.",
+  "Bulkhead_Door00L41_C": "Líc přepážky 3 cm ze strany nákladu, dveře 0,5 m vlevo, k levoboku (při pohledu z nákladu): rámy, světlo nad dveřmi, stavové světlo.",
   "Bulkhead_Door00L38_A": "Líc zadní přepážky kajuty 3 cm, dveře na ose; nápis KAJUTA vedle dveří.",
   "Bulkhead_Door00L38_F": "Líc přední přepážky kajuty, otvor ke schodům do kokpitu až ke stropu: bez nadpraží, o které by si hráč na horních schodech udeřil hlavu.",
   "Ceiling_Tray12W_A": "Otevřený kabelový žlab se svazky po celém stropě chodby (žádný hladký panel), lineární světlo ve žlabu se stínem.",
@@ -51,7 +51,14 @@
    "host": "TEC-B-A",
    "motion": "zasouvá se k pravoboku do kapsy v přepážce 0,3 m (k levoboku zbývá jen 0,2 m stěny)",
    "operation": "samo při přiblížení, stavové světlo u rámu; žádná klávesnice",
-   "purpose": "Odděluje náklad (dekomprese při otevřené rampě) od chodby s komponentami."
+   "purpose": "Odděluje náklad (dekomprese při otevřené rampě) od chodby s komponentami.",
+   "open": [[-1.0, 0.0]],
+   "x": 8.39,
+   "side": "pocket",
+   "side_cz": "v kapse přepážky TEC-B-A",
+   "t": 0.03,
+   "h": 2.05,
+   "_x": "the leaf in its pocket: the middle of the 0.3 m bulkhead TEC-B-A (8.24 … 8.54), y −1.0 … 0.0 open"
   },
   "DR-TEC-CAB": {
    "leaf": "proposed",
@@ -82,7 +89,7 @@
    "type": "posuvné jednokřídlé",
    "kit": "Furniture_Hygiene15L_A",
    "slide_part": [0, -1],
-   "motion": "zasouvá se k přídi (náběžná hrana s výstražným pruhem a madlem je na zadní straně křídla)",
+   "motion": "zasouvá se k přídi do kapsy v čelní stěně buňky; náběžná hrana s výstražným pruhem a madlem je vzadu, těsnění na zadní zárubni, ústí kapsy na přední (kit opraven 1. 10. 2026)",
    "operation": "ručně za madlo; obsazeno ukazuje světlo nad dveřmi a obrazovka",
    "purpose": "Soukromí hygienické buňky."
   }
@@ -96,16 +103,22 @@
   "HLD-M-QFUEL": {
    "bay": "pod podlahou uličky",
    "access": "plnicí hrdlo zvenku na břiše; servis deskou v podlaze uličky",
-   "replace": "nádrž otvorem v podlaze uličky"
+   "replace": "nádrž otvorem v podlaze uličky",
+   "proposal": {
+    "rect": [5.4, 7.4, 0.7, 1.6],
+    "z": [-0.55, -0.05],
+    "label": "návrh v2: o 0,10 m k ose",
+    "why": "v1 má spodní roh (y 1,70, z −0,55) 4,6 cm za zkosením břicha (trup v z −0,55 na y 1,654, x 5,4 … 7,4); v2 má 5 cm k plášti a stejný objem"
+   }
   },
   "TEC-M-POWER": {
    "bay": "TEC-W-L1",
-   "access": "těžká mřížová dvířka na pantech",
+   "access": "posuvné křídlo výklenku (ve hře otevřené v kapse)",
    "replace": "reaktor na saních vyjede po kolejnicích do chodby"
   },
   "TEC-M-COOLER-L": {
    "bay": "TEC-W-L2",
-   "access": "spodní výklenek za mřížkou",
+   "access": "spodní výklenek s posuvným křídlem (otevřené)",
    "replace": "jádro se vytáhne do chodby, kanál zůstává"
   },
   "TEC-M-SHIELD": {
@@ -115,19 +128,30 @@
   },
   "TEC-M-COOLER-R": {
    "bay": "TEC-W-R2",
-   "access": "spodní výklenek za mřížkou",
+   "access": "spodní výklenek s posuvným křídlem (otevřené)",
    "replace": "jádro se vytáhne do chodby"
   },
   "CAB-M-LIFESUP": {
    "bay": "pod podlahou, z většiny pod lůžkem CAB-U-BUNK (y 0,92 … 1,50), 0,25 m blíž k ose než v layoutu v1",
    "access": "zvednutím matrace a odklopením desky podlahy v podstavci lůžka (návrh); sání v podstavci lůžka, zpětné sání v CAB-W-L1",
    "replace": "shora otvorem v podlaze pod lůžkem po zvednutí matrace a roštu",
-   "built_as": "jednotka nepostavena (layout v2: posunutá dovnitř, aby se vešla do trupu); ve hře sání v podstavci lůžka a zpětné sání v CAB-W-L1"
+   "built_as": "jednotka nepostavena (layout v2: posunutá dovnitř, aby se vešla do trupu); ve hře sání v podstavci lůžka a zpětné sání v CAB-W-L1",
+   "previous": {
+    "rect": [12.9, 14.5, 1.1, 1.75],
+    "z": [-0.55, -0.05],
+    "label": "layout v1 (zčásti mimo trup)"
+   }
   },
   "CPT-M-AVIONICS": {
    "bay": "pod podlahou kokpitu",
    "access": "odklopná deska před křeslem",
-   "replace": "vytažením nahoru otvorem v podlaze"
+   "replace": "vytažením nahoru otvorem v podlaze",
+   "proposal": {
+    "rect": [18.8, 19.3, -0.45, 0.45],
+    "z": [0.15, 0.65],
+    "label": "návrh v2: o 0,35 m výš",
+    "why": "v1 má spodní hranu z −0,20 pod břichem (trup dole v x 18,81 na −0,09, v x 19,29 na +0,08); v2 z 0,15 … 0,65 je celá v trupu a do podlahy kokpitu (+1,15) zbývá 0,5 m"
+   }
   }
  },
  "ids": {
@@ -244,11 +268,23 @@
    ],
    "scatter": ["D-I-R-SCATTER-01", "D-I-R-SCATTER-02", "D-I-R-SCATTER-03", "D-I-R-SCATTER-04", "D-I-R-SCATTER-05", "D-I-R-SCATTER-06", "D-I-R-SCATTER-07"],
    "grab_bars": ["CPT-O-GRAB-01", "CPT-O-GRAB-02"]
+  },
+  "fittings": [
+   ["extinguisher", "HLD-O-FIRE-01"],
+   ["handrail", "HLD-O-RAIL-01"],
+   ["vent", "HLD-O-VENT-01"],
+   ["vent", "HLD-O-VENT-02"],
+   ["junction", "HLD-O-JBOX-01"],
+   ["junction", "HLD-O-JBOX-02"],
+   ["junction", "HLD-O-JBOX-03"],
+   ["conduit", "HLD-O-COND-01"],
+   ["conduit", "HLD-O-COND-02"]
+  ],
+  "stairs": {
+   "cockpit": "CPT-O-STAIRS"
   }
  },
- "review_notes": {
-  "DR-CAB-HYG": "kit (Furniture_Hygiene15L_A) kreslí výstražný pruh a madlo na zadní hraně křídla, ale těsnění u zadní zárubně – jedno z nich je opačně; výkres bere směr otevírání podle pruhu a madla (k přídi)"
- },
+ "review_notes": {},
  "decal_items": {
   "hazard_stripe": "výstražný pruh na hraně (rám dveří, práh)",
   "st_service": "malý šablonový nápis SERVICE ACCESS (servisní přístup)",
@@ -300,5 +336,15 @@
  "approved": {
   "date": "1. 10. 2026",
   "what": "styl listu I-04 (vzor pro I-01 až I-09), měřítko 1:20 na A0 s detaily 1:5 / 1:10, dveře DR-TEC-CAB (dvoukřídlé posuvné ze strany chodby) a DR-CAB-CPT (otvor bez dveří), kit platí před layoutem, číslo úseku 06 u přední přepážky"
+ },
+ "fitting_purpose": {
+  "extinguisher": "hasicí přístroj CO2 u dveří do chodby, nad ním nápis FIRE (D-INT-FIRE)",
+  "handrail": "madlo podél uličky: opora za letu a při nakládce",
+  "vent": "větrací mřížka u podlahy (rozvod vzduchu podpory života)",
+  "junction": "rozvodná skříňka energie a dat",
+  "conduit": "kabelová chránička po stěně"
+ },
+ "stairs_purpose": {
+  "cockpit": "Jediný přístup do kokpitu z kajuty: strmé lodní schody k podlaze kokpitu +1,15 (po zvýšení kokpitu 25. 9.), madla po obou stranách, svítící náběžné hrany stupňů."
  }
 }

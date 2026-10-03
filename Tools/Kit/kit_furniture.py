@@ -513,7 +513,10 @@ def hygiene(var, L, name, seed):
     ring(p, "Kit_Structure", fx, -dw, dw, 0.0, dh, 0.04, 0.035, bevel=0.008, bottom=False)     # (round 2: "a thin frame")
     # the door (built closed - the layout's walk_exempt; rounds 1-3: "one flat slab, nothing says it slides"): the
     # leaf's body, three fields on it with dark gaps between, a hazard band on its leading edge, the pull in the middle
-    # field; its head track over it, a threshold with the guide groove under it, the seal at the jamb
+    # field; its head track over it, a threshold with the guide groove under it. It opens towards -Y (in a ship's run
+    # the bow, author 1. 10. 2026), into a pocket in the front wall: the leading edge with the band and the pull is the
+    # +Y one, the rubber seal on the +Y (strike) jamb where it closes, the pocket's dark mouth on the -Y jamb (the
+    # interior drawing I-04 found the seal on the pocket's side)
     p.box("Kit_Seal", (fx - 0.06, -dw, 0.0), (fx - 0.04, dw, dh), panel=False)
     front_plate(p, "Kit_Primary", fx - 0.012, -dw + 0.006, dw - 0.006, 0.012, dh - 0.03, t=0.02, panel=False)
     # (verification round: "thin grooves, still one slab") the fields 12 mm off the body, 2 cm apart, the middle one
@@ -529,7 +532,8 @@ def hygiene(var, L, name, seed):
     p.box("Kit_Seal", (fx - 0.001, -dw + 0.01, dh - 0.02), (fx + 0.0008, dw - 0.01, dh - 0.012), panel=False)
     p.box("Kit_Structure", (fx - 0.035, -dw, 0.0), (fx + 0.03, dw, 0.012), bevel=0.003, segments=1, panel=False)
     p.box("Kit_Seal", (fx - 0.002, -dw + 0.01, 0.012), (fx + 0.006, dw - 0.01, 0.0126), panel=False)
-    p.box("Kit_Rubber", (fx - 0.006, -dw, 0.012), (fx + 0.004, -dw + 0.006, dh - 0.03), panel=False)     # the leaf's seal at the jamb
+    p.box("Kit_Rubber", (fx - 0.006, dw - 0.006, 0.012), (fx + 0.004, dw, dh - 0.03), panel=False)       # the seal, strike jamb
+    p.box("Kit_Seal", (fx - 0.045, -dw, 0.012), (fx - 0.001, -dw + 0.008, dh - 0.03), panel=False)       # the pocket's mouth
     # the occupancy screen beside the door, the extraction grille over it on the other side; the occupancy light in a
     # housing on the frame's head (round 3: "a housed light over the door tied to the screen's state")
     screen(p, fx, dw + 0.09, hw - 0.1, 1.36, 1.5, REGIONS["hygiene"])

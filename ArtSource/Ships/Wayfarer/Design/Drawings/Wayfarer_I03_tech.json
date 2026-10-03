@@ -1,0 +1,362 @@
+{
+ "_comment": "Written by Tools/Design/draw_interior_sheet.py: the IDs this sheet draws and labels per view and lists per schedule, with the digests of the data it was drawn from (Tools/Tests/test_interior_drawing.py).",
+ "sheet": "I-03",
+ "ship": "Wayfarer",
+ "room": "tech",
+ "section_x": 9.0,
+ "digests": {
+  "layout": "9ed16b60fbcc",
+  "interior": "37c119fe0110",
+  "setup": "de82013afd6a",
+  "lights": "dc19a3d11ce6",
+  "design": "0386482c0b74",
+  "kit": "c8f141a12540",
+  "library": "3bdd02712ff2",
+  "light_rules": "788f180917fd"
+ },
+ "geometry": {
+  "SM_Ship_Wayfarer.fbx": "71e64743a0a5",
+  "SM_Ship_Wayfarer_Interior.fbx": "68ea3ca70413",
+  "SM_Ship_Wayfarer_Canopy.fbx": "50abe89a8300",
+  "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
+  "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",
+  "SM_Kit_Bulkhead_Door00L41_C.fbx": "f9b4f693887f",
+  "SM_Kit_Bulkhead_Door00W_A.fbx": "55f8f83e0001",
+  "SM_Kit_Bulkhead_Door03W_B.fbx": "0f7e22a8da73",
+  "SM_Kit_Ceiling_Panel06L41_B.fbx": "c2b804214ae9",
+  "SM_Kit_Ceiling_Panel12L38_A.fbx": "63bfaf0f739f",
+  "SM_Kit_Ceiling_Panel12L38_C.fbx": "54440fb30f8c",
+  "SM_Kit_Ceiling_Panel12L41_A.fbx": "d5cde371a617",
+  "SM_Kit_Ceiling_Panel12L41_C.fbx": "be7369dda0e1",
+  "SM_Kit_Ceiling_Tray06W_A.fbx": "ec5273e6eadb",
+  "SM_Kit_Ceiling_Tray12W_A.fbx": "917dc4e8bfc5",
+  "SM_Kit_Floor_Grille06W_A.fbx": "eef9d9eebbf3",
+  "SM_Kit_Floor_Plate12L38_A.fbx": "da3843b4b56b",
+  "SM_Kit_Floor_Plate12W_A.fbx": "3c1c37e452a1",
+  "SM_Kit_Furniture_Bunk21L_A.fbx": "2da233450b4e",
+  "SM_Kit_Furniture_Food16L_A.fbx": "d53b0199e80a",
+  "SM_Kit_Furniture_Hygiene15L_A.fbx": "1465fff4e498",
+  "SM_Kit_Furniture_Locker10L_A.fbx": "6dd14a4712d7",
+  "SM_Kit_Wall_ComponentBay06W_B.fbx": "7e19b0b40b85",
+  "SM_Kit_Wall_ComponentBay12W_A.fbx": "f3cdad016e5d",
+  "SM_Kit_Wall_ComponentBay12W_C.fbx": "5ff06f593acf",
+  "SM_Kit_Wall_HullLiner06L_A.fbx": "d03d7dc4bd82",
+  "SM_Kit_Wall_HullLiner06L_D.fbx": "979c8698b706",
+  "SM_Kit_Wall_HullLiner12L_A.fbx": "437ae9c9309d",
+  "SM_Kit_Wall_HullLiner12L_B.fbx": "3d7ad312a0a0",
+  "SM_Kit_Wall_HullLiner12L_C.fbx": "8de727448a4b",
+  "SM_Kit_Wall_HullLiner12L_E.fbx": "7cefc2a60c6c",
+  "SM_Kit_Wall_HullLiner12L_S.fbx": "fe59bfb14dd4"
+ },
+ "drawn": {
+  "PLAN": [
+   "DR-HLD-TEC",
+   "DR-TEC-CAB",
+   "TEC-B-A",
+   "TEC-B-F",
+   "TEC-FL-1",
+   "TEC-FL-2",
+   "TEC-FL-2/Channel_0",
+   "TEC-M-COOLER-L",
+   "TEC-M-COOLER-R",
+   "TEC-M-POWER",
+   "TEC-M-SHIELD",
+   "TEC-W-L1",
+   "TEC-W-L2",
+   "TEC-W-R1",
+   "TEC-W-R2"
+  ],
+  "RCP": [
+   "TEC-C-1",
+   "TEC-C-1/Linear_0",
+   "TEC-C-2",
+   "TEC-C-2/Linear_0"
+  ],
+  "EL-L": [
+   "TEC-W-L1",
+   "TEC-W-L1/Bay_0",
+   "TEC-W-L1/Cove_0",
+   "TEC-W-L1/Wash_0",
+   "TEC-W-L1/maker_veyra",
+   "TEC-W-L1/plate_reactor",
+   "TEC-W-L1/rivet_row_8",
+   "TEC-W-L1/st_rails",
+   "TEC-W-L1/warn_hv",
+   "TEC-W-L1/warn_hv#2",
+   "TEC-W-L2",
+   "TEC-W-L2/Bay_0",
+   "TEC-W-L2/Cove_0",
+   "TEC-W-L2/Wash_0",
+   "TEC-W-L2/plate_cooler"
+  ],
+  "EL-F": [
+   "D-INT-COCKPIT",
+   "DR-TEC-CAB",
+   "TEC-B-F",
+   "TEC-B-F/Door_0",
+   "TEC-B-F/Status_0",
+   "TEC-B-F/hazard_stripe",
+   "TEC-B-F/hazard_stripe#2"
+  ],
+  "EL-R": [
+   "TEC-W-R1",
+   "TEC-W-R1/Cove_0",
+   "TEC-W-R1/Emitter_0",
+   "TEC-W-R1/Wash_0",
+   "TEC-W-R1/plate_shield",
+   "TEC-W-R1/rivet_row_8",
+   "TEC-W-R1/st_inspect",
+   "TEC-W-R2",
+   "TEC-W-R2/Bay_0",
+   "TEC-W-R2/Cove_0",
+   "TEC-W-R2/Wash_0",
+   "TEC-W-R2/plate_cooler"
+  ],
+  "EL-A": [
+   "DR-HLD-TEC",
+   "TEC-B-A",
+   "TEC-B-A/Door_0",
+   "TEC-B-A/Reveal_0",
+   "TEC-B-A/Status_0",
+   "TEC-B-A/hazard_stripe",
+   "TEC-B-A/hazard_stripe#2",
+   "TEC-B-A/st_service"
+  ],
+  "SEC": [
+   "TEC-C-1",
+   "TEC-FL-1",
+   "TEC-M-POWER",
+   "TEC-M-SHIELD",
+   "TEC-W-L1",
+   "TEC-W-R1"
+  ],
+  "DET-A": [
+   "TEC-M-POWER",
+   "TEC-W-L1"
+  ],
+  "DET-B": [
+   "TEC-M-COOLER-L",
+   "TEC-W-L2"
+  ],
+  "DET-C": [
+   "TEC-M-SHIELD",
+   "TEC-W-R1"
+  ]
+ },
+ "labelled": {
+  "PLAN": [
+   "DR-HLD-TEC",
+   "DR-TEC-CAB",
+   "TEC-B-A",
+   "TEC-B-F",
+   "TEC-FL-1",
+   "TEC-FL-2",
+   "TEC-FL-2/Channel_0",
+   "TEC-M-COOLER-L",
+   "TEC-M-COOLER-R",
+   "TEC-M-POWER",
+   "TEC-M-SHIELD",
+   "TEC-W-L1",
+   "TEC-W-L2",
+   "TEC-W-R1",
+   "TEC-W-R2"
+  ],
+  "RCP": [
+   "TEC-C-1",
+   "TEC-C-1/Linear_0",
+   "TEC-C-2",
+   "TEC-C-2/Linear_0"
+  ],
+  "SEC": [
+   "TEC-C-1",
+   "TEC-FL-1",
+   "TEC-M-POWER",
+   "TEC-M-SHIELD",
+   "TEC-W-L1",
+   "TEC-W-R1"
+  ],
+  "EL-L": [
+   "TEC-W-L1",
+   "TEC-W-L1/Bay_0",
+   "TEC-W-L1/Cove_0",
+   "TEC-W-L1/Wash_0",
+   "TEC-W-L1/maker_veyra",
+   "TEC-W-L1/plate_reactor",
+   "TEC-W-L1/rivet_row_8",
+   "TEC-W-L1/st_rails",
+   "TEC-W-L1/warn_hv",
+   "TEC-W-L1/warn_hv#2",
+   "TEC-W-L2",
+   "TEC-W-L2/Bay_0",
+   "TEC-W-L2/Cove_0",
+   "TEC-W-L2/Wash_0",
+   "TEC-W-L2/plate_cooler"
+  ],
+  "EL-F": [
+   "D-INT-COCKPIT",
+   "DR-TEC-CAB",
+   "TEC-B-F",
+   "TEC-B-F/Door_0",
+   "TEC-B-F/Status_0",
+   "TEC-B-F/hazard_stripe",
+   "TEC-B-F/hazard_stripe#2"
+  ],
+  "EL-R": [
+   "TEC-W-R1",
+   "TEC-W-R1/Cove_0",
+   "TEC-W-R1/Emitter_0",
+   "TEC-W-R1/Wash_0",
+   "TEC-W-R1/plate_shield",
+   "TEC-W-R1/rivet_row_8",
+   "TEC-W-R1/st_inspect",
+   "TEC-W-R2",
+   "TEC-W-R2/Bay_0",
+   "TEC-W-R2/Cove_0",
+   "TEC-W-R2/Wash_0",
+   "TEC-W-R2/plate_cooler"
+  ],
+  "EL-A": [
+   "DR-HLD-TEC",
+   "TEC-B-A",
+   "TEC-B-A/Door_0",
+   "TEC-B-A/Reveal_0",
+   "TEC-B-A/Status_0",
+   "TEC-B-A/hazard_stripe",
+   "TEC-B-A/hazard_stripe#2",
+   "TEC-B-A/st_service"
+  ],
+  "DET-A": [
+   "TEC-M-POWER",
+   "TEC-W-L1"
+  ],
+  "DET-B": [
+   "TEC-M-COOLER-L",
+   "TEC-W-L2"
+  ],
+  "DET-C": [
+   "TEC-M-SHIELD",
+   "TEC-W-R1"
+  ]
+ },
+ "schedules": {
+  "kit": [
+   "TEC-B-A",
+   "TEC-B-F",
+   "TEC-C-1",
+   "TEC-C-2",
+   "TEC-FL-1",
+   "TEC-FL-2",
+   "TEC-W-L1",
+   "TEC-W-L2",
+   "TEC-W-R1",
+   "TEC-W-R2"
+  ],
+  "furniture": [
+   "DR-HLD-TEC",
+   "DR-TEC-CAB",
+   "TEC-M-COOLER-L",
+   "TEC-M-COOLER-R",
+   "TEC-M-POWER",
+   "TEC-M-SHIELD"
+  ],
+  "lights": [
+   "TEC-B-A/Door_0",
+   "TEC-B-A/Reveal_0",
+   "TEC-B-A/Status_0",
+   "TEC-B-F/Door_0",
+   "TEC-B-F/Status_0",
+   "TEC-C-1/Linear_0",
+   "TEC-C-2/Linear_0",
+   "TEC-FL-2/Channel_0",
+   "TEC-W-L1/Bay_0",
+   "TEC-W-L1/Cove_0",
+   "TEC-W-L1/Wash_0",
+   "TEC-W-L2/Bay_0",
+   "TEC-W-L2/Cove_0",
+   "TEC-W-L2/Wash_0",
+   "TEC-W-R1/Cove_0",
+   "TEC-W-R1/Emitter_0",
+   "TEC-W-R1/Wash_0",
+   "TEC-W-R2/Bay_0",
+   "TEC-W-R2/Cove_0",
+   "TEC-W-R2/Wash_0"
+  ],
+  "decals": [
+   "D-INT-COCKPIT",
+   "TEC-B-A/hazard_stripe",
+   "TEC-B-A/hazard_stripe#2",
+   "TEC-B-A/st_service",
+   "TEC-B-F/hazard_stripe",
+   "TEC-B-F/hazard_stripe#2",
+   "TEC-FL-1/grime_smear",
+   "TEC-FL-1/grime_smear#2",
+   "TEC-FL-1/grime_soot",
+   "TEC-FL-1/grime_soot#2",
+   "TEC-FL-1/grime_soot#3",
+   "TEC-FL-1/grime_soot#4",
+   "TEC-FL-1/grime_soot#5",
+   "TEC-FL-2/grime_soot",
+   "TEC-FL-2/grime_soot#2",
+   "TEC-FL-2/grime_soot#3",
+   "TEC-FL-2/grime_soot#4",
+   "TEC-FL-2/grime_soot#5",
+   "TEC-W-L1/grime_rim",
+   "TEC-W-L1/grime_soot",
+   "TEC-W-L1/maker_veyra",
+   "TEC-W-L1/plate_reactor",
+   "TEC-W-L1/rivet_row_8",
+   "TEC-W-L1/st_rails",
+   "TEC-W-L1/warn_hv",
+   "TEC-W-L1/warn_hv#2",
+   "TEC-W-L2/grime_rim",
+   "TEC-W-L2/grime_streaks",
+   "TEC-W-L2/plate_cooler",
+   "TEC-W-R1/grime_rim",
+   "TEC-W-R1/grime_soot",
+   "TEC-W-R1/plate_shield",
+   "TEC-W-R1/rivet_row_8",
+   "TEC-W-R1/st_inspect",
+   "TEC-W-R2/grime_rim",
+   "TEC-W-R2/grime_streaks",
+   "TEC-W-R2/plate_cooler"
+  ]
+ },
+ "checks": [
+  [
+   "TEC-M-POWER",
+   "Reaktor S1: v layoutu x 8,35 … 9,55, y 1,05 … 1,85, z 0,00 … 1,90; postavený výklenek v TEC-W-L1 x 8,64 … 9,64, y 1,20 … 1,78, z 0,16 … 1,02 (nejvíc 880 mm; kit platí, layout opravit)"
+  ],
+  [
+   "TEC-M-COOLER-L",
+   "Chladič S1 (levý): v layoutu x 9,60 … 10,30, y 1,15 … 1,85, z 0,00 … 1,40; postavený výklenek v TEC-W-L2 x 9,83 … 10,25, y 1,20 … 1,78, z 0,16 … 1,02 (nejvíc 380 mm; kit platí, layout opravit)"
+  ],
+  [
+   "TEC-M-SHIELD",
+   "Generátor štítů S1: v layoutu x 8,35 … 9,45, y −1,85 … −1,10, z 0,00 … 1,60; postavený výklenek v TEC-W-R1 x 8,64 … 9,64, y −1,68 … −1,20, z 0,16 … 1,02 (nejvíc 580 mm; kit platí, layout opravit)"
+  ],
+  [
+   "TEC-M-COOLER-R",
+   "Chladič S1 (pravý): v layoutu x 9,55 … 10,30, y −1,85 … −1,15, z 0,00 … 1,40; postavený výklenek v TEC-W-R2 x 9,83 … 10,25, y −1,78 … −1,20, z 0,16 … 1,02 (nejvíc 380 mm; kit platí, layout opravit)"
+  ],
+  [
+   "DR-TEC-CAB",
+   "křídlo y 0,50 … 1,00, výška 2,05, v datech strana (technická chodba): zkosení stěn (líc ±1,20, od +1,30) zasahuje od +1,57, v horní hraně o 0,36 m; díly na líci (rám, madlo, stavové světlo) vystupují až 68 mm – křídlo musí jet aspoň 78 mm od líce; na dráze jsou D-INT-COCKPIT, TEC-B-F/Status_0 – přesunout"
+  ],
+  [
+   "DR-TEC-CAB",
+   "křídlo y −1,00 … −0,50, výška 2,05, v datech strana (technická chodba): zkosení stěn (líc ±1,20, od +1,30) zasahuje od +1,57, v horní hraně o 0,36 m; díly na líci (rám, madlo, stavové světlo) vystupují až 52 mm – křídlo musí jet aspoň 62 mm od líce"
+  ],
+  [
+   "DR-TEC-CAB",
+   "křídlo y 0,50 … 1,00, výška 2,05, varianta strana (kajuta): díly na líci (rám, madlo, stavové světlo) vystupují až 80 mm – křídlo musí jet aspoň 90 mm od líce"
+  ],
+  [
+   "DR-TEC-CAB",
+   "křídlo y −1,00 … −0,50, výška 2,05, varianta strana (kajuta): díly na líci (rám, madlo, stavové světlo) vystupují až 68 mm – křídlo musí jet aspoň 78 mm od líce; na dráze jsou CAB-B-A/Status_0 – přesunout"
+  ],
+  [
+   "#",
+   "K rozhodnutí autora: dvoukřídlé posuvné dveře 1,00 m se na straně chodby (průřez W) pod zkosení nevejdou (užší křídla by zúžila otvor pod 0,90 m pravidla kitu); na straně kajuty (obložení L, zkosení od +1,70) se vejdou, pokud pojedou odsazeně od dílů na líci a nápisy a světla na dráze se přesunou."
+  ]
+ ]
+}

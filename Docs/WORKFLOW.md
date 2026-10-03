@@ -1224,6 +1224,12 @@ snímku.
   žádá překreslit 8 listů (~20 MB PNG v LFS) a v paralelní práci dělá binární konflikty. Řešení: ID interiéru jsou
   v `Design/<Loď>_interior_design.json` navázaná na data stavby klíčem, který test ověřuje, a otisky interiéru se
   počítají jen z interiérové části dat (`interior_model._digests`).
+- fj) **`kit_build.py -- <dávka> --only <díl>` uložil `Kit_<Dávka>.blend` jen s tím dílem** (1. 10. 2026, oprava dveří
+  hygienické buňky). Skript na konci ukládá celou scénu jako blend dávky, a `--only` staví jen vybrané díly, takže
+  z archivu zmizí ostatní (lůžko, skříň, výdejník; `kit_layout.kit_blends` a `kit_clash.py` hledají díly v blendech).
+  `--only` stačí na rychlou kontrolu; do commitu přestav celou dávku. FBX dílů, jejichž geometrie se nezměnila, se
+  liší jen časovým razítkem: porovnej je (`fbx_mesh.read`) a nezměněné vrať, ať v LFS nevznikají kopie. Jméno pro
+  `--only` je celé jméno meshe (`SM_Kit_Furniture_Hygiene15L_A`), krátké jméno nepostaví nic („parts": 0).
 - fk) **Po sloučení rovných ploch uletěla deska o 15–420 m / dno kanálu zčernalo** (1. 10. 2026, rozpočet trojúhelníků
   krok a). Solidify s `use_even_offset` na sloučených (nekonvexních, degenerovaných) n-úhelnících vymrštil vrchol
   desky detailu P-B: export zastavil jen první případ („Ship is 424.94 m across“), druhý (−16 m) chytil až
@@ -1244,6 +1250,15 @@ snímku.
   přestavbách za sebou na stejném místě (1 cm: šum sítě trupu z ff posune zásah paprsku o 1–8 mm, přelosovaný decal
   skočí o decimetry nebo změní položku). Po změně `seed` nebo pravidel test přeskočí (otisk vstupů
   `rules_hash`) – pak přestavět dvakrát. Oprava sama jednorázově přelosovala všechny náhodné decaly.
+- fn) **Na výkresu nákladu chybělo šest nápisů a hasicí přístroj, světel bylo o dvě víc** (2. 10. 2026, kritik I-02).
+  Model výkresu bral místnost bodu z obdélníku layoutu (y ±1,90), ale obložení nákladu z kitu je na ±2,05: nápisy na
+  něm (y ±2,025) vypadly, a vnější reflektory gondol nad stropem (z 2,59) prošly filtrem výšky jako světla nákladu.
+  Řešení: `interior_model._room_spaces` (místnost = obdélník rozšířený k lícům stěn kitu), světla exportu nad stropem
+  kit místnosti jdou na exteriér; vybavení lodi z `interior.kit.fittings` má vlastní ID. Kit platí před layoutem.
+- fo) **Světlá výška pod žebrem kabiny vyšla víc, než je** (2. 10. 2026, I-01: 2,08 místo 2,05). Řez rovinou x vrací úsečky s konci na
+  hranách trojúhelníků; spodní plocha žebra přes celou šířku dala úsečku s konci daleko mimo pás y ±0,3, takže filtr
+  koncových bodů ji vynechal. Úsečky se před hledáním minima ořezávají na pás (`DeckSheet.clear_height`). Pozor i na
+  odečet z výkresu: v podélném řezu se žebro kreslí níž, než je nad hlavou, protože jde dál k boku za rovinou řezu.
 
 
 ---

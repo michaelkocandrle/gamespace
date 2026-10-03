@@ -8706,7 +8706,7 @@
     146.5,
     231.0
    ],
-   "tris": 2414,
+   "tris": 2426,
    "tris_decals": 28,
    "tri_budget": 15000,
    "materials": [
@@ -8738,7 +8738,7 @@
     "domain": "CORNER",
     "edge": 2916,
     "secondary": 768,
-    "floor": 708,
+    "floor": 716,
     "seam": 0
    },
    "status": "built",

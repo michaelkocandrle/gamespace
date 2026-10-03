@@ -27,7 +27,7 @@ Referenční soubory tohoto skillu (čti podle úlohy):
 - **Žádná jména ze Star Citizenu** (lodě, firmy, stanice); naše: Halcyon Freightworks, Kestrel Dynamics, Veyra.
 - Assety zdarma (licence!) nebo po dílech, nikdy celá sestava jedním promptem, žádné placené balíky (skill
   `asset-sources`).
-- Posuzuje se **z první osoby** (oko ~1,65 m), 1920×1080, RTX 2060. Stylový záměr kroku patří do briefu kritika.
+- Posuzuje se **z první osoby** (oko ~1,65 m), snímky 1920×1080 (cíl výkonu 1440p / 60 fps, CLAUDE.md). Stylový záměr kroku patří do briefu kritika.
 - Optimalizace až na konci, když je vzhled hotový (autor 29. 9. 2026).
 
 ## Kit: stavba dílů

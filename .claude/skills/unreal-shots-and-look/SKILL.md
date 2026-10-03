@@ -16,8 +16,9 @@ Insights), 11 (vzhled scény). Presety interiéru Wayfareru a kitu: skill `ship-
 - **Každý snímek si sám prohlédni** (Read na PNG) a porovnej s referencí (`starcitizenreference/`,
   `Docs/UI/`, `ArtSource/Reference/Mood/`). Autorovi napiš, co na snímcích je, a odděl, co musí
   posoudit sám (pocit, plynulost, jas na jeho monitoru, čitelnost za pohybu).
-- Autor hraje **1920 × 1080 na RTX 2060 6 GB**. Výchozí `Shots.ps1` je 1600 × 900 → FPS o ~40 %
-  lepší a písmo RT jinak ostré. Na výkon, jas a čitelnost vždy `-Width 1920 -Height 1080`.
+- Cíl výkonu (autor 3. 10. 2026): **2560 × 1440 / 60 fps s TSR nebo DLSS** na RTX 5070 Ti 16 GB (dřív 1080p na RTX 2060;
+  ta měření neplatí). Výchozí `Shots.ps1` je 1600 × 900 → FPS lepší a písmo RT jinak ostré. Snímky pro kritika
+  `-Width 1920 -Height 1080`; výkon měřit až při optimalizaci na konci, pak v 2560 × 1440.
 - Hra během snímků převezme popředí okna. Předem se neptej, jestli autorovi běží hra: `Package.ps1` ji sám
   ukončí; po balení zkontroluj čas exe.
 
