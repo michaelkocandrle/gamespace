@@ -3352,6 +3352,16 @@ void USpaceCockpitDisplays::SetPower(bool bLit, float BootAlpha)
 	bPowerLit = bLit;
 	PowerBootAlpha = bLit ? FMath::Clamp(BootAlpha, 0.f, 1.f) : 0.f;
 	ApplyScreenVisibility();
+	// The holo projection deploys (author 5. 10. 2026: SC animates it): over the first quarter of the start-up the
+	// picture rises out of the emitter - its height grows from a line of light to full.
+	const float Rise = FMath::SmoothStep(0.f, 0.25f, PowerBootAlpha);
+	for (const TCHAR* Name : { TEXT("Flight"), TEXT("Status"), TEXT("Radar"), TEXT("Ship") })
+	{
+		if (UWidget* Boot = WidgetTree ? WidgetTree->FindWidget(FName(*FString::Printf(TEXT("Boot%s"), Name))) : nullptr)
+		{
+			Boot->SetRenderScale(FVector2D(FMath::Lerp(0.85f, 1.f, Rise), FMath::Max(Rise, 0.02f)));
+		}
+	}
 	if (bLit && PowerBootAlpha < 1.f && WidgetTree)
 	{
 		// The systems report one after another over the first 80 % of the start-up; the bar fills to the end.
@@ -3389,6 +3399,11 @@ void USpaceCockpitDisplays::ApplyScreenVisibility()
 	{
 		const bool bCentre = FCString::Strcmp(Name, TEXT("Radar")) == 0 || FCString::Strcmp(Name, TEXT("Ship")) == 0;
 		const bool bShown = !bCentre || bCentreOn;
+		if (UWidget* Boot = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("Boot%s"), Name))))
+		{
+			// the projection grows up out of its emitter (pivot on the bottom edge)
+			Boot->SetRenderTransformPivot(FVector2D(0.5, 1.0));
+		}
 		if (UWidget* Pages = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("%sScreen"), Name))))
 		{
 			Pages->SetVisibility(bShown && View == 2 ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);

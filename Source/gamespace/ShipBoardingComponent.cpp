@@ -410,6 +410,9 @@ APawn* UShipBoardingComponent::LeaveSeat()
 	if (APlayerCharacter* Character = Cast<APlayerCharacter>(Pilot))
 	{
 		Character->BoardInterior(Ship, Seat.GetRotation().GetForwardVector());
+		// getting up: the view rises from the seat to the standing eye instead of cutting (author 5. 10. 2026)
+		PlayerController->SetViewTarget(Ship);
+		PlayerController->SetViewTargetWithBlend(Character, Character->GetSeatBlendSeconds(), VTBlend_EaseInOut, 2.0f);
 	}
 	UE_LOG(LogSpaceship, Log, TEXT("%s: pilot up from the seat at %s"), *Ship->GetName(), *Start.GetLocation().ToString());
 	return Pilot;

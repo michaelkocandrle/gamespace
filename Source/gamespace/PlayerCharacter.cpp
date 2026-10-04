@@ -600,7 +600,13 @@ bool APlayerCharacter::TryInteriorInteract()
 		ASpacePlayerController::SetShipInteriorLighting(false);
 		PlayerController->Possess(Ship);
 		Ship->OnBoarded();
-		Destroy();
+		// the view glides from the standing eye down into the seat; the character stays (hidden, no collision) as the
+		// blend's start until it ends
+		PlayerController->SetViewTarget(this);
+		PlayerController->SetViewTargetWithBlend(Ship, SeatBlendSeconds, VTBlend_EaseInOut, 2.0f);
+		SetActorHiddenInGame(true);
+		SetActorEnableCollision(false);
+		SetLifeSpan(SeatBlendSeconds + 0.2f);
 		return true;
 	}
 	if (Ship->IsNearRamp(GetActorLocation()))

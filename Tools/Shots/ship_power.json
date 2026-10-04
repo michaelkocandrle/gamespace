@@ -1,13 +1,98 @@
 {
-  "_comment": "SC cold start (step 2a, 4. 10. 2026): the cockpit powered off (dark glass, no HUD, key list with NAPÁJENÍ U), the PWR selector hovered in interact mode, the start-up screens mid-way (space.Power 1, PowerBootSeconds 2.5), powered on, and the PWR selector hovered while on (hotspot 2 after the two MFDs). Run: Tools/Shots.ps1 -Preset ship_power -Editor -Width 2560 -Height 1440",
-  "shots": [
-    {"name": "flat", "camera": "chase", "altitude_m": 40.0, "facing": "horizon", "hud": 0, "gear": true, "settle": 2.0, "console": ["space.FlatSpot 5 8"]},
-    {"name": "warmup", "camera": "chase", "altitude_m": 3.2, "facing": "horizon", "hud": 0, "gear": true, "settle": 10.0},
-    {"name": "power_off", "camera": "cockpit", "hud": 1, "settle": 2.0, "console": ["space.Power 0"]},
-    {"name": "power_off_hover_pwr", "camera": "cockpit", "hud": 1, "settle": 1.0, "console": ["space.InteractMode 1 0"]},
-    {"name": "booting", "camera": "cockpit", "hud": 1, "settle": 1.3, "console": ["space.InteractMode 0", "space.Power 1"]},
-    {"name": "power_on", "camera": "cockpit", "hud": 1, "settle": 3.0},
-    {"name": "power_on_hover_pwr", "camera": "cockpit", "hud": 1, "settle": 1.0, "console": ["space.InteractMode 1 2"]},
-    {"name": "power_off_chase", "camera": "chase", "hud": 1, "settle": 2.0, "console": ["space.InteractMode 0", "space.Power 0"]}
-  ]
+ "_comment": "SC cold start (step 2a, 4. 10. 2026): the cockpit powered off (dark glass, no HUD, key list with NAPÁJENÍ U), the PWR selector hovered in interact mode, the start-up screens mid-way (space.Power 1, PowerBootSeconds 2.5), powered on, and the PWR selector hovered while on (hotspot 2 after the two MFDs). Run: Tools/Shots.ps1 -Preset ship_power -Editor -Width 2560 -Height 1440",
+ "shots": [
+  {
+   "name": "flat",
+   "camera": "chase",
+   "altitude_m": 40.0,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "console": [
+    "space.FlatSpot 5 8"
+   ]
+  },
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3.2,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 10.0
+  },
+  {
+   "name": "power_off",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Power 0"
+   ]
+  },
+  {
+   "name": "power_off_hover_pwr",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.InteractMode 1 0"
+   ]
+  },
+  {
+   "name": "booting",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.3,
+   "console": [
+    "space.InteractMode 0",
+    "space.Power 1"
+   ]
+  },
+  {
+   "name": "power_on",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 3.0
+  },
+  {
+   "name": "power_on_hover_pwr",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.InteractMode 1 2"
+   ]
+  },
+  {
+   "name": "power_off_again",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.InteractMode 0",
+    "space.Power 0"
+   ]
+  },
+  {
+   "name": "holo_rising",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 0.25,
+   "console": [
+    "space.Power 1"
+   ]
+  },
+  {
+   "name": "power_off_chase",
+   "camera": "chase",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.InteractMode 0",
+    "space.Power 0"
+   ]
+  }
+ ]
 }

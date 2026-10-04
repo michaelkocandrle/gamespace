@@ -595,6 +595,15 @@ painted from the controller's `FSpaceInteractionView`), `SpaceNotifications`, th
 debug HUD stays only in HUD mode 3. Headless: `Tools/Tests/test_interaction.py`; shots:
 `Tools/Shots/interaction.json`.
 
+### Animations (author 5. 10. 2026: SC animates them; first ones)
+
+- **Sitting down / getting up**: no cut. The view glides between the standing eye and the seat
+  (`APlayerCharacter::SeatBlendSeconds` 0.8 s, `SetViewTargetWithBlend`, ease in-out); sitting, the character stays
+  hidden and without collision as the blend's start until it ends (`SetLifeSpan`).
+- **Holo projection deploys** at power on: over the first quarter of the start-up the MFD pictures grow up out of
+  their emitters (render scale with a bottom pivot, `USpaceCockpitDisplays::SetPower`); shot `ship_power/holo_rising`.
+- Still to do: the ramp and the doors opening, a body animation for sitting.
+
 ### Ship power (SC cold start, step 2a)
 
 `ASpaceshipPawn::GetPowerState()`: **Off**, **Booting** (`PowerBootSeconds` 2.5 s), **On**. `bStartPowered`

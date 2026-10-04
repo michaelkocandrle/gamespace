@@ -40,6 +40,9 @@ public:
 	/** A tap on F: sit down or step outside inside a ship, board one outside (ASpacePlayerController calls it). */
 	void Interact();
 
+	/** How long the view glides between the standing eye and the seat (SeatBlendSeconds). */
+	float GetSeatBlendSeconds() const { return SeatBlendSeconds; }
+
 	APlayerCharacter();
 
 	virtual void BeginPlay() override;
@@ -243,6 +246,11 @@ protected:
 	/** No boarding for this long after the character appeared (it spawns next to the ship). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "0.0", Units = "s"))
 	float BoardingCooldownSeconds = 0.75f;
+
+	/** Sitting down / getting up: the view moves between the standing eye and the seat this long (author 5. 10. 2026:
+	 * no cuts - SC animates it). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character|Ship")
+	float SeatBlendSeconds = 0.8f;
 
 	/** The capsule inside a ship (SetShipCapsule): 56 cm wide, 1.80 m tall - a person, not the mannequin's margin. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "10.0", Units = "cm"))
