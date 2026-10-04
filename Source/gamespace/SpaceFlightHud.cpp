@@ -2273,7 +2273,7 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 		GGauge->Marker = State.bGSafeActive ? State.GSafeMaxG / GMeterRangeG : -1.f;
 		GGauge->MarkerColor = Faded(Label, 0.8f);
 	}
-	SetText(TEXT("GText"), FString::Printf(TEXT("%.1f G"), State.GForce), GColor);
+	SetText(TEXT("GText"), FString::Printf(TEXT("%.1f"), State.GForce), GColor);
 	SetText(TEXT("GValue"), FString::Printf(TEXT("%.1f"), State.GForce), GColor == Instrument ? Label : GColor);
 	SetText(TEXT("GMax"), FString::Printf(TEXT("%.1f"), State.GSafeMaxG), State.bGSafeActive ? Faded(Label, 0.8f) : Faded(Label, 0.4f));
 
@@ -2709,7 +2709,7 @@ void USpaceCockpitDisplays::BuildTree()
 		UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), Name);
 		for (const TCHAR* LampName : LampNames)
 		{
-			Vertical(Column, Key(LampName, 104.f, 50.f, true), HAlign_Center, FMargin(0.f, 0.f, 0.f, 10.f));
+			Vertical(Column, Key(LampName, 116.f, 50.f, true), HAlign_Center, FMargin(0.f, 0.f, 0.f, 10.f));   // (116: BOOST in the wide SC face)
 		}
 		return Column;
 	};
@@ -2833,7 +2833,11 @@ void USpaceCockpitDisplays::BuildTree()
 	Horizontal(SpeedLine, Words(TEXT("SpeedValue"), TEXT("0"), 96.f), VAlign_Bottom, FMargin(0.f));
 	Horizontal(SpeedLine, Words(TEXT("SpeedUnit"), TEXT("m/s"), 22.f, Faded(MfdText, 0.6f)), VAlign_Bottom, FMargin(4.f, 0.f, 0.f, 18.f));
 	Vertical(Big, SpeedLine, HAlign_Left, FMargin(0.f, -12.f, 0.f, 0.f));
-	Vertical(Big, Words(TEXT("GText"), TEXT("0.0 G"), 56.f), HAlign_Left, FMargin(0.f, -6.f, 0.f, 0.f));
+	// the G like the speed: the figure and a small unit beside it (the wide SC face ran "0.6 G" into the bars)
+	UHorizontalBox* GLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightGLine"));
+	Horizontal(GLine, Words(TEXT("GText"), TEXT("0.0"), 56.f), VAlign_Bottom, FMargin(0.f));
+	Horizontal(GLine, Words(TEXT("GTextUnit"), TEXT("G"), 22.f, Faded(MfdText, 0.6f)), VAlign_Bottom, FMargin(4.f, 0.f, 0.f, 10.f));
+	Vertical(Big, GLine, HAlign_Left, FMargin(0.f, -6.f, 0.f, 0.f));
 	Horizontal(Readout, Big, VAlign_Top, FMargin(0.f), true);
 	auto Bar = [&](const TCHAR* Caption, const FName GaugeName, const FName ValueName)
 	{
@@ -3174,8 +3178,22 @@ void USpaceCockpitDisplays::BuildTree()
 	{
 		if (UTextBlock* Text = Cast<UTextBlock>(Widget))
 		{
-			// The type's glow: a wider, brighter cyan outline than the HUD's faint one (static, so TSR keeps it).
+			// SC's MFD type (author 5. 10. 2026: copy it - the menu's Oxanium read as the faithful one): the wide
+			// squarish face with rounded corners for labels and figures alike, instead of the condensed Rajdhani and the
+			// mono figures (the readability minimum of 26 px stays).
 			FSlateFontInfo Font = Text->GetFont();
+			static const FString Oxanium = FPaths::ProjectContentDir() / TEXT("UI/Fonts/Oxanium-Medium.ttf");
+			// (not on the centre column's small screens: 11 cm of glass hold two words only in the condensed face)
+			const FString TextName = Text->GetName();
+			if (FPaths::FileExists(Oxanium) && !TextName.StartsWith(TEXT("Radar")) && !TextName.StartsWith(TEXT("Ship")))
+			{
+				// (wider than the condensed face: 12 % smaller, down to the readability minimums - 26 px on the MFDs, 21 on
+				// the centre column's captions - and no extra tracking on the small type)
+				const float Floor = Font.Size >= 56.f ? Font.Size : Font.Size >= 26.f ? 26.f : FMath::Min(Font.Size, 21.f);   // the big figures keep their size
+				FSlateFontInfo Wide(Oxanium, FMath::Max(Font.Size * 0.88f, Floor));
+				Wide.LetterSpacing = Font.Size >= 26.f && Font.Size < 56.f ? Font.LetterSpacing / 3 : 0;   // big figures set tight
+				Font = Wide;
+			}
 			Font.OutlineSettings.OutlineSize = 2;
 			Font.OutlineSettings.OutlineColor = FLinearColor(0.15f, 0.7f, 1.f, 0.42f);
 			Text->SetFont(Font);
