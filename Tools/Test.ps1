@@ -116,7 +116,7 @@ try {
     $offline = @(Get-ChildItem (Join-Path $repo "Tools") -Recurse -Filter "test_*.py" |
         Where-Object { $_.Directory.Name -ceq "tests" }) +
         @("test_material_hlsl.py", "test_decal_orientation.py", "test_docs_limits.py", "test_exterior_drawing.py",
-          "test_interior_drawing.py", "test_heavy_lock.py", "test_build_dir.py", "test_triangle_budget.py", "test_kit_decals.py" |
+          "test_interior_drawing.py", "test_heavy_lock.py", "test_build_dir.py", "test_triangle_budget.py", "test_kit_decals.py", "test_cockpit_v2_design.py" |
           ForEach-Object { Get-Item (Join-Path $repo "Tools/Tests/$_") })
     foreach ($file in $offline) {
         Invoke-Python "offline" $file.Name @($file.FullName)

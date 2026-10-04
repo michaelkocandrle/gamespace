@@ -1,0 +1,45 @@
+{
+ "sheet": "C-01",
+ "elements": [
+  "CK-HP-L",
+  "CK-HP-R",
+  "CK-HP-C",
+  "CK-CF",
+  "CK-DS",
+  "CK-SC-L",
+  "CK-SC-R",
+  "CK-CB",
+  "CK-HT",
+  "CK-LT",
+  "CK-LB"
+ ],
+ "callouts": [
+  "CK-HP-L",
+  "CK-HP-R",
+  "CK-HP-C",
+  "CK-CF",
+  "CK-DS",
+  "CK-SC-L",
+  "CK-SC-R",
+  "CK-CB",
+  "CK-HT",
+  "CK-LT",
+  "CK-LB"
+ ],
+ "concepts": [
+  "1_layout_monitor.png",
+  "2_layout_industrial.png",
+  "3_holo_hightech.png",
+  "4_holo_industrial.png"
+ ],
+ "targets": [
+  "T-EDGE",
+  "T-LAYERS",
+  "T-SCREWS",
+  "T-LABELS",
+  "T-ROUGH",
+  "T-FRAME",
+  "T-HOLO",
+  "T-CONTROL"
+ ]
+}

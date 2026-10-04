@@ -48,10 +48,10 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Čeká na rozhodnutí autora
 
+- **Kokpit v2** (4. 10.): list C-01 `Design/Drawings/Wayfarer_C01_cockpit_v2.png`, data `Wayfarer_cockpit_v2.json`, koncepty
+  `Concept/Cockpit_v2/` (C high-tech / D průmyslový), 4 otázky na listu; po schválení materiály, geometrie, stavba.
 - Podpora života Wayfareru v2: posunutá k ose, z většiny pod lůžkem (list I-04, řez R1; po sloučení `import_kit.py`).
-- **Na kokpit z kitu** (mimo rozsah 3. 10.): ~40 štítků ovladačů kokpitu v datech, hustota světel kokpitu 3,9/m²
-  proti pravidlu 2–3, texty layoutu (ulička 1,25 vs 1,40; „0,35 m“), dveře DR-TEC-CAB do kajuty s odsazením 78–90 mm
-  a přesun položek na stěně.
+- K tomu z 3. 10.: ~40 štítků ovladačů, světla kokpitu 3,9/m² (pravidlo 2–3), texty layoutu, dveře DR-TEC-CAB 78–90 mm.
 - Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověření FAIL 7/6/6/7/7/8/8/7, levné body opravené).
 - Steadfast: schválení 2D návrhu v2 (`Steadfast_Design.md`); kanopa Wayfareru (téma v2), paleta Kestrel Dynamics.
 
@@ -75,6 +75,6 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 1. **Wayfarer revize G** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený.
 2. **Přistání na svahu hotové** (3. 10.), čeká na vyzkoušení autorem; později odpružení nohou, mírnější klesání u země.
 3. **Podle SC z autorova záznamu** (`OwnCapture_Gameplay_Notes.md`): menu, nastavení, klávesy, interakce hotové; další
-   pak visor pěšky, systémy lodi, stanice. **Přednost má vzhled** (autor 4. 10.: kokpit „plastový“, MFD jako PC): plán `Docs/Reviews/2026-10-04_cockpit_gap_analysis.md`; krok H (holo obsah MFD) hotový, kritik
-   FAIL 5,9 – hologram potřebuje geometrii (bez desky a rámu monitoru), další je 2D návrh kokpitu v2.
+   pak visor pěšky, systémy lodi, stanice. **Přednost má vzhled kokpitu** (`2026-10-04_cockpit_gap_analysis.md`; holo
+   obsah MFD hotový, kritik FAIL 5,9 – chce geometrii projektorů): čeká na schválení C-01, pak stavba.
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).
