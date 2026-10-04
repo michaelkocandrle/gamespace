@@ -653,6 +653,17 @@ soft gradient crossing the key. The critic still read it as a styled physical sc
 
 Design: `ArtSource/Ships/Wayfarer/Design/Wayfarer_cockpit_v2.json`, sheet C-01.
 
+The canopy's inner frame (CK-CF, `hs_canopy_frame.py`, recipe `interior.cockpit.inner_frame`, compared with SC
+5. 10. 2026) gives the cockpit SC's cage:
+
+- a graphite profile is swept inside along the glass's boundary edges in front of the pilot (`min_x`, `min_z`) and
+  along its creases (the top bow and the side struts, `crease_deg`);
+- it has a cream lip, a rubber seal and screws;
+- nothing upright stands within 15 degrees of the line of sight; a bow overhead may come down to 10 degrees above
+  it (`clear_up_deg`);
+- the ends that ran into the hull are trimmed (`crease_max_abs_y`, `back_inset_m`; GEOTEST penetrating);
+- each prism's normals are recalculated, because a reversed edge turned it inside out and one-sided it vanished.
+
 ## Ship art pipeline
 
 Since 24. 9. 2026 a ship's exterior is built exactly from its approved 2D drawing

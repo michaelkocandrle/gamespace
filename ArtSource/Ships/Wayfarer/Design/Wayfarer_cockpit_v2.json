@@ -4,7 +4,7 @@
  "status": "approved (author 4. 10. 2026: \"pokračuj\" = the recommended answers)",
  "base_shot": "C:/gamespace-shots/20261004_192117_ship_power/05_power_on.png",
  "eye": [
-  17.38,
+  16.95,
   0.0,
   2.45
  ],
@@ -245,7 +245,8 @@
    "callout_uv": [
     0.18,
     0.12
-   ]
+   ],
+   "state": "built 5. 10. 2026 (hs_canopy_frame.py, recipe interior.cockpit.inner_frame): profile along the glass edges in front of the pilot and along its creases (top bow, side struts); nothing upright within 15 deg of the line of sight, a bow overhead from 10 deg up"
   },
   {
    "id": "CK-DS",

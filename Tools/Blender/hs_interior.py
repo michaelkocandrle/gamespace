@@ -418,6 +418,10 @@ def dashboard(g, r, zr, z0, ship, screen_bm, sockets, eye):
         import hs_cockpit
         back = hs_cockpit.build_wrap(g, screen_bm, sockets, eye, COCKPIT, z0, lights_out)
         tbox(g, "int_dark", "kit_trim01", back[0], back[1], 0.8)      # footwell back wall, panel trim
+        if COCKPIT.get("inner_frame"):
+            # cockpit v2 CK-CF: the canopy's inner frame round the glass (hs_canopy_frame.py)
+            import hs_canopy_frame
+            print("HSINTERIOR canopy inner frame", hs_canopy_frame.build(g, ship, eye, COCKPIT["inner_frame"]))
         return
     if COCKPIT.get("style") == "pods":
         import hs_cockpit
