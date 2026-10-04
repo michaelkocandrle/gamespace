@@ -20,8 +20,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
   KLÁVESY jako klávesnice a myš SC (jen přehled; tabulka `FSpaceControls` hlídaná testem proti assetům).
 - **Interakce podle SC** (4. 10., krok 1 z autorova záznamu, kritik PASS 6,5): ťuknout F = výzva u předmětu, podržet F =
   režim interakce (kurzor, MFD klikací), seznam kláves vpravo dole, hlášení a tipy (`README` „Interaction“).
-- **Napájení lodi** (4. 10., krok 2a, kritik PASS 6,9): U nebo knoflík PWR (režim interakce); vypnuto = bez tahu, tmavý
-  kokpit a MFD, bez HUD; náběh 2,5 s s obrazovkou SYSTEM START; Alt+U = showroom (`README` „Ship power“).
+- **Napájení lodi** (4. 10., kroky 2a/2b, kritik PASS 6,9): U nebo knoflík PWR, vypnuto = bez tahu a tmavý kokpit, náběh
+  2,5 s; MFD CONFIGURATION s klikacími přepínači; vstávání za letu (loď zabrzdí); Alt+U = showroom (`README` „Ship power“).
 - **Postava:** první osoba (V pěšky = třetí jen pro testy); sférická gravitace planety i umělá v lodi.
 - **Wayfarer** (Halcyon Freightworks, malá multirole, 1 pilot) – jediná létající loď:
   - exteriér v2.1 přesně podle výkresu (`hs_build_ship`; ploutve 1,3 m potvrzené autorem, výška lodi 4,9 m), mesh
@@ -58,8 +58,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 ## Známé problémy
 
 - Podvozek, křídla a zbraně Wayfareru bez kitu; nohy bez odpružení (jeden mesh). Klesání (C) u země dopadá ~10 m/s.
-  Snímek 11 `wayfarer_exterior_review` staví loď do svahu 32° (trup v terénu), chce `space.FlatSpot`.
-- `DebugEngageQuantum` po zadání cíle jménem znovu vybírá cíl podle nosu lodi (drobnost, autor 1. 10.).
+  Snímek 11 `wayfarer_exterior_review` staví loď do svahu 32° (trup v terénu), chce `space.FlatSpot`. `DebugEngageQuantum`
+  po zadání cíle jménem znovu vybírá cíl podle nosu lodi (drobnost, autor 1. 10.).
 - Interiér Wayfareru: otevřené body recenzí `2026-09-30_cabin_furniture.md` a `2026-09-30_cabin_liner.md`.
 - **Odrazy kovu odložené na optimalizaci** (autor 30. 9.): odrazy Lumenu do drsnosti 0,32 za +1,3 ms.
 - Kit: vyšlapaná linie potřebuje směrovou buňku atlasu špíny, špína v kanálech dlouhou úzkou buňku (krok c); ohmatání
@@ -68,13 +68,13 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
   náhodné decaly už na pořadí stavby nezávisí (9.6 fl, test v `test_kit_decals.py`).
 - Hřebenový terén vypnutý (kamera po přistání pod zemí); kameny bez kolize; zvuky procedurální, jas oblohy odhad. Quantum tunel méně „mléčný“, TSR
   čáry podél jisker; displeje bez mipmap (pod ~1600 px písmo zrní), duchy čísel.
-- Neověřeno autorem: časování quantum skoku, HUD SC-1c mimo 1080p, chůze Steadfastem; Shipping build nezkoušen; v PIE
-  Escape ukončí hru (menu F10); debug HUD anglicky; `compileall` SyntaxWarning v šesti skriptech `Tools/Assets`.
+- Neověřeno autorem: quantum skok, HUD SC-1c mimo 1080p, chůze Steadfastem; Shipping nezkoušen; PIE Escape končí hru.
 
 ## Další kroky
 
 1. **Wayfarer revize G** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený.
 2. **Přistání na svahu hotové** (3. 10.), čeká na vyzkoušení autorem; později odpružení nohou, mírnější klesání u země.
 3. **Podle SC z autorova záznamu** (`OwnCapture_Gameplay_Notes.md`): menu, nastavení, klávesy, interakce hotové; další
-   2b. stránka CONFIGURATION a vstávání za letu, 3. visor pěšky, 4. systémy lodi, 5. stanice a hangár.
+   další 3. visor pěšky, 4. systémy lodi, 5. stanice a hangár. **Přednost má vzhled** (autor 4. 10.: kokpit „plastový“,
+   MFD jako palubní počítač): plán `Docs/Reviews/2026-10-04_cockpit_gap_analysis.md`, začít krokem H (holografické MFD).
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).

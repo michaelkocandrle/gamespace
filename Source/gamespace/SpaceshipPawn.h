@@ -188,6 +188,35 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Power")
 	bool TogglePower();
 
+	/**
+	 * A point on an MFD's glass in the world: Display 0 left, 1 right; UV 0..1 from the display's top left (the canvas'
+	 * layout). False for a ship without that display.
+	 */
+	bool GetDisplayPoint(int32 Display, const FVector2D& UV, FVector& OutLocation) const;
+
+	/** The page an MFD shows (0 left, 1 right); 0 without displays. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Displays")
+	int32 GetMfdPage(int32 Display) const;
+
+	/** The glass of the dashboard MFDs, cm (hs_cockpit: screen_w 0.32 m, 490 / 560 of it high). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Displays")
+	FVector2D MfdGlassSizeCm = FVector2D(32.0, 28.0);
+
+	/**
+	 * F in the seat while flying (SC: the pilot can get up in flight, the ship holds its position): the ship brakes
+	 * to a hold and the pilot stands up once it is still. F again cancels. True when that started.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Walk")
+	bool RequestLeaveSeatInFlight();
+
+	/** Braking to a hold for the pilot to get up (RequestLeaveSeatInFlight). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	bool IsLeaveSeatPending() const { return bLeaveSeatPending; }
+
+	/** Flying, powered, walkable: F would brake to a hold and stand the pilot up. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	bool CanLeaveSeatInFlight() const;
+
 	/** The dashboard's PWR selector in the world (left of the left MFD); false for a ship without that display. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Power")
 	bool GetPowerControlLocation(FVector& OutLocation) const;
@@ -2006,6 +2035,7 @@ private:
 	/** The cockpit lights follow the power (lit from the start-up on). */
 	void ApplyPowerLights();
 	ESpacePowerState PowerState = ESpacePowerState::On;
+	bool bLeaveSeatPending = false;
 	float PowerBootElapsed = 0.f;
 	void UpdateAfterburner(float DeltaSeconds);
 	void SetFreeLookHeld(bool bHeld);

@@ -608,6 +608,20 @@ the kit showroom now.
 - Console `space.Power 0|1 [instant]`. Headless: `Tools/Tests/test_ship_power.py`; shots:
   `Tools/Shots/ship_power.json`.
 
+### MFD CONFIGURATION and getting up in flight (step 2b)
+
+- The left MFD's fourth page **CONFIGURATION** (SC's flight switches): COUPLED MODE, G-SAFE, COMSTAB, PRECISION MODE,
+  VTOL, each a row with an ON / OFF switch. In interact mode each switch is a hotspot (`COUPLED MODE: VYPNOUT` ...)
+  while the page is up and the ship is powered; the points come from `USpaceCockpitDisplays::ConfigSwitchUV` mapped
+  onto the glass by `ASpaceshipPawn::GetDisplayPoint` (`MfdGlassSizeCm` 32 x 28). The MFDs' own hotspot (next page)
+  sits on the page tab at the bottom now.
+- The hover label is a hologram (no box: glowing cyan type, corner brackets, faint scan lines) and only the control
+  under the cursor is marked; settings `Rozhraní – popisky interakce` (`bShowInteractLabels`) hides the label.
+- **Getting up in flight** (SC: the ship holds its position): F in the seat while flying powered starts a hold
+  (`RequestLeaveSeatInFlight`: coupled on, the spacebrake held, the controls let go); once under 1 m/s the pilot
+  stands up. F again cancels. The key list says `VSTÁT (LOĎ ZASTAVÍ)` / `ZŮSTAT SEDĚT (LOĎ BRZDÍ)`.
+- Headless: `Tools/Tests/test_mfd_config.py`; shots: `Tools/Shots/mfd_config.json` (`space.MfdPage 3 0`).
+
 ## Ship art pipeline
 
 Since 24. 9. 2026 a ship's exterior is built exactly from its approved 2D drawing

@@ -25,6 +25,10 @@ struct FSpaceHotspot
 	TFunction<void(bool bPrimary)> Use;
 	/** What the right click does, if anything (shown under the label). */
 	FText SecondaryLabel;
+	/** Where the label goes instead of just above the control (a control on a display: over its frame, so the label
+	 * never covers the page). */
+	bool bLabelAnchor = false;
+	FVector LabelWorldLocation = FVector::ZeroVector;
 };
 
 /** One line of SC's context key list at the bottom right: "ACTION [key]". */

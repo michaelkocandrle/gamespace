@@ -1127,6 +1127,7 @@ TSharedRef<SWidget> SSpaceMenu::BuildTabRows(ESpaceSettingsTab Tab)
 			[](float V) { return FText::FromString(FString::Printf(TEXT("%.2f"), V)); }));
 		Add(MakeToggleRow(LOCTEXT("ShowFps", "Rozhraní – zobrazit FPS"), &Draft.bShowFps));
 		Add(MakeToggleRow(LOCTEXT("ShowHints", "Rozhraní – tipy"), &Draft.bShowHints));
+		Add(MakeToggleRow(LOCTEXT("ShowInteractLabels", "Rozhraní – popisky interakce"), &Draft.bShowInteractLabels));
 		break;
 
 	case ESpaceSettingsTab::Graphics:
@@ -1596,6 +1597,7 @@ void SSpaceMenu::LoadDraft()
 	Draft.bInvertFreeLook = Settings->bInvertFreeLookPitch;
 	Draft.bInvertWalk = Settings->bInvertWalkPitch;
 	Draft.bShowHints = Settings->bShowHints;
+	Draft.bShowInteractLabels = Settings->bShowInteractLabels;
 }
 
 void SSpaceMenu::SetGroupsFromPreset(int32 Preset)
@@ -1669,6 +1671,7 @@ void SSpaceMenu::Commit()
 	Settings->bInvertFreeLookPitch = Draft.bInvertFreeLook;
 	Settings->bInvertWalkPitch = Draft.bInvertWalk;
 	Settings->bShowHints = Draft.bShowHints;
+	Settings->bShowInteractLabels = Draft.bShowInteractLabels;
 
 	// Applies the video mode and scalability and saves GameUserSettings.ini.
 	Settings->ApplySettings(false);
@@ -1728,6 +1731,7 @@ void SSpaceMenu::ResetTab()
 		Draft.bFlightPathMarker = Defaults->bShowFlightPathMarker;
 		Draft.CameraShake = Defaults->CameraShakeScale;
 		Draft.bShowHints = Defaults->bShowHints;
+		Draft.bShowInteractLabels = Defaults->bShowInteractLabels;
 		break;
 	default:
 		break;

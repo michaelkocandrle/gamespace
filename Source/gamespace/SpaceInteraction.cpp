@@ -5,6 +5,7 @@
 #include "PlayerCharacter.h"
 #include "ShipQuantumComponent.h"
 #include "SpaceshipPawn.h"
+#include "SpaceFlightHud.h"
 
 #define LOCTEXT_NAMESPACE "SpaceInteraction"
 
@@ -12,6 +13,48 @@ namespace SpaceInteractionLocal
 {
 	/** Interact mode reaches hotspots this far from the eye on foot (SC: within arm's reach of a panel, a little more). */
 	constexpr double ReachOnFootCm = 600.0;
+
+	/** The left MFD's CONFIGURATION page, while it is up: each row's switch. */
+	void AddConfig(ASpaceshipPawn* Ship, TArray<FSpaceHotspot>& Out)
+	{
+		if (Ship->GetPowerState() != ESpacePowerState::On || Ship->GetMfdPage(0) != USpaceCockpitDisplays::ConfigPage)
+		{
+			return;
+		}
+		const TWeakObjectPtr<ASpaceshipPawn> Weak(Ship);
+		const bool bOn[] = { Ship->IsFlightAssistOn(), Ship->IsGSafeOn(), Ship->IsComStabOn(), Ship->IsPrecisionModeOn(), Ship->IsVtolOn() };
+		for (int32 Row = 0; Row < USpaceCockpitDisplays::ConfigRowNames().Num() && Row < UE_ARRAY_COUNT(bOn); ++Row)
+		{
+			FVector At;
+			if (!Ship->GetDisplayPoint(0, USpaceCockpitDisplays::ConfigSwitchUV(Row), At))
+			{
+				return;
+			}
+			FSpaceHotspot Spot;
+			Spot.Label = FText::Format(bOn[Row] ? LOCTEXT("CfgOff", "{0}: VYPNOUT") : LOCTEXT("CfgOn", "{0}: ZAPNOUT"),
+				FText::FromString(USpaceCockpitDisplays::ConfigRowNames()[Row]));
+			Spot.WorldLocation = At;
+			// The label over the display's top frame, above this switch: never over the page (critic 4. 10.).
+			Spot.bLabelAnchor = Ship->GetDisplayPoint(0, FVector2D(USpaceCockpitDisplays::ConfigSwitchUV(Row).X - 0.25, -0.07), Spot.LabelWorldLocation);
+			Spot.Use = [Weak, Row](bool bPrimary)
+			{
+				ASpaceshipPawn* Live = Weak.Get();
+				if (!Live || !bPrimary)
+				{
+					return;
+				}
+				switch (Row)
+				{
+				case 0: Live->SetFlightAssist(!Live->IsFlightAssistOn()); break;
+				case 1: Live->SetGSafe(!Live->IsGSafeOn()); break;
+				case 2: Live->SetComStab(!Live->IsComStabOn()); break;
+				case 3: Live->TogglePrecisionMode(); break;
+				default: Live->ToggleVtol(); break;
+				}
+			};
+			Out.Add(MoveTemp(Spot));
+		}
+	}
 
 	/** The dashboard's PWR selector (SC: the lit POWER key you click in interact mode). */
 	void AddPower(ASpaceshipPawn* Ship, TArray<FSpaceHotspot>& Out)
@@ -43,12 +86,12 @@ namespace SpaceInteractionLocal
 			return;
 		}
 		const TWeakObjectPtr<ASpaceshipPawn> Weak(Ship);
-		const TCHAR* Sockets[] = { TEXT("Display_left"), TEXT("Display_right") };
 		const FText Labels[] = { LOCTEXT("MfdLeft", "LEVÉ MFD – DALŠÍ STRÁNKA"), LOCTEXT("MfdRight", "PRAVÉ MFD – DALŠÍ STRÁNKA") };
 		for (int32 Display = 0; Display < 2; ++Display)
 		{
+			// On the page tab at the bottom (SC pages with the arrows there): the page itself has its own controls.
 			FVector At;
-			if (!Ship->GetHullSocketLocation(Sockets[Display], At))
+			if (!Ship->GetDisplayPoint(Display, FVector2D(0.5, 0.94), At))
 			{
 				continue;
 			}
@@ -79,6 +122,7 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 	{
 		AddMfds(Ship, OutHotspots);
 		AddPower(Ship, OutHotspots);
+		AddConfig(Ship, OutHotspots);
 		// Getting up is on the key list (SC); the seat itself is under the pilot's view.
 		return;
 	}
@@ -126,6 +170,7 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 			OutHotspots.Add(MoveTemp(Spot));
 			AddMfds(Inside, OutHotspots);
 			AddPower(Inside, OutHotspots);
+			AddConfig(Inside, OutHotspots);
 		}
 		if (bRamp && FVector::Dist(Ramp, At) < ReachOnFootCm && Inside->IsLanded())
 		{
@@ -175,9 +220,17 @@ void SpaceInteraction::KeyHints(APawn* Pawn, bool bInteractMode, const FSpaceInt
 	{
 		// SC's list starts with POWER (TOGGLE) [U]; without power only the seat, interact mode and the camera.
 		Add(LOCTEXT("HintPower", "NAPÁJENÍ (ZAP/VYP)"), TEXT("U"));
-		if (Ship->CanLeaveSeat())
+		if (Ship->IsLeaveSeatPending())
+		{
+			Add(LOCTEXT("HintGetUpCancel", "ZŮSTAT SEDĚT (LOĎ BRZDÍ)"), TEXT("F"));
+		}
+		else if (Ship->CanLeaveSeat())
 		{
 			Add(LOCTEXT("HintGetUp", "VSTÁT"), TEXT("F"));
+		}
+		else if (Ship->CanLeaveSeatInFlight())
+		{
+			Add(LOCTEXT("HintGetUpFlight", "VSTÁT (LOĎ ZASTAVÍ)"), TEXT("F"));
 		}
 		else if (Ship->CanExit())
 		{

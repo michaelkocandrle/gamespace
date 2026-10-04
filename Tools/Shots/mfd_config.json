@@ -1,0 +1,72 @@
+{
+ "_comment": "Step 2b (4. 10. 2026): the left MFD's CONFIGURATION page (space.MfdPage 3 0) and interact mode hovering its switches. Seated hotspots: 0 left MFD page tab, 1 right MFD page tab, 2 PWR, 3.. CONFIGURATION rows. Run: Tools/Shots.ps1 -Preset mfd_config -Editor -Width 2560 -Height 1440",
+ "shots": [
+  {
+   "name": "flat",
+   "camera": "chase",
+   "altitude_m": 40.0,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "console": [
+    "space.FlatSpot 5 8"
+   ]
+  },
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3.2,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 10.0
+  },
+  {
+   "name": "config_page",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.5,
+   "console": [
+    "space.MfdPage 3 0"
+   ]
+  },
+  {
+   "name": "config_hover_coupled",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.InteractMode 1 3"
+   ]
+  },
+  {
+   "name": "config_hover_comstab",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.InteractMode 1 5"
+   ]
+  },
+  {
+   "name": "config_hover_tab",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.InteractMode 1 0"
+   ]
+  },
+  {
+   "name": "config_zoom",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.InteractMode 0",
+    "space.DashboardFocus 1"
+   ]
+  }
+ ]
+}

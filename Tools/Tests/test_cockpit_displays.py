@@ -86,7 +86,7 @@ check("pages switch, title and page tab follow", displays.debug_get_page(0) == 1
       and displays.debug_get_text("FlightTitle") == "THRUSTERS" and displays.debug_get_text("FlightPage") == "THRUSTERS"
       and displays.debug_get_text("StatusTitle") == "SELF STATUS", "%d %d %r %r" % (displays.debug_get_page(0), displays.debug_get_page(1),
                                                                              displays.debug_get_text("FlightTitle"), displays.debug_get_text("StatusTitle")))
-displays.set_pages(3, -1)
+displays.set_pages(4, -1)   # the left MFD has four pages (CONFIGURATION, 4. 10. 2026), the right three
 check("pages wrap round both ways", displays.debug_get_page(0) == 0 and displays.debug_get_page(1) == 2)
 displays.set_pages(0, 0)
 check("thrust bars are block bars along the row", displays.debug_get_gauge("ThrustGauge_MAIN").get_editor_property("horizontal")
@@ -147,7 +147,7 @@ try:
     component.cycle_page(0, -1)
     component.cycle_page(0, -1)
     component.set_page(1, 5)
-    check("the display component pages: [ forward, Alt+[ back, wrapping", first == 1 and component.get_page(0) == 2 and component.get_page(1) == 2,
+    check("the display component pages: [ forward, Alt+[ back, wrapping", first == 1 and component.get_page(0) == 3 and component.get_page(1) == 2,
           "%d %d %d" % (first, component.get_page(0), component.get_page(1)))
     component.set_page(0, 0)
     component.set_page(1, 0)

@@ -44,7 +44,7 @@ namespace
 	/** space.MfdPage <left> <right>: the MFDs' pages of the ship flown here (shots, testing). */
 	FAutoConsoleCommandWithWorldAndArgs MfdPageCommand(
 		TEXT("space.MfdPage"),
-		TEXT("space.MfdPage <left 0-2> <right 0-2>: FLIGHT / THRUSTERS / NAVIGATION on the left, STATUS / CONTACTS / SELF STATUS on the right."),
+		TEXT("space.MfdPage <left 0-3> <right 0-2>: FLIGHT / THRUSTERS / NAVIGATION / CONFIGURATION on the left, STATUS / CONTACTS / SELF STATUS on the right."),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
 		{
 			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
@@ -199,7 +199,7 @@ void UCockpitDisplayComponent::SetPage(int32 Display, int32 Page)
 	{
 		return;
 	}
-	const int32 Count = USpaceCockpitDisplays::PageCount;
+	const int32 Count = USpaceCockpitDisplays::PageCount(Display);
 	Pages[Display] = ((Page % Count) + Count) % Count;
 	// Fill the new page's figures on the next draw rather than up to 200 ms later.
 	SinceState = 1.f / FMath::Max(StateRateHz, 1.f);

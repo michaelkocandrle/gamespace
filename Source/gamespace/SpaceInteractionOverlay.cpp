@@ -10,6 +10,7 @@
 #include "Rendering/SlateRenderer.h"
 #include "SpaceNotifications.h"
 #include "SpacePlayerController.h"
+#include "SpaceUserSettings.h"
 #include "Styling/CoreStyle.h"
 
 namespace SpaceOverlayStyle
@@ -235,22 +236,40 @@ int32 SSpaceInteractionOverlay::OnPaint(const FPaintArgs&, const FGeometry& Geom
 			{
 				Fill(Out, Layer, Geometry, Ring(At, 8.f, 20), Cyan * FLinearColor(1, 1, 1, 0.3f));
 				Glow(Ring(At, 8.f), Cyan, 1.8f, Layer + 1, 0.8f);
-				// SC: one short line just above the hovered control (back is on the key list). A slim glass backing,
-				// since the label sits over a busy display.
+				// SC: one short line just above the hovered control (back is on the key list). Settings can hide it.
+				const USpaceUserSettings* Settings = USpaceUserSettings::Get();
+				if (Settings && !Settings->bShowInteractLabels)
+				{
+					continue;
+				}
+				// A hologram, not a sticker (author 4. 10.): no box - glowing cyan type, corner brackets and faint scan
+				// lines, the light of the projection rather than a panel.
 				const FString Label = View.Hotspots[Index].Label.ToString();
 				const FSlateFontInfo Info = Font(true, 15.f);
 				const FVector2f TextSize = Measure(Label, Info);
-				const float BackY = At.Y - 64.f - TextSize.Y - 6.f;
-				const TArray<FVector2f> Back = RoundedBox(At.X - TextSize.X * 0.5f - 8.f, BackY, TextSize.X + 16.f, TextSize.Y + 6.f, 4.f);
-				Fill(Out, Layer + 1, Geometry, Back, Srgb(5, 15, 20, 0.45f));
-				Write(Label, { At.X - TextSize.X * 0.5f, BackY + 3.f }, Info, Title, Layer + 2, false);
-				// A thin leader from the label down to the ring.
-				Lines({ { At.X, BackY + TextSize.Y + 6.f }, { At.X, At.Y - 10.f } }, Cyan * FLinearColor(1, 1, 1, 0.6f), 1.f, Layer + 2);
+				const bool bAnchored = View.Hotspots[Index].bLabelAnchor && View.HotspotLabelScreen.IsValidIndex(Index);
+				const FVector2f LabelAt = bAnchored ? ToLocal(View.HotspotLabelScreen[Index]) : At;
+				const FVector2f TextAt(LabelAt.X - TextSize.X * 0.5f, bAnchored ? LabelAt.Y - TextSize.Y * 0.5f : At.Y - 30.f - TextSize.Y);
+				const float L = TextAt.X - 10.f, R = TextAt.X + TextSize.X + 10.f, T = TextAt.Y - 4.f, B = TextAt.Y + TextSize.Y + 4.f;
+				Fill(Out, Layer, Geometry, BoxPoints(L, T, R - L, B - T), Srgb(20, 90, 120, 0.12f));
+				for (float Y = T + 2.f; Y < B; Y += 3.f)
+				{
+					Lines({ { L, Y }, { R, Y } }, Cyan * FLinearColor(1, 1, 1, 0.06f), 1.f, Layer + 1);
+				}
+				const float C = 7.f;
+				for (const FVector2f& Corner : { FVector2f(L, T), FVector2f(R, T), FVector2f(R, B), FVector2f(L, B) })
+				{
+					const float SX = Corner.X < LabelAt.X ? 1.f : -1.f, SY = Corner.Y < TextAt.Y ? 1.f : -1.f;
+					Glow({ Corner + FVector2f(SX * C, 0.f), Corner, Corner + FVector2f(0.f, SY * C) }, Cyan, 1.4f, Layer + 1, 0.7f);
+				}
+				// The type's glow: soft copies around it, then the type itself.
+				for (const FVector2f& Offset : { FVector2f(-1.5f, 0.f), FVector2f(1.5f, 0.f), FVector2f(0.f, -1.5f), FVector2f(0.f, 1.5f) })
+				{
+					Write(Label, TextAt + Offset, Info, Cyan * FLinearColor(1, 1, 1, 0.22f), Layer + 2, false);
+				}
+				Write(Label, TextAt, Info, Title, Layer + 3, false);
 			}
-			else
-			{
-				Lines(Ring(At, 6.f), CyanDim, 1.6f, Layer + 1);
-			}
+			// (the others: nothing - SC marks only the control under the cursor)
 		}
 	}
 

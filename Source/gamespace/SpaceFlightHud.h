@@ -943,6 +943,12 @@ public:
 	static constexpr float CanvasWidth = 2.f * DisplayWidth + CentreWidth;
 	static constexpr float CanvasHeight = DisplayHeight;
 
+	/** CONFIGURATION's layout (ConfigSwitchUV): row height, the switch's width, where the rows start on the display. */
+	static constexpr float ConfigRowHeight = 46.f;
+	static constexpr float ConfigSwitchWidth = 104.f;
+	static constexpr float ConfigScreenPadding = 20.f;
+	static constexpr float ConfigRowsTop = 104.f;
+
 	/**
 	 * A screen's rectangle on the canvas, by the name of its socket (Display_<name>): left, right,
 	 * centre_top, centre_bottom. Empty for an unknown name.
@@ -985,12 +991,23 @@ public:
 	 * NAVIGATION; right (1): STATUS, CONTACTS, SELF STATUS - only what the game has data for (no weapons,
 	 * shields, power or cooling pages until those systems exist).
 	 */
-	static constexpr int32 PageCount = 3;
+	static int32 PageCount(int32 Display) { return PageTitles(Display).Num(); }
 
 	/** The page titles of a display (0 left, 1 right). */
 	static const TArray<FString>& PageTitles(int32 Display);
 
-	/** Shows these pages (wrapped into 0..PageCount-1); the title and the page tab follow. */
+	/** The left display's CONFIGURATION page (SC's flight switches) and its rows, in the order of ConfigRowNames. */
+	static constexpr int32 ConfigPage = 3;
+	static const TArray<FString>& ConfigRowNames();
+
+	/**
+	 * Where a CONFIGURATION row's switch is on the left display, as a fraction of the display (0..1 from its top
+	 * left): what interact mode clicks.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
+	static FVector2D ConfigSwitchUV(int32 Row);
+
+	/** Shows these pages (wrapped into each display's count); the title and the page tab follow. */
 	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
 	void SetPages(int32 LeftPage, int32 RightPage);
 

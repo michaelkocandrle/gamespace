@@ -19,6 +19,8 @@ struct FSpaceInteractionView
 	TArray<FSpaceHotspot> Hotspots;
 	TArray<FVector2D> HotspotScreen;
 	TArray<bool> HotspotOnScreen;
+	/** Each hotspot's label anchor on screen (its own point when it has none). */
+	TArray<FVector2D> HotspotLabelScreen;
 	int32 Hovered = INDEX_NONE;
 	TArray<FSpaceKeyHint> Keys;
 };

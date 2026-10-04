@@ -575,10 +575,56 @@ void ASpaceshipPawn::SetFreeLookHeld(bool bHeld)
 
 void ASpaceshipPawn::Interact()
 {
-	if (!LeaveSeat())
+	if (bLeaveSeatPending)
+	{
+		// F again: stay in the seat.
+		bLeaveSeatPending = false;
+		bSpaceBrakeHeld = false;
+		return;
+	}
+	if (!LeaveSeat() && !RequestLeaveSeatInFlight())
 	{
 		ExitShip();
 	}
+}
+
+bool ASpaceshipPawn::CanLeaveSeatInFlight() const
+{
+	return HasWalkInterior() && PilotCharacterClass != nullptr && IsPowered() && !IsLanded()
+		&& Quantum->GetState() != EQuantumState::Traveling && !CanLeaveSeat();
+}
+
+bool ASpaceshipPawn::RequestLeaveSeatInFlight()
+{
+	if (!CanLeaveSeatInFlight())
+	{
+		return false;
+	}
+	bLeaveSeatPending = true;
+	// Coupled holds the ship still once the pilot is up (decoupled it would drift or fall).
+	SetFlightAssist(true);
+	UE_LOG(LogSpaceship, Log, TEXT("%s: braking to a hold for the pilot to get up"), *GetName());
+	return true;
+}
+
+int32 ASpaceshipPawn::GetMfdPage(int32 Display) const
+{
+	return CockpitDisplays ? CockpitDisplays->GetPage(Display) : 0;
+}
+
+bool ASpaceshipPawn::GetDisplayPoint(int32 Display, const FVector2D& UV, FVector& OutLocation) const
+{
+	FVector Screen;
+	if (!GetHullSocketLocation(Display == 0 ? TEXT("Display_left") : TEXT("Display_right"), Screen))
+	{
+		return false;
+	}
+	// The glass faces the eye (hs_cockpit.oriented); its centre is ~1 cm behind the socket.
+	const FVector Normal = (GetPilotEyeLocation() - Screen).GetSafeNormal();
+	const FVector Right = (Normal ^ GetActorUpVector()).GetSafeNormal();
+	const FVector PanelUp = (Right ^ Normal).GetSafeNormal();
+	OutLocation = Screen - Normal * 1.0 + Right * ((UV.X - 0.5) * MfdGlassSizeCm.X) + PanelUp * ((0.5 - UV.Y) * MfdGlassSizeCm.Y);
+	return true;
 }
 
 void ASpaceshipPawn::CycleMfdPage(int32 Display, int32 Direction)
@@ -868,6 +914,13 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 	{
 		CameraBoom->bEnableCameraLag = true;
 	}
+	// Still enough: up from the seat (once; without a player to stand up the request just ends).
+	if (bLeaveSeatPending && CanLeaveSeat())
+	{
+		bLeaveSeatPending = false;
+		bSpaceBrakeHeld = false;
+		LeaveSeat();
+	}
 }
 
 void ASpaceshipPawn::StepFlight(float DeltaSeconds)
@@ -890,6 +943,20 @@ void ASpaceshipPawn::StepFlight(float DeltaSeconds)
 	UpdateQuantum(DeltaSeconds);
 	// Before steering: while held it takes the mouse movement for itself.
 	UpdateFreeLook(DeltaSeconds);
+	if (bLeaveSeatPending && (!CanLeaveSeatInFlight() && !CanLeaveSeat()))
+	{
+		bLeaveSeatPending = false;
+		bSpaceBrakeHeld = false;
+	}
+	if (bLeaveSeatPending)
+	{
+		// Braking to a hold: the pilot has let go of the controls.
+		ThrustInput = StrafeInput = LiftInput = RollInput = 0.f;
+		LookInput = FVector2D::ZeroVector;
+		MouseLookDelta = FVector2D::ZeroVector;
+		MouseStick = FVector2D::ZeroVector;
+		bSpaceBrakeHeld = true;
+	}
 	if (!IsPowered())
 	{
 		// The keys and the stick move nothing; free look above still turns the pilot's head.

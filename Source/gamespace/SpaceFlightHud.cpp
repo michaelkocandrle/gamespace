@@ -2125,6 +2125,18 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 	SetLamp(TEXT("PREC"), State.bPrecisionOn, State.bPrecisionActive ? Instrument : Amber);
 	// Amber while switched on but not in effect, the same rule as G-Safe and precision mode.
 	SetLamp(TEXT("VTOL"), State.bVtolOn, State.bVtolActive ? Instrument : Amber);
+	// CONFIGURATION's switches (only on the displays): lit ON, dark OFF.
+	const bool ConfigOn[] = { State.bCoupled, State.bGSafeOn, State.bComStab, State.bPrecisionOn, State.bVtolOn };
+	for (int32 Index = 0; Index < UE_ARRAY_COUNT(ConfigOn); ++Index)
+	{
+		const FName Lamp(*FString::Printf(TEXT("Cfg%d"), Index));
+		if (UTextBlock* SwitchLabel = LampLabels.FindRef(Lamp))
+		{
+			SwitchLabel->SetText(FText::FromString(ConfigOn[Index] ? TEXT("ON") : TEXT("OFF")));
+			SwitchLabel->SetColorAndOpacity(FSlateColor(ConfigOn[Index] ? Label : Faded(Amber, 0.85f)));
+		}
+		SetLamp(Lamp, true, ConfigOn[Index] ? Instrument : Faded(Amber, 0.45f));
+	}
 
 	// The flight path marker (SC-3): where the ship is going, not where the nose points.
 	Show(TEXT("Velocity"), State.bVelocityVisible);
@@ -2852,7 +2864,56 @@ void USpaceCockpitDisplays::BuildTree()
 		ListRow(NavPage, TEXT("Nav"), Index);
 	}
 	Vertical(NavPage, Words(TEXT("NavEmpty"), TEXT("NO BODY NEAR"), 28.f, Faded(MfdText, 0.5f)), HAlign_Left, FMargin(0.f, 6.f));
-	Screen(TEXT("Flight"), ScreenRect(TEXT("left")), { Flight, ThrustPage, NavPage });
+	// --- Left display, page 4: CONFIGURATION - SC's flight switches as rows with a switch, clicked in interact mode
+	// (the author's capture 4. 10. 2026: ENABLE COUPLED MODE ... with pill switches). Only switches the ship has.
+	UVerticalBox* ConfigPageBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ConfigPage"));
+	Vertical(ConfigPageBox, Words(TEXT("ConfigHeader"), TEXT("FLIGHT"), 26.f, MfdText), HAlign_Left, FMargin(0.f, 0.f, 0.f, 0.f));
+	Vertical(ConfigPageBox, Rule(TEXT("ConfigHeaderRule"), 0.f, 0.4f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 0.f));
+	for (int32 Index = 0; Index < ConfigRowNames().Num(); ++Index)
+	{
+		const FString Lamp = FString::Printf(TEXT("Cfg%d"), Index);
+		// One fixed box per row with the bar, the label and the switch laid over it (in a horizontal box the label's
+		// tall line box set its own row pitch and the switches drifted off their rows - critic 4. 10.).
+		UOverlay* ConfigRow = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("ConfigRow%d"), Index)));
+		// A faint lane under every other row, across the whole width: from the seat the panel is seen at an angle
+		// and the rule lines alone did not tie a switch to its label (critic 4. 10.).
+		// (a line as thick as the row is the band)
+		USpaceHudSymbol* Lane = Symbol(FName(*FString::Printf(TEXT("ConfigLane%d"), Index)), ESpaceHudSymbol::Line, Faded(MfdBlue, Index % 2 == 0 ? 0.22f : 0.f));
+		Lane->Thickness = ConfigRowHeight - 4.f;
+		Lane->Points = { FVector2D(0.0, 0.5), FVector2D(1.0, 0.5) };
+		if (UOverlaySlot* LaneSlot = ConfigRow->AddChildToOverlay(Lane))
+		{
+			LaneSlot->SetHorizontalAlignment(HAlign_Fill);
+			LaneSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		USpaceHudSymbol* Tick = Symbol(FName(*FString::Printf(TEXT("ConfigTick%d"), Index)), ESpaceHudSymbol::Line, Faded(FLinearColor(1.f, 0.55f, 0.12f), 0.9f));
+		Tick->Thickness = 4.f;
+		Tick->Points = { FVector2D(0.5, 0.0), FVector2D(0.5, 1.0) };
+		if (UOverlaySlot* TickSlot = ConfigRow->AddChildToOverlay(Sized(FName(*FString::Printf(TEXT("ConfigTickBox%d"), Index)), Tick, 6.f, 26.f)))
+		{
+			TickSlot->SetHorizontalAlignment(HAlign_Left);
+			TickSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		// (the caps sit low in their line box, which keeps room for accents above: lifted onto the row's axis)
+		if (UOverlaySlot* LabelSlot = ConfigRow->AddChildToOverlay(Words(FName(*FString::Printf(TEXT("ConfigLabel%d"), Index)), *ConfigRowNames()[Index], 28.f)))
+		{
+			LabelSlot->SetHorizontalAlignment(HAlign_Left);
+			LabelSlot->SetVerticalAlignment(VAlign_Center);
+			LabelSlot->SetPadding(FMargin(18.f, 0.f, 0.f, 6.f));
+		}
+		if (UOverlaySlot* SwitchSlot = ConfigRow->AddChildToOverlay(Key(*Lamp, ConfigSwitchWidth, 40.f, true)))
+		{
+			SwitchSlot->SetHorizontalAlignment(HAlign_Right);
+			SwitchSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		Vertical(ConfigPageBox, Sized(FName(*FString::Printf(TEXT("ConfigRowBox%d"), Index)), ConfigRow, 0.f, ConfigRowHeight), HAlign_Fill, FMargin(0.f));
+		Vertical(ConfigPageBox, Rule(FName(*FString::Printf(TEXT("ConfigRule%d"), Index)), 0.f, 0.6f), HAlign_Fill, FMargin(0.f));
+		if (USpaceHudSymbol* RowRule = Cast<USpaceHudSymbol>(Parts.FindRef(FName(*FString::Printf(TEXT("ConfigRule%d"), Index)))))
+		{
+			RowRule->Thickness = 3.f;
+		}
+	}
+	Screen(TEXT("Flight"), ScreenRect(TEXT("left")), { Flight, ThrustPage, NavPage, ConfigPageBox });
 
 	// --- Right display, STATUS: a list like the contacts page (the MODE / GEAR / QUANTUM keys repeated it) ----
 	UHorizontalBox* Status = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("StatusContent"));
@@ -3266,9 +3327,24 @@ void USpaceCockpitDisplays::SetShip(const AActor* Ship)
 
 const TArray<FString>& USpaceCockpitDisplays::PageTitles(int32 Display)
 {
-	static const TArray<FString> Left = { TEXT("FLIGHT"), TEXT("THRUSTERS"), TEXT("NAVIGATION") };
+	static const TArray<FString> Left = { TEXT("FLIGHT"), TEXT("THRUSTERS"), TEXT("NAVIGATION"), TEXT("CONFIGURATION") };
 	static const TArray<FString> Right = { TEXT("STATUS"), TEXT("CONTACTS"), TEXT("SELF STATUS") };
 	return Display == 0 ? Left : Right;
+}
+
+const TArray<FString>& USpaceCockpitDisplays::ConfigRowNames()
+{
+	// In the order of the switches in ApplyState and the hotspots in SpaceInteraction.
+	static const TArray<FString> Names = { TEXT("COUPLED MODE"), TEXT("G-SAFE"), TEXT("COMSTAB"), TEXT("PRECISION MODE"), TEXT("VTOL") };
+	return Names;
+}
+
+FVector2D USpaceCockpitDisplays::ConfigSwitchUV(int32 Row)
+{
+	// The page's layout: the screen's padding, title, rule, the FLIGHT header, then rows of ConfigRowHeight + a rule.
+	const float X = DisplayWidth - ConfigScreenPadding - ConfigSwitchWidth * 0.5f;
+	const float Y = ConfigRowsTop + (float(Row) + 0.5f) * (ConfigRowHeight + 4.f);  // + the 4 px box of each row's rule
+	return FVector2D(X / DisplayWidth, Y / DisplayHeight);
 }
 
 void USpaceCockpitDisplays::SetPages(int32 LeftPage, int32 RightPage)
@@ -3277,7 +3353,8 @@ void USpaceCockpitDisplays::SetPages(int32 LeftPage, int32 RightPage)
 	const int32 Wanted[] = { LeftPage, RightPage };
 	for (int32 Display = 0; Display < 2 && Display < PageSwitchers.Num(); ++Display)
 	{
-		const int32 Page = ((Wanted[Display] % PageCount) + PageCount) % PageCount;
+		const int32 Count = PageCount(Display);
+		const int32 Page = ((Wanted[Display] % Count) + Count) % Count;
 		if (!PageSwitchers[Display] || PageSwitchers[Display]->GetActiveWidgetIndex() == Page)
 		{
 			continue;

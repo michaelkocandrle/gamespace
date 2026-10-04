@@ -319,12 +319,22 @@ void ASpacePlayerController::TickInteraction()
 	View.bTargetOnScreen = View.Target.bValid && OnScreen(View.Target.WorldLocation, View.TargetScreen);
 	View.HotspotScreen.SetNum(View.Hotspots.Num());
 	View.HotspotOnScreen.SetNum(View.Hotspots.Num());
+	View.HotspotLabelScreen.SetNum(View.Hotspots.Num());
 	float MouseX = 0.f, MouseY = 0.f;
 	const bool bMouse = bInteractMode && GetMousePosition(MouseX, MouseY);
 	double Best = HoverPixels;
 	for (int32 Index = 0; Index < View.Hotspots.Num(); ++Index)
 	{
 		View.HotspotOnScreen[Index] = OnScreen(View.Hotspots[Index].WorldLocation, View.HotspotScreen[Index]);
+		View.HotspotLabelScreen[Index] = View.HotspotScreen[Index];
+		if (View.Hotspots[Index].bLabelAnchor)
+		{
+			FVector2D Anchor;
+			if (OnScreen(View.Hotspots[Index].LabelWorldLocation, Anchor))
+			{
+				View.HotspotLabelScreen[Index] = Anchor;
+			}
+		}
 		if (bMouse && View.HotspotOnScreen[Index])
 		{
 			const double Distance = FVector2D::Distance(View.HotspotScreen[Index], FVector2D(MouseX, MouseY));

@@ -158,6 +158,10 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	bool bShowHints = true;
 
+	/** Game: the label over the control under the cursor in interact mode (author 4. 10. 2026: may be hidden). */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	bool bShowInteractLabels = true;
+
 	/** Controls: free look (hold Alt / C) pitch inverted. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	bool bInvertFreeLookPitch = false;

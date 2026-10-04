@@ -70,6 +70,7 @@ void USpaceUserSettings::SetGameDefaults()
 	bInvertFreeLookPitch = false;
 	bInvertWalkPitch = false;
 	bShowHints = true;
+	bShowInteractLabels = true;
 }
 
 void USpaceUserSettings::LoadSettings(bool bForceReload)
