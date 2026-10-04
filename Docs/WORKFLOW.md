@@ -1281,6 +1281,12 @@ snímku.
   jako modul (`python -m yt_dlp`, skript ho tak volá). Nainstalováno `winget install Gyan.FFmpeg`; aliasy ve
   `WinGet\Links` Git Bash nenajde, přidej na PATH složku `...\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-*\bin`.
   Snímky z cizího videa nejdou do gitu ani ve srovnávacích listech kritika (`.gitignore` u recenze).
+- fv) **Hra spadla na `Assertion failed: Addr < GetData() || Addr >= ...` (Array.h)** (4. 10. 2026, menu). `Line.Add(Line[0])`
+  předá referenci do vlastního pole; když `Add` pole zvětší, reference míří do uvolněné paměti. Prvek si nejdřív zkopíruj.
+- fw) **Nastavení „Ostření“ nemělo vliv** (4. 10. 2026). `r.Tonemapper.Sharpen` byl v `[SystemSettings]` v
+  `DefaultEngine.ini`; ta priorita přebíjí `ECVF_SetByGameSetting`. Co má ovládat menu, nesmí být v ini.
+- fx) **VÝCHOZÍ v menu vracelo hráčovy uložené hodnoty** (4. 10. 2026). `GetDefault<USpaceUserSettings>()` (CDO) se načítá
+  z `GameUserSettings.ini`, takže drží uložené hodnoty, ne výchozí. Výchozí hodnoty jsou v `SetGameDefaults()` (v kódu).
 
 
 ---

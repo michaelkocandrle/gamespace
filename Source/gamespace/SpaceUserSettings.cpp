@@ -8,6 +8,10 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "HAL/IConsoleManager.h"
+#include "EngineUtils.h"
+#include "Misc/App.h"
+#include "PlayerCharacter.h"
+#include "SpaceshipPawn.h"
 
 USpaceUserSettings::USpaceUserSettings(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -37,6 +41,11 @@ void USpaceUserSettings::SetToDefaults()
 	ScalabilityQuality.ResolutionQuality = DefaultRenderScale;
 	ApplyQualityRules();
 
+	SetGameDefaults();
+}
+
+void USpaceUserSettings::SetGameDefaults()
+{
 	MasterVolume = 0.8f;
 	EffectsVolume = 1.f;
 	MusicVolume = 0.7f;
@@ -44,6 +53,22 @@ void USpaceUserSettings::SetToDefaults()
 	bInvertShipPitch = false;
 	HudMode = 1;
 	bShowFps = false;
+	bStartDecoupled = false;
+	bDefaultGSafe = true;
+	bDefaultComStab = true;
+	bVirtualJoystick = true;
+	VJoyDeadzone = 0.06f;
+	bShowFlightPathMarker = true;
+	CameraShakeScale = 1.f;
+	FieldOfView = 88.f;
+	bMotionBlur = true;
+	bFilmGrain = true;
+	bChromaticAberration = true;
+	Sharpen = DefaultSharpen;
+	Gamma = 50.f;
+	bAudioInBackground = false;
+	bInvertFreeLookPitch = false;
+	bInvertWalkPitch = false;
 }
 
 void USpaceUserSettings::LoadSettings(bool bForceReload)
@@ -71,14 +96,23 @@ void USpaceUserSettings::MigrateSettings()
 	// RTX 2060 (23. 9. 2026, Tools/Shots/perf_quality.json): cinematic at 100 % was 49 FPS in the ship's
 	// interior and 70 in flight, epic + TSR 75 % is 70 and 98. The interior is pixel-bound: single groups a
 	// step down saved 0-1 ms, the render scale six. Cinematic and 100 % stay a choice in the menu.
-	UE_LOG(LogTemp, Display, TEXT("Settings: preset %d at %.0f %% -> epic at %.0f %% (version %d -> %d)"),
-		GraphicsQualityLevel, ScalabilityQuality.ResolutionQuality, DefaultRenderScale, SettingsVersion, CurrentSettingsVersion);
-	GraphicsQualityLevel = DefaultQualityLevel;
-	ScalabilityQuality.SetFromSingleQualityLevel(GraphicsQualityLevel);
-	ScalabilityQuality.ResolutionQuality = DefaultRenderScale;
-	ApplyQualityRules();
-	Scalability::SetQualityLevels(ScalabilityQuality);
-	ApplyNonResolutionSettings();
+	if (SettingsVersion < 4)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Settings: preset %d at %.0f %% -> epic at %.0f %% (version %d -> %d)"),
+			GraphicsQualityLevel, ScalabilityQuality.ResolutionQuality, DefaultRenderScale, SettingsVersion, CurrentSettingsVersion);
+		GraphicsQualityLevel = DefaultQualityLevel;
+		ScalabilityQuality.SetFromSingleQualityLevel(GraphicsQualityLevel);
+		ScalabilityQuality.ResolutionQuality = DefaultRenderScale;
+		ApplyQualityRules();
+		Scalability::SetQualityLevels(ScalabilityQuality);
+		ApplyNonResolutionSettings();
+	}
+	// Version 5: sharpening became a setting (it was r.Tonemapper.Sharpen=0.6 in DefaultEngine.ini). A file saved
+	// before may hold 0 from a build where the setting existed without that default; give it the game's 0.6 back.
+	if (SettingsVersion < 5)
+	{
+		Sharpen = DefaultSharpen;
+	}
 	SettingsVersion = CurrentSettingsVersion;
 	SaveSettings();
 }
@@ -97,6 +131,37 @@ void USpaceUserSettings::ApplyGameSettings(const UWorld* World) const
 	{
 		// Same priority as the H key and the console, so neither locks the other out.
 		Hud->Set(FMath::Clamp(HudMode, 0, 3), ECVF_SetByConsole);
+	}
+
+	// The image: engine console variables at game-setting priority (a console override still wins).
+	auto SetVariable = [](const TCHAR* Name, float Value)
+	{
+		if (IConsoleVariable* Variable = IConsoleManager::Get().FindConsoleVariable(Name))
+		{
+			Variable->Set(Value, ECVF_SetByGameSetting);
+		}
+	};
+	SetVariable(TEXT("r.MotionBlur.Amount"), bMotionBlur ? -1.f : 0.f);
+	SetVariable(TEXT("r.FilmGrain"), bFilmGrain ? 1.f : 0.f);
+	SetVariable(TEXT("r.SceneColorFringeQuality"), bChromaticAberration ? 1.f : 0.f);
+	SetVariable(TEXT("r.Tonemapper.Sharpen"), FMath::Clamp(Sharpen, 0.f, 1.f) * 2.f);
+	if (GEngine)
+	{
+		GEngine->DisplayGamma = DisplayGammaFor(Gamma);
+	}
+	FApp::SetUnfocusedVolumeMultiplier(bAudioInBackground ? 1.f : 0.f);
+
+	// What the ships and characters already in the world read once at BeginPlay.
+	if (World)
+	{
+		for (TActorIterator<ASpaceshipPawn> Ship(World); Ship; ++Ship)
+		{
+			Ship->ApplyUserSettings(false);
+		}
+		for (TActorIterator<APlayerCharacter> Character(World); Character; ++Character)
+		{
+			Character->ApplyUserSettings();
+		}
 	}
 }
 
@@ -155,4 +220,34 @@ bool USpaceUserSettings::ShouldShowFps()
 {
 	const USpaceUserSettings* Settings = Get();
 	return Settings && Settings->bShowFps;
+}
+
+bool USpaceUserSettings::IsFreeLookPitchInverted()
+{
+	const USpaceUserSettings* Settings = Get();
+	return Settings && Settings->bInvertFreeLookPitch;
+}
+
+bool USpaceUserSettings::IsWalkPitchInverted()
+{
+	const USpaceUserSettings* Settings = Get();
+	return Settings && Settings->bInvertWalkPitch;
+}
+
+bool USpaceUserSettings::ShouldShowFlightPathMarker()
+{
+	const USpaceUserSettings* Settings = Get();
+	return !Settings || Settings->bShowFlightPathMarker;
+}
+
+float USpaceUserSettings::GetCameraShakeScale()
+{
+	const USpaceUserSettings* Settings = Get();
+	return Settings ? FMath::Clamp(Settings->CameraShakeScale, 0.f, 2.f) : 1.f;
+}
+
+float USpaceUserSettings::GetFieldOfView()
+{
+	const USpaceUserSettings* Settings = Get();
+	return Settings ? FMath::Clamp(Settings->FieldOfView, 60.f, 120.f) : 0.f;
 }

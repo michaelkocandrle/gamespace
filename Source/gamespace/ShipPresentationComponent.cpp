@@ -148,7 +148,7 @@ void UShipPresentationComponent::UpdateCameraEffects(float DeltaSeconds)
 	static const IConsoleVariable* ShakeScale = IConsoleManager::Get().RegisterConsoleVariable(TEXT("space.CameraShake"), 1.f,
 		TEXT("Camera shake multiplier (boost, afterburner, quantum, heat, kicks); 0 = none."), ECVF_Default);
 	const float Spool = Ship->Quantum->GetState() == EQuantumState::Ready ? Ship->GetQuantumEngageHold() : 0.f;
-	const float Amplitude = ShakeScale->GetFloat() * (Ship->HeatShakeCm * Ship->Heat * Ship->Heat + Ship->BoostShakeCm * BoostBlend + Ship->AfterburnerShakeCm * AfterburnerFeel
+	const float Amplitude = ShakeScale->GetFloat() * USpaceUserSettings::GetCameraShakeScale() * (Ship->HeatShakeCm * Ship->Heat * Ship->Heat + Ship->BoostShakeCm * BoostBlend + Ship->AfterburnerShakeCm * AfterburnerFeel
 		+ Ship->QuantumShakeCm * (Spool * Spool + 0.25f * QuantumBlend) + Ship->KickShakeCm * CameraKick);
 	const double Time = Ship->GetWorld()->GetTimeSeconds();
 	const FVector Shake = Amplitude < 0.01f

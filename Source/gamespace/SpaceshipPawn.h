@@ -144,6 +144,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Flight")
 	void SetFlightAssist(bool bOn);
 
+	/**
+	 * The player's settings (USpaceUserSettings): virtual joystick and its dead zone, the cockpit field of view, and with
+	 * bFlightDefaults (a ship that just spawned) coupled / G-Safe / ComStab as they start. BeginPlay calls it with
+	 * true, the settings menu with false, so a change mid-flight never flips a switch the pilot set.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Settings")
+	void ApplyUserSettings(bool bFlightDefaults);
+
 	/** Spacebrake, held (X): brake to a stop with every thruster, coupled or decoupled. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Flight")
 	void SetSpaceBrake(bool bHeld);

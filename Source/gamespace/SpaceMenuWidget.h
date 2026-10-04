@@ -37,7 +37,7 @@ enum class ESpaceSettingsTab : uint8
  * starcitizenreference/MenuSettings_OwnCapture_Notes.md, 4. 10. 2026): hard boxes with a thin outline and a cut
  * bottom-right corner, a squarish face (Oxanium, the free face nearest SC's that has Czech letters), an image card to
  * play from, a full-screen black settings page with tabs across the top, a row highlight under the mouse, arrow
- * selectors that go round, drop-down boxes and sliders with a white block thumb. Settings take effect at
+ * selectors that stop at their ends, drop-down boxes and sliders with a white block thumb. Settings take effect at
  * once, as in SC; RESET puts the current tab back to its defaults. The title screen keeps our live 3D background.
  *
  * Owned and shown by ASpacePlayerController; every action goes back to it.
@@ -56,6 +56,8 @@ public:
 	void ShowPage(ESpaceMenuPage Page);
 	ESpaceMenuPage GetPage() const { return CurrentPage; }
 	void ShowTab(ESpaceSettingsTab Tab);
+	/** Screenshots: the current tab's list scrolled to its end. */
+	void ScrollTabToEnd();
 
 	virtual bool SupportsKeyboardFocus() const override { return true; }
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
@@ -77,7 +79,31 @@ private:
 		bool bInvertPitch = false;
 		int32 HudMode = 1;
 		bool bShowFps = false;
+		// Graphics groups, in SpaceMenuStyle::GroupNames' order: view distance, shadows, GI, reflections, textures,
+		// effects, post process, foliage, shading. 0 low .. 4 cinematic.
+		int32 Groups[9] = { 3, 3, 2, 3, 3, 3, 3, 3, 3 };
+		float FieldOfView = 88.f;
+		float Gamma = 50.f;
+		float Sharpen = 0.3f;
+		bool bMotionBlur = true;
+		bool bFilmGrain = true;
+		bool bChromaticAberration = true;
+		bool bStartDecoupled = false;
+		bool bGSafe = true;
+		bool bComStab = true;
+		bool bVirtualJoystick = true;
+		float VJoyDeadzone = 0.06f;
+		bool bFlightPathMarker = true;
+		float CameraShake = 1.f;
+		bool bAudioInBackground = false;
+		bool bInvertFreeLook = false;
+		bool bInvertWalk = false;
 	};
+
+	/** The quality groups as the preset sets them (global illumination capped as USpaceUserSettings does). */
+	void SetGroupsFromPreset(int32 Preset);
+	/** The groups differ from what the preset gives them: the preset row reads "Vlastní". */
+	bool AreGroupsCustom() const;
 
 	TSharedRef<SWidget> BuildTitlePage();
 	TSharedRef<SWidget> BuildPausePage();
@@ -91,10 +117,12 @@ private:
 	TSharedRef<SWidget> MakeTab(ESpaceSettingsTab Tab, const FText& Label);
 	/** Label, the control in its 402-wide column, and an optional widget right of it (a slider's value). */
 	TSharedRef<SWidget> MakeRow(const FText& Label, const TSharedRef<SWidget>& Control, const TSharedPtr<SWidget>& After = nullptr);
-	/** ‹ value ›: steps round Count() values, both arrows always lit (as SC's two-value rows). */
+	/** ‹ value ›: steps through Count() values without wrapping, the arrow at an end dimmed (SC GAME SETTINGS). */
 	TSharedRef<SWidget> MakeSelectorRow(const FText& Label, TFunction<int32()> GetIndex, TFunction<void(int32)> SetIndex,
 		TFunction<int32()> Count, TFunction<FText(int32)> Describe);
 	TSharedRef<SWidget> MakeToggleRow(const FText& Label, bool* Value);
+	/** A section title in a tab (SC's tree node in CONTROLS). */
+	TSharedRef<SWidget> MakeHeading(const FText& Label);
 	/** A box with › and the value; a click opens the list of values under it. */
 	TSharedRef<SWidget> MakeDropdownRow(const FText& Label, TFunction<int32()> GetIndex, TFunction<void(int32)> SetIndex,
 		TFunction<int32()> Count, TFunction<FText(int32)> Describe);
@@ -117,6 +145,7 @@ private:
 	ESpaceSettingsTab CurrentTab = ESpaceSettingsTab::Graphics;
 	TSharedPtr<SWidgetSwitcher> Switcher;
 	TSharedPtr<SWidgetSwitcher> TabSwitcher;
+	TArray<TSharedPtr<class SScrollBox>> TabScrolls;
 	FDraft Draft;
 	TArray<FIntPoint> Resolutions;
 

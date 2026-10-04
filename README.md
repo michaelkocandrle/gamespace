@@ -1115,7 +1115,16 @@ the build.
   DefaultEngine.ini, saved to `GameUserSettings.ini`): window mode, resolution, overall quality,
   resolution scale, VSync, frame limit; master / effects / music volume (heard live while
   dragging); mouse sensitivity (multiplies ship steering, free look and on-foot look); inverted
-  ship pitch; HUD mode; FPS counter, in four tabs (HRA, GRAFIKA, ZVUK, OVLÁDÁNÍ). Every change applies and saves at
+  ship pitch; HUD mode; FPS counter, in four tabs (HRA, GRAFIKA, ZVUK, OVLÁDÁNÍ); since 4. 10. 2026 also, after SC's
+  OPTIONS MENU and only where the game has the system: flight defaults for a new ship (coupled / decoupled, G-Safe,
+  ComStab), the virtual joystick and its dead zone, the flight path marker, camera shake (`space.CameraShake` x the
+  setting), SC's named upscaling modes over TSR (Native 100 .. Performance 50 %, ours 75 % by default), quality per
+  scalability group (the preset reads Vlastní when one differs; global illumination stops at High), field of view
+  (cockpit and on foot, 88), gamma (`DisplayGamma` 1.8-2.6), motion blur / chromatic aberration / film grain
+  (`r.MotionBlur.Amount`, `r.SceneColorFringeQuality`, `r.FilmGrain`), sharpening (`r.Tonemapper.Sharpen`, default 30 =
+  the 0.6 that was in DefaultEngine.ini - settings version 5 gives it back to older files), background audio, and pitch
+  inversion for flight, free look and on foot. Ships read their flight defaults once when they spawn
+  (`ASpaceshipPawn::ApplyUserSettings(true)`); a change in the menu updates the rest live. Every change applies and saves at
   once, as in SC (a slider when its drag ends); ZPĚT / Escape leaves, VÝCHOZÍ puts the tab back to its defaults. First
   start: borderless fullscreen at the desktop resolution, quality Epic at a 75 % render scale. The quality row reads
   `GetGraphicsQualityLevel()` (the lowest scalability group), not the engine's

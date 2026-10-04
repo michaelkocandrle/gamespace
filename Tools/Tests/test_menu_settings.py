@@ -198,4 +198,57 @@ check("a saved medium preset is brought up to epic",
       older.get_graphics_quality_level() == 3 and older.get_anti_aliasing_quality() == 3,
       "preset %d, anti-aliasing %d" % (older.get_graphics_quality_level(), older.get_anti_aliasing_quality()))
 
+# --- Settings after SC 4.10's OPTIONS MENU (4. 10. 2026) --------------------------------------------
+defaults = unreal.new_object(unreal.SpaceUserSettings)
+defaults.set_game_defaults()
+cdo = defaults  # the class default object holds the saved file's values, not the defaults
+check("new settings default as SC / the game today",
+      not cdo.get_editor_property("start_decoupled") and cdo.get_editor_property("default_g_safe") and cdo.get_editor_property("default_com_stab")
+      and cdo.get_editor_property("virtual_joystick") and abs(cdo.get_editor_property("v_joy_deadzone") - 0.06) < 1e-6
+      and cdo.get_editor_property("show_flight_path_marker") and abs(cdo.get_editor_property("field_of_view") - 88.0) < 1e-6
+      and cdo.get_editor_property("motion_blur") and abs(cdo.get_editor_property("gamma") - 50.0) < 1e-6
+      and not cdo.get_editor_property("audio_in_background") and abs(cdo.get_editor_property("sharpen") - 0.3) < 1e-6)
+image = unreal.new_object(unreal.SpaceUserSettings)
+image.set_editor_property("motion_blur", False)
+image.set_editor_property("film_grain", False)
+image.set_editor_property("chromatic_aberration", False)
+image.set_editor_property("sharpen", 0.5)
+image.debug_apply_game_settings()
+values = [unreal.SystemLibrary.get_console_variable_float_value(n) for n in ("r.MotionBlur.Amount", "r.FilmGrain", "r.SceneColorFringeQuality", "r.Tonemapper.Sharpen")]
+check("motion blur, grain and fringe off, sharpening 50 % reach the renderer", values == [0.0, 0.0, 0.0, 1.0], str(values))
+image.set_editor_property("motion_blur", True)
+image.set_editor_property("film_grain", True)
+image.set_editor_property("chromatic_aberration", True)
+image.set_editor_property("sharpen", 0.0)
+image.debug_apply_game_settings()
+values = [unreal.SystemLibrary.get_console_variable_float_value(n) for n in ("r.MotionBlur.Amount", "r.FilmGrain", "r.SceneColorFringeQuality", "r.Tonemapper.Sharpen")]
+check("and back on (motion blur back to the engine's own amount)", values == [-1.0, 1.0, 1.0, 0.0], str(values))
+engine = unreal.GameUserSettings.get_game_user_settings()
+saved = (engine.get_editor_property("start_decoupled"), engine.get_editor_property("default_g_safe"), engine.get_editor_property("virtual_joystick"))
+engine.set_editor_property("start_decoupled", True)
+engine.set_editor_property("default_g_safe", False)
+engine.set_editor_property("virtual_joystick", False)
+flight_test = eas.spawn_actor_from_class(unreal.SpaceshipPawn, unreal.Vector(0.0, 0.0, 500000.0), unreal.Rotator())
+try:
+    flight_test.apply_user_settings(True)
+    check("a new ship starts as the settings say (decoupled, G-Safe off, no virtual joystick)",
+          not flight_test.is_flight_assist_on() and not flight_test.is_g_safe_on() and not flight_test.uses_virtual_joystick())
+    flight_test.set_flight_assist(True)
+    flight_test.apply_user_settings(False)
+    check("a settings change mid-flight leaves the switches alone", flight_test.is_flight_assist_on())
+finally:
+    eas.destroy_actor(flight_test)
+    engine.set_editor_property("start_decoupled", saved[0])
+    engine.set_editor_property("default_g_safe", saved[1])
+    engine.set_editor_property("virtual_joystick", saved[2])
+
+v4 = unreal.new_object(unreal.SpaceUserSettings)
+v4.set_overall_scalability_level(4)
+v4.set_editor_property("sharpen", 0.0)
+v4.debug_set_settings_version(4)
+v4.migrate_settings()
+check("a version 4 file gets the game's sharpening back and keeps its quality",
+      abs(v4.get_editor_property("sharpen") - 0.3) < 1e-6 and v4.get_graphics_quality_level() == 4 and v4.debug_get_settings_version() == 5,
+      "sharpen %.2f, preset %d, version %d" % (v4.get_editor_property("sharpen"), v4.get_graphics_quality_level(), v4.debug_get_settings_version()))
+
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

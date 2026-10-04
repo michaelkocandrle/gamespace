@@ -112,6 +112,15 @@ APlayerCharacter::APlayerCharacter()
 	Movement->bOrientRotationToMovement = false;
 }
 
+void APlayerCharacter::ApplyUserSettings()
+{
+	if (const float Fov = USpaceUserSettings::GetFieldOfView(); Fov > 0.f)
+	{
+		FirstPersonFov = Fov;
+	}
+	FirstPersonCamera->SetFieldOfView(FirstPersonFov);
+}
+
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -119,7 +128,7 @@ void APlayerCharacter::BeginPlay()
 	GetCharacterMovement()->JumpZVelocity = JumpVelocity;
 
 	FirstPersonCamera->SetRelativeLocation(FirstPersonEyeOffset);
-	FirstPersonCamera->SetFieldOfView(FirstPersonFov);
+	ApplyUserSettings();
 	SetFirstPerson(bFirstPerson);
 
 	// Gravity before the first movement tick, or the character starts falling along world -Z.
@@ -445,7 +454,8 @@ void APlayerCharacter::HandleLook(const FInputActionValue& Value)
 	LookYaw = FRotator::NormalizeAxis(LookYaw + float(Delta.X));
 	const float Low = bFirstPerson ? -FirstPersonPitchLimit : MinViewPitch;
 	const float High = bFirstPerson ? FirstPersonPitchLimit : MaxViewPitch;
-	LookPitch = FMath::Clamp(LookPitch + float(Delta.Y) * (bInvertPitch ? -1.f : 1.f), Low, High);
+	const bool bInvert = bInvertPitch != USpaceUserSettings::IsWalkPitchInverted();
+	LookPitch = FMath::Clamp(LookPitch + float(Delta.Y) * (bInvert ? -1.f : 1.f), Low, High);
 }
 
 void APlayerCharacter::HandleJump(const FInputActionValue& /*Value*/)

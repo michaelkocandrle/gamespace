@@ -19,6 +19,7 @@
 #include "HAL/IConsoleManager.h"
 #include "Rendering/DrawElements.h"
 #include "SpaceshipPawn.h"
+#include "SpaceUserSettings.h"
 #include "Brushes/SlateRoundedBoxBrush.h"
 #include "Misc/Paths.h"
 #include "HAL/FileManager.h"
@@ -1918,7 +1919,7 @@ FSpaceFlightHudState USpaceFlightHud::ApplyView(const FSpaceFlightHudState& Stat
 		// Below a walking pace the direction is noise, and a marker that jitters round the middle of
 		// the screen is worse than none.
 		const FVector Velocity = Ship->GetLinearVelocity();
-		Out.bVelocityVisible = Velocity.Size() > SpaceHudStyle::VelocityMarkerMinSpeed;
+		Out.bVelocityVisible = Velocity.Size() > SpaceHudStyle::VelocityMarkerMinSpeed && USpaceUserSettings::ShouldShowFlightPathMarker();
 		if (Out.bVelocityVisible)
 		{
 			Out.bVelocityBehind = !SpaceHudStyle::ProjectDirection(Velocity.GetSafeNormal(), View.GetUnitAxis(EAxis::X),

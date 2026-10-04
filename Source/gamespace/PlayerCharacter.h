@@ -35,6 +35,9 @@ class GAMESPACE_API APlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
+	/** The player's settings: the first person field of view (the menu calls it again when it changes). */
+	void ApplyUserSettings();
+
 	APlayerCharacter();
 
 	virtual void BeginPlay() override;

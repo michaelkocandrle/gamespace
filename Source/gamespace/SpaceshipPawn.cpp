@@ -234,6 +234,7 @@ void ASpaceshipPawn::BeginPlay()
 	BaseSocketOffset = CameraBoom->SocketOffset;
 	BaseChaseFov = ChaseCamera->FieldOfView;
 	BaseCockpitFov = CockpitCamera->FieldOfView;
+	ApplyUserSettings(true);
 
 	if (!EngineLoopSound)
 	{
@@ -483,6 +484,28 @@ void ASpaceshipPawn::SetFreeLookHeld(bool bHeld)
 	}
 }
 
+void ASpaceshipPawn::ApplyUserSettings(bool bFlightDefaults)
+{
+	const USpaceUserSettings* Settings = USpaceUserSettings::Get();
+	if (!Settings)
+	{
+		return;
+	}
+	bMouseRecenter = !Settings->bVirtualJoystick;
+	VJoyDeadzone = FMath::Clamp(Settings->VJoyDeadzone, 0.f, 0.5f);
+	if (const float Fov = USpaceUserSettings::GetFieldOfView(); Fov > 0.f)
+	{
+		BaseCockpitFov = Fov;
+	}
+	if (bFlightDefaults)
+	{
+		// The switches as a fresh ship has them; set directly, without the toggles' messages and sounds.
+		bFlightAssist = !Settings->bStartDecoupled;
+		bGSafe = Settings->bDefaultGSafe;
+		bComStab = Settings->bDefaultComStab;
+	}
+}
+
 void ASpaceshipPawn::UpdateFreeLook(float DeltaSeconds)
 {
 	if (bFreeLookHeld)
@@ -494,7 +517,8 @@ void ASpaceshipPawn::UpdateFreeLook(float DeltaSeconds)
 		{
 			FreeLookTarget.X = FMath::Clamp(FreeLookTarget.X, -FreeLookMaxYawDeg, FreeLookMaxYawDeg);
 		}
-		FreeLookTarget.Y = FMath::Clamp(FreeLookTarget.Y + MouseLookDelta.Y * LookScale, -FreeLookMaxPitchDeg, FreeLookMaxPitchDeg);
+		const float PitchSign = USpaceUserSettings::IsFreeLookPitchInverted() ? -1.f : 1.f;
+		FreeLookTarget.Y = FMath::Clamp(FreeLookTarget.Y + MouseLookDelta.Y * LookScale * PitchSign, -FreeLookMaxPitchDeg, FreeLookMaxPitchDeg);
 		MouseLookDelta = FVector2D::ZeroVector;
 		LookInput = FVector2D::ZeroVector;
 	}

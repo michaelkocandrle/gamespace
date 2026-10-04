@@ -1,0 +1,61 @@
+{
+ "topic": "settings_content",
+ "date": "2026-10-04",
+ "goal": "Obsah nastavení podle SC 4.10 (autorův záznam vlevo) ve schváleném stylu menu (recenze 2026-10-04_menu_sc, PASS 7,4): nové řádky v záložkách HRA (výchozí stavy letu, VJoy, značka dráhy letu, třes kamery), GRAFIKA (upscaling s pojmenovanými režimy, technika TSR, kvalita po položkách, zorné pole, gama, rozmazání pohybem, ostření, chromatická aberace, zrnitost), ZVUK (zvuk na pozadí), OVLÁDÁNÍ (inverze podle kontextu). Hodnoť rozložení, čitelnost a soulad s referencí; jen nastavení, ke kterým má hra systém (DLSS, HDR, VR apod. chybí záměrně).",
+ "style": "Star Citizen 4.10 OPTIONS MENU, česky; popisky s předponou „Let – …“, „Inverze – …“ jako SC „Defaults – Flight: …“.",
+ "checklist": "cockpit",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-04_settings_content",
+ "notes": [
+  "OVĚŘOVACÍ KOLO: ověř body kola 1 – (1) nové řádky grafiky doložené (list Grafika – konec), (2) šipka ztlumená na kraji seznamu, hodnoty se nepřetáčejí, (3) jednotné předpony v HRA, (5) nadpisy sekcí v OVLÁDÁNÍ, (6) ZVUK a OVLÁDÁNÍ na samostatných listech. Bod 4 (Coupled) zůstává záměrně: termín SC, stejný jako na HUD (CPLD). Řekni u každého opraveno / neopraveno a dej celkové skóre.",
+  "Tyrkysový pruh u řádku Odrazy je zvýraznění pod myší (kurzor tam náhodou stál), jako řádek Graphics Renderer v referenci.",
+  "Checklist kokpitu: hodnoť jen čitelnost a soulad stylu."
+ ],
+ "pairs": [
+  {
+   "title": "Grafika – začátek",
+   "distance": "mid",
+   "light": "night",
+   "ref": "ArtSource/Reference/Video/sc_own_01_start/frames/t00_00_44.jpg",
+   "ref_label": "SC 4.10, GRAPHICS",
+   "ours": "shots:20261004_110608_menu_sc/01_settings_graphics.png",
+   "ours_label": "ve hře, GRAFIKA nahoře"
+  },
+  {
+   "title": "Grafika – konec seznamu",
+   "distance": "mid",
+   "light": "night",
+   "ref": "ArtSource/Reference/Video/sc_own_01_start/frames/t00_00_52.jpg",
+   "ref_label": "SC 4.10, GRAPHICS dole (Image)",
+   "ours": "shots:20261004_110608_menu_sc/02_settings_graphics_end.png",
+   "ours_label": "ve hře, GRAFIKA dole"
+  },
+  {
+   "title": "Hra",
+   "distance": "mid",
+   "light": "night",
+   "ref": "ArtSource/Reference/Video/sc_own_01_start/frames/t00_00_20.jpg",
+   "ref_label": "SC 4.10, GAME SETTINGS",
+   "ours": "shots:20261004_110608_menu_sc/03_settings_game.png",
+   "ours_label": "ve hře, HRA"
+  },
+  {
+   "title": "Zvuk",
+   "distance": "mid",
+   "light": "night",
+   "ref": "ArtSource/Reference/Video/sc_own_01_start/frames/t00_01_00.jpg",
+   "ref_label": "SC 4.10, AUDIO",
+   "ours": "shots:20261004_110608_menu_sc/04_settings_audio.png",
+   "ours_label": "ve hře, ZVUK"
+  },
+  {
+   "title": "Ovládání",
+   "distance": "mid",
+   "light": "night",
+   "ref": "ArtSource/Reference/Video/sc_own_01_start/frames/t00_01_04.jpg",
+   "ref_label": "SC 4.10, CONTROLS",
+   "ours": "shots:20261004_110608_menu_sc/05_settings_controls.png",
+   "ours_label": "ve hře, OVLÁDÁNÍ"
+  }
+ ]
+}

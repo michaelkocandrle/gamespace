@@ -3,6 +3,7 @@
   "shots": [
     {"name": "title", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0, "console": ["space.Menu 0"]},
     {"name": "settings_graphics", "altitude_m": -1, "hud": 0, "settle": 1.0, "console": ["space.Menu 2 1"]},
+    {"name": "settings_graphics_end", "altitude_m": -1, "hud": 0, "settle": 1.0, "console": ["space.Menu 2 1 1"]},
     {"name": "settings_game", "altitude_m": -1, "hud": 0, "settle": 1.0, "console": ["space.Menu 2 0"]},
     {"name": "settings_audio", "altitude_m": -1, "hud": 0, "settle": 1.0, "console": ["space.Menu 2 2"]},
     {"name": "settings_controls", "altitude_m": -1, "hud": 0, "settle": 1.0, "console": ["space.Menu 2 3"]},

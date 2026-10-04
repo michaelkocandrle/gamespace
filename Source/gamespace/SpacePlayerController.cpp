@@ -220,7 +220,7 @@ void ASpacePlayerController::ShowMenu(bool bTitleScreen)
 	SetShowMouseCursor(true);
 }
 
-void ASpacePlayerController::DebugShowMenu(int32 Page, int32 Tab)
+void ASpacePlayerController::DebugShowMenu(int32 Page, int32 Tab, bool bScrollToEnd)
 {
 	if (Page < 0)
 	{
@@ -232,6 +232,10 @@ void ASpacePlayerController::DebugShowMenu(int32 Page, int32 Tab)
 	{
 		Menu->ShowTab(ESpaceSettingsTab(FMath::Clamp(Tab, 0, int32(ESpaceSettingsTab::Count) - 1)));
 		Menu->ShowPage(ESpaceMenuPage(FMath::Clamp(Page, 0, 3)));
+		if (bScrollToEnd)
+		{
+			Menu->ScrollTabToEnd();
+		}
 	}
 }
 
@@ -239,7 +243,7 @@ namespace SpacePlayerControllerConsole
 {
 	static FAutoConsoleCommandWithWorldAndArgs MenuCommand(
 		TEXT("space.Menu"),
-		TEXT("space.Menu <page> [tab]: shows a menu page over the game without pausing, for screenshots - 0 title, 1 pause, 2 settings, 3 loading, -1 hides it; tab 0 game, 1 graphics, 2 audio, 3 controls."),
+		TEXT("space.Menu <page> [tab] [1 = list scrolled to its end]: shows a menu page over the game without pausing, for screenshots - 0 title, 1 pause, 2 settings, 3 loading, -1 hides it; tab 0 game, 1 graphics, 2 audio, 3 controls."),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
 		{
 			ASpacePlayerController* Controller = World ? Cast<ASpacePlayerController>(World->GetFirstPlayerController()) : nullptr;
@@ -247,7 +251,7 @@ namespace SpacePlayerControllerConsole
 			{
 				return;
 			}
-			Controller->DebugShowMenu(FCString::Atoi(*Args[0]), Args.Num() > 1 ? FCString::Atoi(*Args[1]) : 1);
+			Controller->DebugShowMenu(FCString::Atoi(*Args[0]), Args.Num() > 1 ? FCString::Atoi(*Args[1]) : 1, Args.Num() > 2 && FCString::Atoi(*Args[2]) != 0);
 		}));
 }
 

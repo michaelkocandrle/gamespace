@@ -124,6 +124,16 @@ namespace SpaceMenuStyle
 
 	/** 0 means no limit. */
 	const int32 FrameLimits[] = { 0, 30, 60, 120, 144, 165, 240 };
+
+	/** SC's named upscaling modes over our TSR render scale (75 % is ours, the default). */
+	const float UpscaleScales[] = { 100.f, 77.f, 75.f, 67.f, 58.f, 50.f };
+
+	const FText QualityName(int32 Level)
+	{
+		static const FText Names[] = { NSLOCTEXT("SpaceMenu", "Low", "Nízká"), NSLOCTEXT("SpaceMenu", "Medium", "Střední"),
+			NSLOCTEXT("SpaceMenu", "High", "Vysoká"), NSLOCTEXT("SpaceMenu", "Epic", "Velmi vysoká"), NSLOCTEXT("SpaceMenu", "Cinematic", "Filmová") };
+		return Names[FMath::Clamp(Level, 0, 4)];
+	}
 	const EWindowMode::Type WindowModes[] = { EWindowMode::WindowedFullscreen, EWindowMode::Fullscreen, EWindowMode::Windowed };
 
 	/** A filled convex polygon in the widget's space, optionally textured by Brush (UVs from the size). */
@@ -441,6 +451,14 @@ void SSpaceMenu::ShowPage(ESpaceMenuPage Page)
 	Switcher->SetActiveWidgetIndex(static_cast<int32>(Page));
 }
 
+void SSpaceMenu::ScrollTabToEnd()
+{
+	if (TabScrolls.IsValidIndex(int32(CurrentTab)) && TabScrolls[int32(CurrentTab)].IsValid())
+	{
+		TabScrolls[int32(CurrentTab)]->ScrollToEnd();
+	}
+}
+
 void SSpaceMenu::ShowTab(ESpaceSettingsTab Tab)
 {
 	CurrentTab = Tab;
@@ -709,14 +727,16 @@ TSharedRef<SWidget> SSpaceMenu::BuildSettingsPage()
 	SAssignNew(TabSwitcher, SWidgetSwitcher);
 	for (int32 Index = 0; Index < int32(ESpaceSettingsTab::Count); ++Index)
 	{
+		TSharedPtr<SScrollBox> Scroll;
 		TabSwitcher->AddSlot()
 		[
-			SNew(SScrollBox)
+			SAssignNew(Scroll, SScrollBox)
 			.ScrollBarStyle(&ScrollBar())
 			.ScrollBarThickness(FVector2D(4.0, 4.0))
 			.ScrollBarPadding(FMargin(0.f, 2.f, 2.f, 2.f))
 			+ SScrollBox::Slot().Padding(FMargin(0.f, 4.f, 10.f, 4.f))[ BuildTabRows(ESpaceSettingsTab(Index)) ]
 		];
+		TabScrolls.Add(Scroll);
 	}
 	TabSwitcher->SetActiveWidgetIndex(static_cast<int32>(CurrentTab));
 
@@ -763,14 +783,27 @@ TSharedRef<SWidget> SSpaceMenu::BuildTabRows(ESpaceSettingsTab Tab)
 	switch (Tab)
 	{
 	case ESpaceSettingsTab::Game:
-		Add(MakeSelectorRow(LOCTEXT("Hud", "HUD (klávesa H)"),
+		Add(MakeSelectorRow(LOCTEXT("StartFlight", "Let – výchozí řízení"),
+			[this]() { return Draft.bStartDecoupled ? 1 : 0; }, [this](int32 I) { Draft.bStartDecoupled = I != 0; }, []() { return 2; },
+			[](int32 I) { return I ? LOCTEXT("Decoupled", "Decoupled") : LOCTEXT("Coupled", "Coupled"); }));
+		Add(MakeToggleRow(LOCTEXT("DefaultGSafe", "Let – G-Safe"), &Draft.bGSafe));
+		Add(MakeToggleRow(LOCTEXT("DefaultComStab", "Let – ComStab"), &Draft.bComStab));
+		Add(MakeToggleRow(LOCTEXT("VJoy", "Let – virtuální joystick (VJoy)"), &Draft.bVirtualJoystick));
+		Add(MakeSliderRow(LOCTEXT("VJoyDeadzone", "Let – mrtvá zóna VJoy"), &Draft.VJoyDeadzone, 0.f, 0.3f,
+			[](float V) { return FText::FromString(FString::Printf(TEXT("%.1f"), V * 100.f)); }));
+		Add(MakeDropdownRow(LOCTEXT("FlightPath", "HUD – značka dráhy letu"),
+			[this]() { return Draft.bFlightPathMarker ? 0 : 1; }, [this](int32 I) { Draft.bFlightPathMarker = I == 0; }, []() { return 2; },
+			[](int32 I) { return I == 0 ? LOCTEXT("Always", "Vždy") : LOCTEXT("Never", "Nikdy"); }));
+		Add(MakeSelectorRow(LOCTEXT("Hud", "HUD – režim (klávesa H)"),
 			[this]() { return Draft.HudMode; }, [this](int32 I) { Draft.HudMode = I; }, []() { return 4; },
 			[](int32 I)
 			{
 				return I == 0 ? LOCTEXT("HudOff", "Skrytý") : I == 1 ? LOCTEXT("HudFlight", "Jen letový HUD")
 					: I == 2 ? LOCTEXT("HudCompact", "S textem") : LOCTEXT("HudFull", "S plným textem");
 			}));
-		Add(MakeToggleRow(LOCTEXT("ShowFps", "Zobrazit FPS"), &Draft.bShowFps));
+		Add(MakeSliderRow(LOCTEXT("CameraShake", "Kamera – třes kamery"), &Draft.CameraShake, 0.f, 2.f,
+			[](float V) { return FText::FromString(FString::Printf(TEXT("%.2f"), V)); }));
+		Add(MakeToggleRow(LOCTEXT("ShowFps", "Rozhraní – zobrazit FPS"), &Draft.bShowFps));
 		break;
 
 	case ESpaceSettingsTab::Graphics:
@@ -795,28 +828,71 @@ TSharedRef<SWidget> SSpaceMenu::BuildTabRows(ESpaceSettingsTab Tab)
 			{
 				return FrameLimits[I] == 0 ? LOCTEXT("NoLimit", "Bez limitu") : FText::FromString(FString::Printf(TEXT("%d FPS"), FrameLimits[I]));
 			}));
-		Add(MakeSliderRow(LOCTEXT("ResolutionScale", "Rozlišení vykreslování (TSR)"), &Draft.ResolutionScale, 50.f, 100.f,
-			[](float V) { return FText::FromString(FString::Printf(TEXT("%d %%"), FMath::RoundToInt32(V))); }));
-		Add(MakeDropdownRow(LOCTEXT("Quality", "Celková kvalita"),
-			[this]() { return Draft.Quality; }, [this](int32 I) { Draft.Quality = I; }, []() { return 5; },
+		Add(MakeDropdownRow(LOCTEXT("Upscaling", "Upscaling"),
+			[this]()
+			{
+				int32 Best = 0;
+				for (int32 I = 1; I < UE_ARRAY_COUNT(UpscaleScales); ++I)
+				{
+					Best = FMath::Abs(UpscaleScales[I] - Draft.ResolutionScale) < FMath::Abs(UpscaleScales[Best] - Draft.ResolutionScale) ? I : Best;
+				}
+				return Best;
+			},
+			[this](int32 I) { Draft.ResolutionScale = UpscaleScales[FMath::Clamp(I, 0, int32(UE_ARRAY_COUNT(UpscaleScales)) - 1)]; },
+			[]() { return int32(UE_ARRAY_COUNT(UpscaleScales)); },
 			[](int32 I)
 			{
-				static const FText Names[] = { LOCTEXT("Low", "Nízká"), LOCTEXT("Medium", "Střední"), LOCTEXT("High", "Vysoká"),
-					LOCTEXT("Epic", "Velmi vysoká"), LOCTEXT("Cinematic", "Filmová") };
-				return Names[FMath::Clamp(I, 0, 4)];
+				static const FText Names[] = { LOCTEXT("UpNative", "Nativní (100 %)"), LOCTEXT("UpUltra", "Ultra kvalita (77 %)"),
+					LOCTEXT("UpHigh", "Vysoká kvalita (75 %)"), LOCTEXT("UpQuality", "Kvalita (67 %)"), LOCTEXT("UpBalanced", "Vyvážené (58 %)"),
+					LOCTEXT("UpPerformance", "Výkon (50 %)") };
+				return Names[FMath::Clamp(I, 0, 5)];
 			}));
+		Add(MakeSelectorRow(LOCTEXT("UpscalingTechnique", "Technika upscalingu"),
+			[]() { return 0; }, [](int32) {}, []() { return 1; }, [](int32) { return LOCTEXT("Tsr", "TSR"); }));
+		Add(MakeDropdownRow(LOCTEXT("Quality", "Celková kvalita"),
+			[this]() { return AreGroupsCustom() ? 5 : Draft.Quality; },
+			[this](int32 I) { Draft.Quality = I; SetGroupsFromPreset(I); }, []() { return 5; },
+			[](int32 I) { return I > 4 ? LOCTEXT("Custom", "Vlastní") : QualityName(I); }));
+		{
+			const FText GroupLabels[] = { LOCTEXT("GroupView", "Dohlednost objektů"), LOCTEXT("GroupShadow", "Stíny"),
+				LOCTEXT("GroupGI", "Globální osvětlení"), LOCTEXT("GroupReflection", "Odrazy"), LOCTEXT("GroupTexture", "Textury"),
+				LOCTEXT("GroupEffects", "Efekty"), LOCTEXT("GroupPost", "Postprocesy"), LOCTEXT("GroupFoliage", "Vegetace a kameny"),
+				LOCTEXT("GroupShading", "Kvalita shaderů") };
+			for (int32 Group = 0; Group < 9; ++Group)
+			{
+				// Global illumination stops at High: it halves the frame rate above (USpaceUserSettings).
+				const int32 Levels = Group == 2 ? USpaceUserSettings::MaxGlobalIlluminationQuality + 1 : 5;
+				Add(MakeDropdownRow(GroupLabels[Group],
+					[this, Group]() { return Draft.Groups[Group]; }, [this, Group](int32 I) { Draft.Groups[Group] = I; },
+					[Levels]() { return Levels; }, [](int32 I) { return QualityName(I); }));
+			}
+		}
+		Add(MakeSliderRow(LOCTEXT("Fov", "Zorné pole (kokpit a pěšky)"), &Draft.FieldOfView, 70.f, 110.f,
+			[](float V) { return FText::FromString(FString::Printf(TEXT("%d"), FMath::RoundToInt32(V))); }));
+		Add(MakeSliderRow(LOCTEXT("Gamma", "Gama"), &Draft.Gamma, 0.f, 100.f,
+			[](float V) { return FText::FromString(FString::Printf(TEXT("%d"), FMath::RoundToInt32(V))); }));
+		Add(MakeToggleRow(LOCTEXT("MotionBlur", "Rozmazání pohybem"), &Draft.bMotionBlur));
+		Add(MakeSliderRow(LOCTEXT("Sharpen", "Ostření"), &Draft.Sharpen, 0.f, 1.f,
+			[](float V) { return FText::FromString(FString::Printf(TEXT("%d"), FMath::RoundToInt32(V * 100.f))); }));
+		Add(MakeToggleRow(LOCTEXT("Fringe", "Chromatická aberace"), &Draft.bChromaticAberration));
+		Add(MakeToggleRow(LOCTEXT("Grain", "Zrnitost obrazu"), &Draft.bFilmGrain));
 		break;
 
 	case ESpaceSettingsTab::Audio:
 		Add(MakeSliderRow(LOCTEXT("MasterVolume", "Celková hlasitost"), &Draft.MasterVolume, 0.f, 1.f, Percent, true));
 		Add(MakeSliderRow(LOCTEXT("EffectsVolume", "Hlasitost efektů a motorů"), &Draft.EffectsVolume, 0.f, 1.f, Percent, true));
 		Add(MakeSliderRow(LOCTEXT("MusicVolume", "Hlasitost hudby a ambientu"), &Draft.MusicVolume, 0.f, 1.f, Percent, true));
+		Add(MakeToggleRow(LOCTEXT("BackgroundAudio", "Zvuk, když hra není v popředí"), &Draft.bAudioInBackground));
 		break;
 
 	case ESpaceSettingsTab::Controls:
-		Add(MakeSliderRow(LOCTEXT("Sensitivity", "Citlivost myši"), &Draft.MouseSensitivity, 0.25f, 3.f,
+		Add(MakeHeading(LOCTEXT("InversionHeading", "Inverze")));
+		Add(MakeToggleRow(LOCTEXT("InvertPitch", "      Let – klopení (myš nahoru = nos dolů)"), &Draft.bInvertPitch));
+		Add(MakeToggleRow(LOCTEXT("InvertFreeLook", "      Volné rozhlížení – sklon"), &Draft.bInvertFreeLook));
+		Add(MakeToggleRow(LOCTEXT("InvertWalk", "      Pěšky – sklon"), &Draft.bInvertWalk));
+		Add(MakeHeading(LOCTEXT("SensitivityHeading", "Myš")));
+		Add(MakeSliderRow(LOCTEXT("Sensitivity", "      Citlivost myši"), &Draft.MouseSensitivity, 0.25f, 3.f,
 			[](float V) { return FText::FromString(FString::Printf(TEXT("%.2f"), V)); }));
-		Add(MakeToggleRow(LOCTEXT("InvertPitch", "Let - Obrácené klopení (myš nahoru = nos dolů)"), &Draft.bInvertPitch));
 		break;
 
 	default:
@@ -924,24 +1000,33 @@ TSharedRef<SWidget> SSpaceMenu::MakeSelectorRow(const FText& Label, TFunction<in
 	TFunction<int32()> Count, TFunction<FText(int32)> Describe)
 {
 	using namespace SpaceMenuStyle;
-	// Both arrows always lit and the values go round, as SC's two-value rows (VSync Yes: both arrows bright).
-	auto Arrow = [this, GetIndex, SetIndex, Count](bool bRight) -> TSharedRef<SWidget>
+	// No wrapping: the arrow towards the end of the list is dimmed (SC GAME SETTINGS: "Yes" has its right arrow dim,
+	// "No" its left one; No comes first).
+	auto CanStep = [GetIndex, Count](int32 Direction)
+	{
+		const int32 Next = GetIndex() + Direction;
+		return Next >= 0 && Next < Count();
+	};
+	auto Arrow = [this, GetIndex, SetIndex, CanStep](bool bRight) -> TSharedRef<SWidget>
 	{
 		const int32 Direction = bRight ? 1 : -1;
 		return SNew(SButton)
 			.ButtonStyle(&FlatButton())
 			.ContentPadding(FMargin(12.f, 6.f))
 			.OnHovered_Lambda([this]() { Hovered(); })
-			.OnClicked_Lambda([this, GetIndex, SetIndex, Count, Direction]()
+			.OnClicked_Lambda([this, GetIndex, SetIndex, CanStep, Direction]()
 			{
-				const int32 N = FMath::Max(Count(), 1);
-				SetIndex((GetIndex() + Direction + N) % N);
-				Commit();
-				Clicked();
+				if (CanStep(Direction))
+				{
+					SetIndex(GetIndex() + Direction);
+					Commit();
+					Clicked();
+				}
 				return FReply::Handled();
 			})
 			[
-				SNew(SSpaceChevron).Right(bRight).Color(Text)
+				SNew(SSpaceChevron).Right(bRight)
+				.Color_Lambda([CanStep, Direction]() { return CanStep(Direction) ? Text : FLinearColor(Text.R, Text.G, Text.B, 0.18f); })
 			];
 	};
 	return MakeRow(Label,
@@ -952,6 +1037,33 @@ TSharedRef<SWidget> SSpaceMenu::MakeSelectorRow(const FText& Label, TFunction<in
 			SNew(STextBlock).Text_Lambda([GetIndex, Describe]() { return Describe(GetIndex()); }).Font(Font(false, 13.f)).ColorAndOpacity(Text)
 		]
 		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Arrow(true) ]);
+}
+
+TSharedRef<SWidget> SSpaceMenu::MakeHeading(const FText& Label)
+{
+	using namespace SpaceMenuStyle;
+	// SC's tree node in CONTROLS: a small outlined box with a minus, the title beside it.
+	return SNew(SBox).HeightOverride(63.f).Padding(FMargin(55.f, 0.f, 0.f, 0.f)).VAlign(VAlign_Center)
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+			[
+				SNew(SBox).WidthOverride(16.f).HeightOverride(16.f)
+				[
+					SNew(SSpaceBox).Outline(Outline).Corner(0.f).Thickness(1.f)
+					[
+						SNew(SBox).HAlign(HAlign_Center).VAlign(VAlign_Center)
+						[
+							SNew(SBox).WidthOverride(8.f).HeightOverride(1.6f)[ SNew(SImage).Image(White()).ColorAndOpacity(Text) ]
+						]
+					]
+				]
+			]
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(FMargin(12.f, 0.f, 0.f, 0.f))
+			[
+				SNew(STextBlock).Text(Label).Font(Font(true, 13.f)).ColorAndOpacity(Text)
+			]
+		];
 }
 
 TSharedRef<SWidget> SSpaceMenu::MakeToggleRow(const FText& Label, bool* Value)
@@ -1130,6 +1242,57 @@ void SSpaceMenu::LoadDraft()
 	Draft.bInvertPitch = Settings->bInvertShipPitch;
 	Draft.HudMode = FMath::Clamp(Settings->HudMode, 0, 3);
 	Draft.bShowFps = Settings->bShowFps;
+
+	Draft.Groups[0] = Settings->GetViewDistanceQuality();
+	Draft.Groups[1] = Settings->GetShadowQuality();
+	Draft.Groups[2] = Settings->GetGlobalIlluminationQuality();
+	Draft.Groups[3] = Settings->GetReflectionQuality();
+	Draft.Groups[4] = Settings->GetTextureQuality();
+	Draft.Groups[5] = Settings->GetVisualEffectQuality();
+	Draft.Groups[6] = Settings->GetPostProcessingQuality();
+	Draft.Groups[7] = Settings->GetFoliageQuality();
+	Draft.Groups[8] = Settings->GetShadingQuality();
+	for (int32& Group : Draft.Groups)
+	{
+		Group = FMath::Clamp(Group, 0, 4);
+	}
+	Draft.FieldOfView = Settings->FieldOfView;
+	Draft.Gamma = Settings->Gamma;
+	Draft.Sharpen = Settings->Sharpen;
+	Draft.bMotionBlur = Settings->bMotionBlur;
+	Draft.bFilmGrain = Settings->bFilmGrain;
+	Draft.bChromaticAberration = Settings->bChromaticAberration;
+	Draft.bStartDecoupled = Settings->bStartDecoupled;
+	Draft.bGSafe = Settings->bDefaultGSafe;
+	Draft.bComStab = Settings->bDefaultComStab;
+	Draft.bVirtualJoystick = Settings->bVirtualJoystick;
+	Draft.VJoyDeadzone = Settings->VJoyDeadzone;
+	Draft.bFlightPathMarker = Settings->bShowFlightPathMarker;
+	Draft.CameraShake = Settings->CameraShakeScale;
+	Draft.bAudioInBackground = Settings->bAudioInBackground;
+	Draft.bInvertFreeLook = Settings->bInvertFreeLookPitch;
+	Draft.bInvertWalk = Settings->bInvertWalkPitch;
+}
+
+void SSpaceMenu::SetGroupsFromPreset(int32 Preset)
+{
+	for (int32 Group = 0; Group < 9; ++Group)
+	{
+		Draft.Groups[Group] = Group == 2 ? FMath::Min(Preset, USpaceUserSettings::MaxGlobalIlluminationQuality) : Preset;
+	}
+}
+
+bool SSpaceMenu::AreGroupsCustom() const
+{
+	for (int32 Group = 0; Group < 9; ++Group)
+	{
+		const int32 Expected = Group == 2 ? FMath::Min(Draft.Quality, USpaceUserSettings::MaxGlobalIlluminationQuality) : Draft.Quality;
+		if (Draft.Groups[Group] != Expected)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void SSpaceMenu::Commit()
@@ -1144,6 +1307,16 @@ void SSpaceMenu::Commit()
 	Settings->SetScreenResolution(Draft.WindowMode == 0 || !Resolutions.IsValidIndex(Draft.Resolution)
 		? Settings->GetDesktopResolution() : Resolutions[Draft.Resolution]);
 	Settings->SetOverallScalabilityLevel(Draft.Quality);
+	// Then each group as the page has it (equal to the preset unless one was picked by hand).
+	Settings->SetViewDistanceQuality(Draft.Groups[0]);
+	Settings->SetShadowQuality(Draft.Groups[1]);
+	Settings->SetGlobalIlluminationQuality(FMath::Min(Draft.Groups[2], USpaceUserSettings::MaxGlobalIlluminationQuality));
+	Settings->SetReflectionQuality(Draft.Groups[3]);
+	Settings->SetTextureQuality(Draft.Groups[4]);
+	Settings->SetVisualEffectQuality(Draft.Groups[5]);
+	Settings->SetPostProcessingQuality(Draft.Groups[6]);
+	Settings->SetFoliageQuality(Draft.Groups[7]);
+	Settings->SetShadingQuality(Draft.Groups[8]);
 	Settings->SetResolutionScaleValueEx(Draft.ResolutionScale);
 	Settings->SetVSyncEnabled(Draft.bVSync);
 	Settings->SetFrameRateLimit(float(SpaceMenuStyle::FrameLimits[FMath::Clamp(Draft.FrameLimit, 0, int32(UE_ARRAY_COUNT(SpaceMenuStyle::FrameLimits)) - 1)]));
@@ -1155,6 +1328,22 @@ void SSpaceMenu::Commit()
 	Settings->bInvertShipPitch = Draft.bInvertPitch;
 	Settings->HudMode = Draft.HudMode;
 	Settings->bShowFps = Draft.bShowFps;
+	Settings->FieldOfView = Draft.FieldOfView;
+	Settings->Gamma = Draft.Gamma;
+	Settings->Sharpen = Draft.Sharpen;
+	Settings->bMotionBlur = Draft.bMotionBlur;
+	Settings->bFilmGrain = Draft.bFilmGrain;
+	Settings->bChromaticAberration = Draft.bChromaticAberration;
+	Settings->bStartDecoupled = Draft.bStartDecoupled;
+	Settings->bDefaultGSafe = Draft.bGSafe;
+	Settings->bDefaultComStab = Draft.bComStab;
+	Settings->bVirtualJoystick = Draft.bVirtualJoystick;
+	Settings->VJoyDeadzone = Draft.VJoyDeadzone;
+	Settings->bShowFlightPathMarker = Draft.bFlightPathMarker;
+	Settings->CameraShakeScale = Draft.CameraShake;
+	Settings->bAudioInBackground = Draft.bAudioInBackground;
+	Settings->bInvertFreeLookPitch = Draft.bInvertFreeLook;
+	Settings->bInvertWalkPitch = Draft.bInvertWalk;
 
 	// Applies the video mode and scalability and saves GameUserSettings.ini.
 	Settings->ApplySettings(false);
@@ -1167,7 +1356,9 @@ void SSpaceMenu::Commit()
 
 void SSpaceMenu::ResetTab()
 {
-	const USpaceUserSettings* Defaults = GetDefault<USpaceUserSettings>();
+	// Not GetDefault<>(): the class default object is loaded from the player's own GameUserSettings.ini.
+	USpaceUserSettings* Defaults = NewObject<USpaceUserSettings>(GetTransientPackage());
+	Defaults->SetGameDefaults();
 	switch (CurrentTab)
 	{
 	case ESpaceSettingsTab::Graphics:
@@ -1177,23 +1368,40 @@ void SSpaceMenu::ResetTab()
 		const FIntPoint Desktop = USpaceUserSettings::Get() ? USpaceUserSettings::Get()->GetDesktopResolution() : FIntPoint::ZeroValue;
 		Draft.Resolution = FMath::Max(Resolutions.IndexOfByKey(Desktop), 0);
 		Draft.Quality = USpaceUserSettings::DefaultQualityLevel;
+		SetGroupsFromPreset(Draft.Quality);
 		Draft.ResolutionScale = USpaceUserSettings::DefaultRenderScale;
 		Draft.bVSync = false;
 		Draft.FrameLimit = 0;
+		Draft.FieldOfView = Defaults->FieldOfView;
+		Draft.Gamma = Defaults->Gamma;
+		Draft.Sharpen = Defaults->Sharpen;
+		Draft.bMotionBlur = Defaults->bMotionBlur;
+		Draft.bFilmGrain = Defaults->bFilmGrain;
+		Draft.bChromaticAberration = Defaults->bChromaticAberration;
 		break;
 	}
 	case ESpaceSettingsTab::Audio:
 		Draft.MasterVolume = Defaults->MasterVolume;
 		Draft.EffectsVolume = Defaults->EffectsVolume;
 		Draft.MusicVolume = Defaults->MusicVolume;
+		Draft.bAudioInBackground = Defaults->bAudioInBackground;
 		break;
 	case ESpaceSettingsTab::Controls:
 		Draft.MouseSensitivity = Defaults->MouseSensitivity;
 		Draft.bInvertPitch = Defaults->bInvertShipPitch;
+		Draft.bInvertFreeLook = Defaults->bInvertFreeLookPitch;
+		Draft.bInvertWalk = Defaults->bInvertWalkPitch;
 		break;
 	case ESpaceSettingsTab::Game:
 		Draft.HudMode = Defaults->HudMode;
 		Draft.bShowFps = Defaults->bShowFps;
+		Draft.bStartDecoupled = Defaults->bStartDecoupled;
+		Draft.bGSafe = Defaults->bDefaultGSafe;
+		Draft.bComStab = Defaults->bDefaultComStab;
+		Draft.bVirtualJoystick = Defaults->bVirtualJoystick;
+		Draft.VJoyDeadzone = Defaults->VJoyDeadzone;
+		Draft.bFlightPathMarker = Defaults->bShowFlightPathMarker;
+		Draft.CameraShake = Defaults->CameraShakeScale;
 		break;
 	default:
 		break;
