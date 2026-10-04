@@ -96,6 +96,29 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "1.0"))
 	float DisplayLightRadiusCm = 160.f;
 
+	/** The screens' scan line depth at runtime (the hologram look); negative keeps the material's own (0.06). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	float HoloScanDepth = 0.16f;
+
+	/** The screens' brightness key at runtime (below it the glass is clear); negative keeps the material's 0.07. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	float HoloGlassThreshold = 0.04f;
+
+	/** The plate behind the displays' glass at runtime (alpha 0 keeps the material's own grey 0.02). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	FLinearColor HoloBackColor = FLinearColor(0.003f, 0.0035f, 0.0045f, 1.f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	float HoloBackRoughness = 0.6f;
+
+	/** Metallic of that plate (a glossy plate mirrored the display lights as a blue ball in mid-screen and read as a monitor - critic 4. 10.; matte black it is). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	float HoloBackMetallic = 0.f;
+
+	/** The screens' emission x this at runtime (bloom of the projection); 0 keeps the material's. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	float HoloEmissiveScale = 1.45f;
+
 	/** The cockpit radar's range, metres (the reference's shows 2 km; asteroids here are kilometres apart). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "100.0"))
 	float RadarRangeM = 5000.f;

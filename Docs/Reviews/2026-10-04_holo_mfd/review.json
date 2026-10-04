@@ -1,0 +1,53 @@
+{
+ "topic": "holo_mfd",
+ "date": "2026-10-04",
+ "goal": "Holografické MFD (autor 4. 10. 2026: displeje mají mít „daleko víc holografic vibe… high tech advanced, teď působí plasticky, jako palubní displej, palubní počítač“). Obsah displejů jako světlo v tmavé prázdnotě: bez plných tmavých výplní, klávesy, přepínače a hodnoty jako světelné obrysy se září podél obrysu, tenké světelné rohy místo rámečku monitoru, záře projektoru od spodní hrany, hlubší řádkování, téměř černá deska za sklem. Posuzuj jen obsah displejů (MFD a malé středové), ne fyzický rám displeje a kokpit (ty se budou přestavovat zvlášť).",
+ "style": "High-tech holografické rozhraní (nad rámec SC, které má MFD jako fyzické obrazovky): azurové světelné linky a text, průhlednost, žádné plastové panely; čitelnost z pohledu pilota zachovat.",
+ "checklist": null,
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-04_holo_mfd",
+ "notes": [
+  "Reference vlevo: list 1 a 2 SC MFD (fyzická obrazovka, styl obsahu); list 3 a 4 náš předchozí stav (plastový dojem, který autor odmítl) proti novému.",
+  "Rám displeje se světelnou linkou je geometrie kokpitu, ne předmět této recenze.",
+  "Kolo 2: celý obraz displejů tónovaný do azurové a písmo se září (širší azurový obrys), hodnoty v rohových závorkách místo rámečků, klávesy a přepínače jako světelné pilulky, viněta a bodová mřížka za obsahem (nižší práh klíčování skla 0,025, takže slabé části projekce prosvítají), silnější záře projektoru zdola, větší a odsazené světelné rohy, 0m/s a 1.00 ATM. Paralaxa dvou rovin vyžaduje geometrii (dvě skla) a patří k přestavbě kokpitu.",
+  "Kolo 3: deska za obsahem je tmavé lesklé sklo (hladké, bez kovu), takže místo matné desky odráží kokpit a oblohu a obsah na něm „visí“; emise obrazovek x1,45 pro bloom; hustší a jasnější bodová mřížka; záře projektoru u spodní hrany silnější; spodní záložka jen jako světelná linka s textem; měkká viněta odstraněna (sklo klíčuje obsah podle jasu a slabý přechod se lámal do tvrdých obdélníků)."
+ ],
+ "pairs": [
+  {
+   "title": "CONFIGURATION, pohled pilota",
+   "distance": "near",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_own_04/frames/t00_08_06.jpg",
+   "ref_label": "SC 4.x",
+   "ours": "shots:20261004_191318_mfd_config/02_config_page.png",
+   "ours_label": "holografické MFD"
+  },
+  {
+   "title": "FLIGHT a STATUS",
+   "distance": "near",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_own_04/frames/t00_02_36.jpg",
+   "ref_label": "SC 4.x",
+   "ours": "shots:20261004_191353_ship_power/05_power_on.png",
+   "ours_label": "holografické MFD"
+  },
+  {
+   "title": "Před a po (CONFIGURATION)",
+   "distance": "near",
+   "light": "day",
+   "ref": "shots:20261004_183833_mfd_config/02_config_page.png",
+   "ref_label": "dřív: plné výplně, „palubní počítač“",
+   "ours": "shots:20261004_191318_mfd_config/02_config_page.png",
+   "ours_label": "teď: světelné obrysy"
+  },
+  {
+   "title": "Před a po (FLIGHT)",
+   "distance": "near",
+   "light": "day",
+   "ref": "shots:20261004_172544_ship_power/05_power_on.png",
+   "ref_label": "dřív",
+   "ours": "shots:20261004_191353_ship_power/05_power_on.png",
+   "ours_label": "teď"
+  }
+ ]
+}

@@ -8,6 +8,7 @@
 #include "Components/RectLightComponent.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/World.h"
+#include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Misc/App.h"
 #include "RenderDeferredCleanup.h"
@@ -125,6 +126,45 @@ void UCockpitDisplayComponent::BeginPlay()
 
 	Material = UMaterialInstanceDynamic::Create(Mesh->GetMaterial(Slot), this);
 	Material->SetTextureParameterValue(TextureParameter, RenderTarget);
+	// Holographic displays (author 4. 10. 2026): deeper scan lines than the glass's default...
+	if (HoloScanDepth >= 0.f)
+	{
+		Material->SetScalarParameterValue(TEXT("ScanDepth"), HoloScanDepth);
+	}
+	// A lower key threshold lets the faint parts of the projection (vignette, grid, glows) through instead of
+	// cutting them to clear glass.
+	if (HoloGlassThreshold >= 0.f)
+	{
+		Material->SetScalarParameterValue(TEXT("GlassThreshold"), HoloGlassThreshold);
+	}
+	// Brighter than a monitor: the projection blooms (the cyan tint keeps it under the white-type smear limit).
+	float Emissive = 0.f;
+	if (HoloEmissiveScale > 0.f && Material->GetScalarParameterValue(TEXT("EmissiveStrength"), Emissive))
+	{
+		Material->SetScalarParameterValue(TEXT("EmissiveStrength"), Emissive * HoloEmissiveScale);
+	}
+	// ...and the plate behind the glass near black and smoother: the picture floats in a dark void instead of
+	// sitting on a lit grey-blue panel (that, the solid key fills and the bezel read as a monitor).
+	if (HoloBackColor.A > 0.f)
+	{
+		TArray<UStaticMeshComponent*> Meshes;
+		GetOwner()->GetComponents<UStaticMeshComponent>(Meshes);
+		for (UStaticMeshComponent* Each : Meshes)
+		{
+			for (int32 Index = 0; Index < Each->GetNumMaterials(); ++Index)
+			{
+				UMaterialInterface* Back = Each->GetMaterial(Index);
+				if (Back && Back->GetName().Contains(TEXT("IntScreenBack")))
+				{
+					UMaterialInstanceDynamic* Plate = UMaterialInstanceDynamic::Create(Back, this);
+					Plate->SetVectorParameterValue(TEXT("BaseColor"), FLinearColor(HoloBackColor.R, HoloBackColor.G, HoloBackColor.B));
+					Plate->SetScalarParameterValue(TEXT("Roughness"), HoloBackRoughness);
+					Plate->SetScalarParameterValue(TEXT("Metallic"), HoloBackMetallic);
+					Each->SetMaterial(Index, Plate);
+				}
+			}
+		}
+	}
 	Mesh->SetMaterial(Slot, Material);
 	// Draw on the first tick.
 	SinceDraw = 1.f / UpdateRateHz;

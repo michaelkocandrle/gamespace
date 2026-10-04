@@ -622,6 +622,27 @@ the kit showroom now.
   stands up. F again cancels. The key list says `VSTÁT (LOĎ ZASTAVÍ)` / `ZŮSTAT SEDĚT (LOĎ BRZDÍ)`.
 - Headless: `Tools/Tests/test_mfd_config.py`; shots: `Tools/Shots/mfd_config.json` (`space.MfdPage 3 0`).
 
+### Holographic MFD look (step H, 4. 10. 2026)
+
+The displays' content is drawn as light (author: "more holographic, not an onboard computer"):
+
+- `USpaceCockpitDisplays::BuildTree` sets `bHolo` on every lamp and symbol;
+- keys and switches are pills of light with an outline glow; values sit in corner brackets; page tabs are a line;
+- the glass shows corner brackets, the projector's emitter line and glow from the bottom edge, and a dot grid;
+- the whole picture is tinted cyan, and the type gets a wider cyan outline (its halo).
+
+`UCockpitDisplayComponent` sets at runtime:
+
+- `HoloScanDepth` 0.16;
+- `HoloGlassThreshold` 0.04 (the brightness key);
+- `HoloEmissiveScale` 1.45;
+- the plate behind the glass (`IntScreenBack`) near black and matte (`HoloBackColor`).
+
+Glows are drawn along outlines only: a filled halo is keyed up by the screen material into a solid block, and so is a
+soft gradient crossing the key. The critic still read it as a styled physical screen after 3 rounds
+(`Docs/Reviews/2026-10-04_holo_mfd.md`); a hologram in a void needs the cockpit geometry (no plate or monitor frame,
+an emitter), see `Docs/Reviews/2026-10-04_cockpit_gap_analysis.md`.
+
 ## Ship art pipeline
 
 Since 24. 9. 2026 a ship's exterior is built exactly from its approved 2D drawing

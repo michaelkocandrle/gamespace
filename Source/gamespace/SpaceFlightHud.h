@@ -483,6 +483,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
 	bool bButton = false;
 
+	/** On the holographic MFDs (author 4. 10. 2026): light only - a glowing outline and a faint inner light, no dark
+	 * solid backing (that read as a plastic monitor). */
+	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
+	bool bHolo = false;
+
+	/** Holographic page tab: a line of light under the title instead of a closed pill (critic 4. 10.). */
+	UPROPERTY(BlueprintReadOnly, Category = "Lamp")
+	bool bHoloUnderline = false;
+
 	/** Sets where the lamp should go; a change starts a short flash. */
 	void SetTarget(bool bLit, const FLinearColor& InColor);
 
@@ -589,6 +598,11 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
 	float Thickness = 1.2f;
+
+	/** MfdGlass as a projection (author 4. 10. 2026): no panel - glowing corner brackets, a hairline frame and the
+	 * emitter's light rising from the bottom edge. */
+	UPROPERTY(BlueprintReadOnly, Category = "Symbol")
+	bool bHolo = false;
 
 protected:
 	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,

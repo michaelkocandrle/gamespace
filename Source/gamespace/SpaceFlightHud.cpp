@@ -655,6 +655,44 @@ int32 USpaceHudLamp::NativePaint(const FPaintArgs& Args, const FGeometry& Allott
 	// small square lamp inside on the right. The box keeps its colour; the square carries the state.
 	const float Lit = FMath::Clamp(Intensity + 0.6f * Flash * Intensity, 0.f, 1.5f);
 	const float Breath = FMath::Lerp(1.f, Pulse, FMath::Min(Lit, 1.f));
+	if (bHolo && bHoloUnderline)
+	{
+		const TArray<FVector2f> Under = { FVector2f(Size.X * 0.08f, Size.Y - 2.f), FVector2f(Size.X * 0.92f, Size.Y - 2.f) };
+		PaintLine(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), Under, Faded(Color, 0.3f), true, 7.f);
+		PaintLine(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), Under, Faded(Color, 1.f), true, 2.f);
+		return LayerId + 2;
+	}
+	if (bHolo && (bButton || bBadge))
+	{
+		// A hologram's key: an outline of light with its glow, a faint inner light when lit; never a dark slab.
+		const float Lit01 = FMath::Min(Lit, 1.f);
+		if (bBadge)
+		{
+			// A value in brackets of light, not a form field (critic 4. 10.): four corners and their glow.
+			const float Arm = FMath::Min(14.f, Size.Y * 0.4f);
+			const FVector2f Corners[4] = { FVector2f(1.f, 1.f), FVector2f(Size.X - 1.f, 1.f), FVector2f(Size.X - 1.f, Size.Y - 1.f), FVector2f(1.f, Size.Y - 1.f) };
+			for (const FVector2f& Corner : Corners)
+			{
+				const float SX = Corner.X < Size.X * 0.5f ? 1.f : -1.f, SY = Corner.Y < Size.Y * 0.5f ? 1.f : -1.f;
+				const TArray<FVector2f> Bracket = { Corner + FVector2f(SX * Arm, 0.f), Corner, Corner + FVector2f(0.f, SY * Arm) };
+				PaintLine(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), Bracket, Faded(Color, 0.25f * Breath), true, 6.f);
+				PaintLine(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), Bracket, Faded(Color, 0.95f), true, 2.f);
+			}
+			return LayerId + 2;
+		}
+		// Keys and switches: pills of light.
+		const float Radius = Size.Y * 0.5f;
+		// The glow follows the outline only: a filled halo (GlowRounded) is keyed up by the screen material into a
+		// solid block, which is what made the keys read as plastic.
+		const float Glow = (0.3f + 0.7f * Lit01) * Breath;
+		RoundedBox(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, Radius, FLinearColor::Transparent,
+			Faded(Color, 0.10f * Glow), 8.f);
+		RoundedBox(OutDrawElements, LayerId, AllottedGeometry, FVector2f::ZeroVector, Size, Radius, FLinearColor::Transparent,
+			Faded(Color, 0.22f * Glow), 4.f);
+		RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, FVector2f::ZeroVector, Size, Radius, FLinearColor::Transparent,
+			Faded(Color, 0.45f + 0.55f * Lit01), 1.2f + 0.8f * Lit01);
+		return LayerId + 2;
+	}
 	if (bButton)
 	{
 		// The reference's MFD keys: a dark rounded key with a blue rim, lit keys filled and bright.
@@ -1064,6 +1102,41 @@ int32 USpaceHudSymbol::NativePaint(const FPaintArgs& Args, const FGeometry& Allo
 		break;
 	case ESpaceHudSymbol::MfdGlass:
 	{
+		if (bHolo)
+		{
+			// The projection: the emitter's light rising from the bottom edge, a hairline frame and glowing corner
+			// brackets. Everything dark stays clear glass (the screen material keys the content out by brightness).
+			TArray<FSlateGradientStop> Rise;
+			Rise.Add(FSlateGradientStop(FVector2f::ZeroVector, FLinearColor(Color.R, Color.G, Color.B, 0.f)));
+			Rise.Add(FSlateGradientStop(FVector2f(0.f, Size.Y * 0.78f), FLinearColor(Color.R, Color.G, Color.B, 0.f)));
+			Rise.Add(FSlateGradientStop(FVector2f(0.f, Size.Y * 0.95f), FLinearColor(Color.R, Color.G, Color.B, 0.3f)));
+			Rise.Add(FSlateGradientStop(FVector2f(0.f, Size.Y), FLinearColor(Color.R, Color.G, Color.B, 0.55f)));
+			FSlateDrawElement::MakeGradient(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), MoveTemp(Rise), Orient_Horizontal);
+			// A dot grid at a few percent - the space the picture floats in (static). No soft vignette: the glass keys
+			// the content by brightness, and a faint gradient crossing the key came out as hard dark boxes.
+			for (float GX = 22.f; GX < Size.X - 16.f; GX += 22.f)
+			{
+				for (float GY = 22.f; GY < Size.Y - 16.f; GY += 22.f)
+				{
+					PaintLine(OutDrawElements, LayerId + 1, Paint, { FVector2f(GX - 1.f, GY), FVector2f(GX + 1.f, GY) }, Faded(Color, 0.32f), false, 2.f);
+				}
+			}
+			// The emitter: a bright line along the bottom edge.
+			PaintLine(OutDrawElements, LayerId + 1, Paint, { FVector2f(10.f, Size.Y - 3.f), FVector2f(Size.X - 10.f, Size.Y - 3.f) }, Faded(Color, 0.75f), true, 2.f);
+			RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, FVector2f(3.f, 3.f), Size - FVector2f(6.f, 6.f), 6.f, FLinearColor::Transparent,
+				Faded(Color, 0.14f), 1.f);
+			const float Arm = FMath::Min(Size.X, Size.Y) * 0.08f;
+			const float I = 9.f;
+			const FVector2f Corners[4] = { FVector2f(I, I), FVector2f(Size.X - I, I), FVector2f(Size.X - I, Size.Y - I), FVector2f(I, Size.Y - I) };
+			for (const FVector2f& Corner : Corners)
+			{
+				const float SX = Corner.X < Size.X * 0.5f ? 1.f : -1.f, SY = Corner.Y < Size.Y * 0.5f ? 1.f : -1.f;
+				const TArray<FVector2f> Bracket = { Corner + FVector2f(SX * Arm, 0.f), Corner, Corner + FVector2f(0.f, SY * Arm) };
+				PaintLine(OutDrawElements, LayerId + 2, Paint, Bracket, Faded(Color, 0.3f), true, 8.f);
+				PaintLine(OutDrawElements, LayerId + 2, Paint, Bracket, Faded(Color, 1.f), true, 3.f);
+			}
+			break;
+		}
 		// Deep blue-black, a little lighter at the top, like lit glass. Half as bright as it was: the
 		// Star Citizen screens are dark glass the content stands out of (24. 9. 2026, HANDOFF point 72).
 		TArray<FSlateGradientStop> Stops;
@@ -2284,8 +2357,9 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 	const FString None = TEXT("-");
 	SetText(TEXT("RowRAltValue"), !State.bHasEnvironment ? None : State.AltitudeAglM < 10000.f ? FString::Printf(TEXT("%.0fm"), State.AltitudeAglM)
 		: FString::Printf(TEXT("%.1fkm"), State.AltitudeAglM / 1000.f), Label);
-	SetText(TEXT("RowVsiValue"), State.bHasEnvironment ? FString::Printf(TEXT("%+.0fm/s"), State.VerticalSpeedMS) : None, Label);
-	SetText(TEXT("RowAtmoValue"), State.bHasEnvironment ? FString::Printf(TEXT("%.3fp"), State.AtmosphereDensity) : None, Label);
+	SetText(TEXT("RowVsiValue"), State.bHasEnvironment ? (FMath::Abs(State.VerticalSpeedMS) < 0.5f ? FString(TEXT("0m/s"))
+		: FString::Printf(TEXT("%+.0fm/s"), State.VerticalSpeedMS)) : None, Label);
+	SetText(TEXT("RowAtmoValue"), State.bHasEnvironment ? FString::Printf(TEXT("%.2f ATM"), State.AtmosphereDensity) : None, Label);
 	SetText(TEXT("RowGearValue"), State.GearLabel, State.bGearWarning && !State.bGearDown ? (bBlink ? Red : Faded(Red, 0.4f))
 		: State.bGearMoving ? Amber : State.bGearDown ? Instrument : Label);
 	SetText(TEXT("RowQuantumValue"), State.QuantumLabel, State.QuantumLabel == TEXT("OFF") ? Faded(Label, 0.6f)
@@ -2875,12 +2949,13 @@ void USpaceCockpitDisplays::BuildTree()
 		// One fixed box per row with the bar, the label and the switch laid over it (in a horizontal box the label's
 		// tall line box set its own row pitch and the switches drifted off their rows - critic 4. 10.).
 		UOverlay* ConfigRow = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("ConfigRow%d"), Index)));
-		// A faint lane under every other row, across the whole width: from the seat the panel is seen at an angle
-		// and the rule lines alone did not tie a switch to its label (critic 4. 10.).
-		// (a line as thick as the row is the band)
-		USpaceHudSymbol* Lane = Symbol(FName(*FString::Printf(TEXT("ConfigLane%d"), Index)), ESpaceHudSymbol::Line, Faded(MfdBlue, Index % 2 == 0 ? 0.22f : 0.f));
-		Lane->Thickness = ConfigRowHeight - 4.f;
-		Lane->Points = { FVector2D(0.0, 0.5), FVector2D(1.0, 0.5) };
+		// From the seat the panel is seen at an angle and the rule lines alone did not tie a switch to its label
+		// (critic 4. 10.).
+		// A thin leader of light from the label to the switch (a filled lane was keyed up by the screen material into
+		// a solid block - not a hologram, author 4. 10.).
+		USpaceHudSymbol* Lane = Symbol(FName(*FString::Printf(TEXT("ConfigLane%d"), Index)), ESpaceHudSymbol::Line, Faded(MfdBlue, 0.45f));
+		Lane->Thickness = 1.5f;
+		Lane->Points = { FVector2D(0.57, 0.5), FVector2D(0.78, 0.5) };
 		if (UOverlaySlot* LaneSlot = ConfigRow->AddChildToOverlay(Lane))
 		{
 			LaneSlot->SetHorizontalAlignment(HAlign_Fill);
@@ -2938,7 +3013,7 @@ void USpaceCockpitDisplays::BuildTree()
 			ValueSlot->SetHorizontalAlignment(HAlign_Center);
 			ValueSlot->SetVerticalAlignment(VAlign_Center);
 		}
-		Horizontal(Line, Sized(FName(*FString::Printf(TEXT("RowPillBox_%s"), Name)), Value, 176.f, 44.f), VAlign_Center, FMargin(0.f));
+		Horizontal(Line, Sized(FName(*FString::Printf(TEXT("RowPillBox_%s"), Name)), Value, 196.f, 44.f), VAlign_Center, FMargin(0.f));
 		Vertical(List, Line, HAlign_Fill, FMargin(0.f, 2.f));
 		Vertical(List, Rule(FName(*FString::Printf(TEXT("RowRule_%s"), Name)), 0.f, 0.15f), HAlign_Fill, FMargin(0.f, 2.f));
 	};
@@ -3082,6 +3157,31 @@ void USpaceCockpitDisplays::BuildTree()
 	Boot(TEXT("Status"), ScreenRect(TEXT("right")), { TEXT("LIFE SUPPORT"), TEXT("RADAR"), TEXT("QUANTUM DRIVE") });
 	Boot(TEXT("Radar"), ScreenRect(TEXT("centre_top")), {});
 	Boot(TEXT("Ship"), ScreenRect(TEXT("centre_bottom")), {});
+
+	// Holographic displays (author 4. 10. 2026: "daleko víc holografic vibe ... působí plasticky, jako palubní
+	// počítač"): every key, badge and glass on them is drawn as light.
+	WidgetTree->ForEachWidget([](UWidget* Widget)
+	{
+		if (UTextBlock* Text = Cast<UTextBlock>(Widget))
+		{
+			// The type's glow: a wider, brighter cyan outline than the HUD's faint one (static, so TSR keeps it).
+			FSlateFontInfo Font = Text->GetFont();
+			Font.OutlineSettings.OutlineSize = 2;
+			Font.OutlineSettings.OutlineColor = FLinearColor(0.15f, 0.7f, 1.f, 0.42f);
+			Text->SetFont(Font);
+		}
+		else if (USpaceHudLamp* Lamp = Cast<USpaceHudLamp>(Widget))
+		{
+			Lamp->bHolo = true;
+			Lamp->bHoloUnderline = Lamp->GetName().EndsWith(TEXT("TabShape"));
+		}
+		else if (USpaceHudSymbol* Part = Cast<USpaceHudSymbol>(Widget))
+		{
+			Part->bHolo = true;
+		}
+	});
+	// Light, not paint: the whole picture tinted cyan, so the near-white type glows like the HUD's.
+	SetColorAndOpacity(FLinearColor(0.68f, 0.94f, 1.f, 1.f));
 
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 }

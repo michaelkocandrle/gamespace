@@ -75,6 +75,6 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 1. **Wayfarer revize G** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený.
 2. **Přistání na svahu hotové** (3. 10.), čeká na vyzkoušení autorem; později odpružení nohou, mírnější klesání u země.
 3. **Podle SC z autorova záznamu** (`OwnCapture_Gameplay_Notes.md`): menu, nastavení, klávesy, interakce hotové; další
-   další 3. visor pěšky, 4. systémy lodi, 5. stanice a hangár. **Přednost má vzhled** (autor 4. 10.: kokpit „plastový“,
-   MFD jako palubní počítač): plán `Docs/Reviews/2026-10-04_cockpit_gap_analysis.md`, začít krokem H (holografické MFD).
+   pak visor pěšky, systémy lodi, stanice. **Přednost má vzhled** (autor 4. 10.: kokpit „plastový“, MFD jako PC): plán `Docs/Reviews/2026-10-04_cockpit_gap_analysis.md`; krok H (holo obsah MFD) hotový, kritik
+   FAIL 5,9 – hologram potřebuje geometrii (bez desky a rámu monitoru), další je 2D návrh kokpitu v2.
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).
