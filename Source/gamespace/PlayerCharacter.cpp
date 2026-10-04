@@ -21,6 +21,7 @@
 #include "SpaceDebugHUD.h"
 #include "SpaceInterior.h"
 #include "SpacePlayerController.h"
+#include "Camera/PlayerCameraManager.h"
 #include "SpaceshipPawn.h"
 #include "SpaceUserSettings.h"
 #include "UObject/ConstructorHelpers.h"
@@ -598,12 +599,14 @@ bool APlayerCharacter::TryInteriorInteract()
 		InteriorShip = nullptr;
 		Ship->SetInteriorWalk(false);
 		ASpacePlayerController::SetShipInteriorLighting(false);
+		const FMinimalViewInfo Standing = PlayerController->PlayerCameraManager ? PlayerController->PlayerCameraManager->GetCameraCacheView() : FMinimalViewInfo();
 		PlayerController->Possess(Ship);
 		Ship->OnBoarded();
-		// the view glides from the standing eye down into the seat; the character stays (hidden, no collision) as the
-		// blend's start until it ends
-		PlayerController->SetViewTarget(this);
-		PlayerController->SetViewTargetWithBlend(Ship, SeatBlendSeconds, VTBlend_EaseInOut, 2.0f);
+		// the view travels from the standing eye over the backrest down into the seat, the head dipping
+		if (ASpacePlayerController* SpaceController = Cast<ASpacePlayerController>(PlayerController))
+		{
+			SpaceController->PlaySeatTransition(Standing, Ship, SeatBlendSeconds, 22.f, 16.f);
+		}
 		SetActorHiddenInGame(true);
 		SetActorEnableCollision(false);
 		SetLifeSpan(SeatBlendSeconds + 0.2f);

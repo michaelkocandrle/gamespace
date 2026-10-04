@@ -19,6 +19,7 @@
 #include "HAL/IConsoleManager.h"
 #include "Rendering/DrawElements.h"
 #include "SpaceshipPawn.h"
+#include "HAL/PlatformTime.h"
 #include "SpaceUserSettings.h"
 #include "Brushes/SlateRoundedBoxBrush.h"
 #include "Misc/Paths.h"
@@ -3150,6 +3151,15 @@ void USpaceCockpitDisplays::BuildTree()
 			ColumnSlot->SetHorizontalAlignment(HAlign_Fill);
 			ColumnSlot->SetVerticalAlignment(VAlign_Fill);
 		}
+		// the emitter's beam: a bright line on the top edge while the picture rises (SetPower fades it)
+		USpaceHudSymbol* Scan = Symbol(FName(*FString::Printf(TEXT("Boot%sScanLine"), Name)), ESpaceHudSymbol::Line, FLinearColor(0.75f, 0.95f, 1.f, 1.f));
+		Scan->Thickness = 5.f;
+		Scan->Points = { FVector2D(0.02, 0.5), FVector2D(0.98, 0.5) };
+		if (UOverlaySlot* ScanSlot = Overlay->AddChildToOverlay(Sized(FName(*FString::Printf(TEXT("Boot%sScan"), Name)), Scan, 0.f, 10.f)))
+		{
+			ScanSlot->SetHorizontalAlignment(HAlign_Fill);
+			ScanSlot->SetVerticalAlignment(VAlign_Top);
+		}
 		Overlay->SetVisibility(ESlateVisibility::Collapsed);
 		Place(Overlay, Rect);
 	};
@@ -3349,17 +3359,44 @@ void USpaceCockpitDisplays::SetCentreColumn(bool bOn)
 
 void USpaceCockpitDisplays::SetPower(bool bLit, float BootAlpha)
 {
+	constexpr double RetractSeconds = 0.45;
+	const double Now = FPlatformTime::Seconds();
+	if (bPowerLit && !bLit)
+	{
+		// switched off: the picture retracts into the emitter before it goes dark
+		RetractStartSeconds = Now;
+		RetractFromView = PowerBootAlpha < 1.f ? 1 : 2;
+	}
 	bPowerLit = bLit;
 	PowerBootAlpha = bLit ? FMath::Clamp(BootAlpha, 0.f, 1.f) : 0.f;
+	const bool bRetracting = !bLit && RetractStartSeconds >= 0.0 && Now - RetractStartSeconds < RetractSeconds;
 	ApplyScreenVisibility();
-	// The holo projection deploys (author 5. 10. 2026: SC animates it): over the first quarter of the start-up the
-	// picture rises out of the emitter - its height grows from a line of light to full.
-	const float Rise = FMath::SmoothStep(0.f, 0.25f, PowerBootAlpha);
+	if (!WidgetTree)
+	{
+		return;
+	}
+	// The holo projection deploys (author 5. 10. 2026: "výraznější animace", SC animates it): over the first 40 % of
+	// the start-up the picture rises out of the emitter from a line of light, overshoots a little and settles; it
+	// flickers twice as it catches and a bright line rides its top edge while it rises. Off, it sinks back down.
+	const float RiseT = FMath::Clamp(PowerBootAlpha / 0.4f, 0.f, 1.f);
+	const float C1 = 1.70158f, C3 = C1 + 1.f;                       // ease-out-back
+	const float Rise = bLit ? (RiseT >= 1.f ? 1.f : 1.f + C3 * FMath::Pow(RiseT - 1.f, 3.f) + C1 * FMath::Pow(RiseT - 1.f, 2.f)) : 1.f;
+	const float Sink = bRetracting ? 1.f - FMath::SmoothStep(0.f, 1.f, float((Now - RetractStartSeconds) / RetractSeconds)) : 1.f;
+	const bool bFlicker = bLit && RiseT > 0.f && RiseT < 0.3f && FMath::Frac(Now * 14.0) < 0.35;
 	for (const TCHAR* Name : { TEXT("Flight"), TEXT("Status"), TEXT("Radar"), TEXT("Ship") })
 	{
-		if (UWidget* Boot = WidgetTree ? WidgetTree->FindWidget(FName(*FString::Printf(TEXT("Boot%s"), Name))) : nullptr)
+		for (const FString& Widget : { FString::Printf(TEXT("Boot%s"), Name), FString::Printf(TEXT("%sScreen"), Name) })
 		{
-			Boot->SetRenderScale(FVector2D(FMath::Lerp(0.85f, 1.f, Rise), FMath::Max(Rise, 0.02f)));
+			if (UWidget* Part = WidgetTree->FindWidget(FName(*Widget)))
+			{
+				const float Y = bRetracting ? Sink : (Widget.StartsWith(TEXT("Boot")) ? Rise : 1.f);
+				Part->SetRenderScale(FVector2D(FMath::Lerp(0.8f, 1.f, FMath::Clamp(Y, 0.f, 1.f)), FMath::Max(Y, 0.015f)));
+				Part->SetRenderOpacity(bFlicker && Widget.StartsWith(TEXT("Boot")) ? 0.35f : 1.f);
+			}
+		}
+		if (UWidget* Scan = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("Boot%sScan"), Name))))
+		{
+			Scan->SetRenderOpacity(bLit ? 1.f - FMath::SmoothStep(0.7f, 1.f, RiseT) : 0.f);
 		}
 	}
 	if (bLit && PowerBootAlpha < 1.f && WidgetTree)
@@ -3389,7 +3426,8 @@ void USpaceCockpitDisplays::SetPower(bool bLit, float BootAlpha)
 
 void USpaceCockpitDisplays::ApplyScreenVisibility()
 {
-	const int32 View = !bPowerLit ? 0 : PowerBootAlpha < 1.f ? 1 : 2;
+	const bool bRetracting = !bPowerLit && RetractStartSeconds >= 0.0 && FPlatformTime::Seconds() - RetractStartSeconds < 0.45;
+	const int32 View = bRetracting ? RetractFromView : !bPowerLit ? 0 : PowerBootAlpha < 1.f ? 1 : 2;
 	if (View == AppliedPowerView || !WidgetTree)
 	{
 		return;
@@ -3399,10 +3437,13 @@ void USpaceCockpitDisplays::ApplyScreenVisibility()
 	{
 		const bool bCentre = FCString::Strcmp(Name, TEXT("Radar")) == 0 || FCString::Strcmp(Name, TEXT("Ship")) == 0;
 		const bool bShown = !bCentre || bCentreOn;
-		if (UWidget* Boot = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("Boot%s"), Name))))
+		for (const FString& Widget : { FString::Printf(TEXT("Boot%s"), Name), FString::Printf(TEXT("%sScreen"), Name) })
 		{
-			// the projection grows up out of its emitter (pivot on the bottom edge)
-			Boot->SetRenderTransformPivot(FVector2D(0.5, 1.0));
+			if (UWidget* Part = WidgetTree->FindWidget(FName(*Widget)))
+			{
+				// the projection grows out of / sinks into its emitter (pivot on the bottom edge)
+				Part->SetRenderTransformPivot(FVector2D(0.5, 1.0));
+			}
 		}
 		if (UWidget* Pages = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("%sScreen"), Name))))
 		{

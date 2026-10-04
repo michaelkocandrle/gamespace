@@ -33,6 +33,8 @@
 #include "SpaceInteraction.h"
 #include "SpaceInteractionOverlay.h"
 #include "SpaceNotifications.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSpacePlayer, Log, All);
 
@@ -198,10 +200,72 @@ void ASpacePlayerController::PlayerTick(float DeltaTime)
 		UpdateTitleCamera(DeltaTime);
 	}
 	TickEntryWatch();
+	TickSeatTransition(DeltaTime);
 	if (!IsTitleScreen())
 	{
 		TickInteraction();
 		TickNotifications();
+	}
+}
+
+void ASpacePlayerController::PlaySeatTransition(const FMinimalViewInfo& From, AActor* To, float Seconds, float ArcCm, float PitchDipDeg)
+{
+	if (!To || Seconds <= 0.f || !GetWorld())
+	{
+		return;
+	}
+	if (!SeatCamera)
+	{
+		FActorSpawnParameters Params;
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SeatCamera = GetWorld()->SpawnActor<ACameraActor>(From.Location, From.Rotation, Params);
+		if (!SeatCamera)
+		{
+			return;
+		}
+		SeatCamera->GetCameraComponent()->bConstrainAspectRatio = false;
+	}
+	SeatCamera->SetActorLocationAndRotation(From.Location, From.Rotation);
+	SeatCamera->GetCameraComponent()->SetFieldOfView(From.FOV);
+	SeatFrom = From;
+	SeatTo = To;
+	SeatSeconds = Seconds;
+	SeatElapsed = 0.f;
+	SeatArcCm = ArcCm;
+	SeatDipDeg = PitchDipDeg;
+	SetViewTarget(SeatCamera);
+}
+
+void ASpacePlayerController::TickSeatTransition(float DeltaTime)
+{
+	if (SeatSeconds <= 0.f || !SeatCamera)
+	{
+		return;
+	}
+	AActor* To = SeatTo.Get();
+	if (!To)
+	{
+		SeatSeconds = 0.f;
+		return;
+	}
+	SeatElapsed += DeltaTime;
+	const float A = FMath::Clamp(SeatElapsed / SeatSeconds, 0.f, 1.f);
+	const float E = A * A * A * (A * (A * 6.f - 15.f) + 10.f);       // smootherstep: a body's start and stop
+	FMinimalViewInfo ToView;
+	To->CalcCamera(DeltaTime, ToView);
+	// a quadratic arc over the backrest, in the ship's (or the walker's) up
+	const FVector Up = To->GetActorUpVector();
+	const FVector Mid = FMath::Lerp(SeatFrom.Location, ToView.Location, 0.5f) + Up * SeatArcCm;
+	const FVector P = FMath::Lerp(FMath::Lerp(SeatFrom.Location, Mid, E), FMath::Lerp(Mid, ToView.Location, E), E);
+	FRotator R = FQuat::Slerp(SeatFrom.Rotation.Quaternion(), ToView.Rotation.Quaternion(), E).Rotator();
+	R.Pitch -= SeatDipDeg * FMath::Sin(A * PI);                      // the head looks down on the way
+	R.Roll += SeatDipDeg * 0.25f * FMath::Sin(A * 2.f * PI);          // and sways a little as the body turns
+	SeatCamera->SetActorLocationAndRotation(P, R);
+	SeatCamera->GetCameraComponent()->SetFieldOfView(FMath::Lerp(SeatFrom.FOV, ToView.FOV, E));
+	if (A >= 1.f)
+	{
+		SeatSeconds = 0.f;
+		SetViewTarget(To);
 	}
 }
 

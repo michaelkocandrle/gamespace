@@ -250,7 +250,7 @@ protected:
 	/** Sitting down / getting up: the view moves between the standing eye and the seat this long (author 5. 10. 2026:
 	 * no cuts - SC animates it). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character|Ship")
-	float SeatBlendSeconds = 0.8f;
+	float SeatBlendSeconds = 1.4f;
 
 	/** The capsule inside a ship (SetShipCapsule): 56 cm wide, 1.80 m tall - a person, not the mannequin's margin. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "10.0", Units = "cm"))

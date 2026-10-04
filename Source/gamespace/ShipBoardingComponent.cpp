@@ -11,6 +11,8 @@
 #include "GameFramework/PlayerController.h"
 #include "PhysicsEngine/BodySetup.h"
 #include "PlayerCharacter.h"
+#include "Camera/PlayerCameraManager.h"
+#include "SpacePlayerController.h"
 #include "SpaceInterior.h"
 #include "SpaceshipLog.h"
 #include "SpaceshipPawn.h"
@@ -406,13 +408,16 @@ APawn* UShipBoardingComponent::LeaveSeat()
 		return nullptr;
 	}
 	Ship->ClearPilotInput();
+	const FMinimalViewInfo Seated = PlayerController->PlayerCameraManager ? PlayerController->PlayerCameraManager->GetCameraCacheView() : FMinimalViewInfo();
 	PlayerController->Possess(Pilot);
 	if (APlayerCharacter* Character = Cast<APlayerCharacter>(Pilot))
 	{
 		Character->BoardInterior(Ship, Seat.GetRotation().GetForwardVector());
-		// getting up: the view rises from the seat to the standing eye instead of cutting (author 5. 10. 2026)
-		PlayerController->SetViewTarget(Ship);
-		PlayerController->SetViewTargetWithBlend(Character, Character->GetSeatBlendSeconds(), VTBlend_EaseInOut, 2.0f);
+		// getting up: the view rises out of the seat and back over the backrest to the standing eye (author 5. 10. 2026)
+		if (ASpacePlayerController* SpaceController = Cast<ASpacePlayerController>(PlayerController))
+		{
+			SpaceController->PlaySeatTransition(Seated, Character, Character->GetSeatBlendSeconds() * 0.85f, 18.f, 10.f);
+		}
 	}
 	UE_LOG(LogSpaceship, Log, TEXT("%s: pilot up from the seat at %s"), *Ship->GetName(), *Start.GetLocation().ToString());
 	return Pilot;

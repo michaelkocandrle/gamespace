@@ -1049,6 +1049,9 @@ private:
 	void ApplyScreenVisibility();
 	bool bCentreOn = true;
 	bool bPowerLit = true;
+	/** Power off: the projection retracts into its emitter for RetractSeconds before it goes dark. */
+	double RetractStartSeconds = -1.0;
+	int32 RetractFromView = 2;
 	float PowerBootAlpha = 1.f;
 	int32 AppliedPowerView = -1;
 

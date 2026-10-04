@@ -597,11 +597,19 @@ debug HUD stays only in HUD mode 3. Headless: `Tools/Tests/test_interaction.py`;
 
 ### Animations (author 5. 10. 2026: SC animates them; first ones)
 
-- **Sitting down / getting up**: no cut. The view glides between the standing eye and the seat
-  (`APlayerCharacter::SeatBlendSeconds` 0.8 s, `SetViewTargetWithBlend`, ease in-out); sitting, the character stays
-  hidden and without collision as the blend's start until it ends (`SetLifeSpan`).
-- **Holo projection deploys** at power on: over the first quarter of the start-up the MFD pictures grow up out of
-  their emitters (render scale with a bottom pivot, `USpaceCockpitDisplays::SetPower`); shot `ship_power/holo_rising`.
+- **Sitting down / getting up**: no cut (`ASpacePlayerController::PlaySeatTransition`).
+  - The view travels on an arc over the backrest (22 / 18 cm), the head dipping (16 / 10 degrees) and swaying a
+    little.
+  - Smootherstep over `APlayerCharacter::SeatBlendSeconds` 1.4 s (getting up 1.2 s), through a camera actor.
+  - Sitting, the character stays hidden and without collision as the start of the arc until it ends.
+- **Holo projection deploys** at power on, over the first 40 % of the start-up
+  (`USpaceCockpitDisplays::SetPower`, bottom pivot):
+  - the MFD pictures rise out of their emitters with an ease-out-back overshoot;
+  - they flicker twice as they catch;
+  - a bright beam line rides the rising top edge.
+- **Holo projection retracts** when the ship is switched off: the pictures sink back into the emitters for 0.45 s
+  before going dark.
+- Shots: `ship_power/holo_rising`, `holo_retracting`.
 - Still to do: the ramp and the doors opening, a body animation for sitting.
 
 ### Ship power (SC cold start, step 2a)

@@ -43,6 +43,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Menu")
 	bool IsTitleScreen() const;
 
+	/**
+	 * Sitting down / getting up (author 5. 10. 2026: "výraznější animace", SC animates the body into the seat): the view
+	 * travels from From (the old eye) to To's camera on an arc ArcCm high (over the backrest), the head dipping
+	 * PitchDipDeg on the way, ease in-out over Seconds; then To is the view target again.
+	 */
+	void PlaySeatTransition(const FMinimalViewInfo& From, AActor* To, float Seconds, float ArcCm, float PitchDipDeg);
+
+	/** Tests and shots: 0..1 through a running seat transition, -1 when none runs. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Tests")
+	float GetSeatTransitionAlpha() const { return SeatSeconds > 0.f ? FMath::Clamp(SeatElapsed / SeatSeconds, 0.f, 1.f) : -1.f; }
+
 	UFUNCTION(BlueprintPure, Category = "Menu")
 	bool IsMenuOpen() const { return Menu.IsValid(); }
 
@@ -142,6 +153,15 @@ private:
 	void HandleShowroomKey(const FInputActionValue& Value);
 	void ShowMenu(bool bTitleScreen);
 	void TickInteraction();
+	void TickSeatTransition(float DeltaTime);
+	UPROPERTY(Transient)
+	TObjectPtr<class ACameraActor> SeatCamera;
+	FMinimalViewInfo SeatFrom;
+	TWeakObjectPtr<AActor> SeatTo;
+	float SeatSeconds = 0.f;
+	float SeatElapsed = 0.f;
+	float SeatArcCm = 0.f;
+	float SeatDipDeg = 0.f;
 	void SetInteractMode(bool bOn);
 	/** Hint cards the first time something matters, toasts on events (USpaceNotifications). */
 	void TickNotifications();

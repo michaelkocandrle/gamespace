@@ -85,6 +85,21 @@
    ]
   },
   {
+   "name": "power_on_again",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 3.0
+  },
+  {
+   "name": "holo_retracting",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 0.2,
+   "console": [
+    "space.Power 0"
+   ]
+  },
+  {
    "name": "power_off_chase",
    "camera": "chase",
    "hud": 1,
