@@ -95,6 +95,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Interior")
 	bool IsWalkingInterior() const { return bWalkingInterior; }
 
+	/**
+	 * Screenshots (console space.Menu): shows a menu page over whatever is running, without pausing, so the shot runner
+	 * keeps ticking. Page 0 title, 1 pause, 2 settings, 3 loading; Tab the settings tab; a negative page hides it.
+	 */
+	void DebugShowMenu(int32 Page, int32 Tab);
+
 	/** Whether this level has an interior to walk. */
 	UFUNCTION(BlueprintPure, Category = "Interior")
 	bool HasInterior() const;

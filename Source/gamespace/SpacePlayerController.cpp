@@ -220,6 +220,37 @@ void ASpacePlayerController::ShowMenu(bool bTitleScreen)
 	SetShowMouseCursor(true);
 }
 
+void ASpacePlayerController::DebugShowMenu(int32 Page, int32 Tab)
+{
+	if (Page < 0)
+	{
+		HideMenu();
+		return;
+	}
+	ShowMenu(Page == 0);
+	if (Menu.IsValid())
+	{
+		Menu->ShowTab(ESpaceSettingsTab(FMath::Clamp(Tab, 0, int32(ESpaceSettingsTab::Count) - 1)));
+		Menu->ShowPage(ESpaceMenuPage(FMath::Clamp(Page, 0, 3)));
+	}
+}
+
+namespace SpacePlayerControllerConsole
+{
+	static FAutoConsoleCommandWithWorldAndArgs MenuCommand(
+		TEXT("space.Menu"),
+		TEXT("space.Menu <page> [tab]: shows a menu page over the game without pausing, for screenshots - 0 title, 1 pause, 2 settings, 3 loading, -1 hides it; tab 0 game, 1 graphics, 2 audio, 3 controls."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			ASpacePlayerController* Controller = World ? Cast<ASpacePlayerController>(World->GetFirstPlayerController()) : nullptr;
+			if (!Controller || Args.Num() < 1)
+			{
+				return;
+			}
+			Controller->DebugShowMenu(FCString::Atoi(*Args[0]), Args.Num() > 1 ? FCString::Atoi(*Args[1]) : 1);
+		}));
+}
+
 void ASpacePlayerController::HideMenu()
 {
 	if (MenuHost.IsValid())

@@ -15,6 +15,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
   **Přistání na svahu** (3. 10.): loď stojí na třech patkách (rovina pod patkami, `TripodRest`), pohyb sweepuje vlastní
   kolizi trupu (UCX) místo kořenového boxu, `Obstructed` = trup by se dotkl terénu; `landing_slope`, README „On a slope“.
   HUD: rámeček stavu přistání nad páskou kurzu (TOUCHDOWN, LANDED, jantarově důvod odmítnutí), `landing_hud`.
+- **Menu a nastavení ve stylu SC 4.10** (4. 10., z autorova záznamu SC, kritik PASS 7,4): karta HRÁT, záložky, písmo Oxanium.
   Tělesa pro quantum, radar a `FindNearest` drží `USpaceCelestialRegistrySubsystem`.
 - **Postava:** první osoba (V pěšky = třetí jen pro testy); sférická gravitace planety i umělá v lodi.
 - **Wayfarer** (Halcyon Freightworks, malá multirole, 1 pilot) – jediná létající loď:
@@ -72,9 +73,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Další kroky
 
-1. **Wayfarer revize G** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený do finální
-   recenze. Další práce podle autora (3. 10.): let (HUD, mapa, palivo), interiér, Steadfast.
+1. **Wayfarer revize G** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený.
 2. **Přistání na svahu hotové** (3. 10.), čeká na vyzkoušení autorem; později odpružení nohou, mírnější klesání u země.
-3. **SC-3:** přistávací HUD hotový (4. 10., rámeček stavu, kritik PASS 6,75); dál podle autora, pak mapa systému a doplňování quantum paliva (SC-4), přetížení (SC-5),
-   systémy lodi a power triangle (SC-6). Každou fázi potvrdit s autorem.
+3. **Podle SC z autorova záznamu** (`starcitizenreference/captures/SEZNAM_ZABERU.md`): vzhled menu hotový; další obsah
+   nastavení (DLSS/TSR, FOV, kvalita, let, kamera), klávesy, načítání; pak mapa, palivo, SC-5, SC-6 (potvrdit s autorem).
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).

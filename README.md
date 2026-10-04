@@ -1107,21 +1107,33 @@ the build.
 - **Title screen** `/Game/Maps/MainMenu` (built by `Tools/Assets/build_main_menu.py`, the game's
   `GameDefaultMap`; the editor still starts on TestSpace): Orun and Keth, a slowly drifting camera
   (`MenuCamera` around the actor tagged `MenuOrbitCenter`), ambient music and the ship set as
-  `MENU_SHIP` in `build_main_menu.py` (the Wayfarer). HRÁT / NASTAVENÍ / KONEC. Game mode `ASpaceMenuGameMode`: no pawn.
+  `MENU_SHIP` in `build_main_menu.py` (the Wayfarer). Game mode `ASpaceMenuGameMode`: no pawn. Laid out as SC 4.10's
+  main menu (below): logo, one line, the play card (VSTOUPIT DO VESMÍRU / HRÁT GAMESPACE), UKONČIT HRU and NASTAVENÍ.
 - **Pause menu**: Escape (F10 too; in PIE Escape stops the session, so use F10 there) pauses the
-  game: POKRAČOVAT / NASTAVENÍ / HLAVNÍ MENU / UKONČIT HRU.
+  game: POKRAČOVAT / (PROHLÍDKA INTERIÉRU) / NASTAVENÍ / HLAVNÍ MENU / UKONČIT HRU.
 - **Settings** (`USpaceUserSettings`, a `UGameUserSettings` subclass registered in
   DefaultEngine.ini, saved to `GameUserSettings.ini`): window mode, resolution, overall quality,
   resolution scale, VSync, frame limit; master / effects / music volume (heard live while
   dragging); mouse sensitivity (multiplies ship steering, free look and on-foot look); inverted
-  ship pitch; HUD mode; FPS counter. POUŽÍT applies and saves, Escape / ZPĚT discards. First
-  start: borderless fullscreen at the desktop resolution, quality High. The quality row reads
+  ship pitch; HUD mode; FPS counter, in four tabs (HRA, GRAFIKA, ZVUK, OVLÁDÁNÍ). Every change applies and saves at
+  once, as in SC (a slider when its drag ends); ZPĚT / Escape leaves, VÝCHOZÍ puts the tab back to its defaults. First
+  start: borderless fullscreen at the desktop resolution, quality Epic at a 75 % render scale. The quality row reads
   `GetGraphicsQualityLevel()` (the lowest scalability group), not the engine's
   `GetOverallScalabilityLevel()`, which is -1 whenever the resolution scale is not the preset's
   default: the row then showed High and the next POUŽÍT saved High over the player's choice.
 - **Global keys** live in `ASpacePlayerController`'s own mapping context (priority 100): Escape /
   F10 menu, H HUD (saved to the settings). Pawns no longer bind H.
 - The menus are plain Slate (`SSpaceMenu`), no UMG assets. UI sounds `/Game/UI/Audio`.
+- **Look (4. 10. 2026): Star Citizen 4.10's menus as closely as we can** (the author's own capture,
+  `starcitizenreference/MenuSettings_OwnCapture_Notes.md`; critic PASS 7.4, `Docs/Reviews/2026-10-04_menu_sc.md`):
+  boxes with a thin outline and a cut bottom-right corner (`SSpaceBox`, filled polygons, a picture for the card),
+  SC's warm off-white, the settings page opaque black with tabs across the top and a dark teal bar under the hovered
+  row (`SSpaceRow`), ‹ › selectors that go round, drop-down boxes (`SMenuAnchor`), sliders with a white block thumb,
+  drawn chevrons and the logo's emblem. Font **Oxanium** (OFL, `Content/UI/Fonts`, static 400/500 cut from the
+  variable font): SC's face is closest to Electrolize, which has no Czech letters. The play card's picture is
+  `Content/UI/Menu/card_play.jpg` (a dusk shot of the Wayfarer), read from the file and staged with
+  `DirectoriesToAlwaysStageAsUFS`. Pictures: `Tools/Shots.ps1 -Preset menu_sc -Editor -Width 2560 -Height 1440`
+  (`space.Menu <page> [tab]` shows a page over the game without pausing).
 
 **Cooking and path-loaded assets.** The cooker only follows references from the cooked maps.
 Everything C++ loads by path (input actions and contexts, sounds, dust material) was missing from

@@ -1,0 +1,60 @@
+{
+ "topic": "menu_sc",
+ "date": "2026-10-04",
+ "goal": "Hlavní menu, nastavení a pauza hry Gamespace přestylované co nejvěrněji podle Star Citizenu 4.10 (autorův vlastní záznam vlevo): rozložení, tvary rámečků se seříznutým rohem, záložky, zvýraznění řádku, ovládací prvky (šipkový výběr, rozbalovací pole, posuvník), písmo, barvy a proporce. Obsah nastavení je zatím náš (13 položek ve 4 záložkách); chybějící položky ani záložky SC se nehodnotí.",
+ "style": "Star Citizen 4.10 menu: černé neprůhledné nastavení, tenké světlé obrysy, seříznutý pravý dolní roh, tlumená bílá do zelena, hranaté písmo (Oxanium místo písma SC kvůli české diakritice), karta s obrázkem na úvodní obrazovce. Texty jsou česky.",
+ "checklist": "cockpit",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-04_menu_sc",
+ "notes": [
+  "OVĚŘOVACÍ KOLO: ověř jen body kola 1 – (1) ztmavení za textem na úvodní obrazovce a v pauze, (2) kontrast titulku karty, (3) obě šipky výběru stejně jasné, větší a tučnější, (5) tlačítko pauzy bez klávesy v závorce. Řekni u každého opraveno / neopraveno a dej celkové skóre.",
+  "Pozadí naší úvodní obrazovky je ve snímku běžící hra (testovací scéna); skutečné hlavní menu má vlastní 3D scénu s lodí. Štítek FREE LOOK nahoře patří testovací scéně, ne menu.",
+  "Myš na snímcích nikde nestojí, takže zvýraznění řádku (tmavě tyrkysový pruh) a stavy po najetí nejsou vidět; reference je má (řádek Graphics Renderer).",
+  "Ukazatel využití paměti grafiky, druhá karta (Arena Commander), odkaz na průvodce a panel přátel zatím chybí záměrně (nejsou k nim systémy).",
+  "Checklist kokpitu: hodnoť jen body o čitelnosti a souladu stylu; ostatní se menu netýkají."
+ ],
+ "pairs": [
+  {
+   "title": "Úvodní obrazovka",
+   "distance": "far",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_own_01_start/frames/t00_00_06.jpg",
+   "ref_label": "SC 4.10, hlavní menu",
+   "ours": "shots:20261004_103855_menu_sc/00_title.png",
+   "ours_label": "ve hře, 2560x1440"
+  },
+  {
+   "title": "Nastavení – grafika",
+   "distance": "mid",
+   "light": "night",
+   "ref": "ArtSource/Reference/Video/sc_own_01_start/frames/t00_00_44.jpg",
+   "ref_label": "SC 4.10, OPTIONS MENU / GRAPHICS",
+   "ours": "shots:20261004_103855_menu_sc/01_settings_graphics.png",
+   "ours_label": "ve hře, NASTAVENÍ / GRAFIKA"
+  },
+  {
+   "title": "Nastavení – hra a zvuk",
+   "distance": "mid",
+   "light": "night",
+   "ref": [
+    "ArtSource/Reference/Video/sc_own_01_start/frames/t00_00_10.jpg",
+    "ArtSource/Reference/Video/sc_own_01_start/frames/t00_01_00.jpg"
+   ],
+   "ref_label": "SC 4.10, GAME SETTINGS a AUDIO",
+   "ours": [
+    "shots:20261004_103855_menu_sc/02_settings_game.png",
+    "shots:20261004_103855_menu_sc/03_settings_audio.png"
+   ],
+   "ours_label": "ve hře, HRA a ZVUK"
+  },
+  {
+   "title": "Pauza",
+   "distance": "far",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_own_01_start/frames/t00_00_06.jpg",
+   "ref_label": "SC 4.10 (pauzu záznam nemá: styl tlačítek z hlavního menu)",
+   "ours": "shots:20261004_103855_menu_sc/05_pause.png",
+   "ours_label": "ve hře, pauza"
+  }
+ ]
+}

@@ -2,36 +2,75 @@
 
 #include "SpaceMenuWidget.h"
 
+#include "Engine/Texture2D.h"
+#include "Framework/Application/SlateApplication.h"
+#include "ImageUtils.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Misc/Paths.h"
+#include "Rendering/DrawElements.h"
+#include "Rendering/SlateRenderer.h"
 #include "SpacePlayerController.h"
 #include "SpaceUserSettings.h"
 #include "Styling/CoreStyle.h"
+#include "Styling/SlateBrush.h"
 #include "Widgets/Images/SImage.h"
-#include "Widgets/SNullWidget.h"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Input/SMenuAnchor.h"
 #include "Widgets/Input/SSlider.h"
-#include "Widgets/Layout/SBorder.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SSpacer.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/SBoxPanel.h"
+#include "Widgets/SLeafWidget.h"
+#include "Widgets/SNullWidget.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/Text/STextBlock.h"
 
 #define LOCTEXT_NAMESPACE "SpaceMenu"
 
+// Sizes are in Slate units at 1080p (Slate scales them with the window), measured from the author's 1440p capture of
+// SC 4.10 (starcitizenreference/MenuSettings_OwnCapture_Notes.md).
 namespace SpaceMenuStyle
 {
-	const FLinearColor Text(0.90f, 0.93f, 0.97f);
-	const FLinearColor Dim(0.55f, 0.62f, 0.70f);
-	const FLinearColor Accent(0.40f, 0.78f, 1.00f);
-	const FLinearColor Panel(0.010f, 0.015f, 0.030f, 0.82f);
-	const FLinearColor Button(0.07f, 0.10f, 0.16f, 0.95f);
-
-	FSlateFontInfo Font(const FName Weight, float Size)
+	FLinearColor Srgb(uint8 R, uint8 G, uint8 B, float A = 1.f)
 	{
-		return FCoreStyle::GetDefaultFontStyle(Weight, Size);
+		FLinearColor Color = FLinearColor::FromSRGBColor(FColor(R, G, B));
+		Color.A = A;
+		return Color;
+	}
+
+	// SC's slightly warm, green-tinted off-white and its dark greys; the hover bar is SC's dark teal.
+	const FLinearColor Text = Srgb(225, 236, 232);
+	const FLinearColor TextDim = Srgb(140, 150, 146);
+	const FLinearColor Outline = Srgb(205, 214, 209, 0.95f);
+	const FLinearColor OutlineHover = Srgb(240, 248, 244);
+	const FLinearColor OutlineDim = Srgb(120, 128, 124, 0.9f);
+	const FLinearColor ButtonFill = Srgb(67, 76, 71, 0.72f);
+	const FLinearColor ButtonHover = Srgb(88, 99, 93, 0.85f);
+	const FLinearColor TabActive = Srgb(69, 74, 68);
+	const FLinearColor TabHover = Srgb(40, 45, 42);
+	const FLinearColor RowHover = Srgb(1, 44, 60);
+	const FLinearColor RowHoverEdge = Srgb(28, 104, 128);
+	const FLinearColor FieldFill = Srgb(13, 20, 20);
+	const FLinearColor FieldEdge = Srgb(62, 72, 70);
+	const FLinearColor PlayFill = Srgb(192, 200, 176);
+	const FLinearColor PlayHover = Srgb(222, 230, 206);
+	const FLinearColor PlayText = Srgb(18, 22, 18);
+	const FLinearColor Page = Srgb(0, 2, 0);
+
+	/**
+	 * Oxanium (SIL OFL, Content/UI/Fonts, static 400 / 500 cut from the variable font): squarish with rounded corners like
+	 * SC's menu face, and unlike Electrolize, the closer match, it has every Czech letter. Read from the file like the
+	 * HUD's faces (no font assets in a headless editor); the engine face if the file is missing.
+	 */
+	FSlateFontInfo Font(bool bMedium, float Size, int32 LetterSpacing = 0)
+	{
+		const FString Path = FPaths::ProjectContentDir() / TEXT("UI/Fonts") / (bMedium ? TEXT("Oxanium-Medium.ttf") : TEXT("Oxanium-Regular.ttf"));
+		FSlateFontInfo Info = FPaths::FileExists(Path) ? FSlateFontInfo(Path, Size)
+			: FCoreStyle::GetDefaultFontStyle(bMedium ? TEXT("Bold") : TEXT("Regular"), Size);
+		Info.LetterSpacing = LetterSpacing;
+		return Info;
 	}
 
 	const FSlateBrush* White()
@@ -39,10 +78,316 @@ namespace SpaceMenuStyle
 		return FCoreStyle::Get().GetBrush("WhiteBrush");
 	}
 
+	/** A button that draws nothing itself: the boxes inside it do. */
+	const FButtonStyle& FlatButton()
+	{
+		static const FButtonStyle Style = FButtonStyle()
+			.SetNormal(FSlateNoResource())
+			.SetHovered(FSlateNoResource())
+			.SetPressed(FSlateNoResource())
+			.SetDisabled(FSlateNoResource())
+			.SetNormalPadding(FMargin(0.f))
+			.SetPressedPadding(FMargin(0.f));
+		return Style;
+	}
+
+	/** SC's slider: dark track, white rectangular thumb. */
+	const FSliderStyle& Slider()
+	{
+		static const FSliderStyle Style = []()
+		{
+			FSliderStyle S = FCoreStyle::Get().GetWidgetStyle<FSliderStyle>("Slider");
+			const FSlateColorBrush Bar(FieldFill);
+			S.SetNormalBarImage(Bar).SetHoveredBarImage(Bar).SetDisabledBarImage(Bar);
+			FSlateColorBrush Thumb(FLinearColor::White);
+			Thumb.ImageSize = FVector2D(9.0, 22.0);
+			S.SetNormalThumbImage(Thumb).SetHoveredThumbImage(Thumb).SetDisabledThumbImage(Thumb);
+			S.SetBarThickness(22.f);
+			return S;
+		}();
+		return Style;
+	}
+
+	/** A thin white scroll bar on the right, as SC's. */
+	const FScrollBarStyle& ScrollBar()
+	{
+		static const FScrollBarStyle Style = []()
+		{
+			FScrollBarStyle S = FCoreStyle::Get().GetWidgetStyle<FScrollBarStyle>("ScrollBar");
+			const FSlateColorBrush Thumb(Srgb(230, 236, 233));
+			S.SetNormalThumbImage(Thumb).SetHoveredThumbImage(Thumb).SetDraggedThumbImage(Thumb);
+			S.SetVerticalBackgroundImage(FSlateNoResource()).SetVerticalTopSlotImage(FSlateNoResource()).SetVerticalBottomSlotImage(FSlateNoResource());
+			return S;
+		}();
+		return Style;
+	}
+
 	/** 0 means no limit. */
 	const int32 FrameLimits[] = { 0, 30, 60, 120, 144, 165, 240 };
 	const EWindowMode::Type WindowModes[] = { EWindowMode::WindowedFullscreen, EWindowMode::Fullscreen, EWindowMode::Windowed };
+
+	/** A filled convex polygon in the widget's space, optionally textured by Brush (UVs from the size). */
+	void Polygon(FSlateWindowElementList& Out, int32 Layer, const FGeometry& Geometry, const TArray<FVector2f>& Points,
+		const FLinearColor& Color, const FSlateBrush* Brush = nullptr)
+	{
+		if (Points.Num() < 3 || !FSlateApplication::IsInitialized())
+		{
+			return;
+		}
+		const FSlateResourceHandle Handle = FSlateApplication::Get().GetRenderer()->GetResourceHandle(Brush ? *Brush : *White());
+		const FSlateRenderTransform& Transform = Geometry.GetAccumulatedRenderTransform();
+		const FVector2f Size = Geometry.GetLocalSize();
+		const FColor Vertex = Color.ToFColor(true);
+		TArray<FSlateVertex> Verts;
+		TArray<SlateIndex> Indices;
+		for (const FVector2f& Point : Points)
+		{
+			const FVector2f UV = Brush ? FVector2f(Point.X / FMath::Max(Size.X, 1.f), Point.Y / FMath::Max(Size.Y, 1.f)) : FVector2f(0.5f, 0.5f);
+			Verts.Add(FSlateVertex::Make(Transform, Point, UV, Vertex));
+		}
+		for (int32 Index = 1; Index + 1 < Points.Num(); ++Index)
+		{
+			Indices.Add(0);
+			Indices.Add(SlateIndex(Index));
+			Indices.Add(SlateIndex(Index + 1));
+		}
+		FSlateDrawElement::MakeCustomVerts(Out, Layer, Handle, Verts, Indices, nullptr, 0, 0);
+	}
+
+	/** The outline of a box with its bottom-right corner cut by Corner. */
+	TArray<FVector2f> CutBox(const FVector2f& Size, float Corner, float Inset = 0.f)
+	{
+		const float C = FMath::Clamp(Corner, 0.f, FMath::Min(Size.X, Size.Y) * 0.5f);
+		const float I = Inset;
+		return { { I, I }, { Size.X - I, I }, { Size.X - I, Size.Y - C - I * 0.4f }, { Size.X - C - I * 0.4f, Size.Y - I }, { I, Size.Y - I } };
+	}
 }
+
+/**
+ * SC's box: a fill (or a picture), a thin outline and a cut bottom-right corner, with other colours while the mouse is
+ * over it (the box is hit-testable, so it is "hovered" whenever the cursor is over it or its content).
+ */
+class SSpaceBox : public SCompoundWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SSpaceBox)
+		: _Fill(FLinearColor::Transparent), _Outline(FLinearColor::Transparent), _HoverFill(FLinearColor(0, 0, 0, -1)),
+		  _HoverOutline(FLinearColor(0, 0, 0, -1)), _Corner(10.f), _Thickness(1.5f), _Padding(0.f), _Brush(nullptr) {}
+		SLATE_ATTRIBUTE(FLinearColor, Fill)
+		SLATE_ATTRIBUTE(FLinearColor, Outline)
+		/** Alpha below 0: same as Fill / Outline. */
+		SLATE_ATTRIBUTE(FLinearColor, HoverFill)
+		SLATE_ATTRIBUTE(FLinearColor, HoverOutline)
+		SLATE_ARGUMENT(float, Corner)
+		SLATE_ARGUMENT(float, Thickness)
+		SLATE_ARGUMENT(FMargin, Padding)
+		/** A picture filling the box, cut corner included. */
+		SLATE_ARGUMENT(const FSlateBrush*, Brush)
+		SLATE_DEFAULT_SLOT(FArguments, Content)
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs)
+	{
+		Fill = InArgs._Fill;
+		Outline = InArgs._Outline;
+		HoverFill = InArgs._HoverFill;
+		HoverOutline = InArgs._HoverOutline;
+		Corner = InArgs._Corner;
+		Thickness = InArgs._Thickness;
+		Brush = InArgs._Brush;
+		ChildSlot.Padding(InArgs._Padding)[ InArgs._Content.Widget ];
+	}
+
+	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& Geometry, const FSlateRect& Culling, FSlateWindowElementList& Out,
+		int32 Layer, const FWidgetStyle& Style, bool bParentEnabled) const override
+	{
+		const FVector2f Size = Geometry.GetLocalSize();
+		const bool bHover = IsHovered();
+		const FLinearColor Tint = Style.GetColorAndOpacityTint();
+		FLinearColor FillColor = bHover && HoverFill.Get().A >= 0.f ? HoverFill.Get() : Fill.Get();
+		FLinearColor LineColor = bHover && HoverOutline.Get().A >= 0.f ? HoverOutline.Get() : Outline.Get();
+		if (Brush)
+		{
+			SpaceMenuStyle::Polygon(Out, Layer, Geometry, SpaceMenuStyle::CutBox(Size, Corner), FLinearColor::White * Tint, Brush);
+		}
+		if (FillColor.A > 0.001f)
+		{
+			SpaceMenuStyle::Polygon(Out, Layer, Geometry, SpaceMenuStyle::CutBox(Size, Corner), FillColor * Tint);
+		}
+		if (LineColor.A > 0.001f)
+		{
+			TArray<FVector2f> Line = SpaceMenuStyle::CutBox(Size, Corner, Thickness * 0.5f);
+			const FVector2f First = Line[0];  // not Line.Add(Line[0]): the reference dies when Add grows the array
+			Line.Add(First);
+			FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), Line, ESlateDrawEffect::None, LineColor * Tint, true, Thickness);
+		}
+		return SCompoundWidget::OnPaint(Args, Geometry, Culling, Out, Layer + 2, Style, bParentEnabled);
+	}
+
+private:
+	TAttribute<FLinearColor> Fill, Outline, HoverFill, HoverOutline;
+	float Corner = 10.f;
+	float Thickness = 1.5f;
+	const FSlateBrush* Brush = nullptr;
+};
+
+/** A setting's row: SC's full-width dark teal bar under the mouse. */
+class SSpaceRow : public SCompoundWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SSpaceRow) {}
+		SLATE_DEFAULT_SLOT(FArguments, Content)
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs)
+	{
+		ChildSlot[ InArgs._Content.Widget ];
+	}
+
+	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& Geometry, const FSlateRect& Culling, FSlateWindowElementList& Out,
+		int32 Layer, const FWidgetStyle& Style, bool bParentEnabled) const override
+	{
+		if (IsHovered())
+		{
+			const FVector2f Size = Geometry.GetLocalSize();
+			const float Top = 9.f, Bottom = Size.Y - 9.f;
+			SpaceMenuStyle::Polygon(Out, Layer, Geometry, { { 0.f, Top }, { Size.X, Top }, { Size.X, Bottom }, { 0.f, Bottom } }, SpaceMenuStyle::RowHover);
+			FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), TArray<FVector2f>{ { 0.f, Bottom }, { Size.X, Bottom } },
+				ESlateDrawEffect::None, SpaceMenuStyle::RowHoverEdge, true, 1.5f);
+			FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), TArray<FVector2f>{ { 0.f, Top }, { Size.X, Top } },
+				ESlateDrawEffect::None, SpaceMenuStyle::RowHoverEdge * FLinearColor(1, 1, 1, 0.5f), true, 1.f);
+		}
+		return SCompoundWidget::OnPaint(Args, Geometry, Culling, Out, Layer + 2, Style, bParentEnabled);
+	}
+};
+
+/** SC's bold chevron (‹ or ›), drawn, so it does not depend on a font's arrows. */
+class SSpaceChevron : public SLeafWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SSpaceChevron) : _Right(true), _Color(FLinearColor::White) {}
+		SLATE_ARGUMENT(bool, Right)
+		SLATE_ATTRIBUTE(FLinearColor, Color)
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs)
+	{
+		bRight = InArgs._Right;
+		Color = InArgs._Color;
+	}
+
+	virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D(14.0, 20.0); }
+
+	virtual int32 OnPaint(const FPaintArgs&, const FGeometry& Geometry, const FSlateRect&, FSlateWindowElementList& Out,
+		int32 Layer, const FWidgetStyle& Style, bool) const override
+	{
+		const float L = bRight ? 3.5f : 10.5f, R = bRight ? 10.5f : 3.5f;
+		FSlateDrawElement::MakeLines(Out, Layer, Geometry.ToPaintGeometry(), TArray<FVector2f>{ { L, 2.5f }, { R, 10.f }, { L, 17.5f } },
+			ESlateDrawEffect::None, Color.Get() * Style.GetColorAndOpacityTint(), true, 3.4f);
+		return Layer;
+	}
+
+private:
+	bool bRight = true;
+	TAttribute<FLinearColor> Color;
+};
+
+/** The logo's emblem between the words: a ring with a four-pointed star, after SC's. */
+class SSpaceEmblem : public SLeafWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SSpaceEmblem) {}
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments&) {}
+
+	virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D(58.0, 58.0); }
+
+	virtual int32 OnPaint(const FPaintArgs&, const FGeometry& Geometry, const FSlateRect&, FSlateWindowElementList& Out,
+		int32 Layer, const FWidgetStyle& Style, bool) const override
+	{
+		const FVector2f Size = Geometry.GetLocalSize();
+		const FVector2f C = Size * 0.5f;
+		const float R = FMath::Min(Size.X, Size.Y) * 0.5f - 2.f;
+		const FLinearColor Color = SpaceMenuStyle::Text * Style.GetColorAndOpacityTint();
+		TArray<FVector2f> Ring;
+		for (int32 I = 0; I <= 48; ++I)
+		{
+			const float A = 2.f * PI * I / 48.f;
+			Ring.Add(C + FVector2f(FMath::Cos(A), FMath::Sin(A)) * R);
+		}
+		FSlateDrawElement::MakeLines(Out, Layer, Geometry.ToPaintGeometry(), Ring, ESlateDrawEffect::None, Color, true, 2.f);
+		TArray<FVector2f> Inner;
+		for (int32 I = 0; I <= 48; ++I)
+		{
+			const float A = 2.f * PI * I / 48.f;
+			Inner.Add(C + FVector2f(FMath::Cos(A), FMath::Sin(A)) * R * 0.78f);
+		}
+		FSlateDrawElement::MakeLines(Out, Layer, Geometry.ToPaintGeometry(), Inner, ESlateDrawEffect::None, Color, true, 1.2f);
+		// The star: four long points and four short ones, as two filled quads per point pair.
+		const float Long = R * 0.66f, Short = R * 0.16f;
+		for (int32 I = 0; I < 4; ++I)
+		{
+			const float A = PI * 0.5f * I - PI * 0.5f;
+			const FVector2f Tip = C + FVector2f(FMath::Cos(A), FMath::Sin(A)) * Long;
+			const FVector2f Left = C + FVector2f(FMath::Cos(A - PI * 0.25f), FMath::Sin(A - PI * 0.25f)) * Short;
+			const FVector2f Right = C + FVector2f(FMath::Cos(A + PI * 0.25f), FMath::Sin(A + PI * 0.25f)) * Short;
+			SpaceMenuStyle::Polygon(Out, Layer + 1, Geometry, { C, Left, Tip, Right }, Color);
+		}
+		return Layer + 1;
+	}
+};
+
+/** Darkens the left of the title screen's live background towards the cards, fading out to the right. */
+class SSpaceVignette : public SLeafWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SSpaceVignette) {}
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments&) {}
+
+	virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D(1.0, 1.0); }
+
+	virtual int32 OnPaint(const FPaintArgs&, const FGeometry& Geometry, const FSlateRect&, FSlateWindowElementList& Out,
+		int32 Layer, const FWidgetStyle&, bool) const override
+	{
+		const float W = Geometry.GetLocalSize().X;
+		TArray<FSlateGradientStop> Stops;
+		// White text and outlines stand on dark ground in SC (its nebula is dark); ours is a live scene, maybe a bright sky.
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, 0.f), FLinearColor(0.f, 0.f, 0.f, 0.80f)));
+		Stops.Add(FSlateGradientStop(FVector2f(W * 0.34f, 0.f), FLinearColor(0.f, 0.f, 0.f, 0.62f)));
+		Stops.Add(FSlateGradientStop(FVector2f(W * 0.66f, 0.f), FLinearColor(0.f, 0.f, 0.f, 0.f)));
+		FSlateDrawElement::MakeGradient(Out, Layer, Geometry.ToPaintGeometry(), MoveTemp(Stops), Orient_Vertical);
+		return Layer;
+	}
+};
+
+/** A horizontal dark band fading out up and down: behind text laid over a picture. */
+class SSpaceBand : public SLeafWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SSpaceBand) {}
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments&) {}
+
+	virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D(1.0, 1.0); }
+
+	virtual int32 OnPaint(const FPaintArgs&, const FGeometry& Geometry, const FSlateRect&, FSlateWindowElementList& Out,
+		int32 Layer, const FWidgetStyle&, bool) const override
+	{
+		const float H = Geometry.GetLocalSize().Y;
+		TArray<FSlateGradientStop> Stops;
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, 0.f), FLinearColor(0.f, 0.f, 0.f, 0.f)));
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, H * 0.5f), FLinearColor(0.f, 0.f, 0.f, 0.55f)));
+		Stops.Add(FSlateGradientStop(FVector2f(0.f, H), FLinearColor(0.f, 0.f, 0.f, 0.f)));
+		FSlateDrawElement::MakeGradient(Out, Layer, Geometry.ToPaintGeometry(), MoveTemp(Stops), Orient_Horizontal);
+		return Layer;
+	}
+};
+
+// -------------------------------------------------------------------------------------------
 
 void SSpaceMenu::Construct(const FArguments& InArgs)
 {
@@ -61,6 +406,19 @@ void SSpaceMenu::Construct(const FArguments& InArgs)
 	}
 	Resolutions.Sort([](const FIntPoint& A, const FIntPoint& B) { return A.X * A.Y < B.X * B.Y; });
 	LoadDraft();
+
+	// The play card's picture, read from its file at runtime (staged raw like the fonts: DirectoriesToAlwaysStageAsUFS).
+	const FString CardPath = FPaths::ProjectContentDir() / TEXT("UI/Menu/card_play.jpg");
+	if (FPaths::FileExists(CardPath))
+	{
+		if (UTexture2D* Texture = FImageUtils::ImportFileAsTexture2D(CardPath))
+		{
+			CardTexture.Reset(Texture);
+			CardBrush = MakeShared<FSlateBrush>();
+			CardBrush->SetResourceObject(Texture);
+			CardBrush->ImageSize = FVector2D(Texture->GetSizeX(), Texture->GetSizeY());
+		}
+	}
 
 	ChildSlot
 	[
@@ -81,6 +439,15 @@ void SSpaceMenu::ShowPage(ESpaceMenuPage Page)
 	}
 	CurrentPage = Page;
 	Switcher->SetActiveWidgetIndex(static_cast<int32>(Page));
+}
+
+void SSpaceMenu::ShowTab(ESpaceSettingsTab Tab)
+{
+	CurrentTab = Tab;
+	if (TabSwitcher.IsValid())
+	{
+		TabSwitcher->SetActiveWidgetIndex(static_cast<int32>(Tab));
+	}
 }
 
 FReply SSpaceMenu::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
@@ -112,382 +479,603 @@ FReply SSpaceMenu::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKey
 TSharedRef<SWidget> SSpaceMenu::BuildTitlePage()
 {
 	using namespace SpaceMenuStyle;
-	return SNew(SOverlay)
-		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Fill)
+	// The logo after SC's: wide, widely spaced capitals with the emblem between the words and a thin line over and
+	// under the lettering.
+	auto Rule = []() { return SNew(SBox).HeightOverride(2.f)[ SNew(SImage).Image(White()).ColorAndOpacity(Text) ]; };
+	auto Word = [](const FText& Value)
+	{
+		return SNew(STextBlock).Text(Value).Font(Font(true, 46.f, 330)).ColorAndOpacity(Text);
+	};
+	const TSharedRef<SWidget> Logo = SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
 		[
-			SNew(SBox).WidthOverride(620.f)
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot().AutoHeight()[ Rule() ]
+			+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 3.f)[ Word(LOCTEXT("LogoGame", "GAME")) ]
+			+ SVerticalBox::Slot().AutoHeight()[ Rule() ]
+		]
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(10.f, 0.f)[ SNew(SSpaceEmblem) ]
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot().AutoHeight()[ Rule() ]
+			+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 3.f)[ Word(LOCTEXT("LogoSpace", "SPACE")) ]
+			+ SVerticalBox::Slot().AutoHeight()[ Rule() ]
+		];
+
+	return SNew(SOverlay)
+		+ SOverlay::Slot()[ SNew(SSpaceVignette) ]
+		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Fill).Padding(FMargin(80.f, 40.f, 0.f, 51.f))
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot().AutoHeight()[ Logo ]
+			+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(0.f, 30.f, 0.f, 12.f))
 			[
-				SNew(SBorder)
-				.BorderImage(White())
-				.BorderBackgroundColor(FLinearColor(0.f, 0.f, 0.f, 0.55f))
-				.Padding(FMargin(72.f, 0.f))
+				SNew(STextBlock)
+				.Text(LOCTEXT("Subtitle", "Vyber si jednu z následujících možností hry Gamespace."))
+				.Font(Font(false, 16.f))
+				.ColorAndOpacity(Text)
+			]
+			+ SVerticalBox::Slot().AutoHeight()[ BuildPlayCard() ]
+			+ SVerticalBox::Slot().FillHeight(1.f)[ SNew(SSpacer) ]
+			+ SVerticalBox::Slot().AutoHeight()
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().AutoWidth()
 				[
-					SNew(SVerticalBox)
-					+ SVerticalBox::Slot().FillHeight(1.f) [ SNew(SSpacer) ]
-					+ SVerticalBox::Slot().AutoHeight()
-					[
-						SNew(STextBlock).Text(LOCTEXT("Title", "GAMESPACE")).Font(Font("Bold", 64.f)).ColorAndOpacity(Text)
-					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(6.f, 0.f, 0.f, 56.f))
-					[
-						SNew(STextBlock).Text(LOCTEXT("Subtitle", "prototyp  ·  Veyra")).Font(Font("Regular", 20.f)).ColorAndOpacity(Accent)
-					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 6.f)
-					[
-						MakeButton(LOCTEXT("Play", "HRÁT"), [this]()
+					MakeButton(LOCTEXT("Quit", "Ukončit hru"), [this]()
+					{
+						if (ASpacePlayerController* Controller = Owner.Get())
 						{
-							ShowPage(ESpaceMenuPage::Loading);
-							if (ASpacePlayerController* Controller = Owner.Get())
-							{
-								Controller->StartGame();
-							}
-						}, 30.f)
-					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 6.f)
-					[
-						MakeButton(LOCTEXT("Settings", "NASTAVENÍ"), [this]() { ShowPage(ESpaceMenuPage::Settings); }, 30.f)
-					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 6.f)
-					[
-						MakeButton(LOCTEXT("Quit", "KONEC"), [this]()
-						{
-							if (ASpacePlayerController* Controller = Owner.Get())
-							{
-								Controller->QuitGame();
-							}
-						}, 30.f)
-					]
-					+ SVerticalBox::Slot().FillHeight(1.2f) [ SNew(SSpacer) ]
-					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(6.f, 0.f, 0.f, 40.f))
-					[
-						SNew(STextBlock)
-						.Text(LOCTEXT("TitleHint", "Ve hře: Escape menu  ·  H HUD  ·  J cruise  ·  V flight assist  ·  C kokpit"))
-						.Font(Font("Regular", 13.f))
-						.ColorAndOpacity(Dim)
-						.AutoWrapText(true)
-					]
+							Controller->QuitGame();
+						}
+					}, 200.f)
+				]
+				+ SHorizontalBox::Slot().AutoWidth().Padding(FMargin(15.f, 0.f, 0.f, 0.f))
+				[
+					MakeButton(LOCTEXT("Settings", "Nastavení"), [this]() { ShowPage(ESpaceMenuPage::Settings); }, 200.f)
 				]
 			]
 		];
 }
 
-TSharedRef<SWidget> SSpaceMenu::BuildPausePage()
+TSharedRef<SWidget> SSpaceMenu::BuildPlayCard()
 {
 	using namespace SpaceMenuStyle;
-	return SNew(SOverlay)
-		+ SOverlay::Slot()
+	auto Play = [this]()
+	{
+		Clicked();
+		ShowPage(ESpaceMenuPage::Loading);
+		if (ASpacePlayerController* Controller = Owner.Get())
+		{
+			Controller->StartGame();
+		}
+		return FReply::Handled();
+	};
+	// The card is a flat button; its hover shows SC's description strip and brightens the outline.
+	TSharedRef<TWeakPtr<SButton>> Card = MakeShared<TWeakPtr<SButton>>();
+	auto CardHovered = [Card]() { const TSharedPtr<SButton> Button = Card->Pin(); return Button.IsValid() && Button->IsHovered(); };
+
+	TSharedRef<SButton> Button = SNew(SButton)
+		.ButtonStyle(&FlatButton())
+		.OnHovered_Lambda([this]() { Hovered(); })
+		.OnClicked_Lambda(Play)
 		[
-			SNew(SImage).Image(White()).ColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.55f))
-		]
-		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
-		[
-			SNew(SBox).WidthOverride(520.f)
+			SNew(SBox).WidthOverride(649.f).HeightOverride(498.f)
 			[
-				SNew(SBorder)
-				.BorderImage(White())
-				.BorderBackgroundColor(Panel)
-				.Padding(FMargin(48.f, 40.f))
+				SNew(SOverlay)
+				+ SOverlay::Slot()
+				[
+					SNew(SSpaceBox)
+					.Brush(CardBrush.Get())
+					.Fill(CardBrush.IsValid() ? FLinearColor::Transparent : FieldFill)
+					.Outline(Outline)
+					.HoverOutline(OutlineHover)
+					.Corner(18.f)
+					.Thickness(1.6f)
+				]
+				// The version tab in the top-left corner.
+				+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(2.f)
+				[
+					SNew(SSpaceBox).Fill(FLinearColor(0.f, 0.f, 0.f, 0.62f)).Corner(9.f).Padding(FMargin(11.f, 4.f, 20.f, 5.f))
+					[
+						SNew(STextBlock).Text(LOCTEXT("Version", "Prototyp 0.4: Veyra")).Font(Font(false, 10.5f)).ColorAndOpacity(Text)
+					]
+				]
+				// A soft dark band behind the title, so it reads over a bright sky (critic 4. 10. 2026).
+				+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Center).Padding(FMargin(2.f, 0.f))
+				[
+					SNew(SBox).HeightOverride(150.f)[ SNew(SSpaceBand) ]
+				]
+				+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
 				[
 					SNew(SVerticalBox)
-					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(0.f, 0.f, 0.f, 28.f))
+					+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)
 					[
-						SNew(STextBlock).Text(LOCTEXT("Paused", "PAUZA")).Font(Font("Bold", 44.f)).ColorAndOpacity(Text)
+						SNew(STextBlock).Text(LOCTEXT("JoinUniverse", "VSTOUPIT DO VESMÍRU")).Font(Font(true, 19.f, 40)).ColorAndOpacity(Text)
+						.ShadowColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.6f)).ShadowOffset(FVector2D(1.0, 1.0))
 					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 5.f)
+					+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(FMargin(0.f, 6.f, 0.f, 0.f))
 					[
-						MakeButton(LOCTEXT("Resume", "POKRAČOVAT"), [this]()
-						{
-							if (ASpacePlayerController* Controller = Owner.Get())
-							{
-								Controller->ResumeGame();
-							}
-						})
+						SNew(SButton)
+						.ButtonStyle(&FlatButton())
+						.OnHovered_Lambda([this]() { Hovered(); })
+						.OnClicked_Lambda(Play)
+						[
+							SNew(SSpaceBox).Fill(PlayFill).HoverFill(PlayHover).Corner(0.f).Padding(FMargin(14.f, 3.f, 14.f, 4.f))
+							[
+								SNew(STextBlock).Text(LOCTEXT("PlayGame", "HRÁT GAMESPACE")).Font(Font(true, 13.f, 30)).ColorAndOpacity(PlayText)
+							]
+						]
 					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 5.f)
+				]
+				// SC's one-line description along the bottom while the card is under the mouse.
+				+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Bottom).Padding(FMargin(2.f, 0.f, 20.f, 2.f))
+				[
+					SNew(SBox)
+					.Visibility_Lambda([CardHovered]() { return CardHovered() ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 					[
-						// Walk the Steadfast interior, or back (the same as I). Only where there is one.
-						Owner.IsValid() && Owner->HasInterior()
-							? MakeButton(Owner->IsWalkingInterior() ? LOCTEXT("InteriorBack", "ZPĚT (I)")
-							                                         : LOCTEXT("Interior", "INTERIÉR STEADFASTU (I)"), [this]()
-							{
-								if (ASpacePlayerController* Controller = Owner.Get())
-								{
-									Controller->ResumeGame();
-									Controller->ToggleInterior();
-								}
-							})
-							: SNullWidget::NullWidget
-					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 5.f)
-					[
-						MakeButton(LOCTEXT("PauseSettings", "NASTAVENÍ"), [this]() { ShowPage(ESpaceMenuPage::Settings); })
-					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 5.f)
-					[
-						MakeButton(LOCTEXT("MainMenu", "HLAVNÍ MENU"), [this]()
-						{
-							ShowPage(ESpaceMenuPage::Loading);
-							if (ASpacePlayerController* Controller = Owner.Get())
-							{
-								Controller->GoToMainMenu();
-							}
-						})
-					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 5.f)
-					[
-						MakeButton(LOCTEXT("PauseQuit", "UKONČIT HRU"), [this]()
-						{
-							if (ASpacePlayerController* Controller = Owner.Get())
-							{
-								Controller->QuitGame();
-							}
-						})
+						SNew(SSpaceBox).Fill(FLinearColor(0.f, 0.f, 0.f, 0.68f)).Corner(0.f).Padding(FMargin(12.f, 7.f))
+						[
+							SNew(STextBlock)
+							.Text(LOCTEXT("PlayDescription", "Planeta Veyra a loď Wayfarer: let, přistání a výstup na povrch."))
+							.Font(Font(false, 12.f))
+							.ColorAndOpacity(Text)
+						]
 					]
 				]
 			]
 		];
+	*Card = Button;
+	return Button;
+}
+
+TSharedRef<SWidget> SSpaceMenu::BuildPausePage()
+{
+	using namespace SpaceMenuStyle;
+	TSharedRef<SVerticalBox> Column = SNew(SVerticalBox)
+		+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(0.f, 0.f, 0.f, 26.f))
+		[
+			SNew(STextBlock).Text(LOCTEXT("Paused", "PAUZA")).Font(Font(true, 23.f, 60)).ColorAndOpacity(Text)
+		];
+	auto Add = [&Column](const TSharedRef<SWidget>& Widget) { Column->AddSlot().AutoHeight().Padding(0.f, 6.f)[ Widget ]; };
+	Add(MakeButton(LOCTEXT("Resume", "Pokračovat"), [this]()
+	{
+		if (ASpacePlayerController* Controller = Owner.Get())
+		{
+			Controller->ResumeGame();
+		}
+	}, 330.f));
+	// Walk the Steadfast interior, or back (the same as I). Only where there is one.
+	if (Owner.IsValid() && Owner->HasInterior())
+	{
+		Add(MakeButton(Owner->IsWalkingInterior() ? LOCTEXT("InteriorBack", "Zpět z interiéru") : LOCTEXT("Interior", "Prohlídka interiéru"), [this]()
+		{
+			if (ASpacePlayerController* Controller = Owner.Get())
+			{
+				Controller->ResumeGame();
+				Controller->ToggleInterior();
+			}
+		}, 330.f));
+	}
+	Add(MakeButton(LOCTEXT("PauseSettings", "Nastavení"), [this]() { ShowPage(ESpaceMenuPage::Settings); }, 330.f));
+	Add(MakeButton(LOCTEXT("MainMenu", "Hlavní menu"), [this]()
+	{
+		ShowPage(ESpaceMenuPage::Loading);
+		if (ASpacePlayerController* Controller = Owner.Get())
+		{
+			Controller->GoToMainMenu();
+		}
+	}, 330.f));
+	Add(MakeButton(LOCTEXT("PauseQuit", "Ukončit hru"), [this]()
+	{
+		if (ASpacePlayerController* Controller = Owner.Get())
+		{
+			Controller->QuitGame();
+		}
+	}, 330.f));
+
+	return SNew(SOverlay)
+		+ SOverlay::Slot()[ SNew(SImage).Image(White()).ColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.55f)) ]
+		+ SOverlay::Slot()[ SNew(SSpaceVignette) ]
+		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Center).Padding(FMargin(80.f, 0.f))[ Column ];
 }
 
 TSharedRef<SWidget> SSpaceMenu::BuildLoadingPage()
 {
 	using namespace SpaceMenuStyle;
 	return SNew(SOverlay)
-		+ SOverlay::Slot()
+		+ SOverlay::Slot()[ SNew(SImage).Image(White()).ColorAndOpacity(Page) ]
+		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(FMargin(0.f, 0.f, 80.f, 60.f))
 		[
-			SNew(SImage).Image(White()).ColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.85f))
-		]
-		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
-		[
-			SNew(STextBlock).Text(LOCTEXT("Loading", "NAČÍTÁNÍ…")).Font(Font("Bold", 36.f)).ColorAndOpacity(Text)
+			SNew(STextBlock).Text(LOCTEXT("Loading", "NAČÍTÁNÍ…")).Font(Font(true, 19.f, 120)).ColorAndOpacity(Text)
 		];
 }
 
 TSharedRef<SWidget> SSpaceMenu::BuildSettingsPage()
 {
 	using namespace SpaceMenuStyle;
+	TSharedRef<SHorizontalBox> Tabs = SNew(SHorizontalBox);
+	const FText TabNames[] = { LOCTEXT("TabGame", "HRA"), LOCTEXT("TabGraphics", "GRAFIKA"), LOCTEXT("TabAudio", "ZVUK"),
+		LOCTEXT("TabControls", "OVLÁDÁNÍ") };
+	for (int32 Index = 0; Index < int32(ESpaceSettingsTab::Count); ++Index)
+	{
+		Tabs->AddSlot().FillWidth(1.f).Padding(FMargin(Index == 0 ? 0.f : 10.f, 0.f, Index + 1 == int32(ESpaceSettingsTab::Count) ? 0.f : 10.f, 0.f))
+		[
+			MakeTab(ESpaceSettingsTab(Index), TabNames[Index])
+		];
+	}
 
-	auto Percent = [](float Value) { return FText::FromString(FString::Printf(TEXT("%d %%"), FMath::RoundToInt32(Value * 100.f))); };
+	SAssignNew(TabSwitcher, SWidgetSwitcher);
+	for (int32 Index = 0; Index < int32(ESpaceSettingsTab::Count); ++Index)
+	{
+		TabSwitcher->AddSlot()
+		[
+			SNew(SScrollBox)
+			.ScrollBarStyle(&ScrollBar())
+			.ScrollBarThickness(FVector2D(4.0, 4.0))
+			.ScrollBarPadding(FMargin(0.f, 2.f, 2.f, 2.f))
+			+ SScrollBox::Slot().Padding(FMargin(0.f, 4.f, 10.f, 4.f))[ BuildTabRows(ESpaceSettingsTab(Index)) ]
+		];
+	}
+	TabSwitcher->SetActiveWidgetIndex(static_cast<int32>(CurrentTab));
 
-	TSharedRef<SVerticalBox> Rows = SNew(SVerticalBox);
-	auto Add = [&Rows](const TSharedRef<SWidget>& Row) { Rows->AddSlot().AutoHeight().Padding(0.f, 4.f)[ Row ]; };
-
-	Add(MakeSection(LOCTEXT("Graphics", "GRAFIKA")));
-	Add(MakeChoiceRow(LOCTEXT("WindowMode", "Režim zobrazení"),
-		[this]() { return Draft.WindowMode; }, [this](int32 I) { Draft.WindowMode = I; }, []() { return 3; },
-		[](int32 I)
-		{
-			return I == 0 ? LOCTEXT("Borderless", "Celá obrazovka (bez rámečku)")
-				: I == 1 ? LOCTEXT("Exclusive", "Celá obrazovka (exkluzivní)") : LOCTEXT("Windowed", "V okně");
-		}));
-	Add(MakeChoiceRow(LOCTEXT("Resolution", "Rozlišení"),
-		[this]() { return Draft.Resolution; }, [this](int32 I) { Draft.Resolution = I; }, [this]() { return Resolutions.Num(); },
-		[this](int32 I)
-		{
-			if (Draft.WindowMode == 0)
-			{
-				return LOCTEXT("DesktopResolution", "podle monitoru");
-			}
-			const FIntPoint R = Resolutions.IsValidIndex(I) ? Resolutions[I] : FIntPoint::ZeroValue;
-			return FText::FromString(FString::Printf(TEXT("%d × %d"), R.X, R.Y));
-		}));
-	Add(MakeChoiceRow(LOCTEXT("Quality", "Kvalita grafiky"),
-		[this]() { return Draft.Quality; }, [this](int32 I) { Draft.Quality = I; }, []() { return 5; },
-		[](int32 I)
-		{
-			static const FText Names[] = { LOCTEXT("Low", "Nízká"), LOCTEXT("Medium", "Střední"), LOCTEXT("High", "Vysoká"),
-				LOCTEXT("Epic", "Epická"), LOCTEXT("Cinematic", "Filmová") };
-			return Names[FMath::Clamp(I, 0, 4)];
-		}));
-	Add(MakeSliderRow(LOCTEXT("ResolutionScale", "Rozlišení vykreslování (TSR)"), &Draft.ResolutionScale, 50.f, 100.f,
-		[](float V) { return FText::FromString(FString::Printf(TEXT("%d %%"), FMath::RoundToInt32(V))); }));
-	Add(MakeToggleRow(LOCTEXT("VSync", "Vertikální synchronizace"), &Draft.bVSync));
-	Add(MakeChoiceRow(LOCTEXT("FrameLimit", "Limit snímků"),
-		[this]() { return Draft.FrameLimit; }, [this](int32 I) { Draft.FrameLimit = I; }, []() { return int32(UE_ARRAY_COUNT(FrameLimits)); },
-		[](int32 I)
-		{
-			return FrameLimits[I] == 0 ? LOCTEXT("NoLimit", "Bez limitu") : FText::FromString(FString::Printf(TEXT("%d FPS"), FrameLimits[I]));
-		}));
-
-	Add(MakeSection(LOCTEXT("Audio", "ZVUK")));
-	Add(MakeSliderRow(LOCTEXT("MasterVolume", "Celková hlasitost"), &Draft.MasterVolume, 0.f, 1.f, Percent, true));
-	Add(MakeSliderRow(LOCTEXT("EffectsVolume", "Efekty a motory"), &Draft.EffectsVolume, 0.f, 1.f, Percent, true));
-	Add(MakeSliderRow(LOCTEXT("MusicVolume", "Hudba a ambient"), &Draft.MusicVolume, 0.f, 1.f, Percent, true));
-
-	Add(MakeSection(LOCTEXT("Controls", "OVLÁDÁNÍ")));
-	Add(MakeSliderRow(LOCTEXT("Sensitivity", "Citlivost myši"), &Draft.MouseSensitivity, 0.25f, 3.f,
-		[](float V) { return FText::FromString(FString::Printf(TEXT("× %.2f"), V)); }));
-	Add(MakeToggleRow(LOCTEXT("InvertPitch", "Obrácené klopení lodi (myš nahoru = nos dolů)"), &Draft.bInvertPitch));
-
-	Add(MakeSection(LOCTEXT("Game", "HRA")));
-	Add(MakeChoiceRow(LOCTEXT("Hud", "HUD (klávesa H)"),
-		[this]() { return Draft.HudMode; }, [this](int32 I) { Draft.HudMode = I; }, []() { return 4; },
-		[](int32 I)
-		{
-			return I == 0 ? LOCTEXT("HudOff", "Skrytý") : I == 1 ? LOCTEXT("HudFlight", "Jen letový HUD")
-				: I == 2 ? LOCTEXT("HudCompact", "S textem") : LOCTEXT("HudFull", "S plným textem");
-		}));
-	Add(MakeToggleRow(LOCTEXT("ShowFps", "Zobrazit FPS"), &Draft.bShowFps));
-
+	// SC: an opaque black page, the title top left, the tabs across the full width, one outlined list, BACK and RESET.
 	return SNew(SOverlay)
-		+ SOverlay::Slot()
+		+ SOverlay::Slot()[ SNew(SImage).Image(White()).ColorAndOpacity(Page) ]
+		+ SOverlay::Slot().Padding(FMargin(39.f, 0.f, 39.f, 39.f))
 		[
-			SNew(SImage).Image(White()).ColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.5f))
-		]
-		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center).Padding(40.f)
-		[
-			SNew(SBox).WidthOverride(1000.f).MaxDesiredHeight(920.f)
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(3.f, 36.f, 0.f, 0.f))
 			[
-				SNew(SBorder)
-				.BorderImage(White())
-				.BorderBackgroundColor(Panel)
-				.Padding(FMargin(48.f, 36.f))
+				SNew(STextBlock).Text(LOCTEXT("SettingsTitle", "NASTAVENÍ")).Font(Font(false, 23.f, 20)).ColorAndOpacity(Text)
+			]
+			+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(0.f, 34.f, 0.f, 0.f))
+			[
+				SNew(SBox).HeightOverride(51.f)[ Tabs ]
+			]
+			+ SVerticalBox::Slot().FillHeight(1.f).Padding(FMargin(0.f, 38.f, 0.f, 0.f))
+			[
+				SNew(SSpaceBox).Outline(OutlineDim).Corner(0.f).Thickness(1.5f).Padding(FMargin(2.f))
 				[
-					SNew(SVerticalBox)
-					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(0.f, 0.f, 0.f, 16.f))
-					[
-						SNew(STextBlock).Text(LOCTEXT("SettingsTitle", "NASTAVENÍ")).Font(Font("Bold", 40.f)).ColorAndOpacity(Text)
-					]
-					+ SVerticalBox::Slot().FillHeight(1.f)
-					[
-						SNew(SScrollBox) + SScrollBox::Slot().Padding(FMargin(0.f, 0.f, 16.f, 0.f)) [ Rows ]
-					]
-					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(0.f, 24.f, 0.f, 0.f))
-					[
-						SNew(SHorizontalBox)
-						+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
-						[
-							SNew(STextBlock)
-							.Text_Lambda([this]()
-							{
-								return FPlatformTime::Seconds() - AppliedTime < 2.5
-									? LOCTEXT("Applied", "Uloženo.")
-									: LOCTEXT("SettingsHint", "Escape: zpět bez uložení");
-							})
-							.Font(Font("Regular", 15.f))
-							.ColorAndOpacity(Dim)
-						]
-						+ SHorizontalBox::Slot().AutoWidth().Padding(8.f, 0.f)
-						[
-							MakeButton(LOCTEXT("Apply", "POUŽÍT"), [this]() { ApplyDraft(); }, 22.f)
-						]
-						+ SHorizontalBox::Slot().AutoWidth().Padding(8.f, 0.f)
-						[
-							MakeButton(LOCTEXT("Back", "ZPĚT"), [this]() { CloseSettings(); }, 22.f)
-						]
-					]
+					TabSwitcher.ToSharedRef()
+				]
+			]
+			+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(0.f, 40.f, 0.f, 0.f))
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().AutoWidth()[ MakeButton(LOCTEXT("Back", "Zpět"), [this]() { CloseSettings(); }, 132.f, false) ]
+				+ SHorizontalBox::Slot().AutoWidth().Padding(FMargin(20.f, 0.f, 0.f, 0.f))
+				[
+					MakeButton(LOCTEXT("Reset", "Výchozí"), [this]() { ResetTab(); }, 292.f, false)
 				]
 			]
 		];
+}
+
+TSharedRef<SWidget> SSpaceMenu::BuildTabRows(ESpaceSettingsTab Tab)
+{
+	using namespace SpaceMenuStyle;
+	TSharedRef<SVerticalBox> Rows = SNew(SVerticalBox);
+	auto Add = [&Rows](const TSharedRef<SWidget>& Row) { Rows->AddSlot().AutoHeight()[ Row ]; };
+	auto Percent = [](float Value) { return FText::FromString(FString::Printf(TEXT("%d"), FMath::RoundToInt32(Value * 100.f))); };
+
+	switch (Tab)
+	{
+	case ESpaceSettingsTab::Game:
+		Add(MakeSelectorRow(LOCTEXT("Hud", "HUD (klávesa H)"),
+			[this]() { return Draft.HudMode; }, [this](int32 I) { Draft.HudMode = I; }, []() { return 4; },
+			[](int32 I)
+			{
+				return I == 0 ? LOCTEXT("HudOff", "Skrytý") : I == 1 ? LOCTEXT("HudFlight", "Jen letový HUD")
+					: I == 2 ? LOCTEXT("HudCompact", "S textem") : LOCTEXT("HudFull", "S plným textem");
+			}));
+		Add(MakeToggleRow(LOCTEXT("ShowFps", "Zobrazit FPS"), &Draft.bShowFps));
+		break;
+
+	case ESpaceSettingsTab::Graphics:
+		Add(MakeDropdownRow(LOCTEXT("Resolution", "Rozlišení"),
+			[this]() { return Draft.Resolution; }, [this](int32 I) { Draft.Resolution = I; }, [this]() { return Resolutions.Num(); },
+			[this](int32 I)
+			{
+				const FIntPoint R = Resolutions.IsValidIndex(I) ? Resolutions[I] : FIntPoint::ZeroValue;
+				return FText::FromString(FString::Printf(TEXT("%d X %d"), R.X, R.Y));
+			}));
+		Add(MakeDropdownRow(LOCTEXT("WindowMode", "Režim zobrazení"),
+			[this]() { return Draft.WindowMode; }, [this](int32 I) { Draft.WindowMode = I; }, []() { return 3; },
+			[](int32 I)
+			{
+				return I == 0 ? LOCTEXT("Borderless", "Celá obrazovka bez rámečku") : I == 1 ? LOCTEXT("Exclusive", "Celá obrazovka")
+					: LOCTEXT("Windowed", "V okně");
+			}));
+		Add(MakeToggleRow(LOCTEXT("VSync", "Vertikální synchronizace"), &Draft.bVSync));
+		Add(MakeDropdownRow(LOCTEXT("FrameLimit", "Limit snímků"),
+			[this]() { return Draft.FrameLimit; }, [this](int32 I) { Draft.FrameLimit = I; }, []() { return int32(UE_ARRAY_COUNT(FrameLimits)); },
+			[](int32 I)
+			{
+				return FrameLimits[I] == 0 ? LOCTEXT("NoLimit", "Bez limitu") : FText::FromString(FString::Printf(TEXT("%d FPS"), FrameLimits[I]));
+			}));
+		Add(MakeSliderRow(LOCTEXT("ResolutionScale", "Rozlišení vykreslování (TSR)"), &Draft.ResolutionScale, 50.f, 100.f,
+			[](float V) { return FText::FromString(FString::Printf(TEXT("%d %%"), FMath::RoundToInt32(V))); }));
+		Add(MakeDropdownRow(LOCTEXT("Quality", "Celková kvalita"),
+			[this]() { return Draft.Quality; }, [this](int32 I) { Draft.Quality = I; }, []() { return 5; },
+			[](int32 I)
+			{
+				static const FText Names[] = { LOCTEXT("Low", "Nízká"), LOCTEXT("Medium", "Střední"), LOCTEXT("High", "Vysoká"),
+					LOCTEXT("Epic", "Velmi vysoká"), LOCTEXT("Cinematic", "Filmová") };
+				return Names[FMath::Clamp(I, 0, 4)];
+			}));
+		break;
+
+	case ESpaceSettingsTab::Audio:
+		Add(MakeSliderRow(LOCTEXT("MasterVolume", "Celková hlasitost"), &Draft.MasterVolume, 0.f, 1.f, Percent, true));
+		Add(MakeSliderRow(LOCTEXT("EffectsVolume", "Hlasitost efektů a motorů"), &Draft.EffectsVolume, 0.f, 1.f, Percent, true));
+		Add(MakeSliderRow(LOCTEXT("MusicVolume", "Hlasitost hudby a ambientu"), &Draft.MusicVolume, 0.f, 1.f, Percent, true));
+		break;
+
+	case ESpaceSettingsTab::Controls:
+		Add(MakeSliderRow(LOCTEXT("Sensitivity", "Citlivost myši"), &Draft.MouseSensitivity, 0.25f, 3.f,
+			[](float V) { return FText::FromString(FString::Printf(TEXT("%.2f"), V)); }));
+		Add(MakeToggleRow(LOCTEXT("InvertPitch", "Let - Obrácené klopení (myš nahoru = nos dolů)"), &Draft.bInvertPitch));
+		break;
+
+	default:
+		break;
+	}
+	return Rows;
 }
 
 // -------------------------------------------------------------------------------------------
 // Building blocks
 // -------------------------------------------------------------------------------------------
 
-TSharedRef<SWidget> SSpaceMenu::MakeButton(const FText& Label, TFunction<void()> OnClick, float FontSize)
+TSharedRef<SWidget> SSpaceMenu::MakeButton(const FText& Label, TFunction<void()> OnClick, float Width, bool bFilled)
 {
 	using namespace SpaceMenuStyle;
 	return SNew(SButton)
-		.ButtonColorAndOpacity(Button)
-		.ContentPadding(FMargin(26.f, 10.f))
-		.HAlign(HAlign_Left)
+		.ButtonStyle(&FlatButton())
 		.OnHovered_Lambda([this]() { Hovered(); })
 		.OnClicked_Lambda([this, OnClick]()
 		{
-			if (ASpacePlayerController* Controller = Owner.Get())
-			{
-				Controller->PlayUiSound(true);
-			}
+			Clicked();
 			OnClick();
 			return FReply::Handled();
 		})
 		[
-			SNew(STextBlock).Text(Label).Font(Font("Bold", FontSize)).ColorAndOpacity(Text)
+			SNew(SBox).WidthOverride(Width).HeightOverride(bFilled ? 43.f : 51.f)
+			[
+				SNew(SSpaceBox)
+				.Fill(bFilled ? ButtonFill : FLinearColor::Transparent)
+				.HoverFill(bFilled ? ButtonHover : TabHover)
+				.Outline(Outline)
+				.HoverOutline(OutlineHover)
+				.Corner(13.f)
+				.Padding(FMargin(16.f, 0.f))
+				[
+					SNew(SBox).VAlign(VAlign_Center).HAlign(HAlign_Left)
+					[
+						SNew(STextBlock).Text(Label.ToUpper()).Font(Font(false, 13.f, 20)).ColorAndOpacity(Text)
+					]
+				]
+			]
 		];
 }
 
-TSharedRef<SWidget> SSpaceMenu::MakeSection(const FText& Title)
+TSharedRef<SWidget> SSpaceMenu::MakeTab(ESpaceSettingsTab Tab, const FText& Label)
 {
 	using namespace SpaceMenuStyle;
-	return SNew(SBox).Padding(FMargin(0.f, 18.f, 0.f, 4.f))
+	auto Active = [this, Tab]() { return CurrentTab == Tab; };
+	return SNew(SButton)
+		.ButtonStyle(&FlatButton())
+		.OnHovered_Lambda([this]() { Hovered(); })
+		.OnClicked_Lambda([this, Tab]()
+		{
+			Clicked();
+			ShowTab(Tab);
+			return FReply::Handled();
+		})
 		[
-			SNew(STextBlock).Text(Title).Font(Font("Bold", 17.f)).ColorAndOpacity(Accent)
+			SNew(SSpaceBox)
+			.Fill_Lambda([Active]() { return Active() ? TabActive : FLinearColor::Transparent; })
+			.HoverFill_Lambda([Active]() { return Active() ? TabActive : TabHover; })
+			.Outline(Outline)
+			.HoverOutline(OutlineHover)
+			.Corner(13.f)
+			.Padding(FMargin(17.f, 0.f))
+			[
+				SNew(SBox).VAlign(VAlign_Center).HAlign(HAlign_Left)
+				[
+					SNew(STextBlock).Text(Label).Font(Font(false, 12.5f, 20)).ColorAndOpacity(Text)
+				]
+			]
 		];
 }
 
-TSharedRef<SWidget> SSpaceMenu::MakeChoiceRow(const FText& Label, TFunction<int32()> GetIndex, TFunction<void(int32)> SetIndex,
+TSharedRef<SWidget> SSpaceMenu::MakeRow(const FText& Label, const TSharedRef<SWidget>& Control, const TSharedPtr<SWidget>& After)
+{
+	using namespace SpaceMenuStyle;
+	return SNew(SSpaceRow)
+		[
+			SNew(SBox).HeightOverride(63.f)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+				[
+					SNew(SBox).WidthOverride(581.f).Padding(FMargin(55.f, 0.f, 12.f, 0.f))
+					[
+						SNew(STextBlock).Text(Label).Font(Font(false, 13.f)).ColorAndOpacity(Text)
+					]
+				]
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+				[
+					SNew(SBox).WidthOverride(402.f)[ Control ]
+				]
+				// A slider's value, right of it as in SC.
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(FMargin(14.f, 0.f, 0.f, 0.f))
+				[
+					After.IsValid() ? After.ToSharedRef() : SNullWidget::NullWidget
+				]
+				+ SHorizontalBox::Slot().FillWidth(1.f)[ SNew(SSpacer) ]
+			]
+		];
+}
+
+TSharedRef<SWidget> SSpaceMenu::MakeSelectorRow(const FText& Label, TFunction<int32()> GetIndex, TFunction<void(int32)> SetIndex,
 	TFunction<int32()> Count, TFunction<FText(int32)> Describe)
 {
 	using namespace SpaceMenuStyle;
-	auto Step = [this, GetIndex, SetIndex, Count](int32 Direction)
+	// Both arrows always lit and the values go round, as SC's two-value rows (VSync Yes: both arrows bright).
+	auto Arrow = [this, GetIndex, SetIndex, Count](bool bRight) -> TSharedRef<SWidget>
 	{
-		const int32 N = FMath::Max(Count(), 1);
-		SetIndex((GetIndex() + Direction + N) % N);
-		if (ASpacePlayerController* Controller = Owner.Get())
-		{
-			Controller->PlayUiSound(false);
-		}
-		return FReply::Handled();
-	};
-	auto Arrow = [Step](const TCHAR* Glyph, int32 Direction) -> TSharedRef<SWidget>
-	{
+		const int32 Direction = bRight ? 1 : -1;
 		return SNew(SButton)
-			.ButtonColorAndOpacity(SpaceMenuStyle::Button)
-			.ContentPadding(FMargin(14.f, 2.f))
-			.OnClicked_Lambda([Step, Direction]() { return Step(Direction); })
+			.ButtonStyle(&FlatButton())
+			.ContentPadding(FMargin(12.f, 6.f))
+			.OnHovered_Lambda([this]() { Hovered(); })
+			.OnClicked_Lambda([this, GetIndex, SetIndex, Count, Direction]()
+			{
+				const int32 N = FMath::Max(Count(), 1);
+				SetIndex((GetIndex() + Direction + N) % N);
+				Commit();
+				Clicked();
+				return FReply::Handled();
+			})
 			[
-				SNew(STextBlock).Text(FText::FromString(Glyph)).Font(SpaceMenuStyle::Font("Bold", 18.f)).ColorAndOpacity(SpaceMenuStyle::Text)
+				SNew(SSpaceChevron).Right(bRight).Color(Text)
 			];
 	};
-	return SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot().FillWidth(0.48f).VAlign(VAlign_Center)
+	return MakeRow(Label,
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Arrow(false) ]
+		+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center).HAlign(HAlign_Center)
 		[
-			SNew(STextBlock).Text(Label).Font(Font("Regular", 18.f)).ColorAndOpacity(Text)
+			SNew(STextBlock).Text_Lambda([GetIndex, Describe]() { return Describe(GetIndex()); }).Font(Font(false, 13.f)).ColorAndOpacity(Text)
 		]
-		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center) [ Arrow(TEXT("<"), -1) ]
-		+ SHorizontalBox::Slot().FillWidth(0.52f).VAlign(VAlign_Center).HAlign(HAlign_Center)
-		[
-			SNew(STextBlock).Text_Lambda([GetIndex, Describe]() { return Describe(GetIndex()); }).Font(Font("Bold", 18.f)).ColorAndOpacity(Accent)
-		]
-		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center) [ Arrow(TEXT(">"), 1) ];
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Arrow(true) ]);
 }
 
 TSharedRef<SWidget> SSpaceMenu::MakeToggleRow(const FText& Label, bool* Value)
 {
-	return MakeChoiceRow(Label, [Value]() { return *Value ? 1 : 0; }, [Value](int32 I) { *Value = I != 0; }, []() { return 2; },
-		[](int32 I) { return I ? LOCTEXT("ToggleOn", "Zapnuto") : LOCTEXT("ToggleOff", "Vypnuto"); });
+	return MakeSelectorRow(Label, [Value]() { return *Value ? 1 : 0; }, [Value](int32 I) { *Value = I != 0; }, []() { return 2; },
+		[](int32 I) { return I ? LOCTEXT("ToggleOn", "Ano") : LOCTEXT("ToggleOff", "Ne"); });
+}
+
+TSharedRef<SWidget> SSpaceMenu::MakeDropdownRow(const FText& Label, TFunction<int32()> GetIndex, TFunction<void(int32)> SetIndex,
+	TFunction<int32()> Count, TFunction<FText(int32)> Describe)
+{
+	using namespace SpaceMenuStyle;
+	TSharedRef<TWeakPtr<SMenuAnchor>> Anchor = MakeShared<TWeakPtr<SMenuAnchor>>();
+	auto Field = [](const TSharedRef<SWidget>& Content, bool bHoverable)
+	{
+		return SNew(SBox).HeightOverride(30.f)
+			[
+				SNew(SSpaceBox)
+				.Fill(FieldFill)
+				.HoverFill(bHoverable ? RowHover : FLinearColor(0, 0, 0, -1))
+				.Outline(FieldEdge)
+				.HoverOutline(bHoverable ? RowHoverEdge : FLinearColor(0, 0, 0, -1))
+				.Corner(0.f)
+				.Thickness(1.f)
+				[
+					Content
+				]
+			];
+	};
+	TSharedRef<SMenuAnchor> Menu = SNew(SMenuAnchor)
+		.Placement(MenuPlacement_BelowAnchor)
+		.Method(EPopupMethod::UseCurrentWindow)
+		.OnGetMenuContent_Lambda([this, Anchor, GetIndex, SetIndex, Count, Describe, Field]() -> TSharedRef<SWidget>
+		{
+			TSharedRef<SVerticalBox> List = SNew(SVerticalBox);
+			for (int32 Index = 0; Index < Count(); ++Index)
+			{
+				List->AddSlot().AutoHeight()
+				[
+					SNew(SButton)
+					.ButtonStyle(&FlatButton())
+					.OnHovered_Lambda([this]() { Hovered(); })
+					.OnClicked_Lambda([this, Anchor, SetIndex, Index]()
+					{
+						SetIndex(Index);
+						Commit();
+						Clicked();
+						if (const TSharedPtr<SMenuAnchor> Open = Anchor->Pin())
+						{
+							Open->SetIsOpen(false);
+						}
+						return FReply::Handled();
+					})
+					[
+						SNew(SBox).WidthOverride(402.f)
+						[
+							Field(SNew(SBox).VAlign(VAlign_Center).HAlign(HAlign_Center)
+							[
+								SNew(STextBlock).Text(Describe(Index)).Font(Font(false, 13.f))
+								.ColorAndOpacity(Index == GetIndex() ? FSlateColor(OutlineHover) : FSlateColor(TextDim))
+							], true)
+						]
+					]
+				];
+			}
+			return SNew(SBox).MaxDesiredHeight(380.f)[ SNew(SScrollBox).ScrollBarStyle(&ScrollBar()) + SScrollBox::Slot()[ List ] ];
+		})
+		[
+			SNew(SButton)
+			.ButtonStyle(&FlatButton())
+			.OnHovered_Lambda([this]() { Hovered(); })
+			.OnClicked_Lambda([this, Anchor]()
+			{
+				if (const TSharedPtr<SMenuAnchor> Open = Anchor->Pin())
+				{
+					Open->SetIsOpen(!Open->IsOpen());
+					Clicked();
+				}
+				return FReply::Handled();
+			})
+			[
+				Field(SNew(SOverlay)
+					+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Center).Padding(FMargin(6.f, 0.f))[ SNew(SSpaceChevron).Right(true).Color(Text) ]
+					+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
+					[
+						SNew(STextBlock).Text_Lambda([GetIndex, Describe]() { return Describe(GetIndex()); }).Font(Font(false, 13.f)).ColorAndOpacity(Text)
+					], false)
+			]
+		];
+	*Anchor = Menu;
+	return MakeRow(Label, Menu);
 }
 
 TSharedRef<SWidget> SSpaceMenu::MakeSliderRow(const FText& Label, float* Value, float Min, float Max, TFunction<FText(float)> Describe, bool bPreviewVolume)
 {
 	using namespace SpaceMenuStyle;
-	return SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot().FillWidth(0.48f).VAlign(VAlign_Center)
-		[
-			SNew(STextBlock).Text(Label).Font(Font("Regular", 18.f)).ColorAndOpacity(Text)
-		]
-		+ SHorizontalBox::Slot().FillWidth(0.40f).VAlign(VAlign_Center).Padding(8.f, 6.f)
-		[
-			SNew(SSlider)
-			.MinValue(Min)
-			.MaxValue(Max)
-			.Value_Lambda([Value]() { return *Value; })
-			.OnValueChanged_Lambda([this, Value, bPreviewVolume](float NewValue)
-			{
-				*Value = NewValue;
-				if (bPreviewVolume)
-				{
-					if (ASpacePlayerController* Controller = Owner.Get())
+	return MakeRow(Label,
+		SNew(SBox).HeightOverride(24.f)
+			[
+				SNew(SSpaceBox).Outline(FieldEdge).Corner(0.f).Thickness(1.f).Padding(FMargin(1.f))
+				[
+					SNew(SSlider)
+					.Style(&Slider())
+					.IndentHandle(false)
+					.MinValue(Min)
+					.MaxValue(Max)
+					.Value_Lambda([Value]() { return *Value; })
+					.OnValueChanged_Lambda([this, Value, bPreviewVolume](float NewValue)
 					{
-						Controller->PreviewVolumes(Draft.MasterVolume, Draft.EffectsVolume, Draft.MusicVolume);
-					}
-				}
-			})
-		]
-		+ SHorizontalBox::Slot().FillWidth(0.12f).VAlign(VAlign_Center).HAlign(HAlign_Right)
-		[
-			SNew(STextBlock).Text_Lambda([Value, Describe]() { return Describe(*Value); }).Font(Font("Bold", 18.f)).ColorAndOpacity(Accent)
-		];
+						*Value = NewValue;
+						if (bPreviewVolume)
+						{
+							if (ASpacePlayerController* Controller = Owner.Get())
+							{
+								Controller->PreviewVolumes(Draft.MasterVolume, Draft.EffectsVolume, Draft.MusicVolume);
+							}
+						}
+					})
+					// Applying (scalability, saving the file) on every pixel of a drag would stall; once, when it ends.
+					.OnMouseCaptureEnd_Lambda([this]() { Commit(); })
+					.OnControllerCaptureEnd_Lambda([this]() { Commit(); })
+				]
+			],
+		SNew(STextBlock).Text_Lambda([Value, Describe]() { return Describe(*Value); }).Font(Font(false, 13.f)).ColorAndOpacity(Text));
 }
 
 // -------------------------------------------------------------------------------------------
@@ -504,7 +1092,7 @@ void SSpaceMenu::LoadDraft()
 	const EWindowMode::Type Mode = Settings->GetFullscreenMode();
 	Draft.WindowMode = Mode == EWindowMode::WindowedFullscreen ? 0 : Mode == EWindowMode::Fullscreen ? 1 : 2;
 
-	const FIntPoint Current = Settings->GetScreenResolution();
+	const FIntPoint Current = Draft.WindowMode == 0 ? Settings->GetDesktopResolution() : Settings->GetScreenResolution();
 	Draft.Resolution = Resolutions.Num() - 1;
 	for (int32 Index = 0; Index < Resolutions.Num(); ++Index)
 	{
@@ -544,7 +1132,7 @@ void SSpaceMenu::LoadDraft()
 	Draft.bShowFps = Settings->bShowFps;
 }
 
-void SSpaceMenu::ApplyDraft()
+void SSpaceMenu::Commit()
 {
 	USpaceUserSettings* Settings = USpaceUserSettings::Get();
 	if (!Settings)
@@ -575,19 +1163,47 @@ void SSpaceMenu::ApplyDraft()
 		Settings->ApplyGameSettings(Controller->GetWorld());
 		Controller->PreviewVolumes(Settings->MasterVolume, Settings->EffectsVolume, Settings->MusicVolume);
 	}
-	AppliedTime = FPlatformTime::Seconds();
+}
+
+void SSpaceMenu::ResetTab()
+{
+	const USpaceUserSettings* Defaults = GetDefault<USpaceUserSettings>();
+	switch (CurrentTab)
+	{
+	case ESpaceSettingsTab::Graphics:
+	{
+		// As USpaceUserSettings::SetToDefaults: borderless at the monitor's resolution, epic at a 75 % render scale.
+		Draft.WindowMode = 0;
+		const FIntPoint Desktop = USpaceUserSettings::Get() ? USpaceUserSettings::Get()->GetDesktopResolution() : FIntPoint::ZeroValue;
+		Draft.Resolution = FMath::Max(Resolutions.IndexOfByKey(Desktop), 0);
+		Draft.Quality = USpaceUserSettings::DefaultQualityLevel;
+		Draft.ResolutionScale = USpaceUserSettings::DefaultRenderScale;
+		Draft.bVSync = false;
+		Draft.FrameLimit = 0;
+		break;
+	}
+	case ESpaceSettingsTab::Audio:
+		Draft.MasterVolume = Defaults->MasterVolume;
+		Draft.EffectsVolume = Defaults->EffectsVolume;
+		Draft.MusicVolume = Defaults->MusicVolume;
+		break;
+	case ESpaceSettingsTab::Controls:
+		Draft.MouseSensitivity = Defaults->MouseSensitivity;
+		Draft.bInvertPitch = Defaults->bInvertShipPitch;
+		break;
+	case ESpaceSettingsTab::Game:
+		Draft.HudMode = Defaults->HudMode;
+		Draft.bShowFps = Defaults->bShowFps;
+		break;
+	default:
+		break;
+	}
+	Commit();
 }
 
 void SSpaceMenu::CloseSettings()
 {
-	// Unapplied changes are dropped; undo the volume preview.
-	if (const USpaceUserSettings* Settings = USpaceUserSettings::Get())
-	{
-		if (ASpacePlayerController* Controller = Owner.Get())
-		{
-			Controller->PreviewVolumes(Settings->MasterVolume, Settings->EffectsVolume, Settings->MusicVolume);
-		}
-	}
+	// Everything is applied as it changes (as SC); Back only leaves.
 	ShowPage(bTitleScreen ? ESpaceMenuPage::Main : ESpaceMenuPage::Pause);
 }
 
@@ -596,6 +1212,14 @@ void SSpaceMenu::Hovered()
 	if (ASpacePlayerController* Controller = Owner.Get())
 	{
 		Controller->PlayUiSound(false);
+	}
+}
+
+void SSpaceMenu::Clicked()
+{
+	if (ASpacePlayerController* Controller = Owner.Get())
+	{
+		Controller->PlayUiSound(true);
 	}
 }
 

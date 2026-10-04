@@ -1,0 +1,12 @@
+{
+  "_comment": "Menus in SC 4.10's style (4. 10. 2026): title, pause, the settings tabs and loading, shown over the running game by space.Menu <page> [tab] (no pause, so the runner keeps going). The title screen's real background is the MainMenu level; here it is the game behind. Compare at the capture's size: .\\Tools\\Shots.ps1 -Preset menu_sc -Editor -Width 2560 -Height 1440",
+  "shots": [
+    {"name": "title", "camera": "chase", "altitude_m": 3000, "facing": "horizon", "hud": 0, "gear": false, "settle": 2.0, "console": ["space.Menu 0"]},
+    {"name": "settings_graphics", "altitude_m": -1, "hud": 0, "settle": 1.0, "console": ["space.Menu 2 1"]},
+    {"name": "settings_game", "altitude_m": -1, "hud": 0, "settle": 1.0, "console": ["space.Menu 2 0"]},
+    {"name": "settings_audio", "altitude_m": -1, "hud": 0, "settle": 1.0, "console": ["space.Menu 2 2"]},
+    {"name": "settings_controls", "altitude_m": -1, "hud": 0, "settle": 1.0, "console": ["space.Menu 2 3"]},
+    {"name": "pause", "altitude_m": -1, "hud": 0, "settle": 1.0, "console": ["space.Menu 1"]},
+    {"name": "loading", "altitude_m": -1, "hud": 0, "settle": 1.0, "console": ["space.Menu 3"]}
+  ]
+}
