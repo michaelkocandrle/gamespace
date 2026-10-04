@@ -574,7 +574,10 @@ After SC 4.x (`starcitizenreference/OwnCapture_Gameplay_Notes.md`, "Rozhraní hr
   The target is shown **by the object** as a label with an F keycap (`SEDNOUT [F]` on the seat back,
   `VYSTOUPIT [F]` at the `WalkRamp` socket, `RAMPA ZAVŘENÁ ZA LETU` greyed when the ship is not landed,
   `VSTOUPIT DO LODI [F]` outside).
-- **Hold F** = interact mode while held: mouse cursor, look frozen, clickable hotspots in the world
+- **Hold F** = interact mode while held (SC, author 5. 10. 2026): the player keeps looking round (in the seat the
+  mouse turns the head - free look - instead of steering), the target is the hotspot nearest the screen's centre
+  (70 px), drawn as SC does: a white pointing-hand cursor, light corners round the control at its own size
+  (`FSpaceHotspot::SizeCm`), its name beside it in light italic spaced caps. Clickable hotspots in the world
   (seated: the left and right MFD at the `Display_left` / `Display_right` sockets; on foot inside: the
   seat, the MFDs, the ramp when landed). The hovered hotspot (nearest within 36 px) gets a label on a
   dark backing; LMB uses it (MFD next page), RMB goes back.

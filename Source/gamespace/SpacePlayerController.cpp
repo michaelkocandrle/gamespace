@@ -224,22 +224,11 @@ void ASpacePlayerController::SetInteractMode(bool bOn)
 		return;
 	}
 	bInteractMode = bOn;
-	if (bOn)
+	// SC (the author, 5. 10. 2026): holding F the player keeps looking round; what is under the cursor at the
+	// screen's centre is the target. In the seat the mouse turns the head (free look), it does not steer the ship.
+	if (ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(GetPawn()))
 	{
-		// A cursor over the game (SC's interact mode); keys still reach the game.
-		FInputModeGameAndUI Mode;
-		Mode.SetHideCursorDuringCapture(false);
-		Mode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
-		SetInputMode(Mode);
-		SetShowMouseCursor(true);
-		int32 Width = 0, Height = 0;
-		GetViewportSize(Width, Height);
-		SetMouseLocation(Width / 2, Height / 2);
-	}
-	else if (!IsMenuOpen())
-	{
-		SetInputMode(FInputModeGameOnly());
-		SetShowMouseCursor(false);
+		Ship->SetInteractLook(bOn);
 	}
 }
 
@@ -247,7 +236,7 @@ void ASpacePlayerController::TickInteraction()
 {
 	// SC: a tap on F uses the target; holding it a moment is interact mode, released it closes again.
 	constexpr double HoldSeconds = 0.3;
-	constexpr double HoverPixels = 36.0;
+	constexpr double HoverPixels = 70.0;
 	APawn* const Played = GetPawn();
 	const bool bAllowed = Played && !IsMenuOpen();
 	const bool bDown = bAllowed && IsInputKeyDown(EKeys::F);
@@ -320,13 +309,18 @@ void ASpacePlayerController::TickInteraction()
 	View.HotspotScreen.SetNum(View.Hotspots.Num());
 	View.HotspotOnScreen.SetNum(View.Hotspots.Num());
 	View.HotspotLabelScreen.SetNum(View.Hotspots.Num());
-	float MouseX = 0.f, MouseY = 0.f;
-	const bool bMouse = bInteractMode && GetMousePosition(MouseX, MouseY);
+	View.HotspotPixelSize.SetNum(View.Hotspots.Num());
+	const float MouseX = Width * 0.5f, MouseY = Height * 0.5f;
+	const bool bMouse = bInteractMode;
+	View.CursorScreen = FVector2D(MouseX, MouseY);
+	const float FocalPx = PlayerCameraManager ? float(Width) * 0.5f / FMath::Tan(FMath::DegreesToRadians(PlayerCameraManager->GetFOVAngle() * 0.5f)) : float(Width) * 0.5f;
+	const FVector EyeAt = PlayerCameraManager ? PlayerCameraManager->GetCameraLocation() : FVector::ZeroVector;
 	double Best = HoverPixels;
 	for (int32 Index = 0; Index < View.Hotspots.Num(); ++Index)
 	{
 		View.HotspotOnScreen[Index] = OnScreen(View.Hotspots[Index].WorldLocation, View.HotspotScreen[Index]);
 		View.HotspotLabelScreen[Index] = View.HotspotScreen[Index];
+		View.HotspotPixelSize[Index] = View.Hotspots[Index].SizeCm * FocalPx / FMath::Max(1.f, float(FVector::Dist(EyeAt, View.Hotspots[Index].WorldLocation)));
 		if (View.Hotspots[Index].bLabelAnchor)
 		{
 			FVector2D Anchor;
@@ -348,6 +342,7 @@ void ASpacePlayerController::TickInteraction()
 	if (bInteractMode && View.Hotspots.IsValidIndex(ForcedHover))
 	{
 		View.Hovered = ForcedHover;
+		View.CursorScreen = View.HotspotScreen[ForcedHover];
 	}
 	if (bInteractMode && View.Hotspots.IsValidIndex(View.Hovered) && View.Hotspots[View.Hovered].Use)
 	{

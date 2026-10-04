@@ -181,6 +181,15 @@ int32 SSpaceInteractionOverlay::OnPaint(const FPaintArgs&, const FGeometry& Geom
 		FSlateDrawElement::MakeText(Out, AtLayer + 1, Geometry.ToPaintGeometry(FVector2f(2000.f, 200.f), FSlateLayoutTransform(At)),
 			Value, Info, ESlateDrawEffect::None, Color * Style.GetColorAndOpacityTint());
 	};
+	// SC's interact labels lean: the type sheared like an italic (the font has no italic face).
+	auto WriteItalic = [&](const FString& Value, const FVector2f& At, const FSlateFontInfo& Info, const FLinearColor& Color, int32 AtLayer)
+	{
+		const FSlateRenderTransform Local = Concatenate(FShear2D(-0.22f, 0.f), FSlateRenderTransform(At));
+		const FSlateRenderTransform Full = Concatenate(Local, Geometry.GetAccumulatedRenderTransform());
+		const FSlateLayoutTransform LayoutAt = Concatenate(FSlateLayoutTransform(At), Geometry.GetAccumulatedLayoutTransform());
+		FSlateDrawElement::MakeText(Out, AtLayer, FPaintGeometry(LayoutAt, Full, FVector2f(2000.f, 200.f), true), Value, Info,
+			ESlateDrawEffect::None, Color * Style.GetColorAndOpacityTint());
+	};
 	// SC's glow: wider, fainter copies of a line under it.
 	auto Glow = [&](const TArray<FVector2f>& Points, const FLinearColor& Color, float Thickness, int32 AtLayer, float Strength = 1.f)
 	{
@@ -224,6 +233,19 @@ int32 SSpaceInteractionOverlay::OnPaint(const FPaintArgs&, const FGeometry& Geom
 	// --- Interact mode: the hotspots, the hovered one labelled -----------------------------------------------------------
 	if (View.bInteractMode)
 	{
+		// SC's interact cursor: a small white pointing hand, its fingertip on the target (the screen's centre - the
+		// player keeps looking round)
+		{
+			const FVector2f C = ToLocal(View.CursorScreen);
+			auto Hand = [&](float Grow, const FLinearColor& Color, int32 AtLayer)
+			{
+				Fill(Out, AtLayer, Geometry, BoxPoints(C.X - 2.f - Grow, C.Y - Grow, 4.f + 2.f * Grow, 11.f + 2.f * Grow), Color);          // finger
+				Fill(Out, AtLayer, Geometry, BoxPoints(C.X - 2.f - Grow, C.Y + 7.f - Grow, 11.f + 2.f * Grow, 10.f + 2.f * Grow), Color);   // palm
+				Fill(Out, AtLayer, Geometry, BoxPoints(C.X - 6.f - Grow, C.Y + 9.f - Grow, 4.f + 2.f * Grow, 5.f + 2.f * Grow), Color);    // thumb
+			};
+			Hand(1.2f, Srgb(10, 20, 26, 0.7f), Layer + 4);
+			Hand(0.f, Srgb(245, 250, 252), Layer + 5);
+		}
 		for (int32 Index = 0; Index < View.Hotspots.Num(); ++Index)
 		{
 			if (!View.HotspotOnScreen.IsValidIndex(Index) || !View.HotspotOnScreen[Index])
@@ -234,40 +256,30 @@ int32 SSpaceInteractionOverlay::OnPaint(const FPaintArgs&, const FGeometry& Geom
 			const bool bHovered = Index == View.Hovered;
 			if (bHovered)
 			{
-				Fill(Out, Layer, Geometry, Ring(At, 8.f, 20), Cyan * FLinearColor(1, 1, 1, 0.3f));
-				Glow(Ring(At, 8.f), Cyan, 1.8f, Layer + 1, 0.8f);
-				// SC: one short line just above the hovered control (back is on the key list). Settings can hide it.
+				// SC (the author's captures, 5. 10. 2026): the control under the cursor lights up - here light corners
+				// round it at its own size, not a marker dot - and its name stands beside it in light italic caps.
+				const float Px = View.HotspotPixelSize.IsValidIndex(Index) ? FMath::Clamp(View.HotspotPixelSize[Index] / PixelScale, 16.f, 260.f) : 30.f;
+				const float HalfBox = Px * 0.5f + 4.f, Arm = FMath::Max(6.f, HalfBox * 0.45f);
+				Fill(Out, Layer, Geometry, BoxPoints(At.X - HalfBox, At.Y - HalfBox, HalfBox * 2.f, HalfBox * 2.f), Srgb(200, 240, 255, 0.07f));
+				for (const FVector2f& Sign : { FVector2f(-1.f, -1.f), FVector2f(1.f, -1.f), FVector2f(1.f, 1.f), FVector2f(-1.f, 1.f) })
+				{
+					const FVector2f Corner = At + Sign * HalfBox;
+					Glow({ Corner - FVector2f(Sign.X * Arm, 0.f), Corner, Corner - FVector2f(0.f, Sign.Y * Arm) }, Srgb(210, 245, 255), 1.6f, Layer + 1, 0.9f);
+				}
 				const USpaceUserSettings* Settings = USpaceUserSettings::Get();
 				if (Settings && !Settings->bShowInteractLabels)
 				{
 					continue;
 				}
-				// A hologram, not a sticker (author 4. 10.): no box - glowing cyan type, corner brackets and faint scan
-				// lines, the light of the projection rather than a panel.
+				FSlateFontInfo Info = Font(true, 16.f);
+				Info.LetterSpacing = 140;
 				const FString Label = View.Hotspots[Index].Label.ToString();
-				const FSlateFontInfo Info = Font(true, 15.f);
-				const FVector2f TextSize = Measure(Label, Info);
-				const bool bAnchored = View.Hotspots[Index].bLabelAnchor && View.HotspotLabelScreen.IsValidIndex(Index);
-				const FVector2f LabelAt = bAnchored ? ToLocal(View.HotspotLabelScreen[Index]) : At;
-				const FVector2f TextAt(LabelAt.X - TextSize.X * 0.5f, bAnchored ? LabelAt.Y - TextSize.Y * 0.5f : At.Y - 30.f - TextSize.Y);
-				const float L = TextAt.X - 10.f, R = TextAt.X + TextSize.X + 10.f, T = TextAt.Y - 4.f, B = TextAt.Y + TextSize.Y + 4.f;
-				Fill(Out, Layer, Geometry, BoxPoints(L, T, R - L, B - T), Srgb(20, 90, 120, 0.12f));
-				for (float Y = T + 2.f; Y < B; Y += 3.f)
-				{
-					Lines({ { L, Y }, { R, Y } }, Cyan * FLinearColor(1, 1, 1, 0.06f), 1.f, Layer + 1);
-				}
-				const float C = 7.f;
-				for (const FVector2f& Corner : { FVector2f(L, T), FVector2f(R, T), FVector2f(R, B), FVector2f(L, B) })
-				{
-					const float SX = Corner.X < LabelAt.X ? 1.f : -1.f, SY = Corner.Y < TextAt.Y ? 1.f : -1.f;
-					Glow({ Corner + FVector2f(SX * C, 0.f), Corner, Corner + FVector2f(0.f, SY * C) }, Cyan, 1.4f, Layer + 1, 0.7f);
-				}
-				// The type's glow: soft copies around it, then the type itself.
+				const FVector2f LabelAt(At.X + HalfBox + 10.f, At.Y - HalfBox - 4.f - 18.f);
 				for (const FVector2f& Offset : { FVector2f(-1.5f, 0.f), FVector2f(1.5f, 0.f), FVector2f(0.f, -1.5f), FVector2f(0.f, 1.5f) })
 				{
-					Write(Label, TextAt + Offset, Info, Cyan * FLinearColor(1, 1, 1, 0.22f), Layer + 2, false);
+					WriteItalic(Label, LabelAt + Offset, Info, Cyan * FLinearColor(1, 1, 1, 0.25f), Layer + 2);
 				}
-				Write(Label, TextAt, Info, Title, Layer + 3, false);
+				WriteItalic(Label, LabelAt, Info, Title, Layer + 3);
 			}
 			// (the others: nothing - SC marks only the control under the cursor)
 		}

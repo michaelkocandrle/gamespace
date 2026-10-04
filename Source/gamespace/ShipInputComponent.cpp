@@ -555,20 +555,13 @@ void UShipInputComponent::HandleAxisCompleted(const FInputActionValue& /*Value*/
 
 void UShipInputComponent::HandleLook(const FInputActionValue& Value)
 {
-	if (ASpacePlayerController::IsInteractModeFor(CastChecked<APawn>(GetOwner())))
-	{
-		return;  // the mouse is the cursor in interact mode
-	}
 	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
 	Ship->LookInput = Value.Get<FVector2D>();
 }
 
 void UShipInputComponent::HandleMouseLook(const FInputActionValue& Value)
 {
-	if (ASpacePlayerController::IsInteractModeFor(CastChecked<APawn>(GetOwner())))
-	{
-		return;
-	}
+	// (in interact mode the ship holds free look: the mouse turns the head - SpacePlayerController::SetInteractMode)
 	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
 	// Accumulated: every pixel moved between two ticks counts, however events are batched.
 	Ship->MouseLookDelta += Value.Get<FVector2D>();
@@ -718,6 +711,10 @@ void UShipInputComponent::HandleFreeLookStarted(const FInputActionValue& /*Value
 
 void UShipInputComponent::HandleFreeLookCompleted(const FInputActionValue& /*Value*/)
 {
+	if (ASpacePlayerController::IsInteractModeFor(CastChecked<APawn>(GetOwner())))
+	{
+		return;  // the right button was a click on a display; interact mode keeps the free look
+	}
 	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
 	Ship->SetFreeLookHeld(false);
 }

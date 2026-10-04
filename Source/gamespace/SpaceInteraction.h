@@ -29,6 +29,8 @@ struct FSpaceHotspot
 	 * never covers the page). */
 	bool bLabelAnchor = false;
 	FVector LabelWorldLocation = FVector::ZeroVector;
+	/** The control's size, cm: the highlight frames it (SC lights the control itself, no marker dot). */
+	float SizeCm = 6.f;
 };
 
 /** One line of SC's context key list at the bottom right: "ACTION [key]". */

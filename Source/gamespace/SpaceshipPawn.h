@@ -194,6 +194,9 @@ public:
 	 */
 	bool GetDisplayPoint(int32 Display, const FVector2D& UV, FVector& OutLocation) const;
 
+	/** Interact mode (F held) in the seat: the mouse turns the pilot's head (free look) instead of steering. */
+	void SetInteractLook(bool bOn) { SetFreeLookHeld(bOn); }
+
 	/** The page an MFD shows (0 left, 1 right); 0 without displays. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Displays")
 	int32 GetMfdPage(int32 Display) const;

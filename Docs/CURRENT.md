@@ -48,12 +48,12 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Čeká na rozhodnutí autora
 
+- **Autor 5. 10. – věrná kopie SC podle referencí** (pak vlastní styl): režim interakce jako SC hotový (rozhlížení, ruka,
+  rámeček prvku); zbývá **animace** (sednutí/vstávání, výjezd holoprojekce, rampa, dveře), holo MFD + písmo jako SC.
 - **Kokpit v2** (4. 10.): C-01 schválen výchozími volbami (D průmyslový, zakouřené hologramy, HOTAS, krémové obložení –
   autor může změnit); hotové holoprojektory MFD (CK-HP-L/R) a vnitřní rám kanopy (CK-CF); dál HOTAS, konzole a ovladače, materiály, střed.
 - Podpora života Wayfareru v2: posunutá k ose, z většiny pod lůžkem (list I-04, řez R1; po sloučení `import_kit.py`).
-- K tomu z 3. 10.: ~40 štítků ovladačů, světla kokpitu 3,9/m² (pravidlo 2–3), texty layoutu, dveře DR-TEC-CAB 78–90 mm.
-- Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověření FAIL 7/6/6/7/7/8/8/7, levné body opravené).
-- Steadfast: schválení 2D návrhu v2 (`Steadfast_Design.md`); kanopa Wayfareru (téma v2), paleta Kestrel Dynamics.
+- Nábytek kajuty: posouzení ve hře (kritik FAIL 7/6/6/7/7/8/8/7); Steadfast: schválení 2D návrhu v2, paleta Kestrel.
 
 ## Známé problémy
 

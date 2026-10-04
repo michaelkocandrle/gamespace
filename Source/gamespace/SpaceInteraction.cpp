@@ -34,6 +34,7 @@ namespace SpaceInteractionLocal
 			Spot.Label = FText::Format(bOn[Row] ? LOCTEXT("CfgOff", "{0}: VYPNOUT") : LOCTEXT("CfgOn", "{0}: ZAPNOUT"),
 				FText::FromString(USpaceCockpitDisplays::ConfigRowNames()[Row]));
 			Spot.WorldLocation = At;
+			Spot.SizeCm = 6.f;
 			// The label over the display's top frame, above this switch: never over the page (critic 4. 10.).
 			Spot.bLabelAnchor = Ship->GetDisplayPoint(0, FVector2D(USpaceCockpitDisplays::ConfigSwitchUV(Row).X - 0.25, -0.07), Spot.LabelWorldLocation);
 			Spot.Use = [Weak, Row](bool bPrimary)
@@ -68,6 +69,7 @@ namespace SpaceInteractionLocal
 		FSpaceHotspot Spot;
 		Spot.Label = Ship->GetPowerState() == ESpacePowerState::Off ? LOCTEXT("PowerOn", "ZAPNOUT NAPÁJENÍ") : LOCTEXT("PowerOff", "VYPNOUT NAPÁJENÍ");
 		Spot.WorldLocation = At;
+		Spot.SizeCm = 4.f;
 		Spot.Use = [Weak](bool bPrimary)
 		{
 			if (ASpaceshipPawn* Live = Weak.Get(); Live && bPrimary)
@@ -99,6 +101,7 @@ namespace SpaceInteractionLocal
 			Spot.Label = Labels[Display];
 			Spot.SecondaryLabel = LOCTEXT("MfdBack", "PRAVÉ TLAČÍTKO: ZPĚT");
 			Spot.WorldLocation = At;
+			Spot.SizeCm = 18.f;
 			Spot.Use = [Weak, Display](bool bPrimary)
 			{
 				if (ASpaceshipPawn* Live = Weak.Get())
@@ -159,6 +162,7 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 			FSpaceHotspot Spot;
 			Spot.Label = LOCTEXT("SitSpot", "SEDNOUT");
 			Spot.WorldLocation = Seat;
+			Spot.SizeCm = 30.f;
 			Spot.Use = [WeakCharacter](bool bPrimary)
 			{
 				if (APlayerCharacter* Live = WeakCharacter.Get(); bPrimary && Live && Live->GetInteriorShip()
@@ -177,6 +181,7 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 			FSpaceHotspot Spot;
 			Spot.Label = LOCTEXT("RampSpot", "VYSTOUPIT");
 			Spot.WorldLocation = Ramp;
+			Spot.SizeCm = 50.f;
 			Spot.Use = [WeakCharacter](bool bPrimary)
 			{
 				if (APlayerCharacter* Live = WeakCharacter.Get(); bPrimary && Live && Live->GetInteriorShip()

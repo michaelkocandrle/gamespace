@@ -450,10 +450,7 @@ void APlayerCharacter::HandleMoveCompleted(const FInputActionValue& /*Value*/)
 
 void APlayerCharacter::HandleLook(const FInputActionValue& Value)
 {
-	if (ASpacePlayerController::IsInteractModeFor(this))
-	{
-		return;  // the mouse is the cursor in interact mode
-	}
+	// (interact mode keeps looking round: the target is what the screen's centre points at - SC)
 	const FVector2D Delta = Value.Get<FVector2D>() * (LookSensitivity * USpaceUserSettings::GetMouseSensitivityScale());
 	LookYaw = FRotator::NormalizeAxis(LookYaw + float(Delta.X));
 	const float Low = bFirstPerson ? -FirstPersonPitchLimit : MinViewPitch;

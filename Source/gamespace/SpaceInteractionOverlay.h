@@ -21,6 +21,10 @@ struct FSpaceInteractionView
 	TArray<bool> HotspotOnScreen;
 	/** Each hotspot's label anchor on screen (its own point when it has none). */
 	TArray<FVector2D> HotspotLabelScreen;
+	/** Each hotspot's size on screen, px (its SizeCm at its distance). */
+	TArray<float> HotspotPixelSize;
+	/** Where the interact cursor is: the screen's centre (the player keeps looking round, SC), or the forced hover. */
+	FVector2D CursorScreen = FVector2D::ZeroVector;
 	int32 Hovered = INDEX_NONE;
 	TArray<FSpaceKeyHint> Keys;
 };
