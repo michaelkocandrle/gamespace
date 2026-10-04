@@ -398,7 +398,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::HandleJumpReleased);
 		Input->BindAction(SprintAction, ETriggerEvent::Triggered, this, &APlayerCharacter::HandleSprint);
 		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::HandleSprintReleased);
-		Input->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::HandleInteract);
+		// F is read by ASpacePlayerController (a tap does Interact(), holding it is interact mode); not bound here.
 		ToggleViewAction = NewObject<UInputAction>(this, TEXT("IA_ToggleView_Runtime"));
 		ToggleViewAction->ValueType = EInputActionValueType::Boolean;
 		ViewMappingContext = NewObject<UInputMappingContext>(this, TEXT("IMC_CharacterView_Runtime"));
@@ -450,6 +450,10 @@ void APlayerCharacter::HandleMoveCompleted(const FInputActionValue& /*Value*/)
 
 void APlayerCharacter::HandleLook(const FInputActionValue& Value)
 {
+	if (ASpacePlayerController::IsInteractModeFor(this))
+	{
+		return;  // the mouse is the cursor in interact mode
+	}
 	const FVector2D Delta = Value.Get<FVector2D>() * (LookSensitivity * USpaceUserSettings::GetMouseSensitivityScale());
 	LookYaw = FRotator::NormalizeAxis(LookYaw + float(Delta.X));
 	const float Low = bFirstPerson ? -FirstPersonPitchLimit : MinViewPitch;
@@ -484,6 +488,11 @@ void APlayerCharacter::HandleToggleHud(const FInputActionValue& /*Value*/)
 }
 
 void APlayerCharacter::HandleInteract(const FInputActionValue& /*Value*/)
+{
+	Interact();
+}
+
+void APlayerCharacter::Interact()
 {
 	if (InteriorShip.IsValid())
 	{

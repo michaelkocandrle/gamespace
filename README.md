@@ -523,7 +523,8 @@ Unarmed animations), installed unchanged at `/Game/Characters/Mannequins` by
 
 Input: `IMC_Character` with `IA_CharMove`, `IA_CharLook`, `IA_CharJump`, `IA_CharSprint` and the
 shared `IA_Interact` (F, Pressed), created by `Tools/Assets/add_character_input.py`, which also
-appended F to `IMC_Spaceship`. Each pawn removes its mapping contexts when it is unpossessed, so
+appended F to `IMC_Spaceship`. Since the interaction step (below) neither pawn binds `IA_Interact`:
+`ASpacePlayerController` reads F itself to tell a tap from a hold. Each pawn removes its mapping contexts when it is unpossessed, so
 the ship's mouse context never swallows the character's mouse look.
 
 - **Gravity** comes from the nearest celestial body every tick: `SetGravityDirection(-Up)` and
@@ -563,6 +564,32 @@ the ship's mouse context never swallows the character's mouse look.
 
 Headless: `Tools/Tests/test_character_l6.py` (assets and input, gravity frame transport, exit
 placement, native pose evaluation, foot IK with forced ground, terrain vs collision error).
+
+### Interaction (SC style, step 1 of the own-capture roadmap)
+
+After SC 4.x (`starcitizenreference/OwnCapture_Gameplay_Notes.md`, "Rozhraní hráče"):
+
+- **Tap F** (< 0.3 s) uses the target: sit down / stand up, step out by the ramp, board a landed ship.
+  The target is shown **by the object** as a label with an F keycap (`SEDNOUT [F]` on the seat back,
+  `VYSTOUPIT [F]` at the `WalkRamp` socket, `RAMPA ZAVŘENÁ ZA LETU` greyed when the ship is not landed,
+  `VSTOUPIT DO LODI [F]` outside).
+- **Hold F** = interact mode while held: mouse cursor, look frozen, clickable hotspots in the world
+  (seated: the left and right MFD at the `Display_left` / `Display_right` sockets; on foot inside: the
+  seat, the MFDs, the ramp when landed). The hovered hotspot (nearest within 36 px) gets a label on a
+  dark backing; LMB uses it (MFD next page), RMB goes back.
+- **Key list** at the bottom right: what the keys do right now (seated: interact mode, gear, SCM / NAV,
+  coupled, brake, quantum when ready, take-off when landed, camera; on foot: the target, jump, sprint;
+  in interact mode: use / back / close).
+- **Notifications** (`USpaceNotifications`, game instance subsystem): a toast pill at the top centre
+  (quantum jump done, boarding a ship) and tutorial hint cards at the right edge (flight basics, quantum,
+  landing, interaction), each hint once per run; settings `Rozhraní – tipy` turns the cards off.
+
+Code: `SpaceInteraction` (targets, hotspots, key list per pawn), `SSpaceInteractionOverlay` (Slate,
+painted from the controller's `FSpaceInteractionView`), `SpaceNotifications`, the F logic in
+`ASpacePlayerController::TickInteraction`. Console: `space.InteractMode 0|1 [hotspot]`,
+`space.Notify toast <text>` / `space.Notify hint <title>|<body>`. The old centre `[F]` prompt of the
+debug HUD stays only in HUD mode 3. Headless: `Tools/Tests/test_interaction.py`; shots:
+`Tools/Shots/interaction.json`.
 
 ## Ship art pipeline
 

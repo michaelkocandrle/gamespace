@@ -69,6 +69,7 @@ void USpaceUserSettings::SetGameDefaults()
 	bAudioInBackground = false;
 	bInvertFreeLookPitch = false;
 	bInvertWalkPitch = false;
+	bShowHints = true;
 }
 
 void USpaceUserSettings::LoadSettings(bool bForceReload)

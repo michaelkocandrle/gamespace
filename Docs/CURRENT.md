@@ -18,6 +18,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 - **Menu a nastavení ve stylu SC 4.10** (4. 10., autorův záznam SC, kritik PASS 7,4 / 7,5): karta HRÁT, záložky, Oxanium;
   obsah ~35 položek se skutečným systémem (výchozí stavy letu, VJoy, upscaling, kvalita po skupinách, FOV, gama, obraz);
   KLÁVESY jako klávesnice a myš SC (jen přehled; tabulka `FSpaceControls` hlídaná testem proti assetům).
+- **Interakce podle SC** (4. 10., krok 1 z autorova záznamu, kritik PASS 6,5): ťuknout F = výzva u předmětu, podržet F =
+  režim interakce (kurzor, MFD klikací), seznam kláves vpravo dole, hlášení a tipy (`README` „Interaction“).
 - **Postava:** první osoba (V pěšky = třetí jen pro testy); sférická gravitace planety i umělá v lodi.
 - **Wayfarer** (Halcyon Freightworks, malá multirole, 1 pilot) – jediná létající loď:
   - exteriér v2.1 přesně podle výkresu (`hs_build_ship`; ploutve 1,3 m potvrzené autorem, výška lodi 4,9 m), mesh
@@ -41,10 +43,6 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 - **Flotila:** Ship Matrix a dossiery publikované (skill `ship-pipeline` 1b); Delver a Farsight jen jako spec.
 - **Nástroje:** `Test.ps1`, `Build.ps1`, CI s offline testy (stav přes veřejné API GitHubu), kritik s prahem `step` /
   `ship`, zámek `HeavyLock.ps1`, snímky v `C:\gamespace-shots` (`shots:` v recenzích), `Cleanup.ps1` na konci kroku.
-
-## Paralelní práce
-
-- Větev `wayfarer-dossier-interior` sloučená 3. 10. (výkresy I-01–I-09). Druhá session teď nic nemá.
 
 ## Čeká na rozhodnutí autora
 
@@ -75,6 +73,6 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 1. **Wayfarer revize G** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený.
 2. **Přistání na svahu hotové** (3. 10.), čeká na vyzkoušení autorem; později odpružení nohou, mírnější klesání u země.
-3. **Podle SC z autorova záznamu** (`starcitizenreference/captures/SEZNAM_ZABERU.md`): menu, nastavení i klávesy hotové;
-   další přemapování kláves, načítání, FSR (plugin AMD; karta RX 9070), ukazatel VRAM; pak mapa, palivo, SC-5, SC-6 (potvrdit s autorem).
+3. **Podle SC z autorova záznamu** (`OwnCapture_Gameplay_Notes.md`): menu, nastavení, klávesy, interakce hotové; další
+   2. studený start lodi (U, náběh MFD, CONFIGURATION, vstát za letu), 3. visor pěšky, 4. systémy lodi, 5. stanice a hangár.
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).

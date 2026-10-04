@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
+#include "SpacePlayerController.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "InputMappingContext.h"
@@ -114,10 +115,7 @@ void UShipInputComponent::BindInput(UInputComponent* PlayerInputComponent)
 		Input->BindAction(Ship->BoostAction, ETriggerEvent::Canceled, this, &UShipInputComponent::HandleBoostCompleted);
 	}
 
-	if (Ship->InteractAction)
-	{
-		Input->BindAction(Ship->InteractAction, ETriggerEvent::Started, this, &UShipInputComponent::HandleInteract);
-	}
+	// F (InteractAction) is read by ASpacePlayerController: a tap does Ship->Interact(), holding it is interact mode.
 
 	// H (HUD) and Escape (menu) are bound by ASpacePlayerController, the same in the ship and on foot.
 
@@ -557,12 +555,20 @@ void UShipInputComponent::HandleAxisCompleted(const FInputActionValue& /*Value*/
 
 void UShipInputComponent::HandleLook(const FInputActionValue& Value)
 {
+	if (ASpacePlayerController::IsInteractModeFor(CastChecked<APawn>(GetOwner())))
+	{
+		return;  // the mouse is the cursor in interact mode
+	}
 	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
 	Ship->LookInput = Value.Get<FVector2D>();
 }
 
 void UShipInputComponent::HandleMouseLook(const FInputActionValue& Value)
 {
+	if (ASpacePlayerController::IsInteractModeFor(CastChecked<APawn>(GetOwner())))
+	{
+		return;
+	}
 	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
 	// Accumulated: every pixel moved between two ticks counts, however events are batched.
 	Ship->MouseLookDelta += Value.Get<FVector2D>();
@@ -582,12 +588,7 @@ void UShipInputComponent::HandleBoost(const FInputActionValue& /*Value*/)
 
 void UShipInputComponent::HandleInteract(const FInputActionValue& /*Value*/)
 {
-	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
-	// a walkable ship: up from the seat into the cockpit; otherwise out beside the landed ship
-	if (!Ship->LeaveSeat())
-	{
-		Ship->ExitShip();
-	}
+	CastChecked<ASpaceshipPawn>(GetOwner())->Interact();
 }
 
 void UShipInputComponent::HandleFlightAssist(const FInputActionValue& /*Value*/)
@@ -598,6 +599,10 @@ void UShipInputComponent::HandleFlightAssist(const FInputActionValue& /*Value*/)
 
 void UShipInputComponent::HandleQuantumEngageStarted(const FInputActionValue& /*Value*/)
 {
+	if (ASpacePlayerController::IsInteractModeFor(CastChecked<APawn>(GetOwner())))
+	{
+		return;  // the left button clicks hotspots in interact mode
+	}
 	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
 	Ship->SetQuantumEngageHeld(true);
 }
@@ -703,6 +708,10 @@ void UShipInputComponent::HandleCameraZoom(const FInputActionValue& Value)
 
 void UShipInputComponent::HandleFreeLookStarted(const FInputActionValue& /*Value*/)
 {
+	if (ASpacePlayerController::IsInteractModeFor(CastChecked<APawn>(GetOwner())))
+	{
+		return;  // the right button goes back on a display in interact mode
+	}
 	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
 	Ship->SetFreeLookHeld(true);
 }

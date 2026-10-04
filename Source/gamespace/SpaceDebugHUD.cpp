@@ -579,9 +579,9 @@ void ASpaceDebugHUD::DrawHUD()
 		DrawText(Label, LabelColor, X, LabelY, Font, LabelScale);
 	}
 
-	// What F does here, under the view's centre in every HUD mode but off: walking a ship has no other way to
-	// tell where the seat and the ramp answer (the text panel with MODE is mode 2 and up)
-	const FString Prompt = Mode >= 1 ? InteractPrompt(*Pawn) : FString();
+	// What F does here: the interaction overlay shows it by the object now (SC, 4. 10. 2026); this centre text
+	// stays only in the full debug mode (3), next to the text panel that also names it.
+	const FString Prompt = Mode >= 3 ? InteractPrompt(*Pawn) : FString();
 	if (!Prompt.IsEmpty())
 	{
 		const float PromptScale = Scale * 1.7f;

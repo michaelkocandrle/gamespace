@@ -102,6 +102,7 @@ private:
 		bool bAudioInBackground = false;
 		bool bInvertFreeLook = false;
 		bool bInvertWalk = false;
+		bool bShowHints = true;
 	};
 
 	/** The quality groups as the preset sets them (global illumination capped as USpaceUserSettings does). */

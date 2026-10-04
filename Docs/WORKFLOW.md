@@ -1287,6 +1287,9 @@ snímku.
   `DefaultEngine.ini`; ta priorita přebíjí `ECVF_SetByGameSetting`. Co má ovládat menu, nesmí být v ini.
 - fx) **VÝCHOZÍ v menu vracelo hráčovy uložené hodnoty** (4. 10. 2026). `GetDefault<USpaceUserSettings>()` (CDO) se načítá
   z `GameUserSettings.ini`, takže drží uložené hodnoty, ne výchozí. Výchozí hodnoty jsou v `SetGameDefaults()` (v kódu).
+- fy) **UE test prošel všemi body, ale `Test.ps1` hlásil exit 1** (4. 10. 2026). `LevelEditorSubsystem.new_level("/Temp/x")`
+  zaloguje `Error`, když level v `/Temp` už existuje, a commandlet pak vrátí 1. V testech `load_level` existující mapy.
+  Herní subsystém v testu: `unreal.new_object(Třída, outer=unreal.new_object(unreal.GameInstance))`.
 
 
 ---

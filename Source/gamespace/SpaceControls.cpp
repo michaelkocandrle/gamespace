@@ -2,6 +2,9 @@
 
 #include "SpaceControls.h"
 
+#include "GameFramework/Pawn.h"
+#include "SpaceInteraction.h"
+
 #define LOCTEXT_NAMESPACE "SpaceControls"
 
 const TArray<FSpaceControl>& FSpaceControls::Get()
@@ -111,6 +114,29 @@ TArray<FString> USpaceControlsLibrary::DescribeControls()
 		const TCHAR* Mode = Control.Mode == ESpaceControlMode::Flight ? TEXT("flight") : Control.Mode == ESpaceControlMode::OnFoot ? TEXT("onfoot") : TEXT("global");
 		Lines.Add(FString::Printf(TEXT("%s|%s|%d|%s|%s"), Mode, *Control.Key.ToString(), Control.bAlt ? 1 : 0,
 			Control.Action.IsNone() ? TEXT("") : *Control.Action.ToString(), *Control.Label.ToString().Replace(TEXT("\n"), TEXT(" "))));
+	}
+	return Lines;
+}
+
+TArray<FString> USpaceControlsLibrary::DescribeInteraction(APawn* Pawn, bool bInteractMode)
+{
+	TArray<FString> Lines;
+	FSpaceInteractTarget Target;
+	TArray<FSpaceHotspot> Hotspots;
+	SpaceInteraction::Gather(Pawn, Target, Hotspots);
+	if (Target.bValid)
+	{
+		Lines.Add(FString::Printf(TEXT("target|%s|%d"), *Target.Label.ToString(), Target.bAvailable ? 1 : 0));
+	}
+	for (const FSpaceHotspot& Spot : Hotspots)
+	{
+		Lines.Add(TEXT("hotspot|") + Spot.Label.ToString());
+	}
+	TArray<FSpaceKeyHint> Keys;
+	SpaceInteraction::KeyHints(Pawn, bInteractMode, Target, Keys);
+	for (const FSpaceKeyHint& Key : Keys)
+	{
+		Lines.Add(FString::Printf(TEXT("key|%s|%s"), *Key.Action.ToString(), *Key.Key));
 	}
 	return Lines;
 }

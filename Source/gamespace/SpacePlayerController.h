@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "SpaceInteractionOverlay.h"
 #include "SpacePlayerController.generated.h"
 
 class SSpaceMenu;
@@ -44,6 +45,26 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Menu")
 	bool IsMenuOpen() const { return Menu.IsValid(); }
+
+	// --- Interaction (SC, step 1 after the author's captures, 4. 10. 2026) ---------------------------------------------
+	// F is read here: a tap does the default action of the target shown by its object, holding it turns on interact
+	// mode (a cursor over the game, hotspots to click; the pawns ignore the mouse while it is on).
+
+	/** What the interaction overlay draws this frame. */
+	const FSpaceInteractionView& GetInteractionView() const { return InteractionView; }
+
+	UFUNCTION(BlueprintPure, Category = "Interaction")
+	bool IsInteractModeOn() const { return bInteractMode; }
+
+	/** Whether the player controlling Pawn is in interact mode (the pawns' mouse handlers ask). */
+	static bool IsInteractModeFor(const APawn* Pawn);
+
+	/** Tests and screenshots: interact mode on or off without holding F. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugSetInteractMode(bool bOn);
+
+	/** Screenshots: show this hotspot as hovered in interact mode (the cursor cannot be placed); -1 follows the mouse. */
+	void DebugForceHover(int32 Index) { ForcedHover = Index; }
 
 	/** Pauses the game and shows the pause menu. Nothing on the title screen. */
 	UFUNCTION(BlueprintCallable, Category = "Menu")
@@ -120,10 +141,25 @@ private:
 	void HandleInteriorKey(const FInputActionValue& Value);
 	void HandleShowroomKey(const FInputActionValue& Value);
 	void ShowMenu(bool bTitleScreen);
+	void TickInteraction();
+	void SetInteractMode(bool bOn);
+	/** Hint cards the first time something matters, toasts on events (USpaceNotifications). */
+	void TickNotifications();
 	void HideMenu();
 	void UpdateTitleCamera(float DeltaTime);
 
 	TSharedPtr<SSpaceMenu> Menu;
+	TSharedPtr<class SSpaceInteractionOverlay> InteractionOverlay;
+	TSharedPtr<SWidget> InteractionOverlayHost;
+	FSpaceInteractionView InteractionView;
+	bool bInteractMode = false;
+	int32 ForcedHover = INDEX_NONE;
+	bool bInteractKeyWasDown = false;
+	bool bInteractHoldUsed = false;
+	double InteractKeyDownSeconds = 0.0;
+	/** For the event toasts: what the pawn was last frame. */
+	TWeakObjectPtr<class ASpaceshipPawn> LastInteriorShip;
+	bool bLastQuantumTraveling = false;
 	TSharedPtr<SWidget> MenuHost;
 
 	UPROPERTY(Transient)

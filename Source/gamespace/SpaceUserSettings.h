@@ -154,6 +154,10 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	bool bAudioInBackground = false;
 
+	/** Game: hint cards the first time something matters (SC's Show Hints). */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	bool bShowHints = true;
+
 	/** Controls: free look (hold Alt / C) pitch inverted. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	bool bInvertFreeLookPitch = false;

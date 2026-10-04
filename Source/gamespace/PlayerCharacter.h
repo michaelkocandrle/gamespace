@@ -37,6 +37,8 @@ class GAMESPACE_API APlayerCharacter : public ACharacter
 public:
 	/** The player's settings: the first person field of view (the menu calls it again when it changes). */
 	void ApplyUserSettings();
+	/** A tap on F: sit down or step outside inside a ship, board one outside (ASpacePlayerController calls it). */
+	void Interact();
 
 	APlayerCharacter();
 

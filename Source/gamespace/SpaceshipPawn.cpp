@@ -484,6 +484,46 @@ void ASpaceshipPawn::SetFreeLookHeld(bool bHeld)
 	}
 }
 
+void ASpaceshipPawn::Interact()
+{
+	if (!LeaveSeat())
+	{
+		ExitShip();
+	}
+}
+
+void ASpaceshipPawn::CycleMfdPage(int32 Display, int32 Direction)
+{
+	if (CockpitDisplays)
+	{
+		CockpitDisplays->CyclePage(Display, Direction);
+	}
+}
+
+bool ASpaceshipPawn::GetHullSocketLocation(FName Socket, FVector& OutLocation) const
+{
+	if (!Hull)
+	{
+		return false;
+	}
+	const FString Plain = Socket.ToString();
+	const FName Candidates[] = { Socket, FName(*(TEXT("SOCKET_") + Plain)) };
+	for (const FName& Name : Candidates)
+	{
+		if (Hull->DoesSocketExist(Name))
+		{
+			OutLocation = Hull->GetSocketLocation(Name);
+			return true;
+		}
+	}
+	return false;
+}
+
+FVector ASpaceshipPawn::GetPilotEyeLocation() const
+{
+	return CockpitCamera ? CockpitCamera->GetComponentLocation() : GetActorLocation();
+}
+
 void ASpaceshipPawn::ApplyUserSettings(bool bFlightDefaults)
 {
 	const USpaceUserSettings* Settings = USpaceUserSettings::Get();

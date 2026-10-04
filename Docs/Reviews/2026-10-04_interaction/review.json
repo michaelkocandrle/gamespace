@@ -1,0 +1,18 @@
+{
+ "topic": "interaction",
+ "date": "2026-10-04",
+ "goal": "Interakce ve stylu SC 4.x (autorův záznam vlevo): výzva u předmětu (popisek + azurová klávesa F, např. SEDNOUT [F] u sedadla), režim interakce podržením F (kurzor, najetí na MFD ukáže plovoucí popisek), kontextový seznam kláves vpravo dole (AKCE + klávesa v rámečku), hlášení nahoře uprostřed (tmavá pilulka se žlutým kosočtvercem) a tutoriálová karta vpravo (azurový titulek, 2-4 řádky). Posuzuj jen tyto prvky rozhraní a jejich čitelnost a soulad se SC; kokpit, letový HUD a interiér jsou hotové a mimo rozsah. Texty jsou česky (vědomě).",
+ "style": "Star Citizen 4.x visor UI: tenké světlé písmo (Oxanium místo SC písma), azurové rámečky kláves, bez pevných panelů kromě hlášení a karet.",
+ "checklist": null,
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-04_interaction",
+ "notes": ["SC seznam kláves je mírně zakřivený jako visor; náš je rovný (vědomé zjednodušení).",
+           "Popisek najetí v SC je bez podkladu; náš má tenký skleněný podklad, protože přes jasné MFD nebyl čitelný.", "Kolo 2: opraveno podle kola 1 (svislá výzva s klávesou 36 px a třemi tečkami, pilulka 56 px se zaoblením a dutým kosočtvercem, azurová rodina barev se září, seznam kláves bez linky a bez textu v rámečku, popisek najetí jen jeden řádek, karta bez pruhu).",
+           "Lodě se liší (SC Aurora vs. náš Wayfarer); porovnávej jen prvky rozhraní."],
+ "pairs": [
+  {"title": "Sedadlo, seznam kláves", "distance": "near", "light": "interior", "ref": "ArtSource/Reference/Video/sc_own_04/frames/t00_02_36.jpg", "ref_label": "SC 4.x, Aurora, seznam kláves vpravo dole + karta RADAR PING ANGLE", "ours": "shots:20261004_160308_interaction/02_seat_keys.png", "ours_label": "ve hře, Wayfarer v sedadle"},
+  {"title": "Režim interakce, najetí na MFD", "distance": "near", "light": "interior", "ref": "ArtSource/Reference/Video/sc_own_04/frames/t00_02_48.jpg", "ref_label": "SC 4.x, CYCLE CONFIGURATION nad tlačítkem", "ours": "shots:20261004_160308_interaction/03_seat_interact_mfd.png", "ours_label": "ve hře, levé MFD pod kurzorem"},
+  {"title": "Pěšky, výzva u sedadla", "distance": "near", "light": "interior", "ref": "ArtSource/Reference/Video/sc_own_04/frames/t00_00_33.jpg", "ref_label": "SC 4.x, SIT [F] u sedadla pilota", "ours": "shots:20261004_160308_interaction/07_step_back_seat_prompt.png", "ours_label": "ve hře, SEDNOUT [F]"},
+  {"title": "Hlášení a karta", "distance": "near", "light": "interior", "ref": "ArtSource/Reference/Video/sc_own_04/frames/t00_00_00.jpg", "ref_label": "SC 4.x, pilulka nahoře uprostřed", "ours": "shots:20261004_160308_interaction/06_toast_and_hint.png", "ours_label": "ve hře, pilulka + karta Interakce"}
+ ]
+}

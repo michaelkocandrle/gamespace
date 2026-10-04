@@ -65,4 +65,11 @@ public:
 	/** One line per control: "<mode>|<key>|<alt 0/1>|<action>|<label>" with mode flight / onfoot / global. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	static TArray<FString> DescribeControls();
+
+	/**
+	 * What interaction offers this pawn (SpaceInteraction): "target|<label>|<available 0/1>", "hotspot|<label>" per
+	 * hotspot and "key|<action>|<key>" per line of the key list (interact mode as asked).
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	static TArray<FString> DescribeInteraction(APawn* Pawn, bool bInteractMode);
 };

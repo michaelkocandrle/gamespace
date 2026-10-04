@@ -28,6 +28,11 @@
 #include "SpaceMenuWidget.h"
 #include "SpaceUserSettings.h"
 #include "Widgets/SWeakWidget.h"
+#include "HAL/PlatformTime.h"
+#include "ShipQuantumComponent.h"
+#include "SpaceInteraction.h"
+#include "SpaceInteractionOverlay.h"
+#include "SpaceNotifications.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSpacePlayer, Log, All);
 
@@ -160,12 +165,28 @@ void ASpacePlayerController::BeginPlay()
 		SetInputMode(FInputModeGameOnly());
 		SetShowMouseCursor(false);
 		StartPrewarm();
+		// SC's interaction layer over the game, under the menus (z-order 50).
+		if (UGameViewportClient* Viewport = GetWorld()->GetGameViewport())
+		{
+			InteractionOverlay = SNew(SSpaceInteractionOverlay).Owner(TWeakObjectPtr<ASpacePlayerController>(this));
+			InteractionOverlayHost = SNew(SWeakWidget).PossiblyNullContent(InteractionOverlay);
+			Viewport->AddViewportWidgetContent(InteractionOverlayHost.ToSharedRef(), 10);
+		}
 	}
 }
 
 void ASpacePlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	HideMenu();
+	if (InteractionOverlayHost.IsValid())
+	{
+		if (UGameViewportClient* Viewport = GetWorld() ? GetWorld()->GetGameViewport() : nullptr)
+		{
+			Viewport->RemoveViewportWidgetContent(InteractionOverlayHost.ToSharedRef());
+		}
+	}
+	InteractionOverlayHost.Reset();
+	InteractionOverlay.Reset();
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -177,6 +198,197 @@ void ASpacePlayerController::PlayerTick(float DeltaTime)
 		UpdateTitleCamera(DeltaTime);
 	}
 	TickEntryWatch();
+	if (!IsTitleScreen())
+	{
+		TickInteraction();
+		TickNotifications();
+	}
+}
+
+bool ASpacePlayerController::IsInteractModeFor(const APawn* Pawn)
+{
+	const ASpacePlayerController* Controller = Pawn ? Cast<ASpacePlayerController>(Pawn->GetController()) : nullptr;
+	return Controller && Controller->bInteractMode;
+}
+
+void ASpacePlayerController::DebugSetInteractMode(bool bOn)
+{
+	SetInteractMode(bOn);
+	bInteractHoldUsed = bOn;
+}
+
+void ASpacePlayerController::SetInteractMode(bool bOn)
+{
+	if (bOn == bInteractMode)
+	{
+		return;
+	}
+	bInteractMode = bOn;
+	if (bOn)
+	{
+		// A cursor over the game (SC's interact mode); keys still reach the game.
+		FInputModeGameAndUI Mode;
+		Mode.SetHideCursorDuringCapture(false);
+		Mode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+		SetInputMode(Mode);
+		SetShowMouseCursor(true);
+		int32 Width = 0, Height = 0;
+		GetViewportSize(Width, Height);
+		SetMouseLocation(Width / 2, Height / 2);
+	}
+	else if (!IsMenuOpen())
+	{
+		SetInputMode(FInputModeGameOnly());
+		SetShowMouseCursor(false);
+	}
+}
+
+void ASpacePlayerController::TickInteraction()
+{
+	// SC: a tap on F uses the target; holding it a moment is interact mode, released it closes again.
+	constexpr double HoldSeconds = 0.3;
+	constexpr double HoverPixels = 36.0;
+	APawn* const Played = GetPawn();
+	const bool bAllowed = Played && !IsMenuOpen();
+	const bool bDown = bAllowed && IsInputKeyDown(EKeys::F);
+	const double Now = FPlatformTime::Seconds();
+	if (bDown && !bInteractKeyWasDown)
+	{
+		InteractKeyDownSeconds = Now;
+		bInteractHoldUsed = false;
+	}
+	if (bDown && !bInteractMode && Now - InteractKeyDownSeconds >= HoldSeconds)
+	{
+		SetInteractMode(true);
+		bInteractHoldUsed = true;
+	}
+	if (!bDown && bInteractKeyWasDown)
+	{
+		if (bInteractMode)
+		{
+			SetInteractMode(false);
+		}
+		else if (!bInteractHoldUsed && bAllowed)
+		{
+			SpaceInteraction::Interact(Played);
+		}
+	}
+	if (!bAllowed && bInteractMode)
+	{
+		SetInteractMode(false);
+	}
+	bInteractKeyWasDown = bDown;
+
+	FSpaceInteractionView& View = InteractionView;
+	APawn* const Current = GetPawn();  // the tap may just have swapped it
+	View.bInteractMode = bInteractMode;
+	View.Hovered = INDEX_NONE;
+	const IConsoleVariable* Hud = IConsoleManager::Get().FindConsoleVariable(TEXT("space.Hud"));
+	View.bVisible = Current && !IsMenuOpen() && (!Hud || Hud->GetInt() > 0);
+	if (!Current)
+	{
+		View.Hotspots.Reset();
+		View.Keys.Reset();
+		View.Target = FSpaceInteractTarget();
+		return;
+	}
+	SpaceInteraction::Gather(Current, View.Target, View.Hotspots);
+	int32 Width = 0, Height = 0;
+	GetViewportSize(Width, Height);
+	auto OnScreen = [&](const FVector& World, FVector2D& OutScreen)
+	{
+		return ProjectWorldLocationToScreen(World, OutScreen, true) && OutScreen.X >= 0.0 && OutScreen.Y >= 0.0
+			&& OutScreen.X <= Width && OutScreen.Y <= Height;
+	};
+	View.bTargetOnScreen = View.Target.bValid && OnScreen(View.Target.WorldLocation, View.TargetScreen);
+	View.HotspotScreen.SetNum(View.Hotspots.Num());
+	View.HotspotOnScreen.SetNum(View.Hotspots.Num());
+	float MouseX = 0.f, MouseY = 0.f;
+	const bool bMouse = bInteractMode && GetMousePosition(MouseX, MouseY);
+	double Best = HoverPixels;
+	for (int32 Index = 0; Index < View.Hotspots.Num(); ++Index)
+	{
+		View.HotspotOnScreen[Index] = OnScreen(View.Hotspots[Index].WorldLocation, View.HotspotScreen[Index]);
+		if (bMouse && View.HotspotOnScreen[Index])
+		{
+			const double Distance = FVector2D::Distance(View.HotspotScreen[Index], FVector2D(MouseX, MouseY));
+			if (Distance < Best)
+			{
+				Best = Distance;
+				View.Hovered = Index;
+			}
+		}
+	}
+	if (bInteractMode && View.Hotspots.IsValidIndex(ForcedHover))
+	{
+		View.Hovered = ForcedHover;
+	}
+	if (bInteractMode && View.Hotspots.IsValidIndex(View.Hovered) && View.Hotspots[View.Hovered].Use)
+	{
+		if (WasInputKeyJustPressed(EKeys::LeftMouseButton))
+		{
+			PlayUiSound(true);
+			View.Hotspots[View.Hovered].Use(true);
+		}
+		else if (WasInputKeyJustPressed(EKeys::RightMouseButton))
+		{
+			PlayUiSound(false);
+			View.Hotspots[View.Hovered].Use(false);
+		}
+	}
+	SpaceInteraction::KeyHints(GetPawn(), bInteractMode, View.Target, View.Keys);
+}
+
+void ASpacePlayerController::TickNotifications()
+{
+	USpaceNotifications* Notes = USpaceNotifications::Get(this);
+	APawn* const Current = GetPawn();
+	if (!Notes || !Current)
+	{
+		return;
+	}
+	// The screenshot runner's pictures stay free of cards and toasts.
+	FString ShotList;
+	if (FParse::Value(FCommandLine::Get(), TEXT("-ShotList="), ShotList))
+	{
+		return;
+	}
+	if (ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Current))
+	{
+		Notes->Hint(TEXT("FlightBasics"), NSLOCTEXT("SpaceHints", "FlightTitle", "Ovládání lodi"),
+			NSLOCTEXT("SpaceHints", "FlightBody", "W a S tah, A a D úkrok, mezerník a Ctrl nahoru a dolů, Q a E náklon, myš zatáčí. B přepíná SCM a NAV, N vysune podvozek."));
+		if (Ship->GetMasterMode() == EMasterMode::NAV && Ship->HasQuantumTarget())
+		{
+			Notes->Hint(TEXT("Quantum"), NSLOCTEXT("SpaceHints", "QuantumTitle", "Quantum skok"),
+				NSLOCTEXT("SpaceHints", "QuantumBody", "Namiř nos na cíl. Pohon se nejdřív roztočí a zkalibruje; až HUD ukáže READY, podrž levé tlačítko myši."));
+		}
+		if (!Ship->IsLanded() && Ship->HasGroundInfo() && Ship->GetGroundGapCm() >= 0.f && Ship->GetGroundGapCm() < 3000.f)
+		{
+			Notes->Hint(TEXT("Landing"), NSLOCTEXT("SpaceHints", "LandingTitle", "Přistání"),
+				NSLOCTEXT("SpaceHints", "LandingBody", "Vysuň podvozek (N) a klesej (Ctrl). Rámeček nad páskou kurzu řekne, proč loď nepřistává: sklon, nerovný terén nebo rychlost."));
+		}
+		const bool bTraveling = Ship->GetQuantumState() == EQuantumState::Traveling;
+		if (bLastQuantumTraveling && !bTraveling)
+		{
+			Notes->Toast(NSLOCTEXT("SpaceHints", "QuantumDone", "Quantum skok dokončen"));
+		}
+		bLastQuantumTraveling = bTraveling;
+	}
+	else if (APlayerCharacter* Walker = Cast<APlayerCharacter>(Current))
+	{
+		Notes->Hint(TEXT("Interaction"), NSLOCTEXT("SpaceHints", "InteractTitle", "Interakce"),
+			NSLOCTEXT("SpaceHints", "InteractBody", "Krátké F použije věc s popiskem. Podržením F zapneš režim interakce: kurzorem klikáš na obrazovky a ovládání, pravým tlačítkem zpět."));
+		ASpaceshipPawn* Inside = Walker->GetInteriorShip();
+		if (Inside && !LastInteriorShip.IsValid())
+		{
+			FString Name = Inside->GetClass()->GetName();
+			Name.RemoveFromStart(TEXT("BP_Ship_"));
+			Name.RemoveFromEnd(TEXT("_C"));
+			Notes->Toast(FText::Format(NSLOCTEXT("SpaceHints", "Boarded", "Jsi na palubě lodi {0}"), FText::FromString(Name.ToUpper())));
+		}
+		LastInteriorShip = Inside;
+		bLastQuantumTraveling = false;
+	}
 }
 
 void ASpacePlayerController::UpdateTitleCamera(float DeltaTime)
@@ -243,6 +455,48 @@ void ASpacePlayerController::DebugShowMenu(int32 Page, int32 Tab, bool bScrollTo
 
 namespace SpacePlayerControllerConsole
 {
+	static FAutoConsoleCommandWithWorldAndArgs InteractModeCommand(
+		TEXT("space.InteractMode"),
+		TEXT("space.InteractMode 0|1 [hotspot]: interact mode off or on as if F were held, with that hotspot shown hovered (screenshots)."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			ASpacePlayerController* Controller = World ? Cast<ASpacePlayerController>(World->GetFirstPlayerController()) : nullptr;
+			if (!Controller || Args.Num() < 1)
+			{
+				return;
+			}
+			Controller->DebugSetInteractMode(FCString::Atoi(*Args[0]) != 0);
+			Controller->DebugForceHover(Args.Num() > 1 ? FCString::Atoi(*Args[1]) : INDEX_NONE);
+		}));
+
+	static FAutoConsoleCommandWithWorldAndArgs NotifyCommand(
+		TEXT("space.Notify"),
+		TEXT("space.Notify toast <text...> | hint <title>|<body...>: push a toast or a hint card (screenshots and tests)."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			USpaceNotifications* Notes = USpaceNotifications::Get(World);
+			if (!Notes || Args.Num() < 2)
+			{
+				return;
+			}
+			TArray<FString> Rest(Args);
+			Rest.RemoveAt(0);
+			const FString Text = FString::Join(Rest, TEXT(" "));
+			if (Args[0] == TEXT("hint"))
+			{
+				FString Title, Body;
+				if (!Text.Split(TEXT("|"), &Title, &Body))
+				{
+					Title = Text;
+				}
+				Notes->DebugHint(Title, Body);
+			}
+			else
+			{
+				Notes->DebugToast(Text);
+			}
+		}));
+
 	static FAutoConsoleCommandWithWorldAndArgs MenuCommand(
 		TEXT("space.Menu"),
 		TEXT("space.Menu <page> [tab] [1 = list scrolled to its end]: shows a menu page over the game without pausing, for screenshots - 0 title, 1 pause, 2 settings, 3 loading, -1 hides it; tab 0 game, 1 graphics, 2 audio, 3 controls."),

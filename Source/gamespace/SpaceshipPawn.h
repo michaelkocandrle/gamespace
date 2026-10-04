@@ -144,6 +144,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Flight")
 	void SetFlightAssist(bool bOn);
 
+	/** A tap on F in the pilot seat: up into a walkable ship, else out beside it when landed. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Walk")
+	void Interact();
+
+	/** A dashboard display's next (+1) or previous (-1) page: 0 left, 1 right (F1 / F2, or a click in interact mode). */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Displays")
+	void CycleMfdPage(int32 Display, int32 Direction);
+
+	/** A hull socket in the world, with or without the SOCKET_ prefix the FBX import drops; false if there is none. */
+	bool GetHullSocketLocation(FName Socket, FVector& OutLocation) const;
+
+	/** The pilot's eye (the cockpit camera) in the world. */
+	FVector GetPilotEyeLocation() const;
+
 	/**
 	 * The player's settings (USpaceUserSettings): virtual joystick and its dead zone, the cockpit field of view, and with
 	 * bFlightDefaults (a ship that just spawned) coupled / G-Safe / ComStab as they start. BeginPlay calls it with

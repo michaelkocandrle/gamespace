@@ -1126,6 +1126,7 @@ TSharedRef<SWidget> SSpaceMenu::BuildTabRows(ESpaceSettingsTab Tab)
 		Add(MakeSliderRow(LOCTEXT("CameraShake", "Kamera – třes kamery"), &Draft.CameraShake, 0.f, 2.f,
 			[](float V) { return FText::FromString(FString::Printf(TEXT("%.2f"), V)); }));
 		Add(MakeToggleRow(LOCTEXT("ShowFps", "Rozhraní – zobrazit FPS"), &Draft.bShowFps));
+		Add(MakeToggleRow(LOCTEXT("ShowHints", "Rozhraní – tipy"), &Draft.bShowHints));
 		break;
 
 	case ESpaceSettingsTab::Graphics:
@@ -1594,6 +1595,7 @@ void SSpaceMenu::LoadDraft()
 	Draft.bAudioInBackground = Settings->bAudioInBackground;
 	Draft.bInvertFreeLook = Settings->bInvertFreeLookPitch;
 	Draft.bInvertWalk = Settings->bInvertWalkPitch;
+	Draft.bShowHints = Settings->bShowHints;
 }
 
 void SSpaceMenu::SetGroupsFromPreset(int32 Preset)
@@ -1666,6 +1668,7 @@ void SSpaceMenu::Commit()
 	Settings->bAudioInBackground = Draft.bAudioInBackground;
 	Settings->bInvertFreeLookPitch = Draft.bInvertFreeLook;
 	Settings->bInvertWalkPitch = Draft.bInvertWalk;
+	Settings->bShowHints = Draft.bShowHints;
 
 	// Applies the video mode and scalability and saves GameUserSettings.ini.
 	Settings->ApplySettings(false);
@@ -1724,6 +1727,7 @@ void SSpaceMenu::ResetTab()
 		Draft.VJoyDeadzone = Defaults->VJoyDeadzone;
 		Draft.bFlightPathMarker = Defaults->bShowFlightPathMarker;
 		Draft.CameraShake = Defaults->CameraShakeScale;
+		Draft.bShowHints = Defaults->bShowHints;
 		break;
 	default:
 		break;
