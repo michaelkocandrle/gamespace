@@ -59,6 +59,7 @@ const TArray<FSpaceControl>& FSpaceControls::Get()
 		Add(M::Flight, TEXT("F1"), true, LOCTEXT("MfdLeftBack", "Alt: zpět"), C::Interface, nullptr);
 		Add(M::Flight, TEXT("F2"), true, LOCTEXT("MfdRightBack", "Alt: zpět"), C::Interface, nullptr);
 		Add(M::Flight, TEXT("F"), false, LOCTEXT("GetUp", "Vstát /\nvystoupit"), C::Interaction, TEXT("IA_Interact"));
+		Add(M::Flight, TEXT("U"), false, LOCTEXT("Power", "Napájení\nlodi"), C::Systems, nullptr);
 		// On foot (IMC_Character, and the view switch the character adds itself).
 		Add(M::OnFoot, TEXT("W"), false, LOCTEXT("WalkFwd", "Chůze\nvpřed"), C::Movement, TEXT("IA_CharMove"));
 		Add(M::OnFoot, TEXT("S"), false, LOCTEXT("WalkBack", "Chůze\nvzad"), C::Movement, TEXT("IA_CharMove"));

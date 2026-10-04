@@ -1,0 +1,56 @@
+{
+ "topic": "ship_power",
+ "date": "2026-10-04",
+ "goal": "Studený start lodi podle SC 4.x (autorův záznam vlevo): vypnutá loď má tmavý kokpit, černé sklo MFD, žádný letový HUD, svítí jen drobné kontrolky; seznam kláves vpravo dole začíná NAPÁJENÍ (ZAP/VYP) [U]; v režimu interakce se kurzorem najede na knoflík PWR vlevo od levého MFD (popisek ZAPNOUT NAPÁJENÍ); po zapnutí ~2,5 s náběh (na MFD jméno lodi, SYSTEM START, systémy naskakují OK, lišta průběhu), pak stránky MFD a HUD. Posuzuj jen stavy napájení a obrazovky náběhu; kokpit, HUD a stránky MFD jsou hotové a mimo rozsah.",
+ "style": "Star Citizen 4.x: tmavý vypnutý kokpit, MFD jako černé sklo, náběh rychlý a střídmý, texty MFD anglicky, rozhraní hráče česky.",
+ "checklist": null,
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-04_ship_power",
+ "notes": [
+  "SC záznam má snímky po 3 s, náběh samotný není zachycen; obrazovka náběhu je naše interpretace (SC ukazuje logo výrobce).",
+  "Lodě se liší (SC Aurora / Pisces vs. náš Wayfarer); porovnávej stavy a rozhraní, ne kokpit.",
+  "Kurzor myši ve snímcích chybí (snímky ho nekreslí).",
+  "Kolo 2: světelné pásy trupu, světla kitu a skleněné linky ve vypnutém stavu zhasnuté (3 %), hologram skrytý; NAPÁJENÍ U i v režimu interakce; popisek najetí azurový bez rámečku; náběh: čekající systém jantarové --, hotový zelené OK, pod lištou řádek SHIP OS 2.4, malé displeje jen BOOT a lišta.",
+  "Řádky na MFD jsou v perspektivě šikmé (panely jsou natočené k oku), proto OK vpravo stojí výš / níž než začátek řádku vlevo; leží na stejném řádku.",
+  "Oranžová linka podél parapetu je lak (Accent), ne světlo; ve vypnutém stavu už nesvítí.",
+  "Kontrolky modulů (LED) svítí záměrně i bez napájení, jako řada drobných LED v desce Pisces v referenci."
+ ],
+ "pairs": [
+  {
+   "title": "Vypnuto, pohled pilota",
+   "distance": "near",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_own_04/frames/t00_03_36.jpg",
+   "ref_label": "SC 4.x, Aurora vypnutá",
+   "ours": "shots:20261004_172544_ship_power/02_power_off.png",
+   "ours_label": "ve hře, vypnuto"
+  },
+  {
+   "title": "Vypnuto, najetí na PWR",
+   "distance": "near",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_own_03/frames/t00_05_48.jpg",
+   "ref_label": "SC 4.x, Pisces, POWER ON pod kurzorem",
+   "ours": "shots:20261004_172544_ship_power/03_power_off_hover_pwr.png",
+   "ours_label": "ve hře, ZAPNOUT NAPÁJENÍ"
+  },
+  {
+   "title": "Náběh",
+   "distance": "near",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_own_04/frames/t00_02_33.jpg",
+   "ref_label": "SC 4.x, těsně před zapnutím (náběh nezachycen)",
+   "ours": "shots:20261004_172544_ship_power/04_booting.png",
+   "ours_label": "ve hře, náběh v půlce"
+  },
+  {
+   "title": "Zapnuto",
+   "distance": "near",
+   "light": "day",
+   "ref": "ArtSource/Reference/Video/sc_own_04/frames/t00_02_36.jpg",
+   "ref_label": "SC 4.x, 3 s po zapnutí",
+   "ours": "shots:20261004_172544_ship_power/05_power_on.png",
+   "ours_label": "ve hře, zapnuto"
+  }
+ ]
+}

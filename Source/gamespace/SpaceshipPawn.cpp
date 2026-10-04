@@ -217,6 +217,7 @@ ASpaceshipPawn::ASpaceshipPawn()
 void ASpaceshipPawn::BeginPlay()
 {
 	Super::BeginPlay();
+	PowerState = bStartPowered ? ESpacePowerState::On : ESpacePowerState::Off;
 
 	Presentation->LoadViewCollection();
 
@@ -278,6 +279,94 @@ void ASpaceshipPawn::PlaceCockpitLights()
 	};
 	SetupCockpitLight(CockpitLight, CockpitLightIntensityCd, CockpitLightOffset);
 	SetupCockpitLight(CockpitFillLight, CockpitFillIntensityCd, CockpitFillOffset);
+	ApplyPowerLights();
+}
+
+void ASpaceshipPawn::ApplyPowerLights()
+{
+	const bool bLit = PowerState != ESpacePowerState::Off;
+	CockpitLight->SetVisibility(bLit && CockpitLightIntensityCd > 0.f);
+	CockpitFillLight->SetVisibility(bLit && CockpitFillIntensityCd > 0.f);
+}
+
+float ASpaceshipPawn::GetPowerBootAlpha() const
+{
+	switch (PowerState)
+	{
+	case ESpacePowerState::Off: return 0.f;
+	case ESpacePowerState::Booting: return FMath::Clamp(PowerBootElapsed / FMath::Max(PowerBootSeconds, 0.1f), 0.f, 0.999f);
+	default: return 1.f;
+	}
+}
+
+bool ASpaceshipPawn::SetPower(bool bOn, bool bInstant)
+{
+	if (!bOn && Quantum->GetState() == EQuantumState::Traveling)
+	{
+		return false;
+	}
+	const ESpacePowerState Was = PowerState;
+	if (!bOn)
+	{
+		PowerState = ESpacePowerState::Off;
+	}
+	else if (bInstant)
+	{
+		PowerState = ESpacePowerState::On;
+	}
+	else if (PowerState == ESpacePowerState::Off)
+	{
+		PowerState = ESpacePowerState::Booting;
+		PowerBootElapsed = 0.f;
+	}
+	if (PowerState != Was)
+	{
+		if (PowerState == ESpacePowerState::Off)
+		{
+			SetQuantumEngageHeld(false);
+			Systems->CutBoostAndAfterburner();
+		}
+		ApplyPowerLights();
+		UE_LOG(LogSpaceship, Log, TEXT("%s: power %s"), *GetName(),
+			PowerState == ESpacePowerState::Off ? TEXT("off") : PowerState == ESpacePowerState::Booting ? TEXT("starting up") : TEXT("on"));
+	}
+	return true;
+}
+
+bool ASpaceshipPawn::TogglePower()
+{
+	return SetPower(PowerState == ESpacePowerState::Off);
+}
+
+void ASpaceshipPawn::UpdatePower(float DeltaSeconds)
+{
+	if (PowerState == ESpacePowerState::Booting)
+	{
+		PowerBootElapsed += DeltaSeconds;
+		if (PowerBootElapsed >= PowerBootSeconds)
+		{
+			PowerState = ESpacePowerState::On;
+			ApplyPowerLights();
+			UE_LOG(LogSpaceship, Log, TEXT("%s: power on"), *GetName());
+		}
+	}
+}
+
+bool ASpaceshipPawn::GetPowerControlLocation(FVector& OutLocation) const
+{
+	FVector Screen;
+	if (!GetHullSocketLocation(TEXT("Display_left"), Screen))
+	{
+		return false;
+	}
+	// hs_cockpit.dash: the panel faces the eye (n), right = up x n in Blender's axes; here the same frame in UE's.
+	// The PWR rotary is the second of four rows in the left pod's outer control module: 22.75 cm left of the
+	// screen's centre, 4.3 cm up, on the module's face ~1.5 cm behind the socket (3 cm before the recess).
+	const FVector Normal = (GetPilotEyeLocation() - Screen).GetSafeNormal();
+	const FVector Right = (Normal ^ GetActorUpVector()).GetSafeNormal();
+	const FVector PanelUp = (Right ^ Normal).GetSafeNormal();
+	OutLocation = Screen - Right * 22.75 + PanelUp * 4.3 - Normal * 1.5;
+	return true;
 }
 
 void ASpaceshipPawn::SnapCameraToShip()
@@ -783,6 +872,14 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 
 void ASpaceshipPawn::StepFlight(float DeltaSeconds)
 {
+	UpdatePower(DeltaSeconds);
+	if (!IsPowered())
+	{
+		// No power, no thrusters (and no boost, afterburner or quantum below).
+		Systems->SetBoostHeld(false);
+		Systems->SetAfterburnerHeld(false);
+		bSpaceBrakeHeld = false;
+	}
 	UpdateEnvironment(DeltaSeconds);
 	UpdateMasterMode(DeltaSeconds);
 	UpdateVtol(DeltaSeconds);
@@ -793,6 +890,14 @@ void ASpaceshipPawn::StepFlight(float DeltaSeconds)
 	UpdateQuantum(DeltaSeconds);
 	// Before steering: while held it takes the mouse movement for itself.
 	UpdateFreeLook(DeltaSeconds);
+	if (!IsPowered())
+	{
+		// The keys and the stick move nothing; free look above still turns the pilot's head.
+		ThrustInput = StrafeInput = LiftInput = RollInput = 0.f;
+		LookInput = FVector2D::ZeroVector;
+		MouseLookDelta = FVector2D::ZeroVector;
+		MouseStick = FVector2D::ZeroVector;
+	}
 	if (Landing->GetState() == ELandingState::Landed)
 	{
 		UpdateLandedMotion(DeltaSeconds);
@@ -908,7 +1013,8 @@ void ASpaceshipPawn::UpdateQuantum(float DeltaSeconds)
 	FShipQuantumContext Context;
 	Context.Location = GetActorLocation();
 	Context.Nose = GetActorForwardVector();
-	Context.bLanded = Landing->GetState() == ELandingState::Landed;
+	// Without power the drive cannot spool: treated as the landed case, which blocks it.
+	Context.bLanded = Landing->GetState() == ELandingState::Landed || !IsPowered();
 	Context.bInNav = Systems->GetMasterMode() == EMasterMode::NAV && !Systems->IsMasterModeSwitching();
 	const UShipQuantumComponent::FFrame Frame = Quantum->Update(DeltaSeconds, Context, GetQuantumRules());
 	// Engage: the button held for QuantumEngageHoldSeconds while ready.
@@ -1189,6 +1295,11 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		if (IsGSafeActive())
 		{
 			LocalAcceleration = LimitThrustForPilot(LocalAcceleration, bComStab && bCoupled);
+		}
+		if (!IsPowered())
+		{
+			// No power: the ship falls or drifts (SC: a ship powered off in flight drops).
+			LocalAcceleration = FVector::ZeroVector;
 		}
 		// How hard the engines are working, for the glow and the sound. The vertical axis is measured
 		// against a hover's worth of thrust (HoverThrustReferenceG), not against what the lift

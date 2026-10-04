@@ -118,6 +118,13 @@ private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<ULocalLightComponent>> FixtureLights;
 	bool bFixtureLightsOn = true;
+	/** The interior's lamps, glow strips and accents (and the hologram) as the power last left them. */
+	bool bPowerGlowLit = true;
+	/** Their dynamic materials and full emissive strengths, found on the first power-off. */
+	TArray<TPair<TWeakObjectPtr<UMaterialInstanceDynamic>, float>> PowerGlowMaterials;
+	bool bPowerGlowGathered = false;
+	/** Dims them (and hides the hologram) while the ship is powered off. */
+	void ApplyPowerGlow(bool bLit);
 	int32 FixtureLightMode = -1;
 	bool bFixtureLightsDirty = false;
 	/** The interior meshes (Interior, InteriorKit, InteriorDecals): out of the sun's shadows while the interior

@@ -279,6 +279,22 @@ void ASpacePlayerController::TickInteraction()
 	}
 	bInteractKeyWasDown = bDown;
 
+	// U in the pilot seat: the ship's power (SC). Alt+U is the kit showroom (HandleShowroomKey).
+	const bool bAlt = IsInputKeyDown(EKeys::LeftAlt) || IsInputKeyDown(EKeys::RightAlt);
+	const bool bPowerDown = bAllowed && IsInputKeyDown(EKeys::U) && !bAlt;
+	if (bPowerDown && !bPowerKeyWasDown)
+	{
+		if (ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Played))
+		{
+			Ship->TogglePower();
+			if (USpaceNotifications* Notes = USpaceNotifications::Get(this); Notes && Ship->GetPowerState() == ESpacePowerState::Off)
+			{
+				Notes->Toast(NSLOCTEXT("SpaceHints", "PowerOff", "Napájení lodi vypnuto"), 3.f);
+			}
+		}
+	}
+	bPowerKeyWasDown = bPowerDown;
+
 	FSpaceInteractionView& View = InteractionView;
 	APawn* const Current = GetPawn();  // the tap may just have swapped it
 	View.bInteractMode = bInteractMode;
@@ -467,6 +483,27 @@ namespace SpacePlayerControllerConsole
 			}
 			Controller->DebugSetInteractMode(FCString::Atoi(*Args[0]) != 0);
 			Controller->DebugForceHover(Args.Num() > 1 ? FCString::Atoi(*Args[1]) : INDEX_NONE);
+		}));
+
+	static FAutoConsoleCommandWithWorldAndArgs PowerCommand(
+		TEXT("space.Power"),
+		TEXT("space.Power 0|1 [instant]: the ship's power off or on (with its start-up unless instant is 1)."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			APlayerController* Controller = World ? World->GetFirstPlayerController() : nullptr;
+			ASpaceshipPawn* Ship = Controller ? Cast<ASpaceshipPawn>(Controller->GetPawn()) : nullptr;
+			if (!Ship)
+			{
+				// On foot inside: the ship around the pilot.
+				if (APlayerCharacter* Walker = Controller ? Cast<APlayerCharacter>(Controller->GetPawn()) : nullptr)
+				{
+					Ship = Walker->GetInteriorShip();
+				}
+			}
+			if (Ship && Args.Num() >= 1)
+			{
+				Ship->SetPower(FCString::Atoi(*Args[0]) != 0, Args.Num() > 1 && FCString::Atoi(*Args[1]) != 0);
+			}
 		}));
 
 	static FAutoConsoleCommandWithWorldAndArgs NotifyCommand(
@@ -758,6 +795,11 @@ void ASpacePlayerController::HandleInteriorKey(const FInputActionValue& /*Value*
 
 void ASpacePlayerController::HandleShowroomKey(const FInputActionValue& /*Value*/)
 {
+	// Alt+U: plain U is the ship's power since 4. 10. 2026 (SC).
+	if (!IsInputKeyDown(EKeys::LeftAlt) && !IsInputKeyDown(EKeys::RightAlt))
+	{
+		return;
+	}
 	if (!IsMenuOpen() && !IsTitleScreen())
 	{
 		// U walks a round: the showroom, its annex (the catalogue-only kit parts), the stair bay (batch 3), then

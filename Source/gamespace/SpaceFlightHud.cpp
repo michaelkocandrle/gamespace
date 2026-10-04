@@ -2423,8 +2423,9 @@ void USpaceFlightHud::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	static const IConsoleVariable* HudMode = IConsoleManager::Get().FindConsoleVariable(TEXT("space.Hud"));
 	const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(GetOwningPlayerPawn());
 	FSpaceFlightHudState State = MakeState(Ship, HudMode ? HudMode->GetInt() : 1);
-	// Leaning in to the dashboard (Z), the HUD would lie over the displays: it steps aside.
-	State.bVisible = State.bVisible && !(Ship && Ship->GetDashboardFocus() > 0.35f);
+	// Leaning in to the dashboard (Z), the HUD would lie over the displays: it steps aside. It is the ship's HUD:
+	// powered off or starting up it is not there (SC: it comes up with the displays).
+	State.bVisible = State.bVisible && !(Ship && Ship->GetDashboardFocus() > 0.35f) && !(Ship && !Ship->IsPowered());
 	// The HUD is drawn over the view, so its horizon and heading are the view's.
 	if (const APlayerController* Player = GetOwningPlayer())
 	{
@@ -2950,6 +2951,77 @@ void USpaceCockpitDisplays::BuildTree()
 	Vertical(ShipPage, ShipFooter, HAlign_Fill, FMargin(2.f, 2.f, 2.f, 0.f));
 	SmallScreen(TEXT("Ship"), ScreenRect(TEXT("centre_bottom")), ShipPage);
 
+	// --- The start-up (power on, SC's cold start): the ship's name, its systems coming up, a progress bar ----------
+	// A system still to come is an amber WAIT, a done one a green OK (critic 4. 10.: "..." read as empty).
+	const FLinearColor BootPending(1.f, 0.43f, 0.05f);
+	auto Boot = [&](const TCHAR* Name, const FBox2D& Rect, const TArray<const TCHAR*>& Systems)
+	{
+		const bool bLarge = Systems.Num() > 0;
+		UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("Boot%s"), Name)));
+		if (UOverlaySlot* GlassSlot = Overlay->AddChildToOverlay(Symbol(FName(*FString::Printf(TEXT("Boot%sGlass"), Name)), ESpaceHudSymbol::MfdGlass, MfdBlue)))
+		{
+			GlassSlot->SetHorizontalAlignment(HAlign_Fill);
+			GlassSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("Boot%sColumn"), Name)));
+		// The small centre screens: one big word and the bar (their name and caption were unreadable from the seat).
+		if (bLarge)
+		{
+			Vertical(Column, Words(FName(*FString::Printf(TEXT("Boot%sShip"), Name)), TEXT("SHIP"), 60.f), HAlign_Center, FMargin(0.f, 40.f, 0.f, 0.f));
+			Vertical(Column, Words(FName(*FString::Printf(TEXT("Boot%sCaption"), Name)), TEXT("SYSTEM START"), 26.f, Faded(MfdText, 0.6f)), HAlign_Center,
+				FMargin(0.f, 0.f, 0.f, 34.f));
+		}
+		else
+		{
+			Vertical(Column, Words(FName(*FString::Printf(TEXT("Boot%sWord"), Name)), TEXT("BOOT"), 34.f), HAlign_Center, FMargin(0.f, 60.f, 0.f, 0.f));
+		}
+		for (int32 Index = 0; Index < Systems.Num(); ++Index)
+		{
+			UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("Boot%sRow%d"), Name, Index)));
+			Horizontal(Row, Words(FName(*FString::Printf(TEXT("Boot%sSystem%d"), Name, Index)), Systems[Index], 28.f, Faded(MfdText, 0.85f)), VAlign_Fill, FMargin(0.f), true);
+			Horizontal(Row, Words(FName(*FString::Printf(TEXT("Boot%sCheck%d"), Name, Index)), TEXT("WAIT"), 28.f, BootPending), VAlign_Fill, FMargin(0.f));
+			Vertical(Column, Row, HAlign_Fill, FMargin(30.f, 0.f, 30.f, 14.f));
+		}
+		Vertical(Column, WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass(), FName(*FString::Printf(TEXT("Boot%sSpace"), Name))), HAlign_Fill, FMargin(0.f), true);
+		// The progress bar: a track and a filled bar whose width follows the start-up.
+		UOverlay* Track = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("Boot%sTrack"), Name)));
+		if (UOverlaySlot* RuleSlot = Track->AddChildToOverlay(Rule(FName(*FString::Printf(TEXT("Boot%sTrackRule"), Name)), 0.f, 0.5f)))
+		{
+			RuleSlot->SetHorizontalAlignment(HAlign_Fill);
+			RuleSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		USpaceHudLamp* Bar = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), FName(*FString::Printf(TEXT("Boot%sBarLamp"), Name)));
+		Bar->bButton = true;
+		Bar->Color = MfdBlue;
+		Bar->Intensity = 1.f;
+		Bar->Target = 1.f;
+		if (UOverlaySlot* BarSlot = Track->AddChildToOverlay(Sized(FName(*FString::Printf(TEXT("Boot%sBar"), Name)), Bar, 1.f, bLarge ? 16.f : 12.f)))
+		{
+			BarSlot->SetHorizontalAlignment(HAlign_Left);
+			BarSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		Vertical(Column, Sized(FName(*FString::Printf(TEXT("Boot%sTrackBox"), Name)), Track, 0.f, 24.f), HAlign_Fill,
+			FMargin(bLarge ? 40.f : 14.f, 0.f, bLarge ? 40.f : 14.f, bLarge ? 6.f : 30.f));
+		if (bLarge)
+		{
+			// A fixed line, not a running percentage: a number rewritten every frame ghosts under TSR (cockpit-displays).
+			Vertical(Column, Words(FName(*FString::Printf(TEXT("Boot%sPercent"), Name)), TEXT("SHIP OS 2.4"), 26.f, Faded(MfdText, 0.5f)), HAlign_Center,
+				FMargin(0.f, 0.f, 0.f, 22.f));
+		}
+		if (UOverlaySlot* ColumnSlot = Overlay->AddChildToOverlay(Column))
+		{
+			ColumnSlot->SetPadding(FMargin(20.f, 12.f, 20.f, 12.f));
+			ColumnSlot->SetHorizontalAlignment(HAlign_Fill);
+			ColumnSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		Overlay->SetVisibility(ESlateVisibility::Collapsed);
+		Place(Overlay, Rect);
+	};
+	Boot(TEXT("Flight"), ScreenRect(TEXT("left")), { TEXT("POWER PLANT"), TEXT("IFCS"), TEXT("THRUSTERS") });
+	Boot(TEXT("Status"), ScreenRect(TEXT("right")), { TEXT("LIFE SUPPORT"), TEXT("RADAR"), TEXT("QUANTUM DRIVE") });
+	Boot(TEXT("Radar"), ScreenRect(TEXT("centre_top")), {});
+	Boot(TEXT("Ship"), ScreenRect(TEXT("centre_bottom")), {});
+
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
@@ -3106,17 +3178,83 @@ FSpaceFlightHudState USpaceCockpitDisplays::MakeDisplayState(const ASpaceshipPaw
 
 void USpaceCockpitDisplays::SetCentreColumn(bool bOn)
 {
-	for (const TCHAR* Name : { TEXT("RadarScreen"), TEXT("ShipScreen") })
+	if (bOn != bCentreOn)
 	{
-		if (UWidget* Screen = WidgetTree ? WidgetTree->FindWidget(Name) : nullptr)
+		bCentreOn = bOn;
+		AppliedPowerView = -1;
+		ApplyScreenVisibility();
+	}
+}
+
+void USpaceCockpitDisplays::SetPower(bool bLit, float BootAlpha)
+{
+	bPowerLit = bLit;
+	PowerBootAlpha = bLit ? FMath::Clamp(BootAlpha, 0.f, 1.f) : 0.f;
+	ApplyScreenVisibility();
+	if (bLit && PowerBootAlpha < 1.f && WidgetTree)
+	{
+		// The systems report one after another over the first 80 % of the start-up; the bar fills to the end.
+		for (const TCHAR* Name : { TEXT("Flight"), TEXT("Status"), TEXT("Radar"), TEXT("Ship") })
 		{
-			Screen->SetVisibility(bOn ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+			if (USizeBox* Bar = Cast<USizeBox>(WidgetTree->FindWidget(FName(*FString::Printf(TEXT("Boot%sBar"), Name)))))
+			{
+				const float Track = FCString::Strcmp(Name, TEXT("Flight")) == 0 || FCString::Strcmp(Name, TEXT("Status")) == 0
+					? DisplayWidth - 40.f - 80.f : CentreWidth - 40.f - 28.f;
+				Bar->SetWidthOverride(FMath::Max(1.f, Track * PowerBootAlpha));
+			}
+			for (int32 Index = 0; Index < 3; ++Index)
+			{
+				if (UTextBlock* Check = Cast<UTextBlock>(WidgetTree->FindWidget(FName(*FString::Printf(TEXT("Boot%sCheck%d"), Name, Index)))))
+				{
+					const bool bDone = PowerBootAlpha >= 0.8f * float(Index + 1) / 3.f;
+					Check->SetText(FText::FromString(bDone ? TEXT("OK") : TEXT("WAIT")));
+					Check->SetColorAndOpacity(FSlateColor(bDone ? FLinearColor(0.1f, 1.f, 0.42f) : FLinearColor(1.f, 0.43f, 0.05f)));
+				}
+			}
+
+		}
+	}
+}
+
+void USpaceCockpitDisplays::ApplyScreenVisibility()
+{
+	const int32 View = !bPowerLit ? 0 : PowerBootAlpha < 1.f ? 1 : 2;
+	if (View == AppliedPowerView || !WidgetTree)
+	{
+		return;
+	}
+	AppliedPowerView = View;
+	for (const TCHAR* Name : { TEXT("Flight"), TEXT("Status"), TEXT("Radar"), TEXT("Ship") })
+	{
+		const bool bCentre = FCString::Strcmp(Name, TEXT("Radar")) == 0 || FCString::Strcmp(Name, TEXT("Ship")) == 0;
+		const bool bShown = !bCentre || bCentreOn;
+		if (UWidget* Pages = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("%sScreen"), Name))))
+		{
+			Pages->SetVisibility(bShown && View == 2 ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		}
+		if (UWidget* Boot = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("Boot%s"), Name))))
+		{
+			Boot->SetVisibility(bShown && View == 1 ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 		}
 	}
 }
 
 void USpaceCockpitDisplays::SetShip(const AActor* Ship)
 {
+	// The start-up screens carry the ship's name (its Blueprint's, BP_Ship_<Name>).
+	if (Ship && WidgetTree)
+	{
+		FString ShipName = Ship->GetClass()->GetName();
+		ShipName.RemoveFromStart(TEXT("BP_Ship_"));
+		ShipName.RemoveFromEnd(TEXT("_C"));
+		for (const TCHAR* Name : { TEXT("Flight"), TEXT("Status"), TEXT("Radar"), TEXT("Ship") })
+		{
+			if (UTextBlock* Text = Cast<UTextBlock>(WidgetTree->FindWidget(FName(*FString::Printf(TEXT("Boot%sShip"), Name)))))
+			{
+				Text->SetText(FText::FromString(ShipName.ToUpper()));
+			}
+		}
+	}
 	for (const TCHAR* ShipPart : { TEXT("ShipStatus"), TEXT("ShipStatusLarge") })
 	{
 		if (USpaceHudShipStatus* ShipStatus = Cast<USpaceHudShipStatus>(Parts.FindRef(ShipPart)))

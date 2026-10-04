@@ -155,6 +155,8 @@ private:
 	bool bInteractMode = false;
 	int32 ForcedHover = INDEX_NONE;
 	bool bInteractKeyWasDown = false;
+	/** U (power) on the last tick, for its press edge. */
+	bool bPowerKeyWasDown = false;
 	bool bInteractHoldUsed = false;
 	double InteractKeyDownSeconds = 0.0;
 	/** For the event toasts: what the pawn was last frame. */

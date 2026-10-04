@@ -206,7 +206,8 @@ void UShipPresentationComponent::SetupAudioLayers()
 void UShipPresentationComponent::UpdateEngineAudio(float DeltaSeconds)
 {
 	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
-	const bool bPiloted = Ship->IsPlayerControlled();
+	// Powered off the engines and the cockpit's hum are silent; they spool up with the start-up.
+	const bool bPiloted = Ship->IsPlayerControlled() && Ship->GetPowerState() != ESpacePowerState::Off;
 
 	// Eased rather than snapped, so the engines spool up and down instead of clicking. The load is
 	// what the thrusters really do: braking and holding altitude are heard too, a steady coast
@@ -291,6 +292,58 @@ void UShipPresentationComponent::SetupShipLights()
 	}
 }
 
+void UShipPresentationComponent::ApplyPowerGlow(bool bLit)
+{
+	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	bPowerGlowLit = bLit;
+	TArray<UStaticMeshComponent*> Meshes;
+	Ship->GetComponents<UStaticMeshComponent>(Meshes);
+	if (!bPowerGlowGathered)
+	{
+		// The materials space.IntEmissive scales: the interior's lamps, glow strips and accents...
+		bPowerGlowGathered = true;
+		for (UStaticMeshComponent* Mesh : Meshes)
+		{
+			for (int32 Slot = 0; Slot < Mesh->GetNumMaterials(); ++Slot)
+			{
+				UMaterialInterface* Material = Mesh->GetMaterial(Slot);
+				UMaterialInstanceDynamic* Dynamic = Cast<UMaterialInstanceDynamic>(Material);
+				UMaterialInterface* Source = Dynamic ? Dynamic->Parent.Get() : Material;
+				const FString Name = Source ? Source->GetName() : FString();
+				float Base = 0.f;
+				// ...the interior kit's glow materials (MI_Kit_<Maker>_Glow*), and the hull's lamps and light strips (MI_Ship_<Ship>_Light*, _PosWhite; the strobes and thrusters
+				// follow the power in UpdateShipLights): their orange strips along the cockpit sill lit a dead ship.
+				const bool bHullLamp = Name.Contains(TEXT("_Light")) || Name.Contains(TEXT("_PosWhite"));
+				if (!(Name.Contains(TEXT("IntLight")) || Name.Contains(TEXT("IntGlow")) || Name.Contains(TEXT("IntAccentGlow")) || Name.Contains(TEXT("_Glow")) || bHullLamp)
+					|| !Source->GetScalarParameterValue(TEXT("EmissiveStrength"), Base))
+				{
+					continue;
+				}
+				if (!Dynamic)
+				{
+					Dynamic = Mesh->CreateDynamicMaterialInstance(Slot, Source);
+				}
+				PowerGlowMaterials.Add({ Dynamic, Base });
+			}
+		}
+	}
+	// Powered off a faint remnant stays (SC's dark cockpit still shows its fittings by the hangar's light).
+	for (const TPair<TWeakObjectPtr<UMaterialInstanceDynamic>, float>& Glow : PowerGlowMaterials)
+	{
+		if (UMaterialInstanceDynamic* Dynamic = Glow.Key.Get())
+		{
+			Dynamic->SetScalarParameterValue(TEXT("EmissiveStrength"), Glow.Value * (bLit ? 1.f : 0.03f));
+		}
+	}
+	for (UStaticMeshComponent* Mesh : Meshes)
+	{
+		if (Mesh->GetName().StartsWith(TEXT("Hologram")))
+		{
+			Mesh->SetVisibility(bLit);
+		}
+	}
+}
+
 void UShipPresentationComponent::UpdateShipLights(float DeltaSeconds)
 {
 	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
@@ -309,9 +362,16 @@ void UShipPresentationComponent::UpdateShipLights(float DeltaSeconds)
 	// instead of the soft blue of the reference (the author, 22. 9. 2026).
 	const float Thrust = (Ship->ThrusterIdleGlow + (1.f - Ship->ThrusterIdleGlow) * EngineLoad + Ship->ThrusterAfterburnerGlow * AfterburnerFeel
 		+ 0.3f * BoostBlend + Ship->ThrusterQuantumGlow * QuantumBlend) * FMath::Lerp(1.f, Ship->QuantumThrusterScale, QuantumBlend);
+	const float Power = Ship->GetPowerState() == ESpacePowerState::Off ? 0.f : 1.f;
 	for (FShipGlowMaterial& Glow : ThrusterMaterials)
 	{
-		Apply(Glow, Glow.BaseStrength * Thrust);
+		Apply(Glow, Glow.BaseStrength * Thrust * Power);
+	}
+
+	const bool bGlowLit = Ship->GetPowerState() != ESpacePowerState::Off;
+	if (bGlowLit != bPowerGlowLit)
+	{
+		ApplyPowerGlow(bGlowLit);
 	}
 
 	// A quick double flash, like aircraft anti-collision strobes.
@@ -319,7 +379,7 @@ void UShipPresentationComponent::UpdateShipLights(float DeltaSeconds)
 	const bool bFlash = Phase < 0.06 || (Phase > 0.16 && Phase < 0.22);
 	for (FShipGlowMaterial& Glow : StrobeMaterials)
 	{
-		Apply(Glow, Glow.BaseStrength * (bFlash ? 1.f : 0.03f));
+		Apply(Glow, Glow.BaseStrength * (bFlash ? 1.f : 0.03f) * Power);
 	}
 }
 
@@ -447,7 +507,8 @@ void UShipPresentationComponent::UpdateViewCollection()
 	// The fixture lights (a light for every strip and lamp, hs_fixture_lights.py) only while the camera is inside:
 	// without shadows they light the hull through its walls, and from outside their volumes cover the whole ship
 	// on screen (~3 ms on the target GPU in a close chase view)
-	const bool bWantFixtures = FixtureLightMode < 0 ? bInside : FixtureLightMode > 0;
+	// The fixtures are the ship's lights: dark while it is powered off.
+	const bool bWantFixtures = (FixtureLightMode < 0 ? bInside : FixtureLightMode > 0) && Ship->GetPowerState() != ESpacePowerState::Off;
 	// The interior lighting (MegaLights, walked interiors): the interior meshes out of the sun's shadows - the hull
 	// shadows the rooms anyway, and flown the cockpit keeps its interior's sun shadows
 	const int32 ShadowState = ASpacePlayerController::IsInteriorLightingOn() ? 1 : 0;

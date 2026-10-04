@@ -183,8 +183,8 @@ void UCockpitDisplayComponent::SetDisplayLightIntensity(float Candela)
 	DisplayLightIntensityCd = FMath::Max(Candela, 0.f);
 	for (int32 Index = 0; Index < Lights.Num(); ++Index)
 	{
-		Lights[Index]->SetIntensity(DisplayLightIntensityCd * LightShares[Index]);
-		Lights[Index]->SetVisibility(DisplayLightIntensityCd > 0.f);
+		Lights[Index]->SetIntensity(DisplayLightIntensityCd * LightShares[Index] * PowerLightScale);
+		Lights[Index]->SetVisibility(DisplayLightIntensityCd * PowerLightScale > 0.f);
 	}
 }
 
@@ -236,6 +236,15 @@ void UCockpitDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	{
 		return;
 	}
+	// The ship's power: dark glass when off, the start-up screen while booting (in every view: the lights).
+	const ESpacePowerState Power = Ship->GetPowerState();
+	const float LightScale = Power == ESpacePowerState::Off ? 0.f : Power == ESpacePowerState::Booting ? 0.5f : 1.f;
+	if (LightScale != PowerLightScale)
+	{
+		PowerLightScale = LightScale;
+		SetDisplayLightIntensity(DisplayLightIntensityCd);
+	}
+	Widget->SetPower(Power != ESpacePowerState::Off, Ship->GetPowerBootAlpha());
 	if (bOnlyInCockpitView && (!Ship->IsCockpitView() || !Ship->IsLocallyControlled()))
 	{
 		return;

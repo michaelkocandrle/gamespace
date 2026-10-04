@@ -97,6 +97,15 @@ enum class ESpaceshipAxis : uint8
  * automatically. If neither exists, the pawn builds an equivalent set procedurally at possession
  * time so it is flyable out of the box.
  */
+/** The ship's power (SC's cold start): off is a dark cockpit, booting the displays' start-up, on everything works. */
+UENUM(BlueprintType)
+enum class ESpacePowerState : uint8
+{
+	Off,
+	Booting,
+	On
+};
+
 UCLASS(Blueprintable)
 class GAMESPACE_API ASpaceshipPawn : public APawn
 {
@@ -157,6 +166,47 @@ public:
 
 	/** The pilot's eye (the cockpit camera) in the world. */
 	FVector GetPilotEyeLocation() const;
+
+	// --- Power (SC's cold start, the author's capture 4. 10. 2026) ---------------------------------------------------
+
+	/** Off: dark cockpit, black displays, no HUD, no thrust. Booting: the displays start up for PowerBootSeconds. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Power")
+	ESpacePowerState GetPowerState() const { return PowerState; }
+
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Power")
+	bool IsPowered() const { return PowerState == ESpacePowerState::On; }
+
+	/** 0..1 through the start-up: 0 off, 1 on. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Power")
+	float GetPowerBootAlpha() const;
+
+	/** Power on (the start-up runs, or not with bInstant) or off. Refused (false) during a quantum jump. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Power")
+	bool SetPower(bool bOn, bool bInstant = false);
+
+	/** U in the seat, or the PWR selector on the dashboard in interact mode. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Power")
+	bool TogglePower();
+
+	/** The dashboard's PWR selector in the world (left of the left MFD); false for a ship without that display. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Power")
+	bool GetPowerControlLocation(FVector& OutLocation) const;
+
+	/** Tests: runs the start-up for this long. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugStepPower(float DeltaSeconds) { UpdatePower(DeltaSeconds); }
+
+	/** Tests: the thrust the last flight step applied (local cm/s^2; zero without power). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Tests")
+	FVector DebugGetThrusterAcceleration() const { return ThrusterAcceleration; }
+
+	/** Powered when the game starts (the author flies right away); off, the ship waits for U like SC's. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Power")
+	bool bStartPowered = true;
+
+	/** SC's displays and HUD are up within ~3 s of POWER (frames 3 s apart in the author's capture). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Power", meta = (ClampMin = "0.1"))
+	float PowerBootSeconds = 2.5f;
 
 	/**
 	 * The player's settings (USpaceUserSettings): virtual joystick and its dead zone, the cockpit field of view, and with
@@ -1951,6 +2001,12 @@ private:
 
 	/** Puts the cockpit key and fill lights at the eye + their offsets (BeginPlay, and when the eye moves). */
 	void PlaceCockpitLights();
+	/** The start-up's clock: Booting turns On after PowerBootSeconds. */
+	void UpdatePower(float DeltaSeconds);
+	/** The cockpit lights follow the power (lit from the start-up on). */
+	void ApplyPowerLights();
+	ESpacePowerState PowerState = ESpacePowerState::On;
+	float PowerBootElapsed = 0.f;
 	void UpdateAfterburner(float DeltaSeconds);
 	void SetFreeLookHeld(bool bHeld);
 	void UpdateFreeLook(float DeltaSeconds);

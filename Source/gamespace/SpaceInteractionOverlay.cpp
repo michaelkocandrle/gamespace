@@ -238,13 +238,12 @@ int32 SSpaceInteractionOverlay::OnPaint(const FPaintArgs&, const FGeometry& Geom
 				// SC: one short line just above the hovered control (back is on the key list). A slim glass backing,
 				// since the label sits over a busy display.
 				const FString Label = View.Hotspots[Index].Label.ToString();
-				const FSlateFontInfo Info = Font(true, 12.5f);
+				const FSlateFontInfo Info = Font(true, 15.f);
 				const FVector2f TextSize = Measure(Label, Info);
 				const float BackY = At.Y - 64.f - TextSize.Y - 6.f;
 				const TArray<FVector2f> Back = RoundedBox(At.X - TextSize.X * 0.5f - 8.f, BackY, TextSize.X + 16.f, TextSize.Y + 6.f, 4.f);
-				Fill(Out, Layer + 1, Geometry, Back, Srgb(5, 15, 20, 0.72f));
-				Lines(Closed(Back), Cyan * FLinearColor(1, 1, 1, 0.4f), 1.f, Layer + 2);
-				Write(Label, { At.X - TextSize.X * 0.5f, BackY + 3.f }, Info, Text, Layer + 2, false);
+				Fill(Out, Layer + 1, Geometry, Back, Srgb(5, 15, 20, 0.45f));
+				Write(Label, { At.X - TextSize.X * 0.5f, BackY + 3.f }, Info, Title, Layer + 2, false);
 				// A thin leader from the label down to the ring.
 				Lines({ { At.X, BackY + TextSize.Y + 6.f }, { At.X, At.Y - 10.f } }, Cyan * FLinearColor(1, 1, 1, 0.6f), 1.f, Layer + 2);
 			}

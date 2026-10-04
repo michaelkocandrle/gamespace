@@ -13,8 +13,35 @@ namespace SpaceInteractionLocal
 	/** Interact mode reaches hotspots this far from the eye on foot (SC: within arm's reach of a panel, a little more). */
 	constexpr double ReachOnFootCm = 600.0;
 
+	/** The dashboard's PWR selector (SC: the lit POWER key you click in interact mode). */
+	void AddPower(ASpaceshipPawn* Ship, TArray<FSpaceHotspot>& Out)
+	{
+		FVector At;
+		if (!Ship->GetPowerControlLocation(At))
+		{
+			return;
+		}
+		const TWeakObjectPtr<ASpaceshipPawn> Weak(Ship);
+		FSpaceHotspot Spot;
+		Spot.Label = Ship->GetPowerState() == ESpacePowerState::Off ? LOCTEXT("PowerOn", "ZAPNOUT NAPÁJENÍ") : LOCTEXT("PowerOff", "VYPNOUT NAPÁJENÍ");
+		Spot.WorldLocation = At;
+		Spot.Use = [Weak](bool bPrimary)
+		{
+			if (ASpaceshipPawn* Live = Weak.Get(); Live && bPrimary)
+			{
+				Live->TogglePower();
+			}
+		};
+		Out.Add(MoveTemp(Spot));
+	}
+
 	void AddMfds(ASpaceshipPawn* Ship, TArray<FSpaceHotspot>& Out)
 	{
+		// Dark glass has no pages to click through.
+		if (Ship->GetPowerState() != ESpacePowerState::On)
+		{
+			return;
+		}
 		const TWeakObjectPtr<ASpaceshipPawn> Weak(Ship);
 		const TCHAR* Sockets[] = { TEXT("Display_left"), TEXT("Display_right") };
 		const FText Labels[] = { LOCTEXT("MfdLeft", "LEVÉ MFD – DALŠÍ STRÁNKA"), LOCTEXT("MfdRight", "PRAVÉ MFD – DALŠÍ STRÁNKA") };
@@ -51,6 +78,7 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 	if (ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Pawn))
 	{
 		AddMfds(Ship, OutHotspots);
+		AddPower(Ship, OutHotspots);
 		// Getting up is on the key list (SC); the seat itself is under the pilot's view.
 		return;
 	}
@@ -97,6 +125,7 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 			};
 			OutHotspots.Add(MoveTemp(Spot));
 			AddMfds(Inside, OutHotspots);
+			AddPower(Inside, OutHotspots);
 		}
 		if (bRamp && FVector::Dist(Ramp, At) < ReachOnFootCm && Inside->IsLanded())
 		{
@@ -133,6 +162,10 @@ void SpaceInteraction::KeyHints(APawn* Pawn, bool bInteractMode, const FSpaceInt
 	auto Add = [&Out](const FText& Action, const TCHAR* Key) { Out.Add({ Action, Key }); };
 	if (bInteractMode)
 	{
+		if (Cast<ASpaceshipPawn>(Pawn))
+		{
+			Add(LOCTEXT("HintPowerInteract", "NAPÁJENÍ (ZAP/VYP)"), TEXT("U"));
+		}
 		Add(LOCTEXT("HintUse", "POUŽÍT"), TEXT("LMB"));
 		Add(LOCTEXT("HintBack", "ZPĚT (MFD)"), TEXT("RMB"));
 		Add(LOCTEXT("HintLeave", "ZAVŘÍT INTERAKCI (PUSTIT)"), TEXT("F"));
@@ -140,6 +173,8 @@ void SpaceInteraction::KeyHints(APawn* Pawn, bool bInteractMode, const FSpaceInt
 	}
 	if (const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Pawn))
 	{
+		// SC's list starts with POWER (TOGGLE) [U]; without power only the seat, interact mode and the camera.
+		Add(LOCTEXT("HintPower", "NAPÁJENÍ (ZAP/VYP)"), TEXT("U"));
 		if (Ship->CanLeaveSeat())
 		{
 			Add(LOCTEXT("HintGetUp", "VSTÁT"), TEXT("F"));
@@ -149,7 +184,11 @@ void SpaceInteraction::KeyHints(APawn* Pawn, bool bInteractMode, const FSpaceInt
 			Add(LOCTEXT("HintGetOut", "VYSTOUPIT"), TEXT("F"));
 		}
 		Add(LOCTEXT("HintInteractMode", "INTERAKCE (DRŽET)"), TEXT("F"));
-		if (Ship->IsLanded())
+		if (!Ship->IsPowered())
+		{
+			// nothing to fly yet
+		}
+		else if (Ship->IsLanded())
 		{
 			Add(LOCTEXT("HintTakeOff", "VZLET"), TEXT("Space"));
 		}

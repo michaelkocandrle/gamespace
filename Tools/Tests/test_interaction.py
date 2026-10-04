@@ -62,7 +62,7 @@ try:
     check("landed: take-off on Space, no flight keys", ("VZLET", "Space") in keys and not any(a == "SCM / NAV" for a, k in keys), str(keys))
     ship.debug_force_landed(False)
     _, keys, _ = describe(ship, True)
-    check("interact mode: use, back and close", [a for a, k in keys] == ["POUŽÍT", "ZPĚT (MFD)", "ZAVŘÍT INTERAKCI (PUSTIT)"], str(keys))
+    check("interact mode: use, back and close", [a for a, k in keys] == ["NAPÁJENÍ (ZAP/VYP)", "POUŽÍT", "ZPĚT (MFD)", "ZAVŘÍT INTERAKCI (PUSTIT)"], str(keys))
 finally:
     eas.destroy_actor(ship)
 

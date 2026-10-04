@@ -971,6 +971,16 @@ public:
 	void SetCentreColumn(bool bOn);
 
 	/**
+	 * The ship's power: unlit = every screen dark (the glass shows black); lit with BootAlpha under 1 = the start-up
+	 * screen (the ship's name, the systems coming up, a progress bar); lit at 1 = the pages.
+	 */
+	void SetPower(bool bLit, float BootAlpha);
+
+	/** Tests: what the displays show: 0 dark, 1 starting up, 2 pages. */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
+	int32 DebugGetPowerView() const { return !bPowerLit ? 0 : PowerBootAlpha < 1.f ? 1 : 2; }
+
+	/**
 	 * MFD pages, as the reference's MFDs page with the keys beside them. Left (0): FLIGHT, THRUSTERS,
 	 * NAVIGATION; right (1): STATUS, CONTACTS, SELF STATUS - only what the game has data for (no weapons,
 	 * shields, power or cooling pages until those systems exist).
@@ -1004,6 +1014,12 @@ protected:
 
 private:
 	TMap<FName, float> LastFigures;
+	/** Shows the pages or the start-up screens as the power and the centre column ask. */
+	void ApplyScreenVisibility();
+	bool bCentreOn = true;
+	bool bPowerLit = true;
+	float PowerBootAlpha = 1.f;
+	int32 AppliedPowerView = -1;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UWidgetSwitcher>> PageSwitchers;

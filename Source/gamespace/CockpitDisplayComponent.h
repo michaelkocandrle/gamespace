@@ -117,6 +117,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays")
 	void SetDisplayLightIntensity(float Candela);
 
+	/** Tests: the share of the display lights the ship's power allows (0 off, 0.5 starting up, 1 on). */
+	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
+	float GetPowerLightScale() const { return PowerLightScale; }
+
 	/** Tests: the display lights made at BeginPlay. */
 	UFUNCTION(BlueprintCallable, Category = "Cockpit Displays|Tests")
 	int32 GetDisplayLightCount() const { return Lights.Num(); }
@@ -176,6 +180,8 @@ private:
 	TSharedPtr<class SVirtualWindow> DrawWindow;
 	TSharedPtr<class FHittestGrid> HitTestGrid;
 	float SinceDraw = 0.f;
+	/** The display lights' share by the ship's power (set every tick, applied on a change). */
+	float PowerLightScale = 1.f;
 	float SinceState = 0.f;
 	float CurrentScale = 1.f;
 };

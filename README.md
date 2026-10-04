@@ -443,7 +443,8 @@ from `Tools/Assets/add_vtol_input.py`, and `space.Vtol 1|0` switches it from the
 | Dashboard focus | hold `Z` or the middle mouse button | -            |
 | MFD pages    | `F1` left, `F2` right (`Alt` + key: back; `[` `]` on a US keyboard) | - |
 | Get up / get out | `F`: in a landed walkable ship (or below 1 m/s) stand up behind the seat; otherwise get out when LANDED. On foot in the ship: `F` at the seat sits down, at the ramp goes out (landed only); outside, `F` at a walkable ship goes in up the ramp | - |
-| Kit showroom / Steadfast interior | `U` / `I` (there and back) | - |
+| Ship power (SC) | `U` (in the seat) | - |
+| Kit showroom / Steadfast interior | `Alt+U` / `I` (there and back) | - |
 | Free look    | hold right mouse button    | -                    |
 | HUD          | `H` (compact / full / off) | -                    |
 
@@ -590,6 +591,22 @@ painted from the controller's `FSpaceInteractionView`), `SpaceNotifications`, th
 `space.Notify toast <text>` / `space.Notify hint <title>|<body>`. The old centre `[F]` prompt of the
 debug HUD stays only in HUD mode 3. Headless: `Tools/Tests/test_interaction.py`; shots:
 `Tools/Shots/interaction.json`.
+
+### Ship power (SC cold start, step 2a)
+
+`ASpaceshipPawn::GetPowerState()`: **Off**, **Booting** (`PowerBootSeconds` 2.5 s), **On**. `bStartPowered`
+(default on: the game starts flying). **U** in the seat or the dashboard's **PWR** selector in interact mode
+(`GetPowerControlLocation`: left of the left MFD, from the cockpit generator's layout) toggles it; **Alt+U** is
+the kit showroom now.
+
+- Off: no thrust (`LocalAcceleration` zeroed, the keys and the stick cleared, boost / afterburner / quantum
+  blocked; a ship powered off in flight falls), no engine sound or thruster glow, the cockpit lights and fixture
+  lights out, the interior's glow materials at 6 %, the hologram hidden, the MFDs dark glass, no flight HUD. The
+  key list keeps only `NAPÁJENÍ (ZAP/VYP) U`, getting up, interact mode and the camera; the MFD hotspots go.
+- Booting: lights on, display lights at half, the MFDs show the start-up (`USpaceCockpitDisplays::SetPower`:
+  ship name, SYSTEM START, three systems per MFD turning OK, a progress bar), no thrust yet.
+- Console `space.Power 0|1 [instant]`. Headless: `Tools/Tests/test_ship_power.py`; shots:
+  `Tools/Shots/ship_power.json`.
 
 ## Ship art pipeline
 
