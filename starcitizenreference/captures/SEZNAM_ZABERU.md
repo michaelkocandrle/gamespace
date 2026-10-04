@@ -6,8 +6,12 @@ Pro autora (4. 10. 2026). Záběry jsou jen vzor: z hry nic nevytahujeme (soubor
 
 - **Rozlišení 2560 × 1440, celá obrazovka**, HUD a UI zapnuté, pokud u bodu není napsáno jinak.
 - **FOV v SC nastav na 88°** (Nastavení → Grafika / Kamera), stejně jako náš kokpit, a nech ho tak u všech záběrů.
-- **Screenshot:** Print Screen, uloží se do `StarCitizen\LIVE\screenshots`. **Video:** NVIDIA app, Alt+F9 start a stop.
-  U videa stačí 10–60 s, víc není potřeba.
+- **Stačí video** (AMD Adrenalin, 4. 10. 2026): snímky si z něj vystřihnu sám (`Tools/Reference/fetch_video.py
+  <soubor> <název>`). Adrenalin: rozlišení „In-game“ (1440p), 60 fps, **bitrate aspoň 50 Mbps**, kodek HEVC nebo AV1.
+  Na každé obrazovce s textem (menu, nastavení, MFD) **zastav na 1–2 s bez pohybu myši**, ať je snímek ostrý.
+  Jedno delší video na celou složku je v pořádku; v `poznamky.txt` stačí hrubé časy (např. „1:20 nastavení zvuku“).
+- **Screenshot** (Print Screen, `StarCitizen\LIVE\screenshots`) dělej jen u drobného textu, který chci číst
+  (klávesy, popisky MFD): video ho rozmaže kompresí.
 - **Kam:** `starcitizenreference\captures\<složka>\`. Soubor pojmenuj číslem bodu, např. `01_03.png` nebo `03_02.mp4`.
   Když bod nejde splnit, napiš ke složce do `poznamky.txt` proč (stačí jedna věta).
 - Značky: **[S]** screenshot, **[V]** krátké video, **[S+V]** obojí.

@@ -1,6 +1,7 @@
 """Reference video from YouTube -> frames to look at (21. 9. 2026).
 
     python Tools/Reference/fetch_video.py <url> <name> [--every 2] [--from 0:30 --to 5:00] [--subs]
+    python Tools/Reference/fetch_video.py <video file> <name> [--every 1]   (the author's own SC captures, 4. 10. 2026)
 
 1. Downloads the best video stream up to 2160p (plus audio, merged to mp4) with yt-dlp into
    ArtSource/Reference/Video/<name>/ and prints the resolution that actually came down (ffprobe),
@@ -71,7 +72,7 @@ def transcript(vtt, out):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("url")
+    parser.add_argument("url", help="YouTube URL, or a video file on disk (the author's own SC captures)")
     parser.add_argument("name", help="folder name, e.g. sc_quantum_travel")
     parser.add_argument("--every", type=float, default=2.0, help="seconds between frames")
     parser.add_argument("--from", dest="start", default=None, help="start time for frames, e.g. 0:30")
@@ -81,11 +82,13 @@ def main():
 
     folder = os.path.join(ROOT, args.name)
     os.makedirs(folder, exist_ok=True)
-    video = os.path.join(folder, "video.mp4")
-    if not os.path.exists(video):
+    local = os.path.isfile(args.url)
+    # A local file (AMD Adrenalin / NVIDIA recording, mp4 or mkv) is read where it is: nothing is downloaded or copied.
+    video = os.path.abspath(args.url) if local else os.path.join(folder, "video.mp4")
+    if not local and not os.path.exists(video):
         run([sys.executable, "-m", "yt_dlp", "-f", "bv*[height<=2160]+ba/b[height<=2160]/bv*+ba/b",
              "--merge-output-format", "mp4", "-o", video, "--no-playlist", args.url])
-    if args.subs:
+    if args.subs and not local:
         vtt = os.path.join(folder, "subs.en.vtt")
         if not os.path.exists(vtt):
             subprocess.run([sys.executable, "-m", "yt_dlp", "--skip-download", "--write-auto-subs", "--write-subs",
@@ -95,8 +98,8 @@ def main():
         else:
             print("TRANSCRIPT none (YouTube refused the captions - look at the frames)")
     width, height, fps, codec, duration = probe(video)
-    print("DOWNLOADED %dx%d, %.2f fps, %s, %.0f s, %.0f MB" % (
-        width, height, fps, codec, duration, os.path.getsize(video) / 1e6))
+    print("%s %dx%d, %.2f fps, %s, %.0f s, %.0f MB" % (
+        "LOCAL" if local else "DOWNLOADED", width, height, fps, codec, duration, os.path.getsize(video) / 1e6))
 
     frames = os.path.join(folder, "frames")
     os.makedirs(frames, exist_ok=True)
