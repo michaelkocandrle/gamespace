@@ -1,48 +1,353 @@
 {
  "_comment": "Wayfarer cockpit v2 design (step 1 of Docs/Reviews/2026-10-04_cockpit_gap_analysis.md, author 4. 10. 2026: the cockpit reads plastic and simplistic, the MFDs like an onboard computer). Single source for the C-01 sheet (Tools/Design/draw_cockpit_v2_sheet.py) and, after approval, for the build (hs_cockpit.py). Coordinates: layout space in metres (x forward from the stern, y to port, z up). status: proposed until the author approves.",
  "ship": "Wayfarer",
- "status": "proposed",
+ "status": "approved (author 4. 10. 2026: \"pokračuj\" = the recommended answers)",
  "base_shot": "C:/gamespace-shots/20261004_192117_ship_power/05_power_on.png",
- "eye": [17.38, 0.0, 2.45],
+ "eye": [
+  17.38,
+  0.0,
+  2.45
+ ],
  "references": {
-  "sc": ["ArtSource/Reference/Video/sc_own_04/frames/t00_02_36.jpg", "ArtSource/Reference/Video/sc_own_04/frames/t00_08_06.jpg", "ArtSource/Reference/Video/sc_own_03/frames/t00_05_48.jpg"],
+  "sc": [
+   "ArtSource/Reference/Video/sc_own_04/frames/t00_02_36.jpg",
+   "ArtSource/Reference/Video/sc_own_04/frames/t00_08_06.jpg",
+   "ArtSource/Reference/Video/sc_own_03/frames/t00_05_48.jpg"
+  ],
   "concepts": "ArtSource/Ships/Wayfarer/Concept/Cockpit_v2/"
  },
  "targets": [
-  {"id": "T-EDGE", "what": "Hrany dílů", "value": "tvrdé zkosení 4–8 mm s úzkým odleskem; zaoblení jen u rukou (madla, opěrky)", "why": "měkké zaoblené desky rr_slab čtou jako mýdlo / plast"},
-  {"id": "T-LAYERS", "what": "Vrstvy povrchu", "value": "každá plocha nad 0,15 m² aspoň 2 vrstvy (rám + výplň nebo krytka), spára 4–6 mm", "why": "plné plochy bez dělení"},
-  {"id": "T-SCREWS", "what": "Šrouby a spony", "value": "rohy krytek a desek; 25–60 na m² viditelné plochy pultu (decaly s normálou)", "why": "chybí mikrodetail"},
-  {"id": "T-LABELS", "what": "Drobné nápisy", "value": "písmo 6–12 mm, 15–30 štítků na m² pultu, legenda u každého ovladače", "why": "SC má husté drobné značení, naše je řídké a velké"},
-  {"id": "T-ROUGH", "what": "Drsnost", "value": "rozsah 0,25–0,85 na pultu, variace v rámci dílu ±0,1 (špína, otěr)", "why": "jedna drsnost na slot = plast"},
-  {"id": "T-FRAME", "what": "Vzpěry kanopy", "value": "8–12 cm široké, 8–10 cm hluboké, vnitřní lem a těsnění, šrouby po 15 cm", "why": "kokpit má sedět v kleci, dnes je jen tenká hrana skla"},
-  {"id": "T-HOLO", "what": "Displeje", "value": "projekce bez desky a bez rámu monitoru; emitor 5 cm vysoký; skrz obraz vidět kokpit", "why": "autor: holografický, high-tech, ne palubní počítač"},
-  {"id": "T-CONTROL", "what": "Ovladače", "value": "hloubka nad deskou 15–35 mm, kryté přepínače, otočné voliče, guma + kov", "why": "dnes 14,5 mm ploché desky, čtou se jako nálepky"}
+  {
+   "id": "T-EDGE",
+   "what": "Hrany dílů",
+   "value": "tvrdé zkosení 4–8 mm s úzkým odleskem; zaoblení jen u rukou (madla, opěrky)",
+   "why": "měkké zaoblené desky rr_slab čtou jako mýdlo / plast"
+  },
+  {
+   "id": "T-LAYERS",
+   "what": "Vrstvy povrchu",
+   "value": "každá plocha nad 0,15 m² aspoň 2 vrstvy (rám + výplň nebo krytka), spára 4–6 mm",
+   "why": "plné plochy bez dělení"
+  },
+  {
+   "id": "T-SCREWS",
+   "what": "Šrouby a spony",
+   "value": "rohy krytek a desek; 25–60 na m² viditelné plochy pultu (decaly s normálou)",
+   "why": "chybí mikrodetail"
+  },
+  {
+   "id": "T-LABELS",
+   "what": "Drobné nápisy",
+   "value": "písmo 6–12 mm, 15–30 štítků na m² pultu, legenda u každého ovladače",
+   "why": "SC má husté drobné značení, naše je řídké a velké"
+  },
+  {
+   "id": "T-ROUGH",
+   "what": "Drsnost",
+   "value": "rozsah 0,25–0,85 na pultu, variace v rámci dílu ±0,1 (špína, otěr)",
+   "why": "jedna drsnost na slot = plast"
+  },
+  {
+   "id": "T-FRAME",
+   "what": "Vzpěry kanopy",
+   "value": "8–12 cm široké, 8–10 cm hluboké, vnitřní lem a těsnění, šrouby po 15 cm",
+   "why": "kokpit má sedět v kleci, dnes je jen tenká hrana skla"
+  },
+  {
+   "id": "T-HOLO",
+   "what": "Displeje",
+   "value": "projekce bez desky a bez rámu monitoru; emitor 5 cm vysoký; skrz obraz vidět kokpit",
+   "why": "autor: holografický, high-tech, ne palubní počítač"
+  },
+  {
+   "id": "T-CONTROL",
+   "what": "Ovladače",
+   "value": "hloubka nad deskou 15–35 mm, kryté přepínače, otočné voliče, guma + kov",
+   "why": "dnes 14,5 mm ploché desky, čtou se jako nálepky"
+  }
  ],
  "materials": [
-  {"id": "MZ-C1", "name": "Grafitový lak (konstrukce pultu)", "roughness": [0.45, 0.6], "wear": "otěr hran 0,15, prach v koutech", "colour": [0.035, 0.037, 0.042]},
-  {"id": "MZ-C2", "name": "Výplňové panely (tmavší, jemná textura)", "roughness": [0.6, 0.75], "wear": "šmouhy od rukou", "colour": [0.022, 0.024, 0.028]},
-  {"id": "MZ-C3", "name": "Kartáčovaný kov (lišty, krytky, šrouby)", "roughness": [0.28, 0.4], "metallic": 1.0, "wear": "lesklé hrany", "colour": [0.55, 0.56, 0.58]},
-  {"id": "MZ-C4", "name": "Guma (opěrky, rukojeti, těsnění)", "roughness": [0.8, 0.9], "colour": [0.012, 0.012, 0.013]},
-  {"id": "MZ-C5", "name": "Krémové obložení (Halcyon, jen ostění kanopy)", "roughness": [0.5, 0.65], "wear": "otěr hran, špína dole", "colour": [0.62, 0.58, 0.5]},
-  {"id": "MZ-C6", "name": "Oranžové akcenty Halcyon (pruhy, kryty spínačů)", "roughness": [0.4, 0.5], "colour": [0.85, 0.34, 0.06]}
+  {
+   "id": "MZ-C1",
+   "name": "Grafitový lak (konstrukce pultu)",
+   "roughness": [
+    0.45,
+    0.6
+   ],
+   "wear": "otěr hran 0,15, prach v koutech",
+   "colour": [
+    0.035,
+    0.037,
+    0.042
+   ]
+  },
+  {
+   "id": "MZ-C2",
+   "name": "Výplňové panely (tmavší, jemná textura)",
+   "roughness": [
+    0.6,
+    0.75
+   ],
+   "wear": "šmouhy od rukou",
+   "colour": [
+    0.022,
+    0.024,
+    0.028
+   ]
+  },
+  {
+   "id": "MZ-C3",
+   "name": "Kartáčovaný kov (lišty, krytky, šrouby)",
+   "roughness": [
+    0.28,
+    0.4
+   ],
+   "metallic": 1.0,
+   "wear": "lesklé hrany",
+   "colour": [
+    0.55,
+    0.56,
+    0.58
+   ]
+  },
+  {
+   "id": "MZ-C4",
+   "name": "Guma (opěrky, rukojeti, těsnění)",
+   "roughness": [
+    0.8,
+    0.9
+   ],
+   "colour": [
+    0.012,
+    0.012,
+    0.013
+   ]
+  },
+  {
+   "id": "MZ-C5",
+   "name": "Krémové obložení (Halcyon, jen ostění kanopy)",
+   "roughness": [
+    0.5,
+    0.65
+   ],
+   "wear": "otěr hran, špína dole",
+   "colour": [
+    0.62,
+    0.58,
+    0.5
+   ]
+  },
+  {
+   "id": "MZ-C6",
+   "name": "Oranžové akcenty Halcyon (pruhy, kryty spínačů)",
+   "roughness": [
+    0.4,
+    0.5
+   ],
+   "colour": [
+    0.85,
+    0.34,
+    0.06
+   ]
+  }
  ],
  "elements": [
-  {"id": "CK-HP-L", "name": "Holoprojektor levý (místo levého MFD)", "kind": "holo_projector", "purpose": "Promítá stránky levého MFD (FLIGHT, THRUSTERS, NAVIGATION, CONFIGURATION) jako světlo nad pultem; bez desky a rámu monitoru.", "at": [18.02, 0.4, 1.95], "size": [0.36, 0.06, 0.05], "image": [0.32, 0.28], "material": "MZ-C1 / MZ-C3", "replaces": "IntScreenBack, rámeček skla, světelná linka monitoru (hs_cockpit.glass_panel)", "callout_uv": [0.30, 0.83]},
-  {"id": "CK-HP-R", "name": "Holoprojektor pravý (místo pravého MFD)", "kind": "holo_projector", "purpose": "Promítá stránky pravého MFD (STATUS, CONTACTS, SELF STATUS).", "at": [18.02, -0.4, 1.95], "size": [0.36, 0.06, 0.05], "image": [0.32, 0.28], "material": "MZ-C1 / MZ-C3", "replaces": "jako CK-HP-L", "callout_uv": [0.83, 0.83]},
-  {"id": "CK-HP-C", "name": "Středový holosloupek (RADAR, SELF STATUS)", "kind": "holo_projector", "purpose": "Dva malé obrazy nad úzkým emitorem ve středu; radar jako kruh světla.", "at": [18.28, 0.0, 1.98], "size": [0.24, 0.06, 0.04], "image": [0.21, 0.25], "material": "MZ-C1 / MZ-C3", "callout_uv": [0.555, 0.66]},
-  {"id": "CK-CF", "name": "Vnitřní rám kanopy", "kind": "strut", "purpose": "Vzpěry podél rámu kanopy s hloubkou, vnitřním lemem, těsněním a šrouby: kokpit sedí v kleci, rám dává měřítko.", "size_cm": [10, 9], "material": "MZ-C1 + MZ-C4 (těsnění) + MZ-C5 (lem)", "from": "exteriér canopy_frame (stejné linie)", "callout_uv": [0.18, 0.12]},
-  {"id": "CK-DS", "name": "Kapota a pult (přestavba povrchu)", "kind": "shell", "purpose": "Pult z vrstvených dílů: konstrukce MZ-C1 se zkosenými hranami, zapuštěné výplně MZ-C2 se spárami, kovové krytky se šrouby; místo jednoho zaobleného tělesa.", "material": "MZ-C1, MZ-C2, MZ-C3", "callout_uv": [0.555, 0.52]},
-  {"id": "CK-SC-L", "name": "Levá boční konzole", "kind": "console", "purpose": "Napájení (PWR), baterie, stav; mřížka větrání, hlubší ovladače (kryté přepínače, otočný volič), legendy.", "material": "MZ-C1 / MZ-C3 / MZ-C4", "callout_uv": [0.05, 0.62]},
-  {"id": "CK-SC-R", "name": "Pravá boční konzole", "kind": "console", "purpose": "Senzory a komunikace (SCAN, COMMS, ESP, IFCS); mřížka, hlubší ovladače, legendy.", "material": "MZ-C1 / MZ-C3 / MZ-C4", "callout_uv": [0.95, 0.62]},
-  {"id": "CK-CB", "name": "Kabelové svazky pod pultem", "kind": "cable_run", "purpose": "Tři svazky z konzolí pod pult a do podlahy, spony po 0,2 m: technická stavba, ne skořepina.", "material": "MZ-C4 + MZ-C3 (spony)", "callout_uv": [0.40, 0.97]},
-  {"id": "CK-HT", "name": "HOTAS: řídicí páka vpravo, plyn vlevo", "kind": "controls", "purpose": "V zorném poli dole po stranách, na opěrkách sedadla; SC je má vidět a pilot je drží.", "material": "MZ-C4 / MZ-C3 / MZ-C6", "open_question": true, "callout_uv": [0.88, 0.97]},
-  {"id": "CK-LT", "name": "Světla kokpitu v2", "kind": "lights", "purpose": "Jantarové pásky pod hranou pultu, bodová světla nad konzolemi, slabé azurové světlo projekce na pult; vypnuto = jen LED.", "material": "-", "callout_uv": [0.70, 0.72]},
-  {"id": "CK-LB", "name": "Drobné značení", "kind": "decals", "purpose": "Legendy ovladačů, výstražné šablony, čísla panelů, štítek výrobce (Halcyon) podle T-LABELS.", "material": "decaly", "callout_uv": [0.12, 0.80]}
+  {
+   "id": "CK-HP-L",
+   "name": "Holoprojektor levý (místo levého MFD)",
+   "kind": "holo_projector",
+   "purpose": "Promítá stránky levého MFD (FLIGHT, THRUSTERS, NAVIGATION, CONFIGURATION) jako světlo nad pultem; bez desky a rámu monitoru.",
+   "at": [
+    18.02,
+    0.4,
+    1.95
+   ],
+   "size": [
+    0.36,
+    0.06,
+    0.05
+   ],
+   "image": [
+    0.32,
+    0.28
+   ],
+   "material": "MZ-C1 / MZ-C3",
+   "replaces": "IntScreenBack, rámeček skla, světelná linka monitoru (hs_cockpit.glass_panel)",
+   "callout_uv": [
+    0.3,
+    0.83
+   ],
+   "state": "built 4. 10. 2026 (hs_cockpit.holo_projector, recipe interior.cockpit.holo_mfd; PWR selector socket Control_pwr)"
+  },
+  {
+   "id": "CK-HP-R",
+   "name": "Holoprojektor pravý (místo pravého MFD)",
+   "kind": "holo_projector",
+   "purpose": "Promítá stránky pravého MFD (STATUS, CONTACTS, SELF STATUS).",
+   "at": [
+    18.02,
+    -0.4,
+    1.95
+   ],
+   "size": [
+    0.36,
+    0.06,
+    0.05
+   ],
+   "image": [
+    0.32,
+    0.28
+   ],
+   "material": "MZ-C1 / MZ-C3",
+   "replaces": "jako CK-HP-L",
+   "callout_uv": [
+    0.83,
+    0.83
+   ],
+   "state": "built 4. 10. 2026 (hs_cockpit.holo_projector, recipe interior.cockpit.holo_mfd; PWR selector socket Control_pwr)"
+  },
+  {
+   "id": "CK-HP-C",
+   "name": "Středový holosloupek (RADAR, SELF STATUS)",
+   "kind": "holo_projector",
+   "purpose": "Dva malé obrazy nad úzkým emitorem ve středu; radar jako kruh světla.",
+   "at": [
+    18.28,
+    0.0,
+    1.98
+   ],
+   "size": [
+    0.24,
+    0.06,
+    0.04
+   ],
+   "image": [
+    0.21,
+    0.25
+   ],
+   "material": "MZ-C1 / MZ-C3",
+   "callout_uv": [
+    0.555,
+    0.66
+   ]
+  },
+  {
+   "id": "CK-CF",
+   "name": "Vnitřní rám kanopy",
+   "kind": "strut",
+   "purpose": "Vzpěry podél rámu kanopy s hloubkou, vnitřním lemem, těsněním a šrouby: kokpit sedí v kleci, rám dává měřítko.",
+   "size_cm": [
+    10,
+    9
+   ],
+   "material": "MZ-C1 + MZ-C4 (těsnění) + MZ-C5 (lem)",
+   "from": "exteriér canopy_frame (stejné linie)",
+   "callout_uv": [
+    0.18,
+    0.12
+   ]
+  },
+  {
+   "id": "CK-DS",
+   "name": "Kapota a pult (přestavba povrchu)",
+   "kind": "shell",
+   "purpose": "Pult z vrstvených dílů: konstrukce MZ-C1 se zkosenými hranami, zapuštěné výplně MZ-C2 se spárami, kovové krytky se šrouby; místo jednoho zaobleného tělesa.",
+   "material": "MZ-C1, MZ-C2, MZ-C3",
+   "callout_uv": [
+    0.555,
+    0.52
+   ]
+  },
+  {
+   "id": "CK-SC-L",
+   "name": "Levá boční konzole",
+   "kind": "console",
+   "purpose": "Napájení (PWR), baterie, stav; mřížka větrání, hlubší ovladače (kryté přepínače, otočný volič), legendy.",
+   "material": "MZ-C1 / MZ-C3 / MZ-C4",
+   "callout_uv": [
+    0.05,
+    0.62
+   ]
+  },
+  {
+   "id": "CK-SC-R",
+   "name": "Pravá boční konzole",
+   "kind": "console",
+   "purpose": "Senzory a komunikace (SCAN, COMMS, ESP, IFCS); mřížka, hlubší ovladače, legendy.",
+   "material": "MZ-C1 / MZ-C3 / MZ-C4",
+   "callout_uv": [
+    0.95,
+    0.62
+   ]
+  },
+  {
+   "id": "CK-CB",
+   "name": "Kabelové svazky pod pultem",
+   "kind": "cable_run",
+   "purpose": "Tři svazky z konzolí pod pult a do podlahy, spony po 0,2 m: technická stavba, ne skořepina.",
+   "material": "MZ-C4 + MZ-C3 (spony)",
+   "callout_uv": [
+    0.4,
+    0.97
+   ]
+  },
+  {
+   "id": "CK-HT",
+   "name": "HOTAS: řídicí páka vpravo, plyn vlevo",
+   "kind": "controls",
+   "purpose": "V zorném poli dole po stranách, na opěrkách sedadla; SC je má vidět a pilot je drží.",
+   "material": "MZ-C4 / MZ-C3 / MZ-C6",
+   "open_question": true,
+   "callout_uv": [
+    0.88,
+    0.97
+   ]
+  },
+  {
+   "id": "CK-LT",
+   "name": "Světla kokpitu v2",
+   "kind": "lights",
+   "purpose": "Jantarové pásky pod hranou pultu, bodová světla nad konzolemi, slabé azurové světlo projekce na pult; vypnuto = jen LED.",
+   "material": "-",
+   "callout_uv": [
+    0.7,
+    0.72
+   ]
+  },
+  {
+   "id": "CK-LB",
+   "name": "Drobné značení",
+   "kind": "decals",
+   "purpose": "Legendy ovladačů, výstražné šablony, čísla panelů, štítek výrobce (Halcyon) podle T-LABELS.",
+   "material": "decaly",
+   "callout_uv": [
+    0.12,
+    0.8
+   ]
+  }
  ],
  "questions": [
   "Směr: C (čistý high-tech, tmavý grafit, hologramy nad emitory) nebo D (drsný průmyslový nákladák: krémová a grafit, odhalené rozvody, mřížky, HOTAS)? A a B drží naše rozložení a ukazují úroveň detailu, hologramy z nich ale nevyšly.",
   "Hologramy: úplně průhledné (skrz vidět kokpit) nebo s jemně zakouřeným pozadím kvůli čitelnosti na slunci?",
   "HOTAS v zorném poli (páka a plyn na opěrkách) – ano? Ruce pilota až později s animací sedu.",
   "Krémové obložení kanopy ponechat (Halcyon), nebo jen grafit s oranžovými akcenty?"
+ ],
+ "decisions": [
+  [
+   "Směr C nebo D?",
+   "D průmyslový nákladák (krémová + grafit, odhalené rozvody, mřížky, kryté přepínače), hologramy nad emitory jako C"
+  ],
+  [
+   "Hologramy průhledné nebo zakouřené?",
+   "jemně zakouřené pozadí (čitelnost na slunci), skrz je kokpit tlumeně vidět"
+  ],
+  [
+   "HOTAS?",
+   "ano, hned jako geometrie; ruce pilota později s animací sedu"
+  ],
+  [
+   "Krémové obložení?",
+   "ponechat krémové obložení kanopy (teplá architektura), grafitový pult"
+  ]
  ]
 }

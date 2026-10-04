@@ -104,6 +104,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
 	float HoloGlassThreshold = 0.04f;
 
+	/** The holo picture's smoke (the screen material's dithered GlassOpacity: 0 clear, 1 solid); negative keeps 0. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
+	float HoloSmoke = 0.22f;
+
 	/** The plate behind the displays' glass at runtime (alpha 0 keeps the material's own grey 0.02). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
 	FLinearColor HoloBackColor = FLinearColor(0.003f, 0.0035f, 0.0045f, 1.f);

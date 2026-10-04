@@ -192,6 +192,7 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
     face = c + n * 0.0014
     usable_h = h - 0.018
     cell = usable_h / len(rows)
+    placed = {}
     for i, row in enumerate(rows):
         v = usable_h / 2 - cell * (i + 0.5)
         for j, (kind, label) in enumerate(row):
@@ -211,6 +212,7 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
             elif kind in ("led_w", "led_o", "led_blink"):
                 _led(g, p, right, up, n, {"led_w": "int_led_w", "led_o": "int_led_o", "led_blink": "int_led_blink"}[kind])
             if label:
+                placed[label] = p
                 LABELS.append({"item": label, "at": list(face + right * u + up * (v + lift - cell / 2 + 0.0058)),
                                "n": list(n), "x": list(right), "y": list(up), "scale": label_scale,
                                "max_w": (w - 0.016) / len(row) - 0.004})
@@ -222,6 +224,8 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
 # the mesh's centre, which import_ship.py sets as HoloPivot from the imported mesh's bounds). Off the line of
 # sight: over the left MFD. Damage colours are prepared in the material (DamageColor x DamageAmount x vertex
 # colour R), static for now.
+    return placed
+
 
 def _envelope(bm, voxels, smooth=30):
     """The outer envelope of the triangles in bm as a new closed bmesh (26. 9. 2026): a decimated copy of the
@@ -624,6 +628,26 @@ def glass_panel(g, screen_bm, sockets, name, c, right, up, n, w, h, proud, visor
             rr_slab(g["int_dark"], q + n * 0.006 - right * su * 0.004 - up * sv * 0.004, right, up, n, 0.014, 0.014, 0.003, 0.01, 2)
 
 
+def holo_projector(g, screen_bm, sockets, name, top, right, n, w, h, eye, holo):
+    """CK-HP (cockpit v2, author 4. 10. 2026: the MFDs a hologram, not an onboard computer): an emitter bar on the
+    pod's top edge - a chamfered graphite housing with a brushed cap and a lens slot of light along its top - and the
+    MFD picture standing over it as light, facing the eye, with nothing behind it but the cockpit (no back plate, no
+    monitor bezel). The picture is the Screens part as before; its socket keeps the Display_<name> name."""
+    Z = Vector((0.0, 0.0, 1.0))
+    fwd = Vector((n.x, n.y, 0.0)).normalized()
+    ew, ed, eh = holo.get("emitter", [w + 0.04, 0.05, 0.045])
+    base = top + fwd * (ed * 0.15)
+    rr_slab(g["int_console"], base + Z * eh, right, fwd, Z, ew, ed, 0.006, eh, 2)                 # housing
+    rr_slab(g["int_trim"], base + Z * (eh + 0.003), right, fwd, Z, ew - 0.012, ed - 0.012, 0.004, 0.003, 2)   # cap
+    rr_slab(g["int_glow"], base + Z * (eh + 0.0045), right, fwd, Z, ew - 0.05, 0.006, 0.002, 0.002, 1)       # lens
+    for su in (-1, 1):                                                                              # end caps
+        q = base + right * (su * (ew / 2 - 0.008)) + Z * (eh * 0.5)
+        tube(g["int_trim"], q - fwd * (ed * 0.5), q + fwd * (ed * 0.5), 0.006, 8)
+    centre = base + Z * (eh + holo.get("image_gap", 0.025) + h / 2)
+    r2, u2, n2 = oriented(eye, centre)
+    screen(screen_bm, sockets, name, centre, r2, u2, n2, w, h)
+
+
 def oriented(eye, c):
     """Right / up / normal of a panel at c that faces the eye (pilot looks along +x, right = -y)."""
     n = (Vector(eye) - Vector(c)).normalized()
@@ -831,6 +855,13 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
     around them carries status lights, a knob and a row of keys (author 25. 9. 2026: no tablets on a table)."""
     import bpy
     eye = Vector(eye)
+    holo_lift = 0.0
+    if spec.get("holo_mfd"):
+        # cockpit v2: the pods sit lower, the holo picture stands over them (holo_projector)
+        new_z = spec["holo_mfd"].get("pod_z", spec["pod_z"])
+        sh0 = spec["screen_w"] * 490.0 / 560.0
+        holo_lift = (spec["pod_z"] + sh0 / 2 + spec["top_margin"]) - (new_z + spec["holo_mfd"].get("fascia_h", 0.2) / 2)
+        spec = dict(spec, pod_z=new_z)
     tmp = bmesh.new()
     tilt = math.tan(math.radians(spec.get("fascia_tilt_deg", 22.0)))
     zb = spec.get("fascia_bottom_z", 0.97)
@@ -847,23 +878,41 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
         sw = spec["screen_w"]
         sh = sw * 490.0 / 560.0
         pw = sw + 2 * spec["side_margin"]
-        # screen in its recess, a satin bezel and a thin cool light line round the glass
-        rr_ring(g["int_dark"], c, right, up, n, sw + 0.03, sh + 0.03, 0.018, 0.015, 0.035)
-        rr_ring(g["int_trim"], c + n * 0.006, right, up, n, sw + 0.05, sh + 0.05, 0.03, 0.014, 0.012)
-        glass_panel(g, screen_bm, sockets, "left" if side > 0 else "right", c, right, up, n, sw, sh, 0.02)
         hw, hh = (sw + 0.05) / 2, (sh + 0.05) / 2
         P = lambda u, v, c=c, right=right, up=up: c + right * u + up * v
         uo, ui = (pw / 2) * (-side), (pw / 2) * side
-        vt, vb = sh / 2 + spec["top_margin"], -(sh / 2 + spec["top_margin"] + below)
         u_lo, u_hi = sorted((uo, ui))
-        quads = [
-            [P(u_lo, vb), P(u_hi, vb), P(u_hi, -hh), P(u_lo, -hh)],      # under the screen (key row)
-            [P(u_lo, hh), P(u_hi, hh), P(u_hi, vt), P(u_lo, vt)],        # over it
-            [P(u_lo, -hh), P(-hw, -hh), P(-hw, hh), P(u_lo, hh)],        # left strip
-            [P(hw, -hh), P(u_hi, -hh), P(u_hi, hh), P(hw, hh)],          # right strip
-        ]
+        holo = spec.get("holo_mfd")
+        if holo:
+            # cockpit v2: a lower, closed fascia (no screen hole) with the holo projector on its top edge
+            half = holo.get("fascia_h", 0.2) / 2
+            vt, vb = half, -(half + holo.get("below", 0.02))
+            # (1 cm past the wrap's edges: flush to them the lowered fascia left hairline gaps at its seam, GEOTEST holes)
+            quads = [[P(u_lo - 0.01, vb - 0.01), P(u_hi + 0.01, vb - 0.01), P(u_hi + 0.01, vt + 0.01), P(u_lo - 0.01, vt + 0.01)]]
+            holo_projector(g, screen_bm, sockets, "left" if side > 0 else "right", P(0.0, vt), right, n, sw, sh, eye, holo)
+            module_h = 2 * half - 0.02
+        else:
+            # screen in its recess, a satin bezel and a thin cool light line round the glass
+            rr_ring(g["int_dark"], c, right, up, n, sw + 0.03, sh + 0.03, 0.018, 0.015, 0.035)
+            rr_ring(g["int_trim"], c + n * 0.006, right, up, n, sw + 0.05, sh + 0.05, 0.03, 0.014, 0.012)
+            glass_panel(g, screen_bm, sockets, "left" if side > 0 else "right", c, right, up, n, sw, sh, 0.02)
+            vt, vb = sh / 2 + spec["top_margin"], -(sh / 2 + spec["top_margin"] + below)
+            quads = [
+                [P(u_lo, vb), P(u_hi, vb), P(u_hi, -hh), P(u_lo, -hh)],      # under the screen (key row)
+                [P(u_lo, hh), P(u_hi, hh), P(u_hi, vt), P(u_lo, vt)],        # over it
+                [P(u_lo, -hh), P(-hw, -hh), P(-hw, hh), P(u_lo, hh)],        # left strip
+                [P(hw, -hh), P(u_hi, -hh), P(u_hi, hh), P(hw, hh)],          # right strip
+            ]
+            module_h = sh + 0.04
         _quad_faces(tmp, quads, eye)
-        cols.append((side, "pod_outer", P(uo, vb), P(uo, vt)))
+        # (holo: the outer edge keeps the old pod's top height - the wrap from the side console meets the canopy
+        # lining there; lowered with the fascia it left a gap along the sill, GEOTEST holes)
+        outer_top = P(uo, vt) + Vector((0.0, 0.0, holo_lift)) if holo else P(uo, vt)
+        cols.append((side, "pod_outer", P(uo, vb), outer_top))
+        if holo:
+            # and right inside it the low edge: a vertical step outside the picture, the shelf and its trim stay low
+            # over the pod (sloping from the raised edge they crossed the picture)
+            cols.append((side, "pod_outer_low", P(uo * 0.995, vb), P(uo * 0.995, vt)))
         cols.append((side, "pod_inner", P(ui, vb), P(ui, vt)))
         # the outer strip: a control module (status LEDs, a rotary selector, two backlit keys); the key row under
         # the screen
@@ -876,8 +925,11 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
                 [[("led_o", "ck_link"), ("led_w", "ck_trk"), ("led_blink", "ck_warn")], [("rotary", "ck_scan")], [("button", "ck_qt"), ("button", "ck_comms")],
                  [("rocker", "ck_esp"), ("rocker", "ck_ifcs")]])
         from mathutils.bvhtree import BVHTree
-        control_module(g, s0, right, up, n, pw / 2 - hw - 0.03, sh + 0.04, rows, tree=BVHTree.FromBMesh(tmp))
-        kc = c - up * (hh + below * 0.5) + n * 0.004
+        placed = control_module(g, s0, right, up, n, pw / 2 - hw - 0.03, module_h, rows, tree=BVHTree.FromBMesh(tmp))
+        if "ck_pwr" in placed:
+            # the PWR selector as a socket (interact mode clicks it; SpaceshipPawn::GetPowerControlLocation)
+            sockets["Control_pwr"] = placed["ck_pwr"] + n * 0.012
+        kc = (c - up * 0.02 if holo else c - up * (hh + below * 0.5)) + n * 0.004
         for k in range(7):
             p = kc + right * (-0.15 + k * 0.05)
             rr_slab(g["int_dark"], p + n * 0.002, right, up, n, 0.036, 0.03, 0.005, 0.004, 2)
@@ -889,11 +941,15 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
     wing = [tuple(w) for w in spec.get("wing", [(17.3, 1.13, 1.06), (17.62, 0.98, 1.22)])]   # (x, |y|, top z)
     seq = [column(x, y, zb, zt) for x, y, zt in wing]
     seq.append(L["pod_outer"])
+    if "pod_outer_low" in L:
+        seq.append(L["pod_outer_low"])
     pod_l = len(seq) - 1
     seq.append(L["pod_inner"])
     seq.append(column(spec["centre_x"], 0.0, zb, spec.get("centre_top_z", 1.3)))
     seq.append(R["pod_inner"])
     pod_r = len(seq) - 1
+    if "pod_outer_low" in R:
+        seq.append(R["pod_outer_low"])
     seq.append(R["pod_outer"])
     seq += [column(x, -y, zb, zt) for x, y, zt in reversed(wing)]
     quads = []

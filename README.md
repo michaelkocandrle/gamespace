@@ -640,8 +640,18 @@ The displays' content is drawn as light (author: "more holographic, not an onboa
 
 Glows are drawn along outlines only: a filled halo is keyed up by the screen material into a solid block, and so is a
 soft gradient crossing the key. The critic still read it as a styled physical screen after 3 rounds
-(`Docs/Reviews/2026-10-04_holo_mfd.md`); a hologram in a void needs the cockpit geometry (no plate or monitor frame,
-an emitter), see `Docs/Reviews/2026-10-04_cockpit_gap_analysis.md`.
+(`Docs/Reviews/2026-10-04_holo_mfd.md`), so the geometry followed (cockpit v2 CK-HP, recipe
+`interior.cockpit.holo_mfd`, `hs_cockpit.holo_projector`):
+
+- the MFD pods sit lower (`pod_z` 1.85) with a closed fascia and no screen hole;
+- an emitter bar (graphite housing, brushed cap, lens slot of light) sits on the pod's top edge;
+- the MFD picture stands over the emitter facing the eye, with no back plate or bezel, so the cockpit shows through;
+- `HoloSmoke` 0.22 dithers a faint smoke into the glass;
+- the pod's outer edge keeps the old height as a vertical step outside the picture, so the wrap still meets the
+  canopy lining;
+- the PWR selector is a socket now (`Control_pwr`, from `control_module`'s placed controls).
+
+Design: `ArtSource/Ships/Wayfarer/Design/Wayfarer_cockpit_v2.json`, sheet C-01.
 
 ## Ship art pipeline
 

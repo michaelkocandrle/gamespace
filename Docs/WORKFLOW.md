@@ -1290,6 +1290,13 @@ snímku.
 - fy) **UE test prošel všemi body, ale `Test.ps1` hlásil exit 1** (4. 10. 2026). `LevelEditorSubsystem.new_level("/Temp/x")`
   zaloguje `Error`, když level v `/Temp` už existuje, a commandlet pak vrátí 1. V testech `load_level` existující mapy.
   Herní subsystém v testu: `unreal.new_object(Třída, outer=unreal.new_object(unreal.GameInstance))`.
+- fz) **Hologram MFD pořád četl jako monitor** (4. 10. 2026). Displej byl skleněný panel v zapuštěném rámu s deskou za
+  sklem; materiál obrazovky klíčuje obsah podle jasu, takže všechno tmavé ukáže desku, a slabé plné výplně (záře,
+  pruhy, viněta) klíčování zesílí na plné bloky. Řešení: geometrie (pod bez otvoru, emitor, obraz nad ním bez desky,
+  `hs_cockpit.holo_projector`); záře kreslit jen podél obrysů. Snížený pod nechal škvíru u bočního obložení
+  (GEOTEST holes): vnější hrana podu zůstává ve staré výšce jako svislý schod (`pod_outer_low`).
+- ga) **`HeavyLock.ps1 run -Exec "bash …"` nenašel bash** (4. 10. 2026). PowerShell nemá Git Bash v PATH: v `-Exec`
+  plná cesta `& '<git>\bin\bash.exe' skript.sh` (`(Get-Command git).Source` vrátí `cmd\git.exe`, bash je v `bin\bash.exe`).
 
 
 ---

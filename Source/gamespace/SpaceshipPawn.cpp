@@ -354,6 +354,11 @@ void ASpaceshipPawn::UpdatePower(float DeltaSeconds)
 
 bool ASpaceshipPawn::GetPowerControlLocation(FVector& OutLocation) const
 {
+	// The cockpit generator's socket on the PWR selector (cockpit v2); older builds: from the left display.
+	if (GetHullSocketLocation(TEXT("Control_pwr"), OutLocation))
+	{
+		return true;
+	}
 	FVector Screen;
 	if (!GetHullSocketLocation(TEXT("Display_left"), Screen))
 	{

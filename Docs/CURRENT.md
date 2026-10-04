@@ -48,8 +48,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Čeká na rozhodnutí autora
 
-- **Kokpit v2** (4. 10.): list C-01 `Design/Drawings/Wayfarer_C01_cockpit_v2.png`, data `Wayfarer_cockpit_v2.json`, koncepty
-  `Concept/Cockpit_v2/` (C high-tech / D průmyslový), 4 otázky na listu; po schválení materiály, geometrie, stavba.
+- **Kokpit v2** (4. 10.): C-01 schválen výchozími volbami (D průmyslový, zakouřené hologramy, HOTAS, krémové obložení –
+  autor může změnit); hotové holoprojektory MFD (CK-HP-L/R); dál materiály, rám kanopy, konzole, HOTAS, střed (CK-HP-C).
 - Podpora života Wayfareru v2: posunutá k ose, z většiny pod lůžkem (list I-04, řez R1; po sloučení `import_kit.py`).
 - K tomu z 3. 10.: ~40 štítků ovladačů, světla kokpitu 3,9/m² (pravidlo 2–3), texty layoutu, dveře DR-TEC-CAB 78–90 mm.
 - Nábytek kajuty: posouzení ve hře (kritik po 3 kolech a ověření FAIL 7/6/6/7/7/8/8/7, levné body opravené).

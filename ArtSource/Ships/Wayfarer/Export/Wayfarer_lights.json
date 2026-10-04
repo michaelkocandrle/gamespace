@@ -608,9 +608,9 @@
    "intensity_cd": 1.5,
    "radius_m": 5.0,
    "location": [
-    18.100000381469727,
-    0.5600000023841858,
-    2.3070740699768066
+    18.0,
+    0.7200000286102295,
+    2.282336950302124
    ],
    "direction": [
     0,
@@ -621,9 +621,9 @@
    "source_radius_cm": 2.0,
    "specular": 0.25,
    "location_ue_cm": [
-    785.0,
-    -56.0,
-    110.7
+    775.0,
+    -72.0,
+    108.2
    ],
    "direction_ue": [
     0,
@@ -948,9 +948,9 @@
    "intensity_cd": 0.42,
    "radius_m": 1.6,
    "location": [
-    18.0845,
+    18.0852,
     -0.55,
-    1.7852
+    1.6155
    ],
    "direction": [
     0,
@@ -961,9 +961,9 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    783.4,
+    783.5,
     55.0,
-    58.5
+    41.5
    ],
    "direction_ue": [
     0,
@@ -982,9 +982,9 @@
    "intensity_cd": 0.42,
    "radius_m": 1.6,
    "location": [
-    18.0845,
+    18.0852,
     0.55,
-    1.7852
+    1.6155
    ],
    "direction": [
     0,
@@ -995,9 +995,9 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    783.4,
+    783.5,
     -55.0,
-    58.5
+    41.5
    ],
    "direction_ue": [
     0,
@@ -1247,16 +1247,16 @@
    "name": "fix_31",
    "type": "point",
    "color": [
-    0.45,
-    0.72,
-    1.0
+    1.0,
+    0.35,
+    0.08
    ],
-   "intensity_cd": 0.194,
+   "intensity_cd": 0.192,
    "radius_m": 1.6,
    "location": [
-    17.8914,
-    -0.3519,
-    2.1447
+    17.8346,
+    0.8756,
+    2.0643
    ],
    "direction": [
     0,
@@ -1267,9 +1267,9 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    764.1,
-    35.2,
-    94.5
+    758.5,
+    -87.6,
+    86.4
    ],
    "direction_ue": [
     0,
@@ -1281,16 +1281,16 @@
    "name": "fix_32",
    "type": "point",
    "color": [
-    0.45,
-    0.72,
-    1.0
+    1.0,
+    0.35,
+    0.08
    ],
-   "intensity_cd": 0.194,
+   "intensity_cd": 0.192,
    "radius_m": 1.6,
    "location": [
-    17.8914,
-    0.3519,
-    2.1447
+    17.8358,
+    -0.8755,
+    2.063
    ],
    "direction": [
     0,
@@ -1301,9 +1301,9 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    764.1,
-    -35.2,
-    94.5
+    758.6,
+    87.5,
+    86.3
    ],
    "direction_ue": [
     0,
@@ -1315,16 +1315,16 @@
    "name": "fix_33",
    "type": "point",
    "color": [
-    1.0,
-    0.35,
-    0.08
+    0.45,
+    0.72,
+    1.0
    ],
-   "intensity_cd": 0.193,
+   "intensity_cd": 0.186,
    "radius_m": 1.6,
    "location": [
-    17.8326,
-    -0.8755,
-    2.0687
+    18.0565,
+    0.4137,
+    2.0663
    ],
    "direction": [
     0,
@@ -1335,9 +1335,9 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    758.3,
-    87.5,
-    86.9
+    780.6,
+    -41.4,
+    86.6
    ],
    "direction_ue": [
     0,
@@ -1349,16 +1349,16 @@
    "name": "fix_34",
    "type": "point",
    "color": [
-    1.0,
-    0.35,
-    0.08
+    0.45,
+    0.72,
+    1.0
    ],
-   "intensity_cd": 0.193,
+   "intensity_cd": 0.186,
    "radius_m": 1.6,
    "location": [
-    17.833,
-    0.8753,
-    2.0679
+    18.1689,
+    -0.4557,
+    1.987
    ],
    "direction": [
     0,
@@ -1369,9 +1369,9 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    758.3,
-    -87.5,
-    86.8
+    791.9,
+    45.6,
+    78.7
    ],
    "direction_ue": [
     0,
@@ -1381,74 +1381,6 @@
   },
   {
    "name": "fix_35",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.154,
-   "radius_m": 1.6,
-   "location": [
-    17.8511,
-    -0.3369,
-    1.9947
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    760.1,
-    33.7,
-    79.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_36",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.154,
-   "radius_m": 1.6,
-   "location": [
-    17.8511,
-    0.3369,
-    1.9946
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    760.1,
-    -33.7,
-    79.5
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_37",
    "type": "point",
    "color": [
     1.0,
@@ -1482,7 +1414,7 @@
    ]
   },
   {
-   "name": "fix_38",
+   "name": "fix_36",
    "type": "point",
    "color": [
     1.0,

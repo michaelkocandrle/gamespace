@@ -137,6 +137,11 @@ void UCockpitDisplayComponent::BeginPlay()
 	{
 		Material->SetScalarParameterValue(TEXT("GlassThreshold"), HoloGlassThreshold);
 	}
+	// A faintly smoked projection (author 4. 10., cockpit v2: readable in the sun, the cockpit dimly seen through it).
+	if (HoloSmoke >= 0.f)
+	{
+		Material->SetScalarParameterValue(TEXT("GlassOpacity"), HoloSmoke);
+	}
 	// Brighter than a monitor: the projection blooms (the cyan tint keeps it under the white-type smear limit).
 	float Emissive = 0.f;
 	if (HoloEmissiveScale > 0.f && Material->GetScalarParameterValue(TEXT("EmissiveStrength"), Emissive))

@@ -247,7 +247,8 @@ def main(argv):
     ai.build_collision(ship, [o for k, o in out.items() if k not in ("Canopy", "Decals", "Interior", "Screens", "InteriorKit", "InteriorDecals", "Hologram")], regions)
     sockets = {}
     for name, loc in json.loads(bpy.context.scene.get("hs_display_sockets", "{}")).items():
-        cfg["sockets"]["Display_" + name] = {"location": loc}
+        # controls the code finds by socket keep their own name (Control_pwr), displays get Display_<name>
+        cfg["sockets"][name if name.startswith("Control_") else "Display_" + name] = {"location": loc}
     for name, s in cfg["sockets"].items():
         s = dict(s)
         if "location" in s:

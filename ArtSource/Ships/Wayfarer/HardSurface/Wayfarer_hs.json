@@ -2934,6 +2934,7 @@
    "pod_x": 18.02,
    "pod_y": 0.4,
    "pod_z": 2.103,
+   "holo_mfd": {"_comment": "cockpit v2 CK-HP (Design/Wayfarer_cockpit_v2.json, author 4. 10. 2026): a lower closed fascia, an emitter bar on its top edge and the MFD picture standing over it as light; pod_z overrides the pod centre in this mode (the picture top stays near the old screen top, under the eye)", "pod_z": 1.85, "fascia_h": 0.2, "below": 0.02, "image_gap": 0.025, "emitter": [0.36, 0.05, 0.045]},
    "screen_w": 0.32,
    "side_margin": 0.13,
    "top_margin": 0.018,
@@ -2957,7 +2958,7 @@
    "centre_top_z": 2.05,
    "hologram": {
     "_comment": "the ship hologram (step 6): over the left MFD, off the line of sight; at = x, y and a z above the pod's top (a ray down finds it)",
-    "at": [18.1, 0.56, 2.3],
+    "at": [18.0, 0.72, 2.3],
     "length_m": 0.2,
     "light_cd": 1.5
    },
