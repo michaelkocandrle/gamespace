@@ -234,7 +234,9 @@ void ASpacePlayerController::DebugShowMenu(int32 Page, int32 Tab, bool bScrollTo
 		Menu->ShowPage(ESpaceMenuPage(FMath::Clamp(Page, 0, 3)));
 		if (bScrollToEnd)
 		{
+			// The list scrolled to its end; on the KLÁVESY tab, the on-foot controls instead.
 			Menu->ScrollTabToEnd();
+			Menu->SetKeysMode(1);
 		}
 	}
 }

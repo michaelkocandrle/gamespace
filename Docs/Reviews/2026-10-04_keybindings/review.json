@@ -1,0 +1,15 @@
+{
+ "topic": "keybindings",
+ "date": "2026-10-04",
+ "goal": "Záložka KLÁVESY v nastavení podle SC 4.10 KEYBINDINGS (autorův záznam vlevo): obrázek klávesnice (české QWERTZ) a myši, obsazené klávesy orámované barvou kategorie s názvem akce, popisky tlačítek a kolečka myši, kombinace s Alt, barevná legenda, přepínač LET / PĚŠKY dole. Zatím jen přehled bez přemapování (SC tlačítko ADVANCED CONTROLS CUSTOMIZATION záměrně chybí). Styl menu je schválený (2026-10-04_menu_sc).",
+ "style": "Star Citizen 4.10 KEYBINDINGS, česky.",
+ "checklist": "cockpit",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-04_keybindings",
+ "notes": ["Hra má méně akcí než SC (žádné zbraně, těžba, záchrana), proto je obsazených kláves méně.",
+           "Checklist kokpitu: hodnoť jen čitelnost a soulad stylu."],
+ "pairs": [
+  {"title": "Klávesy – let", "distance": "mid", "light": "night", "ref": "ArtSource/Reference/Video/sc_own_01_start/frames/t00_01_40.jpg", "ref_label": "SC 4.10, KEYBINDINGS / FLIGHT", "ours": "shots:20261004_113407_menu_sc/06_settings_keys_flight.png", "ours_label": "ve hře, KLÁVESY / LET"},
+  {"title": "Klávesy – pěšky", "distance": "mid", "light": "night", "ref": "ArtSource/Reference/Video/sc_own_01_start/frames/t00_01_54.jpg", "ref_label": "SC 4.10, KEYBINDINGS / ON FOOT", "ours": "shots:20261004_113407_menu_sc/07_settings_keys_onfoot.png", "ours_label": "ve hře, KLÁVESY / PĚŠKY"}
+ ]
+}

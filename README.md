@@ -1142,7 +1142,13 @@ the build.
   variable font): SC's face is closest to Electrolize, which has no Czech letters. The play card's picture is
   `Content/UI/Menu/card_play.jpg` (a dusk shot of the Wayfarer), read from the file and staged with
   `DirectoriesToAlwaysStageAsUFS`. Pictures: `Tools/Shots.ps1 -Preset menu_sc -Editor -Width 2560 -Height 1440`
-  (`space.Menu <page> [tab]` shows a page over the game without pausing).
+  (`space.Menu <page> [tab] [1]` shows a page over the game without pausing; 1 = list scrolled to its end / on-foot keys).
+- **KLÁVESY tab (4. 10. 2026), SC's KEYBINDINGS:** the keyboard (Czech QWERTZ) with every bound key as a dark rounded box,
+  the key big at the top right and what it does at the bottom left, the keys of a special mode outlined in its colour
+  (camera, landing, navigation, interaction; the rest white, Alt orange with its actions on F1 / F2), the mouse with dots
+  and a list, a legend, and SC's framed "› LET / PĚŠKY" switch. Read only for now (no rebinding). The controls come from
+  one table, `FSpaceControls` (`SpaceControls.h/.cpp`); `test_menu_settings.py` checks it against `IMC_Spaceship` and
+  `IMC_Character` both ways, so a key added to an asset without the table (or the reverse) fails the test.
 
 **Cooking and path-loaded assets.** The cooker only follows references from the cooked maps.
 Everything C++ loads by path (input actions and contexts, sounds, dust material) was missing from

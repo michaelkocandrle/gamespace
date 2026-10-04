@@ -251,4 +251,34 @@ check("a version 4 file gets the game's sharpening back and keeps its quality",
       abs(v4.get_editor_property("sharpen") - 0.3) < 1e-6 and v4.get_graphics_quality_level() == 4 and v4.debug_get_settings_version() == 5,
       "sharpen %.2f, preset %d, version %d" % (v4.get_editor_property("sharpen"), v4.get_graphics_quality_level(), v4.debug_get_settings_version()))
 
+# --- KLÁVESY tab: the controls table against the mapping contexts ---------------------------------------------
+table = [line.split("|") for line in unreal.SpaceControlsLibrary.describe_controls()]
+entries = {(mode, key, action) for mode, key, alt, action, label in table if alt == "0"}
+for imc_name, modes in (("IMC_Spaceship", ("flight", "global")), ("IMC_Character", ("onfoot", "global"))):
+    imc = unreal.EditorAssetLibrary.load_asset("/Game/Input/" + imc_name)
+    missing = []
+    for m in imc.get_editor_property("default_key_mappings").get_editor_property("mappings"):
+        act = m.get_editor_property("action")
+        key = str(m.get_editor_property("key").get_editor_property("key_name"))
+        if key.startswith("Gamepad") or not act:
+            continue
+        name = act.get_name()
+        # the speed limiter and the zoom share the wheel: the zoom is the Alt one
+        if name == "IA_CameraZoom":
+            ok = any(r[1] == key and r[2] == "1" and r[3] == name for r in table)
+        else:
+            ok = any((mode, key, name) in entries for mode in modes)
+        if not ok:
+            missing.append("%s %s" % (key, name))
+    check("every key in %s is on the KLÁVESY page" % imc_name, not missing, ", ".join(missing))
+in_assets = set()
+for imc_name in ("IMC_Spaceship", "IMC_Character", "IMC_SpaceshipMouse"):
+    imc = unreal.EditorAssetLibrary.load_asset("/Game/Input/" + imc_name)
+    for m in imc.get_editor_property("default_key_mappings").get_editor_property("mappings"):
+        act = m.get_editor_property("action")
+        if act:
+            in_assets.add((str(m.get_editor_property("key").get_editor_property("key_name")), act.get_name()))
+stale = [r[1] + " " + r[3] for r in table if r[3] and (r[1], r[3]) not in in_assets]
+check("the KLÁVESY page shows no mapping the assets do not have", not stale, ", ".join(stale))
+
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

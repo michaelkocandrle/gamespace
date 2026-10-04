@@ -3,8 +3,8 @@
 Jediný zdroj **aktuálního** stavu pod `CLAUDE.md`, **nejvýš 80 řádků**; hotové do stavu, podrobnosti do recenzí a commitů.
 
 Stav k **3. 10. 2026**: Wayfarer postavený podle výkresů **revize G** (kritik po ověřovacím kole PASS 6,5); povrch trupu
-je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **Cíl výkonu: 1440p / 60 fps s TSR nebo DLSS**
-(RTX 5070 Ti, `CLAUDE.md`; staré 20 ms na RTX 2060 neplatí); nic se neměří ani neoptimalizuje do konce.
+je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **Cíl výkonu: 1440p / 60 fps s TSR**
+(AMD RX 9070, `CLAUDE.md`; staré 20 ms na RTX 2060 neplatí); nic se neměří ani neoptimalizuje do konce.
 
 ## Stav
 
@@ -16,7 +16,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
   kolizi trupu (UCX) místo kořenového boxu, `Obstructed` = trup by se dotkl terénu; `landing_slope`, README „On a slope“.
   HUD: rámeček stavu přistání nad páskou kurzu (TOUCHDOWN, LANDED, jantarově důvod odmítnutí), `landing_hud`.
 - **Menu a nastavení ve stylu SC 4.10** (4. 10., autorův záznam SC, kritik PASS 7,4 / 7,5): karta HRÁT, záložky, Oxanium;
-  obsah ~35 položek se skutečným systémem (výchozí stavy letu, VJoy, upscaling, kvalita po skupinách, FOV, gama, obraz).
+  obsah ~35 položek se skutečným systémem (výchozí stavy letu, VJoy, upscaling, kvalita po skupinách, FOV, gama, obraz);
+  KLÁVESY jako klávesnice a myš SC (jen přehled; tabulka `FSpaceControls` hlídaná testem proti assetům).
 - **Postava:** první osoba (V pěšky = třetí jen pro testy); sférická gravitace planety i umělá v lodi.
 - **Wayfarer** (Halcyon Freightworks, malá multirole, 1 pilot) – jediná létající loď:
   - exteriér v2.1 přesně podle výkresu (`hs_build_ship`; ploutve 1,3 m potvrzené autorem, výška lodi 4,9 m), mesh
@@ -43,8 +44,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Paralelní práce
 
-- Větev `wayfarer-dossier-interior` (682ed1f) sloučená do main 3. 10. (výkresy I-01–I-09, oprava dveří hygieny v kitu:
-  FBX v repozitáři, do UE se dostane `import_kit.py` při příští přestavbě). Druhá session teď nic nemá.
+- Větev `wayfarer-dossier-interior` sloučená 3. 10. (výkresy I-01–I-09). Druhá session teď nic nemá.
 
 ## Čeká na rozhodnutí autora
 
@@ -75,6 +75,6 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 1. **Wayfarer revize G** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený.
 2. **Přistání na svahu hotové** (3. 10.), čeká na vyzkoušení autorem; později odpružení nohou, mírnější klesání u země.
-3. **Podle SC z autorova záznamu** (`starcitizenreference/captures/SEZNAM_ZABERU.md`): menu i obsah nastavení hotové;
-   další klávesy, načítání, DLSS (plugin NVIDIA), ukazatel VRAM; pak mapa, palivo, SC-5, SC-6 (potvrdit s autorem).
+3. **Podle SC z autorova záznamu** (`starcitizenreference/captures/SEZNAM_ZABERU.md`): menu, nastavení i klávesy hotové;
+   další přemapování kláves, načítání, FSR (plugin AMD; karta RX 9070), ukazatel VRAM; pak mapa, palivo, SC-5, SC-6 (potvrdit s autorem).
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).

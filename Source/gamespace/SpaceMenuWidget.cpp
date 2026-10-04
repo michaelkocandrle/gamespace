@@ -9,6 +9,8 @@
 #include "Misc/Paths.h"
 #include "Rendering/DrawElements.h"
 #include "Rendering/SlateRenderer.h"
+#include "Fonts/FontMeasure.h"
+#include "SpaceControls.h"
 #include "SpacePlayerController.h"
 #include "SpaceUserSettings.h"
 #include "Styling/CoreStyle.h"
@@ -397,6 +399,286 @@ public:
 	}
 };
 
+/**
+ * SC's KEYBINDINGS page as a picture: the keyboard (Czech QWERTZ, the author's) filling the panel, every bound key a dark
+ * rounded box with a bright outline, the key big at the top right and what it does at the bottom left; the keys of a
+ * special mode (camera, landing, navigation, interaction) outlined in its colour as SC's; the mouse's buttons and wheel
+ * beside it, the Alt combinations and a legend of the colours in use. One widget, a 1800 x 640 design space scaled to fit.
+ */
+class SSpaceKeyboard : public SLeafWidget
+{
+public:
+	SLATE_BEGIN_ARGS(SSpaceKeyboard) {}
+		/** Which controls to show: flight (with the global keys) or on foot. */
+		SLATE_ATTRIBUTE(ESpaceControlMode, Mode)
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs)
+	{
+		Mode = InArgs._Mode;
+	}
+
+	virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D(DesignW, DesignH); }
+
+	virtual int32 OnPaint(const FPaintArgs&, const FGeometry& Geometry, const FSlateRect&, FSlateWindowElementList& Out,
+		int32 Layer, const FWidgetStyle& Style, bool) const override
+	{
+		using namespace SpaceMenuStyle;
+		const FVector2f Size = Geometry.GetLocalSize();
+		const float Scale = FMath::Min(Size.X / DesignW, Size.Y / DesignH);
+		const FVector2f Origin((Size.X - DesignW * Scale) * 0.5f, (Size.Y - DesignH * Scale) * 0.5f);
+		const ESpaceControlMode Shown = Mode.Get();
+
+		// What is bound to each key in this mode (the global keys show in flight and on foot alike).
+		TMap<FName, const FSpaceControl*> ByKey;
+		TArray<const FSpaceControl*> Mouse;
+		TArray<const FSpaceControl*> Combos;
+		TMap<FName, const FSpaceControl*> AltOnKey;
+		TSet<ESpaceControlCategory> Used;
+		// SC's modifier colour (its Alt key is outlined orange, the modified actions marked M1 / M2 in it).
+		const FLinearColor ModifierColor(1.f, 0.42f, 0.05f);
+		for (const FSpaceControl& Control : FSpaceControls::Get())
+		{
+			if (Control.Mode != Shown && Control.Mode != ESpaceControlMode::Global)
+			{
+				continue;
+			}
+			Used.Add(Control.Category);
+			if (Control.Key.ToString().Contains(TEXT("Mouse")))
+			{
+				Mouse.Add(&Control);
+			}
+			else if (Control.bAlt)
+			{
+				Combos.Add(&Control);
+				AltOnKey.Add(Control.Key, &Control);
+			}
+			else if (!ByKey.Contains(Control.Key))
+			{
+				ByKey.Add(Control.Key, &Control);
+			}
+		}
+		// SC outlines a bound key in white and only the keys of a special mode in that mode's colour (camera blue,
+		// landing yellow, ...): the same here for landing, camera, navigation and interaction.
+		auto KeyColor = [](ESpaceControlCategory Category)
+		{
+			return Category == ESpaceControlCategory::Landing || Category == ESpaceControlCategory::Camera
+				|| Category == ESpaceControlCategory::Navigation || Category == ESpaceControlCategory::Interaction
+				? FSpaceControls::CategoryColor(Category) : SpaceMenuStyle::OutlineHover;
+		};
+
+		auto P = [&](float X, float Y) { return Origin + FVector2f(X, Y) * Scale; };
+		// SC's key: a dark rounded rectangle with its outline.
+		auto Key = [&](float X, float Y, float W, float H, const FLinearColor& Line, float Thickness, const FLinearColor& Fill)
+		{
+			constexpr float R = 7.f;
+			TArray<FVector2f> Ring;
+			const FVector2f Corners[] = { { X + W - R, Y + R }, { X + W - R, Y + H - R }, { X + R, Y + H - R }, { X + R, Y + R } };
+			for (int32 C = 0; C < 4; ++C)
+			{
+				for (int32 S = 0; S <= 4; ++S)
+				{
+					const float A = PI * 0.5f * (C - 1) + PI * 0.5f * S / 4.f;
+					Ring.Add(P(Corners[C].X + FMath::Cos(A) * R, Corners[C].Y + FMath::Sin(A) * R));
+				}
+			}
+			if (Fill.A > 0.f)
+			{
+				Polygon(Out, Layer, Geometry, Ring, Fill);
+			}
+			const FVector2f First = Ring[0];
+			Ring.Add(First);
+			if (Thickness >= 2.f)
+			{
+				// A soft glow under a bound key's outline, as SC's keys light up.
+				FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), Ring, ESlateDrawEffect::None,
+					Line * FLinearColor(1.f, 1.f, 1.f, 0.22f), true, Thickness * 3.f);
+			}
+			FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), Ring, ESlateDrawEffect::None, Line, true, Thickness);
+		};
+		auto Measure = [&](const FString& Value, const FSlateFontInfo& Info)
+		{
+			return FSlateApplication::IsInitialized()
+				? FVector2f(FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(Value, Info)) : FVector2f::ZeroVector;
+		};
+		// Align: 0 left, 1 right.
+		auto Write = [&](const FString& Value, float X, float Y, float FontSize, bool bMedium, const FLinearColor& Color, float Align = 0.f)
+		{
+			const FSlateFontInfo Info = Font(bMedium, FontSize * Scale);
+			FVector2f At = P(X, Y);
+			At.X -= Measure(Value, Info).X * Align;
+			FSlateDrawElement::MakeText(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2f(1000.f, 100.f), FSlateLayoutTransform(At)), Value, Info,
+				ESlateDrawEffect::None, Color * Style.GetColorAndOpacityTint());
+		};
+
+		// --- Keyboard (Czech QWERTZ): rows of { label, key, width in units } ------------------------------------------
+		struct FKeyCap { const TCHAR* Label; const TCHAR* KeyName; float Width; };
+		static const TArray<TArray<FKeyCap>> Rows = {
+			{ { TEXT("Esc"), TEXT("Escape"), 1.f }, { nullptr, nullptr, 1.f }, { TEXT("F1"), TEXT("F1"), 1.f }, { TEXT("F2"), TEXT("F2"), 1.f },
+			  { TEXT("F3"), TEXT("F3"), 1.f }, { TEXT("F4"), TEXT("F4"), 1.f }, { nullptr, nullptr, 0.5f }, { TEXT("F5"), TEXT("F5"), 1.f },
+			  { TEXT("F6"), TEXT("F6"), 1.f }, { TEXT("F7"), TEXT("F7"), 1.f }, { TEXT("F8"), TEXT("F8"), 1.f }, { nullptr, nullptr, 0.5f },
+			  { TEXT("F9"), TEXT("F9"), 1.f }, { TEXT("F10"), TEXT("F10"), 1.f }, { TEXT("F11"), TEXT("F11"), 1.f }, { TEXT("F12"), TEXT("F12"), 1.f } },
+			{ { TEXT(";"), TEXT("Tilde"), 1.f }, { TEXT("+"), TEXT("One"), 1.f }, { TEXT("ě"), TEXT("Two"), 1.f }, { TEXT("š"), TEXT("Three"), 1.f },
+			  { TEXT("č"), TEXT("Four"), 1.f }, { TEXT("ř"), TEXT("Five"), 1.f }, { TEXT("ž"), TEXT("Six"), 1.f }, { TEXT("ý"), TEXT("Seven"), 1.f },
+			  { TEXT("á"), TEXT("Eight"), 1.f }, { TEXT("í"), TEXT("Nine"), 1.f }, { TEXT("é"), TEXT("Zero"), 1.f }, { TEXT("="), TEXT("Hyphen"), 1.f },
+			  { TEXT("´"), TEXT("Equals"), 1.f }, { TEXT("Back"), TEXT("BackSpace"), 2.f } },
+			{ { TEXT("Tab"), TEXT("Tab"), 1.5f }, { TEXT("Q"), TEXT("Q"), 1.f }, { TEXT("W"), TEXT("W"), 1.f }, { TEXT("E"), TEXT("E"), 1.f },
+			  { TEXT("R"), TEXT("R"), 1.f }, { TEXT("T"), TEXT("T"), 1.f }, { TEXT("Z"), TEXT("Z"), 1.f }, { TEXT("U"), TEXT("U"), 1.f },
+			  { TEXT("I"), TEXT("I"), 1.f }, { TEXT("O"), TEXT("O"), 1.f }, { TEXT("P"), TEXT("P"), 1.f }, { TEXT("ú"), TEXT("LeftBracket"), 1.f },
+			  { TEXT(")"), TEXT("RightBracket"), 1.f }, { TEXT("¨"), TEXT("Backslash"), 1.5f } },
+			{ { TEXT("Caps"), TEXT("CapsLock"), 1.75f }, { TEXT("A"), TEXT("A"), 1.f }, { TEXT("S"), TEXT("S"), 1.f }, { TEXT("D"), TEXT("D"), 1.f },
+			  { TEXT("F"), TEXT("F"), 1.f }, { TEXT("G"), TEXT("G"), 1.f }, { TEXT("H"), TEXT("H"), 1.f }, { TEXT("J"), TEXT("J"), 1.f },
+			  { TEXT("K"), TEXT("K"), 1.f }, { TEXT("L"), TEXT("L"), 1.f }, { TEXT("ů"), TEXT("Semicolon"), 1.f }, { TEXT("§"), TEXT("Apostrophe"), 1.f },
+			  { TEXT("Enter"), TEXT("Enter"), 2.25f } },
+			{ { TEXT("Shift"), TEXT("LeftShift"), 2.25f }, { TEXT("Y"), TEXT("Y"), 1.f }, { TEXT("X"), TEXT("X"), 1.f }, { TEXT("C"), TEXT("C"), 1.f },
+			  { TEXT("V"), TEXT("V"), 1.f }, { TEXT("B"), TEXT("B"), 1.f }, { TEXT("N"), TEXT("N"), 1.f }, { TEXT("M"), TEXT("M"), 1.f },
+			  { TEXT(","), TEXT("Comma"), 1.f }, { TEXT("."), TEXT("Period"), 1.f }, { TEXT("-"), TEXT("Slash"), 1.f }, { TEXT("Shift"), TEXT("RightShift"), 2.75f } },
+			{ { TEXT("Ctrl"), TEXT("LeftControl"), 1.25f }, { TEXT("Win"), TEXT("LeftCommand"), 1.25f }, { TEXT("Alt"), TEXT("LeftAlt"), 1.25f },
+			  { TEXT("Space"), TEXT("SpaceBar"), 6.25f }, { TEXT("AltGr"), TEXT("RightAlt"), 1.25f }, { TEXT("Win"), TEXT("RightCommand"), 1.25f },
+			  { TEXT("Menu"), TEXT("Apps"), 1.25f }, { TEXT("Ctrl"), TEXT("RightControl"), 1.25f } } };
+
+		constexpr float Unit = 96.f, Gap = 8.f, Left = 6.f, Top = 6.f, FRowH = 76.f;
+		const FLinearColor KeyFill(0.002f, 0.003f, 0.003f, 1.f);
+		float Y = Top;
+		for (int32 Row = 0; Row < Rows.Num(); ++Row)
+		{
+			const float H = (Row == 0 ? FRowH : Unit) - Gap;
+			float X = Left;
+			for (const FKeyCap& Cap : Rows[Row])
+			{
+				const float W = Cap.Width * Unit - Gap;
+				if (Cap.Label)
+				{
+					const FSpaceControl* const* Found = ByKey.Find(FName(Cap.KeyName));
+					const FSpaceControl* Bound = Found ? *Found : nullptr;
+					if (Bound)
+					{
+						const FLinearColor Edge = KeyColor(Bound->Category);
+						Key(X, Y, W, H, Edge, 2.4f, KeyFill);
+						// The key big at the top right, what it does at the bottom left (SC); an Alt action in the modifier's colour.
+						Write(Cap.Label, X + W - 9.f, Y + 4.f, 17.f, true, FLinearColor::White, 1.f);
+						TArray<FString> Lines;
+						Bound->Label.ToString().ParseIntoArray(Lines, TEXT("\n"));
+						if (Row == 0)
+						{
+							// The function row is lower: one line under the key's name.
+							Lines = { FString::Join(Lines, TEXT(" ")) };
+						}
+						const FSpaceControl* const* WithAlt = AltOnKey.Find(Bound->Key);
+						const int32 Count = FMath::Min(Lines.Num(), WithAlt ? 2 : 3);
+						const int32 Total = Count + (WithAlt ? 1 : 0);
+						for (int32 Line = 0; Line < Count; ++Line)
+						{
+							Write(Lines[Line], X + 9.f, Y + H - 8.f - (Total - Line) * 17.f, 12.f, false, FLinearColor::White, 0.f);
+						}
+						if (WithAlt)
+						{
+							Write((*WithAlt)->Label.ToString().Replace(TEXT("\n"), TEXT(" ")), X + 9.f, Y + H - 8.f - 17.f, 12.f, false, ModifierColor, 0.f);
+						}
+					}
+					else if (FName(Cap.KeyName) == TEXT("LeftAlt") && AltOnKey.Num() > 0)
+					{
+						// The modifier, outlined in its colour (SC's orange Alt).
+						Key(X, Y, W, H, ModifierColor, 2.4f, KeyFill);
+						Write(Cap.Label, X + W - 9.f, Y + 4.f, 17.f, true, FLinearColor::White, 1.f);
+						Write(TEXT("Modifikátor"), X + 9.f, Y + H - 8.f - 17.f, 12.f, false, ModifierColor, 0.f);
+					}
+					else
+					{
+						Key(X, Y, W, H, FLinearColor(1.f, 1.f, 1.f, 0.14f), 1.f, FLinearColor::Transparent);
+						Write(Cap.Label, X + W - 9.f, Y + 4.f, 14.f, true, FLinearColor(Text.R, Text.G, Text.B, 0.35f), 1.f);
+					}
+				}
+				X += Cap.Width * Unit;
+			}
+			Y += (Row == 0 ? FRowH + 12.f : Unit);
+		}
+
+		// --- Mouse and its controls ---------------------------------------------------------------------------------------
+		const float MX = 1466.f, MY = 10.f, MW = 96.f, MH = 160.f;
+		{
+			TArray<FVector2f> Shell;
+			for (int32 I = 0; I <= 32; ++I)
+			{
+				const float A = PI * I / 32.f;
+				Shell.Add(P(MX + MW * 0.5f - FMath::Cos(A) * MW * 0.5f, MY + 52.f - FMath::Sin(A) * 52.f));
+			}
+			for (int32 I = 0; I <= 32; ++I)
+			{
+				const float A = PI * I / 32.f;
+				Shell.Add(P(MX + MW * 0.5f + FMath::Cos(A) * MW * 0.5f, MY + MH - 52.f + FMath::Sin(A) * 52.f));
+			}
+			const FVector2f First = Shell[0];
+			Shell.Add(First);
+			FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), Shell, ESlateDrawEffect::None, OutlineHover, true, 2.f);
+			FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), TArray<FVector2f>{ P(MX + MW * 0.5f, MY), P(MX + MW * 0.5f, MY + 78.f) },
+				ESlateDrawEffect::None, OutlineHover, true, 1.6f);
+			FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), TArray<FVector2f>{ P(MX, MY + 78.f), P(MX + MW, MY + 78.f) },
+				ESlateDrawEffect::None, OutlineHover, true, 1.6f);
+			Key(MX + MW * 0.5f - 7.f, MY + 18.f, 14.f, 36.f, OutlineHover, 1.6f, FLinearColor(0.012f, 0.016f, 0.016f, 1.f));
+		}
+		auto Anchor = [&](const FSpaceControl& Control) -> FVector2f
+		{
+			const FString Name = Control.Key.ToString();
+			return Name == TEXT("LeftMouseButton") ? FVector2f(MX + 24.f, MY + 42.f)
+				: Name == TEXT("RightMouseButton") ? FVector2f(MX + MW - 24.f, MY + 42.f)
+				: Name == TEXT("MiddleMouseButton") ? FVector2f(MX + MW * 0.5f, MY + 9.f)
+				: Name == TEXT("MouseWheelAxis") ? FVector2f(MX + MW * 0.5f, Control.bAlt ? MY + 66.f : MY + 36.f)
+				: FVector2f(MX + MW * 0.5f, MY + MH - 26.f);
+		};
+		auto MouseName = [](const FSpaceControl& Control) -> FString
+		{
+			const FString Name = Control.Key.ToString();
+			const FString Base = Name == TEXT("LeftMouseButton") ? TEXT("Levé tlačítko") : Name == TEXT("RightMouseButton") ? TEXT("Pravé tlačítko")
+				: Name == TEXT("MiddleMouseButton") ? TEXT("Prostřední tlačítko") : Name == TEXT("MouseWheelAxis") ? TEXT("Kolečko") : TEXT("Pohyb myši");
+			return Control.bAlt ? TEXT("Alt + ") + Base.ToLower() : Base;
+		};
+		auto Dot = [&](const FVector2f& At, const FLinearColor& Color)
+		{
+			Polygon(Out, Layer + 2, Geometry, { P(At.X - 7.f, At.Y), P(At.X, At.Y - 7.f), P(At.X + 7.f, At.Y), P(At.X, At.Y + 7.f) }, Color);
+		};
+		float CallY = 4.f;
+		for (const FSpaceControl* Control : Mouse)
+		{
+			const FLinearColor Color = KeyColor(Control->Category);
+			Dot(Anchor(*Control), Color);
+			Dot(FVector2f(1474.f, MY + MH + 30.f + CallY + 11.f), Color);
+			Write(MouseName(*Control), 1488.f, MY + MH + 30.f + CallY, 12.f, true, Color);
+			Write(Control->Label.ToString().Replace(TEXT("\n"), TEXT(" ")), 1488.f, MY + MH + 30.f + CallY + 19.f, 12.f, false, Text);
+			CallY += 48.f;
+		}
+
+		// --- Legend: only the colours this page uses ---------------------------------------------------------------------
+		float LX = 6.f;
+		const float LY = DesignH - 34.f;
+		auto Legend = [&](const FLinearColor& Color, const FString& Name)
+		{
+			Key(LX, LY + 3.f, 20.f, 20.f, Color, 2.4f, FLinearColor(0.002f, 0.003f, 0.003f, 1.f));
+			Write(Name, LX + 30.f, LY + 2.f, 12.5f, false, Text);
+			LX += 60.f + Measure(Name, Font(false, 12.5f)).X;
+		};
+		Legend(OutlineHover, LOCTEXT("LegendGeneral", "Ostatní akce").ToString());
+		for (ESpaceControlCategory Which : { ESpaceControlCategory::Camera, ESpaceControlCategory::Landing, ESpaceControlCategory::Navigation,
+			ESpaceControlCategory::Interaction })
+		{
+			if (Used.Contains(Which))
+			{
+				Legend(FSpaceControls::CategoryColor(Which), FSpaceControls::CategoryName(Which).ToString());
+			}
+		}
+		if (AltOnKey.Num() > 0)
+		{
+			Legend(ModifierColor, LOCTEXT("LegendModifier", "S klávesou Alt").ToString());
+		}
+		return Layer + 2;
+	}
+
+private:
+	static constexpr float DesignW = 1800.f;
+	static constexpr float DesignH = 660.f;
+	TAttribute<ESpaceControlMode> Mode;
+};
+
 // -------------------------------------------------------------------------------------------
 
 void SSpaceMenu::Construct(const FArguments& InArgs)
@@ -715,7 +997,7 @@ TSharedRef<SWidget> SSpaceMenu::BuildSettingsPage()
 	using namespace SpaceMenuStyle;
 	TSharedRef<SHorizontalBox> Tabs = SNew(SHorizontalBox);
 	const FText TabNames[] = { LOCTEXT("TabGame", "HRA"), LOCTEXT("TabGraphics", "GRAFIKA"), LOCTEXT("TabAudio", "ZVUK"),
-		LOCTEXT("TabControls", "OVLÁDÁNÍ") };
+		LOCTEXT("TabControls", "OVLÁDÁNÍ"), LOCTEXT("TabKeys", "KLÁVESY") };
 	for (int32 Index = 0; Index < int32(ESpaceSettingsTab::Count); ++Index)
 	{
 		Tabs->AddSlot().FillWidth(1.f).Padding(FMargin(Index == 0 ? 0.f : 10.f, 0.f, Index + 1 == int32(ESpaceSettingsTab::Count) ? 0.f : 10.f, 0.f))
@@ -727,6 +1009,18 @@ TSharedRef<SWidget> SSpaceMenu::BuildSettingsPage()
 	SAssignNew(TabSwitcher, SWidgetSwitcher);
 	for (int32 Index = 0; Index < int32(ESpaceSettingsTab::Count); ++Index)
 	{
+		if (ESpaceSettingsTab(Index) == ESpaceSettingsTab::Keys)
+		{
+			TabSwitcher->AddSlot()
+			[
+				SNew(SBox).Padding(FMargin(16.f, 12.f))
+				[
+					SNew(SSpaceKeyboard).Mode_Lambda([this]() { return KeysMode == 0 ? ESpaceControlMode::Flight : ESpaceControlMode::OnFoot; })
+				]
+			];
+			TabScrolls.Add(nullptr);
+			continue;
+		}
 		TSharedPtr<SScrollBox> Scroll;
 		TabSwitcher->AddSlot()
 		[
@@ -767,7 +1061,35 @@ TSharedRef<SWidget> SSpaceMenu::BuildSettingsPage()
 				+ SHorizontalBox::Slot().AutoWidth()[ MakeButton(LOCTEXT("Back", "Zpět"), [this]() { CloseSettings(); }, 132.f, false) ]
 				+ SHorizontalBox::Slot().AutoWidth().Padding(FMargin(20.f, 0.f, 0.f, 0.f))
 				[
-					MakeButton(LOCTEXT("Reset", "Výchozí"), [this]() { ResetTab(); }, 292.f, false)
+					SNew(SBox).Visibility_Lambda([this]() { return CurrentTab == ESpaceSettingsTab::Keys ? EVisibility::Collapsed : EVisibility::Visible; })
+					[
+						MakeButton(LOCTEXT("Reset", "Výchozí"), [this]() { ResetTab(); }, 292.f, false)
+					]
+				]
+				+ SHorizontalBox::Slot().FillWidth(1.f)[ SNew(SSpacer) ]
+				// SC's mode selector under the keyboard: a framed "› FLIGHT" button; a click switches to the other mode.
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+				[
+					SNew(SBox)
+					.Visibility_Lambda([this]() { return CurrentTab == ESpaceSettingsTab::Keys ? EVisibility::Visible : EVisibility::Collapsed; })
+					.WidthOverride(360.f).HeightOverride(51.f)
+					[
+						SNew(SButton).ButtonStyle(&FlatButton())
+						.OnHovered_Lambda([this]() { Hovered(); })
+						.OnClicked_Lambda([this]() { KeysMode = 1 - KeysMode; Clicked(); return FReply::Handled(); })
+						[
+							SNew(SSpaceBox).Outline(Outline).HoverOutline(OutlineHover).HoverFill(TabHover).Corner(13.f).Padding(FMargin(16.f, 0.f))
+							[
+								SNew(SHorizontalBox)
+								+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ SNew(SSpaceChevron).Right(true).Color(Text) ]
+								+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(FMargin(14.f, 0.f, 0.f, 0.f))
+								[
+									SNew(STextBlock).Font(Font(false, 13.f, 20)).ColorAndOpacity(Text)
+									.Text_Lambda([this]() { return KeysMode == 0 ? LOCTEXT("KeysFlight", "LET") : LOCTEXT("KeysOnFoot", "PĚŠKY"); })
+								]
+							]
+						]
+					]
 				]
 			]
 		];

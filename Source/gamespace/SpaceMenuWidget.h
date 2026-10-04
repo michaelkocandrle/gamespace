@@ -26,6 +26,8 @@ enum class ESpaceSettingsTab : uint8
 	Graphics,
 	Audio,
 	Controls,
+	/** SC's KEYBINDINGS: the keyboard and the mouse with every bound key. */
+	Keys,
 	Count
 };
 
@@ -58,6 +60,8 @@ public:
 	void ShowTab(ESpaceSettingsTab Tab);
 	/** Screenshots: the current tab's list scrolled to its end. */
 	void ScrollTabToEnd();
+	/** Screenshots: the KLÁVESY tab's flight (0) or on-foot (1) controls. */
+	void SetKeysMode(int32 InMode) { KeysMode = FMath::Clamp(InMode, 0, 1); }
 
 	virtual bool SupportsKeyboardFocus() const override { return true; }
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
@@ -146,6 +150,8 @@ private:
 	TSharedPtr<SWidgetSwitcher> Switcher;
 	TSharedPtr<SWidgetSwitcher> TabSwitcher;
 	TArray<TSharedPtr<class SScrollBox>> TabScrolls;
+	/** The KLÁVESY tab shows flight (0) or on-foot (1) controls. */
+	int32 KeysMode = 0;
 	FDraft Draft;
 	TArray<FIntPoint> Resolutions;
 
