@@ -88,28 +88,30 @@ namespace SpaceInteractionLocal
 			return;
 		}
 		const TWeakObjectPtr<ASpaceshipPawn> Weak(Ship);
-		const FText Labels[] = { LOCTEXT("MfdLeft", "LEVÉ MFD – DALŠÍ STRÁNKA"), LOCTEXT("MfdRight", "PRAVÉ MFD – DALŠÍ STRÁNKA") };
 		for (int32 Display = 0; Display < 2; ++Display)
 		{
-			// On the page tab at the bottom (SC pages with the arrows there): the page itself has its own controls.
-			FVector At;
-			if (!Ship->GetDisplayPoint(Display, FVector2D(0.5, 0.94), At))
+			// The page tab's arrows at the bottom of the page (SC): < the page before, > the next one. Each is its own
+			// small control the cursor has to be on (author 5. 10. 2026: "click right on the arrow, not the middle").
+			for (const int32 Step : { -1, 1 })
 			{
-				continue;
-			}
-			FSpaceHotspot Spot;
-			Spot.Label = Labels[Display];
-			Spot.SecondaryLabel = LOCTEXT("MfdBack", "PRAVÉ TLAČÍTKO: ZPĚT");
-			Spot.WorldLocation = At;
-			Spot.SizeCm = 18.f;
-			Spot.Use = [Weak, Display](bool bPrimary)
-			{
-				if (ASpaceshipPawn* Live = Weak.Get())
+				FVector At;
+				if (!Ship->GetDisplayPoint(Display, FVector2D(Step < 0 ? 0.035 : 0.965, 0.94), At))
 				{
-					Live->CycleMfdPage(Display, bPrimary ? 1 : -1);
+					continue;
 				}
-			};
-			Out.Add(MoveTemp(Spot));
+				FSpaceHotspot Spot;
+				Spot.Label = Step < 0 ? LOCTEXT("MfdPrev", "PŘEDCHOZÍ STRÁNKA") : LOCTEXT("MfdNext", "DALŠÍ STRÁNKA");
+				Spot.WorldLocation = At;
+				Spot.SizeCm = 3.5f;
+				Spot.Use = [Weak, Display, Step](bool bPrimary)
+				{
+					if (ASpaceshipPawn* Live = Weak.Get())
+					{
+						Live->CycleMfdPage(Display, bPrimary ? Step : -Step);
+					}
+				};
+				Out.Add(MoveTemp(Spot));
+			}
 		}
 	}
 }

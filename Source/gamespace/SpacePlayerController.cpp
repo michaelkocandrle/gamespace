@@ -353,7 +353,9 @@ void ASpacePlayerController::TickInteraction()
 	View.bInteractMode = bInteractMode;
 	View.Hovered = INDEX_NONE;
 	const IConsoleVariable* Hud = IConsoleManager::Get().FindConsoleVariable(TEXT("space.Hud"));
-	View.bVisible = Current && !IsMenuOpen() && (!Hud || Hud->GetInt() > 0);
+	// H hides the HUD, not the interaction (author 5. 10. 2026: the cursor vanished with the HUD)
+	View.bVisible = Current && !IsMenuOpen();
+	View.bHudShown = !Hud || Hud->GetInt() > 0;
 	if (!Current)
 	{
 		View.Hotspots.Reset();
@@ -396,7 +398,9 @@ void ASpacePlayerController::TickInteraction()
 		if (bMouse && View.HotspotOnScreen[Index])
 		{
 			const double Distance = FVector2D::Distance(View.HotspotScreen[Index], FVector2D(MouseX, MouseY));
-			if (Distance < Best)
+			// the cursor has to be on the control (its own size on screen, at least a finger's width), not just near
+			const double Reach = FMath::Max(14.0, View.HotspotPixelSize[Index] * 0.5 + 6.0);
+			if (Distance < Best && Distance < Reach)
 			{
 				Best = Distance;
 				View.Hovered = Index;

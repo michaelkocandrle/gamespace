@@ -1127,7 +1127,6 @@ TSharedRef<SWidget> SSpaceMenu::BuildTabRows(ESpaceSettingsTab Tab)
 			[](float V) { return FText::FromString(FString::Printf(TEXT("%.2f"), V)); }));
 		Add(MakeToggleRow(LOCTEXT("ShowFps", "Rozhraní – zobrazit FPS"), &Draft.bShowFps));
 		Add(MakeToggleRow(LOCTEXT("ShowHints", "Rozhraní – tipy"), &Draft.bShowHints));
-		Add(MakeToggleRow(LOCTEXT("ShowInteractLabels", "Rozhraní – popisky interakce"), &Draft.bShowInteractLabels));
 		break;
 
 	case ESpaceSettingsTab::Graphics:

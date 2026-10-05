@@ -14,10 +14,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
   SC-3 značka dráhy letu, SC-4 quantum drive (cíl nosem, spool, kalibrace, tunel, příjezd). Ovládání: `README.md`.
   **Přistání na svahu** (3. 10.): loď stojí na třech patkách (rovina pod patkami, `TripodRest`), pohyb sweepuje vlastní
   kolizi trupu (UCX) místo kořenového boxu, `Obstructed` = trup by se dotkl terénu; `landing_slope`, README „On a slope“.
-  HUD: rámeček stavu přistání nad páskou kurzu (TOUCHDOWN, LANDED, jantarově důvod odmítnutí), `landing_hud`.
-- **Menu a nastavení ve stylu SC 4.10** (4. 10., autorův záznam SC, kritik PASS 7,4 / 7,5): karta HRÁT, záložky, Oxanium;
-  obsah ~35 položek se skutečným systémem (výchozí stavy letu, VJoy, upscaling, kvalita po skupinách, FOV, gama, obraz);
-  KLÁVESY jako klávesnice a myš SC (jen přehled; tabulka `FSpaceControls` hlídaná testem proti assetům).
+- **Menu a nastavení ve stylu SC 4.10** (4. 10., kritik PASS 7,4 / 7,5): karta HRÁT, záložky, ~35 položek, KLÁVESY.
 - **Interakce podle SC** (4. 10., krok 1 z autorova záznamu, kritik PASS 6,5): ťuknout F = výzva u předmětu, podržet F =
   režim interakce (kurzor, MFD klikací), seznam kláves vpravo dole, hlášení a tipy (`README` „Interaction“).
 - **Napájení lodi** (4. 10., kroky 2a/2b, kritik PASS 6,9): U nebo knoflík PWR, vypnuto = bez tahu a tmavý kokpit, náběh
@@ -48,8 +45,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Čeká na rozhodnutí autora
 
-- **Autor 5. 10. – věrná kopie SC podle referencí** (pak vlastní styl): režim interakce jako SC hotový (rozhlížení, ruka,
-  rámeček prvku); animace: sednutí/vstávání, výjezd holoprojekce a posuvné dveře (F, samy se zavřou) hotové; písmo MFD Oxanium; zbývá rampa.
+- **Autor 5. 10. – věrná kopie SC podle referencí** (pak vlastní styl); pořadí v Dalších krocích, bod 0.
 - **Kokpit v2** (4. 10.): C-01 schválen výchozími volbami (D průmyslový, zakouřené hologramy, HOTAS, krémové obložení –
   autor může změnit); hotové holoprojektory MFD (CK-HP-L/R) a vnitřní rám kanopy (CK-CF); dál HOTAS, konzole a ovladače, materiály, střed.
 - Podpora života Wayfareru v2: posunutá k ose, z většiny pod lůžkem (list I-04, řez R1; po sloučení `import_kit.py`).
@@ -66,14 +62,18 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
   madel; lišty stropu po segmentech. Rozvody S na zadním konci (x 3–4) dělají ohyb přes pole bez desky.
 - **Determinismus stavby na později** (WORKFLOW 9.6 ff): šum ±40 trojúhelníků, 3 FBX, import ukládá ~150 assetů;
   náhodné decaly už na pořadí stavby nezávisí (9.6 fl, test v `test_kit_decals.py`).
-- Hřebenový terén vypnutý (kamera po přistání pod zemí); kameny bez kolize; zvuky procedurální, jas oblohy odhad. Quantum tunel méně „mléčný“, TSR
-  čáry podél jisker; displeje bez mipmap (pod ~1600 px písmo zrní), duchy čísel.
+- Hřebenový terén vypnutý; kameny bez kolize; zvuky procedurální; quantum tunel, TSR jiskry, displeje bez mipmap, duchy čísel.
 - Neověřeno autorem: quantum skok, HUD SC-1c mimo 1080p, chůze Steadfastem; Shipping nezkoušen; PIE Escape končí hru.
 
 ## Další kroky
 
-1. **Wayfarer revize G** (`Docs/Reviews/2026-10-03_wayfarer_sides_revG.md`, PASS 6,5): povrch trupu zmrazený.
-2. **Přistání na svahu hotové** (3. 10.), čeká na vyzkoušení autorem; později odpružení nohou, mírnější klesání u země.
+0. **Autor 5. 10. (screenshoty), v tomto pořadí:**
+   a) holo MFD v3: širší, jiné rozložení textu, jiný font a styl, výraznější náběh a zajíždění, zvuky holotechnologie;
+   b) dveře: holografický dotykový panel vedle dveří (otevírá se přes režim interakce), detail dveří;
+   c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
+      strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); pak rampa.
+   Hotové 5. 10.: klik přímo na šipky MFD, bez popisků, nový kurzor, interakce nezávislá na H; posuvné dveře.
+1. Povrch trupu zmrazený (revize G, PASS 6,5); přistání na svahu čeká na vyzkoušení autorem (pak odpružení nohou).
 3. **Podle SC z autorova záznamu** (`OwnCapture_Gameplay_Notes.md`): menu, nastavení, klávesy, interakce hotové; další
    pak visor pěšky, systémy lodi, stanice. **Přednost má vzhled kokpitu** (`2026-10-04_cockpit_gap_analysis.md`; holo
    obsah MFD hotový, kritik FAIL 5,9 – chce geometrii projektorů): čeká na schválení C-01, pak stavba.

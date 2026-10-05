@@ -251,18 +251,19 @@ int32 SSpaceInteractionOverlay::OnPaint(const FPaintArgs&, const FGeometry& Geom
 	// --- Interact mode: the hotspots, the hovered one labelled -----------------------------------------------------------
 	if (View.bInteractMode)
 	{
-		// SC's interact cursor: a small white pointing hand, its fingertip on the target (the screen's centre - the
-		// player keeps looking round)
+		// The interact cursor (author 5. 10. 2026: the boxy hand looked cheap): four thin ticks round the point the
+		// player looks at, no dot. Over a control they close in and turn the UI's cyan.
 		{
 			const FVector2f C = ToLocal(View.CursorScreen);
-			auto Hand = [&](float Grow, const FLinearColor& Color, int32 AtLayer)
+			const bool bOver = View.Hotspots.IsValidIndex(View.Hovered);
+			const float Gap = bOver ? 4.f : 7.f, Len = bOver ? 7.f : 5.f;
+			const FLinearColor Tick = bOver ? Srgb(140, 230, 255) : Srgb(235, 245, 250, 0.9f);
+			for (const FVector2f& Dir : { FVector2f(1.f, 0.f), FVector2f(-1.f, 0.f), FVector2f(0.f, 1.f), FVector2f(0.f, -1.f) })
 			{
-				Fill(Out, AtLayer, Geometry, BoxPoints(C.X - 2.f - Grow, C.Y - Grow, 4.f + 2.f * Grow, 11.f + 2.f * Grow), Color);          // finger
-				Fill(Out, AtLayer, Geometry, BoxPoints(C.X - 2.f - Grow, C.Y + 7.f - Grow, 11.f + 2.f * Grow, 10.f + 2.f * Grow), Color);   // palm
-				Fill(Out, AtLayer, Geometry, BoxPoints(C.X - 6.f - Grow, C.Y + 9.f - Grow, 4.f + 2.f * Grow, 5.f + 2.f * Grow), Color);    // thumb
-			};
-			Hand(1.2f, Srgb(10, 20, 26, 0.7f), Layer + 4);
-			Hand(0.f, Srgb(245, 250, 252), Layer + 5);
+				const TArray<FVector2f> Line = { C + Dir * Gap, C + Dir * (Gap + Len) };
+				Lines(Line, Srgb(5, 12, 16, 0.55f), 3.4f, Layer + 4);
+				Glow(Line, Tick, 1.4f, Layer + 5, bOver ? 1.f : 0.5f);
+			}
 		}
 		for (int32 Index = 0; Index < View.Hotspots.Num(); ++Index)
 		{
@@ -284,27 +285,14 @@ int32 SSpaceInteractionOverlay::OnPaint(const FPaintArgs&, const FGeometry& Geom
 					const FVector2f Corner = At + Sign * HalfBox;
 					Glow({ Corner - FVector2f(Sign.X * Arm, 0.f), Corner, Corner - FVector2f(0.f, Sign.Y * Arm) }, Srgb(210, 245, 255), 1.6f, Layer + 1, 0.9f);
 				}
-				const USpaceUserSettings* Settings = USpaceUserSettings::Get();
-				if (Settings && !Settings->bShowInteractLabels)
-				{
-					continue;
-				}
-				FSlateFontInfo Info = Font(true, 16.f);
-				Info.LetterSpacing = 140;
-				const FString Label = View.Hotspots[Index].Label.ToString();
-				const FVector2f LabelAt(At.X + HalfBox + 10.f, At.Y - HalfBox - 4.f - 18.f);
-				for (const FVector2f& Offset : { FVector2f(-1.5f, 0.f), FVector2f(1.5f, 0.f), FVector2f(0.f, -1.5f), FVector2f(0.f, 1.5f) })
-				{
-					WriteItalic(Label, LabelAt + Offset, Info, Cyan * FLinearColor(1, 1, 1, 0.25f), Layer + 2);
-				}
-				WriteItalic(Label, LabelAt, Info, Title, Layer + 3);
+				// no name beside it (author 5. 10. 2026: the labels made no sense there)
 			}
 			// (the others: nothing - SC marks only the control under the cursor)
 		}
 	}
 
 	// --- The context key list, bottom right ------------------------------------------------------------------------------
-	if (View.Keys.Num() > 0)
+	if (View.Keys.Num() > 0 && View.bHudShown)
 	{
 		const FSlateFontInfo Info = Font(true, 13.f);
 		const float Right = Size.X - 52.f, LineH = 34.f, Cap = 27.f, CapFont = 12.f;

@@ -11,6 +11,8 @@ class ASpacePlayerController;
 /** What the overlay draws this frame, gathered by the player controller (screen positions in viewport pixels). */
 struct FSpaceInteractionView
 {
+	/** The HUD is on (H): the key list goes with it, the interaction itself stays. */
+	bool bHudShown = true;
 	bool bVisible = false;
 	bool bInteractMode = false;
 	FSpaceInteractTarget Target;

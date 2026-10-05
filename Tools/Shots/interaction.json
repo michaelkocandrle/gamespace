@@ -1,15 +1,107 @@
 {
-  "_comment": "SC-style interaction (step 1, 4. 10. 2026): the context key list at the bottom right in the seat, interact mode (hold F) with a hovered MFD and the seat, the prompt by the seat on foot (SEDNOUT [F]), a toast and a hint card. space.InteractMode 1 <n> shows hotspot n hovered (seated: 0 left MFD, 1 right MFD; on foot: 0 seat, then the MFDs); space.Notify pushes a toast or a card (the runner suppresses the automatic ones). Run: .\\Tools\\Shots.ps1 -Preset interaction -Editor -Width 2560 -Height 1440",
-  "shots": [
-    {"name": "flat", "camera": "chase", "altitude_m": 40.0, "facing": "horizon", "hud": 0, "gear": true, "settle": 2.0, "console": ["space.FlatSpot 5 8"]},
-    {"name": "warmup", "camera": "chase", "altitude_m": 3.2, "facing": "horizon", "hud": 0, "gear": true, "settle": 10.0},
-    {"name": "seat_keys", "camera": "cockpit", "hud": 1, "settle": 1.5},
-    {"name": "seat_interact_mfd", "camera": "cockpit", "hud": 1, "settle": 1.0, "console": ["space.InteractMode 1 0"]},
-    {"name": "seat_interact_right", "camera": "cockpit", "hud": 1, "settle": 1.0, "console": ["space.InteractMode 1 1"]},
-    {"name": "stand_look_seat", "camera": "pawn", "hud": 1, "settle": 2.5, "console": ["space.InteractMode 0", "space.Interact", "space.Walk 0 0 0.1 180"]},
-    {"name": "toast_and_hint", "camera": "pawn", "hud": 1, "settle": 1.0,
-     "console": ["space.Notify toast Jsi na palubě lodi WAYFARER", "space.Notify hint Interakce|Krátké F použije věc s popiskem. Podržením F zapneš režim interakce: kurzorem klikáš na obrazovky a ovládání, pravým tlačítkem zpět."]},
-    {"name": "step_back_seat_prompt", "camera": "pawn", "hud": 1, "settle": 2.0, "console": ["space.Walk -1 0 0.12 180"]},
-    {"name": "foot_interact", "camera": "pawn", "hud": 1, "settle": 1.0, "console": ["space.InteractMode 1 0"]}
-  ]
+ "_comment": "SC-style interaction (step 1, 4. 10. 2026): the context key list at the bottom right in the seat, interact mode (hold F) with a hovered MFD and the seat, the prompt by the seat on foot (SEDNOUT [F]), a toast and a hint card. space.InteractMode 1 <n> shows hotspot n hovered (seated: 0 left MFD, 1 right MFD; on foot: 0 seat, then the MFDs); space.Notify pushes a toast or a card (the runner suppresses the automatic ones). Run: .\\Tools\\Shots.ps1 -Preset interaction -Editor -Width 2560 -Height 1440",
+ "shots": [
+  {
+   "name": "flat",
+   "camera": "chase",
+   "altitude_m": 40.0,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "console": [
+    "space.FlatSpot 5 8"
+   ]
+  },
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3.2,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 10.0
+  },
+  {
+   "name": "seat_keys",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.5
+  },
+  {
+   "name": "seat_interact_mfd",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.InteractMode 1 0"
+   ]
+  },
+  {
+   "name": "seat_interact_right",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.InteractMode 1 1"
+   ]
+  },
+  {
+   "name": "seat_interact_next_arrow",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.InteractMode 1 1"
+   ]
+  },
+  {
+   "name": "seat_interact_hud_off",
+   "camera": "cockpit",
+   "hud": 0,
+   "settle": 1.0,
+   "console": [
+    "space.InteractMode 1 3"
+   ]
+  },
+  {
+   "name": "stand_look_seat",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.InteractMode 0",
+    "space.Interact",
+    "space.Walk 0 0 0.1 180"
+   ]
+  },
+  {
+   "name": "toast_and_hint",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.Notify toast Jsi na palubě lodi WAYFARER",
+    "space.Notify hint Interakce|Krátké F použije věc s popiskem. Podržením F zapneš režim interakce: kurzorem klikáš na obrazovky a ovládání, pravým tlačítkem zpět."
+   ]
+  },
+  {
+   "name": "step_back_seat_prompt",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Walk -1 0 0.12 180"
+   ]
+  },
+  {
+   "name": "foot_interact",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.InteractMode 1 0"
+   ]
+  }
+ ]
 }

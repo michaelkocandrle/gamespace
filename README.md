@@ -575,12 +575,12 @@ After SC 4.x (`starcitizenreference/OwnCapture_Gameplay_Notes.md`, "Rozhraní hr
   `VYSTOUPIT [F]` at the `WalkRamp` socket, `RAMPA ZAVŘENÁ ZA LETU` greyed when the ship is not landed,
   `VSTOUPIT DO LODI [F]` outside).
 - **Hold F** = interact mode while held (SC, author 5. 10. 2026): the player keeps looking round (in the seat the
-  mouse turns the head - free look - instead of steering), the target is the hotspot nearest the screen's centre
-  (70 px), drawn as SC does: a white pointing-hand cursor, light corners round the control at its own size
-  (`FSpaceHotspot::SizeCm`), its name beside it in light italic spaced caps. Clickable hotspots in the world
-  (seated: the left and right MFD at the `Display_left` / `Display_right` sockets; on foot inside: the
-  seat, the MFDs, the ramp when landed). The hovered hotspot (nearest within 36 px) gets a label on a
-  dark backing; LMB uses it (MFD next page), RMB goes back.
+  mouse turns the head - free look - instead of steering). The cursor is the screen's centre, drawn as four thin
+  ticks (they close in and turn cyan over a control); a control is hovered only when the cursor is on it (its own
+  size on screen, `FSpaceHotspot::SizeCm`, at least 14 px), shown by light corners round it - no name beside it.
+  Hotspots: seated, the MFD page tab's **<** and **>** arrows (previous / next page), the PWR selector and the
+  CONFIGURATION switches; on foot inside, the seat and the ramp. LMB uses, RMB goes the other way.
+  H (the HUD) hides the key list only; the interaction, its cursor and the prompts stay.
 - **Key list** at the bottom right: what the keys do right now (seated: interact mode, gear, SCM / NAV,
   coupled, brake, quantum when ready, take-off when landed, camera; on foot: the target, jump, sprint;
   in interact mode: use / back / close).

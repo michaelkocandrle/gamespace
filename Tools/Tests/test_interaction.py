@@ -71,7 +71,7 @@ if sut.name():
     bp = eas.spawn_actor_from_class(sut.bp_class(), unreal.Vector(0.0, 0.0, 500000.0), unreal.Rotator())
     try:
         hotspots, _, _ = describe(bp)
-        check("%s: both MFDs are hotspots" % sut.name(), sum(1 for h in hotspots if "MFD" in h) == 2, str(hotspots))
+        check("%s: both MFDs' page arrows are hotspots (< and > each)" % sut.name(), sum(1 for h in hotspots if "STRÁNKA" in h) == 4, str(hotspots))
     finally:
         eas.destroy_actor(bp)
 else:
