@@ -67,7 +67,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
    a) holo MFD v3 + kokpit: hotové (stránky, motory, zvuky, křeslo, konzole, panel dveří, hasičák); kritik 3 kola
       FAIL 6,17 bez „musí se opravit“ – otevřené body v `2026-10-06_cockpit_critic.md` (konzole, středové displeje);
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
-      strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); pak rampa.
+      strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); rampa: plán a rozhodnutí A/B
+      čeká na autora (`2026-10-06_ramp_plan.md`).
    Hotové 5. 10.: klik přímo na šipky MFD, bez popisků, nový kurzor, interakce nezávislá na H; posuvné dveře.
 1. Povrch trupu zmrazený (revize G, PASS 6,5); přistání na svahu čeká na vyzkoušení autorem (pak odpružení nohou).
 3. **Podle SC z autorova záznamu** (`OwnCapture_Gameplay_Notes.md`): menu, nastavení, klávesy, interakce hotové; další
