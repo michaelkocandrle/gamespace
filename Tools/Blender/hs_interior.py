@@ -145,6 +145,11 @@ def build_door(leaf, n, ship, coll, mats, H):
     else:
         sides = [(-1, w / 2 + 0.03), (1, w / 2 + 0.03)]                  # two halves part
     out = [("Control_door%d" % n, Vector((x + 0.12, yc, 1.2)))]
+    # the holographic touch panel beside the doorway (author 5. 10. 2026: SC's door panel, opened in interact mode),
+    # on the side the leaf does not slide to, 20 cm past the opening, 6 cm in front of the wall (UShipBoardingComponent
+    # puts the hologram there)
+    away = -sides[0][0] if len(sides) == 1 else 1
+    out.append(("Control_door%d_panel" % n, Vector((x + 0.06, yc + away * (w / 2 + 0.2), 1.3))))
     for k, (sgn, lw) in enumerate(sides):
         letter = "AB"[k]
         closed_c = yc + (0.0 if len(sides) == 1 else sgn * lw / 2)

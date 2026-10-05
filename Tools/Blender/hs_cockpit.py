@@ -1128,12 +1128,23 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
             # the PWR selector as a socket (interact mode clicks it; SpaceshipPawn::GetPowerControlLocation)
             sockets["Control_pwr"] = placed["ck_pwr"] + n * 0.012
         kc = (c - up * 0.02 if holo else c - up * (hh + below * 0.5)) + n * 0.004
+        # the key row (author 5. 10. 2026: the pastel pads read as plastic toys): SC's backlit keys - a satin bezel
+        # strip with a recessed well per key, a dark graphite cap with a dished face, a lit legend bar along its top
+        # edge, a status LED on the active ones (amber on two), separator ribs between the wells
+        rr_slab(g["int_trim"], kc + n * 0.003, right, up, n, 0.37, 0.046, 0.008, 0.006, 3)
+        rr_slab(g["int_dark"], kc + n * 0.0035, right, up, n, 0.36, 0.038, 0.006, 0.002, 3)
         for k in range(7):
             p = kc + right * (-0.15 + k * 0.05)
-            rr_slab(g["int_dark"], p + n * 0.002, right, up, n, 0.036, 0.03, 0.005, 0.004, 2)
-            rr_slab(g["accent" if k in (1, 4) else "int_trim"], p + n * 0.008, right, up, n, 0.028, 0.022, 0.004, 0.006, 2)
-            if k % 2 == 0:
-                rr_slab(g["int_glow"], p + n * 0.009 + up * 0.02, right, up, n, 0.012, 0.004, 0.0015, 0.002, 2)
+            rr_slab(g["int_dark"], p + n * 0.0015, right, up, n, 0.04, 0.032, 0.005, 0.005, 3)                 # the well
+            rr_slab(g["int_console"], p + n * 0.0085, right, up, n, 0.034, 0.026, 0.005, 0.0075, 4)            # the cap
+            rr_slab(g["int_dark"], p + n * 0.0088 - up * 0.002, right, up, n, 0.026, 0.014, 0.004, 0.0008, 3)  # its dish
+            rr_slab(g["int_glow"], p + n * 0.0089 + up * 0.0095, right, up, n, 0.022, 0.0032, 0.0012, 0.0012, 2)   # legend bar
+            if k in (0, 2, 3, 6):
+                rr_slab(g["accent" if k in (2, 6) else "int_glow"], p + n * 0.0089 - up * 0.0095 + right * 0.012, right, up, n,
+                        0.004, 0.004, 0.0018, 0.0012, 2)                                                       # status LED
+            if k < 6:
+                q = p + right * 0.025
+                rr_slab(g["int_trim"], q + n * 0.0055, right, up, n, 0.004, 0.034, 0.001, 0.003, 1)            # rib
     L = {k: (b, t) for s, k, b, t in cols if s > 0}
     R = {k: (b, t) for s, k, b, t in cols if s < 0}
     wing = [tuple(w) for w in spec.get("wing", [(17.3, 1.13, 1.06), (17.62, 0.98, 1.22)])]   # (x, |y|, top z)

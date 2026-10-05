@@ -231,6 +231,10 @@ public:
 	FVector GetDoorLocation(int32 Door) const;
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
 	FVector GetDoorPromptLocation(int32 Door) const;
+	/** The door's holographic touch panel beside it (interact mode); false without one. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Walk")
+	bool GetDoorPanelLocation(int32 Door, FVector& OutLocation) const;
+	void SetDoorPanelHovered(int32 Door, bool bHovered);
 	/** Tests: steps the doors. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
 	void DebugStepDoors(float DeltaSeconds);

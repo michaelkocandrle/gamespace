@@ -3,6 +3,9 @@
 #include "ShipBoardingComponent.h"
 
 #include "HAL/PlatformTime.h"
+#include "Components/WidgetComponent.h"
+#include "Misc/App.h"
+#include "SpaceDoorPanel.h"
 
 #include "Algo/Find.h"
 #include "Components/BoxComponent.h"
@@ -355,6 +358,71 @@ void UShipBoardingComponent::FindDoors()
 		Leaf.Mesh->SetRelativeLocation(Leaf.ClosedRel);                  // the game starts with the doors shut
 	}
 	ApplyDoorCollision();
+	// the holographic touch panels beside the doorways (a world-space widget each, facing forward like the leaf)
+	DoorPanels.SetNum(DoorOpen.Num());
+	for (int32 Door = 0; Door < DoorOpen.Num(); ++Door)
+	{
+		FVector At;
+		if (!FApp::CanEverRender() || !Ship->GetHullSocketLocation(FName(*FString::Printf(TEXT("Control_door%d_panel"), Door)), At))
+		{
+			continue;
+		}
+		UWidgetComponent* Panel = NewObject<UWidgetComponent>(Ship, FName(*FString::Printf(TEXT("DoorPanel%d"), Door)));
+		Panel->SetupAttachment(Ship->GetRootComponent());
+		Panel->SetWidgetSpace(EWidgetSpace::World);
+		Panel->SetWidgetClass(USpaceDoorPanel::StaticClass());
+		Panel->SetDrawSize(FVector2D(240.0, 330.0));
+		Panel->SetPivot(FVector2D(0.5, 0.5));
+		Panel->SetBlendMode(EWidgetBlendMode::Transparent);
+		Panel->SetTwoSided(false);
+		Panel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Panel->SetCastShadow(false);
+		Panel->RegisterComponent();
+		// 11 cm further out than the socket: the kit's wall face stands proud of the bulkhead plane (at the socket the
+		// hologram was inside the wall)
+		Panel->SetWorldLocation(At + Ship->GetActorForwardVector() * 11.0 + Ship->GetActorUpVector() * 22.0);   // (over the junction box)
+		Panel->SetWorldRotation(Ship->GetActorRotation());              // facing the ship's forward, like the leaf's face
+		Panel->SetWorldScale3D(FVector(1.0, 0.065, 0.065));              // 240 x 330 px = 15.6 x 21.5 cm
+		DoorPanels[Door] = Panel;
+	}
+	UpdateDoorPanels();
+}
+
+void UShipBoardingComponent::UpdateDoorPanels()
+{
+	for (int32 Door = 0; Door < DoorPanels.Num(); ++Door)
+	{
+		if (UWidgetComponent* Panel = DoorPanels[Door])
+		{
+			if (USpaceDoorPanel* Widget = Cast<USpaceDoorPanel>(Panel->GetUserWidgetObject()))
+			{
+				Widget->DoorNumber = Door;
+				Widget->Open = DoorOpen.IsValidIndex(Door) ? DoorOpen[Door] : 0.f;
+				Widget->bOpening = DoorTarget.IsValidIndex(Door) && DoorTarget[Door] > 0.5f;
+			}
+		}
+	}
+}
+
+bool UShipBoardingComponent::GetDoorPanelLocation(int32 Door, FVector& OutLocation) const
+{
+	if (!DoorPanels.IsValidIndex(Door) || !DoorPanels[Door])
+	{
+		return CastChecked<ASpaceshipPawn>(GetOwner())->GetHullSocketLocation(FName(*FString::Printf(TEXT("Control_door%d_panel"), Door)), OutLocation);
+	}
+	OutLocation = DoorPanels[Door]->GetComponentLocation();
+	return true;
+}
+
+void UShipBoardingComponent::SetDoorPanelHovered(int32 Door, bool bHovered)
+{
+	if (DoorPanels.IsValidIndex(Door) && DoorPanels[Door])
+	{
+		if (USpaceDoorPanel* Widget = Cast<USpaceDoorPanel>(DoorPanels[Door]->GetUserWidgetObject()))
+		{
+			Widget->bHovered = bHovered;
+		}
+	}
 }
 
 int32 UShipBoardingComponent::FindDoorNear(const FVector& Location, float ReachCm, const FVector& Facing) const
@@ -441,6 +509,7 @@ void UShipBoardingComponent::TickDoors(float DeltaSeconds)
 		DoorOpen[Door] = FMath::FInterpConstantTo(DoorOpen[Door], DoorTarget[Door], DeltaSeconds, 1.f / ShipDoors::DoorSeconds);
 		bMoved |= DoorOpen[Door] != Before;
 	}
+	UpdateDoorPanels();
 	if (!bMoved)
 	{
 		return;

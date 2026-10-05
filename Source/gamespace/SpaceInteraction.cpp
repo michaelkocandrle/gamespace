@@ -217,6 +217,29 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 			AddPower(Inside, OutHotspots);
 			AddConfig(Inside, OutHotspots);
 		}
+		// the doors' holographic touch panels (author 5. 10. 2026: SC's door panel, opened in interact mode)
+		const TWeakObjectPtr<ASpaceshipPawn> WeakShip(Inside);
+		for (int32 Door = 0; Door < Inside->GetDoorCount(); ++Door)
+		{
+			FVector Panel;
+			if (!Inside->GetDoorPanelLocation(Door, Panel) || FVector::Dist(Panel, At) > 350.0)
+			{
+				continue;
+			}
+			FSpaceHotspot Spot;
+			Spot.Label = Inside->IsDoorOpen(Door) ? LOCTEXT("DoorPanelClose", "ZAVŘÍT DVEŘE") : LOCTEXT("DoorPanelOpen", "OTEVŘÍT DVEŘE");
+			Spot.WorldLocation = Panel;
+			Spot.SizeCm = 12.f;
+			Spot.Aspect = 240.f / 330.f;
+			Spot.Use = [WeakShip, Door](bool bPrimary)
+			{
+				if (ASpaceshipPawn* Live = WeakShip.Get(); Live && bPrimary)
+				{
+					Live->SetDoorOpen(Door, !Live->IsDoorOpen(Door));
+				}
+			};
+			OutHotspots.Add(MoveTemp(Spot));
+		}
 		if (bRamp && FVector::Dist(Ramp, At) < ReachOnFootCm && Inside->IsLanded())
 		{
 			FSpaceHotspot Spot;

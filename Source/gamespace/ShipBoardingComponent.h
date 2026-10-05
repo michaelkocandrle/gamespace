@@ -78,6 +78,15 @@ private:
 	TArray<double> DoorOpenedAt;
 	/** Per door, in the ship's frame: the prompt point, or zero = the doorway's centre. */
 	TArray<FVector> DoorPrompt;
+	/** Per door: its holographic touch panel (socket Control_door<n>_panel), or null. */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<class UWidgetComponent>> DoorPanels;
+	void UpdateDoorPanels();
+public:
+	/** The door's touch panel in the world (interact mode clicks it); false without one. */
+	bool GetDoorPanelLocation(int32 Door, FVector& OutLocation) const;
+	void SetDoorPanelHovered(int32 Door, bool bHovered);
+private:
 	bool bDoorsFound = false;
 	void ApplyDoorCollision();
 

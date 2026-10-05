@@ -688,6 +688,8 @@ bool ASpaceshipPawn::IsDoorOpen(int32 Door) const { return Boarding->IsDoorOpen(
 int32 ASpaceshipPawn::GetDoorCount() const { return Boarding->GetDoorCount(); }
 FVector ASpaceshipPawn::GetDoorLocation(int32 Door) const { return Boarding->GetDoorLocation(Door); }
 FVector ASpaceshipPawn::GetDoorPromptLocation(int32 Door) const { return Boarding->GetDoorPromptLocation(Door); }
+bool ASpaceshipPawn::GetDoorPanelLocation(int32 Door, FVector& OutLocation) const { return Boarding->GetDoorPanelLocation(Door, OutLocation); }
+void ASpaceshipPawn::SetDoorPanelHovered(int32 Door, bool bHovered) { Boarding->SetDoorPanelHovered(Door, bHovered); }
 void ASpaceshipPawn::DebugStepDoors(float DeltaSeconds) { Boarding->TickDoors(DeltaSeconds); }
 float ASpaceshipPawn::DebugGetDoorOpenAlpha(int32 Door) const { return Boarding->GetDoorOpenAlpha(Door); }
 
