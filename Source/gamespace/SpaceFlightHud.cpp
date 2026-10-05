@@ -134,8 +134,8 @@ namespace SpaceHudStyle
 	// azure for the holo effect": a saturated azure chrome and near-white ice-blue type)
 	const FLinearColor MfdBlue(0.02f, 0.45f, 1.f, 1.f);
 	const FLinearColor MfdBlueFaint(0.02f, 0.45f, 1.f, 0.35f);
-	const FLinearColor MfdText(0.62f, 0.93f, 1.f, 1.f);
-	const FLinearColor MfdTabIdle(0.06f, 0.22f, 0.36f, 0.95f);   // an idle tab: dim azure
+	const FLinearColor MfdText(0.55f, 0.88f, 1.f, 0.95f);
+	const FLinearColor MfdTabIdle(0.2f, 0.52f, 0.78f, 0.95f);   // an idle tab: a softer azure (too dark at 0.06 / 0.22)
 	const FLinearColor MfdAmber(0.91f, 0.38f, 0.016f, 1.f);      // SC's flags and cautions #F5A623
 
 	/** Rows of the navigation page's body list and of the contacts page. */
@@ -2770,7 +2770,7 @@ void USpaceCockpitDisplays::BuildTree()
 			USpaceHudLamp* Shape = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), FName(*FString::Printf(TEXT("%sTabFill%d"), ScreenName, Index)));
 			Shape->bButton = true;
 			Shape->Color = MfdBlue;
-			Shape->Intensity = Shape->Target = Index == 0 ? 1.f : 0.15f;
+			Shape->Intensity = Shape->Target = Index == 0 ? 1.f : 0.4f;
 			Lamps.Add(Shape->GetFName(), Shape);
 			if (UOverlaySlot* ShapeSlot = Tab->AddChildToOverlay(Shape))
 			{
@@ -3268,7 +3268,7 @@ void USpaceCockpitDisplays::BuildTree()
 			// holo MFD v3 type (author 5. 10. 2026 "really work on the font"): Saira SemiBold, the closest free face to SC
 			// 4.x's MFD type (wide, rounded-square, semibold - bolder than the Oxanium it replaces, so the light reads),
 			// and the big figures in Saira Condensed SemiBold: tall narrow numerals like SC's speed.
-			static const FString Saira = FPaths::ProjectContentDir() / TEXT("UI/Fonts/Saira-SemiBold.ttf");
+			static const FString Saira = FPaths::ProjectContentDir() / TEXT("UI/Fonts/Saira-Medium.ttf");   // (SemiBold read too heavy, author 5. 10.)
 			static const FString SairaCondensed = FPaths::ProjectContentDir() / TEXT("UI/Fonts/SairaCondensed-SemiBold.ttf");
 			// (not on the centre column's small screens: 11 cm of glass hold two words only in the condensed face)
 			const FString TextName = Text->GetName();
@@ -3284,8 +3284,8 @@ void USpaceCockpitDisplays::BuildTree()
 				Font = Face;
 			}
 			// light, not ink: a soft azure halo round every letter
-			Font.OutlineSettings.OutlineSize = bBig ? 3 : 2;
-			Font.OutlineSettings.OutlineColor = FLinearColor(0.f, 0.45f, 1.f, 0.55f);
+			Font.OutlineSettings.OutlineSize = bBig ? 2 : 1;
+			Font.OutlineSettings.OutlineColor = FLinearColor(0.f, 0.45f, 1.f, 0.4f);
 			Text->SetFont(Font);
 		}
 		else if (USpaceHudLamp* Lamp = Cast<USpaceHudLamp>(Widget))
@@ -3698,7 +3698,7 @@ void USpaceCockpitDisplays::SetPages(int32 LeftPage, int32 RightPage)
 		{
 			if (USpaceHudLamp* Tab = Lamps.FindRef(FName(*FString::Printf(TEXT("%sTabFill%d"), Screens[Display], Index))))
 			{
-				Tab->Target = Index == Page ? 1.f : 0.15f;
+				Tab->Target = Index == Page ? 1.f : 0.4f;
 				Tab->Intensity = Tab->Target;
 			}
 			if (UTextBlock* Label = Texts.FindRef(FName(*FString::Printf(TEXT("%sTabLabel%d"), Screens[Display], Index))))

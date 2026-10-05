@@ -2210,6 +2210,11 @@ private:
 	float Heat = 0.f;
 	FVector ChaseCameraBaseLocation = FVector::ZeroVector;
 	FVector CockpitCameraBaseLocation = FVector::ZeroVector;
+public:
+	/** The cockpit camera sits this far behind the eye socket (author 5. 10. 2026: the cockpit felt crowded). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Camera")
+	float CockpitEyeBackCm = 9.f;
+private:
 
 	bool bDashboardFocusHeld = false;
 	float DashboardFocusBlend = 0.f;

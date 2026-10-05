@@ -49,7 +49,9 @@ def cockpit_items(spec, eye, root=None):
     if not ck:
         return out
     e = Vector(eye)
-    for side, label, keys in ((1, "ck_flight", "left"), (-1, "ck_sys", "right")):
+    # (not with the holo MFDs: the printed FLIGHT / SYSTEMS words and the C21 / C22 numbers on the pods read cheap and
+    # stood behind the light - author 5. 10. 2026)
+    for side, label, keys in (() if ck.get("holo_mfd") else ((1, "ck_flight", "left"), (-1, "ck_sys", "right"))):
         c = Vector((ck["pod_x"], side * ck["pod_y"], ck["pod_z"]))
         n = (e - c).normalized()
         right = Vector((0, 0, 1)).cross(n).normalized()

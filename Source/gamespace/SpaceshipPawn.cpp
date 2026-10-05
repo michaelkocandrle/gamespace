@@ -222,7 +222,9 @@ void ASpaceshipPawn::BeginPlay()
 	Presentation->LoadViewCollection();
 
 	ChaseCameraBaseLocation = ChaseCamera->GetRelativeLocation();
-	CockpitCameraBaseLocation = CockpitCamera->GetRelativeLocation();
+	// the pilot's head a little back from the design eye (author 5. 10. 2026: the cockpit felt crowded)
+	CockpitCameraBaseLocation = CockpitCamera->GetRelativeLocation() - FVector(CockpitEyeBackCm, 0.0, 0.0);
+	CockpitCamera->SetRelativeLocation(CockpitCameraBaseLocation);
 	HullSparks->SetHull(Hull);
 	// The nose glow sits just ahead of and below the hull's front, whatever the ship.
 	if (Hull->GetStaticMesh())

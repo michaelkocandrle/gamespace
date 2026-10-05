@@ -106,7 +106,7 @@ public:
 
 	/** The holo picture's smoke (the screen material's dithered GlassOpacity: 0 clear, 1 solid); negative keeps 0. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
-	float HoloSmoke = 0.38f;   // (v3, 5. 10. 2026: a darker smoke behind the light - the picture was lost over the cockpit)
+	float HoloSmoke = 0.3f;   // (v3, 5. 10. 2026: a darker smoke behind the light - the picture was lost over the cockpit)
 
 	/** The plate behind the displays' glass at runtime (alpha 0 keeps the material's own grey 0.02). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
@@ -121,7 +121,7 @@ public:
 
 	/** The screens' emission x this at runtime (bloom of the projection); 0 keeps the material's. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays")
-	float HoloEmissiveScale = 1.9f;   // (v3: brighter, author 'sometimes not seen at all')
+	float HoloEmissiveScale = 1.6f;   // (v3: brighter, author 'sometimes not seen at all')
 
 	/** The cockpit radar's range, metres (the reference's shows 2 km; asteroids here are kilometres apart). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "100.0"))
