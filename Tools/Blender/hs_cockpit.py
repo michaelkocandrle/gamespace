@@ -4,7 +4,7 @@ bezels left and right, a central pedestal with a holographic radar and the two s
 banks under the pods, a low sculpted graphite cowl instead of a dashboard wall and a glare shield.
 
 Called by hs_interior.dashboard() when recipe interior.cockpit.style == "pods". Screens keep the game's
-canvas (USpaceCockpitDisplays: left / right 560x490, centre_top 210x259, centre_bottom 210x231), so every
+canvas (USpaceCockpitDisplays: left / right 880x490 since holo MFD v3, centre_top 210x259, centre_bottom 210x231), so every
 screen quad has its canvas rectangle's aspect ratio and a Display_<name> socket in front of it
 (test_cockpit_displays.py). Placement rule (test_cockpit_frame.py): every screen whole in the level view
 under the HUD - top edge >= 8 deg (the HUD ends ~5 deg under the eye), bottom edge <= 28 deg under the eye, the nearest screen >= 0.9 m ahead.
@@ -17,9 +17,11 @@ import math
 import bmesh
 from mathutils import Vector
 
-RECTS = {"left": (0, 0, 560, 490), "right": (560, 0, 1120, 490),
-         "centre_top": (1120, 0, 1330, 259), "centre_bottom": (1120, 259, 1330, 490)}
-CANVAS = (1330.0, 490.0)
+# (holo MFD v3, 5. 10. 2026: the MFDs SC's 1.8 : 1, 880 px wide - was 560)
+RECTS = {"left": (0, 0, 880, 490), "right": (880, 0, 1760, 490),
+         "centre_top": (1760, 0, 1970, 259), "centre_bottom": (1760, 259, 1970, 490)}
+CANVAS = (1970.0, 490.0)
+MFD_ASPECT = 490.0 / 880.0
 
 
 # ------------------------------------------------------------------------------------------ helpers
@@ -889,7 +891,9 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
             vt, vb = half, -(half + holo.get("below", 0.02))
             # (1 cm past the wrap's edges: flush to them the lowered fascia left hairline gaps at its seam, GEOTEST holes)
             quads = [[P(u_lo - 0.01, vb - 0.01), P(u_hi + 0.01, vb - 0.01), P(u_hi + 0.01, vt + 0.01), P(u_lo - 0.01, vt + 0.01)]]
-            holo_projector(g, screen_bm, sockets, "left" if side > 0 else "right", P(0.0, vt), right, n, sw, sh, eye, holo)
+            # the picture is wider than the old screen (holo MFD v3: image_w, SC's 1.8 : 1); the pod stays
+            iw = holo.get("image_w", sw)
+            holo_projector(g, screen_bm, sockets, "left" if side > 0 else "right", P(0.0, vt), right, n, iw, iw * MFD_ASPECT, eye, holo)
             module_h = 2 * half - 0.02
         else:
             # screen in its recess, a satin bezel and a thin cool light line round the glass

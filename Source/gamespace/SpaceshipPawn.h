@@ -225,7 +225,7 @@ public:
 
 	/** The glass of the dashboard MFDs, cm (hs_cockpit: screen_w 0.32 m, 490 / 560 of it high). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Displays")
-	FVector2D MfdGlassSizeCm = FVector2D(32.0, 28.0);
+	FVector2D MfdGlassSizeCm = FVector2D(50.3, 28.0);   // holo MFD v3: 880 x 490 px at 1750 px/m
 
 	/**
 	 * F in the seat while flying (SC: the pilot can get up in flight, the ship holds its position): the ship brakes

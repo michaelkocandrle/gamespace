@@ -2935,7 +2935,7 @@
    "pod_y": 0.4,
    "pod_z": 2.103,
    "inner_frame": {"_comment": "cockpit v2 CK-CF (Design/Wayfarer_cockpit_v2.json; SC comparison 5. 10. 2026): a graphite profile inside along every edge of the canopy glass, cream lining lip, rubber seal, screws every 15 cm (Tools/Blender/hs_canopy_frame.py); frames only the glass that is there, no strut across the view", "cover_m": 0.035, "back_m": 0.03, "back_inset_m": 0.065, "depth_m": 0.08, "chamfer_m": 0.008, "lip_m": 0.02, "seal_m": 0.012, "bolt_pitch_m": 0.15, "bolt_r_m": 0.006, "max_dist_m": 3.5, "min_z": 2.05, "min_x": 17.68, "crease_deg": 12.0, "clear_view_deg": 15.0, "clear_up_deg": 10.0, "crease_half_w_m": 0.045, "crease_depth_m": 0.07, "crease_max_abs_y": 0.97, "extend_m": 0.01},
-   "holo_mfd": {"_comment": "cockpit v2 CK-HP (Design/Wayfarer_cockpit_v2.json, author 4. 10. 2026): a lower closed fascia, an emitter bar on its top edge and the MFD picture standing over it as light; pod_z overrides the pod centre in this mode (the picture top stays near the old screen top, under the eye)", "pod_z": 1.85, "fascia_h": 0.2, "below": 0.02, "image_gap": 0.025, "emitter": [0.36, 0.05, 0.045]},
+   "holo_mfd": {"_comment": "cockpit v2 CK-HP (Design/Wayfarer_cockpit_v2.json, author 4. 10. 2026): a lower closed fascia, an emitter bar on its top edge and the MFD picture standing over it as light; pod_z overrides the pod centre in this mode (the picture top stays near the old screen top, under the eye)", "pod_z": 1.85, "fascia_h": 0.2, "below": 0.02, "image_gap": 0.025, "emitter": [0.54, 0.05, 0.045], "image_w": 0.503, "_image_w": "holo MFD v3 (5. 10. 2026): the picture SC's 1.8 : 1, 880 x 490 px at 1750 px/m (was the 0.32 m screen)"},
    "screen_w": 0.32,
    "side_margin": 0.13,
    "top_margin": 0.018,

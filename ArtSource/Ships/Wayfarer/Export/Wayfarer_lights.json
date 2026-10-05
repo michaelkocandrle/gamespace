@@ -1247,6 +1247,74 @@
    "name": "fix_31",
    "type": "point",
    "color": [
+    0.45,
+    0.72,
+    1.0
+   ],
+   "intensity_cd": 0.294,
+   "radius_m": 1.6,
+   "location": [
+    17.9441,
+    -0.3716,
+    1.987
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    769.4,
+    37.2,
+    78.7
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_32",
+   "type": "point",
+   "color": [
+    0.45,
+    0.72,
+    1.0
+   ],
+   "intensity_cd": 0.294,
+   "radius_m": 1.6,
+   "location": [
+    17.9441,
+    0.3716,
+    1.987
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    769.4,
+    -37.2,
+    78.7
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_33",
+   "type": "point",
+   "color": [
     1.0,
     0.35,
     0.08
@@ -1278,7 +1346,7 @@
    ]
   },
   {
-   "name": "fix_32",
+   "name": "fix_34",
    "type": "point",
    "color": [
     1.0,
@@ -1304,74 +1372,6 @@
     758.6,
     87.5,
     86.3
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_33",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.186,
-   "radius_m": 1.6,
-   "location": [
-    18.0565,
-    0.4137,
-    2.0663
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    780.6,
-    -41.4,
-    86.6
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_34",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.186,
-   "radius_m": 1.6,
-   "location": [
-    18.1689,
-    -0.4557,
-    1.987
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    791.9,
-    45.6,
-    78.7
    ],
    "direction_ue": [
     0,

@@ -47,7 +47,7 @@ public:
 	 * thin strokes fell between samples and the words broke up.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "0.01"))
-	float ScreenShareAt88 = 0.155f;
+	float ScreenShareAt88 = 0.244f;   // holo MFD v3: the 0.503 m glass (0.155 for the 0.32 m one)
 
 	/** Render target pixels per screen pixel (a little over 1 keeps edges smooth). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cockpit Displays", meta = (ClampMin = "0.5"))

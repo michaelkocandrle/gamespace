@@ -946,7 +946,10 @@ class GAMESPACE_API USpaceCockpitDisplays : public USpaceFlightHud
 public:
 	/** One display, pixels (the render target is two of them side by side). */
 	/** The glass is ~29 x 25 cm: the same shape, so nothing is stretched. */
-	static constexpr float DisplayWidth = 560.f;
+	static constexpr float DisplayWidth = 880.f;    // holo MFD v3 (5. 10. 2026): SC's 1.8 : 1 (was 560)
+	static constexpr float ScreenPadding = 20.f;
+	static constexpr float PagingButtonWidth = 110.f;
+	static constexpr float PagingButtonHeight = 36.f;
 	static constexpr float DisplayHeight = 490.f;
 
 	/** The centre column's two screens: ~11 x 13.5 and ~11 x 12 cm of glass at the big displays' density. */
@@ -1009,6 +1012,7 @@ public:
 
 	/** The page titles of a display (0 left, 1 right). */
 	static const TArray<FString>& PageTitles(int32 Display);
+	static const TArray<FString>& PageTabNames(int32 Display);
 
 	/** The left display's CONFIGURATION page (SC's flight switches) and its rows, in the order of ConfigRowNames. */
 	static constexpr int32 ConfigPage = 3;

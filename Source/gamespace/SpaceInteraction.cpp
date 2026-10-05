@@ -96,15 +96,18 @@ namespace SpaceInteractionLocal
 			for (const int32 Step : { -1, 1 })
 			{
 				FVector At;
-				if (!Ship->GetDisplayPoint(Display, FVector2D(Step < 0 ? 0.035 : 0.965, 0.94), At))
+				// the paging buttons in the bottom bar's corners (USpaceCockpitDisplays: padding 20, 110 x 36, 12 from the foot)
+				const double U = (USpaceCockpitDisplays::ScreenPadding + USpaceCockpitDisplays::PagingButtonWidth * 0.5) / USpaceCockpitDisplays::DisplayWidth;
+				const double V = 1.0 - (12.0 + 22.0) / USpaceCockpitDisplays::DisplayHeight;
+				if (!Ship->GetDisplayPoint(Display, FVector2D(Step < 0 ? U : 1.0 - U, V), At))
 				{
 					continue;
 				}
 				FSpaceHotspot Spot;
 				Spot.Label = Step < 0 ? LOCTEXT("MfdPrev", "PŘEDCHOZÍ STRÁNKA") : LOCTEXT("MfdNext", "DALŠÍ STRÁNKA");
 				Spot.WorldLocation = At;
-				Spot.SizeCm = 3.f;
-				Spot.Aspect = 0.8f;      // the arrow glyph, a little taller than wide
+				Spot.SizeCm = USpaceCockpitDisplays::PagingButtonWidth / USpaceCockpitDisplays::DisplayWidth * Ship->MfdGlassSizeCm.X;
+				Spot.Aspect = USpaceCockpitDisplays::PagingButtonWidth / USpaceCockpitDisplays::PagingButtonHeight;
 				Spot.Use = [Weak, Display, Step](bool bPrimary)
 				{
 					if (ASpaceshipPawn* Live = Weak.Get())
