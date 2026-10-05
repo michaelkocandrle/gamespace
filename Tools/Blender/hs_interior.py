@@ -511,6 +511,18 @@ def obj_console(g, r, zr, z0):
             for sy in (-1, 1):
                 q = tc + Vector((sx * 0.07, sy * 0.05, 0.0035))
                 cyl(g["int_trim"], q, q + Vector((0, 0, 0.003)), 0.004, 8)
+        # (critic round 3: the top still a bare slab from the seat) a rubber mat strip in a satin-rimmed recess along
+        # the outer half, ahead of the switch module, with ribs across it
+        mc = Vector(((x0 + 0.66 + x1 - 0.28) / 2, (y1 - 0.11) if y0 > 0 else (y0 + 0.11), top + 0.012))
+        ml = (x1 - 0.28) - (x0 + 0.66)
+        if ml > 0.08:
+            X, Y, Z = Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))
+            hs_cockpit.rr_ring(g["int_trim"], mc + Z * 0.005, X, Y, Z, ml, 0.13, 0.01, 0.01, 0.005, 3)
+            hs_cockpit.rr_slab(g["int_dark"], mc + Z * 0.0015, X, Y, Z, ml - 0.016, 0.114, 0.008, 0.002, 3)
+            k = 0
+            while (k + 1) * 0.028 < ml - 0.03:
+                hs_cockpit.rr_slab(g["int_console"], mc + X * (-ml / 2 + 0.02 + k * 0.028) + Z * 0.004, X, Y, Z, 0.012, 0.1, 0.004, 0.0025, 2)
+                k += 1
         # (critic round 2: the outer half of the top still empty) a switch module on the outer half, beside the forearm rest
         oc = Vector((x0 + 0.53, (y1 - 0.11) if y0 > 0 else (y0 + 0.11), top + 0.016))   # (clear of the canopy module aft)
         hs_cockpit.control_module(g, oc, Vector((0, -1, 0)), Vector((1, 0, 0)), Vector((0, 0, 1)), 0.16, 0.2,

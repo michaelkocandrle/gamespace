@@ -1145,6 +1145,17 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
             if k < 6:
                 q = p + right * 0.025
                 rr_slab(g["int_trim"], q + n * 0.0055, right, up, n, 0.004, 0.034, 0.001, 0.003, 1)            # rib
+        if holo:
+            # the fascia's broad face (critic 6. 10.: a cloudy empty slab): panel seams above and below the key row,
+            # vertical breaks at the ends, bolt heads at the panels' corners
+            fc = c + n * 0.0015
+            for v in (0.05, -0.068):
+                rr_slab(g["int_dark"], fc + up * v, right, up, n, 0.36, 0.003, 0.001, 0.002, 1)
+            for u in (-0.185, 0.185):
+                rr_slab(g["int_dark"], fc + right * u - up * 0.01, right, up, n, 0.003, 0.2, 0.001, 0.002, 1)
+                for v in (0.075, -0.092):
+                    q = c + right * (u * 0.93) + up * v
+                    tube(g["int_trim"], q, q + n * 0.004, 0.0035, 8)
     L = {k: (b, t) for s, k, b, t in cols if s > 0}
     R = {k: (b, t) for s, k, b, t in cols if s < 0}
     wing = [tuple(w) for w in spec.get("wing", [(17.3, 1.13, 1.06), (17.62, 0.98, 1.22)])]   # (x, |y|, top z)

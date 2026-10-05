@@ -65,6 +65,16 @@ int32 USpaceDoorPanel::NativePaint(const FPaintArgs& Args, const FGeometry& Geom
 	Line(Out, Layer + 2, Geometry, Ring, Faded(1.f), 4.f);
 	if (Open < 0.5f && !bOpening)
 	{
+		// shut: two chevrons pointing together (a padlock read as locked - critic 5. 10.)
+		const float Bc = R * 0.32f;
+		for (const float S : { -1.f, 1.f })
+		{
+			const FVector2D Tip = C + FVector2D(S * Bc * 0.35f, 0.f);
+			Line(Out, Layer + 2, Geometry, { Tip + FVector2D(S * Bc, -Bc), Tip, Tip + FVector2D(S * Bc, Bc) }, Faded(1.f), 3.5f);
+		}
+	}
+	else if (false)
+	{
 		// the lock: a body and a shackle
 		const float B = R * 0.42f;
 		Line(Out, Layer + 2, Geometry, { C + FVector2D(-B, -B * 0.1), C + FVector2D(B, -B * 0.1), C + FVector2D(B, B * 1.05), C + FVector2D(-B, B * 1.05), C + FVector2D(-B, -B * 0.1) }, Faded(1.f), 3.f);

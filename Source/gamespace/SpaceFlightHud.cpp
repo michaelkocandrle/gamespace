@@ -1119,7 +1119,8 @@ int32 USpaceHudSymbol::NativePaint(const FPaintArgs& Args, const FGeometry& Allo
 			FSlateDrawElement::MakeGradient(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), MoveTemp(Rise), Orient_Horizontal);
 			// A dot grid at a few percent - the space the picture floats in (static). No soft vignette: the glass keys
 			// the content by brightness, and a faint gradient crossing the key came out as hard dark boxes.
-			for (float GX = 22.f; GX < Size.X - 16.f; GX += 22.f)
+			// (not on the centre column's small screens: there the grid read as grey static - critic 5. 10.)
+			for (float GX = 22.f; Size.X > 300.f && GX < Size.X - 16.f; GX += 22.f)
 			{
 				for (float GY = 22.f; GY < Size.Y - 16.f; GY += 22.f)
 				{
@@ -1618,7 +1619,40 @@ int32 USpaceHudShipStatus::NativePaint(const FPaintArgs& Args, const FGeometry& 
 		}
 		const FVector2f First = Points[0];
 		Points.Add(First);
+		// (the large MFD page: a soft glow under each line - critic 6. 10.: "a thin crude line drawing")
+		if (Size.X > 300.f)
+		{
+			PaintLine(OutDrawElements, LayerId, Paint, Points, Faded(Color, 0.16f), true, 7.f);
+		}
 		PaintLine(OutDrawElements, LineLayer, Paint, Points, Faded(Color, 0.75f), true, SmallScreenLine);
+	}
+	if (Size.X > 300.f)
+	{
+		// SC's self status framing: a dashed centreline through the ship, bracket arcs either side with ticks
+		const FVector2f Top = ToScreen(FVector2D(Middle.X, Bounds.Max.Y)), Bottom = ToScreen(FVector2D(Middle.X, Bounds.Min.Y));
+		for (float T = 0.f; T < 1.f; T += 0.06f)
+		{
+			PaintLine(OutDrawElements, LineLayer, Paint, { FMath::Lerp(Top, Bottom, T), FMath::Lerp(Top, Bottom, FMath::Min(T + 0.03f, 1.f)) },
+				Faded(Color, 0.35f), false, SmallScreenLine);
+		}
+		const float R = FMath::Min(Size.X, Size.Y) * 0.47f;
+		for (const float Side : { -1.f, 1.f })
+		{
+			TArray<FVector2f> Arc;
+			for (int32 K = 0; K <= 24; ++K)
+			{
+				const float A = FMath::DegreesToRadians(-40.f + 80.f * K / 24.f);
+				Arc.Add(Centre + FVector2f(Side * FMath::Cos(A), FMath::Sin(A)) * R);
+			}
+			PaintLine(OutDrawElements, LineLayer, Paint, Arc, Faded(Color, 0.55f), true, SmallScreenLine);
+			for (int32 K = 0; K <= 8; ++K)
+			{
+				const float A = FMath::DegreesToRadians(-40.f + 80.f * K / 8.f);
+				const FVector2f Dir(Side * FMath::Cos(A), FMath::Sin(A));
+				PaintLine(OutDrawElements, LineLayer, Paint, { Centre + Dir * R, Centre + Dir * (R - (K % 4 == 0 ? 12.f : 6.f)) },
+					Faded(Color, 0.6f), false, SmallScreenLine);
+			}
+		}
 	}
 	// Engines: a ring each, filled and trailing a plume behind as they work.
 	const float Demand = FMath::Clamp(EngineDemand, 0.f, 1.f);

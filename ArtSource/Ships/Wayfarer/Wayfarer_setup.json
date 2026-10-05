@@ -1347,14 +1347,14 @@
     ]
    },
    "scalars": {
-    "PrimaryRoughness": 0.45,
-    "SecondaryRoughness": 0.45,
+    "PrimaryRoughness": 0.62,
+    "SecondaryRoughness": 0.62,
     "PaintMetallic": 0.2,
-    "GrungeAmount": 0.1,
+    "GrungeAmount": 0.06,
     "EdgeWear": 0.0,
     "DirtAmount": 0.0,
-    "GrungeTileCm": 45.0,
-    "RoughVariation": 0.35
+    "GrungeTileCm": 16.0,
+    "RoughVariation": 0.14
    },
    "slots": [
     "M_Ship_Wayfarer_IntConsole"

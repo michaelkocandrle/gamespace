@@ -130,18 +130,18 @@
    "hud": 0,
    "gear": true,
    "settle": 2.0,
-   "name": "extinguisher",
+   "name": "left_console_top",
    "camera_local": [
-    -1.75,
-    -1.45,
-    0.15
+    6.25,
+    -0.45,
+    1.35
    ],
    "look_local": [
-    -2.27,
-    -1.97,
-    -0.42
+    6.75,
+    -0.95,
+    0.55
    ],
-   "fov": 45
+   "fov": 60
   },
   {
    "altitude_m": 3000,
@@ -149,18 +149,18 @@
    "hud": 0,
    "gear": true,
    "settle": 2.0,
-   "name": "extinguisher_close",
+   "name": "right_console_top",
    "camera_local": [
-    -1.95,
-    -1.7,
-    -0.15
+    6.25,
+    0.45,
+    1.35
    ],
    "look_local": [
-    -2.27,
-    -1.97,
-    -0.3
+    6.75,
+    0.95,
+    0.55
    ],
-   "fov": 40
+   "fov": 60
   }
  ]
 }
