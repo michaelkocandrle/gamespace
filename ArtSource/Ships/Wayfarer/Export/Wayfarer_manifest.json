@@ -25,6 +25,7 @@
         "SOCKET_Control_door0_a",
         "SOCKET_Control_door1",
         "SOCKET_Control_door1_a",
+        "SOCKET_Control_eng",
         "SOCKET_Control_pwr",
         "SOCKET_Display_centre_bottom",
         "SOCKET_Display_centre_top",
@@ -39,7 +40,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "8c1942f097c2310d850e0e6e24c6581d54831473"
+      "geometry_hash": "ec6916a5988218ba9a3923f81a3aaf530f79b2c3"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -53,7 +54,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "a0cdc1d1b64019a2303650414b97ec86e630d8ea"
+      "geometry_hash": "9e8af74dc58d2f0e78262d9f859ecaec7c3a471c"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -88,14 +89,14 @@
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "d80ff7c680663d276feba8fd4ebdaa69820f7900"
+      "geometry_hash": "bf73dd23f8b2a3a839734c343e8559eba4bf8d20"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
       "objects": [
         "SM_Ship_Wayfarer_InteriorDecals"
       ],
-      "geometry_hash": "052cd06558ddf755ab1a23adcde12ab993203a88"
+      "geometry_hash": "43e4e05f2ead2392484feeff53423cf08d43001c"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorKit.fbx",
@@ -116,8 +117,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 459485,
-      "verts": 305339,
+      "tris": 459487,
+      "verts": 305340,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -305,8 +306,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 403582,
-      "verts": 210975,
+      "tris": 429822,
+      "verts": 224229,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -345,8 +346,8 @@
     "SM_Ship_Wayfarer_InteriorDecals": {
       "lod": 0,
       "part": "InteriorDecals",
-      "tris": 5336,
-      "verts": 4581,
+      "tris": 5258,
+      "verts": 4467,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -360,7 +361,7 @@
           -0.04850006103515625
         ],
         [
-          9.016197204589844,
+          8.671916961669922,
           2.020479679107666,
           1.9275434017181396
         ]
@@ -506,7 +507,7 @@
         [
           -9.949999809265137,
           3.2013895511627197,
-          0.8000011444091797
+          0.8000004291534424
         ],
         [
           -7.250000476837158,
@@ -678,6 +679,19 @@
         20.75,
         -0.0,
         -16.0
+      ]
+    },
+    "SOCKET_Control_eng": {
+      "parent": "SM_Ship_Wayfarer",
+      "location_m": [
+        7.47627,
+        0.86618,
+        0.7076
+      ],
+      "location_ue_cm": [
+        747.63,
+        -86.62,
+        70.76
       ]
     },
     "SOCKET_Control_pwr": {

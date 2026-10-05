@@ -56,11 +56,11 @@ else:
         # 2) hotspots
         bp.set_power(True, True)
         hotspots, _ = describe(bp)
-        check("FLIGHT page: four MFD page arrows and PWR", len(hotspots) == 5, str(hotspots))
+        check("FLIGHT page: four MFD page arrows, PWR and the ENGINE switch", len(hotspots) == 6, str(hotspots))
         bp.cycle_mfd_page(0, -1)
         check("one page back from FLIGHT is CONFIGURATION", bp.get_mfd_page(0) == 3, str(bp.get_mfd_page(0)))
         hotspots, _ = describe(bp)
-        config = hotspots[5:]
+        config = hotspots[5:-1]
         check("CONFIGURATION: one hotspot per switch (with ENGINES)", len(config) == 6, str(hotspots))
         check("a switch says what a click does", config and config[0] == "COUPLED MODE: VYPNOUT", str(config[:1]))
         bp.set_flight_assist(False)

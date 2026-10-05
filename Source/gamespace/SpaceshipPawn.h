@@ -263,6 +263,8 @@ public:
 	/** The dashboard's PWR selector in the world (left of the left MFD); false for a ship without that display. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Power")
 	bool GetPowerControlLocation(FVector& OutLocation) const;
+	/** The ENGINE switch under its red guard on the left console beside the seat (socket Control_eng). */
+	bool GetEngineControlLocation(FVector& OutLocation) const { return GetHullSocketLocation(TEXT("Control_eng"), OutLocation); }
 
 	/** Tests: runs the start-up for this long. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")

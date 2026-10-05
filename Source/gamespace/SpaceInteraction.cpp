@@ -59,6 +59,30 @@ namespace SpaceInteractionLocal
 		}
 	}
 
+	/** The ENGINE switch beside the seat (SC's power / engines triad, author 5. 10. 2026): with power only. */
+	void AddEngines(ASpaceshipPawn* Ship, TArray<FSpaceHotspot>& Out)
+	{
+		FVector At;
+		if (!Ship->IsPowered() || !Ship->GetEngineControlLocation(At))
+		{
+			return;
+		}
+		const TWeakObjectPtr<ASpaceshipPawn> Weak(Ship);
+		FSpaceHotspot Spot;
+		Spot.Label = Ship->AreEnginesWanted() ? LOCTEXT("EnginesOff", "VYPNOUT MOTORY") : LOCTEXT("EnginesOn", "NASTARTOVAT MOTORY");
+		Spot.WorldLocation = At;
+		Spot.SizeCm = 3.2f;
+		Spot.Aspect = 0.8f;
+		Spot.Use = [Weak](bool bPrimary)
+		{
+			if (ASpaceshipPawn* Live = Weak.Get(); Live && bPrimary)
+			{
+				Live->ToggleEngines();
+			}
+		};
+		Out.Add(MoveTemp(Spot));
+	}
+
 	/** The dashboard's PWR selector (SC: the lit POWER key you click in interact mode). */
 	void AddPower(ASpaceshipPawn* Ship, TArray<FSpaceHotspot>& Out)
 	{
@@ -134,6 +158,7 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 		AddMfds(Ship, OutHotspots);
 		AddPower(Ship, OutHotspots);
 		AddConfig(Ship, OutHotspots);
+		AddEngines(Ship, OutHotspots);
 		// Getting up is on the key list (SC); the seat itself is under the pilot's view.
 		return;
 	}

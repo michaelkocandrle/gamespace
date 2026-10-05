@@ -9,6 +9,7 @@
       "socket Control_door0_a scale (100, 100, 100) reset to 1",
       "socket Control_door1 scale (100, 100, 100) reset to 1",
       "socket Control_door1_a scale (100, 100, 100) reset to 1",
+      "socket Control_eng scale (100, 100, 100) reset to 1",
       "socket Control_pwr scale (100, 100, 100) reset to 1",
       "socket Display_centre_bottom scale (100, 100, 100) reset to 1",
       "socket Display_centre_top scale (100, 100, 100) reset to 1",
@@ -37,15 +38,15 @@
     "SM_Ship_Wayfarer_Screens"
   ],
   "imported_hashes": {
-    "SM_Ship_Wayfarer": "8c1942f097c2310d850e0e6e24c6581d54831473",
+    "SM_Ship_Wayfarer": "ec6916a5988218ba9a3923f81a3aaf530f79b2c3",
     "SM_Ship_Wayfarer_Canopy": "879389a2da32c2818440c8370cc947c38af0759c",
-    "SM_Ship_Wayfarer_Decals": "a0cdc1d1b64019a2303650414b97ec86e630d8ea",
+    "SM_Ship_Wayfarer_Decals": "9e8af74dc58d2f0e78262d9f859ecaec7c3a471c",
     "SM_Ship_Wayfarer_Door0A": "f9d145f388da7447785dc4ba277f65f149afeb94",
     "SM_Ship_Wayfarer_Door1A": "72c81bc8de3b1ab9965ab65505b327dd2c45e83b",
     "SM_Ship_Wayfarer_Gear": "7dc7e8ec1f70b6d335d5d82d424f2e9d8b4d85bf",
     "SM_Ship_Wayfarer_Hologram": "19ad136b4dfcafa2f3fc35755332989246018cd3",
-    "SM_Ship_Wayfarer_Interior": "d80ff7c680663d276feba8fd4ebdaa69820f7900",
-    "SM_Ship_Wayfarer_InteriorDecals": "052cd06558ddf755ab1a23adcde12ab993203a88",
+    "SM_Ship_Wayfarer_Interior": "bf73dd23f8b2a3a839734c343e8559eba4bf8d20",
+    "SM_Ship_Wayfarer_InteriorDecals": "43e4e05f2ead2392484feeff53423cf08d43001c",
     "SM_Ship_Wayfarer_InteriorKit": "fcd23c62c7bfc496dd3aaf101e89f159d82e432f",
     "SM_Ship_Wayfarer_Screens": "283bb6547e4e8d5ea3b6249679d57d6e962d8042"
   },

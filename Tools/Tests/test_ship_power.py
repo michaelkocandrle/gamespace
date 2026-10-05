@@ -126,7 +126,8 @@ if sut.name():
         check("off: only the PWR selector is clickable (dark MFDs)", hotspots == ["ZAPNOUT NAPÁJENÍ"], str(hotspots))
         bp.set_power(True, True)
         hotspots, _ = describe(bp)
-        check("on: the MFDs' page arrows and the PWR selector", len(hotspots) == 5 and hotspots[-1] == "VYPNOUT NAPÁJENÍ", str(hotspots))
+        check("on: the MFDs' page arrows, the PWR selector and the ENGINE switch", len(hotspots) == 6 and hotspots[4] == "VYPNOUT NAPÁJENÍ"
+          and hotspots[-1] == "VYPNOUT MOTORY", str(hotspots))
     finally:
         eas.destroy_actor(bp)
 else:

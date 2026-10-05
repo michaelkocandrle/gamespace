@@ -18,6 +18,8 @@ import bmesh
 from mathutils import Vector
 
 # (holo MFD v3, 5. 10. 2026: the MFDs SC's 1.8 : 1, 880 px wide - was 560)
+SIDE_SOCKETS = {}   # sockets placed by wing_panels (no sockets dict there): build() copies them
+
 RECTS = {"left": (0, 0, 880, 490), "right": (880, 0, 1760, 490),
          "centre_top": (1760, 0, 1970, 259), "centre_bottom": (1760, 259, 1970, 490)}
 CANVAS = (1970.0, 490.0)
@@ -471,6 +473,180 @@ def pilot_seat(g, rect, zr):
         tube(g["int_trim"], hinge - right * 0.03, hinge + right * 0.03, 0.013, 12)
         tube(g["int_trim"], pan - upz * 0.05 + right * (sd * 0.3) - fwd * 0.2, hinge, 0.012, 10)
         tube(g["int_trim"], hinge, top - upz * 0.03 - fwd * 0.1, 0.01, 8)
+
+
+def _catmull(points, sub):
+    """Catmull-Rom resample of a polyline of tuples (each value interpolated alike), `sub` steps per span."""
+    out = []
+    n = len(points)
+    for i in range(n - 1):
+        p0, p1, p2, p3 = points[max(i - 1, 0)], points[i], points[i + 1], points[min(i + 2, n - 1)]
+        for k in range(sub):
+            t = k / sub
+            out.append(tuple(0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t * t + (-a + 3 * b - 3 * c + d) * t ** 3)
+                             for a, b, c, d in zip(p0, p1, p2, p3)))
+    out.append(points[-1])
+    return out
+
+
+def pilot_seat_v3(g, rect, zr):
+    """The pilot seat after SC's (author 5. 10. 2026: "the seat still not good enough, plastic and cheap"): one
+    sculpted bucket shell swept from the pan's front lip up the back to the headrest (a U section whose sides rise
+    into wings), quilted channels of padding on it with bolsters along the sides, a five-point harness in dark webbing
+    with a machined rotary buckle, and a structural frame - spine spars, a gas strut, the swivel post on floor rails.
+    Seat-local: x forward, z up from the floor, the pilot's right is -y."""
+    x0, x1, y0, y1 = rect
+    z0 = zr[0]
+    cx, cy = (x0 + x1) / 2 + 0.05, (y0 + y1) / 2
+    side = Vector((0, -1, 0))
+
+    def W(x, z):
+        return Vector((cx + x, cy, z0 + z))
+
+    # the spine: (x, z, half width, wing height) from the pan's front lip up to the head
+    spine = _catmull([(0.29, 0.405, 0.245, 0.03), (0.14, 0.395, 0.265, 0.05), (-0.04, 0.40, 0.275, 0.065),
+                      (-0.165, 0.455, 0.28, 0.08), (-0.205, 0.60, 0.285, 0.11), (-0.23, 0.80, 0.285, 0.125),
+                      (-0.255, 1.00, 0.275, 0.115), (-0.272, 1.15, 0.235, 0.075), (-0.285, 1.27, 0.17, 0.055),
+                      (-0.292, 1.39, 0.16, 0.05), (-0.295, 1.44, 0.15, 0.04)], 4)
+    m = len(spine)
+    frames = []
+    for i, (x, z, hw, wing) in enumerate(spine):
+        a, b = spine[max(i - 1, 0)], spine[min(i + 1, m - 1)]
+        t = Vector((b[0] - a[0], 0, b[1] - a[1])).normalized()
+        nrm = t.cross(side).normalized()           # towards the pilot (up on the pan, forward on the back)
+        frames.append((W(x, z), nrm, hw, wing))
+    # arc length along the spine (for the channels)
+    arc = [0.0]
+    for i in range(1, m):
+        arc.append(arc[-1] + (frames[i][0] - frames[i - 1][0]).length)
+
+    def surf(i, u, lift=0.0):
+        """The shell's front surface at station i, across-coordinate u in -1..1, lifted along the normal."""
+        c, nrm, hw, wing = frames[i]
+        rise = wing * abs(u) ** 3.2
+        return c + side * (u * hw) + nrm * (rise + lift)
+
+    U = [-1.0 + 2.0 * k / 20 for k in range(21)]
+    # 1) the shell: the U section with a 4.5 cm wall, its rim rounded over (a carbon-grey composite)
+    rings = []
+    for i in range(m):
+        c, nrm, hw, wing = frames[i]
+        front = [surf(i, u) for u in U]
+        back = [surf(i, u * 1.02, -0.045) - nrm * 0.01 * (1 - abs(u)) for u in reversed(U)]
+        lip = [surf(i, 1.0, 0.012) + side * 0.008, surf(i, 1.0, -0.02) + side * 0.016]
+        lip_l = [surf(i, -1.0, -0.02) - side * 0.016, surf(i, -1.0, 0.012) - side * 0.008]
+        rings.append(front + lip + back + lip_l)
+    loft(g["int_console"], rings)
+
+    # 2) the padding: quilted channels across the pan and up the back, each a pillowed strip with rounded ends,
+    # 1.4 cm grooves between them; bolsters along both sides of the back and the pan
+    def pad(i0, i1, u0, u1, bulge, base=0.004, ends=0.35):
+        rr = []
+        n_u = 12
+        for i in range(i0, i1 + 1):
+            s_ = (arc[i] - arc[i0]) / max(arc[i1] - arc[i0], 1e-4)
+            end = max(math.sin(math.pi * min(max(s_, 0.0), 1.0)), 0.02) ** ends
+            top, bot = [], []
+            for k in range(n_u + 1):
+                u = u0 + (u1 - u0) * k / n_u
+                w = (u - u0) / (u1 - u0)
+                b = bulge * end * max(math.sin(math.pi * w), 0.0) ** 0.55
+                top.append(surf(i, u, base + b))
+                bot.append(surf(i, u, -0.004))
+            rr.append(top + list(reversed(bot)))
+        loft(g["int_leather"], rr)
+
+    def at(arc_len):
+        return min(range(m), key=lambda i: abs(arc[i] - arc_len))
+    # channel stations by arc length from the front lip (m): pan 2, back 4, head 1
+    channels = [(0.02, 0.17), (0.185, 0.33), (0.40, 0.56), (0.575, 0.72), (0.735, 0.88), (0.895, 1.02), (1.10, 1.25)]
+    for a0, a1 in channels:
+        i0, i1 = at(a0), at(a1)
+        if i1 - i0 >= 2:
+            pad(i0, i1, -0.66, 0.66, 0.042 if a0 < 1.0 else 0.05)
+    for sgn in (-1, 1):
+        for a0, a1 in ((0.03, 0.30), (0.40, 1.03)):
+            i0, i1 = at(a0), at(a1)
+            u0, u1 = (0.72, 0.97) if sgn > 0 else (-0.97, -0.72)
+            pad(i0, i1, u0, u1, 0.05, ends=0.5)
+    # the grooves' welts: a thin dark line down the middle of each gap
+    for a0, a1 in channels[:-1]:
+        i = at(a1 + 0.008)
+        ring_pts = [surf(i, u, 0.004) for u in U[3:-3]]
+        for pa, pb in zip(ring_pts, ring_pts[1:]):
+            tube(g["int_dark"], pa, pb, 0.0035, 6)
+
+    # 3) the harness: five points in dark webbing over the padding, steel adjusters, a machined rotary buckle
+    def strap(points, width=0.046, thick=0.0045, key="int_dark"):   # (dark webbing: the fabric grey read cartoon blue)
+        rr = []
+        for k, p_ in enumerate(points):
+            a_, b_ = points[max(k - 1, 0)], points[min(k + 1, len(points) - 1)]
+            t_ = (b_ - a_).normalized()
+            n_ = Vector((0, 0, 1)) if abs(t_.z) < 0.7 else Vector((1, 0, 0))
+            w_ = t_.cross(n_).normalized()
+            n_ = w_.cross(t_).normalized()
+            rr.append([p_ + w_ * width / 2, p_ + w_ * width / 2 + n_ * thick, p_ - w_ * width / 2 + n_ * thick, p_ - w_ * width / 2])
+        loft(g[key], rr)
+
+    buckle = surf(at(0.24), 0.0, 0.05)
+    shoulder_i, hip_i = at(1.06), at(0.40)
+    for sgn in (-1, 1):
+        u = sgn * 0.27
+        path = [surf(i, u, 0.056) for i in range(shoulder_i, hip_i - 1, -2)]
+        path.append(buckle + side * (sgn * 0.03) + Vector((0.0, 0, 0.004)))
+        strap(path)
+        # over the top of the back into the harness slot
+        top = surf(at(1.09), u, 0.03)
+        strap([top, top - frames[at(1.09)][1] * 0.07 + Vector((0, 0, 0.012))], width=0.046)
+        # the adjuster on the chest and the lap belt from the hip to the buckle
+        adj = surf(at(0.83), u, 0.064)
+        rr_slab(g["int_trim"], adj, side, Vector((0, 0, 1)), frames[at(0.83)][1], 0.058, 0.032, 0.006, 0.009, 3)
+        lap = [surf(i, sgn * 0.94, 0.045) for i in range(hip_i, hip_i - 3, -1)]
+        lap += [surf(at(0.30), sgn * 0.5, 0.05), buckle + side * (sgn * 0.035)]
+        strap(lap, width=0.05)
+        rr_slab(g["accent"], surf(at(0.70), u, 0.062), side, Vector((0, 0, 1)), frames[at(0.70)][1], 0.03, 0.05, 0.004, 0.003, 2)
+    # crotch strap and the buckle: a satin disc, a dark ring, the orange release tab
+    strap([surf(at(0.05), 0.0, 0.03), buckle - Vector((0.03, 0, 0)) + Vector((0, 0, 0.002))], width=0.05)
+    up_ = frames[at(0.24)][1]
+    tube(g["int_trim"], buckle, buckle + up_ * 0.016, 0.042, 28)
+    tube(g["int_dark"], buckle + up_ * 0.016, buckle + up_ * 0.02, 0.034, 24)
+    tube(g["accent"], buckle + up_ * 0.02, buckle + up_ * 0.026, 0.018, 18)
+    rr_slab(g["int_trim"], buckle + up_ * 0.026, side, Vector((1, 0, 0)), up_, 0.026, 0.006, 0.002, 0.004, 1)
+
+    # 4) the frame: spine spars behind the shell, a gas strut, the swivel post and its plinth on two floor rails
+    for sgn in (-1, 1):
+        sp = [surf(i, sgn * 0.82, -0.07) - frames[i][1] * 0.02 for i in range(at(0.30), at(1.12), 3)]
+        for pa, pb in zip(sp, sp[1:]):
+            tube(g["int_trim"], pa, pb, 0.016, 10)
+        rail_a, rail_b = W(-0.30, 0.015) + side * (sgn * 0.17), W(0.30, 0.015) + side * (sgn * 0.17)
+        rr_slab(g["int_dark"], (rail_a + rail_b) / 2, side, Vector((1, 0, 0)), Vector((0, 0, 1)), 0.045, 0.66, 0.006, 0.02, 2)
+        rr_slab(g["int_trim"], (rail_a + rail_b) / 2 + Vector((0, 0, 0.021)), side, Vector((1, 0, 0)), Vector((0, 0, 1)), 0.016, 0.64, 0.004, 0.006, 2)
+    base = W(0.0, 0.035)
+    rr_slab(g["int_console"], base, side, Vector((1, 0, 0)), Vector((0, 0, 1)), 0.42, 0.46, 0.05, 0.05, 5)
+    tube(g["int_trim"], W(0.0, 0.085), W(0.0, 0.27), 0.055, 24)
+    tube(g["int_dark"], W(0.0, 0.27), W(0.0, 0.30), 0.12, 28)
+    tube(g["int_trim"], W(0.0, 0.30), W(0.0, 0.33), 0.1, 28)
+    # the gas strut from the post to the back's spar cross-bar
+    hinge = surf(at(0.48), 0.0, -0.09)
+    tube(g["int_trim"], W(-0.02, 0.24), (W(-0.02, 0.24) + hinge) / 2, 0.022, 14)
+    tube(g["int_dark"], (W(-0.02, 0.24) + hinge) / 2, hinge, 0.013, 12)
+    tube(g["int_trim"], surf(at(0.48), -0.8, -0.09), surf(at(0.48), 0.8, -0.09), 0.014, 10)
+    # the height lever under the pan's right edge
+    tube(g["int_trim"], surf(at(0.10), -1.0, -0.06), surf(at(0.10), -1.0, -0.06) + Vector((0.08, -0.03, -0.01)), 0.007, 8)
+    tube(g["accent"], surf(at(0.10), -1.0, -0.06) + Vector((0.08, -0.03, -0.01)), surf(at(0.10), -1.0, -0.06) + Vector((0.11, -0.04, -0.012)), 0.011, 10)
+
+    # 5) armrests (author 26. 9. 2026): padded arms on graphite shells, hinged on the frame, 23 cm clear of the consoles
+    pan = W(0.02, 0.45)
+    fwd, upz = Vector((1, 0, 0)), Vector((0, 0, 1))
+    for sd in (-1, 1):
+        top = pan + side * (sd * 0.345) + fwd * 0.03 + upz * 0.22
+        rr_slab(g["int_console"], top - upz * 0.03, side, fwd, upz, 0.085, 0.34, 0.024, 0.026, 5)
+        rr_slab(g["int_leather"], top, side, fwd, upz, 0.075, 0.32, 0.026, 0.032, 6)
+        rr_slab(g["int_dark"], top + upz * 0.001, side, fwd, upz, 0.004, 0.27, 0.001, 0.001, 1)   # welt
+        hinge_a = top - upz * 0.055 - fwd * 0.15
+        tube(g["int_trim"], hinge_a - side * 0.03, hinge_a + side * 0.03, 0.014, 14)
+        tube(g["int_trim"], pan - upz * 0.05 + side * (sd * 0.3) - fwd * 0.2, hinge_a, 0.012, 10)
+        tube(g["int_trim"], hinge_a, top - upz * 0.035 - fwd * 0.1, 0.011, 10)
 
 
 # ------------------------------------------------------------------------------------------ HOTAS
@@ -1028,12 +1204,16 @@ def wing_panels(g, eye, spec):
                 c = hit - n * 0.035
             else:
                 r, u, n = oriented(eye, c)
-            rows = ([[("guarded", "ck_gear"), ("guarded", "ck_vtol"), ("rocker", "ck_lights"), ("rocker", "ck_extlt")],
+            # (the ENGINE switch under a red guard beside the seat, author 5. 10. 2026: SC's power / engines triad)
+            rows = ([[("guarded", "ck_gear"), ("guarded", "ck_vtol"), ("guarded_red", "ck_eng"), ("rocker", "ck_lights")],
                      [("led_o", "ck_temp"), ("button", "ck_cool"), ("button", "ck_boost"), ("button", "ck_decpl"), ("led_blink", "ck_warn")]]
                     if side > 0 else
                     [[("guarded_red", "ck_masterarm"), ("encoder", "ck_wpn"), ("rotary", "ck_nav"), ("rocker", "ck_rcs")],
                      [("led_blink", "ck_armed"), ("button", "ck_aux"), ("led_o", "ck_heat"), ("led_w", "ck_ready")]])
-            control_module(g, c + n * 0.035, r, u, n, 0.2, 0.15, rows, tree=tree)
+            placed = control_module(g, c + n * 0.035, r, u, n, 0.2, 0.15, rows, tree=tree)
+            if "ck_eng" in placed and side > 0:
+                # the ENGINE switch as a socket (interact mode clicks it; SpaceshipPawn::GetEngineControlLocation)
+                SIDE_SOCKETS["Control_eng"] = placed["ck_eng"] + n * 0.015
 
 
 def underdash(g, eye, spec, zfloor, lights_out):
@@ -1100,6 +1280,8 @@ def build_wrap(g, screen_bm, sockets, eye, spec, zfloor, lights_out):
         # two blue spots at the bottom of the pilot's view)
         lights_out.append({"at": [spec["pod_x"] - 0.2, side * spec["pod_y"], spec["pod_z"] - 0.02], "cd": spec.get("desk_light_cd", 3.0),
                            "type": "point", "color": [0.45, 0.7, 1.0], "source_radius_cm": 8.0})
+    SIDE_SOCKETS.clear()
     wing_panels(g, eye, spec)
+    sockets.update(SIDE_SOCKETS)
     pedestal(g, screen_bm, sockets, eye, spec)
     return underdash(g, eye, spec, zfloor, lights_out)
