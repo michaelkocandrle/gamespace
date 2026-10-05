@@ -452,6 +452,47 @@ def obj_console(g, r, zr, z0):
         for f in (0.08, 0.3, 0.5, 0.7, 0.92):
             for yy in (y0 + 0.045, y1 - 0.045):
                 cyl(g["int_trim"], (x0 + (x1 - x0) * f, yy, top + 0.012), (x0 + (x1 - x0) * f, yy, top + 0.016), 0.004, 6)
+        # (author 5. 10. 2026: the consoles flat slabs, "plastic and cheap" - the corridor ceiling's level: layered
+        # trims, ribs, a padded forearm rest, a vent)
+        import hs_cockpit
+        sgn = 1.0 if y0 > 0 else -1.0               # +1: the left console (outboard = +y)
+        inner = y0 if y0 > 0 else y1                # the face towards the pilot
+
+        def proud(d):
+            return sorted((inner, inner - sgn * d))
+        # the forearm rest along the inner edge of the top, behind the HOTAS: a padded leather bar on a graphite base
+        pc = Vector((x0 + 0.40, inner + sgn * 0.085, top + 0.016))   # (ends 3 cm short of the HOTAS bases)
+        hs_cockpit.rr_slab(g["int_console"], pc, Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1)), 0.46, 0.1, 0.03, 0.014, 4)
+        hs_cockpit.rr_slab(g["int_leather"], pc + Vector((0, 0, 0.034)), Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1)), 0.44, 0.085, 0.032, 0.04, 6)   # (front face at c, depth behind)
+        hs_cockpit.rr_slab(g["int_dark"], pc + Vector((0, 0, 0.0345)), Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1)), 0.4, 0.004, 0.001, 0.002, 1)   # the welt, sunk into the pad
+        # the inner face: a dark recessed kick at the foot under a satin plinth strip, a trim band under the top,
+        # structural ribs between them and a louvred vent near the front
+        ya, yb = proud(0.004)
+        box(g["int_dark"], (x0 + 0.02, ya, z0), (x1 - 0.02, yb, z0 + 0.07))
+        ya, yb = proud(0.016)
+        box(g["int_trim"], (x0 + 0.01, ya, z0 + 0.07), (x1 - 0.01, yb, z0 + 0.086))
+        ya, yb = proud(0.01)
+        box(g["int_trim"], (x0 + 0.01, ya, top - 0.095), (x1 - 0.01, yb, top - 0.078))
+        ya, yb = proud(0.013)
+        for f in (0.2, 0.45, 0.7):
+            xr = x0 + (x1 - x0) * f
+            box(g["int_console"], (xr - 0.016, ya, z0 + 0.086), (xr + 0.016, yb, top - 0.095))
+            for zz in (z0 + 0.11, top - 0.12):
+                ya2, yb2 = proud(0.016)
+                cyl(g["int_trim"], (xr, (ya2 + yb2) / 2, zz), (xr, yb2 if sgn < 0 else ya2, zz), 0.005, 8)
+        vx0, vx1 = x1 - 0.33, x1 - 0.1
+        vz0, vz1 = z0 + 0.16, top - 0.14
+        ya, yb = proud(0.006)
+        box(g["int_trim"], (vx0 - 0.012, ya, vz0 - 0.012), (vx1 + 0.012, yb, vz1 + 0.012))
+        ya, yb = proud(0.008)
+        box(g["int_dark"], (vx0, ya, vz0), (vx1, yb, vz1))
+        k = 0
+        zz = vz0 + 0.012
+        while zz < vz1 - 0.01:
+            ya, yb = proud(0.014)
+            box(g["int_console"], (vx0 + 0.006, ya, zz), (vx1 - 0.006, yb, zz + 0.008))
+            zz += 0.022
+            k += 1
         if y0 > 0:
             # the left console's module aft of the throttle: the canopy LOCK rocker and three labelled status LEDs
             # (18 cm: at 15 the outer LED's label crossed the housing's rim)
