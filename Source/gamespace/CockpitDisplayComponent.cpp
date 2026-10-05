@@ -119,9 +119,13 @@ void UCockpitDisplayComponent::BeginPlay()
 	HoloTickSound = Load(TEXT("SW_HoloTick"));
 	PowerUpSound = Load(TEXT("SW_PowerUp"));
 	PowerDownSound = Load(TEXT("SW_PowerDown"));
+	EngineStartSound = Load(TEXT("SW_EngineStart"));
+	EngineStopSound = Load(TEXT("SW_EngineStop"));
+	SwitchClickSound = Load(TEXT("SW_SwitchClick"));
 	if (const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(GetOwner()))
 	{
 		LastPower = static_cast<uint8>(Ship->GetPowerState());
+		LastEngine = static_cast<uint8>(Ship->GetEngineState());
 	}
 	if (!FApp::CanEverRender() || GetNetMode() == NM_DedicatedServer)
 	{
@@ -326,6 +330,10 @@ void UCockpitDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	// the sounds follow the picture: power up / down, the holo deploying, catching and retracting
 	if (static_cast<uint8>(Power) != LastPower)
 	{
+		if (LastPower == static_cast<uint8>(ESpacePowerState::Off) || Power == ESpacePowerState::Off)
+		{
+			PlayHoloSound(SwitchClickSound, -1, 0.8f);   // the PWR selector's snap
+		}
 		if (LastPower == static_cast<uint8>(ESpacePowerState::Off))
 		{
 			PlayHoloSound(PowerUpSound, -1);
@@ -340,6 +348,28 @@ void UCockpitDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 		}
 		LastBootAlpha = Power == ESpacePowerState::Booting ? 0.f : 1.f;
 		LastPower = static_cast<uint8>(Power);
+	}
+	// the engines: their start-up and run-down (and the switch, when the pilot flips it with the power on)
+	const ESpacePowerState Engines = Ship->GetEngineState();
+	if (static_cast<uint8>(Engines) != LastEngine)
+	{
+		if (LastEngine == static_cast<uint8>(ESpacePowerState::Off))
+		{
+			if (Power == ESpacePowerState::On && Ship->GetPowerBootAlpha() >= 1.f && LastPower == static_cast<uint8>(ESpacePowerState::On))
+			{
+				PlayHoloSound(SwitchClickSound, -1, 0.8f);
+			}
+			PlayHoloSound(EngineStartSound, -1, 0.9f);
+		}
+		else if (Engines == ESpacePowerState::Off)
+		{
+			if (Power != ESpacePowerState::Off)
+			{
+				PlayHoloSound(SwitchClickSound, -1, 0.8f);
+			}
+			PlayHoloSound(EngineStopSound, -1, 0.9f);
+		}
+		LastEngine = static_cast<uint8>(Engines);
 	}
 	if (Power == ESpacePowerState::Booting)
 	{

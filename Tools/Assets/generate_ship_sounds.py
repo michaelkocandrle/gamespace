@@ -27,7 +27,8 @@ One-shots:
     touchdown.wav      landing gear taking the weight.
     ui_hover.wav, ui_confirm.wav, menu_ambience.wav (loop)   title screen and menus.
 
-Holo technology (author 5. 10. 2026: "add sounds matching this technology"):
+Holo technology (author 5. 10. 2026: "add sounds matching this technology"; the same evening "cheap": replaced by
+ArtSource/Audio/ElevenLabs, these generators are kept but not run):
 
     holo_deploy.wav    1.0 s: the MFD picture rising out of its emitter - a soft electric swell, a
                        rising glassy shimmer of detuned partials with a fast flutter, a light lock tick.
@@ -423,12 +424,8 @@ SOUNDS = {
     "ui_hover": ui_hover,
     "ui_confirm": ui_confirm,
     "menu_ambience": menu_ambience,
-    "holo_deploy": holo_deploy,
-    "holo_retract": holo_retract,
-    "holo_flicker": holo_flicker,
-    "holo_tick": holo_tick,
-    "power_up": power_up,
-    "power_down": power_down,
+    # (holo_* and power_* are no longer generated: the author found them cheap; recorded-quality ones in
+    # ArtSource/Audio/ElevenLabs replace them - the functions stay as a fallback)
 }
 
 

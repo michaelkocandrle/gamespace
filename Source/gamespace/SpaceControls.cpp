@@ -60,6 +60,7 @@ const TArray<FSpaceControl>& FSpaceControls::Get()
 		Add(M::Flight, TEXT("F2"), true, LOCTEXT("MfdRightBack", "Alt: zpět"), C::Interface, nullptr);
 		Add(M::Flight, TEXT("F"), false, LOCTEXT("GetUp", "Vstát /\nvystoupit"), C::Interaction, TEXT("IA_Interact"));
 		Add(M::Flight, TEXT("U"), false, LOCTEXT("Power", "Napájení\nlodi"), C::Systems, nullptr);
+		Add(M::Flight, TEXT("I"), false, LOCTEXT("Engines", "Motory"), C::Systems, nullptr);
 		// On foot (IMC_Character, and the view switch the character adds itself).
 		Add(M::OnFoot, TEXT("W"), false, LOCTEXT("WalkFwd", "Chůze\nvpřed"), C::Movement, TEXT("IA_CharMove"));
 		Add(M::OnFoot, TEXT("S"), false, LOCTEXT("WalkBack", "Chůze\nvzad"), C::Movement, TEXT("IA_CharMove"));
@@ -73,7 +74,7 @@ const TArray<FSpaceControl>& FSpaceControls::Get()
 		Add(M::Global, TEXT("Escape"), false, LOCTEXT("Menu", "Menu"), C::Interface, nullptr);
 		Add(M::Global, TEXT("F10"), false, LOCTEXT("MenuF10", "Menu"), C::Interface, nullptr);
 		Add(M::Global, TEXT("H"), false, LOCTEXT("Hud", "HUD"), C::Interface, TEXT("IA_ToggleHud"));
-		Add(M::Global, TEXT("I"), false, LOCTEXT("Interior", "Prohlídka\ninteriéru"), C::Interface, nullptr);
+		Add(M::Global, TEXT("I"), true, LOCTEXT("Interior", "Alt: prohlídka interiéru"), C::Interface, nullptr);
 		return T;
 	}();
 	return Controls;

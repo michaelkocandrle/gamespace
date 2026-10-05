@@ -61,7 +61,7 @@ else:
         check("one page back from FLIGHT is CONFIGURATION", bp.get_mfd_page(0) == 3, str(bp.get_mfd_page(0)))
         hotspots, _ = describe(bp)
         config = hotspots[5:]
-        check("CONFIGURATION: one hotspot per switch", len(config) == 5, str(hotspots))
+        check("CONFIGURATION: one hotspot per switch (with ENGINES)", len(config) == 6, str(hotspots))
         check("a switch says what a click does", config and config[0] == "COUPLED MODE: VYPNOUT", str(config[:1]))
         bp.set_flight_assist(False)
         hotspots, _ = describe(bp)

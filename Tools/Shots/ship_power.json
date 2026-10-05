@@ -97,6 +97,32 @@
    "settle": 3.0
   },
   {
+   "name": "engines_off",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.5,
+   "console": [
+    "space.MfdPage 3 0",
+    "space.Engines 0"
+   ]
+  },
+  {
+   "name": "engines_starting",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 1.0,
+   "console": [
+    "space.Engines 1"
+   ]
+  },
+  {
+   "name": "engines_running",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 3.0,
+   "console": []
+  },
+  {
    "name": "holo_retracting",
    "camera": "cockpit",
    "hud": 1,

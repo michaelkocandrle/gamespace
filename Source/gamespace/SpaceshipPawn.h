@@ -173,6 +173,24 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Power")
 	ESpacePowerState GetPowerState() const { return PowerState; }
 
+	/** The engines (author 5. 10. 2026, SC: power and engines are separate switches - U and I). Off / starting
+	 * (EngineStartSeconds, no thrust yet) / running. They need the power; switched on without it they start as soon
+	 * as the power is up, and the power going off stops them. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Power")
+	ESpacePowerState GetEngineState() const { return EngineState; }
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Power")
+	bool AreEnginesRunning() const { return IsPowered() && EngineState == ESpacePowerState::On; }
+	/** Whether the pilot wants them on (they follow it once there is power). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Power")
+	bool AreEnginesWanted() const { return bEnginesWanted; }
+	/** 0 off .. 1 running (the start-up's progress; the engine glow and sound follow it). */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Power")
+	float GetEngineSpoolAlpha() const;
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Power")
+	bool SetEngines(bool bOn, bool bInstant = false);
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Power")
+	bool ToggleEngines();
+
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Power")
 	bool IsPowered() const { return PowerState == ESpacePowerState::On; }
 
@@ -261,6 +279,10 @@ public:
 	/** SC's displays and HUD are up within ~3 s of POWER (frames 3 s apart in the author's capture). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Power", meta = (ClampMin = "0.1"))
 	float PowerBootSeconds = 2.5f;
+
+	/** The engines' start-up (spool) before they give thrust. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Power", meta = (ClampMin = "0.1"))
+	float EngineStartSeconds = 3.f;
 
 	/**
 	 * The player's settings (USpaceUserSettings): virtual joystick and its dead zone, the cockpit field of view, and with
@@ -2060,6 +2082,9 @@ private:
 	/** The cockpit lights follow the power (lit from the start-up on). */
 	void ApplyPowerLights();
 	ESpacePowerState PowerState = ESpacePowerState::On;
+	ESpacePowerState EngineState = ESpacePowerState::On;
+	float EngineStartElapsed = 0.f;
+	bool bEnginesWanted = true;
 	bool bLeaveSeatPending = false;
 	float PowerBootElapsed = 0.f;
 	void UpdateAfterburner(float DeltaSeconds);

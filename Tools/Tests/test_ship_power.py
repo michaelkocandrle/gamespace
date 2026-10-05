@@ -85,7 +85,24 @@ try:
     check("starting up: still no thrust", speed(fly(ship, 0.25)) < 1.0)
     ship.debug_step_power(boot)
     check("after PowerBootSeconds the ship is on", ship.is_powered() and ship.get_power_boot_alpha() == 1.0)
+    # the engines (author 5. 10. 2026, SC: U power, I engines): they start with the power, spool, then thrust
+    spool = ship.get_editor_property("engine_start_seconds")
+    check("with power the engines start (wanted)", ship.get_engine_state() == unreal.SpacePowerState.BOOTING and not ship.are_engines_running(),
+          str(ship.get_engine_state()))
+    check("engines starting: no thrust yet", speed(fly(ship, 0.25)) < 1.0)
+    ship.debug_step_power(spool)
+    check("after EngineStartSeconds the engines run", ship.are_engines_running() and ship.get_engine_spool_alpha() == 1.0)
     check("on again: W accelerates", speed(fly(ship, 1.0)) > 100.0)
+    ship.set_engines(False, False)
+    check("engines off: the power stays, no thrust", ship.is_powered() and speed(fly(ship, 1.0)) < 1.0)
+    _, keys = describe(ship)
+    check("engines off: MOTORY (ZAP/VYP) I on the list, no flight keys", ("MOTORY (ZAP/VYP)", "I") in keys and ("SCM / NAV", "B") not in keys, str(keys))
+    ship.set_engines(True, True)
+    check("engines on (instant): W accelerates", speed(fly(ship, 1.0)) > 100.0)
+    ship.set_power(False, False)
+    check("power off stops the engines", ship.get_engine_state() == unreal.SpacePowerState.OFF and ship.are_engines_wanted())
+    ship.set_power(True, True)
+    check("instant power on brings the wanted engines up with it", ship.are_engines_running())
     _, keys = describe(ship)
     check("on: flight keys on the list", ("SCM / NAV", "B") in keys and keys[0][1] == "U", str(keys))
     ship.set_power(False, False)
@@ -118,6 +135,7 @@ else:
 # 5) controls and shots
 controls = unreal.SpaceControlsLibrary.describe_controls()
 check("KLÁVESY lists U for the power", any(c.startswith("flight|U|0|") for c in controls))
+check("KLÁVESY lists I for the engines", any(c.startswith("flight|I|0|") for c in controls))
 shots = json.load(open(os.path.join(REPO, "Tools", "Shots", "ship_power.json"), encoding="utf-8"))["shots"]
 check("the ship_power shots switch the power", any("space.Power 1" in c for s in shots for c in s.get("console", [])))
 

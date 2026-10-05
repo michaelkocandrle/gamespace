@@ -1942,6 +1942,8 @@ FSpaceFlightHudState USpaceFlightHud::MakeState(const ASpaceshipPawn* Ship, int3
 	State.bPrecisionOn = Ship->IsPrecisionModeOn();
 	State.bPrecisionActive = Ship->IsPrecisionActive();
 	State.bVtolOn = Ship->IsVtolOn();
+	State.bEnginesOn = Ship->AreEnginesWanted();
+	State.bEnginesStarting = Ship->GetEngineState() == ESpacePowerState::Booting;
 	State.bVtolActive = Ship->IsVtolActive();
 	State.Stick = Ship->GetMouseStick();
 	State.Deadzone = Ship->GetVirtualJoystickDeadzone();
@@ -2204,13 +2206,15 @@ void USpaceFlightHud::ApplyState(const FSpaceFlightHudState& InState)
 	// Amber while switched on but not in effect, the same rule as G-Safe and precision mode.
 	SetLamp(TEXT("VTOL"), State.bVtolOn, State.bVtolActive ? Instrument : Amber);
 	// CONFIGURATION's switches (only on the displays): lit ON, dark OFF.
-	const bool ConfigOn[] = { State.bCoupled, State.bGSafeOn, State.bComStab, State.bPrecisionOn, State.bVtolOn };
+	const bool ConfigOn[] = { State.bCoupled, State.bGSafeOn, State.bComStab, State.bPrecisionOn, State.bVtolOn, State.bEnginesOn };
 	for (int32 Index = 0; Index < UE_ARRAY_COUNT(ConfigOn); ++Index)
 	{
 		const FName Lamp(*FString::Printf(TEXT("Cfg%d"), Index));
 		if (UTextBlock* SwitchLabel = LampLabels.FindRef(Lamp))
 		{
-			SwitchLabel->SetText(FText::FromString(ConfigOn[Index] ? TEXT("ON") : TEXT("OFF")));
+			// (the engines' switch reads START while they spool up)
+			const bool bStarting = Index == 5 && State.bEnginesStarting;
+			SwitchLabel->SetText(FText::FromString(bStarting ? TEXT("START") : ConfigOn[Index] ? TEXT("ON") : TEXT("OFF")));
 			SwitchLabel->SetColorAndOpacity(FSlateColor(ConfigOn[Index] ? Label : Faded(Amber, 0.85f)));
 		}
 		SetLamp(Lamp, true, ConfigOn[Index] ? Instrument : Faded(Amber, 0.45f));
@@ -3659,7 +3663,7 @@ const TArray<FString>& USpaceCockpitDisplays::PageTitles(int32 Display)
 const TArray<FString>& USpaceCockpitDisplays::ConfigRowNames()
 {
 	// In the order of the switches in ApplyState and the hotspots in SpaceInteraction.
-	static const TArray<FString> Names = { TEXT("COUPLED MODE"), TEXT("G-SAFE"), TEXT("COMSTAB"), TEXT("PRECISION MODE"), TEXT("VTOL") };
+	static const TArray<FString> Names = { TEXT("COUPLED MODE"), TEXT("G-SAFE"), TEXT("COMSTAB"), TEXT("PRECISION MODE"), TEXT("VTOL"), TEXT("ENGINES") };
 	return Names;
 }
 

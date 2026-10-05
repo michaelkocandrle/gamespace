@@ -347,6 +347,21 @@ void ASpacePlayerController::TickInteraction()
 		}
 	}
 	bPowerKeyWasDown = bPowerDown;
+	// I in the pilot seat: the engines (SC). Alt+I is the old interior tour (HandleInteriorKey).
+	const bool bEnginesDown = bAllowed && IsInputKeyDown(EKeys::I) && !bAlt;
+	if (bEnginesDown && !bEnginesKeyWasDown)
+	{
+		if (ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Played))
+		{
+			Ship->ToggleEngines();
+			if (USpaceNotifications* Notes = USpaceNotifications::Get(this))
+			{
+				Notes->Toast(Ship->AreEnginesWanted() ? (Ship->IsPowered() ? NSLOCTEXT("SpaceHints", "EnginesStart", "Motory startují")
+					: NSLOCTEXT("SpaceHints", "EnginesNoPower", "Motory: nejdřív napájení (U)")) : NSLOCTEXT("SpaceHints", "EnginesOff", "Motory vypnuty"), 3.f);
+			}
+		}
+	}
+	bEnginesKeyWasDown = bEnginesDown;
 
 	FSpaceInteractionView& View = InteractionView;
 	APawn* const Current = GetPawn();  // the tap may just have swapped it
@@ -576,6 +591,18 @@ namespace SpacePlayerControllerConsole
 			if (Ship && Args.Num() >= 1)
 			{
 				Ship->SetPower(FCString::Atoi(*Args[0]) != 0, Args.Num() > 1 && FCString::Atoi(*Args[1]) != 0);
+			}
+		}));
+
+	static FAutoConsoleCommandWithWorldAndArgs EnginesCommand(
+		TEXT("space.Engines"),
+		TEXT("space.Engines 0|1 [instant]: the ship's engines off or on (with their spool unless instant is 1; they need the power)."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			APlayerController* Controller = World ? World->GetFirstPlayerController() : nullptr;
+			if (ASpaceshipPawn* Ship = Controller ? Cast<ASpaceshipPawn>(Controller->GetPawn()) : nullptr; Ship && Args.Num() >= 1)
+			{
+				Ship->SetEngines(FCString::Atoi(*Args[0]) != 0, Args.Num() > 1 && FCString::Atoi(*Args[1]) != 0);
 			}
 		}));
 
@@ -860,6 +887,11 @@ bool ASpacePlayerController::HasInterior() const
 
 void ASpacePlayerController::HandleInteriorKey(const FInputActionValue& /*Value*/)
 {
+	// Alt+I: plain I is the ship's engines since 5. 10. 2026 (SC)
+	if (!IsInputKeyDown(EKeys::LeftAlt) && !IsInputKeyDown(EKeys::RightAlt))
+	{
+		return;
+	}
 	if (!IsMenuOpen() && !IsTitleScreen())
 	{
 		ToggleInterior();

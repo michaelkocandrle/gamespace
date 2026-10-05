@@ -22,7 +22,7 @@ namespace SpaceInteractionLocal
 			return;
 		}
 		const TWeakObjectPtr<ASpaceshipPawn> Weak(Ship);
-		const bool bOn[] = { Ship->IsFlightAssistOn(), Ship->IsGSafeOn(), Ship->IsComStabOn(), Ship->IsPrecisionModeOn(), Ship->IsVtolOn() };
+		const bool bOn[] = { Ship->IsFlightAssistOn(), Ship->IsGSafeOn(), Ship->IsComStabOn(), Ship->IsPrecisionModeOn(), Ship->IsVtolOn(), Ship->AreEnginesWanted() };
 		for (int32 Row = 0; Row < USpaceCockpitDisplays::ConfigRowNames().Num() && Row < UE_ARRAY_COUNT(bOn); ++Row)
 		{
 			FVector At;
@@ -51,7 +51,8 @@ namespace SpaceInteractionLocal
 				case 1: Live->SetGSafe(!Live->IsGSafeOn()); break;
 				case 2: Live->SetComStab(!Live->IsComStabOn()); break;
 				case 3: Live->TogglePrecisionMode(); break;
-				default: Live->ToggleVtol(); break;
+				case 4: Live->ToggleVtol(); break;
+				default: Live->ToggleEngines(); break;
 				}
 			};
 			Out.Add(MoveTemp(Spot));
@@ -240,6 +241,12 @@ void SpaceInteraction::KeyHints(APawn* Pawn, bool bInteractMode, const FSpaceInt
 	{
 		// SC's list starts with POWER (TOGGLE) [U]; without power only the seat, interact mode and the camera.
 		Add(LOCTEXT("HintPower", "NAPÁJENÍ (ZAP/VYP)"), TEXT("U"));
+		// SC's power triad: the engines next (I), with power only
+		if (Ship->IsPowered())
+		{
+			Add(Ship->GetEngineState() == ESpacePowerState::Booting ? LOCTEXT("HintEnginesStarting", "MOTORY STARTUJÍ")
+				: LOCTEXT("HintEngines", "MOTORY (ZAP/VYP)"), TEXT("I"));
+		}
 		if (Ship->IsLeaveSeatPending())
 		{
 			Add(LOCTEXT("HintGetUpCancel", "ZŮSTAT SEDĚT (LOĎ BRZDÍ)"), TEXT("F"));
@@ -257,9 +264,9 @@ void SpaceInteraction::KeyHints(APawn* Pawn, bool bInteractMode, const FSpaceInt
 			Add(LOCTEXT("HintGetOut", "VYSTOUPIT"), TEXT("F"));
 		}
 		Add(LOCTEXT("HintInteractMode", "INTERAKCE (DRŽET)"), TEXT("F"));
-		if (!Ship->IsPowered())
+		if (!Ship->AreEnginesRunning())
 		{
-			// nothing to fly yet
+			// nothing to fly yet (no power or no engines)
 		}
 		else if (Ship->IsLanded())
 		{

@@ -35,21 +35,35 @@ SOUNDS = (
     (UI_FOLDER + "/SW_UiHover", "ui_hover.wav", False),
     (UI_FOLDER + "/SW_UiConfirm", "ui_confirm.wav", False),
     (UI_FOLDER + "/SW_MenuAmbience", "menu_ambience.wav", True),
+    # the ship systems (author 5. 10. 2026: the procedural ones "cheap, like a kids' game"): recorded-quality sound
+    # effects from ElevenLabs Sound Effects 2 (via Scenario), kept in ArtSource/Audio/ElevenLabs (mp3 source +
+    # the 48 kHz mono wav made from it with ffmpeg); prompts in that folder's README.md
     ("SW_HoloDeploy", "holo_deploy.wav", False),
     ("SW_HoloRetract", "holo_retract.wav", False),
     ("SW_HoloFlicker", "holo_flicker.wav", False),
     ("SW_HoloTick", "holo_tick.wav", False),
     ("SW_PowerUp", "power_up.wav", False),
     ("SW_PowerDown", "power_down.wav", False),
+    ("SW_EngineStart", "engine_start.wav", False),
+    ("SW_EngineStop", "engine_stop.wav", False),
+    ("SW_SwitchClick", "switch_click.wav", False),
 )
+RECORDED = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "ArtSource", "Audio", "ElevenLabs")
 
-missing = [f for _, f, _ in SOUNDS if not os.path.isfile(os.path.join(GENERATED, f))]
+
+def source_path(name):
+    # a recorded sound wins over a generated one of the same name
+    recorded = os.path.join(RECORDED, name)
+    return recorded if os.path.isfile(recorded) else os.path.join(GENERATED, name)
+
+
+missing = [f for _, f, _ in SOUNDS if not os.path.isfile(source_path(f))]
 if missing:
     raise RuntimeError("missing %s in %s - run Tools/Assets/generate_ship_sounds.py first" % (", ".join(missing), GENERATED))
 
 for name, source, looping in SOUNDS:
     path = name if name.startswith("/") else "%s/%s" % (FOLDER, name)
-    sound = ga.import_file(path, os.path.join(GENERATED, source), on_exists="update", properties={"looping": looping})
+    sound = ga.import_file(path, source_path(source), on_exists="update", properties={"looping": looping})
     if not isinstance(sound, unreal.SoundWave):
         raise RuntimeError("%s imported as %s, expected SoundWave" % (path, sound.get_class().get_name()))
     unreal.log("build_ship_audio: %s, %.1f s, looping=%s" % (

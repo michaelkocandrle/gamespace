@@ -225,6 +225,14 @@ private:
 	TObjectPtr<class USoundBase> PowerUpSound;
 	UPROPERTY(Transient)
 	TObjectPtr<class USoundBase> PowerDownSound;
+	UPROPERTY(Transient)
+	TObjectPtr<class USoundBase> EngineStartSound;
+	UPROPERTY(Transient)
+	TObjectPtr<class USoundBase> EngineStopSound;
+	UPROPERTY(Transient)
+	TObjectPtr<class USoundBase> SwitchClickSound;
+	/** The engines' state of the last tick (ESpacePowerState as uint8). */
+	uint8 LastEngine = 2;
 	/** ESpacePowerState of the last tick (uint8: the enum lives in SpaceshipPawn.h). */
 	uint8 LastPower = 2;
 	float LastBootAlpha = 1.f;

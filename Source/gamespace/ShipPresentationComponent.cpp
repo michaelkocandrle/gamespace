@@ -216,7 +216,9 @@ void UShipPresentationComponent::UpdateEngineAudio(float DeltaSeconds)
 	// never silent.
 	const float LeverLoad = Ship->Quantum->GetState() == EQuantumState::Traveling ? 0.35f
 		: Ship->bFlightAssist ? 0.35f * FMath::Clamp(float(Ship->LinearVelocity.Size()) / FMath::Max(Ship->GetModeMaxSpeed(), 1.f), 0.f, 1.f) : 0.f;
-	EngineLoad = FMath::FInterpTo(EngineLoad, bPiloted ? FMath::Max(Ship->EngineDemand, LeverLoad) : 0.f, DeltaSeconds, Ship->EngineSpoolRate);
+	// (the engines are their own switch since 5. 10. 2026: their load and roar follow their spool)
+	const float Spool = Ship->GetEngineSpoolAlpha();
+	EngineLoad = FMath::FInterpTo(EngineLoad, bPiloted ? Spool * FMath::Max(Ship->EngineDemand, FMath::Max(LeverLoad, 0.12f * Spool)) : 0.f, DeltaSeconds, Ship->EngineSpoolRate);
 	EngineBoostBlend = FMath::FInterpTo(EngineBoostBlend, bPiloted && Ship->Systems->IsAfterburnerActive() ? 1.f : 0.f, DeltaSeconds, Ship->EngineSpoolRate);
 	HumBlend = FMath::FInterpTo(HumBlend, bPiloted ? 1.f : 0.f, DeltaSeconds, 1.5f);
 
@@ -362,7 +364,7 @@ void UShipPresentationComponent::UpdateShipLights(float DeltaSeconds)
 	// instead of the soft blue of the reference (the author, 22. 9. 2026).
 	const float Thrust = (Ship->ThrusterIdleGlow + (1.f - Ship->ThrusterIdleGlow) * EngineLoad + Ship->ThrusterAfterburnerGlow * AfterburnerFeel
 		+ 0.3f * BoostBlend + Ship->ThrusterQuantumGlow * QuantumBlend) * FMath::Lerp(1.f, Ship->QuantumThrusterScale, QuantumBlend);
-	const float Power = Ship->GetPowerState() == ESpacePowerState::Off ? 0.f : 1.f;
+	const float Power = Ship->GetEngineSpoolAlpha();   // the nozzles glow with the engines, not the power
 	for (FShipGlowMaterial& Glow : ThrusterMaterials)
 	{
 		Apply(Glow, Glow.BaseStrength * Thrust * Power);

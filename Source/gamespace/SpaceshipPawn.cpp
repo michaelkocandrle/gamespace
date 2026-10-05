@@ -218,6 +218,7 @@ void ASpaceshipPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	PowerState = bStartPowered ? ESpacePowerState::On : ESpacePowerState::Off;
+	EngineState = PowerState;
 
 	Presentation->LoadViewCollection();
 
@@ -327,6 +328,11 @@ bool ASpaceshipPawn::SetPower(bool bOn, bool bInstant)
 		{
 			SetQuantumEngageHeld(false);
 			Systems->CutBoostAndAfterburner();
+			EngineState = ESpacePowerState::Off;    // no power, no engines (they restart with it if still wanted)
+		}
+		else if (PowerState == ESpacePowerState::On && bEnginesWanted)
+		{
+			EngineState = ESpacePowerState::On;     // the instant power-up (tests, shots) brings them up with it
 		}
 		ApplyPowerLights();
 		UE_LOG(LogSpaceship, Log, TEXT("%s: power %s"), *GetName(),
@@ -340,6 +346,52 @@ bool ASpaceshipPawn::TogglePower()
 	return SetPower(PowerState == ESpacePowerState::Off);
 }
 
+bool ASpaceshipPawn::SetEngines(bool bOn, bool bInstant)
+{
+	if (!bOn && Quantum->GetState() == EQuantumState::Traveling)
+	{
+		return false;
+	}
+	bEnginesWanted = bOn;
+	const ESpacePowerState Was = EngineState;
+	if (!bOn)
+	{
+		EngineState = ESpacePowerState::Off;
+		Systems->CutBoostAndAfterburner();
+		SetQuantumEngageHeld(false);
+	}
+	else if (IsPowered() && EngineState == ESpacePowerState::Off)
+	{
+		EngineState = bInstant ? ESpacePowerState::On : ESpacePowerState::Booting;
+		EngineStartElapsed = 0.f;
+	}
+	if (EngineState != Was)
+	{
+		UE_LOG(LogSpaceship, Log, TEXT("%s: engines %s"), *GetName(),
+			EngineState == ESpacePowerState::Off ? TEXT("off") : EngineState == ESpacePowerState::Booting ? TEXT("starting") : TEXT("running"));
+	}
+	return true;
+}
+
+bool ASpaceshipPawn::ToggleEngines()
+{
+	return SetEngines(!bEnginesWanted);
+}
+
+float ASpaceshipPawn::GetEngineSpoolAlpha() const
+{
+	if (!IsPowered())
+	{
+		return 0.f;
+	}
+	switch (EngineState)
+	{
+	case ESpacePowerState::Off: return 0.f;
+	case ESpacePowerState::Booting: return FMath::Clamp(EngineStartElapsed / FMath::Max(EngineStartSeconds, 0.1f), 0.f, 0.999f);
+	default: return 1.f;
+	}
+}
+
 void ASpaceshipPawn::UpdatePower(float DeltaSeconds)
 {
 	if (PowerState == ESpacePowerState::Booting)
@@ -350,6 +402,21 @@ void ASpaceshipPawn::UpdatePower(float DeltaSeconds)
 			PowerState = ESpacePowerState::On;
 			ApplyPowerLights();
 			UE_LOG(LogSpaceship, Log, TEXT("%s: power on"), *GetName());
+		}
+	}
+	// the engines: they start once there is power (if the pilot has them switched on), then spool up
+	if (PowerState == ESpacePowerState::On && bEnginesWanted && EngineState == ESpacePowerState::Off)
+	{
+		EngineState = ESpacePowerState::Booting;
+		EngineStartElapsed = 0.f;
+	}
+	if (EngineState == ESpacePowerState::Booting)
+	{
+		EngineStartElapsed += DeltaSeconds;
+		if (EngineStartElapsed >= EngineStartSeconds)
+		{
+			EngineState = ESpacePowerState::On;
+			UE_LOG(LogSpaceship, Log, TEXT("%s: engines running"), *GetName());
 		}
 	}
 }
@@ -950,9 +1017,9 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 void ASpaceshipPawn::StepFlight(float DeltaSeconds)
 {
 	UpdatePower(DeltaSeconds);
-	if (!IsPowered())
+	if (!AreEnginesRunning())
 	{
-		// No power, no thrusters (and no boost, afterburner or quantum below).
+		// No power or no engines, no thrusters (and no boost, afterburner or quantum below).
 		Systems->SetBoostHeld(false);
 		Systems->SetAfterburnerHeld(false);
 		bSpaceBrakeHeld = false;
@@ -981,7 +1048,7 @@ void ASpaceshipPawn::StepFlight(float DeltaSeconds)
 		MouseStick = FVector2D::ZeroVector;
 		bSpaceBrakeHeld = true;
 	}
-	if (!IsPowered())
+	if (!AreEnginesRunning())
 	{
 		// The keys and the stick move nothing; free look above still turns the pilot's head.
 		ThrustInput = StrafeInput = LiftInput = RollInput = 0.f;
@@ -1105,7 +1172,7 @@ void ASpaceshipPawn::UpdateQuantum(float DeltaSeconds)
 	Context.Location = GetActorLocation();
 	Context.Nose = GetActorForwardVector();
 	// Without power the drive cannot spool: treated as the landed case, which blocks it.
-	Context.bLanded = Landing->GetState() == ELandingState::Landed || !IsPowered();
+	Context.bLanded = Landing->GetState() == ELandingState::Landed || !AreEnginesRunning();
 	Context.bInNav = Systems->GetMasterMode() == EMasterMode::NAV && !Systems->IsMasterModeSwitching();
 	const UShipQuantumComponent::FFrame Frame = Quantum->Update(DeltaSeconds, Context, GetQuantumRules());
 	// Engage: the button held for QuantumEngageHoldSeconds while ready.
@@ -1387,9 +1454,9 @@ void ASpaceshipPawn::UpdateLinearMotion(float DeltaSeconds)
 		{
 			LocalAcceleration = LimitThrustForPilot(LocalAcceleration, bComStab && bCoupled);
 		}
-		if (!IsPowered())
+		if (!AreEnginesRunning())
 		{
-			// No power: the ship falls or drifts (SC: a ship powered off in flight drops).
+			// No power or no engines: the ship falls or drifts (SC: a ship powered off in flight drops).
 			LocalAcceleration = FVector::ZeroVector;
 		}
 		// How hard the engines are working, for the glow and the sound. The vertical axis is measured
