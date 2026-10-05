@@ -444,6 +444,7 @@ from `Tools/Assets/add_vtol_input.py`, and `space.Vtol 1|0` switches it from the
 | MFD pages    | `F1` left, `F2` right (`Alt` + key: back; `[` `]` on a US keyboard) | - |
 | Get up / get out | `F`: in a landed walkable ship (or below 1 m/s) stand up behind the seat; otherwise get out when LANDED. On foot in the ship: `F` at the seat sits down, at the ramp goes out (landed only); outside, `F` at a walkable ship goes in up the ramp | - |
 | Ship power (SC) | `U` (in the seat) | - |
+| Engines (SC; need the power, 3 s spool) | `I` (in the seat; Alt+I = the old interior tour) | - |
 | Kit showroom / Steadfast interior | `Alt+U` / `I` (there and back) | - |
 | Free look    | hold right mouse button    | -                    |
 | HUD          | `H` (compact / full / off) | -                    |
@@ -633,6 +634,13 @@ debug HUD stays only in HUD mode 3. Headless: `Tools/Tests/test_interaction.py`;
 - Still to do: the ramp opening, a body animation for sitting.
 
 ### Ship power (SC cold start, step 2a)
+
+**Engines** (author 5. 10. 2026): `ASpaceshipPawn::GetEngineState()` Off / starting (`EngineStartSeconds` 3 s) /
+running, apart from the power: `I` in the seat, the ENGINE switch under a red guard on the left console (socket
+`Control_eng`, interact mode) or the ENGINES switch on MFD CONFIGURATION; they start with the power when wanted,
+the power going off stops them; thrust, boost and quantum need them running; the nozzle glow and the engine roar
+follow their spool, the reactor hum the power. `space.Engines 0|1 [instant]`. Sounds (power, holo, engines, the
+switch) are ElevenLabs Sound Effects 2 (`ArtSource/Audio/ElevenLabs`).
 
 `ASpaceshipPawn::GetPowerState()`: **Off**, **Booting** (`PowerBootSeconds` 2.5 s), **On**. `bStartPowered`
 (default on: the game starts flying). **U** in the seat or the dashboard's **PWR** selector in interact mode

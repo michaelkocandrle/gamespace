@@ -1,0 +1,76 @@
+{
+ "_comment": "The hold's fire extinguisher (author 5. 10. 2026: cheap) from the walker's eye, either side.",
+ "shots": [
+  {
+   "name": "flat",
+   "camera": "chase",
+   "altitude_m": 40.0,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "console": [
+    "space.FlatSpot 5 8"
+   ]
+  },
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3.2,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 10.0,
+   "console": [
+    "stat none"
+   ]
+  },
+  {
+   "name": "a_stand_up",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Interact",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "a2_look_seat",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Walk 0 0 0.1 180"
+   ]
+  },
+  {
+   "name": "b_down_stairs",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.Walk 1 0 0.5 0",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "ext_a",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 2.5,
+   "console": [
+    "space.WalkAt -340 -120 145"
+   ]
+  },
+  {
+   "name": "ext_b",
+   "camera": "pawn",
+   "hud": 0,
+   "settle": 2.5,
+   "console": [
+    "space.WalkAt -340 120 215"
+   ]
+  }
+ ]
+}

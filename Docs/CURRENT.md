@@ -65,9 +65,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 0. **Autor 5. 10. (screenshoty), v tomto pořadí:**
    a) holo MFD v3 (`2026-10-05_holo_mfd_v3_spec.md`): rám, 880 × 490, azurová, Saira, vyjíždění zespodu hotové; zbývá dotáhnout další stránky;
-   a2) autor 5. 10. večer: zvuky napájení a holo „levné, jak z dětské hry“ → skutečné zvukové assety místo procedurálních;
-      motory zvlášť od napájení (ENGINES na MFD + kvalitní přepínač u sedadla); kokpit dál z levných tvarů: střední
-      displeje RADAR / SELF STATUS, křeslo, nápis SERVICE ACCESS; MFD ještě víc „holo“ (méně kontrastu, ne tučně);
+   a2) večer 5. 10. hotové: motory (I) zvlášť od napájení, zvuky ElevenLabs, křeslo v3, přepínač ENG, holo střední
+      displeje, konzole, hasicí přístroj (`2026-10-05_cockpit_detail_pass.md`); dál další stránky MFD, kritik;
    b) dveře: holografický dotykový panel vedle dveří (otevírá se přes režim interakce), detail dveří;
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
       strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); pak rampa.

@@ -301,6 +301,120 @@ def _pipe(bm, a, b, r, seg=12):
     bmesh.ops.transform(bm, matrix=m, verts=res["verts"])
 
 
+def _lathe(bm, cx, cy, profile, seg=28, axis_x=None):
+    """A solid of revolution round a vertical axis at (cx, cy): profile = [(z, r)] bottom to top, capped."""
+    rings = []
+    for z, r in profile:
+        rings.append([bm.verts.new((cx + r * math.cos(2 * math.pi * k / seg), cy + r * math.sin(2 * math.pi * k / seg), z))
+                      for k in range(seg)])
+    for a, b in zip(rings, rings[1:]):
+        for k in range(seg):
+            j = (k + 1) % seg
+            bm.faces.new((a[k], a[j], b[j], b[k]))
+    bm.faces.new(rings[0][::-1])
+    bm.faces.new(rings[-1])
+
+
+def _band(bm, cx, cy, z0, z1, r_in, r_out, seg=28, a0=0.0, a1=2 * math.pi):
+    """A ring (or an arc of one, a0..a1) of rectangular section round a vertical axis."""
+    full = abs(a1 - a0 - 2 * math.pi) < 1e-6
+    n = seg if full else seg + 1
+    ang = [a0 + (a1 - a0) * k / seg for k in range(n)]
+    quads = []
+    for a in ang:
+        c, s_ = math.cos(a), math.sin(a)
+        quads.append([bm.verts.new((cx + r * c, cy + r * s_, z)) for r, z in ((r_in, z0), (r_out, z0), (r_out, z1), (r_in, z1))])
+    for k in range(n if full else n - 1):
+        a, b = quads[k], quads[(k + 1) % n]
+        for i in range(4):
+            j = (i + 1) % 4
+            bm.faces.new((a[i], a[j], b[j], b[i]))
+    if not full:
+        bm.faces.new(quads[0][::-1])
+        bm.faces.new(quads[-1])
+
+
+def extinguisher(g, box, x, yw):
+    """A wall-mounted CO2 extinguisher (author 5. 10. 2026: the old red cylinder with bands read cheap - every prop
+    at SC's level): a lathed bottle with a shoulder, a rounded base and a rubber foot, a valve head with a pressure
+    gauge, a pinned safety ring, the carry handle and squeeze lever, a hose with ferrules to a horn clipped to the
+    bottle, on a chamfered back plate with bolts, a lower cradle and two strap bands with latches."""
+    side = 1 if yw > 0 else -1
+    r = 0.068
+    yc = yw - side * (r + 0.03)
+    # the bottle: foot ring, rounded base, body, shoulder, neck
+    _lathe(g["int_dark"], x, yc, [(0.50, r - 0.004), (0.515, r - 0.002), (0.515, r - 0.012)], 32)
+    prof = [(0.512, r - 0.022), (0.518, r - 0.008), (0.53, r - 0.001), (0.545, r)]
+    prof += [(0.545 + 0.4 * k / 6, r) for k in range(1, 7)]
+    prof += [(0.97, r - 0.004), (0.99, r - 0.016), (1.005, r - 0.034), (1.015, 0.022), (1.02, 0.02)]
+    _lathe(g["int_red"], x, yc, prof, 32)
+    _band(g["int_trim"], x, yc, 0.70, 0.83, r - 0.001, r + 0.0012, 32)                       # the label band (decal on it)
+    # the valve: a collar, the body, the outlet, the gauge with its glass
+    _lathe(g["int_trim"], x, yc, [(1.018, 0.024), (1.03, 0.024), (1.03, 0.019), (1.045, 0.019)], 20)
+    box(g["int_dark"], (x - 0.022, yc - 0.017, 1.045), (x + 0.03, yc + 0.017, 1.095))
+    box(g["int_trim"], (x - 0.026, yc - 0.019, 1.06), (x + 0.034, yc + 0.019, 1.068))
+    gx, gz = x - 0.018, 1.075          # (set into the valve body: 8 mm off it the gauge floated)
+    _pipe(g["int_trim"], (gx, yc, gz), (gx - 0.012, yc, gz), 0.016, 18)
+    _pipe(g["int_light"], (gx - 0.012, yc, gz), (gx - 0.0135, yc, gz), 0.013, 18)           # the gauge face
+    _pipe(g["accent"], (gx - 0.0136, yc - 0.002, gz + 0.004), (gx - 0.0137, yc + 0.006, gz - 0.006), 0.0012, 4)   # needle
+    # carry handle (fixed) and the squeeze lever over it, forward of the valve
+    for z0, z1, key, dx in ((1.095, 1.103, "int_dark", 0.0), (1.102, 1.112, "int_trim", 0.004)):
+        box(g[key], (x - 0.01 + dx, yc - 0.014, z0), (x + 0.13, yc + 0.014, z1))
+        box(g[key], (x + 0.12, yc - 0.014, z0 - (0.02 if key == "int_dark" else 0.0)), (x + 0.13, yc + 0.014, z1))
+    # the safety pin through the head and its ring, with the tamper seal (orange)
+    pin_end = yc + side * 0.03
+    _pipe(g["int_trim"], (x + 0.01, yc - side * 0.024, 1.101), (x + 0.01, pin_end, 1.101), 0.0022, 6)
+    ring_c = (x + 0.01 + 0.014, pin_end, 1.101)          # the ring through the pin's eye (1.5 cm off it, it floated)
+    prev = None
+    for k in range(17):
+        a = 2 * math.pi * k / 16
+        p_ = (ring_c[0] + 0.014 * math.cos(a), ring_c[1], ring_c[2] + 0.014 * math.sin(a))
+        if prev:
+            _pipe(g["int_trim"], prev, p_, 0.0018, 5)
+        prev = p_
+    box(g["accent"], (x + 0.006, yc + side * 0.026 - 0.003, 1.096), (x + 0.014, yc + side * 0.026 + 0.003, 1.106))
+    # the hose: from the outlet down in a soft curve to the horn, ferrules at both ends
+    out = (x + 0.035, yc, 1.07)
+    pts = []
+    for k in range(9):
+        t = k / 8.0
+        pts.append((out[0] + 0.05 * math.sin(math.pi * t * 0.9) + 0.012 * t, yc - side * (0.0 + 0.055 * t), 1.07 - 0.36 * t + 0.03 * math.sin(math.pi * t)))
+    _pipe(g["int_trim"], out, (out[0] + 0.012, yc, 1.07), 0.012, 12)
+    for a, b in zip(pts, pts[1:]):
+        _pipe(g["int_dark"], a, b, 0.0095, 10)
+    horn_top = pts[-1]
+    _pipe(g["int_trim"], horn_top, (horn_top[0], horn_top[1], horn_top[2] - 0.02), 0.012, 12)
+    _lathe(g["int_dark"], horn_top[0], horn_top[1], [(horn_top[2] - 0.17, 0.034), (horn_top[2] - 0.165, 0.036),
+                                                       (horn_top[2] - 0.12, 0.026), (horn_top[2] - 0.02, 0.012)], 18)
+    # the horn's clip on the bottle
+    box(g["int_trim"], (horn_top[0] - 0.012, yc - side * 0.07, horn_top[2] - 0.1), (horn_top[0] + 0.012, yc - side * 0.045, horn_top[2] - 0.085))
+    # the mount: a chamfered back plate with bolts, the lower cradle and two strap bands with latches
+    ya, yb = sorted((yw, yw - side * 0.012))
+    box(g["int_console"], (x - 0.075, ya, 0.47), (x + 0.075, yb, 1.13))
+    ya2, yb2 = sorted((yw - side * 0.012, yw - side * 0.016))
+    box(g["int_trim"], (x - 0.065, ya2, 0.48), (x + 0.065, yb2, 1.12))
+    for bx_ in (x - 0.055, x + 0.055):
+        for bz in (0.495, 1.105):
+            _pipe(g["int_trim"], (bx_, yw - side * 0.016, bz), (bx_, yw - side * 0.022, bz), 0.006, 8)
+    # (a half-ring cradle under the base and the straps round the front half of the bottle)
+    a0 = math.pi * (0.5 if side < 0 else -0.5)
+    a_face = a0 + math.pi
+    _band(g["int_trim"], x, yc, 0.485, 0.505, r - 0.03, r + 0.01, 24, a_face - 0.5 * math.pi, a_face + 0.5 * math.pi)
+    for zb in (0.6, 0.88):
+        _band(g["int_dark"], x, yc, zb, zb + 0.028, r + 0.0008, r + 0.006, 32, a_face - 0.62 * math.pi, a_face + 0.62 * math.pi)
+        # the latch at the front
+        lx = x + (r + 0.006) * math.cos(a_face)
+        ly = yc + (r + 0.006) * math.sin(a_face)
+        box(g["int_trim"], (lx - 0.012, ly - 0.012, zb - 0.004), (lx + 0.012, ly + 0.012, zb + 0.032))
+        box(g["accent"], (lx - 0.006, ly - 0.014, zb + 0.008), (lx + 0.006, ly + 0.014, zb + 0.02))
+        # the strap's ends into the back plate
+        for e in (-1, 1):
+            ex = x + (r + 0.004) * math.cos(a_face + e * 0.62 * math.pi)
+            ey = yc + (r + 0.004) * math.sin(a_face + e * 0.62 * math.pi)
+            ya3, yb3 = sorted((ey, yw - side * 0.012))
+            box(g["int_dark"], (ex - 0.004, ya3, zb), (ex + 0.004, yb3, zb + 0.028))
+
+
 def fittings(kit, g, box, spec, lights_out):
     """Equipment with a purpose at the functional spots (recipe interior.kit.fittings), clustered like the
     reference: a fire extinguisher by the door, a handrail along the aisle, floor-level air vents.
@@ -311,17 +425,7 @@ def fittings(kit, g, box, spec, lights_out):
         t = f["type"]
         if t == "extinguisher":
             x, yw = f["at"]
-            side = 1 if yw > 0 else -1
-            yc = yw - side * 0.1
-            _pipe(g["int_red"], (x, yc, 0.55), (x, yc, 0.98), 0.065, 16)
-            _pipe(g["int_dark"], (x, yc, 0.98), (x, yc, 1.05), 0.03, 12)
-            box(g["int_dark"], (x - 0.03, yc - 0.01, 1.03), (x + 0.1, yc + 0.01, 1.05))          # lever
-            _pipe(g["int_dark"], (x + 0.05, yc, 1.0), (x + 0.1, yc, 0.7), 0.01, 8)            # hose
-            ya, yb = sorted((yw, yc + side * 0.02))
-            for z in (0.62, 0.9):
-                box(g["int_trim"], (x - 0.08, ya, z), (x + 0.08, yb, z + 0.03))               # bracket bands
-            ya, yb = sorted((yw, yw - side * 0.02))
-            box(g["int_trim"], (x - 0.1, ya, 0.5), (x + 0.1, yb, 1.1))
+            extinguisher(g, box, x, yw)
         elif t == "handrail":
             x0, x1 = f["x"]
             yw, z = f["y"], f.get("z", 1.0)

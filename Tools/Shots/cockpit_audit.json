@@ -123,6 +123,44 @@
     0.0,
     0.6
    ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "name": "extinguisher",
+   "camera_local": [
+    -1.75,
+    -1.45,
+    0.15
+   ],
+   "look_local": [
+    -2.27,
+    -1.97,
+    -0.42
+   ],
+   "fov": 45
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "name": "extinguisher_close",
+   "camera_local": [
+    -1.95,
+    -1.7,
+    -0.15
+   ],
+   "look_local": [
+    -2.27,
+    -1.97,
+    -0.3
+   ],
+   "fov": 40
   }
  ]
 }
