@@ -68,7 +68,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 ## Další kroky
 
 0. **Autor 5. 10. (screenshoty), v tomto pořadí:**
-   a) holo MFD v3 (`2026-10-05_holo_mfd_v3_spec.md`): rám, 880 × 490, FLIGHT/STATUS hotové; zbývá písmo Saira, další stránky;
+   a) holo MFD v3 (`2026-10-05_holo_mfd_v3_spec.md`): rám, 880 × 490, azurová, Saira, vyjíždění zespodu hotové; zbývá dotáhnout další stránky;
    b) dveře: holografický dotykový panel vedle dveří (otevírá se přes režim interakce), detail dveří;
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
       strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); pak rampa.

@@ -602,14 +602,23 @@ debug HUD stays only in HUD mode 3. Headless: `Tools/Tests/test_interaction.py`;
     little.
   - Smootherstep over `APlayerCharacter::SeatBlendSeconds` 1.4 s (getting up 1.2 s), through a camera actor.
   - Sitting, the character stays hidden and without collision as the start of the arc until it ends.
-- **Holo projection deploys** at power on, over the first 40 % of the start-up
-  (`USpaceCockpitDisplays::SetPower`, bottom pivot):
-  - the MFD pictures rise out of their emitters with an ease-out-back overshoot;
-  - they flicker twice as they catch;
-  - a bright beam line rides the rising top edge.
-- **Holo projection retracts** when the ship is switched off: the pictures sink back into the emitters for 0.45 s
-  before going dark.
-- Shots: `ship_power/holo_rising`, `holo_retracting`.
+- **Holo MFDs v3** (author 5. 10. 2026; `Docs/Reviews/2026-10-05_holo_mfd_v3_spec.md`):
+  - 880 x 490 px per MFD (SC's 1.8 : 1) on a 0.503 m picture over the pods (`hs_cockpit` `holo_mfd.image_w`);
+  - frame after SC 4.x: a tab bar of the pages along the top, the page's name between the << / >> paging
+    buttons along the bottom (the interact mode's hotspots);
+  - a contrasty azure: chrome `MfdBlue`, ice-blue type with an azure halo, darker smoke (`HoloSmoke` 0.38) and
+    brighter light (`HoloEmissiveScale` 1.9);
+  - type: Saira SemiBold, the big figures Saira Condensed SemiBold (OFL, `Content/UI/Fonts`, static cuts made
+    from the variable font with fontTools); the speed between thin brackets.
+- **Holo projection deploys** over the first 45 % of the start-up (`USpaceCockpitDisplays::SetPower`):
+  - a line of light opens sideways out of each emitter (the beam at the display's foot);
+  - the picture slides up out of the emitter with an ease-out-back overshoot (each screen clips to its frame);
+  - it drops out twice as it catches.
+- **Holo projection retracts** when the ship is switched off (0.55 s): it slides down into the emitter, then
+  the line closes to a point.
+- **Sounds** (`generate_ship_sounds.py`): holo deploy / retract / flicker / page tick, power up / down
+  (`UCockpitDisplayComponent::PlayHoloSound`).
+- Shots: `ship_power/holo_line`, `holo_rising`, `holo_retracting`, `holo_retract_line`.
 - **Sliding doors** inside the ship (`hs_interior.build_door`, `UShipBoardingComponent::TickDoors`):
   - each doorway between rooms has a leaf (part `Door<n><A|B>`, one leaf when the wall beside it has room, else two
     halves) with a light slot along its closing edge and an orange hand plate on both faces;
