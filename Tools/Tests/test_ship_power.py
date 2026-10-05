@@ -121,4 +121,21 @@ check("KLÁVESY lists U for the power", any(c.startswith("flight|U|0|") for c in
 shots = json.load(open(os.path.join(REPO, "Tools", "Shots", "ship_power.json"), encoding="utf-8"))["shots"]
 check("the ship_power shots switch the power", any("space.Power 1" in c for s in shots for c in s.get("console", [])))
 
+# 6) the holo deploy / retract (author 5. 10. 2026: more pronounced) and the holo technology's sounds
+D = unreal.SpaceCockpitDisplays
+share = 0.45
+start, line_half, line_done, end = D.holo_deploy_scale(0.0), D.holo_deploy_scale(share * 0.1), D.holo_deploy_scale(share * 0.2), D.holo_deploy_scale(share)
+check("deploy: a line of light opens sideways first", start.x == 0.0 and start.y == 0.0 and 0.6 < line_half.x < 1.0 and line_half.y == 0.0 and line_done.x > 0.99,
+      "%s %s %s" % (start, line_half, line_done))
+peak = max(D.holo_deploy_scale(share * a / 50.0).y for a in range(50))
+check("deploy: the picture rises out of it with an overshoot and settles", 1.05 < peak < 1.2 and end.x == 1.0 and end.y == 1.0, "peak %.2f" % peak)
+r_mid, r_line, r_end = D.holo_retract_scale(0.4), D.holo_retract_scale(0.7), D.holo_retract_scale(1.0)
+check("retract: collapses to the line, then the line closes", r_mid.x == 1.0 and 0.0 < r_mid.y < 1.0 and r_line.y == 0.0 and 0.0 < r_line.x < 1.0 and abs(r_end.x) < 1e-4,
+      "%s %s %s" % (r_mid, r_line, r_end))
+for name in ("SW_HoloDeploy", "SW_HoloRetract", "SW_HoloFlicker", "SW_HoloTick", "SW_PowerUp", "SW_PowerDown"):
+    check("sound %s exists" % name, unreal.EditorAssetLibrary.does_asset_exist("/Game/Ships/Audio/" + name))
+src = open(os.path.join(REPO, "Source", "gamespace", "CockpitDisplayComponent.cpp"), encoding="utf-8").read()
+check("the displays play them (deploy, retract, flicker, page tick, power up / down)",
+      all(("SW_" + n) in src for n in ("HoloDeploy", "HoloRetract", "HoloFlicker", "HoloTick", "PowerUp", "PowerDown")) and "PlayHoloSound(HoloTickSound" in src)
+
 log("SUMMARY %s (%d failed: %s)" % ("OK" if not failures else "FAILED", len(failures), ", ".join(failures)))

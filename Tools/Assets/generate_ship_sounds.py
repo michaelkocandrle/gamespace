@@ -27,6 +27,16 @@ One-shots:
     touchdown.wav      landing gear taking the weight.
     ui_hover.wav, ui_confirm.wav, menu_ambience.wav (loop)   title screen and menus.
 
+Holo technology (author 5. 10. 2026: "add sounds matching this technology"):
+
+    holo_deploy.wav    1.0 s: the MFD picture rising out of its emitter - a soft electric swell, a
+                       rising glassy shimmer of detuned partials with a fast flutter, a light lock tick.
+    holo_retract.wav   0.55 s: the picture sinking back - a falling shimmer and a collapsing tone.
+    holo_flicker.wav   0.12 s: a crackle of the projection catching.
+    holo_tick.wav      0.1 s: a glassy blip when a holo page changes.
+    power_up.wav       2.5 s: the ship's systems spooling up (the start-up, PowerBootSeconds).
+    power_down.wav     1.6 s: the systems winding down.
+
 Design rules learned from the first engine loop: keep energy out of 2-5 kHz (it reads as a
 vacuum cleaner or a whine), use narrow noise bands or low partials rather than bright sines, and
 give every sound a slope above ~1 kHz. The script prints the band balance of each file.
@@ -308,6 +318,98 @@ def menu_ambience(rng):
     return normalise(mix, rms_dbfs=-19.0, peak_dbfs=-3.0), True
 
 
+def _shimmer(n, start_hz, end_hz, curve, rng):
+    """Detuned glassy partials gliding together, each with its own fast flutter: the holo 'light' sound."""
+    t = np.arange(n) / RATE
+    out = np.zeros(n)
+    for ratio, weight in ((1.0, 1.0), (1.503, 0.55), (2.01, 0.35), (2.997, 0.18)):
+        detune = 1.0 + rng.uniform(-0.004, 0.004)
+        tone = glide_tone(n, start_hz * ratio * detune, end_hz * ratio * detune, curve)
+        flutter = 1.0 + 0.35 * np.sin(2.0 * np.pi * rng.uniform(17.0, 29.0) * t + rng.uniform(0, 6.28))
+        out += weight * tone * flutter
+    return unit_rms(out)
+
+
+def holo_deploy(rng):
+    """The holo MFD rising out of its emitter: electric swell, rising shimmer, a lock tick at the top."""
+    n = int(RATE * 1.0)
+    t = np.arange(n) / RATE
+    rise = np.clip(t / 0.75, 0.0, 1.0)
+    swell = glide_tone(n, 70.0, 140.0, 0.6, ((1, 1.0), (2, 0.4), (3, 0.15))) * (rise ** 0.7) * np.exp(-np.maximum(t - 0.8, 0) / 0.08)
+    shimmer = _shimmer(n, 380.0, 1150.0, 0.55, rng) * (rise ** 1.4) * np.exp(-np.maximum(t - 0.78, 0) / 0.12)
+    air = sweep_noise(rng, n, 500.0, 2600.0, 0.6, 0.7) * rise * np.exp(-np.maximum(t - 0.75, 0) / 0.1)
+    lock_t = np.maximum(t - 0.76, 0.0)
+    lock = (t > 0.76) * (np.sin(2.0 * np.pi * 1320.0 * lock_t) * np.exp(-lock_t / 0.025) + 0.6 * np.sin(2.0 * np.pi * 330.0 * lock_t) * np.exp(-lock_t / 0.05))
+    mix = 0.55 * unit_rms(swell) + 0.38 * shimmer + 0.16 * air + 0.5 * lock
+    mix = brickless_lowpass(mix, 4200.0, 2)
+    return normalise(fade(mix, 8.0, 60.0), rms_dbfs=-24.0, peak_dbfs=-6.0), False
+
+
+def holo_retract(rng):
+    """The picture sinking back into the emitter: falling shimmer, a collapsing tone, a soft thump."""
+    n = int(RATE * 0.55)
+    t = np.arange(n) / RATE
+    fall = np.exp(-t / 0.28)
+    shimmer = _shimmer(n, 1050.0, 260.0, 0.8, rng) * fall
+    tone = glide_tone(n, 520.0, 90.0, 0.7, ((1, 1.0), (2, 0.3))) * np.exp(-t / 0.22)
+    thump = np.sin(2.0 * np.pi * 70.0 * t) * np.exp(-np.maximum(t - 0.4, 0) / 0.05) * (t > 0.4)
+    mix = 0.45 * shimmer + 0.5 * unit_rms(tone) * fall + 0.35 * thump
+    mix = brickless_lowpass(mix, 3600.0, 2)
+    return normalise(fade(mix, 2.0, 50.0), rms_dbfs=-25.0, peak_dbfs=-7.0), False
+
+
+def holo_flicker(rng):
+    """The projection catching: a short electric crackle with a buzz under it."""
+    n = int(RATE * 0.12)
+    t = np.arange(n) / RATE
+    gate = (rng.uniform(0, 1, n // 64 + 1) > 0.45).repeat(64)[:n] * 1.0
+    crackle = unit_rms(brickless_lowpass(rng.standard_normal(n), 3000.0, 2)) * gate
+    buzz = np.sign(np.sin(2.0 * np.pi * 120.0 * t)) * 0.4 + np.sin(2.0 * np.pi * 240.0 * t)
+    mix = (0.5 * crackle + 0.35 * unit_rms(brickless_lowpass(buzz, 1200.0, 2))) * np.exp(-t / 0.05)
+    return normalise(fade(mix, 1.0, 15.0), peak_dbfs=-12.0), False
+
+
+def holo_tick(rng):
+    """A holo page changing: a glassy blip, a little shimmer tail."""
+    n = int(RATE * 0.1)
+    t = np.arange(n) / RATE
+    blip = (np.sin(2.0 * np.pi * 1480.0 * t) + 0.5 * np.sin(2.0 * np.pi * 2220.0 * t)) * np.exp(-t / 0.018)
+    tail = _shimmer(n, 900.0, 1100.0, 1.0, rng) * np.exp(-t / 0.035)
+    body = np.sin(2.0 * np.pi * 260.0 * t) * np.exp(-t / 0.02)
+    mix = brickless_lowpass(0.6 * blip + 0.25 * tail + 0.4 * body, 3800.0, 2)
+    return normalise(fade(mix, 0.5, 20.0), peak_dbfs=-9.0), False
+
+
+def power_up(rng):
+    """The ship's systems spooling up over the start-up: a rising reactor whine kept low, relays, air."""
+    n = int(RATE * 2.5)
+    t = np.arange(n) / RATE
+    spool = glide_tone(n, 38.0, 118.0, 0.55, ((1, 1.0), (2, 0.55), (3, 0.3), (5, 0.1)))
+    spool *= np.clip(t / 0.4, 0.0, 1.0) * np.exp(-np.maximum(t - 2.2, 0) / 0.25)
+    air = sweep_noise(rng, n, 180.0, 900.0, 0.8, 0.8) * np.clip(t / 1.5, 0, 1) * np.exp(-np.maximum(t - 2.1, 0) / 0.3)
+    relays = np.zeros(n)
+    for at in (0.05, 0.62, 1.18, 1.71, 2.2):
+        k = int(at * RATE)
+        m = int(RATE * 0.05)
+        relays[k:k + m] += unit_rms(brickless_lowpass(rng.standard_normal(m), 2200.0, 2)) * np.exp(-np.arange(m) / RATE / 0.008)
+    mix = 0.6 * unit_rms(spool) + 0.2 * air + 0.35 * relays
+    mix = brickless_lowpass(mix, 3000.0, 2)
+    return normalise(fade(mix, 5.0, 120.0), rms_dbfs=-23.0, peak_dbfs=-5.0), False
+
+
+def power_down(rng):
+    """The systems winding down: a falling whine and a last relay."""
+    n = int(RATE * 1.6)
+    t = np.arange(n) / RATE
+    spool = glide_tone(n, 118.0, 30.0, 0.5, ((1, 1.0), (2, 0.5), (3, 0.25))) * np.exp(-t / 0.7)
+    relay_m = int(RATE * 0.05)
+    relay = np.zeros(n)
+    relay[:relay_m] = unit_rms(brickless_lowpass(rng.standard_normal(relay_m), 2200.0, 2)) * np.exp(-np.arange(relay_m) / RATE / 0.008)
+    air = sweep_noise(rng, n, 900.0, 150.0, 0.8, 0.6) * np.exp(-t / 0.5)
+    mix = brickless_lowpass(0.6 * unit_rms(spool) + 0.35 * relay + 0.18 * air, 3000.0, 2)
+    return normalise(fade(mix, 2.0, 150.0), rms_dbfs=-24.0, peak_dbfs=-5.0), False
+
+
 SOUNDS = {
     "engine_loop": engine_loop,
     "engine_hum": engine_hum,
@@ -321,6 +423,12 @@ SOUNDS = {
     "ui_hover": ui_hover,
     "ui_confirm": ui_confirm,
     "menu_ambience": menu_ambience,
+    "holo_deploy": holo_deploy,
+    "holo_retract": holo_retract,
+    "holo_flicker": holo_flicker,
+    "holo_tick": holo_tick,
+    "power_up": power_up,
+    "power_down": power_down,
 }
 
 

@@ -35,6 +35,12 @@ SOUNDS = (
     (UI_FOLDER + "/SW_UiHover", "ui_hover.wav", False),
     (UI_FOLDER + "/SW_UiConfirm", "ui_confirm.wav", False),
     (UI_FOLDER + "/SW_MenuAmbience", "menu_ambience.wav", True),
+    ("SW_HoloDeploy", "holo_deploy.wav", False),
+    ("SW_HoloRetract", "holo_retract.wav", False),
+    ("SW_HoloFlicker", "holo_flicker.wav", False),
+    ("SW_HoloTick", "holo_tick.wav", False),
+    ("SW_PowerUp", "power_up.wav", False),
+    ("SW_PowerDown", "power_down.wav", False),
 )
 
 missing = [f for _, f, _ in SOUNDS if not os.path.isfile(os.path.join(GENERATED, f))]

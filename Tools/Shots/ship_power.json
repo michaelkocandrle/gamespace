@@ -76,13 +76,19 @@
    ]
   },
   {
-   "name": "holo_rising",
+   "name": "holo_line",
    "camera": "cockpit",
    "hud": 1,
-   "settle": 0.25,
+   "settle": 0.12,
    "console": [
     "space.Power 1"
    ]
+  },
+  {
+   "name": "holo_rising",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 0.3
   },
   {
    "name": "power_on_again",
@@ -98,6 +104,12 @@
    "console": [
     "space.Power 0"
    ]
+  },
+  {
+   "name": "holo_retract_line",
+   "camera": "cockpit",
+   "hud": 1,
+   "settle": 0.2
   },
   {
    "name": "power_off_chase",

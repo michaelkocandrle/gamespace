@@ -3171,6 +3171,20 @@ void USpaceCockpitDisplays::BuildTree()
 	Boot(TEXT("Status"), ScreenRect(TEXT("right")), { TEXT("LIFE SUPPORT"), TEXT("RADAR"), TEXT("QUANTUM DRIVE") });
 	Boot(TEXT("Radar"), ScreenRect(TEXT("centre_top")), {});
 	Boot(TEXT("Ship"), ScreenRect(TEXT("centre_bottom")), {});
+	// The emitter's beam at the foot of each display: the line of light the picture opens from and closes into
+	// (a picture squashed into a line is too dim to read as light; SetPower drives its width and opacity).
+	for (const TPair<const TCHAR*, const TCHAR*>& Beam : { TPair<const TCHAR*, const TCHAR*>(TEXT("Flight"), TEXT("left")),
+		TPair<const TCHAR*, const TCHAR*>(TEXT("Status"), TEXT("right")), TPair<const TCHAR*, const TCHAR*>(TEXT("Radar"), TEXT("centre_top")),
+		TPair<const TCHAR*, const TCHAR*>(TEXT("Ship"), TEXT("centre_bottom")) })
+	{
+		const FBox2D Rect = ScreenRect(Beam.Value);
+		USpaceHudSymbol* BeamLine = Symbol(FName(*FString::Printf(TEXT("Beam%s"), Beam.Key)), ESpaceHudSymbol::Line, FLinearColor(0.8f, 0.97f, 1.f, 1.f));
+		BeamLine->Thickness = 6.f;
+		BeamLine->Points = { FVector2D(0.0, 0.5), FVector2D(1.0, 0.5) };
+		BeamLine->SetRenderTransformPivot(FVector2D(0.5, 0.5));
+		BeamLine->SetRenderOpacity(0.f);
+		Place(BeamLine, FBox2D(FVector2D(Rect.Min.X + 6.0, Rect.Max.Y - 16.0), FVector2D(Rect.Max.X - 6.0, Rect.Max.Y - 4.0)));
+	}
 
 	// Holographic displays (author 4. 10. 2026: "daleko víc holografic vibe ... působí plasticky, jako palubní
 	// počítač"): every key, badge and glass on them is drawn as light.
@@ -3375,9 +3389,38 @@ void USpaceCockpitDisplays::SetCentreColumn(bool bOn)
 	}
 }
 
+FVector2D USpaceCockpitDisplays::HoloDeployScale(float BootAlpha)
+{
+	const float A = FMath::Clamp(BootAlpha / HoloDeployShare, 0.f, 1.f);
+	if (A < 0.2f)
+	{
+		// the line of light opens sideways from the emitter's centre (ease-out cubic)
+		const float T = A / 0.2f;
+		return FVector2D(1.f - FMath::Pow(1.f - T, 3.f), 0.f);
+	}
+	// the picture rises out of the line, overshooting about 10 % before it settles (ease-out-back)
+	const float T = (A - 0.2f) / 0.8f;
+	const float C1 = 1.70158f, C3 = C1 + 1.f;
+	return FVector2D(1.f, T >= 1.f ? 1.f : 1.f + C3 * FMath::Pow(T - 1.f, 3.f) + C1 * FMath::Pow(T - 1.f, 2.f));
+}
+
+FVector2D USpaceCockpitDisplays::HoloRetractScale(float T)
+{
+	T = FMath::Clamp(T, 0.f, 1.f);
+	if (T < 0.65f)
+	{
+		// the picture collapses down onto its emitter (ease-in: it gathers speed)
+		const float U = T / 0.65f;
+		return FVector2D(1.f, 1.f - U * U);
+	}
+	// then the line of light closes to a point
+	const float U = (T - 0.65f) / 0.35f;
+	return FVector2D(1.f - U * U, 0.f);
+}
+
 void USpaceCockpitDisplays::SetPower(bool bLit, float BootAlpha)
 {
-	constexpr double RetractSeconds = 0.45;
+	constexpr double RetractSeconds = USpaceCockpitDisplays::HoloRetractSeconds;
 	const double Now = FPlatformTime::Seconds();
 	if (bPowerLit && !bLit)
 	{
@@ -3393,28 +3436,45 @@ void USpaceCockpitDisplays::SetPower(bool bLit, float BootAlpha)
 	{
 		return;
 	}
-	// The holo projection deploys (author 5. 10. 2026: "výraznější animace", SC animates it): over the first 40 % of
-	// the start-up the picture rises out of the emitter from a line of light, overshoots a little and settles; it
-	// flickers twice as it catches and a bright line rides its top edge while it rises. Off, it sinks back down.
-	const float RiseT = FMath::Clamp(PowerBootAlpha / 0.4f, 0.f, 1.f);
-	const float C1 = 1.70158f, C3 = C1 + 1.f;                       // ease-out-back
-	const float Rise = bLit ? (RiseT >= 1.f ? 1.f : 1.f + C3 * FMath::Pow(RiseT - 1.f, 3.f) + C1 * FMath::Pow(RiseT - 1.f, 2.f)) : 1.f;
-	const float Sink = bRetracting ? 1.f - FMath::SmoothStep(0.f, 1.f, float((Now - RetractStartSeconds) / RetractSeconds)) : 1.f;
-	const bool bFlicker = bLit && RiseT > 0.f && RiseT < 0.3f && FMath::Frac(Now * 14.0) < 0.35;
+	// The holo projection deploys (author 5. 10. 2026: "výraznější animace", twice): over the first HoloDeployShare of
+	// the start-up a thin line of light opens sideways out of the emitter's centre (the first 20 %), then the picture
+	// rises out of that line with an overshoot and settles; it drops out twice as it catches (FlickerAt, where the
+	// component plays the crackle) and a bright beam line rides its top edge. Off: it collapses down to the line,
+	// then the line closes to a point over HoloRetractSeconds.
+	const FVector2D Deploy = HoloDeployScale(PowerBootAlpha);
+	const FVector2D Retract = bRetracting ? HoloRetractScale(float((Now - RetractStartSeconds) / RetractSeconds)) : FVector2D(1.0, 1.0);
+	const float A = FMath::Clamp(PowerBootAlpha / HoloDeployShare, 0.f, 1.f);
+	bool bFlicker = false;
+	for (const float At : HoloFlickerAt)
+	{
+		bFlicker |= bLit && A >= At && A < At + 0.035f;
+	}
 	for (const TCHAR* Name : { TEXT("Flight"), TEXT("Status"), TEXT("Radar"), TEXT("Ship") })
 	{
 		for (const FString& Widget : { FString::Printf(TEXT("Boot%s"), Name), FString::Printf(TEXT("%sScreen"), Name) })
 		{
 			if (UWidget* Part = WidgetTree->FindWidget(FName(*Widget)))
 			{
-				const float Y = bRetracting ? Sink : (Widget.StartsWith(TEXT("Boot")) ? Rise : 1.f);
-				Part->SetRenderScale(FVector2D(FMath::Lerp(0.8f, 1.f, FMath::Clamp(Y, 0.f, 1.f)), FMath::Max(Y, 0.015f)));
-				Part->SetRenderOpacity(bFlicker && Widget.StartsWith(TEXT("Boot")) ? 0.35f : 1.f);
+				const FVector2D Scale = bRetracting ? Retract : (Widget.StartsWith(TEXT("Boot")) ? Deploy : FVector2D(1.0, 1.0));
+				Part->SetRenderScale(FVector2D(FMath::Max(Scale.X, 0.002), FMath::Max(Scale.Y, 0.012)));
+				Part->SetRenderOpacity(bFlicker && Widget.StartsWith(TEXT("Boot")) ? 0.25f : 1.f);
 			}
 		}
 		if (UWidget* Scan = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("Boot%sScan"), Name))))
 		{
-			Scan->SetRenderOpacity(bLit ? 1.f - FMath::SmoothStep(0.7f, 1.f, RiseT) : 0.f);
+			Scan->SetRenderOpacity(bLit ? 1.f - FMath::SmoothStep(0.75f, 1.f, A) : 0.f);
+		}
+		if (UWidget* Beam = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("Beam%s"), Name))))
+		{
+			// deploying: the line opens, then fades as the picture leaves it; retracting: it gathers the picture,
+			// then closes to a point
+			const float RetractT = bRetracting ? float((Now - RetractStartSeconds) / RetractSeconds) : 0.f;
+			const float Opacity = bLit && PowerBootAlpha < 1.f ? 1.f - FMath::SmoothStep(0.22f, 0.45f, A)
+				: bRetracting ? FMath::SmoothStep(0.35f, 0.6f, RetractT) : 0.f;
+			const float Width = bLit ? Deploy.X : bRetracting ? Retract.X : 0.f;
+			Beam->SetRenderOpacity(Opacity);
+			Beam->SetRenderScale(FVector2D(FMath::Max(Width, 0.002f), 1.0));
+			Beam->SetVisibility(Opacity > 0.01f ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 		}
 	}
 	if (bLit && PowerBootAlpha < 1.f && WidgetTree)
@@ -3444,7 +3504,7 @@ void USpaceCockpitDisplays::SetPower(bool bLit, float BootAlpha)
 
 void USpaceCockpitDisplays::ApplyScreenVisibility()
 {
-	const bool bRetracting = !bPowerLit && RetractStartSeconds >= 0.0 && FPlatformTime::Seconds() - RetractStartSeconds < 0.45;
+	const bool bRetracting = !bPowerLit && RetractStartSeconds >= 0.0 && FPlatformTime::Seconds() - RetractStartSeconds < HoloRetractSeconds;
 	const int32 View = bRetracting ? RetractFromView : !bPowerLit ? 0 : PowerBootAlpha < 1.f ? 1 : 2;
 	if (View == AppliedPowerView || !WidgetTree)
 	{

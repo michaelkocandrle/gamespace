@@ -22,6 +22,8 @@
 #include "EngineUtils.h"
 #include "HAL/IConsoleManager.h"
 #include "Stats/Stats.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 
 // "stat SpaceCockpit": what the dashboard displays cost the game thread.
 DECLARE_STATS_GROUP(TEXT("SpaceCockpit"), STATGROUP_SpaceCockpit, STATCAT_Advanced);
@@ -92,9 +94,35 @@ UMeshComponent* UCockpitDisplayComponent::FindDisplaySlot(const AActor* Ship, co
 	return nullptr;
 }
 
+void UCockpitDisplayComponent::PlayHoloSound(USoundBase* Sound, int32 Display, float Volume) const
+{
+	const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(GetOwner());
+	if (!Sound || !Ship || !Ship->IsLocallyControlled())
+	{
+		return;
+	}
+	FVector At = Ship->GetPilotEyeLocation();
+	if (Display >= 0)
+	{
+		Ship->GetDisplayPoint(Display, FVector2D(0.5, 0.9), At);
+	}
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, At, Volume);
+}
+
 void UCockpitDisplayComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	auto Load = [](const TCHAR* Name) { return LoadObject<USoundBase>(nullptr, *FString::Printf(TEXT("/Game/Ships/Audio/%s.%s"), Name, Name)); };
+	HoloDeploySound = Load(TEXT("SW_HoloDeploy"));
+	HoloRetractSound = Load(TEXT("SW_HoloRetract"));
+	HoloFlickerSound = Load(TEXT("SW_HoloFlicker"));
+	HoloTickSound = Load(TEXT("SW_HoloTick"));
+	PowerUpSound = Load(TEXT("SW_PowerUp"));
+	PowerDownSound = Load(TEXT("SW_PowerDown"));
+	if (const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(GetOwner()))
+	{
+		LastPower = static_cast<uint8>(Ship->GetPowerState());
+	}
 	if (!FApp::CanEverRender() || GetNetMode() == NM_DedicatedServer)
 	{
 		SetComponentTickEnabled(false);
@@ -245,7 +273,12 @@ void UCockpitDisplayComponent::SetPage(int32 Display, int32 Page)
 		return;
 	}
 	const int32 Count = USpaceCockpitDisplays::PageCount(Display);
+	const int32 Before = Pages[Display];
 	Pages[Display] = ((Page % Count) + Count) % Count;
+	if (Pages[Display] != Before)
+	{
+		PlayHoloSound(HoloTickSound, Display, 0.8f);
+	}
 	// Fill the new page's figures on the next draw rather than up to 200 ms later.
 	SinceState = 1.f / FMath::Max(StateRateHz, 1.f);
 }
@@ -289,7 +322,38 @@ void UCockpitDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 		PowerLightScale = LightScale;
 		SetDisplayLightIntensity(DisplayLightIntensityCd);
 	}
-	Widget->SetPower(Power != ESpacePowerState::Off, Ship->GetPowerBootAlpha());
+	const float BootAlpha = Ship->GetPowerBootAlpha();
+	// the sounds follow the picture: power up / down, the holo deploying, catching and retracting
+	if (static_cast<uint8>(Power) != LastPower)
+	{
+		if (LastPower == static_cast<uint8>(ESpacePowerState::Off))
+		{
+			PlayHoloSound(PowerUpSound, -1);
+			PlayHoloSound(HoloDeploySound, 0);
+			PlayHoloSound(HoloDeploySound, 1, 0.8f);
+		}
+		else if (Power == ESpacePowerState::Off)
+		{
+			PlayHoloSound(PowerDownSound, -1);
+			PlayHoloSound(HoloRetractSound, 0);
+			PlayHoloSound(HoloRetractSound, 1, 0.8f);
+		}
+		LastBootAlpha = Power == ESpacePowerState::Booting ? 0.f : 1.f;
+		LastPower = static_cast<uint8>(Power);
+	}
+	if (Power == ESpacePowerState::Booting)
+	{
+		for (const float At : USpaceCockpitDisplays::HoloFlickerAt)
+		{
+			const float Alpha = At * USpaceCockpitDisplays::HoloDeployShare;
+			if (LastBootAlpha < Alpha && BootAlpha >= Alpha)
+			{
+				PlayHoloSound(HoloFlickerSound, 0, 0.7f);
+			}
+		}
+		LastBootAlpha = BootAlpha;
+	}
+	Widget->SetPower(Power != ESpacePowerState::Off, BootAlpha);
 	if (bOnlyInCockpitView && (!Ship->IsCockpitView() || !Ship->IsLocallyControlled()))
 	{
 		return;

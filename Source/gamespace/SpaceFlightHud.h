@@ -1049,6 +1049,18 @@ private:
 	void ApplyScreenVisibility();
 	bool bCentreOn = true;
 	bool bPowerLit = true;
+public:
+	/** The holo deploy takes this share of the start-up (2.5 s: ~1.1 s); the retract HoloRetractSeconds. */
+	static constexpr float HoloDeployShare = 0.45f;
+	static constexpr double HoloRetractSeconds = 0.55;
+	/** Where in the deploy (0..1) the picture drops out as it catches (the component plays the crackle there). */
+	static constexpr float HoloFlickerAt[2] = { 0.3f, 0.42f };
+	/** The picture's render scale (x, y) at a start-up alpha / a retract time 0..1: tests, shots and SetPower. */
+	UFUNCTION(BlueprintPure, Category = "Cockpit|Tests")
+	static FVector2D HoloDeployScale(float BootAlpha);
+	UFUNCTION(BlueprintPure, Category = "Cockpit|Tests")
+	static FVector2D HoloRetractScale(float T);
+private:
 	/** Power off: the projection retracts into its emitter for RetractSeconds before it goes dark. */
 	double RetractStartSeconds = -1.0;
 	int32 RetractFromView = 2;
