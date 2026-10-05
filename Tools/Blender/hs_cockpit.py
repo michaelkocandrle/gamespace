@@ -950,6 +950,24 @@ def pedestal(g, screen_bm, sockets, eye, spec):
     hc = Vector((x0 - 0.13, 0.0, ztop - 0.075))
     hr, hu, hn = oriented(eye, hc)
     cw = spec["centre_w"]
+    if spec.get("holo_mfd"):
+        # holo MFD v3 (author 5. 10. 2026: the centre screens in their rounded chrome frame read as a toy tablet):
+        # the column ends in an emitter bar and the RADAR / SELF STATUS pictures stand over it as light, like the MFDs
+        Z = Vector((0.0, 0.0, 1.0))
+        top = Vector((x0 - 0.13, 0.0, ztop))
+        fwd = Vector((hn.x, hn.y, 0.0)).normalized()
+        ew = 2 * cw + 0.07
+        rr_slab(g["int_console"], top + Z * 0.012, hr, fwd, Z, ew, 0.07, 0.012, 0.03, 3)                    # housing
+        rr_slab(g["int_trim"], top + Z * 0.0145, hr, fwd, Z, ew - 0.012, 0.058, 0.008, 0.003, 3)            # cap
+        rr_slab(g["int_glow"], top + Z * 0.016, hr, fwd, Z, ew - 0.04, 0.006, 0.002, 0.002, 1)              # lens
+        for su in (-1, 1):
+            q = top + hr * (su * (ew / 2 - 0.008)) + Z * 0.0
+            tube(g["int_trim"], q - fwd * 0.03, q + fwd * 0.03, 0.006, 8)
+        for name, du, h in (("centre_top", -(cw / 2 + 0.008), cw * 259.0 / 210.0), ("centre_bottom", cw / 2 + 0.008, cw * 231.0 / 210.0)):
+            c = top + hr * du + Z * (0.016 + 0.02 + h / 2)
+            r2, u2, n2 = oriented(eye, c)
+            screen(screen_bm, sockets, name, c, r2, u2, n2, cw, h)
+        return
     rr_slab(g["int_console"], hc - hn * 0.01, hr, hu, hn, 2 * cw + 0.09, cw * 1.35 + 0.04, 0.04, 0.06)
     rr_ring(g["int_trim"], hc + hn * 0.004, hr, hu, hn, 2 * cw + 0.09, cw * 1.35 + 0.04, 0.04, 0.012, 0.01)
     for name, du, h in (("centre_top", -(cw / 2 + 0.012), cw * 259.0 / 210.0), ("centre_bottom", cw / 2 + 0.012, cw * 231.0 / 210.0)):

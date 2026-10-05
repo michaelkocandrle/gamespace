@@ -25,8 +25,10 @@
       "socket WalkSeat scale (100, 100, 100) reset to 1"
     ],
     "SM_Ship_Wayfarer_Decals": [],
-    "SM_Ship_Wayfarer_Interior": [],
-    "SM_Ship_Wayfarer_InteriorDecals": []
+    "SM_Ship_Wayfarer_Interior": [
+      "deleted and imported fresh: old material slots ['M_Ship_Wayfarer_Accent', 'M_Ship_Wayfarer_IntDark', 'M_Ship_Wayfarer_IntFloor', 'M_Ship_Wayfarer_IntTrim', 'M_Ship_Wayfarer_IntPanel', 'M_Ship_Wayfarer_IntWall', 'M_Ship_Wayfarer_IntGlow', 'M_Ship_Wayfarer_IntConsole', 'M_Ship_Wayfarer_IntAccentGlow', 'M_Ship_Wayfarer_IntLeather', 'M_Ship_Wayfarer_IntLedOrange', 'M_Ship_Wayfarer_IntLedWhite', 'M_Ship_Wayfarer_IntLedBlink', 'M_Ship_Wayfarer_IntScreenBack', 'M_Ship_Wayfarer_IntRed', 'M_Ship_Wayfarer_IntRubber', 'M_Ship_Wayfarer_IntFabric', 'M_Ship_Wayfarer_IntCream', 'M_Ship_Wayfarer_IntFrame']"
+    ],
+    "SM_Ship_Wayfarer_Screens": []
   },
   "kept_unchanged": [
     "SM_Ship_Wayfarer_Canopy",
@@ -34,21 +36,21 @@
     "SM_Ship_Wayfarer_Door1A",
     "SM_Ship_Wayfarer_Gear",
     "SM_Ship_Wayfarer_Hologram",
-    "SM_Ship_Wayfarer_InteriorKit",
-    "SM_Ship_Wayfarer_Screens"
+    "SM_Ship_Wayfarer_InteriorDecals",
+    "SM_Ship_Wayfarer_InteriorKit"
   ],
   "imported_hashes": {
-    "SM_Ship_Wayfarer": "ec6916a5988218ba9a3923f81a3aaf530f79b2c3",
+    "SM_Ship_Wayfarer": "9724576e6272e0919b60aa61db0b85684d0e550d",
     "SM_Ship_Wayfarer_Canopy": "879389a2da32c2818440c8370cc947c38af0759c",
-    "SM_Ship_Wayfarer_Decals": "9e8af74dc58d2f0e78262d9f859ecaec7c3a471c",
+    "SM_Ship_Wayfarer_Decals": "834f7fe93410ba682d6e0d36e68263cb14144b35",
     "SM_Ship_Wayfarer_Door0A": "f9d145f388da7447785dc4ba277f65f149afeb94",
     "SM_Ship_Wayfarer_Door1A": "72c81bc8de3b1ab9965ab65505b327dd2c45e83b",
     "SM_Ship_Wayfarer_Gear": "7dc7e8ec1f70b6d335d5d82d424f2e9d8b4d85bf",
     "SM_Ship_Wayfarer_Hologram": "19ad136b4dfcafa2f3fc35755332989246018cd3",
-    "SM_Ship_Wayfarer_Interior": "bf73dd23f8b2a3a839734c343e8559eba4bf8d20",
+    "SM_Ship_Wayfarer_Interior": "032929700763eb6b02836f24a0fab012f52b5a16",
     "SM_Ship_Wayfarer_InteriorDecals": "43e4e05f2ead2392484feeff53423cf08d43001c",
     "SM_Ship_Wayfarer_InteriorKit": "fcd23c62c7bfc496dd3aaf101e89f159d82e432f",
-    "SM_Ship_Wayfarer_Screens": "283bb6547e4e8d5ea3b6249679d57d6e962d8042"
+    "SM_Ship_Wayfarer_Screens": "af6c471502017df4007048c3af25d4531fda123a"
   },
   "materials": [
     "29 decal materials: HazardExhaust_L, HazardExhaust_R, Int_CautionLoad, Int_Cockpit, Int_CockpitStairs, Int_Engineering, Int_Exit, Int_Fire, Int_Galley, Int_Grid, Int_Hold, Int_Hygiene, Int_Lane, Int_LifeSupport, Int_Quarters, Int_RampHazard, Int_Sec02, Int_Sec03, Int_Sec04, Int_Sec05, Int_Sec06, Int_StairHazard, Int_Suit, Logo_L, Logo_R, Name_L, Name_R, Reg_L, Reg_R",
