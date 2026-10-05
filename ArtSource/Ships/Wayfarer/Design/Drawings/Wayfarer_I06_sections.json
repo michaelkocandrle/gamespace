@@ -6,7 +6,7 @@
  "section_x": 1.3,
  "digests": {
   "layout": "9ed16b60fbcc",
-  "interior": "3996fd2caefb",
+  "interior": "cb3459ab61d4",
   "setup": "de82013afd6a",
   "lights": "0e870169cd7e",
   "design": "0386482c0b74",
@@ -15,8 +15,8 @@
   "light_rules": "788f180917fd"
  },
  "geometry": {
-  "SM_Ship_Wayfarer.fbx": "623e4a83249e",
-  "SM_Ship_Wayfarer_Interior.fbx": "4380f52fca29",
+  "SM_Ship_Wayfarer.fbx": "329832bada9d",
+  "SM_Ship_Wayfarer_Interior.fbx": "84fd5cb0162b",
   "SM_Ship_Wayfarer_Canopy.fbx": "50abe89a8300",
   "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
   "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",

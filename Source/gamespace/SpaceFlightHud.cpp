@@ -2789,7 +2789,7 @@ void USpaceCockpitDisplays::BuildTree()
 			}
 			Horizontal(Tabs, Tab, VAlign_Fill, FMargin(Index == 0 ? 0.f : 6.f, 0.f, 0.f, 0.f), true);
 		}
-		Vertical(Column, Sized(FName(*FString::Printf(TEXT("%sTabsBox"), ScreenName)), Tabs, 0.f, 42.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 4.f));
+		Vertical(Column, Sized(FName(*FString::Printf(TEXT("%sTabsBox"), ScreenName)), Tabs, 0.f, 48.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 2.f));   // (42: the labels were cut)
 		Vertical(Column, Rule(FName(*FString::Printf(TEXT("%sRule"), ScreenName)), 0.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 8.f));
 		Vertical(Column, Content, HAlign_Fill, FMargin(0.f), true);
 		// the bottom bar: << NAME >>
@@ -2999,11 +2999,13 @@ void USpaceCockpitDisplays::BuildTree()
 		TPair<const TCHAR*, const TCHAR*>(TEXT("LIMIT"), TEXT("NavLimit")), TPair<const TCHAR*, const TCHAR*>(TEXT("QUANTUM"), TEXT("NavQuantum")) })
 	{
 		UHorizontalBox* FigureLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("NavFigure_%s"), NavFigure.Key)));
-		Horizontal(FigureLine, Words(FName(*FString::Printf(TEXT("NavCaption_%s"), NavFigure.Key)), NavFigure.Key, 22.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f), true);
-		Horizontal(FigureLine, Words(NavFigure.Value, TEXT("-"), 28.f), VAlign_Center, FMargin(0.f));
-		Vertical(NavFigures, FigureLine, HAlign_Fill, FMargin(0.f, -4.f));
+		Horizontal(FigureLine, Words(FName(*FString::Printf(TEXT("NavCaption_%s"), NavFigure.Key)), NavFigure.Key, 22.f, Faded(MfdText, 0.6f)), VAlign_Center, FMargin(0.f), true);
+		Horizontal(FigureLine, Words(NavFigure.Value, TEXT("-"), 26.f), VAlign_Center, FMargin(0.f));
+		Vertical(NavFigures, FigureLine, HAlign_Fill, FMargin(0.f, -6.f));
 	}
-	Horizontal(NavTop, NavFigures, VAlign_Top, FMargin(0.f), true);
+	// (critic 5. 10.: the captions floated far from their values - a compact block on the right, label beside value)
+	Horizontal(NavTop, WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass()), VAlign_Top, FMargin(0.f), true);
+	Horizontal(NavTop, Sized(TEXT("NavFiguresBox"), NavFigures, 300.f, 0.f), VAlign_Top, FMargin(0.f));
 	Vertical(NavPage, NavTop, HAlign_Fill, FMargin(0.f, 0.f, 0.f, 2.f));
 	Vertical(NavPage, Rule(TEXT("NavRule"), 0.f, 0.2f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 0.f));
 	auto ListHeader = [&](const FName Name, const TCHAR* First)
@@ -3028,10 +3030,10 @@ void USpaceCockpitDisplays::BuildTree()
 		ListFlag->Thickness = 4.f;
 		ListFlag->Points = { FVector2D(0.5, 0.0), FVector2D(0.5, 1.0) };
 		Horizontal(ListLine, Sized(FName(*(Row + TEXT("FlagBox"))), ListFlag, 6.f, 24.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
-		Horizontal(ListLine, Words(FName(*FString::Printf(TEXT("%sName_%d"), *Prefix, Index)), TEXT("-"), 28.f), VAlign_Center, FMargin(0.f), true);
-		Horizontal(ListLine, Sized(FName(*(Row + TEXT("DistBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sDist_%d"), *Prefix, Index)), TEXT("-"), 28.f, ETextJustify::Right), 160.f, 0.f),
+		Horizontal(ListLine, Words(FName(*FString::Printf(TEXT("%sName_%d"), *Prefix, Index)), TEXT("-"), 26.f), VAlign_Center, FMargin(0.f), true);
+		Horizontal(ListLine, Sized(FName(*(Row + TEXT("DistBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sDist_%d"), *Prefix, Index)), TEXT("-"), 26.f, ETextJustify::Right), 160.f, 0.f),
 			VAlign_Center, FMargin(0.f));
-		Horizontal(ListLine, Sized(FName(*(Row + TEXT("BrgBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sBrg_%d"), *Prefix, Index)), TEXT("-"), 28.f, ETextJustify::Right), 100.f, 0.f),
+		Horizontal(ListLine, Sized(FName(*(Row + TEXT("BrgBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sBrg_%d"), *Prefix, Index)), TEXT("-"), 26.f, ETextJustify::Right), 100.f, 0.f),
 			VAlign_Center, FMargin(0.f));
 		Vertical(RowBox, ListLine, HAlign_Fill, FMargin(0.f, 0.f));
 		Vertical(RowBox, Rule(FName(*(Row + TEXT("Rule"))), 0.f, 0.22f), HAlign_Fill, FMargin(0.f, 1.f));

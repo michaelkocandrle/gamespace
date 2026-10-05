@@ -965,7 +965,7 @@ public:
 
 	/** CONFIGURATION's layout (ConfigSwitchUV): row height, the switch's width, where the rows start on the display. */
 	static constexpr float ConfigRowHeight = 42.f;   // (6 rows since the ENGINES switch, 5. 10. 2026)
-	static constexpr float ConfigSwitchWidth = 104.f;
+	static constexpr float ConfigSwitchWidth = 118.f;   // (104: START crowded its pill)
 	static constexpr float ConfigScreenPadding = 20.f;
 	static constexpr float ConfigRowsTop = 124.f;   // +20 since the Oxanium header (taller line, 5. 10. 2026)
 

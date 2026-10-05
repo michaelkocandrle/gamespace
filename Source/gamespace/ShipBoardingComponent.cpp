@@ -380,7 +380,10 @@ void UShipBoardingComponent::FindDoors()
 		Panel->RegisterComponent();
 		// 11 cm further out than the socket: the kit's wall face stands proud of the bulkhead plane (at the socket the
 		// hologram was inside the wall)
-		Panel->SetWorldLocation(At + Ship->GetActorForwardVector() * 11.0 + Ship->GetActorUpVector() * 22.0);   // (over the junction box)
+		// toward the doorway by 6 cm and 12 cm up: over the junction box, under the room's sign (critic 5. 10.)
+		FVector Toward = FVector::VectorPlaneProject(GetDoorLocation(Door) - At, Ship->GetActorUpVector());
+		Toward = FVector::VectorPlaneProject(Toward, Ship->GetActorForwardVector()).GetSafeNormal();
+		Panel->SetWorldLocation(At + Ship->GetActorForwardVector() * 11.0 + Ship->GetActorUpVector() * 12.0 + Toward * 6.0);
 		Panel->SetWorldRotation(Ship->GetActorRotation());              // facing the ship's forward, like the leaf's face
 		Panel->SetWorldScale3D(FVector(1.0, 0.065, 0.065));              // 240 x 330 px = 15.6 x 21.5 cm
 		DoorPanels[Door] = Panel;

@@ -176,11 +176,12 @@ def build_door(leaf, n, ship, coll, mats, H):
             slab("int_dark", y0 + 0.07, y1 - 0.07, 1.5, 1.54, 0.002)
             # the light slot along the closing edge (the kit's warm glow; dims with the ship's power)
             slab("int_glow", min(lead, lead - e * 0.028), max(lead, lead - e * 0.028), 0.3, h - 0.3, 0.012)
-            # the orange hand plate with three dark grip slots
-            slab("accent", pa, pb, 0.98, 1.2, 0.012)
-            for k in range(3):
-                zk = 1.03 + k * 0.055
-                slab("int_dark", pa + 0.02, pb - 0.02, zk, zk + 0.022, 0.016)
+            # a recessed pull handle (critic 5. 10.: the orange plate with slots read as a primitive): a satin bezel,
+            # a dark pocket, a satin grip bar across it and a thin amber line under it
+            slab("int_trim", pa, pb, 0.96, 1.22, 0.006)
+            slab("int_dark", pa + 0.012, pb - 0.012, 0.975, 1.205, 0.0065)
+            slab("int_trim", pa + 0.022, pb - 0.022, 1.06, 1.12, 0.022)
+            slab("accent", pa + 0.02, pb - 0.02, 0.985, 0.993, 0.0075)
         for key, bm in g.bm.items():
             if bm.verts:
                 ob = hp.finish(bm, "SM_Ship_%s_Door%d%s_%s" % (ship, n, letter, key), coll, {"angle_deg": 30, "width": 0.002, "segments": 1})
@@ -498,6 +499,22 @@ def obj_console(g, r, zr, z0):
             box(g["int_console"], (vx0 + 0.006, ya, zz), (vx1 - 0.006, yb, zz + 0.008))
             zz += 0.022
             k += 1
+        # (critic 5. 10.: the console tops large empty slabs) a recessed service plate ahead of the HOTAS: a satin rim,
+        # a dark inset, a lid with a finger notch and four bolts
+        tc = Vector((x1 - 0.15, (y0 + y1) / 2, top + 0.012))
+        X, Y, Z = Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))
+        hs_cockpit.rr_ring(g["int_trim"], tc + Z * 0.006, X, Y, Z, 0.2, 0.16, 0.012, 0.012, 0.006, 3)     # the rim
+        hs_cockpit.rr_slab(g["int_dark"], tc + Z * 0.0015, X, Y, Z, 0.18, 0.14, 0.01, 0.002, 3)          # the well
+        hs_cockpit.rr_slab(g["int_console"], tc + Z * 0.004, X, Y, Z, 0.168, 0.128, 0.008, 0.0025, 3)   # the lid
+        hs_cockpit.rr_slab(g["int_dark"], tc + X * 0.07 + Z * 0.0042, X, Y, Z, 0.014, 0.05, 0.006, 0.0012, 3)   # notch
+        for sx in (-1, 1):
+            for sy in (-1, 1):
+                q = tc + Vector((sx * 0.07, sy * 0.05, 0.0035))
+                cyl(g["int_trim"], q, q + Vector((0, 0, 0.003)), 0.004, 8)
+        if y0 < 0:
+            # the right console's module aft of the stick, mirroring the left one: lights, comms, two status LEDs
+            hs_cockpit.control_module(g, Vector((x0 + 0.32, (y0 + y1) / 2 - 0.05, top + 0.016)), Vector((0, -1, 0)), Vector((1, 0, 0)),
+                                      Vector((0, 0, 1)), 0.18, 0.11, [[("led_w", "ck_link"), ("led_o", "ck_trk"), ("led_blink", "ck_warn")], [("rocker", "ck_lights"), ("button", "ck_comms")]])
         if y0 > 0:
             # the left console's module aft of the throttle: the canopy LOCK rocker and three labelled status LEDs
             # (18 cm: at 15 the outer LED's label crossed the housing's rim)
