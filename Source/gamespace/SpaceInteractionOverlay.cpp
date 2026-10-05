@@ -210,7 +210,25 @@ int32 SSpaceInteractionOverlay::OnPaint(const FPaintArgs&, const FGeometry& Geom
 	};
 
 	// --- The prompt by the object (not in interact mode, where the hotspots speak) ------------------------------------
-	if (!View.bInteractMode && View.Target.bValid && View.bTargetOnScreen)
+	if (!View.bInteractMode && View.Target.bValid && View.bTargetOnScreen && View.Target.bVertical)
+	{
+		// SC's door prompt: the key cap on the door's edge and the word set vertically above it, reading bottom-up
+		const FVector2f At = ToLocal(View.TargetScreen);
+		const FString Label = View.Target.Label.ToString();
+		const FSlateFontInfo Info = Font(true, 17.f);
+		const FVector2f TextSize = Measure(Label, Info);
+		const float Cap = 36.f;
+		KeyCap(TEXT("F"), { At.X - Cap * 0.5f, At.Y - Cap * 0.5f }, Cap, 19.f, Layer);
+		const FVector2f Base(At.X - TextSize.Y * 0.5f, At.Y - Cap * 0.5f - 14.f);
+		const FSlateRenderTransform Local = Concatenate(FQuat2D(-UE_HALF_PI), FSlateRenderTransform(Base));
+		const FSlateRenderTransform Full = Concatenate(Local, Geometry.GetAccumulatedRenderTransform());
+		const FSlateLayoutTransform LayoutAt = Concatenate(FSlateLayoutTransform(Base), Geometry.GetAccumulatedLayoutTransform());
+		FSlateDrawElement::MakeText(Out, Layer + 3, FPaintGeometry(LayoutAt, Full, FVector2f(2000.f, 200.f), true), Label, Info,
+			ESlateDrawEffect::None, Text * Style.GetColorAndOpacityTint());
+		// a thin cyan rule along the word, like SC's door strip
+		Glow({ { Base.X + TextSize.Y + 6.f, Base.Y }, { Base.X + TextSize.Y + 6.f, Base.Y - TextSize.X } }, Cyan, 1.2f, Layer + 2, 0.7f);
+	}
+	else if (!View.bInteractMode && View.Target.bValid && View.bTargetOnScreen)
 	{
 		const FVector2f At = ToLocal(View.TargetScreen);
 		const FString Label = View.Target.Label.ToString();

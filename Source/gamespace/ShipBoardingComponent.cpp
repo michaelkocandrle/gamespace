@@ -2,6 +2,8 @@
 
 #include "ShipBoardingComponent.h"
 
+#include "HAL/PlatformTime.h"
+
 #include "Algo/Find.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -298,6 +300,189 @@ bool UShipBoardingComponent::HasWalkInterior() const
 	return Ship->Hull && Ship->Hull->DoesSocketExist(ShipWalk::SeatSocket) && Ship->Hull->DoesSocketExist(ShipWalk::RampSocket);
 }
 
+namespace ShipDoors
+{
+	constexpr float DoorSeconds = 0.9f;
+	constexpr double AutoCloseSeconds = 6.0;
+	constexpr double KeepOpenNearCm = 140.0;
+}
+
+void UShipBoardingComponent::FindDoors()
+{
+	bDoorsFound = true;
+	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	TArray<UStaticMeshComponent*> Meshes;
+	Ship->GetComponents<UStaticMeshComponent>(Meshes);
+	for (UStaticMeshComponent* Mesh : Meshes)
+	{
+		const FString Name = Mesh->GetName();
+		if (!Name.StartsWith(TEXT("Door")) || !Mesh->GetStaticMesh() || Name.Len() < 6)
+		{
+			continue;
+		}
+		const FString Tail = Name.Mid(4);                               // "<n><A|B>"
+		const TCHAR Letter = FChar::ToLower(Tail[Tail.Len() - 1]);
+		const int32 Door = FCString::Atoi(*Tail.LeftChop(1));
+		FVector Closed;
+		if (!Ship->GetHullSocketLocation(FName(*FString::Printf(TEXT("Control_door%d_%c"), Door, Letter)), Closed))
+		{
+			continue;
+		}
+		FDoorLeaf Leaf;
+		Leaf.Mesh = Mesh;
+		Leaf.Door = Door;
+		Leaf.OpenRel = Mesh->GetRelativeLocation();
+		// the leaf is imported open: closing moves its centre onto the socket (in the parent's space)
+		const FVector Delta = Closed - Mesh->Bounds.Origin;
+		const USceneComponent* Parent = Mesh->GetAttachParent();
+		Leaf.ClosedRel = Leaf.OpenRel + (Parent ? Parent->GetComponentTransform().InverseTransformVectorNoScale(Delta) : Delta);
+		DoorLeaves.Add(Leaf);
+		if (DoorOpen.Num() <= Door)
+		{
+			DoorOpen.SetNumZeroed(Door + 1);
+			DoorTarget.SetNumZeroed(Door + 1);
+			DoorOpenedAt.SetNumZeroed(Door + 1);
+			DoorPrompt.SetNumZeroed(Door + 1);
+		}
+		// one leaf: SC puts OPEN [F] by the edge that closes, 12 cm in from it
+		const FVector Slide = (Mesh->Bounds.Origin - Closed).GetSafeNormal();
+		const double Half = FMath::Abs(FVector::DotProduct(Mesh->Bounds.BoxExtent, Slide.GetAbs()));
+		const FVector Edge = Closed - Slide * FMath::Max(Half - 12.0, 0.0);
+		DoorPrompt[Door] = DoorPrompt[Door].IsZero() && Letter == TEXT('a') ? Ship->GetActorTransform().InverseTransformPosition(Edge) : FVector::ZeroVector;
+	}
+	for (const FDoorLeaf& Leaf : DoorLeaves)
+	{
+		Leaf.Mesh->SetRelativeLocation(Leaf.ClosedRel);                  // the game starts with the doors shut
+	}
+	ApplyDoorCollision();
+}
+
+int32 UShipBoardingComponent::FindDoorNear(const FVector& Location, float ReachCm, const FVector& Facing) const
+{
+	int32 Best = INDEX_NONE;
+	double BestDistance = ReachCm;
+	const FVector Up = GetOwner()->GetActorUpVector();
+	const FVector Ahead = FVector::VectorPlaneProject(Facing, Up).GetSafeNormal();
+	for (int32 Door = 0; Door < DoorOpen.Num(); ++Door)
+	{
+		const FVector ToDoor = FVector::VectorPlaneProject(GetDoorLocation(Door) - Location, Up);
+		// with a view: only the doors in front of the walker (not the one just passed behind him)
+		if (!Ahead.IsZero() && ToDoor.SizeSquared() > FMath::Square(30.0) && FVector::DotProduct(ToDoor.GetSafeNormal(), Ahead) < 0.35)
+		{
+			continue;
+		}
+		const double Distance = FVector::Dist(GetDoorLocation(Door), Location);
+		if (Distance < BestDistance)
+		{
+			BestDistance = Distance;
+			Best = Door;
+		}
+	}
+	return Best;
+}
+
+FVector UShipBoardingComponent::GetDoorLocation(int32 Door) const
+{
+	FVector At = FVector::ZeroVector;
+	CastChecked<ASpaceshipPawn>(GetOwner())->GetHullSocketLocation(FName(*FString::Printf(TEXT("Control_door%d"), Door)), At);
+	return At;
+}
+
+FVector UShipBoardingComponent::GetDoorPromptLocation(int32 Door) const
+{
+	FVector At = GetDoorLocation(Door);
+	if (DoorPrompt.IsValidIndex(Door) && !DoorPrompt[Door].IsZero())
+	{
+		// at the leaf's edge, the height of the doorway's socket
+		const FTransform ShipT = GetOwner()->GetActorTransform();
+		FVector Local = DoorPrompt[Door];
+		Local.Z = ShipT.InverseTransformPosition(At).Z;
+		At = ShipT.TransformPosition(Local);
+	}
+	return At;
+}
+
+void UShipBoardingComponent::SetDoorOpen(int32 Door, bool bOpen)
+{
+	if (!DoorTarget.IsValidIndex(Door))
+	{
+		return;
+	}
+	DoorTarget[Door] = bOpen ? 1.f : 0.f;
+	if (bOpen)
+	{
+		DoorOpenedAt[Door] = FPlatformTime::Seconds();
+	}
+}
+
+void UShipBoardingComponent::TickDoors(float DeltaSeconds)
+{
+	if (!bDoorsFound)
+	{
+		FindDoors();
+	}
+	if (DoorLeaves.IsEmpty())
+	{
+		return;
+	}
+	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	const APawn* Walker = Ship->GetWorld() && Ship->GetWorld()->GetFirstPlayerController() ? Ship->GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr;
+	const double Now = FPlatformTime::Seconds();
+	bool bMoved = false;
+	for (int32 Door = 0; Door < DoorOpen.Num(); ++Door)
+	{
+		// SC's doors shut again by themselves once nobody stands in them
+		if (DoorTarget[Door] > 0.5f && Now - DoorOpenedAt[Door] > ShipDoors::AutoCloseSeconds
+			&& !(Walker && Walker != Ship && FVector::Dist(Walker->GetActorLocation(), GetDoorLocation(Door)) < ShipDoors::KeepOpenNearCm))
+		{
+			DoorTarget[Door] = 0.f;
+		}
+		const float Before = DoorOpen[Door];
+		DoorOpen[Door] = FMath::FInterpConstantTo(DoorOpen[Door], DoorTarget[Door], DeltaSeconds, 1.f / ShipDoors::DoorSeconds);
+		bMoved |= DoorOpen[Door] != Before;
+	}
+	if (!bMoved)
+	{
+		return;
+	}
+	for (const FDoorLeaf& Leaf : DoorLeaves)
+	{
+		if (UStaticMeshComponent* Mesh = Leaf.Mesh.Get())
+		{
+			// a heavy leaf: slow start, quick middle, soft stop
+			const float A = FMath::SmoothStep(0.f, 1.f, DoorOpen[Leaf.Door]);
+			Mesh->SetRelativeLocation(FMath::Lerp(Leaf.ClosedRel, Leaf.OpenRel, A));
+		}
+	}
+	ApplyDoorCollision();
+}
+
+void UShipBoardingComponent::ApplyDoorCollision()
+{
+	for (const FDoorLeaf& Leaf : DoorLeaves)
+	{
+		UStaticMeshComponent* Mesh = Leaf.Mesh.Get();
+		if (!Mesh)
+		{
+			continue;
+		}
+		// a shut leaf stops the walker (the rooms' rule while the interior is walked), an opening one lets him pass
+		const bool bBlocks = bInteriorWalked && DoorOpen[Leaf.Door] < 0.6f;
+		if (bBlocks)
+		{
+			Mesh->SetCollisionObjectType(ECC_WorldStatic);
+			Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+			Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+			Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+			Mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+		else
+		{
+			Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
+}
+
 bool UShipBoardingComponent::CanLeaveSeat() const
 {
 	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
@@ -386,6 +571,7 @@ void UShipBoardingComponent::SetInteriorWalk(bool bWalking)
 		WalkGravity = nullptr;
 	}
 	UE_LOG(LogSpaceship, Log, TEXT("%s: interior %s"), *Ship->GetName(), bWalking ? TEXT("walked (per-polygon collision, gravity)") : TEXT("closed"));
+	ApplyDoorCollision();
 }
 
 APawn* UShipBoardingComponent::LeaveSeat()

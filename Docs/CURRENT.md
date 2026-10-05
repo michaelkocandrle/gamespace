@@ -49,7 +49,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 ## Čeká na rozhodnutí autora
 
 - **Autor 5. 10. – věrná kopie SC podle referencí** (pak vlastní styl): režim interakce jako SC hotový (rozhlížení, ruka,
-  rámeček prvku); animace: sednutí/vstávání a výjezd holoprojekce hotové; zbývá rampa, dveře, holo MFD + písmo jako SC.
+  rámeček prvku); animace: sednutí/vstávání, výjezd holoprojekce a posuvné dveře (F, samy se zavřou) hotové; písmo MFD Oxanium; zbývá rampa.
 - **Kokpit v2** (4. 10.): C-01 schválen výchozími volbami (D průmyslový, zakouřené hologramy, HOTAS, krémové obložení –
   autor může změnit); hotové holoprojektory MFD (CK-HP-L/R) a vnitřní rám kanopy (CK-CF); dál HOTAS, konzole a ovladače, materiály, střed.
 - Podpora života Wayfareru v2: posunutá k ose, z většiny pod lůžkem (list I-04, řez R1; po sloučení `import_kit.py`).

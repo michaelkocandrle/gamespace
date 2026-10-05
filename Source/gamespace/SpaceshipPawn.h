@@ -197,6 +197,28 @@ public:
 	/** Interact mode (F held) in the seat: the mouse turns the pilot's head (free look) instead of steering. */
 	void SetInteractLook(bool bOn) { SetFreeLookHeld(bOn); }
 
+	/** Sliding doors inside (UShipBoardingComponent): the doorway near a location, open / shut it. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Walk")
+	int32 FindDoorNear(const FVector& Location, float ReachCm) const;
+	/** The doorway in front of a walker looking along Facing (doors behind him are skipped). */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Walk")
+	int32 FindDoorAhead(const FVector& Location, const FVector& Facing, float ReachCm) const;
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Walk")
+	void SetDoorOpen(int32 Door, bool bOpen);
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	bool IsDoorOpen(int32 Door) const;
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	int32 GetDoorCount() const;
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	FVector GetDoorLocation(int32 Door) const;
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	FVector GetDoorPromptLocation(int32 Door) const;
+	/** Tests: steps the doors. */
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Tests")
+	void DebugStepDoors(float DeltaSeconds);
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Tests")
+	float DebugGetDoorOpenAlpha(int32 Door) const;
+
 	/** The page an MFD shows (0 left, 1 right); 0 without displays. */
 	UFUNCTION(BlueprintPure, Category = "Spaceship|Displays")
 	int32 GetMfdPage(int32 Display) const;

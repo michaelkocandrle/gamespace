@@ -592,6 +592,16 @@ bool APlayerCharacter::TryInteriorInteract()
 	{
 		return false;
 	}
+	if (!Ship->IsNearSeat(GetActorLocation()))
+	{
+		// a door (SC: OPEN [F] beside it)
+		const int32 Door = Ship->FindDoorAhead(GetActorLocation() + GetActorUpVector() * 40.0, GetViewRotation().Vector(), 160.f);
+		if (Door != INDEX_NONE)
+		{
+			Ship->SetDoorOpen(Door, !Ship->IsDoorOpen(Door));
+			return true;
+		}
+	}
 	if (Ship->IsNearSeat(GetActorLocation()))
 	{
 		// sit down and fly

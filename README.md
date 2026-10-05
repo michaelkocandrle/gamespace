@@ -610,7 +610,18 @@ debug HUD stays only in HUD mode 3. Headless: `Tools/Tests/test_interaction.py`;
 - **Holo projection retracts** when the ship is switched off: the pictures sink back into the emitters for 0.45 s
   before going dark.
 - Shots: `ship_power/holo_rising`, `holo_retracting`.
-- Still to do: the ramp and the doors opening, a body animation for sitting.
+- **Sliding doors** inside the ship (`hs_interior.build_door`, `UShipBoardingComponent::TickDoors`):
+  - each doorway between rooms has a leaf (part `Door<n><A|B>`, one leaf when the wall beside it has room, else two
+    halves) with a light slot along its closing edge and an orange hand plate on both faces;
+  - built open in Blender (so the walk check passes), the game shuts them at start: closed = the leaf's centre on
+    socket `Control_door<n>_<a|b>`; **F** at a door (within 1.6 m, the one ahead of the walker's view) opens or
+    shuts it over 0.9 s (smoothstep); an open door shuts by itself after 6 s with nobody within 1.4 m;
+  - a shut leaf blocks the walker (query-only collision per polygon), an opening one lets him pass from 40 %;
+  - prompt like SC: the F key on the door and the word (OTEVŘÍT / ZAVŘÍT) set vertically above it;
+  - `space.WalkAt <x> <y> [yaw]` puts the walker at a spot in the ship's frame (shots); headless
+    `Tools/Tests/test_doors.py`, shots `Tools/Shots/doors.json`. `wayfarer_walk` walks into the shut doors (use
+    `doors` for that path).
+- Still to do: the ramp opening, a body animation for sitting.
 
 ### Ship power (SC cold start, step 2a)
 

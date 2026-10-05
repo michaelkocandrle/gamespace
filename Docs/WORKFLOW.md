@@ -1297,6 +1297,10 @@ snímku.
   (GEOTEST holes): vnější hrana podu zůstává ve staré výšce jako svislý schod (`pod_outer_low`).
 - ga) **`HeavyLock.ps1 run -Exec "bash …"` nenašel bash** (4. 10. 2026). PowerShell nemá Git Bash v PATH: v `-Exec`
   plná cesta `& '<git>\bin\bash.exe' skript.sh` (`(Get-Command git).Source` vrátí `cmd\git.exe`, bash je v `bin\bash.exe`).
+- gb) **Zavřené dveře posunuté o 12 cm, madlo za hranou křídla** (5. 10. 2026). Zavřená poloha = střed bounds dílu na
+  socketu; detail dílu trčící ven (znaménko strany v `build_door`) posune celý díl. Detaily dílu drž uvnitř jeho obrysu;
+  test `test_doors.py` porovnává posun s šířkou bounds. Výběr dveří pěšky podle pohledu (`FindDoorAhead`), jinak F
+  zavře dveře za zády. `space.WalkAt` má yaw 0 = na záď. `import_ship.py` potřebuje absolutní `GAMESPACE_SHIP_MANIFEST`.
 
 
 ---

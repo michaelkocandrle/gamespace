@@ -547,7 +547,7 @@ def add_mesh_component(blueprint, extra):
         # Attached under Hull, which already carries the offset.
         existing.set_editor_property("relative_location", unreal.Vector(0.0, 0.0, 0.0))
         existing.set_collision_profile_name("NoCollision")
-        if extra["component"] in ("Interior", "InteriorKit"):
+        if extra["component"] in ("Interior", "InteriorKit") or extra["component"].startswith("Door"):
             # walkable (author 29. 9. 2026): the pawn turns the rooms' collision on while someone walks inside
             # (ASpaceshipPawn::SetInteriorWalk); the character collides with the mesh itself, not a box round it.
             # Per polygon for now - the look first, collision boxes with the optimisation at the end

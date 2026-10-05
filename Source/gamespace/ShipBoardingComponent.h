@@ -46,7 +46,41 @@ public:
 
 	bool IsInteriorWalked() const { return bInteriorWalked; }
 
+	// --- Sliding doors (author 5. 10. 2026: SC's doors open; hs_interior.build_door) ------------------------------------
+
+	/** The doorway within ReachCm of a location (its centre socket Control_door<n>), or INDEX_NONE. */
+	int32 FindDoorNear(const FVector& Location, float ReachCm, const FVector& Facing = FVector::ZeroVector) const;
+	int32 GetDoorCount() const { return DoorOpen.Num(); }
+	bool IsDoorOpen(int32 Door) const { return DoorTarget.IsValidIndex(Door) && DoorTarget[Door] > 0.5f; }
+	/** 0 closed .. 1 open (tests, shots). */
+	float GetDoorOpenAlpha(int32 Door) const { return DoorOpen.IsValidIndex(Door) ? DoorOpen[Door] : 0.f; }
+	FVector GetDoorLocation(int32 Door) const;
+	/** SC's prompt point: on the shut leaf, near its closing edge (the doorway's centre for a two-leaf door). */
+	FVector GetDoorPromptLocation(int32 Door) const;
+	void SetDoorOpen(int32 Door, bool bOpen);
+	/** Moves the leaves (DoorSeconds), closes an open door after DoorAutoCloseSeconds with nobody in it. */
+	void TickDoors(float DeltaSeconds);
+
 private:
+	/** The door leaves (components Door<n><A|B>), found on the first tick: open = as imported, closed = moved so their
+	 * centre sits on the socket Control_door<n>_<a|b>. */
+	void FindDoors();
+	struct FDoorLeaf
+	{
+		TWeakObjectPtr<class UStaticMeshComponent> Mesh;
+		int32 Door = 0;
+		FVector OpenRel = FVector::ZeroVector;
+		FVector ClosedRel = FVector::ZeroVector;
+	};
+	TArray<FDoorLeaf> DoorLeaves;
+	TArray<float> DoorOpen;
+	TArray<float> DoorTarget;
+	TArray<double> DoorOpenedAt;
+	/** Per door, in the ship's frame: the prompt point, or zero = the doorway's centre. */
+	TArray<FVector> DoorPrompt;
+	bool bDoorsFound = false;
+	void ApplyDoorCollision();
+
 	FVector PushClearOfHull(const FVector& Start, const FVector& Direction, float CapsuleRadius, float CapsuleHalfHeight) const;
 	bool IsExitSpotFree(const FVector& Location, const FVector& Up, float CapsuleRadius, float CapsuleHalfHeight) const;
 

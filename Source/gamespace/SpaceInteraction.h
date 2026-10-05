@@ -9,6 +9,8 @@ class APawn;
 /** What a tap on F does here, and where: SC's prompt by the object ("SIT [F]", "OPEN [F]"). */
 struct FSpaceInteractTarget
 {
+	/** SC's door prompt: the label set vertically along the door's edge beside the key. */
+	bool bVertical = false;
 	bool bValid = false;
 	/** False: the action exists but cannot be done now (the ramp in flight); the prompt says why instead. */
 	bool bAvailable = true;

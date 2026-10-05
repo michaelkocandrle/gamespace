@@ -1,0 +1,150 @@
+{
+ "_comment": "Sliding doors in the Wayfarer (author 5. 10. 2026: SC's doors open). From the seat down to the cabin, the shut door to the technical corridor with SC's vertical OTEVŘÍT [F] prompt, F: half open, open, the hold door the same, through it, back: the door shut by itself (its far face). Run -Editor, or -Package -Width 1920 -Height 1080.",
+ "shots": [
+  {
+   "name": "flat",
+   "camera": "chase",
+   "altitude_m": 40.0,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "console": [
+    "space.FlatSpot 5 8"
+   ]
+  },
+  {
+   "name": "warmup",
+   "camera": "chase",
+   "altitude_m": 3.2,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 10.0,
+   "console": [
+    "stat none"
+   ]
+  },
+  {
+   "name": "a_stand_up",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 3.0,
+   "console": [
+    "space.Interact",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "a2_look_seat",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Walk 0 0 0.1 180"
+   ]
+  },
+  {
+   "name": "b_down_stairs",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.Walk 1 0 0.5 0",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "b2_look_back_up",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Walk 0 0 0.1 180",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "c_cabin",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.Walk 1 0 1.2 0",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "d_door1_shut_prompt",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.WalkAt 130 0 0",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "d2_door1_opening",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 0.35,
+   "console": [
+    "space.Interact"
+   ]
+  },
+  {
+   "name": "d3_door1_open",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 1.5,
+   "console": []
+  },
+  {
+   "name": "e_door0_shut_prompt",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.5,
+   "console": [
+    "space.WalkAt -60 -50 0",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "e2_door0_opening",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 0.4,
+   "console": [
+    "space.Interact"
+   ]
+  },
+  {
+   "name": "e3_door0_open",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 1.5,
+   "console": []
+  },
+  {
+   "name": "f_through_door0",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 2.0,
+   "console": [
+    "space.Walk 1 0 0.8",
+    "space.Where"
+   ]
+  },
+  {
+   "name": "g_back_door0_far_face",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 7.0,
+   "console": [
+    "space.WalkAt -330 -50 180",
+    "space.Where"
+   ]
+  }
+ ]
+}

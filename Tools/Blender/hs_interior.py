@@ -124,6 +124,66 @@ def _minus(span, holes):
     return parts
 
 
+DOOR_LEAVES = []
+
+
+def build_door(leaf, n, ship, coll, mats, H):
+    """A doorway's sliding leaves (author 5. 10. 2026: SC's doors slide into the wall; the author's capture: a panel
+    with a light slot and an orange PUSH TO OPEN plate, F to open). One leaf when the wall on one side has room for it,
+    else two that part to both sides. Built OPEN (beside the doorway, 10-13.5 cm in front of the wall's forward face,
+    clear of the frame posts) so the walk check passes the doorway; the game closes them. Each leaf is its own part
+    SM_Ship_<Ship>_Door<n><A|B>_<material>; sockets Control_door<n> (the doorway's centre, for the prompt) and
+    Control_door<n>_<a|b> (where the leaf's centre goes when it is closed). Returns [(socket, location)]."""
+    x, yc, w, half = leaf["x"], leaf["yc"], leaf["w"], leaf["half"]
+    h = 2.08
+    t = 0.035
+    xf = x + 0.10                       # the leaf's back face
+    room_neg = (yc - w / 2) - (-half)   # wall beside the doorway towards -y
+    room_pos = half - (yc + w / 2)
+    if max(room_neg, room_pos) >= w + 0.06:
+        sides = [(-1 if room_neg >= room_pos else 1, w + 0.06)]          # one leaf, the whole width
+    else:
+        sides = [(-1, w / 2 + 0.03), (1, w / 2 + 0.03)]                  # two halves part
+    out = [("Control_door%d" % n, Vector((x + 0.12, yc, 1.2)))]
+    for k, (sgn, lw) in enumerate(sides):
+        letter = "AB"[k]
+        closed_c = yc + (0.0 if len(sides) == 1 else sgn * lw / 2)
+        open_c = closed_c + sgn * (lw + 0.01)
+        g = B()
+        y0, y1 = open_c - lw / 2, open_c + lw / 2
+        box(g["int_panel"], (xf, y0, 0.01), (xf + t, y1, h))                                   # the leaf
+        lead = y1 if sgn < 0 else y0                                                           # the edge that closes
+        e = 1 if sgn < 0 else -1          # into the leaf from its closing edge
+        px = lead - e * 0.15
+        pa, pb = min(px, px - e * 0.11), max(px, px - e * 0.11)
+        # both faces alike (the door is opened from both rooms); d = +1 the forward face, -1 the aft one
+        # (critic 5. 10. 2026: "a flat matte slab" - a light border, a lighter field broken in three, a lit slot)
+        for d, face in ((1, xf + t), (-1, xf)):
+            def slab(key, ya, yb, za, zb, proud, depth=0.0):
+                lo, hi = sorted((face - d * depth, face + d * proud))
+                box(g[key], (lo, ya, za), (hi, yb, zb))
+            for (ya, yb, za, zb) in ((y0, y0 + 0.045, 0.01, h), (y1 - 0.045, y1, 0.01, h),
+                                     (y0, y1, 0.01, 0.065), (y0, y1, h - 0.055, h)):
+                slab("int_trim", ya, yb, za, zb, 0.008)                                         # the light border
+            for (za, zb) in ((0.09, 0.74), (0.78, 1.5), (1.54, h - 0.08)):
+                slab("int_wall", y0 + 0.07, y1 - 0.07, za, zb, 0.004)                           # the field in three
+            slab("int_dark", y0 + 0.07, y1 - 0.07, 0.74, 0.78, 0.002)                           # the breaks between them
+            slab("int_dark", y0 + 0.07, y1 - 0.07, 1.5, 1.54, 0.002)
+            # the light slot along the closing edge (the kit's warm glow; dims with the ship's power)
+            slab("int_glow", min(lead, lead - e * 0.028), max(lead, lead - e * 0.028), 0.3, h - 0.3, 0.012)
+            # the orange hand plate with three dark grip slots
+            slab("accent", pa, pb, 0.98, 1.2, 0.012)
+            for k in range(3):
+                zk = 1.03 + k * 0.055
+                slab("int_dark", pa + 0.02, pb - 0.02, zk, zk + 0.022, 0.016)
+        for key, bm in g.bm.items():
+            if bm.verts:
+                ob = hp.finish(bm, "SM_Ship_%s_Door%d%s_%s" % (ship, n, letter, key), coll, {"angle_deg": 30, "width": 0.002, "segments": 1})
+                ob.data.materials.append(mats[key])
+        out.append(("Control_door%d_%s" % (n, letter.lower()), Vector((xf + t / 2, closed_c, h / 2))))
+    return out
+
+
 def bulkhead(g, x, y0, y1, z0, z1, door, facing, full=False):
     """A cross wall at x from y0 to y1 with an open doorway (door: [yc, width] or None), framed. full: the doorway
     runs up to the ceiling (z1) with no header - the cockpit's door at the foot of the steep stairs, where a
@@ -606,6 +666,7 @@ MATS = {}
 def build(recipe, layout, coll, mats, ship, hull):
     MATS.clear()
     MATS.update(mats)
+    DOOR_LEAVES.clear()
     spec = recipe["interior"]
     H = spec.get("height_m", 2.3)
     inset = spec.get("wall_inset_m", 0.05)
@@ -714,6 +775,10 @@ def build(recipe, layout, coll, mats, ship, hull):
             continue
         full = d is not None and abs(x - rooms["cockpit"]["rect"][0]) < 0.01
         bulkhead(g, x, y0i, y1i, 0.0, H, (d["at"][1], d["width"]) if d else None, 1, full=full)
+        if d is not None and not full and spec.get("door_leaves", True):
+            # a sliding leaf in this doorway (author 5. 10. 2026: SC's doors open); how far the wall beside it runs
+            near = [kit_half[r["id"]] for r in rooms.values() if r["id"] in kit_half and (abs(r["rect"][0] - x) < 0.01 or abs(r["rect"][1] - x) < 0.01)]
+            DOOR_LEAVES.append({"x": x, "yc": d["at"][1], "w": d["width"], "half": min(near) if near else y1i, "name": d.get("name", "")})
         if kit is not None:
             # kit panels on the faces that look into kit rooms
             ks = next((v["scale"] for v in report["kit"].values() if isinstance(v, dict) and "scale" in v), None) or _kit_scale(spec, H)
@@ -1116,6 +1181,10 @@ def build(recipe, layout, coll, mats, ship, hull):
         dspec["_exclude_x"] = [rooms[r]["rect"][:2] for r in mod_rooms]
         dobjs, report["decals"] = hs_interior_decals.build(objs, ship, coll, dspec, ROOT, mats, eye)
         objs += dobjs
+    # the sliding door leaves (built open, the game closes them): their own parts Door<n>A/B and sockets
+    for n, leaf in enumerate(DOOR_LEAVES):
+        for name, at in build_door(leaf, n, ship, coll, mats, H):
+            sockets[name] = at
     if holo_centre is not None and "holo" in mats:
         # the ship hologram over the left MFD (hs_cockpit.build_hologram): on the pod's top, found by a ray down
         import hs_cockpit

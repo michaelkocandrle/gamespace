@@ -211,6 +211,31 @@ namespace
 			Character->DebugWalk(FVector2D(FCString::Atof(*Args[1]), FCString::Atof(*Args[0])), FCString::Atof(*Args[2]));
 		}));
 
+	/** space.WalkAt: puts the walker at a spot in the ship's frame (cm, keeping its height), for shots. */
+	FAutoConsoleCommandWithWorldAndArgs WalkAtCommand(
+		TEXT("space.WalkAt"),
+		TEXT("space.WalkAt <x> <y> [yaw]: the walker inside a ship to x, y in the ship's frame (cm, as space.Where prints), keeping its height."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			APlayerController* Controller = World ? World->GetFirstPlayerController() : nullptr;
+			APlayerCharacter* Character = Controller ? Cast<APlayerCharacter>(Controller->GetPawn()) : nullptr;
+			ASpaceshipPawn* Ship = Character ? Character->GetInteriorShip() : nullptr;
+			if (!Ship || Args.Num() < 2)
+			{
+				UE_LOG(LogSpaceInterior, Display, TEXT("space.WalkAt <x> <y> [yaw] (walking inside a ship only)"));
+				return;
+			}
+			const FTransform ShipT = Ship->GetActorTransform();
+			FVector Local = ShipT.InverseTransformPosition(Character->GetActorLocation());
+			Local.X = FCString::Atof(*Args[0]);
+			Local.Y = FCString::Atof(*Args[1]);
+			Character->SetActorLocation(ShipT.TransformPosition(Local), false, nullptr, ETeleportType::TeleportPhysics);
+			if (Args.Num() > 2)
+			{
+				Character->SetLookYaw(FCString::Atof(*Args[2]));
+			}
+		}));
+
 	/** space.Interact: what F does now - up from the seat of a walkable ship (or out beside a landed one), sit down
 	 * or step out down the ramp inside it, board or walk in up the ramp from outside. For shots and tests. */
 	FAutoConsoleCommandWithWorldAndArgs InteractCommand(

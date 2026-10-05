@@ -612,6 +612,16 @@ bool ASpaceshipPawn::RequestLeaveSeatInFlight()
 	return true;
 }
 
+int32 ASpaceshipPawn::FindDoorNear(const FVector& Location, float ReachCm) const { return Boarding->FindDoorNear(Location, ReachCm); }
+int32 ASpaceshipPawn::FindDoorAhead(const FVector& Location, const FVector& Facing, float ReachCm) const { return Boarding->FindDoorNear(Location, ReachCm, Facing); }
+void ASpaceshipPawn::SetDoorOpen(int32 Door, bool bOpen) { Boarding->SetDoorOpen(Door, bOpen); }
+bool ASpaceshipPawn::IsDoorOpen(int32 Door) const { return Boarding->IsDoorOpen(Door); }
+int32 ASpaceshipPawn::GetDoorCount() const { return Boarding->GetDoorCount(); }
+FVector ASpaceshipPawn::GetDoorLocation(int32 Door) const { return Boarding->GetDoorLocation(Door); }
+FVector ASpaceshipPawn::GetDoorPromptLocation(int32 Door) const { return Boarding->GetDoorPromptLocation(Door); }
+void ASpaceshipPawn::DebugStepDoors(float DeltaSeconds) { Boarding->TickDoors(DeltaSeconds); }
+float ASpaceshipPawn::DebugGetDoorOpenAlpha(int32 Door) const { return Boarding->GetDoorOpenAlpha(Door); }
+
 int32 ASpaceshipPawn::GetMfdPage(int32 Display) const
 {
 	return CockpitDisplays ? CockpitDisplays->GetPage(Display) : 0;
@@ -909,6 +919,7 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	StepFlight(DeltaSeconds);
+	Boarding->TickDoors(DeltaSeconds);
 	Presentation->UpdateCameraEffects(DeltaSeconds);
 	Presentation->UpdateEngineAudio(DeltaSeconds);
 	Presentation->UpdateShipLights(DeltaSeconds);

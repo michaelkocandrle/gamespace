@@ -21,6 +21,10 @@
         "UCX_SM_Ship_Wayfarer_10",
         "SOCKET_CameraTarget",
         "SOCKET_Cockpit",
+        "SOCKET_Control_door0",
+        "SOCKET_Control_door0_a",
+        "SOCKET_Control_door1",
+        "SOCKET_Control_door1_a",
         "SOCKET_Control_pwr",
         "SOCKET_Display_centre_bottom",
         "SOCKET_Display_centre_top",
@@ -35,7 +39,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "27c7a61aae39102acaa3152f0221a2c20dc9cd33"
+      "geometry_hash": "816755d1748a35ef887a831713f3e73b6554c613"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -49,7 +53,21 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "ff7e1daad48362a1a5c941d4b111af07973d6f15"
+      "geometry_hash": "71e4f5a96a36be1485b8629c88d293f654467af8"
+    },
+    {
+      "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
+      "objects": [
+        "SM_Ship_Wayfarer_Door0A"
+      ],
+      "geometry_hash": "f9d145f388da7447785dc4ba277f65f149afeb94"
+    },
+    {
+      "fbx": "SM_Ship_Wayfarer_Door1A.fbx",
+      "objects": [
+        "SM_Ship_Wayfarer_Door1A"
+      ],
+      "geometry_hash": "72c81bc8de3b1ab9965ab65505b327dd2c45e83b"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Gear.fbx",
@@ -70,7 +88,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "c6b9293b198a3d074579119f5cd06f0e6b33f6a5"
+      "geometry_hash": "6b2c8cd9cb3ac744dd4958ed49882b3f122f54e8"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
@@ -98,8 +116,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 459485,
-      "verts": 305339,
+      "tris": 459477,
+      "verts": 305335,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -183,6 +201,60 @@
         ]
       ]
     },
+    "SM_Ship_Wayfarer_Door0A": {
+      "lod": 0,
+      "part": "Door0A",
+      "tris": 1298,
+      "verts": 680,
+      "materials": [
+        "M_Ship_Wayfarer_Accent",
+        "M_Ship_Wayfarer_IntPanel",
+        "M_Ship_Wayfarer_IntTrim",
+        "M_Ship_Wayfarer_IntWall",
+        "M_Ship_Wayfarer_IntDark",
+        "M_Ship_Wayfarer_IntGlow"
+      ],
+      "uv_layers": 1,
+      "bounds_m": [
+        [
+          -1.9659996032714844,
+          -1.1019999980926514,
+          -1.1920000314712524
+        ],
+        [
+          -1.8990001678466797,
+          -0.0379999615252018,
+          0.8819999694824219
+        ]
+      ]
+    },
+    "SM_Ship_Wayfarer_Door1A": {
+      "lod": 0,
+      "part": "Door1A",
+      "tris": 1300,
+      "verts": 680,
+      "materials": [
+        "M_Ship_Wayfarer_Accent",
+        "M_Ship_Wayfarer_IntPanel",
+        "M_Ship_Wayfarer_IntTrim",
+        "M_Ship_Wayfarer_IntWall",
+        "M_Ship_Wayfarer_IntDark",
+        "M_Ship_Wayfarer_IntGlow"
+      ],
+      "uv_layers": 1,
+      "bounds_m": [
+        [
+          0.17399978637695312,
+          -1.6019999980926514,
+          -1.1920000314712524
+        ],
+        [
+          0.2409992218017578,
+          -0.5380001068115234,
+          0.8819999694824219
+        ]
+      ]
+    },
     "SM_Ship_Wayfarer_Gear": {
       "lod": 0,
       "part": "Gear",
@@ -233,7 +305,7 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 403590,
+      "tris": 403584,
       "verts": 210975,
       "materials": [
         "M_Ship_Wayfarer_Accent",
@@ -434,7 +506,7 @@
         [
           -9.949999809265137,
           3.2013895511627197,
-          0.8000001907348633
+          0.8000011444091797
         ],
         [
           -7.250000476837158,
@@ -554,6 +626,58 @@
         670.0,
         -0.0,
         125.0
+      ]
+    },
+    "SOCKET_Control_door0": {
+      "parent": "SM_Ship_Wayfarer",
+      "location_m": [
+        -1.93,
+        0.5,
+        0.0
+      ],
+      "location_ue_cm": [
+        -193.0,
+        -50.0,
+        0.0
+      ]
+    },
+    "SOCKET_Control_door0_a": {
+      "parent": "SM_Ship_Wayfarer",
+      "location_m": [
+        -1.9325,
+        0.5,
+        -0.16
+      ],
+      "location_ue_cm": [
+        -193.25,
+        -50.0,
+        -16.0
+      ]
+    },
+    "SOCKET_Control_door1": {
+      "parent": "SM_Ship_Wayfarer",
+      "location_m": [
+        0.21,
+        0.0,
+        0.0
+      ],
+      "location_ue_cm": [
+        21.0,
+        -0.0,
+        0.0
+      ]
+    },
+    "SOCKET_Control_door1_a": {
+      "parent": "SM_Ship_Wayfarer",
+      "location_m": [
+        0.2075,
+        0.0,
+        -0.16
+      ],
+      "location_ue_cm": [
+        20.75,
+        -0.0,
+        -16.0
       ]
     },
     "SOCKET_Control_pwr": {

@@ -149,6 +149,14 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 			OutTarget.Label = LOCTEXT("Sit", "SEDNOUT");
 			OutTarget.WorldLocation = Seat;
 		}
+		else if (const int32 Door = Inside->FindDoorAhead(At + Inside->GetActorUpVector() * 40.0, Pawn->GetViewRotation().Vector(), 160.f); Door != INDEX_NONE)
+		{
+			OutTarget.bValid = true;
+			OutTarget.bVertical = true;
+			OutTarget.Label = Inside->IsDoorOpen(Door) ? LOCTEXT("DoorClose", "ZAVŘÍT") : LOCTEXT("DoorOpen", "OTEVŘÍT");
+			// a little under the eye on the door (SC's prompt sits on the panel, not at the walker's feet)
+			OutTarget.WorldLocation = Inside->GetDoorPromptLocation(Door) + Inside->GetActorUpVector() * 25.0;
+		}
 		else if (Inside->IsNearRamp(At) && bRamp)
 		{
 			OutTarget.bValid = true;

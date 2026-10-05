@@ -157,6 +157,9 @@ def main(argv):
         elif o.name.endswith("_Hologram"):
             # the cockpit's ship hologram (hs_cockpit.build_hologram): additive, turns about its own centre
             assign[o.name] = "Hologram"
+        elif "_Door" in o.name:
+            # a sliding door leaf (hs_interior.build_door): its own part Door<n><A|B>, moved by the pawn
+            assign[o.name] = "Door" + o.name.split("_Door", 1)[1].split("_", 1)[0]
         elif "_IntKit_" in o.name:
             # modular kit pieces (hs_interior_kit.py): their trim-sheet UVs are the look, no unwrap
             assign[o.name] = "InteriorKit"
