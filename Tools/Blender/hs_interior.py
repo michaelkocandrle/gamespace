@@ -511,6 +511,13 @@ def obj_console(g, r, zr, z0):
             for sy in (-1, 1):
                 q = tc + Vector((sx * 0.07, sy * 0.05, 0.0035))
                 cyl(g["int_trim"], q, q + Vector((0, 0, 0.003)), 0.004, 8)
+        # (critic round 2: the outer half of the top still empty) a switch module on the outer half, beside the forearm rest
+        oc = Vector((x0 + 0.53, (y1 - 0.11) if y0 > 0 else (y0 + 0.11), top + 0.016))   # (clear of the canopy module aft)
+        hs_cockpit.control_module(g, oc, Vector((0, -1, 0)), Vector((1, 0, 0)), Vector((0, 0, 1)), 0.16, 0.2,
+                                  [[("rocker", "ck_hyd"), ("rocker", "ck_o2")], [("guarded", "ck_esp"), ("button", "ck_aux")],
+                                   [("led_w", "ck_ready"), ("led_o", "ck_heat")]] if y0 > 0 else
+                                  [[("rocker", "ck_rcs"), ("rocker", "ck_ifcs")], [("guarded", "ck_qt"), ("button", "ck_scan")],
+                                   [("led_w", "ck_link"), ("led_blink", "ck_armed")]])
         if y0 < 0:
             # the right console's module aft of the stick, mirroring the left one: lights, comms, two status LEDs
             hs_cockpit.control_module(g, Vector((x0 + 0.32, (y0 + y1) / 2 - 0.05, top + 0.016)), Vector((0, -1, 0)), Vector((1, 0, 0)),

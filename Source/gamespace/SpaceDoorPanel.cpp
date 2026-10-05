@@ -88,7 +88,7 @@ int32 USpaceDoorPanel::NativePaint(const FPaintArgs& Args, const FGeometry& Geom
 	}
 
 	// the state
-	const FString State = bOpening ? (Open < 0.98f ? TEXT("OPENING") : TEXT("OPEN")) : (Open > 0.02f ? TEXT("CLOSING") : TEXT("LOCKED"));
+	const FString State = bOpening ? (Open < 0.98f ? TEXT("OPENING") : TEXT("OPEN")) : (Open > 0.02f ? TEXT("CLOSING") : TEXT("CLOSED"));   // (LOCKED + TAP TO OPEN contradicted itself)
 	const FSlateFontInfo StateFont = Font(32.f);
 	FSlateDrawElement::MakeText(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2f(W, 40.f), FSlateLayoutTransform(FVector2f(22.f, H * 0.66f))),
 		State, StateFont, ESlateDrawEffect::None, Faded(1.f));

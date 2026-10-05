@@ -3036,10 +3036,14 @@ void USpaceCockpitDisplays::BuildTree()
 		Horizontal(ListLine, Sized(FName(*(Row + TEXT("BrgBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sBrg_%d"), *Prefix, Index)), TEXT("-"), 26.f, ETextJustify::Right), 100.f, 0.f),
 			VAlign_Center, FMargin(0.f));
 		Vertical(RowBox, ListLine, HAlign_Fill, FMargin(0.f, 0.f));
-		Vertical(RowBox, Rule(FName(*(Row + TEXT("Rule"))), 0.f, 0.22f), HAlign_Fill, FMargin(0.f, 1.f));
+		Vertical(RowBox, Rule(FName(*(Row + TEXT("Rule"))), 0.f, 0.4f), HAlign_Fill, FMargin(0.f, 1.f));   // (a firm rule ties the values to their entry)
 		Vertical(Into, RowBox, HAlign_Fill, FMargin(0.f));
 	};
-	Vertical(NavPage, ListHeader(TEXT("NavHeader"), TEXT("BODY")), HAlign_Fill, FMargin(0.f, -2.f, 0.f, 0.f));
+	// (critic 5. 10., round 2: the header row pushed KETH into the footer and read as the values' row - the list
+	// goes without it, each entry on its own firm rule)
+	UWidget* NavHeader = ListHeader(TEXT("NavHeader"), TEXT("BODY"));
+	NavHeader->SetVisibility(ESlateVisibility::Collapsed);
+	Vertical(NavPage, NavHeader, HAlign_Fill, FMargin(0.f));
 	for (int32 Index = 0; Index < NavRows; ++Index)
 	{
 		ListRow(NavPage, TEXT("Nav"), Index);
