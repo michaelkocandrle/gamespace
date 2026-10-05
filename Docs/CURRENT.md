@@ -48,6 +48,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 - **Autor 5. 10. – věrná kopie SC podle referencí** (pak vlastní styl); pořadí v Dalších krocích, bod 0.
 - **Kokpit v2** (4. 10.): C-01 schválen výchozími volbami (D průmyslový, zakouřené hologramy, HOTAS, krémové obložení –
   autor může změnit); hotové holoprojektory MFD (CK-HP-L/R) a vnitřní rám kanopy (CK-CF); dál HOTAS, konzole a ovladače, materiály, střed.
+- Podpora života Wayfareru v2: posunutá k ose, z většiny pod lůžkem (list I-04, řez R1; po sloučení `import_kit.py`).
 - Nábytek kajuty: posouzení ve hře (kritik FAIL 7/6/6/7/7/8/8/7); Steadfast: schválení 2D návrhu v2, paleta Kestrel.
 
 ## Známé problémy
@@ -67,8 +68,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 ## Další kroky
 
 0. **Autor 5. 10. (screenshoty), v tomto pořadí:**
-   a) holo MFD v3: zvuky, náběh, plátno 880 × 490, záložky, « », paleta, FLIGHT/STATUS hotové; zbývá písmo Saira (souhlas autora),
-      ostatní stránky, pruh kontrolek pravého MFD, barevný lem (`2026-10-05_holo_mfd_v3_spec.md`);
+   a) holo MFD v3 (`2026-10-05_holo_mfd_v3_spec.md`): rám, 880 × 490, FLIGHT/STATUS hotové; zbývá písmo Saira, další stránky;
    b) dveře: holografický dotykový panel vedle dveří (otevírá se přes režim interakce), detail dveří;
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
       strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); pak rampa.
