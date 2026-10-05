@@ -64,10 +64,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 ## Další kroky
 
 0. **Autor 5. 10. (screenshoty), v tomto pořadí:**
-   a) holo MFD v3 (`2026-10-05_holo_mfd_v3_spec.md`): rám, 880 × 490, azurová, Saira, vyjíždění zespodu hotové; zbývá dotáhnout další stránky;
-   a2) večer 5. 10. hotové: motory (I) zvlášť od napájení, zvuky ElevenLabs, křeslo v3, přepínač ENG, holo střední
-      displeje, konzole, hasicí přístroj (`2026-10-05_cockpit_detail_pass.md`); dál další stránky MFD, kritik;
-   b) dveře: holografický dotykový panel vedle dveří (otevírá se přes režim interakce), detail dveří;
+   a) holo MFD v3 + kokpit: hotové (stránky, motory, zvuky, křeslo, konzole, panel dveří, hasičák); kritik 3 kola
+      FAIL 6,17 bez „musí se opravit“ – otevřené body v `2026-10-06_cockpit_critic.md` (konzole, středové displeje);
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
       strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); pak rampa.
    Hotové 5. 10.: klik přímo na šipky MFD, bez popisků, nový kurzor, interakce nezávislá na H; posuvné dveře.
