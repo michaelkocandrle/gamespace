@@ -251,18 +251,17 @@ int32 SSpaceInteractionOverlay::OnPaint(const FPaintArgs&, const FGeometry& Geom
 	// --- Interact mode: the hotspots, the hovered one labelled -----------------------------------------------------------
 	if (View.bInteractMode)
 	{
-		// The interact cursor (author 5. 10. 2026: the boxy hand looked cheap): four thin ticks round the point the
-		// player looks at, no dot. Over a control they close in and turn the UI's cyan.
+		// The interact cursor (author 5. 10. 2026: the boxy hand looked cheap, then "smaller, and over a control fit
+		// it to the control"): four short thin ticks round the point the player looks at, no dot; over a control the
+		// cursor becomes the control's own frame (the corners below), so the ticks are not drawn.
+		if (!View.Hotspots.IsValidIndex(View.Hovered))
 		{
 			const FVector2f C = ToLocal(View.CursorScreen);
-			const bool bOver = View.Hotspots.IsValidIndex(View.Hovered);
-			const float Gap = bOver ? 4.f : 7.f, Len = bOver ? 7.f : 5.f;
-			const FLinearColor Tick = bOver ? Srgb(140, 230, 255) : Srgb(235, 245, 250, 0.9f);
 			for (const FVector2f& Dir : { FVector2f(1.f, 0.f), FVector2f(-1.f, 0.f), FVector2f(0.f, 1.f), FVector2f(0.f, -1.f) })
 			{
-				const TArray<FVector2f> Line = { C + Dir * Gap, C + Dir * (Gap + Len) };
-				Lines(Line, Srgb(5, 12, 16, 0.55f), 3.4f, Layer + 4);
-				Glow(Line, Tick, 1.4f, Layer + 5, bOver ? 1.f : 0.5f);
+				const TArray<FVector2f> Line = { C + Dir * 3.5f, C + Dir * 7.f };
+				Lines(Line, Srgb(5, 12, 16, 0.5f), 2.6f, Layer + 4);
+				Lines(Line, Srgb(235, 245, 250, 0.85f), 1.1f, Layer + 5);
 			}
 		}
 		for (int32 Index = 0; Index < View.Hotspots.Num(); ++Index)
@@ -277,13 +276,16 @@ int32 SSpaceInteractionOverlay::OnPaint(const FPaintArgs&, const FGeometry& Geom
 			{
 				// SC (the author's captures, 5. 10. 2026): the control under the cursor lights up - here light corners
 				// round it at its own size, not a marker dot - and its name stands beside it in light italic caps.
-				const float Px = View.HotspotPixelSize.IsValidIndex(Index) ? FMath::Clamp(View.HotspotPixelSize[Index] / PixelScale, 16.f, 260.f) : 30.f;
-				const float HalfBox = Px * 0.5f + 4.f, Arm = FMath::Max(6.f, HalfBox * 0.45f);
-				Fill(Out, Layer, Geometry, BoxPoints(At.X - HalfBox, At.Y - HalfBox, HalfBox * 2.f, HalfBox * 2.f), Srgb(200, 240, 255, 0.07f));
+				const float Px = View.HotspotPixelSize.IsValidIndex(Index) ? FMath::Clamp(View.HotspotPixelSize[Index] / PixelScale, 10.f, 260.f) : 30.f;
+				// the frame takes the control's shape (SizeCm is its width, Aspect width / height), 3 px clear of it
+				const float Aspect = FMath::Clamp(View.Hotspots[Index].Aspect, 0.25f, 4.f);
+				const FVector2f Half(Px * 0.5f + 3.f, Px * 0.5f / Aspect + 3.f);
+				const float Arm = FMath::Max(4.f, FMath::Min(Half.X, Half.Y) * 0.5f);
+				Fill(Out, Layer, Geometry, BoxPoints(At.X - Half.X, At.Y - Half.Y, Half.X * 2.f, Half.Y * 2.f), Srgb(200, 240, 255, 0.07f));
 				for (const FVector2f& Sign : { FVector2f(-1.f, -1.f), FVector2f(1.f, -1.f), FVector2f(1.f, 1.f), FVector2f(-1.f, 1.f) })
 				{
-					const FVector2f Corner = At + Sign * HalfBox;
-					Glow({ Corner - FVector2f(Sign.X * Arm, 0.f), Corner, Corner - FVector2f(0.f, Sign.Y * Arm) }, Srgb(210, 245, 255), 1.6f, Layer + 1, 0.9f);
+					const FVector2f Corner = At + Sign * Half;
+					Glow({ Corner - FVector2f(Sign.X * Arm, 0.f), Corner, Corner - FVector2f(0.f, Sign.Y * Arm) }, Srgb(210, 245, 255), 1.4f, Layer + 1, 0.9f);
 				}
 				// no name beside it (author 5. 10. 2026: the labels made no sense there)
 			}

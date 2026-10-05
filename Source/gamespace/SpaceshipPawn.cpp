@@ -634,11 +634,17 @@ bool ASpaceshipPawn::GetDisplayPoint(int32 Display, const FVector2D& UV, FVector
 	{
 		return false;
 	}
-	// The glass faces the eye (hs_cockpit.oriented); its centre is ~1 cm behind the socket.
-	const FVector Normal = (GetPilotEyeLocation() - Screen).GetSafeNormal();
+	// The glass faces the eye it was built for (hs_cockpit.oriented: the design eye, socket Cockpit - not the camera,
+	// which free look and the seat move; 5. 10. 2026 the hover frames sat a row high); its centre is 3 cm behind the socket.
+	FVector DesignEye;
+	if (!GetHullSocketLocation(TEXT("Cockpit"), DesignEye))
+	{
+		DesignEye = GetPilotEyeLocation();
+	}
+	const FVector Normal = (DesignEye - Screen).GetSafeNormal();
 	const FVector Right = (Normal ^ GetActorUpVector()).GetSafeNormal();
 	const FVector PanelUp = (Right ^ Normal).GetSafeNormal();
-	OutLocation = Screen - Normal * 1.0 + Right * ((UV.X - 0.5) * MfdGlassSizeCm.X) + PanelUp * ((0.5 - UV.Y) * MfdGlassSizeCm.Y);
+	OutLocation = Screen - Normal * 3.0 + Right * ((UV.X - 0.5) * MfdGlassSizeCm.X) + PanelUp * ((0.5 - UV.Y) * MfdGlassSizeCm.Y);
 	return true;
 }
 

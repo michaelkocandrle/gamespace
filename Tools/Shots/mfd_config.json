@@ -37,7 +37,7 @@
    "hud": 1,
    "settle": 1.0,
    "console": [
-    "space.InteractMode 1 3"
+    "space.InteractMode 1 5"
    ]
   },
   {
@@ -46,7 +46,7 @@
    "hud": 1,
    "settle": 1.0,
    "console": [
-    "space.InteractMode 1 5"
+    "space.InteractMode 1 7"
    ]
   },
   {

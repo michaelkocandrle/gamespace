@@ -33,6 +33,8 @@ struct FSpaceHotspot
 	FVector LabelWorldLocation = FVector::ZeroVector;
 	/** The control's size, cm: the highlight frames it (SC lights the control itself, no marker dot). */
 	float SizeCm = 6.f;
+	/** Its width over its height (the hover frame takes the control's shape): 1 square, > 1 wide like a switch. */
+	float Aspect = 1.f;
 };
 
 /** One line of SC's context key list at the bottom right: "ACTION [key]". */

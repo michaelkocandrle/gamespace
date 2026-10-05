@@ -961,7 +961,7 @@ public:
 	static constexpr float ConfigRowHeight = 46.f;
 	static constexpr float ConfigSwitchWidth = 104.f;
 	static constexpr float ConfigScreenPadding = 20.f;
-	static constexpr float ConfigRowsTop = 104.f;
+	static constexpr float ConfigRowsTop = 124.f;   // +20 since the Oxanium header (taller line, 5. 10. 2026)
 
 	/**
 	 * A screen's rectangle on the canvas, by the name of its socket (Display_<name>): left, right,

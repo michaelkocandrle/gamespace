@@ -35,6 +35,7 @@ namespace SpaceInteractionLocal
 				FText::FromString(USpaceCockpitDisplays::ConfigRowNames()[Row]));
 			Spot.WorldLocation = At;
 			Spot.SizeCm = 6.f;
+			Spot.Aspect = 2.3f;      // the ON / OFF pill
 			// The label over the display's top frame, above this switch: never over the page (critic 4. 10.).
 			Spot.bLabelAnchor = Ship->GetDisplayPoint(0, FVector2D(USpaceCockpitDisplays::ConfigSwitchUV(Row).X - 0.25, -0.07), Spot.LabelWorldLocation);
 			Spot.Use = [Weak, Row](bool bPrimary)
@@ -102,7 +103,8 @@ namespace SpaceInteractionLocal
 				FSpaceHotspot Spot;
 				Spot.Label = Step < 0 ? LOCTEXT("MfdPrev", "PŘEDCHOZÍ STRÁNKA") : LOCTEXT("MfdNext", "DALŠÍ STRÁNKA");
 				Spot.WorldLocation = At;
-				Spot.SizeCm = 3.5f;
+				Spot.SizeCm = 3.f;
+				Spot.Aspect = 0.8f;      // the arrow glyph, a little taller than wide
 				Spot.Use = [Weak, Display, Step](bool bPrimary)
 				{
 					if (ASpaceshipPawn* Live = Weak.Get())
