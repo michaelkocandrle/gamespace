@@ -2940,31 +2940,59 @@ void USpaceCockpitDisplays::BuildTree()
 	for (const TCHAR* Axis : { TEXT("MAIN"), TEXT("RETRO"), TEXT("STRAFE"), TEXT("UP"), TEXT("DOWN") })
 	{
 		UHorizontalBox* ThrustLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("ThrustRow_%s"), Axis)));
-		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustNameBox_%s"), Axis)), Words(FName(*FString::Printf(TEXT("ThrustName_%s"), Axis)), Axis, 30.f), 134.f, 0.f),
+		// (holo MFD v3: SC's amber flag before each row)
+		USpaceHudSymbol* ThrustFlag = Symbol(FName(*FString::Printf(TEXT("ThrustFlag_%s"), Axis)), ESpaceHudSymbol::Line, MfdAmber);
+		ThrustFlag->Thickness = 4.f;
+		ThrustFlag->Points = { FVector2D(0.5, 0.0), FVector2D(0.5, 1.0) };
+		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustFlagBox_%s"), Axis)), ThrustFlag, 6.f, 24.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
+		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustNameBox_%s"), Axis)), Words(FName(*FString::Printf(TEXT("ThrustName_%s"), Axis)), Axis, 28.f), 134.f, 0.f),
 			VAlign_Center, FMargin(0.f));
 		// The strafe row says which side it fires to.
 		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustSideBox_%s"), Axis)),
 			FCString::Strcmp(Axis, TEXT("STRAFE")) == 0 ? static_cast<UWidget*>(Words(TEXT("ThrustStrafeSide"), TEXT(""), 30.f)) : static_cast<UWidget*>(WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass())),
 			28.f, 0.f), VAlign_Center, FMargin(0.f));
-		USpaceHudGauge* ThrustGauge = Gauge(FName(*FString::Printf(TEXT("ThrustGauge_%s"), Axis)), 12);
+		USpaceHudGauge* ThrustGauge = Gauge(FName(*FString::Printf(TEXT("ThrustGauge_%s"), Axis)), 20);
 		ThrustGauge->bHorizontal = true;
-		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustGaugeBox_%s"), Axis)), ThrustGauge, 0.f, 24.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f), true);
+		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustGaugeBox_%s"), Axis)), ThrustGauge, 0.f, 20.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f), true);
 		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustValueBox_%s"), Axis)),
 			AlignedWords(FName(*FString::Printf(TEXT("ThrustValue_%s"), Axis)), TEXT("-"), 28.f, ETextJustify::Right), 168.f, 0.f), VAlign_Center, FMargin(0.f));
-		Vertical(ThrustPage, ThrustLine, HAlign_Fill, FMargin(0.f, 1.f));
+		Vertical(ThrustPage, ThrustLine, HAlign_Fill, FMargin(0.f, -1.f));
 	}
 	Vertical(ThrustPage, Rule(TEXT("ThrustRule"), 0.f, 0.2f), HAlign_Fill, FMargin(0.f, 3.f));
 	UHorizontalBox* ThrustFooter = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ThrustFooter"));
-	Horizontal(ThrustFooter, Words(TEXT("ThrustBoost"), TEXT("BOOST OFF"), 26.f), VAlign_Center, FMargin(0.f), true);
-	Horizontal(ThrustFooter, Words(TEXT("ThrustGSafe"), TEXT("G-SAFE"), 26.f), VAlign_Center, FMargin(0.f));
+	// (the footer as SC's chips: each word in a bracketed badge)
+	auto Chip = [&](const FName Name, const TCHAR* Initial)
+	{
+		UOverlay* Box = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*(Name.ToString() + TEXT("Chip"))));
+		USpaceHudLamp* Shape = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), FName(*(Name.ToString() + TEXT("ChipShape"))));
+		Shape->bBadge = true;
+		Shape->Color = MfdBlue;
+		Shape->Intensity = Shape->Target = 1.f;
+		if (UOverlaySlot* ShapeSlot = Box->AddChildToOverlay(Shape))
+		{
+			ShapeSlot->SetHorizontalAlignment(HAlign_Fill);
+			ShapeSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		if (UOverlaySlot* TextSlot = Box->AddChildToOverlay(Words(Name, Initial, 26.f)))
+		{
+			TextSlot->SetHorizontalAlignment(HAlign_Center);
+			TextSlot->SetVerticalAlignment(VAlign_Center);
+			TextSlot->SetPadding(FMargin(16.f, 2.f));
+		}
+		return Box;
+	};
+	Horizontal(ThrustFooter, Chip(TEXT("ThrustBoost"), TEXT("BOOST OFF")), VAlign_Center, FMargin(0.f, 0.f, 16.f, 0.f));
+	Horizontal(ThrustFooter, WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass()), VAlign_Center, FMargin(0.f), true);
+	Horizontal(ThrustFooter, Chip(TEXT("ThrustGSafe"), TEXT("G-SAFE")), VAlign_Center, FMargin(0.f));
 	Vertical(ThrustPage, ThrustFooter, HAlign_Fill, FMargin(0.f));
 
 	// --- Left display, page 3: NAVIGATION - master mode, cruise, and the bodies with range and bearing ---
 	UVerticalBox* NavPage = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("NavPage"));
 	UHorizontalBox* NavTop = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("NavTop"));
-	UVerticalBox* NavModeBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("NavModeBox"));
-	Vertical(NavModeBox, Words(TEXT("NavMode"), TEXT("SCM"), 62.f), HAlign_Left, FMargin(0.f, -10.f, 0.f, -8.f));
-	Vertical(NavModeBox, Words(TEXT("NavSub"), TEXT("FLIGHT"), 26.f, Faded(MfdText, 0.8f)), HAlign_Left, FMargin(2.f, 0.f, 0.f, 0.f));
+	// (v3: the mode and its sub-mode side by side - stacked, the body list ran into the bottom bar)
+	UHorizontalBox* NavModeBox = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("NavModeBox"));
+	Horizontal(NavModeBox, Words(TEXT("NavMode"), TEXT("SCM"), 56.f), VAlign_Bottom, FMargin(0.f, -10.f, 0.f, -6.f));
+	Horizontal(NavModeBox, Words(TEXT("NavSub"), TEXT("FLIGHT"), 26.f, Faded(MfdText, 0.8f)), VAlign_Bottom, FMargin(10.f, 0.f, 0.f, 6.f));
 	Horizontal(NavTop, NavModeBox, VAlign_Top, FMargin(0.f, 0.f, 24.f, 0.f));
 	UVerticalBox* NavFigures = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("NavFigures"));
 	for (const TPair<const TCHAR*, const TCHAR*>& NavFigure : { TPair<const TCHAR*, const TCHAR*>(TEXT("SPEED"), TEXT("NavSpeed")),
@@ -2973,7 +3001,7 @@ void USpaceCockpitDisplays::BuildTree()
 		UHorizontalBox* FigureLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("NavFigure_%s"), NavFigure.Key)));
 		Horizontal(FigureLine, Words(FName(*FString::Printf(TEXT("NavCaption_%s"), NavFigure.Key)), NavFigure.Key, 22.f, Faded(MfdText, 0.55f)), VAlign_Center, FMargin(0.f), true);
 		Horizontal(FigureLine, Words(NavFigure.Value, TEXT("-"), 28.f), VAlign_Center, FMargin(0.f));
-		Vertical(NavFigures, FigureLine, HAlign_Fill, FMargin(0.f, -2.f));
+		Vertical(NavFigures, FigureLine, HAlign_Fill, FMargin(0.f, -4.f));
 	}
 	Horizontal(NavTop, NavFigures, VAlign_Top, FMargin(0.f), true);
 	Vertical(NavPage, NavTop, HAlign_Fill, FMargin(0.f, 0.f, 0.f, 2.f));
@@ -2996,16 +3024,20 @@ void USpaceCockpitDisplays::BuildTree()
 		UVerticalBox* RowBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*Row));
 		Parts.Add(FName(*Row), RowBox);
 		UHorizontalBox* ListLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*(Row + TEXT("Line"))));
-		Horizontal(ListLine, Words(FName(*FString::Printf(TEXT("%sName_%d"), *Prefix, Index)), TEXT("-"), 30.f), VAlign_Center, FMargin(0.f), true);
-		Horizontal(ListLine, Sized(FName(*(Row + TEXT("DistBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sDist_%d"), *Prefix, Index)), TEXT("-"), 30.f, ETextJustify::Right), 160.f, 0.f),
+		USpaceHudSymbol* ListFlag = Symbol(FName(*(Row + TEXT("Flag"))), ESpaceHudSymbol::Line, MfdAmber);
+		ListFlag->Thickness = 4.f;
+		ListFlag->Points = { FVector2D(0.5, 0.0), FVector2D(0.5, 1.0) };
+		Horizontal(ListLine, Sized(FName(*(Row + TEXT("FlagBox"))), ListFlag, 6.f, 24.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
+		Horizontal(ListLine, Words(FName(*FString::Printf(TEXT("%sName_%d"), *Prefix, Index)), TEXT("-"), 28.f), VAlign_Center, FMargin(0.f), true);
+		Horizontal(ListLine, Sized(FName(*(Row + TEXT("DistBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sDist_%d"), *Prefix, Index)), TEXT("-"), 28.f, ETextJustify::Right), 160.f, 0.f),
 			VAlign_Center, FMargin(0.f));
 		Horizontal(ListLine, Sized(FName(*(Row + TEXT("BrgBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sBrg_%d"), *Prefix, Index)), TEXT("-"), 28.f, ETextJustify::Right), 100.f, 0.f),
 			VAlign_Center, FMargin(0.f));
 		Vertical(RowBox, ListLine, HAlign_Fill, FMargin(0.f, 0.f));
-		Vertical(RowBox, Rule(FName(*(Row + TEXT("Rule"))), 0.f, 0.12f), HAlign_Fill, FMargin(0.f, 1.f));
+		Vertical(RowBox, Rule(FName(*(Row + TEXT("Rule"))), 0.f, 0.22f), HAlign_Fill, FMargin(0.f, 1.f));
 		Vertical(Into, RowBox, HAlign_Fill, FMargin(0.f));
 	};
-	Vertical(NavPage, ListHeader(TEXT("NavHeader"), TEXT("BODY")), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 2.f));
+	Vertical(NavPage, ListHeader(TEXT("NavHeader"), TEXT("BODY")), HAlign_Fill, FMargin(0.f, -2.f, 0.f, 0.f));
 	for (int32 Index = 0; Index < NavRows; ++Index)
 	{
 		ListRow(NavPage, TEXT("Nav"), Index);
@@ -3127,11 +3159,11 @@ void USpaceCockpitDisplays::BuildTree()
 		TPair<const TCHAR*, const TCHAR*>(TEXT("GEAR"), TEXT("SelfGear")), TPair<const TCHAR*, const TCHAR*>(TEXT("ENGINES"), TEXT("SelfEngines")),
 		TPair<const TCHAR*, const TCHAR*>(TEXT("BOOST"), TEXT("SelfBoost")) })
 	{
-		// Four figures (the afterburner fuel is on the FLIGHT page), each caption over its value.
-		Vertical(SelfList, Words(FName(*FString::Printf(TEXT("SelfCaption_%s"), SelfFigure.Key)), SelfFigure.Key, 20.f, Faded(MfdText, 0.55f)), HAlign_Left, FMargin(0.f));
-		Vertical(SelfList, Words(SelfFigure.Value, TEXT("-"), 30.f), HAlign_Left, FMargin(0.f, -4.f, 0.f, 0.f));
+		// Four figures (the afterburner fuel is on the FLIGHT page) as SC's flagged rows, the value right-aligned
+		// (v3: caption over value ran the last one into the bottom bar)
+		FlagRow(SelfList, FString::Printf(TEXT("Self%s"), SelfFigure.Key), SelfFigure.Key, SelfFigure.Value, 28.f);
 	}
-	Horizontal(SelfPage, Sized(TEXT("SelfListBox"), SelfList, 170.f, 0.f), VAlign_Top, FMargin(0.f));
+	Horizontal(SelfPage, Sized(TEXT("SelfListBox"), SelfList, 330.f, 0.f), VAlign_Top, FMargin(0.f, 4.f, 0.f, 0.f));
 	Screen(TEXT("Status"), ScreenRect(TEXT("right")), { Status, ContactsPage, SelfPage });
 
 	// --- Centre column, top: RADAR, the disc in the middle of the reference's dashboard --------------
