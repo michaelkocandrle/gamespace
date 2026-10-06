@@ -444,7 +444,8 @@ def factory_material_spec(role, maker, data=None):
         "PanelTone": r.get("panel_tone", 0.04), "MicroRough": r.get("micro_rough", 0.03),
         "ScratchAmount": r.get("scratches", 0.0), "Brushed": 0.0,      # polished, not brushed (board round 1)
         "CavityStrength": 0.0, "AOStrength": 0.0, "MetalShare": 0.0, "CarbonShare": 0.0, "LiveryAmount": 0.0,
-        "ClearCoat": 0.0, "FloorWear": 0.0, "TopWear": 0.0, "PanelDirtVar": 0.0, "DetailNormalStrength": 0.0})
+        "ClearCoat": r.get("clear_coat", 0.0), "ClearCoatRoughness": r.get("clear_coat_rough", 0.08),
+        "FloorWear": 0.0, "TopWear": 0.0, "PanelDirtVar": 0.0, "DetailNormalStrength": 0.0})
     if r.get("detail_normal"):
         scalars.update({"DetailTileCm": r["detail_tile_cm"], "DetailNormalStrength": r["detail_strength"]})
     # the walked line: the lanes' own colour a little lighter and smoother - polished by boots, not a stain

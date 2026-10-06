@@ -9678,31 +9678,30 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Terminal_Eng07W_A.fbx",
    "dims_m": [
-    0.058,
-    0.78,
-    0.475
+    0.035,
+    0.672,
+    0.409
    ],
    "expected_size_cm": [
-    5.8,
-    78.0,
-    47.5
+    3.5,
+    67.2,
+    40.9
    ],
-   "tris": 6348,
-   "tris_decals": 6,
+   "tris": 7132,
+   "tris_decals": 2,
    "tri_budget": 40000,
    "materials": [
-    "Kit_Lacquer",
+    "Kit_Glass",
     "Kit_Lip",
     "Kit_Graphite",
-    "Kit_Gasket",
     "Kit_GlowFoot",
-    "Kit_Panel",
+    "Kit_Shell",
     "Kit_DecalPaint"
    ],
    "sockets": {
     "SOCKET_Light_Screen_0": {
      "location_ue_cm": [
-      7.6,
+      6.0,
       -0.0,
       0.0
      ],
@@ -9728,20 +9727,19 @@
     }
    },
    "collision_hulls": 1,
-   "decals": 2,
+   "decals": 1,
    "decal_items": [
-    "st_hfcl",
-    "red_marker"
+    "st_hfcl"
    ],
    "service_labels": [
     "st_hfcl"
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 1080,
+    "edge": 8386,
     "secondary": 0,
-    "floor": 8284,
-    "seam": 0
+    "floor": 10430,
+    "seam": 16
    },
    "status": "built"
   },
@@ -9763,7 +9761,7 @@
     100.0,
     172.0
    ],
-   "tris": 3248,
+   "tris": 9290,
    "tris_decals": 50,
    "tri_budget": 40000,
    "materials": [
@@ -9771,6 +9769,7 @@
     "Kit_Lacquer",
     "Kit_Lip",
     "Kit_Graphite",
+    "Kit_Gasket",
     "Kit_Panel",
     "Kit_Red",
     "Kit_GlowRed",
@@ -9841,7 +9840,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 2232,
+    "edge": 3432,
     "secondary": 0,
     "floor": 980,
     "seam": 0

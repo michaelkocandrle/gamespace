@@ -349,88 +349,69 @@ def face_label(p, item, y, z, x, scale=1.0, label=True, rot=0.0):
 
 
 def terminal_housing(name, seed):
-    """SC's wall engineering terminal (author 7. 10. 2026, his captures; round 2: "a big plastic thing - tune it into
-    detail"), built in layers like the reference: a dark mounting plate behind with a shadow gap and bolts; the light
-    bezel with a sunk panel line round its face, a step down into a dark inner wall and a polished lip round the deep
-    glass; a two-tone top tab with a seam, slots and a status LED; the left wing (grey) with a round key in a dark
-    bezel and a knurled ring, a slider grip running in a recessed channel; screws, vent slots, a stencilled ID, a
-    hatching band. The screen faces +x, the pivot is the back's centre on the wall."""
+    """SC's wall engineering terminal, round 3 (author 7. 10. 2026: "too robust, not high-tech; one flat white without
+    sheen reads as plastic; the bits at the bottom look out of place"): a slim shell - 33 mm border, 30 mm deep - in a
+    light grey paint under a clear coat, its outer edge rounded in five steps so the light runs round it, the tab grown
+    out of the outline; a hairline polished lip and a satin dark step down to the glass; a shadow gap behind (a smaller
+    dark body); on the left border a slim recessed slider and a small key; nothing stuck on. The screen faces +x, the
+    pivot is the back's centre on the wall."""
     p = kit_geo.Part(name, seed)
-    W, H = 0.70, 0.43
-    B0, D = 0.012, 0.046               # the bezel's back (on the mounting plate) and its face
-    seg = 10
-    # 1 the mounting plate: dark, larger, chamfered, four bolts - the shadow line round the bezel
-    mount = rounded_rect(W + 0.05, H + 0.045, 0.03, seg)
-    p.poly_prism("Kit_Graphite", mount, face_matrix(B0), B0, bevel=0.002, panel=False, segments=1)
-    for y, z in ((-0.36, 0.23), (0.36, 0.23), (-0.36, -0.23), (0.36, -0.23)):
-        p.tube("Kit_Lip", (B0, y, z), (B0 + 0.004, y, z), 0.006, 12)
-        p.tube("Kit_Graphite", (B0 + 0.004, y, z), (B0 + 0.0048, y, z), 0.0025, 6)
-    # 2 the bezel: the outer rim, a sunk panel line, the face, the step down, the dark inner wall, the polished lip
-    outer = rounded_rect(W, H, 0.045, seg)
-    rim_in = rounded_rect(W - 0.024, H - 0.024, 0.033, seg)
-    groove = rounded_rect(W - 0.030, H - 0.030, 0.030, seg)
-    face_in = rounded_rect(0.626, 0.346, 0.03, seg)
-    step = rounded_rect(0.610, 0.330, 0.026, seg)
-    lip_out = rounded_rect(0.600, 0.320, 0.023, seg)
-    lip_in = rounded_rect(0.592, 0.312, 0.020, seg)
-    glass = rounded_rect(0.586, 0.306, 0.018, seg)
-    band(p, "Kit_Lacquer", outer, rim_in, D, D - B0)
-    band(p, "Kit_Graphite", rim_in, groove, D - 0.002, D - B0 - 0.002)
-    band(p, "Kit_Lacquer", groove, face_in, D, D - B0)
-    band(p, "Kit_Lacquer", face_in, step, D - 0.005, D - B0 - 0.005)          # the step down to the glass
-    band(p, "Kit_Graphite", step, lip_out, D - 0.008, D - B0 - 0.008)         # the dark inner wall
-    band(p, "Kit_Lip", lip_out, lip_in, D - 0.011, 0.004)                     # the polished lip
-    band(p, "Kit_Graphite", lip_in, glass, D - 0.012, D - B0 - 0.012)
-    p.poly_prism("Kit_Graphite", glass, face_matrix(0.013), 0.001, bevel=0.0, panel=False, segments=1)   # behind the live screen (1.5 cm)
-    # 3 the top tab: a grey trapezoid with a seam, two slots and a small status LED
-    tab = [(-0.15, 0.2), (0.15, 0.2), (0.13, 0.238), (-0.13, 0.238)]
-    p.poly_prism("Kit_Panel", tab, face_matrix(D + 0.004), D + 0.004 - B0, bevel=0.002, segments=1)
-    p.poly_prism("Kit_Graphite", [(-0.125, 0.226), (0.125, 0.226), (0.125, 0.228), (-0.125, 0.228)], face_matrix(D + 0.0045), 0.001,
-                 panel=False, segments=1)
-    p.poly_prism("Kit_GlowFoot", [(0.085, 0.212), (0.105, 0.212), (0.105, 0.216), (0.085, 0.216)], face_matrix(D + 0.005), 0.001,
-                 panel=False, segments=1)
-    for y in (-0.06, -0.045, -0.03):
-        p.poly_prism("Kit_Graphite", [(y - 0.004, 0.208), (y + 0.004, 0.208), (y + 0.004, 0.22), (y - 0.004, 0.22)], face_matrix(D + 0.0045),
-                     0.002, panel=False, segments=1)
-    # 4 the left wing (the viewer's left: -y): a grey plate, the key in a dark bezel with a knurled ring, the slider
-    wing = [(-0.335, 0.16), (-0.405, 0.13), (-0.405, -0.19), (-0.335, -0.21)]
-    p.poly_prism("Kit_Panel", wing, face_matrix(D - 0.004), D - 0.004 - B0, bevel=0.003, segments=1)
-    ky, kz = -0.368, 0.05
-    p.tube("Kit_Graphite", (D - 0.006, ky, kz), (D - 0.001, ky, kz), 0.028, 32)
-    for k in range(28):
-        a = 2.0 * math.pi * k / 28
-        cy, cz = ky + math.cos(a) * 0.0215, kz + math.sin(a) * 0.0215
-        p.box("Kit_Lip", (D - 0.001, cy - 0.0012, cz - 0.0012), (D + 0.009, cy + 0.0012, cz + 0.0012), panel=False)
-    p.tube("Kit_Panel", (D - 0.001, ky, kz), (D + 0.010, ky, kz), 0.0195, 32)
-    p.tube("Kit_Lip", (D + 0.010, ky, kz), (D + 0.0115, ky, kz), 0.014, 32)
-    # the slider: a dark channel sunk in the wing, the grip riding in it with its ribs
-    p.box("Kit_Graphite", (D - 0.012, -0.388, -0.18), (D - 0.0035, -0.348, -0.04), bevel=0.0015, segments=1)
-    p.box("Kit_Panel", (D - 0.008, -0.385, -0.165), (D + 0.004, -0.351, -0.085), bevel=0.002, segments=1)
-    for k in range(7):
-        z = -0.159 + k * 0.0105
-        p.box("Kit_Gasket", (D + 0.004, -0.382, z), (D + 0.0075, -0.354, z + 0.005), panel=False)
-    # 5 screws in the bezel's corners and the big one at the top right
-    for y, z in ((-0.318, 0.178), (0.318, 0.178), (-0.318, -0.178), (0.318, -0.178)):
-        p.tube("Kit_Graphite", (D - 0.0015, y, z), (D + 0.0005, y, z), 0.0055, 16)
-        p.tube("Kit_Lip", (D + 0.0005, y, z), (D + 0.0015, y, z), 0.004, 6)
-    p.tube("Kit_Graphite", (D - 0.002, 0.322, 0.19), (D + 0.001, 0.322, 0.19), 0.011, 24)
-    p.tube("Kit_Lip", (D + 0.001, 0.322, 0.19), (D + 0.0035, 0.322, 0.19), 0.008, 24)
-    # 6 the bottom: a row of vent slots on the bezel's lower band, a status LED pair at the right
-    for k in range(12):
-        y = -0.11 + k * 0.02
-        p.poly_prism("Kit_Graphite", [(y - 0.0035, -0.2), (y + 0.0035, -0.2), (y + 0.0035, -0.188), (y - 0.0035, -0.188)], face_matrix(D + 0.0003),
-                     0.003, panel=False, segments=1)
-    for y in (0.24, 0.258):
-        p.poly_prism("Kit_GlowFoot", [(y - 0.005, -0.195), (y + 0.005, -0.195), (y + 0.005, -0.191), (y - 0.005, -0.191)], face_matrix(D + 0.001),
-                     0.001, panel=False, segments=1)
-    # 7 the information layer: an ID stencil at the top left, a small service marker (a hatching band on the wing
-    # had no room between the key and the slider)
-    face_label(p, "st_hfcl", -0.22, 0.194, D, scale=0.55)
-    face_label(p, "red_marker", 0.205, -0.193, D)
+    seg = 12
+    GW, GH = 0.586, 0.306                      # the glass (the live screen fills it)
+    OW, OH = 0.606, 0.326                      # the shell's opening
+    W, H, R = 0.672, 0.392, 0.042              # the shell
+    X0, XF = 0.012, 0.030                      # the shell's back and face (the body behind it 12 mm deep, set in)
+    fm = lambda x: face_matrix(x)              # noqa: E731
+    outer = rounded_rect(W, H, R, seg)
+    # the tab grows out of the top edge (between the two top corners)
+    top = H / 2
+    k = seg + 1
+    outer = outer[:k] + [(0.135, top), (0.118, top + 0.017), (-0.118, top + 0.017), (-0.135, top)] + outer[k:]
+    opening = rounded_rect(OW, OH, 0.026, seg)
+    # 1 the body behind: dark, 8 mm smaller all round - the shell floats on a shadow gap
+    p.poly_prism("Kit_Graphite", rounded_rect(W - 0.016, H - 0.016, R - 0.008, seg), fm(X0), X0, bevel=0.002, panel=False, segments=2)
+    # 2 the shell: rounded outer edge (5 steps), a softer inner edge
+    p.frame_ring("Kit_Shell", outer, opening, fm(XF), XF - X0, bevel_out=0.0075, bevel_in=0.003, segments=5)
+    # 3 the hairline lip and the satin step down to the glass
+    lip_o = rounded_rect(OW, OH, 0.026, seg)
+    lip_i = rounded_rect(OW - 0.004, OH - 0.004, 0.024, seg)
+    p.frame_ring("Kit_Lip", lip_o, lip_i, fm(XF - 0.004), 0.003, bevel_in=0.0008, segments=2, panel=False)
+    p.frame_ring("Kit_Graphite", lip_i, rounded_rect(GW, GH, 0.018, seg), fm(XF - 0.007), XF - 0.007 - X0, bevel_in=0.0015, segments=3,
+                 panel=False)
+    p.poly_prism("Kit_Graphite", rounded_rect(GW, GH, 0.018, seg), fm(0.013), 0.001, bevel=0.0, panel=False, segments=1)
+    # 4 the tab: a dark glass sensor window set in it, a 3 mm status light
+    win = rounded_rect(0.09, 0.008, 0.0035, 6)
+    win = [(y, z + top + 0.0085) for y, z in win]
+    win_rim = [(y, z + top + 0.0085) for y, z in rounded_rect(0.094, 0.012, 0.005, 6)]
+    p.frame_ring("Kit_Lip", win_rim, win, fm(XF + 0.0003), 0.0015, panel=False, segments=1)
+    p.poly_prism("Kit_Glass", win, fm(XF - 0.0005), 0.002, bevel=0.0, panel=False, segments=1)
+    p.lathe("Kit_GlowFoot", [(0.0, 0.0), (0.0016, 0.0), (0.0016, 0.0012), (0.0, 0.0014)], (XF - 0.0005, 0.075, top + 0.0085), axis=(1, 0, 0),
+            seg=16)
+    # 5 the left border: a slim recessed slot with the slider, a small key above it (no wing bolted on)
+    sy = -(OW / 2 + (W - OW) / 4)
+    slot_o = [(y + sy, z - 0.05) for y, z in rounded_rect(0.013, 0.1, 0.0065, 6)]
+    slot_i = [(y + sy, z - 0.05) for y, z in rounded_rect(0.009, 0.096, 0.0045, 6)]
+    p.frame_ring("Kit_Lip", slot_o, slot_i, fm(XF + 0.0002), 0.001, panel=False, segments=1)
+    p.poly_prism("Kit_Graphite", slot_i, fm(XF - 0.004), 0.004, bevel=0.0, panel=False, segments=1)
+    p.poly_prism("Kit_Shell", [(y + sy, z - 0.028) for y, z in rounded_rect(0.008, 0.022, 0.0035, 6)], fm(XF - 0.0005), 0.004,
+                 bevel=0.0012, panel=False, segments=3)
+    for k2 in range(5):
+        z = -0.035 + k2 * 0.0035
+        p.poly_prism("Kit_Graphite", [(sy - 0.003, z), (sy + 0.003, z), (sy + 0.003, z + 0.0012), (sy - 0.003, z + 0.0012)], fm(XF + 0.0001), 0.0006,
+                     panel=False, segments=1)
+    p.lathe("Kit_Lip", [(0.0074, 0.0), (0.0074, 0.0012), (0.0062, 0.0016), (0.0, 0.0016)], (XF - 0.0004, sy, 0.055), axis=(1, 0, 0), seg=32)
+    p.lathe("Kit_Shell", [(0.0058, 0.0), (0.0058, 0.0024), (0.0052, 0.0034), (0.0035, 0.004), (0.0, 0.0042)], (XF + 0.0008, sy, 0.055),
+            axis=(1, 0, 0), seg=32)
+    # 6 four small countersunk screws in the corners, flush
+    for y, z in ((-0.306, 0.166), (0.306, 0.166), (-0.306, -0.166), (0.306, -0.166)):
+        p.lathe("Kit_Lip", [(0.0032, 0.0), (0.0032, 0.0004), (0.0, 0.0006)], (XF - 0.0002, y, z), axis=(1, 0, 0), seg=16)
+        p.box("Kit_Graphite", (XF + 0.0003, y - 0.0021, z - 0.00035), (XF + 0.0006, y + 0.0021, z + 0.00035), panel=False)
+    # 7 a small ID stencil in the top left of the border
+    face_label(p, "st_hfcl", -0.22, 0.176, XF, scale=0.42)
     # the screen's glow on what is in front of it
-    p.socket("Light_Screen_0", (D + 0.03, 0.0, 0.0), x=(1, 0, 0), z=(0, 0, 1), type="rect", role="cool", cd=0.5,
+    p.socket("Light_Screen_0", (XF + 0.03, 0.0, 0.0), x=(1, 0, 0), z=(0, 0, 1), type="rect", role="cool", cd=0.5,
              width_cm=56.0, height_cm=28.0, radius_m=2.0, dir_ue=[1.0, 0.0, 0.0], along_ue=[0.0, 1.0, 0.0], shadows=False)
-    p.collision_box((0.0, -W / 2 - 0.03, -H / 2 - 0.02), (D, W / 2 + 0.03, H / 2 + 0.02))
+    p.collision_box((0.0, -W / 2, -H / 2), (XF, W / 2, H / 2 + 0.017))
     return p
 
 
@@ -448,6 +429,64 @@ def niche(p, y0, z0, y1, z1, c, front, deep, wall_role, back_role, lip=True):
     band(p, wall_role, o, inset(o, 0.004), front, deep)
     p.poly_prism(back_role, inset(o, 0.004), face_matrix(front - deep + 0.002), 0.002, bevel=0.0, panel=False, segments=1)
     return o
+
+
+def extinguisher(p, ex, ey, z0):
+    """A fire extinguisher modelled as one (author 7. 10. 2026: the first one was "a cylinder with something on top",
+    low quality): a 2 kg canister - the body turned from a profile (a domed foot, a soft shoulder, a neck), glossy red
+    under a clear coat; a rubber foot ring and a label sleeve; the head - a valve body with its collar, a pressure gauge
+    with a white dial and a polished bezel, the carry handle and the squeeze lever (flat swept straps), the safety pin
+    with its pull ring; a rubber hose with polished ferrules down to the nozzle in a clip; the wall bracket with two
+    straps and their buckles. ex, ey: the axis; z0 its foot. Faces +x (the niche's opening)."""
+    up = (0, 0, 1)
+    body = [(0.0, 0.0), (0.016, 0.0012), (0.028, 0.005), (0.036, 0.0115), (0.0405, 0.0215), (0.042, 0.034), (0.042, 0.258),
+            (0.0412, 0.27), (0.0385, 0.2805), (0.0335, 0.2895), (0.0265, 0.2955), (0.019, 0.299), (0.0155, 0.3005), (0.0155, 0.31)]
+    p.lathe("Kit_Red", body, (ex, ey, z0), up, seg=56, close=True)
+    # the rubber foot and the label sleeve (a cream band with a hairline edge)
+    p.lathe("Kit_Gasket", [(0.0418, 0.009), (0.0432, 0.0115), (0.0436, 0.016), (0.0436, 0.029), (0.0428, 0.032), (0.0418, 0.0335)],
+            (ex, ey, z0), up, seg=56)
+    p.lathe("Kit_Lacquer", [(0.0419, 0.104), (0.0425, 0.1055), (0.0425, 0.2045), (0.0419, 0.206)], (ex, ey, z0), up, seg=56)
+    p.lathe("Kit_Graphite", [(0.04255, 0.122), (0.04265, 0.1225), (0.04265, 0.1265), (0.04255, 0.127)], (ex, ey, z0), up, seg=56)
+    # the head: the collar, the valve body, its cap
+    zh = z0 + 0.31
+    p.lathe("Kit_Lip", [(0.0158, 0.0), (0.0175, 0.0015), (0.0175, 0.007), (0.0158, 0.0085)], (ex, ey, zh - 0.004), up, seg=32)
+    p.lathe("Kit_Graphite", [(0.0145, 0.0), (0.0145, 0.012), (0.0158, 0.014), (0.0158, 0.026), (0.0132, 0.031), (0.009, 0.0335),
+                              (0.0, 0.0345)], (ex, ey, zh + 0.004), up, seg=32, close=True)
+    # the gauge on the valve's front: polished bezel, white dial, a dark needle
+    gx, gz = ex + 0.0155, zh + 0.021
+    p.lathe("Kit_Lip", [(0.0062, 0.0), (0.0098, 0.0005), (0.0102, 0.004), (0.0094, 0.0062), (0.0082, 0.0064)], (gx, ey, gz), (1, 0, 0), seg=32)
+    p.lathe("Kit_Lacquer", [(0.0082, 0.0055), (0.0, 0.0058)], (gx, ey, gz), (1, 0, 0), seg=32)
+    p.box("Kit_Graphite", (gx + 0.0059, ey - 0.0004, gz - 0.0005), (gx + 0.0062, ey + 0.0055, gz + 0.0005), panel=False)
+    p.lathe("Kit_GlowRed", [(0.0016, 0.0059), (0.0, 0.006)], (gx, ey - 0.004, gz - 0.003), (1, 0, 0), seg=10)
+    # the carry handle (fixed, below) and the squeeze lever (above): flat swept straps running out to +y
+    p.sweep("Kit_Graphite", [(ex, ey + 0.008, zh + 0.012), (ex, ey + 0.03, zh + 0.008), (ex, ey + 0.056, zh + 0.0005),
+                             (ex, ey + 0.078, zh - 0.008), (ex, ey + 0.088, zh - 0.015)], 0.0062, seg=14, scale_y=0.42)
+    p.sweep("Kit_Graphite", [(ex, ey + 0.006, zh + 0.03), (ex, ey + 0.03, zh + 0.034), (ex, ey + 0.058, zh + 0.03),
+                             (ex, ey + 0.082, zh + 0.02), (ex, ey + 0.094, zh + 0.011)], 0.0055, seg=14, scale_y=0.45)
+    p.sweep("Kit_Gasket", [(ex, ey + 0.05, zh + 0.002), (ex, ey + 0.068, zh - 0.004), (ex, ey + 0.084, zh - 0.0125)], 0.0068, seg=14,
+            scale_y=0.6)                                                                        # the handle's grip
+    # the safety pin through the valve and its pull ring, a thin tamper seal
+    p.sweep("Kit_Lip", [(ex - 0.012, ey + 0.012, zh + 0.022), (ex + 0.018, ey + 0.012, zh + 0.022)], 0.0012, seg=8)
+    ring = [(ex + 0.018 + 0.0085 * (1 - math.cos(a)), ey + 0.012, zh + 0.022 + 0.0085 * math.sin(a))
+            for a in [2 * math.pi * k / 24 for k in range(25)]]
+    p.sweep("Kit_Lip", ring, 0.0014, seg=8, caps=False)
+    p.sweep("Kit_GlowRed", [(ex + 0.02, ey + 0.012, zh + 0.0215), (ex + 0.022, ey + 0.006, zh + 0.012)], 0.0005, seg=6)
+    # the hose: out of the valve's side (-y), down along the body to the nozzle held in a clip
+    hose = [(ex, ey - 0.016, zh + 0.016), (ex + 0.002, ey - 0.03, zh + 0.012), (ex + 0.006, ey - 0.045, zh - 0.004),
+            (ex + 0.01, ey - 0.052, zh - 0.03), (ex + 0.012, ey - 0.053, zh - 0.08), (ex + 0.012, ey - 0.052, zh - 0.15)]
+    p.sweep("Kit_Gasket", hose, 0.0058, seg=16)
+    for c, a in ((hose[0], (0, -1, 0)), (hose[-1], (0, 0, -1))):
+        p.lathe("Kit_Lip", [(0.0068, 0.0), (0.0072, 0.002), (0.0072, 0.009), (0.0066, 0.011)], c, a, seg=24)
+    nz = (ex + 0.012, ey - 0.052, zh - 0.161)
+    p.lathe("Kit_Graphite", [(0.0066, 0.0), (0.0078, 0.006), (0.0094, 0.03), (0.0102, 0.042), (0.0096, 0.045), (0.0072, 0.046)], nz,
+            (0, 0, -1), seg=28)
+    p.box("Kit_Lip", (ex + 0.002, ey - 0.0625, zh - 0.135), (ex + 0.008, ey - 0.0415, zh - 0.127), bevel=0.001, segments=2)   # the clip
+    # the wall bracket: a back plate, two straps round the body with their buckles
+    p.box("Kit_Panel", (ex - 0.052, ey - 0.03, z0 + 0.04), (ex - 0.044, ey + 0.03, z0 + 0.27), bevel=0.003, segments=3)
+    for zb in (z0 + 0.07, z0 + 0.225):
+        p.lathe("Kit_Graphite", [(0.0436, 0.0), (0.0452, 0.0008), (0.0452, 0.0132), (0.0436, 0.014)], (ex, ey, zb), up, seg=56)
+        p.box("Kit_Lip", (ex + 0.041, ey - 0.008, zb - 0.002), (ex + 0.0485, ey + 0.008, zb + 0.016), bevel=0.0015, segments=3)
+        p.box("Kit_Graphite", (ex + 0.0485, ey - 0.005, zb + 0.004), (ex + 0.05, ey + 0.005, zb + 0.01), panel=False)
 
 
 def bay_service(name, seed):
@@ -488,16 +527,8 @@ def bay_service(name, seed):
     cell(-0.225, 0.84, 0.085, 1.48, octagon(-0.205, 0.86, 0.065, 1.46, 0.05))
     # A: the fire extinguisher niche lit red, 0.8 m up
     niche(p, -0.47, 0.82, -0.25, 1.48, 0.03, face, 0.13, "Kit_Graphite", "Kit_GlowRed")
-    ey, ex = -0.36, face - 0.07
-    p.tube("Kit_Red", (ex, ey, 0.93), (ex, ey, 1.24), 0.045, 28)                    # the cylinder (0.052 x 0.38 filled the niche)
-    p.tube("Kit_Red", (ex, ey, 1.24), (ex, ey, 1.27), 0.038, 28)
-    p.tube("Kit_Graphite", (ex, ey, 1.27), (ex, ey, 1.31), 0.02, 16)                  # the valve
-    p.box("Kit_Graphite", (ex - 0.012, ey - 0.012, 1.31), (ex + 0.012, ey + 0.05, 1.33), bevel=0.003, segments=1)   # the lever
-    p.tube("Kit_Graphite", (ex, ey + 0.05, 1.32), (ex - 0.03, ey + 0.058, 1.16), 0.007, 10)   # the hose
-    p.tube("Kit_Graphite", (ex - 0.03, ey + 0.058, 1.16), (ex - 0.034, ey + 0.062, 1.09), 0.011, 12)   # the nozzle
-    for z in (1.0, 1.18):
-        p.box("Kit_Lip", (ex - 0.01, ey - 0.05, z), (ex + 0.01, ey + 0.05, z + 0.012), panel=False)   # the bracket bands
-    p.box("Kit_Panel", (face - 0.135, ey - 0.06, 0.86), (face - 0.12, ey + 0.06, 1.3), panel=False)   # the bracket's back plate
+    ey = -0.36
+    extinguisher(p, face - 0.072, ey, 0.905)
     p.socket("Light_Fire_0", (face - 0.02, ey, 1.45), x=(1, 0, 0), z=(0, 0, 1), type="point", role="signal", cd=0.25,
              radius_m=0.6, source_radius_cm=1.0, shadows=False)
     # under it: a hatch with a recessed grip and the red marker; a text strip at the foot

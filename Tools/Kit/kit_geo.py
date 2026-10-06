@@ -39,7 +39,7 @@ ROLES = ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber
          # the parts factory's shared base (ArtSource/Kit/kit_materials.json, 6. 10. 2026): lacquer, polished lip, dark
          "Kit_Lacquer", "Kit_Lip", "Kit_Graphite", "Kit_Gasket", "Kit_AntiSlip", "Kit_GlowFoot",
          # decal stack step (6. 10. 2026): the mid-grey panel and the dark perforated insert
-         "Kit_Panel", "Kit_Perforated", "Kit_Red", "Kit_GlowRed"]
+         "Kit_Panel", "Kit_Perforated", "Kit_Red", "Kit_GlowRed", "Kit_Shell"]
 
 
 def frame(origin, ax, ay, az):
@@ -203,6 +203,117 @@ class Part:
         tmp.transform(m)
         faces = self._merge(bm, tmp, local, edge)
         # U along the prism's longest extent: a corner post is a prism, its brushing runs up it (critic, material r2)
+        self.meta[role].append((faces, ("member",) + _bounds(local), self._panel_id(panel), False))
+        return faces
+
+    # ------------------------------------------------------------------ modelled shapes (author 7. 10. 2026: props
+    # from boxes, tubes and flat bands read as plastic toys - real profiles, sweeps and rounded bevels instead)
+    def lathe(self, role, profile, base, axis=(0, 0, 1), seg=48, panel=False, close=False):
+        """A body of revolution: `profile` [(r, h)] from bottom to top (r 0 closes the end on the axis), turned round
+        the axis through `base`. Shaded smooth; a profile corner sharper than the mesh's 40 deg stays crisp."""
+        bm = self.bm[role]
+        tmp = bmesh.new()
+        rings = []
+        for r, h in profile:
+            if r <= 1e-6:
+                rings.append([tmp.verts.new((0.0, 0.0, h))])
+                continue
+            rings.append([tmp.verts.new((r * math.cos(2 * math.pi * k / seg), r * math.sin(2 * math.pi * k / seg), h)) for k in range(seg)])
+        for a, b in zip(rings, rings[1:]):
+            for k in range(seg):
+                k2 = (k + 1) % seg
+                if len(a) == 1 and len(b) == 1:
+                    continue
+                if len(a) == 1:
+                    tmp.faces.new((a[0], b[k], b[k2]))
+                elif len(b) == 1:
+                    tmp.faces.new((a[k], b[0], a[k2]))
+                else:
+                    tmp.faces.new((a[k], b[k], b[k2], a[k2]))
+        if close and len(rings[0]) > 1:
+            tmp.faces.new(list(reversed(rings[0])))
+        if close and len(rings[-1]) > 1:
+            tmp.faces.new(rings[-1])
+        bmesh.ops.recalc_face_normals(tmp, faces=tmp.faces)
+        local = [v.co.copy() for v in tmp.verts]
+        q = Vector((0, 0, 1)).rotation_difference(Vector(axis).normalized())
+        tmp.transform(Matrix.Translation(Vector(base)) @ q.to_matrix().to_4x4())
+        faces = self._merge(bm, tmp, local)
+        for f in faces:
+            f.smooth = True
+        self.meta[role].append((faces, ("tube",), self._panel_id(panel), False))
+        return faces
+
+    def sweep(self, role, path, r, seg=16, caps=True, scale_y=1.0):
+        """A tube swept along a polyline (hoses, handles, rings), its section a circle of radius r (scale_y < 1 flattens
+        it into a strap); the frames turn smoothly round the path's bends."""
+        bm = self.bm[role]
+        pts = [Vector(p) for p in path]
+        if len(pts) < 2:
+            return []
+        tmp = bmesh.new()
+        rings = []
+        up = Vector((0, 0, 1))
+        for i, p in enumerate(pts):
+            t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
+            if abs(t.dot(up)) > 0.95:
+                up = Vector((1, 0, 0))
+            x = t.cross(up).normalized()
+            y = x.cross(t).normalized()
+            up = y
+            rings.append([tmp.verts.new(p + (x * math.cos(2 * math.pi * k / seg) + y * math.sin(2 * math.pi * k / seg) * scale_y) * r)
+                          for k in range(seg)])
+        for a, b in zip(rings, rings[1:]):
+            for k in range(seg):
+                k2 = (k + 1) % seg
+                tmp.faces.new((a[k], a[k2], b[k2], b[k]))
+        if caps:
+            tmp.faces.new(list(reversed(rings[0])))
+            tmp.faces.new(rings[-1])
+        bmesh.ops.recalc_face_normals(tmp, faces=tmp.faces)
+        local = [v.co.copy() for v in tmp.verts]
+        faces = self._merge(bm, tmp, local)
+        for f in faces:
+            f.smooth = True
+        self.meta[role].append((faces, ("tube",), self._panel_id(False), False))
+        return faces
+
+    def frame_ring(self, role, outer, inner, m, depth, bevel_out=0.0, bevel_in=0.0, segments=4, panel=True):
+        """A flat ring between two outlines (local x, y; the inner one a hole) extruded back along -z by depth, its front
+        edges rounded: the outer edge by bevel_out, the inner by bevel_in, `segments` steps each - the rounded chamfers
+        that catch a highlight (a bezel round a screen, a frame round a niche). Then m."""
+        bm = self.bm[role]
+        tmp = bmesh.new()
+        lo = [tmp.verts.new((x, y, 0.0)) for x, y in outer]
+        li = [tmp.verts.new((x, y, 0.0)) for x, y in inner]
+        edges = [tmp.edges.new((lo[i], lo[(i + 1) % len(lo)])) for i in range(len(lo))]
+        edges += [tmp.edges.new((li[i], li[(i + 1) % len(li)])) for i in range(len(li))]
+        bmesh.ops.triangle_fill(tmp, use_beauty=True, use_dissolve=False, edges=edges)
+        front = list(tmp.faces)
+        ext = bmesh.ops.extrude_face_region(tmp, geom=front)
+        moved = [g for g in ext["geom"] if isinstance(g, bmesh.types.BMVert)]
+        bmesh.ops.translate(tmp, verts=moved, vec=(0.0, 0.0, -depth))
+        bmesh.ops.recalc_face_normals(tmp, faces=tmp.faces)
+        # the triangle fill's inner edges lie flat: merge the front back into one region of quads where it can
+        bmesh.ops.join_triangles(tmp, faces=[f for f in tmp.faces if abs(f.normal.z) > 0.99], cmp_seam=False, cmp_sharp=False,
+                                 cmp_uvs=False, cmp_vcols=False, cmp_materials=False, angle_face_threshold=0.01,
+                                 angle_shape_threshold=3.14)
+        edge = set()
+        for verts, w in ((lo, bevel_out), (li, bevel_in)):
+            if w <= 0:
+                continue
+            vs = set(verts)
+            geom = [e for e in tmp.edges if e.verts[0] in vs and e.verts[1] in vs]
+            res = bmesh.ops.bevel(tmp, geom=geom, offset=w, offset_type="OFFSET", segments=segments, profile=0.5, affect="EDGES",
+                                  clamp_overlap=True)
+            edge |= set(res["faces"])
+        for f in tmp.faces:
+            f.smooth = True
+        local = [v.co.copy() for v in tmp.verts]
+        tmp.transform(m)
+        faces = self._merge(bm, tmp, local, edge)
+        for f in faces:
+            f.smooth = True
         self.meta[role].append((faces, ("member",) + _bounds(local), self._panel_id(panel), False))
         return faces
 
