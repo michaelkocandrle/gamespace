@@ -8845,19 +8845,20 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Test_Portal03W_A.fbx",
    "dims_m": [
-    0.284,
-    2.4,
-    2.3
+    0.3,
+    2.6,
+    2.36
    ],
    "expected_size_cm": [
-    28.4,
-    240.0,
-    230.0
+    30.0,
+    260.0,
+    236.0
    ],
-   "tris": 3624,
+   "tris": 3828,
    "tris_decals": 0,
    "tri_budget": 40000,
    "materials": [
+    "Kit_Seal",
     "Kit_GlowWarm",
     "Kit_Lacquer",
     "Kit_Lip",
@@ -8872,9 +8873,9 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 5652,
+    "edge": 5148,
     "secondary": 0,
-    "floor": 1112,
+    "floor": 1408,
     "seam": 0
    },
    "status": "built"
@@ -8897,7 +8898,7 @@
     260.0,
     239.0
    ],
-   "tris": 1192,
+   "tris": 1624,
    "tris_decals": 0,
    "tri_budget": 40000,
    "materials": [
@@ -8914,9 +8915,9 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 1512,
+    "edge": 2088,
     "secondary": 0,
-    "floor": 1112,
+    "floor": 1672,
     "seam": 0
    },
    "status": "built"

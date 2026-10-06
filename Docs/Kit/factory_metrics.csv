@@ -14,3 +14,7 @@ date,part,workflow,kind,step,what,minutes,critic_rounds,rebuilds,notes
 2026-10-06,KF-PORTAL-01,v0.2,tool,3,materials v0.2 (roles split; kit micro node scratch band; tread normal; factory emissive) + test v0.2,10,0,0,
 2026-10-06,KF-PORTAL-01,v0.2,tool,3,kit_factory test section (portal ring from the sheet profile; bay) + SHOWROOM test_section + preset,9,0,0,
 2026-10-06,KF-PORTAL-01,v0.2,part,3,test section: Blender + 3 x (import ~2.5 min + shots ~1.5 min) + P25 before/after 4 runs + sheets,21,0,3,round 1 dark (mean 0.10) + end bar; round 2 walked line as blotches; round 3 shown
+2026-10-06,KF-PORTAL-01,v0.2,return,3->2,step 3 approved but sent back to step 2 by DESIGN errors (profile read as stripes; L1 a box on the pillar not a boot; floor plates as mats without a lip network),0,0,1,retrospective input: the 2D sheet (step 2) did not check the profile as one form nor the floor as one system against the etalon - add an etalon comparison of the sheet's eye view to step 2
+2026-10-06,KF-PORTAL-01,v0.2,part,2,sheet rev. C (one-form profile; boot L1 in view/section/plan; lip network),12,0,0,
+2026-10-06,KF-PORTAL-01,v0.2,tool,2,draw_part_sheet rev. C views + measure_look dark/light shares and --all,6,0,0,
+2026-10-06,KF-PORTAL-01,v0.2,part,3,rough test section rev. C (Blender) + light calibration 4 rounds (import ~2 min + shots ~1.5 min each),24,0,4,round 1 L1 lit its own boot; round 2 40% dark; round 3 light floor; round 4 close to the etalon except the darks (12-26% vs 1%)

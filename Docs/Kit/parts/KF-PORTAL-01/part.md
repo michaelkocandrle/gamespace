@@ -161,3 +161,17 @@ na RX 9070 v 1440p +0,6 až +1,4 ms GPU. Blockout (krok 4) až po schválení ta
 - Listy a zdůvodnění: `Docs/Reviews/2026-10-06_kit_test_section.md`.
 - P25: Wayfarer před a po beze změny (rozdíly jen šum na hranách).
 - Blockout (krok 4) až po schválení autorem.
+
+## Návrat do kroku 2 – list rev. C a kalibrace světla (6. 10., STOP)
+
+- Krok 3 je schválený. Kvůli **návrhovým chybám** se díl vrátil do kroku 2:
+  - profil se četl jako proužky;
+  - patka byla krabička místo boty;
+  - podlaha byla „rohožky“ bez sítě lemu.
+- **Rev. C:**
+  - rám je jeden lakovaný tvar s jedinou leštěnou linkou na hraně koruny a manžetou uvnitř;
+  - osmiboká bota L1 se zapuštěným světlem;
+  - souvislá síť lemu přes celou podlahu.
+- **Kalibrace světla:** L1 reflektor 4 cd ze štěrbiny, L2 18 cd / 100°, L3 8 cd, grafit Halcyonu 0,06.
+- Tabulka jasu a listy jsou v `Docs/Reviews/2026-10-06_kit_test_section_revc.md`.
+- Blockout (krok 4) až po schválení autorem.

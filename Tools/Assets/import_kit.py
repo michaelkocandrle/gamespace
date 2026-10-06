@@ -170,9 +170,12 @@ SHOWROOM = {
         # per portal, (kind, dx along the portal, y, z, cd, extra)
         # round 2: x3-4 brighter and the warm lights neutral (round 1: mean 0.10 / p10 0.00 / B/R 0.71 against the
         # etalon's 0.23-0.28 / 0.13 / 0.96-1.02 - the SC corridor is lit, neutral, never black)
-        "portal_lights": [("foot", 0.15, -1.0, 0.1, 2.5, None), ("foot", 0.15, 1.0, 0.1, 2.5, None),
-                          ("corner", 0.15, -0.47, 2.04, 40.0, 70.0), ("corner", 0.15, 0.47, 2.04, 40.0, 70.0),
-                          ("strip", 0.15, 0.0, 2.2, 25.0, (100.0, 2.0))],
+        # rev. C calibration (6. 10.): the etalon is mid-dark with few light areas (light > 0.45: 4-7 %); round 1 of rev. C
+        # had 19-33 % - the crowns burnt by L3 and L2; at L3 6 / L2 14 cd the scene went 40 % dark (the etalon: 1 %): L3 10,
+        # L2 24 cd with a wide 100 deg cone (a wash on the walls, not a spot on the crown), L1 a spot out of the boot
+        "portal_lights": [("foot", 0.15, -0.975, 0.05, 4.0, 110.0), ("foot", 0.15, 0.975, 0.05, 4.0, 110.0),
+                          ("corner", 0.15, -0.47, 2.04, 18.0, 100.0), ("corner", 0.15, 0.47, 2.04, 18.0, 100.0),
+                          ("strip", 0.15, 0.0, 2.2, 8.0, (100.0, 2.0))],
     },
     "spawn": ((0.7, 0.0), 0.0),
     "spawn_annex": ((3.1, -4.8), 0.0),
@@ -631,7 +634,10 @@ def build_test_section(actors, meshes, mis, sec, counts):
                 loc = _v((x + dx, y), z)
                 label = "KitTest_%d_%s_%d" % (k, kind, j)
                 if kind == "foot":
-                    a = light(actors, loc, "foot", cd, 0.9, label, source_cm=1.0)
+                    # rev. C: a spot from the boot's slot, 30 deg down and out over the floor and the lip - it must not
+                    # light its own boot (round 1: a point light turned the boot's face into a white patch)
+                    a = light(actors, loc, "foot", cd, 1.2, label, spot=True, cone=extra or 110.0, source_cm=0.6)
+                    a.set_actor_rotation(unreal.Rotator(roll=0.0, pitch=-30.0, yaw=90.0 if y < 0 else -90.0), False)
                 elif kind == "corner":
                     a = light(actors, loc, "neutral", cd, 3.5, label, spot=True, cone=extra, source_cm=2.0)
                 else:

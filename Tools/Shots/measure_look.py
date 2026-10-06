@@ -27,9 +27,14 @@ def stats(path):
     m = a[(l > 0.05) & (l < 0.9)]
     r, g, b = m.mean(0)
     p10, p50, p90, p99 = np.percentile(l, [10, 50, 90, 99])
-    return "mean %.2f p10 %.2f p50 %.2f p90 %.2f p99 %.2f | sat %.2f B/R %.2f | detail %.4f" % (
-        l.mean(), p10, p50, p90, p99, sat, b / r, detail)
+    # the distribution's ends (parts factory light calibration, 6. 10. 2026): the share of dark (< 0.08) and light
+    # (> 0.45) pixels - SC's corridor is mid-dark with islands of light and highlights, not evenly lit
+    dark, light = (l < 0.08).mean(), (l > 0.45).mean()
+    return "mean %.2f p10 %.2f p50 %.2f p90 %.2f p99 %.2f | dark %2.0f%% light %2.0f%% | sat %.2f B/R %.2f | detail %.4f" % (
+        l.mean(), p10, p50, p90, p99, 100 * dark, 100 * light, sat, b / r, detail)
 
 
-for f in sorted(glob.glob(os.path.join(sys.argv[1], "*.png")))[1:]:
+# the first file is a shot set's warmup; --all measures every file (a folder of reference images)
+files = sorted(glob.glob(os.path.join(sys.argv[1], "*.png")))
+for f in files if "--all" in sys.argv else files[1:]:
     print("LOOK %-24s %s" % (os.path.basename(f)[:-4], stats(f)))
