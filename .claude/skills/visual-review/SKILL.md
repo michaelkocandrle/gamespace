@@ -100,6 +100,8 @@ nenahrazuje je: musí proběhnout obojí. `test_ship_geometry.py` běží sám j
   Ostrůvky světla a tmavé mezery, ne ploché osvětlení.
 - Decaly a značení: malé, hierarchie logo / název místa / servisní značky; část značení jako geometrie (ražba,
   reliéf). Nezrcadlené, čitelné z oka.
+- Vrstvené detailní decaly (autor 6. 10. 2026): plochy dílu i navazující stěny mají několik vrstev textur přes sebe
+  (šum laku, skvrny, panelové spáry, mřížky, lišty, nálepky); jednolitá plocha bez vrstev působí plastově = chyba.
 - Špína a opotřebení: podle míry ve stylu výrobce; ve spárách a na hranách, kde vzniká, ne rovnoměrně.
 - Funkce a stavy: pohyblivé části, světelné stavy a napojení na sousední díly (stěna, podlaha) bez mezer.
 <!-- /critic-checklist -->

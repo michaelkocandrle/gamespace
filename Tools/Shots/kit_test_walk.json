@@ -1,0 +1,1 @@
+﻿{"_comment": "The corridor test section reached as the player does (space.Showroom test = the 4th Alt+U stop), packaged game.", "shots": [{"name": "warmup", "camera": "pawn", "hud": 1, "settle": 6.0, "console": ["stat none", "space.Showroom test"]}, {"name": "walked_in", "camera": "pawn", "hud": 1, "settle": 2.0, "console": []}]}

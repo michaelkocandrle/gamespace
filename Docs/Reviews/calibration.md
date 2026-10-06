@@ -129,3 +129,7 @@ zadání nebo checklist).
   a nepopsaná tlačítka, i když popisky ENG/SHLD byly pod nimi. Jde o chyby čtení malých detailů, ne
   o slepé místo zadání, takže zadání beze změny. Obrana je ověřování každé výtky výřezem
   (`Docs/Reviews/2026-09-25_wayfarer_cockpit_v2/evidence/`).
+
+- 6. 10. 2026, KF-PORTAL-01 ve hře (autor): díl působí plastově, stěny holé. Kouzlo SC jsou **vrstvené detailní
+  decaly** (textury navrstvené na sebe pro plnost, pak detaily), ne jednoduché nápisy. Kritik to zachytil jen
+  částečně (jedna drsnost, chybí 3. vrstva); do checklistu `part` patří hustota vrstvených decalů na všech plochách.

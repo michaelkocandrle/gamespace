@@ -50,3 +50,11 @@ Sběr během pilotu. Retrospektiva po dokončení pilotu z nich udělá návrh w
 - Kritik se na dílu zasekne kolem 5: lokální opravy skóre nehnou. Pilotní práh „všech šest ≥ 7“ vyžaduje
   systémové kroky (materiálová deska: šum drsnosti, lem, podlaha; značení výrobce; tmavá špína) dřív, než díl
   dostane kritika.
+
+## Autorovo oko ve hře (krok 9, 6. 10.)
+
+- Úsek je dostupný přes Alt+U (4. zastávka). **Chyba:** postava v úseku nejde dál (neprůchozí; autor: zatím jedno).
+- **Hlavní výtka:** plastovost a holé zdi bez decalů. Kouzlo SC jsou vrstvené detailní decaly: různé textury
+  navrstvené na sebe pro pocit plnosti, pak detaily. Dosavadní decaly byly jednoduché (nápisy, EXIT). Návrh do
+  workflow: krok „vrstvy decalů“ s plánem vrstev pro každou plochu dílu (podklad s mikrovariací → velké skvrny
+  a variace laku → panelové spáry, mřížky, lišty → štítky, šrouby).

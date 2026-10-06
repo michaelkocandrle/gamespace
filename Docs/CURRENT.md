@@ -43,8 +43,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Čeká na rozhodnutí autora
 
-- **Továrna – STOP:** krok 9 KF-PORTAL-01 (oko ve hře, `space.Showroom test` / Alt+U); kritik FAIL 5,2
-  (`Docs/Reviews/2026-10-06_kf_portal_01_critic.md`): jas úseku (L3 jen nepřímé), 3. vrstva pilíře, logo, deska; P25 při přestavbě Wayfareru.
+- **Továrna:** KF-PORTAL-01 krok 9 – autor: plastové, holé zdi; chybí **vrstvené detailní decaly** (retro); úsek
+  neprůchozí (Alt+U 4. zastávka); kritik FAIL 5,2 (`2026-10-06_kf_portal_01_critic.md`); P25 při přestavbě Wayfareru.
 - **Autor 5. 10. – věrná kopie SC podle referencí** (pak vlastní styl); pořadí v Dalších krocích, bod 0.
 - **Kokpit v2** (4. 10.): C-01 schválen výchozími volbami (D průmyslový, zakouřené hologramy, HOTAS, krémové obložení –
   autor může změnit); hotové holoprojektory MFD (CK-HP-L/R) a vnitřní rám kanopy (CK-CF); dál HOTAS, konzole a ovladače, materiály, střed.
