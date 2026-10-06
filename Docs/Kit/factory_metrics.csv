@@ -4,3 +4,8 @@ date,part,workflow,kind,step,what,minutes,critic_rounds,rebuilds,notes
 2026-10-06,KF-PORTAL-01,v0.1,tool,2,draw_part_sheet.py simplest version (7 views from JSON),3,0,0,first render had a broken mirror of the profile
 2026-10-06,KF-PORTAL-01,v0.1,part,2,part JSON + sheet checked view by view (3 renders),3,0,2,two fixes of the sheet (profile path; labels and the hidden strip)
 2026-10-06,KF-PORTAL-01,v0.1,part,1,etalon card: quality targets + Halcyon style proposal,2,0,0,wall clock; the etalon itself was made the session before
+2026-10-06,KF-PORTAL-01,v0.1,part,2,sheet rev. B (author's 5 changes) + Steadfast 2D corridor check,8,0,1,L3 visibility computed on the sheet; plinth light removed
+2026-10-06,KF-PORTAL-01,v0.1,tool,2,draw_part_sheet.py rev. B views (two eye views; floor; joint; L3 ray check),6,0,0,Bash ate backslash-n twice (patch via Edit)
+2026-10-06,KF-PORTAL-01,v0.1,tool,3,kit_materials.json + M_Kit_Base (kit wear band / walked line) + build_factory_materials + test_kit_materials.py,9,0,0,simplest versions
+2026-10-06,KF-PORTAL-01,v0.1,tool,3,kit_factory.py board samples + SHOWROOM board + preset kit_material_board,7,0,0,
+2026-10-06,KF-PORTAL-01,v0.1,part,3,board: Blender build + 3 x (UE import ~4 min + shots ~2 min) + reflection perf at 1440p,22,0,3,round 1 floor coplanar + brushed lip; round 2 wear invisible (band verified by a diagnostic shot); round 3 wear 1.0 / 0.15

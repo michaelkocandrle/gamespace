@@ -974,6 +974,20 @@ wear = max(wear, saturate((top * (0.35 + g) - 0.55) * 1.6) * TopWear);   // soft
 return float4(g, ao, saturate(dirt), saturate(wear));
 """
 
+# The kit's own wear style (M_Kit_Base only, parts factory step 3, 6. 10. 2026; the maker's palette in
+# ArtSource/Kit/kit_materials.json): edge wear only in a band of height above the part's floor (hands and shoulders,
+# 0.9-1.6 m for Halcyon; LocalPos is cm above the kit part's pivot on the deck, so it holds in a moving ship), soft
+# 5 cm ends; the walked line on up-facing faces at the floor within WalkHalfCm of the part's centre line (run parts:
+# y = 0 on the corridor's axis), broken by the grunge - worn through to the bare metal, a line, not the whole floor.
+_KIT_WEAR_PARAMS = (("WearBandOn", 0.0), ("WearBandLo", 90.0), ("WearBandHi", 160.0), ("WalkWear", 0.0),
+                    ("WalkHalfCm", 25.0))
+_KIT_WEAR_CODE = """float band = saturate((LocalPos.z - WearBandLo) / 5.0) * saturate((WearBandHi - LocalPos.z) / 5.0);
+wear *= lerp(1.0, band, WearBandOn);
+float walk = saturate((n.z - 0.9) * 10.0) * saturate((6.0 - LocalPos.z) / 4.0)
+           * saturate((WalkHalfCm - abs(LocalPos.y)) / max(WalkHalfCm * 0.5, 1.0));
+wear = max(wear, saturate((walk * (0.45 + g) - 0.35) * 2.0) * WalkWear);
+return float4(g, ao, saturate(dirt), saturate(wear));"""
+
 # T_Ship_Micro (generate_detail_textures.py) on UV0 in metres: R brushing, G micro-scratches, B fine roughness noise.
 # The kit's UV0 runs along each member (kit_geo: U on a box's longest axis, along a tube), so the brushing follows the
 # member; one tap, not three. A mesh whose UV0 is an atlas (the ships' hulls) gets it squeezed - they leave
@@ -1056,15 +1070,20 @@ def _surface_switch(m, on, off, x, y):
     return sw
 
 
-def build_layered_master():
+def build_layered_master(path=None, kit=False):
     """Layered hull paint (step 5 of the SC detail plan, skill ship-pipeline 3b3): primary and secondary
     paint by mask, cavity darkening and dirt from the baked AO, edge wear to bare metal on convex edges
     broken up by grunge, grunge over the paint, all from vertex colours (hs_layers.py) and one tiling
     texture, no per-ship UV textures. Parameters (colours linear): PrimaryColor, SecondaryColor,
     BareMetalColor, DirtColor, PrimaryRoughness, SecondaryRoughness, PaintMetallic, BareMetalRoughness,
     EdgeWear, DirtAmount, GrungeAmount, GrungeTileCm, RoughVariation, CavityStrength, AOStrength,
-    EmissiveColor, EmissiveStrength."""
-    m = _fresh_material(MASTERS["layered"])
+    EmissiveColor, EmissiveStrength.
+
+    kit=True builds the kit's own copy at `path` (M_Kit_Base, parts factory step 3, 6. 10. 2026): the same graph plus
+    the maker's wear style - WearBandOn / WearBandLo / WearBandHi (cm above the part's floor: edge wear only at hand and
+    shoulder height) and WalkWear / WalkHalfCm (the walked line: up-facing faces at the floor within WalkHalfCm of the
+    part's centre line worn through). Its own asset, so a kit change never recompiles the ships (lesson P25)."""
+    m = _fresh_material(path or MASTERS["layered"])
     m.set_editor_property("used_with_nanite", True)
     grunge_tex = import_shared_texture("T_Ship_Detail_Grunge")
     vc = _node(m, unreal.MaterialExpressionVertexColor, -1700, 0)
@@ -1102,9 +1121,18 @@ def build_layered_master():
         params[pname] = _scalar(m, pname, 0.0, -2300, 650 + i * 100)
     mask_in = ["VC", "Amount", "LocalPos", "TexG", "Tile", "DirtAmount", "EdgeWear", "WearThreshold"]
     detail_in = mask_in + ["PanelId", "PanelShift", "PanelDirtVar", "FloorWear", "TopWear"]
+    detail_code = _LAYER_MASK_DETAIL_NODE
+    if kit:
+        for i, (pname, default) in enumerate(_KIT_WEAR_PARAMS):
+            params[pname] = _scalar(m, pname, default, -2500, 650 + i * 100)
+        detail_in = detail_in + [p for p, _ in _KIT_WEAR_PARAMS]
+        detail_code = _LAYER_MASK_DETAIL_NODE.replace("return float4(g, ao, saturate(dirt), saturate(wear));",
+                                                      _KIT_WEAR_CODE)
+        if detail_code == _LAYER_MASK_DETAIL_NODE:
+            raise RuntimeError("the kit wear code found no return in the layered detail node")
     plain_masks = _custom(m, "Layered_masks", _LAYER_MASK_NODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4, mask_in,
                           -1250, 300)
-    detail_masks = _custom(m, "Layered_masks_detail", _LAYER_MASK_DETAIL_NODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4,
+    detail_masks = _custom(m, "Layered_masks_detail", detail_code, unreal.CustomMaterialOutputType.CMOT_FLOAT4,
                            detail_in, -1250, 100)
     for node, names in ((plain_masks, mask_in), (detail_masks, detail_in)):
         if not MEL.connect_material_expressions(vc, "", node, "VC"):

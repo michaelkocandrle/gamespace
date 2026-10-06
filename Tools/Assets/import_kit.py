@@ -155,7 +155,21 @@ SHOWROOM = {
                    # the stair bay's hall (provisional, 3.4 m high): 100 cd - at 40 its mean was 0.07
                    ((15.3, -1.8), 100.0, 110.0, 3.35), ((15.3, 1.5), 100.0, 110.0, 3.35), ((18.8, -1.8), 100.0, 110.0, 3.35),
                    ((18.8, 1.5), 100.0, 110.0, 3.35)],
-    "gravity": (-0.3, 20.3, -9.3, 8.3),
+    # x to 25.3 (6. 10. 2026): the material board's room behind the stair bay
+    "gravity": (-0.3, 25.3, -9.3, 8.3),
+    # parts factory pilot 1 step 3 (6. 10. 2026): the material sample board of the kit's shared base, in its own dark
+    # room behind the stair bay, lit like the SC etalon - a warm source hidden over the samples, cool points at the
+    # floor, a dim fill; no window, no sun. Samples (kit_factory.py) back to the wall at x 24.95, facing -x; the
+    # second profile in the Kestrel palette (the same base, only another maker's palette). Shots: kit_material_board.
+    "board": {
+        "room": (20.2, 25.1, -2.1, 2.1, 2.5),
+        "samples": [("Sample_Lacquer18F_A", (24.95, -1.2), 180.0, None), ("Sample_Dark18F_A", (24.95, -0.6), 180.0, None),
+                    ("Sample_Profile18F_A", (24.95, 0.0), 180.0, None), ("Sample_Lip18F_A", (24.95, 0.6), 180.0, None),
+                    ("Sample_Profile18F_A", (24.95, 1.2), 180.0, "Kestrel"), ("Sample_Floor09F_A", (23.6, 0.0), 0.0, None)],
+        # (kind, (x, y), z, cd, extra): the warm hidden strip as a downward rect light, cool floor points, a dim fill
+        "lights": [("rect", (24.45, 0.0), 2.42, 45.0, (300.0, 12.0)), ("point_cool", (24.2, -1.95), 0.08, 3.0, None),
+                   ("point_cool", (24.2, 1.95), 0.08, 3.0, None), ("fill", (21.6, 0.0), 2.45, 12.0, 120.0)],
+    },
     "spawn": ((0.7, 0.0), 0.0),
     "spawn_annex": ((3.1, -4.8), 0.0),
     "spawn_stairs": ((15.0, -1.8), 0.0),             # in front of the stair: space.Walk 1 0 3 climbs it
@@ -391,7 +405,60 @@ def build_materials():
     MEL.update_material_instance(wi)
     EAL.save_loaded_asset(wi, only_if_is_dirty=False)
     mis["Kit_DecalWear"] = wi
+    for maker in FACTORY_MAKERS:
+        built = build_factory_materials(masters, maker)
+        if maker == MAKER:
+            mis.update(built)
+        else:
+            mis.update({"%s@%s" % (role, maker): mi for role, mi in built.items()})
     return mis
+
+
+FACTORY_MATS = os.path.join(REPO, "ArtSource", "Kit", "kit_materials.json")
+FACTORY_MAKERS = ("Halcyon", "Kestrel")       # the board shows that another maker is only another palette
+
+
+def factory_material_spec(role, maker, data=None):
+    """The layered spec of a factory role for a maker (kit_materials.json): the quality is the role's (roughness,
+    metallic), the colours and the wear the maker's style - edge wear only in the hand band, dirt in the seams through
+    the kit occlusion, the walked line on the floor. Plain Python, so the offline test can read it too."""
+    data = data or json.load(open(FACTORY_MATS, encoding="utf-8"))
+    r, m = data["roles"][role], data["makers"][maker]
+    pal, w = m["palette"], m["wear"]
+    lo, hi = data["limits"]["hand_band_m"]
+    colour = pal[r["colour"]]
+    scalars = {"PrimaryRoughness": r["roughness"], "SecondaryRoughness": r["roughness"] + 0.04,
+               "PaintMetallic": r["metallic"], "BareMetalRoughness": 0.32,
+               "EdgeWear": w["edge_wear"] if r.get("edge_wear") else 0.0, "WearThreshold": w.get("edge_threshold", 0.35),
+               "WearBandOn": 1.0, "WearBandLo": lo * 100.0, "WearBandHi": hi * 100.0,
+               "WalkWear": w["walked"] if r.get("walked") else 0.0, "WalkHalfCm": w["walk_half_width_m"] * 100.0,
+               "DirtAmount": w["cavity_dirt"] if r.get("cavity_dirt") else 0.0, "GrungeAmount": w["grunge"],
+               "RoughVariation": 0.12, "CavityStrength": 0.0, "AOStrength": 0.0, "PanelTone": 0.08, "PanelRough": 0.08,
+               "MetalShare": 0.0, "CarbonShare": 0.0, "LiveryAmount": 0.0, "ClearCoat": 0.0, "FloorWear": 0.0,
+               "TopWear": 0.0, "PanelDirtVar": 0.0}
+    scalars.update(SURFACE)
+    scalars.update({"FloorWear": 0.0, "TopWear": 0.0, "MicroRough": 0.06, "ScratchAmount": 0.03 if r["metallic"] > 0.5 else 0.02,
+                    # polished, not brushed: brushing streaked the lip (board round 1, 6. 10. 2026)
+                    "Brushed": 0.0})
+    return {"master": "kitbase", "switches": {"SurfaceDetail": True},
+            "vectors": {"PrimaryColor": colour, "SecondaryColor": [c * 0.85 for c in colour],
+                        "BareMetalColor": pal["bare_metal"], "DirtColor": pal["dirt"]},
+            "scalars": scalars}
+
+
+def build_factory_materials(masters, maker):
+    """The parts factory's shared base (step 3, pilot 1, 6. 10. 2026): M_Kit_Base (the layered graph with the kit's
+    wear style, its own asset) and MI_Kit_<Maker>_<Role> for the roles of kit_materials.json."""
+    if "kitbase" not in masters:
+        masters["kitbase"] = ship_materials.build_layered_master(MATS + "/M_Kit_Base", kit=True)
+    data = json.load(open(FACTORY_MATS, encoding="utf-8"))
+    out = {}
+    for role in data["roles"]:
+        if role.startswith("_"):
+            continue
+        out[role] = ship_materials.build_instance("MI_Kit_%s_%s" % (maker, role.split("_", 1)[1]), MATS,
+                                                  factory_material_spec(role, maker, data), masters)
+    return out
 
 
 def import_parts(mis, report):
@@ -511,6 +578,39 @@ def _v(xy, z=0.0):
 def _rot(yaw, x, y):
     ca, sa = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
     return x * ca - y * sa, x * sa + y * ca
+
+
+def build_board(actors, meshes, mis, board, counts):
+    """The material sample board (parts factory step 3): a dark room, the samples, the etalon-like lights."""
+    cube = EAL.load_asset("/Engine/BasicShapes/Cube")
+    x0, x1, y0, y1, h = board["room"]
+    t = 0.1
+    for k, (a0, a1, b0, b1, z0, z1) in enumerate(((x0 - t, x0, y0, y1, 0.0, h), (x1, x1 + t, y0, y1, 0.0, h),
+                                                  (x0, x1, y0 - t, y0, 0.0, h), (x0, x1, y1, y1 + t, 0.0, h),
+                                                  (x0 - t, x1 + t, y0 - t, y1 + t, h, h + t),
+                                                  # the room's floor 3 cm under the deck: the floor sample's lip is
+                                                  # at z 0 and its field 6 mm under it (coplanar, it vanished)
+                                                  (x0 - t, x1 + t, y0 - t, y1 + t, -0.03 - t, -0.03))):
+        spawn_mesh(actors, cube, _v(((a0 + a1) / 2, (b0 + b1) / 2), (z0 + z1) / 2), 0.0, "KitBoard_Room_%d" % k,
+                   mis["Kit_Dark"], unreal.Vector(a1 - a0, b1 - b0, z1 - z0))
+    for short, pos, yaw, maker in board["samples"]:
+        sm, part = meshes["SM_Kit_" + short]
+        a = spawn_mesh(actors, sm, _v(pos, 0.0), yaw, "KitBoard_%s%s" % (short, "_" + maker if maker else ""))
+        comp = a.static_mesh_component
+        for i, slot in enumerate(comp.get_material_slot_names()):
+            key = str(slot) + ("@" + maker if maker else "")
+            if key in mis and mis[key] is not None:
+                comp.set_material(i, mis[key])
+        counts["parts"] += 1
+    for k, (kind, xy, z, cd, extra) in enumerate(board["lights"]):
+        if kind == "rect":
+            rect_light(actors, _v(xy, z), "warm", cd, 3.5, "KitBoard_Warm_%d" % k, unreal.Vector(0, 0, -1),
+                       unreal.Vector(0, 1, 0), extra[0], extra[1])
+        elif kind == "point_cool":
+            light(actors, _v(xy, z), "cool", cd, 1.2, "KitBoard_Cool_%d" % k)
+        else:
+            light(actors, _v(xy, z), "work", cd, 5.0, "KitBoard_Fill_%d" % k, spot=True, cone=extra)
+        counts["lights"] += 1
 
 
 def place_part(actors, meshes, short, pos_cm, yaw, label, counts):
@@ -642,6 +742,7 @@ def build_showroom(meshes, mis, report):
             cum += meshes["SM_Kit_" + m][1]["length_m"]
     for m, pos, yaw in L["placed"]:
         place_part(actors, meshes, m, unreal.Vector(pos[0] * 100.0, pos[1] * 100.0, 0.0), yaw, "Kit_" + m, counts)
+    build_board(actors, meshes, mis, L["board"], counts)
     # provisional: ceiling and floor planes, a dark box against the sun, spots where the kit has no ceiling yet
     plane = EAL.load_asset("/Engine/BasicShapes/Plane")
     cube = EAL.load_asset("/Engine/BasicShapes/Cube")

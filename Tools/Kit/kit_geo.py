@@ -35,7 +35,9 @@ TRIM = json.load(open(os.path.join(ROOT, "ArtSource", "Kit", "Textures", "trim_i
 
 ROLES = ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber", "Kit_Fabric", "Kit_Plastic", "Kit_Trim",
          "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_GlowNeutral", "Kit_GlowDim", "Kit_Screen",
-         "Kit_Glass", "Kit_Cushion"]
+         "Kit_Glass", "Kit_Cushion",
+         # the parts factory's shared base (ArtSource/Kit/kit_materials.json, 6. 10. 2026): lacquer, polished lip, dark
+         "Kit_Lacquer", "Kit_Lip", "Kit_Dark", "Kit_AntiSlip"]
 
 
 def frame(origin, ax, ay, az):
@@ -430,6 +432,11 @@ def materials():
         "Kit_DecalGrime": ([0.04, 0.036, 0.03], 0.8, 0.0, None),
         "Kit_DecalWear": ([0.14, 0.13, 0.12], 0.35, 0.0, None),
     }
+    # the factory roles' previews from the shared base (Halcyon's palette)
+    fm = json.load(open(os.path.join(ROOT, "ArtSource", "Kit", "kit_materials.json"), encoding="utf-8"))
+    for role, r in fm["roles"].items():
+        if not role.startswith("_"):
+            spec[role] = (fm["makers"]["Halcyon"]["palette"][r["colour"]], r["roughness"], r["metallic"], None)
     tex = os.path.join(ROOT, "ArtSource", "Kit", "Textures")
     out = {}
     for name, (c, r, mt, emit) in spec.items():

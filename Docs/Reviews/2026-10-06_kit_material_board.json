@@ -1,0 +1,97 @@
+{
+ "topic": "kit_material_board",
+ "date": "2026-10-06",
+ "goal": "Tabule vzorků sdíleného materiálového základu kitu (továrna dílů, pilot 1 KF-PORTAL-01, krok 3): světlý lak, leštěný lem 18 mm, tmavá guma/grafit, protiskluzová podlaha; otěr hran jen ve výšce ruky, špína ve spárách, vyšlapaná dráha.",
+ "style": "Kvalita podle etalonu SC (Aurora Mk II), barvy a opotřebení podle stylu výrobce Halcyon Freightworks: celý rám krémový lak, grafit, gunmetal; udržovaná pracovní loď. Poslední vzorek vpravo je stejný profil v paletě Kestrel.",
+ "checklist": "part",
+ "gate": "part",
+ "pilot": true,
+ "out": "Docs/Reviews/2026-10-06_kit_material_board",
+ "notes": [
+  "Tabule stojí v tmavé zkušební místnosti, ne v chodbě: hodnotí se materiály, ne prostor.",
+  "Snímky 2560 × 1440, varianta odrazů c (Lumen do drsnosti 0,32)."
+ ],
+ "etalon": [
+  {
+   "img": "Docs/Kit/etalon/sc/ram_portal_1.jpg",
+   "label": "portál do hloubky"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/ram_portal_2.jpg",
+   "label": "pata rámu se světlem"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/podlaha_2.jpg",
+   "label": "podlaha, leštěný lem"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/stena_1.jpg",
+   "label": "lak, perforace"
+  }
+ ],
+ "pairs": [
+  {
+   "title": "Tabule celkem",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_1.jpg",
+   "ref_label": "SC Aurora, chodba",
+   "ours": "C:/gamespace-shots/20261006_185810_kit_material_board/01_a_board.png",
+   "ours_label": "tabule vzorků, Editor 1440p"
+  },
+  {
+   "title": "Profil portálu 3/4",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_2.jpg",
+   "ref_label": "SC pata rámu",
+   "ours": "C:/gamespace-shots/20261006_185810_kit_material_board/02_b_profile_34.png",
+   "ours_label": "výsek profilu, lem, manžeta"
+  },
+  {
+   "title": "Otěr v pásmu ruky",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_3.jpg",
+   "ref_label": "SC rám",
+   "ours": "C:/gamespace-shots/20261006_185810_kit_material_board/04_c2_profile_band_height.png",
+   "ours_label": "profil 0,75-1,45 m"
+  },
+  {
+   "title": "Lak a tmavá třetina",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/stena_1.jpg",
+   "ref_label": "SC stěna",
+   "ours": "C:/gamespace-shots/20261006_185810_kit_material_board/05_d_lacquer_dark.png",
+   "ours_label": "lak se spárami, guma"
+  },
+  {
+   "title": "Leštěný lem",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/podlaha_1.jpg",
+   "ref_label": "SC lem podlahy",
+   "ours": "C:/gamespace-shots/20261006_185810_kit_material_board/06_e_lip.png",
+   "ours_label": "leštěný kov"
+  },
+  {
+   "title": "Podlaha a vyšlapaná dráha",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/podlaha_2.jpg",
+   "ref_label": "SC podlaha",
+   "ours": "C:/gamespace-shots/20261006_185810_kit_material_board/07_f_floor_walk.png",
+   "ours_label": "chodník, lem, dráha"
+  },
+  {
+   "title": "Halcyon vs Kestrel",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/stena_4.jpg",
+   "ref_label": "SC světlá stěna",
+   "ours": "C:/gamespace-shots/20261006_185810_kit_material_board/08_g_halcyon_kestrel.png",
+   "ours_label": "stejný profil, dvě palety"
+  }
+ ]
+}

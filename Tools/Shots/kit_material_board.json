@@ -1,0 +1,231 @@
+{
+ "_comment": "Parts factory pilot 1 step 3 (6. 10. 2026): the material sample board of the kit's shared base (M_Kit_Base, ArtSource/Kit/kit_materials.json) in its own room behind the stair bay (import_kit SHOWROOM['board']), lit like the SC etalon. Variant c reflections on (Lumen traced only below roughness 0.32, half resolution), then the board and the lip without Lumen reflections for comparison. Run: Tools/Shots.ps1 -Preset kit_material_board -Editor -Width 2560 -Height 1440 The last shot is a diagnostic: the lacquer's edge wear at full strength, to show where the hand band (0.9-1.6 m) lets it through.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 8.0,
+   "camera_location": [
+    21.4,
+    -500.0,
+    1.6
+   ],
+   "camera_look_at": [
+    24.9,
+    -500.0,
+    1.0
+   ],
+   "fov": 70,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none",
+    "r.MegaLights.EnableForProject 1",
+    "space.InteriorLighting 1",
+    "r.Lumen.Reflections.Allow 1",
+    "r.Lumen.Reflections.MaxRoughnessToTrace 0.32",
+    "r.Lumen.Reflections.DownsampleFactor 2"
+   ]
+  },
+  {
+   "name": "a_board",
+   "camera": "free",
+   "hud": 0,
+   "settle": 4.0,
+   "camera_location": [
+    21.4,
+    -500.0,
+    1.6
+   ],
+   "camera_look_at": [
+    24.9,
+    -500.0,
+    1.0
+   ],
+   "fov": 70,
+   "console": [
+    "r.Lumen.Reflections.Allow 1",
+    "r.Lumen.Reflections.MaxRoughnessToTrace 0.32",
+    "r.Lumen.Reflections.DownsampleFactor 2"
+   ]
+  },
+  {
+   "name": "b_profile_34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    24.2,
+    -499.55,
+    1.35
+   ],
+   "camera_look_at": [
+    24.88,
+    -500.0,
+    1.25
+   ],
+   "fov": 45
+  },
+  {
+   "name": "c_profile_band",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    24.35,
+    -499.68,
+    1.0
+   ],
+   "camera_look_at": [
+    24.88,
+    -500.0,
+    1.2
+   ],
+   "fov": 40
+  },
+  {
+   "name": "c2_profile_band_height",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    24.05,
+    -499.75,
+    1.1
+   ],
+   "camera_look_at": [
+    24.88,
+    -500.0,
+    1.1
+   ],
+   "fov": 75
+  },
+  {
+   "name": "d_lacquer_dark",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    23.9,
+    -500.9,
+    1.3
+   ],
+   "camera_look_at": [
+    24.9,
+    -500.9,
+    1.1
+   ],
+   "fov": 50
+  },
+  {
+   "name": "e_lip",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    24.15,
+    -499.65,
+    1.5
+   ],
+   "camera_look_at": [
+    24.9,
+    -499.4,
+    1.45
+   ],
+   "fov": 45
+  },
+  {
+   "name": "f_floor_walk",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    22.7,
+    -499.5,
+    1.3
+   ],
+   "camera_look_at": [
+    23.6,
+    -500.0,
+    0.0
+   ],
+   "fov": 55
+  },
+  {
+   "name": "g_halcyon_kestrel",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    23.7,
+    -499.4,
+    1.5
+   ],
+   "camera_look_at": [
+    24.9,
+    -499.4,
+    1.1
+   ],
+   "fov": 55
+  },
+  {
+   "name": "h_board_no_lumen_refl",
+   "camera": "free",
+   "hud": 0,
+   "settle": 4.0,
+   "camera_location": [
+    21.4,
+    -500.0,
+    1.6
+   ],
+   "camera_look_at": [
+    24.9,
+    -500.0,
+    1.0
+   ],
+   "fov": 70,
+   "console": [
+    "r.Lumen.Reflections.Allow 0"
+   ]
+  },
+  {
+   "name": "i_lip_no_lumen_refl",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    24.15,
+    -499.65,
+    1.5
+   ],
+   "camera_look_at": [
+    24.9,
+    -499.4,
+    1.45
+   ],
+   "fov": 45
+  },
+  {
+   "name": "j_diag_band_exaggerated",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    24.05,
+    -499.75,
+    1.1
+   ],
+   "camera_look_at": [
+    24.88,
+    -500.0,
+    1.1
+   ],
+   "fov": 75,
+   "console": [
+    "r.Lumen.Reflections.Allow 1",
+    "space.Kit EdgeWear 1 Lacquer",
+    "space.Kit WearThreshold 0 Lacquer"
+   ]
+  }
+ ]
+}

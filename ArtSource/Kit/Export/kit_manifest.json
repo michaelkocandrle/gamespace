@@ -8835,6 +8835,203 @@
     "front": "Saved/KitCatalog/SM_Kit_Furniture_Food16L_A_front.png",
     "34": "Saved/KitCatalog/SM_Kit_Furniture_Food16L_A_34.png"
    }
+  },
+  "SM_Kit_Sample_Lacquer18F_A": {
+   "category": "Sample",
+   "family": "Sample_Lacquer",
+   "section": "F",
+   "length_m": 1.8,
+   "variant": "A",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Sample_Lacquer18F_A.fbx",
+   "dims_m": [
+    0.084,
+    0.34,
+    1.8
+   ],
+   "expected_size_cm": [
+    8.4,
+    34.0,
+    180.0
+   ],
+   "tris": 716,
+   "tris_decals": 0,
+   "tri_budget": 30000,
+   "materials": [
+    "Kit_Lacquer",
+    "Kit_Lip",
+    "Kit_Dark"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 432,
+    "secondary": 0,
+    "floor": 136,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Sample_Lip18F_A": {
+   "category": "Sample",
+   "family": "Sample_Lip",
+   "section": "F",
+   "length_m": 1.8,
+   "variant": "A",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Sample_Lip18F_A.fbx",
+   "dims_m": [
+    0.082,
+    0.34,
+    1.8
+   ],
+   "expected_size_cm": [
+    8.2,
+    34.0,
+    180.0
+   ],
+   "tris": 412,
+   "tris_decals": 0,
+   "tri_budget": 30000,
+   "materials": [
+    "Kit_Lip",
+    "Kit_Dark"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 720,
+    "secondary": 0,
+    "floor": 200,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Sample_Dark18F_A": {
+   "category": "Sample",
+   "family": "Sample_Dark",
+   "section": "F",
+   "length_m": 1.8,
+   "variant": "A",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Sample_Dark18F_A.fbx",
+   "dims_m": [
+    0.083,
+    0.34,
+    1.8
+   ],
+   "expected_size_cm": [
+    8.3,
+    34.0,
+    180.0
+   ],
+   "tris": 344,
+   "tris_decals": 0,
+   "tri_budget": 30000,
+   "materials": [
+    "Kit_Dark"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 480,
+    "secondary": 0,
+    "floor": 252,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Sample_Profile18F_A": {
+   "category": "Sample",
+   "family": "Sample_Profile",
+   "section": "F",
+   "length_m": 1.8,
+   "variant": "A",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Sample_Profile18F_A.fbx",
+   "dims_m": [
+    0.122,
+    0.34,
+    1.8
+   ],
+   "expected_size_cm": [
+    12.2,
+    34.0,
+    180.0
+   ],
+   "tris": 2208,
+   "tris_decals": 0,
+   "tri_budget": 30000,
+   "materials": [
+    "Kit_Lacquer",
+    "Kit_Lip",
+    "Kit_Dark"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1224,
+    "secondary": 0,
+    "floor": 844,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Sample_Floor09F_A": {
+   "category": "Sample",
+   "family": "Sample_Floor",
+   "section": "F",
+   "length_m": 0.9,
+   "variant": "A",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Sample_Floor09F_A.fbx",
+   "dims_m": [
+    1.0,
+    1.3,
+    0.03
+   ],
+   "expected_size_cm": [
+    100.0,
+    130.0,
+    3.0
+   ],
+   "tris": 656,
+   "tris_decals": 0,
+   "tri_budget": 30000,
+   "materials": [
+    "Kit_Lip",
+    "Kit_Dark",
+    "Kit_AntiSlip"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 576,
+    "secondary": 0,
+    "floor": 768,
+    "seam": 0
+   },
+   "status": "built"
   }
  }
 }

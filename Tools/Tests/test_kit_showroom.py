@@ -143,7 +143,8 @@ room = [a for a in actors if tag in list(a.tags)]
 modules = [a for a in room if isinstance(a, unreal.StaticMeshActor) and a.static_mesh_component.static_mesh
            and a.static_mesh_component.static_mesh.get_name().startswith("SM_Kit_")]
 L = C["SHOWROOM"]
-expected = sum(len(r[3]) for r in L["wall_runs"]) + sum(len(r[2]) for r in L["run_parts"]) + len(L["placed"])
+expected = (sum(len(r[3]) for r in L["wall_runs"]) + sum(len(r[2]) for r in L["run_parts"]) + len(L["placed"])
+            + len(L.get("board", {}).get("samples", [])))     # the parts factory's material board (6. 10. 2026)
 check("every part of the sample placed (%d)" % expected, len(modules) == expected, "%d" % len(modules))
 walls = [a for a in modules if a.static_mesh_component.static_mesh.get_name().startswith("SM_Kit_Wall_")]
 rects = [a for a in room if isinstance(a, unreal.RectLight)]

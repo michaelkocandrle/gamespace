@@ -135,3 +135,13 @@ doporučeno 1,2 m podle etalonu.
    při elevaci ≥ 63°, z obou směrů. Při pohledu vodorovně (svislé ½ FOV 29°) je mimo obraz. Výpočet je přímo
    v listu (`hidden_strip_visibility`).
 5. Destička příčného pásu má 4 šrouby.
+
+## Krok 3 – materiálový základ kitu (6. 10., STOP)
+
+Sdílený základ kitu vznikl v pilotu 1:
+- `ArtSource/Kit/kit_materials.json`: role trojice, palety Halcyon a Kestrel, styl opotřebení výrobce;
+- master `M_Kit_Base` a instance `MI_Kit_<Výrobce>_<Role>`;
+- tabule vzorků v showroomu a test `test_kit_materials.py`.
+
+Podrobnosti, slabá místa a měření odrazů jsou v `Docs/Reviews/2026-10-06_kit_material_board.md`. Varianta c stojí
+na RX 9070 v 1440p +0,6 až +1,4 ms GPU. Blockout (krok 4) až po schválení tabule autorem.
