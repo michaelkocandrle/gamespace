@@ -260,7 +260,8 @@ namespace SpaceEngLocal
 	constexpr double PowerX0 = 440.0, PowerX1 = 488.0, PowerBottom = 708.0, PowerPitch = 26.5;
 }
 
-using namespace SpaceEngLocal;
+// (no file-wide using: in the game target's unity build it leaked White / Red / Ink into SpaceMenuWidget.cpp and
+// broke its Slate brackets - each function below opens the namespace itself)
 
 // =====================================================================================================================
 // Screen
@@ -268,6 +269,7 @@ using namespace SpaceEngLocal;
 int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeometry& Geo, const FSlateRect& Culling,
 	FSlateWindowElementList& Out, int32 Layer, const FWidgetStyle& Style, bool bParentEnabled) const
 {
+	using namespace SpaceEngLocal;
 	const ASpaceEngineeringTerminal* T = Terminal.Get();
 	const FPen Pen{ Out, Geo, Layer };
 	// the glass: dark teal, fine scan lines, a soft brighter middle
@@ -982,11 +984,13 @@ void ASpaceEngineeringTerminal::ApplyPreset(int32 Index)
 
 float ASpaceEngineeringTerminal::ColumnX(int32 System)
 {
+	using namespace SpaceEngLocal;
 	return System >= 0 && System < int32(UE_ARRAY_COUNT(Columns)) ? float(Columns[System]) : 0.f;
 }
 
 FBox2D ASpaceEngineeringTerminal::PipBox(float CentreX, int32 Pip)
 {
+	using namespace SpaceEngLocal;
 	const double Y0 = PipBottom - Pip * PipPitch;
 	return FBox2D(USpaceEngineeringScreen::Ref(CentreX - PipHalfW, Y0), USpaceEngineeringScreen::Ref(CentreX + PipHalfW, Y0 + PipH));
 }
@@ -1101,6 +1105,7 @@ void ASpaceEngineeringTerminal::BuildWire()
 
 void ASpaceEngineeringTerminal::GatherHotspots(TArray<FSpaceHotspot>& Out)
 {
+	using namespace SpaceEngLocal;
 	const double CmPerPx = GlassSizeCm.X / USpaceEngineeringScreen::CanvasW;
 	const TWeakObjectPtr<ASpaceEngineeringTerminal> Weak(this);
 	auto Spot = [&](const FBox2D& Box, TFunction<void(ASpaceEngineeringTerminal*)> Use)

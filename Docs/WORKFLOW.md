@@ -232,6 +232,9 @@ Nástrahy (23. 9. 2026):
   změny hlaviček vyžadují restart editoru a plný build. Autorovi to vždy napiš.
 - **Herní target se kompiluje jinak než editor** (jiné seskupení unity build). Chyba se může
   ukázat až při `Package.ps1`. Viz nástraha 9.4a.
+- **Žádné `using namespace` na úrovni souboru v .cpp** (7. 10. 2026). V unity buildu herního targetu se propsal
+  `using namespace SpaceEngLocal` (`White`, `Red`, `Ink`) do `SpaceMenuWidget.cpp` a rozbil jeho závorky Slate
+  (C2679 / C7732). Editor se přitom zkompiloval. Namespace otevírej uvnitř funkcí.
 - Nový modul v `gamespace.Build.cs` (naposledy `RenderCore`) je povolený. Smart App Control je
   vypnutý.
 
