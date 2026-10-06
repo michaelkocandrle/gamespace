@@ -1,8 +1,21 @@
-# Workflow továrny dílů – v0 (návrh, 6. 10. 2026, čeká na schválení autorem)
+# Workflow továrny dílů – v0.1 (schváleno autorem 6. 10. 2026)
+
+| Verze | Datum | Změny |
+|---|---|---|
+| v0 | 6. 10. 2026 | návrh |
+| v0.1 | 6. 10. 2026 | autor schválil v0 s úpravami: (1) karta dílu odděluje **kvalitu ze SC** od **stylu výrobce**, kit přebírá principy kvality RSI, ne barvy a styl Aurory, špína se hodnotí podle stylu výrobce; (2) nástroje v pilotu jen v nejjednodušší funkční verzi, jejich čas se vede zvlášť; (3) materiálová trojice a světlo v pouzdře vznikají v pilotu 1 jako sdílený základ `M_Kit_*`; (4) piloty po jednom: 1 = rámový modul chodby, 2 = pouzdro panelu dveří (po retrospektivě pilotu 1), terminál není pilot; skill `visual-review` upraven (gate a checklist `part`, pole `etalon`) |
 
 **Cíl:** každý díl jednou na úroveň etalonu SC (`Docs/Kit/etalon/etalon.md`), pak v každé lodi. Lodě se liší
 paletou, doplňky a světly.
-**Princip:** nejdřív 1–2 piloty celé (tvar, materiál, světlo, decaly, špína, funkce). Na nich se workflow odladí.
+**Kvalita a styl zvlášť** (v0.1): z etalonu SC se přebírají **principy kvality RSI**:
+- materiálová trojice (světlý lak / leštěný lem 1,5–2 cm / tmavá perforace nebo guma);
+- světlo vždy v pouzdře nebo skryté v hraně;
+- stupňovité profily, zapuštěná pole, zkosené rámy.
+
+**Ne barvy a styl Aurory.** Barvy, tvarové akcenty a míru opotřebení dodává **výrobce lodi paletou** (Halcyon
+Freightworks, Kestrel Dynamics…); rozměr „špína“ se hodnotí podle stylu výrobce.
+
+**Princip:** piloty po jednom, každý celý (tvar, materiál, světlo, decaly, špína, funkce). Na nich se workflow odladí.
 Zrychluje se jen podle naměřených dat (kap. 5).
 **Vstupy:**
 - etalon;
@@ -11,16 +24,17 @@ Zrychluje se jen podle naměřených dat (kap. 5).
 - recenze chodby, kajuty a rampy.
 
 Každý díl má složku `Docs/Kit/parts/<ID>/` s kartou `part.md` (zadání, cíle, metriky) a recenzí. Nové nástroje
-v textu jsou označené **(nový)**; postaví se v pilotu, ne předem.
+v textu jsou označené **(nový)**. Postaví se v pilotu, ne předem, a **jen v nejjednodušší funkční verzi** (v0.1).
+Čas na nástroje se v `factory_metrics.csv` vede zvlášť od času na díl.
 
 ## 1. Výroba jednoho dílu
 
 | # | Krok – co se dělá | Čím | Výstup | Hotovo, když | Kontroly (poučení) |
 |---|---|---|---|---|---|
 | 0 | **Zadání:** kategorie, úroveň, cílové lodě a jejich rozměry z výkresů, rozměrová řada a varianty | výkresy lodí, `kit_rules.json`, `kit_parts.json` | karta `part.md` | každá cílová loď má rozměr, do kterého díl padne | P9 řada z výkresů; P13 uzel = samostatný díl |
-| 1 | **Etalonová karta:** 3–4 kotevní záběry SC a měřené cíle v šesti rozměrech: vrstvy a hustota, materiály, světlo, decaly, špína, tvar | `etalon/sc/*.jpg`; když chybí záběr, požadavek na dotočení autorovi | tabulka cílů v `part.md` | každý rozměr má číslo nebo „nejistě“ | P2 cíle měřené, ne pocitové |
+| 1 | **Etalonová karta, dvě části:** (a) **cíle kvality ze SC** – 3–4 kotevní záběry a měřené cíle v šesti rozměrech (tvar a hierarchie, materiály, světlo, decaly, špína, funkce), platí pro všechny díly; (b) **styl výrobce** – paleta, tvarosloví, míra opotřebení (navrhne Claude, potvrdí autor) | `etalon/sc/*.jpg`; když chybí záběr, požadavek na dotočení autorovi | tabulka cílů a styl v `part.md` | každý rozměr má číslo nebo „nejistě“; styl výrobce potvrzený autorem | P2 cíle měřené, ne pocitové |
 | 2 | **2D list dílu:** pohled, řez, detail profilu 1:5; obě polohy pohyblivých částí; pohled z oka (co je vidět); volné místo kolem | `Tools/Design` (nový `draw_part_sheet.py` podle `draw_interior_sheet.py`) | `ArtSource/Kit/Design/<ID>.png` + JSON | **autor list schválil** | P2 2D před 3D; P7 obě polohy, průchod 1,8 m, dosednutí; P8 0,5 m za dveřmi, řez trupem; P15 funkční prvek na líc; P16 obsah za mřížkou z oka |
-| 3 | **Materiálový základ:** díl používá sdílený master + trim + zrno, žádný vlastní materiál | `M_Kit_*`, `kit_trim_sheet.py`; test limitů (nový `test_kit_materials.py`) | seznam slotů v `part.md` | test zelený: lak metallic ≤ 0,1, konstrukce ≤ 0,5, měkké plochy `pad()` | P1 základ před koly; P10 kov; P14 čalounění |
+| 3 | **Materiálový základ:** díl používá sdílený master + trim + zrno, žádný vlastní materiál. **V pilotu 1 je krok 3 stavbou tohoto základu** (`M_Kit_*` s trojicí lak / leštěný lem / perforace-guma a pouzdro světla jako sdílený díl), ne materiálem jednoho dílu | `M_Kit_*`, `kit_trim_sheet.py`; test limitů (nový `test_kit_materials.py`) | seznam slotů v `part.md` | test zelený: lak metallic ≤ 0,1, konstrukce ≤ 0,5, měkké plochy `pad()` | P1 základ před koly; P10 kov; P14 čalounění |
 | 4 | **Blockout:** hrubá geometrie v rozměrech, jeden snímek z oka vedle etalonu | `Tools/Kit/kit_<dávka>.py`, `render_kit_closeup.py` | `closeup_<ID>_eye.png` | silueta a proporce odpovídají etalonu na listu vedle sebe | P3 tvar dřív než obsah; P18 `--python-exit-code 1`, čas blendu |
 | 5 | **Detail:** vrstvy 2 a 3, decaly, špína, světlo v pouzdře podle světelného plánu kategorie | kit skript, knihovna decalů, `kit_layout.py` | díl v blendu + manifest | hustota vrstev podle karty; A/B snímek decalů a špíny (vyp / černá / bílá) | P5 A/B před laděním; P20 seřazené pořadí; P23 orientace nápisů; P24 atlas jen `append`, celá dávka |
 | 6 | **UE a showroom:** import, snímky z pevné sady pohledů (kap. 3), změření vzhledu | `import_kit.py`, `Shots.ps1 -Preset part_<kat> -Editor`, `measure_look.py` | `shots:part_<ID>/…` | kvalita vynucená (v logu), čas FBX novější než blend, `measure_look` v rozsahu SC | P19 export a čas FBX; P22 `-Editor` a kvalita; P25 změna masteru = snímky všech lodí |
@@ -50,11 +64,9 @@ v textu jsou označené **(nový)**; postaví se v pilotu, ne předem.
   - díl podle odladěného workflow = průměr ≥ 7 a žádný rozměr pod 6.
   - Dnešní `step` (6,5) zůstává pro místnosti.
 - **Autorovo oko má poslední slovo.** Rozdíl mezi kritikem a autorem jde do `calibration.md` a do checklistu.
-- **Návrh změny skillu `visual-review`** (zatím neměnit):
-  - nový checklist `part` se šesti rozměry a kotvou „SC vlevo“;
-  - `gate: part`;
-  - pole `etalon` v `review.json`, které vloží kotevní záběry do listu.
-  - V checklistu `interior` opravit zastaralý bod „u dveří žádný panel“ – panel dveří dnes existuje (5. 10.).
+- **Skill `visual-review`** (upraveno v0.1): checklist `part`, `gate: part` (`"pilot": true/false`), pole `etalon`
+  v `review.json` → `sheet_00_etalon.jpg` a oddíl „Etalon“ v briefu; bod „u dveří žádný panel“ nahrazen panelem
+  ve fyzickém pouzdře.
 
 ## 3. Showroom – pevné pohledy
 
@@ -91,7 +103,8 @@ Pohledy A–D jsou stejné pro všechny díly kategorie, takže se díly dají �
 
 ## 5. Pravidla zrychlování
 
-**Po každém dílu** se do `Docs/Kit/factory_metrics.csv` zapíše:
+**Po každém dílu** se do `Docs/Kit/factory_metrics.csv` zapíše (řádek na krok; sloupec `kind` = `part` nebo
+`tool`, čas na nástroje zvlášť):
 - čas po krocích (práce / čekání na snímky a balení);
 - počet kol kritika a skóre po kolech;
 - přestavby (kroky vrácené zpět);
@@ -119,8 +132,11 @@ Pohledy A–D jsou stejné pro všechny díly kategorie, takže se díly dají �
 - Díl se staví podle verze, která platila na jeho začátku (`workflow_version` v katalogu).
 - Nové nástrahy jdou do `WORKFLOW.md` kap. 9 a trvalé know-how do skillu `ship-interior`.
 
-## Návrh prvních pilotů
+## Piloty (autor 6. 10. 2026)
 
-Podrobnosti jsou v `etalon.md` kap. 5. Rozhoduje autor.
-- **Úroveň 1:** rámový modul chodby (portál + patky se světlem + podlahová deska).
-- **Úroveň 2:** inženýrský terminál (centrální displej lodi).
+Jdou **po jednom**; pilot 2 začne až po retrospektivě pilotu 1.
+1. **Pilot 1:** rámový modul chodby (portál + patky se světlem + podlahová deska), `Docs/Kit/parts/KF-PORTAL-01/`.
+   Zároveň staví sdílený materiálový základ a pouzdro světla (krok 3).
+2. **Pilot 2:** pouzdro panelu dveří; logika `USpaceDoorPanel` zůstává.
+
+Inženýrský terminál není pilot: patří k systémům lodi později.

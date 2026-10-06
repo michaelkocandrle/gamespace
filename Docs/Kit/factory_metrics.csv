@@ -1,0 +1,6 @@
+date,part,workflow,kind,step,what,minutes,critic_rounds,rebuilds,notes
+2026-10-06,KF-PORTAL-01,v0.1,tool,-,make_compare_sheet.py: gate part + etalon sheet; visual-review skill and critic,2,0,0,wall clock 18:09-18:11
+2026-10-06,KF-PORTAL-01,v0.1,part,0,brief + size series from Wayfarer and Steadfast v2 drawings (subagent),3,0,0,Steadfast v2 corridor 1.6 m fits no kit section; Wayfarer needs a 0.6 plate
+2026-10-06,KF-PORTAL-01,v0.1,tool,2,draw_part_sheet.py simplest version (7 views from JSON),3,0,0,first render had a broken mirror of the profile
+2026-10-06,KF-PORTAL-01,v0.1,part,2,part JSON + sheet checked view by view (3 renders),3,0,2,two fixes of the sheet (profile path; labels and the hidden strip)
+2026-10-06,KF-PORTAL-01,v0.1,part,1,etalon card: quality targets + Halcyon style proposal,2,0,0,wall clock; the etalon itself was made the session before

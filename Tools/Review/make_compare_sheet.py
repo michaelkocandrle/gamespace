@@ -12,7 +12,11 @@ review.json:
     "checklist": "cockpit",                 # section of the critic checklist in the skill (see below); null = none
     "gate": "step",                         # PASS threshold in the brief: "step" (kit parts, furniture, one room:
                                             # mean >= 6.5, none under 6) or "ship" (a finished ship: none under 7);
-                                            # "ship" by default (author 30. 9. 2026)
+                                            # "ship" by default (author 30. 9. 2026); "part" for a parts-factory part
+                                            # (Docs/Kit/FACTORY_WORKFLOW.md: six dimensions against the SC etalon)
+    "pilot": true,                          # with "part": a pilot part (all six >= 7) or not (mean >= 7, none under 6)
+    "etalon": [{"img": "Docs/Kit/etalon/sc/ram_portal_1.jpg", "label": "portal, corridor depth"}],
+                                            # optional: the part card's SC anchor shots -> sheet_00_etalon.jpg + brief
     "skill": ".claude/skills/visual-review/SKILL.md",   # optional, this by default
     "out": "Docs/Reviews/2026-09-25_wayfarer_cockpit",  # optional
     "notes": ["Text vpravo nahoře (FPS, stat unit) je měřicí overlay, ne součást výsledku."],   # optional
@@ -26,7 +30,7 @@ distance: close | mid | far; light: day | night | space | studio. "ref" may be a
 The checklist is the text between "<!-- critic-checklist:<name> -->" and "<!-- /critic-checklist -->"
 in the skill.
 
-Output (in "out"): sheet_NN_<slug>.jpg (2 x 1280x720 panels under a label bar) and brief.md.
+Output (in "out"): sheet_00_etalon.jpg (with "etalon"), sheet_NN_<slug>.jpg (2 x 1280x720 panels under a label bar) and brief.md.
 The brief says nothing about how the work was done or what was intended - the critic must not know.
 """
 import datetime
@@ -94,7 +98,19 @@ GATES = {
     "step": "Dílčí krok (díly kitu, nábytek, jednotlivé místnosti): PASS, když průměr kategorií je aspoň 6,5, žádná"
             " kategorie nemá méně než 6 a žádný bod není „musí se opravit“.",
     "ship": "Hotová loď: PASS, když žádná kategorie nemá méně než 7 a žádný bod není „musí se opravit“.",
+    "part": "Díl továrny (pilot): hodnotí se šest rozměrů proti etalonu SC (tvar a hierarchie, materiály, světlo,"
+            " decaly a značení, špína a opotřebení podle stylu výrobce, funkce a stavy); PASS, když všech šest má"
+            " aspoň 7 a žádný bod není „musí se opravit“.",
+    "part_series": "Díl továrny (podle odladěného workflow): hodnotí se šest rozměrů proti etalonu SC (tvar a"
+                   " hierarchie, materiály, světlo, decaly a značení, špína a opotřebení podle stylu výrobce, funkce"
+                   " a stavy); PASS, když průměr je aspoň 7, žádný rozměr nemá méně než 6 a žádný bod není"
+                   " „musí se opravit“.",
 }
+
+# 10 = indistinguishable from SC, 7 = the same level from the player's eye, 5 = right direction, a layer missing
+PART_SCALE = ("Stupnice rozměrů: 10 = nerozeznatelné od SC, 7 = stejná úroveň z oka hráče, 5 = správný směr, chybí"
+              " vrstva. Kvalita se měří proti etalonu, barvy a míra opotřebení podle stylu výrobce v oddílu Styl"
+              " (ne podle barev etalonu).")
 
 
 def main():
@@ -104,6 +120,20 @@ def main():
     os.makedirs(out, exist_ok=True)
     f_big, f_small = font(26), font(19)
     sheets = []
+    etalon = [e if isinstance(e, dict) else {"img": e} for e in spec.get("etalon", [])]
+    if etalon:
+        # The part card's SC anchors on one sheet (two tiled panels), so every round sees the same yardstick.
+        sheet = Image.new("RGB", (PW * 2 + 8, PH + BAR), (8, 8, 9))
+        d = ImageDraw.Draw(sheet)
+        d.rectangle([0, 0, PW * 2 + 8, BAR - 4], fill=(40, 40, 46))
+        d.text((14, 6), "ETALON SC  –  kotevní záběry dílu", font=f_big, fill=(235, 235, 235))
+        d.text((14, 38), "  |  ".join(e.get("label", os.path.basename(e["img"])) for e in etalon)[:200], font=f_small,
+               fill=(190, 190, 190))
+        half = (len(etalon) + 1) // 2
+        sheet.paste(panel([e["img"] for e in etalon[:half]]), (0, BAR))
+        if etalon[half:]:
+            sheet.paste(panel([e["img"] for e in etalon[half:]]), (PW + 8, BAR))
+        sheet.save(os.path.join(out, "sheet_00_etalon.jpg"), quality=90)
     for i, p in enumerate(spec["pairs"], 1):
         sheet = Image.new("RGB", (PW * 2 + 8, PH + BAR), (8, 8, 9))
         d = ImageDraw.Draw(sheet)
@@ -126,8 +156,16 @@ def main():
     for name, p, cond in sheets:
         lines.append("- `%s` – %s (%s); reference: %s; výsledek: %s" % (os.path.join(out, name).replace("\\", "/"), p.get("title", ""), cond,
                                                                        p.get("ref_label", ""), p.get("ours_label", "")))
+    if etalon:
+        lines += ["", "## Etalon", "`%s` – kotevní záběry Star Citizenu pro tento díl: %s." % (
+            os.path.join(out, "sheet_00_etalon.jpg").replace("\\", "/"),
+            "; ".join(e.get("label", os.path.basename(e["img"])) for e in etalon))]
     gate = spec.get("gate", "ship")
+    if gate == "part" and spec.get("pilot") is False:
+        gate = "part_series"
     lines += ["", "## Práh", GATES[gate]]
+    if gate.startswith("part"):
+        lines.append(PART_SCALE)
     if spec.get("checklist"):
         lines += ["", "## Checklist", checklist(spec.get("skill", ".claude/skills/visual-review/SKILL.md"), spec["checklist"]), ""]
     open(os.path.join(out, "brief.md"), "w", encoding="utf-8").write("\n".join(lines))

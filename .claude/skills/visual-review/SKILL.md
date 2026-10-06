@@ -24,6 +24,15 @@ nenahrazuje je: musí proběhnout obojí. `test_ship_geometry.py` běží sám j
      kategorie pod 6 a žádný bod „musí se opravit“;
    - `"ship"` pro hotovou loď (výchozí, když `gate` chybí): PASS = všechny kategorie aspoň 7 a žádný bod „musí se
      opravit“.
+   - `"part"` pro díl továrny (`Docs/Kit/FACTORY_WORKFLOW.md`, autor 6. 10. 2026): kritik hodnotí **šest rozměrů
+     proti etalonu SC** (tvar a hierarchie, materiály, světlo, decaly a značení, špína a opotřebení, funkce a stavy;
+     10 = nerozeznatelné od SC, 7 = stejná úroveň z oka hráče). `"pilot": true` = všech šest aspoň 7; jinak
+     (`"pilot": false`) průměr aspoň 7 a žádný rozměr pod 6. Vždy bez bodu „musí se opravit“. Kvalita se měří
+     proti etalonu, barvy a míra opotřebení podle stylu výrobce v `style` (ne podle barev etalonu).
+2c. **Etalon** (jen u dílů továrny): pole `etalon` v `review.json` = kotevní záběry z karty dílu
+   (`Docs/Kit/parts/<ID>/part.md`, obrázky `Docs/Kit/etalon/sc/`), `[{"img": ..., "label": ...}]`.
+   `make_compare_sheet.py` z nich udělá `sheet_00_etalon.jpg` a oddíl „Etalon“ v briefu; kritik je vidí v každém
+   kole. Checklist `part`.
 3. **Stylový záměr kroku** (např. „udržovaná pracovní loď: panely téměř čisté, špína jen tam, kde vzniká“) patří
    do `goal`/`style` briefu, aby kritik nechtěl víc, než je záměr.
 4. **Spusť kritika.** Dostane **jen** `brief.md` a listy: žádný popis postupu, doby práce, záměrů ani vlastní názor.
@@ -70,14 +79,29 @@ nenahrazuje je: musí proběhnout obojí. `test_ship_geometry.py` běží sám j
   lichoběžník / osmiúhelník. Pravoúhlá místnost s rovnými stěnami je chyba.
 - Vrstvy: žebra, kabelové žlaby a trubky pod stropem, panely s hloubkou a přesahy, madla, skříňky
   se západkami, mřížky v podlaze, přípojky. Detail shlukovaný kolem funkčních míst.
-- Každý předmět má účel; žádné výplňové rekvizity, žádné krabicové pulty. U dveří žádná klávesnice ani ovládací
-  panel (záměr projektu); stav dveří ukazuje světlo a značení. Chybějící panel u dveří nevytýkej.
+- Každý předmět má účel; žádné výplňové rekvizity, žádné krabicové pulty. U dveří dotykový panel jako v SC
+  (od 5. 10. 2026, `USpaceDoorPanel`): čitelný stav (OPEN / CLOSED), ve fyzickém pouzdře; numerická klávesnice
+  ne.
 - Materiály: čalounění, guma, broušený i lakovaný kov, akcenty palety; tmavá teplá architektura,
   studené UI. Béžová / jednolitá / plastová plocha je chyba.
 - Decaly: označení místností a sekcí, nouzové značky, popisky ovladačů; čitelné, nezrcadlené.
 - Světlo: kontrast, svítidla v pouzdrech, kužely, tmavá místa, akcenty. Ploché rovnoměrné světlo
   ze stropu je chyba, stejně jako přepálená skvrna.
 - Geometrie: žádné díry do prázdna, průniky stěnou, plovoucí díly, lišty mimo místo.
+<!-- /critic-checklist -->
+
+<!-- critic-checklist:part -->
+- Hodnoť šest rozměrů dílu proti etalonu SC (`sheet_00_etalon.jpg`); stejné pohledy z pevné sady showroomu.
+- Tvar a hierarchie: stupňovité profily (2–3 stupně po 2–3 cm), zapuštěná pole, zkosené rámy 45°, tři vrstvy
+  (díl → zapuštěné pole / vložka → šrouby, perforace, štítky). Holá rovná plocha přes 0,5 m je chyba.
+- Materiály: trojice světlý (nebo paletový) lak / leštěný lem 1,5–2 cm, který kreslí obrys v odlescích / tmavá
+  perforace nebo guma. Jedna drsnost na celém dílu je chyba. Barvy podle stylu výrobce, ne podle etalonu.
+- Světlo: vždy v pouzdře s difuzorem nebo skryté v hraně, s přechodem do tmy; holý svítící pruh je chyba.
+  Ostrůvky světla a tmavé mezery, ne ploché osvětlení.
+- Decaly a značení: malé, hierarchie logo / název místa / servisní značky; část značení jako geometrie (ražba,
+  reliéf). Nezrcadlené, čitelné z oka.
+- Špína a opotřebení: podle míry ve stylu výrobce; ve spárách a na hranách, kde vzniká, ne rovnoměrně.
+- Funkce a stavy: pohyblivé části, světelné stavy a napojení na sousední díly (stěna, podlaha) bez mezer.
 <!-- /critic-checklist -->
 
 <!-- critic-checklist:cockpit -->

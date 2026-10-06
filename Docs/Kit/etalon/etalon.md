@@ -235,7 +235,10 @@ s postavou nebo dveřmi v záběru kvůli měřítku.
    konzole** shora z 30 cm.
 10. Poznamenat si **FOV ze SC** (nastavení hry), aby showroom snímal stejnou ohniskovou vzdáleností.
 
-## 5. Návrh prvních pilotů (rozhoduje autor)
+## 5. Návrh prvních pilotů
+
+**Rozhodnutí autora 6. 10. 2026:** pilot 1 = rámový modul chodby (`Docs/Kit/parts/KF-PORTAL-01/`), pilot 2 = pouzdro
+panelu dveří; inženýrský terminál není pilot (systémy lodi později). Původní návrh:
 
 **Úroveň 1 – rámový modul chodby: portál + patka se světlem + podlahová deska mezi dvěma portály**
 (`ram_portal_1`–`3`, `podlaha_1`–`2`)

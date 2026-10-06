@@ -72,6 +72,9 @@ Pravidla:
 - Verdikt podle oddílu „Práh“ v `brief.md` (autor 30. 9. 2026):
   - **dílčí krok** (díly kitu, nábytek, jednotlivé místnosti): PASS, když průměr osmi kategorií je aspoň 6,5,
     žádná kategorie nemá méně než 6 a žádný bod není „musí se opravit“;
+  - **díl továrny** (brief má oddíly „Etalon“ a „Práh: Díl továrny“): místo osmi kategorií vyplň tabulku šesti
+    rozměrů (Tvar a hierarchie, Materiály, Světlo, Decaly a značení, Špína a opotřebení, Funkce a stavy), každý
+    proti kotevním záběrům `sheet_00_etalon.jpg`; práh podle briefu (pilot: všech šest aspoň 7);
   - **hotová loď**, a vždy, když brief práh neuvádí: PASS jen tehdy, když žádná kategorie nemá méně než 7 a žádný
     bod není „musí se opravit“.
   Jinak FAIL.
