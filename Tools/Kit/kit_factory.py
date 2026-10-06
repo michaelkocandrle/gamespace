@@ -230,6 +230,9 @@ def wall_module(p, s, L):
         wall.decal(p, "maker", 0.45, 0.8, 0.0105, scale=0.42, label=True)
         wall.decal(p, "st_service", 0.45, 0.66, 0.0105, scale=0.8, label=True)
         wall.decal(p, "slot_l", 0.45, 0.56, 0.014, scale=0.8)
+        wall.decal(p, "latch_kit", 0.66, 0.75, 0.014, scale=0.7, label=True)
+        wall.decal(p, "red_marker", 0.13, 1.02, 0.005, label=True)
+        text_strip(p, wall, "st_gnd", 0.55, 0.82, 0.36, scale=0.75)
         led(p, wall, 0.76, 1.04, 0.005)
         led(p, wall, 0.79, 1.04, 0.005)
         wall.decal(p, "corner_mark", 0.13, 0.46, 0.005, scale=0.7, label=True)
@@ -244,11 +247,16 @@ def wall_module(p, s, L):
         led(p, wall, 0.45, 0.62, 0.005)
         led(p, wall, 0.45, 0.6, 0.005)
         wall.decal(p, "tri_warning", 0.74, 0.55, 0.005, scale=0.5, label=True)
+        wall.decal(p, "latch_kit", 0.3, 0.97, 0.005, scale=0.6, label=True)
+        wall.decal(p, "red_dot", 0.36, 0.47, 0.005, label=True)
+        text_strip(p, wall, "st_extpwr", 0.1, 0.4, 0.36, scale=0.75)
     # 3 the upper band: a slot row, a text strip, tone-on-tone hatching at the edge by the portal
     # a row of small upright slots (SC: 3-6 little cut-outs in a row)
     for i in range(6):
         wall.decal(p, "slot_s", 0.12 + i * 0.035, 1.2, 0.0, scale=0.3, rot=90.0)
     text_strip(p, wall, "st_inspect" if s < 0 else "st_torque", 0.5, 0.84, 1.2)
+    wall.decal(p, "corner_mark", 0.08, 1.26, 0.0, scale=0.5, label=True)
+    wall.decal(p, "st_hfcl", 0.7, 1.26, 0.0, scale=0.7, label=True)
     wall.decal(p, "hazard_subtle", 0.03, 0.75, 0.0, scale=0.6, rot=90.0, label=True)
     wall.decal(p, "hazard_subtle", 0.87, 0.75, 0.0, scale=0.6, rot=90.0, label=True)
     # 4 the slope: perforated panels in a frame with a middle bar
@@ -276,10 +284,24 @@ def wall_module(p, s, L):
     p.grime("rim", (0.45, s * half, 0.11), (0, -s, 0), (0, 0, 1), (0.8, 0.06), 0.8)
 
 
+CEIL_LIGHT_CD = 2.0      # 6 cd: mean 0.35, 3 cd: 0.30 against SC 0.21-0.24
+
+
 def ceiling_module(p, L):
     """The ceiling panel between the portals: a slot row each side of a small vent, a text strip."""
     ceil = Face((0.0, 0.0, SEC["ceiling"]), (0, -1, 0), (0, 0, -1))
-    ceil.decal(p, "vent_small", L / 2, 0.0, 0.0)
+    # step 2 of the decal stack (author 6. 10.): a housed ceiling light per module - SC's ceiling modules carry their own
+    # lights, the slopes and the walls sat in the dark with the portal's lights only. A framed recess, an opal diffuser,
+    # a rect light aimed down (the source is the diffuser, never a bare strip)
+    box = [(0.2, -0.06), (0.7, -0.06), (0.7, 0.06), (0.2, 0.06)]
+    rim = [(0.18, -0.08), (0.72, -0.08), (0.72, 0.08), (0.18, 0.08)]
+    ceil.ring(p, "Kit_Panel", rim, box, 0.012, 0.012)
+    ceil.prism(p, "Kit_GlowNeutral", box, 0.004, 0.002, bevel=0.0)
+    for x in (0.25, 0.35, 0.45, 0.55, 0.65):
+        ceil.prism(p, "Kit_Graphite", [(x - 0.002, -0.06), (x + 0.002, -0.06), (x + 0.002, 0.06), (x - 0.002, 0.06)], 0.006, 0.002, bevel=0.0)
+    p.socket("Light_Ceil_0", (L / 2, 0.0, SEC["ceiling"] - 0.01), x=(0, 0, -1), z=(1, 0, 0), type="rect", role="neutral",
+             cd=CEIL_LIGHT_CD, width_cm=50.0, height_cm=12.0, radius_m=3.0, dir_ue=[0.0, 0.0, -1.0], along_ue=[1.0, 0.0, 0.0])
+    ceil.decal(p, "vent_small", L / 2, -0.28, 0.0, scale=0.8)
     for i in range(4):
         ceil.decal(p, "slot_s", 0.12 + i * 0.035, -0.4, 0.0, scale=0.3, rot=90.0)
         ceil.decal(p, "slot_s", 0.68 + i * 0.035, 0.4, 0.0, scale=0.3, rot=90.0)

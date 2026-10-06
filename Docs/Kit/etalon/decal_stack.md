@@ -64,7 +64,7 @@ lamelami.
 
 ## Stav v1 (6. 10., zkušební úsek)
 
-Snímky: `stack_v1_eye.jpg` a `stack_v1_wall_34.jpg`.
+Snímky v1 nahradila v2.
 
 **Stěna úseku je postavená jako modul s vrstvami** (`Tools/Kit/kit_factory.py`, `wall_module`):
 - **tóny:** nové role `Kit_Panel` (středně šedá 0,19) a `Kit_Perforated` (tmavá perforace, `kit_perf_normal.py`);
@@ -84,3 +84,13 @@ Levá a pravá strana se liší.
 - Hustota je pořád pod SC.
 - Plochy rámu portálu jsou úzké (24–25 mm), takže se na ně řady výřezů jako v SC nevejdou bez rozšíření profilu.
 - Logo Halcyonu chybí.
+
+## Stav v2 (6. 10., autor „pokračuj tím")
+
+Snímky: `stack_v2_eye.jpg`, `stack_v2_wall_34.jpg` a `stack_v2_detail.jpg`.
+
+- **Stropní svítidlo v každém modulu:** zapuštěný rám, opálový difuzor s mřížkou, plošné světlo dolů 2 cd. Jas je
+  teď u etalonu: medián 0,21–0,24, SC 0,19–0,22. Při 6 cd byl průměr 0,35, při 3 cd 0,30.
+- **Druhá řada drobností:** západky, červené servisní značky, pásky GND POINT a EXT PWR, rohové značky, HF-CL 07.
+- **Rám portálu rev. G:** manžeta 80 → 40 mm, lakované pásy podhledu 24 → 44 mm. Po celém obvodu (pilíře, šikminy,
+  horní člen) mají řady malých výřezů po 12 cm.

@@ -340,6 +340,33 @@ def boot(p, sec_key, s):
     p.grime("smear", (0.15, Y(v1 + 45), 0.0), (0, 0, 1), (0, s, 0), (0.34, 0.08), SPEC["details"]["grime"]["alpha"])
 
 
+def frame_cutouts(p, fsec, sec_key):
+    """Rev. G (decal stack, author 6. 10. 2026): rows of small rectangular cut-outs along the soffit's two lacquer strips,
+    every 12 cm up the pillars, over the slopes and along the top member (SC's frames; Docs/Kit/etalon/decal_stack.md).
+    The soffit is the section's outline offset by the profile's top v; each cut-out lies along the frame."""
+    ct = SPEC["details"]["cutouts"]
+    sc = SPEC["profile"]["protrusion_by_section"][sec_key] / SPEC["profile"]["protrusion_by_section"]["W"]
+    line = full(offset_inward(half_profile(fsec), 100 * sc * MM))
+    centre = Vector((0.0, fsec["ceiling"] / 2))
+    for (y0, z0), (y1, z1) in zip(line, line[1:]):
+        a, b = Vector((y0, z0)), Vector((y1, z1))
+        seg = (b - a).length
+        if seg < 0.2:
+            continue
+        t2 = (b - a) / seg
+        n2 = Vector((-t2.y, t2.x))
+        if n2.dot(centre - a) < 0:
+            n2 = -n2
+        k = int((seg - 0.12) // ct["pitch_m"])
+        for i in range(k + 1):
+            q = a + t2 * (0.06 + (seg - 0.12 - k * ct["pitch_m"]) / 2 + i * ct["pitch_m"])
+            if q.y < ct["from_z_m"]:
+                continue
+            n, t = Vector((0.0, n2.x, n2.y)), Vector((0.0, t2.x, t2.y))
+            for u in ct["u_mm"]:
+                kit_batch2.label(p, ct["item"], (u * MM, q.x, q.y), n, t, n.cross(t), scale=ct["scale"])
+
+
 def portal_frame(name, sec_key, seed):
     """Rev. E + step 5: the frame swept from the sheet's profile (one lacquer form, the steps' 45 deg facets, the
     polished crown facet), the rubber cuff on the soffit, the boots, the L2 / L3 lights, the threshold and labels."""
@@ -384,6 +411,7 @@ def portal_frame(name, sec_key, seed):
              dir_ue=[0.0, 0.0, 1.0], along_ue=[0.0, -1.0, 0.0], shadows=False)
     threshold(p, sec_key)
     pillar_labels(p, sec_key)
+    frame_cutouts(p, fsec, sec_key)
     p.collision_box((0.0, -half, 0.0), (0.3, half, sec["ceiling"]))
     p.socket("Snap_Start", (0, 0, 0), x=(-1, 0, 0), z=(0, 0, 1))
     p.socket("Snap_End", (0.3, 0, 0), x=(1, 0, 0), z=(0, 0, 1))

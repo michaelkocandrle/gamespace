@@ -2,7 +2,7 @@
  "_comment": "Parts factory pilot 1 (FACTORY_WORKFLOW v0.1, author 6. 10. 2026): the corridor frame module - portal ring, its foot lights and the floor plates between two portals. Step 2 drawing data, read by Tools/Design/draw_part_sheet.py. Lengths in metres in the layout frame (x along the run, y across, z up from the deck); the profile detail in millimetres. Sections from ArtSource/Kit/kit_rules.json.",
  "id": "KF-PORTAL-01",
  "title": "Rámový modul chodby – portál, patky se světlem, podlahová deska",
- "revision": "F",
+ "revision": "G",
  "status": "rev. F (bota zblízka, rozptyl, L3, šrouby, špína)",
  "date": "2026-10-06",
  "sections": [
@@ -50,14 +50,15 @@
    "_comment": "rev. E: the crown's 45 deg facet (18 x 18 mm) polished - one light line from each side"
   },
   "cuff": {
-   "u0": 110,
-   "u1": 190,
+   "u0": 130,
+   "u1": 170,
    "depth": 4,
    "rib_pitch": 9,
    "rib_width": 4,
    "material": "guma",
    "_comment": "rev. D: finer ribs (4 on a 9 mm pitch, 2 mm high), the rubber a tone lighter (kit_materials rubber 0.04): no dark stripe in the middle of the frame",
-   "rib_height": 2
+   "rib_height": 2,
+   "_rev_g": "rev. G (decal stack, author 6. 10.): the cuff narrowed 80 -> 40 mm so the soffit's lacquer strips grow 24 -> 44 mm and take SC's rows of small cut-outs"
   },
   "protrusion_by_section": {
    "W": 100,
@@ -131,7 +132,7 @@
      "Kit_Lacquer"
     ],
     [
-     110,
+     130,
      100,
      "cuff"
     ]
@@ -283,6 +284,11 @@
    "rev": "F",
    "date": "2026-10-06",
    "what": "kalich: grafitové stěny s přechodem od zdroje do tmy, viditelná hloubka 35 mm (W) / 30 (N), leštěný rámeček 6 mm, drážka na stěnách boty; druhé slabé světlo jen na podlahu bez stínů (0,5 cd, 100°, ~0,5 m); L3 nepřímé na horním členu do kazety (člen 40 mm pod stropem); šrouby destičky stejné (saténový grafit); špína alfa 0,8 jen na místech vzniku"
+  },
+  {
+   "rev": "G",
+   "date": "2026-10-06",
+   "what": "vrstvy decalů: manžeta 80 → 40 mm, lakované pásy podhledu 24 → 44 mm s řadami malých výřezů po 12 cm (etalon SC)"
   }
  ],
  "plinth": {
@@ -374,6 +380,17 @@
   "grime": {
    "_what": "Halcyon (author 6. 10.): alpha ~0.8, only where dirt forms - the boots' feet, the gutter by the plinth, the threshold's corners outside the grooves (door surroundings: in the door parts). No overall dirt.",
    "alpha": 0.8
+  },
+  "cutouts": {
+   "item": "slot_s",
+   "scale": 0.2,
+   "pitch_m": 0.12,
+   "u_mm": [
+    108,
+    192
+   ],
+   "from_z_m": 0.35,
+   "_what": "rev. G: SC's frames carry rows of small rectangular cut-outs along the soffit"
   }
  },
  "l3": {
