@@ -155,20 +155,24 @@ SHOWROOM = {
                    # the stair bay's hall (provisional, 3.4 m high): 100 cd - at 40 its mean was 0.07
                    ((15.3, -1.8), 100.0, 110.0, 3.35), ((15.3, 1.5), 100.0, 110.0, 3.35), ((18.8, -1.8), 100.0, 110.0, 3.35),
                    ((18.8, 1.5), 100.0, 110.0, 3.35)],
-    # x to 25.3 (6. 10. 2026): the material board's room behind the stair bay
+    # x to 25.3 (6. 10. 2026): the parts factory test section behind the stair bay
     "gravity": (-0.3, 25.3, -9.3, 8.3),
-    # parts factory pilot 1 step 3 (6. 10. 2026): the material sample board of the kit's shared base, in its own dark
-    # room behind the stair bay, lit like the SC etalon - a warm source hidden over the samples, cool points at the
-    # floor, a dim fill; no window, no sun. Samples (kit_factory.py) back to the wall at x 24.95, facing -x; the
-    # second profile in the Kestrel palette (the same base, only another maker's palette). Shots: kit_material_board.
-    "board": {
+    # parts factory pilot 1 step 3 (FACTORY_WORKFLOW v0.2, 6. 10. 2026): the corridor test section for the kit's
+    # shared material base - rough KF-PORTAL-01 geometry (kit_factory.py), 3 portals on the 1.2 m pitch in a W corridor,
+    # in its own dark room behind the stair bay; only the sheet's lights per portal (L1 foot points ~7500 K, L2 warm
+    # corner spots, L3 the hidden warm strip as a rect light under the top member), no room fill (author: no blue
+    # room light). Shots: kit_test_section (the SC etalon's angles).
+    "test_section": {
         "room": (20.2, 25.1, -2.1, 2.1, 2.5),
-        "samples": [("Sample_Lacquer18F_A", (24.95, -1.2), 180.0, None), ("Sample_Dark18F_A", (24.95, -0.6), 180.0, None),
-                    ("Sample_Profile18F_A", (24.95, 0.0), 180.0, None), ("Sample_Lip18F_A", (24.95, 0.6), 180.0, None),
-                    ("Sample_Profile18F_A", (24.95, 1.2), 180.0, "Kestrel"), ("Sample_Floor09F_A", (23.6, 0.0), 0.0, None)],
-        # (kind, (x, y), z, cd, extra): the warm hidden strip as a downward rect light, cool floor points, a dim fill
-        "lights": [("rect", (24.45, 0.0), 2.42, 45.0, (300.0, 12.0)), ("point_cool", (24.2, -1.95), 0.08, 3.0, None),
-                   ("point_cool", (24.2, 1.95), 0.08, 3.0, None), ("fill", (21.6, 0.0), 2.45, 12.0, 120.0)],
+        "x0": 20.3,
+        "run": ["Test_Bay09W_A", "Test_Portal03W_A", "Test_Bay09W_A", "Test_Portal03W_A", "Test_Bay09W_A",
+                "Test_Portal03W_A", "Test_Bay09W_A"],
+        # per portal, (kind, dx along the portal, y, z, cd, extra)
+        # round 2: x3-4 brighter and the warm lights neutral (round 1: mean 0.10 / p10 0.00 / B/R 0.71 against the
+        # etalon's 0.23-0.28 / 0.13 / 0.96-1.02 - the SC corridor is lit, neutral, never black)
+        "portal_lights": [("foot", 0.15, -1.0, 0.1, 2.5, None), ("foot", 0.15, 1.0, 0.1, 2.5, None),
+                          ("corner", 0.15, -0.47, 2.04, 40.0, 70.0), ("corner", 0.15, 0.47, 2.04, 40.0, 70.0),
+                          ("strip", 0.15, 0.0, 2.2, 25.0, (100.0, 2.0))],
     },
     "spawn": ((0.7, 0.0), 0.0),
     "spawn_annex": ((3.1, -4.8), 0.0),
@@ -415,49 +419,70 @@ def build_materials():
 
 
 FACTORY_MATS = os.path.join(REPO, "ArtSource", "Kit", "kit_materials.json")
-FACTORY_MAKERS = ("Halcyon", "Kestrel")       # the board shows that another maker is only another palette
+FACTORY_MAKERS = ("Halcyon", "Kestrel")       # another maker is only another palette (the lip stays)
 
 
 def factory_material_spec(role, maker, data=None):
     """The layered spec of a factory role for a maker (kit_materials.json): the quality is the role's (roughness,
-    metallic), the colours and the wear the maker's style - edge wear only in the hand band, dirt in the seams through
-    the kit occlusion, the walked line on the floor. Plain Python, so the offline test can read it too."""
+    metallic, surface detail), the colours and the wear the maker's style - edge wear only in the hand band, dirt in
+    the seams through the kit occlusion, the walked line polished through roughness (the "bare metal" of a floor role
+    is its own colour, smoother). A role with a fixed albedo (the lip) ignores the palette. Plain Python."""
     data = data or json.load(open(FACTORY_MATS, encoding="utf-8"))
     r, m = data["roles"][role], data["makers"][maker]
     pal, w = m["palette"], m["wear"]
     lo, hi = data["limits"]["hand_band_m"]
-    colour = pal[r["colour"]]
-    scalars = {"PrimaryRoughness": r["roughness"], "SecondaryRoughness": r["roughness"] + 0.04,
-               "PaintMetallic": r["metallic"], "BareMetalRoughness": 0.32,
-               "EdgeWear": w["edge_wear"] if r.get("edge_wear") else 0.0, "WearThreshold": w.get("edge_threshold", 0.35),
-               "WearBandOn": 1.0, "WearBandLo": lo * 100.0, "WearBandHi": hi * 100.0,
-               "WalkWear": w["walked"] if r.get("walked") else 0.0, "WalkHalfCm": w["walk_half_width_m"] * 100.0,
-               "DirtAmount": w["cavity_dirt"] if r.get("cavity_dirt") else 0.0, "GrungeAmount": w["grunge"],
-               "RoughVariation": 0.12, "CavityStrength": 0.0, "AOStrength": 0.0, "PanelTone": 0.08, "PanelRough": 0.08,
-               "MetalShare": 0.0, "CarbonShare": 0.0, "LiveryAmount": 0.0, "ClearCoat": 0.0, "FloorWear": 0.0,
-               "TopWear": 0.0, "PanelDirtVar": 0.0}
-    scalars.update(SURFACE)
-    scalars.update({"FloorWear": 0.0, "TopWear": 0.0, "MicroRough": 0.06, "ScratchAmount": 0.03 if r["metallic"] > 0.5 else 0.02,
-                    # polished, not brushed: brushing streaked the lip (board round 1, 6. 10. 2026)
-                    "Brushed": 0.0})
+    colour = r["albedo"] if "albedo" in r else pal[r["colour"]]
+    walked = bool(r.get("walked"))
+    scalars = dict(SURFACE)
+    scalars.update({
+        "PrimaryRoughness": r["roughness"], "SecondaryRoughness": r["roughness"] + 0.03, "PaintMetallic": r["metallic"],
+        "EdgeWear": w["edge_wear"] if r.get("edge_wear") else 0.0, "WearThreshold": w.get("edge_threshold", 0.35),
+        "BareMetalRoughness": w["walk_roughness"] if walked else 0.32,
+        "WearBandOn": 1.0, "WearBandLo": lo * 100.0, "WearBandHi": hi * 100.0, "ScratchBandOn": 1.0,
+        "WalkWear": w["walked"] if walked else 0.0, "WalkHalfCm": w["walk_half_width_m"] * 100.0,
+        "DirtAmount": w["cavity_dirt"] if r.get("cavity_dirt") else 0.0, "GrungeAmount": r.get("grunge", 0.05),
+        "RoughVariation": r.get("rough_variation", 0.06), "PanelRough": r.get("panel_rough", 0.06),
+        "PanelTone": r.get("panel_tone", 0.04), "MicroRough": r.get("micro_rough", 0.03),
+        "ScratchAmount": r.get("scratches", 0.0), "Brushed": 0.0,      # polished, not brushed (board round 1)
+        "CavityStrength": 0.0, "AOStrength": 0.0, "MetalShare": 0.0, "CarbonShare": 0.0, "LiveryAmount": 0.0,
+        "ClearCoat": 0.0, "FloorWear": 0.0, "TopWear": 0.0, "PanelDirtVar": 0.0, "DetailNormalStrength": 0.0})
+    if r.get("detail_normal"):
+        scalars.update({"DetailTileCm": r["detail_tile_cm"], "DetailNormalStrength": r["detail_strength"]})
+    # the walked line: the lanes' own colour a little lighter and smoother - polished by boots, not a stain
+    bare = [c * 1.3 for c in colour] if walked else pal["bare_metal"]
     return {"master": "kitbase", "switches": {"SurfaceDetail": True},
-            "vectors": {"PrimaryColor": colour, "SecondaryColor": [c * 0.85 for c in colour],
-                        "BareMetalColor": pal["bare_metal"], "DirtColor": pal["dirt"]},
+            "vectors": {"PrimaryColor": colour, "SecondaryColor": [c * 0.9 for c in colour], "BareMetalColor": bare,
+                        "DirtColor": pal["dirt"]},
             "scalars": scalars}
 
 
 def build_factory_materials(masters, maker):
     """The parts factory's shared base (step 3, pilot 1, 6. 10. 2026): M_Kit_Base (the layered graph with the kit's
-    wear style, its own asset) and MI_Kit_<Maker>_<Role> for the roles of kit_materials.json."""
+    wear style, its own asset) and MI_Kit_<Maker>_<Role> for the roles of kit_materials.json, the emissive roles
+    on the plain master."""
     if "kitbase" not in masters:
         masters["kitbase"] = ship_materials.build_layered_master(MATS + "/M_Kit_Base", kit=True)
     data = json.load(open(FACTORY_MATS, encoding="utf-8"))
+    tex = os.path.join(REPO, "ArtSource", "Kit", "Textures")
     out = {}
-    for role in data["roles"]:
+    for role, r in data["roles"].items():
         if role.startswith("_"):
             continue
-        out[role] = ship_materials.build_instance("MI_Kit_%s_%s" % (maker, role.split("_", 1)[1]), MATS,
-                                                  factory_material_spec(role, maker, data), masters)
+        mi = ship_materials.build_instance("MI_Kit_%s_%s" % (maker, role.split("_", 1)[1]), MATS,
+                                           factory_material_spec(role, maker, data), masters)
+        if r.get("detail_normal"):
+            MEL.set_material_instance_texture_parameter_value(mi, "DetailNormalMap",
+                                                              import_texture(os.path.join(tex, r["detail_normal"]), "normal"))
+            MEL.update_material_instance(mi)
+            EAL.save_loaded_asset(mi, only_if_is_dirty=False)
+        out[role] = mi
+    for role, e in data.get("emissive", {}).items():
+        if role.startswith("_"):
+            continue
+        out[role] = ship_materials.build_instance(
+            "MI_Kit_%s_%s" % (maker, role.split("_", 1)[1]), MATS,
+            {"master": "hull", "base_color": [0.05, 0.05, 0.05], "roughness": 0.3, "metallic": 0.0,
+             "emissive_color": e["colour"], "emissive_strength": e["strength"]}, masters)
     return out
 
 
@@ -510,6 +535,10 @@ def spawn_mesh(actors, sm, loc, yaw, label, material=None, scale=None):
 
 LIGHT_COLOURS = {"warm": (255, 228, 200), "cool": (115, 184, 255), "work": (255, 236, 214), "signal": (255, 90, 20),
                  "neutral": (255, 245, 234)}
+# the parts factory's own light colours, kept apart: the ships' interior drawings fingerprint LIGHT_COLOURS
+# (interior_model.kit_light_rules). The KF-PORTAL-01 foot light L1: white with a blue tint (~7500 K), not the
+# plinth's saturated blue.
+FACTORY_LIGHT_COLOURS = {"foot": (222, 232, 255)}
 
 
 def rect_light(actors, loc, role, cd, radius_m, label, forward, along, width_cm, height_cm):
@@ -529,7 +558,7 @@ def rect_light(actors, loc, role, cd, radius_m, label, forward, along, width_cm,
     c.set_editor_property("barn_door_angle", 70.0)
     c.set_editor_property("barn_door_length", 3.0)
     c.set_editor_property("specular_scale", 0.3)
-    col = LIGHT_COLOURS[role]
+    col = LIGHT_COLOURS.get(role) or FACTORY_LIGHT_COLOURS[role]
     c.set_editor_property("light_color", unreal.Color(r=col[0], g=col[1], b=col[2], a=255))
     a.set_actor_label(label)
     a.set_editor_property("tags", [unreal.Name(TAG)])
@@ -547,7 +576,7 @@ def light(actors, loc, role, cd, radius_m, label, spot=False, cone=80.0, source_
     c.set_editor_property("cast_shadows", True)             # MegaLights variant C, as rect_light
     c.set_editor_property("source_radius", float(source_cm) if source_cm else (1.0 if not spot else 4.0))
     c.set_editor_property("specular_scale", 0.2 if not spot else 0.6)
-    col = LIGHT_COLOURS[role]
+    col = LIGHT_COLOURS.get(role) or FACTORY_LIGHT_COLOURS[role]
     c.set_editor_property("light_color", unreal.Color(r=col[0], g=col[1], b=col[2], a=255))
     if spot:
         c.set_editor_property("outer_cone_angle", cone / 2)
@@ -580,37 +609,39 @@ def _rot(yaw, x, y):
     return x * ca - y * sa, x * sa + y * ca
 
 
-def build_board(actors, meshes, mis, board, counts):
-    """The material sample board (parts factory step 3): a dark room, the samples, the etalon-like lights."""
+def build_test_section(actors, meshes, mis, sec, counts):
+    """The corridor test section (parts factory step 3, v0.2): a dark room, the rough modules along x, the sheet's
+    lights per portal."""
     cube = EAL.load_asset("/Engine/BasicShapes/Cube")
-    x0, x1, y0, y1, h = board["room"]
+    x0, x1, y0, y1, h = sec["room"]
     t = 0.1
     for k, (a0, a1, b0, b1, z0, z1) in enumerate(((x0 - t, x0, y0, y1, 0.0, h), (x1, x1 + t, y0, y1, 0.0, h),
                                                   (x0, x1, y0 - t, y0, 0.0, h), (x0, x1, y1, y1 + t, 0.0, h),
                                                   (x0 - t, x1 + t, y0 - t, y1 + t, h, h + t),
-                                                  # the room's floor 3 cm under the deck: the floor sample's lip is
-                                                  # at z 0 and its field 6 mm under it (coplanar, it vanished)
-                                                  (x0 - t, x1 + t, y0 - t, y1 + t, -0.03 - t, -0.03))):
-        spawn_mesh(actors, cube, _v(((a0 + a1) / 2, (b0 + b1) / 2), (z0 + z1) / 2), 0.0, "KitBoard_Room_%d" % k,
-                   mis["Kit_Dark"], unreal.Vector(a1 - a0, b1 - b0, z1 - z0))
-    for short, pos, yaw, maker in board["samples"]:
+                                                  (x0 - t, x1 + t, y0 - t, y1 + t, -0.1 - t, -0.1))):
+        spawn_mesh(actors, cube, _v(((a0 + a1) / 2, (b0 + b1) / 2), (z0 + z1) / 2), 0.0, "KitTest_Room_%d" % k,
+                   mis["Kit_Seal"], unreal.Vector(a1 - a0, b1 - b0, z1 - z0))
+    x = sec["x0"]
+    for k, short in enumerate(sec["run"]):
         sm, part = meshes["SM_Kit_" + short]
-        a = spawn_mesh(actors, sm, _v(pos, 0.0), yaw, "KitBoard_%s%s" % (short, "_" + maker if maker else ""))
-        comp = a.static_mesh_component
-        for i, slot in enumerate(comp.get_material_slot_names()):
-            key = str(slot) + ("@" + maker if maker else "")
-            if key in mis and mis[key] is not None:
-                comp.set_material(i, mis[key])
+        spawn_mesh(actors, sm, _v((x, 0.0), 0.0), 0.0, "KitTest_%d_%s" % (k, short))
         counts["parts"] += 1
-    for k, (kind, xy, z, cd, extra) in enumerate(board["lights"]):
-        if kind == "rect":
-            rect_light(actors, _v(xy, z), "warm", cd, 3.5, "KitBoard_Warm_%d" % k, unreal.Vector(0, 0, -1),
-                       unreal.Vector(0, 1, 0), extra[0], extra[1])
-        elif kind == "point_cool":
-            light(actors, _v(xy, z), "cool", cd, 1.2, "KitBoard_Cool_%d" % k)
-        else:
-            light(actors, _v(xy, z), "work", cd, 5.0, "KitBoard_Fill_%d" % k, spot=True, cone=extra)
-        counts["lights"] += 1
+        if "Portal" in short:
+            for j, (kind, dx, y, z, cd, extra) in enumerate(sec["portal_lights"]):
+                loc = _v((x + dx, y), z)
+                label = "KitTest_%d_%s_%d" % (k, kind, j)
+                if kind == "foot":
+                    a = light(actors, loc, "foot", cd, 0.9, label, source_cm=1.0)
+                elif kind == "corner":
+                    a = light(actors, loc, "neutral", cd, 3.5, label, spot=True, cone=extra, source_cm=2.0)
+                else:
+                    a = rect_light(actors, loc, "neutral", cd, 2.5, label, unreal.Vector(0, 0, -1), unreal.Vector(0, 1, 0),
+                                   extra[0], extra[1])
+                counts["lights"] += 1
+        x += part["length_m"]
+    # the corridor's end: a graphite wall (the room's floor edge behind the last bay read as a bright bar, round 1)
+    spawn_mesh(actors, cube, _v((x + 0.01, 0.0), 1.15), 0.0, "KitTest_End", mis["Kit_Graphite"], unreal.Vector(0.02, 2.6, 2.4))
+
 
 
 def place_part(actors, meshes, short, pos_cm, yaw, label, counts):
@@ -742,7 +773,7 @@ def build_showroom(meshes, mis, report):
             cum += meshes["SM_Kit_" + m][1]["length_m"]
     for m, pos, yaw in L["placed"]:
         place_part(actors, meshes, m, unreal.Vector(pos[0] * 100.0, pos[1] * 100.0, 0.0), yaw, "Kit_" + m, counts)
-    build_board(actors, meshes, mis, L["board"], counts)
+    build_test_section(actors, meshes, mis, L["test_section"], counts)
     # provisional: ceiling and floor planes, a dark box against the sun, spots where the kit has no ceiling yet
     plane = EAL.load_asset("/Engine/BasicShapes/Plane")
     cube = EAL.load_asset("/Engine/BasicShapes/Cube")

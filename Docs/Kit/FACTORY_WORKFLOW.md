@@ -1,9 +1,10 @@
-# Workflow továrny dílů – v0.1 (schváleno autorem 6. 10. 2026)
+# Workflow továrny dílů – v0.2 (autor 6. 10. 2026)
 
 | Verze | Datum | Změny |
 |---|---|---|
 | v0 | 6. 10. 2026 | návrh |
 | v0.1 | 6. 10. 2026 | autor schválil v0 s úpravami: (1) karta dílu odděluje **kvalitu ze SC** od **stylu výrobce**, kit přebírá principy kvality RSI, ne barvy a styl Aurory, špína se hodnotí podle stylu výrobce; (2) nástroje v pilotu jen v nejjednodušší funkční verzi, jejich čas se vede zvlášť; (3) materiálová trojice a světlo v pouzdře vznikají v pilotu 1 jako sdílený základ `M_Kit_*`; (4) piloty po jednom: 1 = rámový modul chodby, 2 = pouzdro panelu dveří (po retrospektivě pilotu 1), terminál není pilot; skill `visual-review` upraven (gate a checklist `part`, pole `etalon`) |
+| v0.2 | 6. 10. 2026 | autor neschválil tabuli materiálů a změnil test (poučení **P26**): materiály se posuzují **v kontextu a ze stejných úhlů jako kotevní záběry SC**, ne na izolovaných vzorcích snímaných kolmo. Krok 3 (a každý další krok se snímky) používá **zkušební úsek chodby** (3 portály, podlaha, kus stěny a stropu z hrubé geometrie listu) se světly z listu a bez pomocného světla místnosti; kap. 3 přepsána |
 
 **Cíl:** každý díl jednou na úroveň etalonu SC (`Docs/Kit/etalon/etalon.md`), pak v každé lodi. Lodě se liší
 paletou, doplňky a světly.
@@ -34,10 +35,10 @@ v textu jsou označené **(nový)**. Postaví se v pilotu, ne předem, a **jen v
 | 0 | **Zadání:** kategorie, úroveň, cílové lodě a jejich rozměry z výkresů, rozměrová řada a varianty | výkresy lodí, `kit_rules.json`, `kit_parts.json` | karta `part.md` | každá cílová loď má rozměr, do kterého díl padne | P9 řada z výkresů; P13 uzel = samostatný díl |
 | 1 | **Etalonová karta, dvě části:** (a) **cíle kvality ze SC** – 3–4 kotevní záběry a měřené cíle v šesti rozměrech (tvar a hierarchie, materiály, světlo, decaly, špína, funkce), platí pro všechny díly; (b) **styl výrobce** – paleta, tvarosloví, míra opotřebení (navrhne Claude, potvrdí autor) | `etalon/sc/*.jpg`; když chybí záběr, požadavek na dotočení autorovi | tabulka cílů a styl v `part.md` | každý rozměr má číslo nebo „nejistě“; styl výrobce potvrzený autorem | P2 cíle měřené, ne pocitové |
 | 2 | **2D list dílu:** pohled, řez, detail profilu 1:5; obě polohy pohyblivých částí; pohled z oka (co je vidět); volné místo kolem | `Tools/Design` (nový `draw_part_sheet.py` podle `draw_interior_sheet.py`) | `ArtSource/Kit/Design/<ID>.png` + JSON | **autor list schválil** | P2 2D před 3D; P7 obě polohy, průchod 1,8 m, dosednutí; P8 0,5 m za dveřmi, řez trupem; P15 funkční prvek na líc; P16 obsah za mřížkou z oka |
-| 3 | **Materiálový základ:** díl používá sdílený master + trim + zrno, žádný vlastní materiál. **V pilotu 1 je krok 3 stavbou tohoto základu** (`M_Kit_*` s trojicí lak / leštěný lem / perforace-guma a pouzdro světla jako sdílený díl), ne materiálem jednoho dílu | `M_Kit_*`, `kit_trim_sheet.py`; test limitů (nový `test_kit_materials.py`) | seznam slotů v `part.md` | test zelený: lak metallic ≤ 0,1, konstrukce ≤ 0,5, měkké plochy `pad()` | P1 základ před koly; P10 kov; P14 čalounění |
+| 3 | **Materiálový základ:** díl používá sdílený master + trim + zrno, žádný vlastní materiál. **V pilotu 1 je krok 3 stavbou tohoto základu** (`M_Kit_Base`, `kit_materials.json`: lak / světlý leštěný lem / guma + grafit, protiskluzové pásy), ne materiálem jednoho dílu. Posuzuje se **jen ve zkušebním úseku** (kap. 3) | `M_Kit_Base`, `kit_materials.json`, `test_kit_materials.py`, `kit_factory.py` + preset `kit_test_section` | listy SC / úsek ze 4 úhlů etalonu | test zelený (limity, lem pevný u všech výrobců, kontrast pásů); `measure_look` v rozsahu etalonu; autor schválil listy | P1 základ před koly; P10 kov; P14 čalounění; **P26 kontext a úhly etalonu**; P25 snímky lodí před a po |
 | 4 | **Blockout:** hrubá geometrie v rozměrech, jeden snímek z oka vedle etalonu | `Tools/Kit/kit_<dávka>.py`, `render_kit_closeup.py` | `closeup_<ID>_eye.png` | silueta a proporce odpovídají etalonu na listu vedle sebe | P3 tvar dřív než obsah; P18 `--python-exit-code 1`, čas blendu |
 | 5 | **Detail:** vrstvy 2 a 3, decaly, špína, světlo v pouzdře podle světelného plánu kategorie | kit skript, knihovna decalů, `kit_layout.py` | díl v blendu + manifest | hustota vrstev podle karty; A/B snímek decalů a špíny (vyp / černá / bílá) | P5 A/B před laděním; P20 seřazené pořadí; P23 orientace nápisů; P24 atlas jen `append`, celá dávka |
-| 6 | **UE a showroom:** import, snímky z pevné sady pohledů (kap. 3), změření vzhledu | `import_kit.py`, `Shots.ps1 -Preset part_<kat> -Editor`, `measure_look.py` | `shots:part_<ID>/…` | kvalita vynucená (v logu), čas FBX novější než blend, `measure_look` v rozsahu SC | P19 export a čas FBX; P22 `-Editor` a kvalita; P25 změna masteru = snímky všech lodí |
+| 6 | **UE a zkušební úsek:** import, snímky z pevné sady pohledů v kontextu (kap. 3), změření vzhledu | `import_kit.py`, `Shots.ps1 -Preset part_<kat> -Editor`, `measure_look.py` | `shots:part_<ID>/…` | kvalita vynucená (v logu), čas FBX novější než blend, `measure_look` v rozsahu SC | P19 export a čas FBX; P22 `-Editor` a kvalita; P25 změna masteru = snímky všech lodí; P26 v kontextu, úhly etalonu |
 | 7 | **Výkon světel** v lodi (interiér i let, 3 běhy) | `Shots.ps1 -Preset kit_perf_profile` | čísla v `part.md` | bez stínů, cena zapsaná (neoptimalizuje se, jen se hlídá skok) | P12 |
 | 8 | **Kritik proti etalonu:** list SC vlevo, díl vpravo, stejné vzdálenosti; brief s provizorními prvky a výřezy klíčových prvků | `make_compare_sheet.py`, `visual-critic` | recenze `Docs/Reviews/<datum>_part_<ID>.md` | PASS podle kap. 2, nebo 3 kola a otevřené body autorovi | P6 provizorní se nehodnotí; P11 výřez a poloha ke každému prvku; P4 protichůdnou výtku nejdřív změř; P1 2× ≤ 5 → systémový krok; P21 čitelnost = ray cast; P17 černé plochy = test jiného masteru |
 | 9 | **Autorovo oko** ve hře: díl ve showroomu a v jedné lodi | `Package.ps1`, `Play.ps1`; scénář v odpovědi | verdikt autora | autor napsal „schváleno“ nebo výtky | – |
@@ -68,26 +69,28 @@ v textu jsou označené **(nový)**. Postaví se v pilotu, ne předem, a **jen v
   v `review.json` → `sheet_00_etalon.jpg` a oddíl „Etalon“ v briefu; bod „u dveří žádný panel“ nahrazen panelem
   ve fyzickém pouzdře.
 
-## 3. Showroom – pevné pohledy
+## 3. Zkušební úsek a pevné pohledy (v0.2, poučení P26)
 
-**Místo:** etalonová zátoka v `TestSpace`, rozšíření `space.Showroom` o `part <ID>` (nový).
-- Neutrální okolí ze schválených dílů W.
-- **Stejné světlo pro všechny díly:** pracovní 4000 K, patková světla, žádné slunce.
+**Místo:** zkušební úsek chodby v `TestSpace` za schodišťovou halou (`import_kit.SHOWROOM["test_section"]`,
+geometrie `Tools/Kit/kit_factory.py`).
+- Chodba W se **3 portály po 1,2 m**, podlahou, kusem stěny a stropu, z hrubé geometrie listu dílu. Není to
+  blockout dílu.
+- Díl, který se hodnotí, se do úseku vloží místo své hrubé verze; zbytek zůstává jako kontext.
+- **Světlo jen z listu** (u pilotu 1: L1 patky ~7500 K, L2 rohy, L3 skrytá lišta). Žádné pomocné světlo místnosti,
+  žádné slunce, žádné okno.
+- Tóny se měří `measure_look.py` proti kotevním záběrům (etalon Aurory: průměr 0,23–0,28, p10 0,13, B/R ~1,0).
 
-**Sady pohledů:** preset `Tools/Shots/part_<kategorie>.json` z jedné šablony (nový generátor).
-- Výška oka 1,65 m.
-- FOV podle nastavení SC (autor zjistí, viz `etalon.md` kap. 4).
+**Pohledy:** stejné úhly jako kotevní záběry SC (preset `Tools/Shots/kit_test_section.json`), FOV 90 (autor), 2560 × 1440.
 
-| Kategorie | Pohledy |
-|---|---|
-| Stěna, rám / portál, dveře | A celek z 2 m po ose; B 3/4 z 1,2 m; C detail z 0,5 m; D chodba do hloubky se 3 moduly (jako `ram_portal_1`) |
-| Podlaha, strop | A z oka 2 m dopředu, skloněno 35° (jako `podlaha_1`); B kolmo z 1 m; C detail lemu 0,4 m |
-| Rozvody, svítidla | A z 1,5 m; B detail objímky nebo difuzoru 0,4 m; C světlo vypnuté / zapnuté |
-| MFD, konzole, křeslo | A z pilotního oka; B kolmo z 0,4 m; C stavy vypnuto / náběh / zapnuto |
-| Panel dveří, centrální displej | A z 1 m; B 0,4 m kolmo; C stavy (úvod, provoz, porucha) |
-| Nábytek, kuchyň, drobné | A z 2 m; B 3/4 z 1 m; C detail 0,4 m; D světlo výklenku vyp / zap |
+| Pohled | Úhel | Kotevní záběr |
+|---|---|---|
+| 1 | z oka 1,65 m po ose do hloubky | `ram_portal_1` |
+| 2 | pata pilíře se světlem L1 šikmo shora z ~1,2 m | `ram_portal_2` |
+| 3 | podlaha 35° dolů s lemem | `podlaha_1` |
+| 4 | detail laku a tmavé třetiny z ~0,5 m šikmo | `ram_portal_3` |
 
-Pohledy A–D jsou stejné pro všechny díly kategorie, takže se díly dají řadit vedle sebe a vedle etalonu.
+Další kategorie (dveře, panel dveří, nábytek…) dostanou svůj úsek a úhly podle svých kotevních záběrů, až na ně
+přijde řada. Izolované vzorky snímané kolmo se nehodnotí.
 
 ## 4. Katalog
 

@@ -121,7 +121,7 @@ python Tools/Kit/kit_catalog.py <dávka>     # katalogový list Docs/Kit/catalog
 - Bodovky, svatozáře stropu (`Light_Halo`), wash stěn, výklenky a stavová světla jen v režimu interiéru
   (`INTERIOR_ONLY_SOCKETS`, tag `InteriorOnly`, `ASpaceshipPawn::InteriorOnlyLights`); v letu nesvítí (9.6 dz).
 - Režim osvětlení interiéru (`ASpacePlayerController::ApplyInteriorLighting`, `SetInteriorLighting`, pro snímky
-  s volnou kamerou `space.InteriorLighting 1|0`): MegaLights (2 vzorky na pixel), vypnuté odrazy Lumenu, interiérové
+  s volnou kamerou `space.InteriorLighting 1|0`): MegaLights (2 vzorky na pixel), odrazy Lumenu varianta c (do drsnosti 0,32, ½ rozlišení; od 6. 10.), interiérové
   meshe mimo stíny slunce (9.6 dr, ds). MegaLights se předehřívají na startu levelu (`-NoMegaLightsPrewarm` vypne).
 - Široká místnost (průřezy L41/L38): bodovka 50°, 260 cd se stínem, svatozář 6 cd neutrální, bodovky na stěny
   60 cd / 70° skloněné 22°, žlábek 0,5 cd/m, wash dolů po stěně 5 cd/m; kajuta tlumená `light_scale` 0,6 (9.6 em).

@@ -84,6 +84,7 @@ Mimo rozsah: exteriérový kit trupu (desky, rám T, páteř; `2026-10-01_wayfar
 | 23 | Zrcadlené decaly, regrese (`kit_batch2`, `kit_bays`) | Každý nový nebo obnovený nápis test orientace + snímek. |
 | 24 | Nová položka atlasu posunula UV starých; `--only` smazal díly z blendu (9.6 dt, ez, fj) | Atlas jen `append`; do commitu vždy celá dávka. |
 | 25 | Změna sdíleného masteru tiše změnila Wayfarer (9.6 di) | Po změně masteru snímky před/po u všech lodí. |
+| 26 | Tabule materiálů na izolovaných vzorcích snímaných kolmo v tmavé místnosti (autor ji 6. 10. neschválil: lak jako papír, lem bez odrazů, nic k porovnání se SC; `2026-10-06_kit_material_board`) | Materiály posuzuj jen v kontextu (zkušební úsek) a ze stejných úhlů a se stejným světlem jako kotevní záběry SC (workflow v0.2 kap. 3). |
 
 Opakující se vzorec: **11 interiérových recenzí (kit 1–3, materiál, špína, výklenky, sklad, kajuta 2×, holo MFD,
 kokpit) skončilo po 3 kolech FAIL s otevřenými body**; PASS jen dveře (2 kola), napájení a kolo 4 pilotu trupu. Příčina je systémová (materiál, světlo, 2D návrh předmětu), ne díl.

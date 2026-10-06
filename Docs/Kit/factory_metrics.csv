@@ -9,3 +9,8 @@ date,part,workflow,kind,step,what,minutes,critic_rounds,rebuilds,notes
 2026-10-06,KF-PORTAL-01,v0.1,tool,3,kit_materials.json + M_Kit_Base (kit wear band / walked line) + build_factory_materials + test_kit_materials.py,9,0,0,simplest versions
 2026-10-06,KF-PORTAL-01,v0.1,tool,3,kit_factory.py board samples + SHOWROOM board + preset kit_material_board,7,0,0,
 2026-10-06,KF-PORTAL-01,v0.1,part,3,board: Blender build + 3 x (UE import ~4 min + shots ~2 min) + reflection perf at 1440p,22,0,3,round 1 floor coplanar + brushed lip; round 2 wear invisible (band verified by a diagnostic shot); round 3 wear 1.0 / 0.15
+2026-10-06,KF-PORTAL-01,v0.2,tool,3,P25 presets + shot_diff.py (noise floor from two identical runs),5,0,0,
+2026-10-06,KF-PORTAL-01,v0.2,tool,3,C++ variant c reflections + build,4,0,0,SetInteriorLighting
+2026-10-06,KF-PORTAL-01,v0.2,tool,3,materials v0.2 (roles split; kit micro node scratch band; tread normal; factory emissive) + test v0.2,10,0,0,
+2026-10-06,KF-PORTAL-01,v0.2,tool,3,kit_factory test section (portal ring from the sheet profile; bay) + SHOWROOM test_section + preset,9,0,0,
+2026-10-06,KF-PORTAL-01,v0.2,part,3,test section: Blender + 3 x (import ~2.5 min + shots ~1.5 min) + P25 before/after 4 runs + sheets,21,0,3,round 1 dark (mean 0.10) + end bar; round 2 walked line as blotches; round 3 shown

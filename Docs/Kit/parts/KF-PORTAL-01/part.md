@@ -145,3 +145,19 @@ Sdílený základ kitu vznikl v pilotu 1:
 
 Podrobnosti, slabá místa a měření odrazů jsou v `Docs/Reviews/2026-10-06_kit_material_board.md`. Varianta c stojí
 na RX 9070 v 1440p +0,6 až +1,4 ms GPU. Blockout (krok 4) až po schválení tabule autorem.
+
+## Krok 3b – zkušební úsek (workflow v0.2, 6. 10., STOP)
+
+- Autor tabuli neschválil. Rozhodl: odrazy kovu varianta c v celé hře, výchozí rozteč portálů **1,2 m**, FOV 90°.
+- Poučení P26: materiály se posuzují v kontextu, ze stejných úhlů jako etalon.
+- **Zkušební úsek chodby:** 3 portály po 1,2 m, hrubá geometrie z listu rev. B, světla L1/L2/L3.
+- **Materiály v0.2:**
+  - lak je satén;
+  - světlý leštěný lem pevný u všech výrobců;
+  - guma 0,88 a grafit 0,45 zvlášť;
+  - škrábance jen na grafitu ve výšce ruky;
+  - protiskluzový vzor v pásech, dráha přes drsnost;
+  - L1 ~7500 K.
+- Listy a zdůvodnění: `Docs/Reviews/2026-10-06_kit_test_section.md`.
+- P25: Wayfarer před a po beze změny (rozdíly jen šum na hranách).
+- Blockout (krok 4) až po schválení autorem.

@@ -35,16 +35,16 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 - **Steadfast** (nákladní): 2D návrh v2 čeká na schválení; starý odmítnutý interiér v `TestSpace` (klávesa I).
 - **Interiérový kit** (`ArtSource/Kit/kit_rules.json`, `kit_parts.json`): dávky 1–3, 4 zčásti, 6 (nábytek kajuty);
   ukázka v `TestSpace` (U). Strop 500 + 3500 trojúhelníků na metr (autor 30. 9.; převezme `kit_manifest.json`).
-- **Továrna dílů** (6. 10.): `Docs/Kit/` soupis `catalog_draft.md`, etalon SC `etalon/etalon.md`, workflow **v0.1**
-  `FACTORY_WORKFLOW.md`; **pilot 1 `KF-PORTAL-01`**: list rev. B schválený, krok 3 materiálový základ `M_Kit_Base` + tabule (`parts/`).
+- **Továrna dílů** (6. 10.): `Docs/Kit/` soupis `catalog_draft.md`, etalon SC `etalon/etalon.md`, workflow
+  `FACTORY_WORKFLOW.md` **v0.2** (P26: materiály v kontextu); **pilot 1 `KF-PORTAL-01`**: list rev. B, krok 3 zkušební úsek (`parts/`).
 - **Flotila:** Ship Matrix a dossiery publikované (skill `ship-pipeline` 1b); Delver a Farsight jen jako spec.
 - **Nástroje:** `Test.ps1`, `Build.ps1`, CI s offline testy (stav přes veřejné API GitHubu), kritik s prahem `step` /
   `ship` / `part`, zámek `HeavyLock.ps1`, snímky v `C:\gamespace-shots` (`shots:` v recenzích), `Cleanup.ps1` na konci kroku.
 
 ## Čeká na rozhodnutí autora
 
-- **Továrna – STOP:** posoudit tabuli materiálů (`Docs/Reviews/2026-10-06_kit_material_board.md`) a výchozí rozteč 1,2 / 2,4;
-  odrazy varianta c (+1 ms GPU); FOV ze SC; pilot 2 (pouzdro panelu dveří) až po retrospektivě pilotu 1.
+- **Továrna – STOP:** posoudit 4 listy zkušebního úseku (`Docs/Reviews/2026-10-06_kit_test_section.md`); rozteč 1,2 m,
+  FOV 90° (autor 6. 10.); pilot 2 (pouzdro panelu dveří) až po retrospektivě pilotu 1.
 - **Autor 5. 10. – věrná kopie SC podle referencí** (pak vlastní styl); pořadí v Dalších krocích, bod 0.
 - **Kokpit v2** (4. 10.): C-01 schválen výchozími volbami (D průmyslový, zakouřené hologramy, HOTAS, krémové obložení –
   autor může změnit); hotové holoprojektory MFD (CK-HP-L/R) a vnitřní rám kanopy (CK-CF); dál HOTAS, konzole a ovladače, materiály, střed.
@@ -56,7 +56,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
   Snímek 11 `wayfarer_exterior_review` staví loď do svahu 32° (trup v terénu), chce `space.FlatSpot`. `DebugEngageQuantum`
   po zadání cíle jménem znovu vybírá cíl podle nosu lodi (drobnost, autor 1. 10.).
 - Interiér Wayfareru: otevřené body recenzí `2026-09-30_cabin_furniture.md` a `2026-09-30_cabin_liner.md`.
-- **Odrazy kovu:** v interiéru vypnuté (C++ `SetInteriorLighting`); varianta c na RX 9070 1440p +0,6–1,4 ms GPU (6. 10.), čeká na autora.
+- **Odrazy kovu:** varianta c zapnutá v celé hře (autor 6. 10.; interiér Lumen do drsnosti 0,32, ½ rozlišení; RX 9070 +0,6–1,4 ms).
 - Kit: vyšlapaná linie potřebuje směrovou buňku atlasu špíny, špína v kanálech dlouhou úzkou buňku (krok c); ohmatání
   madel; lišty stropu po segmentech. Rozvody S na zadním konci (x 3–4) dělají ohyb přes pole bez desky.
 - **Determinismus stavby na později** (WORKFLOW 9.6 ff): šum ±40 trojúhelníků, 3 FBX, import ukládá ~150 assetů;

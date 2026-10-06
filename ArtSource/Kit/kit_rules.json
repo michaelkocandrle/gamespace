@@ -84,7 +84,7 @@
   "_mesh_example": "SM_Kit_Wall_Grille06W_B = wall module, grille, 0.6 m, section W, variant B (size in decimetres)",
   "material_instance": "^MI_Kit_(Halcyon|Kestrel)_[A-Z][A-Za-z]+$",
   "texture": "^T_Kit_[A-Z][A-Za-z0-9]+_(BC|N|ORM|M|H|E)$",
-  "slot_roles": ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber", "Kit_Fabric", "Kit_Plastic", "Kit_Trim", "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_GlowNeutral", "Kit_Screen", "Kit_Glass", "Kit_Lacquer", "Kit_Lip", "Kit_Dark", "Kit_AntiSlip"]
+  "slot_roles": ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber", "Kit_Fabric", "Kit_Plastic", "Kit_Trim", "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_GlowNeutral", "Kit_Screen", "Kit_Glass", "Kit_Lacquer", "Kit_Lip", "Kit_Graphite", "Kit_Gasket", "Kit_AntiSlip", "Kit_GlowFoot"]
  },
  "palettes": {
   "_comment": "Linear colours per slot role; a ship picks one with 'kit_maker' in its setup (MI_Kit_<Maker>_<Role>). Kestrel Dynamics is a proposal.",

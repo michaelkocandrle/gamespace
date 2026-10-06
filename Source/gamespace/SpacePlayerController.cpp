@@ -772,9 +772,8 @@ namespace
 	// MegaLights variant C (author, 27. 9. 2026): interiors are lit through MegaLights with the fixtures' ray-traced
 	// shadows (the kit showroom's lights cast shadows in the level); the view from the ship and the planet keep
 	// today's lighting until MegaLights is measured there
-	// Lumen reflections are off in interiors (author, 27. 9. 2026): 2.3-2.8 ms of the 60 FPS budget for no visible
-	// difference on the matt kit paint; traced only up to roughness 0.3 at half resolution they still cost ~1.5 ms
-	// and missed the target (Docs/Reviews/2026-09-27_interior_perf_profile.md)
+	// Lumen reflections in interiors: off from 27. 9. 2026 (2.3-2.8 ms on the RTX 2060), variant c since 6. 10. 2026
+	// (traced below roughness 0.32 at half resolution, SetInteriorLighting)
 	/** space.InteriorLighting asked for the interior lighting (shots with the free camera): the prewarm's end keeps it. */
 	bool bInteriorLightingRequested = false;
 	/** What SetInteriorLighting set last (ships read it through ASpacePlayerController::IsInteriorLightingOn). */
@@ -797,9 +796,31 @@ namespace
 				Samples->Set(2, ECVF_SetByCode);
 			}
 		}
+		// Variant c of the metal reflections (author 6. 10. 2026, Docs/Reviews/2026-10-06_kit_material_board.md): Lumen
+		// reflections stay on in interiors too, traced only below roughness 0.32 at half resolution - the polished lips
+		// and glass are traced, the matt paint is not (RX 9070, 1440p TSR: +0.6-1.4 ms GPU). Outside the ship's interior
+		// the full reflections as before.
+		static const float StartMaxRoughness = [&Console]()
+		{
+			IConsoleVariable* Var = Console.FindConsoleVariable(TEXT("r.Lumen.Reflections.MaxRoughnessToTrace"));
+			return Var ? Var->GetFloat() : -1.0f;
+		}();
+		static const int32 StartDownsample = [&Console]()
+		{
+			IConsoleVariable* Var = Console.FindConsoleVariable(TEXT("r.Lumen.Reflections.DownsampleFactor"));
+			return Var ? Var->GetInt() : 1;
+		}();
 		if (IConsoleVariable* Reflections = Console.FindConsoleVariable(TEXT("r.Lumen.Reflections.Allow")))
 		{
-			Reflections->Set(bInterior ? 0 : 1, ECVF_SetByCode);
+			Reflections->Set(1, ECVF_SetByCode);
+		}
+		if (IConsoleVariable* MaxRoughness = Console.FindConsoleVariable(TEXT("r.Lumen.Reflections.MaxRoughnessToTrace")))
+		{
+			MaxRoughness->Set(bInterior ? 0.32f : StartMaxRoughness, ECVF_SetByCode);
+		}
+		if (IConsoleVariable* Downsample = Console.FindConsoleVariable(TEXT("r.Lumen.Reflections.DownsampleFactor")))
+		{
+			Downsample->Set(bInterior ? 2 : StartDownsample, ECVF_SetByCode);
 		}
 	}
 

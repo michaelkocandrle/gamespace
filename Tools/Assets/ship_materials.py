@@ -980,12 +980,19 @@ return float4(g, ao, saturate(dirt), saturate(wear));
 # 5 cm ends; the walked line on up-facing faces at the floor within WalkHalfCm of the part's centre line (run parts:
 # y = 0 on the corridor's axis), broken by the grunge - worn through to the bare metal, a line, not the whole floor.
 _KIT_WEAR_PARAMS = (("WearBandOn", 0.0), ("WearBandLo", 90.0), ("WearBandHi", 160.0), ("WalkWear", 0.0),
-                    ("WalkHalfCm", 25.0))
+                    ("WalkHalfCm", 25.0), ("ScratchBandOn", 0.0))
+# The kit's micro detail: the scratches (G) only in the hand band when ScratchBandOn (the author, board round 2:
+# scratches on whole walls read as dirt; hands scratch where hands go).
+_KIT_MICRO_NODE = """float4 t = float4(Texture2DSample(TexM, TexMSampler, UV / max(Tile * 0.01, 0.01)).rgb, 0.0);
+float band = saturate((LocalPos.z - WearBandLo) / 5.0) * saturate((WearBandHi - LocalPos.z) / 5.0);
+t.g *= lerp(1.0, band, ScratchBandOn);
+return t;"""
 _KIT_WEAR_CODE = """float band = saturate((LocalPos.z - WearBandLo) / 5.0) * saturate((WearBandHi - LocalPos.z) / 5.0);
 wear *= lerp(1.0, band, WearBandOn);
 float walk = saturate((n.z - 0.9) * 10.0) * saturate((6.0 - LocalPos.z) / 4.0)
            * saturate((WalkHalfCm - abs(LocalPos.y)) / max(WalkHalfCm * 0.5, 1.0));
-wear = max(wear, saturate((walk * (0.45 + g) - 0.35) * 2.0) * WalkWear);
+// soft, not patchy: the grunge only shades it (the walked line read as dark blotches, test section round 2)
+wear = max(wear, walk * (0.7 + 0.3 * g) * WalkWear);
 return float4(g, ao, saturate(dirt), saturate(wear));"""
 
 # T_Ship_Micro (generate_detail_textures.py) on UV0 in metres: R brushing, G micro-scratches, B fine roughness noise.
@@ -1147,11 +1154,16 @@ def build_layered_master(path=None, kit=False):
     masks = _surface_switch(m, detail_masks, plain_masks, -1000, 200)
     micro_tex = _node(m, unreal.MaterialExpressionTextureObjectParameter, -1700, -300, parameter_name="MicroMap",
                       sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_MASKS, texture=import_shared_texture("T_Ship_Micro"))
-    micro = _custom(m, "Layered_micro", _LAYER_MICRO_NODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4,
-                    ["TexM", "UV", "Tile"], -1250, -300)
+    micro_in = ["TexM", "UV", "Tile"] + (["LocalPos", "WearBandLo", "WearBandHi", "ScratchBandOn"] if kit else [])
+    micro = _custom(m, "Layered_micro", _KIT_MICRO_NODE if kit else _LAYER_MICRO_NODE,
+                    unreal.CustomMaterialOutputType.CMOT_FLOAT4, micro_in, -1250, -300)
     _link(micro_tex, micro, "TexM")
     _link(_node(m, unreal.MaterialExpressionTextureCoordinate, -1500, -250, coordinate_index=0), micro, "UV")
     _link(_scalar(m, "MicroTileCm", 60.0, -1700, -150), micro, "Tile")
+    if kit:
+        _link(local_position, micro, "LocalPos")
+        for name in micro_in[4:]:
+            _link(params[name], micro, name)
     neutral = _node(m, unreal.MaterialExpressionConstant4Vector, -1250, -150,
                     constant=unreal.LinearColor(0.5, 0.0, 0.5, 0.0))
     micro_masks = _surface_switch(m, micro, neutral, -1000, -250)

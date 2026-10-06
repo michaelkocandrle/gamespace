@@ -37,7 +37,7 @@ ROLES = ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber
          "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_GlowNeutral", "Kit_GlowDim", "Kit_Screen",
          "Kit_Glass", "Kit_Cushion",
          # the parts factory's shared base (ArtSource/Kit/kit_materials.json, 6. 10. 2026): lacquer, polished lip, dark
-         "Kit_Lacquer", "Kit_Lip", "Kit_Dark", "Kit_AntiSlip"]
+         "Kit_Lacquer", "Kit_Lip", "Kit_Graphite", "Kit_Gasket", "Kit_AntiSlip", "Kit_GlowFoot"]
 
 
 def frame(origin, ax, ay, az):
@@ -436,7 +436,11 @@ def materials():
     fm = json.load(open(os.path.join(ROOT, "ArtSource", "Kit", "kit_materials.json"), encoding="utf-8"))
     for role, r in fm["roles"].items():
         if not role.startswith("_"):
-            spec[role] = (fm["makers"]["Halcyon"]["palette"][r["colour"]], r["roughness"], r["metallic"], None)
+            c = r["albedo"] if "albedo" in r else fm["makers"]["Halcyon"]["palette"][r["colour"]]
+            spec[role] = (c, r["roughness"], r["metallic"], None)
+    for role, e in fm.get("emissive", {}).items():
+        if not role.startswith("_"):
+            spec[role] = ([0.05, 0.05, 0.05], 0.3, 0.0, (e["colour"], e["strength"]))
     tex = os.path.join(ROOT, "ArtSource", "Kit", "Textures")
     out = {}
     for name, (c, r, mt, emit) in spec.items():

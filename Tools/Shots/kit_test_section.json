@@ -1,0 +1,96 @@
+{
+ "_comment": "Parts factory pilot 1 step 3 (FACTORY_WORKFLOW v0.2, lesson P26, 6. 10. 2026): the kit's shared material base in the corridor test section (import_kit SHOWROOM['test_section'], rough KF-PORTAL-01 geometry, 3 portals on 1.2 m), from the SC etalon's anchor angles: (1) from the eye 1.65 m down the corridor (ram_portal_1), (2) the pillar's foot with L1 from ~1.2 m obliquely above (ram_portal_2), (3) the floor 35 deg down with the lip (podlaha_1), (4) the lacquer and the dark third from ~0.5 m obliquely (ram_portal_3). FOV 90 (author). The game's reflections (variant c, SetInteriorLighting). Run: Tools/Shots.ps1 -Preset kit_test_section -Editor -Width 2560 -Height 1440",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 8.0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none",
+    "r.MegaLights.EnableForProject 1",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "name": "1_eye_depth",
+   "camera": "free",
+   "hud": 0,
+   "settle": 4.0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90
+  },
+  {
+   "name": "2_pillar_foot_L1",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    21.75,
+    -499.65,
+    1.25
+   ],
+   "camera_look_at": [
+    22.42,
+    -501.0,
+    0.12
+   ],
+   "fov": 80
+  },
+  {
+   "name": "3_floor_35",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    22.45,
+    -500.0,
+    0.25
+   ],
+   "fov": 90
+  },
+  {
+   "name": "4_lacquer_dark_detail",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    22.05,
+    -500.45,
+    1.35
+   ],
+   "camera_look_at": [
+    22.45,
+    -501.08,
+    1.2
+   ],
+   "fov": 60
+  }
+ ]
+}
