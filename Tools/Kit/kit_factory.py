@@ -28,7 +28,7 @@ import kit_portal  # noqa: E402  (the part itself: KF-PORTAL-01's blockout)
 import kit_batch2  # noqa: E402  (the decal helper)
 
 # the test section's shell (walls, ceiling, kick strip) and the part under test (kit_portal.PARTS, step 4 blockout)
-FACTORY = [("Test", "Shell", 0.9, "W", "A"), ("Terminal", "Eng", 0.7, "W", "A")] + kit_portal.PARTS
+FACTORY = [("Test", "Shell", 0.9, "W", "A"), ("Terminal", "Eng", 0.7, "W", "A"), ("Bay", "Service", 1.0, "W", "A")] + kit_portal.PARTS
 VIEWS = {(c, p): ((1, 0.0, 0.0), (1, -0.6, 0.2)) for c, p, _, _, _ in FACTORY}
 
 
@@ -428,14 +428,126 @@ def terminal_housing(name, seed):
     face_label(p, "st_hfcl", -0.22, 0.194, D, scale=0.55)
     face_label(p, "red_marker", 0.205, -0.193, D)
     # the screen's glow on what is in front of it
-    p.socket("Light_Screen_0", (D + 0.03, 0.0, 0.0), x=(1, 0, 0), z=(0, 0, 1), type="rect", role="cool", cd=1.2,
+    p.socket("Light_Screen_0", (D + 0.03, 0.0, 0.0), x=(1, 0, 0), z=(0, 0, 1), type="rect", role="cool", cd=0.5,
              width_cm=56.0, height_cm=28.0, radius_m=2.0, dir_ue=[1.0, 0.0, 0.0], along_ue=[0.0, 1.0, 0.0], shadows=False)
     p.collision_box((0.0, -W / 2 - 0.03, -H / 2 - 0.02), (D, W / 2 + 0.03, H / 2 + 0.02))
     return p
 
 
+def box_yz(p, role, y0, z0, y1, z1, x_front, depth, bevel=0.0015):
+    p.poly_prism(role, [(y0, z0), (y1, z0), (y1, z1), (y0, z1)], face_matrix(x_front), depth, bevel=bevel, panel=False, segments=1)
+
+
+def niche(p, y0, z0, y1, z1, c, front, deep, wall_role, back_role, lip=True):
+    """An octagonal recess in the bay's face: a frame band (lip), the inner walls as bands stepping back, a back panel
+    (emissive for a lit niche). Returns the opening's octagon."""
+    o = octagon(y0, z0, y1, z1, c)
+    if lip:
+        band(p, "Kit_Lip", octagon(y0 - 0.006, z0 - 0.006, y1 + 0.006, z1 + 0.006, c + 0.0025), o, front + 0.002, 0.004)
+    # the walls: a thin ring round the opening, deep
+    band(p, wall_role, o, inset(o, 0.004), front, deep)
+    p.poly_prism(back_role, inset(o, 0.004), face_matrix(front - deep + 0.002), 0.002, bevel=0.0, panel=False, segments=1)
+    return o
+
+
+def bay_service(name, seed):
+    """SC's engineering bay wall after the author's capture (7. 10. 2026; Docs/Kit/etalon/sc/decal_aurora_bay.jpg): in a
+    grey frame 1.0 x 1.72 m, 0.18 m deep - a fire extinguisher unit (an octagonal niche lit red, the extinguisher in its
+    bracket, a hatch under it with a red marker), two lockers with warm-lit cream insides and polished lips, the
+    component bay cover (four nested octagonal levels, the maker's mark and a stencil), louvers and a slot row over
+    them, bolts and hatching. The face is +x, the pivot is the back's bottom centre on the wall; -y is the viewer's left."""
+    p = kit_geo.Part(name, seed)
+    W, H, D = 1.0, 1.72, 0.18
+    # the carcass: back, sides, top; the face plate as bands round the three columns
+    box_yz(p, "Kit_Graphite", -W / 2, 0.0, W / 2, H, 0.02, 0.02)
+    face = D - 0.03
+    # the carcass: hollow (the niches sink into it) - sides, top, bottom; the face plate in cells round the openings
+    p.box("Kit_Panel", (0.02, -W / 2, 0.0), (face, -W / 2 + 0.015, H), bevel=0.003, segments=1)
+    p.box("Kit_Panel", (0.02, W / 2 - 0.015, 0.0), (face, W / 2, H), bevel=0.003, segments=1)
+    p.box("Kit_Panel", (0.02, -W / 2, H - 0.015), (face, W / 2, H), bevel=0.003, segments=1)
+    p.box("Kit_Panel", (0.02, -W / 2, 0.0), (face, W / 2, 0.015), bevel=0.003, segments=1)
+
+    def cell(y0, z0, y1, z1, opening=None):
+        if opening is None:
+            box_yz(p, "Kit_Panel", y0, z0, y1, z1, face, 0.02, bevel=0.002)
+        else:
+            band(p, "Kit_Panel", octagon(y0, z0, y1, z1, 0.0008), opening, face, 0.02)
+    # columns (y): A the fire unit -0.485..-0.235, B the lockers -0.225..0.085, C the component bay 0.09..0.49
+    cell(-0.5, 0.0, -0.485, H)
+    cell(0.49, 0.0, 0.5, H)
+    cell(-0.235, 0.0, -0.225, H)
+    cell(0.085, 0.0, 0.09, H)
+    cell(0.09, 0.0, 0.49, H)
+    cell(-0.485, 0.0, -0.235, 0.80)
+    cell(-0.485, 1.50, -0.235, H)
+    cell(-0.225, 0.0, 0.085, 0.16)
+    cell(-0.225, 0.80, 0.085, 0.84)
+    cell(-0.225, 1.48, 0.085, H)
+    cell(-0.485, 0.80, -0.235, 1.50, octagon(-0.47, 0.82, -0.25, 1.48, 0.03))
+    cell(-0.225, 0.16, 0.085, 0.80, octagon(-0.205, 0.18, 0.065, 0.78, 0.05))
+    cell(-0.225, 0.84, 0.085, 1.48, octagon(-0.205, 0.86, 0.065, 1.46, 0.05))
+    # A: the fire extinguisher niche lit red, 0.8 m up
+    niche(p, -0.47, 0.82, -0.25, 1.48, 0.03, face, 0.13, "Kit_Graphite", "Kit_GlowRed")
+    ey, ex = -0.36, face - 0.07
+    p.tube("Kit_Red", (ex, ey, 0.93), (ex, ey, 1.24), 0.045, 28)                    # the cylinder (0.052 x 0.38 filled the niche)
+    p.tube("Kit_Red", (ex, ey, 1.24), (ex, ey, 1.27), 0.038, 28)
+    p.tube("Kit_Graphite", (ex, ey, 1.27), (ex, ey, 1.31), 0.02, 16)                  # the valve
+    p.box("Kit_Graphite", (ex - 0.012, ey - 0.012, 1.31), (ex + 0.012, ey + 0.05, 1.33), bevel=0.003, segments=1)   # the lever
+    p.tube("Kit_Graphite", (ex, ey + 0.05, 1.32), (ex - 0.03, ey + 0.058, 1.16), 0.007, 10)   # the hose
+    p.tube("Kit_Graphite", (ex - 0.03, ey + 0.058, 1.16), (ex - 0.034, ey + 0.062, 1.09), 0.011, 12)   # the nozzle
+    for z in (1.0, 1.18):
+        p.box("Kit_Lip", (ex - 0.01, ey - 0.05, z), (ex + 0.01, ey + 0.05, z + 0.012), panel=False)   # the bracket bands
+    p.box("Kit_Panel", (face - 0.135, ey - 0.06, 0.86), (face - 0.12, ey + 0.06, 1.3), panel=False)   # the bracket's back plate
+    p.socket("Light_Fire_0", (face - 0.02, ey, 1.45), x=(1, 0, 0), z=(0, 0, 1), type="point", role="signal", cd=0.25,
+             radius_m=0.6, source_radius_cm=1.0, shadows=False)
+    # under it: a hatch with a recessed grip and the red marker; a text strip at the foot
+    hatch = octagon(-0.47, 0.18, -0.25, 0.74, 0.02)
+    p.poly_prism("Kit_Panel", hatch, face_matrix(face + 0.008), 0.008, bevel=0.002, segments=1)
+    box_yz(p, "Kit_Graphite", -0.40, 0.62, -0.32, 0.645, face + 0.0085, 0.006)
+    for z in (0.22, 0.70):
+        for y in (-0.455, -0.265):
+            p.tube("Kit_Lip", (face + 0.008, y, z), (face + 0.010, y, z), 0.004, 8)
+    # B: two lockers, warm-lit
+    for z0, z1 in ((0.18, 0.78), (0.86, 1.46)):
+        niche(p, -0.205, z0, 0.065, z1, 0.05, face, 0.13, "Kit_Lacquer", "Kit_GlowWarm")
+        p.socket("Light_Locker_%d" % int(z0 * 10), (face - 0.05, -0.07, z1 - 0.06), x=(1, 0, 0), z=(0, 0, 1), type="point",
+                 role="warm", cd=0.18, radius_m=0.4, source_radius_cm=2.0, shadows=False)
+        # the inner top: a small dark slot (the latch) and the shelf lip
+        box_yz(p, "Kit_Graphite", -0.11, z1 - 0.035, -0.03, z1 - 0.02, face - 0.02, 0.01)
+    # C: the component bay cover - frame, recess, plate, polished outline, inner dark plate with the mark
+    c0 = octagon(0.10, 0.16, 0.48, 1.05, 0.06)
+    band(p, "Kit_Panel", c0, inset(c0, 0.025), face + 0.018, 0.012)
+    p.poly_prism("Kit_Graphite", inset(c0, 0.025), face_matrix(face + 0.008), 0.002, bevel=0.0, panel=False, segments=1)
+    plate = octagon(0.14, 0.32, 0.44, 0.94, 0.07)
+    p.poly_prism("Kit_Panel", plate, face_matrix(face + 0.02), 0.012, bevel=0.002, segments=1)
+    band(p, "Kit_Lip", plate, inset(plate, 0.004), face + 0.0205, 0.001)
+    mark = octagon(0.17, 0.52, 0.41, 0.88, 0.05)
+    p.poly_prism("Kit_Graphite", mark, face_matrix(face + 0.021), 0.001, bevel=0.0, panel=False, segments=1)
+    box_yz(p, "Kit_Graphite", 0.22, 0.2, 0.36, 0.24, face + 0.0185, 0.008)                # the pull
+    # over B and C: louvers and a slot row
+    for k in range(6):
+        z = 1.52 + k * 0.026
+        p.box("Kit_Graphite", (face - 0.005, -0.21, z), (face + 0.012, 0.47, z + 0.012), bevel=0.002, segments=1)
+    box_yz(p, "Kit_Graphite", -0.215, 1.505, 0.475, 1.68, face - 0.004, 0.02)
+    # bolts on the frame
+    for y in (-0.47, 0.47):
+        for z in (0.06, 1.62):
+            p.tube("Kit_Lip", (D - 0.03, y, z), (D - 0.026, y, z), 0.007, 12)
+    # the information layer
+    lab = lambda item, y, z, x, sc=1.0, rot=0.0, lb=True: face_label(p, item, y, z, x, scale=sc, label=lb, rot=rot)  # noqa: E731
+    lab("maker", 0.29, 0.79, face + 0.0215, 0.36)
+    lab("st_service", 0.29, 0.62, face + 0.0215, 0.9)
+    lab("plate_cooler", 0.29, 0.43, face + 0.021, 0.85)
+    lab("red_marker", -0.36, 0.3, face + 0.0085, 2.2)
+    lab("st_inspect", -0.36, 0.1, face, 0.8)
+    lab("hazard_subtle", -0.36, 1.58, face + 0.01, 0.55)
+    lab("st_gnd", 0.29, 0.1, face, 0.8)
+    p.collision_box((0.0, -W / 2, 0.0), (D, W / 2, H))
+    return p
+
+
 def part_name_any(cat, part, size, sec, var):
-    return kit_portal.part_name(cat, part, size, sec, var) if cat not in ("Test", "Terminal") else part_name(cat, part, size, sec, var)
+    return kit_portal.part_name(cat, part, size, sec, var) if cat not in ("Test", "Terminal", "Bay") else part_name(cat, part, size, sec, var)
 
 
 def build_part(cat, part, size, sec_key, var, seed):
@@ -443,4 +555,6 @@ def build_part(cat, part, size, sec_key, var, seed):
         return test_shell(part_name(cat, part, size, sec_key, var), seed)
     if cat == "Terminal":
         return terminal_housing(part_name(cat, part, size, sec_key, var), seed)
+    if cat == "Bay":
+        return bay_service(part_name(cat, part, size, sec_key, var), seed)
     return kit_portal.build_part(cat, part, size, sec_key, var, seed)

@@ -631,12 +631,15 @@ def build_test_section(actors, meshes, mis, sec, counts):
     # engineering MFD - the live screen and its controls are the C++ actor's, the housing the factory part)
     short = "Terminal_Eng07W_A"
     if "SM_Kit_" + short in meshes:
-        pos = unreal.Vector(x * 100.0, 0.0, 145.0)
+        pos = unreal.Vector(x * 100.0, 55.0, 145.0)          # the viewer's right; the service bay on the left
         term = actors.spawn_actor_from_class(unreal.SpaceEngineeringTerminal, KIT_ORIGIN + pos, unreal.Rotator(roll=0.0, pitch=0.0, yaw=180.0))
         term.set_actor_label("KitTest_Terminal")
         term.get_editor_property("housing").set_static_mesh(meshes["SM_Kit_" + short][0])
         term.set_editor_property("tags", [unreal.Name(TAG)])
         place_part(actors, meshes, short, pos, 180.0, "KitTest_TerminalLight", counts, spawn=False)
+    # SC's engineering bay wall (the fire extinguisher unit, lockers, the component bay cover) on the viewer's left
+    if "SM_Kit_Bay_Service10W_A" in meshes:
+        place_part(actors, meshes, "Bay_Service10W_A", unreal.Vector(x * 100.0, -48.0, 0.0), 180.0, "KitTest_Bay", counts)
     vol = actors.spawn_actor_from_class(unreal.PostProcessVolume, _v(((x0 + x1) / 2, 0.0), h / 2),
                                         unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
     vol.set_actor_label("KitTest_InteriorPost")

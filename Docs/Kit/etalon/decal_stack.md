@@ -122,3 +122,31 @@ Snímky: `terminal_corridor.jpg`, `terminal_config.jpg`, `terminal_3dview.jpg` a
   FUEL ukazují 100 %.
 - **Průchodnost:** portál měl jednu kolizní krabici přes celou světlost a stěny úseku žádnou. Teď mají kolizi práh,
   pilíře, boty, šikminy, horní člen a stěny.
+
+## Ladění terminálu a servisní stěna (7. 10.)
+
+Snímky: `terminal_housing.jpg`, `terminal_3dview.jpg`, `bay_end_wall.jpg` a `bay_close.jpg`.
+
+**Terminál:**
+- **Záložky** se kreslí nad panelem. Předtím jim panel zakryl pravou půlku i text. Jsou to zkosené výstupky
+  s textem a ikonou.
+- **Rám** je ve vrstvách:
+  - montážní deska se šrouby a stínovou spárou;
+  - zapuštěná obvodová spára, sestup do tmavé vnitřní stěny, leštěná hrana kolem hlubšího skla;
+  - dvoubarevný horní výstupek se spárou, sloty a LED;
+  - tlačítko ve věnci s vroubkovaným prstencem, posuvník v drážce;
+  - šrouby, větrací sloty, LED a ID.
+
+  Rohy jsou bez zkosení na každém segmentu: radiální rýhy působily plastově.
+- **Paleta** je vzorkovaná ze SC a převedená ze sRGB do lineárních barev.
+- **3D VIEW** je rentgen interiéru zevnitř chodby, oříznutý na plochu panelu.
+
+**Servisní stěna** (`SM_Kit_Bay_Service10W_A`, podle `sc/decal_aurora_bay.jpg`) stojí na čelní stěně vlevo,
+terminál vpravo:
+- skříň hasicího přístroje: niša s červeně svítící zadní stěnou, přístroj s ventilem, pákou, hadicí a tryskou
+  v držáku, pod ní dvířka;
+- dvě skříňky s teple osvětleným krémovým vnitřkem a leštěným lemem;
+- kryt COMPONENT BAY: 4 vnořené osmiboké úrovně, HALCYON FREIGHTWORKS, SERVICE ACCESS a štítek COOLER S1;
+- žaluzie, šrouby, šrafy a šablony.
+
+Nové role jsou `Kit_Red` (červený lak) a `Kit_GlowRed`.
