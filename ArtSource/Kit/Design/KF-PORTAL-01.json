@@ -2,51 +2,208 @@
  "_comment": "Parts factory pilot 1 (FACTORY_WORKFLOW v0.1, author 6. 10. 2026): the corridor frame module - portal ring, its foot lights and the floor plates between two portals. Step 2 drawing data, read by Tools/Design/draw_part_sheet.py. Lengths in metres in the layout frame (x along the run, y across, z up from the deck); the profile detail in millimetres. Sections from ArtSource/Kit/kit_rules.json.",
  "id": "KF-PORTAL-01",
  "title": "Rámový modul chodby – portál, patky se světlem, podlahová deska",
- "revision": "A",
- "status": "návrh ke schválení (krok 2)",
+ "revision": "B",
+ "status": "rev. B ke schválení",
  "date": "2026-10-06",
- "sections": ["W", "N"],
+ "sections": [
+  "W",
+  "N"
+ ],
  "portal_length": 0.3,
- "pitches": {"short": 1.2, "long": 2.4},
+ "pitches": {
+  "short": 1.2,
+  "long": 2.4
+ },
  "profile": {
   "_comment": "Cross-section of the ring member, u along the run (0..300 mm), v from the wall panel face into the corridor (0 = panel face, + = into the room). Steps: the base, step 2, the crown; a polished lip on the crown's edges, the ribbed cuff in the crown's middle; the hidden strip behind step 2 on the top member only.",
   "gap": 8,
   "steps": [
-   {"name": "základna", "u0": 8, "u1": 292, "v0": 0, "v1": 40, "material": "lak rámu"},
-   {"name": "stupeň 2", "u0": 38, "u1": 262, "v0": 40, "v1": 70, "material": "lak rámu"},
-   {"name": "koruna", "u0": 68, "u1": 232, "v0": 70, "v1": 100, "material": "lak rámu", "chamfer": 12}
+   {
+    "name": "základna",
+    "u0": 8,
+    "u1": 292,
+    "v0": 0,
+    "v1": 40,
+    "material": "lak rámu"
+   },
+   {
+    "name": "stupeň 2",
+    "u0": 38,
+    "u1": 262,
+    "v0": 40,
+    "v1": 70,
+    "material": "lak rámu"
+   },
+   {
+    "name": "koruna",
+    "u0": 68,
+    "u1": 232,
+    "v0": 70,
+    "v1": 100,
+    "material": "lak rámu",
+    "chamfer": 12
+   }
   ],
-  "lip": {"width": 18, "material": "leštěný kov", "_comment": "on both crown edges, wrapping the 12 mm chamfer"},
-  "cuff": {"u0": 125, "u1": 175, "depth": 6, "rib_pitch": 15, "rib_width": 7, "material": "guma"},
-  "protrusion_by_section": {"W": 100, "N": 80, "_N": "N: step 2 and the crown 10 mm shallower each (base 0-40, step 40-60, crown 60-80)"},
-  "hidden_strip": {"member": "top", "u": 52, "v": 73, "width": 12, "_comment": "LED strip in the shadow of step 2, washing the crown down; only on the top member"}
+  "lip": {
+   "width": 18,
+   "material": "leštěný kov",
+   "_comment": "on both crown edges, wrapping the 12 mm chamfer"
+  },
+  "cuff": {
+   "u0": 125,
+   "u1": 175,
+   "depth": 6,
+   "rib_pitch": 15,
+   "rib_width": 7,
+   "material": "guma"
+  },
+  "protrusion_by_section": {
+   "W": 100,
+   "N": 80,
+   "_N": "N: step 2 and the crown 10 mm shallower each (base 0-40, step 40-60, crown 60-80)"
+  },
+  "hidden_strip": {
+   "member": "top",
+   "grooves": [
+    [
+     54,
+     68
+    ],
+    [
+     232,
+     246
+    ]
+   ],
+   "groove_depth": 20,
+   "strip": 12,
+   "_comment": "rev. B: two symmetric strips, each at the top of a 14 x 20 mm groove in step 2's ledge, against the crown's riser (rev. A: one strip on the ledge face, u 46-58, seen from the near side)"
+  }
  },
  "lights": [
-  {"id": "L1", "name": "patka", "count": "2 na portál", "housing": "osmiboké 150 × 150 mm, hloubka 60 mm, difuzor 90 × 50 mm rýhovaný", "where": "u paty pilíře, z 0,02–0,17 m, čelo 30 mm za lícem koruny", "colour": "studená modrobílá (UI, ~8000 K)", "reach": "skvrna na podlaze ~0,5 m", "shadows": "ne"},
-  {"id": "L2", "name": "horní roh", "count": "2 na portál", "housing": "kruhové Ø 60 mm, hloubka 40 mm, v zalomení šikminy a vybrání", "where": "W z 2,10 m, N z 2,10 m", "colour": "teplá bílá 4000 K", "reach": "kužel 50° dolů do osy", "shadows": "ne"},
-  {"id": "L3", "name": "skrytá lišta", "count": "1 na portál (horní člen)", "housing": "lišta 12 mm ve stínu stupně 2, zdroj není z oka vidět", "where": "horní člen, celá šířka stropu", "colour": "teplá bílá 3500 K", "reach": "přechod jasu na koruně shora dolů", "shadows": "ne"}
+  {
+   "id": "L1",
+   "name": "patka",
+   "count": "2 na portál",
+   "housing": "osmiboké 150 × 150 mm, hloubka 60 mm, difuzor 90 × 50 mm rýhovaný",
+   "where": "u paty pilíře, z 0,02–0,17 m, čelo 30 mm za lícem koruny",
+   "colour": "studená modrobílá (UI, ~8000 K)",
+   "reach": "skvrna na podlaze ~0,5 m",
+   "shadows": "ne"
+  },
+  {
+   "id": "L2",
+   "name": "horní roh",
+   "count": "2 na portál",
+   "housing": "kruhové Ø 60 mm, hloubka 40 mm, v zalomení šikminy a vybrání",
+   "where": "W z 2,10 m, N z 2,10 m",
+   "colour": "teplá bílá 4000 K",
+   "reach": "kužel 50° dolů do osy",
+   "shadows": "ne"
+  },
+  {
+   "id": "L3",
+   "name": "skrytá lišta",
+   "count": "2 na portál (horní člen)",
+   "housing": "2 lišty 12 mm v drážce 14 × 20 u boků koruny",
+   "where": "horní člen, celá šířka stropu",
+   "colour": "teplá bílá 3500 K",
+   "reach": "přechod jasu na koruně (zdroj skrytý)",
+   "shadows": "ne"
+  }
  ],
  "floor": {
-  "_comment": "Between portals: octagonal plates 0.9 m long and transverse bands 0.3 m; short pitch = portal + plate, long pitch = portal + plate + band + plate. W: the centre plate 1.2 wide plus side plates to the plinth; N: the centre plate only.",
-  "plate_length": 0.9,
+  "_comment": "rev. B: the kit floor's character (kit_batch3.py: anti-slip lanes on the walkway, smooth bolted side plates, edge strips, the grille over a deep channel) with the SC principles only: a polished lip 18 mm round the walkway plate, its lane field sunk 6 mm, chamfered corners. Not the Aurora's perforated plate.",
+  "plate_lengths": [
+   0.9,
+   0.6
+  ],
   "band_length": 0.3,
-  "centre_width": 1.2,
+  "walk_width": 1.2,
   "corner_chamfer": 0.12,
   "lip": 0.018,
-  "lip_inset": 0.02,
-  "gap": 0.01,
   "insert_recess": 0.006,
-  "perforation": {"hole": 0.015, "pitch": 0.025, "pattern": "hex"},
-  "side_plate_grooves": 4,
-  "gutter": 0.1,
-  "band": {"grooves": 5, "groove": 0.01, "cover": [0.4, 0.15], "cover_bolts": 4, "bolt_cups": {"d": 0.04, "count": 2}, "logo": [0.15, 0.05]}
+  "lanes": {
+   "width": 0.08,
+   "pitch": 0.11,
+   "material": "protiskluzový grafit"
+  },
+  "edge_strip": 0.06,
+  "side_plate": "hladká deska se 4 šrouby (W)",
+  "grille": {
+   "channel_width": 0.6,
+   "depth": 0.2,
+   "bar_pitch": 0.045,
+   "_what": "variant G: the grille over a deep service channel along the run (Floor_Grille)"
+  },
+  "band": {
+   "grooves": 5,
+   "groove": 0.01,
+   "cover": [
+    0.4,
+    0.15
+   ],
+   "cover_bolts": 4,
+   "bolt_cups": {
+    "d": 0.04,
+    "count": 2
+   },
+   "logo": [
+    0.15,
+    0.05
+   ]
+  }
  },
- "threshold": {"_comment": "The floor inside the portal module: a plain tread plate 0.3 m with the lip, the foot light housings at its ends.", "lip": 0.018},
+ "threshold": {
+  "_comment": "The floor inside the portal module: a plain tread plate 0.3 m with the lip, the foot light housings at its ends.",
+  "lip": 0.018
+ },
  "decals": [
-  {"what": "číslo úseku na pilíři", "size": "text 30 mm", "where": "pilíř, z 1,45 m, na stupni 2"},
-  {"what": "servisní štítek rámu", "size": "8 mm", "where": "základna, u patky"},
-  {"what": "logo výrobce", "size": "150 × 50 mm, ražba (geometrie)", "where": "krycí destička příčného pásu"},
-  {"what": "šipky směru", "size": "30 mm", "where": "příčný pás, u lemu"}
+  {
+   "what": "číslo úseku na pilíři",
+   "size": "text 30 mm",
+   "where": "pilíř, z 1,45 m, na stupni 2"
+  },
+  {
+   "what": "servisní štítek rámu",
+   "size": "8 mm",
+   "where": "základna, u patky"
+  },
+  {
+   "what": "logo výrobce",
+   "size": "150 × 50 mm, ražba (geometrie)",
+   "where": "krycí destička příčného pásu"
+  },
+  {
+   "what": "šipky směru",
+   "size": "30 mm",
+   "where": "příčný pás, u lemu"
+  }
  ],
- "eye": {"height": 1.65, "fov": 90, "_fov": "nejistě: FOV ze SC dodá autor"}
+ "eye": {
+  "height": 1.65,
+  "fov": 90,
+  "_fov": "nejistě: FOV ze SC dodá autor",
+  "pitches": [
+   1.2,
+   2.4
+  ]
+ },
+ "revisions": [
+  {
+   "rev": "A",
+   "date": "2026-10-06",
+   "what": "první vydání"
+  },
+  {
+   "rev": "B",
+   "date": "2026-10-06",
+   "what": "pohled z oka v roztečích 1,2 a 2,4 m; podlaha s charakterem kitu (protiskluzové pásy, hluboká mřížka) + lem 18 mm, vložka −6 mm, zkosené rohy; sokl bez holé modré lišty (pryžový kopací pás); L3 dvě symetrické lišty v drážce, ověřená viditelnost; destička pásu se 4 šrouby; rám celý krémový lak"
+  }
+ ],
+ "plinth": {
+  "rev": "B",
+  "choice": "pryžový kopací pás 100 mm bez světla",
+  "why": "etalon SC nemá souvislou světelnou lištu u podlahy: orientační světlo dávají patky L1 (ostrůvky po rozteči), holý emisivní pruh porušuje pravidlo světla v pouzdře; pryž doplní materiálovou trojici a chrání sokl",
+  "alternative": "lišta s opálovým difuzorem 20 mm v drážce 30 mm pod přesahem 10 mm (zdroj skrytý), kdyby autor chtěl souvislou linku"
+ }
 }

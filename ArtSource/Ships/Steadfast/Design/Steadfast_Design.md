@@ -99,3 +99,18 @@ Z dnešní verze zůstává to, co autor schválil:
 2. Dálková věž na hřbetě a stanoviště senzorů v kokpitu – ano, nebo loď bez věže (čistý hauler)?
 3. Ošetřovna vs. druhá kajuta – má loď mít ošetřovnu, nebo radši větší kajutu posádky?
 4. Vstup rampou v břiše (jako Freelancer) vs. zadní rampou (jako Cutlass / C1) – zadní rampa by znamenala přesunout strojovnu nahoru a doprostřed.
+
+### Rozhodnutí autora 6. 10. 2026 – hlavní chodba podle kitu
+
+- Hlavní chodba horní paluby bude **W 2,4 × 2,3 m** (kit, továrna dílů `Docs/Kit/parts/KF-PORTAL-01/part.md`), ne 1,6 × 2,4.
+- **Ověření ve 2D** (`Steadfast_layout.json`, tlakový trup 6,4 m):
+  - Chodba se do trupu vejde. Stěny se strukturou sahají do |y| 1,4 m a boční místnosti zůstanou 1,8 m hluboké
+    (|y| 1,4–3,2).
+  - Kolidují 2 předměty: **skříň s léky v ošetřovně** (|y| 1,0–1,4; přesunout k vnější stěně nebo podél x) a
+    **stůl pro čtyři v jídelně** (|y| 1,3–2,7; posunout na |y| 1,5–2,9). Ostatní předměty jsou za |y| 2,1.
+  - Výška: strop chodby 2,3 je pod světlou výškou paluby 2,4. Konstrukce stropu kitu (0,25 m) ale zasahuje 0,15 m
+    nad 2,4, do střechy trupu, jejíž tloušťka zatím není navržená (nejistě).
+  - Délka 11,5 m → **11,4 m** (mřížka 0,3), stěna předsíně můstku z x 20,5 na 20,4.
+  - Dveře 1,0–1,3 m do bočních místností se nevejdou do pole 0,9 m mezi portály po 1,2 m. U dveří proto pole 2,1 m
+    (rozteč 2,4), jinde podle zvolené výchozí rozteče.
+- Až autor schválí návrh v2, promítne se to do `Steadfast_layout.json` a výkresů.
