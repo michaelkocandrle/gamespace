@@ -35,12 +35,16 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 - **Steadfast** (nákladní): 2D návrh v2 čeká na schválení; starý odmítnutý interiér v `TestSpace` (klávesa I).
 - **Interiérový kit** (`ArtSource/Kit/kit_rules.json`, `kit_parts.json`): dávky 1–3, 4 zčásti, 6 (nábytek kajuty);
   ukázka v `TestSpace` (U). Strop 500 + 3500 trojúhelníků na metr (autor 30. 9.; převezme `kit_manifest.json`).
-  **Továrna dílů – soupis** (6. 10.): `Docs/Kit/catalog_draft.md` (díly úr. 1/2, 25 poučení, mezery); jen analýza.
+  **Továrna dílů** (6. 10.): soupis `Docs/Kit/catalog_draft.md`, etalon SC `Docs/Kit/etalon/etalon.md` (Aurora, 39 výřezů),
+  workflow v0 `Docs/Kit/FACTORY_WORKFLOW.md`; jen dokumenty, nic se nestavělo.
 - **Flotila:** Ship Matrix a dossiery publikované (skill `ship-pipeline` 1b); Delver a Farsight jen jako spec.
 - **Nástroje:** `Test.ps1`, `Build.ps1`, CI s offline testy (stav přes veřejné API GitHubu), kritik s prahem `step` /
   `ship`, zámek `HeavyLock.ps1`, snímky v `C:\gamespace-shots` (`shots:` v recenzích), `Cleanup.ps1` na konci kroku.
 
 ## Čeká na rozhodnutí autora
+
+- **Továrna dílů:** schválit workflow v0 a vybrat piloty (návrh: rámový modul chodby + inženýrský terminál); dotočit
+  ve SC mezery z `etalon.md` kap. 4 (kuchyň, stůl, lůžko, rozvody, oblouk, špína, FOV).
 
 - **Autor 5. 10. – věrná kopie SC podle referencí** (pak vlastní styl); pořadí v Dalších krocích, bod 0.
 - **Kokpit v2** (4. 10.): C-01 schválen výchozími volbami (D průmyslový, zakouřené hologramy, HOTAS, krémové obložení –

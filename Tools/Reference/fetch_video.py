@@ -116,10 +116,15 @@ def main():
         offset = sum(p * 60 ** i for i, p in enumerate(reversed(parts)))
     run(cut + ["-i", video, "-vf", "fps=1/%g" % args.every, "-q:v", "2", os.path.join(frames, "f_%05d.jpg")])
 
-    # Name each frame by its time in the video, so a sheet points straight at the file.
+    # Name each frame by its time in the video, so a sheet points straight at the file. A fractional --every
+    # (0.5 s for detail passes) adds tenths, or frames within one second would overwrite each other.
     for index, path in enumerate(sorted(glob.glob(os.path.join(frames, "f_*.jpg")))):
-        seconds = int(offset + index * args.every)
-        os.replace(path, os.path.join(frames, "t%02d_%02d_%02d.jpg" % (seconds // 3600, seconds % 3600 // 60, seconds % 60)))
+        at = offset + index * args.every
+        seconds = int(at)
+        name = "t%02d_%02d_%02d" % (seconds // 3600, seconds % 3600 // 60, seconds % 60)
+        if args.every % 1:
+            name += "_%d" % int(round((at - seconds) * 10))
+        os.replace(path, os.path.join(frames, name + ".jpg"))
 
     # Contact sheets, 4x3 frames each, labelled with the time. With PIL: ffmpeg's drawtext crashes on
     # Windows without a font configured (21. 9. 2026).
@@ -138,9 +143,11 @@ def main():
         sheet = Image.new("RGB", (cell_w * 4, cell_h * 3))
         for slot, path in enumerate(names[sheet_index:sheet_index + 12]):
             image = Image.open(path).convert("RGB").resize((cell_w, cell_h))
-            stamp = os.path.basename(path)[1:-4].replace("_", ":")
+            stamp = ":".join(os.path.basename(path)[1:-4].split("_")[:3])
+            if os.path.basename(path)[1:-4].count("_") == 3:
+                stamp += "." + os.path.basename(path)[1:-4].split("_")[3]
             draw = ImageDraw.Draw(image)
-            draw.rectangle((0, 0, 130, 36), fill=(0, 0, 0))
+            draw.rectangle((0, 0, 160, 36), fill=(0, 0, 0))
             draw.text((8, 4), stamp, fill=(255, 220, 0), font=font)
             sheet.paste(image, ((slot % 4) * cell_w, (slot // 4) * cell_h))
         sheet.save(os.path.join(sheets, "sheet_%03d.jpg" % (sheet_index // 12 + 1)), quality=88)
