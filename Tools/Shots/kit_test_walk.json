@@ -1,1 +1,38 @@
-﻿{"_comment": "The corridor test section reached as the player does (space.Showroom test = the 4th Alt+U stop), packaged game.", "shots": [{"name": "warmup", "camera": "pawn", "hud": 1, "settle": 6.0, "console": ["stat none", "space.Showroom test"]}, {"name": "walked_in", "camera": "pawn", "hud": 1, "settle": 2.0, "console": []}]}
+{
+ "_comment": "The corridor test section reached as the player does (space.Showroom test = the 4th Alt+U stop) and walked through to the terminal (author 7. 10.: the section was not passable - the portal's collision filled it). space.Walk logs where the walk stops.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 6.0,
+   "console": [
+    "stat none",
+    "space.Showroom test"
+   ]
+  },
+  {
+   "name": "a_start",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 1.0,
+   "console": []
+  },
+  {
+   "name": "b_walk_through",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 6.5,
+   "console": [
+    "space.Walk 1 0 6.0 0"
+   ]
+  },
+  {
+   "name": "c_at_terminal",
+   "camera": "pawn",
+   "hud": 1,
+   "settle": 1.0,
+   "console": []
+  }
+ ]
+}

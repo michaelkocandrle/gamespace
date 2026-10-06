@@ -154,6 +154,11 @@ public:
 	/** The 3D view's projection of a ship-space point (cm) into the canvas, from the current orbit. */
 	FVector2D Project(const FVector& P) const;
 
+	/** The 3D view's geometry (BuildWire): edges A-B (kind 1 = a brighter edge), the relay's connection anchors. */
+	TArray<FVector> WireA, WireB, WireAnchors;
+	TArray<uint8> WireKind;
+	void BuildWire();
+
 	/** Where the column of system S stands (its centre x on the canvas) and pip K's box. */
 	static float ColumnX(int32 System);
 	static FBox2D PipBox(float CentreX, int32 Pip);

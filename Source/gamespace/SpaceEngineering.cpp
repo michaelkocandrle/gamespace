@@ -23,19 +23,24 @@
 // =====================================================================================================================
 namespace SpaceEngLocal
 {
-	const FLinearColor Glass(0.010f, 0.030f, 0.036f, 1.f);
-	const FLinearColor PanelFill(0.018f, 0.050f, 0.058f, 1.f);
-	const FLinearColor CardFill(0.050f, 0.115f, 0.130f, 1.f);
-	const FLinearColor Cell(0.060f, 0.165f, 0.185f, 1.f);
-	const FLinearColor Ink(0.50f, 0.90f, 0.93f, 1.f);
-	const FLinearColor InkDim(0.20f, 0.42f, 0.45f, 1.f);
-	const FLinearColor InkFaint(0.10f, 0.22f, 0.24f, 1.f);
-	const FLinearColor PipOff(0.045f, 0.120f, 0.135f, 1.f);
-	const FLinearColor PipEdge(0.16f, 0.32f, 0.35f, 1.f);
-	const FLinearColor White(0.88f, 0.97f, 1.f, 1.f);
-	const FLinearColor Amber(1.f, 0.66f, 0.18f, 1.f);
-	const FLinearColor Red(0.90f, 0.10f, 0.20f, 1.f);
-	const FLinearColor Dark(0.01f, 0.05f, 0.06f, 1.f);
+	// sRGB sampled from the author's capture (7. 10. 2026; Slate colours are linear: the first palette, written as sRGB
+	// numbers, came out pale grey instead of cyan and the glass too light)
+	float Lin(uint8 V) { const float C = V / 255.f; return C <= 0.04045f ? C / 12.92f : FMath::Pow((C + 0.055f) / 1.055f, 2.4f); }
+	FLinearColor SRGB(uint8 R, uint8 G, uint8 B, float A = 1.f) { return FLinearColor(Lin(R), Lin(G), Lin(B), A); }
+	const FLinearColor Glass = SRGB(13, 21, 22);
+	const FLinearColor PanelFill = SRGB(18, 26, 26);
+	const FLinearColor CardFill = SRGB(38, 56, 59);
+	const FLinearColor Cell = SRGB(43, 67, 69);
+	const FLinearColor Ink = SRGB(98, 222, 230);        // over-saturated: the filmic tonemapper bleaches bright cyan
+	const FLinearColor InkDim = SRGB(70, 128, 132);
+	const FLinearColor InkFaint = SRGB(32, 52, 54);
+	const FLinearColor PipOff = SRGB(46, 76, 79);
+	const FLinearColor PipEdge = SRGB(78, 118, 121);
+	const FLinearColor White = SRGB(226, 240, 240);
+	const FLinearColor Amber = SRGB(226, 170, 62);
+	const FLinearColor Red = SRGB(214, 40, 72);
+	const FLinearColor Dark = SRGB(10, 24, 27);
+	const FLinearColor KeyFill = SRGB(78, 198, 208);
 
 	FSlateFontInfo Font(float Size, bool bBold = false)
 	{
@@ -270,10 +275,13 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 	for (float Y = 0.f; Y < CanvasH; Y += 4.f)
 	{
 		FSlateDrawElement::MakeBox(Out, Layer, Geo.ToPaintGeometry(FVector2f(CanvasW, 1.f), FSlateLayoutTransform(FVector2f(0.f, Y))),
-			Pen.WhiteBrush, ESlateDrawEffect::None, FLinearColor(0.03f, 0.08f, 0.09f, 0.35f));
+			Pen.WhiteBrush, ESlateDrawEffect::None, SRGB(30, 48, 50, 0.18f));
 	}
-	FSlateDrawElement::MakeBox(Out, Layer, Geo.ToPaintGeometry(FVector2f(CanvasW * 0.7f, CanvasH * 0.6f), FSlateLayoutTransform(FVector2f(CanvasW * 0.15f, CanvasH * 0.25f))),
-		Pen.WhiteBrush, ESlateDrawEffect::None, FLinearColor(0.02f, 0.06f, 0.07f, 0.35f));
+	for (int32 K = 0; K < 8; ++K)
+	{
+		FSlateDrawElement::MakeBox(Out, Layer, Geo.ToPaintGeometry(FVector2f(CanvasW, 12.f), FSlateLayoutTransform(FVector2f(0.f, K * 12.f))),
+			Pen.WhiteBrush, ESlateDrawEffect::None, SRGB(40, 90, 95, 0.10f * (8 - K) / 8.f));
+	}
 	if (!T)
 	{
 		return Layer + 5;
@@ -299,7 +307,7 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 			const bool bLit = K < FMath::RoundToInt(Pct / 100.f * Ticks);
 			const bool bRedZone = K >= Ticks * 0.75 && H >= 2;
 			const FLinearColor C = bLit ? (Pct < 10.f ? Red : White) : (bRedZone ? Red * FLinearColor(0.6f, 0.6f, 0.6f, 0.7f) : InkFaint);
-			Pen.Lines({ {Tx, 190}, {Tx, 208} }, C, 1.6f);
+			Pen.Lines({ {Tx, 190}, {Tx, 208} }, C, 2.3f);
 		}
 		if (Pct <= 0.f)
 		{
@@ -438,9 +446,9 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 			Pen.Lines({ {554, Y}, {566, Y} }, bLit ? (K > 33 ? Red : Ink) : InkFaint, 1.4f);
 		}
 		Pen.Text(568, 724, TEXT("°C"), 9.0, InkDim);
-		Pen.Fill(482, 745, 548, 785, InkDim * FLinearColor(1, 1, 1, 0.8f));
+		Pen.Fill(482, 745, 548, 785, KeyFill);
 		Pen.Rect(482, 745, 548, 785, Ink, 1.6f);
-		Glyph(Pen, -1, 515, 765, White);
+		Glyph(Pen, -1, 515, 765, Dark);
 		Pen.Text(578, 820, TEXT("POWER SOURCES"), 15.0, InkDim, 0);
 		// the arrow into the systems and the double rules either side
 		Pen.Lines({ {716, 722}, {752, 762}, {716, 802} }, CardFill, 9.f);
@@ -490,8 +498,16 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 				Pen.Lines({ {Cx - PipHalfW - 10, Hy - 3}, {Cx - PipHalfW - 10, Hy + PipH + 3} }, Amber, 2.f);
 				Pen.Text(Cx - PipHalfW - 21, Hy + PipH * 0.5, TEXT("H"), 11.0, Amber, 0);
 			}
-			// the heat bar beside the column
+			// the heat bar beside the column (the coolers have none)
 			const double Bx = Cx + PipHalfW + 10;
+			if (Sys.Group == 2)
+			{
+				const bool bKeyOn2 = Sys.bOn;
+				Pen.Fill(Cx - 32, 742, Cx + 32, 782, bKeyOn2 ? KeyFill : PipOff);
+				Pen.Rect(Cx - 32, 742, Cx + 32, 782, bKeyOn2 ? White * FLinearColor(1, 1, 1, 0.6f) : PipEdge, 1.2f);
+				Glyph(Pen, Sys.Icon, Cx, 762, bKeyOn2 ? Dark : InkDim);
+				continue;
+			}
 			const double Top = 592.0;
 			const int32 Ticks = 40;
 			for (int32 K = 0; K < Ticks; ++K)
@@ -504,7 +520,7 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 			Pen.Text(Bx + 12, 722, TEXT("°C"), 9.0, InkDim);
 			// the key
 			const bool bKeyOn = Sys.bOn && !bQuantumLocked;
-			Pen.Fill(Cx - 32, 742, Cx + 32, 782, bKeyOn ? Ink * FLinearColor(0.8f, 0.8f, 0.8f, 1.f) : PipOff);
+			Pen.Fill(Cx - 32, 742, Cx + 32, 782, bKeyOn ? KeyFill : PipOff);
 			Pen.Rect(Cx - 32, 742, Cx + 32, 782, bKeyOn ? White * FLinearColor(1, 1, 1, 0.6f) : PipEdge, 1.2f);
 			Glyph(Pen, Sys.Icon, Cx, 762, bKeyOn ? Dark : InkDim);
 		}
@@ -521,6 +537,9 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 	else if (T->Tab == 0)
 	{
 		// ---- 3D VIEW: the ship's wireframe ----------------------------------------------------------------------------
+		// clipped to the panel: the x-ray spilled over the header and the tabs
+		const FVector2D ClipA = Ref(240.0, 336.0), ClipB = Ref(1808.0, 888.0);
+		Out.PushClip(FSlateClippingZone(FSlateRect(FVector2f(Geo.LocalToAbsolute(ClipA)), FVector2f(Geo.LocalToAbsolute(ClipB)))));
 		const FLinearColor Wire(0.30f, 0.75f, 0.80f, 0.22f), WireBright(0.55f, 0.95f, 1.f, 0.55f);
 		// the rooms: the corridor's frames and the end room as boxes (the filter ROOMS)
 		auto BoxLines = [&](const FVector& C, const FVector& E, const FLinearColor& Col, float Th)
@@ -535,38 +554,15 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 		};
 		if (T->Filters[2])
 		{
-			// the corridor's octagonal frames every 120 cm and the longitudinal edges between them
-			const FVector2D Oct[] = { {-120, 0}, {120, 0}, {120, 130}, {60, 210}, {60, 230}, {-60, 230}, {-60, 210}, {-120, 130} };
-			for (int32 F = 0; F < 6; ++F)
+			// the rooms: the ship's own geometry as an x-ray (ASpaceEngineeringTerminal::BuildWire) - every edge twice, a
+			// wide faint glow under a thin line, so overlapping layers build up the way SC's 3D view glows
+			for (int32 K = 0; K < T->WireA.Num(); ++K)
 			{
-				const double X = -300.0 + F * 120.0;
-				TArray<FVector2D> Ring;
-				for (const FVector2D& O : Oct)
-				{
-					Ring.Add(T->Project(FVector(X, O.X, O.Y)));
-				}
-				Ring.Add(FVector2D(Ring[0]));
-				Pen.LinesC(Ring, F == 0 || F == 5 ? WireBright : Wire, 1.4f, 2);
-				// an inner frame ring (the portal's soffit), fainter
-				TArray<FVector2D> Inner;
-				for (const FVector2D& O : Oct)
-				{
-					Inner.Add(T->Project(FVector(X, O.X * 0.9, O.Y * 0.92 + 6)));
-				}
-				Inner.Add(FVector2D(Inner[0]));
-				Pen.LinesC(Inner, Wire * FLinearColor(1, 1, 1, 0.6f), 1.f, 2);
+				const FVector2D A = T->Project(T->WireA[K]), B = T->Project(T->WireB[K]);
+				const bool bBright = T->WireKind[K] > 0;
+				Pen.LinesC({ A, B }, FLinearColor(0.25f, 0.75f, 0.85f, bBright ? 0.10f : 0.05f), 4.f, 2);
+				Pen.LinesC({ A, B }, FLinearColor(0.45f, 0.90f, 1.f, bBright ? 0.55f : 0.24f), 1.1f, 2);
 			}
-			for (const FVector2D& O : Oct)
-			{
-				Pen.LinesC({ T->Project(FVector(-300, O.X, O.Y)), T->Project(FVector(300, O.X, O.Y)) }, Wire, 1.2f, 2);
-			}
-			// floor plates and the end room
-			for (int32 F = 0; F < 5; ++F)
-			{
-				const double X = -300.0 + F * 120.0 + 60.0;
-				BoxLines(FVector(X, 0, 2), FVector(40, 55, 2), Wire, 1.f);
-			}
-			BoxLines(FVector(390, 0, 115), FVector(90, 150, 115), Wire, 1.2f);
 		}
 		if (T->Filters[0])
 		{
@@ -581,11 +577,9 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 			{
 				Pen.LinesC({ From, T->Project(T->Components[K].Centre) }, WireBright, 1.4f, 3);
 			}
-			for (int32 K = 0; K < 18; ++K)
+			for (const FVector& Anchor : T->WireAnchors)
 			{
-				const double X = -300.0 + (K % 6) * 120.0;
-				const double Y = (K / 6 - 1) * 110.0;
-				Pen.LinesC({ From, T->Project(FVector(X, Y, K % 2 ? 230.0 : 0.0)) }, Wire, 1.f, 3);
+				Pen.LinesC({ From, T->Project(Anchor) }, FLinearColor(0.55f, 0.95f, 1.f, 0.30f), 1.f, 3);
 			}
 		}
 		// the components: bright blocks, the selected one with a ring and its letter
@@ -601,7 +595,9 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 					Bounds += T->Project(Corner);
 				}
 				const bool bSel = K == T->SelectedComponent;
-				Pen.FillC(Bounds.Min, Bounds.Max, FLinearColor(0.45f, 0.9f, 0.95f, bSel ? 0.55f : 0.32f), 3);
+				Pen.FillC(Bounds.Min - FVector2D(10, 10), Bounds.Max + FVector2D(10, 10), FLinearColor(0.3f, 0.85f, 1.f, 0.10f), 3);
+				Pen.FillC(Bounds.Min - FVector2D(4, 4), Bounds.Max + FVector2D(4, 4), FLinearColor(0.4f, 0.9f, 1.f, 0.16f), 3);
+				Pen.FillC(Bounds.Min, Bounds.Max, FLinearColor(0.55f, 0.95f, 1.f, bSel ? 0.85f : 0.55f), 3);
 				BoxLines(C.Centre, C.Extent, FLinearColor(0.75f, 1.f, 1.f, 0.9f), 1.6f);
 				if (T->bShowIcons)
 				{
@@ -622,6 +618,7 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 				}
 			}
 		}
+		Out.PopClip();
 		// the filters
 		Pen.Fill(285, 712, 520, 880, FLinearColor(0.f, 0.f, 0.f, 0.35f));
 		Pen.Text(298, 727, TEXT("FILTERS"), 14.0, White);
@@ -764,11 +761,12 @@ void ASpaceEngineeringTerminal::Seed()
 		Components.Add(K);
 	};
 	Components.Reset();
-	Comp(TEXT("R"), TEXT("RELAY"), TEXT("Fuses"), TEXT("2/2"), FVector(-40, 0, 200), FVector(30, 22, 14));
-	Comp(TEXT("P"), TEXT("POWER PLANT"), TEXT("Output"), TEXT("10/10"), FVector(400, 0, 55), FVector(45, 40, 55));
-	Comp(TEXT("C"), TEXT("COOLER"), TEXT("Coolant"), TEXT("100%"), FVector(400, -110, 35), FVector(25, 20, 35));
-	Comp(TEXT("C"), TEXT("COOLER"), TEXT("Coolant"), TEXT("100%"), FVector(400, 110, 35), FVector(25, 20, 35));
-	Comp(TEXT("L"), TEXT("LIFE SUPPORT"), TEXT("Filters"), TEXT("4/4"), FVector(-260, 95, 40), FVector(22, 15, 40));
+	Comp(TEXT("R"), TEXT("RELAY"), TEXT("Fuses"), TEXT("2/2"), FVector(-60, 0, 205), FVector(26, 20, 12));
+	Comp(TEXT("P"), TEXT("POWER PLANT"), TEXT("Output"), TEXT("10/10"), FVector(280, 0, 50), FVector(40, 38, 50));
+	Comp(TEXT("C"), TEXT("COOLER"), TEXT("Coolant"), TEXT("100%"), FVector(280, -105, 32), FVector(22, 18, 32));
+	Comp(TEXT("C"), TEXT("COOLER"), TEXT("Coolant"), TEXT("100%"), FVector(280, 105, 32), FVector(22, 18, 32));
+	Comp(TEXT("L"), TEXT("LIFE SUPPORT"), TEXT("Filters"), TEXT("4/4"), FVector(-150, 108, 60), FVector(10, 8, 22));
+	BuildWire();
 }
 
 void ASpaceEngineeringTerminal::BeginPlay()
@@ -998,15 +996,101 @@ FVector ASpaceEngineeringTerminal::CanvasToWorld(const FVector2D& Canvas) const
 
 FVector2D ASpaceEngineeringTerminal::Project(const FVector& P) const
 {
-	// a slow orbit round the ship from above and behind, perspective, into the 3D view's panel
-	const double Yaw = FMath::DegreesToRadians(Orbit + 200.0), Pitch = FMath::DegreesToRadians(24.0);
-	const FVector C = P - FVector(60, 0, 115);
-	const double X1 = C.X * FMath::Cos(Yaw) - C.Y * FMath::Sin(Yaw), Y1 = C.X * FMath::Sin(Yaw) + C.Y * FMath::Cos(Yaw);
-	const double Depth = X1 * FMath::Cos(Pitch) + C.Z * FMath::Sin(Pitch) + 1100.0;
-	const double Up = -X1 * FMath::Sin(Pitch) + C.Z * FMath::Cos(Pitch);
-	const double F = 1350.0 / FMath::Max(200.0, Depth);
-	const FVector2D Centre = USpaceEngineeringScreen::Ref(1030.0, 610.0);
-	return Centre + FVector2D(Y1 * F, -Up * F) * USpaceEngineeringScreen::RefScale;
+	// SC's 3D view looks along the ship from inside its start, a little above the floor: the camera before the first
+	// frame, aimed down the corridor at the end room, swaying slowly from side to side
+	const double Sway = FMath::Sin(FMath::DegreesToRadians(Orbit * 3.0));
+	const FVector Eye(-470.0, 70.0 * Sway, 165.0);
+	const FVector Aim(260.0, -40.0 * Sway, 95.0);
+	const FVector F = (Aim - Eye).GetSafeNormal();
+	const FVector R = FVector::CrossProduct(FVector::UpVector, F).GetSafeNormal();
+	const FVector U = FVector::CrossProduct(F, R);
+	const FVector D = P - Eye;
+	const double Depth = FMath::Max(15.0, FVector::DotProduct(D, F));
+	const double Focal = 720.0;
+	const FVector2D Centre = USpaceEngineeringScreen::Ref(1030.0, 600.0);
+	return Centre + FVector2D(FVector::DotProduct(D, R), -FVector::DotProduct(D, U)) * (Focal / Depth) * USpaceEngineeringScreen::RefScale;
+}
+
+void ASpaceEngineeringTerminal::BuildWire()
+{
+	// the test section as the 3D view draws it (cm, x along the corridor from its middle): the portals' frames (an outer
+	// and an inner ring, 30 cm deep), the boots, the wall modules' fields, the floor plates, the ceiling lights, the end
+	// room
+	WireA.Reset();
+	WireB.Reset();
+	WireKind.Reset();
+	WireAnchors.Reset();
+	auto Seg = [this](const FVector& A, const FVector& B, uint8 Kind) { WireA.Add(A); WireB.Add(B); WireKind.Add(Kind); };
+	auto Poly = [&](const TArray<FVector>& Pts, bool bClose, uint8 Kind)
+	{
+		for (int32 K = 0; K + 1 < Pts.Num(); ++K)
+		{
+			Seg(Pts[K], Pts[K + 1], Kind);
+		}
+		if (bClose && Pts.Num() > 2)
+		{
+			Seg(Pts.Last(), Pts[0], Kind);
+		}
+	};
+	const FVector2D Oct[] = { {-120, 0}, {-120, 130}, {-60, 210}, {-60, 230}, {60, 230}, {60, 210}, {120, 130}, {120, 0} };
+	auto Ring = [&](double X, double Inset)
+	{
+		TArray<FVector> Out;
+		for (const FVector2D& O : Oct)
+		{
+			const double Y = O.X - FMath::Sign(O.X) * Inset;
+			const double Z = O.Y < 1.0 ? 0.0 : O.Y - (O.Y > 220.0 ? Inset : 0.0);
+			Out.Add(FVector(X, Y, Z));
+		}
+		return Out;
+	};
+	for (int32 F = 0; F < 5; ++F)
+	{
+		const double X0 = -300.0 + F * 120.0, X1 = X0 + 30.0;
+		const TArray<FVector> A0 = Ring(X0, 0.0), A1 = Ring(X1, 0.0), B0 = Ring(X0, 10.0), B1 = Ring(X1, 10.0);
+		Poly(B0, false, 1);
+		Poly(B1, false, 1);
+		Poly(A0, false, 0);
+		Poly(A1, false, 0);
+		for (int32 K = 0; K < B0.Num(); ++K)
+		{
+			Seg(B0[K], B1[K], 0);
+			WireAnchors.Add(B0[K]);
+		}
+		for (const double S : { -1.0, 1.0 })
+		{
+			const FVector C(X0 + 15.0, S * 103.0, 15.0);
+			const FVector E(15.0, 17.0, 0.0);
+			Poly({ C + FVector(-E.X, -E.Y, 0), C + FVector(E.X, -E.Y, 0), C + FVector(E.X, E.Y, 0), C + FVector(-E.X, E.Y, 0) }, true, 0);
+		}
+		if (F == 4)
+		{
+			break;
+		}
+		// the wall module up to the next frame: the main field (two levels), the vent band, the slope panel
+		const double M0 = X1 + 6.0, M1 = X0 + 120.0 - 6.0;
+		for (const double S : { -1.0, 1.0 })
+		{
+			const double Y = S * 119.0;
+			Poly({ FVector(M0, Y, 39), FVector(M1, Y, 39), FVector(M1, Y, 112), FVector(M0, Y, 112) }, true, 0);
+			Poly({ FVector(M0 + 4, Y, 45), FVector(M1 - 4, Y, 45), FVector(M1 - 4, Y, 106), FVector(M0 + 4, Y, 106) }, true, 0);
+			Poly({ FVector(M0, Y, 13), FVector(M1, Y, 13), FVector(M1, Y, 33), FVector(M0, Y, 33) }, true, 0);
+			Poly({ FVector(M0, S * 116.0, 136.0), FVector(M1, S * 116.0, 136.0), FVector(M1, S * 64.0, 205.0), FVector(M0, S * 64.0, 205.0) }, true, 0);
+		}
+		Poly({ FVector(M0, -55, 0), FVector(M1, -55, 0), FVector(M1, 55, 0), FVector(M0, 55, 0) }, true, 0);
+		Poly({ FVector(M0 + 10, -45, 0), FVector(M1 - 10, -45, 0), FVector(M1 - 10, 45, 0), FVector(M0 + 10, 45, 0) }, true, 0);
+		const double Lc = (M0 + M1) * 0.5;
+		Poly({ FVector(Lc - 25, -6, 229), FVector(Lc + 25, -6, 229), FVector(Lc + 25, 6, 229), FVector(Lc - 25, 6, 229) }, true, 1);
+		WireAnchors.Add(FVector(Lc, 0, 229));
+	}
+	// the end room with the terminal's wall
+	const double RX0 = 180.0, RX1 = 360.0, RY = 150.0, RZ = 240.0;
+	Poly({ FVector(RX0, -RY, 0), FVector(RX1, -RY, 0), FVector(RX1, RY, 0), FVector(RX0, RY, 0) }, true, 0);
+	Poly({ FVector(RX0, -RY, RZ), FVector(RX1, -RY, RZ), FVector(RX1, RY, RZ), FVector(RX0, RY, RZ) }, true, 0);
+	for (const FVector2D& C : { FVector2D(RX0, -RY), FVector2D(RX1, -RY), FVector2D(RX1, RY), FVector2D(RX0, RY) })
+	{
+		Seg(FVector(C.X, C.Y, 0), FVector(C.X, C.Y, RZ), 0);
+	}
 }
 
 void ASpaceEngineeringTerminal::GatherHotspots(TArray<FSpaceHotspot>& Out)
