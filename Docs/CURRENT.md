@@ -36,15 +36,15 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 - **Interiérový kit** (`ArtSource/Kit/kit_rules.json`, `kit_parts.json`): dávky 1–3, 4 zčásti, 6 (nábytek kajuty);
   ukázka v `TestSpace` (U). Strop 500 + 3500 trojúhelníků na metr (autor 30. 9.; převezme `kit_manifest.json`).
 - **Továrna dílů** (6. 10.): `Docs/Kit/` soupis `catalog_draft.md`, etalon SC `etalon/etalon.md`, workflow
-  `FACTORY_WORKFLOW.md` **v0.2**; **pilot 1 `KF-PORTAL-01`**: list rev. E, **krok 5–6 hotové** (detail, UE), STOP před krokem 7.
+  `FACTORY_WORKFLOW.md` **v0.2**; **pilot 1 `KF-PORTAL-01`**: list rev. F, **krok 7–8 hotové** (výkon ~1 ms; kritik FAIL 5,2 po 3 kolech), STOP před krokem 9.
 - **Flotila:** Ship Matrix a dossiery publikované (skill `ship-pipeline` 1b); Delver a Farsight jen jako spec.
 - **Nástroje:** `Test.ps1`, `Build.ps1`, CI s offline testy (stav přes veřejné API GitHubu), kritik s prahem `step` /
   `ship` / `part`, zámek `HeavyLock.ps1`, snímky v `C:\gamespace-shots` (`shots:` v recenzích), `Cleanup.ps1` na konci kroku.
 
 ## Čeká na rozhodnutí autora
 
-- **Továrna – STOP:** posoudit detail KF-PORTAL-01 (`Docs/Reviews/2026-10-06_kf_portal_01_detail.md`): otevřené rozptyl
-  kalichu, drážka L3, síla špíny; závoj interiéru bez kokpitu; pilot 2 až po retrospektivě (`Docs/Kit/retro/`).
+- **Továrna – STOP:** krok 9 KF-PORTAL-01 (oko ve hře, `space.Showroom test` / Alt+U); kritik FAIL 5,2
+  (`Docs/Reviews/2026-10-06_kf_portal_01_critic.md`): jas úseku (L3 jen nepřímé), 3. vrstva pilíře, logo, deska; P25 při přestavbě Wayfareru.
 - **Autor 5. 10. – věrná kopie SC podle referencí** (pak vlastní styl); pořadí v Dalších krocích, bod 0.
 - **Kokpit v2** (4. 10.): C-01 schválen výchozími volbami (D průmyslový, zakouřené hologramy, HOTAS, krémové obložení –
   autor může změnit); hotové holoprojektory MFD (CK-HP-L/R) a vnitřní rám kanopy (CK-CF); dál HOTAS, konzole a ovladače, materiály, střed.

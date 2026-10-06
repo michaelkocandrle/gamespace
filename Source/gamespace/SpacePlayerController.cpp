@@ -768,6 +768,8 @@ namespace
 	const FName ShowroomSpawnTag(TEXT("KitShowroomSpawn"));
 	const FName ShowroomAnnexSpawnTag(TEXT("KitShowroomAnnexSpawn"));
 	const FName ShowroomStairsSpawnTag(TEXT("KitShowroomStairsSpawn"));
+	// the parts factory's corridor test section behind the stair bay (KF-PORTAL-01, 6. 10. 2026)
+	const FName ShowroomTestSpawnTag(TEXT("KitShowroomTestSpawn"));
 
 	// MegaLights variant C (author, 27. 9. 2026): interiors are lit through MegaLights with the fixtures' ray-traced
 	// shadows (the kit showroom's lights cast shadows in the level); the view from the ship and the planet keep
@@ -928,9 +930,9 @@ void ASpacePlayerController::HandleShowroomKey(const FInputActionValue& /*Value*
 	}
 	if (!IsMenuOpen() && !IsTitleScreen())
 	{
-		// U walks a round: the showroom, its annex (the catalogue-only kit parts), the stair bay (batch 3), then
-		// back where the player came from (author, 27. 9. 2026)
-		static const FName Round[] = {ShowroomSpawnTag, ShowroomAnnexSpawnTag, ShowroomStairsSpawnTag};
+		// U walks a round: the showroom, its annex (the catalogue-only kit parts), the stair bay (batch 3), the parts
+		// factory's test section (6. 10. 2026), then back where the player came from (author, 27. 9. 2026)
+		static const FName Round[] = {ShowroomSpawnTag, ShowroomAnnexSpawnTag, ShowroomStairsSpawnTag, ShowroomTestSpawnTag};
 		int32 Stop = INDEX_NONE;
 		for (int32 i = 0; bWalkingInterior && i < UE_ARRAY_COUNT(Round); ++i)
 		{

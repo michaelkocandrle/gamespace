@@ -169,17 +169,21 @@ def view_front(ax, spec, secs):
         pts = [(s * (half - v / 1000), z / 1000) for v, z in boot_section(spec)]
         ax.add_patch(Polygon(pts, fc=C_BOOT, ec=C_FRAME_E, lw=0.6))
         ax.plot([s * (half - v1 / 1000), s * (half - (v1 - 12) / 1000)], [h / 1000, h / 1000], color=C_LIP, lw=2.0)
-        yb, yd = s * (half - v1 / 1000), s * (half - (v1 - cp["depth_by_section"]["W"]) / 1000)
+        yb, yd = s * (half - v1 / 1000), s * (half - (v1 - cp["well_by_section"]["W"]) / 1000)
         zc, r = cp["z_by_section"]["W"] / 1000, cp["size"] / 2000
         ax.add_patch(Polygon([(yb, zc - r), (yd, zc - r), (yd, zc + r), (yb, zc + r)], fc="#3a3c41", ec="k", lw=0.4))
         ax.add_patch(Circle((yd + s * 0.004, zc), 0.007, fc="white", ec="#9fb6e0", lw=0.5))
         ty = s * (w["ceiling_width"] / 2 - p)
         ax.add_patch(Circle((ty * 0.97, w["vertical_to"] + w["slope_rise"] - 0.02), 0.03, fc=C_WARM, ec="k", lw=0.4))
-    cw = w["ceiling_width"] / 2 - 0.07
-    ax.plot([-cw, cw], [w["ceiling"] - 0.055, w["ceiling"] - 0.055], color=C_WARM, lw=1.5, ls=(0, (3, 1)))
-    note(ax, (half - v1 / 1000, 0.07), "L1 bota 150 mm, plochá, kalich hl. 60", (0.3, 0.62))
+    # rev. F: the coffer (graphite plate at the ceiling) and L3 lying on the top member, aimed up into it
+    cw = w["ceiling_width"] / 2
+    gap = spec["l3"]["gap_mm"] / 1000
+    ax.add_patch(Rectangle((-cw - 0.05, w["ceiling"]), 2 * cw + 0.1, 0.02, fc="#3a3c41", ec="k", lw=0.3))
+    ax.plot([-cw + 0.1, cw - 0.1], [w["ceiling"] - gap + 0.006] * 2, color=C_WARM, lw=1.5, ls=(0, (3, 1)))
+    note(ax, (half - v1 / 1000, 0.07), "L1 bota 150 mm, plochá, kalich hl. %d + rozptyl na podlahu" % cp["well_by_section"]["W"],
+         (0.3, 0.62))
     note(ax, (0.5, 2.08), "L2 horní roh Ø60, 18 cd, kužel 100°", (0.75, 2.5))
-    note(ax, (0.0, w["ceiling"] - 0.055), "L3 2× skrytá lišta v drážce u koruny (jen horní člen)", (-1.4, 2.62))
+    note(ax, (0.0, w["ceiling"] - gap + 0.006), "L3 lišta na horním členu, míří nahoru do kazety (zdroj nad okem)", (-1.4, 2.62))
     note(ax, (-half + 0.05, 0.9), "rám = jeden tvar v laku,\nčela stupňů zkosená 45°", (-1.45, 1.2))
     note(ax, (-(half - p), 0.7), "leštěná zkosená hrana koruny", (-0.95, 0.42))
     dim(ax, (-half + p, -0.12), (half - p, -0.12), "světlost u podlahy %.2f m (nad botami %.2f)" % (
@@ -307,9 +311,9 @@ def view_profile(ax, spec):
             ax.plot([u0, u1], [v0, v1], color=C_LIP, lw=4, solid_capstyle="butt")
         elif r == "edge":
             ax.plot([u0, u1], [v0, v1], color="#c0392b", lw=2, solid_capstyle="butt")
-    # L3: the rev. B grooves sat on step 2's ledge, which the rev. E facets replace - its new place is an open point
-    ax.text(150, -20, "L3 skrytá lišta: místo drážky po rev. E otevřené (zdroj nesmí být z oka vidět)", fontsize=5.5,
-            ha="center", color="#c0392b")
+    # rev. F: L3 left the profile - it lies on the top member's upper face (40 mm under the ceiling), aimed up
+    ax.text(150, -20, "L3 (rev. F): na horní ploše horního členu 40 mm pod stropem, míří do kazety – zdroj z oka nevidět",
+            fontsize=5.5, ha="center", color="#555")
     cf = pr["cuff"]
     ax.add_patch(Rectangle((cf["u0"], 100 - cf["depth"]), cf["u1"] - cf["u0"], cf["depth"], fc=C_RUBBER, ec="k", lw=0.4))
     u = cf["u0"] + 3
@@ -356,7 +360,7 @@ def view_floor(ax, spec, secs):
                 ax.add_patch(Polygon(pts, fc=C_BOOT, ec=C_LIP, lw=1.2))
                 # rev. E: the cup's well in plan (dashed), its small source at the bottom
                 yb = s * (half - v1 / 1000)
-                yd = s * (half - (v1 - cp["depth_by_section"]["W"]) / 1000)
+                yd = s * (half - (v1 - cp["well_by_section"]["W"]) / 1000)
                 ax.add_patch(Rectangle((x + (cp["u"] - cp["size"] / 2) / 1000, min(yb, yd)), cp["size"] / 1000, abs(yd - yb),
                                        fc="#3a3c41", ec=C_FRAME_E, lw=0.4, ls="--"))
                 ax.add_patch(Circle((x + cp["u"] / 1000, yd - s * 0.006), 0.007, fc="white", ec="#9fb6e0", lw=0.4))
@@ -401,27 +405,38 @@ def view_joint(ax, spec):
     b = spec["boot"]
     cp = b["cup"]
     v1, prot, h = boot_dims(spec)
-    dep, zc, r = cp["depth_by_section"]["W"], cp["z_by_section"]["W"], cp["size"] / 2
+    dep, zc, r = cp["well_by_section"]["W"], cp["z_by_section"]["W"], cp["size"] / 2
     ax.add_patch(Rectangle((-60, -60), 340, 60, fc="#d8d8d8", ec="#888", lw=0.4, hatch="////"))
     ax.add_patch(Rectangle((-60, 0), 60, 330, fc="#55585e", ec="k", lw=0.4))
     ax.add_patch(Polygon(boot_section(spec), fc=C_BOOT, ec=C_FRAME_E, lw=0.7))
     ax.add_patch(Rectangle((0, h), prot, 330 - h, fc=C_FRAME, ec="k", lw=0.5))
     ax.text(prot / 2, h + 80, "pilíř\n(jeden tvar)", fontsize=5.5, ha="center", va="center")
     ax.add_patch(Rectangle((v1 - 12, h - 12), 13, 13, fc=C_LIP, ec="k", lw=0.4))
-    ax.add_patch(Rectangle((v1 - dep, zc - r), dep, 2 * r, fc="#e9eef8", ec=C_FRAME_E, lw=0.6))
+    # rev. F: graphite walls (the room no longer lights them white), a polished rim 6 mm round the mouth, a groove
+    ax.add_patch(Rectangle((v1 - dep, zc - r), dep, 2 * r, fc="#5a5d63", ec=C_FRAME_E, lw=0.6))
+    ax.add_patch(Rectangle((v1 - dep, zc - r), dep * 0.4, 2 * r, fc="#9aa4b8", ec="none", alpha=0.6))
+    ax.add_patch(Rectangle((v1, zc - r - cp["rim"]), 2.5, cp["rim"], fc=C_LIP, ec="k", lw=0.3))
+    ax.add_patch(Rectangle((v1, zc + r), 2.5, cp["rim"], fc=C_LIP, ec="k", lw=0.3))
+    zg = h - b["groove_from_top"]
+    ax.add_patch(Rectangle((v1 - 1, zg - 1.5), 3, 3, fc="#222", ec="none"))
+    sp = cp["spill"]
+    ax.annotate("", xy=(v1 + 120, 0), xytext=(v1 + 20, h * 0.8), arrowprops=dict(arrowstyle="->", color=C_COOL, lw=0.8))
     ax.add_patch(Rectangle((v1 - dep, zc - r), 4, 2 * r, fc="#3a3c41", ec="none"))
     ax.add_patch(Circle((v1 - dep + 6, zc), cp["emitter"] / 2, fc="white", ec="#9fb6e0", lw=0.6))
     ax.add_patch(Circle((v1 - dep + 9, zc), 3, fc="#ffffff", ec=C_COOL, lw=0.5))
-    for rr, a in ((40, 0.5), (90, 0.25), (160, 0.12)):
+    for rr, a in ((20, 0.5), (40, 0.25)):
         ax.add_patch(Circle((v1 - dep + 9, zc), rr, fc="none", ec="#9fb6e0", lw=0.5, alpha=a * 2, ls="--"))
     ax.add_patch(Rectangle((v1, -6), 18, 6, fc=C_LIP, ec="none"))
     ax.add_patch(Rectangle((v1 + 18, -6), 140, 6, fc="#5f636a", ec="k", lw=0.3))
     note(ax, (v1 - 5, h - 5), "leštěná hrana nahoře 12 mm, plochý vrch", (v1 + 30, h + 90))
-    note(ax, (v1 - dep / 2, zc + r - 4), "kalich: osmiboká jamka %d, hl. %d;\nsvítí vnitřní stěny" % (cp["size"], dep), (v1 + 30, zc + 115))
+    note(ax, (v1 - dep / 2, zc + r - 4), "kalich %d, hl. %d, grafitové stěny:\nsvětlo u zdroje → tma u ústí;\nleštěný rámeček %d" % (
+        cp["size"], dep, cp["rim"]), (v1 + 30, zc + 110))
+    note(ax, (v1, zg), "drážka %d mm pod vrchem" % b["groove_from_top"], (v1 + 40, 140))
+    note(ax, (v1 + 70, h * 0.4), "rozptyl %.1f cd, %d°,\n~0,5 m, bez stínů" % (sp["cd"], sp["cone_deg"]), (v1 + 90, 60))
     note(ax, (v1 - dep + 6, zc - 6), "zdroj Ø%d u tmavého dna = malý bod" % cp["emitter"], (v1 + 30, zc - 60))
     dim(ax, (0, -30), (v1, -30), "%d (N %d)" % (v1, b["v1_by_section"]["N"]))
     dim(ax, (-35, 0), (-35, h), "%d (N %d)" % (h, b["height_by_section"]["N"]), off=(-14, 0))
-    ax.text(130, 345, "bota L1 rev. E – řez kalichem (mm)", fontsize=6, ha="center", color="#555")
+    ax.text(130, 345, "bota L1 rev. F – řez kalichem (mm)", fontsize=6, ha="center", color="#555")
     ax.set_xlim(-100, 420)
     ax.set_ylim(-70, 360)
 
@@ -513,7 +528,7 @@ def main():
                                                                           view_profile(ax, spec))),
         ("podlaha", fig.add_axes([0.03, 0.05, 0.30, 0.40]), lambda ax: (setup(ax, "4 Podlaha – půdorys 2 × 1,2 (W)",
                                                                               "1:20"), view_floor(ax, spec, secs))),
-        ("napojeni", fig.add_axes([0.36, 0.05, 0.22, 0.40]), lambda ax: (setup(ax, "5 Patka L1 – bota rev. E, řez",
+        ("napojeni", fig.add_axes([0.36, 0.05, 0.22, 0.40]), lambda ax: (setup(ax, "5 Patka L1 – bota rev. F, řez",
                                                                                "1:5"), view_joint(ax, spec))),
         ("oko_12", fig.add_axes([0.61, 0.23, 0.19, 0.29]), lambda ax: (setup(ax, "6a Pohled z oka – rozteč 1,2", ""),
                                                                            view_eye(ax, spec, secs, 1.2))),

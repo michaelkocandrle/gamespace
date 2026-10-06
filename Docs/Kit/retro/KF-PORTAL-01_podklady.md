@@ -26,3 +26,27 @@ Sběr během pilotu. Retrospektiva po dokončení pilotu z nich udělá návrh w
 | Bota se zkosením do pilíře četla z oka jako stříška | Tvary u paty: plochý vrch, zkosení jen svislých hran; zkontrolovat siluetu z oka 1,65 m |
 | Kalich: světlo pár cm od světlého dna = plochý bílý osmiúhelník (3 kola) | Svítidlo-záře: tmavé dno, zdroj malý, světlo slabé (≈ 0,05 cd) u dna; ověřit snímkem zblízka v prvním kole |
 | A/B (P5) odhalil, že se nepoložila žádná karta špíny (chyba v `hs_decals`) | A/B snímek je povinný i tehdy, když build hlásí jen „no faces“ – číst `decals_failed` v KITBUILD |
+
+## Rev. F (autor 6. 10.: krok 5–6 schváleny s úpravami)
+
+**Úpravy autora:**
+1. Kalich s přechodem do tmy a tmavým dnem, leštěný rámeček, drážka na botě, z dálky jasný bod.
+2. Slabé světlo jen na podlahu.
+3. L3 skrytá z každého směru.
+4. Stejné šrouby.
+5. Špína alfa ~0,8 jen na místech vzniku, A/B.
+
+**Poučení:**
+- Kalich s lakovanými stěnami osvětlí místnost a čte se jako bílé okénko. Stěny musí být tmavé, světlo nese jen
+  zdroj.
+- Hloubka kalichu a úhel pohledu z oka: při 60 mm a r 35 mm není dno ani zdroj z oka pod 45° vidět. Hloubka
+  ≤ r.
+- Nepřímé světlo potřebuje světlý odražeč. Grafitová kazeta světlo pohltila; i lakovaná vrací do chodby málo. Skrytý
+  zdroj s malou plochou úsek ztmaví proti etalonu. U dílu, který nese celé světlo chodby, rozhodnout o přímé složce
+  už na listu.
+- Paprsky karty špíny startují 6 cm nad plochou. Karta, která zasahuje pod jiný tvar (botu), se vytratí. Kartu
+  klást s odstupem.
+- Leštěné šrouby zrcadlí místnost (2 tmavé, 2 světlé). Malé kovové prvky dělat saténové.
+- Kritik se na dílu zasekne kolem 5: lokální opravy skóre nehnou. Pilotní práh „všech šest ≥ 7“ vyžaduje
+  systémové kroky (materiálová deska: šum drsnosti, lem, podlaha; značení výrobce; tmavá špína) dřív, než díl
+  dostane kritika.

@@ -174,13 +174,14 @@ namespace
 
 	FAutoConsoleCommandWithWorldAndArgs ShowroomCommand(
 		TEXT("space.Showroom"),
-		TEXT("space.Showroom [annex|stairs]: walk the interior kit showroom in TestSpace, its annex with the catalogue-only parts or the stair bay (from the ship or another interior, or back). U in the game walks showroom -> annex -> stair bay -> back."),
+		TEXT("space.Showroom [annex|stairs|test]: walk the interior kit showroom in TestSpace, its annex with the catalogue-only parts, the stair bay or the parts factory's test section (from the ship or another interior, or back). Alt+U in the game walks showroom -> annex -> stair bay -> test section -> back."),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
 		{
 			ASpacePlayerController* Controller = World ? Cast<ASpacePlayerController>(World->GetFirstPlayerController()) : nullptr;
 			const FString Stop = Args.Num() > 0 ? Args[0].ToLower() : FString();
 			const TCHAR* Tag = Stop == TEXT("annex") ? TEXT("KitShowroomAnnexSpawn")
-				: Stop == TEXT("stairs") ? TEXT("KitShowroomStairsSpawn") : TEXT("KitShowroomSpawn");
+				: Stop == TEXT("stairs") ? TEXT("KitShowroomStairsSpawn")
+				: Stop == TEXT("test") ? TEXT("KitShowroomTestSpawn") : TEXT("KitShowroomSpawn");
 			const bool bDone = Controller && Controller->ToggleInteriorAt(Tag);
 			UE_LOG(LogSpaceInterior, Display, TEXT("space.Showroom: %s"), bDone
 				? (Controller->IsWalkingInterior() ? TEXT("walking the kit showroom") : TEXT("back"))

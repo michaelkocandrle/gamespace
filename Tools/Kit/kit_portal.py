@@ -197,12 +197,14 @@ def threshold(p, sec_key):
             yy = s * (edge + 0.012 + g * 0.014)
             ya, yb = sorted((yy - 0.002, yy + 0.002))
             p.box("Kit_Seal", (0.0, ya, 0.0035), (0.3, yb, 0.0045), panel=False)
-        p.grime("smear", (0.15, s * (edge - 0.06), -rec), (0, 0, 1), (0, s, 0), (0.24, 0.1), 0.35)
+        # (the threshold's corners by the walls lie under the boots: their dirt is the rim card at the boots' feet)
     # the cover plate (graphite, 2 mm proud of the field) with 4 polished bolts and the badge in relief
     p.box("Kit_Graphite", (0.15 - cw / 2, -cl / 2, -rec), (0.15 + cw / 2, cl / 2, -rec + 0.003), bevel=0.0015, segments=1)
     for bx in (0.15 - cw / 2 + 0.018, 0.15 + cw / 2 - 0.018):
         for by in (-cl / 2 + 0.02, cl / 2 - 0.02):
-            p.tube("Kit_Lip", (bx, by, -rec + 0.003), (bx, by, -rec + 0.0045), 0.006, 10)
+            # rev. F: satin graphite heads - polished ones mirrored the room, two dark and two light (only a reflection,
+            # the same material; the author asked for four alike)
+            p.tube("Kit_Graphite", (bx, by, -rec + 0.003), (bx, by, -rec + 0.0045), 0.006, 10)
     bw, bl = dt["threshold"]["badge"]
     # the maker's badge in relief: graphite raised 1.5 mm, its two bars polished (round 1: a lacquer badge read as a
     # white sticker)
@@ -278,18 +280,45 @@ def boot(p, sec_key, s):
     # drawn in (u, z - zc); local z -> -s y (front at the face, the depth towards the wall), local y -> s z: the matrix
     # keeps a positive determinant on both sides, so the local polygon's z is mirrored for s = -1
     m = Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, -s * 1.0, Y(v1)), (0.0, s * 1.0, 0.0, zc), (0.0, 0.0, 0.0, 1.0)))
+    # rev. F round 2: the well's walls satin graphite - lacquer walls lit by the room read as a white window; dark walls
+    # carry only the bottom light's falloff (bright by the source, dark at the mouth)
     for poly in pieces:
         p.poly_prism("Kit_Lacquer", [(x, s * z) for x, z in poly], m, dep * MM)
+    sl = 0.0015
+    oc_s = [(0.15 + (r - sl) * math.cos(math.radians(45 * k)), (r - sl) * math.sin(math.radians(45 * k))) for k in range(8)]
+    for k in range(8):
+        j = (k + 1) % 8
+        p.poly_prism("Kit_Graphite", [(x, s * z) for x, z in (oc_s[k], oc_s[j], oc[j], oc[k])], m, cp["well_by_section"][sec_key] * MM,
+                     panel=False, segments=1)
     # the cup's bottom (lacquer, lit) and the small emitter in its middle; the light a little in front of it
-    yb = Y(v1 - dep)
+    wl = cp["well_by_section"][sec_key]                        # the well's visible depth (rev. F: the emitter shows)
+    yb = Y(v1 - wl)
     ya, yb2 = sorted((yb, yb - s * 0.001))
     # the bottom dark (round 1: a lacquer bottom 15 mm from the light read as a flat white octagon); the light falls
     # on the well's lacquer walls, the source shows as the small emitter only
     p.box("Kit_Gasket", (0.15 - r, ya, zc - r), (0.15 + r, yb2, zc + r), panel=False)
     e = cp["emitter"] * MM / 2
-    p.tube("Kit_GlowFoot", (0.15, yb, zc), (0.15, yb - s * 0.003, zc), e, 12)
-    p.socket("Light_Cup_%d" % (0 if s < 0 else 1), (0.15, yb - s * dep * MM * 0.15, zc), x=(0, -s, 0), z=(0, 0, 1), type="point",
-             role="foot", cd=cp["light_cd"], radius_m=cp["light_radius_m"], source_radius_cm=0.6)
+    # critic round 2: a flat 3 mm dot hid at the bottom from a 45 deg view - a drop standing 9 mm proud of it shows
+    p.tube("Kit_GlowFoot", (0.15, yb, zc), (0.15, yb - s * 0.009, zc), e, 12)
+    # rev. F: a weak light right at the bottom with a short reach - the walls fall off from the source to the dark
+    p.socket("Light_Cup_%d" % (0 if s < 0 else 1), (0.15, yb - s * wl * MM * 0.15, zc), x=(0, -s, 0), z=(0, 0, 1), type="point",
+             role="foot", cd=cp["light_cd"], radius_m=cp["light_radius_m"], source_radius_cm=0.4, shadows=False)
+    # rev. F: the polished frame round the cup's opening (the lip's principle), 6 mm wide, 1.5 mm proud
+    rf = cp["rim"] * MM
+    oc_i = [(0.15 + r * math.cos(math.radians(45 * k)), r * math.sin(math.radians(45 * k))) for k in range(8)]
+    oc_o = [(0.15 + (r + rf) * math.cos(math.radians(45 * k)), (r + rf) * math.sin(math.radians(45 * k)))
+            for k in range(8)]
+    mf = Matrix(((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, -s * 1.0, Y(v1) - s * 0.0015), (0.0, s * 1.0, 0.0, zc), (0.0, 0.0, 0.0, 1.0)))
+    for k in range(8):
+        j = (k + 1) % 8
+        p.poly_prism("Kit_Lip", [(x, s * z) for x, z in (oc_i[k], oc_i[j], oc_o[j], oc_o[k])], mf, 0.0025, bevel=0.0005,
+                     segments=1)
+    # rev. F: the floor's soft spill - a second weak light, no shadows, aimed down and out from above the cup
+    sp = cp["spill"]
+    # round 2: tilted 45 deg out with a 100 deg cone, so its back edge stays in front of the face and misses the well
+    p.socket("Light_Spill_%d" % (0 if s < 0 else 1), (0.15, Y(v1 + 20), h * 0.8), x=(0, -s, 0), z=(0, 0, 1), type="spot",
+             role="foot", cd=sp["cd"], cone_deg=sp["cone_deg"], radius_m=sp["radius_m"], source_radius_cm=6.0, shadows=False,
+             dir_ue=[0.0, round(s * 0.7071, 4), -0.7071])
     # the polished bead on the top edge: the corridor face and the two plan chamfers, 1 mm proud
     bd = bt["bead"]
     edge = [(0, v1 - c), (c, v1), (300 - c, v1), (300, v1 - c)]
@@ -301,8 +330,14 @@ def boot(p, sec_key, s):
         quad = [((ua + ox) * MM, Y(va + oy)), ((ub + ox) * MM, Y(vb + oy)), ((ub + ix) * MM, Y(vb + iy)),
                 ((ua + ix) * MM, Y(va + iy))]
         p.poly_prism("Kit_Lip", quad, Matrix.Translation((0, 0, h + 0.001)), bd * MM + 0.001, bevel=0.003, segments=2)
-    # dirt where it forms: a rim card round the boot's foot on the floor
-    p.grime("rim", (0.15, Y(v1 + 30), 0.0), (0, 0, 1), (0, s, 0), (0.32, 0.07), 0.55)
+        # rev. F: one shallow groove round the boot's walls 30 mm under the top (a dark line, 3 mm)
+        gq = [((ua + ox * 0.8) * MM, Y(va + oy * 0.8)), ((ub + ox * 0.8) * MM, Y(vb + oy * 0.8)),
+              ((ub + ix * 0.2) * MM, Y(vb + iy * 0.2)), ((ua + ix * 0.2) * MM, Y(va + iy * 0.2))]
+        zg = h - bt["groove_from_top"] * MM
+        p.poly_prism("Kit_Gasket", gq, Matrix.Translation((0, 0, zg + 0.0015)), 0.003, panel=False)
+    # dirt where it forms (Halcyon, alpha ~0.8): a rim card round the boot's foot on the floor
+    # (centre 45 mm out: at 30 the card's top row lay under the boot, its rays started inside it and the card faded out)
+    p.grime("smear", (0.15, Y(v1 + 45), 0.0), (0, 0, 1), (0, s, 0), (0.34, 0.08), SPEC["details"]["grime"]["alpha"])
 
 
 def portal_frame(name, sec_key, seed):
@@ -312,13 +347,16 @@ def portal_frame(name, sec_key, seed):
     sec = section(sec_key)
     pr = SPEC["profile"]
     sc = pr["protrusion_by_section"][sec_key] / pr["protrusion_by_section"]["W"]
-    loft(p, sec, frame_profile(sec_key))
+    # rev. F: the top member hangs L3's gap under the ceiling (the uplight's coffer above it)
+    gap = SPEC["l3"]["gap_mm"] * MM
+    fsec = dict(sec, ceiling=sec["ceiling"] - gap, cove_to=sec["cove_to"] - gap)
+    loft(p, fsec, frame_profile(sec_key))
     cf = pr["cuff"]
     top = 100 * sc
-    ring(p, sec, "Kit_Gasket", cf["u0"], cf["u1"], top / sc - cf["depth"] / sc, top / sc + 0.2, scale=sc)
+    ring(p, fsec, "Kit_Gasket", cf["u0"], cf["u1"], top / sc - cf["depth"] / sc, top / sc + 0.2, scale=sc)
     u = cf["u0"] + 3
     while u + cf["rib_width"] <= cf["u1"]:
-        ring(p, sec, "Kit_Gasket", u, u + cf["rib_width"], top / sc, top / sc + cf["rib_height"] / sc, scale=sc)
+        ring(p, fsec, "Kit_Gasket", u, u + cf["rib_width"], top / sc, top / sc + cf["rib_height"] / sc, scale=sc)
         u += cf["rib_pitch"]
     half = sec["width"] / 2
     prot = pr["protrusion_by_section"][sec_key] * MM
@@ -330,8 +368,20 @@ def portal_frame(name, sec_key, seed):
         p.tube("Kit_GlowWarm", (0.15, cy, cz + 0.002), (0.15, cy, cz - 0.001), 0.022, 16)
         p.socket("Light_Corner_%d" % (0 if s < 0 else 1), (0.15, cy, cz - 0.01), x=(0, 0, -1), z=(1, 0, 0), type="spot",
                  role="neutral", cd=lt["L2_cd"], cone_deg=lt["L2_cone_deg"], radius_m=3.5, source_radius_cm=2.0)
-    kit_batch2.strip_light_along(p, "Light_Strip_0", (0.15, 0.0, sec["ceiling"] - 0.1), (0, 0, -1), (0, 1, 0),
-                                 sec["ceiling_width"] - 0.2, 0.02, "neutral", lt["L3_cd"], 2.5)
+    # rev. F: L3 an uplight lying on the top member, aimed up into the coffer - from any eye (below the member) the source
+    # is never seen; the coffer glows and lights the crown indirectly. The coffer: a light lacquer plate under the ceiling over
+    # the module (round 2: a graphite one swallowed the light - the cove needs a light reflector)
+    cw2 = sec["ceiling_width"] / 2
+    p.box("Kit_Lacquer", (0.0, -cw2 - 0.05, sec["ceiling"] - 0.004), (0.3, cw2 + 0.05, sec["ceiling"]), bevel=0.001, segments=1)
+    # critic round 1: from the eye the lit coffer read as a bare light strip - two 25 mm lacquer upstands along the top
+    # member's edges make it a cove: only a thin glowing line over the member stays in view
+    for x0 in (0.0, 0.29):
+        p.box("Kit_Lacquer", (x0, -cw2 + 0.05, fsec["ceiling"]), (x0 + 0.01, cw2 - 0.05, fsec["ceiling"] + 0.025), bevel=0.002,
+              segments=1)
+    p.box("Kit_Seal", (0.0, -cw2 - 0.12, sec["ceiling"] + 0.02), (0.3, cw2 + 0.12, sec["ceiling"] + 0.03), panel=False)
+    p.socket("Light_Strip_0", (0.15, 0.0, fsec["ceiling"] + 0.004), x=(0, 0, 1), z=(1, 0, 0), type="rect", role="neutral",
+             cd=lt["L3_cd"], width_cm=round((sec["ceiling_width"] - 0.2) * 100, 1), height_cm=4.0, radius_m=1.5,
+             dir_ue=[0.0, 0.0, 1.0], along_ue=[0.0, -1.0, 0.0], shadows=False)
     threshold(p, sec_key)
     pillar_labels(p, sec_key)
     p.collision_box((0.0, -half, 0.0), (0.3, half, sec["ceiling"]))
@@ -380,7 +430,7 @@ def floor_walk(name, sec_key, seed):
             yy = s * (edge + 0.012 + g * 0.014)
             ya, yb = sorted((yy - 0.002, yy + 0.002))
             p.box("Kit_Seal", (0.0, ya, 0.0035), (L, yb, 0.0045), panel=False)
-        p.grime("rim", (L / 2, s * (edge + 0.03), 0.004), (0, 0, 1), (0, s, 0), (L - 0.05, 0.06), 0.45)
+        p.grime("rim", (L / 2, s * (edge + 0.03), 0.004), (0, 0, 1), (0, s, 0), (L - 0.05, 0.06), SPEC["details"]["grime"]["alpha"])
     p.collision_box((0.0, -half, -0.05), (L, half, 0.0))
     p.socket("Snap_Start", (0, 0, 0), x=(-1, 0, 0), z=(0, 0, 1))
     p.socket("Snap_End", (L, 0, 0), x=(1, 0, 0), z=(0, 0, 1))

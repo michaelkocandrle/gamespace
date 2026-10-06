@@ -1,0 +1,236 @@
+{
+ "_comment": "KF-PORTAL-01 step 7 (author 6. 10. 2026): the part's lights in the corridor test section - interior lighting, flight lighting (space.InteriorLighting 0) and the showroom's lights off (the part's lights' own cost), three runs each; only watch for a jump, no optimisation. Run -Package -Width 2560 -Height 1440, then python Tools/Shots/perf_log.py <log>.",
+ "shots": [
+  {
+   "camera": "free",
+   "hud": 0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "name": "warmup",
+   "settle": 8.0,
+   "console": [
+    "stat none",
+    "r.GPUStatsEnabled 1",
+    "r.MegaLights.EnableForProject 1",
+    "space.KitReset",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "camera": "free",
+   "hud": 0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "name": "interior_1",
+   "settle": 6.0,
+   "console": [
+    "space.KitReset",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "camera": "free",
+   "hud": 0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "name": "flight_1",
+   "settle": 6.0,
+   "console": [
+    "space.InteriorLighting 0"
+   ]
+  },
+  {
+   "camera": "free",
+   "hud": 0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "name": "lights_off_1",
+   "settle": 6.0,
+   "console": [
+    "space.InteriorLighting 1",
+    "space.KitLight Showroom Intensity 0"
+   ]
+  },
+  {
+   "camera": "free",
+   "hud": 0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "name": "interior_2",
+   "settle": 6.0,
+   "console": [
+    "space.KitReset",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "camera": "free",
+   "hud": 0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "name": "flight_2",
+   "settle": 6.0,
+   "console": [
+    "space.InteriorLighting 0"
+   ]
+  },
+  {
+   "camera": "free",
+   "hud": 0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "name": "lights_off_2",
+   "settle": 6.0,
+   "console": [
+    "space.InteriorLighting 1",
+    "space.KitLight Showroom Intensity 0"
+   ]
+  },
+  {
+   "camera": "free",
+   "hud": 0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "name": "interior_3",
+   "settle": 6.0,
+   "console": [
+    "space.KitReset",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "camera": "free",
+   "hud": 0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "name": "flight_3",
+   "settle": 6.0,
+   "console": [
+    "space.InteriorLighting 0"
+   ]
+  },
+  {
+   "camera": "free",
+   "hud": 0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "name": "lights_off_3",
+   "settle": 6.0,
+   "console": [
+    "space.InteriorLighting 1",
+    "space.KitLight Showroom Intensity 0"
+   ]
+  },
+  {
+   "camera": "free",
+   "hud": 0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.35
+   ],
+   "fov": 90,
+   "name": "reset",
+   "settle": 2.0,
+   "console": [
+    "space.KitReset",
+    "space.InteriorLighting 1"
+   ]
+  }
+ ]
+}

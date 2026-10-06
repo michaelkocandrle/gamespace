@@ -8885,17 +8885,17 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Portal_Frame03W_A.fbx",
    "dims_m": [
-    0.3,
+    0.301,
     2.6,
-    2.36
+    2.39
    ],
    "expected_size_cm": [
-    30.0,
+    30.1,
     260.0,
-    236.0
+    239.0
    ],
-   "tris": 3068,
-   "tris_decals": 24,
+   "tris": 4180,
+   "tris_decals": 40,
    "tri_budget": 40000,
    "materials": [
     "Kit_Seal",
@@ -8942,55 +8942,99 @@
     "SOCKET_Light_Cup_0": {
      "location_ue_cm": [
       15.0,
-      108.1,
+      105.97,
       7.0
      ],
      "params": {
       "type": "point",
       "role": "foot",
-      "cd": 0.05,
-      "radius_m": 0.5,
-      "source_radius_cm": 0.6
+      "cd": 0.012,
+      "radius_m": 0.12,
+      "source_radius_cm": 0.4,
+      "shadows": false
      }
     },
     "SOCKET_Light_Cup_1": {
      "location_ue_cm": [
       15.0,
-      -108.1,
+      -105.97,
       7.0
      ],
      "params": {
       "type": "point",
       "role": "foot",
-      "cd": 0.05,
-      "radius_m": 0.5,
-      "source_radius_cm": 0.6
+      "cd": 0.012,
+      "radius_m": 0.12,
+      "source_radius_cm": 0.4,
+      "shadows": false
+     }
+    },
+    "SOCKET_Light_Spill_0": {
+     "location_ue_cm": [
+      15.0,
+      101.0,
+      12.0
+     ],
+     "params": {
+      "type": "spot",
+      "role": "foot",
+      "cd": 0.35,
+      "cone_deg": 100.0,
+      "radius_m": 0.45,
+      "source_radius_cm": 6.0,
+      "shadows": false,
+      "dir_ue": [
+       0.0,
+       -0.7071,
+       -0.7071
+      ]
+     }
+    },
+    "SOCKET_Light_Spill_1": {
+     "location_ue_cm": [
+      15.0,
+      -101.0,
+      12.0
+     ],
+     "params": {
+      "type": "spot",
+      "role": "foot",
+      "cd": 0.35,
+      "cone_deg": 100.0,
+      "radius_m": 0.45,
+      "source_radius_cm": 6.0,
+      "shadows": false,
+      "dir_ue": [
+       0.0,
+       0.7071,
+       -0.7071
+      ]
      }
     },
     "SOCKET_Light_Strip_0": {
      "location_ue_cm": [
       15.0,
       -0.0,
-      220.0
+      226.4
      ],
      "params": {
       "type": "rect",
       "role": "neutral",
-      "cd": 8.0,
+      "cd": 24,
       "width_cm": 100.0,
-      "height_cm": 2.0,
-      "radius_m": 2.5,
+      "height_cm": 4.0,
+      "radius_m": 1.5,
       "dir_ue": [
        0.0,
-       -0.0,
-       -1.0
+       0.0,
+       1.0
       ],
       "along_ue": [
        0.0,
        -1.0,
        0.0
       ],
-      "megalights_shadow": true
+      "shadows": false
      }
     },
     "SOCKET_Snap_End": {
@@ -9017,15 +9061,15 @@
     "panel_B03",
     "panel_B03",
     "panel_B03",
-    "grime_rim",
-    "grime_rim"
+    "grime_smear",
+    "grime_smear"
    ],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 1856,
+    "edge": 3224,
     "secondary": 0,
-    "floor": 2480,
+    "floor": 3888,
     "seam": 0
    },
    "status": "built"
@@ -9039,17 +9083,17 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Portal_Frame03N_A.fbx",
    "dims_m": [
-    0.3,
+    0.301,
     1.4,
-    2.36
+    2.39
    ],
    "expected_size_cm": [
-    30.0,
+    30.1,
     140.0,
-    236.0
+    239.0
    ],
-   "tris": 3068,
-   "tris_decals": 26,
+   "tris": 4180,
+   "tris_decals": 40,
    "tri_budget": 40000,
    "materials": [
     "Kit_Seal",
@@ -9096,55 +9140,99 @@
     "SOCKET_Light_Cup_0": {
      "location_ue_cm": [
       15.0,
-      51.82,
+      50.55,
       5.8
      ],
      "params": {
       "type": "point",
       "role": "foot",
-      "cd": 0.05,
-      "radius_m": 0.5,
-      "source_radius_cm": 0.6
+      "cd": 0.012,
+      "radius_m": 0.12,
+      "source_radius_cm": 0.4,
+      "shadows": false
      }
     },
     "SOCKET_Light_Cup_1": {
      "location_ue_cm": [
       15.0,
-      -51.82,
+      -50.55,
       5.8
      ],
      "params": {
       "type": "point",
       "role": "foot",
-      "cd": 0.05,
-      "radius_m": 0.5,
-      "source_radius_cm": 0.6
+      "cd": 0.012,
+      "radius_m": 0.12,
+      "source_radius_cm": 0.4,
+      "shadows": false
+     }
+    },
+    "SOCKET_Light_Spill_0": {
+     "location_ue_cm": [
+      15.0,
+      46.0,
+      9.6
+     ],
+     "params": {
+      "type": "spot",
+      "role": "foot",
+      "cd": 0.35,
+      "cone_deg": 100.0,
+      "radius_m": 0.45,
+      "source_radius_cm": 6.0,
+      "shadows": false,
+      "dir_ue": [
+       0.0,
+       -0.7071,
+       -0.7071
+      ]
+     }
+    },
+    "SOCKET_Light_Spill_1": {
+     "location_ue_cm": [
+      15.0,
+      -46.0,
+      9.6
+     ],
+     "params": {
+      "type": "spot",
+      "role": "foot",
+      "cd": 0.35,
+      "cone_deg": 100.0,
+      "radius_m": 0.45,
+      "source_radius_cm": 6.0,
+      "shadows": false,
+      "dir_ue": [
+       0.0,
+       0.7071,
+       -0.7071
+      ]
      }
     },
     "SOCKET_Light_Strip_0": {
      "location_ue_cm": [
       15.0,
       -0.0,
-      220.0
+      226.4
      ],
      "params": {
       "type": "rect",
       "role": "neutral",
-      "cd": 8.0,
+      "cd": 24,
       "width_cm": 40.0,
-      "height_cm": 2.0,
-      "radius_m": 2.5,
+      "height_cm": 4.0,
+      "radius_m": 1.5,
       "dir_ue": [
        0.0,
-       -0.0,
-       -1.0
+       0.0,
+       1.0
       ],
       "along_ue": [
        0.0,
        -1.0,
        0.0
       ],
-      "megalights_shadow": true
+      "shadows": false
      }
     },
     "SOCKET_Snap_End": {
@@ -9165,22 +9253,21 @@
     }
    },
    "collision_hulls": 1,
-   "decals": 7,
+   "decals": 6,
    "decal_items": [
     "panel_B03",
     "panel_B03",
     "panel_B03",
     "panel_B03",
-    "grime_rim",
-    "grime_rim",
+    "grime_smear",
     "grime_smear"
    ],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 1856,
+    "edge": 3224,
     "secondary": 0,
-    "floor": 2480,
+    "floor": 3888,
     "seam": 0
    },
    "status": "built"

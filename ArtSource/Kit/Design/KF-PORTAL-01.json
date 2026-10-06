@@ -2,8 +2,8 @@
  "_comment": "Parts factory pilot 1 (FACTORY_WORKFLOW v0.1, author 6. 10. 2026): the corridor frame module - portal ring, its foot lights and the floor plates between two portals. Step 2 drawing data, read by Tools/Design/draw_part_sheet.py. Lengths in metres in the layout frame (x along the run, y across, z up from the deck); the profile detail in millimetres. Sections from ArtSource/Kit/kit_rules.json.",
  "id": "KF-PORTAL-01",
  "title": "Rámový modul chodby – portál, patky se světlem, podlahová deska",
- "revision": "E",
- "status": "rev. E ke schválení (tvar rámu a boty; krok 5 detail)",
+ "revision": "F",
+ "status": "rev. F (bota zblízka, rozptyl, L3, šrouby, špína)",
  "date": "2026-10-06",
  "sections": [
   "W",
@@ -146,7 +146,7 @@
    "housing": "osmiboká jamka 70 mm, hl. 60 (N 45) v ploché botě 150 mm; tmavé dno, zdroj Ø14",
    "where": "čelo boty, z 0,07 m (N 0,058)",
    "colour": "~7500 K",
-   "reach": "0,05 cd: svítí stěny kalichu; rozptyl na podlahu slabý (otevřené)",
+   "reach": "stěny kalichu 0,012 cd; + světlo na podlahu 0,5 cd / 100° bez stínů, ~0,5 m",
    "shadows": "ne"
   },
   {
@@ -161,12 +161,12 @@
   },
   {
    "id": "L3",
-   "name": "skrytá lišta",
+   "name": "nepřímé (kazeta)",
    "count": "2 na portál (horní člen)",
-   "housing": "lišta pod horním členem; místo drážky po rev. E otevřené",
-   "where": "horní člen, celá šířka stropu",
+   "housing": "lišta na horní ploše horního členu, míří nahoru do kazety; člen 40 mm pod stropem",
+   "where": "horní člen, šířka stropu − 0,2 m",
    "colour": "neutrální bílá (kalibrace rev. C)",
-   "reach": "8 cd, přechod jasu na koruně",
+   "reach": "24 cd, záře kazety, nepřímo na korunu (rev. F: 8 cd jako uplight nechalo úhel 1 a 4 pod etalonem)",
    "shadows": "ne"
   }
  ],
@@ -278,6 +278,11 @@
    "rev": "E",
    "date": "2026-10-06",
    "what": "čela stupňů rámu zkosená pod 45° (chytají světlo, ne stín), leštěná je zkosená hrana koruny; bota L1 nižší (W 150, N 120 mm), osmiboká i v půdorysu, plochá bez stříšky, s leštěnou hranou; kalich hluboký 60 mm, svítí jeho vnitřní stěny, zdroj jen malý bod Ø14"
+  },
+  {
+   "rev": "F",
+   "date": "2026-10-06",
+   "what": "kalich: grafitové stěny s přechodem od zdroje do tmy, viditelná hloubka 35 mm (W) / 30 (N), leštěný rámeček 6 mm, drážka na stěnách boty; druhé slabé světlo jen na podlahu bez stínů (0,5 cd, 100°, ~0,5 m); L3 nepřímé na horním členu do kazety (člen 40 mm pod stropem); šrouby destičky stejné (saténový grafit); špína alfa 0,8 jen na místech vzniku"
   }
  ],
  "plinth": {
@@ -308,16 +313,29 @@
     "W": 60,
     "N": 45
    },
-   "emitter": 14,
-   "light_cd": 0.05,
-   "light_radius_m": 0.5,
+   "emitter": 18,
+   "light_cd": 0.012,
+   "light_radius_m": 0.12,
    "bottom": "tmavá guma",
-   "_light": "round 2 (6. 10.): 0.6 cd a few cm from the walls burnt the well to a flat white octagon; 0.05 cd near the dark bottom - the walls bright at the bottom, falling off to the rim"
+   "_light": "rev. F: 0.012 cd right at the dark bottom, 12 cm reach: the walls fall off from the source to the dark, the bottom stays dark; the floor gets the spill light",
+   "rim": 6,
+   "spill": {
+    "cd": 0.35,
+    "cone_deg": 100.0,
+    "radius_m": 0.45
+   },
+   "walls": "Kit_Graphite sleeve 1.5 mm (rev. F round 2: lacquer walls read as a white window)",
+   "well_by_section": {
+    "W": 35,
+    "N": 30
+   },
+   "_well": "rev. F round 3: the dark bottom 35/30 mm deep (the body keeps 60/45 for the plan chamfer); at 60/45 mm the eye saw only the walls, no bright point from afar"
   },
   "height_by_section": {
    "W": 150,
    "N": 120
-  }
+  },
+  "groove_from_top": 30
  },
  "light_levels": {
   "_comment": "rev. C calibration (Docs/Reviews/2026-10-06_kit_test_section_revc.md); L1 rev. D: the cup's weak point light",
@@ -325,7 +343,7 @@
   "L1_radius_m": 0.5,
   "L2_cd": 18.0,
   "L2_cone_deg": 100.0,
-  "L3_cd": 8.0
+  "L3_cd": 24
  },
  "details": {
   "_comment": "Step 5 detail (6. 10. 2026) from the etalon card and the Halcyon style: labels small in a hierarchy, relief instead of big decals, no screws on the lacquer.",
@@ -354,7 +372,12 @@
    "_what": "the edge strip by the plinth with 3 grooves along the run (the etalon's gutter)"
   },
   "grime": {
-   "_what": "dirt where it forms: rim cards round the boot's foot, smears in the threshold's corners by the walls, along the gutter; the walked line and the seams through the material"
+   "_what": "Halcyon (author 6. 10.): alpha ~0.8, only where dirt forms - the boots' feet, the gutter by the plinth, the threshold's corners outside the grooves (door surroundings: in the door parts). No overall dirt.",
+   "alpha": 0.8
   }
+ },
+ "l3": {
+  "gap_mm": 40,
+  "_comment": "rev. F: the top member hangs 40 mm under the ceiling; L3 lies on its top, aimed up into a graphite coffer over the module - the source is above every eye and faces away from it, so it is never seen; the coffer's glow lights the crown indirectly"
  }
 }

@@ -205,3 +205,26 @@ na RX 9070 v 1440p +0,6 až +1,4 ms GPU. Blockout (krok 4) až po schválení ta
 - Závoj interiéru je bez kokpitu.
 - Recenze a tabulka jasu SC / blockout / detail: `Docs/Reviews/2026-10-06_kf_portal_01_detail.md`.
 - Krok 7 (výkon) a 8 (kritik) až po schválení.
+
+## Rev. F, krok 7 (výkon) a krok 8 (kritik) – 6. 10., STOP
+
+- **Rev. F** podle úprav autora 1–5. Kalich: grafitové stěny, viditelná hloubka 35 / 30 mm, kapka zdroje Ø18,
+  leštěný rámeček 6 mm. Bota: drážka 30 mm pod vrchem.
+- **Světla:** rozptyl na podlahu 0,35 cd / 100° / 0,45 m bez stínů. L3 svítí nahoru do lakované kazety, člen je
+  40 mm pod stropem, clonky 25 mm.
+- **Šrouby** jsou saténový grafit. **Špína** alfa 0,8 jen na místech vzniku.
+- **Krok 7** (1440p, zabalená hra, 3 běhy, GPU ms):
+
+  | Interiér | Let | Světla dílu vyp. |
+  |---:|---:|---:|
+  | 6,36 | 6,85 | 5,31 |
+
+  Světla 4 portálů stojí asi 1,05 ms. Bez skoku.
+- **Krok 8:** kritik FAIL 5,3 / 5,3 / 5,2 (pilot: všech šest ≥ 7). Body a reakce:
+  `Docs/Reviews/2026-10-06_kf_portal_01_critic.md`.
+- **Otevřené pro autora:**
+  - jas úseku pod etalonem: L3 je jen nepřímé;
+  - třetí vrstva na pilíři;
+  - logo Halcyonu;
+  - drsnost laku a podlaha (materiálová deska);
+  - špína ve světelné skvrně.

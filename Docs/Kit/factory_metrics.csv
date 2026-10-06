@@ -29,3 +29,7 @@ date,part,workflow,kind,step,what,minutes,critic_rounds,rebuilds,notes
 2026-10-06,KF-PORTAL-01,v0.2,tool,5,hs_decals card_at winding fix (no grime card laid since 3. 10.) found by debugging,8,0,0,
 2026-10-06,KF-PORTAL-01,v0.2,part,5,details: labels on the pillar facets; threshold grooves / cover plate / relief badge; gutter grooves; grime cards,12,0,2,cup light 3 rounds; badge white -> graphite relief
 2026-10-06,KF-PORTAL-01,v0.2,part,6,UE: test section + showroom fixed views + 4 details + A/B (P5) + measure + P25 cockpit check,16,0,0,
+2026-10-06,KF-PORTAL-01,v0.2,part,5,rev. F (cup graphite + well 35 + drop + rim + groove; spill light; L3 uplight + coffer + cove upstands; bolts; grime 0.8 at origins),40,0,9,cup read white (lacquer walls); emitter hidden at 60 mm; coffer graphite swallowed L3; boot grime card under the boot
+2026-10-06,KF-PORTAL-01,v0.2,tool,5,draw_part_sheet rev. F (well/rim/groove/spill/L3 coffer),8,0,0,
+2026-10-06,KF-PORTAL-01,v0.2,part,7,light performance 1440p packaged 3 runs (kit_portal_perf): interior 6.36 / flight 6.85 / lights off 5.31 ms,10,0,1,part lights ~1.05 ms - no jump
+2026-10-06,KF-PORTAL-01,v0.2,part,8,critic vs etalon (Opus; gate part; pilot) 3 rounds 5.3 / 5.3 / 5.2 FAIL,45,3,2,scores stuck - systemic (lacquer roughness; floor; marking; grime as light dust)

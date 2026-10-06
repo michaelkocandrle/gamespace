@@ -1,0 +1,136 @@
+{
+ "topic": "kf_portal_01_critic",
+ "date": "2026-10-06",
+ "goal": "Díl KF-PORTAL-01 (modul rámu chodby) po kroku 6, list rev. F: rám jako jeden lakovaný tvar se zkosenými čely stupňů a leštěnou hranou koruny; nízká plochá osmiboká bota L1 s kalichem (grafitové stěny, světlo u dna, leštěný rámeček otvoru, drážka na stěnách boty) a slabým rozptylem jen na podlahu; L2 bodová světla v horních rozích; L3 skrytá lišta na horním členu svítí nahoru do kazety pod stropem (zdroj z oka nevidět); práh s drážkami, krycí destičkou se 4 šrouby a reliéfem; štítky 3 cm na boku pilíře; opotřebení Halcyon.",
+ "style": "Kvalita podle etalonu SC (Aurora Mk II), barvy a opotřebení podle Halcyon Freightworks: rám krémový lak, stěny a podlaha grafit; udržovaná pracovní loď; špína (alfa ~0,8) JEN na místech vzniku – paty bot, žlab u soklu, rohy prahu; žádná plošná špína. Snímky ze stejných úhlů jako kotevní záběry SC.",
+ "checklist": "part",
+ "gate": "part",
+ "pilot": true,
+ "out": "Docs/Reviews/2026-10-06_kf_portal_01_critic",
+ "notes": [
+  "Konec chodby uzavírá 4. portál před stěnou zkušební místnosti; zkušební místnost nemá jiné světlo než světla dílu.",
+  "Závoj interiéru (lehký opar, zvednutá černá) jako v interiéru lodi.",
+  "Detailní páry 5–7 nemají SC protějšek ve stejném úhlu: vlevo je etalonový záběr pro srovnání úrovně, u A/B špíny vlevo stav bez karet špíny.",
+  "Rozhodnutí autora (platí pro hodnocení): bota má být hladká krémová s JEDNOU mělkou drážkou nebo vloženým polem (ne šrouby a štítky); rozsah značení kroku 5 (štítek B03 3 cm na základně pilíře, reliéfní odznak a krycí destička prahu) autor schválil; špína jen alfa ~0,8 a jen na místech vzniku, udržovaná loď. Stěny a strop zkušební místnosti nejsou součástí dílu.",
+  "Špína v kitu je záměrně světlý matný prach (tmavá karta na tmavém grafitu nebyla v A/B vidět, rozhodnutí z ladění Wayfareru)."
+ ],
+ "etalon": [
+  {
+   "img": "Docs/Kit/etalon/sc/ram_portal_1.jpg",
+   "label": "chodba do hloubky"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/ram_portal_2.jpg",
+   "label": "pata rámu se světlem"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/podlaha_1.jpg",
+   "label": "podlaha s lemem"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/ram_portal_3.jpg",
+   "label": "rám zblízka"
+  }
+ ],
+ "pairs": [
+  {
+   "title": "1 Z oka 1,65 m do hloubky",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_1.jpg",
+   "ref_label": "SC Aurora, chodba",
+   "ours": "C:/gamespace-shots/20261006_224145_kit_test_section/01_1_eye_depth.png",
+   "ours_label": "díl rev. F, Editor 1440p, FOV 90"
+  },
+  {
+   "title": "2 Pata pilíře se světlem L1",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_2.jpg",
+   "ref_label": "SC pata rámu",
+   "ours": "C:/gamespace-shots/20261006_224145_kit_test_section/02_2_pillar_foot_L1.png",
+   "ours_label": "díl rev. F, Editor 1440p, FOV 90"
+  },
+  {
+   "title": "3 Podlaha 35° dolů s lemem",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/podlaha_1.jpg",
+   "ref_label": "SC podlaha",
+   "ours": "C:/gamespace-shots/20261006_224145_kit_test_section/03_3_floor_35.png",
+   "ours_label": "díl rev. F, Editor 1440p, FOV 90"
+  },
+  {
+   "title": "4 Lak a tmavá třetina zblízka",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_3.jpg",
+   "ref_label": "SC rám",
+   "ours": "C:/gamespace-shots/20261006_224145_kit_test_section/04_4_lacquer_dark_detail.png",
+   "ours_label": "díl rev. F, Editor 1440p, FOV 90"
+  },
+  {
+   "title": "5 Detail bota a kalich",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_2.jpg",
+   "ref_label": "SC pata rámu",
+   "ours": "C:/gamespace-shots/20261006_224145_kit_test_section/10_10_detail_boot_cup.png",
+   "ours_label": "bota L1 zblízka"
+  },
+  {
+   "title": "6 Detail práh a štítek",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/podlaha_1.jpg",
+   "ref_label": "SC podlaha",
+   "ours": "C:/gamespace-shots/20261006_224145_kit_test_section/09_9_detail_threshold.png",
+   "ours_label": "práh, destička se 4 šrouby"
+  },
+  {
+   "title": "7 A/B špína u paty boty",
+   "distance": "close",
+   "light": "studio",
+   "ref": "C:/gamespace-shots/20261006_224235_kit_portal_ab/07_decal_d_off_cup.png",
+   "ref_label": "karty špíny vypnuté",
+   "ours": "C:/gamespace-shots/20261006_224235_kit_portal_ab/01_decal_a_normal_cup.png",
+   "ours_label": "karty špíny alfa 0,8"
+  },
+  {
+   "title": "8 Pevný pohled showroomu B 3/4",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_3.jpg",
+   "ref_label": "SC rám",
+   "ours": "C:/gamespace-shots/20261006_224145_kit_test_section/06_6_showroom_B_34_1m2.png",
+   "ours_label": "3/4 z 1,2 m"
+  },
+  {
+   "title": "9 Výřez kalich boty (plné rozlišení)",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_2.jpg",
+   "ref_label": "SC pata rámu",
+   "ours": "Docs/Reviews/2026-10-06_kf_portal_01_critic/evidence/k2_b1_kalich.jpg",
+   "ours_label": "kalich, výřez 400 px"
+  },
+  {
+   "title": "10 Výřez štítek B03",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_3.jpg",
+   "ref_label": "SC rám",
+   "ours": "Docs/Reviews/2026-10-06_kf_portal_01_critic/evidence/k1_b5_stitek.jpg",
+   "ours_label": "detail 8, štítek na základně pilíře"
+  },
+  {
+   "title": "11 Výřez lem podlahy",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/podlaha_1.jpg",
+   "ref_label": "SC podlaha",
+   "ours": "Docs/Reviews/2026-10-06_kf_portal_01_critic/evidence/k1_b7_lem.jpg",
+   "ours_label": "síť leštěného lemu"
+  }
+ ]
+}

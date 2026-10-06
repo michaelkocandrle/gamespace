@@ -175,6 +175,7 @@ SHOWROOM = {
     "spawn": ((0.7, 0.0), 0.0),
     "spawn_annex": ((3.1, -4.8), 0.0),
     "spawn_stairs": ((15.0, -1.8), 0.0),             # in front of the stair: space.Walk 1 0 3 climbs it
+    "spawn_test": ((20.6, 0.0), 0.0),                # the parts factory's test section (Alt+U, space.Showroom test)
     # the half-open window of End24W_B looks out at a star field: a card behind the wall whose material looks the
     # stars up by the view direction (a window onto infinity, no parallax); in a ship the real outside
     "window_stars": ((-1.3, 0.0, 1.0), (3.0, 2.2)),
@@ -539,7 +540,7 @@ LIGHT_COLOURS = {"warm": (255, 228, 200), "cool": (115, 184, 255), "work": (255,
 FACTORY_LIGHT_COLOURS = {"foot": (222, 232, 255)}
 
 
-def rect_light(actors, loc, role, cd, radius_m, label, forward, along, width_cm, height_cm):
+def rect_light(actors, loc, role, cd, radius_m, label, forward, along, width_cm, height_cm, shadows=True):
     """A linear fixture: a rect light facing `forward`, its width along `along` (world vectors)."""
     rot = unreal.MathLibrary.make_rot_from_xy(forward, along)
     a = actors.spawn_actor_from_class(unreal.RectLight, loc, rot)
@@ -550,7 +551,7 @@ def rect_light(actors, loc, role, cd, radius_m, label, forward, along, width_cm,
     c.set_editor_property("attenuation_radius", float(radius_m) * 100.0)
     # MegaLights variant C (author, 27. 9. 2026): every kit light casts its ray-traced shadow; MegaLights is on while
     # walking an interior (SpacePlayerController), shots of the showroom set r.MegaLights.EnableForProject 1
-    c.set_editor_property("cast_shadows", True)
+    c.set_editor_property("cast_shadows", bool(shadows))
     c.set_editor_property("source_width", float(width_cm))
     c.set_editor_property("source_height", float(height_cm))
     c.set_editor_property("barn_door_angle", 70.0)
@@ -563,7 +564,7 @@ def rect_light(actors, loc, role, cd, radius_m, label, forward, along, width_cm,
     return a
 
 
-def light(actors, loc, role, cd, radius_m, label, spot=False, cone=80.0, source_cm=None):
+def light(actors, loc, role, cd, radius_m, label, spot=False, cone=80.0, source_cm=None, shadows=True):
     cls = unreal.SpotLight if spot else unreal.PointLight
     a = actors.spawn_actor_from_class(cls, loc, unreal.Rotator(roll=0.0, pitch=-90.0 if spot else 0.0, yaw=0.0))
     c = a.spot_light_component if spot else a.point_light_component
@@ -571,7 +572,7 @@ def light(actors, loc, role, cd, radius_m, label, spot=False, cone=80.0, source_
     c.set_editor_property("intensity_units", unreal.LightUnits.CANDELAS)
     c.set_editor_property("intensity", float(cd) * KIT_LIGHT_SCALE)
     c.set_editor_property("attenuation_radius", float(radius_m) * 100.0)
-    c.set_editor_property("cast_shadows", True)             # MegaLights variant C, as rect_light
+    c.set_editor_property("cast_shadows", bool(shadows))    # MegaLights variant C, as rect_light (a socket may say no)
     c.set_editor_property("source_radius", float(source_cm) if source_cm else (1.0 if not spot else 4.0))
     c.set_editor_property("specular_scale", 0.2 if not spot else 0.6)
     col = LIGHT_COLOURS.get(role) or FACTORY_LIGHT_COLOURS[role]
@@ -656,10 +657,10 @@ def place_part(actors, meshes, short, pos_cm, yaw, label, counts):
             ax, ay, az = prm.get("along_ue", (0.0, -1.0, 0.0))    # default: the part's +Y (Unreal -Y)
             gx, gy = _rot(yaw, ax, ay)
             rect_light(actors, at, prm.get("role", "warm"), prm["cd"], prm.get("radius_m", 2.0), lab, unreal.Vector(fx, fy, dz),
-                       unreal.Vector(gx, gy, az), prm["width_cm"], prm["height_cm"])
+                       unreal.Vector(gx, gy, az), prm["width_cm"], prm["height_cm"], shadows=prm.get("shadows", True))
         elif prm.get("type") == "spot":
             sa = light(actors, at, prm.get("role", "work"), prm["cd"], prm.get("radius_m", 3.8), lab, spot=True,
-                       cone=prm.get("cone_deg", 90.0), source_cm=prm.get("source_radius_cm"))
+                       cone=prm.get("cone_deg", 90.0), source_cm=prm.get("source_radius_cm"), shadows=prm.get("shadows", True))
             if "dir_ue" in prm and sa is not None:
                 # a tilted spot (the wide ceilings' wall washers)
                 dx, dy, dz = prm["dir_ue"]
@@ -667,7 +668,7 @@ def place_part(actors, meshes, short, pos_cm, yaw, label, counts):
                 sa.set_actor_rotation(unreal.MathLibrary.make_rot_from_x(unreal.Vector(fx, fy, dz)), False)
         else:
             light(actors, at, prm.get("role", "warm"), prm.get("cd", 1.0), prm.get("radius_m", 1.6), lab,
-                  source_cm=prm.get("source_radius_cm"))
+                  source_cm=prm.get("source_radius_cm"), shadows=prm.get("shadows", True))
         counts["lights"] += 1
 
 
@@ -798,7 +799,8 @@ def build_showroom(meshes, mis, report):
     gravity.get_editor_property("volume").set_box_extent(unreal.Vector((gx1 - gx0) * 50.0, (gy1 - gy0) * 50.0, 200.0))
     gravity.set_editor_property("tags", [unreal.Name(TAG)])
     for key, label, tag in (("spawn", "KitShowroom_Spawn", SPAWN_TAG), ("spawn_annex", "KitShowroom_AnnexSpawn", ANNEX_SPAWN_TAG),
-                            ("spawn_stairs", "KitShowroom_StairsSpawn", STAIRS_SPAWN_TAG)):
+                            ("spawn_stairs", "KitShowroom_StairsSpawn", STAIRS_SPAWN_TAG),
+                            ("spawn_test", "KitShowroom_TestSpawn", "KitShowroomTestSpawn")):
         (sx, sy), syaw = L[key]
         spawn = actors.spawn_actor_from_class(unreal.TargetPoint, _v((sx, sy), 0.05), unreal.Rotator(roll=0.0, pitch=0.0, yaw=syaw))
         spawn.set_actor_label(label)
