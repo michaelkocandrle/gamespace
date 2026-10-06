@@ -7,6 +7,8 @@
   "Kit_Graphite": {"roughness": [0.4, 0.5], "metallic": [0.0, 0.1], "scratches": [0.0, 0.04]},
   "Kit_Gasket": {"roughness": [0.85, 0.9], "metallic": [0.0, 0.0], "scratches": [0.0, 0.0]},
   "Kit_AntiSlip": {"roughness": [0.55, 0.75], "metallic": [0.0, 0.1], "scratches": [0.0, 0.0]},
+  "Kit_Panel": {"roughness": [0.4, 0.55], "metallic": [0.0, 0.1], "micro_rough": [0.0, 0.04], "scratches": [0.0, 0.04]},
+  "Kit_Perforated": {"roughness": [0.5, 0.75], "metallic": [0.0, 0.2], "scratches": [0.0, 0.0]},
   "signal_area_max": 0.03,
   "edge_wear_mm": [2, 6],
   "hand_band_m": [0.9, 1.6],
@@ -15,21 +17,28 @@
  "roles": {
   "_comment": "Per role: the colour (a palette key, or a fixed 'albedo' the maker cannot change), roughness, metallic, the surface detail and the wear switches. 'bevel_mm' = the bevel the parts give the role's edges (the edge wear is as wide). micro_rough / grunge / rough_variation / panel_rough / panel_tone / scratches feed the layered master's SurfaceDetail; scratches only in the hand band (ScratchBandOn).",
   "Kit_Lacquer": {"colour": "lacquer", "roughness": 0.47, "metallic": 0.04, "edge_wear": true, "cavity_dirt": true, "bevel_mm": 4,
-                  "micro_rough": 0.018, "grunge": 0.03, "rough_variation": 0.05, "panel_rough": 0.06, "panel_tone": 0.035, "scratches": 0.0,
-                  "_why": "satin, not paper (author, board round 2): the grain down ~70 % (micro 0.06 -> 0.018), a soft highlight at 0.47, a faint per-panel variation"},
+                  "micro_rough": 0.025, "grunge": 0.22, "rough_variation": 0.16, "panel_rough": 0.08, "panel_tone": 0.06, "scratches": 0.0,
+                  "_why": "satin, not paper (author, board round 2): the grain down ~70 % (micro 0.06 -> 0.018), a soft highlight at 0.47. Decal stack layers 1-2 (author 6. 10., step 9: the part read plastic): the grunge blotches 0.03 -> 0.22 and the roughness breakup 0.05 -> 0.16, a stronger per-panel tone - a broken-up lacquer, not a flat one"},
   "Kit_Lip": {"albedo": [0.74, 0.74, 0.75], "roughness": 0.2, "metallic": 1.0, "edge_wear": false, "cavity_dirt": false, "bevel_mm": 2,
               "micro_rough": 0.005, "grunge": 0.0, "rough_variation": 0.02, "panel_rough": 0.0, "panel_tone": 0.0, "scratches": 0.0,
               "_why": "a light polished silver for every maker, no brushing, with the variant c reflections"},
   "Kit_Graphite": {"colour": "graphite", "roughness": 0.45, "metallic": 0.04, "edge_wear": false, "cavity_dirt": true, "bevel_mm": 3,
-                   "micro_rough": 0.03, "grunge": 0.05, "rough_variation": 0.06, "panel_rough": 0.06, "panel_tone": 0.05, "scratches": 0.035,
-                   "_why": "satin graphite; scratches at half the old strength and only at hand height"},
+                   "micro_rough": 0.03, "grunge": 0.3, "rough_variation": 0.18, "panel_rough": 0.08, "panel_tone": 0.1, "scratches": 0.035,
+                   "_why": "satin graphite; scratches at half the old strength and only at hand height. Decal stack layers 1-2 (6. 10.): grunge 0.05 -> 0.3, roughness breakup 0.06 -> 0.18 - the bare walls read flat"},
   "Kit_Gasket": {"colour": "rubber", "roughness": 0.88, "metallic": 0.0, "edge_wear": false, "cavity_dirt": true, "bevel_mm": 2,
                  "micro_rough": 0.2, "grunge": 0.08, "rough_variation": 0.04, "panel_rough": 0.0, "panel_tone": 0.0, "scratches": 0.0,
                  "_why": "matt dark rubber with a fine grain (micro roughness) and the cuff's ribs as geometry"},
   "Kit_AntiSlip": {"colour": "tread", "roughness": 0.62, "metallic": 0.04, "edge_wear": false, "cavity_dirt": true, "walked": true, "bevel_mm": 2,
                    "micro_rough": 0.04, "grunge": 0.06, "rough_variation": 0.06, "panel_rough": 0.04, "panel_tone": 0.03, "scratches": 0.0,
                    "detail_normal": "T_Kit_Tread_N.png", "detail_tile_cm": 6.0, "detail_strength": 0.55,
-                   "_why": "today's kit tread pattern in the lanes (Tools/Kit/kit_tread_normal.py), the lanes only a little lighter than the field (lane_contrast_max); the walked line polished through roughness, not a dark stain"}
+                   "_why": "today's kit tread pattern in the lanes (Tools/Kit/kit_tread_normal.py), the lanes only a little lighter than the field (lane_contrast_max); the walked line polished through roughness, not a dark stain"},
+  "Kit_Panel": {"colour": "panel", "roughness": 0.46, "metallic": 0.05, "edge_wear": true, "cavity_dirt": true, "bevel_mm": 3,
+                "micro_rough": 0.03, "grunge": 0.28, "rough_variation": 0.16, "panel_rough": 0.08, "panel_tone": 0.12, "scratches": 0.03,
+                "_why": "decal stack step (author 6. 10., Docs/Kit/etalon/decal_stack.md): SC's walls and panels are mid grey (0.24-0.31 on screen), not black - the layers need the tonal room; each panel a slightly different tone"},
+  "Kit_Perforated": {"colour": "perf", "roughness": 0.62, "metallic": 0.1, "edge_wear": false, "cavity_dirt": true, "bevel_mm": 2,
+                     "micro_rough": 0.03, "grunge": 0.12, "rough_variation": 0.08, "panel_rough": 0.04, "panel_tone": 0.05, "scratches": 0.0,
+                     "detail_normal": "T_Kit_Perf_N.png", "detail_tile_cm": 8.0, "detail_strength": 1.0,
+                     "_why": "the dark third of SC's walls: a fine staggered perforation in dark inserts (Tools/Kit/kit_perf_normal.py)"}
  },
  "emissive": {
   "_comment": "Emissive roles of the factory parts (plain master): the L1 foot light's diffuser white with a blue tint (~7500 K), small and bright enough to bloom - not a saturated blue patch.",
@@ -39,13 +48,15 @@
   "Halcyon": {
    "_comment": "Halcyon Freightworks (part.md KF-PORTAL-01 step 1b, author 6. 10. 2026: the frame all cream lacquer). Wear: a maintained working ship - dirt in the seams, edge wear only at hand and shoulder height, the walked line; no overall wear. edge_wear 1.0 / threshold 0.15: at 0.8 / 0.35 the 4 mm worn bevels did not show (board round 2).",
    "palette": {"lacquer": [0.7, 0.66, 0.58], "graphite": [0.06, 0.058, 0.056], "rubber": [0.04, 0.04, 0.042], "tread": [0.072, 0.07, 0.067],
-               "signal": [0.85, 0.34, 0.06], "bare_metal": [0.5, 0.5, 0.52], "dirt": [0.05, 0.045, 0.04]},
+               "signal": [0.85, 0.34, 0.06], "bare_metal": [0.5, 0.5, 0.52], "dirt": [0.05, 0.045, 0.04],
+               "panel": [0.19, 0.186, 0.18], "perf": [0.05, 0.05, 0.052]},
    "wear": {"cavity_dirt": 0.45, "edge_wear": 1.0, "edge_threshold": 0.15, "walked": 0.7, "walk_half_width_m": 0.25, "walk_roughness": 0.4}
   },
   "Kestrel": {
    "_comment": "Kestrel Dynamics (kit-design.md proposal, not approved): a light grey-white lacquer, dark gunmetal, a blue accent; cleaner than Halcyon.",
    "palette": {"lacquer": [0.62, 0.64, 0.66], "graphite": [0.06, 0.063, 0.068], "rubber": [0.038, 0.039, 0.042], "tread": [0.074, 0.077, 0.082],
-               "signal": [0.12, 0.35, 0.8], "bare_metal": [0.52, 0.53, 0.55], "dirt": [0.045, 0.045, 0.045]},
+               "signal": [0.12, 0.35, 0.8], "bare_metal": [0.52, 0.53, 0.55], "dirt": [0.045, 0.045, 0.045],
+               "panel": [0.19, 0.192, 0.196], "perf": [0.048, 0.05, 0.053]},
    "wear": {"cavity_dirt": 0.25, "edge_wear": 0.5, "edge_threshold": 0.3, "walked": 0.35, "walk_half_width_m": 0.25, "walk_roughness": 0.35}
   }
  }
