@@ -188,3 +188,20 @@ na RX 9070 v 1440p +0,6 až +1,4 ms GPU. Blockout (krok 4) až po schválení ta
 - **Post-process interiéru** (závoj, zvednutá černá) je jen uvnitř lodí; vesmír a planety se nezměnily (P25).
 - Listy, tabulka jasu SC / rev. C / rev. D: `Docs/Reviews/2026-10-06_kf_portal_01_blockout.md`.
 - Krok 5 (detail) až po schválení autorem.
+
+## Rev. E, krok 5 (detail) a krok 6 (UE) – 6. 10., STOP
+
+- Blockout je schválený s úpravami tvaru. **Rev. E:**
+  - čela stupňů zkosená pod 45°, leštěná zkosená hrana koruny;
+  - bota nízká (W 150, N 120), plochá, osmiboká, s hlubokým kalichem a tmavým dnem.
+- **Detail:**
+  - štítky 3 cm na plošce pilíře;
+  - práh s drážkami, krycí destičkou se 4 šrouby a reliéfem;
+  - žlab u soklu, karty špíny, otěr v pásmu ruky.
+- **Otevřené:**
+  - rozptyl kalichu na podlahu;
+  - nové místo drážky L3;
+  - síla karet špíny.
+- Závoj interiéru je bez kokpitu.
+- Recenze a tabulka jasu SC / blockout / detail: `Docs/Reviews/2026-10-06_kf_portal_01_detail.md`.
+- Krok 7 (výkon) a 8 (kritik) až po schválení.

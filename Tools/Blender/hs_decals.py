@@ -347,7 +347,10 @@ class Placer:
         faces = 0
         for j in range(ny):
             for i in range(nx):
-                quad = [rows[j][i], rows[j][i + 1], rows[j + 1][i + 1], rows[j + 1][i]]
+                # counter-clockwise seen along n: x = y x n and the rows run down -y, so (i, j) -> (i, j + 1) ->
+                # (i + 1, j + 1) -> (i + 1, j). The other way round every face came out facing -n, and the fold check
+                # below (3. 10. 2026) dropped every card: no grime card was laid from then on (found 6. 10. 2026)
+                quad = [rows[j][i], rows[j + 1][i], rows[j + 1][i + 1], rows[j][i + 1]]
                 if any(v is None for v, _, _ in quad):
                     continue
                 f = self.bm.faces.new([v for v, _, _ in quad])

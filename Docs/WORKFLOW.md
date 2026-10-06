@@ -774,6 +774,11 @@ snímku.
 
 ### 9.6 Blender pipeline
 
+- **Karty špíny se nepokládaly** (`hs_decals.card_at`, od 3. 10. do 6. 10. 2026): buňky se skládaly v pořadí, ve kterém
+  normála plochy mířila proti normále povrchu, a kontrola přeložených buněk je zahodila všechny. Build hlásil
+  `grime_<druh> no faces`, snímky vypadaly „čistě“. Oprava je obrácené pořadí vrcholů. Odhalil to A/B snímek (P5)
+  a ladicí skript na hotovém blendu. Po přestavbě dílů a lodí se karty vrátí: P25 snímky.
+
 - a) **Rám displeje se otočil dvakrát.** Rotace byla v placement matici i v osách `u`/`v`.
   `add_displays` dostává matici bez rotace.
 - b) **Otvory rámečků AI modelu nejsou obdélníky** (lichoběžníky, zkosené rohy). Proto `corners`

@@ -8894,8 +8894,8 @@
     260.0,
     236.0
    ],
-   "tris": 4132,
-   "tris_decals": 0,
+   "tris": 3068,
+   "tris_decals": 24,
    "tri_budget": 40000,
    "materials": [
     "Kit_Seal",
@@ -8904,7 +8904,9 @@
     "Kit_Lip",
     "Kit_Graphite",
     "Kit_Gasket",
-    "Kit_GlowFoot"
+    "Kit_GlowFoot",
+    "Kit_DecalPaint",
+    "Kit_DecalGrime"
    ],
    "sockets": {
     "SOCKET_Light_Corner_0": {
@@ -8940,29 +8942,29 @@
     "SOCKET_Light_Cup_0": {
      "location_ue_cm": [
       15.0,
-      101.8,
-      9.5
+      108.1,
+      7.0
      ],
      "params": {
       "type": "point",
       "role": "foot",
-      "cd": 0.6,
+      "cd": 0.05,
       "radius_m": 0.5,
-      "source_radius_cm": 0.8
+      "source_radius_cm": 0.6
      }
     },
     "SOCKET_Light_Cup_1": {
      "location_ue_cm": [
       15.0,
-      -101.8,
-      9.5
+      -108.1,
+      7.0
      ],
      "params": {
       "type": "point",
       "role": "foot",
-      "cd": 0.6,
+      "cd": 0.05,
       "radius_m": 0.5,
-      "source_radius_cm": 0.8
+      "source_radius_cm": 0.6
      }
     },
     "SOCKET_Light_Strip_0": {
@@ -9009,14 +9011,21 @@
     }
    },
    "collision_hulls": 1,
-   "decals": 0,
-   "decal_items": [],
+   "decals": 6,
+   "decal_items": [
+    "panel_B03",
+    "panel_B03",
+    "panel_B03",
+    "panel_B03",
+    "grime_rim",
+    "grime_rim"
+   ],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 4680,
+    "edge": 1856,
     "secondary": 0,
-    "floor": 2280,
+    "floor": 2480,
     "seam": 0
    },
    "status": "built"
@@ -9039,8 +9048,8 @@
     140.0,
     236.0
    ],
-   "tris": 4132,
-   "tris_decals": 0,
+   "tris": 3068,
+   "tris_decals": 26,
    "tri_budget": 40000,
    "materials": [
     "Kit_Seal",
@@ -9049,7 +9058,9 @@
     "Kit_Lip",
     "Kit_Graphite",
     "Kit_Gasket",
-    "Kit_GlowFoot"
+    "Kit_GlowFoot",
+    "Kit_DecalPaint",
+    "Kit_DecalGrime"
    ],
    "sockets": {
     "SOCKET_Light_Corner_0": {
@@ -9085,29 +9096,29 @@
     "SOCKET_Light_Cup_0": {
      "location_ue_cm": [
       15.0,
-      46.8,
-      9.5
+      51.82,
+      5.8
      ],
      "params": {
       "type": "point",
       "role": "foot",
-      "cd": 0.6,
+      "cd": 0.05,
       "radius_m": 0.5,
-      "source_radius_cm": 0.8
+      "source_radius_cm": 0.6
      }
     },
     "SOCKET_Light_Cup_1": {
      "location_ue_cm": [
       15.0,
-      -46.8,
-      9.5
+      -51.82,
+      5.8
      ],
      "params": {
       "type": "point",
       "role": "foot",
-      "cd": 0.6,
+      "cd": 0.05,
       "radius_m": 0.5,
-      "source_radius_cm": 0.8
+      "source_radius_cm": 0.6
      }
     },
     "SOCKET_Light_Strip_0": {
@@ -9154,14 +9165,22 @@
     }
    },
    "collision_hulls": 1,
-   "decals": 0,
-   "decal_items": [],
+   "decals": 7,
+   "decal_items": [
+    "panel_B03",
+    "panel_B03",
+    "panel_B03",
+    "panel_B03",
+    "grime_rim",
+    "grime_rim",
+    "grime_smear"
+   ],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 4680,
+    "edge": 1856,
     "secondary": 0,
-    "floor": 2280,
+    "floor": 2480,
     "seam": 0
    },
    "status": "built"
@@ -9177,21 +9196,22 @@
    "dims_m": [
     0.9,
     2.6,
-    0.064
+    0.067
    ],
    "expected_size_cm": [
     90.0,
     260.0,
-    6.4
+    6.7
    ],
-   "tris": 1120,
-   "tris_decals": 0,
+   "tris": 1192,
+   "tris_decals": 88,
    "tri_budget": 40000,
    "materials": [
     "Kit_Seal",
     "Kit_Lip",
     "Kit_Graphite",
-    "Kit_AntiSlip"
+    "Kit_AntiSlip",
+    "Kit_DecalGrime"
    ],
    "sockets": {
     "SOCKET_Snap_End": {
@@ -9212,14 +9232,17 @@
     }
    },
    "collision_hulls": 1,
-   "decals": 0,
-   "decal_items": [],
+   "decals": 2,
+   "decal_items": [
+    "grime_rim",
+    "grime_rim"
+   ],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
     "edge": 1440,
     "secondary": 0,
-    "floor": 1392,
+    "floor": 1488,
     "seam": 0
    },
    "status": "built"
@@ -9235,21 +9258,22 @@
    "dims_m": [
     0.9,
     1.4,
-    0.064
+    0.067
    ],
    "expected_size_cm": [
     90.0,
     140.0,
-    6.4
+    6.7
    ],
-   "tris": 732,
-   "tris_decals": 0,
+   "tris": 804,
+   "tris_decals": 88,
    "tri_budget": 40000,
    "materials": [
     "Kit_Seal",
     "Kit_Lip",
     "Kit_Graphite",
-    "Kit_AntiSlip"
+    "Kit_AntiSlip",
+    "Kit_DecalGrime"
    ],
    "sockets": {
     "SOCKET_Snap_End": {
@@ -9270,14 +9294,17 @@
     }
    },
    "collision_hulls": 1,
-   "decals": 0,
-   "decal_items": [],
+   "decals": 2,
+   "decal_items": [
+    "grime_rim",
+    "grime_rim"
+   ],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
     "edge": 864,
     "secondary": 0,
-    "floor": 896,
+    "floor": 992,
     "seam": 0
    },
    "status": "built"

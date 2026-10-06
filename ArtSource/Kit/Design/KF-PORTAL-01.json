@@ -2,8 +2,8 @@
  "_comment": "Parts factory pilot 1 (FACTORY_WORKFLOW v0.1, author 6. 10. 2026): the corridor frame module - portal ring, its foot lights and the floor plates between two portals. Step 2 drawing data, read by Tools/Design/draw_part_sheet.py. Lengths in metres in the layout frame (x along the run, y across, z up from the deck); the profile detail in millimetres. Sections from ArtSource/Kit/kit_rules.json.",
  "id": "KF-PORTAL-01",
  "title": "Rámový modul chodby – portál, patky se světlem, podlahová deska",
- "revision": "D",
- "status": "rev. D ke schválení (bota L1 a manžeta; zbytek rev. C schválen)",
+ "revision": "E",
+ "status": "rev. E ke schválení (tvar rámu a boty; krok 5 detail)",
  "date": "2026-10-06",
  "sections": [
   "W",
@@ -45,9 +45,9 @@
    }
   ],
   "lip": {
-   "edge": 12,
+   "edge": 18,
    "material": "leštěný kov",
-   "_comment": "rev. C: only on the crown's edge - a 12 x 12 mm polished bead along the edge between the crown's face and its soffit, one light line from each side"
+   "_comment": "rev. E: the crown's 45 deg facet (18 x 18 mm) polished - one light line from each side"
   },
   "cuff": {
    "u0": 110,
@@ -81,17 +81,72 @@
    "_comment": "rev. B: two symmetric strips, each at the top of a 14 x 20 mm groove in step 2's ledge, against the crown's riser (rev. A: one strip on the ledge face, u 46-58, seen from the near side)"
   },
   "solid": true,
-  "_solid": "rev. C: the three steps are one solid shape in one lacquer, no seams between them - they read only by shadow and highlight"
+  "_solid": "rev. C: the three steps are one solid shape in one lacquer, no seams between them - they read only by shadow and highlight",
+  "profile_half": {
+   "_comment": "rev. E: the member's cross-section from the wall side to the middle (u mm along the run, v mm out of the wall), mirrored at u 150; each riser a 45 deg facet with a short vertical foot, the treads 5-6 mm (the worn edges); the crown's facet is the polished lip. Roles per edge to the next point.",
+   "points": [
+    [
+     8,
+     0,
+     "Kit_Lacquer"
+    ],
+    [
+     8,
+     15,
+     "Kit_Lacquer"
+    ],
+    [
+     33,
+     40,
+     "edge"
+    ],
+    [
+     38,
+     40,
+     "Kit_Lacquer"
+    ],
+    [
+     38,
+     46,
+     "Kit_Lacquer"
+    ],
+    [
+     62,
+     70,
+     "edge"
+    ],
+    [
+     68,
+     70,
+     "Kit_Lacquer"
+    ],
+    [
+     68,
+     82,
+     "Kit_Lip"
+    ],
+    [
+     86,
+     100,
+     "Kit_Lacquer"
+    ],
+    [
+     110,
+     100,
+     "cuff"
+    ]
+   ]
+  }
  },
  "lights": [
   {
    "id": "L1",
    "name": "bota – kalich",
    "count": "2 na portál",
-   "housing": "osmiboký kalich 110 / 90 mm, hl. 30, ve světlé botě; svítící dno",
-   "where": "čelo boty, z 0,095 m",
+   "housing": "osmiboká jamka 70 mm, hl. 60 (N 45) v ploché botě 150 mm; tmavé dno, zdroj Ø14",
+   "where": "čelo boty, z 0,07 m (N 0,058)",
    "colour": "~7500 K",
-   "reach": "~0,5 m, jemný rozptyl na podlahu",
+   "reach": "0,05 cd: svítí stěny kalichu; rozptyl na podlahu slabý (otevřené)",
    "shadows": "ne"
   },
   {
@@ -108,7 +163,7 @@
    "id": "L3",
    "name": "skrytá lišta",
    "count": "2 na portál (horní člen)",
-   "housing": "2 lišty 12 mm v drážce 14 × 20 u boků koruny",
+   "housing": "lišta pod horním členem; místo drážky po rev. E otevřené",
    "where": "horní člen, celá šířka stropu",
    "colour": "neutrální bílá (kalibrace rev. C)",
    "reach": "8 cd, přechod jasu na koruně",
@@ -218,6 +273,11 @@
    "rev": "D",
    "date": "2026-10-06",
    "what": "bota L1 světlá v laku rámu s leštěnou hranou nahoře, světlo jako záře uvnitř osmibokého kalichu (svítící dno + slabé světlo s dosahem ~0,5 m), žádný reflektor; v N menší bota (120 mm) kvůli průchodu; manžeta jemnější (žebra 4 / 9, výška 2) a guma o tón světlejší"
+  },
+  {
+   "rev": "E",
+   "date": "2026-10-06",
+   "what": "čela stupňů rámu zkosená pod 45° (chytají světlo, ne stín), leštěná je zkosená hrana koruny; bota L1 nižší (W 150, N 120 mm), osmiboká i v půdorysu, plochá bez stříšky, s leštěnou hranou; kalich hluboký 60 mm, svítí jeho vnitřní stěny, zdroj jen malý bod Ø14"
   }
  ],
  "plinth": {
@@ -227,12 +287,10 @@
   "alternative": "lišta s opálovým difuzorem 20 mm v drážce 30 mm pod přesahem 10 mm (zdroj skrytý), kdyby autor chtěl souvislou linku"
  },
  "boot": {
-  "_comment": "rev. D: the L1 boot round the pillar's foot, grown into the floor (etalon ram_portal_*, podlaha_*): LIGHT, in the frame's lacquer, a polished bead on its top edge; plan u 0-300 along the run, v 0-v1 from the wall face (W 170, N 120 - the N passage keeps 0.96 m), the corridor-side corners chamfered 60 mm; vertical to z 160, then 45 deg up into the pillar's crown. The light: a glow INSIDE an octagonal cup in its corridor face (a glowing back + a weak point light, ~0.5 m reach, that lights the cup's inner walls and gives only a soft spill on the floor) - no spot, no hard ellipses; ~7500 K.",
+  "_comment": "rev. E: the L1 boot round the pillar's foot - light lacquer, a polished bead on its top edge, octagonal in plan (the corridor-side vertical edges chamfered 50 mm), flat on top with no roof (the pillar rises out of it); W 150 mm high, N 120 mm (in proportion); the cup sunk 60 mm (W) / 45 mm (N) into its corridor face, an octagon 70 mm across: its inner walls lit by a weak point light, the source a small bright point (a 14 mm emitter at the bottom); ~7500 K, no spot.",
   "u0": 0,
   "u1": 300,
-  "chamfer": 60,
-  "z_vert": 160,
-  "z_top": 230,
+  "chamfer": 50,
   "v1_by_section": {
    "W": 170,
    "N": 120
@@ -241,12 +299,24 @@
   "bead": 12,
   "cup": {
    "u": 150,
-   "z": 95,
-   "outer": 110,
-   "inner": 90,
-   "depth": 30,
-   "light_cd": 0.6,
-   "light_radius_m": 0.5
+   "z_by_section": {
+    "W": 70,
+    "N": 58
+   },
+   "size": 70,
+   "depth_by_section": {
+    "W": 60,
+    "N": 45
+   },
+   "emitter": 14,
+   "light_cd": 0.05,
+   "light_radius_m": 0.5,
+   "bottom": "tmavá guma",
+   "_light": "round 2 (6. 10.): 0.6 cd a few cm from the walls burnt the well to a flat white octagon; 0.05 cd near the dark bottom - the walls bright at the bottom, falling off to the rim"
+  },
+  "height_by_section": {
+   "W": 150,
+   "N": 120
   }
  },
  "light_levels": {
@@ -256,5 +326,35 @@
   "L2_cd": 18.0,
   "L2_cone_deg": 100.0,
   "L3_cd": 8.0
+ },
+ "details": {
+  "_comment": "Step 5 detail (6. 10. 2026) from the etalon card and the Halcyon style: labels small in a hierarchy, relief instead of big decals, no screws on the lacquer.",
+  "pillar_label": {
+   "item": "panel_B03",
+   "scale": 0.5,
+   "at_z": 1.0,
+   "_what": "a 3 cm frame number on the base facet of each pillar (etalon: 3 cm labels on the pillar's side)"
+  },
+  "threshold": {
+   "grooves": 5,
+   "groove_w": 0.01,
+   "cover": [
+    0.4,
+    0.15
+   ],
+   "cover_bolts": 4,
+   "badge": [
+    0.12,
+    0.04
+   ],
+   "_what": "the threshold as the band: 5 grooves across, a cover plate 400 x 150 with 4 bolts (a functional cover), the maker's badge in relief on it"
+  },
+  "gutter": {
+   "grooves": 3,
+   "_what": "the edge strip by the plinth with 3 grooves along the run (the etalon's gutter)"
+  },
+  "grime": {
+   "_what": "dirt where it forms: rim cards round the boot's foot, smears in the threshold's corners by the walls, along the gutter; the walked line and the seams through the material"
+  }
  }
 }

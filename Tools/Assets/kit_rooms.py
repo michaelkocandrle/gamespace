@@ -259,7 +259,7 @@ def build_ship(ship, recipe, report):
 
 def add_interior_post(comps, ship, hull_cm):
     """The interior's haze and lifted blacks (author 6. 10. 2026; interior_post.py): a box over the union of the ship's
-    rooms (Design/<Ship>_layout.json, layout metres: the deck's floor to its clear height + 1.2 m for raised floors
+    rooms but the cockpit (Design/<Ship>_layout.json, layout metres: the deck's floor to its clear height + 1.2 m for raised floors
     such as the cockpit's) and a bounded PostProcessComponent in it. A component of the ship, so it moves with it;
     outside the box (the chase camera, space, planets) nothing changes."""
     import interior_post
@@ -267,7 +267,10 @@ def add_interior_post(comps, ship, hull_cm):
     if not os.path.exists(path):
         return None
     layout = json.load(open(path, encoding="utf-8"))
-    rects = [r["rect"] for r in layout.get("rooms", []) if r.get("rect")]
+    # the cockpit and the bridge stay out (author 6. 10. 2026): the view out into space must stay sharp
+    skip = ("cockpit", "bridge", "kokpit")
+    rects = [r["rect"] for r in layout.get("rooms", [])
+             if r.get("rect") and not any(k in (str(r.get("id", "")) + str(r.get("name", ""))).lower() for k in skip)]
     if not rects:
         return None
     deck = next(iter(layout["decks"].values()))

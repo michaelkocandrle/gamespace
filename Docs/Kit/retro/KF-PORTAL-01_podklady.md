@@ -17,3 +17,12 @@ Sběr během pilotu. Retrospektiva po dokončení pilotu z nich udělá návrh w
    výsledku (list `sheet_05_oko_list_vs_hra.jpg`).
 2. **Krok 1:** karta etalonu u svítidel zapíše charakter světla (záře / kužel / skvrna, dosah).
 3. **Krok 3:** tabulka jasu (`measure_look`: průměr, p10, medián, p90, tmavé, světlé) proti etalonu je výstup kroku.
+
+## Poučení z rev. E (autor 6. 10.: blockout schválen s úpravami tvaru)
+
+| Problém | Poučení / pravidlo |
+|---|---|
+| Svislá čela stupňů (90°) četla ve světle shora jako tmavé proužky – rám jako 5–6 rovnoběžných pruhů | Čela profilů navrhovat jako plošky ≤ 45° k hlavnímu světlu; v kroku 2 stínovaný pohled z oka (proužky jsou vidět už v listu) |
+| Bota se zkosením do pilíře četla z oka jako stříška | Tvary u paty: plochý vrch, zkosení jen svislých hran; zkontrolovat siluetu z oka 1,65 m |
+| Kalich: světlo pár cm od světlého dna = plochý bílý osmiúhelník (3 kola) | Svítidlo-záře: tmavé dno, zdroj malý, světlo slabé (≈ 0,05 cd) u dna; ověřit snímkem zblízka v prvním kole |
+| A/B (P5) odhalil, že se nepoložila žádná karta špíny (chyba v `hs_decals`) | A/B snímek je povinný i tehdy, když build hlásí jen „no faces“ – číst `decals_failed` v KITBUILD |

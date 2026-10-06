@@ -23,3 +23,9 @@ date,part,workflow,kind,step,what,minutes,critic_rounds,rebuilds,notes
 2026-10-06,KF-PORTAL-01,v0.2,tool,4,kit_portal.py (the part's builder W/N with light sockets) + kit_factory shell + render_part_eye.py,14,0,0,
 2026-10-06,KF-PORTAL-01,v0.2,tool,4,interior post-process (interior_post.py; kit_rooms box + component; test section volume),10,0,1,box with NoCollision did nothing (QueryOnly + Ignore fixes it)
 2026-10-06,KF-PORTAL-01,v0.2,part,4,blockout W/N in the test section + 4 etalon sheets + eye vs sheet + N render + P25 interior/exterior,18,0,0,first blockout round accepted for the author; darks now at SC level
+2026-10-06,KF-PORTAL-01,v0.2,return,4->2,blockout approved with shape changes (rev. E: step faces 45 deg; boot lower / flat / octagonal; cup deeper),0,0,1,retrospective: shaded eye view in the sheet would have shown the stripes
+2026-10-06,KF-PORTAL-01,v0.2,part,2,sheet rev. E (profile with 45 deg facets; boot; joint) ,10,0,0,
+2026-10-06,KF-PORTAL-01,v0.2,tool,4,kit_portal loft (profile swept along the section) + boot with a sunk cup,15,0,1,cup frame pieces needed the rectangle corners
+2026-10-06,KF-PORTAL-01,v0.2,tool,5,hs_decals card_at winding fix (no grime card laid since 3. 10.) found by debugging,8,0,0,
+2026-10-06,KF-PORTAL-01,v0.2,part,5,details: labels on the pillar facets; threshold grooves / cover plate / relief badge; gutter grooves; grime cards,12,0,2,cup light 3 rounds; badge white -> graphite relief
+2026-10-06,KF-PORTAL-01,v0.2,part,6,UE: test section + showroom fixed views + 4 details + A/B (P5) + measure + P25 cockpit check,16,0,0,
