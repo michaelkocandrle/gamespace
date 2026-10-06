@@ -24,9 +24,11 @@ import unreal
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(REPO, "Tools", "Kit"))
+sys.path.insert(0, HERE)                 # interior_post.py when run on its own
 import kit_layout  # noqa: E402   (the placement, shared with Blender's geometry check)
 
 MESH_PREFIX, LIGHT_PREFIX = "InteriorMod_", "Light_fix_kit_"
+POST_PREFIX = "InteriorPost"            # the interior's post-process box (interior_post.py, 6. 10. 2026)
 
 
 def _import_kit_constants():
@@ -35,9 +37,10 @@ def _import_kit_constants():
     out = {}
     for node in tree.body:
         if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) \
-                and node.targets[0].id in ("KIT_LIGHT_SCALE", "LIGHT_COLOURS"):
+                and node.targets[0].id in ("KIT_LIGHT_SCALE", "LIGHT_COLOURS", "FACTORY_LIGHT_COLOURS"):
             out[node.targets[0].id] = ast.literal_eval(node.value)
-    return out["KIT_LIGHT_SCALE"], out["LIGHT_COLOURS"]
+    # the parts factory's own roles too (the L1 cup light "foot"), so its parts light the same in a ship
+    return out["KIT_LIGHT_SCALE"], dict(out["LIGHT_COLOURS"], **out.get("FACTORY_LIGHT_COLOURS", {}))
 
 
 KIT_LIGHT_SCALE, LIGHT_COLOURS = _import_kit_constants()
@@ -102,14 +105,16 @@ class Components:
 
     def remove_old(self):
         handles = self._handles()
-        old = [h for h in handles if (self._name(h)[0] or "").startswith((MESH_PREFIX, LIGHT_PREFIX))]
+        old = [h for h in handles if (self._name(h)[0] or "").startswith((MESH_PREFIX, LIGHT_PREFIX, POST_PREFIX))]
         if old:
             self.sub.delete_subobjects(handles[0], old, self.bp)
         return len(old)
 
-    def add(self, cls, name):
+    def add(self, cls, name, parent_name="Hull"):
         handles = self._handles()
-        parent = next((h for h in handles if self._name(h)[0] == "Hull"), handles[0])
+        parent = next((h for h in handles if self._name(h)[0] == parent_name), None)
+        if parent is None:
+            parent = next((h for h in handles if self._name(h)[0] == "Hull"), handles[0])
         params = unreal.AddNewSubobjectParams()   # struct constructors take no keyword arguments
         params.set_editor_property("parent_handle", parent)
         params.set_editor_property("new_class", cls)
@@ -246,9 +251,44 @@ def build_ship(ship, recipe, report):
             if prm.get("interior_only") or sname.startswith(INTERIOR_ONLY_SOCKETS):
                 lc.set_editor_property("component_tags", [unreal.Name(INTERIOR_ONLY_TAG)])
             n_lights += 1
+    post = add_interior_post(comps, ship, hull_cm)
     unreal.BlueprintEditorLibrary.compile_blueprint(bp)
     unreal.EditorAssetLibrary.save_loaded_asset(bp, only_if_is_dirty=False)
-    report[ship] = {"rooms": mods.get("rooms", []), "parts": n_parts, "lights": n_lights, "removed": removed}
+    report[ship] = {"rooms": mods.get("rooms", []), "parts": n_parts, "lights": n_lights, "removed": removed, "post": post}
+
+
+def add_interior_post(comps, ship, hull_cm):
+    """The interior's haze and lifted blacks (author 6. 10. 2026; interior_post.py): a box over the union of the ship's
+    rooms (Design/<Ship>_layout.json, layout metres: the deck's floor to its clear height + 1.2 m for raised floors
+    such as the cockpit's) and a bounded PostProcessComponent in it. A component of the ship, so it moves with it;
+    outside the box (the chase camera, space, planets) nothing changes."""
+    import interior_post
+    path = os.path.join(REPO, "ArtSource", "Ships", ship, "Design", "%s_layout.json" % ship)
+    if not os.path.exists(path):
+        return None
+    layout = json.load(open(path, encoding="utf-8"))
+    rects = [r["rect"] for r in layout.get("rooms", []) if r.get("rect")]
+    if not rects:
+        return None
+    deck = next(iter(layout["decks"].values()))
+    x0, x1 = min(r[0] for r in rects), max(r[1] for r in rects)
+    y0, y1 = min(r[2] for r in rects), max(r[3] for r in rects)
+    z0, z1 = deck["floor_z"] - 0.2, deck["floor_z"] + deck["clear_height"] + 1.2
+    # layout y is to port, Unreal's y mirrored (hull_cm takes y already in Unreal's sense)
+    centre = hull_cm((x0 + x1) / 2, -(y0 + y1) / 2, (z0 + z1) / 2)
+    box = comps.add(unreal.BoxComponent, POST_PREFIX + "_Box")
+    box.set_editor_property("relative_location", centre)
+    box.set_box_extent(unreal.Vector((x1 - x0) * 50.0, (y1 - y0) * 50.0, (z1 - z0) * 50.0))
+    # query-only and ignoring every channel: the post-process component finds the camera inside its parent box by the
+    # box's body (GetDistanceToCollision) - with NoCollision there is no body and the veil never applied (6. 10. 2026);
+    # nothing traces or sweeps against it (the ship sweeps only its Hull)
+    box.set_collision_enabled(unreal.CollisionEnabled.QUERY_ONLY)
+    box.set_collision_response_to_all_channels(unreal.CollisionResponseType.ECR_IGNORE)
+    box.set_editor_property("generate_overlap_events", False)
+    box.set_editor_property("hidden_in_game", True)
+    pp = comps.add(unreal.PostProcessComponent, POST_PREFIX, parent_name=POST_PREFIX + "_Box")
+    interior_post.apply_component(pp)
+    return {"box_m": [round(x0, 2), round(x1, 2), round(y0, 2), round(y1, 2), round(z0, 2), round(z1, 2)]}
 
 
 def build_all():

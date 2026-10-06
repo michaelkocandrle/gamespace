@@ -30,6 +30,8 @@ C_COOL = "#3c8dde"
 C_WARM = "#e0a040"
 C_FLOOR = "#8d9096"
 C_DIM = "#c0392b"
+C_BOOT = "#e6dcc8"       # rev. D: the boot in the frame's lacquer
+C_GLOW = "#dfe9ff"       # the cup's glow (~7500 K)
 
 
 def section_profile(sec):
@@ -98,18 +100,42 @@ def note(ax, xy, text, xytext, fs=6):
                 bbox=dict(fc="#fffbe8", ec="#bbb", lw=0.3, pad=1.2))
 
 
-def boot_section(spec):
+def boot_section(spec, sec_key="W"):
     """The boot's section (v from the wall face, z), mm."""
-    b = spec["boot"]
-    return [(0, 0), (b["v1"], 0), (b["v1"], b["z_vert"]), (b["v1"] - (b["z_top"] - b["z_vert"]), b["z_top"]), (0, b["z_top"])]
+    v1, prot, zv, zt = boot_dims(spec, sec_key)
+    return [(0, 0), (v1, 0), (v1, zv), (prot, zt), (0, zt)]
 
 
-def boot_plan(spec):
+def boot_plan(spec, sec_key="W"):
     """The boot's plan (u along the run, v from the wall face), mm: octagonal on the corridor side."""
     b = spec["boot"]
+    v1 = b["v1_by_section"][sec_key]
     c = b["chamfer"]
-    return [(b["u0"], 0), (b["u1"], 0), (b["u1"], b["v1"] - c), (b["u1"] - c, b["v1"]), (b["u0"] + c, b["v1"]),
-            (b["u0"], b["v1"] - c)]
+    return [(b["u0"], 0), (b["u1"], 0), (b["u1"], v1 - c), (b["u1"] - c, v1), (b["u0"] + c, v1), (b["u0"], v1 - c)]
+
+
+def boot_dims(spec, sec_key="W"):
+    b = spec["boot"]
+    v1 = b["v1_by_section"][sec_key]
+    prot = spec["profile"]["protrusion_by_section"][sec_key]
+    return v1, prot, b["z_vert"], b["z_vert"] + (v1 - prot)
+
+
+def _boot_elevation(ax, spec, x0, L):
+    """The boot seen from the corridor (u, z): light lacquer, the bead along the top edge, the cup's glow."""
+    b = spec["boot"]
+    v1, prot, zv, zt = boot_dims(spec)
+    c = b["chamfer"] / 1000
+    ax.add_patch(Polygon([(x0, 0), (x0 + L, 0), (x0 + L, zv / 1000), (x0 + L - c, zt / 1000), (x0 + c, zt / 1000),
+                          (x0, zv / 1000)], fc=C_BOOT, ec=C_FRAME_E, lw=0.5))
+    for xx in (x0 + c, x0 + L - c):
+        ax.plot([xx, xx], [0, zv / 1000], color="#b8ad97", lw=0.4)
+    ax.plot([x0, x0 + L], [zv / 1000, zv / 1000], color=C_LIP, lw=1.6)
+    cp = b["cup"]
+    ax.add_patch(Polygon(octagon(x0 + cp["u"] / 1000, cp["z"] / 1000, cp["outer"] / 1000, cp["outer"] / 1000,
+                                 cp["outer"] / 1000 * 0.29), fc=C_BOOT, ec=C_FRAME_E, lw=0.5))
+    ax.add_patch(Polygon(octagon(x0 + cp["u"] / 1000, cp["z"] / 1000, cp["inner"] / 1000, cp["inner"] / 1000,
+                                 cp["inner"] / 1000 * 0.29), fc=C_GLOW, ec="#9fb6e0", lw=0.5))
 
 
 def view_front(ax, spec, secs):
@@ -117,7 +143,6 @@ def view_front(ax, spec, secs):
     outer = section_profile(w)
     p = spec["profile"]["protrusion_by_section"]["W"] / 1000
     rings = [offset_inward(outer, d / 1000) for d in (0, 40, 70, 100)]
-    # rev. C: one solid shape in one lacquer - the steps only as thin shade lines, no seams
     poly = full(rings[0]) + list(reversed(full(rings[3])))
     ax.add_patch(Polygon(poly, closed=True, fc=C_FRAME, ec=C_FRAME_E, lw=0.6))
     for k in (1, 2):
@@ -132,24 +157,29 @@ def view_front(ax, spec, secs):
     ax.text(0, 1.55, "N (čárkovaně)\n1,2 × 2,3 m", fontsize=6, ha="center", color="#555")
     ax.plot([-1.3, 1.3], [0, 0], color=C_FLOOR, lw=1.2)
     half = w["width"] / 2
-    sl = spec["boot"]["slot"]
+    v1, prot, zv, zt = boot_dims(spec)
+    cp = spec["boot"]["cup"]
     for s in (-1, 1):
-        # the boot in section across the corridor: grows out of the floor, wraps the pillar's foot
         pts = [(s * (half - v / 1000), z / 1000) for v, z in boot_section(spec)]
-        ax.add_patch(Polygon(pts, fc="#3a3c41", ec="k", lw=0.6))
-        yb = s * (half - spec["boot"]["v1"] / 1000)
-        ax.add_patch(Circle((yb + s * 0.004, (sl["z0"] + sl["z1"]) / 2000), 0.012, fc="white", ec=C_COOL, lw=0.8))
+        ax.add_patch(Polygon(pts, fc=C_BOOT, ec=C_FRAME_E, lw=0.6))
+        ax.plot([s * (half - v1 / 1000), s * (half - v1 / 1000)], [(zv - 12) / 1000, zv / 1000], color=C_LIP, lw=2.0)
+        # the cup's collar out of the face, its glowing back
+        yb = s * (half - v1 / 1000)
+        yc = yb - s * cp["depth"] / 1000
+        ax.add_patch(Rectangle((min(yb, yc), (cp["z"] - cp["outer"] / 2) / 1000), abs(yc - yb), cp["outer"] / 1000,
+                               fc=C_BOOT, ec=C_FRAME_E, lw=0.5))
+        ax.plot([yb, yb], [(cp["z"] - cp["inner"] / 2) / 1000, (cp["z"] + cp["inner"] / 2) / 1000], color=C_GLOW, lw=3)
         ty = s * (w["ceiling_width"] / 2 - p)
         ax.add_patch(Circle((ty * 0.97, w["vertical_to"] + w["slope_rise"] - 0.02), 0.03, fc=C_WARM, ec="k", lw=0.4))
     cw = w["ceiling_width"] / 2 - 0.07
     ax.plot([-cw, cw], [w["ceiling"] - 0.055, w["ceiling"] - 0.055], color=C_WARM, lw=1.5, ls=(0, (3, 1)))
-    note(ax, (half - 0.17, 0.12), "L1 bota 300 × 170 × 230, zdroj v štěrbině", (0.35, 0.6))
-    note(ax, (0.5, 2.08), "L2 horní roh Ø60, 4000 K", (0.9, 2.5))
+    note(ax, (half - v1 / 1000, 0.1), "L1 světlá bota s leštěnou hranou,\nzáře v osmibokém kalichu", (0.25, 0.62))
+    note(ax, (0.5, 2.08), "L2 horní roh Ø60, 18 cd, kužel 100°", (0.75, 2.5))
     note(ax, (0.0, w["ceiling"] - 0.055), "L3 2× skrytá lišta v drážce u koruny (jen horní člen)", (-1.4, 2.62))
     note(ax, (-half + 0.05, 0.9), "rám = jeden plný tvar v laku,\nstupně 40 / 70 / 100 jen stínem", (-1.45, 1.2))
     note(ax, (-(half - p), 0.7), "leštěná linka jen na hraně koruny", (-0.95, 0.42))
     dim(ax, (-half + p, -0.12), (half - p, -0.12), "světlost u podlahy %.2f m (nad botami %.2f)" % (
-        w["width"] - 2 * p, w["width"] - 2 * spec["boot"]["v1"] / 1000))
+        w["width"] - 2 * p, w["width"] - 2 * v1 / 1000))
     dim(ax, (-half, -0.25), (half, -0.25), "W %.1f m mezi líci stěn" % w["width"])
     dim(ax, (1.45, 0), (1.45, w["ceiling"] - p), "světlá výška %.2f" % (w["ceiling"] - p), off=(0.05, 0))
     ax.set_xlim(-1.6, 1.7)
@@ -171,15 +201,13 @@ def view_section(ax, spec, secs):
         ax.add_patch(Rectangle((a + 0.009, -0.05), b - a - 0.018, 0.044, fc="#b9bcc2", ec="k", lw=0.4))
         ax.text((a + b) / 2, -0.12, t, fontsize=6, ha="center")
     for x in sorted({v for a, b, _ in segs for v in (a, b)}):
-        ax.add_patch(Rectangle((x - 0.009, -0.006), 0.018, 0.006, fc=C_LIP, ec="none"))       # the lip network
+        ax.add_patch(Rectangle((x - 0.009, -0.006), 0.018, 0.006, fc=C_LIP, ec="none"))
     for z, t in ((0.1, "sokl"), (w["vertical_to"], "zlom 1,3"), (w["vertical_to"] + w["slope_rise"], "vybrání 2,1")):
         ax.plot([-0.1, end + 0.1], [z, z], color="#888", lw=0.5, ls="--")
         ax.text(end + 0.12, z, t, fontsize=6, va="center")
-    b = spec["boot"]
-    sl = b["slot"]
+    st = spec["profile"]["steps"]
     for x0 in (0, xs[4]):
         ax.add_patch(Rectangle((x0 + 0.008, 0), L - 0.016, w["ceiling"], fc=C_FRAME, ec=C_FRAME_E, lw=0.5, alpha=0.55))
-        st = spec["profile"]["steps"]
         ax.add_patch(Polygon([(x0 + st[0]["u0"] / 1000, w["ceiling"]), (x0 + st[0]["u1"] / 1000, w["ceiling"]),
                               (x0 + st[0]["u1"] / 1000, w["ceiling"] - st[0]["v1"] / 1000),
                               (x0 + st[1]["u1"] / 1000, w["ceiling"] - st[0]["v1"] / 1000),
@@ -191,22 +219,13 @@ def view_section(ax, spec, secs):
                               (x0 + st[1]["u0"] / 1000, w["ceiling"] - st[1]["v1"] / 1000),
                               (x0 + st[1]["u0"] / 1000, w["ceiling"] - st[0]["v1"] / 1000),
                               (x0 + st[0]["u0"] / 1000, w["ceiling"] - st[0]["v1"] / 1000)], fc=C_FRAME, ec="k", lw=0.6))
-        # the boot seen from the corridor: its corridor face between the chamfers, the chamfer up into the pillar
-        c = b["chamfer"] / 1000
-        ax.add_patch(Polygon([(x0, 0), (x0 + L, 0), (x0 + L, b["z_vert"] / 1000), (x0 + L - c, b["z_top"] / 1000),
-                              (x0 + c, b["z_top"] / 1000), (x0, b["z_vert"] / 1000)], fc="#3a3c41", ec="k", lw=0.5))
-        ax.plot([x0 + c, x0 + c], [0, b["z_top"] / 1000], color="#555", lw=0.4)
-        ax.plot([x0 + L - c, x0 + L - c], [0, b["z_top"] / 1000], color="#555", lw=0.4)
-        ax.plot([x0 + c, x0 + L - c], [b["z_vert"] / 1000] * 2, color="#555", lw=0.4)
-        ax.add_patch(Rectangle((x0 + sl["u0"] / 1000, sl["z0"] / 1000), (sl["u1"] - sl["u0"]) / 1000,
-                               (sl["z1"] - sl["z0"]) / 1000, fc="#111", ec="none"))
-        ax.add_patch(Circle((x0 + 0.15, (sl["z0"] + sl["z1"]) / 2000), 0.007, fc="white", ec=C_COOL, lw=0.6))
+        _boot_elevation(ax, spec, x0, L)
         ax.add_patch(Circle((x0 + L / 2, 2.08), 0.03, fc=C_WARM, ec="k", lw=0.4))
     dim(ax, (0, 2.62), (xs[1], 2.62), "0,3")
     dim(ax, (0, 2.75), (xs[4], 2.75), "rozteč 2,4 = 0,3 + 0,9 + 0,3 + 0,9")
     dim(ax, (0, -0.32), (xs[1] + pl, -0.32), "rozteč 1,2 = 0,3 + 0,9 (výchozí, autor 6. 10.)")
     note(ax, (xs[4] + 0.15, 2.22), "řez horním členem: jeden plný tvar", (xs[4] - 1.0, 1.75))
-    note(ax, (xs[4] + 0.15, 0.12), "bota L1 kolem paty pilíře", (xs[4] - 0.95, 0.55))
+    note(ax, (xs[4] + 0.15, 0.095), "světlá bota, záře v kalichu", (xs[4] - 1.0, 0.55))
     note(ax, (xs[3] + 0.0, -0.003), "síť leštěného lemu", (xs[2] - 0.2, 0.3))
     ax.set_xlim(-0.2, end + 0.55)
     ax.set_ylim(-0.42, 2.85)
@@ -308,7 +327,7 @@ def view_profile(ax, spec):
         u += cf["rib_pitch"]
     note(ax, (hs["grooves"][0][0] + 7, mid["v1"] - 18), "L3 2× lišta 12 v drážce 14 × 20 u boku koruny", (-85, 74))
     note(ax, (crown["u0"] + 4, crown["v1"] - 4), "leštěná hrana koruny 12 × 12 (jedna linka)", (-85, 128))
-    note(ax, ((cf["u0"] + cf["u1"]) / 2, crown["v1"] - 3), "pryžová manžeta 80 na vnitřní straně, žebra 7 / 15", (150, 140))
+    note(ax, ((cf["u0"] + cf["u1"]) / 2, crown["v1"] - 3), "pryžová manžeta %d na vnitřní straně, žebra %d / %d" % (cf["u1"] - cf["u0"], cf["rib_width"], cf["rib_pitch"]), (150, 140))
     ax.text(150, 30, "jeden plný tvar, jeden lak –\nstupně čitelné jen stínem a odleskem", fontsize=6, ha="center")
     dim(ax, (0, -55), (300, -55), "modul 300 (spára 2 × 4)")
     dim(ax, (390, 0), (390, 100), "100 (W)\n80 (N)", off=(18, 0))
@@ -325,8 +344,8 @@ def view_profile(ax, spec):
 
 
 def view_floor(ax, spec, secs):
-    """Plan of two 1.2 m pitches in W (rev. C): threshold + walkway plate A, threshold + grille plate G, with the boots
-    at the pillars and one continuous network of the polished lip over every plate."""
+    """Plan of two 1.2 m pitches in W: threshold + walkway plate A, threshold + grille plate G, the boots at the
+    pillars (rev. D: light, the cup on the corridor face) and the continuous network of the polished lip."""
     w = secs["W"]
     fl = spec["floor"]
     L = spec["portal_length"]
@@ -335,22 +354,25 @@ def view_floor(ax, spec, secs):
     edge = half - fl["edge_strip"]
     ln = fl["plate_lengths"][0]
     c = fl["corner_chamfer"]
-    lw_lip = 2.2
-    lip_col = C_LIP
 
-    def lipped(poly, fc, hatch=None):
-        ax.add_patch(Polygon(poly, fc=fc, ec=lip_col, lw=lw_lip, hatch=hatch, joinstyle="miter"))
+    def lipped(poly, fc):
+        ax.add_patch(Polygon(poly, fc=fc, ec=C_LIP, lw=2.2, joinstyle="miter"))
 
+    v1 = spec["boot"]["v1_by_section"]["W"]
+    cp = spec["boot"]["cup"]
     x = 0.0
     for kind in ("t", "a", "t", "g", "t"):
         size = L if kind == "t" else ln
         if kind == "t":
             lipped([(x, -edge), (x + size, -edge), (x + size, edge), (x, edge)], "#5d6066")
-            b = spec["boot"]
             for s in (-1, 1):
                 pts = [(x + u / 1000, s * (half - v / 1000)) for u, v in boot_plan(spec)]
-                ax.add_patch(Polygon(pts, fc="#3a3c41", ec="k", lw=0.6))
-                ax.add_patch(Circle((x + 0.15, s * (half - b["v1"] / 1000)), 0.012, fc="white", ec=C_COOL, lw=0.8))
+                ax.add_patch(Polygon(pts, fc=C_BOOT, ec=C_LIP, lw=1.2))
+                yb = s * (half - v1 / 1000)
+                yc = yb - s * cp["depth"] / 1000
+                ax.add_patch(Rectangle((x + (cp["u"] - cp["outer"] / 2) / 1000, min(yb, yc)), cp["outer"] / 1000,
+                                       abs(yc - yb), fc=C_BOOT, ec=C_FRAME_E, lw=0.5))
+                ax.add_patch(Circle((x + cp["u"] / 1000, yc - s * 0.03), 0.035, fc=C_GLOW, ec="none", alpha=0.6))
         else:
             o = octagon(x + size / 2, 0, size, 2 * walk, c)
             if kind == "a":
@@ -368,7 +390,6 @@ def view_floor(ax, spec, secs):
                     ax.plot([x + 0.06, x + size - 0.06], [yb, yb], color="#8a8e95", lw=0.5)
                     yb += fl["grille"]["bar_pitch"]
             for s in (-1, 1):
-                # the corner triangles by the chamfers and the side plates: each in the network
                 lipped([(x, s * walk), (x + c, s * walk), (x, s * (walk - c))], "#5d6066")
                 lipped([(x + size, s * walk), (x + size - c, s * walk), (x + size, s * (walk - c))], "#5d6066")
                 lipped([(x, s * walk), (x + size, s * walk), (x + size, s * edge), (x, s * edge)], "#666a71")
@@ -380,43 +401,43 @@ def view_floor(ax, spec, secs):
     note(ax, (L + 0.45, walk + 0.005), "souvislá síť leštěného lemu 18 mm přes všechny desky", (-0.25, 1.92))
     note(ax, (L + 0.15, -0.5), "boční deska a rohové trojúhelníky – také v síti", (-0.2, -1.6))
     note(ax, (2 * L + ln + 0.45, 0.0), "G: mřížka nad kanálem 0,6 × hl. 0,2", (1.3, -1.92))
-    note(ax, (0.15, half - 0.17), "bota L1 v půdorysu, zdroj = bod", (0.5, 1.4))
+    note(ax, (0.15, half - 0.17), "světlá bota L1, kalich ke chodbě, jemná záře", (0.45, 1.4))
     dim(ax, (-0.08, -half), (-0.08, half), "W 2,4", off=(-0.08, 0))
-    ax.text(x / 2, -2.1, "rozteč 1,2 m (výchozí): práh 0,3 + deska 0,9; N 1,2: jen chodník a práh", fontsize=6, ha="center",
-            color="#555")
+    ax.text(x / 2, -2.1, "rozteč 1,2 m (výchozí): práh 0,3 + deska 0,9; N: bota 120 mm, chodník přes celou šířku", fontsize=6,
+            ha="center", color="#555")
     ax.set_xlim(-0.3, x + 0.1)
     ax.set_ylim(-2.2, 2.05)
 
 
 def view_joint(ax, spec):
-    """The boot (L1) 1:5: its section across the corridor (left) and its plan (right), mm."""
+    """The boot (L1) rev. D 1:5: its section across the corridor through the cup, mm."""
     b = spec["boot"]
-    sl = b["slot"]
-    ox = 0
-    # section: the wall face at v = 0 (left), the floor at z = 0
-    ax.add_patch(Rectangle((ox - 60, -60), 330, 60, fc="#d8d8d8", ec="#888", lw=0.4, hatch="////"))
-    ax.add_patch(Rectangle((ox - 60, 0), 60, 330, fc="#55585e", ec="k", lw=0.4))
-    ax.add_patch(Polygon([(ox + v, z) for v, z in boot_section(spec)], fc="#3a3c41", ec="k", lw=0.7))
-    ax.add_patch(Rectangle((ox, b["z_top"]), 100, 100, fc=C_FRAME, ec="k", lw=0.5))
-    ax.text(ox + 50, b["z_top"] + 50, "pilíř\n(jeden tvar)", fontsize=5.5, ha="center", va="center")
-    # the slot and the emitter, its beam down and out
-    ax.add_patch(Rectangle((ox + b["v1"] - sl["depth"], sl["z0"]), sl["depth"], sl["z1"] - sl["z0"], fc="#111", ec="k", lw=0.3))
-    ex, ez = ox + b["v1"] - sl["depth"] + 4, (sl["z0"] + sl["z1"]) / 2
-    ax.add_patch(Circle((ex, ez), sl["emitter"] / 2, fc="white", ec=C_COOL, lw=0.8))
-    a = math.radians(sl["aim_deg"])
-    for da in (-12, 0, 12):
-        aa = a + math.radians(da)
-        reach = ez / math.sin(aa)               # to the floor
-        ax.plot([ex, ex + reach * math.cos(aa)], [ez, 0.0], color=C_COOL, lw=0.5, ls="--")
-    ax.add_patch(Rectangle((ox + b["v1"], -6), 18, 6, fc=C_LIP, ec="none"))
-    ax.add_patch(Rectangle((ox + b["v1"] + 18, -6), 150, 6, fc="#5f636a", ec="k", lw=0.3))
-    note(ax, (ox + b["v1"] - 10, ez), "štěrbina 60 × 20, hl. 25;\nzdroj Ø12 vzadu, míří 30° dolů", (ox + 175, 200))
-    note(ax, (ox + b["v1"] + 9, -3), "lem sítě u paty boty", (ox + 195, -45))
-    note(ax, (ox + 140, 195), "zkosení 45° do pilíře", (ox + 175, 270))
-    dim(ax, (ox, -30), (ox + b["v1"], -30), "170")
-    dim(ax, (ox - 35, 0), (ox - 35, b["z_top"]), "230", off=(-14, 0))
-    ax.text(ox + 110, 345, "bota L1 – řez napříč chodbou (mm)", fontsize=6, ha="center", color="#555")
-    ax.set_xlim(-100, 400)
+    cp = b["cup"]
+    v1, prot, zv, zt = boot_dims(spec)
+    ax.add_patch(Rectangle((-60, -60), 340, 60, fc="#d8d8d8", ec="#888", lw=0.4, hatch="////"))
+    ax.add_patch(Rectangle((-60, 0), 60, 330, fc="#55585e", ec="k", lw=0.4))
+    ax.add_patch(Polygon(boot_section(spec), fc=C_BOOT, ec=C_FRAME_E, lw=0.7))
+    ax.add_patch(Rectangle((0, zt), prot, 100, fc=C_FRAME, ec="k", lw=0.5))
+    ax.text(prot / 2, zt + 50, "pilíř\n(jeden tvar)", fontsize=5.5, ha="center", va="center")
+    ax.add_patch(Rectangle((v1 - 12, zv - 12), 14, 14, fc=C_LIP, ec="k", lw=0.4))
+    # the cup: a collar 30 mm out of the face, its glowing back, the weak light inside
+    z0, z1 = cp["z"] - cp["outer"] / 2, cp["z"] + cp["outer"] / 2
+    zi0, zi1 = cp["z"] - cp["inner"] / 2, cp["z"] + cp["inner"] / 2
+    ax.add_patch(Rectangle((v1, z0), cp["depth"], (cp["outer"] - cp["inner"]) / 2, fc=C_BOOT, ec=C_FRAME_E, lw=0.5))
+    ax.add_patch(Rectangle((v1, zi1), cp["depth"], (cp["outer"] - cp["inner"]) / 2, fc=C_BOOT, ec=C_FRAME_E, lw=0.5))
+    ax.add_patch(Rectangle((v1 - 2, zi0), 3, cp["inner"], fc=C_GLOW, ec="#9fb6e0", lw=0.5))
+    ax.add_patch(Circle((v1 + cp["depth"] * 0.4, cp["z"]), 4, fc="white", ec="#9fb6e0", lw=0.6))
+    for r, a in ((60, 0.35), (120, 0.18), (190, 0.08)):
+        ax.add_patch(Circle((v1 + cp["depth"] * 0.4, cp["z"]), r, fc="none", ec="#9fb6e0", lw=0.5, alpha=a * 2, ls="--"))
+    ax.add_patch(Rectangle((v1, -6), 18, 6, fc=C_LIP, ec="none"))
+    ax.add_patch(Rectangle((v1 + 18, -6), 140, 6, fc="#5f636a", ec="k", lw=0.3))
+    note(ax, (v1 - 5, zv - 5), "leštěná hrana boty 12 mm", (v1 + 40, zv + 70))
+    note(ax, (v1 + 15, cp["z"]), "osmiboký kalich 110 / 90, hl. 30;\nsvítící dno + slabé světlo ~0,5 m", (v1 + 45, cp["z"] + 120))
+    note(ax, (v1 + 60, 2), "jen jemný rozptyl na podlahu,\nžádný reflektor", (v1 + 45, -45))
+    dim(ax, (0, -30), (v1, -30), "%d (N %d)" % (v1, b["v1_by_section"]["N"]))
+    dim(ax, (-35, 0), (-35, zt), "%d" % zt, off=(-14, 0))
+    ax.text(130, 345, "bota L1 rev. D – řez kalichem (mm)", fontsize=6, ha="center", color="#555")
+    ax.set_xlim(-100, 420)
     ax.set_ylim(-70, 360)
 
 
@@ -459,7 +480,7 @@ def view_eye(ax, spec, secs, pitch):
     for (y0, z0) in outer:
         a, b = proj(0.6, y0, z0), proj(9.0, y0, z0)
         ax.plot([a[0], b[0]], [a[1], b[1]], color="#888", lw=0.4)
-    ax.text(0, -1.0, "rozteč %.1f m; oko 1,65 m v ose, FOV %d° (do dodání FOV ze SC)" % (pitch, spec["eye"]["fov"]),
+    ax.text(0, -1.0, "rozteč %.1f m; oko 1,65 m v ose, FOV %d° (jako SC)" % (pitch, spec["eye"]["fov"]),
             fontsize=6, ha="center", color="#555")
     ax.set_xlim(-1.3, 1.3)
     ax.set_ylim(-1.08, 0.75)
@@ -483,7 +504,8 @@ def view_table(ax, spec):
     mats = ("Materiály (styl výrobce v part.md): celý rám krémový lak (Halcyon, autor 6. 10.); leštěný lem = leštěný "
             "kov; manžeta a sokl = guma; chodník = protiskluzový grafit; desky a pás = grafit. Všechna světla "
             "v pouzdře nebo skrytá, bez stínů.")
-    revs = "  ".join("%s %s: %s" % (r["rev"], r["date"], r["what"]) for r in spec.get("revisions", []))
+    # the last two revisions (the rest stays in the JSON): the full list ran into the title line at rev. D
+    revs = "  ".join("%s %s: %s" % (r["rev"], r["date"], r["what"]) for r in spec.get("revisions", [])[-2:])
     ax.text(0.0, 0.28, "\n".join(textwrap.wrap("Revize: " + revs, 150)), fontsize=5.5, va="top", color="#444")
     ax.text(0.0, 0.43, "\n".join(textwrap.wrap(mats, 150)), fontsize=6, va="top")
     ax.text(0.0, 0.02, "%s  rev. %s  |  %s  |  %s  |  sekce %s; S a T jen poznámka" % (
@@ -506,7 +528,7 @@ def main():
                                                                           view_profile(ax, spec))),
         ("podlaha", fig.add_axes([0.03, 0.05, 0.30, 0.40]), lambda ax: (setup(ax, "4 Podlaha – půdorys 2 × 1,2 (W)",
                                                                               "1:20"), view_floor(ax, spec, secs))),
-        ("napojeni", fig.add_axes([0.36, 0.05, 0.22, 0.40]), lambda ax: (setup(ax, "5 Patka L1 – bota, řez",
+        ("napojeni", fig.add_axes([0.36, 0.05, 0.22, 0.40]), lambda ax: (setup(ax, "5 Patka L1 – bota rev. D, řez",
                                                                                "1:5"), view_joint(ax, spec))),
         ("oko_12", fig.add_axes([0.61, 0.23, 0.19, 0.29]), lambda ax: (setup(ax, "6a Pohled z oka – rozteč 1,2", ""),
                                                                            view_eye(ax, spec, secs, 1.2))),

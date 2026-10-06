@@ -86,6 +86,7 @@
   "texture": "^T_Kit_[A-Z][A-Za-z0-9]+_(BC|N|ORM|M|H|E)$",
   "slot_roles": ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber", "Kit_Fabric", "Kit_Plastic", "Kit_Trim", "Kit_Seal", "Kit_GlowWarm", "Kit_GlowCool", "Kit_GlowSignal", "Kit_GlowNeutral", "Kit_Screen", "Kit_Glass", "Kit_Lacquer", "Kit_Lip", "Kit_Graphite", "Kit_Gasket", "Kit_AntiSlip", "Kit_GlowFoot"]
  },
+ "interior_post": {"_comment": "The post-process of a ship's interior only (author 6. 10. 2026: a light haze and slightly lifted blacks in ship interiors, never the global tone curve - space and planets must not change). A veil: the contrast a little down, the shadows offset up, a touch less saturation. Tools/Assets/interior_post.py puts it on a PostProcessComponent in a box round the kit rooms (kit_rooms.py) and on the parts factory's test section (import_kit.py).", "contrast": 0.9, "offset_shadows": [0.018, 0.018, 0.02], "saturation": 0.95, "priority": 10.0, "blend_radius_cm": 60.0},
  "palettes": {
   "_comment": "Linear colours per slot role; a ship picks one with 'kit_maker' in its setup (MI_Kit_<Maker>_<Role>). Kestrel Dynamics is a proposal.",
   "_Halcyon": "Kit_Primary calibrated to the approved Wayfarer corridor (walls 0.085, panels 0.13, a little metal sheen): 0.06 with no metal read black in the showroom (27. 9. 2026). Kit_GlowWarm 1/0.9/0.78 (was 1/0.82/0.62: the showroom measured B/R 0.58, SC 0.72-1.05)",

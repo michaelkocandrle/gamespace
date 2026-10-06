@@ -1,0 +1,70 @@
+{
+ "topic": "kf_portal_01_blockout",
+ "date": "2026-10-06",
+ "goal": "Blockout dílu KF-PORTAL-01 (krok 4 workflow) podle listu rev. C + D na zkušebním úseku chodby W: portál jako jeden lakovaný tvar s leštěnou hranou koruny a manžetou, světlá bota L1 se září v osmibokém kalichu, podlahový modul 0,9 v síti leštěného lemu, rozteč 1,2 m. Světla ze socketů dílu; post-process interiéru (lehký opar, zvednutá černá).",
+ "style": "Kvalita podle etalonu SC (Aurora Mk II), barvy a opotřebení podle Halcyon Freightworks: rám krémový lak, stěny a podlaha grafit; udržovaná pracovní loď. Snímky ze stejných úhlů jako kotevní záběry SC.",
+ "checklist": "part",
+ "gate": "part",
+ "pilot": true,
+ "out": "Docs/Reviews/2026-10-06_kf_portal_01_blockout",
+ "notes": [
+  "Blockout: tvary a materiály sdíleného základu, bez decalů, ražby, špíny a otěru hran (krok 5).",
+  "Konec chodby uzavírá 4. portál před stěnou zkušební místnosti."
+ ],
+ "etalon": [
+  {
+   "img": "Docs/Kit/etalon/sc/ram_portal_1.jpg",
+   "label": "chodba do hloubky"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/ram_portal_2.jpg",
+   "label": "pata rámu se světlem"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/podlaha_1.jpg",
+   "label": "podlaha s lemem"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/ram_portal_3.jpg",
+   "label": "rám zblízka"
+  }
+ ],
+ "pairs": [
+  {
+   "title": "1 Z oka 1,65 m do hloubky",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_1.jpg",
+   "ref_label": "SC Aurora, chodba",
+   "ours": "C:/gamespace-shots/20261006_203857_kit_test_section/01_1_eye_depth.png",
+   "ours_label": "blockout dílu, Editor 1440p, FOV 90"
+  },
+  {
+   "title": "2 Pata pilíře se světlem L1",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_2.jpg",
+   "ref_label": "SC pata rámu",
+   "ours": "C:/gamespace-shots/20261006_203857_kit_test_section/02_2_pillar_foot_L1.png",
+   "ours_label": "z ~1,25 m šikmo shora"
+  },
+  {
+   "title": "3 Podlaha 35° dolů s lemem",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/podlaha_1.jpg",
+   "ref_label": "SC podlaha",
+   "ours": "C:/gamespace-shots/20261006_203857_kit_test_section/03_3_floor_35.png",
+   "ours_label": "chodník, lem, pásy, dráha"
+  },
+  {
+   "title": "4 Lak a tmavá třetina zblízka",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/ram_portal_3.jpg",
+   "ref_label": "SC rám",
+   "ours": "C:/gamespace-shots/20261006_203857_kit_test_section/04_4_lacquer_dark_detail.png",
+   "ours_label": "z ~0,7 m šikmo"
+  }
+ ]
+}

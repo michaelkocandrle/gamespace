@@ -233,7 +233,7 @@ s postavou nebo dveřmi v záběru kvůli měřítku.
 8. **Lékárnička** – C8R Pisces Rescue, Cutlass Red, C1 Spirit: z 1 m, štítky z 30 cm.
 9. **Strop** kolmo vzhůru v chodbě Aurory z ~1 m; **MFD** kolmo z 40 cm (vypnuto, náběh, zapnuto); **boční
    konzole** shora z 30 cm.
-10. Poznamenat si **FOV ze SC** (nastavení hry), aby showroom snímal stejnou ohniskovou vzdáleností.
+10. **FOV ve SC je 90°** (potvrdil autor 6. 10. 2026); showroom a zkušební úsek snímají s FOV 90.
 
 ## 5. Návrh prvních pilotů
 

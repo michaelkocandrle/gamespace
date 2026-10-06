@@ -452,6 +452,11 @@ Každá nás stála aspoň hodinu. Formát: **příznak → příčina → řeš
 
 ### 9.2 Vykreslování (UE 5.8)
 
+- **PostProcessComponent v krabici nic nedělá:** omezený post-process (`unbound` vypnuté) pozná kameru uvnitř podle
+  těla rodičovské `BoxComponent` (`GetDistanceToCollision`). S kolizí `NoCollision` tělo nemá a závoj interiéru
+  Wayfareru se nikdy nepoužil (snímky před a po se lišily jen šumem). Řešení: krabice `QueryOnly`, odpověď na všechny
+  kanály `Ignore`, bez overlap událostí (`kit_rooms.add_interior_post`, 6. 10. 2026).
+
 - **Materiál z Pythonu:** uzly `Transform` (world→local, local→tangent) daly v `M_Ship_PBR` nulový vektor a
   **loď byla černá**. Převody prostorů dělej v HLSL uvnitř `MaterialExpressionCustom`
   (`GetPrimitiveData(Parameters).WorldToLocal`, `Parameters.TangentToWorld`), vstupy uzlu připojuj jménem

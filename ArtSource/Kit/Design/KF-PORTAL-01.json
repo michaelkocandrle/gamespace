@@ -2,8 +2,8 @@
  "_comment": "Parts factory pilot 1 (FACTORY_WORKFLOW v0.1, author 6. 10. 2026): the corridor frame module - portal ring, its foot lights and the floor plates between two portals. Step 2 drawing data, read by Tools/Design/draw_part_sheet.py. Lengths in metres in the layout frame (x along the run, y across, z up from the deck); the profile detail in millimetres. Sections from ArtSource/Kit/kit_rules.json.",
  "id": "KF-PORTAL-01",
  "title": "Rámový modul chodby – portál, patky se světlem, podlahová deska",
- "revision": "C",
- "status": "rev. C ke schválení",
+ "revision": "D",
+ "status": "rev. D ke schválení (bota L1 a manžeta; zbytek rev. C schválen)",
  "date": "2026-10-06",
  "sections": [
   "W",
@@ -52,11 +52,12 @@
   "cuff": {
    "u0": 110,
    "u1": 190,
-   "depth": 6,
-   "rib_pitch": 15,
-   "rib_width": 7,
+   "depth": 4,
+   "rib_pitch": 9,
+   "rib_width": 4,
    "material": "guma",
-   "_comment": "on the crown's soffit (the inner side, facing the opening), 80 mm"
+   "_comment": "rev. D: finer ribs (4 on a 9 mm pitch, 2 mm high), the rubber a tone lighter (kit_materials rubber 0.04): no dark stripe in the middle of the frame",
+   "rib_height": 2
   },
   "protrusion_by_section": {
    "W": 100,
@@ -85,21 +86,21 @@
  "lights": [
   {
    "id": "L1",
-   "name": "patka (bota)",
+   "name": "bota – kalich",
    "count": "2 na portál",
-   "housing": "bota 300 × 170 × 230 mm; štěrbina 60 × 20, hl. 25; zdroj Ø12",
-   "where": "z 0,04–0,06 m v čele boty, míří 30° dolů na podlahu a lem",
-   "colour": "bílá s modrým nádechem ~7500 K",
-   "reach": "skvrna na podlaze ~0,5 m; z oka malý bod",
+   "housing": "osmiboký kalich 110 / 90 mm, hl. 30, ve světlé botě; svítící dno",
+   "where": "čelo boty, z 0,095 m",
+   "colour": "~7500 K",
+   "reach": "~0,5 m, jemný rozptyl na podlahu",
    "shadows": "ne"
   },
   {
    "id": "L2",
    "name": "horní roh",
    "count": "2 na portál",
-   "housing": "kruhové Ø 60 mm, hloubka 40 mm, v zalomení šikminy a vybrání",
+   "housing": "kruhové Ø 60 mm, kužel 100°, 18 cd",
    "where": "W z 2,10 m, N z 2,10 m",
-   "colour": "teplá bílá 4000 K",
+   "colour": "neutrální bílá (kalibrace rev. C)",
    "reach": "kužel 50° dolů do osy",
    "shadows": "ne"
   },
@@ -109,8 +110,8 @@
    "count": "2 na portál (horní člen)",
    "housing": "2 lišty 12 mm v drážce 14 × 20 u boků koruny",
    "where": "horní člen, celá šířka stropu",
-   "colour": "teplá bílá 3500 K",
-   "reach": "přechod jasu na koruně (zdroj skrytý)",
+   "colour": "neutrální bílá (kalibrace rev. C)",
+   "reach": "8 cd, přechod jasu na koruně",
    "shadows": "ne"
   }
  ],
@@ -191,7 +192,7 @@
  "eye": {
   "height": 1.65,
   "fov": 90,
-  "_fov": "nejistě: FOV ze SC dodá autor",
+  "_fov": "FOV 90 jako ve SC (potvrdil autor 6. 10. 2026)",
   "pitches": [
    1.2,
    2.4
@@ -212,6 +213,11 @@
    "rev": "C",
    "date": "2026-10-06",
    "what": "rám jeden plný lakovaný tvar bez spár mezi stupni, leštěný lem jen na hraně koruny (jedna linka), pryžová manžeta na vnitřní straně; patka L1 jako osmiboká bota kolem paty pilíře, vrostlá do podlahy, světlo zapuštěné uvnitř; souvislá síť leštěného lemu přes všechny desky, práh, boční desky a pás"
+  },
+  {
+   "rev": "D",
+   "date": "2026-10-06",
+   "what": "bota L1 světlá v laku rámu s leštěnou hranou nahoře, světlo jako záře uvnitř osmibokého kalichu (svítící dno + slabé světlo s dosahem ~0,5 m), žádný reflektor; v N menší bota (120 mm) kvůli průchodu; manžeta jemnější (žebra 4 / 9, výška 2) a guma o tón světlejší"
   }
  ],
  "plinth": {
@@ -221,21 +227,34 @@
   "alternative": "lišta s opálovým difuzorem 20 mm v drážce 30 mm pod přesahem 10 mm (zdroj skrytý), kdyby autor chtěl souvislou linku"
  },
  "boot": {
-  "_comment": "rev. C: L1 as an octagonal boot round the pillar's foot, grown into the floor (etalon ram_portal_*, podlaha_*): plan u 0-300 along the run, v 0-170 from the wall face (70 mm beyond the crown), the corridor-side corners chamfered 60 mm; section: vertical to z 160, a 45 deg chamfer up into the pillar to z 230; graphite; its base meets the floor's lip network. The light: a slot 60 x 20 mm at z 40-60 in its corridor face, recessed 25 mm, a 12 mm emitter at its back aimed 30 deg down at the floor and the lip - from the eye only a small bright point.",
+  "_comment": "rev. D: the L1 boot round the pillar's foot, grown into the floor (etalon ram_portal_*, podlaha_*): LIGHT, in the frame's lacquer, a polished bead on its top edge; plan u 0-300 along the run, v 0-v1 from the wall face (W 170, N 120 - the N passage keeps 0.96 m), the corridor-side corners chamfered 60 mm; vertical to z 160, then 45 deg up into the pillar's crown. The light: a glow INSIDE an octagonal cup in its corridor face (a glowing back + a weak point light, ~0.5 m reach, that lights the cup's inner walls and gives only a soft spill on the floor) - no spot, no hard ellipses; ~7500 K.",
   "u0": 0,
   "u1": 300,
-  "v1": 170,
   "chamfer": 60,
   "z_vert": 160,
   "z_top": 230,
-  "slot": {
-   "u0": 120,
-   "u1": 180,
-   "z0": 40,
-   "z1": 60,
-   "depth": 25,
-   "emitter": 12,
-   "aim_deg": 30
+  "v1_by_section": {
+   "W": 170,
+   "N": 120
+  },
+  "material": "lak rámu",
+  "bead": 12,
+  "cup": {
+   "u": 150,
+   "z": 95,
+   "outer": 110,
+   "inner": 90,
+   "depth": 30,
+   "light_cd": 0.6,
+   "light_radius_m": 0.5
   }
+ },
+ "light_levels": {
+  "_comment": "rev. C calibration (Docs/Reviews/2026-10-06_kit_test_section_revc.md); L1 rev. D: the cup's weak point light",
+  "L1_cd": 0.6,
+  "L1_radius_m": 0.5,
+  "L2_cd": 18.0,
+  "L2_cone_deg": 100.0,
+  "L3_cd": 8.0
  }
 }

@@ -36,15 +36,15 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 - **Interiérový kit** (`ArtSource/Kit/kit_rules.json`, `kit_parts.json`): dávky 1–3, 4 zčásti, 6 (nábytek kajuty);
   ukázka v `TestSpace` (U). Strop 500 + 3500 trojúhelníků na metr (autor 30. 9.; převezme `kit_manifest.json`).
 - **Továrna dílů** (6. 10.): `Docs/Kit/` soupis `catalog_draft.md`, etalon SC `etalon/etalon.md`, workflow
-  `FACTORY_WORKFLOW.md` **v0.2**; **pilot 1 `KF-PORTAL-01`**: krok 3 (materiály) schválen, zpět v kroku 2 – list rev. C + kalibrace světla.
+  `FACTORY_WORKFLOW.md` **v0.2**; **pilot 1 `KF-PORTAL-01`**: list rev. D, **krok 4 blockout** (W/N, `Tools/Kit/kit_portal.py`).
 - **Flotila:** Ship Matrix a dossiery publikované (skill `ship-pipeline` 1b); Delver a Farsight jen jako spec.
 - **Nástroje:** `Test.ps1`, `Build.ps1`, CI s offline testy (stav přes veřejné API GitHubu), kritik s prahem `step` /
   `ship` / `part`, zámek `HeavyLock.ps1`, snímky v `C:\gamespace-shots` (`shots:` v recenzích), `Cleanup.ps1` na konci kroku.
 
 ## Čeká na rozhodnutí autora
 
-- **Továrna – STOP:** posoudit list rev. C, tabulku jasu a 4 listy (`Docs/Reviews/2026-10-06_kit_test_section_revc.md`);
-  zbývá tmavších ploch (12–26 % proti 1 % v SC); pilot 2 (pouzdro panelu dveří) až po retrospektivě pilotu 1.
+- **Továrna – STOP:** posoudit blockout KF-PORTAL-01 (`Docs/Reviews/2026-10-06_kf_portal_01_blockout.md`); závoj interiéru
+  i přes výhled z kokpitu (vynechat?); pilot 2 (pouzdro panelu dveří) až po retrospektivě (`Docs/Kit/retro/`).
 - **Autor 5. 10. – věrná kopie SC podle referencí** (pak vlastní styl); pořadí v Dalších krocích, bod 0.
 - **Kokpit v2** (4. 10.): C-01 schválen výchozími volbami (D průmyslový, zakouřené hologramy, HOTAS, krémové obložení –
   autor může změnit); hotové holoprojektory MFD (CK-HP-L/R) a vnitřní rám kanopy (CK-CF); dál HOTAS, konzole a ovladače, materiály, střed.

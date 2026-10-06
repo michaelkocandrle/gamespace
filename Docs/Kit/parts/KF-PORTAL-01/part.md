@@ -113,7 +113,7 @@ Zdroj: dnešní chodba a exteriér Wayfareru (paleta `kit-design.md` kap. 4).
 **Rozhodnutí autora 6. 10.:**
 - rám je celý krémový lak;
 - Steadfast v2 má chodbu W 2,4 × 2,3;
-- FOV dodá autor, do té doby 90°.
+- FOV 90° jako ve SC (potvrdil autor 6. 10.).
 
 **Otevřené pro autora:** výchozí rozteč portálů 1,2, nebo 2,4 m. List rev. B ukazuje obě (pohled 6a/6b);
 doporučeno 1,2 m podle etalonu.
@@ -175,3 +175,16 @@ na RX 9070 v 1440p +0,6 až +1,4 ms GPU. Blockout (krok 4) až po schválení ta
 - **Kalibrace světla:** L1 reflektor 4 cd ze štěrbiny, L2 18 cd / 100°, L3 8 cd, grafit Halcyonu 0,06.
 - Tabulka jasu a listy jsou v `Docs/Reviews/2026-10-06_kit_test_section_revc.md`.
 - Blockout (krok 4) až po schválení autorem.
+
+## Rev. D a krok 4 – blockout (6. 10., STOP)
+
+- Rev. C je schválený kromě boty.
+- **Rev. D:**
+  - bota L1 je světlá s leštěnou hranou a září v osmibokém kalichu, jemný rozptyl, žádný reflektor;
+  - v N je bota 120 mm;
+  - manžeta je jemnější a světlejší.
+- **Blockout** `Tools/Kit/kit_portal.py`: `Portal_Frame03W/N_A`, `Floor_Walk09W/N_A`; světla jako sockety dílu.
+  Zkušební úsek je z blockoutu.
+- **Post-process interiéru** (závoj, zvednutá černá) je jen uvnitř lodí; vesmír a planety se nezměnily (P25).
+- Listy, tabulka jasu SC / rev. C / rev. D: `Docs/Reviews/2026-10-06_kf_portal_01_blockout.md`.
+- Krok 5 (detail) až po schválení autorem.

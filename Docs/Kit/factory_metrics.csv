@@ -18,3 +18,8 @@ date,part,workflow,kind,step,what,minutes,critic_rounds,rebuilds,notes
 2026-10-06,KF-PORTAL-01,v0.2,part,2,sheet rev. C (one-form profile; boot L1 in view/section/plan; lip network),12,0,0,
 2026-10-06,KF-PORTAL-01,v0.2,tool,2,draw_part_sheet rev. C views + measure_look dark/light shares and --all,6,0,0,
 2026-10-06,KF-PORTAL-01,v0.2,part,3,rough test section rev. C (Blender) + light calibration 4 rounds (import ~2 min + shots ~1.5 min each),24,0,4,round 1 L1 lit its own boot; round 2 40% dark; round 3 light floor; round 4 close to the etalon except the darks (12-26% vs 1%)
+2026-10-06,KF-PORTAL-01,v0.2,part,2,sheet rev. D (boot L1 light with a glowing cup; cuff finer; N boot 120),10,0,1,rev. C approved except the boot
+2026-10-06,KF-PORTAL-01,v0.2,tool,2,draw_part_sheet rev. D views,4,0,0,
+2026-10-06,KF-PORTAL-01,v0.2,tool,4,kit_portal.py (the part's builder W/N with light sockets) + kit_factory shell + render_part_eye.py,14,0,0,
+2026-10-06,KF-PORTAL-01,v0.2,tool,4,interior post-process (interior_post.py; kit_rooms box + component; test section volume),10,0,1,box with NoCollision did nothing (QueryOnly + Ignore fixes it)
+2026-10-06,KF-PORTAL-01,v0.2,part,4,blockout W/N in the test section + 4 etalon sheets + eye vs sheet + N render + P25 interior/exterior,18,0,0,first blockout round accepted for the author; darks now at SC level

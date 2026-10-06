@@ -74,7 +74,7 @@ rozhodnutí = úprava tohoto souboru ve stejném commitu, s datem a důvodem.
 - **Interiérový kit** je vlastní; čísla (mřížka, průřezy, rozpočty, palety) jsou jen v `ArtSource/Kit/kit_rules.json`.
 - **Interiér bez Nanite** (tenké díly mizely, stíny MegaLights chtějí přesnou geometrii, mesh u kamery rozmazává
   TSR); sklo, hologramy a decaly jsou vlastní díly bez Nanite.
-- **Světlo interiéru:** MegaLights jen s kamerou uvnitř lodi (autor 27. 9. 2026), odrazy Lumenu v interiéru varianta c: do drsnosti 0,32 v polovičním rozlišení (autor 6. 10. 2026); světla
+- **Světlo interiéru:** MegaLights jen s kamerou uvnitř lodi (autor 27. 9. 2026), odrazy Lumenu v interiéru varianta c: do drsnosti 0,32 v polovičním rozlišení (autor 6. 10. 2026); závoj interiéru (kontrast, zvednutá černá) jako PostProcessComponent v krabici místností, komponenta lodi – nikdy globální tónová křivka (autor 6. 10. 2026, `interior_post.py`); světla
   jen pro interiér nesou tag a v letu nesvítí.
 - **Assety načítané z C++ podle cesty** musí být v `DirectoriesToAlwaysCook`; `Package.ps1` klíčové kontroluje.
   Odloženo (audit v1, P2): Asset Manager a Primary Data Assets, až knihovna assetů poroste (víc lodí, delší cook).

@@ -8836,14 +8836,54 @@
     "34": "Saved/KitCatalog/SM_Kit_Furniture_Food16L_A_34.png"
    }
   },
-  "SM_Kit_Test_Portal03W_A": {
+  "SM_Kit_Test_Shell09W_A": {
    "category": "Test",
-   "family": "Test_Portal",
+   "family": "Test_Shell",
+   "section": "W",
+   "length_m": 0.9,
+   "variant": "A",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Test_Shell09W_A.fbx",
+   "dims_m": [
+    0.9,
+    2.6,
+    2.33
+   ],
+   "expected_size_cm": [
+    90.0,
+    260.0,
+    233.0
+   ],
+   "tris": 504,
+   "tris_decals": 0,
+   "tri_budget": 40000,
+   "materials": [
+    "Kit_Seal",
+    "Kit_Graphite",
+    "Kit_Gasket"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 648,
+    "secondary": 0,
+    "floor": 280,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Portal_Frame03W_A": {
+   "category": "Portal",
+   "family": "Portal_Frame",
    "section": "W",
    "length_m": 0.3,
    "variant": "A",
    "batch": 0,
-   "fbx": "ArtSource/Kit/Export/SM_Kit_Test_Portal03W_A.fbx",
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Portal_Frame03W_A.fbx",
    "dims_m": [
     0.3,
     2.6,
@@ -8854,7 +8894,7 @@
     260.0,
     236.0
    ],
-   "tris": 3828,
+   "tris": 4132,
    "tris_decals": 0,
    "tri_budget": 40000,
    "materials": [
@@ -8866,58 +8906,378 @@
     "Kit_Gasket",
     "Kit_GlowFoot"
    ],
-   "sockets": {},
+   "sockets": {
+    "SOCKET_Light_Corner_0": {
+     "location_ue_cm": [
+      15.0,
+      47.0,
+      206.0
+     ],
+     "params": {
+      "type": "spot",
+      "role": "neutral",
+      "cd": 18.0,
+      "cone_deg": 100.0,
+      "radius_m": 3.5,
+      "source_radius_cm": 2.0
+     }
+    },
+    "SOCKET_Light_Corner_1": {
+     "location_ue_cm": [
+      15.0,
+      -47.0,
+      206.0
+     ],
+     "params": {
+      "type": "spot",
+      "role": "neutral",
+      "cd": 18.0,
+      "cone_deg": 100.0,
+      "radius_m": 3.5,
+      "source_radius_cm": 2.0
+     }
+    },
+    "SOCKET_Light_Cup_0": {
+     "location_ue_cm": [
+      15.0,
+      101.8,
+      9.5
+     ],
+     "params": {
+      "type": "point",
+      "role": "foot",
+      "cd": 0.6,
+      "radius_m": 0.5,
+      "source_radius_cm": 0.8
+     }
+    },
+    "SOCKET_Light_Cup_1": {
+     "location_ue_cm": [
+      15.0,
+      -101.8,
+      9.5
+     ],
+     "params": {
+      "type": "point",
+      "role": "foot",
+      "cd": 0.6,
+      "radius_m": 0.5,
+      "source_radius_cm": 0.8
+     }
+    },
+    "SOCKET_Light_Strip_0": {
+     "location_ue_cm": [
+      15.0,
+      -0.0,
+      220.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "neutral",
+      "cd": 8.0,
+      "width_cm": 100.0,
+      "height_cm": 2.0,
+      "radius_m": 2.5,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "along_ue": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
    "collision_hulls": 1,
    "decals": 0,
    "decal_items": [],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 5148,
+    "edge": 4680,
     "secondary": 0,
-    "floor": 1408,
+    "floor": 2280,
     "seam": 0
    },
    "status": "built"
   },
-  "SM_Kit_Test_Bay09W_A": {
-   "category": "Test",
-   "family": "Test_Bay",
+  "SM_Kit_Portal_Frame03N_A": {
+   "category": "Portal",
+   "family": "Portal_Frame",
+   "section": "N",
+   "length_m": 0.3,
+   "variant": "A",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Portal_Frame03N_A.fbx",
+   "dims_m": [
+    0.3,
+    1.4,
+    2.36
+   ],
+   "expected_size_cm": [
+    30.0,
+    140.0,
+    236.0
+   ],
+   "tris": 4132,
+   "tris_decals": 0,
+   "tri_budget": 40000,
+   "materials": [
+    "Kit_Seal",
+    "Kit_GlowWarm",
+    "Kit_Lacquer",
+    "Kit_Lip",
+    "Kit_Graphite",
+    "Kit_Gasket",
+    "Kit_GlowFoot"
+   ],
+   "sockets": {
+    "SOCKET_Light_Corner_0": {
+     "location_ue_cm": [
+      15.0,
+      19.0,
+      206.0
+     ],
+     "params": {
+      "type": "spot",
+      "role": "neutral",
+      "cd": 18.0,
+      "cone_deg": 100.0,
+      "radius_m": 3.5,
+      "source_radius_cm": 2.0
+     }
+    },
+    "SOCKET_Light_Corner_1": {
+     "location_ue_cm": [
+      15.0,
+      -19.0,
+      206.0
+     ],
+     "params": {
+      "type": "spot",
+      "role": "neutral",
+      "cd": 18.0,
+      "cone_deg": 100.0,
+      "radius_m": 3.5,
+      "source_radius_cm": 2.0
+     }
+    },
+    "SOCKET_Light_Cup_0": {
+     "location_ue_cm": [
+      15.0,
+      46.8,
+      9.5
+     ],
+     "params": {
+      "type": "point",
+      "role": "foot",
+      "cd": 0.6,
+      "radius_m": 0.5,
+      "source_radius_cm": 0.8
+     }
+    },
+    "SOCKET_Light_Cup_1": {
+     "location_ue_cm": [
+      15.0,
+      -46.8,
+      9.5
+     ],
+     "params": {
+      "type": "point",
+      "role": "foot",
+      "cd": 0.6,
+      "radius_m": 0.5,
+      "source_radius_cm": 0.8
+     }
+    },
+    "SOCKET_Light_Strip_0": {
+     "location_ue_cm": [
+      15.0,
+      -0.0,
+      220.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "neutral",
+      "cd": 8.0,
+      "width_cm": 40.0,
+      "height_cm": 2.0,
+      "radius_m": 2.5,
+      "dir_ue": [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      "along_ue": [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      "megalights_shadow": true
+     }
+    },
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      30.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 4680,
+    "secondary": 0,
+    "floor": 2280,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Floor_Walk09W_A": {
+   "category": "Floor",
+   "family": "Floor_Walk",
    "section": "W",
    "length_m": 0.9,
    "variant": "A",
    "batch": 0,
-   "fbx": "ArtSource/Kit/Export/SM_Kit_Test_Bay09W_A.fbx",
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Walk09W_A.fbx",
    "dims_m": [
     0.9,
     2.6,
-    2.39
+    0.064
    ],
    "expected_size_cm": [
     90.0,
     260.0,
-    239.0
+    6.4
    ],
-   "tris": 1624,
+   "tris": 1120,
    "tris_decals": 0,
    "tri_budget": 40000,
    "materials": [
     "Kit_Seal",
     "Kit_Lip",
     "Kit_Graphite",
-    "Kit_Gasket",
     "Kit_AntiSlip"
    ],
-   "sockets": {},
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      90.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
    "collision_hulls": 1,
    "decals": 0,
    "decal_items": [],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 2088,
+    "edge": 1440,
     "secondary": 0,
-    "floor": 1672,
+    "floor": 1392,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Floor_Walk09N_A": {
+   "category": "Floor",
+   "family": "Floor_Walk",
+   "section": "N",
+   "length_m": 0.9,
+   "variant": "A",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Floor_Walk09N_A.fbx",
+   "dims_m": [
+    0.9,
+    1.4,
+    0.064
+   ],
+   "expected_size_cm": [
+    90.0,
+    140.0,
+    6.4
+   ],
+   "tris": 732,
+   "tris_decals": 0,
+   "tri_budget": 40000,
+   "materials": [
+    "Kit_Seal",
+    "Kit_Lip",
+    "Kit_Graphite",
+    "Kit_AntiSlip"
+   ],
+   "sockets": {
+    "SOCKET_Snap_End": {
+     "location_ue_cm": [
+      90.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    },
+    "SOCKET_Snap_Start": {
+     "location_ue_cm": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "params": {}
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 864,
+    "secondary": 0,
+    "floor": 896,
     "seam": 0
    },
    "status": "built"

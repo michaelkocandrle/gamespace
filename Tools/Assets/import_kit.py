@@ -165,17 +165,12 @@ SHOWROOM = {
     "test_section": {
         "room": (20.2, 25.1, -2.1, 2.1, 2.5),
         "x0": 20.3,
-        "run": ["Test_Bay09W_A", "Test_Portal03W_A", "Test_Bay09W_A", "Test_Portal03W_A", "Test_Bay09W_A",
-                "Test_Portal03W_A", "Test_Bay09W_A"],
-        # per portal, (kind, dx along the portal, y, z, cd, extra)
-        # round 2: x3-4 brighter and the warm lights neutral (round 1: mean 0.10 / p10 0.00 / B/R 0.71 against the
-        # etalon's 0.23-0.28 / 0.13 / 0.96-1.02 - the SC corridor is lit, neutral, never black)
-        # rev. C calibration (6. 10.): the etalon is mid-dark with few light areas (light > 0.45: 4-7 %); round 1 of rev. C
-        # had 19-33 % - the crowns burnt by L3 and L2; at L3 6 / L2 14 cd the scene went 40 % dark (the etalon: 1 %): L3 10,
-        # L2 24 cd with a wide 100 deg cone (a wash on the walls, not a spot on the crown), L1 a spot out of the boot
-        "portal_lights": [("foot", 0.15, -0.975, 0.05, 4.0, 110.0), ("foot", 0.15, 0.975, 0.05, 4.0, 110.0),
-                          ("corner", 0.15, -0.47, 2.04, 18.0, 100.0), ("corner", 0.15, 0.47, 2.04, 18.0, 100.0),
-                          ("strip", 0.15, 0.0, 2.2, 8.0, (100.0, 2.0))],
+        # step 4 (6. 10. 2026): the part's blockout - the floor module under the shell, the portal frame with its own
+        # light sockets (L1 cup, L2 corners, L3 strip; levels from the rev. C calibration); a 4th portal closes the run
+        # so the end is a lit frame, not a bare unlit wall (it skewed the measurement)
+        "run": [("Test_Shell09W_A", "Floor_Walk09W_A"), ("Portal_Frame03W_A",), ("Test_Shell09W_A", "Floor_Walk09W_A"),
+                ("Portal_Frame03W_A",), ("Test_Shell09W_A", "Floor_Walk09W_A"), ("Portal_Frame03W_A",),
+                ("Test_Shell09W_A", "Floor_Walk09W_A"), ("Portal_Frame03W_A",)],
     },
     "spawn": ((0.7, 0.0), 0.0),
     "spawn_annex": ((3.1, -4.8), 0.0),
@@ -613,8 +608,9 @@ def _rot(yaw, x, y):
 
 
 def build_test_section(actors, meshes, mis, sec, counts):
-    """The corridor test section (parts factory step 3, v0.2): a dark room, the rough modules along x, the sheet's
-    lights per portal."""
+    """The corridor test section (parts factory, step 4): a dark room, the shell and the part's blockout along x (its
+    lights from its sockets, as in a ship), the end wall, and the interior post-process (interior_post.py) over it."""
+    import interior_post
     cube = EAL.load_asset("/Engine/BasicShapes/Cube")
     x0, x1, y0, y1, h = sec["room"]
     t = 0.1
@@ -625,28 +621,19 @@ def build_test_section(actors, meshes, mis, sec, counts):
         spawn_mesh(actors, cube, _v(((a0 + a1) / 2, (b0 + b1) / 2), (z0 + z1) / 2), 0.0, "KitTest_Room_%d" % k,
                    mis["Kit_Seal"], unreal.Vector(a1 - a0, b1 - b0, z1 - z0))
     x = sec["x0"]
-    for k, short in enumerate(sec["run"]):
-        sm, part = meshes["SM_Kit_" + short]
-        spawn_mesh(actors, sm, _v((x, 0.0), 0.0), 0.0, "KitTest_%d_%s" % (k, short))
-        counts["parts"] += 1
-        if "Portal" in short:
-            for j, (kind, dx, y, z, cd, extra) in enumerate(sec["portal_lights"]):
-                loc = _v((x + dx, y), z)
-                label = "KitTest_%d_%s_%d" % (k, kind, j)
-                if kind == "foot":
-                    # rev. C: a spot from the boot's slot, 30 deg down and out over the floor and the lip - it must not
-                    # light its own boot (round 1: a point light turned the boot's face into a white patch)
-                    a = light(actors, loc, "foot", cd, 1.2, label, spot=True, cone=extra or 110.0, source_cm=0.6)
-                    a.set_actor_rotation(unreal.Rotator(roll=0.0, pitch=-30.0, yaw=90.0 if y < 0 else -90.0), False)
-                elif kind == "corner":
-                    a = light(actors, loc, "neutral", cd, 3.5, label, spot=True, cone=extra, source_cm=2.0)
-                else:
-                    a = rect_light(actors, loc, "neutral", cd, 2.5, label, unreal.Vector(0, 0, -1), unreal.Vector(0, 1, 0),
-                                   extra[0], extra[1])
-                counts["lights"] += 1
-        x += part["length_m"]
-    # the corridor's end: a graphite wall (the room's floor edge behind the last bay read as a bright bar, round 1)
+    for k, slot in enumerate(sec["run"]):
+        for short in slot:
+            place_part(actors, meshes, short, unreal.Vector(x * 100.0, 0.0, 0.0), 0.0, "KitTest_%d_%s" % (k, short), counts)
+        x += meshes["SM_Kit_" + slot[0]][1]["length_m"]
     spawn_mesh(actors, cube, _v((x + 0.01, 0.0), 1.15), 0.0, "KitTest_End", mis["Kit_Graphite"], unreal.Vector(0.02, 2.6, 2.4))
+    vol = actors.spawn_actor_from_class(unreal.PostProcessVolume, _v(((x0 + x1) / 2, 0.0), h / 2),
+                                        unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
+    vol.set_actor_label("KitTest_InteriorPost")
+    vol.set_actor_scale3d(unreal.Vector((x1 - x0) / 2.0, (y1 - y0) / 2.0, h / 2.0))   # the default brush is 200 cm
+    interior_post.apply_volume(vol)
+    vol.set_editor_property("tags", [unreal.Name(TAG)])
+    origin, extent = vol.get_actor_bounds(False)
+    unreal.log("KITTEST interior post volume extent %s (cm; 0 = no brush, the volume would do nothing)" % extent)
 
 
 

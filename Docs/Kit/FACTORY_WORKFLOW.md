@@ -80,7 +80,7 @@ geometrie `Tools/Kit/kit_factory.py`).
   žádné slunce, žádné okno.
 - Tóny se měří `measure_look.py` proti kotevním záběrům (etalon Aurory: průměr 0,23–0,28, p10 0,13, B/R ~1,0).
 
-**Pohledy:** stejné úhly jako kotevní záběry SC (preset `Tools/Shots/kit_test_section.json`), FOV 90 (autor), 2560 × 1440.
+**Pohledy:** stejné úhly jako kotevní záběry SC (preset `Tools/Shots/kit_test_section.json`), FOV 90 jako ve SC (potvrdil autor 6. 10. 2026), 2560 × 1440.
 
 | Pohled | Úhel | Kotevní záběr |
 |---|---|---|

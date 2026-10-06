@@ -144,7 +144,7 @@ modules = [a for a in room if isinstance(a, unreal.StaticMeshActor) and a.static
            and a.static_mesh_component.static_mesh.get_name().startswith("SM_Kit_")]
 L = C["SHOWROOM"]
 expected = (sum(len(r[3]) for r in L["wall_runs"]) + sum(len(r[2]) for r in L["run_parts"]) + len(L["placed"])
-            + len(L.get("test_section", {}).get("run", [])))     # the parts factory test section (6. 10. 2026)
+            + sum(len(slot) for slot in L.get("test_section", {}).get("run", [])))   # the parts factory test section
 check("every part of the sample placed (%d)" % expected, len(modules) == expected, "%d" % len(modules))
 walls = [a for a in modules if a.static_mesh_component.static_mesh.get_name().startswith("SM_Kit_Wall_")]
 rects = [a for a in room if isinstance(a, unreal.RectLight)]
