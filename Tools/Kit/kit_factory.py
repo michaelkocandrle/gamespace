@@ -332,44 +332,105 @@ def face_matrix(x_front):
 
 
 def band(p, role, outer, inner, x_front, depth):
+    """The band between two rounded outlines with as many points, as quads (no bevel: bevelled quads drew a groove at
+    every corner segment - the radial lines the author read as plastic, 7. 10. 2026)."""
     k = len(outer)
     for i in range(k):
         j = (i + 1) % k
-        p.poly_prism(role, [outer[i], outer[j], inner[j], inner[i]], face_matrix(x_front), depth, bevel=0.0008, segments=1)
+        p.poly_prism(role, [outer[i], outer[j], inner[j], inner[i]], face_matrix(x_front), depth, bevel=0.0, panel=False,
+                     segments=1)
+
+
+def face_label(p, item, y, z, x, scale=1.0, label=True, rot=0.0):
+    """A decal on the terminal's face (normal +x): its frame y along +y, up +z (x cross y = the normal)."""
+    c, s_ = math.cos(math.radians(rot)), math.sin(math.radians(rot))
+    xd, yd = Vector((0.0, c, s_)), Vector((0.0, -s_, c))
+    kit_batch2.label(p, item, (x, y, z), (1, 0, 0), xd, yd, scale=scale, is_label=label)
 
 
 def terminal_housing(name, seed):
-    """SC's wall engineering terminal (author 7. 10. 2026, his captures): a light rounded bezel 0.70 x 0.43 m with a
-    step and a polished lip round the glass, a tab on top, a round key and a ribbed slider on the left, a screw in the
-    corner; the glass's dark backing (the live screen is ASpaceEngineeringTerminal's widget 4 mm in front of it). The
-    screen faces +x, the pivot is the back's centre on the wall."""
+    """SC's wall engineering terminal (author 7. 10. 2026, his captures; round 2: "a big plastic thing - tune it into
+    detail"), built in layers like the reference: a dark mounting plate behind with a shadow gap and bolts; the light
+    bezel with a sunk panel line round its face, a step down into a dark inner wall and a polished lip round the deep
+    glass; a two-tone top tab with a seam, slots and a status LED; the left wing (grey) with a round key in a dark
+    bezel and a knurled ring, a slider grip running in a recessed channel; screws, vent slots, a stencilled ID, a
+    hatching band. The screen faces +x, the pivot is the back's centre on the wall."""
     p = kit_geo.Part(name, seed)
-    W, H, D = 0.70, 0.43, 0.04
-    outer = rounded_rect(W, H, 0.045)
-    mid = rounded_rect(0.616, 0.338, 0.03)
-    lip_in = rounded_rect(0.596, 0.316, 0.022)
-    glass = rounded_rect(0.586, 0.306, 0.018)
-    band(p, "Kit_Lacquer", outer, mid, D, D)                      # the bezel
-    band(p, "Kit_Graphite", mid, lip_in, D - 0.006, D - 0.006)    # the inner step, darker
-    band(p, "Kit_Lip", lip_in, glass, D - 0.012, 0.004)           # the polished edge round the glass
-    p.poly_prism("Kit_Graphite", glass, face_matrix(0.008), 0.008, bevel=0.0, panel=False, segments=1)
-    # the tab on top (SC's terminals have a raised block over the screen's middle)
-    tab = [(-0.13, 0.205), (0.13, 0.205), (0.115, 0.232), (-0.115, 0.232)]
-    p.poly_prism("Kit_Lacquer", tab, face_matrix(D + 0.004), D + 0.004, bevel=0.002, segments=1)
-    # the left wing: a round key and a ribbed slider grip (the viewer's left: -y here - +y came out on the right)
-    wing = [(-0.33, 0.15), (-0.4, 0.12), (-0.4, -0.18), (-0.33, -0.2)]
-    p.poly_prism("Kit_Lacquer", wing, face_matrix(D - 0.004), D - 0.004, bevel=0.003, segments=1)
-    p.tube("Kit_Graphite", (D - 0.004, -0.365, 0.04), (D + 0.008, -0.365, 0.04), 0.022, 24)
-    p.tube("Kit_Gasket", (D + 0.008, -0.365, 0.04), (D + 0.011, -0.365, 0.04), 0.016, 24)
-    p.box("Kit_Graphite", (D - 0.006, -0.385, -0.17), (D + 0.004, -0.35, -0.05), bevel=0.002, segments=1)
-    for k in range(9):
-        z = -0.162 + k * 0.0135
-        p.box("Kit_Gasket", (D + 0.004, -0.382, z), (D + 0.008, -0.353, z + 0.006), panel=False)
-    p.tube("Kit_Lip", (D, 0.322, 0.188), (D + 0.004, 0.322, 0.188), 0.008, 12)
+    W, H = 0.70, 0.43
+    B0, D = 0.012, 0.046               # the bezel's back (on the mounting plate) and its face
+    seg = 10
+    # 1 the mounting plate: dark, larger, chamfered, four bolts - the shadow line round the bezel
+    mount = rounded_rect(W + 0.05, H + 0.045, 0.03, seg)
+    p.poly_prism("Kit_Graphite", mount, face_matrix(B0), B0, bevel=0.002, panel=False, segments=1)
+    for y, z in ((-0.36, 0.23), (0.36, 0.23), (-0.36, -0.23), (0.36, -0.23)):
+        p.tube("Kit_Lip", (B0, y, z), (B0 + 0.004, y, z), 0.006, 12)
+        p.tube("Kit_Graphite", (B0 + 0.004, y, z), (B0 + 0.0048, y, z), 0.0025, 6)
+    # 2 the bezel: the outer rim, a sunk panel line, the face, the step down, the dark inner wall, the polished lip
+    outer = rounded_rect(W, H, 0.045, seg)
+    rim_in = rounded_rect(W - 0.024, H - 0.024, 0.033, seg)
+    groove = rounded_rect(W - 0.030, H - 0.030, 0.030, seg)
+    face_in = rounded_rect(0.626, 0.346, 0.03, seg)
+    step = rounded_rect(0.610, 0.330, 0.026, seg)
+    lip_out = rounded_rect(0.600, 0.320, 0.023, seg)
+    lip_in = rounded_rect(0.592, 0.312, 0.020, seg)
+    glass = rounded_rect(0.586, 0.306, 0.018, seg)
+    band(p, "Kit_Lacquer", outer, rim_in, D, D - B0)
+    band(p, "Kit_Graphite", rim_in, groove, D - 0.002, D - B0 - 0.002)
+    band(p, "Kit_Lacquer", groove, face_in, D, D - B0)
+    band(p, "Kit_Lacquer", face_in, step, D - 0.005, D - B0 - 0.005)          # the step down to the glass
+    band(p, "Kit_Graphite", step, lip_out, D - 0.008, D - B0 - 0.008)         # the dark inner wall
+    band(p, "Kit_Lip", lip_out, lip_in, D - 0.011, 0.004)                     # the polished lip
+    band(p, "Kit_Graphite", lip_in, glass, D - 0.012, D - B0 - 0.012)
+    p.poly_prism("Kit_Graphite", glass, face_matrix(0.013), 0.001, bevel=0.0, panel=False, segments=1)   # behind the live screen (1.5 cm)
+    # 3 the top tab: a grey trapezoid with a seam, two slots and a small status LED
+    tab = [(-0.15, 0.2), (0.15, 0.2), (0.13, 0.238), (-0.13, 0.238)]
+    p.poly_prism("Kit_Panel", tab, face_matrix(D + 0.004), D + 0.004 - B0, bevel=0.002, segments=1)
+    p.poly_prism("Kit_Graphite", [(-0.125, 0.226), (0.125, 0.226), (0.125, 0.228), (-0.125, 0.228)], face_matrix(D + 0.0045), 0.001,
+                 panel=False, segments=1)
+    p.poly_prism("Kit_GlowFoot", [(0.085, 0.212), (0.105, 0.212), (0.105, 0.216), (0.085, 0.216)], face_matrix(D + 0.005), 0.001,
+                 panel=False, segments=1)
+    for y in (-0.06, -0.045, -0.03):
+        p.poly_prism("Kit_Graphite", [(y - 0.004, 0.208), (y + 0.004, 0.208), (y + 0.004, 0.22), (y - 0.004, 0.22)], face_matrix(D + 0.0045),
+                     0.002, panel=False, segments=1)
+    # 4 the left wing (the viewer's left: -y): a grey plate, the key in a dark bezel with a knurled ring, the slider
+    wing = [(-0.335, 0.16), (-0.405, 0.13), (-0.405, -0.19), (-0.335, -0.21)]
+    p.poly_prism("Kit_Panel", wing, face_matrix(D - 0.004), D - 0.004 - B0, bevel=0.003, segments=1)
+    ky, kz = -0.368, 0.05
+    p.tube("Kit_Graphite", (D - 0.006, ky, kz), (D - 0.001, ky, kz), 0.028, 32)
+    for k in range(28):
+        a = 2.0 * math.pi * k / 28
+        cy, cz = ky + math.cos(a) * 0.0215, kz + math.sin(a) * 0.0215
+        p.box("Kit_Lip", (D - 0.001, cy - 0.0012, cz - 0.0012), (D + 0.009, cy + 0.0012, cz + 0.0012), panel=False)
+    p.tube("Kit_Panel", (D - 0.001, ky, kz), (D + 0.010, ky, kz), 0.0195, 32)
+    p.tube("Kit_Lip", (D + 0.010, ky, kz), (D + 0.0115, ky, kz), 0.014, 32)
+    # the slider: a dark channel sunk in the wing, the grip riding in it with its ribs
+    p.box("Kit_Graphite", (D - 0.012, -0.388, -0.18), (D - 0.0035, -0.348, -0.04), bevel=0.0015, segments=1)
+    p.box("Kit_Panel", (D - 0.008, -0.385, -0.165), (D + 0.004, -0.351, -0.085), bevel=0.002, segments=1)
+    for k in range(7):
+        z = -0.159 + k * 0.0105
+        p.box("Kit_Gasket", (D + 0.004, -0.382, z), (D + 0.0075, -0.354, z + 0.005), panel=False)
+    # 5 screws in the bezel's corners and the big one at the top right
+    for y, z in ((-0.318, 0.178), (0.318, 0.178), (-0.318, -0.178), (0.318, -0.178)):
+        p.tube("Kit_Graphite", (D - 0.0015, y, z), (D + 0.0005, y, z), 0.0055, 16)
+        p.tube("Kit_Lip", (D + 0.0005, y, z), (D + 0.0015, y, z), 0.004, 6)
+    p.tube("Kit_Graphite", (D - 0.002, 0.322, 0.19), (D + 0.001, 0.322, 0.19), 0.011, 24)
+    p.tube("Kit_Lip", (D + 0.001, 0.322, 0.19), (D + 0.0035, 0.322, 0.19), 0.008, 24)
+    # 6 the bottom: a row of vent slots on the bezel's lower band, a status LED pair at the right
+    for k in range(12):
+        y = -0.11 + k * 0.02
+        p.poly_prism("Kit_Graphite", [(y - 0.0035, -0.2), (y + 0.0035, -0.2), (y + 0.0035, -0.188), (y - 0.0035, -0.188)], face_matrix(D + 0.0003),
+                     0.003, panel=False, segments=1)
+    for y in (0.24, 0.258):
+        p.poly_prism("Kit_GlowFoot", [(y - 0.005, -0.195), (y + 0.005, -0.195), (y + 0.005, -0.191), (y - 0.005, -0.191)], face_matrix(D + 0.001),
+                     0.001, panel=False, segments=1)
+    # 7 the information layer: an ID stencil at the top left, a small service marker (a hatching band on the wing
+    # had no room between the key and the slider)
+    face_label(p, "st_hfcl", -0.22, 0.194, D, scale=0.55)
+    face_label(p, "red_marker", 0.205, -0.193, D)
     # the screen's glow on what is in front of it
     p.socket("Light_Screen_0", (D + 0.03, 0.0, 0.0), x=(1, 0, 0), z=(0, 0, 1), type="rect", role="cool", cd=1.2,
              width_cm=56.0, height_cm=28.0, radius_m=2.0, dir_ue=[1.0, 0.0, 0.0], along_ue=[0.0, 1.0, 0.0], shadows=False)
-    p.collision_box((0.0, -W / 2, -H / 2), (D, W / 2, H / 2))
+    p.collision_box((0.0, -W / 2 - 0.03, -H / 2 - 0.02), (D, W / 2 + 0.03, H / 2 + 0.02))
     return p
 
 

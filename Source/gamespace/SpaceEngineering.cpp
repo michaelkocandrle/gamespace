@@ -142,7 +142,7 @@ namespace SpaceEngLocal
 			const FVector2D Size = Measure(Str, F);
 			const FVector2D Centre = P(X, Y);
 			const FSlateRenderTransform Rotate(FQuat2D(FMath::DegreesToRadians(-90.f)));
-			FSlateDrawElement::MakeText(Out, Layer + 3,
+			FSlateDrawElement::MakeText(Out, Layer + 6,
 				Geo.ToPaintGeometry(FVector2f(Size), FSlateLayoutTransform(FVector2f(Centre - Size * 0.5)), Rotate, FVector2f(0.5f, 0.5f)), Str, F,
 				ESlateDrawEffect::None, C);
 		}
@@ -342,39 +342,45 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 	// ---- the side tabs and the main panel --------------------------------------------------------------------------
 	const bool bEdit = T->Tab == 1 && T->bEditing;
 	const FLinearColor Frame = bEdit ? Amber : Ink;
+	Pen.Chamfer(232, 330, 1815, 893, 22, Frame, bEdit ? 3.f : 1.6f, true, PanelFill);
+	Pen.Fill(250, 330, 1798, 333, Frame * FLinearColor(1, 1, 1, 0.25f));
+	// the tabs stand out of the panel's left edge, over it (drawn under the panel they lost their right half and the
+	// text - author 7. 10.): a chamfered box each, the name read upwards, its glyph under it
 	for (int32 K = 0; K < 3; ++K)
 	{
 		const bool bOn = T->Tab == K;
 		const double Y0 = TabY[K][0], Y1 = TabY[K][1];
+		const double X0 = 194.0, X1 = 250.0;
 		const FLinearColor C = bOn ? (bEdit ? Amber : Ink) : InkDim;
-		Pen.Fill(212, Y0, 252, Y1, bOn ? CardFill : PanelFill);
-		Pen.Lines({ {252, Y0}, {214, Y0 + 8}, {212, Y1 - 8}, {252, Y1} }, C, bOn ? 2.2f : 1.4f);
-		Pen.TextUp(231, (Y0 + Y1) * 0.5 - 12, TabNames[K], 17.0, bOn ? White : Ink * FLinearColor(0.75f, 0.75f, 0.75f, 1.f));
-		// the tab's small glyph under its name
-		const double Gy = Y1 - 20;
+		Pen.Fill(X0 + 2, Y0 + 2, X1, Y1 - 2, bOn ? CardFill : PanelFill, 3);
+		Pen.Lines({ {X1, Y0}, {X0 + 8, Y0}, {X0, Y0 + 8}, {X0, Y1 - 8}, {X0 + 8, Y1}, {X1, Y1} }, C, bOn ? 2.2f : 1.4f, 4);
+		if (bOn)
+		{
+			Pen.Lines({ {X0 - 4, Y0 + 14}, {X0 - 4, Y1 - 14} }, C, 3.f, 4);
+		}
+		Pen.TextUp(222, (Y0 + Y1) * 0.5 - 14, TabNames[K], 16.0, bOn ? White : Ink * FLinearColor(0.75f, 0.75f, 0.75f, 1.f));
+		const double Gx = 222, Gy = Y1 - 18;
 		if (K == 0)
 		{
-			Pen.Lines({ {229, Gy - 8}, {223, Gy + 6}, {229, Gy + 2}, {235, Gy + 6}, {229, Gy - 8} }, C, 1.8f);
+			Pen.Lines({ {Gx, Gy - 8}, {Gx - 6, Gy + 6}, {Gx, Gy + 2}, {Gx + 6, Gy + 6}, {Gx, Gy - 8} }, C, 1.8f, 5);
 		}
 		else if (K == 1)
 		{
 			for (int32 B = 0; B < 3; ++B)
 			{
-				Pen.Fill(223 + B * 5, Gy + 6 - B * 3, 226 + B * 5, Gy + 8, C);
+				Pen.Fill(Gx - 7 + B * 5, Gy + 4 - B * 4, Gx - 4 + B * 5, Gy + 7, C, 5);
 			}
 		}
 		else
 		{
-			Pen.Lines({ {223, Gy - 6}, {223, Gy + 6} }, C, 1.6f);
-			Pen.Lines({ {229, Gy - 6}, {229, Gy + 6} }, C, 1.6f);
-			Pen.Lines({ {235, Gy - 6}, {235, Gy + 6} }, C, 1.6f);
-			Pen.Fill(221, Gy - 2, 226, Gy + 1, C);
-			Pen.Fill(227, Gy + 2, 232, Gy + 5, C);
-			Pen.Fill(233, Gy - 4, 238, Gy - 1, C);
+			for (int32 B = 0; B < 3; ++B)
+			{
+				const double Lx = Gx - 6 + B * 6, Ky = Gy + (B == 1 ? 3 : B == 0 ? -1 : -4);
+				Pen.Lines({ {Lx, Gy - 6}, {Lx, Gy + 6} }, C, 1.4f, 5);
+				Pen.Fill(Lx - 2, Ky - 1.5, Lx + 2, Ky + 1.5, C, 5);
+			}
 		}
 	}
-	Pen.Chamfer(232, 330, 1815, 893, 22, Frame, bEdit ? 3.f : 1.6f, true, PanelFill);
-	Pen.Fill(250, 330, 1798, 333, Frame * FLinearColor(1, 1, 1, 0.25f));
 
 	if (T->Tab == 1)
 	{
@@ -694,7 +700,7 @@ int32 USpaceEngineeringScreen::NativePaint(const FPaintArgs& Args, const FGeomet
 	Pen.Lines({ {1030, 935}, {1050, 905}, {1070, 935} }, Mark, 3.f);
 	Pen.Lines({ {1040, 935}, {1050, 920}, {1060, 935} }, Mark, 3.f);
 	Pen.Text(1050, 962, T->MakerName, 22.0, Mark, 0, true);
-	return Layer + 6;
+	return Layer + 8;
 }
 
 // =====================================================================================================================

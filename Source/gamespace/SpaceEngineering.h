@@ -102,7 +102,7 @@ public:
 	FVector2D GlassSizeCm = FVector2D(57.0, 28.5);
 
 	UPROPERTY(EditAnywhere, Category = "Engineering")
-	FVector GlassCentreCm = FVector(1.2, 0.0, 0.0);
+	FVector GlassCentreCm = FVector(1.8, 0.0, 0.0);      // 5 mm in front of the housing's dark glass backing (1.3 cm)
 
 	/** The ship's name on the watermark (the maker, not SC's). */
 	UPROPERTY(EditAnywhere, Category = "Engineering")

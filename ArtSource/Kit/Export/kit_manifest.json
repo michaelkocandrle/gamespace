@@ -9678,28 +9678,31 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Terminal_Eng07W_A.fbx",
    "dims_m": [
-    0.051,
-    0.75,
-    0.447
+    0.058,
+    0.78,
+    0.475
    ],
    "expected_size_cm": [
-    5.1,
-    75.0,
-    44.7
+    5.8,
+    78.0,
+    47.5
    ],
-   "tris": 3728,
-   "tris_decals": 0,
+   "tris": 6348,
+   "tris_decals": 6,
    "tri_budget": 40000,
    "materials": [
     "Kit_Lacquer",
     "Kit_Lip",
     "Kit_Graphite",
-    "Kit_Gasket"
+    "Kit_Gasket",
+    "Kit_GlowFoot",
+    "Kit_Panel",
+    "Kit_DecalPaint"
    ],
    "sockets": {
     "SOCKET_Light_Screen_0": {
      "location_ue_cm": [
-      7.0,
+      7.6,
       -0.0,
       0.0
      ],
@@ -9725,14 +9728,19 @@
     }
    },
    "collision_hulls": 1,
-   "decals": 0,
-   "decal_items": [],
-   "service_labels": [],
+   "decals": 2,
+   "decal_items": [
+    "st_hfcl",
+    "red_marker"
+   ],
+   "service_labels": [
+    "st_hfcl"
+   ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 5400,
+    "edge": 1080,
     "secondary": 0,
-    "floor": 5716,
+    "floor": 8284,
     "seam": 0
    },
    "status": "built"
