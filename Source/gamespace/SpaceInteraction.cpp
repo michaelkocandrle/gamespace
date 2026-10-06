@@ -2,6 +2,9 @@
 
 #include "SpaceInteraction.h"
 
+#include "EngineUtils.h"
+#include "SpaceEngineering.h"
+
 #include "PlayerCharacter.h"
 #include "ShipQuantumComponent.h"
 #include "SpaceshipPawn.h"
@@ -169,6 +172,14 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 		return;
 	}
 	const FVector At = Character->GetActorLocation();
+	// wall terminals within arm's reach (the engineering terminal, author 7. 10. 2026): every control on the glass
+	for (TActorIterator<ASpaceEngineeringTerminal> It(Character->GetWorld()); It; ++It)
+	{
+		if (FVector::Dist(It->GetActorLocation(), At) < 260.0)
+		{
+			It->GatherHotspots(OutHotspots);
+		}
+	}
 	if (ASpaceshipPawn* Inside = Character->GetInteriorShip())
 	{
 		FVector Seat, Ramp;

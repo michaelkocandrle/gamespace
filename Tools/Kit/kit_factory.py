@@ -28,7 +28,7 @@ import kit_portal  # noqa: E402  (the part itself: KF-PORTAL-01's blockout)
 import kit_batch2  # noqa: E402  (the decal helper)
 
 # the test section's shell (walls, ceiling, kick strip) and the part under test (kit_portal.PARTS, step 4 blockout)
-FACTORY = [("Test", "Shell", 0.9, "W", "A")] + kit_portal.PARTS
+FACTORY = [("Test", "Shell", 0.9, "W", "A"), ("Terminal", "Eng", 0.7, "W", "A")] + kit_portal.PARTS
 VIEWS = {(c, p): ((1, 0.0, 0.0), (1, -0.6, 0.2)) for c, p, _, _, _ in FACTORY}
 
 
@@ -125,6 +125,14 @@ def test_shell(name, seed):
           bevel=0.003, segments=1)
     p.box("Kit_Seal", (0.0, -half - 0.1, SEC["ceiling"] + 0.02), (L, half + 0.1, SEC["ceiling"] + 0.03), panel=False)
     p.collision_box((0.0, -half, 2.0), (L, half, SEC["ceiling"]))
+    # the walls (they had none: the player could walk into them) - the vertical wall and the slope as hulls
+    cw = SEC["ceiling_width"] / 2
+    top = SEC["vertical_to"] + SEC["slope_rise"]
+    for s in (-1, 1):
+        y0, y1 = sorted((s * (half - 0.03), s * (half + 0.03)))
+        p.collision_box((0.0, y0, 0.0), (L, y1, SEC["vertical_to"]))
+        p.collision_hull([(x, s * (yy + d), zz) for x in (0.0, L) for d in (-0.03, 0.03)
+                          for yy, zz in ((half, SEC["vertical_to"]), (cw, top))])
     ceiling_module(p, L)
     return p
 
@@ -308,11 +316,70 @@ def ceiling_module(p, L):
     text_strip(p, ceil, "st_inspect", 0.3, 0.6, 0.25)
 
 
+def rounded_rect(w, h, r, seg=5):
+    """A rounded rectangle centred on 0 in (y, z), as many points per corner as seg + 1 (rings pair two of them)."""
+    pts = []
+    for cy, cz, a0 in ((w / 2 - r, h / 2 - r, 0.0), (-w / 2 + r, h / 2 - r, 90.0), (-w / 2 + r, -h / 2 + r, 180.0), (w / 2 - r, -h / 2 + r, 270.0)):
+        for k in range(seg + 1):
+            a = math.radians(a0 + 90.0 * k / seg)
+            pts.append((cy + r * math.cos(a), cz + r * math.sin(a)))
+    return pts
+
+
+def face_matrix(x_front):
+    # a prism drawn in (y, z) and extruded along -x from x_front (right-handed: y x z = x)
+    return Matrix(((0.0, 0.0, 1.0, x_front), (1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 0.0, 1.0)))
+
+
+def band(p, role, outer, inner, x_front, depth):
+    k = len(outer)
+    for i in range(k):
+        j = (i + 1) % k
+        p.poly_prism(role, [outer[i], outer[j], inner[j], inner[i]], face_matrix(x_front), depth, bevel=0.0008, segments=1)
+
+
+def terminal_housing(name, seed):
+    """SC's wall engineering terminal (author 7. 10. 2026, his captures): a light rounded bezel 0.70 x 0.43 m with a
+    step and a polished lip round the glass, a tab on top, a round key and a ribbed slider on the left, a screw in the
+    corner; the glass's dark backing (the live screen is ASpaceEngineeringTerminal's widget 4 mm in front of it). The
+    screen faces +x, the pivot is the back's centre on the wall."""
+    p = kit_geo.Part(name, seed)
+    W, H, D = 0.70, 0.43, 0.04
+    outer = rounded_rect(W, H, 0.045)
+    mid = rounded_rect(0.616, 0.338, 0.03)
+    lip_in = rounded_rect(0.596, 0.316, 0.022)
+    glass = rounded_rect(0.586, 0.306, 0.018)
+    band(p, "Kit_Lacquer", outer, mid, D, D)                      # the bezel
+    band(p, "Kit_Graphite", mid, lip_in, D - 0.006, D - 0.006)    # the inner step, darker
+    band(p, "Kit_Lip", lip_in, glass, D - 0.012, 0.004)           # the polished edge round the glass
+    p.poly_prism("Kit_Graphite", glass, face_matrix(0.008), 0.008, bevel=0.0, panel=False, segments=1)
+    # the tab on top (SC's terminals have a raised block over the screen's middle)
+    tab = [(-0.13, 0.205), (0.13, 0.205), (0.115, 0.232), (-0.115, 0.232)]
+    p.poly_prism("Kit_Lacquer", tab, face_matrix(D + 0.004), D + 0.004, bevel=0.002, segments=1)
+    # the left wing: a round key and a ribbed slider grip (the viewer's left: -y here - +y came out on the right)
+    wing = [(-0.33, 0.15), (-0.4, 0.12), (-0.4, -0.18), (-0.33, -0.2)]
+    p.poly_prism("Kit_Lacquer", wing, face_matrix(D - 0.004), D - 0.004, bevel=0.003, segments=1)
+    p.tube("Kit_Graphite", (D - 0.004, -0.365, 0.04), (D + 0.008, -0.365, 0.04), 0.022, 24)
+    p.tube("Kit_Gasket", (D + 0.008, -0.365, 0.04), (D + 0.011, -0.365, 0.04), 0.016, 24)
+    p.box("Kit_Graphite", (D - 0.006, -0.385, -0.17), (D + 0.004, -0.35, -0.05), bevel=0.002, segments=1)
+    for k in range(9):
+        z = -0.162 + k * 0.0135
+        p.box("Kit_Gasket", (D + 0.004, -0.382, z), (D + 0.008, -0.353, z + 0.006), panel=False)
+    p.tube("Kit_Lip", (D, 0.322, 0.188), (D + 0.004, 0.322, 0.188), 0.008, 12)
+    # the screen's glow on what is in front of it
+    p.socket("Light_Screen_0", (D + 0.03, 0.0, 0.0), x=(1, 0, 0), z=(0, 0, 1), type="rect", role="cool", cd=1.2,
+             width_cm=56.0, height_cm=28.0, radius_m=2.0, dir_ue=[1.0, 0.0, 0.0], along_ue=[0.0, 1.0, 0.0], shadows=False)
+    p.collision_box((0.0, -W / 2, -H / 2), (D, W / 2, H / 2))
+    return p
+
+
 def part_name_any(cat, part, size, sec, var):
-    return kit_portal.part_name(cat, part, size, sec, var) if cat != "Test" else part_name(cat, part, size, sec, var)
+    return kit_portal.part_name(cat, part, size, sec, var) if cat not in ("Test", "Terminal") else part_name(cat, part, size, sec, var)
 
 
 def build_part(cat, part, size, sec_key, var, seed):
     if cat == "Test":
         return test_shell(part_name(cat, part, size, sec_key, var), seed)
+    if cat == "Terminal":
+        return terminal_housing(part_name(cat, part, size, sec_key, var), seed)
     return kit_portal.build_part(cat, part, size, sec_key, var, seed)

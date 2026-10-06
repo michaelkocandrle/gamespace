@@ -43,8 +43,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Čeká na rozhodnutí autora
 
-- **Továrna:** vrstvy decalů v2 na stěnách úseku (`Docs/Kit/etalon/decal_stack.md`), portál rev. G; autor posoudí ve
-  hře (Alt+U 4. zastávka); úsek neprůchozí; kritik rev. F FAIL 5,2; P25 při přestavbě Wayfareru.
+- **Továrna:** vrstvy decalů v2 (`Docs/Kit/etalon/decal_stack.md`), portál rev. G, úsek průchozí (kolize po členech);
+  **inženýrský terminál** SC na čelní stěně úseku (`SpaceEngineering.*`, F: CONFIG / 3D VIEW / PRESETS); autor posoudí.
 - **Autor 5. 10. – věrná kopie SC podle referencí** (pak vlastní styl); pořadí v Dalších krocích, bod 0.
 - **Kokpit v2** (4. 10.): C-01 schválen výchozími volbami (D průmyslový, zakouřené hologramy, HOTAS, krémové obložení –
   autor může změnit); hotové holoprojektory MFD (CK-HP-L/R) a vnitřní rám kanopy (CK-CF); dál HOTAS, konzole a ovladače, materiály, střed.

@@ -412,7 +412,27 @@ def portal_frame(name, sec_key, seed):
     threshold(p, sec_key)
     pillar_labels(p, sec_key)
     frame_cutouts(p, fsec, sec_key)
-    p.collision_box((0.0, -half, 0.0), (0.3, half, sec["ceiling"]))
+    # the author 6. 10. 2026: one box over the whole section was an invisible wall - the player could not walk through.
+    # Collision only where the frame is: the threshold under the feet, each pillar with its boot, the slopes' members as
+    # hulls, the top member
+    p.collision_box((0.0, -half, -0.05), (0.3, half, 0.0))
+    bv = SPEC["boot"]["v1_by_section"][sec_key] * MM
+    bh = SPEC["boot"]["height_by_section"][sec_key] * MM
+    for s in (-1, 1):
+        y0, y1 = sorted((s * half, s * (half - prot)))
+        p.collision_box((0.0, y0, 0.0), (0.3, y1, sec["vertical_to"]))
+        y0, y1 = sorted((s * half, s * (half - bv)))
+        p.collision_box((0.0, y0, 0.0), (0.3, y1, bh))
+        a2 = (s * half, sec["vertical_to"])
+        b2 = (s * sec["ceiling_width"] / 2, sec["vertical_to"] + sec["slope_rise"])
+        hull = []
+        for (yy, zz) in (a2, b2):
+            for d in (0.0, prot * 1.4):
+                for x in (0.0, 0.3):
+                    hull.append((x, yy - s * d, zz - (d if zz > sec["vertical_to"] + 0.01 else 0.0)))
+        p.collision_hull(hull)
+    cw2c = sec["ceiling_width"] / 2
+    p.collision_box((0.0, -cw2c, fsec["ceiling"] - prot), (0.3, cw2c, sec["ceiling"]))
     p.socket("Snap_Start", (0, 0, 0), x=(-1, 0, 0), z=(0, 0, 1))
     p.socket("Snap_End", (0.3, 0, 0), x=(1, 0, 0), z=(0, 0, 1))
     return p

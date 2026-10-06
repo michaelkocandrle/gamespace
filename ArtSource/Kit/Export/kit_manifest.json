@@ -8898,7 +8898,7 @@
      }
     }
    },
-   "collision_hulls": 1,
+   "collision_hulls": 5,
    "decals": 84,
    "decal_items": [
     "bolt",
@@ -9185,7 +9185,7 @@
      "params": {}
     }
    },
-   "collision_hulls": 1,
+   "collision_hulls": 8,
    "decals": 82,
    "decal_items": [
     "panel_B03",
@@ -9461,7 +9461,7 @@
      "params": {}
     }
    },
-   "collision_hulls": 1,
+   "collision_hulls": 8,
    "decals": 70,
    "decal_items": [
     "panel_B03",
@@ -9665,6 +9665,74 @@
     "edge": 864,
     "secondary": 0,
     "floor": 992,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Terminal_Eng07W_A": {
+   "category": "Terminal",
+   "family": "Terminal_Eng",
+   "section": "W",
+   "length_m": 0.7,
+   "variant": "A",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Terminal_Eng07W_A.fbx",
+   "dims_m": [
+    0.051,
+    0.75,
+    0.447
+   ],
+   "expected_size_cm": [
+    5.1,
+    75.0,
+    44.7
+   ],
+   "tris": 3728,
+   "tris_decals": 0,
+   "tri_budget": 40000,
+   "materials": [
+    "Kit_Lacquer",
+    "Kit_Lip",
+    "Kit_Graphite",
+    "Kit_Gasket"
+   ],
+   "sockets": {
+    "SOCKET_Light_Screen_0": {
+     "location_ue_cm": [
+      7.0,
+      -0.0,
+      0.0
+     ],
+     "params": {
+      "type": "rect",
+      "role": "cool",
+      "cd": 1.2,
+      "width_cm": 56.0,
+      "height_cm": 28.0,
+      "radius_m": 2.0,
+      "dir_ue": [
+       1.0,
+       0.0,
+       0.0
+      ],
+      "along_ue": [
+       0.0,
+       1.0,
+       0.0
+      ],
+      "shadows": false
+     }
+    }
+   },
+   "collision_hulls": 1,
+   "decals": 0,
+   "decal_items": [],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 5400,
+    "secondary": 0,
+    "floor": 5716,
     "seam": 0
    },
    "status": "built"

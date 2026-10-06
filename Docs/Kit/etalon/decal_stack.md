@@ -94,3 +94,31 @@ Snímky: `stack_v2_eye.jpg`, `stack_v2_wall_34.jpg` a `stack_v2_detail.jpg`.
 - **Druhá řada drobností:** západky, červené servisní značky, pásky GND POINT a EXT PWR, rohové značky, HF-CL 07.
 - **Rám portálu rev. G:** manžeta 80 → 40 mm, lakované pásy podhledu 24 → 44 mm. Po celém obvodu (pilíře, šikminy,
   horní člen) mají řady malých výřezů po 12 cm.
+
+## Inženýrský terminál a průchodnost (7. 10.)
+
+Autor: „přesně stejný MFD řídící panel jako na referencích, kompletně stejnou kvalitu".
+
+Snímky: `terminal_corridor.jpg`, `terminal_config.jpg`, `terminal_3dview.jpg` a `terminal_housing.jpg`.
+
+- **Pouzdro:** díl `SM_Kit_Terminal_Eng07W_A` (`kit_factory.terminal_housing`).
+  - Světlý zaoblený rám 0,70 × 0,43 m, tmavý stupeň a leštěná hrana kolem skla.
+  - Výstupek nahoře, vlevo kulatý ovladač a žebrovaný posuvník, šroub v rohu.
+  - Slabé světlo obrazovky na okolí.
+- **Obrazovka:** `ASpaceEngineeringTerminal` / `USpaceEngineeringScreen` (C++).
+  - **Hlavička:** ARMOR, HULL, COOLING SYSTEM, LIFE SUPPORT a HYDROGEN FUEL; NAV/SCM, oznámení, zvonek, zavřít.
+  - **Záložky:** 3D VIEW, CONFIG, PRESETS.
+  - **CONFIG:**
+    - výkonová deska: zdroje → systémy (zbraně, trysky, štíty, kvantový pohon jen v NAV, podpora života, radar) →
+      2 chladiče;
+    - pipy, teplotní lišty, značky H a klávesy s ikonami;
+    - jantarový rám úprav s EDIT / NEWPRESET_n, CLEAR ALL, SAVE a SAVE AND APPLY.
+  - **3D VIEW:** drátový model chodby s komponentami (relé, elektrárna, chladiče, podpora života), propojeními,
+    filtry a kartou vybrané komponenty.
+  - **PRESETS:** uložené konfigurace s APPLY.
+- **Ovládání:** podržet F (režim interakce) a kliknout přesně na prvek. Konzole pro snímky: `space.EngTab`,
+  `space.EngClick`, `space.EngSave`, `space.EngNav`.
+- **Hodnoty:** model energie je terminálu vlastní. Hra zatím nemá zbraně, štíty ani teplotu; hlavičky ARMOR, HULL a
+  FUEL ukazují 100 %.
+- **Průchodnost:** portál měl jednu kolizní krabici přes celou světlost a stěny úseku žádnou. Teď mají kolizi práh,
+  pilíře, boty, šikminy, horní člen a stěny.

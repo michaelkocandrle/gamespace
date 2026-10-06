@@ -627,6 +627,16 @@ def build_test_section(actors, meshes, mis, sec, counts):
             place_part(actors, meshes, short, unreal.Vector(x * 100.0, 0.0, 0.0), 0.0, "KitTest_%d_%s" % (k, short), counts)
         x += meshes["SM_Kit_" + slot[0]][1]["length_m"]
     spawn_mesh(actors, cube, _v((x + 0.01, 0.0), 1.15), 0.0, "KitTest_End", mis["Kit_Graphite"], unreal.Vector(0.02, 2.6, 2.4))
+    # the engineering terminal on the end wall at eye height, facing back down the corridor (author 7. 10. 2026: SC's
+    # engineering MFD - the live screen and its controls are the C++ actor's, the housing the factory part)
+    short = "Terminal_Eng07W_A"
+    if "SM_Kit_" + short in meshes:
+        pos = unreal.Vector(x * 100.0, 0.0, 145.0)
+        term = actors.spawn_actor_from_class(unreal.SpaceEngineeringTerminal, KIT_ORIGIN + pos, unreal.Rotator(roll=0.0, pitch=0.0, yaw=180.0))
+        term.set_actor_label("KitTest_Terminal")
+        term.get_editor_property("housing").set_static_mesh(meshes["SM_Kit_" + short][0])
+        term.set_editor_property("tags", [unreal.Name(TAG)])
+        place_part(actors, meshes, short, pos, 180.0, "KitTest_TerminalLight", counts, spawn=False)
     vol = actors.spawn_actor_from_class(unreal.PostProcessVolume, _v(((x0 + x1) / 2, 0.0), h / 2),
                                         unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
     vol.set_actor_label("KitTest_InteriorPost")
@@ -638,10 +648,12 @@ def build_test_section(actors, meshes, mis, sec, counts):
 
 
 
-def place_part(actors, meshes, short, pos_cm, yaw, label, counts):
-    """One kit part at a world position (cm, relative to KIT_ORIGIN) and yaw, with the lights of its sockets."""
+def place_part(actors, meshes, short, pos_cm, yaw, label, counts, spawn=True):
+    """One kit part at a world position (cm, relative to KIT_ORIGIN) and yaw, with the lights of its sockets (spawn
+    False: the lights only - the part's mesh goes into an actor of its own, e.g. the engineering terminal)."""
     sm, part = meshes["SM_Kit_" + short]
-    spawn_mesh(actors, sm, KIT_ORIGIN + pos_cm, yaw, label)
+    if spawn:
+        spawn_mesh(actors, sm, KIT_ORIGIN + pos_cm, yaw, label)
     counts["parts"] += 1
     for sname, sock in part["sockets"].items():
         prm = sock.get("params") or {}
