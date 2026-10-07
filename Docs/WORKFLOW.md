@@ -787,6 +787,11 @@ snímku.
 - **Pás na konzoli „zmačkaná fólie“** (kokpit, 7. 10. 2026): nebyl to lesk ani grunge materiálu interiéru, ale trim
   kitu `kit_trim02` na těle (`tbox`). Podezřelý materiál najdi obarvením (dočasně jasná barva v setupu, reimport,
   jeden snímek), ne odhadem; v kokpitu tělo konzole `int_console`.
+- **Karty špíny v kokpitu nejsou vidět, kritik stagnuje na „vše čisté a modrošedé“** (7. 10. 2026): tmavá špína na
+  tmavém grafitu nemá kontrast (ošoupání je v SC světlé) a studené kokpitové světlo s modrou září displejů sjednotilo
+  všechny materiály do jednoho tónu. Řešení: světlý slot `DecalWear` (`grime(..., wear=True)`), teple neutrální
+  `pawn.cockpit_light_color`, slabší `display_light_intensity_cd`, tónový odstup krytů od těl. Při stagnaci skóre
+  nejdřív světlo a tóny, až pak další detail.
 - **CI (GitHub) hlásí „Run failed: Offline tests“ do mailu po každém pushi** (6.–7. 10. 2026): offline test četl
   FBX, který je v CI jen ukazatel Git LFS (`checkout lfs: false`) – `fbx_mesh` spadl na „buffer is smaller“. Offline
   testy smí číst jen JSON a skripty; data z FBX ber z manifestu exportu, nebo testuj `is_lfs_pointer`. Stav CI:

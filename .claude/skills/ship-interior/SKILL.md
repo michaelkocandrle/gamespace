@@ -208,6 +208,14 @@ Díry zavírá tmavý plášť `Int_HullSkin` a obložení (9.6 bm–bo).
   stavba jako `INTDECALS {"labels_failed": …}` → rozšiř modul.
 - Decaly interiéru jako mesh decaly: `interior.decals` → `hs_interior_decals.py` (`items` paprskem, `scatter`
   mřížkou paprsků: `axis: "x"` = mřížka y×z, `axis: "z"` = mřížka x×y, `grab_bars`), part `InteriorDecals`.
+- **Vrstvení decalů na kokpitu** (7. 10. 2026, podle `Docs/Kit/etalon/decal_stack.md`): z generátoru se klade
+  `hs_cockpit.stencil(item, at, n, right, up, scale, max_w)` (libovolná položka knihovny: `rivet_row_*`, `slot_s`,
+  `seam_*`, `socket`, `access_panel`, `st_*`, `hazard_subtle`, `corner_mark`, `tri_warning`, `panel_*`, opotřebení
+  `edge_scuff`, `scratches`, `streak_short`) a `hs_cockpit.grime(at, n, up, (w, h), kind, alpha)` (karty špíny
+  `smear` / `rim` / `streaks` / `soot` přes `Placer.card_at`). Rámec musí být pravotočivý: `right × up = n`, jinak
+  se položka zrcadlí. Nápisy čtené z křesla: `right` = −Y (pravá ruka pilota), `up` = +X (dopředu). Pořadí vrstev:
+  podklad (tón ≥ 0,08, variace drsnosti) → vnoření tvarem → střední detail → informace → opotřebení. Malá karta
+  špíny na členité ploše ztratí buňky a s nimi krytí: dávej alfa 0,85–1 a kartu na rovnou plochu.
 - Odraz skla podle kamery: `MPC_ShipView.InsideView` (1 = kamera v obálce partů `Interior*`), nastavuje
   `ASpaceshipPawn::UpdateViewCollection`; `M_Ship_Glass` míchá hodnoty zvenku a `…Inside`, uvnitř se vypíná
   `r.Lumen.TranslucencyReflections.FrontLayer.Enable`. Loď s interiérem má `pawn.hide_canopy_in_cockpit: false`

@@ -37,7 +37,13 @@
   "hide_canopy_in_cockpit": false,
   "cockpit_view_pitch_deg": 0.0,
   "cockpit_exposure_bias": -0.2,
-  "_comment_exposure": "Concept A (25. 9. 2026): the painted cockpit must read as a form by day and by night, so the cockpit view is 0.5 EV brighter than the Vanguard's -0.7; the screens' emissive strength drops by the same 2^0.5 (2.9 -> 2.05) so they keep their brightness."
+  "_comment_exposure": "Concept A (25. 9. 2026): the painted cockpit must read as a form by day and by night, so the cockpit view is 0.5 EV brighter than the Vanguard's -0.7; the screens' emissive strength drops by the same 2^0.5 (2.9 -> 2.05) so they keep their brightness.",
+  "cockpit_light_color": [
+   1.0,
+   0.93,
+   0.84
+  ],
+  "_comment_light_color": "7. 10. 2026: warm neutral (was the C++ default 0.85/0.92/1.0): under the cool key light and the blue screens every cockpit material read the same steel blue-grey (critic, three rounds) - SC's Aurora cockpit is lit warm-white"
  },
  "components": {
   "camera_boom": {
@@ -60,8 +66,9 @@
   },
   "cockpit_displays": {
    "_comment": "The displays' glow on the cockpit around them (rect lights at the Display_* sockets, UCockpitDisplayComponent). state_rate_hz 5: the figures change five times a second, so temporal AA (TSR) settles on each number and it reads sharp (the Vanguard's finding, 19. 9. 2026).",
-   "display_light_intensity_cd": 12.0,
-   "state_rate_hz": 5.0
+   "display_light_intensity_cd": 7.0,
+   "state_rate_hz": 5.0,
+   "_light_7_10": "7. 10. 2026: 12 -> 7 cd - the blue screen glow tinted the whole cockpit steel blue (critic)"
   }
  },
  "materials": {
@@ -1330,14 +1337,14 @@
    "master": "layered",
    "vectors": {
     "PrimaryColor": [
-     0.05,
-     0.045,
-     0.042
+     0.082,
+     0.076,
+     0.07
     ],
     "SecondaryColor": [
-     0.05,
-     0.045,
-     0.042
+     0.074,
+     0.069,
+     0.064
     ],
     "BareMetalColor": [
      0.55,
@@ -1354,17 +1361,18 @@
     "PrimaryRoughness": 0.62,
     "SecondaryRoughness": 0.62,
     "PaintMetallic": 0.2,
-    "GrungeAmount": 0.06,
+    "GrungeAmount": 0.16,
     "EdgeWear": 0.0,
     "DirtAmount": 0.0,
-    "GrungeTileCm": 16.0,
-    "RoughVariation": 0.14
+    "GrungeTileCm": 24.0,
+    "RoughVariation": 0.25
    },
    "slots": [
     "M_Ship_Wayfarer_IntConsole"
    ],
    "_comment": "warm graphite of the cockpit pods, cowl and pedestal (the exterior's saddle colour)",
-   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)",
+   "_tone": "7. 10. 2026: 0.05 -> 0.082 - the decal stack needs tonal room (Docs/Kit/etalon/decal_stack.md, layer 0)"
   },
   "MI_Ship_Wayfarer_Channel": {
    "_comment": "exterior kit channel floor under the plates and the frame: darker and rougher than the gunmetal frame, dirt in it (kit pilot critic round 1, 1. 10. 2026)",
@@ -1450,14 +1458,14 @@
    "master": "layered",
    "vectors": {
     "PrimaryColor": [
-     0.15,
-     0.148,
-     0.145
+     0.2,
+     0.197,
+     0.192
     ],
     "SecondaryColor": [
-     0.13,
-     0.128,
-     0.126
+     0.18,
+     0.177,
+     0.172
     ],
     "BareMetalColor": [
      0.55,
@@ -1498,11 +1506,11 @@
    "metallic": 0.0,
    "roughness": 0.3,
    "emissive_color": [
-    0.35,
-    0.7,
+    0.82,
+    0.9,
     1.0
    ],
-   "emissive_strength": 2.6,
+   "emissive_strength": 0.55,
    "_comment": "7. 10. 2026: the console edge lights as soft diffusers (critic: 'burnt-out white lines' at the IntGlow 8)"
   },
   "MI_Ship_Wayfarer_IntLeatherPerf": {
@@ -1538,8 +1546,8 @@
     "DirtAmount": 0.0,
     "GrungeTileCm": 6.0,
     "RoughVariation": 0.08,
-    "DetailTileCm": 3.2,
-    "DetailNormalStrength": 1.0,
+    "DetailTileCm": 4.0,
+    "DetailNormalStrength": 1.6,
     "MicroRough": 0.06,
     "ScratchAmount": 0.0,
     "PanelShift": 0.0
@@ -1553,6 +1561,76 @@
    },
    "textures": {
     "detail_normal": "ArtSource/Kit/Textures/T_Kit_Perf_N.png"
+   }
+  },
+  "MI_Ship_Wayfarer_IntWebbing": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.09,
+     0.085,
+     0.078
+    ],
+    "SecondaryColor": [
+     0.084,
+     0.079,
+     0.073
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.86,
+    "SecondaryRoughness": 0.88,
+    "PaintMetallic": 0.0,
+    "GrungeAmount": 0.15,
+    "EdgeWear": 0.0,
+    "DirtAmount": 0.0,
+    "GrungeTileCm": 6.0,
+    "RoughVariation": 0.08,
+    "DetailTileCm": 1.2,
+    "DetailNormalStrength": 0.8,
+    "MicroRough": 0.08,
+    "ScratchAmount": 0.0,
+    "PanelShift": 0.0
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntWebbing"
+   ],
+   "_comment": "7. 10. 2026: the harness webbing - a warm grey woven strap (critic r3: the straps melted into the leather), the kit's fabric weave normal",
+   "switches": {
+    "SurfaceDetail": true
+   },
+   "textures": {
+    "detail_normal": "ArtSource/Kit/Textures/T_Kit_Fabric_N.png"
+   }
+  },
+  "MI_Ship_Wayfarer_DecalWear": {
+   "_comment": "7. 10. 2026: interior wear cards - the grime atlas tinted light (the kit's walked line, import_kit WEAR_*): polish and scuffs where hands and boots work; dark grime does not read on the dark cockpit",
+   "master": "meshdecal_grime",
+   "slots": [
+    "M_Ship_Wayfarer_DecalWear"
+   ],
+   "textures": {
+    "decal_bc": "ArtSource/Ships/Shared/Decals/Grime/T_Grime_BC.png",
+    "decal_m": "ArtSource/Ships/Shared/Decals/Grime/T_Grime_M.png"
+   },
+   "decal_opacity": 1.0,
+   "decal_roughness_scale": 0.35,
+   "vectors": {
+    "DecalTint": [
+     8.0,
+     8.8,
+     10.0
+    ]
    }
   }
  },

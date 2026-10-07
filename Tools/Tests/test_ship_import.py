@@ -123,7 +123,8 @@ def main():
                     check("%s %s = %s, set up for its role" % (name, param, want), ok, texture.get_name() if texture else "none")
             if mi and "emissive_strength" in spec:
                 got = MEL.get_material_instance_scalar_parameter_value(mi, "EmissiveStrength")
-                check("%s glows" % name, abs(got - spec["emissive_strength"]) < 1e-3 and got > 1.0, "%.1f" % got)
+                # (a soft diffuser may glow under 1: IntGlowSoft 0.55, 7. 10. 2026)
+                check("%s glows" % name, abs(got - spec["emissive_strength"]) < 1e-3 and got > 0.3, "%.2f" % got)
         # the markings' flips as the setup writes them: build_decal_instances sets DecalFlipU/V only when the setup has
         # them, so an instance could keep an older flip the setup no longer states - the text read right until the
         # instance was made anew and then backwards (REACTOR / COOLER, 28. 9. 2026; test_decal_orientation.py checks the
@@ -248,6 +249,9 @@ def main():
                 got = target.get_editor_property(prop)
                 if isinstance(want, bool):
                     ok, shown = got == want, str(got)
+                elif isinstance(want, (list, tuple)) and isinstance(got, unreal.LinearColor):
+                    ok = max(abs(got.r - want[0]), abs(got.g - want[1]), abs(got.b - want[2])) < 0.01
+                    shown = "(%.2f, %.2f, %.2f)" % (got.r, got.g, got.b)
                 elif isinstance(want, (list, tuple)):
                     ok = max(abs(got.x - want[0]), abs(got.y - want[1]), abs(got.z - want[2])) < 0.5
                     shown = "(%.0f, %.0f, %.0f)" % (got.x, got.y, got.z)

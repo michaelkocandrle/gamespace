@@ -493,6 +493,62 @@ def obj_console(g, r, zr, z0):
             for zz in (z0 + 0.11, top - 0.12):
                 ya2, yb2 = proud(0.016)
                 cyl(g["int_trim"], (xr, (ya2 + yb2) / 2, zz), (xr, yb2 if sgn < 0 else ya2, zz), 0.005, 8)
+        # (critic 7. 10. r2/r3: the inner faces empty blocks) a bolted service panel aft of the vent with its stencil,
+        # a panel number by the rib; boot scuffs along the kick
+        sp0, sp1 = x0 + 0.3, x0 + 0.62
+        sz0, sz1 = z0 + 0.14, top - 0.13
+        ya, yb = proud(0.005)
+        box(g["int_trim"], (sp0 - 0.008, ya, sz0 - 0.008), (sp1 + 0.008, yb, sz1 + 0.008))
+        ya, yb = proud(0.009)
+        box(g["int_housing"], (sp0, ya, sz0), (sp1, yb, sz1))
+        for xx in (sp0 + 0.018, sp1 - 0.018):
+            for zz in (sz0 + 0.018, sz1 - 0.018):
+                q = Vector((xx, inner - sgn * 0.009, zz))
+                cyl(g["int_trim"], q, q - Vector((0, sgn * 0.0015, 0)), 0.003, 8)          # flush screws, not knobs
+        nin = Vector((0, -sgn, 0))
+        rgt = Vector((sgn, 0, 0))
+        hs_cockpit.stencil("st_service", Vector(((sp0 + sp1) / 2, inner - sgn * 0.0095, sz1 - 0.04)), nin, rgt, Vector((0, 0, 1)), 0.9, 0.3)
+        hs_cockpit.stencil("hatch_small", Vector(((sp0 + sp1) / 2, inner - sgn * 0.0095, (sz0 + sz1) / 2 - 0.01)), nin, rgt,
+                           Vector((0, 0, 1)), 0.9, 0.2)
+        hs_cockpit.stencil("panel_B03" if sgn > 0 else "panel_B07", Vector((x0 + 0.2 * (x1 - x0) + 0.04, inner - sgn * 0.0135, top - 0.13)),
+                           nin, rgt, Vector((0, 0, 1)), 0.5, 0.05)
+        hs_cockpit.grime(Vector(((x0 + x1) / 2, inner - sgn * 0.004, z0 + 0.09)), nin, Vector((0, 0, -1)), (x1 - x0 - 0.1, 0.1), "rim", 0.6)
+        # (author 7. 10. 2026: "layer decals and textures over each other") the console's decal stack after the etalon's
+        # analysis (Docs/Kit/etalon/decal_stack.md): mid detail (seams, rivet rows, slot rows, a socket), the information
+        # layer (small tone-on-tone stencils, subtle hatching, corner marks) and wear (scuffs where forearms and boots
+        # rub, scratches by the controls, a short streak) on the top, the inner face and the nose
+        st = hs_cockpit.stencil
+        Z3, X3, Yo = Vector((0, 0, 1)), Vector((1, 0, 0)), Vector((0, 1, 0))   # (a right-handed frame on the top: X x Y = Z)
+        tz = top + 0.012
+        mid = inner + sgn * (abs(y1 - y0) / 2)
+        outer = inner + sgn * abs(y1 - y0)
+        # top: wear along the inner edge, scratches, rivets along the outer edge, slot row, stencils, hatching, corners
+        for xx in (x0 + 0.26, x0 + 0.58):
+            st("edge_scuff", Vector((xx, inner + sgn * 0.04, tz)), Z3, X3, Yo, 0.6, 9.0)
+        st("scratches", Vector((x0 + 0.55, mid - sgn * 0.02, tz)), Z3, X3, Yo, 0.45, 9.0)
+        # hands at the HOTAS and along the forearm edge: smears and a worn rim (critic 7. 10.: the grime invisible)
+        hs_cockpit.grime(Vector((x0 + 0.75, inner + sgn * 0.15, tz)), Z3, Yo, (0.26, 0.24), "smear", 1.0)
+        hs_cockpit.grime(Vector(((x0 + x1) / 2, inner + sgn * 0.03, tz)), Z3, Yo * sgn, (x1 - x0 - 0.12, 0.06), "rim", 1.0)
+        hs_cockpit.grime(Vector(((x0 + x1) / 2, inner + sgn * 0.022, tz)), Z3, Yo * sgn, (x1 - x0 - 0.14, 0.04), "rim", 1.0, wear=True)
+        hs_cockpit.grime(Vector((x0 + 0.75, inner + sgn * 0.15, tz)), Z3, Yo, (0.2, 0.2), "smear", 0.9, wear=True)
+        hs_cockpit.grime(Vector(((x0 + x1) / 2, inner - sgn * 0.004, z0 + 0.12)), nin, Vector((0, 0, -1)), (x1 - x0 - 0.12, 0.08), "rim", 0.9, wear=True)
+        st("rivet_row_8", Vector((x0 + 0.36, outer - sgn * 0.038, tz)), Z3, X3, Yo, 0.8, 9.0)
+        st("slot_s", Vector((x0 + 0.78, inner + sgn * 0.44, tz)), Z3, X3, Yo, 0.5, 9.0)
+        st("st_torque", Vector((x0 + 0.62, mid, tz)), Z3, Yo, -X3, 0.5, 9.0)
+        st("hazard_subtle", Vector((x0 + 0.055, mid, tz)), Z3, Yo, -X3, 0.85, 9.0)
+
+        # the inner face: a rivet row under the top, boot scuffs at the kick, a socket with its label aft, a streak
+        st("rivet_row_16", Vector(((x0 + x1) / 2, inner - sgn * 0.0005, top - 0.024)), nin, rgt, Z3, 0.9, 9.0)
+        for xx in (x0 + 0.39, x0 + 0.69):
+            st("edge_scuff", Vector((xx, inner - sgn * 0.0005, z0 + 0.11)), nin, rgt, Z3, 0.6, 9.0)
+        st("socket", Vector((x0 + 0.12, inner - sgn * 0.0005, z0 + 0.36)), nin, rgt, Z3, 0.8, 9.0)
+        st("label_power", Vector((x0 + 0.12, inner - sgn * 0.0005, z0 + 0.29)), nin, rgt, Z3, 0.45, 9.0)
+        st("streak_short", Vector((sp0 + 0.05, inner - sgn * 0.0005, z0 + 0.112)), nin, rgt, Z3, 0.3, 9.0)
+        # the nose (facing forward): an access panel, a vent stencil, a bolt row under the top
+        nose_r = Vector((0, 1, 0))
+        st("access_panel", Vector((x1 + 0.0005, mid, z0 + 0.36)), X3, nose_r, Z3, 0.8, 9.0)
+        st("st_vent", Vector((x1 + 0.0005, mid, top - 0.12)), X3, nose_r, Z3, 0.6, 9.0)
+        st("bolt_row_4", Vector((x1 + 0.0005, mid, top - 0.03)), X3, nose_r, Z3, 0.7, 9.0)
         vx0, vx1 = x1 - 0.33, x1 - 0.1
         vz0, vz1 = z0 + 0.16, top - 0.14
         ya, yb = proud(0.006)
@@ -767,6 +823,7 @@ def build(recipe, layout, coll, mats, ship, hull):
     lights_out.clear()
     import hs_cockpit
     hs_cockpit.LABELS.clear()
+    hs_cockpit.GRIME.clear()
     rooms = {r["id"]: r for r in layout["rooms"]}
     doors = layout["doors"]
     report = {"rooms": [], "objects": 0}

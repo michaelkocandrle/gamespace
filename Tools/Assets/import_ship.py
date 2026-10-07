@@ -483,6 +483,8 @@ def apply_pawn_settings(plan, report):
             target.set_editor_property("socket_offset", unreal.Vector(offset.x, offset.y, float(value)))
         elif isinstance(value, bool):
             target.set_editor_property(prop, value)
+        elif isinstance(value, (list, tuple)) and prop.endswith("_color"):
+            target.set_editor_property(prop, unreal.LinearColor(float(value[0]), float(value[1]), float(value[2]), 1.0))
         elif isinstance(value, (list, tuple)):
             target.set_editor_property(prop, vec(value))
         else:

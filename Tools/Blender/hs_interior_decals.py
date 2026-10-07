@@ -119,6 +119,17 @@ def build(objs, ship, coll, spec, root, mats, eye):
     for it in cockpit_items(spec, eye, root) + spec.get("items", []):
         if shoot(it):
             report["items"] += 1
+    # grime cards at the cockpit's controls (hs_cockpit.GRIME, 7. 10. 2026)
+    import hs_cockpit
+    report["grime"] = 0
+    for gc in hs_cockpit.GRIME:
+        at, n = Vector(gc["at"]), Vector(gc["n"])
+        hit, hn = pl.cast(at + n * 0.03, -n)
+        if hit is None:
+            continue
+        if pl.card_at(hit, hn, Vector(gc["up"]), gc["size"], gc["kind"], step=0.03, reach=0.02, alpha=gc["alpha"],
+                      slot_name="DecalWear" if gc.get("wear") else "DecalGrime"):
+            report["grime"] += 1
     for sc in spec.get("scatter", []):
         rng = random.Random(sc.get("seed", 3))
         names, weights = sc["items"], sc.get("weights") or [1] * len(sc["items"])
@@ -153,7 +164,9 @@ def build(objs, ship, coll, spec, root, mats, eye):
     me = bpy.data.meshes.new(name)
     pl.bm.to_mesh(me)
     pl.bm.free()
-    for slot in hs_decals.SHIP_SLOTS:
+    # (7. 10. 2026) the interior's decals take the light wear slot too: dark grime alone does not read on the dark
+    # cockpit - SC's wear there is polish and scuffs, lighter than the paint
+    for slot in hs_decals.SLOTS:
         m = bpy.data.materials.get("M_Ship_%s_%s" % (ship, slot)) or bpy.data.materials.new("M_Ship_%s_%s" % (ship, slot))
         me.materials.append(m)
     ob = bpy.data.objects.new(name, me)
