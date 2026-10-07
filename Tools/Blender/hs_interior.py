@@ -512,7 +512,8 @@ def obj_console(g, r, zr, z0):
                            Vector((0, 0, 1)), 0.9, 0.2)
         hs_cockpit.stencil("panel_B03" if sgn > 0 else "panel_B07", Vector((x0 + 0.2 * (x1 - x0) + 0.04, inner - sgn * 0.0135, top - 0.13)),
                            nin, rgt, Vector((0, 0, 1)), 0.5, 0.05)
-        hs_cockpit.grime(Vector(((x0 + x1) / 2, inner - sgn * 0.004, z0 + 0.09)), nin, Vector((0, 0, -1)), (x1 - x0 - 0.1, 0.1), "rim", 0.6)
+        # (critic 7. 10.: a smeared blot, not dirt settled at the edge) a narrow rim on the kick's top edge only
+        hs_cockpit.grime(Vector(((x0 + x1) / 2, inner - sgn * 0.004, z0 + 0.094)), nin, Vector((0, 0, -1)), (x1 - x0 - 0.1, 0.035), "rim", 0.85)
         # (author 7. 10. 2026: "layer decals and textures over each other") the console's decal stack after the etalon's
         # analysis (Docs/Kit/etalon/decal_stack.md): mid detail (seams, rivet rows, slot rows, a socket), the information
         # layer (small tone-on-tone stencils, subtle hatching, corner marks) and wear (scuffs where forearms and boots
@@ -531,7 +532,7 @@ def obj_console(g, r, zr, z0):
         hs_cockpit.grime(Vector(((x0 + x1) / 2, inner + sgn * 0.03, tz)), Z3, Yo * sgn, (x1 - x0 - 0.12, 0.06), "rim", 1.0)
         hs_cockpit.grime(Vector(((x0 + x1) / 2, inner + sgn * 0.022, tz)), Z3, Yo * sgn, (x1 - x0 - 0.14, 0.04), "rim", 1.0, wear=True)
         hs_cockpit.grime(Vector((x0 + 0.75, inner + sgn * 0.15, tz)), Z3, Yo, (0.2, 0.2), "smear", 0.9, wear=True)
-        hs_cockpit.grime(Vector(((x0 + x1) / 2, inner - sgn * 0.004, z0 + 0.12)), nin, Vector((0, 0, -1)), (x1 - x0 - 0.12, 0.08), "rim", 0.9, wear=True)
+        hs_cockpit.grime(Vector(((x0 + x1) / 2, inner - sgn * 0.004, z0 + 0.105)), nin, Vector((0, 0, -1)), (x1 - x0 - 0.12, 0.03), "rim", 0.9, wear=True)
         st("rivet_row_8", Vector((x0 + 0.36, outer - sgn * 0.038, tz)), Z3, X3, Yo, 0.8, 9.0)
         st("slot_s", Vector((x0 + 0.78, inner + sgn * 0.44, tz)), Z3, X3, Yo, 0.5, 9.0)
         st("st_torque", Vector((x0 + 0.62, mid, tz)), Z3, Yo, -X3, 0.5, 9.0)
@@ -539,6 +540,16 @@ def obj_console(g, r, zr, z0):
 
         # the inner face: a rivet row under the top, boot scuffs at the kick, a socket with its label aft, a streak
         st("rivet_row_16", Vector(((x0 + x1) / 2, inner - sgn * 0.0005, top - 0.024)), nin, rgt, Z3, 0.9, 9.0)
+        # (critic 7. 10.: the inner face one flat field) panel seams down it with their numbers, an inspection stencil,
+        # a high-voltage tag by the socket, dirt settled in the seams
+        for k_, xs_ in enumerate((x0 + 0.27, x0 + 0.66)):          # (clear of the ribs and the vent)
+            if xs_ > x1 - 0.06:
+                continue
+            st("seam_straight", Vector((xs_, inner - sgn * 0.0005, z0 + 0.36)), nin, Z3, -rgt, 0.8, 9.0)
+            st(("panel_A12", "panel_A14", "panel_E11")[k_], Vector((xs_ + 0.035, inner - sgn * 0.0005, top - 0.12)), nin, rgt, Z3, 0.42, 9.0)
+            hs_cockpit.grime(Vector((xs_, inner - sgn * 0.004, z0 + 0.36)), nin, -rgt, (0.4, 0.03), "rim", 0.8)
+        st("st_inspect", Vector((x1 - 0.2, inner - sgn * 0.0005, top - 0.065)), nin, rgt, Z3, 0.5, 9.0)
+        st("warn_hv", Vector((x0 + 0.12, inner - sgn * 0.0005, z0 + 0.42)), nin, rgt, Z3, 0.45, 9.0)
         for xx in (x0 + 0.39, x0 + 0.69):
             st("edge_scuff", Vector((xx, inner - sgn * 0.0005, z0 + 0.11)), nin, rgt, Z3, 0.6, 9.0)
         st("socket", Vector((x0 + 0.12, inner - sgn * 0.0005, z0 + 0.36)), nin, rgt, Z3, 0.8, 9.0)

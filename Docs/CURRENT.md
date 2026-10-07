@@ -68,7 +68,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 0. **Autor 5. 10. (screenshoty), v tomto pořadí:**
    a) holo MFD v3 + kokpit hotové; **konzole, křeslo a plyn 7. 10.** (šedé kryty, nouzové tlačítko, mřížka, perforace;
-      PASS 6,5; detail 2: vrstvení decalů, ošoupání `DecalWear`, křeslo, teplé světlo, PASS 6,6, `…_cockpit_detail_2.md`);
+      PASS 6,5; detail 2 a 3: vrstvení decalů, ošoupání, křeslo, teplé světlo, PASS 6,6 / 6,5, `…_cockpit_detail_3.md`);
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
       strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); rampa: plán a rozhodnutí A/B
       čeká na autora (`2026-10-06_ramp_plan.md`).

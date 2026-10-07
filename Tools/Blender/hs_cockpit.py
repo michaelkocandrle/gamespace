@@ -209,6 +209,10 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
     face = c + n * 0.0014
     grime(c, n, up, (w * 0.9, h * 0.9), "smear", 0.85)
     grime(c - up * (h * 0.3), n, up, (w * 0.8, h * 0.35), "smear", 0.8, wear=True)
+    for dv in (up, -up):                                                    # dirt settled round the housing's gap
+        grime(c + dv * (h / 2 + 0.02), n, -dv, (w + 0.05, 0.045), "soot", 1.0)
+    for du in (right, -right):
+        grime(c + du * (w / 2 + 0.02), n, -du, (h + 0.05, 0.045), "soot", 1.0)
     usable_h = h - 0.018
     cell = usable_h / len(rows)
     placed = {}
@@ -674,7 +678,8 @@ def pilot_seat_v3(g, rect, zr):
         if i1 - i0 >= 2:
             pad(i0, i1, -0.66, 0.66, 0.042 if a0 < 1.0 else 0.05, key="int_leather_perf")   # perforated centre field
     for sgn in (-1, 1):
-        for a0, a1 in ((0.03, 0.30), (0.40, 1.03)):
+        # (critic 7. 10.: the sides one smooth black bolster) the back's bolster in three stitched segments
+        for a0, a1 in ((0.03, 0.30), (0.40, 0.60), (0.62, 0.82), (0.84, 1.03)):
             i0, i1 = at(a0), at(a1)
             u0, u1 = (0.72, 0.97) if sgn > 0 else (-0.97, -0.72)
             pad(i0, i1, u0, u1, 0.05, ends=0.5, stitch=True)
@@ -713,6 +718,8 @@ def pilot_seat_v3(g, rect, zr):
     for sgn in (-1, 1):
         u = sgn * 0.27
         path = [surf(i, u, 0.056) for i in range(shoulder_i, hip_i - 1, -2)]
+        # (critic 7. 10.: the webbing broke in a sharp right angle like steel strip) a soft curve down into the lock
+        path += [surf(at(0.35), u * 0.8, 0.062), surf(at(0.30), u * 0.5, 0.064)]
         path.append(buckle + side * (sgn * 0.03) + Vector((0.0, 0, 0.004)))
         strap(path)
         # over the top of the back into the harness slot
@@ -725,8 +732,9 @@ def pilot_seat_v3(g, rect, zr):
         rr_ring(g["int_trim"], adj + fn_ * 0.006, side, Vector((0, 0, 1)), fn_, 0.062, 0.036, 0.007, 0.007, 0.011, 4)
         rr_slab(g["int_dark"], adj + fn_ * 0.004, side, Vector((0, 0, 1)), fn_, 0.05, 0.008, 0.003, 0.006, 2)
         rr_slab(g["int_trim"], adj + fn_ * 0.0075 - Vector((0, 0, 0.011)), side, Vector((0, 0, 1)), fn_, 0.05, 0.005, 0.0025, 0.004, 2)
-        lap = [surf(i, sgn * 0.94, 0.045) for i in range(hip_i, hip_i - 3, -1)]
-        lap += [surf(at(0.30), sgn * 0.5, 0.05), buckle + side * (sgn * 0.035)]
+        # over the bolster, not beside it, curving into the lock
+        lap = [surf(at(0.42), sgn * 0.96, 0.072), surf(at(0.38), sgn * 0.86, 0.078), surf(at(0.34), sgn * 0.68, 0.074),
+               surf(at(0.30), sgn * 0.45, 0.066), buckle + side * (sgn * 0.035)]
         strap(lap, width=0.05)
         rr_slab(g["accent"], surf(at(0.70), u, 0.062), side, Vector((0, 0, 1)), frames[at(0.70)][1], 0.03, 0.05, 0.004, 0.003, 2)
     # crotch strap and the buckle: a satin disc, a dark ring, the orange release tab
@@ -824,6 +832,8 @@ def pilot_seat_v3(g, rect, zr):
             for sv_ in (-1, 1):
                 q = cp + side * (su_ * 0.018) + fwd * (sv_ * 0.028) + upz * 0.004
                 tube(g["int_trim"], q, q + upz * 0.0015, 0.0022, 6)
+        for dv_, lab_ in ((-0.014, "ck_comms" if sd > 0 else "ck_lights"), (0.014, "ck_scan" if sd > 0 else "ck_extlt")):
+            stencil(lab_, cp + fwd * dv_ - side * 0.0 + upz * 0.0058 + Vector((0, -0.0135, 0)), upz, Vector((0, -1, 0)), fwd, 0.48, 0.05)
         grime(top + upz * 0.03 - fwd * 0.05, upz, fwd, (0.07, 0.18), "smear", 0.9, wear=True)
         hinge_a = top - upz * 0.055 - fwd * 0.15
         tube(g["int_trim"], hinge_a - side * 0.03, hinge_a + side * 0.03, 0.014, 14)
@@ -1099,7 +1109,7 @@ def pod(g, screen_bm, sockets, eye, name, c, spec):
         return (u + so * 0.02 * k * k * (v < 0), v - bulge * k * k if v < 0 else v)
     rr_slab(g["int_console"], pc - n * 0.006, right, up, n, pw, ph, spec["radius"], 0.09, shape=shape)
     rr_ring(g["int_trim"], pc + n * 0.012, right, up, n, pw + 0.012, ph + 0.012, spec["radius"] + 0.006, 0.026, 0.024, shape=shape)
-    rr_ring(g["int_glow"], pc + n * 0.0135, right, up, n, pw - 0.018, ph - 0.018, spec["radius"] - 0.009, 0.004, 0.003, shape=shape)
+    rr_ring(g["int_glow_soft"], pc + n * 0.0135, right, up, n, pw - 0.018, ph - 0.018, spec["radius"] - 0.009, 0.004, 0.003, shape=shape)
     # a dark inner mask around the glass (the screen sits in a recess, as a real display does)
     rr_ring(g["int_dark"], c + n * 0.004, right, up, n, sw + 0.03, sh + 0.03, 0.02, 0.016, 0.006)
     screen(screen_bm, sockets, name, c + n * 0.002, right, up, n, sw, sh)
@@ -1524,7 +1534,7 @@ def underdash(g, eye, spec, zfloor, lights_out):
         tube(g["int_dark"], rod0.lerp(rod1, 0.5), rod1, 0.016, 12)                                        # damper
         tube(g["int_trim"], rod1 - Vector((0.01, 0, 0)), rod1 + Vector((0.01, 0, 0)), 0.03, 12)            # wall mount
     for y0, y1 in ((-0.9, -0.2), (0.2, 0.9)):
-        tube(g["int_glow"], Vector((spec["pod_x"] - 0.02, y0, zb - 0.02)), Vector((spec["pod_x"] - 0.02, y1, zb - 0.02)), 0.004, 6)
+        tube(g["int_glow_soft"], Vector((spec["pod_x"] - 0.02, y0, zb - 0.02)), Vector((spec["pod_x"] - 0.02, y1, zb - 0.02)), 0.004, 6)
     lights_out.append({"at": [18.3, 0.0, zfloor + 0.35], "cd": spec.get("footwell_cd", 2.5)})
     return (xw, -0.95, zfloor), (xw + 0.04, 0.95, zb)
 

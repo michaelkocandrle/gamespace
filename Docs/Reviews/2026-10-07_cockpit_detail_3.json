@@ -1,0 +1,78 @@
+{
+ "topic": "cockpit_detail_3",
+ "date": "2026-10-07",
+ "goal": "Kokpit Wayfareru, třetí kolo detailu po PASS 6,6: popruhy z teple šedé tkaniny odlišené od rámu a kůže, čitelná perforace kůže, popisky tlačítek na loketních opěrkách, tmavá špína ve spárách kolem krytů modulů (vedle světlého ošoupání), méně sytá modrá záře displejů a tlumené světelné linky pod MFD; kokpitové světlo teple neutrální. Předchozí vrstvy: decaly konzolí (nýty, sloty, šablony, šrafy, opotřebení), nouzové tlačítko, HOTAS.",
+ "style": "Úroveň SC, ne přesná kopie (autor 7. 10.: kopírujeme level, ne rozměry). Halcyon průmyslový kokpit (C-01 D): teplý grafit těl, střední šedý satén krytů, oranžové akcenty výrobce místo žlutých šraf SC.",
+ "checklist": "cockpit",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-07_cockpit_detail_3",
+ "notes": [
+  "Hodnotí se konzole, křeslo a celkový dojem z místa pilota; obsah MFD a HUD se v tomto kroku neměnil.",
+  "Snímky konzolí jsou z editoru se studiovou kamerou nad konzolí."
+ ],
+ "pairs": [
+  {
+   "title": "1 Z místa pilota (displeje, konzole dole)",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_114559_mfd_pages/03_pages_navigation_self_landed.png",
+   "ours_label": "pohled pilota, přistáno"
+  },
+  {
+   "title": "2 Levá konzole shora",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_114518_cockpit_audit/03_left_console.png",
+   "ours_label": "levá konzole, plyn"
+  },
+  {
+   "title": "3 Pravá konzole shora",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_114518_cockpit_audit/04_right_console.png",
+   "ours_label": "pravá konzole, knipl"
+  },
+  {
+   "title": "4 Hlava konzole: mřížka, nouzové tlačítko",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_114518_cockpit_audit/09_left_console_head.png",
+   "ours_label": "hlava levé konzole: nouzové tlačítko, mřížka"
+  },
+  {
+   "title": "5 Křeslo zepředu: popruhy, přezky",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/kreslo_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_114518_cockpit_audit/01_seat_front.png",
+   "ours_label": "křeslo pilota"
+  },
+  {
+   "title": "6 Hlava pravé konzole a knipl",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_114518_cockpit_audit/10_right_console_head.png",
+   "ours_label": "hlava pravé konzole"
+  },
+  {
+   "title": "7 Křeslo z boku: kostra, postroj, přezka",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/kreslo_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_114518_cockpit_audit/02_seat_side.png",
+   "ours_label": "křeslo z boku"
+  }
+ ]
+}
