@@ -965,7 +965,7 @@ float ao = lerp(1.0, VC.r, Amount);
 float edge = (1.0 - VC.g) * Amount;
 float dirt = saturate((1.0 - ao) * 1.8) * saturate(0.3 + g) * DirtAmount * Amount;
 dirt *= lerp(1.0, 0.3 + 1.4 * PanelId.x, PanelDirtVar);
-float wear = saturate((edge * (0.5 + 1.0 * g) - WearThreshold) * 3.0) * EdgeWear;
+float wear = saturate((edge * (0.5 + 1.0 * g) - WearThreshold) * WearSharpness) * EdgeWear;
 float low = saturate((1.0 - VC.r) * 2.5);
 wear = max(wear, saturate((edge * (0.4 + g) - 0.3) * 3.0) * low * FloorWear);
 // (hand height only: a floor line in the same signal paint read as orange blotches - LocalPos in cm above the part's floor)
@@ -980,7 +980,8 @@ return float4(g, ao, saturate(dirt), saturate(wear));
 # 5 cm ends; the walked line on up-facing faces at the floor within WalkHalfCm of the part's centre line (run parts:
 # y = 0 on the corridor's axis), broken by the grunge - worn through to the bare metal, a line, not the whole floor.
 _KIT_WEAR_PARAMS = (("WearBandOn", 0.0), ("WearBandLo", 90.0), ("WearBandHi", 160.0), ("WalkWear", 0.0),
-                    ("WalkHalfCm", 25.0), ("ScratchBandOn", 0.0), ("FaceWear", 0.0), ("FaceDirt", 0.0))
+                    ("WalkHalfCm", 25.0), ("ScratchBandOn", 0.0), ("FaceWear", 0.0), ("FaceDirt", 0.0),
+                    ("WearSharpness", 3.0))
 # The kit's micro detail: the scratches (G) only in the hand band when ScratchBandOn (the author, board round 2:
 # scratches on whole walls read as dirt; hands scratch where hands go).
 _KIT_MICRO_NODE = """float4 t = float4(Texture2DSample(TexM, TexMSampler, UV / max(Tile * 0.01, 0.01)).rgb, 0.0);
@@ -1138,14 +1139,15 @@ def build_layered_master(path=None, kit=False):
         params[pname] = _scalar(m, pname, 0.0, -2300, 650 + i * 100)
     mask_in = ["VC", "Amount", "LocalPos", "TexG", "Tile", "DirtAmount", "EdgeWear", "WearThreshold"]
     detail_in = mask_in + ["PanelId", "PanelShift", "PanelDirtVar", "FloorWear", "TopWear"]
-    detail_code = _LAYER_MASK_DETAIL_NODE
+    # WearSharpness is a kit parameter; the ships' layered master keeps the old fixed ramp
+    detail_code = _LAYER_MASK_DETAIL_NODE.replace("WearSharpness", "3.0")
     if kit:
         for i, (pname, default) in enumerate(_KIT_WEAR_PARAMS):
             params[pname] = _scalar(m, pname, default, -2500, 650 + i * 100)
         detail_in = detail_in + [p for p, _ in _KIT_WEAR_PARAMS]
         detail_code = _LAYER_MASK_DETAIL_NODE.replace("return float4(g, ao, saturate(dirt), saturate(wear));",
                                                       _KIT_WEAR_CODE)
-        if detail_code == _LAYER_MASK_DETAIL_NODE:
+        if "return float4(g, ao, saturate(dirt), saturate(wear));" in detail_code.split("// FaceWear")[0]:
             raise RuntimeError("the kit wear code found no return in the layered detail node")
     plain_masks = _custom(m, "Layered_masks", _LAYER_MASK_NODE, unreal.CustomMaterialOutputType.CMOT_FLOAT4, mask_in,
                           -1250, 300)

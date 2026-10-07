@@ -1,0 +1,83 @@
+{
+ "topic": "kf_cockpit_console",
+ "date": "2026-10-07",
+ "goal": "Levá loketní konzole kokpitu, VARIANTA B postavená podle našeho 2D návrhu (Docs/Kit/parts/KF-COCKPIT-CONSOLE/concept, autor 7. 10.: reference SC jsou styl, rozměry a skladba naše). Ošoupaný světlý kovový rám s tmavými panely, opěrka předloktí jako nosník na dvou šikmých konzolách nad podstavcem (mezera), knipl na vlastním bloku před opěrkou, prostřední blok se sáním a stavovým pásem a klávesami na zkosení ke křeslu, věž s nouzovou klávesou pod krytem a kolébkami (otočené k pilotovi), modul tří jištěných přepínačů, servisní poklop vzadu, trubkové madlo s oranžovým návlekem, oranžové šrafy, vrstvené decaly (oděry, škrábance, štítky), nové opotřebení ploch v materiálu kitu. Díl sám v testovacím úseku pod neutrálním světlem, úhly jako reference. Kolo 8 po kole 7 (5,5): materiál kitu nově ošoupává i plochy (světlé odřené plochy, ne černé kaňky), oděr hran v kokpitové výšce, vyšší věž s čelem k pilotovi a rámečky kolébek s LED, svítící klávesy a stavové proužky (nové emisní role), jednodílná tmavá opěrka s prošitým okrajem, oranžový znak Halcyon, tmavé vložky v bocích, plochý lučík podél rukojeti, kovová hlava kniplu. Kolo 9 po kole 8 (5,6): ošoupání ploch utlumené, tmavé vložky i na bocích věže, poklop vzadu zapuštěný v tmavém rámu se šrouby a mřížkou, klávesy a proužky jasněji svítí, věž užší a vyšší klín k pilotovi, větší legendy kolébek, legendy u jištěných přepínačů, vroubkovaný návlek madla, odlehčovací otvory v konzolách, stupňovitý bok nosníku. Kolo 10 po kole 9 (5,9): velké plochy jako grafitové vložky ve světlém rámu (boky věže, víko poklopu), nouzová klávesa níž v čele věže s méně otevřeným krytem, větší oranžový znak Halcyon na nosníku. Kolo 11 po kole 10 (5,9): světlejší decaly kitu (legendy, nápisy, oděry – DecalTint 1,9 na barevných decalech), kryt nouzové klávesy skoro zavřený (nečouhá nad věž), větší legendy kolébek, světlý šev a oranžový znak + HALCYON na vnějším boku věže, štítek výrobce na podstavci, škrábance. Kolo 12 po kole 11 (6,0): čelo věže celé jako grafitová vložka ve světlém rámu se šrouby, oranžovým znakem // a nápisem HALCYON FREIGHTWORKS, znak // na nosníku jako geometrie, mráčky z ploch odstraněné (oděr jen na hranách, přerušovaný), klávesy v tmavém rámečku, stavový pás na téměř černém poli, větší legendy kolébek. Kolo 13 po kole 12 (6,1): rám je nekovový lak (metallic 0,08) a odhalený kov na hranách světlý kov (0,62, drsnost 0,3) přerušovaný podle grunge, grafitové vložky na čelech bloku kniplu a na čele podstavce pod přepínači (s mřížkou), znak // u nápisu HALCYON na nosníku, bez škrábanců na grafitovém víku. Kolo 14 po kole 13 (6,1): tmavé mráčky odstraněné (byly to škrábance mikrotextury jako plný kov – na rámu vypnuté), odhalený kov na hranách světlý (0,7, metallic 0,65, drsnost 0,4) jen na zkoseních a přerušovaný, spodní pás nosníku grafitová vložka, větší znak // na nosníku. Kolo 15 po kole 14 (6,4): lak rámu ztmavený (albedo lineárně 0,15 ≈ sRGB 0,42, drsnost 0,55 s variací), odhalený kov hran 0,7 tak dostal kontrast, vyšší grafitové vložky na bocích podstavce, širší tmavý rámeček kláves. Kolo 16 po kole 15 (PASS 6,5): oděr hran jemněji přerušovaný (grunge 14 cm, práh 0,6), variace drsnosti ploch snížená (bez mráčků), kryt nouzové klávesy zavřený, větší legendy kolébek. Kolo 17 po kole 16 (PASS 6,6): oděr hran souvislejší (práh 0,42, přerušení po 8 cm), bez variace drsnosti na plochách, klávesy s gradientem (studený okraj, teplý jasný střed), stavové proužky modrobílé a jantarový TEMP, větší štítek EMERG O2 pod nouzovou klávesou a kolébky níž, spára na horní ploše věže, škrábance vedle klávesy, znak // na nosníku dál od kraje a menší nápis, decaly kitu zesvětlené 1,5×. Kolo 18 po kole 17 (PASS 6,8): širší zkosení rámů (12–13 mm) a nižší práh oděru 0,36 – oděr hran viditelnější, oranžový rám kolem nouzové klávesy 10 mm, větší LED nad kolébkami.",
+ "style": "Úroveň SC, ne přesná kopie (autor 7. 10.). Halcyon: oranžové akcenty místo žlutých, šedé laky, udržovaná pracovní loď.",
+ "checklist": "interior",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-07_kf_cockpit_console_r18",
+ "notes": [
+  "Hodnotí se jen konzole (díl továrny), ne stěny a podlaha testovacího úseku.",
+  "Světlo testovacího úseku je neutrální a jasnější než kokpit SC na referencích – jas sám o sobě nehodnoť, hodnoť tóny materiálů mezi sebou."
+ ],
+ "etalon": [
+  {
+   "img": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "label": "SC konzole"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/konzole_3.jpg",
+   "label": "SC loketní konzole s kniplem"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/kreslo_2.jpg",
+   "label": "SC křeslo a konzole"
+  }
+ ],
+ "pairs": [
+  {
+   "title": "1 Konzole 3/4 zepředu nad loketní jednotkou",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_3.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_000437_kit_cockpit_console_b/01_1_ref34.png",
+   "ours_label": "KF konzole B"
+  },
+  {
+   "title": "2 Zepředu přes nos konzole",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/kreslo_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_000437_kit_cockpit_console_b/02_2_front.png",
+   "ours_label": "KF konzole B"
+  },
+  {
+   "title": "3 Ovládací blok zblízka",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_000437_kit_cockpit_console_b/03_3_face_close.png",
+   "ours_label": "KF konzole B"
+  },
+  {
+   "title": "4 Knipl a opěrka zápěstí zblízka",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_3.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_000437_kit_cockpit_console_b/04_4_stick_close.png",
+   "ours_label": "KF konzole B"
+  },
+  {
+   "title": "5 Bok od pilota (mezera pod loketní jednotkou)",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/kreslo_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_000437_kit_cockpit_console_b/05_5_side_gap.png",
+   "ours_label": "KF konzole B"
+  },
+  {
+   "title": "6 Shora",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_000437_kit_cockpit_console_b/06_6_top.png",
+   "ours_label": "KF konzole B"
+  }
+ ]
+}

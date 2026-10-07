@@ -47,6 +47,7 @@ EAL, MEL = unreal.EditorAssetLibrary, unreal.MaterialEditingLibrary
 DECAL_MIS = {"Kit_Decal": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_Decal",
              "Kit_DecalAO": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalAO",
              "Kit_DecalPaint": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalPaint"}
+FRESH_PARTS = ("SM_Kit_Cockpit_",)    # always imported fresh (see import_parts)
 PAINT_TINT = (1.5, 1.5, 1.5)        # the kit labels and scuffs: 0.42 grey -> ~0.63; 1.9 turned the orange yellow (7. 10.)
 GRIME_PARENT = "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalGrime"
 GRIME_OPACITY = 1.0
@@ -461,7 +462,7 @@ def factory_material_spec(role, maker, data=None):
         "ClearCoat": r.get("clear_coat", 0.0), "ClearCoatRoughness": r.get("clear_coat_rough", 0.08),
         "FloorWear": 0.0, "TopWear": 0.0, "PanelDirtVar": 0.0, "DetailNormalStrength": 0.0,
         "FaceWear": r.get("face_wear", 0.0), "FaceDirt": r.get("face_dirt", 0.0),
-        "BareMetallic": r.get("bare_metallic", 1.0)})
+        "BareMetallic": r.get("bare_metallic", 1.0), "WearSharpness": r.get("wear_sharpness", 3.0)})
     if r.get("grunge_tile_cm"):                  # a small part's own grunge scale (120 cm drew nothing on a console)
         scalars["GrungeTileCm"] = r["grunge_tile_cm"]
     if r.get("detail_normal"):
@@ -514,6 +515,12 @@ def import_parts(mis, report):
         mesh = {"name": name, "fbx": os.path.join(REPO, part["fbx"]), "destination": DEST, "asset_path": "%s/%s" % (DEST, name),
                 "nanite": False, "collision_hulls": part["collision_hulls"], "materials": part["materials"],
                 "sockets": {k: v["location_ue_cm"] for k, v in part["sockets"].items()}, "expected_size_cm": part["expected_size_cm"]}
+        # the parts in development are imported fresh: a reimport over the asset kept its old section-to-slot map,
+        # and after a role was added the frame's faces drew with the new edge material (cockpit console B, 8. 10. 2026;
+        # the slot names and their order matched, so ensure_fbx_slots did not catch it)
+        if name.startswith(FRESH_PARTS) and EAL.does_asset_exist(mesh["asset_path"]):
+            if not EAL.delete_asset(mesh["asset_path"]):
+                raise import_ship.ImportFailed("%s could not be deleted for a fresh import" % mesh["asset_path"])
         sm = import_ship.import_fbx(mesh)
         verdict = import_ship.compare_size(import_ship.mesh_size_cm(sm), mesh["expected_size_cm"])
         if verdict != "ok":

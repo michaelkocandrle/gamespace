@@ -66,7 +66,7 @@ def hatch(p, x0, x1, z0, z1, u, n_sign, step=0.022):
 def emergency_key(p, c, r, a, n):
     """The red emergency key under a flip-up red cover, framed in orange, its label plate."""
     fm = lambda o: frame(o, r, a, n)                         # noqa: E731
-    p.box("Kit_Signal", (-0.036, -0.027, -0.002), (0.036, 0.027, 0.002), bevel=0.0015, segments=2, m=fm(c))
+    p.box("Kit_Signal", (-0.04, -0.031, -0.002), (0.04, 0.031, 0.002), bevel=0.0015, segments=2, m=fm(c))
     p.box("Kit_Graphite", (-0.03, -0.021, 0.0), (0.03, 0.021, 0.007), bevel=0.003, segments=2, m=fm(c))
     p.box("Kit_Red", (-0.022, -0.014, 0.005), (0.022, 0.014, 0.011), bevel=0.0025, segments=3, m=fm(c))
     p.box("Kit_GlowRed", (-0.013, -0.002, 0.0108), (0.013, 0.002, 0.0114), m=fm(c), panel=False)
@@ -86,6 +86,7 @@ def emergency_key(p, c, r, a, n):
 
 def console_b(name, seed):
     p = kit_geo.Part(name, seed)
+    p.edge_roles = {"Kit_Frame": "Kit_FrameEdge"}   # the frame's chamfers: a glossier polished paint that catches the light
     p.sharp_deg = 20.0           # the concept's machined chamfers (25-55 deg) must not shade into soft rolls
     # 1 the pedestal: a light worn frame, the kick chamfered back, a dark recessed kick with a vent row
     ped = [(0.03, 0.07), (L - 0.06, 0.07), (L - 0.02, 0.11), (L - 0.02, DECK), (0.0, DECK), (0.0, 0.1)]
@@ -111,7 +112,7 @@ def console_b(name, seed):
     # brackets and a rear leg over the deck (the 9 cm gap under it is the concept's floating arm)
     beam = [(0.02, BEAM0), (0.58, BEAM0), (0.63, BEAM0 + 0.03), (0.63, AT - 0.035), (0.6, AT - 0.018), (0.03, AT - 0.018),
             (0.0, AT - 0.04), (0.0, BEAM0 + 0.02)]
-    side_prism(p, "Kit_Frame", beam, -0.075, 0.155, 0.008, 1)
+    side_prism(p, "Kit_Frame", beam, -0.075, 0.155, 0.006, 1)
     # the stepped side: a lower band 8 mm proud on both sides, chamfered (the concept's beam is not one slab)
     band = [(0.04, BEAM0 - 0.004), (0.57, BEAM0 - 0.004), (0.6, BEAM0 + 0.022), (0.04, BEAM0 + 0.022), (0.02, BEAM0 + 0.01)]
     side_prism(p, "Kit_Graphite", band, -0.083, -0.07, 0.004, 1)        # the lower band a graphite inset
@@ -150,7 +151,7 @@ def console_b(name, seed):
     p.box("Kit_Perforated", (0.015, -0.0275, DECK + 0.02), (0.06, -0.023, BEAM0 - 0.02), panel=False)
     # 3 the stick block: a light block, a dark top plate, the stick with its hatched boot ring; a mesh grille on its side
     sb = [(0.66, DECK), (0.87, DECK), (0.87, 0.49), (0.85, 0.505), (0.68, 0.505), (0.66, 0.49)]
-    side_prism(p, "Kit_Frame", sb, U0 - 0.012, 0.18, 0.008, 1)
+    side_prism(p, "Kit_Frame", sb, U0 - 0.012, 0.18, 0.006, 1)
     p.box("Kit_Housing", (0.69, U0 + 0.005, 0.503), (0.84, 0.165, 0.509), bevel=0.003, segments=2)
     p.box("Kit_Perforated", (0.69, U0 - 0.0145, DECK + 0.015), (0.84, U0 - 0.011, 0.485), panel=False)
     for xx in (0.68, 0.85):
@@ -164,7 +165,7 @@ def console_b(name, seed):
             screw(p, Vector((xf + nx * 0.0045, uu, 0.466)), X * nx, 0.003)
     # 4 the middle block: the intake grille on top, the status strip and the 2 x 2 keys on its seat-facing chamfer
     mb = [(0.2, DECK), (W - 0.005, DECK), (W - 0.005, 0.52), (0.34, 0.52), (0.2, 0.455)]
-    end_prism(p, "Kit_Frame", mb, 0.64, 0.98, 0.008, 1)
+    end_prism(p, "Kit_Frame", mb, 0.64, 0.98, 0.006, 1)
     p.box("Kit_Lip", (0.68, 0.38, 0.52), (0.94, 0.62, 0.524), bevel=0.0015, segments=2)
     p.box("Kit_Graphite", (0.687, 0.387, 0.524), (0.933, 0.613, 0.5245), panel=False)
     for k in range(10):
@@ -199,7 +200,7 @@ def console_b(name, seed):
     # 5 the front tower: its rear slope faces the pilot with the emergency key and the rockers, LEDs over them
     TU = 0.27                                                  # the tower's seat-side face
     tw = [(0.98, DECK), (L - 0.02, DECK), (L - 0.02, 0.7), (L - 0.05, 0.74), (1.115, 0.74), (0.98, 0.5)]
-    side_prism(p, "Kit_Frame", tw, TU, W - 0.005, 0.01, 1)
+    side_prism(p, "Kit_Frame", tw, TU, W - 0.005, 0.006, 1)
     a = Vector((0.135, 0, 0.24)).normalized()                 # up the slope (forward and up, ~30 deg off vertical)
     r = Vector((0, -1, 0))                                     # the pilot's right on it (toward the seat side... mirrored)
     nf = r.cross(a)                                            # out of it: back to the pilot and up
@@ -215,11 +216,10 @@ def console_b(name, seed):
         q = fc - a * 0.078 + r * (0.105 * (i - 1)) + nf * 0.002
         p.box("Kit_Lip", (-0.016, -0.024, 0.0), (0.016, 0.03, 0.0015), bevel=0.001, segments=1, m=ff(q), panel=False)   # its frame
         _rocker(p, q, r, a, nf, lab, label_scale=1.1)
-        p.box("Kit_GlowKey", (-0.006, 0.022, 0.0015), (0.006, 0.026, 0.0027), m=ff(q), panel=False)
+        p.box("Kit_GlowKey", (-0.008, 0.021, 0.0015), (0.008, 0.0265, 0.0027), m=ff(q), panel=False)
     for su in (-1, 1):
         for sv in (-1, 1):
             screw(p, fc + r * (su * (w2 - 0.012)) + a * (sv * (h2 - 0.012)) + nf * 0.002, nf)
-        _label(p, "scratches", fc + r * (su * (w2 - 0.022)) + a * 0.05 + nf * 0.0025, nf, r, a, scale=0.13, is_label=False)
     p.box("Kit_Graphite", (1.131, TU + 0.02, 0.7395), (1.134, W - 0.025, 0.7408), panel=False)            # the top's seam
     for uf, ns_ in ((TU, -1), (W - 0.005, 1)):
         # the inset follows the side's outline 20 mm in: the slope edge leans with the face
@@ -267,11 +267,6 @@ def console_b(name, seed):
         k += 1
     for uu in (0.13, W - 0.13):
         p.box("Kit_Housing", (L - 0.03, uu - 0.025, hz - 0.03), (L + 0.0, uu + 0.025, hz + 0.03), bevel=0.005, segments=2)
-    # 7 dirt and wear: the kick, the deck seams, the rest's front edge, the handle mounts
-    p.grime("rim", (L / 2, U0 - 0.002, 0.08), (0, -1, 0), (0, 0, 1), (L - 0.1, 0.05), 0.8)
-    p.grime("rim", (L / 2, W + 0.002, 0.08), (0, 1, 0), (0, 0, 1), (L - 0.1, 0.05), 0.8)
-    p.grime("rim", (0.32, -0.0779, AT - 0.03), (0, -1, 0), (0, 0, 1), (0.55, 0.02), 0.7, wear=True)
-    p.grime("rim", (0.5, U0 - 0.0015, DECK - 0.02), (0, -1, 0), (0, 0, 1), (0.9, 0.03), 0.6, wear=True)
     # 7a the front deck by the seat, ahead of the stick: a small switch module - a sloped dark plate in a light frame,
     # three guarded toggles (the guards two bent bars), their legends, a status LED each
     m0 = Vector((1.03, 0.095, DECK))
@@ -317,33 +312,25 @@ def console_b(name, seed):
     _label(p, "st_service", Vector((0.22, hu0 + 0.06, zt + 0.0004)), Z, X, Y, scale=0.7)       # read from the seat
     _label(p, "arrow_access", Vector((0.32, hu1 - 0.1, zt + 0.0004)), Z, X, Y, scale=0.5)
     _label(p, "pn_4", Vector((0.48, hu0 + 0.06, zt + 0.0004)), Z, X, Y, scale=0.6)
-    # 7c the layered detail decals (author 6. 10.: SC's fullness is stacked detail decals): scuffs on the edges hands
-    # touch, scratches on the rails and lids, drip streaks under the grilles, service stencils and ids on the panels
-    # (footprints: edge_scuff 0.4 x 0.05 m, scratches 0.3 x 0.3, each fully on one flat face - the placer drops a
-    # decal across an edge or over a raised part)
-    det = [("edge_scuff", (0.5, -0.0779, 0.58), -Y, X, 0.5),
-           ("edge_scuff", (0.62, U0 - 0.0005, 0.398), -Y, X, 0.7), ("edge_scuff", (0.24, U0 - 0.0005, 0.398), -Y, X, 0.7),
-           ("edge_scuff", (0.62, W + 0.0005, 0.398), Y, -X, 0.7),
-           ("scratches", (0.95, W + 0.0005, 0.32), Y, -X, 0.45),
-           ("st_inspect", (0.24, U0 - 0.0065, 0.19), -Y, X, 0.7), ("pn_1", (0.1, U0 - 0.0065, DECK - 0.1), -Y, X, 0.7),
-           ("pn_2", (0.5, U0 - 0.0065, DECK - 0.1), -Y, X, 0.7), ("tri_warning", (1.11, TU - 0.0065, 0.5), -Y, X, 0.6),
-           ("warning_label", (0.62, W + 0.0065, 0.22), Y, -X, 0.8), ("st_torque", (0.25, W + 0.0065, 0.33), Y, -X, 0.6),
+    # 7c the decal layers (author 8. 10.: the parts are new from the factory - no wear; the richness is stacked detail):
+    # stencils, labels and ids on the graphite insets, rivet rows on the frame band, a socket and a hazard band on the
+    # front, plates on the outboard side - each fully on one flat face
+    zb = 0.41                                                   # the frame band between the insets and the belt line
+    det = [("st_inspect", (0.24, U0 - 0.0065, 0.19), -Y, X, 0.7), ("st_service", (0.27, U0 - 0.0065, 0.29), -Y, X, 0.7),
+           ("pn_1", (0.1, U0 - 0.0065, DECK - 0.1), -Y, X, 0.7), ("pn_2", (0.5, U0 - 0.0065, DECK - 0.1), -Y, X, 0.7),
+           ("warn_hv", (0.63, U0 - 0.0065, 0.25), -Y, X, 0.7), ("st_hfcl", (0.63, U0 - 0.0065, 0.17), -Y, X, 0.7),
+           ("rivet_row_8", (0.24, U0 - 0.0005, zb), -Y, X, 0.8), ("rivet_row_8", (0.63, U0 - 0.0005, zb), -Y, X, 0.8),
+           ("rivet_row_8", (0.24, W + 0.0005, zb), Y, -X, 0.8), ("rivet_row_8", (0.63, W + 0.0005, zb), Y, -X, 0.8),
+           ("label_coolant", (0.24, W + 0.0065, 0.2), Y, -X, 0.8), ("st_torque", (0.25, W + 0.0065, 0.33), Y, -X, 0.6),
+           ("warning_label", (0.62, W + 0.0065, 0.22), Y, -X, 0.8), ("st_gnd", (0.62, W + 0.0065, 0.32), Y, -X, 0.8),
+           ("tri_warning", (1.11, TU - 0.0065, 0.5), -Y, X, 0.6), ("panel_B07", (1.1, W + 0.0045, 0.6), Y, -X, 0.6),
+           ("socket", (L - 0.0155, (U0 + TU) / 2, 0.33), X, Y, 0.8),
+           ("hazard_subtle", (L - 0.0195, (TU + W) / 2, 0.39), X, Y, 0.9), ("panel_A12", (L - 0.0195, (TU + W) / 2, 0.2), X, Y, 0.8),
            ("corner_mark", (0.9, 0.0, DECK + 0.0065), Z, X, 0.6), ("label_power", (0.94, U0 - 0.0005, 0.22), -Y, X, 0.6),
-           ("ck_maker_plate", (0.96, W + 0.0045, 0.19), Y, -X, 0.9), ("scratches", (1.12, W + 0.0047, 0.55), Y, -X, 0.3),
-           ("scratches", (0.98, 0.04, DECK + 0.0065), Z, X, 0.25)]
+           ("ck_maker_plate", (0.96, W + 0.0045, 0.19), Y, -X, 0.9)]
     for item, at, nn, rr, sc_ in det:
         nn = Vector(nn)
         up = Z if abs(nn.z) < 0.5 else Y                       # right x up = the normal (a right-handed decal frame)
-        _label(p, item, Vector(at), nn, Vector(rr), up, scale=sc_, is_label=item.startswith(("st_", "pn_", "label_", "warning", "tri_")))
-    # light wear along the edges hands and boots touch: the beam's top edges, the pedestal's top edge, the tower's
-    # slope and front edges, the kick
-    for at, n, up, size in (((0.32, -0.074, AT - 0.019), (0, 0, 1), (0, -1, 0), (0.58, 0.012)),
-                            ((0.32, 0.154, AT - 0.019), (0, 0, 1), (0, 1, 0), (0.58, 0.012)),
-                            ((0.6, U0 + 0.001, DECK + 0.005), (0, 0, 1), (0, -1, 0), (1.1, 0.012)),
-                            ((0.6, W - 0.001, DECK + 0.005), (0, 0, 1), (0, 1, 0), (1.1, 0.012)),
-                            ((L - 0.03, (TU + W) / 2, 0.6), (1, 0, 1), (0, 0, 1), (0.42, 0.02)),
-                            ((0.77, U0 - 0.011, 0.5), (0, 0, 1), (0, -1, 0), (0.2, 0.012)),
-                            ((L / 2, U0 + 0.002, 0.095), (0, -1, 0), (0, 0, 1), (L - 0.12, 0.03))):
-        p.grime("rim", at, n, up, size, 0.8, wear=True)
+        _label(p, item, Vector(at), nn, Vector(rr), up, scale=sc_, is_label=item.startswith(("st_", "pn_", "label_", "warning", "tri_", "warn_", "panel_", "ck_")))
     p.collision_box((0.0, -0.08, 0.0), (L + 0.09, W + 0.005, 0.68))
     return p

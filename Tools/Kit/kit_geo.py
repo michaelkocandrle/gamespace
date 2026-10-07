@@ -39,7 +39,8 @@ ROLES = ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber
          # the parts factory's shared base (ArtSource/Kit/kit_materials.json, 6. 10. 2026): lacquer, polished lip, dark
          "Kit_Lacquer", "Kit_Lip", "Kit_Graphite", "Kit_Gasket", "Kit_AntiSlip", "Kit_GlowFoot",
          # decal stack step (6. 10. 2026): the mid-grey panel and the dark perforated insert
-         "Kit_Panel", "Kit_Perforated", "Kit_Red", "Kit_GlowRed", "Kit_Shell", "Kit_Housing", "Kit_Console", "Kit_Frame", "Kit_GlowKey", "Kit_GlowAmber"]
+         "Kit_Panel", "Kit_Perforated", "Kit_Red", "Kit_GlowRed", "Kit_Shell", "Kit_Housing", "Kit_Console", "Kit_Frame", "Kit_GlowKey", "Kit_GlowAmber",
+         "Kit_FrameEdge"]
 
 
 def frame(origin, ax, ay, az):
@@ -54,6 +55,9 @@ class Part:
     def __init__(self, name, seed=1):
         self.name = name
         self.sharp_deg = 40.0           # edges sharper than this shade split (a part of crisp chamfers sets it lower)
+        # {role: edge role}: the chamfers a bevel made on a role go to its own slot, their own worn material (the
+        # cockpit console, 8. 10. 2026: a role's wear without the vertex-colour mask)
+        self.edge_roles = {}
         self.bm = {r: bmesh.new() for r in ROLES}
         for b in self.bm.values():
             # before any vertex: a new custom-data layer invalidates the Python references to existing verts
@@ -392,7 +396,12 @@ class Part:
         uv1 = out.loops.layers.uv.new("PanelId")
         col = out.loops.layers.float_color.new("Col")
         used = [r for r in ROLES if self.bm[r].faces]
+        for role, er in self.edge_roles.items():
+            if role in used and er not in used and any(f in self.edge_faces for f in self.bm[role].faces):
+                used.append(er)
         for si, role in enumerate(used):
+            if not self.bm[role].faces:
+                continue                # an edge role: its faces come from its base role
             src = self.bm[role]
             src.normal_update()
             loc = src.verts.layers.float_vector.get("local")
@@ -410,7 +419,7 @@ class Part:
                     nf = out.faces.new([vmap[v] for v in f.verts])
                 except ValueError:
                     continue
-                nf.material_index = si
+                nf.material_index = used.index(self.edge_roles[role]) if role in self.edge_roles and f in self.edge_faces else si
                 nf.smooth = f.smooth
                 mode, pid, secondary = face_meta.get(f, (("box",), (0.5, 0.99), False))
                 n = f.normal

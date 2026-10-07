@@ -1,0 +1,40 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 19,
+ "variant": "B",
+ "date": "2026-10-08",
+ "verdict": "FAIL",
+ "gate": "step",
+ "first_impression": "Udržovaná šedá konzole Halcyon s grafitovými vložkami, oranžovými akcenty a svítícími klávesami; nový materiál zkosení ale na všech hranách čte jako mramor nebo maskáč (měkké bílé a šedé mapy), ne jako lak prodřený do kovu.",
+ "scores": {
+  "silueta_a_tvar": {"score": 6, "why": "Nosník na dvou konzolách s otvory, mezera a stupňovitý bok drží (list 5 vpravo 1000-1600,280-480); šikmá plocha věže je dál jeden hladký klín se spárou (list 3 vpravo 1300-1420,60-560)."},
+  "hierarchie_a_hustota_detailu": {"score": 7, "why": "Detail shlukovaný u kniplu, sání, stavového pásu, kláves, kolébek, EMERG a poklopu (list 6 vpravo 1100-1950,80-540); hladké zůstávají šikmá plocha věže a bok podstavce (list 5 vpravo 1000-1600,440-560)."},
+  "materialy": {"score": 5, "why": "Plochy laku jsou teď čisté a tóny lak / grafit / pryž / oranžová sedí, ale zkosení mají nízkofrekvenční bílo-šedé skvrny bez ostrých okrajů – čtou jako mramor/maskáč, ne jako odřený kov (list 3 vpravo 1390-1960,55-115 a svislá hrana 1390-1440,60-560; list 4 vpravo 1440-1510,400-600 a 1545-1600,415-470; list 6 vpravo 1530-1760,255-285 a 1950-1990,60-330; list 5 vpravo 1610-1900,400-510)."},
+  "decaly": {"score": 6, "why": "Znak // a HALCYON FREIGHTWORKS čisté (list 5 vpravo 1060-1370,335-380; list 3 vpravo 1570-1920,170-500); škrábance kolem ovladačů nerozeznatelné, spodní nápisy na tmavém pásu splývají (list 6 vpravo 1240-1620,565-585)."},
+  "svetlo": {"score": 7, "why": "Klávesy 2x2 s gradientem, MAIN/BATT modrobílé, TEMP teplý (list 3 vpravo 1085-1300,200-370); LED nad kolébkami ploché čtverečky bez záře (list 3 vpravo 1090,445 / 1135,495 / 1185,550)."},
+  "citelnost": {"score": 6, "why": "Zblízka čitelné MAIN/BATT/TEMP, LIGHTS/GEAR/VTOL, CAUTION, ACCESS, SERVICE ACCESS; legendy kolébek shora a z boku drobné (list 6 vpravo 1780-1900,425-435; list 5 vpravo 1810-1900,315-345), štítek EMERG O2 malý a natočený (list 6 vpravo 1790-1830,130-180)."},
+  "chyby_geometrie": {"score": 8, "why": "Bez děr, průniků a plovoucích dílů; kryt nouzové klávesy nečouhá (list 1 vpravo 1650-1900,265-300)."},
+  "soulad_stylu": {"score": 6, "why": "Díly sdílejí lak, vložky, šrouby a oranžové akcenty, ale zkosení věže je dál široké (~12 mm, list 3 vpravo 1390-1440) proti 6 mm na blocích a nosníku, a skvrnitý materiál zkosení stylově neladí s čistými plochami ani s návrhem."}
+ },
+ "average": 6.4,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "r18_status": {
+  "1_oder_hran_stejnomerny": "nepovedlo se – změněno, ale k horšímu: oděr už není souvislá lesklá linka, místo ní jsou na zkoseních měkké mramorové skvrny bez ostrých hran (viz bod 1). Zúžení zkosení na blocích a nosníku na 6 mm je vidět a pomohlo (list 5 vpravo nosník), věž ale zůstala široká.",
+  "2_sikma_plocha_veze": "neopraveno: list 3 vpravo 1300-1420,60-560 dál hladký světlý klín se spárou.",
+  "3_legendy_kolebek_led": "neopraveno: legendy shora drobné (list 6 vpravo 1780-1900,425-435), LED bez záře (list 3 vpravo).",
+  "4_bok_podstavce_spodni_napisy": "neopraveno: list 5 vpravo 1000-1600,440-560 holý; list 6 vpravo 1240-1620,565-585 nápisy splývají.",
+  "5_skrabance_emerg_o2": "neopraveno: škrábance nerozeznatelné, EMERG O2 malý a natočený do boku."
+ },
+ "concept_match": {
+  "layout_percent": 78,
+  "look_percent": 62,
+  "summary": "Skladba, tónová hierarchie a svítící prvky odpovídají návrhu. Návrh má na hranách ostré malé světlé odštěpky kovu v tmavším laku; náš výsledek má mramorové skvrny po celé šíři zkosení. Dál chybí členění šikmé plochy věže a detail boku podstavce."
+ },
+ "findings": [
+  {"n": 1, "title": "Zkosení čtou jako mramor/maskáč", "where": "list 3 vpravo horní hrana věže 1390-1960,55-115 a svislá hrana 1390-1440,60-560; list 4 vpravo rám opěrky 1440-1510,400-600 a blok kniplu 1545-1600,415-470; list 6 vpravo 1530-1760,255-285 a 1950-1990,60-330; list 5 vpravo blok kniplu 1610-1900,400-510", "problem": "Maska prodření je nízkofrekvenční a měkká (skvrny 3-8 cm s rozmazaným přechodem), světlý kov i lak mají podobnou hodnotu, takže zkosení vypadá jako mramor nebo maskáčový vzor. Odhalený kov v návrhu je ostrý, úzký a vázaný na nejvyšší hranu.", "severity": "musí se opravit", "fix": "Masku zostřit: grunge s menší škálou (2-4 cm místo ~14 cm), přes smoothstep s úzkým přechodem (např. 0,48-0,52), aby byla binární; kov jen na vnějších 2-3 mm zkosení (gradient přes UV/vertex color šířky zkosení), zbytek zkosení stejný lak jako plocha; kov albedo ~0,55-0,6, metallic 1, drsnost 0,35-0,45, lak beze změny; podíl kovu ~30-40 % délky hrany, širší (8-15 mm) jen na rozích. Ověřit list 3 vpravo 1390-1960,55-115 – musí číst jako odštěpky, ne skvrny."},
+  {"n": 2, "title": "Šikmá plocha věže hladká", "where": "list 3 vpravo 1300-1420,60-560; list 1 vpravo 1640-1760,270-500", "problem": "Největší plocha v pohledu pilota je hladký světlý klín se spárou; návrh tu má grafitovou vložku se šrouby.", "severity": "doporučeno", "fix": "Grafitová vložka (albedo 0,08-0,12) na ~60 % plochy v rámu 15-20 mm, 4 šrouby, ve spodní třetině štítek nebo šrafa 80-100 mm."},
+  {"n": 3, "title": "Zkosení věže široké proti ostatním dílům", "where": "list 3 vpravo 1390-1440,60-560; list 1 vpravo 1640-1900,260-500", "problem": "Věž má dál ~12 mm zkosení, bloky a nosník 6 mm; věž proto vypadá měkčí a skvrnitější než zbytek.", "severity": "doporučeno", "fix": "Zkosení věže sjednotit na 6 mm (max 8 mm na horní hraně)."},
+  {"n": 4, "title": "Legendy kolébek a LED", "where": "list 6 vpravo 1780-1900,425-435; list 5 vpravo 1810-1900,315-345; LED list 3 vpravo 1090,445 / 1135,495 / 1185,550", "problem": "Z pohledu pilota legendy LIGHTS/GEAR/VTOL pod hranicí čitelnosti; LED ploché bez záře.", "severity": "doporučeno", "fix": "Legendy tučně 8-10 mm, albedo >= 0,6, na ploše kolmé k pohledu pilota; LED emise 10-15, studená modrobílá, jemný bloom."},
+  {"n": 5, "title": "Bok podstavce, spodní nápisy, škrábance, EMERG O2", "where": "list 5 vpravo 1000-1600,440-560; list 6 vpravo 1240-1620,565-585 a 1790-1830,130-180; okolí kniplu list 6 vpravo 1550-1760,280-540", "problem": "Holý bok podstavce, splývající spodní nápisy, žádné rozeznatelné škrábance u ovladačů, malý natočený štítek EMERG O2.", "severity": "doporučeno", "fix": "2-3 grafitové vložky v rámu 20-30 mm se šrouby po ~100 mm a oranžová šrafa 150 mm; spodní nápisy albedo >= 0,5; 5-8 škrábanců (albedo ~0,55, 10-40 x 1-2 mm) v okruhu 60 mm kolem kniplu, kláves a madla; EMERG O2 písmo 10-12 mm na čelo věže pod klávesu."}
+ ]
+}
