@@ -39,7 +39,7 @@ ROLES = ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber
          # the parts factory's shared base (ArtSource/Kit/kit_materials.json, 6. 10. 2026): lacquer, polished lip, dark
          "Kit_Lacquer", "Kit_Lip", "Kit_Graphite", "Kit_Gasket", "Kit_AntiSlip", "Kit_GlowFoot",
          # decal stack step (6. 10. 2026): the mid-grey panel and the dark perforated insert
-         "Kit_Panel", "Kit_Perforated", "Kit_Red", "Kit_GlowRed", "Kit_Shell", "Kit_Housing", "Kit_Console"]
+         "Kit_Panel", "Kit_Perforated", "Kit_Red", "Kit_GlowRed", "Kit_Shell", "Kit_Housing", "Kit_Console", "Kit_Frame"]
 
 
 def frame(origin, ax, ay, az):
@@ -53,6 +53,7 @@ def frame(origin, ax, ay, az):
 class Part:
     def __init__(self, name, seed=1):
         self.name = name
+        self.sharp_deg = 40.0           # edges sharper than this shade split (a part of crisp chamfers sets it lower)
         self.bm = {r: bmesh.new() for r in ROLES}
         for b in self.bm.values():
             # before any vertex: a new custom-data layer invalidates the Python references to existing verts
@@ -447,7 +448,7 @@ class Part:
         coll.objects.link(ob)
         # sharp edges from the bevels read as smooth faces with crisp silhouettes
         me.shade_smooth()
-        me.set_sharp_from_angle(angle=math.radians(40))
+        me.set_sharp_from_angle(angle=math.radians(self.sharp_deg))
         for i, pts in enumerate(self.ucx):
             cm = bpy.data.meshes.new("UCX_%s_%02d" % (self.name, i))
             cbm = bmesh.new()

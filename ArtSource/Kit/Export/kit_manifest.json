@@ -9944,6 +9944,79 @@
     "seam": 0
    },
    "status": "built"
+  },
+  "SM_Kit_Cockpit_Console12W_B": {
+   "category": "Cockpit",
+   "family": "Cockpit_Console",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "B",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_Console12W_B.fbx",
+   "dims_m": [
+    1.29,
+    0.756,
+    0.73
+   ],
+   "expected_size_cm": [
+    129.0,
+    75.6,
+    73.0
+   ],
+   "tris": 24196,
+   "tris_decals": 500,
+   "tri_budget": 90000,
+   "materials": [
+    "Kit_Signal",
+    "Kit_GlowCool",
+    "Kit_GlowSignal",
+    "Kit_GlowNeutral",
+    "Kit_Lip",
+    "Kit_Graphite",
+    "Kit_Gasket",
+    "Kit_Perforated",
+    "Kit_Red",
+    "Kit_GlowRed",
+    "Kit_Shell",
+    "Kit_Housing",
+    "Kit_Frame",
+    "Kit_DecalPaint",
+    "Kit_DecalGrime",
+    "Kit_DecalWear"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 19,
+   "decal_items": [
+    "panel_C21",
+    "maker",
+    "maker",
+    "ck_rcs",
+    "ck_main",
+    "ck_batt",
+    "ck_temp",
+    "ck_emerg_o2",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 15702,
+    "secondary": 0,
+    "floor": 4030,
+    "seam": 0
+   },
+   "status": "built"
   }
  }
 }

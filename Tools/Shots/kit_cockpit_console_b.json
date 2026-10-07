@@ -1,0 +1,130 @@
+{
+ "_comment": "Variant B of KF-COCKPIT-CONSOLE (after the 2D concept, 7. 10. 2026) at the same angles as kit_cockpit_console_studio, 1.6 m behind variant A (origin (21.3, -500.1)).",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 8.0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.45
+   ],
+   "fov": 90,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none",
+    "r.MegaLights.EnableForProject 1",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "name": "1_ref34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    23.15,
+    -499.55,
+    1.35
+   ],
+   "camera_look_at": [
+    22.0,
+    -500.3,
+    0.55
+   ],
+   "fov": 60
+  },
+  {
+   "name": "2_front",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    23.35,
+    -500.25,
+    1.25
+   ],
+   "camera_look_at": [
+    21.8,
+    -500.35,
+    0.5
+   ],
+   "fov": 55
+  },
+  {
+   "name": "3_face_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    22.9,
+    -500.05,
+    0.95
+   ],
+   "camera_look_at": [
+    22.4,
+    -500.45,
+    0.55
+   ],
+   "fov": 42
+  },
+  {
+   "name": "4_stick_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    22.45,
+    -499.75,
+    1.0
+   ],
+   "camera_look_at": [
+    22.1,
+    -500.08,
+    0.78
+   ],
+   "fov": 40
+  },
+  {
+   "name": "5_side_gap",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    21.85,
+    -499.35,
+    0.66
+   ],
+   "camera_look_at": [
+    21.85,
+    -500.3,
+    0.56
+   ],
+   "fov": 55
+  },
+  {
+   "name": "6_top",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    21.9,
+    -499.8,
+    1.65
+   ],
+   "camera_look_at": [
+    21.9,
+    -500.35,
+    0.5
+   ],
+   "fov": 55
+  }
+ ]
+}

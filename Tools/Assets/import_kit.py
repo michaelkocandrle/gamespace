@@ -645,6 +645,9 @@ def build_test_section(actors, meshes, mis, sec, counts):
     # axis (the part's +y outboard is Unreal -y), so the "pilot" stands where the corridor is
     if "SM_Kit_Cockpit_Console12W_A" in meshes:
         place_part(actors, meshes, "Cockpit_Console12W_A", unreal.Vector(x * 100.0 - 220.0, -10.0, 0.0), 0.0, "KitTest_CockpitConsole", counts)
+    # variant B after the 2D concept (7. 10. 2026), 1.6 m behind A, the same line
+    if "SM_Kit_Cockpit_Console12W_B" in meshes:
+        place_part(actors, meshes, "Cockpit_Console12W_B", unreal.Vector(x * 100.0 - 380.0, -10.0, 0.0), 0.0, "KitTest_CockpitConsoleB", counts)
     vol = actors.spawn_actor_from_class(unreal.PostProcessVolume, _v(((x0 + x1) / 2, 0.0), h / 2),
                                         unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
     vol.set_actor_label("KitTest_InteriorPost")

@@ -1,0 +1,229 @@
+"""KF-COCKPIT-CONSOLE variant B: the left cockpit console after the 2D concept set (Docs/Kit/parts/KF-COCKPIT-CONSOLE,
+author 7. 10. 2026: build it as another part in the showroom, keep variant A).
+
+What the concept says (part.md): a light, worn metal frame with dark panels set in it, not a lacquered box; the
+forearm rest a separate beam on two slanted brackets over the pedestal with a clear gap; the stick ahead of it on its
+own block with the hatched boot ring; a middle block with the intake grille on top and the status strip and the keys
+on its seat-facing chamfer; a raised front tower with the emergency key and the rockers; a tube grab handle with an
+orange sleeve across the front. Sizes and layout are ours (1.2 x 0.67 m, the rest at elbow height 0.62 m).
+One deviation from the concept: the tower's controls face the pilot (its rear slope), not the front - the concept's
+front face would be out of the seated pilot's view and reach.
+
+Local frame as variant A: x along the console, rear (the seat back) 0 -> front L; u (local y) 0 at the seat side ->
+W outboard, the forearm rest overhangs u < 0; z up from the floor. (The FBX mirrors y: in Unreal the seat side is +y.)
+"""
+import math
+
+from mathutils import Vector
+
+import kit_geo
+from kit_geo import frame
+from kit_cockpit import stick, _label, _rocker
+
+L, W = 1.2, 0.67
+U0 = -0.03               # the pedestal's seat-side face (the beam overhangs it by 4.5 cm)
+DECK = 0.44              # the pedestal's top
+BEAM0, AT = 0.53, 0.62   # the forearm beam's underside and the rest's top (elbow height)
+X, Y, Z = Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))
+
+
+def side_prism(p, role, pts, u0, u1, bevel, seg=3):
+    """A profile in the x-z plane extruded across u from u0 to u1."""
+    p.poly_prism(role, pts, frame(Vector((0, u0, 0)), (1, 0, 0), (0, 0, 1), (0, -1, 0)), u1 - u0, bevel=bevel, segments=seg)
+
+
+def end_prism(p, role, pts, x0, x1, bevel, seg=3):
+    """A profile in the u-z plane extruded along x from x0 to x1."""
+    p.poly_prism(role, pts, frame(Vector((x1, 0, 0)), (0, 1, 0), (0, 0, 1), (1, 0, 0)), x1 - x0, bevel=bevel, segments=seg)
+
+
+def screw(p, c, n, r=0.0034):
+    p.lathe("Kit_Lip", [(r, 0.0), (r, 0.0007), (0.0, 0.001)], tuple(c), axis=tuple(n), seg=12)
+
+
+def chamfer_panel(p, role, x0, x1, z0, z1, u, n_sign, c=0.03, depth=0.006):
+    """A dark panel with one chamfered corner set into a long face (u: the face; n_sign -1 = the seat side)."""
+    pts = [(x0, z0), (x1 - c, z0), (x1, z0 + c), (x1, z1), (x0, z1)]
+    if n_sign < 0:
+        side_prism(p, role, pts, u - depth, u + 0.002, 0.003, 2)
+    else:
+        side_prism(p, role, pts, u - 0.002, u + depth, 0.003, 2)
+    for xx, zz in ((x0 + 0.015, z0 + 0.015), (x0 + 0.015, z1 - 0.015), (x1 - 0.015, z1 - 0.015), (x1 - c - 0.01, z0 + 0.015)):
+        screw(p, Vector((xx, u + n_sign * (depth + 0.0005), zz)), Y * n_sign)
+
+
+def hatch(p, x0, x1, z0, z1, u, n_sign, step=0.022):
+    """Oblique orange bars on a long face (Halcyon's hazard hatch)."""
+    k = 0
+    x = x0
+    while x + (z1 - z0) < x1 + 1e-6:
+        uu = u + n_sign * 0.0012
+        p.sweep("Kit_Signal", [Vector((x, uu, z0)), Vector((x + (z1 - z0), uu, z1))], 0.004, seg=6, scale_y=0.2)
+        x += step
+        k += 1
+
+
+def emergency_key(p, c, r, a, n):
+    """The red emergency key under a flip-up red cover, framed in orange, its label plate."""
+    fm = lambda o: frame(o, r, a, n)                         # noqa: E731
+    p.box("Kit_Signal", (-0.036, -0.027, -0.002), (0.036, 0.027, 0.002), bevel=0.0015, segments=2, m=fm(c))
+    p.box("Kit_Graphite", (-0.03, -0.021, 0.0), (0.03, 0.021, 0.007), bevel=0.003, segments=2, m=fm(c))
+    p.box("Kit_Red", (-0.022, -0.014, 0.005), (0.022, 0.014, 0.011), bevel=0.0025, segments=3, m=fm(c))
+    p.box("Kit_GlowRed", (-0.013, -0.002, 0.0108), (0.013, 0.002, 0.0114), m=fm(c), panel=False)
+    hinge = c + a * 0.024 + n * 0.01
+    p.sweep("Kit_Lip", [hinge - r * 0.033, hinge + r * 0.033], 0.0045, seg=12)
+    t = math.radians(70)
+    a2, n2 = a * math.cos(t) + n * math.sin(t), -a * math.sin(t) + n * math.cos(t)
+    mc = frame(hinge, r, a2, n2)
+    p.box("Kit_Red", (-0.03, 0.0, -0.0015), (0.03, 0.043, 0.0015), bevel=0.0012, segments=2, m=mc)
+    for sv in (-1, 1):
+        p.box("Kit_Red", (sv * 0.03 - 0.0015, 0.0, -0.0095), (sv * 0.03 + 0.0015, 0.043, 0.0), bevel=0.0007, segments=1, m=mc)
+    p.box("Kit_Red", (-0.03, 0.0405, -0.0095), (0.03, 0.043, 0.0), bevel=0.0007, segments=1, m=mc)
+    lp = c - a * 0.042
+    p.box("Kit_Graphite", (-0.04, -0.011, 0.0), (0.04, 0.011, 0.0015), m=fm(lp), panel=False)
+    _label(p, "ck_emerg_o2", lp + n * 0.0017, n, r, a, scale=0.5)
+
+
+def console_b(name, seed):
+    p = kit_geo.Part(name, seed)
+    p.sharp_deg = 20.0           # the concept's machined chamfers (25-55 deg) must not shade into soft rolls
+    # 1 the pedestal: a light worn frame, the kick chamfered back, a dark recessed kick with a vent row
+    ped = [(0.03, 0.07), (L - 0.06, 0.07), (L - 0.02, 0.11), (L - 0.02, DECK), (0.0, DECK), (0.0, 0.1)]
+    side_prism(p, "Kit_Frame", ped, U0, W, 0.012, 1)
+    p.box("Kit_Graphite", (0.05, U0 + 0.02, 0.0), (L - 0.08, W - 0.02, 0.075), bevel=0.004, segments=2)
+    for k in range(14):
+        xk = 0.12 + k * 0.024
+        p.box("Kit_Housing", (xk, U0 + 0.016, 0.018), (xk + 0.012, U0 + 0.022, 0.055), bevel=0.002, segments=1, panel=False)
+        p.box("Kit_Housing", (xk + 0.5, W - 0.026, 0.018), (xk + 0.512, W - 0.02, 0.055), bevel=0.002, segments=1, panel=False)
+    # dark panels set into both long faces, a belt line over them, screws; the outboard front a hatch band and a plate
+    for x0, x1 in ((0.05, 0.42), (0.45, 0.8)):
+        chamfer_panel(p, "Kit_Graphite", x0, x1, 0.12, DECK - 0.07, U0, -1)
+        chamfer_panel(p, "Kit_Graphite", x0, x1, 0.12, DECK - 0.07, W, 1)
+    chamfer_panel(p, "Kit_Graphite", 0.83, L - 0.08, 0.12, 0.3, U0, -1, c=0.05)
+    p.box("Kit_Graphite", (0.0, U0 - 0.004, DECK - 0.052), (L - 0.02, U0, DECK - 0.046), panel=False)
+    p.box("Kit_Graphite", (0.0, W, DECK - 0.052), (L - 0.02, W + 0.004, DECK - 0.046), panel=False)
+    hatch(p, 0.85, L - 0.1, DECK - 0.04, DECK - 0.012, W, 1)
+    p.box("Kit_Housing", (0.86, W, 0.14), (1.06, W + 0.004, 0.24), bevel=0.002, segments=1)
+    _label(p, "panel_C21", Vector((0.96, W + 0.0045, 0.19)), Y, Vector((-1, 0, 0)), Z, scale=0.9)
+    _label(p, "maker", Vector((0.62, U0 - 0.0075, 0.28)), -Y, X, Z, scale=0.75)
+    # the deck: a dark plate between the blocks
+    p.box("Kit_Housing", (0.0, U0, DECK - 0.004), (L - 0.02, W, DECK + 0.006), bevel=0.003, segments=2)
+    # 2 the forearm beam: a light frame in a stepped side profile, two padded perforated rests on it, on two slanted
+    # brackets and a rear leg over the deck (the 9 cm gap under it is the concept's floating arm)
+    beam = [(0.02, BEAM0), (0.58, BEAM0), (0.63, BEAM0 + 0.03), (0.63, AT - 0.035), (0.6, AT - 0.018), (0.03, AT - 0.018),
+            (0.0, AT - 0.04), (0.0, BEAM0 + 0.02)]
+    side_prism(p, "Kit_Frame", beam, -0.075, 0.155, 0.008, 1)
+    p.box("Kit_Graphite", (0.04, -0.0775, BEAM0 + 0.03), (0.56, -0.074, BEAM0 + 0.038), panel=False)          # the groove
+    for k in range(6):
+        screw(p, Vector((0.06 + k * 0.1, -0.0758, BEAM0 + 0.017)), -Y, 0.003)
+    for xa, xb in ((0.035, 0.31), (0.32, 0.595)):
+        p.box("Kit_Gasket", (xa, -0.062, AT - 0.022), (xb, 0.142, AT), bevel=0.013, segments=4)
+        for i in range(int((xb - xa - 0.03) / 0.011)):
+            for j in range(15):
+                hx, hu = xa + 0.02 + i * 0.011, -0.042 + j * 0.0115 + (0.0057 if i % 2 else 0.0)
+                if hu > 0.123:
+                    continue
+                p.box("Kit_Graphite", (hx - 0.0015, hu - 0.0015, AT - 0.0004), (hx + 0.0015, hu + 0.0015, AT + 0.0003), panel=False)
+    _label(p, "maker", Vector((0.3, -0.0778, AT - 0.05)), -Y, X, Z, scale=0.55)
+    for xb in (0.2, 0.46):                                                                   # the slanted brackets
+        br = [(xb - 0.03, DECK + 0.006), (xb + 0.035, DECK + 0.006), (xb + 0.065, BEAM0 + 0.002), (xb + 0.005, BEAM0 + 0.002)]
+        for ua, ub in ((-0.025, 0.0), (0.105, 0.13)):
+            side_prism(p, "Kit_Housing", br, ua, ub, 0.004, 2)
+            screw(p, Vector((xb + 0.02, ua - 0.0005, DECK + 0.03)), -Y, 0.004)
+            screw(p, Vector((xb + 0.045, ua - 0.0005, BEAM0 - 0.02)), -Y, 0.004)
+    rear = [(0.0, DECK), (0.075, DECK), (0.075, BEAM0 + 0.002), (0.0, BEAM0 + 0.002)]
+    side_prism(p, "Kit_Frame", rear, -0.025, 0.14, 0.008, 1)
+    p.box("Kit_Perforated", (0.015, -0.0275, DECK + 0.02), (0.06, -0.023, BEAM0 - 0.02), panel=False)
+    # 3 the stick block: a light block, a dark top plate, the stick with its hatched boot ring; a mesh grille on its side
+    sb = [(0.66, DECK), (0.87, DECK), (0.87, 0.49), (0.85, 0.505), (0.68, 0.505), (0.66, 0.49)]
+    side_prism(p, "Kit_Frame", sb, U0 - 0.012, 0.18, 0.008, 1)
+    p.box("Kit_Housing", (0.69, U0 + 0.005, 0.503), (0.84, 0.165, 0.509), bevel=0.003, segments=2)
+    p.box("Kit_Perforated", (0.69, U0 - 0.0145, DECK + 0.015), (0.84, U0 - 0.011, 0.485), panel=False)
+    for xx in (0.68, 0.85):
+        screw(p, Vector((xx, U0 - 0.0125, DECK + 0.012)), -Y)
+        screw(p, Vector((xx, U0 - 0.0125, 0.488)), -Y)
+    stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs")
+    # 4 the middle block: the intake grille on top, the status strip and the 2 x 2 keys on its seat-facing chamfer
+    mb = [(0.2, DECK), (W - 0.005, DECK), (W - 0.005, 0.52), (0.34, 0.52), (0.2, 0.455)]
+    end_prism(p, "Kit_Frame", mb, 0.64, 0.98, 0.008, 1)
+    p.box("Kit_Lip", (0.68, 0.38, 0.52), (0.94, 0.62, 0.524), bevel=0.0015, segments=2)
+    p.box("Kit_Graphite", (0.687, 0.387, 0.524), (0.933, 0.613, 0.5245), panel=False)
+    for k in range(10):
+        xk = 0.693 + k * 0.0236
+        p.box("Kit_Housing", (xk, 0.393, 0.5245), (xk + 0.012, 0.607, 0.531), bevel=0.0025, segments=2, panel=False)
+    d = Vector((0, 0.14, 0.065)).normalized()                 # up the chamfer
+    n = X.cross(d)                                            # out of it, to the seat and up
+    c0 = Vector((0.0, 0.27, 0.4875)) + n * 0.0005
+    fm = lambda o: frame(o, X, d, n)                          # noqa: E731
+    p.box("Kit_Housing", (-0.0, -0.06, -0.004), (0.32, 0.06, 0.003), bevel=0.003, segments=2, m=fm(c0 + X * 0.65))
+    sc = c0 + X * 0.73                                        # the status strip: three lamps, legends beside them
+    p.box("Kit_Lip", (-0.07, -0.042, 0.002), (0.07, 0.042, 0.005), bevel=0.0015, segments=2, m=fm(sc))
+    p.box("Kit_Graphite", (-0.065, -0.037, 0.005), (0.065, 0.037, 0.0055), m=fm(sc), panel=False)
+    for k, lab in enumerate(("ck_main", "ck_batt", "ck_temp")):
+        q = sc + d * (0.022 - 0.022 * k)
+        p.box("Kit_GlowCool" if k < 2 else "Kit_GlowSignal", (0.005, -0.004, 0.0055), (0.055, 0.004, 0.0065), m=fm(q), panel=False)
+        _label(p, lab, q - X * 0.03 + n * 0.0058, n, X, d, scale=0.62)
+    kc = c0 + X * 0.89                                         # the keys
+    p.box("Kit_Lip", (-0.055, -0.05, 0.002), (0.055, 0.05, 0.005), bevel=0.0015, segments=2, m=fm(kc))
+    p.box("Kit_Graphite", (-0.05, -0.045, 0.005), (0.05, 0.045, 0.006), m=fm(kc), panel=False)
+    for i, lab in enumerate(("ck_lights", "ck_gear", "ck_vtol", "ck_esp")):
+        q = kc + X * (0.024 * (1 if i % 2 else -1)) + d * (0.021 * (1 if i < 2 else -1))
+        p.box("Kit_Housing", (-0.019, -0.017, 0.006), (0.019, 0.017, 0.01), bevel=0.002, segments=2, m=fm(q))
+        p.box("Kit_GlowNeutral", (-0.016, -0.014, 0.01), (0.016, 0.014, 0.0135), bevel=0.0015, segments=2, m=fm(q))
+    for xx in (0.665, 0.955):
+        screw(p, c0 + X * xx + d * 0.04 + n * 0.003, n)
+        screw(p, c0 + X * xx - d * 0.04 + n * 0.003, n)
+    # 5 the front tower: its rear slope faces the pilot with the emergency key and the rockers, LEDs over them
+    TU = 0.22                                                  # the tower's seat-side face
+    tw = [(0.97, DECK), (L - 0.02, DECK), (L - 0.02, 0.58), (L - 0.05, 0.62), (1.09, 0.62), (0.97, 0.49)]
+    side_prism(p, "Kit_Frame", tw, TU, W - 0.005, 0.01, 1)
+    a = Vector((0.12, 0, 0.13)).normalized()                  # up the slope (forward and up)
+    r = Vector((0, -1, 0))                                     # the pilot's right on it (toward the seat side... mirrored)
+    nf = r.cross(a)                                            # out of it: back to the pilot and up
+    if nf.x > 0:
+        r, nf = -r, -nf
+    fc = Vector((1.03, (TU + W - 0.005) / 2, 0.555)) + nf * 0.0005
+    ff = lambda o: frame(o, r, a, nf)                          # noqa: E731
+    w2, h2 = (W - 0.005 - TU - 0.04) / 2, 0.08
+    p.box("Kit_Lip", (-w2 - 0.004, -h2 - 0.004, -0.004), (w2 + 0.004, h2 + 0.004, 0.0015), bevel=0.002, segments=2, m=ff(fc))
+    p.box("Kit_Graphite", (-w2, -h2, -0.004), (w2, h2, 0.002), m=ff(fc), panel=False)
+    emergency_key(p, fc + a * 0.03 + nf * 0.002, r, a, nf)
+    for i, lab in enumerate(("ck_pwr", "ck_extlt", "ck_eng")):
+        q = fc - a * 0.04 + r * (0.12 * (i - 1)) + nf * 0.002
+        _rocker(p, q, r, a, nf, lab)
+        p.box("Kit_GlowCool", (-0.006, 0.022, 0.0), (0.006, 0.026, 0.0012), m=ff(q), panel=False)
+    for su in (-1, 1):
+        for sv in (-1, 1):
+            screw(p, fc + r * (su * (w2 - 0.012)) + a * (sv * (h2 - 0.012)) + nf * 0.002, nf)
+    chamfer_panel(p, "Kit_Graphite", 1.06, L - 0.06, DECK + 0.03, 0.57, TU, -1, c=0.04)
+    p.box("Kit_Graphite", (L - 0.026, TU + 0.03, DECK + 0.03), (L - 0.016, W - 0.035, 0.55), bevel=0.003, segments=1)
+    for k in range(9):                                         # the front's orange hatch band
+        uu = TU + 0.06 + k * 0.035
+        p.sweep("Kit_Signal", [Vector((L - 0.0155, uu, 0.5)), Vector((L - 0.0155, uu + 0.03, 0.535))], 0.004, seg=6, scale_y=0.2)
+    # 6 the grab handle: a dark tube across the front on two blocks, an orange knurled sleeve
+    hz = 0.47
+    hp = [Vector((L - 0.02, 0.13, hz)), Vector((L + 0.045, 0.13, hz)), Vector((L + 0.07, 0.16, hz)), Vector((L + 0.07, W - 0.16, hz)),
+          Vector((L + 0.045, W - 0.13, hz)), Vector((L - 0.02, W - 0.13, hz))]
+    p.sweep("Kit_Housing", hp, 0.015, seg=16)
+    p.sweep("Kit_Signal", [Vector((L + 0.07, 0.2, hz)), Vector((L + 0.07, W - 0.2, hz))], 0.0185, seg=16)
+    for uu in (0.2, W - 0.2):
+        p.lathe("Kit_Graphite", [(0.02, -0.006), (0.02, 0.006), (0.0, 0.006)], (L + 0.07, uu, hz), axis=(0, 1, 0), seg=16)
+    for uu in (0.13, W - 0.13):
+        p.box("Kit_Housing", (L - 0.03, uu - 0.025, hz - 0.03), (L + 0.0, uu + 0.025, hz + 0.03), bevel=0.005, segments=2)
+    # 7 dirt and wear: the kick, the deck seams, the rest's front edge, the handle mounts
+    p.grime("rim", (L / 2, U0 - 0.002, 0.08), (0, -1, 0), (0, 0, 1), (L - 0.1, 0.05), 0.8)
+    p.grime("rim", (L / 2, W + 0.002, 0.08), (0, 1, 0), (0, 0, 1), (L - 0.1, 0.05), 0.8)
+    p.grime("rim", (0.32, -0.0779, AT - 0.03), (0, -1, 0), (0, 0, 1), (0.55, 0.02), 0.7, wear=True)
+    p.grime("rim", (0.5, U0 - 0.0015, DECK - 0.02), (0, -1, 0), (0, 0, 1), (0.9, 0.03), 0.6, wear=True)
+    # light wear along the edges hands and boots touch: the beam's top edges, the pedestal's top edge, the tower's
+    # slope and front edges, the kick
+    for at, n, up, size in (((0.32, -0.074, AT - 0.019), (0, 0, 1), (0, -1, 0), (0.58, 0.012)),
+                            ((0.32, 0.154, AT - 0.019), (0, 0, 1), (0, 1, 0), (0.58, 0.012)),
+                            ((0.6, U0 + 0.001, DECK + 0.005), (0, 0, 1), (0, -1, 0), (1.1, 0.012)),
+                            ((0.6, W - 0.001, DECK + 0.005), (0, 0, 1), (0, 1, 0), (1.1, 0.012)),
+                            ((L - 0.03, (TU + W) / 2, 0.6), (1, 0, 1), (0, 0, 1), (0.42, 0.02)),
+                            ((0.77, U0 - 0.011, 0.5), (0, 0, 1), (0, -1, 0), (0.2, 0.012)),
+                            ((L / 2, U0 + 0.002, 0.095), (0, -1, 0), (0, 0, 1), (L - 0.12, 0.03))):
+        p.grime("rim", at, n, up, size, 0.8, wear=True)
+    p.collision_box((0.0, -0.08, 0.0), (L + 0.09, W + 0.005, 0.68))
+    return p
