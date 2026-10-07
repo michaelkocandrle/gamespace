@@ -787,6 +787,16 @@ snímku.
 - **Pás na konzoli „zmačkaná fólie“** (kokpit, 7. 10. 2026): nebyl to lesk ani grunge materiálu interiéru, ale trim
   kitu `kit_trim02` na těle (`tbox`). Podezřelý materiál najdi obarvením (dočasně jasná barva v setupu, reimport,
   jeden snímek), ne odhadem; v kokpitu tělo konzole `int_console`.
+- **Legendy a štítky kitu čtou šedě na šedé** (8. 10. 2026): kit bral barevný decal lodi bez zesvětlení (barva
+  knihovny 0,42). Řešení: `DecalTint` v masteru barevných decalů (výchozí 1), kit má `MI_Kit_<Maker>_DecalPaint`
+  s `PAINT_TINT` 1,5 (1,9 posunulo oranžovou do žluté).
+- **„Oděr“ nebo lesk hran zabírá půl boku** (8. 10. 2026): zkosení 12 mm na 5–9 cm vysokých blocích tvoří půl
+  plochy. Zkosení držet ~6 mm; maska hran ve FBX i v UE je správná (ověřeno), jen geometrie byla hrubá.
+- **Po přidání role čte díl podivně** – reimport přes asset může nechat starou mapu sekcí; díly ve vývoji se proto
+  importují načisto (`import_kit.FRESH_PARTS`).
+- **Opotřebení dílů lodí nedělat** (autor 8. 10. 2026): díly jsou nové z výroby; hloubka z kontrastu materiálů
+  (lak pod čirým lakem, leštěné kovové hrany `Part.edge_roles`, matný grafit `Kit_Inset`, mikrotextury
+  `kit_paint_normals.py`) a z vrstev decalů.
 - **Díl kitu pod 0,9 m je „továrně čistý“, oděr hran chybí** (7. 10. 2026, kokpitová konzole): `M_Kit_Base` nosí oděr
   hran a škrábance jen v pásmu rukou `hand_band_m` 0,9–1,6 m nad podlahou dílu (stěny) a plochy čistí – oděr jen na
   zkoseních, špína jen ve spárách. Řešení v roli (`kit_materials.json`): `wear_band_m` (kokpit [0, 1]), `face_wear` /

@@ -52,3 +52,6 @@ v lodi). Snímky `Tools/Shots/kit_cockpit_console_b.json` (stejné úhly jako `k
 
 **Po kolech 7–10 (7. 10. 2026):** kritik 5,5 → 5,9, skladba návrhu ~75 %, vzhled ~47 %. Stav `variant_b_v1.jpg`,
 otevřené body v `Docs/Reviews/2026-10-07_kf_cockpit_console.md` (varianta B).
+
+**Kola 11–23 (8. 10. 2026):** PASS 6,6. Nový díl z výroby bez opotřebení (autor). Stav `variant_b_v2.jpg`,
+materiály a otevřené body v recenzi.

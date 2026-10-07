@@ -19,6 +19,10 @@ Brána `step` (průměr ≥ 6,5, žádná kategorie pod 6). Hodnotí se jen lev�
 | 8 | B | 5,6 | opěrka a knipl opravené; světlé skvrny po plochách, věž, legendy |
 | 9 | B | 5,9 | světlo a čitelnost 6; materiál a decaly 5 (rám bez vložek, oděr hran) |
 | 10 | B | 5,9 | skladba ~75 %, vzhled ~47 %; zbývá materiál, bok věže, kryt, decaly |
+| 11–14 | B | 6,0 → 6,4 | čitelné decaly (DecalTint), čelo věže grafit s logem, rám nekovový lak |
+| 15–18 | B | **6,5 → 6,8 PASS** | tmavší lak, odřené hrany; pak autor opotřebení zrušil |
+| 19–20 | B | 6,4 | pokusy o oděr (mramor) – autor 8. 10.: díly jsou nové z výroby, bez opotřebení |
+| 21–23 | B nový | 6,5 → **6,6 PASS** | lak pod čirým lakem, leštěné kovové hrany, matný grafit vložek, výstražný pás, rýhovaný návlek, druhá vrstva šablon |
 
 ## Co se změnilo
 
@@ -89,3 +93,17 @@ tmavou místnost jako černé kaňky), ostrá zkosení `Part.sharp_deg`, svítí
 4. Decaly: oranžový znak // na nosníku i věži viditelně, štítek HF-3287, škrábance kolem ovladačů, kontrastní
    spodní nápisy (decal `maker` má šedou 0,42 – chce světlejší variantu).
 5. Svit: bloom kláves (emise 15–25 s tmavým rámečkem), větší legendy kolébek.
+
+## Kola 11–23 a rozhodnutí autora (8. 10. 2026)
+
+- **Opotřebení zrušeno** (autor): díly lodí jsou nové z výroby – lesklé, matné, naleštěné; detail z vrstvení decalů a
+  textur (paměť `brand-new-parts-no-wear`). Kola 15–19 hledala oděr hran; nástroje z toho zůstaly (role hrany
+  `Part.edge_roles`, `WearSharpness`, `BareMetallic`, pásmo oděru role), ale B je nepoužívá k oděru.
+- **Systémové nálezy:** decaly kitu šedly (barevný decal lodi bez `DecalTint` → `MI_Kit_Halcyon_DecalPaint` 1,5×);
+  zkosení 12 mm na 5–9 cm blocích zabírala půl boku (6 mm); díly kokpitu se importují načisto (`FRESH_PARTS`).
+- **Materiály B:** `Kit_Frame` lak pod čirým lakem s pomerančovou kůrou (`T_Kit_OrangePeel_N`), `Kit_FrameEdge`
+  leštěný kov na zkoseních, `Kit_Inset` hluboký matný grafit se zrnem (`T_Kit_Grain_N`), `Kit_Grip` rýhovaný návlek
+  (`T_Kit_Knurl_N`), generátor `Tools/Kit/kit_paint_normals.py`.
+- **Otevřené (kolo 23, doporučeno):** podpanely na boku nosníku a šikmém boku věže, opěrka ve dvou segmentech s lemem
+  a zrnem kůže, třetí vrstva mikro šablon, LED kolébek v rámečku; horní tmavé plochy čtou pod stropním světlem úseku
+  šedě (světlo, ne materiál).
