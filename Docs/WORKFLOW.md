@@ -787,6 +787,14 @@ snímku.
 - **Pás na konzoli „zmačkaná fólie“** (kokpit, 7. 10. 2026): nebyl to lesk ani grunge materiálu interiéru, ale trim
   kitu `kit_trim02` na těle (`tbox`). Podezřelý materiál najdi obarvením (dočasně jasná barva v setupu, reimport,
   jeden snímek), ne odhadem; v kokpitu tělo konzole `int_console`.
+- **Díl kitu pod 0,9 m je „továrně čistý“, oděr hran chybí** (7. 10. 2026, kokpitová konzole): `M_Kit_Base` nosí oděr
+  hran a škrábance jen v pásmu rukou `hand_band_m` 0,9–1,6 m nad podlahou dílu (stěny) a plochy čistí – oděr jen na
+  zkoseních, špína jen ve spárách. Řešení v roli (`kit_materials.json`): `wear_band_m` (kokpit [0, 1]), `face_wear` /
+  `face_dirt` (oděr a film po plochách, `FaceWear`/`FaceDirt`), `grunge_tile_cm` (120 cm na malém dílu nic nekreslí).
+- **Oděr čte jako černé kaňky** (7. 10. 2026): odhalený kov je hladký kov (drsnost 0,32) a zrcadlí tmavou místnost.
+  Řešení: role s `bare_colour` světlým a `bare_rough` ~0,5 – oděr pak čte jako světlé ošoupání.
+- **Zkosení dílu se stínuje jako oblá plocha** (7. 10. 2026): kit vyhlazuje hrany pod 40°; designová zkosení 25–55°
+  splývají. Díl strojních zkosení nastaví `p.sharp_deg = 20`.
 - **Karty špíny v kokpitu nejsou vidět, kritik stagnuje na „vše čisté a modrošedé“** (7. 10. 2026): tmavá špína na
   tmavém grafitu nemá kontrast (ošoupání je v SC světlé) a studené kokpitové světlo s modrou září displejů sjednotilo
   všechny materiály do jednoho tónu. Řešení: světlý slot `DecalWear` (`grime(..., wear=True)`), teple neutrální

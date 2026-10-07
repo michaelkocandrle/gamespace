@@ -1,0 +1,44 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 9,
+ "variant": "B",
+ "date": "2026-10-07",
+ "verdict": "FAIL",
+ "gate": "step",
+ "first_impression": "Funkční skladba je teď čitelná a ovládání má popisky, ale tělo konzole zůstává světle šedý čistý lak s velkými hladkými plochami (bok věže, deska ACCESS), takže hráč nevidí ošoupaný kovový rám s grafitovými vložkami jako v návrhu a u SC.",
+ "scores": {
+  "silueta_a_tvar": {"score": 6, "why": "Nosník má stupňovitý bok a konzole s odlehčovacími otvory (list 5 vpravo), věž je vyšší, ale z pohledu zepředu a zblízka je to velký plochý šedý klín bez zlomů (list 3 vpravo vpravo, list 2 vpravo vpravo dole) a červený kryt sedí na horní zadní hraně jako samostatná kostka (list 1 a 2 vpravo uprostřed)."},
+  "hierarchie_a_hustota_detailu": {"score": 6, "why": "Detail je hustý u sání, stavového pásu, kláves a přepínačů (list 6 vpravo vpravo), ale největší plochy - bok věže (list 3 vpravo), deska ACCESS (list 4 a 6 vpravo) a horní plocha bloku přepínačů - jsou holé bez spár, šroubů a štítků."},
+  "materialy": {"score": 5, "why": "Mráčkovité světlé skvrny jsou utlumené, ale pořád viditelné na desce ACCESS a bloku sání (list 6 vpravo); oděr hran chybí všude, rám a výplně mají stejný světle šedý lak; tmavé vložky jen na čele věže a spodku (list 1, 3 vpravo); opěrka, grip a vroubkovaný oranžový návlek jsou správně."},
+  "decaly": {"score": 5, "why": "Přibyly legendy LIGHTS/GEAR/VTOL (list 3 vpravo vlevo dole) a oranžový štítek u krytu (list 5, 6 vpravo), ale chybí oranžový znak Halcyon (nosník jen šedý text, list 5 vpravo), štítek HF-3287, EMER pod krytem, šrafy kolem krytu a vrstvené škrábance; nápisy na spodku stále splývají (list 6 vpravo dole)."},
+  "svetlo": {"score": 6, "why": "Klávesy 2x2 a proužky MAIN/BATT/TEMP jsou nejjasnější body dílu a TEMP je jantarový (list 3 vpravo), LED u přepínačů jsou vidět; chybí ale záře/bloom a barevná teplota, proužky se čtou spíš jako bílý lak než jako světlovod."},
+  "citelnost": {"score": 6, "why": "MAIN/BATT/TEMP a LIGHTS/GEAR/VTOL jsou čitelné (list 3 vpravo), legendy kolébek na věži jsou drobné a z pohledu pilota sotva čitelné (list 5 vpravo vpravo nahoře), nápis EMER a legendy kláves chybí."},
+  "chyby_geometrie": {"score": 7, "why": "Bez děr a průniků; červený kryt z pohledu zepředu stále čouhá za sáním jako volná červená kostka (list 1 vpravo nahoře uprostřed, list 2 vpravo uprostřed); na hraně věže je úzký tmavý pás se dvěma tečkami, který nečte jako funkční prvek (list 3 vpravo uprostřed)."},
+  "soulad_stylu": {"score": 6, "why": "Tmavá opěrka, grip a tmavé čelo věže mluví jazykem návrhu, zbytek těla je čistý světlý lak, takže díl působí jako ze dvou sad."}
+ },
+ "average": 5.9,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "r8_status": {
+  "1_material": "částečně - skvrny utlumené, ale stále viditelné (list 6 vpravo deska ACCESS, sání); oděr hran a kontrast světlý rám / grafitové vložky stále chybí kromě čela věže",
+  "2_svit_klaves": "částečně - klávesy a proužky jsou nejsvětlejší body, LED u přepínačů vidět; bez bloomu, proužky čtou jako lak",
+  "3_vez": "částečně - věž vyšší a užší klín, tmavé čelo s rámečky kolébek, legendy kolébek; kryt stále na horní hraně a čouhá zepředu, EMER chybí, bok věže je největší holá plocha",
+  "4_access_deska": "částečně - přibyly rohové šrouby, mřížka a SERVICE ACCESS, ale deska je stále plochá světlá tabule bez tmavého rámu a viditelné spáry/hloubky (list 4, 6 vpravo)",
+  "5_legendy_znak": "částečně - legendy LIGHTS/GEAR/VTOL a kolébek hotové; oranžový znak Halcyon, legendy kláves a vrstvené škrábance chybí",
+  "6_navlek_madla": "opraveno - vroubkovaný/segmentovaný oranžový návlek (list 3 vpravo dole)",
+  "7_napisy_spodek": "neopraveno - HALCYON FREIGHTWORKS na spodku stále splývá (list 6 vpravo dole)"
+ },
+ "concept_match": {
+  "layout_percent": 75,
+  "look_percent": 45,
+  "summary": "Skladba odpovídá návrhu (opěrka na konzolách s otvory, knipl, sání, stavový pás, klávesy, věž, tři přepínače, madlo). Vzhled ne: návrh má ošoupaný ocelový rám s výrazným oděrem hran a grafitové vložky na všech bocích, všude šrouby, kryt zapuštěný v oranžovém rámu na čele věže s EMER, oranžový znak HALCYON a štítek HF-3287."
+ },
+ "findings": [
+  {"n": 1, "title": "Materiál: chybí světlý rám vs. grafitové vložky a oděr hran", "where": "list 6 vpravo deska ACCESS, blok sání, blok přepínačů; list 3 vpravo bok věže; list 1 vpravo boky podstavce", "problem": "Celé tělo má jeden světle šedý lak se zbytkovými mráčky; hrany čisté; tmavé vložky jen na čele věže a spodku.", "severity": "musí se opravit", "fix": "Velké výplně (bok věže, deska ACCESS kolem poklopu, boky bloku sání a přepínačů, boky podstavce) přepnout na grafitovou vložku albedo 0,08-0,12 s 15-25 mm světlým rámem; oděr hran přes curvature masku (holý kov, metallic 1, roughness 0,3, šíře 2-5 mm, přerušovaný, silnější na horních hranách v dosahu ruky); zbytkové skvrny přesunout jen do roughness."},
+  {"n": 2, "title": "Holý bok věže", "where": "list 3 vpravo vpravo, list 2 vpravo vpravo dole, list 1 vpravo", "problem": "Bok věže je největší plocha dílu, hladká světlá deska bez spár a šroubů; tmavá vložka se šrafy je jen úzký pás dole.", "severity": "musí se opravit", "fix": "Bok rozdělit na rám + zapuštěný grafitový panel (spára 2 mm, hloubka 3-4 mm), 4-6 šroubů, zlom/zkosení v polovině výšky jako v návrhu, oranžový znak // HALCYON na rámu."},
+  {"n": 3, "title": "Kryt EMER na horní hraně věže, chybí EMER", "where": "list 1 a 2 vpravo uprostřed (červená kostka za sáním), list 5 a 6 vpravo", "problem": "Kryt sedí na horní zadní hraně a zepředu čte jako volná červená kostka; nápis EMER chybí.", "severity": "musí se opravit", "fix": "Kryt zapustit do oranžového rámu 6 mm uvnitř čela věže (pod horní hranou, ne nad ní), pod něj bílý nápis EMER 8-10 mm; horní hranu věže uzavřít rámem."},
+  {"n": 4, "title": "Deska ACCESS stále plochá tabule", "where": "list 4 vpravo nahoře, list 6 vpravo vlevo nahoře", "problem": "Poklop nemá viditelnou spáru, hloubku ani tmavý rám; mřížka je malý tmavý obdélník, nápisy skoro neviditelné.", "severity": "musí se opravit", "fix": "Spára 2-3 mm s tmavým stínem, hloubka 3 mm, tmavý rám 20 mm kolem, úchytová prohlubeň, mřížka 80x40 mm s lamelami, štítek HF-3287 PILOT INTERFACE L.ARM s kontrastem >= 0,4."},
+  {"n": 5, "title": "Znak Halcyon a vrstvené škrábance", "where": "list 5 vpravo nosník, list 6 vpravo dole", "problem": "Na nosníku jen šedý text bez oranžového znaku; spodní nápisy splývají; chybí vrstva škrábanců a oděrů kolem ovladačů.", "severity": "musí se opravit", "fix": "Oranžový znak // před HALCYON na nosníku a boku věže, spodní nápisy kontrast >= 0,4 nebo přesun na světlý rám; decaly škrábanců kolem kniplu, kláves, kolébek a na horní hraně nosníku."},
+  {"n": 6, "title": "Svit kláves a proužků bez záře", "where": "list 3 a 6 vpravo klávesy 2x2 a MAIN/BATT/TEMP", "problem": "Bílé plochy jsou nejjasnější, ale bez bloomu a gradientu, čtou jako bílý lak.", "severity": "doporučeno", "fix": "Emise kláves 15-25 teplá bílá s tmavším okrajem klávesy (rámeček 1 mm), proužky modrobílé 10-15, TEMP jantar; tmavé pozadí stavového pásu kolem proužků, aby záře měla kontrast."},
+  {"n": 7, "title": "Drobné legendy kolébek a nefunkční pás na hraně věže", "where": "list 5 vpravo vpravo nahoře; list 3 vpravo uprostřed", "problem": "Legendy kolébek jsou z pohledu pilota sotva čitelné; úzký tmavý pás se dvěma tečkami na hraně věže nečte jako ovladač.", "severity": "doporučeno", "fix": "Legendy THR/LAND/CARGO 7-8 mm bílé; pás buď nahradit čitelným prvkem (LED stavu krytu se štítkem), nebo odstranit."}
+ ]
+}

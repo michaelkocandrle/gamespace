@@ -212,9 +212,13 @@ Díry zavírá tmavý plášť `Int_HullSkin` a obložení (9.6 bm–bo).
   díl se modeluje v `Tools/Kit/kit_cockpit.py` nástroji `kit_geo` (hrany podle velikosti prvku, `lathe`, `sweep`,
   `mesh`, maska hran a okluze, role materiálů továrny), staví se `kit_build.py -- factory --only SM_Kit_Cockpit_…`
   (~20 s) a do lodi se dosadí přes `interior.kit_modules.run_parts` s výškou z (`[[x, y, z], [dir], [parts]]`);
-  `hs_interior.KIT_CONSOLES` pak generovanou konzoli vynechá. **Posuzovat v kokpitu, ne ve zkušebním úseku chodby**
-  (jasné světlo chodby udělalo ze střední šedé bílou: kritik 4,5 v chodbě). Silueta podle SC: štíhlé stupňovité
-  rameno nad tmavým ustoupeným podstavcem, světlý lak jen na loketní jednotce.
+  `hs_interior.KIT_CONSOLES` pak generovanou konzoli vynechá. **Postup (po 9 kolech 7. 10.):** nejdřív 2D návrh
+  z AI ze všech úhlů (reference SC jen styl, `Docs/Kit/parts/KF-COCKPIT-CONSOLE/concept/gen_concepts.py`), pak díl
+  podle něj a hodnocení **samotného dílu v neutrálním světle zkušebního úseku** ve stejných úhlech (preset
+  `kit_cockpit_console_b`); tmavý kokpit skrýval vady materiálu a albeda se zvedala proti světlu (kritik 5,6 v kokpitu,
+  5,0 v úseku). Teprve hotový díl se posuzuje v kokpitu. Materiál: role `Kit_Frame` (ošoupaný kov) a tmavé vložky
+  `Kit_Graphite`, oděr v kokpitové výšce (`wear_band_m`, `face_wear`, `bare_colour`, WORKFLOW kap. 9), svícení
+  `Kit_GlowKey` / `Kit_GlowAmber`, ostrá zkosení `p.sharp_deg = 20`, detailní decaly po celé ploše.
 - **Vrstvení decalů na kokpitu** (7. 10. 2026, podle `Docs/Kit/etalon/decal_stack.md`): z generátoru se klade
   `hs_cockpit.stencil(item, at, n, right, up, scale, max_w)` (libovolná položka knihovny: `rivet_row_*`, `slot_s`,
   `seam_*`, `socket`, `access_panel`, `st_*`, `hazard_subtle`, `corner_mark`, `tri_warning`, `panel_*`, opotřebení

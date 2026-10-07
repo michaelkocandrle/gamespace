@@ -141,7 +141,7 @@ def stick(p, base, label, head_role="Kit_Shell", guard="c"):
 
 
 # ------------------------------------------------------------------ the sloped control face, sunk into the deck's nose
-def _rocker(p, c, r, a, n, label):
+def _rocker(p, c, r, a, n, label, label_scale=0.48):
     """A real rocker: a dark bezel, a cap in two halves tilted about its pivot (one pressed), a lit index, its label."""
     fm = frame(c, r, a, n)
     p.box("Kit_Graphite", (-0.0095, -0.016, -0.002), (0.0095, 0.016, 0.004), bevel=0.0018, segments=2, m=fm)
@@ -152,7 +152,7 @@ def _rocker(p, c, r, a, n, label):
         p.box("Kit_Shell", (-0.0075, 0.0 if sv > 0 else -0.012, -0.002), (0.0075, 0.012 if sv > 0 else 0.0, 0.003), bevel=0.0012, segments=2,
               m=frame(c + n * 0.005, r, a2, n2))
     p.box("Kit_GlowCool", (-0.004, 0.0085, 0.0066), (0.004, 0.0098, 0.0072), m=fm, panel=False)
-    _label(p, label, c - a * 0.026 + n * 0.0005, n, r, a, scale=0.48)
+    _label(p, label, c - a * 0.026 + n * 0.0005, n, r, a, scale=label_scale)
 
 
 def control_face(p, x0, x1, u0, u1, z0):

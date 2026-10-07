@@ -49,3 +49,6 @@ v lodi). Snímky `Tools/Shots/kit_cockpit_console_b.json` (stejné úhly jako `k
 - **Stav:** tvar sedí, povrch ne – pořád čistá šedá, karty ošoupání skoro nevidět, velké prázdné plochy desky.
   Další krok je systémový: viditelné opotřebení v materiálu továrny (maska oděru hran, špína ve spárách, šum
   drsnosti) a hustší panelizace (tmavá pole v rámech, šrouby) podle `sheet_turnaround.png`.
+
+**Po kolech 7–10 (7. 10. 2026):** kritik 5,5 → 5,9, skladba návrhu ~75 %, vzhled ~47 %. Stav `variant_b_v1.jpg`,
+otevřené body v `Docs/Reviews/2026-10-07_kf_cockpit_console.md` (varianta B).

@@ -15,6 +15,10 @@ Brána `step` (průměr ≥ 6,5, žádná kategorie pod 6). Hodnotí se jen lev�
 | 4 | v5 | 5,5 | silueta pořád kvádr, legendy, opotřebení laku není vidět, prázdné desky, slabé podsvícení |
 | 5 | v6 | 5,6 | stavový pás opravený; dál silueta, opotřebení, holé plochy modulů, legendy kláves, logo, ploché světlo |
 | 6 | v6 v testovacím úseku | 5,0 | neutrální světlo odkrylo „bílý čistý plast“: materiály 4, holé plochy, silueta, lučík, legendy |
+| 7 | B podle 2D návrhu | 5,5 | skladba návrhu ~65 %, vzhled ~30 %; jednolitý lak, černé kaňky, nízká věž, nesvítí |
+| 8 | B | 5,6 | opěrka a knipl opravené; světlé skvrny po plochách, věž, legendy |
+| 9 | B | 5,9 | světlo a čitelnost 6; materiál a decaly 5 (rám bez vložek, oděr hran) |
+| 10 | B | 5,9 | skladba ~75 %, vzhled ~47 %; zbývá materiál, bok věže, kryt, decaly |
 
 ## Co se změnilo
 
@@ -66,3 +70,22 @@ dorovnat světlem kokpitu (systémový krok 3).
 **Další krok:** kalibrace albed a opotřebení rolí továrny v neutrálním světle úseku proti referencím (měřit
 pixely SC vs. naše na stejném typu plochy), pak tvar (silueta, holé plochy, lučík) a emisivní legendy; kokpit
 se pak dosvítí.
+
+## Varianta B (kola 7–10)
+
+Díl `SM_Kit_Cockpit_Console12W_B` podle 2D návrhu (`Docs/Kit/parts/KF-COCKPIT-CONSOLE/part.md`), hodnocený sám
+v neutrálním světle (preset `kit_cockpit_console_b`), snímek stavu `Docs/Kit/parts/KF-COCKPIT-CONSOLE/variant_b_v1.jpg`.
+
+**Systémové opravy materiálu kitu** (platí pro všechny díly, výchozí hodnoty beze změny): oděr hran v pásmu podle
+role (`wear_band_m`; kokpit 0–1 m – konzole pod 0,9 m dřív neměla oděr vůbec), `FaceWear`/`FaceDirt` v `M_Kit_Base`,
+měřítko grunge na roli, vlastní barva a drsnost odhaleného kovu (`bare_colour`, `bare_rough` – hladký kov zrcadlil
+tmavou místnost jako černé kaňky), ostrá zkosení `Part.sharp_deg`, svítící role `Kit_GlowKey`, `Kit_GlowAmber`.
+
+**Otevřené (kolo 10, „musí“):**
+1. Materiál: velké plochy jako grafitové vložky (albedo 0,08–0,12) ve světlém rámu všude; oděr hran na rámu
+   výraznější (dnes jen na zkoseních, světlý a úzký) – nejspíš maska zakřivení/šířky v `M_Kit_Base`.
+2. Bok věže: zapuštěný panel se spárou, šrouby, zkosení v polovině, znak // HALCYON.
+3. Kryt EMER: nic nad horní hranou věže, nápis EMER pod krytem (knihovna má jen `ck_emerg_o2`).
+4. Decaly: oranžový znak // na nosníku i věži viditelně, štítek HF-3287, škrábance kolem ovladačů, kontrastní
+   spodní nápisy (decal `maker` má šedou 0,42 – chce světlejší variantu).
+5. Svit: bloom kláves (emise 15–25 s tmavým rámečkem), větší legendy kolébek.

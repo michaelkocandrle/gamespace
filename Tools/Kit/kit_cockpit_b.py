@@ -72,7 +72,7 @@ def emergency_key(p, c, r, a, n):
     p.box("Kit_GlowRed", (-0.013, -0.002, 0.0108), (0.013, 0.002, 0.0114), m=fm(c), panel=False)
     hinge = c + a * 0.024 + n * 0.01
     p.sweep("Kit_Lip", [hinge - r * 0.033, hinge + r * 0.033], 0.0045, seg=12)
-    t = math.radians(70)
+    t = math.radians(40)
     a2, n2 = a * math.cos(t) + n * math.sin(t), -a * math.sin(t) + n * math.cos(t)
     mc = frame(hinge, r, a2, n2)
     p.box("Kit_Red", (-0.03, 0.0, -0.0015), (0.03, 0.043, 0.0015), bevel=0.0012, segments=2, m=mc)
@@ -113,6 +113,10 @@ def console_b(name, seed):
     beam = [(0.02, BEAM0), (0.58, BEAM0), (0.63, BEAM0 + 0.03), (0.63, AT - 0.035), (0.6, AT - 0.018), (0.03, AT - 0.018),
             (0.0, AT - 0.04), (0.0, BEAM0 + 0.02)]
     side_prism(p, "Kit_Frame", beam, -0.075, 0.155, 0.008, 1)
+    # the stepped side: a lower band 8 mm proud on both sides, chamfered (the concept's beam is not one slab)
+    band = [(0.04, BEAM0 - 0.004), (0.57, BEAM0 - 0.004), (0.6, BEAM0 + 0.022), (0.04, BEAM0 + 0.022), (0.02, BEAM0 + 0.01)]
+    side_prism(p, "Kit_Frame", band, -0.083, -0.07, 0.004, 1)
+    side_prism(p, "Kit_Frame", band, 0.15, 0.163, 0.004, 1)
     p.box("Kit_Graphite", (0.04, -0.0775, BEAM0 + 0.03), (0.56, -0.074, BEAM0 + 0.038), panel=False)          # the groove
     for k in range(6):
         screw(p, Vector((0.06 + k * 0.1, -0.0758, BEAM0 + 0.017)), -Y, 0.003)
@@ -129,12 +133,16 @@ def console_b(name, seed):
                 p.box("Kit_Seal", (hx - 0.0015, hu - 0.0015, AT - 0.0004), (hx + 0.0015, hu + 0.0015, AT + 0.0002), panel=False)
     _label(p, "maker", Vector((0.33, -0.0778, AT - 0.05)), -Y, X, Z, scale=0.55)
     for k in range(2):                                         # Halcyon's mark: two slanted orange bars
-        x_ = 0.135 + k * 0.014
-        p.sweep("Kit_Signal", [Vector((x_, -0.0768, AT - 0.062)), Vector((x_ + 0.01, -0.0768, AT - 0.038))], 0.0035, seg=6, scale_y=0.3)
+        x_ = 0.12 + k * 0.02
+        p.sweep("Kit_Signal", [Vector((x_, -0.0768, AT - 0.066)), Vector((x_ + 0.014, -0.0768, AT - 0.034))], 0.0055, seg=6, scale_y=0.25)
     for xb in (0.2, 0.46):                                                                   # the slanted brackets
         br = [(xb - 0.03, DECK + 0.006), (xb + 0.035, DECK + 0.006), (xb + 0.065, BEAM0 + 0.002), (xb + 0.005, BEAM0 + 0.002)]
         for ua, ub in ((-0.025, 0.0), (0.105, 0.13)):
             side_prism(p, "Kit_Housing", br, ua, ub, 0.004, 2)
+            hc = Vector((xb + 0.018, 0.0, (DECK + BEAM0) / 2))                         # the lightening hole
+            for uu, nn in ((ua - 0.0004, -1), (ub + 0.0004, 1)):
+                p.lathe("Kit_Seal", [(0.012, 0.0), (0.012, 0.0006), (0.0, 0.0006)], (hc.x, uu, hc.z), axis=(0, nn, 0), seg=20)
+                p.lathe("Kit_Lip", [(0.0135, 0.0), (0.0135, 0.0004), (0.012, 0.0006)], (hc.x, uu, hc.z), axis=(0, nn, 0), seg=20)
             screw(p, Vector((xb + 0.02, ua - 0.0005, DECK + 0.03)), -Y, 0.004)
             screw(p, Vector((xb + 0.045, ua - 0.0005, BEAM0 - 0.02)), -Y, 0.004)
     rear = [(0.0, DECK), (0.075, DECK), (0.075, BEAM0 + 0.002), (0.0, BEAM0 + 0.002)]
@@ -181,29 +189,37 @@ def console_b(name, seed):
         screw(p, c0 + X * xx + d * 0.04 + n * 0.003, n)
         screw(p, c0 + X * xx - d * 0.04 + n * 0.003, n)
     # 5 the front tower: its rear slope faces the pilot with the emergency key and the rockers, LEDs over them
-    TU = 0.22                                                  # the tower's seat-side face
-    tw = [(0.97, DECK), (L - 0.02, DECK), (L - 0.02, 0.66), (L - 0.05, 0.7), (1.1, 0.7), (0.97, 0.48)]
+    TU = 0.27                                                  # the tower's seat-side face
+    tw = [(0.98, DECK), (L - 0.02, DECK), (L - 0.02, 0.7), (L - 0.05, 0.74), (1.115, 0.74), (0.98, 0.5)]
     side_prism(p, "Kit_Frame", tw, TU, W - 0.005, 0.01, 1)
-    a = Vector((0.13, 0, 0.22)).normalized()                  # up the slope (forward and up, ~30 deg off vertical)
+    a = Vector((0.135, 0, 0.24)).normalized()                 # up the slope (forward and up, ~30 deg off vertical)
     r = Vector((0, -1, 0))                                     # the pilot's right on it (toward the seat side... mirrored)
     nf = r.cross(a)                                            # out of it: back to the pilot and up
     if nf.x > 0:
         r, nf = -r, -nf
-    fc = Vector((1.035, (TU + W - 0.005) / 2, 0.59)) + nf * 0.0005
+    fc = Vector((1.0475, (TU + W - 0.005) / 2, 0.62)) + nf * 0.0005
     ff = lambda o: frame(o, r, a, nf)                          # noqa: E731
-    w2, h2 = (W - 0.005 - TU - 0.04) / 2, 0.11
+    w2, h2 = (W - 0.005 - TU - 0.04) / 2, 0.125
     p.box("Kit_Lip", (-w2 - 0.004, -h2 - 0.004, -0.004), (w2 + 0.004, h2 + 0.004, 0.0015), bevel=0.002, segments=2, m=ff(fc))
     p.box("Kit_Graphite", (-w2, -h2, -0.004), (w2, h2, 0.002), m=ff(fc), panel=False)
-    emergency_key(p, fc + a * 0.05 + nf * 0.002, r, a, nf)
+    emergency_key(p, fc + a * 0.03 + nf * 0.002, r, a, nf)
     for i, lab in enumerate(("ck_pwr", "ck_extlt", "ck_eng")):
-        q = fc - a * 0.045 + r * (0.12 * (i - 1)) + nf * 0.002
+        q = fc - a * 0.05 + r * (0.105 * (i - 1)) + nf * 0.002
         p.box("Kit_Lip", (-0.016, -0.024, 0.0), (0.016, 0.03, 0.0015), bevel=0.001, segments=1, m=ff(q), panel=False)   # its frame
-        _rocker(p, q, r, a, nf, lab)
+        _rocker(p, q, r, a, nf, lab, label_scale=0.62)
         p.box("Kit_GlowKey", (-0.006, 0.022, 0.0015), (0.006, 0.026, 0.0027), m=ff(q), panel=False)
     for su in (-1, 1):
         for sv in (-1, 1):
             screw(p, fc + r * (su * (w2 - 0.012)) + a * (sv * (h2 - 0.012)) + nf * 0.002, nf)
-    chamfer_panel(p, "Kit_Graphite", 1.08, L - 0.06, DECK + 0.03, 0.64, TU, -1, c=0.04)
+    for uf, ns_ in ((TU, -1), (W - 0.005, 1)):
+        # the inset follows the side's outline 20 mm in: the slope edge leans with the face
+        ins = [(1.0, DECK + 0.02), (L - 0.04, DECK + 0.02), (L - 0.04, 0.68), (1.115, 0.72), (1.0, 0.53)]
+        if ns_ < 0:
+            side_prism(p, "Kit_Graphite", ins, uf - 0.004, uf + 0.002, 0.002, 1)
+        else:
+            side_prism(p, "Kit_Graphite", ins, uf - 0.002, uf + 0.004, 0.002, 1)
+        for xx, zz in ((1.015, DECK + 0.035), (L - 0.055, DECK + 0.035), (L - 0.055, 0.665), (1.015, 0.52)):
+            screw(p, Vector((xx, uf + ns_ * 0.0045, zz)), Y * ns_)
     p.box("Kit_Graphite", (L - 0.026, TU + 0.03, DECK + 0.03), (L - 0.016, W - 0.035, 0.55), bevel=0.003, segments=1)
     for k in range(9):                                         # the front's orange hatch band
         uu = TU + 0.06 + k * 0.035
@@ -215,7 +231,11 @@ def console_b(name, seed):
     p.sweep("Kit_Housing", hp, 0.015, seg=16)
     p.sweep("Kit_Signal", [Vector((L + 0.07, 0.2, hz)), Vector((L + 0.07, W - 0.2, hz))], 0.0185, seg=16)
     for uu in (0.2, W - 0.2):
-        p.lathe("Kit_Graphite", [(0.02, -0.006), (0.02, 0.006), (0.0, 0.006)], (L + 0.07, uu, hz), axis=(0, 1, 0), seg=16)
+        p.lathe("Kit_Housing", [(0.021, -0.008), (0.021, 0.008), (0.0, 0.008)], (L + 0.07, uu, hz), axis=(0, 1, 0), seg=16)
+    k = 0
+    while 0.215 + k * 0.012 < W - 0.215:
+        p.lathe("Kit_Signal", [(0.0192, -0.0015), (0.0192, 0.0015), (0.0, 0.0015)], (L + 0.07, 0.215 + k * 0.012, hz), axis=(0, 1, 0), seg=16)
+        k += 1
     for uu in (0.13, W - 0.13):
         p.box("Kit_Housing", (L - 0.03, uu - 0.025, hz - 0.03), (L + 0.0, uu + 0.025, hz + 0.03), bevel=0.005, segments=2)
     # 7 dirt and wear: the kick, the deck seams, the rest's front edge, the handle mounts
@@ -242,8 +262,9 @@ def console_b(name, seed):
         for sv in (-1, 1):
             p.sweep("Kit_Housing", [fs_(pc) @ (q + Vector((sv * 0.013, -0.012, 0.002))), fs_(pc) @ (q + Vector((sv * 0.013, -0.008, 0.022))),
                                     fs_(pc) @ (q + Vector((sv * 0.013, 0.004, 0.022)))], 0.0018, seg=6)
-        p.box("Kit_GlowCool" if k != 1 else "Kit_GlowSignal", q + Vector((-0.004, 0.012, 0.002)), q + Vector((0.004, 0.016, 0.003)),
+        p.box("Kit_GlowKey" if k != 1 else "Kit_GlowAmber", q + Vector((-0.004, 0.012, 0.002)), q + Vector((0.004, 0.016, 0.003)),
               m=fs_(pc), panel=False)
+        _label(p, lab, fs_(pc) @ (q + Vector((0.0, -0.019, 0.0021))), ns, X, sd_, scale=0.5)
     # 7b the rear deck outboard of the beam: a service hatch (a raised lid in a dark seam, a recessed pull, two
     # quarter-turn latches, its stencils) - the concept has no empty board
     hx0, hx1, hu0, hu1 = 0.06, 0.58, 0.2, W - 0.04
@@ -251,11 +272,16 @@ def console_b(name, seed):
     lid = [(hu0, DECK), (hu1, DECK), (hu1, DECK + 0.018), (hu1 - 0.012, DECK + 0.026), (hu0 + 0.012, DECK + 0.026), (hu0, DECK + 0.018)]
     end_prism(p, "Kit_Frame", lid, hx0, hx1, 0.003, 1)
     zt = DECK + 0.026
-    p.box("Kit_Graphite", (hx0 + 0.03, hu0 + 0.03, zt - 0.0008), (hx1 - 0.03, hu0 + 0.033, zt + 0.0003), panel=False)
-    p.box("Kit_Graphite", (hx0 + 0.03, hu1 - 0.033, zt - 0.0008), (hx1 - 0.03, hu1 - 0.03, zt + 0.0003), panel=False)
+    p.box("Kit_Graphite", (hx0 + 0.022, hu0 + 0.022, zt - 0.002), (hx1 - 0.022, hu1 - 0.022, zt + 0.006), bevel=0.004, segments=1)
+    zt += 0.006
+    for xx in (hx0 + 0.035, hx1 - 0.035):
+        for uu in (hu0 + 0.035, hu1 - 0.035):
+            screw(p, Vector((xx, uu, zt)), Z, 0.0045)
+    p.box("Kit_Lip", (hx1 - 0.13, hu0 + 0.05, zt - 0.001), (hx1 - 0.046, hu0 + 0.094, zt + 0.0012), bevel=0.001, segments=1)
+    p.box("Kit_Perforated", (hx1 - 0.126, hu0 + 0.054, zt + 0.0012), (hx1 - 0.05, hu0 + 0.09, zt + 0.0016), panel=False)
     p.box("Kit_Seal", (0.27, hu1 - 0.075, zt - 0.012), (0.37, hu1 - 0.045, zt + 0.0003), bevel=0.004, segments=2)        # the pull
     p.box("Kit_Lip", (0.28, hu1 - 0.07, zt - 0.006), (0.36, hu1 - 0.065, zt - 0.002), bevel=0.0015, segments=2)
-    for xx in (hx0 + 0.04, hx1 - 0.04):
+    for xx in (hx0 + 0.05, hx1 - 0.16):
         c = Vector((xx, (hu0 + hu1) / 2, zt))
         p.lathe("Kit_Lip", [(0.011, 0.0), (0.011, 0.0015), (0.009, 0.0025)], tuple(c), seg=20)
         p.box("Kit_Graphite", (xx - 0.0075, (hu0 + hu1) / 2 - 0.0015, zt + 0.0015), (xx + 0.0075, (hu0 + hu1) / 2 + 0.0015, zt + 0.0035), panel=False)

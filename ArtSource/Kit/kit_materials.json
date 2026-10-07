@@ -49,7 +49,7 @@
                   "_why": "a service unit's painted gunmetal, darker and with more sheen than the wall panel (critic 7. 10. 2026, bay wall round 2: the mid-grey matte panel read as plastic beside SC's metallic grey bay)"},
   "Kit_Frame": {"colour": "frame", "roughness": 0.42, "metallic": 0.55, "edge_wear": true, "cavity_dirt": true, "bevel_mm": 4,
                 "micro_rough": 0.04, "grunge": 0.5, "rough_variation": 0.32, "panel_rough": 0.1, "panel_tone": 0.1, "scratches": 0.07,
-                "bare_colour": [0.78, 0.77, 0.75], "bare_rough": 0.5, "face_wear": 0.9, "face_dirt": 0.0, "grunge_tile_cm": 35, "wear_band_m": [0.0, 1.0],
+                "bare_colour": [0.78, 0.77, 0.75], "bare_rough": 0.5, "face_wear": 0.4, "face_dirt": 0.0, "grunge_tile_cm": 35, "wear_band_m": [0.0, 1.0],
                 "_why": "the light worn metal frames of the cockpit console concept (Docs/Kit/parts/KF-COCKPIT-CONSOLE, 7. 10. 2026): a scuffed light steel grey with sheen, dark panels set in it - not a white lacquer (critic r6)"},
   "Kit_Console": {"colour": "console", "roughness": 0.42, "metallic": 0.05, "edge_wear": true, "cavity_dirt": true, "bevel_mm": 3,
                   "micro_rough": 0.03, "grunge": 0.34, "rough_variation": 0.18, "panel_rough": 0.08, "panel_tone": 0.1, "scratches": 0.04,
@@ -68,8 +68,8 @@
   "_comment": "Emissive roles of the factory parts (plain master): the L1 foot light's diffuser white with a blue tint (~7500 K), small and bright enough to bloom - not a saturated blue patch.",
   "Kit_GlowFoot": {"colour": [0.82, 0.89, 1.0], "strength": 9.0},
   "Kit_GlowRed": {"colour": [1.0, 0.12, 0.09], "strength": 1.6},
-  "Kit_GlowKey": {"colour": [0.92, 0.95, 1.0], "strength": 14.0},
-  "Kit_GlowAmber": {"colour": [1.0, 0.55, 0.12], "strength": 14.0}
+  "Kit_GlowKey": {"colour": [1.0, 0.96, 0.9], "strength": 40.0},
+  "Kit_GlowAmber": {"colour": [1.0, 0.55, 0.12], "strength": 30.0}
  },
  "makers": {
   "Halcyon": {

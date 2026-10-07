@@ -9954,23 +9954,22 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_Console12W_B.fbx",
    "dims_m": [
-    1.29,
-    0.759,
-    0.71
+    1.291,
+    0.761,
+    0.74
    ],
    "expected_size_cm": [
-    129.0,
-    75.9,
-    71.0
+    129.1,
+    76.1,
+    74.0
    ],
-   "tris": 25340,
-   "tris_decals": 628,
+   "tris": 27920,
+   "tris_decals": 626,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
     "Kit_Seal",
     "Kit_GlowCool",
-    "Kit_GlowSignal",
     "Kit_Lip",
     "Kit_Graphite",
     "Kit_Gasket",
@@ -9988,7 +9987,7 @@
    ],
    "sockets": {},
    "collision_hulls": 1,
-   "decals": 38,
+   "decals": 41,
    "decal_items": [
     "panel_C21",
     "maker",
@@ -10001,6 +10000,9 @@
     "ck_pwr",
     "ck_extlt",
     "ck_eng",
+    "ck_lights",
+    "ck_gear",
+    "ck_vtol",
     "st_service",
     "arrow_access",
     "pn_4",
@@ -10037,7 +10039,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 16722,
+    "edge": 16986,
     "secondary": 0,
     "floor": 4030,
     "seam": 0
