@@ -144,7 +144,8 @@ modules = [a for a in room if isinstance(a, unreal.StaticMeshActor) and a.static
            and a.static_mesh_component.static_mesh.get_name().startswith("SM_Kit_")]
 L = C["SHOWROOM"]
 expected = (sum(len(r[3]) for r in L["wall_runs"]) + sum(len(r[2]) for r in L["run_parts"]) + len(L["placed"])
-            + sum(len(slot) for slot in L.get("test_section", {}).get("run", [])))   # the parts factory test section
+            + sum(len(slot) for slot in L.get("test_section", {}).get("run", []))    # the parts factory test section
+            + ("SM_Kit_Bay_Service10W_A" in parts))      # the service bay wall on the test section's end wall (7. 10. 2026)
 check("every part of the sample placed (%d)" % expected, len(modules) == expected, "%d" % len(modules))
 walls = [a for a in modules if a.static_mesh_component.static_mesh.get_name().startswith("SM_Kit_Wall_")]
 rects = [a for a in room if isinstance(a, unreal.RectLight)]
@@ -176,8 +177,14 @@ if gravity and annex:
           gravity[0].contains_point(annex[0].get_actor_location() + unreal.Vector(0.0, 0.0, 100.0)))
 # MegaLights variant C (author, 27. 9. 2026): every kit light casts its (ray-traced) shadow
 lights = [a for a in room if isinstance(a, (unreal.RectLight, unreal.SpotLight, unreal.PointLight))]
-unshadowed = [a.get_actor_label() for a in lights if not a.get_component_by_class(unreal.LocalLightComponent).get_editor_property("cast_shadows")]
-check("every showroom light casts shadows (%d lights)" % len(lights), lights and not unshadowed, ", ".join(unshadowed[:5]))
+# - except where the part's socket says "shadows": false (the portal's foot cups and spill, the terminal's screen glow,
+# the bay's niche and locker lights - parts factory, light performance step): those parts' lights may be unshadowed
+no_shadow_parts = {n[len("SM_Kit_"):] for n, e in parts.items()
+                   if any(s.get("params", {}).get("shadows") is False for s in e.get("sockets", {}).values())}
+unshadowed = [a.get_actor_label() for a in lights if not a.get_component_by_class(unreal.LocalLightComponent).get_editor_property("cast_shadows")
+              and not any(p_ in a.get_actor_label() for p_ in no_shadow_parts)]
+check("every showroom light casts shadows unless its socket says not (%d lights)" % len(lights), lights and not unshadowed,
+      ", ".join(unshadowed[:5]))
 # the half-open window looks out at a star field card behind the end wall, without collision
 stars = [a for a in room if a.get_actor_label() == "KitShowroom_WindowStars"]
 mat = stars[0].static_mesh_component.get_material(0) if stars else None

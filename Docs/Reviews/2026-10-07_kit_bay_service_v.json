@@ -1,0 +1,43 @@
+{
+ "topic": "kit_bay_service",
+ "date": "2026-10-07",
+ "goal": "Servisní stěna inženýrské sekce podle autorova záznamu ze SC (Aurora): skříň hasicího přístroje (červeně podsvícená niša, přístroj velikosti SC v kolébce s horním držákem), dvě skříňky s krémovým vnitřkem osvětleným zakrytým pásem pod stropem (zadní deska, háčky, gumová rohož, leštěný práh), kryt COMPONENT BAY jako silná deska se širokým zkosením a raženým logem výrobce, servisní poklop s mřížkou nad krytem.",
+ "style": "Kvalita podle SC, barvy Halcyon Freightworks: grafit a šedé panely, krémový lak uvnitř skříněk, červený lak hasičáku; udržovaná pracovní loď, špína zatím jen základní. Logo HALCYON místo RSI je záměr (vlastní výrobce). Skříň jednotky má vlastní tmavší saténový kovový lak (Kit_Housing), stěny chodby zůstávají středně šedé (rozhodnutí autora 6. 10.).",
+ "checklist": "interior",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-07_kit_bay_service_v",
+ "notes": [
+  "Za stěnou je tmavá stěna zkušební místnosti, ne pokračování lodi; terminál vpravo je hotový samostatný díl.",
+  "Reference je jeden záběr SC; detailní pohledy se srovnávají s jeho výřezem.",
+  "Ověřovací kolo: ověř jen tyto body z předchozího kola – (1) kryt COMPONENT BAY má mít silnou desku se širokým (cca 4,5 cm) světlejším zkoseným pruhem po obvodu, zapuštěnou v rámu; (2) grafitové plochy krytu a rámů nemají být jednolité: variace drsnosti, opotřebené hrany a základní ušpinění u úchytů a madla. Rozhodni PASS/FAIL podle prahu s tím, že ostatní kategorie se oproti minulému kolu (průměr 6,75, nic pod 6) nezhoršily, pokud to na listech nevidíš jinak."
+ ],
+ "pairs": [
+  {
+   "title": "1 Čelní stěna z oka 1,65 m",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/decal_aurora_bay.jpg",
+   "ref_label": "SC Aurora, servisní stěna",
+   "ours": "C:/gamespace-shots/20261007_021858_kit_bay/01_7_end_wall_eye.png",
+   "ours_label": "celá servisní stěna a terminál"
+  },
+  {
+   "title": "2 Hasicí skříň a skříňky zblízka",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/decal_aurora_bay.jpg",
+   "ref_label": "SC Aurora, servisní stěna",
+   "ours": "C:/gamespace-shots/20261007_021858_kit_bay/02_8_bay_close.png",
+   "ours_label": "hasičák v kolébce, skříňky"
+  },
+  {
+   "title": "5 Kryt COMPONENT BAY 3/4",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/decal_aurora_bay.jpg",
+   "ref_label": "SC Aurora, servisní stěna",
+   "ours": "C:/gamespace-shots/20261007_021858_kit_bay/06_12_cover_34.png",
+   "ours_label": "kryt s ražením, západky"
+  }
+ ]
+}

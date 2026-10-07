@@ -141,12 +141,16 @@ Snímky: `terminal_housing.jpg`, `terminal_3dview.jpg`, `bay_end_wall.jpg` a `ba
 - **Paleta** je vzorkovaná ze SC a převedená ze sRGB do lineárních barev.
 - **3D VIEW** je rentgen interiéru zevnitř chodby, oříznutý na plochu panelu.
 
-**Servisní stěna** (`SM_Kit_Bay_Service10W_A`, podle `sc/decal_aurora_bay.jpg`) stojí na čelní stěně vlevo,
-terminál vpravo:
-- skříň hasicího přístroje: niša s červeně svítící zadní stěnou, přístroj s ventilem, pákou, hadicí a tryskou
-  v držáku, pod ní dvířka;
-- dvě skříňky s teple osvětleným krémovým vnitřkem a leštěným lemem;
-- kryt COMPONENT BAY: 4 vnořené osmiboké úrovně, HALCYON FREIGHTWORKS, SERVICE ACCESS a štítek COOLER S1;
+**Servisní stěna** (`SM_Kit_Bay_Service10W_A`, podle `sc/decal_aurora_bay.jpg`; rev. 2 7. 10.) stojí na čelní
+stěně vlevo, terminál vpravo; skříň je 21 cm hluboká (dřív 18), aby se do niše vešel větší přístroj:
+- skříň hasicího přístroje: niša s červeně svítící zadní stěnou; přístroj 1,3× (∅ 11 cm, 47 cm; autor: „pořád
+  větší“), stojí v tmavé kolébce s gumovým kalíškem, nad ním držák s mřížkou a červenou kontrolkou; pod nišou dvířka;
+- dvě skříňky: krémový lak bez emise (dřív přepálené bílé plochy), zakrytý teplý pás pod stropem, zadní deska se
+  zkoseným vrchem a leštěnou linkou, dva háčky, gumová rohož, leštěný práh, západka ve stropě;
+- kryt COMPONENT BAY: silná deska se zkosením 16 mm v tmavém lůžku, vlasová drážka a leštěná linka, **ražené**
+  logo HALCYON a nápis COMPONENT BAY jako geometrie (`emboss_text`, písmo projektu), boční západky, zapuštěné madlo,
+  štítek COOLER S1;
+- nad krytem servisní poklop chladicí smyčky: čtvrtotáčkové zámky, mřížka s lamelami, pár LED, pás TORQUE;
 - žaluzie, šrouby, šrafy a šablony.
 
 Nové role jsou `Kit_Red` (červený lak) a `Kit_GlowRed`.

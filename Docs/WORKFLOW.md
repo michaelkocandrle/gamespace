@@ -777,6 +777,10 @@ snímku.
 
 ### 9.6 Blender pipeline
 
+- **Ražený text ztrojnásobil trojúhelníky dílu** (`kit_factory.emboss_text`, 7. 10. 2026): křivka písma FONT má
+  výchozí `resolution_u = 12` a s `bevel_depth` každé písmeno stovky trojúhelníků; servisní stěna 37 k → 91 k
+  (`KITBUILD over_budget`). Řešení: `resolution_u = 3`, `bevel_resolution = 0`; na čitelnosti z oka to nepoznáš.
+
 - **Karty špíny se nepokládaly** (`hs_decals.card_at`, od 3. 10. do 6. 10. 2026): buňky se skládaly v pořadí, ve kterém
   normála plochy mířila proti normále povrchu, a kontrola přeložených buněk je zahodila všechny. Build hlásil
   `grime_<druh> no faces`, snímky vypadaly „čistě“. Oprava je obrácené pořadí vrcholů. Odhalil to A/B snímek (P5)

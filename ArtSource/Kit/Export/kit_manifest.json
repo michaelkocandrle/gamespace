@@ -9752,97 +9752,115 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Bay_Service10W_A.fbx",
    "dims_m": [
-    0.173,
+    0.222,
     1.0,
     1.72
    ],
    "expected_size_cm": [
-    17.3,
+    22.2,
     100.0,
     172.0
    ],
-   "tris": 9290,
-   "tris_decals": 50,
+   "tris": 39702,
+   "tris_decals": 190,
    "tri_budget": 40000,
    "materials": [
+    "Kit_Plastic",
     "Kit_GlowWarm",
     "Kit_Lacquer",
     "Kit_Lip",
     "Kit_Graphite",
     "Kit_Gasket",
+    "Kit_AntiSlip",
+    "Kit_GlowFoot",
     "Kit_Panel",
     "Kit_Red",
     "Kit_GlowRed",
-    "Kit_DecalPaint"
+    "Kit_Shell",
+    "Kit_Housing",
+    "Kit_DecalPaint",
+    "Kit_DecalGrime"
    ],
    "sockets": {
     "SOCKET_Light_Fire_0": {
      "location_ue_cm": [
       13.0,
-      36.0,
-      145.0
+      37.8,
+      139.0
      ],
      "params": {
       "type": "point",
       "role": "signal",
-      "cd": 0.25,
-      "radius_m": 0.6,
+      "cd": 0.7,
+      "radius_m": 0.32,
       "source_radius_cm": 1.0,
       "shadows": false
      }
     },
     "SOCKET_Light_Locker_1": {
      "location_ue_cm": [
-      10.0,
+      12.5,
       7.0,
-      72.0
+      75.0
      ],
      "params": {
       "type": "point",
       "role": "warm",
-      "cd": 0.18,
-      "radius_m": 0.4,
+      "cd": 0.12,
+      "radius_m": 0.45,
       "source_radius_cm": 2.0,
       "shadows": false
      }
     },
     "SOCKET_Light_Locker_8": {
      "location_ue_cm": [
-      10.0,
+      12.5,
       7.0,
-      140.0
+      143.0
      ],
      "params": {
       "type": "point",
       "role": "warm",
-      "cd": 0.18,
-      "radius_m": 0.4,
+      "cd": 0.12,
+      "radius_m": 0.45,
       "source_radius_cm": 2.0,
       "shadows": false
      }
     }
    },
    "collision_hulls": 1,
-   "decals": 7,
+   "decals": 19,
    "decal_items": [
-    "maker",
-    "st_service",
+    "red_dot",
+    "st_torque",
     "plate_cooler",
     "red_marker",
     "st_inspect",
     "hazard_subtle",
-    "st_gnd"
+    "st_gnd",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim",
+    "grime_smear",
+    "grime_smear",
+    "grime_streaks",
+    "grime_rim",
+    "grime_smear",
+    "grime_smear",
+    "grime_smear",
+    "grime_smear",
+    "grime_rim"
    ],
    "service_labels": [
     "st_gnd",
     "st_inspect",
-    "st_service"
+    "st_torque"
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 3432,
+    "edge": 7608,
     "secondary": 0,
-    "floor": 980,
+    "floor": 11002,
     "seam": 0
    },
    "status": "built"

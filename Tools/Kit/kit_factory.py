@@ -415,8 +415,65 @@ def terminal_housing(name, seed):
     return p
 
 
+FONTS = {"rajdhani": "Content/UI/Fonts/Rajdhani-SemiBold.ttf", "saira": "Content/UI/Fonts/Saira-SemiBold.ttf"}
+
+
+def emboss_text(p, role, body, y, z, x, size, depth, font="rajdhani", bevel=0.0, wrap=None):
+    """Raised lettering as real geometry on a face looking +x (SC's embossed maker's mark on the component bay cover;
+    a decal stencil read as print). size = the font's em in metres; the letters stand `depth` proud of x, flat-shaded."""
+    import bpy
+    cu = bpy.data.curves.new("txt", "FONT")
+    cu.body = body
+    cu.font = bpy.data.fonts.load(os.path.join(ROOT, FONTS[font]), check_existing=True)
+    cu.size = size
+    cu.align_x, cu.align_y = "CENTER", "CENTER"
+    cu.extrude = depth / 2
+    cu.bevel_depth, cu.bevel_resolution = bevel, 0
+    cu.resolution_u = 3                         # the glyphs' curves: 12 (default) tripled the part's triangles
+    ob = bpy.data.objects.new("txt", cu)
+    bpy.context.scene.collection.objects.link(ob)
+    bpy.context.view_layer.update()
+    me = bpy.data.meshes.new_from_object(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+    # the text's x right, y up, z out -> the part's +y, +z, +x; its back sits on the face
+    if wrap is None:
+        verts = [(x + v.co.z + depth / 2, y + v.co.x, z + v.co.y) for v in me.vertices]
+    else:
+        # printed on a body of revolution round a vertical axis through (cx, cy) of radius r: the text's x runs round it
+        # (its middle facing +x), its z out of the surface
+        cx, cy, r = wrap
+        verts = []
+        for v in me.vertices:
+            a, rr = (y + v.co.x) / r, r + v.co.z + depth / 2
+            verts.append((cx + rr * math.cos(a), cy + rr * math.sin(a), z + v.co.y))
+    faces = [list(f.vertices) for f in me.polygons]
+    bpy.data.objects.remove(ob)
+    bpy.data.curves.remove(cu)
+    bpy.data.meshes.remove(me)
+    for f in p.mesh(role, verts, faces):
+        f.smooth = False
+
+
 def box_yz(p, role, y0, z0, y1, z1, x_front, depth, bevel=0.0015):
     p.poly_prism(role, [(y0, z0), (y1, z0), (y1, z1), (y0, z1)], face_matrix(x_front), depth, bevel=bevel, panel=False, segments=1)
+
+
+def chamfer_band(p, role, outer, x_out, inner, x_in):
+    """A sloped facet between two outlines with as many points (y, z) on a face looking +x: the outer one at x_out, the
+    inner one at x_in - SC's wide 45 deg chamfers round covers and niche frames, flat-shaded so the facet catches light."""
+    k = len(outer)
+    verts = [(x_out, y, z) for y, z in outer] + [(x_in, y, z) for y, z in inner]
+    faces = [[i, (i + 1) % k, k + (i + 1) % k, k + i] for i in range(k)]
+    for f in p.mesh(role, verts, faces):
+        f.smooth = False
+
+
+def raised_frame(p, opening, front, w=0.022, h=0.012, c=0.012):
+    """A frame standing proud round an opening (critic 7. 10. 2026: the niches were cut straight into a flat plate): a
+    chamfered outer facet up from the face plate, a flat top band to the opening's lip."""
+    outer = inset(opening, -w)
+    top = inset(opening, -(w - c))
+    chamfer_band(p, "Kit_Housing", outer, front, top, front + h)
+    band(p, "Kit_Housing", top, opening, front + h, h)
 
 
 def niche(p, y0, z0, y1, z1, c, front, deep, wall_role, back_role, lip=True):
@@ -429,6 +486,26 @@ def niche(p, y0, z0, y1, z1, c, front, deep, wall_role, back_role, lip=True):
     band(p, wall_role, o, inset(o, 0.004), front, deep)
     p.poly_prism(back_role, inset(o, 0.004), face_matrix(front - deep + 0.002), 0.002, bevel=0.0, panel=False, segments=1)
     return o
+
+
+class Scaled:
+    """A Part seen through a uniform scale about a point: lathe, sweep and box take the same arguments as on the Part
+    (the extinguisher was modelled at a 2 kg size; the author 7. 10. 2026 wants it bigger - SC's fills its niche)."""
+
+    def __init__(self, p, origin, s):
+        self.p, self.o, self.s = p, Vector(origin), s
+
+    def _pt(self, q):
+        return tuple(self.o + (Vector(q) - self.o) * self.s)
+
+    def lathe(self, role, profile, base, axis=(0, 0, 1), seg=48, close=False):
+        self.p.lathe(role, [(r * self.s, h * self.s) for r, h in profile], self._pt(base), axis, seg=seg, close=close)
+
+    def sweep(self, role, path, r, seg=16, caps=True, scale_y=1.0):
+        self.p.sweep(role, [self._pt(q) for q in path], r * self.s, seg=seg, caps=caps, scale_y=scale_y)
+
+    def box(self, role, lo, hi, bevel=0.0, segments=2, panel=True):
+        self.p.box(role, self._pt(lo), self._pt(hi), bevel=bevel * self.s, segments=segments, panel=panel)
 
 
 def extinguisher(p, ex, ey, z0):
@@ -472,8 +549,9 @@ def extinguisher(p, ex, ey, z0):
     p.sweep("Kit_Lip", ring, 0.0014, seg=8, caps=False)
     p.sweep("Kit_GlowRed", [(ex + 0.02, ey + 0.012, zh + 0.0215), (ex + 0.022, ey + 0.006, zh + 0.012)], 0.0005, seg=6)
     # the hose: out of the valve's side (-y), down along the body to the nozzle held in a clip
-    hose = [(ex, ey - 0.016, zh + 0.016), (ex + 0.002, ey - 0.03, zh + 0.012), (ex + 0.006, ey - 0.045, zh - 0.004),
-            (ex + 0.01, ey - 0.052, zh - 0.03), (ex + 0.012, ey - 0.053, zh - 0.08), (ex + 0.012, ey - 0.052, zh - 0.15)]
+    hose = [(ex, ey - 0.016, zh + 0.016), (ex + 0.004, ey - 0.032, zh + 0.012), (ex + 0.014, ey - 0.047, zh - 0.006),
+            (ex + 0.024, ey - 0.055, zh - 0.04), (ex + 0.026, ey - 0.057, zh - 0.085), (ex + 0.018, ey - 0.055, zh - 0.125),
+            (ex + 0.012, ey - 0.052, zh - 0.15)]
     p.sweep("Kit_Gasket", hose, 0.0058, seg=16)
     for c, a in ((hose[0], (0, -1, 0)), (hose[-1], (0, 0, -1))):
         p.lathe("Kit_Lip", [(0.0068, 0.0), (0.0072, 0.002), (0.0072, 0.009), (0.0066, 0.011)], c, a, seg=24)
@@ -496,21 +574,21 @@ def bay_service(name, seed):
     component bay cover (four nested octagonal levels, the maker's mark and a stencil), louvers and a slot row over
     them, bolts and hatching. The face is +x, the pivot is the back's bottom centre on the wall; -y is the viewer's left."""
     p = kit_geo.Part(name, seed)
-    W, H, D = 1.0, 1.72, 0.18
+    W, H, D = 1.0, 1.72, 0.21                  # 21 cm deep (was 18): room for the bigger extinguisher in its niche
     # the carcass: back, sides, top; the face plate as bands round the three columns
     box_yz(p, "Kit_Graphite", -W / 2, 0.0, W / 2, H, 0.02, 0.02)
     face = D - 0.03
     # the carcass: hollow (the niches sink into it) - sides, top, bottom; the face plate in cells round the openings
-    p.box("Kit_Panel", (0.02, -W / 2, 0.0), (face, -W / 2 + 0.015, H), bevel=0.003, segments=1)
-    p.box("Kit_Panel", (0.02, W / 2 - 0.015, 0.0), (face, W / 2, H), bevel=0.003, segments=1)
-    p.box("Kit_Panel", (0.02, -W / 2, H - 0.015), (face, W / 2, H), bevel=0.003, segments=1)
-    p.box("Kit_Panel", (0.02, -W / 2, 0.0), (face, W / 2, 0.015), bevel=0.003, segments=1)
+    p.box("Kit_Housing", (0.02, -W / 2, 0.0), (face, -W / 2 + 0.015, H), bevel=0.003, segments=1)
+    p.box("Kit_Housing", (0.02, W / 2 - 0.015, 0.0), (face, W / 2, H), bevel=0.003, segments=1)
+    p.box("Kit_Housing", (0.02, -W / 2, H - 0.015), (face, W / 2, H), bevel=0.003, segments=1)
+    p.box("Kit_Housing", (0.02, -W / 2, 0.0), (face, W / 2, 0.015), bevel=0.003, segments=1)
 
     def cell(y0, z0, y1, z1, opening=None):
         if opening is None:
-            box_yz(p, "Kit_Panel", y0, z0, y1, z1, face, 0.02, bevel=0.002)
+            box_yz(p, "Kit_Housing", y0, z0, y1, z1, face, 0.02, bevel=0.002)
         else:
-            band(p, "Kit_Panel", octagon(y0, z0, y1, z1, 0.0008), opening, face, 0.02)
+            band(p, "Kit_Housing", octagon(y0, z0, y1, z1, 0.0008), opening, face, 0.02)
     # columns (y): A the fire unit -0.485..-0.235, B the lockers -0.225..0.085, C the component bay 0.09..0.49
     cell(-0.5, 0.0, -0.485, H)
     cell(0.49, 0.0, 0.5, H)
@@ -525,36 +603,154 @@ def bay_service(name, seed):
     cell(-0.485, 0.80, -0.235, 1.50, octagon(-0.47, 0.82, -0.25, 1.48, 0.03))
     cell(-0.225, 0.16, 0.085, 0.80, octagon(-0.205, 0.18, 0.065, 0.78, 0.05))
     cell(-0.225, 0.84, 0.085, 1.48, octagon(-0.205, 0.86, 0.065, 1.46, 0.05))
-    # A: the fire extinguisher niche lit red, 0.8 m up
-    niche(p, -0.47, 0.82, -0.25, 1.48, 0.03, face, 0.13, "Kit_Graphite", "Kit_GlowRed")
-    ey = -0.36
-    extinguisher(p, face - 0.072, ey, 0.905)
-    p.socket("Light_Fire_0", (face - 0.02, ey, 1.45), x=(1, 0, 0), z=(0, 0, 1), type="point", role="signal", cd=0.25,
-             radius_m=0.6, source_radius_cm=1.0, shadows=False)
+    # A: the fire extinguisher niche lit red, 0.8 m up; the extinguisher 1.3x the 2 kg model (author 7. 10. 2026:
+    # "still bigger" - SC's fills its niche: ~11 cm across, ~47 cm tall) standing in a dark cradle, a clamp housing over it
+    deep = 0.155
+    niche(p, -0.47, 0.82, -0.25, 1.48, 0.03, face, deep, "Kit_Graphite", "Kit_Red")
+    raised_frame(p, octagon(-0.47, 0.82, -0.25, 1.48, 0.03), face, w=0.012, h=0.01, c=0.008)
+    ey, ex, zf = -0.378, face - 0.082, 0.905
+    extinguisher(Scaled(p, (ex, ey, zf), 1.3), ex, ey, zf)
+    # the cradle: a dark block across the niche's foot, a polished lip on its front edge, a rubber cup the foot sits in
+    p.box("Kit_Graphite", (face - deep + 0.004, -0.444, 0.852), (face - 0.022, -0.276, zf), bevel=0.01, segments=3)
+    p.lathe("Kit_Lip", [(0.064, 0.0), (0.067, 0.001), (0.067, 0.003), (0.064, 0.004)], (ex, ey, zf - 0.002), (0, 0, 1), seg=48)
+    for y in (-0.43, -0.29):
+        p.lathe("Kit_Lip", [(0.005, 0.0), (0.005, 0.0015), (0.0035, 0.003), (0.0, 0.0032)], (face - 0.022, y, 0.878), (1, 0, 0), seg=16)
+    p.box("Kit_Lip", (face - 0.024, -0.444, zf - 0.008), (face - 0.021, -0.276, zf - 0.004), bevel=0.0008, segments=1, panel=False)
+    p.lathe("Kit_Gasket", [(0.058, 0.0), (0.063, 0.002), (0.063, 0.018), (0.06, 0.02)], (ex, ey, zf - 0.004), (0, 0, 1), seg=48)
+    face_label(p, "red_dot", -0.31, 0.878, face - 0.0215, scale=0.8)
+    # the clamp housing at the top: a dark block with a grille of slots and a red status pip
+    p.box("Kit_Graphite", (face - deep + 0.004, -0.444, 1.405), (face - 0.03, -0.276, 1.452), bevel=0.004, segments=2)
+    for k in range(5):
+        yk = -0.4 + k * 0.018
+        p.box("Kit_Housing", (face - 0.0305, yk - 0.004, 1.414), (face - 0.0295, yk + 0.004, 1.443), panel=False)
+    p.lathe("Kit_GlowRed", [(0.0025, 0.0), (0.0025, 0.0012), (0.0, 0.0016)], (face - 0.03, -0.3, 1.428), (1, 0, 0), seg=12)
+    p.box("Kit_GlowRed", (face - 0.07, -0.43, 1.399), (face - 0.036, -0.29, 1.406), panel=False)     # the source under it
+    p.socket("Light_Fire_0", (face - 0.05, ey, 1.39), x=(1, 0, 0), z=(0, 0, 1), type="point", role="signal", cd=0.7,
+             radius_m=0.32, source_radius_cm=1.0, shadows=False)
     # under it: a hatch with a recessed grip and the red marker; a text strip at the foot
     hatch = octagon(-0.47, 0.18, -0.25, 0.74, 0.02)
-    p.poly_prism("Kit_Panel", hatch, face_matrix(face + 0.008), 0.008, bevel=0.002, segments=1)
+    p.poly_prism("Kit_Housing", hatch, face_matrix(face + 0.008), 0.008, bevel=0.002, segments=1)
     box_yz(p, "Kit_Graphite", -0.40, 0.62, -0.32, 0.645, face + 0.0085, 0.006)
     for z in (0.22, 0.70):
         for y in (-0.455, -0.265):
             p.tube("Kit_Lip", (face + 0.008, y, z), (face + 0.010, y, z), 0.004, 8)
-    # B: two lockers, warm-lit
+    # B: two lockers (author 7. 10.: flat glowing white boxes): a cream lacquer inside lit by a housed warm strip under
+    # its roof, not an emissive back - the back a raised panel with a chamfered top (SC's shield outline) and a hairline
+    # lip, two coat hooks, a rubber mat on the floor behind a polished sill, the latch slot in the roof
+    ldeep = 0.15
     for z0, z1 in ((0.18, 0.78), (0.86, 1.46)):
-        niche(p, -0.205, z0, 0.065, z1, 0.05, face, 0.13, "Kit_Lacquer", "Kit_GlowWarm")
-        p.socket("Light_Locker_%d" % int(z0 * 10), (face - 0.05, -0.07, z1 - 0.06), x=(1, 0, 0), z=(0, 0, 1), type="point",
-                 role="warm", cd=0.18, radius_m=0.4, source_radius_cm=2.0, shadows=False)
-        # the inner top: a small dark slot (the latch) and the shelf lip
-        box_yz(p, "Kit_Graphite", -0.11, z1 - 0.035, -0.03, z1 - 0.02, face - 0.02, 0.01)
-    # C: the component bay cover - frame, recess, plate, polished outline, inner dark plate with the mark
+        niche(p, -0.205, z0, 0.065, z1, 0.05, face, ldeep, "Kit_Lacquer", "Kit_Lacquer")
+        raised_frame(p, octagon(-0.205, z0, 0.065, z1, 0.05), face, w=0.016, h=0.012, c=0.01)
+        back = face - ldeep + 0.004
+        shield = [(-0.18, z0 + 0.04), (0.04, z0 + 0.04), (0.04, z1 - 0.11), (0.0, z1 - 0.07), (-0.14, z1 - 0.07), (-0.18, z1 - 0.11)]
+        p.poly_prism("Kit_Lacquer", shield, face_matrix(back + 0.01), 0.01, bevel=0.003, segments=2)
+        band(p, "Kit_Lip", [(-0.183, z0 + 0.037), (0.043, z0 + 0.037), (0.043, z1 - 0.109), (0.001, z1 - 0.067), (-0.141, z1 - 0.067),
+                            (-0.183, z1 - 0.109)], shield, back + 0.0085, 0.002)
+        for y in (-0.12, -0.02):
+            p.lathe("Kit_Lip", [(0.009, 0.0), (0.009, 0.003), (0.0045, 0.006), (0.0045, 0.028), (0.007, 0.031), (0.0, 0.034)],
+                    (back + 0.01, y, z1 - 0.15), (1, 0, 0), seg=20, close=True)
+        # the roof's light: a housed strip with an opal diffuser across the front of the roof
+        p.box("Kit_Graphite", (face - 0.08, -0.152, z1 - 0.016), (face - 0.028, 0.012, z1 - 0.003), bevel=0.002, segments=1)
+        p.box("Kit_GlowWarm", (face - 0.074, -0.146, z1 - 0.019), (face - 0.034, 0.006, z1 - 0.015), panel=False)
+        p.socket("Light_Locker_%d" % int(z0 * 10), (face - 0.055, -0.07, z1 - 0.03), x=(1, 0, 0), z=(0, 0, 1), type="point",
+                 role="warm", cd=0.12, radius_m=0.45, source_radius_cm=2.0, shadows=False)
+        # the latch slot in the roof, behind the light
+        p.box("Kit_Graphite", (face - 0.12, -0.11, z1 - 0.012), (face - 0.09, -0.03, z1 - 0.003), bevel=0.001, segments=1, panel=False)
+        # the floor: a rubber mat, a polished sill at the front edge
+        p.box("Kit_AntiSlip", (back + 0.012, -0.17, z0), (face - 0.02, 0.03, z0 + 0.006), bevel=0.002, segments=1)
+        for k in range(7):
+            yk = -0.155 + k * 0.029
+            p.box("Kit_Gasket", (back + 0.016, yk, z0 + 0.006), (face - 0.024, yk + 0.012, z0 + 0.008), panel=False)
+        p.box("Kit_Lip", (face - 0.018, -0.172, z0 - 0.002), (face - 0.004, 0.032, z0 + 0.008), bevel=0.002, segments=2)
+    # C: the component bay cover after SC's (the author's capture): a heavy plate standing proud of a dark recess, its
+    # edge a wide 45 deg chamfer that catches the light, a hairline groove inset on its face, the maker's mark large;
+    # latches each side, a recessed pull at the foot
     c0 = octagon(0.10, 0.16, 0.48, 1.05, 0.06)
-    band(p, "Kit_Panel", c0, inset(c0, 0.025), face + 0.018, 0.012)
+    band(p, "Kit_Housing", c0, inset(c0, 0.025), face + 0.018, 0.012)
     p.poly_prism("Kit_Graphite", inset(c0, 0.025), face_matrix(face + 0.008), 0.002, bevel=0.0, panel=False, segments=1)
-    plate = octagon(0.14, 0.32, 0.44, 0.94, 0.07)
-    p.poly_prism("Kit_Panel", plate, face_matrix(face + 0.02), 0.012, bevel=0.002, segments=1)
-    band(p, "Kit_Lip", plate, inset(plate, 0.004), face + 0.0205, 0.001)
-    mark = octagon(0.17, 0.52, 0.41, 0.88, 0.05)
-    p.poly_prism("Kit_Graphite", mark, face_matrix(face + 0.021), 0.001, bevel=0.0, panel=False, segments=1)
-    box_yz(p, "Kit_Graphite", 0.22, 0.2, 0.36, 0.24, face + 0.0185, 0.008)                # the pull
+    plate = octagon(0.135, 0.20, 0.445, 1.01, 0.075)
+    cf = face + 0.036                                                  # the cover's face
+    p.poly_prism("Kit_Housing", plate, face_matrix(cf - 0.028), 0.006, bevel=0.0, panel=False, segments=1)
+    pface = inset(plate, 0.045)
+    chamfer_band(p, "Kit_Panel", plate, cf - 0.028, pface, cf)
+    p.poly_prism("Kit_Housing", pface, face_matrix(cf), 0.002, bevel=0.0, panel=False, segments=1)
+    band(p, "Kit_Graphite", inset(plate, 0.03), inset(plate, 0.033), cf + 0.0003, 0.0006)
+    band(p, "Kit_Lip", inset(plate, 0.0155), inset(plate, 0.0175), cf + 0.0002, 0.0004)
+    for y, sgn in ((0.135, -1), (0.445, 1)):
+        yc = y + sgn * 0.004
+        p.box("Kit_Lip", (face + 0.012, yc - 0.009, 0.56), (face + 0.03, yc + 0.009, 0.66), bevel=0.003, segments=2)
+        p.box("Kit_Graphite", (face + 0.029, yc - 0.003, 0.575), (face + 0.031, yc + 0.003, 0.645), panel=False)
+    box_yz(p, "Kit_Graphite", 0.23, 0.245, 0.35, 0.272, cf + 0.0004, 0.012)                 # the pull, sunk in the face
+    box_yz(p, "Kit_Lip", 0.235, 0.249, 0.345, 0.252, cf - 0.004, 0.002, bevel=0.0)
+    # over the cover: the coolant loop's service hatch (the plain field read empty) - a raised plate with quarter-turn
+    # fasteners, a recessed intake grille, a status LED pair and its stencil strip
+    hp = octagon(0.13, 1.1, 0.45, 1.46, 0.035)
+    p.poly_prism("Kit_Housing", hp, face_matrix(face + 0.012), 0.012, bevel=0.004, segments=2)
+    band(p, "Kit_Lip", inset(hp, 0.008), inset(hp, 0.0095), face + 0.0122, 0.0004)
+    for y, z in ((0.155, 1.125), (0.425, 1.125), (0.155, 1.435), (0.425, 1.435)):
+        p.lathe("Kit_Lip", [(0.0075, 0.0), (0.0075, 0.0015), (0.006, 0.0028), (0.0, 0.003)], (face + 0.012, y, z), (1, 0, 0), seg=20)
+        p.box("Kit_Graphite", (face + 0.0148, y - 0.005, z - 0.0008), (face + 0.0152, y + 0.005, z + 0.0008), panel=False)
+    grille = octagon(0.17, 1.2, 0.41, 1.37, 0.02)
+    p.poly_prism("Kit_Graphite", grille, face_matrix(face + 0.0125), 0.006, bevel=0.0, panel=False, segments=1)
+    for k in range(8):
+        z = 1.212 + k * 0.0195
+        p.box("Kit_Housing", (face + 0.0118, 0.18, z), (face + 0.0168, 0.40, z + 0.009), bevel=0.0015, segments=2)
+    for y in (0.37, 0.39):
+        p.box("Kit_GlowFoot", (face + 0.012, y - 0.006, 1.398), (face + 0.0135, y + 0.006, 1.402), panel=False)
+    box_yz(p, "Kit_Graphite", 0.17, 1.39, 0.34, 1.41, face + 0.0135, 0.0015, bevel=0.0)
+    face_label(p, "st_torque", 0.255, 1.4, face + 0.0135, scale=0.8)
+
+    # --- round 2 (critic r1): the unit's marking, the extinguisher's label, screws, small plates, grime
+    # the extinguisher's printed label wrapped round the sleeve: CO2, the type line, a red rule
+    lr = 0.0425 * 1.3
+    emboss_text(p, "Kit_Red", "CO2", 0.0, zf + 0.228, 0.0, 0.034, 0.0004, wrap=(ex, ey, lr))
+    emboss_text(p, "Kit_Graphite", "FIRE EXTINGUISHER", 0.0, zf + 0.196, 0.0, 0.0105, 0.0003, wrap=(ex, ey, lr))
+    emboss_text(p, "Kit_Graphite", "CLASS B  C  E  -  5 KG", 0.0, zf + 0.181, 0.0, 0.0075, 0.0003, wrap=(ex, ey, lr))
+    p.lathe("Kit_Red", [(lr + 0.0002, zf + 0.168), (lr + 0.0005, zf + 0.1685), (lr + 0.0005, zf + 0.172), (lr + 0.0002, zf + 0.1725)],
+            (ex, ey, 0.0), (0, 0, 1), seg=56)
+    # the unit's name on the frame between the hatch and the niche, a pictogram plate on the hatch, the hatch's purpose
+    box_yz(p, "Kit_Graphite", -0.475, 0.766, -0.245, 0.792, face + 0.0012, 0.0012, bevel=0.0)
+    emboss_text(p, "Kit_Lacquer", "FIRE EXTINGUISHER UNIT", -0.36, 0.779, face + 0.0012, 0.0175, 0.0006)
+    # the bracket's release: a red push button in a guard ring on the hatch, its stencil
+    p.lathe("Kit_Graphite", [(0.017, 0.0), (0.017, 0.006), (0.0125, 0.008), (0.0115, 0.002), (0.0, 0.002)], (face + 0.008, -0.295, 0.69),
+            (1, 0, 0), seg=28)
+    p.lathe("Kit_Red", [(0.0105, 0.0), (0.0105, 0.006), (0.009, 0.0085), (0.0, 0.0092)], (face + 0.01, -0.295, 0.69), (1, 0, 0), seg=28)
+    emboss_text(p, "Kit_Lacquer", "RELEASE", -0.295, 0.662, face + 0.008, 0.0105, 0.0004)
+    box_yz(p, "Kit_Red", -0.395, 0.48, -0.325, 0.55, face + 0.0095, 0.0015, bevel=0.0008)
+    for y0, z0, y1, z1 in ((-0.373, 0.492, -0.355, 0.527), (-0.37, 0.527, -0.358, 0.532), (-0.366, 0.532, -0.362, 0.537),
+                           (-0.366, 0.537, -0.346, 0.540), (-0.351, 0.497, -0.347, 0.537), (-0.353, 0.49, -0.345, 0.497)):
+        box_yz(p, "Kit_Lacquer", y0, z0, y1, z1, face + 0.0102, 0.0007, bevel=0.0)                 # the extinguisher glyph
+    emboss_text(p, "Kit_Lacquer", "SPARE  CHARGE", -0.36, 0.44, face + 0.008, 0.017, 0.0005)
+    # the lockers' numbers on the frame under each
+    box_yz(p, "Kit_Graphite", -0.135, 0.82 - 0.0135, -0.005, 0.82 + 0.0135, face + 0.0012, 0.0012, bevel=0.0)
+    emboss_text(p, "Kit_Lacquer", "LOCKER 01", -0.07, 0.82, face + 0.0012, 0.019, 0.0006)
+    box_yz(p, "Kit_Graphite", -0.135, 0.085 - 0.0135, -0.005, 0.085 + 0.0135, face + 0.0012, 0.0012, bevel=0.0)
+    emboss_text(p, "Kit_Lacquer", "LOCKER 02", -0.07, 0.085, face + 0.0012, 0.019, 0.0006)
+    # screws round the openings and on the cells' corners
+    screws = [(-0.478, 0.81), (-0.242, 0.81), (-0.478, 1.49), (-0.242, 1.49), (-0.215, 0.17), (0.075, 0.17), (-0.215, 1.47), (0.075, 1.47),
+              (-0.215, 0.79), (0.075, 0.79), (-0.215, 0.85), (0.075, 0.85), (0.1, 0.03), (0.48, 0.03), (0.1, 1.08), (0.48, 1.08),
+              (-0.478, 0.03), (-0.242, 0.03), (-0.215, 0.03), (0.075, 0.03)]
+    for y, z in screws:
+        p.lathe("Kit_Lip", [(0.0042, 0.0), (0.0042, 0.0006), (0.0, 0.0009)], (face, y, z), (1, 0, 0), seg=16)
+        p.box("Kit_Graphite", (face + 0.0007, y - 0.0028, z - 0.0005), (face + 0.001, y + 0.0028, z + 0.0005), panel=False)
+    # seams: a vertical service line in the cover column, a horizontal one under the hatch
+    box_yz(p, "Kit_Graphite", 0.093, 0.02, 0.0955, 1.69, face + 0.0003, 0.0006, bevel=0.0)
+    box_yz(p, "Kit_Graphite", -0.483, 0.155, -0.237, 0.1575, face + 0.0003, 0.0006, bevel=0.0)
+    # small plates: an inspection tag by the hatch, a pressure tag by the niche
+    box_yz(p, "Kit_Lip", -0.47, 0.03, -0.39, 0.06, face + 0.0012, 0.0012, bevel=0.0004)
+    emboss_text(p, "Kit_Graphite", "INSP 03-2949", -0.43, 0.045, face + 0.0012, 0.0085, 0.0003)
+    # the dirt where it forms: the bay's foot, under the lockers' sills and the cover's pull, round the cradle
+    for y, w in ((-0.36, 0.24), (-0.07, 0.3), (0.29, 0.38)):
+        p.grime("rim", (face + 0.001, y, 0.07), (1, 0, 0), (0, 0, 1), (w, 0.12), 0.7)
+    for z in (0.17, 0.85):
+        p.grime("smear", (face + 0.001, -0.07, z - 0.02), (1, 0, 0), (0, 0, 1), (0.22, 0.06), 0.5)
+    p.grime("streaks", (cf + 0.001, 0.29, 0.22), (1, 0, 0), (0, 0, 1), (0.14, 0.1), 0.45)
+    p.grime("rim", (face + 0.001, -0.36, 0.8), (1, 0, 0), (0, 0, 1), (0.22, 0.05), 0.5)
+    p.grime("smear", (cf + 0.001, 0.29, 0.72), (1, 0, 0), (0, 0, 1), (0.22, 0.09), 0.3)
+    p.grime("smear", (cf + 0.001, 0.29, 0.3), (1, 0, 0), (0, 0, 1), (0.2, 0.12), 0.45)
+    for y in (0.16, 0.42):
+        p.grime("smear", (cf + 0.001, y, 0.61), (1, 0, 0), (0, 0, 1), (0.05, 0.14), 0.45)
+    p.grime("rim", (face + 0.001, 0.29, 0.17), (1, 0, 0), (0, 0, 1), (0.36, 0.05), 0.6)
     # over B and C: louvers and a slot row
     for k in range(6):
         z = 1.52 + k * 0.026
@@ -566,9 +762,10 @@ def bay_service(name, seed):
             p.tube("Kit_Lip", (D - 0.03, y, z), (D - 0.026, y, z), 0.007, 12)
     # the information layer
     lab = lambda item, y, z, x, sc=1.0, rot=0.0, lb=True: face_label(p, item, y, z, x, scale=sc, label=lb, rot=rot)  # noqa: E731
-    lab("maker", 0.29, 0.79, face + 0.0215, 0.36)
-    lab("st_service", 0.29, 0.62, face + 0.0215, 0.9)
-    lab("plate_cooler", 0.29, 0.43, face + 0.021, 0.85)
+    # SC's cover carries the maker's mark large and embossed, the bay's name small under it (author's capture)
+    emboss_text(p, "Kit_Shell", "HALCYON", 0.29, 0.72, face + 0.036, 0.05, 0.0025, bevel=0.0005)
+    emboss_text(p, "Kit_Shell", "COMPONENT  BAY", 0.29, 0.585, face + 0.036, 0.022, 0.0008)
+    lab("plate_cooler", 0.29, 0.38, face + 0.0365, 0.7)
     lab("red_marker", -0.36, 0.3, face + 0.0085, 2.2)
     lab("st_inspect", -0.36, 0.1, face, 0.8)
     lab("hazard_subtle", -0.36, 1.58, face + 0.01, 0.55)
