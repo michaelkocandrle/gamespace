@@ -107,7 +107,7 @@ def console_b(name, seed):
     p.box("Kit_Housing", (0.86, W, 0.14), (1.06, W + 0.004, 0.24), bevel=0.002, segments=1)
     _label(p, "maker", Vector((0.62, U0 - 0.0075, 0.28)), -Y, X, Z, scale=0.75)
     # the deck: a dark plate between the blocks
-    p.box("Kit_Housing", (0.0, U0, DECK - 0.004), (L - 0.02, W, DECK + 0.006), bevel=0.003, segments=2)
+    p.box("Kit_Inset", (0.0, U0, DECK - 0.004), (L - 0.02, W, DECK + 0.006), bevel=0.003, segments=2)
     # 2 the forearm beam: a light frame in a stepped side profile, two padded perforated rests on it, on two slanted
     # brackets and a rear leg over the deck (the 9 cm gap under it is the concept's floating arm)
     beam = [(0.02, BEAM0), (0.58, BEAM0), (0.63, BEAM0 + 0.03), (0.63, AT - 0.035), (0.6, AT - 0.018), (0.03, AT - 0.018),
@@ -243,9 +243,17 @@ def console_b(name, seed):
         mark = [(u_, 0.6), (u_ + 0.009, 0.6), (u_ + 0.023, 0.632), (u_ + 0.014, 0.632)]
         p.poly_prism("Kit_Signal", mark, frame(Vector((L - 0.0125, 0, 0)), (0, 1, 0), (0, 0, 1), (1, 0, 0)), 0.004, bevel=0.0)
     _label(p, "maker", Vector((L - 0.0145, TU + 0.23, 0.615)), X, Y, Z, scale=0.38)
-    for k in range(9):                                         # the front's orange hatch band
-        uu = TU + 0.06 + k * 0.035
-        p.sweep("Kit_Signal", [Vector((L - 0.0155, uu, 0.5)), Vector((L - 0.0155, uu + 0.03, 0.535))], 0.004, seg=6, scale_y=0.2)
+    # the front's hazard band: one 38 mm band in a 2 mm black frame, 9 mm orange bars at 45 deg with 9 mm gaps, clipped
+    fz0, fz1, fu0, fu1 = 0.496, 0.534, TU + 0.05, W - 0.06
+    fmh = frame(Vector((L - 0.0145, 0, 0)), (0, 1, 0), (0, 0, 1), (1, 0, 0))
+    p.box("Kit_Seal", (L - 0.0162, fu0 - 0.002, fz0 - 0.002), (L - 0.0148, fu1 + 0.002, fz1 + 0.002), panel=False)
+    hgt = fz1 - fz0
+    uu = fu0 - hgt
+    while uu < fu1:
+        poly = [(uu, fz0), (uu + 0.009, fz0), (uu + 0.009 + hgt, fz1), (uu + hgt, fz1)]
+        if poly[0][0] >= fu0 and poly[2][0] <= fu1:              # whole bars only (clipped ends read as slivers)
+            p.poly_prism("Kit_Signal", poly, fmh, 0.0004, bevel=0.0)
+        uu += 0.018
     # the pedestal's front under the switch module: a graphite inset, its vent and a hazard band
     p.box("Kit_Inset", (L - 0.026, U0 + 0.02, 0.13), (L - 0.016, TU - 0.02, DECK - 0.03), bevel=0.003, segments=1)
     p.box("Kit_Perforated", (L - 0.0165, U0 + 0.04, 0.16), (L - 0.0155, TU - 0.04, 0.24), panel=False)
@@ -257,13 +265,11 @@ def console_b(name, seed):
     hp = [Vector((L - 0.02, 0.13, hz)), Vector((L + 0.045, 0.13, hz)), Vector((L + 0.07, 0.16, hz)), Vector((L + 0.07, W - 0.16, hz)),
           Vector((L + 0.045, W - 0.13, hz)), Vector((L - 0.02, W - 0.13, hz))]
     p.sweep("Kit_Housing", hp, 0.015, seg=16)
-    p.sweep("Kit_Signal", [Vector((L + 0.07, 0.2, hz)), Vector((L + 0.07, W - 0.2, hz))], 0.0185, seg=16)
+    p.sweep("Kit_Grip", [Vector((L + 0.07, 0.2, hz)), Vector((L + 0.07, W - 0.2, hz))], 0.0185, seg=24)
     for uu in (0.2, W - 0.2):
         p.lathe("Kit_Housing", [(0.021, -0.008), (0.021, 0.008), (0.0, 0.008)], (L + 0.07, uu, hz), axis=(0, 1, 0), seg=16)
-    k = 0
-    while 0.215 + k * 0.012 < W - 0.215:
-        p.lathe("Kit_Signal", [(0.0192, -0.0015), (0.0192, 0.0015), (0.0, 0.0015)], (L + 0.07, 0.215 + k * 0.012, hz), axis=(0, 1, 0), seg=16)
-        k += 1
+    for uu in (0.212, W - 0.212):                               # polished end rings
+        p.lathe("Kit_Lip", [(0.0195, -0.003), (0.0195, 0.003), (0.0, 0.003)], (L + 0.07, uu, hz), axis=(0, 1, 0), seg=24)
     for uu in (0.13, W - 0.13):
         p.box("Kit_Housing", (L - 0.03, uu - 0.025, hz - 0.03), (L + 0.0, uu + 0.025, hz + 0.03), bevel=0.005, segments=2)
     # 7a the front deck by the seat, ahead of the stick: a small switch module - a sloped dark plate in a light frame,

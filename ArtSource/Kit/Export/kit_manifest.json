@@ -9963,7 +9963,7 @@
     76.2,
     74.1
    ],
-   "tris": 28780,
+   "tris": 27936,
    "tris_decals": 286,
    "tri_budget": 90000,
    "materials": [
@@ -9983,6 +9983,7 @@
     "Kit_GlowKey",
     "Kit_GlowAmber",
     "Kit_Inset",
+    "Kit_Grip",
     "Kit_FrameEdge",
     "Kit_Decal",
     "Kit_DecalAO",

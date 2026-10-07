@@ -1,0 +1,83 @@
+{
+ "topic": "kf_cockpit_console",
+ "date": "2026-10-07",
+ "goal": "Levá loketní konzole kokpitu, VARIANTA B postavená podle našeho 2D návrhu (Docs/Kit/parts/KF-COCKPIT-CONSOLE/concept, autor 7. 10.: reference SC jsou styl, rozměry a skladba naše). Ošoupaný světlý kovový rám s tmavými panely, opěrka předloktí jako nosník na dvou šikmých konzolách nad podstavcem (mezera), knipl na vlastním bloku před opěrkou, prostřední blok se sáním a stavovým pásem a klávesami na zkosení ke křeslu, věž s nouzovou klávesou pod krytem a kolébkami (otočené k pilotovi), modul tří jištěných přepínačů, servisní poklop vzadu, trubkové madlo s oranžovým návlekem, oranžové šrafy, vrstvené decaly (oděry, škrábance, štítky), nové opotřebení ploch v materiálu kitu. Díl sám v testovacím úseku pod neutrálním světlem, úhly jako reference. ROZHODNUTÍ AUTORA 8. 10.: díly našich lodí jsou nové z výroby – lesklé, matné, naleštěné, BEZ opotřebení, oděrů, škrábanců a špíny. Opotřebení NEHODNOŤ a nežádej. Hodnoť detail, vrstvení decalů a textur, materiálový kontrast (lesk/mat, lak/grafit/kov), čistotu provedení. Kolo 20: lak rámu pod čirým lakem, leštěná zkosení chytající světlo, grafitové vložky, vrstvené decaly (servisní a HV šablony, nýty, zásuvka, výstražný pás, štítky), čelo věže s logem a šrafami, svítící klávesy s gradientem. Kolo 21 po kole 20 (6,4): materiálový kontrast – rám světlejší lak (sRGB ~0,5) pod plným čirým lakem s jemnou pomerančovou kůrou (normálová mapa), zkosení leštěný kov (metallic 1, albedo 0,75, drsnost 0,18), všechny vložky nová role hluboký matný grafit (albedo ~0,06, drsnost 0,62, práškové zrno) včetně ovládacího pole věže, poklopu, čela věže a podstavce; odstraněna čára přes bok věže. Kolo 22 po kole 21 (6,5): grafit vložek tmavší (albedo 0,035, drsnost 0,62) i na desce pod opěrkou a poklopu, výstražný pás na čele věže jako ucelený pás 38 mm s pruhy 9 mm pod 45° v černém rámečku, návlek madla s diamantovým rýhováním (normálová mapa) a leštěnými koncovými kroužky, jemnější pomerančová kůra laku.",
+ "style": "Úroveň SC, ne přesná kopie (autor 7. 10.). Halcyon: oranžové akcenty místo žlutých, šedé laky, udržovaná pracovní loď.",
+ "checklist": "interior",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-07_kf_cockpit_console_r22",
+ "notes": [
+  "Hodnotí se jen konzole (díl továrny), ne stěny a podlaha testovacího úseku.",
+  "Světlo testovacího úseku je neutrální a jasnější než kokpit SC na referencích – jas sám o sobě nehodnoť, hodnoť tóny materiálů mezi sebou."
+ ],
+ "etalon": [
+  {
+   "img": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "label": "SC konzole"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/konzole_3.jpg",
+   "label": "SC loketní konzole s kniplem"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/kreslo_2.jpg",
+   "label": "SC křeslo a konzole"
+  }
+ ],
+ "pairs": [
+  {
+   "title": "1 Konzole 3/4 zepředu nad loketní jednotkou",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_3.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_010907_kit_cockpit_console_b/01_1_ref34.png",
+   "ours_label": "KF konzole B"
+  },
+  {
+   "title": "2 Zepředu přes nos konzole",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/kreslo_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_010907_kit_cockpit_console_b/02_2_front.png",
+   "ours_label": "KF konzole B"
+  },
+  {
+   "title": "3 Ovládací blok zblízka",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_010907_kit_cockpit_console_b/03_3_face_close.png",
+   "ours_label": "KF konzole B"
+  },
+  {
+   "title": "4 Knipl a opěrka zápěstí zblízka",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_3.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_010907_kit_cockpit_console_b/04_4_stick_close.png",
+   "ours_label": "KF konzole B"
+  },
+  {
+   "title": "5 Bok od pilota (mezera pod loketní jednotkou)",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/kreslo_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_010907_kit_cockpit_console_b/05_5_side_gap.png",
+   "ours_label": "KF konzole B"
+  },
+  {
+   "title": "6 Shora",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261008_010907_kit_cockpit_console_b/06_6_top.png",
+   "ours_label": "KF konzole B"
+  }
+ ]
+}

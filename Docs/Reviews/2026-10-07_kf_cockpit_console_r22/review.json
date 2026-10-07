@@ -1,0 +1,44 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 22,
+ "variant": "B",
+ "date": "2026-10-08",
+ "verdict": "PASS",
+ "gate": "step",
+ "note": "Autor 8. 10.: díly jsou nové z výroby, opotřebení se nehodnotí ani nežádá. Proporce proti SC nejsou blokující.",
+ "first_impression": "Čistá nová konzole Halcyon s ucelenou výstražnou cedulí na čele věže a rýhovaným madlem. Horní vložky (poklop, deska pod opěrkou) jsou už znatelně tmavší než rám, ale pořád světlejší než grafit čela věže. Velké boční plochy jsou holé, takže celek působí spíš jako čistá CG maketa než hutný díl SC.",
+ "scores": {
+  "silueta_a_tvar": {"score": 7, "why": "Nosník opěrky na dvou šikmých konzolách s mezerou, blok kniplu, prostřední blok a zkosená věž čtou podle návrhu (list 5 vpravo 1000-1600,270-470; list 1 vpravo 1230-1900,200-560)."},
+  "hierarchie_a_hustota_detailu": {"score": 6, "why": "Detail se shlukuje u kniplu, kláves a kolébek (list 6 vpravo 1540-1960,80-490), ale bok nosníku (list 5 vpravo 1000-1560,290-420), šikmý bok věže (list 3 vpravo 1300-1500,60-560) a opěrka (list 4 vpravo 1000-1460,190-540) jsou velké plochy bez podpanelů."},
+  "materialy": {"score": 6, "why": "Poklop a deska pod opěrkou jsou tmavší než rám (list 6 vpravo poklop 1120-1500,120-360 jas ~0,30 proti rámu ~0,60, poměr ~2:1) a zkosení chytají světlo (list 5 vpravo 1620-1900,420-500), ale poklop je viditelně světlejší než grafit čela věže (list 6 vpravo 1760-1960,80-320 ~0,15). Čirý lak s pomerančovou kůrou na rámu pořád není rozeznat; rám působí jako matná šedá barva."},
+  "decaly": {"score": 7, "why": "Na čele věže je teď ucelená výstražná cedule s hustými pruhy pod 45° v černém rámečku pod logem (list 3 vpravo 1550-1890,280-480; list 2 vpravo 1600-1840,545-590); po bocích nosníku a podstavce ale pořád chybí druhá vrstva drobných šablon, štítků a nýtů (list 5 vpravo 1000-1560,290-420)."},
+  "svetlo": {"score": 7, "why": "Klávesy 2x2 a pásky MAIN/BATT/TEMP svítí s gradientem (list 3 vpravo 1100-1290,180-370). LED u kolébek jsou ploché čtverečky bez záře (list 3 vpravo 1090,445 / 1135,495 / 1185,550)."},
+  "citelnost": {"score": 6, "why": "Zblízka jsou MAIN/BATT/TEMP i LIGHTS/GEAR/VTOL čitelné (list 3 vpravo), shora jsou ale legendy kolébek (list 6 vpravo 1780-1900,425-435) a spodní nápisy (list 6 vpravo 1240-1620,565-585) pod hranicí čitelnosti."},
+  "chyby_geometrie": {"score": 7, "why": "Bez děr, průniků a plovoucích dílů. Návlek madla má jemné rýhování a koncové kroužky místo kostiček (list 3 vpravo 1570-1960,470-611; list 1 vpravo 1700-1840,480-540)."},
+  "soulad_stylu": {"score": 7, "why": "Bloky sdílejí rám, šrouby a oranžové akcenty. Jediná nejednotnost je dvojí odstín vložek: poklop je středně tmavě šedý, čelo věže je grafit."}
+ },
+ "average": 6.6,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "concept_match": {
+  "layout_percent": 80,
+  "look_percent": 66,
+  "summary": "Skladba odpovídá návrhu. Výstražný pás a madlo jsou teď podle návrhu. Horní vložky ještě nejsou tak tmavé jako v návrhu. Chybí kovově lesklý rám, opěrka s lemem a husté spáry a šrouby po bocích."
+ },
+ "r21_followup": [
+  {"r21": 1, "title": "Horní vložky nejsou grafit", "status": "částečně", "detail": "Poklop a deska pod opěrkou jsou zřetelně tmavší než rám (poměr ~2:1 proti ~1,4:1 v r21), ale cíle 3:1 nedosahují a jsou světlejší než grafit čela věže. Body se snižuje na doporučeno, protože tónové oddělení už čte."},
+  {"r21": 2, "title": "Šrafy na čele věže rozházené", "status": "opraveno", "detail": "Ucelený pás s hustými pruhy pod 45° v černém rámečku (list 3 vpravo 1550-1890,280-480)."},
+  {"r21": 3, "title": "Velké holé plochy", "status": "neopraveno", "detail": "Bok nosníku, šikmý bok věže a poklop pořád bez spár, podpanelů a řad šroubů."},
+  {"r21": 4, "title": "Opěrka a mikrotextura laku", "status": "neopraveno", "detail": "Opěrka je pořád jedna deska s pravidelnými tečkami bez lemu a segmentů (list 4 vpravo). Jemnější pomerančová kůra je na snímcích neviditelná."},
+  {"r21": 5, "title": "Vrstvení decalů", "status": "neopraveno", "detail": "Mimo čelo věže je pořád jen jedna vrstva decalů, bez mikro šablon a štítků dílů."},
+  {"r21": 6, "title": "Návlek madla pixelový", "status": "opraveno", "detail": "Má jemné rýhování a leštěné koncové kroužky. Odstín je spíš žlutooranžový (~sRGB 230,150,40) než oranž akcentů."},
+  {"r21": 7, "title": "Legendy a LED kolébek", "status": "neopraveno", "detail": "Shora jsou nečitelné a LED jsou ploché."}
+ ],
+ "findings": [
+  {"n": 1, "title": "Horní vložky světlejší než grafit věže", "where": "list 6 vpravo poklop 1120-1500,120-360 a deska pod opěrkou; list 4 vpravo 1250-1830,220-420; srovnání s čelem věže list 6 vpravo 1760-1960,80-320", "problem": "Poklop a deska pod opěrkou mají jas ~0,30, čelo věže ~0,15. Dvě různé role grafitu působí, jako by poklop byl jiný materiál, a horní pohled pilota zůstává převážně šedý. Pravděpodobně jde o lesklý odraz stropního světla nebo o jinou instanci materiálu.", "severity": "doporučeno", "fix": "Ověřit, že poklop i deska používají stejnou instanci grafitu jako čelo věže (albedo 0,035, bez ClearCoat). Drsnost zvednout na 0,70-0,75, aby nebrala zrcadlový odraz stropu, specular 0,35. Cíl na listu 6: jas poklopu <= 0,18 a poměr rám : vložka >= 3:1."},
+  {"n": 2, "title": "Velké holé plochy na bocích", "where": "list 5 vpravo bok nosníku 1000-1560,290-420; list 3 vpravo šikmý bok věže 1300-1500,60-560; list 6 vpravo poklop", "problem": "Největší plochy nemají spáry, podpanely ani šrouby, takže detail je jen kolem ovladačů.", "severity": "doporučeno", "fix": "Bok nosníku: 2 zapuštěné grafitové panely ~220 x 70 mm, hloubka 10-15 mm, spára 2 mm, šrouby 5 mm v rozích. Šikmý bok věže: grafitová vložka ~60 % plochy v rámu 15-20 mm se 4 šrouby. Poklop: obvodová spára 2 mm, 2 zapuštěné západky 20 x 8 mm a šrouby 5 mm po 100 mm."},
+  {"n": 3, "title": "Druhá vrstva decalů po plochách", "where": "list 5 vpravo bok nosníku a podstavec; list 6 vpravo spodní pás 1240-1620,565-585; list 1 vpravo boky podstavce 1270-1420,300-560", "problem": "Mimo čelo věže je jen logo a pár nápisů. Chybí drobné šablony a štítky, které u nového dílu SC dávají plnost.", "severity": "doporučeno", "fix": "Na každou viditelnou plochu 1-2 štítky 25-40 mm s rámečkem a ikonou a 6-10 mikro šablon 4-6 mm (HF-3287, TORQUE 12 Nm, HV, šipky zvedání). Albedo 0,7 na grafitu a 0,15 na laku. Podél spodní hrany nosníku a podstavce řada nýtů 4 mm po 25 mm (normálový decal)."},
+  {"n": 4, "title": "Lak rámu bez čirého laku a kůry", "where": "list 1 vpravo rám 1230-1640,200-560; list 5 vpravo nosník 1000-1600,270-420", "problem": "Rám působí jako matná šedá barva. Ostrý lesk čirého laku ani pomerančová kůra v odlesku nejsou vidět, takže chybí kontrast lak/mat/kov, který brief žádá.", "severity": "doporučeno", "fix": "ClearCoat 1, ClearCoatRoughness 0,05-0,08 a základní drsnost 0,35. Normálová síla pomerančové kůry 0,12-0,18 při dlaždici 0,08-0,1 m, jen ve vrstvě ClearCoat. Ověřit snímkem s odleskem stropního světla na horní ploše nosníku."},
+  {"n": 5, "title": "Opěrka plochá deska", "where": "list 4 vpravo 1000-1460,190-540; list 6 vpravo 1010-1500,370-530", "problem": "Opěrka je jedna deska s pravidelnými tečkami. Nemá lem, segmenty ani prošití, a v nejbližším záběru je to nejslabší díl.", "severity": "doporučeno", "fix": "2 polstrované segmenty s mezerou 6 mm, obvodový zaoblený lem 8-10 mm, prošití 3 mm od okraje (normálová mapa), perforace 2 mm po 6 mm jen ve středu segmentu, albedo 0,05, drsnost 0,7, jemné zrno kůže v normálové mapě."},
+  {"n": 6, "title": "Legendy a LED kolébek, odstín návleku", "where": "list 6 vpravo 1780-1900,425-435 a 1240-1620,565-585; list 3 vpravo LED 1090,445 / 1135,495 / 1185,550; návlek list 3 vpravo 1570-1960,470-611", "problem": "Shora jsou legendy a spodní nápisy nečitelné a LED ploché bez záře. Návlek je žlutější než oranžové akcenty na čele věže.", "severity": "doporučeno", "fix": "Legendy tučně 8-10 mm, albedo >= 0,7. Spodní nápisy 10 mm. LED v kovovém rámečku 1 mm s kopulkou, emise 10-15, studená modrobílá. Návlek albedo sRGB (200,95,25), aby seděl s pruhy výstražného pásu."}
+ ]
+}
