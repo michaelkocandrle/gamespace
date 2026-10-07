@@ -9864,6 +9864,83 @@
     "seam": 0
    },
    "status": "built"
+  },
+  "SM_Kit_Cockpit_Console12W_A": {
+   "category": "Cockpit",
+   "family": "Cockpit_Console",
+   "section": "W",
+   "length_m": 1.2,
+   "variant": "A",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_Console12W_A.fbx",
+   "dims_m": [
+    1.292,
+    0.751,
+    0.831
+   ],
+   "expected_size_cm": [
+    129.2,
+    75.1,
+    83.1
+   ],
+   "tris": 15852,
+   "tris_decals": 156,
+   "tri_budget": 90000,
+   "materials": [
+    "Kit_Signal",
+    "Kit_GlowCool",
+    "Kit_GlowSignal",
+    "Kit_Cushion",
+    "Kit_Lip",
+    "Kit_Graphite",
+    "Kit_Gasket",
+    "Kit_Panel",
+    "Kit_Red",
+    "Kit_GlowRed",
+    "Kit_Shell",
+    "Kit_Housing",
+    "Kit_Console",
+    "Kit_DecalPaint",
+    "Kit_DecalGrime",
+    "Kit_DecalWear"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 20,
+   "decal_items": [
+    "st_vent",
+    "ck_main",
+    "ck_batt",
+    "ck_temp",
+    "panel_C21",
+    "ck_lights",
+    "ck_gear",
+    "ck_vtol",
+    "ck_esp",
+    "st_torque",
+    "ck_emerg_o2",
+    "ck_pwr",
+    "ck_extlt",
+    "ck_eng",
+    "ck_rcs",
+    "hazard_subtle",
+    "maker",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim"
+   ],
+   "service_labels": [
+    "st_torque",
+    "st_vent"
+   ],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 15342,
+    "secondary": 0,
+    "floor": 1748,
+    "seam": 0
+   },
+   "status": "built"
   }
  }
 }

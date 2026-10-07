@@ -1,65 +1,41 @@
 {
   "manifest": "C:\\gamespace\\gamespace\\ArtSource\\Ships\\Wayfarer\\Export\\Wayfarer_manifest.json",
   "ship": "Wayfarer",
-  "meshes": {
-    "SM_Ship_Wayfarer": [
-      "socket CameraTarget scale (100, 100, 100) reset to 1",
-      "socket Cockpit scale (100, 100, 100) reset to 1",
-      "socket Control_door0 scale (100, 100, 100) reset to 1",
-      "socket Control_door0_a scale (100, 100, 100) reset to 1",
-      "socket Control_door0_panel scale (100, 100, 100) reset to 1",
-      "socket Control_door1 scale (100, 100, 100) reset to 1",
-      "socket Control_door1_a scale (100, 100, 100) reset to 1",
-      "socket Control_door1_panel scale (100, 100, 100) reset to 1",
-      "socket Control_eng scale (100, 100, 100) reset to 1",
-      "socket Control_pwr scale (100, 100, 100) reset to 1",
-      "socket Display_centre_bottom scale (100, 100, 100) reset to 1",
-      "socket Display_centre_top scale (100, 100, 100) reset to 1",
-      "socket Display_left scale (100, 100, 100) reset to 1",
-      "socket Display_right scale (100, 100, 100) reset to 1",
-      "socket Engine_L scale (100, 100, 100) reset to 1",
-      "socket Engine_R scale (100, 100, 100) reset to 1",
-      "socket Exit scale (100, 100, 100) reset to 1",
-      "socket Gear_L scale (100, 100, 100) reset to 1",
-      "socket Gear_Nose scale (100, 100, 100) reset to 1",
-      "socket Gear_R scale (100, 100, 100) reset to 1",
-      "socket WalkRamp scale (100, 100, 100) reset to 1",
-      "socket WalkSeat scale (100, 100, 100) reset to 1"
-    ],
-    "SM_Ship_Wayfarer_Decals": [],
-    "SM_Ship_Wayfarer_Interior": [],
-    "SM_Ship_Wayfarer_InteriorDecals": []
-  },
+  "meshes": {},
   "kept_unchanged": [
+    "SM_Ship_Wayfarer",
     "SM_Ship_Wayfarer_Canopy",
+    "SM_Ship_Wayfarer_Decals",
     "SM_Ship_Wayfarer_Door0A",
     "SM_Ship_Wayfarer_Door1A",
     "SM_Ship_Wayfarer_Gear",
     "SM_Ship_Wayfarer_Hologram",
+    "SM_Ship_Wayfarer_Interior",
+    "SM_Ship_Wayfarer_InteriorDecals",
     "SM_Ship_Wayfarer_InteriorKit",
     "SM_Ship_Wayfarer_Screens"
   ],
   "imported_hashes": {
-    "SM_Ship_Wayfarer": "865a27a5e6de78e104a1d544eea60537b32be98f",
+    "SM_Ship_Wayfarer": "8788049a6ee21fc322326a73f66d3819b7fcd752",
     "SM_Ship_Wayfarer_Canopy": "879389a2da32c2818440c8370cc947c38af0759c",
-    "SM_Ship_Wayfarer_Decals": "ca6ac18db8ab49c25cb21d87ef078f4d3f9e4dab",
+    "SM_Ship_Wayfarer_Decals": "6792a9cc870eac443ecaa24af39fba342eeac4d1",
     "SM_Ship_Wayfarer_Door0A": "f593dd2e91e797e067daf38767cd9fe81d9cea12",
     "SM_Ship_Wayfarer_Door1A": "e399533e241926e1610ed1e6957b7139fb21cc10",
     "SM_Ship_Wayfarer_Gear": "7dc7e8ec1f70b6d335d5d82d424f2e9d8b4d85bf",
-    "SM_Ship_Wayfarer_Hologram": "19ad136b4dfcafa2f3fc35755332989246018cd3",
-    "SM_Ship_Wayfarer_Interior": "88d5ec0942883c0dbf280b5e6722ab64aff0f946",
-    "SM_Ship_Wayfarer_InteriorDecals": "6dc417d93f76a47212f70cdb4a04b31634ec7662",
+    "SM_Ship_Wayfarer_Hologram": "7f42a610def6af75b04036c4eeda939904c09720",
+    "SM_Ship_Wayfarer_Interior": "7286e891b192a8ba9b3c1b475349ac90247a2ad5",
+    "SM_Ship_Wayfarer_InteriorDecals": "f8548b77eaf34aea7a41219260b5f59cbee074b9",
     "SM_Ship_Wayfarer_InteriorKit": "7c6de1d8613fe23f6b2058b655890a31c906a456",
     "SM_Ship_Wayfarer_Screens": "af6c471502017df4007048c3af25d4531fda123a"
   },
   "materials": [
     "29 decal materials: HazardExhaust_L, HazardExhaust_R, Int_CautionLoad, Int_Cockpit, Int_CockpitStairs, Int_Engineering, Int_Exit, Int_Fire, Int_Galley, Int_Grid, Int_Hold, Int_Hygiene, Int_Lane, Int_LifeSupport, Int_Quarters, Int_RampHazard, Int_Sec02, Int_Sec03, Int_Sec04, Int_Sec05, Int_Sec06, Int_StairHazard, Int_Suit, Logo_L, Logo_R, Name_L, Name_R, Reg_L, Reg_R",
-    "58 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_MeshDecalAO, /Game/Ships/Shared/Materials/M_Ship_MeshDecalGrime, /Game/Ships/Shared/Materials/M_Ship_Layered, /Game/Ships/Shared/Materials/M_Ship_ScreenBack, /Game/Ships/Shared/Materials/M_Ship_Blink, /Game/Ships/Shared/Materials/M_Ship_Holo"
+    "60 material instances, masters /Game/Ships/Shared/Materials/M_Ship_Hull, /Game/Ships/Shared/Materials/M_Ship_PBR, /Game/Ships/Shared/Materials/M_Ship_Glass, /Game/Ships/Shared/Materials/M_Ship_Screen, /Game/Ships/Shared/Materials/M_Ship_Decal, /Game/Ships/Shared/Materials/M_Ship_MeshDecal, /Game/Ships/Shared/Materials/M_Ship_MeshDecalPaint, /Game/Ships/Shared/Materials/M_Ship_MeshDecalAO, /Game/Ships/Shared/Materials/M_Ship_MeshDecalGrime, /Game/Ships/Shared/Materials/M_Ship_Layered, /Game/Ships/Shared/Materials/M_Ship_ScreenBack, /Game/Ships/Shared/Materials/M_Ship_Blink, /Game/Ships/Shared/Materials/M_Ship_Holo"
   ],
   "hologram_pivot_cm": [
     775.0,
     -72.0,
-    108.2
+    116.5
   ],
   "blueprint": {
     "path": "/Game/Ships/Wayfarer/Blueprints/BP_Ship_Wayfarer",
@@ -110,6 +86,8 @@
       "pawn.cockpit_view_pitch_deg = 0.0",
       "pawn.cockpit_exposure_bias = -0.2",
       "pawn.cockpit_light_color = [1.0, 0.93, 0.84]",
+      "pawn.cockpit_fill_intensity_cd = 3.0",
+      "pawn.cockpit_fill_offset = [45.0, 0.0, -45.0]",
       "camera_boom.target_arm_length = 2800.0",
       "camera_boom.socket_offset = [0.0, 0.0, 520.0]",
       "camera_boom.camera_lag_speed = 6.0",
@@ -172,12 +150,12 @@
       "light Light_int_4 (spot, 1.8 cd) at [585.0, -55.0, 160.0]",
       "light Light_int_5 (spot, 4.0 cd) at [745.0, 105.0, 70.0]",
       "light Light_int_6 (spot, 1.8 cd) at [585.0, 55.0, 160.0]",
-      "light Light_int_7 (spot, 6.0 cd) at [665.0, -92.5, 131.2]",
-      "light Light_int_8 (spot, 6.0 cd) at [665.0, 92.5, 131.2]",
+      "light Light_int_7 (spot, 6.0 cd) at [665.0, -76.5, 131.2]",
+      "light Light_int_8 (spot, 6.0 cd) at [665.0, 76.5, 131.2]",
       "light Light_int_9 (point, 1.6 cd) at [605.0, -0.0, 145.0]",
       "light Light_int_10 (point, 2.0 cd) at [735.0, -55.0, 7.0]",
       "light Light_int_11 (point, 2.0 cd) at [735.0, 55.0, 7.0]",
-      "light Light_int_12 (point, 1.5 cd) at [775.0, -72.0, 108.2]",
+      "light Light_int_12 (point, 1.5 cd) at [775.0, -72.0, 116.5]",
       "light Light_fix_13 (point, 0.528 cd) at [492.8, -0.0, -101.9]",
       "light Light_fix_14 (point, 0.528 cd) at [510.8, -0.0, -82.8]",
       "light Light_fix_15 (point, 0.528 cd) at [528.8, -0.0, -63.6]",
@@ -195,7 +173,7 @@
       "light Light_fix_27 (point, 0.294 cd) at [769.4, 37.2, 78.7]",
       "light Light_fix_28 (point, 0.294 cd) at [769.4, -37.2, 78.7]",
       "light Light_fix_29 (point, 0.192 cd) at [758.5, -87.6, 86.4]",
-      "light Light_fix_30 (point, 0.192 cd) at [758.6, 87.5, 86.3]",
+      "light Light_fix_30 (point, 0.192 cd) at [758.6, 87.6, 86.3]",
       "light Light_fix_31 (point, 0.141 cd) at [724.4, 109.5, 66.1]",
       "light Light_fix_32 (point, 0.141 cd) at [724.7, -108.3, 64.9]"
     ]
@@ -208,9 +186,9 @@
         "hold",
         "cabin"
       ],
-      "parts": 53,
+      "parts": 54,
       "lights": 103,
-      "removed": 159,
+      "removed": 160,
       "post": {
         "box_m": [
           1.0,

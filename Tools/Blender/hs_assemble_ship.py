@@ -208,6 +208,11 @@ def main(argv):
     if recipe.get("layers"):
         import hs_layers
         layer_report = hs_layers.bake(out[""], recipe["layers"], off)
+    # (7. 10. 2026) the same masks on the interior where it is layered (the cockpit): occlusion -> dirt settled in the
+    # corners and seams, convex bevels -> worn edges (critic: "factory clean, no dirt in the gaps")
+    if recipe.get("interior_layers") and out.get("Interior") is not None:
+        import hs_layers
+        layer_report["interior"] = hs_layers.bake(out["Interior"], recipe["interior_layers"], off)
     # 3b) mesh decals and trim strips laid onto the finished hull (Tools/Blender/hs_decals.py): their own
     #     part with atlas UVs, no unwrap, no collision, not Nanite (setup no_nanite_parts)
     import hs_decals

@@ -2036,15 +2036,15 @@ def schedules(rs, x, ytop, decals_at=None):
     room = rs.rid
     TS, RH = 2.5, 4.4
     els = [e for e in m.elements if (e.room == room or room in (e.extra.get("rooms") or ())) and e.status != "remove"]
-    K = [e for e in els if e.kit and e.cat in ("wall", "bulkhead", "ceiling", "floor")]
-    K.sort(key=lambda e: ({"wall": 0, "bulkhead": 1, "ceiling": 2, "floor": 3}[e.cat], e.id))
+    K = [e for e in els if e.kit and e.cat in ("wall", "bulkhead", "ceiling", "floor", "cockpit")]
+    K.sort(key=lambda e: ({"wall": 0, "bulkhead": 1, "ceiling": 2, "floor": 3, "cockpit": 4}[e.cat], e.id))
     cols = [("ID", 21, "left"), ("díl kitu", 41, "left"), ("umístění (m)", 52, "left", 2), ("trojúh.", 11, "right")]
     rows = [([e.id, e.kit, e.where, "%d" % e.extra["tris"]], STATUS_COL[e.status]) for e in K]
     if not K:                                   # a room the ship builds (the cockpit)
         sh.t(x, ytop - 3.4, "DÍLY KITU: žádné – místnost staví loď (hs_interior, hs_cockpit)", 3.4, weight="bold")
         y1 = ytop - 8.0
     else:
-        y1 = ds.table(sh, x, ytop, "DÍLY KITU (stěny, přepážky, strop, podlaha)", cols, rows, size=TS, rowh=RH)
+        y1 = ds.table(sh, x, ytop, "DÍLY KITU (stěny, přepážky, strop, podlaha, kokpit)", cols, rows, size=TS, rowh=RH)
     sched = {"kit": {e.id for e in K}}
     # each kit part's purpose once
     xp = x + sum(c[1] for c in cols) + 5

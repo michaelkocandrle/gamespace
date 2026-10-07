@@ -736,6 +736,18 @@
    "roughness": 0.5,
    "metallic": 0.4
   },
+  "int_seat": {
+   "slot": "IntSeat",
+   "colour": [0.2, 0.196, 0.19],
+   "roughness": 0.45,
+   "metallic": 0.1
+  },
+  "int_floor_ck": {
+   "slot": "IntFloorCockpit",
+   "colour": [0.09, 0.088, 0.085],
+   "roughness": 0.55,
+   "metallic": 0.4
+  },
   "int_webbing": {
    "slot": "IntWebbing",
    "colour": [0.13, 0.122, 0.112],
@@ -2435,6 +2447,14 @@
    }
   ]
  },
+ "interior_layers": {
+  "_comment": "7. 10. 2026: the layered material's masks baked on the interior (hs_layers.bake on SM_..._Interior) - the cockpit only (region_x layout), short occlusion rays for cockpit-sized seams",
+  "region_x": [15.85, 19.3],
+  "ao_rays": 40,
+  "ao_distance_m": 0.04,
+  "edge": [0.25, 0.42],
+  "edge_max_face_m2": 0.0015
+ },
  "layers": {
   "_comment": "Vertex-colour masks for M_Ship_Layered (Tools/Blender/hs_layers.py). Whole ship (region_x covers the hull).",
   "region_x": [-1.0, 21.5],
@@ -2843,6 +2863,7 @@
   [[10.39, -1.9], [15.19, -1.9], [0, 1], ["Wall_HullLiner12L_A", "Wall_HullLiner12L_A", "Wall_HullLiner12L_A", "Wall_HullLiner06L_A", "Wall_HullLiner06L_D"]]
  ],
    "run_parts": [
+    [[16.3, 0.43, 1.15], [1, 0], ["Cockpit_Console12W_A"]],
     [[8.54, -1.2], [1, 0], ["Bulkhead_Door03W_B"]],
     [[10.33, 1.2], [-1, 0], ["Bulkhead_Door00W_A"]],
     [[10.40, -1.9], [1, 0], ["Bulkhead_Door00L38_A"]],

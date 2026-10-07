@@ -39,7 +39,7 @@ ROLES = ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber
          # the parts factory's shared base (ArtSource/Kit/kit_materials.json, 6. 10. 2026): lacquer, polished lip, dark
          "Kit_Lacquer", "Kit_Lip", "Kit_Graphite", "Kit_Gasket", "Kit_AntiSlip", "Kit_GlowFoot",
          # decal stack step (6. 10. 2026): the mid-grey panel and the dark perforated insert
-         "Kit_Panel", "Kit_Perforated", "Kit_Red", "Kit_GlowRed", "Kit_Shell", "Kit_Housing"]
+         "Kit_Panel", "Kit_Perforated", "Kit_Red", "Kit_GlowRed", "Kit_Shell", "Kit_Housing", "Kit_Console"]
 
 
 def frame(origin, ax, ay, az):

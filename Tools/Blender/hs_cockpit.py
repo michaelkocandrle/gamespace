@@ -100,7 +100,10 @@ GRIME = []
 
 
 def grime(at, n, up, size, kind="smear", alpha=0.5, wear=False):
-    """wear: the light polish / scuff card (DecalWear) instead of the dark dirt."""
+    """wear: the light polish / scuff card (DecalWear) instead of the dark dirt. The soft "smear" blotch is not laid
+    (critic 7. 10. r4: blotches in the middle of plates read as smoke): dirt sits in seams and on edges only."""
+    if kind == "smear":
+        return
     GRIME.append({"at": list(at), "n": list(n), "up": list(up), "size": list(size), "kind": kind, "alpha": alpha, "wear": wear})
 
 
@@ -637,7 +640,7 @@ def pilot_seat_v3(g, rect, zr):
         lip = [surf(i, 1.0, 0.012) + side * 0.008, surf(i, 1.0, -0.02) + side * 0.016]
         lip_l = [surf(i, -1.0, -0.02) - side * 0.016, surf(i, -1.0, 0.012) - side * 0.008]
         rings.append(front + lip + back + lip_l)
-    loft(g["int_console"], rings)
+    loft(g["int_seat"], rings)            # (critic / SC Aurora: a mid-grey shell, not a black one - 7. 10. 2026)
 
     # 2) the padding: quilted channels across the pan and up the back, each a pillowed strip with rounded ends,
     # 1.4 cm grooves between them; bolsters along both sides of the back and the pan
@@ -667,7 +670,7 @@ def pilot_seat_v3(g, rect, zr):
                     b = bulge * end * max(math.sin(math.pi * w), 0.0) ** 0.55
                     line.append(surf(i, uu, base + b + 0.0006))
                 for pa, pb in zip(line, line[1:]):
-                    tube(g["int_cream"], pa, pb, 0.0007, 4)
+                    tube(g["int_webbing"], pa, pb, 0.0006, 4)
 
     def at(arc_len):
         return min(range(m), key=lambda i: abs(arc[i] - arc_len))
@@ -711,7 +714,7 @@ def pilot_seat_v3(g, rect, zr):
         loft(g[key], rr)
         for line in st:
             for pa, pb in zip(line, line[1:]):
-                tube(g["int_cream"], pa, pb, 0.0006, 4)
+                tube(g["int_trim"], pa, pb, 0.0005, 4)
 
     buckle = surf(at(0.24), 0.0, 0.05)
     shoulder_i, hip_i = at(1.06), at(0.40)
@@ -790,6 +793,30 @@ def pilot_seat_v3(g, rect, zr):
         tube(g["int_trim"], lv, lv + side * (sgn * 0.008), 0.009, 14)                                 # recline lever
         tube(g["int_trim"], lv + side * (sgn * 0.006), lv + side * (sgn * 0.006) + Vector((0.07, 0, -0.03)), 0.005, 8)
         tube(g["accent"], lv + side * (sgn * 0.006) + Vector((0.07, 0, -0.03)), lv + side * (sgn * 0.006) + Vector((0.1, 0, -0.042)), 0.009, 12)
+    # (critic 7. 10.: no joint between pan and back) a machined pivot hub each side where the back meets the pan:
+    # a housing-grey disc, a satin cap, six bolts round it
+    for sgn in (-1, 1):
+        hc = surf(at(0.40), sgn * 1.0, -0.035) + side * (sgn * 0.035)
+        ax_ = side * sgn
+        tube(g["int_housing"], hc, hc + ax_ * 0.016, 0.05, 32)
+        tube(g["int_trim"], hc + ax_ * 0.016, hc + ax_ * 0.022, 0.022, 24)
+        tube(g["int_dark"], hc + ax_ * 0.022, hc + ax_ * 0.024, 0.009, 12)
+        ref = Vector((1, 0, 0))
+        oth = ax_.cross(ref).normalized()
+        for k in range(6):
+            a_ = 2 * math.pi * k / 6
+            q = hc + ax_ * 0.016 + (ref * math.cos(a_) + oth * math.sin(a_)) * 0.036
+            tube(g["int_trim"], q, q + ax_ * 0.004, 0.0045, 6)
+    # (SC's seat: grab handles beside the headrest, the maker's mark on it) satin loops on both sides of the head,
+    # the maker's mark across the headrest
+    for sgn in (-1, 1):
+        h0 = surf(at(1.12), sgn * 1.0, -0.01) + side * (sgn * 0.012)
+        h1 = surf(at(1.30), sgn * 1.0, -0.01) + side * (sgn * 0.012)
+        loop = [h0, h0 + side * (sgn * 0.045), h1 + side * (sgn * 0.045), h1]
+        for pa, pb in zip(loop, loop[1:]):
+            tube(g["int_trim"], pa, pb, 0.008, 10)
+    hh = surf(at(1.33), 0.0, 0.056)
+    stencil("maker", hh, frames[at(1.33)][1], -side, frames[at(1.33)][1].cross(-side).normalized(), 0.3, 0.2)
     # 4) the frame: spine spars behind the shell, a gas strut, the swivel post and its plinth on two floor rails
     for sgn in (-1, 1):
         sp = [surf(i, sgn * 0.82, -0.07) - frames[i][1] * 0.02 for i in range(at(0.30), at(1.12), 3)]
@@ -812,33 +839,7 @@ def pilot_seat_v3(g, rect, zr):
     tube(g["int_trim"], surf(at(0.10), -1.0, -0.06), surf(at(0.10), -1.0, -0.06) + Vector((0.08, -0.03, -0.01)), 0.007, 8)
     tube(g["accent"], surf(at(0.10), -1.0, -0.06) + Vector((0.08, -0.03, -0.01)), surf(at(0.10), -1.0, -0.06) + Vector((0.11, -0.04, -0.012)), 0.011, 10)
 
-    # 5) armrests (author 26. 9. 2026): padded arms on graphite shells, hinged on the frame, 23 cm clear of the consoles
-    pan = W(0.02, 0.45)
-    fwd, upz = Vector((1, 0, 0)), Vector((0, 0, 1))
-    for sd in (-1, 1):
-        top = pan + side * (sd * 0.345) + fwd * 0.03 + upz * 0.22
-        rr_slab(g["int_console"], top - upz * 0.03, side, fwd, upz, 0.085, 0.34, 0.024, 0.026, 5)
-        rr_slab(g["int_leather"], top, side, fwd, upz, 0.075, 0.32, 0.026, 0.032, 6)
-        rr_slab(g["int_dark"], top + upz * 0.001, side, fwd, upz, 0.004, 0.27, 0.001, 0.001, 1)   # welt
-        # (critic 7. 10.: bare armrest pads) a small control plate at the front of each arm: a grey bezel, two
-        # backlit-free push caps, four screws
-        cp = top + fwd * 0.11 + upz * 0.002
-        rr_slab(g["int_housing"], cp + upz * 0.004, side, fwd, upz, 0.05, 0.07, 0.008, 0.006, 3)
-        rr_ring(g["int_trim"], cp + upz * 0.0045, side, fwd, upz, 0.05, 0.07, 0.008, 0.003, 0.002, 3)
-        for dv_ in (-0.014, 0.014):
-            tube(g["int_trim"], cp + fwd * dv_ + upz * 0.004, cp + fwd * dv_ + upz * 0.007, 0.0075, 14)
-            tube(g["int_dark"], cp + fwd * dv_ + upz * 0.006, cp + fwd * dv_ + upz * 0.0095, 0.006, 14)
-        for su_ in (-1, 1):
-            for sv_ in (-1, 1):
-                q = cp + side * (su_ * 0.018) + fwd * (sv_ * 0.028) + upz * 0.004
-                tube(g["int_trim"], q, q + upz * 0.0015, 0.0022, 6)
-        for dv_, lab_ in ((-0.014, "ck_comms" if sd > 0 else "ck_lights"), (0.014, "ck_scan" if sd > 0 else "ck_extlt")):
-            stencil(lab_, cp + fwd * dv_ - side * 0.0 + upz * 0.0058 + Vector((0, -0.0135, 0)), upz, Vector((0, -1, 0)), fwd, 0.48, 0.05)
-        grime(top + upz * 0.03 - fwd * 0.05, upz, fwd, (0.07, 0.18), "smear", 0.9, wear=True)
-        hinge_a = top - upz * 0.055 - fwd * 0.15
-        tube(g["int_trim"], hinge_a - side * 0.03, hinge_a + side * 0.03, 0.014, 14)
-        tube(g["int_trim"], pan - upz * 0.05 + side * (sd * 0.3) - fwd * 0.2, hinge_a, 0.012, 10)
-        tube(g["int_trim"], hinge_a, top - upz * 0.035 - fwd * 0.1, 0.011, 10)
+    # (7. 10. 2026: no armrests on the seat - the consoles moved in to 0.43 m and are the armrests, as in SC)
 
 
 # ------------------------------------------------------------------------------------------ HOTAS
@@ -856,15 +857,23 @@ def _ring(c, fwd, side, up_, d, w, r, seg=5, groove=0.0):
     return pts
 
 
-def _boot(g, base, top_r=0.018, bottom_r=0.05, h=0.07, folds=4):
+def _boot(g, base, top_r=0.018, bottom_r=0.05, h=0.07, folds=6):
+    """A rubber bellows (critic 7. 10.: "a stepped cone of discs"): smooth convolutions - a sine profile sampled finely
+    over a taper, 36 around, in rubber; a satin clamp ring at its foot with six screws, a narrow collar at its top."""
     rings = []
-    levels = folds * 2 + 1
-    for k in range(levels + 1):
-        t = k / levels
-        rr = bottom_r + (top_r - bottom_r) * t + (0.004 if k % 2 else 0.0)
+    steps = folds * 8
+    for k in range(steps + 1):
+        t = k / steps
+        rr = bottom_r + (top_r - bottom_r) * t ** 0.85 + 0.0055 * (0.5 + 0.5 * math.cos(2 * math.pi * folds * t)) * (1.0 - 0.6 * t)
         z = base.z + h * t
-        rings.append([Vector((base.x + rr * math.cos(2 * math.pi * i / 24), base.y + rr * math.sin(2 * math.pi * i / 24), z)) for i in range(24)])
-    loft(g["int_leather"], rings)
+        rings.append([Vector((base.x + rr * math.cos(2 * math.pi * i / 36), base.y + rr * math.sin(2 * math.pi * i / 36), z)) for i in range(36)])
+    loft(g["int_rubber"], rings)
+    tube(g["int_trim"], base - Vector((0, 0, 0.002)), base + Vector((0, 0, 0.007)), bottom_r + 0.008, 36)        # clamp ring
+    for k in range(6):
+        a_ = 2 * math.pi * (k + 0.5) / 6
+        q = base + Vector(((bottom_r + 0.0045) * math.cos(a_), (bottom_r + 0.0045) * math.sin(a_), 0.007))
+        tube(g["int_dark"], q, q + Vector((0, 0, 0.0015)), 0.0022, 6)
+    tube(g["int_trim"], base + Vector((0, 0, h - 0.004)), base + Vector((0, 0, h + 0.006)), top_r + 0.003, 24)  # top collar
 
 
 def _base_plate(g, c, w, d, label=None):
@@ -905,7 +914,7 @@ def hotas_stick(g, base):
     loft(g["int_rubber"], rings)
     top = g0 + ax * L
     # the head: a dark slanted cap with the hats and the pickle
-    rr_slab(g["int_dark"], top + ax * 0.004, side * -1, fwd, ax, 0.034, 0.046, 0.012, 0.006, 4)
+    rr_slab(g["int_housing"], top + ax * 0.004, side * -1, fwd, ax, 0.034, 0.046, 0.012, 0.006, 4)   # grey head (SC)
     for off, rr in ((-0.01, 0.0065), (0.012, 0.0055)):
         c = top + ax * 0.004 + fwd * off
         tube(g["int_trim"], c, c + ax * 0.008, rr, 14)                                             # hat base
@@ -973,7 +982,15 @@ def hotas_throttle(g, base):
         rings.append(_ring(top + ax * (0.085 * t - 0.01), fwd, side, ax, d, w, 0.016, 5))
     loft(g["int_rubber"], rings)
     head = top + ax * 0.075
-    rr_slab(g["int_dark"], head + ax * 0.004, side * -1, fwd, ax, 0.054, 0.066, 0.014, 0.006, 4)   # cap
+    rr_slab(g["int_housing"], head + ax * 0.004, side * -1, fwd, ax, 0.054, 0.066, 0.014, 0.006, 4)   # cap (SC: grey)
+    # (critic 7. 10.: "a black block") a grey machined shell on the outboard flank of the grip, a satin seam line,
+    # two screws - the rubber stays only where the fingers and the palm hold it
+    sh_c = top + ax * 0.045 + side * 0.03
+    rr_slab(g["int_housing"], sh_c, fwd, ax, side, 0.06, 0.06, 0.012, 0.006, 4)
+    rr_ring(g["int_trim"], sh_c + side * 0.0005, fwd, ax, side, 0.06, 0.06, 0.012, 0.0015, 0.001, 4)
+    for dv in (-0.02, 0.02):
+        q = sh_c + ax * dv + side * 0.0004
+        tube(g["int_trim"], q, q + side * 0.0012, 0.0022, 8)
     # thumb hat and two backlit buttons on the inboard face (towards the pilot: -side)
     face = head - side * 0.03 - ax * 0.02
     tube(g["int_trim"], face, face - side * 0.008, 0.0065, 14)
@@ -1006,6 +1023,154 @@ def hotas_throttle(g, base):
     rr_slab(g["int_dark"], ro, fwd, ax, side, 0.026, 0.014, 0.003, 0.003, 2)
     for sv in (-1, 1):
         rr_slab(g["int_trim"], ro + fwd * (sv * 0.006) + side * 0.003, fwd, ax, side, 0.01, 0.01, 0.002, 0.003, 2)
+
+
+
+# ------------------------------------------------------------------------------------------ SC-style armrest controls
+# Author 7. 10. 2026: "the lever not good enough, the emergency button turned the wrong way and makes no sense - take
+# what SC has and how they have it". SC Aurora (Docs/Kit/etalon/sc/konzole_*.jpg, kreslo_*.jpg): a stick on a chrome
+# ball over a base disc ringed with black-and-white hatching, a slim flat-sided grip with a silver C-guard arching over
+# its head, a perforated wrist rest behind it, a grey control block sloped towards the pilot carrying the red QNTM-style
+# guarded key (a rectangular red lens under a hinged red cover) over a row of labelled rockers, and a C-shaped grab
+# handle off the arm's outboard front with the maker's mark.
+
+def _sphere(bm, c, r, nu=20, nv=12):
+    rings = []
+    for k in range(1, nv):
+        t = math.pi * k / nv
+        z, rr = -math.cos(t) * r, math.sin(t) * r
+        rings.append([c + Vector((rr * math.cos(2 * math.pi * i / nu), rr * math.sin(2 * math.pi * i / nu), z)) for i in range(nu)])
+    loft(bm, rings)
+
+
+def _hatch_disc(g, c, r_in, r_out, k=36):
+    """A flat ring of alternating dark / light wedges, each one sheared - SC's hatched stick base."""
+    for i in range(k):
+        a0, a1 = 2 * math.pi * i / k, 2 * math.pi * (i + 1) / k
+        sh = 2 * math.pi / k * 1.2
+        q = [c + Vector((r_in * math.cos(a0), r_in * math.sin(a0), 0.0)), c + Vector((r_in * math.cos(a1), r_in * math.sin(a1), 0.0)),
+             c + Vector((r_out * math.cos(a1 + sh), r_out * math.sin(a1 + sh), 0.0)), c + Vector((r_out * math.cos(a0 + sh), r_out * math.sin(a0 + sh), 0.0))]
+        bm = g["int_dark"] if i % 2 else g["accent"]
+        vs = [bm.verts.new(p) for p in q] + [bm.verts.new(p - Vector((0, 0, 0.002))) for p in q]
+        bm.faces.new(vs[3::-1])                                     # (the loop runs clockwise from above)
+        for j in range(4):
+            jj = (j + 1) % 4
+            bm.faces.new((vs[jj], vs[j], vs[4 + j], vs[4 + jj]))
+
+
+def sc_stick(g, base, label, inboard):
+    """SC's stick at base (console top): a grey base plate with a hatched ring, a chrome ball and neck, a slim grip
+    (dark rubber sides, a grey front plate and head, buttons under the thumb), the silver C-guard over the head.
+    inboard: the unit vector towards the pilot (the thumb side)."""
+    X, Z = Vector((1, 0, 0)), Vector((0, 0, 1))
+    Ym, Yp = Vector((0, -1, 0)), Vector((0, 1, 0))        # right-handed frames: (-Y) x X = Z, Y x Z = X
+    side = inboard.normalized()
+    rr_slab(g["int_housing"], base + Z * 0.008, Ym, X, Z, 0.15, 0.15, 0.025, 0.012, 5)                # base plate
+    rr_ring(g["int_trim"], base + Z * 0.0085, Ym, X, Z, 0.15, 0.15, 0.025, 0.004, 0.002, 5)
+    tube(g["int_dark"], base + Z * 0.0075, base + Z * 0.009, 0.06, 40)
+    _hatch_disc(g, base + Z * 0.0105, 0.04, 0.054)
+    tube(g["int_trim"], base + Z * 0.008, base + Z * 0.014, 0.033, 32)                                 # collar
+    _sphere(g["int_trim"], base + Z * 0.03, 0.022)                                                      # chrome ball
+    tube(g["int_trim"], base + Z * 0.045, base + Z * 0.07, 0.009, 16)                                  # neck
+    for k in range(4):
+        q = base + Z * 0.0085 + (side * math.cos(math.pi / 4 + k * math.pi / 2) + X * math.sin(math.pi / 4 + k * math.pi / 2)) * 0.06
+        tube(g["int_trim"], q, q + Z * 0.002, 0.003, 8)
+    # the grip: leaning forward 8 deg, 12 cm, a slim box with soft edges
+    lean = math.radians(8.0)
+    ax = (Z * math.cos(lean) + X * math.sin(lean)).normalized()
+    fwd = (X * math.cos(lean) - Z * math.sin(lean)).normalized()
+    g0 = base + Z * 0.07
+    gc = g0 + ax * 0.06
+    # body: rubber, built as a rounded slab standing along ax (front face towards fwd)
+    rings = []
+    for k in range(13):
+        t_ = k / 12
+        d_ = 0.036 + 0.012 * math.sin(math.pi * min(t_ / 0.85, 1.0))                 # front-back: the palm swell
+        w_ = 0.03 + 0.006 * math.sin(math.pi * min(t_ / 0.85, 1.0))
+        rings.append(_ring(g0 + ax * (0.12 * t_) + fwd * 0.002, fwd, Yp, ax, d_, w_, 0.012, 4,
+                           0.0025 * abs(math.sin(3 * math.pi * t_)) if t_ < 0.6 else 0.0))
+    loft(g["int_rubber"], rings)
+    # the grey front plate down the grip's face and the grey head block
+    rr_slab(g["int_housing"], gc + fwd * 0.0235 + ax * 0.01, Yp, ax, fwd, 0.026, 0.085, 0.009, 0.004, 4)
+    head = g0 + ax * 0.122
+    rr_slab(g["int_housing"], head + ax * 0.012, Ym, fwd, ax, 0.04, 0.054, 0.012, 0.022, 4)
+    # the C-guard: a flat silver bar from the head's back over its top to the front, down to the trigger height
+    pts = []
+    for k in range(37):                                     # (12 steps read as chain links - critic eye 7. 10.)
+        t = math.pi * k / 36
+        pts.append(head + ax * (0.008 + 0.032 * math.sin(t)) + fwd * (-0.034 * math.cos(t)) + fwd * 0.004)
+    pts.append(pts[-1] - ax * 0.035)
+    for sd in (-1, 1):                                                  # a pair of flat silver bars, 2 cm apart
+        for a, b in zip(pts, pts[1:]):
+            tube(g["int_trim"], a + Yp * (sd * 0.009), b + Yp * (sd * 0.009), 0.0042, 8)
+    tube(g["int_trim"], pts[18] - Yp * 0.011, pts[18] + Yp * 0.011, 0.004, 8)        # the bridge at the top
+    # buttons on the head's top and the thumb side, a hat
+    for k, off in enumerate((-0.012, 0.012)):
+        c = head + ax * 0.024 + fwd * off
+        tube(g["int_dark"], c, c + ax * 0.004, 0.0065, 16)
+        tube(g["accent" if k else "int_trim"], c + ax * 0.004, c + ax * 0.0055, 0.0048, 16)
+    th = gc + side * 0.018 + ax * 0.035
+    tube(g["int_trim"], th, th + side * 0.004, 0.0068, 16)
+    for dv in (fwd, ax):
+        tube(g["int_trim"], th + side * 0.004 - dv * 0.004, th + side * 0.004 + dv * 0.004, 0.0016, 6)
+    tr = gc + fwd * 0.046 + ax * 0.02                                                                   # trigger
+    rr_slab(g["int_dark"], tr, Yp, ax, fwd, 0.016, 0.03, 0.006, 0.012, 3)
+    # label on the base plate, aft of the stick, read from the seat
+    stencil(label, base + Z * 0.0145 - X * 0.062, Z, Ym, X, 0.45, 0.08)
+    grime(base + Z * 0.0145, Z, X, (0.16, 0.16), "smear", 0.8, wear=True)
+
+
+def sc_control_block(g, c, w, h, tilt_deg, key_label, rockers):
+    """The grey control block sloped towards the pilot (SC's QNTM / CYCLE CONFIGURATION block): a wedge pedestal, on its
+    face the red guarded key (a rectangular red lens in a dark bezel under a hinged red cover) with its label, a row of
+    labelled rockers under it, hatched corner plates, screws. c: the face's centre; the face looks aft and up."""
+    t = math.radians(tilt_deg)
+    n = Vector((-math.sin(t), 0.0, math.cos(t)))
+    up = Vector((math.cos(t), 0.0, math.sin(t)))
+    right = Vector((0.0, -1.0, 0.0))
+    rr_slab(g["int_housing"], c, right, up, n, w, h, 0.01, 0.1, 4)                                      # the wedge
+    rr_ring(g["int_trim"], c + n * 0.0006, right, up, n, w, h, 0.01, 0.003, 0.0015, 4)
+    face = c + n * 0.0008
+    # the red key: dark bezel, red lens, its lamp, the red cover hinged at the top and flipped up
+    kc = face + up * (h * 0.22)
+    rr_slab(g["int_dark"], kc + n * 0.004, right, up, n, 0.058, 0.04, 0.006, 0.006, 3)
+    rr_slab(g["int_red"], kc + n * 0.0075, right, up, n, 0.044, 0.026, 0.004, 0.004, 3)
+    rr_slab(g["int_led_o"], kc + n * 0.0078, right, up, n, 0.03, 0.004, 0.0015, 0.0005, 2)
+    hinge = kc + up * 0.023 + n * 0.009
+    tube(g["int_trim"], hinge - right * 0.03, hinge + right * 0.03, 0.0028, 10)
+    r2, u2, n2 = _frame_tilt(right, up, n, -62.0)                     # (at -105 it read edge-on as a red stick)
+    rr_slab(g["int_red"], hinge + u2 * 0.021 + n2 * 0.002, r2, u2, n2, 0.056, 0.04, 0.006, 0.003, 2)
+    rr_ring(g["int_trim"], hinge + u2 * 0.021 + n2 * 0.0025, r2, u2, n2, 0.056, 0.04, 0.006, 0.002, 0.001, 2)
+    LABELS.append({"item": key_label, "at": list(kc - up * 0.031 + n * 0.0002), "n": list(n), "x": list(right), "y": list(up),
+                   "scale": 0.85, "max_w": w * 0.8})
+    # the rockers
+    k = len(rockers)
+    for i, lab in enumerate(rockers):
+        p = face + up * (-h * 0.3) + right * (-w * 0.32 + w * 0.64 * i / max(k - 1, 1))
+        _rocker(g, p, right, up, n)
+        LABELS.append({"item": lab, "at": list(p - up * 0.022 + n * 0.0002), "n": list(n), "x": list(right), "y": list(up),
+                       "scale": 0.42, "max_w": w / k - 0.006})
+    # hatched plates in the lower corners, four screws
+    for su in (-1, 1):
+        hp = face + right * (su * (w / 2 - 0.016)) + up * (h * 0.2)
+        rr_slab(g["int_dark"], hp + n * 0.001, right, up, n, 0.02, 0.03, 0.002, 0.001, 2)
+        stencil("hazard_subtle", hp + n * 0.0016, n, up, -right, 0.08, 0.03)
+        for sv in (-1, 1):
+            q = face + right * (su * (w / 2 - 0.007)) + up * (sv * (h / 2 - 0.007))
+            tube(g["int_trim"], q, q + n * 0.002, 0.0024, 8)
+    grime(face - up * (h * 0.2), n, up, (w * 0.8, h * 0.4), "smear", 0.8, wear=True)
+    grime(c - n * 0.06 - up * (h / 2), Vector((0, 0, 1)), Vector((1, 0, 0)), (w + 0.04, 0.05), "soot", 0.9)
+
+
+def grab_handle(g, a, out, up_):
+    """A C-shaped grey grab handle standing off the arm's outboard front (SC's RSI handle), the maker's mark on it."""
+    out, up_ = out.normalized(), up_.normalized()
+    fwd = up_.cross(out).normalized()
+    pts = [a, a + out * 0.07, a + out * 0.07 + fwd * 0.12, a + fwd * 0.12]
+    for p, q in zip(pts, pts[1:]):
+        rr_slab(g["int_housing"], (p + q) / 2 + up_ * 0.0, (q - p).normalized().cross(up_).normalized(), (q - p).normalized(), up_,
+                0.034, (q - p).length + 0.034, 0.01, 0.028, 3)
+    stencil("maker", a + out * 0.07 + fwd * 0.06 + up_ * 0.0002, up_, -fwd if out.y > 0 else fwd, out if out.y > 0 else -out, 0.2, 0.12)
 
 
 def glass_panel(g, screen_bm, sockets, name, c, right, up, n, w, h, proud, visor=True):
@@ -1421,7 +1586,8 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
     bmesh.ops.solidify(tmp, geom=tmp.faces[:], thickness=0.03)
     mesh = bpy.data.meshes.new("_dash_tmp")
     tmp.to_mesh(mesh)
-    g["int_console"].from_mesh(mesh)
+    # (critic 7. 10.: the lower third of the pilot's view a black mass) the dash wrap in the housing grey, like SC's
+    g["int_housing"].from_mesh(mesh)
     bpy.data.meshes.remove(mesh)
     tmp.free()
     # panel breaks across the glare shield every ~25 cm and a row of bolts along its back edge (critic: empty

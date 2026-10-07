@@ -1,0 +1,42 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 4,
+ "date": "2026-10-07",
+ "verdict": "FAIL",
+ "gate": "step",
+ "first_impression": "Šedá čistá konzole s pěkným kniplem, ale pořád hranatý kvádr s plochými deskami a drobnými šedými popisky; působí jako dobře rozkreslená maketa, ne jako opotřebený lisovaný díl ze SC.",
+ "scores": {
+  "silueta_a_tvar": {"score": 5, "why": "Tělo je stále kvádr se svislými boky a rovnou deskou (list 4 vpravo vlevo, list 1 vpravo); chybí stupňovitý profil, vyložená loketní jednotka na konzolách, podříznutí a zkosené čelo jako na etalonu."},
+  "hierarchie_a_hustota_detailu": {"score": 6, "why": "Moduly ve spárách se šrouby, žaluzie s lemem, 4 klávesy a knipl dávají řád, ale velké plochy desek (list 3 vpravo velký modul, list 2 vpravo deska C21, list 1 vpravo pravá tmavá deska) jsou holé."},
+  "materialy": {"score": 6, "why": "Tělo je nově středně šedé a ladí s křeslem, ale lak je jednolitý: oděr hran ani špína ve spárách nejsou na žádném listu vidět, loketní jednotka bez znatelného clear coatu."},
+  "decaly": {"score": 5, "why": "EMERG O2 je čitelný, D05/C21 a legendy kláves jsou bledé a malé; chybí logo výrobce, šrafované pásy a vrstvené detailní decaly, které etalon má na každém modulu."},
+  "svetlo": {"score": 5, "why": "Ploché studiové světlo s ostrým vrženým stínem (list 1 vpravo, list 2 vpravo pravá polovina tmavá); klávesy mají jen tenkou emisivní čárku bez glow, stavové proužky nesvítí do okolí."},
+  "citelnost": {"score": 5, "why": "TEMP/BATT/MAIN (list 2), ESP/VTOL/GEAR/PWR/EXT LT/ENG (list 3) jsou tenké šedé písmo na šedé, z pohledu pilota nečitelné; legendy pásu jsou vedle proužků, ne nad nimi."},
+  "chyby_geometrie": {"score": 6, "why": "Bez děr; C-lučík je teď jeden oblouk, ale čte se jako tenká kulatá trubka, ne plochý pás 15x9 mm; na listu 1 vpravo u pravé hrany trčí stříbrná lišta přes hranu desky."},
+  "soulad_stylu": {"score": 6, "why": "Tonalita sedí ke křeslu a oranžové akcenty Halcyonu (šrafa základny, rámeček klávesy, EMERG O2) jsou správně; tvarový jazyk (ostré kvádry) se ale liší od zaobleného křesla."}
+ },
+ "average": 5.5,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "previous_round_check": [
+  {"r3": 1, "title": "Silueta = krabice", "status": "neopraveno", "where": "list 4 vpravo vlevo, list 1 vpravo"},
+  {"r3": 2, "title": "Materiál těla černý, bez opotřebení", "status": "částečně - barva opravena na střední šedou, oděr hran a špína ve spárách nejsou vidět", "where": "list 1-3 vpravo"},
+  {"r3": 3, "title": "Čitelnost legend", "status": "neopraveno - legendy stále tenké, šedé a malé; pás má legendy vedle proužků", "where": "list 2, 3 vpravo"},
+  {"r3": 4, "title": "C-lučík jako drátěná smyčka", "status": "částečně - jeden oblouk, ale profil vypadá kulatý a tenký, ne plochý pás", "where": "list 1 vpravo nahoře, list 4"},
+  {"r3": 5, "title": "Prázdné plochy", "status": "neopraveno", "where": "list 3 vpravo, list 2 vpravo"},
+  {"r3": 6, "title": "Chybí logo a značení", "status": "neopraveno", "where": "list 1, 4"},
+  {"r3": 7, "title": "Useknutý decal u mřížky", "status": "opraveno - na listu 2 už není vidět", "where": "list 2 vpravo"},
+  {"r3": 8, "title": "Kryt červené klávesy", "status": "opraveno - kryt má tloušťku a bočnice, pant naznačený", "where": "list 3 vpravo nahoře"},
+  {"r3": 9, "title": "Mezera pod loketní jednotkou", "status": "nečitelné - na žádném listu není mezera ani konzoly vidět", "where": "list 1, 4"},
+  {"r3": 10, "title": "Podsvícení a světelné akcenty", "status": "neopraveno - stejná tenká čárka bez glow", "where": "list 1, 3"}
+ ],
+ "findings": [
+  {"n": 1, "title": "Silueta = krabice", "where": "list 4 vpravo levá konzole; list 1 vpravo", "problem": "Kvádr s rovnou deskou a svislými boky; etalon má stupňovitý profil, loketní jednotku vyloženou do strany na masivních konzolách, výřezy v boku a zkosené čelo.", "severity": "musí se opravit", "fix": "Čelo zkosit 25-30 st.; vnitřní bok podříznout 50 mm pod deskou; loketní jednotku vysunout 60-80 mm k sedáku na dvou L-konzolách tl. 25 mm se světlejším kovem; patku odsadit 30 mm se zkosením 45 st.; do boku 2 kapsy/výřezy hl. 15-20 mm."},
+  {"n": 2, "title": "Čitelnost legend", "where": "list 2 vpravo (TEMP/BATT/MAIN, C21), list 3 vpravo (ESP, VTOL, GEAR, PWR, EXT LT, ENG)", "problem": "Tenké šedé písmo na šedém, od křesla nečitelné; legendy pásu leží vedle proužků natočené, ne nad nimi.", "severity": "musí se opravit", "fix": "Bílé (0,85) tučné písmo s výškou znaku 7-9 mm, na tmavém podkladovém poli; legendy kláves přímo na čele klávesy emisivně; legenda pásu nad každým proužkem, vodorovně ve směru čtení pilota."},
+  {"n": 3, "title": "Lak bez opotřebení", "where": "list 1, 2, 3 vpravo všechny desky", "problem": "Středně šedá je správně, ale plocha je jednolitá; oděr hran, špína ve spárách a variace drsnosti nejsou vidět, loketní jednotka bez clear coatu.", "severity": "musí se opravit", "fix": "Edge-wear maska 1-3 mm na hranách desek (světlejší kov, roughness 0,3) se silou viditelnou ze 60 cm; AO/grime ve spárách a kolem šroubů (tmavší o 30-40 %); roughness šum 0,45-0,65; loketní jednotka clear coat 0,7, roughness 0,25."},
+  {"n": 4, "title": "Prázdné desky bez vrstvení a decalů", "where": "list 3 vpravo velký modul s klávesami; list 2 vpravo deska C21; list 1 vpravo tmavá deska vpravo", "problem": "Moduly jsou hladké desky s pár prvky; etalon má lisované lemy, žebra, malé mřížky, štítky, šrafy a logo.", "severity": "musí se opravit", "fix": "Na každý modul obvodový lem 4 mm vystouplý 2 mm a vnitřní vybrání 1,5 mm; logo Halcyon 30-40 mm na boku loketní jednotky; oranžovo-šedé šrafy 20 mm na čele a madle; bílá ID panelů 10 mm; 2-3 detailní decaly (warning, šipky, panel ID) na modul."},
+  {"n": 5, "title": "C-lučík kniplu", "where": "list 1 vpravo nahoře u hlavy; list 4 vpravo levý knipl", "problem": "Oblouk se čte jako tenká kulatá trubka, ne pevný plochý pás 15x9 mm; čepy nejsou vidět.", "severity": "doporučeno", "fix": "Ověřit průřez 15x9 mm s plochou širší stranou k pilotovi, zkosení 1 mm, čepy jako válce 8 mm s podložkou; broušený hliník roughness 0,3 s anizotropií."},
+  {"n": 6, "title": "Podsvícení a světelné akcenty", "where": "list 1 a 3 klávesy, list 2 stavový pás", "problem": "Klávesy mají jen tenkou čárku, stavové proužky a LED nesvítí do okolí; konzole nemá lokální akcent, světlo je ploché.", "severity": "doporučeno", "fix": "Emisivní legenda a 1 mm lem klávesy se silou pro bloom; stavové proužky 3x silnější; 2-3 jantarové LED na pásu; slabé podsvícení zevnitř mřížky sání."},
+  {"n": 7, "title": "Lišta přes hranu", "where": "list 1 vpravo pravý okraj desky (stříbrný profil)", "problem": "Stříbrná lišta přesahuje hranu desky a končí ve vzduchu.", "severity": "doporučeno", "fix": "Zkrátit na délku hrany a ukončit čelem nebo zaoblením r 3 mm."},
+  {"n": 8, "title": "Mezera pod loketní jednotkou nečitelná", "where": "list 1 vpravo, list 4 vpravo", "problem": "Mezeru 4,5 cm a konzoly není na žádném listu vidět; jednotka splývá s tělem.", "severity": "doporučeno", "fix": "Přidat záběr z boku; konzoly světlejší kov, pod jednotkou tmavý AO stín; spodní hranu jednotky zkosit 10 mm."}
+ ]
+}

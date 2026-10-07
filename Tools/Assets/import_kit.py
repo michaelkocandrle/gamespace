@@ -641,6 +641,10 @@ def build_test_section(actors, meshes, mis, sec, counts):
     # SC's engineering bay wall (the fire extinguisher unit, lockers, the component bay cover) on the viewer's left
     if "SM_Kit_Bay_Service10W_A" in meshes:
         place_part(actors, meshes, "Bay_Service10W_A", unreal.Vector(x * 100.0, -48.0, 0.0), 180.0, "KitTest_Bay", counts)
+    # the cockpit console pilot (KF-COCKPIT-CONSOLE, 7. 10. 2026) 2 m before the end wall: its inner face on the corridor's
+    # axis (the part's +y outboard is Unreal -y), so the "pilot" stands where the corridor is
+    if "SM_Kit_Cockpit_Console12W_A" in meshes:
+        place_part(actors, meshes, "Cockpit_Console12W_A", unreal.Vector(x * 100.0 - 220.0, -10.0, 0.0), 0.0, "KitTest_CockpitConsole", counts)
     vol = actors.spawn_actor_from_class(unreal.PostProcessVolume, _v(((x0 + x1) / 2, 0.0), h / 2),
                                         unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
     vol.set_actor_label("KitTest_InteriorPost")

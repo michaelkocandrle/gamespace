@@ -1,0 +1,83 @@
+{
+ "topic": "kf_cockpit_console",
+ "date": "2026-10-07",
+ "goal": "Levá loketní konzole kokpitu jako díl továrny (pilot nového postupu pro kokpit): tělo středně šedé s tmavou patkou, vyvýšená loketní jednotka ve světle šedém laku pod clear coatem s perforovanou opěrkou zápěstí, knipl SC (chromová koule na šrafované základně, tvarovaná pryžová rukojeť, šedá hlava se dvěma hat přepínači a červeným tlačítkem, spoušť, stříbrný C-lučík), modul 4 kláves, šikmý ovládací blok s červenou klávesou pod krytem a kolébkami, mřížka sání, stavový pás, madlo vpředu, servisní panel a mřížka na vnitřním boku; hrany v hierarchii (tělo 20 mm, desky 8–12 mm, drobnosti 1–3 mm), materiály ze sdíleného základu továrny. Ergonomie: deska 0,60 m (výška lokte), knipl 0,40 m od osy křesla, hlava 0,18 m nad loketní jednotkou, blok 0,15 m od ruky. Díl stojí samostatně ve zkušebním úseku chodby (bez kokpitu kolem).",
+ "style": "Úroveň SC, ne přesná kopie (autor 7. 10.). Halcyon: oranžové akcenty místo žlutých, šedé laky, udržovaná pracovní loď.",
+ "checklist": "interior",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-07_kf_cockpit_console",
+ "notes": [
+  "Okolí (chodba, stěny, skříňky) je zkušební úsek továrny, nehodnotí se.",
+  "Konzole je vytržená z kokpitu – křeslo a kanopa kolem chybí záměrně."
+ ],
+ "etalon": [
+  {
+   "img": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "label": "SC konzole"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/konzole_3.jpg",
+   "label": "SC loketní konzole s kniplem"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/kreslo_2.jpg",
+   "label": "SC křeslo a konzole"
+  }
+ ],
+ "pairs": [
+  {
+   "title": "1 Z místa pilota 3/4",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_3.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_133252_kit_cockpit_console/01_1_pilot_34.png",
+   "ours_label": "KF konzole"
+  },
+  {
+   "title": "2 Deska zblízka",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_133252_kit_cockpit_console/02_2_deck_close.png",
+   "ours_label": "KF konzole"
+  },
+  {
+   "title": "3 Knipl zblízka",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_3.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_133252_kit_cockpit_console/03_3_stick_close.png",
+   "ours_label": "KF konzole"
+  },
+  {
+   "title": "4 Ovládací blok",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_133252_kit_cockpit_console/04_4_block_close.png",
+   "ours_label": "KF konzole"
+  },
+  {
+   "title": "5 Vnitřní bok konzole",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_3.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_133252_kit_cockpit_console/05_5_inner_face.png",
+   "ours_label": "KF konzole"
+  },
+  {
+   "title": "6 Zepředu 3/4",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/kreslo_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_133252_kit_cockpit_console/06_6_front_34.png",
+   "ours_label": "KF konzole"
+  }
+ ]
+}

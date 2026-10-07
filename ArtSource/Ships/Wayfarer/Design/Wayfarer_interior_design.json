@@ -10,6 +10,7 @@
   "cockpit": "CPT"
  },
  "kit_purpose": {
+  "Cockpit_Console12W_A": "Levá loketní konzole pilota (díl továrny): knipl RCS na loketní jednotce s opěrkou zápěstí, šikmé čelo s nouzovým kyslíkem pod krytem a kolébkami napájení, vnějších světel a motorů, klávesy světel, podvozku, VTOL a ESP, stavový pás napájení, baterie a teploty, sání chlazení konzole, madlo.",
   "Wall_ComponentBay12W_A": "Výklenek reaktoru S1 ve stěně: posuvné křídlo výklenku, ve hře otevřené v kapse u levé líce (hrana s oranžovým pruhem a madlem), reaktor na saních na výsuvných kolejnicích, stavová obrazovka, kabely a chlazení do výklenku, světlo výklenku.",
   "Wall_ComponentBay06W_B": "Výklenek chladiče S1: žebrované jádro ve spodním výklenku s otevřeným posuvným křídlem, výfukový kanál za stěnou nahoru ke kořeni křídla, světlo výklenku.",
   "Wall_ComponentBay12W_C": "Výklenek generátoru štítů S1: poklop s rychlouzávěry a průhledem, prstenec emitoru svítí okénkem.",
@@ -220,6 +221,7 @@
     ]
    ],
    "run_parts": [
+    [["CPT-CO-01", "Cockpit_Console12W_A"]],
     [["TEC-B-A", "Bulkhead_Door03W_B"]],
     [["TEC-B-F", "Bulkhead_Door00W_A"]],
     [["CAB-B-A", "Bulkhead_Door00L38_A"]],
@@ -303,6 +305,19 @@
   "ck_eject": "štítek katapultáže",
   "ck_canopy": "štítek ovládání kabiny",
   "ck_emerg_o2": "štítek nouzového kyslíku",
+  "ck_batt": "legenda kontrolky baterie",
+  "ck_eng": "legenda kolébky motorů",
+  "ck_esp": "legenda klávesy ESP",
+  "ck_extlt": "legenda kolébky vnějších světel",
+  "ck_gear": "legenda klávesy podvozku",
+  "ck_lights": "legenda klávesy světel",
+  "ck_main": "legenda kontrolky hlavního napájení",
+  "ck_pwr": "legenda kolébky napájení",
+  "ck_rcs": "štítek kniplu RCS",
+  "ck_temp": "legenda kontrolky teploty",
+  "ck_vtol": "legenda klávesy VTOL",
+  "panel_C21": "číslo panelu konzole",
+  "st_torque": "utahovací moment šroubů modulu",
   "label_o2": "servisní štítek podpory života",
   "tri_warning": "výstražný trojúhelník",
   "stencil_nostep": "šablonový nápis NO STEP (nešlapat)"

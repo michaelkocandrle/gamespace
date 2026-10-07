@@ -1,0 +1,79 @@
+{
+ "topic": "cockpit_to8",
+ "date": "2026-10-07",
+ "goal": "Kokpit Wayfareru – ladění k úrovni SC (cíl hodnocení 8). Konzole: šedé kryty modulů, nouzové tlačítko pod krytem, mřížka, šrafy, decaly ve vrstvách (nýty, švy s čísly, šablony, výstrahy), tmavá špína ve spárách a světlé ošoupání u ovladačů, mikrodrsnost a škrábance materiálu, kartáčovaný satén lišt, zaoblená těla. Křeslo: středně šedá skořepina jako u SC, šedá perforovaná výplň, segmentované prošité boky, teple šedé popruhy do otočného zámku, kloub mezi sedákem a opěrákem, madla u opěrky hlavy, ovladače na loketních opěrkách. Světlo teple neutrální. Kolo 2: napečená maska okluze a hran na interiéru kokpitu (špína usazená v koutech a spárách, ošoupané hrany v materiálu), plynulá pryžová manžeta kniplu s objímkou a šrouby, deska pod MFD ve světlé šedé (čitelná z místa pilota), teplé výplňové světlo. Kolo 3 (autor: ovládání jako v SC): na obou konzolích knipl SC – chromová koule na šedé základně se šrafovaným kroužkem, štíhlá rukojeť se šedou čelní deskou a hlavou pod stříbrným C-lučíkem, tlačítka, spoušť; šikmý šedý ovládací blok natočený k pilotovi s červenou klávesou pod červeným krytem (QNTM / EMERG O2) a řadou kolébek s popisky; perforovaná opěrka zápěstí; skořepina křesla středně šedá (0,13).",
+ "style": "Úroveň SC, ne přesná kopie (autor 7. 10.: kopírujeme level, ne rozměry). Halcyon průmyslový kokpit (C-01 D): teplý grafit těl, střední šedý satén krytů, oranžové akcenty výrobce místo žlutých šraf SC.",
+ "checklist": "cockpit",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-07_cockpit_to8_r3",
+ "notes": [
+  "Hodnotí se konzole, křeslo a celkový dojem z místa pilota; obsah MFD a HUD se v tomto kroku neměnil.",
+  "Snímky konzolí jsou z editoru se studiovou kamerou nad konzolí.",
+  "Modrá skvrna vlevo od levého MFD v pohledu pilota je hologram lodi (záměrný prvek kokpitu, schválený v kroku 6), ne odlesk."
+ ],
+ "pairs": [
+  {
+   "title": "1 Z místa pilota (displeje, konzole dole)",
+   "distance": "mid",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_124910_mfd_pages/03_pages_navigation_self_landed.png",
+   "ours_label": "pohled pilota, přistáno"
+  },
+  {
+   "title": "2 Levá konzole shora",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_124829_cockpit_audit/03_left_console.png",
+   "ours_label": "levá konzole, plyn"
+  },
+  {
+   "title": "3 Pravá konzole shora",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_124829_cockpit_audit/04_right_console.png",
+   "ours_label": "pravá konzole, knipl"
+  },
+  {
+   "title": "4 Hlava konzole: mřížka, nouzové tlačítko",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_124829_cockpit_audit/09_left_console_head.png",
+   "ours_label": "hlava levé konzole: nouzové tlačítko, mřížka"
+  },
+  {
+   "title": "5 Křeslo zepředu: popruhy, přezky",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/kreslo_1.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_124829_cockpit_audit/01_seat_front.png",
+   "ours_label": "křeslo pilota"
+  },
+  {
+   "title": "6 Hlava pravé konzole a knipl",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/konzole_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_124829_cockpit_audit/10_right_console_head.png",
+   "ours_label": "hlava pravé konzole"
+  },
+  {
+   "title": "7 Křeslo z boku: kostra, postroj, přezka",
+   "distance": "close",
+   "light": "studio",
+   "ref": "Docs/Kit/etalon/sc/kreslo_2.jpg",
+   "ref_label": "SC Aurora",
+   "ours": "C:/gamespace-shots/20261007_124829_cockpit_audit/02_seat_side.png",
+   "ours_label": "křeslo z boku"
+  }
+ ]
+}

@@ -434,8 +434,13 @@ def obj_bunk(g, r, zr):
     lights_out.append({"at": [(x0 + x1) / 2, y1 - 0.3, 1.25], "warm": True, "cd": 6})
 
 
+KIT_CONSOLES = set()     # "left" / "right": the console is a factory part (kit_modules run_parts, kit_cockpit.py), not built here
+
+
 def obj_console(g, r, zr, z0):
     x0, x1, y0, y1 = r
+    if ("left" if y0 > 0 else "right") in KIT_CONSOLES:
+        return
     top = zr[1] - 0.1
     if COCKPIT.get("style") in ("pods", "wrap"):
         # the outer edge stood 2-3 cm into the hull where the tub narrows (geometry check, 25. 9. 2026)
@@ -446,7 +451,10 @@ def obj_console(g, r, zr, z0):
     if COCKPIT.get("style") in ("pods", "wrap"):
         # (7. 10. 2026: the kit trim strip on the body's inner face read as crumpled foil under the top - the body
         # in the cockpit's warm graphite)
-        box(g["int_console"], (x0, y0, z0), (x1, y1, top))
+        # (critic 7. 10.: boxy CAD blocks) the body with its vertical edges rounded 3 cm in plan
+        import hs_cockpit as _hc
+        _hc.rr_slab(g["int_console"], Vector(((x0 + x1) / 2, (y0 + y1) / 2, top)), Vector((1, 0, 0)), Vector((0, 1, 0)),
+                    Vector((0, 0, 1)), x1 - x0, y1 - y0, 0.03, top - z0, 3)
     else:
         tbox(g, "int_dark", "kit_trim02", (x0, y0, z0), (x1, y1, top), 1.0)
     if COCKPIT.get("style") in ("pods", "wrap"):
@@ -474,9 +482,18 @@ def obj_console(g, r, zr, z0):
         def proud(d):
             return sorted((inner, inner - sgn * d))
         # the forearm rest along the inner edge of the top, behind the HOTAS: a padded leather bar on a graphite base
-        pc = Vector((x0 + 0.40, inner + sgn * 0.085, top + 0.016))   # (ends 3 cm short of the HOTAS bases)
+        # (critic 7. 10. r4: the stick out of the forearm's line, the arm "in wings") an arm shelf off the console's
+        # inner edge, in to 0.36 m from the seat axis, at the console's top height - the forearm lies on it from the
+        # elbow to the stick at 0.40 m
+        sh_in = sgn * 0.36
+        ya_, yb_ = sorted((sh_in, inner + sgn * 0.02))
+        hs_cockpit.rr_slab(g["int_housing"], Vector(((x0 + 0.2 + x0 + 0.95) / 2, (ya_ + yb_) / 2, top + 0.012)), Vector((1, 0, 0)),
+                           Vector((0, 1, 0)), Vector((0, 0, 1)), 0.75, yb_ - ya_, 0.02, 0.05, 3)
+        hs_cockpit.rr_ring(g["int_trim"], Vector(((x0 + 0.2 + x0 + 0.95) / 2, (ya_ + yb_) / 2, top + 0.0125)), Vector((1, 0, 0)),
+                           Vector((0, 1, 0)), Vector((0, 0, 1)), 0.75, yb_ - ya_, 0.02, 0.004, 0.002, 3)
+        pc = Vector((x0 + 0.47, sgn * 0.40, top + 0.016))     # the wrist rest in line with the stick, 10 cm behind it
         hs_cockpit.rr_slab(g["int_console"], pc, Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1)), 0.46, 0.1, 0.03, 0.014, 4)
-        hs_cockpit.rr_slab(g["int_leather"], pc + Vector((0, 0, 0.034)), Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1)), 0.44, 0.085, 0.032, 0.04, 6)   # (front face at c, depth behind)
+        hs_cockpit.rr_slab(g["int_leather_perf"], pc + Vector((0, 0, 0.034)), Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1)), 0.44, 0.085, 0.032, 0.04, 6)   # (front face at c, depth behind)
         hs_cockpit.rr_slab(g["int_dark"], pc + Vector((0, 0, 0.0345)), Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1)), 0.4, 0.004, 0.001, 0.002, 1)   # the welt, sunk into the pad
         # the inner face: a dark recessed kick at the foot under a satin plinth strip, a trim band under the top,
         # structural ribs between them and a louvred vent near the front
@@ -579,7 +596,11 @@ def obj_console(g, r, zr, z0):
         # along the console's nose
         tc = Vector((x1 - 0.15, (y0 + y1) / 2, top + 0.012))
         X, Y, Z = Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))
-        hs_cockpit.console_head(g, tc - X * 0.012, X, Y, Z, 0.22, 0.3, "ck_emerg_o2" if y0 > 0 else "ck_alarm")
+        # (author 7. 10.: the emergency button turned the wrong way, out of place) SC's block sloped towards the pilot:
+        # the red guarded key over a row of labelled rockers, read from the seat
+        hs_cockpit.sc_control_block(g, Vector((x1 - 0.12, (y0 + y1) / 2 + sgn * 0.06, top + 0.012 + 0.065)), 0.26, 0.18, 38.0,
+                                    "ck_emerg_o2" if y0 > 0 else "ck_qt",
+                                    ["ck_pwr", "ck_extlt", "ck_eng"] if y0 > 0 else ["ck_shld", "ck_cool", "ck_wpn"])
         # (critic 7. 10. r1: the top round the HOTAS 60 % empty) a rocker bank in the middle band beside the HOTAS,
         # 2 x 2 labelled rockers in a grey housing
         rc = Vector((x0 + 0.78, (y0 + y1) / 2 + (0.005 if y0 > 0 else -0.005), top + 0.016))
@@ -826,6 +847,11 @@ MATS = {}
 def build(recipe, layout, coll, mats, ship, hull):
     MATS.clear()
     MATS.update(mats)
+    KIT_CONSOLES.clear()
+    for a, d_, parts_ in (recipe.get("interior", {}).get("kit_modules", {}).get("run_parts") or []):
+        for m_ in parts_:
+            if m_.startswith("Cockpit_Console"):
+                KIT_CONSOLES.add("left" if a[1] > 0 else "right")
     DOOR_LEAVES.clear()
     spec = recipe["interior"]
     H = spec.get("height_m", 2.3)
@@ -966,7 +992,7 @@ def build(recipe, layout, coll, mats, ship, hull):
     zc = ck["floor_z"]
     poly = ck["poly"]
     sill = spec.get("sill_z", 1.05)
-    fb = g["int_floor"]
+    fb = g["int_floor_ck"]                                    # (the cockpit's own floor tone, 7. 10. 2026)
     top = [fb.verts.new((p[0], p[1], zc)) for p in poly]
     res = bmesh.ops.contextual_create(fb, geom=top)
     # a closed slab, not a single face: finish() recalculates normals, and a lone face came out facing down -
@@ -1397,8 +1423,12 @@ def cockpit_detail(g, layout, zc, sill):
     ztop = right["z"][1] - 0.1 + 0.012          # on the console's top plate
     # HOTAS: the stick on the right console, the throttle on the left, where the forearms rest (hs_cockpit)
     import hs_cockpit
-    hs_cockpit.hotas_stick(g, Vector((right["rect"][0] + 0.8, right["rect"][3] - 0.16, ztop + 0.004)))
-    hs_cockpit.hotas_throttle(g, Vector((left["rect"][0] + 0.7, left["rect"][2] + 0.14, ztop + 0.004)))
+    # (author 7. 10. 2026: as SC has it) SC-style sticks on both arms: a chrome ball on a hatched base, a slim grip
+    # under a silver C-guard (Aurora flies on two sticks; the left one strafes)
+    # the hand at 0.47 m from the seat axis, 15 cm ahead of the eye (a seated pilot's forearm along the console)
+    hs_cockpit.sc_stick(g, Vector((right["rect"][0] + 0.8, -0.40, ztop + 0.004)), "ck_flight", Vector((0, 1, 0)))
+    if "left" not in KIT_CONSOLES:
+        hs_cockpit.sc_stick(g, Vector((left["rect"][0] + 0.8, 0.40, ztop + 0.004)), "ck_rcs", Vector((0, -1, 0)))
     # console edge lights facing the pilot (dim, below the dashboard line)
     for o in (left, right):
         x0, x1, y0, y1 = o["rect"]
@@ -1411,17 +1441,104 @@ def cockpit_detail(g, layout, zc, sill):
             box(g["int_trim"], (x0 + 0.04, ya_, za), (x1 - 0.04, yb_, zb))
         ya_, yb_ = sorted((inner - s_ * 0.0075, inner - s_ * 0.0065))
         box(g["int_glow_soft"], (x0 + 0.05, ya_, ztop - 0.06), (x1 - 0.05, yb_, ztop - 0.05))
-    # tread strips on the cockpit floor between the stairs and the footwell (a plain slab - critic 25. 9.)
-    k = 0
-    xx = 16.25   # clear of the stairs' top edge (16.20)
-    while xx < 18.55:
-        box(g["int_trim"], (xx, -0.85, zc + 0.0005), (xx + 0.018, 0.85, zc + 0.003))
-        xx += 0.09
-        k += 1
+    # the cockpit floor (author 7. 10. 2026: "the floor more - the layout of the objects, how far they are from the
+    # seat and the panel"), layered after the SC Aurora's (Docs/Kit/etalon/sc/kreslo_*.jpg, podlaha_*.jpg): plates with
+    # seams and corner screws, an anti-slip aisle behind the seat, a perforated footrest plate before it, louvred floor
+    # vents along the console feet, marker lights at the aisle's edges; stencils, a hazard edge at the stairs, the
+    # walked line and dirt in the corners
+    import hs_cockpit as _hc
+    Zf, Xf, Yf = Vector((0, 0, 1)), Vector((1, 0, 0)), Vector((0, 1, 0))
+    Ymf = Vector((0, -1, 0))
+    ci = abs(left["rect"][2])                                 # the consoles' inner face from the axis (0.43)
+    sx0, sx1 = seat_o["rect"][0], seat_o["rect"][1]
+    fx0, fx1 = 16.22, 18.6                                    # the stairs' top edge .. the cowl's foot
+    # 1 plates: dark seams across and along, screws at the crossings
+    for xs in (16.55, 17.45, 18.05):
+        box(g["int_dark"], (xs - 0.004, -0.95, zc), (xs + 0.004, 0.95, zc + 0.0008))
+        for d_ in (-0.007, 0.007):
+            box(g["int_trim"], (xs + d_ - 0.002, -0.95, zc), (xs + d_ + 0.002, 0.95, zc + 0.0012))
+    for ys in (-ci, ci):
+        box(g["int_dark"], (fx0, ys - 0.004, zc), (fx1, ys + 0.004, zc + 0.0008))
+    for xs in (16.55, 17.45, 18.05):
+        for ys in (-ci - 0.03, -ci + 0.03, ci - 0.03, ci + 0.03):
+            cyl(g["int_trim"], (xs + 0.03, ys, zc), (xs + 0.03, ys, zc + 0.002), 0.005, 8)
+    # 2 the aisle behind the seat: an anti-slip plate in a satin frame (ribs across), the walked line on it
+    ax0, ax1, aw = fx0 + 0.03, sx0 - 0.04, ci - 0.07
+    box(g["int_trim"], (ax0 - 0.012, -aw - 0.012, zc), (ax1 + 0.012, aw + 0.012, zc + 0.004))
+    box(g["int_floor_ck"], (ax0, -aw, zc), (ax1, aw, zc + 0.006))
+    xx = ax0 + 0.02
+    while xx < ax1 - 0.02:
+        box(g["int_rubber"], (xx, -aw + 0.02, zc + 0.006), (xx + 0.012, aw - 0.02, zc + 0.0085))
+        xx += 0.032
+    _hc.grime(Vector(((ax0 + ax1) / 2, 0.0, zc + 0.0085)), Zf, Xf, (0.22, ax1 - ax0), "smear", 0.8, wear=True)
+    _hc.hazard_band(g, Vector((fx0 + 0.02, 0.0, zc + 0.004)), Ymf, Xf, Zf, 2 * aw, 0.024)
+    # 3 the footrest before the seat: a plate sloped up 18 deg towards the cowl, perforated, satin edges, grip bars
+    tx0, tx1 = 17.62, 17.92
+    t = math.radians(24.0)
+    fc = Vector(((tx0 + tx1) / 2, 0.0, zc + 0.02 + math.tan(t) * (tx1 - tx0) / 2))
+    nrm = Vector((-math.sin(t), 0.0, math.cos(t)))
+    upv = Vector((math.cos(t), 0.0, math.sin(t)))
+    _hc.rr_slab(g["int_dark"], fc - nrm * 0.01, Ymf, upv, nrm, 0.62, (tx1 - tx0) / math.cos(t), 0.02, 0.06, 3)       # wedge
+    _hc.rr_slab(g["int_housing"], fc, Ymf, upv, nrm, 0.58, (tx1 - tx0) / math.cos(t) - 0.03, 0.015, 0.008, 3)
+    _hc.rr_ring(g["int_trim"], fc + nrm * 0.0005, Ymf, upv, nrm, 0.58, (tx1 - tx0) / math.cos(t) - 0.03, 0.015, 0.006, 0.002, 3)
+    pl = (tx1 - tx0) / math.cos(t)
+    for i in range(36):                                       # dense perforation: small holes, staggered
+        for j in range(11):
+            p = fc + Ymf * (-0.255 + 0.0146 * i + (0.0073 if j % 2 else 0.0)) + upv * (-pl / 2 + 0.03 + (pl - 0.1) * j / 10) + nrm * 0.0008
+            _hc.rr_slab(g["int_dark"], p, Ymf, upv, nrm, 0.0055, 0.0055, 0.0027, 0.0004, 2)
+    hb = fc - upv * (pl / 2 - 0.012) + nrm * 0.012                # the heel bar across the foot of the plate
+    _hc.tube(g["int_trim"], hb - Ymf * 0.28, hb + Ymf * 0.28, 0.009, 14)
+    for sd in (-1, 1):                                        # side cheeks down to the floor, toe strips
+        ch = fc + Ymf * (sd * 0.3) - nrm * 0.02
+        _hc.rr_slab(g["int_housing"], ch, upv, -nrm, Ymf * sd, pl, 0.07, 0.01, 0.012, 3)
+        ts = fc + Ymf * (sd * 0.13) + upv * (pl / 2 - 0.05) + nrm * 0.009
+        _hc.rr_slab(g["int_rubber"], ts, Ymf, upv, nrm, 0.16, 0.035, 0.008, 0.003, 2)
+        for sv in (-1, 1):
+            q = fc + Ymf * (sd * 0.275) + upv * (sv * (pl / 2 - 0.02)) - nrm * 0.0005
+            _hc.tube(g["int_trim"], q, q + nrm * 0.002, 0.0045, 8)
+    _hc.grime(fc + nrm * 0.009, nrm, upv, (0.5, 0.26), "smear", 0.9, wear=True)
+    _hc.stencil("panel_G08", fc + nrm * 0.0092 - upv * (pl / 2 - 0.035) + Ymf * 0.2, nrm, Ymf, upv, 0.4, 9.0)
+    # 4 louvred floor vents along the console feet, both sides of the seat and the footwell
+    for sd in (-1, 1):
+        vy = sd * (ci + 0.0)
+        for vx0, vx1 in ((16.3, 16.5), (17.5, 17.6)):
+            ya, yb = sorted((vy - sd * 0.0, vy - sd * 0.09))
+            box(g["int_trim"], (vx0 - 0.008, ya - 0.008, zc), (vx1 + 0.008, yb + 0.008, zc + 0.003))
+            box(g["int_dark"], (vx0, ya, zc - 0.01), (vx1, yb, zc + 0.002))
+            xv = vx0 + 0.01
+            while xv < vx1 - 0.006:
+                box(g["int_housing"], (xv, ya + 0.004, zc - 0.006), (xv + 0.006, yb - 0.004, zc + 0.0015))
+                xv += 0.016
+        # dirt settled in the corner between the floor and the console's foot
+        _hc.grime(Vector(((fx0 + 17.5) / 2, sd * (ci - 0.01), zc + 0.003)), Zf, Yf * sd, (17.5 - fx0, 0.07), "soot", 0.9)
+        # marker lights along the aisle's edge, every 30 cm
+        xl = fx0 + 0.1
+        while xl < sx0 - 0.05:
+            yl = sd * (ci - 0.02)
+            ya, yb = sorted((yl, yl - sd * 0.012))
+            box(g["int_trim"], (xl - 0.018, ya - 0.004, zc), (xl + 0.018, yb + 0.004, zc + 0.004))
+            box(g["int_glow_soft"], (xl - 0.012, ya, zc + 0.004), (xl + 0.012, yb, zc + 0.0048))
+            xl += 0.3
+    # plate numbers and a torque stencil, read from the seat
+    _hc.stencil("panel_D05", Vector((16.4, -0.2, zc + 0.0069)), Zf, Ymf, Xf, 0.5, 9.0)       # on the aisle plate
+    _hc.stencil("panel_G08", Vector((18.12, 0.6, zc + 0.0009)), Zf, Ymf, Xf, 0.5, 9.0)
+    _hc.stencil("st_torque", Vector((18.12, -0.6, zc + 0.0009)), Zf, Ymf, Xf, 0.5, 9.0)
+    _hc.grime(Vector((18.2, 0.0, zc + 0.001)), Zf, Xf, (0.9, 0.35), "rim", 0.6)          # dust at the cowl's foot
     # seat rails and pedestal
     x0, x1, y0, y1 = seat_o["rect"]
     for yy in (-0.2, 0.2):
         box(g["int_trim"], (x0 - 0.25, yy - 0.025, zc), (x1 + 0.1, yy + 0.025, zc + 0.03))
+        box(g["int_dark"], (x0 - 0.24, yy - 0.006, zc + 0.03), (x1 + 0.09, yy + 0.006, zc + 0.0305))   # the slot
+        for xe in (x0 - 0.25, x1 + 0.08):                                                             # end stops
+            box(g["int_housing"], (xe, yy - 0.028, zc + 0.03), (xe + 0.024, yy + 0.028, zc + 0.044))
+            box(g["int_red"], (xe + 0.006, yy - 0.01, zc + 0.044), (xe + 0.018, yy + 0.01, zc + 0.047))
+            for sd_ in (-1, 1):
+                cyl(g["int_trim"], (xe + 0.012, yy + sd_ * 0.019, zc + 0.044), (xe + 0.012, yy + sd_ * 0.019, zc + 0.0455), 0.003, 6)
+        xb_ = x0 - 0.2
+        while xb_ < x1 + 0.08:
+            for sd_ in (-1, 1):
+                cyl(g["int_dark"], (xb_, yy + sd_ * 0.017, zc + 0.03), (xb_, yy + sd_ * 0.017, zc + 0.033), 0.004, 6)
+            xb_ += 0.15
     box(g["int_dark"], (x0 + 0.15, -0.22, zc + 0.03), (x1 - 0.15, 0.22, zc + 0.16))
     # (the sill switch panels are gone: the tub is clamped inside the hull now and they hung beside it; the
     # control modules on the side consoles replace them)

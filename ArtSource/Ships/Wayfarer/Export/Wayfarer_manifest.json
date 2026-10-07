@@ -42,7 +42,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "865a27a5e6de78e104a1d544eea60537b32be98f"
+      "geometry_hash": "8788049a6ee21fc322326a73f66d3819b7fcd752"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -56,7 +56,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "ca6ac18db8ab49c25cb21d87ef078f4d3f9e4dab"
+      "geometry_hash": "6792a9cc870eac443ecaa24af39fba342eeac4d1"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -84,21 +84,21 @@
       "objects": [
         "SM_Ship_Wayfarer_Hologram"
       ],
-      "geometry_hash": "19ad136b4dfcafa2f3fc35755332989246018cd3"
+      "geometry_hash": "7f42a610def6af75b04036c4eeda939904c09720"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Interior.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "88d5ec0942883c0dbf280b5e6722ab64aff0f946"
+      "geometry_hash": "7286e891b192a8ba9b3c1b475349ac90247a2ad5"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
       "objects": [
         "SM_Ship_Wayfarer_InteriorDecals"
       ],
-      "geometry_hash": "6dc417d93f76a47212f70cdb4a04b31634ec7662"
+      "geometry_hash": "f8548b77eaf34aea7a41219260b5f59cbee074b9"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorKit.fbx",
@@ -119,8 +119,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 459485,
-      "verts": 305339,
+      "tris": 459489,
+      "verts": 305341,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -180,8 +180,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 66402,
-      "verts": 72334,
+      "tris": 66388,
+      "verts": 72323,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -296,20 +296,20 @@
         [
           7.650007247924805,
           0.651155948638916,
-          1.0623688697814941
+          1.1450345516204834
         ],
         [
           7.850000381469727,
           0.788830041885376,
-          1.1023023128509521
+          1.1849653720855713
         ]
       ]
     },
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 727506,
-      "verts": 375909,
+      "tris": 654030,
+      "verts": 338753,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -317,12 +317,13 @@
         "M_Ship_Wayfarer_IntTrim",
         "M_Ship_Wayfarer_IntPanel",
         "M_Ship_Wayfarer_IntWall",
+        "M_Ship_Wayfarer_IntFloorCockpit",
         "M_Ship_Wayfarer_IntGlow",
         "M_Ship_Wayfarer_IntConsole",
         "M_Ship_Wayfarer_IntAccentGlow",
+        "M_Ship_Wayfarer_IntSeat",
         "M_Ship_Wayfarer_IntLeatherPerf",
         "M_Ship_Wayfarer_IntLeather",
-        "M_Ship_Wayfarer_IntCream",
         "M_Ship_Wayfarer_IntWebbing",
         "M_Ship_Wayfarer_IntHousing",
         "M_Ship_Wayfarer_IntRed",
@@ -330,9 +331,9 @@
         "M_Ship_Wayfarer_IntLedWhite",
         "M_Ship_Wayfarer_IntLedBlink",
         "M_Ship_Wayfarer_IntGlowSoft",
+        "M_Ship_Wayfarer_IntCream",
         "M_Ship_Wayfarer_IntRubber",
         "M_Ship_Wayfarer_IntLight",
-        "M_Ship_Wayfarer_IntFabric",
         "M_Ship_Wayfarer_IntFrame"
       ],
       "uv_layers": 1,
@@ -352,8 +353,8 @@
     "SM_Ship_Wayfarer_InteriorDecals": {
       "lod": 0,
       "part": "InteriorDecals",
-      "tris": 10453,
-      "verts": 8681,
+      "tris": 7710,
+      "verts": 6467,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -718,14 +719,14 @@
     "SOCKET_Control_eng": {
       "parent": "SM_Ship_Wayfarer",
       "location_m": [
-        7.47627,
-        0.86618,
-        0.7076
+        7.70278,
+        1.11378,
+        0.54165
       ],
       "location_ue_cm": [
-        747.63,
-        -86.62,
-        70.76
+        770.28,
+        -111.38,
+        54.16
       ]
     },
     "SOCKET_Control_pwr": {

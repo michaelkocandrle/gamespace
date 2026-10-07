@@ -1,0 +1,130 @@
+{
+ "_comment": "KF-COCKPIT-CONSOLE pilot in the kit test section (author 7. 10. 2026: cockpit parts as factory parts). Angles after the SC etalon konzole_* / kreslo_*. Run -Editor -Width 2560 -Height 1440.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 8.0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.45
+   ],
+   "fov": 90,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none",
+    "r.MegaLights.EnableForProject 1",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "name": "1_pilot_34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    23.35,
+    -499.62,
+    1.22
+   ],
+   "camera_look_at": [
+    23.85,
+    -500.35,
+    0.55
+   ],
+   "fov": 62
+  },
+  {
+   "name": "2_deck_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    23.450000000000003,
+    -499.85,
+    1.0
+   ],
+   "camera_look_at": [
+    23.820000000000004,
+    -500.2,
+    0.6
+   ],
+   "fov": 50
+  },
+  {
+   "name": "3_stick_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    23.520000000000003,
+    -499.82,
+    0.86
+   ],
+   "camera_look_at": [
+    23.700000000000003,
+    -500.07,
+    0.72
+   ],
+   "fov": 45
+  },
+  {
+   "name": "4_block_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    23.650000000000002,
+    -500.3,
+    0.95
+   ],
+   "camera_look_at": [
+    23.980000000000004,
+    -500.58,
+    0.66
+   ],
+   "fov": 45
+  },
+  {
+   "name": "5_inner_face",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    23.400000000000002,
+    -499.35,
+    0.75
+   ],
+   "camera_look_at": [
+    23.55,
+    -500.1,
+    0.35
+   ],
+   "fov": 62
+  },
+  {
+   "name": "6_front_34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    24.750000000000004,
+    -499.75,
+    1.15
+   ],
+   "camera_look_at": [
+    23.700000000000003,
+    -500.4,
+    0.45
+   ],
+   "fov": 55
+  }
+ ]
+}

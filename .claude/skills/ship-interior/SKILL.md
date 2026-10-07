@@ -208,6 +208,13 @@ Díry zavírá tmavý plášť `Int_HullSkin` a obložení (9.6 bm–bo).
   stavba jako `INTDECALS {"labels_failed": …}` → rozšiř modul.
 - Decaly interiéru jako mesh decaly: `interior.decals` → `hs_interior_decals.py` (`items` paprskem, `scatter`
   mřížkou paprsků: `axis: "x"` = mřížka y×z, `axis: "z"` = mřížka x×y, `grab_bars`), part `InteriorDecals`.
+- **Díly kokpitu jako díly továrny** (7. 10. 2026, autor: kokpit z `hs_cockpit` působil plasticky i po 10 kolech):
+  díl se modeluje v `Tools/Kit/kit_cockpit.py` nástroji `kit_geo` (hrany podle velikosti prvku, `lathe`, `sweep`,
+  `mesh`, maska hran a okluze, role materiálů továrny), staví se `kit_build.py -- factory --only SM_Kit_Cockpit_…`
+  (~20 s) a do lodi se dosadí přes `interior.kit_modules.run_parts` s výškou z (`[[x, y, z], [dir], [parts]]`);
+  `hs_interior.KIT_CONSOLES` pak generovanou konzoli vynechá. **Posuzovat v kokpitu, ne ve zkušebním úseku chodby**
+  (jasné světlo chodby udělalo ze střední šedé bílou: kritik 4,5 v chodbě). Silueta podle SC: štíhlé stupňovité
+  rameno nad tmavým ustoupeným podstavcem, světlý lak jen na loketní jednotce.
 - **Vrstvení decalů na kokpitu** (7. 10. 2026, podle `Docs/Kit/etalon/decal_stack.md`): z generátoru se klade
   `hs_cockpit.stencil(item, at, n, right, up, scale, max_w)` (libovolná položka knihovny: `rivet_row_*`, `slot_s`,
   `seam_*`, `socket`, `access_panel`, `st_*`, `hazard_subtle`, `corner_mark`, `tri_warning`, `panel_*`, opotřebení

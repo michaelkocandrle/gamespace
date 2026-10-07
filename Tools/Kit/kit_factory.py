@@ -28,7 +28,8 @@ import kit_portal  # noqa: E402  (the part itself: KF-PORTAL-01's blockout)
 import kit_batch2  # noqa: E402  (the decal helper)
 
 # the test section's shell (walls, ceiling, kick strip) and the part under test (kit_portal.PARTS, step 4 blockout)
-FACTORY = [("Test", "Shell", 0.9, "W", "A"), ("Terminal", "Eng", 0.7, "W", "A"), ("Bay", "Service", 1.0, "W", "A")] + kit_portal.PARTS
+FACTORY = [("Test", "Shell", 0.9, "W", "A"), ("Terminal", "Eng", 0.7, "W", "A"), ("Bay", "Service", 1.0, "W", "A"),
+           ("Cockpit", "Console", 1.2, "W", "A")] + kit_portal.PARTS
 VIEWS = {(c, p): ((1, 0.0, 0.0), (1, -0.6, 0.2)) for c, p, _, _, _ in FACTORY}
 
 
@@ -37,7 +38,7 @@ def part_name(cat, part, size, sec, var):
 
 
 def budget(cat, part, size):
-    return 40000
+    return 90000 if cat == "Cockpit" else 40000
 
 
 # ------------------------------------------------------------------ the W profile (as draw_part_sheet.py)
@@ -775,7 +776,7 @@ def bay_service(name, seed):
 
 
 def part_name_any(cat, part, size, sec, var):
-    return kit_portal.part_name(cat, part, size, sec, var) if cat not in ("Test", "Terminal", "Bay") else part_name(cat, part, size, sec, var)
+    return kit_portal.part_name(cat, part, size, sec, var) if cat not in ("Test", "Terminal", "Bay", "Cockpit") else part_name(cat, part, size, sec, var)
 
 
 def build_part(cat, part, size, sec_key, var, seed):
@@ -785,4 +786,7 @@ def build_part(cat, part, size, sec_key, var, seed):
         return terminal_housing(part_name(cat, part, size, sec_key, var), seed)
     if cat == "Bay":
         return bay_service(part_name(cat, part, size, sec_key, var), seed)
+    if cat == "Cockpit":
+        import kit_cockpit
+        return kit_cockpit.console(part_name(cat, part, size, sec_key, var), seed)
     return kit_portal.build_part(cat, part, size, sec_key, var, seed)

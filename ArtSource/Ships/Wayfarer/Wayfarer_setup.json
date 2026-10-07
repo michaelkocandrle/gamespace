@@ -43,7 +43,14 @@
    0.93,
    0.84
   ],
-  "_comment_light_color": "7. 10. 2026: warm neutral (was the C++ default 0.85/0.92/1.0): under the cool key light and the blue screens every cockpit material read the same steel blue-grey (critic, three rounds) - SC's Aurora cockpit is lit warm-white"
+  "_comment_light_color": "7. 10. 2026: warm neutral (was the C++ default 0.85/0.92/1.0): under the cool key light and the blue screens every cockpit material read the same steel blue-grey (critic, three rounds) - SC's Aurora cockpit is lit warm-white",
+  "cockpit_fill_intensity_cd": 3.0,
+  "cockpit_fill_offset": [
+   45.0,
+   0.0,
+   -45.0
+  ],
+  "_comment_fill": "7. 10. 2026: a soft warm fill below and ahead of the eye - the lower dash and the console heads sank into black from the seat (critic)"
  },
  "components": {
   "camera_boom": {
@@ -783,9 +790,9 @@
      0.57
     ],
     "DirtColor": [
-     0.04,
-     0.04,
-     0.04
+     0.03,
+     0.028,
+     0.025
     ]
    },
    "scalars": {
@@ -794,15 +801,30 @@
     "PaintMetallic": 0.8,
     "GrungeAmount": 0.06,
     "EdgeWear": 0.0,
-    "DirtAmount": 0.0,
+    "DirtAmount": 0.3,
     "GrungeTileCm": 12.0,
-    "RoughVariation": 0.2
+    "RoughVariation": 0.2,
+    "MicroTileCm": 40.0,
+    "MicroRough": 0.06,
+    "ScratchAmount": 0.12,
+    "Brushed": 0.7,
+    "DetailTileCm": 20.0,
+    "DetailNormalStrength": 0.0,
+    "PanelShift": 0.0,
+    "PanelDirtVar": 0.0,
+    "FloorWear": 0.0,
+    "TopWear": 0.0,
+    "WearThreshold": 0.3
    },
    "slots": [
     "M_Ship_Wayfarer_IntTrim"
    ],
    "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)",
-   "_trim": "7. 10. 2026: the long satin bands read as crumpled foil - half-res Lumen reflections (variant c, interior rough <= 0.32) on a 0.8-metallic band, plus grunge 0.25: roughness 0.42 (out of the traced range), faint fine grunge"
+   "_trim": "7. 10. 2026: the long satin bands read as crumpled foil - half-res Lumen reflections (variant c, interior rough <= 0.32) on a 0.8-metallic band, plus grunge 0.25: roughness 0.42 (out of the traced range), faint fine grunge",
+   "switches": {
+    "SurfaceDetail": true
+   },
+   "_surface": "7. 10. 2026: the layered master's surface detail on (micro roughness, scratches, brushed metal on the trim) - critic: 'one smooth satin, no micro variation'"
   },
   "MI_Ship_Wayfarer_IntDark": {
    "master": "layered",
@@ -883,14 +905,14 @@
    "master": "layered",
    "vectors": {
     "PrimaryColor": [
-     0.04,
-     0.038,
-     0.036
+     0.085,
+     0.083,
+     0.08
     ],
     "SecondaryColor": [
-     0.04,
-     0.038,
-     0.036
+     0.0799,
+     0.07802,
+     0.0752
     ],
     "BareMetalColor": [
      0.55,
@@ -1358,27 +1380,42 @@
      0.57
     ],
     "DirtColor": [
-     0.04,
-     0.04,
-     0.04
+     0.03,
+     0.028,
+     0.025
     ]
    },
    "scalars": {
     "PrimaryRoughness": 0.62,
     "SecondaryRoughness": 0.62,
     "PaintMetallic": 0.2,
-    "GrungeAmount": 0.16,
-    "EdgeWear": 0.0,
-    "DirtAmount": 0.0,
-    "GrungeTileCm": 24.0,
-    "RoughVariation": 0.25
+    "GrungeAmount": 0.0,
+    "EdgeWear": 0.4,
+    "DirtAmount": 0.3,
+    "GrungeTileCm": 8.0,
+    "RoughVariation": 0.12,
+    "MicroTileCm": 40.0,
+    "MicroRough": 0.14,
+    "ScratchAmount": 0.05,
+    "Brushed": 0.0,
+    "DetailTileCm": 20.0,
+    "DetailNormalStrength": 0.0,
+    "PanelShift": 0.0,
+    "PanelDirtVar": 0.0,
+    "FloorWear": 0.0,
+    "TopWear": 0.0,
+    "WearThreshold": 0.3
    },
    "slots": [
     "M_Ship_Wayfarer_IntConsole"
    ],
    "_comment": "warm graphite of the cockpit pods, cowl and pedestal (the exterior's saddle colour)",
    "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)",
-   "_tone": "7. 10. 2026: 0.05 -> 0.082 - the decal stack needs tonal room (Docs/Kit/etalon/decal_stack.md, layer 0)"
+   "_tone": "7. 10. 2026: 0.05 -> 0.082 - the decal stack needs tonal room (Docs/Kit/etalon/decal_stack.md, layer 0)",
+   "switches": {
+    "SurfaceDetail": true
+   },
+   "_surface": "7. 10. 2026: the layered master's surface detail on (micro roughness, scratches, brushed metal on the trim) - critic: 'one smooth satin, no micro variation'"
   },
   "MI_Ship_Wayfarer_Channel": {
    "_comment": "exterior kit channel floor under the plates and the frame: darker and rougher than the gunmetal frame, dirt in it (kit pilot critic round 1, 1. 10. 2026)",
@@ -1479,25 +1516,40 @@
      0.57
     ],
     "DirtColor": [
-     0.05,
-     0.048,
-     0.045
+     0.03,
+     0.028,
+     0.025
     ]
    },
    "scalars": {
     "PrimaryRoughness": 0.38,
     "SecondaryRoughness": 0.42,
     "PaintMetallic": 0.35,
-    "GrungeAmount": 0.14,
-    "EdgeWear": 0.35,
-    "DirtAmount": 0.12,
-    "GrungeTileCm": 30.0,
-    "RoughVariation": 0.25
+    "GrungeAmount": 0.0,
+    "EdgeWear": 0.6,
+    "DirtAmount": 0.3,
+    "GrungeTileCm": 8.0,
+    "RoughVariation": 0.12,
+    "MicroTileCm": 40.0,
+    "MicroRough": 0.12,
+    "ScratchAmount": 0.1,
+    "Brushed": 0.0,
+    "DetailTileCm": 20.0,
+    "DetailNormalStrength": 0.0,
+    "PanelShift": 0.0,
+    "PanelDirtVar": 0.0,
+    "FloorWear": 0.0,
+    "TopWear": 0.0,
+    "WearThreshold": 0.3
    },
    "slots": [
     "M_Ship_Wayfarer_IntHousing"
    ],
-   "_comment": "7. 10. 2026: the cockpit's module housings and console tops in SC's mid-grey satin metal (SC Aurora consoles, Docs/Kit/etalon/sc/konzole_*.jpg); the bodies stay in the warm graphite IntConsole"
+   "_comment": "7. 10. 2026: the cockpit's module housings and console tops in SC's mid-grey satin metal (SC Aurora consoles, Docs/Kit/etalon/sc/konzole_*.jpg); the bodies stay in the warm graphite IntConsole",
+   "switches": {
+    "SurfaceDetail": true
+   },
+   "_surface": "7. 10. 2026: the layered master's surface detail on (micro roughness, scratches, brushed metal on the trim) - critic: 'one smooth satin, no micro variation'"
   },
   "MI_Ship_Wayfarer_IntGlowSoft": {
    "master": "hull",
@@ -1523,14 +1575,14 @@
    "master": "layered",
    "vectors": {
     "PrimaryColor": [
-     0.045,
-     0.042,
-     0.04
+     0.11,
+     0.108,
+     0.104
     ],
     "SecondaryColor": [
-     0.045,
-     0.042,
-     0.04
+     0.10339999999999999,
+     0.10152,
+     0.09775999999999999
     ],
     "BareMetalColor": [
      0.55,
@@ -1638,6 +1690,101 @@
      10.0
     ]
    }
+  },
+  "MI_Ship_Wayfarer_IntSeat": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.09,
+     0.088,
+     0.085
+    ],
+    "SecondaryColor": [
+     0.085,
+     0.083,
+     0.08
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.03,
+     0.028,
+     0.025
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.5,
+    "SecondaryRoughness": 0.52,
+    "PaintMetallic": 0.1,
+    "GrungeAmount": 0.0,
+    "EdgeWear": 0.5,
+    "DirtAmount": 0.25,
+    "GrungeTileCm": 8.0,
+    "RoughVariation": 0.12,
+    "MicroTileCm": 40.0,
+    "MicroRough": 0.14,
+    "ScratchAmount": 0.05,
+    "Brushed": 0.0,
+    "DetailTileCm": 20.0,
+    "DetailNormalStrength": 0.0,
+    "PanelShift": 0.0,
+    "PanelDirtVar": 0.0,
+    "FloorWear": 0.0,
+    "TopWear": 0.0,
+    "WearThreshold": 0.3
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntSeat"
+   ],
+   "_comment": "7. 10. 2026: the pilot seat's shell - SC Aurora's seat is mid grey, ours was black (critic: the seat a flat black block)",
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)",
+   "switches": {
+    "SurfaceDetail": true
+   }
+  },
+  "MI_Ship_Wayfarer_IntFloorCockpit": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.09,
+     0.088,
+     0.085
+    ],
+    "SecondaryColor": [
+     0.085,
+     0.083,
+     0.08
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.6,
+    "SecondaryRoughness": 0.6,
+    "PaintMetallic": 0.5,
+    "GrungeAmount": 0.0,
+    "EdgeWear": 0.5,
+    "DirtAmount": 0.3,
+    "GrungeTileCm": 8.0,
+    "RoughVariation": 0.35,
+    "WearThreshold": 0.3
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntFloorCockpit"
+   ],
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)",
+   "_comment": "7. 10. 2026: the cockpit's own floor - a lighter worn graphite (critic r4: a cold blue-black empty floor)"
   }
  },
  "no_nanite_parts": [

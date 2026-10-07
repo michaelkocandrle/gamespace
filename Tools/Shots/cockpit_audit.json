@@ -199,6 +199,63 @@
     0.93,
     0.56
    ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "name": "floor_footwell",
+   "camera_local": [
+    7.12,
+    0.3,
+    0.95
+   ],
+   "look_local": [
+    7.62,
+    0.0,
+    -0.05
+   ],
+   "fov": 60
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "name": "floor_aisle",
+   "camera_local": [
+    6.45,
+    0.35,
+    1.15
+   ],
+   "look_local": [
+    5.95,
+    0.0,
+    -0.05
+   ],
+   "fov": 62
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "name": "layout_top",
+   "camera_local": [
+    6.85,
+    0.0,
+    1.75
+   ],
+   "look_local": [
+    6.95,
+    0.0,
+    -0.05
+   ],
+   "fov": 80
   }
  ]
 }
