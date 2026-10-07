@@ -9956,15 +9956,15 @@
    "dims_m": [
     1.291,
     0.762,
-    0.74
+    0.741
    ],
    "expected_size_cm": [
     129.1,
     76.2,
-    74.0
+    74.1
    ],
-   "tris": 28744,
-   "tris_decals": 628,
+   "tris": 28804,
+   "tris_decals": 636,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
@@ -9973,6 +9973,7 @@
     "Kit_Lip",
     "Kit_Graphite",
     "Kit_Gasket",
+    "Kit_GlowFoot",
     "Kit_Perforated",
     "Kit_Red",
     "Kit_GlowRed",
@@ -9987,7 +9988,7 @@
    ],
    "sockets": {},
    "collision_hulls": 1,
-   "decals": 42,
+   "decals": 44,
    "decal_items": [
     "maker",
     "maker",
@@ -9999,6 +10000,8 @@
     "ck_pwr",
     "ck_extlt",
     "ck_eng",
+    "scratches",
+    "scratches",
     "maker",
     "ck_lights",
     "ck_gear",

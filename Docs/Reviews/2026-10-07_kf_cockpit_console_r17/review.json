@@ -1,0 +1,40 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 17,
+ "variant": "B",
+ "date": "2026-10-08",
+ "verdict": "PASS",
+ "gate": "step",
+ "first_impression": "Šedě lakovaná pracovní konzole Halcyon s grafitovými vložkami, oranžovými akcenty a teď už svítícími klávesami se studeným okrajem; proti návrhu je ale pořád jako nová – ošoupané hrany se světlým kovem, které návrh nese všude, na snímcích skoro nejsou.",
+ "scores": {
+  "silueta_a_tvar": {"score": 6, "why": "Nosník na dvou konzolách s otvory, mezera a stupňovitý bok drží (list 5 vpravo 1000-1600,280-480); věž je dál jeden hladký klín – na šikmé ploše je jen tenká spára (list 3 vpravo 1290-1420,230-300), vložky a zlom z návrhu chybí (list 3 vpravo 1300-1500,60-560)."},
+  "hierarchie_a_hustota_detailu": {"score": 7, "why": "Detail shlukovaný u funkčních míst: blok kniplu, sání, stavový pás, klávesy 2x2, kolébky, EMERG O2, poklop SERVICE ACCESS (list 6 vpravo 1100-1950,80-540); hladké zůstávají šikmá plocha věže a horní lem rámu kolem opěrky (list 4 vpravo 1450-1560,440-611)."},
+  "materialy": {"score": 7, "why": "Tónové odstupy lak / grafit / pryž / oranžový návlek sedí (list 1 vpravo 1240-1900,210-580), mráčky drsnosti zmizely; souvislejší oděr hran se ale na snímcích skoro neprojevil – hrany věže, nosníku a bloku kniplu jsou čisté (list 1 vpravo 1640-1900,260-300; list 5 vpravo 1050-1600,290-420; list 4 vpravo 1460-1560,440-611)."},
+  "decaly": {"score": 6, "why": "// na nosníku už celý a v poměru k menšímu nápisu HALCYON FREIGHTWORKS (list 5 vpravo 1060-1370,335-380), přibyl žlutý štítek EMERG O2 (list 5 vpravo 1860-1910,265-285); škrábance u klávesy nejsou rozeznatelné, spodní nápisy na tmavém pásu dál splývají (list 6 vpravo 1180-1620,565-585)."},
+  "svetlo": {"score": 7, "why": "Klávesy 2x2 mají studený modrý okraj a jasný střed (list 3 vpravo 1140-1300,250-370), proužky MAIN/BATT modrobílé a TEMP teplý (list 3 vpravo 1085-1175,200-280); záře (bloom) kolem nich je slabá a LED u kolébek jsou dál drobné čtverečky (list 3 vpravo 1090,445 / 1135,495 / 1185,550)."},
+  "citelnost": {"score": 6, "why": "Zblízka čitelné MAIN/BATT/TEMP, LIGHTS/GEAR/VTOL, CAUTION, ACCESS, SERVICE ACCESS (list 3, 4, 6 vpravo); shora a z boku legendy kolébek pořád drobné (list 6 vpravo 1780-1900,425-435; list 5 vpravo 1810-1900,320-340) a EMERG O2 je malý štítek bez oranžového rámu kolem klávesy (list 6 vpravo 1810-1840,120-160)."},
+  "chyby_geometrie": {"score": 8, "why": "Díry, průniky ani plovoucí díly nevidím; kryt nouzové klávesy nečouhá nad věž (list 1 vpravo 1650-1900,265-300)."},
+  "soulad_stylu": {"score": 7, "why": "Věž, nosník, podstavec, bloky a poklop sdílejí lak, grafitové vložky, šrouby a oranžové akcenty; působí jako jedna sada."}
+ },
+ "average": 6.8,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "r16_status": {
+  "1_opotrebeni_oder_mracky_skrabance": "částečně: mráčky drsnosti na plochách zmizely (list 3 vpravo horní plocha věže čistá) – opraveno; oděr hran po prahu 0,42 je dál skoro neviditelný (list 1, 4, 5 vpravo hrany čisté); škrábance vedle klávesy na snímcích nerozeznám.",
+  "2_zare_klaves_a_prouzku": "převážně opraveno: klávesy s gradientem (studený okraj, teplý střed), proužky modrobílé + jantarový TEMP (list 3 vpravo). Bloom slabý, LED kolébek dál drobné.",
+  "3_emer_kryt_legendy_kolebek": "částečně: štítek EMERG O2 pod klávesou přibyl (list 5, 6 vpravo), ale malý a bez oranžového rámu kolem klávesy; kolébky níž, legendy shora a z boku dál drobné.",
+  "4_sikma_plocha_vez_hola": "částečně: spára na ploše věže je (list 3 vpravo 1290-1420,230-300), ale grafitový panel se šrouby na šikmé ploše chybí; plocha dál velká a hladká.",
+  "5_znak_napisy_podstavec": "částečně: // na nosníku dál od kraje a nápis menší – opraveno (list 5 vpravo 1060-1370,335-380); spodní nápisy na tmavém pásu dál splývají (list 6 vpravo 1180-1620,565-585), bok podstavce pod nosníkem bez rámů a šroubů (list 5 vpravo 1000-1600,440-520)."
+ },
+ "concept_match": {
+  "layout_percent": 78,
+  "look_percent": 65,
+  "summary": "Skladba, tónová hierarchie a nově i svítící prvky odpovídají návrhu. Nejvíc chybí viditelné ošoupání hran světlým kovem, EMER v oranžovém rámu a členění šikmé plochy věže."
+ },
+ "findings": [
+  {"n": 1, "title": "Oděr hran stále skoro neviditelný", "where": "list 1 vpravo hrany věže 1640-1900,260-300 a rám opěrky 1230-1450,210-350; list 4 vpravo 1460-1560,440-611; list 5 vpravo nosník 1050-1600,290-420", "problem": "Po prahu 0,42 je světlý kov na hranách jen ojediněle; návrh má souvislé ošoupané hrany s přerušovaným světlým kovem na všech vnějších hranách. Pravděpodobně je pás oděru příliš úzký (pod pixel na střední vzdálenosti) nebo maska zasahuje jen zkosení.", "severity": "doporučeno", "fix": "Šířku pásu oděru zvětšit na 6-10 mm (v rozlišení snímku 1080p >= 2 px na střední vzdálenosti), práh 0,35-0,4, kontrast albedo lak 0,15 vs. kov 0,7 ponechat; aplikovat i na horní hrany věže, nosníku, bloku kniplu a rámu opěrky. Ověřit výřezem listu 1 vpravo 1640-1900,260-300."},
+  {"n": 2, "title": "Nouzová klávesa bez oranžového rámu, EMERG O2 malý", "where": "list 5 vpravo 1860-1930,190-290; list 6 vpravo 1800-1900,80-170", "problem": "Červená klávesa a štítek EMERG O2 jsou malé a bez oranžového rámu, který návrh dává jako hlavní orientační prvek věže.", "severity": "doporučeno", "fix": "Oranžový rám 8-10 mm kolem klávesy, štítek zvětšit na výšku písma 10-12 mm, bílý tučný text na tmavém poli (nebo černý na oranžovém), umístit na plochu natočenou k pilotovi."},
+  {"n": 3, "title": "Legendy kolébek a LED z pohledu pilota", "where": "list 6 vpravo 1780-1900,425-435; list 5 vpravo 1810-1900,320-340; LED list 3 vpravo 1090,445 / 1135,495 / 1185,550", "problem": "Shora a z boku legendy LIGHTS/GEAR/VTOL nečitelné, LED drobné bez záře.", "severity": "doporučeno", "fix": "Legendy tučné 8-10 mm, kontrast albedo >= 0,6 na grafitu; LED 1 x 6 mm s emisí ~10 a bloom; případně legendu nad kolébku místo pod."},
+  {"n": 4, "title": "Šikmá plocha věže hladká", "where": "list 3 vpravo 1300-1500,60-560", "problem": "Jedna spára nestačí; návrh má na věži grafitovou vložku a zlom.", "severity": "doporučeno", "fix": "Grafitový panel (albedo 0,08-0,12) na ~60 % šikmé plochy v rámu 15-20 mm se 4 šrouby; zkosení 10 mm na hraně k pilotovi."},
+  {"n": 5, "title": "Spodní nápisy a bok podstavce, škrábance", "where": "list 6 vpravo 1180-1620,565-585; list 5 vpravo 1000-1600,440-520; list 6 vpravo okolí kniplu a kláves 1550-1760,280-540", "problem": "Spodní nápisy splývají s tmavým pásem, bok podstavce pod nosníkem bez rámů a šroubů, škrábance kolem ovladačů nerozeznatelné.", "severity": "doporučeno", "fix": "Spodní nápisy albedo >= 0,5; na boku podstavce 2-3 grafitové vložky v rámu 20-30 mm se šrouby po ~100 mm; světlé škrábance albedo ~0,55, délka 10-40 mm, 5-8 kusů v okruhu 60 mm kolem kniplu, kláves a madla."}
+ ]
+}

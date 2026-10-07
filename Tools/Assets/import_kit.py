@@ -47,7 +47,7 @@ EAL, MEL = unreal.EditorAssetLibrary, unreal.MaterialEditingLibrary
 DECAL_MIS = {"Kit_Decal": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_Decal",
              "Kit_DecalAO": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalAO",
              "Kit_DecalPaint": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalPaint"}
-PAINT_TINT = (1.9, 1.9, 1.9)        # the kit's labels and scuffs: 0.42 grey -> ~0.8 (7. 10. 2026)
+PAINT_TINT = (1.5, 1.5, 1.5)        # the kit labels and scuffs: 0.42 grey -> ~0.63; 1.9 turned the orange yellow (7. 10.)
 GRIME_PARENT = "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalGrime"
 GRIME_OPACITY = 1.0
 # the dirt as a matte grey dust, lighter than the paint (~0.2 linear on the kit's 0.07-0.1 graphite). A darker band

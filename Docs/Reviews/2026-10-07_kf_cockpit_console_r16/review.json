@@ -1,0 +1,40 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 16,
+ "variant": "B",
+ "date": "2026-10-07",
+ "verdict": "PASS",
+ "gate": "step",
+ "first_impression": "Šedě lakovaná pracovní konzole s grafitovými vložkami a oranžovými akcenty, skladbou odpovídá návrhu; proti návrhu je ale pořád čistá a nová – oděr hran a škrábance skoro chybí, svítící prvky jsou ploché bílé plochy a EMER u nouzové klávesy chybí.",
+ "scores": {
+  "silueta_a_tvar": {"score": 6, "why": "Nosník na konzolách s otvory, mezera a stupňovitý bok drží (list 5 vpravo 1000-1600,280-480); věž je dál jeden hladký klín s holou šikmou plochou a holou horní plochou (list 3 vpravo 1300-1500,60-560 a 1420-1950,55-200)."},
+  "hierarchie_a_hustota_detailu": {"score": 7, "why": "Detail shlukovaný u funkčních míst: blok kniplu, sání, stavový pás, klávesy 2x2, kolébky, poklop SERVICE ACCESS se šrouby a mřížkou (list 6 vpravo 1100-1950,80-540); holé zůstávají šikmá plocha věže a horní plocha rámu kolem opěrky (list 4 vpravo 1460-1560,440-611)."},
+  "materialy": {"score": 7, "why": "Tónové odstupy lak / grafit / pryž / oranžový návlek sedí s návrhem (list 1 vpravo 1240-1900,210-580). Mráčky drsnosti jsou slabší, ale dál vidět na horní ploše věže (list 3 vpravo 1450-1900,60-200) a na čele rámu u opěrky (list 4 vpravo 1460-1560,450-600); světlý kov na hranách jen ojediněle (list 5 vpravo hrana nosníku 1560-1600,300-420) a škrábance kolem ovladačů chybí."},
+  "decaly": {"score": 6, "why": "// HALCYON FREIGHTWORKS a šrafy na čele věže výrazné (list 3 vpravo 1560-1930,170-500); // na nosníku dál useknutý levým okrajem a malý proti velkému nápisu (list 5 vpravo 1005-1040,335-380 vs. 1110-1325,345-370), spodní nápisy na tmavém pásu splývají (list 6 vpravo 1200-1620,570-585), žádné štítky ani škrábance u kniplu a kláves."},
+  "svetlo": {"score": 6, "why": "Klávesy 2x2 a proužky MAIN/BATT/TEMP svítí plošně bílé bez záře a gradientu (list 3 vpravo 1140-1300,250-370; list 6 vpravo 1590-1750,290-350); LED nad kolébkami drobné čtverečky bez záře (list 3 vpravo 1090,445 / 1135,495 / 1185,550)."},
+  "citelnost": {"score": 6, "why": "Zblízka čitelné MAIN/BATT/TEMP, LIGHTS/GEAR/VTOL, CAUTION, ACCESS, SERVICE ACCESS (list 3, 4, 6 vpravo); shora a z boku jsou legendy kolébek dál drobné (list 6 vpravo 1780-1900,432; list 5 vpravo 1830-1910,300) a EMER u nouzové klávesy chybí (list 5 vpravo 1880-1930,190-250)."},
+  "chyby_geometrie": {"score": 8, "why": "Díry, průniky ani plovoucí díly nevidím; kryt nouzové klávesy už nečouhá nad horní hranu věže (list 1 vpravo 1650-1900,265-300)."},
+  "soulad_stylu": {"score": 7, "why": "Věž, nosník, podstavec, bloky a poklop mají stejný lak, stejné grafitové vložky, šrouby a oranžové akcenty; působí jako jedna sada."}
+ },
+ "average": 6.6,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "r15_status": {
+  "1_opotrebeni_oder_mracky_skrabance": "částečně: mráčky drsnosti slabší (list 6 vpravo plochy kolem poklopu čisté), ale dál na horní ploše věže (list 3 vpravo 1450-1900,60-200) a na čele rámu u opěrky (list 4 vpravo 1460-1560,450-600). Jemnější přerušení oděru se neprojevilo – oděr je skoro neviditelný; škrábance kolem ovladačů chybí.",
+  "2_zare_klaves_a_prouzku": "neopraveno: klávesy a proužky plošně bílé bez záře, LED kolébek drobné.",
+  "3_emer_kryt_legendy_kolebek": "částečně: kryt nouzové klávesy zavřený a nečouhá nad věž (list 1 vpravo) – opraveno; legendy kolébek zblízka větší a čitelné (list 3 vpravo 1030-1140,450-600), shora a z boku dál drobné; EMER a oranžový rám nouzové klávesy chybí.",
+  "4_sikma_plocha_vez_hola": "neopraveno: šikmá i horní plocha věže dál nečleněné (list 3 vpravo 1300-1500,60-560 a 1420-1950,55-200).",
+  "5_znak_napisy_podstavec": "neopraveno: // na nosníku useknutý a malý, spodní nápisy splývají; bok podstavce pod nosníkem z boku tmavší, ale bez rámů a šroubů (list 5 vpravo 1000-1600,440-520)."
+ },
+ "concept_match": {
+  "layout_percent": 76,
+  "look_percent": 62,
+  "summary": "Skladba a tónová hierarchie odpovídají návrhu. Proti návrhu chybí hlavně viditelné opotřebení (přerušovaný světlý kov na všech vnějších hranách, škrábance), záře kláves a proužků, EMER v oranžovém rámu a členění věže spárami a vložkami."
+ },
+ "findings": [
+  {"n": 1, "title": "Opotřebení: oděr hran skoro neviditelný, zbytky mráčků, žádné škrábance", "where": "list 3 vpravo horní plocha a hrany věže 1420-1950,55-200; list 4 vpravo 1460-1560,450-600; list 5 vpravo hrany nosníku 1050-1600,290-420; list 6 vpravo okolí kniplu a kláves 1550-1760,280-540", "problem": "Po jemnějším přerušení (grunge 14 cm, práh 0,6) je světlý kov na hranách jen v pár bodech; na plochách dál měkké šedé skvrny; u míst úchopu žádné škrábance. Návrh má ošoupané hrany s přerušovaným světlým kovem všude a jemné škrábance.", "severity": "doporučeno", "fix": "Práh grunge snížit z 0,6 na 0,4-0,45 (pokrytí hran 50-70 % délky), šířku oděru 4-8 mm, grunge měřítko 6-8 cm; platí i pro horní hrany věže, nosníku a bloku kniplu. Variaci drsnosti laku na velkých plochách vypnout úplně (nebo měřítko >= 1 m). Světlé škrábance (albedo ~0,55, 10-40 mm) v okruhu 60 mm kolem kniplu, kláves, kolébek a madla."},
+  {"n": 2, "title": "Záře kláves, proužků a LED", "where": "list 3 vpravo 1140-1300,250-370 a LED 1090,445 / 1135,495 / 1185,550; list 6 vpravo 1590-1750,290-350", "problem": "Svítící prvky jsou ploché bílé plochy bez záře a gradientu; LED kolébek drobné bez záře.", "severity": "doporučeno", "fix": "Emise kláves 15-25 s gradientem (střed 100 %, okraj 60 %), teplá bílá ~5000 K; proužky MAIN/BATT modrobílé 10-15, TEMP jantar; LED 1 x 6 mm, emise ~10. Ověřit bloom na listu 3."},
+  {"n": 3, "title": "EMER a oranžový rám nouzové klávesy, legendy kolébek z pohledu pilota", "where": "list 5 vpravo 1880-1930,190-250 a 1830-1910,300; list 6 vpravo 1780-1900,432", "problem": "Nouzová klávesa bez oranžového rámu a nápisu EMER; legendy kolébek shora a z boku nečitelné.", "severity": "doporučeno", "fix": "Oranžový rám 8-10 mm kolem klávesy, bílý tučný EMER 10-12 mm pod ní; legendy kolébek tučné 8-10 mm a posunout je na plochu natočenou k pilotovi (pod kolébky, ne do žlábku)."},
+  {"n": 4, "title": "Šikmá a horní plocha věže nečleněné", "where": "list 3 vpravo 1300-1500,60-560 a 1420-1950,55-200", "problem": "Velké hladké desky; návrh má na věži spáry, zlom a vložky.", "severity": "doporučeno", "fix": "Šikmou plochu rozdělit spárou 2 mm a grafitovým panelem (~60 % plochy) se 4 šrouby; na horní ploše podélná spára 2 mm nebo zkosení 10 mm u hrany k pilotovi."},
+  {"n": 5, "title": "Znak // na nosníku, spodní nápisy, bok podstavce", "where": "list 5 vpravo 1005-1040,335-380 a 1000-1600,440-520; list 6 vpravo 1200-1620,570-585", "problem": "// useknutý u okraje a malý proti nápisu; spodní nápisy splývají s tmavým pásem; bok podstavce pod nosníkem bez rámů a šroubů.", "severity": "doporučeno", "fix": "// ~30 mm vysoký, 15 mm za začátek nosníku; HALCYON FREIGHTWORKS na nosníku zmenšit na ~60 %. Spodní nápisy albedo >= 0,5. Na boku podstavce 2-3 grafitové vložky (albedo 0,08-0,12) v rámu 20-30 mm se šrouby po ~100 mm."}
+ ]
+}

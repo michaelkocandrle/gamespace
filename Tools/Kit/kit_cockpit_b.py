@@ -72,16 +72,16 @@ def emergency_key(p, c, r, a, n):
     p.box("Kit_GlowRed", (-0.013, -0.002, 0.0108), (0.013, 0.002, 0.0114), m=fm(c), panel=False)
     hinge = c + a * 0.024 + n * 0.01
     p.sweep("Kit_Lip", [hinge - r * 0.033, hinge + r * 0.033], 0.0045, seg=12)
-    t = math.radians(15)                                      # the cover just lifted (it stuck out over the tower)
+    t = math.radians(0)                                      # the cover just lifted (it stuck out over the tower)
     a2, n2 = a * math.cos(t) + n * math.sin(t), -a * math.sin(t) + n * math.cos(t)
     mc = frame(hinge, r, a2, n2)
     p.box("Kit_Red", (-0.03, 0.0, -0.0015), (0.03, 0.043, 0.0015), bevel=0.0012, segments=2, m=mc)
     for sv in (-1, 1):
         p.box("Kit_Red", (sv * 0.03 - 0.0015, 0.0, -0.0095), (sv * 0.03 + 0.0015, 0.043, 0.0), bevel=0.0007, segments=1, m=mc)
     p.box("Kit_Red", (-0.03, 0.0405, -0.0095), (0.03, 0.043, 0.0), bevel=0.0007, segments=1, m=mc)
-    lp = c - a * 0.042
-    p.box("Kit_Graphite", (-0.04, -0.011, 0.0), (0.04, 0.011, 0.0015), m=fm(lp), panel=False)
-    _label(p, "ck_emerg_o2", lp + n * 0.0017, n, r, a, scale=0.5)
+    lp = c - a * 0.045
+    p.box("Kit_Graphite", (-0.052, -0.017, 0.0), (0.052, 0.017, 0.0015), m=fm(lp), panel=False)
+    _label(p, "ck_emerg_o2", lp + n * 0.0017, n, r, a, scale=0.8)
 
 
 def console_b(name, seed):
@@ -130,9 +130,9 @@ def console_b(name, seed):
                 if hu > 0.115 or hx > xb - 0.03:
                     continue
                 p.box("Kit_Seal", (hx - 0.0015, hu - 0.0015, AT - 0.0004), (hx + 0.0015, hu + 0.0015, AT + 0.0002), panel=False)
-    _label(p, "maker", Vector((0.35, -0.0778, AT - 0.05)), -Y, X, Z, scale=0.4)
+    _label(p, "maker", Vector((0.4, -0.0778, AT - 0.05)), -Y, X, Z, scale=0.3)
     for k in range(2):                                         # Halcyon's mark: two slanted orange bars, 30 mm
-        x_ = 0.175 + k * 0.022
+        x_ = 0.235 + k * 0.022
         bar = [(x_, AT - 0.068), (x_ + 0.011, AT - 0.068), (x_ + 0.027, AT - 0.034), (x_ + 0.016, AT - 0.034)]
         side_prism(p, "Kit_Signal", bar, -0.078, -0.074, 0.0, 1)
     for xb in (0.2, 0.46):                                                                   # the slanted brackets
@@ -181,7 +181,7 @@ def console_b(name, seed):
     p.box("Kit_Seal", (-0.065, -0.037, 0.005), (0.065, 0.037, 0.0055), m=fm(sc), panel=False)
     for k, lab in enumerate(("ck_main", "ck_batt", "ck_temp")):
         q = sc + d * (0.022 - 0.022 * k)
-        p.box("Kit_GlowKey" if k < 2 else "Kit_GlowAmber", (0.005, -0.004, 0.0055), (0.055, 0.004, 0.0065), m=fm(q), panel=False)
+        p.box("Kit_GlowFoot" if k < 2 else "Kit_GlowAmber", (0.005, -0.004, 0.0055), (0.055, 0.004, 0.0065), m=fm(q), panel=False)
         _label(p, lab, q - X * 0.03 + n * 0.0058, n, X, d, scale=0.62)
     kc = c0 + X * 0.89                                         # the keys
     p.box("Kit_Lip", (-0.055, -0.05, 0.002), (0.055, 0.05, 0.005), bevel=0.0015, segments=2, m=fm(kc))
@@ -190,7 +190,9 @@ def console_b(name, seed):
         q = kc + X * (0.024 * (1 if i % 2 else -1)) + d * (0.021 * (1 if i < 2 else -1))
         p.box("Kit_Seal", (-0.0235, -0.021, 0.006), (0.0235, 0.021, 0.0098), bevel=0.001, segments=1, m=fm(q))
         p.box("Kit_Housing", (-0.019, -0.017, 0.006), (0.019, 0.017, 0.01), bevel=0.002, segments=2, m=fm(q))
-        p.box("Kit_GlowKey", (-0.016, -0.014, 0.01), (0.016, 0.014, 0.0135), bevel=0.0015, segments=2, m=fm(q))
+        # a gradient: the cap's rim on the dimmer cool glow, a brighter warm centre a hair proud
+        p.box("Kit_GlowCool", (-0.016, -0.014, 0.01), (0.016, 0.014, 0.0135), bevel=0.0015, segments=2, m=fm(q))
+        p.box("Kit_GlowKey", (-0.0105, -0.0085, 0.0135), (0.0105, 0.0085, 0.0139), m=fm(q), panel=False)
     for xx in (0.665, 0.955):
         screw(p, c0 + X * xx + d * 0.04 + n * 0.003, n)
         screw(p, c0 + X * xx - d * 0.04 + n * 0.003, n)
@@ -210,13 +212,15 @@ def console_b(name, seed):
     p.box("Kit_Graphite", (-w2, -h2, -0.004), (w2, h2, 0.002), m=ff(fc), panel=False)
     emergency_key(p, fc + a * 0.025 + nf * 0.002, r, a, nf)
     for i, lab in enumerate(("ck_pwr", "ck_extlt", "ck_eng")):
-        q = fc - a * 0.05 + r * (0.105 * (i - 1)) + nf * 0.002
+        q = fc - a * 0.078 + r * (0.105 * (i - 1)) + nf * 0.002
         p.box("Kit_Lip", (-0.016, -0.024, 0.0), (0.016, 0.03, 0.0015), bevel=0.001, segments=1, m=ff(q), panel=False)   # its frame
-        _rocker(p, q, r, a, nf, lab, label_scale=0.9)
+        _rocker(p, q, r, a, nf, lab, label_scale=1.1)
         p.box("Kit_GlowKey", (-0.006, 0.022, 0.0015), (0.006, 0.026, 0.0027), m=ff(q), panel=False)
     for su in (-1, 1):
         for sv in (-1, 1):
             screw(p, fc + r * (su * (w2 - 0.012)) + a * (sv * (h2 - 0.012)) + nf * 0.002, nf)
+        _label(p, "scratches", fc + r * (su * (w2 - 0.022)) + a * 0.05 + nf * 0.0025, nf, r, a, scale=0.13, is_label=False)
+    p.box("Kit_Graphite", (1.131, TU + 0.02, 0.7395), (1.134, W - 0.025, 0.7408), panel=False)            # the top's seam
     for uf, ns_ in ((TU, -1), (W - 0.005, 1)):
         # the inset follows the side's outline 20 mm in: the slope edge leans with the face
         ins = [(1.0, DECK + 0.02), (L - 0.04, DECK + 0.02), (L - 0.04, 0.68), (1.115, 0.72), (1.0, 0.53)]
