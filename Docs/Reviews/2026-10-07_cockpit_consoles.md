@@ -70,4 +70,6 @@ Finální snímky ze zabalené hry: `shots:20261007_101154_cockpit_audit`, `shot
   ač mířila po normále – `test_ship_geometry` shodil přestavbu (`mirrored_decals`); nově stejný test (T × B) · N.
 - `test_kit_showroom`: materiál lodi smí mít `SurfaceDetail`, když ho setup zapíná (perforovaná kůže).
 - `test_exterior_drawing`: rada k přegenerování rozvrhu kitu uvádí `--region` (výchozí je pilot, soubor je ship).
-- Známé: náhodné decaly trupu se mezi dvěma přestavbami střídají ve dvou stavech (`test_kit_decals`), odloženo.
+- Známé: náhodné decaly trupu jednou mezi dvěma přestavbami poskočily (`test_kit_decals`); další přestavba prošla.
+- CI na GitHubu padalo od 6. 10. v `test_interior_drawing`: model četl sockety z FBX, v CI je to jen ukazatel LFS;
+  nově z manifestu exportu (`interior_model`).

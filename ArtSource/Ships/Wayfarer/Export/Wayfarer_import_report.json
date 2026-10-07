@@ -27,7 +27,6 @@
       "socket WalkSeat scale (100, 100, 100) reset to 1"
     ],
     "SM_Ship_Wayfarer_Decals": [],
-    "SM_Ship_Wayfarer_Hologram": [],
     "SM_Ship_Wayfarer_Interior": []
   },
   "kept_unchanged": [
@@ -35,19 +34,20 @@
     "SM_Ship_Wayfarer_Door0A",
     "SM_Ship_Wayfarer_Door1A",
     "SM_Ship_Wayfarer_Gear",
+    "SM_Ship_Wayfarer_Hologram",
     "SM_Ship_Wayfarer_InteriorDecals",
     "SM_Ship_Wayfarer_InteriorKit",
     "SM_Ship_Wayfarer_Screens"
   ],
   "imported_hashes": {
-    "SM_Ship_Wayfarer": "c9b37b2b599729bffc83166bef3429e1c01cce60",
+    "SM_Ship_Wayfarer": "5bc6a7d43657d1b4d60495504da229548e1cc897",
     "SM_Ship_Wayfarer_Canopy": "879389a2da32c2818440c8370cc947c38af0759c",
-    "SM_Ship_Wayfarer_Decals": "e052bccfbc03b76c354cb90c6bcb67bd9900cf3c",
+    "SM_Ship_Wayfarer_Decals": "4a4f3f985a30fb3712808dd1fab379aca2a55b89",
     "SM_Ship_Wayfarer_Door0A": "f593dd2e91e797e067daf38767cd9fe81d9cea12",
     "SM_Ship_Wayfarer_Door1A": "e399533e241926e1610ed1e6957b7139fb21cc10",
     "SM_Ship_Wayfarer_Gear": "7dc7e8ec1f70b6d335d5d82d424f2e9d8b4d85bf",
     "SM_Ship_Wayfarer_Hologram": "19ad136b4dfcafa2f3fc35755332989246018cd3",
-    "SM_Ship_Wayfarer_Interior": "ea76895e038a19cac1089bcc0f48a821bbe039bd",
+    "SM_Ship_Wayfarer_Interior": "4d83cb1f11fc71cfa86d466f466b527aeaa2c62d",
     "SM_Ship_Wayfarer_InteriorDecals": "7fa87d2741ec40acb0f50e8a895e4b5313958c42",
     "SM_Ship_Wayfarer_InteriorKit": "7c6de1d8613fe23f6b2058b655890a31c906a456",
     "SM_Ship_Wayfarer_Screens": "af6c471502017df4007048c3af25d4531fda123a"

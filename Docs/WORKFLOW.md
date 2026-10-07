@@ -787,6 +787,10 @@ snímku.
 - **Pás na konzoli „zmačkaná fólie“** (kokpit, 7. 10. 2026): nebyl to lesk ani grunge materiálu interiéru, ale trim
   kitu `kit_trim02` na těle (`tbox`). Podezřelý materiál najdi obarvením (dočasně jasná barva v setupu, reimport,
   jeden snímek), ne odhadem; v kokpitu tělo konzole `int_console`.
+- **CI (GitHub) hlásí „Run failed: Offline tests“ do mailu po každém pushi** (6.–7. 10. 2026): offline test četl
+  FBX, který je v CI jen ukazatel Git LFS (`checkout lfs: false`) – `fbx_mesh` spadl na „buffer is smaller“. Offline
+  testy smí číst jen JSON a skripty; data z FBX ber z manifestu exportu, nebo testuj `is_lfs_pointer`. Stav CI:
+  `curl https://api.github.com/repos/michaelkocandrle/gamespace/commits/<sha>/check-runs`, pak `/check-runs/<id>/annotations`.
 - **`exterior_kit_layout.py` bez `--region` přepíše rozvrh celé lodi pilotem** (výchozí region pilot, uložený ship):
   `test_exterior_drawing` pak hlásí chybějící desky P-S-K*. Vždy `--region ship` (rada testu ho už uvádí).
 

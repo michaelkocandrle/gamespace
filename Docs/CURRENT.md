@@ -60,7 +60,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 - Kit: vyšlapaná linie potřebuje směrovou buňku atlasu špíny, špína v kanálech dlouhou úzkou buňku (krok c); ohmatání
   madel; lišty stropu po segmentech. Rozvody S na zadním konci (x 3–4) dělají ohyb přes pole bez desky.
 - **Determinismus stavby na později** (WORKFLOW 9.6 ff): šum ±40 trojúhelníků, 3 FBX, import ukládá ~150 assetů; shluky
-  decalů trupu se mezi přestavbami střídají ve dvou stavech (`test_kit_decals` FAIL od 7. 10., odložený úkol).
+  decalů trupu občas mezi dvěma přestavbami poskočí (`test_kit_decals`; 7. 10. jednou, další přestavba prošla).
 - Hřebenový terén vypnutý; kameny bez kolize; zvuky procedurální; quantum tunel, TSR jiskry, displeje bez mipmap, duchy čísel.
 - Neověřeno autorem: quantum skok, HUD SC-1c mimo 1080p, chůze Steadfastem; Shipping nezkoušen; PIE Escape končí hru.
 

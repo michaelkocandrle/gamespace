@@ -8,15 +8,15 @@
   "layout": "9ed16b60fbcc",
   "interior": "cb3459ab61d4",
   "setup": "de82013afd6a",
-  "lights": "7ded38486721",
+  "lights": "c88a8e41bb83",
   "design": "0386482c0b74",
   "kit": "c8f141a12540",
   "library": "3bdd02712ff2",
   "light_rules": "788f180917fd"
  },
  "geometry": {
-  "SM_Ship_Wayfarer.fbx": "e74dba5e668e",
-  "SM_Ship_Wayfarer_Interior.fbx": "19295396afc5",
+  "SM_Ship_Wayfarer.fbx": "7796c91283fd",
+  "SM_Ship_Wayfarer_Interior.fbx": "652e353162f1",
   "SM_Ship_Wayfarer_Canopy.fbx": "50abe89a8300",
   "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
   "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",

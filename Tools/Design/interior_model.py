@@ -538,11 +538,24 @@ class Model:
             mt = re.search(pattern, t)
             return tuple(float(v) for v in mt.groups()) if n > 1 else float(mt.group(1))
 
-        fbx = self.ship_fbx("")
-        if not os.path.exists(fbx):
+        # the sockets from the export manifest (plain JSON), not from the FBX: in CI the FBX is only a Git LFS pointer
+        # (7. 10. 2026: test_interior_drawing failed on GitHub since 6. 10. reading the pointer as FBX)
+        man = os.path.join(ROOT, "ArtSource", "Ships", self.ship, "Export", "%s_manifest.json" % self.ship)
+        if not os.path.exists(man):
             return
-        import fbx_mesh
-        nulls = fbx_mesh.read(fbx)["nulls"]
+        nulls = {}
+
+        def collect(o):
+            if isinstance(o, dict):
+                for k, v in o.items():
+                    if k.startswith("SOCKET_") and isinstance(v, dict) and "location_m" in v:
+                        nulls[k] = tuple(v["location_m"])
+                    else:
+                        collect(v)
+            elif isinstance(o, list):
+                for v in o:
+                    collect(v)
+        collect(json.load(open(man, encoding="utf-8")))
 
         def lay(v):
             return tuple(float(a) - float(b) for a, b in zip(v, self.offset))
