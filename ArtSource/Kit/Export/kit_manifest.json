@@ -9964,7 +9964,7 @@
     74.1
    ],
    "tris": 27936,
-   "tris_decals": 286,
+   "tris_decals": 300,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
@@ -9991,7 +9991,7 @@
    ],
    "sockets": {},
    "collision_hulls": 1,
-   "decals": 39,
+   "decals": 44,
    "decal_items": [
     "maker",
     "maker",
@@ -10031,7 +10031,12 @@
     "panel_A12",
     "corner_mark",
     "label_power",
-    "ck_maker_plate"
+    "ck_maker_plate",
+    "st_hfcl",
+    "st_torque",
+    "st_gnd",
+    "pn_7",
+    "pn_8"
    ],
    "service_labels": [
     "label_coolant",

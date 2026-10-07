@@ -332,7 +332,12 @@ def console_b(name, seed):
            ("socket", (L - 0.0155, (U0 + TU) / 2, 0.33), X, Y, 0.8),
            ("hazard_subtle", (L - 0.0195, (TU + W) / 2, 0.39), X, Y, 0.9), ("panel_A12", (L - 0.0195, (TU + W) / 2, 0.2), X, Y, 0.8),
            ("corner_mark", (0.9, 0.0, DECK + 0.0065), Z, X, 0.6), ("label_power", (0.94, U0 - 0.0005, 0.22), -Y, X, 0.6),
-           ("ck_maker_plate", (0.96, W + 0.0045, 0.19), Y, -X, 0.9)]
+           ("ck_maker_plate", (0.96, W + 0.0045, 0.19), Y, -X, 0.9),
+           # the second layer: small stencils and ids on the insets and the frame
+           ("st_hfcl", (1.13, TU - 0.0065, 0.62), -Y, X, 0.45), ("pn_3", (1.03, TU - 0.0065, 0.47), -Y, X, 0.6),
+           ("st_extpwr", (0.81, W + 0.0035, 0.46), Y, -X, 0.6), ("st_torque", (0.81, W + 0.0035, 0.3), Y, -X, 0.5),
+           ("pn_6", (0.73, W + 0.0035, 0.42), Y, -X, 0.6), ("st_gnd", (L - 0.0155, (U0 + TU) / 2, 0.39), X, Y, 0.5),
+           ("pn_7", (0.11, U0 - 0.0065, 0.16), -Y, X, 0.6), ("pn_8", (0.5, W + 0.0065, 0.16), Y, -X, 0.6)]
     for item, at, nn, rr, sc_ in det:
         nn = Vector(nn)
         up = Z if abs(nn.z) < 0.5 else Y                       # right x up = the normal (a right-handed decal frame)
