@@ -780,6 +780,15 @@ snímku.
 - **Ražený text ztrojnásobil trojúhelníky dílu** (`kit_factory.emboss_text`, 7. 10. 2026): křivka písma FONT má
   výchozí `resolution_u = 12` a s `bevel_depth` každé písmeno stovky trojúhelníků; servisní stěna 37 k → 91 k
   (`KITBUILD over_budget`). Řešení: `resolution_u = 3`, `bevel_resolution = 0`; na čitelnosti z oka to nepoznáš.
+- **Přestavba Wayfareru padá na `mirrored_decals` u karty špíny** (7. 10. 2026): buňka karty přes ostrý ohyb trupu
+  (kořen křídla) se zkroutí – normála ještě míří po `n`, ale textura je zrcadlená. `card_at` zahazuje i buňky
+  s (T × B) · N < 0 (`_uv_mirrored`, stejný test jako `check_ship_geometry`). Ladění: najdi plochu podle `at`
+  z GeoCheck, materiál a UV určí položku.
+- **Pás na konzoli „zmačkaná fólie“** (kokpit, 7. 10. 2026): nebyl to lesk ani grunge materiálu interiéru, ale trim
+  kitu `kit_trim02` na těle (`tbox`). Podezřelý materiál najdi obarvením (dočasně jasná barva v setupu, reimport,
+  jeden snímek), ne odhadem; v kokpitu tělo konzole `int_console`.
+- **`exterior_kit_layout.py` bez `--region` přepíše rozvrh celé lodi pilotem** (výchozí region pilot, uložený ship):
+  `test_exterior_drawing` pak hlásí chybějící desky P-S-K*. Vždy `--region ship` (rada testu ho už uvádí).
 
 - **Karty špíny se nepokládaly** (`hs_decals.card_at`, od 3. 10. do 6. 10. 2026): buňky se skládaly v pořadí, ve kterém
   normála plochy mířila proti normále povrchu, a kontrola přeložených buněk je zahodila všechny. Build hlásil

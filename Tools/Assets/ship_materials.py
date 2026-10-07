@@ -52,7 +52,7 @@ MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glas
            "blink": SHARED + "/M_Ship_Blink", "holo": SHARED + "/M_Ship_Holo"}
 TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap",
                   "decal_normal": "DecalNormalMap", "decal_m": "DecalMMap", "decal_bc": "DecalColorMap",
-                  "decal_ao": "DecalAOMap"}
+                  "decal_ao": "DecalAOMap", "detail_normal": "DetailNormalMap"}
 
 
 def _asset_tools():
@@ -795,7 +795,7 @@ def import_texture(ship, key, source, never_stream=False):
     texture = unreal.EditorAssetLibrary.load_asset("%s/%s" % (folder, name))
     if texture is None:
         raise RuntimeError("could not import %s" % filename)
-    if key in ("normal", "decal_normal"):
+    if key in ("normal", "decal_normal", "detail_normal"):
         texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_NORMALMAP)
         texture.set_editor_property("srgb", False)
         texture.set_editor_property("flip_green_channel", True)

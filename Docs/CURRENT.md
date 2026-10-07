@@ -59,16 +59,16 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 - **Odrazy kovu:** varianta c zapnutá v celé hře (autor 6. 10.; interiér Lumen do drsnosti 0,32, ½ rozlišení; RX 9070 +0,6–1,4 ms).
 - Kit: vyšlapaná linie potřebuje směrovou buňku atlasu špíny, špína v kanálech dlouhou úzkou buňku (krok c); ohmatání
   madel; lišty stropu po segmentech. Rozvody S na zadním konci (x 3–4) dělají ohyb přes pole bez desky.
-- **Determinismus stavby na později** (WORKFLOW 9.6 ff): šum ±40 trojúhelníků, 3 FBX, import ukládá ~150 assetů;
-  náhodné decaly už na pořadí stavby nezávisí (9.6 fl, test v `test_kit_decals.py`).
+- **Determinismus stavby na později** (WORKFLOW 9.6 ff): šum ±40 trojúhelníků, 3 FBX, import ukládá ~150 assetů; shluky
+  decalů trupu se mezi přestavbami střídají ve dvou stavech (`test_kit_decals` FAIL od 7. 10., odložený úkol).
 - Hřebenový terén vypnutý; kameny bez kolize; zvuky procedurální; quantum tunel, TSR jiskry, displeje bez mipmap, duchy čísel.
 - Neověřeno autorem: quantum skok, HUD SC-1c mimo 1080p, chůze Steadfastem; Shipping nezkoušen; PIE Escape končí hru.
 
 ## Další kroky
 
 0. **Autor 5. 10. (screenshoty), v tomto pořadí:**
-   a) holo MFD v3 + kokpit: hotové (stránky, motory, zvuky, křeslo, konzole, panel dveří, hasičák); kritik 3 kola
-      FAIL 6,17 bez „musí se opravit“ – otevřené body v `2026-10-06_cockpit_critic.md` (konzole, středové displeje);
+   a) holo MFD v3 + kokpit hotové; **konzole, křeslo a plyn 7. 10.** (šedé kryty, nouzové tlačítko, mřížka, perforace;
+      kritik PASS 6,5, `2026-10-07_cockpit_consoles.md`); zbývá opotřebení kokpitu, středové displeje, čela konzolí;
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
       strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); rampa: plán a rozhodnutí A/B
       čeká na autora (`2026-10-06_ramp_plan.md`).

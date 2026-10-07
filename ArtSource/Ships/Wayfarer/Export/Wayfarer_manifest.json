@@ -42,7 +42,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "94ca2f335c624380bc1b5755cb224b44b1b86cc4"
+      "geometry_hash": "c9b37b2b599729bffc83166bef3429e1c01cce60"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -56,7 +56,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "c53b99c3756b7ce1dfc1d60191267101a55165f9"
+      "geometry_hash": "e052bccfbc03b76c354cb90c6bcb67bd9900cf3c"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -91,21 +91,21 @@
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "fdc28e6c654bf51216b099317f64c320d139a0b9"
+      "geometry_hash": "ea76895e038a19cac1089bcc0f48a821bbe039bd"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
       "objects": [
         "SM_Ship_Wayfarer_InteriorDecals"
       ],
-      "geometry_hash": "77dbe6dac08c671d535c6541ca92ddd86faee6d6"
+      "geometry_hash": "7fa87d2741ec40acb0f50e8a895e4b5313958c42"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorKit.fbx",
       "objects": [
         "SM_Ship_Wayfarer_InteriorKit"
       ],
-      "geometry_hash": "fcd23c62c7bfc496dd3aaf101e89f159d82e432f"
+      "geometry_hash": "7c6de1d8613fe23f6b2058b655890a31c906a456"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Screens.fbx",
@@ -119,8 +119,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 459497,
-      "verts": 305345,
+      "tris": 459485,
+      "verts": 305339,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -180,8 +180,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 52314,
-      "verts": 64349,
+      "tris": 66402,
+      "verts": 72338,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -193,9 +193,9 @@
       "uv_layers": 1,
       "bounds_m": [
         [
-          -10.714330673217773,
+          -10.730973243713379,
           -7.331887722015381,
-          -1.8331999778747559
+          -1.8340001106262207
         ],
         [
           10.043219566345215,
@@ -308,8 +308,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 491354,
-      "verts": 255481,
+      "tris": 710234,
+      "verts": 367095,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -320,15 +320,18 @@
         "M_Ship_Wayfarer_IntGlow",
         "M_Ship_Wayfarer_IntConsole",
         "M_Ship_Wayfarer_IntAccentGlow",
+        "M_Ship_Wayfarer_IntLeatherPerf",
         "M_Ship_Wayfarer_IntLeather",
-        "M_Ship_Wayfarer_IntLedWhite",
-        "M_Ship_Wayfarer_IntLedOrange",
-        "M_Ship_Wayfarer_IntLedBlink",
-        "M_Ship_Wayfarer_IntRed",
         "M_Ship_Wayfarer_IntCream",
+        "M_Ship_Wayfarer_IntHousing",
+        "M_Ship_Wayfarer_IntRed",
+        "M_Ship_Wayfarer_IntLedOrange",
+        "M_Ship_Wayfarer_IntLedWhite",
+        "M_Ship_Wayfarer_IntLedBlink",
         "M_Ship_Wayfarer_IntRubber",
         "M_Ship_Wayfarer_IntLight",
         "M_Ship_Wayfarer_IntFabric",
+        "M_Ship_Wayfarer_IntGlowSoft",
         "M_Ship_Wayfarer_IntFrame"
       ],
       "uv_layers": 1,
@@ -348,8 +351,8 @@
     "SM_Ship_Wayfarer_InteriorDecals": {
       "lod": 0,
       "part": "InteriorDecals",
-      "tris": 4930,
-      "verts": 4249,
+      "tris": 4958,
+      "verts": 4297,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -372,8 +375,8 @@
     "SM_Ship_Wayfarer_InteriorKit": {
       "lod": 0,
       "part": "InteriorKit",
-      "tris": 156,
-      "verts": 112,
+      "tris": 68,
+      "verts": 64,
       "materials": [
         "M_Ship_Wayfarer_KitTrim01",
         "M_Ship_Wayfarer_KitTrim02"
@@ -509,7 +512,7 @@
         [
           -9.949999809265137,
           3.2013895511627197,
-          0.8000004291534424
+          0.8000011444091797
         ],
         [
           -7.250000476837158,

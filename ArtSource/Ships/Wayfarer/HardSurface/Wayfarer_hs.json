@@ -736,6 +736,25 @@
    "roughness": 0.5,
    "metallic": 0.4
   },
+  "int_glow_soft": {
+   "slot": "IntGlowSoft",
+   "colour": [0.05, 0.05, 0.06],
+   "roughness": 0.3,
+   "metallic": 0.0,
+   "emit": [0.35, 0.7, 1.0]
+  },
+  "int_leather_perf": {
+   "slot": "IntLeatherPerf",
+   "colour": [0.045, 0.042, 0.04],
+   "roughness": 0.7,
+   "metallic": 0.0
+  },
+  "int_housing": {
+   "slot": "IntHousing",
+   "colour": [0.15, 0.148, 0.145],
+   "roughness": 0.38,
+   "metallic": 0.35
+  },
   "int_red": {
    "slot": "IntRed",
    "colour": [0.45, 0.03, 0.02],

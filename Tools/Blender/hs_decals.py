@@ -95,6 +95,19 @@ def _note(pl, rule, key, item, fr=None, points=None):
         pl.random[rule + ":" + key] = " ".join([item] + ["%.3f" % v for q in points for v in q])
 
 
+def _uv_mirrored(f, uv):
+    """The face's texture reads mirrored from its front ((T x B) . N < 0) - check_ship_geometry.mirrored_mesh_decals."""
+    l0, l1, l2 = f.loops[0], f.loops[1], f.loops[2]
+    e1, e2 = l1.vert.co - l0.vert.co, l2.vert.co - l0.vert.co
+    d1, d2 = l1[uv].uv - l0[uv].uv, l2[uv].uv - l0[uv].uv
+    det = d1.x * d2.y - d2.x * d1.y
+    if abs(det) < 1e-12:
+        return False
+    t = (e1 * d2.y - e2 * d1.y) / det
+    b = (e2 * d1.x - e1 * d2.x) / det
+    return t.cross(b).dot(f.normal) < 0
+
+
 class Placer:
     def __init__(self, target, spec, index, off, pod_axis):
         bm = bmesh.new()
@@ -359,9 +372,11 @@ class Placer:
                 for loop, (_, s_, t) in zip(f.loops, quad):
                     loop[self.uv].uv = (u0 + 0.5 * s_, v_top - 0.5 * t)
                 f.normal_update()   # a new face's normal is zero until updated (WORKFLOW 9.3 s)
-                if f.normal.dot(n) < 0:
+                if f.normal.dot(n) < 0 or _uv_mirrored(f, self.uv):
                     # a cell folded over a step (a plate edge, a ring): flipped it read mirrored (test_ship_geometry
-                    # mirrored_decals, whole-ship kit 3. 10. 2026) - drop it like a cell that missed
+                    # mirrored_decals, whole-ship kit 3. 10. 2026) - drop it like a cell that missed. A cell twisted
+                    # where the surface turns sharply (a wing root, 7. 10. 2026) can still face along n with its
+                    # texture mirrored: the same (T x B) . N test as the geometry check
                     self.bm.faces.remove(f)
                     continue
                 faces += 1

@@ -161,6 +161,44 @@
     0.55
    ],
    "fov": 60
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "name": "left_console_head",
+   "fov": 55,
+   "camera_local": [
+    6.8,
+    -0.55,
+    1.2
+   ],
+   "look_local": [
+    7.24,
+    -0.93,
+    0.56
+   ]
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "name": "right_console_head",
+   "fov": 55,
+   "camera_local": [
+    6.8,
+    0.55,
+    1.2
+   ],
+   "look_local": [
+    7.24,
+    0.93,
+    0.56
+   ]
   }
  ]
 }

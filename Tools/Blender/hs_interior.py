@@ -443,11 +443,18 @@ def obj_console(g, r, zr, z0):
             y1 -= 0.04
         else:
             y0 += 0.04
-    tbox(g, "int_dark", "kit_trim02", (x0, y0, z0), (x1, y1, top), 1.0)
+    if COCKPIT.get("style") in ("pods", "wrap"):
+        # (7. 10. 2026: the kit trim strip on the body's inner face read as crumpled foil under the top - the body
+        # in the cockpit's warm graphite)
+        box(g["int_console"], (x0, y0, z0), (x1, y1, top))
+    else:
+        tbox(g, "int_dark", "kit_trim02", (x0, y0, z0), (x1, y1, top), 1.0)
     if COCKPIT.get("style") in ("pods", "wrap"):
         # a top plate inside the body with a satin rim (the old tilted plate overhung the console; its glow
         # rectangle was a placeholder and its knobs bare cylinders - control modules come from hs_cockpit)
-        box(g["int_console"], (x0 + 0.03, y0 + 0.03, top), (x1 - 0.03, y1 - 0.03, top + 0.012))
+        # (7. 10. 2026, SC's consoles: mid-grey satin metal housings round dark insets - the near-black top read as one
+        # slab) the top plate in the housing grey
+        box(g["int_housing"], (x0 + 0.03, y0 + 0.03, top), (x1 - 0.03, y1 - 0.03, top + 0.012))
         for xa, xb, ya, yb in ((x0 + 0.02, x1 - 0.02, y0 + 0.02, y0 + 0.03), (x0 + 0.02, x1 - 0.02, y1 - 0.03, y1 - 0.02),
                                (x0 + 0.02, x0 + 0.03, y0 + 0.02, y1 - 0.02), (x1 - 0.03, x1 - 0.02, y0 + 0.02, y1 - 0.02)):
             box(g["int_trim"], (xa, ya, top), (xb, yb, top + 0.016))
@@ -499,18 +506,22 @@ def obj_console(g, r, zr, z0):
             box(g["int_console"], (vx0 + 0.006, ya, zz), (vx1 - 0.006, yb, zz + 0.008))
             zz += 0.022
             k += 1
-        # (critic 5. 10.: the console tops large empty slabs) a recessed service plate ahead of the HOTAS: a satin rim,
-        # a dark inset, a lid with a finger notch and four bolts
+        # (critic 5. 10.: the console tops large empty slabs; 7. 10.: SC's console heads - a speaker grille, a big red
+        # guarded push button, hazard hatching) the module ahead of the HOTAS: a housing-grey plate in a satin rim, the
+        # aft half a perforated grille, the fore half a red emergency button under a hinged orange guard, a hazard band
+        # along the console's nose
         tc = Vector((x1 - 0.15, (y0 + y1) / 2, top + 0.012))
         X, Y, Z = Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))
-        hs_cockpit.rr_ring(g["int_trim"], tc + Z * 0.006, X, Y, Z, 0.2, 0.16, 0.012, 0.012, 0.006, 3)     # the rim
-        hs_cockpit.rr_slab(g["int_dark"], tc + Z * 0.0015, X, Y, Z, 0.18, 0.14, 0.01, 0.002, 3)          # the well
-        hs_cockpit.rr_slab(g["int_console"], tc + Z * 0.004, X, Y, Z, 0.168, 0.128, 0.008, 0.0025, 3)   # the lid
-        hs_cockpit.rr_slab(g["int_dark"], tc + X * 0.07 + Z * 0.0042, X, Y, Z, 0.014, 0.05, 0.006, 0.0012, 3)   # notch
-        for sx in (-1, 1):
-            for sy in (-1, 1):
-                q = tc + Vector((sx * 0.07, sy * 0.05, 0.0035))
-                cyl(g["int_trim"], q, q + Vector((0, 0, 0.003)), 0.004, 8)
+        hs_cockpit.console_head(g, tc - X * 0.012, X, Y, Z, 0.22, 0.3, "ck_emerg_o2" if y0 > 0 else "ck_alarm")
+        # (critic 7. 10. r1: the top round the HOTAS 60 % empty) a rocker bank in the middle band beside the HOTAS,
+        # 2 x 2 labelled rockers in a grey housing
+        rc = Vector((x0 + 0.78, (y0 + y1) / 2 + (0.005 if y0 > 0 else -0.005), top + 0.016))
+        hs_cockpit.control_module(g, rc, Vector((0, -1, 0)), Vector((1, 0, 0)), Vector((0, 0, 1)), 0.15, 0.22,
+                                  [[("rocker", "ck_pwr"), ("rocker", "ck_eng")], [("rocker", "ck_extlt"), ("rocker", "ck_batt")]]
+                                  if y0 > 0 else
+                                  [[("rocker", "ck_shld"), ("rocker", "ck_cool")], [("rocker", "ck_wpn"), ("rocker", "ck_sys")]],
+                                  label_scale=0.5)
+        hs_cockpit.hazard_band(g, Vector((x1 - 0.036, (y0 + y1) / 2, top + 0.012)), Y, X, Z, (y1 - y0) - 0.09, 0.022)
         # (critic round 3: the top still a bare slab from the seat) a rubber mat strip in a satin-rimmed recess along
         # the outer half, ahead of the switch module, with ribs across it
         mc = Vector(((x0 + 0.66 + x1 - 0.28) / 2, (y1 - 0.11) if y0 > 0 else (y0 + 0.11), top + 0.012))
@@ -953,7 +964,10 @@ def build(recipe, layout, coll, mats, ship, hull):
                     pass
         if COCKPIT.get("style") in ("pods", "wrap"):
             # the orange line along the sill (concept A: the accent runs round the cockpit at console height)
-            obox(g["int_accent_glow" if "int_accent_glow" in MATS else "accent"], (c.x, c.y, sill - 0.035), d, (0, 0, 1), (length, 0.086, 0.012))
+            # (7. 10. 2026: the 8.6 cm glowing band shone through the holo MFDs - critic, rounds 1-3 - now a 1.4 cm
+            # pinstripe in a dark channel)
+            obox(g["int_dark"], (c.x, c.y, sill - 0.036), d, (0, 0, 1), (length, 0.034, 0.012))
+            obox(g["int_accent_glow" if "int_accent_glow" in MATS else "accent"], (c.x, c.y, sill - 0.034), d, (0, 0, 1), (length, 0.014, 0.012))
     report["cockpit"] = True
     # every layout object by its name
     eye = recipe["assemble"]["sockets"]["Cockpit"]["location"]
@@ -1322,7 +1336,13 @@ def cockpit_detail(g, layout, zc, sill):
         x0, x1, y0, y1 = o["rect"]
         inner = y0 if y0 > 0 else y1
         s_ = 1 if y0 > 0 else -1
-        box(g["int_glow"], (x0 + 0.05, inner - s_ * 0.002, ztop - 0.06), (x1 - 0.05, inner + s_ * 0.0, ztop - 0.05))
+        # (critic 7. 10. r1: a burnt-out white line) a soft diffuser set back in a dark channel with satin lips
+        box(g["int_dark"], (x0 + 0.04, inner - s_ * 0.006, ztop - 0.066), (x1 - 0.04, inner + s_ * 0.0, ztop - 0.044))
+        for za, zb in ((ztop - 0.068, ztop - 0.064), (ztop - 0.046, ztop - 0.042)):
+            ya_, yb_ = sorted((inner - s_ * 0.008, inner))
+            box(g["int_trim"], (x0 + 0.04, ya_, za), (x1 - 0.04, yb_, zb))
+        ya_, yb_ = sorted((inner - s_ * 0.0075, inner - s_ * 0.0065))
+        box(g["int_glow_soft"], (x0 + 0.05, ya_, ztop - 0.06), (x1 - 0.05, yb_, ztop - 0.05))
     # tread strips on the cockpit floor between the stairs and the footwell (a plain slab - critic 25. 9.)
     k = 0
     xx = 16.25   # clear of the stairs' top edge (16.20)

@@ -120,11 +120,17 @@ for path in sorted(kit_layered):
     tile = MEL.get_material_instance_scalar_parameter_value(mi, "GrungeTileCm")
     check("%s: surface detail on (SurfaceDetail, GrungeTileCm %.0f)" % (mi.get_name(), tile),
           MEL.get_material_instance_static_switch_parameter_value(mi, "SurfaceDetail") and 20.0 <= tile <= 200.0)
-# the ships keep the master's default: the switch off (the Wayfarer's look does not change with the kit's)
+# the ships keep the master's default: the switch off (the Wayfarer's look does not change with the kit's) - unless
+# the ship's setup turns it on for that material on purpose (7. 10. 2026: the seat's perforated leather)
+_ship_setup = json.load(open(os.path.join(REPO, "ArtSource", "Ships", "Wayfarer", "Wayfarer_setup.json"), encoding="utf-8"))
+_opt_in = {n for n, sp in _ship_setup.get("materials", {}).items()
+           if isinstance(sp, dict) and (sp.get("switches") or {}).get("SurfaceDetail")}
 for path in unreal.EditorAssetLibrary.list_assets("/Game/Ships/Wayfarer/Materials", recursive=False, include_folder=False):
     mi = unreal.EditorAssetLibrary.load_asset(path)
     if isinstance(mi, unreal.MaterialInstanceConstant) and mi.get_editor_property("parent")             and mi.get_editor_property("parent").get_name() == "M_Ship_Layered":
-        check("%s: surface detail off" % mi.get_name(), not MEL.get_material_instance_static_switch_parameter_value(mi, "SurfaceDetail"))
+        want = mi.get_name() in _opt_in
+        check("%s: surface detail %s" % (mi.get_name(), "on (setup)" if want else "off"),
+              bool(MEL.get_material_instance_static_switch_parameter_value(mi, "SurfaceDetail")) == want)
 
 # ---------------------------------------------------------------- the layout rule for service labels
 runs = C.get("SHOWROOM", {}).get("wall_runs", [])

@@ -135,7 +135,8 @@ def test_ship(ship):
         kit = json.load(open(kit_path, encoding="utf-8"))
         stale = [k for k, v in m.digests.items() if kit["digests"].get(k) != v]
         check("%s kit layout made from the current data" % ship, not stale,
-              ("run python Tools/Design/exterior_kit_layout.py %s (changed: %s)" % (ship, ", ".join(stale))) if stale else "")
+              ("run python Tools/Design/exterior_kit_layout.py %s --region %s (changed: %s)"
+               % (ship, kit.get("region", "ship"), ", ".join(stale))) if stale else "")   # (the default region is pilot)
         built = {e.id for e in m.elements if e.cat == "panel" and e.status == "built"}
         # a small hatch rendered as mesh decals (recipe exterior_kit.decal_detail) is built as a decal with its ID
         laid = {p["id"] for p in kit["plates"]} | {d["id"] for d in kit.get("decals", []) if d["id"] in built}

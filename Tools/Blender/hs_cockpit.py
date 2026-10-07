@@ -185,7 +185,7 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
     c = seat(tree, c, right, up, n, w, h)
     # a dark gap round the housing: the module reads as set into the dash (it looked laid on it - critic, 25. 9.)
     rr_ring(g["int_dark"], c - n * 0.0005, right, up, n, w + 0.012, h + 0.012, 0.01, 0.0065, 0.03, 4)
-    rr_slab(g["int_console"], c, right, up, n, w, h, 0.006, 0.03)
+    rr_slab(g["int_housing"], c, right, up, n, w, h, 0.006, 0.03)                                  # (SC: grey housings)
     rr_ring(g["int_trim"], c + n * 0.0015, right, up, n, w, h, 0.006, 0.004, 0.003, 4)
     rr_slab(g["int_dark"], c + n * 0.0012, right, up, n, w - 0.012, h - 0.012, 0.003, 0.002, 3)
     for su in (-1, 1):
@@ -220,6 +220,78 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
                 LABELS.append({"item": label, "at": list(face + right * u + up * (v + lift - cell / 2 + 0.0058)),
                                "n": list(n), "x": list(right), "y": list(up), "scale": label_scale,
                                "max_w": (w - 0.016) / len(row) - 0.004})
+    return placed
+
+
+def console_head(g, c, right, up, n, w, h, label):
+    """The module at a console's nose (7. 10. 2026, after SC's console heads): a housing-grey plate in a satin rim set
+    into a dark gap; the aft half (-right) a perforated speaker grille (a field of round holes in a dark well), the fore
+    half a big red push button in a polished bezel under a hinged orange guard, its label under it; four screws."""
+    rr_ring(g["int_dark"], c - n * 0.0005, right, up, n, w + 0.012, h + 0.012, 0.012, 0.0065, 0.02, 4)
+    rr_slab(g["int_housing"], c + n * 0.004, right, up, n, w, h, 0.01, 0.016, 4)
+    rr_ring(g["int_trim"], c + n * 0.0055, right, up, n, w, h, 0.01, 0.004, 0.003, 4)
+    # the grille: a dark well, a perforated plate over it (holes as dark discs on the grey, 9 x 7, staggered)
+    gc = c + up * (h * 0.22) + n * 0.004
+    gw, gh = w - 0.03, h * 0.42
+    rr_ring(g["int_trim"], gc + n * 0.0012, right, up, n, gw, gh, 0.008, 0.003, 0.0016, 3)
+    rr_slab(g["int_housing"], gc + n * 0.0006, right, up, n, gw - 0.006, gh - 0.006, 0.006, 0.001, 3)
+    nu, nv = 24, 14
+    for i in range(nu):
+        for j in range(nv):
+            du = -gw / 2 + 0.009 + (gw - 0.018) * i / (nu - 1) + (0.0036 if j % 2 else 0.0)
+            dv = -gh / 2 + 0.009 + (gh - 0.018) * j / (nv - 1)
+            if abs(du) > gw / 2 - 0.008:
+                continue
+            rr_slab(g["int_dark"], gc + right * du + up * dv + n * 0.0008, right, up, n, 0.0026, 0.0026, 0.0013, 0.0004, 2)
+    # the button: a polished bezel ring, a deep red cap with a lighter dome, a clear guard on a hinge, the label below
+    # the button on its own raised plinth (critic 7. 10. r1: small and hidden under its cover)
+    bc = c - up * (h * 0.2) + n * 0.004
+    rr_slab(g["int_housing"], bc + n * 0.008, right, up, n, 0.1, 0.1, 0.012, 0.008, 4)               # plinth
+    rr_ring(g["int_trim"], bc + n * 0.0085, right, up, n, 0.1, 0.1, 0.012, 0.004, 0.002, 4)
+    bc = bc + n * 0.008
+    rr_ring(g["int_dark"], bc + n * 0.001, right, up, n, 0.08, 0.08, 0.014, 0.008, 0.002, 4)
+    tube(g["int_trim"], bc, bc + n * 0.008, 0.031, 40)                                             # polished bezel
+    tube(g["int_dark"], bc + n * 0.008, bc + n * 0.0085, 0.026, 40)
+    tube(g["int_red"], bc + n * 0.007, bc + n * 0.02, 0.024, 40)                                   # the mushroom cap
+    tube(g["int_red"], bc + n * 0.02, bc + n * 0.023, 0.02, 40)
+    tube(g["int_led_o"], bc + n * 0.023, bc + n * 0.0234, 0.008, 24)                               # its lamp
+    for su in (-1, 1):                                                                             # the guard's cheeks
+        rr_slab(g["int_housing"], bc + right * (su * 0.038) + n * 0.014, n, up, right * su, 0.028, 0.07, 0.003, 0.004, 2)
+    hinge = bc + up * 0.036 + n * 0.017
+    tube(g["int_trim"], hinge - right * 0.04, hinge + right * 0.04, 0.0035, 12)
+    r2, u2, n2 = _frame_tilt(right, up, n, -100.0)                                                 # the red guard, flipped open
+    # (critic 7. 10. r2: a bare frame read as a handle) a solid red cover plate with a raised rim and a finger lip
+    gcen = hinge + u2 * 0.034 + n2 * 0.002
+    rr_slab(g["int_red"], gcen, r2, u2, n2, 0.074, 0.066, 0.006, 0.003, 2)
+    rr_ring(g["int_red"], gcen + n2 * 0.004, r2, u2, n2, 0.074, 0.066, 0.006, 0.004, 0.004, 2)
+    rr_slab(g["int_red"], gcen + u2 * 0.035 + n2 * 0.003, r2, u2, n2, 0.03, 0.008, 0.003, 0.004, 2)
+    for su in (-1, 1):                                                                             # hinge knuckles
+        tube(g["int_red"], hinge + right * (su * 0.03) - right * 0.008, hinge + right * (su * 0.03) + right * 0.008, 0.0045, 12)
+    # (the label clear of the plinth's rim - its top was cut off, "EMERG UZ")
+    LABELS.append({"item": label, "at": list(bc - up * 0.074 - n * 0.0075), "n": list(n), "x": list(right), "y": list(up),
+                   "scale": 1.0, "max_w": w * 0.8})
+    for su in (-1, 1):
+        for sv in (-1, 1):
+            q = c + right * (su * (w / 2 - 0.009)) + up * (sv * (h / 2 - 0.009)) + n * 0.004
+            tube(g["int_trim"], q, q + n * 0.003, 0.0026, 10)
+            rr_slab(g["int_dark"], q + n * 0.0031, right, up, n, 0.0036, 0.0008, 0.0003, 0.0004, 1)
+
+
+def hazard_band(g, c, right, up, n, w, h, pitch=0.02):
+    """A hazard hatch band centred at c along `right`: a dark strip with orange 45 deg bars (SC's yellow-black
+    hatching on console noses and module edges, here in Halcyon orange), a satin hairline each side."""
+    rr_slab(g["int_dark"], c + n * 0.0006, right, up, n, w, h, 0.002, 0.0008, 1)
+    k = int(w / pitch)
+    bar = pitch * 0.5
+    for i in range(k):
+        u = -w / 2 + pitch * (i + 0.5)
+        if abs(u) > w / 2 - pitch * 0.5:
+            continue
+        r2 = (right + up).normalized()
+        u2 = (up - right).normalized()
+        rr_slab(g["accent"], c + right * u + n * 0.0009, r2, u2, n, bar * 0.707, h * 1.414 * 0.62, 0.0004, 0.0003, 1)
+    for sv in (-1, 1):
+        rr_slab(g["int_trim"], c + up * (sv * (h / 2 + 0.0015)) + n * 0.0007, right, up, n, w, 0.0015, 0.0005, 0.0008, 1)
 
 
 # ------------------------------------------------------------------------------------------ hologram
@@ -228,7 +300,6 @@ def control_module(g, c, right, up, n, w, h, rows, label_scale=0.42, tree=None):
 # the mesh's centre, which import_ship.py sets as HoloPivot from the imported mesh's bounds). Off the line of
 # sight: over the left MFD. Damage colours are prepared in the material (DamageColor x DamageAmount x vertex
 # colour R), static for now.
-    return placed
 
 
 def _envelope(bm, voxels, smooth=30):
@@ -540,7 +611,7 @@ def pilot_seat_v3(g, rect, zr):
 
     # 2) the padding: quilted channels across the pan and up the back, each a pillowed strip with rounded ends,
     # 1.4 cm grooves between them; bolsters along both sides of the back and the pan
-    def pad(i0, i1, u0, u1, bulge, base=0.004, ends=0.35):
+    def pad(i0, i1, u0, u1, bulge, base=0.004, ends=0.35, key="int_leather", stitch=False):
         rr = []
         n_u = 12
         for i in range(i0, i1 + 1):
@@ -554,7 +625,19 @@ def pilot_seat_v3(g, rect, zr):
                 top.append(surf(i, u, base + b))
                 bot.append(surf(i, u, -0.004))
             rr.append(top + list(reversed(bot)))
-        loft(g["int_leather"], rr)
+        loft(g[key], rr)
+        if stitch:
+            # (critic 7. 10. r1) a light double stitch along both long edges of the channel, 9 and 13 mm in
+            for uu in (u0 + (u1 - u0) * 0.06, u0 + (u1 - u0) * 0.085, u1 - (u1 - u0) * 0.085, u1 - (u1 - u0) * 0.06):
+                line = []
+                for i in range(i0 + 1, i1):
+                    s_ = (arc[i] - arc[i0]) / max(arc[i1] - arc[i0], 1e-4)
+                    end = max(math.sin(math.pi * min(max(s_, 0.0), 1.0)), 0.02) ** ends
+                    w = (uu - u0) / (u1 - u0)
+                    b = bulge * end * max(math.sin(math.pi * w), 0.0) ** 0.55
+                    line.append(surf(i, uu, base + b + 0.0006))
+                for pa, pb in zip(line, line[1:]):
+                    tube(g["int_cream"], pa, pb, 0.0007, 4)
 
     def at(arc_len):
         return min(range(m), key=lambda i: abs(arc[i] - arc_len))
@@ -563,12 +646,12 @@ def pilot_seat_v3(g, rect, zr):
     for a0, a1 in channels:
         i0, i1 = at(a0), at(a1)
         if i1 - i0 >= 2:
-            pad(i0, i1, -0.66, 0.66, 0.042 if a0 < 1.0 else 0.05)
+            pad(i0, i1, -0.66, 0.66, 0.042 if a0 < 1.0 else 0.05, key="int_leather_perf")   # perforated centre field
     for sgn in (-1, 1):
         for a0, a1 in ((0.03, 0.30), (0.40, 1.03)):
             i0, i1 = at(a0), at(a1)
             u0, u1 = (0.72, 0.97) if sgn > 0 else (-0.97, -0.72)
-            pad(i0, i1, u0, u1, 0.05, ends=0.5)
+            pad(i0, i1, u0, u1, 0.05, ends=0.5, stitch=True)
     # the grooves' welts: a thin dark line down the middle of each gap
     for a0, a1 in channels[:-1]:
         i = at(a1 + 0.008)
@@ -577,16 +660,27 @@ def pilot_seat_v3(g, rect, zr):
             tube(g["int_dark"], pa, pb, 0.0035, 6)
 
     # 3) the harness: five points in dark webbing over the padding, steel adjusters, a machined rotary buckle
-    def strap(points, width=0.046, thick=0.0045, key="int_dark"):   # (dark webbing: the fabric grey read cartoon blue)
-        rr = []
-        for k, p_ in enumerate(points):
-            a_, b_ = points[max(k - 1, 0)], points[min(k + 1, len(points) - 1)]
+    def strap(points, width=0.046, thick=0.006, key="int_dark"):   # (dark webbing: the fabric grey read cartoon blue)
+        """Webbing (7. 10. 2026, critic: flat paper strips): a 6 mm band with chamfered edges, smoothed along its path
+        (Catmull-Rom), a light box stitch 5 mm in from each edge."""
+        pts = [Vector(q) for q in _catmull([tuple(q) for q in points], 3)] if len(points) > 2 else list(points)
+        rr, st = [], ([], [])
+        ch = 0.0018
+        for k, p_ in enumerate(pts):
+            a_, b_ = pts[max(k - 1, 0)], pts[min(k + 1, len(pts) - 1)]
             t_ = (b_ - a_).normalized()
             n_ = Vector((0, 0, 1)) if abs(t_.z) < 0.7 else Vector((1, 0, 0))
             w_ = t_.cross(n_).normalized()
             n_ = w_.cross(t_).normalized()
-            rr.append([p_ + w_ * width / 2, p_ + w_ * width / 2 + n_ * thick, p_ - w_ * width / 2 + n_ * thick, p_ - w_ * width / 2])
+            hw = width / 2
+            rr.append([p_ + w_ * hw, p_ + w_ * hw + n_ * (thick - ch), p_ + w_ * (hw - ch) + n_ * thick,
+                       p_ - w_ * (hw - ch) + n_ * thick, p_ - w_ * hw + n_ * (thick - ch), p_ - w_ * hw])
+            for side_k, sg in enumerate((1, -1)):
+                st[side_k].append(p_ + w_ * (sg * (hw - 0.005)) + n_ * (thick + 0.0002))
         loft(g[key], rr)
+        for line in st:
+            for pa, pb in zip(line, line[1:]):
+                tube(g["int_cream"], pa, pb, 0.0006, 4)
 
     buckle = surf(at(0.24), 0.0, 0.05)
     shoulder_i, hip_i = at(1.06), at(0.40)
@@ -600,7 +694,11 @@ def pilot_seat_v3(g, rect, zr):
         strap([top, top - frames[at(1.09)][1] * 0.07 + Vector((0, 0, 0.012))], width=0.046)
         # the adjuster on the chest and the lap belt from the hip to the buckle
         adj = surf(at(0.83), u, 0.064)
-        rr_slab(g["int_trim"], adj, side, Vector((0, 0, 1)), frames[at(0.83)][1], 0.058, 0.032, 0.006, 0.009, 3)
+        # (a machined frame the webbing runs through, a dark bar across it, not a plain plate)
+        fn_ = frames[at(0.83)][1]
+        rr_ring(g["int_trim"], adj + fn_ * 0.006, side, Vector((0, 0, 1)), fn_, 0.062, 0.036, 0.007, 0.007, 0.011, 4)
+        rr_slab(g["int_dark"], adj + fn_ * 0.004, side, Vector((0, 0, 1)), fn_, 0.05, 0.008, 0.003, 0.006, 2)
+        rr_slab(g["int_trim"], adj + fn_ * 0.0075 - Vector((0, 0, 0.011)), side, Vector((0, 0, 1)), fn_, 0.05, 0.005, 0.0025, 0.004, 2)
         lap = [surf(i, sgn * 0.94, 0.045) for i in range(hip_i, hip_i - 3, -1)]
         lap += [surf(at(0.30), sgn * 0.5, 0.05), buckle + side * (sgn * 0.035)]
         strap(lap, width=0.05)
@@ -613,6 +711,15 @@ def pilot_seat_v3(g, rect, zr):
     tube(g["accent"], buckle + up_ * 0.02, buckle + up_ * 0.026, 0.018, 18)
     rr_slab(g["int_trim"], buckle + up_ * 0.026, side, Vector((1, 0, 0)), up_, 0.026, 0.006, 0.002, 0.004, 1)
 
+    # (critic 7. 10. r1: the shell one smooth colour) a satin metal rail along each wing of the back, three screws
+    for sgn in (-1, 1):
+        ia, ib = at(0.52), at(0.95)
+        for i in (ia, (ia + ib) // 2, ib):
+            q = surf(i, sgn * 1.0, 0.0) + side * (sgn * 0.017)
+            tube(g["int_trim"], q, q + side * (sgn * 0.004), 0.006, 12)
+        pts = [surf(i, sgn * 1.0, -0.016) + side * (sgn * 0.0165) for i in range(ia, ib + 1)]
+        for pa, pb in zip(pts, pts[1:]):
+            tube(g["int_housing"], pa, pb, 0.012, 8)
     # 4) the frame: spine spars behind the shell, a gas strut, the swivel post and its plinth on two floor rails
     for sgn in (-1, 1):
         sp = [surf(i, sgn * 0.82, -0.07) - frames[i][1] * 0.02 for i in range(at(0.30), at(1.12), 3)]
@@ -779,6 +886,22 @@ def hotas_throttle(g, base):
     # index-finger slew nub at the front
     c = head + fwd * 0.036 - ax * 0.015
     tube(g["int_trim"], c, c + fwd * 0.006, 0.0045, 10)
+    # (critic 7. 10. r2: "a rounded box with dots") finger ridges down the front, a palm swell at the back, a satin
+    # band under the cap, a red guarded button on top and a two-way rocker on the outboard face
+    for k, h in enumerate((0.012, 0.03, 0.048)):
+        q = top + ax * h + fwd * (0.036 + 0.004 * math.sin(math.pi * h / 0.085))
+        tube(g["int_rubber"], q - side * 0.024, q + side * 0.024, 0.0045, 10)
+    rr_slab(g["int_rubber"], top + ax * 0.035 - fwd * 0.037, side, ax, -fwd, 0.056, 0.06, 0.02, 0.012, 4)   # palm swell
+    rr_slab(g["int_trim"], head - ax * 0.0035, side * -1, fwd, ax, 0.058, 0.07, 0.015, 0.003, 4)            # satin band
+    cap = head + ax * 0.0045
+    tube(g["int_dark"], cap, cap + ax * 0.003, 0.011, 18)
+    tube(g["int_red"], cap + ax * 0.003, cap + ax * 0.008, 0.0075, 18)
+    for su in (-1, 1):
+        rr_slab(g["int_trim"], cap + side * (su * 0.012) + ax * 0.005, ax, fwd, side * su, 0.012, 0.022, 0.002, 0.003, 2)
+    ro = head + side * 0.03 - ax * 0.012
+    rr_slab(g["int_dark"], ro, fwd, ax, side, 0.026, 0.014, 0.003, 0.003, 2)
+    for sv in (-1, 1):
+        rr_slab(g["int_trim"], ro + fwd * (sv * 0.006) + side * 0.003, fwd, ax, side, 0.01, 0.01, 0.002, 0.003, 2)
 
 
 def glass_panel(g, screen_bm, sockets, name, c, right, up, n, w, h, proud, visor=True):

@@ -776,19 +776,20 @@
     ]
    },
    "scalars": {
-    "PrimaryRoughness": 0.35,
-    "SecondaryRoughness": 0.35,
+    "PrimaryRoughness": 0.42,
+    "SecondaryRoughness": 0.44,
     "PaintMetallic": 0.8,
-    "GrungeAmount": 0.25,
+    "GrungeAmount": 0.06,
     "EdgeWear": 0.0,
     "DirtAmount": 0.0,
-    "GrungeTileCm": 45.0,
-    "RoughVariation": 0.35
+    "GrungeTileCm": 12.0,
+    "RoughVariation": 0.2
    },
    "slots": [
     "M_Ship_Wayfarer_IntTrim"
    ],
-   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
+   "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)",
+   "_trim": "7. 10. 2026: the long satin bands read as crumpled foil - half-res Lumen reflections (variant c, interior rough <= 0.32) on a 0.8-metallic band, plus grunge 0.25: roughness 0.42 (out of the traced range), faint fine grunge"
   },
   "MI_Ship_Wayfarer_IntDark": {
    "master": "layered",
@@ -890,16 +891,19 @@
     ]
    },
    "scalars": {
-    "PrimaryRoughness": 0.5,
-    "SecondaryRoughness": 0.5,
+    "PrimaryRoughness": 0.7,
+    "SecondaryRoughness": 0.72,
     "PaintMetallic": 0.0,
-    "GrungeAmount": 0.25,
+    "GrungeAmount": 0.08,
     "EdgeWear": 0.0,
-    "DirtAmount": 0.0
+    "DirtAmount": 0.0,
+    "GrungeTileCm": 6.0,
+    "RoughVariation": 0.08
    },
    "slots": [
     "M_Ship_Wayfarer_IntLeather"
-   ]
+   ],
+   "_comment": "7. 10. 2026: the forearm pads read as crumpled foil from the seat (roughness 0.5 with the 25 % grunge normals) - a matte fine-grained leather"
   },
   "MI_Ship_Wayfarer_IntLight": {
    "master": "hull",
@@ -1441,6 +1445,115 @@
    ],
    "metallic": 1.0,
    "roughness": 0.3
+  },
+  "MI_Ship_Wayfarer_IntHousing": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.15,
+     0.148,
+     0.145
+    ],
+    "SecondaryColor": [
+     0.13,
+     0.128,
+     0.126
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.05,
+     0.048,
+     0.045
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.38,
+    "SecondaryRoughness": 0.42,
+    "PaintMetallic": 0.35,
+    "GrungeAmount": 0.14,
+    "EdgeWear": 0.35,
+    "DirtAmount": 0.12,
+    "GrungeTileCm": 30.0,
+    "RoughVariation": 0.25
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntHousing"
+   ],
+   "_comment": "7. 10. 2026: the cockpit's module housings and console tops in SC's mid-grey satin metal (SC Aurora consoles, Docs/Kit/etalon/sc/konzole_*.jpg); the bodies stay in the warm graphite IntConsole"
+  },
+  "MI_Ship_Wayfarer_IntGlowSoft": {
+   "master": "hull",
+   "slots": [
+    "M_Ship_Wayfarer_IntGlowSoft"
+   ],
+   "base_color": [
+    0.05,
+    0.05,
+    0.06
+   ],
+   "metallic": 0.0,
+   "roughness": 0.3,
+   "emissive_color": [
+    0.35,
+    0.7,
+    1.0
+   ],
+   "emissive_strength": 2.6,
+   "_comment": "7. 10. 2026: the console edge lights as soft diffusers (critic: 'burnt-out white lines' at the IntGlow 8)"
+  },
+  "MI_Ship_Wayfarer_IntLeatherPerf": {
+   "master": "layered",
+   "vectors": {
+    "PrimaryColor": [
+     0.045,
+     0.042,
+     0.04
+    ],
+    "SecondaryColor": [
+     0.045,
+     0.042,
+     0.04
+    ],
+    "BareMetalColor": [
+     0.55,
+     0.55,
+     0.57
+    ],
+    "DirtColor": [
+     0.04,
+     0.04,
+     0.04
+    ]
+   },
+   "scalars": {
+    "PrimaryRoughness": 0.7,
+    "SecondaryRoughness": 0.72,
+    "PaintMetallic": 0.0,
+    "GrungeAmount": 0.08,
+    "EdgeWear": 0.0,
+    "DirtAmount": 0.0,
+    "GrungeTileCm": 6.0,
+    "RoughVariation": 0.08,
+    "DetailTileCm": 3.2,
+    "DetailNormalStrength": 1.0,
+    "MicroRough": 0.06,
+    "ScratchAmount": 0.0,
+    "PanelShift": 0.0
+   },
+   "slots": [
+    "M_Ship_Wayfarer_IntLeatherPerf"
+   ],
+   "_comment": "7. 10. 2026: the seat's centre channels in perforated leather (SC seats: a perforated centre field between stitched bolsters; the kit's perforation normal)",
+   "switches": {
+    "SurfaceDetail": true
+   },
+   "textures": {
+    "detail_normal": "ArtSource/Kit/Textures/T_Kit_Perf_N.png"
+   }
   }
  },
  "no_nanite_parts": [
