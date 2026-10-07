@@ -1,0 +1,35 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 20,
+ "variant": "B",
+ "date": "2026-10-08",
+ "verdict": "FAIL",
+ "gate": "step",
+ "note": "Autor 8. 10.: díly jsou nové z výroby, opotřebení se nehodnotí ani nežádá.",
+ "first_impression": "Čistá, nová šedá konzole Halcyon se svítícími klávesami a oranžovými akcenty, ale celek čte jako jeden matný šedý lak – chybí kontrast světlý rám / tmavý grafit / leštěný kov z návrhu a velké plochy jsou prázdné, takže působí spíš jako CG maketa než hotový díl SC.",
+ "scores": {
+  "silueta_a_tvar": {"score": 7, "why": "Nosník opěrky na dvou konzolách s mezerou, blok kniplu, prostřední blok a věž odpovídají skladbě návrhu (list 5 vpravo 1000-1900,270-520; list 6 vpravo)."},
+  "hierarchie_a_hustota_detailu": {"score": 6, "why": "Detail shlukovaný u kniplu, stavového pásu, kláves a kolébek (list 6 vpravo 1540-1920,280-490), ale servisní poklop (list 6 vpravo 1120-1480,120-360), bok nosníku (list 5 vpravo 1000-1600,290-420) a šikmá plocha věže (list 3 vpravo 1300-1440,60-560) jsou velké holé plochy."},
+  "materialy": {"score": 5, "why": "Rám, horní desky, poklop i věž mají skoro stejnou střední šedou a matný povrch bez viditelného čirého laku; grafit je jen na čele věže, stavovém pásu a modulu kolébek, leštěná zkosení jsou slabá linka (list 3 vpravo 1390-1440,60-560) a kov skoro chybí – kontrast lak/grafit/kov z návrhu není."},
+  "decaly": {"score": 6, "why": "Logo // a HALCYON FREIGHTWORKS, ACCESS, SERVICE ACCESS, CAUTION a šrafy jsou čisté (list 3 vpravo 1570-1920,170-500; list 6 vpravo 1180-1460,150-340), ale jsou v jedné vrstvě, řídké, šrafy jsou tenké rozházené čárky a chybí drobné šablony, nýty a štítky po plochách."},
+  "svetlo": {"score": 7, "why": "Klávesy 2x2 s gradientem a MAIN/BATT/TEMP pásky svítí přesvědčivě (list 3 vpravo 1130-1290,250-370); LED u kolébek jsou ploché čtverečky bez záře (list 3 vpravo 1090,445 / 1135,495 / 1185,550)."},
+  "citelnost": {"score": 6, "why": "Zblízka čitelné MAIN/BATT/TEMP a LIGHTS/GEAR/VTOL (list 3 vpravo), shora legendy kolébek (list 6 vpravo 1780-1900,425-435) a spodní nápisy (list 6 vpravo 1240-1620,565-585) pod hranicí čitelnosti."},
+  "chyby_geometrie": {"score": 7, "why": "Bez děr a plovoucích dílů; přes šikmou plochu věže vede tenká diagonální čára (list 3 vpravo 1285-1440,255-370), která nepatří k žádnému dílu; textura návleku madla je pixelová (list 3 vpravo 1680-1900,480-611)."},
+  "soulad_stylu": {"score": 7, "why": "Všechny bloky sdílejí lak, šrouby a oranžové akcenty; jednotný, ale až příliš jednolitý."}
+ },
+ "average": 6.4,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "concept_match": {
+  "layout_percent": 80,
+  "look_percent": 55,
+  "summary": "Skladba odpovídá návrhu. Vzhled ne: návrh má světlý kovově lesklý rám, výrazně tmavé grafitové panely (boky podstavce, poklop, vložky), husté šrouby, spáry a vícevrstvé decaly; náš výsledek je převážně jedna střední šedá, matná a prázdná."
+ },
+ "findings": [
+  {"n": 1, "title": "Chybí materiálový kontrast lak / grafit / kov", "where": "list 1 vpravo celá konzole; list 6 vpravo poklop 1120-1480,120-360 a horní desky 1540-1760,80-280; list 3 vpravo zkosení věže 1390-1440,60-560", "problem": "Rám i vložené desky mají podobnou hodnotu (~0,35-0,45) a podobnou drsnost; čirý lak není znát (žádný ostrý odlesk), grafit je jen na třech místech, leštěná zkosení nečtou jako kov.", "severity": "musí se opravit", "fix": "Rám: lak albedo 0,50-0,55, roughness 0,40, ClearCoat 1, ClearCoatRoughness 0,08-0,12. Vložené plochy (poklop, deska pod opěrkou, bok podstavce, šikmá plocha věže, bok bloku kniplu): grafit albedo 0,06-0,09, roughness 0,60-0,65, bez clear coatu. Zkosení 4-6 mm: kov metallic 1, albedo 0,75, roughness 0,15-0,20. Cíl: poměr jasu rám : grafit aspoň 4 : 1 v listu 1 vpravo."},
+  {"n": 2, "title": "Velké holé plochy", "where": "list 6 vpravo poklop 1120-1480,120-360; list 5 vpravo bok nosníku 1000-1600,290-420 a podstavec 1000-1600,440-560; list 3 vpravo šikmá plocha věže 1300-1440,60-560", "problem": "Největší plochy nemají členění; návrh je dělí spárami, vložkami a šrouby.", "severity": "doporučeno", "fix": "Spáry 1,5-2 mm široké, 2-3 mm hluboké, dělení na podpanely 120-200 mm; šrouby 5-6 mm v rozích a po 80-120 mm; na šikmé ploše věže grafitová vložka na ~60 % plochy v rámu 15-20 mm se 4 šrouby; na boku nosníku 2 zapuštěné panely 15 mm hluboké."},
+  {"n": 3, "title": "Decaly v jedné řídké vrstvě, šrafy rozházené", "where": "list 3 vpravo šrafy na čele věže 1570-1920,260-480; list 5 vpravo bok nosníku; list 6 vpravo spodní pás 1240-1620,565-585", "problem": "Šrafy jsou tenké čárky s velkými mezerami, nečtou jako výstražný pás; chybí drobné šablony, štítky a nýty, které dávají SC plnost (nové, ne opotřebené).", "severity": "doporučeno", "fix": "Tři vrstvy: (a) šrafový pás 35-40 mm vysoký, pruhy 8-10 mm pod 45° s mezerou 8-10 mm v černém rámu 2 mm; (b) 1-2 štítky 25-40 mm s rámečkem a ikonou na každou viditelnou plochu; (c) mikro šablony 4-6 mm (čísla dílů, HV, torque) 6-10 na plochu, albedo 0,7 na grafitu / 0,15 na laku; řada nýtů 4-5 mm po 25 mm podél spodní hrany nosníku a podstavce."},
+  {"n": 4, "title": "Povrchy bez mikrotextury", "where": "list 1 a 6 vpravo všechny lakované plochy; list 4 vpravo opěrka 1000-1460,190-540", "problem": "Lak i grafit jsou dokonale hladké, odlesk se nemění – plastový CG vzhled. Opěrka je jedna plochá deska s tečkami bez lemu.", "severity": "doporučeno", "fix": "Nové, ne opotřebené: jemná normálová textura laku (orange peel, dlaždice 0,15 m, síla 0,05-0,1), roughness variace ±0,04; grafit s jemným kartáčováním nebo zrnem 0,5 mm; opěrku rozdělit na 2 segmenty, obvodový lem 8-10 mm se zaoblením a prošitím, perforace 2 mm po 6 mm."},
+  {"n": 5, "title": "Návlek madla pixelový, diagonální čára na věži", "where": "list 3 vpravo návlek 1680-1900,480-611; čára 1285-1440,255-370", "problem": "Oranžový návlek má hrubou kostičkovou texturu (chybí rozlišení); přes šikmou plochu věže vede cizí tenká čára.", "severity": "doporučeno", "fix": "Návlek: rýhování (diamant 2-3 mm) jako normálová mapa >= 1024 px na 100 mm, albedo sRGB ~(200,95,25), roughness 0,6, kovové koncové kroužky roughness 0,2. Čáru odstranit (zjistit, který díl nebo decal ji kreslí)."},
+  {"n": 6, "title": "Legendy a LED kolébek", "where": "list 6 vpravo 1780-1900,425-435 a 1240-1620,565-585; list 3 vpravo LED 1090,445 / 1135,495 / 1185,550", "problem": "Shora legendy a spodní nápisy nečitelné, LED ploché bez záře.", "severity": "doporučeno", "fix": "Legendy tučně 8-10 mm, albedo >= 0,7 na grafitu; spodní nápisy 10 mm; LED v kovovém rámečku 1 mm, emise 10-15, studená modrobílá, jemný bloom."}
+ ]
+}

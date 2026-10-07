@@ -98,9 +98,9 @@ def console_b(name, seed):
         p.box("Kit_Housing", (xk + 0.5, W - 0.026, 0.018), (xk + 0.512, W - 0.02, 0.055), bevel=0.002, segments=1, panel=False)
     # dark panels set into both long faces, a belt line over them, screws; the outboard front a hatch band and a plate
     for x0, x1 in ((0.05, 0.42), (0.45, 0.8)):
-        chamfer_panel(p, "Kit_Graphite", x0, x1, 0.11, DECK - 0.062, U0, -1)
-        chamfer_panel(p, "Kit_Graphite", x0, x1, 0.11, DECK - 0.062, W, 1)
-    chamfer_panel(p, "Kit_Graphite", 0.83, L - 0.08, 0.12, 0.3, U0, -1, c=0.05)
+        chamfer_panel(p, "Kit_Inset", x0, x1, 0.11, DECK - 0.062, U0, -1)
+        chamfer_panel(p, "Kit_Inset", x0, x1, 0.11, DECK - 0.062, W, 1)
+    chamfer_panel(p, "Kit_Inset", 0.83, L - 0.08, 0.12, 0.3, U0, -1, c=0.05)
     p.box("Kit_Graphite", (0.0, U0 - 0.004, DECK - 0.052), (L - 0.02, U0, DECK - 0.046), panel=False)
     p.box("Kit_Graphite", (0.0, W, DECK - 0.052), (L - 0.02, W + 0.004, DECK - 0.046), panel=False)
     hatch(p, 0.85, L - 0.1, DECK - 0.04, DECK - 0.012, W, 1)
@@ -115,8 +115,8 @@ def console_b(name, seed):
     side_prism(p, "Kit_Frame", beam, -0.075, 0.155, 0.006, 1)
     # the stepped side: a lower band 8 mm proud on both sides, chamfered (the concept's beam is not one slab)
     band = [(0.04, BEAM0 - 0.004), (0.57, BEAM0 - 0.004), (0.6, BEAM0 + 0.022), (0.04, BEAM0 + 0.022), (0.02, BEAM0 + 0.01)]
-    side_prism(p, "Kit_Graphite", band, -0.083, -0.07, 0.004, 1)        # the lower band a graphite inset
-    side_prism(p, "Kit_Graphite", band, 0.15, 0.163, 0.004, 1)
+    side_prism(p, "Kit_Inset", band, -0.083, -0.07, 0.004, 1)           # the lower band a graphite inset
+    side_prism(p, "Kit_Inset", band, 0.15, 0.163, 0.004, 1)
     p.box("Kit_Graphite", (0.04, -0.0775, BEAM0 + 0.03), (0.56, -0.074, BEAM0 + 0.038), panel=False)          # the groove
     for k in range(6):
         screw(p, Vector((0.06 + k * 0.1, -0.0758, BEAM0 + 0.017)), -Y, 0.003)
@@ -159,7 +159,7 @@ def console_b(name, seed):
         screw(p, Vector((xx, U0 - 0.0125, 0.488)), -Y)
     stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs", head_role="Kit_Frame", guard="d")      # a worn metal head (concept)
     for xf, nx in ((0.66, -1), (0.87, 1)):                     # graphite insets on the block's ends, 15 mm frame
-        p.box("Kit_Graphite", (xf - 0.002 if nx > 0 else xf - 0.004, U0 + 0.003, DECK + 0.015),
+        p.box("Kit_Inset", (xf - 0.002 if nx > 0 else xf - 0.004, U0 + 0.003, DECK + 0.015),
               (xf + 0.004 if nx > 0 else xf + 0.002, 0.165, 0.475), bevel=0.002, segments=1)
         for uu in (U0 + 0.012, 0.156):
             screw(p, Vector((xf + nx * 0.0045, uu, 0.466)), X * nx, 0.003)
@@ -171,7 +171,7 @@ def console_b(name, seed):
     for k in range(10):
         xk = 0.693 + k * 0.0236
         p.box("Kit_Housing", (xk, 0.393, 0.5245), (xk + 0.012, 0.607, 0.531), bevel=0.0025, segments=2, panel=False)
-    chamfer_panel(p, "Kit_Graphite", 0.67, 0.95, DECK + 0.02, 0.5, W - 0.005, 1, c=0.03)
+    chamfer_panel(p, "Kit_Inset", 0.67, 0.95, DECK + 0.02, 0.5, W - 0.005, 1, c=0.03)
     d = Vector((0, 0.14, 0.065)).normalized()                 # up the chamfer
     n = X.cross(d)                                            # out of it, to the seat and up
     c0 = Vector((0.0, 0.27, 0.4875)) + n * 0.0005
@@ -210,7 +210,7 @@ def console_b(name, seed):
     ff = lambda o: frame(o, r, a, nf)                          # noqa: E731
     w2, h2 = (W - 0.005 - TU - 0.04) / 2, 0.125
     p.box("Kit_Lip", (-w2 - 0.004, -h2 - 0.004, -0.004), (w2 + 0.004, h2 + 0.004, 0.0015), bevel=0.002, segments=2, m=ff(fc))
-    p.box("Kit_Graphite", (-w2, -h2, -0.004), (w2, h2, 0.002), m=ff(fc), panel=False)
+    p.box("Kit_Inset", (-w2, -h2, -0.004), (w2, h2, 0.002), m=ff(fc), panel=False)
     emergency_key(p, fc + a * 0.025 + nf * 0.002, r, a, nf)
     for i, lab in enumerate(("ck_pwr", "ck_extlt", "ck_eng")):
         q = fc - a * 0.078 + r * (0.105 * (i - 1)) + nf * 0.002
@@ -225,18 +225,17 @@ def console_b(name, seed):
         # the inset follows the side's outline 20 mm in: the slope edge leans with the face
         ins = [(1.0, DECK + 0.02), (L - 0.04, DECK + 0.02), (L - 0.04, 0.68), (1.115, 0.72), (1.0, 0.53)]
         if ns_ < 0:
-            side_prism(p, "Kit_Graphite", ins, uf - 0.004, uf + 0.002, 0.002, 1)
+            side_prism(p, "Kit_Inset", ins, uf - 0.004, uf + 0.002, 0.002, 1)
         else:
-            side_prism(p, "Kit_Graphite", ins, uf - 0.002, uf + 0.004, 0.002, 1)
+            side_prism(p, "Kit_Inset", ins, uf - 0.002, uf + 0.004, 0.002, 1)
         for xx, zz in ((1.015, DECK + 0.035), (L - 0.055, DECK + 0.035), (L - 0.055, 0.665), (1.015, 0.52)):
             screw(p, Vector((xx, uf + ns_ * 0.0045, zz)), Y * ns_)
-        p.box("Kit_Lip", (1.005, uf + ns_ * 0.0042 - 0.0008, 0.585), (L - 0.045, uf + ns_ * 0.0042 + 0.0008, 0.589), panel=False)  # a bright seam
     # the Halcyon mark and name on the tower's outboard inset (the side the hull lights)
     for k in range(2):
         x_ = 1.008 + k * 0.016
         p.sweep("Kit_Signal", [Vector((x_, W + 0.0041, 0.47)), Vector((x_ + 0.012, W + 0.0041, 0.5))], 0.005, seg=6, scale_y=0.25)
     _label(p, "maker", Vector((1.105, W + 0.0045, 0.485)), Y, -X, Z, scale=0.18)
-    p.box("Kit_Graphite", (L - 0.026, TU + 0.025, DECK + 0.025), (L - 0.016, W - 0.03, 0.672), bevel=0.003, segments=1)
+    p.box("Kit_Inset", (L - 0.026, TU + 0.025, DECK + 0.025), (L - 0.016, W - 0.03, 0.672), bevel=0.003, segments=1)
     for uu, zz in ((TU + 0.038, DECK + 0.038), (W - 0.043, DECK + 0.038), (TU + 0.038, 0.66), (W - 0.043, 0.66)):
         screw(p, Vector((L - 0.0155, uu, zz)), X, 0.004)
     for k in range(2):
@@ -248,7 +247,7 @@ def console_b(name, seed):
         uu = TU + 0.06 + k * 0.035
         p.sweep("Kit_Signal", [Vector((L - 0.0155, uu, 0.5)), Vector((L - 0.0155, uu + 0.03, 0.535))], 0.004, seg=6, scale_y=0.2)
     # the pedestal's front under the switch module: a graphite inset, its vent and a hazard band
-    p.box("Kit_Graphite", (L - 0.026, U0 + 0.02, 0.13), (L - 0.016, TU - 0.02, DECK - 0.03), bevel=0.003, segments=1)
+    p.box("Kit_Inset", (L - 0.026, U0 + 0.02, 0.13), (L - 0.016, TU - 0.02, DECK - 0.03), bevel=0.003, segments=1)
     p.box("Kit_Perforated", (L - 0.0165, U0 + 0.04, 0.16), (L - 0.0155, TU - 0.04, 0.24), panel=False)
     for uu in (U0 + 0.033, TU - 0.033):
         for zz in (0.143, DECK - 0.043):
@@ -296,7 +295,7 @@ def console_b(name, seed):
     lid = [(hu0, DECK), (hu1, DECK), (hu1, DECK + 0.018), (hu1 - 0.012, DECK + 0.026), (hu0 + 0.012, DECK + 0.026), (hu0, DECK + 0.018)]
     end_prism(p, "Kit_Frame", lid, hx0, hx1, 0.003, 1)
     zt = DECK + 0.026
-    p.box("Kit_Graphite", (hx0 + 0.022, hu0 + 0.022, zt - 0.002), (hx1 - 0.022, hu1 - 0.022, zt + 0.006), bevel=0.004, segments=1)
+    p.box("Kit_Inset", (hx0 + 0.022, hu0 + 0.022, zt - 0.002), (hx1 - 0.022, hu1 - 0.022, zt + 0.006), bevel=0.004, segments=1)
     zt += 0.006
     for xx in (hx0 + 0.035, hx1 - 0.035):
         for uu in (hu0 + 0.035, hu1 - 0.035):

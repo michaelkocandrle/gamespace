@@ -40,7 +40,7 @@ ROLES = ["Kit_Primary", "Kit_Structure", "Kit_Accent", "Kit_Signal", "Kit_Rubber
          "Kit_Lacquer", "Kit_Lip", "Kit_Graphite", "Kit_Gasket", "Kit_AntiSlip", "Kit_GlowFoot",
          # decal stack step (6. 10. 2026): the mid-grey panel and the dark perforated insert
          "Kit_Panel", "Kit_Perforated", "Kit_Red", "Kit_GlowRed", "Kit_Shell", "Kit_Housing", "Kit_Console", "Kit_Frame", "Kit_GlowKey", "Kit_GlowAmber",
-         "Kit_FrameEdge"]
+         "Kit_FrameEdge", "Kit_Inset"]
 
 
 def frame(origin, ax, ay, az):
