@@ -47,6 +47,7 @@ EAL, MEL = unreal.EditorAssetLibrary, unreal.MaterialEditingLibrary
 DECAL_MIS = {"Kit_Decal": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_Decal",
              "Kit_DecalAO": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalAO",
              "Kit_DecalPaint": "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalPaint"}
+PAINT_TINT = (1.9, 1.9, 1.9)        # the kit's labels and scuffs: 0.42 grey -> ~0.8 (7. 10. 2026)
 GRIME_PARENT = "/Game/Ships/Wayfarer/Materials/MI_Ship_Wayfarer_DecalGrime"
 GRIME_OPACITY = 1.0
 # the dirt as a matte grey dust, lighter than the paint (~0.2 linear on the kit's 0.07-0.1 graphite). A darker band
@@ -385,6 +386,17 @@ def build_materials():
     mis["Kit_Screen"] = screen
     for role, path in DECAL_MIS.items():
         mis[role] = EAL.load_asset(path)
+    # the kit's own paint decals (labels, legends, scuffs): the ship's paint decal lifted (DecalTint) - the library's
+    # 0.42 grey legends read grey on the dark fields, the scuffs dull
+    paint = "MI_Kit_%s_DecalPaint" % MAKER
+    path = "%s/%s" % (MATS, paint)
+    pi = EAL.load_asset(path) if EAL.does_asset_exist(path) else unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+        paint, MATS, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+    MEL.set_material_instance_parent(pi, EAL.load_asset(DECAL_MIS["Kit_DecalPaint"]))
+    MEL.set_material_instance_vector_parameter_value(pi, "DecalTint", unreal.LinearColor(*PAINT_TINT, 1.0))
+    MEL.update_material_instance(pi)
+    EAL.save_loaded_asset(pi, only_if_is_dirty=False)
+    mis["Kit_DecalPaint"] = pi
     # grime cards (kit_geo Part.grime): the ship grime material (atlas, colour, roughness) as the parent, the kit's
     # own opacity; the card's vertex alpha scales it again (the walked line)
     grime = "MI_Kit_%s_DecalGrime" % MAKER
@@ -437,7 +449,7 @@ def factory_material_spec(role, maker, data=None):
     scalars = dict(SURFACE)
     scalars.update({
         "PrimaryRoughness": r["roughness"], "SecondaryRoughness": r["roughness"] + 0.03, "PaintMetallic": r["metallic"],
-        "EdgeWear": w["edge_wear"] if r.get("edge_wear") else 0.0, "WearThreshold": w.get("edge_threshold", 0.35),
+        "EdgeWear": w["edge_wear"] if r.get("edge_wear") else 0.0, "WearThreshold": r.get("edge_threshold", w.get("edge_threshold", 0.35)),
         "BareMetalRoughness": w["walk_roughness"] if walked else r.get("bare_rough", 0.32),
         "WearBandOn": 1.0, "WearBandLo": lo * 100.0, "WearBandHi": hi * 100.0, "ScratchBandOn": 1.0,
         "WalkWear": w["walked"] if walked else 0.0, "WalkHalfCm": w["walk_half_width_m"] * 100.0,

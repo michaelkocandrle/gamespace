@@ -1,0 +1,41 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 12,
+ "variant": "B",
+ "date": "2026-10-07",
+ "verdict": "FAIL",
+ "gate": "step",
+ "first_impression": "Čelo věže teď působí jako díl ze SC: grafitová vložka ve světlém rámu se šrouby, oranžovým znakem // a šrafami. Zbytek těla je ale pořád čistý, nový světle šedý lak bez viditelného oděru hran, takže konzole nevypadá jako ošoupaný pracovní díl z návrhu.",
+ "scores": {
+  "silueta_a_tvar": {"score": 6, "why": "Nosník na konzolách s otvory a stupňovitým bokem drží (list 5 vpravo). Věž je pořád jeden klín bez zlomu v polovině výšky; horní třetina nad vložkou a šikmá plocha ke kolébkám jsou hladké světlé plochy (list 3 vpravo nahoře a vlevo od vložky, list 2 vpravo dole)."},
+  "hierarchie_a_hustota_detailu": {"score": 7, "why": "Největší plocha, čelo věže, má teď rám, šrouby, vložku, znak, nápis a šrafy (list 3 a 2 vpravo); detail je shlukovaný u sání, stavového pásu, kláves a přepínačů (list 6 vpravo). Holé zůstávají šikmá plocha věže s CAUTION (list 3 vpravo uprostřed), horní plocha bloku přepínačů (list 1 vpravo dole) a horní část věže."},
+  "materialy": {"score": 5, "why": "Mráčky z ploch zmizely (list 3 vpravo), ale přerušovaný oděr hran není vidět v žádném záběru: hrany věže, bloku kniplu a nosníku jsou čisté světle šedé (list 1, 3, 5 vpravo). Víko poklopu je dál středně šedé, ne grafitové (list 6 vpravo vlevo nahoře), a mimo čelo věže nikde není kontrast ošoupaný kovový rám vs. tmavá vložka jako v návrhu."},
+  "decaly": {"score": 6, "why": "Oranžový znak //, HALCYON FREIGHTWORKS a šrafy na věži jsou výrazné a čitelné (list 3 vpravo). Znak // na nosníku je jen malá oranžová značka na předním konci (list 1 vpravo 1250,245; list 6 vpravo 1080,568), v boku z listu 5 vedle velkého šedého HALCYON FREIGHTWORKS chybí; škrábance jsou jen na víku poklopu; spodní nápisy HALCYON FREIGHTWORKS splývají s tmavým pásem (list 6 vpravo dole)."},
+  "svetlo": {"score": 6, "why": "Klávesy 2x2 jsou v tmavém rámečku a stavový pás na téměř černém poli, TEMP jantarový (list 3 a 6 vpravo). Klávesy i proužky jsou ale plošně bílé bez záře a bez gradientu, čtou se spíš jako bílý lak než jako podsvícený světlovod (list 3 vpravo 1215,280)."},
+  "citelnost": {"score": 6, "why": "MAIN/BATT/TEMP, LIGHTS/GEAR/VTOL, CAUTION, ACCESS, SERVICE ACCESS jsou čitelné (list 3, 6 vpravo). Legendy kolébek na věži jsou z pohledu pilota dál drobné a nečitelné (list 5 vpravo 1860,300; list 6 vpravo 1810,180) a nápis EMER u nouzové klávesy chybí (list 5 vpravo 1890,210)."},
+  "chyby_geometrie": {"score": 7, "why": "Díry, průniky ani plovoucí díly nevidím. Ve 3/4 pohledu je ale na horní hraně věže dál vidět červená lišta krytu (list 1 vpravo 1770,297)."},
+  "soulad_stylu": {"score": 6, "why": "Čelo věže, opěrka, grip a bloky kláves mluví jazykem návrhu; nosník, podstavec, blok kniplu a horní část věže jsou čistý světlý lak, takže díl dál působí jako ze dvou sad."}
+ },
+ "average": 6.1,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "r11_status": {
+  "1_material_ram_vlozky_oder": "částečně: mráčky z ploch odstraněné (list 3 vpravo) a čelo věže je grafitová vložka ve světlém rámu; oděr hran ale v žádném záběru není vidět, víko poklopu je dál středně šedé (list 6 vpravo), ostatní boky bez kontrastu rám/vložka.",
+  "2_holy_bok_veze": "opraveno z velké části: čelo věže má rám, šrouby, grafitovou vložku, znak // a HALCYON FREIGHTWORKS (list 3 a 2 vpravo). Zbývá šikmá plocha s CAUTION a horní třetina věže hladká, zlom v polovině výšky chybí.",
+  "3_znak_halcyon_skrabance_kontrast": "částečně: oranžový znak na věži výrazný (list 3 vpravo); na nosníku jen malá značka na předním konci (list 1 vpravo 1250,245), z boku (list 5) chybí; škrábance kolem kniplu, kláves, madla chybí; spodní nápisy dál splývají (list 6 vpravo dole).",
+  "4_cerveny_kryt_emer": "neopraveno: červená lišta na horní hraně věže ve 3/4 pohledu (list 1 vpravo 1770,297), EMER chybí (list 5 vpravo).",
+  "5_svit_klaves": "částečně: tmavý rámeček kláves a téměř černé pole stavového pásu jsou hotové (list 3, 6 vpravo); záře/bloom chybí.",
+  "6_legendy_kolebek_poklop": "neopraveno: legendy kolébek z pohledu pilota nečitelné (list 5 vpravo), spára víka poklopu mělká bez úchytové prohlubně (list 4 vpravo)."
+ },
+ "concept_match": {
+  "layout_percent": 75,
+  "look_percent": 55,
+  "summary": "Skladba odpovídá návrhu. Čelo věže je teď nejblíž návrhu ze všech ploch (grafit v rámu, šrouby, znak //, šrafy). Návrh má ale ošoupaný ocelový rám s výrazným oděrem hran na celém těle, grafitové vložky na všech bocích podstavce a nosníku, EMER pod krytem, čitelné THR/LAND/CARGO a // HALCYON na nosníku; u nás zbytek těla zůstává čistý světlý lak."
+ },
+ "findings": [
+  {"n": 1, "title": "Oděr hran a kontrast rám/vložka mimo čelo věže", "where": "list 1 vpravo hrany věže, blok kniplu, nosník, podstavec; list 5 vpravo horní hrana nosníku; list 6 vpravo víko poklopu", "problem": "Přerušovaný oděr hran není v žádném záběru vidět, tělo je čistý nový lak; víko poklopu středně šedé; boky podstavce a nosníku nemají grafitové vložky jako v návrhu.", "severity": "musí se opravit", "fix": "Oděr hran přes curvature/bevel masku: holý kov albedo 0,55–0,65, metallic 1, roughness 0,25–0,35, šíře 3–6 mm (dnes zjevně pod rozlišením snímku), přerušovaný šumem s pokrytím 40–60 % hran, 2x silnější na horních hranách nosníku, bloku kniplu a věže. Víko poklopu a boky podstavce/nosníku na grafit albedo 0,08–0,12, roughness 0,5–0,6, v rámu 15–25 mm se šrouby po 80–120 mm. Ověřit zblízka ve 3/4 záběru (list 1), že je oděr vidět."},
+  {"n": 2, "title": "Znak // HALCYON na nosníku a škrábance kolem ovladačů", "where": "list 5 vpravo bok nosníku; list 1 vpravo 1250,245; list 4 vpravo okolí kniplu; list 6 vpravo dole", "problem": "Na boku nosníku je jen velký šedý text, oranžový znak je jen malá značka na předním konci; škrábance jsou jen na víku poklopu; spodní nápisy na tmavém pásu splývají.", "severity": "doporučeno", "fix": "Před HALCYON FREIGHTWORKS na boku nosníku oranžový // výšky jako písmo (~30 mm) a text zmenšit na ~60 % s mezerou 15 mm, jako HALCYON v návrhu. Škrábance a oděry hustotou jako na víku kolem kniplu (r 60 mm), kláves, kolébek, madla a na horní hraně nosníku. Spodní nápisy na kontrast >= 0,4 (albedo textu >= 0,5 na pásu 0,05)."},
+  {"n": 3, "title": "EMER a červená lišta krytu", "where": "list 5 vpravo 1890,210; list 1 vpravo 1770,297", "problem": "Pod krytem chybí nápis EMER; ve 3/4 pohledu kouká červená lišta krytu nad horní hranu věže.", "severity": "doporučeno", "fix": "Kryt zapustit 3–5 mm pod horní hranu čela (nebo přidat oranžový rám 8–10 mm kolem klávesy jako v návrhu, který lištu zakryje); pod klávesu bílý nápis EMER výšky 10–12 mm na grafitu."},
+  {"n": 4, "title": "Legendy kolébek", "where": "list 5 vpravo 1860,300; list 6 vpravo 1810,180", "problem": "Legendy kolébek na věži jsou z pohledu pilota drobné a nečitelné.", "severity": "doporučeno", "fix": "THR/LAND/CARGO bílé, výška 8–10 mm, tučné, pod kolébkami na grafitovém poli; nad kolébky LED proužky 1 x 6 mm s emisí 10."},
+  {"n": 5, "title": "Záře kláves a proužků, holá šikmá plocha věže", "where": "list 3 vpravo klávesy 2x2 a šikmá plocha s CAUTION", "problem": "Klávesy jsou plošně bílé bez záře; šikmá plocha věže vlevo od vložky je hladká světlá deska.", "severity": "doporučeno", "fix": "Klávesy emise 15–25 s vnitřním gradientem (střed 100 %, okraj 60 %) a mírným bloomem; proužky modrobílé 10–15. Šikmou plochu věže rozdělit spárou 2 mm a grafitovým panelem s 4 šrouby, nebo zlomem v polovině výšky jako v návrhu."}
+ ]
+}

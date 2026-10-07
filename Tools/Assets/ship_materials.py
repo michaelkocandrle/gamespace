@@ -1318,7 +1318,13 @@ def build_mesh_decal_master(paint):
         # bolts); a DBuffer decal has one opacity for all it writes, so the paint quad sits on top of
         # the normal-only one and covers just those parts
         col = _texture_param(m, "DecalColorMap", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR, white, -900, 1000)
-        _output(col, unreal.MaterialProperty.MP_BASE_COLOR)
+        # DecalTint (default 1: the ships unchanged) lifts the library's grey legends where a kit part needs them
+        # light on its dark fields (the cockpit console, 7. 10. 2026: the 0.42 grey legends read grey on grey)
+        tinted = _node(m, unreal.MaterialExpressionMultiply, -500, 1000)
+        if not MEL.connect_material_expressions(col, "RGB", tinted, "A"):
+            raise RuntimeError("decal colour -> tint")
+        _link(_vector(m, "DecalTint", (1.0, 1.0, 1.0), -900, 1200), tinted, "B")
+        _output(tinted, unreal.MaterialProperty.MP_BASE_COLOR)
         own = _node(m, unreal.MaterialExpressionMultiply, -350, 850)
         _link(opacity, own, "A")
         if not MEL.connect_material_expressions(col, "A", own, "B"):
