@@ -460,7 +460,8 @@ def factory_material_spec(role, maker, data=None):
         "CavityStrength": 0.0, "AOStrength": 0.0, "MetalShare": 0.0, "CarbonShare": 0.0, "LiveryAmount": 0.0,
         "ClearCoat": r.get("clear_coat", 0.0), "ClearCoatRoughness": r.get("clear_coat_rough", 0.08),
         "FloorWear": 0.0, "TopWear": 0.0, "PanelDirtVar": 0.0, "DetailNormalStrength": 0.0,
-        "FaceWear": r.get("face_wear", 0.0), "FaceDirt": r.get("face_dirt", 0.0)})
+        "FaceWear": r.get("face_wear", 0.0), "FaceDirt": r.get("face_dirt", 0.0),
+        "BareMetallic": r.get("bare_metallic", 1.0)})
     if r.get("grunge_tile_cm"):                  # a small part's own grunge scale (120 cm drew nothing on a console)
         scalars["GrungeTileCm"] = r["grunge_tile_cm"]
     if r.get("detail_normal"):

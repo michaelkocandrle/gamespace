@@ -1070,7 +1070,8 @@ rough += (D.z - 0.5) * MicroRough + (D.x - 0.5) * Brushed * 0.3;
 rough = lerp(rough, BareRough, saturate(D.y * ScratchAmount));
 rough = lerp(rough, 0.85, dirt);
 rough = lerp(rough, BareRough, wear);
-float metal = lerp(PaintMetal, 1.0, max(max(wear, isMetal * Amount * LiveryAmount), saturate(D.y * ScratchAmount)));
+float metal = lerp(PaintMetal, BareMetalness, max(wear, saturate(D.y * ScratchAmount)));
+metal = lerp(metal, 1.0, isMetal * Amount * LiveryAmount);
 return float3(saturate(rough), metal, lerp(1.0, ao, AOStrength));
 """
 
@@ -1117,6 +1118,9 @@ def build_layered_master(path=None, kit=False):
         "SecondaryRough": _scalar(m, "SecondaryRoughness", 0.5, -1700, 1750),
         "PaintMetal": _scalar(m, "PaintMetallic", 0.0, -1700, 1850),
         "BareRough": _scalar(m, "BareMetalRoughness", 0.3, -1700, 1950),
+        # the worn-through metal's metallic (default 1; a kit role's lighter scuff takes ~0.65, a full metal
+        # mirrored the dark room and the scuffs read as dark clouds - cockpit console, 7. 10. 2026)
+        "BareMetalness": _scalar(m, "BareMetallic", 1.0, -1700, 2050),
         "RoughVariation": _scalar(m, "RoughVariation", 0.2, -1700, 2050),
         "AOStrength": _scalar(m, "AOStrength", 0.8, -1700, 2150),
         "WearThreshold": _scalar(m, "WearThreshold", 0.45, -1700, 2250),
@@ -1178,7 +1182,7 @@ def build_layered_master(path=None, kit=False):
     colour_in = ["M", "VC", "Amount", "Primary", "Secondary", "BareMetal", "DirtColor", "GrungeAmount", "CavityStrength",
                  "Accent", "MetalPanel", "PanelTone", "LiveryColor", "D", "Brushed", "ScratchAmount"] + livery_in
     surface_in = ["M", "VC", "Amount", "PrimaryRough", "SecondaryRough", "PaintMetal", "BareRough", "AOStrength", "RoughVariation",
-                  "PanelRough", "D", "Brushed", "ScratchAmount", "MicroRough"] + livery_in
+                  "PanelRough", "D", "Brushed", "ScratchAmount", "MicroRough", "BareMetalness"] + livery_in
     nodes = {}
     for key, code, names, y in (("colour", _LAYER_COLOUR, colour_in, 0), ("surface", _LAYER_SURFACE, surface_in, 700)):
         node = _custom(m, "Layered_" + key, code, unreal.CustomMaterialOutputType.CMOT_FLOAT3, names, -900, y)

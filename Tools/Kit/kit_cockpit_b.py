@@ -97,8 +97,8 @@ def console_b(name, seed):
         p.box("Kit_Housing", (xk + 0.5, W - 0.026, 0.018), (xk + 0.512, W - 0.02, 0.055), bevel=0.002, segments=1, panel=False)
     # dark panels set into both long faces, a belt line over them, screws; the outboard front a hatch band and a plate
     for x0, x1 in ((0.05, 0.42), (0.45, 0.8)):
-        chamfer_panel(p, "Kit_Graphite", x0, x1, 0.12, DECK - 0.07, U0, -1)
-        chamfer_panel(p, "Kit_Graphite", x0, x1, 0.12, DECK - 0.07, W, 1)
+        chamfer_panel(p, "Kit_Graphite", x0, x1, 0.11, DECK - 0.062, U0, -1)
+        chamfer_panel(p, "Kit_Graphite", x0, x1, 0.11, DECK - 0.062, W, 1)
     chamfer_panel(p, "Kit_Graphite", 0.83, L - 0.08, 0.12, 0.3, U0, -1, c=0.05)
     p.box("Kit_Graphite", (0.0, U0 - 0.004, DECK - 0.052), (L - 0.02, U0, DECK - 0.046), panel=False)
     p.box("Kit_Graphite", (0.0, W, DECK - 0.052), (L - 0.02, W + 0.004, DECK - 0.046), panel=False)
@@ -114,8 +114,8 @@ def console_b(name, seed):
     side_prism(p, "Kit_Frame", beam, -0.075, 0.155, 0.008, 1)
     # the stepped side: a lower band 8 mm proud on both sides, chamfered (the concept's beam is not one slab)
     band = [(0.04, BEAM0 - 0.004), (0.57, BEAM0 - 0.004), (0.6, BEAM0 + 0.022), (0.04, BEAM0 + 0.022), (0.02, BEAM0 + 0.01)]
-    side_prism(p, "Kit_Frame", band, -0.083, -0.07, 0.004, 1)
-    side_prism(p, "Kit_Frame", band, 0.15, 0.163, 0.004, 1)
+    side_prism(p, "Kit_Graphite", band, -0.083, -0.07, 0.004, 1)        # the lower band a graphite inset
+    side_prism(p, "Kit_Graphite", band, 0.15, 0.163, 0.004, 1)
     p.box("Kit_Graphite", (0.04, -0.0775, BEAM0 + 0.03), (0.56, -0.074, BEAM0 + 0.038), panel=False)          # the groove
     for k in range(6):
         screw(p, Vector((0.06 + k * 0.1, -0.0758, BEAM0 + 0.017)), -Y, 0.003)
@@ -132,8 +132,8 @@ def console_b(name, seed):
                 p.box("Kit_Seal", (hx - 0.0015, hu - 0.0015, AT - 0.0004), (hx + 0.0015, hu + 0.0015, AT + 0.0002), panel=False)
     _label(p, "maker", Vector((0.35, -0.0778, AT - 0.05)), -Y, X, Z, scale=0.4)
     for k in range(2):                                         # Halcyon's mark: two slanted orange bars, 30 mm
-        x_ = 0.185 + k * 0.02
-        bar = [(x_, AT - 0.066), (x_ + 0.009, AT - 0.066), (x_ + 0.023, AT - 0.036), (x_ + 0.014, AT - 0.036)]
+        x_ = 0.175 + k * 0.022
+        bar = [(x_, AT - 0.068), (x_ + 0.011, AT - 0.068), (x_ + 0.027, AT - 0.034), (x_ + 0.016, AT - 0.034)]
         side_prism(p, "Kit_Signal", bar, -0.078, -0.074, 0.0, 1)
     for xb in (0.2, 0.46):                                                                   # the slanted brackets
         br = [(xb - 0.03, DECK + 0.006), (xb + 0.035, DECK + 0.006), (xb + 0.065, BEAM0 + 0.002), (xb + 0.005, BEAM0 + 0.002)]
@@ -188,7 +188,7 @@ def console_b(name, seed):
     p.box("Kit_Graphite", (-0.05, -0.045, 0.005), (0.05, 0.045, 0.006), m=fm(kc), panel=False)
     for i, lab in enumerate(("ck_lights", "ck_gear", "ck_vtol", "ck_esp")):
         q = kc + X * (0.024 * (1 if i % 2 else -1)) + d * (0.021 * (1 if i < 2 else -1))
-        p.box("Kit_Seal", (-0.0205, -0.0185, 0.006), (0.0205, 0.0185, 0.0098), bevel=0.001, segments=1, m=fm(q))
+        p.box("Kit_Seal", (-0.0235, -0.021, 0.006), (0.0235, 0.021, 0.0098), bevel=0.001, segments=1, m=fm(q))
         p.box("Kit_Housing", (-0.019, -0.017, 0.006), (0.019, 0.017, 0.01), bevel=0.002, segments=2, m=fm(q))
         p.box("Kit_GlowKey", (-0.016, -0.014, 0.01), (0.016, 0.014, 0.0135), bevel=0.0015, segments=2, m=fm(q))
     for xx in (0.665, 0.955):
