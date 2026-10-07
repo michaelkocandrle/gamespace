@@ -200,6 +200,10 @@ def module(p, x0, x1, u0, u1, z):
     rows of such modules, not one board). Returns its top height."""
     p.box("Kit_Graphite", (x0 - 0.006, u0 - 0.006, z - 0.006), (x1 + 0.006, u1 + 0.006, z + 0.0005), panel=False)
     p.box("Kit_Console", (x0, u0, z - 0.012), (x1, u1, z + 0.008), bevel=0.006, segments=3)
+    i0, i1, j0, j1 = x0 + 0.022, x1 - 0.022, u0 + 0.022, u1 - 0.022
+    for a_, b_ in (((i0, j0), (i1, j0 + 0.0015)), ((i0, j1 - 0.0015), (i1, j1)), ((i0, j0), (i0 + 0.0015, j1)), ((i1 - 0.0015, j0), (i1, j1))):
+        p.box("Kit_Graphite", (a_[0], a_[1], z + 0.0078), (b_[0], b_[1], z + 0.0086), panel=False)
+    p.grime("rim", ((x0 + x1) / 2, u0 + 0.004, z + 0.0081), (0, 0, 1), (0, -1, 0), (x1 - x0 - 0.02, 0.012), 0.6, wear=True)
     for xx in (x0 + 0.012, x1 - 0.012):
         for uu in (u0 + 0.012, u1 - 0.012):
             p.lathe("Kit_Lip", [(0.0032, 0.0), (0.0032, 0.0006), (0.0, 0.0009)], (xx, uu, z + 0.008), seg=12)
@@ -245,7 +249,7 @@ def console(name, seed):
     p.box("Kit_Graphite", (0.51, 0.305, zm), (0.73, 0.395, zm + 0.0034), panel=False)
     for k, lab in enumerate(("ck_main", "ck_batt", "ck_temp")):
         xk = 0.545 + 0.075 * k
-        p.box("Kit_GlowCool" if k < 2 else "Kit_GlowSignal", (xk - 0.016, 0.36, zm + 0.0034), (xk + 0.016, 0.368, zm + 0.0037), panel=False)
+        p.box("Kit_GlowCool" if k < 2 else "Kit_GlowSignal", (xk - 0.022, 0.358, zm + 0.0034), (xk + 0.022, 0.372, zm + 0.0037), panel=False)
         _label(p, lab, Vector((xk, 0.33, zm + 0.0035)), Z, Vector((0, -1, 0)), X, scale=0.75)
     _label(p, "panel_C21", Vector((0.62, 0.52, zm + 0.0004)), Z, Vector((0, -1, 0)), X, scale=0.6)
     zm = module(p, 0.77, 0.98, 0.24, W - 0.04, DT - 0.006)              # C: a 2 x 2 key pad
@@ -254,7 +258,7 @@ def console(name, seed):
         p.box("Kit_Graphite", kx + Vector((-0.016, -0.016, -0.001)), kx + Vector((0.016, 0.016, 0.004)), bevel=0.002, segments=2)
         p.box("Kit_Shell", kx + Vector((-0.012, -0.012, 0.003)), kx + Vector((0.012, 0.012, 0.009)), bevel=0.002, segments=2)
         p.box("Kit_GlowCool", kx + Vector((-0.007, 0.007, 0.0088)), kx + Vector((0.007, 0.0085, 0.0092)), panel=False)
-        _label(p, lab, kx + Vector((0.0, -0.032, 0.0005)), Z, Vector((0, -1, 0)), X, scale=0.5)
+        _label(p, lab, kx + Vector((0.0, -0.042, 0.0005)), Z, Vector((0, -1, 0)), X, scale=0.62)
     _label(p, "st_torque", Vector((0.6, 0.6, zm - 0.008 + 0.0004)), Z, Vector((0, -1, 0)), X, scale=0.5)
     # 3 the nose: the control face rising from the deck, one mass with it
     control_face(p, L - 0.2, L, 0.0, W, D)
@@ -265,9 +269,14 @@ def console(name, seed):
         p.box("Kit_Housing", (xb - 0.04, 0.0, DT - 0.01), (xb + 0.04, 0.17, AT - 0.04), bevel=0.006, segments=2)
         for uu in (0.03, 0.14):
             p.lathe("Kit_Lip", [(0.004, 0.0), (0.004, 0.001), (0.0, 0.0013)], (xb + 0.041, uu, (DT + AT - 0.05) / 2), axis=(1, 0, 0), seg=12)
-    p.box("Kit_Shell", (0.16, -0.075, AT - 0.045), (0.98, 0.19, AT - 0.016), bevel=0.016, segments=4)
-    p.box("Kit_Shell", (0.18, -0.065, AT - 0.02), (0.96, 0.178, AT), bevel=0.012, segments=4)
-    p.box("Kit_Graphite", (0.17, -0.07, AT - 0.0195), (0.97, 0.185, AT - 0.0165), panel=False)
+    def plan(x0, x1, u0, u1, c):                                      # the arm's plan, ends chamfered c at the pilot's side
+        return [(x0 + c, u0), (x1 - c, u0), (x1, u0 + c), (x1, u1), (x0, u1), (x0, u0 + c)]
+    p.poly_prism("Kit_Shell", plan(0.16, 0.98, -0.075, 0.19, 0.06), frame(Vector((0, 0, AT - 0.016)), (1, 0, 0), (0, 1, 0), (0, 0, 1)),
+                 0.029, bevel=0.012, segments=4)
+    p.poly_prism("Kit_Shell", plan(0.18, 0.96, -0.065, 0.178, 0.05), frame(Vector((0, 0, AT)), (1, 0, 0), (0, 1, 0), (0, 0, 1)),
+                 0.02, bevel=0.01, segments=4)
+    p.poly_prism("Kit_Graphite", plan(0.17, 0.97, -0.07, 0.185, 0.055), frame(Vector((0, 0, AT - 0.0165)), (1, 0, 0), (0, 1, 0), (0, 0, 1)),
+                 0.003, bevel=0.0, segments=1, panel=False)
     for x_ in (0.22, 0.92):
         for u_ in (-0.045, 0.155):
             p.lathe("Kit_Lip", [(0.0034, 0.0), (0.0034, 0.0006), (0.0, 0.0009)], (x_, u_, AT), seg=12)
@@ -288,7 +297,7 @@ def console(name, seed):
             p.box("Kit_Graphite", (hx - 0.0018, hu - 0.0018, AT + 0.0295), (hx + 0.0018, hu + 0.0018, AT + 0.0306), panel=False)
     stick(p, Vector((sx, su, AT)), "ck_rcs")
     _label(p, "hazard_subtle", Vector((0.9, 0.08, AT + 0.0004)), Z, Vector((0, -1, 0)), X, scale=0.35)
-    _label(p, "maker", Vector((0.35, -0.0751, AT - 0.031)), Vector((0, -1, 0)), X, Z, scale=0.18)
+    _label(p, "maker", Vector((0.62, -0.0005, D - 0.06)), Vector((0, -1, 0)), X, Z, scale=0.5)
     # 5 the grab handle at the front outboard corner
     hp = [Vector((L - 0.06, W - 0.03, DT + 0.03)), Vector((L + 0.05, W - 0.03, DT + 0.03)), Vector((L + 0.07, W - 0.08, DT + 0.03)),
           Vector((L + 0.07, W - 0.2, DT + 0.03)), Vector((L + 0.05, W - 0.22, DT + 0.03)), Vector((L - 0.03, W - 0.22, DT + 0.03))]

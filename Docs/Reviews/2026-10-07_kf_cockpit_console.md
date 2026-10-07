@@ -13,6 +13,7 @@ Brána `step` (průměr ≥ 6,5, žádná kategorie pod 6). Hodnotí se jen lev�
 | 2 | v3 | 4,8 | plochá deska s kniplem; chybí zvednutá loketní jednotka, moduly, oranžové akcenty, legendy malé |
 | 3 | v4 | 5,3 | silueta kvádru, tělo téměř černé, legendy nečitelné, C-lučík jako dráty |
 | 4 | v5 | 5,5 | silueta pořád kvádr, legendy, opotřebení laku není vidět, prázdné desky, slabé podsvícení |
+| 5 | v6 | 5,6 | stavový pás opravený; dál silueta, opotřebení, holé plochy modulů, legendy kláves, logo, ploché světlo |
 
 ## Co se změnilo
 
@@ -23,7 +24,20 @@ Brána `step` (průměr ≥ 6,5, žádná kategorie pod 6). Hodnotí se jen lev�
   a klín čela – panelová šeď 0,19 v tlumeném kokpitu četla jako černá; mezera pod loketní jednotkou 4,5 cm;
   C-lučík jeden plochý pás na čepech; legendy stavového pásu nad proužky; kryt klávesy s bočnicemi a pantem.
 
-## Otevřené výtky (kolo 4) a reakce
+- **v6:** loketní jednotka se zkosenými konci, vybrání v modulech se světlým ošoupáním hrany, větší legendy
+  a stavové proužky, logo na vnitřním boku podstavce.
+
+## Proč skóre stagnuje (po kole 5)
+
+Kola 3–5 přidávají po 0,1–0,5 a kritik opakuje tytéž výtky: ploché světlo bez měkkého stínu, opotřebení laku
+z masky továrny není v tlumeném kokpitu vidět, legendy decalů štítků jsou šedé (sdílený decal materiál lodi).
+To nejsou vady jednoho dílu, ale systému (paměť `critic-systemic-not-local`). Další krok proto systémově:
+1. světlo nad konzolemi (malé bodové světlo s měkkým stínem v kokpitu, `Wayfarer_setup.json`);
+2. opotřebení `Kit_Console`/`Kit_Shell`: silnější a nepravidelná maska oděru, tmavší spáry a šrouby;
+3. emisivní legendy kláves (podsvícené písmo, ne šedý decal);
+4. pak silueta (kapsy v boku, podříznutí, patka) a teprve potom pravá konzole jako zrcadlo.
+
+## Otevřené výtky (kolo 4–5) a reakce
 
 1. Silueta kvádru (musí): zkosené čelo 25–30°, podříznutý vnitřní bok, kapsy v boku, odsazená patka – další krok.
 2. Legendy (musí): decaly štítků jdou přes sdílený decal materiál lodi a čtou se šedě; potřeba světlejší

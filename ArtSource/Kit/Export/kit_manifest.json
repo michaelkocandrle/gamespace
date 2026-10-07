@@ -9875,16 +9875,16 @@
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_Console12W_A.fbx",
    "dims_m": [
     1.292,
-    0.751,
+    0.749,
     0.831
    ],
    "expected_size_cm": [
     129.2,
-    75.1,
+    74.9,
     83.1
    ],
-   "tris": 15852,
-   "tris_decals": 156,
+   "tris": 16308,
+   "tris_decals": 198,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
@@ -9906,7 +9906,7 @@
    ],
    "sockets": {},
    "collision_hulls": 1,
-   "decals": 20,
+   "decals": 23,
    "decal_items": [
     "st_vent",
     "ck_main",
@@ -9927,6 +9927,9 @@
     "maker",
     "grime_rim",
     "grime_rim",
+    "grime_rim",
+    "grime_rim",
+    "grime_rim",
     "grime_rim"
    ],
    "service_labels": [
@@ -9935,7 +9938,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 15342,
+    "edge": 15918,
     "secondary": 0,
     "floor": 1748,
     "seam": 0
