@@ -116,15 +116,21 @@ def console_b(name, seed):
     p.box("Kit_Graphite", (0.04, -0.0775, BEAM0 + 0.03), (0.56, -0.074, BEAM0 + 0.038), panel=False)          # the groove
     for k in range(6):
         screw(p, Vector((0.06 + k * 0.1, -0.0758, BEAM0 + 0.017)), -Y, 0.003)
-    for xa, xb in ((0.035, 0.31), (0.32, 0.595)):
+    for xa, xb in ((0.035, 0.595),):
         p.box("Kit_Gasket", (xa, -0.062, AT - 0.022), (xb, 0.142, AT), bevel=0.013, segments=4)
+        for a_, b_ in (((xa + 0.018, -0.045), (xb - 0.018, -0.0435)), ((xa + 0.018, 0.1235), (xb - 0.018, 0.125)),
+                       ((xa + 0.018, -0.045), (xa + 0.0195, 0.125)), ((xb - 0.0195, -0.045), (xb - 0.018, 0.125))):
+            p.box("Kit_Seal", (a_[0], a_[1], AT - 0.0004), (b_[0], b_[1], AT + 0.0003), panel=False)          # the stitching
         for i in range(int((xb - xa - 0.03) / 0.011)):
             for j in range(15):
-                hx, hu = xa + 0.02 + i * 0.011, -0.042 + j * 0.0115 + (0.0057 if i % 2 else 0.0)
-                if hu > 0.123:
+                hx, hu = xa + 0.03 + i * 0.011, -0.034 + j * 0.0105 + (0.0052 if i % 2 else 0.0)
+                if hu > 0.115 or hx > xb - 0.03:
                     continue
-                p.box("Kit_Graphite", (hx - 0.0015, hu - 0.0015, AT - 0.0004), (hx + 0.0015, hu + 0.0015, AT + 0.0003), panel=False)
-    _label(p, "maker", Vector((0.3, -0.0778, AT - 0.05)), -Y, X, Z, scale=0.55)
+                p.box("Kit_Seal", (hx - 0.0015, hu - 0.0015, AT - 0.0004), (hx + 0.0015, hu + 0.0015, AT + 0.0002), panel=False)
+    _label(p, "maker", Vector((0.33, -0.0778, AT - 0.05)), -Y, X, Z, scale=0.55)
+    for k in range(2):                                         # Halcyon's mark: two slanted orange bars
+        x_ = 0.135 + k * 0.014
+        p.sweep("Kit_Signal", [Vector((x_, -0.0768, AT - 0.062)), Vector((x_ + 0.01, -0.0768, AT - 0.038))], 0.0035, seg=6, scale_y=0.3)
     for xb in (0.2, 0.46):                                                                   # the slanted brackets
         br = [(xb - 0.03, DECK + 0.006), (xb + 0.035, DECK + 0.006), (xb + 0.065, BEAM0 + 0.002), (xb + 0.005, BEAM0 + 0.002)]
         for ua, ub in ((-0.025, 0.0), (0.105, 0.13)):
@@ -142,7 +148,7 @@ def console_b(name, seed):
     for xx in (0.68, 0.85):
         screw(p, Vector((xx, U0 - 0.0125, DECK + 0.012)), -Y)
         screw(p, Vector((xx, U0 - 0.0125, 0.488)), -Y)
-    stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs")
+    stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs", head_role="Kit_Frame", guard="d")      # a worn metal head (concept)
     # 4 the middle block: the intake grille on top, the status strip and the 2 x 2 keys on its seat-facing chamfer
     mb = [(0.2, DECK), (W - 0.005, DECK), (W - 0.005, 0.52), (0.34, 0.52), (0.2, 0.455)]
     end_prism(p, "Kit_Frame", mb, 0.64, 0.98, 0.008, 1)
@@ -151,6 +157,7 @@ def console_b(name, seed):
     for k in range(10):
         xk = 0.693 + k * 0.0236
         p.box("Kit_Housing", (xk, 0.393, 0.5245), (xk + 0.012, 0.607, 0.531), bevel=0.0025, segments=2, panel=False)
+    chamfer_panel(p, "Kit_Graphite", 0.67, 0.95, DECK + 0.02, 0.5, W - 0.005, 1, c=0.03)
     d = Vector((0, 0.14, 0.065)).normalized()                 # up the chamfer
     n = X.cross(d)                                            # out of it, to the seat and up
     c0 = Vector((0.0, 0.27, 0.4875)) + n * 0.0005
@@ -161,7 +168,7 @@ def console_b(name, seed):
     p.box("Kit_Graphite", (-0.065, -0.037, 0.005), (0.065, 0.037, 0.0055), m=fm(sc), panel=False)
     for k, lab in enumerate(("ck_main", "ck_batt", "ck_temp")):
         q = sc + d * (0.022 - 0.022 * k)
-        p.box("Kit_GlowCool" if k < 2 else "Kit_GlowSignal", (0.005, -0.004, 0.0055), (0.055, 0.004, 0.0065), m=fm(q), panel=False)
+        p.box("Kit_GlowKey" if k < 2 else "Kit_GlowAmber", (0.005, -0.004, 0.0055), (0.055, 0.004, 0.0065), m=fm(q), panel=False)
         _label(p, lab, q - X * 0.03 + n * 0.0058, n, X, d, scale=0.62)
     kc = c0 + X * 0.89                                         # the keys
     p.box("Kit_Lip", (-0.055, -0.05, 0.002), (0.055, 0.05, 0.005), bevel=0.0015, segments=2, m=fm(kc))
@@ -169,33 +176,34 @@ def console_b(name, seed):
     for i, lab in enumerate(("ck_lights", "ck_gear", "ck_vtol", "ck_esp")):
         q = kc + X * (0.024 * (1 if i % 2 else -1)) + d * (0.021 * (1 if i < 2 else -1))
         p.box("Kit_Housing", (-0.019, -0.017, 0.006), (0.019, 0.017, 0.01), bevel=0.002, segments=2, m=fm(q))
-        p.box("Kit_GlowNeutral", (-0.016, -0.014, 0.01), (0.016, 0.014, 0.0135), bevel=0.0015, segments=2, m=fm(q))
+        p.box("Kit_GlowKey", (-0.016, -0.014, 0.01), (0.016, 0.014, 0.0135), bevel=0.0015, segments=2, m=fm(q))
     for xx in (0.665, 0.955):
         screw(p, c0 + X * xx + d * 0.04 + n * 0.003, n)
         screw(p, c0 + X * xx - d * 0.04 + n * 0.003, n)
     # 5 the front tower: its rear slope faces the pilot with the emergency key and the rockers, LEDs over them
     TU = 0.22                                                  # the tower's seat-side face
-    tw = [(0.97, DECK), (L - 0.02, DECK), (L - 0.02, 0.58), (L - 0.05, 0.62), (1.09, 0.62), (0.97, 0.49)]
+    tw = [(0.97, DECK), (L - 0.02, DECK), (L - 0.02, 0.66), (L - 0.05, 0.7), (1.1, 0.7), (0.97, 0.48)]
     side_prism(p, "Kit_Frame", tw, TU, W - 0.005, 0.01, 1)
-    a = Vector((0.12, 0, 0.13)).normalized()                  # up the slope (forward and up)
+    a = Vector((0.13, 0, 0.22)).normalized()                  # up the slope (forward and up, ~30 deg off vertical)
     r = Vector((0, -1, 0))                                     # the pilot's right on it (toward the seat side... mirrored)
     nf = r.cross(a)                                            # out of it: back to the pilot and up
     if nf.x > 0:
         r, nf = -r, -nf
-    fc = Vector((1.03, (TU + W - 0.005) / 2, 0.555)) + nf * 0.0005
+    fc = Vector((1.035, (TU + W - 0.005) / 2, 0.59)) + nf * 0.0005
     ff = lambda o: frame(o, r, a, nf)                          # noqa: E731
-    w2, h2 = (W - 0.005 - TU - 0.04) / 2, 0.08
+    w2, h2 = (W - 0.005 - TU - 0.04) / 2, 0.11
     p.box("Kit_Lip", (-w2 - 0.004, -h2 - 0.004, -0.004), (w2 + 0.004, h2 + 0.004, 0.0015), bevel=0.002, segments=2, m=ff(fc))
     p.box("Kit_Graphite", (-w2, -h2, -0.004), (w2, h2, 0.002), m=ff(fc), panel=False)
-    emergency_key(p, fc + a * 0.03 + nf * 0.002, r, a, nf)
+    emergency_key(p, fc + a * 0.05 + nf * 0.002, r, a, nf)
     for i, lab in enumerate(("ck_pwr", "ck_extlt", "ck_eng")):
-        q = fc - a * 0.04 + r * (0.12 * (i - 1)) + nf * 0.002
+        q = fc - a * 0.045 + r * (0.12 * (i - 1)) + nf * 0.002
+        p.box("Kit_Lip", (-0.016, -0.024, 0.0), (0.016, 0.03, 0.0015), bevel=0.001, segments=1, m=ff(q), panel=False)   # its frame
         _rocker(p, q, r, a, nf, lab)
-        p.box("Kit_GlowCool", (-0.006, 0.022, 0.0), (0.006, 0.026, 0.0012), m=ff(q), panel=False)
+        p.box("Kit_GlowKey", (-0.006, 0.022, 0.0015), (0.006, 0.026, 0.0027), m=ff(q), panel=False)
     for su in (-1, 1):
         for sv in (-1, 1):
             screw(p, fc + r * (su * (w2 - 0.012)) + a * (sv * (h2 - 0.012)) + nf * 0.002, nf)
-    chamfer_panel(p, "Kit_Graphite", 1.06, L - 0.06, DECK + 0.03, 0.57, TU, -1, c=0.04)
+    chamfer_panel(p, "Kit_Graphite", 1.08, L - 0.06, DECK + 0.03, 0.64, TU, -1, c=0.04)
     p.box("Kit_Graphite", (L - 0.026, TU + 0.03, DECK + 0.03), (L - 0.016, W - 0.035, 0.55), bevel=0.003, segments=1)
     for k in range(9):                                         # the front's orange hatch band
         uu = TU + 0.06 + k * 0.035
@@ -215,6 +223,61 @@ def console_b(name, seed):
     p.grime("rim", (L / 2, W + 0.002, 0.08), (0, 1, 0), (0, 0, 1), (L - 0.1, 0.05), 0.8)
     p.grime("rim", (0.32, -0.0779, AT - 0.03), (0, -1, 0), (0, 0, 1), (0.55, 0.02), 0.7, wear=True)
     p.grime("rim", (0.5, U0 - 0.0015, DECK - 0.02), (0, -1, 0), (0, 0, 1), (0.9, 0.03), 0.6, wear=True)
+    # 7a the front deck by the seat, ahead of the stick: a small switch module - a sloped dark plate in a light frame,
+    # three guarded toggles (the guards two bent bars), their legends, a status LED each
+    m0 = Vector((1.03, 0.095, DECK))
+    mod = [(-0.05, 0.0), (0.12, 0.0), (0.12, 0.06), (-0.05, 0.03)]   # (u, z): its top slopes down to the seat
+    end_prism(p, "Kit_Frame", [(m0.y + a_, m0.z + b_) for a_, b_ in mod], 0.92, 1.15, 0.005, 1)
+    sd_ = Vector((0, 0.17, 0.03)).normalized()
+    ns = X.cross(sd_)
+    if ns.z < 0:
+        ns = -ns
+    pc = Vector((1.035, m0.y + 0.035, m0.z + 0.045)) + ns * 0.0005
+    fs_ = lambda o: frame(o, X, sd_, ns)                       # noqa: E731
+    p.box("Kit_Graphite", (-0.1, -0.026, -0.002), (0.1, 0.026, 0.002), m=fs_(pc), panel=False)
+    for k, lab in enumerate(("ck_lights", "ck_gear", "ck_vtol")):
+        q = Vector((0.06 * (k - 1), 0.0, 0.0))
+        p.box("Kit_Lip", q + Vector((-0.009, -0.012, 0.002)), q + Vector((0.009, 0.004, 0.005)), bevel=0.0015, segments=2, m=fs_(pc))
+        p.sweep("Kit_Lip", [fs_(pc) @ (q + Vector((0.0, -0.004, 0.005))), fs_(pc) @ (q + Vector((0.0, 0.006, 0.019)))], 0.0022, seg=8)
+        for sv in (-1, 1):
+            p.sweep("Kit_Housing", [fs_(pc) @ (q + Vector((sv * 0.013, -0.012, 0.002))), fs_(pc) @ (q + Vector((sv * 0.013, -0.008, 0.022))),
+                                    fs_(pc) @ (q + Vector((sv * 0.013, 0.004, 0.022)))], 0.0018, seg=6)
+        p.box("Kit_GlowCool" if k != 1 else "Kit_GlowSignal", q + Vector((-0.004, 0.012, 0.002)), q + Vector((0.004, 0.016, 0.003)),
+              m=fs_(pc), panel=False)
+    # 7b the rear deck outboard of the beam: a service hatch (a raised lid in a dark seam, a recessed pull, two
+    # quarter-turn latches, its stencils) - the concept has no empty board
+    hx0, hx1, hu0, hu1 = 0.06, 0.58, 0.2, W - 0.04
+    p.box("Kit_Graphite", (hx0 - 0.006, hu0 - 0.006, DECK + 0.004), (hx1 + 0.006, hu1 + 0.006, DECK + 0.008), panel=False)
+    lid = [(hu0, DECK), (hu1, DECK), (hu1, DECK + 0.018), (hu1 - 0.012, DECK + 0.026), (hu0 + 0.012, DECK + 0.026), (hu0, DECK + 0.018)]
+    end_prism(p, "Kit_Frame", lid, hx0, hx1, 0.003, 1)
+    zt = DECK + 0.026
+    p.box("Kit_Graphite", (hx0 + 0.03, hu0 + 0.03, zt - 0.0008), (hx1 - 0.03, hu0 + 0.033, zt + 0.0003), panel=False)
+    p.box("Kit_Graphite", (hx0 + 0.03, hu1 - 0.033, zt - 0.0008), (hx1 - 0.03, hu1 - 0.03, zt + 0.0003), panel=False)
+    p.box("Kit_Seal", (0.27, hu1 - 0.075, zt - 0.012), (0.37, hu1 - 0.045, zt + 0.0003), bevel=0.004, segments=2)        # the pull
+    p.box("Kit_Lip", (0.28, hu1 - 0.07, zt - 0.006), (0.36, hu1 - 0.065, zt - 0.002), bevel=0.0015, segments=2)
+    for xx in (hx0 + 0.04, hx1 - 0.04):
+        c = Vector((xx, (hu0 + hu1) / 2, zt))
+        p.lathe("Kit_Lip", [(0.011, 0.0), (0.011, 0.0015), (0.009, 0.0025)], tuple(c), seg=20)
+        p.box("Kit_Graphite", (xx - 0.0075, (hu0 + hu1) / 2 - 0.0015, zt + 0.0015), (xx + 0.0075, (hu0 + hu1) / 2 + 0.0015, zt + 0.0035), panel=False)
+    _label(p, "st_service", Vector((0.22, hu0 + 0.06, zt + 0.0004)), Z, X, Y, scale=0.7)       # read from the seat
+    _label(p, "arrow_access", Vector((0.32, hu1 - 0.1, zt + 0.0004)), Z, X, Y, scale=0.5)
+    _label(p, "pn_4", Vector((0.48, hu0 + 0.06, zt + 0.0004)), Z, X, Y, scale=0.6)
+    # 7c the layered detail decals (author 6. 10.: SC's fullness is stacked detail decals): scuffs on the edges hands
+    # touch, scratches on the rails and lids, drip streaks under the grilles, service stencils and ids on the panels
+    # (footprints: edge_scuff 0.4 x 0.05 m, scratches 0.3 x 0.3, each fully on one flat face - the placer drops a
+    # decal across an edge or over a raised part)
+    det = [("edge_scuff", (0.5, -0.0779, 0.58), -Y, X, 0.5),
+           ("edge_scuff", (0.62, U0 - 0.0005, 0.398), -Y, X, 0.7), ("edge_scuff", (0.24, U0 - 0.0005, 0.398), -Y, X, 0.7),
+           ("edge_scuff", (0.62, W + 0.0005, 0.398), Y, -X, 0.7),
+           ("scratches", (0.2, 0.42, zt + 0.0004), Z, X, 0.55), ("scratches", (0.95, W + 0.0005, 0.32), Y, -X, 0.45),
+           ("st_inspect", (0.24, U0 - 0.0065, 0.19), -Y, X, 0.7), ("pn_1", (0.1, U0 - 0.0065, DECK - 0.1), -Y, X, 0.7),
+           ("pn_2", (0.5, U0 - 0.0065, DECK - 0.1), -Y, X, 0.7), ("tri_warning", (1.11, TU - 0.0065, 0.5), -Y, X, 0.6),
+           ("warning_label", (0.62, W + 0.0065, 0.22), Y, -X, 0.8), ("st_torque", (0.25, W + 0.0065, 0.33), Y, -X, 0.6),
+           ("corner_mark", (0.9, 0.0, DECK + 0.0065), Z, X, 0.6), ("label_power", (0.94, U0 - 0.0005, 0.22), -Y, X, 0.6)]
+    for item, at, nn, rr, sc_ in det:
+        nn = Vector(nn)
+        up = Z if abs(nn.z) < 0.5 else Y                       # right x up = the normal (a right-handed decal frame)
+        _label(p, item, Vector(at), nn, Vector(rr), up, scale=sc_, is_label=item.startswith(("st_", "pn_", "label_", "warning", "tri_")))
     # light wear along the edges hands and boots touch: the beam's top edges, the pedestal's top edge, the tower's
     # slope and front edges, the kick
     for at, n, up, size in (((0.32, -0.074, AT - 0.019), (0, 0, 1), (0, -1, 0), (0.58, 0.012)),

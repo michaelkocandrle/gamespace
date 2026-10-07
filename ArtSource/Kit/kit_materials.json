@@ -47,12 +47,14 @@
   "Kit_Housing": {"colour": "housing", "roughness": 0.34, "metallic": 0.35, "edge_wear": true, "cavity_dirt": true, "bevel_mm": 3,
                   "micro_rough": 0.04, "grunge": 0.42, "rough_variation": 0.3, "panel_rough": 0.1, "panel_tone": 0.12, "scratches": 0.045,
                   "_why": "a service unit's painted gunmetal, darker and with more sheen than the wall panel (critic 7. 10. 2026, bay wall round 2: the mid-grey matte panel read as plastic beside SC's metallic grey bay)"},
-  "Kit_Frame": {"colour": "frame", "roughness": 0.4, "metallic": 0.4, "edge_wear": true, "cavity_dirt": true, "bevel_mm": 4,
+  "Kit_Frame": {"colour": "frame", "roughness": 0.42, "metallic": 0.55, "edge_wear": true, "cavity_dirt": true, "bevel_mm": 4,
                 "micro_rough": 0.04, "grunge": 0.5, "rough_variation": 0.32, "panel_rough": 0.1, "panel_tone": 0.1, "scratches": 0.07,
+                "bare_colour": [0.78, 0.77, 0.75], "bare_rough": 0.5, "face_wear": 0.9, "face_dirt": 0.0, "grunge_tile_cm": 35, "wear_band_m": [0.0, 1.0],
                 "_why": "the light worn metal frames of the cockpit console concept (Docs/Kit/parts/KF-COCKPIT-CONSOLE, 7. 10. 2026): a scuffed light steel grey with sheen, dark panels set in it - not a white lacquer (critic r6)"},
   "Kit_Console": {"colour": "console", "roughness": 0.42, "metallic": 0.05, "edge_wear": true, "cavity_dirt": true, "bevel_mm": 3,
                   "micro_rough": 0.03, "grunge": 0.34, "rough_variation": 0.18, "panel_rough": 0.08, "panel_tone": 0.1, "scratches": 0.04,
-                  "_why": "the cockpit consoles' body (critic r3 7. 10. 2026: the panel grey 0.19 read near black under the dim cockpit light; SC's consoles are mid grey) - lighter than the panel, darker than the shell"},
+                  "bare_colour": [0.78, 0.77, 0.75], "bare_rough": 0.5, "face_wear": 0.4, "face_dirt": 0.3, "grunge_tile_cm": 35, "wear_band_m": [0.0, 1.0],
+                 "_why": "the cockpit consoles' body (critic r3 7. 10. 2026: the panel grey 0.19 read near black under the dim cockpit light; SC's consoles are mid grey) - lighter than the panel, darker than the shell"},
   "Kit_Red": {"colour": "red", "roughness": 0.38, "metallic": 0.08, "edge_wear": true, "cavity_dirt": true, "bevel_mm": 2,
               "micro_rough": 0.02, "grunge": 0.15, "rough_variation": 0.1, "panel_rough": 0.04, "panel_tone": 0.04, "scratches": 0.02,
               "clear_coat": 0.8, "clear_coat_rough": 0.06,
@@ -65,21 +67,23 @@
  "emissive": {
   "_comment": "Emissive roles of the factory parts (plain master): the L1 foot light's diffuser white with a blue tint (~7500 K), small and bright enough to bloom - not a saturated blue patch.",
   "Kit_GlowFoot": {"colour": [0.82, 0.89, 1.0], "strength": 9.0},
-  "Kit_GlowRed": {"colour": [1.0, 0.12, 0.09], "strength": 1.6}
+  "Kit_GlowRed": {"colour": [1.0, 0.12, 0.09], "strength": 1.6},
+  "Kit_GlowKey": {"colour": [0.92, 0.95, 1.0], "strength": 14.0},
+  "Kit_GlowAmber": {"colour": [1.0, 0.55, 0.12], "strength": 14.0}
  },
  "makers": {
   "Halcyon": {
    "_comment": "Halcyon Freightworks (part.md KF-PORTAL-01 step 1b, author 6. 10. 2026: the frame all cream lacquer). Wear: a maintained working ship - dirt in the seams, edge wear only at hand and shoulder height, the walked line; no overall wear. edge_wear 1.0 / threshold 0.15: at 0.8 / 0.35 the 4 mm worn bevels did not show (board round 2).",
    "palette": {"lacquer": [0.7, 0.66, 0.58], "graphite": [0.06, 0.058, 0.056], "rubber": [0.04, 0.04, 0.042], "tread": [0.072, 0.07, 0.067],
                "signal": [0.85, 0.34, 0.06], "bare_metal": [0.5, 0.5, 0.52], "dirt": [0.05, 0.045, 0.04],
-               "panel": [0.19, 0.186, 0.18], "perf": [0.05, 0.05, 0.052], "red": [0.42, 0.025, 0.02], "shell": [0.46, 0.465, 0.47], "housing": [0.105, 0.104, 0.102], "console": [0.31, 0.305, 0.295], "frame": [0.25, 0.248, 0.242]},
+               "panel": [0.19, 0.186, 0.18], "perf": [0.05, 0.05, 0.052], "red": [0.42, 0.025, 0.02], "shell": [0.46, 0.465, 0.47], "housing": [0.105, 0.104, 0.102], "console": [0.31, 0.305, 0.295], "frame": [0.36, 0.355, 0.345]},
    "wear": {"cavity_dirt": 0.45, "edge_wear": 1.0, "edge_threshold": 0.15, "walked": 0.7, "walk_half_width_m": 0.25, "walk_roughness": 0.4}
   },
   "Kestrel": {
    "_comment": "Kestrel Dynamics (kit-design.md proposal, not approved): a light grey-white lacquer, dark gunmetal, a blue accent; cleaner than Halcyon.",
    "palette": {"lacquer": [0.62, 0.64, 0.66], "graphite": [0.06, 0.063, 0.068], "rubber": [0.038, 0.039, 0.042], "tread": [0.074, 0.077, 0.082],
                "signal": [0.12, 0.35, 0.8], "bare_metal": [0.52, 0.53, 0.55], "dirt": [0.045, 0.045, 0.045],
-               "panel": [0.19, 0.192, 0.196], "perf": [0.048, 0.05, 0.053], "red": [0.42, 0.025, 0.02], "shell": [0.46, 0.465, 0.47], "housing": [0.105, 0.104, 0.102], "console": [0.31, 0.313, 0.318], "frame": [0.25, 0.252, 0.256]},
+               "panel": [0.19, 0.192, 0.196], "perf": [0.048, 0.05, 0.053], "red": [0.42, 0.025, 0.02], "shell": [0.46, 0.465, 0.47], "housing": [0.105, 0.104, 0.102], "console": [0.31, 0.313, 0.318], "frame": [0.36, 0.362, 0.366]},
    "wear": {"cavity_dirt": 0.25, "edge_wear": 0.5, "edge_threshold": 0.3, "walked": 0.35, "walk_half_width_m": 0.25, "walk_roughness": 0.35}
   }
  }

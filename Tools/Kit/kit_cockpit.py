@@ -55,7 +55,7 @@ def _rr(w, d, r, n=4):
 
 
 # ------------------------------------------------------------------ the stick (SC's: a chrome ball on a hatched base)
-def stick(p, base, label):
+def stick(p, base, label, head_role="Kit_Shell", guard="c"):
     Z, X, Y = Vector((0, 0, 1)), Vector((1, 0, 0)), Vector((0, 1, 0))
     # the base: a housing-grey plate with an 8 mm rounded edge, four screws, a dark well, the hatch ring, a satin collar
     # (sunk into the arm unit, flush: it overhung the arm's edge - critic r1)
@@ -99,9 +99,9 @@ def stick(p, base, label):
     # the grey head: a rounded block, the front plate down the grip
     head = g0 + lean * (gl + 0.012)
     m = frame(head, fwd, sd, lean)
-    p.box("Kit_Shell", (-0.026, -0.021, -0.012), (0.024, 0.021, 0.014), bevel=0.009, segments=4, m=m)
+    p.box(head_role, (-0.026, -0.021, -0.012), (0.024, 0.021, 0.014), bevel=0.009, segments=4, m=m)
     mf = frame(g0 + lean * 0.05 + fwd * 0.022, sd, lean, fwd)
-    p.box("Kit_Shell", (-0.011, -0.04, -0.003), (0.011, 0.04, 0.003), bevel=0.0025, segments=3, m=mf)
+    p.box(head_role, (-0.011, -0.04, -0.003), (0.011, 0.04, 0.003), bevel=0.0025, segments=3, m=mf)
     # on the head: two hats (a cross on a collar), a red button with a collar, on the thumb side a castle button
     for off, kind in ((-0.012, "hat"), (0.01, "hat"), (0.0, "red")):
         c = head + lean * 0.0145 + fwd * off + sd * (0.0 if kind == "hat" else -0.011)
@@ -121,11 +121,20 @@ def stick(p, base, label):
     p.sweep("Kit_Graphite", tr, 0.0062, seg=10, scale_y=0.55)
     # the silver C-guard over the head: two flat bars and a bridge, smooth (36 steps)
     path = []
-    for k in range(37):
-        a = math.pi * k / 36
-        path.append(head + lean * (0.004 + 0.034 * math.sin(a)) + fwd * (-0.036 * math.cos(a) + 0.004))
-    path.append(path[-1] - lean * 0.04)
-    p.sweep("Kit_Lip", path, 0.0075, seg=12, scale_y=0.6)                # one flat bar, 15 x 9 mm (wires read as a tangle)
+    if guard == "d":
+        # variant B (the concept): a flat brushed bar close along the grip's front, from the head down to the collar,
+        # not over the head
+        for k in range(13):
+            t = k / 12
+            bow = 0.012 * math.sin(math.pi * t)
+            path.append(head + fwd * (0.03 + bow) + lean * (0.004 - (gl + 0.006) * t))
+        p.sweep("Kit_Frame", path, 0.0075, seg=12, scale_y=0.55)
+    else:
+        for k in range(37):
+            a = math.pi * k / 36
+            path.append(head + lean * (0.004 + 0.034 * math.sin(a)) + fwd * (-0.036 * math.cos(a) + 0.004))
+        path.append(path[-1] - lean * 0.04)
+        p.sweep("Kit_Lip", path, 0.0075, seg=12, scale_y=0.6)            # one flat bar, 15 x 9 mm (wires read as a tangle)
     for e in (path[1], path[-1]):                                         # its two pins into the head
         p.lathe("Kit_Graphite", [(0.0045, -0.004), (0.0045, 0.004), (0.0, 0.0045)], tuple(e), axis=tuple(sd), seg=12)
     _label(p, label, base + Vector((-0.062, 0.0, 0.0005)), Z, Vector((0, -1, 0)), X, scale=0.45)

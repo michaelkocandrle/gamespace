@@ -429,14 +429,16 @@ def factory_material_spec(role, maker, data=None):
     data = data or json.load(open(FACTORY_MATS, encoding="utf-8"))
     r, m = data["roles"][role], data["makers"][maker]
     pal, w = m["palette"], m["wear"]
-    lo, hi = data["limits"]["hand_band_m"]
+    # the hand band (0.9-1.6 m: a wall's) unless the role says where hands touch it - the cockpit roles from the floor
+    # up to 1 m (7. 10. 2026: the console stands under 0.7 m, so its edges never wore at all)
+    lo, hi = r.get("wear_band_m", data["limits"]["hand_band_m"])
     colour = r["albedo"] if "albedo" in r else pal[r["colour"]]
     walked = bool(r.get("walked"))
     scalars = dict(SURFACE)
     scalars.update({
         "PrimaryRoughness": r["roughness"], "SecondaryRoughness": r["roughness"] + 0.03, "PaintMetallic": r["metallic"],
         "EdgeWear": w["edge_wear"] if r.get("edge_wear") else 0.0, "WearThreshold": w.get("edge_threshold", 0.35),
-        "BareMetalRoughness": w["walk_roughness"] if walked else 0.32,
+        "BareMetalRoughness": w["walk_roughness"] if walked else r.get("bare_rough", 0.32),
         "WearBandOn": 1.0, "WearBandLo": lo * 100.0, "WearBandHi": hi * 100.0, "ScratchBandOn": 1.0,
         "WalkWear": w["walked"] if walked else 0.0, "WalkHalfCm": w["walk_half_width_m"] * 100.0,
         "DirtAmount": w["cavity_dirt"] if r.get("cavity_dirt") else 0.0, "GrungeAmount": r.get("grunge", 0.05),
@@ -445,11 +447,16 @@ def factory_material_spec(role, maker, data=None):
         "ScratchAmount": r.get("scratches", 0.0), "Brushed": 0.0,      # polished, not brushed (board round 1)
         "CavityStrength": 0.0, "AOStrength": 0.0, "MetalShare": 0.0, "CarbonShare": 0.0, "LiveryAmount": 0.0,
         "ClearCoat": r.get("clear_coat", 0.0), "ClearCoatRoughness": r.get("clear_coat_rough", 0.08),
-        "FloorWear": 0.0, "TopWear": 0.0, "PanelDirtVar": 0.0, "DetailNormalStrength": 0.0})
+        "FloorWear": 0.0, "TopWear": 0.0, "PanelDirtVar": 0.0, "DetailNormalStrength": 0.0,
+        "FaceWear": r.get("face_wear", 0.0), "FaceDirt": r.get("face_dirt", 0.0)})
+    if r.get("grunge_tile_cm"):                  # a small part's own grunge scale (120 cm drew nothing on a console)
+        scalars["GrungeTileCm"] = r["grunge_tile_cm"]
     if r.get("detail_normal"):
         scalars.update({"DetailTileCm": r["detail_tile_cm"], "DetailNormalStrength": r["detail_strength"]})
     # the walked line: the lanes' own colour a little lighter and smoother - polished by boots, not a stain
-    bare = [c * 1.3 for c in colour] if walked else pal["bare_metal"]
+    # a role's own scuffed metal (bare_colour, bare_rough): a smooth dark metal mirrored the dark room and the scuffs
+    # read as black burns on the cockpit console (7. 10. 2026)
+    bare = [c * 1.3 for c in colour] if walked else r.get("bare_colour", pal["bare_metal"])
     return {"master": "kitbase", "switches": {"SurfaceDetail": True},
             "vectors": {"PrimaryColor": colour, "SecondaryColor": [c * 0.9 for c in colour], "BareMetalColor": bare,
                         "DirtColor": pal["dirt"]},

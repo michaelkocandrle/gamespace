@@ -980,7 +980,7 @@ return float4(g, ao, saturate(dirt), saturate(wear));
 # 5 cm ends; the walked line on up-facing faces at the floor within WalkHalfCm of the part's centre line (run parts:
 # y = 0 on the corridor's axis), broken by the grunge - worn through to the bare metal, a line, not the whole floor.
 _KIT_WEAR_PARAMS = (("WearBandOn", 0.0), ("WearBandLo", 90.0), ("WearBandHi", 160.0), ("WalkWear", 0.0),
-                    ("WalkHalfCm", 25.0), ("ScratchBandOn", 0.0))
+                    ("WalkHalfCm", 25.0), ("ScratchBandOn", 0.0), ("FaceWear", 0.0), ("FaceDirt", 0.0))
 # The kit's micro detail: the scratches (G) only in the hand band when ScratchBandOn (the author, board round 2:
 # scratches on whole walls read as dirt; hands scratch where hands go).
 _KIT_MICRO_NODE = """float4 t = float4(Texture2DSample(TexM, TexMSampler, UV / max(Tile * 0.01, 0.01)).rgb, 0.0);
@@ -993,6 +993,12 @@ float walk = saturate((n.z - 0.9) * 10.0) * saturate((6.0 - LocalPos.z) / 4.0)
            * saturate((WalkHalfCm - abs(LocalPos.y)) / max(WalkHalfCm * 0.5, 1.0));
 // soft, not patchy: the grunge only shades it (the walked line read as dark blotches, test section round 2)
 wear = max(wear, walk * (0.7 + 0.3 * g) * WalkWear);
+// FaceWear / FaceDirt (7. 10. 2026, cockpit console: the masks above only wear the chamfers and dirty the seams, a
+// flat face stayed factory clean): scuffs worn through to the bare metal in the fine grunge where the coarse grunge
+// is high - patches broken into specks, in the hand band; a blotchy film of dirt over the faces
+float scuff = saturate((g2 - (1.0 - 0.6 * FaceWear)) * 6.0) * saturate((g1 - 0.3) * 3.0) * saturate(FaceWear * 4.0);
+wear = max(wear, scuff * lerp(1.0, band, WearBandOn));
+dirt = max(dirt, saturate((g1 - 0.45) * 2.5) * FaceDirt);
 return float4(g, ao, saturate(dirt), saturate(wear));"""
 
 # T_Ship_Micro (generate_detail_textures.py) on UV0 in metres: R brushing, G micro-scratches, B fine roughness noise.

@@ -9955,22 +9955,22 @@
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_Console12W_B.fbx",
    "dims_m": [
     1.29,
-    0.756,
-    0.73
+    0.759,
+    0.71
    ],
    "expected_size_cm": [
     129.0,
-    75.6,
-    73.0
+    75.9,
+    71.0
    ],
-   "tris": 24196,
-   "tris_decals": 500,
+   "tris": 25340,
+   "tris_decals": 628,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
+    "Kit_Seal",
     "Kit_GlowCool",
     "Kit_GlowSignal",
-    "Kit_GlowNeutral",
     "Kit_Lip",
     "Kit_Graphite",
     "Kit_Gasket",
@@ -9980,13 +9980,15 @@
     "Kit_Shell",
     "Kit_Housing",
     "Kit_Frame",
+    "Kit_GlowKey",
+    "Kit_GlowAmber",
     "Kit_DecalPaint",
     "Kit_DecalGrime",
     "Kit_DecalWear"
    ],
    "sockets": {},
    "collision_hulls": 1,
-   "decals": 19,
+   "decals": 38,
    "decal_items": [
     "panel_C21",
     "maker",
@@ -9996,6 +9998,25 @@
     "ck_batt",
     "ck_temp",
     "ck_emerg_o2",
+    "ck_pwr",
+    "ck_extlt",
+    "ck_eng",
+    "st_service",
+    "arrow_access",
+    "pn_4",
+    "edge_scuff",
+    "edge_scuff",
+    "edge_scuff",
+    "scratches",
+    "scratches",
+    "st_inspect",
+    "pn_1",
+    "pn_2",
+    "tri_warning",
+    "warning_label",
+    "st_torque",
+    "corner_mark",
+    "label_power",
     "grime_rim",
     "grime_rim",
     "grime_rim",
@@ -10008,10 +10029,15 @@
     "grime_rim",
     "grime_rim"
    ],
-   "service_labels": [],
+   "service_labels": [
+    "label_power",
+    "st_inspect",
+    "st_service",
+    "st_torque"
+   ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 15702,
+    "edge": 16722,
     "secondary": 0,
     "floor": 4030,
     "seam": 0
