@@ -14,6 +14,7 @@ Brána `step` (průměr ≥ 6,5, žádná kategorie pod 6). Hodnotí se jen lev�
 | 3 | v4 | 5,3 | silueta kvádru, tělo téměř černé, legendy nečitelné, C-lučík jako dráty |
 | 4 | v5 | 5,5 | silueta pořád kvádr, legendy, opotřebení laku není vidět, prázdné desky, slabé podsvícení |
 | 5 | v6 | 5,6 | stavový pás opravený; dál silueta, opotřebení, holé plochy modulů, legendy kláves, logo, ploché světlo |
+| 6 | v6 v testovacím úseku | 5,0 | neutrální světlo odkrylo „bílý čistý plast“: materiály 4, holé plochy, silueta, lučík, legendy |
 
 ## Co se změnilo
 
@@ -49,3 +50,19 @@ To nejsou vady jednoho dílu, ale systému (paměť `critic-systemic-not-local`)
 6. C-lučík s plochou stranou a viditelnými čepy (doporučeno).
 
 Listy a review.json: `2026-10-07_kf_cockpit_console_r2` … `_r4`.
+
+## Kolo 6: hodnocení jako terminál (neutrální světlo, úhly referencí)
+
+Preset `Tools/Shots/kit_cockpit_console_studio.json` (konzole v testovacím úseku kitu, záběry jako `konzole_3`,
+`kreslo_1`, `konzole_1`, `kreslo_2`). FBX zrcadlí osu y: strana pilota je v úseku na +y. Kritik 5,0 FAIL.
+
+**Zjištění:** tmavé světlo kokpitu skrývalo hlavní vadu – materiály. V neutrálním světle je loketní jednotka
+(`Kit_Shell`, albedo 0,46) skoro bílá a matná, tělo (`Kit_Console` 0,31) světlé a čisté, bez oděru a špíny.
+Albeda rolí továrny jsme v kokpitu zvedali, aby nebyly černé – tím jsme kompenzovali světlo materiálem. Správně
+je to obráceně: albeda podle SC (kritik: loketní jednotka ~0,45–0,50 sRGB, tělo ~0,30 sRGB, patka ~0,12 sRGB,
+tj. lineárně ~0,18 / 0,07 / 0,014), clear coat, šum drsnosti, oděr na kontaktních hranách – a jas kokpitu
+dorovnat světlem kokpitu (systémový krok 3).
+
+**Další krok:** kalibrace albed a opotřebení rolí továrny v neutrálním světle úseku proti referencím (měřit
+pixely SC vs. naše na stejném typu plochy), pak tvar (silueta, holé plochy, lučík) a emisivní legendy; kokpit
+se pak dosvítí.

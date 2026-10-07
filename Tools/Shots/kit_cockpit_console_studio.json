@@ -1,0 +1,130 @@
+{
+ "_comment": "KF-COCKPIT-CONSOLE judged like the engineering terminal (author 7. 10. 2026, step 1 after the critic stalled at 5.6 in the dim cockpit): the part alone in the kit test section under its neutral light, the angles of the SC etalon (konzole_3 3/4 over the arm, kreslo_1 from the front, the control block close, the stick close, the gap under the arm from the pilot's side, the top). Console origin (22.9, -500.1), length +x; the FBX mirrors y, so the pilot side is +y (y -500.03) and the outboard -500.77. Run -Editor -Width 2560 -Height 1440.",
+ "shots": [
+  {
+   "name": "warmup",
+   "camera": "free",
+   "hud": 0,
+   "settle": 8.0,
+   "camera_location": [
+    20.45,
+    -500.0,
+    1.65
+   ],
+   "camera_look_at": [
+    25.0,
+    -500.0,
+    1.45
+   ],
+   "fov": 90,
+   "console": [
+    "r.GPUStatsEnabled 1",
+    "stat none",
+    "r.MegaLights.EnableForProject 1",
+    "space.InteriorLighting 1"
+   ]
+  },
+  {
+   "name": "1_ref34",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    24.75,
+    -499.55,
+    1.35
+   ],
+   "camera_look_at": [
+    23.6,
+    -500.3,
+    0.55
+   ],
+   "fov": 60
+  },
+  {
+   "name": "2_front",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    24.95,
+    -500.25,
+    1.25
+   ],
+   "camera_look_at": [
+    23.4,
+    -500.35,
+    0.5
+   ],
+   "fov": 55
+  },
+  {
+   "name": "3_face_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    24.5,
+    -500.05,
+    0.95
+   ],
+   "camera_look_at": [
+    24.0,
+    -500.45,
+    0.55
+   ],
+   "fov": 42
+  },
+  {
+   "name": "4_stick_close",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    24.05,
+    -499.75,
+    1.0
+   ],
+   "camera_look_at": [
+    23.7,
+    -500.08,
+    0.78
+   ],
+   "fov": 40
+  },
+  {
+   "name": "5_side_gap",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    23.45,
+    -499.35,
+    0.66
+   ],
+   "camera_look_at": [
+    23.45,
+    -500.3,
+    0.56
+   ],
+   "fov": 55
+  },
+  {
+   "name": "6_top",
+   "camera": "free",
+   "hud": 0,
+   "settle": 2.0,
+   "camera_location": [
+    23.5,
+    -499.8,
+    1.65
+   ],
+   "camera_look_at": [
+    23.5,
+    -500.35,
+    0.5
+   ],
+   "fov": 55
+  }
+ ]
+}
