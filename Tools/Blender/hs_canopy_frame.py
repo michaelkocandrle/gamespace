@@ -107,6 +107,13 @@ def build(g, ship, eye, spec):
             c = p + w * cover + inn * 0.004
             return [c, c + w * seal, c + w * seal + inn * 0.01, c + inn * 0.01]
         _prism(g["int_rubber"], a, b, seal_section(a), seal_section(b))
+        # (author 8. 10.: light from lines, not flat brightness) a cool light line on the cockpit face, between the
+        # screws and the hull side, 1 mm proud
+        if spec.get("glow_line", True):
+            def glow_section(p):
+                c = p + w * (cover - chamfer - lip - 0.022) + inn * (depth + 0.001)
+                return [c, c - w * 0.006, c - w * 0.006 + inn * 0.0015, c + inn * 0.0015]
+            _prism(g["int_glow_soft"], a2, b2, glow_section(a2), glow_section(b2))
         # screws along the cockpit face, carried on along the edges so the pitch stays even round the corners
         length = (b - a).length
         s = pitch - carry
@@ -164,6 +171,12 @@ def build(g, ship, eye, spec):
             c = p + w * (lip / 2) + inn * (cdepth + 0.001)
             return [c, c - w * lip, c - w * lip + inn * 0.006, c + inn * 0.006]
         _prism(g["int_cream"], a2, b2, clip(a2), clip(b2))
+        if spec.get("glow_line", True):
+            for side in (-1, 1):                # a light line either side of the bow's lip
+                def gclip(p, side=side):
+                    c = p + w * (side * (lip / 2 + 0.004)) + inn * (cdepth + 0.001)
+                    return [c, c + w * (side * 0.004), c + w * (side * 0.004) + inn * 0.0015, c + inn * 0.0015]
+                _prism(g["int_glow_soft"], a2, b2, gclip(a2), gclip(b2))
         length = (b - a).length
         k = int(length / pitch)
         for j in range(k):
