@@ -30,7 +30,10 @@ Brána `step` (průměr ≥ 6,5, žádná kategorie pod 6). Hodnotí se jen lev�
 | 34 | B | 7,8 | prošitá kůže se zrnem a leskem, tónové kroky rám : poklop : kůže, čísla panelů 1/2/3; materiály, čitelnost, geometrie 8 |
 | 35–38 | B | 7,9 | celý bok v záběru 5, druhá vrstva panelů (západka, lišty, typový štítek), světlá pata nad nízkým soklem, štítky poklopu a bloku; Světlo drží 7 |
 | 39 | B | **8,0 PASS, cíl splněn** | emise nepřepálená do bílé, tmavý rámeček, světlé saténové hrany místo leštěného kovu; všech 8 kategorií 8 |
-| 40 | B | – | ladění za 8: sytější modrá, klidná světlá deska v mezeře, užší hrany žeber |
+| 40 | B | **8,0 PASS** | ladění za 8: sytější modrá, klidná světlá deska v mezeře, žebra čtou jako vystouplý díl |
+
+**Otevřené (kolo 40, doporučeno):** tmavý proužek pod difuzorem (spodek nosníku světlým saténem), sytější modrá
+z čelního pohledu (0,20; 0,55; 1,0), pruh lesku na kůži (klenba 10 mm napříč), tónový krok 45° paty, mikrořádky ≥ 6,8 mm.
 
 ## Systémové nálezy kol 32–39 (8. 10. 2026)
 

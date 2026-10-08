@@ -1,0 +1,39 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 40,
+ "variant": "B",
+ "date": "2026-10-08",
+ "verdict": "PASS",
+ "gate": "step",
+ "note": "Autor 8. 10.: díly jsou nové z výroby, opotřebení se nehodnotí ani nežádá. Jas úseku se nehodnotí, tóny relativně. Díl nemá vlastní světla, pásek v mezeře a na čele nosníku jen jako emisní akcent. Souřadnice v pixelech zobrazeného listu 2000x611 (originál x1,28); tóny změřené jako průměr sRGB 0-1 z JPG listu, stejné oblasti jako r39.",
+ "first_impression": "Čistá nová konzole Halcyon s modřejším akcentem na čele nosníku, světlejší deskou v mezeře a žebry poklopu, která už čtou jako vystouplý díl; strop 8 drží kůže bez lesku, tmavý proužek pod difuzorem, pata bez tónového kroku a mikrořádky.",
+ "scores": {
+  "silueta_a_tvar": {"score": 8, "why": "Skladba nosník-konzoly-mezera-podstavec-věž čte celá, obrys nosníku z boku čistý (list 5 vpravo 1160-1560,150-215); beze změny."},
+  "hierarchie_a_hustota_detailu": {"score": 8, "why": "Žebra poklopu mají světlou horní hranu a tmavý bok (list 6 vpravo řez y 240: 0,54/0,91/0,61 pak 0,25/0,17 proti poli 0,35) – čtou jako vystouplý díl; pata pod lištou stále bez tónového kroku (0,40 nad vs 0,43 pod)."},
+  "materialy": {"score": 8, "why": "Lak / grafit / kůže / satén v jasných krocích, deska v mezeře rovná bez pomerančové kůry (list 1 vpravo svislý profil 355-380 plynulý gradient 0,28->0,63); kůže ze záběru 1 a 2 stále bez pruhu lesku (sloupcový profil 0,265-0,337 jen pozvolný gradient)."},
+  "decaly": {"score": 8, "why": "Systém světlých štítků jednotný (HATCH A / HF-HT 04, COOLANT 12 BAR, HC-12W, PWR 48V DC, HF-AR 01); SN 0417-B a TORQUE 42 Nm pořád pod 3,5 px."},
+  "svetlo": {"score": 8, "why": "Akcent na čele nosníku modřejší (list 1 vpravo 1365-1420,329-337 průměr 0,50/0,55/0,57, R/B 0,88, vrchol 0,75/0,85/0,90 bez klipu), z boku chladný (list 5 0,40/0,45/0,49); pod pásem ale dál tmavý proužek ~11 px (341-352 průměr 0,21) a z čelního záběru 2 pás čte neutrálně (0,39/0,39/0,39)."},
+  "citelnost": {"score": 8, "why": "COOLANT 12 BAR, OPEN, HATCH A, HF-HT 04, HF-3287 L ARM, LIGHTS/GEAR/VTOL, HF-ST 02 čtou; SN/TORQUE mikrořádky pod 3,5 px."},
+  "chyby_geometrie": {"score": 8, "why": "Bez děr, průniků a plovoucích dílů; difuzor na čele navazuje čistě (list 1 vpravo 1340-1450,325-340), žebra s boky bez artefaktů."},
+  "soulad_stylu": {"score": 8, "why": "Světlý satén na liště paty a deska v mezeře, Kit_GlowStrip a jedna oranžová drží jednu řeč kitu."}
+ },
+ "average": 8.0,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "concept_match": {
+  "layout_percent": 91,
+  "look_percent": 94,
+  "summary": "Žebra poklopu dotažena (světlá hrana + tmavý bok), akcent modřejší, deska v mezeře světlejší a rovná. Zbývá tmavý proužek pod difuzorem, sytost akcentu z čelního pohledu, lesk kůže, tónový krok paty a mikrořádky."
+ },
+ "r39_followup": [
+  {"r39": 1, "title": "Akcent na čele nosníku příliš bledý", "status": "částečně", "detail": "List 1 vpravo 1365-1420,329-337: průměr 0,50/0,55/0,57 (r39 0,55/0,57/0,59), R/B 0,88 (r39 0,93, cíl <= 0,80), B-R 0,07 (cíl >= 0,15); vrchol pásu 0,75/0,85/0,90 (R/B 0,83) bez klipu. Na listu 2 vpravo 1310-1450,322-332 průměr 0,39/0,39/0,39 – z čelního pohledu pořád neutrální."},
+  {"r39": 2, "title": "Deska pod nosníkem: tmavý proužek a zrnitý šum", "status": "částečně", "detail": "Průměr mezery 1350-1440,350-385 je 0,45 (r39 0,35, cíl >= 0,38) a svislý profil je plynulý gradient bez zrna (pomerančová kůra pryč). Tmavý proužek pod difuzorem zůstal: 1365-1420,341-352 průměr 0,21 (r39 0,15), ~11 px; std oblasti 0,16 teď dělá gradient + proužek, ne šum."},
+  {"r39": 6, "title": "Satén žeber čte jako bílá kresba", "status": "opraveno", "detail": "List 6 vpravo řez y 240: horní hrana 0,91, hned vedle tmavý bok 0,17-0,25 (2-3 px), pole 0,35 – žebro má světlo/stín a čte jako vystouplý díl, ne čára. Max 0,91 je nad cílem 0,80, ale proti HATCH A (0,80 průměr) už nesplývá díky tmavému boku."}
+ ],
+ "findings": [
+  {"n": 1, "title": "Tmavý proužek pod difuzorem na čele nosníku", "where": "list 1 vpravo 1365-1420,341-352; list 4 vpravo 1180-1500,560-600", "problem": "Pod chladným pásem je ~11 px pás 0,21 – stín spodní hrany nosníku / spodní plocha v grafitu; mezera z pilotního pohledu má pořád černou čáru mezi akcentem a světlou deskou.", "severity": "doporučeno", "fix": "Spodní plochu nosníku a vnitřní líc konzol v mezeře lakovat světlým saténem albedo 0,6 (ne grafit), případně difuzor protáhnout 3 mm pod spodní hranu (zaoblená hrana 3 mm, emisní i na spodní straně). Cíl: list 1 vpravo 1365-1420,341-352 průměr >= 0,32."},
+  {"n": 2, "title": "Akcent z čelního pohledu neutrální", "where": "list 1 vpravo 1365-1420,329-337; list 2 vpravo 1310-1450,322-332", "problem": "Ze záběru 1 R/B 0,88, ze záběru 2 0,39/0,39/0,39 – akcent tam čte jako šedá linka; modrou nese jen vrchol pásu.", "severity": "doporučeno", "fix": "Kit_GlowStrip na čele (0,20, 0,55, 1,0) x6 a albedo základu difuzoru 0,03 (žádná šedá pod emisí); šířku difuzoru 11 -> 14 mm, aby z čelního pohledu měl >= 4 px. Cíl: list 1 R/B <= 0,80 a B-R >= 0,15; list 2 B-R >= 0,08."},
+  {"n": 3, "title": "Kůže na střední vzdálenost bez pruhu lesku", "where": "list 1 vpravo 1300-1410,255-320; list 2 vpravo 1320-1445,195-300", "problem": "Sloupcový profil 0,265-0,337 jen pozvolný gradient, řádkový 0,25-0,29; polštář ze záběrů 1 a 2 čte jako matná deska.", "severity": "doporučeno", "fix": "Vyklenutí středu na 10 mm jako válcová křivka napříč, drsnost středu 0,22 / okraj 0,45, albedo kůže 0,03. Cíl: na listu 1 pruh napříč polštářem o >= 0,06 světlejší než okolí."},
+  {"n": 4, "title": "Pata bez tónového kroku proti boku", "where": "list 5 vpravo 1660-1860,461-466 vs 477-495", "problem": "Nad lištou 0,40, pod ní 0,43 – pata čte jen jako světlá čára (lišta 0,66), ne jako samostatný díl.", "severity": "doporučeno", "fix": "Šikmou plochu paty lakovat albedo 0,30 (tmavší šedý lak) nebo 0,65; výstražné pásky nechat. Cíl: krok bok/pata >= 0,06 sRGB na listu 5."},
+  {"n": 5, "title": "Mikrořádky SN a TORQUE pod 3,5 px", "where": "list 5 vpravo 1545-1585,398-404 (SN 0417-B); list 3 vpravo 1385-1425,295-310 (TORQUE 42 Nm)", "problem": "Druhé řádky štítků jsou šum, kdežto HF-HT 04 a HC-12W čtou.", "severity": "doporučeno", "fix": "Text 6,8 mm, tah 0,9 mm na SN 0417-B i TORQUE 42 Nm, případně štítek HC-12W 120 x 66 mm. Cíl: >= 3,5 px na listech 3 a 5."}
+ ]
+}
