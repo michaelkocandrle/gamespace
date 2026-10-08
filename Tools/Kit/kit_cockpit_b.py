@@ -151,10 +151,18 @@ def console_b(name, seed):
     for k in range(6):
         screw(p, Vector((0.06 + k * 0.1, -0.0758, BEAM0 + 0.017)), -Y, 0.003)
     for xa, xb in ((0.035, 0.312), (0.318, 0.595)):
-        p.box("Kit_Gasket", (xa, -0.062, AT - 0.022), (xb, 0.142, AT), bevel=0.013, segments=4)
-        for a_, b_ in (((xa + 0.018, -0.045), (xb - 0.018, -0.0435)), ((xa + 0.018, 0.1235), (xb - 0.018, 0.125)),
-                       ((xa + 0.018, -0.045), (xa + 0.0195, 0.125)), ((xb - 0.0195, -0.045), (xb - 0.018, 0.125))):
-            p.box("Kit_Seal", (a_[0], a_[1], AT - 0.0004), (b_[0], b_[1], AT + 0.0003), panel=False)          # the stitching
+        p.box("Kit_Leather", (xa, -0.062, AT - 0.022), (xb, 0.142, AT), bevel=0.013, segments=4)
+        sx0, sx1, su0, su1 = xa + 0.017, xb - 0.017, -0.045, 0.125          # the stitching: 4 mm stitches, 2 mm apart
+        for (p0, p1) in (((sx0, su0), (sx1, su0)), ((sx0, su1), (sx1, su1)), ((sx0, su0), (sx0, su1)), ((sx1, su0), (sx1, su1))):
+            ln = ((p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2) ** 0.5
+            k = 0
+            while k * 0.006 + 0.004 <= ln:
+                t0, t1 = k * 0.006 / ln, (k * 0.006 + 0.004) / ln
+                a0 = (p0[0] + (p1[0] - p0[0]) * t0, p0[1] + (p1[1] - p0[1]) * t0)
+                a1 = (p0[0] + (p1[0] - p0[0]) * t1, p0[1] + (p1[1] - p0[1]) * t1)
+                p.box("Kit_Housing", (min(a0[0], a1[0]) - 0.0006, min(a0[1], a1[1]) - 0.0006, AT - 0.0003),
+                      (max(a0[0], a1[0]) + 0.0006, max(a0[1], a1[1]) + 0.0006, AT + 0.0004), panel=False)
+                k += 1
         for i in range(int((xb - xa - 0.03) / 0.011)):
             for j in range(15):
                 hx, hu = xa + 0.035 + i * 0.011, -0.03 + j * 0.0105 + (0.0052 if i % 2 else 0.0)
@@ -162,6 +170,10 @@ def console_b(name, seed):
                     continue
                 p.box("Kit_Seal", (hx - 0.0015, hu - 0.0015, AT - 0.0004), (hx + 0.0015, hu + 0.0015, AT + 0.0002), panel=False)
     _label(p, "maker", Vector((0.445, -0.0796, BEAM0 + 0.045)), -Y, X, Z, scale=0.3)
+    for k, gl in enumerate(("Kit_GlowCool", "Kit_GlowCool", "Kit_GlowAmber")):      # status LEDs on the beam's front end
+        uu = -0.03 + k * 0.025
+        p.lathe("Kit_Lip", [(0.0045, 0.0), (0.0045, 0.0012), (0.0032, 0.0014)], (0.63, uu, AT - 0.05), axis=(1, 0, 0), seg=16)
+        p.lathe(gl, [(0.003, 0.0), (0.003, 0.0012), (0.002, 0.0024), (0.0, 0.0028)], (0.6312, uu, AT - 0.05), axis=(1, 0, 0), seg=16)
     _label(p, "st_hfcl", Vector((0.18, -0.0796, BEAM0 + 0.045)), -Y, X, Z, scale=0.5)
     for k in range(2):                                         # Halcyon's mark: two slanted orange bars, 30 mm
         x_ = 0.335 + k * 0.016
@@ -250,7 +262,8 @@ def console_b(name, seed):
         _rocker(p, q, r, a, nf, lab, label_scale=0)
         legend(p, {"ck_pwr": "PWR", "ck_extlt": "EXT LT", "ck_eng": "ENG"}[lab], q - a * 0.034 + nf * 0.0002, r, a, nf, h=0.008)
         p.box("Kit_Lip", (-0.0095, 0.0195, 0.0015), (0.0095, 0.028, 0.0026), bevel=0.0006, segments=1, m=ff(q), panel=False)
-        p.box("Kit_GlowKey", (-0.0075, 0.021, 0.0026), (0.0075, 0.0265, 0.0032), m=ff(q), panel=False)
+        p.lathe("Kit_GlowKey", [(0.0028, 0.0), (0.0028, 0.0006), (0.002, 0.0016), (0.0, 0.002)], tuple(ff(q) @ Vector((0.0, 0.0238, 0.0026))),
+                axis=tuple(nf), seg=16)
     for su in (-1, 1):
         for sv in (-1, 1):
             screw(p, fc + r * (su * (w2 - 0.012)) + a * (sv * (h2 - 0.012)) + nf * 0.002, nf)
@@ -264,6 +277,15 @@ def console_b(name, seed):
             side_prism(p, "Kit_Inset", ins, uf - 0.002, uf + 0.004, 0.002, 1)
         for xx, zz in ((1.015, DECK + 0.035), (L - 0.055, DECK + 0.035), (L - 0.055, 0.665), (1.015, 0.52)):
             screw(p, Vector((xx, uf + ns_ * 0.0045, zz)), Y * ns_)
+    # the tower's seat-side inset (the biggest face the pilot sees): a polished-frame plate, a row of vent slots, stencils
+    uf_ = TU - 0.0045
+    p.box("Kit_Lip", (1.03, uf_ - 0.0012, 0.535), (1.072, uf_ + 0.001, 0.561), bevel=0.0006, segments=1, panel=False)
+    p.box("Kit_Graphite", (1.033, uf_ - 0.0016, 0.538), (1.069, uf_ - 0.0011, 0.558), panel=False)
+    legend(p, "HF-3287", Vector((1.051, uf_ - 0.0016, 0.551)), X, Z, -Y, h=0.0045)
+    legend(p, "L ARM", Vector((1.051, uf_ - 0.0016, 0.543)), X, Z, -Y, h=0.0035)
+    for k in range(6):
+        xk = 1.035 + k * 0.016
+        p.box("Kit_Seal", (xk, uf_ - 0.0005, DECK + 0.035), (xk + 0.004, uf_ + 0.001, DECK + 0.075), bevel=0.0008, segments=1, panel=False)
     # the Halcyon mark and name on the tower's outboard inset (the side the hull lights)
     for k in range(2):
         x_ = 1.008 + k * 0.016
@@ -343,8 +365,6 @@ def console_b(name, seed):
     for xx in ((hx0 + hx1) / 2 - 0.12, (hx0 + hx1) / 2 + 0.12):  # two recessed latches, 20 x 8 mm
         p.box("Kit_Seal", (xx - 0.012, hu1 - 0.034, zt - 0.003), (xx + 0.012, hu1 - 0.022, zt + 0.0002), bevel=0.001, segments=1)
         p.box("Kit_Lip", (xx - 0.01, hu1 - 0.032, zt - 0.0015), (xx + 0.01, hu1 - 0.024, zt + 0.0006), bevel=0.0012, segments=1)
-    p.box("Kit_Lip", (hx1 - 0.13, hu0 + 0.05, zt - 0.001), (hx1 - 0.046, hu0 + 0.094, zt + 0.0012), bevel=0.001, segments=1)
-    p.box("Kit_Perforated", (hx1 - 0.126, hu0 + 0.054, zt + 0.0012), (hx1 - 0.05, hu0 + 0.09, zt + 0.0016), panel=False)
     p.box("Kit_Seal", (0.27, hu1 - 0.075, zt - 0.012), (0.37, hu1 - 0.045, zt + 0.0003), bevel=0.004, segments=2)        # the pull
     p.box("Kit_Lip", (0.28, hu1 - 0.07, zt - 0.006), (0.36, hu1 - 0.065, zt - 0.002), bevel=0.0015, segments=2)
     for xx in (hx0 + 0.05, hx1 - 0.16):
@@ -353,7 +373,7 @@ def console_b(name, seed):
         p.box("Kit_Graphite", (xx - 0.0075, (hu0 + hu1) / 2 - 0.0015, zt + 0.0015), (xx + 0.0075, (hu0 + hu1) / 2 + 0.0015, zt + 0.0035), panel=False)
     _label(p, "st_service", Vector((0.22, hu0 + 0.06, zt + 0.0004)), Z, X, Y, scale=0.7)       # read from the seat
     _label(p, "arrow_access", Vector((0.32, hu1 - 0.1, zt + 0.0004)), Z, X, Y, scale=0.5)
-    _label(p, "pn_4", Vector((0.48, hu0 + 0.06, zt + 0.0004)), Z, X, Y, scale=0.6)
+    _label(p, "label_coolant", Vector((0.47, hu0 + 0.07, zt + 0.0004)), Z, X, Y, scale=0.9)
     # 7c the decal layers (author 8. 10.: the parts are new from the factory - no wear; the richness is stacked detail):
     # stencils, labels and ids on the graphite insets, rivet rows on the frame band, a socket and a hazard band on the
     # front, plates on the outboard side - each fully on one flat face

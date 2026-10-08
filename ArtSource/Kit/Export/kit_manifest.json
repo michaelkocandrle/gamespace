@@ -9963,8 +9963,8 @@
     76.2,
     74.1
    ],
-   "tris": 35836,
-   "tris_decals": 276,
+   "tris": 41988,
+   "tris_decals": 290,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
@@ -9985,6 +9985,7 @@
     "Kit_Inset",
     "Kit_Grip",
     "Kit_Legend",
+    "Kit_Leather",
     "Kit_FrameEdge",
     "Kit_Decal",
     "Kit_DecalAO",
@@ -10001,7 +10002,7 @@
     "maker",
     "st_service",
     "arrow_access",
-    "pn_4",
+    "label_coolant",
     "st_inspect",
     "st_service",
     "pn_1",
@@ -10041,7 +10042,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 18714,
+    "edge": 19146,
     "secondary": 0,
     "floor": 4310,
     "seam": 0
