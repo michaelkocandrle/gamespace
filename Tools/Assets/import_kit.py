@@ -565,7 +565,7 @@ LIGHT_COLOURS = {"warm": (255, 228, 200), "cool": (115, 184, 255), "work": (255,
 # the parts factory's own light colours, kept apart: the ships' interior drawings fingerprint LIGHT_COLOURS
 # (interior_model.kit_light_rules). The KF-PORTAL-01 foot light L1: white with a blue tint (~7500 K), not the
 # plinth's saturated blue.
-FACTORY_LIGHT_COLOURS = {"foot": (222, 232, 255)}
+FACTORY_LIGHT_COLOURS = {"foot": (222, 232, 255), "studio": (255, 246, 236)}
 
 
 def rect_light(actors, loc, role, cd, radius_m, label, forward, along, width_cm, height_cm, shadows=True):
@@ -675,6 +675,12 @@ def build_test_section(actors, meshes, mis, sec, counts):
     # variant B after the 2D concept (7. 10. 2026), 1.6 m behind A, the same line
     if "SM_Kit_Cockpit_Console12W_B" in meshes:
         place_part(actors, meshes, "Cockpit_Console12W_B", unreal.Vector(x * 100.0 - 380.0, -10.0, 0.0), 0.0, "KitTest_CockpitConsoleB", counts)
+        # a studio softbox over its pilot side (8. 10. 2026: the kit lights' specular 0.3 left the clear coat and the
+        # polished edges nothing to mirror - the critic read the paint matte for four rounds): full specular
+        b0 = KIT_ORIGIN + unreal.Vector(x * 100.0 - 380.0, -10.0, 0.0)
+        soft = rect_light(actors, b0 + unreal.Vector(60.0, 75.0, 140.0), "studio", 6.0, 3.0, "KitTest_ConsoleBSoftbox",
+                          unreal.Vector(0.0, -0.55, -0.83), unreal.Vector(1.0, 0.0, 0.0), 100.0, 20.0)
+        soft.rect_light_component.set_editor_property("specular_scale", 1.0)
     vol = actors.spawn_actor_from_class(unreal.PostProcessVolume, _v(((x0 + x1) / 2, 0.0), h / 2),
                                         unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
     vol.set_actor_label("KitTest_InteriorPost")

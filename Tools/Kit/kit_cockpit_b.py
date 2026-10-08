@@ -160,7 +160,7 @@ def console_b(name, seed):
                 t0, t1 = k * 0.006 / ln, (k * 0.006 + 0.004) / ln
                 a0 = (p0[0] + (p1[0] - p0[0]) * t0, p0[1] + (p1[1] - p0[1]) * t0)
                 a1 = (p0[0] + (p1[0] - p0[0]) * t1, p0[1] + (p1[1] - p0[1]) * t1)
-                p.box("Kit_Housing", (min(a0[0], a1[0]) - 0.0006, min(a0[1], a1[1]) - 0.0006, AT - 0.0003),
+                p.box("Kit_Legend", (min(a0[0], a1[0]) - 0.0006, min(a0[1], a1[1]) - 0.0006, AT - 0.0003),
                       (max(a0[0], a1[0]) + 0.0006, max(a0[1], a1[1]) + 0.0006, AT + 0.0004), panel=False)
                 k += 1
         for i in range(int((xb - xa - 0.03) / 0.011)):
@@ -262,7 +262,7 @@ def console_b(name, seed):
         _rocker(p, q, r, a, nf, lab, label_scale=0)
         legend(p, {"ck_pwr": "PWR", "ck_extlt": "EXT LT", "ck_eng": "ENG"}[lab], q - a * 0.034 + nf * 0.0002, r, a, nf, h=0.008)
         p.box("Kit_Lip", (-0.0095, 0.0195, 0.0015), (0.0095, 0.028, 0.0026), bevel=0.0006, segments=1, m=ff(q), panel=False)
-        p.lathe("Kit_GlowKey", [(0.0028, 0.0), (0.0028, 0.0006), (0.002, 0.0016), (0.0, 0.002)], tuple(ff(q) @ Vector((0.0, 0.0238, 0.0026))),
+        p.lathe("Kit_GlowKey", [(0.0036, 0.0), (0.0036, 0.0008), (0.0026, 0.0022), (0.0, 0.0028)], tuple(ff(q) @ Vector((0.0, 0.0238, 0.0026))),
                 axis=tuple(nf), seg=16)
     for su in (-1, 1):
         for sv in (-1, 1):
@@ -283,8 +283,8 @@ def console_b(name, seed):
     p.box("Kit_Graphite", (1.033, uf_ - 0.0016, 0.538), (1.069, uf_ - 0.0011, 0.558), panel=False)
     legend(p, "HF-3287", Vector((1.051, uf_ - 0.0016, 0.551)), X, Z, -Y, h=0.0045)
     legend(p, "L ARM", Vector((1.051, uf_ - 0.0016, 0.543)), X, Z, -Y, h=0.0035)
-    for k in range(6):
-        xk = 1.035 + k * 0.016
+    for k in range(8):
+        xk = 1.03 + k * 0.014
         p.box("Kit_Seal", (xk, uf_ - 0.0005, DECK + 0.035), (xk + 0.004, uf_ + 0.001, DECK + 0.075), bevel=0.0008, segments=1, panel=False)
     # the Halcyon mark and name on the tower's outboard inset (the side the hull lights)
     for k in range(2):
@@ -394,7 +394,8 @@ def console_b(name, seed):
            ("st_hfcl", (1.13, TU - 0.0065, 0.62), -Y, X, 0.45), ("pn_3", (1.03, TU - 0.0065, 0.47), -Y, X, 0.6),
            ("st_extpwr", (0.81, W + 0.0035, 0.46), Y, -X, 0.6), ("st_torque", (0.81, W + 0.0035, 0.3), Y, -X, 0.5),
            ("pn_6", (0.73, W + 0.0035, 0.42), Y, -X, 0.6), ("st_gnd", (L - 0.0155, (U0 + TU) / 2, 0.39), X, Y, 0.5),
-           ("pn_7", (0.11, U0 - 0.0065, 0.16), -Y, X, 0.6), ("pn_8", (0.5, W + 0.0065, 0.16), Y, -X, 0.6)]
+           ("pn_7", (0.11, U0 - 0.0065, 0.16), -Y, X, 0.6), ("pn_8", (0.5, W + 0.0065, 0.16), Y, -X, 0.6),
+           ("st_torque", (1.11, TU - 0.0065, 0.6), -Y, X, 0.35), ("pn_5", (1.13, TU - 0.0065, 0.66), -Y, X, 0.5)]
     for item, at, nn, rr, sc_ in det:
         nn = Vector(nn)
         up = Z if abs(nn.z) < 0.5 else Y                       # right x up = the normal (a right-handed decal frame)
