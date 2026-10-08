@@ -84,7 +84,7 @@
       "pawn.hide_hull_in_cockpit = False",
       "pawn.hide_canopy_in_cockpit = False",
       "pawn.cockpit_view_pitch_deg = 0.0",
-      "pawn.cockpit_exposure_bias = 0.3",
+      "pawn.cockpit_exposure_bias = 0.8",
       "pawn.cockpit_light_color = [1.0, 0.93, 0.84]",
       "pawn.cockpit_fill_intensity_cd = 3.0",
       "pawn.cockpit_fill_offset = [45.0, 0.0, -45.0]",

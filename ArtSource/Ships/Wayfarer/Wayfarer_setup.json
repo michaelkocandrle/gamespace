@@ -36,8 +36,8 @@
   "_comment_canopy": "The canopy glass stays in the pilot's view (author 26. 9. 2026: a weak reflection from the cockpit, a strong one outside - MPC_ShipView); from inside it is nearly clear (OpacityInside 0.15).",
   "hide_canopy_in_cockpit": false,
   "cockpit_view_pitch_deg": 0.0,
-  "cockpit_exposure_bias": 0.3,
-  "_exposure_8_10": "author 8. 10. 2026: the cockpit too dark in the game - +0.5 EV (screens 2.05 -> 1.45 to keep their brightness)",
+  "cockpit_exposure_bias": 0.8,
+  "_exposure_8_10": "author 8. 10. 2026: the cockpit too dark in the game, the photo mode's look wanted - -0.2 -> +0.8 EV (screens 2.05 -> 1.03 to keep their brightness)",
   "_comment_exposure": "Concept A (25. 9. 2026): the painted cockpit must read as a form by day and by night, so the cockpit view is 0.5 EV brighter than the Vanguard's -0.7; the screens' emissive strength drops by the same 2^0.5 (2.9 -> 2.05) so they keep their brightness.",
   "cockpit_light_color": [
    1.0,
@@ -1143,7 +1143,7 @@
    "slots": [
     "M_Ship_Wayfarer_Screens"
    ],
-   "emissive_strength": 1.45
+   "emissive_strength": 1.03
   },
   "MI_Ship_Wayfarer_KitTrim01": {
    "_detail": "detail_normal_strength 0.06 on the interior kit (was 0.25): the PBR master read the BC5 detail normal with z = -1 until 27. 9. 2026, so the detail never showed; working, 0.25 read as hammered metal (WORKFLOW dg)",
@@ -1488,6 +1488,8 @@
    "roughness": 0.3
   },
   "MI_Ship_Wayfarer_IntHousing": {
+   "kit_material": "/Game/Kit/Materials/MI_Kit_Halcyon_Frame",
+   "_kit_material": "author 8. 10. 2026: the dash wrap (housing grey, cloudy) in the glossy paint of the column under the radar",
    "master": "layered",
    "vectors": {
     "PrimaryColor": [
