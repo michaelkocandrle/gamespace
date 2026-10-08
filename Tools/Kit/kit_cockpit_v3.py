@@ -258,6 +258,35 @@ def _face_patch(p, role, x0, x1, z0, z1, o0, o1):
     _skin(p, role, rings, centres)
 
 
+# (author 9. 10. 2026: "layer more on it - mesh decals, everything stacked, SC level") the library's structural and
+# info decals stacked on the console's faces: (item, weight, size w x h in m from the library index)
+DRESS = [("rivet_row_4", 3, 0.2, 0.03), ("seam_straight", 2, 0.5, 0.04), ("bolt_row_4", 1, 0.42, 0.05), ("bolt", 2, 0.05, 0.05),
+         ("slot_s", 2, 0.2, 0.05), ("socket", 1, 0.12, 0.08), ("socket_round", 1, 0.1, 0.1), ("vent_small", 1, 0.2, 0.14),
+         ("light_housing", 1, 0.16, 0.08), ("panel_A12", 1, 0.14, 0.05), ("panel_B07", 1, 0.14, 0.05), ("panel_E16", 1, 0.14, 0.05),
+         ("st_inspect", 1, 0.18, 0.03), ("st_torque", 1, 0.168, 0.03), ("st_gnd", 1, 0.134, 0.03), ("label_power", 1, 0.2, 0.07),
+         ("corner_mark", 1, 0.08, 0.08), ("hazard_subtle", 1, 0.36, 0.05), ("red_dot", 1, 0.018, 0.018)]
+
+
+def _dress(p, rng, spots):
+    """spots: (at, normal, xdir, ydir, max_w, max_h) - one library decal fitted into each (scaled down to fit, 35 % at
+    least, else a smaller pick), chosen by weight."""
+    import kit_batch2
+    total = sum(w for _, w, _, _ in DRESS)
+    placed = {}                                    # (one item not twice within 30 cm: the drawings tell copies apart by it)
+    for at, n, xd, yd, mw, mh in spots:
+        for _ in range(8):
+            k = rng.uniform(0, total)
+            for item, w, sw, sh in DRESS:
+                k -= w
+                if k <= 0:
+                    break
+            sc = min(1.0, mw / sw, mh / sh)
+            if sc >= 0.35 and all((Vector(at) - q).length > 0.3 for q in placed.get(item, [])):
+                kit_batch2.label(p, item, at, n, xd, yd, scale=sc)
+                placed.setdefault(item, []).append(Vector(at))
+                break
+
+
 def _wall_console(name, seed):
     p = kit_geo.Part(name, seed)
     p.edge_roles = {"Kit_Frame": "Kit_FrameEdge", "Kit_PanelPaint": "Kit_FrameEdge", "Kit_PanelSatin": "Kit_FrameEdge"}
@@ -323,6 +352,32 @@ def _wall_console(name, seed):
         _face_patch(p, "Kit_GlowWindow", wx0, wx1, 0.17, 0.4, 0.0004, 0.0016)          # (r4: lit through, not dark)
         _face_patch(p, "Kit_Inset", wx0 + 0.012, wx1 - 0.012, 0.215, 0.385, 0.0016, 0.0042)  # the dark panel in the recess
         _face_patch(p, "Kit_GlowStrip", wx0 + 0.015, wx1 - 0.015, 0.182, 0.2, 0.0016, 0.0032)
+    # the stacked decals: a band on the inner face over the windows, the gaps between them, the top's front
+    import random as _r
+    rng = _r.Random(seed * 7 + 3)
+    spots = []
+    x = 15.98
+    while x < 17.62:
+        d, zi = _station(x)
+        tt = (_V(x + 0.01, d, 0) - _V(x, d, 0)).normalized()
+        nn = Vector((tt.y, -tt.x, 0.0))
+        if nn.dot(Vector((0, -1, 0))) < 0:
+            nn = -nn
+        for zz, mh in ((0.47, 0.07), (min(0.58, zi - 0.075), 0.05)):
+            if rng.random() < 0.8:
+                spots.append((_V(x + rng.uniform(-0.02, 0.02), d, zz), nn, tt, Vector((0, 0, 1)), 0.2, mh))
+        x += rng.uniform(0.1, 0.16)
+    for gx in (16.51, 17.23):
+        d, zi = _station(gx)
+        tt = (_V(gx + 0.01, d, 0) - _V(gx, d, 0)).normalized()
+        nn = Vector((tt.y, -tt.x, 0.0))
+        if nn.dot(Vector((0, -1, 0))) < 0:
+            nn = -nn
+        spots.append((_V(gx, d, 0.28), nn, Vector((0, 0, 1)), -tt, 0.2, 0.045))
+    for fx in (17.3, 17.45, 17.6, 17.74):
+        q, r, a, n = top_frame(fx, 0.035)
+        spots.append((q, n, r, a, 0.14, 0.04))
+    _dress(p, rng, spots)
     # the collision: one hull per span
     for (x0, x1) in zip(xs, xs[1:]):
         pts = []

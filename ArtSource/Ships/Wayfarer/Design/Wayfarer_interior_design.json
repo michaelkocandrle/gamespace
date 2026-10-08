@@ -279,7 +279,7 @@
     ["stencil_nostep", "D-I-09"],
     ["stencil_nostep", "D-I-10"]
    ],
-   "scatter": ["D-I-R-SCATTER-01", "D-I-R-SCATTER-02", "D-I-R-SCATTER-03", "D-I-R-SCATTER-04", "D-I-R-SCATTER-05", "D-I-R-SCATTER-06", "D-I-R-SCATTER-07"],
+   "scatter": ["D-I-R-SCATTER-01", "D-I-R-SCATTER-02", "D-I-R-SCATTER-03", "D-I-R-SCATTER-04", "D-I-R-SCATTER-05", "D-I-R-SCATTER-06", "D-I-R-SCATTER-07", "D-I-R-SCATTER-08", "D-I-R-SCATTER-09"],
    "grab_bars": ["CPT-O-GRAB-01", "CPT-O-GRAB-02"]
   },
   "fittings": [
@@ -306,6 +306,15 @@
   "panel_A12": "číslo servisního panelu A12",
   "panel_B07": "číslo servisního panelu B07",
   "pn_1": "číslo panelu 1 na boku podstavce",
+  "bolt": "šroub panelu (jednotlivý)",
+  "bolt_row_4": "řada čtyř šroubů na spoji panelů",
+  "panel_E16": "číslo panelu E16",
+  "red_dot": "červený bod - značka kontroly utažení",
+  "rivet_row_4": "řada čtyř nýtů na okraji panelu",
+  "seam_straight": "spára mezi panely",
+  "slot_s": "krátká větrací štěrbina",
+  "socket_round": "kulatá servisní zásuvka",
+  "vent_small": "malá větrací mřížka",
   "pn_2": "číslo panelu 2 na boku podstavce",
   "pn_3": "číslo panelu 3 na boku podstavce",
   "pn_8": "číslo panelu 8 na vnějším boku",

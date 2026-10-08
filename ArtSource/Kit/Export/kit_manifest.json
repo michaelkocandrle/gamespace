@@ -10286,7 +10286,7 @@
     85.0
    ],
    "tris": 13422,
-   "tris_decals": 12,
+   "tris_decals": 186,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
@@ -10303,15 +10303,37 @@
     "Kit_GlowStrip",
     "Kit_PanelSatin",
     "Kit_GlowWindow",
+    "Kit_Decal",
+    "Kit_DecalAO",
     "Kit_DecalPaint"
    ],
    "sockets": {},
    "collision_hulls": 6,
-   "decals": 1,
+   "decals": 19,
    "decal_items": [
-    "maker"
+    "maker",
+    "panel_E16",
+    "bolt",
+    "vent_small",
+    "bolt_row_4",
+    "st_gnd",
+    "vent_small",
+    "red_dot",
+    "panel_A12",
+    "slot_s",
+    "vent_small",
+    "bolt_row_4",
+    "slot_s",
+    "socket_round",
+    "panel_B07",
+    "slot_s",
+    "red_dot",
+    "slot_s",
+    "corner_mark"
    ],
-   "service_labels": [],
+   "service_labels": [
+    "st_gnd"
+   ],
    "colour_masks": {
     "domain": "CORNER",
     "edge": 7632,
@@ -10340,7 +10362,7 @@
     85.0
    ],
    "tris": 13422,
-   "tris_decals": 12,
+   "tris_decals": 130,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
@@ -10357,15 +10379,38 @@
     "Kit_GlowStrip",
     "Kit_PanelSatin",
     "Kit_GlowWindow",
+    "Kit_Decal",
+    "Kit_DecalAO",
     "Kit_DecalPaint"
    ],
    "sockets": {},
    "collision_hulls": 6,
-   "decals": 1,
+   "decals": 19,
    "decal_items": [
-    "maker"
+    "maker",
+    "bolt",
+    "socket",
+    "st_inspect",
+    "st_torque",
+    "panel_E16",
+    "socket_round",
+    "bolt",
+    "st_torque",
+    "seam_straight",
+    "hazard_subtle",
+    "socket",
+    "red_dot",
+    "rivet_row_4",
+    "st_inspect",
+    "st_torque",
+    "st_inspect",
+    "panel_E16",
+    "red_dot"
    ],
-   "service_labels": [],
+   "service_labels": [
+    "st_inspect",
+    "st_torque"
+   ],
    "colour_masks": {
     "domain": "CORNER",
     "edge": 7632,

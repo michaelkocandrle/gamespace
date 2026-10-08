@@ -3118,8 +3118,8 @@
      "z": [1.92, 2.8],
      "from_y": 0.0,
      "dir_z": 0.25,
-     "step": 0.208,
-     "prob": 0.82,
+     "step": 0.16,
+     "prob": 0.95,
      "seed": 11
     },
     {
@@ -3137,8 +3137,8 @@
      "x": [15.4, 17.4],
      "z": [1.25, 1.75],
      "from_y": 0.0,
-     "step": 0.192,
-     "prob": 0.7,
+     "step": 0.15,
+     "prob": 0.9,
      "seed": 12
     },
     {
@@ -3200,7 +3200,7 @@
      "sides": [1],
      "dir_z": -0.25,
      "step": 0.1,
-     "prob": 0.55,
+     "prob": 0.8,
      "seed": 21
     },
     {
@@ -3220,8 +3220,8 @@
      "from_x": 16.4,
      "sides": [-1],
      "dir_z": 0.0,
-     "step": 0.22,
-     "prob": 0.6,
+     "step": 0.16,
+     "prob": 0.85,
      "seed": 22
     },
     {
@@ -3239,8 +3239,12 @@
      "y": [-1.0, 1.0],
      "from_z": 2.6,
      "step": 0.1,
-     "prob": 0.6,
+     "prob": 0.8,
      "seed": 23
+    },
+    {"_what": "cockpit v4 (author 9. 10.: layer more everywhere) - the aisle floors and the console tops from above: panel numbers, stencils, corner marks, rivets", "axis": "z", "items": ["panel_A12", "panel_C21", "panel_E16", "panel_H19", "st_inspect", "st_torque", "st_rails", "corner_mark", "chevrons_port", "hazard_subtle", "red_dot", "rivet_row_4", "bolt"], "weights": [2, 2, 2, 2, 2, 1, 1, 2, 1, 1, 1, 2, 2], "x": [15.6, 18.0], "y": [0.42, 1.1], "from_z": 2.02, "step": 0.14, "prob": 0.7, "seed": 24
+    },
+    {"_what": "cockpit v4 (author 9. 10.: layer more everywhere) - the aisle floors and the console tops from above: panel numbers, stencils, corner marks, rivets", "axis": "z", "items": ["panel_A12", "panel_C21", "panel_E16", "panel_H19", "st_inspect", "st_torque", "st_rails", "corner_mark", "chevrons_port", "hazard_subtle", "red_dot", "rivet_row_4", "bolt"], "weights": [2, 2, 2, 2, 2, 1, 1, 2, 1, 1, 1, 2, 2], "x": [15.6, 18.0], "y": [-1.1, -0.42], "from_z": 2.02, "step": 0.14, "prob": 0.7, "seed": 25
     }
    ],
    "grab_bars": [

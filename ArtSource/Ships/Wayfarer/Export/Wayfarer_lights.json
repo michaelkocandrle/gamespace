@@ -1356,9 +1356,9 @@
    "intensity_cd": 0.294,
    "radius_m": 1.6,
    "location": [
-    17.9441,
-    0.3716,
-    1.987
+    18.0565,
+    0.4137,
+    2.0582
    ],
    "direction": [
     0,
@@ -1369,9 +1369,9 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    769.4,
-    -37.2,
-    78.7
+    780.6,
+    -41.4,
+    85.8
    ],
    "direction_ue": [
     0,

@@ -6,17 +6,17 @@
  "section_x": 16.4,
  "digests": {
   "layout": "e0d248bb60e1",
-  "interior": "4016417de941",
+  "interior": "56aa4ef1936e",
   "setup": "de82013afd6a",
-  "lights": "02c1a1b1c769",
-  "design": "7dd34989fa88",
-  "kit": "2c887b80e1ed",
-  "library": "122e9ba89b14",
+  "lights": "4b1ad0e7350c",
+  "design": "2cce5292572d",
+  "kit": "fef027086edb",
+  "library": "317d3dc9c7aa",
   "light_rules": "788f180917fd"
  },
  "geometry": {
-  "SM_Ship_Wayfarer.fbx": "1efcbc2d251d",
-  "SM_Ship_Wayfarer_Interior.fbx": "8854c21392f0",
+  "SM_Ship_Wayfarer.fbx": "5cf5914e59d8",
+  "SM_Ship_Wayfarer_Interior.fbx": "0c664f345495",
   "SM_Ship_Wayfarer_Canopy.fbx": "50abe89a8300",
   "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
   "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",
@@ -30,11 +30,11 @@
   "SM_Kit_Ceiling_Panel12L41_C.fbx": "be7369dda0e1",
   "SM_Kit_Ceiling_Tray06W_A.fbx": "ec5273e6eadb",
   "SM_Kit_Ceiling_Tray12W_A.fbx": "917dc4e8bfc5",
-  "SM_Kit_Cockpit_ConsoleWall18W_L.fbx": "19ba359b8d36",
-  "SM_Kit_Cockpit_ConsoleWall18W_R.fbx": "ab98c867fbf6",
-  "SM_Kit_Cockpit_SeatArm07W_L.fbx": "4891b72892a7",
-  "SM_Kit_Cockpit_SeatArm07W_R.fbx": "ccdcf6c7aaf4",
-  "SM_Kit_Cockpit_SeatBack07W_A.fbx": "7ff9af37007a",
+  "SM_Kit_Cockpit_ConsoleWall18W_L.fbx": "a2fe5ee3b823",
+  "SM_Kit_Cockpit_ConsoleWall18W_R.fbx": "c67113e7f33c",
+  "SM_Kit_Cockpit_SeatArm07W_L.fbx": "43ea63843488",
+  "SM_Kit_Cockpit_SeatArm07W_R.fbx": "a28ddb8a289b",
+  "SM_Kit_Cockpit_SeatBack07W_A.fbx": "f83ac6b61c95",
   "SM_Kit_Floor_Grille06W_A.fbx": "eef9d9eebbf3",
   "SM_Kit_Floor_Plate12L38_A.fbx": "da3843b4b56b",
   "SM_Kit_Floor_Plate12W_A.fbx": "3c1c37e452a1",
@@ -290,8 +290,44 @@
    "CPT-CO-01/st_hfcl",
    "CPT-CO-02/ck_rcs",
    "CPT-CO-02/st_hfcl",
+   "CPT-CO-03/bolt",
+   "CPT-CO-03/bolt_row_4",
+   "CPT-CO-03/bolt_row_4#2",
+   "CPT-CO-03/corner_mark",
    "CPT-CO-03/maker",
+   "CPT-CO-03/panel_A12",
+   "CPT-CO-03/panel_B07",
+   "CPT-CO-03/panel_E16",
+   "CPT-CO-03/red_dot",
+   "CPT-CO-03/red_dot#2",
+   "CPT-CO-03/slot_s",
+   "CPT-CO-03/slot_s#2",
+   "CPT-CO-03/slot_s#3",
+   "CPT-CO-03/slot_s#4",
+   "CPT-CO-03/socket_round",
+   "CPT-CO-03/st_gnd",
+   "CPT-CO-03/vent_small",
+   "CPT-CO-03/vent_small#2",
+   "CPT-CO-03/vent_small#3",
+   "CPT-CO-04/bolt",
+   "CPT-CO-04/bolt#2",
+   "CPT-CO-04/hazard_subtle",
    "CPT-CO-04/maker",
+   "CPT-CO-04/panel_E16",
+   "CPT-CO-04/panel_E16#2",
+   "CPT-CO-04/red_dot",
+   "CPT-CO-04/red_dot#2",
+   "CPT-CO-04/rivet_row_4",
+   "CPT-CO-04/seam_straight",
+   "CPT-CO-04/socket",
+   "CPT-CO-04/socket#2",
+   "CPT-CO-04/socket_round",
+   "CPT-CO-04/st_inspect",
+   "CPT-CO-04/st_inspect#2",
+   "CPT-CO-04/st_inspect#3",
+   "CPT-CO-04/st_torque",
+   "CPT-CO-04/st_torque#2",
+   "CPT-CO-04/st_torque#3",
    "CPT-CO-05/maker",
    "CPT-CO-05/maker#2",
    "D-I-01",
@@ -306,7 +342,9 @@
    "D-I-10",
    "D-I-R-SCATTER-01",
    "D-I-R-SCATTER-02",
-   "D-I-R-SCATTER-07"
+   "D-I-R-SCATTER-07",
+   "D-I-R-SCATTER-08",
+   "D-I-R-SCATTER-09"
   ]
  },
  "checks": [
@@ -347,12 +385,132 @@
    "decal x 17,20, z 1,71 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
+   "CPT-CO-03/bolt",
+   "decal x 16,38, z 1,73 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/bolt_row_4",
+   "decal x 16,55, z 1,73 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/bolt_row_4#2",
+   "decal x 17,28, z 1,73 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
    "CPT-CO-03/maker",
    "decal x 16,30, z 1,67 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
+   "CPT-CO-03/panel_A12",
+   "decal x 17,01, z 1,62 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/panel_B07",
+   "decal x 16,51, z 1,43 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/panel_E16",
+   "decal x 16,38, z 1,62 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/red_dot",
+   "decal x 16,85, z 1,73 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/slot_s",
+   "decal x 17,02, z 1,73 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/slot_s#2",
+   "decal x 17,23, z 1,43 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/slot_s#4",
+   "decal x 17,51, z 1,62 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/socket_round",
+   "decal x 17,53, z 1,73 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/st_gnd",
+   "decal x 16,75, z 1,62 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/vent_small",
+   "decal x 16,53, z 1,62 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/vent_small#2",
+   "decal x 16,88, z 1,62 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-03/vent_small#3",
+   "decal x 17,26, z 1,62 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/bolt",
+   "decal x 16,08, z 1,62 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/bolt#2",
+   "decal x 16,74, z 1,62 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/hazard_subtle",
+   "decal x 17,21, z 1,62 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
    "CPT-CO-04/maker",
    "decal x 16,30, z 1,67 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/panel_E16",
+   "decal x 16,48, z 1,62 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/red_dot",
+   "decal x 17,46, z 1,62 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/rivet_row_4",
+   "decal x 17,47, z 1,73 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/seam_straight",
+   "decal x 16,99, z 1,62 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/socket",
+   "decal x 16,11, z 1,73 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/socket#2",
+   "decal x 17,22, z 1,73 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/socket_round",
+   "decal x 16,47, z 1,73 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/st_inspect",
+   "decal x 16,21, z 1,62 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/st_inspect#2",
+   "decal x 16,51, z 1,43 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/st_torque",
+   "decal x 16,37, z 1,73 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/st_torque#2",
+   "decal x 16,74, z 1,73 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-04/st_torque#3",
+   "decal x 17,23, z 1,43 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
    "D-I-03",
