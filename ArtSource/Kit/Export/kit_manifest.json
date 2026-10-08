@@ -10151,15 +10151,15 @@
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_SeatArm07W_L.fbx",
    "dims_m": [
     0.705,
-    0.214,
-    0.526
+    0.212,
+    0.455
    ],
    "expected_size_cm": [
     70.5,
-    21.4,
-    52.6
+    21.2,
+    45.5
    ],
-   "tris": 19532,
+   "tris": 19908,
    "tris_decals": 4,
    "tri_budget": 90000,
    "materials": [
@@ -10181,6 +10181,7 @@
     "Kit_Leather",
     "Kit_GlowStrip",
     "Kit_PanelPaint",
+    "Kit_PanelSatin",
     "Kit_FrameEdge",
     "Kit_DecalPaint"
    ],
@@ -10196,9 +10197,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 9246,
+    "edge": 8526,
     "secondary": 0,
-    "floor": 628,
+    "floor": 1040,
     "seam": 0
    },
    "status": "built"
@@ -10213,15 +10214,15 @@
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_SeatArm07W_R.fbx",
    "dims_m": [
     0.705,
-    0.214,
-    0.526
+    0.212,
+    0.455
    ],
    "expected_size_cm": [
     70.5,
-    21.4,
-    52.6
+    21.2,
+    45.5
    ],
-   "tris": 19532,
+   "tris": 19908,
    "tris_decals": 4,
    "tri_budget": 90000,
    "materials": [
@@ -10243,6 +10244,7 @@
     "Kit_Leather",
     "Kit_GlowStrip",
     "Kit_PanelPaint",
+    "Kit_PanelSatin",
     "Kit_FrameEdge",
     "Kit_DecalPaint"
    ],
@@ -10258,9 +10260,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 9246,
+    "edge": 8526,
     "secondary": 0,
-    "floor": 628,
+    "floor": 1040,
     "seam": 0
    },
    "status": "built"
@@ -10380,17 +10382,17 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_SeatBack07W_A.fbx",
    "dims_m": [
-    0.101,
-    0.4,
-    0.594
+    0.639,
+    0.54,
+    1.038
    ],
    "expected_size_cm": [
-    10.1,
-    40.0,
-    59.4
+    63.9,
+    54.0,
+    103.8
    ],
-   "tris": 3340,
-   "tris_decals": 10,
+   "tris": 9732,
+   "tris_decals": 20,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
@@ -10406,16 +10408,17 @@
    ],
    "sockets": {},
    "collision_hulls": 1,
-   "decals": 1,
+   "decals": 2,
    "decal_items": [
+    "maker",
     "maker"
    ],
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 1632,
+    "edge": 1896,
     "secondary": 0,
-    "floor": 0,
+    "floor": 8520,
     "seam": 0
    },
    "status": "built"

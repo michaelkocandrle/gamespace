@@ -124,11 +124,16 @@ def _seat_arm(name, seed):
     p.box("Kit_Seal", (x0 + 0.03, y1 - 0.002, 0.533), (x1 - 0.05, y1 + 0.0008, 0.545), panel=False)
     p.box("Kit_GlowStrip", (x0 + 0.033, y1 - 0.001, 0.5365), (x1 - 0.053, y1 + 0.0016, 0.5415), bevel=0.0008, segments=1, panel=False)
     # the bracket to the seat: a post under the arm and a plate on the seat's side, bolted
-    p.box("Kit_PanelPaint", (16.87, y0 + 0.004, 0.3), (16.95, y0 + 0.045, 0.532), bevel=0.014, segments=3)
-    p.box("Kit_Lip", (16.81, 0.372, 0.28), (17.01, 0.428, 0.39), bevel=0.005, segments=3)
-    for xx in (16.83, 16.99):
-        for zz in (0.295, 0.375):
-            screw(p, Vector((xx, 0.4285, zz)), Y, 0.004)
+    # (critic r3: the post and the plate hung under the arm as blocks) a swept strut from the arm's underside curving
+    # down into a round flange on the seat's side, a satin collar where it meets the arm
+    for sx in (16.9, 17.2):
+        path = [Vector((sx, y0 + 0.03, 0.532)), Vector((sx, y0 + 0.03, 0.47)), Vector((sx, y0 - 0.005, 0.41)), Vector((sx, 0.385, 0.385))]
+        p.sweep("Kit_PanelSatin", path, 0.016, seg=16)
+        p.lathe("Kit_Lip", [(0.034, 0.0), (0.034, 0.006), (0.028, 0.01), (0.0, 0.011)], (sx, 0.379, 0.385), axis=(0, 1, 0), seg=24)
+        for k in range(4):
+            ang = math.radians(45 + 90 * k)
+            screw(p, Vector((sx + 0.024 * math.cos(ang), 0.39, 0.385 + 0.024 * math.sin(ang))), Y, 0.003)
+        p.lathe("Kit_Lip", [(0.022, 0.0), (0.022, 0.008), (0.0, 0.008)], (sx, y0 + 0.03, 0.524), axis=(0, 0, 1), seg=20)
     _label(p, "st_hfcl", Vector((17.2, y1 + 0.0005, 0.565)), Y, -X, Z, scale=0.35)
     # (cockpit v3 r1, critic: one detail where SC has five) a satin strip along the top's outer edge, perforation in
     # the pad's middle band, two screwed graphite side panels with a grille between, a light line and an LED on the
@@ -362,4 +367,17 @@ def seat_back(name, seed):
     p.box("Kit_GlowStrip", (-0.157, 0.259, 0.0128), (-0.023, 0.267, 0.0145), bevel=0.0008, segments=1, m=fm(o), panel=False)
     _label(p, "maker", fm(o) @ Vector((0.0, -0.06, 0.0151)), n, r, u, scale=0.45)
     p.collision_box(tuple(fm(o) @ Vector((-0.2, -0.3, -0.006))), tuple(fm(o) @ Vector((0.2, 0.3, 0.03))))
+    # (critic r3: the floor's centre empty) behind the seat a graphite anti-slip field in a 20 mm satin frame, a studded
+    # tread, the maker's mark at its aft end
+    fx0, fx1, fy = 16.0, 16.46, 0.27
+    p.box("Kit_Lip", (fx0, -fy, -0.002), (fx1, fy, 0.004), bevel=0.002, segments=2)
+    p.box("Kit_Inset", (fx0 + 0.02, -fy + 0.02, 0.0), (fx1 - 0.02, fy - 0.02, 0.0055), bevel=0.0015, segments=1)
+    xx = fx0 + 0.05
+    while xx < fx1 - 0.04:
+        yy = -fy + 0.05
+        while yy < fy - 0.04:
+            p.lathe("Kit_Housing", [(0.006, 0.0), (0.006, 0.0012), (0.0, 0.0018)], (xx, yy, 0.0055), axis=(0, 0, 1), seg=10)
+            yy += 0.03
+        xx += 0.03
+    _label(p, "maker", Vector((fx0 + 0.035, 0.0, 0.0062)), Vector((0, 0, 1)), Vector((0, -1, 0)), Vector((1, 0, 0)), scale=0.5)
     return p
