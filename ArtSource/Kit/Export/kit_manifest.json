@@ -9963,7 +9963,7 @@
     76.2,
     74.1
    ],
-   "tris": 44788,
+   "tris": 44856,
    "tris_decals": 296,
    "tri_budget": 90000,
    "materials": [
@@ -10045,7 +10045,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 22026,
+    "edge": 22098,
     "secondary": 0,
     "floor": 5094,
     "seam": 0

@@ -123,7 +123,7 @@ def console_b(name, seed):
     p.edge_roles = {"Kit_Frame": "Kit_FrameEdge"}   # the frame's chamfers: a glossier polished paint that catches the light
     p.sharp_deg = 20.0           # the concept's machined chamfers (25-55 deg) must not shade into soft rolls
     # 1 the pedestal: a light worn frame, the kick chamfered back, a dark recessed kick with a vent row
-    ped = [(0.03, 0.07), (L - 0.06, 0.07), (L - 0.02, 0.11), (L - 0.02, DECK), (0.0, DECK), (0.0, 0.1)]
+    ped = [(0.03, 0.07), (L - 0.08, 0.07), (L - 0.02, 0.13), (L - 0.02, DECK), (0.0, DECK), (0.0, 0.1)]   # a 45 deg cut at the front foot
     side_prism(p, "Kit_Frame", ped, U0, W, 0.012, 1)
     p.box("Kit_Graphite", (0.05, U0 + 0.02, 0.0), (L - 0.08, W - 0.02, 0.075), bevel=0.004, segments=2)
     for k in range(14):
@@ -209,7 +209,7 @@ def console_b(name, seed):
     for xx in (0.68, 0.85):
         screw(p, Vector((xx, U0 - 0.0125, DECK + 0.012)), -Y)
         screw(p, Vector((xx, U0 - 0.0125, 0.488)), -Y)
-    stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs", head_role="Kit_Frame", guard="d")      # a worn metal head (concept)
+    stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs", head_role="Kit_Gasket", guard="d")      # a worn metal head (concept)
     for xf, nx in ((0.66, -1), (0.87, 1)):                     # graphite insets on the block's ends, 15 mm frame
         p.box("Kit_Inset", (xf - 0.002 if nx > 0 else xf - 0.004, U0 + 0.003, DECK + 0.015),
               (xf + 0.004 if nx > 0 else xf + 0.002, 0.165, 0.475), bevel=0.002, segments=1)
@@ -288,8 +288,8 @@ def console_b(name, seed):
     uf_ = TU - 0.0045
     p.box("Kit_Lip", (1.03, uf_ - 0.0012, 0.535), (1.072, uf_ + 0.001, 0.561), bevel=0.0006, segments=1, panel=False)
     p.box("Kit_Graphite", (1.033, uf_ - 0.0016, 0.538), (1.069, uf_ - 0.0011, 0.558), panel=False)
-    legend(p, "HF-3287", Vector((1.051, uf_ - 0.0016, 0.551)), X, Z, -Y, h=0.0045)
-    legend(p, "L ARM", Vector((1.051, uf_ - 0.0016, 0.543)), X, Z, -Y, h=0.0035)
+    legend(p, "HF-3287", Vector((1.051, uf_ - 0.0016, 0.552)), X, Z, -Y, h=0.0058)
+    legend(p, "L ARM", Vector((1.051, uf_ - 0.0016, 0.542)), X, Z, -Y, h=0.0045)
     for k in range(8):
         xk = 1.03 + k * 0.014
         p.box("Kit_Seal", (xk, uf_ - 0.0005, DECK + 0.035), (xk + 0.004, uf_ + 0.001, DECK + 0.075), bevel=0.0008, segments=1, panel=False)
@@ -389,7 +389,12 @@ def console_b(name, seed):
         p.lathe("Kit_Lip", [(0.011, 0.0), (0.011, 0.0015), (0.009, 0.0025)], tuple(c), seg=20)
         p.box("Kit_Graphite", (xx - 0.0075, (hu0 + hu1) / 2 - 0.0015, zt + 0.0015), (xx + 0.0075, (hu0 + hu1) / 2 + 0.0015, zt + 0.0035), panel=False)
     _label(p, "st_service", Vector((0.22, hu0 + 0.06, zt + 0.0004)), Z, X, Y, scale=0.7)       # read from the seat
-    _label(p, "label_coolant", Vector((0.47, hu0 + 0.07, zt + 0.0004)), Z, X, Y, scale=0.9)
+    _label(p, "label_coolant", Vector((0.47, hu1 - 0.13, zt + 0.0004)), Z, X, Y, scale=0.9)
+    # a groove splits the lid 60/40; the small field a framed grille
+    gx = hx0 + 0.022 + 0.63 * (hx1 - hx0 - 0.044)
+    p.box("Kit_Seal", (gx - 0.0008, hu0 + 0.03, zt - 0.0005), (gx + 0.0008, hu1 - 0.03, zt + 0.0003), panel=False)
+    p.box("Kit_Lip", (gx + 0.03, hu0 + 0.045, zt - 0.0005), (gx + 0.115, hu0 + 0.09, zt + 0.0009), bevel=0.0006, segments=1, panel=False)
+    p.box("Kit_Perforated", (gx + 0.033, hu0 + 0.048, zt + 0.0009), (gx + 0.112, hu0 + 0.087, zt + 0.0012), panel=False)
     # 15 mm hazard strips low on both pedestal sides (5 mm orange bars, 5 mm gaps, a dark band)
     for uf, ns_ in ((U0, -1), (W, 1)):
         fz0, fz1 = 0.081, 0.099

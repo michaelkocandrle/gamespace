@@ -1,0 +1,43 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 30,
+ "variant": "B",
+ "date": "2026-10-08",
+ "verdict": "PASS",
+ "gate": "step",
+ "note": "Autor 8. 10.: díly jsou nové z výroby, opotřebení se nehodnotí ani nežádá. Proporce proti SC nejsou blokující. Jas úseku se nehodnotí, jen tóny mezi sebou. Souřadnice v pixelech zobrazeného listu 2000x611 (originál x1,28). Návrh: Docs/Kit/parts/KF-COCKPIT-CONSOLE/concept/overview.jpg.",
+ "first_impression": "Čistá nová konzole Halcyon, kde přední modul s tmavými jištěnými kolébkami a studené stavové pruhy konečně sedí do jednoho stylu; od 8 ji drží hlavně opěrka, která dál čte jako středně šedá perforovaná podložka, holý krabicový podstavec s řadou nýtů a prázdná plocha poklopu.",
+ "scores": {
+  "silueta_a_tvar": {"score": 7, "why": "Nosník na šikmých konzolách s mezerou, blok kniplu, prostřední blok a zkosená věž odpovídají návrhu (list 5 vpravo 1000-1990,260-520), ale podstavec je dál pravoúhlá krabice s ostrými hranami a bez šikmých výřezů (list 5 vpravo 1000-2000,520-600; list 1 vpravo 1270-1440,380-600)."},
+  "hierarchie_a_hustota_detailu": {"score": 7, "why": "Detail se správně shlukuje u věže, kláves a modulu kolébek (list 3 vpravo); poklop je přes leštěnou páku a mikrošablonu INSPECT 500 H dál z ~70 % prázdná grafitová plocha (list 6 vpravo 1110-1480,160-300) a boky podstavce nesou jen řadu nýtů (list 5 vpravo 1000-2000,540-560)."},
+  "materialy": {"score": 7, "why": "Lak pod čirým lakem, leštěná zkosení, matný grafit, rýhovaný oranžový návlek a nově tmavé kolébky drží kontrast (list 3 vpravo); kůže opěrky ale pořád čte středně šedě (~0,28-0,30 sRGB) bez viditelného zrna a stehů (list 4 vpravo 1010-1450,190-530) a patka kniplu je bronzová radiálně rýhovaná manžeta (list 6 vpravo 1595-1680,410-490)."},
+  "decaly": {"score": 7, "why": "Vrstvené šablony HF-CL 07, TORQUE 42 Nm, CAUTION, COOLANT 12 BAR, SERVICE ACCESS, INSPECT 500 H a výstražný pás čela věže drží (list 3, list 6 vpravo); chybí oranžovo-černý šrafovaný prstenec kolem kniplu z návrhu a výstražné pásky na bocích podstavce nejsou z žádného úhlu vidět."},
+  "svetlo": {"score": 7, "why": "Stavové pruhy MAIN/BATT studeně modré a TEMP jantarový (list 3 vpravo 1085-1175,210-280), LED kopulky s halo na kolébkách (list 3 vpravo 1100,437 / 1145,490 / 1195,548) a zkosení chytají světlo; svislé boky podstavce a opěrky jsou matné bez pruhu odlesku a mezera pod nosníkem je bez akcentu."},
+  "citelnost": {"score": 7, "why": "MAIN/BATT/TEMP, LT/GR/VT/ESP, LIGHTS/GEAR/VTOL, EMER a COOLANT 12 BAR čitelné (list 3, list 6 vpravo); štítek HF-3287 na boku věže (list 5 vpravo 1950-1985,325-345) a drobné nápisy na panelech podstavce (list 1 vpravo 1290-1330,370-460) dál nečitelné."},
+  "chyby_geometrie": {"score": 7, "why": "Bez děr, průniků, plovoucích dílů; ostré nezkosené hrany podstavce a poklopu působí CAD-ově a na listu 4 vpravo 1490-1540,440-520 je pod předním koncem opěrky vidět tmavý štítek '2 BAR' zakrytý opěrkou – čte jako decal ve špatném místě."},
+  "soulad_stylu": {"score": 8, "why": "Tmavé grafitové kolébky s leštěnými kryty na předním modulu (list 3 vpravo 1030-1210,420-600) teď ladí s kolébkami věže, jedna oranžová, jeden font a jednotná zkosení; vybočuje jen bronzová patka kniplu a šedá opěrka proti téměř černé kůži návrhu."}
+ },
+ "average": 7.1,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "concept_match": {
+  "layout_percent": 83,
+  "look_percent": 81,
+  "summary": "Skladba odpovídá návrhu; nově tmavé jištěné kolébky a studené stavové pruhy. Vzhledu dál chybí téměř černá kůže opěrky s perforací jen ve středu a viditelnými stehy, šrafovaný prstenec kniplu a zkosený, členěný podstavec se šikmými výřezy."
+ },
+ "r29_followup": [
+  {"r29": 1, "title": "Opěrka: tón, perforace a prošití", "status": "neopraveno", "detail": "Drsnost 0,85 tón nesnížila: opěrka dál čte středně šedě (~0,28-0,30 sRGB), perforace pokrývá téměř celé vnitřní pole a stehy ani zrno nejsou ze 70 cm vidět (list 4 vpravo 1010-1450,190-530; list 6 vpravo 1010-1500,375-545)."},
+  {"r29": 2, "title": "Přední modul: tmavé jištěné kolébky", "status": "opraveno", "detail": "Grafitové kolébky s leštěnými bočními kryty, LED s halo nad nimi, legendy čitelné (list 3 vpravo 1030-1210,420-600; list 6 vpravo 1755-1920,390-450)."},
+  {"r29": 3, "title": "Podstavec: zkosení, šikmé výřezy a odlesk", "status": "neopraveno", "detail": "Pravoúhlá krabice s řadou nýtů, ostré hrany, matné boky (list 5 vpravo 1000-2000,520-600; list 1 vpravo 1270-1440,380-600)."},
+  {"r29": 4, "title": "Knipl a patka podle návrhu", "status": "částečně", "detail": "Rukojeť tmavá s lučíkem (list 5 vpravo 1745-1830,170-360), hlava kniplu ale leštěný chrom a patka dál bronzová radiálně rýhovaná manžeta bez oranžovo-černých šraf (list 6 vpravo 1595-1680,410-490; list 4 vpravo 1540-1690,400-600)."},
+  {"r29": 5, "title": "Poklop: hloubka a druhá vrstva detailu", "status": "částečně", "detail": "V úchytu leštěná páka a mikrošablona INSPECT 500 H (list 6 vpravo 1280-1440,135-150); plocha 1110-1480,160-300 ale dál prázdná, bez členění na pole a bez obvodové spáry s AO."},
+  {"r29": 6, "title": "Studený UI akcent a drobné legendy", "status": "částečně", "detail": "MAIN/BATT studeně modré, TEMP jantarový – opraveno (list 3 vpravo 1085-1175,210-280). Štítek HF-3287 a nápisy podstavce dál nečitelné, výstražné pásky boků podstavce neukázány."}
+ ],
+ "findings": [
+  {"n": 1, "title": "Opěrka: skutečně tmavá kůže, perforace jen ve středu, viditelné stehy", "where": "list 4 vpravo 1010-1450,190-530; list 6 vpravo 1010-1500,375-545; list 1 vpravo 1240-1440,200-330", "problem": "Největší plocha v pohledu pilota je dál středně šedá perforovaná podložka; drsnost tón nezměnila, takže problém je v albedu/specularu instance nebo v perforačním decalu.", "severity": "doporučeno", "fix": "Změřit pixel opěrky na snímku a ověřit, která MI je na ní skutečně; cíl sRGB <= 0,12. Albedo 0,015, Specular 0,25, drsnost 0,55; perforační decal omezit na střední pás 55 % šířky (otvory 1,5 mm po 5 mm, tmavá výplň, ne světlá); lem hladký R 12 mm; stehy světle šedé 0,7 sRGB, 4 mm, 7 mm od hrany, tloušťka nitě >= 1,2 mm, aby četly ze 70 cm."},
+  {"n": 2, "title": "Podstavec: zkosení, členění a šikmý výřez", "where": "list 5 vpravo 1000-2000,520-600; list 1 vpravo 1270-1440,380-600", "problem": "Horní bloky mají leštěná zkosení, podstavec je holá krabice s řadou nýtů – nejvíc CAD-ová plocha na listech 1 a 5.", "severity": "doporučeno", "fix": "Leštěné zkosení 9 mm na svislých hranách a horní hraně podstavce; bok rozdělit na 3 grafitové panely se spárou 2 mm a 4 šrouby v rozích místo souvislé řady nýtů; šikmý výřez 45°, výška 60 mm u přední paty; výstražný pásek 18 mm ukázat v záběru (list 1 kamera o 15 cm níž)."},
+  {"n": 3, "title": "Patka a hlava kniplu", "where": "list 6 vpravo 1595-1680,410-490; list 4 vpravo 1540-1690,400-600; list 5 vpravo 1690-1780,380-410", "problem": "Bronzová radiálně rýhovaná manžeta a chromová hlava jsou jediné prvky mimo paletu; návrh má šrafovaný oranžovo-černý prstenec a tmavou rukojeť.", "severity": "doporučeno", "fix": "Manžetu nahradit grafitovým prstencem Ø 90 mm s decalem šraf 9 mm pod 45° oranžová/černá (stejný jako čelo věže), vnitřní leštěný kroužek 4 mm; hlava kniplu tmavá pryž albedo 0,04, drsnost 0,7, chrom jen na tlačítkách a lučíku."},
+  {"n": 4, "title": "Poklop: členění a hloubka", "where": "list 6 vpravo 1110-1480,160-300; list 4 vpravo 1260-1830,220-420", "problem": "Přes páku a mikrošablonu je ~70 % plochy poklopu prázdná grafitová deska.", "severity": "doporučeno", "fix": "Obvodová spára 2 mm hloubka 3 mm s AO; drážka 1 mm dělící poklop na 2 pole (60/40); v menším poli lisované žebro 3 mm nebo mřížka 80x40 mm; šipka OPEN 6 mm u páky; max. 35 % plochy bez prvku."},
+  {"n": 5, "title": "Čitelnost drobných štítků", "where": "list 5 vpravo 1950-1985,325-345; list 1 vpravo 1290-1330,370-460; list 3 vpravo 1310-1350,320-360", "problem": "HF-3287 L ARM a nápisy panelů podstavce jsou šedá skvrna.", "severity": "doporučeno", "fix": "Štítek 30x18 mm, text 5 mm tučně bílý na grafitu (kontrast >= 0,6); nápisy panelů podstavce 10-12 mm."},
+  {"n": 6, "title": "Decal '2 BAR' pod opěrkou a odlesk boků", "where": "list 4 vpravo 1490-1540,440-520; list 5 vpravo 1000-1600,380-440", "problem": "Štítek pod předním koncem opěrky je z poloviny zakrytý a čte jako chyba umístění; svislé lakované boky nosníku a podstavce jsou matné bez pruhu odlesku.", "severity": "doporučeno", "fix": "Štítek posunout o 60 mm dopředu na volnou plochu nebo zrušit; studiové světlo natočit tak, aby přes bok nosníku šel pruh odlesku čirého laku (ClearCoatRoughness 0,04) šíře ~20 % výšky boku."}
+ ]
+}

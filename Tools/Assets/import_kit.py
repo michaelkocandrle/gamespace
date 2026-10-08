@@ -678,8 +678,10 @@ def build_test_section(actors, meshes, mis, sec, counts):
         # a studio softbox over its pilot side (8. 10. 2026: the kit lights' specular 0.3 left the clear coat and the
         # polished edges nothing to mirror - the critic read the paint matte for four rounds): full specular
         b0 = KIT_ORIGIN + unreal.Vector(x * 100.0 - 380.0, -10.0, 0.0)
-        soft = rect_light(actors, b0 + unreal.Vector(60.0, 75.0, 140.0), "studio", 6.0, 3.0, "KitTest_ConsoleBSoftbox",
-                          unreal.Vector(0.0, -0.55, -0.83), unreal.Vector(1.0, 0.0, 0.0), 100.0, 20.0)
+        # low on the pilot's side, nearly level: a streak across the vertical faces, not a wash over the tops (over the
+        # rest it lifted the 0.02 leather to 0.35 on screen)
+        soft = rect_light(actors, b0 + unreal.Vector(60.0, 110.0, 95.0), "studio", 4.0, 3.0, "KitTest_ConsoleBSoftbox",
+                          unreal.Vector(0.0, -0.95, -0.3), unreal.Vector(1.0, 0.0, 0.0), 100.0, 20.0)
         soft.rect_light_component.set_editor_property("specular_scale", 1.0)
     vol = actors.spawn_actor_from_class(unreal.PostProcessVolume, _v(((x0 + x1) / 2, 0.0), h / 2),
                                         unreal.Rotator(roll=0.0, pitch=0.0, yaw=0.0))
