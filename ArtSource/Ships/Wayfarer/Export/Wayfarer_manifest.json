@@ -29,8 +29,7 @@
         "SOCKET_Control_door1_panel",
         "SOCKET_Control_eng",
         "SOCKET_Control_pwr",
-        "SOCKET_Display_centre_bottom",
-        "SOCKET_Display_centre_top",
+        "SOCKET_Control_radar",
         "SOCKET_Display_left",
         "SOCKET_Display_right",
         "SOCKET_Engine_L",
@@ -42,7 +41,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "8788049a6ee21fc322326a73f66d3819b7fcd752"
+      "geometry_hash": "e9ef6748d22deb33edfc7eb4da0ba156766b685b"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -56,7 +55,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "6792a9cc870eac443ecaa24af39fba342eeac4d1"
+      "geometry_hash": "3980b6fec4200cda697b7e2044238a910b9f3578"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -91,14 +90,14 @@
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "7286e891b192a8ba9b3c1b475349ac90247a2ad5"
+      "geometry_hash": "102f945f4293068cde110ba2b1d5eff86ce10053"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
       "objects": [
         "SM_Ship_Wayfarer_InteriorDecals"
       ],
-      "geometry_hash": "f8548b77eaf34aea7a41219260b5f59cbee074b9"
+      "geometry_hash": "d9850fe793dd1374e055a49f053ead9bc8112a9c"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorKit.fbx",
@@ -112,15 +111,15 @@
       "objects": [
         "SM_Ship_Wayfarer_Screens"
       ],
-      "geometry_hash": "af6c471502017df4007048c3af25d4531fda123a"
+      "geometry_hash": "29bd74890f17ced11ecc83214a968570f967996f"
     }
   ],
   "meshes": {
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 459489,
-      "verts": 305341,
+      "tris": 459485,
+      "verts": 305339,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -308,8 +307,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 654030,
-      "verts": 338753,
+      "tris": 582810,
+      "verts": 302501,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -326,10 +325,10 @@
         "M_Ship_Wayfarer_IntLeather",
         "M_Ship_Wayfarer_IntWebbing",
         "M_Ship_Wayfarer_IntHousing",
-        "M_Ship_Wayfarer_IntRed",
-        "M_Ship_Wayfarer_IntLedOrange",
         "M_Ship_Wayfarer_IntLedWhite",
+        "M_Ship_Wayfarer_IntLedOrange",
         "M_Ship_Wayfarer_IntLedBlink",
+        "M_Ship_Wayfarer_IntRed",
         "M_Ship_Wayfarer_IntGlowSoft",
         "M_Ship_Wayfarer_IntCream",
         "M_Ship_Wayfarer_IntRubber",
@@ -353,14 +352,13 @@
     "SM_Ship_Wayfarer_InteriorDecals": {
       "lod": 0,
       "part": "InteriorDecals",
-      "tris": 7710,
-      "verts": 6467,
+      "tris": 6548,
+      "verts": 5427,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
         "M_Ship_Wayfarer_DecalPaint",
-        "M_Ship_Wayfarer_DecalGrime",
-        "M_Ship_Wayfarer_DecalWear"
+        "M_Ship_Wayfarer_DecalGrime"
       ],
       "uv_layers": 1,
       "bounds_m": [
@@ -402,8 +400,8 @@
     "SM_Ship_Wayfarer_Screens": {
       "lod": 0,
       "part": "Screens",
-      "tris": 8,
-      "verts": 16,
+      "tris": 4,
+      "verts": 8,
       "materials": [
         "M_Ship_Wayfarer_Screens"
       ],
@@ -516,7 +514,7 @@
         [
           -9.949999809265137,
           3.2013895511627197,
-          0.8000001907348633
+          0.8000011444091797
         ],
         [
           -7.250000476837158,
@@ -742,30 +740,17 @@
         68.18
       ]
     },
-    "SOCKET_Display_centre_bottom": {
+    "SOCKET_Control_radar": {
       "parent": "SM_Ship_Wayfarer",
       "location_m": [
-        7.79078,
-        -0.05162,
-        1.00214
+        7.82,
+        0.0,
+        0.927
       ],
       "location_ue_cm": [
-        779.08,
-        5.16,
-        100.21
-      ]
-    },
-    "SOCKET_Display_centre_top": {
-      "parent": "SM_Ship_Wayfarer",
-      "location_m": [
-        7.79074,
-        0.05162,
-        1.00799
-      ],
-      "location_ue_cm": [
-        779.07,
-        -5.16,
-        100.8
+        782.0,
+        -0.0,
+        92.7
       ]
     },
     "SOCKET_Display_left": {

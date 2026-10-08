@@ -164,6 +164,12 @@ public:
 	/** A hull socket in the world, with or without the SOCKET_ prefix the FBX import drops; false if there is none. */
 	bool GetHullSocketLocation(FName Socket, FVector& OutLocation) const;
 
+	/** The ship mesh (the hull and its sockets). */
+	UStaticMeshComponent* GetHullMesh() const { return Hull; }
+
+	/** The cockpit's 3D holographic radar (none without the hull socket Control_radar). */
+	class USpaceHoloRadarComponent* GetHoloRadar() const { return HoloRadar; }
+
 	/** The pilot's eye (the cockpit camera) in the world. */
 	FVector GetPilotEyeLocation() const;
 
@@ -1063,6 +1069,10 @@ protected:
 	/** Presentation: camera effects, engine sound, ship lights, dust and the inside view. Its tuning stays here. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
 	TObjectPtr<UShipPresentationComponent> Presentation;
+
+	/** The holographic radar over the centre column's emitter (author 8. 10. 2026). */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")
+	TObjectPtr<class USpaceHoloRadarComponent> HoloRadar;
 
 	/** Getting out, walking in and boarding: exit spots, the walked interior, its gravity. Tuning stays here. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spaceship|Components")

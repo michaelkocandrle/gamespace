@@ -25,6 +25,7 @@ U0 = -0.03               # the pedestal's seat-side face (the beam overhangs it 
 DECK = 0.44              # the pedestal's top
 BEAM0, AT = 0.53, 0.62   # the forearm beam's underside and the rest's top (elbow height)
 X, Y, Z = Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))
+MIRROR = [False]         # building the right-hand console (console_b(mirror=True)): legends are laid pre-flipped
 
 
 def side_prism(p, role, pts, u0, u1, bevel, seg=3):
@@ -80,13 +81,19 @@ def legend(p, body, c, r, a, n, h=0.008, role="Kit_Legend", depth=0.0003, font="
     bpy.context.scene.collection.objects.link(ob)
     bpy.context.view_layer.update()
     me = bpy.data.meshes.new_from_object(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+    if MIRROR[0]:
+        r = -r                  # the whole part is mirrored at the end: lay the text mirrored now so it reads right then
     verts = [tuple(c + r * v.co.x + a * v.co.y + n * (v.co.z + depth / 2)) for v in me.vertices]
     faces = [list(f.vertices) for f in me.polygons]
     bpy.data.objects.remove(ob)
     bpy.data.curves.remove(cu)
     bpy.data.meshes.remove(me)
-    for f in p.mesh(role, verts, faces):
+    made = p.mesh(role, verts, faces)
+    for f in made:
         f.smooth = False
+    if MIRROR[0]:
+        import bmesh
+        bmesh.ops.reverse_faces(p.bm[role], faces=list(made))     # the flipped frame turned them inside out
 
 
 def led(p, c, n, glow="Kit_GlowKey", r=0.003):
@@ -118,7 +125,41 @@ def emergency_key(p, c, r, a, n):
     legend(p, "EMER", lp + n * 0.0012, r, a, n, h=0.011, role="Kit_Seal")
 
 
-def console_b(name, seed):
+def console_b(name, seed, mirror=False):
+    """mirror: the right-hand console (variant BR, author 8. 10. 2026: both sides one design) - the same part mirrored
+    across its long axis, the text and decals still reading the right way."""
+    MIRROR[0] = mirror
+    try:
+        p = _console_b(name, seed)
+    finally:
+        MIRROR[0] = False
+    if mirror:
+        _mirror_y(p)
+    return p
+
+
+def _mirror_y(p):
+    """Mirror a built part across y = 0: vertices, face winding, collision, decal shots (their frames keep reading
+    right: x' = -mirror(x), so x' cross y' is still the normal), panel seam boxes."""
+    import bmesh
+    for bm in p.bm.values():
+        if not bm.verts:
+            continue
+        for v in bm.verts:
+            v.co.y = -v.co.y
+        bmesh.ops.reverse_faces(bm, faces=list(bm.faces))
+    p.ucx = [[Vector((q.x, -q.y, q.z)) for q in pts] for pts in p.ucx]
+    for it in p.decal_items:
+        it["from"] = [it["from"][0], -it["from"][1], it["from"][2]]
+        it["to"] = [it["to"][0], -it["to"][1], it["to"][2]]
+        if it.get("frame"):
+            fx, fy = it["frame"]
+            it["frame"] = [[-fx[0], fx[1], -fx[2]], [fy[0], -fy[1], fy[2]]]
+    for f, (lo, hi) in list(p.seam_box.items()):
+        p.seam_box[f] = (Vector((lo.x, -hi.y, lo.z)), Vector((hi.x, -lo.y, hi.z)))
+
+
+def _console_b(name, seed):
     p = kit_geo.Part(name, seed)
     p.edge_roles = {"Kit_Frame": "Kit_FrameEdge"}   # the frame's chamfers: a glossier polished paint that catches the light
     p.sharp_deg = 20.0           # the concept's machined chamfers (25-55 deg) must not shade into soft rolls
@@ -135,9 +176,11 @@ def console_b(name, seed):
         chamfer_panel(p, "Kit_Inset", x0, x1, 0.11, DECK - 0.062, U0, -1)
         chamfer_panel(p, "Kit_Inset", x0, x1, 0.11, DECK - 0.062, W, 1)
     chamfer_panel(p, "Kit_Inset", 0.83, L - 0.08, 0.12, 0.3, U0, -1, c=0.05)
-    p.box("Kit_Graphite", (0.0, U0 - 0.004, DECK - 0.052), (L - 0.02, U0, DECK - 0.046), panel=False)
-    p.box("Kit_Graphite", (0.0, W, DECK - 0.052), (L - 0.02, W + 0.004, DECK - 0.046), panel=False)
-    hatch(p, 0.85, L - 0.1, DECK - 0.04, DECK - 0.012, W, 1)
+    p.box("Kit_Graphite", (0.0, U0 - 0.004, DECK - 0.052), (L - 0.02, U0 + 0.001, DECK - 0.046), panel=False)
+    p.box("Kit_Graphite", (0.0, W - 0.001, DECK - 0.052), (L - 0.02, W + 0.004, DECK - 0.046), panel=False)
+    # author 8. 10. (in the cockpit): the orange hazard hatch looked bad - a cool light line in a dark channel instead
+    p.box("Kit_Seal", (0.85, W - 0.0004, DECK - 0.031), (L - 0.1, W + 0.0012, DECK - 0.021), panel=False)
+    p.box("Kit_GlowStrip", (0.853, W + 0.0008, DECK - 0.0282), (L - 0.103, W + 0.0024, DECK - 0.0238), bevel=0.0008, segments=1, panel=False)
     uf = U0 - 0.006                                            # the seat-side panels' face: a second, functional layer
     zc = (0.11 + DECK - 0.062) / 2
     p.lathe("Kit_Lip", [(0.018, 0.0), (0.018, 0.0014), (0.014, 0.0018)], (0.255, uf, zc), axis=(0, -1, 0), seg=28)   # 1: a 36 mm quarter-turn latch
@@ -351,13 +394,8 @@ def console_b(name, seed):
     fz0, fz1, fu0, fu1 = 0.496, 0.534, TU + 0.05, W - 0.06
     fmh = frame(Vector((L - 0.0145, 0, 0)), (0, 1, 0), (0, 0, 1), (1, 0, 0))
     p.box("Kit_Seal", (L - 0.0162, fu0 - 0.002, fz0 - 0.002), (L - 0.0148, fu1 + 0.002, fz1 + 0.002), panel=False)
-    hgt = fz1 - fz0
-    uu = fu0 - hgt
-    while uu < fu1:
-        poly = [(uu, fz0), (uu + 0.009, fz0), (uu + 0.009 + hgt, fz1), (uu + hgt, fz1)]
-        if poly[0][0] >= fu0 and poly[2][0] <= fu1:              # whole bars only (clipped ends read as slivers)
-            p.poly_prism("Kit_Signal", poly, fmh, 0.0004, bevel=0.0)
-        uu += 0.018
+    for zl in (fz0 + 0.009, fz1 - 0.009):                        # two cool light lines across it (was the orange hatch)
+        p.box("Kit_GlowStrip", (L - 0.0152, fu0 + 0.004, zl - 0.0025), (L - 0.0138, fu1 - 0.004, zl + 0.0025), bevel=0.0006, segments=1, panel=False)
     # the pedestal's front under the switch module: a graphite inset, its vent and a hazard band
     p.box("Kit_Inset", (L - 0.026, U0 + 0.02, 0.13), (L - 0.016, TU - 0.02, DECK - 0.03), bevel=0.003, segments=1)
     p.box("Kit_Perforated", (L - 0.0165, U0 + 0.04, 0.16), (L - 0.0155, TU - 0.04, 0.24), panel=False)
@@ -451,19 +489,12 @@ def console_b(name, seed):
         for uu in (fu0 + 0.012, fu1 - 0.012):
             screw(p, Vector((xx, uu, zt)), Z, 0.003)
     legend(p, "< OPEN >", Vector((0.32, hu1 - 0.09, zt + 0.0002)), X, Y, Z, h=0.016)
-    # 15 mm hazard strips low on both pedestal sides (5 mm orange bars, 5 mm gaps, a dark band)
+    # a cool light line low along both pedestal sides in a 12 mm dark channel (was orange hazard strips - author 8. 10.)
     for uf, ns_ in ((U0, -1), (W, 1)):
-        fz0, fz1 = 0.081, 0.099
-        for x0_, x1_ in ((0.08, 0.38), (0.5, 0.78)):
-            p.box("Kit_Seal", (x0_ - 0.002, uf + ns_ * 0.0002 - 0.0008, fz0 - 0.002), (x1_ + 0.002, uf + ns_ * 0.0002 + 0.0008, fz1 + 0.002), panel=False)
-            xx = x0_
-            while xx + 0.006 + (fz1 - fz0) <= x1_:
-                bar = [(xx, fz0), (xx + 0.006, fz0), (xx + 0.006 + (fz1 - fz0), fz1), (xx + (fz1 - fz0), fz1)]
-                if ns_ < 0:
-                    side_prism(p, "Kit_Signal", bar, uf - 0.0014, uf - 0.0009, 0.0, 1)
-                else:
-                    side_prism(p, "Kit_Signal", bar, uf + 0.0009, uf + 0.0014, 0.0, 1)
-                xx += 0.012
+        a0, a1 = sorted((uf + ns_ * 0.0002 - 0.0008, uf + ns_ * 0.0002 + 0.0008))
+        p.box("Kit_Seal", (0.06, a0, 0.084), (L - 0.12, a1, 0.096), panel=False)
+        g0, g1 = sorted((uf + ns_ * 0.0006, uf + ns_ * 0.0022))
+        p.box("Kit_GlowStrip", (0.063, g0, 0.0875), (L - 0.123, g1, 0.0925), bevel=0.0008, segments=1, panel=False)
     # 7c the decal layers (author 8. 10.: the parts are new from the factory - no wear; the richness is stacked detail):
     # stencils, labels and ids on the graphite insets, rivet rows on the frame band, a socket and a hazard band on the
     # front, plates on the outboard side - each fully on one flat face

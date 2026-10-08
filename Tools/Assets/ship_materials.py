@@ -653,6 +653,54 @@ def build_screen_master():
     return screen
 
 
+def build_holo_radar_masters():
+    """The cockpit's 3D holographic radar (author 8. 10. 2026, USpaceHoloRadarComponent): additive, unlit, two-sided.
+    M_Ship_HoloRadar on the engine's plane: a disc of light - a faint fill, range rings at 1/3, 2/3 and the rim, a
+    cross, a sweep turning once in SweepSeconds with a fading tail. M_Ship_HoloBlip: a contact point / stalk, Colour x
+    Intensity with a fresnel rim."""
+    out = []
+    m = _fresh_material(SHARED + "/M_Ship_HoloRadar")
+    m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
+    m.set_editor_property("two_sided", True)
+    m.set_editor_property("enable_responsive_aa", True)
+    code = ("float2 p = UV * 2.0 - 1.0; float r = length(p); "
+            "float ring = exp(-abs(r - 0.985) * 140.0) + 0.55 * exp(-abs(r - 0.667) * 180.0) + 0.45 * exp(-abs(r - 0.333) * 180.0); "
+            "float cross = 0.3 * (exp(-abs(p.x) * 260.0) + exp(-abs(p.y) * 260.0)); "
+            "float a = atan2(p.y, p.x); float s = frac(T / max(Sweep, 0.1)) * 6.2831853 - 3.14159265; "
+            "float d = frac((s - a) / 6.2831853); "
+            "float sweep = 0.5 * exp(-d * 9.0) + 0.8 * exp(-d * 260.0); "
+            "float fill = 0.05 + 0.07 * (1.0 - r); "
+            "float edge = saturate((1.0 - r) * 60.0 + 0.6); "
+            "return Col * I * (fill + ring + cross + sweep) * edge * step(r, 1.01);")
+    c = _custom(m, "HoloRadarDisc", code, unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["UV", "T", "Col", "I", "Sweep"], -500, 0)
+    _link(_node(m, unreal.MaterialExpressionTextureCoordinate, -900, -100), c, "UV")
+    _link(_node(m, unreal.MaterialExpressionTime, -900, 0), c, "T")
+    _link(_vector(m, "Colour", (0.35, 0.75, 1.0), -900, 100), c, "Col")
+    _link(_scalar(m, "Intensity", 3.0, -900, 250), c, "I")
+    _link(_scalar(m, "SweepSeconds", 3.0, -900, 350), c, "Sweep")
+    _output(c, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(m)
+    unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
+    out.append(m)
+    b = _fresh_material(SHARED + "/M_Ship_HoloBlip")
+    b.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+    b.set_editor_property("blend_mode", unreal.BlendMode.BLEND_ADDITIVE)
+    b.set_editor_property("two_sided", False)
+    fres = _node(b, unreal.MaterialExpressionFresnel, -700, 200, exponent=2.0, base_reflect_fraction=0.35)
+    k = _node(b, unreal.MaterialExpressionMultiply, -450, 0)
+    _link(_vector(b, "Colour", (0.35, 0.75, 1.0), -700, 0), k, "A")
+    _link(_scalar(b, "Intensity", 6.0, -700, 100), k, "B")
+    e = _node(b, unreal.MaterialExpressionMultiply, -250, 100)
+    _link(k, e, "A")
+    _link(fres, e, "B")
+    _output(e, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    MEL.recompile_material(b)
+    unreal.EditorAssetLibrary.save_loaded_asset(b, only_if_is_dirty=False)
+    out.append(b)
+    return out
+
+
 def build_holo_master():
     """The cockpit's ship hologram (step 6): additive, unlit, one-sided. Emission = HoloColor x HoloStrength x
     (a base plus a fresnel rim) x scan lines rolling up in world z x a faint flicker; damage colour prepared
@@ -891,7 +939,7 @@ def build_masters():
             "decal": build_decal_master(), "meshdecal": build_mesh_decal_master(False),
             "meshdecal_paint": build_mesh_decal_master(True), "meshdecal_ao": build_mesh_decal_ao_master(),
             "meshdecal_grime": build_mesh_decal_grime_master(),
-            "layered": build_layered_master(), "screenback": back, "blink": blink, "holo": build_holo_master()}
+            "layered": build_layered_master(), "screenback": back, "blink": blink, "holo": build_holo_master(), "holo_radar": build_holo_radar_masters()}
 
 
 def build_mesh_decal_ao_master():
@@ -1521,7 +1569,13 @@ def apply(ship, setup, mesh_assets):
     notes = []
     # Mesh-specific entries win over general ones for the same slot.
     ordered = sorted(specs.items(), key=lambda kv: 1 if kv[1].get("meshes") else 0)
-    instances = {name: build_instance(name, folder, spec, masters, ship) for name, spec in ordered}
+    # "kit_material": the slot takes a factory part's instance as it is (author 8. 10. 2026: the cockpit's own surfaces
+    # must be the same paint, graphite and housing as the kit consoles in it, not a look-alike)
+    instances = {name: (unreal.EditorAssetLibrary.load_asset(spec["kit_material"]) if spec.get("kit_material")
+                        else build_instance(name, folder, spec, masters, ship)) for name, spec in ordered}
+    for name, spec in ordered:
+        if instances[name] is None:
+            raise RuntimeError("%s: kit material %s not found (import the kit first)" % (name, spec.get("kit_material")))
     for mesh_name, mesh in mesh_assets.items():
         slots = mesh.get_editor_property("static_materials")
         changed = False

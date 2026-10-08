@@ -1355,10 +1355,15 @@ def pedestal(g, screen_bm, sockets, eye, spec):
         for su in (-1, 1):
             q = top + hr * (su * (ew / 2 - 0.008)) + Z * 0.0
             tube(g["int_trim"], q - fwd * 0.03, q + fwd * 0.03, 0.006, 8)
-        for name, du, h in (("centre_top", -(cw / 2 + 0.008), cw * 259.0 / 210.0), ("centre_bottom", cw / 2 + 0.008, cw * 231.0 / 210.0)):
-            c = top + hr * du + Z * (0.016 + 0.02 + h / 2)
-            r2, u2, n2 = oriented(eye, c)
-            screen(screen_bm, sockets, name, c, r2, u2, n2, cw, h)
+        if spec.get("centre_screens", True):
+            for name, du, h in (("centre_top", -(cw / 2 + 0.008), cw * 259.0 / 210.0), ("centre_bottom", cw / 2 + 0.008, cw * 231.0 / 210.0)):
+                c = top + hr * du + Z * (0.016 + 0.02 + h / 2)
+                r2, u2, n2 = oriented(eye, c)
+                screen(screen_bm, sockets, name, c, r2, u2, n2, cw, h)
+        else:
+            # author 8. 10. 2026: no small centre screens - a 3D holographic radar stands over the emitter instead
+            # (USpaceHoloRadarComponent at this socket, toggled from interact mode)
+            sockets["Control_radar"] = top + Z * 0.017
         return
     rr_slab(g["int_console"], hc - hn * 0.01, hr, hu, hn, 2 * cw + 0.09, cw * 1.35 + 0.04, 0.04, 0.06)
     rr_ring(g["int_trim"], hc + hn * 0.004, hr, hu, hn, 2 * cw + 0.09, cw * 1.35 + 0.04, 0.04, 0.012, 0.01)

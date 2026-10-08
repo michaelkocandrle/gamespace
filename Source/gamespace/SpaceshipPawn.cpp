@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SpaceshipPawn.h"
+#include "SpaceHoloRadarComponent.h"
 #include "SpaceshipLog.h"
 
 #include "Camera/CameraComponent.h"
@@ -189,6 +190,8 @@ ASpaceshipPawn::ASpaceshipPawn()
 	Landing = CreateDefaultSubobject<UShipLandingComponent>(TEXT("ShipLanding"));
 	ShipInput = CreateDefaultSubobject<UShipInputComponent>(TEXT("ShipInput"));
 	Presentation = CreateDefaultSubobject<UShipPresentationComponent>(TEXT("ShipPresentation"));
+	HoloRadar = CreateDefaultSubobject<USpaceHoloRadarComponent>(TEXT("HoloRadar"));
+	HoloRadar->SetupAttachment(HullCollision);
 	Boarding = CreateDefaultSubobject<UShipBoardingComponent>(TEXT("ShipBoarding"));
 
 	SpaceDust =CreateDefaultSubobject<USpaceDustComponent>(TEXT("SpaceDust"));

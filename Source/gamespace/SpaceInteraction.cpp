@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SpaceInteraction.h"
+#include "SpaceHoloRadarComponent.h"
 
 #include "EngineUtils.h"
 #include "SpaceEngineering.h"
@@ -109,6 +110,30 @@ namespace SpaceInteractionLocal
 		Out.Add(MoveTemp(Spot));
 	}
 
+	/** The holographic radar over the centre column (author 8. 10. 2026): click its emitter to switch it on or off. */
+	void AddRadar(ASpaceshipPawn* Ship, TArray<FSpaceHotspot>& Out)
+	{
+		USpaceHoloRadarComponent* Radar = Ship->GetHoloRadar();
+		if (!Radar || !Radar->HasRadar() || !Ship->IsPowered())
+		{
+			return;
+		}
+		const TWeakObjectPtr<ASpaceshipPawn> Weak(Ship);
+		FSpaceHotspot Spot;
+		Spot.Label = Radar->IsRadarOn() ? LOCTEXT("RadarOff", "VYPNOUT RADAR") : LOCTEXT("RadarOn", "ZAPNOUT RADAR");
+		Spot.WorldLocation = Radar->GetComponentLocation();
+		Spot.SizeCm = 8.f;
+		Spot.Aspect = 2.5f;
+		Spot.Use = [Weak](bool bPrimary)
+		{
+			if (ASpaceshipPawn* Live = Weak.Get(); Live && bPrimary && Live->GetHoloRadar())
+			{
+				Live->GetHoloRadar()->ToggleRadar();
+			}
+		};
+		Out.Add(MoveTemp(Spot));
+	}
+
 	void AddMfds(ASpaceshipPawn* Ship, TArray<FSpaceHotspot>& Out)
 	{
 		// Dark glass has no pages to click through.
@@ -159,6 +184,7 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 	if (ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(Pawn))
 	{
 		AddMfds(Ship, OutHotspots);
+		AddRadar(Ship, OutHotspots);
 		AddPower(Ship, OutHotspots);
 		AddConfig(Ship, OutHotspots);
 		AddEngines(Ship, OutHotspots);
@@ -225,6 +251,7 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 			};
 			OutHotspots.Add(MoveTemp(Spot));
 			AddMfds(Inside, OutHotspots);
+			AddRadar(Inside, OutHotspots);
 			AddPower(Inside, OutHotspots);
 			AddConfig(Inside, OutHotspots);
 		}

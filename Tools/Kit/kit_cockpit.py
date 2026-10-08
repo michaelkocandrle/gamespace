@@ -67,14 +67,10 @@ def stick(p, base, label, head_role="Kit_Shell", guard="c", plate_role="Kit_Hous
     if bars != 28:
         # a solid hazard ring 14 mm wide: 2 x bars slanted segments, Halcyon orange and black alternating, no gaps, a
         # polished 3 mm ring outside (the thin bars on graphite read as a beige dial - critic r32)
-        mr = frame(base + Z * 0.0045, X, Y, Z)
-        r0, r1, tw = 0.036, 0.05, 0.16
-        for k in range(2 * bars):
-            a0, a1 = 2 * math.pi * k / (2 * bars), 2 * math.pi * (k + 1) / (2 * bars)
-            quad = [(r0 * math.cos(a0), r0 * math.sin(a0)), (r0 * math.cos(a1), r0 * math.sin(a1)),
-                    (r1 * math.cos(a1 + tw), r1 * math.sin(a1 + tw)), (r1 * math.cos(a0 + tw), r1 * math.sin(a0 + tw))]
-            p.poly_prism("Kit_Signal" if k % 2 == 0 else "Kit_Seal", quad, mr, 0.003, panel=False)
-        p.lathe("Kit_Lip", [(0.053, 0.0015), (0.053, 0.0045), (0.0505, 0.005), (0.0505, 0.0015)], base, seg=48)
+        # author 8. 10. (in the cockpit): the hatched ring looked bad - a dark well with a glowing ring, a high-tech light
+        p.lathe("Kit_Graphite", [(0.05, 0.0015), (0.05, 0.004), (0.034, 0.004), (0.034, 0.0015)], base, seg=64)
+        p.lathe("Kit_GlowStrip", [(0.0455, 0.0038), (0.0455, 0.0052), (0.0425, 0.0052), (0.0425, 0.0038)], base, seg=64)
+        p.lathe("Kit_Lip", [(0.053, 0.0015), (0.053, 0.0045), (0.0505, 0.005), (0.0505, 0.0015)], base, seg=64)
     else:
         p.lathe("Kit_Graphite", [(0.05, 0.0015), (0.05, 0.0035), (0.034, 0.0035), (0.034, 0.0015)], base, seg=48)
     for k in range(bars if bars == 28 else 0):                                     # oblique hatch bars, Halcyon orange on graphite

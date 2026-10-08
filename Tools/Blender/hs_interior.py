@@ -1426,7 +1426,8 @@ def cockpit_detail(g, layout, zc, sill):
     # (author 7. 10. 2026: as SC has it) SC-style sticks on both arms: a chrome ball on a hatched base, a slim grip
     # under a silver C-guard (Aurora flies on two sticks; the left one strafes)
     # the hand at 0.47 m from the seat axis, 15 cm ahead of the eye (a seated pilot's forearm along the console)
-    hs_cockpit.sc_stick(g, Vector((right["rect"][0] + 0.8, -0.40, ztop + 0.004)), "ck_flight", Vector((0, 1, 0)))
+    if "right" not in KIT_CONSOLES:
+        hs_cockpit.sc_stick(g, Vector((right["rect"][0] + 0.8, -0.40, ztop + 0.004)), "ck_flight", Vector((0, 1, 0)))
     if "left" not in KIT_CONSOLES:
         hs_cockpit.sc_stick(g, Vector((left["rect"][0] + 0.8, 0.40, ztop + 0.004)), "ck_rcs", Vector((0, -1, 0)))
     # console edge lights facing the pilot (dim, below the dashboard line)
@@ -1491,7 +1492,7 @@ def cockpit_detail(g, layout, zc, sill):
     for sd in (-1, 1):                                        # side cheeks down to the floor, toe strips
         ch = fc + Ymf * (sd * 0.3) - nrm * 0.02
         _hc.rr_slab(g["int_housing"], ch, upv, -nrm, Ymf * sd, pl, 0.07, 0.01, 0.012, 3)
-        ts = fc + Ymf * (sd * 0.13) + upv * (pl / 2 - 0.05) + nrm * 0.009
+        ts = fc + Ymf * (sd * 0.13) + upv * (pl / 2 - 0.05) + nrm * 0.007
         _hc.rr_slab(g["int_rubber"], ts, Ymf, upv, nrm, 0.16, 0.035, 0.008, 0.003, 2)
         for sv in (-1, 1):
             q = fc + Ymf * (sd * 0.275) + upv * (sv * (pl / 2 - 0.02)) - nrm * 0.0005
