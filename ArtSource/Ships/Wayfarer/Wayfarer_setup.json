@@ -656,6 +656,8 @@
    "roughness": 0.55
   },
   "MI_Ship_Wayfarer_IntWall": {
+   "kit_material": "/Game/Kit/Materials/MI_Kit_Halcyon_Frame",
+   "_kit_material": "author 8. 10. 2026: the glossy light paint of the centre column under the radar (Kit_Frame: clear coat, orange peel) on the cockpit's walls and panels too",
    "_satin_8_10": "author 8. 10. 2026: the kit consoles' paint colour (Kit_Frame) as a satin without the clear coat - the clear-coated paint mirrored the sky on the canopy frame",
    "master": "layered",
    "vectors": {
@@ -688,6 +690,8 @@
    "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
   },
   "MI_Ship_Wayfarer_IntPanel": {
+   "kit_material": "/Game/Kit/Materials/MI_Kit_Halcyon_Frame",
+   "_kit_material": "author 8. 10. 2026: the glossy light paint of the centre column under the radar (Kit_Frame: clear coat, orange peel) on the cockpit's walls and panels too",
    "_satin_8_10": "author 8. 10. 2026: the kit consoles' paint colour (Kit_Frame) as a satin without the clear coat - the clear-coated paint mirrored the sky on the canopy frame",
    "master": "layered",
    "vectors": {
@@ -1309,6 +1313,8 @@
    "wear_amount": 0.0
   },
   "MI_Ship_Wayfarer_IntFrame": {
+   "kit_material": "/Game/Kit/Materials/MI_Kit_Halcyon_Frame",
+   "_kit_material": "author 8. 10. 2026: the glossy light paint of the centre column under the radar (Kit_Frame: clear coat, orange peel) on the cockpit's walls and panels too",
    "_satin_8_10": "author 8. 10. 2026: the kit consoles' paint colour as a satin (the canopy frame lining)",
    "_comment": "cockpit frame lining in the hull's warm off-white paint (concept A in the Wayfarer's colours); satin, not glossy: a strong clear coat mirrored every cockpit lamp as a hot spot on the walls (author 25. 9. 2026)",
    "master": "layered",
