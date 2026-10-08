@@ -123,13 +123,13 @@ def console_b(name, seed):
     p.edge_roles = {"Kit_Frame": "Kit_FrameEdge"}   # the frame's chamfers: a glossier polished paint that catches the light
     p.sharp_deg = 20.0           # the concept's machined chamfers (25-55 deg) must not shade into soft rolls
     # 1 the pedestal: a light worn frame, the kick chamfered back, a dark recessed kick with a vent row
-    ped = [(0.03, 0.07), (L - 0.1, 0.07), (L - 0.02, 0.15), (L - 0.02, DECK), (0.0, DECK), (0.0, 0.1)]   # an 80 mm 45 deg cut at the front foot
+    ped = [(0.03, 0.045), (L - 0.1, 0.045), (L - 0.02, 0.125), (L - 0.02, DECK), (0.0, DECK), (0.0, 0.075)]   # an 80 mm 45 deg cut at the front foot
     side_prism(p, "Kit_Frame", ped, U0, W, 0.012, 1)
-    p.box("Kit_Graphite", (0.05, U0 + 0.02, 0.0), (L - 0.08, W - 0.02, 0.075), bevel=0.004, segments=2)
+    p.box("Kit_Graphite", (0.05, U0 + 0.035, 0.0), (L - 0.1, W - 0.035, 0.05), bevel=0.004, segments=2)
     for k in range(14):
         xk = 0.12 + k * 0.024
-        p.box("Kit_Housing", (xk, U0 + 0.016, 0.018), (xk + 0.012, U0 + 0.022, 0.055), bevel=0.002, segments=1, panel=False)
-        p.box("Kit_Housing", (xk + 0.5, W - 0.026, 0.018), (xk + 0.512, W - 0.02, 0.055), bevel=0.002, segments=1, panel=False)
+        p.box("Kit_Housing", (xk, U0 + 0.031, 0.01), (xk + 0.012, U0 + 0.037, 0.036), bevel=0.002, segments=1, panel=False)
+        p.box("Kit_Housing", (xk + 0.5, W - 0.041, 0.01), (xk + 0.512, W - 0.035, 0.036), bevel=0.002, segments=1, panel=False)
     # dark panels set into both long faces, a belt line over them, screws; the outboard front a hatch band and a plate
     for x0, x1 in ((0.05, 0.29), (0.294, 0.545), (0.549, 0.8)):        # three panels, 4 mm seams between them
         chamfer_panel(p, "Kit_Inset", x0, x1, 0.11, DECK - 0.062, U0, -1)
@@ -151,7 +151,7 @@ def console_b(name, seed):
     p.box("Kit_Lip", (0.6, uf - 0.0012, 0.2), (0.7, uf + 0.001, 0.255), bevel=0.0008, segments=1, panel=False)   # 3: a 100 x 55 type plate
     p.box("Kit_Legend", (0.603, uf - 0.0016, 0.203), (0.697, uf - 0.0011, 0.252), panel=False)
     legend(p, "HC-12W", Vector((0.65, uf - 0.0016, 0.236)), X, Z, -Y, h=0.009, role="Kit_Seal")
-    legend(p, "SN 0417-B  HALCYON", Vector((0.65, uf - 0.0016, 0.2155)), X, Z, -Y, h=0.0055, role="Kit_Seal")
+    legend(p, "SN 0417-B", Vector((0.65, uf - 0.0016, 0.2155)), X, Z, -Y, h=0.0068, role="Kit_Seal")
     for uf_s, ns_ in ((U0, -1), (W, 1)):                       # a polished bead on the foot's break edge
         ua_, ub_ = sorted((uf_s, uf_s + ns_ * 0.003))
         p.box("Kit_FrameEdge", (0.03, ua_, 0.1005), (L - 0.07, ub_, 0.1065), bevel=0.0012, segments=2, panel=False)
@@ -201,8 +201,9 @@ def console_b(name, seed):
     sl = Vector((0.05, 0.0, 0.03)).normalized()                # the strip turns up the beam's slanted front foot (seen from the seat)
     on = Vector((sl.z, 0.0, -sl.x))
     c_ = Vector((0.605, 0.0, BEAM0 + 0.015))
-    pts = [c_ - sl * 0.006, c_ + sl * 0.006, c_ + sl * 0.006 + on * 0.0015, c_ - sl * 0.006 + on * 0.0015]
-    side_prism(p, "Kit_GlowFoot", [(q.x, q.z) for q in pts], -0.066, 0.15, 0.0, 1)
+    for role_, hw, pr, u0_, u1_ in (("Kit_Lip", 0.0095, 0.001, -0.074, 0.154), ("Kit_GlowFoot", 0.007, 0.0022, -0.071, 0.151)):
+        pts = [c_ - sl * hw, c_ + sl * hw, c_ + sl * hw + on * pr, c_ - sl * hw + on * pr]
+        side_prism(p, role_, [(q.x, q.z) for q in pts], u0_, u1_, 0.0, 1)
     for ua in (-0.066, 0.14):                                  # a hidden 6 mm light strip under each beam edge, washing the gap
         p.box("Kit_Seal", (0.07, ua - 0.002, BEAM0 - 0.004), (0.55, ua + 0.008, BEAM0), panel=False)
         p.box("Kit_Lip", (0.072, ua - 0.006, BEAM0 - 0.006), (0.548, ua + 0.012, BEAM0 - 0.003), bevel=0.001, segments=1, panel=False)   # a polished bezel
@@ -211,7 +212,7 @@ def console_b(name, seed):
         uu = -0.03 + k * 0.025
         p.lathe("Kit_Lip", [(0.0045, 0.0), (0.0045, 0.0012), (0.0032, 0.0014)], (0.63, uu, AT - 0.05), axis=(1, 0, 0), seg=16)
         p.lathe(gl, [(0.003, 0.0), (0.003, 0.0012), (0.002, 0.0024), (0.0, 0.0028)], (0.6312, uu, AT - 0.05), axis=(1, 0, 0), seg=16)
-    _label(p, "st_hfcl", Vector((0.18, -0.0796, BEAM0 + 0.045)), -Y, X, Z, scale=0.5)
+    legend(p, "HF-AR 01", Vector((0.175, -0.0797, BEAM0 + 0.045)), X, Z, -Y, h=0.008)
     for k in range(2):                                         # Halcyon's mark: two slanted orange bars, 30 mm
         x_ = 0.335 + k * 0.016
         bar = [(x_, BEAM0 + 0.031), (x_ + 0.008, BEAM0 + 0.031), (x_ + 0.018, BEAM0 + 0.059), (x_ + 0.010, BEAM0 + 0.059)]
@@ -237,8 +238,11 @@ def console_b(name, seed):
     for xx in (0.68, 0.85):
         screw(p, Vector((xx, U0 - 0.0125, DECK + 0.012)), -Y)
         screw(p, Vector((xx, U0 - 0.0125, 0.488)), -Y)
-    for t_, h_, z_ in (("STICK ASSY L", 0.0055, 0.44), ("HF-ST 02", 0.0045, 0.428)):   # the block's front: its stencil, a polished foot bead
-        legend(p, t_, Vector((0.8742, 0.0675, z_)), Y, Z, X, h=h_)
+    p.box("Kit_Lip", (0.873, 0.0255, 0.4565), (0.8752, 0.1095, 0.4745), bevel=0.0005, segments=1, panel=False)   # the block's front: a plate
+    p.box("Kit_Legend", (0.873, 0.0275, 0.4575), (0.8757, 0.1075, 0.4735), panel=False)
+    legend(p, "HF-ST 02", Vector((0.8757, 0.0675, 0.4655)), Y, Z, X, h=0.0085, role="Kit_Seal")
+    for uu in (0.016, 0.119):
+        screw(p, Vector((0.8745, uu, 0.4655)), X, 0.0025)
     p.box("Kit_FrameEdge", (0.869, U0 - 0.012, DECK + 0.004), (0.8725, 0.18, DECK + 0.013), bevel=0.001, segments=1, panel=False)
     stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs", head_role="Kit_Gasket", guard="d", plate_role="Kit_Inset",
           ball_role="Kit_Gasket", bars=15)      # a graphite base, a rubber gimbal boot, 9 mm hatch bars
@@ -434,7 +438,16 @@ def console_b(name, seed):
     for k in range(3):                                          # two ribs 3 x 6 mm across the frame
         xr = fx0 + (fx1 - fx0) * (k + 1) / 4
         if k != 1:
-            p.box("Kit_Inset", (xr - 0.0015, fu0 + 0.012, zt - 0.0005), (xr + 0.0015, fu1 - 0.012, zt + 0.0025), bevel=0.0012, segments=2, panel=False)
+            p.box("Kit_Inset", (xr - 0.0015, fu0 + 0.012, zt - 0.0005), (xr + 0.0015, fu1 - 0.012, zt + 0.0035), bevel=0.0012, segments=2, panel=False)
+            p.box("Kit_FrameEdge", (xr - 0.0012, fu0 + 0.013, zt + 0.003), (xr + 0.0012, fu1 - 0.013, zt + 0.0042), bevel=0.0005, segments=1, panel=False)
+    xm, um = (fx0 + fx1) / 2, (fu0 + fu1) / 2 + 0.035          # a 70 x 40 mm hatch plate between the ribs, four screws in the field
+    p.box("Kit_Lip", (xm - 0.036, um - 0.021, zt - 0.0005), (xm + 0.036, um + 0.021, zt + 0.001), bevel=0.0005, segments=1, panel=False)
+    p.box("Kit_Legend", (xm - 0.034, um - 0.019, zt), (xm + 0.034, um + 0.019, zt + 0.0014), panel=False)
+    legend(p, "HATCH A", Vector((xm, um + 0.006, zt + 0.0014)), X, Y, Z, h=0.008, role="Kit_Seal")
+    legend(p, "HF-HT 04", Vector((xm, um - 0.009, zt + 0.0014)), X, Y, Z, h=0.006, role="Kit_Seal")
+    for xx in (fx0 + 0.012, fx1 - 0.012):
+        for uu in (fu0 + 0.012, fu1 - 0.012):
+            screw(p, Vector((xx, uu, zt)), Z, 0.003)
     legend(p, "< OPEN >", Vector((0.32, hu1 - 0.09, zt + 0.0002)), X, Y, Z, h=0.016)
     # 15 mm hazard strips low on both pedestal sides (5 mm orange bars, 5 mm gaps, a dark band)
     for uf, ns_ in ((U0, -1), (W, 1)):
@@ -456,7 +469,6 @@ def console_b(name, seed):
     det = [("st_inspect", (0.24, U0 - 0.0065, 0.19), -Y, X, 0.7), ("st_service", (0.17, U0 - 0.0065, 0.28), -Y, X, 0.7),
            ("pn_1", (0.085, U0 - 0.0065, DECK - 0.09), -Y, X, 0.7), ("pn_2", (0.33, U0 - 0.0065, DECK - 0.09), -Y, X, 0.7),
            ("pn_3", (0.585, U0 - 0.0065, DECK - 0.09), -Y, X, 0.7),
-           ("pn_8", (0.585, U0 - 0.0065, 0.14), -Y, X, 0.5),
            ("label_coolant", (0.24, W + 0.0065, 0.2), Y, -X, 0.8), ("st_torque", (0.25, W + 0.0065, 0.33), Y, -X, 0.6),
            ("warning_label", (0.62, W + 0.0065, 0.22), Y, -X, 0.8), ("st_gnd", (0.62, W + 0.0065, 0.32), Y, -X, 0.8),
            ("tri_warning", (1.11, TU - 0.0065, 0.5), -Y, X, 0.6), ("panel_B07", (1.1, W + 0.0045, 0.6), Y, -X, 0.6),
