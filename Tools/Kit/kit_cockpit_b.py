@@ -63,6 +63,32 @@ def hatch(p, x0, x1, z0, z1, u, n_sign, step=0.022):
         k += 1
 
 
+def legend(p, body, c, r, a, n, h=0.008, role="Kit_Legend", depth=0.0003, font="Content/UI/Fonts/Rajdhani-SemiBold.ttf"):
+    """Printed lettering as geometry, centred on c in the face frame (r right, a up, n out), cap height ~h: crisp at any
+    distance, white - the library decals' small grey type did not read from the seat (critic r20-23)."""
+    import os
+    import bpy
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    cu = bpy.data.curves.new("legend", "FONT")
+    cu.body = body
+    cu.font = bpy.data.fonts.load(os.path.join(root, font), check_existing=True)
+    cu.size = h * 1.45                                      # Rajdhani's caps are ~0.69 em
+    cu.align_x, cu.align_y = "CENTER", "CENTER"
+    cu.extrude = depth / 2
+    cu.resolution_u = 3
+    ob = bpy.data.objects.new("legend", cu)
+    bpy.context.scene.collection.objects.link(ob)
+    bpy.context.view_layer.update()
+    me = bpy.data.meshes.new_from_object(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+    verts = [tuple(c + r * v.co.x + a * v.co.y + n * (v.co.z + depth / 2)) for v in me.vertices]
+    faces = [list(f.vertices) for f in me.polygons]
+    bpy.data.objects.remove(ob)
+    bpy.data.curves.remove(cu)
+    bpy.data.meshes.remove(me)
+    for f in p.mesh(role, verts, faces):
+        f.smooth = False
+
+
 def emergency_key(p, c, r, a, n):
     """The red emergency key under a flip-up red cover, framed in orange, its label plate."""
     fm = lambda o: frame(o, r, a, n)                         # noqa: E731
@@ -80,8 +106,8 @@ def emergency_key(p, c, r, a, n):
         p.box("Kit_Red", (sv * 0.03 - 0.0015, 0.0, -0.0095), (sv * 0.03 + 0.0015, 0.043, 0.0), bevel=0.0007, segments=1, m=mc)
     p.box("Kit_Red", (-0.03, 0.0405, -0.0095), (0.03, 0.043, 0.0), bevel=0.0007, segments=1, m=mc)
     lp = c - a * 0.045
-    p.box("Kit_Graphite", (-0.052, -0.017, 0.0), (0.052, 0.017, 0.0015), m=fm(lp), panel=False)
-    _label(p, "ck_emerg_o2", lp + n * 0.0017, n, r, a, scale=0.8)
+    p.box("Kit_Signal", (-0.03, -0.0095, 0.0), (0.03, 0.0095, 0.0012), m=fm(lp), panel=False)
+    legend(p, "EMER", lp + n * 0.0012, r, a, n, h=0.011, role="Kit_Seal")
 
 
 def console_b(name, seed):
@@ -120,7 +146,7 @@ def console_b(name, seed):
     p.box("Kit_Graphite", (0.04, -0.0775, BEAM0 + 0.03), (0.56, -0.074, BEAM0 + 0.038), panel=False)          # the groove
     for k in range(6):
         screw(p, Vector((0.06 + k * 0.1, -0.0758, BEAM0 + 0.017)), -Y, 0.003)
-    for xa, xb in ((0.035, 0.595),):
+    for xa, xb in ((0.035, 0.312), (0.318, 0.595)):
         p.box("Kit_Gasket", (xa, -0.062, AT - 0.022), (xb, 0.142, AT), bevel=0.013, segments=4)
         for a_, b_ in (((xa + 0.018, -0.045), (xb - 0.018, -0.0435)), ((xa + 0.018, 0.1235), (xb - 0.018, 0.125)),
                        ((xa + 0.018, -0.045), (xa + 0.0195, 0.125)), ((xb - 0.0195, -0.045), (xb - 0.018, 0.125))):
@@ -183,7 +209,7 @@ def console_b(name, seed):
     for k, lab in enumerate(("ck_main", "ck_batt", "ck_temp")):
         q = sc + d * (0.022 - 0.022 * k)
         p.box("Kit_GlowFoot" if k < 2 else "Kit_GlowAmber", (0.005, -0.004, 0.0055), (0.055, 0.004, 0.0065), m=fm(q), panel=False)
-        _label(p, lab, q - X * 0.03 + n * 0.0058, n, X, d, scale=0.62)
+        legend(p, {"ck_main": "MAIN", "ck_batt": "BATT", "ck_temp": "TEMP"}[lab], q - X * 0.03 + n * 0.0057, X, d, n, h=0.0075)
     kc = c0 + X * 0.89                                         # the keys
     p.box("Kit_Lip", (-0.055, -0.05, 0.002), (0.055, 0.05, 0.005), bevel=0.0015, segments=2, m=fm(kc))
     p.box("Kit_Graphite", (-0.05, -0.045, 0.005), (0.05, 0.045, 0.006), m=fm(kc), panel=False)
@@ -194,6 +220,7 @@ def console_b(name, seed):
         # a gradient: the cap's rim on the dimmer cool glow, a brighter warm centre a hair proud
         p.box("Kit_GlowCool", (-0.016, -0.014, 0.01), (0.016, 0.014, 0.0135), bevel=0.0015, segments=2, m=fm(q))
         p.box("Kit_GlowKey", (-0.0105, -0.0085, 0.0135), (0.0105, 0.0085, 0.0139), m=fm(q), panel=False)
+        legend(p, {"ck_lights": "LT", "ck_gear": "GR", "ck_vtol": "VT", "ck_esp": "ESP"}[lab], fm(q) @ Vector((0.0, 0.0, 0.0139)), X, d, n, h=0.0065, role="Kit_Seal")
     for xx in (0.665, 0.955):
         screw(p, c0 + X * xx + d * 0.04 + n * 0.003, n)
         screw(p, c0 + X * xx - d * 0.04 + n * 0.003, n)
@@ -215,8 +242,10 @@ def console_b(name, seed):
     for i, lab in enumerate(("ck_pwr", "ck_extlt", "ck_eng")):
         q = fc - a * 0.078 + r * (0.105 * (i - 1)) + nf * 0.002
         p.box("Kit_Lip", (-0.016, -0.024, 0.0), (0.016, 0.03, 0.0015), bevel=0.001, segments=1, m=ff(q), panel=False)   # its frame
-        _rocker(p, q, r, a, nf, lab, label_scale=1.1)
-        p.box("Kit_GlowKey", (-0.008, 0.021, 0.0015), (0.008, 0.0265, 0.0027), m=ff(q), panel=False)
+        _rocker(p, q, r, a, nf, lab, label_scale=0)
+        legend(p, {"ck_pwr": "PWR", "ck_extlt": "EXT LT", "ck_eng": "ENG"}[lab], q - a * 0.034 + nf * 0.0002, r, a, nf, h=0.008)
+        p.box("Kit_Lip", (-0.0095, 0.0195, 0.0015), (0.0095, 0.028, 0.0026), bevel=0.0006, segments=1, m=ff(q), panel=False)
+        p.box("Kit_GlowKey", (-0.0075, 0.021, 0.0026), (0.0075, 0.0265, 0.0032), m=ff(q), panel=False)
     for su in (-1, 1):
         for sv in (-1, 1):
             screw(p, fc + r * (su * (w2 - 0.012)) + a * (sv * (h2 - 0.012)) + nf * 0.002, nf)
@@ -293,7 +322,7 @@ def console_b(name, seed):
                                     fs_(pc) @ (q + Vector((sv * 0.013, 0.004, 0.022)))], 0.0018, seg=6)
         p.box("Kit_GlowKey" if k != 1 else "Kit_GlowAmber", q + Vector((-0.004, 0.012, 0.002)), q + Vector((0.004, 0.016, 0.003)),
               m=fs_(pc), panel=False)
-        _label(p, lab, fs_(pc) @ (q + Vector((0.0, -0.019, 0.0021))), ns, X, sd_, scale=0.5)
+        legend(p, {"ck_lights": "LIGHTS", "ck_gear": "GEAR", "ck_vtol": "VTOL"}[lab], fs_(pc) @ (q + Vector((0.0, -0.019, 0.0021))), X, sd_, ns, h=0.0065)
     # 7b the rear deck outboard of the beam: a service hatch (a raised lid in a dark seam, a recessed pull, two
     # quarter-turn latches, its stencils) - the concept has no empty board
     hx0, hx1, hu0, hu1 = 0.06, 0.58, 0.2, W - 0.04
