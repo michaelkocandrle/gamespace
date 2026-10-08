@@ -435,7 +435,7 @@
     0.95,
     0.9
    ],
-   "intensity_cd": 120.0,
+   "intensity_cd": 45.0,
    "radius_m": 5.0,
    "location": [
     16.555,
@@ -469,7 +469,7 @@
     0.95,
     0.9
    ],
-   "intensity_cd": 120.0,
+   "intensity_cd": 45.0,
    "radius_m": 5.0,
    "location": [
     17.387500000000003,
@@ -503,7 +503,7 @@
     0.95,
     0.9
    ],
-   "intensity_cd": 120.0,
+   "intensity_cd": 45.0,
    "radius_m": 5.0,
    "location": [
     16.555,
@@ -537,7 +537,7 @@
     0.95,
     0.9
    ],
-   "intensity_cd": 120.0,
+   "intensity_cd": 45.0,
    "radius_m": 5.0,
    "location": [
     17.387500000000003,
@@ -1255,8 +1255,8 @@
    "radius_m": 1.6,
    "location": [
     17.8346,
-    0.8755,
-    2.0642
+    0.8756,
+    2.0643
    ],
    "direction": [
     0,
@@ -1268,7 +1268,7 @@
    "specular": 0.2,
    "location_ue_cm": [
     758.5,
-    -87.5,
+    -87.6,
     86.4
    ],
    "direction_ue": [

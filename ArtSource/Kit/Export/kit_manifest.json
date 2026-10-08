@@ -10281,7 +10281,7 @@
     52.2,
     94.5
    ],
-   "tris": 25164,
+   "tris": 25252,
    "tris_decals": 12,
    "tri_budget": 90000,
    "materials": [
@@ -10315,7 +10315,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 14562,
+    "edge": 14706,
     "secondary": 0,
     "floor": 1029,
     "seam": 0
@@ -10340,7 +10340,7 @@
     52.2,
     94.5
    ],
-   "tris": 25164,
+   "tris": 25252,
    "tris_decals": 12,
    "tri_budget": 90000,
    "materials": [
@@ -10374,7 +10374,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 14562,
+    "edge": 14706,
     "secondary": 0,
     "floor": 1029,
     "seam": 0

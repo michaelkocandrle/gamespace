@@ -285,6 +285,8 @@ def _wall_console(name, seed):
     for (xa, xb) in ((CX0, 16.5), (16.5, 17.75)):
         o, t, n, ln = _inner_frame(xa, xb, TOP - 0.006, out=-0.004)
         p.box("Kit_Lip", (0.0, 0.0, -0.002), (ln, 0.006, 0.0035), bevel=0.0012, segments=2, m=frame(o, t, Z, n), panel=False)
+        o2, t2, n2, ln2 = _inner_frame(xa, xb, TOP - 0.016, out=0.0)
+        p.box("Kit_GlowStrip", (0.01, -0.0025, -0.0005), (ln2 - 0.01, 0.0025, 0.0018), bevel=0.0006, segments=1, m=frame(o2, t2, Z, n2), panel=False)
     p.collision_hull([Vector((x, y, z)) for (x, y) in inner + outer for z in (0.0, TOP + 0.02)])
     p.collision_box((tx0, yi, TOP), (tx1, yo, TOP + th))
     return p

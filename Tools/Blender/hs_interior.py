@@ -1298,6 +1298,7 @@ def build(recipe, layout, coll, mats, ship, hull):
         # structural ribs across the frame lining at the panel stations: the lining's layer like the corridor's
         # portals (step 7 of the author's cockpit brief) - a graphite band standing proud of the lining
         ribs = bmesh.new()
+        rglow = bmesh.new()
         cut = lb.copy()
         for x in COCKPIT.get("seam_x", []):
             res = bmesh.ops.bisect_plane(cut, geom=cut.verts[:] + cut.edges[:] + cut.faces[:], plane_co=(x, 0, 0), plane_no=(1, 0, 0))
@@ -1318,6 +1319,13 @@ def build(recipe, layout, coll, mats, ship, hull):
                     for idx in ((0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)):
                         try:
                             ribs.faces.new([(vs0 + vs1)[i] for i in idx])
+                        except ValueError:
+                            pass
+                    # a light line inset along the rib's face (8 mm, 1 mm proud of it)
+                    gq = [a_ + Vector((-0.004, 0, 0)), b_ + Vector((-0.004, 0, 0)), b_ + Vector((0.004, 0, 0)), a_ + Vector((0.004, 0, 0))]
+                    if min(a_.z, b_.z) > 1.3:
+                        try:
+                            rglow.faces.new([rglow.verts.new(v + nrm_ * 0.0272) for v in gq])
                         except ValueError:
                             pass
         cut.free()
@@ -1343,6 +1351,15 @@ def build(recipe, layout, coll, mats, ship, hull):
                         except ValueError:
                             pass
         cut.free()
+        if rglow.faces:
+            mg = bpy.data.meshes.new("SM_Ship_%s_Int_LinerRibGlow" % ship)
+            rglow.normal_update()
+            rglow.to_mesh(mg)
+            og = bpy.data.objects.new(mg.name, mg)
+            coll.objects.link(og)
+            mg.materials.append(mats["int_glow_soft"])
+            objs.append(og)
+        rglow.free()
         if ribs.verts:
             ob = hp.finish(ribs, "SM_Ship_%s_Int_LinerRibs" % ship, coll, {"angle_deg": 40, "width": 0.002, "segments": 1})
             # graphite against the glossy white lining (cockpit v3 r1: the ribs in the lining's paint did not read)
