@@ -41,7 +41,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "510abfde3879bd8c0a34e293c64f2d06e07662ee"
+      "geometry_hash": "34955d883507c9db3f27750e66579c3b2bf3d165"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -55,7 +55,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "ed36dfe45f30a58c4fc86f8d3e0a908bd58f51a8"
+      "geometry_hash": "51ca9c3e31e8f197baa5f5a1878ff65fe1e8a283"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -90,14 +90,14 @@
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "1d85458aa22d95da3335f030d16d937f10b82ad0"
+      "geometry_hash": "0862538a9dc2c1df9160260c57e941af9ac457e8"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
       "objects": [
         "SM_Ship_Wayfarer_InteriorDecals"
       ],
-      "geometry_hash": "39ef6fa792a0c32157a37f1251749f615542408a"
+      "geometry_hash": "6f2797966669edd3cd396da5ec3ff413344fe576"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorKit.fbx",
@@ -111,7 +111,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Screens"
       ],
-      "geometry_hash": "29bd74890f17ced11ecc83214a968570f967996f"
+      "geometry_hash": "b63b83e88676784cafc4a8790b61618fb507df17"
     }
   ],
   "meshes": {
@@ -307,7 +307,7 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 664047,
+      "tris": 664043,
       "verts": 344950,
       "materials": [
         "M_Ship_Wayfarer_Accent",
@@ -352,8 +352,8 @@
     "SM_Ship_Wayfarer_InteriorDecals": {
       "lod": 0,
       "part": "InteriorDecals",
-      "tris": 4668,
-      "verts": 4101,
+      "tris": 4716,
+      "verts": 4141,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -400,22 +400,24 @@
     "SM_Ship_Wayfarer_Screens": {
       "lod": 0,
       "part": "Screens",
-      "tris": 4,
-      "verts": 8,
+      "tris": 12,
+      "verts": 24,
       "materials": [
-        "M_Ship_Wayfarer_Screens"
+        "M_Ship_Wayfarer_HoloBeam",
+        "M_Ship_Wayfarer_Screens",
+        "M_Ship_Wayfarer_HoloField"
       ],
       "uv_layers": 1,
       "bounds_m": [
         [
-          7.68603515625,
-          -0.6613576412200928,
-          0.8128783702850342
+          7.683845520019531,
+          -0.6729474663734436,
+          0.788030743598938
         ],
         [
-          7.927028656005859,
-          0.6613576412200928,
-          1.0842626094818115
+          7.9364776611328125,
+          0.6729474663734436,
+          1.0929632186889648
         ]
       ]
     }
@@ -514,7 +516,7 @@
         [
           -9.949999809265137,
           3.2013895511627197,
-          0.8000001907348633
+          0.8000004291534424
         ],
         [
           -7.250000476837158,

@@ -256,8 +256,22 @@ else:
                   str(pv))
         # the display lights look for Display_ sockets on any of the ship's meshes
         sockets = [str(n) for c in ship_bp.get_components_by_class(unreal.StaticMeshComponent) for n in c.get_all_socket_names()]
-        check("a Display_ socket in front of each screen (their glow)", sorted(n for n in sockets if n.startswith("Display_"))
-              == ["Display_centre_bottom", "Display_centre_top", "Display_left", "Display_right"], ", ".join(sockets))
+        # (author 8. 10. 2026: the two small centre screens gave way to the holo radar - cockpit.centre_screens false)
+        want = ["Display_left", "Display_right"]
+        if "Display_centre_top" in sockets:
+            want = ["Display_centre_bottom", "Display_centre_top"] + want
+        check("a Display_ socket in front of each screen (their glow)", sorted(n for n in sockets if n.startswith("Display_")) == want, ", ".join(sockets))
+        # holo MFD v4 (author 8. 10. 2026, the radar's style): a translucent field behind each picture and an additive
+        # beam from the projector, on the screens' mesh
+        if found is not None:
+            names = [str(n) for n in found.get_material_slot_names()]
+            if any(n.endswith("HoloField") for n in names):
+                for suffix, mode in (("HoloField", unreal.BlendMode.BLEND_TRANSLUCENT), ("HoloBeam", unreal.BlendMode.BLEND_ADDITIVE)):
+                    idx = next((i for i, n in enumerate(names) if n.endswith(suffix)), -1)
+                    hmat = found.get_material(idx) if idx >= 0 else None
+                    hpar = hmat.get_editor_property("parent") if isinstance(hmat, unreal.MaterialInstance) else None
+                    check("holo MFD %s on M_Ship_%s (%s)" % (suffix, suffix, mode), hpar is not None and hpar.get_name() == "M_Ship_" + suffix
+                          and hpar.get_editor_property("blend_mode") == mode, "%s / %s" % (hmat and hmat.get_name(), hpar and hpar.get_name()))
         status = displays.debug_get_part("ShipStatus")
         status.set_ship(ship_bp)
         engines = len([n for n in sut.manifest().get("sockets", {}) if n.startswith("SOCKET_Engine")])
@@ -287,7 +301,8 @@ else:
         if "M_Ship_%s_CanopyFrame" % sut.SHIP not in hull_slots and lining == "IntFrame":
             # author 25. 9. 2026, step 7: dark graphite around the displays, cream only as an accent - painted
             # graphite, not a black mass (the earlier rule: off-white 0.15..0.7)
-            check("canopy frame lining dark graphite, not black (0.08..0.2)", base is not None and 0.08 <= max(base.r, base.g, base.b) <= 0.2, str(base))
+            # (author 8. 10. 2026: the cockpit in the radar column's glossy light paint - the kit's panel paint, ~0.46)
+            check("canopy frame lining painted, not black (0.08..0.6)", base is not None and 0.08 <= max(base.r, base.g, base.b) <= 0.6, str(base))
         else:
             check("canopy frame's inside is dark (below 0.1)", base is not None and max(base.r, base.g, base.b) < 0.1, str(base))
     finally:

@@ -1109,38 +1109,9 @@ int32 USpaceHudSymbol::NativePaint(const FPaintArgs& Args, const FGeometry& Allo
 	{
 		if (bHolo)
 		{
-			// The projection: the emitter's light rising from the bottom edge, a hairline frame and glowing corner
-			// brackets. Everything dark stays clear glass (the screen material keys the content out by brightness).
-			TArray<FSlateGradientStop> Rise;
-			Rise.Add(FSlateGradientStop(FVector2f::ZeroVector, FLinearColor(Color.R, Color.G, Color.B, 0.f)));
-			Rise.Add(FSlateGradientStop(FVector2f(0.f, Size.Y * 0.78f), FLinearColor(Color.R, Color.G, Color.B, 0.f)));
-			Rise.Add(FSlateGradientStop(FVector2f(0.f, Size.Y * 0.95f), FLinearColor(Color.R, Color.G, Color.B, 0.3f)));
-			Rise.Add(FSlateGradientStop(FVector2f(0.f, Size.Y), FLinearColor(Color.R, Color.G, Color.B, 0.55f)));
-			FSlateDrawElement::MakeGradient(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), MoveTemp(Rise), Orient_Horizontal);
-			// A dot grid at a few percent - the space the picture floats in (static). No soft vignette: the glass keys
-			// the content by brightness, and a faint gradient crossing the key came out as hard dark boxes.
-			// (not on the centre column's small screens: there the grid read as grey static - critic 5. 10.)
-			for (float GX = 22.f; Size.X > 300.f && GX < Size.X - 16.f; GX += 22.f)
-			{
-				for (float GY = 22.f; GY < Size.Y - 16.f; GY += 22.f)
-				{
-					PaintLine(OutDrawElements, LayerId + 1, Paint, { FVector2f(GX - 1.f, GY), FVector2f(GX + 1.f, GY) }, Faded(Color, 0.32f), false, 2.f);
-				}
-			}
-			// The emitter: a bright line along the bottom edge.
-			PaintLine(OutDrawElements, LayerId + 1, Paint, { FVector2f(10.f, Size.Y - 3.f), FVector2f(Size.X - 10.f, Size.Y - 3.f) }, Faded(Color, 0.75f), true, 2.f);
-			RoundedBox(OutDrawElements, LayerId + 1, AllottedGeometry, FVector2f(3.f, 3.f), Size - FVector2f(6.f, 6.f), 6.f, FLinearColor::Transparent,
-				Faded(Color, 0.14f), 1.f);
-			const float Arm = FMath::Min(Size.X, Size.Y) * 0.08f;
-			const float I = 9.f;
-			const FVector2f Corners[4] = { FVector2f(I, I), FVector2f(Size.X - I, I), FVector2f(Size.X - I, Size.Y - I), FVector2f(I, Size.Y - I) };
-			for (const FVector2f& Corner : Corners)
-			{
-				const float SX = Corner.X < Size.X * 0.5f ? 1.f : -1.f, SY = Corner.Y < Size.Y * 0.5f ? 1.f : -1.f;
-				const TArray<FVector2f> Bracket = { Corner + FVector2f(SX * Arm, 0.f), Corner, Corner + FVector2f(0.f, SY * Arm) };
-				PaintLine(OutDrawElements, LayerId + 2, Paint, Bracket, Faded(Color, 0.3f), true, 8.f);
-				PaintLine(OutDrawElements, LayerId + 2, Paint, Bracket, Faded(Color, 1.f), true, 3.f);
-			}
+			// Holo MFD v4 (8. 10. 2026): the field of light, its edge, corner brackets, the rolling band and the rise
+			// from the emitter are the additive M_Ship_HoloField behind the picture (the radar's look) - drawn here
+			// they came out keyed and masked, a printed frame. The picture keeps only its content.
 			break;
 		}
 		// Deep blue-black, a little lighter at the top, like lit glass. Half as bright as it was: the

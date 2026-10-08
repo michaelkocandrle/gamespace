@@ -1032,6 +1032,20 @@
    "blink_hz": 0.6,
    "blink_min": 0.08
   },
+  "MI_Ship_Wayfarer_HoloField": {
+   "_comment": "holo MFD v4 (author 8. 10. 2026: the MFDs in the radar's holo style): the additive field of light behind each MFD picture (M_Ship_HoloField); Aspect = its width / height (0.523 x 0.299 m)",
+   "master": "holo_field",
+   "slots": ["M_Ship_Wayfarer_HoloField"],
+   "vectors": {"Colour": [0.3, 0.68, 1.0]},
+   "scalars": {"Intensity": 1.0, "Aspect": 1.75, "Rows": 70.0, "BandSeconds": 4.0}
+  },
+  "MI_Ship_Wayfarer_HoloBeam": {
+   "_comment": "holo MFD v4: the projector's fan of light from the lens slot to the picture (M_Ship_HoloBeam)",
+   "master": "holo_beam",
+   "slots": ["M_Ship_Wayfarer_HoloBeam"],
+   "vectors": {"Colour": [0.3, 0.68, 1.0]},
+   "scalars": {"Intensity": 1.0}
+  },
   "MI_Ship_Wayfarer_Holo": {
    "_comment": "the cockpit's ship hologram (M_Ship_Holo); HoloPivot is set by import_ship.py from the Hologram mesh's bounds. ScanDepth 0.12: on the smooth outer envelope (26. 9. 2026) deep scan lines drew wavy contour stripes",
    "master": "holo",

@@ -49,7 +49,8 @@ MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glas
            "meshdecal": SHARED + "/M_Ship_MeshDecal", "meshdecal_paint": SHARED + "/M_Ship_MeshDecalPaint",
            "meshdecal_ao": SHARED + "/M_Ship_MeshDecalAO", "meshdecal_grime": SHARED + "/M_Ship_MeshDecalGrime",
            "layered": SHARED + "/M_Ship_Layered", "screenback": SHARED + "/M_Ship_ScreenBack",
-           "blink": SHARED + "/M_Ship_Blink", "holo": SHARED + "/M_Ship_Holo"}
+           "blink": SHARED + "/M_Ship_Blink", "holo": SHARED + "/M_Ship_Holo",
+           "holo_field": SHARED + "/M_Ship_HoloField", "holo_beam": SHARED + "/M_Ship_HoloBeam"}
 TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap",
                   "decal_normal": "DecalNormalMap", "decal_m": "DecalMMap", "decal_bc": "DecalColorMap",
                   "decal_ao": "DecalAOMap", "detail_normal": "DetailNormalMap"}
@@ -707,6 +708,63 @@ def build_holo_radar_masters():
     return out
 
 
+def build_holo_mfd_masters():
+    """Holo MFD v4 (author 8. 10. 2026: the MFDs in the holo radar's style), additive, unlit, two-sided, on the
+    Screens part. M_Ship_HoloField behind each MFD picture: a faint fill brighter towards the emitter, fine scan rows,
+    a glowing edge with corner brackets, a band rolling up every BandSeconds, a light flicker. M_Ship_HoloBeam: the
+    fan of light from the lens slot to the picture, bright at the lens, soft at its sides, slow streaks. Both scale
+    with Power (UCockpitDisplayComponent: 0 off, the boot alpha while booting, 1 on)."""
+    out = {}
+    field = ("float2 p = UV; float cx = min(p.x, 1.0 - p.x) * Aspect; float cy = min(p.y, 1.0 - p.y); "
+             "float d = min(cx, cy); "
+             "float edge = 0.55 * exp(-d * 160.0) + 0.12 * exp(-d * 25.0); "
+             "float corner = (cx < 0.075 && cy < 0.075) ? 1.6 * exp(-d * 420.0) : 0.0; "
+             "float fill = 0.012 + 0.05 * exp(-p.y * 3.5); "
+             "float rows = 0.8 + 0.2 * sin(p.y * Rows * 6.2831853); "
+             "float b = frac(T / max(Band, 0.1)) * 1.3 - 0.15; float band = 0.22 * exp(-abs(p.y - b) * 30.0); "
+             "float flick = 0.95 + 0.05 * sin(T * 37.0) * sin(T * 11.3); "
+             "return Col * I * Pw * ((fill + band) * rows + edge + corner) * flick;")
+    beam = ("float a = abs(UV.x * 2.0 - 1.0); float across = 1.0 - a * a * a * a; "
+            "float fade = 1.0 - UV.y * 0.8; "
+            "float streak = 0.7 + 0.3 * sin(UV.x * 83.0 + T * 0.9) * sin(UV.x * 31.0 - T * 0.5); "
+            "float lens = exp(-UV.y * 18.0) * 2.0; "
+            "return Col * I * Pw * across * (fade * streak * 0.18 + lens * 0.3);")
+    for key, code, ins in (("HoloField", field, ["UV", "T", "Col", "I", "Pw", "Aspect", "Rows", "Band"]),
+                           ("HoloBeam", beam, ["UV", "T", "Col", "I", "Pw"])):
+        m = _fresh_material(SHARED + "/M_Ship_" + key)
+        m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
+        # the field translucent: a smooth dark-blue tint behind the page (readable over the white cockpit without
+        # the masked glass's dither grain - v4 first try: an additive sheet read milky, white type got lost)
+        m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT if key == "HoloField" else unreal.BlendMode.BLEND_ADDITIVE)
+        m.set_editor_property("two_sided", True)
+        m.set_editor_property("enable_responsive_aa", True)
+        c = _custom(m, key, code, unreal.CustomMaterialOutputType.CMOT_FLOAT3, ins, -500, 0)
+        _link(_node(m, unreal.MaterialExpressionTextureCoordinate, -900, -100), c, "UV")
+        _link(_node(m, unreal.MaterialExpressionTime, -900, 0), c, "T")
+        _link(_vector(m, "Colour", (0.3, 0.68, 1.0), -900, 100), c, "Col")
+        _link(_scalar(m, "Intensity", 1.0, -900, 250), c, "I")
+        _link(_scalar(m, "Power", 1.0, -900, 350), c, "Pw")
+        if key == "HoloField":
+            _link(_scalar(m, "Aspect", 1.8, -900, 450), c, "Aspect")
+            _link(_scalar(m, "Rows", 70.0, -900, 550), c, "Rows")
+            _link(_scalar(m, "BandSeconds", 4.0, -900, 650), c, "Band")
+            op = _custom(m, "HoloFieldOpacity",
+                         "float cx = min(UV.x, 1.0 - UV.x) * Aspect; float cy = min(UV.y, 1.0 - UV.y); float d = min(cx, cy); "
+                         "float inside = saturate(d * 400.0); "
+                         "return saturate(Pw * (Smoke * (0.85 + 0.15 * exp(-UV.y * 3.0)) * inside + 0.5 * exp(-d * 160.0)));",
+                         unreal.CustomMaterialOutputType.CMOT_FLOAT1, ["UV", "Pw", "Aspect", "Smoke"], -500, 400)
+            _link(_node(m, unreal.MaterialExpressionTextureCoordinate, -900, 750), op, "UV")
+            _link(_scalar(m, "Power", 1.0, -900, 850), op, "Pw")
+            _link(_scalar(m, "Aspect", 1.8, -900, 950), op, "Aspect")
+            _link(_scalar(m, "Smoke", 0.55, -900, 1050), op, "Smoke")
+            _output(op, unreal.MaterialProperty.MP_OPACITY)
+        _output(c, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+        MEL.recompile_material(m)
+        unreal.EditorAssetLibrary.save_loaded_asset(m, only_if_is_dirty=False)
+        out[key] = m
+    return out
+
+
 def build_holo_master():
     """The cockpit's ship hologram (step 6): additive, unlit, one-sided. Emission = HoloColor x HoloStrength x
     (a base plus a fresnel rim) x scan lines rolling up in world z x a faint flicker; damage colour prepared
@@ -945,7 +1003,8 @@ def build_masters():
             "decal": build_decal_master(), "meshdecal": build_mesh_decal_master(False),
             "meshdecal_paint": build_mesh_decal_master(True), "meshdecal_ao": build_mesh_decal_ao_master(),
             "meshdecal_grime": build_mesh_decal_grime_master(),
-            "layered": build_layered_master(), "screenback": back, "blink": blink, "holo": build_holo_master(), "holo_radar": build_holo_radar_masters()}
+            "layered": build_layered_master(), "screenback": back, "blink": blink, "holo": build_holo_master(), "holo_radar": build_holo_radar_masters(),
+            **{k: v for k, v in zip(("holo_field", "holo_beam"), build_holo_mfd_masters().values())}}
 
 
 def build_mesh_decal_ao_master():

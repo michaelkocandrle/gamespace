@@ -1152,6 +1152,21 @@ def build(recipe, layout, coll, mats, ship, hull):
         m = bpy.data.materials.get("M_Ship_%s_Screens" % ship) or bpy.data.materials.new("M_Ship_%s_Screens" % ship)
         me.materials.append(m)
         objs.append(ob)
+    # holo MFD v4: the additive field behind each picture and the projector's beam (hs_cockpit.HOLO_BM)
+    import hs_cockpit as _hcb
+    for key, hb in list(_hcb.HOLO_BM.items()):
+        if not hb.faces:
+            continue
+        me = bpy.data.meshes.new("SM_Ship_%s_Int_%s" % (ship, key))
+        hb.normal_update()
+        hb.to_mesh(me)
+        hb.free()
+        ob = bpy.data.objects.new(me.name, me)
+        coll.objects.link(ob)
+        m = bpy.data.materials.get("M_Ship_%s_%s" % (ship, key)) or bpy.data.materials.new("M_Ship_%s_%s" % (ship, key))
+        me.materials.append(m)
+        objs.append(ob)
+    _hcb.HOLO_BM.clear()
     # liner: the hull's inside above the cockpit sill, where there is no glass (a hull seen from inside is
     # culled - the sky would show through it)
     lb = bmesh.new()

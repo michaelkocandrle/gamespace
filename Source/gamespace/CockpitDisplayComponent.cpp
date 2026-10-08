@@ -203,6 +203,18 @@ void UCockpitDisplayComponent::BeginPlay()
 		}
 	}
 	Mesh->SetMaterial(Slot, Material);
+	// Holo MFD v4: the field of light behind each picture and the beam from the lens (additive, on the same mesh)
+	const TArray<FName> SlotNames = Mesh->GetMaterialSlotNames();
+	for (int32 Index = 0; Index < SlotNames.Num(); ++Index)
+	{
+		const FString SlotName = SlotNames[Index].ToString();
+		if ((SlotName.EndsWith(TEXT("HoloField")) || SlotName.EndsWith(TEXT("HoloBeam"))) && Mesh->GetMaterial(Index))
+		{
+			UMaterialInstanceDynamic* Layer = UMaterialInstanceDynamic::Create(Mesh->GetMaterial(Index), this);
+			Mesh->SetMaterial(Index, Layer);
+			HoloLayers.Add(Layer);
+		}
+	}
 	// Draw on the first tick.
 	SinceDraw = 1.f / UpdateRateHz;
 	SinceState = 1.f / StateRateHz;
@@ -384,6 +396,19 @@ void UCockpitDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 		LastBootAlpha = BootAlpha;
 	}
 	Widget->SetPower(Power != ESpacePowerState::Off, BootAlpha);
+	// the holo layers go out with the power and come up with the boot
+	const float LayerPower = Power == ESpacePowerState::Off ? 0.f : Power == ESpacePowerState::Booting ? FMath::Clamp(BootAlpha, 0.f, 1.f) : 1.f;
+	if (FMath::Abs(LayerPower - HoloLayerPower) > 0.01f)
+	{
+		HoloLayerPower = LayerPower;
+		for (UMaterialInstanceDynamic* Layer : HoloLayers)
+		{
+			if (Layer)
+			{
+				Layer->SetScalarParameterValue(TEXT("Power"), LayerPower);
+			}
+		}
+	}
 	if (bOnlyInCockpitView && (!Ship->IsCockpitView() || !Ship->IsLocallyControlled()))
 	{
 		return;

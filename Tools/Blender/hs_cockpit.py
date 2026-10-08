@@ -1198,6 +1198,18 @@ def glass_panel(g, screen_bm, sockets, name, c, right, up, n, w, h, proud, visor
             rr_slab(g["int_dark"], q + n * 0.006 - right * su * 0.004 - up * sv * 0.004, right, up, n, 0.014, 0.014, 0.003, 0.01, 2)
 
 
+HOLO_BM = {}        # holo MFD v4 (author 8. 10. 2026: the MFDs in the radar's holo style): "HoloField", "HoloBeam"
+
+
+def _holo_quad(key, pts, uvs):
+    """A quad with canvas UVs into HOLO_BM[key] (hs_interior writes them as SM_Ship_<ship>_Int_<key>, the Screens part)."""
+    bm = HOLO_BM.setdefault(key, bmesh.new())
+    uvl = bm.loops.layers.uv.get("UVMap") or bm.loops.layers.uv.new("UVMap")
+    f = bm.faces.new([bm.verts.new(p) for p in pts])
+    for loop, uv in zip(f.loops, uvs):
+        loop[uvl].uv = uv
+
+
 def holo_projector(g, screen_bm, sockets, name, top, right, n, w, h, eye, holo):
     """CK-HP (cockpit v2, author 4. 10. 2026: the MFDs a hologram, not an onboard computer): an emitter bar on the
     pod's top edge - a chamfered graphite housing with a brushed cap and a lens slot of light along its top - and the
@@ -1216,6 +1228,18 @@ def holo_projector(g, screen_bm, sockets, name, top, right, n, w, h, eye, holo):
     centre = base + Z * (eh + holo.get("image_gap", 0.025) + h / 2)
     r2, u2, n2 = oriented(eye, centre)
     screen(screen_bm, sockets, name, centre, r2, u2, n2, w, h)
+    # holo MFD v4 (author 8. 10. 2026: "the MFDs from this" - the radar's light): an additive field of light 4 mm
+    # behind the picture, 1 cm larger round it (its glowing edge, corner brackets, the rolling scan band frame
+    # the page), UV (0, 0) at its lower left; and the beam - a fan of light from the lens slot up to the picture's
+    # lower edge, UV v 0 at the lens
+    fc, fw, fh = centre - n2 * 0.004, w + 0.02, h + 0.02
+    _holo_quad("HoloField", [fc - r2 * fw / 2 - u2 * fh / 2, fc + r2 * fw / 2 - u2 * fh / 2, fc + r2 * fw / 2 + u2 * fh / 2, fc - r2 * fw / 2 + u2 * fh / 2],
+               [(0, 0), (1, 0), (1, 1), (0, 1)])
+    lens = base + Z * (eh + 0.0045)
+    lw = ew - 0.05
+    pb = centre - u2 * (h / 2) - n2 * 0.004
+    _holo_quad("HoloBeam", [lens - right * lw / 2, lens + right * lw / 2, pb + r2 * w / 2, pb - r2 * w / 2],
+               [(0, 0), (1, 0), (1, 1), (0, 1)])
 
 
 def oriented(eye, c):

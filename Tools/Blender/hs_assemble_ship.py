@@ -150,7 +150,8 @@ def main(argv):
     # does not touch their canvas UVs
     for o in meshes:
         if "_Int_" in o.name:
-            assign[o.name] = "Screens" if o.name.endswith("_Int_Screens") else "Interior"
+            # (holo MFD v4: the additive field and beam ride with the screens - canvas UVs, no shadow)
+            assign[o.name] = "Screens" if o.name.endswith(("_Int_Screens", "_Int_HoloField", "_Int_HoloBeam")) else "Interior"
         elif o.name.endswith("_IntDecals"):
             # interior mesh decals (hs_interior_decals.py): atlas UVs, their own part like the exterior's Decals
             assign[o.name] = "InteriorDecals"
