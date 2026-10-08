@@ -55,25 +55,26 @@ def _rr(w, d, r, n=4):
 
 
 # ------------------------------------------------------------------ the stick (SC's: a chrome ball on a hatched base)
-def stick(p, base, label, head_role="Kit_Shell", guard="c"):
+def stick(p, base, label, head_role="Kit_Shell", guard="c", plate_role="Kit_Housing", ball_role="Kit_Lip", bars=28):
     Z, X, Y = Vector((0, 0, 1)), Vector((1, 0, 0)), Vector((0, 1, 0))
     # the base: a housing-grey plate with an 8 mm rounded edge, four screws, a dark well, the hatch ring, a satin collar
     # (sunk into the arm unit, flush: it overhung the arm's edge - critic r1)
-    p.box("Kit_Housing", base + Vector((-0.058, -0.052, -0.012)), base + Vector((0.058, 0.052, 0.0015)), bevel=0.006, segments=3)
+    p.box(plate_role, base + Vector((-0.058, -0.052, -0.012)), base + Vector((0.058, 0.052, 0.0015)), bevel=0.006, segments=3)
     for sx in (-1, 1):
         for sy in (-1, 1):
             q = base + Vector((sx * 0.048, sy * 0.042, 0.0015))
             p.lathe("Kit_Lip", [(0.0035, 0.0), (0.0035, 0.0006), (0.0, 0.0009)], q, seg=12)
     p.lathe("Kit_Graphite", [(0.05, 0.0015), (0.05, 0.0035), (0.034, 0.0035), (0.034, 0.0015)], base, seg=48)
-    for k in range(28):                                       # oblique hatch bars, Halcyon orange on graphite
-        a0 = 2 * math.pi * k / 28
+    for k in range(bars):                                     # oblique hatch bars, Halcyon orange on graphite
+        a0 = 2 * math.pi * k / bars
         pa = base + Vector((0.037 * math.cos(a0), 0.037 * math.sin(a0), 0.0037))
         pb = base + Vector((0.048 * math.cos(a0 + 0.16), 0.048 * math.sin(a0 + 0.16), 0.0037))
-        p.sweep("Kit_Signal", [pa, pb], 0.0026, seg=6, scale_y=0.25)       # (Halcyon orange bars on black)
+        rb = 0.0026 if bars == 28 else 0.0045                  # 15 bars: 9 mm orange, 9 mm black
+        p.sweep("Kit_Signal", [pa, pb], rb, seg=6, scale_y=0.00065 / rb)       # (Halcyon orange bars on black)
     p.lathe("Kit_Lip", [(0.034, 0.0), (0.034, 0.006), (0.03, 0.009), (0.024, 0.01)], base, seg=40)
     # the polished ball and the neck
     prof = [(0.0, -0.002)] + [(0.021 * math.sin(math.pi * k / 16), 0.021 - 0.021 * math.cos(math.pi * k / 16)) for k in range(1, 16)] + [(0.0, 0.042)]
-    p.lathe("Kit_Lip", prof, base + Z * 0.006, seg=40)
+    p.lathe(ball_role, prof, base + Z * 0.006, seg=40)
     lean = Vector((math.sin(math.radians(8)), -math.sin(math.radians(6)), 1.0)).normalized()   # forward and in (-y)
     n0 = base + Z * 0.04
     p.lathe("Kit_Lip", [(0.0085, 0.0), (0.0085, 0.022), (0.011, 0.026)], n0, axis=lean, seg=24)

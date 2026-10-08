@@ -123,7 +123,7 @@ def console_b(name, seed):
     p.edge_roles = {"Kit_Frame": "Kit_FrameEdge"}   # the frame's chamfers: a glossier polished paint that catches the light
     p.sharp_deg = 20.0           # the concept's machined chamfers (25-55 deg) must not shade into soft rolls
     # 1 the pedestal: a light worn frame, the kick chamfered back, a dark recessed kick with a vent row
-    ped = [(0.03, 0.07), (L - 0.08, 0.07), (L - 0.02, 0.13), (L - 0.02, DECK), (0.0, DECK), (0.0, 0.1)]   # a 45 deg cut at the front foot
+    ped = [(0.03, 0.07), (L - 0.1, 0.07), (L - 0.02, 0.15), (L - 0.02, DECK), (0.0, DECK), (0.0, 0.1)]   # an 80 mm 45 deg cut at the front foot
     side_prism(p, "Kit_Frame", ped, U0, W, 0.012, 1)
     p.box("Kit_Graphite", (0.05, U0 + 0.02, 0.0), (L - 0.08, W - 0.02, 0.075), bevel=0.004, segments=2)
     for k in range(14):
@@ -131,7 +131,7 @@ def console_b(name, seed):
         p.box("Kit_Housing", (xk, U0 + 0.016, 0.018), (xk + 0.012, U0 + 0.022, 0.055), bevel=0.002, segments=1, panel=False)
         p.box("Kit_Housing", (xk + 0.5, W - 0.026, 0.018), (xk + 0.512, W - 0.02, 0.055), bevel=0.002, segments=1, panel=False)
     # dark panels set into both long faces, a belt line over them, screws; the outboard front a hatch band and a plate
-    for x0, x1 in ((0.05, 0.42), (0.45, 0.8)):
+    for x0, x1 in ((0.05, 0.29), (0.294, 0.545), (0.549, 0.8)):        # three panels, 4 mm seams between them
         chamfer_panel(p, "Kit_Inset", x0, x1, 0.11, DECK - 0.062, U0, -1)
         chamfer_panel(p, "Kit_Inset", x0, x1, 0.11, DECK - 0.062, W, 1)
     chamfer_panel(p, "Kit_Inset", 0.83, L - 0.08, 0.12, 0.3, U0, -1, c=0.05)
@@ -161,7 +161,7 @@ def console_b(name, seed):
     for xa, xb in ((0.035, 0.313), (0.317, 0.595)):
         p.box("Kit_Leather", (xa, -0.062, AT - 0.022), (xb, 0.142, AT), bevel=0.013, segments=4)
         p.box("Kit_Leather", (xa + 0.012, -0.05, AT - 0.004), (xb - 0.012, 0.13, AT + 0.005), bevel=0.009, segments=4)   # the dome
-        sx0, sx1, su0, su1 = xa + 0.017, xb - 0.017, -0.045, 0.125          # the stitching: 4 mm stitches, 2 mm apart
+        sx0, sx1, su0, su1 = xa + 0.024, xb - 0.024, -0.038, 0.118          # the stitching on the dome's flat: 4 mm stitches, 2 mm apart
         for (p0, p1) in (((sx0, su0), (sx1, su0)), ((sx0, su1), (sx1, su1)), ((sx0, su0), (sx0, su1)), ((sx1, su0), (sx1, su1))):
             ln = ((p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2) ** 0.5
             k = 0
@@ -169,16 +169,19 @@ def console_b(name, seed):
                 t0, t1 = k * 0.006 / ln, (k * 0.006 + 0.004) / ln
                 a0 = (p0[0] + (p1[0] - p0[0]) * t0, p0[1] + (p1[1] - p0[1]) * t0)
                 a1 = (p0[0] + (p1[0] - p0[0]) * t1, p0[1] + (p1[1] - p0[1]) * t1)
-                p.box("Kit_Legend", (min(a0[0], a1[0]) - 0.0006, min(a0[1], a1[1]) - 0.0006, AT - 0.0003),
-                      (max(a0[0], a1[0]) + 0.0006, max(a0[1], a1[1]) + 0.0006, AT + 0.0006), panel=False)
+                p.box("Kit_Legend", (min(a0[0], a1[0]) - 0.0008, min(a0[1], a1[1]) - 0.0008, AT + 0.0042),
+                      (max(a0[0], a1[0]) + 0.0008, max(a0[1], a1[1]) + 0.0008, AT + 0.0058), panel=False)
                 k += 1
-        for i in range(int((xb - xa - 0.03) / 0.011)):
-            for j in range(15):
-                hx, hu = xa + 0.035 + i * 0.011, -0.01 + j * 0.0105 + (0.0052 if i % 2 else 0.0)
-                if hu > 0.09 or hx > xb - 0.035:                  # the middle band only (55 % of the width)
+        for i in range(int((xb - xa - 0.09) / 0.006) + 1):          # 1.6 mm holes at 6 mm, a middle band 40 mm wide
+            for j in range(7):
+                hx, hu = xa + 0.045 + i * 0.006, 0.022 + j * 0.006 + (0.003 if i % 2 else 0.0)
+                if hu > 0.062 or hx > xb - 0.045:
                     continue
-                p.box("Kit_Seal", (hx - 0.0012, hu - 0.0012, AT + 0.0044), (hx + 0.0012, hu + 0.0012, AT + 0.0052), panel=False)
+                p.box("Kit_Seal", (hx - 0.0008, hu - 0.0008, AT + 0.0046), (hx + 0.0008, hu + 0.0008, AT + 0.0053), panel=False)
     _label(p, "maker", Vector((0.445, -0.0796, BEAM0 + 0.045)), -Y, X, Z, scale=0.3)
+    for ua in (-0.066, 0.14):                                  # a hidden 6 mm light strip under each beam edge, washing the gap
+        p.box("Kit_Seal", (0.07, ua - 0.002, BEAM0 - 0.004), (0.55, ua + 0.008, BEAM0), panel=False)
+        p.box("Kit_GlowFoot", (0.075, ua, BEAM0 - 0.0045), (0.545, ua + 0.006, BEAM0 - 0.004), panel=False)
     for k, gl in enumerate(("Kit_GlowCool", "Kit_GlowCool", "Kit_GlowAmber")):      # status LEDs on the beam's front end
         uu = -0.03 + k * 0.025
         p.lathe("Kit_Lip", [(0.0045, 0.0), (0.0045, 0.0012), (0.0032, 0.0014)], (0.63, uu, AT - 0.05), axis=(1, 0, 0), seg=16)
@@ -209,7 +212,8 @@ def console_b(name, seed):
     for xx in (0.68, 0.85):
         screw(p, Vector((xx, U0 - 0.0125, DECK + 0.012)), -Y)
         screw(p, Vector((xx, U0 - 0.0125, 0.488)), -Y)
-    stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs", head_role="Kit_Gasket", guard="d")      # a worn metal head (concept)
+    stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs", head_role="Kit_Gasket", guard="d", plate_role="Kit_Inset",
+          ball_role="Kit_Gasket", bars=15)      # a graphite base, a rubber gimbal boot, 9 mm hatch bars
     for xf, nx in ((0.66, -1), (0.87, 1)):                     # graphite insets on the block's ends, 15 mm frame
         p.box("Kit_Inset", (xf - 0.002 if nx > 0 else xf - 0.004, U0 + 0.003, DECK + 0.015),
               (xf + 0.004 if nx > 0 else xf + 0.002, 0.165, 0.475), bevel=0.002, segments=1)
@@ -395,6 +399,16 @@ def console_b(name, seed):
     p.box("Kit_Seal", (gx - 0.0008, hu0 + 0.03, zt - 0.0005), (gx + 0.0008, hu1 - 0.03, zt + 0.0003), panel=False)
     p.box("Kit_Lip", (gx + 0.03, hu0 + 0.045, zt - 0.0005), (gx + 0.115, hu0 + 0.09, zt + 0.0009), bevel=0.0006, segments=1, panel=False)
     p.box("Kit_Perforated", (gx + 0.033, hu0 + 0.048, zt + 0.0009), (gx + 0.112, hu0 + 0.087, zt + 0.0012), panel=False)
+    # the big field: a pressed 3 mm bead frame 15 mm inside the groove and the lid edge, an OPEN arrow at the pull
+    fx0, fx1, fu0, fu1 = hx0 + 0.075, gx - 0.015, hu0 + 0.1, hu1 - 0.1
+    for a, b in (((fx0, fu0), (fx1, fu0 + 0.003)), ((fx0, fu1 - 0.003), (fx1, fu1)),
+                 ((fx0, fu0), (fx0 + 0.003, fu1)), ((fx1 - 0.003, fu0), (fx1, fu1))):
+        p.box("Kit_Inset", (a[0], a[1], zt - 0.0005), (b[0], b[1], zt + 0.0018), bevel=0.0012, segments=2, panel=False)
+    for k in range(3):                                          # two ribs 3 x 6 mm across the frame
+        xr = fx0 + (fx1 - fx0) * (k + 1) / 4
+        if k != 1:
+            p.box("Kit_Inset", (xr - 0.0015, fu0 + 0.012, zt - 0.0005), (xr + 0.0015, fu1 - 0.012, zt + 0.0025), bevel=0.0012, segments=2, panel=False)
+    legend(p, "< OPEN >", Vector((0.32, hu1 - 0.09, zt + 0.0002)), X, Y, Z, h=0.006)
     # 15 mm hazard strips low on both pedestal sides (5 mm orange bars, 5 mm gaps, a dark band)
     for uf, ns_ in ((U0, -1), (W, 1)):
         fz0, fz1 = 0.081, 0.099
@@ -414,7 +428,7 @@ def console_b(name, seed):
     zb = 0.41                                                   # the frame band between the insets and the belt line
     det = [("st_inspect", (0.24, U0 - 0.0065, 0.19), -Y, X, 0.7), ("st_service", (0.27, U0 - 0.0065, 0.29), -Y, X, 0.7),
            ("pn_1", (0.1, U0 - 0.0065, DECK - 0.1), -Y, X, 0.7), ("pn_2", (0.5, U0 - 0.0065, DECK - 0.1), -Y, X, 0.7),
-           ("warn_hv", (0.63, U0 - 0.0065, 0.25), -Y, X, 0.7), ("st_hfcl", (0.63, U0 - 0.0065, 0.17), -Y, X, 0.7),
+           ("label_power", (0.63, U0 - 0.0065, 0.25), -Y, X, 0.7), ("st_hfcl", (0.63, U0 - 0.0065, 0.17), -Y, X, 0.7),
            ("rivet_row_8", (0.24, U0 - 0.0005, zb), -Y, X, 0.8), ("rivet_row_8", (0.63, U0 - 0.0005, zb), -Y, X, 0.8),
            ("rivet_row_8", (0.24, W + 0.0005, zb), Y, -X, 0.8), ("rivet_row_8", (0.63, W + 0.0005, zb), Y, -X, 0.8),
            ("label_coolant", (0.24, W + 0.0065, 0.2), Y, -X, 0.8), ("st_torque", (0.25, W + 0.0065, 0.33), Y, -X, 0.6),

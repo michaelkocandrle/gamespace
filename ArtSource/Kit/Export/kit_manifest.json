@@ -9963,7 +9963,7 @@
     76.2,
     74.1
    ],
-   "tris": 44856,
+   "tris": 47332,
    "tris_decals": 296,
    "tri_budget": 90000,
    "materials": [
@@ -9974,6 +9974,7 @@
     "Kit_Lip",
     "Kit_Graphite",
     "Kit_Gasket",
+    "Kit_GlowFoot",
     "Kit_Perforated",
     "Kit_Red",
     "Kit_GlowRed",
@@ -10008,7 +10009,7 @@
     "st_service",
     "pn_1",
     "pn_2",
-    "warn_hv",
+    "label_power",
     "st_hfcl",
     "rivet_row_8",
     "rivet_row_8",
@@ -10045,9 +10046,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 22098,
+    "edge": 23730,
     "secondary": 0,
-    "floor": 5094,
+    "floor": 5874,
     "seam": 0
    },
    "status": "built"
