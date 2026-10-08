@@ -55,7 +55,7 @@ def _rr(w, d, r, n=4):
 
 
 # ------------------------------------------------------------------ the stick (SC's: a chrome ball on a hatched base)
-def stick(p, base, label, head_role="Kit_Shell", guard="c", plate_role="Kit_Housing", ball_role="Kit_Lip", bars=28):
+def stick(p, base, label, head_role="Kit_Shell", guard="c", plate_role="Kit_Housing", ball_role="Kit_Lip", bars=28, grip_role="Kit_Gasket"):
     Z, X, Y = Vector((0, 0, 1)), Vector((1, 0, 0)), Vector((0, 1, 0))
     # the base: a housing-grey plate with an 8 mm rounded edge, four screws, a dark well, the hatch ring, a satin collar
     # (sunk into the arm unit, flush: it overhung the arm's edge - critic r1)
@@ -92,19 +92,19 @@ def stick(p, base, label, head_role="Kit_Shell", guard="c", plate_role="Kit_Hous
     g0 = n0 + lean * 0.024
     rings = []
     gl = 0.105
-    for k in range(15):
-        t = k / 14
+    for k in range(29):                                       # 28 sections (author 8. 10.: the grip read faceted)
+        t = k / 28
         d = 0.034 + 0.014 * math.sin(math.pi * min(t / 0.8, 1.0)) + 0.004 * (t > 0.85)
         w = 0.03 + 0.007 * math.sin(math.pi * min(t / 0.8, 1.0))
         bulge = -0.006 * math.sin(math.pi * min(t / 0.8, 1.0))          # the palm swell sits aft
         c = g0 + lean * (gl * t) + fwd * bulge
         groove = 0.0032 * abs(math.sin(3 * math.pi * t)) if 0.1 < t < 0.6 else 0.0
         ring = []
-        for u, v in _rr(d, w, 0.013, 4):
+        for u, v in _rr(d, w, 0.013, 7):
             uu = u - (groove if u > 0 else 0.0)
             ring.append(c + fwd * uu + sd * v)
         rings.append(ring)
-    _loft(p, "Kit_Gasket", rings)
+    _loft(p, grip_role, rings)
     # the grey head: a rounded block, the front plate down the grip
     head = g0 + lean * (gl + 0.012)
     m = frame(head, fwd, sd, lean)

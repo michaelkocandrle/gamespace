@@ -108,7 +108,7 @@ def emergency_key(p, c, r, a, n):
     """The red emergency key under a flip-up red cover, framed in orange, its label plate."""
     fm = lambda o: frame(o, r, a, n)                         # noqa: E731
     p.box("Kit_Signal", (-0.04, -0.031, -0.002), (0.04, 0.031, 0.002), bevel=0.0015, segments=2, m=fm(c))
-    p.box("Kit_Graphite", (-0.03, -0.021, 0.0), (0.03, 0.021, 0.007), bevel=0.003, segments=2, m=fm(c))
+    p.box("Kit_Inset", (-0.03, -0.021, 0.0), (0.03, 0.021, 0.007), bevel=0.003, segments=2, m=fm(c))
     p.box("Kit_Red", (-0.022, -0.014, 0.005), (0.022, 0.014, 0.011), bevel=0.0025, segments=3, m=fm(c))
     p.box("Kit_GlowRed", (-0.013, -0.002, 0.0108), (0.013, 0.002, 0.0114), m=fm(c), panel=False)
     hinge = c + a * 0.024 + n * 0.01
@@ -123,6 +123,31 @@ def emergency_key(p, c, r, a, n):
     lp = c - a * 0.045
     p.box("Kit_Signal", (-0.03, -0.0095, 0.0), (0.03, 0.0095, 0.0012), m=fm(lp), panel=False)
     legend(p, "EMER", lp + n * 0.0012, r, a, n, h=0.011, role="Kit_Seal")
+
+
+def keycap(p, fmq, body):
+    """A backlit key (author 8. 10. 2026: the white glowing tiles read cheap): a rounded satin bezel, a dark well, a
+    thin light pipe round a soft-domed grey cap, the legend lit in the cap."""
+    p.box("Kit_Housing", (-0.023, -0.021, 0.006), (0.023, 0.021, 0.0095), bevel=0.003, segments=3, m=fmq)
+    p.box("Kit_Seal", (-0.0195, -0.0175, 0.0093), (0.0195, 0.0175, 0.0097), m=fmq, panel=False)
+    for (a0, b0, a1, b1) in ((-0.0182, -0.0168, 0.0182, -0.0158), (-0.0182, 0.0158, 0.0182, 0.0168),
+                             (-0.0182, -0.0168, -0.0172, 0.0168), (0.0172, -0.0168, 0.0182, 0.0168)):
+        p.box("Kit_GlowCool", (a0, b0, 0.0095), (a1, b1, 0.0103), m=fmq, panel=False)        # the light pipe
+    p.box("Kit_Inset", (-0.0165, -0.015, 0.0095), (0.0165, 0.015, 0.0145), bevel=0.0028, segments=4, m=fmq)
+    legend(p, body, fmq @ Vector((0.0, 0.0, 0.0145)), Vector(fmq.col[0][:3]), Vector(fmq.col[1][:3]), Vector(fmq.col[2][:3]),
+           h=0.0068, role="Kit_GlowKey")
+
+
+def rocker_b(p, q, r, a, n, lit="Kit_GlowCool"):
+    """A shaped rocker switch: a rounded satin bezel, a dark well, a grey cap with a dished, tilted top (the upper end
+    proud - on), a lit index on it."""
+    fm = frame(q, r, a, n)
+    p.box("Kit_Housing", (-0.0125, -0.021, 0.0), (0.0125, 0.021, 0.0042), bevel=0.0022, segments=3, m=fm)
+    p.box("Kit_Seal", (-0.0098, -0.0175, 0.004), (0.0098, 0.0175, 0.0044), m=fm, panel=False)
+    prof = [(-0.016, 0.0038), (0.016, 0.0038), (0.016, 0.0105), (0.011, 0.0112), (0.005, 0.0104), (-0.002, 0.0094),
+            (-0.009, 0.0088), (-0.016, 0.0086)]
+    p.poly_prism("Kit_Inset", prof, frame(q + r * 0.0085, a, n, r), 0.017, bevel=0.0012, segments=3, panel=False)
+    p.box(lit, (-0.004, 0.0085, 0.0108), (0.004, 0.0128, 0.0113), m=fm, panel=False)
 
 
 def console_b(name, seed, mirror=False):
@@ -166,7 +191,7 @@ def _console_b(name, seed):
     # 1 the pedestal: a light worn frame, the kick chamfered back, a dark recessed kick with a vent row
     ped = [(0.03, 0.045), (L - 0.1, 0.045), (L - 0.02, 0.125), (L - 0.02, DECK), (0.0, DECK), (0.0, 0.075)]   # an 80 mm 45 deg cut at the front foot
     side_prism(p, "Kit_Frame", ped, U0, W, 0.012, 1)
-    p.box("Kit_Graphite", (0.05, U0 + 0.035, 0.0), (L - 0.1, W - 0.035, 0.05), bevel=0.004, segments=2)
+    p.box("Kit_Inset", (0.05, U0 + 0.035, 0.0), (L - 0.1, W - 0.035, 0.05), bevel=0.004, segments=2)
     for k in range(14):
         xk = 0.12 + k * 0.024
         p.box("Kit_Housing", (xk, U0 + 0.031, 0.01), (xk + 0.012, U0 + 0.037, 0.036), bevel=0.002, segments=1, panel=False)
@@ -176,8 +201,8 @@ def _console_b(name, seed):
         chamfer_panel(p, "Kit_Inset", x0, x1, 0.11, DECK - 0.062, U0, -1)
         chamfer_panel(p, "Kit_Inset", x0, x1, 0.11, DECK - 0.062, W, 1)
     chamfer_panel(p, "Kit_Inset", 0.83, L - 0.08, 0.12, 0.3, U0, -1, c=0.05)
-    p.box("Kit_Graphite", (0.0, U0 - 0.004, DECK - 0.052), (L - 0.02, U0 + 0.001, DECK - 0.046), panel=False)
-    p.box("Kit_Graphite", (0.0, W - 0.001, DECK - 0.052), (L - 0.02, W + 0.004, DECK - 0.046), panel=False)
+    p.box("Kit_Inset", (0.0, U0 - 0.004, DECK - 0.052), (L - 0.02, U0 + 0.001, DECK - 0.046), panel=False)
+    p.box("Kit_Inset", (0.0, W - 0.001, DECK - 0.052), (L - 0.02, W + 0.004, DECK - 0.046), panel=False)
     # author 8. 10. (in the cockpit): the orange hazard hatch looked bad - a cool light line in a dark channel instead
     p.box("Kit_Seal", (0.85, W - 0.0004, DECK - 0.031), (L - 0.1, W + 0.0012, DECK - 0.021), panel=False)
     p.box("Kit_GlowStrip", (0.853, W + 0.0008, DECK - 0.0282), (L - 0.103, W + 0.0024, DECK - 0.0238), bevel=0.0008, segments=1, panel=False)
@@ -289,8 +314,8 @@ def _console_b(name, seed):
     for uu in (0.016, 0.119):
         screw(p, Vector((0.8745, uu, 0.4655)), X, 0.0025)
     p.box("Kit_FrameEdge", (0.869, U0 - 0.012, DECK + 0.004), (0.8725, 0.18, DECK + 0.013), bevel=0.001, segments=1, panel=False)
-    stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs", head_role="Kit_Gasket", guard="d", plate_role="Kit_Inset",
-          ball_role="Kit_Gasket", bars=15)      # a graphite base, a rubber gimbal boot, 9 mm hatch bars
+    stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs", head_role="Kit_Frame", guard="d", plate_role="Kit_Inset",
+          ball_role="Kit_Gasket", bars=15, grip_role="Kit_Inset")      # a graphite base, a rubber gimbal boot, 9 mm hatch bars
     for xf, nx in ((0.66, -1), (0.87, 1)):                     # graphite insets on the block's ends, 15 mm frame
         p.box("Kit_Inset", (xf - 0.002 if nx > 0 else xf - 0.004, U0 + 0.003, DECK + 0.015),
               (xf + 0.004 if nx > 0 else xf + 0.002, 0.165, 0.475), bevel=0.002, segments=1)
@@ -300,7 +325,7 @@ def _console_b(name, seed):
     mb = [(0.2, DECK), (W - 0.005, DECK), (W - 0.005, 0.52), (0.34, 0.52), (0.2, 0.455)]
     end_prism(p, "Kit_Frame", mb, 0.64, 0.98, 0.009, 1)
     p.box("Kit_Lip", (0.68, 0.38, 0.52), (0.94, 0.62, 0.524), bevel=0.0015, segments=2)
-    p.box("Kit_Graphite", (0.687, 0.387, 0.524), (0.933, 0.613, 0.5245), panel=False)
+    p.box("Kit_Inset", (0.687, 0.387, 0.524), (0.933, 0.613, 0.5245), panel=False)
     for k in range(10):
         xk = 0.693 + k * 0.0236
         p.box("Kit_Housing", (xk, 0.393, 0.5245), (xk + 0.012, 0.607, 0.531), bevel=0.0025, segments=2, panel=False)
@@ -315,19 +340,18 @@ def _console_b(name, seed):
     p.box("Kit_Seal", (-0.065, -0.037, 0.005), (0.065, 0.037, 0.0055), m=fm(sc), panel=False)
     for k, lab in enumerate(("ck_main", "ck_batt", "ck_temp")):
         q = sc + d * (0.022 - 0.022 * k)
-        p.box("Kit_GlowCool" if k < 2 else "Kit_GlowAmber", (0.005, -0.004, 0.0055), (0.055, 0.004, 0.0065), m=fm(q), panel=False)
+        for g in range(8):                                    # an 8-segment level (was one white bar - author 8. 10.)
+            on = g < (8, 6, 3)[k]
+            x0_ = 0.004 + g * 0.0068
+            p.box(("Kit_GlowCool" if k < 2 else "Kit_GlowAmber") if on else "Kit_Inset",
+                  (x0_, -0.0035, 0.0055), (x0_ + 0.0055, 0.0035, 0.0062 if on else 0.0058), m=fm(q), panel=False)
         legend(p, {"ck_main": "MAIN", "ck_batt": "BATT", "ck_temp": "TEMP"}[lab], q - X * 0.03 + n * 0.0057, X, d, n, h=0.0075)
     kc = c0 + X * 0.89                                         # the keys
     p.box("Kit_Lip", (-0.055, -0.05, 0.002), (0.055, 0.05, 0.005), bevel=0.0015, segments=2, m=fm(kc))
-    p.box("Kit_Graphite", (-0.05, -0.045, 0.005), (0.05, 0.045, 0.006), m=fm(kc), panel=False)
+    p.box("Kit_Inset", (-0.05, -0.045, 0.005), (0.05, 0.045, 0.006), m=fm(kc), panel=False)
     for i, lab in enumerate(("ck_lights", "ck_gear", "ck_vtol", "ck_esp")):
         q = kc + X * (0.024 * (1 if i % 2 else -1)) + d * (0.021 * (1 if i < 2 else -1))
-        p.box("Kit_Seal", (-0.0235, -0.021, 0.006), (0.0235, 0.021, 0.0098), bevel=0.001, segments=1, m=fm(q))
-        p.box("Kit_Housing", (-0.019, -0.017, 0.006), (0.019, 0.017, 0.01), bevel=0.002, segments=2, m=fm(q))
-        # a gradient: the cap's rim on the dimmer cool glow, a brighter warm centre a hair proud
-        p.box("Kit_GlowCool", (-0.016, -0.014, 0.01), (0.016, 0.014, 0.0135), bevel=0.0015, segments=2, m=fm(q))
-        p.box("Kit_GlowKey", (-0.0105, -0.0085, 0.0135), (0.0105, 0.0085, 0.0139), m=fm(q), panel=False)
-        legend(p, {"ck_lights": "LT", "ck_gear": "GR", "ck_vtol": "VT", "ck_esp": "ESP"}[lab], fm(q) @ Vector((0.0, 0.0, 0.0139)), X, d, n, h=0.0065, role="Kit_Seal")
+        keycap(p, fm(q), {"ck_lights": "LT", "ck_gear": "GR", "ck_vtol": "VT", "ck_esp": "ESP"}[lab])
     for xx in (0.665, 0.955):
         screw(p, c0 + X * xx + d * 0.04 + n * 0.003, n)
         screw(p, c0 + X * xx - d * 0.04 + n * 0.003, n)
@@ -349,13 +373,13 @@ def _console_b(name, seed):
     for i, lab in enumerate(("ck_pwr", "ck_extlt", "ck_eng")):
         q = fc - a * 0.078 + r * (0.105 * (i - 1)) + nf * 0.002
         p.box("Kit_Lip", (-0.016, -0.024, 0.0), (0.016, 0.03, 0.0015), bevel=0.001, segments=1, m=ff(q), panel=False)   # its frame
-        _rocker(p, q, r, a, nf, lab, label_scale=0, index=False)
+        rocker_b(p, q, r, a, nf)
         legend(p, {"ck_pwr": "PWR", "ck_extlt": "EXT LT", "ck_eng": "ENG"}[lab], q - a * 0.034 + nf * 0.0002, r, a, nf, h=0.008)
         led(p, ff(q) @ Vector((0.0, 0.0245, 0.0015)), nf)
     for su in (-1, 1):
         for sv in (-1, 1):
             screw(p, fc + r * (su * (w2 - 0.012)) + a * (sv * (h2 - 0.012)) + nf * 0.002, nf)
-    p.box("Kit_Graphite", (1.131, TU + 0.02, 0.7395), (1.134, W - 0.025, 0.7408), panel=False)            # the top's seam
+    p.box("Kit_Inset", (1.131, TU + 0.02, 0.7395), (1.134, W - 0.025, 0.7408), panel=False)            # the top's seam
     for uf, ns_ in ((TU, -1), (W - 0.005, 1)):
         # the inset follows the side's outline 20 mm in: the slope edge leans with the face
         ins = [(1.0, DECK + 0.02), (L - 0.04, DECK + 0.02), (L - 0.04, 0.68), (1.115, 0.72), (1.0, 0.53)]
@@ -368,7 +392,7 @@ def _console_b(name, seed):
     # the tower's seat-side inset (the biggest face the pilot sees): a polished-frame plate, a row of vent slots, stencils
     uf_ = TU - 0.0045
     p.box("Kit_Lip", (1.019, uf_ - 0.0012, 0.528), (1.085, uf_ + 0.001, 0.568), bevel=0.0006, segments=1, panel=False)
-    p.box("Kit_Graphite", (1.022, uf_ - 0.0016, 0.531), (1.082, uf_ - 0.0011, 0.565), panel=False)
+    p.box("Kit_Inset", (1.022, uf_ - 0.0016, 0.531), (1.082, uf_ - 0.0011, 0.565), panel=False)
     legend(p, "HF-3287", Vector((1.052, uf_ - 0.0016, 0.5545)), X, Z, -Y, h=0.0095)
     legend(p, "L ARM", Vector((1.052, uf_ - 0.0016, 0.5395)), X, Z, -Y, h=0.0068)
     for k in range(8):
@@ -438,7 +462,7 @@ def _console_b(name, seed):
     # 7b the rear deck outboard of the beam: a service hatch (a raised lid in a dark seam, a recessed pull, two
     # quarter-turn latches, its stencils) - the concept has no empty board
     hx0, hx1, hu0, hu1 = 0.06, 0.58, 0.2, W - 0.04
-    p.box("Kit_Graphite", (hx0 - 0.006, hu0 - 0.006, DECK + 0.004), (hx1 + 0.006, hu1 + 0.006, DECK + 0.008), panel=False)
+    p.box("Kit_Inset", (hx0 - 0.006, hu0 - 0.006, DECK + 0.004), (hx1 + 0.006, hu1 + 0.006, DECK + 0.008), panel=False)
     lid = [(hu0, DECK), (hu1, DECK), (hu1, DECK + 0.018), (hu1 - 0.012, DECK + 0.026), (hu0 + 0.012, DECK + 0.026), (hu0, DECK + 0.018)]
     end_prism(p, "Kit_Frame", lid, hx0, hx1, 0.003, 1)
     zt = DECK + 0.026
@@ -462,7 +486,7 @@ def _console_b(name, seed):
     for xx in (hx0 + 0.05, hx1 - 0.16):
         c = Vector((xx, (hu0 + hu1) / 2, zt))
         p.lathe("Kit_Lip", [(0.011, 0.0), (0.011, 0.0015), (0.009, 0.0025)], tuple(c), seg=20)
-        p.box("Kit_Graphite", (xx - 0.0075, (hu0 + hu1) / 2 - 0.0015, zt + 0.0015), (xx + 0.0075, (hu0 + hu1) / 2 + 0.0015, zt + 0.0035), panel=False)
+        p.box("Kit_Inset", (xx - 0.0075, (hu0 + hu1) / 2 - 0.0015, zt + 0.0015), (xx + 0.0075, (hu0 + hu1) / 2 + 0.0015, zt + 0.0035), panel=False)
     _label(p, "st_service", Vector((0.22, hu0 + 0.06, zt + 0.0004)), Z, X, Y, scale=0.7)       # read from the seat
     _label(p, "label_coolant", Vector((0.47, hu1 - 0.13, zt + 0.0004)), Z, X, Y, scale=0.9)
     # a groove splits the lid 60/40; the small field a framed grille

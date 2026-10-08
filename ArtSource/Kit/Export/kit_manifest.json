@@ -9883,7 +9883,7 @@
     74.9,
     83.1
    ],
-   "tris": 16308,
+   "tris": 17564,
    "tris_decals": 198,
    "tri_budget": 90000,
    "materials": [
@@ -9963,7 +9963,7 @@
     76.2,
     74.1
    ],
-   "tris": 56044,
+   "tris": 59460,
    "tris_decals": 172,
    "tri_budget": 90000,
    "materials": [
@@ -9977,7 +9977,6 @@
     "Kit_Perforated",
     "Kit_Red",
     "Kit_GlowRed",
-    "Kit_Shell",
     "Kit_Housing",
     "Kit_Frame",
     "Kit_GlowKey",
@@ -10037,7 +10036,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 27594,
+    "edge": 31026,
     "secondary": 0,
     "floor": 11446,
     "seam": 0
@@ -10062,7 +10061,7 @@
     76.2,
     74.1
    ],
-   "tris": 56044,
+   "tris": 59460,
    "tris_decals": 172,
    "tri_budget": 90000,
    "materials": [
@@ -10076,7 +10075,6 @@
     "Kit_Perforated",
     "Kit_Red",
     "Kit_GlowRed",
-    "Kit_Shell",
     "Kit_Housing",
     "Kit_Frame",
     "Kit_GlowKey",
@@ -10136,7 +10134,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 27594,
+    "edge": 31026,
     "secondary": 0,
     "floor": 11446,
     "seam": 0
