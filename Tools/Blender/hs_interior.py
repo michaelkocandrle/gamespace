@@ -1638,6 +1638,12 @@ def cockpit_detail(g, layout, zc, sill):
         for t_ in (0.3, 0.75):
             lights_out.append({"at": [x0 + (x1 - x0) * t_, (y0 + y1) / 2, ztop + 0.8], "cd": COCKPIT.get("console_pool_cd", 3.0), "type": "spot",
                                "cone_deg": 80.0, "direction": [0.0, 0.0, -1.0], "color": [1.0, 0.95, 0.9], "source_radius_cm": 20.0})
+        # (cockpit v4, concept B: the consoles' inner faces white and lit, not grey in shade) two spots over the aisle
+        # turned out and down onto the console's face
+        side_ = 1.0 if (y0 + y1) > 0 else -1.0
+        for t_ in (0.25, 0.7):
+            lights_out.append({"at": [x0 + (x1 - x0) * t_, side_ * 0.62, ztop + 0.55], "cd": COCKPIT.get("console_face_cd", 0.0), "type": "spot",
+                               "cone_deg": 100.0, "direction": [0.0, side_ * 0.75, -0.65], "color": [1.0, 0.97, 0.94], "source_radius_cm": 25.0})
     lights_out.append({"at": [16.3, 0.0, zc + 1.5], "cd": 1.6, "warm": True, "source_radius_cm": 30.0})
     # footwell light (warm, small): the pilot's legs and the tub read in the dark
     for s_ in (1, -1):

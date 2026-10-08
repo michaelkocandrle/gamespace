@@ -19,7 +19,7 @@ from mathutils import Vector
 import kit_geo
 from kit_geo import frame
 import kit_cockpit_b as kb
-from kit_cockpit_b import side_prism, screw, legend, led, keycap, rocker_b, MIRROR, _mirror_y
+from kit_cockpit_b import side_prism, screw, legend, led, keycap, rocker_b, emergency_key, MIRROR, _mirror_y
 from kit_cockpit import stick, _label
 
 X, Y, Z = Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))
@@ -225,12 +225,26 @@ def _skin(p, role, rings, centres):
 
 
 def _top_patch(p, role, x0, x1, s0, s1, z0, z1):
-    """A slab following the sloped top between x0..x1 and s0..s1, from z0 to z1 over it (insets, bezels)."""
+    """A slab following the sloped top between x0..x1 and s0..s1 (s1 a number or a function of x: a field that
+    narrows with the console), from z0 to z1 over it (insets, bezels)."""
     xs = [x0] + [st[0] for st in STATIONS if x0 < st[0] < x1] + [x1]
     rings, centres = [], []
     for x in xs:
-        ring = [top_pt(x, s0) + Vector((0, 0, z0)), top_pt(x, s1) + Vector((0, 0, z0)),
-                top_pt(x, s1) + Vector((0, 0, z1)), top_pt(x, s0) + Vector((0, 0, z1))]
+        s1x = s1(x) if callable(s1) else s1
+        ring = [top_pt(x, s0) + Vector((0, 0, z0)), top_pt(x, s1x) + Vector((0, 0, z0)),
+                top_pt(x, s1x) + Vector((0, 0, z1)), top_pt(x, s0) + Vector((0, 0, z1))]
+        rings.append(ring)
+        centres.append(sum(ring, Vector()) / 4)
+    _skin(p, role, rings, centres)
+
+
+def _face_patch(p, role, x0, x1, z0, z1, o0, o1):
+    """A slab on the console's inner face between x0..x1 and z0..z1, o0..o1 proud of it (windows, frames)."""
+    xs = [x0] + [st[0] for st in STATIONS if x0 < st[0] < x1] + [x1]
+    rings, centres = [], []
+    for x in xs:
+        d = _station(x)[0]
+        ring = [_V(x, d + o0, z0), _V(x, d + o0, z1), _V(x, d + o1, z1), _V(x, d + o1, z0)]
         rings.append(ring)
         centres.append(sum(ring, Vector()) / 4)
     _skin(p, role, rings, centres)
@@ -238,7 +252,7 @@ def _top_patch(p, role, x0, x1, s0, s1, z0, z1):
 
 def _wall_console(name, seed):
     p = kit_geo.Part(name, seed)
-    p.edge_roles = {"Kit_Frame": "Kit_FrameEdge", "Kit_PanelPaint": "Kit_FrameEdge"}
+    p.edge_roles = {"Kit_Frame": "Kit_FrameEdge", "Kit_PanelPaint": "Kit_FrameEdge", "Kit_PanelSatin": "Kit_FrameEdge"}
     p.sharp_deg = 20.0
     # the body: one loft through the stations, the panel paint (author 8. 10.: the column's glossy white)
     xs = [st[0] for st in STATIONS]
@@ -247,7 +261,7 @@ def _wall_console(name, seed):
     for x in xs:
         d, zi = _station(x)
         centres.append(_V(x, min(d * 0.45, d - 0.07), zi * 0.5))
-    _skin(p, "Kit_PanelPaint", rings, centres)
+    _skin(p, "Kit_PanelSatin", rings, centres)       # (concept B: white and lit, the mirror coat read grey)
     # the kick's back: dark, a light line along its top lights the recess and the floor (concept B)
     kick = [[_V(x, _station(x)[0] - 0.0505, 0.004), _V(x, _station(x)[0] - 0.0505, 0.098),
              _V(x, _station(x)[0] - 0.047, 0.098), _V(x, _station(x)[0] - 0.047, 0.004)] for x in xs]
@@ -269,34 +283,37 @@ def _wall_console(name, seed):
     nf = Vector((t.y, -t.x, 0.0))
     if nf.dot(Vector((0, -1, 0))) < 0:
         nf = -nf
-    _label(p, "maker", _V(16.3, da + 0.0008, 0.36), nf, t, Vector((0, 0, 1)), scale=0.55)
-    # 1 SYS: a graphite field sunk in a satin bezel on the top, six rockers in a row along it, their legends
-    _top_patch(p, "Kit_Lip", 16.03, 16.58, 0.045, 0.175, -0.002, 0.0025)
-    _top_patch(p, "Kit_Inset", 16.04, 16.57, 0.051, 0.169, -0.001, 0.0034)
+    _label(p, "maker", _V(16.3, da + 0.0008, 0.52), nf, t, Vector((0, 0, 1)), scale=0.55)
+    # (concept B) one graphite field along the top, narrowing with the console, in a satin bezel: the SYS rockers in a
+    # row by the wall, the emergency key, the power bars and the caution lamp ahead of them
+    edge = lambda x: _station(x)[0] - 0.045                # noqa: E731
+    _top_patch(p, "Kit_Lip", 16.03, 17.16, 0.03, edge, -0.002, 0.0025)
+    _top_patch(p, "Kit_Inset", 16.04, 17.15, 0.036, lambda x: edge(x) - 0.006, -0.001, 0.0034)
     labs = ("PWR", "EXT LT", "ENG", "LIGHTS", "GEAR", "VTOL")
     for i, lab in enumerate(labs):
         q, r, a, n = top_frame(16.1 + i * 0.08, 0.098)
         rocker_b(p, q + n * 0.0034, r, a, n, lit="Kit_GlowAmber" if lab == "GEAR" else "Kit_GlowCool")
         legend(p, lab, q - a * 0.032 + n * 0.0036, r, a, n, h=0.0066)
     q, r, a, n = top_frame(16.07, 0.142)
-    legend(p, "SYS", q + n * 0.0036, r, a, n, h=0.009)
-    # 2 the emergency field: a guarded switch, the power bars, a caution lamp
-    _top_patch(p, "Kit_Lip", 16.64, 17.2, 0.03, 0.125, -0.002, 0.0025)
-    _top_patch(p, "Kit_Inset", 16.65, 17.19, 0.036, 0.119, -0.001, 0.0034)
-    q, r, a, n = top_frame(16.74, 0.082)
-    guarded_toggle(p, q + n * 0.0034, r, a, n)
-    legend(p, "EMERG", q - a * 0.033 + n * 0.0036, r, a, n, h=0.0068)
+    legend(p, "SYS", q + n * 0.0036, r, a, n, h=0.013)
+    q, r, a, n = top_frame(16.72, 0.068)
+    emergency_key(p, q + n * 0.0034, r, a, n)
     for k, lab in enumerate(("MAIN", "BATT")):
         for gi in range(8):
             on = gi < (8, 5)[k]
-            q, r, a, n = top_frame(16.86 + gi * 0.017, 0.064 + 0.03 * k)
+            q, r, a, n = top_frame(16.84 + gi * 0.017, 0.064 + 0.03 * k)
             fm = frame(q + n * 0.0034, r, a, n)
             p.box("Kit_GlowCool" if on else "Kit_Seal", (-0.0065, -0.004, 0.0), (0.0065, 0.004, 0.0009 if on else 0.0004), m=fm, panel=False)
-        q, r, a, n = top_frame(16.825, 0.064 + 0.03 * k)
+        q, r, a, n = top_frame(16.805, 0.064 + 0.03 * k)
         legend(p, lab, q + n * 0.0036, r, a, n, h=0.0055)
-    q, r, a, n = top_frame(17.11, 0.08)
+    q, r, a, n = top_frame(17.1, 0.08)
     led(p, q + n * 0.0034, n, glow="Kit_GlowAmber", r=0.004)
     legend(p, "CAUT", q - a * 0.02 + n * 0.0036, r, a, n, h=0.0055)
+    # (concept B) lit windows in the inner face: a dark recess in a satin frame, a band of light along its foot
+    for (wx0, wx1) in ((16.08, 16.46), (16.56, 17.16), (17.3, 17.58)):
+        _face_patch(p, "Kit_Lip", wx0 - 0.008, wx1 + 0.008, 0.162, 0.408, 0.0004, 0.003)
+        _face_patch(p, "Kit_Inset", wx0, wx1, 0.17, 0.4, 0.0004, 0.0036)
+        _face_patch(p, "Kit_GlowStrip", wx0 + 0.015, wx1 - 0.015, 0.182, 0.19, 0.0036, 0.0048)
     # the collision: one hull per span
     for (x0, x1) in zip(xs, xs[1:]):
         pts = []

@@ -3023,6 +3023,8 @@
    "footwell_cd": 2.5,
    "_raise": "Cockpit raised 0.8 m (floor 0.35 -> 1.15, eye 1.65 -> 2.45, author's step 2 view targets 25. 9. 2026): the canopy's glass starts 1 m over the old eye; raised, the pilot sits in the glass band and the exterior stays as drawn. Stairs from the cabin (hs_interior.py).",
    "console_pool_cd": 45.0,
+   "console_face_cd": 90.0,
+   "_console_face_cd": "cockpit v4 (concept B): spots over the aisles onto the side consoles' inner faces",
    "_centre_w": "9 cm: at 11 cm the centre screens' outer edges went behind the MFD pods' inner edges from the eye (critic, 25. 9. 2026)"
   },
   "decals": {

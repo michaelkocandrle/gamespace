@@ -10283,7 +10283,7 @@
     53.8,
     85.0
    ],
-   "tris": 13146,
+   "tris": 13378,
    "tris_decals": 12,
    "tri_budget": 90000,
    "materials": [
@@ -10293,12 +10293,13 @@
     "Kit_GlowSignal",
     "Kit_Lip",
     "Kit_Red",
+    "Kit_GlowRed",
     "Kit_Housing",
     "Kit_GlowAmber",
     "Kit_Inset",
     "Kit_Legend",
     "Kit_GlowStrip",
-    "Kit_PanelPaint",
+    "Kit_PanelSatin",
     "Kit_DecalPaint"
    ],
    "sockets": {},
@@ -10310,9 +10311,9 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 6744,
+    "edge": 7632,
     "secondary": 0,
-    "floor": 188,
+    "floor": 356,
     "seam": 0
    },
    "status": "built"
@@ -10335,7 +10336,7 @@
     53.8,
     85.0
    ],
-   "tris": 13146,
+   "tris": 13378,
    "tris_decals": 12,
    "tri_budget": 90000,
    "materials": [
@@ -10345,12 +10346,13 @@
     "Kit_GlowSignal",
     "Kit_Lip",
     "Kit_Red",
+    "Kit_GlowRed",
     "Kit_Housing",
     "Kit_GlowAmber",
     "Kit_Inset",
     "Kit_Legend",
     "Kit_GlowStrip",
-    "Kit_PanelPaint",
+    "Kit_PanelSatin",
     "Kit_DecalPaint"
    ],
    "sockets": {},
@@ -10362,9 +10364,9 @@
    "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 6744,
+    "edge": 7632,
     "secondary": 0,
-    "floor": 188,
+    "floor": 356,
     "seam": 0
    },
    "status": "built"

@@ -104,6 +104,25 @@
     0.5
    ],
    "fov": 70
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "name": "concept_view",
+   "camera_local": [
+    5.35,
+    0.0,
+    1.8
+   ],
+   "look_local": [
+    7.9,
+    0.0,
+    0.25
+   ],
+   "fov": 100
   }
  ]
 }
