@@ -3005,7 +3005,7 @@
    "_seam_z": "cockpit v3 r2 (critic: the fields between the ribs flat) - horizontal graphite seams across the lining",
    "_seam_x": "cockpit v3 r1 (8. 10. 2026, critic: panels at most 600 x 400 mm) - a graphite rib every 40 cm",
    "pod_bulge": 0.03,
-   "frame_wash_cd": 2.5,
+   "frame_wash_cd": 1.5,
    "_frame_wash_8_10": "author 8. 10. 2026: the white too bright - less wash, the light from the lines (canopy frame glow lines)",
    "fascia_tilt_deg": 22.0,
    "fascia_bottom_z": 1.72,

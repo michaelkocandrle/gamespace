@@ -1616,7 +1616,19 @@ def cockpit_detail(g, layout, zc, sill):
             for sd_ in (-1, 1):
                 cyl(g["int_dark"], (xb_, yy + sd_ * 0.017, zc + 0.03), (xb_, yy + sd_ * 0.017, zc + 0.033), 0.004, 6)
             xb_ += 0.15
-    box(g["int_dark"], (x0 + 0.15, -0.22, zc + 0.03), (x1 - 0.15, 0.22, zc + 0.16))
+    # (cockpit v4 r4, critic: the pedestal bare) satin white, 20 mm radius, a dark kick band, a screwed service cover
+    # on its back, a light line under its top edge
+    px0, px1 = x0 + 0.15, x1 - 0.15
+    _hc.rr_slab(g["int_console"], Vector(((px0 + px1) / 2, 0.0, zc + 0.16)), Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1)),
+                px1 - px0, 0.44, 0.02, 0.11, 4)
+    box(g["int_dark"], (px0 + 0.006, -0.214, zc + 0.03), (px1 - 0.006, 0.214, zc + 0.05))
+    _hc.rr_slab(g["int_trim"], Vector((px0 - 0.003, 0.0, zc + 0.11)), Vector((0, -1, 0)), Vector((0, 0, 1)), Vector((-1, 0, 0)),
+                0.2, 0.08, 0.008, 0.004, 3)
+    for sy_ in (-0.088, 0.088):
+        for sz_ in (0.08, 0.14):
+            cyl(g["int_dark"], (px0 - 0.0035, sy_, zc + sz_), (px0 - 0.0055, sy_, zc + sz_), 0.004, 8)
+    box(g["int_glow_soft"], (px0 + 0.02, -0.2215, zc + 0.135), (px1 - 0.02, -0.2195, zc + 0.141))
+    box(g["int_glow_soft"], (px0 + 0.02, 0.2195, zc + 0.135), (px1 - 0.02, 0.2215, zc + 0.141))
     # (the sill switch panels are gone: the tub is clamped inside the hull now and they hung beside it; the
     # control modules on the side consoles replace them)
     # frame wash: two dim spots at the foot of the front pillars grazing up the canopy frame's lining, so the

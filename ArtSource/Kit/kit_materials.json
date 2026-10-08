@@ -103,7 +103,7 @@
   "Kit_GlowRed": {"colour": [1.0, 0.12, 0.09], "strength": 1.6},
   "Kit_GlowKey": {"colour": [1.0, 0.96, 0.9], "strength": 12.0},
   "Kit_GlowAmber": {"colour": [1.0, 0.55, 0.12], "strength": 10.0},
-  "Kit_GlowStrip": {"colour": [0.3, 0.62, 1.0], "strength": 6.0}
+  "Kit_GlowStrip": {"colour": [0.3, 0.62, 1.0], "strength": 6.0}, "Kit_GlowWindow": {"colour": [0.55, 0.75, 1.0], "strength": 0.9, "_why": "cockpit v4 r4 (critic: the console windows dark): a recess lit through, ~6500 K"}
  },
  "makers": {
   "Halcyon": {

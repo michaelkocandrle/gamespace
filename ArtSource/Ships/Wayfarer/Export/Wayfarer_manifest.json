@@ -41,7 +41,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "e1b781730a82fb824d3679e131592073373f30b4"
+      "geometry_hash": "d0f821033d2beea4d85cc33fb33afdad4a8fb974"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -55,7 +55,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "6932d18bd1c894cda648091d45141bb78eae36cc"
+      "geometry_hash": "4352add502814cd1b6116f9d633d5f93850397b4"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -90,14 +90,14 @@
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "70670738e626ff0530902816c0a33edbed2b8064"
+      "geometry_hash": "8f3c06aa4830caf8fedd4cae547076a85c8c1667"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
       "objects": [
         "SM_Ship_Wayfarer_InteriorDecals"
       ],
-      "geometry_hash": "6f2797966669edd3cd396da5ec3ff413344fe576"
+      "geometry_hash": "399ad63f7bae7baa8d6a88be9a7dbaa6c58a38b3"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorKit.fbx",
@@ -118,8 +118,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 459487,
-      "verts": 305340,
+      "tris": 459479,
+      "verts": 305336,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -179,8 +179,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 66388,
-      "verts": 72318,
+      "tris": 66402,
+      "verts": 72336,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -307,8 +307,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 664045,
-      "verts": 344950,
+      "tris": 666217,
+      "verts": 346086,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -352,8 +352,8 @@
     "SM_Ship_Wayfarer_InteriorDecals": {
       "lod": 0,
       "part": "InteriorDecals",
-      "tris": 4716,
-      "verts": 4141,
+      "tris": 4710,
+      "verts": 4133,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -516,7 +516,7 @@
         [
           -9.949999809265137,
           3.2013895511627197,
-          0.8000001907348633
+          0.8000011444091797
         ],
         [
           -7.250000476837158,

@@ -127,13 +127,16 @@ def _seat_arm(name, seed):
     # (critic r3: the post and the plate hung under the arm as blocks) a swept strut from the arm's underside curving
     # down into a round flange on the seat's side, a satin collar where it meets the arm
     for sx in (16.9, 17.2):
-        path = [Vector((sx, y0 + 0.03, 0.532)), Vector((sx, y0 + 0.03, 0.47)), Vector((sx, y0 - 0.005, 0.41)), Vector((sx, 0.385, 0.385))]
-        p.sweep("Kit_PanelSatin", path, 0.016, seg=16)
-        p.lathe("Kit_Lip", [(0.034, 0.0), (0.034, 0.006), (0.028, 0.01), (0.0, 0.011)], (sx, 0.379, 0.385), axis=(0, 1, 0), seg=24)
-        for k in range(4):
-            ang = math.radians(45 + 90 * k)
-            screw(p, Vector((sx + 0.024 * math.cos(ang), 0.39, 0.385 + 0.024 * math.sin(ang))), Y, 0.003)
-        p.lathe("Kit_Lip", [(0.022, 0.0), (0.022, 0.008), (0.0, 0.008)], (sx, y0 + 0.03, 0.524), axis=(0, 0, 1), seg=20)
+        p.box("Kit_PanelSatin", (sx - 0.07, y0 + 0.01, 0.505), (sx + 0.07, y0 + 0.09, 0.531), bevel=0.008, segments=3)   # the cover
+        p.box("Kit_Lip", (sx - 0.045, y0 + 0.015, 0.497), (sx + 0.045, y0 + 0.085, 0.505), bevel=0.002, segments=2)     # top flange
+        p.box("Kit_PanelSatin", (sx - 0.03, y0 + 0.02, 0.37), (sx + 0.03, y0 + 0.055, 0.5), bevel=0.01, segments=3)    # the post
+        p.box("Kit_PanelSatin", (sx - 0.03, 0.386, 0.37), (sx + 0.03, y0 + 0.055, 0.405), bevel=0.01, segments=3)     # the leg
+        p.box("Kit_Lip", (sx - 0.045, 0.378, 0.352), (sx + 0.045, 0.386, 0.422), bevel=0.002, segments=2)            # seat flange
+        for su in (-1, 1):
+            for sv in (-1, 1):
+                screw(p, Vector((sx + su * 0.033, 0.3862, 0.387 + sv * 0.025)), Y, 0.0032)
+                screw(p, Vector((sx + su * 0.033, y0 + 0.05 + sv * 0.022, 0.4968)), -Z, 0.0032)
+        p.box("Kit_GlowStrip", (sx - 0.0015, y0 + 0.0195, 0.39), (sx + 0.0015, y0 + 0.021, 0.48), panel=False)        # a line down it
     _label(p, "st_hfcl", Vector((17.2, y1 + 0.0005, 0.565)), Y, -X, Z, scale=0.35)
     # (cockpit v3 r1, critic: one detail where SC has five) a satin strip along the top's outer edge, perforation in
     # the pad's middle band, two screwed graphite side panels with a grille between, a light line and an LED on the
@@ -292,13 +295,13 @@ def _wall_console(name, seed):
     # (concept B) one graphite field along the top, narrowing with the console, in a satin bezel: the SYS rockers in a
     # row by the wall, the emergency key, the power bars and the caution lamp ahead of them
     edge = lambda x: _station(x)[0] - 0.045                # noqa: E731
-    _top_patch(p, "Kit_Lip", 16.03, 17.16, 0.03, edge, -0.002, 0.0025)
-    _top_patch(p, "Kit_Inset", 16.04, 17.15, 0.036, lambda x: edge(x) - 0.006, -0.001, 0.0034)
+    _top_patch(p, "Kit_Lip", 16.03, 17.18, 0.018, lambda x: edge(x) + 0.012, -0.002, 0.0025)
+    _top_patch(p, "Kit_Inset", 16.04, 17.17, 0.024, lambda x: edge(x) + 0.006, -0.001, 0.0034)
     labs = ("PWR", "EXT LT", "ENG", "LIGHTS", "GEAR", "VTOL")
     for i, lab in enumerate(labs):
         q, r, a, n = top_frame(16.1 + i * 0.08, 0.098)
         rocker_b(p, q + n * 0.0034, r, a, n, lit="Kit_GlowAmber" if lab == "GEAR" else "Kit_GlowCool")
-        legend(p, lab, q - a * 0.032 + n * 0.0036, r, a, n, h=0.0066)
+        legend(p, lab, q - a * 0.034 + n * 0.0036, r, a, n, h=0.0085)
     q, r, a, n = top_frame(16.07, 0.142)
     legend(p, "SYS", q + n * 0.0036, r, a, n, h=0.013)
     q, r, a, n = top_frame(16.72, 0.068)
@@ -317,8 +320,9 @@ def _wall_console(name, seed):
     # (concept B) lit windows in the inner face: a dark recess in a satin frame, a band of light along its foot
     for (wx0, wx1) in ((16.08, 16.46), (16.56, 17.16), (17.3, 17.58)):
         _face_patch(p, "Kit_Lip", wx0 - 0.008, wx1 + 0.008, 0.162, 0.408, 0.0004, 0.003)
-        _face_patch(p, "Kit_Inset", wx0, wx1, 0.17, 0.4, 0.0004, 0.0036)
-        _face_patch(p, "Kit_GlowStrip", wx0 + 0.015, wx1 - 0.015, 0.182, 0.19, 0.0036, 0.0048)
+        _face_patch(p, "Kit_GlowWindow", wx0, wx1, 0.17, 0.4, 0.0004, 0.0016)          # (r4: lit through, not dark)
+        _face_patch(p, "Kit_Inset", wx0 + 0.012, wx1 - 0.012, 0.215, 0.385, 0.0016, 0.0042)  # the dark panel in the recess
+        _face_patch(p, "Kit_GlowStrip", wx0 + 0.015, wx1 - 0.015, 0.182, 0.2, 0.0016, 0.0032)
     # the collision: one hull per span
     for (x0, x1) in zip(xs, xs[1:]):
         pts = []

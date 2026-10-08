@@ -1651,8 +1651,34 @@ def wing_panels(g, eye, spec):
     LIGHTS, COOL; right MASTER ARM (red guard), WPN, NAV; status LEDs over them."""
     zb = spec.get("fascia_bottom_z", 0.97)
     tilt = math.tan(math.radians(spec.get("fascia_tilt_deg", 22.0)))
+    wing = [tuple(w) for w in spec.get("wing", [(17.3, 1.13, 1.06), (17.62, 0.98, 1.22)])]
     for side in (1, -1):
-        for x, y, zt in [tuple(w) for w in spec.get("wing", [(17.3, 1.13, 1.06), (17.62, 0.98, 1.22)])][1:]:
+        # (cockpit v4 r4, critic: the wing a separate bright plate) its face carries the console's language: a graphite
+        # inset in a satin rim in its tall half, the console's light line along its foot to the MFD pod
+        def col(x, y, zt):
+            b = Vector((x, side * y, zb))
+            f = Vector((x - eye[0], side * y - eye[1], 0)).normalized()
+            return b, Vector((x, side * y, zt)) + f * tilt * (zt - zb)
+        (b0, t0), (b1, t1) = col(*wing[0]), col(*wing[1])
+        nrm = (b1 - b0).cross(t0 - b0).normalized()
+        if nrm.dot(Vector(eye) - b0) < 0:
+            nrm = -nrm
+        P = lambda u, v: b0.lerp(b1, u).lerp(t0.lerp(t1, u), v)                     # noqa: E731
+        quad = [P(0.42, 0.2), P(0.94, 0.2), P(0.94, 0.75), P(0.42, 0.75)]
+        for key, grow, off in (("int_trim", 0.01, 0.003), ("int_dark", 0.0, 0.005)):
+            cen = sum(quad, Vector()) / 4
+            pts = [q + (q - cen).normalized() * grow for q in quad]
+            fr = [g[key].verts.new(q + nrm * off) for q in pts]
+            bk = [g[key].verts.new(q - nrm * 0.004) for q in pts]
+            g[key].faces.new(fr if (fr[1].co - fr[0].co).cross(fr[2].co - fr[0].co).dot(nrm) > 0 else fr[::-1])
+            for i in range(4):
+                j = (i + 1) % 4
+                try:
+                    g[key].faces.new((bk[i], bk[j], fr[j], fr[i]))
+                except ValueError:
+                    pass
+        tube(g["int_glow_soft"], P(0.02, 0.1) + nrm * 0.004, P(1.0, 0.1) + nrm * 0.004, 0.0028, 6)
+        for x, y, zt in wing[1:]:
             zc = (zb + zt) / 2
             f = Vector((x - eye[0], side * y - eye[1], 0)).normalized()
             c = Vector((x + 0.1, side * (y - 0.1), zc)) + f * tilt * (zc - zb)

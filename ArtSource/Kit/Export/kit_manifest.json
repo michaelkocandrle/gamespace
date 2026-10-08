@@ -10151,15 +10151,15 @@
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_SeatArm07W_L.fbx",
    "dims_m": [
     0.705,
-    0.212,
-    0.455
+    0.208,
+    0.454
    ],
    "expected_size_cm": [
     70.5,
-    21.2,
-    45.5
+    20.8,
+    45.4
    ],
-   "tris": 19908,
+   "tris": 21172,
    "tris_decals": 4,
    "tri_budget": 90000,
    "materials": [
@@ -10197,9 +10197,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 8526,
+    "edge": 11454,
     "secondary": 0,
-    "floor": 1040,
+    "floor": 1560,
     "seam": 0
    },
    "status": "built"
@@ -10214,15 +10214,15 @@
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_SeatArm07W_R.fbx",
    "dims_m": [
     0.705,
-    0.212,
-    0.455
+    0.208,
+    0.454
    ],
    "expected_size_cm": [
     70.5,
-    21.2,
-    45.5
+    20.8,
+    45.4
    ],
-   "tris": 19908,
+   "tris": 21172,
    "tris_decals": 4,
    "tri_budget": 90000,
    "materials": [
@@ -10260,9 +10260,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 8526,
+    "edge": 11454,
     "secondary": 0,
-    "floor": 1040,
+    "floor": 1560,
     "seam": 0
    },
    "status": "built"
@@ -10285,7 +10285,7 @@
     53.8,
     85.0
    ],
-   "tris": 13378,
+   "tris": 13422,
    "tris_decals": 12,
    "tri_budget": 90000,
    "materials": [
@@ -10302,6 +10302,7 @@
     "Kit_Legend",
     "Kit_GlowStrip",
     "Kit_PanelSatin",
+    "Kit_GlowWindow",
     "Kit_DecalPaint"
    ],
    "sockets": {},
@@ -10315,7 +10316,7 @@
     "domain": "CORNER",
     "edge": 7632,
     "secondary": 0,
-    "floor": 356,
+    "floor": 412,
     "seam": 0
    },
    "status": "built"
@@ -10338,7 +10339,7 @@
     53.8,
     85.0
    ],
-   "tris": 13378,
+   "tris": 13422,
    "tris_decals": 12,
    "tri_budget": 90000,
    "materials": [
@@ -10355,6 +10356,7 @@
     "Kit_Legend",
     "Kit_GlowStrip",
     "Kit_PanelSatin",
+    "Kit_GlowWindow",
     "Kit_DecalPaint"
    ],
    "sockets": {},
@@ -10368,7 +10370,7 @@
     "domain": "CORNER",
     "edge": 7632,
     "secondary": 0,
-    "floor": 356,
+    "floor": 412,
     "seam": 0
    },
    "status": "built"
