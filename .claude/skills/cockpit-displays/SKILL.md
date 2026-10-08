@@ -36,6 +36,14 @@ historie v archivu `Docs/HANDOFF.md` (body 23–33, 72).
   - **Průsvitný materiál ne:** 19. 9. zdvojoval řádky, protože nemá hloubku ani velocity. Masked hloubku i velocity zapisuje a řazení s kabinou neřeší.
   - **Komponenta `Screens` nevrhá stín** (`import_ship.py`, hlídá test). Maskovaný materiál vrhá stín podle masky a slunce kreslilo písmena jako tmavou posunutou kopii na desku za sklem. Vypadalo to jako duch TSR nebo odraz.
   - Zvažovaný jeden široký střední panel (plátno 1330 × 490) nezaveden: dvojice MFD drží rozpočet písma a střed patří hologramu (krok 6).
+- **Holo MFD v4 (8. 10. 2026, autor: MFD ve stylu holo radaru):** za každým obrazem MFD je průsvitné `M_Ship_HoloField`.
+  - Pole tmavomodře tónuje pozadí, takže obsah čte i nad bílým kokpitem bez zrna ditheru (`HoloSmoke` 0).
+  - Dál nese svítící hranu s rohovými závorkami, jemné řádky, rolující pás a mihotání.
+  - Ze štěrbiny emitoru vede aditivní kužel `M_Ship_HoloBeam`.
+  - Geometrie: `hs_cockpit.HOLO_BM`; obě vrstvy jsou v dílu Screens (kvůli UV).
+  - Parametr `Power` nastavuje `UCockpitDisplayComponent` podle napájení a bootu.
+  - Rám, náběh světla a mřížku už widget nekreslí (`MfdGlass` s `bHolo`).
+  - Aditivní pole bez tónu četlo jako mléčné sklo, proto je pole průsvitné.
 - `USpaceCockpitDisplays` je podtřída `USpaceFlightHud`: **stejné názvy widgetů a stejné `ApplyState`**.
   Nový údaj tedy obvykle = stav v `FSpaceFlightHudState` (make_state) + widget v `BuildTree`.
 - **Plátno 1330 × 490 px:** vlevo FLIGHT 0–560, vpravo STATUS 560–1120, střední sloupek 1120–1330
