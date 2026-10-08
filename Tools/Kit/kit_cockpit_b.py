@@ -157,7 +157,9 @@ def console_b(name, seed):
         p.box("Kit_FrameEdge", (0.03, ua_, 0.1005), (L - 0.07, ub_, 0.1065), bevel=0.0012, segments=2, panel=False)
     p.box("Kit_Housing", (0.86, W, 0.14), (1.06, W + 0.004, 0.24), bevel=0.002, segments=1)
     _label(p, "maker", Vector((0.44, U0 - 0.0065, 0.14)), -Y, X, Z, scale=0.3)
-    # the deck: a dark plate between the blocks
+    # the deck: a dark plate between the blocks; under the beam a frame-paint plate (the gap read as a black hole - r37)
+    p.box("Kit_Frame", (0.078, U0 + 0.004, DECK + 0.006), (0.6, 0.156, DECK + 0.0085), bevel=0.0015, segments=2, panel=False)
+    p.box("Kit_FrameEdge", (L - 0.025, U0 + 0.002, 0.121), (L - 0.0185, W - 0.002, 0.127), bevel=0.0012, segments=2, panel=False)
     p.box("Kit_Inset", (0.0, U0, DECK - 0.004), (L - 0.02, W, DECK + 0.006), bevel=0.003, segments=2)
     # 2 the forearm beam: a light frame in a stepped side profile, two padded perforated rests on it, on two slanted
     # brackets and a rear leg over the deck (the 9 cm gap under it is the concept's floating arm)
@@ -177,41 +179,41 @@ def console_b(name, seed):
         screw(p, Vector((0.06 + k * 0.1, -0.0758, BEAM0 + 0.017)), -Y, 0.003)
     for xa, xb in ((0.035, 0.313), (0.317, 0.595)):
         p.box("Kit_Leather", (xa, -0.062, AT - 0.022), (xb, 0.142, AT), bevel=0.013, segments=4)
-        p.box("Kit_Leather", (xa + 0.012, -0.05, AT - 0.004), (xb - 0.012, 0.13, AT + 0.005), bevel=0.009, segments=4)   # the dome
+        p.box("Kit_Leather", (xa + 0.012, -0.05, AT - 0.004), (xb - 0.012, 0.13, AT + 0.008), bevel=0.011, segments=5)   # the dome
         sx0, sx1, su0, su1 = xa + 0.024, xb - 0.024, -0.038, 0.118          # the stitching on the dome's flat: 4 mm stitches, 2 mm apart
         for (p0, p1) in (((sx0, su0), (sx1, su0)), ((sx0, su1), (sx1, su1)), ((sx0, su0), (sx0, su1)), ((sx1, su0), (sx1, su1))):
             ln = ((p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2) ** 0.5
-            p.box("Kit_Seal", (min(p0[0], p1[0]) - 0.0013, min(p0[1], p1[1]) - 0.0013, AT + 0.0040),     # the stitch's dark channel
-                  (max(p0[0], p1[0]) + 0.0013, max(p0[1], p1[1]) + 0.0013, AT + 0.0052), panel=False)
+            p.box("Kit_Seal", (min(p0[0], p1[0]) - 0.0013, min(p0[1], p1[1]) - 0.0013, AT + 0.0070),     # the stitch's dark channel
+                  (max(p0[0], p1[0]) + 0.0013, max(p0[1], p1[1]) + 0.0013, AT + 0.0082), panel=False)
             k = 0
             while k * 0.006 + 0.004 <= ln:
                 t0, t1 = k * 0.006 / ln, (k * 0.006 + 0.004) / ln
                 a0 = (p0[0] + (p1[0] - p0[0]) * t0, p0[1] + (p1[1] - p0[1]) * t0)
                 a1 = (p0[0] + (p1[0] - p0[0]) * t1, p0[1] + (p1[1] - p0[1]) * t1)
-                p.box("Kit_Housing", (min(a0[0], a1[0]) - 0.0006, min(a0[1], a1[1]) - 0.0006, AT + 0.0042),     # a grey thread
-                      (max(a0[0], a1[0]) + 0.0006, max(a0[1], a1[1]) + 0.0006, AT + 0.0056), panel=False)
+                p.box("Kit_Housing", (min(a0[0], a1[0]) - 0.0006, min(a0[1], a1[1]) - 0.0006, AT + 0.0072),     # a grey thread
+                      (max(a0[0], a1[0]) + 0.0006, max(a0[1], a1[1]) + 0.0006, AT + 0.0086), panel=False)
                 k += 1
         for i in range(int((xb - xa - 0.09) / 0.006) + 1):          # 1.6 mm holes at 6 mm, a middle band 40 mm wide
             for j in range(7):
                 hx, hu = xa + 0.045 + i * 0.006, 0.022 + j * 0.006 + (0.003 if i % 2 else 0.0)
                 if hu > 0.062 or hx > xb - 0.045:
                     continue
-                p.box("Kit_Seal", (hx - 0.001, hu - 0.001, AT + 0.0046), (hx + 0.001, hu + 0.001, AT + 0.0053), panel=False)
+                p.box("Kit_Seal", (hx - 0.001, hu - 0.001, AT + 0.0076), (hx + 0.001, hu + 0.001, AT + 0.0083), panel=False)
     _label(p, "maker", Vector((0.445, -0.0796, BEAM0 + 0.045)), -Y, X, Z, scale=0.3)
     sl = Vector((0.05, 0.0, 0.03)).normalized()                # the strip turns up the beam's slanted front foot (seen from the seat)
     on = Vector((sl.z, 0.0, -sl.x))
     c_ = Vector((0.605, 0.0, BEAM0 + 0.015))
-    for role_, hw, pr, u0_, u1_ in (("Kit_Lip", 0.0095, 0.001, -0.074, 0.154), ("Kit_GlowFoot", 0.007, 0.0022, -0.071, 0.151)):
-        pts = [c_ - sl * hw, c_ + sl * hw, c_ + sl * hw + on * pr, c_ - sl * hw + on * pr]
-        side_prism(p, role_, [(q.x, q.z) for q in pts], u0_, u1_, 0.0, 1)
+    # a cool diffuser across the beam's front face under the LEDs, facing the pilot (critic r37: on the slant it read as an edge)
+    p.box("Kit_Lip", (0.629, -0.073, BEAM0 + 0.0305), (0.631, 0.153, BEAM0 + 0.0425), bevel=0.0006, segments=1, panel=False)
+    p.box("Kit_GlowStrip", (0.6295, -0.071, BEAM0 + 0.0325), (0.6325, 0.151, BEAM0 + 0.0405), bevel=0.0012, segments=2, panel=False)
     for ua in (-0.066, 0.14):                                  # a hidden 6 mm light strip under each beam edge, washing the gap
         p.box("Kit_Seal", (0.07, ua - 0.002, BEAM0 - 0.004), (0.55, ua + 0.008, BEAM0), panel=False)
         p.box("Kit_Lip", (0.072, ua - 0.006, BEAM0 - 0.006), (0.548, ua + 0.012, BEAM0 - 0.003), bevel=0.001, segments=1, panel=False)   # a polished bezel
-        p.box("Kit_GlowFoot", (0.075, ua - 0.003, BEAM0 - 0.010), (0.545, ua + 0.009, BEAM0 - 0.0055), bevel=0.002, segments=2, panel=False)  # 12 mm diffuser
+        p.box("Kit_GlowStrip", (0.075, ua - 0.003, BEAM0 - 0.010), (0.545, ua + 0.009, BEAM0 - 0.0055), bevel=0.002, segments=2, panel=False)  # 12 mm diffuser
     for k, gl in enumerate(("Kit_GlowCool", "Kit_GlowCool", "Kit_GlowAmber")):      # status LEDs on the beam's front end
         uu = -0.03 + k * 0.025
-        p.lathe("Kit_Lip", [(0.0045, 0.0), (0.0045, 0.0012), (0.0032, 0.0014)], (0.63, uu, AT - 0.05), axis=(1, 0, 0), seg=16)
-        p.lathe(gl, [(0.003, 0.0), (0.003, 0.0012), (0.002, 0.0024), (0.0, 0.0028)], (0.6312, uu, AT - 0.05), axis=(1, 0, 0), seg=16)
+        p.lathe("Kit_Lip", [(0.0045, 0.0), (0.0045, 0.0012), (0.0032, 0.0014)], (0.63, uu, AT - 0.043), axis=(1, 0, 0), seg=16)
+        p.lathe(gl, [(0.003, 0.0), (0.003, 0.0012), (0.002, 0.0024), (0.0, 0.0028)], (0.6312, uu, AT - 0.043), axis=(1, 0, 0), seg=16)
     legend(p, "HF-AR 01", Vector((0.175, -0.0797, BEAM0 + 0.045)), X, Z, -Y, h=0.008)
     for k in range(2):                                         # Halcyon's mark: two slanted orange bars, 30 mm
         x_ = 0.335 + k * 0.016
@@ -438,13 +440,13 @@ def console_b(name, seed):
     for k in range(3):                                          # two ribs 3 x 6 mm across the frame
         xr = fx0 + (fx1 - fx0) * (k + 1) / 4
         if k != 1:
-            p.box("Kit_Inset", (xr - 0.0015, fu0 + 0.012, zt - 0.0005), (xr + 0.0015, fu1 - 0.012, zt + 0.0035), bevel=0.0012, segments=2, panel=False)
-            p.box("Kit_FrameEdge", (xr - 0.0012, fu0 + 0.013, zt + 0.003), (xr + 0.0012, fu1 - 0.013, zt + 0.0042), bevel=0.0005, segments=1, panel=False)
+            p.box("Kit_Inset", (xr - 0.0025, fu0 + 0.012, zt - 0.0005), (xr + 0.0025, fu1 - 0.012, zt + 0.005), bevel=0.0012, segments=2, panel=False)
+            p.box("Kit_FrameEdge", (xr - 0.002, fu0 + 0.013, zt + 0.0045), (xr + 0.002, fu1 - 0.013, zt + 0.0058), bevel=0.0005, segments=1, panel=False)
     xm, um = (fx0 + fx1) / 2, (fu0 + fu1) / 2 + 0.035          # a 70 x 40 mm hatch plate between the ribs, four screws in the field
     p.box("Kit_Lip", (xm - 0.036, um - 0.021, zt - 0.0005), (xm + 0.036, um + 0.021, zt + 0.001), bevel=0.0005, segments=1, panel=False)
     p.box("Kit_Legend", (xm - 0.034, um - 0.019, zt), (xm + 0.034, um + 0.019, zt + 0.0014), panel=False)
     legend(p, "HATCH A", Vector((xm, um + 0.006, zt + 0.0014)), X, Y, Z, h=0.008, role="Kit_Seal")
-    legend(p, "HF-HT 04", Vector((xm, um - 0.009, zt + 0.0014)), X, Y, Z, h=0.006, role="Kit_Seal")
+    legend(p, "HF-HT 04", Vector((xm, um - 0.009, zt + 0.0014)), X, Y, Z, h=0.0068, role="Kit_Seal")
     for xx in (fx0 + 0.012, fx1 - 0.012):
         for uu in (fu0 + 0.012, fu1 - 0.012):
             screw(p, Vector((xx, uu, zt)), Z, 0.003)

@@ -9963,7 +9963,7 @@
     76.2,
     74.1
    ],
-   "tris": 56188,
+   "tris": 56788,
    "tris_decals": 172,
    "tri_budget": 90000,
    "materials": [
@@ -9974,7 +9974,6 @@
     "Kit_Lip",
     "Kit_Graphite",
     "Kit_Gasket",
-    "Kit_GlowFoot",
     "Kit_Perforated",
     "Kit_Red",
     "Kit_GlowRed",
@@ -9988,6 +9987,7 @@
     "Kit_Grip",
     "Kit_Legend",
     "Kit_Leather",
+    "Kit_GlowStrip",
     "Kit_Decal",
     "Kit_DecalAO",
     "Kit_DecalPaint"
@@ -10037,9 +10037,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 26058,
+    "edge": 27234,
     "secondary": 0,
-    "floor": 12046,
+    "floor": 12190,
     "seam": 0
    },
    "status": "built"

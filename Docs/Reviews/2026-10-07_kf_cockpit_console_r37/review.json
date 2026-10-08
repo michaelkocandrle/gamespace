@@ -1,0 +1,43 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 37,
+ "variant": "B",
+ "date": "2026-10-08",
+ "verdict": "PASS",
+ "gate": "step",
+ "note": "Autor 8. 10.: díly jsou nové z výroby, opotřebení se nehodnotí ani nežádá. Jas úseku se nehodnotí, tóny relativně. Díl nemá vlastní světla, pásek v mezeře a na čelní patě jen jako emisní akcent. Souřadnice v pixelech zobrazeného listu 2000x611 (originál x1,28).",
+ "first_impression": "Čistá nová konzole Halcyon s dotaženou patou podstavce a popsaným poklopem i blokem kniplu; od 8 ve světle ji dál dělí akcent na čelní patě nosníku, který z pilotního záběru čte jen jako tenká leštěná hrana, ne jako chladný difuzor.",
+ "scores": {
+  "silueta_a_tvar": {"score": 8, "why": "Světlý rám podstavce teď dobíhá až pod výstražné pásky a tmavý kop je jen úzká zapuštěná linka (list 5 vpravo 1230-1880,500-522); skladba nosník-konzoly-mezera-podstavec-věž čte celá."},
+  "hierarchie_a_hustota_detailu": {"score": 8, "why": "Velké pole poklopu má štítek HATCH A, dvě žebra a šrouby (list 6 vpravo 1180-1330,160-300), čelo bloku kniplu světlý štítek HF-ST 02 (list 1 vpravo 1440-1500,430-445); horní hrany žeber ale čtou jako tmavé drážky, ne leštěné lišty."},
+  "materialy": {"score": 8, "why": "Kroky lak rámu / grafit / kůže / leštěný kov drží (list 5, list 6 vpravo); kůže v pilotním záběru 1 dál téměř matná plochá deska bez pruhu lesku (list 1 vpravo 1280-1440,245-330)."},
+  "decaly": {"score": 8, "why": "HF-AR 01 na boku nosníku a HF-CL 07 jen na věži, zbloudilá 8 zmizela, štítky HATCH A a HF-ST 02 sedí do systému světlých štítků; druhé řádky (HF-HT 04 ~2 px, SN 0417-B ~3 px) jsou na hraně čitelnosti."},
+  "svetlo": {"score": 7, "why": "Linka v mezeře z boku jasná (list 5 vpravo 1190-1500,201-208), ale difuzor na čelní patě nosníku čte z pilotního záběru jen jako bílá 1-2 px hrana bez chladného tónu (list 1 vpravo 1350-1445,350-362) a z boku jako oddělený světlý střep (list 5 vpravo 1540-1555,190-205); mezera pod nosníkem v záběru 1 dál černá."},
+  "citelnost": {"score": 8, "why": "COOLANT 12 BAR, OPEN, HF-3287 L ARM, LIGHTS/GEAR/VTOL, HC-12W, HATCH A (~5 px) i HF-ST 02 (~6 px, list 2 vpravo 1365-1420,460-472) čtou; mikrořádky pod 3 px."},
+  "chyby_geometrie": {"score": 8, "why": "Bez děr, průniků a plovoucích dílů; jediný rušivý prvek je světlý klínek difuzoru na konci šikmé čelní paty, který z boku nenavazuje na linku v mezeře (list 5 vpravo 1540-1555,190-205)."},
+  "soulad_stylu": {"score": 8, "why": "Nové štítky HATCH A a HF-ST 02 ve stejném stylu jako HC-12W a PWR 48V DC, jedna oranžová, jeden font, leštěné rámečky – nová vrstva sedí do řeči kitu."}
+ },
+ "average": 7.9,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "concept_match": {
+  "layout_percent": 90,
+  "look_percent": 91,
+  "summary": "Pata podstavce, poklop a čelo bloku kniplu dotaženy. Chybí chladný akcent čitelný z pilotního pohledu a lesk kůže na střední vzdálenost."
+ },
+ "r36_followup": [
+  {"r36": 1, "title": "Akcent mezery z pilotního pohledu", "status": "částečně", "detail": "Na čelní patě je nově souvislá světlá linka přes celou šířku (list 1 vpravo 1350-1445,350-362), ale jen 1-2 px, bílá jako leštěná hrana, bez chladného tónu a bez čitelné šířky 14 mm; z boku konec paty čte jako oddělený světlý klínek (list 5 vpravo 1540-1555,190-205), svislý úsek >= 25 px chybí."},
+  {"r36": 2, "title": "Tmavý sokl pod patou podstavce", "status": "opraveno", "detail": "Světlý rám dobíhá pod výstražné pásky (list 5 vpravo 1160-1900,470-500), tmavý kop je zapuštěná linka ~20 px (1230-1880,500-522); 45° ploška se tónem od rámu neliší, ale podstavec už nestojí na černém soklu."},
+  {"r36": 3, "title": "Kůže v pilotním záběru bez lesku", "status": "neopraveno", "detail": "Drsnost 0,30 se na listu 1 a 2 neprojevila: polštáře jsou dál ploché tmavé desky s prošitím, pruh lesku napříč chybí (list 1 vpravo 1280-1440,245-330; list 2 vpravo 1320-1445,195-300)."},
+  {"r36": 4, "title": "HF-CL 07 dvakrát a osamocená 8", "status": "opraveno", "detail": "Bok nosníku HF-AR 01 (list 5 vpravo 1235-1265,165-171), číslice 8 z panelu 3 pryč; řádek SN 0417-B ~3 px (list 5 vpravo 1545-1585,398-404), cíl >= 4 px skoro splněn."},
+  {"r36": 5, "title": "Velké pole poklopu shora holé", "status": "částečně", "detail": "Štítek HATCH A ~50x22 px na světlém podkladu, čtyři šrouby a žebra jsou (list 6 vpravo 1180-1330,160-300); leštěné horní hrany žeber ale nečtou – žebra jsou tmavé drážky (1205-1215 a 1295-1305,170-300), řádek HF-HT 04 ~2 px."},
+  {"r36": 6, "title": "Šablona na čele bloku kniplu", "status": "opraveno", "detail": "Světlý štítek HF-ST 02 s tmavým textem ~6 px (list 2 vpravo 1365-1420,460-472; list 1 vpravo 1440-1500,430-445); šrouby po stranách nejsou ze středních záběrů vidět, nevadí."}
+ ],
+ "findings": [
+  {"n": 1, "title": "Difuzor na čelní patě nosníku jako chladný pás", "where": "list 1 vpravo 1350-1445,348-362; list 5 vpravo 1500-1555,190-210", "problem": "Z pilotního záběru čte jen jako bílá 1-2 px hrana k nerozeznání od leštěné lišty; z boku konec paty jako oddělený světlý klínek, ne ohyb navazující na linku v mezeře.", "severity": "doporučeno", "fix": "Difuzor 14 mm přesunout ze spodní hrany na čelní plochu zkosení pod tři LED (plocha musí mířit k pilotovi), emisní barva chladná (0,70; 0,88; 1,0) stejná jako linka v mezeře, jas >= 0,85 sRGB, leštěný rámeček 2 mm; v rozích ohyb R10 mm bez spáry do linky v mezeře. Cíl: list 1 souvislý modrobílý pás >= 4 px, list 5 klínek 1540-1555,190-205 nahrazen souvislým pokračováním linky."},
+  {"n": 2, "title": "Kůže v pilotním záběru bez lesku", "where": "list 1 vpravo 1280-1440,245-330; list 2 vpravo 1320-1445,195-300", "problem": "Polštáře zepředu jsou ploché tmavé desky; snižování drsnosti (0,38 → 0,33 → 0,30) se na střední vzdálenosti neprojevuje, chybí tvar, na kterém by se lesk zlomil.", "severity": "doporučeno", "fix": "Geometrie: vyklenutí polštáře 10 mm ve středu, zaoblení hran 15 mm (ne jen normálová mapa); normálu zrna snížit na 0,5, aby nerozbíjela odlesk; drsnost nechat 0,30. Cíl: na listu 1 a 2 pruh lesku napříč polštářem o >= 0,06 sRGB světlejší než střed."},
+  {"n": 3, "title": "Žebra poklopu bez leštěné horní hrany", "where": "list 6 vpravo 1205-1215,170-300 a 1295-1305,170-300", "problem": "Žebra v poli HATCH A čtou jako dvě tmavé drážky, leštěná horní hrana není vidět; pole působí vyřezaně, ne lisovaně.", "severity": "doporučeno", "fix": "Žebro vystouplé 5 mm, horní plocha 4 mm leštěný kov (metallic 1, albedo 0,75, drsnost 0,18), boky žebra grafit 0,045. Cíl: na listu 6 světlá linka >= 2 px po celé délce každého žebra."},
+  {"n": 4, "title": "Mezera pod nosníkem z pilotního záběru černá", "where": "list 1 vpravo 1330-1440,360-400", "problem": "Pod čelem nosníku je tmavá díra s tmavým blokem konzoly; z pohledu pilota mezera čte jako stín, ne jako konstrukční prvek.", "severity": "doporučeno", "fix": "Horní deska podstavce v mezeře v laku rámu (albedo 0,5, čirý lak) místo grafitu a přední šikmá konzola s leštěnou hranou 9 mm. Cíl: list 1 vpravo 1330-1440,365-395 průměr >= 0,40 sRGB a viditelná hrana konzoly."},
+  {"n": 5, "title": "Druhé řádky štítků pod 3 px", "where": "list 6 vpravo 1240-1280,215-222 (HF-HT 04); list 5 vpravo 1545-1585,398-404 (SN 0417-B); list 3 vpravo 1385-1425,295-310 (TORQUE 42 Nm)", "problem": "Hlavní řádky štítků čtou, druhé řádky jsou ze středních záběrů šum.", "severity": "doporučeno", "fix": "Jednotné minimum výšky textu 6,5 mm pro všechny druhé řádky na štítcích (HF-HT 04, SN, TORQUE), řádkování 1,4. Cíl: >= 3,5 px na listech 5 a 6."},
+  {"n": 6, "title": "45° pata se neodlišuje od rámu", "where": "list 5 vpravo 1160-1900,470-500", "problem": "Šikmá 80 mm pata má stejný tón i lesk jako svislý bok rámu; zlom čte jen slabě a leštěná lišta na zlomu není vidět.", "severity": "doporučeno", "fix": "Na hranu zlomu paty leštěnou lištu 6 mm (albedo 0,75, drsnost 0,18) a šikmou plochu o 0,05 tmavší lak (albedo 0,45). Cíl: na listu 5 světlá linka >= 2 px na zlomu a tónový krok >= 0,04 sRGB mezi bokem a patou."}
+ ]
+}
