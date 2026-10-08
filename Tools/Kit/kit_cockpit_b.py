@@ -138,7 +138,7 @@ def console_b(name, seed):
     # brackets and a rear leg over the deck (the 9 cm gap under it is the concept's floating arm)
     beam = [(0.02, BEAM0), (0.58, BEAM0), (0.63, BEAM0 + 0.03), (0.63, AT - 0.035), (0.6, AT - 0.018), (0.03, AT - 0.018),
             (0.0, AT - 0.04), (0.0, BEAM0 + 0.02)]
-    side_prism(p, "Kit_Frame", beam, -0.075, 0.155, 0.006, 1)
+    side_prism(p, "Kit_Frame", beam, -0.075, 0.155, 0.009, 1)
     # the stepped side: a lower band 8 mm proud on both sides, chamfered (the concept's beam is not one slab)
     band = [(0.04, BEAM0 - 0.004), (0.57, BEAM0 - 0.004), (0.6, BEAM0 + 0.022), (0.04, BEAM0 + 0.022), (0.02, BEAM0 + 0.01)]
     side_prism(p, "Kit_Inset", band, -0.083, -0.07, 0.004, 1)           # the lower band a graphite inset
@@ -194,7 +194,7 @@ def console_b(name, seed):
     p.box("Kit_Perforated", (0.015, -0.0275, DECK + 0.02), (0.06, -0.023, BEAM0 - 0.02), panel=False)
     # 3 the stick block: a light block, a dark top plate, the stick with its hatched boot ring; a mesh grille on its side
     sb = [(0.66, DECK), (0.87, DECK), (0.87, 0.49), (0.85, 0.505), (0.68, 0.505), (0.66, 0.49)]
-    side_prism(p, "Kit_Frame", sb, U0 - 0.012, 0.18, 0.006, 1)
+    side_prism(p, "Kit_Frame", sb, U0 - 0.012, 0.18, 0.009, 1)
     p.box("Kit_Housing", (0.69, U0 + 0.005, 0.503), (0.84, 0.165, 0.509), bevel=0.003, segments=2)
     p.box("Kit_Perforated", (0.69, U0 - 0.0145, DECK + 0.015), (0.84, U0 - 0.011, 0.485), panel=False)
     for xx in (0.68, 0.85):
@@ -208,7 +208,7 @@ def console_b(name, seed):
             screw(p, Vector((xf + nx * 0.0045, uu, 0.466)), X * nx, 0.003)
     # 4 the middle block: the intake grille on top, the status strip and the 2 x 2 keys on its seat-facing chamfer
     mb = [(0.2, DECK), (W - 0.005, DECK), (W - 0.005, 0.52), (0.34, 0.52), (0.2, 0.455)]
-    end_prism(p, "Kit_Frame", mb, 0.64, 0.98, 0.006, 1)
+    end_prism(p, "Kit_Frame", mb, 0.64, 0.98, 0.009, 1)
     p.box("Kit_Lip", (0.68, 0.38, 0.52), (0.94, 0.62, 0.524), bevel=0.0015, segments=2)
     p.box("Kit_Graphite", (0.687, 0.387, 0.524), (0.933, 0.613, 0.5245), panel=False)
     for k in range(10):
@@ -244,7 +244,7 @@ def console_b(name, seed):
     # 5 the front tower: its rear slope faces the pilot with the emergency key and the rockers, LEDs over them
     TU = 0.27                                                  # the tower's seat-side face
     tw = [(0.98, DECK), (L - 0.02, DECK), (L - 0.02, 0.7), (L - 0.05, 0.74), (1.115, 0.74), (0.98, 0.5)]
-    side_prism(p, "Kit_Frame", tw, TU, W - 0.005, 0.006, 1)
+    side_prism(p, "Kit_Frame", tw, TU, W - 0.005, 0.009, 1)
     a = Vector((0.135, 0, 0.24)).normalized()                 # up the slope (forward and up, ~30 deg off vertical)
     r = Vector((0, -1, 0))                                     # the pilot's right on it (toward the seat side... mirrored)
     nf = r.cross(a)                                            # out of it: back to the pilot and up
@@ -261,7 +261,7 @@ def console_b(name, seed):
         p.box("Kit_Lip", (-0.016, -0.024, 0.0), (0.016, 0.03, 0.0015), bevel=0.001, segments=1, m=ff(q), panel=False)   # its frame
         _rocker(p, q, r, a, nf, lab, label_scale=0)
         legend(p, {"ck_pwr": "PWR", "ck_extlt": "EXT LT", "ck_eng": "ENG"}[lab], q - a * 0.034 + nf * 0.0002, r, a, nf, h=0.008)
-        p.box("Kit_Lip", (-0.0095, 0.0195, 0.0015), (0.0095, 0.028, 0.0026), bevel=0.0006, segments=1, m=ff(q), panel=False)
+        p.lathe("Kit_Lip", [(0.0055, 0.0), (0.0055, 0.0011), (0.0042, 0.0013)], tuple(ff(q) @ Vector((0.0, 0.0238, 0.0015))), axis=tuple(nf), seg=20)
         p.lathe("Kit_GlowKey", [(0.0036, 0.0), (0.0036, 0.0008), (0.0026, 0.0022), (0.0, 0.0028)], tuple(ff(q) @ Vector((0.0, 0.0238, 0.0026))),
                 axis=tuple(nf), seg=16)
     for su in (-1, 1):
@@ -359,8 +359,11 @@ def console_b(name, seed):
     zt = DECK + 0.026
     p.box("Kit_Inset", (hx0 + 0.022, hu0 + 0.022, zt - 0.002), (hx1 - 0.022, hu1 - 0.022, zt + 0.006), bevel=0.004, segments=1)
     zt += 0.006
-    for xx in (hx0 + 0.035, hx1 - 0.035):
+    for xx in (hx0 + 0.035, (hx0 + hx1) / 2, hx1 - 0.035):
         for uu in (hu0 + 0.035, hu1 - 0.035):
+            screw(p, Vector((xx, uu, zt)), Z, 0.0045)
+    for uu in ((hu0 + hu1) / 2,):
+        for xx in (hx0 + 0.035, hx1 - 0.035):
             screw(p, Vector((xx, uu, zt)), Z, 0.0045)
     for xx in ((hx0 + hx1) / 2 - 0.12, (hx0 + hx1) / 2 + 0.12):  # two recessed latches, 20 x 8 mm
         p.box("Kit_Seal", (xx - 0.012, hu1 - 0.034, zt - 0.003), (xx + 0.012, hu1 - 0.022, zt + 0.0002), bevel=0.001, segments=1)
@@ -372,8 +375,20 @@ def console_b(name, seed):
         p.lathe("Kit_Lip", [(0.011, 0.0), (0.011, 0.0015), (0.009, 0.0025)], tuple(c), seg=20)
         p.box("Kit_Graphite", (xx - 0.0075, (hu0 + hu1) / 2 - 0.0015, zt + 0.0015), (xx + 0.0075, (hu0 + hu1) / 2 + 0.0015, zt + 0.0035), panel=False)
     _label(p, "st_service", Vector((0.22, hu0 + 0.06, zt + 0.0004)), Z, X, Y, scale=0.7)       # read from the seat
-    _label(p, "arrow_access", Vector((0.32, hu1 - 0.1, zt + 0.0004)), Z, X, Y, scale=0.5)
     _label(p, "label_coolant", Vector((0.47, hu0 + 0.07, zt + 0.0004)), Z, X, Y, scale=0.9)
+    # 15 mm hazard strips low on both pedestal sides (5 mm orange bars, 5 mm gaps, a dark band)
+    for uf, ns_ in ((U0, -1), (W, 1)):
+        fz0, fz1 = 0.084, 0.099
+        for x0_, x1_ in ((0.08, 0.38), (0.5, 0.78)):
+            p.box("Kit_Seal", (x0_ - 0.002, uf + ns_ * 0.0002 - 0.0008, fz0 - 0.002), (x1_ + 0.002, uf + ns_ * 0.0002 + 0.0008, fz1 + 0.002), panel=False)
+            xx = x0_
+            while xx + 0.005 + (fz1 - fz0) <= x1_:
+                bar = [(xx, fz0), (xx + 0.005, fz0), (xx + 0.005 + (fz1 - fz0), fz1), (xx + (fz1 - fz0), fz1)]
+                if ns_ < 0:
+                    side_prism(p, "Kit_Signal", bar, uf - 0.0014, uf - 0.0009, 0.0, 1)
+                else:
+                    side_prism(p, "Kit_Signal", bar, uf + 0.0009, uf + 0.0014, 0.0, 1)
+                xx += 0.01
     # 7c the decal layers (author 8. 10.: the parts are new from the factory - no wear; the richness is stacked detail):
     # stencils, labels and ids on the graphite insets, rivet rows on the frame band, a socket and a hazard band on the
     # front, plates on the outboard side - each fully on one flat face
