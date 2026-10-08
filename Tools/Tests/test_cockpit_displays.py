@@ -59,7 +59,8 @@ check("titles FLIGHT and STATUS", displays.debug_get_text("FlightTitle") == "FLI
 size = lambda name: displays.debug_get_text_widget(name).get_editor_property("font").get_editor_property("size")
 # Readable from the seat (author, 19. 9. 2026: the figures were too small): at ~1.5 m an MFD is ~0.38 of its
 # layout on a 1080p screen, so 26 is ~10 px - the least that reads; the speed and G are the large figures.
-check("big type from the seat: speed >= 96, G >= 56, mode >= 60", size("SpeedValue") >= 96 and size("GText") >= 56 and size("NavMode") >= 60,
+# (MFD v5, author 8. 10. 2026, approved mfd_v5_mock.png variant A: the G inside its small ring, 40+ - ~16 px from the seat)
+check("big type from the seat: speed >= 96, G >= 40, mode >= 60", size("SpeedValue") >= 96 and size("GText") >= 40 and size("NavMode") >= 60,
       "speed %d, G %d, mode %d" % (size("SpeedValue"), size("GText"), size("NavMode")))
 readable = ["LampLabel_CPLD", "RowLimitValue", "BoostText", "RowName_GEAR", "RowGearValue", "ThrustName_MAIN", "ThrustValue_MAIN", "ThrustBoost",
             "NavSpeed", "NavName_0", "NavDist_0", "NavBrg_0", "ContactsRange", "ContactName_0", "ContactDist_0", "SelfGear", "SelfEngines",

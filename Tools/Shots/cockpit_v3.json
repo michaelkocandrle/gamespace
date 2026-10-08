@@ -1,5 +1,5 @@
 {
- "_comment": "Cockpit v3 overview (author 8. 10. 2026): from above, from behind high, down the left aisle.",
+ "_comment": "Cockpit v3 overview (author 8. 10. 2026): from above, from behind high, down the left aisle. v4 (8. 10.): the left side console from the seat and from the aisle.",
  "shots": [
   {
    "name": "warmup",
@@ -66,6 +66,44 @@
     0.2
    ],
    "fov": 80
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "name": "console_left_seat",
+   "camera_local": [
+    6.75,
+    0.25,
+    1.05
+   ],
+   "look_local": [
+    6.35,
+    1.25,
+    0.45
+   ],
+   "fov": 70
+  },
+  {
+   "altitude_m": 3000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": true,
+   "settle": 2.0,
+   "name": "console_left_aisle",
+   "camera_local": [
+    5.75,
+    0.55,
+    1.25
+   ],
+   "look_local": [
+    6.6,
+    1.2,
+    0.5
+   ],
+   "fov": 70
   }
  ]
 }

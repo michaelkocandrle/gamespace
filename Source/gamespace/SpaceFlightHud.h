@@ -396,6 +396,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
 	bool bHorizontal = false;
 
+	/** MFD v5 (author 8. 10. 2026, mfd_v5_mock.png variant A): a 270 deg ring like the holo radar's - a faint track, the
+	 * value arc, ticks every 10 %, the marker as a bar across the ring. Value and Marker as for a bar. */
+	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
+	bool bRing = false;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
 	int32 Ticks = 10;
 

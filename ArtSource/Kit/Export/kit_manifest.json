@@ -10274,53 +10274,45 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_ConsoleWall18W_L.fbx",
    "dims_m": [
-    1.851,
-    0.523,
-    0.945
+    1.955,
+    0.538,
+    0.85
    ],
    "expected_size_cm": [
-    185.1,
-    52.3,
-    94.5
+    195.5,
+    53.8,
+    85.0
    ],
-   "tris": 25736,
+   "tris": 13146,
    "tris_decals": 12,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
     "Kit_Seal",
     "Kit_GlowCool",
+    "Kit_GlowSignal",
     "Kit_Lip",
-    "Kit_Perforated",
     "Kit_Red",
-    "Kit_GlowRed",
     "Kit_Housing",
-    "Kit_Frame",
-    "Kit_GlowKey",
     "Kit_GlowAmber",
     "Kit_Inset",
     "Kit_Legend",
     "Kit_GlowStrip",
     "Kit_PanelPaint",
-    "Kit_FrameEdge",
     "Kit_DecalPaint"
    ],
    "sockets": {},
-   "collision_hulls": 3,
-   "decals": 3,
+   "collision_hulls": 6,
+   "decals": 1,
    "decal_items": [
-    "st_service",
-    "pn_2",
     "maker"
    ],
-   "service_labels": [
-    "st_service"
-   ],
+   "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 15498,
+    "edge": 6744,
     "secondary": 0,
-    "floor": 1188,
+    "floor": 188,
     "seam": 0
    },
    "status": "built"
@@ -10334,53 +10326,45 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_ConsoleWall18W_R.fbx",
    "dims_m": [
-    1.851,
-    0.523,
-    0.945
+    1.955,
+    0.538,
+    0.85
    ],
    "expected_size_cm": [
-    185.1,
-    52.3,
-    94.5
+    195.5,
+    53.8,
+    85.0
    ],
-   "tris": 25736,
+   "tris": 13146,
    "tris_decals": 12,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
     "Kit_Seal",
     "Kit_GlowCool",
+    "Kit_GlowSignal",
     "Kit_Lip",
-    "Kit_Perforated",
     "Kit_Red",
-    "Kit_GlowRed",
     "Kit_Housing",
-    "Kit_Frame",
-    "Kit_GlowKey",
     "Kit_GlowAmber",
     "Kit_Inset",
     "Kit_Legend",
     "Kit_GlowStrip",
     "Kit_PanelPaint",
-    "Kit_FrameEdge",
     "Kit_DecalPaint"
    ],
    "sockets": {},
-   "collision_hulls": 3,
-   "decals": 3,
+   "collision_hulls": 6,
+   "decals": 1,
    "decal_items": [
-    "st_service",
-    "pn_2",
     "maker"
    ],
-   "service_labels": [
-    "st_service"
-   ],
+   "service_labels": [],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 15498,
+    "edge": 6744,
     "secondary": 0,
-    "floor": 1188,
+    "floor": 188,
     "seam": 0
    },
    "status": "built"

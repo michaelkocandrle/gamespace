@@ -10,13 +10,13 @@
   "setup": "de82013afd6a",
   "lights": "5dc0d1d77545",
   "design": "7dd34989fa88",
-  "kit": "b51ac81b1fe4",
-  "library": "565536c3fdf2",
+  "kit": "6cfc221fece8",
+  "library": "122e9ba89b14",
   "light_rules": "788f180917fd"
  },
  "geometry": {
-  "SM_Ship_Wayfarer.fbx": "252801e92bd1",
-  "SM_Ship_Wayfarer_Interior.fbx": "6cfdbec546f8",
+  "SM_Ship_Wayfarer.fbx": "9984d6f87c27",
+  "SM_Ship_Wayfarer_Interior.fbx": "9317f587c064",
   "SM_Ship_Wayfarer_Canopy.fbx": "50abe89a8300",
   "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
   "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",
@@ -30,11 +30,11 @@
   "SM_Kit_Ceiling_Panel12L41_C.fbx": "be7369dda0e1",
   "SM_Kit_Ceiling_Tray06W_A.fbx": "ec5273e6eadb",
   "SM_Kit_Ceiling_Tray12W_A.fbx": "917dc4e8bfc5",
-  "SM_Kit_Cockpit_ConsoleWall18W_L.fbx": "cadd35df52bd",
-  "SM_Kit_Cockpit_ConsoleWall18W_R.fbx": "408b73c2a474",
-  "SM_Kit_Cockpit_SeatArm07W_L.fbx": "cebd22e8ef76",
-  "SM_Kit_Cockpit_SeatArm07W_R.fbx": "24f26a7b577e",
-  "SM_Kit_Cockpit_SeatBack07W_A.fbx": "94cfccb94305",
+  "SM_Kit_Cockpit_ConsoleWall18W_L.fbx": "d32cd4fd3b08",
+  "SM_Kit_Cockpit_ConsoleWall18W_R.fbx": "69f1fb122e23",
+  "SM_Kit_Cockpit_SeatArm07W_L.fbx": "89ae95077eba",
+  "SM_Kit_Cockpit_SeatArm07W_R.fbx": "578e009a57f4",
+  "SM_Kit_Cockpit_SeatBack07W_A.fbx": "b7f3dd79413a",
   "SM_Kit_Floor_Grille06W_A.fbx": "eef9d9eebbf3",
   "SM_Kit_Floor_Plate12L38_A.fbx": "da3843b4b56b",
   "SM_Kit_Floor_Plate12W_A.fbx": "3c1c37e452a1",
@@ -279,11 +279,7 @@
    "CPT-CO-02/ck_rcs",
    "CPT-CO-02/st_hfcl",
    "CPT-CO-03/maker",
-   "CPT-CO-03/pn_2",
-   "CPT-CO-03/st_service",
    "CPT-CO-04/maker",
-   "CPT-CO-04/pn_2",
-   "CPT-CO-04/st_service",
    "CPT-CO-05/maker",
    "D-I-01",
    "D-I-02",
@@ -338,20 +334,12 @@
    "decal x 17,20, z 1,71 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
-   "CPT-CO-03/pn_2",
-   "decal x 16,56, z 1,74 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+   "CPT-CO-03/maker",
+   "decal x 16,30, z 1,51 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
-   "CPT-CO-03/st_service",
-   "decal x 16,75, z 1,45 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "CPT-CO-04/pn_2",
-   "decal x 16,56, z 1,74 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "CPT-CO-04/st_service",
-   "decal x 16,75, z 1,45 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+   "CPT-CO-04/maker",
+   "decal x 16,30, z 1,51 je za objektem CPT-O-CONSOLE-R (Pravá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
    "D-I-03",

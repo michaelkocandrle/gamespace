@@ -134,7 +134,7 @@ namespace SpaceHudStyle
 	// azure for the holo effect": a saturated azure chrome and near-white ice-blue type)
 	const FLinearColor MfdBlue(0.02f, 0.45f, 1.f, 1.f);
 	const FLinearColor MfdBlueFaint(0.02f, 0.45f, 1.f, 0.35f);
-	const FLinearColor MfdText(0.55f, 0.88f, 1.f, 0.95f);
+	const FLinearColor MfdText(0.86f, 0.94f, 1.f, 0.95f);   // (MFD v5, author 8. 10. 2026: white type, the cyan for lines - was 0.55 / 0.88 / 1)
 	const FLinearColor MfdTabIdle(0.2f, 0.52f, 0.78f, 0.95f);   // an idle tab: a softer azure (too dark at 0.06 / 0.22)
 	const FLinearColor MfdAmber(0.91f, 0.38f, 0.016f, 1.f);      // SC's flags and cautions #F5A623
 
@@ -748,6 +748,46 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 		return LayerId;
 	}
 	const float Dim = bDim ? 0.4f : 1.f;
+	if (bRing)
+	{
+		// the holo radar's language: a 270 deg track open at the bottom, the value arc over it, ticks outside
+		const FPaintGeometry Paint = AllottedGeometry.ToPaintGeometry();
+		const FVector2f Centre = Size * 0.5f;
+		const float RingRadius = FMath::Min(Size.X, Size.Y) * 0.5f - 16.f;
+		auto At = [&](float Fraction, float Distance)
+		{
+			const float Angle = FMath::DegreesToRadians(135.f + 270.f * Fraction);
+			return Centre + FVector2f(FMath::Cos(Angle), FMath::Sin(Angle)) * Distance;
+		};
+		auto Arc = [&](float From, float To, float Distance)
+		{
+			TArray<FVector2f> Points;
+			const int32 Steps = FMath::Max(2, FMath::CeilToInt((To - From) * 72.f));
+			for (int32 Index = 0; Index <= Steps; ++Index)
+			{
+				Points.Add(At(FMath::Lerp(From, To, static_cast<float>(Index) / Steps), Distance));
+			}
+			return Points;
+		};
+		PaintLine(OutDrawElements, LayerId + 1, Paint, Arc(0.f, 1.f, RingRadius), Faded(Rail, 0.4f * Dim), true, 2.f);
+		for (int32 Index = 0; Index <= 10; ++Index)
+		{
+			const float Fraction = Index / 10.f;
+			PaintLine(OutDrawElements, LayerId + 1, Paint, { At(Fraction, RingRadius + 6.f), At(Fraction, RingRadius + (Index % 5 == 0 ? 14.f : 10.f)) },
+				Faded(Rail, 0.7f * Dim), true, 2.f);
+		}
+		const float Filled = FMath::Clamp(Value, 0.f, 1.f);
+		if (Filled > 0.002f)
+		{
+			PaintLine(OutDrawElements, LayerId + 2, Paint, Arc(0.f, Filled, RingRadius), Faded(FillColor, Dim), true, 6.f);
+		}
+		if (Marker >= 0.f)
+		{
+			const float Mark = FMath::Clamp(Marker, 0.f, 1.f);
+			PaintLine(OutDrawElements, LayerId + 2, Paint, { At(Mark, RingRadius - 10.f), At(Mark, RingRadius + 14.f) }, MarkerColor, true, 6.f);
+		}
+		return LayerId + 3;
+	}
 	const float Radius = Width * 0.5f;
 	// Along the gauge: 0 at the low end. Vertical bars grow upwards, horizontal ones to the right.
 	auto Place = [&](float Along0, float Along1) -> TPair<FVector2f, FVector2f>
@@ -2879,50 +2919,56 @@ void USpaceCockpitDisplays::BuildTree()
 		Vertical(Into, Rule(FName(*(Prefix + TEXT("Rule"))), 0.f, 0.25f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 4.f));
 	};
 
-	// --- Left display, FLIGHT (holo MFD v3 after SC 4.x): the speed and G large on the left with the limit, G max
-	// and mode as flagged rows under them, the speed / boost / afterburner bars in the middle, the switches in the
-	// key strip on the inboard edge -------------------------------------------------------------------------------
+	// --- Left display, FLIGHT (MFD v5, author 8. 10. 2026 "the speed and G figures read wrong - font, style, size,
+	// layout, colours"; Concept/Cockpit/mfd_v5_mock.png variant A): the speed inside a 270 deg ring like the holo
+	// radar's (the limiter its marker), the G in a small ring with G max under it, the boost and afterburner as thin
+	// block bars, the mode and the switches as SC's outlined keys. White type, cyan lines, amber only for flags.
 	UHorizontalBox* Flight = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightContent"));
-	UVerticalBox* FlightMain = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightMain"));
-	// the speed (author 5. 10. 2026 "the speed figures different"): tall condensed numerals between thin brackets,
-	// the unit in a small chip at their top right
-	UHorizontalBox* SpeedLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightSpeedLine"));
-	auto Bracket = [&](const TCHAR* Which, bool bLeft)
+	auto RingWith = [&](const FName Name, UWidget* Inside)
 	{
-		USpaceHudSymbol* Mark = Symbol(FName(*FString::Printf(TEXT("SpeedBracket%s"), Which)), ESpaceHudSymbol::Line, MfdBlue);
-		Mark->Thickness = 2.5f;
-		Mark->Points = bLeft ? TArray<FVector2D>{ FVector2D(1.0, 0.0), FVector2D(0.0, 0.0), FVector2D(0.0, 1.0), FVector2D(1.0, 1.0) }
-			: TArray<FVector2D>{ FVector2D(0.0, 0.0), FVector2D(1.0, 0.0), FVector2D(1.0, 1.0), FVector2D(0.0, 1.0) };
-		return Sized(FName(*FString::Printf(TEXT("SpeedBracket%sBox"), Which)), Mark, 10.f, 88.f);
+		UOverlay* Ring = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*(Name.ToString() + TEXT("Ring"))));
+		USpaceHudGauge* RingGauge = Gauge(Name, 0);
+		RingGauge->bRing = true;
+		if (UOverlaySlot* GaugeSlot = Ring->AddChildToOverlay(RingGauge))
+		{
+			GaugeSlot->SetHorizontalAlignment(HAlign_Fill);
+			GaugeSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		if (UOverlaySlot* InsideSlot = Ring->AddChildToOverlay(Inside))
+		{
+			InsideSlot->SetHorizontalAlignment(HAlign_Center);
+			InsideSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		return Ring;
 	};
-	Horizontal(SpeedLine, Bracket(TEXT("L"), true), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
-	Horizontal(SpeedLine, Words(TEXT("SpeedValue"), TEXT("0"), 80.f), VAlign_Center, FMargin(0.f, -8.f, 0.f, 0.f));
-	Horizontal(SpeedLine, Words(TEXT("SpeedUnit"), TEXT("M/S"), 24.f, Faded(MfdText, 0.7f)), VAlign_Top, FMargin(8.f, 6.f, 4.f, 0.f));
-	Horizontal(SpeedLine, Bracket(TEXT("R"), false), VAlign_Center, FMargin(4.f, 0.f, 0.f, 0.f));
-	Vertical(FlightMain, SpeedLine, HAlign_Left, FMargin(0.f, -4.f, 0.f, 0.f));
-	UHorizontalBox* GLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightGLine"));
-	Horizontal(GLine, Words(TEXT("GText"), TEXT("0.0"), 56.f), VAlign_Bottom, FMargin(0.f));
-	Horizontal(GLine, Words(TEXT("GTextUnit"), TEXT("G"), 24.f, Faded(MfdText, 0.6f)), VAlign_Bottom, FMargin(8.f, 0.f, 0.f, 10.f));
-	Vertical(FlightMain, GLine, HAlign_Left, FMargin(0.f, -8.f, 0.f, 0.f));
-	Horizontal(Flight, Sized(TEXT("FlightMainBox"), FlightMain, 206.f, 0.f), VAlign_Fill, FMargin(0.f));
-	// the limit, G max and mode as flagged rows in their own column (stacked under the figures they ran into the
-	// bottom bar)
-	UVerticalBox* FlightRows = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightRows"));
-	FlagRow(FlightRows, TEXT("FlightLimit"), TEXT("LIMIT"), TEXT("RowLimitValue"), 30.f);
-	FlagRow(FlightRows, TEXT("FlightGMax"), TEXT("G MAX"), TEXT("GMax"), 30.f);
-	FlagRow(FlightRows, TEXT("FlightMode"), TEXT("MODE"), TEXT("ModeText"), 30.f);
-	Horizontal(Flight, Sized(TEXT("FlightRowsBox"), FlightRows, 226.f, 0.f), VAlign_Top, FMargin(12.f, 8.f, 0.f, 0.f));
-	// the bars: SC's tall segmented columns, the value over each and its caption under it
+	// the speed: the figure in the ring's middle, the unit under it, the limit under that
+	UVerticalBox* SpeedCentre = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightSpeedCentre"));
+	Vertical(SpeedCentre, Words(TEXT("SpeedValue"), TEXT("0"), 78.f), HAlign_Center, FMargin(0.f, 10.f, 0.f, -12.f));
+	Vertical(SpeedCentre, Words(TEXT("SpeedUnit"), TEXT("m/s"), 26.f, Faded(MfdText, 0.6f)), HAlign_Center, FMargin(0.f));
+	UHorizontalBox* LimitLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightLimitLine"));
+	Horizontal(LimitLine, Words(TEXT("FlightLimitCaption"), TEXT("LIMIT"), 26.f, Faded(MfdText, 0.6f)), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
+	Horizontal(LimitLine, Words(TEXT("RowLimitValue"), TEXT("-"), 26.f), VAlign_Center, FMargin(0.f));
+	Vertical(SpeedCentre, LimitLine, HAlign_Center, FMargin(0.f, 18.f, 0.f, 0.f));
+	Horizontal(Flight, Sized(TEXT("FlightSpeedBox"), RingWith(TEXT("SpeedGauge"), SpeedCentre), 300.f, 300.f), VAlign_Top, FMargin(0.f, 0.f, 8.f, 0.f));
+	// the G: a small ring, G max under it; the boost and afterburner bars under that
+	UVerticalBox* FlightMiddle = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightMiddle"));
+	UVerticalBox* GCentre = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightGCentre"));
+	Vertical(GCentre, Words(TEXT("GText"), TEXT("0.0"), 46.f), HAlign_Center, FMargin(0.f, 8.f, 0.f, -10.f));
+	Vertical(GCentre, Words(TEXT("GTextUnit"), TEXT("G"), 22.f, Faded(MfdText, 0.6f)), HAlign_Center, FMargin(0.f));
+	Vertical(FlightMiddle, Sized(TEXT("FlightGBox"), RingWith(TEXT("GGauge"), GCentre), 140.f, 140.f), HAlign_Center, FMargin(0.f));
+	UHorizontalBox* GMaxLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightGMaxLine"));
+	Horizontal(GMaxLine, Words(TEXT("FlightGMaxCaption"), TEXT("G MAX"), 26.f, Faded(MfdText, 0.6f)), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
+	Horizontal(GMaxLine, Words(TEXT("GMax"), TEXT("-"), 26.f), VAlign_Center, FMargin(0.f));
+	Vertical(FlightMiddle, GMaxLine, HAlign_Center, FMargin(0.f, -8.f, 0.f, 4.f));
 	UHorizontalBox* Readout = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightReadout"));
 	auto Bar = [&](const TCHAR* Caption, const FName GaugeName, const FName ValueName)
 	{
 		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), *GaugeName.ToString())));
-		Vertical(Box, Words(ValueName, TEXT("-"), 26.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 4.f));
-		Vertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, 10), 44.f, 200.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 6.f));
-		Vertical(Box, Words(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), Caption, 26.f, Faded(MfdText, 0.75f)), HAlign_Center, FMargin(0.f));
-		Horizontal(Readout, Box, VAlign_Top, FMargin(0.f), true);
+		Vertical(Box, Words(ValueName, TEXT("-"), 26.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 2.f));
+		Vertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, 8), 16.f, 56.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 0.f));
+		Vertical(Box, Words(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), Caption, 26.f, Faded(MfdText, 0.6f)), HAlign_Center, FMargin(0.f));
+		Horizontal(Readout, Box, VAlign_Top, FMargin(6.f, 0.f), true);
 	};
-	Bar(TEXT("SPD"), TEXT("SpeedGauge"), TEXT("SpeedPercent"));
 	Bar(TEXT("BST"), TEXT("BoostGauge"), TEXT("BoostText"));
 	Bar(TEXT("AB"), TEXT("AfterburnerGauge"), TEXT("AfterburnerValue"));
 	if (USpaceHudGauge* Afterburner = Gauges.FindRef(TEXT("AfterburnerGauge")))
@@ -2930,10 +2976,38 @@ void USpaceCockpitDisplays::BuildTree()
 		Afterburner->ReserveZone = 0.25f;
 		Afterburner->ReserveColor = Red;
 	}
-	Horizontal(Flight, Readout, VAlign_Top, FMargin(8.f, 0.f, 0.f, 0.f), true);
-	// the key strip: SC's column of keys on the inboard edge
-	Horizontal(Flight, Keys(TEXT("FlightKeys"), { TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB"), TEXT("BOOST"), TEXT("PREC"), TEXT("VTOL") }), VAlign_Top,
-		FMargin(12.f, -4.f, 0.f, 0.f));
+	Vertical(FlightMiddle, Readout, HAlign_Fill, FMargin(0.f));
+	Horizontal(Flight, Sized(TEXT("FlightMiddleBox"), FlightMiddle, 190.f, 0.f), VAlign_Top, FMargin(0.f, -6.f, 12.f, 0.f));
+	// the mode as SC's outlined key, the switches in two columns of keys under it
+	UVerticalBox* FlightModes = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightModes"));
+	UOverlay* ModeChip = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("FlightModeChip"));
+	USpaceHudLamp* ModeShape = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), TEXT("FlightModeChipShape"));
+	ModeShape->bButton = true;
+	ModeShape->Color = MfdBlue;
+	ModeShape->Intensity = ModeShape->Target = 0.55f;
+	if (UOverlaySlot* ShapeSlot = ModeChip->AddChildToOverlay(ModeShape))
+	{
+		ShapeSlot->SetHorizontalAlignment(HAlign_Fill);
+		ShapeSlot->SetVerticalAlignment(VAlign_Fill);
+	}
+	if (UOverlaySlot* ModeSlot = ModeChip->AddChildToOverlay(Words(TEXT("ModeText"), TEXT("SCM"), 30.f)))
+	{
+		ModeSlot->SetHorizontalAlignment(HAlign_Center);
+		ModeSlot->SetVerticalAlignment(VAlign_Center);
+	}
+	Vertical(FlightModes, Words(TEXT("FlightModeCaption"), TEXT("MODE"), 22.f, Faded(MfdText, 0.6f)), HAlign_Left, FMargin(2.f, 0.f, 0.f, 0.f));
+	Vertical(FlightModes, Sized(TEXT("FlightModeChipBox"), ModeChip, 256.f, 50.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 12.f));
+	UVerticalBox* KeyGrid = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightKeys"));
+	const TCHAR* Pairs[3][2] = { { TEXT("CPLD"), TEXT("GSAF") }, { TEXT("CSTB"), TEXT("BOOST") }, { TEXT("PREC"), TEXT("VTOL") } };
+	for (int32 Row = 0; Row < 3; ++Row)
+	{
+		UHorizontalBox* KeyRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("FlightKeyRow%d"), Row)));
+		Horizontal(KeyRow, Key(Pairs[Row][0], 124.f, 46.f, true), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
+		Horizontal(KeyRow, Key(Pairs[Row][1], 124.f, 46.f, true), VAlign_Center, FMargin(0.f));
+		Vertical(KeyGrid, KeyRow, HAlign_Left, FMargin(0.f, 0.f, 0.f, 10.f));
+	}
+	Vertical(FlightModes, KeyGrid, HAlign_Left, FMargin(0.f));
+	Horizontal(Flight, FlightModes, VAlign_Top, FMargin(0.f, 6.f, 0.f, 0.f), true);
 	// --- Left display, page 2: THRUSTERS - what each direction puts out against what it can -----------
 	auto AlignedWords = [&](const FName Name, const TCHAR* Initial, float Size, ETextJustify::Type Justify, const FLinearColor& Color = SpaceHudStyle::MfdText)
 	{
@@ -3316,8 +3390,7 @@ void USpaceCockpitDisplays::BuildTree()
 			// 4.x's MFD type (wide, rounded-square, semibold - bolder than the Oxanium it replaces, so the light reads),
 			// and the big figures in Saira Condensed SemiBold: tall narrow numerals like SC's speed.
 			static const FString Saira = FPaths::ProjectContentDir() / TEXT("UI/Fonts/Saira-Medium.ttf");   // (SemiBold read too heavy, author 5. 10.)
-			static const FString SairaCondensed = FPaths::ProjectContentDir() / TEXT("UI/Fonts/SairaCondensed-SemiBold.ttf");
-			// (not on the centre column's small screens: 11 cm of glass hold two words only in the condensed face)
+				// (not on the centre column's small screens: 11 cm of glass hold two words only in the condensed face)
 			const FString TextName = Text->GetName();
 			const bool bBig = Font.Size >= 56.f;
 			if (FPaths::FileExists(Saira) && !TextName.StartsWith(TEXT("Radar")) && !TextName.StartsWith(TEXT("Ship")))
@@ -3325,7 +3398,8 @@ void USpaceCockpitDisplays::BuildTree()
 				// words 10 % smaller down to the readability minimums (26 px on the MFDs, 21 on the centre captions), set
 				// with a little air; the big figures condensed and 25 % larger (the narrow face has the room)
 				const float Floor = Font.Size >= 26.f ? 26.f : FMath::Min(Font.Size, 21.f);
-				FSlateFontInfo Face(bBig && FPaths::FileExists(SairaCondensed) ? SairaCondensed : Saira,
+				// (MFD v5, author 8. 10. 2026: the condensed figures read wrong - the big figures in the same wide face)
+				FSlateFontInfo Face(Saira,
 					bBig ? Font.Size * 1.25f : FMath::Max(Font.Size * 0.9f, Floor));
 				Face.LetterSpacing = bBig ? 0 : 40;
 				Font = Face;

@@ -1,11 +1,34 @@
 {
   "manifest": "C:\\gamespace\\gamespace\\ArtSource\\Ships\\Wayfarer\\Export\\Wayfarer_manifest.json",
   "ship": "Wayfarer",
-  "meshes": {},
+  "meshes": {
+    "SM_Ship_Wayfarer": [
+      "socket CameraTarget scale (100, 100, 100) reset to 1",
+      "socket Cockpit scale (100, 100, 100) reset to 1",
+      "socket Control_door0 scale (100, 100, 100) reset to 1",
+      "socket Control_door0_a scale (100, 100, 100) reset to 1",
+      "socket Control_door0_panel scale (100, 100, 100) reset to 1",
+      "socket Control_door1 scale (100, 100, 100) reset to 1",
+      "socket Control_door1_a scale (100, 100, 100) reset to 1",
+      "socket Control_door1_panel scale (100, 100, 100) reset to 1",
+      "socket Control_eng scale (100, 100, 100) reset to 1",
+      "socket Control_pwr scale (100, 100, 100) reset to 1",
+      "socket Control_radar scale (100, 100, 100) reset to 1",
+      "socket Display_left scale (100, 100, 100) reset to 1",
+      "socket Display_right scale (100, 100, 100) reset to 1",
+      "socket Engine_L scale (100, 100, 100) reset to 1",
+      "socket Engine_R scale (100, 100, 100) reset to 1",
+      "socket Exit scale (100, 100, 100) reset to 1",
+      "socket Gear_L scale (100, 100, 100) reset to 1",
+      "socket Gear_Nose scale (100, 100, 100) reset to 1",
+      "socket Gear_R scale (100, 100, 100) reset to 1",
+      "socket WalkRamp scale (100, 100, 100) reset to 1",
+      "socket WalkSeat scale (100, 100, 100) reset to 1"
+    ],
+    "SM_Ship_Wayfarer_Decals": []
+  },
   "kept_unchanged": [
-    "SM_Ship_Wayfarer",
     "SM_Ship_Wayfarer_Canopy",
-    "SM_Ship_Wayfarer_Decals",
     "SM_Ship_Wayfarer_Door0A",
     "SM_Ship_Wayfarer_Door1A",
     "SM_Ship_Wayfarer_Gear",
@@ -16,14 +39,14 @@
     "SM_Ship_Wayfarer_Screens"
   ],
   "imported_hashes": {
-    "SM_Ship_Wayfarer": "34955d883507c9db3f27750e66579c3b2bf3d165",
+    "SM_Ship_Wayfarer": "648722476c1997e2574287eed6c8a86e3b2c4780",
     "SM_Ship_Wayfarer_Canopy": "879389a2da32c2818440c8370cc947c38af0759c",
-    "SM_Ship_Wayfarer_Decals": "51ca9c3e31e8f197baa5f5a1878ff65fe1e8a283",
+    "SM_Ship_Wayfarer_Decals": "0668cfeefb67c3ba4a52d32b29b1568e9a4ba905",
     "SM_Ship_Wayfarer_Door0A": "f593dd2e91e797e067daf38767cd9fe81d9cea12",
     "SM_Ship_Wayfarer_Door1A": "e399533e241926e1610ed1e6957b7139fb21cc10",
     "SM_Ship_Wayfarer_Gear": "7dc7e8ec1f70b6d335d5d82d424f2e9d8b4d85bf",
     "SM_Ship_Wayfarer_Hologram": "7f42a610def6af75b04036c4eeda939904c09720",
-    "SM_Ship_Wayfarer_Interior": "0862538a9dc2c1df9160260c57e941af9ac457e8",
+    "SM_Ship_Wayfarer_Interior": "6ebab0118a535a147b2f03269d34bd0df34a1631",
     "SM_Ship_Wayfarer_InteriorDecals": "6f2797966669edd3cd396da5ec3ff413344fe576",
     "SM_Ship_Wayfarer_InteriorKit": "7c6de1d8613fe23f6b2058b655890a31c906a456",
     "SM_Ship_Wayfarer_Screens": "b63b83e88676784cafc4a8790b61618fb507df17"

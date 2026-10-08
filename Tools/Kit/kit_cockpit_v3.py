@@ -4,9 +4,9 @@ column paint), aisles round the seat on both sides.
 
   SM_Kit_Cockpit_SeatArm07W_L / _R          the seat's forearm rest: a leather pad, 2 x 2 backlit keys, the stick; a
                                             bracket down to the seat's side
-  SM_Kit_Cockpit_ConsoleWall18W_L / _R      the wall console from 16.0 m to the dash wing: an intake, a service
-                                            hatch, a tower with the emergency key, six rockers and the status bars on
-                                            its seat-facing slope, light lines along its inner face
+  SM_Kit_Cockpit_ConsoleWall18W_L / _R      v4 (concept consoles_v4_concept_b.png): one lofted shape out of the
+                                            lining up into the dash wing, a sloped top with the SYS rockers and the
+                                            EMERG field sunk in it, a recessed lit kick, light lines on its inner edge
 
 Both are built in the ship layout's coordinates (x from the stern, y to port, z from the cockpit floor) and placed at
 the layout's origin (interior.kit_modules.run_parts [[0, 0, 1.15], [1, 0], [part]]): the console follows the hull's
@@ -19,24 +19,20 @@ from mathutils import Vector
 import kit_geo
 from kit_geo import frame
 import kit_cockpit_b as kb
-from kit_cockpit_b import side_prism, end_prism, screw, legend, led, keycap, rocker_b, emergency_key, MIRROR, _mirror_y
+from kit_cockpit_b import side_prism, screw, legend, led, keycap, rocker_b, MIRROR, _mirror_y
 from kit_cockpit import stick, _label
 
 X, Y, Z = Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1))
 WALL = [(15.2, 1.75), (16.5, 1.6), (18.6, 1.0)]     # the cockpit's port wall (Wayfarer_layout.json, rooms.cockpit.poly)
 LINER = 0.1                                         # the lining's face inside the hull line
-CX0, CX1 = 16.0, 17.85                              # the console's aft end .. its front, tucked into the dash wing
-TOP = 0.70                                          # the console's top over the cockpit floor
-RX0 = 17.2                                          # the front ramp: from the tower's front ..
-RAMP = [(RX0, TOP), (17.62, 0.835), (CX1, 0.835)]   # .. up along the dash wing's top edge (z 0.66 .. 0.82 at x 17.3 ..
-                                                    # 17.62) into its shelf: console and dash read as one shape
-
-
-def ramp_z(x):
-    for (a, b), (c, e) in zip(RAMP, RAMP[1:]):
-        if a <= x <= c:
-            return b + (e - b) * (x - a) / (c - a)
-    return RAMP[-1][1] if x > RX0 else TOP
+CX1 = 17.85                                         # the console's front, tucked into the dash wing
+# cockpit v4 (author 8. 10. 2026: the side consoles read as boxes - concept consoles_v4_concept_b.png approved): one
+# lofted shape growing out of the lining and sweeping up into the dash wing. Stations (x, depth from the lining's
+# face, height of its inner top edge); the top falls 11 deg towards the aisle (SLOPE); the depth never exceeds v3's
+# (the aisles stay as walked).
+STATIONS = [(15.9, 0.06, 0.64), (16.0, 0.30, 0.66), (16.5, 0.257, 0.689), (16.7, 0.24, 0.70), (17.25, 0.14, 0.72),
+            (17.62, 0.08, 0.835), (CX1, 0.06, 0.835)]
+SLOPE = 0.2
 
 
 def wall_y(x):
@@ -44,15 +40,6 @@ def wall_y(x):
         if a <= x <= c:
             return b + (e - b) * (x - a) / (c - a)
     return WALL[-1][1]
-
-
-def depth(x):
-    """The console's depth from the lining: 0.36 m aft, 0.06 m at the dash (the aisle stays >= 0.53 m)."""
-    return 0.36 + (0.06 - 0.36) * (min(max(x, CX0), 17.75) - CX0) / (17.75 - CX0)
-
-
-def inner_y(x):
-    return wall_y(x) - LINER - depth(x)
 
 
 def _built(fn, name, seed, mirror):
@@ -175,158 +162,148 @@ def seat_arm(name, seed, mirror=False):
 
 
 # ------------------------------------------------------------------ the wall console
-def _inner_frame(xa, xb, z, out=0.0):
-    """A frame on the console's inner face between xa and xb: x along it (forward), y up, z out (to the aisle)."""
-    a = Vector((xa, inner_y(xa), z))
-    b = Vector((xb, inner_y(xb), z))
-    t = (b - a).normalized()
-    n = Vector((t.y, -t.x, 0.0))                       # out of the face, to the seat
-    return a + n * out, t, n, (b - a).length
+def _station(x):
+    """(depth, inner top z) at x, linear between the stations."""
+    for (xa, da, za), (xb, db, zb) in zip(STATIONS, STATIONS[1:]):
+        if xa <= x <= xb:
+            t = (x - xa) / (xb - xa)
+            return da + (db - da) * t, za + (zb - za) * t
+    return STATIONS[-1][1], STATIONS[-1][2]
+
+
+def _V(x, s, z):
+    """A point s in from the lining's face (s < 0: into the lining) at height z."""
+    return Vector((x, wall_y(x) - LINER - s, z))
+
+
+def _section(x):
+    """The console's cross-section at x, round from the lining's foot: the kick recessed 5 cm (its top chamfered out
+    to the face), the inner face, a 25 mm chamfer to the top, the sloped top back into the lining."""
+    d, zi = _station(x)
+    zo = zi + SLOPE * (d - 0.005)
+    return [_V(x, -0.02, 0.0), _V(x, d - 0.05, 0.0), _V(x, d - 0.05, 0.10), _V(x, d, 0.13), _V(x, d, zi - 0.03),
+            _V(x, d - 0.025, zi), _V(x, -0.02, zo)]
+
+
+def top_pt(x, s):
+    """A point on the console's sloped top."""
+    d, zi = _station(x)
+    return _V(x, s, zi + SLOPE * (d - 0.025 - s))
+
+
+def top_frame(x, s):
+    """(point, right, up, normal) on the top: up towards the wall (reads from the seat), right forward."""
+    q = top_pt(x, s)
+    a = (top_pt(x, s - 0.01) - q).normalized()
+    r0 = (top_pt(x + 0.01, s) - q).normalized()
+    n = r0.cross(a).normalized()
+    if n.z < 0:
+        n = -n
+    r = a.cross(n).normalized()
+    return q, r, a, n
+
+
+def _skin(p, role, rings, centres):
+    """Closed rings (same count) skinned with quads, each face turned away from its ring pair's centre; caps."""
+    verts, faces = [], []
+    m = len(rings[0])
+    for ring in rings:
+        verts += [Vector(v) for v in ring]
+    def fix(f, c):
+        a_, b_, c_ = verts[f[0]], verts[f[1]], verts[f[2]]
+        nrm = (b_ - a_).cross(c_ - a_)
+        ctr = sum((verts[i] for i in f), Vector()) / len(f)
+        return f if nrm.dot(ctr - c) >= 0 else f[::-1]
+    for k in range(len(rings) - 1):
+        c = (centres[k] + centres[k + 1]) / 2
+        for i in range(m):
+            j = (i + 1) % m
+            faces.append(fix([k * m + i, k * m + j, (k + 1) * m + j, (k + 1) * m + i], c))
+    faces.append(fix(list(range(m)), centres[1]))                         # the caps face away from the next ring
+    faces.append(fix([(len(rings) - 1) * m + i for i in range(m)], centres[-2]))
+    return p.mesh(role, [tuple(v) for v in verts], faces)
+
+
+def _top_patch(p, role, x0, x1, s0, s1, z0, z1):
+    """A slab following the sloped top between x0..x1 and s0..s1, from z0 to z1 over it (insets, bezels)."""
+    xs = [x0] + [st[0] for st in STATIONS if x0 < st[0] < x1] + [x1]
+    rings, centres = [], []
+    for x in xs:
+        ring = [top_pt(x, s0) + Vector((0, 0, z0)), top_pt(x, s1) + Vector((0, 0, z0)),
+                top_pt(x, s1) + Vector((0, 0, z1)), top_pt(x, s0) + Vector((0, 0, z1))]
+        rings.append(ring)
+        centres.append(sum(ring, Vector()) / 4)
+    _skin(p, role, rings, centres)
 
 
 def _wall_console(name, seed):
     p = kit_geo.Part(name, seed)
     p.edge_roles = {"Kit_Frame": "Kit_FrameEdge", "Kit_PanelPaint": "Kit_FrameEdge"}
     p.sharp_deg = 20.0
-    xs = [CX0, 16.5, CX1]
-    inner = [(x, inner_y(x)) for x in xs]
-    outer = [(x, wall_y(x) - LINER + 0.02) for x in xs]     # 2 cm into the lining: no gap at the wall
-    # (author 8. 10.: plastic boxes) the body in the panel paint with a 2 cm rounded top edge, to the ramp
-    bx = [CX0, 16.5, RX0]
-    b_in = [(x, inner_y(x)) for x in bx]
-    b_out = [(x, wall_y(x) - LINER + 0.02) for x in bx]
-    p.poly_prism("Kit_PanelPaint", b_in + b_out[::-1], frame(Vector((0, 0, TOP)), X, Y, Z), TOP, bevel=0.02, segments=3)
-    # the front ramp: rises along the dash wing's top edge into its shelf (one shape with the dash)
-    rv, rf = [], []
-    for (x, zt) in RAMP:
-        yi_, yo_ = inner_y(x), wall_y(x) - LINER + 0.02
-        rv += [Vector((x, yi_, 0.0)), Vector((x, yo_, 0.0)), Vector((x, yo_, zt)), Vector((x, yi_, zt))]
-    for k in range(len(RAMP) - 1):
-        a_, b_ = 4 * k, 4 * (k + 1)
-        rf += [(a_ + 3, a_ + 2, b_ + 2, b_ + 3),          # top
-               (a_ + 0, a_ + 3, b_ + 3, b_ + 0),          # inner face
-               (a_ + 1, b_ + 1, b_ + 2, a_ + 2),          # wall face
-               (a_ + 0, b_ + 0, b_ + 1, a_ + 1)]          # bottom
-    rf += [(0, 1, 2, 3), (len(rv) - 4, len(rv) - 1, len(rv) - 2, len(rv) - 3)]
-    p.mesh("Kit_PanelPaint", [tuple(v) for v in rv], [f[::-1] for f in rf])   # listed clockwise above: reversed
-    # a satin rail along the ramp's inner top edge, a seam where it meets the body
-    p.sweep("Kit_Lip", [Vector((x, inner_y(x) + 0.004, zt - 0.002)) for (x, zt) in RAMP], 0.0045, seg=10)
-    p.box("Kit_Seal", (RX0 - 0.0015, inner_y(RX0) + 0.004, TOP - 0.004), (RX0 + 0.0015, wall_y(RX0) - LINER - 0.004, TOP + 0.001), panel=False)
-    # a dark kick 4 cm in along the floor
-    kick = [(x, inner_y(x) + 0.035) for x in xs]
-    p.poly_prism("Kit_Inset", kick + outer[::-1], frame(Vector((0, 0, 0.05)), X, Y, Z), 0.05, bevel=0.003, segments=1)
-    # the inner face: graphite panels with seams and screws, a light line low and one under the top edge
-    for (xa, xb) in ((CX0, 16.5), (16.5, 17.75)):
-        o, t, n, ln = _inner_frame(xa, xb, 0.0)
-        fm = frame(o, t, Z, n)
-        segs = 1 if ln < 0.6 else 3
-        for k in range(segs):
-            s0 = 0.03 + k * (ln - 0.06) / segs + (0.002 if k else 0.0)
-            s1 = 0.03 + (k + 1) * (ln - 0.06) / segs - (0.002 if k < segs - 1 else 0.0)
-            p.box("Kit_Inset", (s0, 0.12, -0.002), (s1, TOP - 0.08, 0.005), bevel=0.003, segments=2, m=fm)
-            for ss in (s0 + 0.014, s1 - 0.014):
-                for zz in (0.134, TOP - 0.094):
-                    screw(p, fm @ Vector((ss, zz, 0.0055)), n, 0.003)
-        for zz, h in ((0.09, 0.005), (TOP - 0.045, 0.004)):
-            p.box("Kit_Seal", (0.02, zz - 0.006, -0.001), (ln - 0.02, zz + 0.006, 0.0012), m=fm, panel=False)
-            p.box("Kit_GlowStrip", (0.023, zz - h / 2, 0.0005), (ln - 0.023, zz + h / 2, 0.0022), bevel=0.0008, segments=1, m=fm, panel=False)
-    o, t, n, ln = _inner_frame(16.5, 17.75, 0.0)
-    _label(p, "st_service", frame(o, t, Z, n) @ Vector((0.25, 0.3, 0.0056)), n, t, Z, scale=0.6)
-    _label(p, "pn_2", frame(o, t, Z, n) @ Vector((0.06, TOP - 0.11, 0.0056)), n, t, Z, scale=0.6)
-    # 1 the aft top: a service hatch (a framed lid, a recessed pull, four screws, its plate)
-    hx0, hx1 = CX0 + 0.04, 16.62
-    hu0, hu1 = inner_y(hx1) + 0.03, wall_y(hx1) - LINER - 0.03
-    zt = TOP
-    p.box("Kit_Seal", (hx0 - 0.004, hu0 - 0.004, zt - 0.001), (hx1 + 0.004, hu1 + 0.004, zt + 0.0008), panel=False)
-    p.box("Kit_Frame", (hx0, hu0, zt), (hx1, hu1, zt + 0.012), bevel=0.004, segments=2)
-    p.box("Kit_Inset", (hx0 + 0.02, hu0 + 0.02, zt + 0.011), (hx1 - 0.02, hu1 - 0.02, zt + 0.015), bevel=0.002, segments=2)
-    for xx in (hx0 + 0.035, hx1 - 0.035):
-        for uu in (hu0 + 0.035, hu1 - 0.035):
-            screw(p, Vector((xx, uu, zt + 0.015)), Z, 0.0045)
-    p.box("Kit_Seal", (hx1 - 0.16, (hu0 + hu1) / 2 - 0.015, zt + 0.008), (hx1 - 0.08, (hu0 + hu1) / 2 + 0.015, zt + 0.0152), bevel=0.003, segments=2)
-    p.sweep("Kit_Lip", [Vector((hx1 - 0.15, (hu0 + hu1) / 2, zt + 0.011)), Vector((hx1 - 0.09, (hu0 + hu1) / 2, zt + 0.011))], 0.003, seg=12)
-    p.box("Kit_Lip", (hx0 + 0.06, hu0 + 0.05, zt + 0.0148), (hx0 + 0.15, hu0 + 0.1, zt + 0.0162), bevel=0.0006, segments=1, panel=False)
-    p.box("Kit_Legend", (hx0 + 0.062, hu0 + 0.052, zt + 0.0152), (hx0 + 0.148, hu0 + 0.098, zt + 0.0166), panel=False)
-    legend(p, "SERVICE", Vector((hx0 + 0.105, hu0 + 0.081, zt + 0.0166)), X, Y, Z, h=0.009, role="Kit_Seal")
-    legend(p, "HF-WC 01", Vector((hx0 + 0.105, hu0 + 0.064, zt + 0.0166)), X, Y, Z, h=0.0065, role="Kit_Seal")
-    # 2 the tower beside the pilot (x 16.72 .. 17.18): its slope faces the seat with the emergency key, two rows of
-    # rockers and the status bars
-    tx0, tx1 = 16.72, 17.18
-    yi = inner_y(tx1) + 0.012                          # never over the aisle (the inner edge leans in forward)
-    yo = wall_y(tx1) - LINER + 0.01
-    th = 0.24
-    prof = [(yi, TOP), (yo, TOP), (yo, TOP + th), (yi + 0.11, TOP + th), (yi, TOP + 0.08)]
-    end_prism(p, "Kit_PanelPaint", prof, tx0, tx1, 0.016, 3)
-    a = Vector((0.0, 0.11, th - 0.08)).normalized()    # up the slope
-    r = X
-    nf = r.cross(a)                                    # out of the slope, to the seat and up
-    if nf.y > 0:
-        r, nf = -r, -nf
-    fc = Vector(((tx0 + tx1) / 2, yi + 0.055, TOP + 0.08 + (th - 0.08) / 2)) + nf * 0.0005
-    ff = lambda o: frame(o, r, a, nf)                  # noqa: E731
-    w2, h2 = (tx1 - tx0) / 2 - 0.02, ((0.11 ** 2 + (th - 0.08) ** 2) ** 0.5) / 2 - 0.012
-    p.box("Kit_Lip", (-w2 - 0.004, -h2 - 0.004, -0.004), (w2 + 0.004, h2 + 0.004, 0.0015), bevel=0.002, segments=2, m=ff(fc))
-    p.box("Kit_Inset", (-w2, -h2, -0.004), (w2, h2, 0.002), m=ff(fc), panel=False)
-    for row, labs in enumerate((("PWR", "EXT LT", "ENG"), ("LIGHTS", "GEAR", "VTOL"))):
-        for i, lab in enumerate(labs):
-            q = fc + r * (-0.155 + 0.068 * i) + a * (0.03 - 0.062 * row) + nf * 0.002
-            rocker_b(p, q, r, a, nf, lit="Kit_GlowAmber" if lab == "GEAR" else "Kit_GlowCool")
-            legend(p, lab, q - a * 0.027 + nf * 0.0002, r, a, nf, h=0.0068)
-    emergency_key(p, fc + r * 0.135 + a * 0.0 + nf * 0.002, r, a, nf)
-    # the tower's seat-facing foot (TOP .. TOP + 0.08): a light line, a plate; two seams across its top
-    p.box("Kit_Seal", (tx0 + 0.02, yi - 0.0012, TOP + 0.035), (tx1 - 0.02, yi + 0.0004, TOP + 0.047), panel=False)
-    p.box("Kit_GlowStrip", (tx0 + 0.023, yi - 0.0026, TOP + 0.0385), (tx1 - 0.023, yi - 0.0006, TOP + 0.0435), bevel=0.0006, segments=1, panel=False)
-    p.box("Kit_Lip", (tx0 + 0.03, yi - 0.0012, TOP + 0.054), (tx0 + 0.12, yi + 0.0004, TOP + 0.072), bevel=0.0005, segments=1, panel=False)
-    p.box("Kit_Legend", (tx0 + 0.032, yi - 0.0018, TOP + 0.0555), (tx0 + 0.118, yi - 0.0008, TOP + 0.0705), panel=False)
-    legend(p, "PWR MGMT", Vector((tx0 + 0.075, yi - 0.0018, TOP + 0.063)), X, Z, -Y, h=0.0068, role="Kit_Seal")
-    for xs_ in (tx0 + 0.15, tx1 - 0.15):
-        p.box("Kit_Seal", (xs_ - 0.001, yi + 0.115, TOP + th - 0.0006), (xs_ + 0.001, yo - 0.005, TOP + th + 0.0004), panel=False)
-    # the status bars on the tower's top, read from the seat
-    sc = Vector(((tx0 + tx1) / 2, (yi + 0.11 + yo) / 2, TOP + th + 0.0005))
-    p.box("Kit_Lip", (sc.x - 0.075, sc.y - 0.04, sc.z - 0.001), (sc.x + 0.075, sc.y + 0.04, sc.z + 0.003), bevel=0.0015, segments=2)
-    p.box("Kit_Seal", (sc.x - 0.07, sc.y - 0.035, sc.z + 0.003), (sc.x + 0.07, sc.y + 0.035, sc.z + 0.0035), panel=False)
-    fm = lambda o: frame(o, X, Y, Z)                   # noqa: E731
-    for k, lab in enumerate(("MAIN", "BATT", "TEMP")):
-        q = Vector((sc.x - 0.02, sc.y + 0.022 - 0.022 * k, sc.z + 0.0035))
+    # the body: one loft through the stations, the panel paint (author 8. 10.: the column's glossy white)
+    xs = [st[0] for st in STATIONS]
+    rings = [_section(x) for x in xs]
+    centres = []
+    for x in xs:
+        d, zi = _station(x)
+        centres.append(_V(x, min(d * 0.45, d - 0.07), zi * 0.5))
+    _skin(p, "Kit_PanelPaint", rings, centres)
+    # the kick's back: dark, a light line along its top lights the recess and the floor (concept B)
+    kick = [[_V(x, _station(x)[0] - 0.0505, 0.004), _V(x, _station(x)[0] - 0.0505, 0.098),
+             _V(x, _station(x)[0] - 0.047, 0.098), _V(x, _station(x)[0] - 0.047, 0.004)] for x in xs]
+    _skin(p, "Kit_Inset", kick, [sum(r, Vector()) / 4 for r in kick])
+    # (v4 r1: a thin line under the overhang did not read) a 4 cm band of light along the kick's back: the recess glows
+    band = [[_V(x, _station(x)[0] - 0.0468, 0.02), _V(x, _station(x)[0] - 0.0468, 0.06),
+             _V(x, _station(x)[0] - 0.0452, 0.06), _V(x, _station(x)[0] - 0.0452, 0.02)] for x in xs]   # (in front of the dark back)
+    _skin(p, "Kit_GlowStrip", band, [sum(r, Vector()) / 4 for r in band])
+    # the inner top edge: a satin rail in the chamfer and a cool light line under it, both running on into the dash
+    p.sweep("Kit_Lip", [_V(x, _station(x)[0] - 0.011, _station(x)[1] - 0.012) for x in xs], 0.0045, seg=10)
+    p.sweep("Kit_GlowStrip", [_V(x, _station(x)[0] + 0.0012, _station(x)[1] - 0.042) for x in xs], 0.0022, seg=8)
+    # seams down the inner face at its breaks and between them
+    # (v4 r1: black seams every 30 cm read as cracks) hairline seams only where the face breaks
+    for x in (16.5, 17.25):
+        d, zi = _station(x)
+        p.sweep("Kit_Seal", [_V(x, d + 0.0002, 0.135), _V(x, d + 0.0002, zi - 0.05)], 0.0007, seg=4)
+    da = _station(16.3)[0]
+    t = (_V(16.31, da, 0) - _V(16.3, da, 0)).normalized()
+    nf = Vector((t.y, -t.x, 0.0))
+    if nf.dot(Vector((0, -1, 0))) < 0:
+        nf = -nf
+    _label(p, "maker", _V(16.3, da + 0.0008, 0.36), nf, t, Vector((0, 0, 1)), scale=0.55)
+    # 1 SYS: a graphite field sunk in a satin bezel on the top, six rockers in a row along it, their legends
+    _top_patch(p, "Kit_Lip", 16.03, 16.58, 0.045, 0.175, -0.002, 0.0025)
+    _top_patch(p, "Kit_Inset", 16.04, 16.57, 0.051, 0.169, -0.001, 0.0034)
+    labs = ("PWR", "EXT LT", "ENG", "LIGHTS", "GEAR", "VTOL")
+    for i, lab in enumerate(labs):
+        q, r, a, n = top_frame(16.1 + i * 0.08, 0.098)
+        rocker_b(p, q + n * 0.0034, r, a, n, lit="Kit_GlowAmber" if lab == "GEAR" else "Kit_GlowCool")
+        legend(p, lab, q - a * 0.032 + n * 0.0036, r, a, n, h=0.0066)
+    q, r, a, n = top_frame(16.07, 0.142)
+    legend(p, "SYS", q + n * 0.0036, r, a, n, h=0.009)
+    # 2 the emergency field: a guarded switch, the power bars, a caution lamp
+    _top_patch(p, "Kit_Lip", 16.64, 17.2, 0.03, 0.125, -0.002, 0.0025)
+    _top_patch(p, "Kit_Inset", 16.65, 17.19, 0.036, 0.119, -0.001, 0.0034)
+    q, r, a, n = top_frame(16.74, 0.082)
+    guarded_toggle(p, q + n * 0.0034, r, a, n)
+    legend(p, "EMERG", q - a * 0.033 + n * 0.0036, r, a, n, h=0.0068)
+    for k, lab in enumerate(("MAIN", "BATT")):
         for gi in range(8):
-            on = gi < (8, 6, 3)[k]
-            x0_ = 0.004 + gi * 0.0068
-            p.box(("Kit_GlowCool" if k < 2 else "Kit_GlowAmber") if on else "Kit_Inset",
-                  (x0_, -0.0035, 0.0), (x0_ + 0.0055, 0.0035, 0.0007 if on else 0.0003), m=fm(q), panel=False)
-        legend(p, lab, q - X * 0.026 + Z * 0.0002, X, Y, Z, h=0.007)
-    _label(p, "maker", Vector(((tx0 + tx1) / 2, yo - 0.0005 - 0.0, TOP + 0.15)), Y, -X, Z, scale=0.3)
-    # 3 the front top towards the dash (critic r1: 3 modules): a graphite field sunk in a satin lip with four backlit
-    # keys, two knurled selectors and a small grille, its legends
-    # (shape pass 8. 10.) the module sits on the ramp's slope, facing the pilot
-    gx0, gx1 = RX0 + 0.03, 17.59
-    sa = Vector((RAMP[1][0] - RAMP[0][0], 0.0, RAMP[1][1] - RAMP[0][1])).normalized()   # up the slope
-    sn = Vector((-sa.z, 0.0, sa.x))                                                       # out of it, up and aft
-    gu0, gu1 = inner_y(gx1) + 0.012, wall_y(gx1) - LINER - 0.012
-    gm = (gu0 + gu1) / 2
-    go = Vector((gx0, gm, ramp_z(gx0)))
-    gl = (gx1 - gx0) / sa.x
-    gfm = frame(go, sa, Y, sn)
-    gv0, gv1 = gu0 - gm, gu1 - gm
-    p.box("Kit_Lip", (0.0, gv0, -0.001), (gl, gv1, 0.004), bevel=0.0015, segments=2, m=gfm)
-    p.box("Kit_Inset", (0.006, gv0 + 0.006, 0.002), (gl - 0.006, gv1 - 0.006, 0.0045), m=gfm, panel=False)
-    for i, lab in enumerate(("DOOR", "RAMP", "LOCK", "CAB")):
-        q = go + sa * (0.035 + i * 0.045) + sn * (0.0045 - 0.0055)
-        keycap(p, frame(q, -Y, sa, sn), lab)
-    for i, lab in enumerate(("COOL", "VENT")):
-        c = go + sa * (0.215 + i * 0.055) + Y * 0.004 + sn * 0.0045
-        knob(p, c, sn)
-        legend(p, lab, c - Y * 0.024 + sn * 0.0002, sa, Y, sn, h=0.0055)
-    p.box("Kit_Lip", (gl - 0.065, -0.022, 0.0045), (gl - 0.012, 0.022, 0.0065), bevel=0.0008, segments=1, m=gfm, panel=False)
-    p.box("Kit_Perforated", (gl - 0.062, -0.019, 0.0063), (gl - 0.015, 0.019, 0.0072), m=gfm, panel=False)
-    # a satin strip along the top's inner edge
-    for (xa, xb) in ((CX0, 16.5), (16.5, 17.75)):
-        o, t, n, ln = _inner_frame(xa, min(xb, RX0), TOP - 0.006, out=-0.004)
-        p.box("Kit_Lip", (0.0, 0.0, -0.002), (ln, 0.006, 0.0035), bevel=0.0012, segments=2, m=frame(o, t, Z, n), panel=False)
-        o2, t2, n2, ln2 = _inner_frame(xa, xb, TOP - 0.016, out=0.0)
-        p.box("Kit_GlowStrip", (0.01, -0.0025, -0.0005), (ln2 - 0.01, 0.0025, 0.0018), bevel=0.0006, segments=1, m=frame(o2, t2, Z, n2), panel=False)
-    p.collision_hull([Vector((x, y, z)) for (x, y) in b_in + b_out for z in (0.0, TOP + 0.02)])
-    p.collision_hull([Vector((x, y, z)) for (x, zt) in RAMP for y in (inner_y(x), wall_y(x) - LINER + 0.02) for z in (0.0, zt)])
-    p.collision_box((tx0, yi, TOP), (tx1, yo, TOP + th))
+            on = gi < (8, 5)[k]
+            q, r, a, n = top_frame(16.86 + gi * 0.017, 0.064 + 0.03 * k)
+            fm = frame(q + n * 0.0034, r, a, n)
+            p.box("Kit_GlowCool" if on else "Kit_Seal", (-0.0065, -0.004, 0.0), (0.0065, 0.004, 0.0009 if on else 0.0004), m=fm, panel=False)
+        q, r, a, n = top_frame(16.825, 0.064 + 0.03 * k)
+        legend(p, lab, q + n * 0.0036, r, a, n, h=0.0055)
+    q, r, a, n = top_frame(17.11, 0.08)
+    led(p, q + n * 0.0034, n, glow="Kit_GlowAmber", r=0.004)
+    legend(p, "CAUT", q - a * 0.02 + n * 0.0036, r, a, n, h=0.0055)
+    # the collision: one hull per span
+    for (x0, x1) in zip(xs, xs[1:]):
+        pts = []
+        for x in (x0, x1):
+            d, zi = _station(x)
+            pts += [_V(x, -0.02, 0.0), _V(x, d, 0.0), _V(x, d, zi), _V(x, -0.02, zi + SLOPE * (d - 0.005))]
+        p.collision_hull(pts)
     return p
 
 
