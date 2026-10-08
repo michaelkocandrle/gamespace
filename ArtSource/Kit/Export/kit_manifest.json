@@ -9963,13 +9963,14 @@
     76.2,
     74.1
    ],
-   "tris": 43672,
+   "tris": 44380,
    "tris_decals": 290,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
     "Kit_Seal",
     "Kit_GlowCool",
+    "Kit_GlowSignal",
     "Kit_Lip",
     "Kit_Graphite",
     "Kit_Gasket",
@@ -10043,9 +10044,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 19074,
+    "edge": 21594,
     "secondary": 0,
-    "floor": 5238,
+    "floor": 5094,
     "seam": 0
    },
    "status": "built"

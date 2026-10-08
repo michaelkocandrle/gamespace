@@ -89,6 +89,14 @@ def legend(p, body, c, r, a, n, h=0.008, role="Kit_Legend", depth=0.0003, font="
         f.smooth = False
 
 
+def led(p, c, n, glow="Kit_GlowKey", r=0.003):
+    """A status LED: a polished ring, a glowing dome proud of it, a faint halo ring round it."""
+    p.lathe("Kit_Lip", [(r + 0.0022, 0.0), (r + 0.0022, 0.0011), (r + 0.0008, 0.0013)], tuple(c), axis=tuple(n), seg=20)
+    p.lathe(glow, [(r, 0.0), (r, 0.0008), (r * 0.7, 0.0019), (0.0, 0.0025)], tuple(c + n * 0.0011), axis=tuple(n), seg=20)
+    p.lathe("Kit_GlowCool" if glow != "Kit_GlowAmber" else "Kit_GlowSignal",
+            [(r + 0.0045, 0.0), (r + 0.0045, 0.0002), (r + 0.0026, 0.0002), (r + 0.0026, 0.0)], tuple(c + n * 0.0001), axis=tuple(n), seg=24)
+
+
 def emergency_key(p, c, r, a, n):
     """The red emergency key under a flip-up red cover, framed in orange, its label plate."""
     fm = lambda o: frame(o, r, a, n)                         # noqa: E731
@@ -150,8 +158,9 @@ def console_b(name, seed):
                 screw(p, Vector((xx, -0.0795, zz)), -Y, 0.0022)
     for k in range(6):
         screw(p, Vector((0.06 + k * 0.1, -0.0758, BEAM0 + 0.017)), -Y, 0.003)
-    for xa, xb in ((0.035, 0.312), (0.318, 0.595)):
+    for xa, xb in ((0.035, 0.313), (0.317, 0.595)):
         p.box("Kit_Leather", (xa, -0.062, AT - 0.022), (xb, 0.142, AT), bevel=0.013, segments=4)
+        p.box("Kit_Leather", (xa + 0.012, -0.05, AT - 0.004), (xb - 0.012, 0.13, AT + 0.005), bevel=0.009, segments=4)   # the dome
         sx0, sx1, su0, su1 = xa + 0.017, xb - 0.017, -0.045, 0.125          # the stitching: 4 mm stitches, 2 mm apart
         for (p0, p1) in (((sx0, su0), (sx1, su0)), ((sx0, su1), (sx1, su1)), ((sx0, su0), (sx0, su1)), ((sx1, su0), (sx1, su1))):
             ln = ((p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2) ** 0.5
@@ -161,14 +170,14 @@ def console_b(name, seed):
                 a0 = (p0[0] + (p1[0] - p0[0]) * t0, p0[1] + (p1[1] - p0[1]) * t0)
                 a1 = (p0[0] + (p1[0] - p0[0]) * t1, p0[1] + (p1[1] - p0[1]) * t1)
                 p.box("Kit_Legend", (min(a0[0], a1[0]) - 0.0006, min(a0[1], a1[1]) - 0.0006, AT - 0.0003),
-                      (max(a0[0], a1[0]) + 0.0006, max(a0[1], a1[1]) + 0.0006, AT + 0.0004), panel=False)
+                      (max(a0[0], a1[0]) + 0.0006, max(a0[1], a1[1]) + 0.0006, AT + 0.0006), panel=False)
                 k += 1
         for i in range(int((xb - xa - 0.03) / 0.011)):
             for j in range(15):
-                hx, hu = xa + 0.035 + i * 0.011, -0.03 + j * 0.0105 + (0.0052 if i % 2 else 0.0)
-                if hu > 0.11 or hx > xb - 0.035:
+                hx, hu = xa + 0.035 + i * 0.011, -0.01 + j * 0.0105 + (0.0052 if i % 2 else 0.0)
+                if hu > 0.09 or hx > xb - 0.035:                  # the middle band only (55 % of the width)
                     continue
-                p.box("Kit_Seal", (hx - 0.0015, hu - 0.0015, AT - 0.0004), (hx + 0.0015, hu + 0.0015, AT + 0.0002), panel=False)
+                p.box("Kit_Seal", (hx - 0.0012, hu - 0.0012, AT + 0.0044), (hx + 0.0012, hu + 0.0012, AT + 0.0052), panel=False)
     _label(p, "maker", Vector((0.445, -0.0796, BEAM0 + 0.045)), -Y, X, Z, scale=0.3)
     for k, gl in enumerate(("Kit_GlowCool", "Kit_GlowCool", "Kit_GlowAmber")):      # status LEDs on the beam's front end
         uu = -0.03 + k * 0.025
@@ -259,11 +268,9 @@ def console_b(name, seed):
     for i, lab in enumerate(("ck_pwr", "ck_extlt", "ck_eng")):
         q = fc - a * 0.078 + r * (0.105 * (i - 1)) + nf * 0.002
         p.box("Kit_Lip", (-0.016, -0.024, 0.0), (0.016, 0.03, 0.0015), bevel=0.001, segments=1, m=ff(q), panel=False)   # its frame
-        _rocker(p, q, r, a, nf, lab, label_scale=0)
+        _rocker(p, q, r, a, nf, lab, label_scale=0, index=False)
         legend(p, {"ck_pwr": "PWR", "ck_extlt": "EXT LT", "ck_eng": "ENG"}[lab], q - a * 0.034 + nf * 0.0002, r, a, nf, h=0.008)
-        p.lathe("Kit_Lip", [(0.0055, 0.0), (0.0055, 0.0011), (0.0042, 0.0013)], tuple(ff(q) @ Vector((0.0, 0.0238, 0.0015))), axis=tuple(nf), seg=20)
-        p.lathe("Kit_GlowKey", [(0.0036, 0.0), (0.0036, 0.0008), (0.0026, 0.0022), (0.0, 0.0028)], tuple(ff(q) @ Vector((0.0, 0.0238, 0.0026))),
-                axis=tuple(nf), seg=16)
+        led(p, ff(q) @ Vector((0.0, 0.0245, 0.0015)), nf)
     for su in (-1, 1):
         for sv in (-1, 1):
             screw(p, fc + r * (su * (w2 - 0.012)) + a * (sv * (h2 - 0.012)) + nf * 0.002, nf)
@@ -299,6 +306,9 @@ def console_b(name, seed):
         mark = [(u_, 0.6), (u_ + 0.009, 0.6), (u_ + 0.023, 0.632), (u_ + 0.014, 0.632)]
         p.poly_prism("Kit_Signal", mark, frame(Vector((L - 0.0125, 0, 0)), (0, 1, 0), (0, 0, 1), (1, 0, 0)), 0.004, bevel=0.0)
     _label(p, "maker", Vector((L - 0.0145, TU + 0.23, 0.615)), X, Y, Z, scale=0.38)
+    gu0, gz0 = W - 0.12, 0.545                                     # a framed grille sub-panel, 70 x 45 mm
+    p.box("Kit_Lip", (L - 0.0165, gu0 - 0.003, gz0 - 0.003), (L - 0.0135, gu0 + 0.073, gz0 + 0.048), bevel=0.0008, segments=1, panel=False)
+    p.box("Kit_Perforated", (L - 0.0138, gu0, gz0), (L - 0.0132, gu0 + 0.07, gz0 + 0.045), panel=False)
     # the front's hazard band: one 38 mm band in a 2 mm black frame, 9 mm orange bars at 45 deg with 9 mm gaps, clipped
     fz0, fz1, fu0, fu1 = 0.496, 0.534, TU + 0.05, W - 0.06
     fmh = frame(Vector((L - 0.0145, 0, 0)), (0, 1, 0), (0, 0, 1), (1, 0, 0))
@@ -339,17 +349,13 @@ def console_b(name, seed):
         ns = -ns
     pc = Vector((1.035, m0.y + 0.035, m0.z + 0.045)) + ns * 0.0005
     fs_ = lambda o: frame(o, X, sd_, ns)                       # noqa: E731
-    p.box("Kit_Graphite", (-0.1, -0.026, -0.002), (0.1, 0.026, 0.002), m=fs_(pc), panel=False)
+    p.box("Kit_Lip", (-0.104, -0.044, -0.002), (0.104, 0.044, 0.0012), bevel=0.0008, segments=1, m=fs_(pc), panel=False)
+    p.box("Kit_Inset", (-0.1, -0.04, -0.002), (0.1, 0.04, 0.0018), m=fs_(pc), panel=False)
     for k, lab in enumerate(("ck_lights", "ck_gear", "ck_vtol")):
-        q = Vector((0.06 * (k - 1), 0.0, 0.0))
-        p.box("Kit_Lip", q + Vector((-0.009, -0.012, 0.002)), q + Vector((0.009, 0.004, 0.005)), bevel=0.0015, segments=2, m=fs_(pc))
-        p.sweep("Kit_Lip", [fs_(pc) @ (q + Vector((0.0, -0.004, 0.005))), fs_(pc) @ (q + Vector((0.0, 0.006, 0.019)))], 0.0022, seg=8)
-        for sv in (-1, 1):
-            p.sweep("Kit_Housing", [fs_(pc) @ (q + Vector((sv * 0.013, -0.012, 0.002))), fs_(pc) @ (q + Vector((sv * 0.013, -0.008, 0.022))),
-                                    fs_(pc) @ (q + Vector((sv * 0.013, 0.004, 0.022)))], 0.0018, seg=6)
-        p.box("Kit_GlowKey" if k != 1 else "Kit_GlowAmber", q + Vector((-0.004, 0.012, 0.002)), q + Vector((0.004, 0.016, 0.003)),
-              m=fs_(pc), panel=False)
-        legend(p, {"ck_lights": "LIGHTS", "ck_gear": "GEAR", "ck_vtol": "VTOL"}[lab], fs_(pc) @ (q + Vector((0.0, -0.019, 0.0021))), X, sd_, ns, h=0.0065)
+        q = fs_(pc) @ Vector((0.062 * (k - 1), -0.004, 0.0018))
+        _rocker(p, q, X, sd_, ns, lab, label_scale=0, index=False)
+        led(p, q + sd_ * 0.024, ns, "Kit_GlowAmber" if k == 1 else "Kit_GlowKey", r=0.0026)
+        legend(p, {"ck_lights": "LIGHTS", "ck_gear": "GEAR", "ck_vtol": "VTOL"}[lab], q - sd_ * 0.027 + ns * 0.0002, X, sd_, ns, h=0.0075)
     # 7b the rear deck outboard of the beam: a service hatch (a raised lid in a dark seam, a recessed pull, two
     # quarter-turn latches, its stencils) - the concept has no empty board
     hx0, hx1, hu0, hu1 = 0.06, 0.58, 0.2, W - 0.04
@@ -368,7 +374,8 @@ def console_b(name, seed):
     for xx in ((hx0 + hx1) / 2 - 0.12, (hx0 + hx1) / 2 + 0.12):  # two recessed latches, 20 x 8 mm
         p.box("Kit_Seal", (xx - 0.012, hu1 - 0.034, zt - 0.003), (xx + 0.012, hu1 - 0.022, zt + 0.0002), bevel=0.001, segments=1)
         p.box("Kit_Lip", (xx - 0.01, hu1 - 0.032, zt - 0.0015), (xx + 0.01, hu1 - 0.024, zt + 0.0006), bevel=0.0012, segments=1)
-    p.box("Kit_Seal", (0.27, hu1 - 0.075, zt - 0.012), (0.37, hu1 - 0.045, zt + 0.0003), bevel=0.004, segments=2)        # the pull
+    p.box("Kit_Lip", (0.266, hu1 - 0.079, zt - 0.001), (0.374, hu1 - 0.041, zt + 0.0008), bevel=0.0008, segments=1, panel=False)
+    p.box("Kit_Seal", (0.27, hu1 - 0.075, zt - 0.012), (0.37, hu1 - 0.045, zt + 0.0011), bevel=0.004, segments=2)        # the pull
     p.box("Kit_Lip", (0.28, hu1 - 0.07, zt - 0.006), (0.36, hu1 - 0.065, zt - 0.002), bevel=0.0015, segments=2)
     for xx in (hx0 + 0.05, hx1 - 0.16):
         c = Vector((xx, (hu0 + hu1) / 2, zt))
@@ -378,17 +385,17 @@ def console_b(name, seed):
     _label(p, "label_coolant", Vector((0.47, hu0 + 0.07, zt + 0.0004)), Z, X, Y, scale=0.9)
     # 15 mm hazard strips low on both pedestal sides (5 mm orange bars, 5 mm gaps, a dark band)
     for uf, ns_ in ((U0, -1), (W, 1)):
-        fz0, fz1 = 0.084, 0.099
+        fz0, fz1 = 0.081, 0.099
         for x0_, x1_ in ((0.08, 0.38), (0.5, 0.78)):
             p.box("Kit_Seal", (x0_ - 0.002, uf + ns_ * 0.0002 - 0.0008, fz0 - 0.002), (x1_ + 0.002, uf + ns_ * 0.0002 + 0.0008, fz1 + 0.002), panel=False)
             xx = x0_
-            while xx + 0.005 + (fz1 - fz0) <= x1_:
-                bar = [(xx, fz0), (xx + 0.005, fz0), (xx + 0.005 + (fz1 - fz0), fz1), (xx + (fz1 - fz0), fz1)]
+            while xx + 0.006 + (fz1 - fz0) <= x1_:
+                bar = [(xx, fz0), (xx + 0.006, fz0), (xx + 0.006 + (fz1 - fz0), fz1), (xx + (fz1 - fz0), fz1)]
                 if ns_ < 0:
                     side_prism(p, "Kit_Signal", bar, uf - 0.0014, uf - 0.0009, 0.0, 1)
                 else:
                     side_prism(p, "Kit_Signal", bar, uf + 0.0009, uf + 0.0014, 0.0, 1)
-                xx += 0.01
+                xx += 0.012
     # 7c the decal layers (author 8. 10.: the parts are new from the factory - no wear; the richness is stacked detail):
     # stencils, labels and ids on the graphite insets, rivet rows on the frame band, a socket and a hazard band on the
     # front, plates on the outboard side - each fully on one flat face
