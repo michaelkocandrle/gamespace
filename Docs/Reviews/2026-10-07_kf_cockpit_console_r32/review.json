@@ -1,0 +1,43 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 32,
+ "variant": "B",
+ "date": "2026-10-08",
+ "verdict": "PASS",
+ "gate": "step",
+ "note": "Autor 8. 10.: díly jsou nové z výroby, opotřebení se nehodnotí ani nežádá. Jas úseku se nehodnotí, tóny se hodnotí relativně (rám vs. vložky vs. kůže). Souřadnice v pixelech zobrazeného listu 2000x611 (originál x1,28).",
+ "first_impression": "Čistá nová konzole Halcyon s členěným podstavcem a poklopem; od 8 ji drží hlavně opěrka, jejíž bílý obvodový 'steh' čte jako namalovaná linka na velkém prázdném tmavém poli, béžový tečkovaný prstenec kniplu místo oranžovo-černých šraf a neviditelný světelný pásek v mezeře.",
+ "scores": {
+  "silueta_a_tvar": {"score": 7, "why": "Nosník na šikmých konzolách s mezerou, blok kniplu, prostřední blok a zkosená věž odpovídají návrhu (list 5 vpravo 1000-1990,110-330); zkosení 80 mm u přední paty podstavce není ani po snížení záběrů 1 a 5 vidět (list 1 vpravo 1420-1500,540-611; list 5 vpravo je oříznutý pod 611)."},
+  "hierarchie_a_hustota_detailu": {"score": 8, "why": "Bok podstavce nově tři panely se spárami a šrouby (list 5 vpravo 1000-1990,445-611; list 1 vpravo 1270-1420,330-560), větší pole poklopu s lisovaným rámem a dvěma žebry (list 6 vpravo 1170-1340,165-305); největší prázdná plocha jsou teď dvě pole opěrky (list 6 vpravo 1015-1490,385-545)."},
+  "materialy": {"score": 7, "why": "Pryžová koule kardanu a grafitová deska kniplu sedí do palety (list 5 vpravo 1720-1775,210-255), kůže je o odstín tmavší než grafit poklopu (list 4 vpravo 1010-1450,280-470 vs. 1290-1600,250-330), rozdíl je ale jen ~0,03-0,05 sRGB a kůže bez lesku/zrna na střední vzdálenosti čte jako matná pryžová podložka."},
+  "decaly": {"score": 7, "why": "Žlutý štítek podstavce zmizel, SERVICE, PWR 48V DC, COOLANT 12 BAR, INSPECT drží (list 5, list 6 vpravo); prstenec kniplu je z 15 béžových tyčinek na tmavém podkladu a čte jako číselník, ne jako oranžovo-černý šraf (list 6 vpravo 1590-1670,410-500; list 1 vpravo 1430-1480,370-395); HALCYON FREIGHTWORKS je teď 4x a na podstavci obří (list 5 vpravo 1410-1780,560-590)."},
+  "svetlo": {"score": 7, "why": "Odlesky laku na nosníku a leštěné hrany drží (list 5 vpravo 1180-1600,140-235), stavové pruhy a LED s halo (list 3); skrytý studený pásek pod hranami nosníku není v žádném záběru vidět, mezera je dál plochá šedá (list 5 vpravo 1000-1600,240-330; list 1 vpravo 1240-1400,320-400)."},
+  "citelnost": {"score": 7, "why": "MAIN/BATT/TEMP, LT/GR/VT/ESP, LIGHTS/GEAR/VTOL, COOLANT 12 BAR, SERVICE a PWR 48V DC čitelné; OPEN u úchytu poklopu (list 6 vpravo 1300-1325,158-166) a HF-3287 L-ARM ze střední vzdálenosti (list 5 vpravo 1955-1985,225-245) nečitelné."},
+  "chyby_geometrie": {"score": 7, "why": "Bez děr a plovoucích dílů; pod blokem kniplu je dál krátká světlá čárka (list 6 vpravo 1720-1745,540-546) a nad novými panely podstavce zůstala původní řada nýtů, takže bok má dva systémy spojů nad sebou (list 5 vpravo 1000-1990,395-410)."},
+  "soulad_stylu": {"score": 8, "why": "Kolébky, klávesy, věž, modul a nově podstavec sdílí grafit, leštěné rámečky, jeden font; vybočuje béžový prstenec kniplu (není to oranžová návleku/šraf věže) a čtyřnásobné logo."}
+ },
+ "average": 7.3,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "concept_match": {
+  "layout_percent": 85,
+  "look_percent": 84,
+  "summary": "Skladba odpovídá návrhu, podstavec a poklop jsou členěné, kardan pryžový. Vzhledu chybí kůže opěrky jako zřetelně nejtmavší a měkký prvek se skutečným stehem, šrafovaný prstenec kniplu v oranžové a viditelný akcent v mezeře."
+ },
+ "r31_followup": [
+  {"r31": 1, "title": "Opěrka: relativní tón a perforace", "status": "částečně", "detail": "Kůže je tmavší než grafit, ale rozdíl ~0,03-0,05 sRGB místo cílových >= 0,08; perforace ve středním pásu je vidět jen zblízka (list 4 vpravo 1080-1300,330-400); steh 1,6 mm plochý bílý čte jako tenká malovaná linka/páska, ne prošití (list 4 vpravo 1010-1440,280-470; list 6 vpravo 1025-1485,385-525)."},
+  {"r31": 2, "title": "Patka kniplu: šrafovaný prstenec", "status": "částečně", "detail": "Koule kardanu pryžová a deska grafitová (opraveno); 15 tyčinek prstence je béžových a odsazených na tmavém podkladu, čte jako číselník, ne oranžovo-černý šraf (list 6 vpravo 1590-1670,410-500)."},
+  {"r31": 3, "title": "Podstavec: členění boků a viditelný výřez", "status": "opraveno z větší části", "detail": "Tři panely se spárami a šrouby v rozích (list 5 vpravo 1000-1990,445-611); nad nimi zůstala řada nýtů, chybí leštěné zkosení svislých hran a 80mm šikmá pata není v záběru."},
+  {"r31": 4, "title": "Poklop: větší pole", "status": "opraveno", "detail": "Lisovaný rám se dvěma žebry (list 6 vpravo 1170-1340,165-305; list 4 vpravo 1290-1550,260-330); legenda OPEN je ze záběru 6 nečitelná."},
+  {"r31": 5, "title": "Mezera bez světelného akcentu", "status": "neopraveno (není vidět)", "detail": "Pásek pod hranami nosníku na žádném listu nesvítí ani nedává studený přechod na podstavec (list 5 vpravo 1000-1600,240-330)."},
+  {"r31": 6, "title": "Paleta a drobné štítky", "status": "částečně", "detail": "Žlutý štítek nahrazen (opraveno); HF-3287 ze střední vzdálenosti dál nečitelný; světlá čárka pod blokem kniplu zůstala (list 6 vpravo 1720-1745,540-546)."}
+ ],
+ "findings": [
+  {"n": 1, "title": "Opěrka: kůže a steh", "where": "list 4 vpravo 1010-1450,280-470; list 6 vpravo 1015-1490,385-545; list 1 vpravo 1230-1440,205-330", "problem": "Největší plocha v pohledu pilota je prázdné tmavé pole s tenkou bílou rámovou linkou; nečte jako polstrovaná kůže a jen nepatrně se liší od grafitu.", "severity": "doporučeno", "fix": "Grafit vložek zesvětlit na albedo 0,06 (kůže zůstane 0,016), aby rozdíl na snímku byl >= 0,08 sRGB; kůži drsnost 0,55 se zrnem v normálové mapě (dlaždice 4 cm, síla 0,4), aby měla měkký pruh lesku. Steh jako řada čárek: steh 4 mm, mezera 2 mm, nit 1,6 mm, albedo 0,55 (ne 0,9), 8 mm od hrany ve žlábku hl. 1 mm; perforační pás 40 mm ponechat, otvory zvětšit na 2 mm s albedem 0,005."},
+  {"n": 2, "title": "Prstenec kniplu: oranžovo-černý šraf", "where": "list 6 vpravo 1590-1670,410-500; list 1 vpravo 1430-1480,370-395; list 2 vpravo 1375-1430,385-410", "problem": "Béžové tyčinky na tmavém podkladu čtou jako číselník/hodiny, ne jako výstražný šraf ze čela věže.", "severity": "doporučeno", "fix": "Souvislý prstenec šířky 14 mm, šikmé pruhy 9 mm pod 45° střídavě oranžová (stejná instance jako čelo věže, albedo ~0,55/0,25/0,03) a černá 0,02, bez mezer mezi pruhy; vnitřní leštěný kroužek 4 mm a vnější 3 mm."},
+  {"n": 3, "title": "Světelný akcent v mezeře", "where": "list 5 vpravo 1000-1600,240-330; list 1 vpravo 1240-1400,320-400", "problem": "Skrytý pásek není vidět, mezera je plochá.", "severity": "doporučeno", "fix": "Pásek 6 mm, emise 6500 K o intenzitě ~30 % kláves, posunout 5 mm za spodní hranu nosníku a sklonit 30° k podstavci tak, aby horních 60 mm boku podstavce bylo o >= 0,06 sRGB světlejší a do studena; ověřit na listu 5 v oblasti 1000-1600,300-330."},
+  {"n": 4, "title": "Podstavec: jeden systém spojů a šikmá pata", "where": "list 5 vpravo 1000-1990,395-410 a 445-611; list 1 vpravo 1420-1500,540-611", "problem": "Řada nýtů nad novými panely zdvojuje spoje; 80mm pata 45° není v žádném záběru.", "severity": "doporučeno", "fix": "Řadu nýtů odstranit nebo ji nahradit leštěnou lištou 9 mm se zkosením po celé délce horní hrany; na svislé hrany podstavce leštěné zkosení 6-9 mm; záběr 5 oddálit o 25 cm a sklonit o 8° dolů, aby byla vidět podlaha a pata s výstražným páskem 18 mm."},
+  {"n": 5, "title": "Logo HALCYON 4x a obří nápis na podstavci", "where": "list 5 vpravo 1410-1780,560-590; list 1 vpravo 1330-1400,440-540; list 5 vpravo 1270-1430,165-185; list 3 vpravo 1710-1880,170-250", "problem": "Značka se opakuje na nosníku, věži a obou bocích podstavce; na podstavci je přes celý panel a přebíjí servisní šablony.", "severity": "doporučeno", "fix": "Na podstavci logo zrušit nebo zmenšit na 20 mm výšky písma v rohu panelu; místo něj servisní šablony 6-8 mm (číslo panelu, LIFT POINT, šipky) a štítek s výrobním číslem 40x20 mm v leštěném rámečku."},
+  {"n": 6, "title": "Drobné štítky a čárka", "where": "list 6 vpravo 1300-1325,158-166 a 1720-1745,540-546; list 5 vpravo 1955-1985,225-245", "problem": "OPEN a HF-3287 nečitelné ze střední vzdálenosti; světlá čárka pod blokem kniplu přetrvává.", "severity": "doporučeno", "fix": "OPEN 8 mm tučně bílý (albedo 0,8) na grafitu se šipkou 10 mm; HF-3287 6 mm tučně, kontrast >= 0,6; čárku pod blokem kniplu najít (pravděpodobně odhalená hrana desky nebo lišty) a skrýt/odstranit."}
+ ]
+}
