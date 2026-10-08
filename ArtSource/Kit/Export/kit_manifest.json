@@ -9963,8 +9963,8 @@
     76.2,
     74.1
    ],
-   "tris": 51636,
-   "tris_decals": 180,
+   "tris": 56020,
+   "tris_decals": 178,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
@@ -10009,7 +10009,7 @@
     "pn_1",
     "pn_2",
     "pn_3",
-    "st_hfcl",
+    "pn_8",
     "label_coolant",
     "st_torque",
     "warning_label",
@@ -10039,9 +10039,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 25362,
+    "edge": 25770,
     "secondary": 0,
-    "floor": 12954,
+    "floor": 16860,
     "seam": 0
    },
    "status": "built"

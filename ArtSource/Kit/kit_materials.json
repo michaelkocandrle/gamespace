@@ -52,7 +52,7 @@
   "Kit_Housing": {"colour": "housing", "roughness": 0.34, "metallic": 0.35, "edge_wear": true, "cavity_dirt": true, "bevel_mm": 3,
                   "micro_rough": 0.04, "grunge": 0.42, "rough_variation": 0.3, "panel_rough": 0.1, "panel_tone": 0.12, "scratches": 0.045,
                   "_why": "a service unit's painted gunmetal, darker and with more sheen than the wall panel (critic 7. 10. 2026, bay wall round 2: the mid-grey matte panel read as plastic beside SC's metallic grey bay)"},
-  "Kit_Leather": {"albedo": [0.012, 0.012, 0.013], "roughness": 0.38, "metallic": 0.0, "edge_wear": false, "cavity_dirt": false, "bevel_mm": 2,
+  "Kit_Leather": {"albedo": [0.012, 0.012, 0.013], "roughness": 0.33, "metallic": 0.0, "edge_wear": false, "cavity_dirt": false, "bevel_mm": 2,
                   "micro_rough": 0.02, "grunge": 0.0, "rough_variation": 0.04, "panel_rough": 0.0, "panel_tone": 0.0, "scratches": 0.0,
                   "detail_normal": "T_Kit_Leather_N.png", "detail_tile_cm": 3.0, "detail_strength": 1.0,
                   "_why": "the padded forearm rest's leather (critic r24-25 8. 10. 2026: read as a rubber mat) - a pebbled grain"},

@@ -140,15 +140,18 @@ def console_b(name, seed):
     hatch(p, 0.85, L - 0.1, DECK - 0.04, DECK - 0.012, W, 1)
     uf = U0 - 0.006                                            # the seat-side panels' face: a second, functional layer
     zc = (0.11 + DECK - 0.062) / 2
-    p.lathe("Kit_Lip", [(0.013, 0.0), (0.013, 0.0012), (0.011, 0.0016)], (0.255, uf, zc), axis=(0, -1, 0), seg=24)   # 1: a quarter-turn latch
-    p.lathe("Kit_Seal", [(0.011, 0.0), (0.011, 0.0004), (0.0, 0.0004)], (0.255, uf - 0.0004, zc), axis=(0, -1, 0), seg=24)
-    p.box("Kit_Housing", (0.247, uf - 0.0035, zc - 0.002), (0.263, uf, zc + 0.002), bevel=0.001, segments=1, panel=False)
-    zr = 0.11 + (DECK - 0.062 - 0.11) * 0.66                    # 2: a pressed 6 mm rib at two thirds
-    p.box("Kit_Inset", (0.31, uf - 0.003, zr - 0.003), (0.53, uf + 0.001, zr + 0.003), bevel=0.0014, segments=2, panel=False)
-    p.box("Kit_Lip", (0.6, uf - 0.0012, 0.27), (0.652, uf + 0.001, 0.3), bevel=0.0006, segments=1, panel=False)  # 3: a type plate
-    p.box("Kit_Graphite", (0.602, uf - 0.0016, 0.272), (0.65, uf - 0.0011, 0.298), panel=False)
-    legend(p, "TYPE HC-12W", Vector((0.626, uf - 0.0016, 0.2885)), X, Z, -Y, h=0.005)
-    legend(p, "SN 0417-B", Vector((0.626, uf - 0.0016, 0.2785)), X, Z, -Y, h=0.0045)
+    p.lathe("Kit_Lip", [(0.018, 0.0), (0.018, 0.0014), (0.014, 0.0018)], (0.255, uf, zc), axis=(0, -1, 0), seg=28)   # 1: a 36 mm quarter-turn latch
+    p.lathe("Kit_Seal", [(0.014, 0.0), (0.014, 0.0005), (0.0, 0.0005)], (0.255, uf - 0.0005, zc), axis=(0, -1, 0), seg=28)
+    p.box("Kit_Housing", (0.243, uf - 0.004, zc - 0.0035), (0.267, uf, zc + 0.0035), bevel=0.0012, segments=1, panel=False)
+    p.box("Kit_Seal", (0.246, uf - 0.0043, zc - 0.0008), (0.264, uf - 0.0037, zc + 0.0008), panel=False)          # its 3 mm slot
+    for t in (1 / 3, 2 / 3):                                    # 2: two raised 10 mm bars, polished top edges
+        zr = 0.11 + (DECK - 0.062 - 0.11) * t
+        p.box("Kit_Inset", (0.315, uf - 0.003, zr - 0.005), (0.525, uf + 0.001, zr + 0.005), bevel=0.0012, segments=2, panel=False)
+        p.box("Kit_FrameEdge", (0.317, uf - 0.0032, zr + 0.0035), (0.523, uf - 0.001, zr + 0.0052), bevel=0.0006, segments=1, panel=False)
+    p.box("Kit_Lip", (0.6, uf - 0.0012, 0.2), (0.7, uf + 0.001, 0.255), bevel=0.0008, segments=1, panel=False)   # 3: a 100 x 55 type plate
+    p.box("Kit_Legend", (0.603, uf - 0.0016, 0.203), (0.697, uf - 0.0011, 0.252), panel=False)
+    legend(p, "HC-12W", Vector((0.65, uf - 0.0016, 0.236)), X, Z, -Y, h=0.009, role="Kit_Seal")
+    legend(p, "SN 0417-B  HALCYON", Vector((0.65, uf - 0.0016, 0.2155)), X, Z, -Y, h=0.0055, role="Kit_Seal")
     for uf_s, ns_ in ((U0, -1), (W, 1)):                       # a polished bead on the foot's break edge
         ua_, ub_ = sorted((uf_s, uf_s + ns_ * 0.003))
         p.box("Kit_FrameEdge", (0.03, ua_, 0.1005), (L - 0.07, ub_, 0.1065), bevel=0.0012, segments=2, panel=False)
@@ -195,6 +198,11 @@ def console_b(name, seed):
                     continue
                 p.box("Kit_Seal", (hx - 0.001, hu - 0.001, AT + 0.0046), (hx + 0.001, hu + 0.001, AT + 0.0053), panel=False)
     _label(p, "maker", Vector((0.445, -0.0796, BEAM0 + 0.045)), -Y, X, Z, scale=0.3)
+    sl = Vector((0.05, 0.0, 0.03)).normalized()                # the strip turns up the beam's slanted front foot (seen from the seat)
+    on = Vector((sl.z, 0.0, -sl.x))
+    c_ = Vector((0.605, 0.0, BEAM0 + 0.015))
+    pts = [c_ - sl * 0.006, c_ + sl * 0.006, c_ + sl * 0.006 + on * 0.0015, c_ - sl * 0.006 + on * 0.0015]
+    side_prism(p, "Kit_GlowFoot", [(q.x, q.z) for q in pts], -0.066, 0.15, 0.0, 1)
     for ua in (-0.066, 0.14):                                  # a hidden 6 mm light strip under each beam edge, washing the gap
         p.box("Kit_Seal", (0.07, ua - 0.002, BEAM0 - 0.004), (0.55, ua + 0.008, BEAM0), panel=False)
         p.box("Kit_Lip", (0.072, ua - 0.006, BEAM0 - 0.006), (0.548, ua + 0.012, BEAM0 - 0.003), bevel=0.001, segments=1, panel=False)   # a polished bezel
@@ -229,6 +237,9 @@ def console_b(name, seed):
     for xx in (0.68, 0.85):
         screw(p, Vector((xx, U0 - 0.0125, DECK + 0.012)), -Y)
         screw(p, Vector((xx, U0 - 0.0125, 0.488)), -Y)
+    for t_, h_, z_ in (("STICK ASSY L", 0.0055, 0.44), ("HF-ST 02", 0.0045, 0.428)):   # the block's front: its stencil, a polished foot bead
+        legend(p, t_, Vector((0.8742, 0.0675, z_)), Y, Z, X, h=h_)
+    p.box("Kit_FrameEdge", (0.869, U0 - 0.012, DECK + 0.004), (0.8725, 0.18, DECK + 0.013), bevel=0.001, segments=1, panel=False)
     stick(p, Vector((0.765, 0.075, 0.509)), "ck_rcs", head_role="Kit_Gasket", guard="d", plate_role="Kit_Inset",
           ball_role="Kit_Gasket", bars=15)      # a graphite base, a rubber gimbal boot, 9 mm hatch bars
     for xf, nx in ((0.66, -1), (0.87, 1)):                     # graphite insets on the block's ends, 15 mm frame
@@ -424,7 +435,7 @@ def console_b(name, seed):
         xr = fx0 + (fx1 - fx0) * (k + 1) / 4
         if k != 1:
             p.box("Kit_Inset", (xr - 0.0015, fu0 + 0.012, zt - 0.0005), (xr + 0.0015, fu1 - 0.012, zt + 0.0025), bevel=0.0012, segments=2, panel=False)
-    legend(p, "< OPEN >", Vector((0.32, hu1 - 0.0895, zt + 0.0002)), X, Y, Z, h=0.013)
+    legend(p, "< OPEN >", Vector((0.32, hu1 - 0.09, zt + 0.0002)), X, Y, Z, h=0.016)
     # 15 mm hazard strips low on both pedestal sides (5 mm orange bars, 5 mm gaps, a dark band)
     for uf, ns_ in ((U0, -1), (W, 1)):
         fz0, fz1 = 0.081, 0.099
@@ -445,7 +456,7 @@ def console_b(name, seed):
     det = [("st_inspect", (0.24, U0 - 0.0065, 0.19), -Y, X, 0.7), ("st_service", (0.17, U0 - 0.0065, 0.28), -Y, X, 0.7),
            ("pn_1", (0.085, U0 - 0.0065, DECK - 0.09), -Y, X, 0.7), ("pn_2", (0.33, U0 - 0.0065, DECK - 0.09), -Y, X, 0.7),
            ("pn_3", (0.585, U0 - 0.0065, DECK - 0.09), -Y, X, 0.7),
-           ("st_hfcl", (0.63, U0 - 0.0065, 0.17), -Y, X, 0.7),
+           ("pn_8", (0.585, U0 - 0.0065, 0.14), -Y, X, 0.5),
            ("label_coolant", (0.24, W + 0.0065, 0.2), Y, -X, 0.8), ("st_torque", (0.25, W + 0.0065, 0.33), Y, -X, 0.6),
            ("warning_label", (0.62, W + 0.0065, 0.22), Y, -X, 0.8), ("st_gnd", (0.62, W + 0.0065, 0.32), Y, -X, 0.8),
            ("tri_warning", (1.11, TU - 0.0065, 0.5), -Y, X, 0.6), ("panel_B07", (1.1, W + 0.0045, 0.6), Y, -X, 0.6),
