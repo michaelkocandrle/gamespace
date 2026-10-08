@@ -128,7 +128,7 @@ def stick(p, base, label, head_role="Kit_Shell", guard="c"):
             t = k / 12
             bow = 0.012 * math.sin(math.pi * t)
             path.append(head + fwd * (0.03 + bow) + lean * (0.004 - (gl + 0.006) * t))
-        p.sweep("Kit_Frame", path, 0.0075, seg=12, scale_y=0.55)
+        p.sweep("Kit_Lip", path, 0.0045, seg=14)
     else:
         for k in range(37):
             a = math.pi * k / 36
@@ -141,7 +141,7 @@ def stick(p, base, label, head_role="Kit_Shell", guard="c"):
 
 
 # ------------------------------------------------------------------ the sloped control face, sunk into the deck's nose
-def _rocker(p, c, r, a, n, label, label_scale=0.48, index=True):
+def _rocker(p, c, r, a, n, label, label_scale=0.48, index=True, cap="Kit_Shell"):
     """A real rocker: a dark bezel, a cap in two halves tilted about its pivot (one pressed), a lit index, its label."""
     fm = frame(c, r, a, n)
     p.box("Kit_Graphite", (-0.0095, -0.016, -0.002), (0.0095, 0.016, 0.004), bevel=0.0018, segments=2, m=fm)
@@ -149,7 +149,7 @@ def _rocker(p, c, r, a, n, label, label_scale=0.48, index=True):
         t = math.radians(tilt)
         a2 = a * math.cos(t) + n * math.sin(t)
         n2 = -a * math.sin(t) + n * math.cos(t)
-        p.box("Kit_Shell", (-0.0075, 0.0 if sv > 0 else -0.012, -0.002), (0.0075, 0.012 if sv > 0 else 0.0, 0.003), bevel=0.0012, segments=2,
+        p.box(cap, (-0.0075, 0.0 if sv > 0 else -0.012, -0.002), (0.0075, 0.012 if sv > 0 else 0.0, 0.003), bevel=0.0012, segments=2,
               m=frame(c + n * 0.005, r, a2, n2))
     if index:
         p.box("Kit_GlowCool", (-0.004, 0.0085, 0.0066), (0.004, 0.0098, 0.0072), m=fm, panel=False)

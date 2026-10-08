@@ -234,7 +234,7 @@ def console_b(name, seed):
     p.box("Kit_Seal", (-0.065, -0.037, 0.005), (0.065, 0.037, 0.0055), m=fm(sc), panel=False)
     for k, lab in enumerate(("ck_main", "ck_batt", "ck_temp")):
         q = sc + d * (0.022 - 0.022 * k)
-        p.box("Kit_GlowFoot" if k < 2 else "Kit_GlowAmber", (0.005, -0.004, 0.0055), (0.055, 0.004, 0.0065), m=fm(q), panel=False)
+        p.box("Kit_GlowCool" if k < 2 else "Kit_GlowAmber", (0.005, -0.004, 0.0055), (0.055, 0.004, 0.0065), m=fm(q), panel=False)
         legend(p, {"ck_main": "MAIN", "ck_batt": "BATT", "ck_temp": "TEMP"}[lab], q - X * 0.03 + n * 0.0057, X, d, n, h=0.0075)
     kc = c0 + X * 0.89                                         # the keys
     p.box("Kit_Lip", (-0.055, -0.05, 0.002), (0.055, 0.05, 0.005), bevel=0.0015, segments=2, m=fm(kc))
@@ -353,7 +353,10 @@ def console_b(name, seed):
     p.box("Kit_Inset", (-0.1, -0.04, -0.002), (0.1, 0.04, 0.0018), m=fs_(pc), panel=False)
     for k, lab in enumerate(("ck_lights", "ck_gear", "ck_vtol")):
         q = fs_(pc) @ Vector((0.062 * (k - 1), -0.004, 0.0018))
-        _rocker(p, q, X, sd_, ns, lab, label_scale=0, index=False)
+        _rocker(p, q, X, sd_, ns, lab, label_scale=0, index=False, cap="Kit_Inset")
+        for sv in (-1, 1):                                       # polished side guards: guarded switches
+            p.box("Kit_Lip", (sv * 0.0125 - 0.0015, -0.017, 0.0), (sv * 0.0125 + 0.0015, 0.017, 0.009), bevel=0.0007, segments=1,
+                  m=frame(q, X, sd_, ns))
         led(p, q + sd_ * 0.024, ns, "Kit_GlowAmber" if k == 1 else "Kit_GlowKey", r=0.0026)
         legend(p, {"ck_lights": "LIGHTS", "ck_gear": "GEAR", "ck_vtol": "VTOL"}[lab], q - sd_ * 0.027 + ns * 0.0002, X, sd_, ns, h=0.0075)
     # 7b the rear deck outboard of the beam: a service hatch (a raised lid in a dark seam, a recessed pull, two
@@ -376,6 +379,10 @@ def console_b(name, seed):
         p.box("Kit_Lip", (xx - 0.01, hu1 - 0.032, zt - 0.0015), (xx + 0.01, hu1 - 0.024, zt + 0.0006), bevel=0.0012, segments=1)
     p.box("Kit_Lip", (0.266, hu1 - 0.079, zt - 0.001), (0.374, hu1 - 0.041, zt + 0.0008), bevel=0.0008, segments=1, panel=False)
     p.box("Kit_Seal", (0.27, hu1 - 0.075, zt - 0.012), (0.37, hu1 - 0.045, zt + 0.0011), bevel=0.004, segments=2)        # the pull
+    p.sweep("Kit_Lip", [Vector((0.285, hu1 - 0.06, zt - 0.006)), Vector((0.29, hu1 - 0.06, zt - 0.001)), Vector((0.35, hu1 - 0.06, zt - 0.001)),
+                        Vector((0.355, hu1 - 0.06, zt - 0.006))], 0.003, seg=12)                                    # its lever
+    _label(p, "st_inspect", Vector((0.47, hu1 - 0.06, zt + 0.0004)), Z, X, Y, scale=0.45)
+    _label(p, "pn_9", Vector((0.12, hu0 + 0.07, zt + 0.0004)), Z, X, Y, scale=0.6)
     p.box("Kit_Lip", (0.28, hu1 - 0.07, zt - 0.006), (0.36, hu1 - 0.065, zt - 0.002), bevel=0.0015, segments=2)
     for xx in (hx0 + 0.05, hx1 - 0.16):
         c = Vector((xx, (hu0 + hu1) / 2, zt))

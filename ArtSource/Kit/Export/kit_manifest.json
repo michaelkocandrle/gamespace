@@ -9963,8 +9963,8 @@
     76.2,
     74.1
    ],
-   "tris": 44380,
-   "tris_decals": 290,
+   "tris": 44788,
+   "tris_decals": 296,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
@@ -9974,7 +9974,6 @@
     "Kit_Lip",
     "Kit_Graphite",
     "Kit_Gasket",
-    "Kit_GlowFoot",
     "Kit_Perforated",
     "Kit_Red",
     "Kit_GlowRed",
@@ -9994,13 +9993,15 @@
    ],
    "sockets": {},
    "collision_hulls": 1,
-   "decals": 36,
+   "decals": 38,
    "decal_items": [
     "maker",
     "maker",
     "st_hfcl",
     "ck_rcs",
     "maker",
+    "st_inspect",
+    "pn_9",
     "st_service",
     "label_coolant",
     "st_inspect",
@@ -10044,7 +10045,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 21594,
+    "edge": 22026,
     "secondary": 0,
     "floor": 5094,
     "seam": 0
