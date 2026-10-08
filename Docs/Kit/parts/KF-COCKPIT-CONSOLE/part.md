@@ -58,3 +58,8 @@ materiály a otevřené body v recenzi.
 
 **Kola 24–39 (8. 10. 2026):** PASS **8,0**, všech 8 kategorií 8 (cíl autora). Stav `variant_b_v3.jpg` (kolo 40).
 Systémové nálezy (leštěný kov v tmě, přepálená emise, kůže, šrafy, malý text) v recenzi.
+
+**V lodi (8. 10. 2026):** B nahradila A v `Wayfarer_hs.json` (`interior.kit_modules.run_parts`, [16,3; 0,43; 1,15]) a v
+`Wayfarer_interior_design.json` (CPT-CO-01); do lodi ji dosadí `import_ship.py` (`kit_rooms.py`), Blender lodi se
+nepřestavuje. Zabalená hra, snímky `variant_b_in_cockpit.jpg` (preset `cockpit_audit`). Pravá konzole je dál stará
+generovaná z `hs_interior`.

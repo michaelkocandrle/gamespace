@@ -6,12 +6,12 @@
  "section_x": 1.3,
  "digests": {
   "layout": "1438b9ec2c3d",
-  "interior": "cad009f65d91",
+  "interior": "a86c2b0dc459",
   "setup": "de82013afd6a",
   "lights": "a4e47aa2bb6a",
-  "design": "2729674006a0",
-  "kit": "706f4c4344c9",
-  "library": "64fc5c24fb9d",
+  "design": "80271c54300e",
+  "kit": "d05f3bc5596f",
+  "library": "2ddb581bbb9d",
   "light_rules": "788f180917fd"
  },
  "geometry": {
@@ -30,7 +30,7 @@
   "SM_Kit_Ceiling_Panel12L41_C.fbx": "be7369dda0e1",
   "SM_Kit_Ceiling_Tray06W_A.fbx": "ec5273e6eadb",
   "SM_Kit_Ceiling_Tray12W_A.fbx": "917dc4e8bfc5",
-  "SM_Kit_Cockpit_Console12W_A.fbx": "b5e0bbbdcd70",
+  "SM_Kit_Cockpit_Console12W_B.fbx": "1923e493428d",
   "SM_Kit_Floor_Grille06W_A.fbx": "eef9d9eebbf3",
   "SM_Kit_Floor_Plate12L38_A.fbx": "da3843b4b56b",
   "SM_Kit_Floor_Plate12W_A.fbx": "3c1c37e452a1",

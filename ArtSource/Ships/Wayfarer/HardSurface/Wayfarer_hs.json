@@ -2863,7 +2863,7 @@
   [[10.39, -1.9], [15.19, -1.9], [0, 1], ["Wall_HullLiner12L_A", "Wall_HullLiner12L_A", "Wall_HullLiner12L_A", "Wall_HullLiner06L_A", "Wall_HullLiner06L_D"]]
  ],
    "run_parts": [
-    [[16.3, 0.43, 1.15], [1, 0], ["Cockpit_Console12W_A"]],
+    [[16.3, 0.43, 1.15], [1, 0], ["Cockpit_Console12W_B"]],
     [[8.54, -1.2], [1, 0], ["Bulkhead_Door03W_B"]],
     [[10.33, 1.2], [-1, 0], ["Bulkhead_Door00W_A"]],
     [[10.40, -1.9], [1, 0], ["Bulkhead_Door00L38_A"]],

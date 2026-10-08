@@ -11,6 +11,7 @@
  },
  "kit_purpose": {
   "Cockpit_Console12W_A": "Levá loketní konzole pilota (díl továrny): knipl RCS na loketní jednotce s opěrkou zápěstí, šikmé čelo s nouzovým kyslíkem pod krytem a kolébkami napájení, vnějších světel a motorů, klávesy světel, podvozku, VTOL a ESP, stavový pás napájení, baterie a teploty, sání chlazení konzole, madlo.",
+  "Cockpit_Console12W_B": "Levá loketní konzole pilota (díl továrny, varianta B podle 2D návrhu): knipl RCS na loketní jednotce s opěrkou zápěstí, šikmé čelo s nouzovým kyslíkem pod krytem a kolébkami napájení, vnějších světel a motorů, klávesy světel, podvozku, VTOL a ESP, stavový pás napájení, baterie a teploty, sání chlazení konzole, madlo.",
   "Wall_ComponentBay12W_A": "Výklenek reaktoru S1 ve stěně: posuvné křídlo výklenku, ve hře otevřené v kapse u levé líce (hrana s oranžovým pruhem a madlem), reaktor na saních na výsuvných kolejnicích, stavová obrazovka, kabely a chlazení do výklenku, světlo výklenku.",
   "Wall_ComponentBay06W_B": "Výklenek chladiče S1: žebrované jádro ve spodním výklenku s otevřeným posuvným křídlem, výfukový kanál za stěnou nahoru ke kořeni křídla, světlo výklenku.",
   "Wall_ComponentBay12W_C": "Výklenek generátoru štítů S1: poklop s rychlouzávěry a průhledem, prstenec emitoru svítí okénkem.",
@@ -221,7 +222,7 @@
     ]
    ],
    "run_parts": [
-    [["CPT-CO-01", "Cockpit_Console12W_A"]],
+    [["CPT-CO-01", "Cockpit_Console12W_B"]],
     [["TEC-B-A", "Bulkhead_Door03W_B"]],
     [["TEC-B-F", "Bulkhead_Door00W_A"]],
     [["CAB-B-A", "Bulkhead_Door00L38_A"]],
@@ -288,6 +289,20 @@
  },
  "review_notes": {},
  "decal_items": {
+  "ck_maker_plate": "typový štítek konzole (výrobce, typ dílu)",
+  "corner_mark": "rohová značka panelu (ustavení při montáži)",
+  "label_coolant": "štítek okruhu chlazení (COOLANT 12 BAR, HF-CL 03)",
+  "label_power": "štítek napájení (PWR 48V DC, ISOLATE FIRST – nejdřív odpojit)",
+  "panel_A12": "číslo servisního panelu A12",
+  "panel_B07": "číslo servisního panelu B07",
+  "pn_1": "číslo panelu 1 na boku podstavce",
+  "pn_2": "číslo panelu 2 na boku podstavce",
+  "pn_3": "číslo panelu 3 na boku podstavce",
+  "pn_8": "číslo panelu 8 na vnějším boku",
+  "socket": "servisní zásuvka na čele konzole",
+  "st_gnd": "šablonový nápis GND POINT (zemnicí bod)",
+  "st_hfcl": "šablonový nápis čísla dílu HF-CL 07",
+  "warning_label": "výstražný štítek na vnějším boku konzole",
   "hazard_stripe": "výstražný pruh na hraně (rám dveří, práh)",
   "st_service": "malý šablonový nápis SERVICE ACCESS (servisní přístup)",
   "st_inspect": "malý šablonový nápis INSPECT 500 H (kontrola po 500 h)",

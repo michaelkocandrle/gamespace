@@ -6,12 +6,12 @@
  "section_x": 16.4,
  "digests": {
   "layout": "1438b9ec2c3d",
-  "interior": "cad009f65d91",
+  "interior": "a86c2b0dc459",
   "setup": "de82013afd6a",
   "lights": "a4e47aa2bb6a",
-  "design": "2729674006a0",
-  "kit": "706f4c4344c9",
-  "library": "64fc5c24fb9d",
+  "design": "80271c54300e",
+  "kit": "d05f3bc5596f",
+  "library": "2ddb581bbb9d",
   "light_rules": "788f180917fd"
  },
  "geometry": {
@@ -30,7 +30,7 @@
   "SM_Kit_Ceiling_Panel12L41_C.fbx": "be7369dda0e1",
   "SM_Kit_Ceiling_Tray06W_A.fbx": "ec5273e6eadb",
   "SM_Kit_Ceiling_Tray12W_A.fbx": "917dc4e8bfc5",
-  "SM_Kit_Cockpit_Console12W_A.fbx": "b5e0bbbdcd70",
+  "SM_Kit_Cockpit_Console12W_B.fbx": "1923e493428d",
   "SM_Kit_Floor_Grille06W_A.fbx": "eef9d9eebbf3",
   "SM_Kit_Floor_Plate12L38_A.fbx": "da3843b4b56b",
   "SM_Kit_Floor_Plate12W_A.fbx": "3c1c37e452a1",
@@ -262,29 +262,35 @@
    "L-SET-PILOT"
   ],
   "decals": [
-   "CPT-CO-01/ck_batt",
-   "CPT-CO-01/ck_emerg_o2",
-   "CPT-CO-01/ck_eng",
-   "CPT-CO-01/ck_esp",
-   "CPT-CO-01/ck_extlt",
-   "CPT-CO-01/ck_gear",
-   "CPT-CO-01/ck_lights",
-   "CPT-CO-01/ck_main",
-   "CPT-CO-01/ck_pwr",
+   "CPT-CO-01/ck_maker_plate",
    "CPT-CO-01/ck_rcs",
-   "CPT-CO-01/ck_temp",
-   "CPT-CO-01/ck_vtol",
-   "CPT-CO-01/grime_rim",
-   "CPT-CO-01/grime_rim#2",
-   "CPT-CO-01/grime_rim#3",
-   "CPT-CO-01/grime_rim#4",
-   "CPT-CO-01/grime_rim#5",
-   "CPT-CO-01/grime_rim#6",
+   "CPT-CO-01/corner_mark",
    "CPT-CO-01/hazard_subtle",
+   "CPT-CO-01/label_coolant",
+   "CPT-CO-01/label_coolant#2",
+   "CPT-CO-01/label_power",
    "CPT-CO-01/maker",
-   "CPT-CO-01/panel_C21",
+   "CPT-CO-01/maker#2",
+   "CPT-CO-01/maker#3",
+   "CPT-CO-01/panel_A12",
+   "CPT-CO-01/panel_B07",
+   "CPT-CO-01/pn_1",
+   "CPT-CO-01/pn_2",
+   "CPT-CO-01/pn_3",
+   "CPT-CO-01/pn_8",
+   "CPT-CO-01/socket",
+   "CPT-CO-01/st_gnd",
+   "CPT-CO-01/st_gnd#2",
+   "CPT-CO-01/st_hfcl",
+   "CPT-CO-01/st_inspect",
+   "CPT-CO-01/st_inspect#2",
+   "CPT-CO-01/st_service",
+   "CPT-CO-01/st_service#2",
    "CPT-CO-01/st_torque",
-   "CPT-CO-01/st_vent",
+   "CPT-CO-01/st_torque#2",
+   "CPT-CO-01/st_torque#3",
+   "CPT-CO-01/tri_warning",
+   "CPT-CO-01/warning_label",
    "D-I-01",
    "D-I-02",
    "D-I-03",
@@ -322,72 +328,120 @@
    "účel v layoutu uvádí 0,35 m, postavená podlaha je +1,15 – opravit text v layoutu (hlavní session: otisky E-01 až E-08)"
   ],
   [
-   "CPT-CO-01/ck_batt",
-   "decal x 16,92, z 1,68 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "CPT-CO-01/ck_emerg_o2",
-   "decal x 17,40, z 1,71 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "CPT-CO-01/ck_eng",
-   "decal x 17,33, z 1,67 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "CPT-CO-01/ck_esp",
-   "decal x 17,22, z 1,67 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "CPT-CO-01/ck_extlt",
-   "decal x 17,33, z 1,67 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "CPT-CO-01/ck_gear",
-   "decal x 17,22, z 1,67 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "CPT-CO-01/ck_lights",
-   "decal x 17,13, z 1,68 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "CPT-CO-01/ck_main",
-   "decal x 16,85, z 1,68 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "CPT-CO-01/ck_pwr",
-   "decal x 17,33, z 1,67 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+   "CPT-CO-01/ck_maker_plate",
+   "decal x 17,26, z 1,34 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
    "CPT-CO-01/ck_rcs",
-   "decal x 17,04, z 1,76 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+   "decal x 17,00, z 1,66 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
-   "CPT-CO-01/ck_temp",
-   "decal x 16,99, z 1,68 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
-  ],
-  [
-   "CPT-CO-01/ck_vtol",
-   "decal x 17,13, z 1,67 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+   "CPT-CO-01/corner_mark",
+   "decal x 17,20, z 1,60 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
    "CPT-CO-01/hazard_subtle",
-   "decal x 17,20, z 1,76 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+   "decal x 17,48, z 1,54 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/label_coolant",
+   "decal x 16,54, z 1,35 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/label_coolant#2",
+   "decal x 16,77, z 1,62 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/label_power",
+   "decal x 17,24, z 1,37 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
    "CPT-CO-01/maker",
-   "decal x 16,92, z 1,58 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+   "decal x 16,74, z 1,72 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
-   "CPT-CO-01/panel_C21",
-   "decal x 16,92, z 1,67 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+   "CPT-CO-01/maker#2",
+   "decal x 16,74, z 1,29 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/maker#3",
+   "decal x 17,49, z 1,77 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/panel_A12",
+   "decal x 17,48, z 1,35 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/panel_B07",
+   "decal x 17,40, z 1,75 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/pn_1",
+   "decal x 16,39, z 1,50 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/pn_2",
+   "decal x 16,63, z 1,50 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/pn_3",
+   "decal x 16,88, z 1,50 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/pn_8",
+   "decal x 16,80, z 1,31 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/socket",
+   "decal x 17,49, z 1,48 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/st_gnd",
+   "decal x 16,92, z 1,47 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/st_gnd#2",
+   "decal x 17,49, z 1,54 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/st_hfcl",
+   "decal x 17,43, z 1,77 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/st_inspect",
+   "decal x 16,54, z 1,34 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/st_inspect#2",
+   "decal x 16,77, z 1,62 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/st_service",
+   "decal x 16,47, z 1,43 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/st_service#2",
+   "decal x 16,52, z 1,62 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
    "CPT-CO-01/st_torque",
-   "decal x 16,90, z 1,67 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+   "decal x 16,55, z 1,48 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
-   "CPT-CO-01/st_vent",
-   "decal x 16,84, z 1,48 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+   "CPT-CO-01/st_torque#2",
+   "decal x 17,11, z 1,45 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/st_torque#3",
+   "decal x 17,41, z 1,75 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/tri_warning",
+   "decal x 17,41, z 1,65 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
+  ],
+  [
+   "CPT-CO-01/warning_label",
+   "decal x 16,92, z 1,37 je za objektem CPT-O-CONSOLE-L (Levá konzole) – ve hře není vidět; přesunout nebo díl bez něj"
   ],
   [
    "D-I-01",

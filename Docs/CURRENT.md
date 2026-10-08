@@ -69,7 +69,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 0. **Autor 5. 10. (screenshoty), v tomto pořadí:**
    a) holo MFD v3 + kokpit hotové; **konzole, křeslo a plyn 7. 10.** (šedé kryty, nouzové tlačítko, mřížka, perforace;
       PASS 6,5; detail 2 a 3 PASS 6,6 / 6,5); **levá konzole jako díl továrny** `KF-COCKPIT-CONSOLE` v6 (kritik
-      **B podle 2D návrhu** v úseku **PASS 8,0** (kolo 39, vše 8; nový díl bez opotřebení; `…_kf_cockpit_console.md`): dál B do kokpitu, pak pravá zrcadlem;
+      **B podle 2D návrhu** v úseku **PASS 8,0** (kolo 39, vše 8; `…_kf_cockpit_console.md`), **8. 10. v kokpitu lodi a ve hře** – čeká na posouzení autorem, pak pravá zrcadlem;
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
       strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); rampa: plán a rozhodnutí A/B
       čeká na autora (`2026-10-06_ramp_plan.md`).
