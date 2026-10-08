@@ -143,7 +143,11 @@ def console_b(name, seed):
     band = [(0.04, BEAM0 - 0.004), (0.57, BEAM0 - 0.004), (0.6, BEAM0 + 0.022), (0.04, BEAM0 + 0.022), (0.02, BEAM0 + 0.01)]
     side_prism(p, "Kit_Inset", band, -0.083, -0.07, 0.004, 1)           # the lower band a graphite inset
     side_prism(p, "Kit_Inset", band, 0.15, 0.163, 0.004, 1)
-    p.box("Kit_Graphite", (0.04, -0.0775, BEAM0 + 0.03), (0.56, -0.074, BEAM0 + 0.038), panel=False)          # the groove
+    for xa, xb in ((0.05, 0.3), (0.32, 0.57)):                 # the beam side's two graphite sub-panels, screwed
+        p.box("Kit_Inset", (xa, -0.079, BEAM0 + 0.026), (xb, -0.0745, AT - 0.025), bevel=0.0015, segments=1)
+        for xx in (xa + 0.008, xb - 0.008):
+            for zz in (BEAM0 + 0.031, AT - 0.03):
+                screw(p, Vector((xx, -0.0795, zz)), -Y, 0.0022)
     for k in range(6):
         screw(p, Vector((0.06 + k * 0.1, -0.0758, BEAM0 + 0.017)), -Y, 0.003)
     for xa, xb in ((0.035, 0.312), (0.318, 0.595)):
@@ -153,15 +157,16 @@ def console_b(name, seed):
             p.box("Kit_Seal", (a_[0], a_[1], AT - 0.0004), (b_[0], b_[1], AT + 0.0003), panel=False)          # the stitching
         for i in range(int((xb - xa - 0.03) / 0.011)):
             for j in range(15):
-                hx, hu = xa + 0.03 + i * 0.011, -0.034 + j * 0.0105 + (0.0052 if i % 2 else 0.0)
-                if hu > 0.115 or hx > xb - 0.03:
+                hx, hu = xa + 0.035 + i * 0.011, -0.03 + j * 0.0105 + (0.0052 if i % 2 else 0.0)
+                if hu > 0.11 or hx > xb - 0.035:
                     continue
                 p.box("Kit_Seal", (hx - 0.0015, hu - 0.0015, AT - 0.0004), (hx + 0.0015, hu + 0.0015, AT + 0.0002), panel=False)
-    _label(p, "maker", Vector((0.4, -0.0778, AT - 0.05)), -Y, X, Z, scale=0.3)
+    _label(p, "maker", Vector((0.445, -0.0796, BEAM0 + 0.045)), -Y, X, Z, scale=0.3)
+    _label(p, "st_hfcl", Vector((0.18, -0.0796, BEAM0 + 0.045)), -Y, X, Z, scale=0.5)
     for k in range(2):                                         # Halcyon's mark: two slanted orange bars, 30 mm
-        x_ = 0.235 + k * 0.022
-        bar = [(x_, AT - 0.068), (x_ + 0.011, AT - 0.068), (x_ + 0.027, AT - 0.034), (x_ + 0.016, AT - 0.034)]
-        side_prism(p, "Kit_Signal", bar, -0.078, -0.074, 0.0, 1)
+        x_ = 0.335 + k * 0.016
+        bar = [(x_, BEAM0 + 0.031), (x_ + 0.008, BEAM0 + 0.031), (x_ + 0.018, BEAM0 + 0.059), (x_ + 0.010, BEAM0 + 0.059)]
+        side_prism(p, "Kit_Signal", bar, -0.0805, -0.0785, 0.0, 1)
     for xb in (0.2, 0.46):                                                                   # the slanted brackets
         br = [(xb - 0.03, DECK + 0.006), (xb + 0.035, DECK + 0.006), (xb + 0.065, BEAM0 + 0.002), (xb + 0.005, BEAM0 + 0.002)]
         for ua, ub in ((-0.025, 0.0), (0.105, 0.13)):
@@ -335,6 +340,9 @@ def console_b(name, seed):
     for xx in (hx0 + 0.035, hx1 - 0.035):
         for uu in (hu0 + 0.035, hu1 - 0.035):
             screw(p, Vector((xx, uu, zt)), Z, 0.0045)
+    for xx in ((hx0 + hx1) / 2 - 0.12, (hx0 + hx1) / 2 + 0.12):  # two recessed latches, 20 x 8 mm
+        p.box("Kit_Seal", (xx - 0.012, hu1 - 0.034, zt - 0.003), (xx + 0.012, hu1 - 0.022, zt + 0.0002), bevel=0.001, segments=1)
+        p.box("Kit_Lip", (xx - 0.01, hu1 - 0.032, zt - 0.0015), (xx + 0.01, hu1 - 0.024, zt + 0.0006), bevel=0.0012, segments=1)
     p.box("Kit_Lip", (hx1 - 0.13, hu0 + 0.05, zt - 0.001), (hx1 - 0.046, hu0 + 0.094, zt + 0.0012), bevel=0.001, segments=1)
     p.box("Kit_Perforated", (hx1 - 0.126, hu0 + 0.054, zt + 0.0012), (hx1 - 0.05, hu0 + 0.09, zt + 0.0016), panel=False)
     p.box("Kit_Seal", (0.27, hu1 - 0.075, zt - 0.012), (0.37, hu1 - 0.045, zt + 0.0003), bevel=0.004, segments=2)        # the pull

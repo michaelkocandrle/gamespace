@@ -9963,8 +9963,8 @@
     76.2,
     74.1
    ],
-   "tris": 36088,
-   "tris_decals": 272,
+   "tris": 35836,
+   "tris_decals": 276,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
@@ -9992,10 +9992,11 @@
    ],
    "sockets": {},
    "collision_hulls": 1,
-   "decals": 34,
+   "decals": 35,
    "decal_items": [
     "maker",
     "maker",
+    "st_hfcl",
     "ck_rcs",
     "maker",
     "st_service",
@@ -10040,7 +10041,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 18282,
+    "edge": 18714,
     "secondary": 0,
     "floor": 4310,
     "seam": 0

@@ -1,0 +1,43 @@
+{
+ "topic": "kf_cockpit_console",
+ "round": 24,
+ "variant": "B",
+ "date": "2026-10-08",
+ "verdict": "PASS",
+ "gate": "step",
+ "note": "Autor 8. 10.: díly jsou nové z výroby, opotřebení se nehodnotí ani nežádá. Proporce proti SC nejsou blokující. Stropní světlo zesvětluje tmavé horní plochy; tóny posuzovány relativně.",
+ "first_impression": "Čistá nová konzole Halcyon, která teď u ovladačů mluví jazykem kokpitu: legendy MAIN/BATT/TEMP, LIGHTS/GEAR/VTOL a EMER jsou čitelné a opěrka má dva segmenty. Velké plochy (bok nosníku, šikmý bok věže, poklop) jsou ale pořád holé a poklop zůstává středně šedý, takže celek je pořád blíž čisté CG maketě než hutnému dílu SC.",
+ "scores": {
+  "silueta_a_tvar": {"score": 7, "why": "Nosník opěrky na dvou šikmých konzolách s mezerou, blok kniplu, prostřední blok a zkosená věž čtou podle návrhu (list 5 vpravo 1000-1600,270-470; list 1 vpravo 1230-1900,200-560)."},
+  "hierarchie_a_hustota_detailu": {"score": 6, "why": "Detail u kniplu, kláves, kolébek a věže zhoustl (list 3 vpravo), ale bok nosníku (list 5 vpravo 1000-1560,290-420), šikmý grafitový bok věže (list 3 vpravo 1300-1500,60-560) a poklop (list 6 vpravo 1110-1490,120-360) jsou pořád velké plochy bez podpanelů, spár a šroubů."},
+  "materialy": {"score": 6, "why": "Leštěná zkosení a chromové hrany chytají světlo (list 4 vpravo 1150-1500,420-560) a návlek madla s rýhováním je přesvědčivý; poklop a deska pod opěrkou jsou ale pořád středně šedé (list 4 vpravo 1260-1830,220-420, list 6 vpravo) proti grafitu čela věže a svislé plochy rámu působí matně bez čirého laku (list 1 vpravo 1270-1430,300-560)."},
+  "decaly": {"score": 7, "why": "Výstražná cedule s logem na čele věže (list 3 vpravo 1550-1890,280-480), HF-CL 07, CAUTION a nově EMER štítek (list 5 vpravo 1870-1900,265-280); druhá vrstva po bocích nosníku a podstavce zůstává řídká (list 5 vpravo jen logo a nápis)."},
+  "svetlo": {"score": 7, "why": "Klávesy 2x2 a pásky MAIN/BATT/TEMP svítí s gradientem (list 3 vpravo 1080-1290,180-380); LED kolébek mají rámeček, ale pořád nemají záři ani kopulku (list 3 vpravo 1090,445 / 1135,495 / 1185,550)."},
+  "citelnost": {"score": 7, "why": "MAIN/BATT/TEMP, LT/GR/VT/ESP, LIGHTS/GEAR/VTOL a EMER jsou zblízka čitelné (list 3 vpravo, list 5 vpravo); shora jsou legendy kolébek (list 6 vpravo 1780-1900,428-436) a spodní nápisy podstavce (list 6 vpravo 1270-1620,565-585) pořád na hranici čitelnosti."},
+  "chyby_geometrie": {"score": 7, "why": "Bez děr, průniků a plovoucích dílů; nové legendy a rámečky LED sedí na plochách bez z-fightingu (list 3 vpravo)."},
+  "soulad_stylu": {"score": 7, "why": "Bloky sdílejí rám, šrouby, jednu oranžovou a jeden font legend; nejednotné zůstávají dva odstíny vložek: poklop a deska pod opěrkou středně šedé proti grafitu čela a boku věže."}
+ },
+ "average": 6.8,
+ "threshold": "dílčí krok: průměr >= 6,5, žádná kategorie < 6, žádný bod musí se opravit",
+ "concept_match": {
+  "layout_percent": 80,
+  "look_percent": 70,
+  "summary": "Skladba odpovídá návrhu; legendy a segmentovaná opěrka posunuly vzhled. Horní vložky pořád nejsou tak tmavé jako v návrhu a boky nemají husté spáry a šrouby."
+ },
+ "r23_followup": [
+  {"r23": 1, "title": "Poklop a opěrka nejsou grafit", "status": "neopraveno", "detail": "Poklop a deska pod opěrkou mají pořád jas ~0,30 (list 6 vpravo 1110-1490,120-360; list 4 vpravo 1260-1830,220-420) proti ~0,12 na čele věže. Polštáře opěrky jsou tmavší (~0,22), ale ne grafit."},
+  {"r23": 2, "title": "Velké holé plochy na bocích", "status": "neopraveno", "detail": "Bok nosníku, šikmý bok věže a poklop bez podpanelů, spár a řad šroubů (list 5, 3, 6 vpravo)."},
+  {"r23": 3, "title": "Opěrka plochá deska", "status": "částečně", "detail": "Dva segmenty se spárou a zaobleným lemem (list 4 vpravo 1000-1460,190-540; list 6 vpravo 1010-1500,370-545). Perforace je ale pořád pravidelná mřížka přes celou plochu až k lemu, prošití není na žádném listu rozeznat a polštář čte spíš jako gumová rohož než čalounění."},
+  {"r23": 4, "title": "Druhá vrstva decalů po plochách", "status": "částečně", "detail": "Přibyly legendy a EMER štítek u ovladačů; bok nosníku, podstavec a poklop zůstaly bez mikro šablon a nýtů."},
+  {"r23": 5, "title": "Čirý lak a kůra na svislých plochách", "status": "neopraveno", "detail": "Svislé plochy rámu (list 1 vpravo 1270-1430,300-560; list 5 vpravo bok nosníku) pořád matné, kůra nerozeznatelná."},
+  {"r23": 6, "title": "Legendy a LED kolébek", "status": "částečně", "detail": "Legendy zblízka čitelné a LED v kovovém rámečku (list 3 vpravo). Shora pořád drobné; LED bez záře a kopulky."}
+ ],
+ "findings": [
+  {"n": 1, "title": "Poklop a deska pod opěrkou nejsou grafit", "where": "list 6 vpravo poklop 1110-1490,120-360; list 4 vpravo 1260-1830,220-420; srovnání čelo věže list 6 vpravo 1760-1960,80-320", "problem": "Největší horní plocha v pohledu pilota je středně šedá (~0,30) proti grafitu věže (~0,12); třetí kolo beze změny, takže plocha zjevně nepoužívá instanci grafitu.", "severity": "doporučeno", "fix": "Ověřit přiřazení materiálových slotů poklopu a desky (ne jen parametry instance); přepnout na instanci grafitu čela věže (albedo 0,035, drsnost 0,72, specular 0,35, bez ClearCoat). Cíl list 6: jas poklopu <= 0,15, poměr rám : vložka >= 3:1."},
+  {"n": 2, "title": "Velké holé plochy na bocích", "where": "list 5 vpravo bok nosníku 1000-1560,290-420; list 3 vpravo šikmý bok věže 1300-1500,60-560; list 6 vpravo poklop", "problem": "Největší plochy nemají spáry, podpanely ani šrouby; detail je jen u ovladačů.", "severity": "doporučeno", "fix": "Bok nosníku: 2 zapuštěné grafitové panely ~220 x 70 mm, hloubka 10-15 mm, spára 2 mm, šrouby 5 mm v rozích. Šikmý bok věže: rám 15-20 mm v laku kolem grafitové vložky (~60 % plochy), 4 šrouby 5 mm. Poklop: obvodová spára 2 mm, 2 zapuštěné západky 20 x 8 mm, šrouby 5 mm po 100 mm."},
+  {"n": 3, "title": "Čirý lak na svislých plochách", "where": "list 1 vpravo rám 1270-1430,300-560; list 5 vpravo bok nosníku 1000-1560,300-420", "problem": "Odlesk laku jen na horní ploše nosníku; svislé plochy působí jako matná barva, kontrast lak/mat/kov slabší, než brief žádá.", "severity": "doporučeno", "fix": "ClearCoat 1, ClearCoatRoughness 0,04-0,06, základní drsnost 0,4, síla normály kůry 0,15-0,2 při dlaždici 6-8 cm. Ověřit snímkem s pruhovým odleskem (obdélníkové světlo 1 x 0,2 m) přes bok nosníku."},
+  {"n": 4, "title": "Druhá vrstva decalů po plochách", "where": "list 5 vpravo bok nosníku a podstavec; list 1 vpravo boky podstavce 1270-1420,300-560; list 6 vpravo poklop", "problem": "Mimo ovladače a věž jen logo a pár nápisů; chybí hustota drobných štítků nového dílu SC.", "severity": "doporučeno", "fix": "Na každou viditelnou plochu 1-2 štítky 25-40 mm s rámečkem a ikonou a 6-10 mikro šablon 4-6 mm (čísla dílů, TORQUE 12 Nm, GND, šipky zvedání); albedo 0,7 na grafitu, 0,15 na laku. Spodní hrana nosníku a podstavce: řada nýtů 4 mm po 25 mm."},
+  {"n": 5, "title": "Opěrka čte jako gumová rohož", "where": "list 4 vpravo 1000-1460,190-540; list 6 vpravo 1010-1500,370-545", "problem": "Segmenty jsou, ale perforace pokrývá celou plochu až k lemu v pravidelné mřížce a prošití ani zrno kůže nejsou vidět.", "severity": "doporučeno", "fix": "Perforace 2 mm po 6 mm jen ve středním poli (okraj 15 mm hladký), prošití 3 mm od lemu jako normálová mapa (steh 4 mm, síla 0,6) plus jemná AO linka, zrno kůže (dlaždice 5 cm, síla 0,3), lehké vyboulení segmentu 3-4 mm, albedo 0,05, drsnost 0,65."},
+  {"n": 6, "title": "LED kolébek bez záře, legendy shora drobné", "where": "list 3 vpravo LED 1090,445 / 1135,495 / 1185,550; list 6 vpravo 1780-1900,428-436 a 1270-1620,565-585", "problem": "LED ploché bez záře; legendy kolébek a spodní nápisy podstavce shora pod hranicí čitelnosti.", "severity": "doporučeno", "fix": "LED s kopulkou 3 mm, emise 10-15, studená modrobílá; legendy kolébek tučně 9-10 mm, spodní nápisy 10-12 mm, albedo >= 0,7."}
+ ]
+}
