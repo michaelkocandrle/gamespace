@@ -401,6 +401,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
 	bool bRing = false;
 
+	/** MFD v5: a horizontal gauge as a line - a faint track, the value as a bright thick line, the marker a tick. */
+	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
+	bool bThin = false;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Gauge")
 	int32 Ticks = 10;
 

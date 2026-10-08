@@ -662,6 +662,10 @@ int32 USpaceHudLamp::NativePaint(const FPaintArgs& Args, const FGeometry& Allott
 	const float Breath = FMath::Lerp(1.f, Pulse, FMath::Min(Lit, 1.f));
 	if (bHolo && bHoloUnderline)
 	{
+		if (Lit < 0.9f)
+		{
+			return LayerId;   // (an idle tab: its name only)
+		}
 		const TArray<FVector2f> Under = { FVector2f(Size.X * 0.08f, Size.Y - 2.f), FVector2f(Size.X * 0.92f, Size.Y - 2.f) };
 		PaintLine(OutDrawElements, LayerId, AllottedGeometry.ToPaintGeometry(), Under, Faded(Color, 0.3f), true, 7.f);
 		PaintLine(OutDrawElements, LayerId + 1, AllottedGeometry.ToPaintGeometry(), Under, Faded(Color, 1.f), true, 2.f);
@@ -748,6 +752,23 @@ int32 USpaceHudGauge::NativePaint(const FPaintArgs& Args, const FGeometry& Allot
 		return LayerId;
 	}
 	const float Dim = bDim ? 0.4f : 1.f;
+	if (bThin && bHorizontal)
+	{
+		const FPaintGeometry Paint = AllottedGeometry.ToPaintGeometry();
+		const float Y = Size.Y * 0.5f;
+		PaintLine(OutDrawElements, LayerId + 1, Paint, { FVector2f(0.f, Y), FVector2f(Size.X, Y) }, Faded(Rail, 0.75f * Dim), true, 2.f);
+		const float Filled = FMath::Clamp(Value, 0.f, 1.f);
+		if (Filled > 0.002f)
+		{
+			PaintLine(OutDrawElements, LayerId + 2, Paint, { FVector2f(0.f, Y), FVector2f(Size.X * Filled, Y) }, Faded(FillColor, Dim), true, 6.f);
+		}
+		if (Marker >= 0.f)
+		{
+			const float X = Size.X * FMath::Clamp(Marker, 0.f, 1.f);
+			PaintLine(OutDrawElements, LayerId + 2, Paint, { FVector2f(X, Y - 8.f), FVector2f(X, Y + 8.f) }, MarkerColor, true, 2.f);
+		}
+		return LayerId + 3;
+	}
 	if (bRing)
 	{
 		// the holo radar's language: a 270 deg track open at the bottom, the value arc over it, ticks outside
@@ -2908,12 +2929,9 @@ void USpaceCockpitDisplays::BuildTree()
 	// SC 4.x's list row (holo MFD v3): an amber flag, the caption, the value right-aligned, a thin rule under it.
 	auto FlagRow = [&](UVerticalBox* Into, const FString& Prefix, const TCHAR* Caption, const FName ValueName, float ValueSize)
 	{
+		// (MFD v5, mfd_v5_mock.png: no amber flag - the caption dim, the value white on the right, a faint rule)
 		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*(Prefix + TEXT("Row"))));
-		USpaceHudSymbol* Flag = Symbol(FName(*(Prefix + TEXT("Flag"))), ESpaceHudSymbol::Line, MfdAmber);
-		Flag->Thickness = 4.f;
-		Flag->Points = { FVector2D(0.5, 0.0), FVector2D(0.5, 1.0) };
-		Horizontal(Row, Sized(FName(*(Prefix + TEXT("FlagBox"))), Flag, 6.f, 24.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
-		Horizontal(Row, Words(FName(*(Prefix + TEXT("Caption"))), Caption, 26.f, Faded(MfdText, 0.75f)), VAlign_Center, FMargin(0.f), true);
+		Horizontal(Row, Words(FName(*(Prefix + TEXT("Caption"))), Caption, 26.f, Faded(MfdText, 0.6f)), VAlign_Center, FMargin(0.f), true);
 		Horizontal(Row, Words(ValueName, TEXT("-"), ValueSize), VAlign_Center, FMargin(12.f, 0.f, 0.f, 0.f));
 		Vertical(Into, Row, HAlign_Fill, FMargin(0.f, 2.f, 0.f, 2.f));
 		Vertical(Into, Rule(FName(*(Prefix + TEXT("Rule"))), 0.f, 0.25f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 4.f));
@@ -3019,12 +3037,8 @@ void USpaceCockpitDisplays::BuildTree()
 	for (const TCHAR* Axis : { TEXT("MAIN"), TEXT("RETRO"), TEXT("STRAFE"), TEXT("UP"), TEXT("DOWN") })
 	{
 		UHorizontalBox* ThrustLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("ThrustRow_%s"), Axis)));
-		// (holo MFD v3: SC's amber flag before each row)
-		USpaceHudSymbol* ThrustFlag = Symbol(FName(*FString::Printf(TEXT("ThrustFlag_%s"), Axis)), ESpaceHudSymbol::Line, MfdAmber);
-		ThrustFlag->Thickness = 4.f;
-		ThrustFlag->Points = { FVector2D(0.5, 0.0), FVector2D(0.5, 1.0) };
-		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustFlagBox_%s"), Axis)), ThrustFlag, 6.f, 24.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
-		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustNameBox_%s"), Axis)), Words(FName(*FString::Printf(TEXT("ThrustName_%s"), Axis)), Axis, 28.f), 134.f, 0.f),
+		// (MFD v5: the axis name dim, no flag)
+		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustNameBox_%s"), Axis)), Words(FName(*FString::Printf(TEXT("ThrustName_%s"), Axis)), Axis, 28.f, Faded(MfdText, 0.6f)), 152.f, 0.f),
 			VAlign_Center, FMargin(0.f));
 		// The strafe row says which side it fires to.
 		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustSideBox_%s"), Axis)),
@@ -3032,6 +3046,7 @@ void USpaceCockpitDisplays::BuildTree()
 			28.f, 0.f), VAlign_Center, FMargin(0.f));
 		USpaceHudGauge* ThrustGauge = Gauge(FName(*FString::Printf(TEXT("ThrustGauge_%s"), Axis)), 20);
 		ThrustGauge->bHorizontal = true;
+		ThrustGauge->bThin = true;   // (MFD v5: lines like the mock, not block columns)
 		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustGaugeBox_%s"), Axis)), ThrustGauge, 0.f, 20.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f), true);
 		Horizontal(ThrustLine, Sized(FName(*FString::Printf(TEXT("ThrustValueBox_%s"), Axis)),
 			AlignedWords(FName(*FString::Printf(TEXT("ThrustValue_%s"), Axis)), TEXT("-"), 28.f, ETextJustify::Right), 168.f, 0.f), VAlign_Center, FMargin(0.f));
@@ -3105,17 +3120,13 @@ void USpaceCockpitDisplays::BuildTree()
 		UVerticalBox* RowBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*Row));
 		Parts.Add(FName(*Row), RowBox);
 		UHorizontalBox* ListLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*(Row + TEXT("Line"))));
-		USpaceHudSymbol* ListFlag = Symbol(FName(*(Row + TEXT("Flag"))), ESpaceHudSymbol::Line, MfdAmber);
-		ListFlag->Thickness = 4.f;
-		ListFlag->Points = { FVector2D(0.5, 0.0), FVector2D(0.5, 1.0) };
-		Horizontal(ListLine, Sized(FName(*(Row + TEXT("FlagBox"))), ListFlag, 6.f, 24.f), VAlign_Center, FMargin(0.f, 0.f, 12.f, 0.f));
 		Horizontal(ListLine, Words(FName(*FString::Printf(TEXT("%sName_%d"), *Prefix, Index)), TEXT("-"), 26.f), VAlign_Center, FMargin(0.f), true);
 		Horizontal(ListLine, Sized(FName(*(Row + TEXT("DistBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sDist_%d"), *Prefix, Index)), TEXT("-"), 26.f, ETextJustify::Right), 160.f, 0.f),
 			VAlign_Center, FMargin(0.f));
 		Horizontal(ListLine, Sized(FName(*(Row + TEXT("BrgBox"))), AlignedWords(FName(*FString::Printf(TEXT("%sBrg_%d"), *Prefix, Index)), TEXT("-"), 26.f, ETextJustify::Right), 100.f, 0.f),
 			VAlign_Center, FMargin(0.f));
 		Vertical(RowBox, ListLine, HAlign_Fill, FMargin(0.f, 0.f));
-		Vertical(RowBox, Rule(FName(*(Row + TEXT("Rule"))), 0.f, 0.4f), HAlign_Fill, FMargin(0.f, 1.f));   // (a firm rule ties the values to their entry)
+		Vertical(RowBox, Rule(FName(*(Row + TEXT("Rule"))), 0.f, 0.25f), HAlign_Fill, FMargin(0.f, 1.f));   // (MFD v5: a faint rule)
 		Vertical(Into, RowBox, HAlign_Fill, FMargin(0.f));
 	};
 	// (critic 5. 10., round 2: the header row pushed KETH into the footer and read as the values' row - the list
@@ -3151,20 +3162,12 @@ void USpaceCockpitDisplays::BuildTree()
 			LaneSlot->SetHorizontalAlignment(HAlign_Fill);
 			LaneSlot->SetVerticalAlignment(VAlign_Fill);
 		}
-		USpaceHudSymbol* Tick = Symbol(FName(*FString::Printf(TEXT("ConfigTick%d"), Index)), ESpaceHudSymbol::Line, Faded(FLinearColor(1.f, 0.55f, 0.12f), 0.9f));
-		Tick->Thickness = 4.f;
-		Tick->Points = { FVector2D(0.5, 0.0), FVector2D(0.5, 1.0) };
-		if (UOverlaySlot* TickSlot = ConfigRow->AddChildToOverlay(Sized(FName(*FString::Printf(TEXT("ConfigTickBox%d"), Index)), Tick, 6.f, 26.f)))
-		{
-			TickSlot->SetHorizontalAlignment(HAlign_Left);
-			TickSlot->SetVerticalAlignment(VAlign_Center);
-		}
 		// (the caps sit low in their line box, which keeps room for accents above: lifted onto the row's axis)
 		if (UOverlaySlot* LabelSlot = ConfigRow->AddChildToOverlay(Words(FName(*FString::Printf(TEXT("ConfigLabel%d"), Index)), *ConfigRowNames()[Index], 28.f)))
 		{
 			LabelSlot->SetHorizontalAlignment(HAlign_Left);
 			LabelSlot->SetVerticalAlignment(VAlign_Center);
-			LabelSlot->SetPadding(FMargin(18.f, 0.f, 0.f, 6.f));
+			LabelSlot->SetPadding(FMargin(2.f, 0.f, 0.f, 6.f));
 		}
 		if (UOverlaySlot* SwitchSlot = ConfigRow->AddChildToOverlay(Key(*Lamp, ConfigSwitchWidth, 40.f, true)))
 		{
@@ -3183,32 +3186,15 @@ void USpaceCockpitDisplays::BuildTree()
 	// --- Right display, STATUS: a list like the contacts page (the MODE / GEAR / QUANTUM keys repeated it) ----
 	UHorizontalBox* Status = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("StatusContent"));
 	UVerticalBox* List = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("StatusList"));
+	// (MFD v5, mfd_v5_mock.png STATUS: a clean table - the caption dim on the left, the value white and large on the
+	// right, a faint rule under each row; the bracket badges and the amber flags read as a form)
 	auto Row = [&](const TCHAR* Name, const FName ValueName)
 	{
 		UHorizontalBox* Line = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("Row_%s"), Name)));
-		// (v3: SC's amber flag before the name instead of the ">")
-		USpaceHudSymbol* Flag = Symbol(FName(*FString::Printf(TEXT("RowFlag_%s"), Name)), ESpaceHudSymbol::Line, MfdAmber);
-		Flag->Thickness = 4.f;
-		Flag->Points = { FVector2D(0.5, 0.0), FVector2D(0.5, 1.0) };
-		Horizontal(Line, Sized(FName(*FString::Printf(TEXT("RowFlagBox_%s"), Name)), Flag, 6.f, 24.f), VAlign_Center, FMargin(0.f, 0.f, 14.f, 0.f));
-		Horizontal(Line, Words(FName(*FString::Printf(TEXT("RowName_%s"), Name)), Name, 30.f), VAlign_Center, FMargin(0.f), true);
-		UOverlay* Value = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), FName(*FString::Printf(TEXT("RowPill_%s"), Name)));
-		USpaceHudLamp* Pill = WidgetTree->ConstructWidget<USpaceHudLamp>(USpaceHudLamp::StaticClass(), FName(*FString::Printf(TEXT("RowPillShape_%s"), Name)));
-		Pill->bBadge = true;
-		Pill->Color = MfdBlue;
-		Pill->Intensity = 1.f;
-		Pill->Target = 1.f;
-		if (UOverlaySlot* PillSlot = Value->AddChildToOverlay(Pill))
-		{
-			PillSlot->SetHorizontalAlignment(HAlign_Fill);
-			PillSlot->SetVerticalAlignment(VAlign_Fill);
-		}
-		if (UOverlaySlot* ValueSlot = Value->AddChildToOverlay(Words(ValueName, TEXT("-"), 30.f)))
-		{
-			ValueSlot->SetHorizontalAlignment(HAlign_Center);
-			ValueSlot->SetVerticalAlignment(VAlign_Center);
-		}
-		Horizontal(Line, Sized(FName(*FString::Printf(TEXT("RowPillBox_%s"), Name)), Value, 230.f, 44.f), VAlign_Center, FMargin(0.f));
+		Horizontal(Line, Words(FName(*FString::Printf(TEXT("RowName_%s"), Name)), Name, 28.f, Faded(MfdText, 0.6f)), VAlign_Center, FMargin(0.f), true);
+		UTextBlock* RowValue = Words(ValueName, TEXT("-"), 34.f);
+		RowValue->SetJustification(ETextJustify::Right);
+		Horizontal(Line, Sized(FName(*FString::Printf(TEXT("RowValueBox_%s"), Name)), RowValue, 300.f, 44.f), VAlign_Center, FMargin(0.f));
 		Vertical(List, Line, HAlign_Fill, FMargin(0.f, 2.f));
 		Vertical(List, Rule(FName(*FString::Printf(TEXT("RowRule_%s"), Name)), 0.f, 0.25f), HAlign_Fill, FMargin(0.f, 2.f));
 	};
@@ -3412,7 +3398,7 @@ void USpaceCockpitDisplays::BuildTree()
 		else if (USpaceHudLamp* Lamp = Cast<USpaceHudLamp>(Widget))
 		{
 			Lamp->bHolo = true;
-			Lamp->bHoloUnderline = Lamp->GetName().EndsWith(TEXT("TabShape"));
+			Lamp->bHoloUnderline = Lamp->GetName().EndsWith(TEXT("TabShape")) || Lamp->GetName().Contains(TEXT("TabFill"));   // (MFD v5)
 		}
 		else if (USpaceHudSymbol* Part = Cast<USpaceHudSymbol>(Widget))
 		{
