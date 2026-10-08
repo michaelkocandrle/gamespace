@@ -154,12 +154,12 @@ def console_b(name, seed):
     legend(p, "SN 0417-B", Vector((0.65, uf - 0.0016, 0.2155)), X, Z, -Y, h=0.0068, role="Kit_Seal")
     for uf_s, ns_ in ((U0, -1), (W, 1)):                       # a polished bead on the foot's break edge
         ua_, ub_ = sorted((uf_s, uf_s + ns_ * 0.003))
-        p.box("Kit_FrameEdge", (0.03, ua_, 0.1005), (L - 0.07, ub_, 0.1065), bevel=0.0012, segments=2, panel=False)
+        p.box("Kit_Legend", (0.03, ua_, 0.1005), (L - 0.07, ub_, 0.1065), bevel=0.0012, segments=2, panel=False)
     p.box("Kit_Housing", (0.86, W, 0.14), (1.06, W + 0.004, 0.24), bevel=0.002, segments=1)
     _label(p, "maker", Vector((0.44, U0 - 0.0065, 0.14)), -Y, X, Z, scale=0.3)
     # the deck: a dark plate between the blocks; under the beam a frame-paint plate (the gap read as a black hole - r37)
-    p.box("Kit_Frame", (0.078, U0 + 0.004, DECK + 0.006), (0.6, 0.156, DECK + 0.0085), bevel=0.0015, segments=2, panel=False)
-    p.box("Kit_FrameEdge", (L - 0.025, U0 + 0.002, 0.121), (L - 0.0185, W - 0.002, 0.127), bevel=0.0012, segments=2, panel=False)
+    p.box("Kit_Shell", (0.078, U0 + 0.004, DECK + 0.006), (0.6, 0.156, DECK + 0.0085), bevel=0.0015, segments=2, panel=False)
+    p.box("Kit_Legend", (L - 0.025, U0 + 0.002, 0.121), (L - 0.0185, W - 0.002, 0.127), bevel=0.0012, segments=2, panel=False)
     p.box("Kit_Inset", (0.0, U0, DECK - 0.004), (L - 0.02, W, DECK + 0.006), bevel=0.003, segments=2)
     # 2 the forearm beam: a light frame in a stepped side profile, two padded perforated rests on it, on two slanted
     # brackets and a rear leg over the deck (the 9 cm gap under it is the concept's floating arm)
@@ -204,8 +204,8 @@ def console_b(name, seed):
     on = Vector((sl.z, 0.0, -sl.x))
     c_ = Vector((0.605, 0.0, BEAM0 + 0.015))
     # a cool diffuser across the beam's front face under the LEDs, facing the pilot (critic r37: on the slant it read as an edge)
-    p.box("Kit_Lip", (0.629, -0.073, BEAM0 + 0.0305), (0.631, 0.153, BEAM0 + 0.0425), bevel=0.0006, segments=1, panel=False)
-    p.box("Kit_GlowStrip", (0.6295, -0.071, BEAM0 + 0.0325), (0.6325, 0.151, BEAM0 + 0.0405), bevel=0.0012, segments=2, panel=False)
+    p.box("Kit_Seal", (0.629, -0.073, BEAM0 + 0.0295), (0.6315, 0.153, BEAM0 + 0.0435), bevel=0.0006, segments=1, panel=False)    # a dark 1.5 mm bezel
+    p.box("Kit_GlowStrip", (0.6295, -0.0715, BEAM0 + 0.031), (0.6335, 0.1515, BEAM0 + 0.042), bevel=0.0012, segments=2, panel=False)
     for ua in (-0.066, 0.14):                                  # a hidden 6 mm light strip under each beam edge, washing the gap
         p.box("Kit_Seal", (0.07, ua - 0.002, BEAM0 - 0.004), (0.55, ua + 0.008, BEAM0), panel=False)
         p.box("Kit_Lip", (0.072, ua - 0.006, BEAM0 - 0.006), (0.548, ua + 0.012, BEAM0 - 0.003), bevel=0.001, segments=1, panel=False)   # a polished bezel
@@ -441,7 +441,7 @@ def console_b(name, seed):
         xr = fx0 + (fx1 - fx0) * (k + 1) / 4
         if k != 1:
             p.box("Kit_Inset", (xr - 0.0025, fu0 + 0.012, zt - 0.0005), (xr + 0.0025, fu1 - 0.012, zt + 0.005), bevel=0.0012, segments=2, panel=False)
-            p.box("Kit_FrameEdge", (xr - 0.002, fu0 + 0.013, zt + 0.0045), (xr + 0.002, fu1 - 0.013, zt + 0.0058), bevel=0.0005, segments=1, panel=False)
+            p.box("Kit_Legend", (xr - 0.002, fu0 + 0.013, zt + 0.0045), (xr + 0.002, fu1 - 0.013, zt + 0.0058), bevel=0.0005, segments=1, panel=False)
     xm, um = (fx0 + fx1) / 2, (fu0 + fu1) / 2 + 0.035          # a 70 x 40 mm hatch plate between the ribs, four screws in the field
     p.box("Kit_Lip", (xm - 0.036, um - 0.021, zt - 0.0005), (xm + 0.036, um + 0.021, zt + 0.001), bevel=0.0005, segments=1, panel=False)
     p.box("Kit_Legend", (xm - 0.034, um - 0.019, zt), (xm + 0.034, um + 0.019, zt + 0.0014), panel=False)
