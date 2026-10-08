@@ -138,6 +138,20 @@ def console_b(name, seed):
     p.box("Kit_Graphite", (0.0, U0 - 0.004, DECK - 0.052), (L - 0.02, U0, DECK - 0.046), panel=False)
     p.box("Kit_Graphite", (0.0, W, DECK - 0.052), (L - 0.02, W + 0.004, DECK - 0.046), panel=False)
     hatch(p, 0.85, L - 0.1, DECK - 0.04, DECK - 0.012, W, 1)
+    uf = U0 - 0.006                                            # the seat-side panels' face: a second, functional layer
+    zc = (0.11 + DECK - 0.062) / 2
+    p.lathe("Kit_Lip", [(0.013, 0.0), (0.013, 0.0012), (0.011, 0.0016)], (0.255, uf, zc), axis=(0, -1, 0), seg=24)   # 1: a quarter-turn latch
+    p.lathe("Kit_Seal", [(0.011, 0.0), (0.011, 0.0004), (0.0, 0.0004)], (0.255, uf - 0.0004, zc), axis=(0, -1, 0), seg=24)
+    p.box("Kit_Housing", (0.247, uf - 0.0035, zc - 0.002), (0.263, uf, zc + 0.002), bevel=0.001, segments=1, panel=False)
+    zr = 0.11 + (DECK - 0.062 - 0.11) * 0.66                    # 2: a pressed 6 mm rib at two thirds
+    p.box("Kit_Inset", (0.31, uf - 0.003, zr - 0.003), (0.53, uf + 0.001, zr + 0.003), bevel=0.0014, segments=2, panel=False)
+    p.box("Kit_Lip", (0.6, uf - 0.0012, 0.27), (0.652, uf + 0.001, 0.3), bevel=0.0006, segments=1, panel=False)  # 3: a type plate
+    p.box("Kit_Graphite", (0.602, uf - 0.0016, 0.272), (0.65, uf - 0.0011, 0.298), panel=False)
+    legend(p, "TYPE HC-12W", Vector((0.626, uf - 0.0016, 0.2885)), X, Z, -Y, h=0.005)
+    legend(p, "SN 0417-B", Vector((0.626, uf - 0.0016, 0.2785)), X, Z, -Y, h=0.0045)
+    for uf_s, ns_ in ((U0, -1), (W, 1)):                       # a polished bead on the foot's break edge
+        ua_, ub_ = sorted((uf_s, uf_s + ns_ * 0.003))
+        p.box("Kit_FrameEdge", (0.03, ua_, 0.1005), (L - 0.07, ub_, 0.1065), bevel=0.0012, segments=2, panel=False)
     p.box("Kit_Housing", (0.86, W, 0.14), (1.06, W + 0.004, 0.24), bevel=0.002, segments=1)
     _label(p, "maker", Vector((0.44, U0 - 0.0065, 0.14)), -Y, X, Z, scale=0.3)
     # the deck: a dark plate between the blocks
@@ -183,8 +197,8 @@ def console_b(name, seed):
     _label(p, "maker", Vector((0.445, -0.0796, BEAM0 + 0.045)), -Y, X, Z, scale=0.3)
     for ua in (-0.066, 0.14):                                  # a hidden 6 mm light strip under each beam edge, washing the gap
         p.box("Kit_Seal", (0.07, ua - 0.002, BEAM0 - 0.004), (0.55, ua + 0.008, BEAM0), panel=False)
-        p.box("Kit_Lip", (0.072, ua - 0.004, BEAM0 - 0.006), (0.548, ua + 0.01, BEAM0 - 0.003), bevel=0.001, segments=1, panel=False)   # a polished bezel
-        p.box("Kit_GlowCool", (0.075, ua - 0.001, BEAM0 - 0.0085), (0.545, ua + 0.007, BEAM0 - 0.0055), bevel=0.0015, segments=2, panel=False)  # 8 mm diffuser
+        p.box("Kit_Lip", (0.072, ua - 0.006, BEAM0 - 0.006), (0.548, ua + 0.012, BEAM0 - 0.003), bevel=0.001, segments=1, panel=False)   # a polished bezel
+        p.box("Kit_GlowFoot", (0.075, ua - 0.003, BEAM0 - 0.010), (0.545, ua + 0.009, BEAM0 - 0.0055), bevel=0.002, segments=2, panel=False)  # 12 mm diffuser
     for k, gl in enumerate(("Kit_GlowCool", "Kit_GlowCool", "Kit_GlowAmber")):      # status LEDs on the beam's front end
         uu = -0.03 + k * 0.025
         p.lathe("Kit_Lip", [(0.0045, 0.0), (0.0045, 0.0012), (0.0032, 0.0014)], (0.63, uu, AT - 0.05), axis=(1, 0, 0), seg=16)
@@ -389,7 +403,6 @@ def console_b(name, seed):
     p.sweep("Kit_Lip", [Vector((0.285, hu1 - 0.06, zt - 0.006)), Vector((0.29, hu1 - 0.06, zt - 0.001)), Vector((0.35, hu1 - 0.06, zt - 0.001)),
                         Vector((0.355, hu1 - 0.06, zt - 0.006))], 0.003, seg=12)                                    # its lever
     _label(p, "st_inspect", Vector((0.47, hu1 - 0.06, zt + 0.0004)), Z, X, Y, scale=0.45)
-    _label(p, "pn_9", Vector((0.12, hu0 + 0.07, zt + 0.0004)), Z, X, Y, scale=0.6)
     p.box("Kit_Lip", (0.28, hu1 - 0.07, zt - 0.006), (0.36, hu1 - 0.065, zt - 0.002), bevel=0.0015, segments=2)
     for xx in (hx0 + 0.05, hx1 - 0.16):
         c = Vector((xx, (hu0 + hu1) / 2, zt))
@@ -411,7 +424,7 @@ def console_b(name, seed):
         xr = fx0 + (fx1 - fx0) * (k + 1) / 4
         if k != 1:
             p.box("Kit_Inset", (xr - 0.0015, fu0 + 0.012, zt - 0.0005), (xr + 0.0015, fu1 - 0.012, zt + 0.0025), bevel=0.0012, segments=2, panel=False)
-    legend(p, "< OPEN >", Vector((0.32, hu1 - 0.0895, zt + 0.0002)), X, Y, Z, h=0.011)
+    legend(p, "< OPEN >", Vector((0.32, hu1 - 0.0895, zt + 0.0002)), X, Y, Z, h=0.013)
     # 15 mm hazard strips low on both pedestal sides (5 mm orange bars, 5 mm gaps, a dark band)
     for uf, ns_ in ((U0, -1), (W, 1)):
         fz0, fz1 = 0.081, 0.099
@@ -445,7 +458,7 @@ def console_b(name, seed):
            ("st_extpwr", (0.81, W + 0.0035, 0.46), Y, -X, 0.6), ("st_torque", (0.81, W + 0.0035, 0.3), Y, -X, 0.5),
            ("pn_6", (0.73, W + 0.0035, 0.42), Y, -X, 0.6), ("st_gnd", (L - 0.0155, (U0 + TU) / 2, 0.39), X, Y, 0.5),
            ("pn_8", (0.5, W + 0.0065, 0.16), Y, -X, 0.6),
-           ("st_torque", (1.11, TU - 0.0065, 0.6), -Y, X, 0.35), ("pn_5", (1.13, TU - 0.0065, 0.66), -Y, X, 0.5)]
+           ("st_torque", (1.11, TU - 0.0065, 0.6), -Y, X, 0.35)]
     for uf, ns_ in ((U0, -1), (W, 1)):                         # a polished 9 mm bead along the frame band (was rivet rows)
         ua, ub = sorted((uf, uf + ns_ * 0.003))
         p.box("Kit_FrameEdge", (0.02, ua, zb - 0.0045), (0.8, ub, zb + 0.0045), bevel=0.0015, segments=2, panel=False)
