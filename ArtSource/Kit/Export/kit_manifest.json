@@ -10159,7 +10159,7 @@
     21.4,
     52.6
    ],
-   "tris": 19280,
+   "tris": 19532,
    "tris_decals": 4,
    "tri_budget": 90000,
    "materials": [
@@ -10180,6 +10180,7 @@
     "Kit_Legend",
     "Kit_Leather",
     "Kit_GlowStrip",
+    "Kit_PanelPaint",
     "Kit_FrameEdge",
     "Kit_DecalPaint"
    ],
@@ -10195,7 +10196,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 8742,
+    "edge": 9246,
     "secondary": 0,
     "floor": 628,
     "seam": 0
@@ -10220,7 +10221,7 @@
     21.4,
     52.6
    ],
-   "tris": 19280,
+   "tris": 19532,
    "tris_decals": 4,
    "tri_budget": 90000,
    "materials": [
@@ -10241,6 +10242,7 @@
     "Kit_Legend",
     "Kit_Leather",
     "Kit_GlowStrip",
+    "Kit_PanelPaint",
     "Kit_FrameEdge",
     "Kit_DecalPaint"
    ],
@@ -10256,7 +10258,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 8742,
+    "edge": 9246,
     "secondary": 0,
     "floor": 628,
     "seam": 0
@@ -10272,16 +10274,16 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_ConsoleWall18W_L.fbx",
    "dims_m": [
-    1.85,
-    0.522,
+    1.851,
+    0.523,
     0.945
    ],
    "expected_size_cm": [
-    185.0,
-    52.2,
+    185.1,
+    52.3,
     94.5
    ],
-   "tris": 25252,
+   "tris": 25736,
    "tris_decals": 12,
    "tri_budget": 90000,
    "materials": [
@@ -10299,11 +10301,12 @@
     "Kit_Inset",
     "Kit_Legend",
     "Kit_GlowStrip",
+    "Kit_PanelPaint",
     "Kit_FrameEdge",
     "Kit_DecalPaint"
    ],
    "sockets": {},
-   "collision_hulls": 2,
+   "collision_hulls": 3,
    "decals": 3,
    "decal_items": [
     "st_service",
@@ -10315,9 +10318,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 14706,
+    "edge": 15498,
     "secondary": 0,
-    "floor": 1029,
+    "floor": 1188,
     "seam": 0
    },
    "status": "built"
@@ -10331,16 +10334,16 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_ConsoleWall18W_R.fbx",
    "dims_m": [
-    1.85,
-    0.522,
+    1.851,
+    0.523,
     0.945
    ],
    "expected_size_cm": [
-    185.0,
-    52.2,
+    185.1,
+    52.3,
     94.5
    ],
-   "tris": 25252,
+   "tris": 25736,
    "tris_decals": 12,
    "tri_budget": 90000,
    "materials": [
@@ -10358,11 +10361,12 @@
     "Kit_Inset",
     "Kit_Legend",
     "Kit_GlowStrip",
+    "Kit_PanelPaint",
     "Kit_FrameEdge",
     "Kit_DecalPaint"
    ],
    "sockets": {},
-   "collision_hulls": 2,
+   "collision_hulls": 3,
    "decals": 3,
    "decal_items": [
     "st_service",
@@ -10374,9 +10378,9 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 14706,
+    "edge": 15498,
     "secondary": 0,
-    "floor": 1029,
+    "floor": 1188,
     "seam": 0
    },
    "status": "built"

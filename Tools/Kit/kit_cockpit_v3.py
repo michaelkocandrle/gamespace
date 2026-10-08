@@ -27,6 +27,16 @@ WALL = [(15.2, 1.75), (16.5, 1.6), (18.6, 1.0)]     # the cockpit's port wall (W
 LINER = 0.1                                         # the lining's face inside the hull line
 CX0, CX1 = 16.0, 17.85                              # the console's aft end .. its front, tucked into the dash wing
 TOP = 0.70                                          # the console's top over the cockpit floor
+RX0 = 17.2                                          # the front ramp: from the tower's front ..
+RAMP = [(RX0, TOP), (17.62, 0.835), (CX1, 0.835)]   # .. up along the dash wing's top edge (z 0.66 .. 0.82 at x 17.3 ..
+                                                    # 17.62) into its shelf: console and dash read as one shape
+
+
+def ramp_z(x):
+    for (a, b), (c, e) in zip(RAMP, RAMP[1:]):
+        if a <= x <= c:
+            return b + (e - b) * (x - a) / (c - a)
+    return RAMP[-1][1] if x > RX0 else TOP
 
 
 def wall_y(x):
@@ -99,11 +109,11 @@ def boot(p, c, n, r0=0.035, r1=0.012, h=0.03, folds=4):
 # ------------------------------------------------------------------ the seat's arm
 def _seat_arm(name, seed):
     p = kit_geo.Part(name, seed)
-    p.edge_roles = {"Kit_Frame": "Kit_FrameEdge"}
+    p.edge_roles = {"Kit_Frame": "Kit_FrameEdge", "Kit_PanelPaint": "Kit_FrameEdge"}
     p.sharp_deg = 20.0
     x0, x1, y0, y1, at = 16.72, 17.42, 0.42, 0.58, 0.62
     beam = [(x0, 0.53), (x1 - 0.03, 0.53), (x1, 0.56), (x1, 0.598), (x1 - 0.015, 0.605), (x0 + 0.02, 0.605), (x0, 0.585)]
-    side_prism(p, "Kit_Frame", beam, y0, y1, 0.006, 1)
+    side_prism(p, "Kit_PanelPaint", beam, y0, y1, 0.01, 3)          # (shape pass 8. 10.) rounded, not a chamfered box
     # the forearm pad: leather on a graphite base, a domed top, a grey stitch in a dark channel
     p.box("Kit_Inset", (x0 + 0.015, y0 + 0.006, 0.603), (17.02, y1 - 0.006, 0.61), bevel=0.003, segments=2)
     p.box("Kit_Leather", (x0 + 0.02, y0 + 0.01, 0.608), (17.0, y1 - 0.01, at), bevel=0.01, segments=4)
@@ -127,7 +137,7 @@ def _seat_arm(name, seed):
     p.box("Kit_Seal", (x0 + 0.03, y1 - 0.002, 0.533), (x1 - 0.05, y1 + 0.0008, 0.545), panel=False)
     p.box("Kit_GlowStrip", (x0 + 0.033, y1 - 0.001, 0.5365), (x1 - 0.053, y1 + 0.0016, 0.5415), bevel=0.0008, segments=1, panel=False)
     # the bracket to the seat: a post under the arm and a plate on the seat's side, bolted
-    p.box("Kit_Frame", (16.87, y0 + 0.004, 0.3), (16.95, y0 + 0.045, 0.532), bevel=0.008, segments=3)
+    p.box("Kit_PanelPaint", (16.87, y0 + 0.004, 0.3), (16.95, y0 + 0.045, 0.532), bevel=0.014, segments=3)
     p.box("Kit_Lip", (16.81, 0.372, 0.28), (17.01, 0.428, 0.39), bevel=0.005, segments=3)
     for xx in (16.83, 16.99):
         for zz in (0.295, 0.375):
@@ -176,12 +186,32 @@ def _inner_frame(xa, xb, z, out=0.0):
 
 def _wall_console(name, seed):
     p = kit_geo.Part(name, seed)
-    p.edge_roles = {"Kit_Frame": "Kit_FrameEdge"}
+    p.edge_roles = {"Kit_Frame": "Kit_FrameEdge", "Kit_PanelPaint": "Kit_FrameEdge"}
     p.sharp_deg = 20.0
     xs = [CX0, 16.5, CX1]
     inner = [(x, inner_y(x)) for x in xs]
     outer = [(x, wall_y(x) - LINER + 0.02) for x in xs]     # 2 cm into the lining: no gap at the wall
-    p.poly_prism("Kit_Frame", inner + outer[::-1], frame(Vector((0, 0, TOP)), X, Y, Z), TOP, bevel=0.009, segments=1)
+    # (author 8. 10.: plastic boxes) the body in the panel paint with a 2 cm rounded top edge, to the ramp
+    bx = [CX0, 16.5, RX0]
+    b_in = [(x, inner_y(x)) for x in bx]
+    b_out = [(x, wall_y(x) - LINER + 0.02) for x in bx]
+    p.poly_prism("Kit_PanelPaint", b_in + b_out[::-1], frame(Vector((0, 0, TOP)), X, Y, Z), TOP, bevel=0.02, segments=3)
+    # the front ramp: rises along the dash wing's top edge into its shelf (one shape with the dash)
+    rv, rf = [], []
+    for (x, zt) in RAMP:
+        yi_, yo_ = inner_y(x), wall_y(x) - LINER + 0.02
+        rv += [Vector((x, yi_, 0.0)), Vector((x, yo_, 0.0)), Vector((x, yo_, zt)), Vector((x, yi_, zt))]
+    for k in range(len(RAMP) - 1):
+        a_, b_ = 4 * k, 4 * (k + 1)
+        rf += [(a_ + 3, a_ + 2, b_ + 2, b_ + 3),          # top
+               (a_ + 0, a_ + 3, b_ + 3, b_ + 0),          # inner face
+               (a_ + 1, b_ + 1, b_ + 2, a_ + 2),          # wall face
+               (a_ + 0, b_ + 0, b_ + 1, a_ + 1)]          # bottom
+    rf += [(0, 1, 2, 3), (len(rv) - 4, len(rv) - 1, len(rv) - 2, len(rv) - 3)]
+    p.mesh("Kit_PanelPaint", [tuple(v) for v in rv], [f[::-1] for f in rf])   # listed clockwise above: reversed
+    # a satin rail along the ramp's inner top edge, a seam where it meets the body
+    p.sweep("Kit_Lip", [Vector((x, inner_y(x) + 0.004, zt - 0.002)) for (x, zt) in RAMP], 0.0045, seg=10)
+    p.box("Kit_Seal", (RX0 - 0.0015, inner_y(RX0) + 0.004, TOP - 0.004), (RX0 + 0.0015, wall_y(RX0) - LINER - 0.004, TOP + 0.001), panel=False)
     # a dark kick 4 cm in along the floor
     kick = [(x, inner_y(x) + 0.035) for x in xs]
     p.poly_prism("Kit_Inset", kick + outer[::-1], frame(Vector((0, 0, 0.05)), X, Y, Z), 0.05, bevel=0.003, segments=1)
@@ -226,7 +256,7 @@ def _wall_console(name, seed):
     yo = wall_y(tx1) - LINER + 0.01
     th = 0.24
     prof = [(yi, TOP), (yo, TOP), (yo, TOP + th), (yi + 0.11, TOP + th), (yi, TOP + 0.08)]
-    end_prism(p, "Kit_Frame", prof, tx0, tx1, 0.008, 1)
+    end_prism(p, "Kit_PanelPaint", prof, tx0, tx1, 0.016, 3)
     a = Vector((0.0, 0.11, th - 0.08)).normalized()    # up the slope
     r = X
     nf = r.cross(a)                                    # out of the slope, to the seat and up
@@ -267,27 +297,35 @@ def _wall_console(name, seed):
     _label(p, "maker", Vector(((tx0 + tx1) / 2, yo - 0.0005 - 0.0, TOP + 0.15)), Y, -X, Z, scale=0.3)
     # 3 the front top towards the dash (critic r1: 3 modules): a graphite field sunk in a satin lip with four backlit
     # keys, two knurled selectors and a small grille, its legends
-    gx0, gx1 = 17.22, 17.68
+    # (shape pass 8. 10.) the module sits on the ramp's slope, facing the pilot
+    gx0, gx1 = RX0 + 0.03, 17.59
+    sa = Vector((RAMP[1][0] - RAMP[0][0], 0.0, RAMP[1][1] - RAMP[0][1])).normalized()   # up the slope
+    sn = Vector((-sa.z, 0.0, sa.x))                                                       # out of it, up and aft
     gu0, gu1 = inner_y(gx1) + 0.012, wall_y(gx1) - LINER - 0.012
     gm = (gu0 + gu1) / 2
-    p.box("Kit_Lip", (gx0, gu0, TOP - 0.001), (gx1, gu1, TOP + 0.004), bevel=0.0015, segments=2)
-    p.box("Kit_Inset", (gx0 + 0.006, gu0 + 0.006, TOP + 0.002), (gx1 - 0.006, gu1 - 0.006, TOP + 0.0045), panel=False)
+    go = Vector((gx0, gm, ramp_z(gx0)))
+    gl = (gx1 - gx0) / sa.x
+    gfm = frame(go, sa, Y, sn)
+    gv0, gv1 = gu0 - gm, gu1 - gm
+    p.box("Kit_Lip", (0.0, gv0, -0.001), (gl, gv1, 0.004), bevel=0.0015, segments=2, m=gfm)
+    p.box("Kit_Inset", (0.006, gv0 + 0.006, 0.002), (gl - 0.006, gv1 - 0.006, 0.0045), m=gfm, panel=False)
     for i, lab in enumerate(("DOOR", "RAMP", "LOCK", "CAB")):
-        q = Vector((gx0 + 0.04 + i * 0.05, gm, TOP + 0.0045 - 0.0055))
-        keycap(p, frame(q, -Y, X, Z), lab)
+        q = go + sa * (0.035 + i * 0.045) + sn * (0.0045 - 0.0055)
+        keycap(p, frame(q, -Y, sa, sn), lab)
     for i, lab in enumerate(("COOL", "VENT")):
-        c = Vector((gx0 + 0.26 + i * 0.065, gm + 0.004, TOP + 0.0045))
-        knob(p, c, Z)
-        legend(p, lab, c + Vector((0.0, -0.024, 0.0002)), X, Y, Z, h=0.0055)
-    p.box("Kit_Lip", (gx1 - 0.075, gm - 0.022, TOP + 0.0045), (gx1 - 0.012, gm + 0.022, TOP + 0.0065), bevel=0.0008, segments=1, panel=False)
-    p.box("Kit_Perforated", (gx1 - 0.072, gm - 0.019, TOP + 0.0063), (gx1 - 0.015, gm + 0.019, TOP + 0.0072), panel=False)
+        c = go + sa * (0.215 + i * 0.055) + Y * 0.004 + sn * 0.0045
+        knob(p, c, sn)
+        legend(p, lab, c - Y * 0.024 + sn * 0.0002, sa, Y, sn, h=0.0055)
+    p.box("Kit_Lip", (gl - 0.065, -0.022, 0.0045), (gl - 0.012, 0.022, 0.0065), bevel=0.0008, segments=1, m=gfm, panel=False)
+    p.box("Kit_Perforated", (gl - 0.062, -0.019, 0.0063), (gl - 0.015, 0.019, 0.0072), m=gfm, panel=False)
     # a satin strip along the top's inner edge
     for (xa, xb) in ((CX0, 16.5), (16.5, 17.75)):
-        o, t, n, ln = _inner_frame(xa, xb, TOP - 0.006, out=-0.004)
+        o, t, n, ln = _inner_frame(xa, min(xb, RX0), TOP - 0.006, out=-0.004)
         p.box("Kit_Lip", (0.0, 0.0, -0.002), (ln, 0.006, 0.0035), bevel=0.0012, segments=2, m=frame(o, t, Z, n), panel=False)
         o2, t2, n2, ln2 = _inner_frame(xa, xb, TOP - 0.016, out=0.0)
         p.box("Kit_GlowStrip", (0.01, -0.0025, -0.0005), (ln2 - 0.01, 0.0025, 0.0018), bevel=0.0006, segments=1, m=frame(o2, t2, Z, n2), panel=False)
-    p.collision_hull([Vector((x, y, z)) for (x, y) in inner + outer for z in (0.0, TOP + 0.02)])
+    p.collision_hull([Vector((x, y, z)) for (x, y) in b_in + b_out for z in (0.0, TOP + 0.02)])
+    p.collision_hull([Vector((x, y, z)) for (x, zt) in RAMP for y in (inner_y(x), wall_y(x) - LINER + 0.02) for z in (0.0, zt)])
     p.collision_box((tx0, yi, TOP), (tx1, yo, TOP + th))
     return p
 
