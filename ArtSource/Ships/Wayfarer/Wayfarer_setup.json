@@ -763,6 +763,8 @@
    "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
   },
   "MI_Ship_Wayfarer_IntTrim": {
+   "kit_material": "/Game/Kit/Materials/MI_Kit_Halcyon_Lip",
+   "_kit_material": "cockpit v3 r1 (8. 10. 2026): bezels, tubes, rails in the kit's satin polished lip - one metal with the consoles (the dark trim read as black poles)",
    "master": "layered",
    "vectors": {
     "PrimaryColor": [

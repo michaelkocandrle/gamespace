@@ -783,6 +783,8 @@ def stairs(g, fb, floor_faces, zc, x0=15.30, half_w=0.5, rise_max=0.195, tread=0
         p0 = Vector((x0 + 0.05, yr, rise + 0.9))
         p1 = Vector((x_top + 0.1, yr, zc + 0.9))
         cyl(g["int_trim"], p0, p1, 0.02, 12)
+        for t0 in (0.15, 0.62):                               # grip sleeves (cockpit v3 r1: bare black poles)
+            cyl(g["int_rubber"], p0.lerp(p1, t0), p0.lerp(p1, t0 + 0.18), 0.023, 16)
         for q in (p0, p1, p0.lerp(p1, 0.5)):
             # vertical posts down to the tread (or the cockpit floor) under them, with a foot flange: the upper
             # posts used to end on the side wall above its top - hanging in the air (critic, 25. 9. 2026)
@@ -1321,7 +1323,8 @@ def build(recipe, layout, coll, mats, ship, hull):
         cut.free()
         if ribs.verts:
             ob = hp.finish(ribs, "SM_Ship_%s_Int_LinerRibs" % ship, coll, {"angle_deg": 40, "width": 0.002, "segments": 1})
-            ob.data.materials.append(mats["int_console"])
+            # graphite against the glossy white lining (cockpit v3 r1: the ribs in the lining's paint did not read)
+            ob.data.materials.append(mats["int_dark"])
             objs.append(ob)
     if lb.faces:
         me = bpy.data.meshes.new("SM_Ship_%s_Int_Liner" % ship)

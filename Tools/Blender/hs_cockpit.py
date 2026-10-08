@@ -1530,6 +1530,9 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
         # edge, a status LED on the active ones (amber on two), separator ribs between the wells
         rr_slab(g["int_trim"], kc + n * 0.003, right, up, n, 0.37, 0.046, 0.008, 0.006, 3)
         rr_slab(g["int_dark"], kc + n * 0.0035, right, up, n, 0.36, 0.038, 0.006, 0.002, 3)
+        # (cockpit v3 r1, critic: a light line under the MFD panel across its width) a cool line in a dark channel
+        rr_slab(g["int_dark"], kc - up * 0.04 + n * 0.0025, right, up, n, 0.37, 0.012, 0.002, 0.002, 2)
+        rr_slab(g["int_glow_soft"], kc - up * 0.04 + n * 0.0035, right, up, n, 0.35, 0.004, 0.0015, 0.0015, 2)
         for k in range(7):
             p = kc + right * (-0.15 + k * 0.05)
             rr_slab(g["int_dark"], p + n * 0.0015, right, up, n, 0.04, 0.032, 0.005, 0.005, 3)                 # the well

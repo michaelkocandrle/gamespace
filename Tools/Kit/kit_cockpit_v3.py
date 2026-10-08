@@ -56,6 +56,46 @@ def _built(fn, name, seed, mirror):
     return p
 
 
+def guarded_toggle(p, c, r, a, n):
+    """A toggle under a hinged red guard (22 x 30 mm) in a satin bezel, its black-yellow field."""
+    fm = frame(c, r, a, n)
+    p.box("Kit_Lip", (-0.013, -0.017, 0.0), (0.013, 0.017, 0.003), bevel=0.0012, segments=2, m=fm)
+    p.box("Kit_Seal", (-0.010, -0.014, 0.0028), (0.010, 0.014, 0.0034), m=fm, panel=False)
+    p.lathe("Kit_Lip", [(0.0035, 0.0), (0.0035, 0.004), (0.0015, 0.012), (0.0, 0.0125)], tuple(fm @ Vector((0.0, -0.002, 0.003))), axis=tuple(n), seg=12)
+    p.box("Kit_Red", (-0.011, -0.015, 0.016), (0.011, 0.015, 0.0175), bevel=0.0008, segments=1, m=fm)
+    for sv in (-1, 1):
+        p.box("Kit_Red", (sv * 0.011 - 0.001, -0.015, 0.0034), (sv * 0.011 + 0.001, 0.015, 0.0175), m=fm, panel=False)
+    p.box("Kit_Red", (-0.011, 0.014, 0.0034), (0.011, 0.015, 0.0175), m=fm, panel=False)
+    for k in range(5):                                   # the black-yellow field under it
+        p.box("Kit_Signal", (-0.016 + k * 0.0065, -0.024, 0.0), (-0.013 + k * 0.0065, -0.019, 0.0012), m=fm, panel=False)
+
+
+def knob(p, c, n, r=0.011):
+    """A knurled rotary selector: a satin skirt, a graphite knob with ribs, a lit index line."""
+    n = Vector(n)
+    p.lathe("Kit_Lip", [(r + 0.004, 0.0), (r + 0.004, 0.002), (r + 0.002, 0.003)], tuple(c), axis=tuple(n), seg=24)
+    p.lathe("Kit_Inset", [(r, 0.002), (r, 0.012), (r * 0.85, 0.016), (0.0, 0.0165)], tuple(c), axis=tuple(n), seg=24)
+    t = Vector((1, 0, 0)) if abs(n.x) < 0.9 else Vector((0, 1, 0))
+    b = n.cross(t).normalized()
+    t = b.cross(n).normalized()
+    for k in range(16):
+        ang = 2 * math.pi * k / 16
+        q = Vector(c) + (t * math.cos(ang) + b * math.sin(ang)) * r
+        p.sweep("Kit_Housing", [q + n * 0.003, q + n * 0.011], 0.0009, seg=4)
+    p.box("Kit_GlowCool", (-0.0007, 0.002, 0.0164), (0.0007, r * 0.8, 0.0168), m=frame(Vector(c), t, b, n), panel=False)
+
+
+def boot(p, c, n, r0=0.035, r1=0.012, h=0.03, folds=4):
+    """A folded rubber boot round the stick's neck."""
+    prof = [(r0, 0.0)]
+    for k in range(folds * 2):
+        t = (k + 1) / (folds * 2)
+        rr = r0 + (r1 - r0) * t + (0.004 if k % 2 == 0 else -0.002)
+        prof.append((rr, h * t))
+    prof.append((0.0, h))
+    p.lathe("Kit_Gasket", prof, tuple(c), axis=tuple(n), seg=32)
+
+
 # ------------------------------------------------------------------ the seat's arm
 def _seat_arm(name, seed):
     p = kit_geo.Part(name, seed)
@@ -92,6 +132,29 @@ def _seat_arm(name, seed):
         for zz in (0.25, 0.39):
             screw(p, Vector((xx, 0.4285, zz)), Y, 0.0045)
     _label(p, "st_hfcl", Vector((17.2, y1 + 0.0005, 0.565)), Y, -X, Z, scale=0.35)
+    # (cockpit v3 r1, critic: one detail where SC has five) a satin strip along the top's outer edge, perforation in
+    # the pad's middle band, two screwed graphite side panels with a grille between, a light line and an LED on the
+    # front, a folded rubber boot round the stick, a guarded toggle by the keys, the serial plate
+    p.box("Kit_Lip", (x0 + 0.02, y1 - 0.009, 0.603), (x1 - 0.02, y1 - 0.001, 0.607), bevel=0.0012, segments=2, panel=False)
+    for i in range(int((16.97 - x0 - 0.06) / 0.006)):
+        for j in range(5):
+            hx, hu = x0 + 0.05 + i * 0.006, (y0 + y1) / 2 - 0.012 + j * 0.006 + (0.003 if i % 2 else 0.0)
+            p.box("Kit_Seal", (hx - 0.001, hu - 0.001, at + 0.0058), (hx + 0.001, hu + 0.001, at + 0.0066), panel=False)
+    for (sa, sb) in ((x0 + 0.03, x0 + 0.21), (x0 + 0.29, x0 + 0.47)):
+        p.box("Kit_Inset", (sa, y1 - 0.002, 0.545), (sb, y1 + 0.004, 0.597), bevel=0.002, segments=2)
+        for xx in (sa + 0.01, sb - 0.01):
+            for zz in (0.553, 0.589):
+                screw(p, Vector((xx, y1 + 0.0045, zz)), Y, 0.0035)
+    p.box("Kit_Lip", (x0 + 0.215, y1 - 0.001, 0.55), (x0 + 0.285, y1 + 0.0035, 0.592), bevel=0.001, segments=1, panel=False)
+    p.box("Kit_Perforated", (x0 + 0.219, y1 + 0.0032, 0.554), (x0 + 0.281, y1 + 0.0042, 0.588), panel=False)
+    p.box("Kit_Seal", (x1 + 0.0002, y0 + 0.02, 0.566), (x1 + 0.0016, y1 - 0.02, 0.576), panel=False)
+    p.box("Kit_GlowStrip", (x1 + 0.0012, y0 + 0.024, 0.5685), (x1 + 0.0028, y1 - 0.045, 0.5735), bevel=0.0006, segments=1, panel=False)
+    led(p, Vector((x1 + 0.0016, y1 - 0.03, 0.571)), X, glow="Kit_GlowAmber", r=0.0024)
+    boot(p, Vector((17.33, (y0 + y1) / 2, 0.609)), Z)
+    guarded_toggle(p, Vector((17.225, y0 + 0.03, 0.6055)), -Y, X, Z)
+    p.box("Kit_Lip", (x0 + 0.5, y1 - 0.0005, 0.5465), (x0 + 0.62, y1 + 0.0018, 0.5655), bevel=0.0005, segments=1, panel=False)
+    p.box("Kit_Legend", (x0 + 0.502, y1 + 0.0012, 0.548), (x0 + 0.618, y1 + 0.0022, 0.564), panel=False)
+    legend(p, "HF-SA 07  SN 2214", Vector((x0 + 0.56, y1 + 0.0022, 0.556)), -X, Z, Y, h=0.0055, role="Kit_Seal")
     p.collision_box((x0, y0, 0.22), (x1, y1, 0.68))
     return p
 
@@ -179,6 +242,14 @@ def _wall_console(name, seed):
             rocker_b(p, q, r, a, nf, lit="Kit_GlowAmber" if lab == "GEAR" else "Kit_GlowCool")
             legend(p, lab, q - a * 0.027 + nf * 0.0002, r, a, nf, h=0.0068)
     emergency_key(p, fc + r * 0.135 + a * 0.0 + nf * 0.002, r, a, nf)
+    # the tower's seat-facing foot (TOP .. TOP + 0.08): a light line, a plate; two seams across its top
+    p.box("Kit_Seal", (tx0 + 0.02, yi - 0.0012, TOP + 0.035), (tx1 - 0.02, yi + 0.0004, TOP + 0.047), panel=False)
+    p.box("Kit_GlowStrip", (tx0 + 0.023, yi - 0.0026, TOP + 0.0385), (tx1 - 0.023, yi - 0.0006, TOP + 0.0435), bevel=0.0006, segments=1, panel=False)
+    p.box("Kit_Lip", (tx0 + 0.03, yi - 0.0012, TOP + 0.054), (tx0 + 0.12, yi + 0.0004, TOP + 0.072), bevel=0.0005, segments=1, panel=False)
+    p.box("Kit_Legend", (tx0 + 0.032, yi - 0.0018, TOP + 0.0555), (tx0 + 0.118, yi - 0.0008, TOP + 0.0705), panel=False)
+    legend(p, "PWR MGMT", Vector((tx0 + 0.075, yi - 0.0018, TOP + 0.063)), X, Z, -Y, h=0.0068, role="Kit_Seal")
+    for xs_ in (tx0 + 0.15, tx1 - 0.15):
+        p.box("Kit_Seal", (xs_ - 0.001, yi + 0.115, TOP + th - 0.0006), (xs_ + 0.001, yo - 0.005, TOP + th + 0.0004), panel=False)
     # the status bars on the tower's top, read from the seat
     sc = Vector(((tx0 + tx1) / 2, (yi + 0.11 + yo) / 2, TOP + th + 0.0005))
     p.box("Kit_Lip", (sc.x - 0.075, sc.y - 0.04, sc.z - 0.001), (sc.x + 0.075, sc.y + 0.04, sc.z + 0.003), bevel=0.0015, segments=2)
@@ -193,14 +264,26 @@ def _wall_console(name, seed):
                   (x0_, -0.0035, 0.0), (x0_ + 0.0055, 0.0035, 0.0007 if on else 0.0003), m=fm(q), panel=False)
         legend(p, lab, q - X * 0.026 + Z * 0.0002, X, Y, Z, h=0.007)
     _label(p, "maker", Vector(((tx0 + tx1) / 2, yo - 0.0005 - 0.0, TOP + 0.15)), Y, -X, Z, scale=0.3)
-    # 3 the front top towards the dash: an intake grille in a lip
-    gx0, gx1 = 17.24, 17.7
-    p.box("Kit_Lip", (gx0, inner_y(gx1) + 0.015, TOP - 0.001), (gx1, wall_y(gx1) - LINER - 0.015, TOP + 0.004), bevel=0.0015, segments=2)
-    k = 0
-    xx = gx0 + 0.012
-    while xx + 0.012 < gx1 - 0.008:
-        p.box("Kit_Housing", (xx, inner_y(gx1) + 0.022, TOP + 0.004), (xx + 0.01, wall_y(gx1) - LINER - 0.022, TOP + 0.01), bevel=0.0025, segments=2, panel=False)
-        xx += 0.02
+    # 3 the front top towards the dash (critic r1: 3 modules): a graphite field sunk in a satin lip with four backlit
+    # keys, two knurled selectors and a small grille, its legends
+    gx0, gx1 = 17.22, 17.68
+    gu0, gu1 = inner_y(gx1) + 0.012, wall_y(gx1) - LINER - 0.012
+    gm = (gu0 + gu1) / 2
+    p.box("Kit_Lip", (gx0, gu0, TOP - 0.001), (gx1, gu1, TOP + 0.004), bevel=0.0015, segments=2)
+    p.box("Kit_Inset", (gx0 + 0.006, gu0 + 0.006, TOP + 0.002), (gx1 - 0.006, gu1 - 0.006, TOP + 0.0045), panel=False)
+    for i, lab in enumerate(("DOOR", "RAMP", "LOCK", "CAB")):
+        q = Vector((gx0 + 0.04 + i * 0.05, gm, TOP + 0.0045 - 0.0055))
+        keycap(p, frame(q, -Y, X, Z), lab)
+    for i, lab in enumerate(("COOL", "VENT")):
+        c = Vector((gx0 + 0.26 + i * 0.065, gm + 0.004, TOP + 0.0045))
+        knob(p, c, Z)
+        legend(p, lab, c + Vector((0.0, -0.024, 0.0002)), X, Y, Z, h=0.0055)
+    p.box("Kit_Lip", (gx1 - 0.075, gm - 0.022, TOP + 0.0045), (gx1 - 0.012, gm + 0.022, TOP + 0.0065), bevel=0.0008, segments=1, panel=False)
+    p.box("Kit_Perforated", (gx1 - 0.072, gm - 0.019, TOP + 0.0063), (gx1 - 0.015, gm + 0.019, TOP + 0.0072), panel=False)
+    # a satin strip along the top's inner edge
+    for (xa, xb) in ((CX0, 16.5), (16.5, 17.75)):
+        o, t, n, ln = _inner_frame(xa, xb, TOP - 0.006, out=-0.004)
+        p.box("Kit_Lip", (0.0, 0.0, -0.002), (ln, 0.006, 0.0035), bevel=0.0012, segments=2, m=frame(o, t, Z, n), panel=False)
     p.collision_hull([Vector((x, y, z)) for (x, y) in inner + outer for z in (0.0, TOP + 0.02)])
     p.collision_box((tx0, yi, TOP), (tx1, yo, TOP + th))
     return p

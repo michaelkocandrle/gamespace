@@ -39,15 +39,15 @@
     "SM_Ship_Wayfarer_Screens"
   ],
   "imported_hashes": {
-    "SM_Ship_Wayfarer": "6a9159d743a504c735fffb5a8290d5cee3da8d6e",
+    "SM_Ship_Wayfarer": "7f4f2d3b3f433701876724a7f035869bbf948748",
     "SM_Ship_Wayfarer_Canopy": "879389a2da32c2818440c8370cc947c38af0759c",
-    "SM_Ship_Wayfarer_Decals": "d0abbb0b18e1efe4a3feb3fd29a7b3ec01875601",
+    "SM_Ship_Wayfarer_Decals": "2d459121eff971d759279b35de98d5804cbe50c8",
     "SM_Ship_Wayfarer_Door0A": "f593dd2e91e797e067daf38767cd9fe81d9cea12",
     "SM_Ship_Wayfarer_Door1A": "e399533e241926e1610ed1e6957b7139fb21cc10",
     "SM_Ship_Wayfarer_Gear": "7dc7e8ec1f70b6d335d5d82d424f2e9d8b4d85bf",
     "SM_Ship_Wayfarer_Hologram": "7f42a610def6af75b04036c4eeda939904c09720",
-    "SM_Ship_Wayfarer_Interior": "4d047b7bc34db91e8b5bcf9163e8d8384617b0f6",
-    "SM_Ship_Wayfarer_InteriorDecals": "7f1cf134a692569fd803b5bd897bc1d595add575",
+    "SM_Ship_Wayfarer_Interior": "242b4de4eff8dbc105d23e75530fe2bea37c05df",
+    "SM_Ship_Wayfarer_InteriorDecals": "392c1190a7894a4216c43c431af2a1a1d00558af",
     "SM_Ship_Wayfarer_InteriorKit": "7c6de1d8613fe23f6b2058b655890a31c906a456",
     "SM_Ship_Wayfarer_Screens": "29bd74890f17ced11ecc83214a968570f967996f"
   },
@@ -198,7 +198,7 @@
       "light Light_fix_29 (point, 0.294 cd) at [769.4, 37.2, 78.7]",
       "light Light_fix_30 (point, 0.294 cd) at [769.4, -37.2, 78.7]",
       "light Light_fix_31 (point, 0.192 cd) at [758.5, -87.6, 86.4]",
-      "light Light_fix_32 (point, 0.192 cd) at [758.6, 87.5, 86.3]",
+      "light Light_fix_32 (point, 0.192 cd) at [758.6, 87.6, 86.3]",
       "light Light_fix_33 (point, 0.141 cd) at [724.4, 109.5, 66.1]",
       "light Light_fix_34 (point, 0.141 cd) at [724.7, -108.3, 64.9]"
     ]
