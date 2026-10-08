@@ -116,6 +116,7 @@ def _seat_arm(name, seed):
             xx += 0.006
     # 2 x 2 backlit keys and the stick ahead of the pad
     kc = Vector((17.115, (y0 + y1) / 2, 0.605))
+    p.box("Kit_Inset", (17.03, y0 + 0.008, 0.6025), (x1 - 0.012, y1 - 0.012, 0.6052), bevel=0.0015, segments=2, panel=False)   # the controls' field
     p.box("Kit_Lip", (17.055, y0 + 0.012, 0.603), (17.175, y1 - 0.012, 0.607), bevel=0.0015, segments=2)
     for i, lab in enumerate(("LT", "GR", "VT", "ESP")):
         q = kc + X * (0.026 * (1 if i % 2 else -1)) + Y * (0.0245 * (1 if i < 2 else -1))
@@ -126,11 +127,11 @@ def _seat_arm(name, seed):
     p.box("Kit_Seal", (x0 + 0.03, y1 - 0.002, 0.533), (x1 - 0.05, y1 + 0.0008, 0.545), panel=False)
     p.box("Kit_GlowStrip", (x0 + 0.033, y1 - 0.001, 0.5365), (x1 - 0.053, y1 + 0.0016, 0.5415), bevel=0.0008, segments=1, panel=False)
     # the bracket to the seat: a post under the arm and a plate on the seat's side, bolted
-    p.box("Kit_Housing", (16.85, y0 + 0.005, 0.24), (16.97, y0 + 0.06, 0.532), bevel=0.006, segments=3)
-    p.box("Kit_Housing", (16.76, 0.398, 0.22), (17.06, 0.428, 0.42), bevel=0.006, segments=3)
-    for xx in (16.79, 17.03):
-        for zz in (0.25, 0.39):
-            screw(p, Vector((xx, 0.4285, zz)), Y, 0.0045)
+    p.box("Kit_Frame", (16.87, y0 + 0.004, 0.3), (16.95, y0 + 0.045, 0.532), bevel=0.008, segments=3)
+    p.box("Kit_Lip", (16.81, 0.372, 0.28), (17.01, 0.428, 0.39), bevel=0.005, segments=3)
+    for xx in (16.83, 16.99):
+        for zz in (0.295, 0.375):
+            screw(p, Vector((xx, 0.4285, zz)), Y, 0.004)
     _label(p, "st_hfcl", Vector((17.2, y1 + 0.0005, 0.565)), Y, -X, Z, scale=0.35)
     # (cockpit v3 r1, critic: one detail where SC has five) a satin strip along the top's outer edge, perforation in
     # the pad's middle band, two screwed graphite side panels with a grille between, a light line and an LED on the
@@ -291,3 +292,40 @@ def _wall_console(name, seed):
 
 def wall_console(name, seed, mirror=False):
     return _built(_wall_console, name, seed, mirror)
+
+
+# ------------------------------------------------------------------ the seat back's shell
+def seat_back(name, seed):
+    """The pilot seat's back from behind (cockpit v3 r1, critic: a black slab): a glossy shell on the back's 8 deg
+    slope (measured off PilotSeat.glb as placed: x 16.636 at 0.45 m, 16.55 at 1.05 m), a graphite inset in four
+    fields, the mechanism cover with screws, the serial plate and a black-yellow field, a light line under the top."""
+    p = kit_geo.Part(name, seed)
+    p.edge_roles = {"Kit_Frame": "Kit_FrameEdge"}
+    p.sharp_deg = 20.0
+    u = Vector((-0.086, 0.0, 0.6)).normalized()           # up the back
+    n = Vector((-u.z, 0.0, u.x))                           # out of it, aft
+    r = u.cross(n)                                         # right x up = out: the viewer behind sees -y as right
+    r = -r if r.dot(Vector((0, -1, 0))) < 0 else r
+    o = Vector((16.636 - 0.143 * (0.74 - 0.45), 0.0, 0.74)) + n * 0.003
+    fm = lambda q: frame(q, r, u, n)                       # noqa: E731
+    p.box("Kit_Frame", (-0.2, -0.3, -0.006), (0.2, 0.3, 0.012), bevel=0.01, segments=3, m=fm(o))
+    for (a0, a1, b0, b1) in ((-0.15, -0.002, 0.02, 0.24), (0.002, 0.15, 0.02, 0.24), (-0.15, -0.002, -0.2, 0.016), (0.002, 0.15, -0.2, 0.016)):
+        p.box("Kit_Inset", (a0, b0, 0.011), (a1, b1, 0.015), bevel=0.002, segments=2, m=fm(o))
+    for su in (-1, 1):
+        for sv in (-1, 1):
+            screw(p, fm(o) @ Vector((su * 0.175, sv * 0.27, 0.0125)), n, 0.004)
+    # the mechanism cover at the bottom
+    p.box("Kit_Housing", (-0.08, -0.29, 0.012), (0.08, -0.21, 0.03), bevel=0.006, segments=3, m=fm(o))
+    for su in (-1, 1):
+        for sv in (-1, 1):
+            screw(p, fm(o) @ Vector((su * 0.068, -0.25 + sv * 0.028, 0.0302)), n, 0.0035)
+    for k in range(6):                                     # the black-yellow field over it
+        p.box("Kit_Signal", (-0.04 + k * 0.014, -0.205, 0.012), (-0.033 + k * 0.014, -0.188, 0.0135), m=fm(o), panel=False)
+    p.box("Kit_Lip", (0.03, 0.25, 0.0118), (0.13, 0.28, 0.0135), bevel=0.0005, segments=1, m=fm(o), panel=False)
+    p.box("Kit_Legend", (0.032, 0.252, 0.0128), (0.128, 0.278, 0.0142), m=fm(o), panel=False)
+    legend(p, "PS-07  SN 0417", fm(o) @ Vector((0.08, 0.265, 0.0142)), r, u, n, h=0.0075, role="Kit_Seal")
+    p.box("Kit_Seal", (-0.16, 0.255, 0.0118), (-0.02, 0.271, 0.0132), m=fm(o), panel=False)
+    p.box("Kit_GlowStrip", (-0.157, 0.259, 0.0128), (-0.023, 0.267, 0.0145), bevel=0.0008, segments=1, m=fm(o), panel=False)
+    _label(p, "maker", fm(o) @ Vector((0.0, -0.06, 0.0151)), n, r, u, scale=0.45)
+    p.collision_box(tuple(fm(o) @ Vector((-0.2, -0.3, -0.006))), tuple(fm(o) @ Vector((0.2, 0.3, 0.03))))
+    return p

@@ -2880,7 +2880,8 @@
   [[1.6, 0.0], [1, 0], ["Ceiling_Panel06L41_B", "Ceiling_Panel12L41_A", "Ceiling_Panel12L41_C", "Ceiling_Panel12L41_A", "Ceiling_Panel12L41_C", "Ceiling_Panel12L41_A"]],
     [[0.0, 0.0, 1.15], [1, 0], ["Cockpit_SeatArm07W_R"]],
     [[0.0, 0.0, 1.15], [1, 0], ["Cockpit_ConsoleWall18W_L"]],
-    [[0.0, 0.0, 1.15], [1, 0], ["Cockpit_ConsoleWall18W_R"]]
+    [[0.0, 0.0, 1.15], [1, 0], ["Cockpit_ConsoleWall18W_R"]],
+    [[0.0, 0.0, 1.15], [1, 0], ["Cockpit_SeatBack07W_A"]]
  ]
   },
   "kit": {
@@ -3000,6 +3001,8 @@
    "_centre_screens": "author 8. 10. 2026: the two small centre screens go, a 3D holographic radar over the emitter (socket Control_radar) instead",
    "pinstripe_inset_m": 0.07,
    "seam_x": [15.6, 16.0, 16.4, 16.8, 17.2, 17.6, 18.0, 18.4],
+   "seam_z": [1.95, 2.3],
+   "_seam_z": "cockpit v3 r2 (critic: the fields between the ribs flat) - horizontal graphite seams across the lining",
    "_seam_x": "cockpit v3 r1 (8. 10. 2026, critic: panels at most 600 x 400 mm) - a graphite rib every 40 cm",
    "pod_bulge": 0.03,
    "frame_wash_cd": 4.0,

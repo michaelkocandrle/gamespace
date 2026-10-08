@@ -10151,15 +10151,15 @@
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_SeatArm07W_L.fbx",
    "dims_m": [
     0.705,
-    0.188,
-    0.586
+    0.214,
+    0.526
    ],
    "expected_size_cm": [
     70.5,
-    18.8,
-    58.6
+    21.4,
+    52.6
    ],
-   "tris": 19172,
+   "tris": 19280,
    "tris_decals": 4,
    "tri_budget": 90000,
    "materials": [
@@ -10195,7 +10195,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 8550,
+    "edge": 8742,
     "secondary": 0,
     "floor": 628,
     "seam": 0
@@ -10212,15 +10212,15 @@
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_SeatArm07W_R.fbx",
    "dims_m": [
     0.705,
-    0.188,
-    0.586
+    0.214,
+    0.526
    ],
    "expected_size_cm": [
     70.5,
-    18.8,
-    58.6
+    21.4,
+    52.6
    ],
-   "tris": 19172,
+   "tris": 19280,
    "tris_decals": 4,
    "tri_budget": 90000,
    "materials": [
@@ -10256,7 +10256,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 8550,
+    "edge": 8742,
     "secondary": 0,
     "floor": 628,
     "seam": 0
@@ -10377,6 +10377,55 @@
     "edge": 14562,
     "secondary": 0,
     "floor": 1029,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Cockpit_SeatBack07W_A": {
+   "category": "Cockpit",
+   "family": "Cockpit_SeatBack",
+   "section": "W",
+   "length_m": 0.7,
+   "variant": "A",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_SeatBack07W_A.fbx",
+   "dims_m": [
+    0.101,
+    0.4,
+    0.594
+   ],
+   "expected_size_cm": [
+    10.1,
+    40.0,
+    59.4
+   ],
+   "tris": 3340,
+   "tris_decals": 10,
+   "tri_budget": 90000,
+   "materials": [
+    "Kit_Signal",
+    "Kit_Seal",
+    "Kit_Lip",
+    "Kit_Housing",
+    "Kit_Frame",
+    "Kit_Inset",
+    "Kit_Legend",
+    "Kit_GlowStrip",
+    "Kit_FrameEdge",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 1,
+   "decal_items": [
+    "maker"
+   ],
+   "service_labels": [],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 1632,
+    "secondary": 0,
+    "floor": 0,
     "seam": 0
    },
    "status": "built"

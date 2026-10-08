@@ -1,0 +1,84 @@
+{
+ "topic": "cockpit_v3",
+ "date": "2026-10-08",
+ "goal": "Wayfarer cockpit v3 (author 8. 10. 2026, approved plan ArtSource/Ships/Wayfarer/Concept/Cockpit/cockpit_layout_v3_proposal.png): sticks on the seat arms, thin wall consoles running into the dash wings, aisles round the seat, tread plates with light lines; the cockpit's surfaces in one glossy light paint (the author loves the white glossy column under the holo radar), graphite insets, cool light lines, a 3D holo radar. The author wants MUCH more detail everywhere, SC level. Find the highest-impact detail gaps per surface (dash, wall consoles, seat arms, floor, walls, canopy frame) with concrete measurable fixes. Round 2 changes: seat arms (satin top edge, pad perforation, screwed side panels and a grille, a front light line and LED, a folded rubber boot, a guarded toggle, a serial plate); wall console front module (4 backlit keys, 2 knurled selectors, a grille), a satin inner edge, the tower a light line, a PWR MGMT plate and seams; graphite liner ribs every 40 cm on the walls; bezels, tubes and rails in the kit satin metal; rubber grips on the stair rails; a light line under the MFD key rows; denser wall decals. Not yet: canopy frame, seat back, MFD frames.",
+ "style": "Úroveň SC, ne přesná kopie. Halcyon: bílý lesklý lak, grafitové vložky, studené světelné linky, oranžové akcenty jen na madlech a logu. Díly jsou nové z výroby – žádné opotřebení ani špína.",
+ "checklist": "interior",
+ "gate": "step",
+ "out": "Docs/Reviews/2026-10-08_cockpit_v3_r2",
+ "notes": [
+  "Díly jsou nové z výroby záměrně: nežádej opotřebení, škrábance ani špínu.",
+  "Reference SC jsou styl a úroveň detailu, ne rozměry.",
+  "Hodnoť hlavně hustotu a kvalitu detailu (vrstvení, panely, spáry, šrouby, štítky, světla) – autor chce víc detailu všude."
+ ],
+ "etalon": [
+  {
+   "img": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "label": "SC konzole"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/kreslo_2.jpg",
+   "label": "SC křeslo"
+  },
+  {
+   "img": "Docs/Kit/etalon/sc/podlaha_2.jpg",
+   "label": "SC podlaha"
+  }
+ ],
+ "pairs": [
+  {
+   "title": "1 Pohled pilota dopředu",
+   "distance": "far",
+   "light": "game",
+   "ref": "Docs/Kit/etalon/sc/mfd_1.jpg",
+   "ref_label": "SC",
+   "ours": "C:/gamespace-shots/20261008_182620_cockpit/01_cockpit_planet.png",
+   "ours_label": "Wayfarer v3"
+  },
+  {
+   "title": "2 Levá loketní opěrka s kniplem",
+   "distance": "near",
+   "light": "game",
+   "ref": "Docs/Kit/etalon/sc/konzole_3.jpg",
+   "ref_label": "SC",
+   "ours": "C:/gamespace-shots/20261008_182710_cockpit_audit/03_left_console.png",
+   "ours_label": "Wayfarer v3"
+  },
+  {
+   "title": "3 Konzole u stěny a věž (pohled pilota doleva)",
+   "distance": "mid",
+   "light": "game",
+   "ref": "Docs/Kit/etalon/sc/konzole_1.jpg",
+   "ref_label": "SC",
+   "ours": "C:/gamespace-shots/20261008_182620_cockpit/04_cockpit_look_left.png",
+   "ours_label": "Wayfarer v3"
+  },
+  {
+   "title": "4 Levá ulička k palubní desce",
+   "distance": "mid",
+   "light": "game",
+   "ref": "Docs/Kit/etalon/sc/podlaha_1.jpg",
+   "ref_label": "SC",
+   "ours": "C:/gamespace-shots/20261008_182646_cockpit_v3/03_aisle_left.png",
+   "ours_label": "Wayfarer v3"
+  },
+  {
+   "title": "5 Kokpit zezadu shora (křeslo, opěrky, uličky)",
+   "distance": "mid",
+   "light": "game",
+   "ref": "Docs/Kit/etalon/sc/kreslo_2.jpg",
+   "ref_label": "SC",
+   "ours": "C:/gamespace-shots/20261008_182646_cockpit_v3/02_rear_high.png",
+   "ours_label": "Wayfarer v3"
+  },
+  {
+   "title": "6 Palubní deska a MFD",
+   "distance": "mid",
+   "light": "game",
+   "ref": "Docs/Kit/etalon/sc/centralni_displej_1.jpg",
+   "ref_label": "SC",
+   "ours": "C:/gamespace-shots/20261008_182620_cockpit/03_cockpit_hud_off.png",
+   "ours_label": "Wayfarer v3"
+  }
+ ]
+}

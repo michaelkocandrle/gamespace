@@ -16,6 +16,7 @@
   "Cockpit_SeatArm07W_R": "Pravá loketní opěrka křesla (zrcadlo levé): opěrka předloktí, klávesy, knipl letu.",
   "Cockpit_ConsoleWall18W_L": "Levá konzole u stěny napojená na palubní desku: servisní poklop, věž s nouzovou klávesou, kolébkami napájení, světel, motorů, podvozku a VTOL, stavové pruhy, sání chlazení, světelné linky podél uličky.",
   "Cockpit_ConsoleWall18W_R": "Pravá konzole u stěny (zrcadlo levé) napojená na palubní desku.",
+  "Cockpit_SeatBack07W_A": "Kryt zadní strany pilotního křesla: lesklá skořepina s grafitovými poli, kryt mechanismu se šrouby, typový štítek, výstražné pole, světelná linka.",
   "Cockpit_Console12W_BR": "Pravá loketní konzole pilota (díl továrny, zrcadlo varianty B): knipl letu na loketní jednotce s opěrkou předloktí, věž s nouzovou klávesou pod krytem a kolébkami, kolébky světel, podvozku a VTOL, klávesy, stavový pás, sání chlazení, servisní poklop, madlo; světelné linky místo výstražných pásů.",
   "Wall_ComponentBay12W_A": "Výklenek reaktoru S1 ve stěně: posuvné křídlo výklenku, ve hře otevřené v kapse u levé líce (hrana s oranžovým pruhem a madlem), reaktor na saních na výsuvných kolejnicích, stavová obrazovka, kabely a chlazení do výklenku, světlo výklenku.",
   "Wall_ComponentBay06W_B": "Výklenek chladiče S1: žebrované jádro ve spodním výklenku s otevřeným posuvným křídlem, výfukový kanál za stěnou nahoru ke kořeni křídla, světlo výklenku.",
@@ -261,7 +262,8 @@
     ],
     [["CPT-CO-02", "Cockpit_SeatArm07W_R"]],
     [["CPT-CO-03", "Cockpit_ConsoleWall18W_L"]],
-    [["CPT-CO-04", "Cockpit_ConsoleWall18W_R"]]
+    [["CPT-CO-04", "Cockpit_ConsoleWall18W_R"]],
+    [["CPT-CO-05", "Cockpit_SeatBack07W_A"]]
    ]
   },
   "decals": {

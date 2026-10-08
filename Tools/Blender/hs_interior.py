@@ -1321,6 +1321,28 @@ def build(recipe, layout, coll, mats, ship, hull):
                         except ValueError:
                             pass
         cut.free()
+        cut = lb.copy()
+        for zz in COCKPIT.get("seam_z", []):
+            res = bmesh.ops.bisect_plane(cut, geom=cut.verts[:] + cut.edges[:] + cut.faces[:], plane_co=(0, 0, zz), plane_no=(0, 0, 1))
+            for el in res["geom_cut"]:
+                if isinstance(el, bmesh.types.BMEdge) and el.link_faces:
+                    a_, b_ = el.verts[0].co.copy(), el.verts[1].co.copy()
+                    if (b_ - a_).length < 1e-4 or a_.x < 15.3:
+                        continue
+                    fa = el.link_faces[0]
+                    fa.normal_update()
+                    nrm_ = fa.normal.copy()
+                    if nrm_.dot(Vector((17.0, 0.0, 2.2)) - a_) < 0:
+                        nrm_ = -nrm_
+                    q = [a_ + Vector((0, 0, -0.004)), b_ + Vector((0, 0, -0.004)), b_ + Vector((0, 0, 0.004)), a_ + Vector((0, 0, 0.004))]
+                    vs0 = [ribs.verts.new(v + nrm_ * 0.001) for v in q]
+                    vs1 = [ribs.verts.new(v + nrm_ * 0.006) for v in q]
+                    for idx in ((0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)):
+                        try:
+                            ribs.faces.new([(vs0 + vs1)[i] for i in idx])
+                        except ValueError:
+                            pass
+        cut.free()
         if ribs.verts:
             ob = hp.finish(ribs, "SM_Ship_%s_Int_LinerRibs" % ship, coll, {"angle_deg": 40, "width": 0.002, "segments": 1})
             # graphite against the glossy white lining (cockpit v3 r1: the ribs in the lining's paint did not read)
