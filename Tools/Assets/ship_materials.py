@@ -1260,7 +1260,23 @@ def build_layered_master(path=None, kit=False):
     # everything through one Make Material Attributes node: the Python enum has no clear-coat pins
     mk = _node(m, unreal.MaterialExpressionMakeMaterialAttributes, -300, 600)
     m.set_editor_property("use_material_attributes", True)
-    _link(nodes["colour"], mk, "BaseColor")
+    # a cavity map on the detail's triplanar projection (cockpit 8. 10. 2026: the panel trim's seams and recesses
+    # darken the paint - its normal alone read flat, "plastic"); DetailCavityStrength 0 = off
+    cav_tex = _node(m, unreal.MaterialExpressionTextureObjectParameter, -1700, 2350, parameter_name="DetailCavityMap",
+                    texture=import_shared_texture("T_Ship_Detail_Grunge"))
+    cav = _custom(m, "Layered_detail_cavity", _DETAIL_GRUNGE_CODE, unreal.CustomMaterialOutputType.CMOT_FLOAT1,
+                  ["TexG", "LocalPos", "Tile"], -1250, 2350)
+    _link(cav_tex, cav, "TexG")
+    _link(local_position, cav, "LocalPos")
+    _link(_scalar(m, "DetailTileCm", 30.0, -1700, 2500), cav, "Tile")
+    cavf = _custom(m, "Layered_cavity_factor", "return lerp(1.0, C, S);", unreal.CustomMaterialOutputType.CMOT_FLOAT1,
+                   ["C", "S"], -1000, 2350)
+    _link(cav, cavf, "C")
+    _link(_scalar(m, "DetailCavityStrength", 0.0, -1700, 2600), cavf, "S")
+    shaded_colour = _node(m, unreal.MaterialExpressionMultiply, -500, 0)
+    _link(nodes["colour"], shaded_colour, "A")
+    _link(cavf, shaded_colour, "B")
+    _link(shaded_colour, mk, "BaseColor")
     for i, (channel, prop) in enumerate((("r", unreal.MaterialProperty.MP_ROUGHNESS), ("g", unreal.MaterialProperty.MP_METALLIC),
                                          ("b", unreal.MaterialProperty.MP_AMBIENT_OCCLUSION))):
         mask = _node(m, unreal.MaterialExpressionComponentMask, -600, 700 + i * 120,
@@ -1577,11 +1593,15 @@ def apply(ship, setup, mesh_assets):
     ordered = sorted(specs.items(), key=lambda kv: 1 if kv[1].get("meshes") else 0)
     # "kit_material": the slot takes a factory part's instance as it is (author 8. 10. 2026: the cockpit's own surfaces
     # must be the same paint, graphite and housing as the kit consoles in it, not a look-alike)
-    instances = {name: (unreal.EditorAssetLibrary.load_asset(spec["kit_material"]) if spec.get("kit_material")
-                        else build_instance(name, folder, spec, masters, ship)) for name, spec in ordered}
+    instances = {}
     for name, spec in ordered:
-        if instances[name] is None:
-            raise RuntimeError("%s: kit material %s not found (import the kit first)" % (name, spec.get("kit_material")))
+        kit = spec.get("kit_material")
+        mi = unreal.EditorAssetLibrary.load_asset(kit) if kit and unreal.EditorAssetLibrary.does_asset_exist(kit) else None
+        if kit and mi is None:
+            # (import_kit.py imports the ship before it builds a new kit role: the slot keeps its own instance
+            # this once, the next import maps it)
+            notes.append("%s: kit material %s not there yet - its own instance this time" % (name, kit))
+        instances[name] = mi or build_instance(name, folder, spec, masters, ship)
     for mesh_name, mesh in mesh_assets.items():
         slots = mesh.get_editor_property("static_materials")
         changed = False

@@ -467,6 +467,8 @@ def factory_material_spec(role, maker, data=None):
         scalars["GrungeTileCm"] = r["grunge_tile_cm"]
     if r.get("detail_normal"):
         scalars.update({"DetailTileCm": r["detail_tile_cm"], "DetailNormalStrength": r["detail_strength"]})
+    if r.get("detail_cavity"):
+        scalars["DetailCavityStrength"] = r.get("detail_cavity_strength", 0.8)
     # the walked line: the lanes' own colour a little lighter and smoother - polished by boots, not a stain
     # a role's own scuffed metal (bare_colour, bare_rough): a smooth dark metal mirrored the dark room and the scuffs
     # read as black burns on the cockpit console (7. 10. 2026)
@@ -494,6 +496,9 @@ def build_factory_materials(masters, maker):
         if r.get("detail_normal"):
             MEL.set_material_instance_texture_parameter_value(mi, "DetailNormalMap",
                                                               import_texture(os.path.join(tex, r["detail_normal"]), "normal"))
+            if r.get("detail_cavity"):
+                MEL.set_material_instance_texture_parameter_value(mi, "DetailCavityMap",
+                                                                  import_texture(os.path.join(tex, r["detail_cavity"]), "masks"))
             MEL.update_material_instance(mi)
             EAL.save_loaded_asset(mi, only_if_is_dirty=False)
         out[role] = mi

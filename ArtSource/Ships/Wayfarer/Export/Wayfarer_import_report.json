@@ -1,39 +1,16 @@
 {
   "manifest": "C:\\gamespace\\gamespace\\ArtSource\\Ships\\Wayfarer\\Export\\Wayfarer_manifest.json",
   "ship": "Wayfarer",
-  "meshes": {
-    "SM_Ship_Wayfarer": [
-      "socket CameraTarget scale (100, 100, 100) reset to 1",
-      "socket Cockpit scale (100, 100, 100) reset to 1",
-      "socket Control_door0 scale (100, 100, 100) reset to 1",
-      "socket Control_door0_a scale (100, 100, 100) reset to 1",
-      "socket Control_door0_panel scale (100, 100, 100) reset to 1",
-      "socket Control_door1 scale (100, 100, 100) reset to 1",
-      "socket Control_door1_a scale (100, 100, 100) reset to 1",
-      "socket Control_door1_panel scale (100, 100, 100) reset to 1",
-      "socket Control_eng scale (100, 100, 100) reset to 1",
-      "socket Control_pwr scale (100, 100, 100) reset to 1",
-      "socket Control_radar scale (100, 100, 100) reset to 1",
-      "socket Display_left scale (100, 100, 100) reset to 1",
-      "socket Display_right scale (100, 100, 100) reset to 1",
-      "socket Engine_L scale (100, 100, 100) reset to 1",
-      "socket Engine_R scale (100, 100, 100) reset to 1",
-      "socket Exit scale (100, 100, 100) reset to 1",
-      "socket Gear_L scale (100, 100, 100) reset to 1",
-      "socket Gear_Nose scale (100, 100, 100) reset to 1",
-      "socket Gear_R scale (100, 100, 100) reset to 1",
-      "socket WalkRamp scale (100, 100, 100) reset to 1",
-      "socket WalkSeat scale (100, 100, 100) reset to 1"
-    ],
-    "SM_Ship_Wayfarer_Decals": [],
-    "SM_Ship_Wayfarer_Interior": []
-  },
+  "meshes": {},
   "kept_unchanged": [
+    "SM_Ship_Wayfarer",
     "SM_Ship_Wayfarer_Canopy",
+    "SM_Ship_Wayfarer_Decals",
     "SM_Ship_Wayfarer_Door0A",
     "SM_Ship_Wayfarer_Door1A",
     "SM_Ship_Wayfarer_Gear",
     "SM_Ship_Wayfarer_Hologram",
+    "SM_Ship_Wayfarer_Interior",
     "SM_Ship_Wayfarer_InteriorDecals",
     "SM_Ship_Wayfarer_InteriorKit",
     "SM_Ship_Wayfarer_Screens"
