@@ -311,6 +311,9 @@ class Model:
         """The room a kit part serves: a wall module's or bulkhead's room is in front of its face (+X), a run part's
         under its middle."""
         L = self.span(p)
+        if p.category == "Cockpit" and abs(p.x) < 0.01 and abs(p.y_ue) < 0.01 and self.room_at(17.0, 0.0):
+            # cockpit v3 parts are built in the layout's coordinates and placed at its origin (kit_cockpit_v3.py)
+            return self.room_at(17.0, 0.0)
         if p.category in ("Wall", "Bulkhead", "Corner", "Door"):
             mx, my, _ = p.ue_to_layout(40.0, -L * 50.0, 0.0)
         elif p.category == "Furniture":

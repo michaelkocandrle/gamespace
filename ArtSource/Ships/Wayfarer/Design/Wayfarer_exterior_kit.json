@@ -45,9 +45,9 @@
   "_comment": "the whole hull (author 2. 10. 2026: after the pilot the kit on the whole ship): every side band (keel K, lower side L, upper side U, shoulder S), the roof, the aft wall, the full frame (ribs over the whole height, the low longeron) and the channel skin over the whole hull"
  },
  "digests": {
-  "layout": "6f105b1bb2c8",
-  "recipe": "a74877c3f5d3",
-  "setup": "0ecedb6b6ce9",
+  "layout": "5e4187677410",
+  "recipe": "e37791e7648a",
+  "setup": "bf6aadc5b01e",
   "spec": "d9597dfcd605",
   "design": "70fa53707473",
   "library": "148ba66e97f3"

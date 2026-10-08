@@ -30,7 +30,10 @@ import kit_batch2  # noqa: E402  (the decal helper)
 # the test section's shell (walls, ceiling, kick strip) and the part under test (kit_portal.PARTS, step 4 blockout)
 FACTORY = [("Test", "Shell", 0.9, "W", "A"), ("Terminal", "Eng", 0.7, "W", "A"), ("Bay", "Service", 1.0, "W", "A"),
            ("Cockpit", "Console", 1.2, "W", "A"), ("Cockpit", "Console", 1.2, "W", "B"),
-           ("Cockpit", "Console", 1.2, "W", "BR")] + kit_portal.PARTS
+           ("Cockpit", "Console", 1.2, "W", "BR"),
+           # cockpit v3 (8. 10. 2026): the seat's arms and the wall consoles, left and mirrored right
+           ("Cockpit", "SeatArm", 0.7, "W", "L"), ("Cockpit", "SeatArm", 0.7, "W", "R"),
+           ("Cockpit", "ConsoleWall", 1.8, "W", "L"), ("Cockpit", "ConsoleWall", 1.8, "W", "R")] + kit_portal.PARTS
 VIEWS = {(c, p): ((1, 0.0, 0.0), (1, -0.6, 0.2)) for c, p, _, _, _ in FACTORY}
 
 
@@ -788,6 +791,10 @@ def build_part(cat, part, size, sec_key, var, seed):
     if cat == "Bay":
         return bay_service(part_name(cat, part, size, sec_key, var), seed)
     if cat == "Cockpit":
+        if part in ("SeatArm", "ConsoleWall"):          # cockpit v3 (kit_cockpit_v3.py)
+            import kit_cockpit_v3
+            fn = kit_cockpit_v3.seat_arm if part == "SeatArm" else kit_cockpit_v3.wall_console
+            return fn(part_name(cat, part, size, sec_key, var), seed, mirror=var == "R")
         if var in ("B", "BR"):                  # variant B after the 2D concept (Docs/Kit/parts/KF-COCKPIT-CONSOLE); BR its mirror
             import kit_cockpit_b
             return kit_cockpit_b.console_b(part_name(cat, part, size, sec_key, var), seed, mirror=var == "BR")

@@ -1738,6 +1738,8 @@
    }
   },
   "MI_Ship_Wayfarer_IntFloorCockpit": {
+   "kit_material": "/Game/Kit/Materials/MI_Kit_Halcyon_Inset",
+   "_kit_material": "author 8. 10. 2026 (cockpit v3, the floor read cheap): the kit's mid grey graphite with its grain on the cockpit's floor plates",
    "master": "layered",
    "vectors": {
     "PrimaryColor": [

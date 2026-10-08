@@ -10140,6 +10140,232 @@
     "seam": 0
    },
    "status": "built"
+  },
+  "SM_Kit_Cockpit_SeatArm07W_L": {
+   "category": "Cockpit",
+   "family": "Cockpit_SeatArm",
+   "section": "W",
+   "length_m": 0.7,
+   "variant": "L",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_SeatArm07W_L.fbx",
+   "dims_m": [
+    0.7,
+    0.184,
+    0.586
+   ],
+   "expected_size_cm": [
+    70.0,
+    18.4,
+    58.6
+   ],
+   "tris": 12776,
+   "tris_decals": 4,
+   "tri_budget": 90000,
+   "materials": [
+    "Kit_Seal",
+    "Kit_GlowCool",
+    "Kit_Lip",
+    "Kit_Graphite",
+    "Kit_Gasket",
+    "Kit_Red",
+    "Kit_Housing",
+    "Kit_Frame",
+    "Kit_GlowKey",
+    "Kit_Inset",
+    "Kit_Leather",
+    "Kit_GlowStrip",
+    "Kit_FrameEdge",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 2,
+   "decal_items": [
+    "ck_rcs",
+    "st_hfcl"
+   ],
+   "service_labels": [
+    "st_hfcl"
+   ],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 7494,
+    "secondary": 0,
+    "floor": 628,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Cockpit_SeatArm07W_R": {
+   "category": "Cockpit",
+   "family": "Cockpit_SeatArm",
+   "section": "W",
+   "length_m": 0.7,
+   "variant": "R",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_SeatArm07W_R.fbx",
+   "dims_m": [
+    0.7,
+    0.184,
+    0.586
+   ],
+   "expected_size_cm": [
+    70.0,
+    18.4,
+    58.6
+   ],
+   "tris": 12776,
+   "tris_decals": 4,
+   "tri_budget": 90000,
+   "materials": [
+    "Kit_Seal",
+    "Kit_GlowCool",
+    "Kit_Lip",
+    "Kit_Graphite",
+    "Kit_Gasket",
+    "Kit_Red",
+    "Kit_Housing",
+    "Kit_Frame",
+    "Kit_GlowKey",
+    "Kit_Inset",
+    "Kit_Leather",
+    "Kit_GlowStrip",
+    "Kit_FrameEdge",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {},
+   "collision_hulls": 1,
+   "decals": 2,
+   "decal_items": [
+    "ck_rcs",
+    "st_hfcl"
+   ],
+   "service_labels": [
+    "st_hfcl"
+   ],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 7494,
+    "secondary": 0,
+    "floor": 628,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Cockpit_ConsoleWall18W_L": {
+   "category": "Cockpit",
+   "family": "Cockpit_ConsoleWall",
+   "section": "W",
+   "length_m": 1.8,
+   "variant": "L",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_ConsoleWall18W_L.fbx",
+   "dims_m": [
+    1.85,
+    0.522,
+    0.945
+   ],
+   "expected_size_cm": [
+    185.0,
+    52.2,
+    94.5
+   ],
+   "tris": 18780,
+   "tris_decals": 12,
+   "tri_budget": 90000,
+   "materials": [
+    "Kit_Signal",
+    "Kit_Seal",
+    "Kit_GlowCool",
+    "Kit_Lip",
+    "Kit_Red",
+    "Kit_GlowRed",
+    "Kit_Housing",
+    "Kit_Frame",
+    "Kit_GlowAmber",
+    "Kit_Inset",
+    "Kit_Legend",
+    "Kit_GlowStrip",
+    "Kit_FrameEdge",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {},
+   "collision_hulls": 2,
+   "decals": 3,
+   "decal_items": [
+    "st_service",
+    "pn_2",
+    "maker"
+   ],
+   "service_labels": [
+    "st_service"
+   ],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 14442,
+    "secondary": 0,
+    "floor": 1029,
+    "seam": 0
+   },
+   "status": "built"
+  },
+  "SM_Kit_Cockpit_ConsoleWall18W_R": {
+   "category": "Cockpit",
+   "family": "Cockpit_ConsoleWall",
+   "section": "W",
+   "length_m": 1.8,
+   "variant": "R",
+   "batch": 0,
+   "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_ConsoleWall18W_R.fbx",
+   "dims_m": [
+    1.85,
+    0.522,
+    0.945
+   ],
+   "expected_size_cm": [
+    185.0,
+    52.2,
+    94.5
+   ],
+   "tris": 18780,
+   "tris_decals": 12,
+   "tri_budget": 90000,
+   "materials": [
+    "Kit_Signal",
+    "Kit_Seal",
+    "Kit_GlowCool",
+    "Kit_Lip",
+    "Kit_Red",
+    "Kit_GlowRed",
+    "Kit_Housing",
+    "Kit_Frame",
+    "Kit_GlowAmber",
+    "Kit_Inset",
+    "Kit_Legend",
+    "Kit_GlowStrip",
+    "Kit_FrameEdge",
+    "Kit_DecalPaint"
+   ],
+   "sockets": {},
+   "collision_hulls": 2,
+   "decals": 3,
+   "decal_items": [
+    "st_service",
+    "pn_2",
+    "maker"
+   ],
+   "service_labels": [
+    "st_service"
+   ],
+   "colour_masks": {
+    "domain": "CORNER",
+    "edge": 14442,
+    "secondary": 0,
+    "floor": 1029,
+    "seam": 0
+   },
+   "status": "built"
   }
  }
 }

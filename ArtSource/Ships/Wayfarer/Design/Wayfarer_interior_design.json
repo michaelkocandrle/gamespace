@@ -12,6 +12,10 @@
  "kit_purpose": {
   "Cockpit_Console12W_A": "Levá loketní konzole pilota (díl továrny): knipl RCS na loketní jednotce s opěrkou zápěstí, šikmé čelo s nouzovým kyslíkem pod krytem a kolébkami napájení, vnějších světel a motorů, klávesy světel, podvozku, VTOL a ESP, stavový pás napájení, baterie a teploty, sání chlazení konzole, madlo.",
   "Cockpit_Console12W_B": "Levá loketní konzole pilota (díl továrny, varianta B podle 2D návrhu): knipl RCS na loketní jednotce s opěrkou zápěstí, šikmé čelo s nouzovým kyslíkem pod krytem a kolébkami napájení, vnějších světel a motorů, klávesy světel, podvozku, VTOL a ESP, stavový pás napájení, baterie a teploty, sání chlazení konzole, madlo.",
+  "Cockpit_SeatArm07W_L": "Levá loketní opěrka křesla (kokpit v3): kožená opěrka předloktí, klávesy světel, podvozku, VTOL a ESP, knipl RCS, konzola ke křeslu.",
+  "Cockpit_SeatArm07W_R": "Pravá loketní opěrka křesla (zrcadlo levé): opěrka předloktí, klávesy, knipl letu.",
+  "Cockpit_ConsoleWall18W_L": "Levá konzole u stěny napojená na palubní desku: servisní poklop, věž s nouzovou klávesou, kolébkami napájení, světel, motorů, podvozku a VTOL, stavové pruhy, sání chlazení, světelné linky podél uličky.",
+  "Cockpit_ConsoleWall18W_R": "Pravá konzole u stěny (zrcadlo levé) napojená na palubní desku.",
   "Cockpit_Console12W_BR": "Pravá loketní konzole pilota (díl továrny, zrcadlo varianty B): knipl letu na loketní jednotce s opěrkou předloktí, věž s nouzovou klávesou pod krytem a kolébkami, kolébky světel, podvozku a VTOL, klávesy, stavový pás, sání chlazení, servisní poklop, madlo; světelné linky místo výstražných pásů.",
   "Wall_ComponentBay12W_A": "Výklenek reaktoru S1 ve stěně: posuvné křídlo výklenku, ve hře otevřené v kapse u levé líce (hrana s oranžovým pruhem a madlem), reaktor na saních na výsuvných kolejnicích, stavová obrazovka, kabely a chlazení do výklenku, světlo výklenku.",
   "Wall_ComponentBay06W_B": "Výklenek chladiče S1: žebrované jádro ve spodním výklenku s otevřeným posuvným křídlem, výfukový kanál za stěnou nahoru ke kořeni křídla, světlo výklenku.",
@@ -223,7 +227,7 @@
     ]
    ],
    "run_parts": [
-    [["CPT-CO-01", "Cockpit_Console12W_B"]],
+    [["CPT-CO-01", "Cockpit_SeatArm07W_L"]],
     [["TEC-B-A", "Bulkhead_Door03W_B"]],
     [["TEC-B-F", "Bulkhead_Door00W_A"]],
     [["CAB-B-A", "Bulkhead_Door00L38_A"]],
@@ -255,7 +259,9 @@
      ["HLD-C-5", "Ceiling_Panel12L41_C"],
      ["HLD-C-6", "Ceiling_Panel12L41_A"]
     ],
-    [["CPT-CO-02", "Cockpit_Console12W_BR"]]
+    [["CPT-CO-02", "Cockpit_SeatArm07W_R"]],
+    [["CPT-CO-03", "Cockpit_ConsoleWall18W_L"]],
+    [["CPT-CO-04", "Cockpit_ConsoleWall18W_R"]]
    ]
   },
   "decals": {

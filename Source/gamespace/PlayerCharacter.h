@@ -254,7 +254,7 @@ protected:
 
 	/** The capsule inside a ship (SetShipCapsule): 56 cm wide, 1.80 m tall - a person, not the mannequin's margin. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "10.0", Units = "cm"))
-	float ShipCapsuleRadius = 28.f;
+	float ShipCapsuleRadius = 25.f;                       // (8. 10. 2026: 28 -> 25, the cockpit v3 aisles round the seat are 0.53 m at the dash)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "40.0", Units = "cm"))
 	float ShipCapsuleHalfHeight = 90.f;

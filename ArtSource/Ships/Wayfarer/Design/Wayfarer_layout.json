@@ -176,14 +176,14 @@
   {
    "room": "cockpit",
    "name": "Levá konzole",
-   "rect": [16.3, 17.5, 0.43, 1.1], "_ergonomics": "7. 10. 2026: 0.60 -> 0.43 from the seat axis - the stick stood 0.76 m out (SC and real side sticks 0.35-0.45 m; the console is the armrest, as in SC)",
+   "rect": [16.0, 17.85, 1.08, 1.56], "_v3": "8. 10. 2026: cockpit v3 - the console along the wall into the dash wing (Concept/Cockpit/cockpit_layout_v3_proposal.png), the stick on the seat's arm", "_ergonomics": "7. 10. 2026: 0.60 -> 0.43 from the seat axis - the stick stood 0.76 m out (SC and real side sticks 0.35-0.45 m; the console is the armrest, as in SC)",
    "z": [1.15, 1.85],
    "purpose": "Fyzické přepínače: podvozek, světla, rampa, kabina, motory."
   },
   {
    "room": "cockpit",
    "name": "Pravá konzole",
-   "rect": [16.3, 17.5, -1.1, -0.43], "_ergonomics": "7. 10. 2026: see the left console",
+   "rect": [16.0, 17.85, -1.56, -1.08], "_v3": "8. 10. 2026: cockpit v3 - the console along the wall into the dash wing (Concept/Cockpit/cockpit_layout_v3_proposal.png), the stick on the seat's arm", "_ergonomics": "7. 10. 2026: see the left console",
    "z": [1.15, 1.85],
    "purpose": "Energie, štíty, chlazení, kvantový pohon."
   },

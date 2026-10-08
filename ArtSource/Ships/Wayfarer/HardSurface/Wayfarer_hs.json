@@ -2863,7 +2863,7 @@
   [[10.39, -1.9], [15.19, -1.9], [0, 1], ["Wall_HullLiner12L_A", "Wall_HullLiner12L_A", "Wall_HullLiner12L_A", "Wall_HullLiner06L_A", "Wall_HullLiner06L_D"]]
  ],
    "run_parts": [
-    [[16.3, 0.43, 1.15], [1, 0], ["Cockpit_Console12W_B"]],
+    [[0.0, 0.0, 1.15], [1, 0], ["Cockpit_SeatArm07W_L"]],
     [[8.54, -1.2], [1, 0], ["Bulkhead_Door03W_B"]],
     [[10.33, 1.2], [-1, 0], ["Bulkhead_Door00W_A"]],
     [[10.40, -1.9], [1, 0], ["Bulkhead_Door00L38_A"]],
@@ -2878,7 +2878,9 @@
     [[8.54, 0.0], [1, 0], ["Ceiling_Tray12W_A", "Ceiling_Tray06W_A"]],
     [[8.54, 0.0], [1, 0], ["Floor_Plate12W_A", "Floor_Grille06W_A"]],
   [[1.6, 0.0], [1, 0], ["Ceiling_Panel06L41_B", "Ceiling_Panel12L41_A", "Ceiling_Panel12L41_C", "Ceiling_Panel12L41_A", "Ceiling_Panel12L41_C", "Ceiling_Panel12L41_A"]],
-    [[16.3, -0.43, 1.15], [1, 0], ["Cockpit_Console12W_BR"]]
+    [[0.0, 0.0, 1.15], [1, 0], ["Cockpit_SeatArm07W_R"]],
+    [[0.0, 0.0, 1.15], [1, 0], ["Cockpit_ConsoleWall18W_L"]],
+    [[0.0, 0.0, 1.15], [1, 0], ["Cockpit_ConsoleWall18W_R"]]
  ]
   },
   "kit": {

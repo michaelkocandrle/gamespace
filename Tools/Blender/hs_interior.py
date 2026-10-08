@@ -850,8 +850,10 @@ def build(recipe, layout, coll, mats, ship, hull):
     KIT_CONSOLES.clear()
     for a, d_, parts_ in (recipe.get("interior", {}).get("kit_modules", {}).get("run_parts") or []):
         for m_ in parts_:
-            if m_.startswith("Cockpit_Console"):
-                KIT_CONSOLES.add("left" if a[1] > 0 else "right")
+            if m_.startswith("Cockpit_"):
+                # cockpit v3 parts sit at the layout's origin: their side is in the name (_L / _R)
+                side = "left" if m_.endswith("_L") else "right" if m_.endswith(("_R", "_BR")) else ("left" if a[1] > 0 else "right")
+                KIT_CONSOLES.add(side)
     DOOR_LEAVES.clear()
     spec = recipe["interior"]
     H = spec.get("height_m", 2.3)
@@ -1435,6 +1437,8 @@ def cockpit_detail(g, layout, zc, sill):
         x0, x1, y0, y1 = o["rect"]
         inner = y0 if y0 > 0 else y1
         s_ = 1 if y0 > 0 else -1
+        if ("left" if s_ > 0 else "right") in KIT_CONSOLES:
+            continue                                          # the kit console has its own light lines
         # (critic 7. 10. r1: a burnt-out white line) a soft diffuser set back in a dark channel with satin lips
         box(g["int_dark"], (x0 + 0.04, inner - s_ * 0.006, ztop - 0.066), (x1 - 0.04, inner + s_ * 0.0, ztop - 0.044))
         for za, zb in ((ztop - 0.068, ztop - 0.064), (ztop - 0.046, ztop - 0.042)):
@@ -1471,7 +1475,6 @@ def cockpit_detail(g, layout, zc, sill):
     while xx < ax1 - 0.02:
         box(g["int_rubber"], (xx, -aw + 0.02, zc + 0.006), (xx + 0.012, aw - 0.02, zc + 0.0085))
         xx += 0.032
-    _hc.grime(Vector(((ax0 + ax1) / 2, 0.0, zc + 0.0085)), Zf, Xf, (0.22, ax1 - ax0), "smear", 0.8, wear=True)
     _hc.hazard_band(g, Vector((fx0 + 0.02, 0.0, zc + 0.004)), Ymf, Xf, Zf, 2 * aw, 0.024)
     # 3 the footrest before the seat: a plate sloped up 18 deg towards the cowl, perforated, satin edges, grip bars
     tx0, tx1 = 17.62, 17.92
@@ -1497,7 +1500,6 @@ def cockpit_detail(g, layout, zc, sill):
         for sv in (-1, 1):
             q = fc + Ymf * (sd * 0.275) + upv * (sv * (pl / 2 - 0.02)) - nrm * 0.0005
             _hc.tube(g["int_trim"], q, q + nrm * 0.002, 0.0045, 8)
-    _hc.grime(fc + nrm * 0.009, nrm, upv, (0.5, 0.26), "smear", 0.9, wear=True)
     _hc.stencil("panel_G08", fc + nrm * 0.0092 - upv * (pl / 2 - 0.035) + Ymf * 0.2, nrm, Ymf, upv, 0.4, 9.0)
     # 4 louvred floor vents along the console feet, both sides of the seat and the footwell
     for sd in (-1, 1):
@@ -1510,8 +1512,6 @@ def cockpit_detail(g, layout, zc, sill):
             while xv < vx1 - 0.006:
                 box(g["int_housing"], (xv, ya + 0.004, zc - 0.006), (xv + 0.006, yb - 0.004, zc + 0.0015))
                 xv += 0.016
-        # dirt settled in the corner between the floor and the console's foot
-        _hc.grime(Vector(((fx0 + 17.5) / 2, sd * (ci - 0.01), zc + 0.003)), Zf, Yf * sd, (17.5 - fx0, 0.07), "soot", 0.9)
         # marker lights along the aisle's edge, every 30 cm
         xl = fx0 + 0.1
         while xl < sx0 - 0.05:
@@ -1520,11 +1520,30 @@ def cockpit_detail(g, layout, zc, sill):
             box(g["int_trim"], (xl - 0.018, ya - 0.004, zc), (xl + 0.018, yb + 0.004, zc + 0.004))
             box(g["int_glow_soft"], (xl - 0.012, ya, zc + 0.004), (xl + 0.012, yb, zc + 0.0048))
             xl += 0.3
+    # 5 cockpit v3 (author 8. 10. 2026: "the floor still cheap", aisles round the seat): a tread plate along each
+    # side aisle from the seat's arm to the console's foot - rubber ribs across it in a satin frame, a cool light line
+    # along both edges, bolts at the corners
+    if "left" in KIT_CONSOLES and "right" in KIT_CONSOLES:
+        for sd in (-1, 1):
+            ta, tb = sorted((sd * 0.62, sd * 0.98))
+            tx0, tx1 = 16.32, 17.6
+            box(g["int_trim"], (tx0 - 0.014, ta - 0.014, zc), (tx1 + 0.014, tb + 0.014, zc + 0.004))
+            box(g["int_floor_ck"], (tx0, ta, zc), (tx1, tb, zc + 0.006))
+            xr = tx0 + 0.03
+            while xr < tx1 - 0.03:
+                box(g["int_rubber"], (xr, ta + 0.025, zc + 0.006), (xr + 0.014, tb - 0.025, zc + 0.0085))
+                xr += 0.036
+            for ye in (ta - 0.02, tb + 0.02):
+                ya, yb = sorted((ye - 0.004, ye + 0.004))
+                box(g["int_dark"], (tx0, ya - 0.002, zc), (tx1, yb + 0.002, zc + 0.003))
+                box(g["int_glow_soft"], (tx0 + 0.01, ya, zc + 0.003), (tx1 - 0.01, yb, zc + 0.0042))
+            for xe in (tx0 + 0.02, tx1 - 0.02):
+                for ye in (ta + 0.012, tb - 0.012):
+                    cyl(g["int_trim"], (xe, ye, zc + 0.006), (xe, ye, zc + 0.008), 0.0045, 8)
     # plate numbers and a torque stencil, read from the seat
     _hc.stencil("panel_D05", Vector((16.4, -0.2, zc + 0.0069)), Zf, Ymf, Xf, 0.5, 9.0)       # on the aisle plate
     _hc.stencil("panel_G08", Vector((18.12, 0.6, zc + 0.0009)), Zf, Ymf, Xf, 0.5, 9.0)
     _hc.stencil("st_torque", Vector((18.12, -0.6, zc + 0.0009)), Zf, Ymf, Xf, 0.5, 9.0)
-    _hc.grime(Vector((18.2, 0.0, zc + 0.001)), Zf, Xf, (0.9, 0.35), "rim", 0.6)          # dust at the cowl's foot
     # seat rails and pedestal
     x0, x1, y0, y1 = seat_o["rect"]
     for yy in (-0.2, 0.2):

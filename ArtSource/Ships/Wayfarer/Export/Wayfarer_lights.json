@@ -438,8 +438,8 @@
    "intensity_cd": 120.0,
    "radius_m": 5.0,
    "location": [
-    16.66,
-    0.765,
+    16.555,
+    1.32,
     2.5620000000000003
    ],
    "direction": [
@@ -451,8 +451,8 @@
    "source_radius_cm": 20.0,
    "specular": 0.25,
    "location_ue_cm": [
-    641.0,
-    -76.5,
+    630.5,
+    -132.0,
     136.2
    ],
    "direction_ue": [
@@ -472,8 +472,8 @@
    "intensity_cd": 120.0,
    "radius_m": 5.0,
    "location": [
-    17.2,
-    0.765,
+    17.387500000000003,
+    1.32,
     2.5620000000000003
    ],
    "direction": [
@@ -485,8 +485,8 @@
    "source_radius_cm": 20.0,
    "specular": 0.25,
    "location_ue_cm": [
-    695.0,
-    -76.5,
+    713.8,
+    -132.0,
     136.2
    ],
    "direction_ue": [
@@ -506,8 +506,8 @@
    "intensity_cd": 120.0,
    "radius_m": 5.0,
    "location": [
-    16.66,
-    -0.765,
+    16.555,
+    -1.32,
     2.5620000000000003
    ],
    "direction": [
@@ -519,8 +519,8 @@
    "source_radius_cm": 20.0,
    "specular": 0.25,
    "location_ue_cm": [
-    641.0,
-    76.5,
+    630.5,
+    132.0,
     136.2
    ],
    "direction_ue": [
@@ -540,8 +540,8 @@
    "intensity_cd": 120.0,
    "radius_m": 5.0,
    "location": [
-    17.2,
-    -0.765,
+    17.387500000000003,
+    -1.32,
     2.5620000000000003
    ],
    "direction": [
@@ -553,8 +553,8 @@
    "source_radius_cm": 20.0,
    "specular": 0.25,
    "location_ue_cm": [
-    695.0,
-    76.5,
+    713.8,
+    132.0,
     136.2
    ],
    "direction_ue": [
