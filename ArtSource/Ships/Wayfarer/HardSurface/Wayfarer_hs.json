@@ -2864,7 +2864,6 @@
  ],
    "run_parts": [
     [[16.3, 0.43, 1.15], [1, 0], ["Cockpit_Console12W_B"]],
-    [[16.3, -0.43, 1.15], [1, 0], ["Cockpit_Console12W_BR"]],
     [[8.54, -1.2], [1, 0], ["Bulkhead_Door03W_B"]],
     [[10.33, 1.2], [-1, 0], ["Bulkhead_Door00W_A"]],
     [[10.40, -1.9], [1, 0], ["Bulkhead_Door00L38_A"]],
@@ -2878,7 +2877,8 @@
     [[8.19, 2.05], [-1, 0], ["Bulkhead_Door00L41_C"]],
     [[8.54, 0.0], [1, 0], ["Ceiling_Tray12W_A", "Ceiling_Tray06W_A"]],
     [[8.54, 0.0], [1, 0], ["Floor_Plate12W_A", "Floor_Grille06W_A"]],
-  [[1.6, 0.0], [1, 0], ["Ceiling_Panel06L41_B", "Ceiling_Panel12L41_A", "Ceiling_Panel12L41_C", "Ceiling_Panel12L41_A", "Ceiling_Panel12L41_C", "Ceiling_Panel12L41_A"]]
+  [[1.6, 0.0], [1, 0], ["Ceiling_Panel06L41_B", "Ceiling_Panel12L41_A", "Ceiling_Panel12L41_C", "Ceiling_Panel12L41_A", "Ceiling_Panel12L41_C", "Ceiling_Panel12L41_A"]],
+    [[16.3, -0.43, 1.15], [1, 0], ["Cockpit_Console12W_BR"]]
  ]
   },
   "kit": {
@@ -3015,7 +3015,7 @@
    "footwell_back_x": 18.62,
    "footwell_cd": 2.5,
    "_raise": "Cockpit raised 0.8 m (floor 0.35 -> 1.15, eye 1.65 -> 2.45, author's step 2 view targets 25. 9. 2026): the canopy's glass starts 1 m over the old eye; raised, the pilot sits in the glass band and the exterior stays as drawn. Stairs from the cabin (hs_interior.py).",
-   "console_pool_cd": 14.0,
+   "console_pool_cd": 12.0,
    "_centre_w": "9 cm: at 11 cm the centre screens' outer edges went behind the MFD pods' inner edges from the eye (critic, 25. 9. 2026)"
   },
   "decals": {

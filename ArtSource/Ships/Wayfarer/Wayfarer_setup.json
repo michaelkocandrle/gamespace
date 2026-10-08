@@ -656,20 +656,11 @@
    "roughness": 0.55
   },
   "MI_Ship_Wayfarer_IntWall": {
-   "kit_material": "/Game/Kit/Materials/MI_Kit_Halcyon_Frame",
-   "_kit_material": "author 8. 10. 2026: the cockpit's surfaces the same paint / graphite / housing as the kit consoles (Kit_Frame)",
+   "_satin_8_10": "author 8. 10. 2026: the kit consoles' paint colour (Kit_Frame) as a satin without the clear coat - the clear-coated paint mirrored the sky on the canopy frame",
    "master": "layered",
    "vectors": {
-    "PrimaryColor": [
-     0.085,
-     0.08,
-     0.074
-    ],
-    "SecondaryColor": [
-     0.085,
-     0.08,
-     0.074
-    ],
+    "PrimaryColor": [0.22, 0.217, 0.21],
+    "SecondaryColor": [0.2, 0.197, 0.19],
     "BareMetalColor": [
      0.55,
      0.55,
@@ -682,10 +673,10 @@
     ]
    },
    "scalars": {
-    "PrimaryRoughness": 0.5,
+    "PrimaryRoughness": 0.48,
     "SecondaryRoughness": 0.5,
     "PaintMetallic": 0.4,
-    "GrungeAmount": 0.25,
+    "GrungeAmount": 0.04,
     "EdgeWear": 0.0,
     "DirtAmount": 0.0,
     "GrungeTileCm": 45.0,
@@ -697,20 +688,11 @@
    "_grain": "GrungeTileCm 45, RoughVariation 0.35: the 180 cm blotches of the hull were invisible on cockpit-sized surfaces - 'flat graphite without microstructure' (critic); a gloss variation seen in reflections (SC breakdown, 26. 9. 2026)"
   },
   "MI_Ship_Wayfarer_IntPanel": {
-   "kit_material": "/Game/Kit/Materials/MI_Kit_Halcyon_Frame",
-   "_kit_material": "author 8. 10. 2026: the cockpit's surfaces the same paint / graphite / housing as the kit consoles (Kit_Frame)",
+   "_satin_8_10": "author 8. 10. 2026: the kit consoles' paint colour (Kit_Frame) as a satin without the clear coat - the clear-coated paint mirrored the sky on the canopy frame",
    "master": "layered",
    "vectors": {
-    "PrimaryColor": [
-     0.13,
-     0.125,
-     0.118
-    ],
-    "SecondaryColor": [
-     0.13,
-     0.125,
-     0.118
-    ],
+    "PrimaryColor": [0.22, 0.217, 0.21],
+    "SecondaryColor": [0.2, 0.197, 0.19],
     "BareMetalColor": [
      0.55,
      0.55,
@@ -723,10 +705,10 @@
     ]
    },
    "scalars": {
-    "PrimaryRoughness": 0.45,
+    "PrimaryRoughness": 0.48,
     "SecondaryRoughness": 0.45,
     "PaintMetallic": 0.1,
-    "GrungeAmount": 0.25,
+    "GrungeAmount": 0.04,
     "EdgeWear": 0.0,
     "DirtAmount": 0.0,
     "GrungeTileCm": 45.0,
@@ -1327,21 +1309,12 @@
    "wear_amount": 0.0
   },
   "MI_Ship_Wayfarer_IntFrame": {
-   "kit_material": "/Game/Kit/Materials/MI_Kit_Halcyon_Frame",
-   "_kit_material": "author 8. 10. 2026: the cockpit's surfaces the same paint / graphite / housing as the kit consoles (Kit_Frame)",
+   "_satin_8_10": "author 8. 10. 2026: the kit consoles' paint colour as a satin (the canopy frame lining)",
    "_comment": "cockpit frame lining in the hull's warm off-white paint (concept A in the Wayfarer's colours); satin, not glossy: a strong clear coat mirrored every cockpit lamp as a hot spot on the walls (author 25. 9. 2026)",
    "master": "layered",
    "vectors": {
-    "PrimaryColor": [
-     0.11,
-     0.104,
-     0.098
-    ],
-    "SecondaryColor": [
-     0.11,
-     0.104,
-     0.098
-    ],
+    "PrimaryColor": [0.22, 0.217, 0.21],
+    "SecondaryColor": [0.2, 0.197, 0.19],
     "BareMetalColor": [
      0.55,
      0.55,
@@ -1509,8 +1482,6 @@
    "roughness": 0.3
   },
   "MI_Ship_Wayfarer_IntHousing": {
-   "kit_material": "/Game/Kit/Materials/MI_Kit_Halcyon_Housing",
-   "_kit_material": "author 8. 10. 2026: the cockpit's surfaces the same paint / graphite / housing as the kit consoles (Kit_Housing)",
    "master": "layered",
    "vectors": {
     "PrimaryColor": [
