@@ -23,6 +23,10 @@ Brána `step` (průměr ≥ 6,5, žádná kategorie pod 6). Hodnotí se jen lev�
 | 15–18 | B | **6,5 → 6,8 PASS** | tmavší lak, odřené hrany; pak autor opotřebení zrušil |
 | 19–20 | B | 6,4 | pokusy o oděr (mramor) – autor 8. 10.: díly jsou nové z výroby, bez opotřebení |
 | 21–23 | B nový | 6,5 → **6,6 PASS** | lak pod čirým lakem, leštěné kovové hrany, matný grafit vložek, výstražný pás, rýhovaný návlek, druhá vrstva šablon |
+| 24–28 | B | 6,8 → **7,0 PASS** | legendy jako geometrie (`legend()`), LED v rámečku (`led()`), kůže opěrky, podpanely nosníku a věže |
+| 29–31 | B | 7,0 → **7,1 PASS** | studiový softbox s plným odleskem (pruh na čirém laku), pata 45°, pryžová hlava kniplu, poklop 60/40 s mřížkou |
+| 32 | B | **7,3 PASS** | podstavec 3 panely se spárami, lisovaný rám poklopu, opěrka tmavší; hierarchie 8 |
+| 33 | B | – | plný šrafovaný prstenec kniplu, svítící pásek pod nosníkem, leštěná lišta místo nýtů, kontrast kůže/grafit |
 
 ## Co se změnilo
 

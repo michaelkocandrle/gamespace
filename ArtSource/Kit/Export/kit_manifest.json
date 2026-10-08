@@ -9963,7 +9963,7 @@
     76.2,
     74.1
    ],
-   "tris": 47896,
+   "tris": 47984,
    "tris_decals": 184,
    "tri_budget": 90000,
    "materials": [
@@ -10008,6 +10008,7 @@
     "st_service",
     "pn_1",
     "pn_2",
+    "pn_3",
     "st_hfcl",
     "label_coolant",
     "st_torque",
@@ -10024,7 +10025,6 @@
     "st_hfcl",
     "st_torque",
     "st_gnd",
-    "pn_7",
     "pn_8",
     "st_torque",
     "pn_5"
@@ -10040,7 +10040,7 @@
    ],
    "colour_masks": {
     "domain": "CORNER",
-    "edge": 24498,
+    "edge": 24642,
     "secondary": 0,
     "floor": 6162,
     "seam": 0
