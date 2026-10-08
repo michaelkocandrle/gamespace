@@ -794,6 +794,10 @@ snímku.
   plochy. Zkosení držet ~6 mm; maska hran ve FBX i v UE je správná (ověřeno), jen geometrie byla hrubá.
 - **Po přidání role čte díl podivně** – reimport přes asset může nechat starou mapu sekcí; díly ve vývoji se proto
   importují načisto (`import_kit.FRESH_PARTS`).
+- **Leštěná hrana čte jako tmavá čára** (8. 10. 2026): leštěný kov (`Kit_FrameEdge`) zrcadlí tmavé okolí; tenká
+  lišta nebo hrana žebra, která má svítit, je světlý satén (`Kit_Legend`), leštěný kov jen na větších plochách.
+- **Barevný emisní akcent svítí bíle** (8. 10. 2026): síla nad ~10 přepálí barvu do bílé a leštěný rámeček kolem
+  přidá bílou. Sytá barva, síla 5–6, tmavý rámeček (`Kit_GlowStrip` (0,30; 0,62; 1,0) × 6).
 - **Opotřebení dílů lodí nedělat** (autor 8. 10. 2026): díly jsou nové z výroby; hloubka z kontrastu materiálů
   (lak pod čirým lakem, leštěné kovové hrany `Part.edge_roles`, matný grafit `Kit_Inset`, mikrotextury
   `kit_paint_normals.py`) a z vrstev decalů.

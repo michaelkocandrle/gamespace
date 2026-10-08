@@ -26,7 +26,23 @@ Brána `step` (průměr ≥ 6,5, žádná kategorie pod 6). Hodnotí se jen lev�
 | 24–28 | B | 6,8 → **7,0 PASS** | legendy jako geometrie (`legend()`), LED v rámečku (`led()`), kůže opěrky, podpanely nosníku a věže |
 | 29–31 | B | 7,0 → **7,1 PASS** | studiový softbox s plným odleskem (pruh na čirém laku), pata 45°, pryžová hlava kniplu, poklop 60/40 s mřížkou |
 | 32 | B | **7,3 PASS** | podstavec 3 panely se spárami, lisovaný rám poklopu, opěrka tmavší; hierarchie 8 |
-| 33 | B | – | plný šrafovaný prstenec kniplu, svítící pásek pod nosníkem, leštěná lišta místo nýtů, kontrast kůže/grafit |
+| 33 | B | 7,4 | plný šrafovaný prstenec kniplu, svítící pásek pod nosníkem, leštěná lišta místo nýtů, kontrast kůže/grafit; decaly 8 |
+| 34 | B | 7,8 | prošitá kůže se zrnem a leskem, tónové kroky rám : poklop : kůže, čísla panelů 1/2/3; materiály, čitelnost, geometrie 8 |
+| 35–38 | B | 7,9 | celý bok v záběru 5, druhá vrstva panelů (západka, lišty, typový štítek), světlá pata nad nízkým soklem, štítky poklopu a bloku; Světlo drží 7 |
+| 39 | B | **8,0 PASS, cíl splněn** | emise nepřepálená do bílé, tmavý rámeček, světlé saténové hrany místo leštěného kovu; všech 8 kategorií 8 |
+| 40 | B | – | ladění za 8: sytější modrá, klidná světlá deska v mezeře, užší hrany žeber |
+
+## Systémové nálezy kol 32–39 (8. 10. 2026)
+
+- **Leštěný kov v tmavém úseku zrcadlí tmu** a čte jako tmavá čára (žebra, lišta paty, kola 37–38). Světlá hrana, která
+  má číst jako odlesk, je světlý satén (`Kit_Legend` 0,8), ne `Kit_FrameEdge`.
+- **Emise přes ~10 se přepálí do bílé** a ztratí barvu (pás pod LED, kolo 38). Barevný akcent: sytá barva
+  (0,30; 0,62; 1,0) a síla 5–6, tmavý rámeček (leštěný rámeček svítil bíle). Role `Kit_GlowStrip`.
+- **Kůže proti grafitu:** odstup tónu až při albedu kůže 0,012 proti vložkám 0,045; steh jako šedá nit v tmavém žlábku
+  (bílá nit četla jako namalovaná linka), drsnost 0,3 a vyšší klenba pro lesk.
+- **Šrafy kolem kniplu** z plných segmentů oranžová/černá (`stick(..., bars=15)`), tenké pruhy na grafitu četly jako
+  béžový ciferník.
+- **Text pod ~4 px** se nečte: štítky pro střední vzdálenost jako světlá deska s tmavým textem 7–9 mm (`legend(role=...)`).
 
 ## Co se změnilo
 

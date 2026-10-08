@@ -158,7 +158,7 @@ def console_b(name, seed):
     p.box("Kit_Housing", (0.86, W, 0.14), (1.06, W + 0.004, 0.24), bevel=0.002, segments=1)
     _label(p, "maker", Vector((0.44, U0 - 0.0065, 0.14)), -Y, X, Z, scale=0.3)
     # the deck: a dark plate between the blocks; under the beam a frame-paint plate (the gap read as a black hole - r37)
-    p.box("Kit_Shell", (0.078, U0 + 0.004, DECK + 0.006), (0.6, 0.156, DECK + 0.0085), bevel=0.0015, segments=2, panel=False)
+    p.box("Kit_Legend", (0.078, U0 + 0.004, DECK + 0.006), (0.6, 0.156, DECK + 0.0085), bevel=0.0015, segments=2, panel=False)
     p.box("Kit_Legend", (L - 0.025, U0 + 0.002, 0.121), (L - 0.0185, W - 0.002, 0.127), bevel=0.0012, segments=2, panel=False)
     p.box("Kit_Inset", (0.0, U0, DECK - 0.004), (L - 0.02, W, DECK + 0.006), bevel=0.003, segments=2)
     # 2 the forearm beam: a light frame in a stepped side profile, two padded perforated rests on it, on two slanted
@@ -441,7 +441,7 @@ def console_b(name, seed):
         xr = fx0 + (fx1 - fx0) * (k + 1) / 4
         if k != 1:
             p.box("Kit_Inset", (xr - 0.0025, fu0 + 0.012, zt - 0.0005), (xr + 0.0025, fu1 - 0.012, zt + 0.005), bevel=0.0012, segments=2, panel=False)
-            p.box("Kit_Legend", (xr - 0.002, fu0 + 0.013, zt + 0.0045), (xr + 0.002, fu1 - 0.013, zt + 0.0058), bevel=0.0005, segments=1, panel=False)
+            p.box("Kit_Legend", (xr - 0.001, fu0 + 0.013, zt + 0.0045), (xr + 0.001, fu1 - 0.013, zt + 0.0056), bevel=0.0005, segments=1, panel=False)
     xm, um = (fx0 + fx1) / 2, (fu0 + fu1) / 2 + 0.035          # a 70 x 40 mm hatch plate between the ribs, four screws in the field
     p.box("Kit_Lip", (xm - 0.036, um - 0.021, zt - 0.0005), (xm + 0.036, um + 0.021, zt + 0.001), bevel=0.0005, segments=1, panel=False)
     p.box("Kit_Legend", (xm - 0.034, um - 0.019, zt), (xm + 0.034, um + 0.019, zt + 0.0014), panel=False)

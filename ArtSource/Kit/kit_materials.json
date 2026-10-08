@@ -12,7 +12,7 @@
   "Kit_Shell": {"roughness": [0.25, 0.45], "metallic": [0.0, 0.2], "micro_rough": [0.0, 0.04], "scratches": [0.0, 0.03]},
   "Kit_Housing": {"roughness": [0.25, 0.45], "metallic": [0.1, 0.5], "micro_rough": [0.0, 0.05], "scratches": [0.0, 0.05]},
   "Kit_Inset": {"roughness": [0.5, 0.8], "metallic": [0.0, 0.1], "albedo": [0.02, 0.1], "scratches": [0.0, 0.0]},
-  "Kit_Leather": {"roughness": [0.45, 0.9], "metallic": [0.0, 0.05], "albedo": [0.015, 0.1], "scratches": [0.0, 0.0]},
+  "Kit_Leather": {"roughness": [0.25, 0.9], "metallic": [0.0, 0.05], "albedo": [0.01, 0.1], "scratches": [0.0, 0.0]},
   "Kit_Legend": {"roughness": [0.3, 0.6], "metallic": [0.0, 0.1], "albedo": [0.6, 0.9], "scratches": [0.0, 0.0]},
   "Kit_Grip": {"roughness": [0.4, 0.75], "metallic": [0.0, 0.1], "scratches": [0.0, 0.0]},
   "Kit_FrameEdge": {"roughness": [0.12, 0.6], "metallic": [0.0, 1.0], "albedo": [0.6, 0.85], "micro_rough": [0.0, 0.05], "scratches": [0.0, 0.08]},
@@ -93,7 +93,7 @@
   "Kit_GlowRed": {"colour": [1.0, 0.12, 0.09], "strength": 1.6},
   "Kit_GlowKey": {"colour": [1.0, 0.96, 0.9], "strength": 40.0},
   "Kit_GlowAmber": {"colour": [1.0, 0.55, 0.12], "strength": 30.0},
-  "Kit_GlowStrip": {"colour": [0.45, 0.72, 1.0], "strength": 5.0}
+  "Kit_GlowStrip": {"colour": [0.3, 0.62, 1.0], "strength": 6.0}
  },
  "makers": {
   "Halcyon": {

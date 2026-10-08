@@ -55,3 +55,6 @@ otevřené body v `Docs/Reviews/2026-10-07_kf_cockpit_console.md` (varianta B).
 
 **Kola 11–23 (8. 10. 2026):** PASS 6,6. Nový díl z výroby bez opotřebení (autor). Stav `variant_b_v2.jpg`,
 materiály a otevřené body v recenzi.
+
+**Kola 24–39 (8. 10. 2026):** PASS **8,0**, všech 8 kategorií 8 (cíl autora). Stav `variant_b_v3.jpg` (kolo 40).
+Systémové nálezy (leštěný kov v tmě, přepálená emise, kůže, šrafy, malý text) v recenzi.
