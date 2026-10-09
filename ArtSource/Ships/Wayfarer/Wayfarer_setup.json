@@ -1510,14 +1510,14 @@
    ],
    "vectors": {
     "PrimaryColor": [
-     0.1,
-     0.103,
-     0.11
+     0.22,
+     0.22,
+     0.225
     ],
     "SecondaryColor": [
-     0.1,
-     0.103,
-     0.11
+     0.22,
+     0.22,
+     0.225
     ],
     "BareMetalColor": [
      0.4,
@@ -1532,9 +1532,9 @@
    },
    "scalars": {
     "GrungeTileCm": 120.0,
-    "GrungeAmount": 0.35,
-    "DirtAmount": 0.45,
-    "EdgeWear": 0.1,
+    "GrungeAmount": 0.05,
+    "DirtAmount": 0.0,
+    "EdgeWear": 0.0,
     "WearThreshold": 0.45,
     "CavityStrength": 0.5,
     "AOStrength": 1.0,
@@ -1546,7 +1546,8 @@
     "ClearCoat": 0.0,
     "ClearCoatRoughness": 0.3
    },
-   "_round3": "kit pilot critic round 2: dark grey (0.1, was 0.05 near black) - a black channel read as gaps / windows between the roof plates; still darker than the frame"
+   "_round3": "kit pilot critic round 2: dark grey (0.1, was 0.05 near black) - a black channel read as gaps / windows between the roof plates; still darker than the frame",
+   "_sc_9_10": "SC reference (sc_ext_notes): the gap floor reads as a seam's shadow, not a black cage - mid grey, no dirt"
   },
   "MI_Ship_Wayfarer_PosWhite": {
    "_comment": "steady position lenses of the kit strobe housings (fin tips): as bright as the red and green nav lenses, so they bloom at dusk and in space",

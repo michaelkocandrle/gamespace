@@ -1,7 +1,7 @@
 {
  "ship": "Wayfarer",
  "mesh": "SM_Ship_Wayfarer",
- "total": 482241,
+ "total": 490689,
  "budget": 700000,
  "warn": 700000,
  "error": 1000000,
@@ -13,12 +13,12 @@
   },
   "kit_plates": {
    "max": 80000,
-   "tris": 39914,
-   "objects": 147
+   "tris": 48400,
+   "objects": 148
   },
   "kit_frame": {
    "max": 120000,
-   "tris": 32620,
+   "tris": 32582,
    "objects": 16
   },
   "mid_layer": {

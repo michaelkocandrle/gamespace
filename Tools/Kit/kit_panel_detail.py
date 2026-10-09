@@ -214,6 +214,13 @@ def main():
             xv = rng.uniform(x0 + 20, x1 - 20)
             add_box(H, xv - 0.3, y0 + 18, xv + 0.3, y1 - 18, groove(0.6, 0.2))
 
+    if HULL:
+        # (SC reference sc_ext_notes, technique 8: a fine engraved 10 cm grid over the white paint - Crusader / Origin
+        # hulls) hairline grooves 0.8 mm wide, 0.12 mm deep every 100 mm, under everything else
+        for k in range(int(TILE_MM / 100)):
+            v = k * 100.0 + 50.0
+            H -= 0.12 * np.clip(1.0 - np.abs(xx - v) / 0.4, 0.0, 1.0)
+            H -= 0.12 * np.clip(1.0 - np.abs(yy - v) / 0.4, 0.0, 1.0)
     dx = (np.roll(H, -1, 1) - np.roll(H, 1, 1)) / (2 * PX)
     dy = (np.roll(H, -1, 0) - np.roll(H, 1, 0)) / (2 * PX)
     n = np.dstack((-dx, dy, np.ones_like(H)))

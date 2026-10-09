@@ -5,9 +5,9 @@
  "digests": {
   "layout": "5e4187677410",
   "recipe": "f252694caaad",
-  "setup": "bb479a58bc50",
+  "setup": "e1504362dd1b",
   "spec": "d9597dfcd605",
-  "design": "9a42bf155ad0",
+  "design": "faf5ffb4e834",
   "library": "148ba66e97f3"
  },
  "drawn": {
@@ -86,6 +86,7 @@
    "P-S-L10-D",
    "P-S-L10-H",
    "P-S-L11",
+   "P-S-L11-D",
    "P-S-L11-H",
    "P-S-L12",
    "P-S-L12-H",
@@ -331,6 +332,7 @@
    "P-S-L10-D",
    "P-S-L10-H",
    "P-S-L11",
+   "P-S-L11-D",
    "P-S-L11-H",
    "P-S-L12",
    "P-S-L12-H",

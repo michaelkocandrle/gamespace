@@ -15,8 +15,8 @@
   "light_rules": "788f180917fd"
  },
  "geometry": {
-  "SM_Ship_Wayfarer.fbx": "a71c638e4f14",
-  "SM_Ship_Wayfarer_Interior.fbx": "52be1ff7c732",
+  "SM_Ship_Wayfarer.fbx": "1561d16aabf0",
+  "SM_Ship_Wayfarer_Interior.fbx": "bae27af19fcd",
   "SM_Ship_Wayfarer_Canopy.fbx": "50abe89a8300",
   "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
   "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",
@@ -476,7 +476,7 @@
  "checks": [
   [
    "HLD-M-QFUEL",
-   "Nádrž kvantového paliva (postaveno) leží zčásti mimo trup: při x 5,41 roh y 1,70 z −0,55 (layout x 5,40 … 7,40, y 0,80 … 1,70, z −0,55 … −0,05)"
+   "Nádrž kvantového paliva (postaveno) leží zčásti mimo trup: při x 7,39 roh y 1,70 z −0,55 (layout x 5,40 … 7,40, y 0,80 … 1,70, z −0,55 … −0,05)"
   ],
   [
    "DR-HLD-TEC",
