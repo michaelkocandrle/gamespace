@@ -57,14 +57,61 @@ SOUNDS = [
     ("button_press", 0.5, False, [
         "Pressing a backlit physical push button on a spaceship console: a firm, short, muted mechanical click with a soft rubber dampening, close up, no electronic tone.",
         "A chunky cockpit console key pressed and released: two soft mechanical clicks, short, close up, no beep."]),
+    # batch 2 (9. 10. 2026, "no sound in the game sounds good"): the procedural rest and the sounds the game lacks
+    ("boost_start", 1.5, False, [
+        "Spaceship afterburner kicking in, heard from the cockpit: a sudden deep whoosh and a hard thump of extra thrust, the engine roar surging louder.",
+        "Sci-fi fighter boost engaging: a punchy low-frequency burst, rushing air and a rising turbine howl, short and powerful."]),
+    ("boost_loop", 6, True, [
+        "Spaceship afterburner running at full power from inside the cockpit: an intense deep roaring rush, strong hull vibration, aggressive and dense, seamless loop.",
+        "Sustained sci-fi boost thrust: a powerful throaty roar with a high turbine scream on top, heavy and continuous, seamless loop."]),
+    ("cruise_charge", 4, False, [
+        "Spaceship quantum drive spooling up: a deep rising electrical hum building in pitch and intensity, energy crackles, a tense swell before the jump.",
+        "Sci-fi jump drive charging: a low throb rising into a powerful harmonic whine, capacitors charging, building tension."]),
+    ("cruise_engage", 2.5, False, [
+        "Spaceship quantum jump engaging: a massive deep boom and a whoosh of space bending, followed by a rushing roar.",
+        "Sci-fi warp drive launch: a heavy sub-bass impact with a reversed swell and a bright energy tear, cinematic."]),
+    ("cruise_loop", 8, True, [
+        "Inside a spaceship traveling in a quantum tunnel: a smooth deep rushing drone with a soft shimmering harmonic layer, steady and hypnotic, seamless loop.",
+        "Sustained sci-fi warp travel ambience: low rumble with airy energy wash and a subtle pulsing tone, seamless loop."]),
+    ("cruise_drop", 2.5, False, [
+        "Spaceship dropping out of quantum travel: an energy whoosh collapsing into a deep thud, rumble fading to quiet engines.",
+        "Sci-fi warp exit: a reverse swell into a soft heavy impact and a fading shimmer."]),
+    ("touchdown", 1.5, False, [
+        "Heavy spaceship landing gear touching down on the ground, heard from inside: deep hydraulic thud, metal struts compressing with a groan, a settling creak.",
+        "Spacecraft landing contact: a solid low impact through the hull, suspension hiss and metal clunk."]),
+    ("gear_deploy", 3, False, [
+        "Spaceship landing gear extending, heard from the cockpit: hydraulic whine, bay doors opening with a clunk, the gear struts locking down with a heavy mechanical thunk.",
+        "Aircraft-style landing gear lowering: motor whir, hydraulic hiss, a firm lock clank at the end."]),
+    ("gear_retract", 3, False, [
+        "Spaceship landing gear retracting, heard from the cockpit: hydraulic whine, struts folding up, bay doors closing with a heavy clunk.",
+        "Landing gear raising into the hull: motor hum, hydraulic hiss, a solid door thud at the end."]),
+    ("door_open", 1.2, False, [
+        "A sliding metal door on a spaceship opening: a pneumatic hiss and a smooth fast mechanical slide ending with a soft thump.",
+        "Sci-fi interior door opening: a short motor whir, air release and a sliding metal panel."]),
+    ("door_close", 1.2, False, [
+        "A sliding metal door on a spaceship closing: a smooth fast mechanical slide and a firm sealing thud with a short air hiss.",
+        "Sci-fi interior door shutting: sliding panel, a solid clunk and a soft pressure seal."]),
+    ("footstep", 0.5, False, [
+        "A single footstep of a boot on a metal spaceship deck plate: a firm heel strike with a slight hollow metallic ring, close up, dry.",
+        "One boot step on a grated metal floor in a spacecraft: a solid tap with a little metal resonance, short."]),
+    ("ui_hover", 0.5, False, [
+        "Game menu hover sound: a very soft, short, low muted tick, subtle and refined, not a beep.",
+        "Subtle sci-fi menu cursor move: a tiny soft airy tick, quiet and dry."]),
+    ("ui_confirm", 0.6, False, [
+        "Game menu confirm sound in a sci-fi style: a soft, deep, short mechanical click with a low warm resonance, refined, not a phone notification.",
+        "Sci-fi menu select: a muted solid click with a gentle low swell, short and premium."]),
+    ("menu_ambience", 20, True, [
+        "Ambient background for a space game main menu: a deep slow evolving drone, distant hum of a spacecraft, faint airy space atmosphere, calm and vast, seamless loop.",
+        "Calm sci-fi menu ambience: soft low pads of distant machinery and space wind, slowly breathing, seamless loop."]),
 ]
 
 
 def specs():
     out = []
     for name, sec, loop, prompts in SOUNDS:
-        for take, (model, prompt, extra) in zip("abc", (
-                (EL, prompts[0], {"promptInfluence": 0.7}), (EL, prompts[1], {"promptInfluence": 0.5}), (SO, prompts[0], {}))):
+        # (take c on Sonilo: the author's Scenario plan refuses that model - left out)
+        for take, (model, prompt, extra) in zip("ab", (
+                (EL, prompts[0], {"promptInfluence": 0.7}), (EL, prompts[1], {"promptInfluence": 0.5}))):
             if model == EL:
                 params = dict({"text": (prompt + STYLE)[:450], "durationSeconds": sec, "loop": loop, "outputFormat": "mp3_44100_192"}, **extra)
                 ext = "mp3"

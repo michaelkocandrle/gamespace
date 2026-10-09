@@ -76,6 +76,15 @@ private:
 	TArray<float> DoorOpen;
 	TArray<float> DoorTarget;
 	TArray<double> DoorOpenedAt;
+	/** The target the door's sound was last played for (author 9. 10. 2026: doors had no sound). */
+	TArray<float> DoorSoundTarget;
+	UPROPERTY(Transient)
+	TObjectPtr<class USoundBase> DoorOpenSound;
+	UPROPERTY(Transient)
+	TObjectPtr<class USoundBase> DoorCloseSound;
+	UPROPERTY(Transient)
+	TObjectPtr<class USoundAttenuation> DoorAttenuation;
+	void PlayDoorSound(int32 Door, bool bOpen);
 	/** Per door, in the ship's frame: the prompt point, or zero = the doorway's centre. */
 	TArray<FVector> DoorPrompt;
 	/** Per door: its holographic touch panel (socket Control_door<n>_panel), or null. */

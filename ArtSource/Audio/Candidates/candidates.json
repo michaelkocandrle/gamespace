@@ -196,5 +196,23 @@
   "loop": false,
   "asset": "asset_H78UYKRZc5z8sH7cMYSVrHM2",
   "cu": 30
+ },
+ "boost_start_a.mp3": {
+  "sound": "boost_start",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Spaceship afterburner kicking in, heard from the cockpit: a sudden deep whoosh and a hard thump of extra thrust, the engine roar surging louder.",
+  "loop": false,
+  "asset": "asset_Sv8QnygsBaf1xu1xiFFmV83f",
+  "cu": 30
+ },
+ "boost_start_b.mp3": {
+  "sound": "boost_start",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Sci-fi fighter boost engaging: a punchy low-frequency burst, rushing air and a rising turbine howl, short and powerful.",
+  "loop": false,
+  "asset": "asset_TP8Z3SxndzCtYMFcCVAsieKP",
+  "cu": 30
  }
 }

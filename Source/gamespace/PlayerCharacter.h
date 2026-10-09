@@ -259,6 +259,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "40.0", Units = "cm"))
 	float ShipCapsuleHalfHeight = 90.f;
 
+	/** A footstep every this much walked on a ship's deck (author 9. 10. 2026: walking was silent). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "20.0", Units = "cm"))
+	float FootstepStrideCm = 75.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Ship", meta = (ClampMin = "0.0"))
+	float FootstepVolume = 0.35f;
+
 private:
 	/** The ship whose interior this character walks (BoardInterior), or null. */
 	TWeakObjectPtr<ASpaceshipPawn> InteriorShip;
@@ -304,4 +311,11 @@ private:
 
 	int32 TerrainRecoveries = 0;
 	float StuckSeconds = 0.f;
+private:
+	/** Footsteps on a ship's deck: the distance walked since the last one, the sound, whether the walker is in a ship. */
+	float FootstepTravel = 0.f;
+	bool bFootstepsInShip = false;
+	UPROPERTY(Transient)
+	TObjectPtr<class USoundBase> FootstepSound;
+	void UpdateFootsteps(float DeltaSeconds);
 };

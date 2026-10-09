@@ -41,6 +41,8 @@ namespace ShipPresentationDefaults
 	const TCHAR* const CruiseEngageSoundPath = TEXT("/Game/Ships/Audio/SW_CruiseEngage.SW_CruiseEngage");
 	const TCHAR* const CruiseDropSoundPath = TEXT("/Game/Ships/Audio/SW_CruiseDrop.SW_CruiseDrop");
 	const TCHAR* const TouchdownSoundPath = TEXT("/Game/Ships/Audio/SW_Touchdown.SW_Touchdown");
+	const TCHAR* const GearDeploySoundPath = TEXT("/Game/Ships/Audio/SW_GearDeploy.SW_GearDeploy");
+	const TCHAR* const GearRetractSoundPath = TEXT("/Game/Ships/Audio/SW_GearRetract.SW_GearRetract");
 
 	/** The material parameter the ship animates on thruster and strobe slots (M_Ship_Hull). */
 	const FName EmissiveStrengthParameter(TEXT("EmissiveStrength"));
@@ -181,6 +183,8 @@ void UShipPresentationComponent::SetupAudioLayers()
 	Load(Ship->QuantumEngageSound, CruiseEngageSoundPath);
 	Load(Ship->QuantumExitSound, CruiseDropSoundPath);
 	Load(Ship->TouchdownSound, TouchdownSoundPath);
+	Load(Ship->GearDeploySound, GearDeploySoundPath);
+	Load(Ship->GearRetractSound, GearRetractSoundPath);
 
 	// Created at runtime rather than as default subobjects: nothing to configure per ship, and
 	// Blueprints made before these layers existed need no changes.

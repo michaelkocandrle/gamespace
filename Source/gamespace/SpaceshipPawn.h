@@ -2051,6 +2051,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
 	TObjectPtr<USoundBase> TouchdownSound;
 
+	/** The gear going down / up (author 9. 10. 2026: sounds the game lacked). SW_GearDeploy / SW_GearRetract. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
+	TObjectPtr<USoundBase> GearDeploySound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spaceship|Audio")
+	TObjectPtr<USoundBase> GearRetractSound;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spaceship|Audio", meta = (ClampMin = "0.0"))
 	float EngineHumVolume = 0.4f;
 

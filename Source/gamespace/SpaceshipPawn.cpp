@@ -1984,7 +1984,13 @@ UAudioComponent* ASpaceshipPawn::PlayOneShot(USoundBase* Sound, float VolumeScal
 
 bool ASpaceshipPawn::SetGearDown(bool bDown)
 {
-	return Landing->SetGearDown(bDown);
+	const bool bWasDown = Landing->IsGearGoingDown();
+	const bool bDone = Landing->SetGearDown(bDown);
+	if (bDone && bWasDown != bDown)
+	{
+		PlayOneShot(bDown ? GearDeploySound : GearRetractSound, 0.8f);
+	}
+	return bDone;
 }
 
 void ASpaceshipPawn::ToggleGear()

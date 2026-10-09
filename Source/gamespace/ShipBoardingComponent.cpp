@@ -3,6 +3,10 @@
 #include "ShipBoardingComponent.h"
 
 #include "HAL/PlatformTime.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundAttenuation.h"
+#include "Sound/SoundBase.h"
+#include "SpaceUserSettings.h"
 #include "Components/WidgetComponent.h"
 #include "Misc/App.h"
 #include "SpaceDoorPanel.h"
@@ -508,6 +512,19 @@ void UShipBoardingComponent::TickDoors(float DeltaSeconds)
 		{
 			DoorTarget[Door] = 0.f;
 		}
+		if (!DoorSoundTarget.IsValidIndex(Door))
+		{
+			DoorSoundTarget.SetNum(DoorOpen.Num());
+			for (int32 Each = 0; Each < DoorOpen.Num(); ++Each)
+			{
+				DoorSoundTarget[Each] = DoorTarget[Each];
+			}
+		}
+		if (DoorSoundTarget[Door] != DoorTarget[Door])
+		{
+			DoorSoundTarget[Door] = DoorTarget[Door];
+			PlayDoorSound(Door, DoorTarget[Door] > 0.5f);
+		}
 		const float Before = DoorOpen[Door];
 		DoorOpen[Door] = FMath::FInterpConstantTo(DoorOpen[Door], DoorTarget[Door], DeltaSeconds, 1.f / ShipDoors::DoorSeconds);
 		bMoved |= DoorOpen[Door] != Before;
@@ -527,6 +544,32 @@ void UShipBoardingComponent::TickDoors(float DeltaSeconds)
 		}
 	}
 	ApplyDoorCollision();
+}
+
+void UShipBoardingComponent::PlayDoorSound(int32 Door, bool bOpen)
+{
+	if (!DoorOpenSound)
+	{
+		DoorOpenSound = LoadObject<USoundBase>(nullptr, TEXT("/Game/Ships/Audio/SW_DoorOpen.SW_DoorOpen"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+		DoorCloseSound = LoadObject<USoundBase>(nullptr, TEXT("/Game/Ships/Audio/SW_DoorClose.SW_DoorClose"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+	}
+	USoundBase* Sound = bOpen ? DoorOpenSound.Get() : DoorCloseSound.Get();
+	if (!Sound)
+	{
+		return;
+	}
+	if (!DoorAttenuation)
+	{
+		// heard in the room, gone two rooms away: full within 3 m, silent at 15 m
+		DoorAttenuation = NewObject<USoundAttenuation>(this);
+		DoorAttenuation->Attenuation.bAttenuate = true;
+		DoorAttenuation->Attenuation.bSpatialize = true;
+		DoorAttenuation->Attenuation.AttenuationShape = EAttenuationShape::Sphere;
+		DoorAttenuation->Attenuation.AttenuationShapeExtents = FVector(300.f, 0.f, 0.f);
+		DoorAttenuation->Attenuation.FalloffDistance = 1200.f;
+	}
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetDoorLocation(Door), FRotator::ZeroRotator, USpaceUserSettings::GetEffectsVolume() * 0.8f,
+		FMath::FRandRange(0.97f, 1.03f), 0.f, DoorAttenuation);
 }
 
 void UShipBoardingComponent::ApplyDoorCollision()

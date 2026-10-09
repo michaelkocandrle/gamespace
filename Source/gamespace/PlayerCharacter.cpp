@@ -24,6 +24,8 @@
 #include "Camera/PlayerCameraManager.h"
 #include "SpaceshipPawn.h"
 #include "SpaceUserSettings.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 #include "UObject/ConstructorHelpers.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogPlayerCharacter, Log, All);
@@ -322,7 +324,40 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 		AddMovementInput(Heading.GetRightVector(), float(Input.X));
 	}
 
+	UpdateFootsteps(DeltaSeconds);
 	UpdateView();
+}
+
+void APlayerCharacter::UpdateFootsteps(float DeltaSeconds)
+{
+	const UCharacterMovementComponent* Movement = GetCharacterMovement();
+	if (!bFootstepsInShip || Movement->IsFalling() || !Movement->IsMovingOnGround())
+	{
+		FootstepTravel = 0.f;
+		return;
+	}
+	const float Speed = Movement->Velocity.Size();
+	if (Speed < 40.f)
+	{
+		FootstepTravel = FootstepStrideCm * 0.6f;      // the first step comes soon after starting
+		return;
+	}
+	FootstepTravel += Speed * DeltaSeconds;
+	const float Stride = FootstepStrideCm * (bSprintHeld ? 1.25f : 1.f);
+	if (FootstepTravel < Stride)
+	{
+		return;
+	}
+	FootstepTravel -= Stride;
+	if (!FootstepSound)
+	{
+		FootstepSound = LoadObject<USoundBase>(nullptr, TEXT("/Game/Ships/Audio/SW_Footstep.SW_Footstep"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+	}
+	if (FootstepSound && IsLocallyControlled())
+	{
+		UGameplayStatics::PlaySound2D(this, FootstepSound, FootstepVolume * USpaceUserSettings::GetEffectsVolume() * FMath::FRandRange(0.85f, 1.f),
+			FMath::FRandRange(0.9f, 1.08f));
+	}
 }
 
 // -------------------------------------------------------------------------------------------
@@ -568,6 +603,7 @@ void APlayerCharacter::BoardInterior(ASpaceshipPawn* Ship, const FVector& Forwar
 
 void APlayerCharacter::SetShipCapsule(bool bInShip)
 {
+	bFootstepsInShip = bInShip;
 	UCapsuleComponent* Capsule = GetCapsuleComponent();
 	const float Radius = bInShip ? ShipCapsuleRadius : PlayerCharacterDefaults::CapsuleRadius;
 	const float HalfHeight = bInShip ? ShipCapsuleHalfHeight : PlayerCharacterDefaults::CapsuleHalfHeight;

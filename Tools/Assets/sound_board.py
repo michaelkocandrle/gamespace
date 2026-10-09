@@ -28,6 +28,23 @@ SOUNDS = [
     ("switch_click", "Páčkový spínač", "PWR, ENG a kryté spínače", os.path.join(EL, "switch_click.wav")),
     ("button_press", "Tlačítko konzole", "klik na tlačítko v režimu interakce (dnes zvuk menu)", os.path.join(GEN, "ui_confirm.wav")),
 ]
+BATCH2 = [
+    ("boost_start", "Boost – nástup", "Shift: přídavný tah se zapne", os.path.join(GEN, "boost_start.wav")),
+    ("boost_loop", "Boost – smyčka", "drží se Shift", os.path.join(GEN, "boost_loop.wav")),
+    ("cruise_charge", "Quantum – nabíjení", "drží se B v NAV před skokem", os.path.join(GEN, "cruise_charge.wav")),
+    ("cruise_engage", "Quantum – skok", "start skoku", os.path.join(GEN, "cruise_engage.wav")),
+    ("cruise_loop", "Quantum – let tunelem", "smyčka během skoku", os.path.join(GEN, "cruise_loop.wav")),
+    ("cruise_drop", "Quantum – výstup", "konec skoku", os.path.join(GEN, "cruise_drop.wav")),
+    ("touchdown", "Dosednutí", "podvozek se dotkne země", os.path.join(GEN, "touchdown.wav")),
+    ("gear_deploy", "Podvozek – vysunutí", "klávesa N (nový zvuk)", ""),
+    ("gear_retract", "Podvozek – zasunutí", "klávesa N (nový zvuk)", ""),
+    ("door_open", "Dveře – otevření", "posuvné dveře v lodi (nový zvuk)", ""),
+    ("door_close", "Dveře – zavření", "posuvné dveře v lodi (nový zvuk)", ""),
+    ("footstep", "Krok", "chůze po palubě (nový zvuk, střídá se výška)", ""),
+    ("ui_hover", "Menu – najetí", "myš přes tlačítko menu", os.path.join(GEN, "ui_hover.wav")),
+    ("ui_confirm", "Menu – potvrzení", "klik v menu", os.path.join(GEN, "ui_confirm.wav")),
+    ("menu_ambience", "Menu – podkres", "smyčka v hlavním menu", os.path.join(GEN, "menu_ambience.wav")),
+]
 TAKES = {"a": "A – ElevenLabs", "b": "B – ElevenLabs, jiné zadání", "c": "C – Sonilo"}
 
 
@@ -35,15 +52,15 @@ def mp3(src, dst):
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", src, "-ac", "1", "-b:a", "128k", dst], check=True)
 
 
-def main(out):
+def main(out, batch="1"):
     audio = os.path.join(out, "audio")
     os.makedirs(audio, exist_ok=True)
     manifest = json.load(open(os.path.join(CAND, "candidates.json"), encoding="utf-8"))
     rows = []
     files = {}
-    for name, label, where, now in SOUNDS:
+    for name, label, where, now in (BATCH2 if batch == "2" else SOUNDS):
         takes = []
-        if os.path.exists(now):
+        if now and os.path.exists(now):
             mp3(now, os.path.join(audio, "%s_now.mp3" % name))
             takes.append(("now", "Teď ve hře", "audio/%s_now.mp3" % name, ""))
         for t in "abc":
@@ -73,4 +90,4 @@ def main(out):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "1")
