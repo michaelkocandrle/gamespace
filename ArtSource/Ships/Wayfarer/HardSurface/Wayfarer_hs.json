@@ -2596,12 +2596,18 @@
   ]
  },
  "wings": {
-  "_comment": "Shaped wings and fins inside the drawing's slabs (Tools/Blender/hs_wings.py): NACA section, leading-edge strip in the dark material (bare metal read as chrome with Lumen noise on the fins), flap / rudder cut out of the box in secondary paint, flap track fairings.",
+  "_comment": "Shaped wings and fins inside the drawing's slabs (Tools/Blender/hs_wings.py): NACA section, leading-edge band 0.35 m in dark graphite cut every 0.6 m with a bolt per segment and a thin bare-metal nose strip (6 mm of chord: the blunt nose made 2 cm a whole chrome face; SC technique 6, measured 9. 10. 2026; a whole metal edge read as chrome), flap / rudder cut out of the box in secondary paint, flap track fairings.",
   "wing": {
    "id": "F-WING",
    "step": 0.08,
    "t_ratio": 1.0,
    "le": 0.08,
+   "le_m": 0.35,
+   "le_cap": 0.4,
+   "le_seg_m": 0.6,
+   "le_seam": 0.005,
+   "strip_m": 0.006,
+   "le_bolt_d": 0.015,
    "gap": 0.005,
    "flap": {
     "span": [0.3, 0.9],
@@ -2612,6 +2618,8 @@
    "materials": {
     "box": "paint",
     "le": "dark",
+    "strip": "metal",
+    "bolt": "metal",
     "flap": "paint",
     "fairing": "dark",
     "core": "dark"
@@ -2623,6 +2631,12 @@
    "step": 0.06,
    "t_ratio": 1.0,
    "le": 0.1,
+   "le_m": 0.35,
+   "le_cap": 0.4,
+   "le_seg_m": 0.6,
+   "le_seam": 0.005,
+   "strip_m": 0.006,
+   "le_bolt_d": 0.015,
    "gap": 0.005,
    "flap": {
     "span": [0.2, 0.85],
@@ -2632,6 +2646,8 @@
    "materials": {
     "box": "paint2",
     "le": "dark",
+    "strip": "metal",
+    "bolt": "metal",
     "flap": "paint",
     "core": "dark"
    },

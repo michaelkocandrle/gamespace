@@ -8,13 +8,16 @@ module rebuilds each slab (every connected piece of the part) as a shaped surfac
     the planform stays the drawing's outline (the top / side silhouette does not change)
   - an airfoil thickness across the chord (NACA 4-digit shape, "t_ratio" of the slab's thickness at 30 %
     chord = 1): the front silhouette keeps its maximum thickness
-  - split into hard-surface pieces with real gaps: a leading-edge strip (chord 0 .. "le"), the box
+  - split into hard-surface pieces with real gaps: a leading-edge band (chord 0 .. "le", or a constant "le_m"
+    metres capped at "le_cap" of the chord; SC technique 6) cut every "le_seg_m" by transverse seams "le_seam",
+    a bare-metal nose strip "strip_m" wide, a bolt "le_bolt_d" per band segment on each face; the box
     (le .. 1), a flap / rudder ("flap": span fractions and chord start) cut out of the box, each piece
     closed (boundary walls), bevelled with weighted normals; flap track fairings under a wing flap
   - piece materials by key (recipe "materials"), flaps secondary paint (face attribute paint2)
 
-Recipe "wings": {"<part>": {"step", "t_ratio", "le", "flap": {"span": [a, b], "chord": c}, "gap",
-"fairings", "materials": {"box", "le", "flap", "tip"}}}. Prints nothing; returns a report.
+Recipe "wings": {"<part>": {"step", "t_ratio", "le", "le_m", "le_cap", "le_seg_m", "le_seam", "strip_m",
+"le_bolt_d", "flap": {"span": [a, b], "chord": c}, "gap", "fairings", "materials": {"box", "le", "flap",
+"strip", "bolt", "fairing", "core"}}}. Prints nothing; returns a report.
 """
 import math
 
@@ -122,14 +125,18 @@ def _chord_interval(tree, base, chord, thin, span_off, span, lo, hi):
 
 
 def _piece(stations, f0, f1, n_chord, t_ratio, gap_f=0.0):
-    """Closed piece over span stations (list of (span_pt, x0, x1, mid, t)) and chord fractions [f0, f1]."""
+    """Closed piece over span stations ((span_pt, x0, x1, mid, t, chord, thin, ...)) and chord fractions [f0, f1];
+    f0 / f1 are numbers or functions of the station's chord length (a band of constant width in metres)."""
     bm = bmesh.new()
     rows = []
-    for (sp, x0, x1, mid_fn, tmax, chord, thin) in stations:
+    for st in stations:
+        sp, x0, x1, mid_fn, tmax, chord, thin = st[:7]
+        a = f0(x1 - x0) if callable(f0) else f0
+        b = f1(x1 - x0) if callable(f1) else f1
         top, bot = [], []
         for k in range(n_chord + 1):
             u = k / n_chord
-            f = f0 + (f1 - f0) * (0.5 - 0.5 * math.cos(math.pi * u)) if f0 == 0.0 else f0 + (f1 - f0) * u
+            f = a + (b - a) * (0.5 - 0.5 * math.cos(math.pi * u)) if a == 0.0 else a + (b - a) * u
             x = x0 + (x1 - x0) * f
             m = mid_fn(x)
             h = 0.5 * tmax * t_ratio * max(naca(f), 0.004)
@@ -169,16 +176,25 @@ def build(ob, spec, coll, mats, bevel, name):
         s0, s1 = min(s_vals), max(s_vals)
         lo, hi = min(x_vals) - 0.05, max(x_vals) + 0.05
         n_st = max(4, int(math.ceil((s1 - s0) / step)))
+        offs = [s0 + 0.0005 + (s1 - s0 - 0.001) * k / n_st for k in range(n_st + 1)]
+        # the leading-edge band in segments (SC: a dark edge cut every ~0.6 m): exact stations on both sides
+        # of every transverse seam
+        seg_m, seam = spec.get("le_seg_m"), spec.get("le_seam", 0.005)
+        bounds = []
+        if seg_m:
+            n_seg = max(1, int(round((s1 - s0) / seg_m)))
+            bounds = [s0 + (s1 - s0) * k / n_seg for k in range(1, n_seg)]
+            for b in bounds:
+                offs += [b - seam / 2, b + seam / 2]
         stations = []
-        for k in range(n_st + 1):
-            so = s0 + 0.0005 + (s1 - s0 - 0.001) * k / n_st
+        for so in sorted(offs):
             iv = _chord_interval(tree, c, chord, thin, so, span, lo, hi)
             if iv is None or iv[1] - iv[0] < 0.005:
                 continue
             x0, x1 = iv
             base = c + span * so
 
-            def mid_fn(x, base=base):
+            def mid_fn(x, base=base, x0=x0, x1=x1):
                 r = _slab_at(tree, base + chord * x, thin)
                 if r is None:
                     r = _slab_at(tree, base + chord * min(max(x, x0 + 0.01), x1 - 0.01), thin)
@@ -194,16 +210,56 @@ def build(ob, spec, coll, mats, bevel, name):
 
         def st_range(a, b):
             lo_s, hi_s = stations[0][7] + span_len * a, stations[0][7] + span_len * b
-            return [s[:7] for s in stations if lo_s <= s[7] <= hi_s]
+            return [s for s in stations if lo_s <= s[7] <= hi_s]
 
         pieces = []
         # a dark core under the pieces, no gaps: the gaps show structure, not daylight (and the silhouette
         # stays closed)
         core_ratio = spec.get("core", 0.9)
-        pieces.append(("core", _piece([s[:7] for s in stations], 0.0, 1.0, 24, t_ratio * core_ratio)))
-        le_f1 = le
-        box_f0 = le + gap / max(1e-3, (stations[0][2] - stations[0][1]))
-        pieces.append(("le", _piece([s[:7] for s in stations], 0.0, le_f1, 10, t_ratio)))
+        pieces.append(("core", _piece(stations, 0.0, 1.0, 24, t_ratio * core_ratio)))
+        le_m = spec.get("le_m")
+        if le_m:
+            # SC technique 6 (measured 9. 10. 2026): a band of constant width, not a chord fraction
+            cap = spec.get("le_cap", 0.4)
+            le_f1 = lambda L, le_m=le_m, cap=cap: min(cap, le_m / max(L, 1e-3))
+        else:
+            le_f1 = le
+        box_f0 = lambda L, le_f1=le_f1: (le_f1(L) if callable(le_f1) else le_f1) + gap / max(1e-3, L)
+        strip_m = spec.get("strip_m")
+        band_f0 = 0.0
+        if strip_m:
+            # the bare-metal leading-edge strip, continuous along the span
+            strip_f = lambda L, strip_m=strip_m: strip_m / max(L, 1e-3)
+            band_f0 = lambda L, strip_f=strip_f: strip_f(L) + 0.003 / max(1e-3, L)
+            pieces.append(("strip", _piece(stations, 0.0, strip_f, 6, t_ratio)))
+        edges = [stations[0][7] - 1.0] + bounds + [stations[-1][7] + 1.0]
+        segs = []
+        for a_, b_ in zip(edges, edges[1:]):
+            sts = [st for st in stations if a_ + seam / 2 - 1e-6 <= st[7] <= b_ - seam / 2 + 1e-6] if bounds                 else stations
+            if len(sts) >= 2:
+                pieces.append(("le", _piece(sts, band_f0, le_f1, 10, t_ratio)))
+                segs.append(sts)
+        # one bolt per segment on each face, mid band (SC: a 1.5 cm fastener per edge segment)
+        bolt_d = spec.get("le_bolt_d")
+        if bolt_d and segs:
+            bb = bmesh.new()
+            for sts in segs:
+                base, x0, x1, mid_fn, tmax, ch, th, so = sts[len(sts) // 2]
+                L = x1 - x0
+                fa = band_f0(L) if callable(band_f0) else band_f0
+                fb = le_f1(L) if callable(le_f1) else le_f1
+                f = 0.5 * (fa + fb)
+                x = x0 + L * f
+                m = mid_fn(x)
+                h = 0.5 * tmax * t_ratio * naca(f)
+                for sgn in (1, -1):
+                    p = base + ch * x + th * (m + sgn * h)
+                    r = bmesh.ops.create_cone(bb, cap_ends=True, segments=10, radius1=bolt_d / 2,
+                                              radius2=bolt_d / 2 * 0.8, depth=0.004)
+                    mm = Matrix((ch, th.cross(ch), th * sgn)).transposed().to_4x4()
+                    mm.translation = p
+                    bmesh.ops.transform(bb, matrix=mm, verts=r["verts"])
+            pieces.append(("bolt", bb))
         if fl:
             a, b = fl["span"]
             cut = fl["chord"]
@@ -220,7 +276,7 @@ def build(ob, spec, coll, mats, bevel, name):
             if len(mid_flap) >= 2:
                 pieces.append(("flap", _piece(mid_flap, cut + 0.006, 1.0, 10, t_ratio)))
         else:
-            pieces.append(("box", _piece([s[:7] for s in stations], box_f0, 1.0, 24, t_ratio)))
+            pieces.append(("box", _piece(stations, box_f0, 1.0, 24, t_ratio)))
         # flap track fairings: small pods on the pressure side at the flap hinge
         if fl and spec.get("fairings"):
             fb = bmesh.new()
