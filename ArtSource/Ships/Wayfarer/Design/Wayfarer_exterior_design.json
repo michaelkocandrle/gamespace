@@ -57,8 +57,8 @@
   ],
   "kit": [
     {"id": "XK-PLATE", "name": "Deska na rámu", "from": "B", "status": "proposed",
-     "what": "vystouplá deska přišroubovaná na rám: 30 mm, zkosení 4 mm, 40 mm od žeber; šrouby Ø 13 po 600 mm, 40 mm od hrany",
-     "t": 0.03, "bevel": 0.004, "bolt_pitch": 1.2, "bolt_d": 0.02, "bolt_edge": 0.04},
+     "what": "vystouplá deska přišroubovaná na rám: 30 mm, zaoblený okraj 7 mm, ohyby desky r 50 mm, 40 mm od žeber; šrouby Ø 13 po 600 mm, 40 mm od hrany",
+     "t": 0.03, "bevel": 0.007, "bolt_pitch": 1.2, "bolt_d": 0.02, "bolt_edge": 0.04},
     {"id": "XK-PLATE-H", "name": "Těžký plát se šrouby", "from": "C", "status": "proposed",
      "what": "těžký plát 40 mm, řada šroubů Ø 13 mm po 300 mm podél podélných hran", "t": 0.04, "bevel": 0.01,
      "bolt_pitch": 0.9, "bolt_d": 0.013, "bolt_edge": 0.05},

@@ -41,7 +41,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "68d9fd9193fe59d2cbbe2e34ecdcb596fa117c0c"
+      "geometry_hash": "cfa787be82a0ccaa094642c6261cc09df6c2e3b5"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -55,7 +55,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "da4f32b1765e7b3ca7acc0ee3abd97eef920c00e"
+      "geometry_hash": "0246446faf29b137c16f6a31dcb64caf4bc02b36"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -83,14 +83,14 @@
       "objects": [
         "SM_Ship_Wayfarer_Hologram"
       ],
-      "geometry_hash": "544830c02a7f47d27c89225decf9e1c00ecfd798"
+      "geometry_hash": "a7cfd336684e7d191aad5ca33785868d7d858194"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Interior.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "f0fd05724dd73d01f6885160d9b95a89b14ae4d0"
+      "geometry_hash": "06a398a8fe14d8b0ed17d49de226897b42ca7bbb"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
@@ -118,8 +118,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 513825,
-      "verts": 333133,
+      "tris": 594365,
+      "verts": 373403,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -179,8 +179,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 62124,
-      "verts": 63403,
+      "tris": 62466,
+      "verts": 63702,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -307,8 +307,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 693359,
-      "verts": 359444,
+      "tris": 693365,
+      "verts": 359446,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -460,15 +460,15 @@
     "UCX_SM_Ship_Wayfarer_02": {
       "kind": "UCX",
       "mesh": "SM_Ship_Wayfarer",
-      "verts": 26,
+      "verts": 22,
       "bounds_m": [
         [
           -10.349987983703613,
           -2.3999361991882324,
-          -1.899045467376709
+          -1.892960548400879
         ],
         [
-          -2.0500001907348633,
+          -2.0500011444091797,
           2.3992109298706055,
           2.1329803466796875
         ]
@@ -481,13 +481,13 @@
       "bounds_m": [
         [
           -10.777799606323242,
-          2.3502063751220703,
+          2.350139617919922,
           -1.0496281385421753
         ],
         [
           -4.251672267913818,
           4.405611038208008,
-          1.0497982501983643
+          1.0497984886169434
         ]
       ]
     },
@@ -503,7 +503,7 @@
         ],
         [
           -4.251672267913818,
-          -2.3502063751220703,
+          -2.3501393795013428,
           1.0497984886169434
         ]
       ]
@@ -549,7 +549,7 @@
       "bounds_m": [
         [
           -7.829881191253662,
-          2.3002817630767822,
+          2.300082206726074,
           -0.6998500227928162
         ],
         [
@@ -571,7 +571,7 @@
         ],
         [
           2.3500003814697266,
-          -2.3002817630767822,
+          -2.300082206726074,
           -0.20000535249710083
         ]
       ]

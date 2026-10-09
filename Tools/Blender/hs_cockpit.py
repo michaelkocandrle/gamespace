@@ -439,6 +439,13 @@ def build_hologram(g, coll, mat, ship, exterior, centre, length=0.16, max_tris=2
         if me is not None and len(me.polygons):
             tmp = bmesh.new()
             tmp.from_mesh(me)
+            # positions and faces only: a mesh with extra layers (the kit plates' bevel weights) merged into bm
+            # by from_mesh crashed or emptied it
+            for dom in (tmp.verts.layers, tmp.edges.layers, tmp.faces.layers):
+                for kind in ("int", "float", "float_vector", "float_color", "color", "string", "bool"):
+                    coll_ = getattr(dom, kind, None)
+                    for layer in (list(coll_.values()) if coll_ is not None else []):
+                        coll_.remove(layer)
             tmp.transform(ob.matrix_world)
             tm = bpy.data.meshes.new("_holo_part")
             tmp.to_mesh(tm)

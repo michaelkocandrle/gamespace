@@ -111,6 +111,10 @@ def main(argv):
     for o in meshes:
         ev = o.evaluated_get(dg)
         me = bpy.data.meshes.new_from_object(ev, preserve_all_data_layers=True, depsgraph=dg)
+        # the kit plates' fold weights (hs_exterior_kit.shell) only drive the bevel: left on some meshes, merging
+        # them with bmesh.from_mesh crashed Blender (the geometry check, 9. 10. 2026)
+        if me.attributes.get("bevel_weight_edge"):
+            me.attributes.remove(me.attributes["bevel_weight_edge"])
         o.modifiers.clear()
         old = o.data
         o.data = me

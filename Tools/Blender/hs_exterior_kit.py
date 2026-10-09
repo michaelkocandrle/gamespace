@@ -217,10 +217,30 @@ def mirror_into(bm):
     bmesh.ops.reverse_faces(bm, faces=faces)
 
 
-def shell(name, bm, coll, material, t, bevel, paint2=0):
-    """The cut faces as a plate: coplanar faces merged, solidified outwards by t, bevelled (1 segment, hardened
+FOLD_R = 0.05          # SC technique 5 (measured 9. 10. 2026): large form edges rounded r 4-6 cm, not chamfered
+FOLD_MIN_DEG = 20.0    # a fold of the plate itself (not the hull's fine faceting)
+FOLD_MAX_DEG = 100.0
+FOLD_MIN_EDGE = 0.15
+FOLD_MIN_AREA = 0.02   # m2 on both sides of the fold
+FOLD_SEGMENTS = 3
+RIM_SEGMENTS = 2       # the plate's own edge: a rounded lip that catches a highlight (one flat chamfer read as Lego)
+
+
+def shell(name, bm, coll, material, t, bevel, paint2=0, fold_r=FOLD_R):
+    """The cut faces as a plate: coplanar faces merged, solidified outwards by t; folds of the plate (faces at
+    FOLD_MIN_DEG or more) rounded by fold_r (bevel weight), the rims bevelled in RIM_SEGMENTS (hardened
     normals)."""
     dissolve_planar(bm)
+    folds = 0
+    if fold_r > 0:
+        lay = bm.edges.layers.float.get("bevel_weight_edge") or bm.edges.layers.float.new("bevel_weight_edge")
+        lim = math.radians(FOLD_MIN_DEG)
+        for e in bm.edges:
+            # only clean form folds: long edges between large faces, not the fine cuts round recesses (5 cm
+            # rounding on those spiked a plate 2 m out, P-S-K14)
+            if len(e.link_faces) == 2 and lim <= e.calc_face_angle(0.0) <= math.radians(FOLD_MAX_DEG)                     and e.calc_length() >= FOLD_MIN_EDGE and min(f.calc_area() for f in e.link_faces) >= FOLD_MIN_AREA:
+                e[lay] = 1.0
+                folds += 1
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
     bm.free()
@@ -230,9 +250,20 @@ def shell(name, bm, coll, material, t, bevel, paint2=0):
     for poly in ob.data.polygons:
         poly.material_index = 0
     ob.data.shade_smooth()
+    if folds:
+        # the fold rounded on the single surface, before solidify: bevelled after it, the inner shell's
+        # (concave) fold grew a fillet into the hull and the rooms
+        fm = ob.modifiers.new("Fold", "BEVEL")
+        fm.limit_method = "WEIGHT"
+        fm.width = fold_r
+        fm.segments = FOLD_SEGMENTS
     sol = ob.modifiers.new("Solidify", "SOLIDIFY")
     sol.thickness, sol.offset, sol.use_even_offset, sol.use_rim = t, 1.0, True, True
-    hp.add_modifiers(ob, {"angle_deg": 30, "width": min(bevel, t * 0.35), "segments": 1}, width=min(bevel, t * 0.35))
+    hp.add_modifiers(ob, {"angle_deg": 30, "width": min(bevel, t * 0.35), "segments": RIM_SEGMENTS},
+                     width=min(bevel, t * 0.35))
+    if folds:
+        # the rim bevel's arc miter shot vertices metres out where it met the rounded fold (P-S-S06..S10)
+        ob.modifiers["Bevel"].miter_outer = "MITER_SHARP"
     a = ob.data.attributes.get("paint2") or ob.data.attributes.new("paint2", "INT", "FACE")
     a.data.foreach_set("value", [paint2] * len(ob.data.polygons))
     return ob
@@ -591,7 +622,8 @@ def apply(recipe, made, coll, mats, ship):
                 mirror_into(bm)
             name = "SM_Ship_%s_Kit_%s%s%s" % (ship, e["id"], "_%s" % e["view"] if group == "frame" else "",
                                                "_%s" % e["suffix"] if e.get("suffix") else "")
-            shell(name, bm, coll, mats[e["material"]], e["t"], e["bevel"], e.get("paint2", 0))
+            shell(name, bm, coll, mats[e["material"]], e["t"], e["bevel"], e.get("paint2", 0),
+                  fold_r=FOLD_R if group == "plates" else 0.0)
             report[group] += 1
             report["faces"] += nf
             cap = e.get("cap")
