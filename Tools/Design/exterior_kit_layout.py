@@ -95,7 +95,8 @@ def plate_entry(e, view, shape, kit, design_kit, mirror, normal):
     k = design_kit[kit]
     return {"id": e.id, "kit": kit, "material": mat, "paint2": p2, "view": view, "mirror": mirror, "normal": normal,
             "t": k.get("t", k.get("h", 0.02)), "bevel": k.get("bevel", 0.004), "polys": rings(shape),
-            "bolts": bolt_points(shape, shape, k), "bolt_d": k.get("bolt_d", 0.0)}
+            "bolts": bolt_points(shape, shape, k), "bolt_d": k.get("bolt_d", 0.0),
+            **{key: k[key] for key in ("rim_segments", "lip") if key in k}}
 
 
 def vent_entries(e, view, g, k, normal, horizontal, mirror=False):

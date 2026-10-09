@@ -226,10 +226,11 @@ FOLD_SEGMENTS = 3
 RIM_SEGMENTS = 2       # the plate's own edge: a rounded lip that catches a highlight (one flat chamfer read as Lego)
 
 
-def shell(name, bm, coll, material, t, bevel, paint2=0, fold_r=FOLD_R):
+def shell(name, bm, coll, material, t, bevel, paint2=0, fold_r=FOLD_R, rim_segments=RIM_SEGMENTS, lip=None):
     """The cut faces as a plate: coplanar faces merged, solidified outwards by t; folds of the plate (faces at
     FOLD_MIN_DEG or more) rounded by fold_r (bevel weight), the rims bevelled in RIM_SEGMENTS (hardened
-    normals)."""
+    normals). A stepped plate (SC technique 4) takes rim_segments 1 (a flat 45-degree face) and the lip material
+    on that face (the bevel's new faces)."""
     dissolve_planar(bm)
     folds = 0
     if fold_r > 0:
@@ -247,6 +248,8 @@ def shell(name, bm, coll, material, t, bevel, paint2=0, fold_r=FOLD_R):
     ob = bpy.data.objects.new(name, me)
     coll.objects.link(ob)
     ob.data.materials.append(material)
+    if lip is not None:
+        ob.data.materials.append(lip)
     for poly in ob.data.polygons:
         poly.material_index = 0
     ob.data.shade_smooth()
@@ -259,8 +262,11 @@ def shell(name, bm, coll, material, t, bevel, paint2=0, fold_r=FOLD_R):
         fm.segments = FOLD_SEGMENTS
     sol = ob.modifiers.new("Solidify", "SOLIDIFY")
     sol.thickness, sol.offset, sol.use_even_offset, sol.use_rim = t, 1.0, True, True
-    hp.add_modifiers(ob, {"angle_deg": 30, "width": min(bevel, t * 0.35), "segments": RIM_SEGMENTS},
-                     width=min(bevel, t * 0.35))
+    # up to 0.45 t: the bevel also takes the hidden bottom edge (a 45-degree face of 25 mm on a 60 mm doubler)
+    hp.add_modifiers(ob, {"angle_deg": 30, "width": min(bevel, t * 0.45), "segments": rim_segments},
+                     width=min(bevel, t * 0.45))
+    if lip is not None:
+        ob.modifiers["Bevel"].material = 1
     if folds:
         # the rim bevel's arc miter shot vertices metres out where it met the rounded fold (P-S-S06..S10)
         ob.modifiers["Bevel"].miter_outer = "MITER_SHARP"
@@ -623,7 +629,8 @@ def apply(recipe, made, coll, mats, ship):
             name = "SM_Ship_%s_Kit_%s%s%s" % (ship, e["id"], "_%s" % e["view"] if group == "frame" else "",
                                                "_%s" % e["suffix"] if e.get("suffix") else "")
             shell(name, bm, coll, mats[e["material"]], e["t"], e["bevel"], e.get("paint2", 0),
-                  fold_r=FOLD_R if group == "plates" else 0.0)
+                  fold_r=FOLD_R if group == "plates" else 0.0, rim_segments=e.get("rim_segments", RIM_SEGMENTS),
+                  lip=mats[e["lip"]] if e.get("lip") else None)
             report[group] += 1
             report["faces"] += nf
             cap = e.get("cap")

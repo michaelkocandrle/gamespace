@@ -54,9 +54,18 @@ def obj(ship, suffix):
     return bpy.data.objects.get("SM_Ship_%s%s" % (ship, suffix))
 
 
-def world_bm(ob):
+def world_bm(ob, keep_uv=False):
+    """The object's mesh in world space, geometry only (and the UVs if asked): meshes with different attribute
+    layers merged by bmesh.from_mesh crashed Blender in the check (9. 10. 2026)."""
     bm = bmesh.new()
     bm.from_mesh(ob.data)
+    for dom in (bm.verts.layers, bm.edges.layers, bm.faces.layers, bm.loops.layers):
+        for kind in ("int", "float", "float_vector", "float_color", "color", "string", "bool", "uv"):
+            if kind == "uv" and keep_uv:
+                continue
+            coll_ = getattr(dom, kind, None)
+            for layer in (list(coll_.values()) if coll_ is not None else []):
+                coll_.remove(layer)
     bm.transform(ob.matrix_world)
     bm.faces.ensure_lookup_table()
     bm.verts.ensure_lookup_table()
@@ -71,7 +80,7 @@ def mirrored_mesh_decals(ship):
         ob = obj(ship, suffix)
         if ob is None:
             continue
-        bm = world_bm(ob)
+        bm = world_bm(ob, keep_uv=True)
         uv = bm.loops.layers.uv.active
         mats = [m.name if m else "" for m in ob.data.materials]
         for f in bm.faces:
