@@ -10439,16 +10439,16 @@
    "batch": 0,
    "fbx": "ArtSource/Kit/Export/SM_Kit_Cockpit_SeatBack07W_A.fbx",
    "dims_m": [
-    0.639,
-    0.54,
+    0.784,
+    0.763,
     1.038
    ],
    "expected_size_cm": [
-    63.9,
-    54.0,
+    78.4,
+    76.3,
     103.8
    ],
-   "tris": 9732,
+   "tris": 10324,
    "tris_decals": 20,
    "tri_budget": 90000,
    "materials": [
@@ -10460,6 +10460,7 @@
     "Kit_Inset",
     "Kit_Legend",
     "Kit_GlowStrip",
+    "Kit_PanelSatin",
     "Kit_FrameEdge",
     "Kit_DecalPaint"
    ],

@@ -1526,7 +1526,8 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
         _quad_faces(tmp, quads, eye)
         # (holo: the outer edge keeps the old pod's top height - the wrap from the side console meets the canopy
         # lining there; lowered with the fascia it left a gap along the sill, GEOTEST holes)
-        outer_top = P(uo, vt) + Vector((0.0, 0.0, holo_lift)) if holo else P(uo, vt)
+        # (cockpit v4 r4, critic: the raised outer edge stood as a bright fin over the MFD) outer_lift_scale lowers it
+        outer_top = P(uo, vt) + Vector((0.0, 0.0, holo_lift * spec.get("outer_lift_scale", 1.0))) if holo else P(uo, vt)
         cols.append((side, "pod_outer", P(uo, vb), outer_top))
         if holo:
             # and right inside it the low edge: a vertical step outside the picture, the shelf and its trim stay low
@@ -1643,6 +1644,29 @@ def dash(g, screen_bm, sockets, eye, spec, zfloor):
             # (not across the MFD panels: there the strip above the glass is too narrow, the line cut the screens)
             tube(g["int_accent_glow"], t0 + Vector((0, 0, -0.03)), t1 + Vector((0, 0, -0.03)), 0.0035, 6)
         tube(g["int_trim"], b0 + Vector((0, 0, 0.004)), b1 + Vector((0, 0, 0.004)), 0.01, 10)
+    # (cockpit v4 r4, critic: the fin between the console and the MFD a bare bright plate; lowering it opened the sill)
+    # its face carries a graphite inset in a satin rim and a light line under its top edge, the console's language
+    if holo and len(seq) > 4:
+        for i0, i1 in ((1, 2), (len(seq) - 3, len(seq) - 2)):
+            (fb0, ft0), (fb1, ft1) = seq[i0], seq[i1]
+            nrm = (fb1 - fb0).cross(ft0 - fb0).normalized()
+            if nrm.dot(Vector(eye) - fb0) < 0:
+                nrm = -nrm
+            P = lambda u, v, fb0=fb0, fb1=fb1, ft0=ft0, ft1=ft1: fb0.lerp(fb1, u).lerp(ft0.lerp(ft1, u), v)   # noqa: E731
+            quad = [P(0.14, 0.22), P(0.86, 0.22), P(0.86, 0.78), P(0.14, 0.78)]
+            cen = sum(quad, Vector()) / 4
+            for key, grow, off in (("int_trim", 0.012, 0.004), ("int_dark", 0.0, 0.007)):
+                pts = [q + (q - cen).normalized() * grow for q in quad]
+                fr = [g[key].verts.new(q + nrm * off) for q in pts]
+                bk = [g[key].verts.new(q - nrm * 0.004) for q in pts]
+                g[key].faces.new(fr if (fr[1].co - fr[0].co).cross(fr[2].co - fr[0].co).dot(nrm) > 0 else fr[::-1])
+                for i in range(4):
+                    j = (i + 1) % 4
+                    try:
+                        g[key].faces.new((bk[i], bk[j], fr[j], fr[i]))
+                    except ValueError:
+                        pass
+            tube(g["int_glow_soft"], P(0.04, 0.9) + nrm * 0.005, P(0.96, 0.9) + nrm * 0.005, 0.003, 6)
     return seq
 
 

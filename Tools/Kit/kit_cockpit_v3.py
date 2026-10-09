@@ -442,6 +442,32 @@ def seat_back(name, seed):
     p.box("Kit_GlowStrip", (-0.157, 0.259, 0.0128), (-0.023, 0.267, 0.0145), bevel=0.0008, segments=1, m=fm(o), panel=False)
     _label(p, "maker", fm(o) @ Vector((0.0, -0.06, 0.0151)), n, r, u, scale=0.45)
     p.collision_box(tuple(fm(o) @ Vector((-0.2, -0.3, -0.006))), tuple(fm(o) @ Vector((0.2, 0.3, 0.03))))
+    # (cockpit v4, author 9. 10.: layers; critic r3/r4: the seat's shell smooth and grey) satin shell wings round the
+    # backrest's sides and rear corners (measured off PilotSeat.glb as placed: its back's x and half width by height),
+    # a graphite inset on each, a light line down the front edge, screws
+    prof = [(0.55, 16.61, 0.36), (0.65, 16.598, 0.337), (0.75, 16.584, 0.326), (0.85, 16.569, 0.305), (0.95, 16.556, 0.272)]
+    for sd in (1, -1):
+        rings, cens, ins, inc, glow = [], [], [], [], []
+        for z, xb, w in prof:
+            xr, xf = xb - 0.006, xb + 0.17
+            yo, yi = sd * (w + 0.008), sd * (w + 0.02)
+            ring = [Vector((xr - 0.012, sd * (w - 0.12), z)), Vector((xr, sd * (w - 0.12), z)), Vector((xr, yo, z)), Vector((xf, yo, z)),
+                    Vector((xf, yi, z)), Vector((xr - 0.012, yi, z))]
+            rings.append(ring)
+            cens.append(Vector(((xr + xf) / 2, sd * (w - 0.02), z)))
+            glow.append(Vector((xf + 0.0015, sd * (w + 0.014), z)))
+            if 0.6 <= z <= 0.9:
+                ring2 = [Vector((xr + 0.03, yi - sd * 0.0005, z)), Vector((xf - 0.03, yi - sd * 0.0005, z)),
+                         Vector((xf - 0.03, yi + sd * 0.003, z)), Vector((xr + 0.03, yi + sd * 0.003, z))]
+                ins.append(ring2)
+                inc.append(sum(ring2, Vector()) / 4 - Vector((0, sd * 0.01, 0)))
+        _skin(p, "Kit_PanelSatin", rings, cens)
+        if len(ins) >= 2:
+            _skin(p, "Kit_Inset", ins, inc)
+        p.sweep("Kit_GlowStrip", glow, 0.0025, seg=8)
+        for z, xb, w in (prof[0], prof[-1]):
+            for xx in (xb + 0.03, xb + 0.14):
+                screw(p, Vector((xx, sd * (w + 0.0205), z + (0.02 if z < 0.7 else -0.02))), Vector((0, sd, 0)), 0.0035)
     # (critic r3: the floor's centre empty) behind the seat a graphite anti-slip field in a 20 mm satin frame, a studded
     # tread, the maker's mark at its aft end
     fx0, fx1, fy = 16.0, 16.46, 0.27
