@@ -1,7 +1,7 @@
 {
  "ship": "Wayfarer",
  "mesh": "SM_Ship_Wayfarer",
- "total": 459489,
+ "total": 482241,
  "budget": 700000,
  "warn": 700000,
  "error": 1000000,
@@ -48,8 +48,8 @@
   },
   "functional_detail": {
    "max": 40000,
-   "tris": 22856,
-   "objects": 18
+   "tris": 45608,
+   "objects": 19
   },
   "other": {
    "max": null,

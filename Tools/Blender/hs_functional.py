@@ -48,17 +48,34 @@ def _cyl(bm, a, b, r, seg=16, r2=None):
     bmesh.ops.transform(bm, matrix=m, verts=res["verts"])
 
 
+def _cbox(bm, c, x, y, z, size, chamfer):
+    """A machined box: the part's Bevel modifier (4 mm, angle limited) chamfers its edges."""
+    _box(bm, c, x, y, z, size)
+
+
 def rcs(g, p, n, x, y, s):
-    """Thruster block: a bevelled housing flush-ish with the hull, two nozzle bells in a dark recess."""
+    """Thruster block (author 9. 10. 2026: the box with two cylinders read as Lego): a machined gunmetal housing
+    with chamfered edges 3 cm proud, a dark recessed face plate in a raised lip, two nozzle bells (bare-metal
+    flared rim, a dark throat, a hot-metal ring inside), a slotted grille between them, four corner screws."""
     tilt = math.radians(g.get("tilt", 0.0))
     dirn = (n * math.cos(tilt) + x * math.sin(tilt)).normalized()
-    # sunk into the hull: 2.5 cm proud, nozzles 1 cm more (the silhouette of the drawing stays)
-    _box(g["_bm"]["paint"], p + n * 0.0, x, y, n, (0.26 * s, 0.17 * s, 0.05 * s))
-    _box(g["_bm"]["dark"], p + n * 0.025 * s, x, y, n, (0.2 * s, 0.12 * s, 0.006 * s))
+    bm_gm, bm_dk, bm_mt = g["_bm"]["gunmetal"], g["_bm"]["dark"], g["_bm"]["metal"]
+    L, W = 0.30 * s, 0.19 * s
+    _cbox(bm_gm, p + n * 0.012 * s, x, y, n, (L, W, 0.03 * s), 0.008 * s)                    # housing
+    _cbox(bm_gm, p + n * 0.03 * s, x, y, n, (L - 0.03 * s, W - 0.03 * s, 0.006 * s), 0.003 * s)  # lip
+    _box(bm_dk, p + n * 0.0335 * s, x, y, n, (L - 0.05 * s, W - 0.05 * s, 0.002 * s))        # face plate
     for k in (-1, 1):
-        c = p + n * 0.02 * s + x * (0.05 * k * s)
-        _cyl(g["_bm"]["metal"], c - dirn * 0.02 * s, c + dirn * 0.015 * s, 0.03 * s, 16, 0.036 * s)
-        _cyl(g["_bm"]["dark"], c + dirn * 0.01 * s, c + dirn * 0.016 * s, 0.024 * s, 16)
+        c = p + n * 0.034 * s + x * (0.075 * k * s)
+        _cyl(bm_mt, c, c + dirn * 0.022 * s, 0.034 * s, 20, 0.041 * s)                      # flared bell
+        _cyl(bm_dk, c + dirn * 0.004 * s, c + dirn * 0.0225 * s, 0.03 * s, 20, 0.036 * s)    # its throat
+        _cyl(bm_mt, c + dirn * 0.003 * s, c + dirn * 0.008 * s, 0.014 * s, 12)               # the injector
+    for j in range(4):                                                                       # the grille
+        q = p + n * 0.0345 * s + y * ((j - 1.5) * 0.022 * s)
+        _box(bm_mt, q, x, y, n, (0.05 * s, 0.006 * s, 0.003 * s))
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            q = p + n * 0.027 * s + x * sx * (L / 2 - 0.016 * s) + y * sy * (W / 2 - 0.016 * s)
+            _cyl(bm_mt, q, q + n * 0.004 * s, 0.006 * s, 8)
 
 
 def blade(g, p, n, x, y, s):
@@ -100,16 +117,33 @@ def dome(g, p, n, x, y, s):
 
 
 def connector(g, p, n, x, y, s):
-    """Umbilical connector: a flanged port with a cap on a short chain lug."""
-    _cyl(g["_bm"]["dark"], p - n * 0.01, p + n * 0.02, 0.06 * s, 24)
-    _cyl(g["_bm"]["metal"], p + n * 0.02, p + n * 0.04, 0.045 * s, 24)
-    _box(g["_bm"]["dark"], p + n * 0.015 + x * 0.08 * s, x, y, n, (0.04 * s, 0.03 * s, 0.02))
+    """Umbilical connector: a gunmetal flange with 6 bolts, a bare-metal coupling with a dark socket, the cap hinged
+    on a lug beside it."""
+    bm_gm, bm_mt, bm_dk = g["_bm"]["gunmetal"], g["_bm"]["metal"], g["_bm"]["dark"]
+    _cyl(bm_gm, p - n * 0.01, p + n * 0.018, 0.065 * s, 32)
+    for k in range(6):
+        a_ = 2 * math.pi * k / 6
+        q = p + n * 0.018 + (x * math.cos(a_) + y * math.sin(a_)) * 0.052 * s
+        _cyl(bm_mt, q, q + n * 0.004, 0.006 * s, 8)
+    _cyl(bm_mt, p + n * 0.018, p + n * 0.04, 0.04 * s, 24)
+    _cyl(bm_dk, p + n * 0.038, p + n * 0.041, 0.028 * s, 24)
+    _cbox(bm_gm, p + n * 0.02 + x * 0.085 * s, x, y, n, (0.035 * s, 0.03 * s, 0.025), 0.004 * s)
 
 
 def hinge(g, p, n, x, y, s):
-    """Flap hinge: a bracket block and a pin along the span."""
-    _box(g["_bm"]["dark"], p + n * 0.03 * s, x, y, n, (0.12 * s, 0.05 * s, 0.06 * s))
-    _cyl(g["_bm"]["metal"], p + n * 0.05 * s - y * 0.05 * s, p + n * 0.05 * s + y * 0.05 * s, 0.014 * s, 12)
+    """Flap hinge: a chamfered gunmetal mounting plate with 4 screws, two lugs with a bare-metal pin and its caps."""
+    bm_gm, bm_mt = g["_bm"]["gunmetal"], g["_bm"]["metal"]
+    _cbox(bm_gm, p + n * 0.006 * s, x, y, n, (0.14 * s, 0.09 * s, 0.012 * s), 0.004 * s)
+    for k in (-1, 1):
+        _cbox(bm_gm, p + n * 0.035 * s + y * (0.028 * k * s), x, y, n, (0.07 * s, 0.014 * s, 0.05 * s), 0.004 * s)
+        q = p + n * 0.012 * s + x * (0.055 * k * s)
+        for j in (-1, 1):
+            c = q + y * (0.032 * j * s)
+            _cyl(bm_mt, c, c + n * 0.003 * s, 0.005 * s, 8)
+    a_, b_ = p + n * 0.05 * s - y * 0.05 * s, p + n * 0.05 * s + y * 0.05 * s
+    _cyl(bm_mt, a_, b_, 0.011 * s, 16)
+    for c in (a_, b_):
+        _cyl(bm_mt, c - (b_ - a_).normalized() * 0.004 * s, c + (b_ - a_).normalized() * 0.004 * s, 0.016 * s, 16)
 
 
 KINDS = {"rcs": rcs, "blade": blade, "whip": whip, "dome": dome, "connector": connector, "hinge": hinge}
@@ -122,7 +156,7 @@ def apply(recipe, made, coll, mats, bevel):
     rev = recipe["parts"]["pod"]["revolve"]["axis"]
     axis = (rev["y"], rev["z"])
     tree = hs_lights._tree(coll)
-    bms = {k: bmesh.new() for k in ("paint", "dark", "metal")}
+    bms = {k: bmesh.new() for k in ("paint", "dark", "metal", "gunmetal")}
     count = {}
     for g in spec.get("items", []):
         if g.get("kit"):

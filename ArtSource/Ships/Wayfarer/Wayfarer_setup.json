@@ -163,7 +163,7 @@
     "ClearCoatRoughness": 0.05,
     "ClearCoatRoughVariation": 0.1,
     "SecondaryClearCoatRoughness": 0.38,
-    "DetailTileCm": 150.0,
+    "DetailTileCm": 120.0,
     "DetailNormalStrength": 0.55,
     "DetailCavityStrength": 0.45
    },
@@ -174,10 +174,10 @@
    "_round3": "1. 10. 2026 kit pilot critic round 2: RoughVariation 0.45 (was 0.28), GrungeAmount 0.3 (0.15), ClearCoatRoughVariation 0.3 (0.12) - the dirt shows in the gloss; CarbonShare 0 (was 0.05): dark carbon plates read as holes in the roof",
    "_round_ship2": "whole-ship kit critic round 2 (3. 10. 2026): the side plates read cool grey - primary a step lighter and warmer (0.76 0.73 0.66; was 0.70 0.69 0.65)",
    "textures": {
-    "detail_normal": "ArtSource/Kit/Textures/T_Kit_PanelDetail_N.png",
-    "detail_cavity": "ArtSource/Kit/Textures/T_Kit_PanelDetail_C.png"
+    "detail_normal": "ArtSource/Kit/Textures/T_Ship_HullDetail_N.png",
+    "detail_cavity": "ArtSource/Kit/Textures/T_Ship_HullDetail_C.png"
    },
-   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic'): the cockpit's layered panel trim (Tools/Kit/kit_panel_detail.py) as triplanar detail normal + cavity/tone, larger tile"
+   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic', 'texture can be tuned'): a hull set of its own (kit_panel_detail.py --hull: larger plates, plain/stepped/riveted/hatch, no interior labels) as triplanar detail normal + cavity"
   },
   "MI_Ship_Wayfarer_Dark": {
    "master": "layered",
@@ -226,10 +226,10 @@
     "DetailCavityStrength": 0.45
    },
    "textures": {
-    "detail_normal": "ArtSource/Kit/Textures/T_Kit_PanelDetail_N.png",
-    "detail_cavity": "ArtSource/Kit/Textures/T_Kit_PanelDetail_C.png"
+    "detail_normal": "ArtSource/Kit/Textures/T_Ship_HullDetail_N.png",
+    "detail_cavity": "ArtSource/Kit/Textures/T_Ship_HullDetail_C.png"
    },
-   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic'): the cockpit's layered panel trim (Tools/Kit/kit_panel_detail.py) as triplanar detail normal + cavity/tone, larger tile"
+   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic', 'texture can be tuned'): a hull set of its own (kit_panel_detail.py --hull: larger plates, plain/stepped/riveted/hatch, no interior labels) as triplanar detail normal + cavity"
   },
   "MI_Ship_Wayfarer_Accent": {
    "master": "layered",
@@ -273,15 +273,15 @@
     "PaintMetallic": 0.0,
     "ClearCoat": 1.0,
     "ClearCoatRoughness": 0.08,
-    "DetailTileCm": 150.0,
+    "DetailTileCm": 120.0,
     "DetailNormalStrength": 0.4,
     "DetailCavityStrength": 0.4
    },
    "textures": {
-    "detail_normal": "ArtSource/Kit/Textures/T_Kit_PanelDetail_N.png",
-    "detail_cavity": "ArtSource/Kit/Textures/T_Kit_PanelDetail_C.png"
+    "detail_normal": "ArtSource/Kit/Textures/T_Ship_HullDetail_N.png",
+    "detail_cavity": "ArtSource/Kit/Textures/T_Ship_HullDetail_C.png"
    },
-   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic'): the cockpit's layered panel trim (Tools/Kit/kit_panel_detail.py) as triplanar detail normal + cavity/tone, larger tile"
+   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic', 'texture can be tuned'): a hull set of its own (kit_panel_detail.py --hull: larger plates, plain/stepped/riveted/hatch, no interior labels) as triplanar detail normal + cavity"
   },
   "MI_Ship_Wayfarer_Metal": {
    "master": "layered",
@@ -369,17 +369,17 @@
     "PaintMetallic": 0.6,
     "ClearCoat": 0.3,
     "ClearCoatRoughness": 0.1,
-    "DetailTileCm": 120.0,
+    "DetailTileCm": 90.0,
     "DetailNormalStrength": 0.45,
     "DetailCavityStrength": 0.45
    },
    "_round3": "kit pilot critic round 2: the frame one step lighter and metallic (0.24, metallic 0.8; was 0.16 / 0.6) so it reads as structure, not as a dark fill",
    "_round_ship1": "whole-ship kit critic round 1 (3. 10. 2026): frame and channel floor read as one black mass - frame lighter (0.36, metallic 0.6; was 0.24 / 0.8), the channel stays 0.1",
    "textures": {
-    "detail_normal": "ArtSource/Kit/Textures/T_Kit_PanelDetail_N.png",
-    "detail_cavity": "ArtSource/Kit/Textures/T_Kit_PanelDetail_C.png"
+    "detail_normal": "ArtSource/Kit/Textures/T_Ship_HullDetail_N.png",
+    "detail_cavity": "ArtSource/Kit/Textures/T_Ship_HullDetail_C.png"
    },
-   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic'): the cockpit's layered panel trim (Tools/Kit/kit_panel_detail.py) as triplanar detail normal + cavity/tone, larger tile"
+   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic', 'texture can be tuned'): a hull set of its own (kit_panel_detail.py --hull: larger plates, plain/stepped/riveted/hatch, no interior labels) as triplanar detail normal + cavity"
   },
   "MI_Ship_Wayfarer_Glass": {
    "master": "glass",

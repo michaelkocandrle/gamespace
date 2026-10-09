@@ -41,7 +41,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "711f2cb64bd8b1727669c0b7d4ecc104063d556e"
+      "geometry_hash": "031e8b326e390a18e5363dd0519774acf0537647"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -55,7 +55,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "f7c6788d19d67863946b92c22007286b290c8157"
+      "geometry_hash": "adee93d206baaa608bcde7f4697884aaf96bbb6f"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -83,14 +83,14 @@
       "objects": [
         "SM_Ship_Wayfarer_Hologram"
       ],
-      "geometry_hash": "7f42a610def6af75b04036c4eeda939904c09720"
+      "geometry_hash": "f5523d76814ca0c1a5100ae1766e5345be258987"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Interior.fbx",
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "93272f63827469dcf6bc589d2cfe87393b227d1f"
+      "geometry_hash": "309281fa8c2a9032347dedcfeba43f763e3b55b4"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
@@ -118,8 +118,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 459489,
-      "verts": 305341,
+      "tris": 482241,
+      "verts": 317221,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -179,8 +179,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 63228,
-      "verts": 65814,
+      "tris": 63080,
+      "verts": 65696,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -307,8 +307,8 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 693363,
-      "verts": 359448,
+      "tris": 693361,
+      "verts": 359446,
       "materials": [
         "M_Ship_Wayfarer_Accent",
         "M_Ship_Wayfarer_IntDark",
@@ -447,12 +447,12 @@
       "bounds_m": [
         [
           -2.0499954223632812,
-          -2.3600010871887207,
-          -1.8400013446807861
+          -2.3726842403411865,
+          -1.8565003871917725
         ],
         [
           4.949999809265137,
-          2.3600010871887207,
+          2.372685432434082,
           2.1132020950317383
         ]
       ]
@@ -470,7 +470,7 @@
         [
           -2.0500001907348633,
           2.3992109298706055,
-          2.1329493522644043
+          2.1329803466796875
         ]
       ]
     },
@@ -533,7 +533,7 @@
         [
           -9.949999809265137,
           -3.898888111114502,
-          0.8000001907348633
+          0.8000011444091797
         ],
         [
           -7.250000476837158,

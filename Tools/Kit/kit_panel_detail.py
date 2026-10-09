@@ -17,6 +17,7 @@ height field AND tone map of paneling, laid out by a seeded recursive split so n
 """
 import os
 import random
+import sys
 
 import numpy as np
 from PIL import Image
@@ -91,7 +92,7 @@ def set_tone(T, x0, y0, x1, y1, v):
 def split(rng, rect, out, depth=0):
     x0, y0, x1, y1 = rect
     w, h = x1 - x0, y1 - y0
-    if (max(w, h) < rng.uniform(130, 260) and depth > 1) or min(w, h) < 70:
+    if (max(w, h) < rng.uniform(*((220, 400) if HULL else (130, 260))) and depth > 1) or min(w, h) < (110 if HULL else 70):
         out.append(rect)
         return
     if w >= h:
@@ -118,19 +119,23 @@ def type_rows(H, T, rng, x0, y0, x1, rows, size):
         y += size * 1.8
 
 
+HULL = "--hull" in sys.argv     # (author 9. 10. 2026: the exterior a set of its own - bigger plates, no interior labels)
+
+
 def main():
-    rng = random.Random(SEED)
+    rng = random.Random(SEED + (7 if HULL else 0))
     H = np.zeros((N, N), np.float64)
     T = np.ones((N, N), np.float64)
     panels = []
     split(rng, (0.0, 0.0, TILE_MM, TILE_MM), panels)
-    kinds = ["plain", "plain", "recess", "louvre", "grille", "hatch", "label", "step", "rivets", "plain"]
+    kinds = (["plain", "plain", "plain", "step", "step", "rivets", "hatch", "recess", "plain"] if HULL else
+             ["plain", "plain", "recess", "louvre", "grille", "hatch", "label", "step", "rivets", "plain"])
     for (x0, y0, x1, y1) in panels:
         w, h = x1 - x0, y1 - y0
         kind = rng.choice(kinds)
         # tone: the paint's own shade, the secondary grey, a graphite insert
         roll = rng.random()
-        tone = 0.44 if roll < 0.06 else (0.82 if roll < 0.2 else rng.uniform(0.95, 1.0))
+        tone = (0.88 if roll < 0.15 else rng.uniform(0.95, 1.0)) if HULL else (0.44 if roll < 0.06 else (0.82 if roll < 0.2 else rng.uniform(0.95, 1.0)))
         set_tone(T, x0, y0, x1, y1, tone)
         add_box(H, x0, y0, x1, y1, groove(3.0, 1.2))                     # the seam round it
         m = 6.0
@@ -189,7 +194,7 @@ def main():
         else:
             add_box(H, x0 + m, y0 + m, x1 - m, y1 - m, plateau(1.0, 3.0))
             add_box(H, x0 + m + 30, y0 + m + 30, x1 - m - 30, y1 - m - 30, groove(0.9, 0.35))
-            if rng.random() < 0.5:
+            if rng.random() < (0.0 if HULL else 0.5):
                 type_rows(H, T, rng, x0 + m + 12, y1 - m - 22, x0 + m + 12 + min(120, w * 0.5), 1, 5.0)
         # screws in the corners of most panels, a fastener row along a long edge of some
         if kind not in ("hatch",) and rng.random() < 0.8:
@@ -213,7 +218,8 @@ def main():
     dy = (np.roll(H, -1, 0) - np.roll(H, 1, 0)) / (2 * PX)
     n = np.dstack((-dx, dy, np.ones_like(H)))
     n /= np.linalg.norm(n, axis=2, keepdims=True)
-    Image.fromarray(((n * 0.5 + 0.5) * 255).clip(0, 255).astype(np.uint8), "RGB").save(os.path.join(OUT, "T_Kit_PanelDetail_N.png"))
+    stem = "T_Ship_HullDetail" if HULL else "T_Kit_PanelDetail"
+    Image.fromarray(((n * 0.5 + 0.5) * 255).clip(0, 255).astype(np.uint8), "RGB").save(os.path.join(OUT, stem + "_N.png"))
 
     def blur(a, r):
         out = a.copy()
@@ -226,7 +232,7 @@ def main():
     local = blur(blur(H, 6), 6)
     cav = 1.0 - np.clip((local - H) * 1.6, 0.0, 0.8)
     C = np.clip(cav * T, 0.0, 1.0)
-    Image.fromarray((C * 255).clip(0, 255).astype(np.uint8), "L").save(os.path.join(OUT, "T_Kit_PanelDetail_C.png"))
+    Image.fromarray((C * 255).clip(0, 255).astype(np.uint8), "L").save(os.path.join(OUT, stem + "_C.png"))
     print("PANELDETAIL v2", OUT, "panels", len(panels), round(float(H.min()), 2), round(float(H.max()), 2), round(float(C.mean()), 3))
 
 
