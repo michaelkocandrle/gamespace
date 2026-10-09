@@ -61,13 +61,13 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
   madel; lišty stropu po segmentech. Rozvody S na zadním konci (x 3–4) dělají ohyb přes pole bez desky.
 - **Determinismus stavby na později** (WORKFLOW 9.6 ff): šum ±40 trojúhelníků, 3 FBX, import ukládá ~150 assetů; shluky
   decalů trupu občas mezi dvěma přestavbami poskočí (`test_kit_decals`; 7. 10. jednou, další přestavba prošla).
-- Hřebenový terén vypnutý; kameny bez kolize; zvuky procedurální; quantum tunel, TSR jiskry, displeje bez mipmap, duchy čísel.
+- Hřebenový terén vypnutý; kameny bez kolize; zvuky lodi z ElevenLabs (boost/quantum/UI procedurální); quantum tunel, TSR jiskry, displeje bez mipmap, duchy čísel.
 - Neověřeno autorem: quantum skok, HUD SC-1c mimo 1080p, chůze Steadfastem; Shipping nezkoušen; PIE Escape končí hru.
 
 ## Další kroky
 
-0. **Autor 9. 10. – pořadí:** (1) kokpit **good enough** (9. 10.; postup ve skillu `sc-quality-interior`); (2) **zvuky znovu** (motor, start motoru, kliky MFD/prvků – „jako notifikace
-   telefonu“, otevírání/zavírání MFD, zapnutí/vypnutí lodi – nic nezní dobře); (3) exteriér Wayfareru doladit;
+0. **Autor 9. 10. – pořadí:** (1) kokpit **good enough** (9. 10.; postup ve skillu `sc-quality-interior`); (2) **zvuky znovu**: 9. 10. 11 zvuků podle autorova výběru na
+   sound boardu (`sound_candidates.py`, `sound_board.py`), klik v interakci = SW_ButtonPress – čeká na poslech ve hře; (3) exteriér Wayfareru doladit;
    (4) drobnosti interiéru zbytku lodi, dveře, přenesení centrální MFD obrazovky, animace.
    Kokpit 9. 10.: v4 konzole (koncept B), MFD v5 všude, trim v2 s tóny, mesh decaly, rozvody, skořepina křesla,
    strmější schody (průchod za křeslem; `Tools/Blender/cockpit_walk_map.py`); kritik r4 6,0 (`…_cockpit_v4_r4.md`).

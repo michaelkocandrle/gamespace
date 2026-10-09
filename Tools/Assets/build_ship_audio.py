@@ -47,6 +47,9 @@ SOUNDS = (
     ("SW_EngineStart", "engine_start.wav", False),
     ("SW_EngineStop", "engine_stop.wav", False),
     ("SW_SwitchClick", "switch_click.wav", False),
+    # the sounds redone by the author's choice (9. 10. 2026, Tools/Assets/sound_candidates.py + sound_board.py): the
+    # engine loops and a cockpit key press (interact mode used the menu's click)
+    ("SW_ButtonPress", "button_press.wav", False),
 )
 RECORDED = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()), "ArtSource", "Audio", "ElevenLabs")
 

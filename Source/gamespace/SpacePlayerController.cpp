@@ -42,6 +42,7 @@ namespace SpacePlayerDefaults
 {
 	const TCHAR* const UiHoverSoundPath = TEXT("/Game/UI/Audio/SW_UiHover.SW_UiHover");
 	const TCHAR* const UiConfirmSoundPath = TEXT("/Game/UI/Audio/SW_UiConfirm.SW_UiConfirm");
+	const TCHAR* const ButtonPressSoundPath = TEXT("/Game/Ships/Audio/SW_ButtonPress.SW_ButtonPress");
 	const TCHAR* const MenuMusicPath = TEXT("/Game/UI/Audio/SW_MenuAmbience.SW_MenuAmbience");
 
 	/** Above every pawn context (they use 0-1), so Escape and H always reach the controller. */
@@ -113,6 +114,7 @@ void ASpacePlayerController::BeginPlay()
 	using namespace SpacePlayerDefaults;
 	UiHoverSound = LoadSound(UiHoverSoundPath);
 	UiConfirmSound = LoadSound(UiConfirmSoundPath);
+	ButtonPressSound = LoadSound(ButtonPressSoundPath);
 	MenuMusicSound = LoadSound(MenuMusicPath);
 
 	if (const USpaceUserSettings* Settings = USpaceUserSettings::Get())
@@ -431,12 +433,12 @@ void ASpacePlayerController::TickInteraction()
 	{
 		if (WasInputKeyJustPressed(EKeys::LeftMouseButton))
 		{
-			PlayUiSound(true);
+			PlayButtonPress();
 			View.Hotspots[View.Hovered].Use(true);
 		}
 		else if (WasInputKeyJustPressed(EKeys::RightMouseButton))
 		{
-			PlayUiSound(false);
+			PlayButtonPress();
 			View.Hotspots[View.Hovered].Use(false);
 		}
 	}
@@ -721,6 +723,18 @@ void ASpacePlayerController::GoToMainMenu()
 void ASpacePlayerController::QuitGame()
 {
 	UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+}
+
+void ASpacePlayerController::PlayButtonPress()
+{
+	if (ButtonPressSound)
+	{
+		UGameplayStatics::PlaySound2D(this, ButtonPressSound, USpaceUserSettings::GetEffectsVolume() * 0.9f, FMath::FRandRange(0.96f, 1.04f));
+	}
+	else
+	{
+		PlayUiSound(true);
+	}
 }
 
 void ASpacePlayerController::PlayUiSound(bool bConfirm)

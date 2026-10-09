@@ -217,6 +217,11 @@ private:
 	TObjectPtr<USoundBase> UiHoverSound;
 	UPROPERTY(Transient)
 	TObjectPtr<USoundBase> UiConfirmSound;
+	/** A cockpit control pressed in interact mode (author 9. 10. 2026: the menu's click "sounds like a phone notification"):
+	 * a physical console key, not the menu's chime. */
+	UPROPERTY(Transient)
+	TObjectPtr<USoundBase> ButtonPressSound;
+	void PlayButtonPress();
 	UPROPERTY(Transient)
 	TObjectPtr<USoundBase> MenuMusicSound;
 	UPROPERTY(Transient)
