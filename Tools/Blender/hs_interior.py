@@ -781,7 +781,7 @@ def stairs(g, fb, floor_faces, zc, x0=15.30, half_w=0.5, rise_max=0.195, tread=0
         box(g["int_panel"], (min(x0, wall), ya, 0.0), (x_top + 0.04, yb, zc))
         yr = sd * (half_w - 0.05)
         p0 = Vector((x0 + 0.05, yr, rise + 0.9))
-        p1 = Vector((x_top + 0.1, yr, zc + 0.9))
+        p1 = Vector((x_top - 0.05, yr, (n - 1) * rise + 0.9))      # (v4: the rail ends over the last tread, the passage behind the seat stays clear)
         cyl(g["int_trim"], p0, p1, 0.02, 12)
         for t0 in (0.15, 0.62):                               # grip sleeves (cockpit v3 r1: bare black poles)
             cyl(g["int_rubber"], p0.lerp(p1, t0), p0.lerp(p1, t0 + 0.18), 0.023, 16)
@@ -1003,7 +1003,10 @@ def build(recipe, layout, coll, mats, ship, hull):
     # culled, the pilot's feet stood over the terrain seen through the hull (25. 9. 2026)
     ext = bmesh.ops.extrude_face_region(fb, geom=res["faces"])
     bmesh.ops.translate(fb, vec=(0, 0, -0.03), verts=[v for v in ext["geom"] if isinstance(v, bmesh.types.BMVert)])
-    stairs(g, fb, res["faces"] + [e for e in ext["geom"] if isinstance(e, bmesh.types.BMFace)], zc)
+    # (cockpit v4, author 9. 10. 2026: "you still cannot walk round the seat" - Tools/Blender/cockpit_walk_map.py: the
+    # flight's top at 16.20 and its rail posts at 16.30 left 0.31 m to the seat's back at 16.55 for a 0.5 m capsule) a
+    # steeper ship's stair, 5 risers of 0.23 m (under the walker's 0.45 m step) on 0.165 m treads: the top at 15.96
+    stairs(g, fb, res["faces"] + [e for e in ext["geom"] if isinstance(e, bmesh.types.BMFace)], zc, rise_max=0.235, tread=0.165)
     # the tub follows the plan's outline, but the hull is narrower than the plan in places at sill height: clamp
     # every corner inside the hull (a sill trim ran through the wall there, author 25. 9. 2026)
     from mathutils.bvhtree import BVHTree

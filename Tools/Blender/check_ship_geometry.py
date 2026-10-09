@@ -468,6 +468,8 @@ def walk_blocked(ship, recipe):
                 z = feet + WALK_R + 0.05
                 while z <= feet + WALK_H - WALK_R + 1e-6:
                     near = tree.find_nearest(Vector((c.x, c.y, z)) + off, WALK_R)
+                    if near[0] is not None and (near[0] - off).z <= feet + WALK_STEP:
+                        near = (None, None, None, None)     # a step's edge within MaxStepHeight: Character Movement steps onto it
                     if near[0] is not None and near[3] < WALK_R + 0.01:          # 1 cm of clearance: none stopped the game's walker
                         gap = WALK_R + 0.01 - near[3]
                         if worst is None or gap > worst["overlap_m"]:

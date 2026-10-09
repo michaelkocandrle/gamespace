@@ -265,7 +265,7 @@ DRESS = [("rivet_row_4", 3, 0.2, 0.03), ("seam_straight", 2, 0.5, 0.04), ("bolt_
          ("slot_s", 2, 0.2, 0.05), ("socket", 1, 0.12, 0.08), ("socket_round", 1, 0.1, 0.1), ("vent_small", 1, 0.2, 0.14),
          ("light_housing", 1, 0.16, 0.08), ("panel_A12", 1, 0.14, 0.05), ("panel_B07", 1, 0.14, 0.05), ("panel_E16", 1, 0.14, 0.05),
          ("st_inspect", 1, 0.18, 0.03), ("st_torque", 1, 0.168, 0.03), ("st_gnd", 1, 0.134, 0.03), ("label_power", 1, 0.2, 0.07),
-         ("corner_mark", 1, 0.08, 0.08), ("hazard_subtle", 1, 0.36, 0.05), ("red_dot", 1, 0.018, 0.018)]
+         ("corner_mark", 1, 0.08, 0.08), ("hazard_subtle", 1, 0.36, 0.05), ("red_dot", 1, 0.018, 0.018), ("st_vent", 0, 0.2255, 0.03)]
 
 
 def _dress(p, rng, spots):
@@ -312,9 +312,12 @@ def _wall_console(name, seed):
              _V(x, _station(x)[0] - 0.047, 0.098), _V(x, _station(x)[0] - 0.047, 0.004)] for x in xs]
     _skin(p, "Kit_Inset", kick, [sum(r, Vector()) / 4 for r in kick])
     # (v4 r1: a thin line under the overhang did not read) a 4 cm band of light along the kick's back: the recess glows
-    band = [[_V(x, _station(x)[0] - 0.0468, 0.02), _V(x, _station(x)[0] - 0.0468, 0.06),
-             _V(x, _station(x)[0] - 0.0452, 0.06), _V(x, _station(x)[0] - 0.0452, 0.02)] for x in xs]   # (in front of the dark back)
-    _skin(p, "Kit_GlowStrip", band, [sum(r, Vector()) / 4 for r in band])
+    # (author 9. 10.: the band did not fit and did not read as light) the kick's back lit softly over its height, the
+    # source a bright LED line hidden under the overhang's edge
+    band = [[_V(x, _station(x)[0] - 0.0468, 0.008), _V(x, _station(x)[0] - 0.0468, 0.092),
+             _V(x, _station(x)[0] - 0.0458, 0.092), _V(x, _station(x)[0] - 0.0458, 0.008)] for x in xs]
+    _skin(p, "Kit_GlowWindow", band, [sum(r, Vector()) / 4 for r in band])
+    p.sweep("Kit_GlowFoot", [_V(x, _station(x)[0] - 0.04, 0.1025) for x in xs], 0.0035, seg=8)   # (on the overhang's underside)
     # the inner top edge: a satin rail in the chamfer and a cool light line under it, both running on into the dash
     p.sweep("Kit_Lip", [_V(x, _station(x)[0] - 0.011, _station(x)[1] - 0.012) for x in xs], 0.0045, seg=10)
     p.sweep("Kit_GlowStrip", [_V(x, _station(x)[0] + 0.0012, _station(x)[1] - 0.042) for x in xs], 0.0022, seg=8)
@@ -357,9 +360,15 @@ def _wall_console(name, seed):
     # (concept B) lit windows in the inner face: a dark recess in a satin frame, a band of light along its foot
     for (wx0, wx1) in ((16.08, 16.46), (16.56, 17.16), (17.3, 17.58)):
         _face_patch(p, "Kit_Lip", wx0 - 0.008, wx1 + 0.008, 0.162, 0.408, 0.0004, 0.003)
-        _face_patch(p, "Kit_GlowWindow", wx0, wx1, 0.17, 0.4, 0.0004, 0.0016)          # (r4: lit through, not dark)
-        _face_patch(p, "Kit_Inset", wx0 + 0.012, wx1 - 0.012, 0.215, 0.385, 0.0016, 0.0042)  # the dark panel in the recess
-        _face_patch(p, "Kit_GlowStrip", wx0 + 0.015, wx1 - 0.015, 0.182, 0.2, 0.0016, 0.0032)
+        # (author 9. 10.: dark rectangles with no purpose) the cabin air's return grilles: a diffuser lit from behind,
+        # horizontal louvres over it in the satin frame, the light between them; VENT stencilled over each
+        _face_patch(p, "Kit_GlowWindow", wx0, wx1, 0.17, 0.4, 0.0004, 0.0016)
+        zz = 0.182
+        while zz < 0.39:
+            _face_patch(p, "Kit_Inset", wx0 + 0.006, wx1 - 0.006, zz, zz + 0.011, 0.0016, 0.007)
+            zz += 0.021
+        for vx in (wx0 + (wx1 - wx0) / 3, wx0 + 2 * (wx1 - wx0) / 3):
+            _face_patch(p, "Kit_Lip", vx - 0.004, vx + 0.004, 0.17, 0.4, 0.0016, 0.0075)          # louvre bearers
     # the stacked decals: a band on the inner face over the windows, the gaps between them, the top's front
     import random as _r
     rng = _r.Random(seed * 7 + 3)
@@ -376,7 +385,7 @@ def _wall_console(name, seed):
                 spots.append((_V(x + rng.uniform(-0.02, 0.02), d, zz), nn, tt, Vector((0, 0, 1)), 0.2, mh))
         x += rng.uniform(0.1, 0.16)
     for wi, (wx0, wx1) in enumerate(((16.08, 16.46), (16.56, 17.16), (17.3, 17.58))):
-        for (xx_, item, mw, mh) in ((wx0 + 0.06, ("panel_A12", "panel_B07", "panel_E16")[wi], 0.1, 0.035), (wx1 - 0.1, "st_inspect", 0.15, 0.025)):
+        for (xx_, item, mw, mh) in ((wx0 + 0.06, ("panel_A12", "panel_B07", "panel_E16")[wi], 0.1, 0.035), (wx1 - 0.12, "st_vent", 0.17, 0.025)):
             d, zi = _station(xx_)
             tt = (_V(xx_ + 0.01, d, 0) - _V(xx_, d, 0)).normalized()
             nn = Vector((tt.y, -tt.x, 0.0))

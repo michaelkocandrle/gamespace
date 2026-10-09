@@ -66,15 +66,15 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Další kroky
 
-0. **Autor 5. 10. (screenshoty), v tomto pořadí:**
-   a) holo MFD v3 + kokpit hotové; **konzole, křeslo a plyn 7. 10.** (šedé kryty, nouzové tlačítko, mřížka, perforace;
-      PASS 6,5; detail 2 a 3 PASS 6,6 / 6,5); **levá konzole jako díl továrny** `KF-COCKPIT-CONSOLE` v6 (kritik
-      **B podle 2D návrhu** v úseku **PASS 8,0** (kolo 39, vše 8; `…_kf_cockpit_console.md`), **8. 10. v kokpitu**: obě strany B/BR (zrcadlo), kokpit v materiálech kitu, světelné linky místo šraf, 3D holo radar místo minidisplejů (F: interakce, `SpaceHoloRadarComponent`); **v3** (páky na křesle, tenké konzole u stěn, uličky), panelový lak s trimem (`kit_panel_detail.py`), konzole rampou do křídla desky, světelné linky v rámu skla (autor: „obrovský posun“; kritik r3 5,9 FAIL – výtky v `…_cockpit_v3_r3.md`); holo MFD v4 (holo pole + paprsek); **v4 konzole** (koncept B: loft ze stěny do křídla, SYS/EMERG v šikmé ploše, svítící sokl) a **MFD v5** (návrh A: rychlost a G v kruzích, bílé písmo Saira) ; MFD v5 na všech stránkách; dorovnání ke konceptu a výtky r4 (kritik r4 6,0 FAIL, `2026-10-09_cockpit_v4_r4.md`) – čeká na autora; zbývá křídlo desky (přesvícené), skořepina křesla, značení;
+0. **Autor 9. 10. – pořadí:** (1) dotáhnout kokpit (obejít křeslo, okna/sokl konzolí, madla) → prohlásit good enough
+   a napsat skill postupu kvality; (2) **zvuky znovu** (motor, start motoru, kliky MFD/prvků – „jako notifikace
+   telefonu“, otevírání/zavírání MFD, zapnutí/vypnutí lodi – nic nezní dobře); (3) exteriér Wayfareru doladit;
+   (4) drobnosti interiéru zbytku lodi, dveře, přenesení centrální MFD obrazovky, animace.
+   Kokpit 9. 10.: v4 konzole (koncept B), MFD v5 všude, trim v2 s tóny, mesh decaly, rozvody, skořepina křesla,
+   strmější schody (průchod za křeslem; `Tools/Blender/cockpit_walk_map.py`); kritik r4 6,0 (`…_cockpit_v4_r4.md`).
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
       strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); rampa: plán a rozhodnutí A/B
       čeká na autora (`2026-10-06_ramp_plan.md`).
 1. Povrch trupu zmrazený (revize G, PASS 6,5); přistání na svahu čeká na vyzkoušení autorem (pak odpružení nohou).
-3. **Podle SC z autorova záznamu** (`OwnCapture_Gameplay_Notes.md`): menu, nastavení, klávesy, interakce hotové; další
-   pak visor pěšky, systémy lodi, stanice. **Přednost má vzhled kokpitu** (`2026-10-04_cockpit_gap_analysis.md`; holo
-   obsah MFD hotový, kritik FAIL 5,9 – chce geometrii projektorů): čeká na schválení C-01, pak stavba.
+3. Podle SC (`OwnCapture_Gameplay_Notes.md`): dál visor pěšky, systémy lodi, stanice.
 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).

@@ -175,6 +175,7 @@ def build(objs, ship, coll, spec, root, mats, eye):
     # grab bars on the canopy pillars: a satin bar on two stand-offs with a yellow grip, along the surface
     bars = bmesh.new()
     grips = bmesh.new()
+    marks = bmesh.new()
     for gb in spec.get("grab_bars", []):
         o, a = Vector(gb["from"]), Vector(gb["at"])
         hit, n = pl.cast(o, (a - o).normalized())
@@ -196,8 +197,19 @@ def build(objs, ship, coll, spec, root, mats, eye):
                     q = p + along * du + side * dv + n * 0.006
                     _tube(bars, q, q + n * 0.004, 0.005, 8)
         _tube(bars, p0 + n * 0.05 - along * 0.012, p1 + n * 0.05 + along * 0.012, 0.013, 24)
-        _tube(grips, p0 + n * 0.05 + along * 0.06, p1 + n * 0.05 - along * 0.06, 0.016, 24)
-    for bm, key, nm in ((bars, "int_trim", "GrabBars"), (grips, "accent", "GrabGrips")):
+        # (author 9. 10. 2026: the orange grip read as a light tube) a black ribbed rubber grip, only thin amber
+        # bands at its ends mark it
+        g0, g1 = p0 + n * 0.05 + along * 0.06, p1 + n * 0.05 - along * 0.06
+        _tube(grips, g0, g1, 0.016, 24)
+        k = 0
+        while k < 1.0:
+            q = g0.lerp(g1, k)
+            _tube(grips, q, q + (g1 - g0).normalized() * 0.004, 0.0172, 24)
+            k += 0.06
+        for q, d in ((g0, 1), (g1, -1)):
+            _tube(marks, q, q + (g1 - g0).normalized() * d * 0.008, 0.0175, 24)
+    for bm, key, nm in ((bars, "int_trim", "GrabBars"), (grips, "int_rubber" if "int_rubber" in mats else "int_dark", "GrabGrips"),
+                        (marks, "accent", "GrabMarks")):
         if bm.verts:
             m2 = bpy.data.meshes.new("SM_Ship_%s_Int_%s" % (ship, nm))
             bm.to_mesh(m2)

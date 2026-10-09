@@ -848,7 +848,7 @@
    "location": [
     15.178,
     0.0,
-    0.1807
+    0.219
    ],
    "direction": [
     0,
@@ -861,7 +861,7 @@
    "location_ue_cm": [
     492.8,
     -0.0,
-    -101.9
+    -98.1
    ],
    "direction_ue": [
     0,
@@ -880,9 +880,9 @@
    "intensity_cd": 0.528,
    "radius_m": 1.6,
    "location": [
-    15.358,
+    15.343,
     -0.0,
-    0.3723
+    0.449
    ],
    "direction": [
     0,
@@ -893,9 +893,9 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    510.8,
+    509.3,
     -0.0,
-    -82.8
+    -75.1
    ],
    "direction_ue": [
     0,
@@ -914,9 +914,9 @@
    "intensity_cd": 0.528,
    "radius_m": 1.6,
    "location": [
-    15.538,
+    15.508,
     -0.0,
-    0.564
+    0.679
    ],
    "direction": [
     0,
@@ -927,9 +927,9 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    528.8,
+    525.8,
     -0.0,
-    -63.6
+    -52.1
    ],
    "direction_ue": [
     0,
@@ -948,9 +948,9 @@
    "intensity_cd": 0.528,
    "radius_m": 1.6,
    "location": [
-    15.718,
+    15.673,
     -0.0,
-    0.7557
+    0.909
    ],
    "direction": [
     0,
@@ -961,9 +961,9 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    546.8,
+    542.3,
     -0.0,
-    -44.4
+    -29.1
    ],
    "direction_ue": [
     0,
@@ -973,40 +973,6 @@
   },
   {
    "name": "fix_23",
-   "type": "point",
-   "color": [
-    0.45,
-    0.72,
-    1.0
-   ],
-   "intensity_cd": 0.528,
-   "radius_m": 1.6,
-   "location": [
-    15.898,
-    -0.0,
-    0.9473
-   ],
-   "direction": [
-    0,
-    0,
-    -1
-   ],
-   "cone_deg": 40.0,
-   "source_radius_cm": 1.0,
-   "specular": 0.2,
-   "location_ue_cm": [
-    564.8,
-    -0.0,
-    -25.3
-   ],
-   "direction_ue": [
-    0,
-    0,
-    -1
-   ]
-  },
-  {
-   "name": "fix_24",
    "type": "point",
    "color": [
     1.0,
@@ -1040,7 +1006,7 @@
    ]
   },
   {
-   "name": "fix_25",
+   "name": "fix_24",
    "type": "point",
    "color": [
     1.0,
@@ -1074,7 +1040,7 @@
    ]
   },
   {
-   "name": "fix_26",
+   "name": "fix_25",
    "type": "point",
    "color": [
     1.0,
@@ -1108,7 +1074,7 @@
    ]
   },
   {
-   "name": "fix_27",
+   "name": "fix_26",
    "type": "point",
    "color": [
     1.0,
@@ -1142,7 +1108,7 @@
    ]
   },
   {
-   "name": "fix_28",
+   "name": "fix_27",
    "type": "point",
    "color": [
     1.0,
@@ -1176,7 +1142,7 @@
    ]
   },
   {
-   "name": "fix_29",
+   "name": "fix_28",
    "type": "point",
    "color": [
     1.0,
@@ -1210,7 +1176,7 @@
    ]
   },
   {
-   "name": "fix_30",
+   "name": "fix_29",
    "type": "point",
    "color": [
     1.0,
@@ -1244,7 +1210,7 @@
    ]
   },
   {
-   "name": "fix_31",
+   "name": "fix_30",
    "type": "point",
    "color": [
     1.0,
@@ -1278,7 +1244,7 @@
    ]
   },
   {
-   "name": "fix_32",
+   "name": "fix_31",
    "type": "point",
    "color": [
     1.0,
@@ -1312,7 +1278,7 @@
    ]
   },
   {
-   "name": "fix_33",
+   "name": "fix_32",
    "type": "point",
    "color": [
     0.45,
@@ -1346,7 +1312,7 @@
    ]
   },
   {
-   "name": "fix_34",
+   "name": "fix_33",
    "type": "point",
    "color": [
     0.45,
@@ -1380,7 +1346,7 @@
    ]
   },
   {
-   "name": "fix_35",
+   "name": "fix_34",
    "type": "point",
    "color": [
     1.0,
@@ -1414,7 +1380,7 @@
    ]
   },
   {
-   "name": "fix_36",
+   "name": "fix_35",
    "type": "point",
    "color": [
     1.0,
@@ -1424,9 +1390,9 @@
    "intensity_cd": 0.192,
    "radius_m": 1.6,
    "location": [
-    17.8357,
-    -0.8759,
-    2.0635
+    17.8358,
+    -0.8755,
+    2.063
    ],
    "direction": [
     0,
@@ -1438,7 +1404,7 @@
    "specular": 0.2,
    "location_ue_cm": [
     758.6,
-    87.6,
+    87.5,
     86.3
    ],
    "direction_ue": [
@@ -1448,7 +1414,7 @@
    ]
   },
   {
-   "name": "fix_37",
+   "name": "fix_36",
    "type": "point",
    "color": [
     1.0,
@@ -1482,7 +1448,7 @@
    ]
   },
   {
-   "name": "fix_38",
+   "name": "fix_37",
    "type": "point",
    "color": [
     1.0,

@@ -996,8 +996,8 @@
     "location": [-2.4, 0.0, -1.55]
    },
    "WalkSeat": {
-    "_comment": "Walking the ship (author 29. 9. 2026): the pilot stands up here, on the cockpit floor (1.15) between the stairs' top (x 16.20) and the seat (16.55), facing aft.",
-    "location": [16.25, 0.0, 1.15],
+    "_comment": "Walking the ship (author 29. 9. 2026): the pilot stands up here, on the cockpit floor (1.15) between the stairs' top (x 16.00 since the steeper stair of 9. 10. 2026) and the seat (16.53), facing aft.",
+    "location": [16.27, 0.0, 1.15],
     "rotate_z_deg": 180
    },
    "WalkRamp": {

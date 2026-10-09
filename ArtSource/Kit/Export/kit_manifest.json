@@ -10285,7 +10285,7 @@
     53.8,
     85.0
    ],
-   "tris": 13422,
+   "tris": 13954,
    "tris_decals": 230,
    "tri_budget": 90000,
    "materials": [
@@ -10294,6 +10294,7 @@
     "Kit_GlowCool",
     "Kit_GlowSignal",
     "Kit_Lip",
+    "Kit_GlowFoot",
     "Kit_Red",
     "Kit_GlowRed",
     "Kit_Housing",
@@ -10328,7 +10329,7 @@
     "slot_s",
     "panel_A12",
     "panel_B07",
-    "st_inspect",
+    "st_vent",
     "panel_E16",
     "bolt_row_4",
     "bolt_row_4",
@@ -10337,13 +10338,13 @@
     "socket_round"
    ],
    "service_labels": [
-    "st_inspect"
+    "st_vent"
    ],
    "colour_masks": {
     "domain": "CORNER",
     "edge": 7632,
     "secondary": 0,
-    "floor": 412,
+    "floor": 1068,
     "seam": 0
    },
    "status": "built"
@@ -10366,8 +10367,8 @@
     53.8,
     85.0
    ],
-   "tris": 13422,
-   "tris_decals": 210,
+   "tris": 13954,
+   "tris_decals": 204,
    "tri_budget": 90000,
    "materials": [
     "Kit_Signal",
@@ -10375,6 +10376,7 @@
     "Kit_GlowCool",
     "Kit_GlowSignal",
     "Kit_Lip",
+    "Kit_GlowFoot",
     "Kit_Red",
     "Kit_GlowRed",
     "Kit_Housing",
@@ -10390,7 +10392,7 @@
    ],
    "sockets": {},
    "collision_hulls": 6,
-   "decals": 25,
+   "decals": 24,
    "decal_items": [
     "maker",
     "bolt",
@@ -10408,24 +10410,23 @@
     "socket",
     "red_dot",
     "bolt",
-    "st_inspect",
+    "st_vent",
     "panel_B07",
-    "st_inspect",
+    "st_vent",
     "panel_E16",
-    "st_inspect",
     "bolt_row_4",
     "bolt_row_4",
     "rivet_row_4",
     "light_housing"
    ],
    "service_labels": [
-    "st_inspect"
+    "st_vent"
    ],
    "colour_masks": {
     "domain": "CORNER",
     "edge": 7632,
     "secondary": 0,
-    "floor": 412,
+    "floor": 1068,
     "seam": 0
    },
    "status": "built"
