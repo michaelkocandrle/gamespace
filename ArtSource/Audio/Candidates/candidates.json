@@ -1,0 +1,200 @@
+{
+ "engine_loop_a.mp3": {
+  "sound": "engine_loop",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Inside a spaceship cockpit: the main thruster engines running under power, a deep heavy rumbling roar with a low turbine whine layered on top, felt through the hull, steady and powerful, seamless loop.",
+  "loop": true,
+  "asset": "asset_NKVx1EeoKdyW7gPRT9YNsbJf",
+  "cu": 30
+ },
+ "engine_loop_b.mp3": {
+  "sound": "engine_loop",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Spaceship engine thrust heard from the pilot seat: massive low-frequency roar of plasma thrusters, rhythmic subtle pulsing, metal hull resonance and vibration, a soft high turbine whistle, dense and mechanical, seamless loop.",
+  "loop": true,
+  "asset": "asset_CDgoaaxkFsvAH53Yd6CFUTsr",
+  "cu": 30
+ },
+ "engine_hum_a.mp3": {
+  "sound": "engine_hum",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Spaceship idling, heard in the cockpit: a smooth low reactor drone, faint electrical hum of systems, soft air circulation hiss, calm and steady, very low pitch, seamless loop.",
+  "loop": true,
+  "asset": "asset_LPBhF42eoA8Afe4L8cDoXVQH",
+  "cu": 30
+ },
+ "engine_hum_b.mp3": {
+  "sound": "engine_hum",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Idle spaceship engines heard from inside: warm deep reactor hum with a slow subtle throb, quiet mechanical whir of pumps and fans, hull ambience, seamless loop.",
+  "loop": true,
+  "asset": "asset_ZGiehZxpZxEaXr3YxuHLvui5",
+  "cu": 30
+ },
+ "engine_start_a.mp3": {
+  "sound": "engine_start",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Spaceship engines igniting, heard from inside the cockpit: a heavy mechanical clunk of fuel valves, igniter ticking, turbines spooling up with a rising whine, a deep thump as the thrusters catch, building into a powerful steady rumble.",
+  "loop": false,
+  "asset": "asset_dCba1Fs6ZHwN5iqU9XGqGafE",
+  "cu": 30
+ },
+ "engine_start_b.mp3": {
+  "sound": "engine_start",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Starting large spacecraft engines heard through the hull: starter motor whirring, rising turbine spool, pressure hiss, a low boom of ignition, then a deep throbbing engine rumble settling to idle.",
+  "loop": false,
+  "asset": "asset_bTdGt13X4ye1ayodhtTHewAt",
+  "cu": 30
+ },
+ "engine_stop_a.mp3": {
+  "sound": "engine_stop",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Spaceship engines shutting down, heard from the cockpit: the deep rumble cutting off, turbines spooling down with a falling whine, a pressure release hiss, metal ticking as the engines cool.",
+  "loop": false,
+  "asset": "asset_BM6p6tzKZkYxSudTAfB797Z1",
+  "cu": 30
+ },
+ "engine_stop_b.mp3": {
+  "sound": "engine_stop",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Large spacecraft thrusters powering down: falling turbine whine, rumble fading out, a heavy valve clunk, then quiet creaks of cooling metal.",
+  "loop": false,
+  "asset": "asset_qp5DsbNEsGYwsu6MPqkgCiRr",
+  "cu": 30
+ },
+ "power_up_a.mp3": {
+  "sound": "power_up",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Spaceship systems powering on in the cockpit: a heavy main breaker clunk, relays clicking in sequence, a rising electrical hum as power flows through the ship, fans starting, ending in a steady low hum.",
+  "loop": false,
+  "asset": "asset_LgiMuyQfanoEuGCeFyuCUJRg",
+  "cu": 30
+ },
+ "power_up_b.mp3": {
+  "sound": "power_up",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Cockpit power-up of a large spacecraft: thick mechanical switch throw, cascading relay clacks, capacitors charging with a rising tone, ventilation spinning up, settles to a low electrical drone.",
+  "loop": false,
+  "asset": "asset_r3oPL2kKdVyE1RJBVB39sUbz",
+  "cu": 30
+ },
+ "power_down_a.mp3": {
+  "sound": "power_down",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Spaceship systems powering off in the cockpit: a heavy breaker clunk, electrical hum falling and dying, fans spinning down, a last relay click, silence.",
+  "loop": false,
+  "asset": "asset_8g3iFRQKkiMfzRzWCF9bUNnQ",
+  "cu": 30
+ },
+ "power_down_b.mp3": {
+  "sound": "power_down",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Cockpit power-down of a large spacecraft: switch thrown, descending electrical drone, ventilation winding down, soft relay clacks fading out.",
+  "loop": false,
+  "asset": "asset_gebyaZpwJx532L9Ao2Bbcp1H",
+  "cu": 30
+ },
+ "holo_deploy_a.mp3": {
+  "sound": "holo_deploy",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Holographic cockpit display projector turning on: a soft servo whir and a quick rising glassy energy shimmer, subtle crackle, settles quietly, short and refined, not a beep.",
+  "loop": false,
+  "asset": "asset_PEcYaKEMFUsZn79DGoSJ3oDY",
+  "cu": 30
+ },
+ "holo_deploy_b.mp3": {
+  "sound": "holo_deploy",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Sci-fi hologram screen materialising from a projector: brief electrical hum swelling with a light airy shimmer and a soft low click at the end, subtle.",
+  "loop": false,
+  "asset": "asset_rViXVSJUkPzYHTq4BDKJXs6J",
+  "cu": 30
+ },
+ "holo_retract_a.mp3": {
+  "sound": "holo_retract",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Holographic cockpit display projector turning off: a quick descending glassy shimmer collapsing into a soft low thump, servo whir, subtle and short.",
+  "loop": false,
+  "asset": "asset_KeoGEJqZf852pQDms2gqw5eD",
+  "cu": 30
+ },
+ "holo_retract_b.mp3": {
+  "sound": "holo_retract",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Sci-fi hologram screen dissolving: falling airy energy sweep and a soft muffled click as the projector shuts, subtle.",
+  "loop": false,
+  "asset": "asset_o8Z4xKtNPiXNMA4VTbEtsRJy",
+  "cu": 30
+ },
+ "holo_tick_a.mp3": {
+  "sound": "holo_tick",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Pressing a button on a holographic cockpit display: a soft, dry, short tactile tick with a faint low electrical body, subtle and quiet, not a beep, not a notification.",
+  "loop": false,
+  "asset": "asset_j68T1MybTFWc2xCnBeVtESM1",
+  "cu": 30
+ },
+ "holo_tick_b.mp3": {
+  "sound": "holo_tick",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "A single quiet sci-fi interface select sound: muted soft click with a tiny low thump, very short, subtle, dry.",
+  "loop": false,
+  "asset": "asset_BX8eag5txbUzrgFRj1w2qTHi",
+  "cu": 30
+ },
+ "switch_click_a.mp3": {
+  "sound": "switch_click",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "A heavy-duty metal toggle switch in a spaceship cockpit flipped: solid mechanical snap and clack, short and dry, close up.",
+  "loop": false,
+  "asset": "asset_37biGhGnQqD5uKwBLP8snYBD",
+  "cu": 30
+ },
+ "switch_click_b.mp3": {
+  "sound": "switch_click",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Rugged military aircraft rocker switch pressed: firm plastic and metal click with a slight spring, short, close up.",
+  "loop": false,
+  "asset": "asset_RaSnn4DaCJfon4b57t93KVDK",
+  "cu": 30
+ },
+ "button_press_a.mp3": {
+  "sound": "button_press",
+  "take": "a",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "Pressing a backlit physical push button on a spaceship console: a firm, short, muted mechanical click with a soft rubber dampening, close up, no electronic tone.",
+  "loop": false,
+  "asset": "asset_hMHVvmD7gpuKnT6BGf99EPYp",
+  "cu": 30
+ },
+ "button_press_b.mp3": {
+  "sound": "button_press",
+  "take": "b",
+  "model": "model_elevenlabs-sound-effects-v2",
+  "prompt": "A chunky cockpit console key pressed and released: two soft mechanical clicks, short, close up, no beep.",
+  "loop": false,
+  "asset": "asset_H78UYKRZc5z8sH7cMYSVrHM2",
+  "cu": 30
+ }
+}
