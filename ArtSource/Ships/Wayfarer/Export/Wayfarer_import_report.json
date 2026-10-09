@@ -26,7 +26,8 @@
       "socket WalkSeat scale (100, 100, 100) reset to 1"
     ],
     "SM_Ship_Wayfarer_Decals": [],
-    "SM_Ship_Wayfarer_Interior": []
+    "SM_Ship_Wayfarer_Interior": [],
+    "SM_Ship_Wayfarer_InteriorDecals": []
   },
   "kept_unchanged": [
     "SM_Ship_Wayfarer_Canopy",
@@ -34,20 +35,19 @@
     "SM_Ship_Wayfarer_Door1A",
     "SM_Ship_Wayfarer_Gear",
     "SM_Ship_Wayfarer_Hologram",
-    "SM_Ship_Wayfarer_InteriorDecals",
     "SM_Ship_Wayfarer_InteriorKit",
     "SM_Ship_Wayfarer_Screens"
   ],
   "imported_hashes": {
-    "SM_Ship_Wayfarer": "604eb484527e9f688541cdd0b57e9ee8c5566faf",
+    "SM_Ship_Wayfarer": "15a88ed1e320f01d4eef06f7210578465c2b1979",
     "SM_Ship_Wayfarer_Canopy": "879389a2da32c2818440c8370cc947c38af0759c",
-    "SM_Ship_Wayfarer_Decals": "9425c7e8e7f721304c780ce6e097926e2e00a6b7",
+    "SM_Ship_Wayfarer_Decals": "31b8207e26c2826dc64ce1025c0e46e72df155b1",
     "SM_Ship_Wayfarer_Door0A": "f593dd2e91e797e067daf38767cd9fe81d9cea12",
     "SM_Ship_Wayfarer_Door1A": "e399533e241926e1610ed1e6957b7139fb21cc10",
     "SM_Ship_Wayfarer_Gear": "7dc7e8ec1f70b6d335d5d82d424f2e9d8b4d85bf",
     "SM_Ship_Wayfarer_Hologram": "7f42a610def6af75b04036c4eeda939904c09720",
-    "SM_Ship_Wayfarer_Interior": "3d3826f83637bb31759af4eb9d0f32c630d975b4",
-    "SM_Ship_Wayfarer_InteriorDecals": "4b14bf92a89be28bf2dccac07865493aecb9ba89",
+    "SM_Ship_Wayfarer_Interior": "6aa8d54c0d3a78b04ee87541b859532d6b44783c",
+    "SM_Ship_Wayfarer_InteriorDecals": "076c160b17a964a503bd6c42402e3c9612391bb7",
     "SM_Ship_Wayfarer_InteriorKit": "7c6de1d8613fe23f6b2058b655890a31c906a456",
     "SM_Ship_Wayfarer_Screens": "b63b83e88676784cafc4a8790b61618fb507df17"
   },
@@ -185,10 +185,10 @@
       "light Light_int_16 (point, 2.0 cd) at [735.0, -55.0, 7.0]",
       "light Light_int_17 (point, 2.0 cd) at [735.0, 55.0, 7.0]",
       "light Light_int_18 (point, 1.5 cd) at [775.0, -72.0, 116.5]",
-      "light Light_fix_19 (point, 0.528 cd) at [492.8, -0.0, -98.1]",
-      "light Light_fix_20 (point, 0.528 cd) at [509.3, -0.0, -75.1]",
-      "light Light_fix_21 (point, 0.528 cd) at [525.8, -0.0, -52.1]",
-      "light Light_fix_22 (point, 0.528 cd) at [542.3, -0.0, -29.1]",
+      "light Light_fix_19 (point, 0.528 cd) at [502.8, -0.0, -98.1]",
+      "light Light_fix_20 (point, 0.528 cd) at [517.8, -0.0, -75.1]",
+      "light Light_fix_21 (point, 0.528 cd) at [532.8, -0.0, -52.1]",
+      "light Light_fix_22 (point, 0.528 cd) at [547.8, -0.0, -29.1]",
       "light Light_fix_23 (point, 0.458 cd) at [559.7, 164.5, 62.1]",
       "light Light_fix_24 (point, 0.458 cd) at [559.7, -164.5, 62.1]",
       "light Light_fix_25 (point, 0.382 cd) at [676.7, 142.1, 62.1]",

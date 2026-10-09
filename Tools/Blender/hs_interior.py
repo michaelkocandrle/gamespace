@@ -1006,7 +1006,10 @@ def build(recipe, layout, coll, mats, ship, hull):
     # (cockpit v4, author 9. 10. 2026: "you still cannot walk round the seat" - Tools/Blender/cockpit_walk_map.py: the
     # flight's top at 16.20 and its rail posts at 16.30 left 0.31 m to the seat's back at 16.55 for a 0.5 m capsule) a
     # steeper ship's stair, 5 risers of 0.23 m (under the walker's 0.45 m step) on 0.165 m treads: the top at 15.96
-    stairs(g, fb, res["faces"] + [e for e in ext["geom"] if isinstance(e, bmesh.types.BMFace)], zc, rise_max=0.235, tread=0.165)
+    # (9. 10., author: "the character cannot get through the door frame out of the cockpit" - Tools/Blender/walk_probe.py:
+    # starting at 15.30 the 0.23 m risers lifted the walker's head into the doorway's head at 2.30 by 2 cm) the flight
+    # starts 10 cm further in, at 15.40, on 0.15 m treads: its top stays at 16.00, the head clears the doorway
+    stairs(g, fb, res["faces"] + [e for e in ext["geom"] if isinstance(e, bmesh.types.BMFace)], zc, x0=15.40, rise_max=0.235, tread=0.15)
     # the tub follows the plan's outline, but the hull is narrower than the plan in places at sill height: clamp
     # every corner inside the hull (a sill trim ran through the wall there, author 25. 9. 2026)
     from mathutils.bvhtree import BVHTree

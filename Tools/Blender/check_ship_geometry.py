@@ -446,7 +446,7 @@ def walk_blocked(ship, recipe):
         for side in (0.0, -0.12, 0.12):
             feet = fz
             worst = None
-            steps = 33
+            steps = 54                                 # 3 cm (9. 10. 2026: at 5 cm the head in a doorway's head slipped between samples)
             for i in range(steps):
                 t = -0.8 + 1.6 * i / (steps - 1)
                 c = Vector((at[0] + t, at[1] + side, 0.0)) if ax == "x" else Vector((at[0] + side, at[1] + t, 0.0))

@@ -108,7 +108,10 @@ Celá přestavba trvá ~15 min: pouštět na pozadí (`run_in_background`) a če
   jsou schody, ne překážky).
 - **Mapa průchodnosti** (`Tools/Blender/cockpit_walk_map.py` na `<Loď>_HS_Game.blend`): kapsle hry po 3 cm,
   flood fill, ASCII mapa `o` dosažené / `.` odříznuté / `#` blokované. Tak se našlo, že obejití křesla blokoval
-  konec schodiště (31 cm místo 50) → strmější lodní schody (5 × 0,23 m, stupnice 0,165), zábradlí končí na schodu.
+  konec schodiště (31 cm místo 50) → strmější lodní schody (5 × 0,23 m, stupnice 0,15 od x 15,40), zábradlí končí na schodu.
+- **Sonda chůze** (`Tools/Blender/walk_probe.py -- <Loď> x0 y0 x1 y1 [z]`): chodec po přímce po 3 cm, vypíše výšku
+  chodidel a čeho se tělo dotkne (schody označí). Strmější schody zvedly hlavu do nadpraží dveří (2,30 m) → začátek
+  schodiště o 10 cm dál od dveří. Každou změnu schodů / podlah ověřit sondou na ose i ±0,2 m.
 
 ## 9. Nástrahy (příznak → příčina → řešení)
 

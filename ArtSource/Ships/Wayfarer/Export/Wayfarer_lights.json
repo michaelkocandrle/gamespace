@@ -846,7 +846,7 @@
    "intensity_cd": 0.528,
    "radius_m": 1.6,
    "location": [
-    15.178,
+    15.278,
     0.0,
     0.219
    ],
@@ -859,7 +859,7 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    492.8,
+    502.8,
     -0.0,
     -98.1
    ],
@@ -880,8 +880,8 @@
    "intensity_cd": 0.528,
    "radius_m": 1.6,
    "location": [
-    15.343,
-    -0.0,
+    15.428,
+    0.0,
     0.449
    ],
    "direction": [
@@ -893,7 +893,7 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    509.3,
+    517.8,
     -0.0,
     -75.1
    ],
@@ -914,7 +914,7 @@
    "intensity_cd": 0.528,
    "radius_m": 1.6,
    "location": [
-    15.508,
+    15.578,
     -0.0,
     0.679
    ],
@@ -927,7 +927,7 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    525.8,
+    532.8,
     -0.0,
     -52.1
    ],
@@ -948,8 +948,8 @@
    "intensity_cd": 0.528,
    "radius_m": 1.6,
    "location": [
-    15.673,
-    -0.0,
+    15.728,
+    0.0,
     0.909
    ],
    "direction": [
@@ -961,7 +961,7 @@
    "source_radius_cm": 1.0,
    "specular": 0.2,
    "location_ue_cm": [
-    542.3,
+    547.8,
     -0.0,
     -29.1
    ],
