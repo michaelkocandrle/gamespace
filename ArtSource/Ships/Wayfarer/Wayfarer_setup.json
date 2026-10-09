@@ -119,7 +119,11 @@
      0.17,
      0.02
     ],
-    "MetalPanelColor": [0.48, 0.45, 0.38],
+    "MetalPanelColor": [
+     0.48,
+     0.45,
+     0.38
+    ],
     "LiveryColor": [
      0.05,
      0.053,
@@ -134,7 +138,7 @@
     "WearThreshold": 0.45,
     "CavityStrength": 0.3,
     "AOStrength": 0.8,
-    "RoughVariation": 0.45,
+    "RoughVariation": 0.12,
     "BareMetalRoughness": 0.28,
     "PrimaryRoughness": 0.3,
     "SecondaryRoughness": 0.55,
@@ -157,15 +161,23 @@
     "CarbonShare": 0.0,
     "ClearCoat": 1.0,
     "ClearCoatRoughness": 0.05,
-    "ClearCoatRoughVariation": 0.3,
-    "SecondaryClearCoatRoughness": 0.38
+    "ClearCoatRoughVariation": 0.1,
+    "SecondaryClearCoatRoughness": 0.38,
+    "DetailTileCm": 150.0,
+    "DetailNormalStrength": 0.55,
+    "DetailCavityStrength": 0.45
    },
    "_wear": "EdgeWear 0.15 (was 0.8) and the grunge in the clear coat's roughness: SC paint has no worn edges, the dirt shows in the gloss (starcitizenreference/ShipDetailing_VideoNotes.md, 26. 9. 2026)",
    "_livery_roof": "1. 10. 2026: the graphite saddle of livery A off (TopZ 9999): the author wants the roof plates in the primary paint - the chase camera sees mostly the roof, a dark roof made a dark ship",
    "_panel_variation": "1. 10. 2026: PanelTone 0.1 (was 0.07), PanelRough 0.18 (was 0.12): the kit's plates read as one clean tile (kit pilot critic round 1)",
    "_secondary": "2. 10. 2026 kit pilot step c (critic round 3: the shoulder plates S read as windows): secondary paint lighter and warmer (0.53 0.51 0.47, was a cool 0.42 0.43 0.45), SecondaryRoughness 0.55 (0.34) and its own duller clear coat SecondaryClearCoatRoughness 0.38 (the primary keeps 0.05) - it mirrored the sky",
    "_round3": "1. 10. 2026 kit pilot critic round 2: RoughVariation 0.45 (was 0.28), GrungeAmount 0.3 (0.15), ClearCoatRoughVariation 0.3 (0.12) - the dirt shows in the gloss; CarbonShare 0 (was 0.05): dark carbon plates read as holes in the roof",
-   "_round_ship2": "whole-ship kit critic round 2 (3. 10. 2026): the side plates read cool grey - primary a step lighter and warmer (0.76 0.73 0.66; was 0.70 0.69 0.65)"
+   "_round_ship2": "whole-ship kit critic round 2 (3. 10. 2026): the side plates read cool grey - primary a step lighter and warmer (0.76 0.73 0.66; was 0.70 0.69 0.65)",
+   "textures": {
+    "detail_normal": "ArtSource/Kit/Textures/T_Kit_PanelDetail_N.png",
+    "detail_cavity": "ArtSource/Kit/Textures/T_Kit_PanelDetail_C.png"
+   },
+   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic'): the cockpit's layered panel trim (Tools/Kit/kit_panel_detail.py) as triplanar detail normal + cavity/tone, larger tile"
   },
   "MI_Ship_Wayfarer_Dark": {
    "master": "layered",
@@ -202,14 +214,22 @@
     "WearThreshold": 0.45,
     "CavityStrength": 0.3,
     "AOStrength": 0.8,
-    "RoughVariation": 0.28,
+    "RoughVariation": 0.1,
     "BareMetalRoughness": 0.28,
     "PrimaryRoughness": 0.45,
     "SecondaryRoughness": 0.5,
     "PaintMetallic": 0.2,
     "ClearCoat": 0.6,
-    "ClearCoatRoughness": 0.08
-   }
+    "ClearCoatRoughness": 0.08,
+    "DetailTileCm": 120.0,
+    "DetailNormalStrength": 0.5,
+    "DetailCavityStrength": 0.45
+   },
+   "textures": {
+    "detail_normal": "ArtSource/Kit/Textures/T_Kit_PanelDetail_N.png",
+    "detail_cavity": "ArtSource/Kit/Textures/T_Kit_PanelDetail_C.png"
+   },
+   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic'): the cockpit's layered panel trim (Tools/Kit/kit_panel_detail.py) as triplanar detail normal + cavity/tone, larger tile"
   },
   "MI_Ship_Wayfarer_Accent": {
    "master": "layered",
@@ -252,8 +272,16 @@
     "SecondaryRoughness": 0.4,
     "PaintMetallic": 0.0,
     "ClearCoat": 1.0,
-    "ClearCoatRoughness": 0.08
-   }
+    "ClearCoatRoughness": 0.08,
+    "DetailTileCm": 150.0,
+    "DetailNormalStrength": 0.4,
+    "DetailCavityStrength": 0.4
+   },
+   "textures": {
+    "detail_normal": "ArtSource/Kit/Textures/T_Kit_PanelDetail_N.png",
+    "detail_cavity": "ArtSource/Kit/Textures/T_Kit_PanelDetail_C.png"
+   },
+   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic'): the cockpit's layered panel trim (Tools/Kit/kit_panel_detail.py) as triplanar detail normal + cavity/tone, larger tile"
   },
   "MI_Ship_Wayfarer_Metal": {
    "master": "layered",
@@ -334,16 +362,24 @@
     "WearThreshold": 0.45,
     "CavityStrength": 0.3,
     "AOStrength": 0.8,
-    "RoughVariation": 0.35,
+    "RoughVariation": 0.12,
     "BareMetalRoughness": 0.28,
     "PrimaryRoughness": 0.34,
     "SecondaryRoughness": 0.4,
     "PaintMetallic": 0.6,
     "ClearCoat": 0.3,
-    "ClearCoatRoughness": 0.1
+    "ClearCoatRoughness": 0.1,
+    "DetailTileCm": 120.0,
+    "DetailNormalStrength": 0.45,
+    "DetailCavityStrength": 0.45
    },
    "_round3": "kit pilot critic round 2: the frame one step lighter and metallic (0.24, metallic 0.8; was 0.16 / 0.6) so it reads as structure, not as a dark fill",
-   "_round_ship1": "whole-ship kit critic round 1 (3. 10. 2026): frame and channel floor read as one black mass - frame lighter (0.36, metallic 0.6; was 0.24 / 0.8), the channel stays 0.1"
+   "_round_ship1": "whole-ship kit critic round 1 (3. 10. 2026): frame and channel floor read as one black mass - frame lighter (0.36, metallic 0.6; was 0.24 / 0.8), the channel stays 0.1",
+   "textures": {
+    "detail_normal": "ArtSource/Kit/Textures/T_Kit_PanelDetail_N.png",
+    "detail_cavity": "ArtSource/Kit/Textures/T_Kit_PanelDetail_C.png"
+   },
+   "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic'): the cockpit's layered panel trim (Tools/Kit/kit_panel_detail.py) as triplanar detail normal + cavity/tone, larger tile"
   },
   "MI_Ship_Wayfarer_Glass": {
    "master": "glass",
@@ -545,7 +581,11 @@
    ],
    "metallic": 0.0,
    "roughness": 0.2,
-   "emissive_color": [0.45, 0.72, 1.0],
+   "emissive_color": [
+    0.45,
+    0.72,
+    1.0
+   ],
    "emissive_strength": 4
   },
   "MI_Ship_Wayfarer_LightWarm": {
@@ -653,8 +693,16 @@
    "_satin_8_10": "author 8. 10. 2026: the kit consoles' paint colour (Kit_Frame) as a satin without the clear coat - the clear-coated paint mirrored the sky on the canopy frame",
    "master": "layered",
    "vectors": {
-    "PrimaryColor": [0.46, 0.455, 0.445],
-    "SecondaryColor": [0.42, 0.415, 0.405],
+    "PrimaryColor": [
+     0.46,
+     0.455,
+     0.445
+    ],
+    "SecondaryColor": [
+     0.42,
+     0.415,
+     0.405
+    ],
     "BareMetalColor": [
      0.55,
      0.55,
@@ -687,8 +735,16 @@
    "_satin_8_10": "author 8. 10. 2026: the kit consoles' paint colour (Kit_Frame) as a satin without the clear coat - the clear-coated paint mirrored the sky on the canopy frame",
    "master": "layered",
    "vectors": {
-    "PrimaryColor": [0.46, 0.455, 0.445],
-    "SecondaryColor": [0.42, 0.415, 0.405],
+    "PrimaryColor": [
+     0.46,
+     0.455,
+     0.445
+    ],
+    "SecondaryColor": [
+     0.42,
+     0.415,
+     0.405
+    ],
     "BareMetalColor": [
      0.55,
      0.55,
@@ -1027,16 +1083,39 @@
   "MI_Ship_Wayfarer_HoloField": {
    "_comment": "holo MFD v4 (author 8. 10. 2026: the MFDs in the radar's holo style): the additive field of light behind each MFD picture (M_Ship_HoloField); Aspect = its width / height (0.523 x 0.299 m)",
    "master": "holo_field",
-   "slots": ["M_Ship_Wayfarer_HoloField"],
-   "vectors": {"Colour": [0.3, 0.68, 1.0]},
-   "scalars": {"Intensity": 1.0, "Aspect": 1.75, "Rows": 70.0, "BandSeconds": 4.0}
+   "slots": [
+    "M_Ship_Wayfarer_HoloField"
+   ],
+   "vectors": {
+    "Colour": [
+     0.3,
+     0.68,
+     1.0
+    ]
+   },
+   "scalars": {
+    "Intensity": 1.0,
+    "Aspect": 1.75,
+    "Rows": 70.0,
+    "BandSeconds": 4.0
+   }
   },
   "MI_Ship_Wayfarer_HoloBeam": {
    "_comment": "holo MFD v4: the projector's fan of light from the lens slot to the picture (M_Ship_HoloBeam)",
    "master": "holo_beam",
-   "slots": ["M_Ship_Wayfarer_HoloBeam"],
-   "vectors": {"Colour": [0.3, 0.68, 1.0]},
-   "scalars": {"Intensity": 1.0}
+   "slots": [
+    "M_Ship_Wayfarer_HoloBeam"
+   ],
+   "vectors": {
+    "Colour": [
+     0.3,
+     0.68,
+     1.0
+    ]
+   },
+   "scalars": {
+    "Intensity": 1.0
+   }
   },
   "MI_Ship_Wayfarer_Holo": {
    "_comment": "the cockpit's ship hologram (M_Ship_Holo); HoloPivot is set by import_ship.py from the Hologram mesh's bounds. ScanDepth 0.12: on the smooth outer envelope (26. 9. 2026) deep scan lines drew wavy contour stripes",
@@ -1327,8 +1406,16 @@
    "_comment": "cockpit frame lining in the hull's warm off-white paint (concept A in the Wayfarer's colours); satin, not glossy: a strong clear coat mirrored every cockpit lamp as a hot spot on the walls (author 25. 9. 2026)",
    "master": "layered",
    "vectors": {
-    "PrimaryColor": [0.46, 0.455, 0.445],
-    "SecondaryColor": [0.42, 0.415, 0.405],
+    "PrimaryColor": [
+     0.46,
+     0.455,
+     0.445
+    ],
+    "SecondaryColor": [
+     0.42,
+     0.415,
+     0.405
+    ],
     "BareMetalColor": [
      0.55,
      0.55,

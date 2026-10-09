@@ -53,7 +53,7 @@ MASTERS = {"hull": SHARED + "/M_Ship_Hull", "pbr": SHARED + "/M_Ship_PBR", "glas
            "holo_field": SHARED + "/M_Ship_HoloField", "holo_beam": SHARED + "/M_Ship_HoloBeam"}
 TEXTURE_PARAMS = {"base_color": "BaseColorMap", "orm": "ORMMap", "normal": "NormalMap", "ao": "AOMap",
                   "decal_normal": "DecalNormalMap", "decal_m": "DecalMMap", "decal_bc": "DecalColorMap",
-                  "decal_ao": "DecalAOMap", "detail_normal": "DetailNormalMap"}
+                  "decal_ao": "DecalAOMap", "detail_normal": "DetailNormalMap", "detail_cavity": "DetailCavityMap"}
 
 
 def _asset_tools():
@@ -911,7 +911,7 @@ def import_texture(ship, key, source, never_stream=False):
         texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_NORMALMAP)
         texture.set_editor_property("srgb", False)
         texture.set_editor_property("flip_green_channel", True)
-    elif key in ("orm", "ao", "decal_m", "decal_ao"):
+    elif key in ("orm", "ao", "decal_m", "decal_ao", "detail_cavity"):
         # Values, not colour: no sRGB curve on the way in.
         texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_MASKS)
         texture.set_editor_property("srgb", False)
