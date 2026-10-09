@@ -1,0 +1,91 @@
+{
+ "_comment": "Diagnosis 9. 10. 2026: the hull disappears in space 60 km over the planet - Nanite off / on.",
+ "shots": [
+  {
+   "altitude_m": 60000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "name": "warmup",
+   "camera": "chase"
+  },
+  {
+   "altitude_m": 60000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "name": "nanite_on",
+   "console": [
+    "r.Nanite 1"
+   ]
+  },
+  {
+   "altitude_m": 60000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "name": "nanite_off",
+   "console": [
+    "r.Nanite 0"
+   ]
+  },
+  {
+   "altitude_m": 60000,
+   "facing": "horizon",
+   "hud": 0,
+   "gear": false,
+   "settle": 2.0,
+   "fov": 55,
+   "camera_local": [
+    15.75,
+    8,
+    2.8
+   ],
+   "look_local": [
+    4.75,
+    0,
+    0.2
+   ],
+   "name": "nanite_on_again",
+   "console": [
+    "r.Nanite 1"
+   ]
+  }
+ ]
+}

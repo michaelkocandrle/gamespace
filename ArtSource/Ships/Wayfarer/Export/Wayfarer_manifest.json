@@ -41,7 +41,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "15a88ed1e320f01d4eef06f7210578465c2b1979"
+      "geometry_hash": "7cf3ccc7cb3e4cbebc20bdb18d832c3cce07590e"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -55,7 +55,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "31b8207e26c2826dc64ce1025c0e46e72df155b1"
+      "geometry_hash": "d76b3cabf8f24e8607bd7034ed46269d6aece9ef"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -90,7 +90,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "6aa8d54c0d3a78b04ee87541b859532d6b44783c"
+      "geometry_hash": "cd5db1964b2ce052ca26b4469d7bb56a5b882e10"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
@@ -118,8 +118,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 459485,
-      "verts": 305339,
+      "tris": 459483,
+      "verts": 305338,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -179,8 +179,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 66388,
-      "verts": 72325,
+      "tris": 63214,
+      "verts": 65803,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -197,9 +197,9 @@
           -1.8340001106262207
         ],
         [
-          10.043219566345215,
+          10.007495880126953,
           7.332573413848877,
-          2.139873743057251
+          2.1166396141052246
         ]
       ]
     },
@@ -307,7 +307,7 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 693361,
+      "tris": 693363,
       "verts": 359446,
       "materials": [
         "M_Ship_Wayfarer_Accent",
@@ -516,7 +516,7 @@
         [
           -9.949999809265137,
           3.2013895511627197,
-          0.8000004291534424
+          0.8000011444091797
         ],
         [
           -7.250000476837158,
