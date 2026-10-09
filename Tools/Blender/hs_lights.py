@@ -9,7 +9,8 @@ the shape layers. Recipe block "lights", LAYOUT coordinates:
           "cone_deg", "aim": [x, y, z] layout point for a spot}.
   strips  emissive light strips in a dark channel along a pod or, with "on": side / bottom / top and "z" / "y",
           along the hull; ("pod_line": x range at deg; "r" places it at
-          that radius instead of on the surface, e.g. inside the open bay), "width" m, "color".
+          that radius instead of on the surface, e.g. inside the open bay), "width" m, "color"; "channel" m (the
+          band set "depth" m deep between two dark rails, "channel" wide overall).
   points  bare lights without a fitting (inside a bay): "at" layout point, "color", "light" as above.
 
 The real lights are not geometry: they go to the scene property "hs_lights" (JSON), hs_assemble_ship.py
@@ -186,6 +187,18 @@ def apply(recipe, made, coll, mats_factory, bevel):
                 t.normalize()
                 y = n.cross(t)
                 w = st.get("width", 0.02)
+                ch = st.get("channel")
+                if ch:
+                    # SC technique 9 (measured 9. 10. 2026): the strip as a form - a wide band set "depth" deep
+                    # into a dark channel: a floor plate and two rails standing proud of the band
+                    dp = st.get("depth", 0.01)
+                    rail = (ch - w) / 2
+                    _box(housing, mid + n * 0.002, t, y, n, (length + 0.001, ch, 0.004))
+                    for sgn in (1, -1):
+                        _box(housing, mid + n * (0.004 + dp / 2 + 0.002) + y * sgn * (w / 2 + rail / 2), t, y, n,
+                             (length + 0.001, rail, dp + 0.004))
+                    _box(bm_for(colour), mid + n * 0.005, t, y, n, (length + 0.001, w, 0.002))
+                    continue
                 _box(housing, mid + n * 0.003, t, y, n, (length + 0.001, w + 0.02, 0.006))
                 _box(bm_for(colour), mid + n * 0.007, t, y, n, (length + 0.001, w, 0.005))
             if st.get("light") and pts:

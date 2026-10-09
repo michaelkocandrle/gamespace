@@ -118,6 +118,39 @@
         -5.0,
         -0.4
       ]
+    },
+    {
+      "name": "dusk_chase_front_left",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 135,
+      "chase_pitch": -12,
+      "settle": 4.0,
+      "console": [
+        "space.SunDir -52 102"
+      ]
+    },
+    {
+      "name": "dusk_close_front34_right",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        15.75,
+        8,
+        2.8
+      ],
+      "look_local": [
+        4.75,
+        0,
+        0.2
+      ]
     }
   ]
 }

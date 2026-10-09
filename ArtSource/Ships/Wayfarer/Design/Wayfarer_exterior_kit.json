@@ -46,8 +46,8 @@
  },
  "digests": {
   "layout": "5e4187677410",
-  "recipe": "8c93dc1c34cf",
-  "setup": "0df7a8822acc",
+  "recipe": "06ecf8cbc91f",
+  "setup": "2b9ca1ab356c",
   "spec": "d9597dfcd605",
   "design": "57d33d038faf",
   "library": "148ba66e97f3"

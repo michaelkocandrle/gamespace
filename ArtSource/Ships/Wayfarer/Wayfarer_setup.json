@@ -586,7 +586,7 @@
     0.72,
     1.0
    ],
-   "emissive_strength": 4
+   "emissive_strength": 2.5
   },
   "MI_Ship_Wayfarer_LightWarm": {
    "master": "hull",

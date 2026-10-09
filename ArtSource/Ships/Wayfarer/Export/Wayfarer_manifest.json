@@ -41,7 +41,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "596650e7743e23642b305a7f700286fe8ea31092"
+      "geometry_hash": "8511bad213a51a9c0a8cef44368f9ef9a1fad940"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -55,7 +55,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "e6616b476e074c1333bff3242359eb1fa62deed6"
+      "geometry_hash": "b631b627c1abe6383059b0a130e9b2da5c8e368d"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -83,7 +83,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Hologram"
       ],
-      "geometry_hash": "456bf04f87500e91f4fec32605f7dabbc988b2d2"
+      "geometry_hash": "b73218222c35d9122ba84beb552adaed9e258326"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Interior.fbx",
@@ -118,8 +118,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 590279,
-      "verts": 371360,
+      "tris": 614261,
+      "verts": 382511,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -179,8 +179,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 62394,
-      "verts": 63612,
+      "tris": 62824,
+      "verts": 64021,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -294,7 +294,7 @@
       "bounds_m": [
         [
           7.650007247924805,
-          0.651155948638916,
+          0.6511609554290771,
           1.1450345516204834
         ],
         [
@@ -426,7 +426,7 @@
     "UCX_SM_Ship_Wayfarer_00": {
       "kind": "UCX",
       "mesh": "SM_Ship_Wayfarer",
-      "verts": 17,
+      "verts": 15,
       "bounds_m": [
         [
           4.950000762939453,
@@ -548,7 +548,7 @@
       "verts": 14,
       "bounds_m": [
         [
-          -7.829881191253662,
+          -7.828970909118652,
           2.300082206726074,
           -0.6998500227928162
         ],
@@ -565,7 +565,7 @@
       "verts": 15,
       "bounds_m": [
         [
-          -7.829881191253662,
+          -7.828970909118652,
           -7.355200290679932,
           -0.6998500227928162
         ],
