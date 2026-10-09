@@ -312,6 +312,7 @@
     "_NozzleRings": "heat",
     "_NozzleRibs": "gunmetal",
     "_NozzlePlug": "metal",
+    "_NozzleFrame": "metal",
     "_NozzleStruts": "gunmetal",
     "_NozzleCore": "nozzle"
    },
@@ -402,6 +403,7 @@
       "bell": [[0.0, 0.75], [-0.022, 0.738], [-0.03, 0.71], [-0.022, 0.682], [0.0, 0.668], [0.04, 0.665], [0.07, 0.655], [0.14, 0.632], [0.22, 0.6], [0.3, 0.565], [0.38, 0.53], [0.46, 0.5], [0.52, 0.488], [0.62, 0.484]],
       "wall": 0.03,
       "back_r": 0.715,
+      "frame": {"id": "F-NOZZLE-FRAME", "_what": "exit frame: a ring of bare metal 18 cm wide over the lip, 11 cm proud aft, chamfered (SC technique 10, measured 9. 10. 2026)", "x": [-0.11, 0.12], "r": [0.62, 0.8], "chamfer": 0.025},
       "collar": {"id": "F-NOZZLE-COLLAR", "_what": "heat-tinted band round the lip", "x": [-0.012, 0.05], "r": [0.735, 0.765]},
       "rings": {"id": "F-NOZZLE-RING", "_what": "raised stiffening rings inside the bell", "at": [0.16, 0.34], "width": 0.025, "proud": 0.012},
       "ribs": {"id": "F-NOZZLE-RIB", "_what": "radial ribs along the bell wall", "count": 12, "phase_deg": 15, "x": [0.06, 0.5], "height": 0.045, "thickness": 0.028},

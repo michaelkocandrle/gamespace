@@ -151,6 +151,38 @@
         0,
         0.2
       ]
+    },
+    {
+      "name": "day_close_rear",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 60,
+      "camera_local": [
+        -16.25,
+        -2.0,
+        2.3
+      ],
+      "look_local": [
+        -7.25,
+        0.0,
+        0.3
+      ]
+    },
+    {
+      "name": "space_thrusters_lit",
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "speed_ms": 400,
+      "afterburner": true,
+      "settle": 1.5
     }
   ]
 }

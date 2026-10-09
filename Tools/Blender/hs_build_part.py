@@ -505,6 +505,16 @@ def build_nozzle(recipe, coll, axis, n, bevel1, bevel2):
     revolve_closed(bm, [(xa, co["r"][0]), (xa, co["r"][1]), (xb, co["r"][1]), (xb, co["r"][0])], n, axis)
     finish(bm, name + "_NozzleRings", coll, bevel2)
 
+    # the exit frame (SC technique 10, measured 9. 10. 2026: a main engine sits in a 15-20 cm wall of brushed
+    # metal, not a thin rolled lip): a ring over the lip, chamfered on its aft corners, flush with the pod forward
+    fr = nz.get("frame")
+    if fr:
+        (xa, xb), (ri, ro), c = fr["x"], fr["r"], fr.get("chamfer", 0.02)
+        bm = bmesh.new()
+        revolve_closed(bm, [(X(xb), ri), (X(xa) + c, ri), (X(xa), ri + c), (X(xa), ro - c), (X(xa) + c, ro), (X(xb), ro)],
+                       n, axis)
+        finish(bm, name + "_NozzleFrame", coll, bevel2)
+
     # radial ribs along the bell wall
     rb_ = nz["ribs"]
     bm = bmesh.new()
