@@ -66,8 +66,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Další kroky
 
-0. **Autor 9. 10. – pořadí:** (1) dotáhnout kokpit (obejít křeslo, okna/sokl konzolí, madla) → prohlásit good enough
-   a napsat skill postupu kvality; (2) **zvuky znovu** (motor, start motoru, kliky MFD/prvků – „jako notifikace
+0. **Autor 9. 10. – pořadí:** (1) kokpit **good enough** (9. 10.; postup ve skillu `sc-quality-interior`); (2) **zvuky znovu** (motor, start motoru, kliky MFD/prvků – „jako notifikace
    telefonu“, otevírání/zavírání MFD, zapnutí/vypnutí lodi – nic nezní dobře); (3) exteriér Wayfareru doladit;
    (4) drobnosti interiéru zbytku lodi, dveře, přenesení centrální MFD obrazovky, animace.
    Kokpit 9. 10.: v4 konzole (koncept B), MFD v5 všude, trim v2 s tóny, mesh decaly, rozvody, skořepina křesla,

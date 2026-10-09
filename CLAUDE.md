@@ -141,6 +141,7 @@ Blender 5.2 headless z Git Bash **vždy** s `MSYS_NO_PATHCONV=1` (skill `blender
 | `ship-interior` | interiér lodi: interiérový kit, místnosti z kitu v lodi, průchozí loď, světla, materiály |
 | `visual-review` | vizuální kritik: srovnávací listy, brief, kola, checklisty, kalibrace |
 | `cockpit-displays` | MFD, HUD, světla a expozice kokpitu |
+| `sc-quality-interior` | úroveň SC v interiéru: koncept → stavba, loft tvary, vrstvy detailu, světlo, průchodnost (postup kokpitu) |
 | `unreal-scripting` | build, headless Python v UE, testy, balení a cook, nástrahy C++/UHT/Pythonu |
 | `unreal-shots-and-look` | snímky, měření vzhledu a výkonu, ladění za běhu, nástrahy vykreslování |
 | `blender-mcp` | Blender headless i živý přes MCP, operátory vs. bmesh, nástrahy Blenderu |
