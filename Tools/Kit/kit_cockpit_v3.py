@@ -260,6 +260,7 @@ def _face_patch(p, role, x0, x1, z0, z1, o0, o1):
 
 # (author 9. 10. 2026: "layer more on it - mesh decals, everything stacked, SC level") the library's structural and
 # info decals stacked on the console's faces: (item, weight, size w x h in m from the library index)
+DRESS_FILL = {"rivet_row_4", "seam_straight", "bolt", "slot_s", "socket", "socket_round", "light_housing", "red_dot", "corner_mark"}
 DRESS = [("rivet_row_4", 3, 0.2, 0.03), ("seam_straight", 2, 0.5, 0.04), ("bolt_row_4", 1, 0.42, 0.05), ("bolt", 2, 0.05, 0.05),
          ("slot_s", 2, 0.2, 0.05), ("socket", 1, 0.12, 0.08), ("socket_round", 1, 0.1, 0.1), ("vent_small", 1, 0.2, 0.14),
          ("light_housing", 1, 0.16, 0.08), ("panel_A12", 1, 0.14, 0.05), ("panel_B07", 1, 0.14, 0.05), ("panel_E16", 1, 0.14, 0.05),
@@ -271,14 +272,21 @@ def _dress(p, rng, spots):
     """spots: (at, normal, xdir, ydir, max_w, max_h) - one library decal fitted into each (scaled down to fit, 35 % at
     least, else a smaller pick), chosen by weight."""
     import kit_batch2
-    total = sum(w for _, w, _, _ in DRESS)
+    total = sum(w for it, w, _, _ in DRESS if it in DRESS_FILL)
     placed = {}                                    # (one item not twice within 30 cm: the drawings tell copies apart by it)
-    for at, n, xd, yd, mw, mh in spots:
+    for spot in spots:
+        at, n, xd, yd, mw, mh = spot[:6]
+        if len(spot) > 6:                          # a fixed item where it makes sense (a panel number, a stencil)
+            item = spot[6]
+            sw, sh = next((d[2], d[3]) for d in DRESS if d[0] == item)
+            kit_batch2.label(p, item, at, n, xd, yd, scale=min(1.0, mw / sw, mh / sh))
+            placed.setdefault(item, []).append(Vector(at))
+            continue
         for _ in range(8):
             k = rng.uniform(0, total)
             for item, w, sw, sh in DRESS:
-                k -= w
-                if k <= 0:
+                k -= w if item in DRESS_FILL else 0
+                if k <= 0 and item in DRESS_FILL:
                     break
             sc = min(1.0, mw / sw, mh / sh)
             if sc >= 0.35 and all((Vector(at) - q).length > 0.3 for q in placed.get(item, [])):
@@ -367,13 +375,21 @@ def _wall_console(name, seed):
             if rng.random() < 0.8:
                 spots.append((_V(x + rng.uniform(-0.02, 0.02), d, zz), nn, tt, Vector((0, 0, 1)), 0.2, mh))
         x += rng.uniform(0.1, 0.16)
+    for wi, (wx0, wx1) in enumerate(((16.08, 16.46), (16.56, 17.16), (17.3, 17.58))):
+        for (xx_, item, mw, mh) in ((wx0 + 0.06, ("panel_A12", "panel_B07", "panel_E16")[wi], 0.1, 0.035), (wx1 - 0.1, "st_inspect", 0.15, 0.025)):
+            d, zi = _station(xx_)
+            tt = (_V(xx_ + 0.01, d, 0) - _V(xx_, d, 0)).normalized()
+            nn = Vector((tt.y, -tt.x, 0.0))
+            if nn.dot(Vector((0, -1, 0))) < 0:
+                nn = -nn
+            spots.append((_V(xx_, d, 0.428), nn, tt, Vector((0, 0, 1)), mw, mh, item))
     for gx in (16.51, 17.23):
         d, zi = _station(gx)
         tt = (_V(gx + 0.01, d, 0) - _V(gx, d, 0)).normalized()
         nn = Vector((tt.y, -tt.x, 0.0))
         if nn.dot(Vector((0, -1, 0))) < 0:
             nn = -nn
-        spots.append((_V(gx, d, 0.28), nn, Vector((0, 0, 1)), -tt, 0.2, 0.045))
+        spots.append((_V(gx, d, 0.28), nn, Vector((0, 0, 1)), -tt, 0.2, 0.045, "bolt_row_4"))   # the frames' join, bolted
     for fx in (17.3, 17.45, 17.6, 17.74):
         q, r, a, n = top_frame(fx, 0.035)
         spots.append((q, n, r, a, 0.14, 0.04))

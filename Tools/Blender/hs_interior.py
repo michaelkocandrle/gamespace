@@ -1380,6 +1380,89 @@ def build(recipe, layout, coll, mats, ship, hull):
             # graphite against the glossy white lining (cockpit v3 r1: the ribs in the lining's paint did not read)
             ob.data.materials.append(mats["int_dark"])
             objs.append(ob)
+    if COCKPIT.get("style") == "wrap" and COCKPIT.get("services", True):
+        # (cockpit v4, author 9. 10. 2026: "layers, details, and they must make sense") the services the lining carries,
+        # laid on its real surface (ray-cast): two conduits on stand-off clamps along each wall over the console, a
+        # junction box they run into with a flexible conduit dropping from it into the console (the console's power),
+        # an adjustable air outlet by the pilot's head with its duct running up the wall
+        import hs_cockpit as _hcs
+        from mathutils.bvhtree import BVHTree
+        tree_ = BVHTree.FromBMesh(lb)
+        sv_dark, sv_trim, sv_white = bmesh.new(), bmesh.new(), bmesh.new()
+
+        def wall_at(x, z, side):
+            hit_, nrm_, _, _ = tree_.ray_cast(Vector((x, 0.0, z)), Vector((0.0, side, 0.0)), 3.0)
+            if hit_ is None:
+                return None, None
+            if nrm_.y * side > 0:
+                nrm_ = -nrm_
+            return hit_, nrm_
+
+        cz = 1.15                                   # the cockpit floor (layout z)
+        for side in (1, -1):
+            for zz, r_, off in ((cz + 0.93, 0.011, 0.034), (cz + 0.975, 0.007, 0.03)):
+                pts = []
+                xx_ = 15.62
+                while xx_ <= 17.62:
+                    h_, n_ = wall_at(xx_, zz, side)
+                    if h_ is not None:
+                        pts.append((xx_, h_ + n_ * off, n_))
+                    xx_ += 0.05
+                for (xa, pa, na), (xb, pb, nb) in zip(pts, pts[1:]):
+                    _hcs.tube(sv_dark, pa, pb, r_, 10)
+                for (xa, pa, na) in pts:
+                    if any(abs(xa - sx) < 0.026 for sx in COCKPIT.get("seam_x", [])) or abs(xa - 15.7) < 0.026:
+                        # a clamp: a satin saddle round the conduit, its foot screwed to the lining
+                        _hcs.tube(sv_trim, pa - Vector((0.009, 0, 0)), pa + Vector((0.009, 0, 0)), r_ + 0.0035, 10)
+                        _hcs.tube(sv_trim, pa - na * (r_ + 0.002), pa - na * (off - 0.002), 0.005, 8)
+            # the junction box over the console's aft end, the conduits run into it from both sides
+            h_, n_ = wall_at(16.25, cz + 0.955, side)
+            if h_ is not None:
+                t_ = Vector((1.0, 0.0, 0.0))
+                up_ = n_.cross(t_).normalized()
+                if up_.z < 0:
+                    up_ = -up_
+                rt_ = up_.cross(n_).normalized()
+                bc = h_ + n_ * 0.062
+                _hcs.rr_slab(sv_white, bc, rt_, up_, n_, 0.17, 0.13, 0.012, 0.06, 3)
+                _hcs.rr_slab(sv_trim, bc + n_ * 0.003, rt_, up_, n_, 0.15, 0.11, 0.008, 0.004, 3)     # the lid
+                for su in (-1, 1):
+                    for sv in (-1, 1):
+                        cyl(sv_dark, tuple(bc + rt_ * su * 0.064 + up_ * sv * 0.044 + n_ * 0.003), tuple(bc + rt_ * su * 0.064 + up_ * sv * 0.044 + n_ * 0.006), 0.004, 8)
+                # the flexible conduit down into the console: corrugated (rings on a hose), a gland where it enters
+                top_ = bc - up_ * 0.065
+                foot_ = Vector((16.25, h_.y - side * 0.03, cz + 0.735))
+                mid_ = (top_ + foot_) / 2 + n_ * 0.04
+                path_ = [top_.lerp(mid_, k / 4) for k in range(4)] + [mid_.lerp(foot_, k / 4) for k in range(5)]
+                for a_, b_ in zip(path_, path_[1:]):
+                    _hcs.tube(sv_dark, a_, b_, 0.012, 10)
+                    m_ = (a_ + b_) / 2
+                    d_ = (b_ - a_).normalized()
+                    _hcs.tube(sv_dark, m_ - d_ * 0.004, m_ + d_ * 0.004, 0.0145, 10)
+                _hcs.tube(sv_trim, foot_ - Vector((0, 0, 0.004)), foot_ + Vector((0, 0, 0.022)), 0.019, 12)
+            # the air outlet by the pilot's head: a satin bezel, a dark ball nozzle with its vanes, the duct up the wall
+            h_, n_ = wall_at(16.95, cz + 1.12, side)
+            if h_ is not None:
+                c_ = h_ + n_ * 0.004
+                cyl(sv_trim, tuple(c_), tuple(c_ + n_ * 0.018), 0.05, 24)
+                cyl(sv_dark, tuple(c_ + n_ * 0.012), tuple(c_ + n_ * 0.03), 0.032, 20)
+                for k in range(-2, 3):
+                    t_ = Vector((1.0, 0.0, 0.0))
+                    up_ = n_.cross(t_).normalized()
+                    q_ = c_ + n_ * 0.031 + up_ * (k * 0.011)
+                    _hcs.tube(sv_trim, q_ - t_ * 0.026, q_ + t_ * 0.026, 0.0016, 6)
+                pts = []
+                for zz in (cz + 1.19, cz + 1.3, cz + 1.42):
+                    hh_, nn_ = wall_at(16.95, zz, side)
+                    if hh_ is not None:
+                        pts.append(hh_ + nn_ * 0.03)
+                for a_, b_ in zip([c_ + n_ * 0.03 + Vector((0, 0, 0.05))] + pts, pts):
+                    _hcs.tube(sv_white, a_, b_, 0.026, 14)
+        for bm_, key in ((sv_dark, "int_dark"), (sv_trim, "int_trim"), (sv_white, "int_console")):
+            if bm_.verts:
+                ob = hp.finish(bm_, "SM_Ship_%s_Int_Services_%s" % (ship, key), coll, {"angle_deg": 40, "width": 0.0015, "segments": 1})
+                ob.data.materials.append(mats[key])
+                objs.append(ob)
     if lb.faces:
         me = bpy.data.meshes.new("SM_Ship_%s_Int_Liner" % ship)
         lb.to_mesh(me)
