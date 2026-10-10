@@ -41,7 +41,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "72075efdc64bd79d32cc3cce4481ecda80c81b63"
+      "geometry_hash": "acc3cbb4d4dfb6a406858165607eb3bd6d5b0d48"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -55,7 +55,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "b51cc9b066ca14efb611a03aee8a18bb57ae3457"
+      "geometry_hash": "218af3c741562100fe31839b15fe6b44804d2d3f"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -76,7 +76,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Gear"
       ],
-      "geometry_hash": "7dc7e8ec1f70b6d335d5d82d424f2e9d8b4d85bf"
+      "geometry_hash": "70de48fc9a440a2286a0eecda1a439428a996301"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Hologram.fbx",
@@ -90,7 +90,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "3287c33db0a2422a0bcbe26a96f5afa1f10d97f5"
+      "geometry_hash": "f7faf15951a04a4a1d03ac42b3a97cce3e94f8bb"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
@@ -118,8 +118,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 620673,
-      "verts": 385743,
+      "tris": 620677,
+      "verts": 385745,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -179,8 +179,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 62756,
-      "verts": 63946,
+      "tris": 62758,
+      "verts": 63953,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -260,13 +260,14 @@
     "SM_Ship_Wayfarer_Gear": {
       "lod": 0,
       "part": "Gear",
-      "tris": 8740,
-      "verts": 4520,
+      "tris": 11420,
+      "verts": 5908,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Metal",
         "M_Ship_Wayfarer_Paint",
-        "M_Ship_Wayfarer_Accent"
+        "M_Ship_Wayfarer_Accent",
+        "M_Ship_Wayfarer_Gunmetal"
       ],
       "uv_layers": 1,
       "bounds_m": [
@@ -431,7 +432,7 @@
         [
           4.950000762939453,
           -2.196054697036743,
-          -1.8944460153579712
+          -1.8966927528381348
         ],
         [
           10.75,

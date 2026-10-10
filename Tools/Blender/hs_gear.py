@@ -7,7 +7,8 @@ by a working-looking leg inside the same envelopes, so the silhouette holds:
   - torque links (scissor) on the aft side, a drag brace to the front, hydraulic lines down the leg
   - a leg door on the outboard side (main gear) / the front (nose gear) that fills the strut envelope in the
     side view, with a hazard band (accent) at its lower edge
-  - ankle joint and a foot pad: chamfered plate, rubber sole, ribs on top
+  - ankle joint and a foot: rubber sole, gunmetal base plate and a smaller deck, gussets and bolts; a hydraulic
+    actuator ahead of the strut
 
 Recipe "gear": {"<part>": {"at": [x, y, z_top], "mirror": bool, "strut": [lx, ly, top, bottom],
 "pad": [lx, ly, z_bottom, height], "door": "outboard" | "front"}} in layout metres. The finished leg keeps
@@ -37,7 +38,7 @@ def leg(spec, sign):
     y *= sign
     lx, ly, top, bot = spec["strut"]
     plx, ply, pz, ph = spec["pad"]
-    parts = {k: bmesh.new() for k in ("dark", "metal", "paint", "accent", "rubber")}
+    parts = {k: bmesh.new() for k in ("dark", "metal", "paint", "accent", "rubber", "gunmetal")}
     out = 1 if y >= 0 else -1                          # outboard direction in y
     # trunnion yoke and mount block
     _box(parts["dark"], (x, y, top - 0.06), (lx * 0.9, ly * 0.9, 0.12))
@@ -75,11 +76,38 @@ def leg(spec, sign):
     # ankle and pad
     _cyl(parts["metal"], (x, y - 0.09, z_ankle), (x, y + 0.09, z_ankle), 0.05)
     _box(parts["dark"], (x, y, z_ankle - 0.03), (0.2, 0.16, 0.08))
+    # foot (SC exterior technique 12, 10. 10. 2026: the plain black slab read as a brick): a rubber sole proud of
+    # a gunmetal base plate, a smaller deck on it (a step, not one block), two gussets from the ankle block to
+    # the toe and heel, a bolt in each corner of the deck
     pad_top = pz + ph
-    _box(parts["dark"], (x, y, pz + 0.035 + (ph - 0.035) / 2), (plx * 0.96, ply * 0.96, ph - 0.035))
-    _box(parts["rubber"], (x, y, pz + 0.0175), (plx, ply, 0.035))
-    for k in range(4):
-        _box(parts["metal"], (x - plx * 0.3 + k * plx * 0.2, y, pad_top + 0.01), (0.03, ply * 0.8, 0.02))
+    sole = 0.035
+    base_h = (ph - sole) * 0.45
+    _box(parts["rubber"], (x, y, pz + sole / 2), (plx, ply, sole))
+    _box(parts["gunmetal"], (x, y, pz + sole + base_h / 2), (plx * 0.96, ply * 0.96, base_h))
+    deck_h = ph - sole - base_h
+    _box(parts["gunmetal"], (x, y, pz + sole + base_h + deck_h / 2), (plx * 0.72, ply * 0.66, deck_h))
+    for sx in (-1, 1):
+        gx = x + sx * plx * 0.22
+        _box(parts["gunmetal"], (gx, y, pad_top + 0.045), (plx * 0.36, 0.03, 0.09))
+        for sy in (-1, 1):
+            q = (x + sx * plx * 0.32, y + sy * ply * 0.27, pad_top)
+            _cyl(parts["metal"], q, (q[0], q[1], q[2] + 0.012), 0.016, seg=8)
+    # hydraulic retraction actuator ahead of the strut (+x): cylinder from the yoke, rod to the ankle collar,
+    # eyes at both ends
+    # (a front door - the nose gear - takes it on the side instead)
+    front = spec.get("door", "outboard") == "front"
+    ax, ay = (x, y + 0.17) if front else (x + 0.19, y)
+    za, zb = top - 0.16, z_ankle + 0.12
+    zm = za + (zb - za) * 0.55
+    _cyl(parts["dark"], (ax, ay, za), (ax, ay, zm), 0.042, seg=16)
+    _cyl(parts["metal"], (ax, ay, zm), (ax, ay, zb), 0.022, seg=12)
+    for zz in (za + 0.02, zb):
+        if front:
+            _cyl(parts["gunmetal"], (ax - 0.035, ay, zz), (ax + 0.035, ay, zz), 0.03, seg=12)
+        else:
+            _cyl(parts["gunmetal"], (ax, ay - 0.035, zz), (ax, ay + 0.035, zz), 0.03, seg=12)
+    end = (x, y + 0.06, z_ankle + 0.07) if front else (x + 0.06, y, z_ankle + 0.07)
+    _cyl(parts["metal"], (ax, ay - 0.03, zb) if front else (ax - 0.03, ay, zb), end, 0.02, seg=10)
     return parts
 
 
