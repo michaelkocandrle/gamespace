@@ -216,19 +216,20 @@
     "AOStrength": 0.8,
     "RoughVariation": 0.1,
     "BareMetalRoughness": 0.28,
-    "PrimaryRoughness": 0.45,
+    "PrimaryRoughness": 0.5,
     "SecondaryRoughness": 0.5,
     "PaintMetallic": 0.2,
-    "ClearCoat": 0.6,
-    "ClearCoatRoughness": 0.08,
+    "ClearCoat": 0.2,
+    "ClearCoatRoughness": 0.35,
     "DetailTileCm": 120.0,
-    "DetailNormalStrength": 0.5,
-    "DetailCavityStrength": 0.45
+    "DetailNormalStrength": 1.0,
+    "DetailCavityStrength": 0.8
    },
    "textures": {
-    "detail_normal": "ArtSource/Kit/Textures/T_Ship_HullDetail_N.png",
-    "detail_cavity": "ArtSource/Kit/Textures/T_Ship_HullDetail_C.png"
+    "detail_normal": "ArtSource/Kit/Textures/T_Ship_HexDetail_N.png",
+    "detail_cavity": "ArtSource/Kit/Textures/T_Ship_HexDetail_C.png"
    },
+   "_hex_10_10": "SC exterior technique 7 (10. 10. 2026): the dark zones in a satin hex coating (Tools/Kit/hex_detail.py, 17 cm cells), clear coat 0.2 / 0.35 (was a 0.6 / 0.08 gloss)",
    "_detail_9_10": "author 9. 10. 2026 (exterior 'plastic', 'texture can be tuned'): a hull set of its own (kit_panel_detail.py --hull: larger plates, plain/stepped/riveted/hatch, no interior labels) as triplanar detail normal + cavity"
   },
   "MI_Ship_Wayfarer_Accent": {
