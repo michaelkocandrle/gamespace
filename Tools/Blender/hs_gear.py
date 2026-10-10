@@ -106,6 +106,14 @@ def leg(spec, sign):
             _cyl(parts["gunmetal"], (ax - 0.035, ay, zz), (ax + 0.035, ay, zz), 0.03, seg=12)
         else:
             _cyl(parts["gunmetal"], (ax, ay - 0.035, zz), (ax, ay + 0.035, zz), 0.03, seg=12)
+    # hoses from the actuator's head to the yoke, a rubber boot over the ankle joint, a hazard band on the outer
+    # cylinder (exterior critic 10. 10. 2026: at least 3 middle and 10 small shapes on the leg)
+    for k, dz in enumerate((0.03, 0.08)):
+        a0 = Vector((ax, ay, za + dz))
+        a1 = Vector((x + 0.06 * (0 if front else 1), y + (0.09 if front else 0.0) - (0 if front else 0.06 * (k * 2 - 1)), top - 0.13))
+        hs_detail.tube(parts["rubber"], [a0, (a0 + a1) / 2 + Vector((0, 0, 0.04)), a1], 0.011, seg=8, bend=0.05)
+    _cyl(parts["rubber"], (x, y, z_ankle + 0.015), (x, y, z_ankle + 0.05), 0.075, seg=16)
+    _cyl(parts["accent"], (x, y, z_outer_bot + 0.035), (x, y, z_outer_bot + 0.075), 0.113, seg=24)
     end = (x, y + 0.06, z_ankle + 0.07) if front else (x + 0.06, y, z_ankle + 0.07)
     _cyl(parts["metal"], (ax, ay - 0.03, zb) if front else (ax - 0.03, ay, zb), end, 0.02, seg=10)
     return parts

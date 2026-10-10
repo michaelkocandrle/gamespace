@@ -167,7 +167,10 @@
      "from": "side",
      "x": 19.6,
      "z": 1.1,
-     "part": "sensor"
+     "part": "sensor",
+     "on_plate": true,
+     "proud": 0.04,
+     "_on_plate": "10. 10. 2026 (exterior critic r3 point 7): on the 40 mm nose plate N15, not in a cut-out (the empty cut-out read as a hole)"
     },
     {
      "id": "G-SN-02",
@@ -1742,6 +1745,66 @@
     "_what": "wing tip marker"
    },
    {
+    "id": "D-H-63",
+    "item": "access_panel",
+    "on": "top",
+    "x": 9.4,
+    "y": 3.4,
+    "_what": "wing: spar access panel near the root (exterior critic 10. 10. 2026: the wing top was one flat white plate)"
+   },
+   {
+    "id": "D-H-64",
+    "item": "hatch",
+    "on": "top",
+    "x": 8.2,
+    "y": 4.6,
+    "_what": "wing: flap actuator service hatch"
+   },
+   {
+    "id": "D-H-65",
+    "item": "recessed_panel",
+    "on": "top",
+    "x": 7.4,
+    "y": 3.3,
+    "_what": "wing: root fairing panel"
+   },
+   {
+    "id": "D-H-66",
+    "item": "access_panel",
+    "on": "top",
+    "x": 8.3,
+    "y": 5.9,
+    "_what": "wing: outer access panel, gun feed"
+   },
+   {
+    "id": "D-H-67",
+    "item": "bolt_row_4",
+    "on": "top",
+    "x": 7.8,
+    "y": 4.0,
+    "rot": 90,
+    "_what": "wing: rear spar bolt row"
+   },
+   {
+    "id": "D-H-68",
+    "item": "bolt_row_4",
+    "on": "top",
+    "x": 7.8,
+    "y": 5.2,
+    "rot": 90,
+    "_what": ""
+   },
+   {
+    "id": "D-H-69",
+    "item": "xst_service",
+    "scale": 1.5,
+    "on": "top",
+    "x": 8.2,
+    "y": 4.15,
+    "rot": 90,
+    "_what": "wing: stencil beside the flap actuator hatch"
+   },
+   {
     "id": "D-H-48",
     "item": "red_marker",
     "on": "side",
@@ -2369,7 +2432,8 @@
     "id": "D-R-GREEBLE-COMPANIONS",
     "_comment": "labels, markers, chevrons and stencils beside the hull's kit greebles", "vent_stencil": {"side": "xst_vent", "top": "xstl_vent", "bottom": "xst_vent"}, "vent_stencil_scale": 1.5}
   },
-  "grime": [
+  "_grime_off": "author 8. 10. 2026: brand-new factory parts, no grime (exterior critic 10. 10. 2026: the wing streaks and smears read as dirt); the cards stay under _grime for the record",
+  "_grime": [
    {
     "id": "D-G-01",
     "_what": "grime cards (from the SC breakdown, 26. 9. 2026: planes of streaky dirt over the engines and wings). size [w, h], h along 'up' = where the dirt comes from; mirrored",

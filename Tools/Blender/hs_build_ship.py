@@ -327,7 +327,7 @@ def place_greebles(hull, specs, coll, bevel):
             xdir = (Vector((1, 0, 0)) - z * z.x).normalized()
             y = z.cross(xdir)
             rot = Matrix((xdir, y, z)).transposed().to_euler()
-            places.append((tuple(hit + z * 0.002), g["part"], tuple(rot)))
+            places.append((tuple(hit + z * (0.002 + g.get("proud", 0.0))), g["part"], tuple(rot)))
     bm.free()
     kit = hs_build_part.build_kit(bevel)
     inst = hs_build_part.build_instancer(kit)

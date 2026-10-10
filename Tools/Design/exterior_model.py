@@ -852,9 +852,11 @@ class Model:
         return unary_union(geoms) if geoms else Polygon()
 
     def hardware(self):
-        """Parts that sit on the hull's side skin (built or proposed, not removed): what a plate must clear."""
+        """Parts that sit on the hull's side skin (built or proposed, not removed): what a plate must clear. A greeble
+        with "on_plate" sits on the plate instead (raised by "proud"): an empty cut-out round a small part read as a
+        hole in the hull (exterior critic 10. 10. 2026, G-SN-01)."""
         return [e for e in self.elements if e.sb and e.sb["solid"] == "hull" and e.sb["kind"] == "area"
-                and e.status != "remove" and e.data.get("kind") != "conduit"
+                and e.status != "remove" and e.data.get("kind") != "conduit" and not e.data.get("on_plate")
                 and (e.cat == "greeble" or (e.cat == "functional" and e.id != "F-CANOPY-FRAME")
                                               or (e.cat == "light" and not e.extra.get("strip")))]
 
@@ -1432,9 +1434,10 @@ class Model:
             if e.extra.get("cut_in"):
                 note(e, "cut", "výřez v desce %s" % ", ".join(sorted(set(e.extra["cut_in"]))))
             if e.sb["solid"] == "hull" and e.sb["kind"] == "area" and e.cat in ("greeble", "functional", "light") \
-                    and not e.extra.get("cut_in") and e.data.get("kind") != "conduit" \
+                    and not e.extra.get("cut_in") and e.data.get("kind") != "conduit" and not e.data.get("on_plate") \
                     and e.sb["shape"].intersection(plate_union).area > 1e-4:
-                # (a conduit runs over the plates on clamps: F-CONDUIT-S on the shoulder)
+                # (a conduit runs over the plates on clamps: F-CONDUIT-S on the shoulder; an "on_plate" greeble is
+                # raised onto the plate)
                 note(e, "buried", "leží pod deskou bez výřezu")
             if e.sb["solid"] == "hull" and e.sb["kind"] == "line" and e.sb["shape"].intersection(plate_union).length > 0.05:
                 note(e, "buried", "vede pod deskami (%.1f m)" % e.sb["shape"].intersection(plate_union).length)

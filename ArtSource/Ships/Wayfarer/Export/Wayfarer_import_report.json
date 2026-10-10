@@ -26,27 +26,27 @@
       "socket WalkSeat scale (100, 100, 100) reset to 1"
     ],
     "SM_Ship_Wayfarer_Decals": [],
+    "SM_Ship_Wayfarer_Gear": [],
     "SM_Ship_Wayfarer_Interior": []
   },
   "kept_unchanged": [
     "SM_Ship_Wayfarer_Canopy",
     "SM_Ship_Wayfarer_Door0A",
     "SM_Ship_Wayfarer_Door1A",
-    "SM_Ship_Wayfarer_Gear",
     "SM_Ship_Wayfarer_Hologram",
     "SM_Ship_Wayfarer_InteriorDecals",
     "SM_Ship_Wayfarer_InteriorKit",
     "SM_Ship_Wayfarer_Screens"
   ],
   "imported_hashes": {
-    "SM_Ship_Wayfarer": "335a8da8b3dc2e7f0b04cc035e47be9e82120709",
+    "SM_Ship_Wayfarer": "c515eb518ae68bb630d53e42d018f0cb679b40b5",
     "SM_Ship_Wayfarer_Canopy": "879389a2da32c2818440c8370cc947c38af0759c",
-    "SM_Ship_Wayfarer_Decals": "80d9de85948c944a8c1008843ca225c1c60df5c1",
+    "SM_Ship_Wayfarer_Decals": "48a6baf39513e202c3ff3505c77f738f312d973b",
     "SM_Ship_Wayfarer_Door0A": "f593dd2e91e797e067daf38767cd9fe81d9cea12",
     "SM_Ship_Wayfarer_Door1A": "e399533e241926e1610ed1e6957b7139fb21cc10",
-    "SM_Ship_Wayfarer_Gear": "70de48fc9a440a2286a0eecda1a439428a996301",
+    "SM_Ship_Wayfarer_Gear": "49976ce0739e4e85608c83db42f4e78384a9d6d4",
     "SM_Ship_Wayfarer_Hologram": "b27bd3fed5f67b1eaf988c6b64968a0408134eca",
-    "SM_Ship_Wayfarer_Interior": "00ce7957bfbf69a6e85a76f717c2965c17e925f8",
+    "SM_Ship_Wayfarer_Interior": "86681da7d937d7df2506b5ebc8f600d772b07ac6",
     "SM_Ship_Wayfarer_InteriorDecals": "076c160b17a964a503bd6c42402e3c9612391bb7",
     "SM_Ship_Wayfarer_InteriorKit": "7c6de1d8613fe23f6b2058b655890a31c906a456",
     "SM_Ship_Wayfarer_Screens": "b63b83e88676784cafc4a8790b61618fb507df17"
@@ -203,7 +203,7 @@
       "light Light_fix_32 (point, 0.294 cd) at [769.4, 37.2, 78.7]",
       "light Light_fix_33 (point, 0.294 cd) at [780.6, -41.4, 85.8]",
       "light Light_fix_34 (point, 0.192 cd) at [758.5, -87.6, 86.4]",
-      "light Light_fix_35 (point, 0.192 cd) at [758.6, 87.5, 86.3]",
+      "light Light_fix_35 (point, 0.192 cd) at [758.6, 87.6, 86.3]",
       "light Light_fix_36 (point, 0.141 cd) at [724.4, 109.5, 66.1]",
       "light Light_fix_37 (point, 0.141 cd) at [724.7, -108.3, 64.9]"
     ]
