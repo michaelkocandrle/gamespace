@@ -777,6 +777,17 @@ snímku.
 
 ### 9.6 Blender pipeline
 
+- **Úhlový bevel po zaoblení ohybu vystřelil vrcholy o metry** (`hs_exterior_kit.shell`, 9. 10. 2026; `HSASSEMBLE
+  BOUNDS FAIL`, desky P-S-S06..S10 „narostly“ o 7–11 m): `miter_outer = MITER_ARC` okrajového bevelu narazil na
+  zaoblený ohyb (bevel podle váhy). Řešení: na deskách s ohybem `MITER_SHARP`; ohyb zaoblit **před** solidify (po něm
+  vnitřní skořepina dostala výplň do místností) a jen čisté ohyby (hrana ≥ 15 cm, plochy ≥ 0,02 m²).
+- **`bmesh.from_mesh` do společného bmeshe padá nebo vrátí prázdno**, když slučované meshe mají různé vrstvy atributů
+  (9. 10. 2026: `bevel_weight_edge` desek; kontrola geometrie `EXCEPTION_ACCESS_VIOLATION` v `BM_mesh_bm_from_me`,
+  obálka hologramu prázdná). Řešení: před slučováním vrstvy odstranit (`check_ship_geometry.world_bm`,
+  `hs_cockpit.build_hologram`), pomocné atributy po aplikaci modifikátorů smazat (`hs_assemble_ship`).
+- **Směr tětivy křídla:** nos lodi je +x; `hs_wings` do 10. 10. 2026 bral tětivu po +x od nejmenšího x, takže „náběžný“
+  lem ležel na odtokové hraně. Po změně generátoru vždy ověř polohu dílů číslem (bbox), ne jen pohledem.
+
 - **Ražený text ztrojnásobil trojúhelníky dílu** (`kit_factory.emboss_text`, 7. 10. 2026): křivka písma FONT má
   výchozí `resolution_u = 12` a s `bevel_depth` každé písmeno stovky trojúhelníků; servisní stěna 37 k → 91 k
   (`KITBUILD over_budget`). Řešení: `resolution_u = 3`, `bevel_resolution = 0`; na čitelnosti z oka to nepoznáš.

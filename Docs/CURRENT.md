@@ -52,7 +52,7 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Známé problémy
 
-- Podvozek, křídla a zbraně Wayfareru bez kitu; nohy bez odpružení (jeden mesh). Klesání (C) u země dopadá ~10 m/s.
+- Podvozek Wayfareru bez kitu; nohy bez odpružení (jeden mesh). Klesání (C) u země dopadá ~10 m/s.
   Snímek 11 `wayfarer_exterior_review` staví loď do svahu 32° (trup v terénu), chce `space.FlatSpot`. `DebugEngageQuantum`
   po zadání cíle jménem znovu vybírá cíl podle nosu lodi (drobnost, autor 1. 10.).
 - Interiér Wayfareru: otevřené body recenzí `2026-09-30_cabin_furniture.md` a `2026-09-30_cabin_liner.md`.
@@ -67,10 +67,11 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 ## Další kroky
 
 0. **Autor 9. 10. – pořadí:** (1) kokpit **good enough** (9. 10.; postup ve skillu `sc-quality-interior`); (2) **zvuky znovu**: 9. 10. 11 zvuků podle autorova výběru na
-   sound boardu (`sound_candidates.py`, `sound_board.py`), klik v interakci = SW_ButtonPress – čeká na poslech ve hře; (3) exteriér Wayfareru doladit;
+   sound boardu (`sound_candidates.py`, `sound_board.py`), klik v interakci = SW_ButtonPress – čeká na poslech ve hře; (3) exteriér Wayfareru doladit:
+   10. 10. hotové techniky SC z rozboru (`ArtSource/Reference/Video/sc_ext_notes/SC_exterior_techniques.md`) 1, 3, 4, 5, 6, 8, 9, 10
+   (rám trysky), zbraně, oprava tětivy křídel (lem byl od začátku na odtokové hraně), Lumen ShortRangeAO 0 (zrno na laku);
+   zbývá 7 (strukturovaný materiál tmavých zón), 10 tepelná mřížka, 11 značení v měřítku SC, 12 podvozek; rychlé snímky `wayfarer_ext_step`;
    (4) drobnosti interiéru zbytku lodi, dveře, přenesení centrální MFD obrazovky, animace.
-   Kokpit 9. 10.: v4 konzole (koncept B), MFD v5 všude, trim v2 s tóny, mesh decaly, rozvody, skořepina křesla,
-   strmější schody (průchod za křeslem; `Tools/Blender/cockpit_walk_map.py`); kritik r4 6,0 (`…_cockpit_v4_r4.md`).
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
       strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); rampa: plán a rozhodnutí A/B
       čeká na autora (`2026-10-06_ramp_plan.md`).
