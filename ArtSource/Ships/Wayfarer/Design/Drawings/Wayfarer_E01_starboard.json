@@ -4,10 +4,10 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "5e4187677410",
-  "recipe": "369cf65aefbd",
-  "setup": "2b9ca1ab356c",
+  "recipe": "33578203e952",
+  "setup": "b7bc8fb7ccec",
   "spec": "d9597dfcd605",
-  "design": "57d33d038faf",
+  "design": "4ee254cab2ad",
   "library": "148ba66e97f3"
  },
  "drawn": {
@@ -202,6 +202,7 @@
    "D-H-58",
    "D-H-59",
    "D-HAZARDEXHAUST-R",
+   "D-LOGO-FIN-R",
    "D-LOGO-R",
    "D-NAME-R",
    "D-REG-R",
@@ -278,6 +279,7 @@
    "D-H-51",
    "D-H-55",
    "D-HAZARDEXHAUST-R",
+   "D-LOGO-FIN-R",
    "D-T-01",
    "D-T-02",
    "D-T-03",
@@ -690,6 +692,7 @@
    "D-H-50",
    "D-H-51",
    "D-HAZARDEXHAUST-R",
+   "D-LOGO-FIN-R",
    "D-T-01",
    "D-T-02",
    "D-T-03",

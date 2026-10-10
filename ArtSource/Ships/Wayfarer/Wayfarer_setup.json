@@ -1978,8 +1978,8 @@
    ],
    "size": [
     30.0,
-    18.0,
-    70.0
+    9.3,
+    61.5
    ],
    "opacity": 0.95,
    "flip_u": 1.0,
@@ -2092,8 +2092,8 @@
    ],
    "size": [
     30.0,
-    18.0,
-    70.0
+    9.3,
+    61.5
    ],
    "opacity": 0.95,
    "flip_u": 1.0,
@@ -2133,6 +2133,62 @@
     0.07
    ],
    "_upright": "1. 10. 2026: roll +90 (was -90): with -90 the starboard marking read upside down (exterior review 30. 9.)"
+  },
+  {
+   "id": "D-LOGO-FIN-L",
+   "name": "LogoFin_L",
+   "_what": "Halcyon mark on the outboard face of the fin (SC exterior technique 11, 10. 10. 2026: the maker's logo on the fin); 4.5 cm deep, centred on the surface (y 3.66): it does not reach the inboard face, and 2 cm off the surface it lost the forward half on the swept fin; pitch -9.6 = the fin's cant (ray normal 0, -0.985, -0.167 at layout x 1.75 z 2.55; centre x 1.65 z 2.5, 0.44 m: clear of the leading-edge band and the rudder)",
+   "texture": "D_Big_Logo",
+   "location": [
+    -860.0,
+    -366.0,
+    130.0
+   ],
+   "rotation": [
+    -9.6,
+    -90.0,
+    90.0
+   ],
+   "size": [
+    4.5,
+    11.0,
+    22.0
+   ],
+   "opacity": 0.9,
+   "flip_u": 1.0,
+   "tint": [
+    0.06,
+    0.064,
+    0.07
+   ]
+  },
+  {
+   "id": "D-LOGO-FIN-R",
+   "name": "LogoFin_R",
+   "_what": "Halcyon mark on the outboard face of the fin (SC exterior technique 11, 10. 10. 2026: the maker's logo on the fin); 4.5 cm deep, centred on the surface (y 3.66): it does not reach the inboard face, and 2 cm off the surface it lost the forward half on the swept fin; pitch -9.6 = the fin's cant (ray normal 0, 0.985, -0.167 at layout x 1.75 z 2.55; centre x 1.65 z 2.5, 0.44 m: clear of the leading-edge band and the rudder)",
+   "texture": "D_Big_Logo",
+   "location": [
+    -860.0,
+    366.0,
+    130.0
+   ],
+   "rotation": [
+    -9.6,
+    90.0,
+    90.0
+   ],
+   "size": [
+    4.5,
+    11.0,
+    22.0
+   ],
+   "opacity": 0.9,
+   "flip_u": 1.0,
+   "tint": [
+    0.06,
+    0.064,
+    0.07
+   ]
   },
   {
    "id": "D-HAZARDEXHAUST-R",

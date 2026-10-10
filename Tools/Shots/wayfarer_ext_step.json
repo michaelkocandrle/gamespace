@@ -183,6 +183,44 @@
       "speed_ms": 400,
       "afterburner": true,
       "settle": 1.5
+    },
+    {
+      "name": "day_fin_logo",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        -8.5,
+        8.5,
+        1.8
+      ],
+      "look_local": [
+        -8.5,
+        3.7,
+        1.35
+      ]
+    },
+    {
+      "name": "day_registration",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        5.7,
+        6.0,
+        -0.2
+      ],
+      "look_local": [
+        5.7,
+        2.1,
+        -0.4
+      ]
     }
   ]
 }

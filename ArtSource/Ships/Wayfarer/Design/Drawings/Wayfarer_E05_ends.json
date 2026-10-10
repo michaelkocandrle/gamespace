@@ -4,10 +4,10 @@
  "ship": "Wayfarer",
  "digests": {
   "layout": "5e4187677410",
-  "recipe": "369cf65aefbd",
-  "setup": "2b9ca1ab356c",
+  "recipe": "33578203e952",
+  "setup": "b7bc8fb7ccec",
   "spec": "d9597dfcd605",
-  "design": "57d33d038faf",
+  "design": "4ee254cab2ad",
   "library": "148ba66e97f3"
  },
  "drawn": {

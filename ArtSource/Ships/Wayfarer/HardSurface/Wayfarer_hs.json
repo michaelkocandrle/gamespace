@@ -1710,10 +1710,10 @@
 
     "scale": 2.0,
     "on": "top",
-    "x": 9.0,
+    "x": 4.6,
     "y": 5.0,
     "rot": 90,
-    "_what": "NO STEP on the flap"
+    "_what": "NO STEP on the flap (10. 10. 2026: x 4.6, the flap is aft since the wing chord fix)"
    },
    {
     "id": "D-H-45",

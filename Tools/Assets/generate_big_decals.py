@@ -81,7 +81,8 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     items = {
         "D_Big_Wayfarer": pow2(text_image("WAYFARER", "Rajdhani-SemiBold.ttf", 400, spacing=60)),
-        "D_Big_Registration": pow2(text_image("HF-0417", "Rajdhani-SemiBold.ttf", 400, spacing=30)),
+        # SC scale (10. 10. 2026, exterior technique 11): 15 cm letters spread over 1.2 m, not 0.3 m letters
+        "D_Big_Registration": pow2(text_image("HF-0417", "Rajdhani-SemiBold.ttf", 400, spacing=100)),
         "D_Big_Logo": logo(),
         "D_Big_Hazard_Exhaust": hazard("EXHAUST"),
         "D_Big_Hazard_Ramp": hazard("RAMP"),
