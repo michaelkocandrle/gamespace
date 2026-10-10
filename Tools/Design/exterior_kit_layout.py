@@ -106,7 +106,10 @@ def vent_entries(e, view, g, k, normal, horizontal, mirror=False):
     inner = g.buffer(-k["rim"], join_style=2)
     base = dict(id=e.id, kit=e.kit, view=view, mirror=mirror, normal=normal, bolts=[], bolt_d=0.0, paint2=0)
     out = [dict(base, material="gunmetal", t=k["t"], bevel=k["bevel"], polys=rings(g.difference(inner)))]
-    out.append(dict(base, material="dark", t=k["floor"], bevel=0.002, polys=rings(inner), suffix="Floor"))
+    # the aft-facing cooler exhausts glow through their slats (SC exterior technique 10, 10. 10. 2026: a heat grille
+    # at the stern); kit "floor_aft" names the floor's material there (the emissive engine glow, driven by thrust)
+    floor = k.get("floor_aft", "dark") if view == "AFT" else "dark"
+    out.append(dict(base, material=floor, t=k["floor"], bevel=0.002, polys=rings(inner), suffix="Floor"))
     x0, y0, x1, y1 = inner.bounds
     bars, w, pitch = [], k["slat_w"], k["slat_pitch"]
     span = (y1 - y0) if horizontal else (x1 - x0)
