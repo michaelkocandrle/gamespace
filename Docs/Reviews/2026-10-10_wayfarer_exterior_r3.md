@@ -56,3 +56,9 @@ Minulá recenze (9. 10., r2): 5,9. Verdikt po 3 kolech **FAIL**, předáno s ote
   trysek (lopatky, tepelně zbarvené hrdlo), nekotvený oranžový díl u L14, tmavá příď světlejší.
 - **Podklady:** reference SC na listech jsou z velké části jeden záběr Aurory; pro další kolo doplnit cílené záběry
   autora (chase, soumrak, vesmír, trysky, podvozek).
+
+## Po kole 3 (bez nového kola kritika)
+
+- Bod 2 (materiál): lak satén – čirý lak 0,5 / 0,12 s variací 0,3 mezi panely (byl 1,0 / 0,05, „plast“), tmavá
+  livrej 0,09 (byla 0,05), kavita detailní textury 0,25 (rytá mřížka působila nakresleně). Snímky
+  `shots:20261010_212123_wayfarer_ext_step`.

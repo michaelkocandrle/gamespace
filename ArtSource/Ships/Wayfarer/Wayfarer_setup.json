@@ -90,6 +90,7 @@
   "MI_Ship_Wayfarer_Paint": {
    "_comment": "Layered paint with an Origin-like clear coat (author 24. 9. 2026): livery A (graphite saddle, orange stripe), panel variation (tone, roughness, 8 % bare-metal and 5 % carbon panels, UV1 panel ids), clear coat 1 / 0.05. Author chose livery A (24. 9. 2026).",
    "master": "layered",
+   "_satin_10_10": "exterior critic r3 (10. 10. 2026): the even 1.0 / 0.05 clear coat read as plastic over every panel - satin 0.5 / 0.12 with 0.3 variation; livery dark 0.05 -> 0.09 (the black zones lost their shape); detail cavity 0.45 -> 0.25 (the engraved lines read as drawn on)",
    "slots": [
     "M_Ship_Wayfarer_Paint"
    ],
@@ -125,9 +126,9 @@
      0.38
     ],
     "LiveryColor": [
-     0.05,
-     0.053,
-     0.058
+     0.085,
+     0.088,
+     0.095
     ]
    },
    "scalars": {
@@ -159,13 +160,13 @@
     "PanelRough": 0.3,
     "MetalShare": 0.14,
     "CarbonShare": 0.0,
-    "ClearCoat": 1.0,
-    "ClearCoatRoughness": 0.05,
-    "ClearCoatRoughVariation": 0.1,
+    "ClearCoat": 0.5,
+    "ClearCoatRoughness": 0.12,
+    "ClearCoatRoughVariation": 0.3,
     "SecondaryClearCoatRoughness": 0.38,
     "DetailTileCm": 120.0,
     "DetailNormalStrength": 0.55,
-    "DetailCavityStrength": 0.45
+    "DetailCavityStrength": 0.25
    },
    "_wear": "EdgeWear 0.15 (was 0.8) and the grunge in the clear coat's roughness: SC paint has no worn edges, the dirt shows in the gloss (starcitizenreference/ShipDetailing_VideoNotes.md, 26. 9. 2026)",
    "_livery_roof": "1. 10. 2026: the graphite saddle of livery A off (TopZ 9999): the author wants the roof plates in the primary paint - the chase camera sees mostly the roof, a dark roof made a dark ship",
