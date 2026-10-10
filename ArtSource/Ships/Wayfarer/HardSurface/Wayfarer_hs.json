@@ -456,24 +456,114 @@
    "id": "F-GUN-S3",
    "name": "Guns",
    "material": "dark",
+   "bevel_m": 0.004,
+   "_comment": "Size 3 gun (author 9. 10. 2026: plain tubes read as Lego; SC technique 8 of the exterior pass): octagonal receiver, shroud with a heat-sink fin stack between the clamp collars (gun_mounts), taper, barrel, muzzle brake",
    "cylinders": [
     {
-     "x": [6.0, 11.0],
-     "r": 0.18,
+     "x": [
+      5.95,
+      6.0
+     ],
+     "r": 0.17,
+     "segments": 8,
+     "material": "dark",
+     "_what": "receiver back plate",
      "y": 7.15,
      "z": 0.75,
      "mirror": true
     },
     {
-     "x": [11.0, 12.6],
+     "x": [
+      6.0,
+      7.7
+     ],
+     "r": 0.21,
+     "segments": 8,
+     "material": "gunmetal",
+     "_what": "receiver: octagonal machined housing",
+     "y": 7.15,
+     "z": 0.75,
+     "mirror": true
+    },
+    {
+     "x": [
+      7.7,
+      10.5
+     ],
+     "r": 0.15,
+     "segments": 16,
+     "material": "dark",
+     "_what": "barrel shroud",
+     "y": 7.15,
+     "z": 0.75,
+     "mirror": true
+    },
+    {
+     "x": [
+      8.3,
+      8.33
+     ],
+     "r": 0.19,
+     "segments": 16,
+     "material": "gunmetal",
+     "repeat": [
+      9,
+      0.12
+     ],
+     "_what": "heat-sink fin stack, 9 fins 3 cm every 12 cm",
+     "y": 7.15,
+     "z": 0.75,
+     "mirror": true
+    },
+    {
+     "x": [
+      10.5,
+      10.7
+     ],
+     "r": 0.15,
+     "r2": 0.075,
+     "segments": 16,
+     "material": "dark",
+     "_what": "shroud taper",
+     "y": 7.15,
+     "z": 0.75,
+     "mirror": true
+    },
+    {
+     "x": [
+      10.7,
+      12.2
+     ],
      "r": 0.055,
+     "segments": 12,
+     "material": "gunmetal",
+     "_what": "barrel",
      "y": 7.15,
      "z": 0.75,
      "mirror": true
     },
     {
-     "x": [12.45, 12.6],
-     "r": 0.08,
+     "x": [
+      12.2,
+      12.6
+     ],
+     "r": 0.085,
+     "segments": 8,
+     "material": "gunmetal",
+     "_what": "muzzle brake",
+     "y": 7.15,
+     "z": 0.75,
+     "mirror": true
+    },
+    {
+     "x": [
+      12.33,
+      12.38
+     ],
+     "r": 0.092,
+     "segments": 8,
+     "material": "dark",
+     "_what": "muzzle brake port band",
      "y": 7.15,
      "z": 0.75,
      "mirror": true
@@ -2845,8 +2935,8 @@
     "id": "F-GUNMOUNT-01",
     "y": 7.15,
     "z": 0.75,
-    "r": 0.18,
-    "at": [8.2, 9.4, 10.6],
+    "r": 0.15,
+    "at": [7.95, 9.75],
     "_why": "collars only on the gun, the pylon block added top-view area"
    }
   ]

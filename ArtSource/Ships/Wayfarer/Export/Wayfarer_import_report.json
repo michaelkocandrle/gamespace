@@ -39,14 +39,14 @@
     "SM_Ship_Wayfarer_Screens"
   ],
   "imported_hashes": {
-    "SM_Ship_Wayfarer": "e466e0cc46fd6d00e0cf926808f57334eb7e56b7",
+    "SM_Ship_Wayfarer": "c63f098e36275a6b4e61dfd6e4e8a72bc19301cc",
     "SM_Ship_Wayfarer_Canopy": "879389a2da32c2818440c8370cc947c38af0759c",
-    "SM_Ship_Wayfarer_Decals": "bcfa28f168fe1e104475e15c69869d46054efb9c",
+    "SM_Ship_Wayfarer_Decals": "8216e12641f59824444cbb31d063172265ba5129",
     "SM_Ship_Wayfarer_Door0A": "f593dd2e91e797e067daf38767cd9fe81d9cea12",
     "SM_Ship_Wayfarer_Door1A": "e399533e241926e1610ed1e6957b7139fb21cc10",
     "SM_Ship_Wayfarer_Gear": "7dc7e8ec1f70b6d335d5d82d424f2e9d8b4d85bf",
-    "SM_Ship_Wayfarer_Hologram": "091faf79a3b3064979740dcd99baeef812771612",
-    "SM_Ship_Wayfarer_Interior": "fd9c72d7bc300daa4cadd83e083dbc8d4ca19127",
+    "SM_Ship_Wayfarer_Hologram": "b27bd3fed5f67b1eaf988c6b64968a0408134eca",
+    "SM_Ship_Wayfarer_Interior": "598391a462aabfa78754d1bb8b5386ab84d35c3d",
     "SM_Ship_Wayfarer_InteriorDecals": "076c160b17a964a503bd6c42402e3c9612391bb7",
     "SM_Ship_Wayfarer_InteriorKit": "7c6de1d8613fe23f6b2058b655890a31c906a456",
     "SM_Ship_Wayfarer_Screens": "b63b83e88676784cafc4a8790b61618fb507df17"
@@ -63,7 +63,7 @@
   "blueprint": {
     "path": "/Game/Ships/Wayfarer/Blueprints/BP_Ship_Wayfarer",
     "applied": [
-      "hull_collision.box_extent = [1079.5, 735.5, 248.9]",
+      "hull_collision.box_extent = [1079.5, 734.4, 248.9]",
       "hull.static_mesh = /Game/Ships/Wayfarer/Meshes/SM_Ship_Wayfarer",
       "hull.relative_scale3d = [1.0, 1.0, 1.0]",
       "hull.relative_location = [4.53, 0.0, 31.11]",
@@ -71,7 +71,7 @@
       "camera_boom.socket_offset_z = 498.0",
       "camera_boom.probe_size = 50.0",
       "camera_boom.camera_lag_max_distance = 4322.0",
-      "pawn.landing_footprint_radius_cm = 736.0",
+      "pawn.landing_footprint_radius_cm = 734.0",
       "pawn.landing_max_gap_cm = 164.0",
       "pawn.ground_contact_tolerance_cm = 24.9",
       "pawn.heat_shake_cm = 43.2",
@@ -196,7 +196,7 @@
       "light Light_fix_27 (point, 0.382 cd) at [781.7, 112.1, 62.1]",
       "light Light_fix_28 (point, 0.382 cd) at [781.7, -112.1, 62.1]",
       "light Light_fix_29 (point, 0.35 cd) at [912.0, -0.0, 61.6]",
-      "light Light_fix_30 (point, 0.33 cd) at [873.4, 72.5, 49.6]",
+      "light Light_fix_30 (point, 0.33 cd) at [873.4, 72.5, 62.1]",
       "light Light_fix_31 (point, 0.33 cd) at [873.4, -72.5, 62.1]",
       "light Light_fix_32 (point, 0.294 cd) at [769.4, 37.2, 78.7]",
       "light Light_fix_33 (point, 0.294 cd) at [780.6, -41.4, 85.8]",

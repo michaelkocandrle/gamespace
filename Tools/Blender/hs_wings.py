@@ -66,7 +66,8 @@ def _components(ob):
 
 
 def _axes(bm):
-    """Thin axis (smallest extent), chord axis (ship x projected off it), span axis."""
+    """Thin axis (smallest extent), chord axis (ship -x projected off it: leading edge to trailing edge), span
+    axis."""
     pts = [v.co for v in bm.verts]
     c = sum(pts, Vector()) / len(pts)
     best = None
@@ -79,7 +80,9 @@ def _axes(bm):
     thin = best[1]
     if thin.z < -0.1 or (abs(thin.z) < 0.1 and thin.y < 0):
         thin = -thin
-    chord = Vector((1, 0, 0)) - thin * thin.x
+    # chord from the leading edge aft: the ship's nose is +x (until 10. 10. 2026 the chord ran along +x, so chord 0
+    # - the leading-edge band - lay on the trailing edge and the flap near the leading edge)
+    chord = Vector((-1, 0, 0)) + thin * thin.x
     chord.normalize()
     span = thin.cross(chord).normalized()
     # span away from the hull: up for a fin, outboard for a wing

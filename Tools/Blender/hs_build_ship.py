@@ -422,22 +422,36 @@ def main(argv):
             report[part] = {"revolved": True}
             continue
         if cfg.get("cylinders"):
-            bm = bmesh.new()
+            # one object per material (a cylinder may name its own: the guns' receiver and fin stack in gunmetal)
+            bms = {}
             for c in cfg["cylinders"]:
-                for sign in ((1, -1) if c.get("mirror") else (1,)):
-                    x0c, x1c = c["x"]
-                    res = bmesh.ops.create_cone(bm, cap_ends=True, segments=c.get("segments", 24), radius1=c["r"],
-                                                radius2=c.get("r2", c["r"]), depth=x1c - x0c)
-                    bmesh.ops.rotate(bm, verts=res["verts"], cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi / 2, 3, "Y"))
-                    bmesh.ops.translate(bm, verts=res["verts"], vec=((x0c + x1c) / 2, c["y"] * sign, c["z"]))
-            me = bpy.data.meshes.new(name)
-            bm.to_mesh(me)
-            bm.free()
-            ob = bpy.data.objects.new(name, me)
-            coll.objects.link(ob)
-            ob.data.materials.append(mats[cfg.get("material", "dark")])
-            made[part] = ob
-            report[part] = {"object": name, "cylinders": len(cfg["cylinders"])}
+                bm = bms.setdefault(c.get("material", cfg.get("material", "dark")), bmesh.new())
+                xs = [c["x"][0] + k * c["repeat"][1] for k in range(c["repeat"][0])] if c.get("repeat") else [c["x"][0]]
+                for xa in xs:
+                    for sign in ((1, -1) if c.get("mirror") else (1,)):
+                        x0c, x1c = xa, xa + c["x"][1] - c["x"][0]
+                        res = bmesh.ops.create_cone(bm, cap_ends=True, segments=c.get("segments", 24), radius1=c["r"],
+                                                    radius2=c.get("r2", c["r"]), depth=x1c - x0c)
+                        bmesh.ops.rotate(bm, verts=res["verts"], cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi / 2, 3, "Y"))
+                        if c.get("segments", 24) == 8:
+                            # an octagon flat side up, not a corner
+                            bmesh.ops.rotate(bm, verts=res["verts"], cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi / 8, 3, "X"))
+                        bmesh.ops.translate(bm, verts=res["verts"], vec=((x0c + x1c) / 2, c["y"] * sign, c["z"]))
+            first = None
+            for k, (mkey, bm) in enumerate(bms.items()):
+                oname = name if k == 0 else "%s_%s" % (name, mkey.title())
+                if cfg.get("bevel_m"):
+                    import hs_build_part as hp
+                    ob = hp.finish(bm, oname, coll, {"angle_deg": 30, "width": cfg["bevel_m"], "segments": 1})
+                else:
+                    me = bpy.data.meshes.new(oname)
+                    bm.to_mesh(me)
+                    bm.free()
+                    ob = bpy.data.objects.new(oname, me)
+                    coll.objects.link(ob)
+                ob.data.materials.append(mats[mkey])
+                made[part if k == 0 else "%s_%s" % (part, mkey)] = ob
+            report[part] = {"object": name, "cylinders": len(cfg["cylinders"]), "materials": list(bms)}
             continue
         if cfg.get("loft"):
             covered = None
