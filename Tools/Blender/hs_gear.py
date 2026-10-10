@@ -83,9 +83,15 @@ def leg(spec, sign):
     sole = 0.035
     base_h = (ph - sole) * 0.45
     _box(parts["rubber"], (x, y, pz + sole / 2), (plx, ply, sole))
+    # the rubber skirt round the base plate (a tub, not a stack of plates; exterior critic 10. 10. 2026)
+    _box(parts["rubber"], (x, y, pz + sole + 0.015), (plx * 0.985, ply * 0.985, 0.03))
     _box(parts["gunmetal"], (x, y, pz + sole + base_h / 2), (plx * 0.96, ply * 0.96, base_h))
     deck_h = ph - sole - base_h
     _box(parts["gunmetal"], (x, y, pz + sole + base_h + deck_h / 2), (plx * 0.72, ply * 0.66, deck_h))
+    for k in range(5):                                   # transverse ribs on the deck
+        _box(parts["gunmetal"], (x - plx * 0.3 + k * plx * 0.15, y, pad_top + 0.01), (0.022, ply * 0.5, 0.02))
+    for sy in (-1, 1):                                   # ankle ears either side of the pin
+        _box(parts["gunmetal"], (x, y + sy * 0.1, z_ankle - 0.01), (0.14, 0.025, 0.16))
     for sx in (-1, 1):
         gx = x + sx * plx * 0.22
         _box(parts["gunmetal"], (gx, y, pad_top + 0.045), (plx * 0.36, 0.03, 0.09))
@@ -114,6 +120,13 @@ def leg(spec, sign):
         hs_detail.tube(parts["rubber"], [a0, (a0 + a1) / 2 + Vector((0, 0, 0.04)), a1], 0.011, seg=8, bend=0.05)
     _cyl(parts["rubber"], (x, y, z_ankle + 0.015), (x, y, z_ankle + 0.05), 0.075, seg=16)
     _cyl(parts["accent"], (x, y, z_outer_bot + 0.035), (x, y, z_outer_bot + 0.075), 0.113, seg=24)
+    if not front:
+        # a second, parallel actuator on the inboard side (critic: one smooth cylinder and two thin struts)
+        by = y - out * 0.17
+        _cyl(parts["dark"], (x, by, za), (x, by, zm), 0.036, seg=16)
+        _cyl(parts["metal"], (x, by, zm), (x, by, zb), 0.019, seg=12)
+        for zz in (za + 0.02, zb):
+            _cyl(parts["gunmetal"], (x - 0.03, by, zz), (x + 0.03, by, zz), 0.026, seg=12)
     end = (x, y + 0.06, z_ankle + 0.07) if front else (x + 0.06, y, z_ankle + 0.07)
     _cyl(parts["metal"], (ax, ay - 0.03, zb) if front else (ax - 0.03, ay, zb), end, 0.02, seg=10)
     return parts

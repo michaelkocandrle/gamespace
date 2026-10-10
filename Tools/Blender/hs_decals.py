@@ -19,7 +19,7 @@ a kit change upstream once shifted the stream and re-rolled the dirt streak besi
   items / trim          hand-placed hero decals and strips
 
 Where ("on"): pod (x, deg) / side (x, z) / top / bottom (x, y) / ray (at, dir); "rot" about the normal,
-"scale", "mirror" (default true). Ribbons: pod_ring, pod_line, hull_ring, side_line, top_line, bottom_line,
+"scale", "mirror" (default true), "rot_mirror" (added to rot on the mirrored side). Ribbons: pod_ring, pod_line, hull_ring, side_line, top_line, bottom_line,
 ray_line.
 
 Every decal is a grid of quads laid onto the ship (each vertex ray-cast back along the normal, 2 mm off);
@@ -276,7 +276,10 @@ class Placer:
         if hit is None:
             self.skipped["miss"] += 1
             return None
-        return self.place_at(spec["item"], hit, n, spec.get("rot", 0.0), spec.get("scale", 1.0), rule,
+        # "rot_mirror": added on the mirrored side (y < 0), so a stencil on the starboard wing reads from outboard
+        # like its port twin, not upside down (exterior critic 10. 10. 2026: NO STEP on the right wing)
+        rot = spec.get("rot", 0.0) + (spec.get("rot_mirror", 0.0) if side < 0 else 0.0)
+        return self.place_at(spec["item"], hit, n, rot, spec.get("scale", 1.0), rule,
                              spec.get("check_overlap", True), flat=spec.get("flat", False))
 
     def text(self, spec, side, rule="items"):

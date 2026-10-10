@@ -1,496 +1,510 @@
 {
- "_comment": "Wayfarer exterior review for the visual critic (Docs/Reviews/2026-09-30_wayfarer_exterior): close, chase and far views in day (space.SunDir -39 45, the level's sun: flat sky-lit look), dusk (-52 102: low sun behind the ship's right rear, so the right side is lit and the front-left view is backlit) and space (60 km, facing the horizon): first with -52 85 (sun above and behind: backlit), then the level's sun (-39 45), which lights the sides in this order of shots. The lit side in space depends on the order of shots, so keep it. No HUD, no stat overlay. Run: .\\Tools\\Shots.ps1 -Preset wayfarer_exterior_review -Editor -Width 1920 -Height 1080",
- "shots": [
-  {
-   "name": "warmup",
-   "camera": "chase",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 4.0,
-   "console": [
-    "space.SunDir -39 45"
-   ]
-  },
-  {
-   "name": "day_chase_rear",
-   "camera": "chase",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5
-  },
-  {
-   "name": "day_chase_front_left",
-   "camera": "chase",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "chase_yaw": 135,
-   "chase_pitch": -12,
-   "settle": 1.5
-  },
-  {
-   "name": "day_chase_rear_left",
-   "camera": "chase",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "chase_yaw": 45,
-   "chase_pitch": -12,
-   "settle": 1.5
-  },
-  {
-   "name": "day_close_front34",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 55,
-   "camera_local": [
-    15.75,
-    -8,
-    2.8
-   ],
-   "look_local": [
-    4.75,
-    0,
-    0.2
-   ]
-  },
-  {
-   "name": "day_close_nose",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 55,
-   "camera_local": [
-    10.75,
-    -3.5,
-    0.8
-   ],
-   "look_local": [
-    8.25,
-    -0.8,
-    0.1
-   ]
-  },
-  {
-   "name": "day_close_wing",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 55,
-   "camera_local": [
-    -6.25,
-    -9,
-    3.8
-   ],
-   "look_local": [
-    -2.75,
-    -4.5,
-    -0.4
-   ]
-  },
-  {
-   "name": "day_close_engine_fin",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 55,
-   "camera_local": [
-    -12.75,
-    -6.5,
-    3.0
-   ],
-   "look_local": [
-    -8.45,
-    -3.6,
-    1.8
-   ]
-  },
-  {
-   "name": "day_close_gear",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": true,
-   "settle": 2.5,
-   "fov": 50,
-   "camera_local": [
-    -3.85,
-    -4.3,
-    -2.2
-   ],
-   "look_local": [
-    -5.05,
-    -2.25,
-    -2.3
-   ]
-  },
-  {
-   "name": "day_close_rear",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 60,
-   "camera_local": [
-    -16.25,
-    -2.0,
-    2.3
-   ],
-   "look_local": [
-    -7.25,
-    0.0,
-    0.3
-   ]
-  },
-  {
-   "name": "day_far",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 35,
-   "camera_local": [
-    75,
-    -85,
-    22
-   ],
-   "look_local": [
-    0,
-    0,
-    0
-   ]
-  },
-  {
-   "name": "day_landed_walkup",
-   "altitude_m": 3,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": true,
-   "settle": 12.0,
-   "fov": 70,
-   "camera_local": [
-    6,
-    -11,
-    -1.1
-   ],
-   "look_local": [
-    -2,
-    0,
-    -0.3
-   ]
-  },
-  {
-   "name": "dusk_chase_front_left",
-   "camera": "chase",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "chase_yaw": 135,
-   "chase_pitch": -12,
-   "settle": 4.0,
-   "console": [
-    "space.SunDir -52 102"
-   ]
-  },
-  {
-   "name": "dusk_chase_rear_right",
-   "camera": "chase",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "chase_yaw": -45,
-   "chase_pitch": -12,
-   "settle": 1.5
-  },
-  {
-   "name": "dusk_close_front34_right",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 55,
-   "camera_local": [
-    15.75,
-    8,
-    2.8
-   ],
-   "look_local": [
-    4.75,
-    0,
-    0.2
-   ]
-  },
-  {
-   "name": "dusk_close_engine_right",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 55,
-   "camera_local": [
-    -12.75,
-    6.5,
-    3.0
-   ],
-   "look_local": [
-    -8.45,
-    3.6,
-    1.8
-   ]
-  },
-  {
-   "name": "dusk_far",
-   "altitude_m": 3000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 35,
-   "camera_local": [
-    75,
-    85,
-    22
-   ],
-   "look_local": [
-    0,
-    0,
-    0
-   ]
-  },
-  {
-   "name": "space_chase_rear",
-   "camera": "chase",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 4.0,
-   "console": [
-    "space.SunDir -52 85"
-   ]
-  },
-  {
-   "name": "space_chase_front_left",
-   "camera": "chase",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "chase_yaw": 135,
-   "chase_pitch": -12,
-   "settle": 1.5
-  },
-  {
-   "name": "space_chase_rear_right",
-   "camera": "chase",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "chase_yaw": -45,
-   "chase_pitch": -12,
-   "settle": 1.5
-  },
-  {
-   "name": "space_close_front34",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 55,
-   "camera_local": [
-    15.75,
-    -8,
-    2.8
-   ],
-   "look_local": [
-    4.75,
-    0,
-    0.2
-   ]
-  },
-  {
-   "name": "space_close_front34_right",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 55,
-   "camera_local": [
-    15.75,
-    8,
-    2.8
-   ],
-   "look_local": [
-    4.75,
-    0,
-    0.2
-   ]
-  },
-  {
-   "name": "space_close_engine_right",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 55,
-   "camera_local": [
-    -12.75,
-    6.5,
-    3.0
-   ],
-   "look_local": [
-    -8.45,
-    3.6,
-    1.8
-   ]
-  },
-  {
-   "name": "space_far",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 35,
-   "camera_local": [
-    75,
-    -85,
-    22
-   ],
-   "look_local": [
-    0,
-    0,
-    0
-   ]
-  },
-  {
-   "name": "space_thrusters_lit",
-   "camera": "chase",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "chase_yaw": 25,
-   "chase_pitch": -8,
-   "speed_ms": 400,
-   "afterburner": true,
-   "settle": 1.5
-  },
-  {
-   "name": "space_default_sun_rear_left",
-   "camera": "chase",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "chase_yaw": 45,
-   "chase_pitch": -12,
-   "settle": 3.0,
-   "console": [
-    "space.SunDir -39 45"
-   ]
-  },
-  {
-   "name": "space_default_sun_front_right",
-   "camera": "chase",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "chase_yaw": -135,
-   "chase_pitch": -12,
-   "settle": 1.5
-  },
-  {
-   "name": "space_default_sun_close_front34_right",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 55,
-   "camera_local": [
-    15.75,
-    8,
-    2.8
-   ],
-   "look_local": [
-    4.75,
-    0,
-    0.2
-   ]
-  },
-  {
-   "name": "space_default_sun_close_engine_right",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 55,
-   "camera_local": [
-    -12.75,
-    6.5,
-    3.0
-   ],
-   "look_local": [
-    -8.45,
-    3.6,
-    1.8
-   ]
-  },
-  {
-   "name": "space_default_sun_far_right",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5,
-   "fov": 35,
-   "camera_local": [
-    75,
-    85,
-    22
-   ],
-   "look_local": [
-    0,
-    0,
-    0
-   ]
-  },
-  {
-   "name": "space_default_sun_chase_rear",
-   "camera": "chase",
-   "altitude_m": 60000,
-   "facing": "horizon",
-   "hud": 0,
-   "gear": false,
-   "settle": 1.5
-  }
- ]
+  "_comment": "Wayfarer exterior review for the visual critic (Docs/Reviews/2026-09-30_wayfarer_exterior): close, chase and far views in day (space.SunDir -39 45, the level's sun: flat sky-lit look), dusk (-52 102: low sun behind the ship's right rear, so the right side is lit and the front-left view is backlit) and space (60 km, facing the horizon): first with -52 85 (sun above and behind: backlit), then the level's sun (-39 45), which lights the sides in this order of shots. The lit side in space depends on the order of shots, so keep it. No HUD, no stat overlay. Run: .\\Tools\\Shots.ps1 -Preset wayfarer_exterior_review -Editor -Width 1920 -Height 1080",
+  "shots": [
+    {
+      "name": "warmup",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 4.0,
+      "console": [
+        "space.SunDir -39 45"
+      ]
+    },
+    {
+      "name": "day_chase_rear",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5
+    },
+    {
+      "name": "day_chase_front_left",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 135,
+      "chase_pitch": -12,
+      "settle": 1.5
+    },
+    {
+      "name": "day_chase_rear_left",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 45,
+      "chase_pitch": -12,
+      "settle": 1.5
+    },
+    {
+      "name": "day_close_front34",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        15.75,
+        -8,
+        2.8
+      ],
+      "look_local": [
+        4.75,
+        0,
+        0.2
+      ]
+    },
+    {
+      "name": "day_close_nose",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        10.75,
+        -3.5,
+        0.8
+      ],
+      "look_local": [
+        8.25,
+        -0.8,
+        0.1
+      ]
+    },
+    {
+      "name": "day_close_wing",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        -6.25,
+        -9,
+        3.8
+      ],
+      "look_local": [
+        -2.75,
+        -4.5,
+        -0.4
+      ]
+    },
+    {
+      "name": "day_close_engine_fin",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        -12.75,
+        -6.5,
+        3.0
+      ],
+      "look_local": [
+        -8.45,
+        -3.6,
+        1.8
+      ]
+    },
+    {
+      "name": "day_close_gear",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 2.5,
+      "fov": 50,
+      "camera_local": [
+        -3.85,
+        -4.3,
+        -2.2
+      ],
+      "look_local": [
+        -5.05,
+        -2.25,
+        -2.3
+      ]
+    },
+    {
+      "name": "day_close_rear",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 60,
+      "camera_local": [
+        -16.25,
+        -2.0,
+        2.3
+      ],
+      "look_local": [
+        -7.25,
+        0.0,
+        0.3
+      ]
+    },
+    {
+      "name": "day_far",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 35,
+      "camera_local": [
+        75,
+        -85,
+        22
+      ],
+      "look_local": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "day_landed_walkup",
+      "altitude_m": 3,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 12.0,
+      "fov": 70,
+      "camera_local": [
+        6,
+        -11,
+        -1.1
+      ],
+      "look_local": [
+        -2,
+        0,
+        -0.3
+      ]
+    },
+    {
+      "name": "dusk_chase_front_left",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 135,
+      "chase_pitch": -12,
+      "settle": 4.0,
+      "console": [
+        "space.SunDir -52 102"
+      ]
+    },
+    {
+      "name": "dusk_chase_rear_right",
+      "camera": "chase",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": -45,
+      "chase_pitch": -12,
+      "settle": 1.5
+    },
+    {
+      "name": "dusk_close_front34_right",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        15.75,
+        8,
+        2.8
+      ],
+      "look_local": [
+        4.75,
+        0,
+        0.2
+      ]
+    },
+    {
+      "name": "dusk_close_engine_right",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        -12.75,
+        6.5,
+        3.0
+      ],
+      "look_local": [
+        -8.45,
+        3.6,
+        1.8
+      ]
+    },
+    {
+      "name": "dusk_far",
+      "altitude_m": 3000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 35,
+      "camera_local": [
+        75,
+        85,
+        22
+      ],
+      "look_local": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "space_warmup",
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 4.0,
+      "console": [
+        "space.SunDir -52 85"
+      ],
+      "_why": "10. 10. 2026: after the jump to 60 km the main hull mesh was missing in every still space shot until the ship moved (shots 17-23 of the exterior review; the thrust shot and the later ones were whole); a few seconds of flight first",
+      "speed_ms": 200
+    },
+    {
+      "name": "space_chase_rear",
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 4.0,
+      "console": [
+        "space.SunDir -52 85"
+      ]
+    },
+    {
+      "name": "space_chase_front_left",
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 135,
+      "chase_pitch": -12,
+      "settle": 1.5
+    },
+    {
+      "name": "space_chase_rear_right",
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": -45,
+      "chase_pitch": -12,
+      "settle": 1.5
+    },
+    {
+      "name": "space_close_front34",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        15.75,
+        -8,
+        2.8
+      ],
+      "look_local": [
+        4.75,
+        0,
+        0.2
+      ]
+    },
+    {
+      "name": "space_close_front34_right",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        15.75,
+        8,
+        2.8
+      ],
+      "look_local": [
+        4.75,
+        0,
+        0.2
+      ]
+    },
+    {
+      "name": "space_close_engine_right",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        -12.75,
+        6.5,
+        3.0
+      ],
+      "look_local": [
+        -8.45,
+        3.6,
+        1.8
+      ]
+    },
+    {
+      "name": "space_far",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 35,
+      "camera_local": [
+        75,
+        -85,
+        22
+      ],
+      "look_local": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "space_thrusters_lit",
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 25,
+      "chase_pitch": -8,
+      "speed_ms": 400,
+      "afterburner": true,
+      "settle": 1.5
+    },
+    {
+      "name": "space_default_sun_rear_left",
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": 45,
+      "chase_pitch": -12,
+      "settle": 3.0,
+      "console": [
+        "space.SunDir -39 45"
+      ]
+    },
+    {
+      "name": "space_default_sun_front_right",
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "chase_yaw": -135,
+      "chase_pitch": -12,
+      "settle": 1.5
+    },
+    {
+      "name": "space_default_sun_close_front34_right",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        15.75,
+        8,
+        2.8
+      ],
+      "look_local": [
+        4.75,
+        0,
+        0.2
+      ]
+    },
+    {
+      "name": "space_default_sun_close_engine_right",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 55,
+      "camera_local": [
+        -12.75,
+        6.5,
+        3.0
+      ],
+      "look_local": [
+        -8.45,
+        3.6,
+        1.8
+      ]
+    },
+    {
+      "name": "space_default_sun_far_right",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5,
+      "fov": 35,
+      "camera_local": [
+        75,
+        85,
+        22
+      ],
+      "look_local": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "space_default_sun_chase_rear",
+      "camera": "chase",
+      "altitude_m": 60000,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": false,
+      "settle": 1.5
+    }
+  ]
 }

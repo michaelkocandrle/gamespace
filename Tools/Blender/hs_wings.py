@@ -280,6 +280,29 @@ def build(ob, spec, coll, mats, bevel, name):
                 pieces.append(("flap", _piece(mid_flap, cut + 0.006, 1.0, 10, t_ratio)))
         else:
             pieces.append(("box", _piece(stations, box_f0, 1.0, 24, t_ratio)))
+        # raised doubler plates on the upper skin (exterior critic 10. 10. 2026: the wing top was one flat plate with
+        # lines in the texture): "plates" [[span fraction, chord fraction, length along the chord, width], ...],
+        # 12 mm proud, laid tangent to the skin at their centre
+        if spec.get("plates"):
+            pb = bmesh.new()
+            for fs, fc, ln, wd in spec["plates"]:
+                st = min(stations, key=lambda q: abs(q[7] - (stations[0][7] + span_len * fs)))
+                base, x0, x1, mid_fn, tmax, ch, th, so = st
+                x = x0 + (x1 - x0) * fc
+                top_pt = base + ch * x + th * (mid_fn(x) + 0.5 * tmax * t_ratio * naca(fc))
+                xa, xb = x - ln / 2, x + ln / 2
+                ha = mid_fn(xa) + 0.5 * tmax * t_ratio * naca((xa - x0) / (x1 - x0))
+                hb = mid_fn(xb) + 0.5 * tmax * t_ratio * naca((xb - x0) / (x1 - x0))
+                cx = (ch * (xb - xa) + th * (hb - ha)).normalized()
+                nz = cx.cross(th.cross(ch)).normalized()
+                if nz.dot(th) < 0:
+                    nz = -nz
+                r = bmesh.ops.create_cube(pb, size=1.0)
+                bmesh.ops.scale(pb, vec=(ln, wd, 0.016), verts=r["verts"])
+                mm = Matrix((cx, nz.cross(cx), nz)).transposed().to_4x4()
+                mm.translation = top_pt + nz * 0.004
+                bmesh.ops.transform(pb, matrix=mm, verts=r["verts"])
+            pieces.append(("plate", pb))
         # flap track fairings: small pods on the pressure side at the flap hinge
         if fl and spec.get("fairings"):
             fb = bmesh.new()

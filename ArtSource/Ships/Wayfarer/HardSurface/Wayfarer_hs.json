@@ -1716,6 +1716,7 @@
     "x": 4.6,
     "y": 5.0,
     "rot": 90,
+    "rot_mirror": 180,
     "_what": "NO STEP on the flap (10. 10. 2026: x 4.6, the flap is aft since the wing chord fix)"
    },
    {
@@ -1726,7 +1727,8 @@
     "on": "top",
     "x": 6.0,
     "y": 6.0,
-    "rot": 90
+    "rot": 90,
+    "rot_mirror": 180
    },
    {
     "id": "D-H-46",
@@ -1802,6 +1804,7 @@
     "x": 8.2,
     "y": 4.15,
     "rot": 90,
+    "rot_mirror": 180,
     "_what": "wing: stencil beside the flap actuator hatch"
    },
    {
@@ -2724,10 +2727,10 @@
     "x": [5.0, 17.8],
     "z": [[5.0, 1.229], [5.6, 1.233], [6.9, 1.243], [8.2, 1.252], [9.3, 1.26], [10.4, 1.268], [11.6, 1.277], [12.8, 1.286], [13.5, 1.291], [14.0, 1.311], [14.5, 1.332], [15.2, 1.394], [16.0, 1.466], [16.7, 1.445], [17.6, 1.417], [17.8, 1.372]],
     "_z": "revision F, 3. 10. 2026: a polyline along the middle of the narrowed channel between bands L and U (section height v 0.511, design panels.bands; the channel is ~0.10 m since L ends at v 0.497); was z 1.18 in the old 0.35 m channel, and at z 0.35 under the whole-ship kit plates it showed only in the gaps as a dashed line (critic round 1)",
-    "width": 0.05,
-    "channel": 0.09,
-    "depth": 0.01,
-    "_strip_9_10": "SC technique 9 (measured 9. 10. 2026): a wide band recessed 1 cm in a dark channel, not a 1.5 cm line",
+    "width": 0.03,
+    "channel": 0.08,
+    "depth": 0.015,
+    "_strip_9_10": "SC technique 9 (measured 9. 10. 2026): a band recessed in a dark channel; 10. 10. (exterior critic): a 3 cm core 1.5 cm deep in an 8 cm channel (5 cm read as flat tape by day)",
     "color": "strip",
     "_what": "running light along the lower side (SC: cool white emissive strips outline the hull at night)",
     "step": 0.3
@@ -2739,10 +2742,10 @@
     "x": [17.8, 18.75],
     "z": [[17.8, 1.372], [18.2, 1.283], [18.5, 1.216], [18.75, 1.193]],
     "_z": "revision F, 3. 10. 2026: the channel line carried on along the middle of the narrowed L/U channel (v 0.511) to the plates' end before the RCS block (x 18.81); at the old z 1.12 it lay on plate L14 (editor shots); before that z 1.62 under the canopy went under kit plates",
-    "width": 0.05,
-    "channel": 0.09,
-    "depth": 0.01,
-    "_strip_9_10": "SC technique 9 (measured 9. 10. 2026): a wide band recessed 1 cm in a dark channel, not a 1.5 cm line",
+    "width": 0.03,
+    "channel": 0.08,
+    "depth": 0.015,
+    "_strip_9_10": "SC technique 9 (measured 9. 10. 2026): a band recessed in a dark channel; 10. 10. (exterior critic): a 3 cm core 1.5 cm deep in an 8 cm channel (5 cm read as flat tape by day)",
     "color": "strip",
     "_what": "strip under the canopy line",
     "step": 0.3
@@ -2781,10 +2784,13 @@
     "span": [0.3, 0.9],
     "chord": 0.72
    },
+   "plates": [[0.22, 0.42, 0.8, 0.5], [0.5, 0.36, 0.6, 0.42], [0.78, 0.33, 0.45, 0.34]],
+   "_plates": "exterior critic 10. 10. 2026: doubler plates 12 mm proud on the wing top (the mid layer)",
    "fairings": [0.4, 0.75],
    "bevel_m": 0.003,
    "materials": {
     "box": "paint",
+    "plate": "paint",
     "le": "dark",
     "strip": "metal",
     "bolt": "metal",
