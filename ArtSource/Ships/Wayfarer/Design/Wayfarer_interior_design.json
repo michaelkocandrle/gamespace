@@ -4,6 +4,7 @@
  "revision": "B",
  "date": "1. 10. 2026",
  "rooms": {
+  "ramp": "RMP",
   "hold": "HLD",
   "tech": "TEC",
   "cabin": "CAB",

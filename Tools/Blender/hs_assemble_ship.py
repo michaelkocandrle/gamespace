@@ -162,6 +162,9 @@ def main(argv):
         elif o.name.endswith("_Hologram"):
             # the cockpit's ship hologram (hs_cockpit.build_hologram): additive, turns about its own centre
             assign[o.name] = "Hologram"
+        elif "_RampLeaf" in o.name:
+            # the rear ramp's inner side (hs_ramp.leaf); the outer skin joins it in hs_ramp.split
+            assign[o.name] = "RampLeaf"
         elif "_Door" in o.name:
             # a sliding door leaf (hs_interior.build_door): its own part Door<n><A|B>, moved by the pawn
             assign[o.name] = "Door" + o.name.split("_Door", 1)[1].split("_", 1)[0]
@@ -236,6 +239,11 @@ def main(argv):
         print("HSDECALS " + json.dumps({"decals": decal_report["decals"], "faces": decal_report["faces"], "kit": decal_report["kit"]}))
     if decals is not None:
         out["Decals"] = decals
+    ramp_spec = recipe.get("interior", {}).get("ramp")
+    if ramp_spec:
+        # the rear ramp (hs_ramp.py): the finished stern inside the leaf's slab moves to RampLeaf / RampDecals
+        import hs_ramp
+        print("HSRAMP " + json.dumps(hs_ramp.split(out, off, ramp_spec)))
     # 4) UVs
     for key, ob in out.items():
         if key in ("Decals", "Screens", "InteriorKit", "InteriorDecals", "Hologram"):

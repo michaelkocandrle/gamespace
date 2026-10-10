@@ -839,6 +839,40 @@
    "name": "fix_19",
    "type": "point",
    "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "intensity_cd": 1.6,
+   "radius_m": 1.6,
+   "location": [
+    0.75,
+    0.0,
+    2.174
+   ],
+   "direction": [
+    0,
+    0,
+    -1
+   ],
+   "cone_deg": 40.0,
+   "source_radius_cm": 1.0,
+   "specular": 0.2,
+   "location_ue_cm": [
+    -950.0,
+    -0.0,
+    97.4
+   ],
+   "direction_ue": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "fix_20",
+   "type": "point",
+   "color": [
     0.45,
     0.72,
     1.0
@@ -870,7 +904,7 @@
    ]
   },
   {
-   "name": "fix_20",
+   "name": "fix_21",
    "type": "point",
    "color": [
     0.45,
@@ -904,7 +938,7 @@
    ]
   },
   {
-   "name": "fix_21",
+   "name": "fix_22",
    "type": "point",
    "color": [
     0.45,
@@ -938,7 +972,7 @@
    ]
   },
   {
-   "name": "fix_22",
+   "name": "fix_23",
    "type": "point",
    "color": [
     0.45,
@@ -972,7 +1006,7 @@
    ]
   },
   {
-   "name": "fix_23",
+   "name": "fix_24",
    "type": "point",
    "color": [
     1.0,
@@ -1006,7 +1040,7 @@
    ]
   },
   {
-   "name": "fix_24",
+   "name": "fix_25",
    "type": "point",
    "color": [
     1.0,
@@ -1040,7 +1074,7 @@
    ]
   },
   {
-   "name": "fix_25",
+   "name": "fix_26",
    "type": "point",
    "color": [
     1.0,
@@ -1074,7 +1108,7 @@
    ]
   },
   {
-   "name": "fix_26",
+   "name": "fix_27",
    "type": "point",
    "color": [
     1.0,
@@ -1108,7 +1142,7 @@
    ]
   },
   {
-   "name": "fix_27",
+   "name": "fix_28",
    "type": "point",
    "color": [
     1.0,
@@ -1142,7 +1176,7 @@
    ]
   },
   {
-   "name": "fix_28",
+   "name": "fix_29",
    "type": "point",
    "color": [
     1.0,
@@ -1176,7 +1210,7 @@
    ]
   },
   {
-   "name": "fix_29",
+   "name": "fix_30",
    "type": "point",
    "color": [
     1.0,
@@ -1210,7 +1244,7 @@
    ]
   },
   {
-   "name": "fix_30",
+   "name": "fix_31",
    "type": "point",
    "color": [
     1.0,
@@ -1244,7 +1278,7 @@
    ]
   },
   {
-   "name": "fix_31",
+   "name": "fix_32",
    "type": "point",
    "color": [
     1.0,
@@ -1278,7 +1312,7 @@
    ]
   },
   {
-   "name": "fix_32",
+   "name": "fix_33",
    "type": "point",
    "color": [
     0.45,
@@ -1312,7 +1346,7 @@
    ]
   },
   {
-   "name": "fix_33",
+   "name": "fix_34",
    "type": "point",
    "color": [
     0.45,
@@ -1346,7 +1380,7 @@
    ]
   },
   {
-   "name": "fix_34",
+   "name": "fix_35",
    "type": "point",
    "color": [
     1.0,
@@ -1380,7 +1414,7 @@
    ]
   },
   {
-   "name": "fix_35",
+   "name": "fix_36",
    "type": "point",
    "color": [
     1.0,
@@ -1414,7 +1448,7 @@
    ]
   },
   {
-   "name": "fix_36",
+   "name": "fix_37",
    "type": "point",
    "color": [
     1.0,
@@ -1448,7 +1482,7 @@
    ]
   },
   {
-   "name": "fix_37",
+   "name": "fix_38",
    "type": "point",
    "color": [
     1.0,

@@ -892,10 +892,19 @@ def build(recipe, layout, coll, mats, ship, hull):
         hs_interior_kit.preview_materials(mats)
         report["kit"] = {}
     door_xs = [d["at"][0] for d in doors if d["axis"] == "x"]
+    ramp = None
+    if spec.get("ramp"):
+        # the rear ramp as a moving leaf (Tools/Blender/hs_ramp.py, variant A 10. 10. 2026)
+        import hs_ramp
+        ramp = hs_ramp.Ramp(spec["ramp"])
     for rid, r in rooms.items():
         x0, x1, y0, y1 = r["rect"]
         z0 = r.get("floor_z", 0.0)
         if rid == "cockpit":
+            continue
+        if rid == "ramp" and ramp is not None:
+            hs_ramp.interior(g, box, ramp, H)
+            report["rooms"].append(rid)
             continue
         y0i, y1i = y0 + inset, y1 - inset
         if rid in mod_rooms:
@@ -929,8 +938,8 @@ def build(recipe, layout, coll, mats, ship, hull):
         wide = [kit_half[r["id"]] for r in rooms.values() if r["id"] in kit_half and (abs(r["rect"][0] - x) < 0.01 or abs(r["rect"][1] - x) < 0.01)]
         return max(wide) + 0.06 if wide else y1i
     for x in xs:
-        if x > 15.3:
-            continue
+        if x > 15.3 or (ramp is not None and x < 0.5):
+            continue   # (the stern is the ramp's leaf)
         d = next((dd for dd in doors if dd["axis"] == "x" and abs(dd["at"][0] - x) < 0.01), None)
         wh = wall_half(x)
         if wh > y1i + 0.01:
@@ -957,6 +966,14 @@ def build(recipe, layout, coll, mats, ship, hull):
                 box(g["int_trim"], (x, -1.74, 2.12), (x + 0.6, 1.74, H + 0.02))
                 box(g["int_dark"], (x + 0.02, -1.7, 2.1), (x + 0.58, 1.7, 2.12))
                 box(g["accent"], (x + 0.58, -1.7, 2.1), (x + 0.6, 1.7, 2.14))
+            if ramp is not None:
+                # the portal from the hold into the ramp's passage (no leaf here: the ramp closes the stern)
+                # (panelled to |y| 1.7; out to the liner the dark filler of the old wall - a full panel's top corners
+                # stood 2 cm through the hull's upper chamfer)
+                bulkhead(g, x, -1.7, 1.7, 0.0, H, (d["at"][1], d["width"]) if d else (0.0, 2 * ramp.half), 1)
+                for ya, yb in ((y0i, -1.7), (1.7, y1i)):
+                    box(g["int_dark"], (x, ya, 0.0), (x + 0.04, yb, H - 0.1))
+                continue
             # the ramp's inside: a closed leaf with ribs (the ramp opens with walking inside the ship)
             box(g["int_dark"], (x - 0.05, y0i, 0), (x, y1i, H))
             box(g["int_panel"], (x, -1.3, 0.02), (x + 0.03, 1.3, 2.1))
@@ -1519,6 +1536,10 @@ def build(recipe, layout, coll, mats, ship, hull):
         dspec["_exclude_x"] = [rooms[r]["rect"][:2] for r in mod_rooms]
         dobjs, report["decals"] = hs_interior_decals.build(objs, ship, coll, dspec, ROOT, mats, eye)
         objs += dobjs
+    if ramp is not None:
+        # the ramp's leaf (its inner side; the outer skin and parts come from the hull in hs_assemble_ship) and sockets
+        hs_ramp.leaf(ramp, ship, coll, mats, hp.finish)
+        sockets.update(hs_ramp.sockets(ramp))
     # the sliding door leaves (built open, the game closes them): their own parts Door<n>A/B and sockets
     for n, leaf in enumerate(DOOR_LEAVES):
         for name, at in build_door(leaf, n, ship, coll, mats, H):

@@ -5,19 +5,19 @@
  "room": "hold",
  "section_x": 6.4,
  "digests": {
-  "layout": "e0d248bb60e1",
-  "interior": "a2f0f0ffc457",
-  "setup": "de82013afd6a",
-  "lights": "5c5e090e83c3",
-  "design": "7d61847943ec",
+  "layout": "1354920fff51",
+  "interior": "59f6c7b80e5c",
+  "setup": "bb6e1dc1a8e1",
+  "lights": "f2307f95a1b8",
+  "design": "fc99135b3481",
   "kit": "0c87dc030940",
   "library": "54f89bcfc0de",
   "light_rules": "788f180917fd"
  },
  "geometry": {
-  "SM_Ship_Wayfarer.fbx": "bb746495860a",
-  "SM_Ship_Wayfarer_Interior.fbx": "b2a7ddf6f9c5",
-  "SM_Ship_Wayfarer_Canopy.fbx": "50abe89a8300",
+  "SM_Ship_Wayfarer.fbx": "2becfdfeb4be",
+  "SM_Ship_Wayfarer_Interior.fbx": "4f31d1ab030e",
+  "SM_Ship_Wayfarer_Canopy.fbx": "ddc785982d37",
   "SM_Kit_Bulkhead_Door00L38_A.fbx": "5aeb8f473c3c",
   "SM_Kit_Bulkhead_Door00L38_F.fbx": "64768917b686",
   "SM_Kit_Bulkhead_Door00L41_C.fbx": "f9b4f693887f",
@@ -474,10 +474,6 @@
   ]
  },
  "checks": [
-  [
-   "HLD-M-QFUEL",
-   "Nádrž kvantového paliva (postaveno) leží zčásti mimo trup: při x 7,39 roh y 1,70 z −0,55 (layout x 5,40 … 7,40, y 0,80 … 1,70, z −0,55 … −0,05)"
-  ],
   [
    "DR-HLD-TEC",
    "cesta z uličky do DR-HLD-TEC vede šikmo mezi rohem HLD-O-GRID (Nákladová mřížka 8 SCU; x 7,65, y 0,65) a ostěním dveří (x 8,14 z postaveného dílu, y 1,00): 0,60 m – kapsle 0,56 m projde (rezerva 44 mm); podél přepážky před mřížkou zbývá 0,54 m (kapsle tudy neprojde)"

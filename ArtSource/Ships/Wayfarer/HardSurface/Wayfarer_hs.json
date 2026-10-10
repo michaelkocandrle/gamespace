@@ -3012,6 +3012,7 @@
   ]
  },
  "interior": {
+  "ramp": {"hinge": [-0.03, -0.15], "top": [0.375, 2.44], "half": 1.1, "t": 0.12, "open_deg": 130, "reach_out": 0.45, "_comment": "rear ramp, variant A (author 10. 10. 2026, Tools/Blender/hs_ramp.py): one leaf 2.62 m on the stern line from the hinge, 2.2 m wide, 0.12 m thick; a 16 cm header of the stern stays hull above it; open it turns 130 deg about the hinge to the ground (~31 deg); reach_out = how far outside the stern line the leaf takes the kit, parts and decals"},
   "_comment": "The interior from the approved deck plan v1 (Tools/Blender/hs_interior.py): rooms, bulkheads with open doorways, every layout object, cockpit with the game's four screens. Walking inside and the sliding doors / ramp come next.",
   "height_m": 2.3,
   "wall_inset_m": 0.05,
