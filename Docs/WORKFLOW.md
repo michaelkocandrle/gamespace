@@ -777,6 +777,10 @@ snímku.
 
 ### 9.6 Blender pipeline
 
+- **Ve vesmírných snímcích chybí trup** (10. 10. 2026; kritik viděl „řez lodí“): po skoku sady snímků do 60 km
+  chyběl hlavní mesh na všech stojících záběrech, dokud se loď nepohnula. Řešení: zahřívací snímek s letem
+  (`space_warmup`, `speed_ms` 200, 4 s) před prvním vesmírným záběrem; ve hře se loď pohybuje a chyba se neukáže.
+
 - **Úhlový bevel po zaoblení ohybu vystřelil vrcholy o metry** (`hs_exterior_kit.shell`, 9. 10. 2026; `HSASSEMBLE
   BOUNDS FAIL`, desky P-S-S06..S10 „narostly“ o 7–11 m): `miter_outer = MITER_ARC` okrajového bevelu narazil na
   zaoblený ohyb (bevel podle váhy). Řešení: na deskách s ohybem `MITER_SHARP`; ohyb zaoblit **před** solidify (po něm

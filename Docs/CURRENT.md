@@ -32,12 +32,11 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
     varianta B; podlaha zatím lodní) a kajuta z obložení trupu s kit podlahou a nábytkem z kitu;
   - výkresy interiéru (`draw_interior_sheet.py`, `_deck.py`, `_plans.py`): **I-01 až I-04 schváleny jako vzor**, I-05 až
     I-09 jsou generovaná dokumentace bez dalších kol kritika (I-05 kokpit se kontroluje až u kokpitu z kitu).
-- **Steadfast** (nákladní): 2D návrh v2 čeká na schválení; starý odmítnutý interiér v `TestSpace` (klávesa I).
+- **Steadfast** (nákladní): 2D návrh v2 čeká na schválení; starý interiér v `TestSpace` (I). Flotila: Ship Matrix a dossiery (skill `ship-pipeline` 1b).
 - **Interiérový kit** (`ArtSource/Kit/kit_rules.json`, `kit_parts.json`): dávky 1–3, 4 zčásti, 6 (nábytek kajuty);
   ukázka v `TestSpace` (U). Strop 500 + 3500 trojúhelníků na metr (autor 30. 9.; převezme `kit_manifest.json`).
 - **Továrna dílů** (6. 10.): `Docs/Kit/` soupis `catalog_draft.md`, etalon SC `etalon/etalon.md`, workflow
   `FACTORY_WORKFLOW.md` **v0.2**; **pilot 1 `KF-PORTAL-01`**: list rev. F, **krok 7–8 hotové** (výkon ~1 ms; kritik FAIL 5,2 po 3 kolech), STOP před krokem 9.
-- **Flotila:** Ship Matrix a dossiery publikované (skill `ship-pipeline` 1b); Delver a Farsight jen jako spec.
 - **Nástroje:** `Test.ps1`, `Build.ps1`, CI s offline testy (stav přes veřejné API GitHubu), kritik s prahem `step` /
   `ship` / `part`, zámek `HeavyLock.ps1`, snímky v `C:\gamespace-shots` (`shots:` v recenzích), `Cleanup.ps1` na konci kroku.
 
@@ -70,7 +69,8 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
    sound boardu (`sound_candidates.py`, `sound_board.py`), klik v interakci = SW_ButtonPress – čeká na poslech ve hře; (3) exteriér Wayfareru doladit:
    10. 10. hotové techniky SC z rozboru (`ArtSource/Reference/Video/sc_ext_notes/SC_exterior_techniques.md`) 1, 3, 4, 5, 6, 8, 9, 10
    (rám trysky), zbraně, oprava tětivy křídel (lem byl od začátku na odtokové hraně), Lumen ShortRangeAO 0 (zrno na laku);
-   zbývá 7 (strukturovaný materiál tmavých zón), 10 tepelná mřížka, 11 značení v měřítku SC, 12 podvozek; rychlé snímky `wayfarer_ext_step`;
+   10. 10. odpoledne i 7, 11, 12, tepelné mřížky; kritik r3 FAIL 6,25 po 3 kolech (`Docs/Reviews/2026-10-10_wayfarer_exterior_r3.md`):
+   dál střední vrstva geometrie na velkých plochách, variace drsnosti, podvozek jako kloubová noha; snímky `wayfarer_ext_step`;
    (4) drobnosti interiéru zbytku lodi, dveře, přenesení centrální MFD obrazovky, animace.
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
       strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); rampa: plán a rozhodnutí A/B
