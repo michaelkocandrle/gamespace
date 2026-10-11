@@ -2855,7 +2855,9 @@ void USpaceCockpitDisplays::BuildTree()
 			}
 			Horizontal(Tabs, Tab, VAlign_Fill, FMargin(Index == 0 ? 0.f : 6.f, 0.f, 0.f, 0.f), true);
 		}
-		Vertical(Column, Sized(FName(*FString::Printf(TEXT("%sTabsBox"), ScreenName)), Tabs, 0.f, 48.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 2.f));   // (42: the labels were cut)
+		// (the right glass's upper outer corner is cut by the canopy pillar: its last tab, SELF, was clipped - 10. 10. 2026)
+		Vertical(Column, Sized(FName(*FString::Printf(TEXT("%sTabsBox"), ScreenName)), Tabs, 0.f, 48.f), HAlign_Fill,
+			FMargin(0.f, 0.f, DisplayIndex == 1 ? 70.f : 0.f, 2.f));   // (42: the labels were cut)
 		Vertical(Column, Rule(FName(*FString::Printf(TEXT("%sRule"), ScreenName)), 0.f), HAlign_Fill, FMargin(0.f, 0.f, 0.f, 8.f));
 		Vertical(Column, Content, HAlign_Fill, FMargin(0.f), true);
 		// the bottom bar: << NAME >>
@@ -2967,23 +2969,27 @@ void USpaceCockpitDisplays::BuildTree()
 	Horizontal(LimitLine, Words(TEXT("FlightLimitCaption"), TEXT("LIMIT"), 26.f, Faded(MfdText, 0.6f)), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
 	Horizontal(LimitLine, Words(TEXT("RowLimitValue"), TEXT("-"), 26.f), VAlign_Center, FMargin(0.f));
 	Vertical(SpeedCentre, LimitLine, HAlign_Center, FMargin(0.f, 18.f, 0.f, 0.f));
-	Horizontal(Flight, Sized(TEXT("FlightSpeedBox"), RingWith(TEXT("SpeedGauge"), SpeedCentre), 300.f, 300.f), VAlign_Top, FMargin(0.f, 0.f, 8.f, 0.f));
+	// (10. 10. 2026 MFD analysis: speed 300 + G column 190 + keys 256 = 766 px on a 560 px screen - the columns overlapped;
+	// now the speed ring and one right-hand column: the G and the bars over the mode key and the switch keys)
+	Horizontal(Flight, Sized(TEXT("FlightSpeedBox"), RingWith(TEXT("SpeedGauge"), SpeedCentre), 250.f, 250.f), VAlign_Top, FMargin(0.f, 6.f, 14.f, 0.f));
+	UVerticalBox* FlightRight = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightRight"));
+	UHorizontalBox* FlightTop = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightTop"));
 	// the G: a small ring, G max under it; the boost and afterburner bars under that
 	UVerticalBox* FlightMiddle = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightMiddle"));
 	UVerticalBox* GCentre = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightGCentre"));
-	Vertical(GCentre, Words(TEXT("GText"), TEXT("0.0"), 46.f), HAlign_Center, FMargin(0.f, 8.f, 0.f, -10.f));
+	Vertical(GCentre, Words(TEXT("GText"), TEXT("0.0"), 46.f), HAlign_Center, FMargin(0.f, 6.f, 0.f, -10.f));
 	Vertical(GCentre, Words(TEXT("GTextUnit"), TEXT("G"), 22.f, Faded(MfdText, 0.6f)), HAlign_Center, FMargin(0.f));
-	Vertical(FlightMiddle, Sized(TEXT("FlightGBox"), RingWith(TEXT("GGauge"), GCentre), 140.f, 140.f), HAlign_Center, FMargin(0.f));
+	Vertical(FlightMiddle, Sized(TEXT("FlightGBox"), RingWith(TEXT("GGauge"), GCentre), 108.f, 108.f), HAlign_Center, FMargin(0.f));
 	UHorizontalBox* GMaxLine = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightGMaxLine"));
 	Horizontal(GMaxLine, Words(TEXT("FlightGMaxCaption"), TEXT("G MAX"), 26.f, Faded(MfdText, 0.6f)), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
 	Horizontal(GMaxLine, Words(TEXT("GMax"), TEXT("-"), 26.f), VAlign_Center, FMargin(0.f));
-	Vertical(FlightMiddle, GMaxLine, HAlign_Center, FMargin(0.f, -8.f, 0.f, 4.f));
+	Vertical(FlightMiddle, GMaxLine, HAlign_Center, FMargin(0.f, -2.f, 0.f, 0.f));
 	UHorizontalBox* Readout = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("FlightReadout"));
 	auto Bar = [&](const TCHAR* Caption, const FName GaugeName, const FName ValueName)
 	{
 		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*FString::Printf(TEXT("%sColumn"), *GaugeName.ToString())));
 		Vertical(Box, Words(ValueName, TEXT("-"), 26.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 2.f));
-		Vertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, 8), 16.f, 56.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 0.f));
+		Vertical(Box, Sized(FName(*FString::Printf(TEXT("%sBox"), *GaugeName.ToString())), Gauge(GaugeName, 8), 16.f, 64.f), HAlign_Center, FMargin(0.f, 0.f, 0.f, 0.f));
 		Vertical(Box, Words(FName(*FString::Printf(TEXT("%sTitle"), *GaugeName.ToString())), Caption, 26.f, Faded(MfdText, 0.6f)), HAlign_Center, FMargin(0.f));
 		Horizontal(Readout, Box, VAlign_Top, FMargin(6.f, 0.f), true);
 	};
@@ -2994,8 +3000,9 @@ void USpaceCockpitDisplays::BuildTree()
 		Afterburner->ReserveZone = 0.25f;
 		Afterburner->ReserveColor = Red;
 	}
-	Vertical(FlightMiddle, Readout, HAlign_Fill, FMargin(0.f));
-	Horizontal(Flight, Sized(TEXT("FlightMiddleBox"), FlightMiddle, 190.f, 0.f), VAlign_Top, FMargin(0.f, -6.f, 12.f, 0.f));
+	Horizontal(FlightTop, Sized(TEXT("FlightMiddleBox"), FlightMiddle, 136.f, 0.f), VAlign_Top, FMargin(0.f, 0.f, 4.f, 0.f));
+	Horizontal(FlightTop, Readout, VAlign_Top, FMargin(0.f, 4.f, 0.f, 0.f), true);
+	Vertical(FlightRight, FlightTop, HAlign_Fill, FMargin(0.f, 0.f, 0.f, 6.f));
 	// the mode as SC's outlined key, the switches in two columns of keys under it
 	UVerticalBox* FlightModes = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightModes"));
 	UOverlay* ModeChip = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("FlightModeChip"));
@@ -3008,24 +3015,24 @@ void USpaceCockpitDisplays::BuildTree()
 		ShapeSlot->SetHorizontalAlignment(HAlign_Fill);
 		ShapeSlot->SetVerticalAlignment(VAlign_Fill);
 	}
-	if (UOverlaySlot* ModeSlot = ModeChip->AddChildToOverlay(Words(TEXT("ModeText"), TEXT("SCM"), 30.f)))
+	if (UOverlaySlot* ModeSlot = ModeChip->AddChildToOverlay(Words(TEXT("ModeText"), TEXT("SCM"), 28.f)))
 	{
 		ModeSlot->SetHorizontalAlignment(HAlign_Center);
 		ModeSlot->SetVerticalAlignment(VAlign_Center);
 	}
-	Vertical(FlightModes, Words(TEXT("FlightModeCaption"), TEXT("MODE"), 22.f, Faded(MfdText, 0.6f)), HAlign_Left, FMargin(2.f, 0.f, 0.f, 0.f));
-	Vertical(FlightModes, Sized(TEXT("FlightModeChipBox"), ModeChip, 256.f, 50.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 12.f));
+	Vertical(FlightModes, Sized(TEXT("FlightModeChipBox"), ModeChip, 264.f, 38.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 6.f));
 	UVerticalBox* KeyGrid = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightKeys"));
 	const TCHAR* Pairs[3][2] = { { TEXT("CPLD"), TEXT("GSAF") }, { TEXT("CSTB"), TEXT("BOOST") }, { TEXT("PREC"), TEXT("VTOL") } };
 	for (int32 Row = 0; Row < 3; ++Row)
 	{
 		UHorizontalBox* KeyRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("FlightKeyRow%d"), Row)));
-		Horizontal(KeyRow, Key(Pairs[Row][0], 124.f, 46.f, true), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
-		Horizontal(KeyRow, Key(Pairs[Row][1], 124.f, 46.f, true), VAlign_Center, FMargin(0.f));
-		Vertical(KeyGrid, KeyRow, HAlign_Left, FMargin(0.f, 0.f, 0.f, 10.f));
+		Horizontal(KeyRow, Key(Pairs[Row][0], 128.f, 34.f, true), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
+		Horizontal(KeyRow, Key(Pairs[Row][1], 128.f, 34.f, true), VAlign_Center, FMargin(0.f));
+		Vertical(KeyGrid, KeyRow, HAlign_Left, FMargin(0.f, 0.f, 0.f, 5.f));
 	}
 	Vertical(FlightModes, KeyGrid, HAlign_Left, FMargin(0.f));
-	Horizontal(Flight, FlightModes, VAlign_Top, FMargin(0.f, 6.f, 0.f, 0.f), true);
+	Vertical(FlightRight, FlightModes, HAlign_Left, FMargin(0.f));
+	Horizontal(Flight, FlightRight, VAlign_Top, FMargin(0.f), true);
 	// --- Left display, page 2: THRUSTERS - what each direction puts out against what it can -----------
 	auto AlignedWords = [&](const FName Name, const TCHAR* Initial, float Size, ETextJustify::Type Justify, const FLinearColor& Color = SpaceHudStyle::MfdText)
 	{
