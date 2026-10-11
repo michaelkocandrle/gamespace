@@ -690,6 +690,7 @@ bool ASpaceshipPawn::HasRamp() const { return Boarding->HasRamp(); }
 bool ASpaceshipPawn::IsRampOpen() const { return Boarding->IsRampOpen(); }
 float ASpaceshipPawn::GetRampOpenAlpha() const { return Boarding->GetRampOpenAlpha(); }
 void ASpaceshipPawn::SetRampOpen(bool bOpen) { Boarding->SetRampOpen(bOpen); }
+bool ASpaceshipPawn::CanOpenRamp() const { return Boarding->CanOpenRamp(); }
 bool ASpaceshipPawn::IsInRampZone(const FVector& Location) const { return Boarding->IsInRampZone(Location); }
 bool ASpaceshipPawn::IsInsideRooms(const FVector& Location) const { return Boarding->IsInsideRooms(Location); }
 bool ASpaceshipPawn::IsNearRampControl(const FVector& Location) const { return Boarding->IsNearRampControl(Location); }
@@ -1715,7 +1716,9 @@ bool ASpaceshipPawn::BlocksShip(const UPrimitiveComponent* Other) const
 {
 	// What the root box blocks, and nothing else: the hull mesh also blocks pawns (characters walk on it), but the
 	// pilot sitting inside it, or anyone standing next to it, must not stop the ship or its landing.
-	return Other && HullCollision->GetCollisionResponseToChannel(Other->GetCollisionObjectType()) == ECR_Block;
+	// (nor anything riding with the ship - the engineering terminal is its own actor attached to it, 11. 10. 2026)
+	return Other && HullCollision->GetCollisionResponseToChannel(Other->GetCollisionObjectType()) == ECR_Block
+		&& !(Other->GetOwner() && Other->GetOwner()->GetAttachParentActor() == this);
 }
 
 bool ASpaceshipPawn::HullClearOfGround(const FVector& Location, const FQuat& Rotation, double GearTopLocalZ, FString* OutWhat) const

@@ -2,8 +2,8 @@
 
 Jediný zdroj **aktuálního** stavu pod `CLAUDE.md`, **nejvýš 80 řádků**; hotové do stavu, podrobnosti do recenzí a commitů.
 
-Stav k **3. 10. 2026**: Wayfarer postavený podle výkresů **revize G** (kritik po ověřovacím kole PASS 6,5); povrch trupu
-je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **Cíl výkonu: 1440p / 60 fps s TSR**
+Stav k **11. 10. 2026**: Wayfarer podle výkresů revize G + techniky SC na exteriéru, rampa, otočné křeslo, terminál.
+**Cíl výkonu: 1440p / 60 fps s TSR**
 (AMD RX 9070, `CLAUDE.md`; staré 20 ms na RTX 2060 neplatí); nic se neměří ani neoptimalizuje do konce.
 
 ## Stav
@@ -65,16 +65,16 @@ je pro teď uzavřený; výkresy interiéru I-01–I-09 sloučené do main. **C�
 
 ## Další kroky
 
-0. **Autor 9. 10. – pořadí:** (1) kokpit **good enough** (9. 10.; postup ve skillu `sc-quality-interior`); (2) **zvuky znovu**: 9. 10. 11 zvuků podle autorova výběru na
-   sound boardu (`sound_candidates.py`, `sound_board.py`), klik v interakci = SW_ButtonPress – čeká na poslech ve hře; (3) exteriér Wayfareru doladit:
+0. **Autor 9. 10. – pořadí:** (1) kokpit **good enough**; (2) zvuky: 11 podle autorova výběru (`sound_board.py`), zbytek odložen; (3) exteriér:
    10. 10. hotové techniky SC z rozboru (`ArtSource/Reference/Video/sc_ext_notes/SC_exterior_techniques.md`) 1, 3, 4, 5, 6, 8, 9, 10
    (rám trysky), zbraně, oprava tětivy křídel (lem byl od začátku na odtokové hraně), Lumen ShortRangeAO 0 (zrno na laku);
    10. 10. odpoledne i 7, 11, 12, tepelné mřížky; kritik r3 FAIL 6,25 po 3 kolech (`Docs/Reviews/2026-10-10_wayfarer_exterior_r3.md`):
    dál střední vrstva geometrie na velkých plochách, variace drsnosti, podvozek jako kloubová noha; snímky `wayfarer_ext_step`;
-   (4) drobnosti interiéru zbytku lodi, dveře, přenesení centrální MFD obrazovky, animace.
+   (4) 11. 10. hotové: **zadní rampa varianta A** (sklopí se na zem, smyčka pěšky ven a dovnitř bez teleportu, F u rampy
+   zvenku i u spínače v průchodu, `space.Ramp`, snímky `wayfarer_ramp`, `wayfarer_ramp_walk`), **otočné křeslo** (prázdné
+   k chodbě, při sednutí se otočí s pilotem k výhledu), **inženýrský terminál** v lodi (přední stěna nákladu u dveří do
+   technické chodby; energie zatím jeho vlastní model), **holo panely dveří** z obou stran na líci stěny,
+   **MFD FLIGHT** se vejde na displej (dřív 766 px na 560), záložka SELF. Dál: animace těla, MFD dalších stránek.
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
-      strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`); rampa: plán a rozhodnutí A/B
-      čeká na autora (`2026-10-06_ramp_plan.md`).
-1. Povrch trupu zmrazený (revize G, PASS 6,5); přistání na svahu čeká na vyzkoušení autorem (pak odpružení nohou).
-3. Podle SC (`OwnCapture_Gameplay_Notes.md`): dál visor pěšky, systémy lodi, stanice.
-4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).
+      strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`).
+1. Přistání na svahu čeká na vyzkoušení autorem (pak odpružení nohou). 3. Podle SC (`OwnCapture_Gameplay_Notes.md`): dál visor pěšky, systémy lodi, stanice. 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).

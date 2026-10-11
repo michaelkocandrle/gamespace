@@ -336,7 +336,7 @@ void APlayerCharacter::UpdateRampWalk()
 	const FVector At = GetActorLocation();
 	if (ASpaceshipPawn* Ship = InteriorShip.Get())
 	{
-		if (Ship->HasRamp() && Ship->IsLanded() && !Ship->IsInRampZone(At) && !Ship->IsInsideRooms(At))
+		if (Ship->HasRamp() && Ship->GetRampOpenAlpha() > 0.95f && !Ship->IsInRampZone(At) && !Ship->IsInsideRooms(At))
 		{
 			InteriorShip = nullptr;
 			Ship->SetInteriorWalk(false);
@@ -702,9 +702,10 @@ bool APlayerCharacter::TryInteriorInteract()
 	if (Ship->HasRamp() && Ship->IsNearRampControl(GetActorLocation()))
 	{
 		// the ramp's switch by the passage: down for the walk out (UpdateRampWalk), up again
-		if (!Ship->IsLanded())
+		if (!Ship->CanOpenRamp() && !Ship->IsRampOpen())
 		{
-			UE_LOG(LogPlayerCharacter, Log, TEXT("%s: the ramp of %s stays shut in flight"), *GetName(), *Ship->GetName());
+			UE_LOG(LogPlayerCharacter, Log, TEXT("%s: the ramp of %s stays shut in flight (landed %d, speed %.0f cm/s, blocker %s)"), *GetName(),
+				*Ship->GetName(), Ship->IsLanded() ? 1 : 0, Ship->GetVelocity().Size(), *UEnum::GetValueAsString(Ship->GetLandingBlocker()));
 			return false;
 		}
 		Ship->SetRampOpen(!Ship->IsRampOpen());

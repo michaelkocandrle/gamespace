@@ -231,6 +231,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Walk")
 	void SetRampOpen(bool bOpen);
 	bool IsInRampZone(const FVector& Location) const;
+	bool CanOpenRamp() const;
 	bool IsInsideRooms(const FVector& Location) const;
 	bool IsNearRampControl(const FVector& Location) const;
 	FVector GetRampPromptLocation(bool bInside) const;

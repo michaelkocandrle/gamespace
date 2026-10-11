@@ -106,6 +106,8 @@ public:
 
 	bool HasRamp() const;
 	bool IsRampOpen() const { return RampTarget > 0.5f; }
+	/** Landed or settling on the ground (IsLanded flickers while the gear settles). */
+	bool CanOpenRamp() const;
 	/** 0 shut .. 1 down on the ground. */
 	float GetRampOpenAlpha() const { return RampOpen; }
 	void SetRampOpen(bool bOpen);

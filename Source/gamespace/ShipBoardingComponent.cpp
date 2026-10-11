@@ -869,6 +869,14 @@ void UShipBoardingComponent::FindRamp()
 		*RoomsLocal.Min.ToString(), *RoomsLocal.Max.ToString());
 }
 
+bool UShipBoardingComponent::CanOpenRamp() const
+{
+	// landed - or settling on the ground: a landed ship hops a few cm while its gear settles and IsLanded flickers
+	// (the packaged ramp walk, 11. 10. 2026: F in the hold said "shut in flight" on a ship standing on its pads)
+	const ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	return Ship->IsLanded() || (RampAirborneSeconds < 2.f && Ship->GetVelocity().Size() < 100.0);
+}
+
 bool UShipBoardingComponent::HasRamp() const
 {
 	if (!bRampFound)
@@ -885,7 +893,7 @@ void UShipBoardingComponent::SetRampOpen(bool bOpen)
 	{
 		return;
 	}
-	if (bOpen && !Ship->IsLanded())
+	if (bOpen && !CanOpenRamp())
 	{
 		UE_LOG(LogSpaceship, Log, TEXT("%s: the ramp stays shut in flight"), *Ship->GetName());
 		return;
@@ -1155,6 +1163,18 @@ void UShipBoardingComponent::SpawnTerminal()
 		Terminal->Housing->SetStaticMesh(HousingMesh);
 	}
 	Terminal->AttachToActor(Ship, FAttachmentTransformRules::KeepWorldTransform);
+	// a part of the ship: blocks the walker only - as its own actor the ship's hull checks took it for the ground (the
+	// ship stayed "in the air, obstructed" and the ramp would not open, 11. 10. 2026)
+	TArray<UPrimitiveComponent*> Prims;
+	Terminal->GetComponents<UPrimitiveComponent>(Prims);
+	for (UPrimitiveComponent* Prim : Prims)
+	{
+		Prim->SetCollisionObjectType(ECC_WorldStatic);
+		Prim->SetCollisionResponseToAllChannels(ECR_Ignore);
+		Prim->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+		Prim->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	}
+	Ship->MoveIgnoreActorAdd(Terminal);
 	UE_LOG(LogSpaceship, Log, TEXT("%s: engineering terminal at %s"), *Ship->GetName(), *Ship->GetActorTransform().InverseTransformPosition(At).ToString());
 }
 

@@ -231,8 +231,8 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 		{
 			// the rear ramp's switch (variant A, 10. 10. 2026): down for the walk out, up again
 			OutTarget.bValid = true;
-			OutTarget.bAvailable = Inside->IsLanded();
-			OutTarget.Label = !Inside->IsLanded() ? LOCTEXT("RampShutFlight", "RAMPA ZAVŘENÁ ZA LETU")
+			OutTarget.bAvailable = Inside->CanOpenRamp() || Inside->IsRampOpen();
+			OutTarget.Label = !OutTarget.bAvailable ? LOCTEXT("RampShutFlight", "RAMPA ZAVŘENÁ ZA LETU")
 				: Inside->IsRampOpen() ? LOCTEXT("RampClose", "ZAVŘÍT RAMPU") : LOCTEXT("RampOpen", "OTEVŘÍT RAMPU");
 			OutTarget.WorldLocation = Inside->GetRampPromptLocation(true);
 		}
@@ -287,7 +287,7 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 			};
 			OutHotspots.Add(MoveTemp(Spot));
 		}
-		if (Inside->HasRamp() && Inside->IsLanded() && FVector::Dist(Inside->GetRampPromptLocation(true), At) < ReachOnFootCm)
+		if (Inside->HasRamp() && (Inside->CanOpenRamp() || Inside->IsRampOpen()) && FVector::Dist(Inside->GetRampPromptLocation(true), At) < ReachOnFootCm)
 		{
 			FSpaceHotspot Spot;
 			Spot.Label = Inside->IsRampOpen() ? LOCTEXT("RampCloseSpot", "ZAVŘÍT RAMPU") : LOCTEXT("RampOpenSpot", "OTEVŘÍT RAMPU");
