@@ -1883,6 +1883,7 @@
  "no_nanite_parts": [
   "Decals",
   "RampDecals",
+  "PilotSeat",
   "Interior",
   "Screens",
   "InteriorKit",

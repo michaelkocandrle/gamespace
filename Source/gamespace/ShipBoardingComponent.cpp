@@ -646,7 +646,7 @@ void UShipBoardingComponent::SetInteriorWalk(bool bWalking)
 	for (UStaticMeshComponent* Mesh : Meshes)
 	{
 		const FString Name = Mesh->GetName();
-		const bool bRoom = Name == TEXT("Interior") || Name == TEXT("InteriorKit") || Name.StartsWith(TEXT("InteriorMod_"));
+		const bool bRoom = Name == TEXT("Interior") || Name == TEXT("InteriorKit") || Name == TEXT("PilotSeat") || Name.StartsWith(TEXT("InteriorMod_"));
 		if (!bRoom || !Mesh->GetStaticMesh())
 		{
 			continue;
@@ -719,6 +719,8 @@ APawn* UShipBoardingComponent::LeaveSeat()
 		{
 			SpaceController->PlaySeatTransition(Seated, Character, Character->GetSeatBlendSeconds() * 0.85f, 18.f, 10.f);
 		}
+		// the empty seat turns back to face the cabin once the pilot is out of it
+		SetSeatFacingCabin(true, Character->GetSeatBlendSeconds() * 0.85f, 0.9f);
 	}
 	UE_LOG(LogSpaceship, Log, TEXT("%s: pilot up from the seat at %s"), *Ship->GetName(), *Start.GetLocation().ToString());
 	return Pilot;
@@ -974,4 +976,119 @@ void UShipBoardingComponent::PlayRampSound(bool bOpen)
 	FVector Hinge = Ship->GetActorLocation();
 	Ship->GetHullSocketLocation(TEXT("Ramp_hinge"), Hinge);
 	UGameplayStatics::PlaySoundAtLocation(this, Sound, Hinge, FRotator::ZeroRotator, USpaceUserSettings::GetEffectsVolume());
+}
+
+// -------------------------------------------------------------------------------------------
+// Pilot seat swivel (author 10. 10. 2026)
+// -------------------------------------------------------------------------------------------
+
+namespace ShipSeat
+{
+	constexpr float CabinYawDeg = 180.f;
+}
+
+void UShipBoardingComponent::FindSeat()
+{
+	bSeatFound = true;
+	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	FVector PivotWorld;
+	if (!Ship->Hull || !Ship->GetHullSocketLocation(TEXT("Seat_pivot"), PivotWorld))
+	{
+		return;
+	}
+	TArray<UStaticMeshComponent*> Meshes;
+	Ship->GetComponents<UStaticMeshComponent>(Meshes);
+	USceneComponent* Parent = nullptr;
+	for (UStaticMeshComponent* Mesh : Meshes)
+	{
+		const FString Name = Mesh->GetName();
+		// the seat and the kit's arms and back on it (InteriorMod_<n>_Cockpit_SeatArm07W_L ...)
+		if (Mesh->GetStaticMesh() && (Name == TEXT("PilotSeat") || Name.Contains(TEXT("Cockpit_Seat"))))
+		{
+			SeatParts.Add({ Mesh, Mesh->GetRelativeTransform() });
+			if (Name == TEXT("PilotSeat"))
+			{
+				Parent = Mesh->GetAttachParent();
+			}
+		}
+	}
+	if (SeatParts.IsEmpty())
+	{
+		return;
+	}
+	const FTransform ParentTransform = Parent ? Parent->GetComponentTransform() : Ship->GetActorTransform();
+	SeatPivotRel = ParentTransform.InverseTransformPosition(PivotWorld);
+	SeatAxisRel = ParentTransform.InverseTransformVectorNoScale(Ship->GetActorUpVector()).GetSafeNormal();
+	// nobody in it: it waits facing the cabin
+	const FVector Before = SeatParts[0].Mesh.IsValid() ? Ship->GetActorTransform().InverseTransformPosition(SeatParts[0].Mesh->Bounds.Origin) : FVector::ZeroVector;
+	SeatCabin = SeatCabinTarget = Ship->IsPlayerControlled() ? 0.f : 1.f;
+	ApplySeat();
+	const FVector After = SeatParts[0].Mesh.IsValid() ? Ship->GetActorTransform().InverseTransformPosition(SeatParts[0].Mesh->Bounds.Origin) : FVector::ZeroVector;
+	UE_LOG(LogSpaceship, Display, TEXT("%s: pilot seat of %d parts swivels about %s (ship cm); %s centre %s -> %s, cabin %.0f"), *Ship->GetName(),
+		SeatParts.Num(), *Ship->GetActorTransform().InverseTransformPosition(PivotWorld).ToString(),
+		SeatParts[0].Mesh.IsValid() ? *SeatParts[0].Mesh->GetName() : TEXT("-"), *Before.ToString(), *After.ToString(), SeatCabin);
+}
+
+void UShipBoardingComponent::SetSeatFacingCabin(bool bCabin, float DelaySeconds, float TurnSeconds)
+{
+	if (!bSeatFound)
+	{
+		FindSeat();
+	}
+	SeatCabinTarget = bCabin ? 1.f : 0.f;
+	SeatDelay = DelaySeconds;
+	SeatTurnSeconds = FMath::Max(TurnSeconds, 0.05f);
+}
+
+void UShipBoardingComponent::TickSeat(float DeltaSeconds)
+{
+	if (!bSeatFound)
+	{
+		FindSeat();
+	}
+	if (SeatParts.IsEmpty() || SeatCabin == SeatCabinTarget)
+	{
+		return;
+	}
+	if (SeatDelay > 0.f)
+	{
+		SeatDelay -= DeltaSeconds;
+		return;
+	}
+	SeatCabin = FMath::FInterpConstantTo(SeatCabin, SeatCabinTarget, DeltaSeconds, 1.f / SeatTurnSeconds);
+	ApplySeat();
+}
+
+void UShipBoardingComponent::ApplySeat()
+{
+	const float A = FMath::SmoothStep(0.f, 1.f, SeatCabin);
+	const FQuat Turn(SeatAxisRel, FMath::DegreesToRadians(ShipSeat::CabinYawDeg * A));
+	const FTransform Pivot = FTransform(FQuat::Identity, -SeatPivotRel) * FTransform(Turn) * FTransform(FQuat::Identity, SeatPivotRel);
+	for (const FSeatPart& Part : SeatParts)
+	{
+		if (UStaticMeshComponent* Mesh = Part.Mesh.Get())
+		{
+			Mesh->SetRelativeTransform(Part.FlyingRel * Pivot);
+		}
+	}
+}
+
+bool UShipBoardingComponent::GetSeatSwivel(FVector& OutPivot, FVector& OutAxis, float& OutYawDeg) const
+{
+	if (SeatParts.IsEmpty())
+	{
+		return false;
+	}
+	const ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	if (!Ship->GetHullSocketLocation(TEXT("Seat_pivot"), OutPivot))
+	{
+		return false;
+	}
+	OutAxis = Ship->GetActorUpVector();
+	// (the parts turn about the parent-space axis; in the world the same turn is about the ship's up, the sign as the
+	// parent's handedness gives it - measured the same way as the parts)
+	const USceneComponent* Parent = SeatParts[0].Mesh.IsValid() ? SeatParts[0].Mesh->GetAttachParent() : nullptr;
+	const float Handed = Parent && Parent->GetComponentTransform().GetDeterminant() < 0.f ? -1.f : 1.f;
+	OutYawDeg = Handed * ShipSeat::CabinYawDeg * FMath::SmoothStep(0.f, 1.f, SeatCabin);
+	return true;
 }

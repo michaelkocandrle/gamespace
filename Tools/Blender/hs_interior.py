@@ -1133,7 +1133,15 @@ def build(recipe, layout, coll, mats, ship, hull):
             if COCKPIT.get("style") == "wrap":
                 # procedural, like the exterior: no AI geometry in the ship (author, 25. 9. 2026)
                 import hs_cockpit
-                hs_cockpit.pilot_seat_v3(g, (x0, x1, y0, y1), zr)   # (v3 5. 10. 2026; pilot_seat = the old box-pad seat)
+                # its own part PilotSeat (author 10. 10. 2026: the seat faces the cabin and swivels to the canopy with the
+                # pilot sitting down); the pedestal and its rails stay Interior. Pivot: the swivel post
+                seat_g = B()
+                hs_cockpit.pilot_seat_v3(seat_g, (x0, x1, y0, y1), zr)   # (v3 5. 10. 2026; pilot_seat = the old box-pad seat)
+                for key, sbm in seat_g.bm.items():
+                    if sbm.verts:
+                        so = hp.finish(sbm, "SM_Ship_%s_PilotSeat_%s" % (ship, key), coll, {"angle_deg": 30, "width": 0.004, "segments": 2})
+                        so.data.materials.append(mats[key])
+                sockets["Seat_pivot"] = Vector(((x0 + x1) / 2 + 0.05, (y0 + y1) / 2, zr[0]))
             else:
                 seat(coll, mats, spec, (x0, x1, y0, y1), zr)
         else:

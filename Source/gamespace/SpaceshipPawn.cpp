@@ -684,6 +684,8 @@ bool ASpaceshipPawn::RequestLeaveSeatInFlight()
 	return true;
 }
 
+void ASpaceshipPawn::SetSeatFacingCabin(bool bCabin, float DelaySeconds, float TurnSeconds) { Boarding->SetSeatFacingCabin(bCabin, DelaySeconds, TurnSeconds); }
+bool ASpaceshipPawn::GetSeatSwivel(FVector& OutPivot, FVector& OutAxis, float& OutYawDeg) const { return Boarding->GetSeatSwivel(OutPivot, OutAxis, OutYawDeg); }
 bool ASpaceshipPawn::HasRamp() const { return Boarding->HasRamp(); }
 bool ASpaceshipPawn::IsRampOpen() const { return Boarding->IsRampOpen(); }
 float ASpaceshipPawn::GetRampOpenAlpha() const { return Boarding->GetRampOpenAlpha(); }
@@ -1010,6 +1012,7 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 	StepFlight(DeltaSeconds);
 	Boarding->TickDoors(DeltaSeconds);
 	Boarding->TickRamp(DeltaSeconds);
+	Boarding->TickSeat(DeltaSeconds);
 	Presentation->UpdateCameraEffects(DeltaSeconds);
 	Presentation->UpdateEngineAudio(DeltaSeconds);
 	Presentation->UpdateShipLights(DeltaSeconds);

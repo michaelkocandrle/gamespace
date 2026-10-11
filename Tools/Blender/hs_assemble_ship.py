@@ -162,6 +162,9 @@ def main(argv):
         elif o.name.endswith("_Hologram"):
             # the cockpit's ship hologram (hs_cockpit.build_hologram): additive, turns about its own centre
             assign[o.name] = "Hologram"
+        elif "_PilotSeat_" in o.name:
+            # the pilot's seat (hs_interior): swivels about Seat_pivot in the game
+            assign[o.name] = "PilotSeat"
         elif "_RampLeaf" in o.name:
             # the rear ramp's inner side (hs_ramp.leaf); the outer skin joins it in hs_ramp.split
             assign[o.name] = "RampLeaf"
@@ -265,11 +268,11 @@ def main(argv):
     hull = out[""]
     parts = {k: v for k, v in out.items() if k}
     regions = [{"name": c["name"], "box": shift_box(c["box"], off)} for c in cfg["collision"]]
-    ai.build_collision(ship, [o for k, o in out.items() if k not in ("Canopy", "Decals", "Interior", "Screens", "InteriorKit", "InteriorDecals", "Hologram", "RampLeaf", "RampDecals")], regions)
+    ai.build_collision(ship, [o for k, o in out.items() if k not in ("Canopy", "Decals", "Interior", "Screens", "InteriorKit", "InteriorDecals", "Hologram", "RampLeaf", "RampDecals", "PilotSeat")], regions)
     sockets = {}
     for name, loc in json.loads(bpy.context.scene.get("hs_display_sockets", "{}")).items():
         # controls the code finds by socket keep their own name (Control_pwr), displays get Display_<name>
-        cfg["sockets"][name if name.startswith(("Control_", "Ramp_")) else "Display_" + name] = {"location": loc}
+        cfg["sockets"][name if name.startswith(("Control_", "Ramp_", "Seat_")) else "Display_" + name] = {"location": loc}
     for name, s in cfg["sockets"].items():
         s = dict(s)
         if "location" in s:

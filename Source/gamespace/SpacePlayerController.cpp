@@ -255,6 +255,15 @@ void ASpacePlayerController::TickSeatTransition(float DeltaTime)
 	const float E = A * A * A * (A * (A * 6.f - 15.f) + 10.f);       // smootherstep: a body's start and stop
 	FMinimalViewInfo ToView;
 	To->CalcCamera(DeltaTime, ToView);
+	// the pilot seat swivelling with the pilot (it waits facing the cabin): the seated view turns with it
+	FVector Pivot, Axis;
+	float SeatYaw = 0.f;
+	if (const ASpaceshipPawn* Ship = Cast<ASpaceshipPawn>(To); Ship && Ship->GetSeatSwivel(Pivot, Axis, SeatYaw) && SeatYaw != 0.f)
+	{
+		const FQuat Turn(Axis, FMath::DegreesToRadians(SeatYaw));
+		ToView.Location = Pivot + Turn.RotateVector(ToView.Location - Pivot);
+		ToView.Rotation = (Turn * ToView.Rotation.Quaternion()).Rotator();
+	}
 	// a quadratic arc over the backrest, in the ship's (or the walker's) up
 	const FVector Up = To->GetActorUpVector();
 	const FVector Mid = FMath::Lerp(SeatFrom.Location, ToView.Location, 0.5f) + Up * SeatArcCm;

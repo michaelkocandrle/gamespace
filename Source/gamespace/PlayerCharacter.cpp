@@ -687,6 +687,8 @@ bool APlayerCharacter::TryInteriorInteract()
 		const FMinimalViewInfo Standing = PlayerController->PlayerCameraManager ? PlayerController->PlayerCameraManager->GetCameraCacheView() : FMinimalViewInfo();
 		PlayerController->Possess(Ship);
 		Ship->OnBoarded();
+		// the seat waits facing the cabin: the view turns into it, then the seat swivels to the canopy with the pilot
+		Ship->SetSeatFacingCabin(false, SeatBlendSeconds * 0.45f, SeatBlendSeconds * 0.55f);
 		// the view travels from the standing eye over the backrest down into the seat, the head dipping
 		if (ASpacePlayerController* SpaceController = Cast<ASpacePlayerController>(PlayerController))
 		{

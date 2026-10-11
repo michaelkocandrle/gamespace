@@ -1,0 +1,94 @@
+{
+  "_comment": "The pilot seat swivel (author 10. 10. 2026): up from the seat, it turns to face the cabin; back to it, sit down - the view turns into it, then the seat swivels to the canopy with the pilot. Run -Editor.",
+  "shots": [
+    {
+      "name": "flat",
+      "camera": "chase",
+      "altitude_m": 40.0,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 2.0,
+      "console": [
+        "space.FlatSpot 5 8"
+      ]
+    },
+    {
+      "name": "warmup",
+      "camera": "chase",
+      "altitude_m": 3.2,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 10.0,
+      "console": [
+        "stat none"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "name": "a_stand_up",
+      "console": [
+        "space.Interact",
+        "space.Where"
+      ],
+      "settle": 3.0
+    },
+    {
+      "hud": 1,
+      "name": "b_empty_seat_side",
+      "console": [
+        "space.Where"
+      ],
+      "settle": 2.0,
+      "camera_local": [
+        5.0,
+        -0.6,
+        1.1
+      ],
+      "look_local": [
+        6.75,
+        0.0,
+        0.5
+      ],
+      "fov": 60
+    },
+    {
+      "hud": 1,
+      "name": "c_sit",
+      "console": [
+        "space.Interact"
+      ],
+      "settle": 3.0,
+      "camera_local": [
+        5.0,
+        -0.6,
+        1.1
+      ],
+      "look_local": [
+        6.75,
+        0.0,
+        0.5
+      ],
+      "fov": 60
+    },
+    {
+      "hud": 1,
+      "name": "d_seated_side",
+      "console": [],
+      "settle": 1.0,
+      "camera_local": [
+        5.0,
+        -0.6,
+        1.1
+      ],
+      "look_local": [
+        6.75,
+        0.0,
+        0.5
+      ],
+      "fov": 60
+    }
+  ]
+}

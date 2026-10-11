@@ -350,8 +350,10 @@ def check_and_fix_mesh(static_mesh, mesh, report):
     shapes = sum(len(agg.get_editor_property(k)) for k in ("convex_elems", "box_elems", "sphere_elems", "sphyl_elems"))
     if shapes and not mesh["collision_hulls"]:
         # a reimport keeps hulls the FBX no longer has (the ramp leaf's UCX box, 10. 10. 2026): drop them
-        sub = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
-        (sub or unreal.EditorStaticMeshLibrary).remove_collisions(static_mesh)
+        # (StaticMeshEditorSubsystem is None in the commandlet; an empty aggregate on the body setup does it)
+        body = static_mesh.get_editor_property("body_setup")
+        body.set_editor_property("agg_geom", unreal.KAggregateGeom())
+        unreal.EditorAssetLibrary.save_loaded_asset(static_mesh, only_if_is_dirty=False)
         notes.append("removed %d stale collision shape(s)" % shapes)
         agg = static_mesh.get_editor_property("body_setup").get_editor_property("agg_geom")
         shapes = sum(len(agg.get_editor_property(k)) for k in ("convex_elems", "box_elems", "sphere_elems", "sphyl_elems"))
@@ -556,7 +558,7 @@ def add_mesh_component(blueprint, extra):
         # Attached under Hull, which already carries the offset.
         existing.set_editor_property("relative_location", unreal.Vector(0.0, 0.0, 0.0))
         existing.set_collision_profile_name("NoCollision")
-        if extra["component"] in ("Interior", "InteriorKit") or extra["component"].startswith("Door"):
+        if extra["component"] in ("Interior", "InteriorKit", "PilotSeat") or extra["component"].startswith("Door"):
             # walkable (author 29. 9. 2026): the pawn turns the rooms' collision on while someone walks inside
             # (ASpaceshipPawn::SetInteriorWalk); the character collides with the mesh itself, not a box round it.
             # Per polygon for now - the look first, collision boxes with the optimisation at the end

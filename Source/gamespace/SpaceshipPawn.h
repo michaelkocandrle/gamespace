@@ -234,6 +234,9 @@ public:
 	bool IsInsideRooms(const FVector& Location) const;
 	bool IsNearRampControl(const FVector& Location) const;
 	FVector GetRampPromptLocation(bool bInside) const;
+	/** The pilot seat's swivel (UShipBoardingComponent): faces the cabin empty, the canopy flown. */
+	void SetSeatFacingCabin(bool bCabin, float DelaySeconds = 0.f, float TurnSeconds = 0.9f);
+	bool GetSeatSwivel(FVector& OutPivot, FVector& OutAxis, float& OutYawDeg) const;
 	/** Tests: moves the ramp by DeltaSeconds without a world tick. */
 	void DebugStepRamp(float DeltaSeconds);
 

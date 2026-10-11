@@ -115,7 +115,29 @@ public:
 	bool IsNearRampControl(const FVector& Location) const;
 	/** Where the ramp's prompt sits: inside by its switch, outside on the leaf's middle. */
 	FVector GetRampPromptLocation(bool bInside) const;
+	// --- Pilot seat swivel (author 10. 10. 2026): faces the cabin, turns to the canopy as the pilot sits ---------------
+	/** Turn the seat to face the cabin (aft) or the canopy, starting after DelaySeconds, taking TurnSeconds. */
+	void SetSeatFacingCabin(bool bCabin, float DelaySeconds = 0.f, float TurnSeconds = 0.9f);
+	void TickSeat(float DeltaSeconds);
+	/** The seat's swivel in the world: its pivot and the yaw it is turned by now from the flying pose (degrees). */
+	bool GetSeatSwivel(FVector& OutPivot, FVector& OutAxis, float& OutYawDeg) const;
 private:
+	void FindSeat();
+	void ApplySeat();
+	struct FSeatPart
+	{
+		TWeakObjectPtr<class UStaticMeshComponent> Mesh;
+		FTransform FlyingRel;
+	};
+	TArray<FSeatPart> SeatParts;
+	FVector SeatPivotRel = FVector::ZeroVector;
+	FVector SeatAxisRel = FVector::ZAxisVector;
+	/** 0 = the flying pose (as built), 1 = facing the cabin. */
+	float SeatCabin = 0.f;
+	float SeatCabinTarget = 0.f;
+	float SeatDelay = 0.f;
+	float SeatTurnSeconds = 0.9f;
+	bool bSeatFound = false;
 	void FindRamp();
 	struct FRampPart
 	{
