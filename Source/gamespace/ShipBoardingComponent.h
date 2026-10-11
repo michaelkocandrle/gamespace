@@ -91,6 +91,9 @@ private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<class UWidgetComponent>> DoorPanels;
 	void UpdateDoorPanels();
+	/** Both panels of every door on the wall's real face (a trace, once the rooms' collision is on). */
+	void PlaceDoorPanels();
+	bool bDoorPanelsPlaced = false;
 public:
 	/** The door's touch panel in the world (interact mode clicks it); false without one. */
 	bool GetDoorPanelLocation(int32 Door, FVector& OutLocation) const;

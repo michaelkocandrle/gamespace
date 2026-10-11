@@ -36,7 +36,7 @@ int32 USpaceDoorPanel::NativePaint(const FPaintArgs& Args, const FGeometry& Geom
 
 	// a faint smoked field, the frame of light with heavier corner marks, the emitter's line at the foot
 	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(FVector2f(W - 16.f, H - 30.f), FSlateLayoutTransform(FVector2f(8.f, 8.f))),
-		White, ESlateDrawEffect::None, FLinearColor(0.f, 0.04f, 0.07f, 0.55f));
+		White, ESlateDrawEffect::None, FLinearColor(0.f, 0.04f, 0.07f, 0.8f));      // (0.55: on a lit white wall the panel read faint, 10. 10. 2026)
 	Line(Out, Layer + 1, Geometry, { {8, 8}, {W - 8, 8}, {W - 8, H - 22}, {8, H - 22}, {8, 8} }, Faded(0.7f), 2.5f);
 	const float Arm = 22.f;
 	for (const FVector2D& C : { FVector2D(8, 8), FVector2D(W - 8, 8), FVector2D(W - 8, H - 22), FVector2D(8, H - 22) })

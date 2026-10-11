@@ -363,8 +363,10 @@ void UShipBoardingComponent::FindDoors()
 		Leaf.Mesh->SetRelativeLocation(Leaf.ClosedRel);                  // the game starts with the doors shut
 	}
 	ApplyDoorCollision();
-	// the holographic touch panels beside the doorways (a world-space widget each, facing forward like the leaf)
-	DoorPanels.SetNum(DoorOpen.Num());
+	// the holographic touch panels beside the doorways: one on each face of the wall (author 10. 10. 2026: from the hold
+	// the door had none - a world-space widget faces one way), laid on the wall's real face by PlaceDoorPanels once the
+	// rooms' collision is on; until then in front of the socket
+	DoorPanels.SetNum(DoorOpen.Num() * 2);
 	for (int32 Door = 0; Door < DoorOpen.Num(); ++Door)
 	{
 		FVector At;
@@ -372,35 +374,36 @@ void UShipBoardingComponent::FindDoors()
 		{
 			continue;
 		}
-		UWidgetComponent* Panel = NewObject<UWidgetComponent>(Ship, FName(*FString::Printf(TEXT("DoorPanel%d"), Door)));
-		Panel->SetupAttachment(Ship->GetRootComponent());
-		Panel->SetWidgetSpace(EWidgetSpace::World);
-		Panel->SetWidgetClass(USpaceDoorPanel::StaticClass());
-		Panel->SetDrawSize(FVector2D(240.0, 330.0));
-		Panel->SetPivot(FVector2D(0.5, 0.5));
-		Panel->SetBlendMode(EWidgetBlendMode::Transparent);
-		Panel->SetTwoSided(false);
-		Panel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		Panel->SetCastShadow(false);
-		Panel->RegisterComponent();
-		// 11 cm further out than the socket: the kit's wall face stands proud of the bulkhead plane (at the socket the
-		// hologram was inside the wall)
-		// toward the doorway by 6 cm and 12 cm up: over the junction box, under the room's sign (critic 5. 10.)
-		FVector Toward = FVector::VectorPlaneProject(GetDoorLocation(Door) - At, Ship->GetActorUpVector());
-		Toward = FVector::VectorPlaneProject(Toward, Ship->GetActorForwardVector()).GetSafeNormal();
-		Panel->SetWorldLocation(At + Ship->GetActorForwardVector() * 11.0 + Ship->GetActorUpVector() * 12.0 + Toward * 6.0);
-		Panel->SetWorldRotation(Ship->GetActorRotation());              // facing the ship's forward, like the leaf's face
-		Panel->SetWorldScale3D(FVector(1.0, 0.065, 0.065));              // 240 x 330 px = 15.6 x 21.5 cm
-		DoorPanels[Door] = Panel;
+		for (int32 Side = 0; Side < 2; ++Side)
+		{
+			UWidgetComponent* Panel = NewObject<UWidgetComponent>(Ship, FName(*FString::Printf(TEXT("DoorPanel%d%s"), Door, Side ? TEXT("Aft") : TEXT(""))));
+			Panel->SetupAttachment(Ship->GetRootComponent());
+			Panel->SetWidgetSpace(EWidgetSpace::World);
+			Panel->SetWidgetClass(USpaceDoorPanel::StaticClass());
+			Panel->SetDrawSize(FVector2D(240.0, 330.0));
+			Panel->SetPivot(FVector2D(0.5, 0.5));
+			Panel->SetBlendMode(EWidgetBlendMode::Transparent);
+			Panel->SetTwoSided(false);
+			Panel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Panel->SetCastShadow(false);
+			Panel->RegisterComponent();
+			const FVector Out = Ship->GetActorForwardVector() * (Side ? -1.0 : 1.0);
+			Panel->SetWorldLocation(At + Out * 11.0 + Ship->GetActorUpVector() * 12.0);
+			Panel->SetWorldRotation(Out.Rotation());
+			Panel->SetWorldScale3D(FVector(1.0, 0.08, 0.08));                // 240 x 330 px = 19 x 26 cm (15.6 x 21.5 read faint)
+			DoorPanels[Door * 2 + Side] = Panel;
+		}
 	}
+	bDoorPanelsPlaced = false;
 	UpdateDoorPanels();
 }
 
 void UShipBoardingComponent::UpdateDoorPanels()
 {
-	for (int32 Door = 0; Door < DoorPanels.Num(); ++Door)
+	for (int32 Index = 0; Index < DoorPanels.Num(); ++Index)
 	{
-		if (UWidgetComponent* Panel = DoorPanels[Door])
+		const int32 Door = Index / 2;
+		if (UWidgetComponent* Panel = DoorPanels[Index])
 		{
 			if (USpaceDoorPanel* Widget = Cast<USpaceDoorPanel>(Panel->GetUserWidgetObject()))
 			{
@@ -414,21 +417,37 @@ void UShipBoardingComponent::UpdateDoorPanels()
 
 bool UShipBoardingComponent::GetDoorPanelLocation(int32 Door, FVector& OutLocation) const
 {
-	if (!DoorPanels.IsValidIndex(Door) || !DoorPanels[Door])
+	// the panel on the walker's side of the wall
+	const UWorld* World = GetWorld();
+	const APawn* Walker = World && World->GetFirstPlayerController() ? World->GetFirstPlayerController()->GetPawn() : nullptr;
+	const UWidgetComponent* Best = nullptr;
+	for (int32 Side = 0; Side < 2; ++Side)
+	{
+		const UWidgetComponent* Panel = DoorPanels.IsValidIndex(Door * 2 + Side) ? DoorPanels[Door * 2 + Side].Get() : nullptr;
+		if (Panel && (!Best || (Walker && FVector::Dist(Panel->GetComponentLocation(), Walker->GetActorLocation())
+			< FVector::Dist(Best->GetComponentLocation(), Walker->GetActorLocation()))))
+		{
+			Best = Panel;
+		}
+	}
+	if (!Best)
 	{
 		return CastChecked<ASpaceshipPawn>(GetOwner())->GetHullSocketLocation(FName(*FString::Printf(TEXT("Control_door%d_panel"), Door)), OutLocation);
 	}
-	OutLocation = DoorPanels[Door]->GetComponentLocation();
+	OutLocation = Best->GetComponentLocation();
 	return true;
 }
 
 void UShipBoardingComponent::SetDoorPanelHovered(int32 Door, bool bHovered)
 {
-	if (DoorPanels.IsValidIndex(Door) && DoorPanels[Door])
+	for (int32 Side = 0; Side < 2; ++Side)
 	{
-		if (USpaceDoorPanel* Widget = Cast<USpaceDoorPanel>(DoorPanels[Door]->GetUserWidgetObject()))
+		if (DoorPanels.IsValidIndex(Door * 2 + Side) && DoorPanels[Door * 2 + Side])
 		{
-			Widget->bHovered = bHovered;
+			if (USpaceDoorPanel* Widget = Cast<USpaceDoorPanel>(DoorPanels[Door * 2 + Side]->GetUserWidgetObject()))
+			{
+				Widget->bHovered = bHovered;
+			}
 		}
 	}
 }
@@ -500,6 +519,10 @@ void UShipBoardingComponent::TickDoors(float DeltaSeconds)
 	if (DoorLeaves.IsEmpty())
 	{
 		return;
+	}
+	if (bInteriorWalked && !bDoorPanelsPlaced)
+	{
+		PlaceDoorPanels();
 	}
 	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
 	const APawn* Walker = Ship->GetWorld() && Ship->GetWorld()->GetFirstPlayerController() ? Ship->GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr;
@@ -687,6 +710,10 @@ void UShipBoardingComponent::SetInteriorWalk(bool bWalking)
 		WalkGravity = nullptr;
 	}
 	UE_LOG(LogSpaceship, Log, TEXT("%s: interior %s"), *Ship->GetName(), bWalking ? TEXT("walked (per-polygon collision, gravity)") : TEXT("closed"));
+	if (bWalking)
+	{
+		PlaceDoorPanels();
+	}
 	ApplyDoorCollision();
 }
 
@@ -1129,4 +1156,54 @@ void UShipBoardingComponent::SpawnTerminal()
 	}
 	Terminal->AttachToActor(Ship, FAttachmentTransformRules::KeepWorldTransform);
 	UE_LOG(LogSpaceship, Log, TEXT("%s: engineering terminal at %s"), *Ship->GetName(), *Ship->GetActorTransform().InverseTransformPosition(At).ToString());
+}
+
+void UShipBoardingComponent::PlaceDoorPanels()
+{
+	if (bDoorPanelsPlaced || DoorPanels.IsEmpty())
+	{
+		return;
+	}
+	bDoorPanelsPlaced = true;
+	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	UWorld* World = Ship->GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	const FVector Fwd = Ship->GetActorForwardVector();
+	const FVector Up = Ship->GetActorUpVector();
+	FCollisionQueryParams Params(TEXT("DoorPanel"), true);
+	for (const FDoorLeaf& Leaf : DoorLeaves)
+	{
+		if (const UStaticMeshComponent* Mesh = Leaf.Mesh.Get())
+		{
+			Params.AddIgnoredComponent(Mesh);
+		}
+	}
+	for (int32 Index = 0; Index < DoorPanels.Num(); ++Index)
+	{
+		UWidgetComponent* Panel = DoorPanels[Index];
+		FVector At;
+		if (!Panel || !Ship->GetHullSocketLocation(FName(*FString::Printf(TEXT("Control_door%d_panel"), Index / 2)), At))
+		{
+			continue;
+		}
+		// from 90 cm out in the room back to the wall at the panel's height, beside the wall's physical control box (the
+		// socket: 10. 10. 2026 the hologram sat behind that box) - 18 cm further from the doorway, 20 cm up
+		const FVector Out = Fwd * ((Index % 2) ? -1.0 : 1.0);
+		FVector Away = FVector::VectorPlaneProject(At - GetDoorLocation(Index / 2), Up);
+		Away = FVector::VectorPlaneProject(Away, Fwd).GetSafeNormal();
+		const FVector Mid = At + Up * 20.0 + Away * 18.0;
+		FHitResult Hit;
+		if (World->LineTraceSingleByChannel(Hit, Mid + Out * 90.0, Mid - Out * 20.0, ECC_Visibility, Params)
+			&& FVector::DotProduct(Hit.ImpactNormal, Out) > 0.7)
+		{
+			Panel->SetWorldLocation(Hit.ImpactPoint + Hit.ImpactNormal * 1.2);
+			// facing out of the wall, upright with the ship (a bare normal's Rotation() laid the text on its side)
+			Panel->SetWorldRotation(FRotationMatrix::MakeFromXZ(Hit.ImpactNormal, Up).Rotator());
+			UE_LOG(LogSpaceship, Log, TEXT("%s: door %d panel %s on %s"), *Ship->GetName(), Index / 2, (Index % 2) ? TEXT("aft") : TEXT("fwd"),
+				*GetNameSafe(Hit.GetComponent()));
+		}
+	}
 }

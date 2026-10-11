@@ -1,0 +1,76 @@
+{
+  "_comment": "Door holo panels (author 10. 10. 2026: tune the doors and their opening holo display). Run -Editor.",
+  "shots": [
+    {
+      "name": "flat",
+      "camera": "chase",
+      "altitude_m": 40.0,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 2.0,
+      "console": [
+        "space.FlatSpot 5 8"
+      ]
+    },
+    {
+      "name": "warmup",
+      "camera": "chase",
+      "altitude_m": 3.2,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 10.0,
+      "console": [
+        "stat none"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "name": "a_stand_up",
+      "console": [
+        "space.Interact",
+        "space.Where"
+      ],
+      "settle": 3.0
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "name": "b_door1_from_cabin",
+      "console": [
+        "space.WalkAt 120 30 0 0"
+      ],
+      "settle": 2.5
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "name": "c_door1_interact",
+      "console": [
+        "space.InteractMode 1"
+      ],
+      "settle": 1.5
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "name": "d_door0_from_tech",
+      "console": [
+        "space.InteractMode 0",
+        "space.WalkAt -100 -30 0 0"
+      ],
+      "settle": 2.0
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "name": "e_door0_from_hold",
+      "console": [
+        "space.WalkAt -330 -40 180 0"
+      ],
+      "settle": 2.0
+    }
+  ]
+}
