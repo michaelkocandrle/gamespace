@@ -227,7 +227,16 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 			// a little under the eye on the door (SC's prompt sits on the panel, not at the walker's feet)
 			OutTarget.WorldLocation = Inside->GetDoorPromptLocation(Door) + Inside->GetActorUpVector() * 25.0;
 		}
-		else if (Inside->IsNearRamp(At) && bRamp)
+		else if (Inside->HasRamp() && Inside->IsNearRampControl(At))
+		{
+			// the rear ramp's switch (variant A, 10. 10. 2026): down for the walk out, up again
+			OutTarget.bValid = true;
+			OutTarget.bAvailable = Inside->IsLanded();
+			OutTarget.Label = !Inside->IsLanded() ? LOCTEXT("RampShutFlight", "RAMPA ZAVŘENÁ ZA LETU")
+				: Inside->IsRampOpen() ? LOCTEXT("RampClose", "ZAVŘÍT RAMPU") : LOCTEXT("RampOpen", "OTEVŘÍT RAMPU");
+			OutTarget.WorldLocation = Inside->GetRampPromptLocation(true);
+		}
+		else if (!Inside->HasRamp() && Inside->IsNearRamp(At) && bRamp)
 		{
 			OutTarget.bValid = true;
 			OutTarget.bAvailable = Inside->IsLanded();
@@ -278,7 +287,23 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 			};
 			OutHotspots.Add(MoveTemp(Spot));
 		}
-		if (bRamp && FVector::Dist(Ramp, At) < ReachOnFootCm && Inside->IsLanded())
+		if (Inside->HasRamp() && Inside->IsLanded() && FVector::Dist(Inside->GetRampPromptLocation(true), At) < ReachOnFootCm)
+		{
+			FSpaceHotspot Spot;
+			Spot.Label = Inside->IsRampOpen() ? LOCTEXT("RampCloseSpot", "ZAVŘÍT RAMPU") : LOCTEXT("RampOpenSpot", "OTEVŘÍT RAMPU");
+			Spot.WorldLocation = Inside->GetRampPromptLocation(true);
+			Spot.SizeCm = 50.f;
+			Spot.Use = [WeakCharacter](bool bPrimary)
+			{
+				if (APlayerCharacter* Live = WeakCharacter.Get(); bPrimary && Live && Live->GetInteriorShip()
+					&& Live->GetInteriorShip()->IsNearRampControl(Live->GetActorLocation()))
+				{
+					Live->Interact();
+				}
+			};
+			OutHotspots.Add(MoveTemp(Spot));
+		}
+		else if (bRamp && !Inside->HasRamp() && FVector::Dist(Ramp, At) < ReachOnFootCm && Inside->IsLanded())
 		{
 			FSpaceHotspot Spot;
 			Spot.Label = LOCTEXT("RampSpot", "VYSTOUPIT");
@@ -302,6 +327,12 @@ void SpaceInteraction::Gather(APawn* Pawn, FSpaceInteractTarget& OutTarget, TArr
 	{
 		FVector Ramp;
 		OutTarget.bValid = true;
+		if (Ship->HasRamp())
+		{
+			OutTarget.Label = Ship->IsRampOpen() ? LOCTEXT("RampCloseOut", "ZAVŘÍT RAMPU") : LOCTEXT("RampOpenOut", "OTEVŘÍT RAMPU");
+			OutTarget.WorldLocation = Ship->GetRampPromptLocation(false);
+			return;
+		}
 		OutTarget.Label = Ship->HasWalkInterior() ? LOCTEXT("WalkIn", "VSTOUPIT DO LODI") : LOCTEXT("Board", "NASTOUPIT");
 		OutTarget.WorldLocation = Ship->GetHullSocketLocation(TEXT("WalkRamp"), Ramp) ? Ramp
 			: Ship->GetHullSocketLocation(TEXT("Exit"), Ramp) ? Ramp : Ship->GetActorLocation();

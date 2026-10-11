@@ -324,8 +324,40 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 		AddMovementInput(Heading.GetRightVector(), float(Input.X));
 	}
 
+	UpdateRampWalk();
 	UpdateFootsteps(DeltaSeconds);
 	UpdateView();
+}
+
+void APlayerCharacter::UpdateRampWalk()
+{
+	// up the open ramp into the ship and down it out again, on foot (author 10. 10. 2026: the whole loop without a
+	// teleport): the ramp's zone switches the walk to the ship's rooms and back
+	const FVector At = GetActorLocation();
+	if (ASpaceshipPawn* Ship = InteriorShip.Get())
+	{
+		if (Ship->HasRamp() && Ship->IsLanded() && !Ship->IsInRampZone(At) && !Ship->IsInsideRooms(At))
+		{
+			InteriorShip = nullptr;
+			Ship->SetInteriorWalk(false);
+			ASpacePlayerController::SetShipInteriorLighting(false);
+			SetShipCapsule(false);
+			InteriorTransitionTime = GetGameTimeSinceCreation();
+			UE_LOG(LogPlayerCharacter, Log, TEXT("%s walks off the ramp of %s"), *GetName(), *Ship->GetName());
+		}
+		return;
+	}
+	for (TActorIterator<ASpaceshipPawn> It(GetWorld()); It; ++It)
+	{
+		if (It->IsPlayerControlled() || !It->HasRamp() || It->GetRampOpenAlpha() < 0.95f || !It->IsInRampZone(At))
+		{
+			continue;
+		}
+		It->SetInteriorWalk(true);
+		BoardInterior(*It, (GravityFrame * FRotator(0.f, LookYaw, 0.f).Quaternion()).GetForwardVector());
+		UE_LOG(LogPlayerCharacter, Log, TEXT("%s walks up the ramp into %s"), *GetName(), *It->GetName());
+		return;
+	}
 }
 
 void APlayerCharacter::UpdateFootsteps(float DeltaSeconds)
@@ -575,6 +607,13 @@ bool APlayerCharacter::TryBoardShip()
 	{
 		return false;
 	}
+	if (Ship->HasRamp())
+	{
+		// the rear ramp opens (or shuts); the walk up it boards the ship (UpdateRampWalk)
+		Ship->SetRampOpen(!Ship->IsRampOpen());
+		UE_LOG(LogPlayerCharacter, Log, TEXT("%s %s the ramp of %s"), *GetName(), Ship->IsRampOpen() ? TEXT("opens") : TEXT("shuts"), *Ship->GetName());
+		return true;
+	}
 	if (Ship->HasWalkInterior())
 	{
 		// a walkable ship: in up the ramp, into the hold (then to the seat on foot)
@@ -658,7 +697,18 @@ bool APlayerCharacter::TryInteriorInteract()
 		SetLifeSpan(SeatBlendSeconds + 0.2f);
 		return true;
 	}
-	if (Ship->IsNearRamp(GetActorLocation()))
+	if (Ship->HasRamp() && Ship->IsNearRampControl(GetActorLocation()))
+	{
+		// the ramp's switch by the passage: down for the walk out (UpdateRampWalk), up again
+		if (!Ship->IsLanded())
+		{
+			UE_LOG(LogPlayerCharacter, Log, TEXT("%s: the ramp of %s stays shut in flight"), *GetName(), *Ship->GetName());
+			return false;
+		}
+		Ship->SetRampOpen(!Ship->IsRampOpen());
+		return true;
+	}
+	if (!Ship->HasRamp() && Ship->IsNearRamp(GetActorLocation()))
 	{
 		if (!Ship->IsLanded())
 		{

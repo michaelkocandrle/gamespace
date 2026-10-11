@@ -684,6 +684,15 @@ bool ASpaceshipPawn::RequestLeaveSeatInFlight()
 	return true;
 }
 
+bool ASpaceshipPawn::HasRamp() const { return Boarding->HasRamp(); }
+bool ASpaceshipPawn::IsRampOpen() const { return Boarding->IsRampOpen(); }
+float ASpaceshipPawn::GetRampOpenAlpha() const { return Boarding->GetRampOpenAlpha(); }
+void ASpaceshipPawn::SetRampOpen(bool bOpen) { Boarding->SetRampOpen(bOpen); }
+bool ASpaceshipPawn::IsInRampZone(const FVector& Location) const { return Boarding->IsInRampZone(Location); }
+bool ASpaceshipPawn::IsInsideRooms(const FVector& Location) const { return Boarding->IsInsideRooms(Location); }
+bool ASpaceshipPawn::IsNearRampControl(const FVector& Location) const { return Boarding->IsNearRampControl(Location); }
+FVector ASpaceshipPawn::GetRampPromptLocation(bool bInside) const { return Boarding->GetRampPromptLocation(bInside); }
+void ASpaceshipPawn::DebugStepRamp(float DeltaSeconds) { Boarding->TickRamp(DeltaSeconds); }
 int32 ASpaceshipPawn::FindDoorNear(const FVector& Location, float ReachCm) const { return Boarding->FindDoorNear(Location, ReachCm); }
 int32 ASpaceshipPawn::FindDoorAhead(const FVector& Location, const FVector& Facing, float ReachCm) const { return Boarding->FindDoorNear(Location, ReachCm, Facing); }
 void ASpaceshipPawn::SetDoorOpen(int32 Door, bool bOpen) { Boarding->SetDoorOpen(Door, bOpen); }
@@ -1000,6 +1009,7 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 
 	StepFlight(DeltaSeconds);
 	Boarding->TickDoors(DeltaSeconds);
+	Boarding->TickRamp(DeltaSeconds);
 	Presentation->UpdateCameraEffects(DeltaSeconds);
 	Presentation->UpdateEngineAudio(DeltaSeconds);
 	Presentation->UpdateShipLights(DeltaSeconds);

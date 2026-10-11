@@ -723,3 +723,255 @@ APawn* UShipBoardingComponent::LeaveSeat()
 	UE_LOG(LogSpaceship, Log, TEXT("%s: pilot up from the seat at %s"), *Ship->GetName(), *Start.GetLocation().ToString());
 	return Pilot;
 }
+
+// -------------------------------------------------------------------------------------------
+// Rear ramp (variant A, author 10. 10. 2026; Tools/Blender/hs_ramp.py)
+// -------------------------------------------------------------------------------------------
+
+namespace ShipRamp
+{
+	constexpr float RampSeconds = 3.0f;
+	constexpr double ControlReachCm = 220.0;
+	const TCHAR* const OpenSoundPath = TEXT("/Game/Ships/Audio/SW_GearDeploy.SW_GearDeploy");
+	const TCHAR* const CloseSoundPath = TEXT("/Game/Ships/Audio/SW_GearRetract.SW_GearRetract");
+}
+
+void UShipBoardingComponent::FindRamp()
+{
+	bRampFound = true;
+	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	if (!Ship->Hull)
+	{
+		return;
+	}
+	FVector HingeWorld, TipWorld;
+	if (!Ship->GetHullSocketLocation(TEXT("Ramp_hinge"), HingeWorld) || !Ship->GetHullSocketLocation(TEXT("Ramp_tip"), TipWorld))
+	{
+		return;
+	}
+	TArray<UStaticMeshComponent*> Meshes;
+	Ship->GetComponents<UStaticMeshComponent>(Meshes);
+	USceneComponent* Parent = nullptr;
+	for (UStaticMeshComponent* Mesh : Meshes)
+	{
+		const FString Name = Mesh->GetName();
+		if ((Name == TEXT("RampLeaf") || Name == TEXT("RampDecals")) && Mesh->GetStaticMesh())
+		{
+			RampParts.Add({ Mesh, Mesh->GetRelativeTransform() });
+			Parent = Mesh->GetAttachParent();
+			// the walk surface is the box below (per polygon the leaf blocked from one side only: a walker coming
+			// downhill to its foot slipped under it)
+			Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			if (Name == TEXT("RampLeaf"))
+			{
+				RampLeafMesh = Mesh;
+			}
+		}
+	}
+	if (RampParts.IsEmpty())
+	{
+		return;
+	}
+	const FTransform ParentTransform = Parent ? Parent->GetComponentTransform() : Ship->GetActorTransform();
+	RampHingeRel = ParentTransform.InverseTransformPosition(HingeWorld);
+	// the walked collision: a box over the leaf's slab (hinge, outer and inner top corner), riding on the leaf
+	FVector TopWorld;
+	if (RampLeafMesh.IsValid() && Ship->GetHullSocketLocation(TEXT("Ramp_top"), TopWorld))
+	{
+		UStaticMeshComponent* Leaf = RampLeafMesh.Get();
+		const FTransform LeafT = Leaf->GetComponentTransform();
+		const FVector H = LeafT.InverseTransformPosition(HingeWorld);
+		const FVector Top = LeafT.InverseTransformPosition(TopWorld);
+		const FVector Tip = LeafT.InverseTransformPosition(TipWorld);
+		const FVector U = (Top - H).GetSafeNormal();
+		const FVector N = (Tip - Top).GetSafeNormal();
+		const double Length = FVector::Dist(Top, H);
+		const double Thick = FVector::Dist(Tip, Top);
+		const FVector Across = FVector::CrossProduct(N, U).GetSafeNormal();
+		UBoxComponent* Box = NewObject<UBoxComponent>(Ship, TEXT("RampCollision"));
+		Box->SetupAttachment(Leaf);
+		Box->SetRelativeTransform(FTransform(FMatrix(U, Across, N, FVector::ZeroVector).ToQuat(), H + U * (Length * 0.5) + N * (Thick * 0.5)));
+		Box->SetBoxExtent(FVector(Length * 0.5, 108.0, Thick * 0.5 + 1.0));
+		Box->SetCollisionObjectType(ECC_WorldStatic);
+		Box->SetCollisionResponseToAllChannels(ECR_Ignore);
+		Box->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+		Box->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+		Box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		Box->SetHiddenInGame(true);
+		Box->RegisterComponent();
+		RampCollision = Box;
+	}
+	RampAxisRel = ParentTransform.InverseTransformVectorNoScale(Ship->GetActorRightVector()).GetSafeNormal();
+	// the way that takes the free edge out aft (the FBX import mirrors y, so the sign is found, not assumed; "the
+	// lower edge" picked the wrong way - turned forward the edge goes lower still, through the floor)
+	const FVector TipRel = ParentTransform.InverseTransformPosition(TipWorld);
+	const FVector ForwardRel = ParentTransform.InverseTransformVectorNoScale(Ship->GetActorForwardVector());
+	auto TipAfter = [&](float Degrees)
+	{
+		return RampHingeRel + FQuat(RampAxisRel, FMath::DegreesToRadians(Degrees)).RotateVector(TipRel - RampHingeRel);
+	};
+	const float Angle = FMath::Abs(RampAngleDeg);
+	RampAngleDeg = FVector::DotProduct(TipAfter(Angle) - RampHingeRel, ForwardRel) < FVector::DotProduct(TipAfter(-Angle) - RampHingeRel, ForwardRel) ? Angle : -Angle;
+	// the walk zone: the open leaf, its passage and the switch, in the ship's frame
+	const FTransform ToActor = ParentTransform.GetRelativeTransform(Ship->GetActorTransform());
+	RampZoneLocal = FBox(ForceInit);
+	RampZoneLocal += ToActor.TransformPosition(RampHingeRel);
+	RampZoneLocal += ToActor.TransformPosition(TipAfter(RampAngleDeg));
+	RampZoneLocal += ToActor.TransformPosition(TipRel);
+	FVector Control;
+	if (Ship->GetHullSocketLocation(TEXT("Control_ramp"), Control))
+	{
+		RampZoneLocal += Ship->GetActorTransform().InverseTransformPosition(Control);
+	}
+	RampZoneLocal = RampZoneLocal.ExpandBy(FVector(40.0, 130.0, 120.0));
+	RoomsLocal = FBox(ForceInit);
+	for (UStaticMeshComponent* Mesh : Meshes)
+	{
+		const FString Name = Mesh->GetName();
+		if ((Name == TEXT("Interior") || Name == TEXT("InteriorKit")) && Mesh->GetStaticMesh())
+		{
+			RoomsLocal += Mesh->GetStaticMesh()->GetBoundingBox().TransformBy(Mesh->GetComponentTransform().GetRelativeTransform(Ship->GetActorTransform()));
+		}
+	}
+	UE_LOG(LogSpaceship, Display, TEXT("%s: ramp of %d parts, opens %.0f deg; hinge %s, tip open %s (ship cm); walk zone %s .. %s, rooms %s .. %s"),
+		*Ship->GetName(), RampParts.Num(), RampAngleDeg, *ToActor.TransformPosition(RampHingeRel).ToString(),
+		*ToActor.TransformPosition(TipAfter(RampAngleDeg)).ToString(), *RampZoneLocal.Min.ToString(), *RampZoneLocal.Max.ToString(),
+		*RoomsLocal.Min.ToString(), *RoomsLocal.Max.ToString());
+}
+
+bool UShipBoardingComponent::HasRamp() const
+{
+	if (!bRampFound)
+	{
+		const_cast<UShipBoardingComponent*>(this)->FindRamp();
+	}
+	return !RampParts.IsEmpty();
+}
+
+void UShipBoardingComponent::SetRampOpen(bool bOpen)
+{
+	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	if (!HasRamp())
+	{
+		return;
+	}
+	if (bOpen && !Ship->IsLanded())
+	{
+		UE_LOG(LogSpaceship, Log, TEXT("%s: the ramp stays shut in flight"), *Ship->GetName());
+		return;
+	}
+	RampTarget = bOpen ? 1.f : 0.f;
+}
+
+void UShipBoardingComponent::TickRamp(float DeltaSeconds)
+{
+	if (!HasRamp())
+	{
+		return;
+	}
+	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	// shut on take-off: after 2 s off the ground (a landed ship hops a little when it settles or is set down)
+	RampAirborneSeconds = Ship->IsLanded() ? 0.f : RampAirborneSeconds + DeltaSeconds;
+	if (RampTarget > 0.f && RampAirborneSeconds > 2.f)
+	{
+		RampTarget = 0.f;
+	}
+	if (RampSoundTarget != RampTarget)
+	{
+		RampSoundTarget = RampTarget;
+		PlayRampSound(RampTarget > 0.5f);
+	}
+	const float Before = RampOpen;
+	RampOpen = FMath::FInterpConstantTo(RampOpen, RampTarget, DeltaSeconds, 1.f / ShipRamp::RampSeconds);
+	if (RampOpen != Before)
+	{
+		ApplyRamp();
+		if (RampOpen >= 1.f && RampLeafMesh.IsValid())
+		{
+			UE_LOG(LogSpaceship, Display, TEXT("%s: ramp down, leaf centre %s, collision box centre %s (ship cm)"), *Ship->GetName(),
+				*Ship->GetActorTransform().InverseTransformPosition(RampLeafMesh->Bounds.Origin).ToString(),
+				RampCollision ? *Ship->GetActorTransform().InverseTransformPosition(RampCollision->GetComponentLocation()).ToString() : TEXT("-"));
+		}
+	}
+}
+
+void UShipBoardingComponent::ApplyRamp()
+{
+	// a hydraulic leaf: slow start, slow landing
+	const float A = FMath::SmoothStep(0.f, 1.f, RampOpen);
+	const FQuat Turn(RampAxisRel, FMath::DegreesToRadians(RampAngleDeg * A));
+	const FTransform Pivot = FTransform(FQuat::Identity, -RampHingeRel) * FTransform(Turn) * FTransform(FQuat::Identity, RampHingeRel);
+	for (const FRampPart& Part : RampParts)
+	{
+		if (UStaticMeshComponent* Mesh = Part.Mesh.Get())
+		{
+			Mesh->SetRelativeTransform(Part.ClosedRel * Pivot);
+		}
+	}
+}
+
+bool UShipBoardingComponent::IsInRampZone(const FVector& Location) const
+{
+	if (!HasRamp())
+	{
+		return false;
+	}
+	const ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	return RampZoneLocal.IsInside(Ship->GetActorTransform().InverseTransformPosition(Location));
+}
+
+bool UShipBoardingComponent::IsInsideRooms(const FVector& Location) const
+{
+	if (!HasRamp() || !RoomsLocal.IsValid)
+	{
+		return false;
+	}
+	const ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	return RoomsLocal.IsInside(Ship->GetActorTransform().InverseTransformPosition(Location));
+}
+
+bool UShipBoardingComponent::IsNearRampControl(const FVector& Location) const
+{
+	if (!HasRamp())
+	{
+		return false;
+	}
+	return FVector::Dist(GetRampPromptLocation(true), Location) < ShipRamp::ControlReachCm || IsInRampZone(Location);
+}
+
+FVector UShipBoardingComponent::GetRampPromptLocation(bool bInside) const
+{
+	const ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	FVector At;
+	if (bInside && Ship->GetHullSocketLocation(TEXT("Control_ramp"), At))
+	{
+		return At;
+	}
+	FVector Hinge, Tip;
+	if (Ship->GetHullSocketLocation(TEXT("Ramp_hinge"), Hinge) && Ship->GetHullSocketLocation(TEXT("Ramp_tip"), Tip))
+	{
+		// shut: half way up the leaf, outside; open: over its middle
+		const FVector Mid = (Hinge + Tip) * 0.5;
+		return RampOpen > 0.5f ? Hinge - Ship->GetActorForwardVector() * 120.0 + Ship->GetActorUpVector() * 60.0
+			: Mid - Ship->GetActorForwardVector() * 40.0;
+	}
+	return Ship->GetActorLocation();
+}
+
+void UShipBoardingComponent::PlayRampSound(bool bOpen)
+{
+	if (!RampOpenSound)
+	{
+		RampOpenSound = LoadObject<USoundBase>(nullptr, ShipRamp::OpenSoundPath, nullptr, LOAD_NoWarn | LOAD_Quiet);
+		RampCloseSound = LoadObject<USoundBase>(nullptr, ShipRamp::CloseSoundPath, nullptr, LOAD_NoWarn | LOAD_Quiet);
+	}
+	USoundBase* Sound = bOpen ? RampOpenSound.Get() : RampCloseSound.Get();
+	if (!Sound)
+	{
+		return;
+	}
+	const ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	FVector Hinge = Ship->GetActorLocation();
+	Ship->GetHullSocketLocation(TEXT("Ramp_hinge"), Hinge);
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, Hinge, FRotator::ZeroRotator, USpaceUserSettings::GetEffectsVolume());
+}

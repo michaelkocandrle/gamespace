@@ -1,0 +1,129 @@
+{
+  "_comment": "The rear ramp loop on foot (author 10. 10. 2026): up from the seat, set in the hold by the portal, open the ramp (F), walk down and off it, turn, walk up it in, shut it. space.Where logs the position and the walk state. Run -Editor.",
+  "shots": [
+    {
+      "name": "flat",
+      "camera": "chase",
+      "altitude_m": 40.0,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 2.0,
+      "console": [
+        "space.FlatSpot 5 8"
+      ]
+    },
+    {
+      "name": "warmup",
+      "camera": "chase",
+      "altitude_m": 3.2,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 10.0,
+      "console": [
+        "stat none"
+      ]
+    },
+    {
+      "name": "a_stand_up",
+      "camera": "pawn",
+      "hud": 1,
+      "settle": 3.0,
+      "console": [
+        "space.Interact",
+        "space.Where"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "settle": 3.0,
+      "name": "b_in_hold",
+      "console": [
+        "space.WalkAt -820 0 0 0",
+        "space.Where"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "settle": 4.0,
+      "name": "c_open_ramp",
+      "console": [
+        "space.Interact",
+        "space.Where"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "settle": 2.5,
+      "name": "d_walk_down",
+      "console": [
+        "space.Walk 1 0 1.6",
+        "space.Where"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "settle": 2.5,
+      "name": "d2_walk_off",
+      "console": [
+        "space.Walk 1 0 1.4",
+        "space.Where"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "settle": 2.0,
+      "name": "e_turn",
+      "console": [
+        "space.Walk 0 0 0.1 180",
+        "space.Where"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "settle": 2.5,
+      "name": "f_walk_up",
+      "console": [
+        "space.Walk 1 0 1.8",
+        "space.Where"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "settle": 2.0,
+      "name": "f2_in",
+      "console": [
+        "space.Walk 1 0 1.2",
+        "space.Where"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "settle": 1.5,
+      "name": "g_turn_to_ramp",
+      "console": [
+        "space.Walk 0 0 0.1 180",
+        "space.Where"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "settle": 4.0,
+      "name": "h_close_ramp",
+      "console": [
+        "space.Interact",
+        "space.Where"
+      ]
+    }
+  ]
+}

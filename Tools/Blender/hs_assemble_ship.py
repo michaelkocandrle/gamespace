@@ -265,11 +265,11 @@ def main(argv):
     hull = out[""]
     parts = {k: v for k, v in out.items() if k}
     regions = [{"name": c["name"], "box": shift_box(c["box"], off)} for c in cfg["collision"]]
-    ai.build_collision(ship, [o for k, o in out.items() if k not in ("Canopy", "Decals", "Interior", "Screens", "InteriorKit", "InteriorDecals", "Hologram")], regions)
+    ai.build_collision(ship, [o for k, o in out.items() if k not in ("Canopy", "Decals", "Interior", "Screens", "InteriorKit", "InteriorDecals", "Hologram", "RampLeaf", "RampDecals")], regions)
     sockets = {}
     for name, loc in json.loads(bpy.context.scene.get("hs_display_sockets", "{}")).items():
         # controls the code finds by socket keep their own name (Control_pwr), displays get Display_<name>
-        cfg["sockets"][name if name.startswith("Control_") else "Display_" + name] = {"location": loc}
+        cfg["sockets"][name if name.startswith(("Control_", "Ramp_")) else "Display_" + name] = {"location": loc}
     for name, s in cfg["sockets"].items():
         s = dict(s)
         if "location" in s:

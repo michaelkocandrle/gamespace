@@ -1882,6 +1882,7 @@
  },
  "no_nanite_parts": [
   "Decals",
+  "RampDecals",
   "Interior",
   "Screens",
   "InteriorKit",

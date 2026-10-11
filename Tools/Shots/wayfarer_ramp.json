@@ -1,0 +1,149 @@
+{
+  "_comment": "The rear ramp (variant A, 10. 10. 2026): landed on a flat spot, shut, opening, open from behind, along its axis and from the side, shut again. Run: .\\Tools\\Shots.ps1 -Preset wayfarer_ramp",
+  "shots": [
+    {
+      "name": "flat",
+      "camera": "chase",
+      "altitude_m": 40.0,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 2.0,
+      "console": [
+        "space.FlatSpot 5 8"
+      ]
+    },
+    {
+      "name": "warmup",
+      "camera": "chase",
+      "altitude_m": 3.2,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 10.0,
+      "console": [
+        "stat none"
+      ]
+    },
+    {
+      "name": "ramp_closed",
+      "altitude_m": 3.2,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 2.0,
+      "fov": 60,
+      "camera_local": [
+        -16.5,
+        -4.0,
+        -1.0
+      ],
+      "look_local": [
+        -10.0,
+        0.0,
+        -1.4
+      ]
+    },
+    {
+      "name": "ramp_opening",
+      "altitude_m": 3.2,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 1.4,
+      "fov": 60,
+      "camera_local": [
+        -16.5,
+        -4.0,
+        -1.0
+      ],
+      "look_local": [
+        -10.0,
+        0.0,
+        -1.4
+      ],
+      "console": [
+        "space.Ramp 1"
+      ]
+    },
+    {
+      "name": "ramp_open",
+      "altitude_m": 3.2,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 3.0,
+      "fov": 60,
+      "camera_local": [
+        -16.5,
+        -4.0,
+        -1.0
+      ],
+      "look_local": [
+        -10.0,
+        0.0,
+        -1.6
+      ]
+    },
+    {
+      "name": "ramp_open_axis",
+      "altitude_m": 3.2,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 1.0,
+      "fov": 70,
+      "camera_local": [
+        -15.0,
+        0.0,
+        -1.4
+      ],
+      "look_local": [
+        -8.5,
+        0.0,
+        -1.0
+      ]
+    },
+    {
+      "name": "ramp_open_side",
+      "altitude_m": 3.2,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 1.0,
+      "fov": 60,
+      "camera_local": [
+        -11.5,
+        -6.5,
+        -1.8
+      ],
+      "look_local": [
+        -11.5,
+        0.0,
+        -2.0
+      ]
+    },
+    {
+      "name": "ramp_shut_again",
+      "altitude_m": 3.2,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 4.0,
+      "fov": 60,
+      "camera_local": [
+        -16.5,
+        -4.0,
+        -1.0
+      ],
+      "look_local": [
+        -10.0,
+        0.0,
+        -1.4
+      ],
+      "console": [
+        "space.Ramp 0"
+      ]
+    }
+  ]
+}

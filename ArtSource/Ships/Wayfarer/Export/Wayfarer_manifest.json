@@ -31,9 +31,6 @@
         "SOCKET_Control_pwr",
         "SOCKET_Control_radar",
         "SOCKET_Control_ramp",
-        "SOCKET_Display_Ramp_hinge",
-        "SOCKET_Display_Ramp_out",
-        "SOCKET_Display_Ramp_tip",
         "SOCKET_Display_left",
         "SOCKET_Display_right",
         "SOCKET_Engine_L",
@@ -42,10 +39,14 @@
         "SOCKET_Gear_L",
         "SOCKET_Gear_Nose",
         "SOCKET_Gear_R",
+        "SOCKET_Ramp_hinge",
+        "SOCKET_Ramp_out",
+        "SOCKET_Ramp_tip",
+        "SOCKET_Ramp_top",
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "cd0d591a7be73ee113e5e033ed518c41aa880a95"
+      "geometry_hash": "af0ef03fb1f875a95f2d2a2d4d1210c1b43368c9"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -59,7 +60,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "6f1b2fff20251be77898f1afb4832c1d967df281"
+      "geometry_hash": "974c3d24ed111f73665b30fdff899c37f52c5305"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -94,7 +95,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "ceaf27d5cf2abbfc9792b2e6a0562ae4a4c460dd"
+      "geometry_hash": "6d3217a883eb66878853a67b797d7c838e6ae122"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
@@ -115,14 +116,14 @@
       "objects": [
         "SM_Ship_Wayfarer_RampDecals"
       ],
-      "geometry_hash": "f528e17047f613163d63d3601a7317939472d6bb"
+      "geometry_hash": "213e3319afac6869d03f42a6dae65cb37488594d"
     },
     {
       "fbx": "SM_Ship_Wayfarer_RampLeaf.fbx",
       "objects": [
         "SM_Ship_Wayfarer_RampLeaf"
       ],
-      "geometry_hash": "58e66f9a0bce8a21bb2504f0a30b5e1152a5ce69"
+      "geometry_hash": "27692448e82765613edeb8ab4ba286fe91fe5d05"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Screens.fbx",
@@ -136,8 +137,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 631898,
-      "verts": 393404,
+      "tris": 631890,
+      "verts": 393400,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -197,15 +198,14 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 48694,
-      "verts": 55960,
+      "tris": 48680,
+      "verts": 55946,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
         "M_Ship_Wayfarer_DecalPaint",
         "M_Ship_Wayfarer_Trim",
-        "M_Ship_Wayfarer_TrimAO",
-        "M_Ship_Wayfarer_DecalGrime"
+        "M_Ship_Wayfarer_TrimAO"
       ],
       "uv_layers": 1,
       "bounds_m": [
@@ -326,7 +326,7 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 699374,
+      "tris": 699372,
       "verts": 362473,
       "materials": [
         "M_Ship_Wayfarer_Accent",
@@ -426,8 +426,7 @@
         "M_Ship_Wayfarer_DecalAO",
         "M_Ship_Wayfarer_DecalPaint",
         "M_Ship_Wayfarer_Trim",
-        "M_Ship_Wayfarer_TrimAO",
-        "M_Ship_Wayfarer_DecalGrime"
+        "M_Ship_Wayfarer_TrimAO"
       ],
       "uv_layers": 1,
       "bounds_m": [
@@ -848,45 +847,6 @@
         10.0
       ]
     },
-    "SOCKET_Display_Ramp_hinge": {
-      "parent": "SM_Ship_Wayfarer",
-      "location_m": [
-        -10.28,
-        0.0,
-        -1.35
-      ],
-      "location_ue_cm": [
-        -1028.0,
-        -0.0,
-        -135.0
-      ]
-    },
-    "SOCKET_Display_Ramp_out": {
-      "parent": "SM_Ship_Wayfarer",
-      "location_m": [
-        -13.32438,
-        0.0,
-        -2.60457
-      ],
-      "location_ue_cm": [
-        -1332.44,
-        -0.0,
-        -260.46
-      ]
-    },
-    "SOCKET_Display_Ramp_tip": {
-      "parent": "SM_Ship_Wayfarer",
-      "location_m": [
-        -9.75644,
-        0.0,
-        1.22146
-      ],
-      "location_ue_cm": [
-        -975.64,
-        -0.0,
-        122.15
-      ]
-    },
     "SOCKET_Display_left": {
       "parent": "SM_Ship_Wayfarer",
       "location_m": [
@@ -989,6 +949,58 @@
         -505.0,
         225.0,
         -280.0
+      ]
+    },
+    "SOCKET_Ramp_hinge": {
+      "parent": "SM_Ship_Wayfarer",
+      "location_m": [
+        -10.28,
+        0.0,
+        -1.35
+      ],
+      "location_ue_cm": [
+        -1028.0,
+        -0.0,
+        -135.0
+      ]
+    },
+    "SOCKET_Ramp_out": {
+      "parent": "SM_Ship_Wayfarer",
+      "location_m": [
+        -13.32438,
+        0.0,
+        -2.60457
+      ],
+      "location_ue_cm": [
+        -1332.44,
+        -0.0,
+        -260.46
+      ]
+    },
+    "SOCKET_Ramp_tip": {
+      "parent": "SM_Ship_Wayfarer",
+      "location_m": [
+        -9.75644,
+        0.0,
+        1.22146
+      ],
+      "location_ue_cm": [
+        -975.64,
+        -0.0,
+        122.15
+      ]
+    },
+    "SOCKET_Ramp_top": {
+      "parent": "SM_Ship_Wayfarer",
+      "location_m": [
+        -9.875,
+        0.0,
+        1.24
+      ],
+      "location_ue_cm": [
+        -987.5,
+        -0.0,
+        124.0
       ]
     },
     "SOCKET_WalkRamp": {

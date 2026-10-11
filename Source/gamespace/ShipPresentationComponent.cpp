@@ -514,7 +514,10 @@ void UShipPresentationComponent::UpdateViewCollection()
 	// without shadows they light the hull through its walls, and from outside their volumes cover the whole ship
 	// on screen (~3 ms on the target GPU in a close chase view)
 	// The fixtures are the ship's lights: dark while it is powered off.
-	const bool bWantFixtures = (FixtureLightMode < 0 ? bInside : FixtureLightMode > 0) && Ship->GetPowerState() != ESpacePowerState::Off;
+	// (and with the rear ramp down, seen from near the ship: the hold lit through the open stern, author 10. 10. 2026)
+	const bool bRampView = Ship->GetRampOpenAlpha() > 0.05f
+		&& FVector::Dist(Camera->GetCameraLocation(), Ship->GetActorLocation()) < 2500.0;
+	const bool bWantFixtures = (FixtureLightMode < 0 ? (bInside || bRampView) : FixtureLightMode > 0) && Ship->GetPowerState() != ESpacePowerState::Off;
 	// The interior lighting (MegaLights, walked interiors): the interior meshes out of the sun's shadows - the hull
 	// shadows the rooms anyway, and flown the cockpit keeps its interior's sun shadows
 	const int32 ShadowState = ASpacePlayerController::IsInteriorLightingOn() ? 1 : 0;

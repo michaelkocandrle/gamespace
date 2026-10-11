@@ -52,6 +52,21 @@ namespace
 			UE_LOG(LogTemp, Display, TEXT("space.ShipMat %s = %s on %d materials"), *Args[0], *Args[1], Changed);
 		}));
 
+	/** The rear ramp of every ship here: space.Ramp 1 (open, landed only) / 0 (shut). */
+	FAutoConsoleCommandWithWorldAndArgs ShipRampCommand(
+		TEXT("space.Ramp"),
+		TEXT("space.Ramp <0|1>: shut / open the rear ramp of every ship in the world (landed only)."),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+		{
+			const bool bOpen = Args.Num() < 1 || FCString::Atoi(*Args[0]) != 0;
+			for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+			{
+				It->SetRampOpen(bOpen);
+				UE_LOG(LogTemp, Display, TEXT("space.Ramp %s: %s (ramp %s)"), bOpen ? TEXT("open") : TEXT("shut"), *It->GetName(),
+					It->HasRamp() ? TEXT("found") : TEXT("missing"));
+			}
+		}));
+
 	/** The same for a colour: space.ShipMatColor <Parameter> <R> <G> <B>. */
 	FAutoConsoleCommandWithWorldAndArgs ShipMaterialColorCommand(
 		TEXT("space.ShipMatColor"),

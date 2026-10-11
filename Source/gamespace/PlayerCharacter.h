@@ -72,6 +72,8 @@ public:
 	/** Inside a ship: sits down (near the seat) or steps out down the ramp (near it, landed only). */
 	UFUNCTION(BlueprintCallable, Category = "Player|Ship")
 	bool TryInteriorInteract();
+	/** Walking up an open ramp boards its ship, walking off it leaves (no teleport; author 10. 10. 2026). */
+	void UpdateRampWalk();
 
 	/** The slimmer capsule for a ship's tight interior (ShipCapsuleRadius x 2 * ShipCapsuleHalfHeight: the 84 cm
 	 * wide default caught its head on the cockpit door's header going down the steep stairs), or the default one.

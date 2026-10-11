@@ -9,8 +9,9 @@ lies on the ground at ~31 degrees and is walked on its inner face. Recipe interi
     edge follows the stern line, a ceiling and a header over the opening, jamb strips where the hull is cut
   - leaf(ship, coll, mats): the leaf's inner structure (deck plate, treads, kerbs, hazard edges, hinge knuckles) as
     objects SM_Ship_<Ship>_RampLeaf_<material>; hs_assemble_ship groups them into the part RampLeaf
-  - sockets(): Ramp_hinge (a point on the hinge axis), Ramp_tip (the leaf's free edge, closed), Control_ramp (the
-    switch inside the passage), Ramp_out (where a walker steps off the open ramp)
+  - sockets(): Ramp_hinge (a point on the hinge axis), Ramp_top / Ramp_tip (the free edge's outer / inner corner,
+    closed: the game builds the leaf's walked collision box from these three), Control_ramp (the switch inside the
+    passage), Ramp_out (where a walker steps off the open ramp)
   - split(objs, off, spec): in hs_assemble_ship, after the decals - every face of the finished exterior (hull, kit,
     parts, decals) inside the leaf's slab moves to RampLeaf / RampDecals, cut cleanly at the slab's edges
 
@@ -156,6 +157,7 @@ def sockets(r):
     return {
         "Ramp_hinge": r.h.copy(),
         "Ramp_tip": r.p(r.length, r.t),
+        "Ramp_top": r.p(r.length, 0.0),
         "Control_ramp": Vector((0.85, -(r.half - 0.06), 1.3)),
         "Ramp_out": Vector((open_tip.x - 0.8, 0.0, open_tip.z + 0.1)),
     }
@@ -172,8 +174,8 @@ def split(out, off, spec):
     """Move every exterior face inside the leaf's slab from the hull part ("") and the decals ("Decals") into
     RampLeaf / RampDecals (objects in ship coordinates: layout + off)."""
     r = Ramp(spec)
-    o = Vector(off)
-    hinge = r.h + o
+    shift = Vector(off)
+    hinge = r.h + shift
     s_max = r.length
     t_out, t_in = -spec.get("reach_out", 0.45), r.t + 0.005
 
@@ -246,5 +248,11 @@ def split(out, off, spec):
             bpy.ops.object.material_slot_remove_unused()
         else:
             out[dst] = new
+        # drop the slots the faces no longer use (the FBX keeps only used slots: the import compares them)
+        for o in (ob, out[dst]):
+            bpy.ops.object.select_all(action="DESELECT")
+            o.select_set(True)
+            bpy.context.view_layer.objects.active = o
+            bpy.ops.object.material_slot_remove_unused()
         moved[dst] = len(take)
     return moved

@@ -215,7 +215,7 @@ namespace
 	/** space.WalkAt: puts the walker at a spot in the ship's frame (cm, keeping its height), for shots. */
 	FAutoConsoleCommandWithWorldAndArgs WalkAtCommand(
 		TEXT("space.WalkAt"),
-		TEXT("space.WalkAt <x> <y> [yaw]: the walker inside a ship to x, y in the ship's frame (cm, as space.Where prints), keeping its height."),
+		TEXT("space.WalkAt <x> <y> [yaw] [z]: the walker inside a ship to x, y (and z) in the ship's frame (cm, as space.Where prints), keeping its height without z."),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
 		{
 			APlayerController* Controller = World ? World->GetFirstPlayerController() : nullptr;
@@ -230,6 +230,10 @@ namespace
 			FVector Local = ShipT.InverseTransformPosition(Character->GetActorLocation());
 			Local.X = FCString::Atof(*Args[0]);
 			Local.Y = FCString::Atof(*Args[1]);
+			if (Args.Num() > 3)
+			{
+				Local.Z = FCString::Atof(*Args[3]);
+			}
 			Character->SetActorLocation(ShipT.TransformPosition(Local), false, nullptr, ETeleportType::TeleportPhysics);
 			if (Args.Num() > 2)
 			{
@@ -268,6 +272,24 @@ namespace
 			APlayerController* Controller = World ? World->GetFirstPlayerController() : nullptr;
 			APlayerCharacter* Character = Controller ? Cast<APlayerCharacter>(Controller->GetPawn()) : nullptr;
 			ASpaceshipPawn* Ship = Character ? Character->GetInteriorShip() : nullptr;
+			if (!Ship && Character)
+			{
+				// outside: the nearest ship's frame all the same (the ramp walk, 10. 10. 2026)
+				double Best = TNumericLimits<double>::Max();
+				for (TActorIterator<ASpaceshipPawn> It(World); It; ++It)
+				{
+					const double D = FVector::Dist(It->GetActorLocation(), Character->GetActorLocation());
+					if (D < Best && D < 5000.0)
+					{
+						Best = D;
+						Ship = *It;
+					}
+				}
+				if (Ship)
+				{
+					UE_LOG(LogSpaceInterior, Display, TEXT("space.Where: outside %s"), *Ship->GetName());
+				}
+			}
 			if (!Ship)
 			{
 				UE_LOG(LogSpaceInterior, Display, TEXT("space.Where: not walking inside a ship"));

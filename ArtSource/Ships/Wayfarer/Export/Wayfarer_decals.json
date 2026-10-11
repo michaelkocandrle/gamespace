@@ -1,11 +1,11 @@
 {
- "decals": 2441,
+ "decals": 2440,
  "by_rule": {
   "items": 109,
   "panel_numbers": 299,
   "kit_detail": 222,
   "kit_bolts": 1174,
-  "panel_marks": 46,
+  "panel_marks": 45,
   "clusters": 188,
   "greeble_companions": 19,
   "companions": 51,
@@ -13,15 +13,15 @@
  },
  "by_type": {
   "structural": 228,
-  "info": 2211,
+  "info": 2210,
   "wear": 2
  },
  "skipped": {
-  "edge": 422,
+  "edge": 423,
   "overlap": 616,
   "miss": 48
  },
- "faces": 24618,
+ "faces": 24611,
  "kit": {
   "bolts_wanted": 1174,
   "bolts_placed": 1174,

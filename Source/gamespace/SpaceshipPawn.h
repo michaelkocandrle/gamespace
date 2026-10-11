@@ -221,6 +221,22 @@ public:
 	/** Interact mode (F held) in the seat: the mouse turns the pilot's head (free look) instead of steering. */
 	void SetInteractLook(bool bOn) { SetFreeLookHeld(bOn); }
 
+	/** The rear ramp (UShipBoardingComponent, variant A 10. 10. 2026): turns down to the ground, landed only. */
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	bool HasRamp() const;
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	bool IsRampOpen() const;
+	UFUNCTION(BlueprintPure, Category = "Spaceship|Walk")
+	float GetRampOpenAlpha() const;
+	UFUNCTION(BlueprintCallable, Category = "Spaceship|Walk")
+	void SetRampOpen(bool bOpen);
+	bool IsInRampZone(const FVector& Location) const;
+	bool IsInsideRooms(const FVector& Location) const;
+	bool IsNearRampControl(const FVector& Location) const;
+	FVector GetRampPromptLocation(bool bInside) const;
+	/** Tests: moves the ramp by DeltaSeconds without a world tick. */
+	void DebugStepRamp(float DeltaSeconds);
+
 	/** Sliding doors inside (UShipBoardingComponent): the doorway near a location, open / shut it. */
 	UFUNCTION(BlueprintCallable, Category = "Spaceship|Walk")
 	int32 FindDoorNear(const FVector& Location, float ReachCm) const;

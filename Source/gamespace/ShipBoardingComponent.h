@@ -95,6 +95,55 @@ public:
 	/** The door's touch panel in the world (interact mode clicks it); false without one. */
 	bool GetDoorPanelLocation(int32 Door, FVector& OutLocation) const;
 	void SetDoorPanelHovered(int32 Door, bool bHovered);
+
+	// --- Rear ramp (variant A, author 10. 10. 2026; Tools/Blender/hs_ramp.py) -----------------------------------------
+	// The parts RampLeaf and RampDecals turn about the socket Ramp_hinge (the ship's lateral axis) down to the ground in
+	// RampSeconds; only landed, closed again on take-off. Walking up the open ramp boards the ship, walking off it
+	// leaves (APlayerCharacter::UpdateRampWalk) - no teleport.
+
+	bool HasRamp() const;
+	bool IsRampOpen() const { return RampTarget > 0.5f; }
+	/** 0 shut .. 1 down on the ground. */
+	float GetRampOpenAlpha() const { return RampOpen; }
+	void SetRampOpen(bool bOpen);
+	void TickRamp(float DeltaSeconds);
+	/** On the open leaf or in the passage behind it (a box in the ship's frame). */
+	bool IsInRampZone(const FVector& Location) const;
+	/** Within the walked rooms' bounds (the interior meshes). */
+	bool IsInsideRooms(const FVector& Location) const;
+	/** Near the ramp's switch inside (socket Control_ramp) or in its passage. */
+	bool IsNearRampControl(const FVector& Location) const;
+	/** Where the ramp's prompt sits: inside by its switch, outside on the leaf's middle. */
+	FVector GetRampPromptLocation(bool bInside) const;
+private:
+	void FindRamp();
+	struct FRampPart
+	{
+		TWeakObjectPtr<class UStaticMeshComponent> Mesh;
+		FTransform ClosedRel;
+	};
+	TArray<FRampPart> RampParts;
+	/** In the parts' parent (Hull) space: a point on the hinge axis, the axis, the angle to open (signed). */
+	FVector RampHingeRel = FVector::ZeroVector;
+	FVector RampAxisRel = FVector::YAxisVector;
+	float RampAngleDeg = 130.f;
+	float RampOpen = 0.f;
+	float RampTarget = 0.f;
+	float RampSoundTarget = 0.f;
+	float RampAirborneSeconds = 0.f;
+	TWeakObjectPtr<class UStaticMeshComponent> RampLeafMesh;
+	UPROPERTY(Transient)
+	TObjectPtr<class UBoxComponent> RampCollision;
+	bool bRampFound = false;
+	/** Ship frame boxes: the leaf (open) and its passage; the walked rooms. */
+	FBox RampZoneLocal = FBox(ForceInit);
+	FBox RoomsLocal = FBox(ForceInit);
+	void ApplyRamp();
+	void PlayRampSound(bool bOpen);
+	UPROPERTY(Transient)
+	TObjectPtr<class USoundBase> RampOpenSound;
+	UPROPERTY(Transient)
+	TObjectPtr<class USoundBase> RampCloseSound;
 private:
 	bool bDoorsFound = false;
 	void ApplyDoorCollision();

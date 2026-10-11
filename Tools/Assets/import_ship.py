@@ -348,6 +348,13 @@ def check_and_fix_mesh(static_mesh, mesh, report):
     # Collision: exactly the UCX hulls, nothing generated.
     agg = static_mesh.get_editor_property("body_setup").get_editor_property("agg_geom")
     shapes = sum(len(agg.get_editor_property(k)) for k in ("convex_elems", "box_elems", "sphere_elems", "sphyl_elems"))
+    if shapes and not mesh["collision_hulls"]:
+        # a reimport keeps hulls the FBX no longer has (the ramp leaf's UCX box, 10. 10. 2026): drop them
+        sub = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
+        (sub or unreal.EditorStaticMeshLibrary).remove_collisions(static_mesh)
+        notes.append("removed %d stale collision shape(s)" % shapes)
+        agg = static_mesh.get_editor_property("body_setup").get_editor_property("agg_geom")
+        shapes = sum(len(agg.get_editor_property(k)) for k in ("convex_elems", "box_elems", "sphere_elems", "sphyl_elems"))
     if shapes != mesh["collision_hulls"]:
         raise ImportFailed("%s has %d collision shapes, manifest lists %d hulls" % (mesh["name"], shapes, mesh["collision_hulls"]))
 
@@ -558,7 +565,14 @@ def add_mesh_component(blueprint, extra):
             if body:
                 body.set_editor_property("collision_trace_flag", unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
                 unreal.EditorAssetLibrary.save_loaded_asset(mesh, only_if_is_dirty=False)
-        if extra["component"] == "Decals":
+        if extra["component"] == "RampLeaf":
+            # walked on, by its UCX box (hs_ramp.split): simple collision, not per polygon
+            mesh = unreal.EditorAssetLibrary.load_asset(extra["mesh"])
+            body = mesh.get_editor_property("body_setup") if mesh else None
+            if body:
+                body.set_editor_property("collision_trace_flag", unreal.CollisionTraceFlag.CTF_USE_DEFAULT)
+                unreal.EditorAssetLibrary.save_loaded_asset(mesh, only_if_is_dirty=False)
+        if extra["component"] in ("Decals", "RampDecals"):
             # mesh decals (Deferred Decal materials) only paint the hull under them: no shadow, no
             # distance field of their own
             existing.set_editor_property("cast_shadow", False)
