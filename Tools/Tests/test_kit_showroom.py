@@ -255,6 +255,8 @@ for ship in sorted(os.listdir(SHIPS)):
     off = recipe["assemble"]["offset"]
     outside = []
     for o in kit_meshes:
+        if "_Cockpit_" in o.get_name():
+            continue   # (cockpit v3, 7. 10. 2026: the cockpit's factory parts are modelled in place, pivot at the layout origin)
         x = o.get_editor_property("relative_location").x / 100.0 - off[0]
         if not any(rooms[r][0] - 0.01 <= x <= rooms[r][1] + 0.01 for r in mods["rooms"]):
             outside.append("%s at x %.2f" % (o.get_name(), x))

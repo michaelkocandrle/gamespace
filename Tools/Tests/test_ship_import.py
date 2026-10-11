@@ -84,7 +84,8 @@ def main():
             unassigned = []
             for slot in mesh.get_editor_property("static_materials"):
                 mat = slot.get_editor_property("material_interface")
-                if not isinstance(mat, unreal.MaterialInstanceConstant) or not mat.get_path_name().startswith("/Game/Ships/"):
+                # (a setup material may name the interior kit's instance - "kit_material", the cockpit's trim v2, 9. 10. 2026)
+                if not isinstance(mat, unreal.MaterialInstanceConstant) or not mat.get_path_name().startswith(("/Game/Ships/", "/Game/Kit/Materials/")):
                     unassigned.append("%s=%s" % (slot.get_editor_property("material_slot_name"), mat.get_name() if mat else None))
             check("%s every slot has a ship material instance" % m["name"], not unassigned, "; ".join(unassigned))
 
