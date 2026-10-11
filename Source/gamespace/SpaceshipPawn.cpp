@@ -1013,6 +1013,7 @@ void ASpaceshipPawn::Tick(float DeltaSeconds)
 	Boarding->TickDoors(DeltaSeconds);
 	Boarding->TickRamp(DeltaSeconds);
 	Boarding->TickSeat(DeltaSeconds);
+	Boarding->SpawnTerminal();
 	Presentation->UpdateCameraEffects(DeltaSeconds);
 	Presentation->UpdateEngineAudio(DeltaSeconds);
 	Presentation->UpdateShipLights(DeltaSeconds);

@@ -15,6 +15,7 @@
       "socket Control_pwr scale (100, 100, 100) reset to 1",
       "socket Control_radar scale (100, 100, 100) reset to 1",
       "socket Control_ramp scale (100, 100, 100) reset to 1",
+      "socket Control_terminal scale (100, 100, 100) reset to 1",
       "socket Display_left scale (100, 100, 100) reset to 1",
       "socket Display_right scale (100, 100, 100) reset to 1",
       "socket Engine_L scale (100, 100, 100) reset to 1",
@@ -33,11 +34,7 @@
     ],
     "SM_Ship_Wayfarer_Decals": [],
     "SM_Ship_Wayfarer_Interior": [],
-    "SM_Ship_Wayfarer_InteriorDecals": [],
-    "SM_Ship_Wayfarer_PilotSeat": [],
-    "SM_Ship_Wayfarer_RampLeaf": [
-      "removed 1 stale collision shape(s)"
-    ]
+    "SM_Ship_Wayfarer_RampLeaf": []
   },
   "kept_unchanged": [
     "SM_Ship_Wayfarer_Canopy",
@@ -45,19 +42,21 @@
     "SM_Ship_Wayfarer_Door1A",
     "SM_Ship_Wayfarer_Gear",
     "SM_Ship_Wayfarer_Hologram",
+    "SM_Ship_Wayfarer_InteriorDecals",
     "SM_Ship_Wayfarer_InteriorKit",
+    "SM_Ship_Wayfarer_PilotSeat",
     "SM_Ship_Wayfarer_RampDecals",
     "SM_Ship_Wayfarer_Screens"
   ],
   "imported_hashes": {
-    "SM_Ship_Wayfarer": "2d54cb68ab0a3c0d857263d269485b9a3bafc0ef",
+    "SM_Ship_Wayfarer": "1e587a5f3d49668b6c447900e391f066c744b0aa",
     "SM_Ship_Wayfarer_Canopy": "29b9c1f33cc8210171c728da8ba427614fbcf4db",
-    "SM_Ship_Wayfarer_Decals": "a0b536e3de0ca8d9fd27f576bfb589575c62796a",
+    "SM_Ship_Wayfarer_Decals": "fd1618c77ff4a003a6b8437b014e659da1f665e3",
     "SM_Ship_Wayfarer_Door0A": "f593dd2e91e797e067daf38767cd9fe81d9cea12",
     "SM_Ship_Wayfarer_Door1A": "e399533e241926e1610ed1e6957b7139fb21cc10",
     "SM_Ship_Wayfarer_Gear": "84b46bd09fbd96ba2ceae985aeb8449ebad8cee1",
     "SM_Ship_Wayfarer_Hologram": "242cd8493331fa0cd08ec7c5dfefaba9124d96ab",
-    "SM_Ship_Wayfarer_Interior": "8c80e94fe6d7796edccfe8aaec2b68382ec5f510",
+    "SM_Ship_Wayfarer_Interior": "e4fc0d3d320595e2d28ba0ca1374f4f9a719e000",
     "SM_Ship_Wayfarer_InteriorDecals": "ea5b78e552664267d63664d7a71e4b50c45c1e62",
     "SM_Ship_Wayfarer_InteriorKit": "7c6de1d8613fe23f6b2058b655890a31c906a456",
     "SM_Ship_Wayfarer_PilotSeat": "d1fe6dfbb28eb12297ddd1da80abf6c6a14cb868",
@@ -221,7 +220,7 @@
       "light Light_fix_33 (point, 0.294 cd) at [769.4, 37.2, 78.7]",
       "light Light_fix_34 (point, 0.294 cd) at [780.6, -41.4, 85.8]",
       "light Light_fix_35 (point, 0.192 cd) at [758.5, -87.6, 86.4]",
-      "light Light_fix_36 (point, 0.192 cd) at [758.6, 87.6, 86.3]",
+      "light Light_fix_36 (point, 0.192 cd) at [758.6, 87.5, 86.3]",
       "light Light_fix_37 (point, 0.141 cd) at [724.4, 109.5, 66.1]",
       "light Light_fix_38 (point, 0.141 cd) at [724.7, -108.3, 64.9]"
     ]

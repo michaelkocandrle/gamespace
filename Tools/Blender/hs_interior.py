@@ -1544,6 +1544,10 @@ def build(recipe, layout, coll, mats, ship, hull):
         dspec["_exclude_x"] = [rooms[r]["rect"][:2] for r in mod_rooms]
         dobjs, report["decals"] = hs_interior_decals.build(objs, ship, coll, dspec, ROOT, mats, eye)
         objs += dobjs
+    if spec.get("terminal"):
+        # the engineering terminal (SC's central display; author 10. 10. 2026: from the showroom into the ship, the
+        # technical corridor): the game spawns ASpaceEngineeringTerminal here, its back on the wall, facing aft
+        sockets["Control_terminal"] = Vector(spec["terminal"]["at"])
     if ramp is not None:
         # the ramp's leaf (its inner side; the outer skin and parts come from the hull in hs_assemble_ship) and sockets
         hs_ramp.leaf(ramp, ship, coll, mats, hp.finish)

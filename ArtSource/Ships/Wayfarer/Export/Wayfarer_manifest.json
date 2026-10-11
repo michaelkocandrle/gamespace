@@ -31,6 +31,7 @@
         "SOCKET_Control_pwr",
         "SOCKET_Control_radar",
         "SOCKET_Control_ramp",
+        "SOCKET_Control_terminal",
         "SOCKET_Display_left",
         "SOCKET_Display_right",
         "SOCKET_Engine_L",
@@ -47,7 +48,7 @@
         "SOCKET_WalkRamp",
         "SOCKET_WalkSeat"
       ],
-      "geometry_hash": "2d54cb68ab0a3c0d857263d269485b9a3bafc0ef"
+      "geometry_hash": "1e587a5f3d49668b6c447900e391f066c744b0aa"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Canopy.fbx",
@@ -61,7 +62,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Decals"
       ],
-      "geometry_hash": "a0b536e3de0ca8d9fd27f576bfb589575c62796a"
+      "geometry_hash": "fd1618c77ff4a003a6b8437b014e659da1f665e3"
     },
     {
       "fbx": "SM_Ship_Wayfarer_Door0A.fbx",
@@ -96,7 +97,7 @@
       "objects": [
         "SM_Ship_Wayfarer_Interior"
       ],
-      "geometry_hash": "8c80e94fe6d7796edccfe8aaec2b68382ec5f510"
+      "geometry_hash": "e4fc0d3d320595e2d28ba0ca1374f4f9a719e000"
     },
     {
       "fbx": "SM_Ship_Wayfarer_InteriorDecals.fbx",
@@ -145,8 +146,8 @@
     "SM_Ship_Wayfarer": {
       "lod": 0,
       "part": null,
-      "tris": 631902,
-      "verts": 393406,
+      "tris": 631912,
+      "verts": 393411,
       "materials": [
         "M_Ship_Wayfarer_Dark",
         "M_Ship_Wayfarer_Paint",
@@ -206,8 +207,8 @@
     "SM_Ship_Wayfarer_Decals": {
       "lod": 0,
       "part": "Decals",
-      "tris": 48706,
-      "verts": 55980,
+      "tris": 48700,
+      "verts": 55962,
       "materials": [
         "M_Ship_Wayfarer_Decal",
         "M_Ship_Wayfarer_DecalAO",
@@ -334,7 +335,7 @@
     "SM_Ship_Wayfarer_Interior": {
       "lod": 0,
       "part": "Interior",
-      "tris": 610232,
+      "tris": 610230,
       "verts": 316977,
       "materials": [
         "M_Ship_Wayfarer_Accent",
@@ -879,6 +880,19 @@
         -940.0,
         104.0,
         10.0
+      ]
+    },
+    "SOCKET_Control_terminal": {
+      "parent": "SM_Ship_Wayfarer",
+      "location_m": [
+        -2.06,
+        -1.0,
+        0.25
+      ],
+      "location_ue_cm": [
+        -206.0,
+        100.0,
+        25.0
       ]
     },
     "SOCKET_Display_left": {

@@ -1,0 +1,57 @@
+{
+  "_comment": "The engineering terminal in the technical corridor (author 10. 10. 2026). Run -Editor.",
+  "shots": [
+    {
+      "name": "flat",
+      "camera": "chase",
+      "altitude_m": 40.0,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 2.0,
+      "console": [
+        "space.FlatSpot 5 8"
+      ]
+    },
+    {
+      "name": "warmup",
+      "camera": "chase",
+      "altitude_m": 3.2,
+      "facing": "horizon",
+      "hud": 0,
+      "gear": true,
+      "settle": 10.0,
+      "console": [
+        "stat none"
+      ]
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "name": "a_stand_up",
+      "console": [
+        "space.Interact",
+        "space.Where"
+      ],
+      "settle": 3.0
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "name": "b_hold_front",
+      "console": [
+        "space.WalkAt -500 0 180 0"
+      ],
+      "settle": 3.0
+    },
+    {
+      "camera": "pawn",
+      "hud": 1,
+      "name": "c_tech",
+      "console": [
+        "space.WalkAt -170 0 180 0"
+      ],
+      "settle": 2.0
+    }
+  ]
+}

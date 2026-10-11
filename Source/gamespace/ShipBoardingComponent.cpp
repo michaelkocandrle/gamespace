@@ -10,6 +10,7 @@
 #include "Components/WidgetComponent.h"
 #include "Misc/App.h"
 #include "SpaceDoorPanel.h"
+#include "SpaceEngineering.h"
 
 #include "Algo/Find.h"
 #include "Components/BoxComponent.h"
@@ -1091,4 +1092,41 @@ bool UShipBoardingComponent::GetSeatSwivel(FVector& OutPivot, FVector& OutAxis, 
 	const float Handed = Parent && Parent->GetComponentTransform().GetDeterminant() < 0.f ? -1.f : 1.f;
 	OutYawDeg = Handed * ShipSeat::CabinYawDeg * FMath::SmoothStep(0.f, 1.f, SeatCabin);
 	return true;
+}
+
+// -------------------------------------------------------------------------------------------
+// Engineering terminal (author 10. 10. 2026: the central display from the showroom into the ship)
+// -------------------------------------------------------------------------------------------
+
+void UShipBoardingComponent::SpawnTerminal()
+{
+	if (bTerminalTried)
+	{
+		return;
+	}
+	bTerminalTried = true;
+	ASpaceshipPawn* const Ship = CastChecked<ASpaceshipPawn>(GetOwner());
+	FVector At;
+	if (!Ship->GetWorld() || !Ship->GetHullSocketLocation(TEXT("Control_terminal"), At))
+	{
+		return;
+	}
+	UStaticMesh* HousingMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Kit/Meshes/SM_Kit_Terminal_Eng07W_A.SM_Kit_Terminal_Eng07W_A"),
+		nullptr, LOAD_NoWarn | LOAD_Quiet);
+	FActorSpawnParameters Params;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	Params.Owner = Ship;
+	// its back on the bulkhead, the screen facing aft down the corridor (the terminal's screen faces its +x)
+	const FRotator Facing = (Ship->GetActorQuat() * FQuat(FVector::UpVector, PI)).Rotator();
+	Terminal = Ship->GetWorld()->SpawnActor<ASpaceEngineeringTerminal>(ASpaceEngineeringTerminal::StaticClass(), At, Facing, Params);
+	if (!Terminal)
+	{
+		return;
+	}
+	if (HousingMesh && Terminal->Housing)
+	{
+		Terminal->Housing->SetStaticMesh(HousingMesh);
+	}
+	Terminal->AttachToActor(Ship, FAttachmentTransformRules::KeepWorldTransform);
+	UE_LOG(LogSpaceship, Log, TEXT("%s: engineering terminal at %s"), *Ship->GetName(), *Ship->GetActorTransform().InverseTransformPosition(At).ToString());
 }

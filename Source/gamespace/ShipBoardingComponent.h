@@ -115,6 +115,8 @@ public:
 	bool IsNearRampControl(const FVector& Location) const;
 	/** Where the ramp's prompt sits: inside by its switch, outside on the leaf's middle. */
 	FVector GetRampPromptLocation(bool bInside) const;
+	/** The engineering terminal (socket Control_terminal; author 10. 10. 2026): spawned once, riding with the ship. */
+	void SpawnTerminal();
 	// --- Pilot seat swivel (author 10. 10. 2026): faces the cabin, turns to the canopy as the pilot sits ---------------
 	/** Turn the seat to face the cabin (aft) or the canopy, starting after DelaySeconds, taking TurnSeconds. */
 	void SetSeatFacingCabin(bool bCabin, float DelaySeconds = 0.f, float TurnSeconds = 0.9f);
@@ -138,6 +140,9 @@ private:
 	float SeatDelay = 0.f;
 	float SeatTurnSeconds = 0.9f;
 	bool bSeatFound = false;
+	bool bTerminalTried = false;
+	UPROPERTY(Transient)
+	TObjectPtr<class ASpaceEngineeringTerminal> Terminal;
 	void FindRamp();
 	struct FRampPart
 	{
