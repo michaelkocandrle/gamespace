@@ -3000,9 +3000,9 @@ void USpaceCockpitDisplays::BuildTree()
 		Afterburner->ReserveZone = 0.25f;
 		Afterburner->ReserveColor = Red;
 	}
-	Horizontal(FlightTop, Sized(TEXT("FlightMiddleBox"), FlightMiddle, 136.f, 0.f), VAlign_Top, FMargin(0.f, 0.f, 4.f, 0.f));
+	Horizontal(FlightTop, Sized(TEXT("FlightMiddleBox"), FlightMiddle, 150.f, 0.f), VAlign_Top, FMargin(0.f, 0.f, 16.f, 0.f));   // (G MAX ran into BST)
 	Horizontal(FlightTop, Readout, VAlign_Top, FMargin(0.f, 4.f, 0.f, 0.f), true);
-	Vertical(FlightRight, FlightTop, HAlign_Fill, FMargin(0.f, 0.f, 0.f, 6.f));
+	Vertical(FlightRight, FlightTop, HAlign_Fill, FMargin(0.f));
 	// the mode as SC's outlined key, the switches in two columns of keys under it
 	UVerticalBox* FlightModes = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightModes"));
 	UOverlay* ModeChip = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("FlightModeChip"));
@@ -3020,15 +3020,19 @@ void USpaceCockpitDisplays::BuildTree()
 		ModeSlot->SetHorizontalAlignment(HAlign_Center);
 		ModeSlot->SetVerticalAlignment(VAlign_Center);
 	}
-	Vertical(FlightModes, Sized(TEXT("FlightModeChipBox"), ModeChip, 264.f, 38.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 6.f));
+	Vertical(FlightModes, Sized(TEXT("FlightModeChipBox"), ModeChip, 424.f, 40.f), HAlign_Left, FMargin(0.f, 0.f, 0.f, 18.f));
 	UVerticalBox* KeyGrid = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("FlightKeys"));
-	const TCHAR* Pairs[3][2] = { { TEXT("CPLD"), TEXT("GSAF") }, { TEXT("CSTB"), TEXT("BOOST") }, { TEXT("PREC"), TEXT("VTOL") } };
-	for (int32 Row = 0; Row < 3; ++Row)
+	// (11. 10. 2026: three rows of 34 px keys 5 px apart - the outline glows touched and the last row sat on the page
+	// name; the screen is 880 px wide, so two rows of three with room between them)
+	const TCHAR* Rows[2][3] = { { TEXT("CPLD"), TEXT("GSAF"), TEXT("CSTB") }, { TEXT("BOOST"), TEXT("PREC"), TEXT("VTOL") } };
+	for (int32 Row = 0; Row < 2; ++Row)
 	{
 		UHorizontalBox* KeyRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*FString::Printf(TEXT("FlightKeyRow%d"), Row)));
-		Horizontal(KeyRow, Key(Pairs[Row][0], 128.f, 34.f, true), VAlign_Center, FMargin(0.f, 0.f, 8.f, 0.f));
-		Horizontal(KeyRow, Key(Pairs[Row][1], 128.f, 34.f, true), VAlign_Center, FMargin(0.f));
-		Vertical(KeyGrid, KeyRow, HAlign_Left, FMargin(0.f, 0.f, 0.f, 5.f));
+		for (int32 Column = 0; Column < 3; ++Column)
+		{
+			Horizontal(KeyRow, Key(Rows[Row][Column], 128.f, 38.f, true), VAlign_Center, FMargin(0.f, 0.f, Column < 2 ? 20.f : 0.f, 0.f));
+		}
+		Vertical(KeyGrid, KeyRow, HAlign_Left, FMargin(0.f, 0.f, 0.f, 20.f));   // (the outline glow takes 4 px a side)
 	}
 	Vertical(FlightModes, KeyGrid, HAlign_Left, FMargin(0.f));
 	Vertical(FlightRight, FlightModes, HAlign_Left, FMargin(0.f));

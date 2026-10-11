@@ -74,7 +74,7 @@ Stav k **11. 10. 2026**: Wayfarer podle výkresů revize G + techniky SC na exte
    zvenku i u spínače v průchodu, `space.Ramp`, snímky `wayfarer_ramp`, `wayfarer_ramp_walk`), **otočné křeslo** (prázdné
    k chodbě, při sednutí se otočí s pilotem k výhledu), **inženýrský terminál** v lodi (přední stěna nákladu u dveří do
    technické chodby; energie zatím jeho vlastní model), **holo panely dveří** z obou stran na líci stěny,
-   **MFD FLIGHT** se vejde na displej (dřív 766 px na 560), záložka SELF. Dál: animace těla, MFD dalších stránek.
+   **MFD** rozbor všech stránek (FLIGHT se vejde, klávesy 2 × 3 bez překryvu, záložka SELF). Dál: animace těla.
    c) detail všech předmětů na úroveň SC (hasičák, skafandr, dveře, nic z prostých tvarů) a celá loď (stěny, podlaha,
       strop, profily) ve stylu stropu chodby (paměť `sc-level-detail-everywhere`).
 1. Přistání na svahu čeká na vyzkoušení autorem (pak odpružení nohou). 3. Podle SC (`OwnCapture_Gameplay_Notes.md`): dál visor pěšky, systémy lodi, stanice. 4. **Optimalizace až na konci**, až bude vzhled hotový (autor 29. 9.); pak i odrazy kovu (varianta c).

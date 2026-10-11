@@ -46,7 +46,8 @@ historie v archivu `Docs/HANDOFF.md` (body 23–33, 72).
   - Aditivní pole bez tónu četlo jako mléčné sklo, proto je pole průsvitné.
 - `USpaceCockpitDisplays` je podtřída `USpaceFlightHud`: **stejné názvy widgetů a stejné `ApplyState`**.
   Nový údaj tedy obvykle = stav v `FSpaceFlightHudState` (make_state) + widget v `BuildTree`.
-- **Plátno 1330 × 490 px:** vlevo FLIGHT 0–560, vpravo STATUS 560–1120, střední sloupek 1120–1330
+- **Plátno 1970 × 490 px** (holo MFD v3 od 5. 10.; `DisplayWidth` 880): vlevo FLIGHT 0–880, vpravo STATUS 880–1760,
+  střední sloupek 1760–1970
   (radar 0–259, self status 259–490). Každý displej má v receptu `texture_rect`/`texture_size`, stejná
   hustota pixelů na cm skla všude. Otvory v rámu jsou v receptu jako `corners` (ne `rect`), plocha
   sahá ~5 mm pod rámeček (`grow_m`), řez AI skla 6 mm (`cut_depth_m`).
@@ -65,7 +66,7 @@ historie v archivu `Docs/HANDOFF.md` (body 23–33, 72).
 
 ## Stránky MFD
 
-- Vlevo **FLIGHT → THRUSTERS → NAVIGATION**, vpravo **STATUS → CONTACTS → SELF STATUS**, `UWidgetSwitcher`
+- Vlevo **FLIGHT → THRUSTERS → NAVIGATION → CONFIGURATION**, vpravo **STATUS → CONTACTS → SELF STATUS**, `UWidgetSwitcher`
   (kreslí se jen zobrazená; po zrychlení FLIGHT/STATUS ~1,0 ms, ostatní 0,6–1,0 ms za snímek).
 - Klávesy: **F1** levý, **F2** pravý, **Alt+F1/F2** zpět (Shift = boost, proto ne Shift). `[` `]` jen pro US
   klávesnici – na české klávesnici autora nejsou samostatné klávesy. Enginové debug bindy F1/F2
@@ -75,6 +76,9 @@ historie v archivu `Docs/HANDOFF.md` (body 23–33, 72).
 - **Nová stránka:** titulek do `PageTitles`, widgety do pole stránek v `Screen(...)` v `BuildTree`.
   **Jen se skutečnými daty** – zbraně, štíty, energie, chlazení hra nemá a nic se nepředstírá
   (proto chybí i tlačítka PWR/WPN/THR/SHLD/COOL; přijdou se SC-6).
+- **FLIGHT** (11. 10.): prstenec rychlosti 250, vpravo G (108) s G MAX vedle sloupců BST/AB, pod nimi klávesa režimu
+  a 6 kláves ve 2 řádcích po 3 (128 × 38, mezery 20 px). Záře obrysu holo klávesy přesahuje 4 px na stranu:
+  mezera pod ~14 px vypadá jako slepené klávesy.
 - Skryté řádky seznamů skrývej **i s jejich linkou** (řádek a linka v jednom boxu).
 
 ## Střední sloupek (RADAR, SELF STATUS)
